@@ -47,7 +47,7 @@ int create_version_message()
 
 int main()
 {
-    //return run_networking();
-    return create_version_message();
+    return run_networking();
+    //return create_version_message();
 }
 

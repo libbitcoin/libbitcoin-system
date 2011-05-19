@@ -10,14 +10,14 @@ namespace libbitcoin {
 class transaction_input
 {
     unsigned char hash[32];
-    uint_fast32_t index;
+    uint32_t index;
     std::string script;
-    uint_fast32_t sequence;
+    uint32_t sequence;
 };
 
 struct transaction_output
 {
-    uint_fast64_t value;
+    uint64_t value;
     std::string script;
 };
 
@@ -25,8 +25,8 @@ class transaction
 {
 public:
     unsigned char hash[32];
-    uint_fast32_t version;
-    uint_fast32_t locktime;
+    uint32_t version;
+    uint32_t locktime;
     
     std::vector<transaction_input> inputs;
     std::vector<transaction_output> outputs;
