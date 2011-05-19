@@ -17,6 +17,10 @@ struct net_addr
     uint_fast16_t port;
 };
 
+struct header
+{
+};
+
 struct message
 {
     // Empty

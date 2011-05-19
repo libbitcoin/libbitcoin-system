@@ -1,7 +1,6 @@
 #ifndef LIBBITCOIN_NET_DELEGATOR_H
 #define LIBBITCOIN_NET_DELEGATOR_H
 
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/asio.hpp>
 #include <memory>
 #include <thread>
@@ -18,7 +17,8 @@ class delegator : boost::noncopyable
 {
 public:
     virtual void init() = 0;
-    virtual bool connect(std::string ip_addr, unsigned short port=8333) = 0;
+    virtual shared_ptr<peer> connect(std::string ip_addr, 
+            unsigned short port=8333) = 0;
 };
 
 class delegator_default : public delegator
@@ -26,16 +26,15 @@ class delegator_default : public delegator
 public:
     ~delegator_default();
     void init();
-    bool connect(std::string ip_addr, unsigned short port=8333);
-    // temporary!
-    boost::ptr_vector<peer> peers;
+    shared_ptr<peer> connect(std::string ip_addr, 
+            unsigned short port=8333);
 private:
     shared_ptr<io_service> service;
     std::thread runner;
     shared_ptr<io_service::work> work;
 
     shared_ptr<dialect> default_dialect;
-    //boost::ptr_vector<peer> peers;
+    std::vector<shared_ptr<peer>> peers;
 };
 
 } // net
