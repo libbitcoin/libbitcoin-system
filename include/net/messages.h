@@ -19,6 +19,14 @@ struct net_addr
 
 struct header
 {
+    uint_fast32_t magic;
+    uint_fast8_t command;
+    uint_fast32_t length;
+    // Ignored by version and verack commands
+    uint_fast32_t checksum;
+
+    // Used for when header is partially read. >= 24 when finished.
+    size_t bytes_read;
 };
 
 struct message

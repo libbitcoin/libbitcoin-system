@@ -28,6 +28,9 @@ private:
 class deserializer
 {
 public:
+    message::header read_header(serializer::stream &stream);
+    message::version read_version(serializer::stream &stream,
+            message::header header);
 };
 
 } // net
