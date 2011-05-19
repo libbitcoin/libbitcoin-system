@@ -81,10 +81,9 @@ void peer::send(message::version version)
     write_msgs.push_back(msg);
     if (!write_in_progress) {
         buffer(write_msgs.front());
-        //async_write(socket,
-        //        //buffer(write_msgs.front()),
-        //        buffer(databla, lenn),
-        //        boost::bind(&peer::handle_send, this));
+        async_write(*socket,
+                buffer(write_msgs.front()),
+                boost::bind(&peer::handle_send, this));
     }
 }
 

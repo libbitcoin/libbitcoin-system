@@ -45,28 +45,39 @@ static void hash_var_uint(SHA256_CTX &ctx,uint64_t var_uint)
 
 void transaction::calculate_hash()
 {
-    SHA256_CTX md;
+    SHA256_CTX ctx;
     unsigned char digest[SHA256_DIGEST_LENGTH];
     SHA256_Init(&ctx);
     
 #ifdef BOOST_LITTLE_ENDIAN
     SHA256_Update(&ctx,&this->version,sizeof(this->version));
-    hash_var_uint(md,this->inputs.size());
-    for(std::vector<transaction_input>::iterator it: this->input)
+    
+    hash_var_uint(ctx,this->inputs.size());
+    
+    for(std::vector<transaction_input>::iterator it=this->inputs.begin();
+        it != this->inputs.end();++it)
     {
         SHA256_Update(&ctx,&it->hash,sizeof(it->hash));
         SHA256_Update(&ctx,&it->index,sizeof(it->index));
-        SHA256_Update(&ctx,&it->script.c_str(),it->script.length());
+        SHA256_Update(&ctx,it->script.c_str(),it->script.length());
         SHA256_Update(&ctx,&it->sequence,sizeof(it->sequence));
     }
-    hash_var_uint(md,this->outputs.size());
-    SHA256_Update(&ctx,this->locktime,sizeof(this->locktime));
     
-    SHA256_Final(&digest,&ctx);
+    hash_var_uint(ctx,this->outputs.size());
+    
+    for(std::vector<transaction_output>::iterator it=this->outputs.begin();
+        it != this->outputs.end();++it)
+    {
+        SHA256_Update(&ctx,&it->value,sizeof(it->value));
+        SHA256_Update(&ctx,it->script.c_str(),it->script.length());
+    }
+    SHA256_Update(&ctx,&this->locktime,sizeof(this->locktime));
+    
+    SHA256_Final(digest,&ctx);
     
     SHA256_Init(&ctx);
-    SHA256_Update(&digest,sizeof(digest));
-    SHA256_Final(&this->hash,&ctx);
+    SHA256_Update(&ctx,digest,sizeof(digest));
+    SHA256_Final(this->hash,&ctx);
 #elif BOOST_BIG_ENDIAN
 #error Platform not supported
 #else

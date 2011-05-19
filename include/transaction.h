@@ -7,7 +7,7 @@
 
 namespace libbitcoin {
 
-class transaction_input
+struct transaction_input
 {
     unsigned char hash[32];
     uint32_t index;

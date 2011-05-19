@@ -27,13 +27,15 @@ public:
     ~delegator_default();
     void init();
     bool connect(std::string ip_addr, unsigned short port=8333);
+    // temporary!
+    boost::ptr_vector<peer> peers;
 private:
     shared_ptr<io_service> service;
     std::thread runner;
     shared_ptr<io_service::work> work;
 
     shared_ptr<dialect> default_dialect;
-    boost::ptr_vector<peer> peers;
+    //boost::ptr_vector<peer> peers;
 };
 
 } // net

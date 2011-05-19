@@ -6,19 +6,8 @@
 #include <iostream>
 #include <iomanip>
 
-int run_networking()
-{
-    libbitcoin::net::delegator_default net;
-    net.init();
-    if (!net.connect("localhost")) {
-        std::cerr << "noes\n";
-        return -1;
-    }
-    std::cin.get();
-    return 0;
-}
 
-int create_version_message()
+libbitcoin::net::message::version create_version_message()
 {
     libbitcoin::net::message::version version;
     // this is test data. should be in the core eventually
@@ -34,20 +23,25 @@ int create_version_message()
     version.nonce = 0xdeadbeef;
     version.sub_version_num = "";
     version.start_height = 0;
+    return version;
+}
 
-    libbitcoin::net::original_dialect d;
-    libbitcoin::net::serializer::stream msg = d.translate(version);
-    for (auto it = msg.begin(); it != msg.end(); it++) {
-        std::cout << std::hex << std::setfill('0') << std::setw(2)
-                << +static_cast<unsigned char>(*it) << " ";
+int run_networking()
+{
+    libbitcoin::net::delegator_default net;
+    net.init();
+    if (!net.connect("localhost")) {
+        std::cerr << "noes\n";
+        return -1;
     }
-    std::cout << "\n";
+    libbitcoin::net::message::version version = create_version_message();
+    net.peers[0].send(version);
+    std::cin.get();
     return 0;
 }
 
 int main()
 {
     return run_networking();
-    //return create_version_message();
 }
 
