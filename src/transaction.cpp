@@ -1,6 +1,7 @@
 #include <boost/detail/endian.hpp>
 #include <string>
 #include <openssl/sha.h>
+#include <iostream>
 
 #include "transaction.h"
 
@@ -11,19 +12,24 @@ static void hash_var_uint(SHA256_CTX &ctx,uint64_t var_uint)
     if(var_uint < 0xFD)
     {
         uint8_t count = var_uint;
+        
+        std::cout << var_uint << " " << sizeof(count) << std::endl;
+        
         SHA256_Update(&ctx,&count,sizeof(count));
     }
     else if(var_uint <= 0xffff)
     {
-        const unsigned char prefix = 0xFD;
+        const uint8_t prefix = 0xFD;
         uint16_t count = var_uint;
+        
+        std::cout << var_uint << " " << sizeof(count) << std::endl;
         
         SHA256_Update(&ctx,&prefix,sizeof(prefix));
         SHA256_Update(&ctx,&count,sizeof(count));
     }
     else if(var_uint <= 0xffffffff)
     {
-        const unsigned char prefix = 0xFE;
+        const uint8_t prefix = 0xFE;
         uint32_t count = var_uint;
         
         SHA256_Update(&ctx,&prefix,sizeof(prefix));
@@ -31,7 +37,7 @@ static void hash_var_uint(SHA256_CTX &ctx,uint64_t var_uint)
     }
     else if(var_uint <= 0xffffffffffffffff)
     {
-        const unsigned char prefix = 0xFF;
+        const uint8_t prefix = 0xFF;
         uint64_t count = var_uint;
         
         SHA256_Update(&ctx,&prefix,sizeof(prefix));
@@ -59,6 +65,9 @@ void transaction::calculate_hash()
     {
         SHA256_Update(&ctx,&it->hash,sizeof(it->hash));
         SHA256_Update(&ctx,&it->index,sizeof(it->index));
+        
+        hash_var_uint(ctx,it->script.length());
+        
         SHA256_Update(&ctx,it->script.c_str(),it->script.length());
         SHA256_Update(&ctx,&it->sequence,sizeof(it->sequence));
     }
@@ -69,6 +78,7 @@ void transaction::calculate_hash()
         it != this->outputs.end();++it)
     {
         SHA256_Update(&ctx,&it->value,sizeof(it->value));
+        hash_var_uint(ctx,it->script.length());
         SHA256_Update(&ctx,it->script.c_str(),it->script.length());
     }
     SHA256_Update(&ctx,&this->locktime,sizeof(this->locktime));
