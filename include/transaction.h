@@ -5,13 +5,11 @@
 #include <vector>
 #include <stdint.h>
 
-#include "SHA256.h"
-
 namespace libbitcoin {
 
 class transaction_input
 {
-    SHA256 hash;
+    unsigned char hash[32];
     uint_fast32_t index;
     std::string script;
     uint_fast32_t sequence;
@@ -25,14 +23,15 @@ struct transaction_output
 
 class transaction
 {
-    SHA256 hash;
+public:
+    unsigned char hash[32];
     uint_fast32_t version;
     uint_fast32_t locktime;
     
     std::vector<transaction_input> inputs;
     std::vector<transaction_output> outputs;
     
-    SHA256 hash();
+    void calculate_hash();
 };
 }
 #endif

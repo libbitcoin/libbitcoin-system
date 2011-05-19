@@ -19,8 +19,6 @@ class delegator : boost::noncopyable
 public:
     virtual void init() = 0;
     virtual bool connect(std::string ip_addr, unsigned short port=8333) = 0;
-
-    static void run_service(shared_ptr<io_service> io_service);
 };
 
 class delegator_default : public delegator
@@ -34,7 +32,7 @@ private:
     std::thread runner;
     shared_ptr<io_service::work> work;
 
-    shared_ptr<dialect> original_dialect;
+    shared_ptr<dialect> default_dialect;
     boost::ptr_vector<peer> peers;
 };
 

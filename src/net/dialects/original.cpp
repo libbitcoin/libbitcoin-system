@@ -6,7 +6,7 @@
 namespace libbitcoin {
 namespace net {
 
-static std::string construct_header_from(std::string payload, 
+static serializer::stream construct_header_from(serializer::stream payload, 
         std::string command)
 {
     serializer header;
@@ -22,10 +22,10 @@ static std::string construct_header_from(std::string payload,
         //uint32_t checksum = 0;
         //write_to_stream(header, checksum);
     }
-    return header.str();
+    return header.get_data();
 }
 
-const std::string original_dialect::translate(message::version version) const
+const serializer::stream original_dialect::translate(message::version version) const
 {
     serializer payload;
     payload.write_4_bytes(version.version);
@@ -38,8 +38,12 @@ const std::string original_dialect::translate(message::version version) const
     payload.write_byte(0);
     payload.write_4_bytes(version.start_height);
 
-    std::string message = construct_header_from(payload.str(), "version");
-    message += payload.str();
+    serializer::stream msg_body = payload.get_data();
+    serializer::stream message = 
+            construct_header_from(msg_body, "version");
+    // Extend message with actual payload
+    message.reserve(message.size() + distance(msg_body.begin(), msg_body.end()));
+    message.insert(message.end(), msg_body.begin(), msg_body.end());
     return message;
 }
 

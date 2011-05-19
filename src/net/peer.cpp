@@ -4,6 +4,7 @@
 #include <boost/bind.hpp>
 #include <time.h>
 
+#include "net/dialects/original.h"
 #include "net/messages.h"
 
 // DEBUG
@@ -15,7 +16,7 @@ namespace net {
 using boost::asio::buffer;
 
 peer::peer(shared_ptr<dialect> dialect_translator)
- : recv_buff_idx(0), dialect_translator(dialect_translator)
+ : dialect_translator(dialect_translator), recv_buff_idx(0)
 {
 }
 
@@ -39,7 +40,7 @@ bool peer::connect(shared_ptr<io_service> service,
 
         socket->async_read_some(
                 buffer(recv_buff),
-                boost::bind(&peer::recv_handler, this, socket, _1, _2));
+                boost::bind(&peer::handle_recv, this, _1, _2));
     }
     catch (std::exception &ex) {
         return false;
@@ -52,8 +53,8 @@ const char* peer_exception::what() const throw()
     return "Network error in peer.";
 }
 
-void peer::recv_handler(shared_ptr<tcp::socket> socket,
-        const boost::system::error_code &ec, size_t bytes_transferred)
+void peer::handle_recv(const boost::system::error_code &ec,
+        size_t bytes_transferred)
 {
     if (ec) {
         // Temporary. Should remove itself from parent container.
@@ -66,11 +67,23 @@ void peer::recv_handler(shared_ptr<tcp::socket> socket,
     std::cout << recv_buff_idx << "\n";
     socket->async_read_some(
             buffer(recv_buff),
-            boost::bind(&peer::recv_handler, this, socket, _1, _2));
+            boost::bind(&peer::handle_recv, this, _1, _2));
+}
+
+void peer::handle_send()
+{
 }
 
 void peer::send(message::version version)
 {
+    bool write_in_progress = !write_msgs.empty();
+    serializer::stream msg = dialect_translator->translate(version);
+    write_msgs.push_back(msg);
+    if (!write_in_progress) {
+        async_write(socket,
+                buffer(write_msgs.front()),
+                boost::bind(&peer::handle_send, this));
+    }
 }
 
 } // net

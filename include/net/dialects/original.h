@@ -17,7 +17,7 @@ public:
     };
     
     // Equivalent is called untranslate
-    const std::string translate(message::version version) const;
+    const serializer::stream translate(message::version version) const;
 };
 
 } // net

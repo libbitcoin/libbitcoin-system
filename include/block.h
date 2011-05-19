@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include <vector>
 
-#include "SHA256.h"
 #include "transaction.h"
 
 namespace libbitcoin {
@@ -23,7 +22,7 @@ public:
     
     std::vector<transaction> transactions;
     
-    unsigned char[32] hash();
+    void calculate_hash();
 };
 
 }

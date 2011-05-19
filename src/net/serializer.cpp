@@ -73,9 +73,9 @@ void serializer::write_command(std::string command)
         data.push_back(comm_str[i]);
 }
 
-std::string serializer::str()
+serializer::stream serializer::get_data()
 {
-    return std::string(data.begin(), data.end());
+    return data;
 }
 
 } // net

@@ -6,7 +6,9 @@
 #include <boost/cstdint.hpp>
 #include <boost/utility.hpp>
 #include <memory>
+#include <deque>
 
+#include "net/serializer.h"
 #include "net/messages.h"
 
 namespace libbitcoin {
@@ -31,19 +33,23 @@ public:
     ~peer();
     bool connect(std::shared_ptr<io_service> io_service,
             std::string ip_addr, unsigned short port);
-    void recv_handler(shared_ptr<tcp::socket> socket,
-            const boost::system::error_code &ec, size_t bytes_transferred);
+
+    void handle_recv(const boost::system::error_code &ec, size_t bytes_transferred);
+    void handle_send();
 
     void send(message::version version);
 
 private:
     shared_ptr<tcp::socket> socket;
+    shared_ptr<dialect> dialect_translator;
+
     boost::array<boost::uint8_t, 4096> recv_buff;
+    size_t recv_buff_idx;
     // Current message being constructed.
     // Flushed once message is completed.
-    std::vector<char> recv_message;
-    shared_ptr<dialect> dialect_translator;
-    size_t recv_buff_idx;
+    std::vector<char> recv_msg;
+
+    std::deque<serializer::stream> write_msgs;
 };
 
 } // net

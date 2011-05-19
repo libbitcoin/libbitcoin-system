@@ -12,14 +12,17 @@ namespace net {
 class serializer
 {
 public:
+    typedef typename std::vector<char> stream;
+
     void write_byte(uint8_t v);
     void write_4_bytes(uint32_t v);
     void write_8_bytes(uint64_t v);
     void write_net_addr(message::net_addr addr);
     void write_command(std::string command);
-    std::string str();
+
+    stream get_data();
 private:
-    std::vector<char> data;
+    stream data;
 };
 
 class deserializer
