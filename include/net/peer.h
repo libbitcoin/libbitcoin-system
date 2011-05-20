@@ -16,6 +16,7 @@ namespace net {
 
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
+namespace placeholders = boost::asio::placeholders;
 using std::shared_ptr;
 
 class dialect;
@@ -34,12 +35,13 @@ public:
     bool connect(std::shared_ptr<io_service> io_service,
             std::string ip_addr, unsigned short port);
 
-    void handle_recv(const boost::system::error_code &ec, size_t bytes_transferred);
-    void handle_send();
-
     void send(message::version version);
+    void close();
 
 private:
+    void handle_recv(const boost::system::error_code &ec, size_t bytes_transferred);
+    void handle_send(const boost::system::error_code &ec);
+
     shared_ptr<tcp::socket> socket;
     shared_ptr<dialect> dialect_translator;
 
@@ -48,8 +50,6 @@ private:
     // Current message being constructed.
     // Flushed once message is completed.
     std::vector<char> recv_msg;
-
-    std::deque<serializer::stream> write_msgs;
 };
 
 } // net

@@ -7,13 +7,13 @@
 #include "net/dialects/original.h"
 #include "net/messages.h"
 
+#include "shared_const_buffer.h"
+
 // DEBUG
 #include <iostream>
 
 namespace libbitcoin {
 namespace net {
-
-using boost::asio::buffer;
 
 peer::peer(shared_ptr<dialect> dialect_translator)
  : dialect_translator(dialect_translator), recv_buff_idx(0)
@@ -39,7 +39,7 @@ bool peer::connect(shared_ptr<io_service> service,
         socket->connect(endpoint);
 
         socket->async_read_some(
-                buffer(recv_buff),
+                boost::asio::buffer(recv_buff),
                 boost::bind(&peer::handle_recv, this, _1, _2));
     }
     catch (std::exception &ex) {
@@ -53,7 +53,7 @@ const char* peer_exception::what() const throw()
     return "Network error in peer.";
 }
 
-void peer::handle_recv(const boost::system::error_code &ec,
+void peer::handle_recv(const boost::system::error_code& ec,
         size_t bytes_transferred)
 {
     if (ec) {
@@ -66,25 +66,23 @@ void peer::handle_recv(const boost::system::error_code &ec,
         std::cout << recv_buff[i];
     std::cout << recv_buff_idx << "\n";
     socket->async_read_some(
-            buffer(recv_buff),
+            boost::asio::buffer(recv_buff),
             boost::bind(&peer::handle_recv, this, _1, _2));
 }
 
-void peer::handle_send()
+void peer::handle_send(const boost::system::error_code& ec)
 {
+    if (ec) {
+        throw peer_exception();
+    }
 }
 
 void peer::send(message::version version)
 {
-    bool write_in_progress = !write_msgs.empty();
     serializer::stream msg = dialect_translator->translate(version);
-    write_msgs.push_back(msg);
-    if (!write_in_progress) {
-        buffer(write_msgs.front());
-        async_write(*socket,
-                buffer(write_msgs.front()),
-                boost::bind(&peer::handle_send, this));
-    }
+    shared_const_buffer buffer(msg);
+    async_write(*socket, buffer,
+            boost::bind(&peer::handle_send, this, placeholders::error));
 }
 
 } // net
