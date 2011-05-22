@@ -5,6 +5,7 @@
 #include <boost/detail/endian.hpp>
 
 #include "script.hpp"
+#include "transaction.hpp"
 
 namespace libbitcoin {
 
@@ -75,6 +76,11 @@ void script::parse()
         
         this->parsed.push_back(op);
     }
+}
+
+bool script::run(transaction parent)
+{
+    std::vector
 }
 
 } // libbitcoin
