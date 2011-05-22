@@ -46,12 +46,12 @@ private:
             size_t bytes_transferred);
     void handle_send(const boost::system::error_code &ec);
 
-    shared_ptr<tcp::socket> socket;
-    shared_ptr<dialect> translator;
+    shared_ptr<tcp::socket> socket_;
+    shared_ptr<dialect> translator_;
 
-    boost::asio::streambuf response;
-    std::mutex ver_mutex;
-    bool verack_recv, verack_sent;
+    boost::asio::streambuf response_;
+    std::mutex ver_mutex_;
+    bool verack_recv_, verack_sent_;
 };
 
 } // net

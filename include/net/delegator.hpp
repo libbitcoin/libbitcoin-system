@@ -29,12 +29,12 @@ public:
     shared_ptr<peer> connect(std::string ip_addr, 
             unsigned short port=8333);
 private:
-    shared_ptr<io_service> service;
-    std::thread runner;
-    shared_ptr<io_service::work> work;
+    shared_ptr<io_service> service_;
+    std::thread runner_;
+    shared_ptr<io_service::work> work_;
 
-    shared_ptr<dialect> default_dialect;
-    std::vector<shared_ptr<peer>> peers;
+    shared_ptr<dialect> default_dialect_;
+    std::vector<shared_ptr<peer>> peers_;
 };
 
 } // net

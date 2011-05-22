@@ -18,7 +18,8 @@ static serializer::stream construct_header_from(serializer::stream payload,
     uint32_t length = payload.size();
     header.write_4_bytes(length);
     // checksum is not in verson or verack
-    if (command != "version" && command != "verack") {
+    if (command != "version" && command != "verack") 
+    {
         //uint32_t checksum = 0;
         //write_to_stream(header, checksum);
     }

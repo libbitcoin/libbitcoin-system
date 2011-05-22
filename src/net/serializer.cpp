@@ -44,25 +44,25 @@ void write_data(std::vector<char> &data, T val, size_t len, bool reverse=false)
 
 void serializer::write_byte(uint8_t v)
 {
-    data.push_back(v);
+    data_.push_back(v);
 }
 
 void serializer::write_4_bytes(uint32_t v)
 {
-    write_data(data, v, 4);
+    write_data(data_, v, 4);
 }
 
 void serializer::write_8_bytes(uint64_t v)
 {
-    write_data(data, v, 8);
+    write_data(data_, v, 8);
 }
 
 void serializer::write_net_addr(message::net_addr addr)
 {
     write_8_bytes(addr.services);
     for (size_t i = 0; i < 16; i++)
-        data.push_back(addr.ip_addr[i]);
-    write_data(data, addr.port, 2, true);
+        data_.push_back(addr.ip_addr[i]);
+    write_data(data_, addr.port, 2, true);
 }
 
 void serializer::write_command(std::string command)
@@ -72,12 +72,12 @@ void serializer::write_command(std::string command)
     command.copy(comm_str, comm_len);
     // should use std::copy
     for (size_t i = 0; i < comm_len; i++)
-        data.push_back(comm_str[i]);
+        data_.push_back(comm_str[i]);
 }
 
 serializer::stream serializer::get_data()
 {
-    return data;
+    return data_;
 }
 
 template<typename T>
@@ -100,13 +100,15 @@ T read_data(const serializer::stream& data, size_t& pointer, bool reverse=false)
     #endif
 
     T val;
-    if (reverse) {
+    if (reverse) 
+    {
         const char* real_bytes = reinterpret_cast<const char*>(&data[pointer]);
         std::string reverse_bytes(real_bytes, sizeof(T));
         std::reverse(reverse_bytes.begin(), reverse_bytes.end());
         val = *reinterpret_cast<const T*>(reverse_bytes.c_str());
     }
-    else {
+    else 
+    {
         val = *reinterpret_cast<const T*>(&data[pointer]);
     }
     pointer += sizeof(T);
@@ -114,20 +116,22 @@ T read_data(const serializer::stream& data, size_t& pointer, bool reverse=false)
 }
 
 deserializer::deserializer(const serializer::stream& stream)
- : stream(stream), pointer(0)
+ : stream_(stream), pointer_(0)
 {
 }
 
 uint32_t deserializer::read_4_bytes()
 {
-    return read_data<uint32_t>(stream, pointer);
+    return read_data<uint32_t>(stream_, pointer_);
 }
 
 std::string deserializer::read_fixed_len_str(size_t len)
 {
-    assert(pointer + len <= stream.size());
-    std::string ret(stream.begin() + pointer, stream.begin() + pointer + len);
-    pointer += len;
+    assert(pointer_ + len <= stream_.size());
+    std::string ret(
+            stream_.begin() + pointer_, 
+            stream_.begin() + pointer_ + len);
+    pointer_ += len;
     // Remove tailing 0s
     return ret.c_str();
 }

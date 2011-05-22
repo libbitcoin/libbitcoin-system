@@ -8,10 +8,10 @@ namespace libbitcoin {
 
 class script
 {
-    std::string data;
-    
-    void parse();
 public:
+    script(std::string data);
+    script(unsigned char *data, uint64_t length);
+
     enum class opcode
     {
         PUSH_DATA_UINT8 = 76,
@@ -26,10 +26,14 @@ public:
     };
     
     std::vector<operation> parsed;
-    
-    script(std::string data);
-    script(unsigned char *data, uint64_t length);
+
+private:
+    void parse();
+
+    std::string data;
 };
 
-}
+} // libbitcoin
+
 #endif
+

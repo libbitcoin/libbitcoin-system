@@ -21,13 +21,6 @@ public:
 class original_dialect : public dialect
 {
 public:
-    struct var_int
-    {
-        uint64_t get();
-        int len;
-        uint16_t nums[4];
-    };
-    
     // Create stream from message
     const serializer::stream to_network(message::version version) const;
 

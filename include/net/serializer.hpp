@@ -23,7 +23,7 @@ public:
 
     stream get_data();
 private:
-    stream data;
+    stream data_;
 };
 
 class deserializer
@@ -34,8 +34,8 @@ public:
     uint32_t read_4_bytes();
     std::string read_fixed_len_str(size_t len);
 private:
-    const serializer::stream& stream;
-    size_t pointer;
+    const serializer::stream& stream_;
+    size_t pointer_;
 };
 
 } // net
