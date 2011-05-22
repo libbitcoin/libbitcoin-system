@@ -1,7 +1,7 @@
-#include "net/dialects/original.h"
+#include "net/dialect.hpp"
 
-#include "net/serializer.h"
-#include "net/messages.h"
+#include "net/serializer.hpp"
+#include "net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -18,14 +18,16 @@ static serializer::stream construct_header_from(serializer::stream payload,
     uint32_t length = payload.size();
     header.write_4_bytes(length);
     // checksum is not in verson or verack
-    if (command != "version" && command != "verack") {
+    if (command != "version" && command != "verack") 
+    {
         //uint32_t checksum = 0;
         //write_to_stream(header, checksum);
     }
     return header.get_data();
 }
 
-const serializer::stream original_dialect::translate(message::version version) const
+const serializer::stream original_dialect::to_network(
+        message::version version) const
 {
     serializer payload;
     payload.write_4_bytes(version.version);
@@ -45,6 +47,17 @@ const serializer::stream original_dialect::translate(message::version version) c
     message.reserve(message.size() + distance(msg_body.begin(), msg_body.end()));
     message.insert(message.end(), msg_body.begin(), msg_body.end());
     return message;
+}
+
+const message::header original_dialect::header_from_network(
+        const serializer::stream& stream)  const
+{
+    deserializer deserial(stream);
+    message::header header;
+    header.magic = deserial.read_4_bytes();
+    header.command = deserial.read_fixed_len_str(12);
+    header.length = deserial.read_4_bytes();
+    return header;
 }
 
 } // net

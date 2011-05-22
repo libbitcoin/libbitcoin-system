@@ -12,21 +12,18 @@ using namespace boost;
 
 struct net_addr
 {
-    uint_fast64_t services;
-    uint_fast8_t ip_addr[16];
-    uint_fast16_t port;
+    uint64_t services;
+    uint8_t ip_addr[16];
+    uint16_t port;
 };
 
 struct header
 {
-    uint_fast32_t magic;
-    uint_fast8_t command;
-    uint_fast32_t length;
+    uint32_t magic;
+    std::string command;
+    uint32_t length;
     // Ignored by version and verack commands
-    uint_fast32_t checksum;
-
-    // Used for when header is partially read. >= 24 when finished.
-    size_t bytes_read;
+    uint32_t checksum;
 };
 
 struct message
@@ -36,14 +33,14 @@ struct message
 
 struct version : public message 
 {
-    uint_fast32_t version;
-    uint_fast64_t services;
-    uint_fast64_t timestamp;
+    uint32_t version;
+    uint64_t services;
+    uint64_t timestamp;
     net_addr addr_me;
     net_addr addr_you;
-    uint_fast64_t nonce;
+    uint64_t nonce;
     std::string sub_version_num;
-    uint_fast32_t start_height;
+    uint32_t start_height;
 };
 
 } // message

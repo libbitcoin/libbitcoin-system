@@ -2,13 +2,13 @@ CFLAGS= -Wall -pedantic
 
 objs: block transaction
 
-block: ./src/block.cpp ./include/block.h ./include/transaction.h
+block: ./src/block.cpp ./include/block.hpp ./include/transaction.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/block.o ./src/block.cpp -std=c++0x
 
-transaction: ./src/transaction.cpp ./include/transaction.h
+transaction: ./src/transaction.cpp ./include/transaction.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/transaction.o ./src/transaction.cpp -std=c++0x
 	
-script: ./src/script.cpp ./include/script.h
+script: ./src/script.cpp ./include/script.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/script.o ./src/script.cpp -std=c++0x
 
 tests: block_hashing transaction_hashing script_parsing

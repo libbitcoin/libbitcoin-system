@@ -5,11 +5,13 @@
 #include <boost/array.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/utility.hpp>
+#include <boost/asio/streambuf.hpp>
 #include <memory>
+#include <mutex>
 #include <deque>
 
-#include "net/serializer.h"
-#include "net/messages.h"
+#include "net/serializer.hpp"
+#include "net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -27,11 +29,12 @@ public:
     const char* what() const throw();
 };
 
-class peer : boost::noncopyable
+class peer : public boost::noncopyable 
 {
 public:
-    peer(shared_ptr<dialect> dialect_translator);
+    peer(shared_ptr<dialect> translator);
     ~peer();
+
     bool connect(std::shared_ptr<io_service> io_service,
             std::string ip_addr, unsigned short port);
 
@@ -39,17 +42,16 @@ public:
     void close();
 
 private:
-    void handle_recv(const boost::system::error_code &ec, size_t bytes_transferred);
+    void handle_read_header(const boost::system::error_code &ec, 
+            size_t bytes_transferred);
     void handle_send(const boost::system::error_code &ec);
 
-    shared_ptr<tcp::socket> socket;
-    shared_ptr<dialect> dialect_translator;
+    shared_ptr<tcp::socket> socket_;
+    shared_ptr<dialect> translator_;
 
-    boost::array<boost::uint8_t, 4096> recv_buff;
-    size_t recv_buff_idx;
-    // Current message being constructed.
-    // Flushed once message is completed.
-    std::vector<char> recv_msg;
+    boost::asio::streambuf response_;
+    std::mutex ver_mutex_;
+    bool verack_recv_, verack_sent_;
 };
 
 } // net
