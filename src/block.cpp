@@ -1,7 +1,7 @@
 #include <openssl/sha.h>
 #include <boost/detail/endian.hpp>
 
-#include "block.h"
+#include "block.hpp"
 
 namespace libbitcoin {
 

@@ -4,7 +4,7 @@
 
 #include <boost/detail/endian.hpp>
 
-#include "script.h"
+#include "script.hpp"
 
 namespace libbitcoin {
 
