@@ -1,6 +1,6 @@
-#include "net/delegator.h"
+#include "net/delegator.hpp"
 
-#include "net/dialects/original.h"
+#include "net/dialect.hpp"
 
 namespace libbitcoin {
 namespace net {

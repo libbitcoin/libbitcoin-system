@@ -1,10 +1,11 @@
 #ifndef LIBBITCOIN_NET_SERIALIZER_H
 #define LIBBITCOIN_NET_SERIALIZER_H
 
+#include <boost/asio/streambuf.hpp>
 #include <string>
 #include <vector>
 
-#include "net/messages.h"
+#include "net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -28,9 +29,13 @@ private:
 class deserializer
 {
 public:
-    message::header read_header(serializer::stream &stream);
-    message::version read_version(serializer::stream &stream,
-            message::header header);
+    deserializer(const serializer::stream& stream);
+
+    uint32_t read_4_bytes();
+    std::string read_fixed_len_str(size_t len);
+private:
+    const serializer::stream& stream;
+    size_t pointer;
 };
 
 } // net

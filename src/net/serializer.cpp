@@ -1,9 +1,11 @@
-#include "net/serializer.h"
+#include "net/serializer.hpp"
 
 #include <boost/detail/endian.hpp>
+#include <algorithm>
 #include <iostream>
+#include <string>
 
-#include "net/messages.h"
+#include "net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -76,6 +78,58 @@ void serializer::write_command(std::string command)
 serializer::stream serializer::get_data()
 {
     return data;
+}
+
+template<typename T>
+T consume_object(const serializer::stream& stream, size_t& pointer)
+{
+    T* val = reinterpret_cast<T*>(&stream[pointer]);
+    pointer += sizeof(T);
+    return *val;
+}
+
+template<typename T>
+T read_data(const serializer::stream& data, size_t& pointer, bool reverse=false)
+{
+    #ifdef BOOST_LITTLE_ENDIAN
+        // do nothing
+    #elif BOOST_BIG_ENDIAN
+        reverse = true;
+    #else
+        #error "Endian isn't defined!"
+    #endif
+
+    T val;
+    if (reverse) {
+        const char* real_bytes = reinterpret_cast<const char*>(&data[pointer]);
+        std::string reverse_bytes(real_bytes, sizeof(T));
+        std::reverse(reverse_bytes.begin(), reverse_bytes.end());
+        val = *reinterpret_cast<const T*>(reverse_bytes.c_str());
+    }
+    else {
+        val = *reinterpret_cast<const T*>(&data[pointer]);
+    }
+    pointer += sizeof(T);
+    return val;
+}
+
+deserializer::deserializer(const serializer::stream& stream)
+ : stream(stream), pointer(0)
+{
+}
+
+uint32_t deserializer::read_4_bytes()
+{
+    return read_data<uint32_t>(stream, pointer);
+}
+
+std::string deserializer::read_fixed_len_str(size_t len)
+{
+    assert(pointer + len <= stream.size());
+    std::string ret(stream.begin() + pointer, stream.begin() + pointer + len);
+    pointer += len;
+    // Remove tailing 0s
+    return ret.c_str();
 }
 
 } // net

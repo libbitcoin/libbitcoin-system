@@ -5,7 +5,7 @@
 #include <memory>
 #include <thread>
 
-#include "net/peer.h"
+#include "net/peer.hpp"
 
 namespace libbitcoin {
 namespace net {

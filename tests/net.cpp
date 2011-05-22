@@ -1,7 +1,7 @@
-#include "net/messages.h"
-#include "net/delegator.h"
-#include "net/peer.h"
-#include "net/dialects/original.h"
+#include "net/messages.hpp"
+#include "net/delegator.hpp"
+#include "net/dialect.hpp"
+#include "net/peer.hpp"
 
 #include <iostream>
 #include <iomanip>
