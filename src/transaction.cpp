@@ -3,7 +3,7 @@
 #include <openssl/sha.h>
 #include <iostream>
 
-#include "transaction.h"
+#include "transaction.hpp"
 
 namespace libbitcoin {
 
