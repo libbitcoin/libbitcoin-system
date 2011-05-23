@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "transaction.h"
+#include "transaction.hpp"
 
 namespace libbitcoin {
 
@@ -61,7 +61,7 @@ public:
         OR = 133,
         XOR = 134,
         EQUAL = 135,
-        EQUALVERIFY = 136,
+        EQUALVERIFY = 136
     };
 
     struct operation
@@ -72,11 +72,15 @@ public:
     
     bool run(transaction);
     
-    std::vector<operation> parsed;
+    
+    std::vector<operation> parsed();
+    void parsed(std::vector<operation>);
+    
 private:
     void parse();
 
-    std::string data;
+    std::string data_;
+    std::vector<operation> parsed_;
 };
 
 } // libbitcoin
