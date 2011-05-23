@@ -3,6 +3,7 @@
 #include "net/dialect.hpp"
 #include "net/peer.hpp"
 
+#include <memory>
 #include <iostream>
 #include <iomanip>
 
@@ -28,9 +29,9 @@ libbitcoin::net::message::version create_version_message()
 
 int run_networking()
 {
-    libbitcoin::net::delegator_default net;
-    net.init();
-    std::shared_ptr<libbitcoin::net::peer> peer = net.connect("localhost");
+    std::shared_ptr<libbitcoin::net::delegator_default> net(new libbitcoin::net::delegator_default);
+    net->init();
+    std::shared_ptr<libbitcoin::net::peer> peer = net->connect("localhost");
     if (!peer) {
         std::cerr << "noes\n";
         return -1;

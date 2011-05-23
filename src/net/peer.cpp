@@ -5,6 +5,7 @@
 #include <iostream>
 #include <time.h>
 
+#include "net/delegator.hpp"
 #include "net/dialect.hpp"
 #include "net/messages.hpp"
 
@@ -18,21 +19,21 @@ constexpr size_t header_chunk_size = 20;
 // Checksum size is 4 bytes
 constexpr size_t header_checksum_size = 4;
 
-peer::peer(shared_ptr<dialect> translator)
- : translator_(translator), verack_recv_(false), verack_sent_(false)
+peer::peer(shared_ptr<delegator_default> parent_gateway, 
+        shared_ptr<dialect> translator)
+ : parent_gateway_(parent_gateway), translator_(translator)
 {
 }
 
 peer::~peer() 
 {
-    boost::system::error_code ec;
-    socket_->shutdown(tcp::socket::shutdown_both, ec);
-    socket_->close(ec);
+    shutdown();
 }
 
 bool peer::connect(shared_ptr<io_service> service,
         std::string ip_addr, unsigned short port)
 {
+    timeout_.reset(new deadline_timer(*service, posix_time::seconds(5)));
     socket_.reset(new tcp::socket(*service));
     try 
     {
@@ -54,9 +55,16 @@ bool peer::connect(shared_ptr<io_service> service,
     return true;
 }
 
-const char* peer_exception::what() const throw()
+void peer::shutdown()
 {
-    return "Network error in peer.";
+    boost::system::error_code ec;
+    socket_->shutdown(tcp::socket::shutdown_both, ec);
+    socket_->close(ec);
+}
+void peer::destroy_self()
+{
+    parent_gateway_->disconnect(shared_from_this());
+    shutdown();
 }
 
 static serializer::stream consume_response(boost::asio::streambuf &response, 
@@ -77,12 +85,11 @@ void peer::handle_read_header(const boost::system::error_code& ec,
 {
     if (ec) 
     {
-        // Temporary. Should remove itself from parent container.
-        // Too destructive.
-        throw peer_exception();
+        destroy_self();
+        return;
     }
-    assert(bytes_transferred >= header_chunk_size);
-    assert(response_.size() == bytes_transferred);
+    BOOST_ASSERT(bytes_transferred >= header_chunk_size);
+    BOOST_ASSERT(response_.size() == bytes_transferred);
     serializer::stream header_stream = 
             consume_response(response_, header_chunk_size);
     message::header header_msg = translator_->header_from_network(header_stream);
@@ -105,7 +112,10 @@ void peer::handle_read_header(const boost::system::error_code& ec,
 void peer::handle_send(const boost::system::error_code& ec)
 {
     if (ec) 
-        throw peer_exception();
+    {
+        destroy_self();
+        return;
+    }
 }
 
 void peer::send(message::version version)

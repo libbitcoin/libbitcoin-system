@@ -127,7 +127,7 @@ uint32_t deserializer::read_4_bytes()
 
 std::string deserializer::read_fixed_len_str(size_t len)
 {
-    assert(pointer_ + len <= stream_.size());
+    BOOST_ASSERT(pointer_ + len <= stream_.size());
     std::string ret(
             stream_.begin() + pointer_, 
             stream_.begin() + pointer_ + len);
