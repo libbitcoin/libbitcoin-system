@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <boost/detail/endian.hpp>
+#include <openssl/bn.h>
 
 #include "script.hpp"
 #include "transaction.hpp"
@@ -19,6 +20,16 @@ script::script(unsigned char *data, uint64_t length)
 {
     data_.assign(reinterpret_cast<char*>(data), length);
     parse();
+}
+
+void script::parsed(std::vector<script::operation> parsed)
+{
+    parsed_ = parsed;
+}
+
+std::vector<script::operation> script::parsed()
+{
+    return parsed_;
 }
 
 void script::parse()
@@ -80,7 +91,39 @@ void script::parse()
 
 bool script::run(transaction parent)
 {
-    std::vector
+    std::stack<std::string> stack;
+    
+    std::vector<operation>::iterator it;
+    for(it = parsed_.begin(); it < parsed_.end(); ++it)
+    {
+        switch(it->op)
+        {
+            case opcode::PUSH_DATA_UINT8:
+            case opcode::PUSH_DATA_UINT16:
+            case opcode::PUSH_DATA_UINT32:
+                stack.push(it->data);
+                break;
+            case opcode::ZERO:
+            {
+                BIGNUM zero;
+                BN_init(&zero);
+                BN_zero(&zero);
+                unsigned char *zero_packed = new unsigned char[BN_num_bytes(&zero)];
+                stack.push(std::string(reinterpret_cast<char*>(zero_packed),sizeof(zero)));
+            }
+            case opcode::NOP:
+                break;
+            case opcode::VERIFY;
+                stack.top();
+                stack.pop();
+                
+                
+            case opcode::RETURN:
+                return false;
+                break;
+            case 
+        }
+    }
 }
 
 } // libbitcoin
