@@ -19,12 +19,13 @@ namespace net {
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
-namespace placeholders = boost::asio::placeholders;
-namespace posix_time = boost::posix_time;
 using std::shared_ptr;
 
 class delegator_default;
 class dialect;
+class peer;
+
+typedef shared_ptr<peer> peer_ptr;
 
 class peer : private boost::noncopyable, public std::enable_shared_from_this<peer>
 {
@@ -33,16 +34,19 @@ public:
             shared_ptr<dialect> translator);
     ~peer();
 
-    bool connect(std::shared_ptr<io_service> io_service,
+    bool connect(shared_ptr<io_service> io_service,
             std::string ip_addr, unsigned short port);
 
     void send(message::version version);
     void close();
 
 private:
-    void handle_read_header(const boost::system::error_code &ec, 
+    void handle_read_header(const boost::system::error_code& ec, 
             size_t bytes_transferred);
-    void handle_send(const boost::system::error_code &ec);
+    void handle_send(const boost::system::error_code& ec);
+
+    void handle_timeout(const boost::system::error_code& ec);
+    void reset_timeout();
 
     // Calls clean_shutdown and removes self from parent
     void destroy_self();

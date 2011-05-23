@@ -7,6 +7,9 @@
 #include <iostream>
 #include <iomanip>
 
+class core
+{
+};
 
 libbitcoin::net::message::version create_version_message()
 {
@@ -29,9 +32,9 @@ libbitcoin::net::message::version create_version_message()
 
 int run_networking()
 {
-    std::shared_ptr<libbitcoin::net::delegator_default> net(new libbitcoin::net::delegator_default);
+    libbitcoin::net::delegator_ptr net(new libbitcoin::net::delegator_default);
     net->init();
-    std::shared_ptr<libbitcoin::net::peer> peer = net->connect("localhost");
+    libbitcoin::net::peer_ptr peer = net->connect("localhost");
     if (!peer) {
         std::cerr << "noes\n";
         return -1;
