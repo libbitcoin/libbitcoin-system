@@ -1,11 +1,25 @@
+#include "transaction.hpp"
+
 #include <boost/detail/endian.hpp>
 #include <iostream>
 #include <string>
 #include <openssl/sha.h>
 
-#include "transaction.hpp"
+#include "util/logger.hpp"
 
 namespace libbitcoin {
+
+template<typename T>
+void update_sha256(SHA256_CTX& ctx, T& val)
+{
+    SHA256_Update(&ctx, &val, sizeof(T));
+}
+
+template<>
+void update_sha256<std::string>(SHA256_CTX& ctx, std::string& val)
+{
+    SHA256_Update(&ctx, val.c_str(), val.length());
+}
 
 static void hash_var_uint(SHA256_CTX &ctx, uint64_t var_uint)
 {
@@ -13,35 +27,35 @@ static void hash_var_uint(SHA256_CTX &ctx, uint64_t var_uint)
     {
         uint8_t count = var_uint;
         
-        std::cout << var_uint << " " << sizeof(count) << std::endl;
+        logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
         
-        SHA256_Update(&ctx, &count, sizeof(count));
+        update_sha256(ctx, count);
     }
     else if(var_uint <= 0xffff)
     {
         const uint8_t prefix = 0xFD;
         uint16_t count = var_uint;
         
-        std::cout << var_uint << " " << sizeof(count) << std::endl;
+        logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
         
-        SHA256_Update(&ctx, &prefix, sizeof(prefix));
-        SHA256_Update(&ctx, &count, sizeof(count));
+        update_sha256(ctx, prefix);
+        update_sha256(ctx, count);
     }
     else if(var_uint <= 0xffffffff)
     {
         const uint8_t prefix = 0xFE;
         uint32_t count = var_uint;
         
-        SHA256_Update(&ctx, &prefix, sizeof(prefix));
-        SHA256_Update(&ctx, &count, sizeof(count));
+        update_sha256(ctx, prefix);
+        update_sha256(ctx, count);
     }
     else if(var_uint <= 0xffffffffffffffff)
     {
         const uint8_t prefix = 0xFF;
         uint64_t count = var_uint;
         
-        SHA256_Update(&ctx, &prefix, sizeof(prefix));
-        SHA256_Update(&ctx, &count, sizeof(count));
+        update_sha256(ctx, prefix);
+        update_sha256(ctx, count);
     }
     else
     {
@@ -56,34 +70,32 @@ void transaction::calculate_hash()
     SHA256_Init(&ctx);
     
 #ifdef BOOST_LITTLE_ENDIAN
-    SHA256_Update(&ctx, &version, sizeof(version));
+    update_sha256(ctx, version);
     
     hash_var_uint(ctx, inputs.size());
     
-    for(std::vector<transaction_input>::iterator it = inputs.begin();
-        it != inputs.end(); ++it)
+    for(auto it = inputs.begin(); it != inputs.end(); ++it)
     {
-        SHA256_Update(&ctx, &it->hash, sizeof(it->hash));
-        SHA256_Update(&ctx, &it->index, sizeof(it->index));
+        update_sha256(ctx, it->hash);
+        update_sha256(ctx, it->index);
         
         hash_var_uint(ctx, it->script.length());
         
-        SHA256_Update(&ctx, it->script.c_str(), it->script.length());
-        SHA256_Update(&ctx, &it->sequence, sizeof(it->sequence));
+        update_sha256(ctx, it->script);
+        update_sha256(ctx, it->sequence);
     }
     
     hash_var_uint(ctx, outputs.size());
     
-    for(std::vector<transaction_output>::iterator it = outputs.begin();
-        it != outputs.end(); ++it)
+    for(auto it = outputs.begin(); it != outputs.end(); ++it)
     {
-        SHA256_Update(&ctx, &it->value, sizeof(it->value));
+        update_sha256(ctx, it->value);
         hash_var_uint(ctx, it->script.length());
-        SHA256_Update(&ctx, it->script.c_str(), it->script.length());
+        update_sha256(ctx, it->script);
     }
-    SHA256_Update(&ctx, &locktime, sizeof(locktime));
+    update_sha256(ctx, locktime);
     
-    SHA256_Final(digest,&ctx);
+    SHA256_Final(digest, &ctx);
     
     SHA256_Init(&ctx);
     SHA256_Update(&ctx, digest, sizeof(digest));

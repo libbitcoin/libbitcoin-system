@@ -11,7 +11,8 @@ namespace libbitcoin {
 // SYSLOG = system log
 enum logger_level
 {
-    LOG_INFO = 0
+    LOG_INFO = 0,
+    DLOG_INFO
 };
 
 class logger_wrapper
@@ -32,10 +33,7 @@ private:
     logger_level lev_;
 };
 
-logger_wrapper logger(logger_level lev)
-{
-    return logger_wrapper(lev);
-}
+logger_wrapper logger(logger_level lev);
 
 } // libbitcoin
 

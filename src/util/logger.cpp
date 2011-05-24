@@ -17,5 +17,10 @@ logger_wrapper::~logger_wrapper()
     std::cout << stream.str();
 }
 
+logger_wrapper logger(logger_level lev)
+{
+    return logger_wrapper(lev);
+}
+
 } // libbitcoin
 
