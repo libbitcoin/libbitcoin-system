@@ -13,7 +13,7 @@ void transaction::calculate_hash()
     sha_ctx << version;
 
     sha_ctx.push_var_uint(inputs.size());
-    for(auto it = inputs.begin(); it != inputs.end(); it++)
+    for(auto it = inputs.begin(); it != inputs.end(); ++it)
     {
         sha_ctx << it->hash << it->index;
         sha_ctx.push_var_uint(it->script.length());
@@ -22,7 +22,7 @@ void transaction::calculate_hash()
     }
     
     sha_ctx.push_var_uint(outputs.size());
-    for(auto it = outputs.begin(); it != outputs.end(); it++)
+    for(auto it = outputs.begin(); it != outputs.end(); ++it)
     {
         sha_ctx << it->value;
         sha_ctx.push_var_uint(it->script.length());
