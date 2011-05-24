@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <stack>
 
 #include "transaction.hpp"
 
@@ -75,9 +76,11 @@ public:
     
     std::vector<operation> parsed();
     void parsed(std::vector<operation>);
-    
 private:
     void parse();
+    
+    static int64_t parse_bignum(const std::string);
+    static std::string build_bignum(const int64_t);
 
     std::string data_;
     std::vector<operation> parsed_;

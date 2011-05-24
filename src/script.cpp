@@ -1,6 +1,8 @@
 #include <map>
 #include <iostream>
 #include <algorithm>
+#include <stack>
+#include <stdlib.h>
 
 #include <boost/detail/endian.hpp>
 #include <openssl/bn.h>
@@ -89,6 +91,51 @@ void script::parse()
     }
 }
 
+static int64_t script::parse_bignum(std::string data)
+{
+    /*
+    the bignum in bitcoin scripts is a big endian sign & magnitude format
+    the sign is the most significant bit of the least significant byte
+    */
+    
+    int64_t value = 0;
+    bool negative = data[data.size()-1] & 0x80;
+    
+    //strip sign
+    data[data.size()-1] &= 0x7F;
+    
+    for(int i=(data.size()-1);i>=0;--i)
+    {
+        value += data[i] << (data.size()-1-i)*8;
+    }
+    
+    if(negative)
+        value = -value;
+    
+    return value;
+}
+
+static std::string script::build_bignum(int64_t value)
+{
+    std::string data;
+    bool negative = (value < 0);
+    
+    value = abs(value);
+    
+    #ifdef BOOST_LITTLE_ENDIAN
+        std::reverse_copy(&value,&value+sizeof(value),data.begin());
+    #elif BOOST_BIG_ENDIAN
+        std::copy(&value,&value+sizeof(value),data.begin());
+    #else
+        #error Platform not supported
+    #endif
+    
+    if(negative)
+        data[0] |= 0x80;
+    
+    return data;
+}
+
 bool script::run(transaction parent)
 {
     std::stack<std::string> stack;
@@ -105,23 +152,19 @@ bool script::run(transaction parent)
                 break;
             case opcode::ZERO:
             {
-                BIGNUM zero;
-                BN_init(&zero);
-                BN_zero(&zero);
-                unsigned char *zero_packed = new unsigned char[BN_num_bytes(&zero)];
-                stack.push(std::string(reinterpret_cast<char*>(zero_packed),sizeof(zero)));
+                stack.push(build_bignum(0));
+                break;
             }
             case opcode::NOP:
                 break;
-            case opcode::VERIFY;
+            case opcode::VERIFY:
                 stack.top();
                 stack.pop();
-                
+                BIGNUM top;
                 
             case opcode::RETURN:
                 return false;
                 break;
-            case 
         }
     }
 }
