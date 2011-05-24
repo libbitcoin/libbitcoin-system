@@ -212,7 +212,15 @@ bool script::run(transaction parent)
             }
             case opcode::CHECKSIG:
             {
-                std::string ;
+                std::string public_key,signature;
+                
+                public_key = stack.top();
+                stack.pop();
+                
+                signature = stack.top();
+                stack.pop();
+                
+                //TODO insanity
             }
         }
     }
