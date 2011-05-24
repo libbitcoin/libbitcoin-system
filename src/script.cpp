@@ -158,10 +158,7 @@ bool script::run(transaction parent)
             case opcode::NOP:
                 break;
             case opcode::VERIFY:
-                stack.top();
-                stack.pop();
-                BIGNUM top;
-                
+                return parse_bignum(stack.top());
             case opcode::RETURN:
                 return false;
                 break;
