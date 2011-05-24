@@ -20,10 +20,25 @@ script: ./src/script.cpp ./include/script.hpp
 tests: block_hashing transaction_hashing script_parsing
 
 block_hashing: block logger sha256
-	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/block_hashing ./tests/block_hashing.cpp ./obj/block.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl
+	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/block_hashing ./tests/block_hashing.cpp ./obj/block.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl -pedantic -Wall -Wextra
 
 transaction_hashing: transaction logger sha256
-	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/transaction_hashing ./tests/transaction_hashing.cpp ./obj/transaction.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl
+	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/transaction_hashing ./tests/transaction_hashing.cpp ./obj/transaction.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl -pedantic -Wall -Wextra
 	
 script_parsing: script
-	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/script_parsing ./tests/script_parsing.cpp ./obj/script.o -std=c++0x
+	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/script_parsing ./tests/script_parsing.cpp ./obj/script.o -std=c++0x -pedantic -Wall -Wextra
+
+delegator: ./src/net/delegator.cpp ./include/net/delegator.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/delegator.o ./src/net/delegator.cpp -std=c++0x
+
+dialect: ./src/net/dialect.cpp ./include/net/dialect.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/dialect.o ./src/net/dialect.cpp -std=c++0x
+
+peer: ./src/net/peer.cpp ./include/net/peer.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/peer.o ./src/net/peer.cpp -std=c++0x
+
+serializer: ./src/net/serializer.cpp ./include/net/serializer.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/serializer.o ./src/net/serializer.cpp -std=c++0x
+
+nettest: delegator  dialect  peer  serializer
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./tests/net.cpp ./obj/delegator.o ./obj/dialect.o ./obj/peer.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread
