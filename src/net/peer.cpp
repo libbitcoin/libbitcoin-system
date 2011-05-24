@@ -91,6 +91,7 @@ void peer::shutdown()
     boost::system::error_code ec;
     socket_->shutdown(tcp::socket::shutdown_both, ec);
     socket_->close(ec);
+    timeout_->cancel();
 }
 void peer::destroy_self()
 {
