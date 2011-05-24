@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "transaction.hpp"
+#include "util/sha256.hpp"
 
 namespace libbitcoin {
 
@@ -13,17 +14,16 @@ class block
 public:
     void calculate_hash();
 
-    unsigned char hash[32];
+    uint8_t hash[sha256::length];
     
     uint32_t version;
-    unsigned char prev_hash[32];
-    unsigned char merkle_root[32];
+    uint8_t prev_hash[sha256::length];
+    uint8_t merkle_root[sha256::length];
     uint32_t timestamp;
     uint32_t bits;
-    unsigned char nonce[4];
+    uint8_t nonce[4];
     
-    typedef std::vector<transaction> transaction_list;
-    std::vector<transaction> transactions;
+    transaction_array transactions;
 };
 
 } // libbitcoin
