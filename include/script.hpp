@@ -62,7 +62,10 @@ public:
         OR = 133,
         XOR = 134,
         EQUAL = 135,
-        EQUALVERIFY = 136
+        EQUALVERIFY = 136,
+        
+        HASH160 = 169,
+        CHECKSIG = 172
     };
 
     struct operation

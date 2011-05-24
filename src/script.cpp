@@ -5,7 +5,9 @@
 #include <stdlib.h>
 
 #include <boost/detail/endian.hpp>
-#include <openssl/bn.h>
+
+#include <openssl/sha.h>
+#include <openssl/ripemd.h>
 
 #include "script.hpp"
 #include "transaction.hpp"
@@ -91,7 +93,7 @@ void script::parse()
     }
 }
 
-static int64_t script::parse_bignum(std::string data)
+int64_t script::parse_bignum(std::string data)
 {
     /*
     the bignum in bitcoin scripts is a big endian sign & magnitude format
@@ -115,7 +117,7 @@ static int64_t script::parse_bignum(std::string data)
     return value;
 }
 
-static std::string script::build_bignum(int64_t value)
+std::string script::build_bignum(int64_t value)
 {
     std::string data;
     bool negative = (value < 0);
@@ -157,11 +159,61 @@ bool script::run(transaction parent)
             }
             case opcode::NOP:
                 break;
+            case opcode::DUPLICATE:
+                stack.push(stack.top());
+            case opcode::EQUAL:
+            {
+                std::string a,b;
+                a = stack.top();
+                stack.pop();
+                
+                b = stack.top();
+                stack.pop();
+                
+                if (a==b)
+                    stack.push(build_bignum(1));
+                else
+                    stack.push(build_bignum(0));
+            }
+            case opcode::EQUALVERIFY:
+            {
+                std::string a,b;
+                a = stack.top();
+                stack.pop();
+                
+                b = stack.top();
+                stack.pop();
+                
+                return a == b;
+            }
             case opcode::VERIFY:
                 return parse_bignum(stack.top());
             case opcode::RETURN:
                 return false;
-                break;
+            case opcode::HASH160:
+            {
+                std::string data = stack.top();
+                stack.pop();
+                
+                unsigned char sha256_md[SHA256_DIGEST_LENGTH];
+                
+                SHA256_CTX sha256_ctx;
+                SHA256_Init(&sha256_ctx);
+                SHA256_Update(&sha256_ctx,data.c_str(),data.size());
+                SHA256_Final(sha256_md,&sha256_ctx);
+                
+                unsigned char ripemd160_md[RIPEMD160_DIGEST_LENGTH];
+                RIPEMD160_CTX ripemd160_ctx;
+                RIPEMD160_Init(&ripemd160_ctx);
+                RIPEMD160_Update(&ripemd160_ctx,&sha256_md,SHA256_DIGEST_LENGTH);
+                RIPEMD160_Final(ripemd160_md,&ripemd160_ctx);
+                
+                stack.push(std::string(reinterpret_cast<char*>(ripemd160_md),RIPEMD160_DIGEST_LENGTH));
+            }
+            case opcode::CHECKSIG:
+            {
+                std::string ;
+            }
         }
     }
 }
