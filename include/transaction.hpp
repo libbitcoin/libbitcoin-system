@@ -26,12 +26,12 @@ class transaction
 public:
     void calculate_hash();
 
-    unsigned char hash_[32];
-    uint32_t version_;
-    uint32_t locktime_;
+    unsigned char hash[32];
+    uint32_t version;
+    uint32_t locktime;
     
-    std::vector<transaction_input> inputs_;
-    std::vector<transaction_output> outputs_;
+    std::vector<transaction_input> inputs;
+    std::vector<transaction_output> outputs;
 };
 
 } // libbitcoin

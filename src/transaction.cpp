@@ -56,12 +56,12 @@ void transaction::calculate_hash()
     SHA256_Init(&ctx);
     
 #ifdef BOOST_LITTLE_ENDIAN
-    SHA256_Update(&ctx, &version_, sizeof(version_));
+    SHA256_Update(&ctx, &version, sizeof(version));
     
-    hash_var_uint(ctx, inputs_.size());
+    hash_var_uint(ctx, inputs.size());
     
-    for(std::vector<transaction_input>::iterator it = inputs_.begin();
-        it != inputs_.end(); ++it)
+    for(std::vector<transaction_input>::iterator it = inputs.begin();
+        it != inputs.end(); ++it)
     {
         SHA256_Update(&ctx, &it->hash, sizeof(it->hash));
         SHA256_Update(&ctx, &it->index, sizeof(it->index));
@@ -72,22 +72,22 @@ void transaction::calculate_hash()
         SHA256_Update(&ctx, &it->sequence, sizeof(it->sequence));
     }
     
-    hash_var_uint(ctx, outputs_.size());
+    hash_var_uint(ctx, outputs.size());
     
-    for(std::vector<transaction_output>::iterator it = outputs_.begin();
-        it != outputs_.end(); ++it)
+    for(std::vector<transaction_output>::iterator it = outputs.begin();
+        it != outputs.end(); ++it)
     {
         SHA256_Update(&ctx, &it->value, sizeof(it->value));
         hash_var_uint(ctx, it->script.length());
         SHA256_Update(&ctx, it->script.c_str(), it->script.length());
     }
-    SHA256_Update(&ctx, &locktime_, sizeof(locktime_));
+    SHA256_Update(&ctx, &locktime, sizeof(locktime));
     
     SHA256_Final(digest,&ctx);
     
     SHA256_Init(&ctx);
     SHA256_Update(&ctx, digest, sizeof(digest));
-    SHA256_Final(hash_, &ctx);
+    SHA256_Final(hash, &ctx);
 #elif BOOST_BIG_ENDIAN
     #error "Platform not supported"
 #else
