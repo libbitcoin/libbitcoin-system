@@ -1,14 +1,12 @@
 #ifndef LIBBITCOIN_NET_MESSAGES_H
 #define LIBBITCOIN_NET_MESSAGES_H
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <string>
 
 namespace libbitcoin {
 namespace net {
 namespace message {
-
-using namespace boost;
 
 struct net_addr
 {

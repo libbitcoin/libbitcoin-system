@@ -3,9 +3,9 @@
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/utility.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <deque>

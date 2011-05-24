@@ -1,7 +1,7 @@
 #ifndef LIBBITCOIN_BLOCK_H
 #define LIBBITCOIN_BLOCK_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 #include "transaction.hpp"

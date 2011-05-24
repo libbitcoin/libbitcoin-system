@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 #include "util/sha256.hpp"
 

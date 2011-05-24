@@ -3,7 +3,7 @@
 
 #include <openssl/sha.h>
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 
 namespace libbitcoin {
 

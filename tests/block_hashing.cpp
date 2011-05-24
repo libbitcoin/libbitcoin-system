@@ -1,5 +1,5 @@
 #include <string.h>
-#include <stdint.h>
+#include <cstdint>
 
 #include "block.hpp"
 
