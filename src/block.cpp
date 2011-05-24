@@ -1,30 +1,19 @@
-#include <boost/detail/endian.hpp>
-#include <openssl/sha.h>
-
 #include "block.hpp"
+
+#include <boost/detail/endian.hpp>
+
+#include "util/sha256.hpp"
 
 namespace libbitcoin {
 
 void block::calculate_hash()
 {
-    unsigned char digest[SHA256_DIGEST_LENGTH];
-    SHA256_CTX ctx;
-    
+    sha256 sha_ctx;
     //TODO handle errors
-    
 #ifdef BOOST_LITTLE_ENDIAN
-    SHA256_Init(&ctx);
-    SHA256_Update(&ctx, &version_, sizeof(version_));
-    SHA256_Update(&ctx, &prev_hash_, sizeof(prev_hash_));
-    SHA256_Update(&ctx, &merkle_root_, sizeof(merkle_root_));
-    SHA256_Update(&ctx, &timestamp_, sizeof(timestamp_));
-    SHA256_Update(&ctx, &bits_, sizeof(bits_));
-    SHA256_Update(&ctx, &nonce_, sizeof(nonce_));
-    SHA256_Final(digest, &ctx);
-    
-    SHA256_Init(&ctx);
-    SHA256_Update(&ctx, &digest, sizeof(digest));
-    SHA256_Final(hash_, &ctx);
+    sha_ctx << version << prev_hash << merkle_root << timestamp << bits
+            << nonce;
+    sha_ctx.final(hash);
 #elif BOOST_BIG_ENDIAN
     #error "Platform not supported"
 #else

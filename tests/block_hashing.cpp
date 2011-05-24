@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "block.h"
+#include "block.hpp"
 
 int main()
 {
@@ -15,8 +15,8 @@ int main()
     {0x1D,0xAC,0x2B,0x7C}};
     
     unsigned char hash[32];
-    memcpy(hash,block.hash,32);
+    memcpy(hash, block.hash, 32);
     block.calculate_hash();
-    printf("%d\n",memcmp(hash,block.hash,32));
+    printf("%d\n", memcmp(hash, block.hash, 32));
     return 0;
 }

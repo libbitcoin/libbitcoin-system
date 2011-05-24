@@ -13,16 +13,17 @@ class block
 public:
     void calculate_hash();
 
-    unsigned char hash_[32];
+    unsigned char hash[32];
     
-    uint32_t version_;
-    unsigned char prev_hash_[32];
-    unsigned char merkle_root_[32];
-    uint32_t timestamp_;
-    uint32_t bits_;
-    unsigned char nonce_[4];
+    uint32_t version;
+    unsigned char prev_hash[32];
+    unsigned char merkle_root[32];
+    uint32_t timestamp;
+    uint32_t bits;
+    unsigned char nonce[4];
     
-    std::vector<transaction> transactions_;
+    typedef std::vector<transaction> transaction_list;
+    std::vector<transaction> transactions;
 };
 
 } // libbitcoin
