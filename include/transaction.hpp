@@ -16,17 +16,14 @@ struct transaction_input
     std::string script;
     uint32_t sequence;
 };
+typedef std::vector<transaction_input> transaction_input_array;
 
 struct transaction_output
 {
     uint64_t value;
     std::string script;
 };
-
-typedef std::vector<transaction_input> transaction_input_array;
 typedef std::vector<transaction_output> transaction_output_array;
-struct transaction;
-typedef std::vector<transaction> transaction_array;
 
 struct transaction
 {
@@ -39,6 +36,7 @@ struct transaction
     transaction_input_array inputs;
     transaction_output_array outputs;
 };
+typedef std::vector<transaction> transaction_array;
 
 } // libbitcoin
 

@@ -1,5 +1,7 @@
 #include "util/sha256.hpp"
 
+#include <boost/detail/endian.hpp>
+
 #include "util/logger.hpp"
 
 namespace libbitcoin {
@@ -9,37 +11,48 @@ sha256::sha256()
     SHA256_Init(&ctx_);
 }
 
-void sha256::push_str(const std::string& val)
+void sha256::str(const std::string& val)
 {
+#ifdef BOOST_LITTLE_ENDIAN
     SHA256_Update(&ctx_, val.c_str(), val.length());
+#elif BOOST_BIG_ENDIAN
+    #error Platform not supported
+#else
+    #error Platform not supported
+#endif
 }
 
-void sha256::push_var_uint(uint64_t var_uint)
+void sha256::var_uint(uint64_t var_uint)
 {
     if(var_uint < 0xFD)
     {
         uint8_t count = var_uint;
         logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
-        *this << count;
+        update(count);
     }
     else if(var_uint <= 0xffff)
     {
         const uint8_t prefix = 0xFD;
         uint16_t count = var_uint;
         logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
-        *this << prefix << count;
+        update(prefix);
+        update(count);
     }
     else if(var_uint <= 0xffffffff)
     {
         const uint8_t prefix = 0xFE;
         uint32_t count = var_uint;
-        *this << prefix << count;
+        logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
+        update(prefix);
+        update(count);
     }
     else if(var_uint <= 0xffffffffffffffff)
     {
         const uint8_t prefix = 0xFF;
         uint64_t count = var_uint;
-        *this << prefix << count;
+        logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
+        update(prefix);
+        update(count);
     }
     else
     {

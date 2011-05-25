@@ -10,19 +10,18 @@ namespace libbitcoin {
 class sha256
 {
 public:
-    enum { length = SHA256_DIGEST_LENGTH };
+    static const size_t length = SHA256_DIGEST_LENGTH;
 
     sha256();
-
+    
     template<typename T>
-    sha256& operator<<(T& val)
+    void update(T& val)
     {
         SHA256_Update(&ctx_, &val, sizeof(T));
-        return *this;
     }
 
-    void push_var_uint(uint64_t var_uint);
-    void push_str(const std::string& val);
+    void var_uint(uint64_t var_uint);
+    void str(const std::string& val);
 
     SHA256_CTX& ctx() { return ctx_; }
 
