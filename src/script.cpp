@@ -15,30 +15,30 @@
 namespace libbitcoin {
 
 script::script(std::string data)
- : data_(data)
+    :data_(data)
 {
     parse();
 }
 
 script::script(unsigned char *data, uint64_t length)
+    :data_(reinterpret_cast<char*>(data), length)
 {
-    data_.assign(reinterpret_cast<char*>(data), length);
     parse();
 }
 
-void script::parsed(std::vector<script::operation> parsed)
+void script::operations(const std::vector<script::operation>& operations)
 {
-    parsed_ = parsed;
+    operations_ = operations;
 }
 
-std::vector<script::operation> script::parsed()
+const std::vector<script::operation>& script::operations()
 {
-    return parsed_;
+    return operations_;
 }
 
 void script::parse()
 {
-    parsed_.clear();
+    operations_.clear();
     
     std::string::iterator it = data_.begin();
     
@@ -89,7 +89,7 @@ void script::parse()
             }
         }
         
-        parsed_.push_back(op);
+        operations_.push_back(op);
     }
 }
 
@@ -143,7 +143,7 @@ bool script::run(transaction parent)
     std::stack<std::string> stack;
     
     std::vector<operation>::iterator it;
-    for(it = parsed_.begin(); it < parsed_.end(); ++it)
+    for(it = operations_.begin(); it < operations_.end(); ++it)
     {
         switch(it->op)
         {
@@ -196,7 +196,6 @@ bool script::run(transaction parent)
                 stack.pop();
                 
                 unsigned char sha256_md[SHA256_DIGEST_LENGTH];
-                
                 SHA256_CTX sha256_ctx;
                 SHA256_Init(&sha256_ctx);
                 SHA256_Update(&sha256_ctx,data.c_str(),data.size());
@@ -220,7 +219,12 @@ bool script::run(transaction parent)
                 signature = stack.top();
                 stack.pop();
                 
-                //TODO insanity
+                //deep copy
+                std::string data = data_;
+                
+                //find and delete the signature
+                auto signature_start = data.find(signature);
+                data.erase(signature_start,signature_start+signature.length());
             }
         }
     }

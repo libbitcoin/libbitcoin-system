@@ -77,16 +77,16 @@ public:
     bool run(transaction);
     
     
-    std::vector<operation> parsed();
-    void parsed(std::vector<operation>);
+    const std::vector<operation>& operations();
+    void operations(const std::vector<operation>&);
 private:
     void parse();
     
     static int64_t parse_bignum(const std::string);
     static std::string build_bignum(const int64_t);
-
+    
     std::string data_;
-    std::vector<operation> parsed_;
+    std::vector<operation> operations_;
 };
 
 } // libbitcoin
