@@ -19,7 +19,7 @@ struct header
 {
     uint32_t magic;
     std::string command;
-    uint32_t length;
+    uint32_t payload_length;
     // Ignored by version and verack commands
     uint32_t checksum;
 };

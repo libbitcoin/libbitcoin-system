@@ -45,17 +45,24 @@ public:
     void close();
 
 private:
+    void read_header();
+    void read_checksum(message::header header_msg);
+    void read_payload(message::header header_msg);
+
     void handle_read_header(const boost::system::error_code& ec, 
             size_t bytes_transferred);
+    void handle_read_checksum(message::header header_msg,
+            const boost::system::error_code& ec, size_t bytes_transferred);
+    void handle_read_payload(message::header header_msg,
+            const boost::system::error_code& ec, size_t bytes_transferred);
+
     void handle_send(const boost::system::error_code& ec);
 
     void handle_timeout(const boost::system::error_code& ec);
     void reset_timeout();
 
-    // Calls clean_shutdown and removes self from parent
+    // Removes self from parent
     void destroy_self();
-    // Closes socket
-    void shutdown();
 
     shared_ptr<tcp::socket> socket_;
     shared_ptr<delegator> parent_gateway_;

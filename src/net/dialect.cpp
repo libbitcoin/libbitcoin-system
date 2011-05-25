@@ -56,8 +56,18 @@ const message::header original_dialect::header_from_network(
     message::header header;
     header.magic = deserial.read_4_bytes();
     header.command = deserial.read_fixed_len_str(12);
-    header.length = deserial.read_4_bytes();
+    header.payload_length = deserial.read_4_bytes();
     return header;
+}
+
+const message::version original_dialect::version_from_network(
+        const serializer::stream& stream) const
+{
+    deserializer deserial(stream);
+    message::version payload;
+    payload.version = deserial.read_4_bytes();
+    //payload.services = deserial.read_8_bytes();
+    return payload;
 }
 
 } // net

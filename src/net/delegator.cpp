@@ -17,15 +17,7 @@ static void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-delegator_default::~delegator_default()
-{
-    if (acceptor_)
-        acceptor_->close();
-    service_->stop();
-    runner_.join();
-}
-
-void delegator_default::init()
+delegator_default::delegator_default()
 {
     service_.reset(new io_service);
     work_.reset(new io_service::work(*service_));
@@ -35,9 +27,18 @@ void delegator_default::init()
     start_accept();
 }
 
+delegator_default::~delegator_default()
+{
+    if (acceptor_)
+        acceptor_->close();
+    service_->stop();
+    runner_.join();
+}
+
 void delegator_default::add_peer(peer_ptr peer_obj)
 {
     peers_.push_back(peer_obj);
+    logger(LOG_DEBUG) << peers_.size() << " peers connected.";
 }
 
 void delegator_default::perform_disconnect(peer_ptr peer_obj)
@@ -78,6 +79,7 @@ void delegator_default::disconnect(peer_ptr peer_obj)
 {
     strand_->dispatch(boost::bind(
                 &delegator_default::perform_disconnect, this, peer_obj));
+    logger(LOG_DEBUG) << peers_.size() << " peers remaining.";
 }
 
 bool delegator_default::start_accept()
