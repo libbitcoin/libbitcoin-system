@@ -14,7 +14,10 @@ logger_wrapper::logger_wrapper(const logger_wrapper& other)
 }
 logger_wrapper::~logger_wrapper()
 {
-    std::cout << stream.str();
+    if (lev_ == LOG_ERROR || lev_ == LOG_FATAL)
+        std::cerr << stream.str() << std::endl;
+    else
+        std::cout << stream.str() << std::endl;
 }
 
 logger_wrapper logger(logger_level lev)

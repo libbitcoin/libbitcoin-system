@@ -21,7 +21,7 @@ using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
 using std::shared_ptr;
 
-class delegator_default;
+class delegator;
 class dialect;
 class peer;
 
@@ -30,12 +30,16 @@ typedef shared_ptr<peer> peer_ptr;
 class peer : private boost::noncopyable, public std::enable_shared_from_this<peer>
 {
 public:
-    peer(shared_ptr<delegator_default> parent_gateway, 
-            shared_ptr<dialect> translator);
-    ~peer();
+    struct init_data
+    {
+        shared_ptr<delegator> parent_gateway;
+        shared_ptr<dialect> translator;
+        shared_ptr<io_service> service;
+        shared_ptr<tcp::socket> socket;
+    };
 
-    bool connect(shared_ptr<io_service> io_service,
-            std::string ip_addr, unsigned short port);
+    peer(const init_data& dat);
+    ~peer();
 
     void send(message::version version);
     void close();
@@ -54,7 +58,7 @@ private:
     void shutdown();
 
     shared_ptr<tcp::socket> socket_;
-    shared_ptr<delegator_default> parent_gateway_;
+    shared_ptr<delegator> parent_gateway_;
     shared_ptr<dialect> translator_;
 
     boost::asio::streambuf response_;

@@ -30,7 +30,7 @@ libbitcoin::net::message::version create_version_message()
     return version;
 }
 
-int run_networking()
+int run_connect()
 {
     libbitcoin::net::delegator_ptr net(new libbitcoin::net::delegator_default);
     net->init();
@@ -45,8 +45,16 @@ int run_networking()
     return 0;
 }
 
+int run_accept()
+{
+    libbitcoin::net::delegator_ptr net(new libbitcoin::net::delegator_default);
+    net->init();
+    std::cin.get();
+    return 0;
+}
+
 int main()
 {
-    return run_networking();
+    return run_accept();
 }
 

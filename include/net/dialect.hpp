@@ -2,12 +2,16 @@
 #define LIBBITCOIN_NET_DIALECT_H
 
 #include <string>
+#include <memory>
 
 #include "net/serializer.hpp"
 #include "net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
+
+class dialect;
+typedef std::shared_ptr<dialect> dialect_ptr;
 
 class dialect
 {

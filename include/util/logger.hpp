@@ -9,10 +9,14 @@ namespace libbitcoin {
 // DLOG = debug log
 // VLOG = verbose log
 // SYSLOG = system log
+// DEBUG, INFO, WARNING, ERROR, FATAL
 enum logger_level
 {
-    LOG_INFO = 0,
-    DLOG_INFO
+    LOG_DEBUG = 0,
+    LOG_INFO,
+    LOG_WARNING,
+    LOG_ERROR,
+    LOG_FATAL
 };
 
 class logger_wrapper
