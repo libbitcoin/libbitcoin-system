@@ -1,13 +1,12 @@
-#include "net/peer.hpp"
+#include "bitcoin/net/peer.hpp"
 
 #include <boost/bind.hpp>
-#include <iostream>
 #include <time.h>
 
-#include "util/logger.hpp"
-#include "net/delegator.hpp"
-#include "net/dialect.hpp"
-#include "net/messages.hpp"
+#include "bitcoin/util/logger.hpp"
+#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/dialect.hpp"
+#include "bitcoin/net/messages.hpp"
 
 #include "shared_const_buffer.hpp"
 
@@ -29,16 +28,18 @@ peer::peer(const init_data& dat)
         translator_(dat.translator) 
 {
     timeout_.reset(new deadline_timer(*dat.service));
-    async_read(*socket_, response_,
-            boost::asio::transfer_at_least(header_chunk_size),
-            boost::bind(&peer::handle_read_header, this,
-                placeholders::error, placeholders::bytes_transferred));
+    read_header();
     reset_timeout();
 }
 
 peer::~peer() 
 {
-    shutdown();
+    tcp::endpoint remote_endpoint = socket_->remote_endpoint();
+    logger(LOG_DEBUG) << "Closing peer " << remote_endpoint.address().to_string();
+    boost::system::error_code ec;
+    socket_->shutdown(tcp::socket::shutdown_both, ec);
+    socket_->close(ec);
+    timeout_->cancel();
 }
 
 void peer::handle_timeout(const boost::system::error_code& ec)
@@ -67,15 +68,6 @@ void peer::reset_timeout()
             boost::bind(&peer::handle_timeout, this, placeholders::error));
 }
 
-void peer::shutdown()
-{
-    tcp::endpoint remote_endpoint = socket_->remote_endpoint();
-    logger(LOG_DEBUG) << "Closing peer " << remote_endpoint.address().to_string();
-    boost::system::error_code ec;
-    socket_->shutdown(tcp::socket::shutdown_both, ec);
-    socket_->close(ec);
-    timeout_->cancel();
-}
 void peer::destroy_self()
 {
     parent_gateway_->disconnect(shared_from_this());
@@ -94,12 +86,37 @@ static serializer::stream consume_response(boost::asio::streambuf& response,
     return stream;
 }
 
+void peer::read_header()
+{
+    async_read(*socket_, response_,
+            boost::asio::transfer_at_least(header_chunk_size),
+            boost::bind(&peer::handle_read_header, this,
+                placeholders::error, placeholders::bytes_transferred));
+}
+
+void peer::read_checksum(message::header header_msg)
+{
+    async_read(*socket_, response_,
+            boost::asio::transfer_at_least(4),
+            boost::bind(&peer::handle_read_checksum, this,
+                header_msg, placeholders::error, placeholders::bytes_transferred));
+}
+
+void peer::read_payload(message::header header_msg)
+{
+    async_read(*socket_, response_,
+            boost::asio::transfer_at_least(header_msg.payload_length),
+            boost::bind(&peer::handle_read_payload, this,
+                header_msg, placeholders::error, placeholders::bytes_transferred));
+}
+
 void peer::handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred)
 {
     if (ec) 
     {
-        destroy_self();
+        if (ec != boost::asio::error::operation_aborted) 
+            destroy_self();
         return;
     }
     BOOST_ASSERT(bytes_transferred >= header_chunk_size);
@@ -119,16 +136,61 @@ void peer::handle_read_header(const boost::system::error_code& ec,
         // Read checksum
     }
     */
-    std::cout << header_msg.command << "\n";
-    std::cout << "payload is " << header_msg.length << " bytes.\n";
+    // Temporarily we ignore checks
+    if (false)
+    {
+        destroy_self();
+        return;
+    }
+
+    if (header_msg.command == "version" || header_msg.command == "verack")
+    {
+        // Read payload
+        read_payload(header_msg);
+    }
+    else
+    {
+        // Read checksum
+        read_checksum(header_msg);
+    }
+    logger(LOG_DEBUG) << header_msg.command;
+    logger(LOG_DEBUG) << "payload is " << header_msg.payload_length << " bytes.";
     reset_timeout();
+}
+
+void peer::handle_read_checksum(message::header header_msg,
+        const boost::system::error_code& ec, size_t bytes_transferred)
+{
+    if (ec) 
+    {
+        if (ec != boost::asio::error::operation_aborted) 
+            destroy_self();
+        return;
+    }
+}
+
+void peer::handle_read_payload(message::header header_msg,
+        const boost::system::error_code& ec, size_t bytes_transferred)
+{
+    if (ec) 
+    {
+        if (ec != boost::asio::error::operation_aborted) 
+            destroy_self();
+        return;
+    }
+    BOOST_ASSERT(bytes_transferred >= header_msg.payload_length);
+    BOOST_ASSERT(response_.size() == bytes_transferred);
+    serializer::stream payload_stream = 
+            consume_response(response_, header_msg.payload_length);
+    message::version payload = translator_->version_from_network(payload_stream); 
 }
 
 void peer::handle_send(const boost::system::error_code& ec)
 {
     if (ec) 
     {
-        destroy_self();
+        if (ec != boost::asio::error::operation_aborted) 
+            destroy_self();
         return;
     }
 }

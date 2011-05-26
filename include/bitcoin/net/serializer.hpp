@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "net/messages.hpp"
+#include "bitcoin/net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -13,7 +13,7 @@ namespace net {
 class serializer
 {
 public:
-    typedef typename std::vector<char> stream;
+    typedef std::vector<char> stream;
 
     void write_byte(uint8_t v);
     void write_4_bytes(uint32_t v);

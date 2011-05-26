@@ -9,8 +9,8 @@
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
 
-#include "script.hpp"
-#include "transaction.hpp"
+#include "bitcoin/script.hpp"
+#include "bitcoin/transaction.hpp"
 
 namespace libbitcoin {
 

@@ -5,8 +5,8 @@
 #include <memory>
 #include <thread>
 
-#include "net/dialect.hpp"
-#include "net/peer.hpp"
+#include "bitcoin/net/dialect.hpp"
+#include "bitcoin/net/peer.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -20,7 +20,6 @@ typedef shared_ptr<delegator> delegator_ptr;
 class delegator : boost::noncopyable
 {
 public:
-    virtual void init() = 0;
     virtual peer_ptr connect(std::string ip_addr, unsigned short port=8333) = 0;
     virtual void disconnect(peer_ptr peer_obj) = 0;
 };
@@ -29,6 +28,7 @@ class delegator_default : public delegator,
     public std::enable_shared_from_this<delegator_default>
 {
 public:
+    delegator_default();
     ~delegator_default();
     void init();
     peer_ptr connect(std::string ip_addr, unsigned short port=8333);

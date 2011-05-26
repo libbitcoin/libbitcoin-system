@@ -4,8 +4,8 @@
 #include <string>
 #include <memory>
 
-#include "net/serializer.hpp"
-#include "net/messages.hpp"
+#include "bitcoin/net/serializer.hpp"
+#include "bitcoin/net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -20,6 +20,8 @@ public:
             message::version version) const = 0;
     virtual const message::header header_from_network(
             const serializer::stream& stream) const = 0;
+    virtual const message::version version_from_network(
+            const serializer::stream& stream) const = 0;
 };
 
 class original_dialect : public dialect
@@ -30,6 +32,9 @@ public:
 
     // Create header/messages from stream
     const message::header header_from_network(
+            const serializer::stream& stream) const;
+
+    const message::version version_from_network(
             const serializer::stream& stream) const;
 };
 
