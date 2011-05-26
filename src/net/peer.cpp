@@ -1,12 +1,12 @@
-#include "net/peer.hpp"
+#include "bitcoin/net/peer.hpp"
 
 #include <boost/bind.hpp>
 #include <time.h>
 
-#include "util/logger.hpp"
-#include "net/delegator.hpp"
-#include "net/dialect.hpp"
-#include "net/messages.hpp"
+#include "bitcoin/util/logger.hpp"
+#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/dialect.hpp"
+#include "bitcoin/net/messages.hpp"
 
 #include "shared_const_buffer.hpp"
 

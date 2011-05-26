@@ -5,7 +5,7 @@
 #include <vector>
 #include <cstdint>
 
-#include "util/sha256.hpp"
+#include "bitcoin/util/sha256.hpp"
 
 namespace libbitcoin {
 

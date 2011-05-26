@@ -5,7 +5,7 @@
 #include <vector>
 #include <stack>
 
-#include "transaction.hpp"
+#include "bitcoin/transaction.hpp"
 
 namespace libbitcoin {
 

@@ -1,11 +1,11 @@
-#include "net/delegator.hpp"
+#include "bitcoin/net/delegator.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
 #include <iostream>
 
-#include "util/logger.hpp"
-#include "net/dialect.hpp"
+#include "bitcoin/util/logger.hpp"
+#include "bitcoin/net/dialect.hpp"
 
 namespace libbitcoin {
 namespace net {

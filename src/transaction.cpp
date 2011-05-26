@@ -1,8 +1,8 @@
-#include "transaction.hpp"
+#include "bitcoin/transaction.hpp"
 
 #include <boost/detail/endian.hpp>
 
-#include "util/sha256.hpp"
+#include "bitcoin/util/sha256.hpp"
 
 namespace libbitcoin {
 

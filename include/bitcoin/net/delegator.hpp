@@ -5,8 +5,8 @@
 #include <memory>
 #include <thread>
 
-#include "net/dialect.hpp"
-#include "net/peer.hpp"
+#include "bitcoin/net/dialect.hpp"
+#include "bitcoin/net/peer.hpp"
 
 namespace libbitcoin {
 namespace net {

@@ -1,11 +1,11 @@
-#include "net/serializer.hpp"
+#include "bitcoin/net/serializer.hpp"
 
 #include <boost/detail/endian.hpp>
 #include <algorithm>
 #include <iostream>
 #include <string>
 
-#include "net/messages.hpp"
+#include "bitcoin/net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
