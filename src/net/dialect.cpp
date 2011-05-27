@@ -66,7 +66,11 @@ const message::version original_dialect::version_from_network(
     deserializer deserial(stream);
     message::version payload;
     payload.version = deserial.read_4_bytes();
-    //payload.services = deserial.read_8_bytes();
+    payload.services = deserial.read_8_bytes();
+    payload.timestamp = deserial.read_8_bytes();
+    payload.addr_me = deserial.read_net_addr();
+    if (payload.version < 106)
+        BOOST_ASSERT(stream.size() == 4 + 8 + 8 + 26);
     return payload;
 }
 

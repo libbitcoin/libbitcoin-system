@@ -34,8 +34,8 @@ obj/delegator.o: ./src/net/delegator.cpp ./include/bitcoin/net/delegator.hpp
 obj/dialect.o: ./src/net/dialect.cpp ./include/bitcoin/net/dialect.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/dialect.o ./src/net/dialect.cpp -std=c++0x -g
 
-obj/peer.o: ./src/net/peer.cpp ./include/bitcoin/net/peer.hpp
-	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/peer.o ./src/net/peer.cpp -std=c++0x -g
+obj/channel.o: ./src/net/channel.cpp ./include/bitcoin/net/channel.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/channel.o ./src/net/channel.cpp -std=c++0x -g
 
 obj/serializer.o: ./src/net/serializer.cpp ./include/bitcoin/net/serializer.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/serializer.o ./src/net/serializer.cpp -std=c++0x -g
@@ -43,8 +43,8 @@ obj/serializer.o: ./src/net/serializer.cpp ./include/bitcoin/net/serializer.hpp
 obj/nettest.o: ./tests/net.cpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/nettest.o ./tests/net.cpp -std=c++0x -g
 
-bin/tests/nettest: obj/delegator.o  obj/dialect.o  obj/peer.o  obj/serializer.o obj/logger.o obj/nettest.o
-	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/delegator.o ./obj/dialect.o ./obj/peer.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o
+bin/tests/nettest: obj/delegator.o  obj/dialect.o  obj/channel.o  obj/serializer.o obj/logger.o obj/nettest.o
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/delegator.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o
 
 net: bin/tests/nettest
 

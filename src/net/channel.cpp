@@ -1,4 +1,4 @@
-#include "bitcoin/net/peer.hpp"
+#include "bitcoin/net/channel.hpp"
 
 #include <boost/bind.hpp>
 #include <time.h>
@@ -23,7 +23,7 @@ constexpr size_t header_checksum_size = 4;
 // Connection timeout time in seconds
 constexpr size_t disconnect_timeout = 30;
 
-peer::peer(const init_data& dat)
+channel::channel(const init_data& dat)
  : socket_(dat.socket), parent_gateway_(dat.parent_gateway), 
         translator_(dat.translator) 
 {
@@ -32,17 +32,18 @@ peer::peer(const init_data& dat)
     reset_timeout();
 }
 
-peer::~peer() 
+channel::~channel() 
 {
     tcp::endpoint remote_endpoint = socket_->remote_endpoint();
-    logger(LOG_DEBUG) << "Closing peer " << remote_endpoint.address().to_string();
+    logger(LOG_DEBUG) << "Closing channel " 
+            << remote_endpoint.address().to_string();
     boost::system::error_code ec;
     socket_->shutdown(tcp::socket::shutdown_both, ec);
     socket_->close(ec);
     timeout_->cancel();
 }
 
-void peer::handle_timeout(const boost::system::error_code& ec)
+void channel::handle_timeout(const boost::system::error_code& ec)
 {
     if (ec == boost::asio::error::operation_aborted) 
     {
@@ -60,15 +61,15 @@ void peer::handle_timeout(const boost::system::error_code& ec)
     }
 }
 
-void peer::reset_timeout()
+void channel::reset_timeout()
 {
     timeout_->cancel();
     timeout_->expires_from_now(posix_time::seconds(disconnect_timeout));
     timeout_->async_wait(
-            boost::bind(&peer::handle_timeout, this, placeholders::error));
+            boost::bind(&channel::handle_timeout, this, placeholders::error));
 }
 
-void peer::destroy_self()
+void channel::destroy_self()
 {
     parent_gateway_->disconnect(shared_from_this());
 }
@@ -86,31 +87,31 @@ static serializer::stream consume_response(boost::asio::streambuf& response,
     return stream;
 }
 
-void peer::read_header()
+void channel::read_header()
 {
     async_read(*socket_, response_,
             boost::asio::transfer_at_least(header_chunk_size),
-            boost::bind(&peer::handle_read_header, this,
+            boost::bind(&channel::handle_read_header, this,
                 placeholders::error, placeholders::bytes_transferred));
 }
 
-void peer::read_checksum(message::header header_msg)
+void channel::read_checksum(message::header header_msg)
 {
     async_read(*socket_, response_,
             boost::asio::transfer_at_least(4),
-            boost::bind(&peer::handle_read_checksum, this,
-                header_msg, placeholders::error, placeholders::bytes_transferred));
+            boost::bind(&channel::handle_read_checksum, this, header_msg, 
+                placeholders::error, placeholders::bytes_transferred));
 }
 
-void peer::read_payload(message::header header_msg)
+void channel::read_payload(message::header header_msg)
 {
     async_read(*socket_, response_,
             boost::asio::transfer_at_least(header_msg.payload_length),
-            boost::bind(&peer::handle_read_payload, this,
-                header_msg, placeholders::error, placeholders::bytes_transferred));
+            boost::bind(&channel::handle_read_payload, this, header_msg, 
+                placeholders::error, placeholders::bytes_transferred));
 }
 
-void peer::handle_read_header(const boost::system::error_code& ec,
+void channel::handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred)
 {
     if (ec) 
@@ -123,14 +124,11 @@ void peer::handle_read_header(const boost::system::error_code& ec,
     BOOST_ASSERT(response_.size() == bytes_transferred);
     serializer::stream header_stream = 
             consume_response(response_, header_chunk_size);
-    message::header header_msg = translator_->header_from_network(header_stream);
+    message::header header_msg = 
+            translator_->header_from_network(header_stream);
     /*
      * Should be implemented outside in core or whatever
-    if (header_msg.magic != 0xd9b4bef9)
-        throw peer_exception();
     if (header_msg.command == "version") {
-        // if (header_msg.length != ...
-        // Read payload
     }
     else {
         // Read checksum
@@ -139,6 +137,12 @@ void peer::handle_read_header(const boost::system::error_code& ec,
     // Temporarily we ignore checks
     if (false)
     {
+        /*
+        if (header_msg.magic != 0xd9b4bef9)
+            throw channel_exception();
+            // if (header_msg.length != ...
+            // Read payload
+        */
         destroy_self();
         return;
     }
@@ -154,11 +158,12 @@ void peer::handle_read_header(const boost::system::error_code& ec,
         read_checksum(header_msg);
     }
     logger(LOG_DEBUG) << header_msg.command;
-    logger(LOG_DEBUG) << "payload is " << header_msg.payload_length << " bytes.";
+    logger(LOG_DEBUG) << "payload is " << header_msg.payload_length 
+            << " bytes.";
     reset_timeout();
 }
 
-void peer::handle_read_checksum(message::header header_msg,
+void channel::handle_read_checksum(message::header header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if (ec) 
@@ -169,7 +174,7 @@ void peer::handle_read_checksum(message::header header_msg,
     }
 }
 
-void peer::handle_read_payload(message::header header_msg,
+void channel::handle_read_payload(message::header header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if (ec) 
@@ -182,10 +187,11 @@ void peer::handle_read_payload(message::header header_msg,
     BOOST_ASSERT(response_.size() == bytes_transferred);
     serializer::stream payload_stream = 
             consume_response(response_, header_msg.payload_length);
-    message::version payload = translator_->version_from_network(payload_stream); 
+    message::version payload = 
+            translator_->version_from_network(payload_stream); 
 }
 
-void peer::handle_send(const boost::system::error_code& ec)
+void channel::handle_send(const boost::system::error_code& ec)
 {
     if (ec) 
     {
@@ -195,12 +201,12 @@ void peer::handle_send(const boost::system::error_code& ec)
     }
 }
 
-void peer::send(message::version version)
+void channel::send(message::version version)
 {
     serializer::stream msg = translator_->to_network(version);
     shared_const_buffer buffer(msg);
     async_write(*socket_, buffer,
-            boost::bind(&peer::handle_send, this, placeholders::error));
+            boost::bind(&channel::handle_send, this, placeholders::error));
 }
 
 } // net

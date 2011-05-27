@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_NET_PEER_H
-#define LIBBITCOIN_NET_PEER_H
+#ifndef LIBBITCOIN_NET_CHANNEL_H
+#define LIBBITCOIN_NET_CHANNEL_H
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
@@ -23,11 +23,12 @@ using std::shared_ptr;
 
 class delegator;
 class dialect;
-class peer;
+class channel;
 
-typedef shared_ptr<peer> peer_ptr;
+typedef shared_ptr<channel> channel_ptr;
 
-class peer : private boost::noncopyable, public std::enable_shared_from_this<peer>
+class channel : private boost::noncopyable, 
+        public std::enable_shared_from_this<channel>
 {
 public:
     struct init_data
@@ -38,8 +39,8 @@ public:
         shared_ptr<tcp::socket> socket;
     };
 
-    peer(const init_data& dat);
-    ~peer();
+    channel(const init_data& dat);
+    ~channel();
 
     void send(message::version version);
     void close();
@@ -76,3 +77,4 @@ private:
 } // libbitcoin
 
 #endif
+

@@ -1,7 +1,7 @@
-#include "net/messages.hpp"
-#include "net/delegator.hpp"
-#include "net/dialect.hpp"
-#include "net/peer.hpp"
+#include "bitcoin/net/messages.hpp"
+#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/dialect.hpp"
+#include "bitcoin/net/channel.hpp"
 
 #include <memory>
 #include <iostream>
@@ -33,14 +33,14 @@ libbitcoin::net::message::version create_version_message()
 int run_connect()
 {
     libbitcoin::net::delegator_ptr net(new libbitcoin::net::delegator_default);
-    libbitcoin::net::peer_ptr peer = net->connect("localhost");
-    if (!peer) {
+    libbitcoin::net::channel_ptr channel = net->connect("localhost");
+    if (!channel) {
         std::cerr << "noes\n";
         return -1;
     }
     libbitcoin::net::message::version version = create_version_message();
-    peer->send(version);
-    peer.reset();
+    channel->send(version);
+    channel.reset();
     std::cin.get();
     return 0;
 }

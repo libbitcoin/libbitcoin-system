@@ -6,7 +6,7 @@
 #include <thread>
 
 #include "bitcoin/net/dialect.hpp"
-#include "bitcoin/net/peer.hpp"
+#include "bitcoin/net/channel.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -20,8 +20,9 @@ typedef shared_ptr<delegator> delegator_ptr;
 class delegator : boost::noncopyable
 {
 public:
-    virtual peer_ptr connect(std::string ip_addr, unsigned short port=8333) = 0;
-    virtual void disconnect(peer_ptr peer_obj) = 0;
+    virtual channel_ptr connect(std::string ip_addr, 
+            unsigned short port=8333) = 0;
+    virtual void disconnect(channel_ptr channel_obj) = 0;
 };
 
 class delegator_default : public delegator, 
@@ -31,8 +32,8 @@ public:
     delegator_default();
     ~delegator_default();
     void init();
-    peer_ptr connect(std::string ip_addr, unsigned short port=8333);
-    void disconnect(peer_ptr peer_obj);  
+    channel_ptr connect(std::string ip_addr, unsigned short port=8333);
+    void disconnect(channel_ptr channel_obj);  
 
 private:
     typedef shared_ptr<tcp::socket> socket_ptr;
@@ -42,9 +43,9 @@ private:
     bool start_accept();
     void handle_accept(socket_ptr socket);
     
-    peer_ptr create_peer(socket_ptr socket);
-    void add_peer(peer_ptr peer_obj);
-    void perform_disconnect(peer_ptr peer_obj);
+    channel_ptr create_channel(socket_ptr socket);
+    void add_channel(channel_ptr channel_obj);
+    void perform_disconnect(channel_ptr channel_obj);
 
     service_ptr service_;
     std::thread runner_;
@@ -53,7 +54,7 @@ private:
     acceptor_ptr acceptor_;
 
     dialect_ptr default_dialect_;
-    std::vector<peer_ptr> peers_;
+    std::vector<channel_ptr> channels_;
 };
 
 } // net

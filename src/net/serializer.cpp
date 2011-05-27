@@ -125,6 +125,17 @@ uint32_t deserializer::read_4_bytes()
     return read_data<uint32_t>(stream_, pointer_);
 }
 
+uint64_t deserializer::read_8_bytes()
+{
+    return read_data<uint64_t>(stream_, pointer_);
+}
+
+message::net_addr deserializer::read_net_addr()
+{
+    message::net_addr addr;
+    return addr;
+}
+
 std::string deserializer::read_fixed_len_str(size_t len)
 {
     BOOST_ASSERT(pointer_ + len <= stream_.size());
