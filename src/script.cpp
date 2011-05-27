@@ -225,6 +225,25 @@ bool script::run(transaction parent)
                 //find and delete the signature
                 auto signature_start = data.find(signature);
                 data.erase(signature_start,signature_start+signature.length());
+                
+                signature_type type = static_cast<signature_type>(*signature.end());
+                signature.erase(signature.end());
+                
+                for(transaction_input_array::iterator it=parent.inputs.begin();
+                    it<=parent.inputs.end();++it)
+                {
+                    it->script = "";
+                }
+                
+                switch(type)
+                {
+                    case signature_type::NONE:
+                        break;
+                    case signature_type::SINGLE:
+                        break;
+                    case signature_type::ANYONE_CAN_PAY:
+                        break;
+                }
             }
         }
     }

@@ -14,6 +14,14 @@ class script
 public:
     script(std::string data);
     script(unsigned char *data, uint64_t length);
+    
+    enum class signature_type
+    {
+        ALL = 1,
+        NONE = 2,
+        SINGLE = 3,
+        ANYONE_CAN_PAY = 0x80,
+    };
 
     enum class opcode
     {
