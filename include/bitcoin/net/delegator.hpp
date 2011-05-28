@@ -31,7 +31,6 @@ class delegator_default : public delegator,
 public:
     delegator_default();
     ~delegator_default();
-    void init();
     channel_ptr connect(std::string ip_addr, unsigned short port=8333);
     void disconnect(channel_ptr channel_obj);  
 

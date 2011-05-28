@@ -54,7 +54,7 @@ int run_accept()
 
 int main()
 {
-    //return run_connect();
-    return run_accept();
+    return run_connect();
+    //return run_accept();
 }
 

@@ -120,6 +120,16 @@ deserializer::deserializer(const serializer::stream& stream)
 {
 }
 
+uint8_t deserializer::read_byte()
+{
+    return read_data<uint8_t>(stream_, pointer_);
+}
+
+uint16_t deserializer::read_2_bytes()
+{
+    return read_data<uint16_t>(stream_, pointer_);
+}
+
 uint32_t deserializer::read_4_bytes()
 {
     return read_data<uint32_t>(stream_, pointer_);
@@ -130,9 +140,22 @@ uint64_t deserializer::read_8_bytes()
     return read_data<uint64_t>(stream_, pointer_);
 }
 
+static void read_bytes(const serializer::stream& stream, size_t& pointer,
+        std::array<uint8_t, 16>& ip_addr)
+{
+    std::copy(
+            stream.begin() + pointer,
+            stream.begin() + pointer + ip_addr.size(),
+            ip_addr.begin());
+    pointer += ip_addr.size();
+}
 message::net_addr deserializer::read_net_addr()
 {
     message::net_addr addr;
+    addr.services = read_8_bytes();
+    // Read IP address
+    read_bytes(stream_, pointer_, addr.ip_addr);
+    addr.port = read_data<uint16_t>(stream_, pointer_, true);
     return addr;
 }
 
@@ -143,7 +166,7 @@ std::string deserializer::read_fixed_len_str(size_t len)
             stream_.begin() + pointer_, 
             stream_.begin() + pointer_ + len);
     pointer_ += len;
-    // Remove tailing 0s
+    // Removes trailing 0s... Needed for string comparisons
     return ret.c_str();
 }
 

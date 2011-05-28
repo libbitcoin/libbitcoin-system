@@ -24,7 +24,7 @@ delegator_default::delegator_default()
     strand_.reset(new io_service::strand(*service_));
     runner_ = std::thread(run_service, service_);
     default_dialect_.reset(new original_dialect);
-    start_accept();
+    //start_accept();
 }
 
 delegator_default::~delegator_default()

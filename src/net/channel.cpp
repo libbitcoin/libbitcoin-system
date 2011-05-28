@@ -1,7 +1,8 @@
 #include "bitcoin/net/channel.hpp"
 
 #include <boost/bind.hpp>
-#include <time.h>
+#include <iterator>
+#include <ctime>
 
 #include "bitcoin/util/logger.hpp"
 #include "bitcoin/net/delegator.hpp"
@@ -77,9 +78,9 @@ void channel::destroy_self()
 static serializer::stream consume_response(boost::asio::streambuf& response, 
         size_t size)
 {
-    std::string str;
-    std::istream(&response) >> str;
-    serializer::stream stream(str.begin(), str.end());
+    const char* raw_data = boost::asio::buffer_cast<const char*>(
+            response.data());
+    serializer::stream stream(raw_data, raw_data + size);
     // Only accept first n bytes
     stream.resize(size);
     // And consume it from the streambuf
@@ -87,28 +88,37 @@ static serializer::stream consume_response(boost::asio::streambuf& response,
     return stream;
 }
 
+template<typename F>
+void setup_async_read(shared_ptr<tcp::socket> socket, 
+        boost::asio::streambuf& response, size_t read_size, F callback)
+{
+    const int read_until = read_size - response.size();
+    if (read_until <= 0)
+        callback(boost::system::error_code(), 0);
+    else
+        async_read(*socket, response,
+                boost::asio::transfer_at_least(read_until), callback);
+}
+
 void channel::read_header()
 {
-    async_read(*socket_, response_,
-            boost::asio::transfer_at_least(header_chunk_size),
-            boost::bind(&channel::handle_read_header, this,
-                placeholders::error, placeholders::bytes_transferred));
+    auto callback = boost::bind(&channel::handle_read_header, this,
+            placeholders::error, placeholders::bytes_transferred);
+    setup_async_read(socket_, response_, header_chunk_size, callback);
 }
 
 void channel::read_checksum(message::header header_msg)
 {
-    async_read(*socket_, response_,
-            boost::asio::transfer_at_least(4),
-            boost::bind(&channel::handle_read_checksum, this, header_msg, 
-                placeholders::error, placeholders::bytes_transferred));
+    auto callback = boost::bind(&channel::handle_read_checksum, this, 
+            header_msg, placeholders::error, placeholders::bytes_transferred);
+    setup_async_read(socket_, response_, header_checksum_size, callback);
 }
 
 void channel::read_payload(message::header header_msg)
 {
-    async_read(*socket_, response_,
-            boost::asio::transfer_at_least(header_msg.payload_length),
-            boost::bind(&channel::handle_read_payload, this, header_msg, 
-                placeholders::error, placeholders::bytes_transferred));
+    auto callback = boost::bind(&channel::handle_read_payload, this, 
+            header_msg, placeholders::error, placeholders::bytes_transferred);
+    setup_async_read(socket_, response_, header_msg.payload_length, callback);
 }
 
 void channel::handle_read_header(const boost::system::error_code& ec,
@@ -120,10 +130,10 @@ void channel::handle_read_header(const boost::system::error_code& ec,
             destroy_self();
         return;
     }
-    BOOST_ASSERT(bytes_transferred >= header_chunk_size);
-    BOOST_ASSERT(response_.size() == bytes_transferred);
+    BOOST_ASSERT(bytes_transferred + response_.size() >= header_chunk_size);
     serializer::stream header_stream = 
             consume_response(response_, header_chunk_size);
+    BOOST_ASSERT(header_stream.size() == header_chunk_size);
     message::header header_msg = 
             translator_->header_from_network(header_stream);
     /*
@@ -147,6 +157,9 @@ void channel::handle_read_header(const boost::system::error_code& ec,
         return;
     }
 
+    logger(LOG_DEBUG) << header_msg.command;
+    logger(LOG_DEBUG) << "payload is " << header_msg.payload_length 
+            << " bytes.";
     if (header_msg.command == "version" || header_msg.command == "verack")
     {
         // Read payload
@@ -157,9 +170,6 @@ void channel::handle_read_header(const boost::system::error_code& ec,
         // Read checksum
         read_checksum(header_msg);
     }
-    logger(LOG_DEBUG) << header_msg.command;
-    logger(LOG_DEBUG) << "payload is " << header_msg.payload_length 
-            << " bytes.";
     reset_timeout();
 }
 
@@ -172,6 +182,12 @@ void channel::handle_read_checksum(message::header header_msg,
             destroy_self();
         return;
     }
+    BOOST_ASSERT(bytes_transferred + response_.size() >= header_checksum_size);
+    serializer::stream checksum_stream = 
+            consume_response(response_, header_checksum_size);
+    BOOST_ASSERT(checksum_stream.size() == header_checksum_size);
+    read_payload(header_msg);
+    reset_timeout();
 }
 
 void channel::handle_read_payload(message::header header_msg,
@@ -183,12 +199,20 @@ void channel::handle_read_payload(message::header header_msg,
             destroy_self();
         return;
     }
-    BOOST_ASSERT(bytes_transferred >= header_msg.payload_length);
-    BOOST_ASSERT(response_.size() == bytes_transferred);
+    BOOST_ASSERT(bytes_transferred + response_.size() >= 
+            header_msg.payload_length);
     serializer::stream payload_stream = 
             consume_response(response_, header_msg.payload_length);
-    message::version payload = 
-            translator_->version_from_network(payload_stream); 
+    BOOST_ASSERT(payload_stream.size() == header_msg.payload_length);
+    if (header_msg.command == "version")
+    {
+        message::version payload = 
+                translator_->version_from_network(payload_stream); 
+        logger(LOG_DEBUG) << "nonce is " << payload.nonce;
+        logger(LOG_DEBUG) << "last block is " << payload.start_height;
+    }
+    read_header();
+    reset_timeout();
 }
 
 void channel::handle_send(const boost::system::error_code& ec)

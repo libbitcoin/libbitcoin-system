@@ -16,11 +16,11 @@ typedef std::shared_ptr<dialect> dialect_ptr;
 class dialect
 {
 public:
-    virtual const serializer::stream to_network(
+    virtual serializer::stream to_network(
             message::version version) const = 0;
-    virtual const message::header header_from_network(
+    virtual message::header header_from_network(
             const serializer::stream& stream) const = 0;
-    virtual const message::version version_from_network(
+    virtual message::version version_from_network(
             const serializer::stream& stream) const = 0;
 };
 
@@ -28,13 +28,13 @@ class original_dialect : public dialect
 {
 public:
     // Create stream from message
-    const serializer::stream to_network(message::version version) const;
+    serializer::stream to_network(message::version version) const;
 
     // Create header/messages from stream
-    const message::header header_from_network(
+    message::header header_from_network(
             const serializer::stream& stream) const;
 
-    const message::version version_from_network(
+    message::version version_from_network(
             const serializer::stream& stream) const;
 };
 
