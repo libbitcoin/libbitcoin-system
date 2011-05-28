@@ -31,6 +31,8 @@ class deserializer
 public:
     deserializer(const serializer::stream& stream);
 
+    uint8_t read_byte();
+    uint16_t read_2_bytes();
     uint32_t read_4_bytes();
     uint64_t read_8_bytes();
     message::net_addr read_net_addr();

@@ -1,12 +1,14 @@
 #include "bitcoin/net/dialect.hpp"
 
+#include <boost/assert.hpp>
+
 #include "bitcoin/net/serializer.hpp"
 #include "bitcoin/net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
 
-static serializer::stream construct_header_from(serializer::stream payload, 
+serializer::stream construct_header_from(serializer::stream payload, 
         std::string command)
 {
     serializer header;
@@ -26,7 +28,7 @@ static serializer::stream construct_header_from(serializer::stream payload,
     return header.get_data();
 }
 
-const serializer::stream original_dialect::to_network(
+serializer::stream original_dialect::to_network(
         message::version version) const
 {
     serializer payload;
@@ -49,7 +51,7 @@ const serializer::stream original_dialect::to_network(
     return message;
 }
 
-const message::header original_dialect::header_from_network(
+message::header original_dialect::header_from_network(
         const serializer::stream& stream)  const
 {
     deserializer deserial(stream);
@@ -60,17 +62,30 @@ const message::header original_dialect::header_from_network(
     return header;
 }
 
-const message::version original_dialect::version_from_network(
+message::version original_dialect::version_from_network(
         const serializer::stream& stream) const
 {
+    BOOST_ASSERT(stream.size() >= 20); // size of version header = 20 bytes
     deserializer deserial(stream);
     message::version payload;
     payload.version = deserial.read_4_bytes();
     payload.services = deserial.read_8_bytes();
     payload.timestamp = deserial.read_8_bytes();
     payload.addr_me = deserial.read_net_addr();
-    if (payload.version < 106)
+    if (payload.version < 106) {
         BOOST_ASSERT(stream.size() == 4 + 8 + 8 + 26);
+        return payload;
+    }
+    payload.addr_you = deserial.read_net_addr();
+    payload.nonce = deserial.read_8_bytes();
+    // sub_version_num
+    payload.sub_version_num = deserial.read_byte();
+    if (payload.version < 209) {
+        BOOST_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1);
+        return payload;
+    }
+    payload.start_height = deserial.read_4_bytes();
+    BOOST_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
     return payload;
 }
 

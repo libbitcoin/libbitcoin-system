@@ -1,6 +1,7 @@
 #ifndef LIBBITCOIN_NET_MESSAGES_H
 #define LIBBITCOIN_NET_MESSAGES_H
 
+#include <array>
 #include <cstdint>
 #include <string>
 
@@ -11,7 +12,7 @@ namespace message {
 struct net_addr
 {
     uint64_t services;
-    uint8_t ip_addr[16];
+    std::array<uint8_t, 16> ip_addr;
     uint16_t port;
 };
 
