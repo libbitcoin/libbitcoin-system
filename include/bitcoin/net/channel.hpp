@@ -21,7 +21,7 @@ using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
 using std::shared_ptr;
 
-class delegator;
+class connection_manager;
 class dialect;
 class channel;
 
@@ -33,7 +33,7 @@ class channel : private boost::noncopyable,
 public:
     struct init_data
     {
-        shared_ptr<delegator> parent_gateway;
+        shared_ptr<connection_manager> parent_gateway;
         shared_ptr<dialect> translator;
         shared_ptr<io_service> service;
         shared_ptr<tcp::socket> socket;
@@ -66,7 +66,7 @@ private:
     void destroy_self();
 
     shared_ptr<tcp::socket> socket_;
-    shared_ptr<delegator> parent_gateway_;
+    shared_ptr<connection_manager> parent_gateway_;
     shared_ptr<dialect> translator_;
 
     boost::asio::streambuf response_;

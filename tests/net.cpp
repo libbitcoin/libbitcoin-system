@@ -1,5 +1,5 @@
 #include "bitcoin/net/messages.hpp"
-#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/connection_manager.hpp"
 #include "bitcoin/net/dialect.hpp"
 #include "bitcoin/net/channel.hpp"
 
@@ -19,10 +19,10 @@ libbitcoin::net::message::version create_version_message()
     version.services = 1;
     version.timestamp = time(NULL);
     version.addr_me.services = version.services;
-    version.addr_me.ip_addr = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
+    //version.addr_me.ip_addr = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
     version.addr_me.port = 8333;
     version.addr_you.services = version.services;
-    version.addr_you.ip_addr = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 10, 0, 0, 1};
+    //version.addr_you.ip_addr = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 10, 0, 0, 1};
     version.addr_you.port = 8333;
     version.nonce = 0xdeadbeef;
     version.sub_version_num = "";
@@ -32,7 +32,7 @@ libbitcoin::net::message::version create_version_message()
 
 int run_connect()
 {
-    libbitcoin::net::delegator_ptr net(new libbitcoin::net::delegator_default);
+    libbitcoin::net::connection_manager_ptr net(new libbitcoin::net::default_connection_manager);
     libbitcoin::net::channel_ptr channel = net->connect("localhost");
     if (!channel) {
         std::cerr << "noes\n";
@@ -47,7 +47,7 @@ int run_connect()
 
 int run_accept()
 {
-    libbitcoin::net::delegator_ptr net(new libbitcoin::net::delegator_default);
+    libbitcoin::net::connection_manager_ptr net(new libbitcoin::net::default_connection_manager);
     std::cin.get();
     return 0;
 }

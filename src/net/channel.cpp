@@ -5,7 +5,7 @@
 #include <ctime>
 
 #include "bitcoin/util/logger.hpp"
-#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/connection_manager.hpp"
 #include "bitcoin/net/dialect.hpp"
 #include "bitcoin/net/messages.hpp"
 

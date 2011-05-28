@@ -14,10 +14,10 @@ namespace net {
 using boost::asio::io_service;
 using std::shared_ptr;
 
-class delegator;
-typedef shared_ptr<delegator> delegator_ptr;
+class connection_manager;
+typedef shared_ptr<connection_manager> connection_manager_ptr;
 
-class delegator : boost::noncopyable
+class connection_manager : boost::noncopyable
 {
 public:
     virtual channel_ptr connect(std::string ip_addr, 
@@ -25,12 +25,12 @@ public:
     virtual void disconnect(channel_ptr channel_obj) = 0;
 };
 
-class delegator_default : public delegator, 
-    public std::enable_shared_from_this<delegator_default>
+class default_connection_manager : public connection_manager, 
+    public std::enable_shared_from_this<default_connection_manager>
 {
 public:
-    delegator_default();
-    ~delegator_default();
+    default_connection_manager();
+    ~default_connection_manager();
     channel_ptr connect(std::string ip_addr, unsigned short port=8333);
     void disconnect(channel_ptr channel_obj);  
 

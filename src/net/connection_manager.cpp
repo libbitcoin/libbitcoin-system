@@ -1,4 +1,4 @@
-#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/connection_manager.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
@@ -17,7 +17,7 @@ static void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-delegator_default::delegator_default()
+default_connection_manager::default_connection_manager()
 {
     service_.reset(new io_service);
     work_.reset(new io_service::work(*service_));
@@ -27,7 +27,7 @@ delegator_default::delegator_default()
     //start_accept();
 }
 
-delegator_default::~delegator_default()
+default_connection_manager::~default_connection_manager()
 {
     if (acceptor_)
         acceptor_->close();
@@ -35,54 +35,59 @@ delegator_default::~delegator_default()
     runner_.join();
 }
 
-void delegator_default::add_channel(channel_ptr channel_obj)
+void default_connection_manager::add_channel(channel_ptr channel_obj)
 {
     channels_.push_back(channel_obj);
     logger(LOG_DEBUG) << channels_.size() << " peers connected.";
 }
 
-void delegator_default::perform_disconnect(channel_ptr channel_obj)
+void default_connection_manager::perform_disconnect(channel_ptr channel_obj)
 {
     auto matches = std::remove(channels_.begin(), channels_.end(), channel_obj);
     channels_.erase(matches, channels_.end());
 }
 
-channel_ptr delegator_default::create_channel(socket_ptr socket)
+channel_ptr default_connection_manager::create_channel(socket_ptr socket)
 {
     channel::init_data init_data = { 
             shared_from_this(), default_dialect_, service_, socket };
 
     channel_ptr channel_obj(new channel(init_data));
-    strand_->post(boost::bind(&delegator_default::add_channel, this, channel_obj));
+    strand_->post(boost::bind(&default_connection_manager::add_channel, 
+                this, channel_obj));
     return channel_obj;
 }
 
-channel_ptr delegator_default::connect(std::string ip_addr, unsigned short port)
+channel_ptr default_connection_manager::connect(std::string ip_addr, 
+        unsigned short port)
 {
     socket_ptr socket(new tcp::socket(*service_));
     try 
     {
         tcp::resolver resolver(*service_);
-        tcp::resolver::query query(ip_addr, boost::lexical_cast<std::string>(port));
+        tcp::resolver::query query(ip_addr, 
+                boost::lexical_cast<std::string>(port));
         tcp::endpoint endpoint = *resolver.resolve(query);
         socket->connect(endpoint);
     }
     catch (std::exception& ex) 
     {
-        logger(LOG_ERROR) << "Connecting to peer " << ip_addr << ": " << ex.what();
+        logger(LOG_ERROR) << "Connecting to peer " << ip_addr 
+                << ": " << ex.what();
         return channel_ptr();
     }
     return create_channel(socket);
 }
 
-void delegator_default::disconnect(channel_ptr channel_obj)
+void default_connection_manager::disconnect(channel_ptr channel_obj)
 {
     strand_->dispatch(boost::bind(
-                &delegator_default::perform_disconnect, this, channel_obj));
+                &default_connection_manager::perform_disconnect, 
+                    this, channel_obj));
     logger(LOG_DEBUG) << channels_.size() << " peer remaining.";
 }
 
-bool delegator_default::start_accept()
+bool default_connection_manager::start_accept()
 {
     acceptor_.reset(new tcp::acceptor(*service_));
     socket_ptr socket(new tcp::socket(*service_));
@@ -94,7 +99,8 @@ bool delegator_default::start_accept()
         acceptor_->bind(endpoint);
         acceptor_->listen(socket_base::max_connections);
         acceptor_->async_accept(*socket, 
-                boost::bind(&delegator_default::handle_accept, this, socket));
+                boost::bind(&default_connection_manager::handle_accept, 
+                    this, socket));
     }
     catch (std::exception& ex)
     {
@@ -104,7 +110,7 @@ bool delegator_default::start_accept()
     return true;
 }
 
-void delegator_default::handle_accept(socket_ptr socket)
+void default_connection_manager::handle_accept(socket_ptr socket)
 {
     tcp::endpoint remote_endpoint = socket->remote_endpoint();
     logger(LOG_DEBUG) << "New incoming connection from " 
@@ -112,7 +118,8 @@ void delegator_default::handle_accept(socket_ptr socket)
     create_channel(socket);
     socket.reset(new tcp::socket(*service_));
     acceptor_->async_accept(*socket, 
-            boost::bind(&delegator_default::handle_accept, this, socket));
+            boost::bind(&default_connection_manager::handle_accept, 
+                this, socket));
 }
 
 } // net
