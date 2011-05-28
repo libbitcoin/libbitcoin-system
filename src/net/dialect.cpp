@@ -65,7 +65,6 @@ message::header original_dialect::header_from_network(
 message::version original_dialect::version_from_network(
         const serializer::stream& stream) const
 {
-    BOOST_ASSERT(stream.size() >= 20); // size of version header = 20 bytes
     deserializer deserial(stream);
     message::version payload;
     payload.version = deserial.read_4_bytes();
