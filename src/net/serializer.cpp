@@ -6,6 +6,7 @@
 #include <string>
 
 #include "bitcoin/net/messages.hpp"
+#include "bitcoin/util/assert.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -161,7 +162,7 @@ message::net_addr deserializer::read_net_addr()
 
 std::string deserializer::read_fixed_len_str(size_t len)
 {
-    BOOST_ASSERT(pointer_ + len <= stream_.size());
+    BITCOIN_ASSERT(pointer_ + len <= stream_.size());
     std::string ret(
             stream_.begin() + pointer_, 
             stream_.begin() + pointer_ + len);

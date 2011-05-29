@@ -5,6 +5,7 @@
 #include <ctime>
 
 #include "bitcoin/util/logger.hpp"
+#include "bitcoin/util/assert.hpp"
 #include "bitcoin/net/connection_manager.hpp"
 #include "bitcoin/net/dialect.hpp"
 #include "bitcoin/net/messages.hpp"
@@ -130,10 +131,10 @@ void channel::handle_read_header(const boost::system::error_code& ec,
             destroy_self();
         return;
     }
-    BOOST_ASSERT(bytes_transferred + response_.size() >= header_chunk_size);
+    BITCOIN_ASSERT(bytes_transferred + response_.size() >= header_chunk_size);
     serializer::stream header_stream = 
             consume_response(response_, header_chunk_size);
-    BOOST_ASSERT(header_stream.size() == header_chunk_size);
+    BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
     message::header header_msg = 
             translator_->header_from_network(header_stream);
     /*
@@ -182,10 +183,10 @@ void channel::handle_read_checksum(message::header header_msg,
             destroy_self();
         return;
     }
-    BOOST_ASSERT(bytes_transferred + response_.size() >= header_checksum_size);
+    BITCOIN_ASSERT(bytes_transferred + response_.size() >= header_checksum_size);
     serializer::stream checksum_stream = 
             consume_response(response_, header_checksum_size);
-    BOOST_ASSERT(checksum_stream.size() == header_checksum_size);
+    BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
     read_payload(header_msg);
     reset_timeout();
 }
@@ -199,11 +200,11 @@ void channel::handle_read_payload(message::header header_msg,
             destroy_self();
         return;
     }
-    BOOST_ASSERT(bytes_transferred + response_.size() >= 
+    BITCOIN_ASSERT(bytes_transferred + response_.size() >= 
             header_msg.payload_length);
     serializer::stream payload_stream = 
             consume_response(response_, header_msg.payload_length);
-    BOOST_ASSERT(payload_stream.size() == header_msg.payload_length);
+    BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
     if (header_msg.command == "version")
     {
         message::version payload = 

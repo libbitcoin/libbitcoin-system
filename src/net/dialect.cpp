@@ -4,6 +4,7 @@
 
 #include "bitcoin/net/serializer.hpp"
 #include "bitcoin/net/messages.hpp"
+#include "bitcoin/util/assert.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -72,7 +73,7 @@ message::version original_dialect::version_from_network(
     payload.timestamp = deserial.read_8_bytes();
     payload.addr_me = deserial.read_net_addr();
     if (payload.version < 106) {
-        BOOST_ASSERT(stream.size() == 4 + 8 + 8 + 26);
+        BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26);
         return payload;
     }
     payload.addr_you = deserial.read_net_addr();
@@ -80,11 +81,11 @@ message::version original_dialect::version_from_network(
     // sub_version_num
     payload.sub_version_num = deserial.read_byte();
     if (payload.version < 209) {
-        BOOST_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1);
+        BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1);
         return payload;
     }
     payload.start_height = deserial.read_4_bytes();
-    BOOST_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
+    BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
     return payload;
 }
 
