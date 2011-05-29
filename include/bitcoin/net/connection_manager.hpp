@@ -17,6 +17,12 @@ using std::shared_ptr;
 class connection_manager;
 typedef shared_ptr<connection_manager> connection_manager_ptr;
 
+enum connection_flags : uint32_t
+{
+    none = 0,
+    accept_incoming = 1
+};
+
 class connection_manager : boost::noncopyable
 {
 public:
@@ -29,7 +35,7 @@ class default_connection_manager : public connection_manager,
     public std::enable_shared_from_this<default_connection_manager>
 {
 public:
-    default_connection_manager();
+    default_connection_manager(uint32_t flags);
     ~default_connection_manager();
     channel_ptr connect(std::string ip_addr, unsigned short port=8333);
     void disconnect(channel_ptr channel_obj);  
@@ -43,8 +49,6 @@ private:
     void handle_accept(socket_ptr socket);
     
     channel_ptr create_channel(socket_ptr socket);
-    void add_channel(channel_ptr channel_obj);
-    void perform_disconnect(channel_ptr channel_obj);
 
     service_ptr service_;
     std::thread runner_;

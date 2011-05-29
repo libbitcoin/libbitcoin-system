@@ -17,14 +17,15 @@ static void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-default_connection_manager::default_connection_manager()
+default_connection_manager::default_connection_manager(uint32_t flags)
 {
     service_.reset(new io_service);
     work_.reset(new io_service::work(*service_));
     strand_.reset(new io_service::strand(*service_));
     runner_ = std::thread(run_service, service_);
     default_dialect_.reset(new original_dialect);
-    //start_accept();
+    if (flags & connection_flags::accept_incoming)
+        start_accept();
 }
 
 default_connection_manager::~default_connection_manager()
@@ -35,26 +36,18 @@ default_connection_manager::~default_connection_manager()
     runner_.join();
 }
 
-void default_connection_manager::add_channel(channel_ptr channel_obj)
-{
-    channels_.push_back(channel_obj);
-    logger(LOG_DEBUG) << channels_.size() << " peers connected.";
-}
-
-void default_connection_manager::perform_disconnect(channel_ptr channel_obj)
-{
-    auto matches = std::remove(channels_.begin(), channels_.end(), channel_obj);
-    channels_.erase(matches, channels_.end());
-}
-
 channel_ptr default_connection_manager::create_channel(socket_ptr socket)
 {
     channel::init_data init_data = { 
             shared_from_this(), default_dialect_, service_, socket };
 
     channel_ptr channel_obj(new channel(init_data));
-    strand_->post(boost::bind(&default_connection_manager::add_channel, 
-                this, channel_obj));
+    strand_->post(
+            [&channels_, channel_obj]
+            {
+                channels_.push_back(channel_obj);
+                logger(LOG_DEBUG) << channels_.size() << " peers connected.";
+            });
     return channel_obj;
 }
 
@@ -81,9 +74,13 @@ channel_ptr default_connection_manager::connect(std::string ip_addr,
 
 void default_connection_manager::disconnect(channel_ptr channel_obj)
 {
-    strand_->dispatch(boost::bind(
-                &default_connection_manager::perform_disconnect, 
-                    this, channel_obj));
+    strand_->dispatch(
+            [&channels_, channel_obj]
+            {
+                auto matches = std::remove(channels_.begin(), channels_.end(), 
+                        channel_obj);
+                channels_.erase(matches, channels_.end());
+            });
     logger(LOG_DEBUG) << channels_.size() << " peer remaining.";
 }
 

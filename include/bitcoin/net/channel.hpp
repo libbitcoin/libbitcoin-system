@@ -64,6 +64,7 @@ private:
 
     // Removes self from parent
     void destroy_self();
+    bool problems_check(const boost::system::error_code& ec);
 
     shared_ptr<tcp::socket> socket_;
     shared_ptr<connection_manager> parent_gateway_;

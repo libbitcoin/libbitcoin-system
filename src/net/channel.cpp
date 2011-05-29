@@ -1,5 +1,6 @@
 #include "bitcoin/net/channel.hpp"
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/bind.hpp>
 #include <iterator>
 #include <ctime>
@@ -13,7 +14,9 @@
 #include "shared_const_buffer.hpp"
 
 namespace placeholders = boost::asio::placeholders;
-namespace posix_time = boost::posix_time;
+using boost::posix_time::seconds;
+using boost::posix_time::minutes;
+using boost::posix_time::time_duration;
 
 namespace libbitcoin {
 namespace net {
@@ -22,8 +25,8 @@ namespace net {
 constexpr size_t header_chunk_size = 20;
 // Checksum size is 4 bytes
 constexpr size_t header_checksum_size = 4;
-// Connection timeout time in seconds
-constexpr size_t disconnect_timeout = 30;
+// Connection timeout time
+const time_duration disconnect_timeout = seconds(30) + minutes(1);
 
 channel::channel(const init_data& dat)
  : socket_(dat.socket), parent_gateway_(dat.parent_gateway), 
@@ -47,26 +50,17 @@ channel::~channel()
 
 void channel::handle_timeout(const boost::system::error_code& ec)
 {
-    if (ec == boost::asio::error::operation_aborted) 
-    {
-        // Do nothing
-    }
-    else if (ec) 
-    {
-        destroy_self();
-    }
-    else 
-    {
-        logger(LOG_INFO) << "Forcing disconnect due to timeout.";
-        // No response for a while so disconnect
-        destroy_self();
-    }
+    if (problems_check(ec))
+        return;
+    logger(LOG_INFO) << "Forcing disconnect due to timeout.";
+    // No response for a while so disconnect
+    destroy_self();
 }
 
 void channel::reset_timeout()
 {
     timeout_->cancel();
-    timeout_->expires_from_now(posix_time::seconds(disconnect_timeout));
+    timeout_->expires_from_now(disconnect_timeout);
     timeout_->async_wait(
             boost::bind(&channel::handle_timeout, this, placeholders::error));
 }
@@ -74,6 +68,21 @@ void channel::reset_timeout()
 void channel::destroy_self()
 {
     parent_gateway_->disconnect(shared_from_this());
+}
+
+bool channel::problems_check(const boost::system::error_code& ec)
+{
+    if (ec == boost::asio::error::operation_aborted) 
+    {
+        // Do nothing
+        return true;
+    }
+    else if (ec) 
+    {
+        destroy_self();
+        return true;
+    }
+    return false;
 }
 
 static serializer::stream consume_response(boost::asio::streambuf& response, 
@@ -125,12 +134,8 @@ void channel::read_payload(message::header header_msg)
 void channel::handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred)
 {
-    if (ec) 
-    {
-        if (ec != boost::asio::error::operation_aborted) 
-            destroy_self();
+    if (problems_check(ec))
         return;
-    }
     BITCOIN_ASSERT(bytes_transferred + response_.size() >= header_chunk_size);
     serializer::stream header_stream = 
             consume_response(response_, header_chunk_size);
@@ -177,12 +182,8 @@ void channel::handle_read_header(const boost::system::error_code& ec,
 void channel::handle_read_checksum(message::header header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
-    if (ec) 
-    {
-        if (ec != boost::asio::error::operation_aborted) 
-            destroy_self();
+    if (problems_check(ec))
         return;
-    }
     BITCOIN_ASSERT(bytes_transferred + response_.size() >= header_checksum_size);
     serializer::stream checksum_stream = 
             consume_response(response_, header_checksum_size);
@@ -194,12 +195,8 @@ void channel::handle_read_checksum(message::header header_msg,
 void channel::handle_read_payload(message::header header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
-    if (ec) 
-    {
-        if (ec != boost::asio::error::operation_aborted) 
-            destroy_self();
+    if (problems_check(ec))
         return;
-    }
     BITCOIN_ASSERT(bytes_transferred + response_.size() >= 
             header_msg.payload_length);
     serializer::stream payload_stream = 
@@ -218,12 +215,8 @@ void channel::handle_read_payload(message::header header_msg,
 
 void channel::handle_send(const boost::system::error_code& ec)
 {
-    if (ec) 
-    {
-        if (ec != boost::asio::error::operation_aborted) 
-            destroy_self();
+    if (problems_check(ec))
         return;
-    }
 }
 
 void channel::send(message::version version)
