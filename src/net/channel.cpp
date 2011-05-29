@@ -17,14 +17,11 @@ namespace placeholders = boost::asio::placeholders;
 using boost::posix_time::seconds;
 using boost::posix_time::minutes;
 using boost::posix_time::time_duration;
+using boost::asio::buffer;
 
 namespace libbitcoin {
 namespace net {
 
-// Header minus checksum is 4 + 12 + 4 = 20 bytes
-constexpr size_t header_chunk_size = 20;
-// Checksum size is 4 bytes
-constexpr size_t header_checksum_size = 4;
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(30) + minutes(1);
 
@@ -85,50 +82,27 @@ bool channel::problems_check(const boost::system::error_code& ec)
     return false;
 }
 
-static serializer::stream consume_response(boost::asio::streambuf& response, 
-        size_t size)
-{
-    const char* raw_data = boost::asio::buffer_cast<const char*>(
-            response.data());
-    serializer::stream stream(raw_data, raw_data + size);
-    // Only accept first n bytes
-    stream.resize(size);
-    // And consume it from the streambuf
-    response.consume(size);
-    return stream;
-}
-
-template<typename F>
-void setup_async_read(shared_ptr<tcp::socket> socket, 
-        boost::asio::streambuf& response, size_t read_size, F callback)
-{
-    const int read_until = read_size - response.size();
-    if (read_until <= 0)
-        callback(boost::system::error_code(), 0);
-    else
-        async_read(*socket, response,
-                boost::asio::transfer_at_least(read_until), callback);
-}
-
 void channel::read_header()
 {
     auto callback = boost::bind(&channel::handle_read_header, this,
             placeholders::error, placeholders::bytes_transferred);
-    setup_async_read(socket_, response_, header_chunk_size, callback);
+    async_read(*socket_, buffer(inbound_header_), callback);
 }
 
 void channel::read_checksum(message::header header_msg)
 {
     auto callback = boost::bind(&channel::handle_read_checksum, this, 
             header_msg, placeholders::error, placeholders::bytes_transferred);
-    setup_async_read(socket_, response_, header_checksum_size, callback);
+    async_read(*socket_, buffer(inbound_checksum_), callback);
 }
 
 void channel::read_payload(message::header header_msg)
 {
     auto callback = boost::bind(&channel::handle_read_payload, this, 
             header_msg, placeholders::error, placeholders::bytes_transferred);
-    setup_async_read(socket_, response_, header_msg.payload_length, callback);
+    inbound_payload_.resize(header_msg.payload_length);
+    async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length), 
+            callback);
 }
 
 void channel::handle_read_header(const boost::system::error_code& ec,
@@ -136,9 +110,9 @@ void channel::handle_read_header(const boost::system::error_code& ec,
 {
     if (problems_check(ec))
         return;
-    BITCOIN_ASSERT(bytes_transferred + response_.size() >= header_chunk_size);
+    BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
     serializer::stream header_stream = 
-            consume_response(response_, header_chunk_size);
+            serializer::stream(inbound_header_.begin(), inbound_header_.end()); 
     BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
     message::header header_msg = 
             translator_->header_from_network(header_stream);
@@ -184,9 +158,9 @@ void channel::handle_read_checksum(message::header header_msg,
 {
     if (problems_check(ec))
         return;
-    BITCOIN_ASSERT(bytes_transferred + response_.size() >= header_checksum_size);
-    serializer::stream checksum_stream = 
-            consume_response(response_, header_checksum_size);
+    BITCOIN_ASSERT(bytes_transferred == header_checksum_size);
+    serializer::stream checksum_stream = serializer::stream(
+            inbound_checksum_.begin(), inbound_checksum_.end());
     BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
     read_payload(header_msg);
     reset_timeout();
@@ -197,10 +171,9 @@ void channel::handle_read_payload(message::header header_msg,
 {
     if (problems_check(ec))
         return;
-    BITCOIN_ASSERT(bytes_transferred + response_.size() >= 
-            header_msg.payload_length);
-    serializer::stream payload_stream = 
-            consume_response(response_, header_msg.payload_length);
+    BITCOIN_ASSERT(bytes_transferred == header_msg.payload_length);
+    serializer::stream payload_stream = serializer::stream(
+            inbound_payload_.begin(), inbound_payload_.end());
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
     if (header_msg.command == "version")
     {

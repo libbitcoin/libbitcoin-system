@@ -70,7 +70,14 @@ private:
     shared_ptr<connection_manager> parent_gateway_;
     shared_ptr<dialect> translator_;
 
-    boost::asio::streambuf response_;
+    // Header minus checksum is 4 + 12 + 4 = 20 bytes
+    static constexpr size_t header_chunk_size = 20;
+    // Checksum size is 4 bytes
+    static constexpr size_t header_checksum_size = 4;
+
+    boost::array<uint8_t, header_chunk_size> inbound_header_;
+    boost::array<uint8_t, header_checksum_size> inbound_checksum_;
+    std::vector<uint8_t> inbound_payload_;
     shared_ptr<deadline_timer> timeout_;
 };
 
