@@ -2,7 +2,6 @@
 
 #include <boost/assert.hpp>
 
-#include "bitcoin/net/serializer.hpp"
 #include "bitcoin/net/messages.hpp"
 #include "bitcoin/util/assert.hpp"
 

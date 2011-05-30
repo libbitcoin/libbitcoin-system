@@ -4,8 +4,9 @@
 #include <string>
 #include <memory>
 
-#include "bitcoin/net/serializer.hpp"
 #include "bitcoin/net/messages.hpp"
+
+#include "serializer.hpp"
 
 namespace libbitcoin {
 namespace net {

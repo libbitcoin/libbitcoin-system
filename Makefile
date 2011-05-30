@@ -37,7 +37,7 @@ obj/dialect.o: ./src/net/dialect.cpp ./src/net/dialect.hpp
 obj/channel.o: ./src/net/channel.cpp ./src/net/channel.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/channel.o ./src/net/channel.cpp -std=c++0x -g
 
-obj/serializer.o: ./src/net/serializer.cpp ./include/bitcoin/net/serializer.hpp
+obj/serializer.o: ./src/net/serializer.cpp ./src/net/serializer.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/serializer.o ./src/net/serializer.cpp -std=c++0x -g
 
 obj/nettest.o: ./tests/net.cpp

@@ -1,4 +1,4 @@
-#include "bitcoin/net/serializer.hpp"
+#include "serializer.hpp"
 
 #include <boost/detail/endian.hpp>
 #include <algorithm>
