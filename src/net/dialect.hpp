@@ -10,9 +10,6 @@
 namespace libbitcoin {
 namespace net {
 
-class dialect;
-typedef std::shared_ptr<dialect> dialect_ptr;
-
 class dialect
 {
 public:

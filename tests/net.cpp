@@ -28,26 +28,23 @@ libbitcoin::net::message::version create_version_message()
 
 int run_connect()
 {
-    libbitcoin::net::delegator_ptr net(new libbitcoin::net::default_delegator(libbitcoin::net::network_flags::none));
+    libbitcoin::net::delegator_ptr net(new libbitcoin::net::delegator_impl(libbitcoin::net::network_flags::none));
     libbitcoin::net::channel_handle channel = net->connect("localhost");
-    channel = net->connect("localhost");
-    channel = net->connect("localhost");
-    channel = net->connect("localhost");
     if (false) {
         std::cerr << "noes\n";
         return -1;
     }
     libbitcoin::net::message::version version = create_version_message();
-    //channel->send(version);
     net->send(channel, version);
-    //net->disconnect(channel);
+    sleep(3);
+    net->disconnect(channel);
     std::cin.get();
     return 0;
 }
 
 int run_accept()
 {
-    libbitcoin::net::delegator_ptr net(new libbitcoin::net::default_delegator(libbitcoin::net::network_flags::accept_incoming));
+    libbitcoin::net::delegator_ptr net(new libbitcoin::net::delegator_impl(libbitcoin::net::network_flags::accept_incoming));
     std::cin.get();
     return 0;
 }

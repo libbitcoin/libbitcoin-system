@@ -1,4 +1,4 @@
-#include "bitcoin/net/dialect.hpp"
+#include "dialect.hpp"
 
 #include <boost/assert.hpp>
 

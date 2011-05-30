@@ -5,9 +5,9 @@
 #include <iostream>
 
 #include "bitcoin/util/logger.hpp"
-#include "bitcoin/net/dialect.hpp"
 
 #include "channel.hpp"
+#include "dialect.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -19,7 +19,7 @@ static void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-default_delegator::default_delegator(uint32_t flags)
+delegator_impl::delegator_impl(uint32_t flags)
 {
     service_.reset(new io_service);
     work_.reset(new io_service::work(*service_));
@@ -30,7 +30,7 @@ default_delegator::default_delegator(uint32_t flags)
         start_accept();
 }
 
-default_delegator::~default_delegator()
+delegator_impl::~delegator_impl()
 {
     if (acceptor_)
         acceptor_->close();
@@ -38,7 +38,7 @@ default_delegator::~default_delegator()
     runner_.join();
 }
 
-channel_handle default_delegator::create_channel(socket_ptr socket)
+channel_handle delegator_impl::create_channel(socket_ptr socket)
 {
     channel::init_data init_data = { 
             shared_from_this(), default_dialect_, service_, socket };
@@ -53,7 +53,7 @@ channel_handle default_delegator::create_channel(socket_ptr socket)
     return channel_obj->get_id();
 }
 
-channel_handle default_delegator::connect(std::string ip_addr, 
+channel_handle delegator_impl::connect(std::string ip_addr, 
         unsigned short port)
 {
     socket_ptr socket(new tcp::socket(*service_));
@@ -85,7 +85,7 @@ static void remove_matching_channels(channel_list* channels,
     channels->erase_if(is_matching);
     logger(LOG_DEBUG) << channels->size() << " peers remaining.";
 }
-void default_delegator::disconnect(channel_handle chandle)
+void delegator_impl::disconnect(channel_handle chandle)
 {
     strand_->dispatch(
             boost::bind(remove_matching_channels, &channels_, chandle));
@@ -109,18 +109,18 @@ void perform_send(channel_list* channels, channel_handle chandle,
     }
     it->send(message_packet);
 }
-void default_delegator::send(channel_handle chandle, message::version version)
+void delegator_impl::send(channel_handle chandle, message::version version)
 {
     strand_->dispatch(boost::bind(
             &perform_send<message::version>, &channels_, chandle, version));
 }
 
-size_t default_delegator::connection_count() const
+size_t delegator_impl::connection_count() const
 {
     return channels_.size();
 }
 
-bool default_delegator::start_accept()
+bool delegator_impl::start_accept()
 {
     acceptor_.reset(new tcp::acceptor(*service_));
     socket_ptr socket(new tcp::socket(*service_));
@@ -132,7 +132,7 @@ bool default_delegator::start_accept()
         acceptor_->bind(endpoint);
         acceptor_->listen(socket_base::max_connections);
         acceptor_->async_accept(*socket, 
-                boost::bind(&default_delegator::handle_accept, 
+                boost::bind(&delegator_impl::handle_accept, 
                     this, socket));
     }
     catch (std::exception& ex)
@@ -143,7 +143,7 @@ bool default_delegator::start_accept()
     return true;
 }
 
-void default_delegator::handle_accept(socket_ptr socket)
+void delegator_impl::handle_accept(socket_ptr socket)
 {
     tcp::endpoint remote_endpoint = socket->remote_endpoint();
     logger(LOG_DEBUG) << "New incoming connection from " 
@@ -151,7 +151,7 @@ void default_delegator::handle_accept(socket_ptr socket)
     create_channel(socket);
     socket.reset(new tcp::socket(*service_));
     acceptor_->async_accept(*socket, 
-            boost::bind(&default_delegator::handle_accept, 
+            boost::bind(&delegator_impl::handle_accept, 
                 this, socket));
 }
 

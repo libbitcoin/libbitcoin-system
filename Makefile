@@ -31,7 +31,7 @@ script_parsing: script
 obj/delegator.o: ./src/net/delegator.cpp ./include/bitcoin/net/delegator.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/delegator.o ./src/net/delegator.cpp -std=c++0x -g
 
-obj/dialect.o: ./src/net/dialect.cpp ./include/bitcoin/net/dialect.hpp
+obj/dialect.o: ./src/net/dialect.cpp ./src/net/dialect.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/dialect.o ./src/net/dialect.cpp -std=c++0x -g
 
 obj/channel.o: ./src/net/channel.cpp ./src/net/channel.hpp

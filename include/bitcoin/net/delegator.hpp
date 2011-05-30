@@ -6,7 +6,7 @@
 #include <memory>
 #include <thread>
 
-#include "bitcoin/net/dialect.hpp"
+#include "bitcoin/net/messages.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -17,8 +17,10 @@ using std::shared_ptr;
 
 class delegator;
 class channel;
+class dialect;
 
 typedef shared_ptr<delegator> delegator_ptr;
+typedef std::shared_ptr<dialect> dialect_ptr;
 typedef unsigned int channel_handle;
 typedef boost::ptr_vector<channel> channel_list;
 
@@ -38,12 +40,12 @@ public:
     virtual size_t connection_count() const = 0;
 };
 
-class default_delegator : public delegator, 
-    public std::enable_shared_from_this<default_delegator>
+class delegator_impl : public delegator, 
+    public std::enable_shared_from_this<delegator_impl>
 {
 public:
-    default_delegator(uint32_t flags);
-    ~default_delegator();
+    delegator_impl(uint32_t flags);
+    ~delegator_impl();
     channel_handle connect(std::string ip_addr, unsigned short port=8333);
     void disconnect(channel_handle chandle);  
     void send(channel_handle chandle, message::version version);
