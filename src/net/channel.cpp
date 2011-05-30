@@ -1,4 +1,4 @@
-#include "bitcoin/net/channel.hpp"
+#include "channel.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/bind.hpp>
@@ -7,7 +7,7 @@
 
 #include "bitcoin/util/logger.hpp"
 #include "bitcoin/util/assert.hpp"
-#include "bitcoin/net/connection_manager.hpp"
+#include "bitcoin/net/delegator.hpp"
 #include "bitcoin/net/dialect.hpp"
 #include "bitcoin/net/messages.hpp"
 
@@ -25,10 +25,17 @@ namespace net {
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(30) + minutes(1);
 
+channel_handle channel::chan_id_counter = 0;
+
 channel::channel(const init_data& dat)
  : socket_(dat.socket), parent_gateway_(dat.parent_gateway), 
         translator_(dat.translator) 
 {
+    // Unique IDs are assigned to channels by incrementing a shared counter
+    // among instances.
+    channel_id_ = chan_id_counter;
+    chan_id_counter++;
+
     timeout_.reset(new deadline_timer(*dat.service));
     read_header();
     reset_timeout();
@@ -64,7 +71,7 @@ void channel::reset_timeout()
 
 void channel::destroy_self()
 {
-    parent_gateway_->disconnect(shared_from_this());
+    parent_gateway_->disconnect(channel_id_);
 }
 
 bool channel::problems_check(const boost::system::error_code& ec)
@@ -198,6 +205,11 @@ void channel::send(message::version version)
     shared_const_buffer buffer(msg);
     async_write(*socket_, buffer,
             boost::bind(&channel::handle_send, this, placeholders::error));
+}
+
+channel_handle channel::get_id() const
+{
+    return channel_id_;
 }
 
 } // net
