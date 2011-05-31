@@ -1,7 +1,8 @@
-#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/network.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
+#include <algorithm>
 #include <iostream>
 
 #include "bitcoin/util/logger.hpp"
@@ -19,7 +20,7 @@ static void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-delegator_impl::delegator_impl(uint32_t flags)
+network_impl::network_impl(uint32_t flags)
 {
     service_.reset(new io_service);
     work_.reset(new io_service::work(*service_));
@@ -30,7 +31,7 @@ delegator_impl::delegator_impl(uint32_t flags)
         start_accept();
 }
 
-delegator_impl::~delegator_impl()
+network_impl::~network_impl()
 {
     if (acceptor_)
         acceptor_->close();
@@ -38,12 +39,12 @@ delegator_impl::~delegator_impl()
     runner_.join();
 }
 
-channel_handle delegator_impl::create_channel(socket_ptr socket)
+channel_handle network_impl::create_channel(socket_ptr socket)
 {
-    channel::init_data init_data = { 
+    channel_pimpl::init_data init_data = { 
             shared_from_this(), default_dialect_, service_, socket };
 
-    channel* channel_obj = new channel(init_data);
+    channel_pimpl* channel_obj = new channel_pimpl(init_data);
     strand_->post(
             [&channels_, channel_obj]
             {
@@ -53,7 +54,7 @@ channel_handle delegator_impl::create_channel(socket_ptr socket)
     return channel_obj->get_id();
 }
 
-channel_handle delegator_impl::connect(std::string ip_addr, 
+channel_handle network_impl::connect(std::string ip_addr, 
         unsigned short port)
 {
     socket_ptr socket(new tcp::socket(*service_));
@@ -78,14 +79,14 @@ static void remove_matching_channels(channel_list* channels,
         channel_handle chandle)
 {
     auto is_matching =
-            [chandle](channel& channel_obj)
+            [chandle](channel_pimpl& channel_obj)
             {
                 return channel_obj.get_id() == chandle;
             };
     channels->erase_if(is_matching);
     logger(LOG_DEBUG) << channels->size() << " peers remaining.";
 }
-void delegator_impl::disconnect(channel_handle chandle)
+void network_impl::disconnect(channel_handle chandle)
 {
     strand_->dispatch(
             boost::bind(remove_matching_channels, &channels_, chandle));
@@ -96,7 +97,7 @@ void perform_send(channel_list* channels, channel_handle chandle,
         T message_packet)
 {
     auto is_matching =
-            [chandle](const channel& channel_obj)
+            [chandle](const channel_pimpl& channel_obj)
             {
                 return channel_obj.get_id() == chandle;
             };
@@ -104,23 +105,22 @@ void perform_send(channel_list* channels, channel_handle chandle,
     if (it == channels->end())
     {
         logger(LOG_ERROR) << "Non existant channel " << chandle << " for send.";
-        logger(LOG_DEBUG) << channels->size() << " peers connected.";
         return;
     }
     it->send(message_packet);
 }
-void delegator_impl::send(channel_handle chandle, message::version version)
+void network_impl::send(channel_handle chandle, message::version version)
 {
     strand_->dispatch(boost::bind(
             &perform_send<message::version>, &channels_, chandle, version));
 }
 
-size_t delegator_impl::connection_count() const
+size_t network_impl::connection_count() const
 {
     return channels_.size();
 }
 
-bool delegator_impl::start_accept()
+bool network_impl::start_accept()
 {
     acceptor_.reset(new tcp::acceptor(*service_));
     socket_ptr socket(new tcp::socket(*service_));
@@ -132,8 +132,7 @@ bool delegator_impl::start_accept()
         acceptor_->bind(endpoint);
         acceptor_->listen(socket_base::max_connections);
         acceptor_->async_accept(*socket, 
-                boost::bind(&delegator_impl::handle_accept, 
-                    this, socket));
+                boost::bind(&network_impl::handle_accept, this, socket));
     }
     catch (std::exception& ex)
     {
@@ -143,7 +142,7 @@ bool delegator_impl::start_accept()
     return true;
 }
 
-void delegator_impl::handle_accept(socket_ptr socket)
+void network_impl::handle_accept(socket_ptr socket)
 {
     tcp::endpoint remote_endpoint = socket->remote_endpoint();
     logger(LOG_DEBUG) << "New incoming connection from " 
@@ -151,8 +150,7 @@ void delegator_impl::handle_accept(socket_ptr socket)
     create_channel(socket);
     socket.reset(new tcp::socket(*service_));
     acceptor_->async_accept(*socket, 
-            boost::bind(&delegator_impl::handle_accept, 
-                this, socket));
+            boost::bind(&network_impl::handle_accept, this, socket));
 }
 
 } // net

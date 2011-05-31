@@ -28,8 +28,8 @@ transaction_hashing: transaction logger sha256
 script_parsing: script
 	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/script_parsing ./tests/script_parsing.cpp ./obj/script.o -std=c++0x -pedantic -Wall -Wextra
 
-obj/delegator.o: ./src/net/delegator.cpp ./include/bitcoin/net/delegator.hpp
-	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/delegator.o ./src/net/delegator.cpp -std=c++0x -g
+obj/network.o: ./src/net/network.cpp ./include/bitcoin/net/network.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/network.o ./src/net/network.cpp -std=c++0x -g
 
 obj/dialect.o: ./src/net/dialect.cpp ./src/net/dialect.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/dialect.o ./src/net/dialect.cpp -std=c++0x -g
@@ -37,14 +37,17 @@ obj/dialect.o: ./src/net/dialect.cpp ./src/net/dialect.hpp
 obj/channel.o: ./src/net/channel.cpp ./src/net/channel.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/channel.o ./src/net/channel.cpp -std=c++0x -g
 
+obj/kernel.o: ./src/kernel.cpp ./include/bitcoin/kernel.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/kernel.o ./src/kernel.cpp -std=c++0x -g
+
 obj/serializer.o: ./src/net/serializer.cpp ./src/net/serializer.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/serializer.o ./src/net/serializer.cpp -std=c++0x -g
 
 obj/nettest.o: ./tests/net.cpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/nettest.o ./tests/net.cpp -std=c++0x -g
 
-bin/tests/nettest: obj/delegator.o  obj/dialect.o  obj/channel.o  obj/serializer.o obj/logger.o obj/nettest.o
-	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/delegator.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o  obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o obj/kernel.o
 
 net: bin/tests/nettest
 

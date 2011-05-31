@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_NET_DELEGATOR_H
-#define LIBBITCOIN_NET_DELEGATOR_H
+#ifndef LIBBITCOIN_NET_NETWORK_H
+#define LIBBITCOIN_NET_NETWORK_H
 
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/asio.hpp>
@@ -15,14 +15,15 @@ using boost::asio::ip::tcp;
 using boost::asio::io_service;
 using std::shared_ptr;
 
-class delegator;
-class channel;
+class network;
+class network_impl;
+class channel_pimpl;
 class dialect;
 
-typedef shared_ptr<delegator> delegator_ptr;
+typedef shared_ptr<network> network_ptr;
 typedef std::shared_ptr<dialect> dialect_ptr;
 typedef unsigned int channel_handle;
-typedef boost::ptr_vector<channel> channel_list;
+typedef boost::ptr_vector<channel_pimpl> channel_list;
 
 enum network_flags : uint32_t
 {
@@ -30,26 +31,26 @@ enum network_flags : uint32_t
     accept_incoming = 1
 };
 
-class delegator : boost::noncopyable
+class network : boost::noncopyable
 {
 public:
     virtual channel_handle connect(std::string ip_addr, 
             unsigned short port=8333) = 0;
-    virtual void disconnect(channel_handle handle) = 0;
-    virtual void send(channel_handle chandle, message::version version) = 0;
     virtual size_t connection_count() const = 0;
+    virtual void send(channel_handle chandle, message::version version) = 0;
+    virtual void disconnect(channel_handle handle) = 0;
 };
 
-class delegator_impl : public delegator, 
-    public std::enable_shared_from_this<delegator_impl>
+class network_impl : public network, 
+    public std::enable_shared_from_this<network_impl>
 {
 public:
-    delegator_impl(uint32_t flags);
-    ~delegator_impl();
+    network_impl(uint32_t flags);
+    ~network_impl();
     channel_handle connect(std::string ip_addr, unsigned short port=8333);
+    size_t connection_count() const;
     void disconnect(channel_handle chandle);  
     void send(channel_handle chandle, message::version version);
-    size_t connection_count() const;
 
 private:
     typedef shared_ptr<tcp::socket> socket_ptr;

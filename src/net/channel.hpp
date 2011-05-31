@@ -10,7 +10,7 @@
 #include <mutex>
 #include <deque>
 
-#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/network.hpp"
 #include "bitcoin/net/messages.hpp"
 
 #include "serializer.hpp"
@@ -23,23 +23,22 @@ using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
 using std::shared_ptr;
 
-class delegator;
+class network;
 class dialect;
-class channel;
 
-class channel : boost::noncopyable
+class channel_pimpl : boost::noncopyable
 {
 public:
     struct init_data
     {
-        shared_ptr<delegator> parent_gateway;
+        shared_ptr<network> parent_gateway;
         shared_ptr<dialect> translator;
         shared_ptr<io_service> service;
         shared_ptr<tcp::socket> socket;
     };
 
-    channel(const init_data& dat);
-    ~channel();
+    channel_pimpl(const init_data& dat);
+    ~channel_pimpl();
 
     void send(message::version version);
     channel_handle get_id() const;
@@ -69,7 +68,7 @@ private:
     bool problems_check(const boost::system::error_code& ec);
 
     shared_ptr<tcp::socket> socket_;
-    shared_ptr<delegator> parent_gateway_;
+    shared_ptr<network> parent_gateway_;
     shared_ptr<dialect> translator_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes

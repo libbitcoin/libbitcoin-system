@@ -7,7 +7,7 @@
 
 #include "bitcoin/util/logger.hpp"
 #include "bitcoin/util/assert.hpp"
-#include "bitcoin/net/delegator.hpp"
+#include "bitcoin/net/network.hpp"
 #include "bitcoin/net/messages.hpp"
 
 #include "shared_const_buffer.hpp"
@@ -25,9 +25,9 @@ namespace net {
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(30) + minutes(1);
 
-channel_handle channel::chan_id_counter = 0;
+channel_handle channel_pimpl::chan_id_counter = 0;
 
-channel::channel(const init_data& dat)
+channel_pimpl::channel_pimpl(const init_data& dat)
  : socket_(dat.socket), parent_gateway_(dat.parent_gateway), 
         translator_(dat.translator) 
 {
@@ -41,7 +41,7 @@ channel::channel(const init_data& dat)
     reset_timeout();
 }
 
-channel::~channel() 
+channel_pimpl::~channel_pimpl() 
 {
     tcp::endpoint remote_endpoint = socket_->remote_endpoint();
     logger(LOG_DEBUG) << "Closing channel " 
@@ -52,7 +52,7 @@ channel::~channel()
     timeout_->cancel();
 }
 
-void channel::handle_timeout(const boost::system::error_code& ec)
+void channel_pimpl::handle_timeout(const boost::system::error_code& ec)
 {
     if (problems_check(ec))
         return;
@@ -61,20 +61,20 @@ void channel::handle_timeout(const boost::system::error_code& ec)
     destroy_self();
 }
 
-void channel::reset_timeout()
+void channel_pimpl::reset_timeout()
 {
     timeout_->cancel();
     timeout_->expires_from_now(disconnect_timeout);
-    timeout_->async_wait(
-            boost::bind(&channel::handle_timeout, this, placeholders::error));
+    timeout_->async_wait(boost::bind(
+            &channel_pimpl::handle_timeout, this, placeholders::error));
 }
 
-void channel::destroy_self()
+void channel_pimpl::destroy_self()
 {
     parent_gateway_->disconnect(channel_id_);
 }
 
-bool channel::problems_check(const boost::system::error_code& ec)
+bool channel_pimpl::problems_check(const boost::system::error_code& ec)
 {
     if (ec == boost::asio::error::operation_aborted) 
     {
@@ -89,30 +89,30 @@ bool channel::problems_check(const boost::system::error_code& ec)
     return false;
 }
 
-void channel::read_header()
+void channel_pimpl::read_header()
 {
-    auto callback = boost::bind(&channel::handle_read_header, this,
+    auto callback = boost::bind(&channel_pimpl::handle_read_header, this,
             placeholders::error, placeholders::bytes_transferred);
     async_read(*socket_, buffer(inbound_header_), callback);
 }
 
-void channel::read_checksum(message::header header_msg)
+void channel_pimpl::read_checksum(message::header header_msg)
 {
-    auto callback = boost::bind(&channel::handle_read_checksum, this, 
+    auto callback = boost::bind(&channel_pimpl::handle_read_checksum, this, 
             header_msg, placeholders::error, placeholders::bytes_transferred);
     async_read(*socket_, buffer(inbound_checksum_), callback);
 }
 
-void channel::read_payload(message::header header_msg)
+void channel_pimpl::read_payload(message::header header_msg)
 {
-    auto callback = boost::bind(&channel::handle_read_payload, this, 
+    auto callback = boost::bind(&channel_pimpl::handle_read_payload, this, 
             header_msg, placeholders::error, placeholders::bytes_transferred);
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length), 
             callback);
 }
 
-void channel::handle_read_header(const boost::system::error_code& ec,
+void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred)
 {
     if (problems_check(ec))
@@ -160,7 +160,7 @@ void channel::handle_read_header(const boost::system::error_code& ec,
     reset_timeout();
 }
 
-void channel::handle_read_checksum(message::header header_msg,
+void channel_pimpl::handle_read_checksum(message::header header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if (problems_check(ec))
@@ -173,7 +173,7 @@ void channel::handle_read_checksum(message::header header_msg,
     reset_timeout();
 }
 
-void channel::handle_read_payload(message::header header_msg,
+void channel_pimpl::handle_read_payload(message::header header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if (problems_check(ec))
@@ -193,21 +193,21 @@ void channel::handle_read_payload(message::header header_msg,
     reset_timeout();
 }
 
-void channel::handle_send(const boost::system::error_code& ec)
+void channel_pimpl::handle_send(const boost::system::error_code& ec)
 {
     if (problems_check(ec))
         return;
 }
 
-void channel::send(message::version version)
+void channel_pimpl::send(message::version version)
 {
     serializer::stream msg = translator_->to_network(version);
     shared_const_buffer buffer(msg);
-    async_write(*socket_, buffer,
-            boost::bind(&channel::handle_send, this, placeholders::error));
+    async_write(*socket_, buffer, boost::bind(
+            &channel_pimpl::handle_send, this, placeholders::error));
 }
 
-channel_handle channel::get_id() const
+channel_handle channel_pimpl::get_id() const
 {
     return channel_id_;
 }
