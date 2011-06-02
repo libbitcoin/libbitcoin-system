@@ -23,7 +23,7 @@ namespace libbitcoin {
 namespace net {
 
 // Connection timeout time
-const time_duration disconnect_timeout = seconds(30) + minutes(1);
+const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
 channel_handle channel_pimpl::chan_id_counter = 0;
 
@@ -123,23 +123,10 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
     BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
     message::header header_msg = 
             translator_->header_from_network(header_stream);
-    /*
-     * Should be implemented outside in core or whatever
-    if (header_msg.command == "version") {
-    }
-    else {
-        // Read checksum
-    }
-    */
-    // Temporarily we ignore checks
-    if (false)
+
+    if (!translator_->verify_header(header_msg))
     {
-        /*
-        if (header_msg.magic != 0xd9b4bef9)
-            throw channel_exception();
-            // if (header_msg.length != ...
-            // Read payload
-        */
+        logger(LOG_DEBUG) << "Bad header received.";
         destroy_self();
         return;
     }
@@ -188,6 +175,10 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
                 translator_->version_from_network(payload_stream); 
         logger(LOG_DEBUG) << "nonce is " << payload.nonce;
         logger(LOG_DEBUG) << "last block is " << payload.start_height;
+        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
+            destroy_self();
+            return;
+        }
     }
     read_header();
     reset_timeout();

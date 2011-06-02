@@ -20,7 +20,8 @@ static void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-network_impl::network_impl(uint32_t flags)
+network_impl::network_impl(kernel_ptr kern, uint32_t flags)
+ : kernel_(kern)
 {
     service_.reset(new io_service);
     work_.reset(new io_service::work(*service_));
@@ -70,7 +71,7 @@ channel_handle network_impl::connect(std::string ip_addr,
     {
         logger(LOG_ERROR) << "Connecting to peer " << ip_addr 
                 << ": " << ex.what();
-        return UINT_MAX;
+        return 0;
     }
     return create_channel(socket);
 }
@@ -93,8 +94,8 @@ void network_impl::disconnect(channel_handle chandle)
 }
 
 template<typename T>
-void perform_send(channel_list* channels, channel_handle chandle, 
-        T message_packet)
+void perform_send(channel_list* channels, kernel_ptr kern,
+        channel_handle chandle, T message_packet)
 {
     auto is_matching =
             [chandle](const channel_pimpl& channel_obj)
@@ -105,6 +106,7 @@ void perform_send(channel_list* channels, channel_handle chandle,
     if (it == channels->end())
     {
         logger(LOG_ERROR) << "Non existant channel " << chandle << " for send.";
+        kern->send_failed(chandle, message_packet);
         return;
     }
     it->send(message_packet);
@@ -112,12 +114,18 @@ void perform_send(channel_list* channels, channel_handle chandle,
 void network_impl::send(channel_handle chandle, message::version version)
 {
     strand_->dispatch(boost::bind(
-            &perform_send<message::version>, &channels_, chandle, version));
+            &perform_send<message::version>, &channels_, kernel_, 
+                chandle, version));
 }
 
 size_t network_impl::connection_count() const
 {
     return channels_.size();
+}
+
+kernel_ptr network_impl::kernel() const
+{
+    return kernel_;
 }
 
 bool network_impl::start_accept()

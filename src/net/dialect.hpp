@@ -16,10 +16,14 @@ class dialect
 public:
     virtual serializer::stream to_network(
             message::version version) const = 0;
+
     virtual message::header header_from_network(
             const serializer::stream& stream) const = 0;
+
     virtual message::version version_from_network(
             const serializer::stream& stream) const = 0;
+
+    virtual bool verify_header(net::message::header header_msg) const = 0;
 };
 
 class original_dialect : public dialect
@@ -34,6 +38,8 @@ public:
 
     message::version version_from_network(
             const serializer::stream& stream) const;
+
+    bool verify_header(net::message::header header_msg) const;
 };
 
 } // net

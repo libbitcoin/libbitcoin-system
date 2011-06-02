@@ -28,7 +28,8 @@ libbitcoin::net::message::version create_version_message()
 
 int run_connect()
 {
-    libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(libbitcoin::net::network_flags::none));
+    libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
+    libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel, libbitcoin::net::network_flags::none));
     libbitcoin::net::channel_handle channel = net->connect("localhost");
     if (false) {
         std::cerr << "noes\n";
@@ -44,17 +45,17 @@ int run_connect()
 
 int run_accept()
 {
-    libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(libbitcoin::net::network_flags::accept_incoming));
+    libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
+    libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel, libbitcoin::net::network_flags::accept_incoming));
     std::cin.get();
     return 0;
 }
 
 int run_kernel()
 {
-    libbitcoin::net::network_ptr net(
-            new libbitcoin::net::network_impl(
-                libbitcoin::net::network_flags::none));
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
+    libbitcoin::net::network_ptr net(
+            new libbitcoin::net::network_impl(kernel, libbitcoin::net::network_flags::none));
     kernel->register_network(net);
     libbitcoin::net::channel_handle channel = net->connect("localhost");
     libbitcoin::net::message::version version = create_version_message();

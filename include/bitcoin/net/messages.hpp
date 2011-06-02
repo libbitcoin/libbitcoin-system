@@ -25,12 +25,7 @@ struct header
     uint32_t checksum;
 };
 
-struct message
-{
-    // Empty
-};
-
-struct version : public message 
+struct version
 {
     uint32_t version;
     uint64_t services;

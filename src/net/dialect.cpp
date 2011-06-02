@@ -88,6 +88,38 @@ message::version original_dialect::version_from_network(
     return payload;
 }
 
+bool original_dialect::verify_header(net::message::header header_msg) const
+{
+    if (header_msg.magic != 0xd9b4bef9)
+        return false;
+    if (header_msg.command == "version")
+    {
+        if (header_msg.payload_length != 85)
+            return false;
+    }
+    else if (header_msg.command == "verack"
+            || header_msg.command == "getaddr"
+            || header_msg.command == "ping")
+    {
+        if (header_msg.payload_length != 0)
+            return false;
+    }
+    else if (header_msg.command == "inv"
+            || header_msg.command == "addr"
+            || header_msg.command == "getdata"
+            || header_msg.command == "getblocks"
+            || header_msg.command == "getheaders"
+            || header_msg.command == "tx"
+            || header_msg.command == "block"
+            || header_msg.command == "headers"
+            || header_msg.command == "alert")
+    {
+        // Should check if sizes make sense
+        // i.e for addr should be multiple of 30x + 1 byte
+    }
+    return true;
+}
+
 } // net
 } // libbitcoin
 
