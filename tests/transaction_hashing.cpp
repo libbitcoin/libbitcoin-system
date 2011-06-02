@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "transaction.hpp"
+#include "bitcoin/transaction.hpp"
 
 #define LOLHACKS(x) std::string(x,sizeof(x)-1)
 

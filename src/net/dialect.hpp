@@ -20,10 +20,16 @@ public:
     virtual serializer::stream to_network(
             message::verack verack) const = 0;
 
+    virtual serializer::stream to_network(
+            message::getaddr getaddr) const = 0;
+
     virtual message::header header_from_network(
             const serializer::stream& stream) const = 0;
 
     virtual message::version version_from_network(
+            const serializer::stream& stream) const = 0;
+
+    virtual message::addr addr_from_network(
             const serializer::stream& stream) const = 0;
 
     virtual bool verify_header(net::message::header header_msg) const = 0;
@@ -35,12 +41,16 @@ public:
     // Create stream from message
     serializer::stream to_network(message::version version) const;
     serializer::stream to_network(message::verack verack) const;
+    serializer::stream to_network(message::getaddr getaddr) const;
 
     // Create header/messages from stream
     message::header header_from_network(
             const serializer::stream& stream) const;
 
     message::version version_from_network(
+            const serializer::stream& stream) const;
+
+    message::addr addr_from_network(
             const serializer::stream& stream) const;
 
     bool verify_header(net::message::header header_msg) const;

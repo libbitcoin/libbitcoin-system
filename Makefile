@@ -22,7 +22,7 @@ tests: block_hashing transaction_hashing script_parsing
 block_hashing: block obj/logger.o sha256
 	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/block_hashing ./tests/block_hashing.cpp ./obj/block.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl -pedantic -Wall -Wextra
 
-transaction_hashing: transaction logger sha256
+transaction_hashing: transaction obj/logger.o sha256
 	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/transaction_hashing ./tests/transaction_hashing.cpp ./obj/transaction.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl -pedantic -Wall -Wextra
 	
 script_parsing: script

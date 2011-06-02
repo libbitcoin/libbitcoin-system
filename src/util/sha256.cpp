@@ -1,8 +1,8 @@
-#include "util/sha256.hpp"
+#include "bitcoin/util/sha256.hpp"
 
 #include <boost/detail/endian.hpp>
 
-#include "util/logger.hpp"
+#include "bitcoin/util/logger.hpp"
 
 namespace libbitcoin {
 
@@ -11,7 +11,7 @@ sha256::sha256()
     SHA256_Init(&ctx_);
 }
 
-void sha256::str(const std::string& val)
+void sha256::push_str(const std::string& val)
 {
 #ifdef BOOST_LITTLE_ENDIAN
     SHA256_Update(&ctx_, val.c_str(), val.length());
@@ -22,45 +22,43 @@ void sha256::str(const std::string& val)
 #endif
 }
 
-void sha256::var_uint(uint64_t var_uint)
+void sha256::push_var_uint(uint64_t var_uint)
 {
-    if(var_uint < 0xFD)
+    if (var_uint < 0xfd)
     {
         uint8_t count = var_uint;
-        logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
-        update(count);
+        logger(LOG_DEBUG) << var_uint << " " << sizeof(count) << "\n";
+        *this << count;
     }
-    else if(var_uint <= 0xffff)
+    else if (var_uint <= 0xffff)
     {
         const uint8_t prefix = 0xFD;
         uint16_t count = var_uint;
-        logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
-        update(prefix);
-        update(count);
+        logger(LOG_DEBUG) << var_uint << " " << sizeof(count) << "\n";
+        *this << prefix << count;
     }
-    else if(var_uint <= 0xffffffff)
+    else if (var_uint <= 0xffffffff)
     {
         const uint8_t prefix = 0xFE;
         uint32_t count = var_uint;
-        logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
-        update(prefix);
-        update(count);
+        logger(LOG_DEBUG) << var_uint << " " << sizeof(count) << "\n";
+        *this << prefix << count;
     }
-    else if(var_uint <= 0xffffffffffffffff)
+    else if (var_uint <= 0xffffffffffffffff)
     {
         const uint8_t prefix = 0xFF;
         uint64_t count = var_uint;
-        logger(DLOG_INFO) << var_uint << " " << sizeof(count) << "\n";
-        update(prefix);
-        update(count);
+        logger(LOG_DEBUG) << var_uint << " " << sizeof(count) << "\n";
+        *this << prefix << count;
     }
     else
     {
         //TODO handle
+        return;
     }
 }
 
-void sha256::final(unsigned char hash[SHA256_DIGEST_LENGTH])
+void sha256::finalize(unsigned char hash[SHA256_DIGEST_LENGTH])
 {
     SHA256_Final(digest_, &ctx_);
     SHA256_Init(&ctx_);

@@ -173,8 +173,6 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     {
         message::version payload = 
                 translator_->version_from_network(payload_stream); 
-        logger(LOG_DEBUG) << "nonce is " << payload.nonce;
-        logger(LOG_DEBUG) << "last block is " << payload.start_height;
         if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
             destroy_self();
             return;
@@ -188,6 +186,15 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
             return;
         }
     }                              
+    else if (header_msg.command == "addr")
+    {
+        message::addr payload = 
+                translator_->addr_from_network(payload_stream); 
+        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
+            destroy_self();
+            return;
+        }
+    }
     read_header();
     reset_timeout();
 }
@@ -209,6 +216,14 @@ void channel_pimpl::send(message::version version)
 void channel_pimpl::send(message::verack verack)
 {
     serializer::stream msg = translator_->to_network(verack);
+    shared_const_buffer buffer(msg);
+    async_write(*socket_, buffer, boost::bind(
+            &channel_pimpl::handle_send, this, placeholders::error));
+}
+
+void channel_pimpl::send(message::getaddr getaddr)
+{
+    serializer::stream msg = translator_->to_network(getaddr);
     shared_const_buffer buffer(msg);
     async_write(*socket_, buffer, boost::bind(
             &channel_pimpl::handle_send, this, placeholders::error));

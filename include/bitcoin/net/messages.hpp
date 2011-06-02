@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace libbitcoin {
 namespace net {
@@ -39,6 +40,15 @@ struct version
 
 struct verack
 {
+};
+
+struct getaddr
+{
+};
+
+struct addr
+{
+    std::vector<net_addr> addr_list;
 };
 
 } // message

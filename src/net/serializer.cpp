@@ -141,6 +141,21 @@ uint64_t deserializer::read_8_bytes()
     return read_data<uint64_t>(stream_, pointer_);
 }
 
+uint64_t deserializer::read_var_uint()
+{
+    uint8_t length = read_byte();
+    uint64_t value = 0;
+    if (length < 0xfd)
+        value = length;
+    else if (length == 0xfd)
+        value += read_2_bytes();
+    else if (length == 0xfe)
+        value += read_4_bytes();
+    else if (length == 0xff)
+        value += read_8_bytes();
+    return value;
+}
+
 static void read_bytes(const serializer::stream& stream, size_t& pointer,
         std::array<uint8_t, 16>& ip_addr)
 {

@@ -35,6 +35,7 @@ public:
     uint16_t read_2_bytes();
     uint32_t read_4_bytes();
     uint64_t read_8_bytes();
+    uint64_t read_var_uint();
     message::net_addr read_net_addr();
     std::string read_fixed_len_str(size_t len);
 private:

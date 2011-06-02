@@ -1,7 +1,7 @@
 #include <string.h>
 #include <cstdint>
 
-#include "block.hpp"
+#include "bitcoin/block.hpp"
 
 int main()
 {

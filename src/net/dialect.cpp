@@ -4,6 +4,7 @@
 
 #include "bitcoin/net/messages.hpp"
 #include "bitcoin/util/assert.hpp"
+#include "bitcoin/util/logger.hpp"
 
 namespace libbitcoin {
 namespace net {
@@ -65,6 +66,11 @@ serializer::stream original_dialect::to_network(message::verack verack) const
     return header_only_message("verack");
 }
 
+serializer::stream original_dialect::to_network(message::getaddr getaddr) const
+{
+    return header_only_message("getaddr");
+}
+
 message::header original_dialect::header_from_network(
         const serializer::stream& stream)  const
 {
@@ -99,6 +105,16 @@ message::version original_dialect::version_from_network(
     }
     payload.start_height = deserial.read_4_bytes();
     BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
+    return payload;
+}
+
+message::addr original_dialect::addr_from_network(
+        const serializer::stream& stream) const
+{
+    deserializer deserial(stream);
+    message::addr payload;
+    uint64_t length = deserial.read_var_uint();
+    logger(LOG_DEBUG) << "length of var uint = " << length;
     return payload;
 }
 

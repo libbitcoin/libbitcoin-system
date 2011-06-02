@@ -60,6 +60,7 @@ int run_kernel()
     libbitcoin::net::channel_handle channel = net->connect("localhost");
     libbitcoin::net::message::version version = create_version_message();
     net->send(channel, version);
+    net->send(channel, libbitcoin::net::message::getaddr());
     std::cin.get();
     return 0;
 }

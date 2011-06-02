@@ -21,11 +21,15 @@ public:
             net::message::version message);
     void send_failed(net::channel_handle chandle, 
             net::message::verack message);
+    void send_failed(net::channel_handle chandle, 
+            net::message::getaddr message);
 
     bool recv_message(net::channel_handle chandle,
             net::message::version message);
     bool recv_message(net::channel_handle chandle,
             net::message::verack message);
+    bool recv_message(net::channel_handle chandle,
+            net::message::addr message);
 private: 
     shared_ptr<net::network> network_component_;
 };

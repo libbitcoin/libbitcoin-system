@@ -42,6 +42,7 @@ public:
 
     void send(message::version version);
     void send(message::verack verack);
+    void send(message::getaddr getaddr);
     channel_handle get_id() const;
 
 private:

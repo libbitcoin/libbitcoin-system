@@ -30,6 +30,7 @@ public:
     virtual void disconnect(channel_handle handle) = 0;
     virtual void send(channel_handle chandle, message::version version) = 0;
     virtual void send(channel_handle chandle, message::verack verack) = 0;
+    virtual void send(channel_handle chandle, message::getaddr getaddr) = 0;
     virtual kernel_ptr kernel() const = 0;
 };
 
@@ -44,6 +45,7 @@ public:
     void disconnect(channel_handle chandle);  
     void send(channel_handle chandle, message::version version);
     void send(channel_handle chandle, message::verack verack);
+    void send(channel_handle chandle, message::getaddr getaddr);
     kernel_ptr kernel() const;
 
 private:

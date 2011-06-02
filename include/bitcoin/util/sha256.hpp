@@ -15,20 +15,21 @@ public:
     sha256();
     
     template<typename T>
-    void update(T& val)
+    sha256& operator<<(T& val)
     {
         SHA256_Update(&ctx_, &val, sizeof(T));
+        return *this;
     }
 
-    void var_uint(uint64_t var_uint);
-    void str(const std::string& val);
+    void push_var_uint(uint64_t var_uint);
+    void push_str(const std::string& val);
 
     SHA256_CTX& ctx() { return ctx_; }
 
-    void final(unsigned char hash[SHA256_DIGEST_LENGTH]);
+    void finalize(unsigned char hash[length]);
 private:
     SHA256_CTX ctx_;
-    unsigned char digest_[SHA256_DIGEST_LENGTH];
+    unsigned char digest_[length];
 };
 
 } // libbitcoin
