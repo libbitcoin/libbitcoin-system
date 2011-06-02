@@ -112,28 +112,28 @@ void perform_send(channel_list* channels, kernel_ptr kern,
     it->send(message_packet);
 }
 
-//template<typename T>
-//void setup_send_dispatch(
+template<typename T>
+void generic_send(T message_packet, channel_handle chandle,
+        shared_ptr<io_service::strand> strand, channel_list* channels, 
+        kernel_ptr kernel)
+{
+    strand->dispatch(boost::bind(
+            &perform_send<T>, channels, kernel, chandle, message_packet));
+}
 
 void network_impl::send(channel_handle chandle, message::version version)
 {
-    strand_->dispatch(boost::bind(
-            &perform_send<message::version>, &channels_, kernel_, 
-                chandle, version));
+    generic_send(version, chandle, strand_, &channels_, kernel_);
 }
 
 void network_impl::send(channel_handle chandle, message::verack verack)
 {
-    strand_->dispatch(boost::bind(
-            &perform_send<message::verack>, &channels_, kernel_, 
-                chandle, verack));
+    generic_send(verack, chandle, strand_, &channels_, kernel_);
 }
 
 void network_impl::send(channel_handle chandle, message::getaddr getaddr)
 {
-    strand_->dispatch(boost::bind(
-            &perform_send<message::getaddr>, &channels_, kernel_, 
-                chandle, getaddr));
+    generic_send(getaddr, chandle, strand_, &channels_, kernel_);
 }
 
 size_t network_impl::connection_count() const

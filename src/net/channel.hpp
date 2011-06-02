@@ -70,8 +70,8 @@ private:
     bool problems_check(const boost::system::error_code& ec);
 
     shared_ptr<tcp::socket> socket_;
-    shared_ptr<network> parent_gateway_;
-    shared_ptr<dialect> translator_;
+    network_ptr parent_gateway_;
+    dialect_ptr translator_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes
     static const size_t header_chunk_size = 20;

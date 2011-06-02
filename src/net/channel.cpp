@@ -205,28 +205,29 @@ void channel_pimpl::handle_send(const boost::system::error_code& ec)
         return;
 }
 
+template<typename T>
+void generic_send(T message_packet, channel_pimpl* chan_self, 
+        shared_ptr<tcp::socket> socket, dialect_ptr translator)
+{
+    serializer::stream msg = translator->to_network(message_packet);
+    shared_const_buffer buffer(msg);
+    async_write(*socket, buffer, boost::bind(
+            &channel_pimpl::handle_send, chan_self, placeholders::error));
+}
+
 void channel_pimpl::send(message::version version)
 {
-    serializer::stream msg = translator_->to_network(version);
-    shared_const_buffer buffer(msg);
-    async_write(*socket_, buffer, boost::bind(
-            &channel_pimpl::handle_send, this, placeholders::error));
+    generic_send(version, this, socket_, translator_);
 }
 
 void channel_pimpl::send(message::verack verack)
 {
-    serializer::stream msg = translator_->to_network(verack);
-    shared_const_buffer buffer(msg);
-    async_write(*socket_, buffer, boost::bind(
-            &channel_pimpl::handle_send, this, placeholders::error));
+    generic_send(verack, this, socket_, translator_);
 }
 
 void channel_pimpl::send(message::getaddr getaddr)
 {
-    serializer::stream msg = translator_->to_network(getaddr);
-    shared_const_buffer buffer(msg);
-    async_write(*socket_, buffer, boost::bind(
-            &channel_pimpl::handle_send, this, placeholders::error));
+    generic_send(getaddr, this, socket_, translator_);
 }
 
 channel_handle channel_pimpl::get_id() const

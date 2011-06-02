@@ -51,6 +51,8 @@ public:
 private:
     typedef shared_ptr<tcp::socket> socket_ptr;
     typedef shared_ptr<io_service> service_ptr;
+    typedef shared_ptr<io_service::work> work_ptr;
+    typedef shared_ptr<io_service::strand> strand_ptr;
     typedef shared_ptr<tcp::acceptor> acceptor_ptr;
 
     bool start_accept();
@@ -61,8 +63,8 @@ private:
     kernel_ptr kernel_;
     service_ptr service_;
     std::thread runner_;
-    shared_ptr<io_service::work> work_;
-    shared_ptr<io_service::strand> strand_;
+    work_ptr work_;
+    strand_ptr strand_;
     acceptor_ptr acceptor_;
 
     dialect_ptr default_dialect_;
