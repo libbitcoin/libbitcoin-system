@@ -180,6 +180,14 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
             return;
         }
     }
+    else if (header_msg.command == "verack")
+    {
+        message::verack payload;
+        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
+            destroy_self();
+            return;
+        }
+    }                              
     read_header();
     reset_timeout();
 }
@@ -193,6 +201,14 @@ void channel_pimpl::handle_send(const boost::system::error_code& ec)
 void channel_pimpl::send(message::version version)
 {
     serializer::stream msg = translator_->to_network(version);
+    shared_const_buffer buffer(msg);
+    async_write(*socket_, buffer, boost::bind(
+            &channel_pimpl::handle_send, this, placeholders::error));
+}
+
+void channel_pimpl::send(message::verack verack)
+{
+    serializer::stream msg = translator_->to_network(verack);
     shared_const_buffer buffer(msg);
     async_write(*socket_, buffer, boost::bind(
             &channel_pimpl::handle_send, this, placeholders::error));

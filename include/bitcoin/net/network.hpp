@@ -29,6 +29,7 @@ public:
     virtual size_t connection_count() const = 0;
     virtual void disconnect(channel_handle handle) = 0;
     virtual void send(channel_handle chandle, message::version version) = 0;
+    virtual void send(channel_handle chandle, message::verack verack) = 0;
     virtual kernel_ptr kernel() const = 0;
 };
 
@@ -42,6 +43,7 @@ public:
     size_t connection_count() const;
     void disconnect(channel_handle chandle);  
     void send(channel_handle chandle, message::version version);
+    void send(channel_handle chandle, message::verack verack);
     kernel_ptr kernel() const;
 
 private:

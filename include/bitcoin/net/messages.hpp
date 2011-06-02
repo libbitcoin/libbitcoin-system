@@ -37,6 +37,10 @@ struct version
     uint32_t start_height;
 };
 
+struct verack
+{
+};
+
 } // message
 } // net
 } // libbitcoin

@@ -41,6 +41,7 @@ public:
     ~channel_pimpl();
 
     void send(message::version version);
+    void send(message::verack verack);
     channel_handle get_id() const;
 
 private:

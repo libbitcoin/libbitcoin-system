@@ -19,8 +19,20 @@ void kernel::send_failed(net::channel_handle chandle,
 {
 }
 
+void kernel::send_failed(net::channel_handle chandle, 
+        net::message::verack message)
+{
+}
+
 bool kernel::recv_message(net::channel_handle chandle,
         net::message::version message)
+{
+    network_component_->send(chandle, net::message::verack());
+    return true;
+}
+
+bool kernel::recv_message(net::channel_handle chandle, 
+        net::message::verack message)
 {
     return true;
 }

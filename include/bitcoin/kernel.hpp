@@ -19,8 +19,13 @@ public:
     // Callbacks from network component
     void send_failed(net::channel_handle chandle, 
             net::message::version message);
+    void send_failed(net::channel_handle chandle, 
+            net::message::verack message);
+
     bool recv_message(net::channel_handle chandle,
             net::message::version message);
+    bool recv_message(net::channel_handle chandle,
+            net::message::verack message);
 private: 
     shared_ptr<net::network> network_component_;
 };

@@ -28,6 +28,15 @@ serializer::stream construct_header_from(serializer::stream payload,
     return header.get_data();
 }
 
+serializer::stream header_only_message(std::string command)
+{
+    serializer payload;
+    serializer::stream msg_body = payload.get_data();
+    // No data
+    serializer::stream header = construct_header_from(msg_body, "verack");
+    return header;
+}
+
 serializer::stream original_dialect::to_network(
         message::version version) const
 {
@@ -49,6 +58,11 @@ serializer::stream original_dialect::to_network(
     message.reserve(message.size() + distance(msg_body.begin(), msg_body.end()));
     message.insert(message.end(), msg_body.begin(), msg_body.end());
     return message;
+}
+
+serializer::stream original_dialect::to_network(message::verack verack) const
+{
+    return header_only_message("verack");
 }
 
 message::header original_dialect::header_from_network(

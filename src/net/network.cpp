@@ -118,6 +118,13 @@ void network_impl::send(channel_handle chandle, message::version version)
                 chandle, version));
 }
 
+void network_impl::send(channel_handle chandle, message::verack verack)
+{
+    strand_->dispatch(boost::bind(
+            &perform_send<message::verack>, &channels_, kernel_, 
+                chandle, verack));
+}
+
 size_t network_impl::connection_count() const
 {
     return channels_.size();
