@@ -27,13 +27,16 @@ public:
             const serializer::stream& stream) const = 0;
 
     virtual message::version version_from_network(
-            const serializer::stream& stream) const = 0;
+            const message::header header_msg,
+            const serializer::stream& stream, bool& ec) const = 0;
 
     virtual message::addr addr_from_network(
-            const serializer::stream& stream) const = 0;
+            const message::header header_msg,
+            const serializer::stream& stream, bool& ec) const = 0;
 
     virtual message::inv inv_from_network(
-            const serializer::stream& stream) const = 0;
+            const message::header header_msg,
+            const serializer::stream& stream, bool& ec) const = 0;
 
     virtual bool verify_header(net::message::header header_msg) const = 0;
 };
@@ -51,13 +54,16 @@ public:
             const serializer::stream& stream) const;
 
     message::version version_from_network(
-            const serializer::stream& stream) const;
+            const message::header header_msg,
+            const serializer::stream& stream, bool& ec) const;
 
     message::inv inv_from_network(
-            const serializer::stream& stream) const;
+            const message::header header_msg,
+            const serializer::stream& stream, bool& ec) const;
 
     message::addr addr_from_network(
-            const serializer::stream& stream) const;
+            const message::header header_msg,
+            const serializer::stream& stream, bool& ec) const;
 
     bool verify_header(net::message::header header_msg) const;
 };

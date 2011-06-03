@@ -3,6 +3,9 @@
 #include "bitcoin/util/logger.hpp"
 #include "bitcoin/net/network.hpp"
 
+// Debug - should go soon
+#include <iomanip>
+
 namespace libbitcoin {
 
 void kernel::register_network(shared_ptr<net::network> net_comp)
@@ -42,7 +45,8 @@ void display_byte_array(T arr)
     logobj << std::hex;
     for (auto it = arr.cbegin(); it != arr.cend(); ++it)
     {
-        logobj << static_cast<unsigned int>(*it) << " ";
+        logobj << std::setfill('0') << std::setw(2)
+                << static_cast<unsigned int>(*it) << " ";
     }
 }
 
