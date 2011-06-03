@@ -37,6 +37,7 @@ public:
     uint64_t read_8_bytes();
     uint64_t read_var_uint();
     message::net_addr read_net_addr();
+    message::hash_digest read_hash();
     std::string read_fixed_len_str(size_t len);
 private:
     const serializer::stream& stream_;

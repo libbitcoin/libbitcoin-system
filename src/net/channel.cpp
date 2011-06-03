@@ -195,6 +195,15 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
             return;
         }
     }
+    else if (header_msg.command == "inv")
+    {
+        message::inv payload = 
+                translator_->inv_from_network(payload_stream); 
+        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
+            destroy_self();
+            return;
+        }
+    }
     read_header();
     reset_timeout();
 }

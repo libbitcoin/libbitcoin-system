@@ -32,6 +32,9 @@ public:
     virtual message::addr addr_from_network(
             const serializer::stream& stream) const = 0;
 
+    virtual message::inv inv_from_network(
+            const serializer::stream& stream) const = 0;
+
     virtual bool verify_header(net::message::header header_msg) const = 0;
 };
 
@@ -48,6 +51,9 @@ public:
             const serializer::stream& stream) const;
 
     message::version version_from_network(
+            const serializer::stream& stream) const;
+
+    message::inv inv_from_network(
             const serializer::stream& stream) const;
 
     message::addr addr_from_network(

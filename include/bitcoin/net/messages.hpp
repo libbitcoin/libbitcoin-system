@@ -10,11 +10,28 @@ namespace libbitcoin {
 namespace net {
 namespace message {
 
+typedef std::array<uint8_t, 32> hash_digest;
+typedef std::array<uint8_t, 16> ip_address;
+
 struct net_addr
 {
     uint64_t services;
-    std::array<uint8_t, 16> ip_addr;
+    ip_address ip_addr;
     uint16_t port;
+};
+
+enum class inv_type
+{
+    error,
+    transaction,
+    block,
+    none
+};
+
+struct inv_vect
+{
+    inv_type type;
+    hash_digest hash;
 };
 
 struct header
@@ -49,6 +66,11 @@ struct getaddr
 struct addr
 {
     std::vector<net_addr> addr_list;
+};
+
+struct inv
+{
+    std::vector<inv_vect> inv_list;
 };
 
 } // message

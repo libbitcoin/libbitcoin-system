@@ -113,8 +113,43 @@ message::addr original_dialect::addr_from_network(
 {
     deserializer deserial(stream);
     message::addr payload;
-    uint64_t length = deserial.read_var_uint();
-    logger(LOG_DEBUG) << "length of var uint = " << length;
+    uint64_t count = deserial.read_var_uint();
+    for (size_t i = 0; i < count; ++i)
+    {
+        message::net_addr addr = deserial.read_net_addr();
+        payload.addr_list.push_back(addr);
+    }
+    return payload;
+}
+
+message::inv original_dialect::inv_from_network(
+        const serializer::stream& stream) const
+{
+    deserializer deserial(stream);
+    message::inv payload;
+    uint64_t count = deserial.read_var_uint();
+    for (size_t i = 0; i < count; ++i)
+    {
+        message::inv_vect inv_vect;
+        uint32_t raw_type = deserial.read_4_bytes();
+        switch (raw_type)
+        {
+        case 0:
+            inv_vect.type = message::inv_type::error;
+            break;
+        case 1:
+            inv_vect.type = message::inv_type::transaction;
+            break;
+        case 2:
+            inv_vect.type = message::inv_type::block;
+            break;
+        default:
+            inv_vect.type = message::inv_type::none;
+            break;
+        }
+        inv_vect.hash = deserial.read_hash();
+        payload.inv_list.push_back(inv_vect);
+    }
     return payload;
 }
 
@@ -146,6 +181,12 @@ bool original_dialect::verify_header(net::message::header header_msg) const
     {
         // Should check if sizes make sense
         // i.e for addr should be multiple of 30x + 1 byte
+        // Also then add ASSERTS to handlers above.
+    }
+    else
+    {
+        // Unknown header
+        return false;
     }
     return true;
 }

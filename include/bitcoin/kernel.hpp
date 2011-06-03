@@ -23,6 +23,8 @@ public:
             net::message::verack message);
     void send_failed(net::channel_handle chandle, 
             net::message::getaddr message);
+    void send_failed(net::channel_handle chandle, 
+            net::message::inv message);
 
     bool recv_message(net::channel_handle chandle,
             net::message::version message);
@@ -30,6 +32,8 @@ public:
             net::message::verack message);
     bool recv_message(net::channel_handle chandle,
             net::message::addr message);
+    bool recv_message(net::channel_handle chandle,
+            net::message::inv message);
 private: 
     shared_ptr<net::network> network_component_;
 };

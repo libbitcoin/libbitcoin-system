@@ -156,15 +156,35 @@ uint64_t deserializer::read_var_uint()
     return value;
 }
 
-static void read_bytes(const serializer::stream& stream, size_t& pointer,
-        std::array<uint8_t, 16>& ip_addr)
+template<unsigned int N>
+void read_bytes(const serializer::stream& stream, size_t& pointer,
+        std::array<uint8_t, N>& byte_array, bool reverse=false)
 {
-    std::copy(
-            stream.begin() + pointer,
-            stream.begin() + pointer + ip_addr.size(),
-            ip_addr.begin());
-    pointer += ip_addr.size();
+    #ifdef BOOST_LITTLE_ENDIAN
+        // do nothing
+    #elif BOOST_BIG_ENDIAN
+        reverse = true;
+    #else
+        #error "Endian isn't defined!"
+    #endif
+
+    if (reverse)
+    {
+        std::reverse_copy(
+                stream.begin() + pointer,
+                stream.begin() + pointer + byte_array.size(),
+                byte_array.begin());
+    }
+    else
+    {
+        std::copy(
+                stream.begin() + pointer,
+                stream.begin() + pointer + byte_array.size(),
+                byte_array.begin());
+    }
+    pointer += byte_array.size();
 }
+
 message::net_addr deserializer::read_net_addr()
 {
     message::net_addr addr;
@@ -173,6 +193,13 @@ message::net_addr deserializer::read_net_addr()
     read_bytes(stream_, pointer_, addr.ip_addr);
     addr.port = read_data<uint16_t>(stream_, pointer_, true);
     return addr;
+}
+
+message::hash_digest deserializer::read_hash()
+{
+    message::hash_digest hash;
+    read_bytes(stream_, pointer_, hash, true);
+    return hash;
 }
 
 std::string deserializer::read_fixed_len_str(size_t len)
