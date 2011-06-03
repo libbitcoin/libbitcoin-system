@@ -169,11 +169,19 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     serializer::stream payload_stream = serializer::stream(
             inbound_payload_.begin(), inbound_payload_.end());
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
+    bool ret_errc = true;
     if (header_msg.command == "version")
     {
         message::version payload = 
-                translator_->version_from_network(payload_stream); 
-        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
+                translator_->version_from_network(
+                    header_msg, payload_stream, ret_errc); 
+        if (!ret_errc)
+        {
+            destroy_self();
+            return;
+        }
+        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) 
+        {
             destroy_self();
             return;
         }
@@ -181,7 +189,8 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     else if (header_msg.command == "verack")
     {
         message::verack payload;
-        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
+        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) 
+        {
             destroy_self();
             return;
         }
@@ -189,8 +198,15 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     else if (header_msg.command == "addr")
     {
         message::addr payload = 
-                translator_->addr_from_network(payload_stream); 
-        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
+                translator_->addr_from_network(
+                    header_msg, payload_stream, ret_errc); 
+        if (!ret_errc)
+        {
+            destroy_self();
+            return;
+        }
+        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) 
+        {
             destroy_self();
             return;
         }
@@ -198,8 +214,15 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     else if (header_msg.command == "inv")
     {
         message::inv payload = 
-                translator_->inv_from_network(payload_stream); 
-        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) {
+                translator_->inv_from_network(
+                    header_msg, payload_stream, ret_errc); 
+        if (!ret_errc)
+        {
+            destroy_self();
+            return;
+        }
+        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) 
+        {
             destroy_self();
             return;
         }

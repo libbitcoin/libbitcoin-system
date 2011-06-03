@@ -83,8 +83,10 @@ message::header original_dialect::header_from_network(
 }
 
 message::version original_dialect::version_from_network(
-        const serializer::stream& stream) const
+        const message::header header_msg,
+        const serializer::stream& stream, bool& ec) const
 {
+    ec = false;
     deserializer deserial(stream);
     message::version payload;
     payload.version = deserial.read_4_bytes();
@@ -109,8 +111,10 @@ message::version original_dialect::version_from_network(
 }
 
 message::addr original_dialect::addr_from_network(
-        const serializer::stream& stream) const
+        const message::header header_msg,
+        const serializer::stream& stream, bool& ec) const
 {
+    ec = false;
     deserializer deserial(stream);
     message::addr payload;
     uint64_t count = deserial.read_var_uint();
@@ -123,8 +127,10 @@ message::addr original_dialect::addr_from_network(
 }
 
 message::inv original_dialect::inv_from_network(
-        const serializer::stream& stream) const
+        const message::header header_msg,
+        const serializer::stream& stream, bool& ec) const
 {
+    ec = false;
     deserializer deserial(stream);
     message::inv payload;
     uint64_t count = deserial.read_var_uint();

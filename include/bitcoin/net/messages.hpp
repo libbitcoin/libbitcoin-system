@@ -15,6 +15,7 @@ typedef std::array<uint8_t, 16> ip_address;
 
 struct net_addr
 {
+    uint32_t timestamp;
     uint64_t services;
     ip_address ip_addr;
     uint16_t port;
