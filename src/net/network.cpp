@@ -1,11 +1,11 @@
-#include "bitcoin/net/network.hpp"
+#include <bitcoin/net/network.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
 #include <algorithm>
 #include <iostream>
 
-#include "bitcoin/util/logger.hpp"
+#include <bitcoin/util/logger.hpp>
 
 #include "channel.hpp"
 #include "dialect.hpp"

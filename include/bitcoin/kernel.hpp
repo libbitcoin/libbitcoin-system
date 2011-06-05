@@ -4,8 +4,8 @@
 #include <boost/utility.hpp>
 #include <memory>
 
-#include "bitcoin/net/messages.hpp"
-#include "bitcoin/net/types.hpp"
+#include <bitcoin/net/messages.hpp>
+#include <bitcoin/net/types.hpp>
 
 namespace libbitcoin {
 

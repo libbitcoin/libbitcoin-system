@@ -10,8 +10,8 @@
 #include <mutex>
 #include <deque>
 
-#include "bitcoin/net/network.hpp"
-#include "bitcoin/net/messages.hpp"
+#include <bitcoin/net/network.hpp>
+#include <bitcoin/net/messages.hpp>
 
 #include "serializer.hpp"
 

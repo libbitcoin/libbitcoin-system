@@ -2,9 +2,9 @@
 
 #include <boost/assert.hpp>
 
-#include "bitcoin/net/messages.hpp"
-#include "bitcoin/util/assert.hpp"
-#include "bitcoin/util/logger.hpp"
+#include <bitcoin/net/messages.hpp>
+#include <bitcoin/util/assert.hpp>
+#include <bitcoin/util/logger.hpp>
 
 namespace libbitcoin {
 namespace net {

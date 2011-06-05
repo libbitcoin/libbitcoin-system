@@ -5,9 +5,9 @@
 #include <memory>
 #include <thread>
 
-#include "bitcoin/kernel.hpp"
-#include "bitcoin/net/messages.hpp"
-#include "bitcoin/net/types.hpp"
+#include <bitcoin/kernel.hpp>
+#include <bitcoin/net/messages.hpp>
+#include <bitcoin/net/types.hpp>
 
 namespace libbitcoin {
 namespace net {

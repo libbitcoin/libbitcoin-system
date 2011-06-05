@@ -5,10 +5,10 @@
 #include <iterator>
 #include <ctime>
 
-#include "bitcoin/util/logger.hpp"
-#include "bitcoin/util/assert.hpp"
-#include "bitcoin/net/network.hpp"
-#include "bitcoin/net/messages.hpp"
+#include <bitcoin/util/logger.hpp>
+#include <bitcoin/util/assert.hpp>
+#include <bitcoin/net/network.hpp>
+#include <bitcoin/net/messages.hpp>
 
 #include "shared_const_buffer.hpp"
 #include "dialect.hpp"

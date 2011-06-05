@@ -1,7 +1,7 @@
-#include "bitcoin/kernel.hpp"
+#include <bitcoin/kernel.hpp>
 
-#include "bitcoin/util/logger.hpp"
-#include "bitcoin/net/network.hpp"
+#include <bitcoin/util/logger.hpp>
+#include <bitcoin/net/network.hpp>
 
 // Debug - should go soon
 #include <iomanip>

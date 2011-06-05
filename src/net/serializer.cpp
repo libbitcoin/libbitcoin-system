@@ -5,8 +5,8 @@
 #include <iostream>
 #include <string>
 
-#include "bitcoin/net/messages.hpp"
-#include "bitcoin/util/assert.hpp"
+#include <bitcoin/net/messages.hpp>
+#include <bitcoin/util/assert.hpp>
 
 namespace libbitcoin {
 namespace net {

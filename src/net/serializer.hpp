@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "bitcoin/net/messages.hpp"
+#include <bitcoin/net/messages.hpp>
 
 namespace libbitcoin {
 namespace net {

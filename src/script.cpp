@@ -1,16 +1,15 @@
+#include <bitcoin/script.hpp>
+
+#include <boost/detail/endian.hpp>
+#include <openssl/sha.h>
+#include <openssl/ripemd.h>
 #include <map>
 #include <iostream>
 #include <algorithm>
 #include <stack>
 #include <stdlib.h>
 
-#include <boost/detail/endian.hpp>
-
-#include <openssl/sha.h>
-#include <openssl/ripemd.h>
-
-#include "bitcoin/script.hpp"
-#include "bitcoin/transaction.hpp"
+#include <bitcoin/transaction.hpp>
 
 namespace libbitcoin {
 

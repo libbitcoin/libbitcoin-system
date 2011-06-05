@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-#include "bitcoin/net/messages.hpp"
+#include <bitcoin/net/messages.hpp>
 
 #include "serializer.hpp"
 
