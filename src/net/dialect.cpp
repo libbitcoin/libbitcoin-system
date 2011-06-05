@@ -93,11 +93,15 @@ message::version original_dialect::version_from_network(
     payload.services = deserial.read_8_bytes();
     payload.timestamp = deserial.read_8_bytes();
     payload.addr_me = deserial.read_net_addr();
+    // Ignored field
+    payload.addr_me.timestamp = 0;
     if (payload.version < 106) {
         BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26);
         return payload;
     }
     payload.addr_you = deserial.read_net_addr();
+    // Ignored field
+    payload.addr_you.timestamp = 0;
     payload.nonce = deserial.read_8_bytes();
     // sub_version_num
     payload.sub_version_num = deserial.read_byte();
@@ -120,7 +124,9 @@ message::addr original_dialect::addr_from_network(
     uint64_t count = deserial.read_var_uint();
     for (size_t i = 0; i < count; ++i)
     {
+        uint32_t timestamp = deserial.read_4_bytes();
         message::net_addr addr = deserial.read_net_addr();
+        addr.timestamp = timestamp;
         payload.addr_list.push_back(addr);
     }
     return payload;
