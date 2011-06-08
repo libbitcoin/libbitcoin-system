@@ -2,6 +2,7 @@
 #define LIBBITCOIN_NET_NETWORK_H
 
 #include <boost/asio.hpp>
+#include <boost/utility.hpp>
 #include <memory>
 #include <thread>
 
@@ -40,13 +41,13 @@ class network_impl : public network,
 public:
     network_impl(kernel_ptr kern, uint32_t flags);
     ~network_impl();
+    kernel_ptr kernel() const;
     channel_handle connect(std::string ip_addr, unsigned short port=8333);
     size_t connection_count() const;
     void disconnect(channel_handle chandle);  
     void send(channel_handle chandle, message::version version);
     void send(channel_handle chandle, message::verack verack);
     void send(channel_handle chandle, message::getaddr getaddr);
-    kernel_ptr kernel() const;
 
 private:
     typedef shared_ptr<tcp::socket> socket_ptr;

@@ -1,6 +1,7 @@
-#include "bitcoin/net/messages.hpp"
-#include "bitcoin/net/network.hpp"
-#include "bitcoin/kernel.hpp"
+#include <bitcoin/net/messages.hpp>
+#include <bitcoin/net/network.hpp>
+#include <bitcoin/storage/storage.hpp>
+#include <bitcoin/kernel.hpp>
 
 #include <memory>
 #include <iostream>
@@ -57,6 +58,9 @@ int run_kernel()
     libbitcoin::net::network_ptr net(
             new libbitcoin::net::network_impl(kernel, libbitcoin::net::network_flags::none));
     kernel->register_network(net);
+    libbitcoin::storage::storage_ptr storage(
+            new libbitcoin::storage::memory_storage(kernel));
+    kernel->register_storage(storage);
     libbitcoin::net::channel_handle channel = net->connect("localhost");
     libbitcoin::net::message::version version = create_version_message();
     net->send(channel, version);

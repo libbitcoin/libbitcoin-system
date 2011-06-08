@@ -6,6 +6,7 @@
 
 #include <bitcoin/net/messages.hpp>
 #include <bitcoin/net/types.hpp>
+#include <bitcoin/storage/types.hpp>
 
 namespace libbitcoin {
 
@@ -14,8 +15,8 @@ using std::shared_ptr;
 class kernel : boost::noncopyable, public std::enable_shared_from_this<kernel>
 {
 public:
-    void register_network(shared_ptr<net::network> net_comp);
-    shared_ptr<net::network> get_network();
+    void register_network(net::network_ptr net_comp);
+    net::network_ptr get_network();
     // Callbacks from network component
     void send_failed(net::channel_handle chandle, 
             net::message::version message);
@@ -34,8 +35,12 @@ public:
             net::message::addr message);
     bool recv_message(net::channel_handle chandle,
             net::message::inv message);
+
+    void register_storage(storage::storage_ptr stor_comp);
+    storage::storage_ptr get_storage();
 private: 
-    shared_ptr<net::network> network_component_;
+    net::network_ptr network_component_;
+    storage::storage_ptr storage_component_;
 };
 
 typedef shared_ptr<kernel> kernel_ptr;

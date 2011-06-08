@@ -46,8 +46,11 @@ obj/serializer.o: ./src/net/serializer.cpp ./src/net/serializer.hpp
 obj/nettest.o: ./tests/net.cpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/nettest.o ./tests/net.cpp -std=c++0x -g
 
-bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o  obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o
-	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o obj/kernel.o
+obj/storage.o: ./src/storage/storage.cpp ./include/bitcoin/storage/storage.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/storage.o ./src/storage/storage.cpp -std=c++0x -g
+
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o  obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o
 
 net: bin/tests/nettest
 

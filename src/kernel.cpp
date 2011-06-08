@@ -2,18 +2,19 @@
 
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/net/network.hpp>
+#include <bitcoin/storage/storage.hpp>
 
 // Debug - should go soon
 #include <iomanip>
 
 namespace libbitcoin {
 
-void kernel::register_network(shared_ptr<net::network> net_comp)
+void kernel::register_network(net::network_ptr net_comp)
 {
     network_component_ = net_comp;
 }
 
-shared_ptr<net::network> kernel::get_network()
+net::network_ptr kernel::get_network()
 {
     return network_component_;
 }
@@ -95,7 +96,18 @@ bool kernel::recv_message(net::channel_handle chandle,
             logger(LOG_DEBUG) << "MSG_BLOCK";
         display_byte_array(it->hash);
     }
+    storage_component_->push(message);
     return true;
+}
+
+void kernel::register_storage(storage::storage_ptr stor_comp)
+{
+    storage_component_ = stor_comp;
+}
+
+storage::storage_ptr kernel::get_storage()
+{
+    return storage_component_;
 }
 
 } // libbitcoin

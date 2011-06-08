@@ -40,6 +40,11 @@ network_impl::~network_impl()
     runner_.join();
 }
 
+kernel_ptr network_impl::kernel() const
+{
+    return kernel_;
+}
+
 channel_handle network_impl::create_channel(socket_ptr socket)
 {
     channel_pimpl::init_data init_data = { 
@@ -89,7 +94,7 @@ static void remove_matching_channels(channel_list* channels,
 }
 void network_impl::disconnect(channel_handle chandle)
 {
-    strand_->dispatch(
+    strand_->post(
             boost::bind(remove_matching_channels, &channels_, chandle));
 }
 
@@ -117,7 +122,7 @@ void generic_send(T message_packet, channel_handle chandle,
         shared_ptr<io_service::strand> strand, channel_list* channels, 
         kernel_ptr kernel)
 {
-    strand->dispatch(boost::bind(
+    strand->post(boost::bind(
             &perform_send<T>, channels, kernel, chandle, message_packet));
 }
 
@@ -139,11 +144,6 @@ void network_impl::send(channel_handle chandle, message::getaddr getaddr)
 size_t network_impl::connection_count() const
 {
     return channels_.size();
-}
-
-kernel_ptr network_impl::kernel() const
-{
-    return kernel_;
 }
 
 bool network_impl::start_accept()
