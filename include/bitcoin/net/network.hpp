@@ -25,6 +25,7 @@ enum network_flags : uint32_t
 class network : boost::noncopyable
 {
 public:
+    virtual bool start_accept() = 0;
     virtual channel_handle connect(std::string ip_addr, 
             unsigned short port=8333) = 0;
     virtual size_t connection_count() const = 0;
@@ -39,9 +40,10 @@ class network_impl : public network,
     public std::enable_shared_from_this<network_impl>
 {
 public:
-    network_impl(kernel_ptr kern, uint32_t flags);
+    network_impl(kernel_ptr kern);
     ~network_impl();
     kernel_ptr kernel() const;
+    bool start_accept();
     channel_handle connect(std::string ip_addr, unsigned short port=8333);
     size_t connection_count() const;
     void disconnect(channel_handle chandle);  
@@ -56,7 +58,6 @@ private:
     typedef shared_ptr<io_service::strand> strand_ptr;
     typedef shared_ptr<tcp::acceptor> acceptor_ptr;
 
-    bool start_accept();
     void handle_accept(socket_ptr socket);
     
     channel_handle create_channel(socket_ptr socket);

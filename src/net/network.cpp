@@ -20,7 +20,7 @@ static void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-network_impl::network_impl(kernel_ptr kern, uint32_t flags)
+network_impl::network_impl(kernel_ptr kern)
  : kernel_(kern)
 {
     service_.reset(new io_service);
@@ -28,8 +28,6 @@ network_impl::network_impl(kernel_ptr kern, uint32_t flags)
     strand_.reset(new io_service::strand(*service_));
     runner_ = std::thread(run_service, service_);
     default_dialect_.reset(new original_dialect);
-    if (flags & network_flags::accept_incoming)
-        start_accept();
 }
 
 network_impl::~network_impl()
