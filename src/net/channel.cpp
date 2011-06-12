@@ -156,6 +156,8 @@ void channel_pimpl::handle_read_checksum(message::header header_msg,
     serializer::stream checksum_stream = serializer::stream(
             inbound_checksum_.begin(), inbound_checksum_.end());
     BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
+    //header_msg.checksum = cast_stream<uint32_t>(checksum_stream);
+    header_msg.checksum = translator_->checksum_from_network(checksum_stream);
     read_payload(header_msg);
     reset_timeout();
 }

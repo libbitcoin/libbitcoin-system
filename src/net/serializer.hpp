@@ -13,7 +13,7 @@ namespace net {
 class serializer
 {
 public:
-    typedef std::vector<char> stream;
+    typedef std::vector<unsigned char> stream;
 
     void write_byte(uint8_t v);
     void write_4_bytes(uint32_t v);
@@ -48,3 +48,4 @@ private:
 } // libbitcoin
 
 #endif
+

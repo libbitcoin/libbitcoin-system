@@ -37,6 +37,9 @@ obj/dialect.o: ./src/net/dialect.cpp ./src/net/dialect.hpp
 obj/channel.o: ./src/net/channel.cpp ./src/net/channel.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/channel.o ./src/net/channel.cpp -std=c++0x -g
 
+obj/sha256.o: ./src/util/sha256.cpp ./include/bitcoin/util/sha256.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/sha256.o ./src/util/sha256.cpp -std=c++0x -g
+
 obj/kernel.o: ./src/kernel.cpp ./include/bitcoin/kernel.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/kernel.o ./src/kernel.cpp -std=c++0x -g
 
@@ -49,8 +52,8 @@ obj/nettest.o: ./tests/net.cpp
 obj/storage.o: ./src/storage/storage.cpp ./include/bitcoin/storage/storage.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/storage.o ./src/storage/storage.cpp -std=c++0x -g
 
-bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o  obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o
-	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o obj/sha256.o
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o obj/sha256.o -lssl
 
 net: bin/tests/nettest
 

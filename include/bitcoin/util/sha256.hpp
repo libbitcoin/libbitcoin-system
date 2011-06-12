@@ -5,6 +5,8 @@
 #include <string>
 #include <cstdint>
 
+#include <bitcoin/types.hpp>
+
 namespace libbitcoin {
 
 class sha256
@@ -26,11 +28,15 @@ public:
 
     SHA256_CTX& ctx() { return ctx_; }
 
-    void finalize(unsigned char hash[length]);
+    void finalize(data_chunk& hash);
+    // Deprecated
+    void finalize(byte hash[length]);
 private:
     SHA256_CTX ctx_;
-    unsigned char digest_[length];
+    byte digest_[length];
 };
+
+uint32_t generate_sha256_checksum(const data_chunk& chunk);
 
 } // libbitcoin
 

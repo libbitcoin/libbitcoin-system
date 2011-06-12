@@ -53,9 +53,6 @@ public:
 
 private:
     typedef shared_ptr<tcp::socket> socket_ptr;
-    typedef shared_ptr<io_service> service_ptr;
-    typedef shared_ptr<io_service::work> work_ptr;
-    typedef shared_ptr<io_service::strand> strand_ptr;
     typedef shared_ptr<tcp::acceptor> acceptor_ptr;
 
     void handle_accept(socket_ptr socket);

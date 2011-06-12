@@ -84,7 +84,6 @@ public:
     
     bool run(transaction);
     
-    
     const std::vector<operation>& operations();
     void operations(const std::vector<operation>&);
 private:

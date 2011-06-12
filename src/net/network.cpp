@@ -1,7 +1,7 @@
 #include <bitcoin/net/network.hpp>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 #include <algorithm>
 #include <iostream>
 
@@ -93,7 +93,7 @@ static void remove_matching_channels(channel_list* channels,
 void network_impl::disconnect(channel_handle chandle)
 {
     strand_->post(
-            boost::bind(remove_matching_channels, &channels_, chandle));
+            std::bind(remove_matching_channels, &channels_, chandle));
 }
 
 template<typename T>
@@ -120,7 +120,7 @@ void generic_send(T message_packet, channel_handle chandle,
         shared_ptr<io_service::strand> strand, channel_list* channels, 
         kernel_ptr kernel)
 {
-    strand->post(boost::bind(
+    strand->post(std::bind(
             &perform_send<T>, channels, kernel, chandle, message_packet));
 }
 
@@ -156,7 +156,7 @@ bool network_impl::start_accept()
         acceptor_->bind(endpoint);
         acceptor_->listen(socket_base::max_connections);
         acceptor_->async_accept(*socket, 
-                boost::bind(&network_impl::handle_accept, this, socket));
+                std::bind(&network_impl::handle_accept, this, socket));
     }
     catch (std::exception& ex)
     {
@@ -174,7 +174,7 @@ void network_impl::handle_accept(socket_ptr socket)
     create_channel(socket);
     socket.reset(new tcp::socket(*service_));
     acceptor_->async_accept(*socket, 
-            boost::bind(&network_impl::handle_accept, this, socket));
+            std::bind(&network_impl::handle_accept, this, socket));
 }
 
 } // net

@@ -58,12 +58,30 @@ void sha256::push_var_uint(uint64_t var_uint)
     }
 }
 
-void sha256::finalize(unsigned char hash[SHA256_DIGEST_LENGTH])
+void sha256::finalize(data_chunk& hash)
+{
+    byte hash_carr[length];
+    finalize(hash_carr);
+    hash.resize(length);
+    std::copy(hash_carr, hash_carr + length, hash.begin());
+}
+
+void sha256::finalize(byte hash[SHA256_DIGEST_LENGTH])
 {
     SHA256_Final(digest_, &ctx_);
     SHA256_Init(&ctx_);
     SHA256_Update(&ctx_, digest_, sizeof(digest_));
     SHA256_Final(hash, &ctx_);
+}
+
+uint32_t generate_sha256_checksum(const data_chunk& chunk)
+{
+    data_chunk hash;
+    sha256 hasher;
+    for (auto it = chunk.cbegin(); it != chunk.cend(); ++it)
+        hasher << *it;
+    hasher.finalize(hash);
+    return cast_chunk<uint32_t>(hash);
 }
 
 } // libbitcoin

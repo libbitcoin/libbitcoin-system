@@ -26,6 +26,9 @@ public:
     virtual message::header header_from_network(
             const serializer::stream& stream) const = 0;
 
+    virtual uint32_t checksum_from_network(
+            const serializer::stream& stream) const = 0;
+
     virtual message::version version_from_network(
             const message::header header_msg,
             const serializer::stream& stream, bool& ec) const = 0;
@@ -51,6 +54,9 @@ public:
 
     // Create header/messages from stream
     message::header header_from_network(
+            const serializer::stream& stream) const;
+
+    virtual uint32_t checksum_from_network(
             const serializer::stream& stream) const;
 
     message::version version_from_network(

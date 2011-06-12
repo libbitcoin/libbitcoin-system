@@ -1,13 +1,37 @@
 #include <bitcoin/kernel.hpp>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/bind.hpp>
+
+#include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/net/network.hpp>
 #include <bitcoin/storage/storage.hpp>
+
+namespace placeholders = boost::asio::placeholders;
+using boost::posix_time::seconds;
+using boost::posix_time::minutes;
+using boost::posix_time::time_duration;
+using boost::asio::buffer;
 
 // Debug - should go soon
 #include <iomanip>
 
 namespace libbitcoin {
+
+const time_duration poll_inv_timeout = seconds(10);
+
+static void run_service(shared_ptr<io_service> service)
+{
+    service->run();
+}
+
+kernel::kernel()
+{
+    service_.reset(new io_service);
+    work_.reset(new io_service::work(*service_));
+    runner_ = std::thread(run_service, service_);
+}
 
 void kernel::register_network(net::network_ptr net_comp)
 {
@@ -82,8 +106,8 @@ bool kernel::recv_message(net::channel_handle chandle,
 bool kernel::recv_message(net::channel_handle chandle,
         net::message::inv message)
 {
-    for (auto it = message.inv_list.cbegin(); 
-            it != message.inv_list.cend(); ++it)
+    for (auto it = message.invs.cbegin(); 
+            it != message.invs.cend(); ++it)
     {
         if (it->type == net::message::inv_type::none)
             return false;
@@ -97,17 +121,49 @@ bool kernel::recv_message(net::channel_handle chandle,
         display_byte_array(it->hash);
     }
     storage_component_->push(message);
+    accept_inventories(message.invs);
     return true;
 }
 
 void kernel::register_storage(storage::storage_ptr stor_comp)
 {
     storage_component_ = stor_comp;
+    poll_invs_timeout_.reset(new deadline_timer(*service_));
+    reset_inventory_poll();
+}
+
+void kernel::reset_inventory_poll()
+{
+    poll_invs_timeout_->cancel();
+    poll_invs_timeout_->expires_from_now(poll_inv_timeout);
+    poll_invs_timeout_->async_wait(boost::bind(
+            &kernel::request_inventories, this, placeholders::error));
+}
+
+void kernel::request_inventories(const boost::system::error_code& ec)
+{
+    if (ec)
+        return;
+    storage_component_->request_inventories(
+            std::bind(&kernel::accept_inventories, 
+                shared_from_this(), std::placeholders::_1));
+    reset_inventory_poll();
 }
 
 storage::storage_ptr kernel::get_storage()
 {
     return storage_component_;
+}
+
+void kernel::accept_inventories(net::message::inv_list invs)
+{
+    logger(LOG_DEBUG) << "asking for <<<<<";
+    for (auto it = invs.cbegin(); it != invs.cend(); ++it)
+    {
+        BITCOIN_ASSERT(it->type != net::message::inv_type::none);
+        display_byte_array(it->hash);
+    }
+    logger(LOG_DEBUG) << ">>>>>>";
 }
 
 } // libbitcoin

@@ -1,6 +1,9 @@
 #include <bitcoin/storage/storage.hpp>
 
+#include <functional> 
+
 #include <bitcoin/kernel.hpp>
+#include <bitcoin/util/logger.hpp>
 
 namespace libbitcoin {
 namespace storage {
@@ -24,11 +27,28 @@ kernel_ptr memory_storage::kernel() const
     return kernel_;
 }
 
-void push_inv_message(net::message::inv item)
+void memory_storage::do_push(net::message::inv item)
 {
+    logger(LOG_DEBUG) << "storing " << item.invs.size() << " invs";
+    const net::message::inv_list& invs = item.invs;
+    inventories_.insert(inventories_.end(), invs.begin(), invs.end());
+    logger(LOG_DEBUG) << "total of " << inventories_.size() << " invs";
 }
 void memory_storage::push(net::message::inv item)
 {
+    strand_->post(std::bind(&memory_storage::do_push, this, item));
+}
+
+void memory_storage::do_request_inventories(accept_inventories_handler handler)
+{
+    // Remove old inventories...
+    if (!inventories_.empty())
+        handler(inventories_);
+}
+void memory_storage::request_inventories(accept_inventories_handler handler)
+{
+    strand_->post(std::bind(
+            &memory_storage::do_request_inventories, this, handler));
 }
 
 } // storage

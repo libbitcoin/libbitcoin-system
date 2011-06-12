@@ -7,28 +7,29 @@
 
 #include <bitcoin/net/messages.hpp>
 #include <bitcoin/util/assert.hpp>
+#include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 namespace net {
 
-inline void copy_data(std::vector<char> &data, 
-        const char* bytes, size_t len)
+inline void copy_data(std::vector<byte> &data, 
+        const byte* raw_bytes, size_t len)
 {
     for (size_t i = 0; i < len; i++)
-        data.push_back(bytes[i]);
+        data.push_back(raw_bytes[i]);
 }
 
-inline void copy_data_reverse(std::vector<char> &data, 
-        const char* bytes, size_t len)
+inline void copy_data_reverse(std::vector<byte> &data, 
+        const byte* raw_bytes, size_t len)
 {
     for (int i = len - 1; i >= 0; i--) 
-        data.push_back(bytes[i]);
+        data.push_back(raw_bytes[i]);
 }
 
 template<typename T>
-void write_data(std::vector<char> &data, T val, size_t len, bool reverse=false)
+void write_data(std::vector<byte> &data, T val, size_t len, bool reverse=false)
 {
-    char* bytes = reinterpret_cast<char*>(&val);
+    byte* raw_bytes = reinterpret_cast<byte*>(&val);
     #ifdef BOOST_LITTLE_ENDIAN
         // do nothing
     #elif BOOST_BIG_ENDIAN
@@ -38,9 +39,9 @@ void write_data(std::vector<char> &data, T val, size_t len, bool reverse=false)
     #endif
 
     if (reverse)
-        copy_data_reverse(data, bytes, len);
+        copy_data_reverse(data, raw_bytes, len);
     else
-        copy_data(data, bytes, len);
+        copy_data(data, raw_bytes, len);
 }
 
 void serializer::write_byte(uint8_t v)

@@ -35,6 +35,8 @@ struct inv_vect
     hash_digest hash;
 };
 
+typedef std::vector<inv_vect> inv_list;
+
 struct header
 {
     uint32_t magic;
@@ -71,7 +73,7 @@ struct addr
 
 struct inv
 {
-    std::vector<inv_vect> inv_list;
+    inv_list invs;
 };
 
 } // message

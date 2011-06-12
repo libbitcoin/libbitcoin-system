@@ -5,6 +5,7 @@
 #include <bitcoin/net/messages.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/util/sha256.hpp>
 
 namespace libbitcoin {
 namespace net {
@@ -79,7 +80,13 @@ message::header original_dialect::header_from_network(
     header.magic = deserial.read_4_bytes();
     header.command = deserial.read_fixed_len_str(12);
     header.payload_length = deserial.read_4_bytes();
+    header.checksum = 0;
     return header;
+}
+
+uint32_t original_dialect::checksum_from_network(const data_chunk& chunk) const
+{
+    return cast_chunk<uint32_t>(chunk);
 }
 
 message::version original_dialect::version_from_network(
@@ -119,8 +126,13 @@ message::addr original_dialect::addr_from_network(
         const serializer::stream& stream, bool& ec) const
 {
     ec = false;
-    deserializer deserial(stream);
     message::addr payload;
+    if (header_msg.checksum != generate_sha256_checksum(stream))
+    {
+        ec = true;
+        return payload;
+    }
+    deserializer deserial(stream);
     uint64_t count = deserial.read_var_uint();
     for (size_t i = 0; i < count; ++i)
     {
@@ -160,7 +172,7 @@ message::inv original_dialect::inv_from_network(
             break;
         }
         inv_vect.hash = deserial.read_hash();
-        payload.inv_list.push_back(inv_vect);
+        payload.invs.push_back(inv_vect);
     }
     return payload;
 }
