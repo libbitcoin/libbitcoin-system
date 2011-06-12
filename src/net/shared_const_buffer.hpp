@@ -14,7 +14,7 @@ class shared_const_buffer
 {
 public:
   // Construct from a stream object
-  explicit shared_const_buffer(const serializer::stream& user_data)
+  explicit shared_const_buffer(const data_chunk& user_data)
     : data(new std::vector<char>(user_data.begin(), user_data.end())),
       buffer(boost::asio::buffer(*data))
   {

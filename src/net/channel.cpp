@@ -118,8 +118,8 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
-    serializer::stream header_stream = 
-            serializer::stream(inbound_header_.begin(), inbound_header_.end()); 
+    data_chunk header_stream = 
+            data_chunk(inbound_header_.begin(), inbound_header_.end()); 
     BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
     message::header header_msg = 
             translator_->header_from_network(header_stream);
@@ -153,7 +153,7 @@ void channel_pimpl::handle_read_checksum(message::header header_msg,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_checksum_size);
-    serializer::stream checksum_stream = serializer::stream(
+    data_chunk checksum_stream = data_chunk(
             inbound_checksum_.begin(), inbound_checksum_.end());
     BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
     //header_msg.checksum = cast_stream<uint32_t>(checksum_stream);
@@ -168,7 +168,7 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_msg.payload_length);
-    serializer::stream payload_stream = serializer::stream(
+    data_chunk payload_stream = data_chunk(
             inbound_payload_.begin(), inbound_payload_.end());
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
     bool ret_errc = true;
@@ -243,7 +243,7 @@ template<typename T>
 void generic_send(T message_packet, channel_pimpl* chan_self, 
         shared_ptr<tcp::socket> socket, dialect_ptr translator)
 {
-    serializer::stream msg = translator->to_network(message_packet);
+    data_chunk msg = translator->to_network(message_packet);
     shared_const_buffer buffer(msg);
     async_write(*socket, buffer, boost::bind(
             &channel_pimpl::handle_send, chan_self, placeholders::error));

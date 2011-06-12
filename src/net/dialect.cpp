@@ -10,8 +10,7 @@
 namespace libbitcoin {
 namespace net {
 
-serializer::stream construct_header_from(serializer::stream payload, 
-        std::string command)
+data_chunk construct_header_from(data_chunk payload, std::string command)
 {
     serializer header;
     // magic
@@ -30,17 +29,16 @@ serializer::stream construct_header_from(serializer::stream payload,
     return header.get_data();
 }
 
-serializer::stream header_only_message(std::string command)
+data_chunk header_only_message(std::string command)
 {
     serializer payload;
-    serializer::stream msg_body = payload.get_data();
+    data_chunk msg_body = payload.get_data();
     // No data
-    serializer::stream header = construct_header_from(msg_body, "verack");
+    data_chunk header = construct_header_from(msg_body, "verack");
     return header;
 }
 
-serializer::stream original_dialect::to_network(
-        message::version version) const
+data_chunk original_dialect::to_network(message::version version) const
 {
     serializer payload;
     payload.write_4_bytes(version.version);
@@ -53,27 +51,27 @@ serializer::stream original_dialect::to_network(
     payload.write_byte(0);
     payload.write_4_bytes(version.start_height);
 
-    serializer::stream msg_body = payload.get_data();
-    serializer::stream message = 
-            construct_header_from(msg_body, "version");
+    data_chunk msg_body = payload.get_data();
+    data_chunk message = construct_header_from(msg_body, "version");
     // Extend message with actual payload
-    message.reserve(message.size() + distance(msg_body.begin(), msg_body.end()));
+    message.reserve(message.size() + distance(msg_body.begin(), 
+            msg_body.end()));
     message.insert(message.end(), msg_body.begin(), msg_body.end());
     return message;
 }
 
-serializer::stream original_dialect::to_network(message::verack verack) const
+data_chunk original_dialect::to_network(message::verack verack) const
 {
     return header_only_message("verack");
 }
 
-serializer::stream original_dialect::to_network(message::getaddr getaddr) const
+data_chunk original_dialect::to_network(message::getaddr getaddr) const
 {
     return header_only_message("getaddr");
 }
 
 message::header original_dialect::header_from_network(
-        const serializer::stream& stream)  const
+        const data_chunk& stream)  const
 {
     deserializer deserial(stream);
     message::header header;
@@ -91,7 +89,7 @@ uint32_t original_dialect::checksum_from_network(const data_chunk& chunk) const
 
 message::version original_dialect::version_from_network(
         const message::header header_msg,
-        const serializer::stream& stream, bool& ec) const
+        const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -123,7 +121,7 @@ message::version original_dialect::version_from_network(
 
 message::addr original_dialect::addr_from_network(
         const message::header header_msg,
-        const serializer::stream& stream, bool& ec) const
+        const data_chunk& stream, bool& ec) const
 {
     ec = false;
     message::addr payload;
@@ -146,7 +144,7 @@ message::addr original_dialect::addr_from_network(
 
 message::inv original_dialect::inv_from_network(
         const message::header header_msg,
-        const serializer::stream& stream, bool& ec) const
+        const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);

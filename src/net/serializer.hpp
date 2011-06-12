@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <bitcoin/net/messages.hpp>
+#include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 namespace net {
@@ -29,7 +30,7 @@ private:
 class deserializer
 {
 public:
-    deserializer(const serializer::stream& stream);
+    deserializer(const data_chunk& stream);
 
     uint8_t read_byte();
     uint16_t read_2_bytes();
@@ -40,7 +41,7 @@ public:
     message::hash_digest read_hash();
     std::string read_fixed_len_str(size_t len);
 private:
-    const serializer::stream& stream_;
+    const data_chunk& stream_;
     size_t pointer_;
 };
 

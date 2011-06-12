@@ -77,13 +77,13 @@ void serializer::write_command(std::string command)
         data_.push_back(comm_str[i]);
 }
 
-serializer::stream serializer::get_data()
+data_chunk serializer::get_data()
 {
     return data_;
 }
 
 template<typename T>
-T consume_object(const serializer::stream& stream, size_t& pointer)
+T consume_object(const data_chunk& stream, size_t& pointer)
 {
     T* val = reinterpret_cast<T*>(&stream[pointer]);
     pointer += sizeof(T);
@@ -91,7 +91,7 @@ T consume_object(const serializer::stream& stream, size_t& pointer)
 }
 
 template<typename T>
-T read_data(const serializer::stream& data, size_t& pointer, bool reverse=false)
+T read_data(const data_chunk& data, size_t& pointer, bool reverse=false)
 {
     #ifdef BOOST_LITTLE_ENDIAN
         // do nothing
@@ -117,7 +117,7 @@ T read_data(const serializer::stream& data, size_t& pointer, bool reverse=false)
     return val;
 }
 
-deserializer::deserializer(const serializer::stream& stream)
+deserializer::deserializer(const data_chunk& stream)
  : stream_(stream), pointer_(0)
 {
 }
@@ -158,7 +158,7 @@ uint64_t deserializer::read_var_uint()
 }
 
 template<unsigned int N>
-void read_bytes(const serializer::stream& stream, size_t& pointer,
+void read_bytes(const data_chunk& stream, size_t& pointer,
         std::array<uint8_t, N>& byte_array, bool reverse=false)
 {
     #ifdef BOOST_LITTLE_ENDIAN
