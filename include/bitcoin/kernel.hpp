@@ -40,6 +40,8 @@ public:
     bool recv_message(net::channel_handle chandle,
             net::message::inv message);
 
+    void handle_connect(net::channel_handle chandle);
+
     void register_storage(storage::storage_ptr stor_comp);
     storage::storage_ptr get_storage();
     // Callbacks from storage component

@@ -58,9 +58,10 @@ channel_handle network_impl::create_channel(socket_ptr socket)
     return channel_obj->get_id();
 }
 
-channel_handle network_impl::connect(std::string ip_addr, 
+channel_handle network_impl::connect(bool& ec, std::string ip_addr, 
         unsigned short port)
 {
+    ec = false;
     socket_ptr socket(new tcp::socket(*service_));
     try 
     {
@@ -74,6 +75,7 @@ channel_handle network_impl::connect(std::string ip_addr,
     {
         logger(LOG_ERROR) << "Connecting to peer " << ip_addr 
                 << ": " << ex.what();
+        ec = true;
         return 0;
     }
     return create_channel(socket);
@@ -171,7 +173,8 @@ void network_impl::handle_accept(socket_ptr socket)
     tcp::endpoint remote_endpoint = socket->remote_endpoint();
     logger(LOG_DEBUG) << "New incoming connection from " 
             << remote_endpoint.address().to_string();
-    create_channel(socket);
+    channel_handle chandle = create_channel(socket);
+    kernel_->handle_connect(chandle);
     socket.reset(new tcp::socket(*service_));
     acceptor_->async_accept(*socket, 
             std::bind(&network_impl::handle_accept, this, socket));

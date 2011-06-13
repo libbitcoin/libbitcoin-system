@@ -125,6 +125,10 @@ bool kernel::recv_message(net::channel_handle chandle,
     return true;
 }
 
+void kernel::handle_connect(net::channel_handle chandle)
+{
+}
+
 void kernel::register_storage(storage::storage_ptr stor_comp)
 {
     storage_component_ = stor_comp;

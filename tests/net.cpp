@@ -31,8 +31,9 @@ int run_connect()
 {
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
     libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel));
-    libbitcoin::net::channel_handle channel = net->connect("localhost");
-    if (false) {
+    bool ec = false;
+    libbitcoin::net::channel_handle channel = net->connect(ec, "phantom");
+    if (ec) {
         std::cerr << "noes\n";
         return -1;
     }
@@ -44,11 +45,15 @@ int run_connect()
     return 0;
 }
 
+void handle_connect(libbitcoin::net::channel_handle chandle)
+{
+}
+
 int run_accept()
 {
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
     libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel));
-    net->start_accept();
+    net->start_accept(handle_connect);
     std::cin.get();
     return 0;
 }
@@ -62,7 +67,12 @@ int run_kernel()
     libbitcoin::storage::storage_ptr storage(
             new libbitcoin::storage::memory_storage(kernel));
     kernel->register_storage(storage);
-    libbitcoin::net::channel_handle channel = net->connect("localhost");
+    bool ec = false;
+    libbitcoin::net::channel_handle channel = net->connect(ec, "phantom");
+    if (ec) {
+        std::cerr << "noes\n";
+        return -1;
+    }
     libbitcoin::net::message::version version = create_version_message();
     net->send(channel, version);
     net->send(channel, libbitcoin::net::message::getaddr());
