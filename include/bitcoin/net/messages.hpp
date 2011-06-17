@@ -71,6 +71,11 @@ struct addr
     std::vector<net_addr> addr_list;
 };
 
+struct getdata
+{
+    inv_list invs;
+};
+
 struct inv
 {
     inv_list invs;

@@ -2,6 +2,7 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/bind.hpp>
+#include <algorithm>
 
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
@@ -106,6 +107,13 @@ bool kernel::recv_message(net::channel_handle chandle,
 bool kernel::recv_message(net::channel_handle chandle,
         net::message::inv message)
 {
+    auto remove_iter = std::remove_if(message.invs.begin(), message.invs.end(),
+            [](const net::message::inv_vect& inv_item)
+            {
+                return inv_item.type == net::message::inv_type::error;
+            });
+    //message.invs.erase(remove_iter);
+
     for (auto it = message.invs.cbegin(); 
             it != message.invs.cend(); ++it)
     {
@@ -159,8 +167,17 @@ storage::storage_ptr kernel::get_storage()
     return storage_component_;
 }
 
+void send_to_random(net::channel_handle chandle, 
+        net::message::getdata request_message)
+{
+    logger(LOG_DEBUG) << chandle << " blaajaka";
+}
+
 void kernel::accept_inventories(net::message::inv_list invs)
 {
+    net::message::getdata request_message;
+    network_component_->get_random_handle(
+            std::bind(send_to_random, std::placeholders::_1, request_message));
     logger(LOG_DEBUG) << "asking for <<<<<";
     for (auto it = invs.cbegin(); it != invs.cend(); ++it)
     {

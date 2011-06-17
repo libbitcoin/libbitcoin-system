@@ -146,6 +146,18 @@ size_t network_impl::connection_count() const
     return channels_.size();
 }
 
+void network_impl::do_get_random_handle(accept_random_handle accept_handler)
+{
+    size_t rand_index = rand() % channels_.size();
+    channel_handle rand_chan = channels_[rand_index].get_id();
+    accept_handler(rand_chan);
+}
+void network_impl::get_random_handle(accept_random_handle accept_handler)
+{
+    strand_->post(std::bind(
+            &network_impl::do_get_random_handle, this, accept_handler));
+}
+
 bool network_impl::start_accept()
 {
     acceptor_.reset(new tcp::acceptor(*service_));

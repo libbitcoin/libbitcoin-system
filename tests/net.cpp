@@ -53,7 +53,7 @@ int run_accept()
 {
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
     libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel));
-    net->start_accept(handle_connect);
+    net->start_accept();
     std::cin.get();
     return 0;
 }
@@ -68,7 +68,7 @@ int run_kernel()
             new libbitcoin::storage::memory_storage(kernel));
     kernel->register_storage(storage);
     bool ec = false;
-    libbitcoin::net::channel_handle channel = net->connect(ec, "phantom");
+    libbitcoin::net::channel_handle channel = net->connect(ec, "localhost");
     if (ec) {
         std::cerr << "noes\n";
         return -1;
