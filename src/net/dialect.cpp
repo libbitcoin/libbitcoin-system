@@ -10,8 +10,10 @@
 namespace libbitcoin {
 namespace net {
 
-data_chunk construct_header_from(data_chunk payload, std::string command)
+data_chunk construct_header_from(std::string command, data_chunk payload)
 {
+    logger(LOG_INFO) << "s: " << command 
+            << " (" << payload.size() << " bytes)";
     serializer header;
     // magic
     header.write_4_bytes(0xd9b4bef9);
@@ -23,10 +25,21 @@ data_chunk construct_header_from(data_chunk payload, std::string command)
     // checksum is not in verson or verack
     if (command != "version" && command != "verack") 
     {
-        //uint32_t checksum = 0;
-        //write_to_stream(header, checksum);
+        uint32_t checksum = generate_sha256_checksum(payload);
+        header.write_4_bytes(checksum);
     }
     return header.get_data();
+}
+
+data_chunk assemble_message(std::string command, const serializer& payload)
+{
+    data_chunk msg_body = payload.get_data();
+    data_chunk message = construct_header_from(command, msg_body);
+    // Extend message with actual payload
+    message.reserve(message.size() + distance(msg_body.begin(), 
+            msg_body.end()));
+    message.insert(message.end(), msg_body.begin(), msg_body.end());
+    return message;
 }
 
 data_chunk header_only_message(std::string command)
@@ -34,7 +47,7 @@ data_chunk header_only_message(std::string command)
     serializer payload;
     data_chunk msg_body = payload.get_data();
     // No data
-    data_chunk header = construct_header_from(msg_body, "verack");
+    data_chunk header = construct_header_from(command, msg_body);
     return header;
 }
 
@@ -50,24 +63,52 @@ data_chunk original_dialect::to_network(message::version version) const
     // do sub_version_num
     payload.write_byte(0);
     payload.write_4_bytes(version.start_height);
-
-    data_chunk msg_body = payload.get_data();
-    data_chunk message = construct_header_from(msg_body, "version");
-    // Extend message with actual payload
-    message.reserve(message.size() + distance(msg_body.begin(), 
-            msg_body.end()));
-    message.insert(message.end(), msg_body.begin(), msg_body.end());
-    return message;
+    return assemble_message("version", payload);
 }
 
-data_chunk original_dialect::to_network(message::verack verack) const
+data_chunk original_dialect::to_network(message::verack) const
 {
     return header_only_message("verack");
 }
 
-data_chunk original_dialect::to_network(message::getaddr getaddr) const
+data_chunk original_dialect::to_network(message::getaddr) const
 {
     return header_only_message("getaddr");
+}
+
+data_chunk original_dialect::to_network(message::getblocks getblocks) const
+{
+    serializer payload;
+    payload.write_4_bytes(31900);
+    payload.write_var_uint(getblocks.locator_start_hashes.size());
+    payload.write_hash(getblocks.locator_start_hashes[0]);
+    payload.write_hash(getblocks.hash_stop);
+    return assemble_message("getblocks", payload);
+}
+
+data_chunk original_dialect::to_network(message::getdata getdata) const
+{
+    serializer payload;
+    payload.write_var_uint(getdata.invs.size());
+    for (auto it = getdata.invs.cbegin(); it != getdata.invs.cend(); ++it)
+    {
+        switch (it->type)
+        {
+            case net::message::inv_type::transaction:
+                payload.write_4_bytes(1);
+                break;
+            case net::message::inv_type::block:
+                payload.write_4_bytes(2);
+                break;
+            case net::message::inv_type::error:
+            case net::message::inv_type::none:
+            default:
+                BITCOIN_ASSERT(0);
+                break;
+        }
+        payload.write_hash(it->hash);
+    }
+    return assemble_message("getdata", payload);
 }
 
 message::header original_dialect::header_from_network(
@@ -88,8 +129,7 @@ uint32_t original_dialect::checksum_from_network(const data_chunk& chunk) const
 }
 
 message::version original_dialect::version_from_network(
-        const message::header header_msg,
-        const data_chunk& stream, bool& ec) const
+        const message::header, const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -142,9 +182,23 @@ message::addr original_dialect::addr_from_network(
     return payload;
 }
 
+message::inv_type inv_type_from_number(uint32_t raw_type) 
+{
+    switch (raw_type)
+    {
+        case 0:
+            return message::inv_type::error;
+        case 1:
+            return message::inv_type::transaction;
+        case 2:
+            return message::inv_type::block;
+        default:
+            return message::inv_type::none;
+    }
+}
+
 message::inv original_dialect::inv_from_network(
-        const message::header header_msg,
-        const data_chunk& stream, bool& ec) const
+        const message::header, const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -154,21 +208,7 @@ message::inv original_dialect::inv_from_network(
     {
         message::inv_vect inv_vect;
         uint32_t raw_type = deserial.read_4_bytes();
-        switch (raw_type)
-        {
-        case 0:
-            inv_vect.type = message::inv_type::error;
-            break;
-        case 1:
-            inv_vect.type = message::inv_type::transaction;
-            break;
-        case 2:
-            inv_vect.type = message::inv_type::block;
-            break;
-        default:
-            inv_vect.type = message::inv_type::none;
-            break;
-        }
+        inv_vect.type = inv_type_from_number(raw_type);
         inv_vect.hash = deserial.read_hash();
         payload.invs.push_back(inv_vect);
     }
@@ -211,6 +251,19 @@ bool original_dialect::verify_header(net::message::header header_msg) const
         return false;
     }
     return true;
+}
+
+bool original_dialect::checksum_used(const message::header header_msg) const
+{
+    return header_msg.command != "version" && header_msg.command != "verack";
+}
+
+bool original_dialect::verify_checksum(const message::header header_msg,
+        const data_chunk& stream) const
+{
+    if (!checksum_used(header_msg))
+        return true;
+    return header_msg.checksum == generate_sha256_checksum(stream);
 }
 
 } // net

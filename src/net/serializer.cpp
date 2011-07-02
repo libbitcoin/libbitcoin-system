@@ -49,6 +49,11 @@ void serializer::write_byte(uint8_t v)
     data_.push_back(v);
 }
 
+void serializer::write_2_bytes(uint16_t v)
+{
+    write_data(data_, v, 2);
+}
+
 void serializer::write_4_bytes(uint32_t v)
 {
     write_data(data_, v, 4);
@@ -59,12 +64,41 @@ void serializer::write_8_bytes(uint64_t v)
     write_data(data_, v, 8);
 }
 
+void serializer::write_var_uint(uint64_t v)
+{
+    if (v < 0xfd)
+    {
+        write_byte(v);
+    }
+    else if (v <= 0xffff)
+    {
+        write_byte(0xfd);
+        write_2_bytes(v);
+    }
+    else if (v <= 0xffffffff)
+    {
+        write_byte(0xfe);
+        write_4_bytes(v);
+    }
+    else
+    {
+        write_byte(0xff);
+        write_8_bytes(v);
+    }
+}
+
 void serializer::write_net_addr(message::net_addr addr)
 {
     write_8_bytes(addr.services);
     for (size_t i = 0; i < 16; i++)
         data_.push_back(addr.ip_addr[i]);
     write_data(data_, addr.port, 2, true);
+}
+
+void serializer::write_hash(message::hash_digest hash)
+{
+    for (size_t i = hash.size(); i-- > 0;)
+        data_.push_back(hash[i]);
 }
 
 void serializer::write_command(std::string command)
@@ -77,7 +111,7 @@ void serializer::write_command(std::string command)
         data_.push_back(comm_str[i]);
 }
 
-data_chunk serializer::get_data()
+data_chunk serializer::get_data() const
 {
     return data_;
 }

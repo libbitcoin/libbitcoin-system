@@ -25,10 +25,11 @@ public:
 
     void push_var_uint(uint64_t var_uint);
     void push_str(const std::string& val);
+    void push_data(const data_chunk& data);
 
     SHA256_CTX& ctx() { return ctx_; }
 
-    void finalize(data_chunk& hash);
+    data_chunk finalize();
     // Deprecated
     void finalize(byte hash[length]);
 private:

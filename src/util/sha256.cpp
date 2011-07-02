@@ -58,12 +58,20 @@ void sha256::push_var_uint(uint64_t var_uint)
     }
 }
 
-void sha256::finalize(data_chunk& hash)
+void sha256::push_data(const data_chunk& data)
+{
+    for (auto it = data.cbegin(); it != data.cend(); ++it)
+        *this << *it;
+}
+
+data_chunk sha256::finalize()
 {
     byte hash_carr[length];
     finalize(hash_carr);
+    data_chunk hash;
     hash.resize(length);
     std::copy(hash_carr, hash_carr + length, hash.begin());
+    return hash;
 }
 
 void sha256::finalize(byte hash[SHA256_DIGEST_LENGTH])
@@ -76,11 +84,10 @@ void sha256::finalize(byte hash[SHA256_DIGEST_LENGTH])
 
 uint32_t generate_sha256_checksum(const data_chunk& chunk)
 {
-    data_chunk hash;
     sha256 hasher;
     for (auto it = chunk.cbegin(); it != chunk.cend(); ++it)
         hasher << *it;
-    hasher.finalize(hash);
+    data_chunk hash = hasher.finalize();
     return cast_chunk<uint32_t>(hash);
 }
 

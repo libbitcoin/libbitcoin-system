@@ -30,6 +30,10 @@ public:
             net::message::getaddr message);
     void send_failed(net::channel_handle chandle, 
             net::message::inv message);
+    void send_failed(net::channel_handle chandle, 
+            net::message::getdata message);
+    void send_failed(net::channel_handle chandle, 
+            net::message::getblocks message);
 
     bool recv_message(net::channel_handle chandle,
             net::message::version message);
@@ -50,6 +54,8 @@ public:
 private: 
     void reset_inventory_poll();
     void request_inventories(const boost::system::error_code& ec);
+    void send_to_random(net::channel_handle chandle, 
+            net::message::getdata request_message);
 
     net::network_ptr network_component_;
     storage::storage_ptr storage_component_;

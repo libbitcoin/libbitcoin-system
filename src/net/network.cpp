@@ -141,6 +141,16 @@ void network_impl::send(channel_handle chandle, message::getaddr getaddr)
     generic_send(getaddr, chandle, strand_, &channels_, kernel_);
 }
 
+void network_impl::send(channel_handle chandle, message::getdata getdata)
+{
+    generic_send(getdata, chandle, strand_, &channels_, kernel_);
+}
+
+void network_impl::send(channel_handle chandle, message::getblocks getblocks)
+{
+    generic_send(getblocks, chandle, strand_, &channels_, kernel_);
+}
+
 size_t network_impl::connection_count() const
 {
     return channels_.size();

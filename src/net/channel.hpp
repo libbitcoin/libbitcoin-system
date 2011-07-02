@@ -43,6 +43,8 @@ public:
     void send(message::version version);
     void send(message::verack verack);
     void send(message::getaddr getaddr);
+    void send(message::getdata getdata);
+    void send(message::getblocks getblocks);
     channel_handle get_id() const;
 
 private:
@@ -59,6 +61,18 @@ private:
             const boost::system::error_code& ec, size_t bytes_transferred);
     void handle_read_payload(message::header header_msg,
             const boost::system::error_code& ec, size_t bytes_transferred);
+
+    template<typename P>
+    bool transport_payload(P payload, bool ret_errc)
+    {
+        if (ret_errc ||
+            !parent_gateway_->kernel()->recv_message(channel_id_, payload))
+        {
+            destroy_self();
+            return false;
+        }
+        return true;
+    }
 
     void handle_send(const boost::system::error_code& ec);
 

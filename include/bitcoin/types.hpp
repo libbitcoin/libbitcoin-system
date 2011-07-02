@@ -25,7 +25,7 @@ T cast_chunk(const data_chunk& chunk)
 {
     T val = 0;
     for (size_t i = 0; i < sizeof(T); ++i)
-        val += (chunk[sizeof(T) - 1 - i] << i*8);
+        val += (chunk[i] << i*8);
     return val;
 }
 

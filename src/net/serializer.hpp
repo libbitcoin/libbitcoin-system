@@ -17,12 +17,15 @@ public:
     typedef std::vector<unsigned char> stream;
 
     void write_byte(uint8_t v);
+    void write_2_bytes(uint16_t v);
     void write_4_bytes(uint32_t v);
     void write_8_bytes(uint64_t v);
+    void write_var_uint(uint64_t v);
     void write_net_addr(message::net_addr addr);
+    void write_hash(message::hash_digest hash);
     void write_command(std::string command);
 
-    stream get_data();
+    stream get_data() const;
 private:
     stream data_;
 };

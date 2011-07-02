@@ -131,18 +131,17 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
         return;
     }
 
-    logger(LOG_DEBUG) << header_msg.command;
-    logger(LOG_DEBUG) << "payload is " << header_msg.payload_length 
-            << " bytes.";
-    if (header_msg.command == "version" || header_msg.command == "verack")
-    {
-        // Read payload
-        read_payload(header_msg);
-    }
-    else
+    logger(LOG_INFO) << "r: " << header_msg.command
+            << " (" << header_msg.payload_length << " bytes)";
+    if (translator_->checksum_used(header_msg))
     {
         // Read checksum
         read_checksum(header_msg);
+    }
+    else
+    {
+        // Read payload
+        read_payload(header_msg);
     }
     reset_timeout();
 }
@@ -171,63 +170,41 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     data_chunk payload_stream = data_chunk(
             inbound_payload_.begin(), inbound_payload_.end());
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
-    bool ret_errc = true;
+    if (!translator_->verify_checksum(header_msg, payload_stream))
+    {
+        destroy_self();
+        return;
+    }
+    bool ret_errc = false;
     if (header_msg.command == "version")
     {
         message::version payload = 
                 translator_->version_from_network(
                     header_msg, payload_stream, ret_errc); 
-        if (ret_errc)
-        {
-            destroy_self();
+        if (!transport_payload(payload, ret_errc))
             return;
-        }
-        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) 
-        {
-            destroy_self();
-            return;
-        }
     }
     else if (header_msg.command == "verack")
     {
         message::verack payload;
-        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) 
-        {
-            destroy_self();
+        if (!transport_payload(payload, ret_errc))
             return;
-        }
     }                              
     else if (header_msg.command == "addr")
     {
         message::addr payload = 
                 translator_->addr_from_network(
                     header_msg, payload_stream, ret_errc); 
-        if (ret_errc)
-        {
-            destroy_self();
+        if (!transport_payload(payload, ret_errc))
             return;
-        }
-        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) 
-        {
-            destroy_self();
-            return;
-        }
     }
     else if (header_msg.command == "inv")
     {
         message::inv payload = 
                 translator_->inv_from_network(
                     header_msg, payload_stream, ret_errc); 
-        if (ret_errc)
-        {
-            destroy_self();
+        if (!transport_payload(payload, ret_errc))
             return;
-        }
-        if (!parent_gateway_->kernel()->recv_message(channel_id_, payload)) 
-        {
-            destroy_self();
-            return;
-        }
     }
     read_header();
     reset_timeout();
@@ -262,6 +239,16 @@ void channel_pimpl::send(message::verack verack)
 void channel_pimpl::send(message::getaddr getaddr)
 {
     generic_send(getaddr, this, socket_, translator_);
+}
+
+void channel_pimpl::send(message::getdata getdata)
+{
+    generic_send(getdata, this, socket_, translator_);
+}
+
+void channel_pimpl::send(message::getblocks getblocks)
+{
+    generic_send(getblocks, this, socket_, translator_);
 }
 
 channel_handle channel_pimpl::get_id() const

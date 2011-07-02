@@ -37,6 +37,8 @@ public:
     virtual void send(channel_handle chandle, message::version version) = 0;
     virtual void send(channel_handle chandle, message::verack verack) = 0;
     virtual void send(channel_handle chandle, message::getaddr getaddr) = 0;
+    virtual void send(channel_handle chandle, message::getdata getdata) = 0;
+    virtual void send(channel_handle chandle, message::getblocks getblocks) = 0;
 };
 
 class network_impl : public network, 
@@ -55,6 +57,8 @@ public:
     void send(channel_handle chandle, message::version version);
     void send(channel_handle chandle, message::verack verack);
     void send(channel_handle chandle, message::getaddr getaddr);
+    void send(channel_handle chandle, message::getdata getdata);
+    void send(channel_handle chandle, message::getblocks getblocks);
 
 private:
     typedef shared_ptr<tcp::socket> socket_ptr;

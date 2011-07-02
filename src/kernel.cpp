@@ -9,7 +9,6 @@
 #include <bitcoin/net/network.hpp>
 #include <bitcoin/storage/storage.hpp>
 
-namespace placeholders = boost::asio::placeholders;
 using boost::posix_time::seconds;
 using boost::posix_time::minutes;
 using boost::posix_time::time_duration;
@@ -44,23 +43,33 @@ net::network_ptr kernel::get_network()
     return network_component_;
 }
 
-void kernel::send_failed(net::channel_handle chandle, 
-        net::message::version message)
+void kernel::send_failed(net::channel_handle, 
+        net::message::version)
 {
 }
 
-void kernel::send_failed(net::channel_handle chandle, 
-        net::message::verack message)
+void kernel::send_failed(net::channel_handle, 
+        net::message::verack)
 {
 }
 
-void kernel::send_failed(net::channel_handle chandle, 
-        net::message::getaddr message)
+void kernel::send_failed(net::channel_handle, 
+        net::message::getaddr)
 {
 }
 
-void kernel::send_failed(net::channel_handle chandle, 
-        net::message::inv message)
+void kernel::send_failed(net::channel_handle, 
+        net::message::inv)
+{
+}
+
+void kernel::send_failed(net::channel_handle, 
+        net::message::getdata)
+{
+}
+
+void kernel::send_failed(net::channel_handle, 
+        net::message::getblocks)
 {
 }
 
@@ -86,13 +95,13 @@ bool kernel::recv_message(net::channel_handle chandle,
     return true;
 }
 
-bool kernel::recv_message(net::channel_handle chandle, 
-        net::message::verack message)
+bool kernel::recv_message(net::channel_handle, 
+        net::message::verack)
 {
     return true;
 }
 
-bool kernel::recv_message(net::channel_handle chandle,
+bool kernel::recv_message(net::channel_handle,
         net::message::addr message)
 {
     for (auto it = message.addr_list.cbegin(); 
@@ -104,7 +113,7 @@ bool kernel::recv_message(net::channel_handle chandle,
     return true;
 }
 
-bool kernel::recv_message(net::channel_handle chandle,
+bool kernel::recv_message(net::channel_handle,
         net::message::inv message)
 {
     auto remove_iter = std::remove_if(message.invs.begin(), message.invs.end(),
@@ -133,7 +142,7 @@ bool kernel::recv_message(net::channel_handle chandle,
     return true;
 }
 
-void kernel::handle_connect(net::channel_handle chandle)
+void kernel::handle_connect(net::channel_handle)
 {
 }
 
@@ -148,8 +157,9 @@ void kernel::reset_inventory_poll()
 {
     poll_invs_timeout_->cancel();
     poll_invs_timeout_->expires_from_now(poll_inv_timeout);
-    poll_invs_timeout_->async_wait(boost::bind(
-            &kernel::request_inventories, this, placeholders::error));
+    poll_invs_timeout_->async_wait(std::bind(
+            &kernel::request_inventories, shared_from_this(),
+                std::placeholders::_1));
 }
 
 void kernel::request_inventories(const boost::system::error_code& ec)
@@ -167,24 +177,19 @@ storage::storage_ptr kernel::get_storage()
     return storage_component_;
 }
 
-void send_to_random(net::channel_handle chandle, 
+void kernel::send_to_random(net::channel_handle chandle, 
         net::message::getdata request_message)
 {
-    logger(LOG_DEBUG) << chandle << " blaajaka";
+    network_component_->send(chandle, request_message);
 }
 
 void kernel::accept_inventories(net::message::inv_list invs)
 {
     net::message::getdata request_message;
-    network_component_->get_random_handle(
-            std::bind(send_to_random, std::placeholders::_1, request_message));
-    logger(LOG_DEBUG) << "asking for <<<<<";
-    for (auto it = invs.cbegin(); it != invs.cend(); ++it)
-    {
-        BITCOIN_ASSERT(it->type != net::message::inv_type::none);
-        display_byte_array(it->hash);
-    }
-    logger(LOG_DEBUG) << ">>>>>>";
+    request_message.invs = invs;
+    network_component_->get_random_handle(std::bind(
+            &kernel::send_to_random, shared_from_this(), 
+                std::placeholders::_1, request_message));
 }
 
 } // libbitcoin

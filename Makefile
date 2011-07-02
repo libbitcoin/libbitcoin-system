@@ -1,4 +1,4 @@
-CFLAGS= -Wall -pedantic
+CFLAGS= -Wall -pedantic -Wextra
 
 objs: block transaction logger
 
@@ -20,10 +20,10 @@ script: ./src/script.cpp ./include/bitcoin/script.hpp
 tests: block_hashing transaction_hashing script_parsing
 
 block_hashing: block obj/logger.o sha256
-	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/block_hashing ./tests/block_hashing.cpp ./obj/block.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl -pedantic -Wall -Wextra
+	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/block_hashing ./tests/block_hashing.cpp ./obj/block.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl -pedantic -Wall -Wextra -lboost_system
 
 transaction_hashing: transaction obj/logger.o sha256
-	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/transaction_hashing ./tests/transaction_hashing.cpp ./obj/transaction.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl -pedantic -Wall -Wextra
+	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/transaction_hashing ./tests/transaction_hashing.cpp ./obj/transaction.o ./obj/logger.o ./obj/sha256.o -std=c++0x -lssl -pedantic -Wall -Wextra -lboost_system
 	
 script_parsing: script
 	$(CXX) $(CFLAGS) -I./include/ -o ./bin/tests/script_parsing ./tests/script_parsing.cpp ./obj/script.o -std=c++0x -pedantic -Wall -Wextra
