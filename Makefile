@@ -57,3 +57,11 @@ bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o 
 
 net: bin/tests/nettest
 
+obj/gengen.o: ./tests/gengen.cpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/gengen.o ./tests/gengen.cpp -std=c++0x -g
+
+bin/tests/gengen: obj/gengen.o obj/logger.o obj/sha256.o
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/gengen -pedantic -std=c++0x -lboost_system -lboost_thread obj/gengen.o -lssl obj/logger.o obj/sha256.o
+
+gengen: bin/tests/gengen
+
