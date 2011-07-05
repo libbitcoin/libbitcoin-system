@@ -43,8 +43,8 @@ obj/sha256.o: ./src/util/sha256.cpp ./include/bitcoin/util/sha256.hpp
 obj/kernel.o: ./src/kernel.cpp ./include/bitcoin/kernel.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/kernel.o ./src/kernel.cpp -std=c++0x -g
 
-obj/serializer.o: ./src/net/serializer.cpp ./src/net/serializer.hpp
-	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/serializer.o ./src/net/serializer.cpp -std=c++0x -g
+obj/serializer.o: ./src/util/serializer.cpp ./include/bitcoin/util/serializer.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/serializer.o ./src/util/serializer.cpp -std=c++0x -g
 
 obj/nettest.o: ./tests/net.cpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/nettest.o ./tests/net.cpp -std=c++0x -g
@@ -52,16 +52,19 @@ obj/nettest.o: ./tests/net.cpp
 obj/storage.o: ./src/storage/storage.cpp ./include/bitcoin/storage/storage.hpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/storage.o ./src/storage/storage.cpp -std=c++0x -g
 
-bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o obj/sha256.o
-	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o obj/sha256.o -lssl
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o obj/sha256.o obj/types.o
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o -pedantic -std=c++0x -lboost_system -lboost_thread obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o obj/sha256.o -lssl obj/types.o
 
 net: bin/tests/nettest
+
+obj/types.o: ./src/types.cpp ./include/bitcoin/types.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/types.o ./src/types.cpp -std=c++0x -g
 
 obj/gengen.o: ./tests/gengen.cpp
 	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/gengen.o ./tests/gengen.cpp -std=c++0x -g
 
-bin/tests/gengen: obj/gengen.o obj/logger.o obj/sha256.o
-	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/gengen -pedantic -std=c++0x -lboost_system -lboost_thread obj/gengen.o -lssl obj/logger.o obj/sha256.o
+bin/tests/gengen: obj/gengen.o obj/logger.o obj/sha256.o  obj/types.o obj/serializer.o obj/types.o
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/gengen -pedantic -std=c++0x -lboost_system -lboost_thread obj/gengen.o -lssl obj/logger.o obj/sha256.o  obj/types.o obj/serializer.o 
 
 gengen: bin/tests/gengen
 

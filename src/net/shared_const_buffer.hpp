@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 #include <vector>
 
-#include "serializer.hpp"
+#include <bitcoin/util/serializer.hpp>
 
 namespace libbitcoin {
 namespace net {

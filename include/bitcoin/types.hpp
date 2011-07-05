@@ -24,10 +24,7 @@ typedef std::array<uint8_t, 20> short_hash;
 typedef unsigned char byte;
 typedef std::vector<byte> data_chunk;
 
-void extend_data(data_chunk& chunk, const data_chunk& other)
-{
-    chunk.insert(chunk.end(), other.cbegin(), other.cend());
-}
+void extend_data(data_chunk& chunk, const data_chunk& other);
 
 template<typename T>
 T cast_chunk(const data_chunk& chunk)

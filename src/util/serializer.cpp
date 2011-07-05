@@ -1,4 +1,4 @@
-#include "serializer.hpp"
+#include <bitcoin/util/serializer.hpp>
 
 #include <boost/detail/endian.hpp>
 #include <algorithm>
@@ -10,7 +10,6 @@
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
-namespace net {
 
 inline void copy_data(std::vector<byte> &data, 
         const byte* raw_bytes, size_t len)
@@ -27,7 +26,7 @@ inline void copy_data_reverse(std::vector<byte> &data,
 }
 
 template<typename T>
-void write_data(std::vector<byte> &data, T val, size_t len, bool reverse=false)
+void write_data_impl(data_chunk &data, T val, size_t len, bool reverse=false)
 {
     byte* raw_bytes = reinterpret_cast<byte*>(&val);
     #ifdef BOOST_LITTLE_ENDIAN
@@ -51,17 +50,17 @@ void serializer::write_byte(uint8_t v)
 
 void serializer::write_2_bytes(uint16_t v)
 {
-    write_data(data_, v, 2);
+    write_data_impl(data_, v, 2);
 }
 
 void serializer::write_4_bytes(uint32_t v)
 {
-    write_data(data_, v, 4);
+    write_data_impl(data_, v, 4);
 }
 
 void serializer::write_8_bytes(uint64_t v)
 {
-    write_data(data_, v, 8);
+    write_data_impl(data_, v, 8);
 }
 
 void serializer::write_var_uint(uint64_t v)
@@ -87,12 +86,17 @@ void serializer::write_var_uint(uint64_t v)
     }
 }
 
-void serializer::write_net_addr(message::net_addr addr)
+void serializer::write_data(const data_chunk& other_data)
+{
+    extend_data(data_, other_data);
+}
+
+void serializer::write_net_addr(net::message::net_addr addr)
 {
     write_8_bytes(addr.services);
     for (size_t i = 0; i < 16; i++)
         data_.push_back(addr.ip_addr[i]);
-    write_data(data_, addr.port, 2, true);
+    write_data_impl(data_, addr.port, 2, true);
 }
 
 void serializer::write_hash(hash_digest hash)
@@ -220,9 +224,9 @@ void read_bytes(const data_chunk& stream, size_t& pointer,
     pointer += byte_array.size();
 }
 
-message::net_addr deserializer::read_net_addr()
+net::message::net_addr deserializer::read_net_addr()
 {
-    message::net_addr addr;
+    net::message::net_addr addr;
     addr.services = read_8_bytes();
     // Read IP address
     read_bytes(stream_, pointer_, addr.ip_addr);
@@ -248,6 +252,5 @@ std::string deserializer::read_fixed_len_str(size_t len)
     return ret.c_str();
 }
 
-} // net
 } // libbitcoin
 

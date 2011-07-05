@@ -12,8 +12,7 @@
 
 #include <bitcoin/net/network.hpp>
 #include <bitcoin/net/messages.hpp>
-
-#include "serializer.hpp"
+#include <bitcoin/util/serializer.hpp>
 
 namespace libbitcoin {
 namespace net {

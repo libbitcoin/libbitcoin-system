@@ -1,6 +1,6 @@
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/sha256.hpp>
-#include <bitcoin/util/serial.hpp>
+#include <bitcoin/util/serializer.hpp>
 #include <bitcoin/types.hpp>
 #include <iostream>
 
@@ -73,26 +73,26 @@ void create_genesis_block()
     std::cout << "\n";
     */
 
-    libbitcoin::sha256 hasher;
-    hasher.push_data(tx);
-    libbitcoin::hash_digest hash = hasher.finalize();
+    libbitcoin::serializer hasher;
+    hasher.write_data(tx);
+    libbitcoin::hash_digest hash = libbitcoin::generate_sha256_hash(hasher.get_data());
     /*
     for (auto i = hash.begin(); i != hash.end(); ++i)
         std::cout << std::hex << (int)*i << " ";
     std::cout << "\n";
     */
 
-    libbitcoin::sha256 block;
-    block.push_4_bytes(1);
+    libbitcoin::serializer block;
+    block.write_4_bytes(1);
     // prev hash = 0
-    for (size_t i = 0; i < libbitcoin::sha256::length; ++i)
-        block.push_byte(0);
-    block.push_data(libbitcoin::data_chunk(hash.begin(), hash.end()));
-    block.push_4_bytes(1231006505);
-    block.push_4_bytes(0x1d00ffff);
-    block.push_4_bytes(2083236893);
+    for (size_t i = 0; i < libbitcoin::sha256_length; ++i)
+        block.write_byte(0);
+    block.write_data(libbitcoin::data_chunk(hash.begin(), hash.end()));
+    block.write_4_bytes(1231006505);
+    block.write_4_bytes(0x1d00ffff);
+    block.write_4_bytes(2083236893);
 
-    hash = block.finalize();
+    hash = libbitcoin::generate_sha256_hash(block.get_data());
     for (auto i = hash.rbegin(); i != hash.rend(); ++i)
         std::cout << std::hex << (int)*i << " ";
     std::cout << "\n";
