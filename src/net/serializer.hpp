@@ -22,7 +22,7 @@ public:
     void write_8_bytes(uint64_t v);
     void write_var_uint(uint64_t v);
     void write_net_addr(message::net_addr addr);
-    void write_hash(message::hash_digest hash);
+    void write_hash(hash_digest hash);
     void write_command(std::string command);
 
     stream get_data() const;
@@ -41,7 +41,7 @@ public:
     uint64_t read_8_bytes();
     uint64_t read_var_uint();
     message::net_addr read_net_addr();
-    message::hash_digest read_hash();
+    hash_digest read_hash();
     std::string read_fixed_len_str(size_t len);
 private:
     const data_chunk& stream_;

@@ -6,11 +6,12 @@
 #include <string>
 #include <vector>
 
+#include <bitcoin/types.hpp>
+
 namespace libbitcoin {
 namespace net {
 namespace message {
 
-typedef std::array<uint8_t, 32> hash_digest;
 typedef std::array<uint8_t, 16> ip_address;
 
 struct net_addr

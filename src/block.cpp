@@ -11,12 +11,15 @@ void block::calculate_hash()
     sha256 sha_ctx;
     //TODO handle errors
 #ifdef BOOST_LITTLE_ENDIAN
-    sha_ctx << version
-            << prev_hash
-            << merkle_root
-            << timestamp
-            << bits
-            << nonce;
+    sha_ctx.push_4_bytes(version);
+    for (size_t i = 0; i < sha256::length; i++)
+        sha_ctx.push_byte(prev_hash[i]);
+    for (size_t i = 0; i < sha256::length; i++)
+        sha_ctx.push_byte(merkle_root[i]);
+    sha_ctx.push_4_bytes(timestamp);
+    sha_ctx.push_4_bytes(bits);
+    for (size_t i = 0; i < 4; i++)
+        sha_ctx.push_byte(nonce[i]);
 #elif BOOST_BIG_ENDIAN
     #error "Platform not supported"
 #else

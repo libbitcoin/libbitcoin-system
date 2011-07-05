@@ -16,20 +16,17 @@ public:
 
     sha256();
     
-    template<typename T>
-    sha256& operator<<(T& val)
-    {
-        SHA256_Update(&ctx_, &val, sizeof(T));
-        return *this;
-    }
-
+    void push_byte(uint8_t v);
+    void push_2_bytes(uint16_t v);
+    void push_4_bytes(uint32_t v);
+    void push_8_bytes(uint64_t v);
     void push_var_uint(uint64_t var_uint);
     void push_str(const std::string& val);
     void push_data(const data_chunk& data);
 
     SHA256_CTX& ctx() { return ctx_; }
 
-    data_chunk finalize();
+    hash_digest finalize();
     // Deprecated
     void finalize(byte hash[length]);
 private:

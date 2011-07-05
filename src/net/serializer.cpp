@@ -95,7 +95,7 @@ void serializer::write_net_addr(message::net_addr addr)
     write_data(data_, addr.port, 2, true);
 }
 
-void serializer::write_hash(message::hash_digest hash)
+void serializer::write_hash(hash_digest hash)
 {
     for (size_t i = hash.size(); i-- > 0;)
         data_.push_back(hash[i]);
@@ -230,9 +230,9 @@ message::net_addr deserializer::read_net_addr()
     return addr;
 }
 
-message::hash_digest deserializer::read_hash()
+hash_digest deserializer::read_hash()
 {
-    message::hash_digest hash;
+    hash_digest hash;
     read_bytes(stream_, pointer_, hash, true);
     return hash;
 }
