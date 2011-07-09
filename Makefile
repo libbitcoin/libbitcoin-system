@@ -68,3 +68,14 @@ bin/tests/gengen: obj/gengen.o obj/logger.o obj/sha256.o  obj/types.o obj/serial
 
 gengen: bin/tests/gengen
 
+obj/script.o: ./src/script.cpp ./include/bitcoin/script.hpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/script.o ./src/script.cpp -std=c++0x -g
+
+obj/script-test.o: ./tests/script-test.cpp
+	$(CXX) $(CFLAGS) -I./include/ -c -o ./obj/script-test.o ./tests/script-test.cpp -std=c++0x -g
+
+bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o
+	$(CXX) $(CFLAGS) -Iinclude/ -o bin/tests/script-test -pedantic -std=c++0x -lboost_system -lboost_thread obj/script-test.o obj/script.o obj/logger.o -g
+
+script-test: bin/tests/script-test
+
