@@ -2,7 +2,6 @@
 #define LIBBITCOIN_SHA256_H
 
 #include <openssl/sha.h>
-#include <string>
 #include <cstdint>
 
 #include <bitcoin/types.hpp>

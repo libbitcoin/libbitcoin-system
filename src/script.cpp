@@ -1,12 +1,127 @@
 #include <bitcoin/script.hpp>
 
+#include <stack>
+
+#include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/util/ripemd.hpp>
+#include <bitcoin/util/sha256.hpp>
 
 namespace libbitcoin {
+
+void script::join(script other)
+{
+    operations_.insert(operations_.end(), 
+        other.operations_.begin(), other.operations_.end());
+}
 
 void script::push_operation(operation oper)
 {
     operations_.push_back(oper);
+}
+
+bool script::run(transaction parent_tx)
+{
+    stack_.clear();
+    for (auto it = operations_.cbegin(); it != operations_.cend(); ++it)
+    {
+        const operation oper = *it;
+        logger(LOG_DEBUG) << "Run: " << opcode_to_string(oper.code);
+        if (!run_operation(oper, parent_tx))
+            return false;
+        if (oper.data.size() > 0)
+        {
+            BITCOIN_ASSERT(oper.code == opcode::special ||
+                oper.code == opcode::pushdata1 ||
+                oper.code == opcode::pushdata2 ||
+                oper.code == opcode::pushdata4);
+            stack_.push_back(oper.data);
+        }
+    }
+    if (stack_.size() != 0)
+    {
+        logger(LOG_ERROR) << "Script left junk on top of the stack";
+        return false;
+    }
+    return true;
+}
+
+data_chunk script::pop_stack()
+{
+    data_chunk value = stack_.back();
+    stack_.pop_back();
+    return value;
+}
+
+bool script::op_dup()
+{
+    if (stack_.size() < 1)
+        return false;
+    stack_.push_back(stack_.back());
+    return true;
+}
+
+bool script::op_hash160()
+{
+    if (stack_.size() < 1)
+        return false;
+    data_chunk data = pop_stack();
+    short_hash hash = generate_ripemd_hash(data);
+    data_chunk raw_hash(hash.begin(), hash.end());
+    stack_.push_back(raw_hash);
+    return true;
+}
+
+bool script::op_equalverify()
+{
+    if (stack_.size() < 2)
+        return false;
+    return pop_stack() == pop_stack();
+}
+
+bool script::op_checksig(transaction parent_tx)
+{
+    // Unimplemented
+    pop_stack();
+    pop_stack();
+    return true;
+}
+
+bool script::run_operation(operation op, transaction parent_tx)
+{
+    switch (op.code)
+    {
+        case opcode::special:
+            return true;
+
+        case opcode::pushdata1:
+            BITCOIN_ASSERT(op.data.size() == static_cast<size_t>(op.code));
+            return true;
+
+        case opcode::pushdata2:
+            BITCOIN_ASSERT(op.data.size() == static_cast<size_t>(op.code));
+            return true;
+
+        case opcode::pushdata4:
+            BITCOIN_ASSERT(op.data.size() == static_cast<size_t>(op.code));
+            return true;
+
+        case opcode::dup:
+            return op_dup();
+
+        case opcode::hash160:
+            return op_hash160();
+
+        case opcode::equalverify:
+            return op_equalverify();
+
+        case opcode::checksig:
+            return op_checksig(parent_tx);
+
+        default:
+            break;
+    }
+    return false;
 }
 
 std::string script::string_repr()
@@ -85,16 +200,17 @@ script parse_script(data_chunk raw_script)
 
         for (size_t byte_count = 0; byte_count < read_n_bytes; ++byte_count)
         {
+            ++it;
             if (it == raw_script.cend())
             {
                 logger(LOG_ERROR) << "Premature end of script.";
-                break;
+                return script();
             }
-
-            ++it;
             op.data.push_back(*it);
         }
+
         script_object.push_operation(op);
+
     }
     return script_object;
 }

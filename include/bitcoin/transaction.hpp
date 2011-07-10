@@ -11,7 +11,7 @@ namespace libbitcoin {
 
 struct transaction_input
 {
-    uint8_t hash[sha256::length];
+    uint8_t hash[sha256_length];
     uint32_t index;
     std::string script;
     uint32_t sequence;
@@ -29,7 +29,7 @@ struct transaction
 {
     void calculate_hash();
 
-    uint8_t hash[sha256::length];
+    uint8_t hash[sha256_length];
     uint32_t version;
     uint32_t locktime;
     

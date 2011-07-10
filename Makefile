@@ -6,6 +6,9 @@ objs: block transaction logger
 block: ./src/block.cpp
 	$(CXX) $(CFLAGS) -o ./obj/block.o ./src/block.cpp
 
+obj/ripemd.o: ./src/util/ripemd.cpp
+	$(CXX) $(CFLAGS) -o ./obj/ripemd.o ./src/util/ripemd.cpp
+
 sha256: ./src/util/sha256.cpp
 	$(CXX) $(CFLAGS) -o ./obj/sha256.o ./src/util/sha256.cpp
 	
@@ -75,8 +78,8 @@ obj/script.o: ./src/script.cpp ./include/bitcoin/script.hpp
 obj/script-test.o: ./tests/script-test.cpp
 	$(CXX) $(CFLAGS) -o ./obj/script-test.o ./tests/script-test.cpp 
 
-bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o
-	$(CXX) $(LIBS) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o 
+bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o
+	$(CXX) $(LIBS) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o
 
 script-test: bin/tests/script-test
 
