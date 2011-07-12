@@ -229,7 +229,7 @@ net::message::net_addr deserializer::read_net_addr()
     net::message::net_addr addr;
     addr.services = read_8_bytes();
     // Read IP address
-    read_bytes(stream_, pointer_, addr.ip_addr);
+    read_bytes<16>(stream_, pointer_, addr.ip_addr);
     addr.port = read_data<uint16_t>(stream_, pointer_, true);
     return addr;
 }
@@ -237,7 +237,7 @@ net::message::net_addr deserializer::read_net_addr()
 hash_digest deserializer::read_hash()
 {
     hash_digest hash;
-    read_bytes(stream_, pointer_, hash, true);
+    read_bytes<32>(stream_, pointer_, hash, true);
     return hash;
 }
 
