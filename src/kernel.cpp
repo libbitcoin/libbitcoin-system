@@ -43,32 +43,32 @@ net::network_ptr kernel::get_network()
     return network_component_;
 }
 
-void kernel::send_failed(net::channel_handle, 
+void kernel::send_failed(net::channel_handle,
         net::message::version)
 {
 }
 
-void kernel::send_failed(net::channel_handle, 
+void kernel::send_failed(net::channel_handle,
         net::message::verack)
 {
 }
 
-void kernel::send_failed(net::channel_handle, 
+void kernel::send_failed(net::channel_handle,
         net::message::getaddr)
 {
 }
 
-void kernel::send_failed(net::channel_handle, 
+void kernel::send_failed(net::channel_handle,
         net::message::inv)
 {
 }
 
-void kernel::send_failed(net::channel_handle, 
+void kernel::send_failed(net::channel_handle,
         net::message::getdata)
 {
 }
 
-void kernel::send_failed(net::channel_handle, 
+void kernel::send_failed(net::channel_handle,
         net::message::getblocks)
 {
 }
@@ -95,7 +95,7 @@ bool kernel::recv_message(net::channel_handle chandle,
     return true;
 }
 
-bool kernel::recv_message(net::channel_handle, 
+bool kernel::recv_message(net::channel_handle,
         net::message::verack)
 {
     return true;
@@ -104,7 +104,7 @@ bool kernel::recv_message(net::channel_handle,
 bool kernel::recv_message(net::channel_handle,
         net::message::addr message)
 {
-    for (auto it = message.addr_list.cbegin(); 
+    for (auto it = message.addr_list.cbegin();
             it != message.addr_list.cend(); ++it)
     {
         logger(LOG_DEBUG) << it->port;
@@ -116,19 +116,14 @@ bool kernel::recv_message(net::channel_handle,
 bool kernel::recv_message(net::channel_handle,
         net::message::inv message)
 {
-    auto remove_iter = std::remove_if(message.invs.begin(), message.invs.end(),
-            [](const net::message::inv_vect& inv_item)
-            {
-                return inv_item.type == net::message::inv_type::error;
-            });
-    //message.invs.erase(remove_iter);
+    net::message::inv request_invs;
 
-    for (auto it = message.invs.cbegin(); 
+    for (auto it = message.invs.cbegin();
             it != message.invs.cend(); ++it)
     {
         if (it->type == net::message::inv_type::none)
             return false;
-        //logger(LOG_DEBUG) << std::hex << static_cast<unsigned int>(it->hash[0]);
+
         if (it->type == net::message::inv_type::error)
             logger(LOG_DEBUG) << "ERROR";
         else if (it->type == net::message::inv_type::transaction)
@@ -136,9 +131,13 @@ bool kernel::recv_message(net::channel_handle,
         else if (it->type == net::message::inv_type::block)
             logger(LOG_DEBUG) << "MSG_BLOCK";
         display_byte_array(it->hash);
+
+        // Push only block invs to the request queue
+        if (it->type == net::message::inv_type::block)
+            request_invs.invs.push_back(*it);
     }
-    storage_component_->push(message);
-    accept_inventories(message.invs);
+    storage_component_->push(request_invs);
+    accept_inventories(request_invs.invs);
     return true;
 }
 
@@ -167,7 +166,7 @@ void kernel::request_inventories(const boost::system::error_code& ec)
     if (ec)
         return;
     storage_component_->request_inventories(
-            std::bind(&kernel::accept_inventories, 
+            std::bind(&kernel::accept_inventories,
                 shared_from_this(), std::placeholders::_1));
     reset_inventory_poll();
 }
@@ -177,7 +176,7 @@ storage::storage_ptr kernel::get_storage()
     return storage_component_;
 }
 
-void kernel::send_to_random(net::channel_handle chandle, 
+void kernel::send_to_random(net::channel_handle chandle,
         net::message::getdata request_message)
 {
     network_component_->send(chandle, request_message);
@@ -188,7 +187,7 @@ void kernel::accept_inventories(net::message::inv_list invs)
     net::message::getdata request_message;
     request_message.invs = invs;
     network_component_->get_random_handle(std::bind(
-            &kernel::send_to_random, shared_from_this(), 
+            &kernel::send_to_random, shared_from_this(),
                 std::placeholders::_1, request_message));
 }
 
