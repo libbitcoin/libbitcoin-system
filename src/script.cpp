@@ -11,7 +11,7 @@ namespace libbitcoin {
 
 void script::join(script other)
 {
-    operations_.insert(operations_.end(), 
+    operations_.insert(operations_.end(),
         other.operations_.begin(), other.operations_.end());
 }
 
@@ -23,9 +23,8 @@ void script::push_operation(operation oper)
 bool script::run(transaction parent_tx)
 {
     stack_.clear();
-    for (auto it = operations_.cbegin(); it != operations_.cend(); ++it)
+    for (const operation oper: operations_)
     {
-        const operation oper = *it;
         logger(LOG_DEBUG) << "Run: " << opcode_to_string(oper.code);
         if (!run_operation(oper, parent_tx))
             return false;
@@ -127,16 +126,15 @@ bool script::run_operation(operation op, transaction parent_tx)
 std::string script::string_repr()
 {
     std::ostringstream ss;
-    for (auto it = operations_.cbegin(); it != operations_.cend(); ++it)
+    for (const operation op: operations_)
     {
-        const operation op = *it;
         if (op.data.size() == 0)
             ss << opcode_to_string(op.code) << " ";
         else
         {
             ss << "[ ";
-            for (auto dit = op.data.cbegin(); dit != op.data.cend(); ++dit)
-                ss << std::hex << int(*dit) << " ";
+            for (byte b: op.data)
+                ss << std::hex << int(b) << " ";
             ss << "] ";
         }
     }
@@ -176,7 +174,7 @@ size_t number_of_bytes_from_opcode(opcode code, byte raw_byte)
 {
     if (code == opcode::special)
         return raw_byte;
-    else if (code == opcode::pushdata1 || code == opcode::pushdata2 
+    else if (code == opcode::pushdata1 || code == opcode::pushdata2
             || code == opcode::pushdata4)
         return static_cast<size_t>(code);
     else
@@ -190,7 +188,7 @@ script parse_script(data_chunk raw_script)
     {
         byte raw_byte = *it;
         operation op;
-        op.code = static_cast<opcode>(*it);
+        op.code = static_cast<opcode>(raw_byte);
         if (1 <= raw_byte && raw_byte <= 75)
             op.code = opcode::special;
         size_t read_n_bytes = number_of_bytes_from_opcode(op.code, raw_byte);

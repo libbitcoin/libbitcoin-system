@@ -101,11 +101,10 @@ bool kernel::recv_message(net::channel_handle,
 bool kernel::recv_message(net::channel_handle,
         net::message::addr message)
 {
-    for (auto it = message.addr_list.cbegin();
-            it != message.addr_list.cend(); ++it)
+    for (const net::message::net_addr addr: message.addr_list)
     {
-        logger(LOG_DEBUG) << it->port;
-        display_byte_array(it->ip_addr);
+        logger(LOG_DEBUG) << addr.port;
+        display_byte_array(addr.ip_addr);
     }
     return true;
 }

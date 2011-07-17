@@ -90,9 +90,9 @@ data_chunk original_dialect::to_network(message::getdata getdata) const
 {
     serializer payload;
     payload.write_var_uint(getdata.invs.size());
-    for (auto it = getdata.invs.cbegin(); it != getdata.invs.cend(); ++it)
+    for (const message::inv_vect inv: getdata.invs)
     {
-        switch (it->type)
+        switch (inv.type)
         {
             case net::message::inv_type::transaction:
                 payload.write_4_bytes(1);
@@ -106,7 +106,7 @@ data_chunk original_dialect::to_network(message::getdata getdata) const
                 BITCOIN_ASSERT(0);
                 break;
         }
-        payload.write_hash(it->hash);
+        payload.write_hash(inv.hash);
     }
     return assemble_message("getdata", payload);
 }
