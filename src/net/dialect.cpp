@@ -12,7 +12,7 @@ namespace net {
 
 data_chunk construct_header_from(std::string command, data_chunk payload)
 {
-    logger(LOG_INFO) << "s: " << command 
+    logger(LOG_INFO) << "s: " << command
             << " (" << payload.size() << " bytes)";
     serializer header;
     // magic
@@ -23,7 +23,7 @@ data_chunk construct_header_from(std::string command, data_chunk payload)
     uint32_t length = payload.size();
     header.write_4_bytes(length);
     // checksum is not in verson or verack
-    if (command != "version" && command != "verack") 
+    if (command != "version" && command != "verack")
     {
         uint32_t checksum = generate_sha256_checksum(payload);
         header.write_4_bytes(checksum);
@@ -36,7 +36,7 @@ data_chunk assemble_message(std::string command, const serializer& payload)
     data_chunk msg_body = payload.get_data();
     data_chunk message = construct_header_from(command, msg_body);
     // Extend message with actual payload
-    message.reserve(message.size() + distance(msg_body.begin(), 
+    message.reserve(message.size() + distance(msg_body.begin(),
             msg_body.end()));
     message.insert(message.end(), msg_body.begin(), msg_body.end());
     return message;
@@ -182,7 +182,7 @@ message::addr original_dialect::addr_from_network(
     return payload;
 }
 
-message::inv_type inv_type_from_number(uint32_t raw_type) 
+message::inv_type inv_type_from_number(uint32_t raw_type)
 {
     switch (raw_type)
     {
@@ -212,6 +212,21 @@ message::inv original_dialect::inv_from_network(
         inv_vect.hash = deserial.read_hash();
         payload.invs.push_back(inv_vect);
     }
+    return payload;
+}
+
+message::block original_dialect::block_from_network(
+        const message::header, const data_chunk& stream, bool& ec) const
+{
+    ec = false;
+    deserializer deserial(stream);
+    message::block payload;
+    payload.version = deserial.read_4_bytes();
+    payload.prev_block = deserial.read_hash();
+    payload.merkle_root = deserial.read_hash();
+    payload.timestamp = deserial.read_4_bytes();
+    payload.bits = deserial.read_4_bytes();
+    payload.nonce = deserial.read_4_bytes();
     return payload;
 }
 

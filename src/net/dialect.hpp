@@ -25,7 +25,7 @@ public:
 
     virtual message::header header_from_network(
             const data_chunk& stream) const = 0;
-    
+
     virtual bool verify_header(net::message::header header_msg) const = 0;
 
     virtual bool checksum_used(const message::header header_msg) const = 0;
@@ -44,6 +44,10 @@ public:
             const data_chunk& stream, bool& ec) const = 0;
 
     virtual message::inv inv_from_network(
+            const message::header header_msg,
+            const data_chunk& stream, bool& ec) const = 0;
+
+    virtual message::block block_from_network(
             const message::header header_msg,
             const data_chunk& stream, bool& ec) const = 0;
 };
@@ -72,11 +76,15 @@ public:
             const message::header header_msg,
             const data_chunk& stream, bool& ec) const;
 
+    message::addr addr_from_network(
+            const message::header header_msg,
+            const data_chunk& stream, bool& ec) const;
+
     message::inv inv_from_network(
             const message::header header_msg,
             const data_chunk& stream, bool& ec) const;
 
-    message::addr addr_from_network(
+    message::block block_from_network(
             const message::header header_msg,
             const data_chunk& stream, bool& ec) const;
 };

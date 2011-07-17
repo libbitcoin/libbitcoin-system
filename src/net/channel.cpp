@@ -28,8 +28,8 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 channel_handle channel_pimpl::chan_id_counter = 0;
 
 channel_pimpl::channel_pimpl(const init_data& dat)
- : socket_(dat.socket), parent_gateway_(dat.parent_gateway), 
-        translator_(dat.translator) 
+ : socket_(dat.socket), parent_gateway_(dat.parent_gateway),
+        translator_(dat.translator)
 {
     // Unique IDs are assigned to channels by incrementing a shared counter
     // among instances.
@@ -41,10 +41,10 @@ channel_pimpl::channel_pimpl(const init_data& dat)
     reset_timeout();
 }
 
-channel_pimpl::~channel_pimpl() 
+channel_pimpl::~channel_pimpl()
 {
     tcp::endpoint remote_endpoint = socket_->remote_endpoint();
-    logger(LOG_DEBUG) << "Closing channel " 
+    logger(LOG_DEBUG) << "Closing channel "
             << remote_endpoint.address().to_string();
     boost::system::error_code ec;
     socket_->shutdown(tcp::socket::shutdown_both, ec);
@@ -76,12 +76,12 @@ void channel_pimpl::destroy_self()
 
 bool channel_pimpl::problems_check(const boost::system::error_code& ec)
 {
-    if (ec == boost::asio::error::operation_aborted) 
+    if (ec == boost::asio::error::operation_aborted)
     {
         // Do nothing
         return true;
     }
-    else if (ec) 
+    else if (ec)
     {
         destroy_self();
         return true;
@@ -98,17 +98,17 @@ void channel_pimpl::read_header()
 
 void channel_pimpl::read_checksum(message::header header_msg)
 {
-    auto callback = boost::bind(&channel_pimpl::handle_read_checksum, this, 
+    auto callback = boost::bind(&channel_pimpl::handle_read_checksum, this,
             header_msg, placeholders::error, placeholders::bytes_transferred);
     async_read(*socket_, buffer(inbound_checksum_), callback);
 }
 
 void channel_pimpl::read_payload(message::header header_msg)
 {
-    auto callback = boost::bind(&channel_pimpl::handle_read_payload, this, 
+    auto callback = boost::bind(&channel_pimpl::handle_read_payload, this,
             header_msg, placeholders::error, placeholders::bytes_transferred);
     inbound_payload_.resize(header_msg.payload_length);
-    async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length), 
+    async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
             callback);
 }
 
@@ -118,10 +118,10 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
-    data_chunk header_stream = 
-            data_chunk(inbound_header_.begin(), inbound_header_.end()); 
+    data_chunk header_stream =
+            data_chunk(inbound_header_.begin(), inbound_header_.end());
     BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
-    message::header header_msg = 
+    message::header header_msg =
             translator_->header_from_network(header_stream);
 
     if (!translator_->verify_header(header_msg))
@@ -178,9 +178,9 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     bool ret_errc = false;
     if (header_msg.command == "version")
     {
-        message::version payload = 
+        message::version payload =
                 translator_->version_from_network(
-                    header_msg, payload_stream, ret_errc); 
+                    header_msg, payload_stream, ret_errc);
         if (!transport_payload(payload, ret_errc))
             return;
     }
@@ -189,20 +189,28 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
         message::verack payload;
         if (!transport_payload(payload, ret_errc))
             return;
-    }                              
+    }
     else if (header_msg.command == "addr")
     {
-        message::addr payload = 
+        message::addr payload =
                 translator_->addr_from_network(
-                    header_msg, payload_stream, ret_errc); 
+                    header_msg, payload_stream, ret_errc);
         if (!transport_payload(payload, ret_errc))
             return;
     }
     else if (header_msg.command == "inv")
     {
-        message::inv payload = 
+        message::inv payload =
                 translator_->inv_from_network(
-                    header_msg, payload_stream, ret_errc); 
+                    header_msg, payload_stream, ret_errc);
+        if (!transport_payload(payload, ret_errc))
+            return;
+    }
+    else if (header_msg.command == "block")
+    {
+        message::block payload =
+                translator_->block_from_network(
+                    header_msg, payload_stream, ret_errc);
         if (!transport_payload(payload, ret_errc))
             return;
     }
@@ -217,7 +225,7 @@ void channel_pimpl::handle_send(const boost::system::error_code& ec)
 }
 
 template<typename T>
-void generic_send(T message_packet, channel_pimpl* chan_self, 
+void generic_send(T message_packet, channel_pimpl* chan_self,
         shared_ptr<tcp::socket> socket, dialect_ptr translator)
 {
     data_chunk msg = translator->to_network(message_packet);

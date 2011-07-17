@@ -22,17 +22,17 @@ public:
     void register_network(net::network_ptr net_comp);
     net::network_ptr get_network();
     // Callbacks from network component
-    void send_failed(net::channel_handle chandle, 
+    void send_failed(net::channel_handle chandle,
             net::message::version message);
-    void send_failed(net::channel_handle chandle, 
+    void send_failed(net::channel_handle chandle,
             net::message::verack message);
-    void send_failed(net::channel_handle chandle, 
+    void send_failed(net::channel_handle chandle,
             net::message::getaddr message);
-    void send_failed(net::channel_handle chandle, 
+    void send_failed(net::channel_handle chandle,
             net::message::inv message);
-    void send_failed(net::channel_handle chandle, 
+    void send_failed(net::channel_handle chandle,
             net::message::getdata message);
-    void send_failed(net::channel_handle chandle, 
+    void send_failed(net::channel_handle chandle,
             net::message::getblocks message);
 
     bool recv_message(net::channel_handle chandle,
@@ -43,6 +43,8 @@ public:
             net::message::addr message);
     bool recv_message(net::channel_handle chandle,
             net::message::inv message);
+    bool recv_message(net::channel_handle chandle,
+            net::message::block message);
 
     void handle_connect(net::channel_handle chandle);
 
@@ -51,10 +53,10 @@ public:
     // Callbacks from storage component
     void accept_inventories(net::message::inv_list invs);
 
-private: 
+private:
     void reset_inventory_poll();
     void request_inventories(const boost::system::error_code& ec);
-    void send_to_random(net::channel_handle chandle, 
+    void send_to_random(net::channel_handle chandle,
             net::message::getdata request_message);
 
     net::network_ptr network_component_;

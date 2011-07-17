@@ -1,6 +1,6 @@
 #include <bitcoin/storage/storage.hpp>
 
-#include <functional> 
+#include <functional>
 
 #include <bitcoin/kernel.hpp>
 #include <bitcoin/util/logger.hpp>
@@ -27,7 +27,7 @@ kernel_ptr memory_storage::kernel() const
     return kernel_;
 }
 
-void memory_storage::do_push(net::message::inv item)
+void memory_storage::do_push_inv(net::message::inv item)
 {
     logger(LOG_DEBUG) << "storing " << item.invs.size() << " invs";
     const net::message::inv_list& invs = item.invs;
@@ -36,7 +36,16 @@ void memory_storage::do_push(net::message::inv item)
 }
 void memory_storage::push(net::message::inv item)
 {
-    strand_->post(std::bind(&memory_storage::do_push, this, item));
+    strand_->post(std::bind(&memory_storage::do_push_inv, this, item));
+}
+
+void memory_storage::do_push_block(net::message::block item)
+{
+    logger(LOG_DEBUG) << "storing block.";
+}
+void memory_storage::push(net::message::block item)
+{
+    strand_->post(std::bind(&memory_storage::do_push_block, this, item));
 }
 
 void memory_storage::do_request_inventories(accept_inventories_handler handler)

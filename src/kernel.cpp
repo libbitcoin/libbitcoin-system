@@ -78,11 +78,8 @@ void display_byte_array(T arr)
 {
     auto logobj = logger(LOG_DEBUG);
     logobj << std::hex;
-    for (auto it = arr.cbegin(); it != arr.cend(); ++it)
-    {
-        logobj << std::setfill('0') << std::setw(2)
-                << static_cast<unsigned int>(*it) << " ";
-    }
+    for (unsigned int number: arr)
+        logobj << std::setfill('0') << std::setw(2) << number << " ";
 }
 
 bool kernel::recv_message(net::channel_handle chandle,
@@ -117,27 +114,35 @@ bool kernel::recv_message(net::channel_handle,
         net::message::inv message)
 {
     net::message::inv request_invs;
-
-    for (auto it = message.invs.cbegin();
-            it != message.invs.cend(); ++it)
+    for (const net::message::inv_vect curr_inv: message.invs)
     {
-        if (it->type == net::message::inv_type::none)
+        if (curr_inv.type == net::message::inv_type::none)
             return false;
 
-        if (it->type == net::message::inv_type::error)
+        if (curr_inv.type == net::message::inv_type::error)
             logger(LOG_DEBUG) << "ERROR";
-        else if (it->type == net::message::inv_type::transaction)
+        else if (curr_inv.type == net::message::inv_type::transaction)
             logger(LOG_DEBUG) << "MSG_TX";
-        else if (it->type == net::message::inv_type::block)
+        else if (curr_inv.type == net::message::inv_type::block)
             logger(LOG_DEBUG) << "MSG_BLOCK";
-        display_byte_array(it->hash);
+        display_byte_array(curr_inv.hash);
 
         // Push only block invs to the request queue
-        if (it->type == net::message::inv_type::block)
-            request_invs.invs.push_back(*it);
+        if (curr_inv.type == net::message::inv_type::block)
+            request_invs.invs.push_back(curr_inv);
     }
     storage_component_->push(request_invs);
     accept_inventories(request_invs.invs);
+    return true;
+}
+
+bool kernel::recv_message(net::channel_handle,
+        net::message::block message)
+{
+    logger(LOG_DEBUG) << "Block: " << message.version << " "
+            << message.timestamp << " " << message.bits << " "
+            << message.nonce;
+    storage_component_->push(message);
     return true;
 }
 
