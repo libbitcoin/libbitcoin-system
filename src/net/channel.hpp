@@ -54,7 +54,7 @@ private:
     void read_checksum(message::header header_msg);
     void read_payload(message::header header_msg);
 
-    void handle_read_header(const boost::system::error_code& ec, 
+    void handle_read_header(const boost::system::error_code& ec,
             size_t bytes_transferred);
     void handle_read_checksum(message::header header_msg,
             const boost::system::error_code& ec, size_t bytes_transferred);
@@ -81,6 +81,9 @@ private:
     // Removes self from parent
     void destroy_self();
     bool problems_check(const boost::system::error_code& ec);
+
+    // Construct a version message
+    message::version create_version_message();
 
     shared_ptr<tcp::socket> socket_;
     network_ptr parent_gateway_;

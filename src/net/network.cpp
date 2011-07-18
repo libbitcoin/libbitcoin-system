@@ -45,7 +45,7 @@ kernel_ptr network_impl::kernel() const
 
 channel_handle network_impl::create_channel(socket_ptr socket)
 {
-    channel_pimpl::init_data init_data = { 
+    channel_pimpl::init_data init_data = {
             shared_from_this(), default_dialect_, service_, socket };
 
     channel_pimpl* channel_obj = new channel_pimpl(init_data);
@@ -58,22 +58,22 @@ channel_handle network_impl::create_channel(socket_ptr socket)
     return channel_obj->get_id();
 }
 
-channel_handle network_impl::connect(bool& ec, std::string ip_addr, 
+channel_handle network_impl::connect(bool& ec, std::string ip_addr,
         unsigned short port)
 {
     ec = false;
     socket_ptr socket(new tcp::socket(*service_));
-    try 
+    try
     {
         tcp::resolver resolver(*service_);
-        tcp::resolver::query query(ip_addr, 
+        tcp::resolver::query query(ip_addr,
                 boost::lexical_cast<std::string>(port));
         tcp::endpoint endpoint = *resolver.resolve(query);
         socket->connect(endpoint);
     }
-    catch (std::exception& ex) 
+    catch (std::exception& ex)
     {
-        logger(LOG_ERROR) << "Connecting to peer " << ip_addr 
+        logger(LOG_ERROR) << "Connecting to peer " << ip_addr
                 << ": " << ex.what();
         ec = true;
         return 0;
@@ -81,7 +81,7 @@ channel_handle network_impl::connect(bool& ec, std::string ip_addr,
     return create_channel(socket);
 }
 
-static void remove_matching_channels(channel_list* channels, 
+static void remove_matching_channels(channel_list* channels,
         channel_handle chandle)
 {
     auto is_matching =
@@ -119,7 +119,7 @@ void perform_send(channel_list* channels, kernel_ptr kern,
 
 template<typename T>
 void generic_send(T message_packet, channel_handle chandle,
-        shared_ptr<io_service::strand> strand, channel_list* channels, 
+        shared_ptr<io_service::strand> strand, channel_list* channels,
         kernel_ptr kernel)
 {
     strand->post(std::bind(
@@ -179,7 +179,7 @@ bool network_impl::start_accept()
         acceptor_->set_option(tcp::acceptor::reuse_address(true));
         acceptor_->bind(endpoint);
         acceptor_->listen(socket_base::max_connections);
-        acceptor_->async_accept(*socket, 
+        acceptor_->async_accept(*socket,
                 std::bind(&network_impl::handle_accept, this, socket));
     }
     catch (std::exception& ex)
@@ -193,12 +193,12 @@ bool network_impl::start_accept()
 void network_impl::handle_accept(socket_ptr socket)
 {
     tcp::endpoint remote_endpoint = socket->remote_endpoint();
-    logger(LOG_DEBUG) << "New incoming connection from " 
+    logger(LOG_DEBUG) << "New incoming connection from "
             << remote_endpoint.address().to_string();
     channel_handle chandle = create_channel(socket);
     kernel_->handle_connect(chandle);
     socket.reset(new tcp::socket(*service_));
-    acceptor_->async_accept(*socket, 
+    acceptor_->async_accept(*socket,
             std::bind(&network_impl::handle_accept, this, socket));
 }
 

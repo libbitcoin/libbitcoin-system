@@ -7,26 +7,6 @@
 #include <iostream>
 #include <iomanip>
 
-libbitcoin::net::message::version create_version_message()
-{
-    libbitcoin::net::message::version version;
-    // this is test data. should be in the core eventually
-    version.version = 31900;
-    version.services = 1;
-    version.timestamp = time(NULL);
-    version.addr_me.services = version.services;
-    version.addr_me.ip_addr = decltype(version.addr_me.ip_addr){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
-    version.addr_me.ip_addr[0] = 0;
-    version.addr_me.port = 8333;
-    version.addr_you.services = version.services;
-    version.addr_you.ip_addr = decltype(version.addr_you.ip_addr){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 10, 0, 0, 1};
-    version.addr_you.port = 8333;
-    version.nonce = 0xdeadbeef;
-    version.sub_version_num = "";
-    version.start_height = 0;
-    return version;
-}
-
 libbitcoin::net::message::getblocks create_getblocks_message()
 {
     libbitcoin::net::message::getblocks getblocks;
@@ -46,8 +26,6 @@ int run_connect()
         std::cerr << "noes\n";
         return -1;
     }
-    libbitcoin::net::message::version version = create_version_message();
-    net->send(channel, version);
     sleep(3);
     net->disconnect(channel);
     std::cin.get();
@@ -78,8 +56,6 @@ int run_kernel()
         std::cerr << "noes\n";
         return -1;
     }
-    libbitcoin::net::message::version version = create_version_message();
-    net->send(channel, version);
 
     std::cin.get();
     //net->send(channel, libbitcoin::net::message::getaddr());

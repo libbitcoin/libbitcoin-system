@@ -39,6 +39,8 @@ channel_pimpl::channel_pimpl(const init_data& dat)
     timeout_.reset(new deadline_timer(*dat.service));
     read_header();
     reset_timeout();
+
+    send(create_version_message());
 }
 
 channel_pimpl::~channel_pimpl()
@@ -262,6 +264,25 @@ void channel_pimpl::send(message::getblocks getblocks)
 channel_handle channel_pimpl::get_id() const
 {
     return channel_id_;
+}
+
+message::version channel_pimpl::create_version_message()
+{
+    net::message::version version;
+    // this is test data.
+    version.version = 31900;
+    version.services = 1;
+    version.timestamp = time(NULL);
+    version.addr_me.services = version.services;
+    version.addr_me.ip_addr = decltype(version.addr_me.ip_addr){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
+    version.addr_me.port = 8333;
+    version.addr_you.services = version.services;
+    version.addr_you.ip_addr = decltype(version.addr_you.ip_addr){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 10, 0, 0, 1};
+    version.addr_you.port = 8333;
+    version.nonce = 0xdeadbeef;
+    version.sub_version_num = "";
+    version.start_height = 0;
+    return version;
 }
 
 } // net

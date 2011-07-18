@@ -95,6 +95,7 @@ bool kernel::recv_message(net::channel_handle chandle,
 bool kernel::recv_message(net::channel_handle,
         net::message::verack)
 {
+    // When you receive this, then you know other side is accepting your sends
     return true;
 }
 
