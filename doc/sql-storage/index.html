@@ -1,0 +1,299 @@
+<html>
+<head>
+<style>
+table {
+    border-collapse: collapse;
+}
+table, td, th {
+    border: 1px solid black;
+}
+td, th {
+    padding: 5px;
+}
+</style>
+</head>
+<body>
+
+<p><i>A document describing the rationale behind the database structure.</i></p>
+
+<img src='overview.png' />
+
+<h3>Axioms</h3>
+
+<p>
+Starting with these basic rules, we design our database.
+<ul>
+    <li>Blocks are <i>mostly</i> sequential.</li>
+    <li>Blocks contain a list of transactions.</li>
+    <li>Transactions contain a list of inputs + outputs.</li>
+    <li>Blocks can be free floating (orphan blocks).</li>
+    <li>Transactions can be free floating (not yet in a block).</li>
+    <li>There is one sequence of events that we accept as the truth at any one time.</li>
+</ul>
+</p>
+
+<p>
+From big to small:
+<ul>
+    <li>Blocks</li>
+    <li>Transactions</li>
+    <li>Inputs</li>
+    <li>Outputs</li>
+    <li>Scripts</li>
+    <li>Operations</li>
+</ul>
+</p>
+
+<h3>Block-chain</h3>
+
+<p>The block-chain is a series of blocks chained on in a linear sequence. The block-chain is an append only database of all transactions in the network.</p>
+<p>What's accepted as true, is the chain with the highest difficulty. Difficulty is computed using a function from the 'bits' field of the block. Given an entire chain, we can calculate the difficulty using:</p>
+<pre>    SELECT SUM(COMPUTE_DIFFICULTY(bits)) FROM our_chain;</pre>
+<p>Occasionally this chain of events may be conflicting when the chain splits in half because there are two next rival blocks trying to append to the current chain. Always, the chain with the highest cumulative difficulty is preferred over the others.</p>
+<p>It can happen that more blocks build on a chain that previously had lower difficulty and so take over the main chain. This is termed a block-chain re-organisation. But as more blocks build off the main chain, that becomes exponentially less likely until eventually it becomes a near impossibility. Branches off the main block-chain can be pruned once they reach a certain depth that it's near unlikely they will ever become the main branch again.</p>
+<p>We can represent our blocks using this schema:</p>
+<pre>
+blocks:
+    block_id
+    block_hash
+    depth       -- block number in the chain
+    span_left
+    span_right
+    ... other fields
+</pre>
+
+<img src='block-chain.png' />
+
+<table>
+    <tr>
+        <th>block_id</th>
+        <th>depth</th>
+        <th>span_left</th>
+        <th>span_right</th>
+    </tr>
+    <tr>
+        <td>0</td>
+        <td>0</td>
+        <td>0</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td>1</td>
+        <td>1</td>
+        <td>0</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>2</td>
+        <td>0</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>3</td>
+        <td>2</td>
+        <td>3</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td>4</td>
+        <td>3</td>
+        <td>3</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td>5</td>
+        <td>3</td>
+        <td>0</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>6</td>
+        <td>4</td>
+        <td>3</td>
+        <td>3</td>
+    </tr>
+    <tr>
+        <td>7</td>
+        <td>4</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr>
+        <td>8</td>
+        <td>5</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr>
+        <td>9</td>
+        <td>4</td>
+        <td>1</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>10</td>
+        <td>5</td>
+        <td>1</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>11</td>
+        <td>6</td>
+        <td>1</td>
+        <td>2</td>
+    </tr>
+    <tr>
+        <td>12</td>
+        <td>6</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr>
+        <td>13</td>
+        <td>7</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr>
+        <td>14</td>
+        <td>8</td>
+        <td>0</td>
+        <td>0</td>
+    </tr>
+    <tr>
+        <td>15</td>
+        <td>7</td>
+        <td>1</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>16</td>
+        <td>7</td>
+        <td>2</td>
+        <td>2</td>
+    </tr>
+</table>
+
+<p>In the diagram above blocks are represented by black dots. The block_id is a unique identifier for each new block inserted into the database. Each of the dots above would have a unique block_id.</p>
+<p>Depth is the vertical number on the left, and is synonymous with a block's block-number.</p>
+<p>Span left and right indicates the range of chains that a block exists in. A block with a span_left of 0, and a span_right of 3, would exist in chains 0, 1, 2 and 3. Using a span, we can easily select a particular chain:</p>
+<pre>    SELECT * FROM blocks WHERE span_left=0 AND span_right=0;</pre>
+<p>Or select the common point between a series of chains:</p>
+<pre>    SELECT MAX(depth) FROM blocks WHERE span_left&gt;=0 AND span_right&lt;=2;</pre>
+
+<p>Once span_right starts to exceed a value (say 10) and the depth since the chain forked exceeds a certain value, then that chain can be pruned:</p>
+<pre>    DELETE FROM blocks WHERE span_left=10 AND span_right=10;</pre>
+
+<p>The total span range of all blocks should equal all the number of stored chains. If we have a span of [0, 10] then there should be 11 spans from 0 to 10. A table exists to keep track of all the chains.</p>
+
+<pre>
+blockchains:
+    chain_id
+    max_depth
+    last_block_id
+    total_difficulty
+</pre>
+
+<h3>Transaction</h3>
+
+<p>Nothing unusual happens here, except that transactions can be included more than once in multiple chains. A seperate table exists to track the parents for a transaction.</p>
+
+<pre>
+transaction_parents:
+    transaction_id
+    block_id
+    index_in_block
+
+transactions:
+    transaction_id
+    transaction_hash
+    ... other fields
+
+outputs:
+    parent_id       -- transaction parent
+    index_in_parent
+    output_type     -- normal, generated, other
+    address
+    ... other fields
+
+inputs:
+    parent_id
+    index_in_parent
+    previous_output_id
+    ... other fields
+</pre>
+
+<h3>Script</h3>
+
+<p>A script consists of a serious of opcodes and optional data.</p>
+
+<pre>
+script_id_type = SEQUENCE
+
+operations:
+    operation_id
+    script_id
+    code
+    data
+</pre>
+
+<p>A typical script might appear like:</p>
+
+<table>
+    <tr>
+        <th>operation_id</th>
+        <th>script_id</th>
+        <th>code</th>
+        <th>data</th>
+    </tr>
+    <tr>
+        <td>132</td>
+        <td>45</td>
+        <td>dup</td>
+        <td>NULL</td>
+    </tr>
+    <tr>
+        <td>133</td>
+        <td>45</td>
+        <td>hash160</td>
+        <td>NULL</td>
+    </tr>
+    <tr>
+        <td>134</td>
+        <td>45</td>
+        <td>special</td>
+        <td>89 ab cd ef ab ba ab ba ab ba ab ba ab ba ab ba ab ba ab ba</td>
+    </tr>
+    <tr>
+        <td>135</td>
+        <td>45</td>
+        <td>equalverify</td>
+        <td>NULL</td>
+    </tr>
+    <tr>
+        <td>136</td>
+        <td>45</td>
+        <td>checksig</td>
+        <td>NULL</td>
+    </tr>
+</table>
+
+<p>To fetch the script:</p>
+<pre>    SELECT * FROM operations WHERE script_id=45 ORDER BY operation_id ASC;</pre>
+
+<h3>Broadcasted inventories</h3>
+
+<p>This will be stored in memory for now as there are potential attack vectors to serialising inv items. An attacker could cause many disk read/writes by spamming a host potentially. More thought needs to go into this later.</p>
+
+<h3>Main block-chain</h3>
+
+<p>A convenience table is provided for the end user to read the block-chain transaction history. It contains the currently accepted version of the truth. It provides a way for the user to quickly query transactions and see funds in addresses.</p>
+
+<img src='cables.png' />
+
+<p>The inputs and outputs are joined in a view. All the outputs which are final and have not been spent, would have no equivalently joined on input.</p>
+
+</body>
+</html>
+
