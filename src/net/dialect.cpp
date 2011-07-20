@@ -215,6 +215,54 @@ message::inv original_dialect::inv_from_network(
     return payload;
 }
 
+data_chunk read_raw_script(deserializer& deserial)
+{
+    data_chunk raw_script;
+    uint64_t script_length = deserial.read_var_uint();
+    return deserial.read_raw_bytes(script_length);
+}
+
+script read_script(deserializer& deserial)
+{
+    data_chunk raw_script = read_raw_script(deserial);
+    // Eventually plan to move parse_script to inside here
+    return parse_script(raw_script);
+}
+
+message::transaction read_transaction(deserializer& deserial)
+{
+    message::transaction txn;
+    txn.version = deserial.read_4_bytes();
+    uint64_t txn_in_count = deserial.read_var_uint();
+    for (size_t txn_in_i = 0; txn_in_i < txn_in_count; ++txn_in_i)
+    {
+        message::transaction_input input;
+        input.hash = deserial.read_hash();
+        input.index = deserial.read_4_bytes();
+        input.input_script = read_script(deserial);
+        input.sequence = deserial.read_4_bytes();
+        txn.inputs.push_back(input);
+    }
+    uint64_t txn_out_count = deserial.read_var_uint();
+    for (size_t txn_out_i = 0; txn_out_i < txn_out_count; ++txn_out_i)
+    {
+        message::transaction_output output;
+        output.value = deserial.read_8_bytes();
+        output.output_script = read_script(deserial);
+        txn.outputs.push_back(output);
+    }
+    txn.locktime = deserial.read_4_bytes();
+    return txn;
+}
+
+message::transaction original_dialect::transaction_from_network(
+        const message::header, const data_chunk& stream, bool& ec) const
+{
+    ec = false;
+    deserializer deserial(stream);
+    return read_transaction(deserial);
+}
+
 message::block original_dialect::block_from_network(
         const message::header, const data_chunk& stream, bool& ec) const
 {
@@ -227,6 +275,12 @@ message::block original_dialect::block_from_network(
     payload.timestamp = deserial.read_4_bytes();
     payload.bits = deserial.read_4_bytes();
     payload.nonce = deserial.read_4_bytes();
+    uint64_t txn_count = deserial.read_var_uint();
+    for (size_t txn_i = 0; txn_i < txn_count; ++txn_i)
+    {
+        const message::transaction txn = read_transaction(deserial);
+        payload.transactions.push_back(txn);
+    }
     return payload;
 }
 

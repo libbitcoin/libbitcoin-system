@@ -1,5 +1,5 @@
-CFLAGS= -std=c++0x -Wall -pedantic -Wextra -fstack-protector -g -I./include/ -c
-LIBS= -lcrypto -lboost_thread -lboost_system
+CFLAGS= -std=c++0x -Wall -pedantic -Wextra -fstack-protector -g -Iinclude/ -Iusr/include/ -c
+LIBS= usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq
 
 objs: block transaction logger
 
@@ -56,11 +56,14 @@ obj/serializer.o: ./src/util/serializer.cpp ./include/bitcoin/util/serializer.hp
 obj/nettest.o: ./tests/net.cpp
 	$(CXX) $(CFLAGS) -o ./obj/nettest.o ./tests/net.cpp
 
-obj/storage.o: ./src/storage/storage.cpp ./include/bitcoin/storage/storage.hpp
-	$(CXX) $(CFLAGS) -o ./obj/storage.o ./src/storage/storage.cpp
+obj/postgresql_storage.o: ./src/storage/postgresql_storage.cpp ./include/bitcoin/storage/postgresql_storage.hpp
+	$(CXX) $(CFLAGS) -o ./obj/postgresql_storage.o ./src/storage/postgresql_storage.cpp
 
-bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o obj/sha256.o obj/types.o obj/block.o
-	$(CXX) -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/storage.o obj/sha256.o obj/types.o $(LIBS)
+obj/memory_storage.o: ./src/storage/memory_storage.cpp ./include/bitcoin/storage/memory_storage.hpp
+	$(CXX) $(CFLAGS) -o ./obj/memory_storage.o ./src/storage/memory_storage.cpp
+
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o
+	$(CXX) -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o $(LIBS)
 
 net: bin/tests/nettest
 
@@ -85,4 +88,12 @@ bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o 
 	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o $(LIBS)
 
 script-test: bin/tests/script-test
+
+obj/psql.o: ./tests/psql.cpp
+	$(CXX) $(CFLAGS) -o ./obj/psql.o ./tests/psql.cpp
+
+bin/tests/psql: obj/postgresql_storage.o obj/psql.o obj/logger.o obj/script.o obj/ripemd.o obj/block.o obj/serializer.o obj/sha256.o obj/types.o
+	$(CXX) -o bin/tests/psql obj/psql.o obj/postgresql_storage.o obj/logger.o obj/script.o obj/ripemd.o obj/block.o obj/serializer.o obj/sha256.o obj/types.o $(LIBS)
+
+psql: bin/tests/psql
 

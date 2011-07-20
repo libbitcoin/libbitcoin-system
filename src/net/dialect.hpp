@@ -47,6 +47,10 @@ public:
             const message::header header_msg,
             const data_chunk& stream, bool& ec) const = 0;
 
+    virtual message::transaction transaction_from_network(
+            const message::header header_msg,
+            const data_chunk& stream, bool& ec) const = 0;
+
     virtual message::block block_from_network(
             const message::header header_msg,
             const data_chunk& stream, bool& ec) const = 0;
@@ -81,6 +85,10 @@ public:
             const data_chunk& stream, bool& ec) const;
 
     message::inv inv_from_network(
+            const message::header header_msg,
+            const data_chunk& stream, bool& ec) const;
+
+    message::transaction transaction_from_network(
             const message::header header_msg,
             const data_chunk& stream, bool& ec) const;
 

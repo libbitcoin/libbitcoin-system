@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <bitcoin/types.hpp>
+#include <bitcoin/script.hpp>
 
 namespace libbitcoin {
 namespace net {
@@ -78,14 +79,14 @@ struct transaction_input
 {
     hash_digest hash;
     uint32_t index;
-    data_chunk raw_script;
+    script input_script;
     uint32_t sequence;
 };
 
 struct transaction_output
 {
     uint64_t value;
-    data_chunk raw_script;
+    script output_script;
 };
 
 typedef std::vector<transaction_input> transaction_input_array;
@@ -93,7 +94,6 @@ typedef std::vector<transaction_output> transaction_output_array;
 
 struct transaction
 {
-    hash_digest txid;
     uint32_t version;
     uint32_t locktime;
     transaction_input_array inputs;

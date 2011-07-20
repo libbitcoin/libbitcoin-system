@@ -26,6 +26,8 @@ struct operation
     data_chunk data;
 };
 
+typedef std::vector<operation> operation_stack;
+
 class script
 {
 public:
@@ -33,9 +35,11 @@ public:
     void push_operation(operation oper);
     bool run(transaction parent_tx);
 
-    std::string string_repr();
+    std::string string_repr() const;
+
+    operation_stack operations() const;
+
 private:
-    typedef std::vector<operation> operation_stack;
     typedef std::vector<data_chunk> data_stack;
 
     bool op_dup();
@@ -52,6 +56,8 @@ private:
 };
 
 std::string opcode_to_string(opcode code);
+
+// Should be inside the dialect imlementation eventually
 script parse_script(data_chunk raw_script);
 
 } // libbitcoin

@@ -11,17 +11,17 @@
 
 namespace libbitcoin {
 
-inline void copy_data(std::vector<byte> &data, 
+inline void copy_data(std::vector<byte> &data,
         const byte* raw_bytes, size_t len)
 {
     for (size_t i = 0; i < len; i++)
         data.push_back(raw_bytes[i]);
 }
 
-inline void copy_data_reverse(std::vector<byte> &data, 
+inline void copy_data_reverse(std::vector<byte> &data,
         const byte* raw_bytes, size_t len)
 {
-    for (int i = len - 1; i >= 0; i--) 
+    for (int i = len - 1; i >= 0; i--)
         data.push_back(raw_bytes[i]);
 }
 
@@ -140,14 +140,14 @@ T read_data(const data_chunk& data, size_t& pointer, bool reverse=false)
     #endif
 
     T val;
-    if (reverse) 
+    if (reverse)
     {
         const char* real_bytes = reinterpret_cast<const char*>(&data[pointer]);
         std::string reverse_bytes(real_bytes, sizeof(T));
         std::reverse(reverse_bytes.begin(), reverse_bytes.end());
         val = *reinterpret_cast<const T*>(reverse_bytes.c_str());
     }
-    else 
+    else
     {
         val = *reinterpret_cast<const T*>(&data[pointer]);
     }
@@ -224,6 +224,14 @@ void read_bytes(const data_chunk& stream, size_t& pointer,
     pointer += byte_array.size();
 }
 
+data_chunk deserializer::read_raw_bytes(uint64_t n_bytes)
+{
+    data_chunk raw_bytes;
+    for (uint64_t i = 0; i < n_bytes; ++i)
+        raw_bytes.push_back(read_byte());
+    return raw_bytes;
+}
+
 net::message::net_addr deserializer::read_net_addr()
 {
     net::message::net_addr addr;
@@ -245,7 +253,7 @@ std::string deserializer::read_fixed_len_str(size_t len)
 {
     BITCOIN_ASSERT(pointer_ + len <= stream_.size());
     std::string ret(
-            stream_.begin() + pointer_, 
+            stream_.begin() + pointer_,
             stream_.begin() + pointer_ + len);
     pointer_ += len;
     // Removes trailing 0s... Needed for string comparisons

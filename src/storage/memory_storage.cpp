@@ -1,8 +1,7 @@
-#include <bitcoin/storage/storage.hpp>
+#include <bitcoin/storage/memory_storage.hpp>
 
 #include <functional>
 
-#include <bitcoin/kernel.hpp>
 #include <bitcoin/util/logger.hpp>
 
 namespace libbitcoin {
@@ -13,18 +12,12 @@ static void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-memory_storage::memory_storage(kernel_ptr kern)
- : kernel_(kern)
+memory_storage::memory_storage()
 {
     service_.reset(new io_service);
     work_.reset(new io_service::work(*service_));
     strand_.reset(new io_service::strand(*service_));
     runner_ = std::thread(run_service, service_);
-}
-
-kernel_ptr memory_storage::kernel() const
-{
-    return kernel_;
 }
 
 void memory_storage::do_push_inv(net::message::inv item)
@@ -37,6 +30,10 @@ void memory_storage::do_push_inv(net::message::inv item)
 void memory_storage::push(net::message::inv item)
 {
     strand_->post(std::bind(&memory_storage::do_push_inv, this, item));
+}
+
+void memory_storage::push(net::message::transaction item)
+{
 }
 
 void memory_storage::do_push_block(net::message::block item)

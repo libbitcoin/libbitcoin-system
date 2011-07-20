@@ -20,6 +20,11 @@ void script::push_operation(operation oper)
     operations_.push_back(oper);
 }
 
+operation_stack script::operations() const
+{
+    return operations_;
+}
+
 bool script::run(transaction parent_tx)
 {
     stack_.clear();
@@ -123,7 +128,7 @@ bool script::run_operation(operation op, transaction parent_tx)
     return false;
 }
 
-std::string script::string_repr()
+std::string script::string_repr() const
 {
     std::ostringstream ss;
     for (const operation op: operations_)
