@@ -19,6 +19,9 @@ Build cppdb using the instructions on their site.
   # make install
 
 Edit the Makefile CFLAGS and LIBS variables to get the project to compile.
+Import the database too.
+
+  $ psql bitcoin < bitcoin.sql
 
 A good place to start is to run:
 
