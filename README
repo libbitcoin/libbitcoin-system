@@ -1,0 +1,19 @@
+All files in this repository fall under the license specified in LICENSE
+As of now, the project is licensed under the AGPL but we're still working
+on a different license and plan to relicense the project at a later date.
+
+You will need:
+
+  - g++ 4.6
+  - cppdb
+  - boost
+
+Edit the Makefile CFLAGS and LIBS variables to get the project to compile.
+
+A good place to start is to run:
+
+  $ make net
+  $ ./bin/tests/nettest
+
+This is still a work in progress.
+
