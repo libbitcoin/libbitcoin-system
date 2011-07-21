@@ -8,6 +8,16 @@ You will need:
   - cppdb
   - boost
 
+Build cppdb using the instructions on their site.
+
+  $ svn co http://cppcms.svn.sourceforge.net/svnroot/cppcms/cppdb/trunk cppdb-trunk
+  $ cd cppdb-trunk
+  $ mkdir build
+  $ cd build
+  $ cmake -DCMAKE_INSTALL_PREFIX=/home/smf/libbitcoin/usr/ ..  -DPQ_BACKEND_INTERNAL=1
+  $ make
+  # make install
+
 Edit the Makefile CFLAGS and LIBS variables to get the project to compile.
 
 A good place to start is to run:
