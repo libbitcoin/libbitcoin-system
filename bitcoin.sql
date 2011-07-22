@@ -4,7 +4,7 @@
 DROP DOMAIN IF EXISTS amount_type CASCADE;
 CREATE DOMAIN amount_type AS NUMERIC(16, 8) CHECK (VALUE < 21000000 AND VALUE >= 0);
 DROP DOMAIN IF EXISTS hash_type CASCADE;
-CREATE DOMAIN hash_type AS VARCHAR(96);  -- 32*3 because "aa 0f ca ..."
+CREATE DOMAIN hash_type AS VARCHAR(95);  -- 32*3 because "aa 0f ca ..."
 DROP DOMAIN IF EXISTS address_type CASCADE;
 CREATE DOMAIN address_type AS VARCHAR(110);
 
@@ -37,6 +37,33 @@ CREATE TABLE blocks (
     bits_body INT NOT NULL,
     nonce BIGINT NOT NULL,
     when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Genesis block
+INSERT INTO blocks (
+    block_hash,
+    depth,
+    span_left,
+    span_right,
+    version,
+    prev_block_hash,
+    merkle,
+    when_created,
+    bits_head,
+    bits_body,
+    nonce
+) VALUES (
+    '00 00 00 00 00 19 d6 68 9c 08 5a e1 65 83 1e 93 4f f7 63 ae 46 a2 a6 c1 72 b3 f1 b6 0a 8c e2 6f',
+    0,
+    0,
+    0,
+    1,
+    '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00',
+    '4a 5e 1e 4b aa b8 9f 3a 32 51 8a 88 c3 1b c8 7f 61 8f 76 67 3e 2c c7 7a b2 12 7b 7a fd ed a3 3b',
+    TO_TIMESTAMP(1231006505),
+    29,
+    65535,
+    2083236893
 );
 
 ---------------------------------------------------------------------------
@@ -139,8 +166,8 @@ CREATE TYPE parent_ident_type AS ENUM ('input', 'output');
 
 CREATE TABLE operations (
     operation_id INT NOT NULL DEFAULT NEXTVAL('operations_script_id_sequence') PRIMARY KEY,
+    script_id INT NOT NULL,
     opcode opcode_type NOT NULL,
-    data varchar(255),
-    script_id INT NOT NULL
+    data varchar(255)
 );
 
