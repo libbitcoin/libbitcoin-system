@@ -1,6 +1,5 @@
 #include <bitcoin/util/serializer.hpp>
 
-#include <boost/detail/endian.hpp>
 #include <algorithm>
 #include <iostream>
 #include <string>
@@ -129,28 +128,12 @@ T consume_object(const data_chunk& stream, size_t& pointer)
 }
 
 template<typename T>
-T read_data(const data_chunk& data, size_t& pointer, bool reverse=false)
+T read_data_impl(const data_chunk& data, size_t& pointer, bool reverse=true)
 {
-    #ifdef BOOST_LITTLE_ENDIAN
-        // do nothing
-    #elif BOOST_BIG_ENDIAN
-        reverse = true;
-    #else
-        #error "Endian isn't defined!"
-    #endif
-
-    T val;
-    if (reverse)
-    {
-        const char* real_bytes = reinterpret_cast<const char*>(&data[pointer]);
-        std::string reverse_bytes(real_bytes, sizeof(T));
-        std::reverse(reverse_bytes.begin(), reverse_bytes.end());
-        val = *reinterpret_cast<const T*>(reverse_bytes.c_str());
-    }
-    else
-    {
-        val = *reinterpret_cast<const T*>(&data[pointer]);
-    }
+    data_chunk chunk(
+            data.begin() + pointer, 
+            data.begin() + pointer + sizeof(T));
+    T val = cast_chunk<T>(chunk, reverse);
     pointer += sizeof(T);
     return val;
 }
@@ -162,22 +145,22 @@ deserializer::deserializer(const data_chunk& stream)
 
 uint8_t deserializer::read_byte()
 {
-    return read_data<uint8_t>(stream_, pointer_);
+    return read_data_impl<uint8_t>(stream_, pointer_);
 }
 
 uint16_t deserializer::read_2_bytes()
 {
-    return read_data<uint16_t>(stream_, pointer_);
+    return read_data_impl<uint16_t>(stream_, pointer_);
 }
 
 uint32_t deserializer::read_4_bytes()
 {
-    return read_data<uint32_t>(stream_, pointer_);
+    return read_data_impl<uint32_t>(stream_, pointer_);
 }
 
 uint64_t deserializer::read_8_bytes()
 {
-    return read_data<uint64_t>(stream_, pointer_);
+    return read_data_impl<uint64_t>(stream_, pointer_);
 }
 
 uint64_t deserializer::read_var_uint()
@@ -224,7 +207,7 @@ void read_bytes(const data_chunk& stream, size_t& pointer,
     pointer += byte_array.size();
 }
 
-data_chunk deserializer::read_raw_bytes(uint64_t n_bytes)
+data_chunk deserializer::read_data(uint64_t n_bytes)
 {
     data_chunk raw_bytes;
     for (uint64_t i = 0; i < n_bytes; ++i)
@@ -238,7 +221,7 @@ net::message::net_addr deserializer::read_net_addr()
     addr.services = read_8_bytes();
     // Read IP address
     read_bytes<16>(stream_, pointer_, addr.ip_addr);
-    addr.port = read_data<uint16_t>(stream_, pointer_, true);
+    addr.port = read_data_impl<uint16_t>(stream_, pointer_, false);
     return addr;
 }
 

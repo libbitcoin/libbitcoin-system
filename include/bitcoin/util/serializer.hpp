@@ -38,7 +38,7 @@ public:
     uint32_t read_4_bytes();
     uint64_t read_8_bytes();
     uint64_t read_var_uint();
-    data_chunk read_raw_bytes(uint64_t n_bytes);
+    data_chunk read_data(uint64_t n_bytes);
     net::message::net_addr read_net_addr();
     hash_digest read_hash();
     std::string read_fixed_len_str(size_t len);

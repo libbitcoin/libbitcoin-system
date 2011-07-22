@@ -174,6 +174,7 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
     if (!translator_->verify_checksum(header_msg, payload_stream))
     {
+        logger(LOG_WARNING) << "Bad checksum!";
         destroy_self();
         return;
     }

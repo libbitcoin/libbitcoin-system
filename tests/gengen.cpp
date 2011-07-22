@@ -87,13 +87,13 @@ void create_genesis_block()
     // prev hash = 0
     for (size_t i = 0; i < libbitcoin::sha256_length; ++i)
         block.write_byte(0);
-    block.write_data(libbitcoin::data_chunk(hash.begin(), hash.end()));
+    block.write_data(libbitcoin::data_chunk(hash.rbegin(), hash.rend()));
     block.write_4_bytes(1231006505);
     block.write_4_bytes(0x1d00ffff);
     block.write_4_bytes(2083236893);
 
     hash = libbitcoin::generate_sha256_hash(block.get_data());
-    for (auto i = hash.rbegin(); i != hash.rend(); ++i)
+    for (auto i = hash.begin(); i != hash.end(); ++i)
         std::cout << std::hex << (int)*i << " ";
     std::cout << "\n";
 }

@@ -16,13 +16,15 @@ hash_digest generate_sha256_hash(const data_chunk& chunk)
     SHA256_Init(&ctx);
     SHA256_Update(&ctx, digest.data(), sha256_length);
     SHA256_Final(digest.data(), &ctx);
+    // SSL gives us the hash backwards
+    std::reverse(digest.begin(), digest.end());
     return digest;
 }
 
 uint32_t generate_sha256_checksum(const data_chunk& chunk)
 {
     hash_digest hash = generate_sha256_hash(chunk);
-    data_chunk begin_bytes(hash.cbegin(), hash.cbegin() + 4);
+    data_chunk begin_bytes(hash.end() - 4, hash.end());
     return cast_chunk<uint32_t>(begin_bytes);
 }
 

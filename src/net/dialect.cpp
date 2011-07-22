@@ -125,7 +125,8 @@ message::header original_dialect::header_from_network(
 
 uint32_t original_dialect::checksum_from_network(const data_chunk& chunk) const
 {
-    return cast_chunk<uint32_t>(chunk);
+    deserializer deserial(chunk);
+    return deserial.read_4_bytes();
 }
 
 message::version original_dialect::version_from_network(
@@ -219,7 +220,7 @@ data_chunk read_raw_script(deserializer& deserial)
 {
     data_chunk raw_script;
     uint64_t script_length = deserial.read_var_uint();
-    return deserial.read_raw_bytes(script_length);
+    return deserial.read_data(script_length);
 }
 
 script read_script(deserializer& deserial)

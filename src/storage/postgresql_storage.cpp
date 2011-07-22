@@ -149,13 +149,6 @@ void postgresql_storage::push(net::message::block block)
     std::string block_hash_repr = serialize_bytes(block_hash),
             prev_block_repr = serialize_bytes(block.prev_block),
             merkle_repr = serialize_bytes(block.merkle_root);
-    // TODO: fix reverse ordering
-    // #1 priority to fix.
-    std::stringstream ss;
-    ss << std::hex;
-    for (int i = block_hash.size() - 1; i >= 0; --i)
-        ss << std::setw(2) << std::setfill('0') << (int)block_hash[i] << ' ';
-    block_hash_repr = ss.str();
 
     cppdb::result res = sql_ <<
         "INSERT INTO blocks (block_id, block_hash, version, prev_block_hash,"

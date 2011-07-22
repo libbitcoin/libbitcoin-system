@@ -1,6 +1,7 @@
 #ifndef LIBBITCOIN_TYPES_H
 #define LIBBITCOIN_TYPES_H
 
+#include <boost/detail/endian.hpp>
 #include <boost/asio.hpp>
 #include <array>
 #include <memory>
@@ -27,8 +28,19 @@ typedef std::vector<byte> data_chunk;
 void extend_data(data_chunk& chunk, const data_chunk& other);
 
 template<typename T>
-T cast_chunk(const data_chunk& chunk)
+T cast_chunk(data_chunk chunk, bool reverse=false)
 {
+    #ifdef BOOST_LITTLE_ENDIAN
+        reverse = !reverse;
+    #elif BOOST_BIG_ENDIAN
+        // do nothing
+    #else
+        #error "Endian isn't defined!"
+    #endif
+
+    if (reverse)
+        std::reverse(chunk.begin(), chunk.end());
+
     T val = 0;
     for (size_t i = 0; i < sizeof(T); ++i)
         val += (chunk[i] << i*8);
