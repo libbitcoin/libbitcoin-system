@@ -16,7 +16,10 @@ std::string serialize_bytes(T data)
     ss << std::hex;
     for (int val: data)
         ss << std::setw(2) << std::setfill('0') << val << ' ';
-    return ss.str();
+    // Remove end ' '
+    std::string ret = ss.str();
+    ret.resize(ret.size() - 1);
+    return ret;
 }
 
 data_chunk deserialize_bytes(std::string byte_stream)
@@ -54,22 +57,24 @@ void postgresql_storage::push(net::message::inv inv)
 
 void postgresql_storage::insert(operation operation, size_t script_id)
 {
-    cppdb::statement stat = sql_ <<
-        "INSERT INTO operations (opcode, data, script_id)"
-        "VALUES (?, ?, ?)";
     std::string opcode_repr = opcode_to_string(operation.code);
+    cppdb::statement stat = sql_ <<
+        "INSERT INTO operations (opcode, script_id, data)"
+        "VALUES (?, ?, ?)";
     stat.bind(opcode_repr);
+    stat.bind(script_id);
     if (operation.data.size() == 0)
     {
         stat.bind_null();
+        stat.exec();
     }
     else
     {
+        // Scoping rules. String needs to stay around for exec
         std::string byte_stream = serialize_bytes(operation.data);
         stat.bind(byte_stream);
+        stat.exec();
     }
-    stat.bind(script_id);
-    stat.exec();
 }
 
 size_t postgresql_storage::insert_script(operation_stack operations)
@@ -126,7 +131,6 @@ size_t postgresql_storage::insert(net::message::transaction transaction)
         "RETURNING transaction_id"
         << "hello" << transaction.version << transaction.locktime << cppdb::row;
     size_t transaction_id = res.get<size_t>(0);
-    logger(LOG_DEBUG) << "inserted tx " << transaction_id;
     for (size_t i = 0; i < transaction.inputs.size(); ++i)
         insert(transaction.inputs[i], transaction_id, i);
     for (size_t i = 0; i < transaction.outputs.size(); ++i)
