@@ -197,16 +197,13 @@ script parse_script(data_chunk raw_script)
         if (1 <= raw_byte && raw_byte <= 75)
             op.code = opcode::special;
         size_t read_n_bytes = number_of_bytes_from_opcode(op.code, raw_byte);
-        logger(LOG_DEBUG) << "Parsed: " << opcode_to_string(op.code);
-        if (read_n_bytes > 0)
-            logger(LOG_DEBUG) << "Reading: " << read_n_bytes << " bytes...";
 
         for (size_t byte_count = 0; byte_count < read_n_bytes; ++byte_count)
         {
             ++it;
             if (it == raw_script.cend())
             {
-                logger(LOG_ERROR) << "Premature end of script.";
+                logger(LOG_WARNING) << "Premature end of script.";
                 return script();
             }
             op.data.push_back(*it);

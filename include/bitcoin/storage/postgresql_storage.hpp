@@ -18,6 +18,9 @@ public:
     void push(net::message::transaction transaction);
     void push(net::message::block block);
     void request_inventories(accept_inventories_handler handler);
+
+    void organize_blockchain();
+
 private:
     void insert(operation oper, size_t script_id);
     size_t insert_script(operation_stack operations);

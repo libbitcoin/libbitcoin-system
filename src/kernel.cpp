@@ -139,9 +139,6 @@ bool kernel::recv_message(net::channel_handle,
 bool kernel::recv_message(net::channel_handle,
         net::message::block message)
 {
-    logger(LOG_DEBUG) << "Block: " << message.version << " "
-            << message.timestamp << " " << message.bits << " "
-            << message.nonce;
     storage_component_->push(message);
     return true;
 }
