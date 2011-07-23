@@ -10,7 +10,7 @@ CREATE DOMAIN address_type AS VARCHAR(110);
 
 CREATE OR REPLACE FUNCTION internal_to_sql(value bigint) RETURNS amount_type AS $$
         BEGIN
-                RETURN value / 100000000;
+                RETURN value / CAST(100000000 AS NUMERIC(17, 8));
         END;
 $$ LANGUAGE plpgsql;
 
