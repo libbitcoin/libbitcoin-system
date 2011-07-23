@@ -1,7 +1,6 @@
 #include <bitcoin/util/serializer.hpp>
 
 #include <algorithm>
-#include <iostream>
 #include <string>
 
 #include <bitcoin/net/messages.hpp>
@@ -145,7 +144,7 @@ deserializer::deserializer(const data_chunk& stream)
 
 uint8_t deserializer::read_byte()
 {
-    return read_data_impl<uint8_t>(stream_, pointer_);
+    return stream_[pointer_++];
 }
 
 uint16_t deserializer::read_2_bytes()
