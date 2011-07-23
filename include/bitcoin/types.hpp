@@ -43,7 +43,7 @@ T cast_chunk(data_chunk chunk, bool reverse=false)
 
     T val = 0;
     for (size_t i = 0; i < sizeof(T); ++i)
-        val += (chunk[i] << i*8);
+        val += static_cast<T>(chunk[i]) << (i*8);
     return val;
 }
 
