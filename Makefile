@@ -97,3 +97,11 @@ bin/tests/psql: obj/postgresql_storage.o obj/psql.o obj/logger.o obj/script.o ob
 
 psql: bin/tests/psql
 
+obj/types-test.o: ./tests/types-test.cpp
+	$(CXX) $(CFLAGS) -o ./obj/types-test.o ./tests/types-test.cpp
+
+bin/tests/types-test: obj/types.o obj/types-test.o
+	$(CXX) -o bin/tests/types-test obj/types.o obj/types-test.o $(LIBS)
+
+types-test: bin/tests/types-test
+
