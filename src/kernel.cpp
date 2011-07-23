@@ -21,9 +21,13 @@ namespace libbitcoin {
 
 const time_duration poll_inv_timeout = seconds(10);
 
-static void run_service(shared_ptr<io_service> service)
+void run_service(shared_ptr<io_service> service)
 {
     service->run();
+}
+
+void null(bool)
+{
 }
 
 kernel::kernel()
@@ -131,15 +135,15 @@ bool kernel::recv_message(net::channel_handle,
         if (curr_inv.type == net::message::inv_type::block)
             request_invs.invs.push_back(curr_inv);
     }
-    storage_component_->push(request_invs);
-    accept_inventories(request_invs.invs);
+    storage_component_->store(request_invs, null);
+    accept_inventories(request_invs.invs, false);
     return true;
 }
 
 bool kernel::recv_message(net::channel_handle,
         net::message::block message)
 {
-    storage_component_->push(message);
+    storage_component_->store(message, null);
     return true;
 }
 
@@ -167,9 +171,10 @@ void kernel::request_inventories(const boost::system::error_code& ec)
 {
     if (ec)
         return;
-    storage_component_->request_inventories(
+    storage_component_->fetch_inventories(
             std::bind(&kernel::accept_inventories,
-                shared_from_this(), std::placeholders::_1));
+                shared_from_this(), 
+                std::placeholders::_1, std::placeholders::_2));
     reset_inventory_poll();
 }
 
@@ -184,8 +189,10 @@ void kernel::send_to_random(net::channel_handle chandle,
     network_component_->send(chandle, request_message);
 }
 
-void kernel::accept_inventories(net::message::inv_list invs)
+void kernel::accept_inventories(net::message::inv_list invs, bool ec)
 {
+    if (ec)
+        return;
     net::message::getdata request_message;
     request_message.invs = invs;
     network_component_->get_random_handle(std::bind(

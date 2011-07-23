@@ -37,7 +37,8 @@ postgresql_storage::postgresql_storage(std::string database, std::string user)
 {
 }
 
-void postgresql_storage::push(net::message::inv inv)
+void postgresql_storage::store(net::message::inv inv, 
+        operation_handler handle_store)
 {
     cppdb::statement stat = sql_ <<
         "INSERT INTO inventory_requests (type, hash) \
@@ -53,6 +54,7 @@ void postgresql_storage::push(net::message::inv inv)
         stat.bind(byte_stream);
         stat.exec();
     }
+    handle_store(false);
 }
 
 void postgresql_storage::insert(operation operation, size_t script_id)
@@ -138,12 +140,15 @@ size_t postgresql_storage::insert(net::message::transaction transaction)
     return transaction_id;
 }
 
-void postgresql_storage::push(net::message::transaction transaction)
+void postgresql_storage::store(net::message::transaction transaction,
+        operation_handler handle_store)
 {
     insert(transaction);
+    handle_store(false);
 }
 
-void postgresql_storage::push(net::message::block block)
+void postgresql_storage::store(net::message::block block,
+        operation_handler handle_store)
 {
     hash_digest block_hash = hash_block_header(block);
     std::string block_hash_repr = serialize_bytes(block_hash),
@@ -181,10 +186,12 @@ void postgresql_storage::push(net::message::block block)
                 VALUES (?, ?, ?)"
             << transaction_id << block_id << i << cppdb::exec;
     }
+    handle_store(false);
 }
 
-void postgresql_storage::request_inventories(accept_inventories_handler handler)
+void postgresql_storage::fetch_inventories(fetch_handler_inventories)
 {
+    // Not implemented
 }
 
 void postgresql_storage::organize_blockchain()
@@ -215,8 +222,7 @@ void postgresql_storage::organize_blockchain()
             << cppdb::row;
         if (parent_result.empty())
             continue;
-        size_t parent_id = parent_result.get<size_t>(0),
-                parent_depth = parent_result.get<size_t>(1),
+        size_t parent_depth = parent_result.get<size_t>(1),
                 parent_span_left = parent_result.get<size_t>(2),
                 parent_span_right = parent_result.get<size_t>(3);
 

@@ -50,12 +50,11 @@ public:
 
     void register_storage(storage::storage_ptr stor_comp);
     storage::storage_ptr get_storage();
-    // Callbacks from storage component
-    void accept_inventories(net::message::inv_list invs);
 
 private:
     void reset_inventory_poll();
     void request_inventories(const boost::system::error_code& ec);
+    void accept_inventories(net::message::inv_list invs, bool ec);
     void send_to_random(net::channel_handle chandle,
             net::message::getdata request_message);
 

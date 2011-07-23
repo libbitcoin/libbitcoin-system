@@ -27,34 +27,41 @@ void memory_storage::do_push_inv(net::message::inv item)
     inventories_.insert(inventories_.end(), invs.begin(), invs.end());
     logger(LOG_DEBUG) << "total of " << inventories_.size() << " invs";
 }
-void memory_storage::push(net::message::inv item)
+void memory_storage::store(net::message::inv inv, 
+        operation_handler handle_store)
 {
-    strand_->post(std::bind(&memory_storage::do_push_inv, this, item));
+    strand_->post(std::bind(&memory_storage::do_push_inv, this, inv));
+    handle_store(false);
 }
 
-void memory_storage::push(net::message::transaction item)
+void memory_storage::store(net::message::transaction transaction,
+        storage::operation_handler handle_store)
 {
+    handle_store(false);
 }
 
-void memory_storage::do_push_block(net::message::block item)
+void memory_storage::do_push_block(net::message::block block)
 {
     logger(LOG_DEBUG) << "storing block.";
 }
-void memory_storage::push(net::message::block item)
+void memory_storage::store(net::message::block block,
+        operation_handler handle_store)
 {
-    strand_->post(std::bind(&memory_storage::do_push_block, this, item));
+    strand_->post(std::bind(&memory_storage::do_push_block, this, block));
+    handle_store(false);
 }
 
-void memory_storage::do_request_inventories(accept_inventories_handler handler)
+void memory_storage::do_request_inventories(
+        fetch_handler_inventories handle_fetch)
 {
     // Remove old inventories...
     if (!inventories_.empty())
-        handler(inventories_);
+        handle_fetch(inventories_, false);
 }
-void memory_storage::request_inventories(accept_inventories_handler handler)
+void memory_storage::fetch_inventories(fetch_handler_inventories handle_fetch)
 {
     strand_->post(std::bind(
-            &memory_storage::do_request_inventories, this, handler));
+            &memory_storage::do_request_inventories, this, handle_fetch));
 }
 
 } // storage

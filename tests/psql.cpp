@@ -11,6 +11,10 @@ using libbitcoin::opcode;
 using libbitcoin::hash_digest;
 typedef shared_ptr<postgresql_storage> psql_ptr;
 
+void null(bool ec)
+{
+}
+
 void create_fake_stuff(psql_ptr psql)
 {
     // First lets try an inv item
@@ -24,7 +28,7 @@ void create_fake_stuff(psql_ptr psql)
     for (int v: inventory.invs[0].hash)
         std::cout << v << " ";
     std::cout << "\n";
-    psql->push(inventory);
+    psql->store(inventory, null);
 
     // Lets push a transaction
     transaction tx;
@@ -64,7 +68,7 @@ void create_fake_stuff(psql_ptr psql)
     output.output_script = scr;
 
     tx.outputs.push_back(output);
-    psql->push(tx);
+    psql->store(tx, null);
 
     // Create a fake block
     block blk;
@@ -79,7 +83,7 @@ void create_fake_stuff(psql_ptr psql)
     blk.bits = 0x1b0404cb;
     blk.nonce = 2;
     blk.transactions.push_back(tx);
-    psql->push(blk);
+    psql->store(blk, null);
 }
 
 int main()

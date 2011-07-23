@@ -12,12 +12,22 @@ namespace storage {
 class storage : boost::noncopyable
 {
 public:
-    typedef std::function<void (net::message::inv_list)>
-            accept_inventories_handler;
-    virtual void push(net::message::inv inv) = 0;
-    virtual void push(net::message::transaction transaction) = 0;
-    virtual void push(net::message::block block) = 0;
-    virtual void request_inventories(accept_inventories_handler handler) = 0;
+    typedef std::function<void (bool)> operation_handler;
+
+    // Not supported in g++ yet
+    //template <typename Message>
+    //using fetch_handler = std::function<void (Message)>;
+    typedef std::function<void (net::message::inv_list, bool)>
+            fetch_handler_inventories;
+
+    virtual void store(net::message::inv inv, 
+            operation_handler handle_store) = 0;
+    virtual void store(net::message::transaction transaction,
+            operation_handler handle_store) = 0;
+    virtual void store(net::message::block block, 
+            operation_handler handle_store) = 0;
+
+    virtual void fetch_inventories(fetch_handler_inventories handle_fetch) = 0;
 };
 
 } // storage

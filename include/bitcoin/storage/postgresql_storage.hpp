@@ -14,10 +14,12 @@ class postgresql_storage : public storage
 public:
     postgresql_storage(std::string database, std::string user);
 
-    void push(net::message::inv inv);
-    void push(net::message::transaction transaction);
-    void push(net::message::block block);
-    void request_inventories(accept_inventories_handler handler);
+    void store(net::message::inv inv, operation_handler handle_store);
+    void store(net::message::transaction transaction, 
+            operation_handler handle_store);
+    void store(net::message::block block, operation_handler handle_store);
+
+    void fetch_inventories(fetch_handler_inventories handle_fetch);
 
     void organize_blockchain();
 
