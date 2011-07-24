@@ -58,7 +58,8 @@ private:
 std::string opcode_to_string(opcode code);
 
 // TODO: Should be inside the dialect imlementation eventually
-script parse_script(data_chunk raw_script);
+script parse_script(const data_chunk raw_script);
+data_chunk save_script(const script scr);
 
 } // libbitcoin
 

@@ -87,8 +87,8 @@ obj/script.o: ./src/script.cpp ./include/bitcoin/script.hpp
 obj/script-test.o: ./tests/script-test.cpp
 	$(CXX) $(CFLAGS) -o ./obj/script-test.o ./tests/script-test.cpp
 
-bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o
-	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o $(LIBS)
+bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o
+	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o $(LIBS)
 
 script-test: bin/tests/script-test
 

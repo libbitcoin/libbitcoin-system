@@ -186,10 +186,10 @@ size_t number_of_bytes_from_opcode(opcode code, byte raw_byte)
         return 0;
 }
 
-script parse_script(data_chunk raw_script)
+script parse_script(const data_chunk raw_script)
 {
     script script_object;
-    for (auto it = raw_script.cbegin(); it != raw_script.cend(); ++it)
+    for (auto it = raw_script.begin(); it != raw_script.end(); ++it)
     {
         byte raw_byte = *it;
         operation op;
@@ -213,6 +213,20 @@ script parse_script(data_chunk raw_script)
 
     }
     return script_object;
+}
+
+data_chunk save_script(const script scr)
+{
+    data_chunk raw_script;
+    for (operation op: scr.operations())
+    {
+        byte raw_byte = static_cast<byte>(op.code);
+        if (op.code == opcode::special)
+            raw_byte = op.data.size();
+        raw_script.push_back(raw_byte);
+        extend_data(raw_script, op.data);
+    }
+    return raw_script;
 }
 
 } // libbitcoin

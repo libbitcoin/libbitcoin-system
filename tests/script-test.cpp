@@ -1,5 +1,6 @@
 #include <bitcoin/script.hpp>
 #include <bitcoin/util/ripemd.hpp>
+#include <bitcoin/util/assert.hpp>
 #include <iostream>
 
 void ripemd_test()
@@ -23,6 +24,12 @@ int main()
     std::cout << script.string_repr() << "\n";
     libbitcoin::transaction tx;
     std::cout << "Returned: " << (script.run(tx) ? "true" : "false") << "\n";
+
+    // see if script that goes in is the same as what comes out :)
+    libbitcoin::data_chunk back_out = libbitcoin::save_script(libbitcoin::parse_script(raw_input));
+    BITCOIN_ASSERT(back_out == raw_input);
+    back_out = libbitcoin::save_script(libbitcoin::parse_script(raw_script));
+    BITCOIN_ASSERT(back_out == raw_script);
     return 0;
 }
 
