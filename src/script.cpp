@@ -25,7 +25,7 @@ operation_stack script::operations() const
     return operations_;
 }
 
-bool script::run(transaction parent_tx)
+bool script::run(const net::message::transaction& parent_tx)
 {
     stack_.clear();
     for (const operation oper: operations_)
@@ -83,7 +83,7 @@ bool script::op_equalverify()
     return pop_stack() == pop_stack();
 }
 
-bool script::op_checksig(transaction parent_tx)
+bool script::op_checksig(const net::message::transaction& parent_tx)
 {
     // Unimplemented
     pop_stack();
@@ -91,7 +91,8 @@ bool script::op_checksig(transaction parent_tx)
     return true;
 }
 
-bool script::run_operation(operation op, transaction parent_tx)
+bool script::run_operation(operation op, 
+        const net::message::transaction& parent_tx)
 {
     switch (op.code)
     {

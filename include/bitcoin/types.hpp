@@ -25,6 +25,8 @@ typedef std::array<uint8_t, 20> short_hash;
 typedef unsigned char byte;
 typedef std::vector<byte> data_chunk;
 
+typedef std::vector<hash_digest> block_locator;
+
 void extend_data(data_chunk& chunk, const data_chunk& other);
 
 template<typename T>

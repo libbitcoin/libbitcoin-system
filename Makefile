@@ -26,9 +26,6 @@ tests: block_hashing transaction_hashing script_parsing
 block_hashing: block obj/logger.o sha256
 	$(CXX) $(CFLAGS) ./bin/tests/block_hashing ./tests/block_hashing.cpp ./obj/block.o ./obj/logger.o ./obj/sha256.o
 
-transaction_hashing: transaction obj/logger.o sha256
-	$(CXX) ./bin/tests/transaction_hashing ./tests/transaction_hashing.cpp ./obj/transaction.o ./obj/logger.o ./obj/sha256.o $(LIBS)
-
 script_parsing: script
 	$(CXX) $(CFLAGS) ./bin/tests/script_parsing ./tests/script_parsing.cpp ./obj/script.o
 
@@ -65,8 +62,8 @@ obj/elliptic_curve_key.o: ./src/util/elliptic_curve_key.cpp ./include/bitcoin/ut
 obj/memory_storage.o: ./src/storage/memory_storage.cpp ./include/bitcoin/storage/memory_storage.hpp
 	$(CXX) $(CFLAGS) -o ./obj/memory_storage.o ./src/storage/memory_storage.cpp
 
-bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o
-	$(CXX) -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o $(LIBS)
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o
+	$(CXX) -o bin/tests/nettest ./obj/network.o ./obj/dialect.o ./obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o $(LIBS)
 
 net: bin/tests/nettest
 
@@ -107,4 +104,23 @@ bin/tests/types-test: obj/types.o obj/types-test.o
 	$(CXX) -o bin/tests/types-test obj/types.o obj/types-test.o $(LIBS)
 
 types-test: bin/tests/types-test
+
+obj/merkle.o: ./tests/merkle.cpp
+	$(CXX) $(CFLAGS) -o ./obj/merkle.o ./tests/merkle.cpp
+
+bin/tests/merkle: obj/merkle.o
+	$(CXX) -o bin/tests/merkle obj/merkle.o $(LIBS)
+
+merkle: bin/tests/merkle
+
+obj/transaction.o: src/transaction.cpp
+	$(CXX) $(CFLAGS) -o obj/transaction.o src/transaction.cpp
+
+obj/tx-hash.o: tests/tx-hash.cpp
+	$(CXX) $(CFLAGS) -o obj/tx-hash.o tests/tx-hash.cpp
+
+bin/tests/tx-hash: obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o
+	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o $(LIBS)
+
+tx-hash: bin/tests/tx-hash
 

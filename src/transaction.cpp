@@ -1,42 +1,35 @@
 #include <bitcoin/transaction.hpp>
 
-#include <boost/detail/endian.hpp>
-
+#include <bitcoin/util/serializer.hpp>
 #include <bitcoin/util/sha256.hpp>
+#include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 
-void transaction::calculate_hash()
+hash_digest hash_transaction(net::message::transaction transaction)
 {
-    sha256 sha_ctx;
-#ifdef BOOST_LITTLE_ENDIAN
-    sha_ctx << version;
-
-    sha_ctx.push_var_uint(inputs.size());
-    for(auto it = inputs.begin(); it != inputs.end(); ++it)
+    serializer key;
+    key.write_4_bytes(transaction.version);
+    key.write_var_uint(transaction.inputs.size());
+    for (net::message::transaction_input input: transaction.inputs)
     {
-        sha_ctx << it->hash;
-        sha_ctx << it->index;
-        sha_ctx.push_var_uint(it->script.length());
-        sha_ctx.push_str(it->script);
-        sha_ctx << it->sequence;
+        key.write_hash(input.hash);
+        key.write_4_bytes(input.index);
+        data_chunk raw_script = save_script(input.input_script);
+        key.write_var_uint(raw_script.size());
+        key.write_data(raw_script);
+        key.write_4_bytes(input.sequence);
     }
-    
-    sha_ctx.push_var_uint(outputs.size());
-    for(auto it = outputs.begin(); it != outputs.end(); ++it)
+    key.write_var_uint(transaction.outputs.size());
+    for (net::message::transaction_output output: transaction.outputs)
     {
-        sha_ctx << it->value;
-        sha_ctx.push_var_uint(it->script.length());
-        sha_ctx.push_str(it->script);
+        key.write_8_bytes(output.value);
+        data_chunk raw_script = save_script(output.output_script);
+        key.write_var_uint(raw_script.size());
+        key.write_data(raw_script);
     }
-
-    sha_ctx << locktime;
-#elif BOOST_BIG_ENDIAN
-    #error "Platform not supported"
-#else
-    #error "Platform not supported"
-#endif
-    sha_ctx.finalize(hash);
+    key.write_4_bytes(transaction.locktime);
+    return generate_sha256_hash(key.get_data());
 }
 
 } // libbitcoin

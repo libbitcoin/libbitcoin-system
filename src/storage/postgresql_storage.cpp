@@ -4,6 +4,7 @@
 #include <iomanip>
 
 #include <bitcoin/block.hpp>
+#include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
 
 namespace libbitcoin {
@@ -37,7 +38,7 @@ postgresql_storage::postgresql_storage(std::string database, std::string user)
 {
 }
 
-void postgresql_storage::store(net::message::inv inv, 
+void postgresql_storage::store(net::message::inv inv,
         operation_handler handle_store)
 {
     cppdb::statement stat = sql_ <<
@@ -126,12 +127,17 @@ void postgresql_storage::insert(net::message::transaction_output output,
 
 size_t postgresql_storage::insert(net::message::transaction transaction)
 {
+    hash_digest transaction_hash = hash_transaction(transaction);
+    std::string transaction_hash_repr = serialize_bytes(transaction_hash);
     cppdb::result res = sql_ <<
         "INSERT INTO transactions (transaction_id, transaction_hash, \
             version, locktime) \
         VALUES (DEFAULT, ?, ?, ?) \
         RETURNING transaction_id"
-        << "hello" << transaction.version << transaction.locktime << cppdb::row;
+        << transaction_hash_repr
+        << transaction.version
+        << transaction.locktime
+        << cppdb::row;
     size_t transaction_id = res.get<size_t>(0);
     for (size_t i = 0; i < transaction.inputs.size(); ++i)
         insert(transaction.inputs[i], transaction_id, i);
@@ -155,7 +161,7 @@ void postgresql_storage::store(net::message::block block,
             prev_block_repr = serialize_bytes(block.prev_block),
             merkle_repr = serialize_bytes(block.merkle_root);
 
-    cppdb::result res = sql_ << 
+    cppdb::result res = sql_ <<
         "SELECT 1 FROM blocks WHERE block_hash=?"
         << block_hash_repr << cppdb::row;
     if (!res.empty())
@@ -247,13 +253,13 @@ void postgresql_storage::organize_blockchain()
             // Fork in the blockchain!
             size_t chain_id = parent_span_right;
             cppdb::transaction guard(sql_);
-            sql_ << 
+            sql_ <<
                 "UPDATE blocks \
                 SET span_left=span_left+1 \
                 WHERE span_left >= ?"
                 << chain_id
                 << cppdb::exec;
-            sql_ << 
+            sql_ <<
                 "UPDATE blocks \
                 SET span_right=span_right+1 \
                 WHERE span_right >= ?"

@@ -3,10 +3,15 @@
 
 #include <vector>
 
-#include <bitcoin/transaction.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
+
+namespace net {
+    namespace message {
+        struct transaction;
+    }
+}
 
 enum class opcode
 {
@@ -33,7 +38,7 @@ class script
 public:
     void join(script other);
     void push_operation(operation oper);
-    bool run(transaction parent_tx);
+    bool run(const net::message::transaction& parent_tx);
 
     std::string string_repr() const;
 
@@ -45,9 +50,10 @@ private:
     bool op_dup();
     bool op_hash160();
     bool op_equalverify();
-    bool op_checksig(transaction parent_tx);
+    bool op_checksig(const net::message::transaction& parent_tx);
 
-    bool run_operation(operation op, transaction parent_tx);
+    bool run_operation(operation op, 
+            const net::message::transaction& parent_tx);
 
     data_chunk pop_stack();
 

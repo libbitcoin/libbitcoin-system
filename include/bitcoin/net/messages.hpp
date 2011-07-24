@@ -68,10 +68,11 @@ struct getaddr
 {
 };
 
+
 struct getblocks
 {
     // 10 sequential hashes, then exponential samples until reaching genesis
-    std::vector<hash_digest> locator_start_hashes;
+    block_locator locator_start_hashes;
     hash_digest hash_stop;
 };
 
