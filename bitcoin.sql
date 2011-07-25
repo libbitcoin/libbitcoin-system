@@ -8,9 +8,15 @@ CREATE DOMAIN hash_type AS VARCHAR(95);  -- 32*3 because "aa 0f ca ..."
 DROP DOMAIN IF EXISTS address_type CASCADE;
 CREATE DOMAIN address_type AS VARCHAR(110);
 
-CREATE OR REPLACE FUNCTION internal_to_sql(value bigint) RETURNS amount_type AS $$
+CREATE OR REPLACE FUNCTION internal_to_sql(value BIGINT) RETURNS amount_type AS $$
         BEGIN
                 RETURN value / CAST(100000000 AS NUMERIC(17, 8));
+        END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION sql_to_internal(value amount_type) RETURNS BIGINT AS $$
+        BEGIN
+                RETURN CAST(value * 100000000 AS BIGINT);
         END;
 $$ LANGUAGE plpgsql;
 
