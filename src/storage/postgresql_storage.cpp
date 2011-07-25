@@ -56,18 +56,18 @@ postgresql_storage::postgresql_storage(std::string database, std::string user)
 {
 }
 
-void postgresql_storage::store(net::message::inv inv,
+void postgresql_storage::store(message::inv inv,
         operation_handler handle_store)
 {
     cppdb::statement stat = sql_ <<
         "INSERT INTO inventory_requests (type, hash) \
         VALUES (?, ?)";
-    for (net::message::inv_vect ivv: inv.invs)
+    for (message::inv_vect ivv: inv.invs)
     {
         stat.reset();
-        if (ivv.type == net::message::inv_type::transaction)
+        if (ivv.type == message::inv_type::transaction)
             stat.bind("transaction");
-        else if (ivv.type == net::message::inv_type::block)
+        else if (ivv.type == message::inv_type::block)
             stat.bind("block");
         std::string byte_stream = serialize_bytes(ivv.hash);
         stat.bind(byte_stream);
@@ -108,7 +108,7 @@ size_t postgresql_storage::insert_script(operation_stack operations)
     return script_id;
 }
 
-void postgresql_storage::insert(net::message::transaction_input input,
+void postgresql_storage::insert(message::transaction_input input,
         size_t transaction_id, size_t index_in_parent)
 {
     size_t script_id = insert_script(input.input_script.operations());
@@ -128,7 +128,7 @@ void postgresql_storage::insert(net::message::transaction_input input,
         << cppdb::exec;
 }
 
-void postgresql_storage::insert(net::message::transaction_output output,
+void postgresql_storage::insert(message::transaction_output output,
         size_t transaction_id, size_t index_in_parent)
 {
     size_t script_id = insert_script(output.output_script.operations());
@@ -145,7 +145,7 @@ void postgresql_storage::insert(net::message::transaction_output output,
         << cppdb::exec;
 }
 
-size_t postgresql_storage::insert(net::message::transaction transaction)
+size_t postgresql_storage::insert(message::transaction transaction)
 {
     hash_digest transaction_hash = hash_transaction(transaction);
     std::string transaction_hash_repr = serialize_bytes(transaction_hash);
@@ -166,14 +166,14 @@ size_t postgresql_storage::insert(net::message::transaction transaction)
     return transaction_id;
 }
 
-void postgresql_storage::store(net::message::transaction transaction,
+void postgresql_storage::store(message::transaction transaction,
         operation_handler handle_store)
 {
     insert(transaction);
     handle_store(false);
 }
 
-void postgresql_storage::store(net::message::block block,
+void postgresql_storage::store(message::block block,
         operation_handler handle_store)
 {
     hash_digest block_hash = hash_block_header(block);
@@ -204,7 +204,7 @@ void postgresql_storage::store(net::message::block block,
     size_t block_id = result.get<size_t>(0);
     for (size_t i = 0; i < block.transactions.size(); ++i)
     {
-        net::message::transaction transaction = block.transactions[i];
+        message::transaction transaction = block.transactions[i];
         size_t transaction_id = insert(transaction);
         // Create block <-> txn mapping
         sql_ << "INSERT INTO transactions_parents ( \
@@ -242,10 +242,10 @@ script postgresql_storage::select_script(size_t script_id)
     return scr;
 }
 
-net::message::transaction_input_list postgresql_storage::select_inputs(
+message::transaction_input_list postgresql_storage::select_inputs(
         size_t transaction_id)
 {
-    net::message::transaction_input_list inputs;
+    message::transaction_input_list inputs;
     cppdb::result result = sql_ <<
         "SELECT * \
         FROM inputs \
@@ -254,7 +254,7 @@ net::message::transaction_input_list postgresql_storage::select_inputs(
         << transaction_id;
     while (result.next())
     {
-        net::message::transaction_input input;
+        message::transaction_input input;
         input.hash = 
             deserialize_hash(result.get<std::string>("previous_output_hash"));
         input.index = result.get<uint32_t>("previous_output_index");
@@ -265,10 +265,10 @@ net::message::transaction_input_list postgresql_storage::select_inputs(
     }
     return inputs;
 }
-net::message::transaction_output_list postgresql_storage::select_outputs(
+message::transaction_output_list postgresql_storage::select_outputs(
         size_t transaction_id)
 {
-    net::message::transaction_output_list outputs;
+    message::transaction_output_list outputs;
     cppdb::result result = sql_ <<
         "SELECT \
             *, \
@@ -279,7 +279,7 @@ net::message::transaction_output_list postgresql_storage::select_outputs(
         << transaction_id;
     while (result.next())
     {
-        net::message::transaction_output output;
+        message::transaction_output output;
         output.value = result.get<uint64_t>("internal_value");
         size_t script_id = result.get<size_t>("script_id");
         output.output_script = select_script(script_id);
@@ -288,13 +288,13 @@ net::message::transaction_output_list postgresql_storage::select_outputs(
     return outputs;
 }
 
-net::message::transaction_list postgresql_storage::read_transactions(
+message::transaction_list postgresql_storage::read_transactions(
         cppdb::result result)
 {
-    net::message::transaction_list transactions;
+    message::transaction_list transactions;
     while (result.next())
     {
-        net::message::transaction transaction;
+        message::transaction transaction;
         transaction.version = result.get<uint32_t>("version");
         transaction.locktime = result.get<uint32_t>("locktime");
         size_t transaction_id = result.get<size_t>("transaction_id");
@@ -308,7 +308,7 @@ net::message::transaction_list postgresql_storage::read_transactions(
 void postgresql_storage::fetch_block_number(size_t block_number,
         fetch_handler_block handle_fetch)
 {
-    net::message::block block;
+    message::block block;
     cppdb::result block_result = sql_ <<
         "SELECT \
             *, \

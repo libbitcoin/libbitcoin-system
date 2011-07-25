@@ -1,11 +1,11 @@
 #ifndef LIBBITCOIN_BLOCK_H
 #define LIBBITCOIN_BLOCK_H
 
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 
 namespace libbitcoin {
 
-hash_digest hash_block_header(net::message::block block);
+hash_digest hash_block_header(message::block block);
 
 } // libbitcoin
 

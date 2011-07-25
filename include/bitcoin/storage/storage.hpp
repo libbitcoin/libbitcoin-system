@@ -4,7 +4,7 @@
 #include <boost/utility.hpp>
 #include <functional>
 
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 
 namespace libbitcoin {
 namespace storage {
@@ -17,16 +17,16 @@ public:
     // Not supported in g++ yet
     //template <typename Message>
     //using fetch_handler = std::function<void (Message)>;
-    typedef std::function<void (net::message::inv_list, bool)>
+    typedef std::function<void (message::inv_list, bool)>
             fetch_handler_inventories;
-    typedef std::function<void (net::message::block, bool)>
+    typedef std::function<void (message::block, bool)>
             fetch_handler_block;
 
-    virtual void store(net::message::inv inv, 
+    virtual void store(message::inv inv, 
             operation_handler handle_store) = 0;
-    virtual void store(net::message::transaction transaction,
+    virtual void store(message::transaction transaction,
             operation_handler handle_store) = 0;
-    virtual void store(net::message::block block, 
+    virtual void store(message::block block, 
             operation_handler handle_store) = 0;
 
     virtual void fetch_inventories(fetch_handler_inventories handle_fetch) = 0;

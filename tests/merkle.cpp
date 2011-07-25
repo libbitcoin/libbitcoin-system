@@ -17,7 +17,7 @@ void display_hash(libbitcoin::hash_digest h)
     std::cout << std::dec << '\n';
 }
 
-void recv_block(libbitcoin::net::message::block block, bool ec)
+void recv_block(libbitcoin::message::block block, bool ec)
 {
     if (ec)
     {

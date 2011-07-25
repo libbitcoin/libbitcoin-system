@@ -6,7 +6,7 @@
 #include <memory>
 #include <thread>
 
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
@@ -23,28 +23,28 @@ public:
     net::network_ptr get_network();
     // Callbacks from network component
     void send_failed(net::channel_handle chandle,
-            net::message::version message);
+            message::version message);
     void send_failed(net::channel_handle chandle,
-            net::message::verack message);
+            message::verack message);
     void send_failed(net::channel_handle chandle,
-            net::message::getaddr message);
+            message::getaddr message);
     void send_failed(net::channel_handle chandle,
-            net::message::inv message);
+            message::inv message);
     void send_failed(net::channel_handle chandle,
-            net::message::getdata message);
+            message::getdata message);
     void send_failed(net::channel_handle chandle,
-            net::message::getblocks message);
+            message::getblocks message);
 
     bool recv_message(net::channel_handle chandle,
-            net::message::version message);
+            message::version message);
     bool recv_message(net::channel_handle chandle,
-            net::message::verack message);
+            message::verack message);
     bool recv_message(net::channel_handle chandle,
-            net::message::addr message);
+            message::addr message);
     bool recv_message(net::channel_handle chandle,
-            net::message::inv message);
+            message::inv message);
     bool recv_message(net::channel_handle chandle,
-            net::message::block message);
+            message::block message);
 
     void handle_connect(net::channel_handle chandle);
 
@@ -54,9 +54,9 @@ public:
 private:
     void reset_inventory_poll();
     void request_inventories(const boost::system::error_code& ec);
-    void accept_inventories(net::message::inv_list invs, bool ec);
+    void accept_inventories(message::inv_list invs, bool ec);
     void send_to_random(net::channel_handle chandle,
-            net::message::getdata request_message);
+            message::getdata request_message);
 
     net::network_ptr network_component_;
     storage::storage_ptr storage_component_;

@@ -84,8 +84,8 @@ script-test: bin/tests/script-test
 obj/psql.o: ./tests/psql.cpp
 	$(CXX) $(CFLAGS) -o ./obj/psql.o ./tests/psql.cpp
 
-bin/tests/psql: obj/postgresql_storage.o obj/psql.o obj/logger.o obj/script.o obj/ripemd.o obj/block.o obj/serializer.o obj/sha256.o obj/types.o
-	$(CXX) -o bin/tests/psql obj/psql.o obj/postgresql_storage.o obj/logger.o obj/script.o obj/ripemd.o obj/block.o obj/serializer.o obj/sha256.o obj/types.o $(LIBS)
+bin/tests/psql: obj/postgresql_storage.o obj/psql.o obj/logger.o obj/script.o obj/ripemd.o obj/block.o obj/serializer.o obj/sha256.o obj/types.o obj/transaction.o
+	$(CXX) -o bin/tests/psql obj/psql.o obj/postgresql_storage.o obj/logger.o obj/script.o obj/ripemd.o obj/block.o obj/serializer.o obj/sha256.o obj/types.o obj/transaction.o $(LIBS)
 
 psql: bin/tests/psql
 

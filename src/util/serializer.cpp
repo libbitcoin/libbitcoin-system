@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <string>
 
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/types.hpp>
 
@@ -89,7 +89,7 @@ void serializer::write_data(const data_chunk& other_data)
     extend_data(data_, other_data);
 }
 
-void serializer::write_net_addr(net::message::net_addr addr)
+void serializer::write_net_addr(message::net_addr addr)
 {
     write_8_bytes(addr.services);
     for (size_t i = 0; i < 16; i++)
@@ -214,9 +214,9 @@ data_chunk deserializer::read_data(uint64_t n_bytes)
     return raw_bytes;
 }
 
-net::message::net_addr deserializer::read_net_addr()
+message::net_addr deserializer::read_net_addr()
 {
-    net::message::net_addr addr;
+    message::net_addr addr;
     addr.services = read_8_bytes();
     // Read IP address
     read_bytes<16>(stream_, pointer_, addr.ip_addr);

@@ -18,10 +18,10 @@ class memory_storage : public storage
 public:
     memory_storage();
 
-    void store(net::message::inv inv, operation_handler handle_store);
-    void store(net::message::transaction transaction, 
+    void store(message::inv inv, operation_handler handle_store);
+    void store(message::transaction transaction, 
             operation_handler handle_store);
-    void store(net::message::block block, operation_handler handle_store);
+    void store(message::block block, operation_handler handle_store);
 
     void fetch_inventories(fetch_handler_inventories handle_fetch);
     void fetch_block_number(size_t block_number, 
@@ -34,10 +34,10 @@ private:
     strand_ptr strand_;
 
     // The data
-    void do_push_inv(net::message::inv item);
-    void do_push_block(net::message::block item);
+    void do_push_inv(message::inv item);
+    void do_push_block(message::block item);
     void do_request_inventories(fetch_handler_inventories handle_fetch);
-    net::message::inv_list inventories_;
+    message::inv_list inventories_;
 };
 
 } // storage

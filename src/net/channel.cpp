@@ -8,7 +8,7 @@
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/net/network.hpp>
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 
 #include "shared_const_buffer.hpp"
 #include "dialect.hpp"
@@ -269,7 +269,7 @@ channel_handle channel_pimpl::get_id() const
 
 message::version channel_pimpl::create_version_message()
 {
-    net::message::version version;
+    message::version version;
     // this is test data.
     version.version = 31900;
     version.services = 1;

@@ -2,7 +2,7 @@
 
 #include <boost/assert.hpp>
 
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/sha256.hpp>
@@ -94,14 +94,14 @@ data_chunk original_dialect::to_network(message::getdata getdata) const
     {
         switch (inv.type)
         {
-            case net::message::inv_type::transaction:
+            case message::inv_type::transaction:
                 payload.write_4_bytes(1);
                 break;
-            case net::message::inv_type::block:
+            case message::inv_type::block:
                 payload.write_4_bytes(2);
                 break;
-            case net::message::inv_type::error:
-            case net::message::inv_type::none:
+            case message::inv_type::error:
+            case message::inv_type::none:
             default:
                 BITCOIN_ASSERT(0);
                 break;
@@ -285,7 +285,7 @@ message::block original_dialect::block_from_network(
     return payload;
 }
 
-bool original_dialect::verify_header(net::message::header header_msg) const
+bool original_dialect::verify_header(message::header header_msg) const
 {
     if (header_msg.magic != 0xd9b4bef9)
         return false;

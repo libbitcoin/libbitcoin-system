@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_NET_MESSAGES_H
-#define LIBBITCOIN_NET_MESSAGES_H
+#ifndef LIBBITCOIN_MESSAGES_H
+#define LIBBITCOIN_MESSAGES_H
 
 #include <array>
 #include <cstdint>
@@ -10,7 +10,6 @@
 #include <bitcoin/script.hpp>
 
 namespace libbitcoin {
-namespace net {
 namespace message {
 
 typedef std::array<uint8_t, 16> ip_address;
@@ -129,7 +128,6 @@ struct inv
 };
 
 } // message
-} // net
 } // libbitcoin
 
 #endif

@@ -48,32 +48,32 @@ net::network_ptr kernel::get_network()
 }
 
 void kernel::send_failed(net::channel_handle,
-        net::message::version)
+        message::version)
 {
 }
 
 void kernel::send_failed(net::channel_handle,
-        net::message::verack)
+        message::verack)
 {
 }
 
 void kernel::send_failed(net::channel_handle,
-        net::message::getaddr)
+        message::getaddr)
 {
 }
 
 void kernel::send_failed(net::channel_handle,
-        net::message::inv)
+        message::inv)
 {
 }
 
 void kernel::send_failed(net::channel_handle,
-        net::message::getdata)
+        message::getdata)
 {
 }
 
 void kernel::send_failed(net::channel_handle,
-        net::message::getblocks)
+        message::getblocks)
 {
 }
 
@@ -87,26 +87,26 @@ void display_byte_array(T arr)
 }
 
 bool kernel::recv_message(net::channel_handle chandle,
-        net::message::version message)
+        message::version message)
 {
     log_debug() << "nonce is " << message.nonce;
     log_debug() << "last block is " << message.start_height;
     display_byte_array(message.addr_you.ip_addr);
-    network_component_->send(chandle, net::message::verack());
+    network_component_->send(chandle, message::verack());
     return true;
 }
 
 bool kernel::recv_message(net::channel_handle,
-        net::message::verack)
+        message::verack)
 {
     // When you receive this, then you know other side is accepting your sends
     return true;
 }
 
 bool kernel::recv_message(net::channel_handle,
-        net::message::addr message)
+        message::addr message)
 {
-    for (const net::message::net_addr addr: message.addr_list)
+    for (const message::net_addr addr: message.addr_list)
     {
         log_debug() << addr.port;
         display_byte_array(addr.ip_addr);
@@ -115,24 +115,24 @@ bool kernel::recv_message(net::channel_handle,
 }
 
 bool kernel::recv_message(net::channel_handle,
-        net::message::inv message)
+        message::inv message)
 {
-    net::message::inv request_invs;
-    for (const net::message::inv_vect curr_inv: message.invs)
+    message::inv request_invs;
+    for (const message::inv_vect curr_inv: message.invs)
     {
-        if (curr_inv.type == net::message::inv_type::none)
+        if (curr_inv.type == message::inv_type::none)
             return false;
 
-        if (curr_inv.type == net::message::inv_type::error)
+        if (curr_inv.type == message::inv_type::error)
             log_debug() << "ERROR";
-        else if (curr_inv.type == net::message::inv_type::transaction)
+        else if (curr_inv.type == message::inv_type::transaction)
             log_debug() << "MSG_TX";
-        else if (curr_inv.type == net::message::inv_type::block)
+        else if (curr_inv.type == message::inv_type::block)
             log_debug() << "MSG_BLOCK";
         display_byte_array(curr_inv.hash);
 
         // Push only block invs to the request queue
-        if (curr_inv.type == net::message::inv_type::block)
+        if (curr_inv.type == message::inv_type::block)
             request_invs.invs.push_back(curr_inv);
     }
     storage_component_->store(request_invs, null);
@@ -141,7 +141,7 @@ bool kernel::recv_message(net::channel_handle,
 }
 
 bool kernel::recv_message(net::channel_handle,
-        net::message::block message)
+        message::block message)
 {
     storage_component_->store(message, null);
     return true;
@@ -184,16 +184,16 @@ storage::storage_ptr kernel::get_storage()
 }
 
 void kernel::send_to_random(net::channel_handle chandle,
-        net::message::getdata request_message)
+        message::getdata request_message)
 {
     network_component_->send(chandle, request_message);
 }
 
-void kernel::accept_inventories(net::message::inv_list invs, bool ec)
+void kernel::accept_inventories(message::inv_list invs, bool ec)
 {
     if (ec)
         return;
-    net::message::getdata request_message;
+    message::getdata request_message;
     request_message.invs = invs;
     network_component_->get_random_handle(std::bind(
             &kernel::send_to_random, shared_from_this(),

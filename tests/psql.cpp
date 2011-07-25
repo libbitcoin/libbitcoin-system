@@ -1,10 +1,10 @@
 #include <bitcoin/storage/postgresql_storage.hpp>
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 #include <iostream>
 #include <memory>
 using std::shared_ptr;
 using libbitcoin::storage::postgresql_storage;
-using namespace libbitcoin::net::message;
+using namespace libbitcoin::message;
 using libbitcoin::script;
 using libbitcoin::operation;
 using libbitcoin::opcode;

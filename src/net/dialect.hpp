@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 #include <bitcoin/util/serializer.hpp>
 
 namespace libbitcoin {
@@ -26,7 +26,7 @@ public:
     virtual message::header header_from_network(
             const data_chunk& stream) const = 0;
 
-    virtual bool verify_header(net::message::header header_msg) const = 0;
+    virtual bool verify_header(message::header header_msg) const = 0;
 
     virtual bool checksum_used(const message::header header_msg) const = 0;
 
@@ -68,7 +68,7 @@ public:
 
     // Create header/messages from stream
     message::header header_from_network(const data_chunk& stream) const;
-    bool verify_header(net::message::header header_msg) const;
+    bool verify_header(message::header header_msg) const;
 
     bool checksum_used(const message::header header_msg) const;
     virtual uint32_t checksum_from_network(const data_chunk& stream) const;

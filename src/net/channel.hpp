@@ -11,7 +11,7 @@
 #include <deque>
 
 #include <bitcoin/net/network.hpp>
-#include <bitcoin/net/messages.hpp>
+#include <bitcoin/messages.hpp>
 #include <bitcoin/util/serializer.hpp>
 
 namespace libbitcoin {

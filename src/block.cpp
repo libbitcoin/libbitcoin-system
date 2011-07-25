@@ -6,7 +6,7 @@
 
 namespace libbitcoin {
 
-hash_digest hash_block_header(net::message::block block)
+hash_digest hash_block_header(message::block block)
 {
     serializer key;
     key.write_4_bytes(block.version);

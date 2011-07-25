@@ -20,31 +20,31 @@ memory_storage::memory_storage()
     runner_ = std::thread(run_service, service_);
 }
 
-void memory_storage::do_push_inv(net::message::inv item)
+void memory_storage::do_push_inv(message::inv item)
 {
     log_debug() << "storing " << item.invs.size() << " invs";
-    const net::message::inv_list& invs = item.invs;
+    const message::inv_list& invs = item.invs;
     inventories_.insert(inventories_.end(), invs.begin(), invs.end());
     log_debug() << "total of " << inventories_.size() << " invs";
 }
-void memory_storage::store(net::message::inv inv, 
+void memory_storage::store(message::inv inv, 
         operation_handler handle_store)
 {
     strand_->post(std::bind(&memory_storage::do_push_inv, this, inv));
     handle_store(false);
 }
 
-void memory_storage::store(net::message::transaction transaction,
+void memory_storage::store(message::transaction transaction,
         storage::operation_handler handle_store)
 {
     handle_store(false);
 }
 
-void memory_storage::do_push_block(net::message::block block)
+void memory_storage::do_push_block(message::block block)
 {
     log_debug() << "storing block.";
 }
-void memory_storage::store(net::message::block block,
+void memory_storage::store(message::block block,
         operation_handler handle_store)
 {
     strand_->post(std::bind(&memory_storage::do_push_block, this, block));
