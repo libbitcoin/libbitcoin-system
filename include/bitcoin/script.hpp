@@ -22,7 +22,8 @@ enum class opcode
     dup = 118,
     hash160 = 169,
     equalverify = 136,
-    checksig = 172
+    checksig = 172,
+    bad_operation
 };
 
 struct operation
@@ -40,7 +41,7 @@ public:
     void push_operation(operation oper);
     bool run(const net::message::transaction& parent_tx);
 
-    std::string string_repr() const;
+    std::string repr() const;
 
     operation_stack operations() const;
 
@@ -62,6 +63,7 @@ private:
 };
 
 std::string opcode_to_string(opcode code);
+opcode string_to_opcode(std::string code_repr);
 
 // TODO: Should be inside the dialect imlementation eventually
 script parse_script(const data_chunk raw_script);

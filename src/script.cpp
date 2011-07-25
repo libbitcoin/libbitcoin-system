@@ -129,7 +129,7 @@ bool script::run_operation(operation op,
     return false;
 }
 
-std::string script::string_repr() const
+std::string script::repr() const
 {
     std::ostringstream ss;
     for (const operation op: operations_)
@@ -174,6 +174,27 @@ std::string opcode_to_string(opcode code)
             return ss.str();
         }
     }
+}
+opcode string_to_opcode(std::string code_repr)
+{
+    if (code_repr == "special")
+        return opcode::special;
+    else if (code_repr == "pushdata1")
+        return opcode::pushdata1;
+    else if (code_repr == "pushdata2")
+        return opcode::pushdata2;
+    else if (code_repr == "pushdata4")
+        return opcode::pushdata4;
+    else if (code_repr == "dup")
+        return opcode::dup;
+    else if (code_repr == "hash160")
+        return opcode::hash160;
+    else if (code_repr == "equalverify")
+        return opcode::equalverify;
+    else if (code_repr == "checksig")
+        return opcode::checksig;
+    // ERROR: unknown... 
+    return opcode::bad_operation;
 }
 
 size_t number_of_bytes_from_opcode(opcode code, byte raw_byte)
