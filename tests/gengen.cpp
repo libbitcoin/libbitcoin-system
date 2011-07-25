@@ -24,7 +24,7 @@ void create_genesis_block()
 
     const char* genesis_timestamped_message = 
         "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks";
-    libbitcoin::logger(libbitcoin::LOG_INFO) << "Satoshi: " << genesis_timestamped_message;
+    libbitcoin::log_info() << "Satoshi: " << genesis_timestamped_message;
     libbitcoin::data_chunk msg(genesis_timestamped_message, genesis_timestamped_message + strlen(genesis_timestamped_message));
     libbitcoin::data_chunk bits = libbitcoin::uncast_type<uint32_t>(486604799);
 

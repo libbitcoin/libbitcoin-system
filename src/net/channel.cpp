@@ -46,7 +46,7 @@ channel_pimpl::channel_pimpl(const init_data& dat)
 channel_pimpl::~channel_pimpl()
 {
     tcp::endpoint remote_endpoint = socket_->remote_endpoint();
-    logger(LOG_DEBUG) << "Closing channel "
+    log_debug() << "Closing channel "
             << remote_endpoint.address().to_string();
     boost::system::error_code ec;
     socket_->shutdown(tcp::socket::shutdown_both, ec);
@@ -58,7 +58,7 @@ void channel_pimpl::handle_timeout(const boost::system::error_code& ec)
 {
     if (problems_check(ec))
         return;
-    logger(LOG_INFO) << "Forcing disconnect due to timeout.";
+    log_info() << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
     destroy_self();
 }
@@ -128,12 +128,12 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
 
     if (!translator_->verify_header(header_msg))
     {
-        logger(LOG_DEBUG) << "Bad header received.";
+        log_debug() << "Bad header received.";
         destroy_self();
         return;
     }
 
-    logger(LOG_INFO) << "r: " << header_msg.command
+    log_info() << "r: " << header_msg.command
             << " (" << header_msg.payload_length << " bytes)";
     if (translator_->checksum_used(header_msg))
     {
@@ -174,7 +174,7 @@ void channel_pimpl::handle_read_payload(message::header header_msg,
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
     if (!translator_->verify_checksum(header_msg, payload_stream))
     {
-        logger(LOG_WARNING) << "Bad checksum!";
+        log_warning() << "Bad checksum!";
         destroy_self();
         return;
     }

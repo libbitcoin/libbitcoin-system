@@ -30,7 +30,7 @@ bool script::run(const net::message::transaction& parent_tx)
     stack_.clear();
     for (const operation oper: operations_)
     {
-        logger(LOG_DEBUG) << "Run: " << opcode_to_string(oper.code);
+        log_debug() << "Run: " << opcode_to_string(oper.code);
         if (!run_operation(oper, parent_tx))
             return false;
         if (oper.data.size() > 0)
@@ -44,7 +44,7 @@ bool script::run(const net::message::transaction& parent_tx)
     }
     if (stack_.size() != 0)
     {
-        logger(LOG_ERROR) << "Script left junk on top of the stack";
+        log_error() << "Script left junk on top of the stack";
         return false;
     }
     return true;
@@ -225,7 +225,7 @@ script parse_script(const data_chunk raw_script)
             ++it;
             if (it == raw_script.cend())
             {
-                logger(LOG_WARNING) << "Premature end of script.";
+                log_warning() << "Premature end of script.";
                 return script();
             }
             op.data.push_back(*it);

@@ -53,7 +53,7 @@ channel_handle network_impl::create_channel(socket_ptr socket)
             [&channels_, channel_obj]
             {
                 channels_.push_back(channel_obj);
-                logger(LOG_DEBUG) << channels_.size() << " peers connected.";
+                log_debug() << channels_.size() << " peers connected.";
             });
     return channel_obj->get_id();
 }
@@ -73,7 +73,7 @@ channel_handle network_impl::connect(bool& ec, std::string ip_addr,
     }
     catch (std::exception& ex)
     {
-        logger(LOG_ERROR) << "Connecting to peer " << ip_addr
+        log_error() << "Connecting to peer " << ip_addr
                 << ": " << ex.what();
         ec = true;
         return 0;
@@ -90,7 +90,7 @@ static void remove_matching_channels(channel_list* channels,
                 return channel_obj.get_id() == chandle;
             };
     channels->erase_if(is_matching);
-    logger(LOG_DEBUG) << channels->size() << " peers remaining.";
+    log_debug() << channels->size() << " peers remaining.";
 }
 void network_impl::disconnect(channel_handle chandle)
 {
@@ -110,7 +110,7 @@ void perform_send(channel_list* channels, kernel_ptr kern,
     auto it = std::find_if(channels->begin(), channels->end(), is_matching);
     if (it == channels->end())
     {
-        logger(LOG_ERROR) << "Non existant channel " << chandle << " for send.";
+        log_error() << "Non existant channel " << chandle << " for send.";
         kern->send_failed(chandle, message_packet);
         return;
     }
@@ -184,7 +184,7 @@ bool network_impl::start_accept()
     }
     catch (std::exception& ex)
     {
-        logger(LOG_ERROR) << "Accepting connections: " << ex.what();
+        log_error() << "Accepting connections: " << ex.what();
         return false;
     }
     return true;
@@ -193,7 +193,7 @@ bool network_impl::start_accept()
 void network_impl::handle_accept(socket_ptr socket)
 {
     tcp::endpoint remote_endpoint = socket->remote_endpoint();
-    logger(LOG_DEBUG) << "New incoming connection from "
+    log_debug() << "New incoming connection from "
             << remote_endpoint.address().to_string();
     channel_handle chandle = create_channel(socket);
     kernel_->handle_connect(chandle);

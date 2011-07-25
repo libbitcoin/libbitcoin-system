@@ -5,18 +5,13 @@
 
 namespace libbitcoin {
 
-// LOG  = normal
-// DLOG = debug log
-// VLOG = verbose log
-// SYSLOG = system log
-// DEBUG, INFO, WARNING, ERROR, FATAL
-enum logger_level
+enum class logger_level
 {
-    LOG_DEBUG = 0,
-    LOG_INFO,
-    LOG_WARNING,
-    LOG_ERROR,
-    LOG_FATAL
+    debug,
+    info,
+    warning,
+    error,
+    fatal
 };
 
 class logger_wrapper
@@ -37,7 +32,11 @@ private:
     logger_level lev_;
 };
 
-logger_wrapper logger(logger_level lev);
+logger_wrapper log_debug();
+logger_wrapper log_info();
+logger_wrapper log_warning();
+logger_wrapper log_error();
+logger_wrapper log_fatal();
 
 } // libbitcoin
 

@@ -22,10 +22,10 @@ memory_storage::memory_storage()
 
 void memory_storage::do_push_inv(net::message::inv item)
 {
-    logger(LOG_DEBUG) << "storing " << item.invs.size() << " invs";
+    log_debug() << "storing " << item.invs.size() << " invs";
     const net::message::inv_list& invs = item.invs;
     inventories_.insert(inventories_.end(), invs.begin(), invs.end());
-    logger(LOG_DEBUG) << "total of " << inventories_.size() << " invs";
+    log_debug() << "total of " << inventories_.size() << " invs";
 }
 void memory_storage::store(net::message::inv inv, 
         operation_handler handle_store)
@@ -42,7 +42,7 @@ void memory_storage::store(net::message::transaction transaction,
 
 void memory_storage::do_push_block(net::message::block block)
 {
-    logger(LOG_DEBUG) << "storing block.";
+    log_debug() << "storing block.";
 }
 void memory_storage::store(net::message::block block,
         operation_handler handle_store)

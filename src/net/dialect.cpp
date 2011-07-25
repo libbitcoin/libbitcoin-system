@@ -12,7 +12,7 @@ namespace net {
 
 data_chunk construct_header_from(std::string command, data_chunk payload)
 {
-    logger(LOG_INFO) << "s: " << command
+    log_info() << "s: " << command
             << " (" << payload.size() << " bytes)";
     serializer header;
     // magic
