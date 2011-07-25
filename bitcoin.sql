@@ -140,6 +140,7 @@ CREATE TABLE inputs (
     script_id INT NOT NULL,
     previous_output_id INT,
     previous_output_hash hash_type NOT NULL,
+    previous_output_index BIGINT NOT NULL,
     sequence BIGINT NOT NULL
 );
 

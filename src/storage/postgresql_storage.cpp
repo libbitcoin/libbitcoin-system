@@ -96,14 +96,16 @@ void postgresql_storage::insert(net::message::transaction_input input,
     size_t script_id = insert_script(input.input_script.operations());
     std::string hash = serialize_bytes(input.hash);
     sql_ <<
-        "INSERT INTO inputs (input_id, parent_id, index_in_parent, \
-            script_id, previous_output_id, previous_output_hash, sequence) \
-        VALUES (DEFAULT, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO inputs (input_id, parent_id, index_in_parent, script_id, \
+            previous_output_id, previous_output_hash, previous_output_index, \
+            sequence) \
+        VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?)"
         << transaction_id
         << index_in_parent
         << script_id
         << cppdb::null
         << hash
+        << input.index
         << input.sequence
         << cppdb::exec;
 }
