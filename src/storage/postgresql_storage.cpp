@@ -28,9 +28,27 @@ data_chunk deserialize_bytes(std::string byte_stream)
     std::stringstream ss;
     ss << std::hex << byte_stream;
     data_chunk stack;
-    for (int val; ss.good(); ss >> val)
+    while (ss.good())
+    {
+        int val;
+        ss >> val;
         stack.push_back(val);
+    }
     return stack;
+}
+
+hash_digest deserialize_hash(std::string byte_stream)
+{
+    std::stringstream ss;
+    ss << std::hex << byte_stream;
+    hash_digest hash;
+    for (size_t i = 0; i < hash.size(); ++i)
+    {
+        int val;
+        ss >> val;
+        hash[i] = val;
+    }
+    return hash;
 }
 
 postgresql_storage::postgresql_storage(std::string database, std::string user)
