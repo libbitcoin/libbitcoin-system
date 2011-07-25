@@ -64,6 +64,11 @@ void memory_storage::fetch_inventories(fetch_handler_inventories handle_fetch)
             &memory_storage::do_request_inventories, this, handle_fetch));
 }
 
+void memory_storage::fetch_block_number(size_t block_number, 
+        fetch_handler_block handle_fetch)
+{
+}
+
 } // storage
 } // libbitcoin
 

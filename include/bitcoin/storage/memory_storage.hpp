@@ -24,6 +24,8 @@ public:
     void store(net::message::block block, operation_handler handle_store);
 
     void fetch_inventories(fetch_handler_inventories handle_fetch);
+    void fetch_block_number(size_t block_number, 
+            fetch_handler_block handle_fetch);
 
 private:
     service_ptr service_;

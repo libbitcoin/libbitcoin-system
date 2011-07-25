@@ -21,14 +21,6 @@ transaction: ./src/transaction.cpp ./include/bitcoin/transaction.hpp
 script: ./src/script.cpp ./include/bitcoin/script.hpp
 	$(CXX) $(CFLAGS) -o ./obj/script.o ./src/script.cpp
 
-tests: block_hashing transaction_hashing script_parsing
-
-block_hashing: block obj/logger.o sha256
-	$(CXX) $(CFLAGS) ./bin/tests/block_hashing ./tests/block_hashing.cpp ./obj/block.o ./obj/logger.o ./obj/sha256.o
-
-script_parsing: script
-	$(CXX) $(CFLAGS) ./bin/tests/script_parsing ./tests/script_parsing.cpp ./obj/script.o
-
 obj/block.o: ./src/block.cpp ./include/bitcoin/block.hpp
 	$(CXX) $(CFLAGS) -o ./obj/block.o ./src/block.cpp
 
@@ -108,8 +100,8 @@ types-test: bin/tests/types-test
 obj/merkle.o: ./tests/merkle.cpp
 	$(CXX) $(CFLAGS) -o ./obj/merkle.o ./tests/merkle.cpp
 
-bin/tests/merkle: obj/merkle.o
-	$(CXX) -o bin/tests/merkle obj/merkle.o $(LIBS)
+bin/tests/merkle: obj/merkle.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/block.o obj/serializer.o obj/transaction.o
+	$(CXX) -o bin/tests/merkle obj/merkle.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/block.o obj/serializer.o obj/transaction.o $(LIBS)
 
 merkle: bin/tests/merkle
 
@@ -123,4 +115,12 @@ bin/tests/tx-hash: obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj
 	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o $(LIBS)
 
 tx-hash: bin/tests/tx-hash
+
+obj/block-hash.o: tests/block-hash.cpp
+	$(CXX) $(CFLAGS) -o obj/block-hash.o tests/block-hash.cpp
+
+bin/tests/block-hash: obj/block-hash.o obj/block.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/serializer.o obj/transaction.o
+	$(CXX) -o bin/tests/block-hash obj/block-hash.o obj/block.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/serializer.o obj/transaction.o $(LIBS)
+
+block-hash: bin/tests/block-hash
 
