@@ -90,17 +90,17 @@ struct transaction_output
     script output_script;
 };
 
-typedef std::vector<transaction_input> transaction_input_array;
-typedef std::vector<transaction_output> transaction_output_array;
+typedef std::vector<transaction_input> transaction_input_list;
+typedef std::vector<transaction_output> transaction_output_list;
 
 struct transaction
 {
     uint32_t version;
     uint32_t locktime;
-    transaction_input_array inputs;
-    transaction_output_array outputs;
+    transaction_input_list inputs;
+    transaction_output_list outputs;
 };
-typedef std::vector<transaction> transaction_array;
+typedef std::vector<transaction> transaction_list;
 
 struct block
 {
@@ -110,7 +110,7 @@ struct block
     uint32_t timestamp;
     uint32_t bits;
     uint32_t nonce;
-    transaction_array transactions;
+    transaction_list transactions;
 };
 
 struct addr

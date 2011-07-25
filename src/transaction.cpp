@@ -2,9 +2,12 @@
 
 #include <bitcoin/util/serializer.hpp>
 #include <bitcoin/util/sha256.hpp>
+#include <bitcoin/util/logger.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
+
+typedef std::vector<hash_digest> hash_list;
 
 hash_digest hash_transaction(net::message::transaction transaction)
 {
@@ -30,6 +33,77 @@ hash_digest hash_transaction(net::message::transaction transaction)
     }
     key.write_4_bytes(transaction.locktime);
     return generate_sha256_hash(key.get_data());
+}
+
+hash_digest build_merkle_tree(hash_list merkle)
+{
+    if (merkle.empty())
+        return hash_digest{
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    if (merkle.size()%2 != 0)
+        merkle.push_back(merkle.back());
+
+    while (merkle.size() > 1)
+    {
+        hash_list new_merkle;
+        for (auto it = merkle.begin(); it != merkle.end(); ++it)
+        {
+            serializer concat;
+            concat.write_hash(*it);
+            ++it;
+            concat.write_hash(*it);
+            hash_digest new_root = generate_sha256_hash(concat.get_data());
+            new_merkle.push_back(new_root);
+        }
+        merkle = new_merkle;
+    }
+    return merkle[0];
+}
+
+hash_digest generate_merkle_root(net::message::transaction_list transactions)
+{
+    hash_list tx_hashes;
+    for (net::message::transaction tx: transactions)
+        tx_hashes.push_back(hash_transaction(tx));
+    if (tx_hashes.size()%2 != 0)
+        tx_hashes.push_back(tx_hashes.back());
+    return build_merkle_tree(tx_hashes);
+}
+
+std::string input_repr(net::message::transaction_input input)
+{
+    std::ostringstream ss;
+    ss 
+        << "\tindex = " << input.index << "\n"
+        << "\t" << input.input_script.repr() << "\n"
+        << "\tsequence = " << input.sequence << "\n";
+    return ss.str();
+}
+
+std::string output_repr(net::message::transaction_output output)
+{
+    std::ostringstream ss;
+    ss << "\tvalue = " << output.value << "\n"
+        << "\t" << output.output_script.repr() << "\n";
+    return ss.str();
+}
+
+std::string transaction_repr(net::message::transaction transaction)
+{
+    std::ostringstream ss;
+    ss << "Transaction:\n"
+        << "\tversion = " << transaction.version << "\n"
+        << "\tlocktime = " << transaction.locktime << "\n"
+        << "Inputs:\n";
+    for (net::message::transaction_input input: transaction.inputs)
+        ss << input_repr(input);
+    ss << "Outputs:\n";
+    for (net::message::transaction_output output: transaction.outputs)
+        ss << output_repr(output);
+    ss << "\n";
+    return ss.str();
 }
 
 } // libbitcoin
