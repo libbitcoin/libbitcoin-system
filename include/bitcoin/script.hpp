@@ -39,7 +39,7 @@ public:
     void push_operation(operation oper);
     bool run(const message::transaction& parent_tx);
 
-    std::string repr() const;
+    std::string string_repr() const;
 
     operation_stack operations() const;
 

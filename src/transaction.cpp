@@ -72,25 +72,25 @@ hash_digest generate_merkle_root(message::transaction_list transactions)
     return build_merkle_tree(tx_hashes);
 }
 
-std::string input_repr(message::transaction_input input)
+std::string string_repr(message::transaction_input input)
 {
     std::ostringstream ss;
     ss 
         << "\tindex = " << input.index << "\n"
-        << "\t" << input.input_script.repr() << "\n"
+        << "\t" << input.input_script.string_repr() << "\n"
         << "\tsequence = " << input.sequence << "\n";
     return ss.str();
 }
 
-std::string output_repr(message::transaction_output output)
+std::string string_repr(message::transaction_output output)
 {
     std::ostringstream ss;
     ss << "\tvalue = " << output.value << "\n"
-        << "\t" << output.output_script.repr() << "\n";
+        << "\t" << output.output_script.string_repr() << "\n";
     return ss.str();
 }
 
-std::string transaction_repr(message::transaction transaction)
+std::string string_repr(message::transaction transaction)
 {
     std::ostringstream ss;
     ss << "Transaction:\n"
@@ -98,10 +98,10 @@ std::string transaction_repr(message::transaction transaction)
         << "\tlocktime = " << transaction.locktime << "\n"
         << "Inputs:\n";
     for (message::transaction_input input: transaction.inputs)
-        ss << input_repr(input);
+        ss << string_repr(input);
     ss << "Outputs:\n";
     for (message::transaction_output output: transaction.outputs)
-        ss << output_repr(output);
+        ss << string_repr(output);
     ss << "\n";
     return ss.str();
 }

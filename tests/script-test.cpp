@@ -1,6 +1,7 @@
 #include <bitcoin/script.hpp>
 #include <bitcoin/util/ripemd.hpp>
 #include <bitcoin/util/assert.hpp>
+#include <bitcoin/messages.hpp>
 #include <iostream>
 
 void ripemd_test()
@@ -22,7 +23,7 @@ int main()
     libbitcoin::script script_out = libbitcoin::parse_script(raw_script);
     script.join(script_out);
     std::cout << script.string_repr() << "\n";
-    libbitcoin::transaction tx;
+    libbitcoin::message::transaction tx;
     std::cout << "Returned: " << (script.run(tx) ? "true" : "false") << "\n";
 
     // see if script that goes in is the same as what comes out :)

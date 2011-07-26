@@ -129,7 +129,7 @@ bool script::run_operation(operation op,
     return false;
 }
 
-std::string script::repr() const
+std::string script::string_repr() const
 {
     std::ostringstream ss;
     for (const operation op: operations_)
