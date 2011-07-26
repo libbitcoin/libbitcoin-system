@@ -437,6 +437,17 @@ void postgresql_storage::organize_blockchain()
                 << cppdb::exec;
         }
     }
+    matchup_inputs();
+}
+
+void postgresql_storage::matchup_inputs()
+{
+    sql_ <<
+        "UPDATE inputs \
+        SET previous_output_id=transaction_id \
+        FROM transactions \
+        WHERE previous_output_hash=transaction_hash"
+        << cppdb::exec;
 }
 
 } // storage

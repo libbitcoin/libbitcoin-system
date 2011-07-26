@@ -42,6 +42,8 @@ private:
 
     message::transaction_list read_transactions(cppdb::result result);
 
+    void matchup_inputs();
+
     cppdb::session sql_;
 };
 
