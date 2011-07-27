@@ -22,6 +22,8 @@ public:
     void fetch_inventories(fetch_handler_inventories handle_fetch);
     void fetch_block_number(size_t block_number, 
             fetch_handler_block handle_fetch);
+    void fetch_output(hash_digest transaction_hash, uint32_t index,
+            fetch_handler_output handle_fetch);
 
     void organize_blockchain();
 
@@ -34,10 +36,8 @@ private:
             size_t transaction_id, size_t index_in_parent);
     size_t insert(message::transaction transaction);
 
-    message::transaction_input_list select_inputs(
-            size_t transaction_id);
-    message::transaction_output_list select_outputs(
-            size_t transaction_id);
+    message::transaction_input_list select_inputs(size_t transaction_id);
+    message::transaction_output_list select_outputs(size_t transaction_id);
     script select_script(size_t script_id);
 
     message::transaction_list read_transactions(cppdb::result result);

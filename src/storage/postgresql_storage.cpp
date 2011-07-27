@@ -351,6 +351,36 @@ void postgresql_storage::fetch_block_number(size_t block_number,
     handle_fetch(block, false);
 }
 
+void postgresql_storage::fetch_output(hash_digest transaction_hash, 
+        uint32_t index, fetch_handler_output handle_fetch)
+{
+    message::transaction_output output;
+    std::string transaction_hash_repr = serialize_bytes(transaction_hash);
+    cppdb::result result = sql_ <<
+        "SELECT \
+            *, \
+            sql_to_internal(value) internal_value \
+        FROM transactions \
+        JOIN outputs \
+        ON transaction_id=parent_id \
+        WHERE \
+            transaction_hash=? \
+            AND index_in_parent=?"
+        << transaction_hash_repr
+        << index
+        << cppdb::row;
+    if (result.empty())
+    {
+        // ERROR: output doesn't exist
+        handle_fetch(output, true);
+        return;
+    }
+    output.value = result.get<uint64_t>("internal_value");
+    size_t script_id = result.get<size_t>("script_id");
+    output.output_script = select_script(script_id);
+    handle_fetch(output, false);
+}
+
 void postgresql_storage::organize_blockchain()
 {
     cppdb::result result = sql_ <<

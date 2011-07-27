@@ -21,6 +21,8 @@ public:
             fetch_handler_inventories;
     typedef std::function<void (message::block, bool)>
             fetch_handler_block;
+    typedef std::function<void (message::transaction_output, bool)>
+            fetch_handler_output;
 
     virtual void store(message::inv inv, 
             operation_handler handle_store) = 0;
@@ -32,6 +34,8 @@ public:
     virtual void fetch_inventories(fetch_handler_inventories handle_fetch) = 0;
     virtual void fetch_block_number(size_t block_number,
             fetch_handler_block handle_fetch) = 0;
+    virtual void fetch_output(hash_digest transaction_hash, uint32_t index,
+            fetch_handler_output handle_fetch) = 0;
 };
 
 } // storage

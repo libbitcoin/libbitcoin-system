@@ -21,6 +21,7 @@ enum class opcode
     hash160 = 169,
     equalverify = 136,
     checksig = 172,
+    codeseparator,  // Ignored
     bad_operation
 };
 
@@ -37,7 +38,7 @@ class script
 public:
     void join(script other);
     void push_operation(operation oper);
-    bool run(const message::transaction& parent_tx);
+    bool run(const message::transaction& parent_tx, uint32_t input_index);
 
     std::string string_repr() const;
 
@@ -49,10 +50,11 @@ private:
     bool op_dup();
     bool op_hash160();
     bool op_equalverify();
-    bool op_checksig(const message::transaction& parent_tx);
+    bool op_checksig(const message::transaction& parent_tx, 
+            uint32_t input_index);
 
     bool run_operation(operation op, 
-            const message::transaction& parent_tx);
+            const message::transaction& parent_tx, uint32_t input_index);
 
     data_chunk pop_stack();
 

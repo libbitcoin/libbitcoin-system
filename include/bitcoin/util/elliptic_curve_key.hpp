@@ -16,7 +16,7 @@ public:
     bool set_public_key(data_chunk pubkey);
     bool verify(hash_digest hash, data_chunk signature);
 
-private:
+//private:
     bool initialize();
 
     EC_KEY* key_;

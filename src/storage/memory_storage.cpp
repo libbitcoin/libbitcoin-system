@@ -69,6 +69,11 @@ void memory_storage::fetch_block_number(size_t block_number,
 {
 }
 
+void memory_storage::fetch_output(hash_digest transaction_hash, 
+        uint32_t index, fetch_handler_output handle_fetch)
+{
+}
+
 } // storage
 } // libbitcoin
 

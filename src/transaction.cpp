@@ -9,7 +9,8 @@ namespace libbitcoin {
 
 typedef std::vector<hash_digest> hash_list;
 
-hash_digest hash_transaction(message::transaction transaction)
+hash_digest hash_transaction_impl(message::transaction transaction, 
+        uint32_t* hash_type_code)
 {
     serializer key;
     key.write_4_bytes(transaction.version);
@@ -32,7 +33,19 @@ hash_digest hash_transaction(message::transaction transaction)
         key.write_data(raw_script);
     }
     key.write_4_bytes(transaction.locktime);
+    if (hash_type_code != nullptr)
+        key.write_4_bytes(*hash_type_code);
     return generate_sha256_hash(key.get_data());
+}
+
+hash_digest hash_transaction(message::transaction transaction)
+{
+    return hash_transaction_impl(transaction, nullptr);
+}
+hash_digest hash_transaction(message::transaction transaction, 
+        uint32_t hash_type_code)
+{
+    return hash_transaction_impl(transaction, &hash_type_code);
 }
 
 hash_digest build_merkle_tree(hash_list merkle)

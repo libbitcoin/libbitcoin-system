@@ -2,6 +2,9 @@
 
 #include <stack>
 
+#include <bitcoin/messages.hpp>
+#include <bitcoin/transaction.hpp>
+#include <bitcoin/util/elliptic_curve_key.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/ripemd.hpp>
@@ -25,13 +28,13 @@ operation_stack script::operations() const
     return operations_;
 }
 
-bool script::run(const message::transaction& parent_tx)
+bool script::run(const message::transaction& parent_tx, uint32_t input_index)
 {
     stack_.clear();
     for (const operation oper: operations_)
     {
         log_debug() << "Run: " << opcode_to_string(oper.code);
-        if (!run_operation(oper, parent_tx))
+        if (!run_operation(oper, parent_tx, input_index))
             return false;
         if (oper.data.size() > 0)
         {
@@ -83,16 +86,54 @@ bool script::op_equalverify()
     return pop_stack() == pop_stack();
 }
 
-bool script::op_checksig(const message::transaction& parent_tx)
+bool script::op_checksig(const message::transaction& parent_tx, 
+        uint32_t input_index)
 {
-    // Unimplemented
-    pop_stack();
-    pop_stack();
-    return true;
+    if (stack_.size() < 2)
+        return false;
+    data_chunk pubkey = pop_stack(), signature = pop_stack();
+
+    script script_code;
+    for (operation op: operations_)
+    {
+        if (op.data == signature || op.code == opcode::codeseparator)
+            continue;
+        script_code.push_operation(op);
+    }
+
+    elliptic_curve_key key;
+    key.set_public_key(pubkey);
+
+    uint32_t hash_type = 0;
+    hash_type = signature.back();
+    signature.pop_back();
+    BITCOIN_ASSERT(signature.size() == 70);
+
+    if (hash_type != 1)
+    {
+        log_error() << "Unimplemented hash_type";
+        return false;
+    }
+
+    if (input_index >= parent_tx.inputs.size())
+    {
+        log_fatal() << "script::op_checksig() : input_index " << input_index
+                << " is out of range.";
+        return false;
+    }
+
+    message::transaction tx_tmp = parent_tx;
+    // Blank all other inputs' signatures
+    for (message::transaction_input& input: tx_tmp.inputs)
+        input.input_script = script();
+    tx_tmp.inputs[input_index].input_script = script_code;
+
+    hash_digest tx_hash = hash_transaction(tx_tmp, hash_type);
+    return key.verify(tx_hash, signature);
 }
 
 bool script::run_operation(operation op, 
-        const message::transaction& parent_tx)
+        const message::transaction& parent_tx, uint32_t input_index)
 {
     switch (op.code)
     {
@@ -121,7 +162,7 @@ bool script::run_operation(operation op,
             return op_equalverify();
 
         case opcode::checksig:
-            return op_checksig(parent_tx);
+            return op_checksig(parent_tx, input_index);
 
         default:
             break;

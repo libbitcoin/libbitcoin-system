@@ -6,6 +6,9 @@
 namespace libbitcoin {
 
 hash_digest hash_transaction(message::transaction transaction);
+// hash_type_code is used by OP_CHECKSIG
+hash_digest hash_transaction(message::transaction transaction, 
+        uint32_t hash_type_code);
 
 hash_digest generate_merkle_root(message::transaction_list transactions);
 
