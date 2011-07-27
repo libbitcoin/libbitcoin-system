@@ -63,11 +63,11 @@ void network_impl::handle_connect(const boost::system::error_code& ec,
     if (ec)
     {
         log_error() << "Connecting to peer " << ip_addr << ": " << ec.message();
-        handle_connect(ec, 0);
+        handle_connect(network_error::system_network_error, 0);
         return;
     }
     channel_handle chanid = create_channel(socket);
-    handle_connect(ec, chanid);
+    handle_connect(std::error_code(), chanid);
 }
 
 void network_impl::connect(std::string ip_addr, unsigned short port,

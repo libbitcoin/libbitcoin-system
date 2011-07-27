@@ -9,6 +9,7 @@
 #include <bitcoin/kernel.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/net/types.hpp>
+#include <bitcoin/net/errors.hpp>
 
 namespace libbitcoin {
 namespace net {
@@ -16,19 +17,12 @@ namespace net {
 using boost::asio::ip::tcp;
 using boost::asio::io_service;
 
-enum network_flags : uint32_t
-{
-    none = 0,
-    accept_incoming = 1
-};
-
 class network
   : private boost::noncopyable
 {
 public:
     typedef std::function<
-            void (boost::system::error_code, channel_handle chandle)> 
-            connect_handler;
+            void (std::error_code, channel_handle chandle)> connect_handler;
     typedef std::function<void (channel_handle)> accept_random_handle;
 
     virtual kernel_ptr kernel() const = 0;

@@ -39,6 +39,9 @@ obj/sha256.o: src/util/sha256.cpp include/bitcoin/util/sha256.hpp
 obj/kernel.o: src/kernel.cpp include/bitcoin/kernel.hpp
 	$(CXX) $(CFLAGS) -o obj/kernel.o src/kernel.cpp
 
+obj/network_errors.o: src/net/errors.cpp include/bitcoin/net/errors.hpp
+	$(CXX) $(CFLAGS) -o obj/network_errors.o src/net/errors.cpp
+
 obj/storage_errors.o: src/storage/errors.cpp include/bitcoin/storage/errors.hpp
 	$(CXX) $(CFLAGS) -o obj/storage_errors.o src/storage/errors.cpp
 
@@ -57,8 +60,8 @@ obj/elliptic_curve_key.o: src/util/elliptic_curve_key.cpp include/bitcoin/util/e
 obj/memory_storage.o: src/storage/memory_storage.cpp include/bitcoin/storage/memory_storage.hpp
 	$(CXX) $(CFLAGS) -o obj/memory_storage.o src/storage/memory_storage.cpp
 
-bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o
-	$(CXX) -o bin/tests/nettest obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o $(LIBS)
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o
+	$(CXX) -o bin/tests/nettest obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o $(LIBS)
 
 net: bin/tests/nettest
 
