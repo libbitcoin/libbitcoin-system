@@ -7,7 +7,6 @@
 #include <bitcoin/messages.hpp>
 
 namespace libbitcoin {
-namespace storage {
 
 class storage : boost::noncopyable
 {
@@ -38,7 +37,6 @@ public:
             fetch_handler_output handle_fetch) = 0;
 };
 
-} // storage
 } // libbitcoin
 
 #endif

@@ -8,7 +8,6 @@
 #include <bitcoin/storage/storage.hpp>
 
 namespace libbitcoin {
-namespace storage {
 
 using boost::asio::io_service;
 using std::shared_ptr;
@@ -42,7 +41,6 @@ private:
     message::inv_list inventories_;
 };
 
-} // storage
 } // libbitcoin
 
 #endif

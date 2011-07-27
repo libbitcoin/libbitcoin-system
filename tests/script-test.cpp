@@ -8,7 +8,7 @@
 #include <memory>
 
 using std::shared_ptr;
-using libbitcoin::storage::postgresql_storage;
+using libbitcoin::postgresql_storage;
 typedef shared_ptr<postgresql_storage> psql_ptr;
 
 void ripemd_test()

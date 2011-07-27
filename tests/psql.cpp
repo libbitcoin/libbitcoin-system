@@ -3,7 +3,7 @@
 #include <iostream>
 #include <memory>
 using std::shared_ptr;
-using libbitcoin::storage::postgresql_storage;
+using libbitcoin::postgresql_storage;
 using namespace libbitcoin::message;
 using libbitcoin::script;
 using libbitcoin::operation;

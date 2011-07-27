@@ -4,7 +4,6 @@
 #include <memory>
 
 namespace libbitcoin {
-namespace storage {
 
 class storage;
 
@@ -12,8 +11,6 @@ using std::shared_ptr;
 
 typedef shared_ptr<storage> storage_ptr;
 
-
-} // storage
 } // libbitcoin
 
 #endif

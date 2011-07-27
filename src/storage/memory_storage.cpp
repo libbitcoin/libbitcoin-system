@@ -5,7 +5,6 @@
 #include <bitcoin/util/logger.hpp>
 
 namespace libbitcoin {
-namespace storage {
 
 static void run_service(shared_ptr<io_service> service)
 {
@@ -74,6 +73,5 @@ void memory_storage::fetch_output(hash_digest transaction_hash,
 {
 }
 
-} // storage
 } // libbitcoin
 

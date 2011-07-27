@@ -49,10 +49,10 @@ int run_kernel()
     libbitcoin::net::network_ptr net(
             new libbitcoin::net::network_impl(kernel));
     kernel->register_network(net);
-    //libbitcoin::storage::storage_ptr storage(
-    //        new libbitcoin::storage::memory_storage());
-    libbitcoin::storage::storage_ptr storage(
-            new libbitcoin::storage::postgresql_storage("bitcoin", "genjix"));
+    //libbitcoin::storage_ptr storage(
+    //        new libbitcoin::memory_storage());
+    libbitcoin::storage_ptr storage(
+            new libbitcoin::postgresql_storage("bitcoin", "genjix"));
     kernel->register_storage(storage);
     bool ec = false;
     libbitcoin::net::channel_handle channel = net->connect(ec, "localhost");

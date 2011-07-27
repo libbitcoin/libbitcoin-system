@@ -7,7 +7,6 @@
 #include <string>
 
 namespace libbitcoin {
-namespace storage {
 
 class postgresql_storage : public storage
 {
@@ -47,7 +46,6 @@ private:
     cppdb::session sql_;
 };
 
-} // storage
 } // libbitcoin
 
 #endif

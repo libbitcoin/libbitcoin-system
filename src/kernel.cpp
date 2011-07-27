@@ -151,7 +151,7 @@ void kernel::handle_connect(net::channel_handle)
 {
 }
 
-void kernel::register_storage(storage::storage_ptr stor_comp)
+void kernel::register_storage(storage_ptr stor_comp)
 {
     storage_component_ = stor_comp;
     poll_invs_timeout_.reset(new deadline_timer(*service_));
@@ -178,7 +178,7 @@ void kernel::request_inventories(const boost::system::error_code& ec)
     reset_inventory_poll();
 }
 
-storage::storage_ptr kernel::get_storage()
+storage_ptr kernel::get_storage()
 {
     return storage_component_;
 }

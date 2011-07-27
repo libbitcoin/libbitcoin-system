@@ -48,8 +48,8 @@ public:
 
     void handle_connect(net::channel_handle chandle);
 
-    void register_storage(storage::storage_ptr stor_comp);
-    storage::storage_ptr get_storage();
+    void register_storage(storage_ptr stor_comp);
+    storage_ptr get_storage();
 
 private:
     void reset_inventory_poll();
@@ -59,7 +59,7 @@ private:
             message::getdata request_message);
 
     net::network_ptr network_component_;
-    storage::storage_ptr storage_component_;
+    storage_ptr storage_component_;
 
     service_ptr service_;
     std::thread runner_;

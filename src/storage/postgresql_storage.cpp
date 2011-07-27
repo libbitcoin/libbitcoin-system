@@ -8,7 +8,6 @@
 #include <bitcoin/util/assert.hpp>
 
 namespace libbitcoin {
-namespace storage {
 
 template<typename T>
 std::string serialize_bytes(T data)
@@ -480,6 +479,5 @@ void postgresql_storage::matchup_inputs()
         << cppdb::exec;
 }
 
-} // storage
 } // libbitcoin
 
