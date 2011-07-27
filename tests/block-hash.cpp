@@ -9,11 +9,11 @@ using std::shared_ptr;
 using libbitcoin::postgresql_storage;
 typedef shared_ptr<postgresql_storage> psql_ptr;
 
-void recv_block(libbitcoin::message::block block, bool ec)
+void recv_block(libbitcoin::message::block block, std::error_code ec)
 {
     if (ec)
     {
-        std::cerr << "error fetching block.";
+        std::cerr << ec.message() << "\n";
         return;
     }
     std::cout << "version: " << block.version << "\n";

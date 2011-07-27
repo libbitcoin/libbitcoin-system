@@ -79,8 +79,8 @@ obj/script.o: src/script.cpp include/bitcoin/script.hpp
 obj/script-test.o: tests/script-test.cpp
 	$(CXX) $(CFLAGS) -o obj/script-test.o tests/script-test.cpp
 
-bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o
-	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o $(LIBS)
+bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/storage_errors.o
+	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/storage_errors.o $(LIBS)
 
 script-test: bin/tests/script-test
 
@@ -122,8 +122,8 @@ tx-hash: bin/tests/tx-hash
 obj/block-hash.o: tests/block-hash.cpp
 	$(CXX) $(CFLAGS) -o obj/block-hash.o tests/block-hash.cpp
 
-bin/tests/block-hash: obj/block-hash.o obj/block.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/serializer.o obj/transaction.o
-	$(CXX) -o bin/tests/block-hash obj/block-hash.o obj/block.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/serializer.o obj/transaction.o $(LIBS)
+bin/tests/block-hash: obj/block-hash.o obj/block.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/storage_errors.o
+	$(CXX) -o bin/tests/block-hash obj/block-hash.o obj/block.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/storage_errors.o $(LIBS)
 
 block-hash: bin/tests/block-hash
 

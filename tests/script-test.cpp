@@ -40,11 +40,12 @@ void test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb()
     BITCOIN_ASSERT(back_out == raw_script);
 }
 
-void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::message::transaction_input input, libbitcoin::message::transaction_output output, bool ec)
+void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::message::transaction_input input, libbitcoin::message::transaction_output output, 
+        std::error_code ec)
 {
     if (ec)
     {
-        std::cerr << "error fetching prevout.\n";
+        std::cerr << ec.message() << "\n";
         return;
     }
     libbitcoin::script script = input.input_script;
@@ -53,11 +54,11 @@ void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::mess
     std::cout << "Returned: " << (script.run(tx, 0) ? "true" : "false") << "\n";
 }
 
-void recv_block(psql_ptr psql, libbitcoin::message::block block, bool ec)
+void recv_block(psql_ptr psql, libbitcoin::message::block block, std::error_code ec)
 {
     if (ec)
     {
-        std::cerr << "error fetching block.\n";
+        std::cerr << ec.message() << "\n";
         return;
     }
     libbitcoin::message::transaction_input input = block.transactions[1].inputs[0];
