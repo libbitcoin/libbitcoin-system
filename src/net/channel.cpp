@@ -1,7 +1,7 @@
 #include "channel.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 #include <iterator>
 #include <ctime>
 
@@ -13,7 +13,8 @@
 #include "shared_const_buffer.hpp"
 #include "dialect.hpp"
 
-namespace placeholders = boost::asio::placeholders;
+using std::placeholders::_1;
+using std::placeholders::_2;
 using boost::posix_time::seconds;
 using boost::posix_time::minutes;
 using boost::posix_time::time_duration;
@@ -67,8 +68,8 @@ void channel_pimpl::reset_timeout()
 {
     timeout_->cancel();
     timeout_->expires_from_now(disconnect_timeout);
-    timeout_->async_wait(boost::bind(
-            &channel_pimpl::handle_timeout, this, placeholders::error));
+    timeout_->async_wait(std::bind(
+            &channel_pimpl::handle_timeout, this, _1));
 }
 
 void channel_pimpl::destroy_self()
@@ -93,22 +94,21 @@ bool channel_pimpl::problems_check(const boost::system::error_code& ec)
 
 void channel_pimpl::read_header()
 {
-    auto callback = boost::bind(&channel_pimpl::handle_read_header, this,
-            placeholders::error, placeholders::bytes_transferred);
+    auto callback = std::bind(&channel_pimpl::handle_read_header, this, _1, _2);
     async_read(*socket_, buffer(inbound_header_), callback);
 }
 
 void channel_pimpl::read_checksum(message::header header_msg)
 {
-    auto callback = boost::bind(&channel_pimpl::handle_read_checksum, this,
-            header_msg, placeholders::error, placeholders::bytes_transferred);
+    auto callback = std::bind(&channel_pimpl::handle_read_checksum, this,
+            header_msg, _1, _2);
     async_read(*socket_, buffer(inbound_checksum_), callback);
 }
 
 void channel_pimpl::read_payload(message::header header_msg)
 {
-    auto callback = boost::bind(&channel_pimpl::handle_read_payload, this,
-            header_msg, placeholders::error, placeholders::bytes_transferred);
+    auto callback = std::bind(&channel_pimpl::handle_read_payload, this,
+            header_msg, _1, _2);
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
             callback);
@@ -233,8 +233,8 @@ void generic_send(T message_packet, channel_pimpl* chan_self,
 {
     data_chunk msg = translator->to_network(message_packet);
     shared_const_buffer buffer(msg);
-    async_write(*socket, buffer, boost::bind(
-            &channel_pimpl::handle_send, chan_self, placeholders::error));
+    async_write(*socket, buffer, std::bind(
+            &channel_pimpl::handle_send, chan_self, std::placeholders::_1));
 }
 
 void channel_pimpl::send(message::version version)

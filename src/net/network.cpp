@@ -10,6 +10,9 @@
 #include "channel.hpp"
 #include "dialect.hpp"
 
+using std::placeholders::_1;
+using std::placeholders::_2;
+
 namespace libbitcoin {
 namespace net {
 
@@ -49,36 +52,30 @@ channel_handle network_impl::create_channel(socket_ptr socket)
             shared_from_this(), default_dialect_, service_, socket };
 
     channel_pimpl* channel_obj = new channel_pimpl(init_data);
-    strand_->post(
-            [&channels_, channel_obj]
-            {
-                channels_.push_back(channel_obj);
-                log_debug() << channels_.size() << " peers connected.";
-            });
+    channels_.push_back(channel_obj);
+    log_debug() << channels_.size() << " peers connected.";
     return channel_obj->get_id();
 }
 
-channel_handle network_impl::connect(bool& ec, std::string ip_addr,
-        unsigned short port)
+void network_impl::handle_connect(socket_ptr socket, std::string ip_addr,
+        const boost::system::error_code& ec)
 {
-    ec = false;
+    if (ec)
+    {
+        log_error() << "Connecting to peer " << ip_addr << ": " << ec.message();
+    }
+    channel_handle chanid = create_channel(socket);
+}
+
+void network_impl::connect(std::string ip_addr, unsigned short port)
+{
     socket_ptr socket(new tcp::socket(*service_));
-    try
-    {
-        tcp::resolver resolver(*service_);
-        tcp::resolver::query query(ip_addr,
-                boost::lexical_cast<std::string>(port));
-        tcp::endpoint endpoint = *resolver.resolve(query);
-        socket->connect(endpoint);
-    }
-    catch (std::exception& ex)
-    {
-        log_error() << "Connecting to peer " << ip_addr
-                << ": " << ex.what();
-        ec = true;
-        return 0;
-    }
-    return create_channel(socket);
+    tcp::resolver resolver(*service_);
+    tcp::resolver::query query(ip_addr,
+            boost::lexical_cast<std::string>(port));
+    tcp::endpoint endpoint = *resolver.resolve(query);
+    socket->async_connect(endpoint, std::bind(
+            &network_impl::handle_connect, this, socket, ip_addr, _1));
 }
 
 static void remove_matching_channels(channel_list* channels,
@@ -195,8 +192,8 @@ void network_impl::handle_accept(socket_ptr socket)
     tcp::endpoint remote_endpoint = socket->remote_endpoint();
     log_debug() << "New incoming connection from "
             << remote_endpoint.address().to_string();
-    channel_handle chandle = create_channel(socket);
-    kernel_->handle_connect(chandle);
+    channel_handle chanid = create_channel(socket);
+    kernel_->handle_connect(chanid);
     socket.reset(new tcp::socket(*service_));
     acceptor_->async_accept(*socket,
             std::bind(&network_impl::handle_accept, this, socket));

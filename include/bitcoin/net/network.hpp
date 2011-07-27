@@ -25,11 +25,12 @@ enum network_flags : uint32_t
 class network : boost::noncopyable
 {
 public:
+    //typedef std::function<void (
     typedef std::function<void (channel_handle)> accept_random_handle;
 
     virtual kernel_ptr kernel() const = 0;
     virtual bool start_accept() = 0;
-    virtual channel_handle connect(bool& ec, std::string ip_addr, 
+    virtual void connect(std::string ip_addr, 
             unsigned short port=8333) = 0;
     virtual size_t connection_count() const = 0;
     virtual void get_random_handle(accept_random_handle accept_handler) = 0;
@@ -49,7 +50,7 @@ public:
     ~network_impl();
     kernel_ptr kernel() const;
     bool start_accept();
-    channel_handle connect(bool& ec, std::string ip_addr, 
+    void connect(std::string ip_addr, 
             unsigned short port=8333);
     size_t connection_count() const;
     void get_random_handle(accept_random_handle accept_handler);
@@ -65,6 +66,8 @@ private:
     typedef shared_ptr<tcp::acceptor> acceptor_ptr;
 
     void do_get_random_handle(accept_random_handle accept_handler);
+    void handle_connect(socket_ptr, std::string ip_addr, 
+            const boost::system::error_code& ec);
     void handle_accept(socket_ptr socket);
     
     channel_handle create_channel(socket_ptr socket);

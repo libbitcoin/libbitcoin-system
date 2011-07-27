@@ -22,8 +22,9 @@ int run_connect()
 {
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
     libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel));
-    bool ec = false;
-    libbitcoin::net::channel_handle channel = net->connect(ec, "localhost");
+    bool ec;
+    net->connect("localhost");
+    libbitcoin::net::channel_handle channel = 0;
     if (ec) {
         std::cerr << "noes\n";
         return -1;
@@ -55,7 +56,8 @@ int run_kernel()
             new libbitcoin::postgresql_storage("bitcoin", "genjix"));
     kernel->register_storage(storage);
     bool ec = false;
-    libbitcoin::net::channel_handle channel = net->connect(ec, "localhost");
+    net->connect("localhost");
+    libbitcoin::net::channel_handle channel = 0;
     if (ec) {
         std::cerr << "noes\n";
         return -1;
