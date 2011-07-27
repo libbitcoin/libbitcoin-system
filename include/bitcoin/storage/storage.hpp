@@ -9,28 +9,26 @@
 
 namespace libbitcoin {
 
-class storage : boost::noncopyable
+class storage
+  : private boost::noncopyable
 {
 public:
-    typedef std::function<void (bool)> operation_handler;
+    typedef std::function<void (std::error_code)> store_handler;
 
     // Not supported in g++ yet
     //template <typename Message>
     //using fetch_handler = std::function<void (Message)>;
-    typedef std::function<void (message::inv_list, std::error_code ec)>
+    typedef std::function<void (message::inv_list, std::error_code)>
             fetch_handler_inventories;
-    typedef std::function<void (message::block, std::error_code ec)>
+    typedef std::function<void (message::block, std::error_code)>
             fetch_handler_block;
-    typedef std::function<
-            void (message::transaction_output, std::error_code ec)>
+    typedef std::function<void (message::transaction_output, std::error_code)>
             fetch_handler_output;
 
-    virtual void store(message::inv inv, 
-            operation_handler handle_store) = 0;
+    virtual void store(message::inv inv, store_handler handle_store) = 0;
     virtual void store(message::transaction transaction,
-            operation_handler handle_store) = 0;
-    virtual void store(message::block block, 
-            operation_handler handle_store) = 0;
+            store_handler handle_store) = 0;
+    virtual void store(message::block block, store_handler handle_store) = 0;
 
     virtual void fetch_inventories(fetch_handler_inventories handle_fetch) = 0;
     virtual void fetch_block_number(size_t block_number,

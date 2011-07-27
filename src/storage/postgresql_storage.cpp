@@ -56,7 +56,7 @@ postgresql_storage::postgresql_storage(std::string database, std::string user)
 }
 
 void postgresql_storage::store(message::inv inv,
-        operation_handler handle_store)
+        store_handler handle_store)
 {
     cppdb::statement stat = sql_ <<
         "INSERT INTO inventory_requests (type, hash) \
@@ -72,7 +72,7 @@ void postgresql_storage::store(message::inv inv,
         stat.bind(byte_stream);
         stat.exec();
     }
-    handle_store(false);
+    handle_store(std::error_code());
 }
 
 void postgresql_storage::insert(operation operation, size_t script_id)
@@ -166,14 +166,14 @@ size_t postgresql_storage::insert(message::transaction transaction)
 }
 
 void postgresql_storage::store(message::transaction transaction,
-        operation_handler handle_store)
+        store_handler handle_store)
 {
     insert(transaction);
-    handle_store(false);
+    handle_store(std::error_code());
 }
 
 void postgresql_storage::store(message::block block,
-        operation_handler handle_store)
+        store_handler handle_store)
 {
     hash_digest block_hash = hash_block_header(block);
     std::string block_hash_repr = serialize_bytes(block_hash),
@@ -211,7 +211,7 @@ void postgresql_storage::store(message::block block,
                 VALUES (?, ?, ?)"
             << transaction_id << block_id << i << cppdb::exec;
     }
-    handle_store(false);
+    handle_store(std::error_code());
 }
 
 void postgresql_storage::fetch_inventories(fetch_handler_inventories)

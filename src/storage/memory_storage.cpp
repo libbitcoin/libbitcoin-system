@@ -26,28 +26,26 @@ void memory_storage::do_push_inv(message::inv item)
     inventories_.insert(inventories_.end(), invs.begin(), invs.end());
     log_debug() << "total of " << inventories_.size() << " invs";
 }
-void memory_storage::store(message::inv inv, 
-        operation_handler handle_store)
+void memory_storage::store(message::inv inv, store_handler handle_store)
 {
     strand_->post(std::bind(&memory_storage::do_push_inv, this, inv));
-    handle_store(false);
+    handle_store(std::error_code());
 }
 
 void memory_storage::store(message::transaction transaction,
-        storage::operation_handler handle_store)
+        store_handler handle_store)
 {
-    handle_store(false);
+    handle_store(std::error_code());
 }
 
 void memory_storage::do_push_block(message::block block)
 {
     log_debug() << "storing block.";
 }
-void memory_storage::store(message::block block,
-        operation_handler handle_store)
+void memory_storage::store(message::block block, store_handler handle_store)
 {
     strand_->post(std::bind(&memory_storage::do_push_block, this, block));
-    handle_store(false);
+    handle_store(std::error_code());
 }
 
 void memory_storage::do_request_inventories(
@@ -55,7 +53,7 @@ void memory_storage::do_request_inventories(
 {
     // Remove old inventories...
     if (!inventories_.empty())
-        handle_fetch(inventories_, false);
+        handle_fetch(inventories_, std::error_code());
 }
 void memory_storage::fetch_inventories(fetch_handler_inventories handle_fetch)
 {

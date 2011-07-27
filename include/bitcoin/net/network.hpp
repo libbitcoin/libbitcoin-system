@@ -22,7 +22,8 @@ enum network_flags : uint32_t
     accept_incoming = 1
 };
 
-class network : boost::noncopyable
+class network
+  : private boost::noncopyable
 {
 public:
     //typedef std::function<void (
@@ -42,7 +43,8 @@ public:
     virtual void send(channel_handle chandle, message::getblocks getblocks) = 0;
 };
 
-class network_impl : public network, 
+class network_impl
+  : public network, 
     public std::enable_shared_from_this<network_impl>
 {
 public:

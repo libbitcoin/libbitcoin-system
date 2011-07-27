@@ -75,7 +75,8 @@ void network_impl::connect(std::string ip_addr, unsigned short port)
             boost::lexical_cast<std::string>(port));
     tcp::endpoint endpoint = *resolver.resolve(query);
     socket->async_connect(endpoint, std::bind(
-            &network_impl::handle_connect, this, socket, ip_addr, _1));
+            &network_impl::handle_connect, shared_from_this(), 
+                socket, ip_addr, _1));
 }
 
 static void remove_matching_channels(channel_list* channels,
@@ -162,7 +163,8 @@ void network_impl::do_get_random_handle(accept_random_handle accept_handler)
 void network_impl::get_random_handle(accept_random_handle accept_handler)
 {
     strand_->post(std::bind(
-            &network_impl::do_get_random_handle, this, accept_handler));
+            &network_impl::do_get_random_handle, shared_from_this(), 
+                accept_handler));
 }
 
 bool network_impl::start_accept()
@@ -177,7 +179,8 @@ bool network_impl::start_accept()
         acceptor_->bind(endpoint);
         acceptor_->listen(socket_base::max_connections);
         acceptor_->async_accept(*socket,
-                std::bind(&network_impl::handle_accept, this, socket));
+                std::bind(&network_impl::handle_accept, shared_from_this(), 
+                    socket));
     }
     catch (std::exception& ex)
     {
@@ -196,7 +199,8 @@ void network_impl::handle_accept(socket_ptr socket)
     kernel_->handle_connect(chanid);
     socket.reset(new tcp::socket(*service_));
     acceptor_->async_accept(*socket,
-            std::bind(&network_impl::handle_accept, this, socket));
+            std::bind(&network_impl::handle_accept, shared_from_this(), 
+                socket));
 }
 
 } // net

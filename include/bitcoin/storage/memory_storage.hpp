@@ -12,15 +12,15 @@ namespace libbitcoin {
 using boost::asio::io_service;
 using std::shared_ptr;
 
-class memory_storage : public storage
+class memory_storage
+  : public storage
 {
 public:
     memory_storage();
 
-    void store(message::inv inv, operation_handler handle_store);
-    void store(message::transaction transaction, 
-            operation_handler handle_store);
-    void store(message::block block, operation_handler handle_store);
+    void store(message::inv inv, store_handler handle_store);
+    void store(message::transaction transaction, store_handler handle_store);
+    void store(message::block block, store_handler handle_store);
 
     void fetch_inventories(fetch_handler_inventories handle_fetch);
     void fetch_block_number(size_t block_number, 
