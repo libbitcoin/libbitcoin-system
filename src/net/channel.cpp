@@ -69,7 +69,7 @@ void channel_pimpl::reset_timeout()
     timeout_->cancel();
     timeout_->expires_from_now(disconnect_timeout);
     timeout_->async_wait(std::bind(
-            &channel_pimpl::handle_timeout, shared_from_this(), _1));
+            &channel_pimpl::handle_timeout, this, _1));
 }
 
 void channel_pimpl::destroy_self()
@@ -95,21 +95,21 @@ bool channel_pimpl::problems_check(const boost::system::error_code& ec)
 void channel_pimpl::read_header()
 {
     auto callback = std::bind(
-            &channel_pimpl::handle_read_header, shared_from_this(), _1, _2);
+            &channel_pimpl::handle_read_header, this, _1, _2);
     async_read(*socket_, buffer(inbound_header_), callback);
 }
 
 void channel_pimpl::read_checksum(message::header header_msg)
 {
     auto callback = std::bind(&channel_pimpl::handle_read_checksum, 
-            shared_from_this(), header_msg, _1, _2);
+            this, header_msg, _1, _2);
     async_read(*socket_, buffer(inbound_checksum_), callback);
 }
 
 void channel_pimpl::read_payload(message::header header_msg)
 {
     auto callback = std::bind(&channel_pimpl::handle_read_payload, 
-            shared_from_this(), header_msg, _1, _2);
+            this, header_msg, _1, _2);
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
             callback);

@@ -54,7 +54,7 @@ public:
 private:
     void reset_inventory_poll();
     void request_inventories(const boost::system::error_code& ec);
-    void accept_inventories(message::inv_list invs, bool ec);
+    void accept_inventories(message::inv_list invs, std::error_code ec);
     void send_to_random(net::channel_handle chandle,
             message::getdata request_message);
 

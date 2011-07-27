@@ -26,7 +26,7 @@ void run_service(shared_ptr<io_service> service)
     service->run();
 }
 
-void null(bool)
+void null(std::error_code)
 {
 }
 
@@ -136,7 +136,7 @@ bool kernel::recv_message(net::channel_handle,
             request_invs.invs.push_back(curr_inv);
     }
     storage_component_->store(request_invs, null);
-    accept_inventories(request_invs.invs, false);
+    accept_inventories(request_invs.invs, std::error_code());
     return true;
 }
 
@@ -189,7 +189,7 @@ void kernel::send_to_random(net::channel_handle chandle,
     network_component_->send(chandle, request_message);
 }
 
-void kernel::accept_inventories(message::inv_list invs, bool ec)
+void kernel::accept_inventories(message::inv_list invs, std::error_code ec)
 {
     if (ec)
         return;

@@ -57,17 +57,21 @@ channel_handle network_impl::create_channel(socket_ptr socket)
     return channel_obj->get_id();
 }
 
-void network_impl::handle_connect(socket_ptr socket, std::string ip_addr,
-        const boost::system::error_code& ec)
+void network_impl::handle_connect(const boost::system::error_code& ec, 
+        socket_ptr socket, std::string ip_addr, connect_handler handle_connect)
 {
     if (ec)
     {
         log_error() << "Connecting to peer " << ip_addr << ": " << ec.message();
+        handle_connect(ec, 0);
+        return;
     }
     channel_handle chanid = create_channel(socket);
+    handle_connect(ec, chanid);
 }
 
-void network_impl::connect(std::string ip_addr, unsigned short port)
+void network_impl::connect(std::string ip_addr, unsigned short port,
+        connect_handler handle_connect)
 {
     socket_ptr socket(new tcp::socket(*service_));
     tcp::resolver resolver(*service_);
@@ -76,7 +80,7 @@ void network_impl::connect(std::string ip_addr, unsigned short port)
     tcp::endpoint endpoint = *resolver.resolve(query);
     socket->async_connect(endpoint, std::bind(
             &network_impl::handle_connect, shared_from_this(), 
-                socket, ip_addr, _1));
+                _1, socket, ip_addr, handle_connect));
 }
 
 static void remove_matching_channels(channel_list* channels,

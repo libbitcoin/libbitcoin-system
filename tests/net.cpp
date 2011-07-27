@@ -8,6 +8,11 @@
 #include <iostream>
 #include <iomanip>
 
+using libbitcoin::net::network_ptr;
+using libbitcoin::kernel_ptr;
+using std::placeholders::_1;
+using std::placeholders::_2;
+
 libbitcoin::message::getblocks create_getblocks_message()
 {
     libbitcoin::message::getblocks getblocks;
@@ -18,19 +23,23 @@ libbitcoin::message::getblocks create_getblocks_message()
     return getblocks;
 }
 
+void handle_connect(boost::system::error_code ec, kernel_ptr kernel, 
+    libbitcoin::net::channel_handle channel)
+{
+    network_ptr net = kernel->get_network();
+    if (ec) {
+        std::cerr << "noes\n";
+        return;
+    }
+    sleep(3);
+    net->disconnect(channel);
+}
+
 int run_connect()
 {
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
     libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel));
-    bool ec;
-    net->connect("localhost");
-    libbitcoin::net::channel_handle channel = 0;
-    if (ec) {
-        std::cerr << "noes\n";
-        return -1;
-    }
-    sleep(3);
-    net->disconnect(channel);
+    net->connect("localhost", 8333, std::bind(&handle_connect, _1, kernel, _2));
     std::cin.get();
     return 0;
 }
@@ -44,9 +53,21 @@ int run_accept()
     return 0;
 }
 
-int run_kernel()
+void handle_connect_kernel(kernel_ptr kernel, boost::system::error_code ec, 
+    libbitcoin::net::channel_handle channel)
 {
-    libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
+    network_ptr net = kernel->get_network();
+    if (ec) {
+        std::cerr << "noes\n";
+        return;
+    }
+    std::cout << "handle connect\n";
+
+    //net->send(channel, libbitcoin::message::getaddr());
+}
+
+int run_kernel(kernel_ptr kernel)
+{
     libbitcoin::net::network_ptr net(
             new libbitcoin::net::network_impl(kernel));
     kernel->register_network(net);
@@ -55,26 +76,19 @@ int run_kernel()
     libbitcoin::storage_ptr storage(
             new libbitcoin::postgresql_storage("bitcoin", "genjix"));
     kernel->register_storage(storage);
-    bool ec = false;
-    net->connect("localhost");
-    libbitcoin::net::channel_handle channel = 0;
-    if (ec) {
-        std::cerr << "noes\n";
-        return -1;
-    }
-
+    net->connect("localhost", 8333, std::bind(&handle_connect_kernel, kernel, _1, _2));
     std::cin.get();
-    //net->send(channel, libbitcoin::message::getaddr());
 
     libbitcoin::message::getblocks getblocks = create_getblocks_message();
-    net->send(channel, getblocks);
+    net->send(0, getblocks);
     std::cin.get();
     return 0;
 }
 
 int main()
 {
-    return run_kernel();
+    libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
+    return run_kernel(kernel);
     //return run_connect();
     //return run_accept();
 }

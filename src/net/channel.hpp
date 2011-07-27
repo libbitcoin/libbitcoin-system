@@ -26,8 +26,7 @@ class network;
 class dialect;
 
 class channel_pimpl
-  : private boost::noncopyable,
-    public std::enable_shared_from_this<channel_pimpl>
+  : private boost::noncopyable
 {
 public:
     struct init_data

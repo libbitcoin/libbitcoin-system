@@ -26,13 +26,15 @@ class network
   : private boost::noncopyable
 {
 public:
-    //typedef std::function<void (
+    typedef std::function<
+            void (boost::system::error_code, channel_handle chandle)> 
+            connect_handler;
     typedef std::function<void (channel_handle)> accept_random_handle;
 
     virtual kernel_ptr kernel() const = 0;
     virtual bool start_accept() = 0;
-    virtual void connect(std::string ip_addr, 
-            unsigned short port=8333) = 0;
+    virtual void connect(std::string ip_addr, unsigned short port,
+            connect_handler handle_connect) = 0;
     virtual size_t connection_count() const = 0;
     virtual void get_random_handle(accept_random_handle accept_handler) = 0;
     virtual void disconnect(channel_handle handle) = 0;
@@ -52,8 +54,8 @@ public:
     ~network_impl();
     kernel_ptr kernel() const;
     bool start_accept();
-    void connect(std::string ip_addr, 
-            unsigned short port=8333);
+    void connect(std::string ip_addr, unsigned short port, 
+            connect_handler handle_connect);
     size_t connection_count() const;
     void get_random_handle(accept_random_handle accept_handler);
     void disconnect(channel_handle chandle);  
@@ -68,8 +70,9 @@ private:
     typedef shared_ptr<tcp::acceptor> acceptor_ptr;
 
     void do_get_random_handle(accept_random_handle accept_handler);
-    void handle_connect(socket_ptr, std::string ip_addr, 
-            const boost::system::error_code& ec);
+    void handle_connect(const boost::system::error_code& ec, 
+            socket_ptr socket, std::string ip_addr, 
+            connect_handler handle_connect);
     void handle_accept(socket_ptr socket);
     
     channel_handle create_channel(socket_ptr socket);
