@@ -17,11 +17,11 @@ void display_hash(libbitcoin::hash_digest h)
     std::cout << std::dec << '\n';
 }
 
-void recv_block(libbitcoin::message::block block, bool ec)
+void recv_block(libbitcoin::message::block block, std::error_code ec)
 {
     if (ec)
     {
-        std::cerr << "error fetching block.";
+        std::cerr << ec.message() << "\n";
         return;
     }
     BITCOIN_ASSERT(block.transactions.size() == 2);

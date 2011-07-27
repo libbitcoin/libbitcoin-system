@@ -4,6 +4,7 @@
 #include <boost/utility.hpp>
 #include <functional>
 
+#include <bitcoin/storage/errors.hpp>
 #include <bitcoin/messages.hpp>
 
 namespace libbitcoin {
@@ -16,11 +17,12 @@ public:
     // Not supported in g++ yet
     //template <typename Message>
     //using fetch_handler = std::function<void (Message)>;
-    typedef std::function<void (message::inv_list, bool)>
+    typedef std::function<void (message::inv_list, std::error_code ec)>
             fetch_handler_inventories;
-    typedef std::function<void (message::block, bool)>
+    typedef std::function<void (message::block, std::error_code ec)>
             fetch_handler_block;
-    typedef std::function<void (message::transaction_output, bool)>
+    typedef std::function<
+            void (message::transaction_output, std::error_code ec)>
             fetch_handler_output;
 
     virtual void store(message::inv inv, 
