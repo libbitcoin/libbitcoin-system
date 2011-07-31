@@ -3,6 +3,7 @@
 #include <bitcoin/storage/memory_storage.hpp>
 #include <bitcoin/storage/postgresql_storage.hpp>
 #include <bitcoin/kernel.hpp>
+#include <bitcoin/constants.hpp>
 
 #include <memory>
 #include <iostream>
@@ -23,7 +24,7 @@ libbitcoin::message::getblocks create_getblocks_message()
     return getblocks;
 }
 
-void handle_connect(boost::system::error_code ec, kernel_ptr kernel, 
+void handle_connect(std::error_code ec, kernel_ptr kernel, 
     libbitcoin::net::channel_handle channel)
 {
     network_ptr net = kernel->get_network();
@@ -53,7 +54,7 @@ int run_accept()
     return 0;
 }
 
-void handle_connect_kernel(kernel_ptr kernel, boost::system::error_code ec, 
+void handle_connect_kernel(kernel_ptr kernel, std::error_code ec, 
     libbitcoin::net::channel_handle channel)
 {
     network_ptr net = kernel->get_network();
@@ -87,6 +88,7 @@ int run_kernel(kernel_ptr kernel)
 
 int main()
 {
+    std::cout << "max money = " << libbitcoin::max_money() << "\n";
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
     return run_kernel(kernel);
     //return run_connect();
