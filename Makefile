@@ -85,6 +85,14 @@ obj/script-test.o: tests/script-test.cpp
 bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/storage_errors.o
 	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/storage_errors.o $(LIBS)
 
+obj/postbind.o: tests/postbind.cpp
+	$(CXX) $(CFLAGS) -o obj/postbind.o tests/postbind.cpp
+
+bin/tests/postbind: obj/postbind.o
+	$(CXX) -o bin/tests/postbind obj/postbind.o $(LIBS)
+
+postbind: bin/tests/postbind
+
 script-test: bin/tests/script-test
 
 obj/psql.o: tests/psql.cpp
