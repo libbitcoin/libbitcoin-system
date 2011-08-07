@@ -1,0 +1,75 @@
+Max of 80 characters. 4 space indents.
+
+Variables, functions, class-names, enums, typedefs are lowercase. Macros are uppercase. Private class member variables are suffixed with an _
+
+Each line should be indented by either 1 or 2 levels on the next line, and 1 line for each successive indent.
+
+If you're going more than 3 levels deep with each new line of code, then generally you are doing something wrong and code should be siphoned off into functions. Always prefer: flat over nested, dumb over clever, slow+clear over fast+obtuse.
+
+Functions should never be defined in headers. Always in the implementation unless it's required to be in every translation unit (i.e template or constexpr functions).
+
+Format for header file:
+
+    #ifndef LIBBITCOIN_FOO_H
+    #define LIBBITCOIN_FOO_H
+
+    // system includes
+
+    // bitcoin includes
+
+    namespace libbitcoin {
+
+    class foo
+      : public blaa
+    {
+    public:
+      // typedefs
+
+      // functions logically grouped into blocks
+
+      // variables
+
+    private:
+      // same as for public block
+    };
+
+    } // libbitcoin
+
+    #endif
+
+Format for cpp file:
+
+    #include <bitcoin/foo.hpp>
+
+    // system includes
+
+    // bitcoin includes
+
+    namespace libbitcon {
+
+    } // libbitcoin
+
+
+Every { occupies a newline except for namespaces.
+
+Spaces between all operators: x = 5 * 8 + 4 * 2 ... If the order is confusing then use brackets: x = (5 * 8) + (4 * 2). Each : ; (in for loops) or , has a space after them.
+
+All flow control should always happen on new lines.
+
+    // Bad
+    if (blaa) do_foo();
+
+    // Good
+    if (blaa)
+        do_foo();
+
+    // Bad
+    something(); another_thing(); yadayada();
+
+    // Good
+    something(); 
+    another_thing(); 
+    yadayada();
+
+It's nice if function names read like a sentence when used: write_to_stream(data_packet); or say_hello_to(my_friend);
+
