@@ -1,4 +1,4 @@
-CFLAGS= -std=c++0x -Wall -pedantic -Wextra -fstack-protector -g -Iinclude/ -Iusr/include/ -c
+CFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector -g -Iinclude/ -Iusr/include/ -c
 LIBS= usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq
 
 objs: block transaction logger
@@ -60,12 +60,15 @@ obj/elliptic_curve_key.o: src/util/elliptic_curve_key.cpp include/bitcoin/util/e
 obj/memory_storage.o: src/storage/memory_storage.cpp include/bitcoin/storage/memory_storage.hpp
 	$(CXX) $(CFLAGS) -o obj/memory_storage.o src/storage/memory_storage.cpp
 
-bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o
-	$(CXX) -o bin/tests/nettest obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o $(LIBS)
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o obj/threaded_service.o
+	$(CXX) -o bin/tests/nettest obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o obj/threaded_service.o $(LIBS)
 
 net: bin/tests/nettest
 
-obj/verify.o: src/verify.cpp include/bitcoin/verify.hpp
+obj/threaded_service.o: src/util/threaded_service.cpp include/bitcoin/util/threaded_service.hpp
+	$(CXX) $(CFLAGS) -o obj/threaded_service.o src/util/threaded_service.cpp
+
+obj/verify.o: src/verify.cpp include/bitcoin/verify.hpp obj/threaded_service.o
 	$(CXX) $(CFLAGS) -o obj/verify.o src/verify.cpp
 
 obj/types.o: src/types.cpp include/bitcoin/types.hpp
@@ -153,7 +156,7 @@ obj/verify-block.o: tests/verify-block.cpp
 	$(CXX) $(CFLAGS) -o obj/verify-block.o tests/verify-block.cpp
 
 bin/tests/verify-block: obj/verify-block.o obj/postgresql_storage.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o
-	$(CXX) -o bin/tests/verify-block obj/verify-block.o obj/postgresql_storage.o obj/transaction.o obj/script.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o $(LIBS)
+	$(CXX) -o bin/tests/verify-block obj/verify-block.o obj/postgresql_storage.o obj/transaction.o obj/script.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o obj/threaded_service.o $(LIBS)
 
 verify-block: bin/tests/verify-block
 

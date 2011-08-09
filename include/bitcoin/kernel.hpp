@@ -4,10 +4,10 @@
 #include <boost/asio.hpp>
 #include <boost/utility.hpp>
 #include <memory>
-#include <thread>
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/util/threaded_service.hpp>
 
 namespace libbitcoin {
 
@@ -15,7 +15,8 @@ using boost::asio::deadline_timer;
 using std::shared_ptr;
 
 class kernel 
-  : boost::noncopyable, 
+  : public threaded_service,
+    private boost::noncopyable, 
     public std::enable_shared_from_this<kernel>
 {
 public:
@@ -62,10 +63,6 @@ private:
 
     net::network_ptr network_component_;
     storage_ptr storage_component_;
-
-    service_ptr service_;
-    std::thread runner_;
-    work_ptr work_;
 
     shared_ptr<deadline_timer> poll_invs_timeout_;
 };

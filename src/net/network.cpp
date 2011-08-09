@@ -18,18 +18,10 @@ namespace net {
 
 using boost::asio::socket_base;
 
-static void run_service(shared_ptr<io_service> service)
-{
-    service->run();
-}
-
 network_impl::network_impl(kernel_ptr kern)
  : kernel_(kern)
 {
-    service_.reset(new io_service);
-    work_.reset(new io_service::work(*service_));
-    strand_.reset(new io_service::strand(*service_));
-    runner_ = std::thread(run_service, service_);
+    strand_.reset(new io_service::strand(*service()));
     default_dialect_.reset(new original_dialect);
 }
 
@@ -37,8 +29,6 @@ network_impl::~network_impl()
 {
     if (acceptor_)
         acceptor_->close();
-    service_->stop();
-    runner_.join();
 }
 
 kernel_ptr network_impl::kernel() const
@@ -49,7 +39,7 @@ kernel_ptr network_impl::kernel() const
 channel_handle network_impl::create_channel(socket_ptr socket)
 {
     channel_pimpl::init_data init_data = {
-            shared_from_this(), default_dialect_, service_, socket };
+            shared_from_this(), default_dialect_, service(), socket };
 
     channel_pimpl* channel_obj = new channel_pimpl(init_data);
     channels_.push_back(channel_obj);
@@ -73,8 +63,8 @@ void network_impl::handle_connect(const boost::system::error_code& ec,
 void network_impl::connect(std::string ip_addr, unsigned short port,
         connect_handler handle_connect)
 {
-    socket_ptr socket(new tcp::socket(*service_));
-    tcp::resolver resolver(*service_);
+    socket_ptr socket(new tcp::socket(*service()));
+    tcp::resolver resolver(*service());
     tcp::resolver::query query(ip_addr,
             boost::lexical_cast<std::string>(port));
     tcp::endpoint endpoint = *resolver.resolve(query);
@@ -173,8 +163,8 @@ void network_impl::get_random_handle(accept_random_handle accept_handler)
 
 bool network_impl::start_accept()
 {
-    acceptor_.reset(new tcp::acceptor(*service_));
-    socket_ptr socket(new tcp::socket(*service_));
+    acceptor_.reset(new tcp::acceptor(*service()));
+    socket_ptr socket(new tcp::socket(*service()));
     try
     {
         tcp::endpoint endpoint(tcp::v4(), 8333);
@@ -201,7 +191,7 @@ void network_impl::handle_accept(socket_ptr socket)
             << remote_endpoint.address().to_string();
     channel_handle chanid = create_channel(socket);
     kernel_->handle_connect(chanid);
-    socket.reset(new tcp::socket(*service_));
+    socket.reset(new tcp::socket(*service()));
     acceptor_->async_accept(*socket,
             std::bind(&network_impl::handle_accept, shared_from_this(), 
                 socket));

@@ -41,6 +41,7 @@ public:
 
 class network_impl
   : public network, 
+    public threaded_service,
     public std::enable_shared_from_this<network_impl>
 {
 public:
@@ -72,9 +73,6 @@ private:
     channel_handle create_channel(socket_ptr socket);
 
     kernel_ptr kernel_;
-    service_ptr service_;
-    std::thread runner_;
-    work_ptr work_;
     strand_ptr strand_;
     acceptor_ptr acceptor_;
 

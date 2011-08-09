@@ -21,20 +21,12 @@ namespace libbitcoin {
 
 const time_duration poll_inv_timeout = seconds(10);
 
-void run_service(shared_ptr<io_service> service)
-{
-    service->run();
-}
-
 void null(std::error_code)
 {
 }
 
 kernel::kernel()
 {
-    service_.reset(new io_service);
-    work_.reset(new io_service::work(*service_));
-    runner_ = std::thread(run_service, service_);
 }
 
 void kernel::register_network(net::network_ptr net_comp)
@@ -154,7 +146,7 @@ void kernel::handle_connect(net::channel_handle)
 void kernel::register_storage(storage_ptr stor_comp)
 {
     storage_component_ = stor_comp;
-    poll_invs_timeout_.reset(new deadline_timer(*service_));
+    poll_invs_timeout_.reset(new deadline_timer(*service()));
     reset_inventory_poll();
 }
 
