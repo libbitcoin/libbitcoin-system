@@ -321,7 +321,7 @@ void postgresql_storage::fetch_block_number(size_t block_number,
         << cppdb::row;
     if (block_result.empty())
     {
-        handle_fetch(block, storage_error::block_doesnt_exist);
+        handle_fetch(storage_error::block_doesnt_exist, block);
         return;
     }
     size_t block_id = block_result.get<size_t>("block_id");
@@ -346,7 +346,7 @@ void postgresql_storage::fetch_block_number(size_t block_number,
         ORDER BY index_in_block ASC"
         << block_id;
     block.transactions = read_transactions(transactions_result);
-    handle_fetch(block, std::error_code());
+    handle_fetch(std::error_code(), block);
 }
 
 void postgresql_storage::fetch_output(hash_digest transaction_hash, 
@@ -369,13 +369,13 @@ void postgresql_storage::fetch_output(hash_digest transaction_hash,
         << cppdb::row;
     if (result.empty())
     {
-        handle_fetch(output, storage_error::output_doesnt_exist);
+        handle_fetch(storage_error::output_doesnt_exist, output);
         return;
     }
     output.value = result.get<uint64_t>("internal_value");
     size_t script_id = result.get<size_t>("script_id");
     output.output_script = select_script(script_id);
-    handle_fetch(output, std::error_code());
+    handle_fetch(std::error_code(), output);
 }
 
 void postgresql_storage::organize_blockchain()

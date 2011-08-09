@@ -136,7 +136,7 @@ bool kernel::recv_message(net::channel_handle,
             request_invs.invs.push_back(curr_inv);
     }
     storage_component_->store(request_invs, null);
-    accept_inventories(request_invs.invs, std::error_code());
+    accept_inventories(std::error_code(), request_invs.invs);
     return true;
 }
 
@@ -189,7 +189,7 @@ void kernel::send_to_random(net::channel_handle chandle,
     network_component_->send(chandle, request_message);
 }
 
-void kernel::accept_inventories(message::inv_list invs, std::error_code ec)
+void kernel::accept_inventories(std::error_code ec, message::inv_list invs)
 {
     if (ec)
         return;

@@ -51,7 +51,7 @@ obj/serializer.o: src/util/serializer.cpp include/bitcoin/util/serializer.hpp
 obj/nettest.o: tests/net.cpp
 	$(CXX) $(CFLAGS) -o obj/nettest.o tests/net.cpp
 
-obj/postgresql_storage.o: src/storage/postgresql_storage.cpp include/bitcoin/storage/postgresql_storage.hpp
+obj/postgresql_storage.o: src/storage/postgresql_storage.cpp include/bitcoin/storage/postgresql_storage.hpp obj/script.o obj/transaction.o
 	$(CXX) $(CFLAGS) -o obj/postgresql_storage.o src/storage/postgresql_storage.cpp
 
 obj/elliptic_curve_key.o: src/util/elliptic_curve_key.cpp include/bitcoin/util/elliptic_curve_key.hpp
@@ -64,6 +64,9 @@ bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o 
 	$(CXX) -o bin/tests/nettest obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o $(LIBS)
 
 net: bin/tests/nettest
+
+obj/verify.o: src/verify.cpp include/bitcoin/verify.hpp
+	$(CXX) $(CFLAGS) -o obj/verify.o src/verify.cpp
 
 obj/types.o: src/types.cpp include/bitcoin/types.hpp
 	$(CXX) $(CFLAGS) -o obj/types.o src/types.cpp
@@ -125,8 +128,8 @@ obj/transaction.o: src/transaction.cpp
 obj/tx-hash.o: tests/tx-hash.cpp
 	$(CXX) $(CFLAGS) -o obj/tx-hash.o tests/tx-hash.cpp
 
-bin/tests/tx-hash: obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o
-	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o $(LIBS)
+bin/tests/tx-hash: obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o obj/elliptic_curve_key.o
+	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o obj/elliptic_curve_key.o $(LIBS)
 
 tx-hash: bin/tests/tx-hash
 
@@ -145,4 +148,12 @@ bin/tests/ec-key: obj/ec-key.o obj/serializer.o obj/elliptic_curve_key.o obj/typ
 	$(CXX) -o bin/tests/ec-key obj/ec-key.o obj/serializer.o obj/elliptic_curve_key.o obj/types.o obj/sha256.o obj/logger.o $(LIBS)
 
 ec-key: bin/tests/ec-key
+
+obj/verify-block.o: tests/verify-block.cpp
+	$(CXX) $(CFLAGS) -o obj/verify-block.o tests/verify-block.cpp
+
+bin/tests/verify-block: obj/verify-block.o obj/postgresql_storage.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o
+	$(CXX) -o bin/tests/verify-block obj/verify-block.o obj/postgresql_storage.o obj/transaction.o obj/script.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o $(LIBS)
+
+verify-block: bin/tests/verify-block
 

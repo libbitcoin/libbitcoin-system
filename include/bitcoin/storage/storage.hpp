@@ -18,11 +18,11 @@ public:
     // Not supported in g++ yet
     //template <typename Message>
     //using fetch_handler = std::function<void (Message)>;
-    typedef std::function<void (message::inv_list, std::error_code)>
+    typedef std::function<void (std::error_code, message::inv_list)>
             fetch_handler_inventories;
-    typedef std::function<void (message::block, std::error_code)>
+    typedef std::function<void (std::error_code, message::block)>
             fetch_handler_block;
-    typedef std::function<void (message::transaction_output, std::error_code)>
+    typedef std::function<void (std::error_code, message::transaction_output)>
             fetch_handler_output;
 
     virtual void store(message::inv inv, store_handler handle_store) = 0;

@@ -53,7 +53,7 @@ void memory_storage::do_request_inventories(
 {
     // Remove old inventories...
     if (!inventories_.empty())
-        handle_fetch(inventories_, std::error_code());
+        handle_fetch(std::error_code(), inventories_);
 }
 void memory_storage::fetch_inventories(fetch_handler_inventories handle_fetch)
 {

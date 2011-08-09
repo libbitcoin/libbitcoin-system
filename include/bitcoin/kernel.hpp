@@ -14,7 +14,9 @@ namespace libbitcoin {
 using boost::asio::deadline_timer;
 using std::shared_ptr;
 
-class kernel : boost::noncopyable, public std::enable_shared_from_this<kernel>
+class kernel 
+  : boost::noncopyable, 
+    public std::enable_shared_from_this<kernel>
 {
 public:
     kernel();
@@ -54,7 +56,7 @@ public:
 private:
     void reset_inventory_poll();
     void request_inventories(const boost::system::error_code& ec);
-    void accept_inventories(message::inv_list invs, std::error_code ec);
+    void accept_inventories(std::error_code ec, message::inv_list invs);
     void send_to_random(net::channel_handle chandle,
             message::getdata request_message);
 

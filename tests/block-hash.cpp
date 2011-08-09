@@ -9,7 +9,7 @@ using std::shared_ptr;
 using libbitcoin::postgresql_storage;
 typedef shared_ptr<postgresql_storage> psql_ptr;
 
-void recv_block(libbitcoin::message::block block, std::error_code ec)
+void recv_block(std::error_code ec, libbitcoin::message::block block)
 {
     if (ec)
     {
