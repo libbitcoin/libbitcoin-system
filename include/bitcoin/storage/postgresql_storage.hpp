@@ -21,6 +21,8 @@ public:
     void fetch_inventories(fetch_handler_inventories handle_fetch);
     void fetch_block_by_depth(size_t block_number, 
             fetch_handler_block handle_fetch);
+    void fetch_block_by_hash(hash_digest block_hash, 
+            fetch_handler_block handle_fetch);
     void fetch_output_by_hash(hash_digest transaction_hash, uint32_t index,
             fetch_handler_output handle_fetch);
 
@@ -40,6 +42,7 @@ private:
     script select_script(size_t script_id);
 
     message::transaction_list read_transactions(cppdb::result result);
+    message::block read_block(cppdb::result block_result);
 
     void matchup_inputs();
 

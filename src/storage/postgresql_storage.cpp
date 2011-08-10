@@ -304,26 +304,9 @@ message::transaction_list postgresql_storage::read_transactions(
     return transactions;
 }
 
-void postgresql_storage::fetch_block_by_depth(size_t block_number,
-        fetch_handler_block handle_fetch)
+message::block postgresql_storage::read_block(cppdb::result block_result)
 {
     message::block block;
-    cppdb::result block_result = sql_ <<
-        "SELECT \
-            *, \
-            EXTRACT(EPOCH FROM when_created) timest \
-        FROM blocks \
-        WHERE \
-            depth=? \
-            AND span_left=0 \
-            AND span_left=0"
-        << block_number
-        << cppdb::row;
-    if (block_result.empty())
-    {
-        handle_fetch(storage_error::block_doesnt_exist, block);
-        return;
-    }
     size_t block_id = block_result.get<size_t>("block_id");
     block.version = block_result.get<uint32_t>("version");
     block.timestamp = block_result.get<uint32_t>("timest");
@@ -346,6 +329,53 @@ void postgresql_storage::fetch_block_by_depth(size_t block_number,
         ORDER BY index_in_block ASC"
         << block_id;
     block.transactions = read_transactions(transactions_result);
+    return block;
+}
+
+void postgresql_storage::fetch_block_by_depth(size_t block_number,
+        fetch_handler_block handle_fetch)
+{
+    cppdb::result block_result = sql_ <<
+        "SELECT \
+            *, \
+            EXTRACT(EPOCH FROM when_created) timest \
+        FROM blocks \
+        WHERE \
+            depth=? \
+            AND span_left=0 \
+            AND span_left=0"
+        << block_number
+        << cppdb::row;
+    if (block_result.empty())
+    {
+        handle_fetch(storage_error::block_doesnt_exist, message::block());
+        return;
+    }
+    message::block block = read_block(block_result);
+    handle_fetch(std::error_code(), block);
+}
+
+void postgresql_storage::fetch_block_by_hash(hash_digest block_hash, 
+        fetch_handler_block handle_fetch)
+{
+    std::string block_hash_repr = serialize_bytes(block_hash);
+    cppdb::result block_result = sql_ <<
+        "SELECT \
+            *, \
+            EXTRACT(EPOCH FROM when_created) timest \
+        FROM blocks \
+        WHERE \
+            block_hash=? \
+            AND span_left=0 \
+            AND span_left=0"
+        << block_hash_repr
+        << cppdb::row;
+    if (block_result.empty())
+    {
+        handle_fetch(storage_error::block_doesnt_exist, message::block());
+        return;
+    }
+    message::block block = read_block(block_result);
     handle_fetch(std::error_code(), block);
 }
 
