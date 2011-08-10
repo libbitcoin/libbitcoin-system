@@ -1,6 +1,7 @@
 #include <bitcoin/verify.hpp>
 
 #include <bitcoin/block.hpp>
+#include <bitcoin/dialect.hpp>
 #include <bitcoin/storage/storage.hpp>
 #include <bitcoin/storage/errors.hpp>
 #include <bitcoin/util/logger.hpp>
@@ -10,8 +11,10 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-verify_block::verify_block(storage_ptr storage)
-  : storage_(storage)
+constexpr size_t max_block_size = 1000000;
+
+verify_block::verify_block(storage_ptr storage, dialect_ptr dialect)
+  : storage_(storage), dialect_(dialect)
 {
 }
 
@@ -29,6 +32,7 @@ void verify_block::start(message::block current_block,
 
 void verify_block::find_duplicate(std::error_code ec, message::block)
 {
+    goto ignore_duplicate_check;
     if (ec != storage_error::block_doesnt_exist)
     {
         // These are error cases
@@ -39,6 +43,7 @@ void verify_block::find_duplicate(std::error_code ec, message::block)
             handle_status_(ec, false);
         return;
     }
+    ignore_duplicate_check:
 
     handle_status_(std::error_code(), true);
 
@@ -46,6 +51,14 @@ void verify_block::find_duplicate(std::error_code ec, message::block)
     // These are checks that are independent of context
     // that can be verified before saving an orphan block
     // ...
+
+    // Size limits
+    if (current_block_.transactions.empty() || 
+        current_block_.transactions.size() > max_block_size ||
+        dialect_->to_network(current_block_, false).size() > max_block_size)
+    {
+        handle_status_(std::error_code(), false);
+    }
 }
 
 } // libbitcoin

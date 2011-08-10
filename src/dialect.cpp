@@ -30,9 +30,12 @@ data_chunk construct_header_from(std::string command, data_chunk payload)
     return header.get_data();
 }
 
-data_chunk assemble_message(std::string command, const serializer& payload)
+data_chunk assemble_message(std::string command, const serializer& payload,
+        bool include_header)
 {
     data_chunk msg_body = payload.get_data();
+    if (!include_header)
+        return msg_body;
     data_chunk message = construct_header_from(command, msg_body);
     // Extend message with actual payload
     message.reserve(message.size() + distance(msg_body.begin(),
@@ -62,7 +65,7 @@ data_chunk original_dialect::to_network(message::version version) const
     // do sub_version_num
     payload.write_byte(0);
     payload.write_4_bytes(version.start_height);
-    return assemble_message("version", payload);
+    return assemble_message("version", payload, true);
 }
 
 data_chunk original_dialect::to_network(message::verack) const
@@ -82,7 +85,14 @@ data_chunk original_dialect::to_network(message::getblocks getblocks) const
     payload.write_var_uint(getblocks.locator_start_hashes.size());
     payload.write_hash(getblocks.locator_start_hashes[0]);
     payload.write_hash(getblocks.hash_stop);
-    return assemble_message("getblocks", payload);
+    return assemble_message("getblocks", payload, true);
+}
+
+data_chunk original_dialect::to_network(message::block block, 
+        bool include_header) const
+{
+    serializer payload;
+    return assemble_message("block", payload, include_header);
 }
 
 data_chunk original_dialect::to_network(message::getdata getdata) const
@@ -107,7 +117,7 @@ data_chunk original_dialect::to_network(message::getdata getdata) const
         }
         payload.write_hash(inv.hash);
     }
-    return assemble_message("getdata", payload);
+    return assemble_message("getdata", payload, true);
 }
 
 message::header original_dialect::header_from_network(

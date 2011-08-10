@@ -17,13 +17,15 @@ class verify_block
 public:
     typedef std::function<void (std::error_code, bool)> status_handler;
 
-    verify_block(storage_ptr storage);
+    verify_block(storage_ptr storage, dialect_ptr dialect);
     void start(message::block current_block, status_handler handle_status);
 
 private:
     void find_duplicate(std::error_code ec, message::block);
 
     storage_ptr storage_;
+    dialect_ptr dialect_;
+
     message::block current_block_;
     status_handler handle_status_;
 };
