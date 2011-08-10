@@ -6,9 +6,9 @@
 #include <iostream>
 
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/dialect.hpp>
 
 #include "channel.hpp"
-#include "dialect.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;

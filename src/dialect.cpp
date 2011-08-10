@@ -1,4 +1,4 @@
-#include "dialect.hpp"
+#include <bitcoin/dialect.hpp>
 
 #include <boost/assert.hpp>
 
@@ -8,7 +8,6 @@
 #include <bitcoin/util/sha256.hpp>
 
 namespace libbitcoin {
-namespace net {
 
 data_chunk construct_header_from(std::string command, data_chunk payload)
 {
@@ -336,6 +335,5 @@ bool original_dialect::verify_checksum(const message::header header_msg,
     return header_msg.checksum == generate_sha256_checksum(stream);
 }
 
-} // net
 } // libbitcoin
 

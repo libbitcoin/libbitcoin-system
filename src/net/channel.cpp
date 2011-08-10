@@ -8,10 +8,10 @@
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/net/network.hpp>
+#include <bitcoin/dialect.hpp>
 #include <bitcoin/messages.hpp>
 
 #include "shared_const_buffer.hpp"
-#include "dialect.hpp"
 
 using std::placeholders::_1;
 using std::placeholders::_2;

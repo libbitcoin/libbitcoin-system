@@ -8,12 +8,17 @@
 #include <vector>
 
 #include <bitcoin/net/types.hpp>
-#include <bitcoin/storage/types.hpp>
 
 namespace libbitcoin {
 
 using std::shared_ptr;
 using boost::asio::io_service;
+
+class dialect;
+typedef shared_ptr<dialect> dialect_ptr;
+
+class storage;
+typedef shared_ptr<storage> storage_ptr;
 
 typedef shared_ptr<io_service> service_ptr;
 typedef shared_ptr<io_service::work> work_ptr;

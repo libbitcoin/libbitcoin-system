@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_NET_DIALECT_H
-#define LIBBITCOIN_NET_DIALECT_H
+#ifndef LIBBITCOIN_DIALECT_H
+#define LIBBITCOIN_DIALECT_H
 
 #include <string>
 #include <memory>
@@ -8,21 +8,20 @@
 #include <bitcoin/util/serializer.hpp>
 
 namespace libbitcoin {
-namespace net {
 
 class dialect
 {
 public:
+    // To network
     virtual data_chunk to_network(message::version version) const = 0;
-
     virtual data_chunk to_network(message::verack verack) const = 0;
-
     virtual data_chunk to_network(message::getaddr getaddr) const = 0;
-
     virtual data_chunk to_network(message::getdata getdata) const = 0;
-
     virtual data_chunk to_network(message::getblocks getblocks) const = 0;
+    virtual data_chunk to_network(message::block block,
+            bool include_header=true) const = 0;
 
+    // Utilities
     virtual message::header header_from_network(
             const data_chunk& stream) const = 0;
 
@@ -35,6 +34,7 @@ public:
     virtual bool verify_checksum(const message::header header_msg,
             const data_chunk& stream) const = 0;
 
+    // From network
     virtual message::version version_from_network(
             const message::header header_msg,
             const data_chunk& stream, bool& ec) const = 0;
@@ -56,7 +56,8 @@ public:
             const data_chunk& stream, bool& ec) const = 0;
 };
 
-class original_dialect : public dialect
+class original_dialect 
+  : public dialect
 {
 public:
     // Create stream from message
@@ -65,6 +66,7 @@ public:
     data_chunk to_network(message::getaddr getaddr) const;
     data_chunk to_network(message::getdata getdata) const;
     data_chunk to_network(message::getblocks getblocks) const;
+    data_chunk to_network(message::block block, bool include_header) const;
 
     // Create header/messages from stream
     message::header header_from_network(const data_chunk& stream) const;
@@ -97,7 +99,6 @@ public:
             const data_chunk& stream, bool& ec) const;
 };
 
-} // net
 } // libbitcoin
 
 #endif

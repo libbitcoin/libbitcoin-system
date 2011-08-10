@@ -31,9 +31,9 @@ class channel_pimpl
 public:
     struct init_data
     {
-        shared_ptr<network> parent_gateway;
-        shared_ptr<dialect> translator;
-        shared_ptr<io_service> service;
+        network_ptr parent_gateway;
+        dialect_ptr translator;
+        service_ptr service;
         shared_ptr<tcp::socket> socket;
     };
 
