@@ -40,8 +40,8 @@ void test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb()
     BITCOIN_ASSERT(back_out == raw_script);
 }
 
-void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::message::transaction_input input, libbitcoin::message::transaction_output output, 
-        std::error_code ec)
+void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::message::transaction_input input, 
+        std::error_code ec, libbitcoin::message::transaction_output output)
 {
     if (ec)
     {
@@ -54,7 +54,7 @@ void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::mess
     std::cout << "Returned: " << (script.run(tx, 0) ? "true" : "false") << "\n";
 }
 
-void recv_block(psql_ptr psql, libbitcoin::message::block block, std::error_code ec)
+void recv_block(psql_ptr psql, std::error_code ec, libbitcoin::message::block block)
 {
     if (ec)
     {
@@ -64,14 +64,14 @@ void recv_block(psql_ptr psql, libbitcoin::message::block block, std::error_code
     libbitcoin::message::transaction_input input = block.transactions[1].inputs[0];
     libbitcoin::hash_digest hash = input.hash;
     uint32_t index = input.index;
-    psql->fetch_output(hash, index, std::bind(run_script_from_block, block.transactions[1], input, std::placeholders::_1, std::placeholders::_2));
+    psql->fetch_output_by_hash(hash, index, std::bind(run_script_from_block, block.transactions[1], input, std::placeholders::_1, std::placeholders::_2));
 }
 
 int main()
 {
     //test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb();
     psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
-    psql->fetch_block_number(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
+    psql->fetch_block_by_depth(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
     return 0;
 }
 

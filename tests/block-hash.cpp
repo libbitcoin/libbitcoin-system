@@ -30,7 +30,7 @@ void recv_block(std::error_code ec, libbitcoin::message::block block)
 int main()
 {
     psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
-    psql->fetch_block_number(170, recv_block);
+    psql->fetch_block_by_depth(170, recv_block);
     return 0;
 }
 

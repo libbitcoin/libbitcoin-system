@@ -54,7 +54,7 @@ int main()
     test_build_merkle();
 
     psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
-    psql->fetch_block_number(170, recv_block);
+    psql->fetch_block_by_depth(170, recv_block);
     return 0;
 }
 

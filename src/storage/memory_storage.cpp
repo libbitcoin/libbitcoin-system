@@ -61,12 +61,12 @@ void memory_storage::fetch_inventories(fetch_handler_inventories handle_fetch)
             &memory_storage::do_request_inventories, this, handle_fetch));
 }
 
-void memory_storage::fetch_block_number(size_t block_number, 
+void memory_storage::fetch_block_by_depth(size_t block_number, 
         fetch_handler_block handle_fetch)
 {
 }
 
-void memory_storage::fetch_output(hash_digest transaction_hash, 
+void memory_storage::fetch_output_by_hash(hash_digest transaction_hash, 
         uint32_t index, fetch_handler_output handle_fetch)
 {
 }

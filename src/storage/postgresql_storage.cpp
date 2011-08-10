@@ -304,7 +304,7 @@ message::transaction_list postgresql_storage::read_transactions(
     return transactions;
 }
 
-void postgresql_storage::fetch_block_number(size_t block_number,
+void postgresql_storage::fetch_block_by_depth(size_t block_number,
         fetch_handler_block handle_fetch)
 {
     message::block block;
@@ -349,7 +349,7 @@ void postgresql_storage::fetch_block_number(size_t block_number,
     handle_fetch(std::error_code(), block);
 }
 
-void postgresql_storage::fetch_output(hash_digest transaction_hash, 
+void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash, 
         uint32_t index, fetch_handler_output handle_fetch)
 {
     message::transaction_output output;

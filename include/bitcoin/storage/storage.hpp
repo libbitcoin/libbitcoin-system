@@ -31,10 +31,10 @@ public:
     virtual void store(message::block block, store_handler handle_store) = 0;
 
     virtual void fetch_inventories(fetch_handler_inventories handle_fetch) = 0;
-    virtual void fetch_block_number(size_t block_number,
+    virtual void fetch_block_by_depth(size_t block_number,
             fetch_handler_block handle_fetch) = 0;
-    virtual void fetch_output(hash_digest transaction_hash, uint32_t index,
-            fetch_handler_output handle_fetch) = 0;
+    virtual void fetch_output_by_hash(hash_digest transaction_hash, 
+            uint32_t index, fetch_handler_output handle_fetch) = 0;
 };
 
 } // libbitcoin
