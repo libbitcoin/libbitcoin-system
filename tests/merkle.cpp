@@ -49,12 +49,18 @@ void test_build_merkle()
     display_hash(merkle_root);
 }
 
+void test_match_merkles(std::error_code ec, libbitcoin::message::block block)
+{
+    BITCOIN_ASSERT(block.merkle_root == libbitcoin::generate_merkle_root(block.transactions));
+}
+
 int main()
 {
     test_build_merkle();
 
     psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
     psql->fetch_block_by_depth(170, recv_block);
+    psql->fetch_block_by_depth(2, test_match_merkles);
     return 0;
 }
 

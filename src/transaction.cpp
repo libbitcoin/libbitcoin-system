@@ -4,6 +4,7 @@
 #include <bitcoin/util/sha256.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/constants.hpp>
 
 namespace libbitcoin {
 
@@ -51,9 +52,9 @@ hash_digest hash_transaction(message::transaction transaction,
 hash_digest build_merkle_tree(hash_list merkle)
 {
     if (merkle.empty())
-        return hash_digest{
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        return null_hash;
+    else if (merkle.size() == 1)
+        return merkle[0];
 
     if (merkle.size()%2 != 0)
         merkle.push_back(merkle.back());
@@ -80,8 +81,6 @@ hash_digest generate_merkle_root(message::transaction_list transactions)
     hash_list tx_hashes;
     for (message::transaction tx: transactions)
         tx_hashes.push_back(hash_transaction(tx));
-    if (tx_hashes.size()%2 != 0)
-        tx_hashes.push_back(tx_hashes.back());
     return build_merkle_tree(tx_hashes);
 }
 
