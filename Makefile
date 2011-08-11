@@ -160,3 +160,14 @@ bin/tests/verify-block: obj/verify-block.o obj/postgresql_storage.o obj/logger.o
 
 verify-block: bin/tests/verify-block
 
+obj/big_number.o: src/util/big_number.cpp include/bitcoin/util/big_number.hpp
+	$(CXX) $(CFLAGS) -o obj/big_number.o src/util/big_number.cpp
+
+obj/big-number-test.o: tests/big-number-test.cpp
+	$(CXX) $(CFLAGS) -o obj/big-number-test.o tests/big-number-test.cpp
+
+bin/tests/big-number-test: obj/big-number-test.o obj/big_number.o obj/logger.o
+	$(CXX) -o bin/tests/big-number-test obj/big-number-test.o obj/big_number.o obj/logger.o $(LIBS)
+
+big-number-test: bin/tests/big-number-test
+
