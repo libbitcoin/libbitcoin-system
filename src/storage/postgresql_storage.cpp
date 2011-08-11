@@ -1,26 +1,10 @@
 #include <bitcoin/storage/postgresql_storage.hpp>
 
-#include <sstream>
-#include <iomanip>
-
 #include <bitcoin/block.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
 
 namespace libbitcoin {
-
-template<typename T>
-std::string serialize_bytes(T data)
-{
-    std::stringstream ss;
-    ss << std::hex;
-    for (int val: data)
-        ss << std::setw(2) << std::setfill('0') << val << ' ';
-    // Remove end ' '
-    std::string ret = ss.str();
-    ret.resize(ret.size() - 1);
-    return ret;
-}
 
 data_chunk deserialize_bytes(std::string byte_stream)
 {
@@ -68,7 +52,7 @@ void postgresql_storage::store(message::inv inv,
             stat.bind("transaction");
         else if (ivv.type == message::inv_type::block)
             stat.bind("block");
-        std::string byte_stream = serialize_bytes(ivv.hash);
+        std::string byte_stream = hexlify(ivv.hash);
         stat.bind(byte_stream);
         stat.exec();
     }
@@ -91,7 +75,7 @@ void postgresql_storage::insert(operation operation, size_t script_id)
     else
     {
         // Scoping rules. String needs to stay around for exec
-        std::string byte_stream = serialize_bytes(operation.data);
+        std::string byte_stream = hexlify(operation.data);
         stat.bind(byte_stream);
         stat.exec();
     }
@@ -111,7 +95,7 @@ void postgresql_storage::insert(message::transaction_input input,
         size_t transaction_id, size_t index_in_parent)
 {
     size_t script_id = insert_script(input.input_script.operations());
-    std::string hash = serialize_bytes(input.hash);
+    std::string hash = hexlify(input.hash);
     sql_ <<
         "INSERT INTO inputs (input_id, parent_id, index_in_parent, script_id, \
             previous_output_id, previous_output_hash, previous_output_index, \
@@ -147,7 +131,7 @@ void postgresql_storage::insert(message::transaction_output output,
 size_t postgresql_storage::insert(message::transaction transaction)
 {
     hash_digest transaction_hash = hash_transaction(transaction);
-    std::string transaction_hash_repr = serialize_bytes(transaction_hash);
+    std::string transaction_hash_repr = hexlify(transaction_hash);
     cppdb::result result = sql_ <<
         "INSERT INTO transactions (transaction_id, transaction_hash, \
             version, locktime) \
@@ -176,9 +160,9 @@ void postgresql_storage::store(message::block block,
         store_handler handle_store)
 {
     hash_digest block_hash = hash_block_header(block);
-    std::string block_hash_repr = serialize_bytes(block_hash),
-            prev_block_repr = serialize_bytes(block.prev_block),
-            merkle_repr = serialize_bytes(block.merkle_root);
+    std::string block_hash_repr = hexlify(block_hash),
+            prev_block_repr = hexlify(block.prev_block),
+            merkle_repr = hexlify(block.merkle_root);
 
     cppdb::result result = sql_ <<
         "SELECT 1 FROM blocks WHERE block_hash=?"
@@ -358,7 +342,7 @@ void postgresql_storage::fetch_block_by_depth(size_t block_number,
 void postgresql_storage::fetch_block_by_hash(hash_digest block_hash, 
         fetch_handler_block handle_fetch)
 {
-    std::string block_hash_repr = serialize_bytes(block_hash);
+    std::string block_hash_repr = hexlify(block_hash);
     cppdb::result block_result = sql_ <<
         "SELECT \
             *, \
@@ -383,7 +367,7 @@ void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash,
         uint32_t index, fetch_handler_output handle_fetch)
 {
     message::transaction_output output;
-    std::string transaction_hash_repr = serialize_bytes(transaction_hash);
+    std::string transaction_hash_repr = hexlify(transaction_hash);
     cppdb::result result = sql_ <<
         "SELECT \
             *, \

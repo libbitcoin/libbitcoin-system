@@ -5,6 +5,8 @@
 #include <boost/asio.hpp>
 #include <array>
 #include <memory>
+#include <sstream>
+#include <iomanip>
 #include <vector>
 
 #include <bitcoin/net/types.hpp>
@@ -61,6 +63,19 @@ data_chunk uncast_type(T val)
     for (size_t i = 0; i < sizeof(T); ++i)
         chunk.push_back(reinterpret_cast<byte*>(&val)[i]);
     return chunk;
+}
+
+template<typename T>
+std::string hexlify(T data)
+{
+    std::stringstream ss;
+    ss << std::hex;
+    for (int val: data)
+        ss << std::setw(2) << std::setfill('0') << val << ' ';
+    // Remove end ' '
+    std::string ret = ss.str();
+    ret.resize(ret.size() - 1);
+    return ret;
 }
 
 } // libbitcoin
