@@ -47,12 +47,28 @@ void verify_block::find_duplicate(std::error_code ec, message::block)
             handle_status_(ec, false);
         return;
     }
-    ignore_duplicate_check:
+ignore_duplicate_check:
     if (!check_block())
     {
         handle_status_(std::error_code(), false);
         return;
     }
+
+    storage_->fetch_block_by_hash(current_block_.prev_block,
+            std::bind(&verify_block::find_previous,
+                shared_from_this(), _1, _2));
+}
+
+void verify_block::find_previous(std::error_code ec, message::block)
+{
+    if (ec == storage_error::block_doesnt_exist)
+    {
+        // TODO not handled for the time being
+        handle_status_(std::error_code(), false);
+    }
+    else if (ec)
+        handle_status_(ec, false);
+
     handle_status_(std::error_code(), true);
 }
 
