@@ -21,7 +21,6 @@ using boost::asio::socket_base;
 network_impl::network_impl(kernel_ptr kern)
  : kernel_(kern)
 {
-    strand_.reset(new io_service::strand(*service()));
     default_dialect_.reset(new original_dialect);
 }
 
@@ -86,7 +85,7 @@ static void remove_matching_channels(channel_list* channels,
 }
 void network_impl::disconnect(channel_handle chandle)
 {
-    strand_->post(
+    strand()->post(
             std::bind(remove_matching_channels, &channels_, chandle));
 }
 
@@ -111,7 +110,7 @@ void perform_send(channel_list* channels, kernel_ptr kern,
 
 template<typename T>
 void generic_send(T message_packet, channel_handle chandle,
-        shared_ptr<io_service::strand> strand, channel_list* channels,
+        strand_ptr strand, channel_list* channels,
         kernel_ptr kernel)
 {
     strand->post(std::bind(
@@ -120,27 +119,27 @@ void generic_send(T message_packet, channel_handle chandle,
 
 void network_impl::send(channel_handle chandle, message::version version)
 {
-    generic_send(version, chandle, strand_, &channels_, kernel_);
+    generic_send(version, chandle, strand(), &channels_, kernel_);
 }
 
 void network_impl::send(channel_handle chandle, message::verack verack)
 {
-    generic_send(verack, chandle, strand_, &channels_, kernel_);
+    generic_send(verack, chandle, strand(), &channels_, kernel_);
 }
 
 void network_impl::send(channel_handle chandle, message::getaddr getaddr)
 {
-    generic_send(getaddr, chandle, strand_, &channels_, kernel_);
+    generic_send(getaddr, chandle, strand(), &channels_, kernel_);
 }
 
 void network_impl::send(channel_handle chandle, message::getdata getdata)
 {
-    generic_send(getdata, chandle, strand_, &channels_, kernel_);
+    generic_send(getdata, chandle, strand(), &channels_, kernel_);
 }
 
 void network_impl::send(channel_handle chandle, message::getblocks getblocks)
 {
-    generic_send(getblocks, chandle, strand_, &channels_, kernel_);
+    generic_send(getblocks, chandle, strand(), &channels_, kernel_);
 }
 
 size_t network_impl::connection_count() const
@@ -156,7 +155,7 @@ void network_impl::do_get_random_handle(accept_random_handle accept_handler)
 }
 void network_impl::get_random_handle(accept_random_handle accept_handler)
 {
-    strand_->post(std::bind(
+    strand()->post(std::bind(
             &network_impl::do_get_random_handle, shared_from_this(), 
                 accept_handler));
 }

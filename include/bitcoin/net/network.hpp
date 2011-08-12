@@ -73,7 +73,6 @@ private:
     channel_handle create_channel(socket_ptr socket);
 
     kernel_ptr kernel_;
-    strand_ptr strand_;
     acceptor_ptr acceptor_;
 
     dialect_ptr default_dialect_;

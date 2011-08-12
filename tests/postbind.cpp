@@ -22,10 +22,11 @@ using std::placeholders::_1;
 int main()
 {
     service_ptr service(new io_service);
+    strand_ptr strand(new io_service::strand(*service));
     work_ptr work(new io_service::work(*service));
     std::thread t(std::bind(run, service));
-    std::cout << "man thread: " << std::this_thread::get_id() << "\n";
-    auto func = postbind<int>(service, std::bind(foo, 'a', _1));
+    std::cout << "main thread: " << std::this_thread::get_id() << "\n";
+    auto func = postbind<int>(strand, std::bind(foo, 'a', _1));
     func(99);
     t.join();
 }

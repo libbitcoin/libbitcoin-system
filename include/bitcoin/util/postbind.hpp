@@ -14,17 +14,17 @@ class postbind
 public:
     typedef std::function<void (Args...)> function;
 
-    postbind(service_ptr service, function memfunc)
-      : service_(service), memfunc_(memfunc)
+    postbind(strand_ptr strand, function memfunc)
+      : strand_(strand), memfunc_(memfunc)
     {
     }
 
     void operator()(Args... params)
     {
-        service_->post(std::bind(memfunc_, std::forward<Args>(params)...));
+        strand_->post(std::bind(memfunc_, std::forward<Args>(params)...));
     }
 private:
-    service_ptr service_;
+    strand_ptr strand_;
     function memfunc_;
 };
 

@@ -13,8 +13,10 @@ protected:
     threaded_service();
     ~threaded_service();
     service_ptr service();
+    strand_ptr strand();
 private:
     service_ptr service_;
+    strand_ptr strand_;
     std::thread runner_;
     work_ptr work_;
 };
