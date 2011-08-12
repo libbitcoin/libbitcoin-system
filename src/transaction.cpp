@@ -118,5 +118,15 @@ std::string string_repr(message::transaction transaction)
     return ss.str();
 }
 
+bool previous_output_is_null(message::transaction_input input)
+{
+    return input.index == ~0u && input.hash == null_hash;
+}
+
+bool is_coinbase(message::transaction tx)
+{
+    return tx.inputs.size() == 1 && previous_output_is_null(tx.inputs[0]);
+}
+
 } // libbitcoin
 

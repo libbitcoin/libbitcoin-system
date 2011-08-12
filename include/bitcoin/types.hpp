@@ -22,6 +22,9 @@ typedef shared_ptr<dialect> dialect_ptr;
 class storage;
 typedef shared_ptr<storage> storage_ptr;
 
+class clock;
+typedef shared_ptr<clock> clock_ptr;
+
 typedef shared_ptr<io_service> service_ptr;
 typedef shared_ptr<io_service::work> work_ptr;
 typedef shared_ptr<io_service::strand> strand_ptr;

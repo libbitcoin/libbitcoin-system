@@ -152,11 +152,17 @@ bin/tests/ec-key: obj/ec-key.o obj/serializer.o obj/elliptic_curve_key.o obj/typ
 
 ec-key: bin/tests/ec-key
 
+obj/clock.o: src/util/clock.cpp include/bitcoin/util/clock.hpp
+	$(CXX) $(CFLAGS) -o obj/clock.o src/util/clock.cpp
+
+obj/constants.o: src/constants.cpp include/bitcoin/constants.hpp
+	$(CXX) $(CFLAGS) -o obj/constants.o src/constants.cpp
+
 obj/verify-block.o: tests/verify-block.cpp
 	$(CXX) $(CFLAGS) -o obj/verify-block.o tests/verify-block.cpp
 
-bin/tests/verify-block: obj/verify-block.o obj/postgresql_storage.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o obj/dialect.o
-	$(CXX) -o bin/tests/verify-block obj/verify-block.o obj/postgresql_storage.o obj/transaction.o obj/script.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o obj/threaded_service.o obj/dialect.o $(LIBS)
+bin/tests/verify-block: obj/verify-block.o obj/postgresql_storage.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o obj/dialect.o obj/constants.o obj/big_number.o obj/clock.o
+	$(CXX) -o bin/tests/verify-block obj/verify-block.o obj/postgresql_storage.o obj/transaction.o obj/script.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/storage_errors.o obj/verify.o obj/threaded_service.o obj/dialect.o obj/constants.o obj/big_number.o obj/clock.o $(LIBS)
 
 verify-block: bin/tests/verify-block
 
@@ -166,8 +172,8 @@ obj/big_number.o: src/util/big_number.cpp include/bitcoin/util/big_number.hpp
 obj/big-number-test.o: tests/big-number-test.cpp
 	$(CXX) $(CFLAGS) -o obj/big-number-test.o tests/big-number-test.cpp
 
-bin/tests/big-number-test: obj/big-number-test.o obj/big_number.o obj/logger.o
-	$(CXX) -o bin/tests/big-number-test obj/big-number-test.o obj/big_number.o obj/logger.o $(LIBS)
+bin/tests/big-number-test: obj/big-number-test.o obj/big_number.o obj/logger.o obj/constants.o
+	$(CXX) -o bin/tests/big-number-test obj/big-number-test.o obj/big_number.o obj/logger.o obj/constants.o $(LIBS)
 
 big-number-test: bin/tests/big-number-test
 

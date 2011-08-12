@@ -23,10 +23,17 @@ public:
 private:
     void find_duplicate(std::error_code ec, message::block);
 
+    bool check_block();
+    bool check_proof_of_work(hash_digest hash, uint32_t bits);
+    bool check_transaction(const message::transaction& tx);
+    size_t number_script_operations();
+
     storage_ptr storage_;
     dialect_ptr dialect_;
+    clock_ptr clock_;
 
     message::block current_block_;
+    hash_digest current_block_hash_;
     status_handler handle_status_;
 };
 

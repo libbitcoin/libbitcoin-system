@@ -11,6 +11,7 @@ class big_number
 {
 public:
     big_number();
+    big_number(int value);
     void set_compact(uint32_t compact);
     void set_data(data_chunk data);
     data_chunk get_data();

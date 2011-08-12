@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include <bitcoin/util/big_number.hpp>
+
 namespace libbitcoin {
 
 constexpr uint64_t max_money_recursive(uint64_t current)
@@ -20,6 +22,11 @@ constexpr uint64_t max_money()
 {
     return 210000 * max_money_recursive(coin_price(50));
 }
+
+const hash_digest null_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+big_number max_target();
 
 } // libbitcoin
 

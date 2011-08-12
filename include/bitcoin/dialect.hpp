@@ -20,6 +20,8 @@ public:
     virtual data_chunk to_network(message::getblocks getblocks) const = 0;
     virtual data_chunk to_network(message::block block,
             bool include_header=true) const = 0;
+    virtual data_chunk to_network(message::transaction tx,
+            bool include_header=true) const = 0;
 
     // Utilities
     virtual message::header header_from_network(
@@ -67,6 +69,7 @@ public:
     data_chunk to_network(message::getdata getdata) const;
     data_chunk to_network(message::getblocks getblocks) const;
     data_chunk to_network(message::block block, bool include_header) const;
+    data_chunk to_network(message::transaction tx, bool include_header) const;
 
     // Create header/messages from stream
     message::header header_from_network(const data_chunk& stream) const;

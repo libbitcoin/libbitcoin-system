@@ -14,6 +14,9 @@ hash_digest generate_merkle_root(message::transaction_list transactions);
 
 std::string string_repr(message::transaction transaction);
 
+bool previous_output_is_null(message::transaction_input input);
+bool is_coinbase(message::transaction tx);
+
 } // libbitcoin
 
 #endif

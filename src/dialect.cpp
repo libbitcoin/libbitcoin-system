@@ -95,6 +95,13 @@ data_chunk original_dialect::to_network(message::block block,
     return assemble_message("block", payload, include_header);
 }
 
+data_chunk original_dialect::to_network(message::transaction tx, 
+        bool include_header) const
+{
+    serializer payload;
+    return assemble_message("tx", payload, include_header);
+}
+
 data_chunk original_dialect::to_network(message::getdata getdata) const
 {
     serializer payload;

@@ -1,13 +1,15 @@
 #include <bitcoin/util/big_number.hpp>
 
-// TODO Debug
-#include <iostream>
-
 namespace libbitcoin {
 
 big_number::big_number()
 {
     BN_init(&bignum_);
+}
+big_number::big_number(int value)
+{
+    BN_init(&bignum_);
+    BN_set_word(&bignum_, value);
 }
 
 void big_number::set_compact(uint32_t compact)
@@ -68,27 +70,27 @@ hash_digest big_number::get_hash()
 
 bool big_number::operator==(const big_number& other) 
 { 
-    return (BN_cmp(&bignum_, &other.bignum_) == 0); 
+    return BN_cmp(&bignum_, &other.bignum_) == 0; 
 }
 bool big_number::operator!=(const big_number& other) 
 { 
-    return (BN_cmp(&bignum_, &other.bignum_) != 0); 
+    return BN_cmp(&bignum_, &other.bignum_) != 0; 
 }
 bool big_number::operator<=(const big_number& other) 
 { 
-    return (BN_cmp(&bignum_, &other.bignum_) <= 0); 
+    return BN_cmp(&bignum_, &other.bignum_) <= 0; 
 }
 bool big_number::operator>=(const big_number& other) 
 { 
-    return (BN_cmp(&bignum_, &other.bignum_) >= 0); 
+    return BN_cmp(&bignum_, &other.bignum_) >= 0; 
 }
 bool big_number::operator<(const big_number& other)  
 { 
-    return (BN_cmp(&bignum_, &other.bignum_) < 0); 
+    return BN_cmp(&bignum_, &other.bignum_) < 0; 
 }
 bool big_number::operator>(const big_number& other)  
 { 
-    return (BN_cmp(&bignum_, &other.bignum_) > 0); 
+    return BN_cmp(&bignum_, &other.bignum_) > 0; 
 }
 
 } // libbitcoin

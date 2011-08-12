@@ -8,23 +8,11 @@
 #include <bitcoin/util/big_number.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/constants.hpp>
 
 using libbitcoin::data_chunk;
 using libbitcoin::hash_digest;
 using libbitcoin::big_number;
-
-template<typename T>
-std::string serialize_bytes(T data)
-{
-    std::stringstream ss;
-    ss << std::hex;
-    for (int val: data)
-        ss << std::setw(2) << std::setfill('0') << val << ' ';
-    // Remove end ' '
-    std::string ret = ss.str();
-    ret.resize(ret.size() - 1);
-    return ret;
-}
 
 void test()
 {
@@ -41,6 +29,9 @@ void test()
     big_number other;
     other.set_hash(bignum.get_hash());
     assert(other.get_data() == bignum.get_data());
+
+    assert(bignum_max <= libbitcoin::max_target());
+    assert(bignum < libbitcoin::max_target());
 }
 
 int main()
