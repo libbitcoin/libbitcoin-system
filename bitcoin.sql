@@ -125,7 +125,7 @@ CREATE TABLE transactions (
 
 CREATE TABLE outputs (
     output_id INT NOT NULL DEFAULT NEXTVAL('outputs_output_id_sequence') PRIMARY KEY,
-    parent_id INT NOT NULL,
+    transaction_id INT NOT NULL,
     index_in_parent BIGINT NOT NULL,
     script_id INT NOT NULL,
     value amount_type NOT NULL,
@@ -135,7 +135,7 @@ CREATE TABLE outputs (
 
 CREATE TABLE inputs (
     input_id INT NOT NULL DEFAULT NEXTVAL('inputs_input_id_sequence') PRIMARY KEY,
-    parent_id INT NOT NULL,
+    transaction_id INT NOT NULL,
     index_in_parent INT NOT NULL,
     script_id INT NOT NULL,
     previous_output_id INT,

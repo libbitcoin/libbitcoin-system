@@ -103,9 +103,9 @@ void postgresql_storage::insert(message::transaction_input input,
     size_t script_id = insert_script(input.input_script.operations());
     std::string hash = hexlify(input.hash);
     sql_ <<
-        "INSERT INTO inputs (input_id, parent_id, index_in_parent, script_id, \
-            previous_output_id, previous_output_hash, previous_output_index, \
-            sequence) \
+        "INSERT INTO inputs (input_id, transaction_id, index_in_parent, \
+            script_id, previous_output_id, previous_output_hash, \
+            previous_output_index, sequence) \
         VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?)"
         << transaction_id
         << index_in_parent
@@ -122,7 +122,7 @@ void postgresql_storage::insert(message::transaction_output output,
 {
     size_t script_id = insert_script(output.output_script.operations());
     sql_ <<
-        "INSERT INTO outputs (output_id, parent_id, index_in_parent, \
+        "INSERT INTO outputs (output_id, transaction_id, index_in_parent, \
             script_id, value, output_type, address) \
         VALUES (DEFAULT, ?, ?, ?, internal_to_sql(?), ?, ?)"
         << transaction_id
@@ -241,7 +241,7 @@ message::transaction_input_list postgresql_storage::select_inputs(
     cppdb::result result = sql_ <<
         "SELECT * \
         FROM inputs \
-        WHERE parent_id=? \
+        WHERE transaction_id=? \
         ORDER BY index_in_parent ASC"
         << transaction_id;
     while (result.next())
@@ -266,7 +266,7 @@ message::transaction_output_list postgresql_storage::select_outputs(
             *, \
             sql_to_internal(value) internal_value \
         FROM outputs \
-        WHERE parent_id=? \
+        WHERE transaction_id=? \
         ORDER BY index_in_parent ASC"
         << transaction_id;
     while (result.next())
@@ -451,7 +451,7 @@ void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash,
             sql_to_internal(value) internal_value \
         FROM transactions \
         JOIN outputs \
-        ON transaction_id=parent_id \
+        ON transaction_id=transaction_id \
         WHERE \
             transaction_hash=? \
             AND index_in_parent=?"
@@ -563,7 +563,7 @@ void postgresql_storage::matchup_inputs()
 {
     sql_ <<
         "UPDATE inputs \
-        SET previous_output_id=transaction_id \
+        SET previous_output_id=transactions.transaction_id \
         FROM transactions \
         WHERE previous_output_hash=transaction_hash"
         << cppdb::exec;
