@@ -5,13 +5,16 @@
 
 namespace libbitcoin {
 
-enum class storage_error
+enum class error
 {
+    // storage errors
     block_doesnt_exist = 1,
-    output_doesnt_exist
+    output_doesnt_exist,
+    // network errors
+    system_network_error
 };
 
-class storage_category_impl
+class error_category_impl
   : public std::error_category
 {
 public:
@@ -19,17 +22,17 @@ public:
     virtual std::string message(int ev) const;
 };
 
-const std::error_category& storage_category();
+const std::error_category& error_category();
 
-std::error_code make_error_code(storage_error e);
-std::error_condition make_error_condition(storage_error e);
+std::error_code make_error_code(error e);
+std::error_condition make_error_condition(error e);
 
 } // libbitcoin
 
 namespace std
 {
     template <>
-    struct is_error_code_enum<libbitcoin::storage_error>
+    struct is_error_code_enum<libbitcoin::error>
       : public true_type {};
 }
 

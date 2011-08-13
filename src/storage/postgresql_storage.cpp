@@ -339,7 +339,7 @@ void postgresql_storage::fetch_block_by_depth(size_t block_number,
         << cppdb::row;
     if (block_result.empty())
     {
-        handle_fetch(storage_error::block_doesnt_exist, message::block());
+        handle_fetch(error::block_doesnt_exist, message::block());
         return;
     }
     message::block block = read_block(block_result);
@@ -364,7 +364,7 @@ void postgresql_storage::fetch_block_by_hash(hash_digest block_hash,
         << cppdb::row;
     if (block_result.empty())
     {
-        handle_fetch(storage_error::block_doesnt_exist, message::block());
+        handle_fetch(error::block_doesnt_exist, message::block());
         return;
     }
     message::block block = read_block(block_result);
@@ -384,7 +384,7 @@ void postgresql_storage::fetch_block_locator(
         << cppdb::row;
     if (number_blocks_result.empty())
     {
-        handle_fetch(storage_error::block_doesnt_exist, 
+        handle_fetch(error::block_doesnt_exist, 
                 message::block_locator());
         return;
     }
@@ -457,7 +457,7 @@ void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash,
         << cppdb::row;
     if (result.empty())
     {
-        handle_fetch(storage_error::output_doesnt_exist, output);
+        handle_fetch(error::output_doesnt_exist, output);
         return;
     }
     output.value = result.get<uint64_t>("internal_value");

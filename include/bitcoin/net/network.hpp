@@ -9,7 +9,7 @@
 #include <bitcoin/kernel.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/net/types.hpp>
-#include <bitcoin/net/errors.hpp>
+#include <bitcoin/error.hpp>
 
 namespace libbitcoin {
 namespace net {

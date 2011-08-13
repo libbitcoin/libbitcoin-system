@@ -5,7 +5,7 @@
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/storage/storage.hpp>
-#include <bitcoin/storage/errors.hpp>
+#include <bitcoin/error.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/clock.hpp>
 
@@ -37,7 +37,7 @@ void verify_block::start(message::block current_block,
 void verify_block::find_duplicate(std::error_code ec, message::block)
 {
     goto ignore_duplicate_check;
-    if (ec != storage_error::block_doesnt_exist)
+    if (ec != error::block_doesnt_exist)
     {
         // These are error cases
         if (!ec)
@@ -61,7 +61,7 @@ ignore_duplicate_check:
 
 void verify_block::find_previous(std::error_code ec, message::block)
 {
-    if (ec == storage_error::block_doesnt_exist)
+    if (ec == error::block_doesnt_exist)
     {
         // TODO not handled for the time being
         handle_status_(std::error_code(), false);

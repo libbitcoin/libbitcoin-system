@@ -4,7 +4,7 @@
 #include <boost/utility.hpp>
 #include <functional>
 
-#include <bitcoin/storage/errors.hpp>
+#include <bitcoin/error.hpp>
 #include <bitcoin/messages.hpp>
 
 namespace libbitcoin {

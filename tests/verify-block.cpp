@@ -36,7 +36,7 @@ void recv_block(std::error_code ec, libbitcoin::message::block block, verify_blo
 
 int main()
 {
-    storage_ptr psql(new postgresql_storage("bitcoin", "genjix"));
+    storage_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
     dialect_ptr dialect(new original_dialect);
     verify_block_ptr verif(new verify_block(psql, dialect));
     psql->fetch_block_by_depth(2, std::bind(recv_block, _1, _2, verif));

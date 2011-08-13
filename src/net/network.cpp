@@ -52,7 +52,7 @@ void network_impl::handle_connect(const boost::system::error_code& ec,
     if (ec)
     {
         log_error() << "Connecting to peer " << ip_addr << ": " << ec.message();
-        handle_connect(network_error::system_network_error, 0);
+        handle_connect(error::system_network_error, 0);
         return;
     }
     channel_handle chanid = create_channel(socket);
