@@ -24,14 +24,14 @@ script: src/script.cpp include/bitcoin/script.hpp
 obj/block.o: src/block.cpp include/bitcoin/block.hpp
 	$(CXX) $(CFLAGS) -o obj/block.o src/block.cpp
 
-obj/network.o: src/net/network.cpp include/bitcoin/net/network.hpp
-	$(CXX) $(CFLAGS) -o obj/network.o src/net/network.cpp
+obj/network.o: src/network/network.cpp include/bitcoin/network/network.hpp
+	$(CXX) $(CFLAGS) -o obj/network.o src/network/network.cpp
 
 obj/dialect.o: src/dialect.cpp include/bitcoin/dialect.hpp
 	$(CXX) $(CFLAGS) -o obj/dialect.o src/dialect.cpp
 
-obj/channel.o: src/net/channel.cpp src/net/channel.hpp
-	$(CXX) $(CFLAGS) -o obj/channel.o src/net/channel.cpp
+obj/channel.o: src/network/channel.cpp src/network/channel.hpp
+	$(CXX) $(CFLAGS) -o obj/channel.o src/network/channel.cpp
 
 obj/sha256.o: src/util/sha256.cpp include/bitcoin/util/sha256.hpp
 	$(CXX) $(CFLAGS) -o obj/sha256.o src/util/sha256.cpp

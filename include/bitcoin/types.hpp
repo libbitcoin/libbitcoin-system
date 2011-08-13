@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <vector>
 
-#include <bitcoin/net/types.hpp>
+#include <bitcoin/network/types.hpp>
 
 namespace libbitcoin {
 

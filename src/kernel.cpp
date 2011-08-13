@@ -6,7 +6,7 @@
 
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
-#include <bitcoin/net/network.hpp>
+#include <bitcoin/network/network.hpp>
 #include <bitcoin/storage/storage.hpp>
 
 using boost::posix_time::seconds;

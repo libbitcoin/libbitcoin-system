@@ -9,7 +9,7 @@
 #include <bitcoin/constants.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/kernel.hpp>
-#include <bitcoin/net/network.hpp>
+#include <bitcoin/network/network.hpp>
 #include <bitcoin/storage/postgresql_storage.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/postbind.hpp>

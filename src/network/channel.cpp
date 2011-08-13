@@ -7,7 +7,7 @@
 
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/assert.hpp>
-#include <bitcoin/net/network.hpp>
+#include <bitcoin/network/network.hpp>
 #include <bitcoin/dialect.hpp>
 #include <bitcoin/messages.hpp>
 

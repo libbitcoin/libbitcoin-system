@@ -1,4 +1,4 @@
-#include <bitcoin/net/errors.hpp>
+#include <bitcoin/network/errors.hpp>
 
 namespace libbitcoin {
 namespace net {

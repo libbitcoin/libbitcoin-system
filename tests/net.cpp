@@ -1,5 +1,5 @@
 #include <bitcoin/messages.hpp>
-#include <bitcoin/net/network.hpp>
+#include <bitcoin/network/network.hpp>
 #include <bitcoin/storage/memory_storage.hpp>
 #include <bitcoin/storage/postgresql_storage.hpp>
 #include <bitcoin/kernel.hpp>

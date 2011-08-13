@@ -1,4 +1,4 @@
-#include <bitcoin/net/network.hpp>
+#include <bitcoin/network/network.hpp>
 
 #include <boost/lexical_cast.hpp>
 #include <functional>

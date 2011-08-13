@@ -10,7 +10,7 @@
 #include <mutex>
 #include <deque>
 
-#include <bitcoin/net/network.hpp>
+#include <bitcoin/network/network.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/util/serializer.hpp>
 
