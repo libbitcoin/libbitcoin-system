@@ -25,29 +25,18 @@ public:
     void register_network(net::network_ptr net_comp);
     net::network_ptr get_network();
     // Callbacks from network component
-    void send_failed(net::channel_handle chandle,
-            message::version message);
-    void send_failed(net::channel_handle chandle,
-            message::verack message);
-    void send_failed(net::channel_handle chandle,
-            message::getaddr message);
-    void send_failed(net::channel_handle chandle,
-            message::inv message);
-    void send_failed(net::channel_handle chandle,
-            message::getdata message);
-    void send_failed(net::channel_handle chandle,
-            message::getblocks message);
+    void send_failed(net::channel_handle chandle, message::version message);
+    void send_failed(net::channel_handle chandle, message::verack message);
+    void send_failed(net::channel_handle chandle, message::getaddr message);
+    void send_failed(net::channel_handle chandle, message::inv message);
+    void send_failed(net::channel_handle chandle, message::getdata message);
+    void send_failed(net::channel_handle chandle, message::getblocks message);
 
-    bool recv_message(net::channel_handle chandle,
-            message::version message);
-    bool recv_message(net::channel_handle chandle,
-            message::verack message);
-    bool recv_message(net::channel_handle chandle,
-            message::addr message);
-    bool recv_message(net::channel_handle chandle,
-            message::inv message);
-    bool recv_message(net::channel_handle chandle,
-            message::block message);
+    bool recv_message(net::channel_handle chandle, message::version message);
+    bool recv_message(net::channel_handle chandle, message::verack message);
+    bool recv_message(net::channel_handle chandle, message::addr message);
+    bool recv_message(net::channel_handle chandle, message::inv message);
+    bool recv_message(net::channel_handle chandle, message::block message);
 
     void handle_connect(net::channel_handle chandle);
 

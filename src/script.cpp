@@ -257,7 +257,7 @@ script parse_script(const data_chunk raw_script)
         byte raw_byte = *it;
         operation op;
         op.code = static_cast<opcode>(raw_byte);
-        if (1 <= raw_byte && raw_byte <= 75)
+        if (0 <= raw_byte && raw_byte <= 75)
             op.code = opcode::special;
         size_t read_n_bytes = number_of_bytes_from_opcode(op.code, raw_byte);
 

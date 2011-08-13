@@ -4,9 +4,6 @@
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
 
-// TODO debug remove this
-#include <bitcoin/util/logger.hpp>
-
 namespace libbitcoin {
 
 data_chunk deserialize_bytes(std::string byte_stream)

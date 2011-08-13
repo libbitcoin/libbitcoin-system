@@ -39,33 +39,27 @@ net::network_ptr kernel::get_network()
     return network_component_;
 }
 
-void kernel::send_failed(net::channel_handle,
-        message::version)
+void kernel::send_failed(net::channel_handle, message::version)
 {
 }
 
-void kernel::send_failed(net::channel_handle,
-        message::verack)
+void kernel::send_failed(net::channel_handle, message::verack)
 {
 }
 
-void kernel::send_failed(net::channel_handle,
-        message::getaddr)
+void kernel::send_failed(net::channel_handle, message::getaddr)
 {
 }
 
-void kernel::send_failed(net::channel_handle,
-        message::inv)
+void kernel::send_failed(net::channel_handle, message::inv)
 {
 }
 
-void kernel::send_failed(net::channel_handle,
-        message::getdata)
+void kernel::send_failed(net::channel_handle, message::getdata)
 {
 }
 
-void kernel::send_failed(net::channel_handle,
-        message::getblocks)
+void kernel::send_failed(net::channel_handle, message::getblocks)
 {
 }
 
@@ -78,8 +72,7 @@ void display_byte_array(T arr)
         logobj << std::setfill('0') << std::setw(2) << number << " ";
 }
 
-bool kernel::recv_message(net::channel_handle chandle,
-        message::version message)
+bool kernel::recv_message(net::channel_handle chandle, message::version message)
 {
     log_debug() << "nonce is " << message.nonce;
     log_debug() << "last block is " << message.start_height;
@@ -88,15 +81,13 @@ bool kernel::recv_message(net::channel_handle chandle,
     return true;
 }
 
-bool kernel::recv_message(net::channel_handle,
-        message::verack)
+bool kernel::recv_message(net::channel_handle, message::verack)
 {
     // When you receive this, then you know other side is accepting your sends
     return true;
 }
 
-bool kernel::recv_message(net::channel_handle,
-        message::addr message)
+bool kernel::recv_message(net::channel_handle, message::addr message)
 {
     for (const message::net_addr addr: message.addr_list)
     {
@@ -106,8 +97,7 @@ bool kernel::recv_message(net::channel_handle,
     return true;
 }
 
-bool kernel::recv_message(net::channel_handle,
-        message::inv message)
+bool kernel::recv_message(net::channel_handle, message::inv message)
 {
     message::inv request_invs;
     for (const message::inv_vect curr_inv: message.invs)
@@ -132,8 +122,7 @@ bool kernel::recv_message(net::channel_handle,
     return true;
 }
 
-bool kernel::recv_message(net::channel_handle,
-        message::block message)
+bool kernel::recv_message(net::channel_handle, message::block message)
 {
     storage_component_->store(message, null);
     return true;
