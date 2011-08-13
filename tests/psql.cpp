@@ -89,7 +89,7 @@ void create_fake_stuff(psql_ptr psql)
 int main()
 {
     psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
-    psql->organize_blockchain();
+    psql->organize_block_chain();
     return 0;
 }
 

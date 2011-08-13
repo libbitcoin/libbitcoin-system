@@ -83,7 +83,8 @@ data_chunk original_dialect::to_network(message::getblocks getblocks) const
     serializer payload;
     payload.write_4_bytes(31900);
     payload.write_var_uint(getblocks.locator_start_hashes.size());
-    payload.write_hash(getblocks.locator_start_hashes[0]);
+    for (hash_digest start_hash: getblocks.locator_start_hashes)
+        payload.write_hash(start_hash);
     payload.write_hash(getblocks.hash_stop);
     return assemble_message("getblocks", payload, true);
 }

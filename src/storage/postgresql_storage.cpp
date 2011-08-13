@@ -4,6 +4,9 @@
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
 
+// TODO debug remove this
+#include <bitcoin/util/logger.hpp>
+
 namespace libbitcoin {
 
 data_chunk deserialize_bytes(std::string byte_stream)
@@ -363,6 +366,70 @@ void postgresql_storage::fetch_block_by_hash(hash_digest block_hash,
     handle_fetch(std::error_code(), block);
 }
 
+void postgresql_storage::fetch_block_locator(
+        fetch_handler_block_locator handle_fetch)
+{
+    cppdb::result number_blocks_result = sql_ <<
+        "SELECT MAX(depth) \
+        FROM blocks \
+        WHERE \
+            span_left=0 \
+            AND span_right=0"
+        << cppdb::row;
+    if (number_blocks_result.empty())
+    {
+        handle_fetch(storage_error::block_doesnt_exist, 
+                message::block_locator());
+        return;
+    }
+    // Start at max_depth
+    int current_depth = number_blocks_result.get<size_t>(0);
+    std::vector<size_t> indices;
+    // Push last 10 indices first
+    for (size_t i = 0; i < 10; ++i, --current_depth)
+        indices.push_back(current_depth);
+    size_t step = 1;
+    while (true)
+    {
+        current_depth -= step;
+        if (current_depth <= 0)
+            break;
+        indices.push_back(current_depth);
+        step *= 2;
+    }
+    indices.push_back(0);
+    // Now actually fetch the hashes for these blocks
+    // TODO: UGLY!! Hack around limitation of cppdb!
+    std::string hack_sql =
+        "SELECT block_hash \
+        FROM blocks \
+        WHERE \
+            span_left=0 \
+            AND span_right=0 \
+            AND depth IN (";
+    bool is_first = true;
+    for (size_t depth: indices)
+    {
+        if (is_first)
+            is_first = false;
+        else
+            hack_sql += ", ";
+        std::stringstream out;
+        out << depth;
+        hack_sql += out.str();
+    }
+    hack_sql += ") ORDER BY depth DESC";
+    // ----------------------------------------------
+    cppdb::result block_hashes_result = sql_ << hack_sql.c_str();
+    message::block_locator locator;
+    while (block_hashes_result.next())
+    {
+        std::string block_hash_repr = block_hashes_result.get<std::string>(0);
+        locator.push_back(deserialize_hash(block_hash_repr));
+    }
+    handle_fetch(std::error_code(), locator);
+}
+
 void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash, 
         uint32_t index, fetch_handler_output handle_fetch)
 {
@@ -392,7 +459,7 @@ void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash,
     handle_fetch(std::error_code(), output);
 }
 
-void postgresql_storage::organize_blockchain()
+void postgresql_storage::organize_block_chain()
 {
     cppdb::result result = sql_ <<
         "SELECT \

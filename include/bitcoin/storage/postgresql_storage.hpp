@@ -23,10 +23,11 @@ public:
             fetch_handler_block handle_fetch);
     void fetch_block_by_hash(hash_digest block_hash, 
             fetch_handler_block handle_fetch);
+    void fetch_block_locator(fetch_handler_block_locator handle_fetch);
     void fetch_output_by_hash(hash_digest transaction_hash, uint32_t index,
             fetch_handler_output handle_fetch);
 
-    void organize_blockchain();
+    void organize_block_chain();
 
 private:
     void insert(operation oper, size_t script_id);

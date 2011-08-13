@@ -71,8 +71,17 @@ void memory_storage::fetch_block_by_hash(hash_digest block_hash,
 {
 }
 
+void memory_storage::fetch_block_locator(
+        fetch_handler_block_locator handle_fetch)
+{
+}
+
 void memory_storage::fetch_output_by_hash(hash_digest transaction_hash, 
         uint32_t index, fetch_handler_output handle_fetch)
+{
+}
+
+void memory_storage::organize_block_chain()
 {
 }
 

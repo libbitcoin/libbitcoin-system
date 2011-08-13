@@ -22,6 +22,8 @@ public:
             fetch_handler_inventories;
     typedef std::function<void (std::error_code, message::block)>
             fetch_handler_block;
+    typedef std::function<void (std::error_code, message::block_locator)>
+            fetch_handler_block_locator;
     typedef std::function<void (std::error_code, message::transaction_output)>
             fetch_handler_output;
 
@@ -35,8 +37,12 @@ public:
             fetch_handler_block handle_fetch) = 0;
     virtual void fetch_block_by_hash(hash_digest block_hash,    
             fetch_handler_block handle_fetch) = 0;
+    virtual void fetch_block_locator(
+            fetch_handler_block_locator handle_fetch) = 0;
     virtual void fetch_output_by_hash(hash_digest transaction_hash, 
             uint32_t index, fetch_handler_output handle_fetch) = 0;
+
+    virtual void organize_block_chain() = 0;
 };
 
 } // libbitcoin

@@ -12,6 +12,8 @@
 namespace libbitcoin {
 namespace message {
 
+typedef std::vector<hash_digest> block_locator;
+
 typedef std::array<uint8_t, 16> ip_address;
 
 struct net_addr

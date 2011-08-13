@@ -17,12 +17,17 @@ using std::shared_ptr;
 using boost::asio::io_service;
 
 class dialect;
-typedef shared_ptr<dialect> dialect_ptr;
-
 class storage;
-typedef shared_ptr<storage> storage_ptr;
-
+class kernel;
+namespace net {
+    class network;
+} // net
 class clock;
+
+typedef shared_ptr<dialect> dialect_ptr;
+typedef shared_ptr<storage> storage_ptr;
+typedef shared_ptr<kernel> kernel_ptr;
+typedef shared_ptr<net::network> network_ptr;
 typedef shared_ptr<clock> clock_ptr;
 
 typedef shared_ptr<io_service> service_ptr;
@@ -34,8 +39,6 @@ typedef std::array<uint8_t, 20> short_hash;
 
 typedef unsigned char byte;
 typedef std::vector<byte> data_chunk;
-
-typedef std::vector<hash_digest> block_locator;
 
 void extend_data(data_chunk& chunk, const data_chunk& other);
 

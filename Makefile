@@ -177,3 +177,11 @@ bin/tests/big-number-test: obj/big-number-test.o obj/big_number.o obj/logger.o o
 
 big-number-test: bin/tests/big-number-test
 
+obj/poller.o: examples/poller.cpp
+	$(CXX) $(CFLAGS) -o obj/poller.o examples/poller.cpp
+
+bin/examples/poller: obj/poller.o obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o obj/threaded_service.o
+	$(CXX) -o bin/examples/poller obj/poller.o obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/memory_storage.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/storage_errors.o obj/network_errors.o obj/threaded_service.o $(LIBS)
+
+poller: bin/examples/poller
+
