@@ -45,6 +45,7 @@ postgresql_storage::postgresql_storage(std::string database, std::string user)
 void postgresql_storage::store(message::inv inv,
         store_handler handle_store)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     cppdb::statement stat = sql_ <<
         "INSERT INTO inventory_requests (type, hash) \
         VALUES (?, ?)";
@@ -155,6 +156,7 @@ size_t postgresql_storage::insert(message::transaction transaction)
 void postgresql_storage::store(message::transaction transaction,
         store_handler handle_store)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     insert(transaction);
     handle_store(std::error_code());
 }
@@ -162,6 +164,7 @@ void postgresql_storage::store(message::transaction transaction,
 void postgresql_storage::store(message::block block,
         store_handler handle_store)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     hash_digest block_hash = hash_block_header(block);
     std::string block_hash_repr = hexlify(block_hash),
             prev_block_repr = hexlify(block.prev_block),
@@ -203,6 +206,7 @@ void postgresql_storage::store(message::block block,
 
 void postgresql_storage::fetch_inventories(fetch_handler_inventories)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     // Not implemented
 }
 
@@ -322,6 +326,7 @@ message::block postgresql_storage::read_block(cppdb::result block_result)
 void postgresql_storage::fetch_block_by_depth(size_t block_number,
         fetch_handler_block handle_fetch)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     cppdb::result block_result = sql_ <<
         "SELECT \
             *, \
@@ -345,6 +350,7 @@ void postgresql_storage::fetch_block_by_depth(size_t block_number,
 void postgresql_storage::fetch_block_by_hash(hash_digest block_hash, 
         fetch_handler_block handle_fetch)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     std::string block_hash_repr = hexlify(block_hash);
     cppdb::result block_result = sql_ <<
         "SELECT \
@@ -369,6 +375,7 @@ void postgresql_storage::fetch_block_by_hash(hash_digest block_hash,
 void postgresql_storage::fetch_block_locator(
         fetch_handler_block_locator handle_fetch)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     cppdb::result number_blocks_result = sql_ <<
         "SELECT MAX(depth) \
         FROM blocks \
@@ -433,6 +440,7 @@ void postgresql_storage::fetch_block_locator(
 void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash, 
         uint32_t index, fetch_handler_output handle_fetch)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     message::transaction_output output;
     std::string transaction_hash_repr = hexlify(transaction_hash);
     cppdb::result result = sql_ <<
@@ -461,6 +469,7 @@ void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash,
 
 void postgresql_storage::organize_block_chain()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     cppdb::result result = sql_ <<
         "SELECT \
             block_id, \

@@ -5,6 +5,7 @@
 
 #include <cppdb/frontend.h>
 #include <string>
+#include <mutex>
 
 namespace libbitcoin {
 
@@ -48,6 +49,7 @@ private:
     void matchup_inputs();
 
     cppdb::session sql_;
+    std::mutex mutex_;
 };
 
 } // libbitcoin
