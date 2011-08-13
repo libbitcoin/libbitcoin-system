@@ -14,7 +14,6 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 namespace libbitcoin {
-namespace net {
 
 using boost::asio::socket_base;
 
@@ -196,6 +195,5 @@ void network_impl::handle_accept(socket_ptr socket)
                 socket));
 }
 
-} // net
 } // libbitcoin
 

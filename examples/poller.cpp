@@ -32,9 +32,9 @@ public:
 
     void start(std::string hostname, unsigned int port);
 private:
-    typedef std::vector<net::channel_handle> channels_list;
+    typedef std::vector<channel_handle> channels_list;
 
-    void handle_connect(std::error_code ec, net::channel_handle channel);
+    void handle_connect(std::error_code ec, channel_handle channel);
     void reset_timer();
 
     void fetch_locator(const boost::system::error_code& ec);
@@ -54,7 +54,7 @@ poller_application::poller_application(std::string dbname,
         std::string dbuser, std::string dbpass)
   : kernel_(new kernel)
 {
-    network_.reset(new net::network_impl(kernel_));
+    network_.reset(new network_impl(kernel_));
     kernel_->register_network(network_);
 
     storage_.reset(new postgresql_storage(dbname, dbuser, dbpass));
@@ -66,12 +66,12 @@ poller_application::poller_application(std::string dbname,
 void poller_application::start(std::string hostname, unsigned int port)
 {
     network_->connect(hostname, port, 
-        postbind<std::error_code, net::channel_handle>(strand(), std::bind(
+        postbind<std::error_code, channel_handle>(strand(), std::bind(
             &poller_application::handle_connect, shared_from_this(), _1, _2)));
 }
 
 void poller_application::handle_connect(
-    std::error_code ec, net::channel_handle channel)
+    std::error_code ec, channel_handle channel)
 {
     if (ec)
     {
@@ -116,7 +116,7 @@ void poller_application::request_blocks(
     getblocks.locator_start_hashes = locator;
     getblocks.hash_stop = null_hash;
     // Do a broadcast
-    for (net::channel_handle channel: channels_)
+    for (channel_handle channel: channels_)
         network_->send(channel, getblocks);
     reset_timer();
 }

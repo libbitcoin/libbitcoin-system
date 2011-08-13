@@ -12,7 +12,6 @@
 #include <bitcoin/error.hpp>
 
 namespace libbitcoin {
-namespace net {
 
 using boost::asio::ip::tcp;
 using boost::asio::io_service;
@@ -79,7 +78,6 @@ private:
     channel_list channels_;
 };
 
-} // net
 } // libbitcoin
 
 #endif

@@ -7,7 +7,6 @@
 #include <bitcoin/util/serializer.hpp>
 
 namespace libbitcoin {
-namespace net {
 
 // A reference-counted non-modifiable buffer class.
 class shared_const_buffer
@@ -31,7 +30,6 @@ private:
   boost::asio::const_buffer buffer;
 };
 
-} // net
 } // libbitcoin
 
 #endif

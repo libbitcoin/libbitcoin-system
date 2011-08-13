@@ -21,7 +21,6 @@ using boost::posix_time::time_duration;
 using boost::asio::buffer;
 
 namespace libbitcoin {
-namespace net {
 
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
@@ -287,6 +286,5 @@ message::version channel_pimpl::create_version_message()
     return version;
 }
 
-} // net
 } // libbitcoin
 

@@ -9,7 +9,7 @@
 #include <iostream>
 #include <iomanip>
 
-using libbitcoin::net::network_ptr;
+using libbitcoin::network_ptr;
 using libbitcoin::kernel_ptr;
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -25,7 +25,7 @@ libbitcoin::message::getblocks create_getblocks_message()
 }
 
 void handle_connect(std::error_code ec, kernel_ptr kernel, 
-    libbitcoin::net::channel_handle channel)
+    libbitcoin::channel_handle channel)
 {
     network_ptr net = kernel->get_network();
     if (ec) {
@@ -39,7 +39,7 @@ void handle_connect(std::error_code ec, kernel_ptr kernel,
 int run_connect()
 {
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
-    libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel));
+    libbitcoin::network_ptr net(new libbitcoin::network_impl(kernel));
     net->connect("localhost", 8333, std::bind(&handle_connect, _1, kernel, _2));
     std::cin.get();
     return 0;
@@ -48,14 +48,14 @@ int run_connect()
 int run_accept()
 {
     libbitcoin::kernel_ptr kernel(new libbitcoin::kernel);
-    libbitcoin::net::network_ptr net(new libbitcoin::net::network_impl(kernel));
+    libbitcoin::network_ptr net(new libbitcoin::network_impl(kernel));
     net->start_accept();
     std::cin.get();
     return 0;
 }
 
 void handle_connect_kernel(kernel_ptr kernel, std::error_code ec, 
-    libbitcoin::net::channel_handle channel)
+    libbitcoin::channel_handle channel)
 {
     network_ptr net = kernel->get_network();
     if (ec) {
@@ -69,8 +69,8 @@ void handle_connect_kernel(kernel_ptr kernel, std::error_code ec,
 
 int run_kernel(kernel_ptr kernel)
 {
-    libbitcoin::net::network_ptr net(
-            new libbitcoin::net::network_impl(kernel));
+    libbitcoin::network_ptr net(
+            new libbitcoin::network_impl(kernel));
     kernel->register_network(net);
     //libbitcoin::storage_ptr storage(
     //        new libbitcoin::memory_storage());

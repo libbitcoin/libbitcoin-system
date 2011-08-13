@@ -5,7 +5,6 @@
 #include <memory>
 
 namespace libbitcoin {
-namespace net {
 
 class network;
 class network_impl;
@@ -18,7 +17,6 @@ typedef unsigned int channel_handle;
 typedef boost::ptr_vector<channel_pimpl> channel_list;
 
 
-} // net
 } // libbitcoin
 
 #endif

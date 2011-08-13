@@ -15,7 +15,6 @@
 #include <bitcoin/util/serializer.hpp>
 
 namespace libbitcoin {
-namespace net {
 
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
@@ -101,7 +100,6 @@ private:
     shared_ptr<deadline_timer> timeout_;
 };
 
-} // net
 } // libbitcoin
 
 #endif
