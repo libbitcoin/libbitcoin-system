@@ -4,6 +4,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <bitcoin/constants.hpp>
 #include <bitcoin/types.hpp>
@@ -26,9 +27,9 @@ class poller_application
     public std::enable_shared_from_this<poller_application>
 {
 public:
-    poller_application();
+    poller_application(std::string dbname, std::string dbuser);
 
-    void start();
+    void start(std::string hostname, unsigned int port);
 private:
     typedef std::vector<net::channel_handle> channels_list;
 
@@ -48,21 +49,21 @@ private:
 
 typedef std::shared_ptr<poller_application> poller_application_ptr;
 
-poller_application::poller_application()
+poller_application::poller_application(std::string dbname, std::string dbuser)
   : kernel_(new kernel)
 {
     network_.reset(new net::network_impl(kernel_));
     kernel_->register_network(network_);
 
-    storage_.reset(new postgresql_storage("bitcoin", "genjix"));
+    storage_.reset(new postgresql_storage(dbname, dbuser));
     kernel_->register_storage(storage_);
 
     poll_blocks_timer_.reset(new deadline_timer(*service()));
 }
 
-void poller_application::start()
+void poller_application::start(std::string hostname, unsigned int port)
 {
-    network_->connect("localhost", 8333, 
+    network_->connect(hostname, port, 
         postbind<std::error_code, net::channel_handle>(strand(), std::bind(
             &poller_application::handle_connect, shared_from_this(), _1, _2)));
 }
@@ -118,11 +119,26 @@ void poller_application::request_blocks(
     reset_timer();
 }
 
-int main()
+int main(int argc, const char** argv)
 {
-    poller_application_ptr app(new poller_application);
-    app->start();
-    std::cin.get();
+    if (argc < 4)
+    {
+        log_info() << "poller [DBNAME] [DBUSER] [HOST:PORT] ...";
+        return -1;
+    }
+    std::string dbname = argv[1], dbuser = argv[2];
+    poller_application_ptr app(new poller_application(dbname, dbuser));
+    for (int hosts_iter = 3; hosts_iter < argc; ++hosts_iter)
+    {
+        std::vector<std::string> args;
+        boost::split(args, argv[hosts_iter], boost::is_any_of(":"));
+        if (args.size() == 1)
+            app->start(args[0], 8333);
+        else
+            app->start(args[0], boost::lexical_cast<unsigned int>(args[1]));
+    }
+    while (true)
+        sleep(1);
     return 0;
 }
 
