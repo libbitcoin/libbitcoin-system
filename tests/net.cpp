@@ -75,7 +75,7 @@ int run_kernel(kernel_ptr kernel)
     //libbitcoin::storage_ptr storage(
     //        new libbitcoin::memory_storage());
     libbitcoin::storage_ptr storage(
-            new libbitcoin::postgresql_storage("bitcoin", "genjix"));
+            new libbitcoin::postgresql_storage("bitcoin", "genjix", ""));
     kernel->register_storage(storage);
     net->connect("localhost", 8333, std::bind(&handle_connect_kernel, kernel, _1, _2));
     std::cin.get();

@@ -37,8 +37,10 @@ hash_digest deserialize_hash(std::string byte_stream)
     return hash;
 }
 
-postgresql_storage::postgresql_storage(std::string database, std::string user)
-  : sql_(std::string("postgresql:dbname=") + database + ";user=" + user)
+postgresql_storage::postgresql_storage(std::string database, 
+        std::string user, std::string password)
+  : sql_(std::string("postgresql:dbname=") + database + 
+        ";user=" + user + ";password=" + password)
 {
 }
 

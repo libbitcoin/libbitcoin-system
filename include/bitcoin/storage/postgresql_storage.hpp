@@ -13,7 +13,8 @@ class postgresql_storage
   : public storage
 {
 public:
-    postgresql_storage(std::string database, std::string user);
+    postgresql_storage(std::string database, 
+            std::string user, std::string password);
 
     void store(message::inv inv, store_handler handle_store);
     void store(message::transaction transaction, store_handler handle_store);

@@ -11,7 +11,7 @@ using libbitcoin::opcode;
 using libbitcoin::hash_digest;
 typedef shared_ptr<postgresql_storage> psql_ptr;
 
-void null(bool ec)
+void null(std::error_code ec)
 {
 }
 
@@ -88,7 +88,7 @@ void create_fake_stuff(psql_ptr psql)
 
 int main()
 {
-    psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
+    psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
     psql->organize_block_chain();
     return 0;
 }

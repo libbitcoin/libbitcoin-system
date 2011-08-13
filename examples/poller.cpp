@@ -27,7 +27,8 @@ class poller_application
     public std::enable_shared_from_this<poller_application>
 {
 public:
-    poller_application(std::string dbname, std::string dbuser);
+    poller_application(std::string dbname, 
+            std::string dbuser, std::string dbpass);
 
     void start(std::string hostname, unsigned int port);
 private:
@@ -49,13 +50,14 @@ private:
 
 typedef std::shared_ptr<poller_application> poller_application_ptr;
 
-poller_application::poller_application(std::string dbname, std::string dbuser)
+poller_application::poller_application(std::string dbname, 
+        std::string dbuser, std::string dbpass)
   : kernel_(new kernel)
 {
     network_.reset(new net::network_impl(kernel_));
     kernel_->register_network(network_);
 
-    storage_.reset(new postgresql_storage(dbname, dbuser));
+    storage_.reset(new postgresql_storage(dbname, dbuser, dbpass));
     kernel_->register_storage(storage_);
 
     poll_blocks_timer_.reset(new deadline_timer(*service()));
@@ -121,14 +123,14 @@ void poller_application::request_blocks(
 
 int main(int argc, const char** argv)
 {
-    if (argc < 4)
+    if (argc < 5)
     {
-        log_info() << "poller [DBNAME] [DBUSER] [HOST:PORT] ...";
+        log_info() << "poller [DBNAME] [DBUSER] [DBPASSWORD] [HOST:PORT] ...";
         return -1;
     }
-    std::string dbname = argv[1], dbuser = argv[2];
-    poller_application_ptr app(new poller_application(dbname, dbuser));
-    for (int hosts_iter = 3; hosts_iter < argc; ++hosts_iter)
+    std::string dbname = argv[1], dbuser = argv[2], dbpass = argv[3];
+    poller_application_ptr app(new poller_application(dbname, dbuser, dbpass));
+    for (int hosts_iter = 4; hosts_iter < argc; ++hosts_iter)
     {
         std::vector<std::string> args;
         boost::split(args, argv[hosts_iter], boost::is_any_of(":"));
