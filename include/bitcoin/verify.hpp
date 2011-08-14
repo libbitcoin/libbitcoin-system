@@ -21,7 +21,7 @@ public:
     void start(message::block current_block, status_handler handle_status);
 
 private:
-    void find_duplicate(std::error_code ec, message::block);
+    void find_duplicate(std::error_code ec, bool block_exists);
     void find_previous(std::error_code ec, message::block);
 
     bool check_block();

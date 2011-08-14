@@ -1,4 +1,5 @@
 #include <bitcoin/storage/postgresql_storage.hpp>
+#include <bitcoin/util/logger.hpp>
 #include <bitcoin/messages.hpp>
 #include <iostream>
 #include <memory>
@@ -9,7 +10,11 @@ using libbitcoin::script;
 using libbitcoin::operation;
 using libbitcoin::opcode;
 using libbitcoin::hash_digest;
+using libbitcoin::log_error;
 typedef shared_ptr<postgresql_storage> psql_ptr;
+
+using std::placeholders::_1;
+using std::placeholders::_2;
 
 void null(std::error_code ec)
 {
@@ -86,10 +91,28 @@ void create_fake_stuff(psql_ptr psql)
     psql->store(blk, null);
 }
 
+void recv_block(std::error_code ec, libbitcoin::message::block block, psql_ptr psql, size_t block_depth)
+{
+    if (ec)
+    {
+        log_error() << ec.message();
+        exit(0);
+    }
+    if (block_depth == (180 + 100))
+    {
+        exit(0);
+    }
+    block_depth++;
+    psql->fetch_block_by_depth(block_depth, std::bind(recv_block, _1, _2, psql, block_depth));
+}
+
 int main()
 {
     psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
-    psql->organize_block_chain();
+    //psql->organize_block_chain();
+    psql->fetch_block_by_depth(180, std::bind(recv_block, _1, _2, psql, 180));
+    while (true)
+        sleep(10);
     return 0;
 }
 

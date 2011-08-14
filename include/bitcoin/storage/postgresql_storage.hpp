@@ -7,10 +7,14 @@
 #include <string>
 #include <mutex>
 
+#include <bitcoin/util/threaded_service.hpp>
+
 namespace libbitcoin {
 
 class postgresql_storage
-  : public storage
+  : public storage,
+    public threaded_service,
+    public std::enable_shared_from_this<postgresql_storage>
 {
 public:
     postgresql_storage(std::string database, 
@@ -29,9 +33,34 @@ public:
     void fetch_output_by_hash(hash_digest transaction_hash, uint32_t index,
             fetch_handler_output handle_fetch);
 
+    void block_exists_by_hash(hash_digest block_hash,
+            exists_handler handle_exists);
+
     void organize_block_chain();
 
 private:
+
+    void do_store_inv(message::inv inv, store_handler handle_store);
+    void do_store_transaction(message::transaction transaction, 
+            store_handler handle_store);
+    void do_store_block(message::block block, store_handler handle_store);
+
+    void do_fetch_inventories(fetch_handler_inventories handle_fetch);
+    void do_fetch_block_by_depth(size_t block_number, 
+            fetch_handler_block handle_fetch);
+    void do_fetch_block_by_hash(hash_digest block_hash, 
+            fetch_handler_block handle_fetch);
+    void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
+    void do_fetch_output_by_hash(hash_digest transaction_hash, uint32_t index,
+            fetch_handler_output handle_fetch);
+
+    void do_block_exists_by_hash(hash_digest block_hash,
+            exists_handler handle_exists);
+
+    void do_organize_block_chain();
+
+    // ------------
+
     void insert(operation oper, size_t script_id);
     size_t insert_script(operation_stack operations);
     void insert(message::transaction_input input,

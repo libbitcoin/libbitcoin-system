@@ -27,6 +27,8 @@ public:
     typedef std::function<void (std::error_code, message::transaction_output)>
             fetch_handler_output;
 
+    typedef std::function<void (std::error_code, bool)> exists_handler;
+
     virtual void store(message::inv inv, store_handler handle_store) = 0;
     virtual void store(message::transaction transaction,
             store_handler handle_store) = 0;
@@ -41,6 +43,9 @@ public:
             fetch_handler_block_locator handle_fetch) = 0;
     virtual void fetch_output_by_hash(hash_digest transaction_hash, 
             uint32_t index, fetch_handler_output handle_fetch) = 0;
+
+    virtual void block_exists_by_hash(hash_digest block_hash,
+            exists_handler handle_exists) = 0;
 
     virtual void organize_block_chain() = 0;
 };

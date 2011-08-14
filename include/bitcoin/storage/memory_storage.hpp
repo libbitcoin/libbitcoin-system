@@ -31,6 +31,9 @@ public:
     void fetch_output_by_hash(hash_digest transaction_hash, uint32_t index,
             fetch_handler_output handle_fetch);
 
+    void block_exists_by_hash(hash_digest block_hash,
+            exists_handler handle_exists);
+
     void organize_block_chain();
 
 private:

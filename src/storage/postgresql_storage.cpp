@@ -3,6 +3,7 @@
 #include <bitcoin/block.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
+#include <bitcoin/util/logger.hpp>
 
 namespace libbitcoin {
 
@@ -44,7 +45,13 @@ postgresql_storage::postgresql_storage(std::string database,
 void postgresql_storage::store(message::inv inv,
         store_handler handle_store)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    strand()->post(std::bind(
+        &postgresql_storage::do_store_inv, shared_from_this(), 
+            inv, handle_store));
+}
+void postgresql_storage::do_store_inv(message::inv inv,
+        store_handler handle_store)
+{
     cppdb::statement stat = sql_ <<
         "INSERT INTO inventory_requests (type, hash) \
         VALUES (?, ?)";
@@ -155,7 +162,13 @@ size_t postgresql_storage::insert(message::transaction transaction)
 void postgresql_storage::store(message::transaction transaction,
         store_handler handle_store)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    strand()->post(std::bind(
+        &postgresql_storage::do_store_transaction, shared_from_this(),
+            transaction, handle_store));
+}
+void postgresql_storage::do_store_transaction(
+        message::transaction transaction, store_handler handle_store)
+{
     insert(transaction);
     handle_store(std::error_code());
 }
@@ -163,7 +176,13 @@ void postgresql_storage::store(message::transaction transaction,
 void postgresql_storage::store(message::block block,
         store_handler handle_store)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    strand()->post(std::bind(
+        &postgresql_storage::do_store_block, shared_from_this(),
+            block, handle_store));
+}
+void postgresql_storage::do_store_block(message::block block,
+        store_handler handle_store)
+{
     hash_digest block_hash = hash_block_header(block);
     std::string block_hash_repr = hexlify(block_hash),
             prev_block_repr = hexlify(block.prev_block),
@@ -205,7 +224,9 @@ void postgresql_storage::store(message::block block,
 
 void postgresql_storage::fetch_inventories(fetch_handler_inventories)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+}
+void postgresql_storage::do_fetch_inventories(fetch_handler_inventories)
+{
     // Not implemented
 }
 
@@ -325,7 +346,13 @@ message::block postgresql_storage::read_block(cppdb::result block_result)
 void postgresql_storage::fetch_block_by_depth(size_t block_number,
         fetch_handler_block handle_fetch)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    strand()->post(std::bind(
+        &postgresql_storage::do_fetch_block_by_depth, shared_from_this(),
+            block_number, handle_fetch));
+}
+void postgresql_storage::do_fetch_block_by_depth(size_t block_number,
+        fetch_handler_block handle_fetch)
+{
     cppdb::result block_result = sql_ <<
         "SELECT \
             *, \
@@ -349,7 +376,13 @@ void postgresql_storage::fetch_block_by_depth(size_t block_number,
 void postgresql_storage::fetch_block_by_hash(hash_digest block_hash, 
         fetch_handler_block handle_fetch)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    strand()->post(std::bind(
+        &postgresql_storage::do_fetch_block_by_hash, shared_from_this(),
+            block_hash, handle_fetch));
+}
+void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash, 
+        fetch_handler_block handle_fetch)
+{
     std::string block_hash_repr = hexlify(block_hash);
     cppdb::result block_result = sql_ <<
         "SELECT \
@@ -374,7 +407,13 @@ void postgresql_storage::fetch_block_by_hash(hash_digest block_hash,
 void postgresql_storage::fetch_block_locator(
         fetch_handler_block_locator handle_fetch)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    strand()->post(std::bind(
+        &postgresql_storage::do_fetch_block_locator, shared_from_this(),
+            handle_fetch));
+}
+void postgresql_storage::do_fetch_block_locator(
+        fetch_handler_block_locator handle_fetch)
+{
     cppdb::result number_blocks_result = sql_ <<
         "SELECT MAX(depth) \
         FROM blocks \
@@ -439,7 +478,13 @@ void postgresql_storage::fetch_block_locator(
 void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash, 
         uint32_t index, fetch_handler_output handle_fetch)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    strand()->post(std::bind(
+        &postgresql_storage::fetch_output_by_hash, shared_from_this(),
+            transaction_hash, index, handle_fetch));
+}
+void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash, 
+        uint32_t index, fetch_handler_output handle_fetch)
+{
     message::transaction_output output;
     std::string transaction_hash_repr = hexlify(transaction_hash);
     cppdb::result result = sql_ <<
@@ -466,9 +511,39 @@ void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash,
     handle_fetch(std::error_code(), output);
 }
 
+void postgresql_storage::block_exists_by_hash(hash_digest block_hash,
+        exists_handler handle_exists)
+{
+    strand()->post(std::bind(
+        &postgresql_storage::do_block_exists_by_hash, shared_from_this(), 
+            block_hash, handle_exists));
+}
+void postgresql_storage::do_block_exists_by_hash(hash_digest block_hash,
+        exists_handler handle_exists)
+{
+    std::string block_hash_repr = hexlify(block_hash);
+    cppdb::result block_result = sql_ <<
+        "SELECT 1 \
+        FROM blocks \
+        WHERE \
+            block_hash=? \
+            AND span_left=0 \
+            AND span_left=0"
+        << block_hash_repr
+        << cppdb::row;
+    if (block_result.empty())
+        handle_exists(std::error_code(), false);
+    else
+        handle_exists(std::error_code(), true);
+}
+
 void postgresql_storage::organize_block_chain()
 {
-    std::lock_guard<std::mutex> lock(mutex_);
+    service()->post(std::bind(
+        &postgresql_storage::organize_block_chain, shared_from_this()));
+}
+void postgresql_storage::do_organize_block_chain()
+{
     cppdb::result result = sql_ <<
         "SELECT \
             block_id, \

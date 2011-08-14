@@ -81,6 +81,11 @@ void memory_storage::fetch_output_by_hash(hash_digest transaction_hash,
 {
 }
 
+void memory_storage::block_exists_by_hash(hash_digest block_hash,
+            exists_handler handle_exists)
+{
+}
+
 void memory_storage::organize_block_chain()
 {
 }

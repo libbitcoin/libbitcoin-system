@@ -29,22 +29,22 @@ void verify_block::start(message::block current_block,
     current_block_ = current_block;
     // Check for duplicate
     current_block_hash_ = hash_block_header(current_block);
-    storage_->fetch_block_by_hash(current_block_hash_, 
+    storage_->block_exists_by_hash(current_block_hash_, 
             std::bind(&verify_block::find_duplicate, 
                 shared_from_this(), _1, _2));
 }
 
-void verify_block::find_duplicate(std::error_code ec, message::block)
+void verify_block::find_duplicate(std::error_code ec, bool block_exists)
 {
     goto ignore_duplicate_check;
-    if (ec != error::block_doesnt_exist)
+    if (ec)
     {
-        // These are error cases
-        if (!ec)
-            //handle_status_(block_already_exists, false);
-            handle_status_(std::error_code(), false);
-        else if (ec)
-            handle_status_(ec, false);
+        handle_status_(ec, false);
+        return;
+    }
+    else if (!block_exists)
+    {
+        handle_status_(std::error_code(), false);
         return;
     }
 ignore_duplicate_check:

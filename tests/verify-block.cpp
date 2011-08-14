@@ -22,6 +22,7 @@ void block_status(std::error_code ec, bool is_good)
     if (ec)
         libbitcoin::log_error() << "Verifying block: " << ec.message() << "\n";
     std::cout << "block is " << (is_good ? "good" : "bad") << "\n";
+    exit(0);
 }
 
 void recv_block(std::error_code ec, libbitcoin::message::block block, verify_block_ptr verif)
