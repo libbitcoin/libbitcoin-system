@@ -73,6 +73,7 @@ INSERT INTO blocks (
 );
 
 CREATE INDEX ON blocks USING btree (block_hash);
+CREATE INDEX ON blocks (depth);
 
 ---------------------------------------------------------------------------
 -- INVENTORY QUEUE
@@ -119,6 +120,7 @@ CREATE TABLE transactions_parents (
 );
 
 CREATE INDEX ON transactions_parents (transaction_id);
+CREATE INDEX ON transactions_parents (block_id);
 
 CREATE TABLE transactions (
     transaction_id INT NOT NULL DEFAULT NEXTVAL('transactions_transaction_id_sequence') PRIMARY KEY,
@@ -126,6 +128,8 @@ CREATE TABLE transactions (
     version BIGINT NOT NULL,
     locktime BIGINT NOT NULL
 );
+
+CREATE INDEX ON transactions (transaction_id);
 
 CREATE TABLE outputs (
     output_id INT NOT NULL DEFAULT NEXTVAL('outputs_output_id_sequence') PRIMARY KEY,

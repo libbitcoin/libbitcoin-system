@@ -373,7 +373,7 @@ void postgresql_storage::do_fetch_block_by_depth(size_t block_number,
         WHERE \
             depth=? \
             AND span_left=0 \
-            AND span_left=0"
+            AND span_right=0"
         );
     block_statement.reset();
     block_statement.bind(block_number);
