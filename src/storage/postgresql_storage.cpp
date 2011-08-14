@@ -445,27 +445,23 @@ void postgresql_storage::do_fetch_block_locator(
     indices.push_back(0);
     // Now actually fetch the hashes for these blocks
     // TODO: UGLY!! Hack around limitation of cppdb!
-    std::string hack_sql =
+    std::stringstream hack_sql;
+    hack_sql <<
         "SELECT block_hash \
         FROM blocks \
         WHERE \
             span_left=0 \
             AND span_right=0 \
             AND depth IN (";
-    bool is_first = true;
-    for (size_t depth: indices)
+    for (size_t i = 0; i < indices.size(); ++i)
     {
-        if (is_first)
-            is_first = false;
-        else
-            hack_sql += ", ";
-        std::stringstream out;
-        out << depth;
-        hack_sql += out.str();
+        if (i != 0)
+            hack_sql << ", ";
+        hack_sql << indices[i];
     }
-    hack_sql += ") ORDER BY depth DESC";
+    hack_sql << ") ORDER BY depth DESC";
     // ----------------------------------------------
-    cppdb::result block_hashes_result = sql_ << hack_sql.c_str();
+    cppdb::result block_hashes_result = sql_ << hack_sql.str();
     message::block_locator locator;
     while (block_hashes_result.next())
     {
