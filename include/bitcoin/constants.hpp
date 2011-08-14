@@ -9,6 +9,8 @@ namespace libbitcoin {
 
 constexpr uint64_t block_reward = 50;
 
+constexpr uint32_t magic_value = 0xd9b4bef9;
+
 constexpr uint64_t max_money_recursive(uint64_t current)
 {
     return (current > 0) ? 

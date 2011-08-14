@@ -3,6 +3,7 @@
 #include <boost/assert.hpp>
 
 #include <bitcoin/messages.hpp>
+#include <bitcoin/constants.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/sha256.hpp>
@@ -15,7 +16,7 @@ data_chunk construct_header_from(std::string command, data_chunk payload)
             << " (" << payload.size() << " bytes)";
     serializer header;
     // magic
-    header.write_4_bytes(0xd9b4bef9);
+    header.write_4_bytes(magic_value);
     // command
     header.write_command(command);
     // payload length
@@ -304,7 +305,7 @@ message::block original_dialect::block_from_network(
 
 bool original_dialect::verify_header(message::header header_msg) const
 {
-    if (header_msg.magic != 0xd9b4bef9)
+    if (header_msg.magic != magic_value)
         return false;
     if (header_msg.command == "version")
     {
