@@ -98,7 +98,7 @@ void recv_block(std::error_code ec, libbitcoin::message::block block, psql_ptr p
         log_error() << ec.message();
         exit(0);
     }
-    if (block_depth == (180 + 1000))
+    if (block_depth == (180 + 100))
     {
         exit(0);
     }

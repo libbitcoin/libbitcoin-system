@@ -232,15 +232,18 @@ void postgresql_storage::do_fetch_inventories(fetch_handler_inventories)
 
 script postgresql_storage::select_script(size_t script_id)
 {
-    script scr;
-    cppdb::result result = sql_ <<
+    static cppdb::statement statement = sql_.prepare(
         "SELECT \
             opcode, \
             data \
         FROM operations \
         WHERE script_id=? \
         ORDER BY operation_id ASC"
-        << script_id;
+        );
+    statement.reset();
+    statement.bind(script_id);
+    cppdb::result result = statement.query();
+    script scr;
     while (result.next())
     {
         operation op;
@@ -255,13 +258,16 @@ script postgresql_storage::select_script(size_t script_id)
 message::transaction_input_list postgresql_storage::select_inputs(
         size_t transaction_id)
 {
-    message::transaction_input_list inputs;
-    cppdb::result result = sql_ <<
+    static cppdb::statement statement = sql_.prepare(
         "SELECT * \
         FROM inputs \
         WHERE transaction_id=? \
         ORDER BY index_in_parent ASC"
-        << transaction_id;
+        );
+    statement.reset();
+    statement.bind(transaction_id);
+    cppdb::result result = statement.query();
+    message::transaction_input_list inputs;
     while (result.next())
     {
         message::transaction_input input;
@@ -278,15 +284,18 @@ message::transaction_input_list postgresql_storage::select_inputs(
 message::transaction_output_list postgresql_storage::select_outputs(
         size_t transaction_id)
 {
-    message::transaction_output_list outputs;
-    cppdb::result result = sql_ <<
+    static cppdb::statement statement = sql_.prepare(
         "SELECT \
             *, \
             sql_to_internal(value) internal_value \
         FROM outputs \
         WHERE transaction_id=? \
         ORDER BY index_in_parent ASC"
-        << transaction_id;
+        );
+    statement.reset();
+    statement.bind(transaction_id);
+    cppdb::result result = statement.query();
+    message::transaction_output_list outputs;
     while (result.next())
     {
         message::transaction_output output;
@@ -331,14 +340,17 @@ message::block postgresql_storage::read_block(cppdb::result block_result)
     block.merkle_root = 
             deserialize_hash(block_result.get<std::string>("merkle"));
 
-    cppdb::result transactions_result = sql_ <<
+    static cppdb::statement transactions_statement = sql_.prepare(
         "SELECT transactions.* \
         FROM transactions_parents \
         JOIN transactions \
         ON transactions.transaction_id=transactions_parents.transaction_id \
         WHERE block_id=? \
         ORDER BY index_in_block ASC"
-        << block_id;
+        );
+    transactions_statement.reset();
+    transactions_statement.bind(block_id);
+    cppdb::result transactions_result = transactions_statement.query();
     block.transactions = read_transactions(transactions_result);
     return block;
 }
@@ -353,7 +365,7 @@ void postgresql_storage::fetch_block_by_depth(size_t block_number,
 void postgresql_storage::do_fetch_block_by_depth(size_t block_number,
         fetch_handler_block handle_fetch)
 {
-    cppdb::result block_result = sql_ <<
+    static cppdb::statement block_statement = sql_.prepare(
         "SELECT \
             *, \
             EXTRACT(EPOCH FROM when_created) timest \
@@ -362,8 +374,10 @@ void postgresql_storage::do_fetch_block_by_depth(size_t block_number,
             depth=? \
             AND span_left=0 \
             AND span_left=0"
-        << block_number
-        << cppdb::row;
+        );
+    block_statement.reset();
+    block_statement.bind(block_number);
+    cppdb::result block_result = block_statement.row();
     if (block_result.empty())
     {
         handle_fetch(error::block_doesnt_exist, message::block());
@@ -383,8 +397,7 @@ void postgresql_storage::fetch_block_by_hash(hash_digest block_hash,
 void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash, 
         fetch_handler_block handle_fetch)
 {
-    std::string block_hash_repr = hexlify(block_hash);
-    cppdb::result block_result = sql_ <<
+    static cppdb::statement block_statement = sql_.prepare(
         "SELECT \
             *, \
             EXTRACT(EPOCH FROM when_created) timest \
@@ -393,8 +406,11 @@ void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash,
             block_hash=? \
             AND span_left=0 \
             AND span_left=0"
-        << block_hash_repr
-        << cppdb::row;
+        );
+    std::string block_hash_repr = hexlify(block_hash);
+    block_statement.reset();
+    block_statement.bind(block_hash_repr);
+    cppdb::result block_result = block_statement.row();
     if (block_result.empty())
     {
         handle_fetch(error::block_doesnt_exist, message::block());
