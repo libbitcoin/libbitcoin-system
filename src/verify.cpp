@@ -7,6 +7,7 @@
 #include <bitcoin/storage/storage.hpp>
 #include <bitcoin/error.hpp>
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/util/postbind.hpp>
 #include <bitcoin/util/clock.hpp>
 
 namespace libbitcoin {
@@ -30,8 +31,8 @@ void verify_block::start(message::block current_block,
     // Check for duplicate
     current_block_hash_ = hash_block_header(current_block);
     storage_->block_exists_by_hash(current_block_hash_, 
-            std::bind(&verify_block::find_duplicate, 
-                shared_from_this(), _1, _2));
+        postbind<std::error_code, bool>(strand(), std::bind(
+            &verify_block::find_duplicate, shared_from_this(), _1, _2)));
 }
 
 void verify_block::find_duplicate(std::error_code ec, bool block_exists)
@@ -55,8 +56,8 @@ ignore_duplicate_check:
     }
 
     storage_->fetch_block_by_hash(current_block_.prev_block,
-            std::bind(&verify_block::find_previous,
-                shared_from_this(), _1, _2));
+        postbind<std::error_code, message::block>(strand(), std::bind(
+            &verify_block::find_previous, shared_from_this(), _1, _2)));
 }
 
 void verify_block::find_previous(std::error_code ec, message::block)
@@ -68,6 +69,8 @@ void verify_block::find_previous(std::error_code ec, message::block)
     }
     else if (ec)
         handle_status_(ec, false);
+
+    // AcceptBlock() goes here
 
     handle_status_(std::error_code(), true);
 }
