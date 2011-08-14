@@ -31,7 +31,7 @@ CREATE SEQUENCE blocks_block_id_sequence;
 
 CREATE TABLE blocks (
     block_id INT NOT NULL DEFAULT NEXTVAL('blocks_block_id_sequence') PRIMARY KEY,
-    block_hash hash_type NOT NULL,
+    block_hash hash_type NOT NULL UNIQUE,
     depth INT,
     span_left INT,
     span_right INT,
@@ -71,6 +71,8 @@ INSERT INTO blocks (
     65535,
     2083236893
 );
+
+CREATE INDEX ON blocks USING btree (block_hash);
 
 ---------------------------------------------------------------------------
 -- INVENTORY QUEUE
@@ -116,6 +118,8 @@ CREATE TABLE transactions_parents (
     index_in_block INT NOT NULL
 );
 
+CREATE INDEX ON transactions_parents (transaction_id);
+
 CREATE TABLE transactions (
     transaction_id INT NOT NULL DEFAULT NEXTVAL('transactions_transaction_id_sequence') PRIMARY KEY,
     transaction_hash hash_type NOT NULL,
@@ -133,6 +137,8 @@ CREATE TABLE outputs (
     address address_type
 );
 
+CREATE INDEX ON outputs (transaction_id);
+
 CREATE TABLE inputs (
     input_id INT NOT NULL DEFAULT NEXTVAL('inputs_input_id_sequence') PRIMARY KEY,
     transaction_id INT NOT NULL,
@@ -143,6 +149,8 @@ CREATE TABLE inputs (
     previous_output_index BIGINT NOT NULL,
     sequence BIGINT NOT NULL
 );
+
+CREATE INDEX ON inputs (transaction_id);
 
 ---------------------------------------------------------------------------
 -- SCRIPTS
@@ -177,4 +185,6 @@ CREATE TABLE operations (
     opcode opcode_type NOT NULL,
     data varchar(255)
 );
+
+CREATE INDEX ON operations (script_id);
 
