@@ -85,7 +85,7 @@ void poller_application::handle_connect(
 void poller_application::reset_timer()
 {
     poll_blocks_timer_->cancel();
-    poll_blocks_timer_->expires_from_now(seconds(2));
+    poll_blocks_timer_->expires_from_now(seconds(1));
     poll_blocks_timer_->async_wait(
         postbind<const boost::system::error_code>(strand(), std::bind(
             &poller_application::fetch_locator, shared_from_this(), _1)));

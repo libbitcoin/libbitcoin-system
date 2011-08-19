@@ -552,7 +552,7 @@ void postgresql_storage::do_block_exists_by_hash(hash_digest block_hash,
 void postgresql_storage::organize_block_chain()
 {
     service()->post(std::bind(
-        &postgresql_storage::organize_block_chain, shared_from_this()));
+        &postgresql_storage::do_organize_block_chain, shared_from_this()));
 }
 void postgresql_storage::do_organize_block_chain()
 {
@@ -640,7 +640,7 @@ void postgresql_storage::do_organize_block_chain()
                 << cppdb::exec;
         }
     }
-    matchup_inputs();
+    //matchup_inputs();
 }
 
 void postgresql_storage::matchup_inputs()
