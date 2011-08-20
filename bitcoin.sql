@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------
 -- BASE TYPES
 ---------------------------------------------------------------------------
+
 DROP DOMAIN IF EXISTS amount_type CASCADE;
 CREATE DOMAIN amount_type AS NUMERIC(16, 8) CHECK (VALUE < 21000000 AND VALUE >= 0);
 DROP DOMAIN IF EXISTS hash_type CASCADE;
@@ -9,15 +10,40 @@ DROP DOMAIN IF EXISTS address_type CASCADE;
 CREATE DOMAIN address_type AS VARCHAR(110);
 
 CREATE OR REPLACE FUNCTION internal_to_sql(value BIGINT) RETURNS amount_type AS $$
-        BEGIN
-                RETURN value / CAST(100000000 AS NUMERIC(17, 8));
-        END;
+    BEGIN
+        RETURN value / CAST(100000000 AS NUMERIC(17, 8));
+    END;
 $$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION sql_to_internal(value amount_type) RETURNS BIGINT AS $$
-        BEGIN
-                RETURN CAST(value * 100000000 AS BIGINT);
-        END;
+    BEGIN
+        RETURN CAST(value * 100000000 AS BIGINT);
+    END;
+$$ LANGUAGE plpgsql;
+
+---------------------------------------------------------------------------
+-- DIFFICULTY
+---------------------------------------------------------------------------
+
+-- 26959535291011309493156476344723991336010898738574164086137773096960 
+-- That's the maximum target and the maximum difficulty
+
+DROP DOMAIN IF EXISTS target_type CASCADE;
+CREATE DOMAIN target_type AS NUMERIC(68, 0) CHECK (VALUE <= 26959535291011309493156476344723991336010898738574164086137773096960 AND VALUE >= 0);
+
+CREATE OR REPLACE FUNCTION extract_target(bits_head INT, bits_body INT) RETURNS target_type AS $$
+    BEGIN
+        RETURN bits_body * (2^(8*(CAST(bits_head AS target_type) - 3)));
+    END;
+$$ LANGUAGE plpgsql;
+
+DROP DOMAIN IF EXISTS difficulty_type CASCADE;
+CREATE DOMAIN difficulty_type AS NUMERIC(76, 8) CHECK (VALUE <= 26959535291011309493156476344723991336010898738574164086137773096960 AND VALUE > 0);
+
+CREATE OR REPLACE FUNCTION difficulty(bits_head INT, bits_body INT) RETURNS difficulty_type AS $$
+    BEGIN
+        RETURN extract_target(CAST(x'1d' AS INT), CAST(x'00ffff' AS INT)) / extract_target(bits_head, bits_body);
+    END;
 $$ LANGUAGE plpgsql;
 
 ---------------------------------------------------------------------------
