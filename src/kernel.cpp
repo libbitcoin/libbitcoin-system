@@ -63,20 +63,11 @@ void kernel::send_failed(channel_handle, message::getblocks)
 {
 }
 
-template<typename T>
-void display_byte_array(T arr)
-{
-    auto logobj = log_debug();
-    logobj << std::hex;
-    for (unsigned int number: arr)
-        logobj << std::setfill('0') << std::setw(2) << number << " ";
-}
-
 bool kernel::recv_message(channel_handle chandle, message::version message)
 {
     log_debug() << "nonce is " << message.nonce;
     log_debug() << "last block is " << message.start_height;
-    display_byte_array(message.addr_you.ip_addr);
+    log_debug() << hexlify(message.addr_you.ip_addr);
     network_component_->send(chandle, message::verack());
     return true;
 }
@@ -90,10 +81,7 @@ bool kernel::recv_message(channel_handle, message::verack)
 bool kernel::recv_message(channel_handle, message::addr message)
 {
     for (const message::net_addr addr: message.addr_list)
-    {
-        log_debug() << addr.port;
-        display_byte_array(addr.ip_addr);
-    }
+        log_debug() << hexlify(addr.ip_addr) << ' ' << addr.port;
     return true;
 }
 
@@ -111,7 +99,7 @@ bool kernel::recv_message(channel_handle, message::inv message)
             log_debug() << "MSG_TX";
         else if (curr_inv.type == message::inv_type::block)
             log_debug() << "MSG_BLOCK";
-        display_byte_array(curr_inv.hash);
+        log_debug() << hexlify(curr_inv.hash);
 
         // Push only block invs to the request queue
         if (curr_inv.type == message::inv_type::block)
