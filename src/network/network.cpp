@@ -21,6 +21,8 @@ network_impl::network_impl(kernel_ptr kern)
  : kernel_(kern)
 {
     default_dialect_.reset(new original_dialect);
+    our_ip_address_ = message::ip_address{
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
 }
 
 network_impl::~network_impl()
@@ -116,27 +118,28 @@ void generic_send(T message_packet, channel_handle chandle,
             &perform_send<T>, channels, kernel, chandle, message_packet));
 }
 
-void network_impl::send(channel_handle chandle, message::version version)
+void network_impl::send(channel_handle chandle, const message::version& version)
 {
     generic_send(version, chandle, strand(), &channels_, kernel_);
 }
 
-void network_impl::send(channel_handle chandle, message::verack verack)
+void network_impl::send(channel_handle chandle, const message::verack& verack)
 {
     generic_send(verack, chandle, strand(), &channels_, kernel_);
 }
 
-void network_impl::send(channel_handle chandle, message::getaddr getaddr)
+void network_impl::send(channel_handle chandle, const message::getaddr& getaddr)
 {
     generic_send(getaddr, chandle, strand(), &channels_, kernel_);
 }
 
-void network_impl::send(channel_handle chandle, message::getdata getdata)
+void network_impl::send(channel_handle chandle, const message::getdata& getdata)
 {
     generic_send(getdata, chandle, strand(), &channels_, kernel_);
 }
 
-void network_impl::send(channel_handle chandle, message::getblocks getblocks)
+void network_impl::send(channel_handle chandle, 
+        const message::getblocks& getblocks)
 {
     generic_send(getblocks, chandle, strand(), &channels_, kernel_);
 }
@@ -171,8 +174,8 @@ bool network_impl::start_accept()
         acceptor_->bind(endpoint);
         acceptor_->listen(socket_base::max_connections);
         acceptor_->async_accept(*socket,
-                std::bind(&network_impl::handle_accept, shared_from_this(), 
-                    socket));
+            std::bind(&network_impl::handle_accept, shared_from_this(), 
+                socket));
     }
     catch (std::exception& ex)
     {
@@ -193,6 +196,15 @@ void network_impl::handle_accept(socket_ptr socket)
     acceptor_->async_accept(*socket,
             std::bind(&network_impl::handle_accept, shared_from_this(), 
                 socket));
+}
+
+void network_impl::set_ip_address(std::string ip_addr)
+{
+    //our_ip_address_ = ip_addr;
+}
+message::ip_address network_impl::get_ip_address() const
+{
+    return our_ip_address_;
 }
 
 } // libbitcoin

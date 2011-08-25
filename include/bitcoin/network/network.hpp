@@ -20,8 +20,8 @@ class network
   : private boost::noncopyable
 {
 public:
-    typedef std::function<
-            void (std::error_code, channel_handle chandle)> connect_handler;
+    typedef std::function<void (
+            const std::error_code&, channel_handle chandle)> connect_handler;
     typedef std::function<void (channel_handle)> accept_random_handle;
 
     virtual kernel_ptr kernel() const = 0;
@@ -31,11 +31,20 @@ public:
     virtual size_t connection_count() const = 0;
     virtual void get_random_handle(accept_random_handle accept_handler) = 0;
     virtual void disconnect(channel_handle handle) = 0;
-    virtual void send(channel_handle chandle, message::version version) = 0;
-    virtual void send(channel_handle chandle, message::verack verack) = 0;
-    virtual void send(channel_handle chandle, message::getaddr getaddr) = 0;
-    virtual void send(channel_handle chandle, message::getdata getdata) = 0;
-    virtual void send(channel_handle chandle, message::getblocks getblocks) = 0;
+
+    virtual void send(channel_handle chandle,
+            const message::version& version) = 0;
+    virtual void send(channel_handle chandle,
+            const message::verack& verack) = 0;
+    virtual void send(channel_handle chandle,
+            const message::getaddr& getaddr) = 0;
+    virtual void send(channel_handle chandle,
+            const message::getdata& getdata) = 0;
+    virtual void send(channel_handle chandle,
+            const message::getblocks& getblocks) = 0;
+
+    virtual void set_ip_address(std::string ip_addr) = 0;
+    virtual message::ip_address get_ip_address() const = 0;
 };
 
 class network_impl
@@ -53,11 +62,15 @@ public:
     size_t connection_count() const;
     void get_random_handle(accept_random_handle accept_handler);
     void disconnect(channel_handle chandle);  
-    void send(channel_handle chandle, message::version version);
-    void send(channel_handle chandle, message::verack verack);
-    void send(channel_handle chandle, message::getaddr getaddr);
-    void send(channel_handle chandle, message::getdata getdata);
-    void send(channel_handle chandle, message::getblocks getblocks);
+
+    void send(channel_handle chandle, const message::version& version);
+    void send(channel_handle chandle, const message::verack& verack);
+    void send(channel_handle chandle, const message::getaddr& getaddr);
+    void send(channel_handle chandle, const message::getdata& getdata);
+    void send(channel_handle chandle, const message::getblocks& getblocks);
+
+    void set_ip_address(std::string ip_addr);
+    message::ip_address get_ip_address() const;
 
 private:
     typedef shared_ptr<tcp::socket> socket_ptr;
@@ -76,6 +89,8 @@ private:
 
     dialect_ptr default_dialect_;
     channel_list channels_;
+
+    message::ip_address our_ip_address_;
 };
 
 } // libbitcoin

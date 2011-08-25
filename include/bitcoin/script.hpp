@@ -36,13 +36,13 @@ typedef std::vector<operation> operation_stack;
 class script
 {
 public:
-    void join(script other);
+    void join(const script& other);
     void push_operation(operation oper);
     bool run(const message::transaction& parent_tx, uint32_t input_index);
 
     std::string string_repr() const;
 
-    operation_stack operations() const;
+    const operation_stack& operations() const;
 
 private:
     typedef std::vector<data_chunk> data_stack;
@@ -66,8 +66,8 @@ std::string opcode_to_string(opcode code);
 opcode string_to_opcode(std::string code_repr);
 
 // TODO: Should be inside the dialect imlementation eventually
-script parse_script(const data_chunk raw_script);
-data_chunk save_script(const script scr);
+script parse_script(const data_chunk& raw_script);
+data_chunk save_script(const script& scr);
 
 } // libbitcoin
 

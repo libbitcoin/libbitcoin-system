@@ -28,7 +28,7 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 channel_handle channel_pimpl::chan_id_counter = 0;
 
 channel_pimpl::channel_pimpl(const init_data& dat)
- : socket_(dat.socket), parent_gateway_(dat.parent_gateway),
+ : socket_(dat.socket), network_(dat.parent_gateway),
         translator_(dat.translator)
 {
     // Unique IDs are assigned to channels by incrementing a shared counter
@@ -73,7 +73,7 @@ void channel_pimpl::reset_timeout()
 
 void channel_pimpl::destroy_self()
 {
-    parent_gateway_->disconnect(channel_id_);
+    network_->disconnect(channel_id_);
 }
 
 bool channel_pimpl::problems_check(const boost::system::error_code& ec)
@@ -98,14 +98,14 @@ void channel_pimpl::read_header()
     async_read(*socket_, buffer(inbound_header_), callback);
 }
 
-void channel_pimpl::read_checksum(message::header header_msg)
+void channel_pimpl::read_checksum(const message::header& header_msg)
 {
     auto callback = std::bind(&channel_pimpl::handle_read_checksum, 
             this, header_msg, _1, _2);
     async_read(*socket_, buffer(inbound_checksum_), callback);
 }
 
-void channel_pimpl::read_payload(message::header header_msg)
+void channel_pimpl::read_payload(const message::header& header_msg)
 {
     auto callback = std::bind(&channel_pimpl::handle_read_payload, 
             this, header_msg, _1, _2);
@@ -148,7 +148,7 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
     reset_timeout();
 }
 
-void channel_pimpl::handle_read_checksum(message::header header_msg,
+void channel_pimpl::handle_read_checksum(message::header& header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if (problems_check(ec))
@@ -163,7 +163,7 @@ void channel_pimpl::handle_read_checksum(message::header header_msg,
     reset_timeout();
 }
 
-void channel_pimpl::handle_read_payload(message::header header_msg,
+void channel_pimpl::handle_read_payload(const message::header& header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if (problems_check(ec))
@@ -228,7 +228,7 @@ void channel_pimpl::handle_send(const boost::system::error_code& ec)
 }
 
 template<typename T>
-void generic_send(T message_packet, channel_pimpl* chan_self,
+void generic_send(const T& message_packet, channel_pimpl* chan_self,
         shared_ptr<tcp::socket> socket, dialect_ptr translator)
 {
     data_chunk msg = translator->to_network(message_packet);
@@ -237,27 +237,27 @@ void generic_send(T message_packet, channel_pimpl* chan_self,
             &channel_pimpl::handle_send, chan_self, std::placeholders::_1));
 }
 
-void channel_pimpl::send(message::version version)
+void channel_pimpl::send(const message::version& version)
 {
     generic_send(version, this, socket_, translator_);
 }
 
-void channel_pimpl::send(message::verack verack)
+void channel_pimpl::send(const message::verack& verack)
 {
     generic_send(verack, this, socket_, translator_);
 }
 
-void channel_pimpl::send(message::getaddr getaddr)
+void channel_pimpl::send(const message::getaddr& getaddr)
 {
     generic_send(getaddr, this, socket_, translator_);
 }
 
-void channel_pimpl::send(message::getdata getdata)
+void channel_pimpl::send(const message::getdata& getdata)
 {
     generic_send(getdata, this, socket_, translator_);
 }
 
-void channel_pimpl::send(message::getblocks getblocks)
+void channel_pimpl::send(const message::getblocks& getblocks)
 {
     generic_send(getblocks, this, socket_, translator_);
 }
@@ -275,7 +275,7 @@ message::version channel_pimpl::create_version_message()
     version.services = 1;
     version.timestamp = time(NULL);
     version.addr_me.services = version.services;
-    version.addr_me.ip_addr = decltype(version.addr_me.ip_addr){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
+    version.addr_me.ip_addr = network_->get_ip_address();
     version.addr_me.port = 8333;
     version.addr_you.services = version.services;
     version.addr_you.ip_addr = decltype(version.addr_you.ip_addr){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 10, 0, 0, 1};

@@ -10,7 +10,7 @@ namespace libbitcoin {
 
 typedef std::vector<hash_digest> hash_list;
 
-hash_digest hash_transaction_impl(message::transaction transaction, 
+hash_digest hash_transaction_impl(const message::transaction& transaction, 
         uint32_t* hash_type_code)
 {
     serializer key;
@@ -39,17 +39,17 @@ hash_digest hash_transaction_impl(message::transaction transaction,
     return generate_sha256_hash(key.get_data());
 }
 
-hash_digest hash_transaction(message::transaction transaction)
+hash_digest hash_transaction(const message::transaction& transaction)
 {
     return hash_transaction_impl(transaction, nullptr);
 }
-hash_digest hash_transaction(message::transaction transaction, 
+hash_digest hash_transaction(const message::transaction& transaction, 
         uint32_t hash_type_code)
 {
     return hash_transaction_impl(transaction, &hash_type_code);
 }
 
-hash_digest build_merkle_tree(hash_list merkle)
+hash_digest build_merkle_tree(hash_list& merkle)
 {
     if (merkle.empty())
         return null_hash;
@@ -76,7 +76,7 @@ hash_digest build_merkle_tree(hash_list merkle)
     return merkle[0];
 }
 
-hash_digest generate_merkle_root(message::transaction_list transactions)
+hash_digest generate_merkle_root(const message::transaction_list& transactions)
 {
     hash_list tx_hashes;
     for (message::transaction tx: transactions)
@@ -84,7 +84,7 @@ hash_digest generate_merkle_root(message::transaction_list transactions)
     return build_merkle_tree(tx_hashes);
 }
 
-std::string string_repr(message::transaction_input input)
+std::string string_repr(const message::transaction_input& input)
 {
     std::ostringstream ss;
     ss 
@@ -94,7 +94,7 @@ std::string string_repr(message::transaction_input input)
     return ss.str();
 }
 
-std::string string_repr(message::transaction_output output)
+std::string string_repr(const message::transaction_output& output)
 {
     std::ostringstream ss;
     ss << "\tvalue = " << output.value << "\n"
@@ -102,7 +102,7 @@ std::string string_repr(message::transaction_output output)
     return ss.str();
 }
 
-std::string string_repr(message::transaction transaction)
+std::string string_repr(const message::transaction& transaction)
 {
     std::ostringstream ss;
     ss << "Transaction:\n"
@@ -118,12 +118,12 @@ std::string string_repr(message::transaction transaction)
     return ss.str();
 }
 
-bool previous_output_is_null(message::transaction_input input)
+bool previous_output_is_null(const message::transaction_input& input)
 {
     return input.index == ~0u && input.hash == null_hash;
 }
 
-bool is_coinbase(message::transaction tx)
+bool is_coinbase(const message::transaction& tx)
 {
     return tx.inputs.size() == 1 && previous_output_is_null(tx.inputs[0]);
 }

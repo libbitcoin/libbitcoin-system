@@ -42,14 +42,14 @@ postgresql_storage::postgresql_storage(std::string database,
 {
 }
 
-void postgresql_storage::store(message::inv inv,
+void postgresql_storage::store(const message::inv& inv,
         store_handler handle_store)
 {
     strand()->post(std::bind(
         &postgresql_storage::do_store_inv, shared_from_this(), 
             inv, handle_store));
 }
-void postgresql_storage::do_store_inv(message::inv inv,
+void postgresql_storage::do_store_inv(const message::inv& inv,
         store_handler handle_store)
 {
     cppdb::statement stat = sql_ <<
@@ -101,7 +101,7 @@ size_t postgresql_storage::insert_script(operation_stack operations)
     return script_id;
 }
 
-void postgresql_storage::insert(message::transaction_input input,
+void postgresql_storage::insert(const message::transaction_input& input,
         size_t transaction_id, size_t index_in_parent)
 {
     size_t script_id = insert_script(input.input_script.operations());
@@ -121,7 +121,7 @@ void postgresql_storage::insert(message::transaction_input input,
         << cppdb::exec;
 }
 
-void postgresql_storage::insert(message::transaction_output output,
+void postgresql_storage::insert(const message::transaction_output& output,
         size_t transaction_id, size_t index_in_parent)
 {
     size_t script_id = insert_script(output.output_script.operations());
@@ -138,7 +138,7 @@ void postgresql_storage::insert(message::transaction_output output,
         << cppdb::exec;
 }
 
-size_t postgresql_storage::insert(message::transaction transaction)
+size_t postgresql_storage::insert(const message::transaction& transaction)
 {
     hash_digest transaction_hash = hash_transaction(transaction);
     std::string transaction_hash_repr = hexlify(transaction_hash);
@@ -159,7 +159,7 @@ size_t postgresql_storage::insert(message::transaction transaction)
     return transaction_id;
 }
 
-void postgresql_storage::store(message::transaction transaction,
+void postgresql_storage::store(const message::transaction& transaction,
         store_handler handle_store)
 {
     strand()->post(std::bind(
@@ -167,20 +167,20 @@ void postgresql_storage::store(message::transaction transaction,
             transaction, handle_store));
 }
 void postgresql_storage::do_store_transaction(
-        message::transaction transaction, store_handler handle_store)
+        const message::transaction& transaction, store_handler handle_store)
 {
     insert(transaction);
     handle_store(std::error_code());
 }
 
-void postgresql_storage::store(message::block block,
+void postgresql_storage::store(const message::block& block,
         store_handler handle_store)
 {
     strand()->post(std::bind(
         &postgresql_storage::do_store_block, shared_from_this(),
             block, handle_store));
 }
-void postgresql_storage::do_store_block(message::block block,
+void postgresql_storage::do_store_block(const message::block& block,
         store_handler handle_store)
 {
     hash_digest block_hash = hash_block_header(block);

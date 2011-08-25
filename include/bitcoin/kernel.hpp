@@ -25,18 +25,18 @@ public:
     void register_network(network_ptr net_comp);
     network_ptr get_network();
     // Callbacks from network component
-    void send_failed(channel_handle chandle, message::version message);
-    void send_failed(channel_handle chandle, message::verack message);
-    void send_failed(channel_handle chandle, message::getaddr message);
-    void send_failed(channel_handle chandle, message::inv message);
-    void send_failed(channel_handle chandle, message::getdata message);
-    void send_failed(channel_handle chandle, message::getblocks message);
+    void send_failed(channel_handle chandle, const message::version& message);
+    void send_failed(channel_handle chandle, const message::verack& message);
+    void send_failed(channel_handle chandle, const message::getaddr& message);
+    void send_failed(channel_handle chandle, const message::inv& message);
+    void send_failed(channel_handle chandle, const message::getdata& message);
+    void send_failed(channel_handle chandle, const message::getblocks& message);
 
-    bool recv_message(channel_handle chandle, message::version message);
-    bool recv_message(channel_handle chandle, message::verack message);
-    bool recv_message(channel_handle chandle, message::addr message);
-    bool recv_message(channel_handle chandle, message::inv message);
-    bool recv_message(channel_handle chandle, message::block message);
+    bool recv_message(channel_handle chandle, const message::version& message);
+    bool recv_message(channel_handle chandle, const message::verack& message);
+    bool recv_message(channel_handle chandle, const message::addr& message);
+    bool recv_message(channel_handle chandle, const message::inv& message);
+    bool recv_message(channel_handle chandle, const message::block& message);
 
     void handle_connect(channel_handle chandle);
 
@@ -46,9 +46,10 @@ public:
 private:
     void reset_inventory_poll();
     void request_inventories(const boost::system::error_code& ec);
-    void accept_inventories(std::error_code ec, message::inv_list invs);
+    void accept_inventories(const std::error_code& ec, 
+            const message::inv_list& invs);
     void send_to_random(channel_handle chandle,
-            message::getdata request_message);
+            const message::getdata& request_message);
 
     network_ptr network_component_;
     storage_ptr storage_component_;

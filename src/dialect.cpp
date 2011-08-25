@@ -10,7 +10,7 @@
 
 namespace libbitcoin {
 
-data_chunk construct_header_from(std::string command, data_chunk payload)
+data_chunk construct_header_from(std::string command, const data_chunk& payload)
 {
     log_info() << "s: " << command
             << " (" << payload.size() << " bytes)";
@@ -54,7 +54,7 @@ data_chunk header_only_message(std::string command)
     return header;
 }
 
-data_chunk original_dialect::to_network(message::version version) const
+data_chunk original_dialect::to_network(const message::version& version) const
 {
     serializer payload;
     payload.write_4_bytes(version.version);
@@ -69,17 +69,18 @@ data_chunk original_dialect::to_network(message::version version) const
     return assemble_message("version", payload, true);
 }
 
-data_chunk original_dialect::to_network(message::verack) const
+data_chunk original_dialect::to_network(const message::verack&) const
 {
     return header_only_message("verack");
 }
 
-data_chunk original_dialect::to_network(message::getaddr) const
+data_chunk original_dialect::to_network(const message::getaddr&) const
 {
     return header_only_message("getaddr");
 }
 
-data_chunk original_dialect::to_network(message::getblocks getblocks) const
+data_chunk original_dialect::to_network(
+        const message::getblocks& getblocks) const
 {
     serializer payload;
     payload.write_4_bytes(31900);
@@ -90,21 +91,21 @@ data_chunk original_dialect::to_network(message::getblocks getblocks) const
     return assemble_message("getblocks", payload, true);
 }
 
-data_chunk original_dialect::to_network(message::block block, 
+data_chunk original_dialect::to_network(const message::block& block, 
         bool include_header) const
 {
     serializer payload;
     return assemble_message("block", payload, include_header);
 }
 
-data_chunk original_dialect::to_network(message::transaction tx, 
+data_chunk original_dialect::to_network(const message::transaction& tx, 
         bool include_header) const
 {
     serializer payload;
     return assemble_message("tx", payload, include_header);
 }
 
-data_chunk original_dialect::to_network(message::getdata getdata) const
+data_chunk original_dialect::to_network(const message::getdata& getdata) const
 {
     serializer payload;
     payload.write_var_uint(getdata.invs.size());
@@ -148,7 +149,7 @@ uint32_t original_dialect::checksum_from_network(const data_chunk& chunk) const
 }
 
 message::version original_dialect::version_from_network(
-        const message::header, const data_chunk& stream, bool& ec) const
+        const message::header&, const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -179,7 +180,7 @@ message::version original_dialect::version_from_network(
 }
 
 message::addr original_dialect::addr_from_network(
-        const message::header header_msg,
+        const message::header& header_msg,
         const data_chunk& stream, bool& ec) const
 {
     ec = false;
@@ -217,7 +218,7 @@ message::inv_type inv_type_from_number(uint32_t raw_type)
 }
 
 message::inv original_dialect::inv_from_network(
-        const message::header, const data_chunk& stream, bool& ec) const
+        const message::header&, const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -275,7 +276,7 @@ message::transaction read_transaction(deserializer& deserial)
 }
 
 message::transaction original_dialect::transaction_from_network(
-        const message::header, const data_chunk& stream, bool& ec) const
+        const message::header&, const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -283,7 +284,7 @@ message::transaction original_dialect::transaction_from_network(
 }
 
 message::block original_dialect::block_from_network(
-        const message::header, const data_chunk& stream, bool& ec) const
+        const message::header&, const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -303,7 +304,7 @@ message::block original_dialect::block_from_network(
     return payload;
 }
 
-bool original_dialect::verify_header(message::header header_msg) const
+bool original_dialect::verify_header(const message::header& header_msg) const
 {
     if (header_msg.magic != magic_value)
         return false;
@@ -341,12 +342,12 @@ bool original_dialect::verify_header(message::header header_msg) const
     return true;
 }
 
-bool original_dialect::checksum_used(const message::header header_msg) const
+bool original_dialect::checksum_used(const message::header& header_msg) const
 {
     return header_msg.command != "version" && header_msg.command != "verack";
 }
 
-bool original_dialect::verify_checksum(const message::header header_msg,
+bool original_dialect::verify_checksum(const message::header& header_msg,
         const data_chunk& stream) const
 {
     if (!checksum_used(header_msg))

@@ -12,7 +12,7 @@
 
 namespace libbitcoin {
 
-void script::join(script other)
+void script::join(const script& other)
 {
     operations_.insert(operations_.end(),
         other.operations_.begin(), other.operations_.end());
@@ -23,7 +23,7 @@ void script::push_operation(operation oper)
     operations_.push_back(oper);
 }
 
-operation_stack script::operations() const
+const operation_stack& script::operations() const
 {
     return operations_;
 }
@@ -249,7 +249,7 @@ size_t number_of_bytes_from_opcode(opcode code, byte raw_byte)
         return 0;
 }
 
-script parse_script(const data_chunk raw_script)
+script parse_script(const data_chunk& raw_script)
 {
     script script_object;
     for (auto it = raw_script.begin(); it != raw_script.end(); ++it)
@@ -278,7 +278,7 @@ script parse_script(const data_chunk raw_script)
     return script_object;
 }
 
-data_chunk save_script(const script scr)
+data_chunk save_script(const script& scr)
 {
     data_chunk raw_script;
     for (operation op: scr.operations())

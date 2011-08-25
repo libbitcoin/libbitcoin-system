@@ -23,7 +23,7 @@ verify_block::verify_block(storage_ptr storage, dialect_ptr dialect)
 {
 }
 
-void verify_block::start(message::block current_block, 
+void verify_block::start(const message::block& current_block, 
         status_handler handle_status)
 {
     handle_status_ = handle_status;
@@ -148,7 +148,7 @@ bool verify_block::check_transaction(const message::transaction& tx)
     //    return false;
 
     // Check for negative or overflow output values
-    uint64_t total_output_value;
+    uint64_t total_output_value = 0;
     for (message::transaction_output output: tx.outputs)
     {
         if (output.value > max_money())

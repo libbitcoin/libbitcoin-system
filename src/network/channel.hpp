@@ -39,11 +39,11 @@ public:
     channel_pimpl(const init_data& dat);
     ~channel_pimpl();
 
-    void send(message::version version);
-    void send(message::verack verack);
-    void send(message::getaddr getaddr);
-    void send(message::getdata getdata);
-    void send(message::getblocks getblocks);
+    void send(const message::version& version);
+    void send(const message::verack& verack);
+    void send(const message::getaddr& getaddr);
+    void send(const message::getdata& getdata);
+    void send(const message::getblocks& getblocks);
     channel_handle get_id() const;
 
 private:
@@ -51,21 +51,21 @@ private:
     channel_handle channel_id_;
 
     void read_header();
-    void read_checksum(message::header header_msg);
-    void read_payload(message::header header_msg);
+    void read_checksum(const message::header& header_msg);
+    void read_payload(const message::header& header_msg);
 
     void handle_read_header(const boost::system::error_code& ec,
             size_t bytes_transferred);
-    void handle_read_checksum(message::header header_msg,
+    void handle_read_checksum(message::header& header_msg,
             const boost::system::error_code& ec, size_t bytes_transferred);
-    void handle_read_payload(message::header header_msg,
+    void handle_read_payload(const message::header& header_msg,
             const boost::system::error_code& ec, size_t bytes_transferred);
 
     template<typename P>
     bool transport_payload(P payload, bool ret_errc)
     {
         if (ret_errc ||
-            !parent_gateway_->kernel()->recv_message(channel_id_, payload))
+            !network_->kernel()->recv_message(channel_id_, payload))
         {
             destroy_self();
             return false;
@@ -86,13 +86,13 @@ private:
     message::version create_version_message();
 
     shared_ptr<tcp::socket> socket_;
-    network_ptr parent_gateway_;
+    network_ptr network_;
     dialect_ptr translator_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes
-    static const size_t header_chunk_size = 20;
+    static constexpr size_t header_chunk_size = 20;
     // Checksum size is 4 bytes
-    static const size_t header_checksum_size = 4;
+    static constexpr size_t header_checksum_size = 4;
 
     boost::array<uint8_t, header_chunk_size> inbound_header_;
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;

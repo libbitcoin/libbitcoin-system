@@ -20,9 +20,10 @@ public:
     postgresql_storage(std::string database, 
             std::string user, std::string password);
 
-    void store(message::inv inv, store_handler handle_store);
-    void store(message::transaction transaction, store_handler handle_store);
-    void store(message::block block, store_handler handle_store);
+    void store(const message::inv& inv, store_handler handle_store);
+    void store(const message::transaction& transaction,
+            store_handler handle_store);
+    void store(const message::block& block, store_handler handle_store);
 
     void fetch_inventories(fetch_handler_inventories handle_fetch);
     void fetch_block_by_depth(size_t block_number, 
@@ -40,10 +41,11 @@ public:
 
 private:
 
-    void do_store_inv(message::inv inv, store_handler handle_store);
-    void do_store_transaction(message::transaction transaction, 
+    void do_store_inv(const message::inv& inv, store_handler handle_store);
+    void do_store_transaction(const message::transaction& transaction, 
             store_handler handle_store);
-    void do_store_block(message::block block, store_handler handle_store);
+    void do_store_block(const message::block& block,
+            store_handler handle_store);
 
     void do_fetch_inventories(fetch_handler_inventories handle_fetch);
     void do_fetch_block_by_depth(size_t block_number, 
@@ -63,11 +65,11 @@ private:
 
     void insert(operation oper, size_t script_id);
     size_t insert_script(operation_stack operations);
-    void insert(message::transaction_input input,
+    void insert(const message::transaction_input& input,
             size_t transaction_id, size_t index_in_parent);
-    void insert(message::transaction_output output,
+    void insert(const message::transaction_output& output,
             size_t transaction_id, size_t index_in_parent);
-    size_t insert(message::transaction transaction);
+    size_t insert(const message::transaction& transaction);
 
     message::transaction_input_list select_inputs(size_t transaction_id);
     message::transaction_output_list select_outputs(size_t transaction_id);

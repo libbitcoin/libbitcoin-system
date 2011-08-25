@@ -15,10 +15,11 @@ class verify_block
     public std::enable_shared_from_this<verify_block>
 {
 public:
-    typedef std::function<void (std::error_code, bool)> status_handler;
+    typedef std::function<void (const std::error_code&, bool)> status_handler;
 
     verify_block(storage_ptr storage, dialect_ptr dialect);
-    void start(message::block current_block, status_handler handle_status);
+    void start(const message::block& current_block, 
+            status_handler handle_status);
 
 private:
     void find_duplicate(std::error_code ec, bool block_exists);
