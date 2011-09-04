@@ -98,7 +98,6 @@ void poller_application::fetch_locator(const boost::system::error_code& ec)
         log_error() << "Poll timer: " << ec.message();
         return;
     }
-    storage_->organize_block_chain();
     storage_->fetch_block_locator(
         postbind<std::error_code, message::block_locator>(strand(), std::bind(
             &poller_application::request_blocks, shared_from_this(), _1, _2)));

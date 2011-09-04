@@ -12,10 +12,10 @@ std::string error_category_impl::message(int ev) const
     error ec = static_cast<error>(ev);
     switch (ec)
     {
-    case error::block_doesnt_exist:
-        return "Block does not exist";
-    case error::output_doesnt_exist:
-        return "Ouput doesnt exist";
+    case error::object_doesnt_exist:
+        return "Object does not exist";
+    case error::object_already_exists:
+        return "Matching previous object found";
     default:
         return "Unknown error";
     }

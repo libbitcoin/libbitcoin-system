@@ -5,6 +5,8 @@
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 
+#include "postgresql_blockchain.hpp"
+
 namespace libbitcoin {
 
 data_chunk deserialize_bytes(std::string byte_stream)
@@ -40,6 +42,7 @@ postgresql_storage::postgresql_storage(std::string database,
   : sql_(std::string("postgresql:dbname=") + database + 
         ";user=" + user + ";password=" + password)
 {
+    blockchain_.reset(new postgresql_blockchain(sql_, service()));
 }
 
 void postgresql_storage::store(const message::inv& inv,
@@ -192,22 +195,61 @@ void postgresql_storage::do_store_block(const message::block& block,
         "SELECT 1 FROM blocks WHERE block_hash=?"
         << block_hash_repr << cppdb::row;
     if (!result.empty())
+    {
+        handle_store(error::object_already_exists);
         return;
+    }
 
-    result = sql_ <<
-        "INSERT INTO blocks (block_id, block_hash, version, prev_block_hash, \
-            merkle, when_created, bits_head, bits_body, nonce) \
-        VALUES (DEFAULT, ?, ?, ?, ?, TO_TIMESTAMP(?), ?, ?, ?) \
+    static cppdb::statement statement = sql_.prepare(
+        "INSERT INTO blocks( \
+            block_id, \
+            block_hash, \
+            space, \
+            depth, \
+            span_left, \
+            span_right, \
+            version, \
+            prev_block_hash, \
+            merkle, \
+            when_created, \
+            bits_head, \
+            bits_body, \
+            accum_diff, \
+            nonce \
+        ) VALUES ( \
+            DEFAULT, \
+            ?, \
+            nextval('blocks_space_sequence'), \
+            0, \
+            0, \
+            0, \
+            ?, \
+            ?, \
+            ?, \
+            TO_TIMESTAMP(?), \
+            ?, \
+            ?, \
+            difficulty(?, ?), \
+            ? \
+        ) \
         RETURNING block_id"
-        << block_hash_repr
-        << block.version
-        << prev_block_repr
-        << merkle_repr
-        << block.timestamp
-        << (block.bits >> (8*3))
-        << (block.bits & 0x00ffffff)
-        << block.nonce
-        << cppdb::row;
+        );
+
+    statement.reset();
+    statement.bind(block_hash_repr);
+    statement.bind(block.version);
+    statement.bind(prev_block_repr);
+    statement.bind(merkle_repr);
+    statement.bind(block.timestamp);
+    uint32_t bits_head = (block.bits >> (8*3)),
+        bits_body = (block.bits & 0x00ffffff);
+    statement.bind(bits_head);
+    statement.bind(bits_body);
+    statement.bind(bits_head);
+    statement.bind(bits_body);
+    statement.bind(block.nonce);
+
+    result = statement.row();
     size_t block_id = result.get<size_t>(0);
     for (size_t i = 0; i < block.transactions.size(); ++i)
     {
@@ -219,6 +261,7 @@ void postgresql_storage::do_store_block(const message::block& block,
                 VALUES (?, ?, ?)"
             << transaction_id << block_id << i << cppdb::exec;
     }
+    blockchain_->raise_barrier();
     handle_store(std::error_code());
 }
 
@@ -228,131 +271,6 @@ void postgresql_storage::fetch_inventories(fetch_handler_inventories)
 void postgresql_storage::do_fetch_inventories(fetch_handler_inventories)
 {
     // Not implemented
-}
-
-script postgresql_storage::select_script(size_t script_id)
-{
-    static cppdb::statement statement = sql_.prepare(
-        "SELECT \
-            opcode, \
-            data \
-        FROM operations \
-        WHERE script_id=? \
-        ORDER BY operation_id ASC"
-        );
-    statement.reset();
-    statement.bind(script_id);
-    cppdb::result result = statement.query();
-    script scr;
-    while (result.next())
-    {
-        operation op;
-        op.code = string_to_opcode(result.get<std::string>("opcode"));
-        if (!result.is_null("data"))
-            op.data = deserialize_bytes(result.get<std::string>("data"));
-        scr.push_operation(op);
-    }
-    return scr;
-}
-
-message::transaction_input_list postgresql_storage::select_inputs(
-        size_t transaction_id)
-{
-    static cppdb::statement statement = sql_.prepare(
-        "SELECT * \
-        FROM inputs \
-        WHERE transaction_id=? \
-        ORDER BY index_in_parent ASC"
-        );
-    statement.reset();
-    statement.bind(transaction_id);
-    cppdb::result result = statement.query();
-    message::transaction_input_list inputs;
-    while (result.next())
-    {
-        message::transaction_input input;
-        input.hash = 
-            deserialize_hash(result.get<std::string>("previous_output_hash"));
-        input.index = result.get<uint32_t>("previous_output_index");
-        size_t script_id = result.get<size_t>("script_id");
-        input.input_script = select_script(script_id);
-        input.sequence = result.get<uint32_t>("sequence");
-        inputs.push_back(input);
-    }
-    return inputs;
-}
-message::transaction_output_list postgresql_storage::select_outputs(
-        size_t transaction_id)
-{
-    static cppdb::statement statement = sql_.prepare(
-        "SELECT \
-            *, \
-            sql_to_internal(value) internal_value \
-        FROM outputs \
-        WHERE transaction_id=? \
-        ORDER BY index_in_parent ASC"
-        );
-    statement.reset();
-    statement.bind(transaction_id);
-    cppdb::result result = statement.query();
-    message::transaction_output_list outputs;
-    while (result.next())
-    {
-        message::transaction_output output;
-        output.value = result.get<uint64_t>("internal_value");
-        size_t script_id = result.get<size_t>("script_id");
-        output.output_script = select_script(script_id);
-        outputs.push_back(output);
-    }
-    return outputs;
-}
-
-message::transaction_list postgresql_storage::read_transactions(
-        cppdb::result result)
-{
-    message::transaction_list transactions;
-    while (result.next())
-    {
-        message::transaction transaction;
-        transaction.version = result.get<uint32_t>("version");
-        transaction.locktime = result.get<uint32_t>("locktime");
-        size_t transaction_id = result.get<size_t>("transaction_id");
-        transaction.inputs = select_inputs(transaction_id);
-        transaction.outputs = select_outputs(transaction_id);
-        transactions.push_back(transaction);
-    }
-    return transactions;
-}
-
-message::block postgresql_storage::read_block(cppdb::result block_result)
-{
-    message::block block;
-    size_t block_id = block_result.get<size_t>("block_id");
-    block.version = block_result.get<uint32_t>("version");
-    block.timestamp = block_result.get<uint32_t>("timest");
-    uint32_t bits_head = block_result.get<uint32_t>("bits_head"),
-            bits_body = block_result.get<uint32_t>("bits_body");
-    block.bits = bits_body + (bits_head << (3*8));
-    block.nonce = block_result.get<uint32_t>("nonce");
-
-    block.prev_block = 
-            deserialize_hash(block_result.get<std::string>("prev_block_hash"));
-    block.merkle_root = 
-            deserialize_hash(block_result.get<std::string>("merkle"));
-
-    static cppdb::statement transactions_statement = sql_.prepare(
-        "SELECT transactions.* \
-        FROM transactions_parents \
-        JOIN transactions \
-        ON transactions.transaction_id=transactions_parents.transaction_id \
-        WHERE block_id=? \
-        ORDER BY index_in_block ASC"
-        );
-    transactions_statement.reset();
-    transactions_statement.bind(block_id);
-    cppdb::result transactions_result = transactions_statement.query();
-    block.transactions = read_transactions(transactions_result);
-    return block;
 }
 
 void postgresql_storage::fetch_block_by_depth(size_t block_number,
@@ -380,10 +298,10 @@ void postgresql_storage::do_fetch_block_by_depth(size_t block_number,
     cppdb::result block_result = block_statement.row();
     if (block_result.empty())
     {
-        handle_fetch(error::block_doesnt_exist, message::block());
+        handle_fetch(error::object_doesnt_exist, message::block());
         return;
     }
-    message::block block = read_block(block_result);
+    message::block block = blockchain_->read_block(block_result);
     handle_fetch(std::error_code(), block);
 }
 
@@ -413,10 +331,10 @@ void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash,
     cppdb::result block_result = block_statement.row();
     if (block_result.empty())
     {
-        handle_fetch(error::block_doesnt_exist, message::block());
+        handle_fetch(error::object_doesnt_exist, message::block());
         return;
     }
-    message::block block = read_block(block_result);
+    message::block block = blockchain_->read_block(block_result);
     handle_fetch(std::error_code(), block);
 }
 
@@ -439,8 +357,7 @@ void postgresql_storage::do_fetch_block_locator(
         << cppdb::row;
     if (number_blocks_result.empty())
     {
-        handle_fetch(error::block_doesnt_exist, 
-                message::block_locator());
+        handle_fetch(error::object_doesnt_exist, message::block_locator());
         return;
     }
     // Start at max_depth
@@ -514,12 +431,12 @@ void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash,
         << cppdb::row;
     if (result.empty())
     {
-        handle_fetch(error::output_doesnt_exist, output);
+        handle_fetch(error::object_doesnt_exist, output);
         return;
     }
     output.value = result.get<uint64_t>("internal_value");
     size_t script_id = result.get<size_t>("script_id");
-    output.output_script = select_script(script_id);
+    output.output_script = blockchain_->select_script(script_id);
     handle_fetch(std::error_code(), output);
 }
 
@@ -547,110 +464,6 @@ void postgresql_storage::do_block_exists_by_hash(hash_digest block_hash,
         handle_exists(std::error_code(), false);
     else
         handle_exists(std::error_code(), true);
-}
-
-void postgresql_storage::organize_block_chain()
-{
-    service()->post(std::bind(
-        &postgresql_storage::do_organize_block_chain, shared_from_this()));
-}
-void postgresql_storage::do_organize_block_chain()
-{
-    cppdb::result result = sql_ <<
-        "SELECT \
-            block_id, \
-            prev_block_hash \
-        FROM blocks \
-        WHERE depth IS NULL \
-        ORDER BY block_id ASC";
-    while (result.next())
-    {
-        size_t block_id = result.get<size_t>(0);
-        std::string prev_block_hash = result.get<std::string>(1);
-
-        cppdb::result parent_result = sql_ <<
-            "SELECT\
-                block_id, \
-                depth, \
-                span_left, \
-                span_right \
-            FROM blocks \
-            WHERE \
-                block_hash=? \
-                AND depth IS NOT NULL"
-            << prev_block_hash
-            << cppdb::row;
-        if (parent_result.empty())
-            continue;
-        size_t parent_depth = parent_result.get<size_t>(1),
-                parent_span_left = parent_result.get<size_t>(2),
-                parent_span_right = parent_result.get<size_t>(3);
-
-        // Does this parent have children already?
-        cppdb::result has_children_result = sql_ <<
-            "SELECT 1 \
-            FROM blocks \
-            WHERE \
-                span_left >= ? \
-                AND span_right <= ? \
-                AND depth > ? \
-            LIMIT 1"
-            << parent_span_left
-            << parent_span_right
-            << parent_depth
-            << cppdb::row;
-        bool has_children = !has_children_result.empty();
-
-        size_t depth = parent_depth + 1;
-        if (has_children)
-        {
-            // Fork in the blockchain!
-            size_t chain_id = parent_span_right;
-            cppdb::transaction guard(sql_);
-            sql_ <<
-                "UPDATE blocks \
-                SET span_left=span_left+1 \
-                WHERE span_left >= ?"
-                << chain_id
-                << cppdb::exec;
-            sql_ <<
-                "UPDATE blocks \
-                SET span_right=span_right+1 \
-                WHERE span_right >= ?"
-                << chain_id
-                << cppdb::exec;
-            guard.commit();
-        }
-        else
-        {
-            BITCOIN_ASSERT(parent_span_left == parent_span_right);
-            size_t chain_id = parent_span_left;
-
-            sql_ <<
-                "UPDATE blocks \
-                SET \
-                    depth=?, \
-                    span_left=?, \
-                    span_right=? \
-                WHERE block_id=?"
-                << depth
-                << chain_id
-                << chain_id
-                << block_id
-                << cppdb::exec;
-        }
-    }
-    //matchup_inputs();
-}
-
-void postgresql_storage::matchup_inputs()
-{
-    sql_ <<
-        "UPDATE inputs \
-        SET previous_output_id=transactions.transaction_id \
-        FROM transactions \
-        WHERE previous_output_hash=transaction_hash"
-        << cppdb::exec;
 }
 
 } // libbitcoin

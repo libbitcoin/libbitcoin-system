@@ -1,4 +1,4 @@
-CFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector -g -Iinclude/ -Iusr/include/ -c
+CFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector -ggdb -Iinclude/ -Iusr/include/ -c
 LIBS= usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq
 
 objs: block transaction logger
@@ -54,8 +54,8 @@ obj/postgresql_storage.o: src/storage/postgresql_storage.cpp include/bitcoin/sto
 obj/elliptic_curve_key.o: src/util/elliptic_curve_key.cpp include/bitcoin/util/elliptic_curve_key.hpp
 	$(CXX) $(CFLAGS) -o obj/elliptic_curve_key.o src/util/elliptic_curve_key.cpp
 
-bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o
-	$(CXX) -o bin/tests/nettest obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o $(LIBS)
+bin/tests/nettest: obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o
+	$(CXX) -o bin/tests/nettest obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/nettest.o obj/kernel.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o $(LIBS)
 
 net: bin/tests/nettest
 
@@ -82,8 +82,8 @@ obj/script.o: src/script.cpp include/bitcoin/script.hpp
 obj/script-test.o: tests/script-test.cpp
 	$(CXX) $(CFLAGS) -o obj/script-test.o tests/script-test.cpp
 
-bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/error.o
-	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/error.o $(LIBS)
+bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/error.o obj/postgresql_blockchain.o obj/threaded_service.o
+	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/error.o obj/postgresql_blockchain.o obj/threaded_service.o $(LIBS)
 
 obj/postbind.o: tests/postbind.cpp
 	$(CXX) $(CFLAGS) -o obj/postbind.o tests/postbind.cpp
@@ -174,8 +174,19 @@ big-number-test: bin/tests/big-number-test
 obj/poller.o: examples/poller.cpp
 	$(CXX) $(CFLAGS) -o obj/poller.o examples/poller.cpp
 
-bin/examples/poller: obj/poller.o obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o
-	$(CXX) -o bin/examples/poller obj/poller.o obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o $(LIBS)
+bin/examples/poller: obj/poller.o obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o
+	$(CXX) -o bin/examples/poller obj/poller.o obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o $(LIBS)
 
 poller: bin/examples/poller
+
+obj/postgresql_blockchain.o: src/storage/postgresql_blockchain.cpp src/storage/postgresql_blockchain.hpp
+	$(CXX) $(CFLAGS) -o obj/postgresql_blockchain.o src/storage/postgresql_blockchain.cpp
+
+obj/blockchain.o: tests/blockchain.cpp
+	$(CXX) $(CFLAGS) -o obj/blockchain.o tests/blockchain.cpp
+
+bin/tests/blockchain: obj/blockchain.o obj/postgresql_blockchain.o obj/threaded_service.o obj/logger.o obj/script.o obj/elliptic_curve_key.o obj/transaction.o obj/types.o obj/serializer.o obj/sha256.o obj/ripemd.o obj/postgresql_storage.o obj/error.o obj/block.o
+	$(CXX) -o bin/tests/blockchain obj/blockchain.o obj/postgresql_blockchain.o obj/threaded_service.o obj/logger.o obj/script.o obj/elliptic_curve_key.o obj/transaction.o obj/types.o obj/serializer.o obj/sha256.o obj/ripemd.o obj/postgresql_storage.o obj/error.o obj/block.o $(LIBS)
+
+blockchain: bin/tests/blockchain
 

@@ -170,6 +170,16 @@ bool script::run_operation(operation op,
     return false;
 }
 
+transaction_type script::type() const
+{
+    return transaction_type::normal;
+}
+
+bool script::matches_template(operation_stack templ) const
+{
+    return templ.size() == 0;
+}
+
 std::string script::string_repr() const
 {
     std::ostringstream ss;
@@ -257,7 +267,8 @@ script parse_script(const data_chunk& raw_script)
         byte raw_byte = *it;
         operation op;
         op.code = static_cast<opcode>(raw_byte);
-        if (0 <= raw_byte && raw_byte <= 75)
+        // raw_byte is unsigned so it's always >= 0
+        if (raw_byte <= 75)
             op.code = opcode::special;
         size_t read_n_bytes = number_of_bytes_from_opcode(op.code, raw_byte);
 

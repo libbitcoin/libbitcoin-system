@@ -15,6 +15,8 @@ namespace libbitcoin {
 
 using std::shared_ptr;
 using boost::asio::io_service;
+using boost::asio::ip::tcp;
+using boost::asio::deadline_timer;
 
 class dialect;
 class storage;
@@ -33,6 +35,8 @@ typedef shared_ptr<clock> clock_ptr;
 typedef shared_ptr<io_service> service_ptr;
 typedef shared_ptr<io_service::work> work_ptr;
 typedef shared_ptr<io_service::strand> strand_ptr;
+typedef shared_ptr<tcp::socket> socket_ptr;
+typedef shared_ptr<deadline_timer> deadline_timer_ptr;
 
 typedef std::array<uint8_t, 32> hash_digest;
 typedef std::array<uint8_t, 20> short_hash;

@@ -13,14 +13,14 @@
 
 #include "shared_const_buffer.hpp"
 
+namespace libbitcoin {
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::posix_time::seconds;
 using boost::posix_time::minutes;
 using boost::posix_time::time_duration;
 using boost::asio::buffer;
-
-namespace libbitcoin {
 
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
@@ -229,7 +229,7 @@ void channel_pimpl::handle_send(const boost::system::error_code& ec)
 
 template<typename T>
 void generic_send(const T& message_packet, channel_pimpl* chan_self,
-        shared_ptr<tcp::socket> socket, dialect_ptr translator)
+        socket_ptr socket, dialect_ptr translator)
 {
     data_chunk msg = translator->to_network(message_packet);
     shared_const_buffer buffer(msg);

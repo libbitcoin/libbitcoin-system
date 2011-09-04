@@ -11,9 +11,6 @@
 
 namespace libbitcoin {
 
-using boost::asio::deadline_timer;
-using std::shared_ptr;
-
 class kernel 
   : public threaded_service,
     private boost::noncopyable, 
@@ -54,7 +51,7 @@ private:
     network_ptr network_component_;
     storage_ptr storage_component_;
 
-    shared_ptr<deadline_timer> poll_invs_timeout_;
+    deadline_timer_ptr poll_invs_timeout_;
 };
 
 typedef shared_ptr<kernel> kernel_ptr;

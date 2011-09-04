@@ -16,11 +16,6 @@
 
 namespace libbitcoin {
 
-using boost::asio::io_service;
-using boost::asio::ip::tcp;
-using boost::asio::deadline_timer;
-using std::shared_ptr;
-
 class network;
 class dialect;
 
@@ -33,7 +28,7 @@ public:
         network_ptr parent_gateway;
         dialect_ptr translator;
         service_ptr service;
-        shared_ptr<tcp::socket> socket;
+        socket_ptr socket;
     };
 
     channel_pimpl(const init_data& dat);
@@ -85,7 +80,7 @@ private:
     // Construct a version message
     message::version create_version_message();
 
-    shared_ptr<tcp::socket> socket_;
+    socket_ptr socket_;
     network_ptr network_;
     dialect_ptr translator_;
 
@@ -97,7 +92,7 @@ private:
     boost::array<uint8_t, header_chunk_size> inbound_header_;
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;
     std::vector<uint8_t> inbound_payload_;
-    shared_ptr<deadline_timer> timeout_;
+    deadline_timer_ptr timeout_;
 };
 
 } // libbitcoin

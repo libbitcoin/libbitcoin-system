@@ -52,28 +52,42 @@ $$ LANGUAGE plpgsql;
 
 DROP TABLE IF EXISTS blocks;
 DROP SEQUENCE IF EXISTS blocks_block_id_sequence;
+DROP SEQUENCE IF EXISTS blocks_space_sequence;
+DROP TYPE IF EXISTS block_status_type;
 
 CREATE SEQUENCE blocks_block_id_sequence;
+CREATE SEQUENCE blocks_space_sequence;
+-- Space 0 is always reserved for the main chain.
+-- Other spaces contain orphan chains
+
+CREATE TYPE block_status_type AS ENUM (
+    'orphan',
+    'verified'
+);
 
 CREATE TABLE blocks (
     block_id INT NOT NULL DEFAULT NEXTVAL('blocks_block_id_sequence') PRIMARY KEY,
     block_hash hash_type NOT NULL UNIQUE,
-    depth INT,
-    span_left INT,
-    span_right INT,
+    space INT NOT NULL,
+    depth INT NOT NULL,
+    span_left INT NOT NULL,
+    span_right INT NOT NULL,
     version BIGINT NOT NULL,
     prev_block_hash hash_type NOT NULL,
     merkle hash_type NOT NULL,
     when_created TIMESTAMP NOT NULL,
     bits_head INT NOT NULL,
     bits_body INT NOT NULL,
+    accum_diff difficulty_type NOT NULL,
     nonce BIGINT NOT NULL,
-    when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    block_status block_status_type NOT NULL DEFAULT 'orphan'
 );
 
 -- Genesis block
 INSERT INTO blocks (
     block_hash,
+    space,
     depth,
     span_left,
     span_right,
@@ -83,9 +97,12 @@ INSERT INTO blocks (
     when_created,
     bits_head,
     bits_body,
-    nonce
+    accum_diff,
+    nonce,
+    block_status
 ) VALUES (
     '00 00 00 00 00 19 d6 68 9c 08 5a e1 65 83 1e 93 4f f7 63 ae 46 a2 a6 c1 72 b3 f1 b6 0a 8c e2 6f',
+    0,
     0,
     0,
     0,
@@ -95,10 +112,13 @@ INSERT INTO blocks (
     TO_TIMESTAMP(1231006505),
     29,
     65535,
-    2083236893
+    difficulty(29, 65535),
+    2083236893,
+    'verified'
 );
 
 CREATE INDEX ON blocks USING btree (block_hash);
+CREATE INDEX ON blocks (space);
 CREATE INDEX ON blocks (depth);
 
 ---------------------------------------------------------------------------
@@ -156,6 +176,7 @@ CREATE TABLE transactions (
 );
 
 CREATE INDEX ON transactions (transaction_id);
+CREATE INDEX ON transactions (transaction_hash);
 
 CREATE TABLE outputs (
     output_id INT NOT NULL DEFAULT NEXTVAL('outputs_output_id_sequence') PRIMARY KEY,
@@ -181,6 +202,8 @@ CREATE TABLE inputs (
 );
 
 CREATE INDEX ON inputs (transaction_id);
+-- Used for seeing if this output was already spent
+CREATE INDEX ON inputs (previous_output_id);
 
 ---------------------------------------------------------------------------
 -- SCRIPTS

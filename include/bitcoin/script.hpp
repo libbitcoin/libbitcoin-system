@@ -33,6 +33,13 @@ struct operation
 
 typedef std::vector<operation> operation_stack;
 
+enum class transaction_type
+{
+    normal,
+    generate,
+    other
+};
+
 class script
 {
 public:
@@ -41,6 +48,7 @@ public:
     bool run(const message::transaction& parent_tx, uint32_t input_index);
 
     std::string string_repr() const;
+    transaction_type type() const;
 
     const operation_stack& operations() const;
 
@@ -55,6 +63,8 @@ private:
 
     bool run_operation(operation op, 
             const message::transaction& parent_tx, uint32_t input_index);
+
+    bool matches_template(operation_stack templ) const;
 
     data_chunk pop_stack();
 

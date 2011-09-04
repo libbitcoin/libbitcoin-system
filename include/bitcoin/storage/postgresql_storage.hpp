@@ -11,6 +11,9 @@
 
 namespace libbitcoin {
 
+class postgresql_blockchain;
+typedef shared_ptr<postgresql_blockchain> postgresql_blockchain_ptr;
+
 class postgresql_storage
   : public storage,
     public threaded_service,
@@ -37,10 +40,7 @@ public:
     void block_exists_by_hash(hash_digest block_hash,
             exists_handler handle_exists);
 
-    void organize_block_chain();
-
 private:
-
     void do_store_inv(const message::inv& inv, store_handler handle_store);
     void do_store_transaction(const message::transaction& transaction, 
             store_handler handle_store);
@@ -59,8 +59,6 @@ private:
     void do_block_exists_by_hash(hash_digest block_hash,
             exists_handler handle_exists);
 
-    void do_organize_block_chain();
-
     // ------------
 
     void insert(operation oper, size_t script_id);
@@ -71,17 +69,8 @@ private:
             size_t transaction_id, size_t index_in_parent);
     size_t insert(const message::transaction& transaction);
 
-    message::transaction_input_list select_inputs(size_t transaction_id);
-    message::transaction_output_list select_outputs(size_t transaction_id);
-    script select_script(size_t script_id);
-
-    message::transaction_list read_transactions(cppdb::result result);
-    message::block read_block(cppdb::result block_result);
-
-    void matchup_inputs();
-
+    postgresql_blockchain_ptr blockchain_;
     cppdb::session sql_;
-    std::mutex mutex_;
 };
 
 } // libbitcoin

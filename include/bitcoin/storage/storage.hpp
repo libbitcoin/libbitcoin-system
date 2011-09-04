@@ -56,8 +56,6 @@ public:
 
     virtual void block_exists_by_hash(hash_digest block_hash,
             exists_handler handle_exists) = 0;
-
-    virtual void organize_block_chain() = 0;
 };
 
 } // libbitcoin
