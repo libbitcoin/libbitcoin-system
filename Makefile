@@ -174,8 +174,8 @@ big-number-test: bin/tests/big-number-test
 obj/poller.o: examples/poller.cpp
 	$(CXX) $(CFLAGS) -o obj/poller.o examples/poller.cpp
 
-bin/examples/poller: obj/poller.o obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o
-	$(CXX) -o bin/examples/poller obj/poller.o obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o $(LIBS)
+bin/examples/poller: obj/poller.o obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/block.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o obj/verify.o obj/big_number.o obj/clock.o obj/constants.o
+	$(CXX) -o bin/examples/poller obj/poller.o obj/network.o obj/dialect.o obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o obj/verify.o obj/big_number.o obj/clock.o obj/constants.o $(LIBS)
 
 poller: bin/examples/poller
 
@@ -185,8 +185,8 @@ obj/postgresql_blockchain.o: src/storage/postgresql_blockchain.cpp src/storage/p
 obj/blockchain.o: tests/blockchain.cpp
 	$(CXX) $(CFLAGS) -o obj/blockchain.o tests/blockchain.cpp
 
-bin/tests/blockchain: obj/blockchain.o obj/postgresql_blockchain.o obj/threaded_service.o obj/logger.o obj/script.o obj/elliptic_curve_key.o obj/transaction.o obj/types.o obj/serializer.o obj/sha256.o obj/ripemd.o obj/postgresql_storage.o obj/error.o obj/block.o
-	$(CXX) -o bin/tests/blockchain obj/blockchain.o obj/postgresql_blockchain.o obj/threaded_service.o obj/logger.o obj/script.o obj/elliptic_curve_key.o obj/transaction.o obj/types.o obj/serializer.o obj/sha256.o obj/ripemd.o obj/postgresql_storage.o obj/error.o obj/block.o $(LIBS)
+bin/tests/blockchain: obj/blockchain.o obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o obj/verify.o obj/big_number.o obj/clock.o obj/constants.o
+	$(CXX) -o bin/tests/blockchain obj/blockchain.o obj/network.o  obj/dialect.o  obj/channel.o obj/serializer.o obj/logger.o obj/kernel.o obj/sha256.o obj/types.o obj/script.o obj/ripemd.o obj/postgresql_storage.o obj/block.o obj/elliptic_curve_key.o obj/transaction.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o obj/verify.o obj/big_number.o obj/clock.o obj/constants.o $(LIBS)
 
 blockchain: bin/tests/blockchain
 

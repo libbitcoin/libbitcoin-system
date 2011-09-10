@@ -6,8 +6,14 @@
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/verify.hpp>
 
 namespace libbitcoin {
+
+using boost::posix_time::milliseconds;
+using boost::posix_time::seconds;
+using boost::posix_time::time_duration;
+using std::placeholders::_1;
 
 data_chunk deserialize_bytes(std::string byte_stream);
 hash_digest deserialize_hash(std::string byte_stream);
@@ -72,12 +78,19 @@ class postgresql_blockchain
 {
 public:
     postgresql_blockchain(cppdb::session sql, service_ptr service);
-    void raise_barrier();
 
+    void set_clearance(size_t clearance);
+    void set_timeout(time_duration timeout);
+
+    void raise_barrier();
+    
 private: 
     void reset_state();
     void start_exec(const boost::system::error_code& ec);
     void start();
+
+    size_t barrier_clearance_level_;
+    time_duration barrier_timeout_;
 
     deadline_timer_ptr timeout_;
     bool timer_started_;

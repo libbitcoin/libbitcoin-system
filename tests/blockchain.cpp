@@ -79,6 +79,7 @@ dummy_psql::dummy_psql()
 {
     blockchain_.reset(new postgresql_blockchain(sql_, service()));
     deletor_.reset(new override_delete(sql_));
+    blockchain_->set_clearance(4);
 }
 
 void dummy_psql::raise_barrier()
@@ -113,9 +114,8 @@ void dummy_psql::save_nodes()
             when_created, \
             bits_head, \
             bits_body, \
-            accum_diff, \
             nonce, \
-            block_status \
+            status \
         ) VALUES ( \
             ?, \
             nextval('blocks_space_sequence'), \
@@ -128,7 +128,6 @@ void dummy_psql::save_nodes()
             TO_TIMESTAMP(1231006505), \
             29, \
             65534, \
-            difficulty(29, 65535), \
             2083236893, \
             ? \
         )"
@@ -174,7 +173,7 @@ void dummy_psql::display_branch(size_t depth, size_t left, size_t right)
     }
 }
 
-const char* complex_diagram = " \
+const char* diagram = " \
 (root \
     (toys \
         (ford \
@@ -198,18 +197,6 @@ const char* complex_diagram = " \
                 ) \
             ) \
         ) \
-    ) \
-    (sea) \
-) \
-";
-
-const char* diagram = " \
-(root \
-    (toys \
-        (blue) (red) (green) \
-    ) \
-    (bills \
-        (sun) (water) (ice) \
     ) \
     (sea) \
 ) \

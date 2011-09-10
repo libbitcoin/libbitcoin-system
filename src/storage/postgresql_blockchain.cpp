@@ -1,17 +1,10 @@
 #include "postgresql_blockchain.hpp"
 
+#include <bitcoin/dialect.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 
 namespace libbitcoin {
-
-using boost::posix_time::seconds;
-using boost::posix_time::minutes;
-using boost::posix_time::time_duration;
-using std::placeholders::_1;
-
-constexpr size_t barrier_clearance_level = 4;
-const time_duration barrier_timeout = seconds(4);
 
 postgresql_organizer::postgresql_organizer(cppdb::session sql)
   : sql_(sql)
@@ -408,43 +401,65 @@ message::block postgresql_reader::read_block(cppdb::result block_result)
     return block;
 }
 
-postgresql_verifier::postgresql_verifier(cppdb::session sql)
-  : postgresql_reader(sql), sql_(sql) 
+postgresql_block_info postgresql_reader::read_block_info(
+    cppdb::result result)
+{
+    BITCOIN_ASSERT(!result.is_null("prev_block_id"));
+    return {
+        result.get<size_t>("block_id"),
+        result.get<size_t>("depth"),
+        result.get<size_t>("span_left"),
+        result.get<size_t>("span_right"),
+        result.get<size_t>("prev_block_id")
+    };
+}
+
+postgresql_verify_block::postgresql_verify_block(cppdb::session sql, 
+    dialect_ptr dialect, const postgresql_block_info& block_info,
+    const message::block& current_block)
+  : verify_block(dialect, current_block), 
+    sql_(sql), block_info_(block_info), current_block_(current_block)
 {
 }
 
-void postgresql_verifier::verify()
+bool postgresql_verify_block::check()
 {
-    static cppdb::statement statement = sql_.prepare(
-        "SELECT \
-            block_id \
-        FROM blocks \
-        "
-        );
-    log_fatal() << "Verify unimplemented!";
+    if (!check_block())
+        return false;
+    return true;
 }
 
 postgresql_blockchain::postgresql_blockchain(
         cppdb::session sql, service_ptr service)
-  : postgresql_organizer(sql), postgresql_verifier(sql)
+  : postgresql_organizer(sql), postgresql_reader(sql),
+    barrier_clearance_level_(400), barrier_timeout_(milliseconds(500)), 
+    sql_(sql)
 {
-    reset_state();
     timeout_.reset(new deadline_timer(*service));
+    reset_state();
+}
+
+void postgresql_blockchain::set_clearance(size_t clearance)
+{
+    barrier_clearance_level_ = clearance;
+}
+void postgresql_blockchain::set_timeout(time_duration timeout)
+{
+    barrier_timeout_ = timeout;
 }
 
 void postgresql_blockchain::raise_barrier()
 {
     barrier_level_++;
-    if (barrier_level_ > barrier_clearance_level)
+    if (barrier_level_ > barrier_clearance_level_)
     {
-        timeout_->cancel();
         reset_state();
         start();
     }
     else if (!timer_started_)
     {
         timer_started_ = true;
-        timeout_->expires_from_now(barrier_timeout);
+        timeout_->expires_from_now(barrier_timeout_);
         timeout_->async_wait(std::bind( 
             &postgresql_blockchain::start_exec, shared_from_this(), _1));
     }
@@ -452,6 +467,7 @@ void postgresql_blockchain::raise_barrier()
 
 void postgresql_blockchain::reset_state()
 {
+    timeout_->cancel();
     barrier_level_ = 0;
     timer_started_ = false;
 }
