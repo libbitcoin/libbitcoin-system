@@ -84,6 +84,16 @@ void postgresql_organizer::organize()
             parent_id = orphans_results.get<size_t>(3);
         BITCOIN_ASSERT(child_depth == 0);
 
+        static cppdb::statement point_prev_statement = sql_.prepare(
+            "UPDATE blocks \
+            SET prev_block_id=? \
+            WHERE block_id=?"
+            );
+        point_prev_statement.reset();
+        point_prev_statement.bind(parent_id);
+        point_prev_statement.bind(child_id);
+        point_prev_statement.exec();
+
         size_t parent_space, parent_depth;
         span parent_span;
         // Parent depth and space can change if it is
@@ -491,6 +501,38 @@ void postgresql_blockchain::start()
 {
     organize();
     verify();
+}
+
+void postgresql_blockchain::verify()
+{
+    dialect_.reset(new original_dialect);
+    static cppdb::statement statement = sql_.prepare(
+        "SELECT \
+            *, \
+            EXTRACT(EPOCH FROM when_created) timest \
+        FROM blocks \
+        WHERE \
+            status='orphan' \
+            AND space=0  \
+        ORDER BY depth ASC"
+        );
+    statement.reset();
+    cppdb::result result = statement.query();
+    // foreach unverified block where status = orphan
+    // do verification and set status = verified
+    while (result.next())
+    {
+        const postgresql_block_info block_info = read_block_info(result);
+        const message::block current_block = read_block(result);
+
+        postgresql_verify_block verifier(
+            sql_, dialect_, block_info, current_block);
+        //verifier.start();
+        if (!verifier.check())
+        {
+        }
+    }
+    log_debug() << "-------";
 }
 
 } // libbitcoin

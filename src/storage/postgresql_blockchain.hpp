@@ -44,6 +44,11 @@ private:
     cppdb::session sql_;
 };
 
+struct postgresql_block_info
+{
+    size_t block_id, depth, span_left, span_right, prev_block_id;
+};
+
 class postgresql_reader
 {
 public:
@@ -51,6 +56,8 @@ public:
 
     message::block read_block(cppdb::result block_result);
     script select_script(size_t script_id);
+
+    postgresql_block_info read_block_info(cppdb::result result);
 
 private:
     message::transaction_input_list select_inputs(size_t transaction_id);
@@ -61,19 +68,23 @@ private:
     cppdb::session sql_;
 };
 
-class postgresql_verifier
-  : public postgresql_reader
+class postgresql_verify_block
+  : public verify_block
 {
-protected:
-    postgresql_verifier(cppdb::session sql);
-    void verify();
+public:
+    postgresql_verify_block(cppdb::session sql, dialect_ptr,
+        const postgresql_block_info& block_info,
+        const message::block& current_block);
+    bool check();
 private:
     cppdb::session sql_;
+    const postgresql_block_info& block_info_;
+    const message::block& current_block_;
 };
 
 class postgresql_blockchain
   : public postgresql_organizer,
-    public postgresql_verifier,
+    public postgresql_reader,
     public std::enable_shared_from_this<postgresql_blockchain>
 {
 public:
@@ -89,12 +100,17 @@ private:
     void start_exec(const boost::system::error_code& ec);
     void start();
 
+    void verify();
+
     size_t barrier_clearance_level_;
     time_duration barrier_timeout_;
 
     deadline_timer_ptr timeout_;
     bool timer_started_;
     size_t barrier_level_;
+
+    dialect_ptr dialect_;
+    cppdb::session sql_;
 };
 
 } // libbitcoin

@@ -18,61 +18,11 @@ using std::placeholders::_2;
 constexpr size_t max_block_size = 1000000;
 constexpr size_t max_block_script_operations = max_block_size / 50;
 
-verify_block::verify_block(storage_ptr storage, dialect_ptr dialect)
-  : storage_(storage), dialect_(dialect)
+verify_block::verify_block(dialect_ptr dialect, 
+    const message::block& current_block)
+  : dialect_(dialect), current_block_(current_block)
 {
-}
-
-void verify_block::start(const message::block& current_block, 
-        status_handler handle_status)
-{
-    handle_status_ = handle_status;
-    current_block_ = current_block;
-    // Check for duplicate
-    current_block_hash_ = hash_block_header(current_block);
-    storage_->block_exists_by_hash(current_block_hash_, 
-        postbind<std::error_code, bool>(strand(), std::bind(
-            &verify_block::find_duplicate, shared_from_this(), _1, _2)));
-}
-
-void verify_block::find_duplicate(std::error_code ec, bool block_exists)
-{
-    goto ignore_duplicate_check;
-    if (ec)
-    {
-        handle_status_(ec, false);
-        return;
-    }
-    else if (!block_exists)
-    {
-        handle_status_(std::error_code(), false);
-        return;
-    }
-ignore_duplicate_check:
-    if (!check_block())
-    {
-        handle_status_(std::error_code(), false);
-        return;
-    }
-
-    storage_->fetch_block_by_hash(current_block_.prev_block,
-        postbind<std::error_code, message::block>(strand(), std::bind(
-            &verify_block::find_previous, shared_from_this(), _1, _2)));
-}
-
-void verify_block::find_previous(std::error_code ec, message::block)
-{
-    if (ec == error::block_doesnt_exist)
-    {
-        // TODO not handled for the time being
-        handle_status_(std::error_code(), false);
-    }
-    else if (ec)
-        handle_status_(ec, false);
-
-    // AcceptBlock() goes here
-
-    handle_status_(std::error_code(), true);
+    clock_.reset(new clock);
 }
 
 bool verify_block::check_block()
@@ -90,7 +40,8 @@ bool verify_block::check_block()
         return false;
     }
 
-    if (!check_proof_of_work(current_block_hash_, current_block_.bits))
+    const hash_digest current_block_hash = hash_block_header(current_block_);
+    if (!check_proof_of_work(current_block_hash, current_block_.bits))
         return false;
 
     const ptime block_time = 
