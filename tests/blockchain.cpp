@@ -1,6 +1,7 @@
 #include "../src/storage/postgresql_blockchain.hpp"
 #include <bitcoin/util/threaded_service.hpp>
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/util/assert.hpp>
 #include <bitcoin/storage/postgresql_storage.hpp>
 
 #include <boost/algorithm/string/erase.hpp>
@@ -34,11 +35,14 @@ class dummy_psql
 {
 public:
     dummy_psql();
-    void create_tree(std::string diagram);
+    void create_tree(std::string diagram, std::string prev_name);
+    void reset_database();
     void save_nodes();
     void display_nodes();
     void raise_barrier();
     void delete_branch(std::string name);
+    void fake_verify();
+    void check_chains();
 private:
     template<typename Iterator>
     void construct_branch(Iterator& it, const node& parent)
@@ -87,20 +91,36 @@ void dummy_psql::raise_barrier()
     blockchain_->raise_barrier();
 }
 
-void dummy_psql::create_tree(std::string diagram)
+void dummy_psql::create_tree(std::string diagram, std::string prev_name)
 {
     boost::erase_all(diagram, " ");
+    nodes.clear();
     auto it = diagram.cbegin();
     if (*it != '(')
         return;
     node null;
+    null.name = prev_name;
     construct_branch(it, null);
 }
 
-void dummy_psql::save_nodes()
+void dummy_psql::reset_database()
 {
     sql_ << "TRUNCATE blocks" << cppdb::exec;
+    sql_ << "TRUNCATE chains" << cppdb::exec;
+    sql_ <<
+        "INSERT INTO chains ( \
+            work, \
+            chain_id, \
+            depth \
+        ) VALUES ( \
+            difficulty(29, 65535), \
+            0, \
+            0 \
+        )" << cppdb::exec;
     sql_ << "SELECT setval('blocks_space_sequence', 1)" << cppdb::row;
+}
+void dummy_psql::save_nodes()
+{
     static cppdb::statement stat = sql_.prepare(
         "INSERT INTO blocks( \
             block_hash, \
@@ -127,7 +147,7 @@ void dummy_psql::save_nodes()
             'merkle', \
             TO_TIMESTAMP(1231006505), \
             29, \
-            65534, \
+            TRUNC(CASE ? WHEN 'root' THEN 1 ELSE RANDOM() END * 65535), \
             2083236893, \
             ? \
         )"
@@ -139,6 +159,7 @@ void dummy_psql::save_nodes()
         stat.reset();
         stat.bind(n.name);
         stat.bind(n.prev_name);
+        stat.bind(n.name);
         if (n.name == "root")
             stat.bind("verified");
         else
@@ -173,35 +194,6 @@ void dummy_psql::display_branch(size_t depth, size_t left, size_t right)
     }
 }
 
-const char* diagram = " \
-(root \
-    (toys \
-        (ford \
-            (blue) (boxxy) (caracas (venez)) \
-        ) \
-        (misagi \
-            (nein \
-                (yul) \
-            ) \
-        ) \
-    ) \
-    (bills \
-        (electric \
-            (gas \
-                (oil \
-                    (stat \
-                        (sun) \
-                    ) \
-                    (water) \
-                    (ice) \
-                ) \
-            ) \
-        ) \
-    ) \
-    (sea) \
-) \
-";
-
 void dummy_psql::delete_branch(std::string name)
 {
     static cppdb::statement stat = sql_.prepare(
@@ -229,19 +221,133 @@ void dummy_psql::delete_branch(std::string name)
     deletor_->delete_branch(space, depth, span_left, span_right);
 }
 
+void dummy_psql::fake_verify()
+{
+    static cppdb::statement statement = sql_.prepare(
+        "SELECT \
+            *, \
+            EXTRACT(EPOCH FROM when_created) timest \
+        FROM blocks \
+        WHERE \
+            status='orphan' \
+            AND space=0  \
+        ORDER BY depth ASC"
+        );
+    statement.reset();
+    cppdb::result result = statement.query();
+    // foreach unverified block where status = orphan
+    // do verification and set status = verified
+    while (result.next())
+    {
+        sql_ <<
+            "UPDATE chains \
+            SET \
+                work = work + difficulty(?, ?), \
+                depth = ? \
+            WHERE \
+                chain_id >= ? \
+                AND chain_id <= ?" 
+            << result.get<size_t>("bits_head")
+            << result.get<size_t>("bits_body")
+            << result.get<size_t>("depth")
+            << result.get<size_t>("span_left")
+            << result.get<size_t>("span_right")
+            << cppdb::exec;
+
+        sql_ <<
+            "UPDATE blocks \
+            SET status='verified' \
+            WHERE block_id=?"
+            << result.get<size_t>("block_id") << cppdb::exec;
+    }
+}
+
+void dummy_psql::check_chains()
+{
+    cppdb::result result = sql_ << "SELECT *, work * 10000 AS swork FROM chains";
+    while (result.next())
+    {
+        size_t chain_id = result.get<size_t>("chain_id");
+        size_t depth = result.get<size_t>("depth");
+        cppdb::result verres = sql_ <<
+            "SELECT \
+                SUM(difficulty(bits_head, bits_body)) * 10000 AS work, \
+                COUNT(bits_body) AS total \
+            FROM blocks \
+            WHERE \
+                space=0 \
+                AND depth <= ? \
+                AND span_left <= ? \
+                AND span_right >= ? \
+                AND status='verified'"
+            << depth
+            << chain_id
+            << chain_id
+            << cppdb::row;
+        BITCOIN_ASSERT(verres.get<size_t>("total") != 0);
+        BITCOIN_ASSERT(verres.get<std::string>("work") == result.get<std::string>("swork"));
+    }
+}
+
+const char* diagram = " \
+(root \
+    (toys \
+        (ford \
+            (blue) (boxxy) (caracas (venez)) \
+        ) \
+        (misagi \
+            (nein \
+                (yul) \
+            ) \
+        ) \
+    ) \
+    (bills \
+        (zx81) \
+        (electric \
+            (gas \
+                (oil \
+                    (stat \
+                        (sun) \
+                    ) \
+                    (water) \
+                    (ice) \
+                ) \
+            ) \
+        ) \
+    ) \
+    (sea) \
+) \
+";
+
+const char* extended_diagram = "\
+(hello (a) (b)) \
+";
+
 int main()
 {
     dummy_psql dum;
-    dum.create_tree(diagram);
+    dum.create_tree(diagram, "");
+    dum.reset_database();
     dum.save_nodes();
+    dum.raise_barrier();
+    dum.raise_barrier();
+    dum.raise_barrier();
+    dum.raise_barrier();
+    dum.raise_barrier();
+    dum.fake_verify();
 
+    dum.create_tree(extended_diagram, "sea");
+    dum.save_nodes();
     dum.raise_barrier();
     dum.raise_barrier();
     dum.raise_barrier();
     dum.raise_barrier();
     dum.raise_barrier();
+    dum.fake_verify();
 
-    dum.delete_branch("bills");
+    dum.delete_branch("oil");
+    dum.check_chains();
+
     return 0;
 }
 

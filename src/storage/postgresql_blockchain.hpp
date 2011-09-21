@@ -37,9 +37,12 @@ private:
         size_t& space, size_t& depth, span& spn);
     size_t get_block_width(size_t space, size_t depth, span block_span);
     void reserve_branch_area(size_t parent_space, size_t parent_width,
-        size_t parent_span_right, size_t new_child_depth, size_t child_width);
+        const span& parent_span, size_t new_child_depth, size_t child_width);
     void position_child_branch(size_t old_space, size_t new_space,
         size_t new_depth, size_t new_span_left);
+
+    void delete_chains(size_t left, size_t right);
+    void unwind_chain(size_t depth, size_t chain_id);
 
     cppdb::session sql_;
 };

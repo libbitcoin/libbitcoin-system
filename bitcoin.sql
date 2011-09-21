@@ -73,15 +73,15 @@ CREATE TABLE blocks (
     span_left INT NOT NULL,
     span_right INT NOT NULL,
     version BIGINT NOT NULL,
+    prev_block_id INT,
     prev_block_hash hash_type NOT NULL,
     merkle hash_type NOT NULL,
     when_created TIMESTAMP NOT NULL,
     bits_head INT NOT NULL,
     bits_body INT NOT NULL,
-    accum_diff difficulty_type NOT NULL,
     nonce BIGINT NOT NULL,
     when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    block_status block_status_type NOT NULL DEFAULT 'orphan'
+    status block_status_type NOT NULL DEFAULT 'orphan'
 );
 
 -- Genesis block
@@ -97,9 +97,8 @@ INSERT INTO blocks (
     when_created,
     bits_head,
     bits_body,
-    accum_diff,
     nonce,
-    block_status
+    status
 ) VALUES (
     '00 00 00 00 00 19 d6 68 9c 08 5a e1 65 83 1e 93 4f f7 63 ae 46 a2 a6 c1 72 b3 f1 b6 0a 8c e2 6f',
     0,
@@ -112,7 +111,6 @@ INSERT INTO blocks (
     TO_TIMESTAMP(1231006505),
     29,
     65535,
-    difficulty(29, 65535),
     2083236893,
     'verified'
 );
@@ -120,6 +118,43 @@ INSERT INTO blocks (
 CREATE INDEX ON blocks USING btree (block_hash);
 CREATE INDEX ON blocks (space);
 CREATE INDEX ON blocks (depth);
+
+DROP TABLE IF EXISTS chains;
+DROP VIEW IF EXISTS main_chain;
+
+CREATE TABLE chains (
+    work difficulty_type NOT NULL,
+    chain_id INT NOT NULL,
+    depth INT NOT NULL
+);
+
+INSERT INTO chains (
+    work,
+    chain_id,
+    depth
+) SELECT
+    difficulty(bits_head, bits_body),
+    0,
+    0
+FROM blocks
+WHERE block_id=1;
+
+CREATE VIEW main_chain AS
+    WITH main_chain_id AS (
+        SELECT 
+            chain_id, 
+            depth
+        FROM chains
+        ORDER BY work DESC
+        LIMIT 1
+    )
+    SELECT blocks.*
+    FROM blocks, main_chain_id
+    WHERE
+        space=0
+        AND blocks.depth <= main_chain_id.depth
+        AND span_left >= chain_id
+        AND span_right <= chain_id;
 
 ---------------------------------------------------------------------------
 -- INVENTORY QUEUE
@@ -172,7 +207,8 @@ CREATE TABLE transactions (
     transaction_id INT NOT NULL DEFAULT NEXTVAL('transactions_transaction_id_sequence') PRIMARY KEY,
     transaction_hash hash_type NOT NULL,
     version BIGINT NOT NULL,
-    locktime BIGINT NOT NULL
+    locktime BIGINT NOT NULL,
+    when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX ON transactions (transaction_id);

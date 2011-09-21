@@ -24,7 +24,7 @@ for name, depth, left, right in cursor.fetchall():
 
 def display_node(nodes, indent=0):
     for name, depth, left, right, children in nodes:
-        print ' '*(indent*4)+name
+        print ' '*(indent*4)+name, '%i:%i'%(left, right)
         if children:
             display_node(children, indent+1)
 

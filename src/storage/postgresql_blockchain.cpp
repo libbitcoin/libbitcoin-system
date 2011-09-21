@@ -11,9 +11,85 @@ postgresql_organizer::postgresql_organizer(cppdb::session sql)
 {
 }
 
+void postgresql_organizer::delete_chains(size_t left, size_t right)
+{
+    static cppdb::statement delete_chains = sql_.prepare(
+        "DELETE FROM chains \
+        WHERE chain_id BETWEEN ? AND ?"
+        );
+    delete_chains.reset();
+    delete_chains.bind(left);
+    delete_chains.bind(right);
+    delete_chains.exec();
+
+    size_t offset = (right + 1) - left;
+
+    static cppdb::statement adjust_chains = sql_.prepare(
+        "UPDATE chains \
+        SET chain_id = chain_id - ? \
+        WHERE chain_id > ?"
+        );
+    adjust_chains.reset();
+    adjust_chains.bind(offset);
+    adjust_chains.bind(right);
+    adjust_chains.exec();
+}
+
+void postgresql_organizer::unwind_chain(size_t depth, size_t chain_id)
+{
+    static cppdb::statement unwind_chain = sql_.prepare(
+        "UPDATE chains \
+        SET work = work - \
+            (SELECT SUM(difficulty(bits_head, bits_body)) \
+            FROM blocks \
+            WHERE \
+                space=0 \
+                AND depth >= ? \
+                AND span_left <= ? \
+                AND span_right >= ? \
+                AND status='verified') \
+        WHERE chain_id=?"
+        );
+    unwind_chain.reset();
+    unwind_chain.bind(depth);
+    unwind_chain.bind(chain_id);
+    unwind_chain.bind(chain_id);
+    unwind_chain.bind(chain_id);
+    unwind_chain.exec();
+}
+
 void postgresql_organizer::delete_branch(size_t space, size_t depth, 
     size_t span_left, size_t span_right)
 {
+    static cppdb::statement lonely_child = sql_.prepare(
+        "SELECT 1 \
+        FROM blocks \
+        WHERE \
+            space = ? \
+            AND depth = ? - 1 \
+            AND span_left = ? \
+            AND span_right = ? \
+        LIMIT 1"
+        );
+    lonely_child.reset();
+    lonely_child.bind(space);
+    lonely_child.bind(depth);
+    lonely_child.bind(span_left);
+    lonely_child.bind(span_right);
+
+    size_t offset = span_right - span_left;
+
+    if (lonely_child.row().empty())
+    {
+        offset++;
+        delete_chains(span_left, span_right);
+    }
+    else
+    {
+        delete_chains(span_left + 1, span_right);
+        unwind_chain(depth, span_left);
+    }
+    
     static cppdb::statement delete_branch = sql_.prepare(
         "DELETE FROM blocks \
         WHERE \
@@ -29,13 +105,11 @@ void postgresql_organizer::delete_branch(size_t space, size_t depth,
     delete_branch.bind(span_right);
     delete_branch.exec();
 
-    size_t offset = (span_right + 1) - span_left;
-
     static cppdb::statement adjust_left = sql_.prepare(
         "UPDATE blocks \
-        SET span_left=span_left-? \
+        SET span_left = span_left - ? \
         WHERE  \
-            space=? \
+            space = ? \
             AND span_left > ?"
         );
     adjust_left.reset();
@@ -46,9 +120,9 @@ void postgresql_organizer::delete_branch(size_t space, size_t depth,
 
     static cppdb::statement adjust_right = sql_.prepare(
         "UPDATE blocks \
-        SET span_right=span_right-? \
+        SET span_right = span_right - ? \
         WHERE  \
-            space=? \
+            space = ? \
             AND span_right >= ?"
         );
     adjust_right.reset();
@@ -120,7 +194,7 @@ void postgresql_organizer::organize()
             new_child_span_left++;
 
         size_t new_child_depth = parent_depth + 1;
-        reserve_branch_area(parent_space, parent_width, parent_span.right, 
+        reserve_branch_area(parent_space, parent_width, parent_span, 
             new_child_depth, child_width);
         position_child_branch(child_space, parent_space, new_child_depth, 
             new_child_span_left);
@@ -209,7 +283,7 @@ size_t postgresql_organizer::get_block_width(
 }
 
 void postgresql_organizer::reserve_branch_area(size_t parent_space, 
-    size_t parent_width, size_t parent_span_right, 
+    size_t parent_width, const span& parent_span, 
         size_t new_child_depth, size_t child_width)
 {
     if (parent_width == 0 && child_width == 1)
@@ -227,7 +301,7 @@ void postgresql_organizer::reserve_branch_area(size_t parent_space,
     update_right.reset();
     update_right.bind(child_width);
     update_right.bind(parent_space);
-    update_right.bind(parent_span_right);
+    update_right.bind(parent_span.right);
     update_right.exec();
 
     static cppdb::statement update_left = sql_.prepare(
@@ -240,7 +314,7 @@ void postgresql_organizer::reserve_branch_area(size_t parent_space,
     update_left.reset();
     update_left.bind(child_width);
     update_left.bind(parent_space);
-    update_left.bind(parent_span_right);
+    update_left.bind(parent_span.right);
     update_left.exec();
 
     // Expand parent's right bracket
@@ -256,8 +330,44 @@ void postgresql_organizer::reserve_branch_area(size_t parent_space,
     update_parents.bind(child_width);
     update_parents.bind(parent_space);
     update_parents.bind(new_child_depth);
-    update_parents.bind(parent_span_right);
+    update_parents.bind(parent_span.right);
     update_parents.exec();
+
+    // Chains only apply to space 0
+    if (parent_space != 0)
+        return;
+
+    // Fix chain info
+    static cppdb::statement update_other_chains = sql_.prepare(
+        "UPDATE chains \
+        SET chain_id = chain_id + ? \
+        WHERE chain_id > ?"
+        );
+    update_other_chains.reset();
+    update_other_chains.bind(child_width);
+    update_other_chains.bind(parent_span.right);
+    update_other_chains.exec();
+
+    static cppdb::statement tween_chains = sql_.prepare(
+        "INSERT INTO chains ( \
+            work, \
+            chain_id, \
+            depth \
+        ) SELECT \
+            work, \
+            chain_id + ?, \
+            depth \
+        FROM chains \
+        WHERE chain_id=?"
+        );
+    for (size_t sub_chain = parent_width; 
+            sub_chain < parent_width + child_width; ++sub_chain)
+    {
+        tween_chains.reset();
+        tween_chains.bind(sub_chain);
+        tween_chains.bind(parent_span.left);
+        tween_chains.exec();
+    }
 }
 
 void postgresql_organizer::position_child_branch(
