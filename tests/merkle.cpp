@@ -34,7 +34,7 @@ void recv_block(std::error_code ec, libbitcoin::message::block block)
 
 typedef std::vector<libbitcoin::hash_digest> hash_list;
 namespace libbitcoin {
-    libbitcoin::hash_digest build_merkle_tree(hash_list hashes);
+    hash_digest build_merkle_tree(hash_list& merkle);
 }
 
 void test_build_merkle()
@@ -58,7 +58,7 @@ int main()
 {
     test_build_merkle();
 
-    psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
+    psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
     psql->fetch_block_by_depth(170, recv_block);
     psql->fetch_block_by_depth(2, test_match_merkles);
     return 0;

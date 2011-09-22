@@ -56,11 +56,11 @@ hash_digest build_merkle_tree(hash_list& merkle)
     else if (merkle.size() == 1)
         return merkle[0];
 
-    if (merkle.size()%2 != 0)
-        merkle.push_back(merkle.back());
-
     while (merkle.size() > 1)
     {
+        if (merkle.size()%2 != 0)
+            merkle.push_back(merkle.back());
+
         hash_list new_merkle;
         for (auto it = merkle.begin(); it != merkle.end(); ++it)
         {

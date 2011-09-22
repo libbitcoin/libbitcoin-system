@@ -114,8 +114,8 @@ types-test: bin/tests/types-test
 obj/merkle.o: tests/merkle.cpp
 	$(CXX) $(CFLAGS) -o obj/merkle.o tests/merkle.cpp
 
-bin/tests/merkle: obj/merkle.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/block.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/error.o
-	$(CXX) -o bin/tests/merkle obj/merkle.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/block.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/error.o $(LIBS)
+bin/tests/merkle: obj/merkle.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/block.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o obj/verify.o obj/big_number.o obj/dialect.o obj/constants.o obj/clock.o 
+	$(CXX) -o bin/tests/merkle obj/merkle.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/block.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/error.o obj/threaded_service.o  obj/postgresql_blockchain.o obj/verify.o obj/big_number.o obj/dialect.o obj/constants.o obj/clock.o $(LIBS)
 
 merkle: bin/tests/merkle
 
