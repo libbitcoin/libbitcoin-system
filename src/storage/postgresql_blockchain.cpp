@@ -637,12 +637,42 @@ void postgresql_blockchain::verify()
 
         postgresql_verify_block verifier(
             sql_, dialect_, block_info, current_block);
-        //verifier.start();
-        if (!verifier.check())
-        {
-        }
+
+        if (verifier.check())
+            finalize_status(block_info, current_block);
     }
-    log_debug() << "-------";
+    // TODO: Request new blocks + broadcast new blocks
+}
+
+void postgresql_blockchain::finalize_status(
+    const postgresql_block_info& block_info, 
+    const message::block& current_block)
+{
+    // TODO: together with serialise functions, should be in psql_helper.hpp
+    uint32_t bits_head = (current_block.bits >> (8*3)),
+        bits_body = (current_block.bits & 0x00ffffff);
+    // TODO: Should be prepared statements. Too lazy ATM
+    sql_ <<
+        "UPDATE chains \
+        SET \
+            work = work + difficulty(?, ?), \
+            depth = ? \
+        WHERE \
+            chain_id >= ? \
+            AND chain_id <= ?" 
+        << bits_head
+        << bits_body
+        << block_info.depth
+        << block_info.span_left
+        << block_info.span_right
+        << cppdb::exec;
+
+    sql_ <<
+        "UPDATE blocks \
+        SET status='verified' \
+        WHERE block_id=?"
+        << block_info.block_id
+        << cppdb::exec;
 }
 
 } // libbitcoin

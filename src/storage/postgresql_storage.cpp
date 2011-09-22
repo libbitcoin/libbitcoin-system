@@ -214,7 +214,6 @@ void postgresql_storage::do_store_block(const message::block& block,
             when_created, \
             bits_head, \
             bits_body, \
-            accum_diff, \
             nonce \
         ) VALUES ( \
             DEFAULT, \
@@ -229,7 +228,6 @@ void postgresql_storage::do_store_block(const message::block& block,
             TO_TIMESTAMP(?), \
             ?, \
             ?, \
-            difficulty(?, ?), \
             ? \
         ) \
         RETURNING block_id"
@@ -243,8 +241,6 @@ void postgresql_storage::do_store_block(const message::block& block,
     statement.bind(block.timestamp);
     uint32_t bits_head = (block.bits >> (8*3)),
         bits_body = (block.bits & 0x00ffffff);
-    statement.bind(bits_head);
-    statement.bind(bits_body);
     statement.bind(bits_head);
     statement.bind(bits_body);
     statement.bind(block.nonce);

@@ -205,14 +205,11 @@ CREATE INDEX ON transactions_parents (block_id);
 
 CREATE TABLE transactions (
     transaction_id INT NOT NULL DEFAULT NEXTVAL('transactions_transaction_id_sequence') PRIMARY KEY,
-    transaction_hash hash_type NOT NULL,
+    transaction_hash hash_type NOT NULL UNIQUE,
     version BIGINT NOT NULL,
     locktime BIGINT NOT NULL,
     when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE INDEX ON transactions (transaction_id);
-CREATE INDEX ON transactions (transaction_hash);
 
 CREATE TABLE outputs (
     output_id INT NOT NULL DEFAULT NEXTVAL('outputs_output_id_sequence') PRIMARY KEY,

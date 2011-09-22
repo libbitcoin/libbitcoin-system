@@ -75,7 +75,8 @@ class postgresql_verify_block
   : public verify_block
 {
 public:
-    postgresql_verify_block(cppdb::session sql, dialect_ptr,
+    postgresql_verify_block(
+        cppdb::session sql, dialect_ptr,
         const postgresql_block_info& block_info,
         const message::block& current_block);
     bool check();
@@ -104,6 +105,9 @@ private:
     void start();
 
     void verify();
+    void finalize_status(
+        const postgresql_block_info& block_info, 
+        const message::block& current_block);
 
     size_t barrier_clearance_level_;
     time_duration barrier_timeout_;
