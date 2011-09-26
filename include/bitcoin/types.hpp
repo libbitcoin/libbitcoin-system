@@ -84,6 +84,8 @@ std::string hexlify(T data)
         ss << std::setw(2) << std::setfill('0') << val << ' ';
     // Remove end ' '
     std::string ret = ss.str();
+    if (ret.size() == 0)
+        return "";
     ret.resize(ret.size() - 1);
     return ret;
 }
