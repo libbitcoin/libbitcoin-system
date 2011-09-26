@@ -166,8 +166,8 @@ obj/big_number.o: src/util/big_number.cpp include/bitcoin/util/big_number.hpp
 obj/big-number-test.o: tests/big-number-test.cpp
 	$(CXX) $(CFLAGS) -o obj/big-number-test.o tests/big-number-test.cpp
 
-bin/tests/big-number-test: obj/big-number-test.o obj/big_number.o obj/logger.o obj/constants.o
-	$(CXX) -o bin/tests/big-number-test obj/big-number-test.o obj/big_number.o obj/logger.o obj/constants.o $(LIBS)
+bin/tests/big-number-test: obj/big-number-test.o obj/big_number.o obj/logger.o obj/constants.o obj/types.o
+	$(CXX) -o bin/tests/big-number-test obj/big-number-test.o obj/big_number.o obj/logger.o obj/constants.o obj/types.o $(LIBS)
 
 big-number-test: bin/tests/big-number-test
 

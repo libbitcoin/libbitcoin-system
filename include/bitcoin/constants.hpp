@@ -24,13 +24,22 @@ constexpr uint64_t coin_price(uint64_t value=1)
 
 constexpr uint64_t max_money()
 {
+    // 210000 ~ 4 years / 10 minutes
     return 210000 * max_money_recursive(coin_price(block_reward));
 }
 
 const hash_digest null_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+constexpr uint32_t max_bits = 0x1d00ffff;
 big_number max_target();
+
+// Every two weeks we readjust target
+constexpr uint64_t target_timespan = 14 * 24 * 60 * 60;
+// Aim for blocks every 10 mins
+constexpr uint64_t target_spacing = 10 * 60;
+// Two weeks worth of blocks = readjust interval = 2016
+constexpr uint64_t readjustment_interval = target_timespan / target_spacing;
 
 } // libbitcoin
 

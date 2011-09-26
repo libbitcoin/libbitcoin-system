@@ -183,6 +183,7 @@ DROP TABLE IF EXISTS transactions;
 DROP TABLE IF EXISTS transactions_parents;
 DROP TABLE IF EXISTS outputs;
 DROP TABLE IF EXISTS inputs;
+DROP TABLE IF EXISTS spends;
 DROP SEQUENCE IF EXISTS transactions_transaction_id_sequence;
 DROP SEQUENCE IF EXISTS outputs_output_id_sequence;
 DROP SEQUENCE IF EXISTS inputs_input_id_sequence;
@@ -235,8 +236,16 @@ CREATE TABLE inputs (
 );
 
 CREATE INDEX ON inputs (transaction_id);
--- Used for seeing if this output was already spent
-CREATE INDEX ON inputs (previous_output_id);
+
+-- We can find all unspent ouputs using:
+-- SELECT a.* FROM a LEFT JOIN b ON a.id = b.id WHERE b.id IS NULL;
+CREATE TABLE spends (
+    output_id INT NOT NULL,
+    input_id INT NOT NULL,
+    block_id INT NOT NULL
+);
+
+CREATE INDEX ON spends (output_id);
 
 ---------------------------------------------------------------------------
 -- SCRIPTS

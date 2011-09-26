@@ -537,16 +537,82 @@ postgresql_block_info postgresql_reader::read_block_info(
 postgresql_verify_block::postgresql_verify_block(cppdb::session sql, 
     dialect_ptr dialect, const postgresql_block_info& block_info,
     const message::block& current_block)
-  : verify_block(dialect, current_block), 
+  : verify_block(dialect, block_info.depth, current_block), 
     sql_(sql), block_info_(block_info), current_block_(current_block)
 {
 }
 
-bool postgresql_verify_block::check()
+uint32_t postgresql_verify_block::previous_block_bits()
 {
-    if (!check_block())
-        return false;
-    return true;
+    static cppdb::statement previous = sql_.prepare(
+        "SELECT bits_head, bits_body \
+        FROM blocks \
+        WHERE \
+            space = 0 \
+            AND depth = ? \
+            AND span_left <= ? \
+            AND span_right >= ?"
+        );
+    previous.reset();
+    previous.bind(block_info_.depth);
+    previous.bind(block_info_.span_left);
+    previous.bind(block_info_.span_right);
+    cppdb::result result = previous.row();
+    uint32_t bits_head = result.get<uint32_t>("bits_head"),
+            bits_body = result.get<uint32_t>("bits_body");
+    // TODO: Should use shared function with read_block(...)
+    return bits_body + (bits_head << (3*8));
+}
+
+uint64_t postgresql_verify_block::actual_timespan(const uint64_t interval)
+{
+    BITCOIN_ASSERT(block_info_.depth >= interval);
+    size_t begin_block_depth = block_info_.depth - interval;
+    static cppdb::statement find_start = sql_.prepare(
+        "SELECT EXTRACT(EPOCH FROM when_created) \
+        FROM blocks \
+        WHERE \
+            space = 0 \
+            AND depth = ? \
+            AND span_left <= ? \
+            AND span_right >= ?"
+        );
+    find_start.reset();
+    find_start.bind(begin_block_depth);
+    find_start.bind(block_info_.span_left);
+    find_start.bind(block_info_.span_right);
+    cppdb::result result = find_start.row();
+    return current_block_.timestamp - result.get<uint32_t>(0);
+}
+
+uint64_t postgresql_verify_block::median_time_past()
+{
+    BITCOIN_ASSERT(block_info_.depth > 0);
+    size_t median_offset = 5;
+    if (block_info_.depth < 11)
+        median_offset = block_info_.depth / 2;
+
+    static cppdb::statement find_median = sql_.prepare(
+        "SELECT EXTRACT(EPOCH FROM when_created) \
+        FROM blocks \
+        WHERE \
+            space = 0 \
+            AND depth < ? \
+            AND depth >= ? - 11 \
+            AND span_left <= ? \
+            AND span_right >= ? \
+        ORDER BY when_created \
+        LIMIT 1 \
+        OFFSET ?"
+        );
+    find_median.reset();
+    find_median.bind(block_info_.depth);
+    find_median.bind(block_info_.depth);
+    find_median.bind(block_info_.span_left);
+    find_median.bind(block_info_.span_right);
+    find_median.bind(median_offset);
+    cppdb::result result = find_median.row();
+    return result.get<uint32_t>(0);
 }
 
 postgresql_blockchain::postgresql_blockchain(

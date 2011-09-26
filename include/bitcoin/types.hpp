@@ -90,6 +90,16 @@ std::string hexlify(T data)
     return ret;
 }
 
+template<typename Value>
+Value range_constraint(Value value, Value minimum, Value maximum)
+{
+    if (value < minimum)
+        return minimum;
+    else if (value > maximum)
+        return maximum;
+    return value;
+}
+
 } // libbitcoin
 
 #endif

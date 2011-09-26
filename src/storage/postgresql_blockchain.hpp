@@ -79,7 +79,10 @@ public:
         cppdb::session sql, dialect_ptr,
         const postgresql_block_info& block_info,
         const message::block& current_block);
-    bool check();
+protected:
+    uint32_t previous_block_bits();
+    uint64_t actual_timespan(const uint64_t interval);
+    uint64_t median_time_past();
 private:
     cppdb::session sql_;
     const postgresql_block_info& block_info_;
