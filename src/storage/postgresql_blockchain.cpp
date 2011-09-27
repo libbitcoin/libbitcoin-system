@@ -47,7 +47,7 @@ void postgresql_organizer::unwind_chain(size_t depth, size_t chain_id)
                 AND depth >= ? \
                 AND span_left <= ? \
                 AND span_right >= ? \
-                AND status='verified') \
+                AND status='valid') \
         WHERE chain_id=?"
         );
     unwind_chain.reset();
@@ -694,8 +694,8 @@ void postgresql_blockchain::verify()
         );
     statement.reset();
     cppdb::result result = statement.query();
-    // foreach unverified block where status = orphan
-    // do verification and set status = verified
+    // foreach invalid block where status = orphan
+    // do verification and set status = valid
     while (result.next())
     {
         const postgresql_block_info block_info = read_block_info(result);
@@ -735,7 +735,7 @@ void postgresql_blockchain::finalize_status(
 
     sql_ <<
         "UPDATE blocks \
-        SET status='verified' \
+        SET status='valid' \
         WHERE block_id=?"
         << block_info.block_id
         << cppdb::exec;

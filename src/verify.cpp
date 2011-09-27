@@ -39,7 +39,7 @@ bool verify_block::check_block()
 {
     // CheckBlock()
     // These are checks that are independent of context
-    // that can be verified before saving an orphan block
+    // that can be validated before saving an orphan block
     // ...
 
     // Size limits

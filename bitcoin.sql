@@ -62,7 +62,7 @@ CREATE SEQUENCE blocks_space_sequence;
 
 CREATE TYPE block_status_type AS ENUM (
     'orphan',
-    'verified'
+    'valid'
 );
 
 CREATE TABLE blocks (
@@ -112,7 +112,7 @@ INSERT INTO blocks (
     29,
     65535,
     2083236893,
-    'verified'
+    'valid'
 );
 
 CREATE INDEX ON blocks USING btree (block_hash);

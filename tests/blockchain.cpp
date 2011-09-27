@@ -161,7 +161,7 @@ void dummy_psql::save_nodes()
         stat.bind(n.prev_name);
         stat.bind(n.name);
         if (n.name == "root")
-            stat.bind("verified");
+            stat.bind("valid");
         else
             stat.bind("orphan");
         stat.exec();
@@ -235,8 +235,8 @@ void dummy_psql::fake_verify()
         );
     statement.reset();
     cppdb::result result = statement.query();
-    // foreach unverified block where status = orphan
-    // do verification and set status = verified
+    // foreach invalid block where status = orphan
+    // do verification and set status = valid
     while (result.next())
     {
         sql_ <<
@@ -256,7 +256,7 @@ void dummy_psql::fake_verify()
 
         sql_ <<
             "UPDATE blocks \
-            SET status='verified' \
+            SET status='valid' \
             WHERE block_id=?"
             << result.get<size_t>("block_id") << cppdb::exec;
     }
@@ -279,7 +279,7 @@ void dummy_psql::check_chains()
                 AND depth <= ? \
                 AND span_left <= ? \
                 AND span_right >= ? \
-                AND status='verified'"
+                AND status='valid'"
             << depth
             << chain_id
             << chain_id

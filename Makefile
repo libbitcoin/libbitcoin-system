@@ -1,4 +1,4 @@
-CFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector -ggdb -Iinclude/ -Iusr/include/ -c
+CFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -Iinclude/ -Iusr/include/ -c
 LIBS= usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq
 
 objs: block transaction logger
