@@ -1,4 +1,4 @@
-#include <bitcoin/verify.hpp>
+#include <bitcoin/validate.hpp>
 
 #include <bitcoin/block.hpp>
 #include <bitcoin/dialect.hpp>
@@ -19,23 +19,26 @@ using std::placeholders::_2;
 constexpr size_t max_block_size = 1000000;
 constexpr size_t max_block_script_operations = max_block_size / 50;
 
-verify_block::verify_block(dialect_ptr dialect, 
+validate_block::validate_block(dialect_ptr dialect, 
     size_t depth, const message::block& current_block)
   : dialect_(dialect), depth_(depth), current_block_(current_block)
 {
     clock_.reset(new clock);
 }
 
-bool verify_block::check()
+bool validate_block::validates()
 {
     if (!check_block())
         return false;
     if (!accept_block())
         return false;
+    if (!connect_block())
+        return false;
+    // network_->relay_inventory(...);
     return true;
 }
 
-bool verify_block::check_block()
+bool validate_block::check_block()
 {
     // CheckBlock()
     // These are checks that are independent of context
@@ -83,7 +86,7 @@ bool verify_block::check_block()
     return true;
 }
 
-bool verify_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
+bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
 {
     big_number target;
     target.set_compact(bits);
@@ -99,7 +102,7 @@ bool verify_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
     return true;
 }
 
-bool verify_block::check_transaction(const message::transaction& tx)
+bool validate_block::check_transaction(const message::transaction& tx)
 {
     if (tx.inputs.empty() || tx.outputs.empty())
         return false;
@@ -136,7 +139,7 @@ bool verify_block::check_transaction(const message::transaction& tx)
     return true;
 }
 
-size_t verify_block::number_script_operations()
+size_t validate_block::number_script_operations()
 {
     size_t total_operations = 0;
     for (message::transaction tx: current_block_.transactions)
@@ -149,7 +152,7 @@ size_t verify_block::number_script_operations()
     return total_operations;
 }
 
-bool verify_block::accept_block()
+bool validate_block::accept_block()
 {
     if (current_block_.bits != work_required())
         return false;
@@ -161,12 +164,10 @@ bool verify_block::accept_block()
         BITCOIN_ASSERT(tx.locktime == 0);
     if (!passes_checkpoints())
         return false;
-    // AddToBlockIndex checks
-    // network_->relay_inventory(...);
     return true;
 }
 
-uint32_t verify_block::work_required()
+uint32_t validate_block::work_required()
 {
     if (depth_ == 0)
         return max_bits;
@@ -187,7 +188,7 @@ uint32_t verify_block::work_required()
     return retarget.get_compact();
 }
 
-bool verify_block::passes_checkpoints()
+bool validate_block::passes_checkpoints()
 {
     const hash_digest block_hash = hash_block_header(current_block_);
 
@@ -247,6 +248,28 @@ bool verify_block::passes_checkpoints()
                         0x91, 0x18, 0x4a, 0x0d, 0x42, 0xd2, 0xb0, 0xfe})
         return false;
 
+    return true;
+}
+
+bool validate_block::connect_block()
+{
+    uint64_t fees = 0;
+    for (const message::transaction& tx: current_block_.transactions)
+        if (!validate_transaction(tx, fees))
+            return false;
+    uint64_t coinbase_value = total_value(current_block_.transactions[0]);
+    if (coinbase_value  > block_value(depth_) + fees)
+        return false;
+    return true;
+}
+
+bool validate_block::validate_transaction(
+    const message::transaction& tx, uint64_t& fees)
+{
+    // select * from inputs as i1, inputs as i2 where i1.input_id=192 and
+    // i1.previous_output_hash=i2.previous_output_hash and
+    // i1.previous_output_index=i2.previous_output_index and
+    // i2.input_id!=i1.input_id;
     return true;
 }
 

@@ -152,31 +152,7 @@ big_number& big_number::operator/=(const big_number& other)
 
 void big_number::set_uint64(uint64_t value)
 {
-    // TODO: figure out WTF this does then replace with my own code
-    // I doubt all this code is needed.
-    unsigned char pch[sizeof(value) + 6];
-    unsigned char* p = pch + 4;
-    bool fLeadingZeroes = true;
-    for (int i = 0; i < 8; i++)
-    {
-        unsigned char c = (value >> 56) & 0xff;
-        value <<= 8;
-        if (fLeadingZeroes)
-        {
-            if (c == 0)
-                continue;
-            if (c & 0x80)
-                *p++ = 0;
-            fLeadingZeroes = false;
-        }
-        *p++ = c;
-    }
-    unsigned int nSize = p - (pch + 4);
-    pch[0] = (nSize >> 24) & 0xff;
-    pch[1] = (nSize >> 16) & 0xff;
-    pch[2] = (nSize >> 8) & 0xff;
-    pch[3] = (nSize) & 0xff;
-    BN_mpi2bn(pch, p - pch, &bignum_);
+    set_data(uncast_type(value, true));
 }
 
 } // libbitcoin

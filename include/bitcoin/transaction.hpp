@@ -17,6 +17,8 @@ std::string string_repr(const message::transaction& transaction);
 bool previous_output_is_null(const message::transaction_input& input);
 bool is_coinbase(const message::transaction& tx);
 
+uint64_t total_value(const message::transaction& tx);
+
 } // libbitcoin
 
 #endif

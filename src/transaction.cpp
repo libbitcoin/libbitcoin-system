@@ -128,5 +128,13 @@ bool is_coinbase(const message::transaction& tx)
     return tx.inputs.size() == 1 && previous_output_is_null(tx.inputs[0]);
 }
 
+uint64_t total_value(const message::transaction& tx)
+{
+    uint64_t total = 0;
+    for (const message::transaction_output& output: tx.outputs)
+        total += output.value;
+    return total;
+}
+
 } // libbitcoin
 

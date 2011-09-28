@@ -8,6 +8,8 @@
 namespace libbitcoin {
 
 constexpr uint64_t block_reward = 50;
+// 210000 ~ 4 years / 10 minutes
+constexpr uint64_t reward_interval = 210000;
 
 constexpr uint32_t magic_value = 0xd9b4bef9;
 
@@ -24,9 +26,10 @@ constexpr uint64_t coin_price(uint64_t value=1)
 
 constexpr uint64_t max_money()
 {
-    // 210000 ~ 4 years / 10 minutes
-    return 210000 * max_money_recursive(coin_price(block_reward));
+    return reward_interval * max_money_recursive(coin_price(block_reward));
 }
+
+uint64_t block_value(size_t depth);
 
 const hash_digest null_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

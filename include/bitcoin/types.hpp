@@ -67,11 +67,13 @@ T cast_chunk(data_chunk chunk, bool reverse=false)
 }
 
 template<typename T>
-data_chunk uncast_type(T val)
+data_chunk uncast_type(T val, bool reverse=false)
 {
     data_chunk chunk;
     for (size_t i = 0; i < sizeof(T); ++i)
         chunk.push_back(reinterpret_cast<byte*>(&val)[i]);
+    if (reverse)
+        std::reverse(chunk.begin(), chunk.end());
     return chunk;
 }
 

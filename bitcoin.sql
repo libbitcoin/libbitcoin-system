@@ -229,13 +229,13 @@ CREATE TABLE inputs (
     transaction_id INT NOT NULL,
     index_in_parent INT NOT NULL,
     script_id INT NOT NULL,
-    previous_output_id INT,
     previous_output_hash hash_type NOT NULL,
     previous_output_index BIGINT NOT NULL,
     sequence BIGINT NOT NULL
 );
 
 CREATE INDEX ON inputs (transaction_id);
+CREATE INDEX ON inputs (previous_output_hash);
 
 -- We can find all unspent ouputs using:
 -- SELECT a.* FROM a LEFT JOIN b ON a.id = b.id WHERE b.id IS NULL;

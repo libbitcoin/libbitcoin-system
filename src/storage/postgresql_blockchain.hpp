@@ -6,7 +6,7 @@
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/verify.hpp>
+#include <bitcoin/validate.hpp>
 
 namespace libbitcoin {
 
@@ -71,11 +71,11 @@ private:
     cppdb::session sql_;
 };
 
-class postgresql_verify_block
-  : public verify_block
+class postgresql_validate_block
+  : public validate_block
 {
 public:
-    postgresql_verify_block(
+    postgresql_validate_block(
         cppdb::session sql, dialect_ptr,
         const postgresql_block_info& block_info,
         const message::block& current_block);
@@ -107,7 +107,7 @@ private:
     void start_exec(const boost::system::error_code& ec);
     void start();
 
-    void verify();
+    void validate();
     void finalize_status(
         const postgresql_block_info& block_info, 
         const message::block& current_block);

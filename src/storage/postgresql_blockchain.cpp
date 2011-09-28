@@ -534,15 +534,15 @@ postgresql_block_info postgresql_reader::read_block_info(
     };
 }
 
-postgresql_verify_block::postgresql_verify_block(cppdb::session sql, 
+postgresql_validate_block::postgresql_validate_block(cppdb::session sql, 
     dialect_ptr dialect, const postgresql_block_info& block_info,
     const message::block& current_block)
-  : verify_block(dialect, block_info.depth, current_block), 
+  : validate_block(dialect, block_info.depth, current_block), 
     sql_(sql), block_info_(block_info), current_block_(current_block)
 {
 }
 
-uint32_t postgresql_verify_block::previous_block_bits()
+uint32_t postgresql_validate_block::previous_block_bits()
 {
     static cppdb::statement previous = sql_.prepare(
         "SELECT bits_head, bits_body \
@@ -564,7 +564,7 @@ uint32_t postgresql_verify_block::previous_block_bits()
     return bits_body + (bits_head << (3*8));
 }
 
-uint64_t postgresql_verify_block::actual_timespan(const uint64_t interval)
+uint64_t postgresql_validate_block::actual_timespan(const uint64_t interval)
 {
     BITCOIN_ASSERT(block_info_.depth >= interval);
     size_t begin_block_depth = block_info_.depth - interval;
@@ -585,7 +585,7 @@ uint64_t postgresql_verify_block::actual_timespan(const uint64_t interval)
     return current_block_.timestamp - result.get<uint32_t>(0);
 }
 
-uint64_t postgresql_verify_block::median_time_past()
+uint64_t postgresql_validate_block::median_time_past()
 {
     BITCOIN_ASSERT(block_info_.depth > 0);
     size_t median_offset = 5;
@@ -676,10 +676,10 @@ void postgresql_blockchain::start_exec(const boost::system::error_code& ec)
 void postgresql_blockchain::start()
 {
     organize();
-    verify();
+    validate();
 }
 
-void postgresql_blockchain::verify()
+void postgresql_blockchain::validate()
 {
     dialect_.reset(new original_dialect);
     static cppdb::statement statement = sql_.prepare(
@@ -701,10 +701,10 @@ void postgresql_blockchain::verify()
         const postgresql_block_info block_info = read_block_info(result);
         const message::block current_block = read_block(result);
 
-        postgresql_verify_block verifier(
+        postgresql_validate_block block_validation(
             sql_, dialect_, block_info, current_block);
 
-        if (verifier.check())
+        if (block_validation.validates())
             finalize_status(block_info, current_block);
     }
     // TODO: Request new blocks + broadcast new blocks

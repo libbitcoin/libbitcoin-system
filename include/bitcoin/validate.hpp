@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_VERIFY_H
-#define LIBBITCOIN_VERIFY_H
+#ifndef LIBBITCOIN_VALIDATE_H
+#define LIBBITCOIN_VALIDATE_H
 
 #include <thread>
 #include <memory>
@@ -10,13 +10,13 @@
 
 namespace libbitcoin {
 
-class verify_block
+class validate_block
 {
 public:
-    bool check();
+    bool validates();
 
 protected:
-    verify_block(dialect_ptr dialect, 
+    validate_block(dialect_ptr dialect, 
         size_t depth, const message::block& current_block);
 
     virtual uint32_t previous_block_bits() = 0;
@@ -32,6 +32,9 @@ private:
     bool accept_block();
     uint32_t work_required();
     bool passes_checkpoints();
+
+    bool connect_block();
+    bool validate_transaction(const message::transaction& tx, uint64_t& fees);
 
     dialect_ptr dialect_;
     clock_ptr clock_;

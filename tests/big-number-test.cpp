@@ -37,9 +37,9 @@ void test()
     BITCOIN_ASSERT(bignum_max <= libbitcoin::max_target());
     BITCOIN_ASSERT(bignum < libbitcoin::max_target());
 
-    big_number arith(0x1f1f1f1f);
-    arith *= 0x1f1f1f1f;
-    BITCOIN_ASSERT((arith.get_data() == data_chunk{0x03, 0xc8, 0x8d, 0x52, 0x0f, 0x4a, 0x85, 0xc1}));
+    big_number arith(0x1f1f1f1f1f1f);
+    arith *= 0x1f1f1f1f1f1f;
+    BITCOIN_ASSERT((arith.get_data() == data_chunk{0x03, 0xc8, 0x8d, 0x52, 0x16, 0xdb, 0x98, 0xd4, 0x0f, 0x4a, 0x85, 0xc1}));
 }
 
 int main()
