@@ -30,7 +30,7 @@ void write_data_impl(data_chunk &data, T val, size_t len, bool reverse=false)
     #ifdef BOOST_LITTLE_ENDIAN
         // do nothing
     #elif BOOST_BIG_ENDIAN
-        reverse = true;
+        reverse = !reverse;
     #else
         #error "Endian isn't defined!"
     #endif
@@ -184,7 +184,7 @@ void read_bytes(const data_chunk& stream, size_t& pointer,
     #ifdef BOOST_LITTLE_ENDIAN
         // do nothing
     #elif BOOST_BIG_ENDIAN
-        reverse = true;
+        reverse = !reverse;
     #else
         #error "Endian isn't defined!"
     #endif
