@@ -29,11 +29,20 @@ validate_block::validate_block(dialect_ptr dialect,
 bool validate_block::validates()
 {
     if (!check_block())
+    {
+        log_error() << "check_block() failed";
         return false;
+    }
     if (!accept_block())
+    {
+        log_error() << "accept_block() failed";
         return false;
+    }
     if (!connect_block())
+    {
+        log_error() << "connect_block() failed";
         return false;
+    }
     // network_->relay_inventory(...);
     return true;
 }
@@ -253,23 +262,30 @@ bool validate_block::passes_checkpoints()
 
 bool validate_block::connect_block()
 {
-    uint64_t fees = 0;
-    for (const message::transaction& tx: current_block_.transactions)
-        if (!validate_transaction(tx, fees))
+    uint64_t value_in = 0, value_out = 0;
+    for (size_t tx_index = 1; tx_index < current_block_.transactions.size();
+            ++tx_index)
+    {
+        const message::transaction& tx = current_block_.transactions[tx_index];
+        if (!validate_transaction(tx, tx_index, value_in))
             return false;
-    uint64_t coinbase_value = total_value(current_block_.transactions[0]);
+        value_out += total_output_value(tx);
+    }
+    if (value_in < value_out)
+        return false;
+    uint64_t fees = value_in - value_out;
+    if (fees > max_money())
+        return false;
+    uint64_t coinbase_value = 
+        total_output_value(current_block_.transactions[0]);
     if (coinbase_value  > block_value(depth_) + fees)
         return false;
     return true;
 }
 
-bool validate_block::validate_transaction(
-    const message::transaction& tx, uint64_t& fees)
+bool validate_block::validate_transaction(const message::transaction& tx, 
+    size_t index_in_parent, uint64_t& fees)
 {
-    // select * from inputs as i1, inputs as i2 where i1.input_id=192 and
-    // i1.previous_output_hash=i2.previous_output_hash and
-    // i1.previous_output_index=i2.previous_output_index and
-    // i2.input_id!=i1.input_id;
     return true;
 }
 

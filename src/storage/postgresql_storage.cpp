@@ -402,7 +402,7 @@ void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash,
         uint32_t index, fetch_handler_output handle_fetch)
 {
     strand()->post(std::bind(
-        &postgresql_storage::fetch_output_by_hash, shared_from_this(),
+        &postgresql_storage::do_fetch_output_by_hash, shared_from_this(),
             transaction_hash, index, handle_fetch));
 }
 void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash, 
@@ -414,11 +414,12 @@ void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash,
         "SELECT \
             *, \
             sql_to_internal(value) internal_value \
-        FROM transactions \
-        JOIN outputs \
-        ON transaction_id=transaction_id \
+        FROM \
+            transactions, \
+            outputs \
         WHERE \
             transaction_hash=? \
+            AND transactions.transaction_id=outputs.transaction_id \
             AND index_in_parent=?"
         << transaction_hash_repr
         << index

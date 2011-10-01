@@ -11,6 +11,8 @@ constexpr uint64_t block_reward = 50;
 // 210000 ~ 4 years / 10 minutes
 constexpr uint64_t reward_interval = 210000;
 
+constexpr size_t coinbase_maturity = 100;
+
 constexpr uint32_t magic_value = 0xd9b4bef9;
 
 constexpr uint64_t max_money_recursive(uint64_t current)
@@ -28,8 +30,6 @@ constexpr uint64_t max_money()
 {
     return reward_interval * max_money_recursive(coin_price(block_reward));
 }
-
-uint64_t block_value(size_t depth);
 
 const hash_digest null_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

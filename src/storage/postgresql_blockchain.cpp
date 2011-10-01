@@ -1,6 +1,8 @@
 #include "postgresql_blockchain.hpp"
 
+#include <bitcoin/constants.hpp>
 #include <bitcoin/dialect.hpp>
+#include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 
@@ -538,6 +540,7 @@ postgresql_validate_block::postgresql_validate_block(cppdb::session sql,
     dialect_ptr dialect, const postgresql_block_info& block_info,
     const message::block& current_block)
   : validate_block(dialect, block_info.depth, current_block), 
+    postgresql_reader(sql),
     sql_(sql), block_info_(block_info), current_block_(current_block)
 {
 }
@@ -615,6 +618,125 @@ uint64_t postgresql_validate_block::median_time_past()
     return result.get<uint32_t>(0);
 }
 
+bool postgresql_validate_block::validate_transaction(
+    const message::transaction& tx, size_t index_in_parent, 
+    uint64_t& value_in)
+{
+    BITCOIN_ASSERT(!is_coinbase(tx));
+    for (size_t input_index = 0; input_index < tx.inputs.size(); ++input_index)
+        if (!connect_input(tx, input_index, value_in))
+            return false;
+    // select * from inputs as i1, inputs as i2 where i1.input_id=192 and
+    // i1.previous_output_hash=i2.previous_output_hash and
+    // i1.previous_output_index=i2.previous_output_index and
+    // i2.input_id!=i1.input_id;
+    return true;
+}
+
+bool postgresql_validate_block::connect_input(
+    const message::transaction& current_tx, 
+    size_t input_index, uint64_t& value_in)
+{
+    BITCOIN_ASSERT(input_index < current_tx.inputs.size());
+    const message::transaction_input& input = current_tx.inputs[input_index];
+    std::string hash_repr = hexlify(input.hash);
+    static cppdb::statement find_previous_tx = sql_.prepare(
+        "SELECT transaction_id \
+        FROM transactions \
+        WHERE transaction_hash=?"
+        );
+    find_previous_tx.reset();
+    find_previous_tx.bind(hash_repr);
+    cppdb::result previous_tx = find_previous_tx.row();
+    if (previous_tx.empty())
+        return false;
+    size_t previous_tx_id = previous_tx.get<size_t>(0);
+    static cppdb::statement find_previous_output = sql_.prepare(
+        "SELECT \
+            output_id, \
+            script_id, \
+            sql_to_internal(value) \
+        FROM outputs \
+        WHERE \
+            transaction_id=? \
+            AND index_in_parent=?"
+        );
+    find_previous_output.reset();
+    find_previous_output.bind(previous_tx_id);
+    find_previous_output.bind(input.index);
+    cppdb::result previous_output = find_previous_output.row();
+    if (previous_output.empty())
+        return false;
+    size_t output_id = previous_output.get<size_t>(0);
+    size_t output_script_id = previous_output.get<size_t>(1);
+    uint64_t output_value = previous_output.get<uint64_t>(2);
+    if (output_value > max_money())
+        return false;
+    if (is_coinbase_transaction(previous_tx_id))
+    {
+        // Check whether generated coin has sufficiently matured
+        size_t depth_difference =
+            previous_block_depth(previous_tx_id) - block_info_.depth;
+        if (depth_difference < coinbase_maturity)
+            return false;
+    }
+    script output_script = select_script(output_script_id);
+    if (!output_script.run(input.input_script, current_tx, input_index))
+        return false;
+    // TODO: check for previous spends
+    value_in += output_value;
+    if (value_in > max_money())
+        return false;
+    return true;
+}
+
+bool postgresql_validate_block::is_coinbase_transaction(size_t tx_id)
+{
+    static cppdb::statement fetch_params = sql_.prepare(
+        "SELECT \
+            previous_output_hash, \
+            previous_output_index \
+        FROM inputs \
+        WHERE transaction_id=?"
+        );
+    fetch_params.reset();
+    fetch_params.bind(tx_id);
+    cppdb::result params = fetch_params.query();
+    message::transaction partial;
+    while (params.next())
+    {
+        message::transaction_input input;
+        input.hash =
+            deserialize_hash(params.get<std::string>(0));
+        input.index = params.get<size_t>(1);
+        partial.inputs.push_back(input);
+    }
+    return is_coinbase(partial);
+}
+
+size_t postgresql_validate_block::previous_block_depth(size_t previous_tx_id)
+{
+    static cppdb::statement hookup_block = sql_.prepare(
+        "SELECT depth \
+        FROM \
+            transactions_parents, \
+            blocks \
+        WHERE \
+            transaction_id=? \
+            AND transactions_parents.block_id=blocks.block_id \
+            AND space=0 \
+            AND span_left <= ? \
+            AND span_right >= ?"
+        );
+    hookup_block.reset();
+    hookup_block.bind(previous_tx_id);
+    hookup_block.bind(block_info_.span_left);
+    hookup_block.bind(block_info_.span_right);
+    cppdb::result result = hookup_block.row();
+    BITCOIN_ASSERT(!result.empty());
+    return result.get<size_t>(0);
+}
+
 postgresql_blockchain::postgresql_blockchain(
         cppdb::session sql, service_ptr service)
   : postgresql_organizer(sql), postgresql_reader(sql),
@@ -623,6 +745,7 @@ postgresql_blockchain::postgresql_blockchain(
 {
     timeout_.reset(new deadline_timer(*service));
     reset_state();
+    start();
 }
 
 void postgresql_blockchain::set_clearance(size_t clearance)
@@ -706,6 +829,12 @@ void postgresql_blockchain::validate()
 
         if (block_validation.validates())
             finalize_status(block_info, current_block);
+        else
+        {
+            log_error() << "Block " << block_info.block_id
+                << " failed validation!";
+            exit(-1);
+        }
     }
     // TODO: Request new blocks + broadcast new blocks
 }

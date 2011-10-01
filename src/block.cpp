@@ -3,8 +3,16 @@
 #include <bitcoin/util/serializer.hpp>
 #include <bitcoin/util/sha256.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/constants.hpp>
 
 namespace libbitcoin {
+
+uint64_t block_value(size_t depth)
+{
+    uint64_t subsidy = coin_price(block_reward);
+    subsidy >>= (depth / reward_interval);
+    return subsidy;
+}
 
 hash_digest hash_block_header(const message::block& block)
 {

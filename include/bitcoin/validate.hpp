@@ -22,6 +22,8 @@ protected:
     virtual uint32_t previous_block_bits() = 0;
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
     virtual uint64_t median_time_past() = 0;
+    virtual bool validate_transaction(const message::transaction& tx, 
+        size_t index_in_parent, uint64_t& value_in) = 0;
 
 private:
     bool check_block();
@@ -34,7 +36,6 @@ private:
     bool passes_checkpoints();
 
     bool connect_block();
-    bool validate_transaction(const message::transaction& tx, uint64_t& fees);
 
     dialect_ptr dialect_;
     clock_ptr clock_;

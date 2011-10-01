@@ -1,6 +1,6 @@
 CXXFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC
 INCLUDES= -Iinclude/ -Iusr/include/
-LIBS= -Lusr/lib -lcppdb -lcrypto -lboost_thread -lboost_system -ldl -lpq
+LIBS= -Lusr/lib usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq
 BASE_MODULES= \
 	network.o  \
 	dialect.o  \
@@ -25,7 +25,7 @@ BASE_MODULES= \
 	constants.o
 MODULES=$(addprefix obj/, $(BASE_MODULES))
 #OBJECTS=$(addprefix obj/, $(notdir $(SOURCES:.cpp=.o)))
-LIBBITCOIN=-Llib -lbitcoin
+LIBBITCOIN=-Llib lib/libbitcoin.a
 
 #%.o: %.cpp
 #	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(INCLUDES) -c $(input) $(output)
@@ -44,7 +44,7 @@ lib/libbitcoin.a: $(MODULES)
 libbitcoin: lib/libbitcoin.so lib/libbitcoin.a
 
 obj/poller.o: examples/poller.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o obj/poller.o examples/poller.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/examples/poller: libbitcoin obj/poller.o
 	$(CXX) -o bin/examples/poller obj/poller.o $(LIBBITCOIN) $(LIBS)
@@ -56,6 +56,14 @@ net: bin/tests/nettest
 
 bin/tests/blockchain: libbitcoin.so obj/blockchain.o
 	$(CXX) -o bin/tests/blockchain obj/blockchain.o $(LIBBITCOIN) $(LIBS)
+
+obj/script-test.o: tests/script-test.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/script-test: libbitcoin obj/script-test.o
+	$(CXX) -o bin/tests/script-test obj/script-test.o $(LIBBITCOIN) $(LIBS)
+
+script-test: bin/tests/script-test
 
 
 block: src/block.cpp
@@ -132,12 +140,6 @@ gengen: bin/tests/gengen
 obj/script.o: src/script.cpp include/bitcoin/script.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/script-test.o: tests/script-test.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
-
-bin/tests/script-test: obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/error.o obj/postgresql_blockchain.o obj/threaded_service.o
-	$(CXX) -o bin/tests/script-test obj/script-test.o obj/script.o obj/logger.o obj/sha256.o obj/ripemd.o obj/types.o obj/postgresql_storage.o obj/transaction.o obj/block.o obj/serializer.o obj/elliptic_curve_key.o obj/error.o obj/postgresql_blockchain.o obj/threaded_service.o $(LIBS)
-
 obj/postbind.o: tests/postbind.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
@@ -145,8 +147,6 @@ bin/tests/postbind: obj/postbind.o
 	$(CXX) -o bin/tests/postbind obj/postbind.o $(LIBS)
 
 postbind: bin/tests/postbind
-
-script-test: bin/tests/script-test
 
 obj/psql.o: tests/psql.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
