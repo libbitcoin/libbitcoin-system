@@ -28,12 +28,30 @@ const operation_stack& script::operations() const
     return operations_;
 }
 
-bool script::run(const message::transaction& parent_tx, uint32_t input_index)
+bool script::run(script input_script,
+    const message::transaction& parent_tx, uint32_t input_index)
 {
     stack_.clear();
+    input_script.stack_.clear();
+    if (!input_script.run(parent_tx, input_index))
+        return false;
+    stack_ = input_script.stack_;
+    if (!run(parent_tx, input_index))
+        return false;
+    if (stack_.size() != 0)
+    {
+        // TODO: OP_CHECKSIG actually leaves stuff on stack
+        log_error() << "Script left junk on top of the stack";
+        return false;
+    }
+    return true;
+}
+
+bool script::run(const message::transaction& parent_tx, uint32_t input_index)
+{
     for (const operation oper: operations_)
     {
-        log_debug() << "Run: " << opcode_to_string(oper.code);
+        //log_debug() << "Run: " << opcode_to_string(oper.code);
         if (!run_operation(oper, parent_tx, input_index))
             return false;
         if (oper.data.size() > 0)
@@ -44,11 +62,6 @@ bool script::run(const message::transaction& parent_tx, uint32_t input_index)
                 oper.code == opcode::pushdata4);
             stack_.push_back(oper.data);
         }
-    }
-    if (stack_.size() != 0)
-    {
-        log_error() << "Script left junk on top of the stack";
-        return false;
     }
     return true;
 }
@@ -107,7 +120,6 @@ bool script::op_checksig(const message::transaction& parent_tx,
     uint32_t hash_type = 0;
     hash_type = signature.back();
     signature.pop_back();
-    BITCOIN_ASSERT(signature.size() == 70);
 
     if (hash_type != 1)
     {

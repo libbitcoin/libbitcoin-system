@@ -45,7 +45,8 @@ class script
 public:
     void join(const script& other);
     void push_operation(operation oper);
-    bool run(const message::transaction& parent_tx, uint32_t input_index);
+    bool run(script input_script,
+        const message::transaction& parent_tx, uint32_t input_index);
 
     std::string string_repr() const;
     transaction_type type() const;
@@ -54,6 +55,8 @@ public:
 
 private:
     typedef std::vector<data_chunk> data_stack;
+
+    bool run(const message::transaction& parent_tx, uint32_t input_index);
 
     bool op_dup();
     bool op_hash160();

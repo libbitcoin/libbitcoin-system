@@ -3,12 +3,15 @@
 #include <bitcoin/util/ripemd.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/messages.hpp>
+#include <bitcoin/transaction.hpp>
 #include <iostream>
 #include <functional>
 #include <memory>
 
 using std::shared_ptr;
 using libbitcoin::postgresql_storage;
+using libbitcoin::hash_transaction;
+using libbitcoin::hexlify;
 typedef shared_ptr<postgresql_storage> psql_ptr;
 
 void ripemd_test()
@@ -28,10 +31,9 @@ void test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb()
     libbitcoin::data_chunk raw_script{0x76, 0xa9, 0x14, 0xe7, 0x58, 0x5a, 0x2d, 0xc9, 0xd9, 0xcb, 0x01, 0xd5, 0x47, 0x1d, 0xec, 0xf2, 0x39, 0xeb, 0xbd, 0xdd, 0xb6, 0x9b, 0x32, 0x88, 0xac};
     libbitcoin::script script = libbitcoin::parse_script(raw_input);
     libbitcoin::script script_out = libbitcoin::parse_script(raw_script);
-    script.join(script_out);
     std::cout << script.string_repr() << "\n";
     libbitcoin::message::transaction tx;
-    std::cout << "Returned: " << (script.run(tx, 0) ? "true" : "false") << "\n";
+    std::cout << "Returned: " << (script_out.run(script, tx, 0) ? "true" : "false") << "\n";
 
     // see if script that goes in is the same as what comes out :)
     libbitcoin::data_chunk back_out = libbitcoin::save_script(libbitcoin::parse_script(raw_input));
@@ -49,9 +51,10 @@ void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::mess
         return;
     }
     libbitcoin::script script = input.input_script;
-    script.join(output.output_script);
     BITCOIN_ASSERT(input.hash == tx.inputs[0].hash);
-    std::cout << "Returned: " << (script.run(tx, 0) ? "true" : "false") << "\n";
+    std::cout << hexlify(hash_transaction(tx)) << "\n";
+    std::cout << script.string_repr() << "\n";
+    std::cout << "Returned: " << (output.output_script.run(script, tx, 0) ? "true" : "false") << "\n";
 }
 
 void recv_block(psql_ptr psql, std::error_code ec, libbitcoin::message::block block)
@@ -71,8 +74,8 @@ int main()
 {
     //test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb();
     psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
-    psql->fetch_block_by_depth(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
-    sleep(1);
+    //psql->fetch_block_by_depth(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
+    sleep(6);
     return 0;
 }
 
