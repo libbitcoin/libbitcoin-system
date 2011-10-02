@@ -285,6 +285,7 @@ CREATE TYPE opcode_type AS ENUM (
     'pushdata1',
     'pushdata2',
     'pushdata4',
+    'nop',
     'dup',
     'hash160',
     'equalverify',

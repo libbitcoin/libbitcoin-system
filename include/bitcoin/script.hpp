@@ -17,6 +17,7 @@ enum class opcode
     pushdata1 = 76,
     pushdata2 = 77,
     pushdata4 = 78,
+    nop = 97,
     dup = 118,
     hash160 = 169,
     equalverify = 136,

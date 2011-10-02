@@ -194,6 +194,9 @@ bool script::run_operation(operation op,
             BITCOIN_ASSERT(op.data.size() == static_cast<size_t>(op.code));
             return true;
 
+        case opcode::nop:
+            return true;
+
         case opcode::dup:
             return op_dup();
 
@@ -207,6 +210,8 @@ bool script::run_operation(operation op,
             return op_checksig(parent_tx, input_index);
 
         default:
+            log_fatal() << "Umimplemented operation <none " 
+                << static_cast<int>(op.code) << ">";
             break;
     }
     return false;
@@ -252,6 +257,8 @@ std::string opcode_to_string(opcode code)
             return "pushdata2";
         case opcode::pushdata4:
             return "pushdata4";
+        case opcode::nop:
+            return "nop";
         case opcode::dup:
             return "dup";
         case opcode::hash160:
@@ -278,6 +285,8 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::pushdata2;
     else if (code_repr == "pushdata4")
         return opcode::pushdata4;
+    else if (code_repr == "nop")
+        return opcode::nop;
     else if (code_repr == "dup")
         return opcode::dup;
     else if (code_repr == "hash160")
