@@ -99,9 +99,17 @@ bool script::op_equalverify()
     return pop_stack() == pop_stack();
 }
 
-bool script::op_checksig(const message::transaction& parent_tx, 
-        uint32_t input_index)
+inline void nullify_input_sequences(
+    message::transaction_input_list& inputs, uint32_t except_input)
 {
+    for (size_t i = 0; i < inputs.size(); ++i)
+        if (i != except_input)
+            inputs[i].sequence = 0;
+}
+
+bool script::op_checksig(message::transaction parent_tx, uint32_t input_index)
+{
+    BITCOIN_ASSERT(input_index < parent_tx.inputs.size());
     if (stack_.size() < 2)
         return false;
     data_chunk pubkey = pop_stack(), signature = pop_stack();
@@ -121,10 +129,32 @@ bool script::op_checksig(const message::transaction& parent_tx,
     hash_type = signature.back();
     signature.pop_back();
 
-    if (hash_type != 1)
+    if ((hash_type & 0x1f) == sighash::none)
     {
-        log_error() << "Unimplemented hash_type";
-        return false;
+        parent_tx.outputs.clear();
+        nullify_input_sequences(parent_tx.inputs, input_index);
+    }
+    else if ((hash_type & 0x1f) == sighash::single)
+    {
+        uint32_t output_index = input_index;
+        if (output_index >= parent_tx.outputs.size())
+        {
+            log_error() << "sighash::single the output_index is out of range";
+            return false;
+        }
+        parent_tx.outputs.resize(output_index + 1);
+        for (message::transaction_output& output: parent_tx.outputs)
+        {
+            output.value = ~0;
+            output.output_script = script();
+        }
+        nullify_input_sequences(parent_tx.inputs, input_index);
+    }
+
+    if (hash_type & sighash::anyone_can_pay)
+    {
+        parent_tx.inputs[0] = parent_tx.inputs[input_index];
+        parent_tx.inputs.resize(1);
     }
 
     if (input_index >= parent_tx.inputs.size())

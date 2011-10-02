@@ -31,6 +31,17 @@ struct operation
     data_chunk data;
 };
 
+namespace sighash
+{
+    enum : uint32_t
+    {
+        all = 1,
+        none = 2,
+        single = 3,
+        anyone_can_pay = 0x80
+    };
+}
+
 typedef std::vector<operation> operation_stack;
 
 enum class transaction_type
@@ -61,8 +72,7 @@ private:
     bool op_dup();
     bool op_hash160();
     bool op_equalverify();
-    bool op_checksig(const message::transaction& parent_tx, 
-            uint32_t input_index);
+    bool op_checksig(message::transaction parent_tx, uint32_t input_index);
 
     bool run_operation(operation op, 
             const message::transaction& parent_tx, uint32_t input_index);
