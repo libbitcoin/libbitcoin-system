@@ -143,16 +143,26 @@ size_t postgresql_storage::insert(const message::transaction& transaction)
 {
     hash_digest transaction_hash = hash_transaction(transaction);
     std::string transaction_hash_repr = hexlify(transaction_hash);
+    // We use special function to insert txs. 
+    // Some blocks contain duplicates. See SQL for more details.
     cppdb::result result = sql_ <<
-        "INSERT INTO transactions (transaction_id, transaction_hash, \
-            version, locktime) \
-        VALUES (DEFAULT, ?, ?, ?) \
-        RETURNING transaction_id"
+        "SELECT insert_transaction(?, ?, ?)"
         << transaction_hash_repr
         << transaction.version
         << transaction.locktime
         << cppdb::row;
     size_t transaction_id = result.get<size_t>(0);
+    if (transaction_id == 0)
+    {
+        cppdb::result old_transaction_id = sql_ <<
+            "SELECT transaction_id \
+            FROM transactions \
+            WHERE transaction_hash=?"
+            << transaction_hash_repr
+            << cppdb::row;
+        return old_transaction_id.get<size_t>(0);
+    }
+
     for (size_t i = 0; i < transaction.inputs.size(); ++i)
         insert(transaction.inputs[i], transaction_id, i);
     for (size_t i = 0; i < transaction.outputs.size(); ++i)

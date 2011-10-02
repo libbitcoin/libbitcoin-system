@@ -189,6 +189,24 @@ DROP SEQUENCE IF EXISTS outputs_output_id_sequence;
 DROP SEQUENCE IF EXISTS inputs_input_id_sequence;
 DROP TYPE IF EXISTS output_transaction_type;
 
+-- Block 91842 contains the same coinbase as block 91812
+-- Same for blocks 91880 and 91722
+-- We use this function to create new txs.
+DROP FUNCTION IF EXISTS insert_transaction(hash_type, BIGINT, BIGINT);
+CREATE OR REPLACE FUNCTION insert_transaction(tx_hash hash_type, tx_version BIGINT, tx_locktime BIGINT)
+RETURNS INT AS $$
+DECLARE
+ retval INT;
+BEGIN
+    INSERT INTO transactions(transaction_hash, version, locktime) VALUES (tx_hash, tx_version, tx_locktime) RETURNING transaction_id INTO retval;
+    RETURN retval;
+
+    EXCEPTION
+        WHEN unique_violation THEN
+            RETURN 0;
+END;
+$$ LANGUAGE plpgsql;
+
 CREATE SEQUENCE transactions_transaction_id_sequence;
 CREATE SEQUENCE outputs_output_id_sequence;
 CREATE SEQUENCE inputs_input_id_sequence;
