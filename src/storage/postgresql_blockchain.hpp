@@ -85,12 +85,15 @@ protected:
     uint64_t actual_timespan(const uint64_t interval);
     uint64_t median_time_past();
     bool validate_transaction(const message::transaction& tx, 
-        size_t index_in_parent, uint64_t& value_in);
+        size_t index_in_block, uint64_t& value_in);
 private:
-    bool connect_input(const message::transaction& current_tx, 
+    bool connect_input(size_t transaction_id, 
+        const message::transaction& current_tx, 
         size_t input_index, uint64_t& value_in);
     bool is_coinbase_transaction(size_t tx_id);
     size_t previous_block_depth(size_t previous_tx_id);
+    bool search_double_spends(size_t transaction_id, 
+        const message::transaction_input& input, size_t input_index);
 
     cppdb::session sql_;
     const postgresql_block_info& block_info_;

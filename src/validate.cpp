@@ -29,20 +29,11 @@ validate_block::validate_block(dialect_ptr dialect,
 bool validate_block::validates()
 {
     if (!check_block())
-    {
-        log_error() << "check_block() failed";
         return false;
-    }
     if (!accept_block())
-    {
-        log_error() << "accept_block() failed";
         return false;
-    }
     if (!connect_block())
-    {
-        log_error() << "connect_block() failed";
         return false;
-    }
     // network_->relay_inventory(...);
     return true;
 }

@@ -552,7 +552,7 @@ uint32_t postgresql_validate_block::previous_block_bits()
         FROM blocks \
         WHERE \
             space = 0 \
-            AND depth = ? \
+            AND depth = ? - 1 \
             AND span_left <= ? \
             AND span_right >= ?"
         );
@@ -570,22 +570,34 @@ uint32_t postgresql_validate_block::previous_block_bits()
 uint64_t postgresql_validate_block::actual_timespan(const uint64_t interval)
 {
     BITCOIN_ASSERT(block_info_.depth >= interval);
-    size_t begin_block_depth = block_info_.depth - interval;
+    size_t begin_block_depth = block_info_.depth - interval,
+        end_block_depth = block_info_.depth - 1;
     static cppdb::statement find_start = sql_.prepare(
-        "SELECT EXTRACT(EPOCH FROM when_created) \
-        FROM blocks \
+        "SELECT EXTRACT(EPOCH FROM \
+            end_block.when_created - start_block.when_created) \
+        FROM \
+            blocks as start_block, \
+            blocks as end_block \
         WHERE \
-            space = 0 \
-            AND depth = ? \
-            AND span_left <= ? \
-            AND span_right >= ?"
+            start_block.space = 0 \
+            AND start_block.depth = ? \
+            AND start_block.span_left <= ? \
+            AND start_block.span_right >= ? \
+            \
+            AND end_block.space = 0 \
+            AND end_block.depth = ? \
+            AND end_block.span_left <= ? \
+            AND end_block.span_right >= ?"
         );
     find_start.reset();
     find_start.bind(begin_block_depth);
     find_start.bind(block_info_.span_left);
     find_start.bind(block_info_.span_right);
+    find_start.bind(end_block_depth);
+    find_start.bind(block_info_.span_left);
+    find_start.bind(block_info_.span_right);
     cppdb::result result = find_start.row();
-    return current_block_.timestamp - result.get<uint32_t>(0);
+    return result.get<uint32_t>(0);
 }
 
 uint64_t postgresql_validate_block::median_time_past()
@@ -619,12 +631,26 @@ uint64_t postgresql_validate_block::median_time_past()
 }
 
 bool postgresql_validate_block::validate_transaction(
-    const message::transaction& tx, size_t index_in_parent, 
+    const message::transaction& tx, size_t index_in_block, 
     uint64_t& value_in)
 {
+    static cppdb::statement find_transaction_id = sql_.prepare(
+        "SELECT transaction_id \
+        FROM transactions_parents \
+        WHERE \
+            block_id=? \
+            AND index_in_block=?"
+        );
+    find_transaction_id.reset();
+    find_transaction_id.bind(block_info_.block_id);
+    find_transaction_id.bind(index_in_block);
+    cppdb::result transaction_id_result = find_transaction_id.row();
+    BITCOIN_ASSERT(!transaction_id_result.empty());
+    size_t transaction_id = transaction_id_result.get<size_t>(0);
+
     BITCOIN_ASSERT(!is_coinbase(tx));
     for (size_t input_index = 0; input_index < tx.inputs.size(); ++input_index)
-        if (!connect_input(tx, input_index, value_in))
+        if (!connect_input(transaction_id, tx, input_index, value_in))
             return false;
     // select * from inputs as i1, inputs as i2 where i1.input_id=192 and
     // i1.previous_output_hash=i2.previous_output_hash and
@@ -634,7 +660,7 @@ bool postgresql_validate_block::validate_transaction(
 }
 
 bool postgresql_validate_block::connect_input(
-    const message::transaction& current_tx, 
+    size_t transaction_id, const message::transaction& current_tx, 
     size_t input_index, uint64_t& value_in)
 {
     BITCOIN_ASSERT(input_index < current_tx.inputs.size());
@@ -683,7 +709,8 @@ bool postgresql_validate_block::connect_input(
     script output_script = select_script(output_script_id);
     if (!output_script.run(input.input_script, current_tx, input_index))
         return false;
-    // TODO: check for previous spends
+    if (search_double_spends(transaction_id, input, input_index))
+        return false;
     value_in += output_value;
     if (value_in > max_money())
         return false;
@@ -735,6 +762,40 @@ size_t postgresql_validate_block::previous_block_depth(size_t previous_tx_id)
     cppdb::result result = hookup_block.row();
     BITCOIN_ASSERT(!result.empty());
     return result.get<size_t>(0);
+}
+
+bool postgresql_validate_block::search_double_spends(size_t transaction_id, 
+    const message::transaction_input& input, size_t input_index)
+{
+    // What is this input id?
+    //   WHERE transaction_id=... AND index_in_parent=...
+
+    // Has this output been already spent by another input?
+    std::string hash_repr = hexlify(input.hash);
+    static cppdb::statement search_spends = sql_.prepare(
+        "SELECT input_id \
+        FROM inputs \
+        WHERE \
+            previous_output_hash=? \
+            AND previous_output_index=? \
+            AND ( \
+                transaction_id != ? \
+                OR index_in_parent != ? \
+            )"
+        );
+    search_spends.reset();
+    search_spends.bind(hash_repr);
+    search_spends.bind(input.index);
+    search_spends.bind(transaction_id);
+    search_spends.bind(input_index);
+    cppdb::result other_spends = search_spends.query();
+    if (other_spends.empty())
+        return false;
+    log_fatal() << "Search other spends in other branches implemented!";
+    // Is that input in the same branch as us?
+    // - Loop through blocks containing that input
+    // - Check if in same branch
+    return true;
 }
 
 postgresql_blockchain::postgresql_blockchain(
@@ -833,7 +894,9 @@ void postgresql_blockchain::validate()
         {
             log_error() << "Block " << block_info.block_id
                 << " failed validation!";
+            // TODO: Should delete this branch
             exit(-1);
+            break;
         }
     }
     // TODO: Request new blocks + broadcast new blocks
@@ -847,6 +910,7 @@ void postgresql_blockchain::finalize_status(
     uint32_t bits_head = (current_block.bits >> (8*3)),
         bits_body = (current_block.bits & 0x00ffffff);
     // TODO: Should be prepared statements. Too lazy ATM
+    // TODO: This should be atomic
     sql_ <<
         "UPDATE chains \
         SET \
