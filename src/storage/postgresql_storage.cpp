@@ -43,6 +43,8 @@ postgresql_storage::postgresql_storage(std::string database,
         ";user=" + user + ";password=" + password)
 {
     blockchain_.reset(new postgresql_blockchain(sql_, service()));
+    // Organise/validate old blocks in case of unclean shutdown
+    strand()->post(std::bind(&postgresql_blockchain::start, blockchain_));
 }
 
 void postgresql_storage::store(const message::inv& inv,

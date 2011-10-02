@@ -107,6 +107,8 @@ class postgresql_blockchain
 {
 public:
     postgresql_blockchain(cppdb::session sql, service_ptr service);
+    // Only called during init. Otherwise use raise_barrier()
+    void start();
 
     void set_clearance(size_t clearance);
     void set_timeout(time_duration timeout);
@@ -116,7 +118,6 @@ public:
 private: 
     void reset_state();
     void start_exec(const boost::system::error_code& ec);
-    void start();
 
     void validate();
     void finalize_status(

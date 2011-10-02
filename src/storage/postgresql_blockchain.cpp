@@ -561,6 +561,7 @@ uint32_t postgresql_validate_block::previous_block_bits()
     previous.bind(block_info_.span_left);
     previous.bind(block_info_.span_right);
     cppdb::result result = previous.row();
+    BITCOIN_ASSERT(!result.empty());
     uint32_t bits_head = result.get<uint32_t>("bits_head"),
             bits_body = result.get<uint32_t>("bits_body");
     // TODO: Should use shared function with read_block(...)
@@ -806,7 +807,6 @@ postgresql_blockchain::postgresql_blockchain(
 {
     timeout_.reset(new deadline_timer(*service));
     reset_state();
-    start();
 }
 
 void postgresql_blockchain::set_clearance(size_t clearance)
