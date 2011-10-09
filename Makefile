@@ -12,18 +12,20 @@ BASE_MODULES= \
 	types.o \
 	script.o \
 	ripemd.o \
-	postgresql_storage.o \
 	block.o \
     elliptic_curve_key.o \
 	transaction.o \
 	error.o \
 	threaded_service.o \
-	postgresql_blockchain.o \
     validate.o \
 	big_number.o \
 	clock.o \
 	constants.o
+STORAGE_BASE_MODULES = \
+	postgresql_blockchain.o \
+	postgresql_storage.o
 MODULES=$(addprefix obj/, $(BASE_MODULES))
+STORAGE_MODULES=$(addprefix obj/, $(STORAGE_BASE_MODULES))
 #OBJECTS=$(addprefix obj/, $(notdir $(SOURCES:.cpp=.o)))
 LIBBITCOIN=-Llib lib/libbitcoin.a
 
@@ -35,13 +37,17 @@ LIBBITCOIN=-Llib lib/libbitcoin.a
 
 default: libbitcoin.so
 
-lib/libbitcoin.so: $(MODULES)
-	$(CXX) -shared $(MODULES) -o lib/libbitcoin.so
+lib/libbitcoin.so: $(MODULES) ($STORAGE_MODULES)
+	$(CXX) -shared $(MODULES) ($STORAGE_MODULES) -o lib/libbitcoin.so
 
-lib/libbitcoin.a: $(MODULES)
-	ar crf lib/libbitcoin.a $(MODULES)
+lib/libbitcoin.a: $(MODULES) ($STORAGE_MODULES)
+	ar crf lib/libbitcoin.a $(MODULES) ($STORAGE_MODULES)
 
 libbitcoin: lib/libbitcoin.so lib/libbitcoin.a
+
+libbitcoin_no_storage: $(MODULES)
+	ar crf lib/libbitcoin.a $(MODULES)
+	$(CXX) -shared $(MODULES) -o lib/libbitcoin.so
 
 obj/poller.o: examples/poller.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
