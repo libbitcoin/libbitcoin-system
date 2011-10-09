@@ -127,6 +127,7 @@ int main(int argc, const char** argv)
         log_info() << "poller [DBNAME] [DBUSER] [DBPASSWORD] [HOST:PORT] ...";
         return -1;
     }
+    log_info() << "Starting poller... CTRL-D (EOF) to exit.";
     std::string dbname = argv[1], dbuser = argv[2], dbpass = argv[3];
     poller_application_ptr app(new poller_application(dbname, dbuser, dbpass));
     for (int hosts_iter = 4; hosts_iter < argc; ++hosts_iter)
@@ -139,7 +140,12 @@ int main(int argc, const char** argv)
             app->start(args[0], boost::lexical_cast<unsigned int>(args[1]));
     }
     while (true)
-        sleep(1);
+    {
+        char n;
+        std::cin >> n;
+        if (std::cin.eof())
+            break;
+    }
     return 0;
 }
 
