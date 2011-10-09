@@ -68,7 +68,7 @@ bool kernel::recv_message(channel_handle chandle,
 {
     log_debug() << "nonce is " << message.nonce;
     log_debug() << "last block is " << message.start_height;
-    log_debug() << hexlify(message.addr_you.ip_addr);
+    log_debug() << pretty_hex(message.addr_you.ip_addr);
     network_component_->send(chandle, message::verack());
     return true;
 }
@@ -81,8 +81,8 @@ bool kernel::recv_message(channel_handle, const message::verack&)
 
 bool kernel::recv_message(channel_handle, const message::addr& message)
 {
-    for (const message::net_addr addr: message.addr_list)
-        log_debug() << hexlify(addr.ip_addr) << ' ' << addr.port;
+    //for (const message::net_addr addr: message.addr_list)
+    //    log_debug() << pretty_hex(addr.ip_addr) << ' ' << addr.port;
     return true;
 }
 
@@ -93,14 +93,6 @@ bool kernel::recv_message(channel_handle, const message::inv& message)
     {
         if (curr_inv.type == message::inv_type::none)
             return false;
-
-        if (curr_inv.type == message::inv_type::error)
-            log_debug() << "ERROR";
-        else if (curr_inv.type == message::inv_type::transaction)
-            log_debug() << "MSG_TX";
-        else if (curr_inv.type == message::inv_type::block)
-            log_debug() << "MSG_BLOCK";
-        log_debug() << hexlify(curr_inv.hash);
 
         // Push only block invs to the request queue
         if (curr_inv.type == message::inv_type::block)

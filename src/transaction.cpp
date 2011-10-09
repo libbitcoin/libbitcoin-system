@@ -13,6 +13,7 @@ typedef std::vector<hash_digest> hash_list;
 hash_digest hash_transaction_impl(const message::transaction& transaction, 
         uint32_t* hash_type_code)
 {
+    // TODO: Should use the dialect code here?
     serializer key;
     key.write_4_bytes(transaction.version);
     key.write_var_uint(transaction.inputs.size());
@@ -89,7 +90,7 @@ std::string string_repr(const message::transaction_input& input)
     std::ostringstream ss;
     ss 
         << "\tindex = " << input.index << "\n"
-        << "\t" << input.input_script.string_repr() << "\n"
+        << "\t" << input.input_script.pretty() << "\n"
         << "\tsequence = " << input.sequence << "\n";
     return ss.str();
 }
@@ -98,7 +99,7 @@ std::string string_repr(const message::transaction_output& output)
 {
     std::ostringstream ss;
     ss << "\tvalue = " << output.value << "\n"
-        << "\t" << output.output_script.string_repr() << "\n";
+        << "\t" << output.output_script.pretty() << "\n";
     return ss.str();
 }
 

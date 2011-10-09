@@ -1,21 +1,14 @@
 #include <bitcoin/storage/postgresql_storage.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/sha256.hpp>
+#include <bitcoin/util/logger.hpp>
 #include <bitcoin/transaction.hpp>
 #include <iostream>
 #include <memory>
 
 using std::shared_ptr;
-using libbitcoin::postgresql_storage;
+using namespace libbitcoin;
 typedef shared_ptr<postgresql_storage> psql_ptr;
-
-void display_hash(libbitcoin::hash_digest h)
-{
-    std::cout << std::hex;
-    for (int v: h)
-        std::cout << v << ' ';
-    std::cout << std::dec << '\n';
-}
 
 void recv_block(std::error_code ec, libbitcoin::message::block block)
 {
@@ -28,7 +21,6 @@ void recv_block(std::error_code ec, libbitcoin::message::block block)
     libbitcoin::hash_digest h1 = libbitcoin::hash_transaction(block.transactions[0]),
             h2 = libbitcoin::hash_transaction(block.transactions[1]);
     libbitcoin::hash_digest merkle = libbitcoin::generate_merkle_root(block.transactions);
-    display_hash(merkle);
     BITCOIN_ASSERT((merkle == libbitcoin::hash_digest{0x7d, 0xac, 0x2c, 0x56, 0x66, 0x81, 0x5c, 0x17, 0xa3, 0xb3, 0x64, 0x27, 0xde, 0x37, 0xbb, 0x9d, 0x2e, 0x2c, 0x5c, 0xce, 0xc3, 0xf8, 0x63, 0x3e, 0xb9, 0x1a, 0x42, 0x05, 0xcb, 0x4c, 0x10, 0xff}));
 }
 
@@ -46,7 +38,7 @@ void test_build_merkle()
     tx_hashes.push_back(libbitcoin::hash_digest{0x63, 0x59, 0xf0, 0x86, 0x81, 0x71, 0xb1, 0xd1, 0x94, 0xcb, 0xee, 0x1a, 0xf2, 0xf1, 0x6e, 0xa5, 0x98, 0xae, 0x8f, 0xad, 0x66, 0x6d, 0x9b, 0x01, 0x2c, 0x8e, 0xd2, 0xb7, 0x9a, 0x23, 0x6e, 0xc4});
     tx_hashes.push_back(libbitcoin::hash_digest{0xe9, 0xa6, 0x68, 0x45, 0xe0, 0x5d, 0x5a, 0xbc, 0x0a, 0xd0, 0x4e, 0xc8, 0x0f, 0x77, 0x4a, 0x7e, 0x58, 0x5c, 0x6e, 0x8d, 0xb9, 0x75, 0x96, 0x2d, 0x06, 0x9a, 0x52, 0x21, 0x37, 0xb8, 0x0c, 0x1d});
     libbitcoin::hash_digest merkle_root = libbitcoin::build_merkle_tree(tx_hashes);
-    display_hash(merkle_root);
+    BITCOIN_ASSERT((merkle_root == libbitcoin::hash_digest{0xf3, 0xe9, 0x47, 0x42, 0xac, 0xa4, 0xb5, 0xef, 0x85, 0x48, 0x8d, 0xc3, 0x7c, 0x6, 0xc3, 0x28, 0x22, 0x95, 0xff, 0xec, 0x96, 0x9, 0x94, 0xb2, 0xc0, 0xd5, 0xac, 0x2a, 0x25, 0xa9, 0x57, 0x66}));
 }
 
 void test_match_merkles(std::error_code ec, libbitcoin::message::block block)
@@ -58,9 +50,9 @@ int main()
 {
     test_build_merkle();
 
-    psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
-    psql->fetch_block_by_depth(170, recv_block);
-    psql->fetch_block_by_depth(2, test_match_merkles);
+    //psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
+    //psql->fetch_block_by_depth(170, recv_block);
+    //psql->fetch_block_by_depth(2, test_match_merkles);
     return 0;
 }
 

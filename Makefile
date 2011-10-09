@@ -65,6 +65,14 @@ bin/tests/script-test: libbitcoin obj/script-test.o
 
 script-test: bin/tests/script-test
 
+obj/merkle.o: tests/merkle.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/merkle: libbitcoin obj/merkle.o
+	$(CXX) -o bin/tests/merkle obj/merkle.o $(LIBBITCOIN) $(LIBS)
+
+merkle: bin/tests/merkle
+
 
 block: src/block.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
@@ -94,6 +102,9 @@ obj/dialect.o: src/dialect.cpp include/bitcoin/dialect.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/channel.o: src/network/channel.cpp src/network/channel.hpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+obj/benchmark.o: src/util/benchmark.cpp include/bitcoin/util/benchmark.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/sha256.o: src/util/sha256.cpp include/bitcoin/util/sha256.hpp
@@ -163,14 +174,6 @@ bin/tests/types-test: obj/types.o obj/types-test.o
 	$(CXX) -o bin/tests/types-test obj/types.o obj/types-test.o $(LIBS)
 
 types-test: bin/tests/types-test
-
-obj/merkle.o: tests/merkle.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
-
-bin/tests/merkle: obj/merkle.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/block.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/error.o obj/threaded_service.o obj/postgresql_blockchain.o obj/validate.o obj/big_number.o obj/dialect.o obj/constants.o obj/clock.o 
-	$(CXX) -o bin/tests/merkle obj/merkle.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/block.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/error.o obj/threaded_service.o  obj/postgresql_blockchain.o obj/validate.o obj/big_number.o obj/dialect.o obj/constants.o obj/clock.o $(LIBS)
-
-merkle: bin/tests/merkle
 
 obj/transaction.o: src/transaction.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<

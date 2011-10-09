@@ -14,7 +14,7 @@
 using libbitcoin::data_chunk;
 using libbitcoin::hash_digest;
 using libbitcoin::big_number;
-using libbitcoin::hexlify;
+using libbitcoin::pretty_hex;
 using libbitcoin::log_debug;
 
 void test()

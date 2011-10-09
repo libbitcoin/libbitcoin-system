@@ -2,6 +2,7 @@
 #include <bitcoin/script.hpp>
 #include <bitcoin/util/ripemd.hpp>
 #include <bitcoin/util/assert.hpp>
+#include <bitcoin/util/logger.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/transaction.hpp>
 #include <iostream>
@@ -11,7 +12,9 @@
 using std::shared_ptr;
 using libbitcoin::postgresql_storage;
 using libbitcoin::hash_transaction;
-using libbitcoin::hexlify;
+using libbitcoin::pretty_hex;
+using libbitcoin::log_debug;
+using libbitcoin::data_chunk;
 typedef shared_ptr<postgresql_storage> psql_ptr;
 
 void ripemd_test()
@@ -31,7 +34,7 @@ void test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb()
     libbitcoin::data_chunk raw_script{0x76, 0xa9, 0x14, 0xe7, 0x58, 0x5a, 0x2d, 0xc9, 0xd9, 0xcb, 0x01, 0xd5, 0x47, 0x1d, 0xec, 0xf2, 0x39, 0xeb, 0xbd, 0xdd, 0xb6, 0x9b, 0x32, 0x88, 0xac};
     libbitcoin::script script = libbitcoin::parse_script(raw_input);
     libbitcoin::script script_out = libbitcoin::parse_script(raw_script);
-    std::cout << script.string_repr() << "\n";
+    std::cout << script.pretty() << "\n";
     libbitcoin::message::transaction tx;
     std::cout << "Returned: " << (script_out.run(script, tx, 0) ? "true" : "false") << "\n";
 
@@ -52,8 +55,8 @@ void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::mess
     }
     libbitcoin::script script = input.input_script;
     BITCOIN_ASSERT(input.hash == tx.inputs[0].hash);
-    std::cout << hexlify(hash_transaction(tx)) << "\n";
-    std::cout << script.string_repr() << "\n";
+    std::cout << pretty_hex(hash_transaction(tx)) << "\n";
+    std::cout << script.pretty() << "\n";
     std::cout << "Returned: " << (output.output_script.run(script, tx, 0) ? "true" : "false") << "\n";
 }
 
@@ -70,12 +73,19 @@ void recv_block(psql_ptr psql, std::error_code ec, libbitcoin::message::block bl
     psql->fetch_output_by_hash(hash, index, std::bind(run_script_from_block, block.transactions[1], input, std::placeholders::_1, std::placeholders::_2));
 }
 
+void parse_tests()
+{
+    std::string script_look = "dup hash160 [ be ef aa 22 99 11 01 ab cd ef ] equalverify checksig";
+    BITCOIN_ASSERT(libbitcoin::script_from_pretty(script_look).pretty() == script_look);
+}
+
 int main()
 {
     //test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb();
-    psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
+    //psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
     //psql->fetch_block_by_depth(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
-    sleep(6);
+    //sleep(6);
+    parse_tests();
     return 0;
 }
 
