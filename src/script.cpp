@@ -227,19 +227,19 @@ bool script::matches_template(operation_stack templ) const
     return templ.size() == 0;
 }
 
-std::string script::string_repr() const
+std::string script::pretty() const
 {
     std::ostringstream ss;
-    for (const operation op: operations_)
+    for (auto it = operations_.begin(); it != operations_.end(); ++it)
     {
+        if (it != operations_.begin())
+            ss << " ";
+        const operation& op = *it;
         if (op.data.size() == 0)
-            ss << opcode_to_string(op.code) << " ";
+            ss << opcode_to_string(op.code);
         else
         {
-            ss << "[ ";
-            for (byte b: op.data)
-                ss << std::hex << int(b) << " ";
-            ss << "] ";
+            ss << "[ " << pretty_hex(op.data) << " ]";
         }
     }
     return ss.str();
@@ -352,6 +352,40 @@ data_chunk save_script(const script& scr)
         extend_data(raw_script, op.data);
     }
     return raw_script;
+}
+
+script script_from_pretty(const std::string& pretty_script)
+{
+    script script_object;
+    std::stringstream splitter;
+    splitter << pretty_script;
+    std::string token;
+    while (splitter >> token)
+    {
+        operation op;
+        if (token == "[")
+        {
+            while ((splitter >> token) && token != "]")
+            {
+                std::istringstream to_int(token);
+                int value;
+                to_int >> std::hex >> value; 
+                op.data.push_back(value);
+            }
+            if (token != "]")
+            {
+                log_warning() << "Premature end of script.";
+                return script();
+            }
+            op.code = opcode::special;
+        }
+        else
+        {
+            op.code = string_to_opcode(token);
+        }
+        script_object.push_operation(op);
+    }
+    return script_object;
 }
 
 } // libbitcoin

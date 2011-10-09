@@ -398,31 +398,6 @@ postgresql_reader::postgresql_reader(cppdb::session sql)
 {
 }
 
-script postgresql_reader::select_script(size_t script_id)
-{
-    static cppdb::statement statement = sql_.prepare(
-        "SELECT \
-            opcode, \
-            data \
-        FROM operations \
-        WHERE script_id=? \
-        ORDER BY operation_id ASC"
-        );
-    statement.reset();
-    statement.bind(script_id);
-    cppdb::result result = statement.query();
-    script scr;
-    while (result.next())
-    {
-        operation op;
-        op.code = string_to_opcode(result.get<std::string>("opcode"));
-        if (!result.is_null("data"))
-            op.data = deserialize_bytes(result.get<std::string>("data"));
-        scr.push_operation(op);
-    }
-    return scr;
-}
-
 message::transaction_input_list postgresql_reader::select_inputs(
         size_t transaction_id)
 {
@@ -440,10 +415,10 @@ message::transaction_input_list postgresql_reader::select_inputs(
     {
         message::transaction_input input;
         input.hash = 
-            deserialize_hash(result.get<std::string>("previous_output_hash"));
+            hash_from_pretty(result.get<std::string>("previous_output_hash"));
         input.index = result.get<uint32_t>("previous_output_index");
-        size_t script_id = result.get<size_t>("script_id");
-        input.input_script = select_script(script_id);
+        input.input_script = 
+            script_from_pretty(result.get<std::string>("script"));
         input.sequence = result.get<uint32_t>("sequence");
         inputs.push_back(input);
     }
@@ -468,8 +443,8 @@ message::transaction_output_list postgresql_reader::select_outputs(
     {
         message::transaction_output output;
         output.value = result.get<uint64_t>("internal_value");
-        size_t script_id = result.get<size_t>("script_id");
-        output.output_script = select_script(script_id);
+        output.output_script = 
+            script_from_pretty(result.get<std::string>("script"));
         outputs.push_back(output);
     }
     return outputs;
@@ -504,16 +479,18 @@ message::block postgresql_reader::read_block(cppdb::result block_result)
     block.nonce = block_result.get<uint32_t>("nonce");
 
     block.prev_block = 
-            deserialize_hash(block_result.get<std::string>("prev_block_hash"));
+            hash_from_pretty(block_result.get<std::string>("prev_block_hash"));
     block.merkle_root = 
-            deserialize_hash(block_result.get<std::string>("merkle"));
+            hash_from_pretty(block_result.get<std::string>("merkle"));
 
     static cppdb::statement transactions_statement = sql_.prepare(
         "SELECT transactions.* \
-        FROM transactions_parents \
-        JOIN transactions \
-        ON transactions.transaction_id=transactions_parents.transaction_id \
-        WHERE block_id=? \
+        FROM \
+            transactions_parents, \
+            transactions \
+        WHERE \
+            block_id=? \
+            AND transactions.transaction_id=transactions_parents.transaction_id \
         ORDER BY index_in_block ASC"
         );
     transactions_statement.reset();
@@ -666,9 +643,11 @@ bool postgresql_validate_block::connect_input(
 {
     BITCOIN_ASSERT(input_index < current_tx.inputs.size());
     const message::transaction_input& input = current_tx.inputs[input_index];
-    std::string hash_repr = hexlify(input.hash);
+    std::string hash_repr = pretty_hex(input.hash);
     static cppdb::statement find_previous_tx = sql_.prepare(
-        "SELECT transaction_id \
+        "SELECT \
+            transaction_id, \
+            coinbase \
         FROM transactions \
         WHERE transaction_hash=?"
         );
@@ -676,13 +655,16 @@ bool postgresql_validate_block::connect_input(
     find_previous_tx.bind(hash_repr);
     cppdb::result previous_tx = find_previous_tx.row();
     if (previous_tx.empty())
+    {
+        log_error(log_domain::validation) 
+            << "Couldn't find the previous transaction " << hash_repr;
         return false;
+    }
     size_t previous_tx_id = previous_tx.get<size_t>(0);
     static cppdb::statement find_previous_output = sql_.prepare(
         "SELECT \
-            output_id, \
-            script_id, \
-            sql_to_internal(value) \
+            script, \
+            sql_to_internal(value) AS internal_value \
         FROM outputs \
         WHERE \
             transaction_id=? \
@@ -693,13 +675,16 @@ bool postgresql_validate_block::connect_input(
     find_previous_output.bind(input.index);
     cppdb::result previous_output = find_previous_output.row();
     if (previous_output.empty())
+    {
+        log_error(log_domain::validation) 
+            << "Couldn't find the previous output " << input.index 
+            << " in transaction" << hash_repr;
         return false;
-    size_t output_id = previous_output.get<size_t>(0);
-    size_t output_script_id = previous_output.get<size_t>(1);
-    uint64_t output_value = previous_output.get<uint64_t>(2);
+    }
+    uint64_t output_value = previous_output.get<uint64_t>("internal_value");
     if (output_value > max_money())
         return false;
-    if (is_coinbase_transaction(previous_tx_id))
+    if (previous_tx.get<std::string>("coinbase") == "t")
     {
         // Check whether generated coin has sufficiently matured
         size_t depth_difference =
@@ -707,39 +692,22 @@ bool postgresql_validate_block::connect_input(
         if (depth_difference < coinbase_maturity)
             return false;
     }
-    script output_script = select_script(output_script_id);
+    script output_script = 
+        script_from_pretty(previous_output.get<std::string>("script"));
     if (!output_script.run(input.input_script, current_tx, input_index))
+    {
+        log_error(log_domain::validation) << "Script failed evaluation";
         return false;
+    }
     if (search_double_spends(transaction_id, input, input_index))
+    {
+        log_error(log_domain::validation) << "Double spent";
         return false;
+    }
     value_in += output_value;
     if (value_in > max_money())
         return false;
     return true;
-}
-
-bool postgresql_validate_block::is_coinbase_transaction(size_t tx_id)
-{
-    static cppdb::statement fetch_params = sql_.prepare(
-        "SELECT \
-            previous_output_hash, \
-            previous_output_index \
-        FROM inputs \
-        WHERE transaction_id=?"
-        );
-    fetch_params.reset();
-    fetch_params.bind(tx_id);
-    cppdb::result params = fetch_params.query();
-    message::transaction partial;
-    while (params.next())
-    {
-        message::transaction_input input;
-        input.hash =
-            deserialize_hash(params.get<std::string>(0));
-        input.index = params.get<size_t>(1);
-        partial.inputs.push_back(input);
-    }
-    return is_coinbase(partial);
 }
 
 size_t postgresql_validate_block::previous_block_depth(size_t previous_tx_id)
@@ -772,9 +740,9 @@ bool postgresql_validate_block::search_double_spends(size_t transaction_id,
     //   WHERE transaction_id=... AND index_in_parent=...
 
     // Has this output been already spent by another input?
-    std::string hash_repr = hexlify(input.hash);
+    std::string hash_repr = pretty_hex(input.hash);
     static cppdb::statement search_spends = sql_.prepare(
-        "SELECT input_id \
+        "SELECT 1 \
         FROM inputs \
         WHERE \
             previous_output_hash=? \
@@ -858,7 +826,7 @@ void postgresql_blockchain::start_exec(const boost::system::error_code& ec)
 }
 
 void postgresql_blockchain::start()
-{
+{                     
     organize();
     validate();
 }

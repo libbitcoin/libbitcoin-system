@@ -60,7 +60,7 @@ public:
     bool run(script input_script,
         const message::transaction& parent_tx, uint32_t input_index);
 
-    std::string string_repr() const;
+    std::string pretty() const;
     transaction_type type() const;
 
     const operation_stack& operations() const;
@@ -92,6 +92,8 @@ opcode string_to_opcode(std::string code_repr);
 // TODO: Should be inside the dialect imlementation eventually
 script parse_script(const data_chunk& raw_script);
 data_chunk save_script(const script& scr);
+
+script script_from_pretty(const std::string& pretty_script);
 
 } // libbitcoin
 

@@ -15,9 +15,6 @@ using boost::posix_time::seconds;
 using boost::posix_time::time_duration;
 using std::placeholders::_1;
 
-data_chunk deserialize_bytes(std::string byte_stream);
-hash_digest deserialize_hash(std::string byte_stream);
-
 class postgresql_organizer
 {
 protected:
@@ -58,7 +55,6 @@ public:
     postgresql_reader(cppdb::session sql);
 
     message::block read_block(cppdb::result block_result);
-    script select_script(size_t script_id);
 
     postgresql_block_info read_block_info(cppdb::result result);
 
@@ -90,7 +86,6 @@ private:
     bool connect_input(size_t transaction_id, 
         const message::transaction& current_tx, 
         size_t input_index, uint64_t& value_in);
-    bool is_coinbase_transaction(size_t tx_id);
     size_t previous_block_depth(size_t previous_tx_id);
     bool search_double_spends(size_t transaction_id, 
         const message::transaction_input& input, size_t input_index);

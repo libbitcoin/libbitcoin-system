@@ -9,34 +9,6 @@
 
 namespace libbitcoin {
 
-data_chunk deserialize_bytes(std::string byte_stream)
-{
-    std::stringstream ss;
-    ss << std::hex << byte_stream;
-    data_chunk stack;
-    while (ss.good())
-    {
-        int val;
-        ss >> val;
-        stack.push_back(val);
-    }
-    return stack;
-}
-
-hash_digest deserialize_hash(std::string byte_stream)
-{
-    std::stringstream ss;
-    ss << std::hex << byte_stream;
-    hash_digest hash;
-    for (size_t i = 0; i < hash.size(); ++i)
-    {
-        int val;
-        ss >> val;
-        hash[i] = val;
-    }
-    return hash;
-}
-
 postgresql_storage::postgresql_storage(std::string database, 
         std::string user, std::string password)
   : sql_(std::string("postgresql:dbname=") + database + 
@@ -67,57 +39,24 @@ void postgresql_storage::do_store_inv(const message::inv& inv,
             stat.bind("transaction");
         else if (ivv.type == message::inv_type::block)
             stat.bind("block");
-        std::string byte_stream = hexlify(ivv.hash);
+        std::string byte_stream = pretty_hex(ivv.hash);
         stat.bind(byte_stream);
         stat.exec();
     }
     handle_store(std::error_code());
 }
 
-void postgresql_storage::insert(operation operation, size_t script_id)
-{
-    std::string opcode_repr = opcode_to_string(operation.code);
-    cppdb::statement stat = sql_ <<
-        "INSERT INTO operations (opcode, script_id, data) \
-        VALUES (?, ?, ?)";
-    stat.bind(opcode_repr);
-    stat.bind(script_id);
-    if (operation.data.size() == 0)
-    {
-        stat.bind_null();
-        stat.exec();
-    }
-    else
-    {
-        // Scoping rules. String needs to stay around for exec
-        std::string byte_stream = hexlify(operation.data);
-        stat.bind(byte_stream);
-        stat.exec();
-    }
-}
-
-size_t postgresql_storage::insert_script(operation_stack operations)
-{
-    cppdb::result result = sql_ <<
-        "SELECT nextval('script_sequence')" << cppdb::row;
-    size_t script_id = result.get<size_t>(0);
-    for (operation operation: operations)
-        insert(operation, script_id);
-    return script_id;
-}
-
 void postgresql_storage::insert(const message::transaction_input& input,
         size_t transaction_id, size_t index_in_parent)
 {
-    size_t script_id = insert_script(input.input_script.operations());
-    std::string hash = hexlify(input.hash);
+    std::string hash = pretty_hex(input.hash);
     sql_ <<
-        "INSERT INTO inputs (input_id, transaction_id, index_in_parent, \
-            script_id, previous_output_hash, previous_output_index, sequence) \
-        VALUES (DEFAULT, ?, ?, ?, ?, ?, ?)"
+        "INSERT INTO inputs (transaction_id, index_in_parent, \
+            script, previous_output_hash, previous_output_index, sequence) \
+        VALUES (?, ?, ?, ?, ?, ?)"
         << transaction_id
         << index_in_parent
-        << script_id
+        << input.input_script.pretty()
         << hash
         << input.index
         << input.sequence
@@ -127,31 +66,29 @@ void postgresql_storage::insert(const message::transaction_input& input,
 void postgresql_storage::insert(const message::transaction_output& output,
         size_t transaction_id, size_t index_in_parent)
 {
-    size_t script_id = insert_script(output.output_script.operations());
     sql_ <<
-        "INSERT INTO outputs (output_id, transaction_id, index_in_parent, \
-            script_id, value, output_type, address) \
-        VALUES (DEFAULT, ?, ?, ?, internal_to_sql(?), ?, ?)"
+        "INSERT INTO outputs ( \
+            transaction_id, index_in_parent, script, value) \
+        VALUES (?, ?, ?, internal_to_sql(?))"
         << transaction_id
         << index_in_parent
-        << script_id
+        << output.output_script.pretty()
         << output.value
-        << "other"
-        << cppdb::null
         << cppdb::exec;
 }
 
 size_t postgresql_storage::insert(const message::transaction& transaction)
 {
     hash_digest transaction_hash = hash_transaction(transaction);
-    std::string transaction_hash_repr = hexlify(transaction_hash);
+    std::string transaction_hash_repr = pretty_hex(transaction_hash);
     // We use special function to insert txs. 
     // Some blocks contain duplicates. See SQL for more details.
     cppdb::result result = sql_ <<
-        "SELECT insert_transaction(?, ?, ?)"
+        "SELECT insert_transaction(?, ?, ?, ?)"
         << transaction_hash_repr
         << transaction.version
         << transaction.locktime
+        << is_coinbase(transaction)
         << cppdb::row;
     size_t transaction_id = result.get<size_t>(0);
     if (transaction_id == 0)
@@ -197,9 +134,9 @@ void postgresql_storage::do_store_block(const message::block& block,
         store_handler handle_store)
 {
     hash_digest block_hash = hash_block_header(block);
-    std::string block_hash_repr = hexlify(block_hash),
-            prev_block_repr = hexlify(block.prev_block),
-            merkle_repr = hexlify(block.merkle_root);
+    std::string block_hash_repr = pretty_hex(block_hash),
+            prev_block_repr = pretty_hex(block.prev_block),
+            merkle_repr = pretty_hex(block.merkle_root);
 
     cppdb::result result = sql_ <<
         "SELECT 1 FROM blocks WHERE block_hash=?"
@@ -267,6 +204,9 @@ void postgresql_storage::do_store_block(const message::block& block,
                 VALUES (?, ?, ?)"
             << transaction_id << block_id << i << cppdb::exec;
     }
+    // Finalise block
+    sql_ << "UPDATE blocks SET status='orphan' WHERE block_id=?"
+        << block_id << cppdb::exec;
     blockchain_->raise_barrier();
     handle_store(std::error_code());
 }
@@ -331,7 +271,7 @@ void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash,
             AND span_left=0 \
             AND span_left=0"
         );
-    std::string block_hash_repr = hexlify(block_hash);
+    std::string block_hash_repr = pretty_hex(block_hash);
     block_statement.reset();
     block_statement.bind(block_hash_repr);
     cppdb::result block_result = block_statement.row();
@@ -405,7 +345,7 @@ void postgresql_storage::do_fetch_block_locator(
     while (block_hashes_result.next())
     {
         std::string block_hash_repr = block_hashes_result.get<std::string>(0);
-        locator.push_back(deserialize_hash(block_hash_repr));
+        locator.push_back(hash_from_pretty(block_hash_repr));
     }
     handle_fetch(std::error_code(), locator);
 }
@@ -421,7 +361,7 @@ void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash,
         uint32_t index, fetch_handler_output handle_fetch)
 {
     message::transaction_output output;
-    std::string transaction_hash_repr = hexlify(transaction_hash);
+    std::string transaction_hash_repr = pretty_hex(transaction_hash);
     cppdb::result result = sql_ <<
         "SELECT \
             *, \
@@ -442,8 +382,8 @@ void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash,
         return;
     }
     output.value = result.get<uint64_t>("internal_value");
-    size_t script_id = result.get<size_t>("script_id");
-    output.output_script = blockchain_->select_script(script_id);
+    output.output_script =
+        script_from_pretty(result.get<std::string>("script"));
     handle_fetch(std::error_code(), output);
 }
 
@@ -457,7 +397,7 @@ void postgresql_storage::block_exists_by_hash(hash_digest block_hash,
 void postgresql_storage::do_block_exists_by_hash(hash_digest block_hash,
         exists_handler handle_exists)
 {
-    std::string block_hash_repr = hexlify(block_hash);
+    std::string block_hash_repr = pretty_hex(block_hash);
     cppdb::result block_result = sql_ <<
         "SELECT 1 \
         FROM blocks \

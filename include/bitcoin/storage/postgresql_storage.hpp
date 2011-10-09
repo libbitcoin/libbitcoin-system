@@ -61,8 +61,6 @@ private:
 
     // ------------
 
-    void insert(operation oper, size_t script_id);
-    size_t insert_script(operation_stack operations);
     void insert(const message::transaction_input& input,
             size_t transaction_id, size_t index_in_parent);
     void insert(const message::transaction_output& output,

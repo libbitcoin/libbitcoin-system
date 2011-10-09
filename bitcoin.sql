@@ -6,8 +6,6 @@ DROP DOMAIN IF EXISTS amount_type CASCADE;
 CREATE DOMAIN amount_type AS NUMERIC(16, 8) CHECK (VALUE < 21000000 AND VALUE >= 0);
 DROP DOMAIN IF EXISTS hash_type CASCADE;
 CREATE DOMAIN hash_type AS VARCHAR(95);  -- 32*3 because "aa 0f ca ..."
-DROP DOMAIN IF EXISTS address_type CASCADE;
-CREATE DOMAIN address_type AS VARCHAR(110);
 
 CREATE OR REPLACE FUNCTION internal_to_sql(value BIGINT) RETURNS amount_type AS $$
     BEGIN
@@ -61,6 +59,7 @@ CREATE SEQUENCE blocks_space_sequence;
 -- Other spaces contain orphan chains
 
 CREATE TYPE block_status_type AS ENUM (
+    'new',
     'orphan',
     'valid'
 );
@@ -81,7 +80,7 @@ CREATE TABLE blocks (
     bits_body INT NOT NULL,
     nonce BIGINT NOT NULL,
     when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status block_status_type NOT NULL DEFAULT 'orphan'
+    status block_status_type NOT NULL DEFAULT 'new'
 );
 
 -- Genesis block
@@ -118,6 +117,7 @@ INSERT INTO blocks (
 CREATE INDEX ON blocks USING btree (block_hash);
 CREATE INDEX ON blocks (space);
 CREATE INDEX ON blocks (depth);
+CREATE INDEX ON blocks (status, space);
 
 DROP TABLE IF EXISTS chains;
 DROP VIEW IF EXISTS main_chain;
@@ -187,18 +187,20 @@ DROP TABLE IF EXISTS spends;
 DROP SEQUENCE IF EXISTS transactions_transaction_id_sequence;
 DROP SEQUENCE IF EXISTS outputs_output_id_sequence;
 DROP SEQUENCE IF EXISTS inputs_input_id_sequence;
-DROP TYPE IF EXISTS output_transaction_type;
 
 -- Block 91842 contains the same coinbase as block 91812
 -- Same for blocks 91880 and 91722
 -- We use this function to create new txs.
-DROP FUNCTION IF EXISTS insert_transaction(hash_type, BIGINT, BIGINT);
-CREATE OR REPLACE FUNCTION insert_transaction(tx_hash hash_type, tx_version BIGINT, tx_locktime BIGINT)
+DROP FUNCTION IF EXISTS insert_transaction(hash_type, BIGINT, BIGINT, BOOL);
+CREATE OR REPLACE FUNCTION insert_transaction(tx_hash hash_type, tx_version BIGINT, tx_locktime BIGINT, tx_coinbase BOOL)
 RETURNS INT AS $$
 DECLARE
  retval INT;
 BEGIN
-    INSERT INTO transactions(transaction_hash, version, locktime) VALUES (tx_hash, tx_version, tx_locktime) RETURNING transaction_id INTO retval;
+    INSERT INTO transactions(transaction_hash, version, locktime, coinbase) 
+    VALUES (tx_hash, tx_version, tx_locktime, tx_coinbase) 
+    RETURNING transaction_id INTO retval;
+
     RETURN retval;
 
     EXCEPTION
@@ -210,8 +212,6 @@ $$ LANGUAGE plpgsql;
 CREATE SEQUENCE transactions_transaction_id_sequence;
 CREATE SEQUENCE outputs_output_id_sequence;
 CREATE SEQUENCE inputs_input_id_sequence;
-
-CREATE TYPE output_transaction_type AS ENUM ('normal', 'generate', 'other');
 
 CREATE TABLE transactions_parents (
     transaction_id INT NOT NULL,
@@ -227,17 +227,19 @@ CREATE TABLE transactions (
     transaction_hash hash_type NOT NULL UNIQUE,
     version BIGINT NOT NULL,
     locktime BIGINT NOT NULL,
+    coinbase BOOL NOT NULL,
     when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+DROP DOMAIN IF EXISTS script_type CASCADE;
+CREATE DOMAIN script_type AS VARCHAR(500);
 
 CREATE TABLE outputs (
     output_id INT NOT NULL DEFAULT NEXTVAL('outputs_output_id_sequence') PRIMARY KEY,
     transaction_id INT NOT NULL,
     index_in_parent BIGINT NOT NULL,
-    script_id INT NOT NULL,
-    value amount_type NOT NULL,
-    output_type output_transaction_type NOT NULL,
-    address address_type
+    script script_type NOT NULL,
+    value amount_type NOT NULL
 );
 
 CREATE INDEX ON outputs (transaction_id);
@@ -246,7 +248,7 @@ CREATE TABLE inputs (
     input_id INT NOT NULL DEFAULT NEXTVAL('inputs_input_id_sequence') PRIMARY KEY,
     transaction_id INT NOT NULL,
     index_in_parent INT NOT NULL,
-    script_id INT NOT NULL,
+    script script_type NOT NULL,
     previous_output_hash hash_type NOT NULL,
     previous_output_index BIGINT NOT NULL,
     sequence BIGINT NOT NULL
@@ -254,51 +256,4 @@ CREATE TABLE inputs (
 
 CREATE INDEX ON inputs (transaction_id);
 CREATE INDEX ON inputs (previous_output_hash);
-
--- We can find all unspent ouputs using:
--- SELECT a.* FROM a LEFT JOIN b ON a.id = b.id WHERE b.id IS NULL;
-CREATE TABLE spends (
-    output_id INT NOT NULL,
-    input_id INT NOT NULL,
-    block_id INT NOT NULL
-);
-
-CREATE INDEX ON spends (output_id);
-
----------------------------------------------------------------------------
--- SCRIPTS
----------------------------------------------------------------------------
-
--- use sequence for script_id
-
-DROP TABLE IF EXISTS operations;
-DROP SEQUENCE IF EXISTS operations_script_id_sequence;
-DROP SEQUENCE IF EXISTS script_sequence;
-DROP TYPE IF EXISTS opcode_type;
-DROP TYPE IF EXISTS parent_ident_type;
-
-CREATE SEQUENCE operations_script_id_sequence;
-CREATE SEQUENCE script_sequence;
-
-CREATE TYPE opcode_type AS ENUM (
-    'special',
-    'pushdata1',
-    'pushdata2',
-    'pushdata4',
-    'nop',
-    'dup',
-    'hash160',
-    'equalverify',
-    'checksig'
-);
-CREATE TYPE parent_ident_type AS ENUM ('input', 'output');
-
-CREATE TABLE operations (
-    operation_id INT NOT NULL DEFAULT NEXTVAL('operations_script_id_sequence') PRIMARY KEY,
-    script_id INT NOT NULL,
-    opcode opcode_type NOT NULL,
-    data varchar(255)
-);
-
-CREATE INDEX ON operations (script_id);
 

@@ -78,7 +78,7 @@ data_chunk uncast_type(T val, bool reverse=false)
 }
 
 template<typename T>
-std::string hexlify(T data)
+std::string pretty_hex(T data)
 {
     std::stringstream ss;
     ss << std::hex;
@@ -92,15 +92,8 @@ std::string hexlify(T data)
     return ret;
 }
 
-template<typename Value>
-Value range_constraint(Value value, Value minimum, Value maximum)
-{
-    if (value < minimum)
-        return minimum;
-    else if (value > maximum)
-        return maximum;
-    return value;
-}
+data_chunk bytes_from_pretty(std::string byte_stream);
+hash_digest hash_from_pretty(std::string byte_stream);
 
 } // libbitcoin
 
