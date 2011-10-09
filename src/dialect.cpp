@@ -12,7 +12,7 @@ namespace libbitcoin {
 
 data_chunk construct_header_from(std::string command, const data_chunk& payload)
 {
-    log_info() << "s: " << command
+    log_info(log_domain::network) << "s: " << command
             << " (" << payload.size() << " bytes)";
     serializer header;
     // magic

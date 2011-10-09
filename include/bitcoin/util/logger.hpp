@@ -5,8 +5,17 @@
 
 namespace libbitcoin {
 
+enum class log_domain
+{
+    normal,
+    network,
+    storage,
+    validation
+};
+
 enum class logger_level
 {
+    null,
     debug,
     info,
     warning,
@@ -32,11 +41,11 @@ private:
     logger_level lev_;
 };
 
-logger_wrapper log_debug();
-logger_wrapper log_info();
-logger_wrapper log_warning();
-logger_wrapper log_error();
-logger_wrapper log_fatal();
+logger_wrapper log_debug(log_domain domain=log_domain::normal);
+logger_wrapper log_info(log_domain domain=log_domain::normal);
+logger_wrapper log_warning(log_domain domain=log_domain::normal);
+logger_wrapper log_error(log_domain domain=log_domain::normal);
+logger_wrapper log_fatal(log_domain domain=log_domain::normal);
 
 } // libbitcoin
 

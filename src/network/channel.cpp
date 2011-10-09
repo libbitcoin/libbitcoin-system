@@ -133,7 +133,7 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
         return;
     }
 
-    log_info() << "r: " << header_msg.command
+    log_info(log_domain::network) << "r: " << header_msg.command
             << " (" << header_msg.payload_length << " bytes)";
     if (translator_->checksum_used(header_msg))
     {

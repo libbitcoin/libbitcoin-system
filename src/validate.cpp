@@ -29,11 +29,20 @@ validate_block::validate_block(dialect_ptr dialect,
 bool validate_block::validates()
 {
     if (!check_block())
+    {
+        log_error(log_domain::validation) << "Check block failed";
         return false;
+    }
     if (!accept_block())
+    {
+        log_error(log_domain::validation) << "Accept block failed";
         return false;
+    }
     if (!connect_block())
+    {
+        log_error(log_domain::validation) << "Connect block failed";
         return false;
+    }
     // network_->relay_inventory(...);
     return true;
 }
@@ -50,38 +59,61 @@ bool validate_block::check_block()
         current_block_.transactions.size() > max_block_size ||
         dialect_->to_network(current_block_, false).size() > max_block_size)
     {
+        log_error(log_domain::validation) << "Size limits failed";
         return false;
     }
 
     const hash_digest current_block_hash = hash_block_header(current_block_);
     if (!check_proof_of_work(current_block_hash, current_block_.bits))
+    {
+        log_error(log_domain::validation) << "Proof of work failed";
         return false;
+    }
 
     const ptime block_time = 
             boost::posix_time::from_time_t(current_block_.timestamp);
     if (block_time > clock_->get_time() + hours(2))
+    {
+        log_error(log_domain::validation) << "Timestamp too far in the future";
         return false;
+    }
 
     if (!is_coinbase(current_block_.transactions[0]))
+    {
+        log_error(log_domain::validation) 
+            << "First trannsaction is not a coinbase";
         return false;
+    }
     for (size_t i = 1; i < current_block_.transactions.size(); ++i)
     {
         const message::transaction& tx = current_block_.transactions[i];
         if (is_coinbase(tx))
+        {
+            log_error(log_domain::validation) << "More than one coinbase";
             return false;
+        }
     }
 
     for (message::transaction tx: current_block_.transactions)
         if (!check_transaction(tx))
+        {
+            log_error(log_domain::validation) << "Transaction checks failed";
             return false;
+        }
 
     // Check that it's not full of nonstandard transactions
     if (number_script_operations() > max_block_script_operations)
+    {
+        log_error(log_domain::validation) << "Too many script operations";
         return false;
+    }
 
     if (current_block_.merkle_root != 
             generate_merkle_root(current_block_.transactions))
+    {
+        log_error(log_domain::validation) << "Merkle root mismatch";
         return false;
+    }
 
     return true;
 }
@@ -165,6 +197,16 @@ bool validate_block::accept_block()
     if (!passes_checkpoints())
         return false;
     return true;
+}
+
+template<typename Value>
+inline Value range_constraint(Value value, Value minimum, Value maximum)
+{
+    if (value < minimum)
+        return minimum;
+    else if (value > maximum)
+        return maximum;
+    return value;
 }
 
 uint32_t validate_block::work_required()
