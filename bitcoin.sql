@@ -5,7 +5,7 @@
 DROP DOMAIN IF EXISTS amount_type CASCADE;
 CREATE DOMAIN amount_type AS NUMERIC(16, 8) CHECK (VALUE < 21000000 AND VALUE >= 0);
 DROP DOMAIN IF EXISTS hash_type CASCADE;
-CREATE DOMAIN hash_type AS VARCHAR(95);  -- 32*3 because "aa 0f ca ..."
+CREATE DOMAIN hash_type AS bytea;  -- 32*3 because "aa 0f ca ..."
 
 CREATE OR REPLACE FUNCTION internal_to_sql(value BIGINT) RETURNS amount_type AS $$
     BEGIN
@@ -99,14 +99,14 @@ INSERT INTO blocks (
     nonce,
     status
 ) VALUES (
-    '00 00 00 00 00 19 d6 68 9c 08 5a e1 65 83 1e 93 4f f7 63 ae 46 a2 a6 c1 72 b3 f1 b6 0a 8c e2 6f',
+    decode('00 00 00 00 00 19 d6 68 9c 08 5a e1 65 83 1e 93 4f f7 63 ae 46 a2 a6 c1 72 b3 f1 b6 0a 8c e2 6f', 'hex'),
     0,
     0,
     0,
     0,
     1,
-    '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00',
-    '4a 5e 1e 4b aa b8 9f 3a 32 51 8a 88 c3 1b c8 7f 61 8f 76 67 3e 2c c7 7a b2 12 7b 7a fd ed a3 3b',
+    decode('00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00', 'hex'),
+    decode('4a 5e 1e 4b aa b8 9f 3a 32 51 8a 88 c3 1b c8 7f 61 8f 76 67 3e 2c c7 7a b2 12 7b 7a fd ed a3 3b', 'hex'),
     TO_TIMESTAMP(1231006505),
     29,
     65535,
@@ -232,7 +232,7 @@ CREATE TABLE transactions (
 );
 
 DROP DOMAIN IF EXISTS script_type CASCADE;
-CREATE DOMAIN script_type AS VARCHAR(500);
+CREATE DOMAIN script_type AS VARCHAR;
 
 CREATE TABLE outputs (
     output_id INT NOT NULL DEFAULT NEXTVAL('outputs_output_id_sequence') PRIMARY KEY,

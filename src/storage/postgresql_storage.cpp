@@ -9,6 +9,8 @@
 
 namespace libbitcoin {
 
+hash_digest hash_from_bytea(std::string byte_stream);
+
 postgresql_storage::postgresql_storage(std::string database, 
         std::string user, std::string password)
   : sql_(std::string("postgresql:dbname=") + database + 
@@ -53,7 +55,7 @@ void postgresql_storage::insert(const message::transaction_input& input,
     sql_ <<
         "INSERT INTO inputs (transaction_id, index_in_parent, \
             script, previous_output_hash, previous_output_index, sequence) \
-        VALUES (?, ?, ?, ?, ?, ?)"
+        VALUES (?, ?, ?, decode(?, 'hex'), ?, ?)"
         << transaction_id
         << index_in_parent
         << input.input_script.pretty()
@@ -84,7 +86,7 @@ size_t postgresql_storage::insert(const message::transaction& transaction)
     // We use special function to insert txs. 
     // Some blocks contain duplicates. See SQL for more details.
     cppdb::result result = sql_ <<
-        "SELECT insert_transaction(?, ?, ?, ?)"
+        "SELECT insert_transaction(decode(?, 'hex'), ?, ?, ?)"
         << transaction_hash_repr
         << transaction.version
         << transaction.locktime
@@ -96,7 +98,7 @@ size_t postgresql_storage::insert(const message::transaction& transaction)
         cppdb::result old_transaction_id = sql_ <<
             "SELECT transaction_id \
             FROM transactions \
-            WHERE transaction_hash=?"
+            WHERE transaction_hash=decode(?, 'hex')"
             << transaction_hash_repr
             << cppdb::row;
         return old_transaction_id.get<size_t>(0);
@@ -138,11 +140,13 @@ void postgresql_storage::do_store_block(const message::block& block,
             prev_block_repr = pretty_hex(block.prev_block),
             merkle_repr = pretty_hex(block.merkle_root);
 
+    cppdb::transaction guard(sql_);
     cppdb::result result = sql_ <<
-        "SELECT 1 FROM blocks WHERE block_hash=?"
+        "SELECT 1 FROM blocks WHERE block_hash=decode(?, 'hex')"
         << block_hash_repr << cppdb::row;
     if (!result.empty())
     {
+        log_warning() << "Block '" << block_hash_repr << "' already exists";
         handle_store(error::object_already_exists);
         return;
     }
@@ -164,14 +168,14 @@ void postgresql_storage::do_store_block(const message::block& block,
             nonce \
         ) VALUES ( \
             DEFAULT, \
-            ?, \
+            decode(?, 'hex'), \
             nextval('blocks_space_sequence'), \
             0, \
             0, \
             0, \
             ?, \
-            ?, \
-            ?, \
+            decode(?, 'hex'), \
+            decode(?, 'hex'), \
             TO_TIMESTAMP(?), \
             ?, \
             ?, \
@@ -208,6 +212,7 @@ void postgresql_storage::do_store_block(const message::block& block,
     sql_ << "UPDATE blocks SET status='orphan' WHERE block_id=?"
         << block_id << cppdb::exec;
     blockchain_->raise_barrier();
+    guard.commit();
     handle_store(std::error_code());
 }
 
@@ -267,7 +272,7 @@ void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash,
             EXTRACT(EPOCH FROM when_created) timest \
         FROM blocks \
         WHERE \
-            block_hash=? \
+            block_hash=decode(?, 'hex') \
             AND span_left=0 \
             AND span_left=0"
         );
@@ -296,10 +301,7 @@ void postgresql_storage::do_fetch_block_locator(
 {
     cppdb::result number_blocks_result = sql_ <<
         "SELECT MAX(depth) \
-        FROM blocks \
-        WHERE \
-            span_left=0 \
-            AND span_right=0"
+        FROM main_chain"
         << cppdb::row;
     if (number_blocks_result.empty())
     {
@@ -326,12 +328,9 @@ void postgresql_storage::do_fetch_block_locator(
     // TODO: UGLY!! Hack around limitation of cppdb!
     std::stringstream hack_sql;
     hack_sql <<
-        "SELECT block_hash \
-        FROM blocks \
-        WHERE \
-            span_left=0 \
-            AND span_right=0 \
-            AND depth IN (";
+        "SELECT encode(block_hash, 'hex') \
+        FROM main_chain \
+        WHERE depth IN (";
     for (size_t i = 0; i < indices.size(); ++i)
     {
         if (i != 0)
@@ -345,8 +344,9 @@ void postgresql_storage::do_fetch_block_locator(
     while (block_hashes_result.next())
     {
         std::string block_hash_repr = block_hashes_result.get<std::string>(0);
-        locator.push_back(hash_from_pretty(block_hash_repr));
+        locator.push_back(hash_from_bytea(block_hash_repr));
     }
+    BITCOIN_ASSERT(locator.size() == indices.size());
     handle_fetch(std::error_code(), locator);
 }
 
@@ -370,7 +370,7 @@ void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash,
             transactions, \
             outputs \
         WHERE \
-            transaction_hash=? \
+            transaction_hash=decode(?, 'hex') \
             AND transactions.transaction_id=outputs.transaction_id \
             AND index_in_parent=?"
         << transaction_hash_repr
@@ -402,7 +402,7 @@ void postgresql_storage::do_block_exists_by_hash(hash_digest block_hash,
         "SELECT 1 \
         FROM blocks \
         WHERE \
-            block_hash=? \
+            block_hash=decode(?, 'hex') \
             AND span_left=0 \
             AND span_left=0"
         << block_hash_repr

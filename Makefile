@@ -37,11 +37,11 @@ LIBBITCOIN=-Llib lib/libbitcoin.a
 
 default: libbitcoin.so
 
-lib/libbitcoin.so: $(MODULES) ($STORAGE_MODULES)
-	$(CXX) -shared $(MODULES) ($STORAGE_MODULES) -o lib/libbitcoin.so
+lib/libbitcoin.so: $(MODULES) $(STORAGE_MODULES)
+	$(CXX) -shared $(MODULES) $(STORAGE_MODULES) -o lib/libbitcoin.so
 
-lib/libbitcoin.a: $(MODULES) ($STORAGE_MODULES)
-	ar crf lib/libbitcoin.a $(MODULES) ($STORAGE_MODULES)
+lib/libbitcoin.a: $(MODULES) $(STORAGE_MODULES)
+	ar crf lib/libbitcoin.a $(MODULES) $(STORAGE_MODULES)
 
 libbitcoin: lib/libbitcoin.so lib/libbitcoin.a
 
@@ -128,6 +128,9 @@ obj/serializer.o: src/util/serializer.cpp include/bitcoin/util/serializer.hpp
 libbitcoin.a: obj/serializer.o obj/error.o
 
 obj/nettest.o: tests/net.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+obj/bdb_storage.o: src/storage/bdb/bdb_storage.cpp include/bitcoin/storage/bdb_storage.hpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/postgresql_storage.o: src/storage/postgresql_storage.cpp include/bitcoin/storage/postgresql_storage.hpp 

@@ -8,6 +8,19 @@
 
 namespace libbitcoin {
 
+hash_digest hash_from_bytea(std::string byte_stream)
+{
+    std::string spaced_bytes = "";
+    for (auto it = byte_stream.begin(); it != byte_stream.end(); ++it)
+    {
+        spaced_bytes += *it;
+        ++it;
+        spaced_bytes += *it;
+        spaced_bytes += ' ';
+    }
+    return hash_from_pretty(spaced_bytes);
+}
+
 postgresql_organizer::postgresql_organizer(cppdb::session sql)
   : sql_(sql)
 {
@@ -402,7 +415,11 @@ message::transaction_input_list postgresql_reader::select_inputs(
         size_t transaction_id)
 {
     static cppdb::statement statement = sql_.prepare(
-        "SELECT * \
+        "SELECT \
+            encode(previous_output_hash, 'hex') AS previous_output_hash, \
+            previous_output_index, \
+            script, \
+            sequence \
         FROM inputs \
         WHERE transaction_id=? \
         ORDER BY index_in_parent ASC"
@@ -415,7 +432,7 @@ message::transaction_input_list postgresql_reader::select_inputs(
     {
         message::transaction_input input;
         input.hash = 
-            hash_from_pretty(result.get<std::string>("previous_output_hash"));
+            hash_from_bytea(result.get<std::string>("previous_output_hash"));
         input.index = result.get<uint32_t>("previous_output_index");
         input.input_script = 
             script_from_pretty(result.get<std::string>("script"));
@@ -479,9 +496,9 @@ message::block postgresql_reader::read_block(cppdb::result block_result)
     block.nonce = block_result.get<uint32_t>("nonce");
 
     block.prev_block = 
-            hash_from_pretty(block_result.get<std::string>("prev_block_hash"));
+            hash_from_bytea(block_result.get<std::string>("prev_block_hash"));
     block.merkle_root = 
-            hash_from_pretty(block_result.get<std::string>("merkle"));
+            hash_from_bytea(block_result.get<std::string>("merkle"));
 
     static cppdb::statement transactions_statement = sql_.prepare(
         "SELECT transactions.* \
@@ -649,7 +666,7 @@ bool postgresql_validate_block::connect_input(
             transaction_id, \
             coinbase \
         FROM transactions \
-        WHERE transaction_hash=?"
+        WHERE transaction_hash=decode(?, 'hex')"
         );
     find_previous_tx.reset();
     find_previous_tx.bind(hash_repr);
@@ -745,7 +762,7 @@ bool postgresql_validate_block::search_double_spends(size_t transaction_id,
         "SELECT 1 \
         FROM inputs \
         WHERE \
-            previous_output_hash=? \
+            previous_output_hash=decode(?, 'hex') \
             AND previous_output_index=? \
             AND ( \
                 transaction_id != ? \
@@ -836,7 +853,17 @@ void postgresql_blockchain::validate()
     dialect_.reset(new original_dialect);
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
-            *, \
+            block_id, \
+            depth, \
+            span_left, \
+            span_right, \
+            prev_block_id, \
+            version, \
+            bits_head, \
+            bits_body, \
+            nonce, \
+            encode(prev_block_hash, 'hex') AS prev_block_hash, \
+            encode(merkle, 'hex') AS merkle, \
             EXTRACT(EPOCH FROM when_created) timest \
         FROM blocks \
         WHERE \
