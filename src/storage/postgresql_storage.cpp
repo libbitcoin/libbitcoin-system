@@ -24,9 +24,10 @@ postgresql_storage::postgresql_storage(std::string database,
 void postgresql_storage::store(const message::inv& inv,
         store_handler handle_store)
 {
-    strand()->post(std::bind(
-        &postgresql_storage::do_store_inv, shared_from_this(), 
-            inv, handle_store));
+    // temporarily disabled
+    //strand()->post(std::bind(
+    //    &postgresql_storage::do_store_inv, shared_from_this(), 
+    //        inv, handle_store));
 }
 void postgresql_storage::do_store_inv(const message::inv& inv,
         store_handler handle_store)

@@ -98,8 +98,11 @@ bool kernel::recv_message(channel_handle, const message::inv& message)
         if (curr_inv.type == message::inv_type::block)
             request_invs.invs.push_back(curr_inv);
     }
-    storage_component_->store(request_invs, null);
-    accept_inventories(std::error_code(), request_invs.invs);
+    if (request_invs.invs.size() > 0)
+    {
+        storage_component_->store(request_invs, null);
+        accept_inventories(std::error_code(), request_invs.invs);
+    }
     return true;
 }
 
