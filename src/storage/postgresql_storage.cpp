@@ -301,8 +301,10 @@ void postgresql_storage::do_fetch_block_locator(
         fetch_handler_block_locator handle_fetch)
 {
     cppdb::result number_blocks_result = sql_ <<
-        "SELECT MAX(depth) \
-        FROM main_chain"
+        "SELECT depth \
+        FROM chains \
+        ORDER BY work DESC \
+        LIMIT 1"
         << cppdb::row;
     if (number_blocks_result.empty())
     {
