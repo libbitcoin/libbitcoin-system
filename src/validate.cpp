@@ -17,7 +17,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 constexpr size_t max_block_size = 1000000;
-constexpr size_t max_block_script_operations = max_block_size / 50;
+constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 
 validate_block::validate_block(dialect_ptr dialect, 
     size_t depth, const message::block& current_block)
@@ -102,9 +102,9 @@ bool validate_block::check_block()
         }
 
     // Check that it's not full of nonstandard transactions
-    if (number_script_operations() > max_block_script_operations)
+    if (number_script_sig_operations() > max_block_script_sig_operations)
     {
-        log_error(log_domain::validation) << "Too many script operations";
+        log_error(log_domain::validation) << "Too many script *SIG operations";
         return false;
     }
 
@@ -171,17 +171,28 @@ bool validate_block::check_transaction(const message::transaction& tx)
     return true;
 }
 
-size_t validate_block::number_script_operations()
+inline size_t count_script_sigs(const operation_stack& operations)
 {
-    size_t total_operations = 0;
+    size_t total_sigs = 0;
+    for (const operation& op: operations)
+        if (op.code == opcode::checksig)
+            total_sigs++;
+        // TODO: Add OP_CHECKSIGVERIFY OP_CHECKMULTISIG OP_CHECKMULTISIGVERIFY
+        // ... they need to exist first
+    return total_sigs;
+}
+
+size_t validate_block::number_script_sig_operations()
+{
+    size_t total_sigs = 0;
     for (message::transaction tx: current_block_.transactions)
     {
         for (message::transaction_input input: tx.inputs)
-            total_operations += input.input_script.operations().size();
+            total_sigs += count_script_sigs(input.input_script.operations());
         for (message::transaction_output output: tx.outputs)
-            total_operations += output.output_script.operations().size();
+            total_sigs += count_script_sigs(output.output_script.operations());
     }
-    return total_operations;
+    return total_sigs;
 }
 
 bool validate_block::accept_block()

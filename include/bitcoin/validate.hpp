@@ -29,7 +29,7 @@ private:
     bool check_block();
     bool check_proof_of_work(hash_digest hash, uint32_t bits);
     bool check_transaction(const message::transaction& tx);
-    size_t number_script_operations();
+    size_t number_script_sig_operations();
 
     bool accept_block();
     uint32_t work_required();
