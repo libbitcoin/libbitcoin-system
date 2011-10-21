@@ -312,23 +312,18 @@ void postgresql_storage::do_fetch_block_locator(
         return;
     }
     // Start at max_depth
-    int current_depth = number_blocks_result.get<size_t>(0);
+    int top_depth = number_blocks_result.get<size_t>(0);
     std::vector<size_t> indices;
     // Push last 10 indices first
-    for (size_t i = 0; i < 10; ++i, --current_depth)
-        indices.push_back(current_depth);
-    size_t step = 1;
-    while (true)
+    size_t step = 1, start = 0;
+    for (int i = top_depth; i > 0; i -= step, ++start)
     {
-        current_depth -= step;
-        if (current_depth <= 0)
-            break;
-        indices.push_back(current_depth);
-        step *= 2;
+        if (start >= 10)
+            step *= 2;
+        indices.push_back(i);
     }
     indices.push_back(0);
     // Now actually fetch the hashes for these blocks
-    // TODO: UGLY!! Hack around limitation of cppdb!
     std::stringstream hack_sql;
     hack_sql <<
         "SELECT encode(block_hash, 'hex') \
