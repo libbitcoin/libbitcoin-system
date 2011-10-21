@@ -12,6 +12,9 @@
 
 namespace libbitcoin {
 
+static const data_chunk stack_true_value{1, 1};
+static const data_chunk stack_false_value{0};
+
 void script::join(const script& other)
 {
     operations_.insert(operations_.end(),
@@ -28,6 +31,21 @@ const operation_stack& script::operations() const
     return operations_;
 }
 
+inline bool cast_to_bool(const data_chunk& values)
+{
+    for (auto it = values.begin(); it != values.end(); ++it)
+    {
+        if (*it != 0)
+        {
+            // Can be negative zero
+            if (it == values.end() - 1 && *it == 0x80)
+                return false;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool script::run(script input_script,
     const message::transaction& parent_tx, uint32_t input_index)
 {
@@ -38,13 +56,12 @@ bool script::run(script input_script,
     stack_ = input_script.stack_;
     if (!run(parent_tx, input_index))
         return false;
-    if (stack_.size() != 0)
+    if (stack_.empty())
     {
-        // TODO: OP_CHECKSIG actually leaves stuff on stack
-        log_error() << "Script left junk on top of the stack";
+        log_error() << "Script left no data on the stack";
         return false;
     }
-    return true;
+    return cast_to_bool(stack_.back());
 }
 
 bool script::run(const message::transaction& parent_tx, uint32_t input_index)
@@ -108,6 +125,16 @@ inline void nullify_input_sequences(
 }
 
 bool script::op_checksig(message::transaction parent_tx, uint32_t input_index)
+{
+    if (op_checksigverify(parent_tx, input_index))
+        stack_.push_back(stack_true_value);
+    else
+        stack_.push_back(stack_false_value);
+    return true;
+}
+
+bool script::op_checksigverify(
+    message::transaction parent_tx, uint32_t input_index)
 {
     BITCOIN_ASSERT(input_index < parent_tx.inputs.size());
     if (stack_.size() < 2)

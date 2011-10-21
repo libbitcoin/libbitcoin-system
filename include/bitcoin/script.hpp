@@ -73,7 +73,10 @@ private:
     bool op_dup();
     bool op_hash160();
     bool op_equalverify();
+    // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(message::transaction parent_tx, uint32_t input_index);
+    bool op_checksigverify(
+            message::transaction parent_tx, uint32_t input_index);
 
     bool run_operation(operation op, 
             const message::transaction& parent_tx, uint32_t input_index);
