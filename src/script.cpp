@@ -180,18 +180,9 @@ bool script::run_operation(operation op,
     switch (op.code)
     {
         case opcode::special:
-            return true;
-
         case opcode::pushdata1:
-            BITCOIN_ASSERT(op.data.size() == static_cast<size_t>(op.code));
-            return true;
-
         case opcode::pushdata2:
-            BITCOIN_ASSERT(op.data.size() == static_cast<size_t>(op.code));
-            return true;
-
         case opcode::pushdata4:
-            BITCOIN_ASSERT(op.data.size() == static_cast<size_t>(op.code));
             return true;
 
         case opcode::nop:
@@ -210,7 +201,7 @@ bool script::run_operation(operation op,
             return op_checksig(parent_tx, input_index);
 
         default:
-            log_fatal() << "Umimplemented operation <none " 
+            log_fatal() << "Unimplemented operation <none " 
                 << static_cast<int>(op.code) << ">";
             break;
     }
@@ -299,15 +290,37 @@ opcode string_to_opcode(std::string code_repr)
     return opcode::bad_operation;
 }
 
-size_t number_of_bytes_from_opcode(opcode code, byte raw_byte)
+// Read next n bytes while advancing iterator
+// Used for seeing length of data to push to stack with pushdata2/4
+template <typename Iterator>
+inline data_chunk read_back_from_iterator(Iterator& it, size_t total)
 {
-    if (code == opcode::special)
-        return raw_byte;
-    else if (code == opcode::pushdata1 || code == opcode::pushdata2
-            || code == opcode::pushdata4)
-        return static_cast<size_t>(code);
-    else
-        return 0;
+    data_chunk number_bytes;
+    for (size_t i = 0; i < total; ++i)
+    {
+        ++it;
+        number_bytes.push_back(*it);
+    }
+    return number_bytes;
+}
+
+template <typename Iterator>
+size_t number_of_bytes_from_opcode(opcode code, byte raw_byte, Iterator& it)
+{
+    switch (code)
+    {
+        case opcode::special:
+            return raw_byte;
+        case opcode::pushdata1:
+            ++it;
+            return static_cast<uint8_t>(*it);
+        case opcode::pushdata2:
+            return cast_chunk<uint16_t>(read_back_from_iterator(it, 2));
+        case opcode::pushdata4:
+            return cast_chunk<uint32_t>(read_back_from_iterator(it, 4));
+        default:
+            return 0;
+    }
 }
 
 script parse_script(const data_chunk& raw_script)
@@ -321,7 +334,8 @@ script parse_script(const data_chunk& raw_script)
         // raw_byte is unsigned so it's always >= 0
         if (raw_byte <= 75)
             op.code = opcode::special;
-        size_t read_n_bytes = number_of_bytes_from_opcode(op.code, raw_byte);
+        size_t read_n_bytes = 
+            number_of_bytes_from_opcode(op.code, raw_byte, it);
 
         for (size_t byte_count = 0; byte_count < read_n_bytes; ++byte_count)
         {
@@ -340,6 +354,20 @@ script parse_script(const data_chunk& raw_script)
     return script_object;
 }
 
+inline data_chunk operation_metadata(const opcode code, size_t data_size)
+{
+    switch (code)
+    {
+        case opcode::pushdata1:
+            return uncast_type<uint8_t>(data_size);
+        case opcode::pushdata2:
+            return uncast_type<uint16_t>(data_size);
+        case opcode::pushdata4:
+            return uncast_type<uint32_t>(data_size);
+        default:
+            return data_chunk();
+    }
+}
 data_chunk save_script(const script& scr)
 {
     data_chunk raw_script;
@@ -349,6 +377,7 @@ data_chunk save_script(const script& scr)
         if (op.code == opcode::special)
             raw_byte = op.data.size();
         raw_script.push_back(raw_byte);
+        extend_data(raw_script, operation_metadata(op.code, op.data.size()));
         extend_data(raw_script, op.data);
     }
     return raw_script;
