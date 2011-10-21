@@ -72,7 +72,6 @@ CREATE TABLE blocks (
     span_left INT NOT NULL,
     span_right INT NOT NULL,
     version BIGINT NOT NULL,
-    prev_block_id INT,
     prev_block_hash hash_type NOT NULL,
     merkle hash_type NOT NULL,
     when_created TIMESTAMP NOT NULL,

@@ -187,16 +187,6 @@ void postgresql_organizer::organize()
             parent_id = orphans_results.get<size_t>(3);
         BITCOIN_ASSERT(child_depth == 0);
 
-        static cppdb::statement point_prev_statement = sql_.prepare(
-            "UPDATE blocks \
-            SET prev_block_id=? \
-            WHERE block_id=?"
-            );
-        point_prev_statement.reset();
-        point_prev_statement.bind(parent_id);
-        point_prev_statement.bind(child_id);
-        point_prev_statement.exec();
-
         size_t parent_space, parent_depth;
         span parent_span;
         // Parent depth and space can change if it is
@@ -535,13 +525,11 @@ message::block postgresql_reader::read_block(cppdb::result block_result)
 postgresql_block_info postgresql_reader::read_block_info(
     cppdb::result result)
 {
-    BITCOIN_ASSERT(!result.is_null("prev_block_id"));
     return {
         result.get<size_t>("block_id"),
         result.get<size_t>("depth"),
         result.get<size_t>("span_left"),
         result.get<size_t>("span_right"),
-        result.get<size_t>("prev_block_id")
     };
 }
 
@@ -872,7 +860,6 @@ void postgresql_blockchain::validate()
             depth, \
             span_left, \
             span_right, \
-            prev_block_id, \
             version, \
             bits_head, \
             bits_body, \

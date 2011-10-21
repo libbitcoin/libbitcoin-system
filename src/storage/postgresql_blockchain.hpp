@@ -46,7 +46,7 @@ private:
 
 struct postgresql_block_info
 {
-    size_t block_id, depth, span_left, span_right, prev_block_id;
+    size_t block_id, depth, span_left, span_right;
 };
 
 class postgresql_reader
