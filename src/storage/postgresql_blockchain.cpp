@@ -8,17 +8,31 @@
 
 namespace libbitcoin {
 
-hash_digest hash_from_bytea(std::string byte_stream)
+std::string spaced_bytes(std::string byte_stream)
 {
-    std::string spaced_bytes = "";
-    for (auto it = byte_stream.begin(); it != byte_stream.end(); ++it)
+    std::string spaced = "";
+    for (auto it = byte_stream.begin(); ; )
     {
-        spaced_bytes += *it;
+        spaced += *it;
         ++it;
-        spaced_bytes += *it;
-        spaced_bytes += ' ';
+        spaced += *it;
+        ++it;
+        if (it == byte_stream.end())
+            break;
+        else
+            spaced += ' ';
     }
-    return hash_from_pretty(spaced_bytes);
+    return spaced;
+}
+
+inline data_chunk bytes_from_bytea(std::string byte_stream)
+{
+    return bytes_from_pretty(spaced_bytes(byte_stream));
+}
+
+inline hash_digest hash_from_bytea(std::string byte_stream)
+{
+    return hash_from_pretty(spaced_bytes(byte_stream));
 }
 
 postgresql_organizer::postgresql_organizer(cppdb::session sql)
@@ -418,7 +432,7 @@ message::transaction_input_list postgresql_reader::select_inputs(
         "SELECT \
             encode(previous_output_hash, 'hex') AS previous_output_hash, \
             previous_output_index, \
-            script, \
+            encode(script, 'hex') AS script, \
             sequence \
         FROM inputs \
         WHERE transaction_id=? \
@@ -435,7 +449,7 @@ message::transaction_input_list postgresql_reader::select_inputs(
             hash_from_bytea(result.get<std::string>("previous_output_hash"));
         input.index = result.get<uint32_t>("previous_output_index");
         input.input_script = 
-            script_from_pretty(result.get<std::string>("script"));
+            parse_script(bytes_from_bytea(result.get<std::string>("script")));
         input.sequence = result.get<uint32_t>("sequence");
         inputs.push_back(input);
     }
@@ -446,7 +460,8 @@ message::transaction_output_list postgresql_reader::select_outputs(
 {
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
-            *, \
+            transaction_id, \
+            encode(script, 'hex') AS script, \
             sql_to_internal(value) internal_value \
         FROM outputs \
         WHERE transaction_id=? \
@@ -461,7 +476,7 @@ message::transaction_output_list postgresql_reader::select_outputs(
         message::transaction_output output;
         output.value = result.get<uint64_t>("internal_value");
         output.output_script = 
-            script_from_pretty(result.get<std::string>("script"));
+            parse_script(bytes_from_bytea(result.get<std::string>("script")));
         outputs.push_back(output);
     }
     return outputs;
@@ -680,7 +695,7 @@ bool postgresql_validate_block::connect_input(
     size_t previous_tx_id = previous_tx.get<size_t>(0);
     static cppdb::statement find_previous_output = sql_.prepare(
         "SELECT \
-            script, \
+            encode(script, 'hex') AS script, \
             sql_to_internal(value) AS internal_value \
         FROM outputs \
         WHERE \
@@ -709,8 +724,8 @@ bool postgresql_validate_block::connect_input(
         if (depth_difference < coinbase_maturity)
             return false;
     }
-    script output_script = 
-        script_from_pretty(previous_output.get<std::string>("script"));
+    std::string raw_script = previous_output.get<std::string>("script");
+    script output_script = parse_script(bytes_from_bytea(raw_script));
     if (!output_script.run(input.input_script, current_tx, input_index))
     {
         log_error(log_domain::validation) << "Script failed evaluation";

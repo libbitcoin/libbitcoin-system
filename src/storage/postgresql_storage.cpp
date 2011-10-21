@@ -56,10 +56,10 @@ void postgresql_storage::insert(const message::transaction_input& input,
     sql_ <<
         "INSERT INTO inputs (transaction_id, index_in_parent, \
             script, previous_output_hash, previous_output_index, sequence) \
-        VALUES (?, ?, ?, decode(?, 'hex'), ?, ?)"
+        VALUES (?, ?, decode(?, 'hex'), decode(?, 'hex'), ?, ?)"
         << transaction_id
         << index_in_parent
-        << input.input_script.pretty()
+        << pretty_hex(save_script(input.input_script))
         << hash
         << input.index
         << input.sequence
@@ -72,10 +72,10 @@ void postgresql_storage::insert(const message::transaction_output& output,
     sql_ <<
         "INSERT INTO outputs ( \
             transaction_id, index_in_parent, script, value) \
-        VALUES (?, ?, ?, internal_to_sql(?))"
+        VALUES (?, ?, decode(?, 'hex'), internal_to_sql(?))"
         << transaction_id
         << index_in_parent
-        << output.output_script.pretty()
+        << pretty_hex(save_script(output.output_script))
         << output.value
         << cppdb::exec;
 }

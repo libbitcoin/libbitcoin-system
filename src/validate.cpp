@@ -81,7 +81,7 @@ bool validate_block::check_block()
     if (!is_coinbase(current_block_.transactions[0]))
     {
         log_error(log_domain::validation) 
-            << "First trannsaction is not a coinbase";
+            << "First transaction is not a coinbase";
         return false;
     }
     for (size_t i = 1; i < current_block_.transactions.size(); ++i)

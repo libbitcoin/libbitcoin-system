@@ -232,7 +232,7 @@ CREATE TABLE transactions (
 );
 
 DROP DOMAIN IF EXISTS script_type CASCADE;
-CREATE DOMAIN script_type AS VARCHAR;
+CREATE DOMAIN script_type AS bytea;
 
 CREATE TABLE outputs (
     output_id INT NOT NULL DEFAULT NEXTVAL('outputs_output_id_sequence') PRIMARY KEY,

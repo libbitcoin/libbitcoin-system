@@ -137,9 +137,8 @@ void kernel::request_inventories(const boost::system::error_code& ec)
     if (ec)
         return;
     storage_component_->fetch_inventories(
-            std::bind(&kernel::accept_inventories,
-                shared_from_this(), 
-                std::placeholders::_1, std::placeholders::_2));
+        std::bind(&kernel::accept_inventories, shared_from_this(), 
+            std::placeholders::_1, std::placeholders::_2));
     reset_inventory_poll();
 }
 
@@ -149,7 +148,7 @@ storage_ptr kernel::get_storage()
 }
 
 void kernel::accept_inventories(const std::error_code& ec, 
-        const message::inv_list& invs)
+    const message::inv_list& invs)
 {
     if (ec)
         return;
@@ -161,7 +160,7 @@ void kernel::accept_inventories(const std::error_code& ec,
 }
 
 void kernel::send_to_random(channel_handle chandle,
-        const message::getdata& request_message)
+    const message::getdata& request_message)
 {
     network_component_->send(chandle, request_message);
 }
