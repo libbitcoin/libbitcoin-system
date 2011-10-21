@@ -18,6 +18,7 @@ data_chunk bytes_from_pretty(std::string byte_stream)
     {
         int val;
         ss >> val;
+        BITCOIN_ASSERT(val <= 0xff);
         stack.push_back(val);
     }
     return stack;
@@ -25,16 +26,10 @@ data_chunk bytes_from_pretty(std::string byte_stream)
 
 hash_digest hash_from_pretty(std::string byte_stream)
 {
-    std::stringstream ss;
-    ss << std::hex << byte_stream;
+    data_chunk raw_bytes = bytes_from_pretty(byte_stream);
+    BITCOIN_ASSERT(raw_bytes.size() == 32);
     hash_digest hash;
-    for (size_t i = 0; i < hash.size(); ++i)
-    {
-        int val;
-        ss >> val;
-        BITCOIN_ASSERT(val <= 0xff);
-        hash[i] = val;
-    }
+    std::copy(raw_bytes.begin(), raw_bytes.end(), hash.begin());
     return hash;
 }
 
