@@ -96,8 +96,6 @@ opcode string_to_opcode(std::string code_repr);
 script parse_script(const data_chunk& raw_script);
 data_chunk save_script(const script& scr);
 
-script script_from_pretty(const std::string& pretty_script);
-
 } // libbitcoin
 
 #endif

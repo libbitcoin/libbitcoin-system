@@ -376,7 +376,6 @@ script parse_script(const data_chunk& raw_script)
         }
 
         script_object.push_operation(op);
-
     }
     return script_object;
 }
@@ -408,40 +407,6 @@ data_chunk save_script(const script& scr)
         extend_data(raw_script, op.data);
     }
     return raw_script;
-}
-
-script script_from_pretty(const std::string& pretty_script)
-{
-    script script_object;
-    std::stringstream splitter;
-    splitter << pretty_script;
-    std::string token;
-    while (splitter >> token)
-    {
-        operation op;
-        if (token == "[")
-        {
-            while ((splitter >> token) && token != "]")
-            {
-                std::istringstream to_int(token);
-                int value;
-                to_int >> std::hex >> value; 
-                op.data.push_back(value);
-            }
-            if (token != "]")
-            {
-                log_warning() << "Premature end of script.";
-                return script();
-            }
-            op.code = opcode::special;
-        }
-        else
-        {
-            op.code = string_to_opcode(token);
-        }
-        script_object.push_operation(op);
-    }
-    return script_object;
 }
 
 } // libbitcoin
