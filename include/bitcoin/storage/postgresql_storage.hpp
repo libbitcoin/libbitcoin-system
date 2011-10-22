@@ -11,8 +11,8 @@
 
 namespace libbitcoin {
 
-class postgresql_blockchain;
-typedef shared_ptr<postgresql_blockchain> postgresql_blockchain_ptr;
+class pq_blockchain;
+typedef shared_ptr<pq_blockchain> postgresql_blockchain_ptr;
 
 class postgresql_storage
   : public storage,

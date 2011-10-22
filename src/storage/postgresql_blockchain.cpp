@@ -35,12 +35,12 @@ inline hash_digest hash_from_bytea(std::string byte_stream)
     return hash_from_pretty(spaced_bytes(byte_stream));
 }
 
-postgresql_organizer::postgresql_organizer(cppdb::session sql)
+pq_organizer::pq_organizer(cppdb::session sql)
   : sql_(sql)
 {
 }
 
-void postgresql_organizer::delete_chains(size_t left, size_t right)
+void pq_organizer::delete_chains(size_t left, size_t right)
 {
     static cppdb::statement delete_chains = sql_.prepare(
         "DELETE FROM chains \
@@ -64,7 +64,7 @@ void postgresql_organizer::delete_chains(size_t left, size_t right)
     adjust_chains.exec();
 }
 
-void postgresql_organizer::unwind_chain(size_t depth, size_t chain_id)
+void pq_organizer::unwind_chain(size_t depth, size_t chain_id)
 {
     static cppdb::statement unwind_chain = sql_.prepare(
         "UPDATE chains \
@@ -87,7 +87,7 @@ void postgresql_organizer::unwind_chain(size_t depth, size_t chain_id)
     unwind_chain.exec();
 }
 
-void postgresql_organizer::delete_branch(size_t space, size_t depth, 
+void pq_organizer::delete_branch(size_t space, size_t depth, 
     size_t span_left, size_t span_right)
 {
     static cppdb::statement lonely_child = sql_.prepare(
@@ -161,7 +161,7 @@ void postgresql_organizer::delete_branch(size_t space, size_t depth,
     adjust_right.exec();
 }
 
-void postgresql_organizer::organize()
+void pq_organizer::organize()
 {
     static cppdb::statement orphans_statement = sql_.prepare(
         "SELECT \
@@ -220,7 +220,7 @@ void postgresql_organizer::organize()
     }
 }
 
-bool postgresql_organizer::load_span(size_t block_id, span& spn)
+bool pq_organizer::load_span(size_t block_id, span& spn)
 {
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
@@ -243,7 +243,7 @@ bool postgresql_organizer::load_span(size_t block_id, span& spn)
     return true;
 }
 
-bool postgresql_organizer::load_position_info(size_t block_id, 
+bool pq_organizer::load_position_info(size_t block_id, 
     size_t& space, size_t& depth, span& spn)
 {
     static cppdb::statement statement = sql_.prepare(
@@ -271,7 +271,7 @@ bool postgresql_organizer::load_position_info(size_t block_id,
     return true;
 }
 
-size_t postgresql_organizer::get_block_width(
+size_t pq_organizer::get_block_width(
         size_t space, size_t depth, span block_span)
 {
     // If parent's span_left < span_right then parent has children
@@ -301,7 +301,7 @@ size_t postgresql_organizer::get_block_width(
     return 1;
 }
 
-void postgresql_organizer::reserve_branch_area(size_t parent_space, 
+void pq_organizer::reserve_branch_area(size_t parent_space, 
     size_t parent_width, const span& parent_span, 
         size_t new_child_depth, size_t child_width)
 {
@@ -389,7 +389,7 @@ void postgresql_organizer::reserve_branch_area(size_t parent_space,
     }
 }
 
-void postgresql_organizer::position_child_branch(
+void pq_organizer::position_child_branch(
     size_t old_space, size_t new_space, size_t new_depth, size_t new_span_left)
 {
     static cppdb::statement statement = sql_.prepare(
@@ -410,16 +410,17 @@ void postgresql_organizer::position_child_branch(
     statement.exec();
 }
 
-postgresql_reader::postgresql_reader(cppdb::session sql)
+pq_reader::pq_reader(cppdb::session sql)
   : sql_(sql)
 {
 }
 
-message::transaction_input_list postgresql_reader::select_inputs(
-        size_t transaction_id)
+message::transaction_input_list pq_reader::select_inputs(
+        size_t transaction_id, std::vector<size_t>& input_ids)
 {
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
+            input_id, \
             encode(previous_output_hash, 'hex') AS previous_output_hash, \
             previous_output_index, \
             encode(script, 'hex') AS script, \
@@ -434,6 +435,7 @@ message::transaction_input_list postgresql_reader::select_inputs(
     message::transaction_input_list inputs;
     while (result.next())
     {
+        input_ids.push_back(result.get<size_t>("input_id"));
         message::transaction_input input;
         input.hash = 
             hash_from_bytea(result.get<std::string>("previous_output_hash"));
@@ -449,11 +451,12 @@ message::transaction_input_list postgresql_reader::select_inputs(
     }
     return inputs;
 }
-message::transaction_output_list postgresql_reader::select_outputs(
-        size_t transaction_id)
+message::transaction_output_list pq_reader::select_outputs(
+        size_t transaction_id, std::vector<size_t>& output_ids)
 {
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
+            output_id, \
             transaction_id, \
             encode(script, 'hex') AS script, \
             sql_to_internal(value) internal_value \
@@ -467,6 +470,7 @@ message::transaction_output_list postgresql_reader::select_outputs(
     message::transaction_output_list outputs;
     while (result.next())
     {
+        output_ids.push_back(result.get<size_t>("output_id"));
         message::transaction_output output;
         output.value = result.get<uint64_t>("internal_value");
         output.output_script = 
@@ -476,25 +480,36 @@ message::transaction_output_list postgresql_reader::select_outputs(
     return outputs;
 }
 
-message::transaction_list postgresql_reader::read_transactions(
-        cppdb::result result)
+message::transaction_list pq_reader::read_transactions(
+        cppdb::result result, pq_transaction_info_list& tx_infos)
 {
     message::transaction_list transactions;
     while (result.next())
     {
+        pq_transaction_info transaction_info;
         message::transaction transaction;
         transaction.version = result.get<uint32_t>("version");
         transaction.locktime = result.get<uint32_t>("locktime");
         size_t transaction_id = result.get<size_t>("transaction_id");
-        transaction.inputs = select_inputs(transaction_id);
-        transaction.outputs = select_outputs(transaction_id);
+        transaction_info.transaction_id = transaction_id;
+        transaction.inputs = 
+            select_inputs(transaction_id, transaction_info.input_ids);
+        transaction.outputs = 
+            select_outputs(transaction_id, transaction_info.output_ids);
+        tx_infos.push_back(transaction_info);
         transactions.push_back(transaction);
     }
     return transactions;
 }
 
-message::block postgresql_reader::read_block(cppdb::result block_result)
+pq_block pq_reader::read_block(cppdb::result block_result)
 {
+    pq_block_info block_info;
+    block_info.block_id = block_result.get<size_t>("block_id");
+    block_info.depth = block_result.get<size_t>("depth");
+    block_info.span_left = block_result.get<size_t>("span_left");
+    block_info.span_right = block_result.get<size_t>("span_right");
+
     message::block block;
     size_t block_id = block_result.get<size_t>("block_id");
     block.version = block_result.get<uint32_t>("version");
@@ -522,31 +537,22 @@ message::block postgresql_reader::read_block(cppdb::result block_result)
     transactions_statement.reset();
     transactions_statement.bind(block_id);
     cppdb::result transactions_result = transactions_statement.query();
-    block.transactions = read_transactions(transactions_result);
-    return block;
+    block.transactions = 
+        read_transactions(transactions_result, block_info.transactions);
+
+    return std::make_pair(block_info, block);
 }
 
-postgresql_block_info postgresql_reader::read_block_info(
-    cppdb::result result)
-{
-    return {
-        result.get<size_t>("block_id"),
-        result.get<size_t>("depth"),
-        result.get<size_t>("span_left"),
-        result.get<size_t>("span_right"),
-    };
-}
-
-postgresql_validate_block::postgresql_validate_block(cppdb::session sql, 
-    dialect_ptr dialect, const postgresql_block_info& block_info,
+pq_validate_block::pq_validate_block(cppdb::session sql, 
+    dialect_ptr dialect, const pq_block_info& block_info,
     const message::block& current_block)
   : validate_block(dialect, block_info.depth, current_block), 
-    postgresql_reader(sql),
+    pq_reader(sql),
     sql_(sql), block_info_(block_info), current_block_(current_block)
 {
 }
 
-uint32_t postgresql_validate_block::previous_block_bits()
+uint32_t pq_validate_block::previous_block_bits()
 {
     static cppdb::statement previous = sql_.prepare(
         "SELECT bits_head, bits_body \
@@ -569,7 +575,7 @@ uint32_t postgresql_validate_block::previous_block_bits()
     return bits_body + (bits_head << (3*8));
 }
 
-uint64_t postgresql_validate_block::actual_timespan(const uint64_t interval)
+uint64_t pq_validate_block::actual_timespan(const uint64_t interval)
 {
     BITCOIN_ASSERT(block_info_.depth >= interval);
     size_t begin_block_depth = block_info_.depth - interval,
@@ -602,7 +608,7 @@ uint64_t postgresql_validate_block::actual_timespan(const uint64_t interval)
     return result.get<uint32_t>(0);
 }
 
-uint64_t postgresql_validate_block::median_time_past()
+uint64_t pq_validate_block::median_time_past()
 {
     BITCOIN_ASSERT(block_info_.depth > 0);
     size_t median_offset = 5;
@@ -632,28 +638,23 @@ uint64_t postgresql_validate_block::median_time_past()
     return result.get<uint32_t>(0);
 }
 
-bool postgresql_validate_block::validate_transaction(
+bool pq_validate_block::validate_transaction(
     const message::transaction& tx, size_t index_in_block, 
     uint64_t& value_in)
 {
-    static cppdb::statement find_transaction_id = sql_.prepare(
-        "SELECT transaction_id \
-        FROM transactions_parents \
-        WHERE \
-            block_id=? \
-            AND index_in_block=?"
-        );
-    find_transaction_id.reset();
-    find_transaction_id.bind(block_info_.block_id);
-    find_transaction_id.bind(index_in_block);
-    cppdb::result transaction_id_result = find_transaction_id.row();
-    BITCOIN_ASSERT(!transaction_id_result.empty());
-    size_t transaction_id = transaction_id_result.get<size_t>(0);
+    BITCOIN_ASSERT(block_info_.transactions.size() > index_in_block);
+    const pq_transaction_info& tx_info = 
+        block_info_.transactions[index_in_block];
+    size_t transaction_id = tx_info.transaction_id;
 
     BITCOIN_ASSERT(!is_coinbase(tx));
+    BITCOIN_ASSERT(tx.inputs.size() == tx_info.input_ids.size());
     for (size_t input_index = 0; input_index < tx.inputs.size(); ++input_index)
-        if (!connect_input(transaction_id, tx, input_index, value_in))
+    {
+        size_t input_id = tx_info.input_ids[input_index];
+        if (!connect_input(input_id, tx, input_index, value_in))
             return false;
+    }
     // select * from inputs as i1, inputs as i2 where i1.input_id=192 and
     // i1.previous_output_hash=i2.previous_output_hash and
     // i1.previous_output_index=i2.previous_output_index and
@@ -661,69 +662,58 @@ bool postgresql_validate_block::validate_transaction(
     return true;
 }
 
-bool postgresql_validate_block::connect_input(
-    size_t transaction_id, const message::transaction& current_tx, 
+bool pq_validate_block::connect_input(
+    size_t input_id, const message::transaction& current_tx, 
     size_t input_index, uint64_t& value_in)
 {
     BITCOIN_ASSERT(input_index < current_tx.inputs.size());
     const message::transaction_input& input = current_tx.inputs[input_index];
     std::string hash_repr = pretty_hex(input.hash);
-    static cppdb::statement find_previous_tx = sql_.prepare(
+    static cppdb::statement find_previous = sql_.prepare(
         "SELECT \
-            transaction_id, \
-            coinbase \
-        FROM transactions \
-        WHERE transaction_hash=decode(?, 'hex')"
-        );
-    find_previous_tx.reset();
-    find_previous_tx.bind(hash_repr);
-    cppdb::result previous_tx = find_previous_tx.row();
-    if (previous_tx.empty())
-    {
-        log_error(log_domain::validation) 
-            << "Couldn't find the previous transaction " << hash_repr;
-        return false;
-    }
-    size_t previous_tx_id = previous_tx.get<size_t>(0);
-    static cppdb::statement find_previous_output = sql_.prepare(
-        "SELECT \
+            transactions.transaction_id, \
+            coinbase, \
             encode(script, 'hex') AS script, \
             sql_to_internal(value) AS internal_value \
-        FROM outputs \
+        FROM \
+            transactions, \
+            outputs \
         WHERE \
-            transaction_id=? \
+            transaction_hash=decode(?, 'hex') \
+            AND transactions.transaction_id=outputs.transaction_id \
             AND index_in_parent=?"
         );
-    find_previous_output.reset();
-    find_previous_output.bind(previous_tx_id);
-    find_previous_output.bind(input.index);
-    cppdb::result previous_output = find_previous_output.row();
-    if (previous_output.empty())
+    find_previous.reset();
+    find_previous.bind(hash_repr);
+    find_previous.bind(input.index);
+    cppdb::result previous = find_previous.row();
+    if (previous.empty())
     {
         log_error(log_domain::validation) 
             << "Couldn't find the previous output " << input.index 
             << " in transaction" << hash_repr;
         return false;
     }
-    uint64_t output_value = previous_output.get<uint64_t>("internal_value");
+    uint64_t output_value = previous.get<uint64_t>("internal_value");
     if (output_value > max_money())
         return false;
-    if (previous_tx.get<std::string>("coinbase") == "t")
+    if (previous.get<std::string>("coinbase") == "t")
     {
+        size_t previous_tx_id = previous.get<size_t>("transaction_id");
         // Check whether generated coin has sufficiently matured
         size_t depth_difference =
             previous_block_depth(previous_tx_id) - block_info_.depth;
         if (depth_difference < coinbase_maturity)
             return false;
     }
-    std::string raw_script = previous_output.get<std::string>("script");
+    std::string raw_script = previous.get<std::string>("script");
     script output_script = parse_script(bytes_from_bytea(raw_script));
     if (!output_script.run(input.input_script, current_tx, input_index))
     {
         log_error(log_domain::validation) << "Script failed evaluation";
         return false;
     }
-    if (search_double_spends(transaction_id, input, input_index))
+    if (search_double_spends(input_id, input))
     {
         log_error(log_domain::validation) << "Double spent";
         return false;
@@ -734,7 +724,7 @@ bool postgresql_validate_block::connect_input(
     return true;
 }
 
-size_t postgresql_validate_block::previous_block_depth(size_t previous_tx_id)
+size_t pq_validate_block::previous_block_depth(size_t previous_tx_id)
 {
     static cppdb::statement hookup_block = sql_.prepare(
         "SELECT depth \
@@ -757,8 +747,8 @@ size_t postgresql_validate_block::previous_block_depth(size_t previous_tx_id)
     return result.get<size_t>(0);
 }
 
-bool postgresql_validate_block::search_double_spends(size_t transaction_id, 
-    const message::transaction_input& input, size_t input_index)
+bool pq_validate_block::search_double_spends(
+    size_t input_id, const message::transaction_input& input)
 {
     // What is this input id?
     //   WHERE transaction_id=... AND index_in_parent=...
@@ -771,16 +761,12 @@ bool postgresql_validate_block::search_double_spends(size_t transaction_id,
         WHERE \
             previous_output_hash=decode(?, 'hex') \
             AND previous_output_index=? \
-            AND ( \
-                transaction_id != ? \
-                OR index_in_parent != ? \
-            )"
+            AND input_id != ?"
         );
     search_spends.reset();
     search_spends.bind(hash_repr);
     search_spends.bind(input.index);
-    search_spends.bind(transaction_id);
-    search_spends.bind(input_index);
+    search_spends.bind(input_id);
     cppdb::result other_spends = search_spends.query();
     if (other_spends.empty())
         return false;
@@ -791,9 +777,9 @@ bool postgresql_validate_block::search_double_spends(size_t transaction_id,
     return true;
 }
 
-postgresql_blockchain::postgresql_blockchain(
+pq_blockchain::pq_blockchain(
         cppdb::session sql, service_ptr service)
-  : postgresql_organizer(sql), postgresql_reader(sql),
+  : pq_organizer(sql), pq_reader(sql),
     barrier_clearance_level_(400), barrier_timeout_(milliseconds(500)), 
     sql_(sql)
 {
@@ -801,16 +787,16 @@ postgresql_blockchain::postgresql_blockchain(
     reset_state();
 }
 
-void postgresql_blockchain::set_clearance(size_t clearance)
+void pq_blockchain::set_clearance(size_t clearance)
 {
     barrier_clearance_level_ = clearance;
 }
-void postgresql_blockchain::set_timeout(time_duration timeout)
+void pq_blockchain::set_timeout(time_duration timeout)
 {
     barrier_timeout_ = timeout;
 }
 
-void postgresql_blockchain::raise_barrier()
+void pq_blockchain::raise_barrier()
 {
     barrier_level_++;
     if (barrier_level_ > barrier_clearance_level_)
@@ -823,18 +809,18 @@ void postgresql_blockchain::raise_barrier()
         timer_started_ = true;
         timeout_->expires_from_now(barrier_timeout_);
         timeout_->async_wait(std::bind( 
-            &postgresql_blockchain::start_exec, shared_from_this(), _1));
+            &pq_blockchain::start_exec, shared_from_this(), _1));
     }
 }
 
-void postgresql_blockchain::reset_state()
+void pq_blockchain::reset_state()
 {
     timeout_->cancel();
     barrier_level_ = 0;
     timer_started_ = false;
 }
 
-void postgresql_blockchain::start_exec(const boost::system::error_code& ec)
+void pq_blockchain::start_exec(const boost::system::error_code& ec)
 {
     reset_state();
     if (ec == boost::asio::error::operation_aborted)
@@ -849,13 +835,13 @@ void postgresql_blockchain::start_exec(const boost::system::error_code& ec)
     start();
 }
 
-void postgresql_blockchain::start()
+void pq_blockchain::start()
 {                     
     organize();
     validate();
 }
 
-void postgresql_blockchain::validate()
+void pq_blockchain::validate()
 {
     dialect_.reset(new original_dialect);
     static cppdb::statement statement = sql_.prepare(
@@ -883,10 +869,11 @@ void postgresql_blockchain::validate()
     // do verification and set status = valid
     while (result.next())
     {
-        const postgresql_block_info block_info = read_block_info(result);
-        const message::block current_block = read_block(result);
+        pq_block block = read_block(result);
+        const pq_block_info& block_info = std::get<0>(block);
+        const message::block& current_block = std::get<1>(block);
 
-        postgresql_validate_block block_validation(
+        pq_validate_block block_validation(
             sql_, dialect_, block_info, current_block);
 
         if (block_validation.validates())
@@ -903,9 +890,8 @@ void postgresql_blockchain::validate()
     // TODO: Request new blocks + broadcast new blocks
 }
 
-void postgresql_blockchain::finalize_status(
-    const postgresql_block_info& block_info, 
-    const message::block& current_block)
+void pq_blockchain::finalize_status(
+    const pq_block_info& block_info, const message::block& current_block)
 {
     // TODO: together with serialise functions, should be in psql_helper.hpp
     uint32_t bits_head = (current_block.bits >> (8*3)),

@@ -17,9 +17,9 @@ postgresql_storage::postgresql_storage(std::string database,
   : sql_(std::string("postgresql:dbname=") + database + 
         ";user=" + user + ";password=" + password)
 {
-    blockchain_.reset(new postgresql_blockchain(sql_, service()));
+    blockchain_.reset(new pq_blockchain(sql_, service()));
     // Organise/validate old blocks in case of unclean shutdown
-    strand()->post(std::bind(&postgresql_blockchain::start, blockchain_));
+    strand()->post(std::bind(&pq_blockchain::start, blockchain_));
 }
 
 void postgresql_storage::store(const message::inv& inv,
@@ -254,7 +254,7 @@ void postgresql_storage::do_fetch_block_by_depth(size_t block_number,
         handle_fetch(error::object_doesnt_exist, message::block());
         return;
     }
-    message::block block = blockchain_->read_block(block_result);
+    message::block block = std::get<1>(blockchain_->read_block(block_result));
     handle_fetch(std::error_code(), block);
 }
 
@@ -287,7 +287,7 @@ void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash,
         handle_fetch(error::object_doesnt_exist, message::block());
         return;
     }
-    message::block block = blockchain_->read_block(block_result);
+    message::block block = std::get<1>(blockchain_->read_block(block_result));
     handle_fetch(std::error_code(), block);
 }
 
