@@ -4,6 +4,7 @@
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/constants.hpp>
+#include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/sha256.hpp>
@@ -260,7 +261,11 @@ message::transaction read_transaction(deserializer& deserial)
         message::transaction_input input;
         input.hash = deserial.read_hash();
         input.index = deserial.read_4_bytes();
-        input.input_script = read_script(deserial);
+        if (previous_output_is_null(input))
+            input.input_script = 
+                coinbase_script(read_raw_script(deserial));
+        else
+            input.input_script = read_script(deserial);
         input.sequence = deserial.read_4_bytes();
         txn.inputs.push_back(input);
     }

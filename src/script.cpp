@@ -206,6 +206,9 @@ bool script::run_operation(operation op,
 {
     switch (op.code)
     {
+        case opcode::raw_data:
+            return false;
+
         case opcode::special:
         case opcode::pushdata1:
         case opcode::pushdata2:
@@ -267,6 +270,8 @@ std::string opcode_to_string(opcode code)
 {
     switch (code)
     {
+        case opcode::raw_data:
+            return "raw_data";
         case opcode::special:
             return "special";
         case opcode::pushdata1:
@@ -295,7 +300,9 @@ std::string opcode_to_string(opcode code)
 }
 opcode string_to_opcode(std::string code_repr)
 {
-    if (code_repr == "special")
+    if (code_repr == "raw_data")
+        return opcode::raw_data;
+    else if (code_repr == "special")
         return opcode::special;
     else if (code_repr == "pushdata1")
         return opcode::pushdata1;
@@ -350,6 +357,16 @@ size_t number_of_bytes_from_opcode(opcode code, byte raw_byte, Iterator& it)
     }
 }
 
+script coinbase_script(const data_chunk& raw_script)
+{
+    script script_object;
+    operation op;
+    op.code = opcode::raw_data;
+    op.data = raw_script;
+    script_object.push_operation(op);
+    return script_object;
+}
+
 script parse_script(const data_chunk& raw_script)
 {
     script script_object;
@@ -396,8 +413,13 @@ inline data_chunk operation_metadata(const opcode code, size_t data_size)
 }
 data_chunk save_script(const script& scr)
 {
+    const operation_stack& operations = scr.operations();
+    if (operations.empty())
+        return data_chunk();
+    else if (operations[0].code == opcode::raw_data)
+        return operations[0].data;
     data_chunk raw_script;
-    for (operation op: scr.operations())
+    for (const operation& op: scr.operations())
     {
         byte raw_byte = static_cast<byte>(op.code);
         if (op.code == opcode::special)

@@ -438,8 +438,12 @@ message::transaction_input_list postgresql_reader::select_inputs(
         input.hash = 
             hash_from_bytea(result.get<std::string>("previous_output_hash"));
         input.index = result.get<uint32_t>("previous_output_index");
-        input.input_script = 
-            parse_script(bytes_from_bytea(result.get<std::string>("script")));
+        data_chunk raw_script = 
+            bytes_from_bytea(result.get<std::string>("script"));
+        if (previous_output_is_null(input))
+            input.input_script = coinbase_script(raw_script);
+        else
+            input.input_script = parse_script(raw_script);
         input.sequence = result.get<uint32_t>("sequence");
         inputs.push_back(input);
     }

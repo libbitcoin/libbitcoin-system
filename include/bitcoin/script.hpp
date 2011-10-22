@@ -13,6 +13,7 @@ namespace message {
 
 enum class opcode
 {
+    raw_data = 0,
     special = 1,
     pushdata1 = 76,
     pushdata2 = 77,
@@ -93,6 +94,7 @@ std::string opcode_to_string(opcode code);
 opcode string_to_opcode(std::string code_repr);
 
 // TODO: Should be inside the dialect imlementation eventually
+script coinbase_script(const data_chunk& raw_script);
 script parse_script(const data_chunk& raw_script);
 data_chunk save_script(const script& scr);
 

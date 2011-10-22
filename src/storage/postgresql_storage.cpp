@@ -10,6 +10,7 @@
 namespace libbitcoin {
 
 hash_digest hash_from_bytea(std::string byte_stream);
+data_chunk bytes_from_bytea(std::string byte_stream);
 
 postgresql_storage::postgresql_storage(std::string database, 
         std::string user, std::string password)
@@ -362,8 +363,8 @@ void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash,
     std::string transaction_hash_repr = pretty_hex(transaction_hash);
     cppdb::result result = sql_ <<
         "SELECT \
-            *, \
-            sql_to_internal(value) internal_value \
+            encode(script, 'hex') AS script, \
+            sql_to_internal(value) AS internal_value \
         FROM \
             transactions, \
             outputs \
@@ -381,7 +382,7 @@ void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash,
     }
     output.value = result.get<uint64_t>("internal_value");
     output.output_script =
-        script_from_pretty(result.get<std::string>("script"));
+        parse_script(bytes_from_bytea(result.get<std::string>("script")));
     handle_fetch(std::error_code(), output);
 }
 
