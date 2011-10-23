@@ -89,7 +89,7 @@ void pq_organizer::unwind_chain(size_t depth, size_t chain_id)
                 space=0 \
                 AND depth >= ? \
                 AND span_left <= ? \
-                AND span_right >= ? \
+                AND span_right >= ?) \
                 AND status='valid') \
         WHERE chain_id=?"
         );
@@ -883,7 +883,7 @@ void pq_blockchain::validate()
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
             block_id, \
-            depth, \
+            blocks.depth, \
             span_left, \
             span_right, \
             version, \
@@ -893,10 +893,14 @@ void pq_blockchain::validate()
             encode(prev_block_hash, 'hex') AS prev_block_hash, \
             encode(merkle, 'hex') AS merkle, \
             EXTRACT(EPOCH FROM when_created) timest \
-        FROM blocks \
+        FROM \
+            chains, \
+            blocks \
         WHERE \
-            status='orphan' \
-            AND space=0  \
+            space=0  \
+            AND blocks.depth > chains.depth \
+            AND span_left <= chain_id \
+            AND span_right >= chain_id \
         ORDER BY depth ASC"
         );
     statement.reset();
@@ -946,13 +950,6 @@ void pq_blockchain::finalize_status(
         << block_info.depth
         << block_info.span_left
         << block_info.span_right
-        << cppdb::exec;
-
-    sql_ <<
-        "UPDATE blocks \
-        SET status='valid' \
-        WHERE block_id=?"
-        << block_info.block_id
         << cppdb::exec;
 }
 

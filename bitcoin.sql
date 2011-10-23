@@ -58,11 +58,6 @@ CREATE SEQUENCE blocks_space_sequence;
 -- Space 0 is always reserved for the main chain.
 -- Other spaces contain orphan chains
 
-CREATE TYPE block_status_type AS ENUM (
-    'orphan',
-    'valid'
-);
-
 CREATE TABLE blocks (
     block_id INT NOT NULL DEFAULT NEXTVAL('blocks_block_id_sequence') PRIMARY KEY,
     block_hash hash_type NOT NULL UNIQUE,
@@ -77,8 +72,7 @@ CREATE TABLE blocks (
     bits_head INT NOT NULL,
     bits_body INT NOT NULL,
     nonce BIGINT NOT NULL,
-    when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status block_status_type NOT NULL DEFAULT 'orphan'
+    when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Genesis block
@@ -94,8 +88,7 @@ INSERT INTO blocks (
     when_created,
     bits_head,
     bits_body,
-    nonce,
-    status
+    nonce
 ) VALUES (
     decode('00 00 00 00 00 19 d6 68 9c 08 5a e1 65 83 1e 93 4f f7 63 ae 46 a2 a6 c1 72 b3 f1 b6 0a 8c e2 6f', 'hex'),
     0,
@@ -108,8 +101,7 @@ INSERT INTO blocks (
     TO_TIMESTAMP(1231006505),
     29,
     65535,
-    2083236893,
-    'valid'
+    2083236893
 );
 
 CREATE INDEX ON blocks USING btree (block_hash);
