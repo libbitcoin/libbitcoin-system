@@ -781,7 +781,7 @@ pq_blockchain::pq_blockchain(
         cppdb::session sql, service_ptr service)
   : pq_organizer(sql), pq_reader(sql),
     barrier_clearance_level_(400), barrier_timeout_(milliseconds(500)), 
-    sql_(sql)
+    blocks_buffer_(500), sql_(sql)
 {
     timeout_.reset(new deadline_timer(*service));
     reset_state();
@@ -796,6 +796,10 @@ void pq_blockchain::set_timeout(time_duration timeout)
     barrier_timeout_ = timeout;
 }
 
+void pq_blockchain::buffer_block(const pq_block& buffer_block)
+{
+    blocks_buffer_.push_back(buffer_block);
+}
 void pq_blockchain::raise_barrier()
 {
     barrier_level_++;
@@ -841,6 +845,25 @@ void pq_blockchain::start()
     validate();
 }
 
+pq_block pq_blockchain::fetch_or_read_block(cppdb::result result)
+{
+    size_t block_id = result.get<size_t>("block_id");
+    // Search our cache...
+    for (auto it = blocks_buffer_.begin(); it != blocks_buffer_.end(); ++it)
+    {
+        pq_block_info& block_info = std::get<0>(*it);
+        if (block_info.block_id == block_id)
+        {
+            block_info.depth = result.get<size_t>("depth");
+            block_info.span_left = result.get<size_t>("span_left");
+            block_info.span_right = result.get<size_t>("span_right");
+            return *it;
+        }
+    }
+    // ... else read it from the database
+    return read_block(result);
+}
+
 void pq_blockchain::validate()
 {
     dialect_.reset(new original_dialect);
@@ -869,7 +892,7 @@ void pq_blockchain::validate()
     // do verification and set status = valid
     while (result.next())
     {
-        pq_block block = read_block(result);
+        pq_block block = fetch_or_read_block(result);
         const pq_block_info& block_info = std::get<0>(block);
         const message::block& current_block = std::get<1>(block);
 

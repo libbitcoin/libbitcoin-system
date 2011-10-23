@@ -61,11 +61,12 @@ private:
 
     // ------------
 
-    void insert(const message::transaction_input& input,
+    size_t insert(const message::transaction_input& input,
             size_t transaction_id, size_t index_in_parent);
-    void insert(const message::transaction_output& output,
+    size_t insert(const message::transaction_output& output,
             size_t transaction_id, size_t index_in_parent);
-    size_t insert(const message::transaction& transaction);
+    size_t insert(const message::transaction& transaction,
+        std::vector<size_t>& input_ids, std::vector<size_t>& output_ids);
 
     postgresql_blockchain_ptr blockchain_;
     cppdb::session sql_;

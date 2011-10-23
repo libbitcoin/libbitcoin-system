@@ -50,50 +50,61 @@ void postgresql_storage::do_store_inv(const message::inv& inv,
     handle_store(std::error_code());
 }
 
-void postgresql_storage::insert(const message::transaction_input& input,
+size_t postgresql_storage::insert(const message::transaction_input& input,
         size_t transaction_id, size_t index_in_parent)
 {
-    std::string hash = pretty_hex(input.hash);
-    sql_ <<
-        "INSERT INTO inputs (transaction_id, index_in_parent, \
+    std::string hash = pretty_hex(input.hash),
+        pretty_script = pretty_hex(save_script(input.input_script));
+    static cppdb::statement statement = sql_.prepare(
+        "INSERT INTO inputs (input_id, transaction_id, index_in_parent, \
             script, previous_output_hash, previous_output_index, sequence) \
-        VALUES (?, ?, decode(?, 'hex'), decode(?, 'hex'), ?, ?)"
-        << transaction_id
-        << index_in_parent
-        << pretty_hex(save_script(input.input_script))
-        << hash
-        << input.index
-        << input.sequence
-        << cppdb::exec;
+        VALUES (DEFAULT, ?, ?, decode(?, 'hex'), decode(?, 'hex'), ?, ?) \
+        RETURNING input_id"
+        );
+    statement.reset();
+    statement.bind(transaction_id);
+    statement.bind(index_in_parent);
+    statement.bind(pretty_script);
+    statement.bind(hash);
+    statement.bind(input.index);
+    statement.bind(input.sequence);
+    return statement.row().get<size_t>(0);
 }
 
-void postgresql_storage::insert(const message::transaction_output& output,
+size_t postgresql_storage::insert(const message::transaction_output& output,
         size_t transaction_id, size_t index_in_parent)
 {
-    sql_ <<
+    std::string pretty_script = pretty_hex(save_script(output.output_script));
+    static cppdb::statement statement = sql_.prepare(
         "INSERT INTO outputs ( \
-            transaction_id, index_in_parent, script, value) \
-        VALUES (?, ?, decode(?, 'hex'), internal_to_sql(?))"
-        << transaction_id
-        << index_in_parent
-        << pretty_hex(save_script(output.output_script))
-        << output.value
-        << cppdb::exec;
+            output_id, transaction_id, index_in_parent, script, value) \
+        VALUES (DEFAULT, ?, ?, decode(?, 'hex'), internal_to_sql(?)) \
+        RETURNING output_id"
+        );
+    statement.reset();
+    statement.bind(transaction_id);
+    statement.bind(index_in_parent);
+    statement.bind(pretty_script);
+    statement.bind(output.value);
+    return statement.row().get<size_t>(0);
 }
 
-size_t postgresql_storage::insert(const message::transaction& transaction)
+size_t postgresql_storage::insert(const message::transaction& transaction,
+    std::vector<size_t>& input_ids, std::vector<size_t>& output_ids)
 {
     hash_digest transaction_hash = hash_transaction(transaction);
     std::string transaction_hash_repr = pretty_hex(transaction_hash);
     // We use special function to insert txs. 
     // Some blocks contain duplicates. See SQL for more details.
-    cppdb::result result = sql_ <<
+    static cppdb::statement statement = sql_.prepare(
         "SELECT insert_transaction(decode(?, 'hex'), ?, ?, ?)"
-        << transaction_hash_repr
-        << transaction.version
-        << transaction.locktime
-        << is_coinbase(transaction)
-        << cppdb::row;
+        );
+    statement.reset();
+    statement.bind(transaction_hash_repr);
+    statement.bind(transaction.version);
+    statement.bind(transaction.locktime);
+    statement.bind(is_coinbase(transaction));
+    cppdb::result result = statement.row();
     size_t transaction_id = result.get<size_t>(0);
     if (transaction_id == 0)
     {
@@ -107,9 +118,15 @@ size_t postgresql_storage::insert(const message::transaction& transaction)
     }
 
     for (size_t i = 0; i < transaction.inputs.size(); ++i)
-        insert(transaction.inputs[i], transaction_id, i);
+    {
+        size_t input_id = insert(transaction.inputs[i], transaction_id, i);
+        input_ids.push_back(input_id);
+    }
     for (size_t i = 0; i < transaction.outputs.size(); ++i)
-        insert(transaction.outputs[i], transaction_id, i);
+    {
+        size_t output_id = insert(transaction.outputs[i], transaction_id, i);
+        output_ids.push_back(output_id);
+    }
     return transaction_id;
 }
 
@@ -123,7 +140,8 @@ void postgresql_storage::store(const message::transaction& transaction,
 void postgresql_storage::do_store_transaction(
         const message::transaction& transaction, store_handler handle_store)
 {
-    insert(transaction);
+    std::vector<size_t> null_ids;
+    insert(transaction, null_ids, null_ids);
     handle_store(std::error_code());
 }
 
@@ -199,21 +217,29 @@ void postgresql_storage::do_store_block(const message::block& block,
     statement.bind(block.nonce);
 
     result = statement.row();
-    size_t block_id = result.get<size_t>(0);
+    pq_block_info block_info;
+    block_info.block_id = result.get<size_t>(0);
     for (size_t i = 0; i < block.transactions.size(); ++i)
     {
         message::transaction transaction = block.transactions[i];
-        size_t transaction_id = insert(transaction);
+        pq_transaction_info tx_info;
+        tx_info.transaction_id =
+            insert(transaction, tx_info.input_ids, tx_info.output_ids);
         // Create block <-> txn mapping
-        sql_ << "INSERT INTO transactions_parents ( \
-                    transaction_id, block_id, index_in_block) \
-                VALUES (?, ?, ?)"
-            << transaction_id << block_id << i << cppdb::exec;
+        static cppdb::statement link_txs = sql_.prepare(
+            "INSERT INTO transactions_parents ( \
+                transaction_id, block_id, index_in_block) \
+            VALUES (?, ?, ?)"
+            );
+        link_txs.reset();
+        link_txs.bind(tx_info.transaction_id);
+        link_txs.bind(block_info.block_id);
+        link_txs.bind(i);
+        link_txs.exec();
+        block_info.transactions.push_back(tx_info);
     }
-    // Finalise block
-    sql_ << "UPDATE blocks SET status='orphan' WHERE block_id=?"
-        << block_id << cppdb::exec;
     blockchain_->raise_barrier();
+    blockchain_->buffer_block(std::make_pair(block_info, block));
     guard.commit();
     handle_store(std::error_code());
 }

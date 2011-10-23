@@ -59,7 +59,6 @@ CREATE SEQUENCE blocks_space_sequence;
 -- Other spaces contain orphan chains
 
 CREATE TYPE block_status_type AS ENUM (
-    'new',
     'orphan',
     'valid'
 );
@@ -79,7 +78,7 @@ CREATE TABLE blocks (
     bits_body INT NOT NULL,
     nonce BIGINT NOT NULL,
     when_found TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status block_status_type NOT NULL DEFAULT 'new'
+    status block_status_type NOT NULL DEFAULT 'orphan'
 );
 
 -- Genesis block
