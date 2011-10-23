@@ -104,10 +104,9 @@ INSERT INTO blocks (
     2083236893
 );
 
-CREATE INDEX ON blocks USING btree (block_hash);
+CREATE INDEX ON blocks (block_hash);
 CREATE INDEX ON blocks (space);
 CREATE INDEX ON blocks (depth);
-CREATE INDEX ON blocks (status, space);
 
 DROP TABLE IF EXISTS chains;
 DROP VIEW IF EXISTS main_chain;

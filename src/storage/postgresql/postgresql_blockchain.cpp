@@ -525,7 +525,6 @@ pq_block pq_reader::read_block(cppdb::result block_result)
     block_info.span_right = block_result.get<size_t>("span_right");
 
     message::block block;
-    size_t block_id = block_result.get<size_t>("block_id");
     block.version = block_result.get<uint32_t>("version");
     block.timestamp = block_result.get<uint32_t>("timest");
     uint32_t bits_head = block_result.get<uint32_t>("bits_head"),
@@ -549,7 +548,7 @@ pq_block pq_reader::read_block(cppdb::result block_result)
         ORDER BY index_in_block ASC"
         );
     transactions_statement.reset();
-    transactions_statement.bind(block_id);
+    transactions_statement.bind(block_info.block_id);
     cppdb::result transactions_result = transactions_statement.query();
     block.transactions = 
         read_transactions(transactions_result, block_info.transactions);
@@ -873,13 +872,6 @@ pq_block pq_blockchain::fetch_or_read_block(cppdb::result result)
             return *it;
         }
     }
-    // ... else read it from the database
-    return read_block(result);
-}
-
-void pq_blockchain::validate()
-{
-    dialect_.reset(new original_dialect);
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
             block_id, \
@@ -893,6 +885,25 @@ void pq_blockchain::validate()
             encode(prev_block_hash, 'hex') AS prev_block_hash, \
             encode(merkle, 'hex') AS merkle, \
             EXTRACT(EPOCH FROM when_created) timest \
+        FROM blocks \
+        WHERE block_id=?"
+        );
+    statement.reset();
+    statement.bind(block_id);
+    result = statement.row();
+    // ... else read it from the database
+    return read_block(result);
+}
+
+void pq_blockchain::validate()
+{
+    dialect_.reset(new original_dialect);
+    static cppdb::statement statement = sql_.prepare(
+        "SELECT DISTINCT ON (block_id) \
+            block_id, \
+            blocks.depth, \
+            span_left, \
+            span_right \
         FROM \
             chains, \
             blocks \
@@ -901,7 +912,7 @@ void pq_blockchain::validate()
             AND blocks.depth > chains.depth \
             AND span_left <= chain_id \
             AND span_right >= chain_id \
-        ORDER BY depth ASC"
+        ORDER BY block_id, depth ASC"
         );
     statement.reset();
     cppdb::result result = statement.query();
