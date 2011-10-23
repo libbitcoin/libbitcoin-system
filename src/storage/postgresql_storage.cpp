@@ -12,6 +12,9 @@ namespace libbitcoin {
 hash_digest hash_from_bytea(std::string byte_stream);
 data_chunk bytes_from_bytea(std::string byte_stream);
 
+uint32_t extract_bits_head(uint32_t bits);
+uint32_t extract_bits_body(uint32_t bits);
+
 postgresql_storage::postgresql_storage(std::string database, 
         std::string user, std::string password)
   : sql_(std::string("postgresql:dbname=") + database + 
@@ -210,8 +213,8 @@ void postgresql_storage::do_store_block(const message::block& block,
     statement.bind(prev_block_repr);
     statement.bind(merkle_repr);
     statement.bind(block.timestamp);
-    uint32_t bits_head = (block.bits >> (8*3)),
-        bits_body = (block.bits & 0x00ffffff);
+    uint32_t bits_head = extract_bits_head(block.bits),
+        bits_body = extract_bits_body(block.bits);
     statement.bind(bits_head);
     statement.bind(bits_body);
     statement.bind(block.nonce);

@@ -35,6 +35,20 @@ inline hash_digest hash_from_bytea(std::string byte_stream)
     return hash_from_pretty(spaced_bytes(byte_stream));
 }
 
+inline uint32_t combine_bits(uint32_t bits_head, uint32_t bits_body)
+{
+    return bits_body + (bits_head << (3*8));
+}
+
+inline uint32_t extract_bits_head(uint32_t bits)
+{
+    return bits >> (8*3);
+}
+inline uint32_t extract_bits_body(uint32_t bits)
+{
+    return bits & 0x00ffffff;
+}
+
 pq_organizer::pq_organizer(cppdb::session sql)
   : sql_(sql)
 {
@@ -516,7 +530,7 @@ pq_block pq_reader::read_block(cppdb::result block_result)
     block.timestamp = block_result.get<uint32_t>("timest");
     uint32_t bits_head = block_result.get<uint32_t>("bits_head"),
             bits_body = block_result.get<uint32_t>("bits_body");
-    block.bits = bits_body + (bits_head << (3*8));
+    block.bits = combine_bits(bits_head, bits_body);
     block.nonce = block_result.get<uint32_t>("nonce");
 
     block.prev_block = 
@@ -571,8 +585,7 @@ uint32_t pq_validate_block::previous_block_bits()
     BITCOIN_ASSERT(!result.empty());
     uint32_t bits_head = result.get<uint32_t>("bits_head"),
             bits_body = result.get<uint32_t>("bits_body");
-    // TODO: Should use shared function with read_block(...)
-    return bits_body + (bits_head << (3*8));
+    return combine_bits(bits_head, bits_body);
 }
 
 uint64_t pq_validate_block::actual_timespan(const uint64_t interval)
@@ -916,9 +929,8 @@ void pq_blockchain::validate()
 void pq_blockchain::finalize_status(
     const pq_block_info& block_info, const message::block& current_block)
 {
-    // TODO: together with serialise functions, should be in psql_helper.hpp
-    uint32_t bits_head = (current_block.bits >> (8*3)),
-        bits_body = (current_block.bits & 0x00ffffff);
+    uint32_t bits_head = extract_bits_head(current_block.bits),
+        bits_body = extract_bits_body(current_block.bits);
     // TODO: Should be prepared statements. Too lazy ATM
     // TODO: This should be atomic
     sql_ <<
