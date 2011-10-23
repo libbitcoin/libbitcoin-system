@@ -133,7 +133,7 @@ obj/nettest.o: tests/net.cpp
 obj/bdb_storage.o: src/storage/bdb/bdb_storage.cpp include/bitcoin/storage/bdb_storage.hpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/postgresql_storage.o: src/storage/postgresql_storage.cpp include/bitcoin/storage/postgresql_storage.hpp 
+obj/postgresql_storage.o: src/storage/postgresql/postgresql_storage.cpp include/bitcoin/storage/postgresql_storage.hpp 
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/elliptic_curve_key.o: src/util/elliptic_curve_key.cpp include/bitcoin/util/elliptic_curve_key.hpp
@@ -239,7 +239,7 @@ big-number-test: bin/tests/big-number-test
 
 poller: bin/examples/poller
 
-obj/postgresql_blockchain.o: src/storage/postgresql_blockchain.cpp src/storage/postgresql_blockchain.hpp
+obj/postgresql_blockchain.o: src/storage/postgresql/postgresql_blockchain.cpp src/storage/postgresql/postgresql_blockchain.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/blockchain.o: tests/blockchain.cpp
