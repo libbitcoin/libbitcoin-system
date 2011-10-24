@@ -2,7 +2,6 @@
 #define LIBBITCOIN_STORAGE_POSTGRESQL_BLOCKCHAIN_H
 
 #include <tuple>
-#include <boost/circular_buffer.hpp>
 #include <cppdb/frontend.h>
 
 #include <bitcoin/messages.hpp>
@@ -142,7 +141,7 @@ private:
     bool timer_started_;
     size_t barrier_level_;
 
-    boost::circular_buffer<pq_block> blocks_buffer_;
+    std::vector<pq_block> blocks_buffer_;
 
     dialect_ptr dialect_;
     cppdb::session sql_;

@@ -793,7 +793,7 @@ pq_blockchain::pq_blockchain(
         cppdb::session sql, service_ptr service)
   : pq_organizer(sql), pq_reader(sql),
     barrier_clearance_level_(400), barrier_timeout_(milliseconds(500)), 
-    blocks_buffer_(500), sql_(sql)
+    sql_(sql)
 {
     timeout_.reset(new deadline_timer(*service));
     reset_state();
@@ -872,6 +872,7 @@ pq_block pq_blockchain::fetch_or_read_block(cppdb::result result)
             return *it;
         }
     }
+    log_info() << "Block not cached in ring buffer.";
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
             block_id, \
@@ -938,7 +939,7 @@ void pq_blockchain::validate()
             break;
         }
     }
-    // TODO: Request new blocks + broadcast new blocks
+    blocks_buffer_.clear();
 }
 
 void pq_blockchain::finalize_status(
