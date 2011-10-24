@@ -557,11 +557,11 @@ pq_block pq_reader::read_block(cppdb::result block_result)
 }
 
 pq_validate_block::pq_validate_block(cppdb::session sql, 
-    dialect_ptr dialect, const pq_block_info& block_info,
-    const message::block& current_block)
+    dialect_ptr dialect, pq_reader_ptr reader, 
+    const pq_block_info& block_info, const message::block& current_block)
   : validate_block(dialect, block_info.depth, current_block), 
-    pq_reader(sql),
-    sql_(sql), block_info_(block_info), current_block_(current_block)
+    sql_(sql), reader_(reader), 
+    block_info_(block_info), current_block_(current_block)
 {
 }
 
@@ -791,10 +791,11 @@ bool pq_validate_block::search_double_spends(
 
 pq_blockchain::pq_blockchain(
         cppdb::session sql, service_ptr service)
-  : pq_organizer(sql), pq_reader(sql),
-    barrier_clearance_level_(400), barrier_timeout_(milliseconds(500)), 
+  : barrier_clearance_level_(500), barrier_timeout_(milliseconds(500)), 
     sql_(sql)
 {
+    organizer_.reset(new pq_organizer(sql));
+    reader_.reset(new pq_reader(sql));
     timeout_.reset(new deadline_timer(*service));
     reset_state();
 }
@@ -853,7 +854,7 @@ void pq_blockchain::start_exec(const boost::system::error_code& ec)
 
 void pq_blockchain::start()
 {                     
-    organize();
+    organizer_->organize();
     validate();
 }
 
@@ -893,7 +894,7 @@ pq_block pq_blockchain::fetch_or_read_block(cppdb::result result)
     statement.bind(block_id);
     result = statement.row();
     // ... else read it from the database
-    return read_block(result);
+    return reader_->read_block(result);
 }
 
 void pq_blockchain::validate()
@@ -926,7 +927,7 @@ void pq_blockchain::validate()
         const message::block& current_block = std::get<1>(block);
 
         pq_validate_block block_validation(
-            sql_, dialect_, block_info, current_block);
+            sql_, dialect_, reader_, block_info, current_block);
 
         if (block_validation.validates())
             finalize_status(block_info, current_block);
@@ -963,6 +964,11 @@ void pq_blockchain::finalize_status(
         << block_info.span_left
         << block_info.span_right
         << cppdb::exec;
+}
+
+pq_reader_ptr pq_blockchain::reader()
+{
+    return reader_;
 }
 
 } // libbitcoin

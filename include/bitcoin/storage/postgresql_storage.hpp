@@ -12,7 +12,7 @@
 namespace libbitcoin {
 
 class pq_blockchain;
-typedef shared_ptr<pq_blockchain> postgresql_blockchain_ptr;
+typedef shared_ptr<pq_blockchain> pq_blockchain_ptr;
 
 class postgresql_storage
   : public storage,
@@ -68,7 +68,7 @@ private:
     size_t insert(const message::transaction& transaction,
         std::vector<size_t>& input_ids, std::vector<size_t>& output_ids);
 
-    postgresql_blockchain_ptr blockchain_;
+    pq_blockchain_ptr blockchain_;
     cppdb::session sql_;
 };
 

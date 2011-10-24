@@ -283,7 +283,8 @@ void postgresql_storage::do_fetch_block_by_depth(size_t block_number,
         handle_fetch(error::object_doesnt_exist, message::block());
         return;
     }
-    message::block block = std::get<1>(blockchain_->read_block(block_result));
+    message::block block = 
+        std::get<1>(blockchain_->reader()->read_block(block_result));
     handle_fetch(std::error_code(), block);
 }
 
@@ -316,7 +317,8 @@ void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash,
         handle_fetch(error::object_doesnt_exist, message::block());
         return;
     }
-    message::block block = std::get<1>(blockchain_->read_block(block_result));
+    message::block block = 
+        std::get<1>(blockchain_->reader()->read_block(block_result));
     handle_fetch(std::error_code(), block);
 }
 

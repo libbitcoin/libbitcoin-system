@@ -15,9 +15,14 @@ using boost::posix_time::seconds;
 using boost::posix_time::time_duration;
 using std::placeholders::_1;
 
+class pq_organizer;
+class pq_reader;
+typedef std::shared_ptr<pq_organizer> pq_organizer_ptr;
+typedef std::shared_ptr<pq_reader> pq_reader_ptr;
+
 class pq_organizer
 {
-protected:
+public:
     pq_organizer(cppdb::session sql);
     void delete_branch(size_t space, size_t depth, 
         size_t span_left, size_t span_right);
@@ -80,12 +85,11 @@ private:
 };
 
 class pq_validate_block
-  : public validate_block,
-    public pq_reader
+  : public validate_block
 {
 public:
     pq_validate_block(
-        cppdb::session sql, dialect_ptr,
+        cppdb::session sql, dialect_ptr, pq_reader_ptr reader,
         const pq_block_info& block_info,
         const message::block& current_block);
 protected:
@@ -103,14 +107,13 @@ private:
         size_t input_id, const message::transaction_input& input);
 
     cppdb::session sql_;
+    pq_reader_ptr reader_;
     const pq_block_info& block_info_;
     const message::block& current_block_;
 };
 
 class pq_blockchain
-  : public pq_organizer,
-    public pq_reader,
-    public std::enable_shared_from_this<pq_blockchain>
+  : public std::enable_shared_from_this<pq_blockchain>
 {
 public:
     pq_blockchain(cppdb::session sql, service_ptr service);
@@ -122,6 +125,8 @@ public:
 
     void buffer_block(const pq_block& buffer_block);
     void raise_barrier();
+
+    pq_reader_ptr reader();
     
 private: 
     void reset_state();
@@ -143,6 +148,8 @@ private:
 
     std::vector<pq_block> blocks_buffer_;
 
+    pq_organizer_ptr organizer_;
+    pq_reader_ptr reader_;
     dialect_ptr dialect_;
     cppdb::session sql_;
 };
