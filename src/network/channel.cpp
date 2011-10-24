@@ -25,16 +25,13 @@ using boost::asio::buffer;
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
-channel_handle channel_pimpl::chan_id_counter = 0;
-
 channel_pimpl::channel_pimpl(const init_data& dat)
  : socket_(dat.socket), network_(dat.parent_gateway),
         translator_(dat.translator)
 {
     // Unique IDs are assigned to channels by incrementing a shared counter
     // among instances.
-    channel_id_ = chan_id_counter;
-    chan_id_counter++;
+    channel_id_ = rand();
 
     timeout_.reset(new deadline_timer(*dat.service));
     read_header();
@@ -280,7 +277,7 @@ message::version channel_pimpl::create_version_message()
     version.addr_you.services = version.services;
     version.addr_you.ip_addr = decltype(version.addr_you.ip_addr){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 10, 0, 0, 1};
     version.addr_you.port = 8333;
-    version.nonce = 0xdeadbeef;
+    version.nonce = channel_id_;
     version.sub_version_num = "";
     version.start_height = 0;
     return version;

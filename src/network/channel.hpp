@@ -42,7 +42,6 @@ public:
     channel_handle get_id() const;
 
 private:
-    static channel_handle chan_id_counter;
     channel_handle channel_id_;
 
     void read_header();

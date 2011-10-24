@@ -21,9 +21,7 @@ using boost::asio::deadline_timer;
 class dialect;
 class storage;
 class kernel;
-namespace net {
-    class network;
-} // net
+class network;
 class clock;
 
 typedef shared_ptr<dialect> dialect_ptr;
