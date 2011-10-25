@@ -264,5 +264,47 @@ void postgresql_storage::do_fetch_block_locator(
     handle_fetch(std::error_code(), locator);
 }
 
+void postgresql_storage::fetch_balance(const data_chunk& address,
+    fetch_handler_balance handle_fetch)
+{
+    strand()->post(std::bind(
+        &postgresql_storage::do_fetch_balance, shared_from_this(),
+            address, handle_fetch));
+}
+void postgresql_storage::do_fetch_balance(const data_chunk& address,
+    fetch_handler_balance handle_fetch)
+{
+    std::string total_script = "76 a9 14 " + pretty_hex(address) + " 88 ac";
+    static cppdb::statement statement = sql_.prepare(
+        "WITH outs AS ( \
+            SELECT \
+                transaction_hash,  \
+                outputs.index_in_parent,  \
+                outputs.value \
+            FROM \
+            outputs, \
+            transactions \
+            WHERE  \
+                script=decode(?, 'hex') \
+                AND outputs.transaction_id=transactions.transaction_id \
+            ) \
+        SELECT \
+            sql_to_internal(SUM(outs.value)) \
+        FROM outs \
+        LEFT JOIN inputs \
+        ON \
+            inputs.previous_output_hash=transaction_hash \
+            AND inputs.previous_output_index=outs.index_in_parent \
+        WHERE inputs IS NULL"
+        );
+    statement.reset();
+    statement.bind(total_script);
+    cppdb::result result = statement.row();
+    uint64_t value = 0;
+    if (!result.is_null(0))
+        value = result.get<uint64_t>(0);
+    handle_fetch(std::error_code(), value);
+}
+
 } // libbitcoin
 

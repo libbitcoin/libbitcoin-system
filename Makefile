@@ -55,6 +55,14 @@ obj/poller.o: examples/poller.cpp
 bin/examples/poller: libbitcoin obj/poller.o
 	$(CXX) -o bin/examples/poller obj/poller.o $(LIBBITCOIN) $(LIBS)
 
+obj/accounting.o: examples/accounting.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/examples/accounting: libbitcoin obj/accounting.o
+	$(CXX) -o bin/examples/accounting obj/accounting.o $(LIBBITCOIN) $(LIBS)
+
+accounting: bin/examples/accounting
+
 bin/tests/nettest: libbitcoin obj/nettest.o
 	$(CXX) -o bin/tests/nettest obj/nettest.o $(LIBBITCOIN) $(LIBS)
 

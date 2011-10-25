@@ -23,11 +23,16 @@ public:
         const std::error_code&, const message::block_locator&)>
             fetch_handler_block_locator;
 
+    typedef std::function<void (const std::error_code&, uint64_t)>
+            fetch_handler_balance;
+
     virtual void store(const message::block& block, 
             store_handler handle_store) = 0;
 
     virtual void fetch_block_locator(
             fetch_handler_block_locator handle_fetch) = 0;
+    virtual void fetch_balance(const data_chunk& address,
+        fetch_handler_balance handle_fetch) = 0;
 };
 
 } // libbitcoin

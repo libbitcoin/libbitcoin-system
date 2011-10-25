@@ -232,6 +232,7 @@ CREATE TABLE outputs (
 );
 
 CREATE INDEX ON outputs (transaction_id);
+CREATE INDEX ON outputs (script);
 
 CREATE TABLE inputs (
     input_id INT NOT NULL DEFAULT NEXTVAL('inputs_input_id_sequence') PRIMARY KEY,
@@ -244,5 +245,5 @@ CREATE TABLE inputs (
 );
 
 CREATE INDEX ON inputs (transaction_id);
-CREATE INDEX ON inputs (previous_output_hash);
+CREATE INDEX ON inputs (previous_output_hash, previous_output_index);
 
