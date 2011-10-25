@@ -41,17 +41,12 @@ public:
     storage_ptr get_storage();
 
 private:
-    void reset_inventory_poll();
-    void request_inventories(const boost::system::error_code& ec);
-    void accept_inventories(const std::error_code& ec, 
-            const message::inv_list& invs);
+    void accept_inventories(const message::inv_list& invs);
     void send_to_random(channel_handle chandle,
             const message::getdata& request_message);
 
     network_ptr network_component_;
     storage_ptr storage_component_;
-
-    deadline_timer_ptr poll_invs_timeout_;
 };
 
 typedef shared_ptr<kernel> kernel_ptr;

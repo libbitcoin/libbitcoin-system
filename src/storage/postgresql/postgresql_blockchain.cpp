@@ -923,8 +923,8 @@ void pq_blockchain::validate()
     while (result.next())
     {
         pq_block block = fetch_or_read_block(result);
-        const pq_block_info& block_info = std::get<0>(block);
-        const message::block& current_block = std::get<1>(block);
+        const pq_block_info& block_info = block.first;
+        const message::block& current_block = block.second;
 
         pq_validate_block block_validation(
             sql_, dialect_, reader_, block_info, current_block);

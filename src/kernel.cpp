@@ -86,7 +86,7 @@ bool kernel::recv_message(channel_handle, const message::addr& message)
     return true;
 }
 
-bool kernel::recv_message(channel_handle, const message::inv& message)
+bool kernel::recv_message(channel_handle chandle, const message::inv& message)
 {
     message::inv request_invs;
     for (const message::inv_vect curr_inv: message.invs)
@@ -99,10 +99,7 @@ bool kernel::recv_message(channel_handle, const message::inv& message)
             request_invs.invs.push_back(curr_inv);
     }
     if (request_invs.invs.size() > 0)
-    {
-        storage_component_->store(request_invs, null);
-        accept_inventories(std::error_code(), request_invs.invs);
-    }
+        accept_inventories(request_invs.invs);
     return true;
 }
 
@@ -119,27 +116,6 @@ void kernel::handle_connect(channel_handle)
 void kernel::register_storage(storage_ptr stor_comp)
 {
     storage_component_ = stor_comp;
-    poll_invs_timeout_.reset(new deadline_timer(*service()));
-    reset_inventory_poll();
-}
-
-void kernel::reset_inventory_poll()
-{
-    poll_invs_timeout_->cancel();
-    poll_invs_timeout_->expires_from_now(poll_inv_timeout);
-    poll_invs_timeout_->async_wait(std::bind(
-            &kernel::request_inventories, shared_from_this(),
-                std::placeholders::_1));
-}
-
-void kernel::request_inventories(const boost::system::error_code& ec)
-{
-    if (ec)
-        return;
-    storage_component_->fetch_inventories(
-        std::bind(&kernel::accept_inventories, shared_from_this(), 
-            std::placeholders::_1, std::placeholders::_2));
-    reset_inventory_poll();
 }
 
 storage_ptr kernel::get_storage()
@@ -147,16 +123,13 @@ storage_ptr kernel::get_storage()
     return storage_component_;
 }
 
-void kernel::accept_inventories(const std::error_code& ec, 
-    const message::inv_list& invs)
+void kernel::accept_inventories(const message::inv_list& invs)
 {
-    if (ec)
-        return;
     message::getdata request_message;
     request_message.invs = invs;
     network_component_->get_random_handle(std::bind(
-            &kernel::send_to_random, shared_from_this(),
-                std::placeholders::_1, request_message));
+        &kernel::send_to_random, shared_from_this(),
+            std::placeholders::_1, request_message));
 }
 
 void kernel::send_to_random(channel_handle chandle,

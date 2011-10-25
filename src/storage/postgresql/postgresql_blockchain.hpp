@@ -1,7 +1,6 @@
 #ifndef LIBBITCOIN_STORAGE_POSTGRESQL_BLOCKCHAIN_H
 #define LIBBITCOIN_STORAGE_POSTGRESQL_BLOCKCHAIN_H
 
-#include <tuple>
 #include <cppdb/frontend.h>
 
 #include <bitcoin/messages.hpp>
@@ -63,7 +62,7 @@ struct pq_block_info
     pq_transaction_info_list transactions;
 };
 
-typedef std::tuple<pq_block_info, message::block> pq_block;
+typedef std::pair<pq_block_info, message::block> pq_block;
 
 class pq_reader
 {

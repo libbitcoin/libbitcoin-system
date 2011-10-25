@@ -16,7 +16,7 @@ uint32_t extract_bits_head(uint32_t bits);
 uint32_t extract_bits_body(uint32_t bits);
 
 postgresql_storage::postgresql_storage(std::string database, 
-        std::string user, std::string password)
+    std::string user, std::string password)
   : sql_(std::string("postgresql:dbname=") + database + 
         ";user=" + user + ";password=" + password)
 {
@@ -25,36 +25,8 @@ postgresql_storage::postgresql_storage(std::string database,
     strand()->post(std::bind(&pq_blockchain::start, blockchain_));
 }
 
-void postgresql_storage::store(const message::inv& inv,
-        store_handler handle_store)
-{
-    // temporarily disabled
-    //strand()->post(std::bind(
-    //    &postgresql_storage::do_store_inv, shared_from_this(), 
-    //        inv, handle_store));
-}
-void postgresql_storage::do_store_inv(const message::inv& inv,
-        store_handler handle_store)
-{
-    cppdb::statement stat = sql_ <<
-        "INSERT INTO inventory_requests (type, hash) \
-        VALUES (?, ?)";
-    for (message::inv_vect ivv: inv.invs)
-    {
-        stat.reset();
-        if (ivv.type == message::inv_type::transaction)
-            stat.bind("transaction");
-        else if (ivv.type == message::inv_type::block)
-            stat.bind("block");
-        std::string byte_stream = pretty_hex(ivv.hash);
-        stat.bind(byte_stream);
-        stat.exec();
-    }
-    handle_store(std::error_code());
-}
-
 size_t postgresql_storage::insert(const message::transaction_input& input,
-        size_t transaction_id, size_t index_in_parent)
+    size_t transaction_id, size_t index_in_parent)
 {
     std::string hash = pretty_hex(input.hash),
         pretty_script = pretty_hex(save_script(input.input_script));
@@ -131,21 +103,6 @@ size_t postgresql_storage::insert(const message::transaction& transaction,
         output_ids.push_back(output_id);
     }
     return transaction_id;
-}
-
-void postgresql_storage::store(const message::transaction& transaction,
-        store_handler handle_store)
-{
-    strand()->post(std::bind(
-        &postgresql_storage::do_store_transaction, shared_from_this(),
-            transaction, handle_store));
-}
-void postgresql_storage::do_store_transaction(
-        const message::transaction& transaction, store_handler handle_store)
-{
-    std::vector<size_t> null_ids;
-    insert(transaction, null_ids, null_ids);
-    handle_store(std::error_code());
 }
 
 void postgresql_storage::store(const message::block& block,
@@ -247,81 +204,6 @@ void postgresql_storage::do_store_block(const message::block& block,
     handle_store(std::error_code());
 }
 
-void postgresql_storage::fetch_inventories(fetch_handler_inventories)
-{
-}
-void postgresql_storage::do_fetch_inventories(fetch_handler_inventories)
-{
-    // Not implemented
-}
-
-void postgresql_storage::fetch_block_by_depth(size_t block_number,
-        fetch_handler_block handle_fetch)
-{
-    strand()->post(std::bind(
-        &postgresql_storage::do_fetch_block_by_depth, shared_from_this(),
-            block_number, handle_fetch));
-}
-void postgresql_storage::do_fetch_block_by_depth(size_t block_number,
-        fetch_handler_block handle_fetch)
-{
-    static cppdb::statement block_statement = sql_.prepare(
-        "SELECT \
-            *, \
-            EXTRACT(EPOCH FROM when_created) timest \
-        FROM blocks \
-        WHERE \
-            depth=? \
-            AND span_left=0 \
-            AND span_right=0"
-        );
-    block_statement.reset();
-    block_statement.bind(block_number);
-    cppdb::result block_result = block_statement.row();
-    if (block_result.empty())
-    {
-        handle_fetch(error::object_doesnt_exist, message::block());
-        return;
-    }
-    message::block block = 
-        std::get<1>(blockchain_->reader()->read_block(block_result));
-    handle_fetch(std::error_code(), block);
-}
-
-void postgresql_storage::fetch_block_by_hash(hash_digest block_hash, 
-        fetch_handler_block handle_fetch)
-{
-    strand()->post(std::bind(
-        &postgresql_storage::do_fetch_block_by_hash, shared_from_this(),
-            block_hash, handle_fetch));
-}
-void postgresql_storage::do_fetch_block_by_hash(hash_digest block_hash, 
-        fetch_handler_block handle_fetch)
-{
-    static cppdb::statement block_statement = sql_.prepare(
-        "SELECT \
-            *, \
-            EXTRACT(EPOCH FROM when_created) timest \
-        FROM blocks \
-        WHERE \
-            block_hash=decode(?, 'hex') \
-            AND span_left=0 \
-            AND span_left=0"
-        );
-    std::string block_hash_repr = pretty_hex(block_hash);
-    block_statement.reset();
-    block_statement.bind(block_hash_repr);
-    cppdb::result block_result = block_statement.row();
-    if (block_result.empty())
-    {
-        handle_fetch(error::object_doesnt_exist, message::block());
-        return;
-    }
-    message::block block = 
-        std::get<1>(blockchain_->reader()->read_block(block_result));
-    handle_fetch(std::error_code(), block);
-}
-
 void postgresql_storage::fetch_block_locator(
         fetch_handler_block_locator handle_fetch)
 {
@@ -378,69 +260,6 @@ void postgresql_storage::do_fetch_block_locator(
     }
     BITCOIN_ASSERT(locator.size() == indices.size());
     handle_fetch(std::error_code(), locator);
-}
-
-void postgresql_storage::fetch_output_by_hash(hash_digest transaction_hash, 
-        uint32_t index, fetch_handler_output handle_fetch)
-{
-    strand()->post(std::bind(
-        &postgresql_storage::do_fetch_output_by_hash, shared_from_this(),
-            transaction_hash, index, handle_fetch));
-}
-void postgresql_storage::do_fetch_output_by_hash(hash_digest transaction_hash, 
-        uint32_t index, fetch_handler_output handle_fetch)
-{
-    message::transaction_output output;
-    std::string transaction_hash_repr = pretty_hex(transaction_hash);
-    cppdb::result result = sql_ <<
-        "SELECT \
-            encode(script, 'hex') AS script, \
-            sql_to_internal(value) AS internal_value \
-        FROM \
-            transactions, \
-            outputs \
-        WHERE \
-            transaction_hash=decode(?, 'hex') \
-            AND transactions.transaction_id=outputs.transaction_id \
-            AND index_in_parent=?"
-        << transaction_hash_repr
-        << index
-        << cppdb::row;
-    if (result.empty())
-    {
-        handle_fetch(error::object_doesnt_exist, output);
-        return;
-    }
-    output.value = result.get<uint64_t>("internal_value");
-    output.output_script =
-        parse_script(bytes_from_bytea(result.get<std::string>("script")));
-    handle_fetch(std::error_code(), output);
-}
-
-void postgresql_storage::block_exists_by_hash(hash_digest block_hash,
-        exists_handler handle_exists)
-{
-    strand()->post(std::bind(
-        &postgresql_storage::do_block_exists_by_hash, shared_from_this(), 
-            block_hash, handle_exists));
-}
-void postgresql_storage::do_block_exists_by_hash(hash_digest block_hash,
-        exists_handler handle_exists)
-{
-    std::string block_hash_repr = pretty_hex(block_hash);
-    cppdb::result block_result = sql_ <<
-        "SELECT 1 \
-        FROM blocks \
-        WHERE \
-            block_hash=decode(?, 'hex') \
-            AND span_left=0 \
-            AND span_left=0"
-        << block_hash_repr
-        << cppdb::row;
-    if (block_result.empty())
-        handle_exists(std::error_code(), false);
-    else
-        handle_exists(std::error_code(), true);
 }
 
 } // libbitcoin
