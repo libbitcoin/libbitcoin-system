@@ -2,6 +2,7 @@
 
 #include <bitcoin/constants.hpp>
 #include <bitcoin/dialect.hpp>
+#include <bitcoin/kernel.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
@@ -49,8 +50,8 @@ inline uint32_t extract_bits_body(uint32_t bits)
     return bits & 0x00ffffff;
 }
 
-pq_organizer::pq_organizer(cppdb::session sql)
-  : sql_(sql)
+pq_organizer::pq_organizer(cppdb::session sql, kernel_ptr kernel)
+  : sql_(sql), kernel_(kernel)
 {
 }
 
@@ -193,6 +194,7 @@ void pq_organizer::organize()
         );
     orphans_statement.reset();
     cppdb::result orphans_results = orphans_statement.query();
+    std::set<size_t> reorganized_blocks;
     while (orphans_results.next())
     {
         size_t child_id = orphans_results.get<size_t>(0),
@@ -231,7 +233,50 @@ void pq_organizer::organize()
             new_child_depth, child_width);
         position_child_branch(child_space, parent_space, new_child_depth, 
             new_child_span_left);
+
+        reorganized_blocks.insert(child_id);
     }
+    get_inbetweens(reorganized_blocks);
+}
+
+void pq_organizer::get_inbetweens(std::set<size_t> block_ids)
+{
+    block_ids.insert(recent_blocks_.begin(), recent_blocks_.end());
+    recent_blocks_.clear();
+    if (block_ids.empty())
+        return;
+
+    std::stringstream hack_sql;
+    hack_sql <<
+        "SELECT DISTINCT ON (process_blocks.space) \
+            encode(root_blocks.block_hash, 'hex') \
+        FROM \
+            blocks process_blocks, \
+            blocks root_blocks \
+        WHERE \
+            process_blocks.space > 0 \
+            AND process_blocks.space = root_blocks.space \
+            AND root_blocks.depth = 0 \
+            AND process_blocks.block_id IN (";
+    for (auto it = block_ids.begin(); it != block_ids.end(); ++it)
+    {
+        if (it != block_ids.begin())
+            hack_sql << ", ";
+        hack_sql << *it;
+    }
+    hack_sql << ")";
+    cppdb::result block_hashes_result = sql_ << hack_sql.str();
+    hash_list block_hashes;
+    while (block_hashes_result.next())
+        block_hashes.push_back(
+            hash_from_bytea(block_hashes_result.get<std::string>(0)));
+    if (!block_hashes.empty())
+        kernel_->tween_blocks(block_hashes);
+}
+
+void pq_organizer::refresh_block(size_t block_id)
+{
+    recent_blocks_.insert(block_id);
 }
 
 bool pq_organizer::load_span(size_t block_id, span& spn)
@@ -790,11 +835,11 @@ bool pq_validate_block::search_double_spends(
 }
 
 pq_blockchain::pq_blockchain(
-        cppdb::session sql, service_ptr service)
+        cppdb::session sql, service_ptr service, kernel_ptr kernel)
   : barrier_clearance_level_(500), barrier_timeout_(milliseconds(500)), 
     sql_(sql)
 {
-    organizer_.reset(new pq_organizer(sql));
+    organizer_.reset(new pq_organizer(sql, kernel));
     reader_.reset(new pq_reader(sql));
     timeout_.reset(new deadline_timer(*service));
     reset_state();
@@ -964,6 +1009,11 @@ void pq_blockchain::finalize_status(
         << block_info.span_left
         << block_info.span_right
         << cppdb::exec;
+}
+
+pq_organizer_ptr pq_blockchain::organizer()
+{
+    return organizer_;
 }
 
 pq_reader_ptr pq_blockchain::reader()

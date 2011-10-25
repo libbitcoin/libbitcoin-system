@@ -15,12 +15,12 @@ data_chunk bytes_from_bytea(std::string byte_stream);
 uint32_t extract_bits_head(uint32_t bits);
 uint32_t extract_bits_body(uint32_t bits);
 
-postgresql_storage::postgresql_storage(std::string database, 
-    std::string user, std::string password)
+postgresql_storage::postgresql_storage(kernel_ptr kernel,
+    std::string database, std::string user, std::string password)
   : sql_(std::string("postgresql:dbname=") + database + 
         ";user=" + user + ";password=" + password)
 {
-    blockchain_.reset(new pq_blockchain(sql_, service()));
+    blockchain_.reset(new pq_blockchain(sql_, service(), kernel));
     // Organise/validate old blocks in case of unclean shutdown
     strand()->post(std::bind(&pq_blockchain::start, blockchain_));
 }
@@ -122,11 +122,12 @@ void postgresql_storage::do_store_block(const message::block& block,
 
     cppdb::transaction guard(sql_);
     cppdb::result result = sql_ <<
-        "SELECT 1 FROM blocks WHERE block_hash=decode(?, 'hex')"
+        "SELECT block_id FROM blocks WHERE block_hash=decode(?, 'hex')"
         << block_hash_repr << cppdb::row;
     if (!result.empty())
     {
         log_warning() << "Block '" << block_hash_repr << "' already exists";
+        blockchain_->organizer()->refresh_block(result.get<size_t>(0));
         handle_store(error::object_already_exists);
         return;
     }
@@ -200,6 +201,7 @@ void postgresql_storage::do_store_block(const message::block& block,
     }
     blockchain_->raise_barrier();
     blockchain_->buffer_block(std::make_pair(block_info, block));
+    blockchain_->organizer()->refresh_block(block_info.block_id);
     guard.commit();
     handle_store(std::error_code());
 }

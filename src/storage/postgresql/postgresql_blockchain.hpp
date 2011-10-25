@@ -1,6 +1,7 @@
 #ifndef LIBBITCOIN_STORAGE_POSTGRESQL_BLOCKCHAIN_H
 #define LIBBITCOIN_STORAGE_POSTGRESQL_BLOCKCHAIN_H
 
+#include <set>
 #include <cppdb/frontend.h>
 
 #include <bitcoin/messages.hpp>
@@ -22,10 +23,11 @@ typedef std::shared_ptr<pq_reader> pq_reader_ptr;
 class pq_organizer
 {
 public:
-    pq_organizer(cppdb::session sql);
+    pq_organizer(cppdb::session sql, kernel_ptr kernel);
     void delete_branch(size_t space, size_t depth, 
         size_t span_left, size_t span_right);
     void organize();
+    void refresh_block(size_t block_id);
 
 private:
     struct span
@@ -45,7 +47,11 @@ private:
     void delete_chains(size_t left, size_t right);
     void unwind_chain(size_t depth, size_t chain_id);
 
+    void get_inbetweens(std::set<size_t> block_ids);
+    std::set<size_t> recent_blocks_;
+
     cppdb::session sql_;
+    kernel_ptr kernel_;
 };
 
 struct pq_transaction_info
@@ -115,7 +121,7 @@ class pq_blockchain
   : public std::enable_shared_from_this<pq_blockchain>
 {
 public:
-    pq_blockchain(cppdb::session sql, service_ptr service);
+    pq_blockchain(cppdb::session sql, service_ptr service, kernel_ptr kernel);
     // Only called during init. Otherwise use raise_barrier()
     void start();
 
@@ -125,6 +131,7 @@ public:
     void buffer_block(const pq_block& buffer_block);
     void raise_barrier();
 
+    pq_organizer_ptr organizer();
     pq_reader_ptr reader();
     
 private: 

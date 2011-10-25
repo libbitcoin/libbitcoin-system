@@ -31,21 +31,13 @@ public:
             std::string dbuser, std::string dbpass);
 
     void start(std::string hostname, unsigned int port);
+
 private:
-    typedef std::vector<channel_handle> channels_list;
-
     void handle_connect(std::error_code ec, channel_handle channel);
-    void reset_timer();
-
-    void fetch_locator(const boost::system::error_code& ec);
-    void request_blocks(std::error_code ec, message::block_locator locator);
 
     kernel_ptr kernel_;
     network_ptr network_;
     storage_ptr storage_;
-
-    deadline_timer_ptr poll_blocks_timer_;
-    channels_list channels_;
 };
 
 typedef std::shared_ptr<poller_application> poller_application_ptr;
@@ -57,10 +49,8 @@ poller_application::poller_application(std::string dbname,
     network_.reset(new network_impl(kernel_));
     kernel_->register_network(network_);
 
-    storage_.reset(new postgresql_storage(dbname, dbuser, dbpass));
+    storage_.reset(new postgresql_storage(kernel_, dbname, dbuser, dbpass));
     kernel_->register_storage(storage_);
-
-    poll_blocks_timer_.reset(new deadline_timer(*service()));
 }
 
 void poller_application::start(std::string hostname, unsigned int port)
@@ -78,46 +68,7 @@ void poller_application::handle_connect(
         log_error() << "Connect: " << ec.message();
         return;
     }
-    reset_timer();
-    channels_.push_back(channel);
-}
-
-void poller_application::reset_timer()
-{
-    poll_blocks_timer_->cancel();
-    poll_blocks_timer_->expires_from_now(seconds(1));
-    poll_blocks_timer_->async_wait(
-        postbind<const boost::system::error_code>(strand(), std::bind(
-            &poller_application::fetch_locator, shared_from_this(), _1)));
-}
-
-void poller_application::fetch_locator(const boost::system::error_code& ec)
-{
-    if (ec)
-    {
-        log_error() << "Poll timer: " << ec.message();
-        return;
-    }
-    storage_->fetch_block_locator(
-        postbind<std::error_code, message::block_locator>(strand(), std::bind(
-            &poller_application::request_blocks, shared_from_this(), _1, _2)));
-}
-
-void poller_application::request_blocks(
-        std::error_code ec, message::block_locator locator)
-{
-    if (ec)
-    {
-        log_error() << "Block locator: " << ec.message();
-        return;
-    }
-    message::getblocks getblocks;
-    getblocks.locator_start_hashes = locator;
-    getblocks.hash_stop = null_hash;
-    // Do a broadcast
-    for (channel_handle channel: channels_)
-        network_->send(channel, getblocks);
-    reset_timer();
+    log_info() << "Connected.";
 }
 
 int main(int argc, const char** argv)

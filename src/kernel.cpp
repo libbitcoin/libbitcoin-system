@@ -1,31 +1,19 @@
 #include <bitcoin/kernel.hpp>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/bind.hpp>
-#include <algorithm>
-
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/constants.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/storage/storage.hpp>
-
-using boost::posix_time::seconds;
-using boost::posix_time::minutes;
-using boost::posix_time::time_duration;
-using boost::asio::buffer;
-
-// Debug - should go soon
-#include <iomanip>
+#include <bitcoin/util/logger.hpp>
+#include <bitcoin/util/postbind.hpp>
 
 namespace libbitcoin {
-
-const time_duration poll_inv_timeout = seconds(10);
 
 void null(std::error_code)
 {
 }
 
 kernel::kernel()
+  : initial_getblocks_(false)
 {
 }
 
@@ -70,7 +58,34 @@ bool kernel::recv_message(channel_handle chandle,
     log_debug() << "last block is " << message.start_height;
     log_debug() << pretty_hex(message.addr_you.ip_addr);
     network_component_->send(chandle, message::verack());
+    if (!initial_getblocks_)
+    {
+        initial_getblocks_ = true;
+        start_initial_getblocks(chandle);
+    }
     return true;
+}
+
+void kernel::start_initial_getblocks(channel_handle chandle)
+{
+    storage_component_->fetch_block_locator(
+        postbind<std::error_code, message::block_locator>(strand(), std::bind(
+            &kernel::request_initial_blocks, shared_from_this(), 
+                std::placeholders::_1, std::placeholders::_2, chandle)));
+}
+
+void kernel::request_initial_blocks(const std::error_code& ec,
+    const message::block_locator& locator, channel_handle chandle)
+{
+    if (ec)
+    {
+        log_error() << "Initial block locator: " << ec.message();
+        return;
+    }
+    message::getblocks getblocks;
+    getblocks.locator_start_hashes = locator;
+    getblocks.hash_stop = null_hash;
+    network_component_->send(chandle, getblocks);
 }
 
 bool kernel::recv_message(channel_handle, const message::verack&)
@@ -88,7 +103,7 @@ bool kernel::recv_message(channel_handle, const message::addr& message)
 
 bool kernel::recv_message(channel_handle chandle, const message::inv& message)
 {
-    message::inv request_invs;
+    message::getdata request_message;
     for (const message::inv_vect curr_inv: message.invs)
     {
         if (curr_inv.type == message::inv_type::none)
@@ -96,10 +111,13 @@ bool kernel::recv_message(channel_handle chandle, const message::inv& message)
 
         // Push only block invs to the request queue
         if (curr_inv.type == message::inv_type::block)
-            request_invs.invs.push_back(curr_inv);
+        {
+            request_message.invs.push_back(curr_inv);
+            inventory_tracker_.insert(make_pair(curr_inv.hash, chandle));
+        }
     }
-    if (request_invs.invs.size() > 0)
-        accept_inventories(request_invs.invs);
+    if (request_message.invs.size() > 0)
+        network_component_->send(chandle, request_message);
     return true;
 }
 
@@ -123,19 +141,33 @@ storage_ptr kernel::get_storage()
     return storage_component_;
 }
 
-void kernel::accept_inventories(const message::inv_list& invs)
+void kernel::tween_blocks(const hash_list& block_hashes)
 {
-    message::getdata request_message;
-    request_message.invs = invs;
-    network_component_->get_random_handle(std::bind(
-        &kernel::send_to_random, shared_from_this(),
-            std::placeholders::_1, request_message));
+    storage_component_->fetch_block_locator(
+        postbind<std::error_code, message::block_locator>(strand(), std::bind(
+            &kernel::request_next_blocks, shared_from_this(), 
+                std::placeholders::_1, std::placeholders::_2, block_hashes)));
 }
 
-void kernel::send_to_random(channel_handle chandle,
-    const message::getdata& request_message)
+void kernel::request_next_blocks(const std::error_code& ec,
+    const message::block_locator& locator, const hash_list& block_hashes)
 {
-    network_component_->send(chandle, request_message);
+    if (ec)
+    {
+        log_error() << "block locator: " << ec.message();
+        return;
+    }
+    message::getblocks getblocks;
+    getblocks.locator_start_hashes = locator;
+    for (hash_digest block_hash: block_hashes)
+    {
+        auto range = inventory_tracker_.equal_range(block_hash);
+        for (auto it = range.first; it != range.second; ++it)
+        {
+            getblocks.hash_stop = block_hash;
+            network_component_->send(it->second, getblocks);
+        }
+    }
 }
 
 } // libbitcoin

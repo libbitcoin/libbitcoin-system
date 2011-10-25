@@ -20,8 +20,8 @@ class postgresql_storage
     public std::enable_shared_from_this<postgresql_storage>
 {
 public:
-    postgresql_storage(std::string database, 
-            std::string user, std::string password);
+    postgresql_storage(kernel_ptr kernel,
+        std::string database, std::string user, std::string password);
 
     void store(const message::block& block, store_handler handle_store);
 
