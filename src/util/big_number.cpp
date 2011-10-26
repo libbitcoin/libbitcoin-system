@@ -31,12 +31,37 @@ BN_CTX* big_number_context::context()
 
 big_number::big_number()
 {
-    BN_init(&bignum_);
+    initialize();
+}
+big_number::big_number(const big_number& other)
+{
+    initialize();
+    copy(other);
 }
 big_number::big_number(uint64_t value)
 {
-    BN_init(&bignum_);
+    initialize();
     set_uint64(value);
+}
+big_number::~big_number()
+{
+    BN_clear_free(&bignum_);
+}
+
+void big_number::initialize()
+{
+    BN_init(&bignum_);
+}
+
+void big_number::copy(const big_number& other)
+{
+    BN_copy(&bignum_, &other.bignum_);
+}
+
+big_number& big_number::operator=(const big_number& other)
+{
+    copy(other);
+    return *this;
 }
 
 void big_number::set_compact(uint32_t compact)
@@ -111,6 +136,16 @@ hash_digest big_number::get_hash() const
     return repr;
 }
 
+void big_number::set_uint64(uint64_t value)
+{
+    set_data(uncast_type(value, true));
+}
+
+uint64_t big_number::get_uint64() const
+{
+    return cast_chunk<uint64_t>(get_data());
+}
+
 bool big_number::operator==(const big_number& other) 
 { 
     return BN_cmp(&bignum_, &other.bignum_) == 0; 
@@ -136,6 +171,12 @@ bool big_number::operator>(const big_number& other)
     return BN_cmp(&bignum_, &other.bignum_) > 0; 
 }
 
+big_number& big_number::operator+=(const big_number& other)
+{
+    BN_add(&bignum_, &bignum_, &other.bignum_);
+    return *this; 
+}
+
 big_number& big_number::operator*=(const big_number& other)
 {
     big_number_context ctx;
@@ -150,9 +191,14 @@ big_number& big_number::operator/=(const big_number& other)
     return *this;
 }
 
-void big_number::set_uint64(uint64_t value)
+divmod_result divmod(const big_number& a, const big_number& b)
 {
-    set_data(uncast_type(value, true));
+    big_number divider;
+    big_number remainder;
+    big_number_context ctx;
+    BN_div(&divider.bignum_, &remainder.bignum_, 
+        &a.bignum_, &b.bignum_, ctx.context());
+    return std::make_pair(divider, remainder);
 }
 
 } // libbitcoin

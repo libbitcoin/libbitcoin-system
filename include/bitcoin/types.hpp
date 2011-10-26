@@ -61,7 +61,7 @@ T cast_chunk(data_chunk chunk, bool reverse=false)
         std::reverse(chunk.begin(), chunk.end());
 
     T val = 0;
-    for (size_t i = 0; i < sizeof(T); ++i)
+    for (size_t i = 0; i < sizeof(T) && i < chunk.size(); ++i)
         val += static_cast<T>(chunk[i]) << (i*8);
     return val;
 }

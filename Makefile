@@ -18,6 +18,7 @@ BASE_MODULES= \
 	error.o \
 	threaded_service.o \
     validate.o \
+	base58.o \
 	big_number.o \
 	clock.o \
 	constants.o
@@ -62,6 +63,14 @@ bin/examples/accounting: libbitcoin obj/accounting.o
 	$(CXX) -o bin/examples/accounting obj/accounting.o $(LIBBITCOIN) $(LIBS)
 
 accounting: bin/examples/accounting
+
+obj/base58-test.o: tests/base58-test.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/base58-test: libbitcoin obj/base58-test.o
+	$(CXX) -o bin/tests/base58-test obj/base58-test.o $(LIBBITCOIN) $(LIBS)
+
+base58-test: bin/tests/base58-test
 
 bin/tests/nettest: libbitcoin obj/nettest.o
 	$(CXX) -o bin/tests/nettest obj/nettest.o $(LIBBITCOIN) $(LIBS)
@@ -232,6 +241,9 @@ bin/tests/validate-block: obj/validate-block.o obj/postgresql_storage.o obj/logg
 	$(CXX) -o bin/tests/validate-block obj/validate-block.o obj/postgresql_storage.o obj/transaction.o obj/script.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/error.o obj/validate.o obj/threaded_service.o obj/dialect.o obj/constants.o obj/big_number.o obj/clock.o $(LIBS)
 
 validate-block: bin/tests/validate-block
+
+obj/base58.o: src/util/base58.cpp include/bitcoin/util/base58.hpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/big_number.o: src/util/big_number.cpp include/bitcoin/util/big_number.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
