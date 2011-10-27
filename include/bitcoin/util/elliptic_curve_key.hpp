@@ -22,7 +22,7 @@ public:
     bool verify(hash_digest hash, const data_chunk& signature);
 
     bool new_key_pair();
-    bool set_private_key(const data_chunk& privkey);
+    bool set_private_key(const private_data& privkey);
     private_data get_private_key() const;
     data_chunk sign(hash_digest hash) const;
 
