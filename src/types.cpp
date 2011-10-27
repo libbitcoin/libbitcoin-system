@@ -11,13 +11,14 @@ void extend_data(data_chunk& chunk, const data_chunk& other)
 
 data_chunk bytes_from_pretty(std::string byte_stream)
 {
-    std::stringstream ss;
-    ss << std::hex << byte_stream;
     data_chunk stack;
-    while (ss.good())
+    for (auto it = byte_stream.begin(); it != byte_stream.end(); it += 2)
     {
+        if (it != byte_stream.begin() && *it == ' ')
+            ++it;
+        std::istringstream ss(std::string(it, it + 2));
         int val;
-        ss >> val;
+        ss >> std::hex >> val;
         BITCOIN_ASSERT(val <= 0xff);
         stack.push_back(val);
     }
