@@ -1,9 +1,7 @@
 #include <bitcoin/util/elliptic_curve_key.hpp>
-#include <bitcoin/util/base58.hpp>
 #include <bitcoin/util/logger.hpp>
-#include <bitcoin/util/sha256.hpp>
-#include <bitcoin/util/ripemd.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/address.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -13,11 +11,7 @@ using libbitcoin::hash_digest;
 using libbitcoin::data_chunk;
 using libbitcoin::hash_from_pretty;
 using libbitcoin::bytes_from_pretty;
-using libbitcoin::extend_data;
-using libbitcoin::uncast_type;
-using libbitcoin::generate_sha256_checksum;
-using libbitcoin::generate_ripemd_hash;
-using libbitcoin::encode_base58;
+using libbitcoin::pubkey_to_address;
 using libbitcoin::pretty_hex;
 using libbitcoin::private_data;
 using libbitcoin::log_info;
@@ -76,14 +70,7 @@ int address(const std::string raw_private_key)
     if (!ec.set_private_key(
             private_data(raw_private_key.begin(), raw_private_key.end())))
         error_exit("bad private key");
-
-    data_chunk unhashed_address;
-    unhashed_address.push_back(0);
-    extend_data(unhashed_address, generate_ripemd_hash(ec.get_public_key()));
-    uint32_t checksum = generate_sha256_checksum(unhashed_address);
-    extend_data(unhashed_address, uncast_type(checksum));
-    log_info() << encode_base58(unhashed_address);
-
+    log_info() << pubkey_to_address(ec.get_public_key());
     return 0;
 }
 

@@ -9,6 +9,7 @@ BASE_MODULES= \
 	logger.o \
 	kernel.o \
 	sha256.o \
+	address.o \
 	types.o \
 	script.o \
 	ripemd.o \
@@ -169,6 +170,9 @@ obj/validate.o: src/validate.cpp include/bitcoin/validate.hpp
 
 
 obj/threaded_service.o: src/util/threaded_service.cpp include/bitcoin/util/threaded_service.hpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+obj/address.o: src/address.cpp include/bitcoin/address.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/types.o: src/types.cpp include/bitcoin/types.hpp
