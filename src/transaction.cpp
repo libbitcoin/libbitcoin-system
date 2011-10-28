@@ -19,8 +19,8 @@ hash_digest hash_transaction_impl(const message::transaction& transaction,
     key.write_var_uint(transaction.inputs.size());
     for (message::transaction_input input: transaction.inputs)
     {
-        key.write_hash(input.hash);
-        key.write_4_bytes(input.index);
+        key.write_hash(input.previous_output.hash);
+        key.write_4_bytes(input.previous_output.index);
         data_chunk raw_script = save_script(input.input_script);
         key.write_var_uint(raw_script.size());
         key.write_data(raw_script);
@@ -87,8 +87,8 @@ hash_digest generate_merkle_root(const message::transaction_list& transactions)
 std::string string_repr(const message::transaction_input& input)
 {
     std::ostringstream ss;
-    ss 
-        << "\tindex = " << input.index << "\n"
+    ss << "\thash = " << pretty_hex(input.previous_output.hash) << "\n"
+        << "\tindex = " << input.previous_output.index << "\n"
         << "\t" << input.input_script.pretty() << "\n"
         << "\tsequence = " << input.sequence << "\n";
     return ss.str();
@@ -118,14 +118,15 @@ std::string string_repr(const message::transaction& transaction)
     return ss.str();
 }
 
-bool previous_output_is_null(const message::transaction_input& input)
+bool previous_output_is_null(const message::output_point& previous_output)
 {
-    return input.index == ~0u && input.hash == null_hash;
+    return previous_output.index == ~0u && previous_output.hash == null_hash;
 }
 
 bool is_coinbase(const message::transaction& tx)
 {
-    return tx.inputs.size() == 1 && previous_output_is_null(tx.inputs[0]);
+    return tx.inputs.size() == 1 && 
+        previous_output_is_null(tx.inputs[0].previous_output);
 }
 
 uint64_t total_output_value(const message::transaction& tx)

@@ -14,7 +14,7 @@ hash_digest generate_merkle_root(const message::transaction_list& transactions);
 
 std::string string_repr(const message::transaction& transaction);
 
-bool previous_output_is_null(const message::transaction_input& input);
+bool previous_output_is_null(const message::output_point& previous_output);
 bool is_coinbase(const message::transaction& tx);
 
 uint64_t total_output_value(const message::transaction& tx);

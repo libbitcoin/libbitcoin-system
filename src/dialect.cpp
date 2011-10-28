@@ -259,9 +259,9 @@ message::transaction read_transaction(deserializer& deserial)
     for (size_t txn_in_i = 0; txn_in_i < txn_in_count; ++txn_in_i)
     {
         message::transaction_input input;
-        input.hash = deserial.read_hash();
-        input.index = deserial.read_4_bytes();
-        if (previous_output_is_null(input))
+        input.previous_output.hash = deserial.read_hash();
+        input.previous_output.index = deserial.read_4_bytes();
+        if (previous_output_is_null(input.previous_output))
             input.input_script = 
                 coinbase_script(read_raw_script(deserial));
         else

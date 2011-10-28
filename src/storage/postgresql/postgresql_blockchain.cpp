@@ -496,12 +496,13 @@ message::transaction_input_list pq_reader::select_inputs(
     {
         input_ids.push_back(result.get<size_t>("input_id"));
         message::transaction_input input;
-        input.hash = 
+        input.previous_output.hash = 
             hash_from_bytea(result.get<std::string>("previous_output_hash"));
-        input.index = result.get<uint32_t>("previous_output_index");
+        input.previous_output.index =
+            result.get<uint32_t>("previous_output_index");
         data_chunk raw_script = 
             bytes_from_bytea(result.get<std::string>("script"));
-        if (previous_output_is_null(input))
+        if (previous_output_is_null(input.previous_output))
             input.input_script = coinbase_script(raw_script);
         else
             input.input_script = parse_script(raw_script);
@@ -725,7 +726,7 @@ bool pq_validate_block::connect_input(
 {
     BITCOIN_ASSERT(input_index < current_tx.inputs.size());
     const message::transaction_input& input = current_tx.inputs[input_index];
-    std::string hash_repr = pretty_hex(input.hash);
+    std::string hash_repr = pretty_hex(input.previous_output.hash);
     static cppdb::statement find_previous = sql_.prepare(
         "SELECT \
             transactions.transaction_id, \
@@ -742,13 +743,13 @@ bool pq_validate_block::connect_input(
         );
     find_previous.reset();
     find_previous.bind(hash_repr);
-    find_previous.bind(input.index);
+    find_previous.bind(input.previous_output.index);
     cppdb::result previous = find_previous.row();
     if (previous.empty())
     {
         log_error(log_domain::validation) 
-            << "Couldn't find the previous output " << input.index 
-            << " in transaction" << hash_repr;
+            << "Couldn't find the previous output " 
+            << input.previous_output.index << " in transaction" << hash_repr;
         return false;
     }
     uint64_t output_value = previous.get<uint64_t>("internal_value");
@@ -811,7 +812,7 @@ bool pq_validate_block::search_double_spends(
     //   WHERE transaction_id=... AND index_in_parent=...
 
     // Has this output been already spent by another input?
-    std::string hash_repr = pretty_hex(input.hash);
+    std::string hash_repr = pretty_hex(input.previous_output.hash);
     static cppdb::statement search_spends = sql_.prepare(
         "SELECT 1 \
         FROM inputs \
@@ -822,7 +823,7 @@ bool pq_validate_block::search_double_spends(
         );
     search_spends.reset();
     search_spends.bind(hash_repr);
-    search_spends.bind(input.index);
+    search_spends.bind(input.previous_output.index);
     search_spends.bind(input_id);
     cppdb::result other_spends = search_spends.query();
     if (other_spends.empty())

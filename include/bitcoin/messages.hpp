@@ -77,10 +77,15 @@ struct getblocks
     hash_digest hash_stop;
 };
 
-struct transaction_input
+struct output_point
 {
     hash_digest hash;
     uint32_t index;
+};
+
+struct transaction_input
+{
+    output_point previous_output;
     script input_script;
     uint32_t sequence;
 };

@@ -164,7 +164,7 @@ bool validate_block::check_transaction(const message::transaction& tx)
     else
     {
         for (message::transaction_input input: tx.inputs)
-            if (previous_output_is_null(input))
+            if (previous_output_is_null(input.previous_output))
                 return false;
     }
 

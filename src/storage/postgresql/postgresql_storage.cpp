@@ -28,7 +28,7 @@ postgresql_storage::postgresql_storage(kernel_ptr kernel,
 size_t postgresql_storage::insert(const message::transaction_input& input,
     size_t transaction_id, size_t index_in_parent)
 {
-    std::string hash = pretty_hex(input.hash),
+    std::string hash = pretty_hex(input.previous_output.hash),
         pretty_script = pretty_hex(save_script(input.input_script));
     static cppdb::statement statement = sql_.prepare(
         "INSERT INTO inputs (input_id, transaction_id, index_in_parent, \
@@ -41,7 +41,7 @@ size_t postgresql_storage::insert(const message::transaction_input& input,
     statement.bind(index_in_parent);
     statement.bind(pretty_script);
     statement.bind(hash);
-    statement.bind(input.index);
+    statement.bind(input.previous_output.index);
     statement.bind(input.sequence);
     return statement.row().get<size_t>(0);
 }
