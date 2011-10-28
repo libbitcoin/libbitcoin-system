@@ -19,6 +19,7 @@ public:
     ~elliptic_curve_key();
 
     bool set_public_key(const data_chunk& pubkey);
+    data_chunk get_public_key() const;
     bool verify(hash_digest hash, const data_chunk& signature);
 
     bool new_key_pair();

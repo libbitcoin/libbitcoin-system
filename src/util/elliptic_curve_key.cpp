@@ -30,6 +30,19 @@ bool elliptic_curve_key::set_public_key(const data_chunk& pubkey)
     return true;
 }
 
+data_chunk elliptic_curve_key::get_public_key() const
+{
+    // same as get_private_key
+    int length = i2o_ECPublicKey(key_, NULL);
+    if (!length)
+        return private_data();
+    data_chunk pubkey(length, 0);
+    byte* pubkey_begin = &pubkey[0];
+    if (i2o_ECPublicKey(key_, &pubkey_begin) != length)
+        return data_chunk();
+    return pubkey;
+}
+
 bool elliptic_curve_key::verify(hash_digest hash, const data_chunk& signature)
 {
     BITCOIN_ASSERT(key_ != nullptr);
@@ -63,7 +76,7 @@ bool elliptic_curve_key::set_private_key(const private_data& privkey)
 
 private_data elliptic_curve_key::get_private_key() const
 {
-    size_t length = i2d_ECPrivateKey(key_, NULL);
+    int length = i2d_ECPrivateKey(key_, NULL);
     if (!length)
         return private_data();
     private_data privkey(length, 0);

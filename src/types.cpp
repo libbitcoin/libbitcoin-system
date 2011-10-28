@@ -4,11 +4,6 @@
 
 namespace libbitcoin {
 
-void extend_data(data_chunk& chunk, const data_chunk& other)
-{
-    chunk.insert(chunk.end(), other.cbegin(), other.cend());
-}
-
 data_chunk bytes_from_pretty(std::string byte_stream)
 {
     data_chunk stack;

@@ -44,7 +44,11 @@ typedef std::vector<byte> data_chunk;
 
 typedef std::vector<hash_digest> hash_list;
 
-void extend_data(data_chunk& chunk, const data_chunk& other);
+template<typename D, typename T>
+void extend_data(D& chunk, const T& other)
+{
+    chunk.insert(chunk.end(), other.cbegin(), other.cend());
+}
 
 template<typename T>
 T cast_chunk(data_chunk chunk, bool reverse=false)
