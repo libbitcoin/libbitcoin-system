@@ -42,8 +42,6 @@ typedef std::array<uint8_t, 20> short_hash;
 typedef unsigned char byte;
 typedef std::vector<byte> data_chunk;
 
-typedef std::vector<hash_digest> hash_list;
-
 template<typename D, typename T>
 void extend_data(D& chunk, const T& other)
 {

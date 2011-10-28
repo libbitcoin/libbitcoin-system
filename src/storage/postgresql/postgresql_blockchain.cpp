@@ -248,8 +248,9 @@ void pq_organizer::get_inbetweens(std::set<size_t> block_ids)
 
     std::stringstream hack_sql;
     hack_sql <<
-        "SELECT DISTINCT ON (process_blocks.space) \
-            encode(root_blocks.block_hash, 'hex') \
+        "SELECT \
+            encode(root_blocks.block_hash, 'hex'), \
+            encode(process_blocks.block_hash, 'hex') \
         FROM \
             blocks process_blocks, \
             blocks root_blocks \
@@ -266,10 +267,15 @@ void pq_organizer::get_inbetweens(std::set<size_t> block_ids)
     }
     hack_sql << ")";
     cppdb::result block_hashes_result = sql_ << hack_sql.str();
-    hash_list block_hashes;
+    hash_pair_list block_hashes;
     while (block_hashes_result.next())
-        block_hashes.push_back(
-            hash_from_bytea(block_hashes_result.get<std::string>(0)));
+    {
+        hash_digest orphan_root =
+            hash_from_bytea(block_hashes_result.get<std::string>(0));
+        hash_digest block_hash =
+            hash_from_bytea(block_hashes_result.get<std::string>(1));
+        block_hashes.push_back(make_pair(orphan_root, block_hash));
+    }
     if (!block_hashes.empty())
         kernel_->tween_blocks(block_hashes);
 }

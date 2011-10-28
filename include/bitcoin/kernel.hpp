@@ -11,6 +11,9 @@
 
 namespace libbitcoin {
 
+typedef std::pair<hash_digest, hash_digest> hash_pair;
+typedef std::vector<hash_pair> hash_pair_list;
+
 class kernel 
   : public threaded_service,
     private boost::noncopyable, 
@@ -39,14 +42,15 @@ public:
 
     void register_storage(storage_ptr stor_comp);
     storage_ptr get_storage();
-    void tween_blocks(const hash_list& block_hashes);
+    void tween_blocks(const hash_pair_list& block_hashes);
 
 private:
     void start_initial_getblocks(channel_handle chandle);
     void request_initial_blocks(const std::error_code& ec,
         const message::block_locator& locator, channel_handle chandle);
     void request_next_blocks(const std::error_code& ec,
-        const message::block_locator& locator, const hash_list& block_hashes);
+        const message::block_locator& locator, 
+        const hash_pair_list& block_hashes);
 
     network_ptr network_component_;
     storage_ptr storage_component_;

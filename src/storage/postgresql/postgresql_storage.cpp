@@ -128,6 +128,7 @@ void postgresql_storage::do_store_block(const message::block& block,
     {
         log_warning() << "Block '" << block_hash_repr << "' already exists";
         blockchain_->organizer()->refresh_block(result.get<size_t>(0));
+        blockchain_->raise_barrier();
         handle_store(error::object_already_exists);
         return;
     }
@@ -199,9 +200,9 @@ void postgresql_storage::do_store_block(const message::block& block,
         link_txs.exec();
         block_info.transactions.push_back(tx_info);
     }
-    blockchain_->raise_barrier();
     blockchain_->buffer_block(std::make_pair(block_info, block));
     blockchain_->organizer()->refresh_block(block_info.block_id);
+    blockchain_->raise_barrier();
     guard.commit();
     handle_store(std::error_code());
 }

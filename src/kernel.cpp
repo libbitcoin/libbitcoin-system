@@ -101,6 +101,16 @@ bool kernel::recv_message(channel_handle, const message::addr& message)
     return true;
 }
 
+// TODO: Finish this.
+template<typename Function>
+void ask_block(bool block_exists, Function request_block)
+{
+    if (!block_exists)
+        request_block();
+    //else
+    //    tween_blocks...
+}
+
 bool kernel::recv_message(channel_handle chandle, const message::inv& message)
 {
     message::getdata request_message;
@@ -116,6 +126,8 @@ bool kernel::recv_message(channel_handle chandle, const message::inv& message)
             inventory_tracker_.insert(make_pair(curr_inv.hash, chandle));
         }
     }
+    // TODO: Should check if block exists or not first before
+    // wasting bandwidth
     if (request_message.invs.size() > 0)
         network_component_->send(chandle, request_message);
     return true;
@@ -141,7 +153,7 @@ storage_ptr kernel::get_storage()
     return storage_component_;
 }
 
-void kernel::tween_blocks(const hash_list& block_hashes)
+void kernel::tween_blocks(const hash_pair_list& block_hashes)
 {
     storage_component_->fetch_block_locator(
         postbind<std::error_code, message::block_locator>(strand(), std::bind(
@@ -150,7 +162,7 @@ void kernel::tween_blocks(const hash_list& block_hashes)
 }
 
 void kernel::request_next_blocks(const std::error_code& ec,
-    const message::block_locator& locator, const hash_list& block_hashes)
+    const message::block_locator& locator, const hash_pair_list& block_hashes)
 {
     if (ec)
     {
@@ -159,12 +171,15 @@ void kernel::request_next_blocks(const std::error_code& ec,
     }
     message::getblocks getblocks;
     getblocks.locator_start_hashes = locator;
-    for (hash_digest block_hash: block_hashes)
+    for (const hash_pair& continue_hashes: block_hashes)
     {
+        const hash_digest& orphan_root = continue_hashes.first;
+        const hash_digest& block_hash = continue_hashes.second;
+
         auto range = inventory_tracker_.equal_range(block_hash);
         for (auto it = range.first; it != range.second; ++it)
         {
-            getblocks.hash_stop = block_hash;
+            getblocks.hash_stop = orphan_root;
             network_component_->send(it->second, getblocks);
         }
     }
