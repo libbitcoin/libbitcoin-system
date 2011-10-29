@@ -181,12 +181,18 @@ void postgresql_storage::do_store_block(const message::block& block,
     result = statement.row();
     pq_block_info block_info;
     block_info.block_id = result.get<size_t>(0);
+    bool buffer_block = true;
     for (size_t i = 0; i < block.transactions.size(); ++i)
     {
         message::transaction transaction = block.transactions[i];
         pq_transaction_info tx_info;
         tx_info.transaction_id =
             insert(transaction, tx_info.input_ids, tx_info.output_ids);
+        if (tx_info.input_ids.empty())
+        {
+            BITCOIN_ASSERT(tx_info.output_ids.empty());
+            buffer_block = false;
+        }
         // Create block <-> txn mapping
         static cppdb::statement link_txs = sql_.prepare(
             "INSERT INTO transactions_parents ( \
@@ -200,7 +206,8 @@ void postgresql_storage::do_store_block(const message::block& block,
         link_txs.exec();
         block_info.transactions.push_back(tx_info);
     }
-    blockchain_->buffer_block(std::make_pair(block_info, block));
+    if (buffer_block)
+        blockchain_->buffer_block(std::make_pair(block_info, block));
     blockchain_->organizer()->refresh_block(block_info.block_id);
     blockchain_->raise_barrier();
     guard.commit();
