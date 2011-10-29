@@ -2,6 +2,7 @@
 
 #include <stack>
 
+#include <bitcoin/constants.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/elliptic_curve_key.hpp>
@@ -124,37 +125,11 @@ inline void nullify_input_sequences(
             inputs[i].sequence = 0;
 }
 
-bool script::op_checksig(message::transaction parent_tx, uint32_t input_index)
-{
-    if (op_checksigverify(parent_tx, input_index))
-        stack_.push_back(stack_true_value);
-    else
-        stack_.push_back(stack_false_value);
-    return true;
-}
-
-bool script::op_checksigverify(
-    message::transaction parent_tx, uint32_t input_index)
+hash_digest script::generate_signature_hash(
+    message::transaction parent_tx, uint32_t input_index,
+    const script& script_code, uint32_t hash_type)
 {
     BITCOIN_ASSERT(input_index < parent_tx.inputs.size());
-    if (stack_.size() < 2)
-        return false;
-    data_chunk pubkey = pop_stack(), signature = pop_stack();
-
-    script script_code;
-    for (operation op: operations_)
-    {
-        if (op.data == signature || op.code == opcode::codeseparator)
-            continue;
-        script_code.push_operation(op);
-    }
-
-    elliptic_curve_key key;
-    key.set_public_key(pubkey);
-
-    uint32_t hash_type = 0;
-    hash_type = signature.back();
-    signature.pop_back();
 
     if ((hash_type & 0x1f) == sighash::none)
     {
@@ -167,7 +142,7 @@ bool script::op_checksigverify(
         if (output_index >= parent_tx.outputs.size())
         {
             log_error() << "sighash::single the output_index is out of range";
-            return false;
+            return null_hash;
         }
         parent_tx.outputs.resize(output_index + 1);
         for (message::transaction_output& output: parent_tx.outputs)
@@ -188,7 +163,7 @@ bool script::op_checksigverify(
     {
         log_fatal() << "script::op_checksig() : input_index " << input_index
                 << " is out of range.";
-        return false;
+        return null_hash;
     }
 
     message::transaction tx_tmp = parent_tx;
@@ -197,7 +172,45 @@ bool script::op_checksigverify(
         input.input_script = script();
     tx_tmp.inputs[input_index].input_script = script_code;
 
-    hash_digest tx_hash = hash_transaction(tx_tmp, hash_type);
+    return hash_transaction(tx_tmp, hash_type);
+}
+
+bool script::op_checksig(message::transaction parent_tx, uint32_t input_index)
+{
+    if (op_checksigverify(parent_tx, input_index))
+        stack_.push_back(stack_true_value);
+    else
+        stack_.push_back(stack_false_value);
+    return true;
+}
+
+bool script::op_checksigverify(
+    message::transaction parent_tx, uint32_t input_index)
+{
+    if (stack_.size() < 2)
+        return false;
+    data_chunk pubkey = pop_stack(), signature = pop_stack();
+
+    elliptic_curve_key key;
+    key.set_public_key(pubkey);
+
+    uint32_t hash_type = 0;
+    hash_type = signature.back();
+    signature.pop_back();
+
+    script script_code;
+    for (operation op: operations_)
+    {
+        if (op.data == signature || op.code == opcode::codeseparator)
+            continue;
+        script_code.push_operation(op);
+    }
+
+    hash_digest tx_hash =
+        generate_signature_hash(
+            parent_tx, input_index, script_code, hash_type);
+    if (tx_hash == null_hash)
+        return false;
     return key.verify(tx_hash, signature);
 }
 
