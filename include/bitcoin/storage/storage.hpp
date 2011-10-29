@@ -31,7 +31,7 @@ public:
 
     virtual void fetch_block_locator(
             fetch_handler_block_locator handle_fetch) = 0;
-    virtual void fetch_balance(const data_chunk& address,
+    virtual void fetch_balance(const short_hash& pubkey_hash,
         fetch_handler_balance handle_fetch) = 0;
 };
 

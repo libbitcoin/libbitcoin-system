@@ -265,17 +265,17 @@ void postgresql_storage::do_fetch_block_locator(
     handle_fetch(std::error_code(), locator);
 }
 
-void postgresql_storage::fetch_balance(const data_chunk& address,
+void postgresql_storage::fetch_balance(const short_hash& pubkey_hash,
     fetch_handler_balance handle_fetch)
 {
     strand()->post(std::bind(
         &postgresql_storage::do_fetch_balance, shared_from_this(),
-            address, handle_fetch));
+            pubkey_hash, handle_fetch));
 }
-void postgresql_storage::do_fetch_balance(const data_chunk& address,
+void postgresql_storage::do_fetch_balance(const short_hash& pubkey_hash,
     fetch_handler_balance handle_fetch)
 {
-    std::string total_script = "76 a9 14 " + pretty_hex(address) + " 88 ac";
+    std::string total_script = "76 a9 14 " + pretty_hex(pubkey_hash) + " 88 ac";
     static cppdb::statement statement = sql_.prepare(
         "WITH outs AS ( \
             SELECT \

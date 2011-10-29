@@ -18,7 +18,8 @@ using libbitcoin::log_info;
 
 void display_help()
 {
-    puts("Usage: priv [COMMAND] [ARGS]");
+    puts("Usage: priv [COMMAND] [ARGS]...");
+    puts("");
     puts("The priv commands are:");
     puts("  new\t\tGenerate a new private key and output to STDOUT");
     puts("  sign\t\tSign the next argument using the private key in STDIN");

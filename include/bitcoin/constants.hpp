@@ -33,6 +33,8 @@ constexpr uint64_t max_money()
 
 const hash_digest null_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const short_hash null_short_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 constexpr uint32_t max_bits = 0x1d00ffff;
 big_number max_target();

@@ -51,6 +51,14 @@ libbitcoin_no_storage: $(MODULES)
 	ar crf lib/libbitcoin.a $(MODULES)
 	$(CXX) -shared $(MODULES) -o lib/libbitcoin.so
 
+obj/balance.o: examples/subvertx/balance.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/examples/subvertx/balance: libbitcoin obj/balance.o
+	$(CXX) -o bin/examples/subvertx/balance obj/balance.o $(LIBBITCOIN) $(LIBS)
+
+balance: bin/examples/subvertx/balance
+
 obj/priv.o: examples/subvertx/priv.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

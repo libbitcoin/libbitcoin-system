@@ -26,7 +26,7 @@ public:
     void store(const message::block& block, store_handler handle_store);
 
     void fetch_block_locator(fetch_handler_block_locator handle_fetch);
-    void fetch_balance(const data_chunk& address,
+    void fetch_balance(const short_hash& pubkey_hash,
         fetch_handler_balance handle_fetch);
 
 private:
@@ -34,7 +34,7 @@ private:
             store_handler handle_store);
 
     void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
-    void do_fetch_balance(const data_chunk& address,
+    void do_fetch_balance(const short_hash& pubkey_hash,
         fetch_handler_balance handle_fetch);
 
     // ------------
