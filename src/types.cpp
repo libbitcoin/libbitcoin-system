@@ -11,6 +11,9 @@ data_chunk bytes_from_pretty(std::string byte_stream)
     {
         if (it != byte_stream.begin() && *it == ' ')
             ++it;
+        BITCOIN_ASSERT(it + 1 != byte_stream.end());
+        if (it + 1 == byte_stream.end())
+            return data_chunk();
         std::istringstream ss(std::string(it, it + 2));
         int val;
         ss >> std::hex >> val;
