@@ -93,14 +93,18 @@ void network_impl::disconnect(channel_handle chandle)
 }
 
 template<typename Callback, typename Registry>
+void perform_subscribe(channel_handle chandle,
+    Callback handle_message, Registry& registry)
+{
+    registry.insert(std::make_pair(chandle, handle_message));
+}
+
+template<typename Callback, typename Registry>
 void generic_subscribe(strand_ptr strand, channel_handle chandle,
     Callback handle_message, Registry& registry)
 {
-    strand->post(
-        [chandle, handle_message, &registry]
-        {
-            registry.insert(std::make_pair(chandle, handle_message));
-        });
+    strand->post(std::bind(&perform_subscribe<Callback, Registry>,
+        chandle, handle_message, std::ref(registry)));
 }
 
 void network_impl::subscribe_version(channel_handle chandle, 
@@ -140,15 +144,15 @@ void network_impl::subscribe_block(channel_handle chandle,
 
 template<typename Message, typename Callback>
 void perform_send(channel_handle chandle,
-    const Message packet, channel_list* channels, Callback handle_send)
+    const Message packet, channel_list& channels, Callback handle_send)
 {
     auto is_matching =
         [chandle](const channel_pimpl& channel_obj)
         {
             return channel_obj.get_id() == chandle;
         };
-    auto it = std::find_if(channels->begin(), channels->end(), is_matching);
-    if (it == channels->end())
+    auto it = std::find_if(channels.begin(), channels.end(), is_matching);
+    if (it == channels.end())
     {
         log_error() << "Non existant channel " << chandle << " for send.";
         handle_send(error::network_channel_not_found);
@@ -159,40 +163,40 @@ void perform_send(channel_handle chandle,
 
 template<typename Message, typename Callback>
 void generic_send(strand_ptr strand, channel_handle chandle,
-    const Message packet, channel_list* channels, Callback handle_send)
+    const Message packet, channel_list& channels, Callback handle_send)
 {
     strand->post(std::bind(&perform_send<Message, Callback>, 
-        chandle, packet, channels, handle_send));
+        chandle, packet, std::ref(channels), handle_send));
 }
 
 void network_impl::send(channel_handle chandle,
      const message::version& packet, send_handler handle_send)
 {
-    generic_send(strand(), chandle, packet, &channels_, handle_send);
+    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
 }
 
 void network_impl::send(channel_handle chandle,
      const message::verack& packet, send_handler handle_send)
 {
-    generic_send(strand(), chandle, packet, &channels_, handle_send);
+    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
 }
 
 void network_impl::send(channel_handle chandle,
      const message::getaddr& packet, send_handler handle_send)
 {
-    generic_send(strand(), chandle, packet, &channels_, handle_send);
+    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
 }
 
 void network_impl::send(channel_handle chandle,
      const message::getdata& packet, send_handler handle_send)
 {
-    generic_send(strand(), chandle, packet, &channels_, handle_send);
+    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
 }
 
 void network_impl::send(channel_handle chandle, 
         const message::getblocks& packet, send_handler handle_send)
 {
-    generic_send(strand(), chandle, packet, &channels_, handle_send);
+    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
 }
 
 
@@ -210,8 +214,8 @@ template<typename Message, typename Registry>
 void generic_relay(strand_ptr strand, channel_handle chandle, 
     const Message& packet, Registry& registry)
 {
-    strand->post(std::bind(
-        &perform_relay<Message, Registry>, chandle, packet, registry));
+    strand->post(std::bind(&perform_relay<Message, Registry>, 
+            chandle, packet, std::ref(registry)));
 }
 
 void network_impl::relay(channel_handle chandle, 
