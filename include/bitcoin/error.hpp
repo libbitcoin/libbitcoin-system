@@ -11,7 +11,8 @@ enum class error
     object_doesnt_exist = 1,
     object_already_exists,
     // network errors
-    system_network_error
+    system_network_error,
+    network_channel_not_found
 };
 
 class error_category_impl

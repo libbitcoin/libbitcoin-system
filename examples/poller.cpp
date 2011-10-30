@@ -33,8 +33,6 @@ public:
     void start(std::string hostname, unsigned int port);
 
 private:
-    void handle_connect(std::error_code ec, channel_handle channel);
-
     kernel_ptr kernel_;
     network_ptr network_;
     storage_ptr storage_;
@@ -46,7 +44,7 @@ poller_application::poller_application(std::string dbname,
         std::string dbuser, std::string dbpass)
   : kernel_(new kernel)
 {
-    network_.reset(new network_impl(kernel_));
+    network_.reset(new network_impl);
     kernel_->register_network(network_);
 
     storage_.reset(new postgresql_storage(kernel_, dbname, dbuser, dbpass));
@@ -55,20 +53,7 @@ poller_application::poller_application(std::string dbname,
 
 void poller_application::start(std::string hostname, unsigned int port)
 {
-    network_->connect(hostname, port, 
-        postbind<std::error_code, channel_handle>(strand(), std::bind(
-            &poller_application::handle_connect, shared_from_this(), _1, _2)));
-}
-
-void poller_application::handle_connect(
-    std::error_code ec, channel_handle channel)
-{
-    if (ec)
-    {
-        log_error() << "Connect: " << ec.message();
-        return;
-    }
-    log_info() << "Connected.";
+    kernel_->connect(hostname, port);
 }
 
 int main(int argc, const char** argv)

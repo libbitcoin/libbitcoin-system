@@ -23,22 +23,16 @@ class channel_pimpl
   : private boost::noncopyable
 {
 public:
-    struct init_data
-    {
-        network_ptr parent_gateway;
-        dialect_ptr translator;
-        service_ptr service;
-        socket_ptr socket;
-    };
-
-    channel_pimpl(const init_data& dat);
+    channel_pimpl(network_ptr parent_gateway, dialect_ptr translator,
+        service_ptr service, socket_ptr socket);
     ~channel_pimpl();
 
-    void send(const message::version& version);
-    void send(const message::verack& verack);
-    void send(const message::getaddr& getaddr);
-    void send(const message::getdata& getdata);
-    void send(const message::getblocks& getblocks);
+    void send(const message::version& packet);
+    void send(const message::verack& packet);
+    void send(const message::getaddr& packet);
+    void send(const message::getdata& packet);
+    void send(const message::getblocks& packet);
+
     channel_handle get_id() const;
 
 private:
@@ -49,21 +43,21 @@ private:
     void read_payload(const message::header& header_msg);
 
     void handle_read_header(const boost::system::error_code& ec,
-            size_t bytes_transferred);
+        size_t bytes_transferred);
     void handle_read_checksum(message::header& header_msg,
-            const boost::system::error_code& ec, size_t bytes_transferred);
+        const boost::system::error_code& ec, size_t bytes_transferred);
     void handle_read_payload(const message::header& header_msg,
-            const boost::system::error_code& ec, size_t bytes_transferred);
+        const boost::system::error_code& ec, size_t bytes_transferred);
 
     template<typename P>
     bool transport_payload(P payload, bool ret_errc)
     {
-        if (ret_errc ||
-            !network_->kernel()->recv_message(channel_id_, payload))
+        if (ret_errc)
         {
             destroy_self();
             return false;
         }
+        network_->relay(channel_id_, payload);
         return true;
     }
 

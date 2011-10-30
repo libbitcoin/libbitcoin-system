@@ -25,15 +25,16 @@ using boost::asio::buffer;
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
-channel_pimpl::channel_pimpl(const init_data& dat)
- : socket_(dat.socket), network_(dat.parent_gateway),
-        translator_(dat.translator)
+channel_pimpl::channel_pimpl(network_ptr parent_gateway,
+    dialect_ptr translator, service_ptr service, socket_ptr socket)
+ : socket_(socket), network_(parent_gateway),
+        translator_(translator)
 {
     // Unique IDs are assigned to channels by incrementing a shared counter
     // among instances.
     channel_id_ = rand();
 
-    timeout_.reset(new deadline_timer(*dat.service));
+    timeout_.reset(new deadline_timer(*service));
     read_header();
     reset_timeout();
 
@@ -179,8 +180,8 @@ void channel_pimpl::handle_read_payload(const message::header& header_msg,
     if (header_msg.command == "version")
     {
         message::version payload =
-                translator_->version_from_network(
-                    header_msg, payload_stream, ret_errc);
+            translator_->version_from_network(
+                header_msg, payload_stream, ret_errc);
         if (!transport_payload(payload, ret_errc))
             return;
     }
@@ -224,39 +225,39 @@ void channel_pimpl::handle_send(const boost::system::error_code& ec)
         return;
 }
 
-template<typename T>
-void generic_send(const T& message_packet, channel_pimpl* chan_self,
+template<typename Message>
+void generic_send(const Message& packet, channel_pimpl* chan_self,
         socket_ptr socket, dialect_ptr translator)
 {
-    data_chunk msg = translator->to_network(message_packet);
+    data_chunk msg = translator->to_network(packet);
     shared_const_buffer buffer(msg);
     async_write(*socket, buffer, std::bind(
             &channel_pimpl::handle_send, chan_self, std::placeholders::_1));
 }
 
-void channel_pimpl::send(const message::version& version)
+void channel_pimpl::send(const message::version& packet)
 {
-    generic_send(version, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_);
 }
 
-void channel_pimpl::send(const message::verack& verack)
+void channel_pimpl::send(const message::verack& packet)
 {
-    generic_send(verack, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_);
 }
 
-void channel_pimpl::send(const message::getaddr& getaddr)
+void channel_pimpl::send(const message::getaddr& packet)
 {
-    generic_send(getaddr, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_);
 }
 
-void channel_pimpl::send(const message::getdata& getdata)
+void channel_pimpl::send(const message::getdata& packet)
 {
-    generic_send(getdata, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_);
 }
 
-void channel_pimpl::send(const message::getblocks& getblocks)
+void channel_pimpl::send(const message::getblocks& packet)
 {
-    generic_send(getblocks, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_);
 }
 
 channel_handle channel_pimpl::get_id() const

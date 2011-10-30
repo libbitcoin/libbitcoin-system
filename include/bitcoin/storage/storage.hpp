@@ -19,8 +19,8 @@ public:
     //template <typename Message>
     //using fetch_handler = std::function<void (Message)>;
 
-    typedef std::function<void (
-        const std::error_code&, const message::block_locator&)>
+    typedef std::function<
+        void (const std::error_code&, const message::block_locator&)>
             fetch_handler_block_locator;
 
     typedef std::function<void (const std::error_code&, uint64_t)>

@@ -101,4 +101,3 @@ hash_digest hash_from_pretty(std::string byte_stream);
 
 #endif
 
-

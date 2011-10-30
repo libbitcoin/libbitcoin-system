@@ -24,27 +24,21 @@ public:
 
     void register_network(network_ptr net_comp);
     network_ptr get_network();
-    // Callbacks from network component
-    void send_failed(channel_handle chandle, const message::version& message);
-    void send_failed(channel_handle chandle, const message::verack& message);
-    void send_failed(channel_handle chandle, const message::getaddr& message);
-    void send_failed(channel_handle chandle, const message::inv& message);
-    void send_failed(channel_handle chandle, const message::getdata& message);
-    void send_failed(channel_handle chandle, const message::getblocks& message);
 
-    bool recv_message(channel_handle chandle, const message::version& message);
-    bool recv_message(channel_handle chandle, const message::verack& message);
-    bool recv_message(channel_handle chandle, const message::addr& message);
-    bool recv_message(channel_handle chandle, const message::inv& message);
-    bool recv_message(channel_handle chandle, const message::block& message);
+    void connect(std::string hostname, unsigned int port);
 
-    void handle_connect(channel_handle chandle);
+    void receive_version(channel_handle chandle,
+        const message::version& packet);
+    void receive_inv(channel_handle chandle, const message::inv& packet);
+    void receive_block(channel_handle chandle, const message::block& packet);
 
     void register_storage(storage_ptr stor_comp);
     storage_ptr get_storage();
     void tween_blocks(const hash_pair_list& block_hashes);
 
 private:
+    void handle_connect(const std::error_code& ec, channel_handle chandle);
+
     void start_initial_getblocks(channel_handle chandle);
     void request_initial_blocks(const std::error_code& ec,
         const message::block_locator& locator, channel_handle chandle);

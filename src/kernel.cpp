@@ -6,6 +6,9 @@
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/postbind.hpp>
 
+using std::placeholders::_1;
+using std::placeholders::_2;
+
 namespace libbitcoin {
 
 void null(std::error_code)
@@ -27,43 +30,43 @@ network_ptr kernel::get_network()
     return network_component_;
 }
 
-void kernel::send_failed(channel_handle, const message::version&)
+void kernel::connect(std::string hostname, unsigned int port)
 {
+    network_component_->connect(hostname, port, 
+        postbind<std::error_code, channel_handle>(strand(), std::bind(
+            &kernel::handle_connect, shared_from_this(), _1, _2)));
 }
 
-void kernel::send_failed(channel_handle, const message::verack&)
+void kernel::handle_connect(const std::error_code& ec, channel_handle chandle)
 {
+    if (ec)
+    {
+        log_error() << "Problem connecting";
+        return;
+    }
+    network_component_->subscribe_version(chandle,
+        postbind<message::version>(strand(), std::bind(
+            &kernel::receive_version, shared_from_this(), chandle, _1)));
+    network_component_->subscribe_inv(chandle,
+        postbind<message::inv>(strand(), std::bind(
+            &kernel::receive_inv, shared_from_this(), chandle, _1)));
+    network_component_->subscribe_block(chandle,
+        postbind<message::block>(strand(), std::bind(
+            &kernel::receive_block, shared_from_this(), chandle, _1)));
 }
 
-void kernel::send_failed(channel_handle, const message::getaddr&)
+void kernel::receive_version(channel_handle chandle,
+    const message::version& packet)
 {
-}
-
-void kernel::send_failed(channel_handle, const message::inv&)
-{
-}
-
-void kernel::send_failed(channel_handle, const message::getdata&)
-{
-}
-
-void kernel::send_failed(channel_handle, const message::getblocks&)
-{
-}
-
-bool kernel::recv_message(channel_handle chandle,
-        const message::version& message)
-{
-    log_debug() << "nonce is " << message.nonce;
-    log_debug() << "last block is " << message.start_height;
-    log_debug() << pretty_hex(message.addr_you.ip_addr);
-    network_component_->send(chandle, message::verack());
+    log_debug() << "nonce is " << packet.nonce;
+    log_debug() << "last block is " << packet.start_height;
+    log_debug() << pretty_hex(packet.addr_you.ip_addr);
+    network_component_->send(chandle, message::verack(), null);
     if (!initial_getblocks_)
     {
         initial_getblocks_ = true;
         start_initial_getblocks(chandle);
     }
-    return true;
 }
 
 void kernel::start_initial_getblocks(channel_handle chandle)
@@ -71,7 +74,7 @@ void kernel::start_initial_getblocks(channel_handle chandle)
     storage_component_->fetch_block_locator(
         postbind<std::error_code, message::block_locator>(strand(), std::bind(
             &kernel::request_initial_blocks, shared_from_this(), 
-                std::placeholders::_1, std::placeholders::_2, chandle)));
+                _1, _2, chandle)));
 }
 
 void kernel::request_initial_blocks(const std::error_code& ec,
@@ -85,20 +88,7 @@ void kernel::request_initial_blocks(const std::error_code& ec,
     message::getblocks getblocks;
     getblocks.locator_start_hashes = locator;
     getblocks.hash_stop = null_hash;
-    network_component_->send(chandle, getblocks);
-}
-
-bool kernel::recv_message(channel_handle, const message::verack&)
-{
-    // When you receive this, then you know other side is accepting your sends
-    return true;
-}
-
-bool kernel::recv_message(channel_handle, const message::addr& message)
-{
-    //for (const message::net_addr addr: message.addr_list)
-    //    log_debug() << pretty_hex(addr.ip_addr) << ' ' << addr.port;
-    return true;
+    network_component_->send(chandle, getblocks, null);
 }
 
 // TODO: Finish this.
@@ -111,13 +101,14 @@ void ask_block(bool block_exists, Function request_block)
     //    tween_blocks...
 }
 
-bool kernel::recv_message(channel_handle chandle, const message::inv& message)
+void kernel::receive_inv(channel_handle chandle,
+    const message::inv& packet)
 {
     message::getdata request_message;
-    for (const message::inv_vect curr_inv: message.invs)
+    for (const message::inv_vect curr_inv: packet.invs)
     {
         if (curr_inv.type == message::inv_type::none)
-            return false;
+            return;
 
         // Push only block invs to the request queue
         if (curr_inv.type == message::inv_type::block)
@@ -129,18 +120,19 @@ bool kernel::recv_message(channel_handle chandle, const message::inv& message)
     // TODO: Should check if block exists or not first before
     // wasting bandwidth
     if (request_message.invs.size() > 0)
-        network_component_->send(chandle, request_message);
-    return true;
+        network_component_->send(chandle, request_message, null);
+    network_component_->subscribe_inv(chandle,
+        postbind<message::inv>(strand(), std::bind(
+            &kernel::receive_inv, shared_from_this(), chandle, _1)));
 }
 
-bool kernel::recv_message(channel_handle, const message::block& message)
+void kernel::receive_block(channel_handle chandle, 
+    const message::block& packet)
 {
-    storage_component_->store(message, null);
-    return true;
-}
-
-void kernel::handle_connect(channel_handle)
-{
+    storage_component_->store(packet, null);
+    network_component_->subscribe_block(chandle,
+        postbind<message::block>(strand(), std::bind(
+            &kernel::receive_block, shared_from_this(), chandle, _1)));
 }
 
 void kernel::register_storage(storage_ptr stor_comp)
@@ -158,7 +150,7 @@ void kernel::tween_blocks(const hash_pair_list& block_hashes)
     storage_component_->fetch_block_locator(
         postbind<std::error_code, message::block_locator>(strand(), std::bind(
             &kernel::request_next_blocks, shared_from_this(), 
-                std::placeholders::_1, std::placeholders::_2, block_hashes)));
+                _1, _2, block_hashes)));
 }
 
 void kernel::request_next_blocks(const std::error_code& ec,
@@ -180,7 +172,7 @@ void kernel::request_next_blocks(const std::error_code& ec,
         for (auto it = range.first; it != range.second; ++it)
         {
             getblocks.hash_stop = orphan_root;
-            network_component_->send(it->second, getblocks);
+            network_component_->send(it->second, getblocks, null);
         }
     }
 }
