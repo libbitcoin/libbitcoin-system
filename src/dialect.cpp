@@ -40,8 +40,8 @@ data_chunk assemble_message(std::string command, const serializer& payload,
         return msg_body;
     data_chunk message = construct_header_from(command, msg_body);
     // Extend message with actual payload
-    message.reserve(message.size() + distance(msg_body.begin(),
-            msg_body.end()));
+    message.reserve(
+        message.size() + distance(msg_body.begin(), msg_body.end()));
     message.insert(message.end(), msg_body.begin(), msg_body.end());
     return message;
 }

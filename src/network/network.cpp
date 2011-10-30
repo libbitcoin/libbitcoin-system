@@ -66,6 +66,32 @@ void network_impl::connect(std::string hostname, unsigned short port,
             _1, socket, hostname, handle_connect));
 }
 
+void perform_begin_handshake(channel_handle chandle,
+    channel_list& channels, network::send_handler handle_send)
+{
+    auto it = std::find_if(channels.begin(), channels.end(),
+        [chandle](const channel_pimpl& channel_obj)
+        {
+            return channel_obj.get_id() == chandle;
+        });
+    if (it == channels.end())
+    {
+        log_error() << "Non existant channel " << chandle << " for send.";
+        handle_send(error::network_channel_not_found);
+        return;
+    }
+    //std::shared_ptr<size_t> handshake_count(new size_t(0));
+    //std::shared_ptr<std::mutex>
+    //it->send(packet, handle_send);
+}
+
+void network_impl::begin_handshake(channel_handle chandle,
+    send_handler handle_send)
+{
+    //strand()->post(std::bind(&perform_begin_handshake, 
+    //    chandle, std::ref(channels_), handle_send));
+}
+
 void network_impl::listen(connect_handler handle_connect)
 {
     strand()->post(
@@ -75,15 +101,14 @@ void network_impl::listen(connect_handler handle_connect)
         });
 }
 
-static void remove_matching_channels(channel_list* channels,
-        channel_handle chandle)
+void remove_matching_channels(channel_list* channels,
+    channel_handle chandle)
 {
-    auto is_matching =
+    channels->erase_if(
         [chandle](channel_pimpl& channel_obj)
         {
             return channel_obj.get_id() == chandle;
-        };
-    channels->erase_if(is_matching);
+        });
     log_debug() << channels->size() << " peers remaining.";
 }
 void network_impl::disconnect(channel_handle chandle)
@@ -146,12 +171,11 @@ template<typename Message, typename Callback>
 void perform_send(channel_handle chandle,
     const Message packet, channel_list& channels, Callback handle_send)
 {
-    auto is_matching =
+    auto it = std::find_if(channels.begin(), channels.end(),
         [chandle](const channel_pimpl& channel_obj)
         {
             return channel_obj.get_id() == chandle;
-        };
-    auto it = std::find_if(channels.begin(), channels.end(), is_matching);
+        });
     if (it == channels.end())
     {
         log_error() << "Non existant channel " << chandle << " for send.";

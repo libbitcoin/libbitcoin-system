@@ -2,8 +2,8 @@
 #define LIBBITCOIN_NET_SHARED_CONST_BUFFER_H
 
 #include <boost/asio.hpp>
-#include <vector>
 
+#include <bitcoin/types.hpp>
 #include <bitcoin/util/serializer.hpp>
 
 namespace libbitcoin {
@@ -12,22 +12,29 @@ namespace libbitcoin {
 class shared_const_buffer
 {
 public:
-  // Construct from a stream object
-  explicit shared_const_buffer(const data_chunk& user_data)
-    : data(new std::vector<char>(user_data.begin(), user_data.end())),
-      buffer(boost::asio::buffer(*data))
-  {
-  }
+    // Construct from a stream object
+    explicit shared_const_buffer(const data_chunk& user_data)
+      : data(new data_chunk(user_data.begin(), user_data.end())),
+        buffer(boost::asio::buffer(*data))
+    {
+    }
 
-  // Implement the ConstBufferSequence requirements.
-  typedef boost::asio::const_buffer value_type;
-  typedef const boost::asio::const_buffer* const_iterator;
-  const boost::asio::const_buffer* begin() const { return &buffer; }
-  const boost::asio::const_buffer* end() const { return &buffer + 1; }
+    // Implement the ConstBufferSequence requirements.
+    typedef boost::asio::const_buffer value_type;
+    typedef const value_type* const_iterator;
+
+    const const_iterator begin() const
+    { 
+        return &buffer; 
+    }
+    const const_iterator end() const 
+    { 
+        return &buffer + 1; 
+    }
 
 private:
-  boost::shared_ptr<std::vector<char>> data;
-  boost::asio::const_buffer buffer;
+    boost::shared_ptr<data_chunk> data;
+    value_type buffer;
 };
 
 } // libbitcoin

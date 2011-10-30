@@ -39,6 +39,8 @@ public:
     virtual bool start_accept() = 0;
     virtual void connect(std::string hostname, unsigned short port,
         connect_handler handle_connect) = 0;
+    virtual void begin_handshake(channel_handle chandle,
+        send_handler handle_send) = 0;
     virtual void listen(connect_handler handle_connect) = 0;
     virtual size_t connection_count() const = 0;
     virtual void disconnect(channel_handle handle) = 0;
@@ -87,6 +89,8 @@ public:
     bool start_accept();
     void connect(std::string hostname, unsigned short port, 
         connect_handler handle_connect);
+    void begin_handshake(channel_handle chandle,
+        send_handler handle_send);
     void listen(connect_handler handle_connect);
     size_t connection_count() const;
     void disconnect(channel_handle chandle);  
