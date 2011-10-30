@@ -158,7 +158,7 @@ void perform_send(channel_handle chandle,
         handle_send(error::network_channel_not_found);
         return;
     }
-    it->send(packet);
+    it->send(packet, handle_send);
 }
 
 template<typename Message, typename Callback>

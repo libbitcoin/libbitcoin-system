@@ -25,6 +25,10 @@ using boost::asio::buffer;
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
+void null(const std::error_code& ec)
+{
+}
+
 channel_pimpl::channel_pimpl(network_ptr parent_gateway,
     dialect_ptr translator, service_ptr service, socket_ptr socket)
  : socket_(socket), network_(parent_gateway),
@@ -38,7 +42,7 @@ channel_pimpl::channel_pimpl(network_ptr parent_gateway,
     read_header();
     reset_timeout();
 
-    send(create_version_message());
+    send(create_version_message(), null);
 }
 
 channel_pimpl::~channel_pimpl()
@@ -219,45 +223,54 @@ void channel_pimpl::handle_read_payload(const message::header& header_msg,
     reset_timeout();
 }
 
-void channel_pimpl::handle_send(const boost::system::error_code& ec)
+void channel_pimpl::pre_handle_send(const boost::system::error_code& ec,
+    network::send_handler handle_send)
 {
     if (problems_check(ec))
-        return;
+        handle_send(error::network_channel_not_found);
+    else
+        handle_send(std::error_code());
 }
 
 template<typename Message>
 void generic_send(const Message& packet, channel_pimpl* chan_self,
-        socket_ptr socket, dialect_ptr translator)
+    socket_ptr socket, dialect_ptr translator, 
+    network::send_handler handle_send)
 {
     data_chunk msg = translator->to_network(packet);
     shared_const_buffer buffer(msg);
     async_write(*socket, buffer, std::bind(
-            &channel_pimpl::handle_send, chan_self, std::placeholders::_1));
+        &channel_pimpl::pre_handle_send, chan_self, _1, handle_send));
 }
 
-void channel_pimpl::send(const message::version& packet)
+void channel_pimpl::send(const message::version& packet,
+    network::send_handler handle_send)
 {
-    generic_send(packet, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_, handle_send);
 }
 
-void channel_pimpl::send(const message::verack& packet)
+void channel_pimpl::send(const message::verack& packet,
+    network::send_handler handle_send)
 {
-    generic_send(packet, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_, handle_send);
 }
 
-void channel_pimpl::send(const message::getaddr& packet)
+void channel_pimpl::send(const message::getaddr& packet,
+    network::send_handler handle_send)
 {
-    generic_send(packet, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_, handle_send);
 }
 
-void channel_pimpl::send(const message::getdata& packet)
+void channel_pimpl::send(const message::getdata& packet,
+    network::send_handler handle_send)
 {
-    generic_send(packet, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_, handle_send);
 }
 
-void channel_pimpl::send(const message::getblocks& packet)
+void channel_pimpl::send(const message::getblocks& packet,
+    network::send_handler handle_send)
 {
-    generic_send(packet, this, socket_, translator_);
+    generic_send(packet, this, socket_, translator_, handle_send);
 }
 
 channel_handle channel_pimpl::get_id() const

@@ -80,7 +80,7 @@ int run_kernel(kernel_ptr kernel)
     std::cin.get();
 
     libbitcoin::message::getblocks getblocks = create_getblocks_message();
-    net->send(0, getblocks);
+    //net->send(0, getblocks);
     std::cin.get();
     return 0;
 }

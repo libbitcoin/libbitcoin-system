@@ -27,11 +27,16 @@ public:
         service_ptr service, socket_ptr socket);
     ~channel_pimpl();
 
-    void send(const message::version& packet);
-    void send(const message::verack& packet);
-    void send(const message::getaddr& packet);
-    void send(const message::getdata& packet);
-    void send(const message::getblocks& packet);
+    void send(const message::version& packet,
+        network::send_handler handle_send);
+    void send(const message::verack& packet,
+        network::send_handler handle_send);
+    void send(const message::getaddr& packet,
+        network::send_handler handle_send);
+    void send(const message::getdata& packet,
+        network::send_handler handle_send);
+    void send(const message::getblocks& packet,
+        network::send_handler handle_send);
 
     channel_handle get_id() const;
 
@@ -61,7 +66,8 @@ private:
         return true;
     }
 
-    void handle_send(const boost::system::error_code& ec);
+    void pre_handle_send(const boost::system::error_code& ec,
+        network::send_handler handle_send);
 
     void handle_timeout(const boost::system::error_code& ec);
     void reset_timeout();
