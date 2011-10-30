@@ -32,7 +32,7 @@ void receive_inv(network_ptr net, channel_handle chandle,
     }
     net->subscribe_inv(chandle, std::bind(&receive_inv, net, chandle, _1));
     std::unique_lock<std::mutex> lock(mutex);
-    ++inv_count;
+    inv_count += packet.invs.size();
     condition.notify_one();
 }
 
