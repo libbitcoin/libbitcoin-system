@@ -50,10 +50,7 @@ message::getblocks create_getblocks_message()
                         0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1, 
                         0x72, 0xb3, 0xf1, 0xb6, 0x0a, 0x8c, 0xe2, 0x6f};
     packet.locator_start_hashes.push_back(genesis);
-    packet.hash_stop = hash_digest{0, 0, 0, 0, 0, 0, 0, 0, 
-                                   0, 0, 0, 0, 0, 0, 0, 0, 
-                                   0, 0, 0, 0, 0, 0, 0, 0, 
-                                   0, 0, 0, 0, 0, 0, 0, 0};
+    packet.hash_stop.fill(0);
     return packet;
 }
 
