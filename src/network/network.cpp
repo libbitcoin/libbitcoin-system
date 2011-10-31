@@ -53,7 +53,7 @@ void network_impl::handle_connect(const boost::system::error_code& ec,
     handle_connect(std::error_code(), chanid);
 }
 
-void network_impl::connect(std::string hostname, unsigned short port,
+void network_impl::connect(const std::string& hostname, unsigned short port,
         connect_handler handle_connect)
 {
     socket_ptr socket(new tcp::socket(*service()));
@@ -64,32 +64,6 @@ void network_impl::connect(std::string hostname, unsigned short port,
     socket->async_connect(endpoint, std::bind(
         &network_impl::handle_connect, shared_from_this(), 
             _1, socket, hostname, handle_connect));
-}
-
-void perform_begin_handshake(channel_handle chandle,
-    channel_list& channels, network::send_handler handle_send)
-{
-    auto it = std::find_if(channels.begin(), channels.end(),
-        [chandle](const channel_pimpl& channel_obj)
-        {
-            return channel_obj.get_id() == chandle;
-        });
-    if (it == channels.end())
-    {
-        log_error() << "Non existant channel " << chandle << " for send.";
-        handle_send(error::network_channel_not_found);
-        return;
-    }
-    //std::shared_ptr<size_t> handshake_count(new size_t(0));
-    //std::shared_ptr<std::mutex>
-    //it->send(packet, handle_send);
-}
-
-void network_impl::begin_handshake(channel_handle chandle,
-    send_handler handle_send)
-{
-    //strand()->post(std::bind(&perform_begin_handshake, 
-    //    chandle, std::ref(channels_), handle_send));
 }
 
 void network_impl::listen(connect_handler handle_connect)

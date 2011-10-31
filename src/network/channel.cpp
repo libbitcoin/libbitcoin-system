@@ -25,10 +25,6 @@ using boost::asio::buffer;
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
-void null(const std::error_code& ec)
-{
-}
-
 channel_pimpl::channel_pimpl(network_ptr parent_gateway,
     dialect_ptr translator, service_ptr service, socket_ptr socket)
  : socket_(socket), network_(parent_gateway),
@@ -41,8 +37,6 @@ channel_pimpl::channel_pimpl(network_ptr parent_gateway,
     timeout_.reset(new deadline_timer(*service));
     read_header();
     reset_timeout();
-
-    send(create_version_message(), null);
 }
 
 channel_pimpl::~channel_pimpl()
@@ -276,25 +270,6 @@ void channel_pimpl::send(const message::getblocks& packet,
 channel_handle channel_pimpl::get_id() const
 {
     return channel_id_;
-}
-
-message::version channel_pimpl::create_version_message()
-{
-    message::version version;
-    // this is test data.
-    version.version = 31900;
-    version.services = 1;
-    version.timestamp = time(NULL);
-    version.addr_me.services = version.services;
-    version.addr_me.ip_addr = network_->get_ip_address();
-    version.addr_me.port = 8333;
-    version.addr_you.services = version.services;
-    version.addr_you.ip_addr = decltype(version.addr_you.ip_addr){0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 10, 0, 0, 1};
-    version.addr_you.port = 8333;
-    version.nonce = channel_id_;
-    version.sub_version_num = "";
-    version.start_height = 0;
-    return version;
 }
 
 } // libbitcoin

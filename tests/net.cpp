@@ -57,60 +57,19 @@ message::getblocks create_getblocks_message()
     return packet;
 }
 
-typedef std::atomic<size_t> atomic_counter;
-typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
-typedef std::function<void ()> callback_handler;
-
-const size_t clearance_count = 2;
-
-void send_getblocks(network_ptr net, channel_handle chandle)
-{
-    net->send(chandle, create_getblocks_message(), 
-        std::bind(&handle_send_getblock, _1));
-}
-
-void handle_verack_sent(const std::error_code& ec,
-    atomic_counter_ptr counter, callback_handler callback)
-{
-    if (ec)
-        error_exit(ec.message());
-    if (++(*counter) == clearance_count)
-        callback();
-}
-
-void receive_version(channel_handle chandle, const message::version&,
-    network_ptr net, atomic_counter_ptr counter, callback_handler callback)
-{
-    net->send(chandle, message::verack(),
-        std::bind(&handle_verack_sent, _1, counter, callback));
-}
-
-void receive_verack(const message::verack&, 
-    atomic_counter_ptr counter, callback_handler callback)
-{
-    if (++(*counter) == clearance_count)
-        callback();
-}
-
-void handle_connect(const std::error_code& ec, channel_handle chandle,
+void handle_handshake(const std::error_code& ec, channel_handle chandle,
     network_ptr net)
 {
-    if (ec)
-        error_exit(ec.message());
     net->subscribe_inv(chandle, std::bind(&receive_inv, net, chandle, _1));
-
-    atomic_counter_ptr counter(new atomic_counter(0));
-    callback_handler callback = std::bind(&send_getblocks, net, chandle);
-    net->subscribe_version(chandle,
-        std::bind(&receive_version, chandle, _1, net, counter, callback));
-    net->subscribe_verack(chandle,
-        std::bind(&receive_verack, _1, counter, callback));
+    net->send(chandle, create_getblocks_message(), 
+        std::bind(&handle_send_getblock, _1));
 }
 
 int main()
 {
     network_ptr net(new network_impl);
-    net->connect("localhost", 8333, std::bind(&handle_connect, _1, _2, net));
+    handshake_connect(net, "localhost", 8333,
+        std::bind(&handle_handshake, _1, _2, net));
 
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return inv_count >= 500; });

@@ -3,6 +3,7 @@ INCLUDES= -Iinclude/ -Iusr/include/
 LIBS= -Lusr/lib usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq
 BASE_MODULES= \
 	network.o  \
+	handshake.o  \
 	dialect.o  \
 	channel.o \
 	serializer.o \
@@ -141,6 +142,9 @@ script: src/script.cpp include/bitcoin/script.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/block.o: src/block.cpp include/bitcoin/block.hpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+obj/handshake.o: src/network/handshake.cpp include/bitcoin/network/network.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/network.o: src/network/network.cpp include/bitcoin/network/network.hpp

@@ -41,8 +41,6 @@ public:
     channel_handle get_id() const;
 
 private:
-    channel_handle channel_id_;
-
     void read_header();
     void read_checksum(const message::header& header_msg);
     void read_payload(const message::header& header_msg);
@@ -76,8 +74,7 @@ private:
     void destroy_self();
     bool problems_check(const boost::system::error_code& ec);
 
-    // Construct a version message
-    message::version create_version_message();
+    channel_handle channel_id_;
 
     socket_ptr socket_;
     network_ptr network_;
