@@ -7,6 +7,7 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/util/elliptic_curve_key.hpp>
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/util/ripemd.hpp>
 
 #include <functional>
 #include <iostream>
@@ -60,6 +61,18 @@ void handle_connected(const std::error_code& ec, channel_handle chandle,
     net->send(chandle, tx, handle_tx_sent);
 }
 
+script build_output_script(const short_hash& public_key_hash)
+{
+    script result;
+    result.push_operation({opcode::dup, data_chunk()});
+    result.push_operation({opcode::hash160, data_chunk()});
+    result.push_operation({opcode::special,
+        data_chunk(public_key_hash.begin(), public_key_hash.end())});
+    result.push_operation({opcode::equalverify, data_chunk()});
+    result.push_operation({opcode::checksig, data_chunk()});
+    return result;
+}
+
 int main(int argc, char** argv)
 {
     if (argc != 4)
@@ -91,11 +104,8 @@ int main(int argc, char** argv)
 
     transaction_output output;
     output.value = boost::lexical_cast<uint64_t>(argv[3]);
-    short_hash pubkey_hash = address_to_short_hash(argv[2]);
-    data_chunk raw_script{0x76, 0xa9, 0x14};
-    extend_data(raw_script, pubkey_hash);
-    extend_data(raw_script, data_chunk{0x88, 0xac});
-    output.output_script = parse_script(raw_script);
+    short_hash dest_pubkey_hash = address_to_short_hash(argv[2]);
+    output.output_script = build_output_script(dest_pubkey_hash);
 
     transaction tx;
     tx.inputs.push_back(input);
@@ -103,8 +113,10 @@ int main(int argc, char** argv)
     tx.version = 1;
     tx.locktime = 0;
 
-    // temporary... should be prevout script
-    script script_code = output.output_script;
+    // Rebuild previous output script
+    script script_code = 
+        build_output_script(generate_ripemd_hash(public_key));
+
     hash_digest tx_hash =
         script::generate_signature_hash(tx, 0, script_code, 1);
     if (tx_hash == null_hash)
