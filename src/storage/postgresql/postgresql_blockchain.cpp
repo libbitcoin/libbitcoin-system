@@ -236,7 +236,7 @@ void pq_organizer::organize()
 
         reorganized_blocks.insert(child_id);
     }
-    get_inbetweens(reorganized_blocks);
+    //get_inbetweens(reorganized_blocks);
 }
 
 void pq_organizer::get_inbetweens(std::set<size_t> block_ids)
@@ -841,67 +841,12 @@ bool pq_validate_block::search_double_spends(
     return true;
 }
 
-pq_blockchain::pq_blockchain(
-        cppdb::session sql, service_ptr service, kernel_ptr kernel)
-  : barrier_clearance_level_(500), barrier_timeout_(milliseconds(500)), 
-    sql_(sql)
+pq_blockchain::pq_blockchain(cppdb::session sql, 
+    service_ptr service, kernel_ptr kernel)
+ : sql_(sql)
 {
     organizer_.reset(new pq_organizer(sql, kernel));
     reader_.reset(new pq_reader(sql));
-    timeout_.reset(new deadline_timer(*service));
-    reset_state();
-}
-
-void pq_blockchain::set_clearance(size_t clearance)
-{
-    barrier_clearance_level_ = clearance;
-}
-void pq_blockchain::set_timeout(time_duration timeout)
-{
-    barrier_timeout_ = timeout;
-}
-
-void pq_blockchain::buffer_block(const pq_block& buffer_block)
-{
-    blocks_buffer_.push_back(buffer_block);
-}
-void pq_blockchain::raise_barrier()
-{
-    barrier_level_++;
-    if (barrier_level_ > barrier_clearance_level_)
-    {
-        reset_state();
-        start();
-    }
-    else if (!timer_started_)
-    {
-        timer_started_ = true;
-        timeout_->expires_from_now(barrier_timeout_);
-        timeout_->async_wait(std::bind( 
-            &pq_blockchain::start_exec, shared_from_this(), _1));
-    }
-}
-
-void pq_blockchain::reset_state()
-{
-    timeout_->cancel();
-    barrier_level_ = 0;
-    timer_started_ = false;
-}
-
-void pq_blockchain::start_exec(const boost::system::error_code& ec)
-{
-    reset_state();
-    if (ec == boost::asio::error::operation_aborted)
-    {
-        return;
-    }
-    else if (ec)
-    {
-        log_fatal() << "Blockchain processing: " << ec.message();
-        return;
-    }
-    start();
 }
 
 void pq_blockchain::start()
@@ -925,7 +870,6 @@ pq_block pq_blockchain::fetch_or_read_block(cppdb::result result)
             return *it;
         }
     }
-    log_info() << "Block not cached in ring buffer.";
     static cppdb::statement statement = sql_.prepare(
         "SELECT \
             block_id, \

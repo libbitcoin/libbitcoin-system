@@ -106,19 +106,34 @@ size_t postgresql_storage::insert(const message::transaction& transaction,
 }
 
 void postgresql_storage::store(const message::block& block,
-        store_handler handle_store)
+        store_block_handler handle_store)
 {
     strand()->post(std::bind(
         &postgresql_storage::do_store_block, shared_from_this(),
             block, handle_store));
 }
 void postgresql_storage::do_store_block(const message::block& block,
-        store_handler handle_store)
+        store_block_handler handle_store)
 {
     hash_digest block_hash = hash_block_header(block);
     std::string block_hash_repr = pretty_hex(block_hash),
             prev_block_repr = pretty_hex(block.prev_block),
             merkle_repr = pretty_hex(block.merkle_root);
+
+    static cppdb::statement check_confirmed = sql_.prepare(
+        "SELECT 1 \
+        FROM \
+            blocks, \
+            chains \
+        WHERE \
+            block_id=? \
+            AND space=0 \
+            AND blocks.depth <= chains.depth \
+            AND chain_id >= span_left \
+            AND chain_id <= span_right \
+        ORDER BY work DESC \
+        LIMIT 1"
+        );
 
     cppdb::transaction guard(sql_);
     cppdb::result result = sql_ <<
@@ -126,10 +141,13 @@ void postgresql_storage::do_store_block(const message::block& block,
         << block_hash_repr << cppdb::row;
     if (!result.empty())
     {
-        log_warning() << "Block '" << block_hash_repr << "' already exists";
-        blockchain_->organizer()->refresh_block(result.get<size_t>(0));
-        blockchain_->raise_barrier();
-        handle_store(error::object_already_exists);
+        check_confirmed.reset();
+        check_confirmed.bind(result.get<size_t>(0));
+        cppdb::result is_confirmed = check_confirmed.row();
+        if (is_confirmed.empty())
+            handle_store(error::object_already_exists, block_status::orphan);
+        else
+            handle_store(error::object_already_exists, block_status::confirmed);
         return;
     }
 
@@ -206,12 +224,15 @@ void postgresql_storage::do_store_block(const message::block& block,
         link_txs.exec();
         block_info.transactions.push_back(tx_info);
     }
-    if (buffer_block)
-        blockchain_->buffer_block(std::make_pair(block_info, block));
-    blockchain_->organizer()->refresh_block(block_info.block_id);
-    blockchain_->raise_barrier();
     guard.commit();
-    handle_store(std::error_code());
+    blockchain_->start();
+    check_confirmed.reset();
+    check_confirmed.bind(block_info.block_id);
+    cppdb::result is_confirmed = check_confirmed.row();
+    if (is_confirmed.empty())
+        handle_store(std::error_code(), block_status::orphan);
+    else
+        handle_store(std::error_code(), block_status::confirmed);
 }
 
 void postgresql_storage::fetch_block_locator(

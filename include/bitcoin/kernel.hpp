@@ -7,6 +7,7 @@
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/block.hpp>
 #include <bitcoin/util/threaded_service.hpp>
 
 namespace libbitcoin {
@@ -36,6 +37,8 @@ public:
 
 private:
     void handle_connect(const std::error_code& ec, channel_handle chandle);
+    void handle_block_stored(const std::error_code& ec, block_status status,
+        hash_digest block_hash);
 
     void start_initial_getblocks(channel_handle chandle);
     void request_initial_blocks(const std::error_code& ec,

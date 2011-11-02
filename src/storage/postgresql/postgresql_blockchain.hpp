@@ -122,35 +122,19 @@ class pq_blockchain
 {
 public:
     pq_blockchain(cppdb::session sql, service_ptr service, kernel_ptr kernel);
-    // Only called during init. Otherwise use raise_barrier()
     void start();
-
-    void set_clearance(size_t clearance);
-    void set_timeout(time_duration timeout);
-
-    void buffer_block(const pq_block& buffer_block);
-    void raise_barrier();
 
     pq_organizer_ptr organizer();
     pq_reader_ptr reader();
-    
-private: 
-    void reset_state();
-    void start_exec(const boost::system::error_code& ec);
 
     void validate();
+    
+private: 
     void finalize_status(
         const pq_block_info& block_info, 
         const message::block& current_block);
 
     pq_block fetch_or_read_block(cppdb::result result);
-
-    size_t barrier_clearance_level_;
-    time_duration barrier_timeout_;
-
-    deadline_timer_ptr timeout_;
-    bool timer_started_;
-    size_t barrier_level_;
 
     std::vector<pq_block> blocks_buffer_;
 

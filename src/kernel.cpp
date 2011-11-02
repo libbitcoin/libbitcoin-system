@@ -112,14 +112,28 @@ void kernel::receive_inv(channel_handle chandle,
         std::bind(&kernel::receive_inv, shared_from_this(), chandle, _1));
 }
 
-void nullblk(const std::error_code&, block_status)
+void kernel::handle_block_stored(const std::error_code& ec,
+    block_status status, hash_digest block_hash)
 {
+    if (ec && ec != error::object_already_exists)
+    {
+        log_error() << "Problem storing block: " << ec.message();
+        return;
+    }
+    else if (status == block_status::orphan)
+    {
+        hash_pair_list hashes;
+        hashes.push_back(std::make_pair(block_hash, block_hash));
+        tween_blocks(hashes);
+    }
 }
 
 void kernel::receive_block(channel_handle chandle, 
     const message::block& packet)
 {
-    //storage_component_->store(packet, nullblk);
+    storage_component_->store(packet,
+        std::bind(&kernel::handle_block_stored, shared_from_this(),
+            _1, _2, hash_block_header(packet)));
     network_component_->subscribe_block(chandle,
         std::bind(&kernel::receive_block, shared_from_this(), chandle, _1));
 }

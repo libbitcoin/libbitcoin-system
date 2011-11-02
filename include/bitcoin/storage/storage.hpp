@@ -4,6 +4,7 @@
 #include <boost/utility.hpp>
 #include <functional>
 
+#include <bitcoin/block.hpp>
 #include <bitcoin/error.hpp>
 #include <bitcoin/messages.hpp>
 
@@ -14,6 +15,8 @@ class storage
 {
 public:
     typedef std::function<void (const std::error_code&)> store_handler;
+    typedef std::function<void (const std::error_code&, block_status)>
+        store_block_handler;
 
     // Not supported in g++ yet
     //template <typename Message>
@@ -27,7 +30,7 @@ public:
             fetch_handler_balance;
 
     virtual void store(const message::block& block, 
-            store_handler handle_store) = 0;
+            store_block_handler handle_store) = 0;
 
     virtual void fetch_block_locator(
             fetch_handler_block_locator handle_fetch) = 0;

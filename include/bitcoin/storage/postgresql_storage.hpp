@@ -23,7 +23,7 @@ public:
     postgresql_storage(kernel_ptr kernel,
         std::string database, std::string user, std::string password);
 
-    void store(const message::block& block, store_handler handle_store);
+    void store(const message::block& block, store_block_handler handle_store);
 
     void fetch_block_locator(fetch_handler_block_locator handle_fetch);
     void fetch_balance(const short_hash& pubkey_hash,
@@ -31,7 +31,7 @@ public:
 
 private:
     void do_store_block(const message::block& block,
-            store_handler handle_store);
+            store_block_handler handle_store);
 
     void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
     void do_fetch_balance(const short_hash& pubkey_hash,

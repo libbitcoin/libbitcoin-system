@@ -5,6 +5,13 @@
 
 namespace libbitcoin {
 
+enum class block_status
+{
+    orphan,
+    confirmed,
+    bad
+};
+
 hash_digest hash_block_header(const message::block& block);
 
 uint64_t block_value(size_t depth);
