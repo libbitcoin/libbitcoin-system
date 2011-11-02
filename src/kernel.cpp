@@ -32,7 +32,7 @@ network_ptr kernel::get_network()
 
 void kernel::connect(std::string hostname, unsigned int port)
 {
-    network_component_->connect(hostname, port, 
+    handshake_connect(network_component_, hostname, port,
         postbind<std::error_code, channel_handle>(strand(), std::bind(
             &kernel::handle_connect, shared_from_this(), _1, _2)));
 }
@@ -44,29 +44,16 @@ void kernel::handle_connect(const std::error_code& ec, channel_handle chandle)
         log_error() << "Problem connecting";
         return;
     }
-    network_component_->subscribe_version(chandle,
-        postbind<message::version>(strand(), std::bind(
-            &kernel::receive_version, shared_from_this(), chandle, _1)));
-    network_component_->subscribe_inv(chandle,
-        postbind<message::inv>(strand(), std::bind(
-            &kernel::receive_inv, shared_from_this(), chandle, _1)));
-    network_component_->subscribe_block(chandle,
-        postbind<message::block>(strand(), std::bind(
-            &kernel::receive_block, shared_from_this(), chandle, _1)));
-}
-
-void kernel::receive_version(channel_handle chandle,
-    const message::version& packet)
-{
-    log_debug() << "nonce is " << packet.nonce;
-    log_debug() << "last block is " << packet.start_height;
-    log_debug() << pretty_hex(packet.addr_you.ip_addr);
-    network_component_->send(chandle, message::verack(), null);
     if (!initial_getblocks_)
     {
         initial_getblocks_ = true;
         start_initial_getblocks(chandle);
     }
+
+    network_component_->subscribe_inv(chandle,
+        std::bind(&kernel::receive_inv, shared_from_this(), chandle, _1));
+    network_component_->subscribe_block(chandle,
+        std::bind(&kernel::receive_block, shared_from_this(), chandle, _1));
 }
 
 void kernel::start_initial_getblocks(channel_handle chandle)
@@ -122,17 +109,19 @@ void kernel::receive_inv(channel_handle chandle,
     if (request_message.invs.size() > 0)
         network_component_->send(chandle, request_message, null);
     network_component_->subscribe_inv(chandle,
-        postbind<message::inv>(strand(), std::bind(
-            &kernel::receive_inv, shared_from_this(), chandle, _1)));
+        std::bind(&kernel::receive_inv, shared_from_this(), chandle, _1));
+}
+
+void nullblk(const std::error_code&, block_status)
+{
 }
 
 void kernel::receive_block(channel_handle chandle, 
     const message::block& packet)
 {
-    storage_component_->store(packet, null);
+    //storage_component_->store(packet, nullblk);
     network_component_->subscribe_block(chandle,
-        postbind<message::block>(strand(), std::bind(
-            &kernel::receive_block, shared_from_this(), chandle, _1)));
+        std::bind(&kernel::receive_block, shared_from_this(), chandle, _1));
 }
 
 void kernel::register_storage(storage_ptr stor_comp)

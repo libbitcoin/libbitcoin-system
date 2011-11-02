@@ -143,6 +143,30 @@ private:
         socket_ptr socket, std::string ip_addr, 
         connect_handler handle_connect);
     void handle_accept(socket_ptr socket);
+
+    template<typename Callback, typename Registry>
+    void generic_subscribe(channel_handle chandle,
+        Callback handle_message, Registry& registry)
+    {
+        std::unique_lock<std::mutex> lock(registries_mutex_);
+        registry.insert(std::make_pair(chandle, handle_message));
+        lock.unlock();
+    }
+
+    template<typename Message, typename Registry>
+    void generic_relay(channel_handle chandle, 
+        const Message& packet, Registry& registry)
+    {
+        std::unique_lock<std::mutex> lock(registries_mutex_);
+        auto range = registry.equal_range(chandle);
+        std::vector<typename Registry::mapped_type> notify_methods;
+        for (auto it = range.first; it != range.second; ++it)
+            notify_methods.push_back(it->second);
+        registry.erase(range.first, range.second);
+        lock.unlock();
+        for (auto notify: notify_methods)
+            notify(packet);
+    }
     
     channel_handle create_channel(socket_ptr socket);
 
@@ -154,6 +178,7 @@ private:
 
     message::ip_address our_ip_address_;
 
+    std::mutex registries_mutex_;
     version_registry_map version_registry_;
     verack_registry_map verack_registry_;
     addr_registry_map addr_registry_;

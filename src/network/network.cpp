@@ -91,54 +91,39 @@ void network_impl::disconnect(channel_handle chandle)
         std::bind(remove_matching_channels, &channels_, chandle));
 }
 
-template<typename Callback, typename Registry>
-void perform_subscribe(channel_handle chandle,
-    Callback handle_message, Registry& registry)
-{
-    registry.insert(std::make_pair(chandle, handle_message));
-}
-
-template<typename Callback, typename Registry>
-void generic_subscribe(strand_ptr strand, channel_handle chandle,
-    Callback handle_message, Registry& registry)
-{
-    strand->post(std::bind(&perform_subscribe<Callback, Registry>,
-        chandle, handle_message, std::ref(registry)));
-}
-
 void network_impl::subscribe_version(channel_handle chandle, 
     receive_version_handler handle_receive)
 {
     generic_subscribe<receive_version_handler, version_registry_map>(
-        strand(), chandle, handle_receive, version_registry_);
+        chandle, handle_receive, version_registry_);
 }
 
 void network_impl::subscribe_verack(channel_handle chandle,
     receive_verack_handler handle_receive)
 {
     generic_subscribe<receive_verack_handler, verack_registry_map>(
-        strand(), chandle, handle_receive, verack_registry_);
+        chandle, handle_receive, verack_registry_);
 }
 
 void network_impl::subscribe_addr(channel_handle chandle,
     receive_addr_handler handle_receive)
 {
     generic_subscribe<receive_addr_handler, addr_registry_map>(
-        strand(), chandle, handle_receive, addr_registry_);
+        chandle, handle_receive, addr_registry_);
 }
 
 void network_impl::subscribe_inv(channel_handle chandle,
     receive_inv_handler handle_receive)
 {
     generic_subscribe<receive_inv_handler, inv_registry_map>(
-        strand(), chandle, handle_receive, inv_registry_);
+        chandle, handle_receive, inv_registry_);
 }
 
 void network_impl::subscribe_block(channel_handle chandle,
     receive_block_handler handle_receive)
 {
     generic_subscribe<receive_block_handler, block_registry_map>(
-        strand(), chandle, handle_receive, block_registry_);
+        chandle, handle_receive, block_registry_);
 }
 
 template<typename Message, typename Callback>
@@ -197,53 +182,36 @@ void network_impl::send(channel_handle chandle,
     generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
 }
 
-
-template<typename Message, typename Registry>
-void perform_relay(channel_handle chandle, 
-    const Message& packet, Registry& registry)
-{
-    auto range = registry.equal_range(chandle);
-    for (auto it = range.first; it != range.second; ++it)
-        it->second(packet);
-    registry.erase(range.first, range.second);
-}
-
-template<typename Message, typename Registry>
-void generic_relay(strand_ptr strand, channel_handle chandle, 
-    const Message& packet, Registry& registry)
-{
-    strand->post(std::bind(&perform_relay<Message, Registry>, 
-            chandle, packet, std::ref(registry)));
-}
+// Relay functions
 
 void network_impl::relay(channel_handle chandle, 
     const message::version& packet)
 {
-    generic_relay(strand(), chandle, packet, version_registry_);
+    generic_relay(chandle, packet, version_registry_);
 }
 
 void network_impl::relay(channel_handle chandle,
      const message::verack& packet)
 {
-    generic_relay(strand(), chandle, packet, verack_registry_);
+    generic_relay(chandle, packet, verack_registry_);
 }
 
 void network_impl::relay(channel_handle chandle,
      const message::addr& packet)
 {
-    generic_relay(strand(), chandle, packet, addr_registry_);
+    generic_relay(chandle, packet, addr_registry_);
 }
 
 void network_impl::relay(channel_handle chandle,
      const message::inv& packet)
 {
-    generic_relay(strand(), chandle, packet, inv_registry_);
+    generic_relay(chandle, packet, inv_registry_);
 }
 
 void network_impl::relay(channel_handle chandle,
      const message::block& packet)
 {
-    generic_relay(strand(), chandle, packet, block_registry_);
+    generic_relay(chandle, packet, block_registry_);
 }
 
 size_t network_impl::connection_count() const

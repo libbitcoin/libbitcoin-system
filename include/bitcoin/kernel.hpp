@@ -27,8 +27,6 @@ public:
 
     void connect(std::string hostname, unsigned int port);
 
-    void receive_version(channel_handle chandle,
-        const message::version& packet);
     void receive_inv(channel_handle chandle, const message::inv& packet);
     void receive_block(channel_handle chandle, const message::block& packet);
 
