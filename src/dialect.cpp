@@ -11,7 +11,8 @@
 
 namespace libbitcoin {
 
-data_chunk construct_header_from(std::string command, const data_chunk& payload)
+data_chunk construct_header_from(std::string command,
+    const data_chunk& payload)
 {
     log_info(log_domain::network) << "s: " << command
             << " (" << payload.size() << " bytes)";
@@ -33,7 +34,7 @@ data_chunk construct_header_from(std::string command, const data_chunk& payload)
 }
 
 data_chunk assemble_message(std::string command, const serializer& payload,
-        bool include_header)
+    bool include_header)
 {
     data_chunk msg_body = payload.get_data();
     if (!include_header)
@@ -81,7 +82,7 @@ data_chunk original_dialect::to_network(const message::getaddr&) const
 }
 
 data_chunk original_dialect::to_network(
-        const message::getblocks& getblocks) const
+    const message::getblocks& getblocks) const
 {
     serializer payload;
     payload.write_4_bytes(31900);
@@ -150,7 +151,7 @@ uint32_t original_dialect::checksum_from_network(const data_chunk& chunk) const
 }
 
 message::version original_dialect::version_from_network(
-        const message::header&, const data_chunk& stream, bool& ec) const
+    const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -181,16 +182,10 @@ message::version original_dialect::version_from_network(
 }
 
 message::addr original_dialect::addr_from_network(
-        const message::header& header_msg,
-        const data_chunk& stream, bool& ec) const
+    const data_chunk& stream, bool& ec) const
 {
     ec = false;
     message::addr payload;
-    if (header_msg.checksum != generate_sha256_checksum(stream))
-    {
-        ec = true;
-        return payload;
-    }
     deserializer deserial(stream);
     uint64_t count = deserial.read_var_uint();
     for (size_t i = 0; i < count; ++i)
@@ -219,7 +214,7 @@ message::inv_type inv_type_from_number(uint32_t raw_type)
 }
 
 message::inv original_dialect::inv_from_network(
-        const message::header&, const data_chunk& stream, bool& ec) const
+    const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -262,8 +257,7 @@ message::transaction read_transaction(deserializer& deserial)
         input.previous_output.hash = deserial.read_hash();
         input.previous_output.index = deserial.read_4_bytes();
         if (previous_output_is_null(input.previous_output))
-            input.input_script = 
-                coinbase_script(read_raw_script(deserial));
+            input.input_script = coinbase_script(read_raw_script(deserial));
         else
             input.input_script = read_script(deserial);
         input.sequence = deserial.read_4_bytes();
@@ -282,7 +276,7 @@ message::transaction read_transaction(deserializer& deserial)
 }
 
 message::transaction original_dialect::transaction_from_network(
-        const message::header&, const data_chunk& stream, bool& ec) const
+    const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);
@@ -290,7 +284,7 @@ message::transaction original_dialect::transaction_from_network(
 }
 
 message::block original_dialect::block_from_network(
-        const message::header&, const data_chunk& stream, bool& ec) const
+    const data_chunk& stream, bool& ec) const
 {
     ec = false;
     deserializer deserial(stream);

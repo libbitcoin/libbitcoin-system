@@ -39,23 +39,18 @@ public:
 
     // From network
     virtual message::version version_from_network(
-            const message::header& header_msg,
             const data_chunk& stream, bool& ec) const = 0;
 
     virtual message::addr addr_from_network(
-            const message::header& header_msg,
             const data_chunk& stream, bool& ec) const = 0;
 
     virtual message::inv inv_from_network(
-            const message::header& header_msg,
             const data_chunk& stream, bool& ec) const = 0;
 
     virtual message::transaction transaction_from_network(
-            const message::header& header_msg,
             const data_chunk& stream, bool& ec) const = 0;
 
     virtual message::block block_from_network(
-            const message::header& header_msg,
             const data_chunk& stream, bool& ec) const = 0;
 };
 
@@ -85,23 +80,18 @@ public:
             const data_chunk& stream) const;
 
     message::version version_from_network(
-            const message::header&,
             const data_chunk& stream, bool& ec) const;
 
     message::addr addr_from_network(
-            const message::header& header_msg,
             const data_chunk& stream, bool& ec) const;
 
     message::inv inv_from_network(
-            const message::header&,
             const data_chunk& stream, bool& ec) const;
 
     message::transaction transaction_from_network(
-            const message::header& header_msg,
             const data_chunk& stream, bool& ec) const;
 
     message::block block_from_network(
-            const message::header& header_msg,
             const data_chunk& stream, bool& ec) const;
 };
 
