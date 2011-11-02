@@ -12,9 +12,15 @@
 
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/messages.hpp>
+#include <bitcoin/dialect.hpp>
 #include <bitcoin/util/serializer.hpp>
 
+#include "shared_const_buffer.hpp"
+
 namespace libbitcoin {
+
+using std::placeholders::_1;
+using std::placeholders::_2;
 
 class network;
 class dialect;
@@ -27,16 +33,14 @@ public:
         service_ptr service, socket_ptr socket);
     ~channel_pimpl();
 
-    void send(const message::version& packet,
-        network::send_handler handle_send);
-    void send(const message::verack& packet,
-        network::send_handler handle_send);
-    void send(const message::getaddr& packet,
-        network::send_handler handle_send);
-    void send(const message::getdata& packet,
-        network::send_handler handle_send);
-    void send(const message::getblocks& packet,
-        network::send_handler handle_send);
+    template<typename Message>
+    void send(const Message& packet, network::send_handler handle_send)
+    {
+        data_chunk msg = translator_->to_network(packet);
+        shared_const_buffer buffer(msg);
+        async_write(*socket_, buffer, std::bind(
+            &channel_pimpl::pre_handle_send, this, _1, handle_send));
+    }
 
     channel_handle get_id() const;
 

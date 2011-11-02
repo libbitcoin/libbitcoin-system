@@ -8,15 +8,10 @@
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/network/network.hpp>
-#include <bitcoin/dialect.hpp>
 #include <bitcoin/messages.hpp>
-
-#include "shared_const_buffer.hpp"
 
 namespace libbitcoin {
 
-using std::placeholders::_1;
-using std::placeholders::_2;
 using boost::posix_time::seconds;
 using boost::posix_time::minutes;
 using boost::posix_time::time_duration;
@@ -166,7 +161,7 @@ void channel_pimpl::handle_read_payload(const message::header& header_msg,
         return;
     BITCOIN_ASSERT(bytes_transferred == header_msg.payload_length);
     data_chunk payload_stream = data_chunk(
-            inbound_payload_.begin(), inbound_payload_.end());
+        inbound_payload_.begin(), inbound_payload_.end());
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
     if (!translator_->verify_checksum(header_msg, payload_stream))
     {
@@ -178,8 +173,7 @@ void channel_pimpl::handle_read_payload(const message::header& header_msg,
     if (header_msg.command == "version")
     {
         message::version payload =
-            translator_->version_from_network(
-                header_msg, payload_stream, ret_errc);
+            translator_->version_from_network(payload_stream, ret_errc);
         if (!transport_payload(payload, ret_errc))
             return;
     }
@@ -192,24 +186,21 @@ void channel_pimpl::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "addr")
     {
         message::addr payload =
-                translator_->addr_from_network(
-                    header_msg, payload_stream, ret_errc);
+                translator_->addr_from_network(payload_stream, ret_errc);
         if (!transport_payload(payload, ret_errc))
             return;
     }
     else if (header_msg.command == "inv")
     {
         message::inv payload =
-                translator_->inv_from_network(
-                    header_msg, payload_stream, ret_errc);
+                translator_->inv_from_network(payload_stream, ret_errc);
         if (!transport_payload(payload, ret_errc))
             return;
     }
     else if (header_msg.command == "block")
     {
         message::block payload =
-                translator_->block_from_network(
-                    header_msg, payload_stream, ret_errc);
+                translator_->block_from_network(payload_stream, ret_errc);
         if (!transport_payload(payload, ret_errc))
             return;
     }
@@ -224,47 +215,6 @@ void channel_pimpl::pre_handle_send(const boost::system::error_code& ec,
         handle_send(error::network_channel_not_found);
     else
         handle_send(std::error_code());
-}
-
-template<typename Message>
-void generic_send(const Message& packet, channel_pimpl* chan_self,
-    socket_ptr socket, dialect_ptr translator, 
-    network::send_handler handle_send)
-{
-    data_chunk msg = translator->to_network(packet);
-    shared_const_buffer buffer(msg);
-    async_write(*socket, buffer, std::bind(
-        &channel_pimpl::pre_handle_send, chan_self, _1, handle_send));
-}
-
-void channel_pimpl::send(const message::version& packet,
-    network::send_handler handle_send)
-{
-    generic_send(packet, this, socket_, translator_, handle_send);
-}
-
-void channel_pimpl::send(const message::verack& packet,
-    network::send_handler handle_send)
-{
-    generic_send(packet, this, socket_, translator_, handle_send);
-}
-
-void channel_pimpl::send(const message::getaddr& packet,
-    network::send_handler handle_send)
-{
-    generic_send(packet, this, socket_, translator_, handle_send);
-}
-
-void channel_pimpl::send(const message::getdata& packet,
-    network::send_handler handle_send)
-{
-    generic_send(packet, this, socket_, translator_, handle_send);
-}
-
-void channel_pimpl::send(const message::getblocks& packet,
-    network::send_handler handle_send)
-{
-    generic_send(packet, this, socket_, translator_, handle_send);
 }
 
 channel_handle channel_pimpl::get_id() const
