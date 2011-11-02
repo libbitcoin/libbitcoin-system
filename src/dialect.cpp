@@ -104,6 +104,26 @@ data_chunk original_dialect::to_network(const message::transaction& tx,
         bool include_header) const
 {
     serializer payload;
+    payload.write_4_bytes(tx.version);
+    payload.write_var_uint(tx.inputs.size());
+    for (const message::transaction_input& input: tx.inputs)
+    {
+        payload.write_hash(input.previous_output.hash);
+        payload.write_4_bytes(input.previous_output.index);
+        data_chunk raw_script = save_script(input.input_script);
+        payload.write_var_uint(raw_script.size());
+        payload.write_data(raw_script);
+        payload.write_4_bytes(input.sequence);
+    }
+    payload.write_var_uint(tx.outputs.size());
+    for (const message::transaction_output& output: tx.outputs)
+    {
+        payload.write_8_bytes(output.value);
+        data_chunk raw_script = save_script(output.output_script);
+        payload.write_var_uint(raw_script.size());
+        payload.write_data(raw_script);
+    }
+    payload.write_4_bytes(tx.locktime);
     return assemble_message("tx", payload, include_header);
 }
 

@@ -90,6 +90,14 @@ bin/examples/accounting: libbitcoin obj/accounting.o
 
 accounting: bin/examples/accounting
 
+obj/dialect-test.o: tests/dialect-test.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/dialect-test: libbitcoin obj/dialect-test.o
+	$(CXX) -o bin/tests/dialect-test obj/dialect-test.o $(LIBBITCOIN) $(LIBS)
+
+dialect-test: bin/tests/dialect-test
+
 obj/base58-test.o: tests/base58-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

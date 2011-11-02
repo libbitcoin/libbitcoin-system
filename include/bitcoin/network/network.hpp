@@ -46,6 +46,24 @@ public:
     virtual void set_ip_address(std::string ip_addr) = 0;
     virtual message::ip_address get_ip_address() const = 0;
 
+    // List of bitcoin messages
+    // version
+    // verack
+    // addr
+    // inv
+    // getdata
+    // getblocks
+    // getheaders
+    // tx
+    // block
+    // headers
+    // getaddr
+    // checkorder [deprecated]
+    // submitorder [deprecated]
+    // reply [deprecated]
+    // ping
+    // alert
+
     virtual void subscribe_version(channel_handle chandle, 
         receive_version_handler handle_receive) = 0;
     virtual void subscribe_verack(channel_handle chandle,
@@ -67,6 +85,8 @@ public:
         const message::getdata& packet, send_handler handle_send) = 0;
     virtual void send(channel_handle chandle,
         const message::getblocks& packet, send_handler handle_send) = 0;
+    virtual void send(channel_handle chandle,
+        const message::transaction& packet, send_handler handle_send) = 0;
 
     // Non public
     virtual void relay(channel_handle, const message::version& packet) = 0;
@@ -114,6 +134,8 @@ public:
     void send(channel_handle chandle, const message::getdata& packet, 
         send_handler handle_send);
     void send(channel_handle chandle, const message::getblocks& packet, 
+        send_handler handle_send);
+    void send(channel_handle chandle, const message::transaction& packet,
         send_handler handle_send);
 
     // Non public

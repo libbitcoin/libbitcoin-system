@@ -177,7 +177,13 @@ void network_impl::send(channel_handle chandle,
 }
 
 void network_impl::send(channel_handle chandle, 
-        const message::getblocks& packet, send_handler handle_send)
+    const message::getblocks& packet, send_handler handle_send)
+{
+    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
+}
+
+void network_impl::send(channel_handle chandle,
+    const message::transaction& packet, send_handler handle_send)
 {
     generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
 }
