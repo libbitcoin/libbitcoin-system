@@ -24,6 +24,7 @@ void display_help()
     puts("  new\t\tGenerate a new private key and output to STDOUT");
     puts("  sign\t\tSign the next argument using the private key in STDIN");
     puts("  verify\tVerify the next argument using the private key in STDIN");
+    puts("  address\tshow the associated bitcoin address");
 }
 
 void error_exit(const char* message, int status=1)
