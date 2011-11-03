@@ -22,10 +22,12 @@ using std::placeholders::_2;
 
 void display_help()
 {
-    puts("Usage: mktx [OUTPUT] [ADDRESS] [AMOUNT]");
+    puts("Usage: mktx [HOST[:PORT]] [OUTPUT] [ADDRESS] [AMOUNT]");
     puts("");
     puts("OUTPUT consists of a transaction hash and output index");
     puts("  125d49f6b826c564ea99345c56286de4b5126e3da38691caa4ccc68c8c8118d5:1");
+    puts("AMOUNT uses internal bitcoin values");
+    puts("  0.1 BTC = 0.1 * 10^8 = 1000000");
 }
 
 void error_exit(const std::string& message, int status=1)
@@ -75,13 +77,13 @@ script build_output_script(const short_hash& public_key_hash)
 
 int main(int argc, char** argv)
 {
-    if (argc != 4)
+    if (argc != 5)
     {
         display_help();
         return 0;
     }
     std::vector<std::string> output_parts;
-    boost::split(output_parts, argv[1], boost::is_any_of(":"));
+    boost::split(output_parts, argv[2], boost::is_any_of(":"));
     if (output_parts.size() != 2)
         error_exit("output requires transaction hash and index");
 
@@ -103,8 +105,8 @@ int main(int argc, char** argv)
     input.input_script.push_operation({opcode::special, public_key});
 
     transaction_output output;
-    output.value = boost::lexical_cast<uint64_t>(argv[3]);
-    short_hash dest_pubkey_hash = address_to_short_hash(argv[2]);
+    output.value = boost::lexical_cast<uint64_t>(argv[4]);
+    short_hash dest_pubkey_hash = address_to_short_hash(argv[3]);
     output.output_script = build_output_script(dest_pubkey_hash);
 
     transaction tx;
@@ -129,8 +131,15 @@ int main(int argc, char** argv)
     input_script.push_operation({opcode::special, signature});
     input_script.push_operation({opcode::special, public_key});
 
+    std::vector<std::string> args;
+    boost::split(args, argv[1], boost::is_any_of(":"));
+    std::string hostname = args[0];
+    unsigned short port = 8333;
+    if (args.size() > 1)
+        port = boost::lexical_cast<unsigned short>(args[1]);
+
     network_ptr net(new network_impl);
-    handshake_connect(net, "localhost", 8333, 
+    handshake_connect(net, hostname, port, 
         std::bind(&handle_connected, _1, _2, net, tx));
 
     std::unique_lock<std::mutex> lock(mutex);

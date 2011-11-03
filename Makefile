@@ -1,6 +1,6 @@
 CXXFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC
 INCLUDES= -Iinclude/ -Iusr/include/
-LIBS= -Lusr/lib usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq
+LIBS= -Lusr/lib usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq -lz -lpthread -ldl
 BASE_MODULES= \
 	network.o  \
 	handshake.o  \
