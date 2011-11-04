@@ -3,6 +3,7 @@
 #include <bitcoin/util/serializer.hpp>
 #include <bitcoin/util/sha256.hpp>
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/dialect.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>
 
@@ -13,31 +14,11 @@ typedef std::vector<hash_digest> hash_list;
 hash_digest hash_transaction_impl(const message::transaction& transaction, 
         uint32_t* hash_type_code)
 {
-    // TODO: Should use the dialect code here?
-    serializer key;
-    key.write_4_bytes(transaction.version);
-    key.write_var_uint(transaction.inputs.size());
-    for (message::transaction_input input: transaction.inputs)
-    {
-        key.write_hash(input.previous_output.hash);
-        key.write_4_bytes(input.previous_output.index);
-        data_chunk raw_script = save_script(input.input_script);
-        key.write_var_uint(raw_script.size());
-        key.write_data(raw_script);
-        key.write_4_bytes(input.sequence);
-    }
-    key.write_var_uint(transaction.outputs.size());
-    for (message::transaction_output output: transaction.outputs)
-    {
-        key.write_8_bytes(output.value);
-        data_chunk raw_script = save_script(output.output_script);
-        key.write_var_uint(raw_script.size());
-        key.write_data(raw_script);
-    }
-    key.write_4_bytes(transaction.locktime);
+    original_dialect translator;
+    data_chunk serialized_tx = translator.to_network(transaction, false);
     if (hash_type_code != nullptr)
-        key.write_4_bytes(*hash_type_code);
-    return generate_sha256_hash(key.get_data());
+        extend_data(serialized_tx, uncast_type(*hash_type_code));
+    return generate_sha256_hash(serialized_tx);
 }
 
 hash_digest hash_transaction(const message::transaction& transaction)

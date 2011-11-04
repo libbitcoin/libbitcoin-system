@@ -106,6 +106,14 @@ bin/tests/base58-test: libbitcoin obj/base58-test.o
 
 base58-test: bin/tests/base58-test
 
+obj/tx-hash.o: tests/tx-hash.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/tx-hash: libbitcoin obj/tx-hash.o
+	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o $(LIBBITCOIN) $(LIBS)
+
+tx-hash: bin/tests/tx-hash
+
 bin/tests/nettest: libbitcoin obj/nettest.o
 	$(CXX) -o bin/tests/nettest obj/nettest.o $(LIBBITCOIN) $(LIBS)
 
@@ -243,14 +251,6 @@ types-test: bin/tests/types-test
 
 obj/transaction.o: src/transaction.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
-
-obj/tx-hash.o: tests/tx-hash.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
-
-bin/tests/tx-hash: obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o obj/elliptic_curve_key.o
-	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o obj/transaction.o obj/sha256.o obj/script.o obj/serializer.o obj/logger.o obj/types.o obj/ripemd.o obj/elliptic_curve_key.o $(LIBS)
-
-tx-hash: bin/tests/tx-hash
 
 obj/block-hash.o: tests/block-hash.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<

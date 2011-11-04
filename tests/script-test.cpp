@@ -54,7 +54,7 @@ void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::mess
         return;
     }
     libbitcoin::script script = input.input_script;
-    BITCOIN_ASSERT(input.hash == tx.inputs[0].hash);
+    BITCOIN_ASSERT(input.previous_output.hash == tx.inputs[0].previous_output.hash);
     std::cout << pretty_hex(hash_transaction(tx)) << "\n";
     std::cout << script.pretty() << "\n";
     std::cout << "Returned: " << (output.output_script.run(script, tx, 0) ? "true" : "false") << "\n";
@@ -68,24 +68,17 @@ void recv_block(psql_ptr psql, std::error_code ec, libbitcoin::message::block bl
         return;
     }
     libbitcoin::message::transaction_input input = block.transactions[1].inputs[0];
-    libbitcoin::hash_digest hash = input.hash;
-    uint32_t index = input.index;
-    psql->fetch_output_by_hash(hash, index, std::bind(run_script_from_block, block.transactions[1], input, std::placeholders::_1, std::placeholders::_2));
-}
-
-void parse_tests()
-{
-    std::string script_look = "dup hash160 [ be ef aa 22 99 11 01 ab cd ef ] equalverify checksig";
-    BITCOIN_ASSERT(libbitcoin::script_from_pretty(script_look).pretty() == script_look);
+    libbitcoin::hash_digest hash = input.previous_output.hash;
+    uint32_t index = input.previous_output.index;
+    //psql->fetch_output_by_hash(hash, index, std::bind(run_script_from_block, block.transactions[1], input, std::placeholders::_1, std::placeholders::_2));
 }
 
 int main()
 {
-    //test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb();
+    test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb();
     //psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
     //psql->fetch_block_by_depth(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
     //sleep(6);
-    parse_tests();
     return 0;
 }
 
