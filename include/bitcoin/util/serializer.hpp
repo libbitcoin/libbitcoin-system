@@ -28,6 +28,9 @@ private:
     data_chunk data_;
 };
 
+class end_of_stream
+ : std::exception {};
+
 class deserializer
 {
 public:
@@ -43,8 +46,9 @@ public:
     hash_digest read_hash();
     std::string read_fixed_len_str(size_t len);
 private:
-    const data_chunk& stream_;
-    size_t pointer_;
+    typedef data_chunk::const_iterator const_iterator;
+
+    const_iterator begin_, end_;
 };
 
 } // libbitcoin

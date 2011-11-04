@@ -12,6 +12,7 @@ enum class error
     object_already_exists,
     // network errors
     system_network_error,
+    bad_stream,
     network_channel_not_found
 };
 

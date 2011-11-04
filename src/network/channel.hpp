@@ -36,7 +36,16 @@ public:
     template<typename Message>
     void send(const Message& packet, network::send_handler handle_send)
     {
-        data_chunk msg = translator_->to_network(packet);
+        data_chunk msg;
+        try
+        {
+            msg = translator_->to_network(packet);
+        }
+        catch (end_of_stream)
+        {
+            handle_send(error::bad_stream);
+            return;
+        }
         shared_const_buffer buffer(msg);
         async_write(*socket_, buffer, std::bind(
             &channel_pimpl::pre_handle_send, this, _1, handle_send));

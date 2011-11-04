@@ -118,48 +118,47 @@ data_chunk serializer::get_data() const
     return data_;
 }
 
-template<typename T>
-T consume_object(const data_chunk& stream, size_t& pointer)
+template<typename ConstIterator>
+void check_distance(ConstIterator begin, ConstIterator end, size_t distance)
 {
-    T* val = reinterpret_cast<T*>(&stream[pointer]);
-    pointer += sizeof(T);
-    return *val;
+    if (static_cast<size_t>(std::distance(begin, end)) < distance)
+        throw end_of_stream();
 }
 
-template<typename T>
-T read_data_impl(const data_chunk& data, size_t& pointer, bool reverse=true)
+template<typename T, typename Iterator>
+T read_data_impl(Iterator& begin, Iterator end, bool reverse=true)
 {
-    data_chunk chunk(
-            data.begin() + pointer, 
-            data.begin() + pointer + sizeof(T));
+    check_distance(begin, end, sizeof(T));
+    data_chunk chunk(begin, begin + sizeof(T));
     T val = cast_chunk<T>(chunk, reverse);
-    pointer += sizeof(T);
+    begin += sizeof(T);
     return val;
 }
 
 deserializer::deserializer(const data_chunk& stream)
- : stream_(stream), pointer_(0)
+ : begin_(stream.cbegin()), end_(stream.cend())
 {
 }
 
 uint8_t deserializer::read_byte()
 {
-    return stream_[pointer_++];
+    check_distance(begin_, end_, 1);
+    return *(begin_++);
 }
 
 uint16_t deserializer::read_2_bytes()
 {
-    return read_data_impl<uint16_t>(stream_, pointer_);
+    return read_data_impl<uint16_t>(begin_, end_);
 }
 
 uint32_t deserializer::read_4_bytes()
 {
-    return read_data_impl<uint32_t>(stream_, pointer_);
+    return read_data_impl<uint32_t>(begin_, end_);
 }
 
 uint64_t deserializer::read_8_bytes()
 {
-    return read_data_impl<uint64_t>(stream_, pointer_);
+    return read_data_impl<uint64_t>(begin_, end_);
 }
 
 uint64_t deserializer::read_var_uint()
@@ -177,10 +176,11 @@ uint64_t deserializer::read_var_uint()
     return value;
 }
 
-template<unsigned int N>
-void read_bytes(const data_chunk& stream, size_t& pointer,
-        std::array<uint8_t, N>& byte_array, bool reverse=false)
+template<unsigned int N, typename Iterator>
+void read_bytes(Iterator& begin, const Iterator& end,
+    std::array<uint8_t, N>& byte_array, bool reverse=false)
 {
+    check_distance(begin, end, byte_array.size());
     #ifdef BOOST_LITTLE_ENDIAN
         // do nothing
     #elif BOOST_BIG_ENDIAN
@@ -190,24 +190,16 @@ void read_bytes(const data_chunk& stream, size_t& pointer,
     #endif
 
     if (reverse)
-    {
         std::reverse_copy(
-                stream.begin() + pointer,
-                stream.begin() + pointer + byte_array.size(),
-                byte_array.begin());
-    }
+            begin, begin + byte_array.size(), byte_array.begin());
     else
-    {
-        std::copy(
-                stream.begin() + pointer,
-                stream.begin() + pointer + byte_array.size(),
-                byte_array.begin());
-    }
-    pointer += byte_array.size();
+        std::copy(begin, begin + byte_array.size(), byte_array.begin());
+    begin += byte_array.size();
 }
 
 data_chunk deserializer::read_data(uint64_t n_bytes)
 {
+    check_distance(begin_, end_, n_bytes);
     data_chunk raw_bytes;
     for (uint64_t i = 0; i < n_bytes; ++i)
         raw_bytes.push_back(read_byte());
@@ -219,27 +211,24 @@ message::net_addr deserializer::read_net_addr()
     message::net_addr addr;
     addr.services = read_8_bytes();
     // Read IP address
-    read_bytes<16>(stream_, pointer_, addr.ip_addr);
-    addr.port = read_data_impl<uint16_t>(stream_, pointer_, false);
+    read_bytes<16>(begin_, end_, addr.ip_addr);
+    addr.port = read_data_impl<uint16_t>(begin_, end_, false);
     return addr;
 }
 
 hash_digest deserializer::read_hash()
 {
     hash_digest hash;
-    read_bytes<32>(stream_, pointer_, hash, true);
+    read_bytes<32>(begin_, end_, hash, true);
     return hash;
 }
 
 std::string deserializer::read_fixed_len_str(size_t len)
 {
-    BITCOIN_ASSERT(pointer_ + len <= stream_.size());
-    std::string ret(
-            stream_.begin() + pointer_,
-            stream_.begin() + pointer_ + len);
-    pointer_ += len;
+    data_chunk string_bytes = read_data(len);
+    std::string result(string_bytes.begin(), string_bytes.end());
     // Removes trailing 0s... Needed for string comparisons
-    return ret.c_str();
+    return result.c_str();
 }
 
 } // libbitcoin
