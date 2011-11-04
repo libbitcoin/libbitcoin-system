@@ -24,7 +24,7 @@ void recv_block(std::error_code ec, libbitcoin::message::block block)
     BITCOIN_ASSERT(block.transactions.size() == 2);
     std::cout << "\n";
     for (libbitcoin::message::transaction tx: block.transactions)
-        std::cout << libbitcoin::string_repr(tx);
+        std::cout << libbitcoin::pretty(tx);
 }
 
 int main()
