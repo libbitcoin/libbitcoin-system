@@ -21,7 +21,7 @@ constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 
 validate_block::validate_block(dialect_ptr dialect, 
     size_t depth, const message::block& current_block)
-  : dialect_(dialect), depth_(depth), current_block_(current_block)
+ : dialect_(dialect), depth_(depth), current_block_(current_block)
 {
     clock_.reset(new clock);
 }

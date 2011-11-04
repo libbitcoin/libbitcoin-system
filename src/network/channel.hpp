@@ -26,7 +26,7 @@ class network;
 class dialect;
 
 class channel_pimpl
-  : private boost::noncopyable
+ : private boost::noncopyable
 {
 public:
     channel_pimpl(network_ptr parent_gateway, dialect_ptr translator,

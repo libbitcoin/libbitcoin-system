@@ -17,7 +17,7 @@ using boost::asio::ip::tcp;
 using boost::asio::io_service;
 
 class network
-  : private boost::noncopyable
+ : private boost::noncopyable
 {
 public:
     typedef std::function<void (
@@ -97,7 +97,7 @@ public:
 };
 
 class network_impl
-  : public network, 
+ : public network, 
     public threaded_service,
     public std::enable_shared_from_this<network_impl>
 {

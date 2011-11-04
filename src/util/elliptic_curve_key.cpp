@@ -10,7 +10,7 @@
 namespace libbitcoin {
 
 elliptic_curve_key::elliptic_curve_key()
-  : key_(nullptr)
+ : key_(nullptr)
 {
 }
 

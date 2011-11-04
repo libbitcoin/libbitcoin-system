@@ -16,7 +16,7 @@ enum class error
 };
 
 class error_category_impl
-  : public std::error_category
+ : public std::error_category
 {
 public:
     virtual const char* name() const;

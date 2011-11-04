@@ -16,7 +16,7 @@ void null(std::error_code)
 }
 
 kernel::kernel()
-  : initial_getblocks_(false)
+ : initial_getblocks_(false)
 {
 }
 

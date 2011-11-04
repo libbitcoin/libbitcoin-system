@@ -11,7 +11,7 @@
 namespace libbitcoin {
 
 class storage
-  : private boost::noncopyable
+ : private boost::noncopyable
 {
 public:
     typedef std::function<void (const std::error_code&)> store_handler;

@@ -14,7 +14,7 @@ struct node
 };
 
 class override_delete
-  : public postgresql_organizer
+ : public postgresql_organizer
 {
 public:
     override_delete(cppdb::session sql)
@@ -31,7 +31,7 @@ public:
 
 // Tee hee 
 class dummy_psql
-  : public threaded_service
+ : public threaded_service
 {
 public:
     dummy_psql();
@@ -79,7 +79,7 @@ private:
 };
 
 dummy_psql::dummy_psql()
-  : sql_("postgresql:dbname=bitcoin;user=genjix")
+ : sql_("postgresql:dbname=bitcoin;user=genjix")
 {
     blockchain_.reset(new postgresql_blockchain(sql_, service()));
     deletor_.reset(new override_delete(sql_));

@@ -55,7 +55,7 @@ public:
 };
 
 class original_dialect 
-  : public dialect
+ : public dialect
 {
 public:
     // Create stream from message
