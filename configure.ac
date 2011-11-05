@@ -13,6 +13,12 @@ AX_BOOST_BASE
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
-AC_CONFIG_FILES([Makefile include/bitcoin/Makefile src/Makefile])
+
+AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],
+    [Path to the pkgconfig directory [[LIBDIR/pkgconfig]]]),
+    [pkgconfigdir="$withval"], [pkgconfigdir='${libdir}/pkgconfig'])
+AC_SUBST([pkgconfigdir])
+
+AC_CONFIG_FILES([Makefile include/bitcoin/Makefile src/Makefile libbitcoin.pc])
 AC_OUTPUT
 

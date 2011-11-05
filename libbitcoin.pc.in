@@ -1,0 +1,11 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libbitcoin
+Description:  Rewrite bitcoin, make it super-pluggable, very easy to do and hack everything at every level, and very configurable.
+Requires: libboost libssl libcppdb
+Version: @PACKAGE_VERSION@
+Libs: -L${libdir} -lcppdb-lcrypto -lboost_thread -lboost_system -ldl -lpq -lz -lpthread
+
