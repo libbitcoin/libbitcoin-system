@@ -6,5 +6,6 @@ includedir=@includedir@
 Name: libbitcoin
 Description:  Rewrite bitcoin, make it super-pluggable, very easy to do and hack everything at every level, and very configurable.
 Version: @PACKAGE_VERSION@
+Cflags: -I${includedir}
 Libs: -L${libdir} -lcppdb -lcrypto -lboost_thread -lboost_system -ldl -lpq -lz -lpthread
 
