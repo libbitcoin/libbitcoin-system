@@ -1,2 +1,17 @@
+.deps
+.libs
+*.la
+*.lo
+*.o
+Makefile
+Makefile.in
+
 obj
 .*.swp
+
+/aclocal.m4
+/autom4te.cache
+/build-aux
+/config.*
+/configure
+/libtool
