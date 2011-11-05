@@ -1,4 +1,4 @@
-dnl From http://dev.medozas.de/gitweb.cgi?p=m4_jengelh;a=blob;f=gcc4_cpp0x.m4;hb=HEAD
+dnl From git://dev.medozas.de/m4_jengelh
 AC_DEFUN([CHECK_GXX_CPP0X], [
     AC_MSG_CHECKING([for g++ C++0x support])
     AC_LANG_PUSH([C++])
