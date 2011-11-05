@@ -11,6 +11,6 @@ AX_BOOST_SYSTEM
 AX_BOOST_THREAD
 PKG_CHECK_MODULES(SSL, libssl >= 0.9, :,
 		          AC_MSG_ERROR([ SSL development library not found]))
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile include/bitcoin/Makefile src/Makefile])
 AC_OUTPUT
 
