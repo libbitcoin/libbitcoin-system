@@ -9,8 +9,7 @@ CXXFLAGS="-std=c++0x -Wall -pedantic -pthread -ggdb -Wextra -fstack-protector-al
 AX_BOOST_BASE
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
-PKG_CHECK_MODULES(SSL, libssl >= 0.9, :,
-		          AC_MSG_ERROR([ SSL development library not found]))
+PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
 AC_CONFIG_FILES([Makefile include/bitcoin/Makefile src/Makefile])
 AC_OUTPUT
 
