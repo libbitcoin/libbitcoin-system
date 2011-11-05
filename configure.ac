@@ -5,7 +5,10 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 LT_INIT
 AC_PROG_CXX
 CHECK_GXX_CPP0X
-CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -pedantic -pthread -ggdb -Wextra -fstack-protector-all"
+CFLAGS="-ggdb"
+CXXFLAGS="-ggdb"
+my_CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -pedantic -pthread -Wextra -fstack-protector-all"
+AC_SUBST([my_CXXFLAGS])
 AX_BOOST_BASE
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD

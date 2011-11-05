@@ -1,5 +1,6 @@
 lib_LTLIBRARIES = libbitcoin.la
 AM_CPPFLAGS = -I$(srcdir)/../include
+AM_CXXFLAGS = ${my_CXXFLAGS}
 libbitcoin_la_SOURCES = \
 	network/network.cpp  \
 	network/handshake.cpp  \
