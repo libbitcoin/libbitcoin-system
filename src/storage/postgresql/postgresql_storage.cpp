@@ -17,7 +17,7 @@ uint32_t extract_bits_body(uint32_t bits);
 
 postgresql_storage::postgresql_storage(kernel_ptr kernel,
     std::string database, std::string user, std::string password)
- : sql_(std::string("postgresql:dbname=") + database + 
+ : sql_(std::string("postgresql:host=127.0.0.1;dbname=") + database +
         ";user=" + user + ";password=" + password)
 {
     blockchain_.reset(new pq_blockchain(sql_, service(), kernel));
