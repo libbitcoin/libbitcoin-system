@@ -33,43 +33,43 @@ data_chunk construct_header_from(std::string command,
     return header.get_data();
 }
 
-data_chunk original_dialect::create_header(const message::version& version,
+data_chunk original_dialect::create_header(const message::version&,
     const data_chunk& payload) const
 {
     return construct_header_from("version", payload);
 }
 
-data_chunk original_dialect::create_header(const message::verack& verack,
+data_chunk original_dialect::create_header(const message::verack&,
     const data_chunk& payload) const
 {
     return construct_header_from("verack", payload);
 }
 
-data_chunk original_dialect::create_header(const message::getaddr& getaddr,
+data_chunk original_dialect::create_header(const message::getaddr&,
     const data_chunk& payload) const
 {
     return construct_header_from("getaddr", payload);
 }
 
-data_chunk original_dialect::create_header(const message::getdata& getdata,
+data_chunk original_dialect::create_header(const message::getdata&,
     const data_chunk& payload) const
 {
     return construct_header_from("getdata", payload);
 }
 
 data_chunk original_dialect::create_header(
-    const message::getblocks& getblocks, const data_chunk& payload) const
+    const message::getblocks&, const data_chunk& payload) const
 {
     return construct_header_from("getblocks", payload);
 }
 
-data_chunk original_dialect::create_header(const message::block& block,
+data_chunk original_dialect::create_header(const message::block&,
     const data_chunk& payload) const
 {
     return construct_header_from("block", payload);
 }
 
-data_chunk original_dialect::create_header(const message::transaction& tx,
+data_chunk original_dialect::create_header(const message::transaction&,
     const data_chunk& payload) const
 {
     return construct_header_from("tx", payload);

@@ -23,11 +23,11 @@ public:
     typedef boost::asio::const_buffer value_type;
     typedef const value_type* const_iterator;
 
-    const const_iterator begin() const
+    const_iterator begin() const
     { 
         return &buffer; 
     }
-    const const_iterator end() const 
+    const_iterator end() const 
     { 
         return &buffer + 1; 
     }
