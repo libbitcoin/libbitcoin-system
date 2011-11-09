@@ -13,16 +13,29 @@ class dialect
 {
 public:
     // To network
+    virtual data_chunk create_header(const message::version& version,
+        const data_chunk& payload) const = 0;
+    virtual data_chunk create_header(const message::verack& verack,
+        const data_chunk& payload) const = 0;
+    virtual data_chunk create_header(const message::getaddr& getaddr,
+        const data_chunk& payload) const = 0;
+    virtual data_chunk create_header(const message::getdata& getdata,
+        const data_chunk& payload) const = 0;
+    virtual data_chunk create_header(const message::getblocks& getblocks,
+         const data_chunk& payload) const = 0;
+    virtual data_chunk create_header(const message::block& block,
+        const data_chunk& payload) const = 0;
+    virtual data_chunk create_header(const message::transaction& tx,
+        const data_chunk& payload) const = 0;
+
     virtual data_chunk to_network(const message::version& version) const = 0;
     virtual data_chunk to_network(const message::verack& verack) const = 0;
     virtual data_chunk to_network(const message::getaddr& getaddr) const = 0;
     virtual data_chunk to_network(const message::getdata& getdata) const = 0;
     virtual data_chunk to_network(
         const message::getblocks& getblocks) const = 0;
-    virtual data_chunk to_network(const message::block& block,
-        bool include_header=true) const = 0;
-    virtual data_chunk to_network(const message::transaction& tx,
-        bool include_header=true) const = 0;
+    virtual data_chunk to_network(const message::block& block) const = 0;
+    virtual data_chunk to_network(const message::transaction& tx) const = 0;
 
     // Utilities
     virtual message::header header_from_network(
@@ -59,15 +72,28 @@ class original_dialect
 {
 public:
     // Create stream from message
+    data_chunk create_header(const message::version& version,
+        const data_chunk& payload) const;
+    data_chunk create_header(const message::verack& verack,
+        const data_chunk& payload) const;
+    data_chunk create_header(const message::getaddr& getaddr,
+        const data_chunk& payload) const;
+    data_chunk create_header(const message::getdata& getdata,
+        const data_chunk& payload) const;
+    data_chunk create_header(const message::getblocks& getblocks,
+         const data_chunk& payload) const;
+    data_chunk create_header(const message::block& block,
+        const data_chunk& payload) const;
+    data_chunk create_header(const message::transaction& tx,
+        const data_chunk& payload) const;
+
     data_chunk to_network(const message::version& version) const;
     data_chunk to_network(const message::verack& verack) const;
     data_chunk to_network(const message::getaddr& getaddr) const;
     data_chunk to_network(const message::getdata& getdata) const;
     data_chunk to_network(const message::getblocks& getblocks) const;
-    data_chunk to_network(const message::block& block,
-            bool include_header) const;
-    data_chunk to_network(const message::transaction& tx,
-            bool include_header) const;
+    data_chunk to_network(const message::block& block) const;
+    data_chunk to_network(const message::transaction& tx) const;
 
     // Create header/messages from stream
     message::header header_from_network(const data_chunk& stream) const;

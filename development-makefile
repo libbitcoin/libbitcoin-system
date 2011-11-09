@@ -93,8 +93,8 @@ accounting: bin/examples/accounting
 obj/dialect-test.o: tests/dialect-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-bin/tests/dialect-test: libbitcoin obj/dialect-test.o
-	$(CXX) -o bin/tests/dialect-test obj/dialect-test.o $(LIBBITCOIN) $(LIBS)
+bin/tests/dialect-test: obj/dialect-test.o
+	$(CXX) -o bin/tests/dialect-test obj/dialect-test.o $(LIBBITCOIN)
 
 dialect-test: bin/tests/dialect-test
 

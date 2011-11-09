@@ -57,7 +57,7 @@ bool validate_block::check_block()
     // Size limits
     if (current_block_.transactions.empty() || 
         current_block_.transactions.size() > max_block_size ||
-        dialect_->to_network(current_block_, false).size() > max_block_size)
+        dialect_->to_network(current_block_).size() > max_block_size)
     {
         log_error(log_domain::validation) << "Size limits failed";
         return false;

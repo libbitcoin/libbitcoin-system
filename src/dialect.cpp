@@ -33,27 +33,46 @@ data_chunk construct_header_from(std::string command,
     return header.get_data();
 }
 
-data_chunk assemble_message(std::string command, const serializer& payload,
-    bool include_header)
+data_chunk original_dialect::create_header(const message::version& version,
+    const data_chunk& payload) const
 {
-    data_chunk msg_body = payload.get_data();
-    if (!include_header)
-        return msg_body;
-    data_chunk message = construct_header_from(command, msg_body);
-    // Extend message with actual payload
-    message.reserve(
-        message.size() + distance(msg_body.begin(), msg_body.end()));
-    message.insert(message.end(), msg_body.begin(), msg_body.end());
-    return message;
+    return construct_header_from("version", payload);
 }
 
-data_chunk header_only_message(std::string command)
+data_chunk original_dialect::create_header(const message::verack& verack,
+    const data_chunk& payload) const
 {
-    serializer payload;
-    data_chunk msg_body = payload.get_data();
-    // No data
-    data_chunk header = construct_header_from(command, msg_body);
-    return header;
+    return construct_header_from("verack", payload);
+}
+
+data_chunk original_dialect::create_header(const message::getaddr& getaddr,
+    const data_chunk& payload) const
+{
+    return construct_header_from("getaddr", payload);
+}
+
+data_chunk original_dialect::create_header(const message::getdata& getdata,
+    const data_chunk& payload) const
+{
+    return construct_header_from("getdata", payload);
+}
+
+data_chunk original_dialect::create_header(
+    const message::getblocks& getblocks, const data_chunk& payload) const
+{
+    return construct_header_from("getblocks", payload);
+}
+
+data_chunk original_dialect::create_header(const message::block& block,
+    const data_chunk& payload) const
+{
+    return construct_header_from("block", payload);
+}
+
+data_chunk original_dialect::create_header(const message::transaction& tx,
+    const data_chunk& payload) const
+{
+    return construct_header_from("tx", payload);
 }
 
 data_chunk original_dialect::to_network(const message::version& version) const
@@ -68,17 +87,17 @@ data_chunk original_dialect::to_network(const message::version& version) const
     // do sub_version_num
     payload.write_byte(0);
     payload.write_4_bytes(version.start_height);
-    return assemble_message("version", payload, true);
+    return payload.get_data();
 }
 
 data_chunk original_dialect::to_network(const message::verack&) const
 {
-    return header_only_message("verack");
+    return data_chunk();
 }
 
 data_chunk original_dialect::to_network(const message::getaddr&) const
 {
-    return header_only_message("getaddr");
+    return data_chunk();
 }
 
 data_chunk original_dialect::to_network(
@@ -90,18 +109,15 @@ data_chunk original_dialect::to_network(
     for (hash_digest start_hash: getblocks.locator_start_hashes)
         payload.write_hash(start_hash);
     payload.write_hash(getblocks.hash_stop);
-    return assemble_message("getblocks", payload, true);
+    return payload.get_data();
 }
 
-data_chunk original_dialect::to_network(const message::block& block, 
-        bool include_header) const
+data_chunk original_dialect::to_network(const message::block& block) const
 {
-    serializer payload;
-    return assemble_message("block", payload, include_header);
+    return data_chunk();
 }
 
-data_chunk original_dialect::to_network(const message::transaction& tx, 
-        bool include_header) const
+data_chunk original_dialect::to_network(const message::transaction& tx) const
 {
     serializer payload;
     payload.write_4_bytes(tx.version);
@@ -124,7 +140,7 @@ data_chunk original_dialect::to_network(const message::transaction& tx,
         payload.write_data(raw_script);
     }
     payload.write_4_bytes(tx.locktime);
-    return assemble_message("tx", payload, include_header);
+    return payload.get_data();
 }
 
 data_chunk original_dialect::to_network(const message::getdata& getdata) const
@@ -149,7 +165,7 @@ data_chunk original_dialect::to_network(const message::getdata& getdata) const
         }
         payload.write_hash(inv.hash);
     }
-    return assemble_message("getdata", payload, true);
+    return payload.get_data();
 }
 
 message::header original_dialect::header_from_network(

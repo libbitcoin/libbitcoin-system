@@ -27,14 +27,8 @@ int main()
     0x8B, 0x4E, 0xCC, 0x52, 0x88, 0xAC, 0x00, 0x00, 0x00, 0x00};
 
     dialect_ptr translator(new original_dialect);
-    bool ec = false;
-    const message::transaction& tx = translator->transaction_from_network(raw_tx, ec);
-    if (ec)
-    {
-        log_error() << "error parsing tx";
-        return 1;
-    }
-    BITCOIN_ASSERT(raw_tx == translator->to_network(tx, false));
+    const message::transaction& tx = translator->transaction_from_network(raw_tx);
+    BITCOIN_ASSERT(raw_tx == translator->to_network(tx));
     return 0;
 }
 

@@ -15,7 +15,7 @@ hash_digest hash_transaction_impl(const message::transaction& transaction,
         uint32_t* hash_type_code)
 {
     original_dialect translator;
-    data_chunk serialized_tx = translator.to_network(transaction, false);
+    data_chunk serialized_tx = translator.to_network(transaction);
     if (hash_type_code != nullptr)
         extend_data(serialized_tx, uncast_type(*hash_type_code));
     return generate_sha256_hash(serialized_tx);
