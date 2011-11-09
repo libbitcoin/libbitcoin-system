@@ -169,39 +169,30 @@ void channel_pimpl::handle_read_payload(const message::header& header_msg,
         destroy_self();
         return;
     }
-    bool ret_errc = false;
     if (header_msg.command == "version")
     {
-        message::version payload =
-            translator_->version_from_network(payload_stream, ret_errc);
-        if (!transport_payload(payload, ret_errc))
+        if (!transport_payload<message::version>(payload_stream,
+            std::bind(&dialect::version_from_network, translator_, _1)))
             return;
     }
     else if (header_msg.command == "verack")
-    {
-        message::verack payload;
-        if (!transport_payload(payload, ret_errc))
-            return;
-    }
+        network_->relay(channel_id_, message::verack());
     else if (header_msg.command == "addr")
     {
-        message::addr payload =
-                translator_->addr_from_network(payload_stream, ret_errc);
-        if (!transport_payload(payload, ret_errc))
+        if (!transport_payload<message::addr>(payload_stream,
+            std::bind(&dialect::addr_from_network, translator_, _1)))
             return;
     }
     else if (header_msg.command == "inv")
     {
-        message::inv payload =
-                translator_->inv_from_network(payload_stream, ret_errc);
-        if (!transport_payload(payload, ret_errc))
+        if (!transport_payload<message::inv>(payload_stream,
+            std::bind(&dialect::inv_from_network, translator_, _1)))
             return;
     }
     else if (header_msg.command == "block")
     {
-        message::block payload =
-                translator_->block_from_network(payload_stream, ret_errc);
-        if (!transport_payload(payload, ret_errc))
+        if (!transport_payload<message::block>(payload_stream,
+            std::bind(&dialect::block_from_network, translator_, _1)))
             return;
     }
     read_header();

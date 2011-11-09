@@ -36,16 +36,7 @@ public:
     template<typename Message>
     void send(const Message& packet, network::send_handler handle_send)
     {
-        data_chunk msg;
-        try
-        {
-            msg = translator_->to_network(packet);
-        }
-        catch (end_of_stream)
-        {
-            handle_send(error::bad_stream);
-            return;
-        }
+        data_chunk msg = translator_->to_network(packet);
         shared_const_buffer buffer(msg);
         async_write(*socket_, buffer, std::bind(
             &channel_pimpl::pre_handle_send, this, _1, handle_send));
@@ -65,15 +56,21 @@ private:
     void handle_read_payload(const message::header& header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred);
 
-    template<typename P>
-    bool transport_payload(P payload, bool ret_errc)
+    template<typename Message>
+    bool transport_payload(const data_chunk& payload_stream,
+        std::function<Message (const data_chunk&)> read_message)
     {
-        if (ret_errc)
+        Message packet;
+        try
+        {
+            packet = read_message(payload_stream);
+        }
+        catch (end_of_stream)
         {
             destroy_self();
             return false;
         }
-        network_->relay(channel_id_, payload);
+        network_->relay(channel_id_, packet);
         return true;
     }
 

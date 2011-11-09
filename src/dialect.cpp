@@ -171,9 +171,8 @@ uint32_t original_dialect::checksum_from_network(const data_chunk& chunk) const
 }
 
 message::version original_dialect::version_from_network(
-    const data_chunk& stream, bool& ec) const
+    const data_chunk& stream) const
 {
-    ec = false;
     deserializer deserial(stream);
     message::version payload;
     payload.version = deserial.read_4_bytes();
@@ -202,9 +201,8 @@ message::version original_dialect::version_from_network(
 }
 
 message::addr original_dialect::addr_from_network(
-    const data_chunk& stream, bool& ec) const
+    const data_chunk& stream) const
 {
-    ec = false;
     message::addr payload;
     deserializer deserial(stream);
     uint64_t count = deserial.read_var_uint();
@@ -234,9 +232,8 @@ message::inv_type inv_type_from_number(uint32_t raw_type)
 }
 
 message::inv original_dialect::inv_from_network(
-    const data_chunk& stream, bool& ec) const
+    const data_chunk& stream) const
 {
-    ec = false;
     deserializer deserial(stream);
     message::inv payload;
     uint64_t count = deserial.read_var_uint();
@@ -296,17 +293,15 @@ message::transaction read_transaction(deserializer& deserial)
 }
 
 message::transaction original_dialect::transaction_from_network(
-    const data_chunk& stream, bool& ec) const
+    const data_chunk& stream) const
 {
-    ec = false;
     deserializer deserial(stream);
     return read_transaction(deserial);
 }
 
 message::block original_dialect::block_from_network(
-    const data_chunk& stream, bool& ec) const
+    const data_chunk& stream) const
 {
-    ec = false;
     deserializer deserial(stream);
     message::block payload;
     payload.version = deserial.read_4_bytes();

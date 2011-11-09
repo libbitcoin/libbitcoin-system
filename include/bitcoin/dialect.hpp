@@ -18,11 +18,11 @@ public:
     virtual data_chunk to_network(const message::getaddr& getaddr) const = 0;
     virtual data_chunk to_network(const message::getdata& getdata) const = 0;
     virtual data_chunk to_network(
-            const message::getblocks& getblocks) const = 0;
+        const message::getblocks& getblocks) const = 0;
     virtual data_chunk to_network(const message::block& block,
-            bool include_header=true) const = 0;
+        bool include_header=true) const = 0;
     virtual data_chunk to_network(const message::transaction& tx,
-            bool include_header=true) const = 0;
+        bool include_header=true) const = 0;
 
     // Utilities
     virtual message::header header_from_network(
@@ -35,23 +35,23 @@ public:
     virtual uint32_t checksum_from_network(const data_chunk& stream) const = 0;
 
     virtual bool verify_checksum(const message::header& header_msg,
-            const data_chunk& stream) const = 0;
+        const data_chunk& stream) const = 0;
 
     // From network
     virtual message::version version_from_network(
-            const data_chunk& stream, bool& ec) const = 0;
+        const data_chunk& stream) const = 0;
 
     virtual message::addr addr_from_network(
-            const data_chunk& stream, bool& ec) const = 0;
+        const data_chunk& stream) const = 0;
 
     virtual message::inv inv_from_network(
-            const data_chunk& stream, bool& ec) const = 0;
+        const data_chunk& stream) const = 0;
 
     virtual message::transaction transaction_from_network(
-            const data_chunk& stream, bool& ec) const = 0;
+        const data_chunk& stream) const = 0;
 
     virtual message::block block_from_network(
-            const data_chunk& stream, bool& ec) const = 0;
+        const data_chunk& stream) const = 0;
 };
 
 class original_dialect 
@@ -79,20 +79,16 @@ public:
     bool verify_checksum(const message::header& header_msg,
             const data_chunk& stream) const;
 
-    message::version version_from_network(
-            const data_chunk& stream, bool& ec) const;
+    message::version version_from_network(const data_chunk& stream) const;
 
-    message::addr addr_from_network(
-            const data_chunk& stream, bool& ec) const;
+    message::addr addr_from_network(const data_chunk& stream) const;
 
-    message::inv inv_from_network(
-            const data_chunk& stream, bool& ec) const;
+    message::inv inv_from_network(const data_chunk& stream) const;
 
     message::transaction transaction_from_network(
-            const data_chunk& stream, bool& ec) const;
+        const data_chunk& stream) const;
 
-    message::block block_from_network(
-            const data_chunk& stream, bool& ec) const;
+    message::block block_from_network(const data_chunk& stream) const;
 };
 
 } // libbitcoin

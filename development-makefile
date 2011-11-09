@@ -30,7 +30,7 @@ STORAGE_BASE_MODULES = \
 MODULES=$(addprefix obj/, $(BASE_MODULES))
 STORAGE_MODULES=$(addprefix obj/, $(STORAGE_BASE_MODULES))
 #OBJECTS=$(addprefix obj/, $(notdir $(SOURCES:.cpp=.o)))
-LIBBITCOIN=-Llib lib/libbitcoin.a
+LIBBITCOIN=`pkg-config --libs libbitcoin`
 
 #%.o: %.cpp
 #	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $(INCLUDES) -c $(input) $(output)
@@ -114,8 +114,8 @@ bin/tests/tx-hash: libbitcoin obj/tx-hash.o
 
 tx-hash: bin/tests/tx-hash
 
-bin/tests/nettest: libbitcoin obj/nettest.o
-	$(CXX) -o bin/tests/nettest obj/nettest.o $(LIBBITCOIN) $(LIBS)
+bin/tests/nettest: obj/nettest.o
+	$(CXX) -o bin/tests/nettest obj/nettest.o $(LIBBITCOIN)
 
 net: bin/tests/nettest
 
