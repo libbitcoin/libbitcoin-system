@@ -12,9 +12,11 @@ enum class block_status
     bad
 };
 
+uint64_t block_value(size_t depth);
+
 hash_digest hash_block_header(const message::block& block);
 
-uint64_t block_value(size_t depth);
+message::block genesis_block();
 
 } // libbitcoin
 
