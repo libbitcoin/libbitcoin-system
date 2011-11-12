@@ -1,4 +1,5 @@
 AC_INIT([libbitcoin], [0.1], [genjix@riseup.net])
+AC_LANG(C++)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([-Wall -Werror])
@@ -12,6 +13,7 @@ AC_SUBST([my_CXXFLAGS])
 AX_BOOST_BASE
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
+AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
 
 AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],

@@ -25,5 +25,6 @@ libbitcoin_la_SOURCES = \
 	util/clock.cpp \
 	constants.cpp \
 	storage/postgresql/postgresql_blockchain.cpp \
-	storage/postgresql/postgresql_storage.cpp
+	storage/postgresql/postgresql_storage.cpp \
+	storage/bdb/bdb_storage.cpp
 
