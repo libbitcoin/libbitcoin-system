@@ -7,5 +7,7 @@
 #include <bitcoin/script.hpp>
 // ... And so on
 
+namespace bc = libbitcoin;
+
 #endif
 
