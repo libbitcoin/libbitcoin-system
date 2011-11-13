@@ -586,7 +586,7 @@ pq_block pq_reader::read_block(cppdb::result block_result)
 
     block.prev_block = 
             hash_from_bytea(block_result.get<std::string>("prev_block_hash"));
-    block.merkle_root = 
+    block.merkle = 
             hash_from_bytea(block_result.get<std::string>("merkle"));
 
     static cppdb::statement transactions_statement = sql_.prepare(

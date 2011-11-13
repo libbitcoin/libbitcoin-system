@@ -23,6 +23,10 @@ public:
     //using fetch_handler = std::function<void (Message)>;
 
     typedef std::function<
+        void (const std::error_code&, const message::block&)>
+            fetch_handler_block;
+
+    typedef std::function<
         void (const std::error_code&, const message::block_locator&)>
             fetch_handler_block_locator;
 

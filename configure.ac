@@ -14,6 +14,7 @@ AX_BOOST_BASE
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
 AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
+PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
 
 AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],

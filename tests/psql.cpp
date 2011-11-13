@@ -81,7 +81,7 @@ void create_fake_stuff(psql_ptr psql)
     blk.prev_block = hash_digest
         {1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
          1, 2, 3, 4, 5, 6, 7, 8, 9, 0xde, 0xad, 0xbe, 0xef};
-    blk.merkle_root = hash_digest
+    blk.merkle = hash_digest
         {1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
          1, 2, 2, 2, 2, 2, 2, 2, 2, 0xde, 0xad, 0xbe, 0xef};
     blk.timestamp = 9999;

@@ -26,5 +26,6 @@ libbitcoin_la_SOURCES = \
 	constants.cpp \
 	storage/postgresql/postgresql_blockchain.cpp \
 	storage/postgresql/postgresql_storage.cpp \
-	storage/bdb/bdb_storage.cpp
+	storage/bdb/bdb_storage.cpp \
+	storage/bdb/bitcoin.pb.cc
 

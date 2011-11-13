@@ -108,7 +108,7 @@ bool validate_block::check_block()
         return false;
     }
 
-    if (current_block_.merkle_root != 
+    if (current_block_.merkle != 
             generate_merkle_root(current_block_.transactions))
     {
         log_error(log_domain::validation) << "Merkle root mismatch";

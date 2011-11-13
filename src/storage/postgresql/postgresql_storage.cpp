@@ -118,7 +118,7 @@ void postgresql_storage::do_store_block(const message::block& block,
     hash_digest block_hash = hash_block_header(block);
     std::string block_hash_repr = pretty_hex(block_hash),
             prev_block_repr = pretty_hex(block.prev_block),
-            merkle_repr = pretty_hex(block.merkle_root);
+            merkle_repr = pretty_hex(block.merkle);
 
     static cppdb::statement check_confirmed = sql_.prepare(
         "SELECT 1 \

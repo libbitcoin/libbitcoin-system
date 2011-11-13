@@ -43,7 +43,7 @@ void test_build_merkle()
 
 void test_match_merkles(std::error_code ec, libbitcoin::message::block block)
 {
-    BITCOIN_ASSERT(block.merkle_root == libbitcoin::generate_merkle_root(block.transactions));
+    BITCOIN_ASSERT(block.merkle == libbitcoin::generate_merkle_root(block.transactions));
 }
 
 int main()

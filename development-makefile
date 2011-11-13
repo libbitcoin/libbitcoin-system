@@ -109,6 +109,14 @@ base58-test: bin/tests/base58-test
 obj/tx-hash.o: tests/tx-hash.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
+obj/bdb-test.o: tests/bdb-test.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/bdb-test: obj/bdb-test.o
+	$(CXX) -o bin/tests/bdb-test obj/bdb-test.o $(LIBBITCOIN)
+
+bdb-test: bin/tests/bdb-test
+
 bin/tests/tx-hash: obj/tx-hash.o
 	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o $(LIBBITCOIN)
 

@@ -322,7 +322,7 @@ message::block original_dialect::block_from_network(
     message::block payload;
     payload.version = deserial.read_4_bytes();
     payload.prev_block = deserial.read_hash();
-    payload.merkle_root = deserial.read_hash();
+    payload.merkle = deserial.read_hash();
     payload.timestamp = deserial.read_4_bytes();
     payload.bits = deserial.read_4_bytes();
     payload.nonce = deserial.read_4_bytes();

@@ -21,7 +21,7 @@ hash_digest hash_block_header(const message::block& block)
     serializer key;
     key.write_4_bytes(block.version);
     key.write_hash(block.prev_block);
-    key.write_hash(block.merkle_root);
+    key.write_hash(block.merkle);
     key.write_4_bytes(block.timestamp);
     key.write_4_bytes(block.bits);
     key.write_4_bytes(block.nonce);
@@ -33,7 +33,7 @@ message::block genesis_block()
     message::block genesis;
     genesis.version = 1;
     genesis.prev_block = null_hash;
-    genesis.merkle_root = 
+    genesis.merkle = 
         hash_digest{0x4a, 0x5e, 0x1e, 0x4b, 0xaa, 0xb8, 0x9f, 0x3a,
                     0x32, 0x51, 0x8a, 0x88, 0xc3, 0x1b, 0xc8, 0x7f,
                     0x61, 0x8f, 0x76, 0x67, 0x3e, 0x2c, 0xc7, 0x7a, 
@@ -84,7 +84,7 @@ message::block genesis_block()
     genesis.transactions.push_back(coinbase_tx);
     BITCOIN_ASSERT(genesis.transactions.size() == 1);
     BITCOIN_ASSERT(
-        generate_merkle_root(genesis.transactions) == genesis.merkle_root);
+        generate_merkle_root(genesis.transactions) == genesis.merkle);
     return genesis;
 }
 

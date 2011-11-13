@@ -112,7 +112,7 @@ struct block
 {
     uint32_t version;
     hash_digest prev_block;
-    hash_digest merkle_root;
+    hash_digest merkle;
     uint32_t timestamp;
     uint32_t bits;
     uint32_t nonce;
