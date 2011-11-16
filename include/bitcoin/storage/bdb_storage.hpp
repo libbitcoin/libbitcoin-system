@@ -3,7 +3,11 @@
 
 #include <bitcoin/storage/storage.hpp>
 
-#include <db_cxx.h>
+#ifdef DB_CXX_HEADER
+    #include DB_CXX_HEADER
+#else
+    #include <db_cxx.h>
+#endif
 
 #include <bitcoin/util/threaded_service.hpp>
 
