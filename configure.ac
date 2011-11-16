@@ -27,6 +27,8 @@ AX_BOOST_BASE
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
 
+PKG_PROG_PKG_CONFIG
+
 if test "$bld_berkdb" = "yes"; then
 	AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
 	PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
