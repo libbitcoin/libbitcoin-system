@@ -68,7 +68,7 @@ CREATE TABLE blocks (
     version BIGINT NOT NULL,
     prev_block_hash hash_type NOT NULL,
     merkle hash_type NOT NULL,
-    when_created TIMESTAMP NOT NULL,
+    when_created TIMESTAMP WITH TIME ZONE NOT NULL,
     bits_head INT NOT NULL,
     bits_body INT NOT NULL,
     nonce BIGINT NOT NULL,
