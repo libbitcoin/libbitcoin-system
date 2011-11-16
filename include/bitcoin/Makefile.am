@@ -16,9 +16,13 @@ bitcoin_include_HEADERS = \
 bitcoin_storage_includedir = $(includedir)/bitcoin/storage
 bitcoin_storage_include_HEADERS = \
 	storage/postgresql_storage.hpp \
-	storage/bdb_storage.hpp \
-	storage/bdb_detail.hpp \
 	storage/storage.hpp
+
+if DO_BERKDB
+bitcoin_storage_include_HEADERS += \
+	storage/bdb_detail.hpp \
+	storage/bdb_storage.hpp
+endif
 
 bitcoin_network_includedir = $(includedir)/bitcoin/network
 bitcoin_network_include_HEADERS = \

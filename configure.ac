@@ -10,11 +10,24 @@ CFLAGS="-ggdb"
 CXXFLAGS="-ggdb"
 my_CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -pedantic -pthread -Wextra -fstack-protector-all"
 AC_SUBST([my_CXXFLAGS])
+
+AC_ARG_ENABLE(berkdb,
+	[AC_HELP_STRING([--enable-berkdb],
+			[Build Berkeley DB support.])],
+	[bld_berkdb="$enable_berkdb"], [bld_berkdb="no"])
+AM_CONDITIONAL([DO_BERKDB], [test "$enable_berkdb" = "yes"])
+
 AX_BOOST_BASE
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
-AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
-PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
+
+if test "$bld_berkdb" = "yes"; then
+	AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
+	PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
+	AC_SUBST(LDFLAG_BERKDB)
+	LDFLAG_BERKDB="-lprotobuf $DB_CXX_LIBS"
+fi
+
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
 
 AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],
