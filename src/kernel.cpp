@@ -50,8 +50,9 @@ void kernel::handle_connect(const std::error_code& ec, channel_handle chandle)
         start_initial_getblocks(chandle);
     }
 
-    network_component_->subscribe_inv(chandle,
-        std::bind(&kernel::receive_inv, shared_from_this(), chandle, _1));
+    network_component_->subscribe_inventory(chandle,
+        std::bind(&kernel::receive_inventory, shared_from_this(),
+            chandle, _1));
     network_component_->subscribe_block(chandle,
         std::bind(&kernel::receive_block, shared_from_this(), chandle, _1));
 }
@@ -88,28 +89,29 @@ void ask_block(bool block_exists, Function request_block)
     //    tween_blocks...
 }
 
-void kernel::receive_inv(channel_handle chandle,
-    const message::inv& packet)
+void kernel::receive_inventory(channel_handle chandle,
+    const message::inventory& packet)
 {
     message::getdata request_message;
-    for (const message::inv_vect curr_inv: packet.invs)
+    for (const message::inventory_vector curr_inv: packet.inventories)
     {
-        if (curr_inv.type == message::inv_type::none)
+        if (curr_inv.type == message::inventory_type::none)
             return;
 
         // Push only block invs to the request queue
-        if (curr_inv.type == message::inv_type::block)
+        if (curr_inv.type == message::inventory_type::block)
         {
-            request_message.invs.push_back(curr_inv);
+            request_message.inventories.push_back(curr_inv);
             inventory_tracker_.insert(make_pair(curr_inv.hash, chandle));
         }
     }
     // TODO: Should check if block exists or not first before
     // wasting bandwidth
-    if (request_message.invs.size() > 0)
+    if (request_message.inventories.size() > 0)
         network_component_->send(chandle, request_message, null);
-    network_component_->subscribe_inv(chandle,
-        std::bind(&kernel::receive_inv, shared_from_this(), chandle, _1));
+    network_component_->subscribe_inventory(chandle,
+        std::bind(&kernel::receive_inventory, shared_from_this(),
+            chandle, _1));
 }
 
 void kernel::handle_block_stored(const std::error_code& ec,

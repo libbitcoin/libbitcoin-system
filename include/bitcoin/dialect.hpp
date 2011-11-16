@@ -57,7 +57,7 @@ public:
     virtual message::addr addr_from_network(
         const data_chunk& stream) const = 0;
 
-    virtual message::inv inv_from_network(
+    virtual message::inventory inventory_from_network(
         const data_chunk& stream) const = 0;
 
     virtual message::transaction transaction_from_network(
@@ -100,7 +100,7 @@ public:
     bool verify_header(const message::header& header_msg) const;
 
     bool checksum_used(const message::header& header_msg) const;
-    virtual uint32_t checksum_from_network(const data_chunk& stream) const;
+    uint32_t checksum_from_network(const data_chunk& stream) const;
 
     bool verify_checksum(const message::header& header_msg,
             const data_chunk& stream) const;
@@ -109,7 +109,7 @@ public:
 
     message::addr addr_from_network(const data_chunk& stream) const;
 
-    message::inv inv_from_network(const data_chunk& stream) const;
+    message::inventory inventory_from_network(const data_chunk& stream) const;
 
     message::transaction transaction_from_network(
         const data_chunk& stream) const;

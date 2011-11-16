@@ -146,19 +146,19 @@ data_chunk original_dialect::to_network(const message::transaction& tx) const
 data_chunk original_dialect::to_network(const message::getdata& getdata) const
 {
     serializer payload;
-    payload.write_var_uint(getdata.invs.size());
-    for (const message::inv_vect inv: getdata.invs)
+    payload.write_var_uint(getdata.inventories.size());
+    for (const message::inventory_vector inv: getdata.inventories)
     {
         switch (inv.type)
         {
-            case message::inv_type::transaction:
+            case message::inventory_type::transaction:
                 payload.write_4_bytes(1);
                 break;
-            case message::inv_type::block:
+            case message::inventory_type::block:
                 payload.write_4_bytes(2);
                 break;
-            case message::inv_type::error:
-            case message::inv_type::none:
+            case message::inventory_type::error:
+            case message::inventory_type::none:
             default:
                 BITCOIN_ASSERT(0);
                 break;
@@ -232,34 +232,34 @@ message::addr original_dialect::addr_from_network(
     return payload;
 }
 
-message::inv_type inv_type_from_number(uint32_t raw_type)
+message::inventory_type inventory_type_from_number(uint32_t raw_type)
 {
     switch (raw_type)
     {
         case 0:
-            return message::inv_type::error;
+            return message::inventory_type::error;
         case 1:
-            return message::inv_type::transaction;
+            return message::inventory_type::transaction;
         case 2:
-            return message::inv_type::block;
+            return message::inventory_type::block;
         default:
-            return message::inv_type::none;
+            return message::inventory_type::none;
     }
 }
 
-message::inv original_dialect::inv_from_network(
+message::inventory original_dialect::inventory_from_network(
     const data_chunk& stream) const
 {
     deserializer deserial(stream);
-    message::inv payload;
+    message::inventory payload;
     uint64_t count = deserial.read_var_uint();
     for (size_t i = 0; i < count; ++i)
     {
-        message::inv_vect inv_vect;
+        message::inventory_vector inv_vect;
         uint32_t raw_type = deserial.read_4_bytes();
-        inv_vect.type = inv_type_from_number(raw_type);
+        inv_vect.type = inventory_type_from_number(raw_type);
         inv_vect.hash = deserial.read_hash();
-        payload.invs.push_back(inv_vect);
+        payload.inventories.push_back(inv_vect);
     }
     return payload;
 }

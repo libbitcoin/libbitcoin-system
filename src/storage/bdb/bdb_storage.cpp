@@ -152,7 +152,7 @@ uint32_t bdb_storage::save_transaction(const message::transaction& block_tx)
 void bdb_storage::store(const message::block& block, 
     store_block_handler handle_store)
 {
-    save_block(10, block);
+    save_block(1, block);
 }
 
 bool read(Db* database, DbTxn* txn, Dbt* key, std::stringstream& ss)
@@ -247,6 +247,31 @@ void bdb_storage::fetch_block_by_hash(const hash_digest& block_hash,
 
 void bdb_storage::fetch_block_locator(fetch_handler_block_locator handle_fetch)
 {
+    service()->post(std::bind(
+        &bdb_storage::do_fetch_block_locator, shared_from_this(), 
+            handle_fetch));
+}
+void bdb_storage::do_fetch_block_locator(
+    fetch_handler_block_locator handle_fetch)
+{
+    txn_guard txn(env_);
+    Dbc* cursor;
+    db_blocks_->cursor(txn.get(), &cursor, 0);
+    Dbt key, data;
+    if (cursor->get(&key, &data, DB_LAST) == DB_NOTFOUND)
+    {
+        log_error() << "Problem";
+    }
+    BITCOIN_ASSERT(key.get_size() == 4);
+    data_chunk raw_depth;
+    extend_data(raw_depth, std::string(
+        reinterpret_cast<const char*>(key.get_data()), key.get_size()));
+    uint32_t last_block_depth = cast_chunk<uint32_t>(raw_depth);
+    log_debug() << pretty_hex(raw_depth);
+    cursor->close();
+    txn.commit();
+    message::block_locator locator;
+    handle_fetch(std::error_code(), locator);
 }
 
 void bdb_storage::fetch_balance(const short_hash& pubkey_hash,

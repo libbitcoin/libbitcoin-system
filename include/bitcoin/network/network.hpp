@@ -31,8 +31,8 @@ public:
         receive_verack_handler;
     typedef std::function<void (const message::addr&)>
         receive_addr_handler;
-    typedef std::function<void (const message::inv&)>
-        receive_inv_handler;
+    typedef std::function<void (const message::inventory&)>
+        receive_inventory_handler;
     typedef std::function<void (const message::block&)>
         receive_block_handler;
 
@@ -70,8 +70,8 @@ public:
         receive_verack_handler handle_receive) = 0;
     virtual void subscribe_addr(channel_handle chandle,
         receive_addr_handler handle_receive) = 0;
-    virtual void subscribe_inv(channel_handle chandle,
-        receive_inv_handler handle_receive) = 0;
+    virtual void subscribe_inventory(channel_handle chandle,
+        receive_inventory_handler handle_receive) = 0;
     virtual void subscribe_block(channel_handle chandle,
         receive_block_handler handle_receive) = 0;
 
@@ -92,13 +92,12 @@ public:
     virtual void relay(channel_handle, const message::version& packet) = 0;
     virtual void relay(channel_handle, const message::verack& packet) = 0;
     virtual void relay(channel_handle, const message::addr& packet) = 0;
-    virtual void relay(channel_handle, const message::inv& packet) = 0;
+    virtual void relay(channel_handle, const message::inventory& packet) = 0;
     virtual void relay(channel_handle, const message::block& packet) = 0;
 };
 
 class network_impl
- : public network, 
-    public threaded_service,
+ : public network, public threaded_service,
     public std::enable_shared_from_this<network_impl>
 {
 public:
@@ -120,8 +119,8 @@ public:
         receive_verack_handler handle_receive);
     void subscribe_addr(channel_handle chandle,
         receive_addr_handler handle_receive);
-    void subscribe_inv(channel_handle chandle,
-        receive_inv_handler handle_receive);
+    void subscribe_inventory(channel_handle chandle,
+        receive_inventory_handler handle_receive);
     void subscribe_block(channel_handle chandle,
         receive_block_handler handle_receive);
 
@@ -142,7 +141,7 @@ public:
     void relay(channel_handle, const message::version& packet);
     void relay(channel_handle, const message::verack& packet);
     void relay(channel_handle, const message::addr& packet);
-    void relay(channel_handle, const message::inv& packet);
+    void relay(channel_handle, const message::inventory& packet);
     void relay(channel_handle, const message::block& packet);
 
 private:
@@ -156,8 +155,8 @@ private:
         verack_registry_map;
     typedef std::multimap<channel_handle, receive_addr_handler>
         addr_registry_map;
-    typedef std::multimap<channel_handle, receive_inv_handler>
-        inv_registry_map;
+    typedef std::multimap<channel_handle, receive_inventory_handler>
+        inventory_registry_map;
     typedef std::multimap<channel_handle, receive_block_handler>
         block_registry_map;
 
@@ -204,7 +203,7 @@ private:
     version_registry_map version_registry_;
     verack_registry_map verack_registry_;
     addr_registry_map addr_registry_;
-    inv_registry_map inv_registry_;
+    inventory_registry_map inventory_registry_;
     block_registry_map block_registry_;
 };
 

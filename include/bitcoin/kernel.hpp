@@ -28,7 +28,8 @@ public:
 
     void connect(std::string hostname, unsigned int port);
 
-    void receive_inv(channel_handle chandle, const message::inv& packet);
+    void receive_inventory(channel_handle chandle, 
+        const message::inventory& packet);
     void receive_block(channel_handle chandle, const message::block& packet);
 
     void register_storage(storage_ptr stor_comp);

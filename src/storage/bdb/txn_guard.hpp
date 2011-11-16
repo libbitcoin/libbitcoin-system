@@ -27,12 +27,14 @@ public:
 
     void commit()
     {
+        BITCOIN_ASSERT(!used_);
         used_ = true;
         txn_->commit(0);
     }
 
     void abort()
     {
+        BITCOIN_ASSERT(!used_);
         used_ = true;
         txn_->abort();
     }

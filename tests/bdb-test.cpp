@@ -11,6 +11,13 @@ void show_block(const std::error_code& ec, const message::block& blk)
     log_debug() << pretty_hex(hash_transaction(blk.transactions[0]));
 }
 
+void show_locator(const std::error_code& ec, const message::block_locator& loc)
+{
+    log_debug() << "LOC";
+    for (hash_digest h: loc)
+        log_debug() << pretty_hex(h);
+}
+
 int main()
 {
     bdb_storage::setup("database/");
@@ -24,6 +31,7 @@ int main()
                     0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1, 
                     0x72, 0xb3, 0xf1, 0xb6, 0x0a, 0x8c, 0xe2, 0x6f},
         show_block);
+    store->fetch_block_locator(show_locator);
     std::cin.get();
     return 0;
 }

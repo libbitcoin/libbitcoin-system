@@ -112,11 +112,11 @@ void network_impl::subscribe_addr(channel_handle chandle,
         chandle, handle_receive, addr_registry_);
 }
 
-void network_impl::subscribe_inv(channel_handle chandle,
-    receive_inv_handler handle_receive)
+void network_impl::subscribe_inventory(channel_handle chandle,
+    receive_inventory_handler handle_receive)
 {
-    generic_subscribe<receive_inv_handler, inv_registry_map>(
-        chandle, handle_receive, inv_registry_);
+    generic_subscribe<receive_inventory_handler, inventory_registry_map>(
+        chandle, handle_receive, inventory_registry_);
 }
 
 void network_impl::subscribe_block(channel_handle chandle,
@@ -209,9 +209,9 @@ void network_impl::relay(channel_handle chandle,
 }
 
 void network_impl::relay(channel_handle chandle,
-     const message::inv& packet)
+     const message::inventory& packet)
 {
-    generic_relay(chandle, packet, inv_registry_);
+    generic_relay(chandle, packet, inventory_registry_);
 }
 
 void network_impl::relay(channel_handle chandle,

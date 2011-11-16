@@ -24,7 +24,7 @@ struct net_addr
     uint16_t port;
 };
 
-enum class inv_type
+enum class inventory_type
 {
     error,
     transaction,
@@ -32,13 +32,13 @@ enum class inv_type
     none
 };
 
-struct inv_vect
+struct inventory_vector
 {
-    inv_type type;
+    inventory_type type;
     hash_digest hash;
 };
 
-typedef std::vector<inv_vect> inv_list;
+typedef std::vector<inventory_vector> inventory_list;
 
 struct header
 {
@@ -126,12 +126,12 @@ struct addr
 
 struct getdata
 {
-    inv_list invs;
+    inventory_list inventories;
 };
 
-struct inv
+struct inventory
 {
-    inv_list invs;
+    inventory_list inventories;
 };
 
 } // message

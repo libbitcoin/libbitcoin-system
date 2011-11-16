@@ -256,18 +256,8 @@ void postgresql_storage::do_fetch_block_locator(
         handle_fetch(error::object_doesnt_exist, message::block_locator());
         return;
     }
-    // Start at max_depth
     int top_depth = number_blocks_result.get<size_t>(0);
-    std::vector<size_t> indices;
-    // Push last 10 indices first
-    size_t step = 1, start = 0;
-    for (int i = top_depth; i > 0; i -= step, ++start)
-    {
-        if (start >= 10)
-            step *= 2;
-        indices.push_back(i);
-    }
-    indices.push_back(0);
+    std::vector<size_t> indices = block_locator_indices(top_depth);
     // Now actually fetch the hashes for these blocks
     std::stringstream hack_sql;
     hack_sql <<

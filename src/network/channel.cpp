@@ -185,8 +185,8 @@ void channel_pimpl::handle_read_payload(const message::header& header_msg,
     }
     else if (header_msg.command == "inv")
     {
-        if (!transport_payload<message::inv>(payload_stream,
-            std::bind(&dialect::inv_from_network, translator_, _1)))
+        if (!transport_payload<message::inventory>(payload_stream,
+            std::bind(&dialect::inventory_from_network, translator_, _1)))
             return;
     }
     else if (header_msg.command == "block")

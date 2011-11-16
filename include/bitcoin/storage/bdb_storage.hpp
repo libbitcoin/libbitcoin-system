@@ -12,8 +12,7 @@
 namespace libbitcoin {
 
 class bdb_storage
- : public storage,
-    public threaded_service,
+ : public storage, public threaded_service,
     public std::enable_shared_from_this<bdb_storage>
 {
 public:
@@ -39,6 +38,7 @@ private:
         fetch_handler_block handle_fetch);
     void fetch_block_by_hash(const hash_digest& block_hash, 
         fetch_handler_block handle_fetch);
+    void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
 
     bool save_block(size_t depth, const message::block serial_block);
     uint32_t save_transaction(const message::transaction& block_tx);

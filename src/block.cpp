@@ -28,6 +28,22 @@ hash_digest hash_block_header(const message::block& block)
     return generate_sha256_hash(key.get_data());
 }
 
+std::vector<size_t> block_locator_indices(int top_depth)
+{
+    // Start at max_depth
+    std::vector<size_t> indices;
+    // Push last 10 indices first
+    size_t step = 1, start = 0;
+    for (int i = top_depth; i > 0; i -= step, ++start)
+    {
+        if (start >= 10)
+            step *= 2;
+        indices.push_back(i);
+    }
+    indices.push_back(0);
+    return indices;
+}
+
 message::block genesis_block()
 {
     message::block genesis;
