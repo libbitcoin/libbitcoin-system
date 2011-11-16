@@ -11,7 +11,7 @@
 
 namespace libbitcoin {
 
-std::string pubkey_to_address(const data_chunk& public_key);
+std::string public_key_to_address(const data_chunk& public_key);
 
 short_hash address_to_short_hash(const std::string& address);
 

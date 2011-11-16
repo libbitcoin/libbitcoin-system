@@ -7,7 +7,7 @@
 
 namespace libbitcoin {
 
-std::string pubkey_to_address(const data_chunk& public_key)
+std::string public_key_to_address(const data_chunk& public_key)
 {
     data_chunk unhashed_address;
     unhashed_address.push_back(0);
