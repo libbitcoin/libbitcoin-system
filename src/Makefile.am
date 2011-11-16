@@ -23,10 +23,15 @@ libbitcoin_la_SOURCES = \
 	util/base58.cpp \
 	util/big_number.cpp \
 	util/clock.cpp \
-	constants.cpp \
-	storage/postgresql/postgresql_blockchain.cpp \
-	storage/postgresql/postgresql_storage.cpp
+	constants.cpp
 
 if DO_BERKDB
-libbitcoin_la_SOURCES += storage/bdb/bdb_storage.cpp
+libbitcoin_la_SOURCES += \
+	storage/bdb/bdb_storage.cpp
+endif
+
+if DO_POSTGRES
+libbitcoin_la_SOURCES += \
+	storage/postgresql/postgresql_blockchain.cpp \
+	storage/postgresql/postgresql_storage.cpp
 endif

@@ -17,6 +17,12 @@ AC_ARG_ENABLE(berkdb,
 	[bld_berkdb="$enable_berkdb"], [bld_berkdb="no"])
 AM_CONDITIONAL([DO_BERKDB], [test "$enable_berkdb" = "yes"])
 
+AC_ARG_ENABLE(postgres,
+	[AC_HELP_STRING([--enable-postgres],
+			[Build PostgreSQL support.])],
+	[bld_postgres="$enable_postgres"], [bld_postgres="no"])
+AM_CONDITIONAL([DO_POSTGRES], [test "$enable_postgres" = "yes"])
+
 AX_BOOST_BASE
 AX_BOOST_SYSTEM
 AX_BOOST_THREAD
@@ -26,6 +32,11 @@ if test "$bld_berkdb" = "yes"; then
 	PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
 	AC_SUBST(LDFLAG_BERKDB)
 	LDFLAG_BERKDB="-lprotobuf $DB_CXX_LIBS"
+fi
+if test "$bld_postgres" = "yes"; then
+	# some checks here?
+	AC_SUBST(LDFLAG_POSTGRES)
+	LDFLAG_POSTGRES="-lpq"
 fi
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
