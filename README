@@ -4,9 +4,14 @@ on a different license and plan to relicense the project at a later date.
 
 You will need:
 
-  - g++ 4.6
-  - cppdb
-  - boost
+  - G++ 4.6 or newer
+  - Boost
+  - OpenSLL
+  * for PostgreSQL support:
+    - cppdb (with postgres enabled)
+  * for BerkeleyDB support:
+    - berkdb
+    - protobuf
 
 Build cppdb using the instructions on their site.
 
@@ -17,6 +22,8 @@ Build cppdb using the instructions on their site.
   $ cmake -DCMAKE_INSTALL_PREFIX=/home/smf/libbitcoin/usr/ ..  -DPQ_BACKEND_INTERNAL=1
   $ make
   # make install
+
+Gentoo users: just use the ebuild from the bitcoin overlay.
 
 Edit the Makefile CFLAGS and LIBS variables to get the project to compile.
 Import the database too.
