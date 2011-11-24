@@ -4,13 +4,13 @@ on a different license and plan to relicense the project at a later date.
 
 You will need:
 
-  - G++ 4.6 or newer
+  - GCC 4.6 or newer
   - Boost
-  - OpenSLL
+  - OpenSLL 0.9 or newer
   * for PostgreSQL support:
     - cppdb (with postgres enabled)
   * for BerkeleyDB support:
-    - berkdb
+    - berkdb 5.1 or newer
     - protobuf
 
 Build cppdb using the instructions on their site.
