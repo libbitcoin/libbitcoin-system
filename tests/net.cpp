@@ -20,19 +20,19 @@ std::condition_variable condition;
 size_t inv_count = 0;
 
 void receive_inv(network_ptr net, channel_handle chandle,
-    const message::inv& packet)
+    const message::inventory& packet)
 {
     log_info() << "Received:";
-    for (const message::inv_vect& ivv: packet.invs)
+    for (const message::inventory_vector& ivv: packet.inventories)
     {
-        if (ivv.type != message::inv_type::block)
+        if (ivv.type != message::inventory_type::block)
             log_info() << "  --";
         else
             log_info() << "  " << pretty_hex(ivv.hash);
     }
-    net->subscribe_inv(chandle, std::bind(&receive_inv, net, chandle, _1));
+    net->subscribe_inventory(chandle, std::bind(&receive_inv, net, chandle, _1));
     std::unique_lock<std::mutex> lock(mutex);
-    inv_count += packet.invs.size();
+    inv_count += packet.inventories.size();
     condition.notify_one();
 }
 
@@ -57,14 +57,14 @@ message::getblocks create_getblocks_message()
 void handle_handshake(const std::error_code& ec, channel_handle chandle,
     network_ptr net)
 {
-    net->subscribe_inv(chandle, std::bind(&receive_inv, net, chandle, _1));
+    net->subscribe_inventory(chandle, std::bind(&receive_inv, net, chandle, _1));
     net->send(chandle, create_getblocks_message(), 
         std::bind(&handle_send_getblock, _1));
 }
 
 int main()
 {
-    network_ptr net(new network_impl);
+    network_ptr net(new network);
     handshake_connect(net, "localhost", 8333,
         std::bind(&handle_handshake, _1, _2, net));
 

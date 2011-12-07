@@ -17,7 +17,7 @@ using boost::asio::ip::tcp;
 using boost::asio::io_service;
 
 class network
- : private boost::noncopyable
+ : public threaded_service, public std::enable_shared_from_this<network>
 {
 public:
     typedef std::function<void (
@@ -36,15 +36,21 @@ public:
     typedef std::function<void (const message::block&)>
         receive_block_handler;
 
-    virtual bool start_accept() = 0;
-    virtual void connect(const std::string& hostname, unsigned short port,
-        connect_handler handle_connect) = 0;
-    virtual void listen(connect_handler handle_connect) = 0;
-    virtual size_t connection_count() const = 0;
-    virtual void disconnect(channel_handle handle) = 0;
+    network();
+    ~network();
 
-    virtual void set_ip_address(std::string ip_addr) = 0;
-    virtual message::ip_address get_ip_address() const = 0;
+    network(const network&) = delete;
+    void operator=(const network&) = delete;
+
+    bool start_accept();
+    void connect(const std::string& hostname, unsigned short port, 
+        connect_handler handle_connect);
+    void listen(connect_handler handle_connect);
+    size_t connection_count() const;
+    void disconnect(channel_handle chandle);  
+
+    void set_ip_address(std::string ip_addr);
+    message::ip_address get_ip_address() const;
 
     // List of bitcoin messages
     // version
@@ -63,55 +69,6 @@ public:
     // reply [deprecated]
     // ping
     // alert
-
-    virtual void subscribe_version(channel_handle chandle, 
-        receive_version_handler handle_receive) = 0;
-    virtual void subscribe_verack(channel_handle chandle,
-        receive_verack_handler handle_receive) = 0;
-    virtual void subscribe_addr(channel_handle chandle,
-        receive_addr_handler handle_receive) = 0;
-    virtual void subscribe_inventory(channel_handle chandle,
-        receive_inventory_handler handle_receive) = 0;
-    virtual void subscribe_block(channel_handle chandle,
-        receive_block_handler handle_receive) = 0;
-
-    virtual void send(channel_handle chandle,
-        const message::version& packet, send_handler handle_send) = 0;
-    virtual void send(channel_handle chandle,
-        const message::verack& packet, send_handler handle_send) = 0;
-    virtual void send(channel_handle chandle,
-        const message::getaddr& packet, send_handler handle_send) = 0;
-    virtual void send(channel_handle chandle,
-        const message::getdata& packet, send_handler handle_send) = 0;
-    virtual void send(channel_handle chandle,
-        const message::getblocks& packet, send_handler handle_send) = 0;
-    virtual void send(channel_handle chandle,
-        const message::transaction& packet, send_handler handle_send) = 0;
-
-    // Non public
-    virtual void relay(channel_handle, const message::version& packet) = 0;
-    virtual void relay(channel_handle, const message::verack& packet) = 0;
-    virtual void relay(channel_handle, const message::addr& packet) = 0;
-    virtual void relay(channel_handle, const message::inventory& packet) = 0;
-    virtual void relay(channel_handle, const message::block& packet) = 0;
-};
-
-class network_impl
- : public network, public threaded_service,
-    public std::enable_shared_from_this<network_impl>
-{
-public:
-    network_impl();
-    ~network_impl();
-    bool start_accept();
-    void connect(const std::string& hostname, unsigned short port, 
-        connect_handler handle_connect);
-    void listen(connect_handler handle_connect);
-    size_t connection_count() const;
-    void disconnect(channel_handle chandle);  
-
-    void set_ip_address(std::string ip_addr);
-    message::ip_address get_ip_address() const;
 
     void subscribe_version(channel_handle chandle, 
         receive_version_handler handle_receive);
