@@ -45,20 +45,20 @@ data_chunk original_dialect::create_header(const message::verack&,
     return construct_header_from("verack", payload);
 }
 
-data_chunk original_dialect::create_header(const message::getaddr&,
+data_chunk original_dialect::create_header(const message::get_address&,
     const data_chunk& payload) const
 {
     return construct_header_from("getaddr", payload);
 }
 
-data_chunk original_dialect::create_header(const message::getdata&,
+data_chunk original_dialect::create_header(const message::get_data&,
     const data_chunk& payload) const
 {
     return construct_header_from("getdata", payload);
 }
 
 data_chunk original_dialect::create_header(
-    const message::getblocks&, const data_chunk& payload) const
+    const message::get_blocks&, const data_chunk& payload) const
 {
     return construct_header_from("getblocks", payload);
 }
@@ -81,8 +81,8 @@ data_chunk original_dialect::to_network(const message::version& version) const
     payload.write_4_bytes(version.version);
     payload.write_8_bytes(version.services);
     payload.write_8_bytes(version.timestamp);
-    payload.write_net_addr(version.addr_me);
-    payload.write_net_addr(version.addr_you);
+    payload.write_network_address(version.address_me);
+    payload.write_network_address(version.address_you);
     payload.write_8_bytes(version.nonce);
     // do sub_version_num
     payload.write_byte(0);
@@ -95,13 +95,13 @@ data_chunk original_dialect::to_network(const message::verack&) const
     return data_chunk();
 }
 
-data_chunk original_dialect::to_network(const message::getaddr&) const
+data_chunk original_dialect::to_network(const message::get_address&) const
 {
     return data_chunk();
 }
 
 data_chunk original_dialect::to_network(
-    const message::getblocks& getblocks) const
+    const message::get_blocks& getblocks) const
 {
     serializer payload;
     payload.write_4_bytes(31900);
@@ -143,7 +143,7 @@ data_chunk original_dialect::to_network(const message::transaction& tx) const
     return payload.get_data();
 }
 
-data_chunk original_dialect::to_network(const message::getdata& getdata) const
+data_chunk original_dialect::to_network(const message::get_data& getdata) const
 {
     serializer payload;
     payload.write_var_uint(getdata.inventories.size());
@@ -194,16 +194,16 @@ message::version original_dialect::version_from_network(
     payload.version = deserial.read_4_bytes();
     payload.services = deserial.read_8_bytes();
     payload.timestamp = deserial.read_8_bytes();
-    payload.addr_me = deserial.read_net_addr();
+    payload.address_me = deserial.read_network_address();
     // Ignored field
-    payload.addr_me.timestamp = 0;
+    payload.address_me.timestamp = 0;
     if (payload.version < 106) {
         BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26);
         return payload;
     }
-    payload.addr_you = deserial.read_net_addr();
+    payload.address_you = deserial.read_network_address();
     // Ignored field
-    payload.addr_you.timestamp = 0;
+    payload.address_you.timestamp = 0;
     payload.nonce = deserial.read_8_bytes();
     // sub_version_num
     payload.sub_version_num = deserial.read_byte();
@@ -216,18 +216,18 @@ message::version original_dialect::version_from_network(
     return payload;
 }
 
-message::addr original_dialect::addr_from_network(
+message::address original_dialect::address_from_network(
     const data_chunk& stream) const
 {
-    message::addr payload;
+    message::address payload;
     deserializer deserial(stream);
     uint64_t count = deserial.read_var_uint();
     for (size_t i = 0; i < count; ++i)
     {
         uint32_t timestamp = deserial.read_4_bytes();
-        message::net_addr addr = deserial.read_net_addr();
+        message::network_address addr = deserial.read_network_address();
         addr.timestamp = timestamp;
-        payload.addr_list.push_back(addr);
+        payload.addresses.push_back(addr);
     }
     return payload;
 }

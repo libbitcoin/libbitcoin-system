@@ -1,14 +1,4 @@
-#include "channel.hpp"
-
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <functional>
-#include <iterator>
-#include <ctime>
-
-#include <bitcoin/util/logger.hpp>
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/network/network.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/network/channel.hpp>
 
 namespace libbitcoin {
 
@@ -20,93 +10,86 @@ using boost::asio::buffer;
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
-channel_pimpl::channel_pimpl(network_ptr parent_gateway,
-    dialect_ptr translator, service_ptr service, socket_ptr socket)
- : socket_(socket), network_(parent_gateway),
-        translator_(translator)
+channel::channel(socket_ptr socket, service_ptr service, dialect_ptr translator)
+ : killed_(false), socket_(socket), translator_(translator)
 {
-    // Unique IDs are assigned to channels by incrementing a shared counter
-    // among instances.
-    channel_id_ = rand();
-
+    strand_.reset(new io_service::strand(*service));
     timeout_.reset(new deadline_timer(*service));
+}
+
+channel::~channel()
+{
+    stop();
+}
+
+void channel::start()
+{
     read_header();
     reset_timeout();
 }
-
-channel_pimpl::~channel_pimpl()
+void channel::stop()
 {
+    killed_ = true;
     tcp::endpoint remote_endpoint = socket_->remote_endpoint();
-    log_debug() << "Closing channel "
-            << remote_endpoint.address().to_string();
+    log_debug(log_domain::network) << "Closing channel "
+        << remote_endpoint.address().to_string();
     boost::system::error_code ec;
     socket_->shutdown(tcp::socket::shutdown_both, ec);
     socket_->close(ec);
     timeout_->cancel();
 }
 
-void channel_pimpl::handle_timeout(const boost::system::error_code& ec)
+void channel::handle_timeout(const boost::system::error_code& ec)
 {
-    if (problems_check(ec))
+    if (ec == boost::asio::error::operation_aborted)
         return;
-    log_info() << "Forcing disconnect due to timeout.";
+    log_info(log_domain::network) << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
-    destroy_self();
+    stop();
 }
 
-void channel_pimpl::reset_timeout()
+void channel::reset_timeout()
 {
     timeout_->cancel();
     timeout_->expires_from_now(disconnect_timeout);
     timeout_->async_wait(std::bind(
-            &channel_pimpl::handle_timeout, this, _1));
+        &channel::handle_timeout, shared_from_this(), _1));
 }
 
-void channel_pimpl::destroy_self()
+bool channel::problems_check(const boost::system::error_code& ec)
 {
-    network_->disconnect(channel_id_);
-}
-
-bool channel_pimpl::problems_check(const boost::system::error_code& ec)
-{
-    if (ec == boost::asio::error::operation_aborted)
-    {
-        // Do nothing
+    if (killed_)
         return true;
-    }
-    else if (ec)
-    {
-        destroy_self();
-        return true;
-    }
-    return false;
+    else if (!ec)
+        return false;
+    stop();
+    return true;
 }
 
-void channel_pimpl::read_header()
+void channel::read_header()
 {
-    auto callback = std::bind(
-            &channel_pimpl::handle_read_header, this, _1, _2);
-    async_read(*socket_, buffer(inbound_header_), callback);
+    async_read(*socket_, buffer(inbound_header_),
+        strand_->wrap(std::bind(&channel::handle_read_header,
+            shared_from_this(), _1, _2)));
 }
 
-void channel_pimpl::read_checksum(const message::header& header_msg)
+void channel::read_checksum(const message::header& header_msg)
 {
-    auto callback = std::bind(&channel_pimpl::handle_read_checksum, 
-            this, header_msg, _1, _2);
-    async_read(*socket_, buffer(inbound_checksum_), callback);
+    async_read(*socket_, buffer(inbound_checksum_),
+        strand_->wrap(std::bind(&channel::handle_read_checksum, 
+            shared_from_this(), header_msg, _1, _2)));
 }
 
-void channel_pimpl::read_payload(const message::header& header_msg)
+void channel::read_payload(const message::header& header_msg)
 {
-    auto callback = std::bind(&channel_pimpl::handle_read_payload, 
-            this, header_msg, _1, _2);
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
-            callback);
+        strand_->wrap(std::bind(&channel::handle_read_payload, 
+            shared_from_this(), header_msg, _1, _2)));
 }
 
-void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
-        size_t bytes_transferred)
+void channel::handle_read_header(const boost::system::error_code& ec,
+    size_t bytes_transferred)
 {
     if (problems_check(ec))
         return;
@@ -119,8 +102,8 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
 
     if (!translator_->verify_header(header_msg))
     {
-        log_debug() << "Bad header received.";
-        destroy_self();
+        log_debug(log_domain::network) << "Bad header received.";
+        stop();
         return;
     }
 
@@ -139,7 +122,7 @@ void channel_pimpl::handle_read_header(const boost::system::error_code& ec,
     reset_timeout();
 }
 
-void channel_pimpl::handle_read_checksum(message::header& header_msg,
+void channel::handle_read_checksum(message::header& header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if (problems_check(ec))
@@ -154,7 +137,7 @@ void channel_pimpl::handle_read_checksum(message::header& header_msg,
     reset_timeout();
 }
 
-void channel_pimpl::handle_read_payload(const message::header& header_msg,
+void channel::handle_read_payload(const message::header& header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred)
 {
     if (problems_check(ec))
@@ -165,52 +148,84 @@ void channel_pimpl::handle_read_payload(const message::header& header_msg,
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
     if (!translator_->verify_checksum(header_msg, payload_stream))
     {
-        log_warning() << "Bad checksum!";
-        destroy_self();
+        log_warning(log_domain::network) << "Bad checksum!";
+        stop();
         return;
     }
+
     if (header_msg.command == "version")
     {
-        if (!transport_payload<message::version>(payload_stream,
-            std::bind(&dialect::version_from_network, translator_, _1)))
+        if (!transport<message::version>(payload_stream,
+            std::bind(&dialect::version_from_network, translator_, _1),
+            version_registry_))
+        {
             return;
+        }
     }
     else if (header_msg.command == "verack")
-        network_->relay(channel_id_, message::verack());
+    {
+        relay(message::verack(), verack_registry_);
+    }
     else if (header_msg.command == "addr")
     {
-        if (!transport_payload<message::addr>(payload_stream,
-            std::bind(&dialect::addr_from_network, translator_, _1)))
+        if (!transport<message::address>(payload_stream,
+            std::bind(&dialect::address_from_network, translator_, _1),
+            address_registry_))
+        {
             return;
+        }
     }
     else if (header_msg.command == "inv")
     {
-        if (!transport_payload<message::inventory>(payload_stream,
-            std::bind(&dialect::inventory_from_network, translator_, _1)))
+        if (!transport<message::inventory>(payload_stream,
+            std::bind(&dialect::inventory_from_network, translator_, _1),
+            inventory_registry_))
+        {
             return;
+        }
     }
     else if (header_msg.command == "block")
     {
-        if (!transport_payload<message::block>(payload_stream,
-            std::bind(&dialect::block_from_network, translator_, _1)))
+        if (!transport<message::block>(payload_stream,
+            std::bind(&dialect::block_from_network, translator_, _1),
+            block_registry_))
+        {
             return;
+        }
     }
+
     read_header();
     reset_timeout();
 }
 
-void channel_pimpl::pre_handle_send(const boost::system::error_code& ec,
-    network::send_handler handle_send)
+void channel::pre_handle_send(const boost::system::error_code& ec,
+    send_handler handle_send)
 {
     if (problems_check(ec))
-        handle_send(error::network_channel_not_found);
+        handle_send(error::channel_stopped);
     else
         handle_send(std::error_code());
 }
 
-channel_handle channel_pimpl::get_id() const
+void channel::subscribe_version(receive_version_handler handle_receive)
 {
-    return channel_id_;
+    generic_subscribe<message::version>(handle_receive, version_registry_);
+}
+void channel::subscribe_verack(receive_verack_handler handle_receive)
+{
+    generic_subscribe<message::verack>(handle_receive, verack_registry_);
+}
+void channel::subscribe_address(receive_address_handler handle_receive)
+{
+    generic_subscribe<message::address>(handle_receive, address_registry_);
+}
+void channel::subscribe_inventory(receive_inventory_handler handle_receive)
+{
+    generic_subscribe<message::inventory>(handle_receive, inventory_registry_);
+}
+void channel::subscribe_block(receive_block_handler handle_receive)
+{
+    generic_subscribe<message::block>(handle_receive, block_registry_);
 }
 
 } // libbitcoin

@@ -16,11 +16,11 @@ typedef std::vector<hash_digest> block_locator;
 
 typedef std::array<uint8_t, 16> ip_address;
 
-struct net_addr
+struct network_address
 {
     uint32_t timestamp;
     uint64_t services;
-    ip_address ip_addr;
+    ip_address ip;
     uint16_t port;
 };
 
@@ -54,8 +54,8 @@ struct version
     uint32_t version;
     uint64_t services;
     uint64_t timestamp;
-    net_addr addr_me;
-    net_addr addr_you;
+    network_address address_me;
+    network_address address_you;
     uint64_t nonce;
     std::string sub_version_num;
     uint32_t start_height;
@@ -65,12 +65,12 @@ struct verack
 {
 };
 
-struct getaddr
+struct get_address
 {
 };
 
 
-struct getblocks
+struct get_blocks
 {
     // 10 sequential hashes, then exponential samples until reaching genesis
     block_locator locator_start_hashes;
@@ -119,12 +119,12 @@ struct block
     transaction_list transactions;
 };
 
-struct addr
+struct address
 {
-    std::vector<net_addr> addr_list;
+    std::vector<network_address> addresses;
 };
 
-struct getdata
+struct get_data
 {
     inventory_list inventories;
 };

@@ -1,21 +1,25 @@
 #ifndef LIBBITCOIN_NET_TYPES_H
 #define LIBBITCOIN_NET_TYPES_H
 
-#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/asio.hpp>
 #include <memory>
+
+#include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 
 class network;
-class network_impl;
-class channel_pimpl;
+class channel;
 
-using std::shared_ptr;
+using boost::asio::ip::tcp;
+using boost::asio::io_service;
 
-typedef shared_ptr<network> network_ptr;
-typedef unsigned int channel_handle;
-typedef boost::ptr_vector<channel_pimpl> channel_list;
+typedef std::shared_ptr<tcp::socket> socket_ptr;
+typedef std::shared_ptr<tcp::acceptor> acceptor_ptr;
 
+typedef std::shared_ptr<network> network_ptr;
+typedef std::shared_ptr<channel> channel_ptr;
+typedef std::vector<channel_ptr> channel_list;
 
 } // libbitcoin
 

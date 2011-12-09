@@ -13,79 +13,84 @@ typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
 
 const size_t clearance_count = 3;
 
-message::version create_version_message(
-    message::ip_address network_ip, channel_handle chandle)
+message::version create_version_message()
 {
     message::version version;
     // this is test data.
     version.version = 31900;
     version.services = 1;
     version.timestamp = time(NULL);
-    version.addr_me.services = version.services;
-    version.addr_me.ip_addr = network_ip;
-    version.addr_me.port = 8333;
-    version.addr_you.services = version.services;
-    version.addr_you.ip_addr = 
+    version.address_me.services = version.services;
+    version.address_me.ip = 
         message::ip_address{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                             0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
-    version.addr_you.port = 8333;
-    version.nonce = chandle;
+    version.address_me.port = 8333;
+    version.address_you.services = version.services;
+    version.address_you.ip = 
+        message::ip_address{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                            0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
+    version.address_you.port = 8333;
+    version.nonce = rand();
     version.sub_version_num = "";
     version.start_height = 0;
     return version;
 }
 
 void handle_message_sent(const std::error_code& ec,
-    atomic_counter_ptr counter, network::send_handler callback)
+    atomic_counter_ptr counter, handshake_handler completion_callback)
 {
     if (ec)
-        callback(ec);
+        completion_callback(ec);
     else if (++(*counter) == clearance_count)
-        callback(std::error_code());
+        completion_callback(std::error_code());
 }
 
-void receive_version(channel_handle chandle, const message::version&,
-    network_ptr net, atomic_counter_ptr counter, 
-    network::send_handler callback)
+void receive_version(const std::error_code& ec, const message::version&,
+    channel_ptr node, atomic_counter_ptr counter,
+    handshake_handler completion_callback)
 {
-    net->send(chandle, message::verack(),
-        std::bind(&handle_message_sent, _1, counter, callback));
+    if (ec)
+        completion_callback(ec);
+    else
+        node->send(message::verack(), std::bind(
+            &handle_message_sent, _1, counter, completion_callback));
 }
 
-void receive_verack(const message::verack&, 
-    atomic_counter_ptr counter, network::send_handler callback)
+void receive_verack(const std::error_code& ec, const message::verack&, 
+    atomic_counter_ptr counter, handshake_handler completion_callback)
 {
-    if (++(*counter) == clearance_count)
-        callback(std::error_code());
+    if (ec)
+        completion_callback(ec);
+    else if (++(*counter) == clearance_count)
+        completion_callback(std::error_code());
 }
 
-void handshake(network_ptr net, channel_handle chandle, 
-    network::send_handler callback)
+void handshake(channel_ptr node, handshake_handler handle_handshake)
 {
     atomic_counter_ptr counter(new atomic_counter(0));
-    net->send(chandle, create_version_message(net->get_ip_address(), chandle),
-        std::bind(&handle_message_sent, _1, counter, callback));
+    node->send(create_version_message(),
+        std::bind(&handle_message_sent, _1, counter, handle_handshake));
 
-    net->subscribe_version(chandle, 
-        std::bind(&receive_version, chandle, _1, net, counter, callback));
-    net->subscribe_verack(chandle, 
-        std::bind(&receive_verack, _1, counter, callback));
+    node->subscribe_version(std::bind(
+        &receive_version, _1, _2, node, counter, handle_handshake));
+    node->subscribe_verack(std::bind(
+        &receive_verack, _1, _2, counter, handle_handshake));
 }
 
-void start_handshake(const std::error_code& ec, channel_handle chandle,
-    network_ptr net, network::connect_handler handle_connect)
+void start_handshake(const std::error_code& ec, channel_ptr node,
+    network::connect_handler handle_connect)
 {
     if (ec)
-        handle_connect(ec, chandle);
+        handle_connect(ec, node);
     else
-        handshake(net, chandle, std::bind(handle_connect, _1, chandle));
+        handshake(node, std::bind(handle_connect, _1, node));
 }
 
 void handshake_connect(network_ptr net, const std::string& hostname,
-    unsigned short port, network::connect_handler handle_connect)
+    uint16_t port, network::connect_handler handle_connect)
 {
     net->connect(hostname, port, 
-        std::bind(&start_handshake, _1, _2, net, handle_connect));
+        std::bind(&start_handshake, _1, _2, handle_connect));
 }
 
 } // libbitcoin

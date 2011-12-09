@@ -28,22 +28,22 @@ public:
 
     void connect(std::string hostname, unsigned int port);
 
-    void receive_inventory(channel_handle chandle, 
+    void receive_inventory(channel_ptr node, 
         const message::inventory& packet);
-    void receive_block(channel_handle chandle, const message::block& packet);
+    void receive_block(channel_ptr node, const message::block& packet);
 
     void register_storage(storage_ptr stor_comp);
     storage_ptr get_storage();
     void tween_blocks(const hash_pair_list& block_hashes);
 
 private:
-    void handle_connect(const std::error_code& ec, channel_handle chandle);
+    void handle_connect(const std::error_code& ec, channel_ptr node);
     void handle_block_stored(const std::error_code& ec, block_status status,
         hash_digest block_hash);
 
-    void start_initial_getblocks(channel_handle chandle);
+    void start_initial_getblocks(channel_ptr node);
     void request_initial_blocks(const std::error_code& ec,
-        const message::block_locator& locator, channel_handle chandle);
+        const message::block_locator& locator, channel_ptr node);
     void request_next_blocks(const std::error_code& ec,
         const message::block_locator& locator, 
         const hash_pair_list& block_hashes);
@@ -52,7 +52,7 @@ private:
     storage_ptr storage_component_;
 
     bool initial_getblocks_;
-    std::multimap<hash_digest, channel_handle> inventory_tracker_;
+    std::multimap<hash_digest, channel_ptr> inventory_tracker_;
 };
 
 typedef shared_ptr<kernel> kernel_ptr;

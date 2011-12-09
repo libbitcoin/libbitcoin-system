@@ -13,7 +13,7 @@ enum class error
     // network errors
     system_network_error,
     bad_stream,
-    network_channel_not_found
+    channel_stopped
 };
 
 class error_category_impl

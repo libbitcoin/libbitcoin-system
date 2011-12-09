@@ -8,8 +8,6 @@
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/dialect.hpp>
 
-#include "channel.hpp"
-
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -20,23 +18,12 @@ using boost::asio::socket_base;
 network::network()
 {
     default_dialect_.reset(new original_dialect);
-    our_ip_address_ = message::ip_address{
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0};
 }
 
 network::~network()
 {
     if (acceptor_)
         acceptor_->close();
-}
-
-channel_handle network::create_channel(socket_ptr socket)
-{
-    channel_pimpl* channel_obj = new channel_pimpl(
-        shared_from_this(), default_dialect_, service(), socket);
-    channels_.push_back(channel_obj);
-    log_debug() << channels_.size() << " peers connected.";
-    return channel_obj->get_id();
 }
 
 void network::handle_connect(const boost::system::error_code& ec, 
@@ -46,15 +33,16 @@ void network::handle_connect(const boost::system::error_code& ec,
     {
         log_error() << "Connecting to peer " << hostname
             << ": " << ec.message();
-        handle_connect(error::system_network_error, 0);
+        handle_connect(error::system_network_error, nullptr);
         return;
     }
-    channel_handle chanid = create_channel(socket);
-    handle_connect(std::error_code(), chanid);
+    channel_ptr channel_obj(new channel(socket, service(), default_dialect_));
+    channel_obj->start();
+    handle_connect(std::error_code(), channel_obj);
 }
 
-void network::connect(const std::string& hostname, unsigned short port,
-        connect_handler handle_connect)
+void network::connect(const std::string& hostname, uint16_t port,
+    connect_handler handle_connect)
 {
     socket_ptr socket(new tcp::socket(*service()));
     tcp::resolver resolver(*service());
@@ -73,156 +61,6 @@ void network::listen(connect_handler handle_connect)
         {
             listeners_.push_back(handle_connect);
         });
-}
-
-void remove_matching_channels(channel_list* channels,
-    channel_handle chandle)
-{
-    channels->erase_if(
-        [chandle](channel_pimpl& channel_obj)
-        {
-            return channel_obj.get_id() == chandle;
-        });
-    log_debug() << channels->size() << " peers remaining.";
-}
-void network::disconnect(channel_handle chandle)
-{
-    strand()->post(
-        std::bind(remove_matching_channels, &channels_, chandle));
-}
-
-void network::subscribe_version(channel_handle chandle, 
-    receive_version_handler handle_receive)
-{
-    generic_subscribe<receive_version_handler, version_registry_map>(
-        chandle, handle_receive, version_registry_);
-}
-
-void network::subscribe_verack(channel_handle chandle,
-    receive_verack_handler handle_receive)
-{
-    generic_subscribe<receive_verack_handler, verack_registry_map>(
-        chandle, handle_receive, verack_registry_);
-}
-
-void network::subscribe_addr(channel_handle chandle,
-    receive_addr_handler handle_receive)
-{
-    generic_subscribe<receive_addr_handler, addr_registry_map>(
-        chandle, handle_receive, addr_registry_);
-}
-
-void network::subscribe_inventory(channel_handle chandle,
-    receive_inventory_handler handle_receive)
-{
-    generic_subscribe<receive_inventory_handler, inventory_registry_map>(
-        chandle, handle_receive, inventory_registry_);
-}
-
-void network::subscribe_block(channel_handle chandle,
-    receive_block_handler handle_receive)
-{
-    generic_subscribe<receive_block_handler, block_registry_map>(
-        chandle, handle_receive, block_registry_);
-}
-
-template<typename Message, typename Callback>
-void perform_send(channel_handle chandle,
-    const Message packet, channel_list& channels, Callback handle_send)
-{
-    auto it = std::find_if(channels.begin(), channels.end(),
-        [chandle](const channel_pimpl& channel_obj)
-        {
-            return channel_obj.get_id() == chandle;
-        });
-    if (it == channels.end())
-    {
-        log_error() << "Non existant channel " << chandle << " for send.";
-        handle_send(error::network_channel_not_found);
-        return;
-    }
-    it->send(packet, handle_send);
-}
-
-template<typename Message, typename Callback>
-void generic_send(strand_ptr strand, channel_handle chandle,
-    const Message packet, channel_list& channels, Callback handle_send)
-{
-    strand->post(std::bind(&perform_send<Message, Callback>, 
-        chandle, packet, std::ref(channels), handle_send));
-}
-
-void network::send(channel_handle chandle,
-     const message::version& packet, send_handler handle_send)
-{
-    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
-}
-
-void network::send(channel_handle chandle,
-     const message::verack& packet, send_handler handle_send)
-{
-    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
-}
-
-void network::send(channel_handle chandle,
-     const message::getaddr& packet, send_handler handle_send)
-{
-    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
-}
-
-void network::send(channel_handle chandle,
-     const message::getdata& packet, send_handler handle_send)
-{
-    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
-}
-
-void network::send(channel_handle chandle, 
-    const message::getblocks& packet, send_handler handle_send)
-{
-    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
-}
-
-void network::send(channel_handle chandle,
-    const message::transaction& packet, send_handler handle_send)
-{
-    generic_send(strand(), chandle, packet, std::ref(channels_), handle_send);
-}
-
-// Relay functions
-
-void network::relay(channel_handle chandle, 
-    const message::version& packet)
-{
-    generic_relay(chandle, packet, version_registry_);
-}
-
-void network::relay(channel_handle chandle,
-     const message::verack& packet)
-{
-    generic_relay(chandle, packet, verack_registry_);
-}
-
-void network::relay(channel_handle chandle,
-     const message::addr& packet)
-{
-    generic_relay(chandle, packet, addr_registry_);
-}
-
-void network::relay(channel_handle chandle,
-     const message::inventory& packet)
-{
-    generic_relay(chandle, packet, inventory_registry_);
-}
-
-void network::relay(channel_handle chandle,
-     const message::block& packet)
-{
-    generic_relay(chandle, packet, block_registry_);
-}
-
-size_t network::connection_count() const
-{
-    return channels_.size();
 }
 
 bool network::start_accept()
@@ -253,27 +91,18 @@ void network::handle_accept(socket_ptr socket)
     tcp::endpoint remote_endpoint = socket->remote_endpoint();
     log_debug() << "New incoming connection from "
             << remote_endpoint.address().to_string();
-    channel_handle chanid = create_channel(socket);
-    strand()->post(
-        [&listeners_, chanid]
-        {
-            for (connect_handler handle_connect: listeners_)
-                handle_connect(std::error_code(), chanid);
-            listeners_.clear();
-        });
-    socket.reset(new tcp::socket(*service()));
-    acceptor_->async_accept(*socket,
-            std::bind(&network::handle_accept, shared_from_this(), 
-                socket));
-}
-
-void network::set_ip_address(std::string ip_addr)
-{
-    //our_ip_address_ = ip_addr;
-}
-message::ip_address network::get_ip_address() const
-{
-    return our_ip_address_;
+    //channel_handle chanid = create_channel(socket);
+    //strand()->post(
+    //    [&listeners_, chanid]
+    //    {
+    //        for (connect_handler handle_connect: listeners_)
+    //            handle_connect(std::error_code(), chanid);
+    //        listeners_.clear();
+    //    });
+    //socket.reset(new tcp::socket(*service()));
+    //acceptor_->async_accept(*socket,
+    //        std::bind(&network::handle_accept, shared_from_this(), 
+    //            socket));
 }
 
 } // libbitcoin

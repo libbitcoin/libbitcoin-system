@@ -33,7 +33,6 @@ typedef shared_ptr<clock> clock_ptr;
 typedef shared_ptr<io_service> service_ptr;
 typedef shared_ptr<io_service::work> work_ptr;
 typedef shared_ptr<io_service::strand> strand_ptr;
-typedef shared_ptr<tcp::socket> socket_ptr;
 typedef shared_ptr<deadline_timer> deadline_timer_ptr;
 
 typedef std::array<uint8_t, 32> hash_digest;

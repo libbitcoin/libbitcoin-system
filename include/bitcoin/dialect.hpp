@@ -17,11 +17,11 @@ public:
         const data_chunk& payload) const = 0;
     virtual data_chunk create_header(const message::verack&,
         const data_chunk& payload) const = 0;
-    virtual data_chunk create_header(const message::getaddr&,
+    virtual data_chunk create_header(const message::get_address&,
         const data_chunk& payload) const = 0;
-    virtual data_chunk create_header(const message::getdata&,
+    virtual data_chunk create_header(const message::get_data&,
         const data_chunk& payload) const = 0;
-    virtual data_chunk create_header(const message::getblocks&,
+    virtual data_chunk create_header(const message::get_blocks&,
          const data_chunk& payload) const = 0;
     virtual data_chunk create_header(const message::block&,
         const data_chunk& payload) const = 0;
@@ -30,10 +30,11 @@ public:
 
     virtual data_chunk to_network(const message::version& version) const = 0;
     virtual data_chunk to_network(const message::verack& verack) const = 0;
-    virtual data_chunk to_network(const message::getaddr& getaddr) const = 0;
-    virtual data_chunk to_network(const message::getdata& getdata) const = 0;
     virtual data_chunk to_network(
-        const message::getblocks& getblocks) const = 0;
+        const message::get_address& getaddr) const = 0;
+    virtual data_chunk to_network(const message::get_data& getdata) const = 0;
+    virtual data_chunk to_network(
+        const message::get_blocks& getblocks) const = 0;
     virtual data_chunk to_network(const message::block& block) const = 0;
     virtual data_chunk to_network(const message::transaction& tx) const = 0;
 
@@ -54,7 +55,7 @@ public:
     virtual message::version version_from_network(
         const data_chunk& stream) const = 0;
 
-    virtual message::addr addr_from_network(
+    virtual message::address address_from_network(
         const data_chunk& stream) const = 0;
 
     virtual message::inventory inventory_from_network(
@@ -76,11 +77,11 @@ public:
         const data_chunk& payload) const;
     data_chunk create_header(const message::verack&,
         const data_chunk& payload) const;
-    data_chunk create_header(const message::getaddr&,
+    data_chunk create_header(const message::get_address&,
         const data_chunk& payload) const;
-    data_chunk create_header(const message::getdata&,
+    data_chunk create_header(const message::get_data&,
         const data_chunk& payload) const;
-    data_chunk create_header(const message::getblocks&,
+    data_chunk create_header(const message::get_blocks&,
          const data_chunk& payload) const;
     data_chunk create_header(const message::block&,
         const data_chunk& payload) const;
@@ -89,9 +90,9 @@ public:
 
     data_chunk to_network(const message::version& version) const;
     data_chunk to_network(const message::verack& verack) const;
-    data_chunk to_network(const message::getaddr& getaddr) const;
-    data_chunk to_network(const message::getdata& getdata) const;
-    data_chunk to_network(const message::getblocks& getblocks) const;
+    data_chunk to_network(const message::get_address& getaddr) const;
+    data_chunk to_network(const message::get_data& getdata) const;
+    data_chunk to_network(const message::get_blocks& getblocks) const;
     data_chunk to_network(const message::block& block) const;
     data_chunk to_network(const message::transaction& tx) const;
 
@@ -107,7 +108,7 @@ public:
 
     message::version version_from_network(const data_chunk& stream) const;
 
-    message::addr addr_from_network(const data_chunk& stream) const;
+    message::address address_from_network(const data_chunk& stream) const;
 
     message::inventory inventory_from_network(const data_chunk& stream) const;
 
