@@ -16,21 +16,23 @@ typedef std::pair<hash_digest, hash_digest> hash_pair;
 typedef std::vector<hash_pair> hash_pair_list;
 
 class kernel 
- : public threaded_service,
-    private boost::noncopyable, 
-    public std::enable_shared_from_this<kernel>
+ : public threaded_service, public std::enable_shared_from_this<kernel>
 {
 public:
     kernel();
 
+    kernel(const kernel&) = delete;
+    void operator=(const kernel&) = delete;
+
     void register_network(network_ptr net_comp);
     network_ptr get_network();
 
-    void connect(std::string hostname, unsigned int port);
+    void connect(std::string hostname, uint16_t port);
 
-    void receive_inventory(channel_ptr node, 
-        const message::inventory& packet);
-    void receive_block(channel_ptr node, const message::block& packet);
+    void receive_inventory(const std::error_code& ec,
+        const message::inventory& packet, channel_ptr node);
+    void receive_block(const std::error_code& ec,
+        const message::block& packet, channel_ptr node);
 
     void register_storage(storage_ptr stor_comp);
     storage_ptr get_storage();

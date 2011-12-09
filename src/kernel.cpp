@@ -4,7 +4,6 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/storage/storage.hpp>
 #include <bitcoin/util/logger.hpp>
-#include <bitcoin/util/postbind.hpp>
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -30,11 +29,11 @@ network_ptr kernel::get_network()
     return network_component_;
 }
 
-void kernel::connect(std::string hostname, unsigned int port)
+void kernel::connect(std::string hostname, uint16_t port)
 {
-    //handshake_connect(network_component_, hostname, port,
-    //    postbind<std::error_code, channel_handle>(strand(), std::bind(
-    //        &kernel::handle_connect, shared_from_this(), _1, _2)));
+    handshake_connect(network_component_, hostname, port,
+        strand()->wrap(std::bind(
+            &kernel::handle_connect, shared_from_this(), _1, _2)));
 }
 
 void kernel::handle_connect(const std::error_code& ec, channel_ptr node)
@@ -50,19 +49,17 @@ void kernel::handle_connect(const std::error_code& ec, channel_ptr node)
         start_initial_getblocks(node);
     }
 
-    //network_component_->subscribe_inventory(chandle,
-    //    std::bind(&kernel::receive_inventory, shared_from_this(),
-    //        chandle, _1));
-    //network_component_->subscribe_block(chandle,
-    //    std::bind(&kernel::receive_block, shared_from_this(), chandle, _1));
+    node->subscribe_inventory(std::bind(
+        &kernel::receive_inventory, shared_from_this(), _1, _2, node));
+    node->subscribe_block(std::bind(
+        &kernel::receive_block, shared_from_this(), _1, _2, node));
 }
 
 void kernel::start_initial_getblocks(channel_ptr node)
 {
     storage_component_->fetch_block_locator(
-        postbind<std::error_code, message::block_locator>(strand(), std::bind(
-            &kernel::request_initial_blocks, shared_from_this(), 
-                _1, _2, node)));
+        strand()->wrap(std::bind(&kernel::request_initial_blocks,
+            shared_from_this(), _1, _2, node)));
 }
 
 void kernel::request_initial_blocks(const std::error_code& ec,
@@ -76,7 +73,7 @@ void kernel::request_initial_blocks(const std::error_code& ec,
     message::get_blocks getblocks;
     getblocks.locator_start_hashes = locator;
     getblocks.hash_stop = null_hash;
-    //network_component_->send(chandle, getblocks, null);
+    node->send(getblocks, null);
 }
 
 // TODO: Finish this.
@@ -89,8 +86,8 @@ void ask_block(bool block_exists, Function request_block)
     //    tween_blocks...
 }
 
-void kernel::receive_inventory(channel_ptr node,
-    const message::inventory& packet)
+void kernel::receive_inventory(const std::error_code& ec,
+    const message::inventory& packet, channel_ptr node)
 {
     message::get_data request_message;
     for (const message::inventory_vector curr_inv: packet.inventories)
@@ -107,11 +104,10 @@ void kernel::receive_inventory(channel_ptr node,
     }
     // TODO: Should check if block exists or not first before
     // wasting bandwidth
-    //if (request_message.inventories.size() > 0)
-    //    network_component_->send(chandle, request_message, null);
-    //network_component_->subscribe_inventory(chandle,
-    //    std::bind(&kernel::receive_inventory, shared_from_this(),
-    //        chandle, _1));
+    if (request_message.inventories.size() > 0)
+        node->send(request_message, null);
+    node->subscribe_inventory(std::bind(
+        &kernel::receive_inventory, shared_from_this(), _1, _2, node));
 }
 
 void kernel::handle_block_stored(const std::error_code& ec,
@@ -130,14 +126,14 @@ void kernel::handle_block_stored(const std::error_code& ec,
     }
 }
 
-void kernel::receive_block(channel_ptr node, 
-    const message::block& packet)
+void kernel::receive_block(const std::error_code& ec,
+    const message::block& packet, channel_ptr node)
 {
     storage_component_->store(packet,
         std::bind(&kernel::handle_block_stored, shared_from_this(),
             _1, _2, hash_block_header(packet)));
-    //network_component_->subscribe_block(chandle,
-    //    std::bind(&kernel::receive_block, shared_from_this(), chandle, _1));
+    node->subscribe_block(
+        std::bind(&kernel::receive_block, shared_from_this(), _1, _2, node));
 }
 
 void kernel::register_storage(storage_ptr stor_comp)
@@ -153,9 +149,8 @@ storage_ptr kernel::get_storage()
 void kernel::tween_blocks(const hash_pair_list& block_hashes)
 {
     storage_component_->fetch_block_locator(
-        postbind<std::error_code, message::block_locator>(strand(), std::bind(
-            &kernel::request_next_blocks, shared_from_this(), 
-                _1, _2, block_hashes)));
+        strand()->wrap(std::bind(&kernel::request_next_blocks,
+            shared_from_this(), _1, _2, block_hashes)));
 }
 
 void kernel::request_next_blocks(const std::error_code& ec,
@@ -177,7 +172,7 @@ void kernel::request_next_blocks(const std::error_code& ec,
         for (auto it = range.first; it != range.second; ++it)
         {
             getblocks.hash_stop = orphan_root;
-            //network_component_->send(it->second, getblocks, null);
+            it->second->send(getblocks, null);
         }
     }
 }
