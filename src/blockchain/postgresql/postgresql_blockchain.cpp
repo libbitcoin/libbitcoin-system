@@ -1,11 +1,11 @@
-#include <bitcoin/storage/postgresql_storage.hpp>
+#include <bitcoin/blockchain/postgresql_blockchain.hpp>
 
 #include <bitcoin/block.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 
-#include "postgresql_blockchain.hpp"
+#include "pq_blockchain.hpp"
 
 namespace libbitcoin {
 
@@ -15,7 +15,7 @@ data_chunk bytes_from_bytea(std::string byte_stream);
 uint32_t extract_bits_head(uint32_t bits);
 uint32_t extract_bits_body(uint32_t bits);
 
-postgresql_storage::postgresql_storage(kernel_ptr kernel,
+postgresql_blockchain::postgresql_blockchain(kernel_ptr kernel,
     std::string database, std::string user, std::string password)
  : sql_(std::string("postgresql:host=127.0.0.1;dbname=") + database +
         ";user=" + user + ";password=" + password)
@@ -25,7 +25,7 @@ postgresql_storage::postgresql_storage(kernel_ptr kernel,
     strand()->post(std::bind(&pq_blockchain::start, blockchain_));
 }
 
-size_t postgresql_storage::insert(const message::transaction_input& input,
+size_t postgresql_blockchain::insert(const message::transaction_input& input,
     size_t transaction_id, size_t index_in_parent)
 {
     std::string hash = pretty_hex(input.previous_output.hash),
@@ -46,7 +46,7 @@ size_t postgresql_storage::insert(const message::transaction_input& input,
     return statement.row().get<size_t>(0);
 }
 
-size_t postgresql_storage::insert(const message::transaction_output& output,
+size_t postgresql_blockchain::insert(const message::transaction_output& output,
         size_t transaction_id, size_t index_in_parent)
 {
     std::string pretty_script = pretty_hex(save_script(output.output_script));
@@ -64,7 +64,7 @@ size_t postgresql_storage::insert(const message::transaction_output& output,
     return statement.row().get<size_t>(0);
 }
 
-size_t postgresql_storage::insert(const message::transaction& transaction,
+size_t postgresql_blockchain::insert(const message::transaction& transaction,
     std::vector<size_t>& input_ids, std::vector<size_t>& output_ids)
 {
     hash_digest transaction_hash = hash_transaction(transaction);
@@ -105,14 +105,14 @@ size_t postgresql_storage::insert(const message::transaction& transaction,
     return transaction_id;
 }
 
-void postgresql_storage::store(const message::block& block,
+void postgresql_blockchain::store(const message::block& block,
         store_block_handler handle_store)
 {
     strand()->post(std::bind(
-        &postgresql_storage::do_store_block, shared_from_this(),
+        &postgresql_blockchain::do_store_block, shared_from_this(),
             block, handle_store));
 }
-void postgresql_storage::do_store_block(const message::block& block,
+void postgresql_blockchain::do_store_block(const message::block& block,
         store_block_handler handle_store)
 {
     hash_digest block_hash = hash_block_header(block);
@@ -235,14 +235,14 @@ void postgresql_storage::do_store_block(const message::block& block,
         handle_store(std::error_code(), block_status::confirmed);
 }
 
-void postgresql_storage::fetch_block_locator(
+void postgresql_blockchain::fetch_block_locator(
         fetch_handler_block_locator handle_fetch)
 {
     strand()->post(std::bind(
-        &postgresql_storage::do_fetch_block_locator, shared_from_this(),
+        &postgresql_blockchain::do_fetch_block_locator, shared_from_this(),
             handle_fetch));
 }
-void postgresql_storage::do_fetch_block_locator(
+void postgresql_blockchain::do_fetch_block_locator(
         fetch_handler_block_locator handle_fetch)
 {
     cppdb::result number_blocks_result = sql_ <<
@@ -283,14 +283,14 @@ void postgresql_storage::do_fetch_block_locator(
     handle_fetch(std::error_code(), locator);
 }
 
-void postgresql_storage::fetch_balance(const short_hash& pubkey_hash,
+void postgresql_blockchain::fetch_balance(const short_hash& pubkey_hash,
     fetch_handler_balance handle_fetch)
 {
     strand()->post(std::bind(
-        &postgresql_storage::do_fetch_balance, shared_from_this(),
+        &postgresql_blockchain::do_fetch_balance, shared_from_this(),
             pubkey_hash, handle_fetch));
 }
-void postgresql_storage::do_fetch_balance(const short_hash& pubkey_hash,
+void postgresql_blockchain::do_fetch_balance(const short_hash& pubkey_hash,
     fetch_handler_balance handle_fetch)
 {
     std::string total_script = "76 a9 14 " + pretty_hex(pubkey_hash) + " 88 ac";

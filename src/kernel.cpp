@@ -2,7 +2,7 @@
 
 #include <bitcoin/constants.hpp>
 #include <bitcoin/network/network.hpp>
-#include <bitcoin/storage/storage.hpp>
+#include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/util/logger.hpp>
 
 using std::placeholders::_1;
@@ -57,7 +57,7 @@ void kernel::handle_connect(const std::error_code& ec, channel_ptr node)
 
 void kernel::start_initial_getblocks(channel_ptr node)
 {
-    storage_component_->fetch_block_locator(
+    blockchain_component_->fetch_block_locator(
         strand()->wrap(std::bind(&kernel::request_initial_blocks,
             shared_from_this(), _1, _2, node)));
 }
@@ -129,26 +129,26 @@ void kernel::handle_block_stored(const std::error_code& ec,
 void kernel::receive_block(const std::error_code& ec,
     const message::block& packet, channel_ptr node)
 {
-    storage_component_->store(packet,
+    blockchain_component_->store(packet,
         std::bind(&kernel::handle_block_stored, shared_from_this(),
             _1, _2, hash_block_header(packet)));
     node->subscribe_block(
         std::bind(&kernel::receive_block, shared_from_this(), _1, _2, node));
 }
 
-void kernel::register_storage(storage_ptr stor_comp)
+void kernel::register_blockchain(blockchain_ptr stor_comp)
 {
-    storage_component_ = stor_comp;
+    blockchain_component_ = stor_comp;
 }
 
-storage_ptr kernel::get_storage()
+blockchain_ptr kernel::get_blockchain()
 {
-    return storage_component_;
+    return blockchain_component_;
 }
 
 void kernel::tween_blocks(const hash_pair_list& block_hashes)
 {
-    storage_component_->fetch_block_locator(
+    blockchain_component_->fetch_block_locator(
         strand()->wrap(std::bind(&kernel::request_next_blocks,
             shared_from_this(), _1, _2, block_hashes)));
 }

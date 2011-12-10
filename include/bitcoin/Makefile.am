@@ -13,19 +13,19 @@ bitcoin_include_HEADERS = \
 	bitcoin.hpp \
 	types.hpp
 
-bitcoin_storage_includedir = $(includedir)/bitcoin/storage
-bitcoin_storage_include_HEADERS = \
-	storage/storage.hpp
+bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
+bitcoin_blockchain_include_HEADERS = \
+	blockchain/blockchain.hpp
 
 if DO_BERKDB
-bitcoin_storage_include_HEADERS += \
-	storage/bdb_detail.hpp \
-	storage/bdb_storage.hpp
+bitcoin_blockchain_include_HEADERS += \
+	blockchain/bdb_detail.hpp \
+	blockchain/bdb_blockchain.hpp
 endif
 
 if DO_POSTGRES
-bitcoin_storage_include_HEADERS += \
-	storage/postgresql_storage.hpp
+bitcoin_blockchain_include_HEADERS += \
+	blockchain/postgresql_blockchain.hpp
 endif
 
 bitcoin_network_includedir = $(includedir)/bitcoin/network

@@ -1,7 +1,7 @@
-#ifndef LIBBITCOIN_STORAGE_BERKELEYDB_STORAGE_H
-#define LIBBITCOIN_STORAGE_BERKELEYDB_STORAGE_H
+#ifndef LIBBITCOIN_BLOCKCHAIN_BERKELEYDB_BLOCKCHAIN_H
+#define LIBBITCOIN_BLOCKCHAIN_BERKELEYDB_BLOCKCHAIN_H
 
-#include <bitcoin/storage/storage.hpp>
+#include <bitcoin/blockchain/blockchain.hpp>
 
 #ifdef DB_CXX_HEADER
     #include DB_CXX_HEADER
@@ -15,13 +15,13 @@
 
 namespace libbitcoin {
 
-class bdb_storage
- : public storage, public threaded_service,
-    public std::enable_shared_from_this<bdb_storage>
+class bdb_blockchain
+ : public blockchain, public threaded_service,
+    public std::enable_shared_from_this<bdb_blockchain>
 {
 public:
-    bdb_storage(const std::string& prefix);
-    ~bdb_storage();
+    bdb_blockchain(const std::string& prefix);
+    ~bdb_blockchain();
 
     static bool setup(const std::string& prefix);
 
@@ -35,7 +35,7 @@ public:
         fetch_handler_balance handle_fetch);
 
 private:
-    bdb_storage();
+    bdb_blockchain();
     void initialize(const std::string& prefix);
 
     void fetch_block_by_depth(size_t depth, 

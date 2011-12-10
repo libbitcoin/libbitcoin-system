@@ -1,4 +1,4 @@
-#include "postgresql_blockchain.hpp"
+#include "pq_blockchain.hpp"
 
 #include <bitcoin/constants.hpp>
 #include <bitcoin/dialect.hpp>

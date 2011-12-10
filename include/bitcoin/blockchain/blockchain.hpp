@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_STORAGE_STORAGE_H
-#define LIBBITCOIN_STORAGE_STORAGE_H
+#ifndef LIBBITCOIN_BLOCKCHAIN_BLOCKCHAIN_H
+#define LIBBITCOIN_BLOCKCHAIN_BLOCKCHAIN_H
 
 #include <boost/utility.hpp>
 #include <functional>
@@ -10,7 +10,7 @@
 
 namespace libbitcoin {
 
-class storage
+class blockchain
  : private boost::noncopyable
 {
 public:

@@ -34,8 +34,8 @@ public:
     void receive_block(const std::error_code& ec,
         const message::block& packet, channel_ptr node);
 
-    void register_storage(storage_ptr stor_comp);
-    storage_ptr get_storage();
+    void register_blockchain(blockchain_ptr stor_comp);
+    blockchain_ptr get_blockchain();
     void tween_blocks(const hash_pair_list& block_hashes);
 
 private:
@@ -51,7 +51,7 @@ private:
         const hash_pair_list& block_hashes);
 
     network_ptr network_component_;
-    storage_ptr storage_component_;
+    blockchain_ptr blockchain_component_;
 
     bool initial_getblocks_;
     std::multimap<hash_digest, channel_ptr> inventory_tracker_;

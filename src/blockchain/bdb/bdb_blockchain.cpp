@@ -1,4 +1,4 @@
-#include <bitcoin/storage/bdb_storage.hpp>
+#include <bitcoin/blockchain/bdb_blockchain.hpp>
 
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/logger.hpp>
@@ -20,25 +20,25 @@ constexpr uint32_t env_flags =
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
-bdb_storage::bdb_storage(const std::string& prefix)
+bdb_blockchain::bdb_blockchain(const std::string& prefix)
 {
     initialize(prefix);
 }
 
-bdb_storage::bdb_storage()
+bdb_blockchain::bdb_blockchain()
 {
     // Private method. Should never be called by user!
     // Only by factory methods
 }
 
-bdb_storage::~bdb_storage()
+bdb_blockchain::~bdb_blockchain()
 {
     google::protobuf::ShutdownProtobufLibrary();
 }
 
-bool bdb_storage::setup(const std::string& prefix)
+bool bdb_blockchain::setup(const std::string& prefix)
 {
-    bdb_storage handle;
+    bdb_blockchain handle;
     handle.initialize(prefix);
     handle.db_blocks_->truncate(nullptr, 0, 0);
     handle.db_txs_->truncate(nullptr, 0, 0);
@@ -79,7 +79,7 @@ void initialize_database(const bdb_guard<DbEnv>& env, bdb_guard<Db>& database)
     database.set(new Db(env.get(), 0));
 }
 
-void bdb_storage::initialize(const std::string& prefix)
+void bdb_blockchain::initialize(const std::string& prefix)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     env_.set(new DbEnv(0));
@@ -102,7 +102,7 @@ void bdb_storage::initialize(const std::string& prefix)
     txn.commit();
 }
 
-bool bdb_storage::save_block(size_t depth, 
+bool bdb_blockchain::save_block(size_t depth, 
     const message::block serial_block)
 {
     protobuf::Block proto_block =
@@ -131,7 +131,7 @@ bool bdb_storage::save_block(size_t depth,
     txn.commit();
 }
 
-uint32_t bdb_storage::save_transaction(const message::transaction& block_tx)
+uint32_t bdb_blockchain::save_transaction(const message::transaction& block_tx)
 {
     uint32_t block_tx_id = rand();
     BITCOIN_ASSERT(block_tx_id != 0);
@@ -149,7 +149,7 @@ uint32_t bdb_storage::save_transaction(const message::transaction& block_tx)
     return block_tx_id;
 }
 
-void bdb_storage::store(const message::block& block, 
+void bdb_blockchain::store(const message::block& block, 
     store_block_handler handle_store)
 {
     save_block(1, block);
@@ -199,14 +199,14 @@ bool fetch_block_impl(bdb_guard<Db>& db_block_x, bdb_guard<Db>& db_txs,
     return true;
 } 
 
-void bdb_storage::fetch_block(size_t depth, fetch_handler_block handle_fetch)
+void bdb_blockchain::fetch_block(size_t depth, fetch_handler_block handle_fetch)
 {
     service()->post(std::bind(
-        &bdb_storage::fetch_block_by_depth, shared_from_this(),
+        &bdb_blockchain::fetch_block_by_depth, shared_from_this(),
             depth, handle_fetch));
 }
 
-void bdb_storage::fetch_block_by_depth(size_t depth,
+void bdb_blockchain::fetch_block_by_depth(size_t depth,
     fetch_handler_block handle_fetch)
 {
     txn_guard txn(env_);
@@ -221,15 +221,15 @@ void bdb_storage::fetch_block_by_depth(size_t depth,
     handle_fetch(std::error_code(), serial_block);
 }
 
-void bdb_storage::fetch_block(const hash_digest& block_hash,
+void bdb_blockchain::fetch_block(const hash_digest& block_hash,
     fetch_handler_block handle_fetch)
 {
     service()->post(std::bind(
-        &bdb_storage::fetch_block_by_hash, shared_from_this(),
+        &bdb_blockchain::fetch_block_by_hash, shared_from_this(),
             block_hash, handle_fetch));
 }
 
-void bdb_storage::fetch_block_by_hash(const hash_digest& block_hash, 
+void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash, 
     fetch_handler_block handle_fetch)
 {
     txn_guard txn(env_);
@@ -245,13 +245,13 @@ void bdb_storage::fetch_block_by_hash(const hash_digest& block_hash,
     handle_fetch(std::error_code(), serial_block);
 }
 
-void bdb_storage::fetch_block_locator(fetch_handler_block_locator handle_fetch)
+void bdb_blockchain::fetch_block_locator(fetch_handler_block_locator handle_fetch)
 {
     service()->post(std::bind(
-        &bdb_storage::do_fetch_block_locator, shared_from_this(), 
+        &bdb_blockchain::do_fetch_block_locator, shared_from_this(), 
             handle_fetch));
 }
-void bdb_storage::do_fetch_block_locator(
+void bdb_blockchain::do_fetch_block_locator(
     fetch_handler_block_locator handle_fetch)
 {
     txn_guard txn(env_);
@@ -274,7 +274,7 @@ void bdb_storage::do_fetch_block_locator(
     handle_fetch(std::error_code(), locator);
 }
 
-void bdb_storage::fetch_balance(const short_hash& pubkey_hash,
+void bdb_blockchain::fetch_balance(const short_hash& pubkey_hash,
     fetch_handler_balance handle_fetch)
 {
 }

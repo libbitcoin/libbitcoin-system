@@ -4,7 +4,6 @@
 #include <bitcoin/dialect.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
-#include <bitcoin/storage/storage.hpp>
 #include <bitcoin/error.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>

@@ -1,7 +1,7 @@
-#ifndef LIBBITCOIN_STORAGE_POSTGRESQL_STORAGE_H
-#define LIBBITCOIN_STORAGE_POSTGRESQL_STORAGE_H
+#ifndef LIBBITCOIN_BLOCKCHAIN_POSTGRESQL_BLOCKCHAIN_H
+#define LIBBITCOIN_BLOCKCHAIN_POSTGRESQL_BLOCKCHAIN_H
 
-#include <bitcoin/storage/storage.hpp>
+#include <bitcoin/blockchain/blockchain.hpp>
 
 #include <cppdb/frontend.h>
 #include <string>
@@ -14,13 +14,12 @@ namespace libbitcoin {
 class pq_blockchain;
 typedef shared_ptr<pq_blockchain> pq_blockchain_ptr;
 
-class postgresql_storage
- : public storage,
-    public threaded_service,
-    public std::enable_shared_from_this<postgresql_storage>
+class postgresql_blockchain
+ : public blockchain, public threaded_service,
+    public std::enable_shared_from_this<postgresql_blockchain>
 {
 public:
-    postgresql_storage(kernel_ptr kernel,
+    postgresql_blockchain(kernel_ptr kernel,
         std::string database, std::string user, std::string password);
 
     void store(const message::block& block, store_block_handler handle_store);

@@ -27,12 +27,12 @@ libbitcoin_la_SOURCES = \
 
 if DO_BERKDB
 libbitcoin_la_SOURCES += \
-	storage/bdb/bdb_storage.cpp \
-	storage/bdb/bitcoin.pb.cc
+	blockchain/bdb/bdb_blockchain.cpp \
+	blockchain/bdb/bitcoin.pb.cc
 endif
 
 if DO_POSTGRES
 libbitcoin_la_SOURCES += \
-	storage/postgresql/postgresql_blockchain.cpp \
-	storage/postgresql/postgresql_storage.cpp
+	blockchain/postgresql/pq_blockchain.cpp \
+	blockchain/postgresql/postgresql_blockchain.cpp
 endif
