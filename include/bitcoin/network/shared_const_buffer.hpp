@@ -14,8 +14,9 @@ class shared_const_buffer
 public:
     // Construct from a stream object
     explicit shared_const_buffer(const data_chunk& user_data)
-      : data(new data_chunk(user_data.begin(), user_data.end())),
-        buffer(boost::asio::buffer(*data))
+     : data_(std::make_shared<data_chunk>(
+            std::begin(user_data), std::end(user_data))),
+        buffer_(boost::asio::buffer(*data_))
     {
     }
 
@@ -25,16 +26,16 @@ public:
 
     const_iterator begin() const
     { 
-        return &buffer; 
+        return &buffer_; 
     }
     const_iterator end() const 
     { 
-        return &buffer + 1; 
+        return &buffer_ + 1; 
     }
 
 private:
-    boost::shared_ptr<data_chunk> data;
-    value_type buffer;
+    std::shared_ptr<data_chunk> data_;
+    value_type buffer_;
 };
 
 } // libbitcoin
