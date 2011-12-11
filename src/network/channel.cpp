@@ -10,11 +10,12 @@ using boost::asio::buffer;
 // Connection timeout time
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
-channel::channel(socket_ptr socket, service_ptr service, dialect_ptr translator)
- : killed_(false), socket_(socket), translator_(translator)
+channel::channel(socket_ptr socket, thread_core_ptr threaded,
+    dialect_ptr translator)
+ : killed_(false), threaded_(threaded), socket_(socket), translator_(translator)
 {
-    strand_.reset(new io_service::strand(*service));
-    timeout_.reset(new deadline_timer(*service));
+    strand_ = threaded_->create_strand();
+    timeout_.reset(new deadline_timer(*threaded_->service()));
 }
 
 channel::~channel()

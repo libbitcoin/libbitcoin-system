@@ -40,7 +40,7 @@ bitcoin_util_include_HEADERS = \
 	util/elliptic_curve_key.hpp \
 	util/sha256.hpp \
 	util/postbind.hpp \
-	util/threaded_service.hpp \
+	util/threads.hpp \
 	util/serializer.hpp \
 	util/assert.hpp \
 	util/big_number.hpp \

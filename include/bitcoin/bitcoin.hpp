@@ -9,7 +9,7 @@
 #include <bitcoin/util/elliptic_curve_key.hpp>
 #include <bitcoin/util/sha256.hpp>
 #include <bitcoin/util/postbind.hpp>
-#include <bitcoin/util/threaded_service.hpp>
+#include <bitcoin/util/threads.hpp>
 #include <bitcoin/util/serializer.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/big_number.hpp>

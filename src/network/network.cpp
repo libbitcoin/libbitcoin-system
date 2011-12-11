@@ -17,6 +17,8 @@ using boost::asio::socket_base;
 
 network::network()
 {
+    threaded_.reset(new thread_core);
+    strand_ = threaded_->create_strand();
     default_dialect_.reset(new original_dialect);
 }
 
@@ -36,7 +38,8 @@ void network::handle_connect(const boost::system::error_code& ec,
         handle_connect(error::system_network_error, nullptr);
         return;
     }
-    channel_ptr channel_obj(new channel(socket, service(), default_dialect_));
+    channel_ptr channel_obj(
+        new channel(socket, threaded_, default_dialect_));
     channel_obj->start();
     handle_connect(std::error_code(), channel_obj);
 }
@@ -44,8 +47,8 @@ void network::handle_connect(const boost::system::error_code& ec,
 void network::connect(const std::string& hostname, uint16_t port,
     connect_handler handle_connect)
 {
-    socket_ptr socket(new tcp::socket(*service()));
-    tcp::resolver resolver(*service());
+    socket_ptr socket(new tcp::socket(*threaded_->service()));
+    tcp::resolver resolver(*threaded_->service());
     tcp::resolver::query query(hostname,
         boost::lexical_cast<std::string>(port));
     tcp::endpoint endpoint = *resolver.resolve(query);
@@ -56,7 +59,7 @@ void network::connect(const std::string& hostname, uint16_t port,
 
 void network::listen(connect_handler handle_connect)
 {
-    strand()->post(
+    strand_->post(
         [&listeners_, handle_connect]
         {
             listeners_.push_back(handle_connect);
@@ -65,8 +68,8 @@ void network::listen(connect_handler handle_connect)
 
 bool network::start_accept()
 {
-    acceptor_.reset(new tcp::acceptor(*service()));
-    socket_ptr socket(new tcp::socket(*service()));
+    acceptor_.reset(new tcp::acceptor(*threaded_->service()));
+    socket_ptr socket(new tcp::socket(*threaded_->service()));
     try
     {
         tcp::endpoint endpoint(tcp::v4(), 8333);

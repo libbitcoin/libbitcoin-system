@@ -9,14 +9,14 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/network/types.hpp>
 #include <bitcoin/error.hpp>
-#include <bitcoin/util/threaded_service.hpp>
+#include <bitcoin/util/threads.hpp>
 
 #include <bitcoin/network/channel.hpp>
 
 namespace libbitcoin {
 
 class network
- : public threaded_service, public std::enable_shared_from_this<network>
+ : public std::enable_shared_from_this<network>
 {
 public:
     typedef std::function<void (
@@ -60,6 +60,8 @@ private:
     acceptor_ptr acceptor_;
     std::vector<connect_handler> listeners_;
 
+    thread_core_ptr threaded_;
+    strand_ptr strand_;
     dialect_ptr default_dialect_;
 };
 

@@ -63,9 +63,11 @@ void handle_handshake(const std::error_code& ec, channel_ptr node)
 
 int main()
 {
-    network_ptr net(new network);
-    handshake_connect(net, "localhost", 8333,
-        std::bind(&handle_handshake, _1, _2));
+    {
+        network_ptr net(new network);
+        handshake_connect(net, "localhost", 8333,
+            std::bind(&handle_handshake, _1, _2));
+    }
 
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return inv_count >= 500; });

@@ -41,7 +41,8 @@ public:
     typedef std::function<void (const std::error_code&,
         const message::block&)> receive_block_handler;
 
-    channel(socket_ptr socket, service_ptr service, dialect_ptr translator);
+    channel(socket_ptr socket, thread_core_ptr threaded,
+        dialect_ptr translator);
     ~channel();
 
     channel(const channel&) = delete;
@@ -193,6 +194,8 @@ private:
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;
     std::vector<uint8_t> inbound_payload_;
 
+    // We keep the service alive for lifetime rules
+    thread_core_ptr threaded_;
     strand_ptr strand_;
     deadline_timer_ptr timeout_;
 
