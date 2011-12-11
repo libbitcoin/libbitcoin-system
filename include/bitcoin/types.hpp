@@ -44,7 +44,7 @@ typedef std::vector<byte> data_chunk;
 template<typename D, typename T>
 void extend_data(D& chunk, const T& other)
 {
-    chunk.insert(chunk.end(), other.cbegin(), other.cend());
+    chunk.insert(end(chunk), begin(other), end(other));
 }
 
 template<typename T>
@@ -59,7 +59,7 @@ T cast_chunk(data_chunk chunk, bool reverse=false)
     #endif
 
     if (reverse)
-        std::reverse(chunk.begin(), chunk.end());
+        std::reverse(begin(chunk), end(chunk));
 
     T val = 0;
     for (size_t i = 0; i < sizeof(T) && i < chunk.size(); ++i)
@@ -74,7 +74,7 @@ data_chunk uncast_type(T val, bool reverse=false)
     for (size_t i = 0; i < sizeof(T); ++i)
         chunk.push_back(reinterpret_cast<byte*>(&val)[i]);
     if (reverse)
-        std::reverse(chunk.begin(), chunk.end());
+        std::reverse(begin(chunk), end(chunk));
     return chunk;
 }
 
