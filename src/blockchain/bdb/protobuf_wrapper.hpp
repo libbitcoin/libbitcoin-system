@@ -66,6 +66,14 @@ message::block protobuf_to_block_header(const protobuf::Block& proto_block)
     return result_block;
 }
 
+// Ugly boilerplate for ugly transformation
+template <typename InOut>
+data_chunk read_raw_script(const InOut& inout)
+{
+    const std::string& script_str = inout.script();
+    return data_chunk(script_str.begin(), script_str.end());
+}
+
 message::transaction protobuf_to_transaction(
     const protobuf::Transaction& proto_tx)
 {
@@ -80,9 +88,11 @@ message::transaction protobuf_to_transaction(
         std::copy(prev_out_hash.begin(), prev_out_hash.end(),
             tx_input.previous_output.hash.begin());
         tx_input.previous_output.index = proto_input.previous_output_index();
-        const std::string& raw_script = proto_input.script();
-        tx_input.input_script =
-            parse_script(data_chunk(raw_script.begin(), raw_script.end()));
+        const data_chunk& raw_script = read_raw_script(proto_input);
+        if (previous_output_is_null(tx_input.previous_output))
+            tx_input.input_script = coinbase_script(raw_script);
+        else
+            tx_input.input_script = parse_script(raw_script);
         tx_input.sequence = proto_input.sequence();
         result_tx.inputs.push_back(tx_input);
     }
@@ -91,9 +101,7 @@ message::transaction protobuf_to_transaction(
         const protobuf::Transaction::Output& proto_output = proto_tx.outputs(i);
         message::transaction_output tx_output;
         tx_output.value = proto_output.value();
-        const std::string& raw_script = proto_output.script();
-        tx_output.output_script =
-            parse_script(data_chunk(raw_script.begin(), raw_script.end()));
+        tx_output.output_script = parse_script(read_raw_script(proto_output));
         result_tx.outputs.push_back(tx_output);
     }
     return result_tx;

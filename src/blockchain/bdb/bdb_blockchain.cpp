@@ -158,7 +158,10 @@ void bdb_blockchain::store(const message::block& block,
 void bdb_blockchain::do_store(const message::block& block,
     store_block_handler handle_store)
 {
-    save_block(1, block);
+    static size_t depth = 0;
+    ++depth;
+    save_block(depth, block);
+    handle_store(std::error_code(), block_status::orphan);
 }
 
 bool read(Db* database, DbTxn* txn, Dbt* key, std::stringstream& ss)
