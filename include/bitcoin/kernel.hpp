@@ -8,7 +8,7 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/block.hpp>
-#include <bitcoin/util/threaded_service.hpp>
+#include <bitcoin/util/threads.hpp>
 
 namespace libbitcoin {
 

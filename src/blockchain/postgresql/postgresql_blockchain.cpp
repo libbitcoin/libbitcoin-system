@@ -253,7 +253,7 @@ void postgresql_blockchain::do_fetch_block_locator(
         << cppdb::row;
     if (number_blocks_result.empty())
     {
-        handle_fetch(error::object_doesnt_exist, message::block_locator());
+        handle_fetch(error::missing_object, message::block_locator());
         return;
     }
     int top_depth = number_blocks_result.get<size_t>(0);

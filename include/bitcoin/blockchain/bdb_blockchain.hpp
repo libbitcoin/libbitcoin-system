@@ -9,7 +9,7 @@
     #include <db_cxx.h>
 #endif
 
-#include <bitcoin/util/threaded_service.hpp>
+#include <bitcoin/util/threads.hpp>
 
 #include "bdb_detail.hpp"
 
@@ -37,6 +37,9 @@ public:
 private:
     bdb_blockchain();
     void initialize(const std::string& prefix);
+
+    void do_store(const message::block& block,
+        store_block_handler handle_store);
 
     void fetch_block_by_depth(size_t depth, 
         fetch_handler_block handle_fetch);

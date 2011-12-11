@@ -8,7 +8,7 @@ namespace libbitcoin {
 enum class error
 {
     // storage errors
-    object_doesnt_exist = 1,
+    missing_object = 1,
     object_already_exists,
     // network errors
     system_network_error,

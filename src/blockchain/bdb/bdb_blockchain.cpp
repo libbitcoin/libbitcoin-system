@@ -152,6 +152,12 @@ uint32_t bdb_blockchain::save_transaction(const message::transaction& block_tx)
 void bdb_blockchain::store(const message::block& block, 
     store_block_handler handle_store)
 {
+    service()->post(std::bind(
+        &bdb_blockchain::do_store, shared_from_this(), block, handle_store));
+}
+void bdb_blockchain::do_store(const message::block& block,
+    store_block_handler handle_store)
+{
     save_block(1, block);
 }
 
@@ -214,7 +220,7 @@ void bdb_blockchain::fetch_block_by_depth(size_t depth,
     if (!fetch_block_impl(db_blocks_, db_txs_, txn, depth, serial_block))
     {
         txn.abort();
-        handle_fetch(error::object_doesnt_exist, message::block());
+        handle_fetch(error::missing_object, message::block());
         return;
     }
     txn.commit();
@@ -238,7 +244,7 @@ void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash,
         block_hash, serial_block))
     {
         txn.abort();
-        handle_fetch(error::object_doesnt_exist, message::block());
+        handle_fetch(error::missing_object, message::block());
         return;
     }
     txn.commit();
@@ -260,17 +266,36 @@ void bdb_blockchain::do_fetch_block_locator(
     Dbt key, data;
     if (cursor->get(&key, &data, DB_LAST) == DB_NOTFOUND)
     {
-        log_error() << "Problem";
+        log_error() << "Empty blockchain";
+        handle_fetch(error::missing_object, message::block_locator());
+        return;
     }
     BITCOIN_ASSERT(key.get_size() == 4);
     data_chunk raw_depth;
     extend_data(raw_depth, std::string(
         reinterpret_cast<const char*>(key.get_data()), key.get_size()));
     uint32_t last_block_depth = cast_chunk<uint32_t>(raw_depth);
-    log_debug() << pretty_hex(raw_depth);
     cursor->close();
-    txn.commit();
+
     message::block_locator locator;
+    std::vector<size_t> indices = block_locator_indices(last_block_depth);
+    for (size_t current_index: indices)
+    {
+        // bdb provides no way to lookup secondary index AFAIK
+        // we instead regenerate block hash from its header
+        protobuf::Block proto_block;
+        if (!proto_read(db_blocks_, txn, current_index, proto_block))
+        {
+            log_fatal() << "Missing block " << current_index;
+            handle_fetch(error::missing_object, message::block_locator());
+            return;
+        }
+        hash_digest current_hash = 
+            hash_block_header(protobuf_to_block_header(proto_block));
+        locator.push_back(current_hash);
+    }
+    txn.commit();
+
     handle_fetch(std::error_code(), locator);
 }
 

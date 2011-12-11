@@ -16,6 +16,12 @@ public:
         prepare();
     }
 
+    void set(const data_chunk& data)
+    {
+        extend_data(data_buffer_, data);
+        prepare();
+    }
+
     void set(const hash_digest& data)
     {
         extend_data(data_buffer_, data);
