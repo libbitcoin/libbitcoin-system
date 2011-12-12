@@ -584,7 +584,7 @@ pq_block pq_reader::read_block(cppdb::result block_result)
     block.bits = combine_bits(bits_head, bits_body);
     block.nonce = block_result.get<uint32_t>("nonce");
 
-    block.prev_block = 
+    block.previous_block_hash = 
             hash_from_bytea(block_result.get<std::string>("prev_block_hash"));
     block.merkle = 
             hash_from_bytea(block_result.get<std::string>("merkle"));

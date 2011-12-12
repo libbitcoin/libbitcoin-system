@@ -111,7 +111,7 @@ typedef std::vector<transaction> transaction_list;
 struct block
 {
     uint32_t version;
-    hash_digest prev_block;
+    hash_digest previous_block_hash;
     hash_digest merkle;
     uint32_t timestamp;
     uint32_t bits;

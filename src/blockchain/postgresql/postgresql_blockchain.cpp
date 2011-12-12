@@ -117,7 +117,7 @@ void postgresql_blockchain::do_store_block(const message::block& block,
 {
     hash_digest block_hash = hash_block_header(block);
     std::string block_hash_repr = pretty_hex(block_hash),
-            prev_block_repr = pretty_hex(block.prev_block),
+            prev_block_repr = pretty_hex(block.previous_block_hash),
             merkle_repr = pretty_hex(block.merkle);
 
     static cppdb::statement check_confirmed = sql_.prepare(

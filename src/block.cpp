@@ -20,7 +20,7 @@ hash_digest hash_block_header(const message::block& block)
 {
     serializer key;
     key.write_4_bytes(block.version);
-    key.write_hash(block.prev_block);
+    key.write_hash(block.previous_block_hash);
     key.write_hash(block.merkle);
     key.write_4_bytes(block.timestamp);
     key.write_4_bytes(block.bits);
@@ -48,7 +48,7 @@ message::block genesis_block()
 {
     message::block genesis;
     genesis.version = 1;
-    genesis.prev_block = null_hash;
+    genesis.previous_block_hash = null_hash;
     genesis.merkle = 
         hash_digest{0x4a, 0x5e, 0x1e, 0x4b, 0xaa, 0xb8, 0x9f, 0x3a,
                     0x32, 0x51, 0x8a, 0x88, 0xc3, 0x1b, 0xc8, 0x7f,

@@ -14,7 +14,8 @@ protobuf::Block block_header_to_protobuf(uint32_t depth,
     proto_block.set_depth(depth);
     proto_block.set_version(serial_block.version);
     proto_block.set_previous_block_hash(
-        serial_block.prev_block.data(), serial_block.prev_block.size());
+        serial_block.previous_block_hash.data(),
+        serial_block.previous_block_hash.size());
     proto_block.set_merkle(
         serial_block.merkle.data(), serial_block.merkle.size());
     proto_block.set_timestamp(serial_block.timestamp);
@@ -55,9 +56,9 @@ message::block protobuf_to_block_header(const protobuf::Block& proto_block)
 {
     message::block result_block;
     result_block.version = proto_block.version();
-    const std::string& prev_block = proto_block.previous_block_hash();
-    std::copy(prev_block.begin(), prev_block.end(),
-        result_block.prev_block.begin());
+    const std::string& previous_block_hash = proto_block.previous_block_hash();
+    std::copy(previous_block_hash.begin(), previous_block_hash.end(),
+        result_block.previous_block_hash.begin());
     const std::string& merkle = proto_block.merkle();
     std::copy(merkle.begin(), merkle.end(), result_block.merkle.begin());
     result_block.timestamp = proto_block.timestamp();
