@@ -96,7 +96,36 @@ std::string pretty_hex(T data)
 data_chunk bytes_from_pretty(std::string byte_stream);
 hash_digest hash_from_pretty(std::string byte_stream);
 
+// Make hash_digest and short_hash hashable for std::*map variants
+template <typename HashType>
+struct std_hash_wrapper
+{
+    size_t operator()(const HashType& h) const
+    {
+        std::hash<std::string> functor;
+        return functor(std::string(std::begin(h), std::end(h)));
+    }
+};
+
 } // libbitcoin
+
+// Extend std namespace with our hash wrappers
+namespace std
+{
+    using libbitcoin::std_hash_wrapper;
+    using libbitcoin::hash_digest;
+    using libbitcoin::short_hash;
+
+    template <>
+    struct hash<hash_digest> : public std_hash_wrapper<hash_digest>
+    {
+    };
+
+    template <>
+    struct hash<short_hash> : public std_hash_wrapper<short_hash>
+    {
+    };
+}
 
 #endif
 
