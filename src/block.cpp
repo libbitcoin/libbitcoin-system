@@ -73,7 +73,8 @@ message::block genesis_block()
 
     message::transaction_input coinbase_input;
     coinbase_input.previous_output.hash = null_hash;
-    coinbase_input.previous_output.index = ~0u;
+    coinbase_input.previous_output.index = 
+        std::numeric_limits<uint32_t>::max();
     // The Times 03/Jan/2009 Chancellor on brink of second bailout for banks
     coinbase_input.input_script = coinbase_script(
         data_chunk{0x04, 0xff, 0xff, 0x00, 0x1d, 0x01, 0x04, 0x45, 
@@ -86,7 +87,7 @@ message::block genesis_block()
                    0x6f, 0x6e, 0x64, 0x20, 0x62, 0x61, 0x69, 0x6c, 
                    0x6f, 0x75, 0x74, 0x20, 0x66, 0x6f, 0x72, 0x20, 
                    0x62, 0x61, 0x6e, 0x6b, 0x73});
-    coinbase_input.sequence = ~0u;
+    coinbase_input.sequence = std::numeric_limits<uint32_t>::max();
     coinbase_tx.inputs.push_back(coinbase_input);
 
     message::transaction_output coinbase_output;

@@ -101,7 +101,8 @@ std::string pretty(const message::transaction& transaction)
 
 bool previous_output_is_null(const message::output_point& previous_output)
 {
-    return previous_output.index == ~0u && previous_output.hash == null_hash;
+    return previous_output.index == std::numeric_limits<uint32_t>::max() &&
+        previous_output.hash == null_hash;
 }
 
 bool is_coinbase(const message::transaction& tx)
