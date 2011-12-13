@@ -16,6 +16,15 @@ uint64_t block_value(size_t depth)
     return subsidy;
 }
 
+big_number block_work(uint32_t bits)
+{
+    big_number target;
+    target.set_compact(bits);
+    if (target <= 0)
+        return 0;
+    return (big_number(1) << 256) / (target + 1);
+}
+
 hash_digest hash_block_header(const message::block& block)
 {
     serializer key;

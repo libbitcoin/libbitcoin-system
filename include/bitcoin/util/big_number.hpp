@@ -45,12 +45,22 @@ public:
 
 private:
     friend divmod_result divmod(const big_number& a, const big_number& b);
+    friend const big_number operator+(
+        const big_number& a, const big_number& b);
+    friend const big_number operator/(const big_number& a,
+        const big_number& b);
+    friend const big_number operator<<(const big_number& a,
+        unsigned int shift);
 
     void initialize();
     void copy(const big_number& other);
 
     BIGNUM bignum_;
 };
+
+const big_number operator+(const big_number& a, const big_number& b);
+const big_number operator/(const big_number& a, const big_number& b);
+const big_number operator<<(const big_number& a, unsigned int shift);
 
 divmod_result divmod(const big_number& a, const big_number& b);
 

@@ -191,6 +191,23 @@ big_number& big_number::operator/=(const big_number& other)
     return *this;
 }
 
+const big_number operator+(const big_number& a, const big_number& b)
+{
+    big_number result;
+    BN_add(&result.bignum_, &a.bignum_, &b.bignum_);
+    return result;
+}
+const big_number operator/(const big_number& a, const big_number& b)
+{
+    return divmod(a, b).first;
+}
+const big_number operator<<(const big_number& a, unsigned int shift)
+{
+    big_number result;
+    BN_lshift(&result.bignum_, &a.bignum_, shift);
+    return result;
+}
+
 divmod_result divmod(const big_number& a, const big_number& b)
 {
     big_number divider;
