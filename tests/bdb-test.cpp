@@ -4,8 +4,17 @@
 #include <bitcoin/network/network.hpp>
 using namespace libbitcoin;
 
+std::mutex mutex;
+std::condition_variable condition;
+bool finished = false;
+
 void show_block(const std::error_code& ec, const message::block& blk)
 {
+    if (ec)
+    {
+        log_error() << ec.message();
+        return;
+    }
     log_debug() << "Fetch";
     log_debug() << pretty_hex(blk.merkle);
     log_debug() << blk.transactions.size();
@@ -18,14 +27,19 @@ void handle_store(const std::error_code& ec, block_status status,
     if (ec)
         log_error() << ec.message();
     static size_t counter = 0;
-    log_debug() << "Saved block " << ++counter;
-    if (counter == 400)
+    if (++counter == 400)
+    {
         chain->fetch_block(
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x83, 0x9a, 0x8e, 0x68,
                         0x86, 0xab, 0x59, 0x51, 0xd7, 0x6f, 0x41, 0x14,
                         0x75, 0x42, 0x8a, 0xfc, 0x90, 0x94, 0x7e, 0xe3,
                         0x20, 0x16, 0x1b, 0xbf, 0x18, 0xeb, 0x60, 0x48},
             show_block);
+
+        std::unique_lock<std::mutex> lock(mutex);
+        finished = true;
+        condition.notify_one();
+    }
 }
 
 void handle_send_packet(const std::error_code& ec)
@@ -39,7 +53,6 @@ void recv_blk(const std::error_code& ec, const message::block& packet,
 {
     if (ec)
         log_error() << ec.message();
-    log_debug() << pretty_hex(hash_block_header(packet));
     node->subscribe_block(std::bind(recv_blk, _1, _2, node, chain));
     // store block in bdb
     chain->store(packet, std::bind(handle_store, _1, _2, chain));
@@ -48,7 +61,6 @@ void recv_blk(const std::error_code& ec, const message::block& packet,
 void recv_inv(const std::error_code &ec, const message::inventory& packet,
     channel_ptr node)
 {
-    log_info() << "Received:";
     if (ec)
         log_error() << ec.message();
     message::get_data getdata;
@@ -57,7 +69,6 @@ void recv_inv(const std::error_code &ec, const message::inventory& packet,
         if (ivv.type != message::inventory_type::block)
             continue;
         getdata.inventories.push_back(ivv);
-        log_info() << "  " << pretty_hex(ivv.hash);
     }
     node->send(getdata, handle_send_packet);
     node->subscribe_inventory(std::bind(&recv_inv, _1, _2, node));
@@ -78,9 +89,6 @@ void ask_blocks(const std::error_code& ec, channel_ptr node,
 void recv_loc(const std::error_code& ec, const message::block_locator& loc,
     blockchain_ptr chain)
 {
-    log_debug() << "LOC";
-    for (hash_digest h: loc)
-        log_debug() << pretty_hex(h);
     network_ptr net(new network);
     handshake_connect(net, "localhost", 8333,
         std::bind(&ask_blocks, _1, _2, loc, chain));
@@ -90,7 +98,7 @@ int main()
 {
     bdb_blockchain::setup("database/");
     log_debug() << "Setup finished";
-    shared_ptr<bdb_blockchain> store(new bdb_blockchain("database/"));
+    blockchain_ptr store(new bdb_blockchain("database/"));
     log_debug() << "Opened";
     store->fetch_block(0, show_block);
     store->fetch_block(
@@ -100,7 +108,9 @@ int main()
                     0x72, 0xb3, 0xf1, 0xb6, 0x0a, 0x8c, 0xe2, 0x6f},
         show_block);
     store->fetch_block_locator(std::bind(recv_loc, _1, _2, store));
-    std::cin.get();
+
+    std::unique_lock<std::mutex> lock(mutex);
+    condition.wait(lock, []{ return finished; });
     return 0;
 }
 

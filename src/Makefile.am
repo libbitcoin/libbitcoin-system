@@ -23,12 +23,16 @@ libbitcoin_la_SOURCES = \
 	util/base58.cpp \
 	util/big_number.cpp \
 	util/clock.cpp \
-	constants.cpp
+	constants.cpp \
+	blockchain/organizer.cpp
 
 if DO_BERKDB
 libbitcoin_la_SOURCES += \
 	blockchain/bdb/bdb_blockchain.cpp \
-	blockchain/bdb/bitcoin.pb.cc
+	blockchain/bdb/bitcoin.pb.cc \
+	blockchain/bdb/bdb_chain_keeper.cpp \
+	blockchain/bdb/bdb_common.cpp \
+	blockchain/bdb/protobuf_wrapper.cpp
 endif
 
 if DO_POSTGRES

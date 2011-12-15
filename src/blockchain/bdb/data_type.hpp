@@ -7,7 +7,7 @@
 
 namespace libbitcoin {
 
-class data_type
+class readable_data_type
 {
 public:
     void set(uint32_t value)
@@ -50,7 +50,39 @@ private:
     Dbt dbt_;
 };
 
-typedef std::shared_ptr<data_type> data_type_ptr;
+class writable_data_type
+{
+public:
+    writable_data_type()
+    {
+        dbt_.set_flags(DB_DBT_MALLOC);
+    }
+    ~writable_data_type()
+    {
+        free(dbt_.get_data());
+    }
+
+    data_chunk data()
+    {
+        std::string raw_depth(reinterpret_cast<const char*>(
+            dbt_.get_data()), dbt_.get_size());
+        return data_chunk(raw_depth.begin(), raw_depth.end());
+    }
+
+    bool empty()
+    {
+        return dbt_.get_data() == nullptr;
+    }
+
+    Dbt* get()
+    {
+        return &dbt_;
+    }
+private:
+    Dbt dbt_;
+};
+
+typedef std::shared_ptr<writable_data_type> writable_data_type_ptr;
 
 } // libbitcoin
 

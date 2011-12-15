@@ -3,17 +3,16 @@
 
 #include <bitcoin/blockchain/blockchain.hpp>
 
-#ifdef DB_CXX_HEADER
-    #include DB_CXX_HEADER
-#else
-    #include <db_cxx.h>
-#endif
-
+#include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/util/threads.hpp>
 
-#include "bdb_detail.hpp"
+class Db;
+class DbEnv;
 
 namespace libbitcoin {
+
+class bdb_common;
+typedef std::shared_ptr<bdb_common> bdb_common_ptr;
 
 class bdb_blockchain
  : public blockchain, public threaded_service,
@@ -25,7 +24,8 @@ public:
 
     static bool setup(const std::string& prefix);
 
-    void store(const message::block& block, store_block_handler handle_store);
+    void store(const message::block& stored_block,
+        store_block_handler handle_store);
 
     void fetch_block(size_t depth, fetch_handler_block handle_fetch);
     void fetch_block(const hash_digest& block_hash,
@@ -38,7 +38,7 @@ private:
     bdb_blockchain();
     void initialize(const std::string& prefix);
 
-    void do_store(const message::block& block,
+    void do_store(const message::block& store_block,
         store_block_handler handle_store);
 
     void fetch_block_by_depth(size_t depth, 
@@ -47,14 +47,18 @@ private:
         fetch_handler_block handle_fetch);
     void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
 
-    bool save_block(size_t depth, const message::block serial_block);
-    uint32_t save_transaction(const message::transaction& block_tx);
+    DbEnv* env_;
+    Db* db_blocks_;
+    Db* db_blocks_hash_;
+    Db* db_txs_;
+    Db* db_txs_hash_;
 
-    bdb_guard<DbEnv> env_;
-    bdb_guard<Db> db_blocks_;
-    bdb_guard<Db> db_blocks_hash_;
-    bdb_guard<Db> db_txs_;
-    bdb_guard<Db> db_txs_hash_;
+    bdb_common_ptr common_;
+
+    // Organize stuff
+    orphans_pool_ptr orphans_;
+    chain_keeper_ptr chain_;
+    organizer_ptr organize_;
 };
 
 } // libbitcoin

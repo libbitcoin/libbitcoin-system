@@ -29,6 +29,8 @@ logger_wrapper log_debug(log_domain domain)
 
 logger_wrapper log_info(log_domain domain)
 {
+    if (domain == log_domain::network)
+        return logger_wrapper(logger_level::null);
     return logger_wrapper(logger_level::info);
 }
 

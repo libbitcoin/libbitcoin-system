@@ -10,7 +10,7 @@ namespace libbitcoin {
 class txn_guard
 {
 public:
-    txn_guard(const bdb_guard<DbEnv>& env)
+    txn_guard(DbEnv* env)
      : used_(false)
     {
         env->txn_begin(nullptr, &txn_, 0);
@@ -48,6 +48,8 @@ private:
     DbTxn* txn_;
     bool used_;
 };
+
+typedef std::shared_ptr<txn_guard> txn_guard_ptr;
 
 } // libbitcoin
 

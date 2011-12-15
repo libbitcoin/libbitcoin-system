@@ -33,7 +33,7 @@ public:
     typedef std::function<void (const std::error_code&, uint64_t)>
             fetch_handler_balance;
 
-    virtual void store(const message::block& block, 
+    virtual void store(const message::block& stored_block, 
             store_block_handler handle_store) = 0;
 
     virtual void fetch_block(size_t depth,

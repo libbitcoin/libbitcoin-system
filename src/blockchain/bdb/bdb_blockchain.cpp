@@ -1,8 +1,12 @@
 #include <bitcoin/blockchain/bdb_blockchain.hpp>
 
+#include DB_CXX_HEADER
+
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/logger.hpp>
 
+#include "bdb_common.hpp"
+#include "bdb_chain_keeper.hpp"
 #include "data_type.hpp"
 #include "txn_guard.hpp"
 #include "protobuf_wrapper.hpp"
@@ -16,7 +20,8 @@ constexpr uint32_t env_flags =
     DB_INIT_LOG|
     DB_INIT_TXN|
     DB_INIT_MPOOL|
-    DB_THREAD;
+    DB_THREAD|
+    DB_CXX_NO_EXCEPTIONS;
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
@@ -31,8 +36,23 @@ bdb_blockchain::bdb_blockchain()
     // Only by factory methods
 }
 
+template <typename Database>
+inline void shutdown_database(Database*& database)
+{
+    database->close(0);
+    delete database;
+    database = nullptr;
+}
 bdb_blockchain::~bdb_blockchain()
 {
+    // Close secondaries before primaries
+    shutdown_database(db_blocks_hash_);
+    shutdown_database(db_txs_hash_);
+    // Close primaries
+    shutdown_database(db_blocks_);
+    shutdown_database(db_txs_);
+    shutdown_database(env_);
+    // delete
     google::protobuf::ShutdownProtobufLibrary();
 }
 
@@ -42,7 +62,15 @@ bool bdb_blockchain::setup(const std::string& prefix)
     handle.initialize(prefix);
     handle.db_blocks_->truncate(nullptr, 0, 0);
     handle.db_txs_->truncate(nullptr, 0, 0);
-    return handle.save_block(0, genesis_block());
+    // Save genesis block
+    txn_guard_ptr txn = std::make_shared<txn_guard>(handle.env_);
+    if (!handle.common_->save_block(txn, 0, genesis_block()))
+    {
+        txn->abort();
+        return false;
+    }
+    txn->commit();
+    return true;
 }
 
 // Because BDB is dumb
@@ -74,125 +102,82 @@ int get_tx_hash(Db*, const Dbt*, const Dbt* data, Dbt* second_key)
     return 0;
 }
 
-void initialize_database(const bdb_guard<DbEnv>& env, bdb_guard<Db>& database)
-{
-    database.set(new Db(env.get(), 0));
-}
-
 void bdb_blockchain::initialize(const std::string& prefix)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    env_.set(new DbEnv(0));
+    env_ = new DbEnv(0);
     env_->set_lk_max_locks(10000);
     env_->set_lk_max_objects(10000);
     env_->open(prefix.c_str(), env_flags, 0);
-    initialize_database(env_, db_blocks_);
-    initialize_database(env_, db_blocks_hash_);
-    initialize_database(env_, db_txs_);
-    initialize_database(env_, db_txs_hash_);
+    // Create database objects
+    db_blocks_ = new Db(env_, 0);
+    db_blocks_hash_ = new Db(env_, 0);
+    db_txs_ = new Db(env_, 0);
+    db_txs_hash_ = new Db(env_, 0);
     txn_guard txn(env_);
     db_blocks_->open(txn.get(), "blocks", "block-data", DB_BTREE, db_flags, 0);
     db_blocks_hash_->open(txn.get(), "blocks", "block-hash", 
         DB_BTREE, db_flags, 0);
-    db_blocks_->associate(txn.get(), db_blocks_hash_.get(), get_block_hash, 0);
+    db_blocks_->associate(txn.get(), db_blocks_hash_, get_block_hash, 0);
     db_txs_->open(txn.get(), "transactions", "tx-data", DB_BTREE, db_flags, 0);
     db_txs_hash_->open(txn.get(), "transactions", "tx-hash",
         DB_BTREE, db_flags, 0);
-    db_txs_->associate(txn.get(), db_txs_hash_.get(), get_tx_hash, 0);
+    db_txs_->associate(txn.get(), db_txs_hash_, get_tx_hash, 0);
     txn.commit();
+
+    common_ = std::make_shared<bdb_common>(env_,
+        db_blocks_, db_blocks_hash_, db_txs_, db_txs_hash_);
+
+    orphans_ = std::make_shared<orphans_pool>(10);
+    chain_ = std::make_shared<bdb_chain_keeper>(common_, env_,
+        db_blocks_, db_blocks_hash_);
+    organize_ = std::make_shared<organizer>(orphans_, chain_);
 }
 
-bool bdb_blockchain::save_block(size_t depth, 
-    const message::block serial_block)
-{
-    protobuf::Block proto_block =
-        block_header_to_protobuf(depth, serial_block);
-    txn_guard txn(env_);
-    for (const message::transaction& block_tx: serial_block.transactions)
-    {
-        uint32_t block_tx_id = save_transaction(block_tx);
-        if (block_tx_id == 0)
-        {
-            txn.abort();
-            return false;
-        }
-        proto_block.add_transactions(block_tx_id);
-    }
-    std::ostringstream oss;
-    if (!proto_block.SerializeToOstream(&oss))
-    {
-        txn.abort();
-        return false;
-    }
-    data_type key, value;
-    key.set(depth);
-    value.set(oss.str());
-    db_blocks_->put(txn.get(), key.get(), value.get(), DB_NOOVERWRITE);
-    txn.commit();
-}
-
-uint32_t bdb_blockchain::save_transaction(const message::transaction& block_tx)
-{
-    uint32_t block_tx_id = rand();
-    BITCOIN_ASSERT(block_tx_id != 0);
-    protobuf::Transaction proto_tx = transaction_to_protobuf(block_tx);
-    std::ostringstream oss;
-    if (!proto_tx.SerializeToOstream(&oss))
-        return 0;
-    data_type key, value;
-    key.set(block_tx_id);
-    value.set(oss.str());
-    txn_guard txn(env_);
-    // Should check for duplicates first
-    db_txs_->put(txn.get(), key.get(), value.get(), DB_NOOVERWRITE);
-    txn.commit();
-    return block_tx_id;
-}
-
-void bdb_blockchain::store(const message::block& block, 
+void bdb_blockchain::store(const message::block& stored_block, 
     store_block_handler handle_store)
 {
-    service()->post(std::bind(
-        &bdb_blockchain::do_store, shared_from_this(), block, handle_store));
+    service()->post(std::bind(&bdb_blockchain::do_store,
+        shared_from_this(), stored_block, handle_store));
 }
-void bdb_blockchain::do_store(const message::block& block,
+void bdb_blockchain::do_store(const message::block& stored_block,
     store_block_handler handle_store)
 {
-    static size_t depth = 0;
-    ++depth;
-    save_block(depth, block);
+    block_detail_ptr stored_detail =
+        std::make_shared<block_detail>(stored_block);
+    orphans_->add(stored_detail);
+    organize_->start();
+    env_->txn_checkpoint(0, 0, 0);
     handle_store(std::error_code(), block_status::orphan);
 }
 
 bool read(Db* database, DbTxn* txn, Dbt* key, std::stringstream& ss)
 {
-    Dbt data;
-    data.set_flags(DB_DBT_MALLOC);
-    int ret = database->get(nullptr, key, &data, 0);
-    if (!data.get_data())
+    writable_data_type data;
+    if (database->get(txn, key, data.get(), 0) != 0)
         return false;
-    ss  << std::string(
-        reinterpret_cast<const char*>(data.get_data()), data.get_size());
-    free(data.get_data());
+    data_chunk raw_object(data.data());
+    std::copy(raw_object.begin(), raw_object.end(),
+        std::ostream_iterator<byte>(ss));
     return true;
 }
 
 template<typename Index, typename ProtoType>
-bool proto_read(bdb_guard<Db>& database, txn_guard& txn,
+bool proto_read(Db* database, txn_guard_ptr txn,
     const Index& index, ProtoType& proto_object)
 {
-    data_type key;
+    readable_data_type key;
     key.set(index);
     std::stringstream ss;
-    if (!read(database.get(), txn.get(), key.get(), ss))
+    if (!read(database, txn->get(), key.get(), ss))
         return false;
     proto_object.ParseFromIstream(&ss);
     return true;
 }
 
 template<typename Index>
-bool fetch_block_impl(bdb_guard<Db>& db_block_x, bdb_guard<Db>& db_txs,
-    txn_guard& txn, const Index& index, message::block& serial_block)
+bool fetch_block_impl(Db* db_block_x, Db* db_txs,
+    txn_guard_ptr txn, const Index& index, message::block& serial_block)
 {
     protobuf::Block proto_block;
     if (!proto_read(db_block_x, txn, index, proto_block))
@@ -208,7 +193,8 @@ bool fetch_block_impl(bdb_guard<Db>& db_block_x, bdb_guard<Db>& db_txs,
     return true;
 } 
 
-void bdb_blockchain::fetch_block(size_t depth, fetch_handler_block handle_fetch)
+void bdb_blockchain::fetch_block(size_t depth,
+    fetch_handler_block handle_fetch)
 {
     service()->post(std::bind(
         &bdb_blockchain::fetch_block_by_depth, shared_from_this(),
@@ -218,15 +204,15 @@ void bdb_blockchain::fetch_block(size_t depth, fetch_handler_block handle_fetch)
 void bdb_blockchain::fetch_block_by_depth(size_t depth,
     fetch_handler_block handle_fetch)
 {
-    txn_guard txn(env_);
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
     if (!fetch_block_impl(db_blocks_, db_txs_, txn, depth, serial_block))
     {
-        txn.abort();
+        txn->abort();
         handle_fetch(error::missing_object, message::block());
         return;
     }
-    txn.commit();
+    txn->commit();
     handle_fetch(std::error_code(), serial_block);
 }
 
@@ -241,20 +227,21 @@ void bdb_blockchain::fetch_block(const hash_digest& block_hash,
 void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash, 
     fetch_handler_block handle_fetch)
 {
-    txn_guard txn(env_);
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
     if (!fetch_block_impl(db_blocks_hash_, db_txs_, txn, 
         block_hash, serial_block))
     {
-        txn.abort();
+        txn->abort();
         handle_fetch(error::missing_object, message::block());
         return;
     }
-    txn.commit();
+    txn->commit();
     handle_fetch(std::error_code(), serial_block);
 }
 
-void bdb_blockchain::fetch_block_locator(fetch_handler_block_locator handle_fetch)
+void bdb_blockchain::fetch_block_locator(
+    fetch_handler_block_locator handle_fetch)
 {
     service()->post(std::bind(
         &bdb_blockchain::do_fetch_block_locator, shared_from_this(), 
@@ -263,22 +250,14 @@ void bdb_blockchain::fetch_block_locator(fetch_handler_block_locator handle_fetc
 void bdb_blockchain::do_fetch_block_locator(
     fetch_handler_block_locator handle_fetch)
 {
-    txn_guard txn(env_);
-    Dbc* cursor;
-    db_blocks_->cursor(txn.get(), &cursor, 0);
-    Dbt key, data;
-    if (cursor->get(&key, &data, DB_LAST) == DB_NOTFOUND)
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
+    uint32_t last_block_depth = common_->find_last_block_depth(txn);
+    if (last_block_depth == std::numeric_limits<uint32_t>::max())
     {
         log_error() << "Empty blockchain";
         handle_fetch(error::missing_object, message::block_locator());
         return;
     }
-    BITCOIN_ASSERT(key.get_size() == 4);
-    data_chunk raw_depth;
-    extend_data(raw_depth, std::string(
-        reinterpret_cast<const char*>(key.get_data()), key.get_size()));
-    uint32_t last_block_depth = cast_chunk<uint32_t>(raw_depth);
-    cursor->close();
 
     message::block_locator locator;
     std::vector<size_t> indices = block_locator_indices(last_block_depth);
@@ -297,8 +276,7 @@ void bdb_blockchain::do_fetch_block_locator(
             hash_block_header(protobuf_to_block_header(proto_block));
         locator.push_back(current_hash);
     }
-    txn.commit();
-
+    txn->commit();
     handle_fetch(std::error_code(), locator);
 }
 

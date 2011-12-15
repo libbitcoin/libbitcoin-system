@@ -19,7 +19,6 @@ bitcoin_blockchain_include_HEADERS = \
 
 if DO_BERKDB
 bitcoin_blockchain_include_HEADERS += \
-	blockchain/bdb_detail.hpp \
 	blockchain/bdb_blockchain.hpp
 endif
 
