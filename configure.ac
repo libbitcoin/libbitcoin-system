@@ -7,7 +7,7 @@ LT_INIT
 AC_PROG_CXX
 CHECK_GXX_CPP0X
 CFLAGS="-ggdb"
-CXXFLAGS="-ggdb"
+CXXFLAGS="-ggdb -O3 -funroll-loops"
 my_CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -pedantic -pthread -Wextra -fstack-protector-all"
 AC_SUBST([my_CXXFLAGS])
 
