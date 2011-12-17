@@ -1,14 +1,14 @@
-#include <bitcoin/storage/postgresql_storage.hpp>
+//#include <bitcoin/storage/postgresql_storage.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/sha256.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/error.hpp>
 #include <iostream>
 #include <memory>
 
 using std::shared_ptr;
 using namespace libbitcoin;
-typedef shared_ptr<postgresql_storage> psql_ptr;
 
 void recv_block(std::error_code ec, libbitcoin::message::block block)
 {
@@ -46,8 +46,17 @@ void test_match_merkles(std::error_code ec, libbitcoin::message::block block)
     BITCOIN_ASSERT(block.merkle == libbitcoin::generate_merkle_root(block.transactions));
 }
 
+void test_sha256()
+{
+    data_chunk in{'h', 'e', 'l', 'l', 'o'};
+    //log_debug() << pretty_hex(libbitcoin::generate_sha256_hash(in));
+    //BITCOIN_ASSERT((libbitcoin::generate_sha256_hash(in) == libbitcoin::hash_digest{0x95, 0x95, 0xc9, 0xdf, 0x90, 0x07, 0x51, 0x48, 0xeb, 0x06, 0x86, 0x03, 0x65, 0xdf, 0x33, 0x58, 0x4b, 0x75, 0xbf, 0xf7, 0x82, 0xa5, 0x10, 0xc6, 0xcd, 0x48, 0x83, 0xa4, 0x19, 0x83, 0x3d, 0x50}));
+    BITCOIN_ASSERT((libbitcoin::generate_sha256_hash(in) == libbitcoin::hash_digest{0x50, 0x3d, 0x83, 0x19, 0xa4, 0x83, 0x48, 0xcd, 0xc6, 0x10, 0xa5, 0x82, 0xf7, 0xbf, 0x75, 0x4b, 0x58, 0x33, 0xdf, 0x65, 0x03, 0x86, 0x06, 0xeb, 0x48, 0x51, 0x07, 0x90, 0xdf, 0xc9, 0x95, 0x95}));
+}
+
 int main()
 {
+    test_sha256();
     test_build_merkle();
 
     //psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));

@@ -101,10 +101,18 @@ dialect-test: bin/tests/dialect-test
 obj/base58-test.o: tests/base58-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-bin/tests/base58-test: libbitcoin obj/base58-test.o
-	$(CXX) -o bin/tests/base58-test obj/base58-test.o $(LIBBITCOIN) $(LIBS)
+bin/tests/base58-test: obj/base58-test.o
+	$(CXX) -o bin/tests/base58-test obj/base58-test.o $(LIBBITCOIN)
 
 base58-test: bin/tests/base58-test
+
+obj/big-number-test.o: tests/big-number-test.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/big-number-test: obj/big-number-test.o
+	$(CXX) -o bin/tests/big-number-test obj/big-number-test.o $(LIBBITCOIN)
+
+big-number-test: bin/tests/big-number-test
 
 obj/tx-hash.o: tests/tx-hash.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
@@ -141,8 +149,8 @@ script-test: bin/tests/script-test
 obj/merkle.o: tests/merkle.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-bin/tests/merkle: libbitcoin obj/merkle.o
-	$(CXX) -o bin/tests/merkle obj/merkle.o $(LIBBITCOIN) $(LIBS)
+bin/tests/merkle: obj/merkle.o
+	$(CXX) -o bin/tests/merkle obj/merkle.o $(LIBBITCOIN)
 
 merkle: bin/tests/merkle
 
@@ -295,14 +303,6 @@ obj/base58.o: src/util/base58.cpp include/bitcoin/util/base58.hpp
 
 obj/big_number.o: src/util/big_number.cpp include/bitcoin/util/big_number.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
-
-obj/big-number-test.o: tests/big-number-test.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
-
-bin/tests/big-number-test: obj/big-number-test.o obj/big_number.o obj/logger.o obj/constants.o obj/types.o
-	$(CXX) -o bin/tests/big-number-test obj/big-number-test.o obj/big_number.o obj/logger.o obj/constants.o obj/types.o $(LIBS)
-
-big-number-test: bin/tests/big-number-test
 
 
 poller: bin/examples/poller
