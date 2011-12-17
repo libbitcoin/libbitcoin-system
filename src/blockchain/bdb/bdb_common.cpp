@@ -28,13 +28,13 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
     data_chunk raw_depth;
     extend_data(raw_depth, std::string(
         reinterpret_cast<const char*>(key.get_data()), key.get_size()));
-    uint32_t last_block_depth = cast_chunk<uint32_t>(raw_depth);
+    uint32_t last_block_depth = cast_chunk<uint32_t>(raw_depth, true);
     cursor->close();
     return last_block_depth;
 }
 
 bool bdb_common::save_block(txn_guard_ptr txn,
-    size_t depth, const message::block serial_block)
+    uint32_t depth, const message::block serial_block)
 {
     protobuf::Block proto_block =
         block_header_to_protobuf(depth, serial_block);
@@ -62,6 +62,7 @@ bool bdb_common::save_block(txn_guard_ptr txn,
         log_fatal() << "bdb put() failed";
         return false;
     }
+    log_debug() << "END";
     return true;
 }
 

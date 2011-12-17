@@ -56,6 +56,8 @@ message::get_blocks create_getblocks_message()
 
 void handle_handshake(const std::error_code& ec, channel_ptr node)
 {
+    if (ec)
+        error_exit(ec.message());
     node->subscribe_inventory(std::bind(&receive_inv, _1, _2, node));
     node->send(create_getblocks_message(), 
         std::bind(&handle_send_getblock, _1));

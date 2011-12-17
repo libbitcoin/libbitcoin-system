@@ -77,6 +77,8 @@ void recv_inv(const std::error_code &ec, const message::inventory& packet,
 void ask_blocks(const std::error_code& ec, channel_ptr node,
     const message::block_locator& loc, blockchain_ptr chain)
 {
+    if (ec)
+        log_error() << ec.message();
     node->subscribe_inventory(std::bind(recv_inv, _1, _2, node));
     node->subscribe_block(std::bind(recv_blk, _1, _2, node, chain));
 

@@ -21,7 +21,7 @@ public:
     uint32_t find_last_block_depth(txn_guard_ptr txn);
 
     bool save_block(txn_guard_ptr txn,
-        size_t depth, const message::block serial_block);
+        uint32_t depth, const message::block serial_block);
     uint32_t save_transaction(txn_guard_ptr txn,
         const message::transaction& block_tx);
 private:

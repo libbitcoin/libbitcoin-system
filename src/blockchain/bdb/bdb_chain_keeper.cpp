@@ -83,7 +83,7 @@ big_number bdb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 blocks_list bdb_chain_keeper::end_slice(size_t slice_begin_index)
 {
     blocks_list sliced_blocks;
-    log_error() << "UNIMPLEMENTED: " << __PRETTY_FUNCTION__;
+    //log_error() << "UNIMPLEMENTED: " << __PRETTY_FUNCTION__;
     return sliced_blocks;
 }
 
