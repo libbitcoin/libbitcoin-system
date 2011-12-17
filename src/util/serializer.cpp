@@ -9,38 +9,6 @@
 
 namespace libbitcoin {
 
-inline void copy_data(std::vector<byte> &data,
-        const byte* raw_bytes, size_t len)
-{
-    for (size_t i = 0; i < len; i++)
-        data.push_back(raw_bytes[i]);
-}
-
-inline void copy_data_reverse(std::vector<byte> &data,
-        const byte* raw_bytes, size_t len)
-{
-    for (int i = len - 1; i >= 0; i--)
-        data.push_back(raw_bytes[i]);
-}
-
-template<typename T>
-void write_data_impl(data_chunk &data, T val, size_t len, bool reverse=false)
-{
-    byte* raw_bytes = reinterpret_cast<byte*>(&val);
-    #ifdef BOOST_LITTLE_ENDIAN
-        // do nothing
-    #elif BOOST_BIG_ENDIAN
-        reverse = !reverse;
-    #else
-        #error "Endian isn't defined!"
-    #endif
-
-    if (reverse)
-        copy_data_reverse(data, raw_bytes, len);
-    else
-        copy_data(data, raw_bytes, len);
-}
-
 void serializer::write_byte(uint8_t v)
 {
     data_.push_back(v);
@@ -48,17 +16,17 @@ void serializer::write_byte(uint8_t v)
 
 void serializer::write_2_bytes(uint16_t v)
 {
-    write_data_impl(data_, v, 2);
+    extend_data(data_, uncast_type(v));
 }
 
 void serializer::write_4_bytes(uint32_t v)
 {
-    write_data_impl(data_, v, 4);
+    extend_data(data_, uncast_type(v));
 }
 
 void serializer::write_8_bytes(uint64_t v)
 {
-    write_data_impl(data_, v, 8);
+    extend_data(data_, uncast_type(v));
 }
 
 void serializer::write_var_uint(uint64_t v)
@@ -92,15 +60,13 @@ void serializer::write_data(const data_chunk& other_data)
 void serializer::write_network_address(message::network_address addr)
 {
     write_8_bytes(addr.services);
-    for (size_t i = 0; i < 16; i++)
-        data_.push_back(addr.ip[i]);
-    write_data_impl(data_, addr.port, 2, true);
+    extend_data(data_, addr.ip);
+    extend_data(data_, uncast_type(addr.port, true));
 }
 
 void serializer::write_hash(hash_digest hash)
 {
-    for (size_t i = hash.size(); i-- > 0;)
-        data_.push_back(hash[i]);
+    data_.insert(data_.end(), hash.rbegin(), hash.rend());
 }
 
 void serializer::write_command(std::string command)
@@ -108,9 +74,7 @@ void serializer::write_command(std::string command)
     constexpr size_t comm_len = 12;
     char comm_str[comm_len] = { 0 };
     command.copy(comm_str, comm_len);
-    // should use std::copy
-    for (size_t i = 0; i < comm_len; i++)
-        data_.push_back(comm_str[i]);
+    extend_data(data_, comm_str);
 }
 
 data_chunk serializer::get_data() const
@@ -126,7 +90,7 @@ void check_distance(ConstIterator begin, ConstIterator end, size_t distance)
 }
 
 template<typename T, typename Iterator>
-T read_data_impl(Iterator& begin, Iterator end, bool reverse=true)
+T read_data_impl(Iterator& begin, Iterator end, bool reverse=false)
 {
     check_distance(begin, end, sizeof(T));
     data_chunk chunk(begin, begin + sizeof(T));
@@ -212,7 +176,7 @@ message::network_address deserializer::read_network_address()
     addr.services = read_8_bytes();
     // Read IP address
     read_bytes<16>(begin_, end_, addr.ip);
-    addr.port = read_data_impl<uint16_t>(begin_, end_, false);
+    addr.port = read_data_impl<uint16_t>(begin_, end_, true);
     return addr;
 }
 

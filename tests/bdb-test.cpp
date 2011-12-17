@@ -12,7 +12,7 @@ void show_block(const std::error_code& ec, const message::block& blk)
 {
     if (ec)
     {
-        log_error() << ec.message();
+        log_error() << "show_block " << ec.message();
         return;
     }
     log_debug() << "Fetch";
@@ -25,7 +25,7 @@ void handle_store(const std::error_code& ec, block_status status,
     blockchain_ptr chain)
 {
     if (ec)
-        log_error() << ec.message();
+        log_error() << "handle store " << ec.message();
     static size_t counter = 0;
     if (++counter == 400)
     {

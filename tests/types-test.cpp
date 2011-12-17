@@ -16,7 +16,7 @@ int main()
     bs.push_back(0x00);
     bs.push_back(0x00);
 
-    uint64_t val = cast_chunk<uint64_t>(bs, true);
+    uint64_t val = cast_chunk<uint64_t>(bs);
     std::cout << val << "\n";
     std::cout << std::hex << val << "\n";
 

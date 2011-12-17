@@ -33,7 +33,7 @@ short_hash address_to_short_hash(const std::string& address)
         decoded_address.begin(), decoded_address.end() - 4);
     // verify checksum bytes
     if (generate_sha256_checksum(main_body) != 
-            cast_chunk<uint32_t>(checksum_bytes, true))
+            cast_chunk<uint32_t>(checksum_bytes))
         return null_short_hash;
     short_hash result;
     std::copy(main_body.begin() + 1, main_body.end(), result.begin());

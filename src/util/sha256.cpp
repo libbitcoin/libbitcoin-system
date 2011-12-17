@@ -2,8 +2,6 @@
 
 #include <boost/detail/endian.hpp>
 
-#include <bitcoin/util/logger.hpp>
-
 namespace libbitcoin {
 
 hash_digest generate_sha256_hash(const data_chunk& chunk)
@@ -24,7 +22,7 @@ hash_digest generate_sha256_hash(const data_chunk& chunk)
 uint32_t generate_sha256_checksum(const data_chunk& chunk)
 {
     hash_digest hash = generate_sha256_hash(chunk);
-    data_chunk begin_bytes(hash.end() - 4, hash.end());
+    data_chunk begin_bytes(hash.rbegin(), hash.rbegin() + 4);
     return cast_chunk<uint32_t>(begin_bytes);
 }
 

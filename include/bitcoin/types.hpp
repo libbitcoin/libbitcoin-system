@@ -44,16 +44,16 @@ typedef std::vector<byte> data_chunk;
 template<typename D, typename T>
 void extend_data(D& chunk, const T& other)
 {
-    chunk.insert(end(chunk), begin(other), end(other));
+    chunk.insert(std::end(chunk), std::begin(other), std::end(other));
 }
 
 template<typename T>
 T cast_chunk(data_chunk chunk, bool reverse=false)
 {
     #ifdef BOOST_LITTLE_ENDIAN
-        reverse = !reverse;
-    #elif BOOST_BIG_ENDIAN
         // do nothing
+    #elif BOOST_BIG_ENDIAN
+        reverse = !reverse;
     #else
         #error "Endian isn't defined!"
     #endif
@@ -70,9 +70,18 @@ T cast_chunk(data_chunk chunk, bool reverse=false)
 template<typename T>
 data_chunk uncast_type(T val, bool reverse=false)
 {
+    #ifdef BOOST_LITTLE_ENDIAN
+        // do nothing
+    #elif BOOST_BIG_ENDIAN
+        reverse = !reverse;
+    #else
+        #error "Endian isn't defined!"
+    #endif
+
     data_chunk chunk;
     for (size_t i = 0; i < sizeof(T); ++i)
         chunk.push_back(reinterpret_cast<byte*>(&val)[i]);
+
     if (reverse)
         std::reverse(begin(chunk), end(chunk));
     return chunk;
