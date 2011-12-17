@@ -145,51 +145,27 @@ void bdb_blockchain::do_store(const message::block& stored_block,
 {
     block_detail_ptr stored_detail =
         std::make_shared<block_detail>(stored_block);
+    int depth = chain_->find_index(hash_block_header(stored_block));
+    if (depth != -1)
+    {
+        handle_store(error::object_already_exists, block_status::confirmed);
+        return;
+    }
     orphans_->add(stored_detail);
     organize_->start();
     env_->txn_checkpoint(0, 0, 0);
     handle_store(std::error_code(), block_status::orphan);
 }
 
-bool read(Db* database, DbTxn* txn, Dbt* key, std::stringstream& ss)
-{
-    writable_data_type data;
-    if (database->get(txn, key, data.get(), 0) != 0)
-        return false;
-    data_chunk raw_object(data.data());
-    std::copy(raw_object.begin(), raw_object.end(),
-        std::ostream_iterator<byte>(ss));
-    return true;
-}
-
-template<typename Index, typename ProtoType>
-bool proto_read(Db* database, txn_guard_ptr txn,
-    const Index& index, ProtoType& proto_object)
-{
-    readable_data_type key;
-    key.set(index);
-    std::stringstream ss;
-    if (!read(database, txn->get(), key.get(), ss))
-        return false;
-    proto_object.ParseFromIstream(&ss);
-    return true;
-}
-
 template<typename Index>
-bool fetch_block_impl(Db* db_block_x, Db* db_txs,
-    txn_guard_ptr txn, const Index& index, message::block& serial_block)
+bool fetch_block_impl(Db* db_block_x, txn_guard_ptr txn, const Index& index,
+    bdb_common_ptr common, message::block& serial_block)
 {
     protobuf::Block proto_block;
-    if (!proto_read(db_block_x, txn, index, proto_block))
+    if (!bdb_common::proto_read(db_block_x, txn, index, proto_block))
         return false;
-    serial_block = protobuf_to_block_header(proto_block);
-    for (uint32_t tx_index: proto_block.transactions())
-    {
-        protobuf::Transaction proto_tx;
-        if (!proto_read(db_txs, txn, tx_index, proto_tx))
-            return false;
-        serial_block.transactions.push_back(protobuf_to_transaction(proto_tx));
-    }
+    if (!common->reconstruct_block(txn, proto_block, serial_block))
+        return false;
     return true;
 } 
 
@@ -206,7 +182,7 @@ void bdb_blockchain::fetch_block_by_depth(size_t depth,
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
-    if (!fetch_block_impl(db_blocks_, db_txs_, txn, depth, serial_block))
+    if (!fetch_block_impl(db_blocks_, txn, depth, common_, serial_block))
     {
         txn->abort();
         handle_fetch(error::missing_object, message::block());
@@ -229,8 +205,8 @@ void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash,
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
-    if (!fetch_block_impl(db_blocks_hash_, db_txs_, txn, 
-        block_hash, serial_block))
+    if (!fetch_block_impl(db_blocks_hash_, txn, block_hash,
+        common_, serial_block))
     {
         txn->abort();
         handle_fetch(error::missing_object, message::block());
@@ -266,7 +242,8 @@ void bdb_blockchain::do_fetch_block_locator(
         // bdb provides no way to lookup secondary index AFAIK
         // we instead regenerate block hash from its header
         protobuf::Block proto_block;
-        if (!proto_read(db_blocks_, txn, current_index, proto_block))
+        if (!bdb_common::proto_read(db_blocks_, txn,
+            current_index, proto_block))
         {
             log_fatal() << "Missing block " << current_index;
             handle_fetch(error::missing_object, message::block_locator());

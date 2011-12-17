@@ -38,17 +38,13 @@ int bdb_chain_keeper::find_index(const hash_digest& search_block_hash)
     readable_data_type key;
     key.set(search_block_hash);
     writable_data_type primary_key;
-    Dbt ignore_data;
-    ignore_data.set_flags(DB_DBT_MALLOC|DB_DBT_PARTIAL);
-    ignore_data.set_doff(0);
-    ignore_data.set_dlen(0);
+    empty_data_type ignore_data;
     if (db_blocks_hash_->pget(nullptr, key.get(),
-        primary_key.get(), &ignore_data, 0) != 0)
+        primary_key.get(), ignore_data.get(), 0) != 0)
     {
         return -1;
     }
     uint32_t depth = cast_chunk<uint32_t>(primary_key.data());
-    free(ignore_data.get_data());
     return depth;
 }
 
@@ -83,7 +79,39 @@ big_number bdb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 blocks_list bdb_chain_keeper::end_slice(size_t slice_begin_index)
 {
     blocks_list sliced_blocks;
-    //log_error() << "UNIMPLEMENTED: " << __PRETTY_FUNCTION__;
+    Dbc* cursor;
+    db_blocks_->cursor(txn_->get(), &cursor, 0);
+    readable_data_type key;
+    key.set(slice_begin_index);
+    writable_data_type_ptr value;
+    // Position cursor
+    value = std::make_shared<writable_data_type>();
+    if (cursor->get(key.get(), value->get(), DB_SET) != 0)
+        return blocks_list();
+    do
+    {
+        // Read raw value from bdb
+        data_chunk raw_object = value->data();
+        // Construct protobuf header from stringstream
+        std::stringstream ss;
+        std::copy(raw_object.begin(), raw_object.end(),
+            std::ostream_iterator<byte>(ss));
+        protobuf::Block proto_block;
+        proto_block.ParseFromIstream(&ss);
+        // Convert protobuf block header into actual block
+        message::block sliced_block;
+        if (!common_->reconstruct_block(txn_, proto_block, sliced_block))
+            return blocks_list();
+        // Add to list of sliced blocks
+        block_detail_ptr sliced_detail =
+            std::make_shared<block_detail>(sliced_block);
+        sliced_blocks.push_back(sliced_detail);
+        // Delete current item
+        if (cursor->del(0) != 0)
+            return blocks_list();
+        value = std::make_shared<writable_data_type>();
+    }
+    while (cursor->get(key.get(), value->get(), DB_NEXT) == 0);
     return sliced_blocks;
 }
 

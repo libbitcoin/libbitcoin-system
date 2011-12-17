@@ -82,6 +82,28 @@ private:
     Dbt dbt_;
 };
 
+class empty_data_type
+{
+public:
+    empty_data_type()
+    {
+        dbt_.set_flags(DB_DBT_MALLOC|DB_DBT_PARTIAL);
+        dbt_.set_doff(0);
+        dbt_.set_dlen(0);
+    }
+    ~empty_data_type()
+    {
+        free(dbt_.get_data());
+    }
+
+    Dbt* get()
+    {
+        return &dbt_;
+    }
+private:
+    Dbt dbt_;
+};
+
 typedef std::shared_ptr<writable_data_type> writable_data_type_ptr;
 
 } // libbitcoin

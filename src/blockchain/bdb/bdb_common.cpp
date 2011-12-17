@@ -4,10 +4,6 @@
 
 #include <bitcoin/util/logger.hpp>
 
-#include "data_type.hpp"
-#include "txn_guard.hpp"
-#include "protobuf_wrapper.hpp"
-
 namespace libbitcoin {
 
 bdb_common::bdb_common(DbEnv* env, Db* db_blocks, Db* db_blocks_hash,
@@ -80,6 +76,34 @@ uint32_t bdb_common::save_transaction(txn_guard_ptr txn,
     // Checks for duplicates first
     db_txs_->put(txn->get(), key.get(), value.get(), DB_NOOVERWRITE);
     return block_tx_id;
+}
+
+
+bool bdb_common::database_read(Db* database, DbTxn* txn, Dbt* key,
+    std::stringstream& ss)
+{
+    writable_data_type data;
+    if (database->get(txn, key, data.get(), 0) != 0)
+        return false;
+    data_chunk raw_object(data.data());
+    std::copy(raw_object.begin(), raw_object.end(),
+        std::ostream_iterator<byte>(ss));
+    return true;
+}
+
+bool bdb_common::reconstruct_block(txn_guard_ptr txn,
+    const protobuf::Block& proto_block_header,
+    message::block& result_block)
+{
+    result_block = protobuf_to_block_header(proto_block_header);
+    for (uint32_t tx_index: proto_block_header.transactions())
+    {
+        protobuf::Transaction proto_tx;
+        if (!proto_read(db_txs_, txn, tx_index, proto_tx))
+            return false;
+        result_block.transactions.push_back(protobuf_to_transaction(proto_tx));
+    }
+    return true;
 }
 
 } // libbitcoin

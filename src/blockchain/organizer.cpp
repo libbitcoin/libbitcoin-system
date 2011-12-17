@@ -40,6 +40,8 @@ orphans_pool::orphans_pool(size_t pool_size)
 
 void orphans_pool::add(block_detail_ptr incoming_block)
 {
+    // No duplicates
+    remove(incoming_block);
     pool_.push_back(incoming_block);
 }
 
@@ -80,7 +82,9 @@ blocks_list orphans_pool::get_unprocessed()
 
 void orphans_pool::remove(block_detail_ptr remove_block)
 {
-    pool_.erase(std::find(pool_.begin(), pool_.end(), remove_block));
+    auto it = std::find(pool_.begin(), pool_.end(), remove_block);
+    if (it != pool_.end())
+        pool_.erase(it);
 }
 
 organizer::organizer(orphans_pool_ptr orphans, chain_keeper_ptr chain)
