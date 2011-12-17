@@ -26,12 +26,12 @@ std::string spaced_bytes(std::string byte_stream)
     return spaced;
 }
 
-inline data_chunk bytes_from_bytea(std::string byte_stream)
+data_chunk bytes_from_bytea(std::string byte_stream)
 {
     return bytes_from_pretty(spaced_bytes(byte_stream));
 }
 
-inline hash_digest hash_from_bytea(std::string byte_stream)
+hash_digest hash_from_bytea(std::string byte_stream)
 {
     return hash_from_pretty(spaced_bytes(byte_stream));
 }
@@ -41,11 +41,11 @@ inline uint32_t combine_bits(uint32_t bits_head, uint32_t bits_body)
     return bits_body + (bits_head << (3*8));
 }
 
-inline uint32_t extract_bits_head(uint32_t bits)
+uint32_t extract_bits_head(uint32_t bits)
 {
     return bits >> (8*3);
 }
-inline uint32_t extract_bits_body(uint32_t bits)
+uint32_t extract_bits_body(uint32_t bits)
 {
     return bits & 0x00ffffff;
 }
