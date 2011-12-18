@@ -17,14 +17,11 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
 {
     Dbc* cursor;
     db_blocks_->cursor(txn->get(), &cursor, 0);
-    Dbt key, data;
-    if (cursor->get(&key, &data, DB_LAST) == DB_NOTFOUND)
+    writable_data_type key, data;
+    if (cursor->get(key.get(), data.get(), DB_LAST) == DB_NOTFOUND)
         return std::numeric_limits<uint32_t>::max();
-    BITCOIN_ASSERT(key.get_size() == 4);
-    data_chunk raw_depth;
-    extend_data(raw_depth, std::string(
-        reinterpret_cast<const char*>(key.get_data()), key.get_size()));
-    uint32_t last_block_depth = cast_chunk<uint32_t>(raw_depth);
+    BITCOIN_ASSERT(key.get()->get_size() == 4);
+    uint32_t last_block_depth = cast_chunk<uint32_t>(key.data());
     cursor->close();
     return last_block_depth;
 }

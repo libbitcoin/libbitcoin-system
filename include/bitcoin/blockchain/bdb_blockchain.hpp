@@ -36,7 +36,7 @@ public:
 
 private:
     bdb_blockchain();
-    void initialize(const std::string& prefix);
+    bool initialize(const std::string& prefix);
 
     void do_store(const message::block& store_block,
         store_block_handler handle_store);

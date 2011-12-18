@@ -44,6 +44,11 @@ public:
         return txn_;
     }
 
+    DbTxn* get() const
+    {
+        return txn_;
+    }
+
 private:
     DbTxn* txn_;
     bool used_;

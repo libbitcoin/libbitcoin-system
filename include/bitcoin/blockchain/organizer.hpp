@@ -20,10 +20,13 @@ public:
     bool is_processed();
     const hash_digest& hash() const;
     const std::string& label() const;
+    void set_depth(int depth);
+    int depth() const;
 private:
     const message::block actual_block_;
     const hash_digest block_hash_;
     bool processed_;
+    int depth_;
     // For debugging
     std::string label_;
 };
@@ -68,10 +71,14 @@ public:
     organizer(orphans_pool_ptr orphans, chain_keeper_ptr chain);
 
     void start();
+
+protected:
+    virtual bool verify(int fork_index, blocks_list& orphan_chain,
+        int orphan_index) = 0;
+
 private:
     void process(block_detail_ptr process_block);
     void replace_chain(int fork_index, blocks_list& orphan_chain);
-    bool verify(int fork_index, blocks_list& orphan_chain, int orphan_index);
     void clip_orphans(blocks_list& orphan_chain, int orphan_index);
 
     orphans_pool_ptr orphans_;
