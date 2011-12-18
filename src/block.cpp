@@ -9,6 +9,16 @@
 
 namespace libbitcoin {
 
+bool operator==(const message::block block_a, const message::block& block_b)
+{
+    return block_a.version == block_b.version &&
+        block_a.previous_block_hash == block_b.previous_block_hash &&
+        block_a.merkle == block_b.merkle &&
+        block_a.timestamp == block_b.timestamp &&
+        block_a.bits == block_b.bits &&
+        block_a.nonce == block_b.nonce;
+}
+
 uint64_t block_value(size_t depth)
 {
     uint64_t subsidy = coin_price(block_reward);

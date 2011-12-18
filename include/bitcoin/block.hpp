@@ -19,6 +19,8 @@ struct block_info
     size_t depth;
 };
 
+bool operator==(const message::block block_a, const message::block& block_b);
+
 uint64_t block_value(size_t depth);
 big_number block_work(uint32_t bits);
 
