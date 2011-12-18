@@ -13,6 +13,11 @@ You will need:
     - berkdb 5.1 or newer
     - protobuf
 
+Ubuntu users:
+
+  $ sudo apt-get install build-essential autoconf libtool libdb++-dev protobuf pkg-config libboost-all-dev
+  $ autoreconf -i
+
 Build cppdb using the instructions on their site.
 
   $ svn co http://cppcms.svn.sourceforge.net/svnroot/cppcms/cppdb/trunk cppdb-trunk
