@@ -64,7 +64,7 @@ big_number& big_number::operator=(const big_number& other)
     return *this;
 }
 
-void big_number::set_compacted(uint32_t compact)
+void big_number::set_compact(uint32_t compact)
 {
     size_t size = compact >> 24;
     data_chunk number_repr(4 + size);
@@ -78,7 +78,7 @@ void big_number::set_compacted(uint32_t compact)
     BN_mpi2bn(&number_repr[0], number_repr.size(), &bignum_);
 }
 
-uint32_t big_number::compacted() const
+uint32_t big_number::compact() const
 {
     size_t size = BN_bn2mpi(&bignum_, NULL);
     data_chunk number_repr(size);

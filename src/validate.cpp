@@ -119,7 +119,7 @@ bool validate_block::check_block()
 bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
 {
     big_number target;
-    target.set_compacted(bits);
+    target.set_compact(bits);
 
     if (target <= 0 || target > max_target())
         return false;
@@ -229,14 +229,14 @@ uint32_t validate_block::work_required()
     actual = range_constraint(actual, target_timespan / 4, target_timespan * 4);
 
     big_number retarget;
-    retarget.set_compacted(previous_block_bits());
+    retarget.set_compact(previous_block_bits());
     retarget *= actual;
     retarget /= target_timespan;
 
     if (retarget > max_target())
         retarget = max_target();
 
-    return retarget.compacted();
+    return retarget.compact();
 }
 
 bool validate_block::passes_checkpoints()

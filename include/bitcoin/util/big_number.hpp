@@ -22,8 +22,8 @@ public:
 
     big_number& operator=(const big_number& other);
 
-    void set_compacted(uint32_t compact);
-    uint32_t compacted() const;
+    void set_compact(uint32_t compact);
+    uint32_t compact() const;
     void set_data(data_chunk load_data);
     data_chunk data() const;
     void set_hash(hash_digest load_hash);
