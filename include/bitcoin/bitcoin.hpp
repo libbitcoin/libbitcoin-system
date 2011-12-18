@@ -17,7 +17,6 @@
 #include <bitcoin/error.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/postbind.hpp>
 #include <bitcoin/util/threads.hpp>
 #include <bitcoin/util/elliptic_curve_key.hpp>
 #include <bitcoin/util/big_number.hpp>

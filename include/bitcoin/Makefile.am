@@ -38,7 +38,6 @@ bitcoin_util_includedir = $(includedir)/bitcoin/util
 bitcoin_util_include_HEADERS = \
 	util/elliptic_curve_key.hpp \
 	util/sha256.hpp \
-	util/postbind.hpp \
 	util/threads.hpp \
 	util/serializer.hpp \
 	util/assert.hpp \

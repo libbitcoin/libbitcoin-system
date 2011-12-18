@@ -7,7 +7,6 @@
 #include <bitcoin/error.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
-#include <bitcoin/util/postbind.hpp>
 #include <bitcoin/util/clock.hpp>
 
 namespace libbitcoin {
