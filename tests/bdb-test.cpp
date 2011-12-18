@@ -21,7 +21,7 @@ void show_block(const std::error_code& ec, const message::block& blk)
     log_debug() << pretty_hex(hash_transaction(blk.transactions[0]));
 }
 
-void handle_store(const std::error_code& ec, block_status status,
+void handle_store(const std::error_code& ec, block_info info,
     blockchain_ptr chain)
 {
     if (ec)

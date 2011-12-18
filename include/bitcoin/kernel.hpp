@@ -40,7 +40,7 @@ public:
 
 private:
     void handle_connect(const std::error_code& ec, channel_ptr node);
-    void handle_block_stored(const std::error_code& ec, block_status status,
+    void handle_block_stored(const std::error_code& ec, block_info info,
         hash_digest block_hash);
 
     void start_initial_getblocks(channel_ptr node);

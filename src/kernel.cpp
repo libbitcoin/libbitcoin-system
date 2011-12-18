@@ -111,14 +111,14 @@ void kernel::receive_inventory(const std::error_code& ec,
 }
 
 void kernel::handle_block_stored(const std::error_code& ec,
-    block_status status, hash_digest block_hash)
+    block_info info, hash_digest block_hash)
 {
     if (ec && ec != error::object_already_exists)
     {
         log_error() << "Problem storing block: " << ec.message();
         return;
     }
-    else if (status == block_status::orphan)
+    else if (info.status == block_status::orphan)
     {
         hash_pair_list hashes;
         hashes.push_back(std::make_pair(block_hash, block_hash));

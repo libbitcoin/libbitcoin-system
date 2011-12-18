@@ -15,7 +15,7 @@ class blockchain
 {
 public:
     typedef std::function<void (const std::error_code&)> store_handler;
-    typedef std::function<void (const std::error_code&, block_status)>
+    typedef std::function<void (const std::error_code&, block_info)>
         store_block_handler;
 
     // Not supported in g++ yet

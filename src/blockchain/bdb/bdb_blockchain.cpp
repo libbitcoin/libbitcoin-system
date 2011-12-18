@@ -148,13 +148,15 @@ void bdb_blockchain::do_store(const message::block& stored_block,
     int depth = chain_->find_index(hash_block_header(stored_block));
     if (depth != -1)
     {
-        handle_store(error::object_already_exists, block_status::confirmed);
+        handle_store(error::object_already_exists,
+            block_info{block_status::confirmed, depth});
         return;
     }
     orphans_->add(stored_detail);
     organize_->start();
     env_->txn_checkpoint(0, 0, 0);
-    handle_store(std::error_code(), block_status::orphan);
+    handle_store(std::error_code(),
+        block_info{block_status::orphan, 0});
 }
 
 template<typename Index>

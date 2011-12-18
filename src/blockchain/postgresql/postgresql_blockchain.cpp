@@ -115,6 +115,7 @@ void postgresql_blockchain::store(const message::block& block,
 void postgresql_blockchain::do_store_block(const message::block& block,
         store_block_handler handle_store)
 {
+    log_warning() << "postgresql_blockchain::store(...) doesn't return depth";
     hash_digest block_hash = hash_block_header(block);
     std::string block_hash_repr = pretty_hex(block_hash),
             prev_block_repr = pretty_hex(block.previous_block_hash),
@@ -145,9 +146,11 @@ void postgresql_blockchain::do_store_block(const message::block& block,
         check_confirmed.bind(result.get<size_t>(0));
         cppdb::result is_confirmed = check_confirmed.row();
         if (is_confirmed.empty())
-            handle_store(error::object_already_exists, block_status::orphan);
+            handle_store(error::object_already_exists,
+                block_info{block_status::orphan, 0});
         else
-            handle_store(error::object_already_exists, block_status::confirmed);
+            handle_store(error::object_already_exists,
+                block_info{block_status::confirmed, 0});
         return;
     }
 
@@ -230,9 +233,11 @@ void postgresql_blockchain::do_store_block(const message::block& block,
     check_confirmed.bind(block_info.block_id);
     cppdb::result is_confirmed = check_confirmed.row();
     if (is_confirmed.empty())
-        handle_store(std::error_code(), block_status::orphan);
+        handle_store(std::error_code(),
+            block_info{block_status::orphan, 0});
     else
-        handle_store(std::error_code(), block_status::confirmed);
+        handle_store(std::error_code(),
+            block_info{block_status::confirmed, 0});
 }
 
 void postgresql_blockchain::fetch_block_locator(

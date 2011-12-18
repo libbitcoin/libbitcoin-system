@@ -13,6 +13,12 @@ enum class block_status
     bad
 };
 
+struct block_info
+{
+    block_status status;
+    size_t depth;
+};
+
 uint64_t block_value(size_t depth);
 big_number block_work(uint32_t bits);
 
