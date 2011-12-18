@@ -23,12 +23,12 @@ bool block_detail::is_processed()
     return processed_;
 }
 
-const hash_digest& block_detail::get_hash() const
+const hash_digest& block_detail::hash() const
 {
     return block_hash_;
 }
 
-const std::string& block_detail::get_label() const
+const std::string& block_detail::label() const
 {
     return label_;
 }
@@ -55,7 +55,7 @@ blocks_list orphans_pool::trace(block_detail_ptr end_block)
         const hash_digest& previous_hash =
             traced_chain.back()->actual().previous_block_hash;
         for (const block_detail_ptr current_block: pool_)
-            if (current_block->get_hash() == previous_hash)
+            if (current_block->hash() == previous_hash)
             {
                 traced_chain.push_back(current_block);
                 goto resume_loop;
@@ -66,7 +66,7 @@ blocks_list orphans_pool::trace(block_detail_ptr end_block)
     return traced_chain;
 }
 
-blocks_list orphans_pool::get_unprocessed()
+blocks_list orphans_pool::unprocessed()
 {
     blocks_list unprocessed_blocks;
     for (const block_detail_ptr current_block: pool_)
@@ -95,7 +95,7 @@ organizer::organizer(orphans_pool_ptr orphans, chain_keeper_ptr chain)
 void organizer::start()
 {
     // Load unprocessed blocks
-    process_queue_ = orphans_->get_unprocessed();
+    process_queue_ = orphans_->unprocessed();
     // As we loop, we pop blocks off and process them
     while (!process_queue_.empty())
     {

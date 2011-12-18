@@ -25,7 +25,7 @@ public:
     void operator=(const kernel&) = delete;
 
     void register_network(network_ptr net_comp);
-    network_ptr get_network();
+    network_ptr network_service();
 
     void connect(std::string hostname, uint16_t port);
 
@@ -35,7 +35,7 @@ public:
         const message::block& packet, channel_ptr node);
 
     void register_blockchain(blockchain_ptr stor_comp);
-    blockchain_ptr get_blockchain();
+    blockchain_ptr blockchain_service();
     void tween_blocks(const hash_pair_list& block_hashes);
 
 private:
@@ -50,8 +50,8 @@ private:
         const message::block_locator& locator, 
         const hash_pair_list& block_hashes);
 
-    network_ptr network_component_;
-    blockchain_ptr blockchain_component_;
+    network_ptr network_service_;
+    blockchain_ptr blockchain_service_;
 
     bool initial_getblocks_;
     std::multimap<hash_digest, channel_ptr> inventory_tracker_;

@@ -18,8 +18,8 @@ public:
     const message::block& actual() const;
     void mark_processed();
     bool is_processed();
-    const hash_digest& get_hash() const;
-    const std::string& get_label() const;
+    const hash_digest& hash() const;
+    const std::string& label() const;
 private:
     const message::block actual_block_;
     const hash_digest block_hash_;
@@ -38,7 +38,7 @@ public:
     orphans_pool(size_t pool_size);
     void add(block_detail_ptr incoming_block);
     blocks_list trace(block_detail_ptr end_block);
-    blocks_list get_unprocessed();
+    blocks_list unprocessed();
     void remove(block_detail_ptr remove_block);
 private:
     boost::circular_buffer<block_detail_ptr> pool_;

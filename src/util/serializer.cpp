@@ -77,7 +77,7 @@ void serializer::write_command(std::string command)
     extend_data(data_, comm_str);
 }
 
-data_chunk serializer::get_data() const
+data_chunk serializer::data() const
 {
     return data_;
 }

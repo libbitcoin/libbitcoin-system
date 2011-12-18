@@ -19,7 +19,7 @@ uint64_t block_value(size_t depth)
 big_number block_work(uint32_t bits)
 {
     big_number target;
-    target.set_compact(bits);
+    target.set_compacted(bits);
     if (target <= 0)
         return 0;
     return (big_number(1) << 256) / (target + 1);
@@ -34,7 +34,7 @@ hash_digest hash_block_header(const message::block& block)
     key.write_4_bytes(block.timestamp);
     key.write_4_bytes(block.bits);
     key.write_4_bytes(block.nonce);
-    return generate_sha256_hash(key.get_data());
+    return generate_sha256_hash(key.data());
 }
 
 std::vector<size_t> block_locator_indices(int top_depth)

@@ -21,7 +21,7 @@ std::string encode_base58(const data_chunk& unencoded_data)
     {                                                                            
         auto result = divmod(long_value, 58);
         long_value = result.first;
-        size_t remainder = result.second.get_uint64();
+        size_t remainder = result.second.uint64();
         encoded_data += base58_chars[remainder];
     }                                                                            
                                                                                  
@@ -50,7 +50,7 @@ data_chunk decode_base58(const std::string& encoded_data)
     }                                                                            
                                                                                  
     // Get bignum as little endian data                                          
-    data_chunk temp_data = bn.get_data();       
+    data_chunk temp_data = bn.data();       
                                                                                  
     // Trim off sign byte if present                                             
     if (temp_data.size() >= 2 && 

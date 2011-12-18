@@ -64,7 +64,7 @@ big_number& big_number::operator=(const big_number& other)
     return *this;
 }
 
-void big_number::set_compact(uint32_t compact)
+void big_number::set_compacted(uint32_t compact)
 {
     size_t size = compact >> 24;
     data_chunk number_repr(4 + size);
@@ -78,7 +78,7 @@ void big_number::set_compact(uint32_t compact)
     BN_mpi2bn(&number_repr[0], number_repr.size(), &bignum_);
 }
 
-uint32_t big_number::get_compact() const
+uint32_t big_number::compacted() const
 {
     size_t size = BN_bn2mpi(&bignum_, NULL);
     data_chunk number_repr(size);
@@ -94,45 +94,46 @@ uint32_t big_number::get_compact() const
     return compact;
 }
 
-void big_number::set_data(data_chunk data)
+void big_number::set_data(data_chunk load_data)
 {
-    size_t size = data.size();
+    size_t size = load_data.size();
     // BIGNUM's byte stream format expects 4 bytes of
     // big endian size data info at the front
-    data.insert(data.begin(), (size >> 24) & 0xff);
-    data.insert(data.begin() + 1, (size >> 16) & 0xff);
-    data.insert(data.begin() + 2, (size >> 8) & 0xff);
-    data.insert(data.begin() + 3, (size >> 0) & 0xff);
-    BN_mpi2bn(&data[0], data.size(), &bignum_);
+    load_data.insert(load_data.begin(), (size >> 24) & 0xff);
+    load_data.insert(load_data.begin() + 1, (size >> 16) & 0xff);
+    load_data.insert(load_data.begin() + 2, (size >> 8) & 0xff);
+    load_data.insert(load_data.begin() + 3, (size >> 0) & 0xff);
+    BN_mpi2bn(&load_data[0], load_data.size(), &bignum_);
 }
 
-data_chunk big_number::get_data() const
+data_chunk big_number::data() const
 {
     size_t size = BN_bn2mpi(&bignum_, NULL);
     if (size < 4)
         return data_chunk();
-    data_chunk data(size);
-    BN_bn2mpi(&bignum_, &data[0]);
-    data.erase(data.begin(), data.begin() + 4);
-    return data;
+    data_chunk result_data(size);
+    BN_bn2mpi(&bignum_, &result_data[0]);
+    result_data.erase(result_data.begin(), result_data.begin() + 4);
+    return result_data;
 }
 
-void big_number::set_hash(hash_digest hash)
+void big_number::set_hash(hash_digest load_hash)
 {
-    data_chunk hash_data(hash.size());
-    std::copy(hash.begin(), hash.end(), hash_data.begin());
+    data_chunk hash_data(load_hash.size());
+    std::copy(load_hash.begin(), load_hash.end(), hash_data.begin());
     set_data(hash_data);
 }
 
-hash_digest big_number::get_hash() const
+hash_digest big_number::hash() const
 {
     hash_digest repr{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    data_chunk data = get_data();
-    if (data.size() < 4)
+    data_chunk copy_data = data();
+    if (copy_data.size() < 4)
         return repr;
     // Copy up to end, not from start to midway
-    std::copy(data.begin(), data.end(), repr.end() - data.size());
+    std::copy(copy_data.begin(), copy_data.end(),
+        repr.end() - copy_data.size());
     return repr;
 }
 
@@ -141,9 +142,9 @@ void big_number::set_uint64(uint64_t value)
     set_data(uncast_type(value, true));
 }
 
-uint64_t big_number::get_uint64() const
+uint64_t big_number::uint64() const
 {
-    return cast_chunk<uint64_t>(get_data());
+    return cast_chunk<uint64_t>(data());
 }
 
 bool big_number::operator==(const big_number& other) 

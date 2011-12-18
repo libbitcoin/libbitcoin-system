@@ -30,7 +30,7 @@ data_chunk construct_header_from(std::string command,
         uint32_t checksum = generate_sha256_checksum(payload);
         header.write_4_bytes(checksum);
     }
-    return header.get_data();
+    return header.data();
 }
 
 data_chunk original_dialect::create_header(const message::version&,
@@ -87,7 +87,7 @@ data_chunk original_dialect::to_network(const message::version& version) const
     // do sub_version_num
     payload.write_byte(0);
     payload.write_4_bytes(version.start_height);
-    return payload.get_data();
+    return payload.data();
 }
 
 data_chunk original_dialect::to_network(const message::verack&) const
@@ -109,7 +109,7 @@ data_chunk original_dialect::to_network(
     for (hash_digest start_hash: getblocks.locator_start_hashes)
         payload.write_hash(start_hash);
     payload.write_hash(getblocks.hash_stop);
-    return payload.get_data();
+    return payload.data();
 }
 
 data_chunk original_dialect::to_network(const message::block& block) const
@@ -140,7 +140,7 @@ data_chunk original_dialect::to_network(const message::transaction& tx) const
         payload.write_data(raw_script);
     }
     payload.write_4_bytes(tx.locktime);
-    return payload.get_data();
+    return payload.data();
 }
 
 data_chunk original_dialect::to_network(const message::get_data& getdata) const
@@ -165,7 +165,7 @@ data_chunk original_dialect::to_network(const message::get_data& getdata) const
         }
         payload.write_hash(inv.hash);
     }
-    return payload.get_data();
+    return payload.data();
 }
 
 message::header original_dialect::header_from_network(

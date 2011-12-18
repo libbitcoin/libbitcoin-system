@@ -23,7 +23,7 @@ public:
     void write_hash(hash_digest hash);
     void write_command(std::string command);
 
-    data_chunk get_data() const;
+    data_chunk data() const;
 private:
     data_chunk data_;
 };

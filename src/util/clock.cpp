@@ -3,7 +3,7 @@
 
 namespace libbitcoin {
 
-const ptime clock::get_time()
+const ptime clock::time()
 {
     return boost::posix_time::second_clock::universal_time();
 }

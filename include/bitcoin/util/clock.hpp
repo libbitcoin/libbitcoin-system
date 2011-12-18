@@ -11,7 +11,7 @@ using boost::posix_time::hours;
 class clock
 {
 public:
-    const ptime get_time();
+    const ptime time();
 };
 
 } // libbitcoin

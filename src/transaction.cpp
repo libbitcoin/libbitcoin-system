@@ -49,7 +49,7 @@ hash_digest build_merkle_tree(hash_list& merkle)
             serializer concat;
             concat.write_hash(*it);
             concat.write_hash(*(it + 1));
-            hash_digest new_root = generate_sha256_hash(concat.get_data());
+            hash_digest new_root = generate_sha256_hash(concat.data());
             new_merkle.push_back(new_root);
         }
         merkle = new_merkle;

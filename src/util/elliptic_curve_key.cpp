@@ -30,7 +30,7 @@ bool elliptic_curve_key::set_public_key(const data_chunk& pubkey)
     return true;
 }
 
-data_chunk elliptic_curve_key::get_public_key() const
+data_chunk elliptic_curve_key::public_key() const
 {
     // same as get_private_key
     int length = i2o_ECPublicKey(key_, NULL);
@@ -74,7 +74,7 @@ bool elliptic_curve_key::set_private_key(const private_data& privkey)
     return true;
 }
 
-private_data elliptic_curve_key::get_private_key() const
+private_data elliptic_curve_key::private_key() const
 {
     int length = i2d_ECPrivateKey(key_, NULL);
     if (!length)

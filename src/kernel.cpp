@@ -21,17 +21,17 @@ kernel::kernel()
 
 void kernel::register_network(network_ptr net_comp)
 {
-    network_component_ = net_comp;
+    network_service_ = net_comp;
 }
 
-network_ptr kernel::get_network()
+network_ptr kernel::network_service()
 {
-    return network_component_;
+    return network_service_;
 }
 
 void kernel::connect(std::string hostname, uint16_t port)
 {
-    handshake_connect(network_component_, hostname, port,
+    handshake_connect(network_service_, hostname, port,
         strand()->wrap(std::bind(
             &kernel::handle_connect, shared_from_this(), _1, _2)));
 }
@@ -57,7 +57,7 @@ void kernel::handle_connect(const std::error_code& ec, channel_ptr node)
 
 void kernel::start_initial_getblocks(channel_ptr node)
 {
-    blockchain_component_->fetch_block_locator(
+    blockchain_service_->fetch_block_locator(
         strand()->wrap(std::bind(&kernel::request_initial_blocks,
             shared_from_this(), _1, _2, node)));
 }
@@ -129,7 +129,7 @@ void kernel::handle_block_stored(const std::error_code& ec,
 void kernel::receive_block(const std::error_code& ec,
     const message::block& packet, channel_ptr node)
 {
-    blockchain_component_->store(packet,
+    blockchain_service_->store(packet,
         std::bind(&kernel::handle_block_stored, shared_from_this(),
             _1, _2, hash_block_header(packet)));
     node->subscribe_block(
@@ -138,17 +138,17 @@ void kernel::receive_block(const std::error_code& ec,
 
 void kernel::register_blockchain(blockchain_ptr stor_comp)
 {
-    blockchain_component_ = stor_comp;
+    blockchain_service_ = stor_comp;
 }
 
-blockchain_ptr kernel::get_blockchain()
+blockchain_ptr kernel::blockchain_service()
 {
-    return blockchain_component_;
+    return blockchain_service_;
 }
 
 void kernel::tween_blocks(const hash_pair_list& block_hashes)
 {
-    blockchain_component_->fetch_block_locator(
+    blockchain_service_->fetch_block_locator(
         strand()->wrap(std::bind(&kernel::request_next_blocks,
             shared_from_this(), _1, _2, block_hashes)));
 }

@@ -71,7 +71,7 @@ bool validate_block::check_block()
 
     const ptime block_time = 
             boost::posix_time::from_time_t(current_block_.timestamp);
-    if (block_time > clock_->get_time() + hours(2))
+    if (block_time > clock_->time() + hours(2))
     {
         log_error(log_domain::validation) << "Timestamp too far in the future";
         return false;
@@ -120,7 +120,7 @@ bool validate_block::check_block()
 bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
 {
     big_number target;
-    target.set_compact(bits);
+    target.set_compacted(bits);
 
     if (target <= 0 || target > max_target())
         return false;
@@ -230,14 +230,14 @@ uint32_t validate_block::work_required()
     actual = range_constraint(actual, target_timespan / 4, target_timespan * 4);
 
     big_number retarget;
-    retarget.set_compact(previous_block_bits());
+    retarget.set_compacted(previous_block_bits());
     retarget *= actual;
     retarget /= target_timespan;
 
     if (retarget > max_target())
         retarget = max_target();
 
-    return retarget.get_compact();
+    return retarget.compacted();
 }
 
 bool validate_block::passes_checkpoints()
