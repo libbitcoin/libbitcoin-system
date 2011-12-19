@@ -17,7 +17,7 @@ bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
 bitcoin_blockchain_include_HEADERS = \
 	blockchain/blockchain.hpp
 
-if DO_BERKDB
+if DO_BDB
 bitcoin_blockchain_include_HEADERS += \
 	blockchain/bdb_blockchain.hpp
 endif

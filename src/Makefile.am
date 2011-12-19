@@ -26,7 +26,7 @@ libbitcoin_la_SOURCES = \
 	constants.cpp \
 	blockchain/organizer.cpp
 
-if DO_BERKDB
+if DO_BDB
 libbitcoin_la_SOURCES += \
 	blockchain/bdb/bdb_blockchain.cpp \
 	blockchain/bdb/bitcoin.pb.cc \

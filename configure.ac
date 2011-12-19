@@ -11,11 +11,11 @@ CXXFLAGS="-ggdb"
 my_CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -pedantic -pthread -Wextra -fstack-protector-all"
 AC_SUBST([my_CXXFLAGS])
 
-AC_ARG_ENABLE(berkdb,
-	[AC_HELP_STRING([--enable-berkdb],
+AC_ARG_ENABLE(bdb,
+	[AC_HELP_STRING([--enable-bdb],
 			[Build Berkeley DB support.])],
-	[bld_berkdb="$enable_berkdb"], [bld_berkdb="no"])
-AM_CONDITIONAL([DO_BERKDB], [test "$enable_berkdb" = "yes"])
+	[bld_bdb="$enable_bdb"], [bld_bdb="no"])
+AM_CONDITIONAL([DO_BDB], [test "$enable_bdb" = "yes"])
 
 AC_ARG_ENABLE(postgres,
 	[AC_HELP_STRING([--enable-postgres],
@@ -29,11 +29,11 @@ AX_BOOST_THREAD
 
 PKG_PROG_PKG_CONFIG
 
-if test "$bld_berkdb" = "yes"; then
+if test "$bld_bdb" = "yes"; then
 	AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
 	PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
-	AC_SUBST(LDFLAG_BERKDB)
-	LDFLAG_BERKDB="-lprotobuf $DB_CXX_LIBS"
+	AC_SUBST(LDFLAG_BDB)
+	LDFLAG_BDB="-lprotobuf $DB_CXX_LIBS"
 fi
 if test "$bld_postgres" = "yes"; then
 	# some checks here?
