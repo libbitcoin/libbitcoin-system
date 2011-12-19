@@ -26,8 +26,8 @@ void handle_store(const std::error_code& ec, block_info info,
 {
     if (ec)
         log_error() << "handle store " << ec.message();
-    static size_t counter = 0;
-    if (++counter == 400)
+    log_debug() << "added " << info.depth;
+    if (info.depth == 400)
     {
         chain->fetch_block(
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x83, 0x9a, 0x8e, 0x68,

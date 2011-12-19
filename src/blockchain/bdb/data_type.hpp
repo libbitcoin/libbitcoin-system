@@ -38,10 +38,15 @@ public:
     {
         return &dbt_;
     }
+    const Dbt* get() const
+    {
+        return &dbt_;
+    }
 private:
     void prepare()
     {
         dbt_.set_data(&data_buffer_[0]);
+        dbt_.set_ulen(data_buffer_.size());
         dbt_.set_size(data_buffer_.size());
         dbt_.set_flags(DB_DBT_USERMEM);
     }
@@ -62,7 +67,7 @@ public:
         free(dbt_.get_data());
     }
 
-    data_chunk data()
+    data_chunk data() const
     {
         std::string raw_depth(reinterpret_cast<const char*>(
             dbt_.get_data()), dbt_.get_size());
@@ -75,6 +80,10 @@ public:
     }
 
     Dbt* get()
+    {
+        return &dbt_;
+    }
+    const Dbt* get() const
     {
         return &dbt_;
     }
@@ -97,6 +106,10 @@ public:
     }
 
     Dbt* get()
+    {
+        return &dbt_;
+    }
+    const Dbt* get() const
     {
         return &dbt_;
     }

@@ -5,7 +5,7 @@ namespace libbitcoin {
 block_detail::block_detail(const message::block& actual_block,
     const std::string& label)
  : actual_block_(actual_block), block_hash_(hash_block_header(actual_block_)),
-    processed_(false), label_(label)
+    processed_(false), label_(label), depth_(-1)
 {
 }
 
@@ -33,6 +33,16 @@ const std::string& block_detail::label() const
     return label_;
 }
 
+void block_detail::set_depth(int depth)
+{
+    depth_ = depth;
+}
+
+int block_detail::depth() const
+{
+    return depth_;
+}
+
 orphans_pool::orphans_pool(size_t pool_size)
  : pool_(pool_size)
 {
@@ -41,7 +51,9 @@ orphans_pool::orphans_pool(size_t pool_size)
 void orphans_pool::add(block_detail_ptr incoming_block)
 {
     // No duplicates
-    remove(incoming_block);
+    for (block_detail_ptr current_block: pool_)
+        if (current_block->actual() == incoming_block->actual())
+            return;
     pool_.push_back(incoming_block);
 }
 
@@ -82,9 +94,7 @@ blocks_list orphans_pool::unprocessed()
 
 void orphans_pool::remove(block_detail_ptr remove_block)
 {
-    auto it = std::find(pool_.begin(), pool_.end(), remove_block);
-    if (it != pool_.end())
-        pool_.erase(it);
+    pool_.erase(std::find(pool_.begin(), pool_.end(), remove_block));
 }
 
 organizer::organizer(orphans_pool_ptr orphans, chain_keeper_ptr chain)
@@ -145,11 +155,14 @@ void organizer::replace_chain(int fork_index, blocks_list& orphan_chain)
     for (block_detail_ptr replaced_block: replaced_slice)
     {
         replaced_block->mark_processed();
+        replaced_block->set_depth(-1);
         orphans_->add(replaced_block);
     }
+    int arrival_index = fork_index;
     for (block_detail_ptr arrival_block: orphan_chain)
     {
         orphans_->remove(arrival_block);
+        arrival_block->set_depth(++arrival_index);
         chain_->add(arrival_block);
     }
 }
@@ -163,12 +176,6 @@ void organizer::clip_orphans(blocks_list& orphan_chain, int orphan_index)
         // Remove from orphans pool
         orphans_->remove(*it);
     }
-}
-
-bool organizer::verify(int fork_index,
-    blocks_list& orphan_chain, int orphan_index)
-{
-    return true;
 }
 
 } // libbitcoin

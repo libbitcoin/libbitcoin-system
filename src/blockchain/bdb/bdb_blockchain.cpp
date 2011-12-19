@@ -7,6 +7,7 @@
 
 #include "bdb_common.hpp"
 #include "bdb_chain_keeper.hpp"
+#include "bdb_organizer.hpp"
 #include "data_type.hpp"
 #include "txn_guard.hpp"
 #include "protobuf_wrapper.hpp"
@@ -59,7 +60,8 @@ bdb_blockchain::~bdb_blockchain()
 bool bdb_blockchain::setup(const std::string& prefix)
 {
     bdb_blockchain handle;
-    handle.initialize(prefix);
+    if (!handle.initialize(prefix))
+        return false;
     handle.db_blocks_->truncate(nullptr, 0, 0);
     handle.db_txs_->truncate(nullptr, 0, 0);
     // Save genesis block
@@ -102,7 +104,21 @@ int get_tx_hash(Db*, const Dbt*, const Dbt* data, Dbt* second_key)
     return 0;
 }
 
-void bdb_blockchain::initialize(const std::string& prefix)
+int bt_compare_blocks(DB*, const DBT* dbt1, const DBT* dbt2)
+{
+    data_chunk key_data1(dbt1->size), key_data2(dbt2->size);
+    memcpy(key_data1.data(), dbt1->data, dbt1->size);
+    memcpy(key_data2.data(), dbt2->data, dbt2->size);
+    uint32_t depth1 = cast_chunk<uint32_t>(key_data1),
+        depth2 = cast_chunk<uint32_t>(key_data2);
+    if (depth1 < depth2)
+        return -1;
+    else if (depth1 > depth2)
+        return 1;
+    return 0;
+}
+
+bool bdb_blockchain::initialize(const std::string& prefix)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     env_ = new DbEnv(0);
@@ -114,6 +130,11 @@ void bdb_blockchain::initialize(const std::string& prefix)
     db_blocks_hash_ = new Db(env_, 0);
     db_txs_ = new Db(env_, 0);
     db_txs_hash_ = new Db(env_, 0);
+    if (db_blocks_->set_bt_compare(bt_compare_blocks) != 0)
+    {
+        log_fatal() << "Internal error setting BTREE comparison function";
+        return false;
+    }
     txn_guard txn(env_);
     db_blocks_->open(txn.get(), "blocks", "block-data", DB_BTREE, db_flags, 0);
     db_blocks_hash_->open(txn.get(), "blocks", "block-hash", 
@@ -131,7 +152,8 @@ void bdb_blockchain::initialize(const std::string& prefix)
     orphans_ = std::make_shared<orphans_pool>(10);
     chain_ = std::make_shared<bdb_chain_keeper>(common_, env_,
         db_blocks_, db_blocks_hash_);
-    organize_ = std::make_shared<organizer>(orphans_, chain_);
+    organize_ = std::make_shared<bdb_organizer>(orphans_, chain_);
+    return true;
 }
 
 void bdb_blockchain::store(const message::block& stored_block, 
@@ -154,17 +176,23 @@ void bdb_blockchain::do_store(const message::block& stored_block,
     }
     orphans_->add(stored_detail);
     organize_->start();
-    env_->txn_checkpoint(0, 0, 0);
+    // Every 10 blocks, we flush database
+    static size_t flush_counter = 0;
+    if (++flush_counter == 10)
+    {
+        env_->txn_checkpoint(0, 0, 0);
+        flush_counter = 0;
+    }
     handle_store(std::error_code(),
-        block_info{block_status::orphan, 0});
+        block_info{block_status::orphan, stored_detail->depth()});
 }
 
 template<typename Index>
-bool fetch_block_impl(Db* db_block_x, txn_guard_ptr txn, const Index& index,
+bool fetch_block_impl(Db* db_blocks_x, txn_guard_ptr txn, const Index& index,
     bdb_common_ptr common, message::block& serial_block)
 {
     protobuf::Block proto_block;
-    if (!bdb_common::proto_read(db_block_x, txn, index, proto_block))
+    if (!bdb_common::proto_read(db_blocks_x, txn, index, proto_block))
         return false;
     if (!common->reconstruct_block(txn, proto_block, serial_block))
         return false;
