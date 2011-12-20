@@ -24,6 +24,9 @@ public:
 
     void store(const message::block& block, store_block_handler handle_store);
 
+    void fetch_block(size_t depth, fetch_handler_block handle_fetch);
+    void fetch_block(const hash_digest& block_hash,
+        fetch_handler_block handle_fetch);
     void fetch_block_locator(fetch_handler_block_locator handle_fetch);
     void fetch_balance(const short_hash& pubkey_hash,
         fetch_handler_balance handle_fetch);

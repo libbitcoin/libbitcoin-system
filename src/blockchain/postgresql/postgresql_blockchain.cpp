@@ -200,8 +200,8 @@ void postgresql_blockchain::do_store_block(const message::block& block,
     statement.bind(block.nonce);
 
     result = statement.row();
-    pq_block_info block_info;
-    block_info.block_id = result.get<size_t>(0);
+    pq_block_info query_block_info;
+    query_block_info.block_id = result.get<size_t>(0);
     bool buffer_block = true;
     for (size_t i = 0; i < block.transactions.size(); ++i)
     {
@@ -222,15 +222,15 @@ void postgresql_blockchain::do_store_block(const message::block& block,
             );
         link_txs.reset();
         link_txs.bind(tx_info.transaction_id);
-        link_txs.bind(block_info.block_id);
+        link_txs.bind(query_block_info.block_id);
         link_txs.bind(i);
         link_txs.exec();
-        block_info.transactions.push_back(tx_info);
+        query_block_info.transactions.push_back(tx_info);
     }
     guard.commit();
     blockchain_->start();
     check_confirmed.reset();
-    check_confirmed.bind(block_info.block_id);
+    check_confirmed.bind(query_block_info.block_id);
     cppdb::result is_confirmed = check_confirmed.row();
     if (is_confirmed.empty())
         handle_store(std::error_code(),
@@ -238,6 +238,18 @@ void postgresql_blockchain::do_store_block(const message::block& block,
     else
         handle_store(std::error_code(),
             block_info{block_status::confirmed, 0});
+}
+
+void postgresql_blockchain::fetch_block(size_t depth,
+    fetch_handler_block handle_fetch)
+{
+    // Stub!
+}
+
+void postgresql_blockchain::fetch_block(const hash_digest& block_hash,
+    fetch_handler_block handle_fetch)
+{
+    // Stub!
 }
 
 void postgresql_blockchain::fetch_block_locator(

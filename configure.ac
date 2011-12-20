@@ -38,7 +38,7 @@ fi
 if test "$bld_postgres" = "yes"; then
 	# some checks here?
 	AC_SUBST(LDFLAG_POSTGRES)
-	LDFLAG_POSTGRES="-lpq"
+	LDFLAG_POSTGRES="-lpq -lcppdb"
 fi
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
