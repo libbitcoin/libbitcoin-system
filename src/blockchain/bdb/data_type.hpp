@@ -10,46 +10,16 @@ namespace libbitcoin {
 class readable_data_type
 {
 public:
-    void set(uint32_t value)
-    {
-        data_buffer_ = uncast_type(value);
-        prepare();
-    }
+    void set(uint32_t value);
+    void set(const data_chunk& data);
+    void set(const hash_digest& data);
+    void set(const std::string& data);
 
-    void set(const data_chunk& data)
-    {
-        extend_data(data_buffer_, data);
-        prepare();
-    }
+    Dbt* get();
+    const Dbt* get() const;
 
-    void set(const hash_digest& data)
-    {
-        extend_data(data_buffer_, data);
-        prepare();
-    }
-
-    void set(const std::string& data)
-    {
-        extend_data(data_buffer_, data);
-        prepare();
-    }
-
-    Dbt* get()
-    {
-        return &dbt_;
-    }
-    const Dbt* get() const
-    {
-        return &dbt_;
-    }
 private:
-    void prepare()
-    {
-        dbt_.set_data(&data_buffer_[0]);
-        dbt_.set_ulen(data_buffer_.size());
-        dbt_.set_size(data_buffer_.size());
-        dbt_.set_flags(DB_DBT_USERMEM);
-    }
+    void prepare();
 
     data_chunk data_buffer_;
     Dbt dbt_;
@@ -58,66 +28,34 @@ private:
 class writable_data_type
 {
 public:
-    writable_data_type()
-    {
-        dbt_.set_flags(DB_DBT_MALLOC);
-    }
-    ~writable_data_type()
-    {
-        free(dbt_.get_data());
-    }
+    writable_data_type();
+    ~writable_data_type();
 
-    data_chunk data() const
-    {
-        std::string raw_depth(reinterpret_cast<const char*>(
-            dbt_.get_data()), dbt_.get_size());
-        return data_chunk(raw_depth.begin(), raw_depth.end());
-    }
+    data_chunk data() const;
 
-    bool empty()
-    {
-        return dbt_.get_data() == nullptr;
-    }
+    bool empty();
 
-    Dbt* get()
-    {
-        return &dbt_;
-    }
-    const Dbt* get() const
-    {
-        return &dbt_;
-    }
-private:
-    Dbt dbt_;
-};
+    Dbt* get();
+    const Dbt* get() const;
 
-class empty_data_type
-{
-public:
-    empty_data_type()
-    {
-        dbt_.set_flags(DB_DBT_MALLOC|DB_DBT_PARTIAL);
-        dbt_.set_doff(0);
-        dbt_.set_dlen(0);
-    }
-    ~empty_data_type()
-    {
-        free(dbt_.get_data());
-    }
-
-    Dbt* get()
-    {
-        return &dbt_;
-    }
-    const Dbt* get() const
-    {
-        return &dbt_;
-    }
 private:
     Dbt dbt_;
 };
 
 typedef std::shared_ptr<writable_data_type> writable_data_type_ptr;
+
+class empty_data_type
+{
+public:
+    empty_data_type();
+    ~empty_data_type();
+
+    Dbt* get();
+    const Dbt* get() const;
+
+private:
+    Dbt dbt_;
+};
 
 } // libbitcoin
 

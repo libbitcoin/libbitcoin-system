@@ -28,6 +28,8 @@ libbitcoin_la_SOURCES = \
 
 if DO_BDB
 libbitcoin_la_SOURCES += \
+	blockchain/bdb/data_type.cpp \
+	blockchain/bdb/txn_guard.cpp \
 	blockchain/bdb/bdb_blockchain.cpp \
 	blockchain/bdb/bitcoin.pb.cc \
 	blockchain/bdb/bdb_chain_keeper.cpp \

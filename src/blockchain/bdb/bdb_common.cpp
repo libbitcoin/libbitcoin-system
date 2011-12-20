@@ -2,6 +2,7 @@
 
 #include DB_CXX_HEADER
 
+#include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 
 namespace libbitcoin {
