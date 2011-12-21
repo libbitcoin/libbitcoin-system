@@ -34,6 +34,7 @@ libbitcoin_la_SOURCES += \
 	blockchain/bdb/bitcoin.pb.cc \
 	blockchain/bdb/bdb_chain_keeper.cpp \
 	blockchain/bdb/bdb_organizer.cpp \
+	blockchain/bdb/bdb_validate_block.cpp \
 	blockchain/bdb/bdb_common.cpp \
 	blockchain/bdb/protobuf_wrapper.cpp
 endif

@@ -133,6 +133,14 @@ bin/tests/bdb-last: obj/bdb-last.o
 
 bdb-last: bin/tests/bdb-last
 
+obj/bdb-poller.o: tests/bdb-poller.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/bdb-poller: obj/bdb-poller.o
+	$(CXX) -o bin/tests/bdb-poller obj/bdb-poller.o $(LIBBITCOIN)
+
+bdb-poller: bin/tests/bdb-poller
+
 bin/tests/tx-hash: obj/tx-hash.o
 	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o $(LIBBITCOIN)
 

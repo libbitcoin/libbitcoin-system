@@ -17,9 +17,9 @@ using boost::asio::socket_base;
 
 network::network()
 {
-    threaded_.reset(new thread_core);
+    threaded_ = std::make_shared<thread_core>();
     strand_ = threaded_->create_strand();
-    default_dialect_.reset(new original_dialect);
+    default_dialect_ = std::make_shared<original_dialect>();
 }
 
 network::~network()

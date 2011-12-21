@@ -73,7 +73,7 @@ public:
     void start();
 
 protected:
-    virtual bool verify(int fork_index, blocks_list& orphan_chain,
+    virtual bool verify(int fork_index, const blocks_list& orphan_chain,
         int orphan_index) = 0;
 
 private:
