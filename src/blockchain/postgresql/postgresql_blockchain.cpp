@@ -252,6 +252,12 @@ void postgresql_blockchain::fetch_block(const hash_digest& block_hash,
     // Stub!
 }
 
+void postgresql_blockchain::fetch_last_depth(
+    fetch_handler_last_depth handle_fetch)
+{
+    // Stub
+}
+
 void postgresql_blockchain::fetch_block_locator(
         fetch_handler_block_locator handle_fetch)
 {

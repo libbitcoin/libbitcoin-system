@@ -30,6 +30,7 @@ public:
     void fetch_block(size_t depth, fetch_handler_block handle_fetch);
     void fetch_block(const hash_digest& block_hash,
         fetch_handler_block handle_fetch);
+    void fetch_last_depth(fetch_handler_last_depth handle_fetch);
     void fetch_block_locator(fetch_handler_block_locator handle_fetch);
     void fetch_balance(const short_hash& pubkey_hash,
         fetch_handler_balance handle_fetch);
@@ -45,6 +46,7 @@ private:
         fetch_handler_block handle_fetch);
     void fetch_block_by_hash(const hash_digest& block_hash, 
         fetch_handler_block handle_fetch);
+    void do_fetch_last_depth(fetch_handler_last_depth handle_fetch);
     void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
 
     DbEnv* env_;

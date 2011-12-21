@@ -125,6 +125,14 @@ bin/tests/bdb-test: obj/bdb-test.o
 
 bdb-test: bin/tests/bdb-test
 
+obj/bdb-last.o: tests/bdb-last.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/bdb-last: obj/bdb-last.o
+	$(CXX) -o bin/tests/bdb-last obj/bdb-last.o $(LIBBITCOIN)
+
+bdb-last: bin/tests/bdb-last
+
 bin/tests/tx-hash: obj/tx-hash.o
 	$(CXX) -o bin/tests/tx-hash obj/tx-hash.o $(LIBBITCOIN)
 

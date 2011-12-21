@@ -246,6 +246,25 @@ void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash,
     handle_fetch(std::error_code(), serial_block);
 }
 
+void bdb_blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
+{
+    service()->post(std::bind(
+        &bdb_blockchain::do_fetch_last_depth, shared_from_this(),
+            handle_fetch));
+}
+void bdb_blockchain::do_fetch_last_depth(fetch_handler_last_depth handle_fetch)
+{
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
+    uint32_t last_depth = common_->find_last_block_depth(txn);
+    txn->commit();
+    if (last_depth == std::numeric_limits<uint32_t>::max())
+    {
+        handle_fetch(error::missing_object, 0);
+        return;
+    }
+    handle_fetch(std::error_code(), last_depth);
+}
+
 void bdb_blockchain::fetch_block_locator(
     fetch_handler_block_locator handle_fetch)
 {
