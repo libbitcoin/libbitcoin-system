@@ -157,10 +157,18 @@ bin/tests/blockchain: libbitcoin.so obj/blockchain.o
 obj/script-test.o: tests/script-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-bin/tests/script-test: libbitcoin obj/script-test.o
+bin/tests/script-test: obj/script-test.o
 	$(CXX) -o bin/tests/script-test obj/script-test.o $(LIBBITCOIN)
 
 script-test: bin/tests/script-test
+
+obj/clock-test.o: tests/clock-test.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/clock-test: obj/clock-test.o
+	$(CXX) -o bin/tests/clock-test obj/clock-test.o $(LIBBITCOIN)
+
+clock-test: bin/tests/clock-test
 
 obj/merkle.o: tests/merkle.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<

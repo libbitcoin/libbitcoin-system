@@ -22,13 +22,13 @@ class dialect;
 class blockchain;
 class kernel;
 class network;
-class clock;
+class chrono_clock;
 
 typedef shared_ptr<dialect> dialect_ptr;
 typedef shared_ptr<blockchain> blockchain_ptr;
 typedef shared_ptr<kernel> kernel_ptr;
 typedef shared_ptr<network> network_ptr;
-typedef shared_ptr<clock> clock_ptr;
+typedef shared_ptr<chrono_clock> chrono_clock_ptr;
 
 typedef shared_ptr<io_service> service_ptr;
 typedef shared_ptr<io_service::work> work_ptr;

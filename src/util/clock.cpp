@@ -1,9 +1,13 @@
 #include <bitcoin/util/clock.hpp>
 
-
 namespace libbitcoin {
 
-const ptime clock::time()
+void chrono_clock::add_data(ptime time_data)
+{
+    // Lets take 1 clock to sea
+}
+
+const ptime chrono_clock::time() const
 {
     return boost::posix_time::second_clock::universal_time();
 }

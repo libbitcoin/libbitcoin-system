@@ -8,10 +8,14 @@ namespace libbitcoin {
 using boost::posix_time::ptime;
 using boost::posix_time::hours;
 
-class clock
+class chrono_clock
 {
 public:
-    const ptime time();
+    void add_data(ptime time_data);
+    const ptime time() const;
+
+private:
+    ptime offset_;
 };
 
 } // libbitcoin
