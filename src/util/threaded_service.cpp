@@ -10,6 +10,7 @@ void run_service(service_ptr service)
 thread_core::thread_core()
 {
     service_.reset(new io_service);
+    // use std::ref here
     work_.reset(new io_service::work(*service_));
     runner_ = std::thread(run_service, service_);
 }

@@ -38,7 +38,7 @@ private:
     bool connect_block();
 
     dialect_ptr dialect_;
-    clock_ptr clock_;
+    chrono_clock_ptr clock_;
 
     const size_t depth_;
     const message::block& current_block_;

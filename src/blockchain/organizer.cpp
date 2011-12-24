@@ -1,11 +1,13 @@
 #include <bitcoin/blockchain/organizer.hpp>
 
+#include <bitcoin/util/assert.hpp>
+
 namespace libbitcoin {
 
 block_detail::block_detail(const message::block& actual_block,
     const std::string& label)
  : actual_block_(actual_block), block_hash_(hash_block_header(actual_block_)),
-    processed_(false), label_(label), depth_(-1)
+    processed_(false), info_{block_status::orphan, 0}, label_(label)
 {
 }
 
@@ -33,14 +35,14 @@ const std::string& block_detail::label() const
     return label_;
 }
 
-void block_detail::set_depth(int depth)
+void block_detail::set_info(const block_info& replace_info)
 {
-    depth_ = depth;
+    info_ = replace_info;
 }
 
-int block_detail::depth() const
+const block_info& block_detail::info() const
 {
-    return depth_;
+    return info_;
 }
 
 orphans_pool::orphans_pool(size_t pool_size)
@@ -155,27 +157,29 @@ void organizer::replace_chain(int fork_index, blocks_list& orphan_chain)
     for (block_detail_ptr replaced_block: replaced_slice)
     {
         replaced_block->mark_processed();
-        replaced_block->set_depth(-1);
+        replaced_block->set_info({block_status::orphan, 0});
         orphans_->add(replaced_block);
     }
     int arrival_index = fork_index;
     for (block_detail_ptr arrival_block: orphan_chain)
     {
         orphans_->remove(arrival_block);
-        arrival_block->set_depth(++arrival_index);
+        ++arrival_index;
+        arrival_block->set_info({block_status::confirmed, arrival_index});
         chain_->add(arrival_block);
     }
 }
 
 void organizer::clip_orphans(blocks_list& orphan_chain, int orphan_index)
 {
-    for (auto it = orphan_chain.begin() + orphan_index;
-        it != orphan_chain.end(); ++it)
+    auto orphan_start = orphan_chain.begin() + orphan_index;
+    // Remove from orphans pool
+    for (auto it = orphan_start; it != orphan_chain.end(); ++it)
     {
-        orphan_chain.erase(it);
-        // Remove from orphans pool
+        (*it)->set_info({block_status::rejected, 0});
         orphans_->remove(*it);
     }
+    orphan_chain.erase(orphan_start, orphan_chain.end());
 }
 
 } // libbitcoin

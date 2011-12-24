@@ -115,5 +115,10 @@ blocks_list bdb_chain_keeper::end_slice(size_t slice_begin_index)
     return sliced_blocks;
 }
 
+txn_guard_ptr bdb_chain_keeper::txn()
+{
+    return txn_;
+}
+
 } // libbitcoin
 

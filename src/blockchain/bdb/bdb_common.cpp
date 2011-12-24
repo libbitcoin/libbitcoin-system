@@ -28,7 +28,7 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
 }
 
 bool bdb_common::save_block(txn_guard_ptr txn,
-    uint32_t depth, const message::block serial_block)
+    uint32_t depth, const message::block& serial_block)
 {
     protobuf::Block proto_block =
         block_header_to_protobuf(depth, serial_block);
@@ -76,17 +76,39 @@ uint32_t bdb_common::save_transaction(txn_guard_ptr txn,
     return block_tx_id;
 }
 
-
-bool bdb_common::database_read(Db* database, DbTxn* txn, Dbt* key,
-    std::stringstream& ss)
+template<typename Index, typename ProtoType>
+bool proto_read(Db* database, txn_guard_ptr txn,
+    const Index& index, ProtoType& proto_object)
 {
+    readable_data_type key;
+    key.set(index);
+    std::stringstream ss;
     writable_data_type data;
-    if (database->get(txn, key, data.get(), 0) != 0)
+    if (database->get(txn->get(), key.get(), data.get(), 0) != 0)
         return false;
     data_chunk raw_object(data.data());
     std::copy(raw_object.begin(), raw_object.end(),
         std::ostream_iterator<byte>(ss));
+    proto_object.ParseFromIstream(&ss);
     return true;
+}
+
+protobuf::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,
+    uint32_t depth)
+{
+    protobuf::Block proto_block;
+    if (!proto_read(db_blocks_, txn, depth, proto_block))
+        return protobuf::Block();
+    return proto_block;
+}
+
+protobuf::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,
+    const hash_digest& block_hash)
+{
+    protobuf::Block proto_block;
+    if (!proto_read(db_blocks_hash_, txn, block_hash, proto_block))
+        return protobuf::Block();
+    return proto_block;
 }
 
 bool bdb_common::reconstruct_block(txn_guard_ptr txn,

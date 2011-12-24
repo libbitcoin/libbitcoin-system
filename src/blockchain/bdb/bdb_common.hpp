@@ -23,30 +23,19 @@ public:
     uint32_t find_last_block_depth(txn_guard_ptr txn);
 
     bool save_block(txn_guard_ptr txn,
-        uint32_t depth, const message::block serial_block);
+        uint32_t depth, const message::block& serial_block);
     uint32_t save_transaction(txn_guard_ptr txn,
         const message::transaction& block_tx);
 
-    template<typename Index, typename ProtoType>
-    static bool proto_read(Db* database, txn_guard_ptr txn,
-        const Index& index, ProtoType& proto_object)
-    {
-        readable_data_type key;
-        key.set(index);
-        std::stringstream ss;
-        if (!database_read(database, txn->get(), key.get(), ss))
-            return false;
-        proto_object.ParseFromIstream(&ss);
-        return true;
-    }
+    protobuf::Block fetch_proto_block(txn_guard_ptr txn, uint32_t depth);
+    protobuf::Block fetch_proto_block(txn_guard_ptr txn,
+        const hash_digest& block_hash);
 
     bool reconstruct_block(txn_guard_ptr txn,
         const protobuf::Block& proto_block_header,
         message::block& result_block);
-private:
-    static bool database_read(Db* database, DbTxn* txn, Dbt* key,
-        std::stringstream& ss);
 
+private:
     DbEnv* env_;
     Db* db_blocks_;
     Db* db_blocks_hash_;

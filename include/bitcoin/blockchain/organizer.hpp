@@ -20,13 +20,13 @@ public:
     bool is_processed();
     const hash_digest& hash() const;
     const std::string& label() const;
-    void set_depth(int depth);
-    int depth() const;
+    void set_info(const block_info& replace_info);
+    const block_info& info() const;
 private:
     const message::block actual_block_;
     const hash_digest block_hash_;
     bool processed_;
-    int depth_;
+    block_info info_;
     // For debugging
     std::string label_;
 };

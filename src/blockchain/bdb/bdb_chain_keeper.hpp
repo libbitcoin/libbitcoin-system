@@ -25,6 +25,9 @@ public:
     int find_index(const hash_digest& search_block_hash);
     big_number end_slice_difficulty(size_t slice_begin_index);
     blocks_list end_slice(size_t slice_begin_index);
+
+    txn_guard_ptr txn();
+
 private:
     txn_guard_ptr txn_;
 
@@ -34,6 +37,8 @@ private:
     Db* db_blocks_;
     Db* db_blocks_hash_;
 };
+
+typedef std::shared_ptr<bdb_chain_keeper> bdb_chain_keeper_ptr;
 
 } // libbitcoin
 

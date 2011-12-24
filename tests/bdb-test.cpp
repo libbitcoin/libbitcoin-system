@@ -25,7 +25,25 @@ void handle_store(const std::error_code& ec, block_info info,
     blockchain_ptr chain)
 {
     if (ec)
+    {
         log_error() << "handle store " << ec.message();
+        return;
+    }
+    else if (info.status != block_status::confirmed)
+    {
+        log_debug() << "block not added";
+        switch (info.status)
+        {
+            case block_status::orphan:
+                log_debug() << "orphan";
+                break;
+
+            case block_status::rejected:
+                log_debug() << "bad";
+                break;
+        }
+        exit(0);
+    }
     log_debug() << "added " << info.depth;
     if (info.depth == 400)
     {

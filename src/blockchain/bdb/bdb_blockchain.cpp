@@ -150,9 +150,11 @@ bool bdb_blockchain::initialize(const std::string& prefix)
         db_blocks_, db_blocks_hash_, db_txs_, db_txs_hash_);
 
     orphans_ = std::make_shared<orphans_pool>(10);
-    chain_ = std::make_shared<bdb_chain_keeper>(common_, env_,
-        db_blocks_, db_blocks_hash_);
-    organize_ = std::make_shared<bdb_organizer>(orphans_, chain_);
+    bdb_chain_keeper_ptr chainkeeper = std::make_shared<bdb_chain_keeper>(
+        common_, env_, db_blocks_, db_blocks_hash_);
+    chain_ = chainkeeper;
+    organize_ =
+        std::make_shared<bdb_organizer>(common_, orphans_, chainkeeper);
     return true;
 }
 
@@ -183,16 +185,15 @@ void bdb_blockchain::do_store(const message::block& stored_block,
         env_->txn_checkpoint(0, 0, 0);
         flush_counter = 0;
     }
-    handle_store(std::error_code(),
-        block_info{block_status::orphan, stored_detail->depth()});
+    handle_store(std::error_code(), stored_detail->info());
 }
 
 template<typename Index>
-bool fetch_block_impl(Db* db_blocks_x, txn_guard_ptr txn, const Index& index,
+bool fetch_block_impl(txn_guard_ptr txn, const Index& index,
     bdb_common_ptr common, message::block& serial_block)
 {
-    protobuf::Block proto_block;
-    if (!bdb_common::proto_read(db_blocks_x, txn, index, proto_block))
+    protobuf::Block proto_block = common->fetch_proto_block(txn, index);
+    if (!proto_block.IsInitialized())
         return false;
     if (!common->reconstruct_block(txn, proto_block, serial_block))
         return false;
@@ -212,7 +213,7 @@ void bdb_blockchain::fetch_block_by_depth(size_t depth,
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
-    if (!fetch_block_impl(db_blocks_, txn, depth, common_, serial_block))
+    if (!fetch_block_impl(txn, depth, common_, serial_block))
     {
         txn->abort();
         handle_fetch(error::missing_object, message::block());
@@ -235,8 +236,7 @@ void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash,
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
-    if (!fetch_block_impl(db_blocks_hash_, txn, block_hash,
-        common_, serial_block))
+    if (!fetch_block_impl(txn, block_hash, common_, serial_block))
     {
         txn->abort();
         handle_fetch(error::missing_object, message::block());
@@ -290,9 +290,9 @@ void bdb_blockchain::do_fetch_block_locator(
     {
         // bdb provides no way to lookup secondary index AFAIK
         // we instead regenerate block hash from its header
-        protobuf::Block proto_block;
-        if (!bdb_common::proto_read(db_blocks_, txn,
-            current_index, proto_block))
+        protobuf::Block proto_block =
+            common_->fetch_proto_block(txn, current_index);
+        if (!proto_block.IsInitialized())
         {
             log_fatal() << "Missing block " << current_index;
             handle_fetch(error::missing_object, message::block_locator());

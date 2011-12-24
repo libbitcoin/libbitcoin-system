@@ -21,7 +21,7 @@ validate_block::validate_block(dialect_ptr dialect,
     size_t depth, const message::block& current_block)
  : dialect_(dialect), depth_(depth), current_block_(current_block)
 {
-    clock_.reset(new clock);
+    clock_.reset(new chrono_clock);
 }
 
 bool validate_block::validates()
@@ -41,7 +41,6 @@ bool validate_block::validates()
         log_error(log_domain::validation) << "Connect block failed";
         return false;
     }
-    // network_->relay_inventory(...);
     return true;
 }
 

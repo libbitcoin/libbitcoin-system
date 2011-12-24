@@ -10,7 +10,7 @@ enum class block_status
 {
     orphan,
     confirmed,
-    bad
+    rejected
 };
 
 struct block_info
