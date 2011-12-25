@@ -8,6 +8,8 @@ Makefile.in
 
 obj
 .*.swp
+*~
+/*.kdev4
 
 /aclocal.m4
 /autom4te.cache
