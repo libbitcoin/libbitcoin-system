@@ -4,6 +4,7 @@
 
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/data_helpers.hpp>
 
 #include "bdb_common.hpp"
 #include "bdb_chain_keeper.hpp"

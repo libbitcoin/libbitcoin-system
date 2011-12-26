@@ -1,5 +1,7 @@
 #include "data_type.hpp"
 
+#include <bitcoin/data_helpers.hpp>
+
 namespace libbitcoin {
 
 // readable_data_type

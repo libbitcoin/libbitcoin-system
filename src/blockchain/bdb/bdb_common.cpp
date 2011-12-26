@@ -4,6 +4,7 @@
 
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
+#include <bitcoin/data_helpers.hpp>
 
 namespace libbitcoin {
 
