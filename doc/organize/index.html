@@ -1,0 +1,54 @@
+<p>
+<em>A document describing the functioning of the organize algorithm.</em>
+</p>
+
+<p>New blocks when they first come in are added to the orphans pool. The
+pool does not order the blocks. To trace a chain of blocks from an endpoint
+you have to keep looking up the previous block as you go backwards.</p>
+
+<img src="pool.png" />
+
+<p>Assuming we have a valid genesis block, then this pool would produce
+2 chains like this:</p>
+
+<img src="tree.png" />
+
+<p>We loop through every block in the orphan's pool, setting each block to
+processed each loop. This stops us re-processing a block when a new block is
+added again to the pool, re-triggering the organize algorithm.</p>
+
+<p>The blockchain is only ever stored as one main chain. In the blockchain
+database is only stored the currently accepted history. Blocks added to the
+blockchain are taken out of the orphan's pool, and returned back to the pool
+when removed from the blockchain.</p>
+
+<p>If we have the chain:</p>
+
+<pre>
+0 -&gt; 1 -&gt; 2a -&gt; 3a
+</pre>
+
+<p>Then the remaining blocks in the orphan pool are 2b, 3b, 4b. Block 4b comes
+into the pool and will trigger a re-organize. When we run the organize
+algorithm, we find out that the chain 2b, 3b, 4b has greater difficulty.</p>
+
+<ol>
+    <li>Trace backwards through the pool until we cannot cycle backwards
+    anymore. We call this the orphan-root.</li>
+    <li>Organize will first find the fork point within the blockchain
+    to be at block 1 using the orphan-root's previous block hash.</li>
+    <li>The difficulty in the remaining blocks of the main chain and the chain
+    in the orphan pool are calculated. If the main chain algorithm's difficulty
+    is bigger than the orphan's, then the algorithm stops and the main chain
+    is untouched.</li>
+    <li>The new blocks in the orphan pool will replace the ones in the main
+    chain. The end blocks from the main chain are popped off and returned
+    back to the orphan pool. The blocks from the orphan pool are added
+    to the main chain as the new chain.</li>
+    <li>Reorganization has finished.</li>
+</ol>
+
+<pre>
+0 -&gt; 1 -&gt; 2b -&gt; 3b -&gt; 4b
+</pre>
+
