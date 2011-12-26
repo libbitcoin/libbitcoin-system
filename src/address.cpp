@@ -1,6 +1,7 @@
 #include <bitcoin/address.hpp>
 
 #include <bitcoin/constants.hpp>
+#include <bitcoin/data_helpers.hpp>
 #include <bitcoin/util/base58.hpp>
 #include <bitcoin/util/ripemd.hpp>
 #include <bitcoin/util/sha256.hpp>

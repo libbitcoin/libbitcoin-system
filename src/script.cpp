@@ -5,6 +5,7 @@
 #include <bitcoin/constants.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/data_helpers.hpp>
 #include <bitcoin/util/elliptic_curve_key.hpp>
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>

@@ -6,6 +6,7 @@
 #include <bitcoin/dialect.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>
+#include <bitcoin/data_helpers.hpp>
 
 namespace libbitcoin {
 
