@@ -23,6 +23,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* Transaction_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Transaction_reflection_ = NULL;
+const ::google::protobuf::Descriptor* Transaction_BlockPointer_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  Transaction_BlockPointer_reflection_ = NULL;
 const ::google::protobuf::Descriptor* Transaction_Input_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   Transaction_Input_reflection_ = NULL;
@@ -62,12 +65,13 @@ void protobuf_AssignDesc_bitcoin_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Block));
   Transaction_descriptor_ = file->message_type(1);
-  static const int Transaction_offsets_[5] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction, parent_blocks_),
+  static const int Transaction_offsets_[6] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction, parent_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction, inputs_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction, outputs_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction, version_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction, locktime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction, is_coinbase_),
   };
   Transaction_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -80,7 +84,23 @@ void protobuf_AssignDesc_bitcoin_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Transaction));
-  Transaction_Input_descriptor_ = Transaction_descriptor_->nested_type(0);
+  Transaction_BlockPointer_descriptor_ = Transaction_descriptor_->nested_type(0);
+  static const int Transaction_BlockPointer_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction_BlockPointer, depth_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction_BlockPointer, index_),
+  };
+  Transaction_BlockPointer_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      Transaction_BlockPointer_descriptor_,
+      Transaction_BlockPointer::default_instance_,
+      Transaction_BlockPointer_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction_BlockPointer, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction_BlockPointer, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(Transaction_BlockPointer));
+  Transaction_Input_descriptor_ = Transaction_descriptor_->nested_type(1);
   static const int Transaction_Input_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction_Input, previous_output_hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction_Input, previous_output_index_),
@@ -98,7 +118,7 @@ void protobuf_AssignDesc_bitcoin_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Transaction_Input));
-  Transaction_Output_descriptor_ = Transaction_descriptor_->nested_type(1);
+  Transaction_Output_descriptor_ = Transaction_descriptor_->nested_type(2);
   static const int Transaction_Output_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction_Output, value_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Transaction_Output, script_),
@@ -131,6 +151,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Transaction_descriptor_, &Transaction::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    Transaction_BlockPointer_descriptor_, &Transaction_BlockPointer::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Transaction_Input_descriptor_, &Transaction_Input::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     Transaction_Output_descriptor_, &Transaction_Output::default_instance());
@@ -143,6 +165,8 @@ void protobuf_ShutdownFile_bitcoin_2eproto() {
   delete Block_reflection_;
   delete Transaction::default_instance_;
   delete Transaction_reflection_;
+  delete Transaction_BlockPointer::default_instance_;
+  delete Transaction_BlockPointer_reflection_;
   delete Transaction_Input::default_instance_;
   delete Transaction_Input_reflection_;
   delete Transaction_Output::default_instance_;
@@ -160,23 +184,27 @@ void protobuf_AddDesc_bitcoin_2eproto() {
     "epth\030\002 \002(\r\022\017\n\007version\030\006 \002(\r\022\033\n\023previous_"
     "block_hash\030\007 \002(\014\022\016\n\006merkle\030\010 \002(\014\022\021\n\ttime"
     "stamp\030\t \002(\r\022\014\n\004bits\030\n \002(\r\022\r\n\005nonce\030\013 \002(\r"
-    "\022\024\n\014transactions\030\014 \003(\r\"\264\002\n\013Transaction\022\025"
-    "\n\rparent_blocks\030\002 \003(\r\022+\n\006inputs\030\003 \003(\0132\033."
-    "protobuf.Transaction.Input\022-\n\007outputs\030\004 "
-    "\003(\0132\034.protobuf.Transaction.Output\022\017\n\007ver"
-    "sion\030\005 \002(\r\022\020\n\010locktime\030\006 \002(\r\032f\n\005Input\022\034\n"
-    "\024previous_output_hash\030\001 \002(\014\022\035\n\025previous_"
-    "output_index\030\002 \002(\r\022\016\n\006script\030\003 \002(\014\022\020\n\010se"
-    "quence\030\004 \002(\r\032\'\n\006Output\022\r\n\005value\030\001 \002(\004\022\016\n"
-    "\006script\030\002 \002(\014", 493);
+    "\022\024\n\014transactions\030\014 \003(\r\"\224\003\n\013Transaction\0222"
+    "\n\006parent\030\001 \003(\0132\".protobuf.Transaction.Bl"
+    "ockPointer\022+\n\006inputs\030\003 \003(\0132\033.protobuf.Tr"
+    "ansaction.Input\022-\n\007outputs\030\004 \003(\0132\034.proto"
+    "buf.Transaction.Output\022\017\n\007version\030\005 \002(\r\022"
+    "\020\n\010locktime\030\006 \002(\r\022\023\n\013is_coinbase\030\007 \002(\010\032,"
+    "\n\014BlockPointer\022\r\n\005depth\030\001 \002(\r\022\r\n\005index\030\002"
+    " \002(\r\032f\n\005Input\022\034\n\024previous_output_hash\030\001 "
+    "\002(\014\022\035\n\025previous_output_index\030\002 \002(\r\022\016\n\006sc"
+    "ript\030\003 \002(\014\022\020\n\010sequence\030\004 \002(\r\032\'\n\006Output\022\r"
+    "\n\005value\030\001 \002(\004\022\016\n\006script\030\002 \002(\014", 589);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "bitcoin.proto", &protobuf_RegisterTypes);
   Block::default_instance_ = new Block();
   Transaction::default_instance_ = new Transaction();
+  Transaction_BlockPointer::default_instance_ = new Transaction_BlockPointer();
   Transaction_Input::default_instance_ = new Transaction_Input();
   Transaction_Output::default_instance_ = new Transaction_Output();
   Block::default_instance_->InitAsDefaultInstance();
   Transaction::default_instance_->InitAsDefaultInstance();
+  Transaction_BlockPointer::default_instance_->InitAsDefaultInstance();
   Transaction_Input::default_instance_->InitAsDefaultInstance();
   Transaction_Output::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_bitcoin_2eproto);
@@ -703,6 +731,254 @@ void Block::Swap(Block* other) {
 
 
 // ===================================================================
+
+#ifndef _MSC_VER
+const int Transaction_BlockPointer::kDepthFieldNumber;
+const int Transaction_BlockPointer::kIndexFieldNumber;
+#endif  // !_MSC_VER
+
+Transaction_BlockPointer::Transaction_BlockPointer()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void Transaction_BlockPointer::InitAsDefaultInstance() {
+}
+
+Transaction_BlockPointer::Transaction_BlockPointer(const Transaction_BlockPointer& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void Transaction_BlockPointer::SharedCtor() {
+  _cached_size_ = 0;
+  depth_ = 0u;
+  index_ = 0u;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+Transaction_BlockPointer::~Transaction_BlockPointer() {
+  SharedDtor();
+}
+
+void Transaction_BlockPointer::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void Transaction_BlockPointer::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* Transaction_BlockPointer::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return Transaction_BlockPointer_descriptor_;
+}
+
+const Transaction_BlockPointer& Transaction_BlockPointer::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_bitcoin_2eproto();  return *default_instance_;
+}
+
+Transaction_BlockPointer* Transaction_BlockPointer::default_instance_ = NULL;
+
+Transaction_BlockPointer* Transaction_BlockPointer::New() const {
+  return new Transaction_BlockPointer;
+}
+
+void Transaction_BlockPointer::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    depth_ = 0u;
+    index_ = 0u;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool Transaction_BlockPointer::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required uint32 depth = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &depth_)));
+          set_has_depth();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_index;
+        break;
+      }
+      
+      // required uint32 index = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_index:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &index_)));
+          set_has_index();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+      
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void Transaction_BlockPointer::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // required uint32 depth = 1;
+  if (has_depth()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->depth(), output);
+  }
+  
+  // required uint32 index = 2;
+  if (has_index()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->index(), output);
+  }
+  
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* Transaction_BlockPointer::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // required uint32 depth = 1;
+  if (has_depth()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->depth(), target);
+  }
+  
+  // required uint32 index = 2;
+  if (has_index()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->index(), target);
+  }
+  
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int Transaction_BlockPointer::ByteSize() const {
+  int total_size = 0;
+  
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required uint32 depth = 1;
+    if (has_depth()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->depth());
+    }
+    
+    // required uint32 index = 2;
+    if (has_index()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->index());
+    }
+    
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void Transaction_BlockPointer::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const Transaction_BlockPointer* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const Transaction_BlockPointer*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void Transaction_BlockPointer::MergeFrom(const Transaction_BlockPointer& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_depth()) {
+      set_depth(from.depth());
+    }
+    if (from.has_index()) {
+      set_index(from.index());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void Transaction_BlockPointer::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void Transaction_BlockPointer::CopyFrom(const Transaction_BlockPointer& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool Transaction_BlockPointer::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
+  
+  return true;
+}
+
+void Transaction_BlockPointer::Swap(Transaction_BlockPointer* other) {
+  if (other != this) {
+    std::swap(depth_, other->depth_);
+    std::swap(index_, other->index_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata Transaction_BlockPointer::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = Transaction_BlockPointer_descriptor_;
+  metadata.reflection = Transaction_BlockPointer_reflection_;
+  return metadata;
+}
+
+
+// -------------------------------------------------------------------
 
 #ifndef _MSC_VER
 const int Transaction_Input::kPreviousOutputHashFieldNumber;
@@ -1305,11 +1581,12 @@ void Transaction_Output::Swap(Transaction_Output* other) {
 // -------------------------------------------------------------------
 
 #ifndef _MSC_VER
-const int Transaction::kParentBlocksFieldNumber;
+const int Transaction::kParentFieldNumber;
 const int Transaction::kInputsFieldNumber;
 const int Transaction::kOutputsFieldNumber;
 const int Transaction::kVersionFieldNumber;
 const int Transaction::kLocktimeFieldNumber;
+const int Transaction::kIsCoinbaseFieldNumber;
 #endif  // !_MSC_VER
 
 Transaction::Transaction()
@@ -1330,6 +1607,7 @@ void Transaction::SharedCtor() {
   _cached_size_ = 0;
   version_ = 0u;
   locktime_ = 0u;
+  is_coinbase_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -1366,8 +1644,9 @@ void Transaction::Clear() {
   if (_has_bits_[3 / 32] & (0xffu << (3 % 32))) {
     version_ = 0u;
     locktime_ = 0u;
+    is_coinbase_ = false;
   }
-  parent_blocks_.Clear();
+  parent_.Clear();
   inputs_.Clear();
   outputs_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1380,24 +1659,17 @@ bool Transaction::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated uint32 parent_blocks = 2;
-      case 2: {
+      // repeated .protobuf.Transaction.BlockPointer parent = 1;
+      case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_parent_blocks:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 1, 16, input, this->mutable_parent_blocks())));
-        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
-                   == ::google::protobuf::internal::WireFormatLite::
-                      WIRETYPE_LENGTH_DELIMITED) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, this->mutable_parent_blocks())));
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_parent:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_parent()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_parent_blocks;
+        if (input->ExpectTag(10)) goto parse_parent;
         if (input->ExpectTag(26)) goto parse_inputs;
         break;
       }
@@ -1460,6 +1732,22 @@ bool Transaction::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(56)) goto parse_is_coinbase;
+        break;
+      }
+      
+      // required bool is_coinbase = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_is_coinbase:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &is_coinbase_)));
+          set_has_is_coinbase();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -1482,10 +1770,10 @@ bool Transaction::MergePartialFromCodedStream(
 
 void Transaction::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated uint32 parent_blocks = 2;
-  for (int i = 0; i < this->parent_blocks_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(
-      2, this->parent_blocks(i), output);
+  // repeated .protobuf.Transaction.BlockPointer parent = 1;
+  for (int i = 0; i < this->parent_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->parent(i), output);
   }
   
   // repeated .protobuf.Transaction.Input inputs = 3;
@@ -1510,6 +1798,11 @@ void Transaction::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->locktime(), output);
   }
   
+  // required bool is_coinbase = 7;
+  if (has_is_coinbase()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->is_coinbase(), output);
+  }
+  
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -1518,10 +1811,11 @@ void Transaction::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* Transaction::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated uint32 parent_blocks = 2;
-  for (int i = 0; i < this->parent_blocks_size(); i++) {
+  // repeated .protobuf.Transaction.BlockPointer parent = 1;
+  for (int i = 0; i < this->parent_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
-      WriteUInt32ToArray(2, this->parent_blocks(i), target);
+      WriteMessageNoVirtualToArray(
+        1, this->parent(i), target);
   }
   
   // repeated .protobuf.Transaction.Input inputs = 3;
@@ -1546,6 +1840,11 @@ void Transaction::SerializeWithCachedSizes(
   // required uint32 locktime = 6;
   if (has_locktime()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->locktime(), target);
+  }
+  
+  // required bool is_coinbase = 7;
+  if (has_is_coinbase()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->is_coinbase(), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -1573,15 +1872,18 @@ int Transaction::ByteSize() const {
           this->locktime());
     }
     
-  }
-  // repeated uint32 parent_blocks = 2;
-  {
-    int data_size = 0;
-    for (int i = 0; i < this->parent_blocks_size(); i++) {
-      data_size += ::google::protobuf::internal::WireFormatLite::
-        UInt32Size(this->parent_blocks(i));
+    // required bool is_coinbase = 7;
+    if (has_is_coinbase()) {
+      total_size += 1 + 1;
     }
-    total_size += 1 * this->parent_blocks_size() + data_size;
+    
+  }
+  // repeated .protobuf.Transaction.BlockPointer parent = 1;
+  total_size += 1 * this->parent_size();
+  for (int i = 0; i < this->parent_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->parent(i));
   }
   
   // repeated .protobuf.Transaction.Input inputs = 3;
@@ -1625,7 +1927,7 @@ void Transaction::MergeFrom(const ::google::protobuf::Message& from) {
 
 void Transaction::MergeFrom(const Transaction& from) {
   GOOGLE_CHECK_NE(&from, this);
-  parent_blocks_.MergeFrom(from.parent_blocks_);
+  parent_.MergeFrom(from.parent_);
   inputs_.MergeFrom(from.inputs_);
   outputs_.MergeFrom(from.outputs_);
   if (from._has_bits_[3 / 32] & (0xffu << (3 % 32))) {
@@ -1634,6 +1936,9 @@ void Transaction::MergeFrom(const Transaction& from) {
     }
     if (from.has_locktime()) {
       set_locktime(from.locktime());
+    }
+    if (from.has_is_coinbase()) {
+      set_is_coinbase(from.is_coinbase());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -1652,8 +1957,11 @@ void Transaction::CopyFrom(const Transaction& from) {
 }
 
 bool Transaction::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000018) != 0x00000018) return false;
+  if ((_has_bits_[0] & 0x00000038) != 0x00000038) return false;
   
+  for (int i = 0; i < parent_size(); i++) {
+    if (!this->parent(i).IsInitialized()) return false;
+  }
   for (int i = 0; i < inputs_size(); i++) {
     if (!this->inputs(i).IsInitialized()) return false;
   }
@@ -1665,11 +1973,12 @@ bool Transaction::IsInitialized() const {
 
 void Transaction::Swap(Transaction* other) {
   if (other != this) {
-    parent_blocks_.Swap(&other->parent_blocks_);
+    parent_.Swap(&other->parent_);
     inputs_.Swap(&other->inputs_);
     outputs_.Swap(&other->outputs_);
     std::swap(version_, other->version_);
     std::swap(locktime_, other->locktime_);
+    std::swap(is_coinbase_, other->is_coinbase_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

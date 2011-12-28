@@ -34,6 +34,7 @@ void protobuf_ShutdownFile_bitcoin_2eproto();
 
 class Block;
 class Transaction;
+class Transaction_BlockPointer;
 class Transaction_Input;
 class Transaction_Output;
 
@@ -199,6 +200,98 @@ class Block : public ::google::protobuf::Message {
   
   void InitAsDefaultInstance();
   static Block* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Transaction_BlockPointer : public ::google::protobuf::Message {
+ public:
+  Transaction_BlockPointer();
+  virtual ~Transaction_BlockPointer();
+  
+  Transaction_BlockPointer(const Transaction_BlockPointer& from);
+  
+  inline Transaction_BlockPointer& operator=(const Transaction_BlockPointer& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+  
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+  
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Transaction_BlockPointer& default_instance();
+  
+  void Swap(Transaction_BlockPointer* other);
+  
+  // implements Message ----------------------------------------------
+  
+  Transaction_BlockPointer* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Transaction_BlockPointer& from);
+  void MergeFrom(const Transaction_BlockPointer& from);
+  void Clear();
+  bool IsInitialized() const;
+  
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  
+  ::google::protobuf::Metadata GetMetadata() const;
+  
+  // nested types ----------------------------------------------------
+  
+  // accessors -------------------------------------------------------
+  
+  // required uint32 depth = 1;
+  inline bool has_depth() const;
+  inline void clear_depth();
+  static const int kDepthFieldNumber = 1;
+  inline ::google::protobuf::uint32 depth() const;
+  inline void set_depth(::google::protobuf::uint32 value);
+  
+  // required uint32 index = 2;
+  inline bool has_index() const;
+  inline void clear_index();
+  static const int kIndexFieldNumber = 2;
+  inline ::google::protobuf::uint32 index() const;
+  inline void set_index(::google::protobuf::uint32 value);
+  
+  // @@protoc_insertion_point(class_scope:protobuf.Transaction.BlockPointer)
+ private:
+  inline void set_has_depth();
+  inline void clear_has_depth();
+  inline void set_has_index();
+  inline void clear_has_index();
+  
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+  
+  ::google::protobuf::uint32 depth_;
+  ::google::protobuf::uint32 index_;
+  
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  
+  friend void  protobuf_AddDesc_bitcoin_2eproto();
+  friend void protobuf_AssignDesc_bitcoin_2eproto();
+  friend void protobuf_ShutdownFile_bitcoin_2eproto();
+  
+  void InitAsDefaultInstance();
+  static Transaction_BlockPointer* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -470,22 +563,23 @@ class Transaction : public ::google::protobuf::Message {
   
   // nested types ----------------------------------------------------
   
+  typedef Transaction_BlockPointer BlockPointer;
   typedef Transaction_Input Input;
   typedef Transaction_Output Output;
   
   // accessors -------------------------------------------------------
   
-  // repeated uint32 parent_blocks = 2;
-  inline int parent_blocks_size() const;
-  inline void clear_parent_blocks();
-  static const int kParentBlocksFieldNumber = 2;
-  inline ::google::protobuf::uint32 parent_blocks(int index) const;
-  inline void set_parent_blocks(int index, ::google::protobuf::uint32 value);
-  inline void add_parent_blocks(::google::protobuf::uint32 value);
-  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
-      parent_blocks() const;
-  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
-      mutable_parent_blocks();
+  // repeated .protobuf.Transaction.BlockPointer parent = 1;
+  inline int parent_size() const;
+  inline void clear_parent();
+  static const int kParentFieldNumber = 1;
+  inline const ::protobuf::Transaction_BlockPointer& parent(int index) const;
+  inline ::protobuf::Transaction_BlockPointer* mutable_parent(int index);
+  inline ::protobuf::Transaction_BlockPointer* add_parent();
+  inline const ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_BlockPointer >&
+      parent() const;
+  inline ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_BlockPointer >*
+      mutable_parent();
   
   // repeated .protobuf.Transaction.Input inputs = 3;
   inline int inputs_size() const;
@@ -525,23 +619,33 @@ class Transaction : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 locktime() const;
   inline void set_locktime(::google::protobuf::uint32 value);
   
+  // required bool is_coinbase = 7;
+  inline bool has_is_coinbase() const;
+  inline void clear_is_coinbase();
+  static const int kIsCoinbaseFieldNumber = 7;
+  inline bool is_coinbase() const;
+  inline void set_is_coinbase(bool value);
+  
   // @@protoc_insertion_point(class_scope:protobuf.Transaction)
  private:
   inline void set_has_version();
   inline void clear_has_version();
   inline void set_has_locktime();
   inline void clear_has_locktime();
+  inline void set_has_is_coinbase();
+  inline void clear_has_is_coinbase();
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
-  ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > parent_blocks_;
+  ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_BlockPointer > parent_;
   ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_Input > inputs_;
   ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_Output > outputs_;
   ::google::protobuf::uint32 version_;
   ::google::protobuf::uint32 locktime_;
+  bool is_coinbase_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
   
   friend void  protobuf_AddDesc_bitcoin_2eproto();
   friend void protobuf_AssignDesc_bitcoin_2eproto();
@@ -810,6 +914,54 @@ Block::mutable_transactions() {
 
 // -------------------------------------------------------------------
 
+// Transaction_BlockPointer
+
+// required uint32 depth = 1;
+inline bool Transaction_BlockPointer::has_depth() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Transaction_BlockPointer::set_has_depth() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Transaction_BlockPointer::clear_has_depth() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Transaction_BlockPointer::clear_depth() {
+  depth_ = 0u;
+  clear_has_depth();
+}
+inline ::google::protobuf::uint32 Transaction_BlockPointer::depth() const {
+  return depth_;
+}
+inline void Transaction_BlockPointer::set_depth(::google::protobuf::uint32 value) {
+  set_has_depth();
+  depth_ = value;
+}
+
+// required uint32 index = 2;
+inline bool Transaction_BlockPointer::has_index() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Transaction_BlockPointer::set_has_index() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Transaction_BlockPointer::clear_has_index() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Transaction_BlockPointer::clear_index() {
+  index_ = 0u;
+  clear_has_index();
+}
+inline ::google::protobuf::uint32 Transaction_BlockPointer::index() const {
+  return index_;
+}
+inline void Transaction_BlockPointer::set_index(::google::protobuf::uint32 value) {
+  set_has_index();
+  index_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // Transaction_Input
 
 // required bytes previous_output_hash = 1;
@@ -1060,29 +1212,29 @@ inline ::std::string* Transaction_Output::release_script() {
 
 // Transaction
 
-// repeated uint32 parent_blocks = 2;
-inline int Transaction::parent_blocks_size() const {
-  return parent_blocks_.size();
+// repeated .protobuf.Transaction.BlockPointer parent = 1;
+inline int Transaction::parent_size() const {
+  return parent_.size();
 }
-inline void Transaction::clear_parent_blocks() {
-  parent_blocks_.Clear();
+inline void Transaction::clear_parent() {
+  parent_.Clear();
 }
-inline ::google::protobuf::uint32 Transaction::parent_blocks(int index) const {
-  return parent_blocks_.Get(index);
+inline const ::protobuf::Transaction_BlockPointer& Transaction::parent(int index) const {
+  return parent_.Get(index);
 }
-inline void Transaction::set_parent_blocks(int index, ::google::protobuf::uint32 value) {
-  parent_blocks_.Set(index, value);
+inline ::protobuf::Transaction_BlockPointer* Transaction::mutable_parent(int index) {
+  return parent_.Mutable(index);
 }
-inline void Transaction::add_parent_blocks(::google::protobuf::uint32 value) {
-  parent_blocks_.Add(value);
+inline ::protobuf::Transaction_BlockPointer* Transaction::add_parent() {
+  return parent_.Add();
 }
-inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
-Transaction::parent_blocks() const {
-  return parent_blocks_;
+inline const ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_BlockPointer >&
+Transaction::parent() const {
+  return parent_;
 }
-inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
-Transaction::mutable_parent_blocks() {
-  return &parent_blocks_;
+inline ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_BlockPointer >*
+Transaction::mutable_parent() {
+  return &parent_;
 }
 
 // repeated .protobuf.Transaction.Input inputs = 3;
@@ -1177,6 +1329,28 @@ inline ::google::protobuf::uint32 Transaction::locktime() const {
 inline void Transaction::set_locktime(::google::protobuf::uint32 value) {
   set_has_locktime();
   locktime_ = value;
+}
+
+// required bool is_coinbase = 7;
+inline bool Transaction::has_is_coinbase() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void Transaction::set_has_is_coinbase() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void Transaction::clear_has_is_coinbase() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void Transaction::clear_is_coinbase() {
+  is_coinbase_ = false;
+  clear_has_is_coinbase();
+}
+inline bool Transaction::is_coinbase() const {
+  return is_coinbase_;
+}
+inline void Transaction::set_is_coinbase(bool value) {
+  set_has_is_coinbase();
+  is_coinbase_ = value;
 }
 
 

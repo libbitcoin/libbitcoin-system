@@ -5,6 +5,7 @@
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/data_helpers.hpp>
+#include <bitcoin/transaction.hpp>
 
 namespace libbitcoin {
 
@@ -33,9 +34,13 @@ bool bdb_common::save_block(txn_guard_ptr txn,
 {
     protobuf::Block proto_block =
         block_header_to_protobuf(depth, serial_block);
-    for (const message::transaction& block_tx: serial_block.transactions)
+    for (uint32_t block_index = 0;
+        block_index < serial_block.transactions.size(); ++block_index)
     {
-        uint32_t block_tx_id = save_transaction(txn, block_tx);
+        const message::transaction& block_tx =
+            serial_block.transactions[block_index];
+        uint32_t block_tx_id =
+            save_transaction(txn, depth, block_index, block_tx);
         if (block_tx_id == 0)
         {
             log_fatal() << "Could not save transaction";
@@ -60,12 +65,24 @@ bool bdb_common::save_block(txn_guard_ptr txn,
     return true;
 }
 
-uint32_t bdb_common::save_transaction(txn_guard_ptr txn,
-    const message::transaction& block_tx)
+uint32_t bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
+    uint32_t tx_index, const message::transaction& block_tx)
 {
+    // Should check for duplicate txs first
+    //const hash_digest& block_hash = hash_transaction(block_tx);
+    //readable_data_type hash_key;
+    //hash_key.set(block_hash);
+    //writable_data_type tx_value;
+    // Actually add block
     uint32_t block_tx_id = rand();
     BITCOIN_ASSERT(block_tx_id != 0);
     protobuf::Transaction proto_tx = transaction_to_protobuf(block_tx);
+    proto_tx.set_is_coinbase(is_coinbase(block_tx));
+    // Add parent block to transaction
+    protobuf::Transaction_BlockPointer* proto_parent = proto_tx.add_parent();
+    proto_parent->set_depth(block_depth);
+    proto_parent->set_index(tx_index);
+    // Save tx to bdb
     std::ostringstream oss;
     if (!proto_tx.SerializeToOstream(&oss))
         return 0;
@@ -101,6 +118,15 @@ protobuf::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,
     if (!proto_read(db_blocks_, txn, depth, proto_block))
         return protobuf::Block();
     return proto_block;
+}
+
+protobuf::Transaction bdb_common::fetch_proto_transaction(
+    txn_guard_ptr txn, const hash_digest& tx_hash)
+{
+    protobuf::Transaction proto_tx;
+    if (!proto_read(db_txs_hash_, txn, tx_hash, proto_tx))
+        return protobuf::Transaction();
+    return proto_tx;
 }
 
 protobuf::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,

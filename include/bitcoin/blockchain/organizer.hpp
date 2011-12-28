@@ -13,13 +13,11 @@ namespace libbitcoin {
 class block_detail
 {
 public:
-    block_detail(const message::block& actual_block,
-        const std::string& label = "");
+    block_detail(const message::block& actual_block);
     const message::block& actual() const;
     void mark_processed();
     bool is_processed();
     const hash_digest& hash() const;
-    const std::string& label() const;
     void set_info(const block_info& replace_info);
     const block_info& info() const;
 private:
@@ -27,8 +25,6 @@ private:
     const hash_digest block_hash_;
     bool processed_;
     block_info info_;
-    // For debugging
-    std::string label_;
 };
 
 typedef std::shared_ptr<block_detail> block_detail_ptr;

@@ -4,10 +4,9 @@
 
 namespace libbitcoin {
 
-block_detail::block_detail(const message::block& actual_block,
-    const std::string& label)
+block_detail::block_detail(const message::block& actual_block)
  : actual_block_(actual_block), block_hash_(hash_block_header(actual_block_)),
-    processed_(false), info_{block_status::orphan, 0}, label_(label)
+    processed_(false), info_{block_status::orphan, 0}
 {
 }
 
@@ -28,11 +27,6 @@ bool block_detail::is_processed()
 const hash_digest& block_detail::hash() const
 {
     return block_hash_;
-}
-
-const std::string& block_detail::label() const
-{
-    return label_;
 }
 
 void block_detail::set_info(const block_info& replace_info)

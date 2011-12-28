@@ -13,7 +13,11 @@ message Block {
 }
 
 message Transaction {
-    repeated uint32 parent_blocks = 2;
+    message BlockPointer {
+        required uint32 depth = 1;
+        required uint32 index = 2;
+    }
+    repeated BlockPointer parent = 1;
 
     message Input {
         required bytes previous_output_hash = 1;
@@ -32,5 +36,7 @@ message Transaction {
 
     required uint32 version = 5;
     required uint32 locktime = 6;
+
+    required bool is_coinbase = 7;
 }
 
