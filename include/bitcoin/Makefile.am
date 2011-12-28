@@ -11,7 +11,8 @@ bitcoin_include_HEADERS = \
 	constants.hpp \
 	block.hpp \
 	bitcoin.hpp \
-	types.hpp
+	types.hpp \
+	data_helpers.hpp
 
 bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
 bitcoin_blockchain_include_HEADERS = \

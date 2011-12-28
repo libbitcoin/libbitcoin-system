@@ -53,7 +53,6 @@ private:
     Db* db_blocks_;
     Db* db_blocks_hash_;
     Db* db_txs_;
-    Db* db_txs_hash_;
 
     bdb_common_ptr common_;
 

@@ -83,8 +83,7 @@ bool bdb_validate_block::connect_input(const message::transaction& current_tx,
         common_->fetch_proto_transaction(txn_, input.previous_output.hash);
     if (!previous_tx.IsInitialized())
     {
-        log_fatal() << "Unimplemented lookup for tx in bdb orphan chain";
-        return false;
+        return connect_orphan_input();
     }
     BITCOIN_ASSERT(previous_tx.parent_size() > 0);
     const protobuf::Transaction_Output& previous_tx_out =
@@ -110,11 +109,57 @@ bool bdb_validate_block::connect_input(const message::transaction& current_tx,
         return false;
     }
     // Search for double spends
+    //   This must be done in both chain AND orphan
+    if (previous_tx_out.is_spent())
+        return false;
+    else if (orphan_is_spent(input.previous_output))
+        return false;
     // Increase value_in by this output's value
     value_in += output_value;
     if (value_in > max_money())
         return false;
     return true;
+}
+
+bool has_spend(const message::transaction& other_tx,
+    const message::output_point& previous_output)
+{
+    for (const message::transaction_input& other_input: other_tx.inputs)
+        if (other_input.previous_output.hash == previous_output.hash &&
+            other_input.previous_output.index == previous_output.index)
+        {
+            return true;
+        }
+    return false;
+}
+bool has_spend(const message::block& other_block,
+    const message::output_point& previous_output)
+{
+    // Skip coinbase
+    BITCOIN_ASSERT(is_coinbase(other_block.transactions[0]));
+    for (auto it = other_block.transactions.begin() + 1;
+        it != other_block.transactions.end(); ++it)
+    {
+        if (has_spend(*it, previous_output))
+            return true;
+    }
+    return false;
+}
+bool bdb_validate_block::orphan_is_spent(
+    const message::output_point& previous_output)
+{
+    for (size_t i = 0; i < orphan_index_; ++i)
+        if (has_spend(orphan_chain_[i]->actual(), previous_output))
+            return true;
+    return false;
+}
+
+bool bdb_validate_block::connect_orphan_input()
+{
+    // TODO finish this stub
+    log_fatal() << "Unimplemented lookup for tx in bdb orphan chain";
+    exit(1);
+    return false;
 }
 
 } // libbitcoin

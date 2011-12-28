@@ -12,10 +12,6 @@ class bdb_validate_block
  : public validate_block
 {
 public:
-    bdb_validate_block(bdb_common_ptr common, txn_guard_ptr txn,
-        dialect_ptr dialect, size_t depth,
-        const message::block& current_block);
-
     bdb_validate_block(bdb_common_ptr common, int fork_index,
         const blocks_list& orphan_chain, int orphan_index, size_t depth,
         txn_guard_ptr txn, dialect_ptr dialect,
@@ -33,6 +29,9 @@ private:
 
     bool connect_input(const message::transaction& current_tx,
         size_t input_index, uint64_t& value_in);
+    bool orphan_is_spent(const message::output_point& previous_output);
+
+    bool connect_orphan_input();
 
     bdb_common_ptr common_;
     txn_guard_ptr txn_;

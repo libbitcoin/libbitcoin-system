@@ -45,6 +45,7 @@ protobuf::Transaction transaction_to_protobuf(
         proto_output.set_value(block_output.value);
         data_chunk raw_script = save_script(block_output.output_script);
         proto_output.set_script(&raw_script[0], raw_script.size());
+        proto_output.set_is_spent(false);
     }
     return proto_tx;
 }

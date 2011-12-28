@@ -9,7 +9,7 @@ message Block {
     required uint32 bits = 10;
     required uint32 nonce = 11;
 
-    repeated uint32 transactions = 12;
+    repeated bytes transactions = 12;
 }
 
 message Transaction {
@@ -17,6 +17,7 @@ message Transaction {
         required uint32 depth = 1;
         required uint32 index = 2;
     }
+
     repeated BlockPointer parent = 1;
 
     message Input {
@@ -29,6 +30,7 @@ message Transaction {
     message Output {
         required uint64 value = 1;
         required bytes script = 2;
+        required bool is_spent = 8;
     }
 
     repeated Input inputs = 3;

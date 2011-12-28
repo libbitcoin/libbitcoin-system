@@ -49,7 +49,6 @@ bdb_blockchain::~bdb_blockchain()
 {
     // Close secondaries before primaries
     shutdown_database(db_blocks_hash_);
-    shutdown_database(db_txs_hash_);
     // Close primaries
     shutdown_database(db_blocks_);
     shutdown_database(db_txs_);
@@ -92,19 +91,6 @@ int get_block_hash(Db*, const Dbt*, const Dbt* data, Dbt* second_key)
     return 0;
 }
 
-int get_tx_hash(Db*, const Dbt*, const Dbt* data, Dbt* second_key)
-{
-    std::stringstream ss(std::string(
-        reinterpret_cast<const char*>(data->get_data()), data->get_size()));
-    protobuf::Transaction proto_tx;
-    proto_tx.ParseFromIstream(&ss);
-    message::transaction serial_tx = protobuf_to_transaction(proto_tx);
-    second_hash = hash_transaction(serial_tx);
-    second_key->set_data(second_hash.data());
-    second_key->set_size(second_hash.size());
-    return 0;
-}
-
 int bt_compare_blocks(DB*, const DBT* dbt1, const DBT* dbt2)
 {
     data_chunk key_data1(dbt1->size), key_data2(dbt2->size);
@@ -130,7 +116,6 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     db_blocks_ = new Db(env_, 0);
     db_blocks_hash_ = new Db(env_, 0);
     db_txs_ = new Db(env_, 0);
-    db_txs_hash_ = new Db(env_, 0);
     if (db_blocks_->set_bt_compare(bt_compare_blocks) != 0)
     {
         log_fatal() << "Internal error setting BTREE comparison function";
@@ -141,14 +126,11 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     db_blocks_hash_->open(txn.get(), "blocks", "block-hash", 
         DB_BTREE, db_flags, 0);
     db_blocks_->associate(txn.get(), db_blocks_hash_, get_block_hash, 0);
-    db_txs_->open(txn.get(), "transactions", "tx-data", DB_BTREE, db_flags, 0);
-    db_txs_hash_->open(txn.get(), "transactions", "tx-hash",
-        DB_BTREE, db_flags, 0);
-    db_txs_->associate(txn.get(), db_txs_hash_, get_tx_hash, 0);
+    db_txs_->open(txn.get(), "transactions", "tx", DB_BTREE, db_flags, 0);
     txn.commit();
 
     common_ = std::make_shared<bdb_common>(env_,
-        db_blocks_, db_blocks_hash_, db_txs_, db_txs_hash_);
+        db_blocks_, db_blocks_hash_, db_txs_);
 
     orphans_ = std::make_shared<orphans_pool>(10);
     bdb_chain_keeper_ptr chainkeeper = std::make_shared<bdb_chain_keeper>(

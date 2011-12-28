@@ -151,17 +151,21 @@ class Block : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 nonce() const;
   inline void set_nonce(::google::protobuf::uint32 value);
   
-  // repeated uint32 transactions = 12;
+  // repeated bytes transactions = 12;
   inline int transactions_size() const;
   inline void clear_transactions();
   static const int kTransactionsFieldNumber = 12;
-  inline ::google::protobuf::uint32 transactions(int index) const;
-  inline void set_transactions(int index, ::google::protobuf::uint32 value);
-  inline void add_transactions(::google::protobuf::uint32 value);
-  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
-      transactions() const;
-  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
-      mutable_transactions();
+  inline const ::std::string& transactions(int index) const;
+  inline ::std::string* mutable_transactions(int index);
+  inline void set_transactions(int index, const ::std::string& value);
+  inline void set_transactions(int index, const char* value);
+  inline void set_transactions(int index, const void* value, size_t size);
+  inline ::std::string* add_transactions();
+  inline void add_transactions(const ::std::string& value);
+  inline void add_transactions(const char* value);
+  inline void add_transactions(const void* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& transactions() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_transactions();
   
   // @@protoc_insertion_point(class_scope:protobuf.Block)
  private:
@@ -188,7 +192,7 @@ class Block : public ::google::protobuf::Message {
   ::std::string* merkle_;
   ::google::protobuf::uint32 timestamp_;
   ::google::protobuf::uint32 bits_;
-  ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > transactions_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> transactions_;
   ::google::protobuf::uint32 nonce_;
   
   mutable int _cached_size_;
@@ -487,20 +491,30 @@ class Transaction_Output : public ::google::protobuf::Message {
   inline ::std::string* mutable_script();
   inline ::std::string* release_script();
   
+  // required bool is_spent = 8;
+  inline bool has_is_spent() const;
+  inline void clear_is_spent();
+  static const int kIsSpentFieldNumber = 8;
+  inline bool is_spent() const;
+  inline void set_is_spent(bool value);
+  
   // @@protoc_insertion_point(class_scope:protobuf.Transaction.Output)
  private:
   inline void set_has_value();
   inline void clear_has_value();
   inline void set_has_script();
   inline void clear_has_script();
+  inline void set_has_is_spent();
+  inline void clear_has_is_spent();
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
   ::google::protobuf::uint64 value_;
   ::std::string* script_;
+  bool is_spent_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
   
   friend void  protobuf_AddDesc_bitcoin_2eproto();
   friend void protobuf_AssignDesc_bitcoin_2eproto();
@@ -887,27 +901,46 @@ inline void Block::set_nonce(::google::protobuf::uint32 value) {
   nonce_ = value;
 }
 
-// repeated uint32 transactions = 12;
+// repeated bytes transactions = 12;
 inline int Block::transactions_size() const {
   return transactions_.size();
 }
 inline void Block::clear_transactions() {
   transactions_.Clear();
 }
-inline ::google::protobuf::uint32 Block::transactions(int index) const {
+inline const ::std::string& Block::transactions(int index) const {
   return transactions_.Get(index);
 }
-inline void Block::set_transactions(int index, ::google::protobuf::uint32 value) {
-  transactions_.Set(index, value);
+inline ::std::string* Block::mutable_transactions(int index) {
+  return transactions_.Mutable(index);
 }
-inline void Block::add_transactions(::google::protobuf::uint32 value) {
-  transactions_.Add(value);
+inline void Block::set_transactions(int index, const ::std::string& value) {
+  transactions_.Mutable(index)->assign(value);
 }
-inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+inline void Block::set_transactions(int index, const char* value) {
+  transactions_.Mutable(index)->assign(value);
+}
+inline void Block::set_transactions(int index, const void* value, size_t size) {
+  transactions_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Block::add_transactions() {
+  return transactions_.Add();
+}
+inline void Block::add_transactions(const ::std::string& value) {
+  transactions_.Add()->assign(value);
+}
+inline void Block::add_transactions(const char* value) {
+  transactions_.Add()->assign(value);
+}
+inline void Block::add_transactions(const void* value, size_t size) {
+  transactions_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
 Block::transactions() const {
   return transactions_;
 }
-inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
 Block::mutable_transactions() {
   return &transactions_;
 }
@@ -1206,6 +1239,28 @@ inline ::std::string* Transaction_Output::release_script() {
     script_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
+}
+
+// required bool is_spent = 8;
+inline bool Transaction_Output::has_is_spent() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Transaction_Output::set_has_is_spent() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Transaction_Output::clear_has_is_spent() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Transaction_Output::clear_is_spent() {
+  is_spent_ = false;
+  clear_has_is_spent();
+}
+inline bool Transaction_Output::is_spent() const {
+  return is_spent_;
+}
+inline void Transaction_Output::set_is_spent(bool value) {
+  set_has_is_spent();
+  is_spent_ = value;
 }
 
 // -------------------------------------------------------------------

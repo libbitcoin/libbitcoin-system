@@ -10,9 +10,9 @@
 namespace libbitcoin {
 
 bdb_common::bdb_common(DbEnv* env, Db* db_blocks, Db* db_blocks_hash,
-    Db* db_txs, Db* db_txs_hash)
+    Db* db_txs)
  : env_(env), db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
-    db_txs_(db_txs), db_txs_hash_(db_txs_hash)
+    db_txs_(db_txs)
 {
 }
 
@@ -39,14 +39,14 @@ bool bdb_common::save_block(txn_guard_ptr txn,
     {
         const message::transaction& block_tx =
             serial_block.transactions[block_index];
-        uint32_t block_tx_id =
-            save_transaction(txn, depth, block_index, block_tx);
-        if (block_tx_id == 0)
+        const hash_digest& tx_hash = hash_transaction(block_tx);
+        if (!save_transaction(txn, depth, block_index, tx_hash, block_tx))
         {
             log_fatal() << "Could not save transaction";
             return false;
         }
-        proto_block.add_transactions(block_tx_id);
+        proto_block.add_transactions(
+            std::string(tx_hash.begin(), tx_hash.end()));
     }
     std::ostringstream oss;
     if (!proto_block.SerializeToOstream(&oss))
@@ -65,17 +65,13 @@ bool bdb_common::save_block(txn_guard_ptr txn,
     return true;
 }
 
-uint32_t bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
-    uint32_t tx_index, const message::transaction& block_tx)
+bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
+    uint32_t tx_index, const hash_digest& tx_hash,
+    const message::transaction& block_tx)
 {
-    // Should check for duplicate txs first
-    //const hash_digest& block_hash = hash_transaction(block_tx);
-    //readable_data_type hash_key;
-    //hash_key.set(block_hash);
-    //writable_data_type tx_value;
+    if (dupli_save(txn, tx_hash, block_depth, tx_index))
+        return true;
     // Actually add block
-    uint32_t block_tx_id = rand();
-    BITCOIN_ASSERT(block_tx_id != 0);
     protobuf::Transaction proto_tx = transaction_to_protobuf(block_tx);
     proto_tx.set_is_coinbase(is_coinbase(block_tx));
     // Add parent block to transaction
@@ -85,13 +81,70 @@ uint32_t bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
     // Save tx to bdb
     std::ostringstream oss;
     if (!proto_tx.SerializeToOstream(&oss))
-        return 0;
+        return false;
     readable_data_type key, value;
-    key.set(block_tx_id);
+    key.set(tx_hash);
     value.set(oss.str());
     // Checks for duplicates first
-    db_txs_->put(txn->get(), key.get(), value.get(), DB_NOOVERWRITE);
-    return block_tx_id;
+    if (db_txs_->put(txn->get(), key.get(), value.get(), DB_NOOVERWRITE) != 0)
+        return false;
+    if (is_coinbase(block_tx))
+        return true;
+    for (const message::transaction_input& input: block_tx.inputs)
+        if (!mark_spent_outputs(txn, input))
+            return false;
+    return true;
+}
+
+bool bdb_common::dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
+    uint32_t block_depth, uint32_t tx_index)
+{
+    protobuf::Transaction proto_tx = fetch_proto_transaction(txn, tx_hash);
+    if (!proto_tx.IsInitialized())
+        return false;
+    log_debug() << "dupli_save: " << block_depth;
+    BITCOIN_ASSERT(block_depth == 1337);
+    protobuf::Transaction::BlockPointer* parent = proto_tx.add_parent();
+    parent->set_depth(block_depth);
+    parent->set_index(tx_index);
+    return rewrite_transaction(txn, tx_hash, proto_tx);
+}
+
+bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
+    const message::transaction_input& input)
+{
+    protobuf::Transaction proto_tx =
+        fetch_proto_transaction(txn, input.previous_output.hash);
+    if (!proto_tx.IsInitialized())
+        return false;
+    BITCOIN_ASSERT(input.previous_output.index < proto_tx.outputs_size());
+    BITCOIN_ASSERT(!proto_tx.outputs(input.previous_output.index).is_spent());
+    proto_tx.mutable_outputs(input.previous_output.index)->set_is_spent(true);
+    return rewrite_transaction(txn, input.previous_output.hash, proto_tx);
+}
+
+bool bdb_common::rewrite_transaction(txn_guard_ptr txn,
+    const hash_digest& tx_hash, const protobuf::Transaction& replace_proto_tx)
+{
+    // Now rewrite tx
+    // First delete old
+    readable_data_type tx_key;
+    tx_key.set(tx_hash);
+    if (db_txs_->del(txn->get(), tx_key.get(), 0) != 0)
+        return false;
+    // Save tx to bdb
+    std::ostringstream write_oss;
+    if (!replace_proto_tx.SerializeToOstream(&write_oss))
+        return false;
+    readable_data_type tx_data;
+    tx_data.set(write_oss.str());
+    // Checks for duplicates first
+    if (db_txs_->put(txn->get(), tx_key.get(), tx_data.get(),
+        DB_NOOVERWRITE) != 0)
+    {
+        return false;
+    }
+    return true;
 }
 
 template<typename Index, typename ProtoType>
@@ -100,10 +153,10 @@ bool proto_read(Db* database, txn_guard_ptr txn,
 {
     readable_data_type key;
     key.set(index);
-    std::stringstream ss;
     writable_data_type data;
     if (database->get(txn->get(), key.get(), data.get(), 0) != 0)
         return false;
+    std::stringstream ss;
     data_chunk raw_object(data.data());
     std::copy(raw_object.begin(), raw_object.end(),
         std::ostream_iterator<byte>(ss));
@@ -124,7 +177,7 @@ protobuf::Transaction bdb_common::fetch_proto_transaction(
     txn_guard_ptr txn, const hash_digest& tx_hash)
 {
     protobuf::Transaction proto_tx;
-    if (!proto_read(db_txs_hash_, txn, tx_hash, proto_tx))
+    if (!proto_read(db_txs_, txn, tx_hash, proto_tx))
         return protobuf::Transaction();
     return proto_tx;
 }
@@ -143,10 +196,10 @@ bool bdb_common::reconstruct_block(txn_guard_ptr txn,
     message::block& result_block)
 {
     result_block = protobuf_to_block_header(proto_block_header);
-    for (uint32_t tx_index: proto_block_header.transactions())
+    for (const std::string& raw_tx_hash: proto_block_header.transactions())
     {
         protobuf::Transaction proto_tx;
-        if (!proto_read(db_txs_, txn, tx_index, proto_tx))
+        if (!proto_read(db_txs_, txn, raw_tx_hash, proto_tx))
             return false;
         result_block.transactions.push_back(protobuf_to_transaction(proto_tx));
     }
