@@ -102,8 +102,7 @@ bool bdb_common::dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
     protobuf::Transaction proto_tx = fetch_proto_transaction(txn, tx_hash);
     if (!proto_tx.IsInitialized())
         return false;
-    log_debug() << "dupli_save: " << block_depth;
-    BITCOIN_ASSERT(block_depth == 1337);
+    BITCOIN_ASSERT(block_depth == 91842 || block_depth == 91880);
     protobuf::Transaction::BlockPointer* parent = proto_tx.add_parent();
     parent->set_depth(block_depth);
     parent->set_index(tx_index);
