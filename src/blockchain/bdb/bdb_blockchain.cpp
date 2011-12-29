@@ -23,6 +23,7 @@ constexpr uint32_t env_flags =
     DB_INIT_TXN|
     DB_INIT_MPOOL|
     DB_THREAD|
+    DB_TXN_NOSYNC|
     DB_CXX_NO_EXCEPTIONS;
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
@@ -161,14 +162,14 @@ void bdb_blockchain::do_store(const message::block& stored_block,
     }
     orphans_->add(stored_detail);
     organize_->start();
+    handle_store(std::error_code(), stored_detail->info());
     // Every 10 blocks, we flush database
     static size_t flush_counter = 0;
-    if (++flush_counter == 10)
+    if (++flush_counter == 100)
     {
         env_->txn_checkpoint(0, 0, 0);
         flush_counter = 0;
     }
-    handle_store(std::error_code(), stored_detail->info());
 }
 
 template<typename Index>
