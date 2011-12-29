@@ -1,6 +1,8 @@
 #ifndef LIBBITCOIN_DATA_HELPERS_H
 #define LIBBITCOIN_DATA_HELPERS_H
 
+#include <bitcoin/types.hpp>
+
 namespace libbitcoin {
 
 template<typename D, typename T>
@@ -55,18 +57,13 @@ std::string pretty_hex(T data)
     std::stringstream ss;
     ss << std::hex;
     for (int val: data)
-        ss << std::setw(2) << std::setfill('0') << val << ' ';
-    // Remove end ' '
-    std::string ret = ss.str();
-    if (ret.size() == 0)
-        return "";
-    ret.resize(ret.size() - 1);
-    return ret;
+        ss << std::setw(2) << std::setfill('0') << val;
+    return ss.str();
 }
 
 data_chunk bytes_from_pretty(std::string byte_stream);
 hash_digest hash_from_pretty(std::string byte_stream);
 
-}
+} // libbitcoin
 
 #endif

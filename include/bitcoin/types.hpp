@@ -70,7 +70,7 @@ namespace std
     struct hash<short_hash> : public std_hash_wrapper<short_hash>
     {
     };
-}
+} // std
 
 #endif
 

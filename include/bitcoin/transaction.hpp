@@ -19,6 +19,9 @@ bool is_coinbase(const message::transaction& tx);
 
 uint64_t total_output_value(const message::transaction& tx);
 
+bool operator==(const message::output_point& output_a,
+    const message::output_point& output_b);
+
 } // libbitcoin
 
 #endif

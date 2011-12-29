@@ -1,5 +1,6 @@
 #include <bitcoin/blockchain/bdb_blockchain.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/constants.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/network/network.hpp>
 using namespace libbitcoin;
@@ -7,6 +8,24 @@ using namespace libbitcoin;
 std::mutex mutex;
 std::condition_variable condition;
 bool finished = false;
+
+void handle_send_packet(const std::error_code& ec)
+{
+    if (ec)
+        log_error() << ec.message();
+}
+
+void ask_blocks2(const std::error_code& ec, channel_ptr node,
+    const message::block_locator& loc, blockchain_ptr chain,
+    const hash_digest& hash_stop)
+{
+    if (ec)
+        log_error() << ec.message();
+    message::get_blocks packet;
+    packet.locator_start_hashes = loc;
+    packet.hash_stop = hash_stop;
+    node->send(packet, std::bind(&handle_send_packet, _1));
+}
 
 void show_block(const std::error_code& ec, const message::block& blk)
 {
@@ -22,11 +41,11 @@ void show_block(const std::error_code& ec, const message::block& blk)
 }
 
 void handle_store(const std::error_code& ec, block_info info,
-    blockchain_ptr chain)
+    channel_ptr node, blockchain_ptr chain, const hash_digest& block_hash)
 {
     if (ec)
     {
-        log_error() << "handle store " << ec.message();
+        log_error() << "handle store " << ec.message() << " for " << pretty_hex(block_hash);
         return;
     }
     else if (info.status != block_status::confirmed)
@@ -36,13 +55,14 @@ void handle_store(const std::error_code& ec, block_info info,
         {
             case block_status::orphan:
                 log_debug() << "orphan";
+                chain->fetch_block_locator(std::bind(ask_blocks2, _1, node, _2, chain, block_hash));
                 break;
 
             case block_status::rejected:
                 log_debug() << "bad";
+                exit(0);
                 break;
         }
-        exit(0);
     }
     log_debug() << "added " << info.depth;
     if (info.depth == 400)
@@ -54,16 +74,10 @@ void handle_store(const std::error_code& ec, block_info info,
                         0x20, 0x16, 0x1b, 0xbf, 0x18, 0xeb, 0x60, 0x48},
             show_block);
 
-        std::unique_lock<std::mutex> lock(mutex);
-        finished = true;
-        condition.notify_one();
+        //std::unique_lock<std::mutex> lock(mutex);
+        //finished = true;
+        //condition.notify_one();
     }
-}
-
-void handle_send_packet(const std::error_code& ec)
-{
-    if (ec)
-        log_error() << ec.message();
 }
 
 void recv_blk(const std::error_code& ec, const message::block& packet,
@@ -73,7 +87,7 @@ void recv_blk(const std::error_code& ec, const message::block& packet,
         log_error() << ec.message();
     node->subscribe_block(std::bind(recv_blk, _1, _2, node, chain));
     // store block in bdb
-    chain->store(packet, std::bind(handle_store, _1, _2, chain));
+    chain->store(packet, std::bind(handle_store, _1, _2, node, chain, hash_block_header(packet)));
 }
 
 void recv_inv(const std::error_code &ec, const message::inventory& packet,
@@ -93,7 +107,8 @@ void recv_inv(const std::error_code &ec, const message::inventory& packet,
 }
 
 void ask_blocks(const std::error_code& ec, channel_ptr node,
-    const message::block_locator& loc, blockchain_ptr chain)
+    const message::block_locator& loc, blockchain_ptr chain,
+    const hash_digest& hash_stop)
 {
     if (ec)
         log_error() << ec.message();
@@ -102,7 +117,7 @@ void ask_blocks(const std::error_code& ec, channel_ptr node,
 
     message::get_blocks packet;
     packet.locator_start_hashes = loc;
-    packet.hash_stop.fill(0);
+    packet.hash_stop = hash_stop;
     node->send(packet, std::bind(&handle_send_packet, _1));
 }
 
@@ -111,12 +126,12 @@ void recv_loc(const std::error_code& ec, const message::block_locator& loc,
 {
     network_ptr net(new network);
     handshake_connect(net, "localhost", 8333,
-        std::bind(&ask_blocks, _1, _2, loc, chain));
+        std::bind(&ask_blocks, _1, _2, loc, chain, null_hash));
 }
 
 int main()
 {
-    bdb_blockchain::setup("database/");
+    //bdb_blockchain::setup("database/");
     log_debug() << "Setup finished";
     blockchain_ptr store(new bdb_blockchain("database/"));
     log_debug() << "Opened";

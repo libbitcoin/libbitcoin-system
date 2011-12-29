@@ -27,11 +27,17 @@ protected:
 private:
     message::block fetch_block(size_t fetch_depth);
 
-    bool connect_input(const message::transaction& current_tx,
+    bool connect_input(size_t index_in_parent,
+        const message::transaction& current_tx,
         size_t input_index, uint64_t& value_in);
-    bool orphan_is_spent(const message::output_point& previous_output);
+    bool orphan_is_spent(const message::output_point& previous_output,
+        size_t skip_tx, size_t skip_input);
 
-    bool connect_orphan_input();
+    bool connect_orphan_input(size_t index_in_parent,
+        const message::transaction& current_tx,
+        size_t input_index, uint64_t& value_in);
+    bool lookup_transaction(const message::output_point& previous_output,
+        message::transaction& previous_tx, size_t& previous_depth);
 
     bdb_common_ptr common_;
     txn_guard_ptr txn_;

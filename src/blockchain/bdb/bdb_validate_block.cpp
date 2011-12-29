@@ -3,6 +3,7 @@
 #include <bitcoin/util/assert.hpp>
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/constants.hpp>
+#include <bitcoin/data_helpers.hpp>
 #include <bitcoin/transaction.hpp>
 
 namespace libbitcoin {
@@ -67,27 +68,30 @@ bool bdb_validate_block::validate_transaction(const message::transaction& tx,
     BITCOIN_ASSERT(!is_coinbase(tx));
     for (size_t input_index = 0; input_index < tx.inputs.size(); ++input_index)
     {
-        if (!connect_input(tx, input_index, value_in))
+        if (!connect_input(index_in_parent, tx, input_index, value_in))
             return false;
     }
     return true;
 }
 
-bool bdb_validate_block::connect_input(const message::transaction& current_tx,
+bool bdb_validate_block::connect_input(size_t index_in_parent,
+    const message::transaction& current_tx,
     size_t input_index, uint64_t& value_in)
 {
     // Lookup previous output
     BITCOIN_ASSERT(input_index < current_tx.inputs.size());
     const message::transaction_input& input = current_tx.inputs[input_index];
+    const message::output_point& previous_output = input.previous_output;
     protobuf::Transaction previous_tx =
-        common_->fetch_proto_transaction(txn_, input.previous_output.hash);
+        common_->fetch_proto_transaction(txn_, previous_output.hash);
     if (!previous_tx.IsInitialized())
     {
-        return connect_orphan_input();
+        return connect_orphan_input(index_in_parent,
+            current_tx, input_index, value_in);
     }
     BITCOIN_ASSERT(previous_tx.parent_size() > 0);
     const protobuf::Transaction_Output& previous_tx_out =
-        previous_tx.outputs(input.previous_output.index);
+        previous_tx.outputs(previous_output.index);
     // Get output amount
     uint64_t output_value = previous_tx_out.value();
     if (output_value > max_money())
@@ -112,7 +116,7 @@ bool bdb_validate_block::connect_input(const message::transaction& current_tx,
     //   This must be done in both chain AND orphan
     if (previous_tx_out.is_spent())
         return false;
-    else if (orphan_is_spent(input.previous_output))
+    else if (orphan_is_spent(previous_output, index_in_parent, input_index))
         return false;
     // Increase value_in by this output's value
     value_in += output_value;
@@ -121,44 +125,100 @@ bool bdb_validate_block::connect_input(const message::transaction& current_tx,
     return true;
 }
 
-bool has_spend(const message::transaction& other_tx,
-    const message::output_point& previous_output)
+bool bdb_validate_block::orphan_is_spent(
+    const message::output_point& previous_output,
+    size_t skip_tx, size_t skip_input)
 {
-    for (const message::transaction_input& other_input: other_tx.inputs)
-        if (other_input.previous_output.hash == previous_output.hash &&
-            other_input.previous_output.index == previous_output.index)
-        {
-            return true;
-        }
-    return false;
-}
-bool has_spend(const message::block& other_block,
-    const message::output_point& previous_output)
-{
-    // Skip coinbase
-    BITCOIN_ASSERT(is_coinbase(other_block.transactions[0]));
-    for (auto it = other_block.transactions.begin() + 1;
-        it != other_block.transactions.end(); ++it)
+    // TODO factor this to look nicer
+    for (size_t orphan_iter = 0; orphan_iter <= orphan_index_; ++orphan_iter)
     {
-        if (has_spend(*it, previous_output))
-            return true;
+        const message::block& orphan_block =
+            orphan_chain_[orphan_iter]->actual();
+        // Skip coinbase
+        BITCOIN_ASSERT(orphan_block.transactions.size() >= 1);
+        BITCOIN_ASSERT(is_coinbase(orphan_block.transactions[0]));
+        for (size_t tx_index = 0; tx_index < orphan_block.transactions.size();
+            ++tx_index)
+        {
+            const message::transaction& orphan_tx =
+                orphan_block.transactions[tx_index];
+            for (size_t input_index = 0; input_index < orphan_tx.inputs.size();
+                ++input_index)
+            {
+                const message::transaction_input& orphan_input =
+                    orphan_tx.inputs[input_index];
+                if (orphan_iter == orphan_index_ && tx_index == skip_tx &&
+                    input_index == skip_input)
+                {
+                    continue;
+                }
+                else if (orphan_input.previous_output == previous_output)
+                    return true;
+            }
+        }
     }
     return false;
 }
-bool bdb_validate_block::orphan_is_spent(
-    const message::output_point& previous_output)
+
+bool bdb_validate_block::connect_orphan_input(size_t index_in_parent,
+    const message::transaction& current_tx,
+    size_t input_index, uint64_t& value_in)
 {
-    for (size_t i = 0; i < orphan_index_; ++i)
-        if (has_spend(orphan_chain_[i]->actual(), previous_output))
-            return true;
-    return false;
+    const message::transaction_input& input = current_tx.inputs[input_index];
+    const message::output_point previous_output = input.previous_output;
+    // Lookup previous_tx
+    message::transaction previous_tx;
+    size_t previous_depth;
+    if (!lookup_transaction(previous_output, previous_tx, previous_depth))
+        return false;
+    BITCOIN_ASSERT(previous_output.index < previous_tx.outputs.size());
+    const message::transaction_output& previous_tx_out =
+        previous_tx.outputs[previous_output.index];
+    uint64_t output_value = previous_tx_out.value;
+    if (output_value > max_money())
+        return false;
+    // Check coinbase maturity has been reached
+    if (is_coinbase(previous_tx))
+    {
+        size_t depth_difference = depth_ - previous_depth;
+        if (depth_difference < coinbase_maturity)
+            return false;
+    }
+    // Validate script
+    script output_script = previous_tx_out.output_script;
+    if (!output_script.run(input.input_script, current_tx, input_index))
+    {
+        log_error(log_domain::validation) << "Script failed evaluation";
+        return false;
+    }
+    // Search for double spends
+    if (orphan_is_spent(previous_output, index_in_parent, input_index))
+        return false;
+    // Increase value_in by this output's value
+    value_in += output_value;
+    if (value_in > max_money())
+        return false;
+    return true;
 }
 
-bool bdb_validate_block::connect_orphan_input()
+bool bdb_validate_block::lookup_transaction(
+    const message::output_point& previous_output,
+    message::transaction& previous_tx, size_t& previous_depth)
 {
-    // TODO finish this stub
-    log_fatal() << "Unimplemented lookup for tx in bdb orphan chain";
-    exit(1);
+    for (size_t orphan_iter = 0; orphan_iter <= orphan_index_; ++orphan_iter)
+    {
+        const message::block& orphan_block =
+            orphan_chain_[orphan_iter]->actual();
+        for (const message::transaction& orphan_tx: orphan_block.transactions)
+        {
+            if (hash_transaction(orphan_tx) == previous_output.hash)
+            {
+                previous_tx = orphan_tx;
+                previous_depth = fork_index_ + orphan_iter + 1;
+                return true;
+            }
+        }
+    }
     return false;
 }
 

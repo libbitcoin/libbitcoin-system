@@ -120,5 +120,11 @@ uint64_t total_output_value(const message::transaction& tx)
     return total;
 }
 
+bool operator==(const message::output_point& output_a,
+    const message::output_point& output_b)
+{
+    return output_a.hash == output_b.hash && output_a.index == output_b.index;
+}
+
 } // libbitcoin
 
