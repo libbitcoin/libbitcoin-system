@@ -8,12 +8,10 @@
 #include <bitcoin/util/logger.hpp>
 #include <bitcoin/dialect.hpp>
 
-using std::placeholders::_1;
-using std::placeholders::_2;
-
 namespace libbitcoin {
 
-using boost::asio::socket_base;
+using std::placeholders::_1;
+using std::placeholders::_2;
 
 network::network()
 {
@@ -28,33 +26,47 @@ network::~network()
         acceptor_->close();
 }
 
-void network::handle_connect(const boost::system::error_code& ec, 
-    socket_ptr socket, std::string hostname, connect_handler handle_connect)
+void network::resolve_handler(const boost::system::error_code& ec,
+    tcp::resolver::iterator endpoint_iterator,
+    connect_handler handle_connect, resolver_ptr, query_ptr)
 {
     if (ec)
     {
-        log_error() << "Connecting to peer " << hostname
-            << ": " << ec.message();
-        handle_connect(error::system_network_error, nullptr);
+        handle_connect(error::resolve_failed, nullptr);
         return;
     }
-    channel_ptr channel_obj(
-        new channel(socket, threaded_, default_dialect_));
-    channel_obj->start();
-    handle_connect(std::error_code(), channel_obj);
+    socket_ptr socket = std::make_shared<tcp::socket>(*threaded_->service());
+    boost::asio::async_connect(*socket, endpoint_iterator,
+        std::bind(&network::handle_connect, shared_from_this(), 
+            _1, _2, socket, handle_connect));
+}
+
+void network::handle_connect(const boost::system::error_code& ec, 
+    tcp::resolver::iterator endpoint_iterator,
+    socket_ptr socket, connect_handler handle_connect)
+{
+    if (ec)
+    {
+        handle_connect(error::network_unreachable, nullptr);
+        return;
+    }
+    channel_ptr channel_object =
+        std::make_shared<channel>(socket, threaded_, default_dialect_);
+    channel_object->start();
+    handle_connect(std::error_code(), channel_object);
 }
 
 void network::connect(const std::string& hostname, uint16_t port,
     connect_handler handle_connect)
 {
-    socket_ptr socket(new tcp::socket(*threaded_->service()));
-    tcp::resolver resolver(*threaded_->service());
-    tcp::resolver::query query(hostname,
-        boost::lexical_cast<std::string>(port));
-    tcp::endpoint endpoint = *resolver.resolve(query);
-    socket->async_connect(endpoint, std::bind(
-        &network::handle_connect, shared_from_this(), 
-            _1, socket, hostname, handle_connect));
+    resolver_ptr resolver =
+        std::make_shared<tcp::resolver>(*threaded_->service());
+    query_ptr query =
+        std::make_shared<tcp::resolver::query>(hostname,
+            boost::lexical_cast<std::string>(port));
+    resolver->async_resolve(*query,
+        std::bind(&network::resolve_handler, shared_from_this(),
+            _1, _2, handle_connect, resolver, query));
 }
 
 void network::listen(connect_handler handle_connect)
@@ -66,8 +78,9 @@ void network::listen(connect_handler handle_connect)
         });
 }
 
-bool network::start_accept()
+bool network::accept()
 {
+    // TODO this should be 1) using std::make_shared 2) be asynchronous
     acceptor_.reset(new tcp::acceptor(*threaded_->service()));
     socket_ptr socket(new tcp::socket(*threaded_->service()));
     try
@@ -76,7 +89,7 @@ bool network::start_accept()
         acceptor_->open(endpoint.protocol());
         acceptor_->set_option(tcp::acceptor::reuse_address(true));
         acceptor_->bind(endpoint);
-        acceptor_->listen(socket_base::max_connections);
+        acceptor_->listen(boost::asio::socket_base::max_connections);
         acceptor_->async_accept(*socket,
             std::bind(&network::handle_accept, shared_from_this(), 
                 socket));

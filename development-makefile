@@ -1,4 +1,4 @@
-CXXFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC
+CXXFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC -I/home/genjix/usr/include -L/home/genjix/usr/lib
 INCLUDES= -Iinclude/ -Iusr/include/
 LIBS= -Lusr/lib usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq -lz -lpthread -ldl
 BASE_MODULES= \

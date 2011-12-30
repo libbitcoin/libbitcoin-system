@@ -28,7 +28,7 @@ public:
     network(const network&) = delete;
     void operator=(const network&) = delete;
 
-    bool start_accept();
+    bool accept();
     void connect(const std::string& hostname, uint16_t port, 
         connect_handler handle_connect);
     void listen(connect_handler handle_connect);
@@ -52,9 +52,15 @@ public:
     // alert
 
 private:
+    typedef std::shared_ptr<tcp::resolver> resolver_ptr;
+    typedef std::shared_ptr<tcp::resolver::query> query_ptr;
+
+    void resolve_handler(const boost::system::error_code& ec,
+        tcp::resolver::iterator endpoint_iterator,
+        connect_handler handle_connect, resolver_ptr, query_ptr);
     void handle_connect(const boost::system::error_code& ec, 
-        socket_ptr socket, std::string ip_addr, 
-        connect_handler handle_connect);
+        tcp::resolver::iterator endpoint_iterator,
+        socket_ptr socket, connect_handler handle_connect);
     void handle_accept(socket_ptr socket);
 
     acceptor_ptr acceptor_;

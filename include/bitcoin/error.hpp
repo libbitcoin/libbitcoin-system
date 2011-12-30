@@ -11,7 +11,8 @@ enum class error
     missing_object = 1,
     object_already_exists,
     // network errors
-    system_network_error,
+    resolve_failed,
+    network_unreachable,
     bad_stream,
     channel_stopped
 };
