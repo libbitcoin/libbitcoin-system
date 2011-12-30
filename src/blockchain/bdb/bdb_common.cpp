@@ -10,9 +10,9 @@
 namespace libbitcoin {
 
 bdb_common::bdb_common(DbEnv* env, Db* db_blocks, Db* db_blocks_hash,
-    Db* db_txs)
+    Db* db_txs, Db* db_spends)
  : env_(env), db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
-    db_txs_(db_txs)
+    db_txs_(db_txs), db_spends_(db_spends)
 {
 }
 
@@ -27,6 +27,15 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
     uint32_t last_block_depth = cast_chunk<uint32_t>(key.data());
     cursor->close();
     return last_block_depth;
+}
+
+bool bdb_common::is_output_spent(txn_guard_ptr txn,
+    const message::output_point& output)
+{
+    readable_data_type search_spend;
+    empty_data_type ignore_key;
+    return db_spends_->get(txn->get(),
+        search_spend.get(), ignore_key.get(), 0) == 0;
 }
 
 bool bdb_common::save_block(txn_guard_ptr txn,
@@ -112,14 +121,15 @@ bool bdb_common::dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
 bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
     const message::transaction_input& input)
 {
-    protobuf::Transaction proto_tx =
-        fetch_proto_transaction(txn, input.previous_output.hash);
-    if (!proto_tx.IsInitialized())
+    readable_data_type spent_key, null_value;
+    data_chunk raw_key(
+        input.previous_output.hash.begin(), input.previous_output.hash.end());
+    extend_data(raw_key, uncast_type<uint32_t>(input.previous_output.index));
+    spent_key.set(raw_key);
+    if (db_spends_->put(txn->get(), spent_key.get(), null_value.get(),
+            DB_NOOVERWRITE) != 0)
         return false;
-    BITCOIN_ASSERT(input.previous_output.index < proto_tx.outputs_size());
-    BITCOIN_ASSERT(!proto_tx.outputs(input.previous_output.index).is_spent());
-    proto_tx.mutable_outputs(input.previous_output.index)->set_is_spent(true);
-    return rewrite_transaction(txn, input.previous_output.hash, proto_tx);
+    return true;
 }
 
 bool bdb_common::rewrite_transaction(txn_guard_ptr txn,

@@ -491,30 +491,20 @@ class Transaction_Output : public ::google::protobuf::Message {
   inline ::std::string* mutable_script();
   inline ::std::string* release_script();
   
-  // required bool is_spent = 8;
-  inline bool has_is_spent() const;
-  inline void clear_is_spent();
-  static const int kIsSpentFieldNumber = 8;
-  inline bool is_spent() const;
-  inline void set_is_spent(bool value);
-  
   // @@protoc_insertion_point(class_scope:protobuf.Transaction.Output)
  private:
   inline void set_has_value();
   inline void clear_has_value();
   inline void set_has_script();
   inline void clear_has_script();
-  inline void set_has_is_spent();
-  inline void clear_has_is_spent();
   
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
   
   ::google::protobuf::uint64 value_;
   ::std::string* script_;
-  bool is_spent_;
   
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
   
   friend void  protobuf_AddDesc_bitcoin_2eproto();
   friend void protobuf_AssignDesc_bitcoin_2eproto();
@@ -1239,28 +1229,6 @@ inline ::std::string* Transaction_Output::release_script() {
     script_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
-}
-
-// required bool is_spent = 8;
-inline bool Transaction_Output::has_is_spent() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void Transaction_Output::set_has_is_spent() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void Transaction_Output::clear_has_is_spent() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void Transaction_Output::clear_is_spent() {
-  is_spent_ = false;
-  clear_has_is_spent();
-}
-inline bool Transaction_Output::is_spent() const {
-  return is_spent_;
-}
-inline void Transaction_Output::set_is_spent(bool value) {
-  set_has_is_spent();
-  is_spent_ = value;
 }
 
 // -------------------------------------------------------------------

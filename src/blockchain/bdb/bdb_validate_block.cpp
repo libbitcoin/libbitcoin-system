@@ -114,7 +114,7 @@ bool bdb_validate_block::connect_input(size_t index_in_parent,
     }
     // Search for double spends
     //   This must be done in both chain AND orphan
-    if (previous_tx_out.is_spent())
+    if (common_->is_output_spent(txn_, previous_output))
         return false;
     else if (orphan_is_spent(previous_output, index_in_parent, input_index))
         return false;

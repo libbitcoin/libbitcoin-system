@@ -110,6 +110,7 @@ blocks_list bdb_chain_keeper::end_slice(size_t slice_begin_index)
         // Delete current item
         if (cursor->del(0) != 0)
             return blocks_list();
+        // TODO should remove txs + spends too
         value = std::make_shared<writable_data_type>();
     }
     while (cursor->get(key.get(), value->get(), DB_NEXT) == 0);

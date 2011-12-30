@@ -5,6 +5,8 @@
 #include <bitcoin/network/network.hpp>
 using namespace libbitcoin;
 
+bool stop = false;
+
 std::mutex mutex;
 std::condition_variable condition;
 bool finished = false;
@@ -59,7 +61,7 @@ void handle_store(const std::error_code& ec, block_info info,
                 break;
 
             case block_status::rejected:
-                log_debug() << "bad";
+                log_debug() << "bad: " << pretty_hex(block_hash);
                 exit(0);
                 break;
         }
@@ -74,9 +76,12 @@ void handle_store(const std::error_code& ec, block_info info,
                         0x20, 0x16, 0x1b, 0xbf, 0x18, 0xeb, 0x60, 0x48},
             show_block);
 
-        //std::unique_lock<std::mutex> lock(mutex);
-        //finished = true;
-        //condition.notify_one();
+    }
+    if (stop)
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+        finished = true;
+        condition.notify_one();
     }
 }
 
@@ -144,6 +149,8 @@ int main()
         show_block);
     store->fetch_block_locator(std::bind(recv_loc, _1, _2, store));
 
+    std::cin.get();
+    stop = true;
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return finished; });
     return 0;

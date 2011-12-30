@@ -30,7 +30,6 @@ message Transaction {
     message Output {
         required uint64 value = 1;
         required bytes script = 2;
-        required bool is_spent = 8;
     }
 
     repeated Input inputs = 3;

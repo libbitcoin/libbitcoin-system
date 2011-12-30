@@ -53,6 +53,7 @@ bdb_blockchain::~bdb_blockchain()
     // Close primaries
     shutdown_database(db_blocks_);
     shutdown_database(db_txs_);
+    shutdown_database(db_spends_);
     shutdown_database(env_);
     // delete
     google::protobuf::ShutdownProtobufLibrary();
@@ -65,6 +66,7 @@ bool bdb_blockchain::setup(const std::string& prefix)
         return false;
     handle.db_blocks_->truncate(nullptr, 0, 0);
     handle.db_txs_->truncate(nullptr, 0, 0);
+    handle.db_spends_->truncate(nullptr, 0, 0);
     // Save genesis block
     txn_guard_ptr txn = std::make_shared<txn_guard>(handle.env_);
     if (!handle.common_->save_block(txn, 0, genesis_block()))
@@ -117,6 +119,7 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     db_blocks_ = new Db(env_, 0);
     db_blocks_hash_ = new Db(env_, 0);
     db_txs_ = new Db(env_, 0);
+    db_spends_ = new Db(env_, 0);
     if (db_blocks_->set_bt_compare(bt_compare_blocks) != 0)
     {
         log_fatal() << "Internal error setting BTREE comparison function";
@@ -128,10 +131,12 @@ bool bdb_blockchain::initialize(const std::string& prefix)
         DB_BTREE, db_flags, 0);
     db_blocks_->associate(txn.get(), db_blocks_hash_, get_block_hash, 0);
     db_txs_->open(txn.get(), "transactions", "tx", DB_BTREE, db_flags, 0);
+    db_spends_->open(txn.get(), "transactions", "spends",
+        DB_BTREE, db_flags, 0);
     txn.commit();
 
     common_ = std::make_shared<bdb_common>(env_,
-        db_blocks_, db_blocks_hash_, db_txs_);
+        db_blocks_, db_blocks_hash_, db_txs_, db_spends_);
 
     orphans_ = std::make_shared<orphans_pool>(10);
     bdb_chain_keeper_ptr chainkeeper = std::make_shared<bdb_chain_keeper>(
@@ -165,7 +170,7 @@ void bdb_blockchain::do_store(const message::block& stored_block,
     handle_store(std::error_code(), stored_detail->info());
     // Every 10 blocks, we flush database
     static size_t flush_counter = 0;
-    if (++flush_counter == 100)
+    if (++flush_counter == 2000)
     {
         env_->txn_checkpoint(0, 0, 0);
         flush_counter = 0;
