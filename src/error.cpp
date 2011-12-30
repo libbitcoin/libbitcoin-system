@@ -12,12 +12,20 @@ std::string error_category_impl::message(int ev) const
     error ec = static_cast<error>(ev);
     switch (ec)
     {
-    case error::missing_object:
-        return "Object does not exist";
-    case error::object_already_exists:
-        return "Matching previous object found";
-    default:
-        return "Unknown error";
+        case error::missing_object:
+            return "Object does not exist";
+        case error::object_already_exists:
+            return "Matching previous object found";
+        case error::resolve_failed:
+            return "Resolving hostname failed";
+        case error::network_unreachable:
+            return "Unable to reach remote network";
+        case error::bad_stream:
+            return "Bad stream";
+        case error::channel_stopped:
+            return "Channel stopped";
+        default:
+            return "Unknown error";
     }
 }
 
