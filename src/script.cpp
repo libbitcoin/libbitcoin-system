@@ -92,11 +92,30 @@ data_chunk script::pop_stack()
     return value;
 }
 
+bool script::op_drop()
+{
+    if (stack_.size() < 1)
+        return false;
+    stack_.pop_back();
+    return true;
+}
+
 bool script::op_dup()
 {
     if (stack_.size() < 1)
         return false;
     stack_.push_back(stack_.back());
+    return true;
+}
+
+bool script::op_sha256()
+{
+    if (stack_.size() < 1)
+        return false;
+    data_chunk data = pop_stack();
+    data_chunk hash(sha256_length);
+    SHA256(data.data(), data.size(), hash.data());
+    stack_.push_back(hash);
     return true;
 }
 
@@ -108,6 +127,17 @@ bool script::op_hash160()
     short_hash hash = generate_ripemd_hash(data);
     data_chunk raw_hash(hash.begin(), hash.end());
     stack_.push_back(raw_hash);
+    return true;
+}
+
+bool script::op_equal()
+{
+    if (stack_.size() < 2)
+        return false;
+    if (pop_stack() == pop_stack())
+        stack_.push_back(stack_true_value);
+    else
+        stack_.push_back(stack_false_value);
     return true;
 }
 
@@ -232,11 +262,20 @@ bool script::run_operation(operation op,
         case opcode::nop:
             return true;
 
+        case opcode::drop:
+            return op_drop();
+
         case opcode::dup:
             return op_dup();
 
+        case opcode::sha256:
+            return op_sha256();
+
         case opcode::hash160:
             return op_hash160();
+
+        case opcode::equal:
+            return op_equal();
 
         case opcode::equalverify:
             return op_equalverify();
@@ -296,10 +335,16 @@ std::string opcode_to_string(opcode code)
             return "pushdata4";
         case opcode::nop:
             return "nop";
+        case opcode::drop:
+            return "drop";
         case opcode::dup:
             return "dup";
+        case opcode::sha256:
+            return "sha256";
         case opcode::hash160:
             return "hash160";
+        case opcode::equal:
+            return "equal";
         case opcode::equalverify:
             return "equalverify";
         case opcode::checksig:
@@ -326,10 +371,16 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::pushdata4;
     else if (code_repr == "nop")
         return opcode::nop;
+    else if (code_repr == "drop")
+        return opcode::drop;
     else if (code_repr == "dup")
         return opcode::dup;
+    else if (code_repr == "sha256")
+        return opcode::sha256;
     else if (code_repr == "hash160")
         return opcode::hash160;
+    else if (code_repr == "equal")
+        return opcode::equal;
     else if (code_repr == "equalverify")
         return opcode::equalverify;
     else if (code_repr == "checksig")

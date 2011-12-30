@@ -19,8 +19,11 @@ enum class opcode
     pushdata2 = 77,
     pushdata4 = 78,
     nop = 97,
+    drop = 117,
     dup = 118,
+    sha256 = 168,
     hash160 = 169,
+    equal = 135,
     equalverify = 136,
     checksig = 172,
     codeseparator,  // Ignored
@@ -75,8 +78,11 @@ private:
 
     bool run(const message::transaction& parent_tx, uint32_t input_index);
 
+    bool op_drop();
     bool op_dup();
+    bool op_sha256();
     bool op_hash160();
+    bool op_equal();
     bool op_equalverify();
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(message::transaction parent_tx, uint32_t input_index);
