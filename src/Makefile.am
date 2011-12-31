@@ -6,23 +6,23 @@ libbitcoin_la_SOURCES = \
 	network/handshake.cpp  \
 	network/channel.cpp \
 	dialect.cpp  \
-	util/serializer.cpp \
-	util/logger.cpp \
+	utility/serializer.cpp \
+	utility/logger.cpp \
 	kernel.cpp \
-	util/sha256.cpp \
+	utility/sha256.cpp \
 	address.cpp \
 	types.cpp \
 	script.cpp \
-	util/ripemd.cpp \
+	utility/ripemd.cpp \
 	block.cpp \
-    util/elliptic_curve_key.cpp \
+    utility/elliptic_curve_key.cpp \
 	transaction.cpp \
 	error.cpp \
-	util/threaded_service.cpp \
+	utility/threaded_service.cpp \
     validate.cpp \
-	util/base58.cpp \
-	util/big_number.cpp \
-	util/clock.cpp \
+	utility/base58.cpp \
+	utility/big_number.cpp \
+	utility/clock.cpp \
 	constants.cpp \
 	blockchain/organizer.cpp
 

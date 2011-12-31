@@ -5,9 +5,9 @@
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/error.hpp>
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/logger.hpp>
-#include <bitcoin/util/clock.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
+#include <bitcoin/utility/clock.hpp>
 
 namespace libbitcoin {
 

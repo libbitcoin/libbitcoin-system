@@ -3,8 +3,8 @@
 #include <bitcoin/block.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/transaction.hpp>
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 void hash_cmp_tx_b67d0729a14fcd45f88e53f7ec646abb47ed0a52dcdaeae28783a0038dae15c6()
 {

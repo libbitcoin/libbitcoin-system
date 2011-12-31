@@ -1,6 +1,6 @@
 #include "bdb_chain_keeper.hpp"
 
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/data_helpers.hpp>
 
 #include "bdb_common.hpp"

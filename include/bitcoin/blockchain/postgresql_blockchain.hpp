@@ -7,7 +7,7 @@
 #include <string>
 #include <mutex>
 
-#include <bitcoin/util/threads.hpp>
+#include <bitcoin/utility/threads.hpp>
 
 namespace libbitcoin {
 

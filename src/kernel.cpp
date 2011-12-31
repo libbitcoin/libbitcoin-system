@@ -3,7 +3,7 @@
 #include <bitcoin/constants.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 using std::placeholders::_1;
 using std::placeholders::_2;

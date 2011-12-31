@@ -9,7 +9,7 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/network/types.hpp>
 #include <bitcoin/error.hpp>
-#include <bitcoin/util/threads.hpp>
+#include <bitcoin/utility/threads.hpp>
 
 #include <bitcoin/network/channel.hpp>
 

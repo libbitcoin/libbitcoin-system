@@ -1,4 +1,4 @@
-#include <bitcoin/util/sha256.hpp>
+#include <bitcoin/utility/sha256.hpp>
 #include <bitcoin/data_helpers.hpp>
 
 #include <boost/detail/endian.hpp>

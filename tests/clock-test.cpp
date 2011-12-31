@@ -1,5 +1,5 @@
-#include <bitcoin/util/clock.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/clock.hpp>
+#include <bitcoin/utility/logger.hpp>
 using namespace libbitcoin;
 
 int main()

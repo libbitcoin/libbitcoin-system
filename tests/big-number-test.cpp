@@ -5,9 +5,9 @@
 #include <iomanip>
 #include <openssl/bn.h>
 
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/big_number.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/big_number.hpp>
+#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>
 

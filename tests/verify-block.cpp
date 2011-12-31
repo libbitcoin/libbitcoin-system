@@ -1,5 +1,5 @@
 #include <bitcoin/storage/postgresql_storage.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/verify.hpp>
 #include <bitcoin/types.hpp>

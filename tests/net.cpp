@@ -1,5 +1,5 @@
 #include <bitcoin/network/network.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 #include <atomic>
 #include <functional>

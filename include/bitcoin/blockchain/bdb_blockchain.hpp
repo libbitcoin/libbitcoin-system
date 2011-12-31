@@ -4,7 +4,7 @@
 #include <bitcoin/blockchain/blockchain.hpp>
 
 #include <bitcoin/blockchain/organizer.hpp>
-#include <bitcoin/util/threads.hpp>
+#include <bitcoin/utility/threads.hpp>
 
 class Db;
 class DbEnv;

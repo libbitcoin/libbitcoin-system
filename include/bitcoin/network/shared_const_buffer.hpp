@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 
 #include <bitcoin/types.hpp>
-#include <bitcoin/util/serializer.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 

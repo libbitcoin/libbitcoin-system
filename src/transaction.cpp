@@ -1,8 +1,8 @@
 #include <bitcoin/transaction.hpp>
 
-#include <bitcoin/util/serializer.hpp>
-#include <bitcoin/util/sha256.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/dialect.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>

@@ -1,10 +1,10 @@
-#include <bitcoin/util/serializer.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 #include <algorithm>
 #include <string>
 
 #include <bitcoin/messages.hpp>
-#include <bitcoin/util/assert.hpp>
+#include <bitcoin/utility/assert.hpp>
 #include <bitcoin/data_helpers.hpp>
 #include <bitcoin/types.hpp>
 

@@ -7,7 +7,7 @@
 #include <bitcoin/kernel.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/blockchain/bdb_blockchain.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 using namespace libbitcoin;
 

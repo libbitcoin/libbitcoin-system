@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <bitcoin/blockchain/bdb_blockchain.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/logger.hpp>
 using namespace libbitcoin;
 
 void show_last(const std::error_code& ec, size_t last_depth)

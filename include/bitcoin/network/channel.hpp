@@ -16,9 +16,9 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/dialect.hpp>
 #include <bitcoin/data_helpers.hpp>
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/logger.hpp>
-#include <bitcoin/util/serializer.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 

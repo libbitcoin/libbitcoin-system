@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/dialect.hpp>
 
 namespace libbitcoin {

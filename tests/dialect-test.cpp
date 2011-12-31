@@ -1,7 +1,7 @@
 #include <bitcoin/dialect.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 using namespace libbitcoin;
 

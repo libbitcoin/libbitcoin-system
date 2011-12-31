@@ -4,7 +4,6 @@
 #include <openssl/bn.h>
 
 #include <bitcoin/types.hpp>
-#include <bitcoin/util/logger.hpp>
 
 namespace libbitcoin {
 

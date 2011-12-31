@@ -1,6 +1,6 @@
-#include <bitcoin/util/base58.hpp>
+#include <bitcoin/utility/base58.hpp>
 
-#include <bitcoin/util/big_number.hpp>
+#include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {
 

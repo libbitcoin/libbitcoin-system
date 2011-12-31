@@ -35,15 +35,15 @@ bitcoin_network_include_HEADERS = \
 	network/shared_const_buffer.hpp \
 	network/types.hpp
 
-bitcoin_util_includedir = $(includedir)/bitcoin/util
+bitcoin_util_includedir = $(includedir)/bitcoin/utility
 bitcoin_util_include_HEADERS = \
-	util/elliptic_curve_key.hpp \
-	util/sha256.hpp \
-	util/threads.hpp \
-	util/serializer.hpp \
-	util/assert.hpp \
-	util/big_number.hpp \
-	util/clock.hpp \
-	util/base58.hpp \
-	util/ripemd.hpp \
-	util/logger.hpp
+	utility/elliptic_curve_key.hpp \
+	utility/sha256.hpp \
+	utility/threads.hpp \
+	utility/serializer.hpp \
+	utility/assert.hpp \
+	utility/big_number.hpp \
+	utility/clock.hpp \
+	utility/base58.hpp \
+	utility/ripemd.hpp \
+	utility/logger.hpp

@@ -1,7 +1,7 @@
 #include "bdb_validate_block.hpp"
 
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/data_helpers.hpp>
 #include <bitcoin/transaction.hpp>

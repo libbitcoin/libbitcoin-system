@@ -1,8 +1,8 @@
 #include <bitcoin/block.hpp>
 
-#include <bitcoin/util/serializer.hpp>
-#include <bitcoin/util/sha256.hpp>
-#include <bitcoin/util/assert.hpp>
+#include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/assert.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>

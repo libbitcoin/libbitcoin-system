@@ -1,4 +1,4 @@
-#include <bitcoin/util/big_number.hpp>
+#include <bitcoin/utility/big_number.hpp>
 #include <bitcoin/data_helpers.hpp>
 
 namespace libbitcoin {

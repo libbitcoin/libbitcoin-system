@@ -1,5 +1,5 @@
-#include <bitcoin/util/base58.hpp>
-#include <bitcoin/util/assert.hpp>
+#include <bitcoin/utility/base58.hpp>
+#include <bitcoin/utility/assert.hpp>
 
 using namespace libbitcoin;
 

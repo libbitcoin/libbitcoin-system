@@ -1,6 +1,6 @@
 #include "txn_guard.hpp"
 
-#include <bitcoin/util/assert.hpp>
+#include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 

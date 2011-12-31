@@ -1,7 +1,7 @@
 //#include <bitcoin/storage/postgresql_storage.hpp>
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/sha256.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/error.hpp>
 #include <iostream>

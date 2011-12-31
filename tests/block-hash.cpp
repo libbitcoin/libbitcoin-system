@@ -1,6 +1,6 @@
 #include <bitcoin/storage/postgresql_storage.hpp>
 #include <bitcoin/messages.hpp>
-#include <bitcoin/util/assert.hpp>
+#include <bitcoin/utility/assert.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/transaction.hpp>
 #include <iostream>

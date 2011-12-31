@@ -1,7 +1,7 @@
 #include "bdb_organizer.hpp"
 
 #include <bitcoin/dialect.hpp>
-#include <bitcoin/util/assert.hpp>
+#include <bitcoin/utility/assert.hpp>
 
 #include "bdb_validate_block.hpp"
 

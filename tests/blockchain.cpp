@@ -1,7 +1,7 @@
 #include "../src/storage/postgresql_blockchain.hpp"
-#include <bitcoin/util/threaded_service.hpp>
-#include <bitcoin/util/logger.hpp>
-#include <bitcoin/util/assert.hpp>
+#include <bitcoin/utility/threaded_service.hpp>
+#include <bitcoin/utility/logger.hpp>
+#include <bitcoin/utility/assert.hpp>
 #include <bitcoin/storage/postgresql_storage.hpp>
 
 #include <boost/algorithm/string/erase.hpp>

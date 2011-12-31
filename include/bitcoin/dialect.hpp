@@ -5,7 +5,7 @@
 #include <memory>
 
 #include <bitcoin/messages.hpp>
-#include <bitcoin/util/serializer.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 

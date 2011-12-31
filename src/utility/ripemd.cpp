@@ -1,9 +1,9 @@
-#include <bitcoin/util/ripemd.hpp>
+#include <bitcoin/utility/ripemd.hpp>
 
 #include <boost/detail/endian.hpp>
 #include <openssl/sha.h>
 
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
 

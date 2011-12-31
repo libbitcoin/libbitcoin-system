@@ -1,11 +1,11 @@
-#include <bitcoin/util/elliptic_curve_key.hpp>
+#include <bitcoin/utility/elliptic_curve_key.hpp>
 
 #include <algorithm>
 #include <iostream>
 #include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
 
-#include <bitcoin/util/assert.hpp>
+#include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 

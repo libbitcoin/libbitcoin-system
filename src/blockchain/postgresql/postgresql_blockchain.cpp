@@ -2,8 +2,8 @@
 
 #include <bitcoin/block.hpp>
 #include <bitcoin/transaction.hpp>
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/logger.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 #include "pq_blockchain.hpp"
 

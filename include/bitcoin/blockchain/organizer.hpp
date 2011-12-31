@@ -5,7 +5,7 @@
 
 #include <bitcoin/block.hpp>
 #include <bitcoin/messages.hpp>
-#include <bitcoin/util/big_number.hpp>
+#include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {
 

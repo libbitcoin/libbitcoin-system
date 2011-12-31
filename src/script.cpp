@@ -6,11 +6,11 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/data_helpers.hpp>
-#include <bitcoin/util/elliptic_curve_key.hpp>
-#include <bitcoin/util/assert.hpp>
-#include <bitcoin/util/logger.hpp>
-#include <bitcoin/util/ripemd.hpp>
-#include <bitcoin/util/sha256.hpp>
+#include <bitcoin/utility/elliptic_curve_key.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
+#include <bitcoin/utility/ripemd.hpp>
+#include <bitcoin/utility/sha256.hpp>
 
 namespace libbitcoin {
 
