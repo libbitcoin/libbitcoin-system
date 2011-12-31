@@ -1,6 +1,9 @@
 #ifndef LIBBITCOIN_DATA_HELPERS_H
 #define LIBBITCOIN_DATA_HELPERS_H
 
+#include <boost/range/iterator_range.hpp>
+#include <boost/range/sub_range.hpp>
+
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
@@ -64,6 +67,17 @@ std::string pretty_hex(T data)
 data_chunk bytes_from_pretty(std::string byte_stream);
 hash_digest hash_from_pretty(std::string byte_stream);
 
+// Python like range
+//   for (char c: range(str, 0, 2))
+template <typename RangeType>
+boost::sub_range<RangeType> range(RangeType iterable,
+    size_t start_offset=0, size_t end_offset=0)
+{
+    return boost::sub_range<RangeType>(
+        iterable.begin() + start_offset, iterable.end() - end_offset);
+}
+
 } // libbitcoin
 
 #endif
+
