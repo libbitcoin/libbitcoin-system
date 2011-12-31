@@ -11,7 +11,7 @@ libbitcoin_la_SOURCES = \
 	kernel.cpp \
 	utility/sha256.cpp \
 	address.cpp \
-	types.cpp \
+	data_helpers.cpp \
 	script.cpp \
 	utility/ripemd.cpp \
 	block.cpp \

@@ -1,15 +1,12 @@
 #ifndef LIBBITCOIN_TYPES_H
 #define LIBBITCOIN_TYPES_H
 
-#include <boost/detail/endian.hpp>
 #include <boost/asio.hpp>
 #include <array>
 #include <memory>
 #include <sstream>
 #include <iomanip>
 #include <vector>
-
-#include <bitcoin/network/types.hpp>
 
 namespace libbitcoin {
 
@@ -22,18 +19,22 @@ class exporter;
 class blockchain;
 class kernel;
 class network;
+class channel;
 class chrono_clock;
 
-typedef shared_ptr<exporter> exporter_ptr;
-typedef shared_ptr<blockchain> blockchain_ptr;
-typedef shared_ptr<kernel> kernel_ptr;
-typedef shared_ptr<network> network_ptr;
-typedef shared_ptr<chrono_clock> chrono_clock_ptr;
+typedef std::shared_ptr<exporter> exporter_ptr;
+typedef std::shared_ptr<blockchain> blockchain_ptr;
+typedef std::shared_ptr<kernel> kernel_ptr;
+typedef std::shared_ptr<network> network_ptr;
+typedef std::shared_ptr<channel> channel_ptr;
+typedef std::shared_ptr<chrono_clock> chrono_clock_ptr;
 
-typedef shared_ptr<io_service> service_ptr;
-typedef shared_ptr<io_service::work> work_ptr;
-typedef shared_ptr<io_service::strand> strand_ptr;
-typedef shared_ptr<deadline_timer> deadline_timer_ptr;
+typedef std::shared_ptr<io_service> service_ptr;
+typedef std::shared_ptr<io_service::work> work_ptr;
+typedef std::shared_ptr<io_service::strand> strand_ptr;
+typedef std::shared_ptr<deadline_timer> deadline_timer_ptr;
+typedef std::shared_ptr<tcp::socket> socket_ptr;
+typedef std::shared_ptr<tcp::acceptor> acceptor_ptr;
 
 typedef std::array<uint8_t, 32> hash_digest;
 typedef std::array<uint8_t, 20> short_hash;

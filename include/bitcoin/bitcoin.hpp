@@ -8,7 +8,6 @@
 #include <bitcoin/network/channel.hpp>
 #include <bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/network/network.hpp>
-#include <bitcoin/network/types.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/kernel.hpp>
 #include <bitcoin/data_helpers.hpp>

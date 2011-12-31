@@ -3,6 +3,7 @@
 
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/sub_range.hpp>
+#include <boost/detail/endian.hpp>
 
 #include <bitcoin/types.hpp>
 

@@ -7,7 +7,7 @@
 #include <thread>
 
 #include <bitcoin/messages.hpp>
-#include <bitcoin/network/types.hpp>
+#include <bitcoin/types.hpp>
 #include <bitcoin/error.hpp>
 #include <bitcoin/utility/threads.hpp>
 
