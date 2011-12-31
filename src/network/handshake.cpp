@@ -31,7 +31,7 @@ message::version create_version_message()
                             0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
     version.address_you.port = 8333;
     version.nonce = rand();
-    version.user_agent = "";
+    version.user_agent = "/libbitcoin:0.1a/";
     version.start_height = 0;
     return version;
 }
