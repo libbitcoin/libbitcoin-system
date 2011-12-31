@@ -9,7 +9,7 @@
 namespace libbitcoin {
 
 class bdb_organizer
- : public organizer
+  : public organizer
 {
 public:
     bdb_organizer(bdb_common_ptr common,

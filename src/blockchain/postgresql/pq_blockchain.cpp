@@ -52,7 +52,7 @@ uint32_t extract_bits_body(uint32_t bits)
 }
 
 pq_organizer::pq_organizer(cppdb::session sql, kernel_ptr kernel)
- : sql_(sql), kernel_(kernel)
+  : sql_(sql), kernel_(kernel)
 {
 }
 
@@ -477,7 +477,7 @@ void pq_organizer::position_child_branch(
 }
 
 pq_reader::pq_reader(cppdb::session sql)
- : sql_(sql)
+  : sql_(sql)
 {
 }
 
@@ -612,7 +612,7 @@ pq_block pq_reader::read_block(cppdb::result block_result)
 pq_validate_block::pq_validate_block(cppdb::session sql, 
     exporter_ptr saver, pq_reader_ptr reader, 
     const pq_block_info& block_info, const message::block& current_block)
- : validate_block(saver, block_info.depth, current_block), 
+  : validate_block(saver, block_info.depth, current_block), 
     sql_(sql), reader_(reader), 
     block_info_(block_info), current_block_(current_block)
 {
@@ -844,7 +844,7 @@ bool pq_validate_block::search_double_spends(
 
 pq_blockchain::pq_blockchain(cppdb::session sql, 
     service_ptr service, kernel_ptr kernel)
- : sql_(sql)
+  : sql_(sql)
 {
     organizer_.reset(new pq_organizer(sql, kernel));
     reader_.reset(new pq_reader(sql));

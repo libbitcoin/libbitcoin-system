@@ -12,7 +12,7 @@
 namespace libbitcoin {
 
 class bdb_chain_keeper
- : public chain_keeper
+  : public chain_keeper
 {
 public:
     bdb_chain_keeper(bdb_common_ptr common, DbEnv* env,

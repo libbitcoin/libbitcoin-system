@@ -11,7 +11,7 @@ namespace libbitcoin {
 
 bdb_common::bdb_common(DbEnv* env, Db* db_blocks, Db* db_blocks_hash,
     Db* db_txs, Db* db_spends)
- : env_(env), db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
+  : env_(env), db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
     db_txs_(db_txs), db_spends_(db_spends)
 {
 }

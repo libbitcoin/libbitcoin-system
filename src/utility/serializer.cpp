@@ -101,7 +101,7 @@ T read_data_impl(Iterator& begin, Iterator end, bool reverse=false)
 }
 
 deserializer::deserializer(const data_chunk& stream)
- : begin_(stream.cbegin()), end_(stream.cend())
+  : begin_(stream.cbegin()), end_(stream.cend())
 {
 }
 

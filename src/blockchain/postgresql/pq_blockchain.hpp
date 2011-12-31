@@ -90,7 +90,7 @@ private:
 };
 
 class pq_validate_block
- : public validate_block
+  : public validate_block
 {
 public:
     pq_validate_block(
@@ -118,7 +118,7 @@ private:
 };
 
 class pq_blockchain
- : public std::enable_shared_from_this<pq_blockchain>
+  : public std::enable_shared_from_this<pq_blockchain>
 {
 public:
     pq_blockchain(cppdb::session sql, service_ptr service, kernel_ptr kernel);

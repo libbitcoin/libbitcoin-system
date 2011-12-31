@@ -57,19 +57,23 @@ struct std_hash_wrapper
 // Extend std namespace with our hash wrappers
 namespace std
 {
-    using libbitcoin::std_hash_wrapper;
-    using libbitcoin::hash_digest;
-    using libbitcoin::short_hash;
 
-    template <>
-    struct hash<hash_digest> : public std_hash_wrapper<hash_digest>
-    {
-    };
+using libbitcoin::std_hash_wrapper;
+using libbitcoin::hash_digest;
+using libbitcoin::short_hash;
 
-    template <>
-    struct hash<short_hash> : public std_hash_wrapper<short_hash>
-    {
-    };
+template <>
+struct hash<hash_digest>
+  : public std_hash_wrapper<hash_digest>
+{
+};
+
+template <>
+struct hash<short_hash>
+  : public std_hash_wrapper<short_hash>
+{
+};
+
 } // std
 
 #endif

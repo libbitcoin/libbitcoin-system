@@ -15,7 +15,7 @@ class pq_blockchain;
 typedef shared_ptr<pq_blockchain> pq_blockchain_ptr;
 
 class postgresql_blockchain
- : public blockchain, public threaded_service,
+  : public blockchain, public threaded_service,
     public std::enable_shared_from_this<postgresql_blockchain>
 {
 public:

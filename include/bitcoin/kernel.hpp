@@ -16,7 +16,7 @@ typedef std::pair<hash_digest, hash_digest> hash_pair;
 typedef std::vector<hash_pair> hash_pair_list;
 
 class kernel 
- : public threaded_service, public std::enable_shared_from_this<kernel>
+  : public threaded_service, public std::enable_shared_from_this<kernel>
 {
 public:
     kernel();

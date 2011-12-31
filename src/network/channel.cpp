@@ -12,7 +12,7 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
 channel::channel(socket_ptr socket, thread_core_ptr threaded,
     exporter_ptr saver)
- : killed_(false), threaded_(threaded), socket_(socket), export_(saver)
+  : killed_(false), threaded_(threaded), socket_(socket), export_(saver)
 {
     strand_ = threaded_->create_strand();
     timeout_.reset(new deadline_timer(*threaded_->service()));

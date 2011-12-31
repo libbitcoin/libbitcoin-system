@@ -5,7 +5,7 @@
 namespace libbitcoin {
 
 txn_guard::txn_guard(DbEnv* env)
- : used_(false)
+  : used_(false)
 {
     env->txn_begin(nullptr, &txn_, DB_READ_COMMITTED|DB_TXN_NOWAIT);
 }

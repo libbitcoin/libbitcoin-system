@@ -12,7 +12,7 @@ bdb_validate_block::bdb_validate_block(bdb_common_ptr common, int fork_index,
     const blocks_list& orphan_chain, int orphan_index, size_t depth,
     txn_guard_ptr txn, exporter_ptr saver,
     const message::block& current_block)
- : validate_block(saver, depth, current_block), common_(common),
+  : validate_block(saver, depth, current_block), common_(common),
     txn_(txn), depth_(depth), fork_index_(fork_index),
     orphan_index_(orphan_index), orphan_chain_(orphan_chain)
 {

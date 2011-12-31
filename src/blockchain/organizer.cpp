@@ -5,7 +5,7 @@
 namespace libbitcoin {
 
 block_detail::block_detail(const message::block& actual_block)
- : actual_block_(actual_block), block_hash_(hash_block_header(actual_block_)),
+  : actual_block_(actual_block), block_hash_(hash_block_header(actual_block_)),
     processed_(false), info_{block_status::orphan, 0}
 {
 }
@@ -40,7 +40,7 @@ const block_info& block_detail::info() const
 }
 
 orphans_pool::orphans_pool(size_t pool_size)
- : pool_(pool_size)
+  : pool_(pool_size)
 {
 }
 
@@ -94,7 +94,7 @@ void orphans_pool::remove(block_detail_ptr remove_block)
 }
 
 organizer::organizer(orphans_pool_ptr orphans, chain_keeper_ptr chain)
- : orphans_(orphans), chain_(chain)
+  : orphans_(orphans), chain_(chain)
 {
 }
 

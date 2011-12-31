@@ -9,7 +9,7 @@
 namespace libbitcoin {
 
 class bdb_validate_block
- : public validate_block
+  : public validate_block
 {
 public:
     bdb_validate_block(bdb_common_ptr common, int fork_index,

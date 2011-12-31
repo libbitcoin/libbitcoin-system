@@ -32,7 +32,7 @@ strand_ptr thread_core::create_strand()
 }
 
 threaded_service::threaded_service()
- : strand_(core_.create_strand())
+  : strand_(core_.create_strand())
 {
 }
 

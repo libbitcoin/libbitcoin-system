@@ -69,7 +69,7 @@ public:
 };
 
 class satoshi_exporter 
- : public exporter
+  : public exporter
 {
 public:
     // Create stream from message

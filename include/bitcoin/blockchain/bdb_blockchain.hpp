@@ -15,7 +15,7 @@ class bdb_common;
 typedef std::shared_ptr<bdb_common> bdb_common_ptr;
 
 class bdb_blockchain
- : public blockchain, public threaded_service,
+  : public blockchain, public threaded_service,
     public std::enable_shared_from_this<bdb_blockchain>
 {
 public:

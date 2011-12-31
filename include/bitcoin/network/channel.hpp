@@ -26,7 +26,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 class channel
- : public std::enable_shared_from_this<channel>
+  : public std::enable_shared_from_this<channel>
 {
 public:
     typedef std::function<void (const std::error_code&)> send_handler;

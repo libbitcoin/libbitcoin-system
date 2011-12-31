@@ -9,7 +9,7 @@ namespace libbitcoin {
 
 bdb_organizer::bdb_organizer(bdb_common_ptr common,
     orphans_pool_ptr orphans, bdb_chain_keeper_ptr chain)
- : organizer(orphans, chain), common_(common), chain_(chain)
+  : organizer(orphans, chain), common_(common), chain_(chain)
 {
 }
 

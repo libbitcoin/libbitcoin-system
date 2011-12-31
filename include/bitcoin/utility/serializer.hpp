@@ -29,7 +29,7 @@ private:
 };
 
 class end_of_stream
- : std::exception {};
+  : std::exception {};
 
 class deserializer
 {

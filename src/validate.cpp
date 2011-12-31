@@ -19,7 +19,7 @@ constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 
 validate_block::validate_block(exporter_ptr saver, size_t depth,
     const message::block& current_block)
- : exporter_(saver), depth_(depth), current_block_(current_block)
+  : exporter_(saver), depth_(depth), current_block_(current_block)
 {
     clock_.reset(new chrono_clock);
 }

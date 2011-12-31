@@ -11,7 +11,7 @@ namespace libbitcoin {
 
 bdb_chain_keeper::bdb_chain_keeper(bdb_common_ptr common, DbEnv* env,
     Db* db_blocks, Db* db_blocks_hash)
- : common_(common), env_(env), db_blocks_(db_blocks),
+  : common_(common), env_(env), db_blocks_(db_blocks),
     db_blocks_hash_(db_blocks_hash)
 {
 }
