@@ -12,7 +12,7 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
 channel::channel(socket_ptr socket, thread_core_ptr threaded,
     exporter_ptr saver)
-  : killed_(false), threaded_(threaded), socket_(socket), export_(saver)
+  : killed_(false), socket_(socket), export_(saver), threaded_(threaded)
 {
     strand_ = threaded_->create_strand();
     timeout_.reset(new deadline_timer(*threaded_->service()));
@@ -31,13 +31,9 @@ void channel::start()
 void channel::stop()
 {
     killed_ = true;
-    tcp::endpoint remote_endpoint = socket_->remote_endpoint();
-    log_debug(log_domain::network) << "Closing channel "
-        << remote_endpoint.address().to_string();
-    boost::system::error_code ec;
-    socket_->shutdown(tcp::socket::shutdown_both, ec);
-    socket_->close(ec);
     timeout_->cancel();
+    timeout_.reset();
+    socket_.reset();
 }
 
 void channel::handle_timeout(const boost::system::error_code& ec)
@@ -46,6 +42,15 @@ void channel::handle_timeout(const boost::system::error_code& ec)
         return;
     log_info(log_domain::network) << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
+    tcp::endpoint remote_endpoint = socket_->remote_endpoint();
+    log_debug(log_domain::network) << "Closing channel "
+        << remote_endpoint.address().to_string();
+    // TODO should be async
+    // TODO handlers should be able to be registered for this event
+    // this error codes would be delegated to it
+    boost::system::error_code ret_ec;
+    socket_->shutdown(tcp::socket::shutdown_both, ret_ec);
+    socket_->close(ret_ec);
     stop();
 }
 
