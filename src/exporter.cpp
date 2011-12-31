@@ -1,4 +1,4 @@
-#include <bitcoin/dialect.hpp>
+#include <bitcoin/exporter.hpp>
 
 #include <boost/assert.hpp>
 
@@ -33,49 +33,49 @@ data_chunk construct_header_from(std::string command,
     return header.data();
 }
 
-data_chunk original_dialect::create_header(const message::version&,
+data_chunk satoshi_exporter::create_header(const message::version&,
     const data_chunk& payload) const
 {
     return construct_header_from("version", payload);
 }
 
-data_chunk original_dialect::create_header(const message::verack&,
+data_chunk satoshi_exporter::create_header(const message::verack&,
     const data_chunk& payload) const
 {
     return construct_header_from("verack", payload);
 }
 
-data_chunk original_dialect::create_header(const message::get_address&,
+data_chunk satoshi_exporter::create_header(const message::get_address&,
     const data_chunk& payload) const
 {
     return construct_header_from("getaddr", payload);
 }
 
-data_chunk original_dialect::create_header(const message::get_data&,
+data_chunk satoshi_exporter::create_header(const message::get_data&,
     const data_chunk& payload) const
 {
     return construct_header_from("getdata", payload);
 }
 
-data_chunk original_dialect::create_header(
+data_chunk satoshi_exporter::create_header(
     const message::get_blocks&, const data_chunk& payload) const
 {
     return construct_header_from("getblocks", payload);
 }
 
-data_chunk original_dialect::create_header(const message::block&,
+data_chunk satoshi_exporter::create_header(const message::block&,
     const data_chunk& payload) const
 {
     return construct_header_from("block", payload);
 }
 
-data_chunk original_dialect::create_header(const message::transaction&,
+data_chunk satoshi_exporter::create_header(const message::transaction&,
     const data_chunk& payload) const
 {
     return construct_header_from("tx", payload);
 }
 
-data_chunk original_dialect::to_network(const message::version& version) const
+data_chunk satoshi_exporter::to_network(const message::version& version) const
 {
     serializer payload;
     payload.write_4_bytes(version.version);
@@ -90,17 +90,17 @@ data_chunk original_dialect::to_network(const message::version& version) const
     return payload.data();
 }
 
-data_chunk original_dialect::to_network(const message::verack&) const
+data_chunk satoshi_exporter::to_network(const message::verack&) const
 {
     return data_chunk();
 }
 
-data_chunk original_dialect::to_network(const message::get_address&) const
+data_chunk satoshi_exporter::to_network(const message::get_address&) const
 {
     return data_chunk();
 }
 
-data_chunk original_dialect::to_network(
+data_chunk satoshi_exporter::to_network(
     const message::get_blocks& getblocks) const
 {
     serializer payload;
@@ -112,12 +112,12 @@ data_chunk original_dialect::to_network(
     return payload.data();
 }
 
-data_chunk original_dialect::to_network(const message::block& block) const
+data_chunk satoshi_exporter::to_network(const message::block& block) const
 {
     return data_chunk();
 }
 
-data_chunk original_dialect::to_network(const message::transaction& tx) const
+data_chunk satoshi_exporter::to_network(const message::transaction& tx) const
 {
     serializer payload;
     payload.write_4_bytes(tx.version);
@@ -143,7 +143,7 @@ data_chunk original_dialect::to_network(const message::transaction& tx) const
     return payload.data();
 }
 
-data_chunk original_dialect::to_network(const message::get_data& getdata) const
+data_chunk satoshi_exporter::to_network(const message::get_data& getdata) const
 {
     serializer payload;
     payload.write_var_uint(getdata.inventories.size());
@@ -168,7 +168,7 @@ data_chunk original_dialect::to_network(const message::get_data& getdata) const
     return payload.data();
 }
 
-message::header original_dialect::header_from_network(
+message::header satoshi_exporter::header_from_network(
         const data_chunk& stream)  const
 {
     deserializer deserial(stream);
@@ -180,13 +180,13 @@ message::header original_dialect::header_from_network(
     return header;
 }
 
-uint32_t original_dialect::checksum_from_network(const data_chunk& chunk) const
+uint32_t satoshi_exporter::checksum_from_network(const data_chunk& chunk) const
 {
     deserializer deserial(chunk);
     return deserial.read_4_bytes();
 }
 
-message::version original_dialect::version_from_network(
+message::version satoshi_exporter::version_from_network(
     const data_chunk& stream) const
 {
     deserializer deserial(stream);
@@ -216,7 +216,7 @@ message::version original_dialect::version_from_network(
     return payload;
 }
 
-message::address original_dialect::address_from_network(
+message::address satoshi_exporter::address_from_network(
     const data_chunk& stream) const
 {
     message::address payload;
@@ -247,7 +247,7 @@ message::inventory_type inventory_type_from_number(uint32_t raw_type)
     }
 }
 
-message::inventory original_dialect::inventory_from_network(
+message::inventory satoshi_exporter::inventory_from_network(
     const data_chunk& stream) const
 {
     deserializer deserial(stream);
@@ -308,14 +308,14 @@ message::transaction read_transaction(deserializer& deserial)
     return txn;
 }
 
-message::transaction original_dialect::transaction_from_network(
+message::transaction satoshi_exporter::transaction_from_network(
     const data_chunk& stream) const
 {
     deserializer deserial(stream);
     return read_transaction(deserial);
 }
 
-message::block original_dialect::block_from_network(
+message::block satoshi_exporter::block_from_network(
     const data_chunk& stream) const
 {
     deserializer deserial(stream);
@@ -335,7 +335,7 @@ message::block original_dialect::block_from_network(
     return payload;
 }
 
-bool original_dialect::verify_header(const message::header& header_msg) const
+bool satoshi_exporter::verify_header(const message::header& header_msg) const
 {
     if (header_msg.magic != magic_value)
         return false;
@@ -373,12 +373,12 @@ bool original_dialect::verify_header(const message::header& header_msg) const
     return true;
 }
 
-bool original_dialect::checksum_used(const message::header& header_msg) const
+bool satoshi_exporter::checksum_used(const message::header& header_msg) const
 {
     return header_msg.command != "version" && header_msg.command != "verack";
 }
 
-bool original_dialect::verify_checksum(const message::header& header_msg,
+bool satoshi_exporter::verify_checksum(const message::header& header_msg,
         const data_chunk& stream) const
 {
     if (!checksum_used(header_msg))

@@ -1,7 +1,8 @@
 #include "pq_blockchain.hpp"
 
 #include <bitcoin/constants.hpp>
-#include <bitcoin/dialect.hpp>
+#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/exporter.hpp>
 #include <bitcoin/kernel.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
@@ -609,9 +610,9 @@ pq_block pq_reader::read_block(cppdb::result block_result)
 }
 
 pq_validate_block::pq_validate_block(cppdb::session sql, 
-    dialect_ptr dialect, pq_reader_ptr reader, 
+    exporter_ptr saver, pq_reader_ptr reader, 
     const pq_block_info& block_info, const message::block& current_block)
- : validate_block(dialect, block_info.depth, current_block), 
+ : validate_block(saver, block_info.depth, current_block), 
     sql_(sql), reader_(reader), 
     block_info_(block_info), current_block_(current_block)
 {
@@ -895,7 +896,7 @@ pq_block pq_blockchain::fetch_or_read_block(cppdb::result result)
 
 void pq_blockchain::validate()
 {
-    dialect_.reset(new original_dialect);
+    export_ = std::make_shared<satoshi_exporter>();
     static cppdb::statement statement = sql_.prepare(
         "SELECT DISTINCT ON (block_id) \
             block_id, \
@@ -923,7 +924,7 @@ void pq_blockchain::validate()
         const message::block& current_block = block.second;
 
         pq_validate_block block_validation(
-            sql_, dialect_, reader_, block_info, current_block);
+            sql_, export_, reader_, block_info, current_block);
 
         if (block_validation.validates())
             finalize_status(block_info, current_block);

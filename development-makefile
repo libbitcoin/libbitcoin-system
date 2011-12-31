@@ -4,7 +4,7 @@ LIBS= -Lusr/lib usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -
 BASE_MODULES= \
 	network.o  \
 	handshake.o  \
-	dialect.o  \
+	exporter.o  \
 	channel.o \
 	serializer.o \
 	logger.o \
@@ -90,13 +90,13 @@ bin/examples/accounting: libbitcoin obj/accounting.o
 
 accounting: bin/examples/accounting
 
-obj/dialect-test.o: tests/dialect-test.cpp
+obj/exporter-test.o: tests/exporter-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-bin/tests/dialect-test: obj/dialect-test.o
-	$(CXX) -o bin/tests/dialect-test obj/dialect-test.o $(LIBBITCOIN)
+bin/tests/exporter-test: obj/exporter-test.o
+	$(CXX) -o bin/tests/exporter-test obj/exporter-test.o $(LIBBITCOIN)
 
-dialect-test: bin/tests/dialect-test
+exporter-test: bin/tests/exporter-test
 
 obj/base58-test.o: tests/base58-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
@@ -206,7 +206,7 @@ obj/handshake.o: src/network/handshake.cpp include/bitcoin/network/network.hpp
 obj/network.o: src/network/network.cpp include/bitcoin/network/network.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/dialect.o: src/dialect.cpp include/bitcoin/dialect.hpp
+obj/exporter.o: src/exporter.cpp include/bitcoin/exporter.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/channel.o: src/network/channel.cpp src/network/channel.hpp
@@ -317,8 +317,8 @@ obj/constants.o: src/constants.cpp include/bitcoin/constants.hpp
 obj/validate-block.o: tests/validate-block.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-bin/tests/validate-block: obj/validate-block.o obj/postgresql_storage.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/error.o obj/validate.o obj/dialect.o obj/constants.o obj/big_number.o obj/clock.o
-	$(CXX) -o bin/tests/validate-block obj/validate-block.o obj/postgresql_storage.o obj/transaction.o obj/script.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/error.o obj/validate.o obj/threaded_service.o obj/dialect.o obj/constants.o obj/big_number.o obj/clock.o $(LIBS)
+bin/tests/validate-block: obj/validate-block.o obj/postgresql_storage.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/error.o obj/validate.o obj/exporter.o obj/constants.o obj/big_number.o obj/clock.o
+	$(CXX) -o bin/tests/validate-block obj/validate-block.o obj/postgresql_storage.o obj/transaction.o obj/script.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/error.o obj/validate.o obj/threaded_service.o obj/exporter.o obj/constants.o obj/big_number.o obj/clock.o $(LIBS)
 
 validate-block: bin/tests/validate-block
 

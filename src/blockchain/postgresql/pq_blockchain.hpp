@@ -94,7 +94,7 @@ class pq_validate_block
 {
 public:
     pq_validate_block(
-        cppdb::session sql, dialect_ptr, pq_reader_ptr reader,
+        cppdb::session sql, exporter_ptr saver, pq_reader_ptr reader,
         const pq_block_info& block_info,
         const message::block& current_block);
 protected:
@@ -140,7 +140,7 @@ private:
 
     pq_organizer_ptr organizer_;
     pq_reader_ptr reader_;
-    dialect_ptr dialect_;
+    exporter_ptr export_;
     cppdb::session sql_;
 };
 

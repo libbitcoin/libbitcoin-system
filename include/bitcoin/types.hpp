@@ -18,13 +18,13 @@ using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using boost::asio::deadline_timer;
 
-class dialect;
+class exporter;
 class blockchain;
 class kernel;
 class network;
 class chrono_clock;
 
-typedef shared_ptr<dialect> dialect_ptr;
+typedef shared_ptr<exporter> exporter_ptr;
 typedef shared_ptr<blockchain> blockchain_ptr;
 typedef shared_ptr<kernel> kernel_ptr;
 typedef shared_ptr<network> network_ptr;

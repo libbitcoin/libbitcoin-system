@@ -1,7 +1,7 @@
 #include <bitcoin/validate.hpp>
 
 #include <bitcoin/block.hpp>
-#include <bitcoin/dialect.hpp>
+#include <bitcoin/exporter.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/error.hpp>
@@ -17,9 +17,9 @@ using std::placeholders::_2;
 constexpr size_t max_block_size = 1000000;
 constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 
-validate_block::validate_block(dialect_ptr dialect, 
-    size_t depth, const message::block& current_block)
- : dialect_(dialect), depth_(depth), current_block_(current_block)
+validate_block::validate_block(exporter_ptr saver, size_t depth,
+    const message::block& current_block)
+ : exporter_(saver), depth_(depth), current_block_(current_block)
 {
     clock_.reset(new chrono_clock);
 }
@@ -54,7 +54,7 @@ bool validate_block::check_block()
     // Size limits
     if (current_block_.transactions.empty() || 
         current_block_.transactions.size() > max_block_size ||
-        dialect_->to_network(current_block_).size() > max_block_size)
+        exporter_->to_network(current_block_).size() > max_block_size)
     {
         log_error(log_domain::validation) << "Size limits failed";
         return false;
@@ -137,7 +137,7 @@ bool validate_block::check_transaction(const message::transaction& tx)
         return false;
 
     // Maybe not needed since we try to serialise block in CheckBlock()
-    //if (dialect_->to_network(tx, false).size() > max_block_size)
+    //if (exporter_->to_network(tx, false).size() > max_block_size)
     //    return false;
 
     // Check for negative or overflow output values

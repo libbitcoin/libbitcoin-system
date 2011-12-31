@@ -1,4 +1,4 @@
-#include <bitcoin/dialect.hpp>
+#include <bitcoin/exporter.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
@@ -26,7 +26,7 @@ int main()
     0x0E, 0xAB, 0x5B, 0xEA, 0x43, 0x6A, 0x04, 0x84, 0xCF, 0xAB, 0x12, 0x48, 0x5E, 0xFD, 0xA0, 0xB7,
     0x8B, 0x4E, 0xCC, 0x52, 0x88, 0xAC, 0x00, 0x00, 0x00, 0x00};
 
-    dialect_ptr translator(new original_dialect);
+    exporter_ptr translator(new satoshi_exporter);
     const message::transaction& tx = translator->transaction_from_network(raw_tx);
     BITCOIN_ASSERT(raw_tx == translator->to_network(tx));
     return 0;

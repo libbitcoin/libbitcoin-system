@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_DIALECT_H
-#define LIBBITCOIN_DIALECT_H
+#ifndef LIBBITCOIN_EXPORTER_H
+#define LIBBITCOIN_EXPORTER_H
 
 #include <string>
 #include <memory>
@@ -9,7 +9,7 @@
 
 namespace libbitcoin {
 
-class dialect
+class exporter
 {
 public:
     // To network
@@ -68,8 +68,8 @@ public:
         const data_chunk& stream) const = 0;
 };
 
-class original_dialect 
- : public dialect
+class satoshi_exporter 
+ : public exporter
 {
 public:
     // Create stream from message

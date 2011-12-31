@@ -14,7 +14,7 @@ class bdb_validate_block
 public:
     bdb_validate_block(bdb_common_ptr common, int fork_index,
         const blocks_list& orphan_chain, int orphan_index, size_t depth,
-        txn_guard_ptr txn, dialect_ptr dialect,
+        txn_guard_ptr txn, exporter_ptr saver,
         const message::block& current_block);
 
 protected:

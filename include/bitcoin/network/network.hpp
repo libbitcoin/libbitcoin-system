@@ -68,7 +68,7 @@ private:
 
     thread_core_ptr threaded_;
     strand_ptr strand_;
-    dialect_ptr default_dialect_;
+    exporter_ptr export_;
 };
 
 typedef std::function<void (const std::error_code&)> handshake_handler;

@@ -16,8 +16,8 @@ public:
     bool validates();
 
 protected:
-    validate_block(dialect_ptr dialect, 
-        size_t depth, const message::block& current_block);
+    validate_block(exporter_ptr saver, size_t depth,
+        const message::block& current_block);
 
     virtual uint32_t previous_block_bits() = 0;
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
@@ -37,7 +37,7 @@ private:
 
     bool connect_block();
 
-    dialect_ptr dialect_;
+    exporter_ptr exporter_;
     chrono_clock_ptr clock_;
 
     const size_t depth_;

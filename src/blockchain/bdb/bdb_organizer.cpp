@@ -1,6 +1,6 @@
 #include "bdb_organizer.hpp"
 
-#include <bitcoin/dialect.hpp>
+#include <bitcoin/exporter.hpp>
 #include <bitcoin/utility/assert.hpp>
 
 #include "bdb_validate_block.hpp"
@@ -16,15 +16,13 @@ bdb_organizer::bdb_organizer(bdb_common_ptr common,
 bool bdb_organizer::verify(int fork_index, const blocks_list& orphan_chain,
     int orphan_index)
 {
-    dialect_ptr default_dialect = std::make_shared<original_dialect>();
+    exporter_ptr saver = std::make_shared<satoshi_exporter>();
     BITCOIN_ASSERT(orphan_index < orphan_chain.size());
     const message::block& current_block = orphan_chain[orphan_index]->actual();
     size_t depth = fork_index + orphan_index + 1;
     BITCOIN_ASSERT(depth != 0);
-    //bdb_validate_block validate(common_, chain_->txn(),
-    //    default_dialect, depth, current_block);
     bdb_validate_block validate(common_, fork_index, orphan_chain,
-        orphan_index, depth, chain_->txn(), default_dialect, current_block);
+        orphan_index, depth, chain_->txn(), saver, current_block);
     return validate.validates();
 }
 

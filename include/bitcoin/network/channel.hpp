@@ -14,7 +14,7 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/messages.hpp>
-#include <bitcoin/dialect.hpp>
+#include <bitcoin/exporter.hpp>
 #include <bitcoin/data_helpers.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
@@ -42,8 +42,7 @@ public:
     typedef std::function<void (const std::error_code&,
         const message::block&)> receive_block_handler;
 
-    channel(socket_ptr socket, thread_core_ptr threaded,
-        dialect_ptr translator);
+    channel(socket_ptr socket, thread_core_ptr threaded, exporter_ptr saver);
     ~channel();
 
     channel(const channel&) = delete;
@@ -113,8 +112,8 @@ private:
     template<typename Message>
     void do_send(const Message& packet, send_handler handle_send)
     {
-        data_chunk payload = translator_->to_network(packet),
-            header = translator_->create_header(packet, payload);
+        data_chunk payload = export_->to_network(packet),
+            header = export_->create_header(packet, payload);
         // Construct completed packet with header + payload
         data_chunk whole_message = header;
         extend_data(whole_message, payload);
@@ -184,7 +183,7 @@ private:
 
     socket_ptr socket_;
     network_ptr network_;
-    dialect_ptr translator_;
+    exporter_ptr export_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes
     static constexpr size_t header_chunk_size = 20;

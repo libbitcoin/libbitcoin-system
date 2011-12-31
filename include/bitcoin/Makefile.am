@@ -5,7 +5,7 @@ bitcoin_include_HEADERS = \
 	messages.hpp \
 	kernel.hpp \
 	script.hpp \
-	dialect.hpp \
+	exporter.hpp \
 	address.hpp \
 	transaction.hpp \
 	constants.hpp \

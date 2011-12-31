@@ -136,7 +136,7 @@ void recv_loc(const std::error_code& ec, const message::block_locator& loc,
 
 int main()
 {
-    //bdb_blockchain::setup("database/");
+    bdb_blockchain::setup("database/");
     log_debug() << "Setup finished";
     blockchain_ptr store(new bdb_blockchain("database/"));
     log_debug() << "Opened";

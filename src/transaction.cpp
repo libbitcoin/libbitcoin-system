@@ -3,7 +3,7 @@
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/utility/sha256.hpp>
 #include <bitcoin/utility/logger.hpp>
-#include <bitcoin/dialect.hpp>
+#include <bitcoin/exporter.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/data_helpers.hpp>
@@ -15,7 +15,7 @@ typedef std::vector<hash_digest> hash_list;
 hash_digest hash_transaction_impl(const message::transaction& transaction, 
         uint32_t* hash_type_code)
 {
-    original_dialect translator;
+    satoshi_exporter translator;
     data_chunk serialized_tx = translator.to_network(transaction);
     if (hash_type_code != nullptr)
         extend_data(serialized_tx, uncast_type(*hash_type_code));

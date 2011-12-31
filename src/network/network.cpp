@@ -6,7 +6,7 @@
 #include <iostream>
 
 #include <bitcoin/utility/logger.hpp>
-#include <bitcoin/dialect.hpp>
+#include <bitcoin/exporter.hpp>
 
 namespace libbitcoin {
 
@@ -17,7 +17,7 @@ network::network()
 {
     threaded_ = std::make_shared<thread_core>();
     strand_ = threaded_->create_strand();
-    default_dialect_ = std::make_shared<original_dialect>();
+    export_ = std::make_shared<satoshi_exporter>();
 }
 
 network::~network()
@@ -51,7 +51,7 @@ void network::handle_connect(const boost::system::error_code& ec,
         return;
     }
     channel_ptr channel_object =
-        std::make_shared<channel>(socket, threaded_, default_dialect_);
+        std::make_shared<channel>(socket, threaded_, export_);
     channel_object->start();
     handle_connect(std::error_code(), channel_object);
 }

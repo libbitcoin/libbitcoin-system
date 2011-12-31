@@ -11,8 +11,8 @@ using boost::asio::buffer;
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
 channel::channel(socket_ptr socket, thread_core_ptr threaded,
-    dialect_ptr translator)
- : killed_(false), threaded_(threaded), socket_(socket), translator_(translator)
+    exporter_ptr saver)
+ : killed_(false), threaded_(threaded), socket_(socket), export_(saver)
 {
     strand_ = threaded_->create_strand();
     timeout_.reset(new deadline_timer(*threaded_->service()));
@@ -99,9 +99,9 @@ void channel::handle_read_header(const boost::system::error_code& ec,
             data_chunk(inbound_header_.begin(), inbound_header_.end());
     BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
     message::header header_msg =
-            translator_->header_from_network(header_stream);
+            export_->header_from_network(header_stream);
 
-    if (!translator_->verify_header(header_msg))
+    if (!export_->verify_header(header_msg))
     {
         log_debug(log_domain::network) << "Bad header received.";
         stop();
@@ -110,7 +110,7 @@ void channel::handle_read_header(const boost::system::error_code& ec,
 
     log_info(log_domain::network) << "r: " << header_msg.command
             << " (" << header_msg.payload_length << " bytes)";
-    if (translator_->checksum_used(header_msg))
+    if (export_->checksum_used(header_msg))
     {
         // Read checksum
         read_checksum(header_msg);
@@ -133,7 +133,7 @@ void channel::handle_read_checksum(message::header& header_msg,
             inbound_checksum_.begin(), inbound_checksum_.end());
     BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
     //header_msg.checksum = cast_stream<uint32_t>(checksum_stream);
-    header_msg.checksum = translator_->checksum_from_network(checksum_stream);
+    header_msg.checksum = export_->checksum_from_network(checksum_stream);
     read_payload(header_msg);
     reset_timeout();
 }
@@ -147,7 +147,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     data_chunk payload_stream = data_chunk(
         inbound_payload_.begin(), inbound_payload_.end());
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
-    if (!translator_->verify_checksum(header_msg, payload_stream))
+    if (!export_->verify_checksum(header_msg, payload_stream))
     {
         log_warning(log_domain::network) << "Bad checksum!";
         stop();
@@ -157,7 +157,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     if (header_msg.command == "version")
     {
         if (!transport<message::version>(payload_stream,
-            std::bind(&dialect::version_from_network, translator_, _1),
+            std::bind(&exporter::version_from_network, export_, _1),
             version_registry_))
         {
             return;
@@ -170,7 +170,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "addr")
     {
         if (!transport<message::address>(payload_stream,
-            std::bind(&dialect::address_from_network, translator_, _1),
+            std::bind(&exporter::address_from_network, export_, _1),
             address_registry_))
         {
             return;
@@ -179,7 +179,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "inv")
     {
         if (!transport<message::inventory>(payload_stream,
-            std::bind(&dialect::inventory_from_network, translator_, _1),
+            std::bind(&exporter::inventory_from_network, export_, _1),
             inventory_registry_))
         {
             return;
@@ -188,7 +188,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "block")
     {
         if (!transport<message::block>(payload_stream,
-            std::bind(&dialect::block_from_network, translator_, _1),
+            std::bind(&exporter::block_from_network, export_, _1),
             block_registry_))
         {
             return;
