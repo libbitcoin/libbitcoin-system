@@ -30,7 +30,7 @@ void serializer::write_8_bytes(uint64_t v)
     extend_data(data_, uncast_type(v));
 }
 
-void serializer::write_var_uint(uint64_t v)
+void serializer::write_variable_uint(uint64_t v)
 {
     if (v < 0xfd)
     {
@@ -70,12 +70,19 @@ void serializer::write_hash(hash_digest hash)
     data_.insert(data_.end(), hash.rbegin(), hash.rend());
 }
 
-void serializer::write_command(std::string command)
+void serializer::write_fixed_string(const std::string& command,
+    size_t string_size)
 {
-    constexpr size_t comm_len = 12;
-    char comm_str[comm_len] = { 0 };
-    command.copy(comm_str, comm_len);
-    extend_data(data_, comm_str);
+    BITCOIN_ASSERT(command.size() <= string_size);
+    data_chunk raw_string(string_size);
+    std::copy(command.begin(), command.end(), raw_string.begin());
+    extend_data(data_, raw_string);
+}
+
+void serializer::write_string(const std::string& str)
+{
+    write_variable_uint(str.size());
+    write_fixed_string(str, str.size());
 }
 
 data_chunk serializer::data() const
@@ -188,12 +195,18 @@ hash_digest deserializer::read_hash()
     return hash;
 }
 
-std::string deserializer::read_fixed_len_str(size_t len)
+std::string deserializer::read_fixed_string(size_t len)
 {
     data_chunk string_bytes = read_data(len);
     std::string result(string_bytes.begin(), string_bytes.end());
     // Removes trailing 0s... Needed for string comparisons
     return result.c_str();
+}
+
+std::string deserializer::read_string()
+{
+    uint64_t string_size = read_var_uint();
+    return read_fixed_string(string_size);
 }
 
 } // libbitcoin

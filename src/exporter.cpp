@@ -11,6 +11,8 @@
 
 namespace libbitcoin {
 
+constexpr size_t command_size = 12;
+
 data_chunk construct_header_from(std::string command,
     const data_chunk& payload)
 {
@@ -20,7 +22,8 @@ data_chunk construct_header_from(std::string command,
     // magic
     header.write_4_bytes(magic_value);
     // command
-    header.write_command(command);
+    // fixed length string of 12 characters padded with zeros
+    header.write_fixed_string(command, command_size);
     // payload length
     uint32_t length = payload.size();
     header.write_4_bytes(length);
@@ -84,8 +87,7 @@ data_chunk satoshi_exporter::to_network(const message::version& version) const
     payload.write_network_address(version.address_me);
     payload.write_network_address(version.address_you);
     payload.write_8_bytes(version.nonce);
-    // do sub_version_num
-    payload.write_byte(0);
+    payload.write_string(version.user_agent);
     payload.write_4_bytes(version.start_height);
     return payload.data();
 }
@@ -105,7 +107,7 @@ data_chunk satoshi_exporter::to_network(
 {
     serializer payload;
     payload.write_4_bytes(31900);
-    payload.write_var_uint(getblocks.locator_start_hashes.size());
+    payload.write_variable_uint(getblocks.locator_start_hashes.size());
     for (hash_digest start_hash: getblocks.locator_start_hashes)
         payload.write_hash(start_hash);
     payload.write_hash(getblocks.hash_stop);
@@ -121,22 +123,22 @@ data_chunk satoshi_exporter::to_network(const message::transaction& tx) const
 {
     serializer payload;
     payload.write_4_bytes(tx.version);
-    payload.write_var_uint(tx.inputs.size());
+    payload.write_variable_uint(tx.inputs.size());
     for (const message::transaction_input& input: tx.inputs)
     {
         payload.write_hash(input.previous_output.hash);
         payload.write_4_bytes(input.previous_output.index);
         data_chunk raw_script = save_script(input.input_script);
-        payload.write_var_uint(raw_script.size());
+        payload.write_variable_uint(raw_script.size());
         payload.write_data(raw_script);
         payload.write_4_bytes(input.sequence);
     }
-    payload.write_var_uint(tx.outputs.size());
+    payload.write_variable_uint(tx.outputs.size());
     for (const message::transaction_output& output: tx.outputs)
     {
         payload.write_8_bytes(output.value);
         data_chunk raw_script = save_script(output.output_script);
-        payload.write_var_uint(raw_script.size());
+        payload.write_variable_uint(raw_script.size());
         payload.write_data(raw_script);
     }
     payload.write_4_bytes(tx.locktime);
@@ -146,7 +148,7 @@ data_chunk satoshi_exporter::to_network(const message::transaction& tx) const
 data_chunk satoshi_exporter::to_network(const message::get_data& getdata) const
 {
     serializer payload;
-    payload.write_var_uint(getdata.inventories.size());
+    payload.write_variable_uint(getdata.inventories.size());
     for (const message::inventory_vector inv: getdata.inventories)
     {
         switch (inv.type)
@@ -174,7 +176,7 @@ message::header satoshi_exporter::header_from_network(
     deserializer deserial(stream);
     message::header header;
     header.magic = deserial.read_4_bytes();
-    header.command = deserial.read_fixed_len_str(12);
+    header.command = deserial.read_fixed_string(command_size);
     header.payload_length = deserial.read_4_bytes();
     header.checksum = 0;
     return header;
@@ -205,8 +207,7 @@ message::version satoshi_exporter::version_from_network(
     // Ignored field
     payload.address_you.timestamp = 0;
     payload.nonce = deserial.read_8_bytes();
-    // sub_version_num
-    payload.sub_version_num = deserial.read_byte();
+    payload.user_agent = deserial.read_string();
     if (payload.version < 209) {
         BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1);
         return payload;

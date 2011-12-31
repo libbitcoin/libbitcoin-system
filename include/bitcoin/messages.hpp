@@ -57,7 +57,7 @@ struct version
     network_address address_me;
     network_address address_you;
     uint64_t nonce;
-    std::string sub_version_num;
+    std::string user_agent;
     uint32_t start_height;
 };
 

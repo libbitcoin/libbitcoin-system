@@ -9,9 +9,9 @@ void run_service(service_ptr service)
 
 thread_core::thread_core()
 {
-    service_.reset(new io_service);
+    service_ = std::make_shared<io_service>();
     // use std::ref here
-    work_.reset(new io_service::work(*service_));
+    work_ = std::make_shared<io_service::work>(std::ref(*service_));
     runner_ = std::thread(run_service, service_);
 }
 

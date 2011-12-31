@@ -18,7 +18,7 @@ libbitcoin_la_SOURCES = \
     utility/elliptic_curve_key.cpp \
 	transaction.cpp \
 	error.cpp \
-	utility/threaded_service.cpp \
+	utility/threads.cpp \
     validate.cpp \
 	utility/base58.cpp \
 	utility/big_number.cpp \

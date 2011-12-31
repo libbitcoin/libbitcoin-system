@@ -17,11 +17,12 @@ public:
     void write_2_bytes(uint16_t v);
     void write_4_bytes(uint32_t v);
     void write_8_bytes(uint64_t v);
-    void write_var_uint(uint64_t v);
+    void write_variable_uint(uint64_t v);
     void write_data(const data_chunk& other_data);
     void write_network_address(message::network_address addr);
     void write_hash(hash_digest hash);
-    void write_command(std::string command);
+    void write_fixed_string(const std::string& command, size_t string_size);
+    void write_string(const std::string& str);
 
     data_chunk data() const;
 private:
@@ -44,7 +45,8 @@ public:
     data_chunk read_data(uint64_t n_bytes);
     message::network_address read_network_address();
     hash_digest read_hash();
-    std::string read_fixed_len_str(size_t len);
+    std::string read_fixed_string(size_t len);
+    std::string read_string();
 private:
     typedef data_chunk::const_iterator const_iterator;
 
