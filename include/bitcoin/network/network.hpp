@@ -19,8 +19,8 @@ class network
   : public std::enable_shared_from_this<network>
 {
 public:
-    typedef std::function<void (
-        const std::error_code&, channel_ptr)> connect_handler;
+    typedef std::function<
+        void (const std::error_code&, channel_ptr)> connect_handler;
 
     network();
     ~network();
@@ -70,13 +70,6 @@ private:
     strand_ptr strand_;
     exporter_ptr export_;
 };
-
-typedef std::function<void (const std::error_code&)> handshake_handler;
-
-void handshake(channel_ptr node, handshake_handler handle_handshake);
-
-void handshake_connect(network_ptr net, const std::string& hostname,
-    uint16_t port, network::connect_handler handle_connect);
 
 } // libbitcoin
 

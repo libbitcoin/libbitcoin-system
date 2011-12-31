@@ -33,6 +33,7 @@ bitcoin_network_includedir = $(includedir)/bitcoin/network
 bitcoin_network_include_HEADERS = \
 	network/channel.hpp \
 	network/network.hpp \
+	network/handshake.hpp \
 	network/shared_const_buffer.hpp
 
 bitcoin_util_includedir = $(includedir)/bitcoin/utility

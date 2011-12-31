@@ -31,9 +31,9 @@ network_ptr kernel::network_service()
 
 void kernel::connect(std::string hostname, uint16_t port)
 {
-    handshake_connect(network_service_, hostname, port,
-        strand()->wrap(std::bind(
-            &kernel::handle_connect, shared_from_this(), _1, _2)));
+    //handshake_connect(network_service_, hostname, port,
+    //    strand()->wrap(std::bind(
+    //        &kernel::handle_connect, shared_from_this(), _1, _2)));
 }
 
 void kernel::handle_connect(const std::error_code& ec, channel_ptr node)
