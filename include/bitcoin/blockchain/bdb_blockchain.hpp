@@ -22,6 +22,10 @@ public:
     bdb_blockchain(const std::string& prefix);
     ~bdb_blockchain();
 
+    // Non-copyable
+    bdb_blockchain(const bdb_blockchain&) = delete;
+    void operator=(const bdb_blockchain&) = delete;
+
     static bool setup(const std::string& prefix);
 
     void store(const message::block& stored_block,

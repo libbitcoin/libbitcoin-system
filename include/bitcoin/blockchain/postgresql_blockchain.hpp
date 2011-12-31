@@ -22,6 +22,10 @@ public:
     postgresql_blockchain(kernel_ptr kernel,
         std::string database, std::string user, std::string password);
 
+    // Non-copyable
+    postgresql_blockchain(const postgresql_blockchain&) = delete;
+    void operator=(const postgresql_blockchain&) = delete;
+
     void store(const message::block& block, store_block_handler handle_store);
 
     void fetch_block(size_t depth, fetch_handler_block handle_fetch);
