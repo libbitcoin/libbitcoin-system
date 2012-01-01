@@ -42,6 +42,7 @@ if test "$bld_postgres" = "yes"; then
 fi
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
+PKG_CHECK_MODULES([CURL], [libcurl])
 
 AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],
     [Path to the pkgconfig directory [[LIBDIR/pkgconfig]]]),

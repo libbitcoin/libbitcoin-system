@@ -55,13 +55,21 @@ message::get_blocks create_getblocks_message()
     return packet;
 }
 
-void handle_handshake(const std::error_code& ec, channel_ptr node)
+void show_ip(const std::error_code& ec, const message::network_address& addr)
+{
+    if (ec)
+        error_exit(ec.message());
+    log_debug() << pretty_hex(addr.ip);
+}
+void handle_handshake(const std::error_code& ec, channel_ptr node,
+    handshake_ptr hs)
 {
     if (ec)
         error_exit(ec.message());
     node->subscribe_inventory(std::bind(&receive_inv, _1, _2, node));
     node->send(create_getblocks_message(), 
         std::bind(&handle_send_getblock, _1));
+    hs->fetch_network_address(show_ip);
 }
 
 int main()
@@ -69,7 +77,7 @@ int main()
     network_ptr net = std::make_shared<network>();
     handshake_ptr hs = std::make_shared<handshake>();
     hs->connect(net, "localhost", 8333,
-        std::bind(&handle_handshake, _1, _2));
+        std::bind(&handle_handshake, _1, _2, hs));
 
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return inv_count >= 500; });
