@@ -55,6 +55,12 @@ struct std_hash_wrapper
     }
 };
 
+struct node_address
+{
+    std::string hostname;
+    uint8_t port;
+};
+
 } // libbitcoin
 
 // Extend std namespace with our hash wrappers
