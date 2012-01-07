@@ -4,7 +4,6 @@ AM_CXXFLAGS = ${my_CXXFLAGS}
 libbitcoin_la_SOURCES = \
 	network/network.cpp  \
 	network/handshake.cpp  \
-	network/discovery.cpp \
 	network/channel.cpp \
 	exporter.cpp  \
 	utility/serializer.cpp \
