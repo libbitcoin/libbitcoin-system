@@ -83,6 +83,9 @@ struct output_point
     uint32_t index;
 };
 
+// Not in the protocol but still useful
+typedef output_point input_point;
+
 struct transaction_input
 {
     output_point previous_output;

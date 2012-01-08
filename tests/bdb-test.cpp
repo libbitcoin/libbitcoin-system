@@ -1,8 +1,10 @@
 #include <bitcoin/blockchain/bdb_blockchain.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/transaction_pool.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/network/network.hpp>
+#include <bitcoin/network/handshake.hpp>
 using namespace libbitcoin;
 
 bool stop = false;
@@ -10,6 +12,9 @@ bool stop = false;
 std::mutex mutex;
 std::condition_variable condition;
 bool finished = false;
+
+network_ptr net = std::make_shared<network>();
+handshake_ptr hs = std::make_shared<handshake>();
 
 void handle_send_packet(const std::error_code& ec)
 {
@@ -42,6 +47,40 @@ void show_block(const std::error_code& ec, const message::block& blk)
     log_debug() << pretty_hex(hash_transaction(blk.transactions[0]));
 }
 
+transaction_pool_ptr tx_pool;
+message::transaction tx;
+void test_mem_pool(const message::block& blk)
+{
+    log_debug() << "num tx +" << blk.transactions.size();
+    tx = blk.transactions[1];
+}
+
+void handle_txpl(const std::error_code& ec)
+{
+    if (ec)
+    {
+        log_error() << "tx pool: " << ec.message();
+        return;
+    }
+    log_debug() << "fin";
+    sleep(4);
+    std::unique_lock<std::mutex> lock(mutex);
+    finished = true;
+    condition.notify_one();
+}
+
+void show_tx(const std::error_code& ec, const message::transaction& tx,
+    size_t parent_depth, size_t index)
+{
+    if (ec)
+    {
+        log_error() << "showTx: " << ec.message();
+        return;
+    }
+    log_debug() << "tx depth is " << parent_depth << " w idx " << index;
+    log_debug() << pretty(tx);
+}
+
 void handle_store(const std::error_code& ec, block_info info,
     channel_ptr node, blockchain_ptr chain, const hash_digest& block_hash)
 {
@@ -67,6 +106,21 @@ void handle_store(const std::error_code& ec, block_info info,
         }
     }
     log_debug() << "added " << info.depth;
+    if (info.depth == 170 - 1)
+    {
+        log_debug() << "proc tx";
+        //tx.outputs[0].value += coin_price(1);
+        tx_pool->store(tx, handle_txpl);
+    }
+    else if (info.depth == 20)
+    {
+        chain->fetch_transaction(
+            hash_digest{0xdf, 0x2b, 0x06, 0x0f, 0xa2, 0xe5, 0xe9, 0xc8, 
+                        0xed, 0x5e, 0xaf, 0x6a, 0x45, 0xc1, 0x37, 0x53, 
+                        0xec, 0x8c, 0x63, 0x28, 0x2b, 0x26, 0x88, 0x32, 
+                        0x2e, 0xba, 0x40, 0xcd, 0x98, 0xea, 0x06, 0x7a},
+            show_tx);
+    }
     if (info.depth == 400)
     {
         chain->fetch_block(
@@ -75,7 +129,6 @@ void handle_store(const std::error_code& ec, block_info info,
                         0x75, 0x42, 0x8a, 0xfc, 0x90, 0x94, 0x7e, 0xe3,
                         0x20, 0x16, 0x1b, 0xbf, 0x18, 0xeb, 0x60, 0x48},
             show_block);
-
     }
     if (stop)
     {
@@ -88,11 +141,22 @@ void handle_store(const std::error_code& ec, block_info info,
 void recv_blk(const std::error_code& ec, const message::block& packet,
     channel_ptr node, blockchain_ptr chain)
 {
+    static bool stop_inserts = false;
     if (ec)
         log_error() << ec.message();
     node->subscribe_block(std::bind(recv_blk, _1, _2, node, chain));
     // store block in bdb
-    chain->store(packet, std::bind(handle_store, _1, _2, node, chain, hash_block_header(packet)));
+    if (hash_block_header(packet) ==
+        hash_digest{0x00, 0x00, 0x00, 0x00, 0xd1, 0x14, 0x57, 0x90,
+                    0xa8, 0x69, 0x44, 0x03, 0xd4, 0x06, 0x3f, 0x32,
+                    0x3d, 0x49, 0x9e, 0x65, 0x5c, 0x83, 0x42, 0x68,
+                    0x34, 0xd4, 0xce, 0x2f, 0x8d, 0xd4, 0xa2, 0xee})
+    {
+        test_mem_pool(packet);
+        stop_inserts = true;
+    }
+    else if (!stop_inserts)
+        chain->store(packet, std::bind(handle_store, _1, _2, node, chain, hash_block_header(packet)));
 }
 
 void recv_inv(const std::error_code &ec, const message::inventory& packet,
@@ -129,8 +193,7 @@ void ask_blocks(const std::error_code& ec, channel_ptr node,
 void recv_loc(const std::error_code& ec, const message::block_locator& loc,
     blockchain_ptr chain)
 {
-    network_ptr net(new network);
-    handshake_connect(net, "localhost", 8333,
+    hs->connect(net, "localhost", 8333,
         std::bind(&ask_blocks, _1, _2, loc, chain, null_hash));
 }
 
@@ -147,10 +210,11 @@ int main()
                     0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1, 
                     0x72, 0xb3, 0xf1, 0xb6, 0x0a, 0x8c, 0xe2, 0x6f},
         show_block);
+    tx_pool = transaction_pool::create(store);
     store->fetch_block_locator(std::bind(recv_loc, _1, _2, store));
 
-    std::cin.get();
-    stop = true;
+    //std::cin.get();
+    //stop = true;
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return finished; });
     return 0;

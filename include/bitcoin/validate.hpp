@@ -3,17 +3,73 @@
 
 #include <thread>
 #include <memory>
+#include <boost/optional/optional.hpp>
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/threads.hpp>
+#include <bitcoin/transaction_pool.hpp>
 
 namespace libbitcoin {
+
+class validate_transaction
+  : public std::enable_shared_from_this<validate_transaction>
+{
+public:
+    typedef std::function<void (const std::error_code&)> validate_handler;
+
+    validate_transaction(blockchain_ptr chain, exporter_ptr saver,
+        const message::transaction& tx,
+        const pool_buffer& pool, strand_ptr async_strand);
+    void start(validate_handler handle_validate);
+
+    static bool check_transaction(const message::transaction& tx);
+    static size_t number_script_sig_operations(
+        const message::transaction& tx);
+    static bool connect_input(
+        const message::transaction& tx, size_t current_input,
+        const message::transaction& previous_tx,
+        size_t parent_depth, size_t index,
+        size_t last_block_depth, uint64_t& value_in);
+    static bool tally_fees(const message::transaction& tx,
+        uint64_t value_in, uint64_t& fees);
+
+private:
+    bool basic_checks() const;
+    bool is_standard() const;
+    bool exists(const hash_digest& tx_hash) const;
+
+    void handle_duplicate_check(const std::error_code& ec);
+    bool is_spent(const message::output_point outpoint) const;
+
+    void set_last_depth(const std::error_code& ec, size_t last_depth);
+    void fetch_next_previous_transaction();
+    void fetch_input_transaction(const std::error_code& ec,
+        const message::transaction& previous_tx,
+        size_t parent_depth, size_t index);
+
+    void check_double_spend(const std::error_code& ec);
+
+    void check_fees();
+
+    blockchain_ptr chain_;
+    exporter_ptr exporter_;
+    const message::transaction tx_;
+    const hash_digest tx_hash_;
+    const pool_buffer& pool_;
+    size_t last_block_depth_;
+    uint64_t value_in_;
+    size_t current_input_;
+    strand_ptr strand_;
+    validate_handler handle_validate_;
+};
+
+typedef std::shared_ptr<validate_transaction> validate_transaction_ptr;
 
 class validate_block
 {
 public:
-    bool validates();
+    bool start();
 
 protected:
     validate_block(exporter_ptr saver, size_t depth,
@@ -22,7 +78,7 @@ protected:
     virtual uint32_t previous_block_bits() = 0;
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
     virtual uint64_t median_time_past() = 0;
-    virtual bool validate_transaction(const message::transaction& tx, 
+    virtual bool validate_inputs(const message::transaction& tx, 
         size_t index_in_parent, uint64_t& value_in) = 0;
 
 private:

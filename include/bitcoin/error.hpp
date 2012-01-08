@@ -10,6 +10,9 @@ enum class error
     // storage errors
     missing_object = 1,
     object_already_exists,
+    unspent_output,
+    // transaction_pool errors
+    bad_transaction,
     // network errors
     resolve_failed,
     network_unreachable,

@@ -23,7 +23,7 @@ bool bdb_organizer::verify(int fork_index, const blocks_list& orphan_chain,
     BITCOIN_ASSERT(depth != 0);
     bdb_validate_block validate(common_, fork_index, orphan_chain,
         orphan_index, depth, chain_->txn(), saver, current_block);
-    return validate.validates();
+    return validate.start();
 }
 
 } // libbitcoin

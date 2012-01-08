@@ -1,5 +1,6 @@
 #include <bitcoin/validate.hpp>
 
+#include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/exporter.hpp>
 #include <bitcoin/constants.hpp>
@@ -13,9 +14,292 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using std::placeholders::_3;
+using std::placeholders::_4;
 
 constexpr size_t max_block_size = 1000000;
 constexpr size_t max_block_script_sig_operations = max_block_size / 50;
+
+validate_transaction::validate_transaction(blockchain_ptr chain,
+    exporter_ptr saver, const message::transaction& tx,
+    const pool_buffer& pool, strand_ptr async_strand)
+  : chain_(chain), exporter_(saver), tx_(tx), tx_hash_(hash_transaction(tx)),
+    pool_(pool), strand_(async_strand)
+{
+}
+
+void validate_transaction::start(validate_handler handle_validate)
+{
+    handle_validate_ = handle_validate;
+    if (!basic_checks())
+    {
+        handle_validate_(error::bad_transaction);
+        return;
+    }
+
+    // Check for duplicates in the blockchain
+    chain_->fetch_transaction(tx_hash_,
+        strand_->wrap(std::bind(
+            &validate_transaction::handle_duplicate_check,
+                shared_from_this(), _1)));
+}
+
+bool validate_transaction::basic_checks() const
+{
+    if (!check_transaction(tx_))
+        return false;
+
+    if (is_coinbase(tx_))
+        return false;
+
+    // Ummm...
+    //if ((int64)nLockTime > INT_MAX)
+
+    size_t transaction_byte_size = exporter_->to_network(tx_).size();
+    if (number_script_sig_operations(tx_) > (transaction_byte_size / 34) ||
+        transaction_byte_size < 100)
+    {
+        return false;
+    }
+
+    if (!is_standard())
+        return false;
+
+    // Check for conflicts
+    if (exists(tx_hash_))
+        return false;
+    // Check for blockchain duplicates done next in start() after
+    // this function exits.
+
+    return true;
+}
+
+bool validate_transaction::is_standard() const
+{
+    return true;
+}
+
+bool validate_transaction::exists(const hash_digest& tx_hash) const
+{
+    for (const transaction_entry_info& entry: pool_)
+        if (entry.hash == tx_hash)
+            return true;
+    return false;
+}
+
+void validate_transaction::handle_duplicate_check(const std::error_code& ec)
+{
+    if (ec != error::missing_object)
+    {
+        handle_validate_(error::bad_transaction);
+        return;
+    }
+    // Check for conflicts with memory txs
+    for (size_t input_index = 0; input_index < tx_.inputs.size(); 
+        ++input_index)
+    {
+        const message::output_point& previous_output =
+            tx_.inputs[input_index].previous_output;
+        if (is_spent(previous_output))
+        {
+            handle_validate_(error::bad_transaction);
+            return;
+        }
+    }
+    // Check inputs
+
+    // We already know it is not a coinbase tx
+
+    chain_->fetch_last_depth(strand_->wrap(std::bind(
+        &validate_transaction::set_last_depth, shared_from_this(), _1, _2)));
+}
+ 
+bool validate_transaction::is_spent(const message::output_point outpoint) const
+{
+    for (const transaction_entry_info& entry: pool_)
+        for (const message::transaction_input current_input: entry.tx.inputs)
+            if (current_input.previous_output == outpoint)
+                return true;
+    return false;
+}
+
+void validate_transaction::set_last_depth(
+    const std::error_code& ec, size_t last_depth)
+{
+    if (ec)
+    {
+        handle_validate_(ec);
+        return;
+    }
+    // Used for checking coinbase maturity
+    last_block_depth_ = last_depth;
+    value_in_ = 0;
+    BITCOIN_ASSERT(tx_.inputs.size() > 0);
+    current_input_ = 0;
+    fetch_next_previous_transaction();
+}
+
+void validate_transaction::fetch_next_previous_transaction()
+{
+    BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
+    chain_->fetch_transaction(
+        tx_.inputs[current_input_].previous_output.hash,
+        strand_->wrap(std::bind(
+            &validate_transaction::fetch_input_transaction,
+                shared_from_this(), _1, _2, _3, _4)));
+}
+
+bool validate_transaction::connect_input(
+    const message::transaction& tx, size_t current_input,
+    const message::transaction& previous_tx,
+    size_t parent_depth, size_t index,
+    size_t last_block_depth, uint64_t& value_in)
+{
+    const message::transaction_input& input = tx.inputs[current_input];
+    const message::output_point& previous_outpoint =
+        tx.inputs[current_input].previous_output;
+    if (previous_outpoint.index >= previous_tx.outputs.size())
+        return false;
+    const message::transaction_output& previous_output =
+        previous_tx.outputs[previous_outpoint.index];
+    uint64_t output_value = previous_output.value;
+    if (output_value > max_money())
+        return false;
+    if (is_coinbase(previous_tx))
+    {
+        size_t depth_difference = last_block_depth - parent_depth;
+        if (depth_difference < coinbase_maturity)
+            return false;
+    }
+    script output_script = previous_output.output_script;
+    if (!output_script.run(input.input_script, tx, current_input))
+        return false;
+    value_in += output_value;
+    if (value_in > max_money())
+        return false;
+    return true;
+}
+
+void validate_transaction::fetch_input_transaction(const std::error_code& ec,
+    const message::transaction& previous_tx,
+    size_t parent_depth, size_t index)
+{
+    if (!connect_input(tx_, current_input_, previous_tx,
+        parent_depth, index, last_block_depth_, value_in_))
+    {
+        handle_validate_(error::bad_transaction);
+        return;
+    }
+    // Search for double spends...
+    chain_->fetch_spend(tx_.inputs[current_input_].previous_output,
+        strand_->wrap(std::bind(
+            &validate_transaction::check_double_spend,
+                shared_from_this(), _1)));
+}
+
+void validate_transaction::check_double_spend(const std::error_code& ec)
+{
+    if (ec == error::unspent_output)
+    {
+        // End of connect_input checks
+        ++current_input_;
+        if (current_input_ == tx_.inputs.size())
+            check_fees();
+        else
+        {
+            BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
+            // Keep looping
+            fetch_next_previous_transaction();
+        }
+    }
+    else
+    {
+        BITCOIN_ASSERT(!ec || ec != error::missing_object);
+        handle_validate_(error::bad_transaction);
+    }
+}
+
+bool validate_transaction::tally_fees(const message::transaction& tx,
+    uint64_t value_in, uint64_t& total_fees)
+{
+    uint64_t value_out = total_output_value(tx);
+    if (value_in < value_out)
+        return false;
+    uint64_t fee = value_in - value_out;
+    total_fees += fee;
+    if (total_fees > max_money())
+        return false;
+    return true;
+}
+
+void validate_transaction::check_fees()
+{
+    uint64_t fee = 0;
+    tally_fees(tx_, value_in_, fee);
+    // Who cares?
+    // Fuck the police
+    // Every tx equal!
+    handle_validate_(std::error_code());
+}
+
+bool validate_transaction::check_transaction(const message::transaction& tx)
+{
+    if (tx.inputs.empty() || tx.outputs.empty())
+        return false;
+
+    // Maybe not needed since we try to serialise block in CheckBlock()
+    //if (exporter_->to_network(tx, false).size() > max_block_size)
+    //    return false;
+
+    // Check for negative or overflow output values
+    uint64_t total_output_value = 0;
+    for (message::transaction_output output: tx.outputs)
+    {
+        if (output.value > max_money())
+            return false;
+        total_output_value += output.value;
+        if (total_output_value > max_money())
+            return false;
+    }
+
+    if (is_coinbase(tx))
+    {
+        const script& coinbase_script = tx.inputs[0].input_script;
+        size_t coinbase_script_size = save_script(coinbase_script).size();
+        if (coinbase_script_size < 2 || coinbase_script_size > 100)
+            return false;
+    }
+    else
+    {
+        for (message::transaction_input input: tx.inputs)
+            if (previous_output_is_null(input.previous_output))
+                return false;
+    }
+
+    return true;
+}
+
+inline size_t count_script_sigs(const operation_stack& operations)
+{
+    size_t total_sigs = 0;
+    for (const operation& op: operations)
+        if (op.code == opcode::checksig)
+            total_sigs++;
+        // TODO: Add OP_CHECKSIGVERIFY OP_CHECKMULTISIG OP_CHECKMULTISIGVERIFY
+        // ... they need to exist first
+    return total_sigs;
+}
+
+size_t validate_transaction::number_script_sig_operations(
+    const message::transaction& tx)
+{
+    size_t total_sigs = 0;
+    for (message::transaction_input input: tx.inputs)
+        total_sigs += count_script_sigs(input.input_script.operations());
+    for (message::transaction_output output: tx.outputs)
+        total_sigs += count_script_sigs(output.output_script.operations());
+    return total_sigs;
+}
 
 validate_block::validate_block(exporter_ptr saver, size_t depth,
     const message::block& current_block)
@@ -24,7 +308,7 @@ validate_block::validate_block(exporter_ptr saver, size_t depth,
     clock_ = std::make_shared<chrono_clock>();
 }
 
-bool validate_block::validates()
+bool validate_block::start()
 {
     if (!check_block())
     {
@@ -92,7 +376,7 @@ bool validate_block::check_block()
     }
 
     for (message::transaction tx: current_block_.transactions)
-        if (!check_transaction(tx))
+        if (!validate_transaction::check_transaction(tx))
         {
             log_error(log_domain::validation) << "Transaction checks failed";
             return false;
@@ -131,64 +415,11 @@ bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
     return true;
 }
 
-bool validate_block::check_transaction(const message::transaction& tx)
-{
-    if (tx.inputs.empty() || tx.outputs.empty())
-        return false;
-
-    // Maybe not needed since we try to serialise block in CheckBlock()
-    //if (exporter_->to_network(tx, false).size() > max_block_size)
-    //    return false;
-
-    // Check for negative or overflow output values
-    uint64_t total_output_value = 0;
-    for (message::transaction_output output: tx.outputs)
-    {
-        if (output.value > max_money())
-            return false;
-        total_output_value += output.value;
-        if (total_output_value > max_money())
-            return false;
-    }
-
-    if (is_coinbase(tx))
-    {
-        const script& coinbase_script = tx.inputs[0].input_script;
-        size_t coinbase_script_size = save_script(coinbase_script).size();
-        if (coinbase_script_size < 2 || coinbase_script_size > 100)
-            return false;
-    }
-    else
-    {
-        for (message::transaction_input input: tx.inputs)
-            if (previous_output_is_null(input.previous_output))
-                return false;
-    }
-
-    return true;
-}
-
-inline size_t count_script_sigs(const operation_stack& operations)
-{
-    size_t total_sigs = 0;
-    for (const operation& op: operations)
-        if (op.code == opcode::checksig)
-            total_sigs++;
-        // TODO: Add OP_CHECKSIGVERIFY OP_CHECKMULTISIG OP_CHECKMULTISIGVERIFY
-        // ... they need to exist first
-    return total_sigs;
-}
-
 size_t validate_block::number_script_sig_operations()
 {
     size_t total_sigs = 0;
     for (message::transaction tx: current_block_.transactions)
-    {
-        for (message::transaction_input input: tx.inputs)
-            total_sigs += count_script_sigs(input.input_script.operations());
-        for (message::transaction_output output: tx.outputs)
-            total_sigs += count_script_sigs(output.output_script.operations());
-    }
+        total_sigs += validate_transaction::number_script_sig_operations(tx);
     return total_sigs;
 }
 
@@ -303,30 +534,21 @@ bool validate_block::passes_checkpoints()
 
 bool validate_block::connect_block()
 {
-    uint64_t value_in = 0, value_out = 0;
+    uint64_t fees = 0;
     for (size_t tx_index = 1; tx_index < current_block_.transactions.size();
             ++tx_index)
     {
+        uint64_t value_in = 0;
         const message::transaction& tx = current_block_.transactions[tx_index];
-        if (!validate_transaction(tx, tx_index, value_in))
+        if (!validate_inputs(tx, tx_index, value_in))
             return false;
-        value_out += total_output_value(tx);
+        if (!validate_transaction::tally_fees(tx, value_in, fees))
+            return false;
     }
-    if (value_in < value_out)
-        return false;
-    uint64_t fees = value_in - value_out;
-    if (fees > max_money())
-        return false;
     uint64_t coinbase_value = 
         total_output_value(current_block_.transactions[0]);
     if (coinbase_value  > block_value(depth_) + fees)
         return false;
-    return true;
-}
-
-bool validate_block::validate_transaction(const message::transaction& tx, 
-    size_t index_in_parent, uint64_t& fees)
-{
     return true;
 }
 

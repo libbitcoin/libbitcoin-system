@@ -16,6 +16,10 @@ std::string error_category_impl::message(int ev) const
             return "Object does not exist";
         case error::object_already_exists:
             return "Matching previous object found";
+        case error::unspent_output:
+            return "Unspent output";
+        case error::bad_transaction:
+            return "Transaction failed to validate";
         case error::resolve_failed:
             return "Resolving hostname failed";
         case error::network_unreachable:

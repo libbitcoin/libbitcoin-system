@@ -101,7 +101,7 @@ protected:
     uint32_t previous_block_bits();
     uint64_t actual_timespan(const uint64_t interval);
     uint64_t median_time_past();
-    bool validate_transaction(const message::transaction& tx, 
+    bool validate_inputs(const message::transaction& tx, 
         size_t index_in_block, uint64_t& value_in);
 private:
     bool connect_input(

@@ -17,6 +17,7 @@ using boost::asio::deadline_timer;
 
 class exporter;
 class blockchain;
+class transaction_pool;
 class kernel;
 class network;
 class channel;
@@ -25,6 +26,7 @@ class chrono_clock;
 
 typedef std::shared_ptr<exporter> exporter_ptr;
 typedef std::shared_ptr<blockchain> blockchain_ptr;
+typedef std::shared_ptr<transaction_pool> transaction_pool_ptr;
 typedef std::shared_ptr<kernel> kernel_ptr;
 typedef std::shared_ptr<network> network_ptr;
 typedef std::shared_ptr<channel> channel_ptr;

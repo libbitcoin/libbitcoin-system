@@ -37,13 +37,13 @@ void network::resolve_handler(const boost::system::error_code& ec,
     }
     socket_ptr socket = std::make_shared<tcp::socket>(*threaded_->service());
     boost::asio::async_connect(*socket, endpoint_iterator,
-        std::bind(&network::handle_connect, shared_from_this(), 
+        std::bind(&network::call_connect_handler, shared_from_this(), 
             _1, _2, socket, handle_connect));
 }
 
-void network::handle_connect(const boost::system::error_code& ec, 
-    tcp::resolver::iterator endpoint_iterator,
-    socket_ptr socket, connect_handler handle_connect)
+void network::call_connect_handler(const boost::system::error_code& ec, 
+    tcp::resolver::iterator, socket_ptr socket,
+    connect_handler handle_connect)
 {
     if (ec)
     {

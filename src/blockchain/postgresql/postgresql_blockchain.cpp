@@ -307,6 +307,22 @@ void postgresql_blockchain::do_fetch_block_locator(
     handle_fetch(std::error_code(), locator);
 }
 
+void postgresql_blockchain::fetch_transaction(
+    const hash_digest& transaction_hash,
+    fetch_handler_transaction handle_fetch)
+{
+}
+
+void postgresql_blockchain::fetch_output(const message::output_point& outpoint,
+    fetch_handler_output handle_fetch)
+{
+}
+
+void postgresql_blockchain::fetch_spend(const message::output_point& outpoint,
+    fetch_handler_spend handle_fetch)
+{
+}
+
 void postgresql_blockchain::fetch_balance(const short_hash& pubkey_hash,
     fetch_handler_balance handle_fetch)
 {

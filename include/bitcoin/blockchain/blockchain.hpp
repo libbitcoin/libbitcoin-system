@@ -32,6 +32,18 @@ public:
         void (const std::error_code&, const message::block_locator&)>
             fetch_handler_block_locator;
 
+    typedef std::function<
+        void (const std::error_code&, const message::transaction&,
+            size_t, size_t)> fetch_handler_transaction;
+
+    typedef std::function<
+        void (const std::error_code&, const message::transaction_output&)>
+            fetch_handler_output;
+
+    typedef std::function<
+        void (const std::error_code&, const message::input_point&)>
+            fetch_handler_spend;
+
     typedef std::function<void (const std::error_code&, uint64_t)>
         fetch_handler_balance;
 
@@ -45,6 +57,12 @@ public:
     virtual void fetch_last_depth(fetch_handler_last_depth handle_fetch) = 0;
     virtual void fetch_block_locator(
         fetch_handler_block_locator handle_fetch) = 0;
+    virtual void fetch_transaction(const hash_digest& transaction_hash,
+        fetch_handler_transaction handle_fetch) = 0;
+    virtual void fetch_output(const message::output_point& outpoint,
+        fetch_handler_output handle_fetch) = 0;
+    virtual void fetch_spend(const message::output_point& outpoint,
+        fetch_handler_spend handle_fetch) = 0;
     virtual void fetch_balance(const short_hash& pubkey_hash,
         fetch_handler_balance handle_fetch) = 0;
 };

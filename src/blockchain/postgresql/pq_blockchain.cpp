@@ -703,7 +703,7 @@ uint64_t pq_validate_block::median_time_past()
     return result.get<uint32_t>(0);
 }
 
-bool pq_validate_block::validate_transaction(
+bool pq_validate_block::validate_inputs(
     const message::transaction& tx, size_t index_in_block, 
     uint64_t& value_in)
 {
@@ -926,7 +926,7 @@ void pq_blockchain::validate()
         pq_validate_block block_validation(
             sql_, export_, reader_, block_info, current_block);
 
-        if (block_validation.validates())
+        if (block_validation.start())
             finalize_status(block_info, current_block);
         else
         {

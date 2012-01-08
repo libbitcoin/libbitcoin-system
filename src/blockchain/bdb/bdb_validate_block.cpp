@@ -62,7 +62,7 @@ uint64_t bdb_validate_block::median_time_past()
     return times[times.size() / 2];
 }
 
-bool bdb_validate_block::validate_transaction(const message::transaction& tx, 
+bool bdb_validate_block::validate_inputs(const message::transaction& tx, 
     size_t index_in_parent, uint64_t& value_in)
 {
     BITCOIN_ASSERT(!is_coinbase(tx));

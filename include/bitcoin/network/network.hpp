@@ -58,9 +58,9 @@ private:
     void resolve_handler(const boost::system::error_code& ec,
         tcp::resolver::iterator endpoint_iterator,
         connect_handler handle_connect, resolver_ptr, query_ptr);
-    void handle_connect(const boost::system::error_code& ec, 
-        tcp::resolver::iterator endpoint_iterator,
-        socket_ptr socket, connect_handler handle_connect);
+    void call_connect_handler(const boost::system::error_code& ec, 
+        tcp::resolver::iterator, socket_ptr socket,
+        connect_handler handle_connect);
     void handle_accept(socket_ptr socket);
 
     acceptor_ptr acceptor_;
