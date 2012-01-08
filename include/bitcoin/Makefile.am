@@ -3,7 +3,6 @@ bitcoin_include_HEADERS = \
 	error.hpp \
 	validate.hpp \
 	messages.hpp \
-	kernel.hpp \
 	script.hpp \
 	exporter.hpp \
 	address.hpp \

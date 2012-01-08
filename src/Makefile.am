@@ -8,7 +8,6 @@ libbitcoin_la_SOURCES = \
 	exporter.cpp  \
 	utility/serializer.cpp \
 	utility/logger.cpp \
-	kernel.cpp \
 	utility/sha256.cpp \
 	address.cpp \
 	data_helpers.cpp \
