@@ -2,6 +2,9 @@
 
 namespace libbitcoin {
 
+using std::placeholders::_1;
+using std::placeholders::_2;
+
 using boost::posix_time::seconds;
 using boost::posix_time::minutes;
 using boost::posix_time::time_duration;

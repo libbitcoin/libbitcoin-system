@@ -4,6 +4,8 @@
 
 namespace libbitcoin {
 
+using std::placeholders::_1;
+
 discovery::discovery()
 {
     threaded_ = std::make_shared<thread_core>();

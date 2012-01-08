@@ -22,9 +22,6 @@
 
 namespace libbitcoin {
 
-using std::placeholders::_1;
-using std::placeholders::_2;
-
 class channel
   : public std::enable_shared_from_this<channel>
 {
@@ -118,8 +115,9 @@ private:
         data_chunk whole_message = header;
         extend_data(whole_message, payload);
         shared_const_buffer buffer(whole_message);
-        async_write(*socket_, buffer, std::bind(
-            &channel::pre_handle_send, this, _1, handle_send));
+        async_write(*socket_, buffer,
+            std::bind(&channel::pre_handle_send, shared_from_this(),
+                std::placeholders::_1, handle_send));
     }
 
     template<typename Message, typename Registry>
