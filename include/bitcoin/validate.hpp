@@ -28,8 +28,7 @@ public:
         const message::transaction& tx);
     static bool connect_input(
         const message::transaction& tx, size_t current_input,
-        const message::transaction& previous_tx,
-        size_t parent_depth, size_t index,
+        const message::transaction& previous_tx, size_t parent_depth,
         size_t last_block_depth, uint64_t& value_in);
     static bool tally_fees(const message::transaction& tx,
         uint64_t value_in, uint64_t& fees);
@@ -45,8 +44,7 @@ private:
     void set_last_depth(const std::error_code& ec, size_t last_depth);
     void fetch_next_previous_transaction();
     void fetch_input_transaction(const std::error_code& ec,
-        const message::transaction& previous_tx,
-        size_t parent_depth, size_t index);
+        const message::transaction& previous_tx, size_t parent_depth);
 
     void check_double_spend(const std::error_code& ec);
 

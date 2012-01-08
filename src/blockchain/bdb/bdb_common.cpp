@@ -29,10 +29,17 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
     return last_block_depth;
 }
 
+data_chunk create_spent_key(const message::output_point& outpoint)
+{
+    data_chunk raw_key(outpoint.hash.begin(), outpoint.hash.end());
+    extend_data(raw_key, uncast_type<uint32_t>(outpoint.index));
+    return raw_key;
+}
 bool bdb_common::is_output_spent(txn_guard_ptr txn,
     const message::output_point& output)
 {
     readable_data_type search_spend;
+    search_spend.set(create_spent_key(output));
     empty_data_type ignore_key;
     return db_spends_->get(txn->get(),
         search_spend.get(), ignore_key.get(), 0) == 0;
@@ -122,10 +129,7 @@ bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
     const message::transaction_input& input)
 {
     readable_data_type spent_key, null_value;
-    data_chunk raw_key(
-        input.previous_output.hash.begin(), input.previous_output.hash.end());
-    extend_data(raw_key, uncast_type<uint32_t>(input.previous_output.index));
-    spent_key.set(raw_key);
+    spent_key.set(create_spent_key(input.previous_output));
     if (db_spends_->put(txn->get(), spent_key.get(), null_value.get(),
             DB_NOOVERWRITE) != 0)
         return false;

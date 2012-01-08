@@ -146,13 +146,12 @@ void validate_transaction::fetch_next_previous_transaction()
         tx_.inputs[current_input_].previous_output.hash,
         strand_->wrap(std::bind(
             &validate_transaction::fetch_input_transaction,
-                shared_from_this(), _1, _2, _3, _4)));
+                shared_from_this(), _1, _2, _3)));
 }
 
 bool validate_transaction::connect_input(
     const message::transaction& tx, size_t current_input,
-    const message::transaction& previous_tx,
-    size_t parent_depth, size_t index,
+    const message::transaction& previous_tx, size_t parent_depth,
     size_t last_block_depth, uint64_t& value_in)
 {
     const message::transaction_input& input = tx.inputs[current_input];
@@ -181,11 +180,15 @@ bool validate_transaction::connect_input(
 }
 
 void validate_transaction::fetch_input_transaction(const std::error_code& ec,
-    const message::transaction& previous_tx,
-    size_t parent_depth, size_t index)
+    const message::transaction& previous_tx, size_t parent_depth)
 {
+    if (ec)
+    {
+        handle_validate_(error::bad_transaction);
+        return;
+    }
     if (!connect_input(tx_, current_input_, previous_tx,
-        parent_depth, index, last_block_depth_, value_in_))
+        parent_depth, last_block_depth_, value_in_))
     {
         handle_validate_(error::bad_transaction);
         return;
