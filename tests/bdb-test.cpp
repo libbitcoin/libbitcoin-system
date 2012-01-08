@@ -7,6 +7,9 @@
 #include <bitcoin/network/handshake.hpp>
 using namespace libbitcoin;
 
+using std::placeholders::_1;
+using std::placeholders::_2;
+
 bool stop = false;
 
 std::mutex mutex;
