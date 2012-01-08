@@ -24,8 +24,8 @@ bitcoin_blockchain_include_HEADERS += \
 endif
 
 if DO_POSTGRES
-bitcoin_blockchain_include_HEADERS += \
-	blockchain/postgresql_blockchain.hpp
+#bitcoin_blockchain_include_HEADERS += \
+#	blockchain/postgresql_blockchain.hpp
 endif
 
 bitcoin_network_includedir = $(includedir)/bitcoin/network

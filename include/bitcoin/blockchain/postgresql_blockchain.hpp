@@ -19,7 +19,7 @@ class postgresql_blockchain
     public std::enable_shared_from_this<postgresql_blockchain>
 {
 public:
-    postgresql_blockchain(kernel_ptr kernel,
+    postgresql_blockchain(
         std::string database, std::string user, std::string password);
 
     // Non-copyable

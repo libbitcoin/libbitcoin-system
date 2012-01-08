@@ -11,14 +11,12 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/handshake.hpp>
 #include <bitcoin/block.hpp>
-#include <bitcoin/kernel.hpp>
 #include <bitcoin/data_helpers.hpp>
 #include <bitcoin/exporter.hpp>
 #include <bitcoin/validate.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/messages.hpp>
-#include <bitcoin/blockchain/postgresql_blockchain.hpp>
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/bdb_blockchain.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>

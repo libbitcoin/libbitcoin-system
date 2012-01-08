@@ -41,7 +41,7 @@ libbitcoin_la_SOURCES += \
 endif
 
 if DO_POSTGRES
-libbitcoin_la_SOURCES += \
-	blockchain/postgresql/pq_blockchain.cpp \
-	blockchain/postgresql/postgresql_blockchain.cpp
+#libbitcoin_la_SOURCES += \
+#	blockchain/postgresql/pq_blockchain.cpp \
+#	blockchain/postgresql/postgresql_blockchain.cpp
 endif

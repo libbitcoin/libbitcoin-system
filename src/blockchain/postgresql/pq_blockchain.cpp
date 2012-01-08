@@ -3,7 +3,6 @@
 #include <bitcoin/constants.hpp>
 #include <bitcoin/data_helpers.hpp>
 #include <bitcoin/exporter.hpp>
-#include <bitcoin/kernel.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
