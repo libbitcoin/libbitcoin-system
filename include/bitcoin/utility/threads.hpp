@@ -22,7 +22,6 @@ private:
 
 typedef std::shared_ptr<thread_core> thread_core_ptr;
 
-// TODO Deprecate this slowly
 class threaded_service
 {
 protected:
