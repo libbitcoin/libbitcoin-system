@@ -29,6 +29,7 @@
 #include <bitcoin/utility/base58.hpp>
 #include <bitcoin/utility/big_number.hpp>
 #include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/utility/clock.hpp>
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>

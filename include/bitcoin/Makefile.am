@@ -48,4 +48,5 @@ bitcoin_util_include_HEADERS = \
 	utility/clock.hpp \
 	utility/base58.hpp \
 	utility/ripemd.hpp \
+	utility/subscriber.hpp \
 	utility/logger.hpp

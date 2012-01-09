@@ -117,6 +117,14 @@ big-number-test: bin/tests/big-number-test
 obj/tx-hash.o: tests/tx-hash.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
+obj/subscribe.o: tests/subscribe.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/subscribe: obj/subscribe.o
+	$(CXX) -o bin/tests/subscribe obj/subscribe.o $(LIBBITCOIN)
+
+subscribe: bin/tests/subscribe
+
 obj/bdb-test.o: tests/bdb-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
