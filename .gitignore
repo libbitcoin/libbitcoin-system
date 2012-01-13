@@ -10,6 +10,9 @@ obj
 .*.swp
 *~
 /*.kdev4
+/.cproject
+/.project
+/.settings
 
 /aclocal.m4
 /autom4te.cache
