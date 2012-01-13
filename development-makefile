@@ -98,6 +98,14 @@ bin/tests/exporter-test: obj/exporter-test.o
 
 exporter-test: bin/tests/exporter-test
 
+obj/irc-test.o: tests/irc.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/irc: obj/irc-test.o
+	$(CXX) -o bin/tests/irc obj/irc-test.o $(LIBBITCOIN)
+
+irc: bin/tests/irc
+
 obj/base58-test.o: tests/base58-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
