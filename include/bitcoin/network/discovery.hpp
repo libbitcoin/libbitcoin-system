@@ -10,8 +10,6 @@ class discovery
  : public std::enable_shared_from_this<discovery>
 {
     typedef std::function<void (const std::error_code&)> error_handler;
-    typedef std::shared_ptr<tcp::resolver> resolver_ptr;
-    typedef std::shared_ptr<tcp::resolver::query> query_ptr;
 
 public:
     discovery();

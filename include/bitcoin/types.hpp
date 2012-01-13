@@ -38,6 +38,9 @@ typedef std::shared_ptr<deadline_timer> deadline_timer_ptr;
 typedef std::shared_ptr<tcp::socket> socket_ptr;
 typedef std::shared_ptr<tcp::acceptor> acceptor_ptr;
 
+typedef std::shared_ptr<tcp::resolver> resolver_ptr;
+typedef std::shared_ptr<tcp::resolver::query> query_ptr;
+
 typedef std::array<uint8_t, 32> hash_digest;
 typedef std::array<uint8_t, 20> short_hash;
 

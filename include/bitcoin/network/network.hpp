@@ -52,9 +52,6 @@ public:
     // alert
 
 private:
-    typedef std::shared_ptr<tcp::resolver> resolver_ptr;
-    typedef std::shared_ptr<tcp::resolver::query> query_ptr;
-
     void resolve_handler(const boost::system::error_code& ec,
         tcp::resolver::iterator endpoint_iterator,
         connect_handler handle_connect, resolver_ptr, query_ptr);
