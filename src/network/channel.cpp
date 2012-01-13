@@ -18,7 +18,18 @@ channel::channel(socket_ptr socket, thread_core_ptr threaded,
   : killed_(false), socket_(socket), export_(saver), threaded_(threaded)
 {
     strand_ = threaded_->create_strand();
-    timeout_.reset(new deadline_timer(*threaded_->service()));
+    timeout_ = std::make_shared<deadline_timer>(*threaded_->service());
+
+    version_subscriber_ = 
+        std::make_shared<version_subscriber_type>(strand_);
+    verack_subscriber_ = 
+        std::make_shared<verack_subscriber_type>(strand_);
+    address_subscriber_ = 
+        std::make_shared<address_subscriber_type>(strand_);
+    inventory_subscriber_ =
+        std::make_shared<inventory_subscriber_type>(strand_);
+    block_subscriber_ = 
+        std::make_shared<block_subscriber_type>(strand_);
 }
 
 channel::~channel()
@@ -165,21 +176,19 @@ void channel::handle_read_payload(const message::header& header_msg,
     if (header_msg.command == "version")
     {
         if (!transport<message::version>(payload_stream,
-            std::bind(&exporter::version_from_network, export_, _1),
-            version_registry_))
+            &exporter::version_from_network, version_subscriber_))
         {
             return;
         }
     }
     else if (header_msg.command == "verack")
     {
-        relay(message::verack(), verack_registry_);
+        verack_subscriber_->relay(std::error_code(), message::verack());
     }
     else if (header_msg.command == "addr")
     {
         if (!transport<message::address>(payload_stream,
-            std::bind(&exporter::address_from_network, export_, _1),
-            address_registry_))
+            &exporter::address_from_network, address_subscriber_))
         {
             return;
         }
@@ -187,8 +196,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "inv")
     {
         if (!transport<message::inventory>(payload_stream,
-            std::bind(&exporter::inventory_from_network, export_, _1),
-            inventory_registry_))
+            &exporter::inventory_from_network, inventory_subscriber_))
         {
             return;
         }
@@ -196,8 +204,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "block")
     {
         if (!transport<message::block>(payload_stream,
-            std::bind(&exporter::block_from_network, export_, _1),
-            block_registry_))
+            &exporter::block_from_network, block_subscriber_))
         {
             return;
         }
@@ -218,23 +225,28 @@ void channel::pre_handle_send(const boost::system::error_code& ec,
 
 void channel::subscribe_version(receive_version_handler handle_receive)
 {
-    generic_subscribe<message::version>(handle_receive, version_registry_);
+    generic_subscribe<message::version>(
+        handle_receive, version_subscriber_);
 }
 void channel::subscribe_verack(receive_verack_handler handle_receive)
 {
-    generic_subscribe<message::verack>(handle_receive, verack_registry_);
+    generic_subscribe<message::verack>(
+        handle_receive, verack_subscriber_);
 }
 void channel::subscribe_address(receive_address_handler handle_receive)
 {
-    generic_subscribe<message::address>(handle_receive, address_registry_);
+    generic_subscribe<message::address>(
+        handle_receive, address_subscriber_);
 }
 void channel::subscribe_inventory(receive_inventory_handler handle_receive)
 {
-    generic_subscribe<message::inventory>(handle_receive, inventory_registry_);
+    generic_subscribe<message::inventory>(
+        handle_receive, inventory_subscriber_);
 }
 void channel::subscribe_block(receive_block_handler handle_receive)
 {
-    generic_subscribe<message::block>(handle_receive, block_registry_);
+    generic_subscribe<message::block>(
+        handle_receive, block_subscriber_);
 }
 
 } // libbitcoin

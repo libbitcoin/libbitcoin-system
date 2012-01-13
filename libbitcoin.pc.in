@@ -8,6 +8,6 @@ Description:  Rewrite bitcoin, make it super-pluggable, very easy to do and hack
 Version: @PACKAGE_VERSION@
 Requires: libcurl
 Cflags: -I${includedir} -std=gnu++0x
-Libs: -L${libdir} -lbitcoin -lboost_thread -lboost_system -lboost_regex @LDFLAG_BDB@ @LDFLAG_POSTGRES@
-Libs.private: -lcrypto -ldl -lz -lpthread
+Libs: -L${libdir} -lbitcoin -lboost_thread -lboost_system -lboost_regex -lpthread @LDFLAG_BDB@ @LDFLAG_POSTGRES@
+Libs.private: -lcrypto -ldl -lz
 

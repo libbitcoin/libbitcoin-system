@@ -217,6 +217,12 @@ message::version satoshi_exporter::version_from_network(
     return payload;
 }
 
+message::verack satoshi_exporter::verack_from_network(
+    const data_chunk& stream) const
+{
+    return message::verack();
+}
+
 message::address satoshi_exporter::address_from_network(
     const data_chunk& stream) const
 {

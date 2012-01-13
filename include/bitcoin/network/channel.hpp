@@ -19,6 +19,7 @@
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/utility/subscriber.hpp>
 
 namespace libbitcoin {
 
@@ -83,27 +84,26 @@ public:
     }
 
 private:
-    typedef std::stack<receive_version_handler> version_registry_stack;
-    typedef std::stack<receive_verack_handler> verack_registry_stack;
-    typedef std::stack<receive_address_handler> address_registry_stack;
-    typedef std::stack<receive_inventory_handler> inventory_registry_stack;
-    typedef std::stack<receive_block_handler> block_registry_stack;
+    typedef subscriber<const std::error_code&, const message::version&>
+        version_subscriber_type;
+    typedef subscriber<const std::error_code&, const message::verack&>
+        verack_subscriber_type;
+    typedef subscriber<const std::error_code&, const message::address&>
+        address_subscriber_type;
+    typedef subscriber<const std::error_code&, const message::inventory&>
+        inventory_subscriber_type;
+    typedef subscriber<const std::error_code&, const message::block&>
+        block_subscriber_type;
 
-    template<typename Message, typename Callback, typename Registry>
-    void generic_subscribe(Callback handle_message, Registry& registry)
+    template<typename Message, typename Callback, typename SubscriberPtr>
+    void generic_subscribe(Callback handle_message,
+        SubscriberPtr message_subscribe)
     {
         // Subscribing must be immediate. We cannot switch thread contexts
         if (killed_)
             handle_message(error::channel_stopped, Message());
         else
-            do_generic_subscribe(handle_message, registry);
-    }
-    template<typename Callback, typename Registry>
-    void do_generic_subscribe(Callback handle_message, Registry& registry)
-    {
-        std::unique_lock<std::mutex> lock(registries_mutex_);
-        registry.push(handle_message);
-        lock.unlock();
+            message_subscribe->subscribe(handle_message);
     }
 
     template<typename Message>
@@ -120,22 +120,6 @@ private:
                 std::placeholders::_1, handle_send));
     }
 
-    template<typename Message, typename Registry>
-    void relay(const Message& packet, Registry& registry)
-    {
-        std::unique_lock<std::mutex> lock(registries_mutex_);
-        Registry notify_copy = registry;
-        registry = Registry();
-        lock.unlock();
-
-        while (!notify_copy.empty())
-        {
-            notify_copy.top()(std::error_code(), packet);
-            notify_copy.pop();
-        }
-        BITCOIN_ASSERT(notify_copy.empty());
-    }
-
     void read_header();
     void read_checksum(const message::header& header_msg);
     void read_payload(const message::header& header_msg);
@@ -147,23 +131,25 @@ private:
     void handle_read_payload(const message::header& header_msg,
         const boost::system::error_code& ec, size_t bytes_transferred);
 
-    template<typename Message, typename Registry>
+    template<typename Message, typename ExportFunc, typename SubscriberPtr>
     bool transport(const data_chunk& payload_stream,
-        std::function<Message (const data_chunk&)> read_message,
-        Registry& registry)
+        ExportFunc export_func, SubscriberPtr message_subscriber)
     {
         Message packet;
         try
         {
-            packet = read_message(payload_stream);
+            auto convert =
+                std::bind(export_func, export_, std::placeholders::_1);
+            packet = convert(payload_stream);
         }
         catch (end_of_stream)
         {
             log_warning(log_domain::network) << "Premature end of stream";
+            message_subscriber->relay(error::bad_stream, Message());
             stop();
             return false;
         }
-        relay(packet, registry);
+        message_subscriber->relay(std::error_code(), packet);
         return true;
     }
 
@@ -197,12 +183,11 @@ private:
     strand_ptr strand_;
     deadline_timer_ptr timeout_;
 
-    std::mutex registries_mutex_;
-    version_registry_stack version_registry_;
-    verack_registry_stack verack_registry_;
-    address_registry_stack address_registry_;
-    inventory_registry_stack inventory_registry_;
-    block_registry_stack block_registry_;
+    std::shared_ptr<version_subscriber_type> version_subscriber_;
+    std::shared_ptr<verack_subscriber_type> verack_subscriber_;
+    std::shared_ptr<address_subscriber_type> address_subscriber_;
+    std::shared_ptr<inventory_subscriber_type> inventory_subscriber_;
+    std::shared_ptr<block_subscriber_type> block_subscriber_;
 };
 
 } // libbitcoin

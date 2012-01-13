@@ -55,6 +55,9 @@ public:
     virtual message::version version_from_network(
         const data_chunk& stream) const = 0;
 
+    virtual message::verack verack_from_network(
+        const data_chunk& stream) const = 0;
+
     virtual message::address address_from_network(
         const data_chunk& stream) const = 0;
 
@@ -107,14 +110,11 @@ public:
             const data_chunk& stream) const;
 
     message::version version_from_network(const data_chunk& stream) const;
-
+    message::verack verack_from_network(const data_chunk& stream) const;
     message::address address_from_network(const data_chunk& stream) const;
-
     message::inventory inventory_from_network(const data_chunk& stream) const;
-
     message::transaction transaction_from_network(
         const data_chunk& stream) const;
-
     message::block block_from_network(const data_chunk& stream) const;
 };
 
