@@ -58,7 +58,7 @@ struct std_hash_wrapper
 struct node_address
 {
     std::string hostname;
-    uint8_t port;
+    uint16_t port;
 };
 
 } // libbitcoin
