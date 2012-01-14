@@ -5,6 +5,7 @@
 *.o
 Makefile
 Makefile.in
+libbitcoin.pc
 
 obj
 .*.swp
