@@ -3,6 +3,7 @@
 
 #include <bitcoin/types.hpp>
 #include <bitcoin/network/channel.hpp>
+#include <boost/random.hpp>
 
 namespace libbitcoin {
 
@@ -33,6 +34,7 @@ private:
     std::vector<node_address> addresses_;
     socket_ptr socket_;
     boost::asio::streambuf data_;
+    boost::mt19937 rng_;
 
     thread_core_ptr threaded_;
     strand_ptr strand_;

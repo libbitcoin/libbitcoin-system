@@ -1,7 +1,7 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/discovery.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
+#include <ctime>
 
 namespace libbitcoin {
 
@@ -17,6 +17,7 @@ discovery::discovery()
 {
     threaded_ = std::make_shared<thread_core>();
     strand_ = threaded_->create_strand();
+    rng_.seed(static_cast<unsigned int>(std::time(0)));
 }
 
 discovery::~discovery()
@@ -96,11 +97,8 @@ void discovery::irc_readline(const boost::system::error_code& ec, size_t len)
 void discovery::irc_identify()
 {
     std::string str;
-    boost::mt19937 rng;
     boost::uniform_int<> dist(1,1000000000);
-//    boost::variate_generator<boost::mt19937&, boost::uniform_int<> >
-//        die(rng, dist);
-    uint32_t roll = dist(rng);
+    uint32_t roll = dist(rng_);
 
     str = "NICK lbtc" + boost::lexical_cast<std::string>(roll);
     send_raw_line(str);
@@ -113,9 +111,8 @@ void discovery::irc_identify()
 void discovery::irc_join()
 {
     std::string str;
-    boost::mt19937 rng;
     boost::uniform_int<> dist(0,99);
-    uint32_t roll = dist(rng);
+    uint32_t roll = dist(rng_);
 
     str = ":source JOIN :#bitcoin";
     if (roll < 10)
