@@ -10,7 +10,6 @@ void handler(const std::error_code& ec)
 int main()
 {
     std::shared_ptr<libbitcoin::discovery> disc = std::make_shared<libbitcoin::discovery>();
-    libbitcoin::node_address addr = {"irc.freenode.net", 6667};
-    disc->irc_discovery(addr, &handler);
+    disc->irc_discovery(&handler);
     while (std::cin.get() != -1);
 }

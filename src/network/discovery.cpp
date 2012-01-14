@@ -8,6 +8,11 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+data_chunk as_chunk(const std::string& s)
+{
+    return data_chunk(s.begin(), s.end());
+}
+
 discovery::discovery()
 {
     threaded_ = std::make_shared<thread_core>();
@@ -28,58 +33,19 @@ uint16_t discovery::count()
     return addresses_.size();
 }
 
-void discovery::irc_discovery(node_address ircserv, error_handler handler)
+void discovery::irc_discovery(error_handler handler)
 {
-    socket_ptr socket(new tcp::socket(*threaded_->service()));
-    resolver_ptr res = std::make_shared<tcp::resolver>(*threaded_->service());
-    log_debug() << "Querying resolver...";
-    query_ptr query = std::make_shared<tcp::resolver::query>(ircserv.hostname,
-                           boost::lexical_cast<std::string>(ircserv.port));
-    res->async_resolve(*query, std::bind(&discovery::resolve_handler,
-                           shared_from_this(), _1, _2, ircserv, handler));
-
-}
-
-void discovery::irc_handler(const boost::system::error_code& ec,
-                                node_address ircserv)
-{
-    std::string str;
-
-    if (ec)
-    {
-        log_error() << "Connecting to IRC server " << ircserv.hostname
-            << ": " << ec.message();
-        return;
-    }
-
-    boost::array<char, 128> buf;
-    size_t len;
-    boost::system::error_code error;
-    log_debug() << "IRC sayz:";
-    while(len = socket_->read_some(boost::asio::buffer(buf), error))
-        std::cout.write(buf.data(), len);
-
-    /*read(*socket, boost::asio::buffer(talk_buffer_));
-
-    log_debug() << "IRC sayz:";
-    log_debug() << talk_buffer_.data();
-
-    boost::mt19937 rng;
-    boost::uniform_int<> dist(1,1000000000);
-    boost::variate_generator<boost::mt19937&, boost::uniform_int<> >
-        die(rng, dist);
-    uint32_t roll = die();
-
-    str = "NICK " + boost::lexical_cast<std::string>(roll);
-    write(*socket, boost::asio::buffer(str));
-    str = "USER " + boost::lexical_cast<std::string>(roll) + " 8 * : "
-        + boost::lexical_cast<std::string>(roll) + "\n";*/
-
+    resolver_ptr resolver =
+        std::make_shared<tcp::resolver>(*threaded_->service());
+    query_ptr query = std::make_shared<tcp::resolver::query>("irc.lfnet.org",
+        boost::lexical_cast<std::string>(6667));
+    resolver->async_resolve(*query,
+        std::bind(&discovery::resolve_handler, shared_from_this(),
+        _1, _2, handler));
 }
 
 void discovery::resolve_handler(const boost::system::error_code& ec,
-    tcp::resolver::iterator endpoint_iterator,
-	libbitcoin::node_address ircserv, error_handler handler)
+    tcp::resolver::iterator endpoint_iterator, error_handler handler)
 {
     if (ec)
     {
@@ -88,9 +54,88 @@ void discovery::resolve_handler(const boost::system::error_code& ec,
     }
     socket_ = std::make_shared<tcp::socket>(*threaded_->service());
     boost::asio::async_connect(*socket_, endpoint_iterator,
-        std::bind(&discovery::irc_handler, shared_from_this(),
-        _1, ircserv));
+        std::bind(&discovery::irc_connect, shared_from_this(), _1));
 
+}
+
+void discovery::irc_connect(const boost::system::error_code& ec)
+{
+    if (ec)
+    {
+        log_error() << "Connecting to IRC server: " << ec.message();
+        return;
+    }
+
+    boost::asio::async_read_until(*socket_, data_, "\r\n",
+        std::bind(&discovery::irc_readline, shared_from_this(), _1, _2));
+
+    irc_identify();
+}
+
+void discovery::irc_readline(const boost::system::error_code& ec, size_t len)
+{
+    if (ec)
+    {
+//        handler(error::resolve_failed);
+        return;
+    }
+    std::ostringstream oss;
+    oss << &data_;
+    const std::string line = oss.str();
+    log_debug() << line;
+    if (line.find(" 433 ") != std::string::npos)
+        irc_identify();
+
+    if (line.find(" 001 ") != std::string::npos)
+        irc_join();
+
+    boost::asio::async_read_until(*socket_, data_, "\r\n",
+        std::bind(&discovery::irc_readline, shared_from_this(), _1, _2));
+}
+
+void discovery::irc_identify()
+{
+    std::string str;
+    boost::mt19937 rng;
+    boost::uniform_int<> dist(1,1000000000);
+//    boost::variate_generator<boost::mt19937&, boost::uniform_int<> >
+//        die(rng, dist);
+    uint32_t roll = dist(rng);
+
+    str = "NICK lbtc" + boost::lexical_cast<std::string>(roll);
+    send_raw_line(str);
+
+    str = "USER x" + boost::lexical_cast<std::string>(roll) + " 8 * :lbtc"
+        + boost::lexical_cast<std::string>(roll);
+    send_raw_line(str);
+}
+
+void discovery::irc_join()
+{
+    std::string str;
+    boost::mt19937 rng;
+    boost::uniform_int<> dist(0,99);
+    uint32_t roll = dist(rng);
+
+    str = ":source JOIN :#bitcoin";
+    if (roll < 10)
+        str += "0";
+    str += boost::lexical_cast<std::string>(roll);
+
+    send_raw_line(str);
+}
+
+void discovery::send_raw_line(const std::string& message)
+{
+    shared_const_buffer buff(as_chunk(message + "\r\n"));
+    async_write(*socket_, buff,
+        std::bind(&discovery::handle_send, shared_from_this(), _1));
+}
+
+void discovery::handle_send(const boost::system::error_code& ec)
+{
+//    if (ec)
+//        handler(ec.message());
 }
 
 }

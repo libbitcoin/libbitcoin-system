@@ -17,16 +17,22 @@ public:
 
     void clear();
     uint16_t count();
-    void irc_discovery(node_address ircserv, error_handler handler);
-    void irc_handler(const boost::system::error_code& ec, node_address ircserv);
+    void irc_discovery(error_handler handler);
     void resolve_handler(const boost::system::error_code& ec,
                   tcp::resolver::iterator endpoint_iterator,
-                  node_address ircserv, error_handler handler);
+                  error_handler handler);
+    void irc_connect(const boost::system::error_code& ec);
+    void irc_readline(const boost::system::error_code& ec, size_t len);
+    void irc_identify();
+    void irc_join();
+    void send_raw_line(const std::string& message);
+    void handle_send(const boost::system::error_code& ec);
 
 private:
     boost::array<uint8_t, 500> talk_buffer_;
     std::vector<node_address> addresses_;
     socket_ptr socket_;
+    boost::asio::streambuf data_;
 
     thread_core_ptr threaded_;
     strand_ptr strand_;
