@@ -82,13 +82,20 @@ void discovery::irc_readline(const boost::system::error_code& ec, size_t len)
     }
     std::ostringstream oss;
     oss << &data_;
-    const std::string line = oss.str();
+    std::string line = oss.str();
     log_debug() << line;
     if (line.find(" 433 ") != std::string::npos)
         irc_identify();
 
     if (line.find(" 001 ") != std::string::npos)
         irc_join();
+
+    if (line.find("PING :") != std::string::npos)
+    {
+        line.erase(0, 4);
+        line.insert(0, "PONG");
+        send_raw_line(line);
+    }
 
     boost::asio::async_read_until(*socket_, data_, "\r\n",
         std::bind(&discovery::irc_readline, shared_from_this(), _1, _2));
