@@ -19,6 +19,8 @@ public:
     void clear();
     uint16_t count();
     void irc_discovery(error_handler handler);
+
+private:
     void resolve_handler(const boost::system::error_code& ec,
                   tcp::resolver::iterator endpoint_iterator,
                   error_handler handler);
@@ -29,7 +31,6 @@ public:
     void send_raw_line(const std::string& message);
     void handle_send(const boost::system::error_code& ec);
 
-private:
     boost::array<uint8_t, 500> talk_buffer_;
     std::vector<node_address> addresses_;
     socket_ptr socket_;
