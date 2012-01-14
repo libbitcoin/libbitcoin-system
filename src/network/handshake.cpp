@@ -160,23 +160,15 @@ bool handshake::lookup_external(const std::string& website,
         return false;
     curl_easy_cleanup(curl);
     // TODO use std::regex instead ... when it work >_>
-    boost::cmatch res;
-    boost::regex rx;
-    try
-    {
-        rx = "(\\d+)[.](\\d+)[.](\\d+)[.](\\d+)";
-    }
-    catch (boost::regex_error)
-    {
-        return false;
-    }
-    if (!boost::regex_search(response_buffer.c_str(), res, rx))
+    boost::cmatch results;
+    boost::regex rx("(\\d+)[.](\\d+)[.](\\d+)[.](\\d+)");
+    if (!boost::regex_search(response_buffer.c_str(), results, rx))
     {
         return false;
     }
     ip = localhost_ip();
     for (size_t i = 0; i < 4; ++i)
-        ip[i + 12] = boost::lexical_cast<unsigned>(res[i + 1]);
+        ip[i + 12] = boost::lexical_cast<unsigned>(results[i + 1]);
     return true;
 }
 
