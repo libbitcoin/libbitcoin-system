@@ -142,11 +142,11 @@ void validate_transaction::set_last_depth(
 void validate_transaction::fetch_next_previous_transaction()
 {
     BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
-    chain_->fetch_transaction(
+    chain_->fetch_transaction_index(
         tx_.inputs[current_input_].previous_output.hash,
         strand_->wrap(std::bind(
-            &validate_transaction::fetch_input_transaction,
-                shared_from_this(), _1, _2, _3)));
+            &validate_transaction::fetch_input_transaction_index,
+                shared_from_this(), _1, _2)));
 }
 
 bool validate_transaction::connect_input(
@@ -177,6 +177,23 @@ bool validate_transaction::connect_input(
     if (value_in > max_money())
         return false;
     return true;
+}
+
+void validate_transaction::fetch_input_transaction_index(
+    const std::error_code& ec, size_t parent_depth)
+{
+    if (ec)
+    {
+        handle_validate_(error::bad_transaction);
+        return;
+    }
+    // Now fetch actual transaction body
+    BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
+    chain_->fetch_transaction(
+        tx_.inputs[current_input_].previous_output.hash,
+        strand_->wrap(std::bind(
+            &validate_transaction::fetch_input_transaction,
+                shared_from_this(), _1, _2, parent_depth)));
 }
 
 void validate_transaction::fetch_input_transaction(const std::error_code& ec,

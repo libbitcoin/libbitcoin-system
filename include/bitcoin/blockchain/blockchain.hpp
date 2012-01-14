@@ -26,6 +26,9 @@ public:
             fetch_handler_block;
 
     typedef std::function<void (const std::error_code&, size_t)>
+        fetch_handler_block_depth;
+
+    typedef std::function<void (const std::error_code&, size_t)>
         fetch_handler_last_depth;
 
     typedef std::function<
@@ -33,19 +36,20 @@ public:
             fetch_handler_block_locator;
 
     typedef std::function<
-        void (const std::error_code&, const message::transaction&,
-            size_t, size_t)> fetch_handler_transaction;
+        void (const std::error_code&, const message::transaction&)>
+            fetch_handler_transaction;
 
     typedef std::function<
-        void (const std::error_code&, const message::transaction_output&)>
-            fetch_handler_output;
+        void (const std::error_code&, size_t, size_t)>
+            fetch_handler_transaction_index;
 
     typedef std::function<
         void (const std::error_code&, const message::input_point&)>
             fetch_handler_spend;
 
-    typedef std::function<void (const std::error_code&, uint64_t)>
-        fetch_handler_balance;
+    typedef std::function<
+        void (const std::error_code&, const message::output_point_list&)>
+            fetch_handler_outputs;
 
     virtual void store(const message::block& stored_block, 
         store_block_handler handle_store) = 0;
@@ -54,17 +58,26 @@ public:
         fetch_handler_block handle_fetch) = 0;
     virtual void fetch_block(const hash_digest& block_hash,
         fetch_handler_block handle_fetch) = 0;
+    virtual void fetch_block_depth(const hash_digest& block_hash,
+        fetch_handler_block_depth handle_fetch) = 0;
     virtual void fetch_last_depth(fetch_handler_last_depth handle_fetch) = 0;
     virtual void fetch_block_locator(
         fetch_handler_block_locator handle_fetch) = 0;
     virtual void fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch) = 0;
-    virtual void fetch_output(const message::output_point& outpoint,
-        fetch_handler_output handle_fetch) = 0;
+    virtual void fetch_transaction_index(
+        const hash_digest& transaction_hash,
+        fetch_handler_transaction_index handle_fetch) = 0;
+
+    // fetch of inputs and outputs is a future possibility
+    // for now use fetch_transaction and lookup input/output
+
+    // Returns input_point
     virtual void fetch_spend(const message::output_point& outpoint,
         fetch_handler_spend handle_fetch) = 0;
-    virtual void fetch_balance(const short_hash& pubkey_hash,
-        fetch_handler_balance handle_fetch) = 0;
+    // List of output_points
+    virtual void fetch_outputs(const short_hash& pubkey_hash,
+        fetch_handler_outputs handle_fetch) = 0;
 };
 
 } // libbitcoin

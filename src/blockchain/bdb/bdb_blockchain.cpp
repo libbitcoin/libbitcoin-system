@@ -236,6 +236,12 @@ void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash,
     handle_fetch(std::error_code(), serial_block);
 }
 
+void bdb_blockchain::fetch_block_depth(const hash_digest& block_hash,
+    fetch_handler_block_depth handle_fetch)
+{
+    // TODO Unimplemented
+}
+
 void bdb_blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
 {
     strand()->post(
@@ -314,10 +320,34 @@ void bdb_blockchain::do_fetch_transaction(const hash_digest& transaction_hash,
     txn->commit();
     if (!proto_tx.IsInitialized())
     {
-        handle_fetch(error::missing_object, message::transaction(), 0, 0);
+        handle_fetch(error::missing_object, message::transaction());
         return;
     }
     message::transaction tx = protobuf_to_transaction(proto_tx);
+    handle_fetch(std::error_code(), tx);
+}
+
+void bdb_blockchain::fetch_transaction_index(
+    const hash_digest& transaction_hash,
+    fetch_handler_transaction_index handle_fetch)
+{
+    strand()->post(
+        std::bind(&bdb_blockchain::do_fetch_transaction_index,
+            shared_from_this(), transaction_hash, handle_fetch));
+}
+void bdb_blockchain::do_fetch_transaction_index(
+    const hash_digest& transaction_hash,
+    fetch_handler_transaction_index handle_fetch)
+{
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
+    protobuf::Transaction proto_tx =
+        common_->fetch_proto_transaction(txn, transaction_hash);
+    txn->commit();
+    if (!proto_tx.IsInitialized())
+    {
+        handle_fetch(error::missing_object, 0, 0);
+        return;
+    }
     size_t parent_block_depth = 0, index_in_parent = 0;
     for (auto parent: proto_tx.parent())
     {
@@ -327,35 +357,7 @@ void bdb_blockchain::do_fetch_transaction(const hash_digest& transaction_hash,
             index_in_parent = parent.index();
         }
     }
-    handle_fetch(std::error_code(), tx, parent_block_depth, index_in_parent);
-}
-
-void bdb_blockchain::fetch_output(const message::output_point& outpoint,
-    fetch_handler_output handle_fetch)
-{
-    strand()->post(
-        std::bind(&bdb_blockchain::do_fetch_output, shared_from_this(),
-            outpoint, handle_fetch));
-}
-void bdb_blockchain::do_fetch_output(const message::output_point& outpoint,
-    fetch_handler_output handle_fetch)
-{
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn, outpoint.hash);
-    txn->commit();
-    if (!proto_tx.IsInitialized())
-    {
-        handle_fetch(error::missing_object, message::transaction_output());
-        return;
-    }
-    message::transaction tx = protobuf_to_transaction(proto_tx);
-    if (outpoint.index >= tx.outputs.size())
-    {
-        handle_fetch(error::missing_object, message::transaction_output());
-        return;
-    }
-    handle_fetch(std::error_code(), tx.outputs[outpoint.index]);
+    handle_fetch(std::error_code(), parent_block_depth, index_in_parent);
 }
 
 void bdb_blockchain::fetch_spend(const message::output_point& outpoint,
@@ -381,9 +383,10 @@ void bdb_blockchain::do_fetch_spend(const message::output_point& outpoint,
     handle_fetch(std::error_code(), message::input_point());
 }
 
-void bdb_blockchain::fetch_balance(const short_hash& pubkey_hash,
-    fetch_handler_balance handle_fetch)
+void bdb_blockchain::fetch_outputs(const short_hash& pubkey_hash,
+    fetch_handler_outputs handle_fetch)
 {
+    // TODO Unimplemented
 }
 
 } // libbitcoin
