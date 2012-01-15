@@ -58,6 +58,8 @@ private:
         fetch_handler_block handle_fetch);
     void fetch_block_by_hash(const hash_digest& block_hash, 
         fetch_handler_block handle_fetch);
+    void do_fetch_block_depth(const hash_digest& block_hash,
+        fetch_handler_block_depth handle_fetch);
     void do_fetch_last_depth(fetch_handler_last_depth handle_fetch);
     void do_fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch);

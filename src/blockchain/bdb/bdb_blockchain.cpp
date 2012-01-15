@@ -239,7 +239,28 @@ void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash,
 void bdb_blockchain::fetch_block_depth(const hash_digest& block_hash,
     fetch_handler_block_depth handle_fetch)
 {
-    // TODO Unimplemented
+    strand()->post(
+        std::bind(&bdb_blockchain::do_fetch_block_depth, shared_from_this(),
+            block_hash, handle_fetch));
+}
+void bdb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
+    fetch_handler_block_depth handle_fetch)
+{
+    readable_data_type key;
+    key.set(block_hash);
+    writable_data_type primary_key;
+    empty_data_type ignore_data;
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
+    if (db_blocks_hash_->pget(txn->get(), key.get(),
+        primary_key.get(), ignore_data.get(), 0) != 0)
+    {
+        txn->abort();
+        handle_fetch(error::missing_object, 0);
+        return;
+    }
+    txn->commit();
+    size_t depth = cast_chunk<uint32_t>(primary_key.data());
+    handle_fetch(std::error_code(), depth);
 }
 
 void bdb_blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
