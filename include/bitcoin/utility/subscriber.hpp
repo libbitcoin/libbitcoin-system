@@ -41,12 +41,14 @@ private:
 
     void do_relay(Args... params)
     {
-        while (!registry_.empty())
+        registry_stack notify_copy = registry_;
+        registry_ = registry_stack();
+        while (!notify_copy.empty())
         {
-            registry_.top()(std::forward<Args>(params)...);
-            registry_.pop();
+            notify_copy.top()(std::forward<Args>(params)...);
+            notify_copy.pop();
         }
-        BITCOIN_ASSERT(registry_.empty());
+        BITCOIN_ASSERT(notify_copy.empty());
     }
 
     strand_ptr strand_;
