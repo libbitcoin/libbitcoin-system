@@ -72,16 +72,26 @@ void handle_txpl(const std::error_code& ec)
     condition.notify_one();
 }
 
-void show_tx(const std::error_code& ec, const message::transaction& tx,
-    size_t parent_depth, size_t index)
+void show_tx(const std::error_code& ec, const message::transaction& tx)
 {
     if (ec)
     {
         log_error() << "showTx: " << ec.message();
         return;
     }
-    log_debug() << "tx depth is " << parent_depth << " w idx " << index;
     log_debug() << pretty(tx);
+}
+
+void show_spend(const std::error_code& ec, const message::input_point& spend)
+{
+    if (ec)
+    {
+        log_error() << "showSpend: " << ec.message();
+        return;
+    }
+    log_debug() << "SPEND:";
+    log_debug() << pretty_hex(spend.hash);
+    log_debug() << spend.index;
 }
 
 void handle_store(const std::error_code& ec, block_info info,
@@ -133,6 +143,17 @@ void handle_store(const std::error_code& ec, block_info info,
                         0x20, 0x16, 0x1b, 0xbf, 0x18, 0xeb, 0x60, 0x48},
             show_block);
     }
+    else if (info.depth == 200)
+    {
+        chain->fetch_spend(
+            message::output_point{
+                hash_digest{0x04, 0x37, 0xcd, 0x7f, 0x85, 0x25, 0xce, 0xed,
+                            0x23, 0x24, 0x35, 0x9c, 0x2d, 0x0b, 0xa2, 0x60, 
+                            0x06, 0xd9, 0x2d, 0x85, 0x6a, 0x9c, 0x20, 0xfa, 
+                            0x02, 0x41, 0x10, 0x6e, 0xe5, 0xa5, 0x97, 0xc9},
+                0},
+            show_spend);
+    }
     if (stop)
     {
         std::unique_lock<std::mutex> lock(mutex);
@@ -149,16 +170,16 @@ void recv_blk(const std::error_code& ec, const message::block& packet,
         log_error() << ec.message();
     node->subscribe_block(std::bind(recv_blk, _1, _2, node, chain));
     // store block in bdb
-    if (hash_block_header(packet) ==
-        hash_digest{0x00, 0x00, 0x00, 0x00, 0xd1, 0x14, 0x57, 0x90,
-                    0xa8, 0x69, 0x44, 0x03, 0xd4, 0x06, 0x3f, 0x32,
-                    0x3d, 0x49, 0x9e, 0x65, 0x5c, 0x83, 0x42, 0x68,
-                    0x34, 0xd4, 0xce, 0x2f, 0x8d, 0xd4, 0xa2, 0xee})
-    {
-        test_mem_pool(packet);
-        stop_inserts = true;
-    }
-    else if (!stop_inserts)
+    //if (hash_block_header(packet) ==
+    //    hash_digest{0x00, 0x00, 0x00, 0x00, 0xd1, 0x14, 0x57, 0x90,
+    //                0xa8, 0x69, 0x44, 0x03, 0xd4, 0x06, 0x3f, 0x32,
+    //                0x3d, 0x49, 0x9e, 0x65, 0x5c, 0x83, 0x42, 0x68,
+    //                0x34, 0xd4, 0xce, 0x2f, 0x8d, 0xd4, 0xa2, 0xee})
+    //{
+    //    test_mem_pool(packet);
+    //    stop_inserts = true;
+    //}
+    //else if (!stop_inserts)
         chain->store(packet, std::bind(handle_store, _1, _2, node, chain, hash_block_header(packet)));
 }
 

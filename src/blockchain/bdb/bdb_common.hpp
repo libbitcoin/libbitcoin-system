@@ -23,6 +23,9 @@ public:
     uint32_t find_last_block_depth(txn_guard_ptr txn);
     bool is_output_spent(txn_guard_ptr txn,
         const message::output_point& output);
+    bool fetch_spend(txn_guard_ptr txn,
+        const message::output_point& spent_output,
+        message::input_point& input_spend);
 
     bool save_block(txn_guard_ptr txn,
         uint32_t depth, const message::block& serial_block);
@@ -44,7 +47,8 @@ private:
     bool dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
         uint32_t block_depth, uint32_t tx_index);
     bool mark_spent_outputs(txn_guard_ptr txn,
-        const message::transaction_input& input);
+        const message::output_point& previous_output,
+        const message::input_point& current_input);
     bool rewrite_transaction(txn_guard_ptr txn, const hash_digest& tx_hash,
         const protobuf::Transaction& replace_proto_tx);
 

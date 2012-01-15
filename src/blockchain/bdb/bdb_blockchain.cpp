@@ -391,17 +391,16 @@ void bdb_blockchain::fetch_spend(const message::output_point& outpoint,
 void bdb_blockchain::do_fetch_spend(const message::output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
-    // TODO Finished this method
-    log_warning() << "bdb_blockchain::fetch_spend(...) not fully implemented";
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    bool is_spent = common_->is_output_spent(txn, outpoint);
-    txn->commit();
-    if (!is_spent)
+    message::input_point input_spend;
+    if (!common_->fetch_spend(txn, outpoint, input_spend))
     {
+        txn->abort();
         handle_fetch(error::unspent_output, message::input_point());
         return;
     }
-    handle_fetch(std::error_code(), message::input_point());
+    txn->commit();
+    handle_fetch(std::error_code(), input_spend);
 }
 
 void bdb_blockchain::fetch_outputs(const short_hash& pubkey_hash,

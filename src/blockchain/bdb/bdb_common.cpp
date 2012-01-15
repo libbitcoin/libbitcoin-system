@@ -4,6 +4,7 @@
 
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
+#include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/data_helpers.hpp>
 #include <bitcoin/transaction.hpp>
 
@@ -29,11 +30,13 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
     return last_block_depth;
 }
 
-data_chunk create_spent_key(const message::output_point& outpoint)
+template <typename Point>
+data_chunk create_spent_key(const Point& point)
 {
-    data_chunk raw_key(outpoint.hash.begin(), outpoint.hash.end());
-    extend_data(raw_key, uncast_type<uint32_t>(outpoint.index));
-    return raw_key;
+    serializer serial_spend;
+    serial_spend.write_hash(point.hash);
+    serial_spend.write_4_bytes(point.index);
+    return serial_spend.data();
 }
 bool bdb_common::is_output_spent(txn_guard_ptr txn,
     const message::output_point& output)
@@ -43,6 +46,21 @@ bool bdb_common::is_output_spent(txn_guard_ptr txn,
     empty_data_type ignore_key;
     return db_spends_->get(txn->get(),
         search_spend.get(), ignore_key.get(), 0) == 0;
+}
+bool bdb_common::fetch_spend(txn_guard_ptr txn,
+    const message::output_point& spent_output,
+    message::input_point& input_spend)
+{
+    readable_data_type search_spend;
+    search_spend.set(create_spent_key(spent_output));
+    writable_data_type raw_spend;
+    if (db_spends_->get(txn->get(), search_spend.get(),
+            raw_spend.get(), 0) != 0)
+        return false;
+    deserializer deserial(raw_spend.data());
+    input_spend.hash = deserial.read_hash();
+    input_spend.index = deserial.read_4_bytes();
+    return true;
 }
 
 bool bdb_common::save_block(txn_guard_ptr txn,
@@ -106,9 +124,15 @@ bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
         return false;
     if (is_coinbase(block_tx))
         return true;
-    for (const message::transaction_input& input: block_tx.inputs)
-        if (!mark_spent_outputs(txn, input))
+    for (uint32_t input_index = 0; input_index < block_tx.inputs.size();
+        ++input_index)
+    {
+        const message::transaction_input& input = 
+            block_tx.inputs[input_index];
+        const message::input_point inpoint{tx_hash, input_index};
+        if (!mark_spent_outputs(txn, input.previous_output, inpoint))
             return false;
+    }
     return true;
 }
 
@@ -126,11 +150,13 @@ bool bdb_common::dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
 }
 
 bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
-    const message::transaction_input& input)
+    const message::output_point& previous_output,
+    const message::input_point& current_input)
 {
-    readable_data_type spent_key, null_value;
-    spent_key.set(create_spent_key(input.previous_output));
-    if (db_spends_->put(txn->get(), spent_key.get(), null_value.get(),
+    readable_data_type spent_key, spend_value;
+    spent_key.set(create_spent_key(previous_output));
+    spend_value.set(create_spent_key(current_input));
+    if (db_spends_->put(txn->get(), spent_key.get(), spend_value.get(),
             DB_NOOVERWRITE) != 0)
         return false;
     return true;
