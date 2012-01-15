@@ -29,15 +29,16 @@ T cast_chunk(data_chunk chunk, bool reverse=false)
     if (reverse)
         std::reverse(begin(chunk), end(chunk));
 
-    T val = 0;
+    T value = 0;
     for (size_t i = 0; i < sizeof(T) && i < chunk.size(); ++i)
-        val += static_cast<T>(chunk[i]) << (i*8);
-    return val;
+        value += static_cast<T>(chunk[i]) << (i * 8);
+    return value;
 }
 
 template<typename T>
-data_chunk uncast_type(T val, bool reverse=false)
+data_chunk uncast_type(T value, bool reverse=false)
 {
+    // TODO Future versions of boost will have boost::native_to_little(value);
     #ifdef BOOST_LITTLE_ENDIAN
         // do nothing
     #elif BOOST_BIG_ENDIAN
@@ -46,9 +47,9 @@ data_chunk uncast_type(T val, bool reverse=false)
         #error "Endian isn't defined!"
     #endif
 
-    data_chunk chunk;
-    for (size_t i = 0; i < sizeof(T); ++i)
-        chunk.push_back(reinterpret_cast<byte*>(&val)[i]);
+    data_chunk chunk(sizeof(T));
+    byte* value_begin = reinterpret_cast<byte*>(&value);
+    std::copy(value_begin, value_begin + sizeof(T), chunk.begin());
 
     if (reverse)
         std::reverse(begin(chunk), end(chunk));
