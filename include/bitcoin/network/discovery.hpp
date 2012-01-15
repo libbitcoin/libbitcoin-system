@@ -10,14 +10,12 @@ namespace libbitcoin {
 class discovery
  : public std::enable_shared_from_this<discovery>
 {
-    typedef std::function<void (const std::error_code&)> irc_handler;
+    typedef std::function<void (const std::error_code&, const std::string hostname)> irc_handler;
 
 public:
     discovery();
     ~discovery();
 
-    void clear();
-    uint16_t count();
     void irc_discovery(irc_handler handler);
 
 private:
@@ -32,12 +30,11 @@ private:
     void send_raw_line(const std::string& message);
     void handle_send(const boost::system::error_code& ec);
 
-    boost::array<uint8_t, 500> talk_buffer_;
-    std::vector<node_address> addresses_;
     socket_ptr socket_;
     boost::asio::streambuf data_;
     std::string ircchan_;
     std::string ircnick_;
+    std::string ircmyhost_;
     boost::mt19937 rng_;
 
     thread_core_ptr threaded_;

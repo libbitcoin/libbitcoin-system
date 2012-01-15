@@ -1,6 +1,7 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/discovery.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include <ctime>
 
 namespace libbitcoin {
@@ -23,16 +24,6 @@ discovery::~discovery()
 {
 }
 
-void discovery::clear()
-{
-    addresses_.clear();
-}
-
-uint16_t discovery::count()
-{
-    return addresses_.size();
-}
-
 void discovery::irc_discovery(irc_handler handler)
 {
     resolver_ptr resolver =
@@ -49,7 +40,7 @@ void discovery::resolve_handler(const boost::system::error_code& ec,
 {
     if (ec)
     {
-        handler(error::resolve_failed);
+        handler(error::resolve_failed, "");
         return;
     }
     socket_ = std::make_shared<tcp::socket>(*threaded_->service());
@@ -63,7 +54,7 @@ void discovery::irc_connect(const boost::system::error_code& ec,
 {
     if (ec)
     {
-        handler(error::network_unreachable);
+        handler(error::network_unreachable, "");
         return;
     }
 
@@ -73,7 +64,6 @@ void discovery::irc_connect(const boost::system::error_code& ec,
             shared_from_this(), _1, _2, handler));
 
     irc_identify();
-//    handler(NULL);
 }
 
 void discovery::irc_readline(const boost::system::error_code& ec, size_t len,
@@ -81,30 +71,47 @@ void discovery::irc_readline(const boost::system::error_code& ec, size_t len,
 {
     if (ec)
     {
-        handler(error::channel_stopped);
+        handler(error::channel_stopped, "");
         return;
     }
-    std::ostringstream oss;
-    oss << &data_;
-    std::string line = oss.str();
-    log_debug() << line;
-    if (line.find(" 433 ") != std::string::npos)
-        irc_identify();
 
-    if (line.find(" 001 ") != std::string::npos)
-        irc_join();
+    boost::array<char, 500> tb;
+    std::istream is(&data_);
 
-    if (line.find("PING :") != std::string::npos)
+    while (is.getline(tb.data(), 499))
     {
-        line.erase(0, 4);
-        line.insert(0, "PONG");
-        send_raw_line(line);
+        std::string line(tb.data());
+
+        if (line.find(" 433 ") != std::string::npos)
+            irc_identify();
+
+        if (line.find(" 001 ") != std::string::npos)
+            irc_join();
+
+        if (line.find("PING :") != std::string::npos)
+        {
+            line.erase(0, 4);
+            line.insert(0, "PONG");
+            send_raw_line(line);
+        }
+
+        if (line.find(" JOIN :" + ircchan_) != std::string::npos &&
+            line.find(ircnick_) != std::string::npos)
+	    {
+	        std::vector<std::string> parts;
+                boost::split(parts, line, boost::is_any_of("@ "));
+		ircmyhost_ = parts[1];
+	        send_raw_line("WHO " + ircchan_);
+            }
+
+        if (line.find(" 352 ") != std::string::npos)
+        {
+            std::vector<std::string> parts;
+	    boost::split(parts, line, boost::is_any_of(" "));
+	    if (parts.size() > 9 && parts[5] != ircmyhost_)
+	        handler(std::error_code(), parts[5]);
+        }
     }
-
-    if (line.find(" JOIN :" + ircchan_) != std::string::npos &&
-        line.find(ircnick_) != std::string::npos)
-	    send_raw_line("WHO " + ircchan_);
-
 
     boost::asio::async_read_until(*socket_, data_, "\r\n",
         std::bind(&discovery::irc_readline,
@@ -143,8 +150,8 @@ void discovery::send_raw_line(const std::string& message)
 
 void discovery::handle_send(const boost::system::error_code& ec)
 {
-//    if (ec)
-//        handler(ec.message());
+    //if (ec)
+    //    handler(ec.message(), "");
 }
 
 }

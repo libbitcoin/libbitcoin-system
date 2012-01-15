@@ -1,10 +1,15 @@
 #include <bitcoin/network/discovery.hpp>
 #include <bitcoin/error.hpp>
 
-void handler(const std::error_code& ec)
+void handler(const std::error_code& ec, const std::string hostname)
 {
-    libbitcoin::log_fatal() << ec.message();
-    exit(-1);
+    if (ec)
+    {
+        libbitcoin::log_fatal() << ec.message();
+        exit(-1);
+    }
+
+    libbitcoin::log_info() << "Got new client: " << hostname;
 }
 
 int main()
