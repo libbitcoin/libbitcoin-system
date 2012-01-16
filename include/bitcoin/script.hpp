@@ -49,11 +49,13 @@ namespace sighash
 
 typedef std::vector<operation> operation_stack;
 
-enum class transaction_type
+enum class payment_type
 {
-    normal,
-    generate,
-    other
+    pubkey,
+    pubkey_hash,
+    script_hash,
+    multisig,
+    non_standard
 };
 
 class script
@@ -65,7 +67,7 @@ public:
         const message::transaction& parent_tx, uint32_t input_index);
 
     std::string pretty() const;
-    transaction_type type() const;
+    payment_type type() const;
 
     const operation_stack& operations() const;
 

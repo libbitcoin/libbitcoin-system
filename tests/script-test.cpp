@@ -1,21 +1,11 @@
-#include <bitcoin/storage/postgresql_storage.hpp>
-#include <bitcoin/script.hpp>
-#include <bitcoin/utility/ripemd.hpp>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/logger.hpp>
-#include <bitcoin/messages.hpp>
-#include <bitcoin/transaction.hpp>
+#include <bitcoin/blockchain/bdb_blockchain.hpp>
+#include <bitcoin/bitcoin.hpp>
 #include <iostream>
 #include <functional>
 #include <memory>
 
+using namespace libbitcoin;
 using std::shared_ptr;
-using libbitcoin::postgresql_storage;
-using libbitcoin::hash_transaction;
-using libbitcoin::pretty_hex;
-using libbitcoin::log_debug;
-using libbitcoin::data_chunk;
-typedef shared_ptr<postgresql_storage> psql_ptr;
 
 void ripemd_test()
 {
@@ -60,7 +50,7 @@ void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::mess
     std::cout << "Returned: " << (output.output_script.run(script, tx, 0) ? "true" : "false") << "\n";
 }
 
-void recv_block(psql_ptr psql, std::error_code ec, libbitcoin::message::block block)
+void recv_block(blockchain_ptr psql, std::error_code ec, libbitcoin::message::block block)
 {
     if (ec)
     {
@@ -73,9 +63,31 @@ void recv_block(psql_ptr psql, std::error_code ec, libbitcoin::message::block bl
     //psql->fetch_output_by_hash(hash, index, std::bind(run_script_from_block, block.transactions[1], input, std::placeholders::_1, std::placeholders::_2));
 }
 
+void type_test()
+{
+    script coinbase;
+    coinbase.push_operation({opcode::special, {0x04, 0xd4, 0x6c, 0x49, 0x68, 0xbd, 0xe0, 0x28, 0x99, 0xd2, 0xaa, 0x09, 0x63, 0x36, 0x7c, 0x7a, 0x6c, 0xe3, 0x4e, 0xec, 0x33, 0x2b, 0x32, 0xe4, 0x2e, 0x5f, 0x34, 0x07, 0xe0, 0x52, 0xd6, 0x4a, 0xc6, 0x25, 0xda, 0x6f, 0x07, 0x18, 0xe7, 0xb3, 0x02, 0x14, 0x04, 0x34, 0xbd, 0x72, 0x57, 0x06, 0x95, 0x7c, 0x09, 0x2d, 0xb5, 0x38, 0x05, 0xb8, 0x21, 0xa8, 0x5b, 0x23, 0xa7, 0xac, 0x61, 0x72, 0x5b}});
+    coinbase.push_operation({opcode::checksig, {}});
+    BITCOIN_ASSERT(coinbase.type() == payment_type::pubkey);
+
+    script oldpay;
+    oldpay.push_operation({opcode::dup, {}});
+    oldpay.push_operation({opcode::hash160, {}});
+    oldpay.push_operation({opcode::special, {0x5b, 0x46, 0xec, 0x7a, 0x1a, 0xad, 0xaf, 0x2e, 0x73, 0x83, 0x29, 0x1b, 0x7e, 0x48, 0x68, 0xf0, 0x55, 0xb4, 0x04, 0xd3}});
+    oldpay.push_operation({opcode::equalverify, {}});
+    oldpay.push_operation({opcode::checksig, {}});
+    BITCOIN_ASSERT(oldpay.type() == payment_type::pubkey_hash);
+
+    script other;
+    oldpay.push_operation({opcode::equalverify, {}});
+    oldpay.push_operation({opcode::checksig, {}});
+    BITCOIN_ASSERT(other.type() == payment_type::non_standard);
+}
+
 int main()
 {
-    test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb();
+    type_test();
+    //test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb();
     //psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
     //psql->fetch_block_by_depth(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
     //sleep(6);

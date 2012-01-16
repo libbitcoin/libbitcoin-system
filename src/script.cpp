@@ -291,9 +291,41 @@ bool script::run_operation(operation op,
     return false;
 }
 
-transaction_type script::type() const
+bool is_pubkey_type(const operation_stack& ops)
 {
-    return transaction_type::normal;
+    return ops.size() == 2 &&
+        ops[0].code == opcode::special &&
+        ops[1].code == opcode::checksig;
+}
+bool is_pubkey_hash_type(const operation_stack& ops)
+{
+    return ops.size() == 5 &&
+        ops[0].code == opcode::dup &&
+        ops[1].code == opcode::hash160 &&
+        ops[2].code == opcode::special &&
+        ops[3].code == opcode::equalverify &&
+        ops[4].code == opcode::checksig;
+}
+bool is_script_hash_type(const operation_stack& ops)
+{
+    return false;
+}
+bool is_multisig_type(const operation_stack& ops)
+{
+    return false;
+}
+
+payment_type script::type() const
+{
+    if (is_pubkey_type(operations_))
+        return payment_type::pubkey;
+    if (is_pubkey_hash_type(operations_))
+        return payment_type::pubkey_hash;
+    if (is_script_hash_type(operations_))
+        return payment_type::script_hash;
+    if (is_multisig_type(operations_))
+        return payment_type::multisig;
+    return payment_type::non_standard;
 }
 
 bool script::matches_template(operation_stack templ) const
@@ -309,12 +341,10 @@ std::string script::pretty() const
         if (it != operations_.begin())
             ss << " ";
         const operation& op = *it;
-        if (op.data.size() == 0)
+        if (op.data.empty())
             ss << opcode_to_string(op.code);
         else
-        {
             ss << "[ " << pretty_hex(op.data) << " ]";
-        }
     }
     return ss.str();
 }
