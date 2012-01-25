@@ -11,9 +11,9 @@
 namespace libbitcoin {
 
 bdb_common::bdb_common(DbEnv* env, Db* db_blocks, Db* db_blocks_hash,
-    Db* db_txs, Db* db_spends)
+    Db* db_txs, Db* db_spends, Db* db_address)
   : env_(env), db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
-    db_txs_(db_txs), db_spends_(db_spends)
+    db_txs_(db_txs), db_spends_(db_spends), db_address_(db_address)
 {
 }
 
@@ -21,6 +21,7 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
 {
     Dbc* cursor;
     db_blocks_->cursor(txn->get(), &cursor, 0);
+    BITCOIN_ASSERT(cursor != nullptr);
     writable_data_type key, data;
     if (cursor->get(key.get(), data.get(), DB_LAST) == DB_NOTFOUND)
         return std::numeric_limits<uint32_t>::max();
@@ -133,6 +134,14 @@ bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
         if (!mark_spent_outputs(txn, input.previous_output, inpoint))
             return false;
     }
+    for (uint32_t output_index = 0; output_index < block_tx.outputs.size();
+        ++output_index)
+    {
+        const message::transaction_output& output =
+            block_tx.outputs[output_index];
+        if (!add_address(txn, output.output_script, {tx_hash, output_index}))
+            return false;
+    }
     return true;
 }
 
@@ -158,6 +167,23 @@ bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
     spend_value.set(create_spent_key(current_input));
     if (db_spends_->put(txn->get(), spent_key.get(), spend_value.get(),
             DB_NOOVERWRITE) != 0)
+        return false;
+    return true;
+}
+
+bool bdb_common::add_address(txn_guard_ptr txn,
+    const script& output_script, const message::output_point& outpoint)
+{
+    if (output_script.type() != payment_type::pubkey_hash)
+        return true;
+    BITCOIN_ASSERT(output_script.operations().size() == 5);
+    // DUP HASH <data>
+    const data_chunk& pubkey_hash = output_script.operations()[2].data;
+    readable_data_type address_key, output_value;
+    address_key.set(pubkey_hash);
+    output_value.set(create_spent_key(outpoint));
+    if (db_address_->put(txn->get(), address_key.get(),
+            output_value.get(), 0) != 0)
         return false;
     return true;
 }

@@ -3,7 +3,9 @@
 #include DB_CXX_HEADER
 
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
+#include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/data_helpers.hpp>
 
 #include "bdb_common.hpp"
@@ -54,6 +56,7 @@ bdb_blockchain::~bdb_blockchain()
     shutdown_database(db_blocks_);
     shutdown_database(db_txs_);
     shutdown_database(db_spends_);
+    shutdown_database(db_address_);
     shutdown_database(env_);
     // delete
     google::protobuf::ShutdownProtobufLibrary();
@@ -67,6 +70,7 @@ bool bdb_blockchain::setup(const std::string& prefix)
     handle.db_blocks_->truncate(nullptr, 0, 0);
     handle.db_txs_->truncate(nullptr, 0, 0);
     handle.db_spends_->truncate(nullptr, 0, 0);
+    handle.db_address_->truncate(nullptr, 0, 0);
     // Save genesis block
     txn_guard_ptr txn = std::make_shared<txn_guard>(handle.env_);
     if (!handle.common_->save_block(txn, 0, genesis_block()))
@@ -120,6 +124,7 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     db_blocks_hash_ = new Db(env_, 0);
     db_txs_ = new Db(env_, 0);
     db_spends_ = new Db(env_, 0);
+    db_address_ = new Db(env_, 0);
     if (db_blocks_->set_bt_compare(bt_compare_blocks) != 0)
     {
         log_fatal() << "Internal error setting BTREE comparison function";
@@ -133,10 +138,12 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     db_txs_->open(txn.get(), "transactions", "tx", DB_BTREE, db_flags, 0);
     db_spends_->open(txn.get(), "transactions", "spends",
         DB_BTREE, db_flags, 0);
+    db_address_->set_flags(DB_DUP);
+    db_address_->open(txn.get(), "address", "address", DB_BTREE, db_flags, 0);
     txn.commit();
 
     common_ = std::make_shared<bdb_common>(env_,
-        db_blocks_, db_blocks_hash_, db_txs_, db_spends_);
+        db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
 
     orphans_ = std::make_shared<orphans_pool>(10);
     bdb_chain_keeper_ptr chainkeeper = std::make_shared<bdb_chain_keeper>(
@@ -406,7 +413,38 @@ void bdb_blockchain::do_fetch_spend(const message::output_point& outpoint,
 void bdb_blockchain::fetch_outputs(const short_hash& pubkey_hash,
     fetch_handler_outputs handle_fetch)
 {
-    // TODO Unimplemented
+    strand()->post(
+        std::bind(&bdb_blockchain::do_fetch_outputs, shared_from_this(),
+            pubkey_hash, handle_fetch));
+}
+void bdb_blockchain::do_fetch_outputs(const short_hash& pubkey_hash,
+    fetch_handler_outputs handle_fetch)
+{
+    // Associated outputs
+    message::output_point_list assoc_outs;
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
+    Dbc* cursor;
+    db_address_->cursor(txn->get(), &cursor, 0);
+    BITCOIN_ASSERT(cursor != nullptr);
+    readable_data_type key;
+    key.set(pubkey_hash);
+    writable_data_type value;
+    int ret = cursor->get(key.get(), value.get(), DB_SET);
+    while (ret != DB_NOTFOUND)
+    {
+        message::output_point outpoint;
+        // We need a copy not a temporary
+        data_chunk raw_outpoint(value.data());
+        // Then read the value off
+        deserializer deserial(raw_outpoint);
+        outpoint.hash = deserial.read_hash();
+        outpoint.index = deserial.read_4_bytes();
+        assoc_outs.push_back(outpoint);
+        ret = cursor->get(key.get(), value.get(), DB_NEXT_DUP);
+    }
+    cursor->close();
+    txn->commit();
+    handle_fetch(std::error_code(), assoc_outs);
 }
 
 } // libbitcoin

@@ -121,9 +121,9 @@ void handle_store(const std::error_code& ec, block_info info,
     log_debug() << "added " << info.depth;
     if (info.depth == 170 - 1)
     {
-        log_debug() << "proc tx";
-        //tx.outputs[0].value += coin_price(1);
-        tx_pool->store(tx, handle_txpl);
+        //log_debug() << "proc tx";
+        ////tx.outputs[0].value += coin_price(1);
+        //tx_pool->store(tx, handle_txpl);
     }
     else if (info.depth == 20)
     {
@@ -221,11 +221,32 @@ void recv_loc(const std::error_code& ec, const message::block_locator& loc,
         std::bind(&ask_blocks, _1, _2, loc, chain, null_hash));
 }
 
+void show_outputs(const std::error_code& ec,
+    const message::output_point_list& outs)
+{
+    if (ec)
+    {
+        log_error() << ec.message();
+        return;
+    }
+    for (auto o: outs)
+    {
+        log_debug() << pretty_hex(o.hash) << " : " << o.index;
+    }
+}
+
 int main()
 {
-    bdb_blockchain::setup("database/");
+    //bdb_blockchain::setup("database/");
     log_debug() << "Setup finished";
     blockchain_ptr store(new bdb_blockchain("database/"));
+    store->fetch_outputs(short_hash{0x12, 0xab, 0x8d, 0xc5, 0x88, 
+                                    0xca, 0x9d, 0x57, 0x87, 0xdd,
+                                    0xe7, 0xeb, 0x29, 0x56, 0x9d,
+                                    0xa6, 0x3c, 0x3a, 0x23, 0x8c},
+                         show_outputs);
+    std::cin.get();
+    return 0;
     log_debug() << "Opened";
     store->fetch_block(0, show_block);
     store->fetch_block(

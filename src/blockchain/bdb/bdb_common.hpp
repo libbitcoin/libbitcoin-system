@@ -18,7 +18,7 @@ class bdb_common
 {
 public:
     bdb_common(DbEnv* env, Db* db_blocks, Db* db_blocks_hash,
-        Db* db_txs, Db* db_spends);
+        Db* db_txs, Db* db_spends, Db* db_address);
 
     uint32_t find_last_block_depth(txn_guard_ptr txn);
     bool is_output_spent(txn_guard_ptr txn,
@@ -49,6 +49,9 @@ private:
     bool mark_spent_outputs(txn_guard_ptr txn,
         const message::output_point& previous_output,
         const message::input_point& current_input);
+    // returns false only on database failure. It may or may not add an entry
+    bool add_address(txn_guard_ptr txn, const script& output_script,
+        const message::output_point& outpoint);
     bool rewrite_transaction(txn_guard_ptr txn, const hash_digest& tx_hash,
         const protobuf::Transaction& replace_proto_tx);
 
@@ -57,6 +60,7 @@ private:
     Db* db_blocks_hash_;
     Db* db_txs_;
     Db* db_spends_;
+    Db* db_address_;
 };
 
 typedef std::shared_ptr<bdb_common> bdb_common_ptr;

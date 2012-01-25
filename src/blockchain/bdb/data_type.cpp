@@ -24,6 +24,12 @@ void readable_data_type::set(const hash_digest& data)
     prepare();
 }
 
+void readable_data_type::set(const short_hash& data)
+{
+    extend_data(data_buffer_, data);
+    prepare();
+}
+
 void readable_data_type::set(const std::string& data)
 {
     extend_data(data_buffer_, data);

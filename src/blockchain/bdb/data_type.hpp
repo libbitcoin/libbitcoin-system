@@ -13,6 +13,7 @@ public:
     void set(uint32_t value);
     void set(const data_chunk& data);
     void set(const hash_digest& data);
+    void set(const short_hash& data);
     void set(const std::string& data);
 
     Dbt* get();

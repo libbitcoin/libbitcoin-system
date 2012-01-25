@@ -61,19 +61,22 @@ private:
     void do_fetch_block_depth(const hash_digest& block_hash,
         fetch_handler_block_depth handle_fetch);
     void do_fetch_last_depth(fetch_handler_last_depth handle_fetch);
+    void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
     void do_fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch);
     void do_fetch_transaction_index(const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch);
     void do_fetch_spend(const message::output_point& outpoint,
         fetch_handler_spend handle_fetch);
-    void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
+    void do_fetch_outputs(const short_hash& pubkey_hash,
+        fetch_handler_outputs handle_fetch);
 
     DbEnv* env_;
     Db* db_blocks_;
     Db* db_blocks_hash_;
     Db* db_txs_;
     Db* db_spends_;
+    Db* db_address_;
 
     bdb_common_ptr common_;
 

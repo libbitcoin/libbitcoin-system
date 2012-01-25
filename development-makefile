@@ -114,6 +114,14 @@ bin/tests/base58-test: obj/base58-test.o
 
 base58-test: bin/tests/base58-test
 
+obj/serial-test.o: tests/serial-test.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/serial-test: obj/serial-test.o
+	$(CXX) -o bin/tests/serial-test obj/serial-test.o $(LIBBITCOIN)
+
+serial-test: bin/tests/serial-test
+
 obj/big-number-test.o: tests/big-number-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
