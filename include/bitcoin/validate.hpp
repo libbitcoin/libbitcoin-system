@@ -78,8 +78,17 @@ protected:
     virtual uint32_t previous_block_bits() = 0;
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
     virtual uint64_t median_time_past() = 0;
+    // These have optional implementations that can be overriden
     virtual bool validate_inputs(const message::transaction& tx, 
-        size_t index_in_parent, uint64_t& value_in) = 0;
+        size_t index_in_parent, uint64_t& value_in);
+    virtual bool connect_input(size_t index_in_parent,
+        const message::transaction& current_tx,
+        size_t input_index, uint64_t& value_in);
+    virtual bool fetch_transaction(message::transaction& tx, 
+        size_t& previous_depth, const hash_digest& tx_hash) = 0;
+    virtual bool is_output_spent(
+        const message::output_point& previous_output,
+        size_t index_in_parent, size_t input_index) = 0;
 
 private:
     bool check_block();

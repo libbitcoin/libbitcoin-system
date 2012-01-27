@@ -572,5 +572,62 @@ bool validate_block::connect_block()
     return true;
 }
 
+bool validate_block::validate_inputs(const message::transaction& tx, 
+    size_t index_in_parent, uint64_t& value_in)
+{
+    BITCOIN_ASSERT(!is_coinbase(tx));
+    for (size_t input_index = 0; input_index < tx.inputs.size(); ++input_index)
+    {
+        if (!connect_input(index_in_parent, tx, input_index, value_in))
+            return false;
+    }
+    return true;
+}
+
+bool validate_block::connect_input(size_t index_in_parent,
+    const message::transaction& current_tx,
+    size_t input_index, uint64_t& value_in)
+{
+    // Lookup previous output
+    BITCOIN_ASSERT(input_index < current_tx.inputs.size());
+    const message::transaction_input& input = current_tx.inputs[input_index];
+    const message::output_point& previous_output = input.previous_output;
+    message::transaction previous_tx;
+    size_t previous_depth;
+    if (!fetch_transaction(previous_tx, previous_depth, previous_output.hash))
+        return false;
+    const message::transaction_output& previous_tx_out =
+        previous_tx.outputs[previous_output.index];
+    // Get output amount
+    uint64_t output_value = previous_tx_out.value;
+    if (output_value > max_money())
+        return false;
+    // Check coinbase maturity has been reached
+    if (is_coinbase(previous_tx))
+    {
+        uint32_t depth_difference = depth_ - previous_depth;
+        if (depth_difference < coinbase_maturity)
+            return false;
+    }
+    // Validate script
+    script output_script = previous_tx_out.output_script;
+    if (!output_script.run(input.input_script, current_tx, input_index))
+    {
+        log_error(log_domain::validation) << "Script failed evaluation";
+        return false;
+    }
+    // Search for double spends
+    //   This must be done in both chain AND orphan
+    // Searching chain when this tx is an orphan is redundant but
+    // it does not happen enough to care
+    if (is_output_spent(previous_output, index_in_parent, input_index))
+        return false;
+    // Increase value_in by this output's value
+    value_in += output_value;
+    if (value_in > max_money())
+        return false;
+    return true;
+}
+
 } // libbitcoin
 

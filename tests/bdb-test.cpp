@@ -237,16 +237,14 @@ void show_outputs(const std::error_code& ec,
 
 int main()
 {
-    //bdb_blockchain::setup("database/");
+    bdb_blockchain::setup("database/");
     log_debug() << "Setup finished";
     blockchain_ptr store(new bdb_blockchain("database/"));
-    store->fetch_outputs(short_hash{0x12, 0xab, 0x8d, 0xc5, 0x88, 
-                                    0xca, 0x9d, 0x57, 0x87, 0xdd,
-                                    0xe7, 0xeb, 0x29, 0x56, 0x9d,
-                                    0xa6, 0x3c, 0x3a, 0x23, 0x8c},
-                         show_outputs);
-    std::cin.get();
-    return 0;
+    //store->fetch_outputs(short_hash{0x12, 0xab, 0x8d, 0xc5, 0x88, 
+    //                                0xca, 0x9d, 0x57, 0x87, 0xdd,
+    //                                0xe7, 0xeb, 0x29, 0x56, 0x9d,
+    //                                0xa6, 0x3c, 0x3a, 0x23, 0x8c},
+    //                     show_outputs);
     log_debug() << "Opened";
     store->fetch_block(0, show_block);
     store->fetch_block(
