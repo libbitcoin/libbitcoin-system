@@ -44,6 +44,8 @@ void channel::start()
 }
 void channel::stop()
 {
+    if (killed_)
+        return;
     killed_ = true;
     timeout_->cancel();
     timeout_.reset();
@@ -53,6 +55,13 @@ void channel::stop()
 void channel::handle_timeout(const boost::system::error_code& ec)
 {
     if (ec == boost::asio::error::operation_aborted)
+        return;
+    else if (ec)
+    {
+        log_error(log_domain::network) << ec.message();
+        return;
+    }
+    else if (killed_)
         return;
     log_info(log_domain::network) << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
