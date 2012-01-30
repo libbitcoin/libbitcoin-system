@@ -24,6 +24,8 @@ std::string error_category_impl::message(int ev) const
             return "Resolving hostname failed";
         case error::network_unreachable:
             return "Unable to reach remote network";
+        case error::accept_failed:
+            return "Accept connection failed";
         case error::bad_stream:
             return "Bad stream";
         case error::channel_stopped:
