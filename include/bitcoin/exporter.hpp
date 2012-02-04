@@ -132,9 +132,7 @@ data_chunk create_raw_message(exporter_ptr saver, const Message& packet)
     packet_header.command = saver->command_name(packet);
     packet_header.payload_length = payload.size();
     if (saver->checksum_used(packet_header))
-    {
         packet_header.checksum = generate_sha256_checksum(payload);
-    }
     data_chunk raw_header = saver->save(packet_header);
     // Construct completed packet with header + payload
     data_chunk whole_message = raw_header;

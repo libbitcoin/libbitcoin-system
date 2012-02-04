@@ -30,6 +30,8 @@ channel::channel(socket_ptr socket, thread_core_ptr threaded,
         std::make_shared<inventory_subscriber_type>(strand_);
     block_subscriber_ = 
         std::make_shared<block_subscriber_type>(strand_);
+    raw_subscriber_ = 
+        std::make_shared<raw_subscriber_type>(strand_);
 }
 
 channel::~channel()
@@ -178,9 +180,13 @@ void channel::handle_read_payload(const message::header& header_msg,
     if (!export_->verify_checksum(header_msg, payload_stream))
     {
         log_warning(log_domain::network) << "Bad checksum!";
+        raw_subscriber_->relay(error::bad_stream,
+            std::string(), data_chunk());
         stop();
         return;
     }
+    raw_subscriber_->relay(std::error_code(),
+        header_msg.command, inbound_payload_);
 
     if (header_msg.command == "version")
     {
@@ -256,6 +262,40 @@ void channel::subscribe_block(receive_block_handler handle_receive)
 {
     generic_subscribe<message::block>(
         handle_receive, block_subscriber_);
+}
+void channel::subscribe_raw(receive_raw_handler handle_receive)
+{
+    if (killed_)
+        handle_receive(error::channel_stopped, std::string(), data_chunk());
+    else
+        raw_subscriber_->subscribe(handle_receive);
+}
+
+void channel::send_raw(const message::header& packet_header,
+    const data_chunk& payload, send_handler handle_send)
+{
+    if (killed_)
+        handle_send(error::channel_stopped);
+    else
+        strand_->post(std::bind(&channel::do_send_raw,
+            shared_from_this(), packet_header, payload, handle_send));
+}
+void channel::do_send_raw(const message::header& packet_header,
+    const data_chunk& payload, send_handler handle_send)
+{
+    data_chunk raw_header = export_->save(packet_header);
+    // Construct completed packet with header + payload
+    data_chunk whole_message = raw_header;
+    extend_data(whole_message, payload);
+    do_send_common(whole_message, handle_send);
+}
+void channel::do_send_common(const data_chunk& whole_message,
+    send_handler handle_send)
+{
+    shared_const_buffer buffer(whole_message);
+    async_write(*socket_, buffer,
+        std::bind(&channel::call_handle_send, shared_from_this(),
+            std::placeholders::_1, handle_send));
 }
 
 } // libbitcoin

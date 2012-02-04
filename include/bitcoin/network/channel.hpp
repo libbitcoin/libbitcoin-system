@@ -39,6 +39,8 @@ public:
         const message::inventory&)> receive_inventory_handler;
     typedef std::function<void (const std::error_code&,
         const message::block&)> receive_block_handler;
+    typedef std::function<void (const std::error_code&,
+        const std::string&, const data_chunk&)> receive_raw_handler;
 
     channel(socket_ptr socket, thread_core_ptr threaded, exporter_ptr saver);
     ~channel();
@@ -72,8 +74,9 @@ public:
     void subscribe_address(receive_address_handler handle_receive);
     void subscribe_inventory(receive_inventory_handler handle_receive);
     void subscribe_block(receive_block_handler handle_receive);
+    void subscribe_raw(receive_raw_handler handle_receive);
 
-    template<typename Message>
+    template <typename Message>
     void send(const Message& packet, send_handler handle_send)
     {
         if (killed_)
@@ -82,6 +85,8 @@ public:
             strand_->post(std::bind(&channel::do_send<Message>,
                 shared_from_this(), packet, handle_send));
     }
+    void send_raw(const message::header& packet_header,
+        const data_chunk& payload, send_handler handle_send);
 
 private:
     typedef subscriber<const std::error_code&, const message::version&>
@@ -94,8 +99,11 @@ private:
         inventory_subscriber_type;
     typedef subscriber<const std::error_code&, const message::block&>
         block_subscriber_type;
+    typedef subscriber<
+        const std::error_code&, const std::string&, const data_chunk&>
+            raw_subscriber_type;
 
-    template<typename Message, typename Callback, typename SubscriberPtr>
+    template <typename Message, typename Callback, typename SubscriberPtr>
     void generic_subscribe(Callback handle_message,
         SubscriberPtr message_subscribe)
     {
@@ -106,7 +114,7 @@ private:
             message_subscribe->subscribe(handle_message);
     }
 
-    template<typename Message>
+    template <typename Message>
     void do_send(const Message& packet, send_handler handle_send)
     {
         shared_const_buffer buffer(
@@ -115,6 +123,10 @@ private:
             std::bind(&channel::call_handle_send, shared_from_this(),
                 std::placeholders::_1, handle_send));
     }
+    void do_send_raw(const message::header& packet_header,
+        const data_chunk& payload, send_handler handle_send);
+    void do_send_common(const data_chunk& whole_message,
+        send_handler handle_send);
 
     void read_header();
     void read_checksum(const message::header& header_msg);
@@ -184,6 +196,7 @@ private:
     std::shared_ptr<address_subscriber_type> address_subscriber_;
     std::shared_ptr<inventory_subscriber_type> inventory_subscriber_;
     std::shared_ptr<block_subscriber_type> block_subscriber_;
+    std::shared_ptr<raw_subscriber_type> raw_subscriber_;
 };
 
 } // libbitcoin
