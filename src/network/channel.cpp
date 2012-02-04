@@ -127,7 +127,7 @@ void channel::handle_read_header(const boost::system::error_code& ec,
             data_chunk(inbound_header_.begin(), inbound_header_.end());
     BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
     message::header header_msg =
-            export_->header_from_network(header_stream);
+            export_->load_header(header_stream);
 
     if (!export_->verify_header(header_msg))
     {
@@ -185,7 +185,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     if (header_msg.command == "version")
     {
         if (!transport<message::version>(payload_stream,
-            &exporter::version_from_network, version_subscriber_))
+            &exporter::load_version, version_subscriber_))
         {
             return;
         }
@@ -197,7 +197,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "addr")
     {
         if (!transport<message::address>(payload_stream,
-            &exporter::address_from_network, address_subscriber_))
+            &exporter::load_address, address_subscriber_))
         {
             return;
         }
@@ -205,7 +205,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "inv")
     {
         if (!transport<message::inventory>(payload_stream,
-            &exporter::inventory_from_network, inventory_subscriber_))
+            &exporter::load_inventory, inventory_subscriber_))
         {
             return;
         }
@@ -213,7 +213,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     else if (header_msg.command == "block")
     {
         if (!transport<message::block>(payload_stream,
-            &exporter::block_from_network, block_subscriber_))
+            &exporter::load_block, block_subscriber_))
         {
             return;
         }
@@ -223,7 +223,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     reset_timeout();
 }
 
-void channel::pre_handle_send(const boost::system::error_code& ec,
+void channel::call_handle_send(const boost::system::error_code& ec,
     send_handler handle_send)
 {
     if (problems_check(ec))

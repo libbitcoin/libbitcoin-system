@@ -50,22 +50,22 @@ public:
     void stop();
 
     // List of bitcoin messages
-    // version
-    // verack
-    // addr
-    // inv
-    // getdata
-    // getblocks
-    // getheaders
-    // tx
-    // block
-    // headers
-    // getaddr
-    // checkorder [deprecated]
-    // submitorder [deprecated]
-    // reply [deprecated]
+    // version      sub, send
+    // verack       sub, send
+    // addr         sub
+    // inv          sub
+    // getdata      send
+    // getblocks    send
+    // getheaders   [unused]
+    // tx           send
+    // block        sub
+    // headers      [unused]
+    // getaddr      send
+    // checkorder   [deprecated]
+    // submitorder  [deprecated]
+    // reply        [deprecated]
     // ping
-    // alert
+    // alert        [not supported]
 
     void subscribe_version(receive_version_handler handle_receive);
     void subscribe_verack(receive_verack_handler handle_receive);
@@ -109,14 +109,10 @@ private:
     template<typename Message>
     void do_send(const Message& packet, send_handler handle_send)
     {
-        data_chunk payload = export_->to_network(packet),
-            header = export_->create_header(packet, payload);
-        // Construct completed packet with header + payload
-        data_chunk whole_message = header;
-        extend_data(whole_message, payload);
-        shared_const_buffer buffer(whole_message);
+        shared_const_buffer buffer(
+            create_raw_message(export_, packet));
         async_write(*socket_, buffer,
-            std::bind(&channel::pre_handle_send, shared_from_this(),
+            std::bind(&channel::call_handle_send, shared_from_this(),
                 std::placeholders::_1, handle_send));
     }
 
@@ -155,7 +151,7 @@ private:
 
     // Calls the send handler after a successful send, translating
     // the boost error_code to std::error_code
-    void pre_handle_send(const boost::system::error_code& ec,
+    void call_handle_send(const boost::system::error_code& ec,
         send_handler handle_send);
 
     void handle_timeout(const boost::system::error_code& ec);

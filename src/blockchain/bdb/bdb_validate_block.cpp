@@ -103,6 +103,10 @@ bool bdb_validate_block::is_output_spent(
     const message::output_point& previous_output,
     size_t index_in_parent, size_t input_index)
 {
+    // Search for double spends
+    //   This must be done in both chain AND orphan
+    // Searching chain when this tx is an orphan is redundant but
+    // it does not happen enough to care
     if (common_->is_output_spent(txn_, previous_output))
         return true;
     else if (orphan_is_spent(previous_output, index_in_parent, input_index))

@@ -16,7 +16,7 @@ hash_digest hash_transaction_impl(const message::transaction& transaction,
         uint32_t* hash_type_code)
 {
     satoshi_exporter translator;
-    data_chunk serialized_tx = translator.to_network(transaction);
+    data_chunk serialized_tx = translator.save(transaction);
     if (hash_type_code != nullptr)
         extend_data(serialized_tx, uncast_type(*hash_type_code));
     return generate_sha256_hash(serialized_tx);

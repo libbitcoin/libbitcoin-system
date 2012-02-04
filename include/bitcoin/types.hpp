@@ -45,7 +45,7 @@ typedef std::shared_ptr<tcp::resolver::query> query_ptr;
 typedef std::array<uint8_t, 32> hash_digest;
 typedef std::array<uint8_t, 20> short_hash;
 
-typedef unsigned char byte;
+typedef uint8_t byte;
 typedef std::vector<byte> data_chunk;
 
 // Make hash_digest and short_hash hashable for std::*map variants

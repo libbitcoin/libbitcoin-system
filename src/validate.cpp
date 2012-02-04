@@ -55,7 +55,7 @@ bool validate_transaction::basic_checks() const
     // Ummm...
     //if ((int64)nLockTime > INT_MAX)
 
-    size_t transaction_byte_size = exporter_->to_network(tx_).size();
+    size_t transaction_byte_size = exporter_->save(tx_).size();
     if (number_script_sig_operations(tx_) > (transaction_byte_size / 34) ||
         transaction_byte_size < 100)
     {
@@ -268,7 +268,7 @@ bool validate_transaction::check_transaction(const message::transaction& tx)
         return false;
 
     // Maybe not needed since we try to serialise block in CheckBlock()
-    //if (exporter_->to_network(tx, false).size() > max_block_size)
+    //if (exporter_->save(tx, false).size() > max_block_size)
     //    return false;
 
     // Check for negative or overflow output values
@@ -358,7 +358,7 @@ bool validate_block::check_block()
     // Size limits
     if (current_block_.transactions.empty() || 
         current_block_.transactions.size() > max_block_size ||
-        exporter_->to_network(current_block_).size() > max_block_size)
+        exporter_->save(current_block_).size() > max_block_size)
     {
         log_error(log_domain::validation) << "Size limits failed";
         return false;
@@ -617,9 +617,6 @@ bool validate_block::connect_input(size_t index_in_parent,
         return false;
     }
     // Search for double spends
-    //   This must be done in both chain AND orphan
-    // Searching chain when this tx is an orphan is redundant but
-    // it does not happen enough to care
     if (is_output_spent(previous_output, index_in_parent, input_index))
         return false;
     // Increase value_in by this output's value
