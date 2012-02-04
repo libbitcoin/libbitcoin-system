@@ -32,7 +32,7 @@ void ask_blocks2(const std::error_code& ec, channel_ptr node,
     if (ec)
         log_error() << ec.message();
     message::get_blocks packet;
-    packet.locator_start_hashes = loc;
+    packet.start_hashes = loc;
     packet.hash_stop = hash_stop;
     node->send(packet, std::bind(&handle_send_packet, _1));
 }
@@ -209,7 +209,7 @@ void ask_blocks(const std::error_code& ec, channel_ptr node,
     node->subscribe_block(std::bind(recv_blk, _1, _2, node, chain));
 
     message::get_blocks packet;
-    packet.locator_start_hashes = loc;
+    packet.start_hashes = loc;
     packet.hash_stop = hash_stop;
     node->send(packet, std::bind(&handle_send_packet, _1));
 }

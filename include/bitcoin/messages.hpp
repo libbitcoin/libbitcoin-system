@@ -73,7 +73,7 @@ struct get_address
 struct get_blocks
 {
     // 10 sequential hashes, then exponential samples until reaching genesis
-    block_locator locator_start_hashes;
+    block_locator start_hashes;
     hash_digest hash_stop;
 };
 
@@ -123,9 +123,11 @@ struct block
     transaction_list transactions;
 };
 
+typedef std::vector<network_address> network_address_list;
+
 struct address
 {
-    std::vector<network_address> addresses;
+    network_address_list addresses;
 };
 
 struct get_data
