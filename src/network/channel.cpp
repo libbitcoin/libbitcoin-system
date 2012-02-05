@@ -28,6 +28,8 @@ channel::channel(socket_ptr socket, thread_core_ptr threaded,
         std::make_shared<address_subscriber_type>(strand_);
     inventory_subscriber_ =
         std::make_shared<inventory_subscriber_type>(strand_);
+    transaction_subscriber_ = 
+        std::make_shared<transaction_subscriber_type>(strand_);
     block_subscriber_ = 
         std::make_shared<block_subscriber_type>(strand_);
     raw_subscriber_ = 
@@ -216,6 +218,14 @@ void channel::handle_read_payload(const message::header& header_msg,
             return;
         }
     }
+    else if (header_msg.command == "tx")
+    {
+        if (!transport<message::transaction>(payload_stream,
+            &exporter::load_transaction, transaction_subscriber_))
+        {
+            return;
+        }
+    }
     else if (header_msg.command == "block")
     {
         if (!transport<message::block>(payload_stream,
@@ -257,6 +267,11 @@ void channel::subscribe_inventory(receive_inventory_handler handle_receive)
 {
     generic_subscribe<message::inventory>(
         handle_receive, inventory_subscriber_);
+}
+void channel::subscribe_transaction(receive_transaction_handler handle_receive)
+{
+    generic_subscribe<message::transaction>(
+        handle_receive, transaction_subscriber_);
 }
 void channel::subscribe_block(receive_block_handler handle_receive)
 {

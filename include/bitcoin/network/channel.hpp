@@ -38,6 +38,8 @@ public:
     typedef std::function<void (const std::error_code&,
         const message::inventory&)> receive_inventory_handler;
     typedef std::function<void (const std::error_code&,
+        const message::transaction&)> receive_transaction_handler;
+    typedef std::function<void (const std::error_code&,
         const message::block&)> receive_block_handler;
     typedef std::function<void (const std::error_code&,
         const message::header&, const data_chunk&)> receive_raw_handler;
@@ -59,14 +61,14 @@ public:
     // getdata      send
     // getblocks    send
     // getheaders   [unused]
-    // tx           send
+    // tx           sub, send
     // block        sub
     // headers      [unused]
     // getaddr      send
     // checkorder   [deprecated]
     // submitorder  [deprecated]
     // reply        [deprecated]
-    // ping
+    // ping         [internal]
     // alert        [not supported]
 
     template <typename Message>
@@ -85,6 +87,7 @@ public:
     void subscribe_verack(receive_verack_handler handle_receive);
     void subscribe_address(receive_address_handler handle_receive);
     void subscribe_inventory(receive_inventory_handler handle_receive);
+    void subscribe_transaction(receive_transaction_handler handle_receive);
     void subscribe_block(receive_block_handler handle_receive);
     void subscribe_raw(receive_raw_handler handle_receive);
 
@@ -97,6 +100,8 @@ private:
         address_subscriber_type;
     typedef subscriber<const std::error_code&, const message::inventory&>
         inventory_subscriber_type;
+    typedef subscriber<const std::error_code&, const message::transaction&>
+        transaction_subscriber_type;
     typedef subscriber<const std::error_code&, const message::block&>
         block_subscriber_type;
     typedef subscriber<const std::error_code&,
@@ -194,6 +199,7 @@ private:
     std::shared_ptr<verack_subscriber_type> verack_subscriber_;
     std::shared_ptr<address_subscriber_type> address_subscriber_;
     std::shared_ptr<inventory_subscriber_type> inventory_subscriber_;
+    std::shared_ptr<transaction_subscriber_type> transaction_subscriber_;
     std::shared_ptr<block_subscriber_type> block_subscriber_;
     std::shared_ptr<raw_subscriber_type> raw_subscriber_;
 };
