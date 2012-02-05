@@ -40,7 +40,7 @@ public:
     typedef std::function<void (const std::error_code&,
         const message::block&)> receive_block_handler;
     typedef std::function<void (const std::error_code&,
-        const std::string&, const data_chunk&)> receive_raw_handler;
+        const message::header&, const data_chunk&)> receive_raw_handler;
 
     channel(socket_ptr socket, thread_core_ptr threaded, exporter_ptr saver);
     ~channel();
@@ -99,9 +99,8 @@ private:
         inventory_subscriber_type;
     typedef subscriber<const std::error_code&, const message::block&>
         block_subscriber_type;
-    typedef subscriber<
-        const std::error_code&, const std::string&, const data_chunk&>
-            raw_subscriber_type;
+    typedef subscriber<const std::error_code&,
+        const message::header&, const data_chunk&> raw_subscriber_type;
 
     template <typename Message>
     void do_send(const Message& packet, send_handler handle_send)

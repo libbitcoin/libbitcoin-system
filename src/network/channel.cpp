@@ -181,12 +181,12 @@ void channel::handle_read_payload(const message::header& header_msg,
     {
         log_warning(log_domain::network) << "Bad checksum!";
         raw_subscriber_->relay(error::bad_stream,
-            std::string(), data_chunk());
+            message::header(), data_chunk());
         stop();
         return;
     }
     raw_subscriber_->relay(std::error_code(),
-        header_msg.command, inbound_payload_);
+        header_msg, inbound_payload_);
 
     if (header_msg.command == "version")
     {
@@ -266,7 +266,8 @@ void channel::subscribe_block(receive_block_handler handle_receive)
 void channel::subscribe_raw(receive_raw_handler handle_receive)
 {
     if (stopped_)
-        handle_receive(error::channel_stopped, std::string(), data_chunk());
+        handle_receive(error::channel_stopped,
+            message::header(), data_chunk());
     else
         raw_subscriber_->subscribe(handle_receive);
 }
