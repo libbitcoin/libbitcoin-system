@@ -122,6 +122,14 @@ bin/tests/serial-test: obj/serial-test.o
 
 serial-test: bin/tests/serial-test
 
+obj/echo.o: tests/echo.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/echo: obj/echo.o
+	$(CXX) -o bin/tests/echo obj/echo.o $(LIBBITCOIN)
+
+echo: bin/tests/echo
+
 obj/big-number-test.o: tests/big-number-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
