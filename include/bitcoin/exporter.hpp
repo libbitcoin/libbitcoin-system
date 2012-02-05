@@ -49,13 +49,11 @@ public:
 
     // Utilities
     virtual message::header load_header(const data_chunk& stream) const = 0;
-
     virtual bool verify_header(const message::header& header_msg) const = 0;
 
-    virtual bool checksum_used(const message::header& header_msg) const = 0;
-
-    virtual uint32_t checksum_from_network(const data_chunk& stream) const = 0;
-
+    virtual bool is_checksum_used(
+        const message::header& header_msg) const = 0;
+    virtual uint32_t load_checksum(const data_chunk& stream) const = 0;
     virtual bool verify_checksum(const message::header& header_msg,
         const data_chunk& stream) const = 0;
 
@@ -107,9 +105,8 @@ public:
     message::header load_header(const data_chunk& stream) const;
     bool verify_header(const message::header& header_msg) const;
 
-    bool checksum_used(const message::header& header_msg) const;
-    uint32_t checksum_from_network(const data_chunk& stream) const;
-
+    bool is_checksum_used(const message::header& header_msg) const;
+    uint32_t load_checksum(const data_chunk& stream) const;
     bool verify_checksum(const message::header& header_msg,
         const data_chunk& stream) const;
 
@@ -131,7 +128,7 @@ data_chunk create_raw_message(exporter_ptr saver, const Message& packet)
     packet_header.magic = magic_value;
     packet_header.command = saver->command_name(packet);
     packet_header.payload_length = payload.size();
-    if (saver->checksum_used(packet_header))
+    if (saver->is_checksum_used(packet_header))
         packet_header.checksum = generate_sha256_checksum(payload);
     data_chunk raw_header = saver->save(packet_header);
     // Construct completed packet with header + payload

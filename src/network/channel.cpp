@@ -15,7 +15,7 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
 channel::channel(socket_ptr socket, thread_core_ptr threaded,
     exporter_ptr saver)
-  : killed_(false), socket_(socket), export_(saver), threaded_(threaded)
+  : stopped_(false), socket_(socket), export_(saver), threaded_(threaded)
 {
     strand_ = threaded_->create_strand();
     timeout_ = std::make_shared<deadline_timer>(*threaded_->service());
@@ -46,9 +46,9 @@ void channel::start()
 }
 void channel::stop()
 {
-    if (killed_)
+    if (stopped_)
         return;
-    killed_ = true;
+    stopped_ = true;
     timeout_->cancel();
     timeout_.reset();
     socket_.reset();
@@ -63,7 +63,7 @@ void channel::handle_timeout(const boost::system::error_code& ec)
         log_error(log_domain::network) << ec.message();
         return;
     }
-    else if (killed_)
+    else if (stopped_)
         return;
     log_info(log_domain::network) << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
@@ -89,7 +89,7 @@ void channel::reset_timeout()
 
 bool channel::problems_check(const boost::system::error_code& ec)
 {
-    if (killed_)
+    if (stopped_)
         return true;
     else if (!ec)
         return false;
@@ -140,7 +140,7 @@ void channel::handle_read_header(const boost::system::error_code& ec,
 
     log_info(log_domain::network) << "r: " << header_msg.command
             << " (" << header_msg.payload_length << " bytes)";
-    if (export_->checksum_used(header_msg))
+    if (export_->is_checksum_used(header_msg))
     {
         // Read checksum
         read_checksum(header_msg);
@@ -163,7 +163,7 @@ void channel::handle_read_checksum(message::header& header_msg,
             inbound_checksum_.begin(), inbound_checksum_.end());
     BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
     //header_msg.checksum = cast_stream<uint32_t>(checksum_stream);
-    header_msg.checksum = export_->checksum_from_network(checksum_stream);
+    header_msg.checksum = export_->load_checksum(checksum_stream);
     read_payload(header_msg);
     reset_timeout();
 }
@@ -265,7 +265,7 @@ void channel::subscribe_block(receive_block_handler handle_receive)
 }
 void channel::subscribe_raw(receive_raw_handler handle_receive)
 {
-    if (killed_)
+    if (stopped_)
         handle_receive(error::channel_stopped, std::string(), data_chunk());
     else
         raw_subscriber_->subscribe(handle_receive);
@@ -274,7 +274,7 @@ void channel::subscribe_raw(receive_raw_handler handle_receive)
 void channel::send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
-    if (killed_)
+    if (stopped_)
         handle_send(error::channel_stopped);
     else
         strand_->post(std::bind(&channel::do_send_raw,

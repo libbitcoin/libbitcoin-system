@@ -69,17 +69,10 @@ public:
     // ping
     // alert        [not supported]
 
-    void subscribe_version(receive_version_handler handle_receive);
-    void subscribe_verack(receive_verack_handler handle_receive);
-    void subscribe_address(receive_address_handler handle_receive);
-    void subscribe_inventory(receive_inventory_handler handle_receive);
-    void subscribe_block(receive_block_handler handle_receive);
-    void subscribe_raw(receive_raw_handler handle_receive);
-
     template <typename Message>
     void send(const Message& packet, send_handler handle_send)
     {
-        if (killed_)
+        if (stopped_)
             handle_send(error::channel_stopped);
         else
             strand_->post(std::bind(&channel::do_send<Message>,
@@ -87,6 +80,13 @@ public:
     }
     void send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
+
+    void subscribe_version(receive_version_handler handle_receive);
+    void subscribe_verack(receive_verack_handler handle_receive);
+    void subscribe_address(receive_address_handler handle_receive);
+    void subscribe_inventory(receive_inventory_handler handle_receive);
+    void subscribe_block(receive_block_handler handle_receive);
+    void subscribe_raw(receive_raw_handler handle_receive);
 
 private:
     typedef subscriber<const std::error_code&, const message::version&>
@@ -103,17 +103,6 @@ private:
         const std::error_code&, const std::string&, const data_chunk&>
             raw_subscriber_type;
 
-    template <typename Message, typename Callback, typename SubscriberPtr>
-    void generic_subscribe(Callback handle_message,
-        SubscriberPtr message_subscribe)
-    {
-        // Subscribing must be immediate. We cannot switch thread contexts
-        if (killed_)
-            handle_message(error::channel_stopped, Message());
-        else
-            message_subscribe->subscribe(handle_message);
-    }
-
     template <typename Message>
     void do_send(const Message& packet, send_handler handle_send)
     {
@@ -127,6 +116,17 @@ private:
         const data_chunk& payload, send_handler handle_send);
     void do_send_common(const data_chunk& whole_message,
         send_handler handle_send);
+
+    template <typename Message, typename Callback, typename SubscriberPtr>
+    void generic_subscribe(Callback handle_message,
+        SubscriberPtr message_subscribe)
+    {
+        // Subscribing must be immediate. We cannot switch thread contexts
+        if (stopped_)
+            handle_message(error::channel_stopped, Message());
+        else
+            message_subscribe->subscribe(handle_message);
+    }
 
     void read_header();
     void read_checksum(const message::header& header_msg);
@@ -171,7 +171,7 @@ private:
 
     bool problems_check(const boost::system::error_code& ec);
 
-    std::atomic<bool> killed_;
+    std::atomic<bool> stopped_;
 
     socket_ptr socket_;
     network_ptr network_;

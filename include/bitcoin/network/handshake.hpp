@@ -30,7 +30,7 @@ public:
         uint16_t port, network::connect_handler handle_connect);
     void start(channel_ptr node, handshake_handler handle_handshake);
 
-    void discover_external_ip(discover_ip_handler handler_discover);
+    void discover_external_ip(discover_ip_handler handle_discover);
     void fetch_network_address(fetch_network_address_handler handle_fetch);
     void set_port(uint16_t port, setter_handler handle_set);
     void set_user_agent(const std::string& user_agent,
