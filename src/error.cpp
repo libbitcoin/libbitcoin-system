@@ -24,6 +24,10 @@ std::string error_category_impl::message(int ev) const
             return "Resolving hostname failed";
         case error::network_unreachable:
             return "Unable to reach remote network";
+        case error::address_in_use:
+            return "Address already in use";
+        case error::listen_failed:
+            return "Listen incoming connections failed";
         case error::accept_failed:
             return "Accept connection failed";
         case error::bad_stream:

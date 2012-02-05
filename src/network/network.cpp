@@ -13,21 +13,16 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-acceptor::acceptor(thread_core_ptr threaded, uint16_t port)
-  : threaded_(threaded), tcp_acceptor_(*threaded->service())
+acceptor::acceptor(thread_core_ptr threaded,
+    tcp_acceptor_ptr tcp_accept, exporter_ptr saver)
+  : threaded_(threaded), tcp_accept_(tcp_accept), export_(saver)
 {
-    tcp::endpoint endpoint(tcp::v4(), port);
-    tcp_acceptor_.open(endpoint.protocol());
-    tcp_acceptor_.set_option(tcp::acceptor::reuse_address(true));
-    tcp_acceptor_.bind(endpoint);
-    tcp_acceptor_.listen(boost::asio::socket_base::max_connections);
-    export_ = std::make_shared<satoshi_exporter>();
 }
 void acceptor::accept(accept_handler handle_accept)
 {
     socket_ptr socket =
         std::make_shared<tcp::socket>(*threaded_->service());
-    tcp_acceptor_.async_accept(*socket,
+    tcp_accept_->async_accept(*socket,
         std::bind(&acceptor::call_handle_accept, shared_from_this(), 
             _1, socket, handle_accept));
 }
@@ -95,32 +90,46 @@ void network::connect(const std::string& hostname, uint16_t port,
             _1, _2, handle_connect, resolver, query));
 }
 
+// I personally don't like how exceptions mess with the program flow
+bool listen_error(const boost::system::error_code& ec,
+    network::listen_handler handle_listen)
+{
+    if (ec == boost::system::errc::address_in_use)
+    {
+        handle_listen(error::address_in_use, nullptr);
+        return true;
+    }
+    else if (ec)
+    {
+        handle_listen(error::listen_failed, nullptr);
+        return true;
+    }
+    return false;
+}
 void network::listen(uint16_t port, listen_handler handle_listen)
 {
-    acceptor_ptr accept = std::make_shared<acceptor>(threaded_, port);
+    tcp::endpoint endpoint(tcp::v4(), port);
+    acceptor::tcp_acceptor_ptr tcp_accept =
+        std::make_shared<tcp::acceptor>(*threaded_->service());
+    // Need to check error codes for functions
+    boost::system::error_code ec;
+    tcp_accept->open(endpoint.protocol(), ec);
+    if (listen_error(ec, handle_listen))
+        return;
+    tcp_accept->set_option(tcp::acceptor::reuse_address(true), ec);
+    if (listen_error(ec, handle_listen))
+        return;
+    tcp_accept->bind(endpoint, ec);
+    if (listen_error(ec, handle_listen))
+        return;
+    tcp_accept->listen(boost::asio::socket_base::max_connections, ec);
+    if (listen_error(ec, handle_listen))
+        return;
+
+    acceptor_ptr accept =
+        std::make_shared<acceptor>(threaded_, tcp_accept, export_);
     handle_listen(std::error_code(), accept);
 }
-
-//void network::handle_accept(const boost::system::error_code& ec,
-//    socket_ptr socket, acceptor_ptr acceptor,
-//    accept_handler handle_accept)
-//{
-//    tcp::endpoint remote_endpoint = socket->remote_endpoint();
-//    log_debug() << "New incoming connection from "
-//            << remote_endpoint.address().to_string();
-//    //channel_handle chanid = create_channel(socket);
-//    //strand()->post(
-//    //    [&listeners_, chanid]
-//    //    {
-//    //        for (connect_handler handle_connect: listeners_)
-//    //            handle_connect(std::error_code(), chanid);
-//    //        listeners_.clear();
-//    //    });
-//    //socket.reset(new tcp::socket(*service()));
-//    //acceptor_->async_accept(*socket,
-//    //        std::bind(&network::handle_accept, shared_from_this(), 
-//    //            socket));
-//}
 
 } // libbitcoin
 

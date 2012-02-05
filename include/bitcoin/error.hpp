@@ -16,6 +16,8 @@ enum class error
     // network errors
     resolve_failed,
     network_unreachable,
+    address_in_use,
+    listen_failed,
     accept_failed,
     bad_stream,
     channel_stopped

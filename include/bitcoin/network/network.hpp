@@ -19,10 +19,13 @@ class acceptor
   : public std::enable_shared_from_this<acceptor>
 {
 public:
+    typedef std::shared_ptr<tcp::acceptor> tcp_acceptor_ptr;
+
     typedef std::function<
         void (const std::error_code&, channel_ptr)> accept_handler;
 
-    acceptor(thread_core_ptr threaded, uint16_t port);
+    acceptor(thread_core_ptr threaded,
+        tcp_acceptor_ptr tcp_accept, exporter_ptr saver);
     void accept(accept_handler handle_accept);
 
 private:
@@ -30,7 +33,7 @@ private:
         socket_ptr socket, accept_handler handle_accept);
 
     thread_core_ptr threaded_;
-    tcp::acceptor tcp_acceptor_;
+    tcp_acceptor_ptr tcp_accept_;
     exporter_ptr export_;
 };
 
