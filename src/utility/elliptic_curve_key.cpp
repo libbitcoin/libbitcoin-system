@@ -13,11 +13,21 @@ elliptic_curve_key::elliptic_curve_key()
   : key_(nullptr)
 {
 }
-
 elliptic_curve_key::~elliptic_curve_key()
 {
     if (key_ != nullptr)
         EC_KEY_free(key_);
+}
+
+elliptic_curve_key::elliptic_curve_key(const elliptic_curve_key& other)
+{
+    key_ = EC_KEY_dup(other.key_);
+}
+elliptic_curve_key& elliptic_curve_key::operator=(
+    const elliptic_curve_key& other)
+{
+    EC_KEY_copy(key_, other.key_);
+    return *this;
 }
 
 bool elliptic_curve_key::set_public_key(const data_chunk& pubkey)
