@@ -7,6 +7,8 @@
 
 namespace libbitcoin {
 
+constexpr uint32_t protocol_version = 60000;
+
 constexpr uint64_t block_reward = 50;
 // 210000 ~ 4 years / 10 minutes
 constexpr uint64_t reward_interval = 210000;

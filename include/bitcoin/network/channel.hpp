@@ -31,16 +31,31 @@ public:
 
     typedef std::function<void (const std::error_code&, 
         const message::version&)> receive_version_handler;
+
     typedef std::function<void (const std::error_code&,
         const message::verack&)> receive_verack_handler;
+
     typedef std::function<void (const std::error_code&,
         const message::address&)> receive_address_handler;
+
+    typedef std::function<void (const std::error_code&,
+        const message::get_address&)> receive_get_address_handler;
+
     typedef std::function<void (const std::error_code&,
         const message::inventory&)> receive_inventory_handler;
+
+    typedef std::function<void (const std::error_code&,
+        const message::get_data&)> receive_get_data_handler;
+
+    typedef std::function<void (const std::error_code&,
+        const message::get_blocks&)> receive_get_blocks_handler;
+
     typedef std::function<void (const std::error_code&,
         const message::transaction&)> receive_transaction_handler;
+
     typedef std::function<void (const std::error_code&,
         const message::block&)> receive_block_handler;
+
     typedef std::function<void (const std::error_code&,
         const message::header&, const data_chunk&)> receive_raw_handler;
 
@@ -54,17 +69,17 @@ public:
     void stop();
 
     // List of bitcoin messages
-    // version      sub, send
-    // verack       sub, send
-    // addr         sub
-    // inv          sub
-    // getdata      send
-    // getblocks    send
+    // version
+    // verack
+    // addr
+    // getaddr
+    // inv
+    // getdata
+    // getblocks
+    // tx
+    // block
     // getheaders   [unused]
-    // tx           sub, send
-    // block        sub
     // headers      [unused]
-    // getaddr      send
     // checkorder   [deprecated]
     // submitorder  [deprecated]
     // reply        [deprecated]
@@ -86,7 +101,10 @@ public:
     void subscribe_version(receive_version_handler handle_receive);
     void subscribe_verack(receive_verack_handler handle_receive);
     void subscribe_address(receive_address_handler handle_receive);
+    void subscribe_get_address(receive_get_address_handler handle_receive);
     void subscribe_inventory(receive_inventory_handler handle_receive);
+    void subscribe_get_data(receive_get_data_handler handle_receive);
+    void subscribe_get_blocks(receive_get_blocks_handler handle_receive);
     void subscribe_transaction(receive_transaction_handler handle_receive);
     void subscribe_block(receive_block_handler handle_receive);
     void subscribe_raw(receive_raw_handler handle_receive);
@@ -98,8 +116,14 @@ private:
         verack_subscriber_type;
     typedef subscriber<const std::error_code&, const message::address&>
         address_subscriber_type;
+    typedef subscriber<const std::error_code&, const message::get_address&>
+        get_address_subscriber_type;
     typedef subscriber<const std::error_code&, const message::inventory&>
         inventory_subscriber_type;
+    typedef subscriber<const std::error_code&, const message::get_data&>
+        get_data_subscriber_type;
+    typedef subscriber<const std::error_code&, const message::get_blocks&>
+        get_blocks_subscriber_type;
     typedef subscriber<const std::error_code&, const message::transaction&>
         transaction_subscriber_type;
     typedef subscriber<const std::error_code&, const message::block&>
@@ -198,7 +222,10 @@ private:
     std::shared_ptr<version_subscriber_type> version_subscriber_;
     std::shared_ptr<verack_subscriber_type> verack_subscriber_;
     std::shared_ptr<address_subscriber_type> address_subscriber_;
+    std::shared_ptr<get_address_subscriber_type> get_address_subscriber_;
     std::shared_ptr<inventory_subscriber_type> inventory_subscriber_;
+    std::shared_ptr<get_data_subscriber_type> get_data_subscriber_;
+    std::shared_ptr<get_blocks_subscriber_type> get_blocks_subscriber_;
     std::shared_ptr<transaction_subscriber_type> transaction_subscriber_;
     std::shared_ptr<block_subscriber_type> block_subscriber_;
     std::shared_ptr<raw_subscriber_type> raw_subscriber_;

@@ -133,7 +133,7 @@ uint64_t deserializer::read_8_bytes()
     return read_data_impl<uint64_t>(begin_, end_);
 }
 
-uint64_t deserializer::read_var_uint()
+uint64_t deserializer::read_variable_uint()
 {
     uint8_t length = read_byte();
     uint64_t value = 0;
@@ -205,7 +205,7 @@ std::string deserializer::read_fixed_string(size_t len)
 
 std::string deserializer::read_string()
 {
-    uint64_t string_size = read_var_uint();
+    uint64_t string_size = read_variable_uint();
     return read_fixed_string(string_size);
 }
 

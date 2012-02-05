@@ -218,6 +218,22 @@ void channel::handle_read_payload(const message::header& header_msg,
             return;
         }
     }
+    else if (header_msg.command == "getdata")
+    {
+        if (!transport<message::get_data>(payload_stream,
+            &exporter::load_get_data, get_data_subscriber_))
+        {
+            return;
+        }
+    }
+    else if (header_msg.command == "getblocks")
+    {
+        if (!transport<message::get_blocks>(payload_stream,
+            &exporter::load_get_blocks, get_blocks_subscriber_))
+        {
+            return;
+        }
+    }
     else if (header_msg.command == "tx")
     {
         if (!transport<message::transaction>(payload_stream,
@@ -230,6 +246,14 @@ void channel::handle_read_payload(const message::header& header_msg,
     {
         if (!transport<message::block>(payload_stream,
             &exporter::load_block, block_subscriber_))
+        {
+            return;
+        }
+    }
+    else if (header_msg.command == "getaddr")
+    {
+        if (!transport<message::get_address>(payload_stream,
+            &exporter::load_get_address, get_address_subscriber_))
         {
             return;
         }
@@ -268,6 +292,16 @@ void channel::subscribe_inventory(receive_inventory_handler handle_receive)
     generic_subscribe<message::inventory>(
         handle_receive, inventory_subscriber_);
 }
+void channel::subscribe_get_data(receive_get_data_handler handle_receive)
+{
+    generic_subscribe<message::get_data>(
+        handle_receive, get_data_subscriber_);
+}
+void channel::subscribe_get_blocks(receive_get_blocks_handler handle_receive)
+{
+    generic_subscribe<message::get_blocks>(
+        handle_receive, get_blocks_subscriber_);
+}
 void channel::subscribe_transaction(receive_transaction_handler handle_receive)
 {
     generic_subscribe<message::transaction>(
@@ -277,6 +311,11 @@ void channel::subscribe_block(receive_block_handler handle_receive)
 {
     generic_subscribe<message::block>(
         handle_receive, block_subscriber_);
+}
+void channel::subscribe_get_address(receive_get_address_handler handle_receive)
+{
+    generic_subscribe<message::get_address>(
+        handle_receive, get_address_subscriber_);
 }
 void channel::subscribe_raw(receive_raw_handler handle_receive)
 {

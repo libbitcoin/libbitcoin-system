@@ -18,7 +18,7 @@ handshake::handshake()
     threaded_ = std::make_shared<thread_core>();
     strand_ = threaded_->create_strand();
     // Setup template version packet with defaults
-    template_version_.version = 60000;
+    template_version_.version = protocol_version;
     template_version_.services = 1;
     // non-constant field
     //template_version_.timestamp = time(NULL);

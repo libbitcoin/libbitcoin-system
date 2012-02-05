@@ -19,9 +19,17 @@ const char* satoshi_exporter::command_name(const message::verack&) const
 {
     return "verack";
 }
+const char* satoshi_exporter::command_name(const message::address&) const
+{
+    return "addr";
+}
 const char* satoshi_exporter::command_name(const message::get_address&) const
 {
     return "getaddr";
+}
+const char* satoshi_exporter::command_name(const message::inventory&) const
+{
+    return "inv";
 }
 const char* satoshi_exporter::command_name(const message::get_data&) const
 {
@@ -52,18 +60,18 @@ data_chunk satoshi_exporter::save(
     return serial.data();
 }
 
-data_chunk satoshi_exporter::save(const message::version& version) const
+data_chunk satoshi_exporter::save(const message::version& packet) const
 {
-    serializer payload;
-    payload.write_4_bytes(version.version);
-    payload.write_8_bytes(version.services);
-    payload.write_8_bytes(version.timestamp);
-    payload.write_network_address(version.address_me);
-    payload.write_network_address(version.address_you);
-    payload.write_8_bytes(version.nonce);
-    payload.write_string(version.user_agent);
-    payload.write_4_bytes(version.start_height);
-    return payload.data();
+    serializer serial;
+    serial.write_4_bytes(packet.version);
+    serial.write_8_bytes(packet.services);
+    serial.write_8_bytes(packet.timestamp);
+    serial.write_network_address(packet.address_me);
+    serial.write_network_address(packet.address_you);
+    serial.write_8_bytes(packet.nonce);
+    serial.write_string(packet.user_agent);
+    serial.write_4_bytes(packet.start_height);
+    return serial.data();
 }
 
 data_chunk satoshi_exporter::save(const message::verack&) const
@@ -71,83 +79,128 @@ data_chunk satoshi_exporter::save(const message::verack&) const
     return data_chunk();
 }
 
+data_chunk satoshi_exporter::save(const message::address& packet) const
+{
+    serializer serial;
+    serial.write_variable_uint(packet.addresses.size());
+    for (const message::network_address& net_address: packet.addresses)
+    {
+        serial.write_4_bytes(net_address.timestamp);
+        serial.write_network_address(net_address);
+    }
+    return serial.data();
+}
+
 data_chunk satoshi_exporter::save(const message::get_address&) const
 {
     return data_chunk();
 }
 
+uint32_t inventory_type_to_number(message::inventory_type inv_type)
+{
+    switch (inv_type)
+    {
+        case message::inventory_type::error:
+        case message::inventory_type::none:
+        default:
+            return 0;
+
+        case message::inventory_type::transaction:
+            return 1;
+
+        case message::inventory_type::block:
+            return 2;
+    }
+}
+
+template <typename Message>
+void save_inventory_impl(serializer& serial, const Message& packet)
+{
+    serial.write_variable_uint(packet.inventories.size());
+    for (const message::inventory_vector inv: packet.inventories)
+    {
+        uint32_t raw_type = inventory_type_to_number(inv.type);
+        serial.write_4_bytes(raw_type);
+        serial.write_hash(inv.hash);
+    }
+}
+
+data_chunk satoshi_exporter::save(const message::inventory& packet) const
+{
+    serializer serial;
+    save_inventory_impl(serial, packet);
+    return serial.data();
+}
+
+data_chunk satoshi_exporter::save(const message::get_data& packet) const
+{
+    serializer serial;
+    save_inventory_impl(serial, packet);
+    return serial.data();
+}
+
 data_chunk satoshi_exporter::save(
-    const message::get_blocks& getblocks) const
+    const message::get_blocks& packet) const
 {
-    serializer payload;
-    payload.write_4_bytes(31900);
-    payload.write_variable_uint(getblocks.start_hashes.size());
-    for (hash_digest start_hash: getblocks.start_hashes)
-        payload.write_hash(start_hash);
-    payload.write_hash(getblocks.hash_stop);
-    return payload.data();
+    serializer serial;
+    serial.write_4_bytes(protocol_version);
+    serial.write_variable_uint(packet.start_hashes.size());
+    for (hash_digest start_hash: packet.start_hashes)
+        serial.write_hash(start_hash);
+    serial.write_hash(packet.hash_stop);
+    return serial.data();
 }
 
-data_chunk satoshi_exporter::save(const message::block& block) const
+void save_transaction(serializer& serial, const message::transaction& packet)
 {
-    return data_chunk();
-}
-
-data_chunk satoshi_exporter::save(const message::transaction& tx) const
-{
-    serializer payload;
-    payload.write_4_bytes(tx.version);
-    payload.write_variable_uint(tx.inputs.size());
-    for (const message::transaction_input& input: tx.inputs)
+    serial.write_4_bytes(packet.version);
+    serial.write_variable_uint(packet.inputs.size());
+    for (const message::transaction_input& input: packet.inputs)
     {
-        payload.write_hash(input.previous_output.hash);
-        payload.write_4_bytes(input.previous_output.index);
+        serial.write_hash(input.previous_output.hash);
+        serial.write_4_bytes(input.previous_output.index);
         data_chunk raw_script = save_script(input.input_script);
-        payload.write_variable_uint(raw_script.size());
-        payload.write_data(raw_script);
-        payload.write_4_bytes(input.sequence);
+        serial.write_variable_uint(raw_script.size());
+        serial.write_data(raw_script);
+        serial.write_4_bytes(input.sequence);
     }
-    payload.write_variable_uint(tx.outputs.size());
-    for (const message::transaction_output& output: tx.outputs)
+    serial.write_variable_uint(packet.outputs.size());
+    for (const message::transaction_output& output: packet.outputs)
     {
-        payload.write_8_bytes(output.value);
+        serial.write_8_bytes(output.value);
         data_chunk raw_script = save_script(output.output_script);
-        payload.write_variable_uint(raw_script.size());
-        payload.write_data(raw_script);
+        serial.write_variable_uint(raw_script.size());
+        serial.write_data(raw_script);
     }
-    payload.write_4_bytes(tx.locktime);
-    return payload.data();
+    serial.write_4_bytes(packet.locktime);
 }
 
-data_chunk satoshi_exporter::save(const message::get_data& getdata) const
+data_chunk satoshi_exporter::save(const message::transaction& packet) const
 {
-    serializer payload;
-    payload.write_variable_uint(getdata.inventories.size());
-    for (const message::inventory_vector inv: getdata.inventories)
-    {
-        switch (inv.type)
-        {
-            case message::inventory_type::transaction:
-                payload.write_4_bytes(1);
-                break;
-            case message::inventory_type::block:
-                payload.write_4_bytes(2);
-                break;
-            case message::inventory_type::error:
-            case message::inventory_type::none:
-            default:
-                BITCOIN_ASSERT(0);
-                break;
-        }
-        payload.write_hash(inv.hash);
-    }
-    return payload.data();
+    serializer serial;
+    save_transaction(serial, packet);
+    return serial.data();
+}
+
+data_chunk satoshi_exporter::save(const message::block& packet) const
+{
+    serializer serial;
+    serial.write_4_bytes(packet.version);
+    serial.write_hash(packet.previous_block_hash);
+    serial.write_hash(packet.merkle);
+    serial.write_4_bytes(packet.timestamp);
+    serial.write_4_bytes(packet.bits);
+    serial.write_4_bytes(packet.nonce);
+    serial.write_variable_uint(packet.transactions.size());
+    for (const message::transaction& tx: packet.transactions)
+        save_transaction(serial, tx);
+    return serial.data();
 }
 
 message::header satoshi_exporter::load_header(const data_chunk& stream)  const
 {
-    deserializer deserial(stream);
     message::header header;
+    deserializer deserial(stream);
     header.magic = deserial.read_4_bytes();
     header.command = deserial.read_fixed_string(command_size);
     header.payload_length = deserial.read_4_bytes();
@@ -157,50 +210,56 @@ message::header satoshi_exporter::load_header(const data_chunk& stream)  const
 
 message::version satoshi_exporter::load_version(const data_chunk& stream) const
 {
+    message::version packet;
     deserializer deserial(stream);
-    message::version payload;
-    payload.version = deserial.read_4_bytes();
-    payload.services = deserial.read_8_bytes();
-    payload.timestamp = deserial.read_8_bytes();
-    payload.address_me = deserial.read_network_address();
+    packet.version = deserial.read_4_bytes();
+    packet.services = deserial.read_8_bytes();
+    packet.timestamp = deserial.read_8_bytes();
+    packet.address_me = deserial.read_network_address();
     // Ignored field
-    payload.address_me.timestamp = 0;
-    if (payload.version < 106) {
+    packet.address_me.timestamp = 0;
+    if (packet.version < 106) {
         BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26);
-        return payload;
+        return packet;
     }
-    payload.address_you = deserial.read_network_address();
+    packet.address_you = deserial.read_network_address();
     // Ignored field
-    payload.address_you.timestamp = 0;
-    payload.nonce = deserial.read_8_bytes();
-    payload.user_agent = deserial.read_string();
-    if (payload.version < 209) {
+    packet.address_you.timestamp = 0;
+    packet.nonce = deserial.read_8_bytes();
+    packet.user_agent = deserial.read_string();
+    if (packet.version < 209) {
         BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1);
-        return payload;
+        return packet;
     }
-    payload.start_height = deserial.read_4_bytes();
+    packet.start_height = deserial.read_4_bytes();
     BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
-    return payload;
+    return packet;
 }
 
-message::verack satoshi_exporter::load_verack(const data_chunk& stream) const
+message::verack satoshi_exporter::load_verack(const data_chunk&) const
 {
     return message::verack();
 }
 
 message::address satoshi_exporter::load_address(const data_chunk& stream) const
 {
-    message::address payload;
+    message::address packet;
     deserializer deserial(stream);
-    uint64_t count = deserial.read_var_uint();
+    uint64_t count = deserial.read_variable_uint();
     for (size_t i = 0; i < count; ++i)
     {
         uint32_t timestamp = deserial.read_4_bytes();
         message::network_address addr = deserial.read_network_address();
         addr.timestamp = timestamp;
-        payload.addresses.push_back(addr);
+        packet.addresses.push_back(addr);
     }
-    return payload;
+    return packet;
+}
+
+message::get_address satoshi_exporter::load_get_address(
+    const data_chunk&) const
+{
+    return message::get_address();
 }
 
 message::inventory_type inventory_type_from_number(uint32_t raw_type)
@@ -218,27 +277,59 @@ message::inventory_type inventory_type_from_number(uint32_t raw_type)
     }
 }
 
+template <typename Message>
+void load_inventory_impl(deserializer& deserial, Message& packet)
+{
+    uint64_t count = deserial.read_variable_uint();
+    for (size_t i = 0; i < count; ++i)
+    {
+        message::inventory_vector inv;
+        uint32_t raw_type = deserial.read_4_bytes();
+        inv.type = inventory_type_from_number(raw_type);
+        inv.hash = deserial.read_hash();
+        packet.inventories.push_back(inv);
+    }
+}
+
 message::inventory satoshi_exporter::load_inventory(
     const data_chunk& stream) const
 {
+    message::inventory packet;
     deserializer deserial(stream);
-    message::inventory payload;
-    uint64_t count = deserial.read_var_uint();
+    load_inventory_impl(deserial, packet);
+    return packet;
+}
+
+message::get_data satoshi_exporter::load_get_data(
+    const data_chunk& stream) const
+{
+    message::get_data packet;
+    deserializer deserial(stream);
+    load_inventory_impl(deserial, packet);
+    return packet;
+}
+
+message::get_blocks satoshi_exporter::load_get_blocks(
+    const data_chunk& stream) const
+{
+    message::get_blocks packet;
+    deserializer deserial(stream);
+    // Discard protocol version because it is stupid
+    deserial.read_4_bytes();
+    uint32_t count = deserial.read_variable_uint();
     for (size_t i = 0; i < count; ++i)
     {
-        message::inventory_vector inv_vect;
-        uint32_t raw_type = deserial.read_4_bytes();
-        inv_vect.type = inventory_type_from_number(raw_type);
-        inv_vect.hash = deserial.read_hash();
-        payload.inventories.push_back(inv_vect);
+        hash_digest start_hash = deserial.read_hash();
+        packet.start_hashes.push_back(start_hash);
     }
-    return payload;
+    packet.hash_stop = deserial.read_hash();
+    return packet;
 }
 
 data_chunk read_raw_script(deserializer& deserial)
 {
     data_chunk raw_script;
-    uint64_t script_length = deserial.read_var_uint();
+    uint64_t script_length = deserial.read_variable_uint();
     return deserial.read_data(script_length);
 }
 
@@ -252,10 +343,10 @@ script read_script(deserializer& deserial)
 
 message::transaction read_transaction(deserializer& deserial)
 {
-    message::transaction txn;
-    txn.version = deserial.read_4_bytes();
-    uint64_t txn_in_count = deserial.read_var_uint();
-    for (size_t txn_in_i = 0; txn_in_i < txn_in_count; ++txn_in_i)
+    message::transaction packet;
+    packet.version = deserial.read_4_bytes();
+    uint64_t tx_in_count = deserial.read_variable_uint();
+    for (size_t tx_in_i = 0; tx_in_i < tx_in_count; ++tx_in_i)
     {
         message::transaction_input input;
         input.previous_output.hash = deserial.read_hash();
@@ -265,18 +356,18 @@ message::transaction read_transaction(deserializer& deserial)
         else
             input.input_script = read_script(deserial);
         input.sequence = deserial.read_4_bytes();
-        txn.inputs.push_back(input);
+        packet.inputs.push_back(input);
     }
-    uint64_t txn_out_count = deserial.read_var_uint();
-    for (size_t txn_out_i = 0; txn_out_i < txn_out_count; ++txn_out_i)
+    uint64_t tx_out_count = deserial.read_variable_uint();
+    for (size_t tx_out_i = 0; tx_out_i < tx_out_count; ++tx_out_i)
     {
         message::transaction_output output;
         output.value = deserial.read_8_bytes();
         output.output_script = read_script(deserial);
-        txn.outputs.push_back(output);
+        packet.outputs.push_back(output);
     }
-    txn.locktime = deserial.read_4_bytes();
-    return txn;
+    packet.locktime = deserial.read_4_bytes();
+    return packet;
 }
 
 message::transaction satoshi_exporter::load_transaction(
@@ -288,21 +379,21 @@ message::transaction satoshi_exporter::load_transaction(
 
 message::block satoshi_exporter::load_block(const data_chunk& stream) const
 {
+    message::block packet;
     deserializer deserial(stream);
-    message::block payload;
-    payload.version = deserial.read_4_bytes();
-    payload.previous_block_hash = deserial.read_hash();
-    payload.merkle = deserial.read_hash();
-    payload.timestamp = deserial.read_4_bytes();
-    payload.bits = deserial.read_4_bytes();
-    payload.nonce = deserial.read_4_bytes();
-    uint64_t txn_count = deserial.read_var_uint();
-    for (size_t txn_i = 0; txn_i < txn_count; ++txn_i)
+    packet.version = deserial.read_4_bytes();
+    packet.previous_block_hash = deserial.read_hash();
+    packet.merkle = deserial.read_hash();
+    packet.timestamp = deserial.read_4_bytes();
+    packet.bits = deserial.read_4_bytes();
+    packet.nonce = deserial.read_4_bytes();
+    uint64_t tx_count = deserial.read_variable_uint();
+    for (size_t tx_i = 0; tx_i < tx_count; ++tx_i)
     {
-        const message::transaction txn = read_transaction(deserial);
-        payload.transactions.push_back(txn);
+        const message::transaction tx = read_transaction(deserial);
+        packet.transactions.push_back(tx);
     }
-    return payload;
+    return packet;
 }
 
 bool satoshi_exporter::verify_header(const message::header& header_msg) const

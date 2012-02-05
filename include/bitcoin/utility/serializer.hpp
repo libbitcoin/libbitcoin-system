@@ -41,7 +41,7 @@ public:
     uint16_t read_2_bytes();
     uint32_t read_4_bytes();
     uint64_t read_8_bytes();
-    uint64_t read_var_uint();
+    uint64_t read_variable_uint();
     data_chunk read_data(uint64_t n_bytes);
     message::network_address read_network_address();
     hash_digest read_hash();
