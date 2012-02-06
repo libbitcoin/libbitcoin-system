@@ -1,7 +1,13 @@
+Developers/contributors:
+
 Kamil Domański (kdomanski)
 Jan Engelhardt (se7) <jengelh@medozas.de>
 Patrick Strateman (phantomcircuit)
 Denis Roio (jaromil)
 Amir Taaki (genjix) <genjix@riseup.net>
 
-and others.
+Thanks:
+
+Aaron Williamson (SFLC) and Richard Stallman (FSF) for the license,
+Luke Dashjr for pointing out OpenSSL license conflict that needed resolving
+
