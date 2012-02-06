@@ -140,6 +140,10 @@ struct inventory
     inventory_list inventories;
 };
 
+struct ping
+{
+};
+
 } // message
 } // libbitcoin
 

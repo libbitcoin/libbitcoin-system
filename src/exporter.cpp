@@ -47,6 +47,10 @@ const char* satoshi_exporter::command_name(const message::transaction&) const
 {
     return "tx";
 }
+const char* satoshi_exporter::command_name(const message::ping&) const
+{
+    return "ping";
+}
 
 data_chunk satoshi_exporter::save(
     const message::header& packet_header) const
@@ -195,6 +199,11 @@ data_chunk satoshi_exporter::save(const message::block& packet) const
     for (const message::transaction& tx: packet.transactions)
         save_transaction(serial, tx);
     return serial.data();
+}
+
+data_chunk satoshi_exporter::save(const message::ping&) const
+{
+    return data_chunk();
 }
 
 message::header satoshi_exporter::load_header(const data_chunk& stream)  const
@@ -394,6 +403,11 @@ message::block satoshi_exporter::load_block(const data_chunk& stream) const
         packet.transactions.push_back(tx);
     }
     return packet;
+}
+
+message::ping satoshi_exporter::load_ping(const data_chunk&) const
+{
+    return message::ping();
 }
 
 bool satoshi_exporter::verify_header(const message::header& header_msg) const

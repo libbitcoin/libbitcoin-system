@@ -20,7 +20,8 @@ enum class error
     listen_failed,
     accept_failed,
     bad_stream,
-    channel_stopped
+    channel_stopped,
+    channel_timeout
 };
 
 class error_category_impl

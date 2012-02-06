@@ -34,6 +34,8 @@ std::string error_category_impl::message(int ev) const
             return "Bad stream";
         case error::channel_stopped:
             return "Channel stopped";
+        case error::channel_timeout:
+            return "Channel timed out";
         default:
             return "Unknown error";
     }

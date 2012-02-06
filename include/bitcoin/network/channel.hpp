@@ -59,6 +59,8 @@ public:
     typedef std::function<void (const std::error_code&,
         const message::header&, const data_chunk&)> receive_raw_handler;
 
+    typedef std::function<void (const std::error_code&)> stop_handler;
+
     channel(socket_ptr socket, thread_core_ptr threaded, exporter_ptr saver);
     ~channel();
 
@@ -109,6 +111,8 @@ public:
     void subscribe_block(receive_block_handler handle_receive);
     void subscribe_raw(receive_raw_handler handle_receive);
 
+    void subscribe_stop(stop_handler handle_stop);
+
 private:
     typedef subscriber<const std::error_code&, const message::version&>
         version_subscriber_type;
@@ -130,6 +134,8 @@ private:
         block_subscriber_type;
     typedef subscriber<const std::error_code&,
         const message::header&, const data_chunk&> raw_subscriber_type;
+
+    typedef subscriber<const std::error_code&> stop_subscriber_type;
 
     template <typename Message>
     void do_send(const Message& packet, send_handler handle_send)
@@ -195,9 +201,14 @@ private:
         send_handler handle_send);
 
     void handle_timeout(const boost::system::error_code& ec);
-    void reset_timeout();
+    void handle_heartbeat(const boost::system::error_code& ec);
+    
+    void set_timeout(const boost::posix_time::time_duration timeout);
+    void set_heartbeat(const boost::posix_time::time_duration timeout);
+    void reset_timers();
 
     bool problems_check(const boost::system::error_code& ec);
+    void stop_impl();
 
     std::atomic<bool> stopped_;
 
@@ -217,7 +228,7 @@ private:
     // We keep the service alive for lifetime rules
     thread_core_ptr threaded_;
     strand_ptr strand_;
-    deadline_timer_ptr timeout_;
+    deadline_timer_ptr timeout_, heartbeat_;
 
     std::shared_ptr<version_subscriber_type> version_subscriber_;
     std::shared_ptr<verack_subscriber_type> verack_subscriber_;
@@ -229,6 +240,8 @@ private:
     std::shared_ptr<transaction_subscriber_type> transaction_subscriber_;
     std::shared_ptr<block_subscriber_type> block_subscriber_;
     std::shared_ptr<raw_subscriber_type> raw_subscriber_;
+
+    std::shared_ptr<stop_subscriber_type> stop_subscriber_;
 };
 
 } // libbitcoin

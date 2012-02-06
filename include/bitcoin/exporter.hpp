@@ -26,6 +26,7 @@ public:
     virtual const char* command_name(const message::get_blocks&) const = 0;
     virtual const char* command_name(const message::block&) const = 0;
     virtual const char* command_name(const message::transaction&) const = 0;
+    virtual const char* command_name(const message::ping&) const = 0;
 
     // Will ignore checksum when checksum == 0
     virtual data_chunk save(const message::header& packet_header) const = 0;
@@ -39,6 +40,7 @@ public:
     virtual data_chunk save(const message::get_blocks& packet) const = 0;
     virtual data_chunk save(const message::block& packet) const = 0;
     virtual data_chunk save(const message::transaction& packet) const = 0;
+    virtual data_chunk save(const message::ping& packet) const = 0;
 
     // From network
     virtual message::header load_header(
@@ -71,6 +73,9 @@ public:
     virtual message::block load_block(
         const data_chunk& stream) const = 0;
 
+    virtual message::ping load_ping(
+        const data_chunk& stream) const = 0;
+
     // Utilities
     virtual bool verify_header(const message::header& header_msg) const = 0;
 
@@ -95,6 +100,7 @@ public:
     const char* command_name(const message::get_blocks&) const;
     const char* command_name(const message::block&) const;
     const char* command_name(const message::transaction&) const;
+    const char* command_name(const message::ping&) const;
 
     // Will ignore checksum when checksum == 0
     data_chunk save(const message::header& packet_header) const;
@@ -108,6 +114,7 @@ public:
     data_chunk save(const message::get_blocks& packet) const;
     data_chunk save(const message::block& packet) const;
     data_chunk save(const message::transaction& packet) const;
+    data_chunk save(const message::ping& packet) const;
 
     // Create header/messages from stream
     message::header load_header(const data_chunk& stream) const;
@@ -121,6 +128,7 @@ public:
     message::get_blocks load_get_blocks(const data_chunk& stream) const;
     message::transaction load_transaction(const data_chunk& stream) const;
     message::block load_block(const data_chunk& stream) const;
+    message::ping load_ping(const data_chunk& stream) const;
 
     bool verify_header(const message::header& header_msg) const;
 

@@ -11,7 +11,10 @@ using boost::posix_time::time_duration;
 using boost::asio::buffer;
 
 // Connection timeout time
+const time_duration initial_timeout = seconds(0) + minutes(1);
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
+
+const time_duration heartbeat_time = seconds(0) + minutes(30);
 
 channel::channel(socket_ptr socket, thread_core_ptr threaded,
     exporter_ptr saver)
@@ -19,6 +22,7 @@ channel::channel(socket_ptr socket, thread_core_ptr threaded,
 {
     strand_ = threaded_->create_strand();
     timeout_ = std::make_shared<deadline_timer>(*threaded_->service());
+    heartbeat_ = std::make_shared<deadline_timer>(*threaded_->service());
 
     version_subscriber_ = 
         std::make_shared<version_subscriber_type>(strand_);
@@ -34,6 +38,9 @@ channel::channel(socket_ptr socket, thread_core_ptr threaded,
         std::make_shared<block_subscriber_type>(strand_);
     raw_subscriber_ = 
         std::make_shared<raw_subscriber_type>(strand_);
+
+    stop_subscriber_ =
+        std::make_shared<stop_subscriber_type>(strand_);
 }
 
 channel::~channel()
@@ -44,49 +51,89 @@ channel::~channel()
 void channel::start()
 {
     read_header();
-    reset_timeout();
+    set_timeout(initial_timeout);
+    set_heartbeat(heartbeat_time);
 }
 void channel::stop()
 {
     if (stopped_)
         return;
+    stop_impl();
+    stop_subscriber_->relay(error::channel_stopped);
+}
+void channel::stop_impl()
+{
+    // We need this because the timeout timer shares this code with stop()
+    // But sends a different error_code
     stopped_ = true;
     timeout_->cancel();
     timeout_.reset();
+    heartbeat_->cancel();
+    heartbeat_.reset();
     socket_.reset();
+}
+
+bool timer_errors(const boost::system::error_code& ec, bool stopped)
+{
+    if (ec == boost::asio::error::operation_aborted)
+        return true;
+    else if (ec)
+    {
+        log_error(log_domain::network) << ec.message();
+        return true;
+    }
+    else if (stopped)
+        return true;
+    return false;
 }
 
 void channel::handle_timeout(const boost::system::error_code& ec)
 {
-    if (ec == boost::asio::error::operation_aborted)
-        return;
-    else if (ec)
-    {
-        log_error(log_domain::network) << ec.message();
-        return;
-    }
-    else if (stopped_)
+    if (timer_errors(ec, stopped_))
         return;
     log_info(log_domain::network) << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
     tcp::endpoint remote_endpoint = socket_->remote_endpoint();
     log_debug(log_domain::network) << "Closing channel "
         << remote_endpoint.address().to_string();
-    // TODO should be async
-    // TODO handlers should be able to be registered for this event
-    // this error codes would be delegated to it
+    // Force the socket closed
+    // Should we do something with these error_codes?
     boost::system::error_code ret_ec;
     socket_->shutdown(tcp::socket::shutdown_both, ret_ec);
     socket_->close(ret_ec);
-    stop();
+    stop_impl();
+    stop_subscriber_->relay(error::channel_timeout);
 }
 
-void channel::reset_timeout()
+void handle_ping(const std::error_code&)
+{
+    // if there's a problem sending then this channel will be stopped
+}
+void channel::handle_heartbeat(const boost::system::error_code& ec)
+{
+    if (timer_errors(ec, stopped_))
+        return;
+    send(message::ping(), handle_ping);
+}
+
+void channel::set_timeout(const boost::posix_time::time_duration timeout)
 {
     timeout_->cancel();
-    timeout_->expires_from_now(disconnect_timeout);
+    timeout_->expires_from_now(timeout);
     timeout_->async_wait(std::bind(
         &channel::handle_timeout, shared_from_this(), _1));
+}
+void channel::set_heartbeat(const boost::posix_time::time_duration timeout)
+{
+    heartbeat_->cancel();
+    heartbeat_->expires_from_now(timeout);
+    heartbeat_->async_wait(std::bind(
+        &channel::handle_heartbeat, shared_from_this(), _1));
+}
+void channel::reset_timers()
+{
+    set_timeout(disconnect_timeout);
+    set_heartbeat(heartbeat_time);
 }
 
 bool channel::problems_check(const boost::system::error_code& ec)
@@ -152,7 +199,7 @@ void channel::handle_read_header(const boost::system::error_code& ec,
         // Read payload
         read_payload(header_msg);
     }
-    reset_timeout();
+    reset_timers();
 }
 
 void channel::handle_read_checksum(message::header& header_msg,
@@ -167,7 +214,7 @@ void channel::handle_read_checksum(message::header& header_msg,
     //header_msg.checksum = cast_stream<uint32_t>(checksum_stream);
     header_msg.checksum = export_->load_checksum(checksum_stream);
     read_payload(header_msg);
-    reset_timeout();
+    reset_timers();
 }
 
 void channel::handle_read_payload(const message::header& header_msg,
@@ -260,7 +307,7 @@ void channel::handle_read_payload(const message::header& header_msg,
     }
 
     read_header();
-    reset_timeout();
+    reset_timers();
 }
 
 void channel::call_handle_send(const boost::system::error_code& ec,
@@ -324,6 +371,14 @@ void channel::subscribe_raw(receive_raw_handler handle_receive)
             message::header(), data_chunk());
     else
         raw_subscriber_->subscribe(handle_receive);
+}
+
+void channel::subscribe_stop(stop_handler handle_stop)
+{
+    if (stopped_)
+        handle_stop(error::channel_stopped);
+    else
+        stop_subscriber_->subscribe(handle_stop);
 }
 
 void channel::send_raw(const message::header& packet_header,
