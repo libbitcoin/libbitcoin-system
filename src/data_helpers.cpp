@@ -23,14 +23,5 @@ data_chunk bytes_from_pretty(std::string byte_stream)
     return stack;
 }
 
-hash_digest hash_from_pretty(std::string byte_stream)
-{
-    data_chunk raw_bytes = bytes_from_pretty(byte_stream);
-    BITCOIN_ASSERT(raw_bytes.size() == 32);
-    hash_digest hash;
-    std::copy(raw_bytes.begin(), raw_bytes.end(), hash.begin());
-    return hash;
-}
-
 } // libbitcoin
 

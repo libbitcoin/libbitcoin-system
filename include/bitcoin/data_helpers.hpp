@@ -6,6 +6,7 @@
 #include <boost/detail/endian.hpp>
 
 #include <bitcoin/types.hpp>
+#include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -67,7 +68,16 @@ std::string pretty_hex(T data)
 }
 
 data_chunk bytes_from_pretty(std::string byte_stream);
-hash_digest hash_from_pretty(std::string byte_stream);
+
+template <typename HashType>
+HashType hash_from_pretty(std::string byte_stream)
+{
+    data_chunk raw_bytes = bytes_from_pretty(byte_stream);
+    HashType result;
+    BITCOIN_ASSERT(raw_bytes.size() == result.size());
+    std::copy(raw_bytes.begin(), raw_bytes.end(), result.begin());
+    return result;
+}
 
 // Python like range
 //   for (char c: range(str, 0, 2))
