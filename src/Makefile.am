@@ -6,6 +6,7 @@ libbitcoin_la_SOURCES = \
 	network/handshake.cpp  \
 	network/channel.cpp \
 	network/hosts.cpp \
+	network/protocol.cpp \
 	exporter.cpp  \
 	utility/serializer.cpp \
 	utility/logger.cpp \
