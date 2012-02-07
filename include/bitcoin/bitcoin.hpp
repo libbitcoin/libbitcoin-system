@@ -9,6 +9,7 @@
 #include <bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/network/discovery.hpp>
 #include <bitcoin/network/network.hpp>
+#include <bitcoin/network/hosts.hpp>
 #include <bitcoin/network/handshake.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/data_helpers.hpp>

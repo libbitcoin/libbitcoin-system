@@ -22,6 +22,7 @@ class acceptor;
 class network;
 class channel;
 class handshake;
+class hosts;
 class chrono_clock;
 
 typedef std::shared_ptr<exporter> exporter_ptr;
@@ -31,6 +32,7 @@ typedef std::shared_ptr<acceptor> acceptor_ptr;
 typedef std::shared_ptr<network> network_ptr;
 typedef std::shared_ptr<channel> channel_ptr;
 typedef std::shared_ptr<handshake> handshake_ptr;
+typedef std::shared_ptr<hosts> hosts_ptr;
 typedef std::shared_ptr<chrono_clock> chrono_clock_ptr;
 
 typedef std::shared_ptr<io_service> service_ptr;

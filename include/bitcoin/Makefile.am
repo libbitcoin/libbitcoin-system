@@ -35,7 +35,8 @@ bitcoin_network_include_HEADERS = \
 	network/network.hpp \
 	network/handshake.hpp \
 	network/shared_const_buffer.hpp \
-	network/discovery.hpp
+	network/discovery.hpp \
+	network/hosts.hpp
 
 bitcoin_util_includedir = $(includedir)/bitcoin/utility
 bitcoin_util_include_HEADERS = \
