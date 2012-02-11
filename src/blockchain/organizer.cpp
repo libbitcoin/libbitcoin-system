@@ -70,6 +70,7 @@ blocks_list orphans_pool::trace(block_detail_ptr end_block)
             }
         break;
     }
+    BITCOIN_ASSERT(traced_chain.size() > 0);
     std::reverse(traced_chain.begin(), traced_chain.end());
     return traced_chain;
 }
@@ -90,7 +91,9 @@ blocks_list orphans_pool::unprocessed()
 
 void orphans_pool::remove(block_detail_ptr remove_block)
 {
-    pool_.erase(std::find(pool_.begin(), pool_.end(), remove_block));
+    auto it = std::find(pool_.begin(), pool_.end(), remove_block);
+    BITCOIN_ASSERT(it != pool_.end());
+    pool_.erase(it);
 }
 
 organizer::organizer(orphans_pool_ptr orphans, chain_keeper_ptr chain)
@@ -148,12 +151,14 @@ void organizer::replace_chain(int fork_index, blocks_list& orphan_chain)
         return;
     // Replace! Switch!
     blocks_list replaced_slice = chain_->end_slice(fork_index + 1);
-    for (block_detail_ptr replaced_block: replaced_slice)
-    {
-        replaced_block->mark_processed();
-        replaced_block->set_info({block_status::orphan, 0});
-        orphans_->add(replaced_block);
-    }
+    // We add the arriving blocks first to the main chain because if
+    // we add the blocks being replaced back to the pool first then
+    // the we can push the arrival blocks off the bottom of the
+    // circular buffer.
+    // Then when we try to remove the block from the orphans pool,
+    // if will fail to find it. I would rather not add an exception
+    // there so that problems will show earlier.
+    // All arrival_blocks should be blocks from the pool.
     int arrival_index = fork_index;
     for (block_detail_ptr arrival_block: orphan_chain)
     {
@@ -161,6 +166,13 @@ void organizer::replace_chain(int fork_index, blocks_list& orphan_chain)
         ++arrival_index;
         arrival_block->set_info({block_status::confirmed, arrival_index});
         chain_->add(arrival_block);
+    }
+    // Now add the old blocks back to the pool
+    for (block_detail_ptr replaced_block: replaced_slice)
+    {
+        replaced_block->mark_processed();
+        replaced_block->set_info({block_status::orphan, 0});
+        orphans_->add(replaced_block);
     }
 }
 
