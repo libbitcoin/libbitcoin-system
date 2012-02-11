@@ -16,7 +16,8 @@ class bdb_chain_keeper
 {
 public:
     bdb_chain_keeper(bdb_common_ptr common, DbEnv* env,
-        Db* db_blocks, Db* db_blocks_hash);
+        Db* db_blocks, Db* db_blocks_hash,
+        Db* db_txs, Db* db_spends, Db* db_address);
 
     void start();
     void stop();
@@ -29,6 +30,8 @@ public:
     txn_guard_ptr txn();
 
 private:
+    bool clear_transaction_data(const message::transaction& remove_tx);
+
     txn_guard_ptr txn_;
 
     bdb_common_ptr common_;
@@ -36,6 +39,9 @@ private:
     DbEnv* env_;
     Db* db_blocks_;
     Db* db_blocks_hash_;
+    Db* db_txs_;
+    Db* db_spends_;
+    Db* db_address_;
 };
 
 typedef std::shared_ptr<bdb_chain_keeper> bdb_chain_keeper_ptr;

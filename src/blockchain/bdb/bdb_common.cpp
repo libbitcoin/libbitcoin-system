@@ -69,13 +69,13 @@ bool bdb_common::save_block(txn_guard_ptr txn,
 {
     protobuf::Block proto_block =
         block_header_to_protobuf(depth, serial_block);
-    for (uint32_t block_index = 0;
-        block_index < serial_block.transactions.size(); ++block_index)
+    for (uint32_t tx_index = 0;
+        tx_index < serial_block.transactions.size(); ++tx_index)
     {
         const message::transaction& block_tx =
-            serial_block.transactions[block_index];
+            serial_block.transactions[tx_index];
         const hash_digest& tx_hash = hash_transaction(block_tx);
-        if (!save_transaction(txn, depth, block_index, tx_hash, block_tx))
+        if (!save_transaction(txn, depth, tx_index, tx_hash, block_tx))
         {
             log_fatal() << "Could not save transaction";
             return false;

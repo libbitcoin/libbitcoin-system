@@ -2,6 +2,7 @@
 
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/data_helpers.hpp>
+#include <bitcoin/transaction.hpp>
 
 #include "bdb_common.hpp"
 #include "data_type.hpp"
@@ -10,9 +11,11 @@
 namespace libbitcoin {
 
 bdb_chain_keeper::bdb_chain_keeper(bdb_common_ptr common, DbEnv* env,
-    Db* db_blocks, Db* db_blocks_hash)
-  : common_(common), env_(env), db_blocks_(db_blocks),
-    db_blocks_hash_(db_blocks_hash)
+    Db* db_blocks, Db* db_blocks_hash,
+    Db* db_txs, Db* db_spends, Db* db_address)
+  : common_(common), env_(env),
+    db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
+    db_txs_(db_txs), db_spends_(db_spends), db_address_(db_address)
 {
 }
 
@@ -110,11 +113,27 @@ blocks_list bdb_chain_keeper::end_slice(size_t slice_begin_index)
         // Delete current item
         if (cursor->del(0) != 0)
             return blocks_list();
-        // TODO should remove txs + spends too
+        // Remove txs + spends + addresses too
+        for (const message::transaction& block_tx: sliced_block.transactions)
+            if (!clear_transaction_data(block_tx))
+                return blocks_list();
+        // New value object ready to read next block
         value = std::make_shared<writable_data_type>();
     }
     while (cursor->get(key.get(), value->get(), DB_NEXT) == 0);
     return sliced_blocks;
+}
+
+bool bdb_chain_keeper::clear_transaction_data(
+    const message::transaction& remove_tx)
+{
+    const hash_digest& tx_hash = hash_transaction(remove_tx);
+    readable_data_type del_tx_key;
+    del_tx_key.set(tx_hash);
+    if (db_txs_->del(txn_->get(), del_tx_key.get(), 0) != 0)
+        return false;
+    // TODO remove spends and addresses
+    return true;
 }
 
 txn_guard_ptr bdb_chain_keeper::txn()

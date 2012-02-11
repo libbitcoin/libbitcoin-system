@@ -146,8 +146,9 @@ bool bdb_blockchain::initialize(const std::string& prefix)
         db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
 
     orphans_ = std::make_shared<orphans_pool>(20);
-    bdb_chain_keeper_ptr chainkeeper = std::make_shared<bdb_chain_keeper>(
-        common_, env_, db_blocks_, db_blocks_hash_);
+    bdb_chain_keeper_ptr chainkeeper = 
+        std::make_shared<bdb_chain_keeper>(common_, env_,
+            db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
     chain_ = chainkeeper;
     organize_ =
         std::make_shared<bdb_organizer>(common_, orphans_, chainkeeper);
