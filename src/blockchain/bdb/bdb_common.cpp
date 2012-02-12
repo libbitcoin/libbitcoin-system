@@ -4,7 +4,6 @@
 
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
-#include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/data_helpers.hpp>
 #include <bitcoin/transaction.hpp>
 
@@ -31,14 +30,6 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
     return last_block_depth;
 }
 
-template <typename Point>
-data_chunk create_spent_key(const Point& point)
-{
-    serializer serial_spend;
-    serial_spend.write_hash(point.hash);
-    serial_spend.write_4_bytes(point.index);
-    return serial_spend.data();
-}
 bool bdb_common::is_output_spent(txn_guard_ptr txn,
     const message::output_point& output)
 {

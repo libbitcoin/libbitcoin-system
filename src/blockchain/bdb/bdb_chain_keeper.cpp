@@ -132,7 +132,60 @@ bool bdb_chain_keeper::clear_transaction_data(
     del_tx_key.set(tx_hash);
     if (db_txs_->del(txn_->get(), del_tx_key.get(), 0) != 0)
         return false;
-    // TODO remove spends and addresses
+    // Remove spends
+    for (uint32_t input_index = 0; input_index < remove_tx.inputs.size();
+        ++input_index)
+    {
+        const message::transaction_input& input = 
+            remove_tx.inputs[input_index];
+        const message::input_point inpoint{tx_hash, input_index};
+        if (!remove_spend(input.previous_output, inpoint))
+            return false;
+    }
+    // Remove addresses
+    for (uint32_t output_index = 0; output_index < remove_tx.outputs.size();
+        ++output_index)
+    {
+        const message::transaction_output& output =
+            remove_tx.outputs[output_index];
+        if (!remove_address(output.output_script, {tx_hash, output_index}))
+            return false;
+    }
+    return true;
+}
+
+bool bdb_chain_keeper::remove_spend(
+    const message::output_point& previous_output,
+    const message::input_point& current_input)
+{
+    readable_data_type spent_key;
+    spent_key.set(create_spent_key(previous_output));
+    int ret = db_spends_->del(txn_->get(), spent_key.get(), 0);
+    if (ret != 0 && ret != DB_NOTFOUND)
+        return false;
+    return true;
+}
+
+bool bdb_chain_keeper::remove_address(const script& output_script,
+    const message::output_point& outpoint)
+{
+    if (output_script.type() != payment_type::pubkey_hash)
+        return true;
+    BITCOIN_ASSERT(output_script.operations().size() == 5);
+    // DUP HASH <data>
+    const data_chunk& pubkey_hash = output_script.operations()[2].data;
+    readable_data_type address_key, output_value;
+    address_key.set(pubkey_hash);
+    output_value.set(create_spent_key(outpoint));
+    // Perform the actual delete
+    Dbc* cursor;
+    db_address_->cursor(txn_->get(), &cursor, 0);
+    BITCOIN_ASSERT(cursor != nullptr);
+    if (cursor->get(address_key.get(), output_value.get(), DB_GET_BOTH) != 0)
+        return false;
+    if (cursor->del(0) != 0)
+        return false;
+    cursor->close();
     return true;
 }
 

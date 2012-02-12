@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <bitcoin/messages.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 #include "data_type.hpp"
 #include "txn_guard.hpp"
@@ -64,6 +65,16 @@ private:
 };
 
 typedef std::shared_ptr<bdb_common> bdb_common_ptr;
+
+// Used also by bdb_chain_keeper when deleting spends + addresses
+template <typename Point>
+data_chunk create_spent_key(const Point& point)
+{
+    serializer serial_spend;
+    serial_spend.write_hash(point.hash);
+    serial_spend.write_4_bytes(point.index);
+    return serial_spend.data();
+}
 
 } // libbitcoin
 
