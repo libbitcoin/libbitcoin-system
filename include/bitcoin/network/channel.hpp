@@ -230,18 +230,18 @@ private:
     strand_ptr strand_;
     deadline_timer_ptr timeout_, heartbeat_;
 
-    std::shared_ptr<version_subscriber_type> version_subscriber_;
-    std::shared_ptr<verack_subscriber_type> verack_subscriber_;
-    std::shared_ptr<address_subscriber_type> address_subscriber_;
-    std::shared_ptr<get_address_subscriber_type> get_address_subscriber_;
-    std::shared_ptr<inventory_subscriber_type> inventory_subscriber_;
-    std::shared_ptr<get_data_subscriber_type> get_data_subscriber_;
-    std::shared_ptr<get_blocks_subscriber_type> get_blocks_subscriber_;
-    std::shared_ptr<transaction_subscriber_type> transaction_subscriber_;
-    std::shared_ptr<block_subscriber_type> block_subscriber_;
-    std::shared_ptr<raw_subscriber_type> raw_subscriber_;
+    version_subscriber_type::ptr version_subscriber_;
+    verack_subscriber_type::ptr verack_subscriber_;
+    address_subscriber_type::ptr address_subscriber_;
+    get_address_subscriber_type::ptr get_address_subscriber_;
+    inventory_subscriber_type::ptr inventory_subscriber_;
+    get_data_subscriber_type::ptr get_data_subscriber_;
+    get_blocks_subscriber_type::ptr get_blocks_subscriber_;
+    transaction_subscriber_type::ptr transaction_subscriber_;
+    block_subscriber_type::ptr block_subscriber_;
+    raw_subscriber_type::ptr raw_subscriber_;
 
-    std::shared_ptr<stop_subscriber_type> stop_subscriber_;
+    stop_subscriber_type::ptr stop_subscriber_;
 };
 
 } // libbitcoin

@@ -1,7 +1,10 @@
 #ifndef  LIBBITCOIN_UTILITY_SUBSCRIBER_H
 #define  LIBBITCOIN_UTILITY_SUBSCRIBER_H
 
+#include <stack>
+
 #include <bitcoin/types.hpp>
+#include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -11,6 +14,7 @@ class subscriber
 {
 public:
     typedef std::function<void (Args...)> handler_type;
+    typedef std::shared_ptr<subscriber<Args...>> ptr;
 
     subscriber(strand_ptr async_strand)
       : strand_(async_strand)

@@ -13,8 +13,8 @@ class bdb_validate_block
 {
 public:
     bdb_validate_block(bdb_common_ptr common, int fork_index,
-        const blocks_list& orphan_chain, int orphan_index, size_t depth,
-        txn_guard_ptr txn, exporter_ptr saver,
+        const block_detail_list& orphan_chain, int orphan_index,
+        size_t depth, txn_guard_ptr txn, exporter_ptr saver,
         const message::block& current_block);
 
 protected:
@@ -39,7 +39,7 @@ private:
     size_t depth_;
 
     size_t fork_index_, orphan_index_;
-    const blocks_list& orphan_chain_;
+    const block_detail_list& orphan_chain_;
 };
 
 } // libbitcoin

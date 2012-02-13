@@ -145,13 +145,17 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     common_ = std::make_shared<bdb_common>(env_,
         db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
 
+    reorganize_subscriber_ =
+        std::make_shared<reorganize_subscriber_type>(strand());
+
     orphans_ = std::make_shared<orphans_pool>(20);
     bdb_chain_keeper_ptr chainkeeper = 
         std::make_shared<bdb_chain_keeper>(common_, env_,
             db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
     chain_ = chainkeeper;
-    organize_ =
-        std::make_shared<bdb_organizer>(common_, orphans_, chainkeeper);
+    organize_ = std::make_shared<bdb_organizer>(
+        common_, orphans_, chainkeeper, reorganize_subscriber_);
+
     return true;
 }
 
@@ -446,6 +450,12 @@ void bdb_blockchain::do_fetch_outputs(const short_hash& pubkey_hash,
     cursor->close();
     txn->commit();
     handle_fetch(std::error_code(), assoc_outs);
+}
+
+void bdb_blockchain::subscribe_reorganize(
+    reorganize_handler handle_reorganize)
+{
+    reorganize_subscriber_->subscribe(handle_reorganize);
 }
 
 } // libbitcoin

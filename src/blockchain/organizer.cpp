@@ -5,12 +5,17 @@
 namespace libbitcoin {
 
 block_detail::block_detail(const message::block& actual_block)
-  : actual_block_(actual_block), block_hash_(hash_block_header(actual_block_)),
+  : block_hash_(hash_block_header(actual_block)),
     processed_(false), info_{block_status::orphan, 0}
 {
+    actual_block_ = std::make_shared<message::block>(actual_block);
 }
 
 const message::block& block_detail::actual() const
+{
+    return *actual_block_;
+}
+std::shared_ptr<message::block> block_detail::actual_ptr() const
 {
     return actual_block_;
 }
@@ -53,9 +58,9 @@ void orphans_pool::add(block_detail_ptr incoming_block)
     pool_.push_back(incoming_block);
 }
 
-blocks_list orphans_pool::trace(block_detail_ptr end_block)
+block_detail_list orphans_pool::trace(block_detail_ptr end_block)
 {
-    blocks_list traced_chain;
+    block_detail_list traced_chain;
     traced_chain.push_back(end_block);
     while (true)
     {
@@ -75,9 +80,9 @@ blocks_list orphans_pool::trace(block_detail_ptr end_block)
     return traced_chain;
 }
 
-blocks_list orphans_pool::unprocessed()
+block_detail_list orphans_pool::unprocessed()
 {
-    blocks_list unprocessed_blocks;
+    block_detail_list unprocessed_blocks;
     for (const block_detail_ptr current_block: pool_)
     {
         if (!current_block->is_processed())
@@ -114,6 +119,7 @@ void organizer::start()
         // process() can remove blocks from the queue too
         chain_->start();
         process(process_block);
+        // May have already been stopped by replace_chain
         chain_->stop();
     }
 }
@@ -121,16 +127,18 @@ void organizer::start()
 void organizer::process(block_detail_ptr process_block)
 {
     // Trace the chain in the orphan pool
-    blocks_list orphan_chain = orphans_->trace(process_block);
+    block_detail_list orphan_chain = orphans_->trace(process_block);
     int fork_index =
         chain_->find_index(orphan_chain[0]->actual().previous_block_hash);
     if (fork_index != -1)
+        // replace_chain will call chain_->stop()
         replace_chain(fork_index, orphan_chain);
     // Don't mark all orphan_chain as processed here because there might be
     // a winning fork from an earlier block
 }
 
-void organizer::replace_chain(int fork_index, blocks_list& orphan_chain)
+void organizer::replace_chain(int fork_index,
+    block_detail_list& orphan_chain)
 {
     big_number orphan_work = 0;
     // Starting from beginning of the chain, validate blocks
@@ -150,7 +158,7 @@ void organizer::replace_chain(int fork_index, blocks_list& orphan_chain)
     if (orphan_work <= main_work)
         return;
     // Replace! Switch!
-    blocks_list replaced_slice = chain_->end_slice(fork_index + 1);
+    block_detail_list replaced_slice = chain_->end_slice(fork_index + 1);
     // We add the arriving blocks first to the main chain because if
     // we add the blocks being replaced back to the pool first then
     // the we can push the arrival blocks off the bottom of the
@@ -174,9 +182,12 @@ void organizer::replace_chain(int fork_index, blocks_list& orphan_chain)
         replaced_block->set_info({block_status::orphan, 0});
         orphans_->add(replaced_block);
     }
+    chain_->stop();
+    notify_reorganize(orphan_chain, replaced_slice);
 }
 
-void organizer::clip_orphans(blocks_list& orphan_chain, int orphan_index)
+void organizer::clip_orphans(block_detail_list& orphan_chain,
+    int orphan_index)
 {
     auto orphan_start = orphan_chain.begin() + orphan_index;
     // Remove from orphans pool
@@ -186,6 +197,22 @@ void organizer::clip_orphans(blocks_list& orphan_chain, int orphan_index)
         orphans_->remove(*it);
     }
     orphan_chain.erase(orphan_start, orphan_chain.end());
+}
+
+void organizer::notify_reorganize(
+    const block_detail_list& orphan_chain,
+    const block_detail_list& replaced_slice)
+{
+    // Strip out the meta-info, to convert to format which can
+    // be passed to subscribe handlers
+    // orphan_chain = arrival blocks
+    // replaced slice = replaced chain
+    blockchain::block_list arrival_blocks, replaced_blocks;
+    for (block_detail_ptr arrival_block: orphan_chain)
+        arrival_blocks.push_back(arrival_block->actual_ptr());
+    for (block_detail_ptr replaced_block: replaced_slice)
+        replaced_blocks.push_back(replaced_block->actual_ptr());
+    reorganize_occured(arrival_blocks, replaced_blocks);
 }
 
 } // libbitcoin

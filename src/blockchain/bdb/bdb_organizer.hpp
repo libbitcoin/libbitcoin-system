@@ -12,16 +12,24 @@ class bdb_organizer
   : public organizer
 {
 public:
-    bdb_organizer(bdb_common_ptr common,
-        orphans_pool_ptr orphans, bdb_chain_keeper_ptr chain);
+    typedef bdb_blockchain::reorganize_subscriber_type::ptr
+        subscriber_ptr;
+
+    bdb_organizer(bdb_common_ptr common, orphans_pool_ptr orphans,
+        bdb_chain_keeper_ptr chain, subscriber_ptr reorganize_subscriber);
 
 protected:
-    bool verify(int fork_index, const blocks_list& orphan_chain,
+    bool verify(int fork_index, const block_detail_list& orphan_chain,
         int orphan_index);
+    void reorganize_occured(
+        const blockchain::block_list& arrivals,
+        const blockchain::block_list& replaced);
 
 private:
     bdb_common_ptr common_;
     bdb_chain_keeper_ptr chain_;
+
+    subscriber_ptr reorganize_subscriber_;
 };
 
 } // libbitcoin

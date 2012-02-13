@@ -50,6 +50,11 @@ public:
         void (const std::error_code&, const message::output_point_list&)>
             fetch_handler_outputs;
 
+    typedef std::vector<std::shared_ptr<message::block>> block_list;
+    typedef std::function<
+        void (const std::error_code&, const block_list&, const block_list&)>
+            reorganize_handler;
+
     virtual void store(const message::block& stored_block, 
         store_block_handler handle_store) = 0;
 
@@ -77,6 +82,9 @@ public:
     // List of output_points
     virtual void fetch_outputs(const short_hash& pubkey_hash,
         fetch_handler_outputs handle_fetch) = 0;
+
+    virtual void subscribe_reorganize(
+        reorganize_handler handle_reorganize) = 0;
 };
 
 } // libbitcoin

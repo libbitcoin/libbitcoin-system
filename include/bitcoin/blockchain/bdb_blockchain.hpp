@@ -5,6 +5,7 @@
 
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/utility/threads.hpp>
+#include <bitcoin/utility/subscriber.hpp>
 
 class Db;
 class DbEnv;
@@ -19,6 +20,10 @@ class bdb_blockchain
     public std::enable_shared_from_this<bdb_blockchain>
 {
 public:
+    typedef subscriber<
+        const std::error_code&, const block_list&, const block_list&>
+            reorganize_subscriber_type;
+
     bdb_blockchain(const std::string& prefix);
     ~bdb_blockchain();
 
@@ -46,6 +51,8 @@ public:
         fetch_handler_spend handle_fetch);
     void fetch_outputs(const short_hash& pubkey_hash,
         fetch_handler_outputs handle_fetch);
+
+    void subscribe_reorganize(reorganize_handler handle_reorganize);
 
 private:
     bdb_blockchain();
@@ -84,6 +91,8 @@ private:
     orphans_pool_ptr orphans_;
     chain_keeper_ptr chain_;
     organizer_ptr organize_;
+
+    reorganize_subscriber_type::ptr reorganize_subscriber_;
 };
 
 } // libbitcoin

@@ -9,7 +9,7 @@
 namespace libbitcoin {
 
 bdb_validate_block::bdb_validate_block(bdb_common_ptr common, int fork_index,
-    const blocks_list& orphan_chain, int orphan_index, size_t depth,
+    const block_detail_list& orphan_chain, int orphan_index, size_t depth,
     txn_guard_ptr txn, exporter_ptr saver,
     const message::block& current_block)
   : validate_block(saver, depth, current_block), common_(common),

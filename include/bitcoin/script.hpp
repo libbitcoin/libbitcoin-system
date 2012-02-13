@@ -105,7 +105,6 @@ private:
 std::string opcode_to_string(opcode code);
 opcode string_to_opcode(std::string code_repr);
 
-// TODO: Should be inside the exporter imlementation eventually
 script coinbase_script(const data_chunk& raw_script);
 script parse_script(const data_chunk& raw_script);
 data_chunk save_script(const script& scr);
