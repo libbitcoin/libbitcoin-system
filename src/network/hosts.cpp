@@ -70,12 +70,13 @@ void hosts::store(const message::network_address address,
         });
 }
 
-void hosts::fetch(fetch_handler handle_fetch)
+void hosts::fetch_address(fetch_address_handler handle_fetch)
 {
     strand()->post(
-        std::bind(&hosts::do_fetch, shared_from_this(), handle_fetch));
+        std::bind(&hosts::do_fetch_address, shared_from_this(),
+            handle_fetch));
 }
-void hosts::do_fetch(fetch_handler handle_fetch)
+void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 {
     if (buffer_.empty())
     {
@@ -89,6 +90,17 @@ void hosts::do_fetch(fetch_handler handle_fetch)
     address.ip = buffer_[index].ip;
     address.port = buffer_[index].port;
     handle_fetch(std::error_code(), address);
+}
+
+void hosts::fetch_count(fetch_count_handler handle_fetch)
+{
+    strand()->post(
+        std::bind(&hosts::do_fetch_count, shared_from_this(),
+            handle_fetch));
+}
+void hosts::do_fetch_count(fetch_count_handler handle_fetch)
+{
+    handle_fetch(std::error_code(), buffer_.size());
 }
 
 } // libbitcoin

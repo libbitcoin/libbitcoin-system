@@ -46,7 +46,7 @@ int main()
     //}
     h->load("hosts", handle_store);
     log_info() << "hello";
-    h->fetch(handle_fetch);
+    h->fetch_address(handle_fetch);
     sleep(2);
     h->save("hosts1", handle_store);
     std::cin.get();

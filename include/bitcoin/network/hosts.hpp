@@ -25,7 +25,10 @@ public:
 
     typedef std::function<
         void (const std::error_code&, const message::network_address&)>
-            fetch_handler;
+            fetch_address_handler;
+
+    typedef std::function<void (const std::error_code&, size_t)>
+        fetch_count_handler;
 
     hosts();
 
@@ -34,7 +37,8 @@ public:
 
     void store(const message::network_address address,
         store_handler handle_store);
-    void fetch(fetch_handler handle_fetch);
+    void fetch_address(fetch_address_handler handle_fetch);
+    void fetch_count(fetch_count_handler handle_fetch);
 
 private:
     struct hosts_field
@@ -48,7 +52,8 @@ private:
 
     void do_store(const message::network_address address,
         store_handler handle_store);
-    void do_fetch(fetch_handler handle_fetch);
+    void do_fetch_address(fetch_address_handler handle_fetch_address);
+    void do_fetch_count(fetch_count_handler handle_fetch);
 
     boost::circular_buffer<hosts_field> buffer_;
 };
