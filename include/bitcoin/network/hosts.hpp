@@ -30,7 +30,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
 
-    hosts();
+    hosts(size_t capacity=26000);
 
     void load(const std::string& filename, load_handler handle_load);
     void save(const std::string& filename, save_handler handle_save);

@@ -8,8 +8,8 @@
 
 namespace libbitcoin {
 
-hosts::hosts()
-  : buffer_(26000)
+hosts::hosts(size_t capacity)
+  : buffer_(capacity)
 {
     srand(time(nullptr));
 }
