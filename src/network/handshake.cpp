@@ -35,24 +35,17 @@ handshake::handshake()
     template_version_.nonce = rand();
 }
 
+void handshake::start(start_handler handle_start)
+{
+    discover_external_ip(std::bind(handle_start, _1));
+}
+
 void handshake::connect(network_ptr net, const std::string& hostname,
     uint16_t port, network::connect_handler handle_connect)
 {
-    discover_external_ip(
-        std::bind(&handshake::handle_discover_ip, shared_from_this(),
-            _1, net, hostname, port, handle_connect));
-}
-
-void handshake::handle_discover_ip(const std::error_code& ec,
-    network_ptr net, const std::string& hostname,
-    uint16_t port, network::connect_handler handle_connect)
-{
-    if (ec)
-        handle_connect(ec, nullptr);
-    else
-        net->connect(hostname, port, 
-            strand_->wrap(std::bind(&handshake::handle_connect,
-                shared_from_this(), _1, _2, handle_connect)));
+    net->connect(hostname, port, 
+        strand_->wrap(std::bind(&handshake::handle_connect,
+            shared_from_this(), _1, _2, handle_connect)));
 }
 
 void handshake::handle_connect(const std::error_code& ec,
@@ -61,10 +54,10 @@ void handshake::handle_connect(const std::error_code& ec,
     if (ec)
         handle_connect(ec, node);
     else
-        start(node, std::bind(handle_connect, _1, node));
+        ready(node, std::bind(handle_connect, _1, node));
 }
 
-void handshake::start(channel_ptr node,
+void handshake::ready(channel_ptr node,
     handshake::handshake_handler handle_handshake)
 {
     atomic_counter_ptr counter = std::make_shared<atomic_counter>(0);

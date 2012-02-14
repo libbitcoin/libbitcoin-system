@@ -72,12 +72,19 @@ void handle_handshake(const std::error_code& ec, channel_ptr node,
     hs->fetch_network_address(show_ip);
 }
 
+void handle_init(const std::error_code& ec, handshake_ptr hs, network_ptr net)
+{
+    if (ec)
+        error_exit(ec.message());
+    hs->connect(net, "localhost", 8333,
+        std::bind(&handle_handshake, _1, _2, hs));
+}
+
 int main()
 {
     network_ptr net = std::make_shared<network>();
     handshake_ptr hs = std::make_shared<handshake>();
-    hs->connect(net, "localhost", 8333,
-        std::bind(&handle_handshake, _1, _2, hs));
+    hs->start(std::bind(handle_init, _1, hs, net));
 
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return inv_count >= 500; });

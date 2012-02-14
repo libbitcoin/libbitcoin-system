@@ -12,6 +12,8 @@ class handshake
   : public std::enable_shared_from_this<handshake>
 {
 public:
+    typedef std::function<void (const std::error_code&)> start_handler;
+
     typedef std::function<void (const std::error_code&)> handshake_handler;
 
     typedef std::function<void (
@@ -25,10 +27,11 @@ public:
     typedef std::function<void (const std::error_code&)> setter_handler;
 
     handshake();
+    void start(start_handler handle_start);
 
     void connect(network_ptr net, const std::string& hostname,
         uint16_t port, network::connect_handler handle_connect);
-    void start(channel_ptr node, handshake_handler handle_handshake);
+    void ready(channel_ptr node, handshake_handler handle_handshake);
 
     void discover_external_ip(discover_ip_handler handle_discover);
     void fetch_network_address(fetch_network_address_handler handle_fetch);
@@ -40,9 +43,6 @@ private:
     typedef std::atomic<size_t> atomic_counter;
     typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
 
-    void handle_discover_ip(const std::error_code& ec,
-        network_ptr net, const std::string& hostname,
-        uint16_t port, network::connect_handler handle_connect);
     void handle_connect(const std::error_code& ec,
         channel_ptr node, network::connect_handler handle_connect);
 
