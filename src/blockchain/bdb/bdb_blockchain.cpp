@@ -315,7 +315,7 @@ void bdb_blockchain::do_fetch_block_locator(
     }
 
     message::block_locator locator;
-    std::vector<size_t> indices = block_locator_indices(last_block_depth);
+    indices_list indices = block_locator_indices(last_block_depth);
     for (size_t current_index: indices)
     {
         // bdb provides no way to lookup secondary index AFAIK

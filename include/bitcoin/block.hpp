@@ -6,6 +6,8 @@
 
 namespace libbitcoin {
 
+typedef std::vector<size_t> indices_list;
+
 enum class block_status
 {
     orphan,
@@ -26,7 +28,7 @@ big_number block_work(uint32_t bits);
 
 hash_digest hash_block_header(const message::block& block);
 
-std::vector<size_t> block_locator_indices(int top_depth);
+indices_list block_locator_indices(int top_depth);
 
 message::block genesis_block();
 
