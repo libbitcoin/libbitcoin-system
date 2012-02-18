@@ -228,7 +228,7 @@ message::version satoshi_exporter::load_version(const data_chunk& stream) const
     // Ignored field
     packet.address_me.timestamp = 0;
     if (packet.version < 106) {
-        BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26);
+        BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26);
         return packet;
     }
     packet.address_you = deserial.read_network_address();
@@ -237,11 +237,11 @@ message::version satoshi_exporter::load_version(const data_chunk& stream) const
     packet.nonce = deserial.read_8_bytes();
     packet.user_agent = deserial.read_string();
     if (packet.version < 209) {
-        BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1);
+        BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26 + 26 + 8 + 1);
         return packet;
     }
     packet.start_height = deserial.read_4_bytes();
-    BITCOIN_ASSERT(stream.size() == 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
+    BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
     return packet;
 }
 
@@ -416,7 +416,7 @@ bool satoshi_exporter::verify_header(const message::header& header_msg) const
         return false;
     if (header_msg.command == "version")
     {
-        if (header_msg.payload_length != 85)
+        if (header_msg.payload_length < 85)
             return false;
     }
     else if (header_msg.command == "verack"
