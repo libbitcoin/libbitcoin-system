@@ -114,6 +114,14 @@ bin/tests/base58-test: obj/base58-test.o
 
 base58-test: bin/tests/base58-test
 
+obj/chanstop.o: tests/chanstop.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/chanstop: obj/chanstop.o
+	$(CXX) -o bin/tests/chanstop obj/chanstop.o $(LIBBITCOIN)
+
+chanstop: bin/tests/chanstop
+
 obj/protst.o: tests/protst.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
