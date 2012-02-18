@@ -37,6 +37,9 @@ typedef std::shared_ptr<hosts> hosts_ptr;
 typedef std::shared_ptr<protocol> protocol_ptr;
 typedef std::shared_ptr<chrono_clock> chrono_clock_ptr;
 
+typedef std::atomic<size_t> atomic_counter;
+typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
+
 typedef std::shared_ptr<io_service> service_ptr;
 typedef std::shared_ptr<io_service::work> work_ptr;
 typedef std::shared_ptr<io_service::strand> strand_ptr;

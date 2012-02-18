@@ -33,6 +33,7 @@
 #include <bitcoin/utility/clock.hpp>
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/network/protocol.hpp>
 
 namespace bc = libbitcoin;
 

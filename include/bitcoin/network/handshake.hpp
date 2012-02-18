@@ -40,9 +40,6 @@ public:
         setter_handler handle_set);
 
 private:
-    typedef std::atomic<size_t> atomic_counter;
-    typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
-
     void handle_connect(const std::error_code& ec,
         channel_ptr node, network::connect_handler handle_connect);
 

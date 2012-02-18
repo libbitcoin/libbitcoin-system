@@ -1,6 +1,6 @@
 CXXFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC $(CPPFLAGS)
 INCLUDES= -Iinclude/ -Iusr/include/
-LIBS= -Lusr/lib usr/lib/libcppdb.a -lcrypto -lboost_thread -lboost_system -ldl -lpq -lz -lpthread -ldl
+LIBS= -Lusr/lib -lcrypto -lboost_thread -lboost_system -ldl -lz -lpthread -ldl
 BASE_MODULES= \
 	network.o  \
 	handshake.o  \
@@ -113,6 +113,14 @@ bin/tests/base58-test: obj/base58-test.o
 	$(CXX) -o bin/tests/base58-test obj/base58-test.o $(LIBBITCOIN)
 
 base58-test: bin/tests/base58-test
+
+obj/protst.o: tests/protst.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/protst: obj/protst.o
+	$(CXX) -o bin/tests/protst obj/protst.o $(LIBBITCOIN)
+
+protst: bin/tests/protst
 
 obj/hosts-test.o: tests/hosts-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
@@ -335,8 +343,8 @@ obj/transaction.o: src/transaction.cpp
 obj/block-hash.o: tests/block-hash.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-bin/tests/block-hash: obj/block-hash.o obj/block.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/error.o
-	$(CXX) -o bin/tests/block-hash obj/block-hash.o obj/block.o obj/postgresql_storage.o obj/sha256.o obj/script.o obj/logger.o obj/ripemd.o obj/types.o obj/serializer.o obj/transaction.o obj/elliptic_curve_key.o obj/error.o $(LIBS)
+bin/tests/block-hash: obj/block-hash.o
+	$(CXX) -o bin/tests/block-hash obj/block-hash.o $(LIBBITCOIN) $(LIBS)
 
 block-hash: bin/tests/block-hash
 

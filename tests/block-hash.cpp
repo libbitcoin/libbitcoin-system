@@ -1,13 +1,8 @@
-#include <bitcoin/storage/postgresql_storage.hpp>
-#include <bitcoin/messages.hpp>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/block.hpp>
-#include <bitcoin/transaction.hpp>
+#include <bitcoin/bitcoin.hpp>
 #include <iostream>
+using namespace libbitcoin;
 
 using std::shared_ptr;
-using libbitcoin::postgresql_storage;
-typedef shared_ptr<postgresql_storage> psql_ptr;
 
 void recv_block(std::error_code ec, libbitcoin::message::block block)
 {
@@ -29,8 +24,12 @@ void recv_block(std::error_code ec, libbitcoin::message::block block)
 
 int main()
 {
-    psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
-    psql->fetch_block_by_depth(170, recv_block);
+    //psql_ptr psql(new postgresql_storage("bitcoin", "genjix"));
+    //psql->fetch_block_by_depth(170, recv_block);
+
+    indices_list ind = block_locator_indices(100);
+    for (size_t i: ind)
+        log_debug() << i;
     return 0;
 }
 

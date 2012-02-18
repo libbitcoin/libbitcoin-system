@@ -64,9 +64,10 @@ void hosts::store(const message::network_address address,
     store_handler handle_store)
 {
     strand()->post(
-        [&buffer_, address]()
+        [&buffer_, address, handle_store]()
         {
             buffer_.push_back(hosts_field{address.ip, address.port});
+            handle_store(std::error_code());
         });
 }
 
