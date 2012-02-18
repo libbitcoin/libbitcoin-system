@@ -10,7 +10,8 @@ enum class log_domain
     normal,
     network,
     storage,
-    validation
+    validation,
+    protocol
 };
 
 enum class logger_level

@@ -2,8 +2,9 @@
 #define LIBBITCOIN_PROTOCOL_H
 
 #include <memory>
+#include <system_error>
 
-#include <bitcoin/network/hosts.hpp>
+#include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 
@@ -20,6 +21,12 @@ public:
     void bootstrap(completion_handler handle_complete);
     void run();
 private:
+    // start sequence
+    void handle_bootstrap(const std::error_code& ec,
+        atomic_counter_ptr count_paths, completion_handler handle_complete);
+    void handle_start_handshake_service(const std::error_code& ec,
+        atomic_counter_ptr count_paths, completion_handler handle_complete);
+
     // stop sequence
     void handle_save(const std::error_code& ec,
         completion_handler handle_complete);
@@ -34,7 +41,8 @@ private:
         completion_handler handle_complete);
 
     const std::string hosts_filename_;
-    hosts_ptr hosts_dir_;
+    hosts_ptr hosts_;
+    handshake_ptr handshake_;
 };
 
 } // libbitcoin
