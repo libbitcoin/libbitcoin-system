@@ -5,6 +5,8 @@
 #include <system_error>
 
 #include <bitcoin/types.hpp>
+#include <bitcoin/messages.hpp>
+#include <bitcoin/utility/threads.hpp>
 
 namespace libbitcoin {
 
@@ -20,7 +22,15 @@ public:
 
     void bootstrap(completion_handler handle_complete);
     void run();
+
 private:
+    struct connection_info
+    {
+        message::network_address address;
+        channel_ptr node;
+    };
+    typedef std::vector<connection_info> connection_list;
+
     // start sequence
     void handle_bootstrap(const std::error_code& ec,
         atomic_counter_ptr count_paths, completion_handler handle_complete);
@@ -40,9 +50,16 @@ private:
         size_t total_count, atomic_counter_ptr counter,
         completion_handler handle_complete);
 
+    // run loop
+
     const std::string hosts_filename_;
+    const size_t max_outbound_;
     hosts_ptr hosts_;
     handshake_ptr handshake_;
+
+    thread_core_ptr threaded_;
+    strand_ptr strand_;
+    connection_list connections_;
 };
 
 } // libbitcoin

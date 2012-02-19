@@ -9,8 +9,11 @@ using std::placeholders::_2;
 
 namespace libbitcoin {
 
+message::ip_address get_address(uint32_t raw_ip);
+extern std::vector<uint32_t> seed_nodes;
+
 protocol::protocol()
-  : hosts_filename_("hosts")
+  : hosts_filename_("hosts"), max_outbound_(8)
 {
     hosts_ = std::make_shared<hosts>();
     handshake_ = std::make_shared<handshake>();
@@ -18,7 +21,7 @@ protocol::protocol()
 
 void protocol::start(completion_handler handle_complete)
 {
-    atomic_counter_ptr count_paths = std::make_shared<atomic_counter>();
+    atomic_counter_ptr count_paths = std::make_shared<atomic_counter>(0);
     bootstrap(
         std::bind(&protocol::handle_bootstrap, this,
             _1, count_paths, handle_complete));
@@ -38,7 +41,10 @@ void protocol::handle_bootstrap(const std::error_code& ec,
     }
     ++(*count_paths);
     if (*count_paths == 2)
+    {
         handle_complete(std::error_code());
+        run();
+    }
 }
 void protocol::handle_start_handshake_service(const std::error_code& ec,
     atomic_counter_ptr count_paths, completion_handler handle_complete)
@@ -52,7 +58,10 @@ void protocol::handle_start_handshake_service(const std::error_code& ec,
     }
     ++(*count_paths);
     if (*count_paths == 2)
+    {
         handle_complete(std::error_code());
+        run();
+    }
 }
 
 void protocol::stop(completion_handler handle_complete)
@@ -73,12 +82,6 @@ void protocol::handle_save(const std::error_code& ec,
     handle_complete(std::error_code());
 }
 
-std::vector<message::network_address> seed_nodes{
-    message::network_address{0, 0,
-        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            255, 255, 127, 0, 0, 1},
-        8333}
-};
 void protocol::bootstrap(completion_handler handle_complete)
 {
     hosts_->load(hosts_filename_,
@@ -108,13 +111,18 @@ void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
         return;
     }
     if (hosts_count == 0)
-        for (const message::network_address& address: seed_nodes)
+    {
+        atomic_counter_ptr counter = std::make_shared<atomic_counter>(0);
+        for (uint32_t raw_ip: seed_nodes)
         {
-            atomic_counter_ptr counter = std::make_shared<atomic_counter>();
+            message::network_address address;
+            address.ip = get_address(raw_ip);
+            address.port = 8333;
             hosts_->store(address,
                 std::bind(&protocol::handle_seed_store, this,
                     _1, seed_nodes.size(), counter, handle_complete));
         }
+    }
     else
         handle_complete(std::error_code());
 }
@@ -134,6 +142,13 @@ void protocol::handle_seed_store(const std::error_code& ec,
     {
         handle_complete(std::error_code());
     }
+}
+
+void protocol::run()
+{
+    threaded_ = std::make_shared<thread_core>();
+    strand_ = threaded_->create_strand();
+    log_debug() << "Running. Brrrrmmm";
 }
 
 } // libbitcoin
