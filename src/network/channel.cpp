@@ -93,12 +93,14 @@ void channel::handle_timeout(const boost::system::error_code& ec)
         return;
     log_info(log_domain::network) << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
-    tcp::endpoint remote_endpoint = socket_->remote_endpoint();
-    log_debug(log_domain::network) << "Closing channel "
-        << remote_endpoint.address().to_string();
+    boost::system::error_code ret_ec;
+    tcp::endpoint remote_endpoint = socket_->remote_endpoint(ret_ec);
+    if (!ec)
+        log_debug(log_domain::network) << "Closing channel "
+            << remote_endpoint.address().to_string();
+    ret_ec = boost::system::error_code();
     // Force the socket closed
     // Should we do something with these error_codes?
-    boost::system::error_code ret_ec;
     socket_->shutdown(tcp::socket::shutdown_both, ret_ec);
     socket_->close(ret_ec);
     stop_impl();
@@ -157,7 +159,7 @@ void channel::read_checksum(const message::header& header_msg)
 {
     async_read(*socket_, buffer(inbound_checksum_),
         strand_->wrap(std::bind(&channel::handle_read_checksum, 
-            shared_from_this(), header_msg, _1, _2)));
+            shared_from_this(), _1, _2, header_msg)));
 }
 
 void channel::read_payload(const message::header& header_msg)
@@ -165,7 +167,7 @@ void channel::read_payload(const message::header& header_msg)
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
         strand_->wrap(std::bind(&channel::handle_read_payload, 
-            shared_from_this(), header_msg, _1, _2)));
+            shared_from_this(), _1, _2, header_msg)));
 }
 
 void channel::handle_read_header(const boost::system::error_code& ec,
@@ -202,8 +204,8 @@ void channel::handle_read_header(const boost::system::error_code& ec,
     reset_timers();
 }
 
-void channel::handle_read_checksum(message::header& header_msg,
-        const boost::system::error_code& ec, size_t bytes_transferred)
+void channel::handle_read_checksum(const boost::system::error_code& ec,
+    size_t bytes_transferred, message::header& header_msg)
 {
     if (problems_check(ec))
         return;
@@ -217,8 +219,8 @@ void channel::handle_read_checksum(message::header& header_msg,
     reset_timers();
 }
 
-void channel::handle_read_payload(const message::header& header_msg,
-        const boost::system::error_code& ec, size_t bytes_transferred)
+void channel::handle_read_payload(const boost::system::error_code& ec,
+    size_t bytes_transferred, const message::header& header_msg)
 {
     if (problems_check(ec))
         return;

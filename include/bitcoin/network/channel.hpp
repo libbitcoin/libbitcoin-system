@@ -168,10 +168,10 @@ private:
 
     void handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred);
-    void handle_read_checksum(message::header& header_msg,
-        const boost::system::error_code& ec, size_t bytes_transferred);
-    void handle_read_payload(const message::header& header_msg,
-        const boost::system::error_code& ec, size_t bytes_transferred);
+    void handle_read_checksum(const boost::system::error_code& ec,
+        size_t bytes_transferred, message::header& header_msg);
+    void handle_read_payload(const boost::system::error_code& ec,
+        size_t bytes_transferred, const message::header& header_msg);
 
     template<typename Message, typename ExportFunc, typename SubscriberPtr>
     bool transport(const data_chunk& payload_stream,
