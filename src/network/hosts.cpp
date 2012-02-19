@@ -71,6 +71,31 @@ void hosts::store(const message::network_address address,
         });
 }
 
+void hosts::remove(const message::network_address address,
+    remove_handler handle_remove)
+{
+    strand()->post(
+        std::bind(&hosts::do_remove, shared_from_this(),
+            address, handle_remove));
+}
+bool hosts::hosts_field::operator==(const hosts_field& other)
+{
+    return ip == other.ip && port == other.port;
+}
+void hosts::do_remove(const message::network_address address,
+    remove_handler handle_remove)
+{
+    auto it = std::find(buffer_.begin(), buffer_.end(),
+        hosts_field{address.ip, address.port});
+    if (it == buffer_.end())
+    {
+        handle_remove(error::missing_object);
+        return;
+    }
+    buffer_.erase(it);
+    handle_remove(std::error_code());
+}
+
 void hosts::fetch_address(fetch_address_handler handle_fetch)
 {
     strand()->post(

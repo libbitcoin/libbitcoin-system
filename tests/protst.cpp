@@ -20,12 +20,15 @@ void handle_start(const std::error_code& ec)
     if (ec)
         error_exit(ec);
     log_debug() << "started";
-    prot->stop(handle_stop);
+    //prot->stop(handle_stop);
 }
 int main()
 {
     prot = std::make_shared<protocol>();
     prot->start(handle_start);
+    std::cin.get();
+    prot->stop(handle_stop);
+    log_debug() << "stopping.";
     std::cin.get();
     return 0;
 }

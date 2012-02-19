@@ -18,10 +18,9 @@ class hosts
 {
 public:
     typedef std::function<void (const std::error_code&)> load_handler;
-
     typedef std::function<void (const std::error_code&)> save_handler;
-
     typedef std::function<void (const std::error_code&)> store_handler;
+    typedef std::function<void (const std::error_code&)> remove_handler;
 
     typedef std::function<
         void (const std::error_code&, const message::network_address&)>
@@ -37,12 +36,15 @@ public:
 
     void store(const message::network_address address,
         store_handler handle_store);
+    void remove(const message::network_address address,
+        remove_handler handle_remove);
     void fetch_address(fetch_address_handler handle_fetch);
     void fetch_count(fetch_count_handler handle_fetch);
 
 private:
     struct hosts_field
     {
+        bool operator==(const hosts_field& other);
         message::ip_address ip;
         uint16_t port;
     };
@@ -50,8 +52,8 @@ private:
     void do_load(const std::string& filename, load_handler handle_load);
     void do_save(const std::string& filename, save_handler handle_save);
 
-    void do_store(const message::network_address address,
-        store_handler handle_store);
+    void do_remove(const message::network_address address,
+        remove_handler handle_remove);
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);
 
