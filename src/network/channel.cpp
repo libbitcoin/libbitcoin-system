@@ -191,16 +191,7 @@ void channel::handle_read_header(const boost::system::error_code& ec,
 
     log_info(log_domain::network) << "r: " << header_msg.command
             << " (" << header_msg.payload_length << " bytes)";
-    if (export_->is_checksum_used(header_msg))
-    {
-        // Read checksum
-        read_checksum(header_msg);
-    }
-    else
-    {
-        // Read payload
-        read_payload(header_msg);
-    }
+    read_checksum(header_msg);
     reset_timers();
 }
 
@@ -213,8 +204,7 @@ void channel::handle_read_checksum(const boost::system::error_code& ec,
     data_chunk checksum_stream = data_chunk(
             inbound_checksum_.begin(), inbound_checksum_.end());
     BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
-    //header_msg.checksum = cast_stream<uint32_t>(checksum_stream);
-    header_msg.checksum = export_->load_checksum(checksum_stream);
+    header_msg.checksum = cast_chunk<uint32_t>(checksum_stream);
     read_payload(header_msg);
     reset_timers();
 }
@@ -228,7 +218,7 @@ void channel::handle_read_payload(const boost::system::error_code& ec,
     data_chunk payload_stream = data_chunk(
         inbound_payload_.begin(), inbound_payload_.end());
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
-    if (!export_->verify_checksum(header_msg, payload_stream))
+    if (header_msg.checksum != generate_sha256_checksum(payload_stream))
     {
         log_warning(log_domain::network) << "Bad checksum!";
         raw_subscriber_->relay(error::bad_stream,

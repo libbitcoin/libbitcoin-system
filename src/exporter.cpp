@@ -448,23 +448,5 @@ bool satoshi_exporter::verify_header(const message::header& header_msg) const
     return true;
 }
 
-bool satoshi_exporter::is_checksum_used(
-    const message::header& header_msg) const
-{
-    return header_msg.command != "version" && header_msg.command != "verack";
-}
-uint32_t satoshi_exporter::load_checksum(const data_chunk& chunk) const
-{
-    deserializer deserial(chunk);
-    return deserial.read_4_bytes();
-}
-bool satoshi_exporter::verify_checksum(const message::header& header_msg,
-        const data_chunk& stream) const
-{
-    if (!is_checksum_used(header_msg))
-        return true;
-    return header_msg.checksum == generate_sha256_checksum(stream);
-}
-
 } // libbitcoin
 
