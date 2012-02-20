@@ -213,7 +213,7 @@ void protocol::save_seeded_addresses(const std::error_code& ec,
     }
     else
     {
-        log_info() << "Saving seeded addresses.";
+        log_info() << "Storing seeded addresses.";
         for (const message::network_address& net_address: packet.addresses)
             hosts_->store(net_address,
                 strand()->wrap(std::bind(&protocol::handle_seed_store,
@@ -224,13 +224,16 @@ void protocol::handle_seed_store(const std::error_code& ec)
 {
     if (ec)
         log_error(log_domain::protocol) 
-            << "Failed to save addresses from seed nodes: "
+            << "Failed to store addresses from seed nodes: "
             << ec.message();
 }
 
 void protocol::run()
 {
     strand()->dispatch(std::bind(&protocol::try_connect, shared_from_this()));
+    network_->listen(8333,
+        strand()->wrap(std::bind(&protocol::handle_listen,
+            shared_from_this(), _1, _2)));
 }
 void protocol::try_connect()
 {
@@ -290,6 +293,34 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     }
 }
 
+void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
+{
+    if (ec)
+    {
+        log_error(log_domain::protocol)
+            << "Error while listening: " << ec.message();
+    }
+    else
+    {
+        accept->accept(
+            strand()->wrap(std::bind(&protocol::handle_accept,
+                shared_from_this(), _1, _2, accept)));
+    }
+}
+void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
+    acceptor_ptr accept)
+{
+    if (ec)
+    {
+        log_error(log_domain::protocol)
+            << "Problem accepting connection: " << ec.message();
+    }
+    else
+    {
+        setup_new_channel(node);
+    }
+}
+
 void handle_send(const std::error_code& ec)
 {
     if (ec)
@@ -334,7 +365,7 @@ void protocol::receive_address_message(const std::error_code& ec,
     }
     else
     {
-        log_info() << "Saving addresses.";
+        log_info() << "Storing addresses.";
         for (const message::network_address& net_address: packet.addresses)
             hosts_->store(net_address,
                 strand()->wrap(std::bind(&protocol::handle_store_address,
@@ -345,7 +376,20 @@ void protocol::handle_store_address(const std::error_code& ec)
 {
     if (ec)
         log_error(log_domain::protocol) 
-            << "Failed to save address: " << ec.message();
+            << "Failed to store address: " << ec.message();
+}
+
+void protocol::fetch_connection_count(
+    fetch_connection_count_handler handle_fetch)
+{
+    strand()->post(
+        std::bind(&protocol::do_fetch_connection_count,
+            shared_from_this(), handle_fetch));
+}
+void protocol::do_fetch_connection_count(
+    fetch_connection_count_handler handle_fetch)
+{
+    handle_fetch(std::error_code(), connections_.size());
 }
 
 } // libbitcoin

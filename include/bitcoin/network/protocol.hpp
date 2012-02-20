@@ -17,12 +17,18 @@ class protocol
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
 
+    typedef std::function<void (const std::error_code&, size_t)>
+        fetch_connection_count_handler;
+
     protocol();
     void start(completion_handler handle_complete);
     void stop(completion_handler handle_complete);
 
     void bootstrap(completion_handler handle_complete);
     void run();
+
+    void fetch_connection_count(
+        fetch_connection_count_handler handle_fetch);
 
 private:
     struct connection_info
@@ -77,12 +83,19 @@ private:
     void handle_seed_store(const std::error_code& ec);
 
     // run loop
+    // Connect outwards
     void try_connect();
     void attempt_connect(const std::error_code& ec,
         const message::network_address& packet);
     void handle_connect(const std::error_code& ec, channel_ptr node,
         const message::network_address& address);
 
+    // Accept inwards connections
+    void handle_listen(const std::error_code& ec, acceptor_ptr accept);
+    void handle_accept(const std::error_code& ec, channel_ptr node,
+        acceptor_ptr accept);
+
+    // Channel setup
     void setup_new_channel(channel_ptr node);
     void channel_stopped(const std::error_code& ec,
         channel_ptr which_node);
@@ -91,6 +104,10 @@ private:
     void receive_address_message(const std::error_code& ec,
         const message::address& addr, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
+
+    // fetch methods
+    void do_fetch_connection_count(
+        fetch_connection_count_handler handle_fetch);
 
     const std::string hosts_filename_;
     hosts_ptr hosts_;
