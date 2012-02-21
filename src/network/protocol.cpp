@@ -4,10 +4,10 @@
 #include <bitcoin/network/handshake.hpp>
 #include <bitcoin/utility/logger.hpp>
 
+namespace libbitcoin {
+
 using std::placeholders::_1;
 using std::placeholders::_2;
-
-namespace libbitcoin {
 
 static std::string pretty(const message::ip_address& ip)
 {
