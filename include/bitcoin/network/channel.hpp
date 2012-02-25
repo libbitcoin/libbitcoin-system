@@ -23,8 +23,8 @@
 
 namespace libbitcoin {
 
-class channel
-  : public std::enable_shared_from_this<channel>
+class channel_proxy
+  : public std::enable_shared_from_this<channel_proxy>
 {
 public:
     typedef std::function<void (const std::error_code&)> send_handler;
@@ -61,11 +61,12 @@ public:
 
     typedef std::function<void (const std::error_code&)> stop_handler;
 
-    channel(socket_ptr socket, thread_core_ptr threaded, exporter_ptr saver);
-    ~channel();
+    channel_proxy(socket_ptr socket,
+        thread_core_ptr threaded, exporter_ptr saver);
+    ~channel_proxy();
 
-    channel(const channel&) = delete;
-    void operator=(const channel&) = delete;
+    channel_proxy(const channel_proxy&) = delete;
+    void operator=(const channel_proxy&) = delete;
 
     void start();
     void stop();
@@ -94,7 +95,7 @@ public:
         if (stopped_)
             handle_send(error::channel_stopped);
         else
-            strand_->post(std::bind(&channel::do_send<Message>,
+            strand_->post(std::bind(&channel_proxy::do_send<Message>,
                 shared_from_this(), packet, handle_send));
     }
     void send_raw(const message::header& packet_header,
@@ -143,7 +144,7 @@ private:
         shared_const_buffer buffer(
             create_raw_message(export_, packet));
         async_write(*socket_, buffer,
-            std::bind(&channel::call_handle_send, shared_from_this(),
+            std::bind(&channel_proxy::call_handle_send, shared_from_this(),
                 std::placeholders::_1, handle_send));
     }
     void do_send_raw(const message::header& packet_header,
@@ -241,6 +242,59 @@ private:
     raw_subscriber_type::ptr raw_subscriber_;
 
     stop_subscriber_type::ptr stop_subscriber_;
+};
+
+class channel
+{
+public:
+    channel(socket_ptr socket,
+        thread_core_ptr threaded, exporter_ptr saver);
+    ~channel();
+
+    void stop();
+
+    template <typename Message>
+    void send(const Message& packet,
+        channel_proxy::send_handler handle_send)
+    {
+        channel_proxy_ptr proxy = weak_proxy_.lock();
+        if (!proxy)
+            handle_send(error::channel_stopped);
+        else
+            proxy->send(packet, handle_send);
+    }
+
+    void send_raw(const message::header& packet_header,
+        const data_chunk& payload, channel_proxy::send_handler handle_send);
+
+    void subscribe_version(
+        channel_proxy::receive_version_handler handle_receive);
+    void subscribe_verack(
+        channel_proxy::receive_verack_handler handle_receive);
+    void subscribe_address(
+        channel_proxy::receive_address_handler handle_receive);
+    void subscribe_get_address(
+        channel_proxy::receive_get_address_handler handle_receive);
+    void subscribe_inventory(
+        channel_proxy::receive_inventory_handler handle_receive);
+    void subscribe_get_data(
+        channel_proxy::receive_get_data_handler handle_receive);
+    void subscribe_get_blocks(
+        channel_proxy::receive_get_blocks_handler handle_receive);
+    void subscribe_transaction(
+        channel_proxy::receive_transaction_handler handle_receive);
+    void subscribe_block(
+        channel_proxy::receive_block_handler handle_receive);
+    void subscribe_raw(
+        channel_proxy::receive_raw_handler handle_receive);
+
+    void subscribe_stop(
+        channel_proxy::stop_handler handle_stop);
+
+private:
+    typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
+
+    std::weak_ptr<channel_proxy> weak_proxy_;
 };
 
 } // libbitcoin

@@ -16,7 +16,7 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
 const time_duration heartbeat_time = seconds(0) + minutes(30);
 
-channel::channel(socket_ptr socket, thread_core_ptr threaded,
+channel_proxy::channel_proxy(socket_ptr socket, thread_core_ptr threaded,
     exporter_ptr saver)
   : stopped_(false), socket_(socket), export_(saver), threaded_(threaded)
 {
@@ -43,26 +43,26 @@ channel::channel(socket_ptr socket, thread_core_ptr threaded,
         std::make_shared<stop_subscriber_type>(strand_);
 }
 
-channel::~channel()
+channel_proxy::~channel_proxy()
 {
     stop();
 }
 
-void channel::start()
+void channel_proxy::start()
 {
     read_header();
     set_timeout(initial_timeout);
     set_heartbeat(heartbeat_time);
 }
 
-void channel::stop()
+void channel_proxy::stop()
 {
     if (stopped_)
         return;
     stop_impl();
     stop_subscriber_->relay(error::channel_stopped);
 }
-void channel::stop_impl()
+void channel_proxy::stop_impl()
 {
     // We need this because the timeout timer shares this code with stop()
     // But sends a different error_code
@@ -86,7 +86,7 @@ bool timer_errors(const boost::system::error_code& ec, bool stopped)
     return false;
 }
 
-void channel::handle_timeout(const boost::system::error_code& ec)
+void channel_proxy::handle_timeout(const boost::system::error_code& ec)
 {
     if (timer_errors(ec, stopped_))
         return;
@@ -110,34 +110,36 @@ void handle_ping(const std::error_code&)
 {
     // if there's a problem sending then this channel will be stopped
 }
-void channel::handle_heartbeat(const boost::system::error_code& ec)
+void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 {
     if (timer_errors(ec, stopped_))
         return;
     send(message::ping(), handle_ping);
 }
 
-void channel::set_timeout(const boost::posix_time::time_duration timeout)
+void channel_proxy::set_timeout(
+    const boost::posix_time::time_duration timeout)
 {
     timeout_->cancel();
     timeout_->expires_from_now(timeout);
     timeout_->async_wait(std::bind(
-        &channel::handle_timeout, shared_from_this(), _1));
+        &channel_proxy::handle_timeout, shared_from_this(), _1));
 }
-void channel::set_heartbeat(const boost::posix_time::time_duration timeout)
+void channel_proxy::set_heartbeat(
+    const boost::posix_time::time_duration timeout)
 {
     heartbeat_->cancel();
     heartbeat_->expires_from_now(timeout);
     heartbeat_->async_wait(std::bind(
-        &channel::handle_heartbeat, shared_from_this(), _1));
+        &channel_proxy::handle_heartbeat, shared_from_this(), _1));
 }
-void channel::reset_timers()
+void channel_proxy::reset_timers()
 {
     set_timeout(disconnect_timeout);
     set_heartbeat(heartbeat_time);
 }
 
-bool channel::problems_check(const boost::system::error_code& ec)
+bool channel_proxy::problems_check(const boost::system::error_code& ec)
 {
     if (stopped_)
         return true;
@@ -147,29 +149,29 @@ bool channel::problems_check(const boost::system::error_code& ec)
     return true;
 }
 
-void channel::read_header()
+void channel_proxy::read_header()
 {
     async_read(*socket_, buffer(inbound_header_),
-        strand_->wrap(std::bind(&channel::handle_read_header,
+        strand_->wrap(std::bind(&channel_proxy::handle_read_header,
             shared_from_this(), _1, _2)));
 }
 
-void channel::read_checksum(const message::header& header_msg)
+void channel_proxy::read_checksum(const message::header& header_msg)
 {
     async_read(*socket_, buffer(inbound_checksum_),
-        strand_->wrap(std::bind(&channel::handle_read_checksum, 
+        strand_->wrap(std::bind(&channel_proxy::handle_read_checksum, 
             shared_from_this(), _1, _2, header_msg)));
 }
 
-void channel::read_payload(const message::header& header_msg)
+void channel_proxy::read_payload(const message::header& header_msg)
 {
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
-        strand_->wrap(std::bind(&channel::handle_read_payload, 
+        strand_->wrap(std::bind(&channel_proxy::handle_read_payload, 
             shared_from_this(), _1, _2, header_msg)));
 }
 
-void channel::handle_read_header(const boost::system::error_code& ec,
+void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     size_t bytes_transferred)
 {
     if (problems_check(ec))
@@ -194,7 +196,7 @@ void channel::handle_read_header(const boost::system::error_code& ec,
     reset_timers();
 }
 
-void channel::handle_read_checksum(const boost::system::error_code& ec,
+void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
     size_t bytes_transferred, message::header& header_msg)
 {
     if (problems_check(ec))
@@ -208,7 +210,7 @@ void channel::handle_read_checksum(const boost::system::error_code& ec,
     reset_timers();
 }
 
-void channel::handle_read_payload(const boost::system::error_code& ec,
+void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     size_t bytes_transferred, const message::header& header_msg)
 {
     if (problems_check(ec))
@@ -303,7 +305,7 @@ void channel::handle_read_payload(const boost::system::error_code& ec,
     }
 }
 
-void channel::call_handle_send(const boost::system::error_code& ec,
+void channel_proxy::call_handle_send(const boost::system::error_code& ec,
     send_handler handle_send)
 {
     if (problems_check(ec))
@@ -312,52 +314,57 @@ void channel::call_handle_send(const boost::system::error_code& ec,
         handle_send(std::error_code());
 }
 
-void channel::subscribe_version(receive_version_handler handle_receive)
+void channel_proxy::subscribe_version(receive_version_handler handle_receive)
 {
     generic_subscribe<message::version>(
         handle_receive, version_subscriber_);
 }
-void channel::subscribe_verack(receive_verack_handler handle_receive)
+void channel_proxy::subscribe_verack(receive_verack_handler handle_receive)
 {
     generic_subscribe<message::verack>(
         handle_receive, verack_subscriber_);
 }
-void channel::subscribe_address(receive_address_handler handle_receive)
+void channel_proxy::subscribe_address(receive_address_handler handle_receive)
 {
     generic_subscribe<message::address>(
         handle_receive, address_subscriber_);
 }
-void channel::subscribe_inventory(receive_inventory_handler handle_receive)
+void channel_proxy::subscribe_inventory(
+    receive_inventory_handler handle_receive)
 {
     generic_subscribe<message::inventory>(
         handle_receive, inventory_subscriber_);
 }
-void channel::subscribe_get_data(receive_get_data_handler handle_receive)
+void channel_proxy::subscribe_get_data(
+    receive_get_data_handler handle_receive)
 {
     generic_subscribe<message::get_data>(
         handle_receive, get_data_subscriber_);
 }
-void channel::subscribe_get_blocks(receive_get_blocks_handler handle_receive)
+void channel_proxy::subscribe_get_blocks(
+    receive_get_blocks_handler handle_receive)
 {
     generic_subscribe<message::get_blocks>(
         handle_receive, get_blocks_subscriber_);
 }
-void channel::subscribe_transaction(receive_transaction_handler handle_receive)
+void channel_proxy::subscribe_transaction(
+    receive_transaction_handler handle_receive)
 {
     generic_subscribe<message::transaction>(
         handle_receive, transaction_subscriber_);
 }
-void channel::subscribe_block(receive_block_handler handle_receive)
+void channel_proxy::subscribe_block(receive_block_handler handle_receive)
 {
     generic_subscribe<message::block>(
         handle_receive, block_subscriber_);
 }
-void channel::subscribe_get_address(receive_get_address_handler handle_receive)
+void channel_proxy::subscribe_get_address(
+    receive_get_address_handler handle_receive)
 {
     generic_subscribe<message::get_address>(
         handle_receive, get_address_subscriber_);
 }
-void channel::subscribe_raw(receive_raw_handler handle_receive)
+void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 {
     if (stopped_)
         handle_receive(error::channel_stopped,
@@ -366,7 +373,7 @@ void channel::subscribe_raw(receive_raw_handler handle_receive)
         raw_subscriber_->subscribe(handle_receive);
 }
 
-void channel::subscribe_stop(stop_handler handle_stop)
+void channel_proxy::subscribe_stop(stop_handler handle_stop)
 {
     if (stopped_)
         handle_stop(error::channel_stopped);
@@ -374,16 +381,16 @@ void channel::subscribe_stop(stop_handler handle_stop)
         stop_subscriber_->subscribe(handle_stop);
 }
 
-void channel::send_raw(const message::header& packet_header,
+void channel_proxy::send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     if (stopped_)
         handle_send(error::channel_stopped);
     else
-        strand_->post(std::bind(&channel::do_send_raw,
+        strand_->post(std::bind(&channel_proxy::do_send_raw,
             shared_from_this(), packet_header, payload, handle_send));
 }
-void channel::do_send_raw(const message::header& packet_header,
+void channel_proxy::do_send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     data_chunk raw_header = export_->save(packet_header);
@@ -392,13 +399,148 @@ void channel::do_send_raw(const message::header& packet_header,
     extend_data(whole_message, payload);
     do_send_common(whole_message, handle_send);
 }
-void channel::do_send_common(const data_chunk& whole_message,
+void channel_proxy::do_send_common(const data_chunk& whole_message,
     send_handler handle_send)
 {
     shared_const_buffer buffer(whole_message);
     async_write(*socket_, buffer,
-        std::bind(&channel::call_handle_send, shared_from_this(),
+        std::bind(&channel_proxy::call_handle_send, shared_from_this(),
             std::placeholders::_1, handle_send));
+}
+
+// channel
+
+channel::channel(socket_ptr socket,
+    thread_core_ptr threaded, exporter_ptr saver)
+{
+    channel_proxy_ptr proxy =
+        std::make_shared<channel_proxy>(socket, threaded, saver);
+    proxy->start();
+    weak_proxy_ = proxy;
+}
+channel::~channel()
+{
+    stop();
+}
+
+void channel::stop()
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    // Slowly shutdown
+    if (proxy)
+        proxy->stop();
+}
+
+void channel::send_raw(const message::header& packet_header,
+    const data_chunk& payload, channel_proxy::send_handler handle_send)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_send(error::channel_stopped);
+    else
+        proxy->send_raw(packet_header, payload, handle_send);
+}
+
+void channel::subscribe_version(
+    channel_proxy::receive_version_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::version());
+    else
+        proxy->subscribe_version(handle_receive);
+}
+void channel::subscribe_verack(
+    channel_proxy::receive_verack_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::verack());
+    else
+        proxy->subscribe_verack(handle_receive);
+}
+void channel::subscribe_address(
+    channel_proxy::receive_address_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::address());
+    else
+        proxy->subscribe_address(handle_receive);
+}
+void channel::subscribe_get_address(
+    channel_proxy::receive_get_address_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::get_address());
+    else
+        proxy->subscribe_get_address(handle_receive);
+}
+void channel::subscribe_inventory(
+    channel_proxy::receive_inventory_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::inventory());
+    else
+        proxy->subscribe_inventory(handle_receive);
+}
+void channel::subscribe_get_data(
+    channel_proxy::receive_get_data_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::get_data());
+    else
+        proxy->subscribe_get_data(handle_receive);
+}
+void channel::subscribe_get_blocks(
+    channel_proxy::receive_get_blocks_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::get_blocks());
+    else
+        proxy->subscribe_get_blocks(handle_receive);
+}
+void channel::subscribe_transaction(
+    channel_proxy::receive_transaction_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::transaction());
+    else
+        proxy->subscribe_transaction(handle_receive);
+}
+void channel::subscribe_block(
+    channel_proxy::receive_block_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped, message::block());
+    else
+        proxy->subscribe_block(handle_receive);
+}
+void channel::subscribe_raw(
+    channel_proxy::receive_raw_handler handle_receive)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_receive(error::channel_stopped,
+            message::header(), data_chunk());
+    else
+        proxy->subscribe_raw(handle_receive);
+}
+
+void channel::subscribe_stop(
+    channel_proxy::stop_handler handle_stop)
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    if (!proxy)
+        handle_stop(error::channel_stopped);
+    else
+        proxy->subscribe_stop(handle_stop);
 }
 
 } // libbitcoin

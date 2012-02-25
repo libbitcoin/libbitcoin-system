@@ -36,7 +36,6 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
     }
     channel_ptr channel_object =
         std::make_shared<channel>(socket, threaded_, export_);
-    channel_object->start();
     handle_accept(std::error_code(), channel_object);
 }
 
@@ -73,7 +72,6 @@ void network::call_connect_handler(const boost::system::error_code& ec,
     }
     channel_ptr channel_object =
         std::make_shared<channel>(socket, threaded_, export_);
-    channel_object->start();
     handle_connect(std::error_code(), channel_object);
 }
 
