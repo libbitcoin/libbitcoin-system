@@ -72,6 +72,11 @@ void channel_proxy::stop_impl()
     socket_->cancel();
 }
 
+bool channel_proxy::stopped() const
+{
+    return stopped_;
+}
+
 bool timer_errors(const boost::system::error_code& ec, bool stopped)
 {
     if (ec == boost::asio::error::operation_aborted)
@@ -429,6 +434,15 @@ void channel::stop()
     // Slowly shutdown
     if (proxy)
         proxy->stop();
+}
+bool channel::stopped() const
+{
+    channel_proxy_ptr proxy = weak_proxy_.lock();
+    // Slowly shutdown
+    if (!proxy)
+        return true;
+    else
+        return proxy->stopped();
 }
 
 void channel::send_raw(const message::header& packet_header,

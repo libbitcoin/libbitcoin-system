@@ -70,6 +70,7 @@ public:
 
     void start();
     void stop();
+    bool stopped() const;
 
     // List of bitcoin messages
     // version
@@ -252,6 +253,7 @@ public:
     ~channel();
 
     void stop();
+    bool stopped() const;
 
     template <typename Message>
     void send(const Message& packet,
