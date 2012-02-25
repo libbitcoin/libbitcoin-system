@@ -31,7 +31,8 @@ void receive_inv(const std::error_code &ec, const message::inventory& packet,
         //else
         //    log_info() << "  " << pretty_hex(ivv.hash);
     }
-    node->subscribe_inventory(std::bind(&receive_inv, _1, _2, node));
+    //node->subscribe_inventory(std::bind(&receive_inv, _1, _2, node));
+    node->stop();
     std::unique_lock<std::mutex> lock(mutex);
     inv_count += packet.inventories.size();
     condition.notify_one();

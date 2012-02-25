@@ -213,7 +213,6 @@ private:
     std::atomic<bool> stopped_;
 
     socket_ptr socket_;
-    network_ptr network_;
     exporter_ptr export_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes

@@ -54,6 +54,7 @@ void channel::start()
     set_timeout(initial_timeout);
     set_heartbeat(heartbeat_time);
 }
+
 void channel::stop()
 {
     if (stopped_)
@@ -67,10 +68,8 @@ void channel::stop_impl()
     // But sends a different error_code
     stopped_ = true;
     timeout_->cancel();
-    timeout_.reset();
     heartbeat_->cancel();
-    heartbeat_.reset();
-    socket_.reset();
+    socket_->cancel();
 }
 
 bool timer_errors(const boost::system::error_code& ec, bool stopped)
@@ -229,6 +228,11 @@ void channel::handle_read_payload(const boost::system::error_code& ec,
     raw_subscriber_->relay(std::error_code(),
         header_msg, inbound_payload_);
 
+    // This must happen before calling subscribe notification handlers
+    // In case user tries to stop() this channel.
+    read_header();
+    reset_timers();
+
     if (header_msg.command == "version")
     {
         if (!transport<message::version>(payload_stream,
@@ -297,9 +301,6 @@ void channel::handle_read_payload(const boost::system::error_code& ec,
             return;
         }
     }
-
-    read_header();
-    reset_timers();
 }
 
 void channel::call_handle_send(const boost::system::error_code& ec,
