@@ -7,6 +7,7 @@
 #include <bitcoin/types.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/threads.hpp>
+#include <bitcoin/utility/subscriber.hpp>
 
 namespace libbitcoin {
 
@@ -19,6 +20,7 @@ public:
 
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_connection_count_handler;
+    typedef std::function<void (channel_ptr)> channel_handler;
 
     protocol();
     void start(completion_handler handle_complete);
@@ -29,6 +31,7 @@ public:
 
     void fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
+    void subscribe_channel(channel_handler handle_channel);
 
 private:
     struct connection_info
@@ -37,6 +40,10 @@ private:
         channel_ptr node;
     };
     typedef std::vector<connection_info> connection_list;
+    // Accepted connections
+    typedef std::vector<channel_ptr> channel_ptr_list;
+
+    typedef subscriber<channel_ptr> channel_subscriber_type;
 
     // start sequence
     void handle_bootstrap(const std::error_code& ec,
@@ -119,6 +126,9 @@ private:
 
     size_t max_outbound_;
     connection_list connections_;
+    channel_ptr_list accepted_channels_;
+
+    channel_subscriber_type::ptr channel_subscribe_;
 };
 
 } // libbitcoin

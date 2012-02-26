@@ -23,6 +23,7 @@ protocol::protocol()
     hosts_ = std::make_shared<hosts>();
     handshake_ = std::make_shared<handshake>();
     network_ = std::make_shared<network>();
+    channel_subscribe_ = std::make_shared<channel_subscriber_type>(strand());
 }
 
 void protocol::start(completion_handler handle_complete)
@@ -322,6 +323,9 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
     }
     else
     {
+        accepted_channels_.push_back(node);
+        log_info(log_domain::protocol) << "Accepted connection: "
+            << accepted_channels_.size();
         setup_new_channel(node);
     }
 }
@@ -340,6 +344,8 @@ void protocol::setup_new_channel(channel_ptr node)
             shared_from_this(), _1, node)));
     subscribe_address(node);
     node->send(message::get_address(), handle_send);
+    // Notify subscribers
+    channel_subscribe_->relay(node);
 }
 void protocol::channel_stopped(const std::error_code& ec,
     channel_ptr which_node)
@@ -348,10 +354,17 @@ void protocol::channel_stopped(const std::error_code& ec,
     for (; it != connections_.end(); ++it)
         if (it->node == which_node)
             break;
-    BITCOIN_ASSERT(it != connections_.end());
-    connections_.erase(it);
-    // Recreate connections if need be
-    try_connect();
+    if (it != connections_.end())
+    {
+        connections_.erase(it);
+        // Recreate connections if need be
+        try_connect();
+    }
+    auto acc_it = std::find(
+        accepted_channels_.begin(),
+        accepted_channels_.end(), which_node);
+    if (acc_it != accepted_channels_.end())
+        accepted_channels_.erase(acc_it);
 }
 
 void protocol::subscribe_address(channel_ptr node)
@@ -395,6 +408,11 @@ void protocol::do_fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
     handle_fetch(std::error_code(), connections_.size());
+}
+
+void protocol::subscribe_channel(channel_handler handle_channel)
+{
+    channel_subscribe_->subscribe(handle_channel);
 }
 
 } // libbitcoin

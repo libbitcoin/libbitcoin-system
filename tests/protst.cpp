@@ -27,18 +27,24 @@ void display_num_conns(const std::error_code& ec, size_t num)
 {
     log_debug() << num << " CONNECTIONS";
 }
+void mewcj(channel_ptr node)
+{
+    log_debug() << "New channel!";
+    prot->subscribe_channel(mewcj);
+}
 int main()
 {
     prot = std::make_shared<protocol>();
-    //prot->start(handle_start);
-    prot->bootstrap(handle_start);
+    prot->start(handle_start);
+    prot->subscribe_channel(mewcj);
+    //prot->bootstrap(handle_start);
     //std::cin.get();
     //prot->stop(handle_stop);
     //log_debug() << "stopping.";
     //std::cin.get();
     while (true)
     {
-        //prot->fetch_connection_count(display_num_conns);
+        prot->fetch_connection_count(display_num_conns);
         sleep(1);
     }
     return 0;
