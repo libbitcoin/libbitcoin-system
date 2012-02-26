@@ -110,14 +110,6 @@ void protocol::load_hosts(const std::error_code& ec,
             _1, _2, handle_complete)));
 }
 
-const std::vector<std::string> dns_seeds
-{
-    "bitseed.xf2.org",
-    "dnsseed.bluematt.me",
-    "seed.bitcoin.sipa.be",
-    "dnsseed.bitcoin.dashjr.org"
-};
-
 void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
     completion_handler handle_complete)
 {
@@ -130,97 +122,110 @@ void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
     }
     if (hosts_count == 0)
     {
-        seed_endpoint_states seed_states =
-            std::make_shared<std::vector<seed_point>>();
-        for (const std::string& hostname: dns_seeds)
-            connect_dns_seed(hostname, seed_states, handle_complete);
+        load_seeds_ = std::make_shared<seeds>();
+        load_seeds_->start(this, handle_complete);
     }
     else
         handle_complete(std::error_code());
 }
 
-void protocol::check_seed_states_final(seed_endpoint_states states,
+const std::vector<std::string> dns_seeds
+{
+    "bitseed.xf2.org",
+    "dnsseed.bluematt.me",
+    "seed.bitcoin.sipa.be",
+    "dnsseed.bitcoin.dashjr.org"
+};
+
+void protocol::seeds::start(protocol* parent,
     completion_handler handle_complete)
 {
-    if (states->size() != dns_seeds.size())
-        return;
-    for (const seed_point& point: *states)
-        if (!point.error_code)
-        {
-            handle_complete(point.error_code);
-            return;
-        }
-    handle_complete((*states)[0].error_code);
+    handle_complete_ = handle_complete;
+    ended_paths_ = 0;
+    finished_ = false;
+    hosts_ = parent->hosts_;
+    handshake_ = parent->handshake_;
+    network_ = parent->network_;
+    strand_ = parent->strand();
+    for (const std::string& hostname: dns_seeds)
+        connect_dns_seed(hostname);
 }
 
-void protocol::connect_dns_seed(const std::string& hostname,
-    seed_endpoint_states seed_states, completion_handler handle_complete)
+void protocol::seeds::error_case(const std::error_code& ec)
+{
+    if (finished_)
+        return;
+    ++ended_paths_;
+    if (ended_paths_ == dns_seeds.size())
+    {
+        finished_ = true;
+        handle_complete_(ec);
+    }
+}
+
+void protocol::seeds::connect_dns_seed(const std::string& hostname)
 {
     handshake_->connect(network_, hostname, 8333,
-        strand()->wrap(std::bind(&protocol::request_addresses,
-            shared_from_this(), _1, _2, seed_states, handle_complete)));
+        strand_->wrap(std::bind(&protocol::seeds::request_addresses,
+            shared_from_this(), _1, _2)));
 }
-void protocol::request_addresses(const std::error_code& ec,
-    channel_ptr dns_seed_node, seed_endpoint_states seed_states,
-    completion_handler handle_complete)
+void protocol::seeds::request_addresses(
+    const std::error_code& ec, channel_ptr dns_seed_node)
 {
     if (ec)
     {
         log_error(log_domain::protocol) 
             << "Failed to connect to seed node: " << ec.message();
-        seed_states->push_back({seed_state::connect, ec});
-        check_seed_states_final(seed_states, handle_complete);
+        error_case(ec);
     }
     else
     {
         dns_seed_node->send(message::get_address(),
-            strand()->wrap(std::bind(&protocol::handle_send_get_address,
-                shared_from_this(), _1, dns_seed_node,
-                    seed_states, handle_complete)));
+            strand_->wrap(std::bind(&protocol::seeds::handle_send_get_address,
+                shared_from_this(), _1)));
         dns_seed_node->subscribe_address(
-            strand()->wrap(std::bind(&protocol::save_seeded_addresses,
+            strand_->wrap(std::bind(&protocol::seeds::save_addresses,
                 shared_from_this(), _1, _2, dns_seed_node)));
     }
 
 }
-void protocol::handle_send_get_address(const std::error_code& ec,
-    channel_ptr dns_seed_node, seed_endpoint_states seed_states,
-    completion_handler handle_complete)
+void protocol::seeds::handle_send_get_address(const std::error_code& ec)
 {
     if (ec)
     {
         log_error(log_domain::protocol)
             << "Sending get_address message failed: " << ec.message();
-        seed_states->push_back({seed_state::send_request, ec});
-        check_seed_states_final(seed_states, handle_complete);
-    }
-    else
-    {
-        seed_states->push_back({seed_state::send_request, ec});
-        if (seed_states->size() == dns_seeds.size())
-            handle_complete(std::error_code());
+        error_case(ec);
     }
 }
 
-void protocol::save_seeded_addresses(const std::error_code& ec,
-    const message::address& packet, channel_ptr dns_seed_node)
+void protocol::seeds::save_addresses(const std::error_code& ec,
+    const message::address& packet, channel_ptr)
 {
     if (ec)
     {
         log_error(log_domain::protocol)
             << "Problem receiving addresses from seed nodes: "
             << ec.message();
+        error_case(ec);
     }
     else
     {
         log_info() << "Storing seeded addresses.";
         for (const message::network_address& net_address: packet.addresses)
             hosts_->store(net_address,
-                strand()->wrap(std::bind(&protocol::handle_seed_store,
+                strand_->wrap(std::bind(&protocol::seeds::handle_store,
                     shared_from_this(), _1)));
+
+        if (!finished_)
+        {
+            ++ended_paths_;
+            finished_ = true;
+            handle_complete_(std::error_code());
+        }
     }
 }
-void protocol::handle_seed_store(const std::error_code& ec)
+void protocol::seeds::handle_store(const std::error_code& ec)
 {
     if (ec)
         log_error(log_domain::protocol) 

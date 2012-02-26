@@ -55,32 +55,35 @@ private:
         completion_handler handle_complete);
 
     // seed addresses from dns seeds
-    enum class seed_state
+    class seeds
+      : public std::enable_shared_from_this<seeds>
     {
-        connect,
-        send_request
-    };
-    struct seed_point
-    {
-        seed_state end_state;
-        std::error_code error_code;
-    };
-    typedef std::shared_ptr<std::vector<seed_point>> seed_endpoint_states;
-    static void check_seed_states_final(seed_endpoint_states states,
-        completion_handler handle_complete);
+    public:
+        void start(protocol* parent, completion_handler handle_complete);
+    private:
+        void error_case(const std::error_code& ec);
 
-    void connect_dns_seed(const std::string& hostname,
-        seed_endpoint_states seed_states, completion_handler handle_complete);
-    void request_addresses(const std::error_code& ec,
-        channel_ptr dns_seed_node, seed_endpoint_states seed_states,
-        completion_handler handle_complete);
-    void handle_send_get_address(const std::error_code& ec,
-        channel_ptr dns_seed_node, seed_endpoint_states seed_states, 
-        completion_handler handle_complete);
+        void connect_dns_seed(const std::string& hostname);
+        void request_addresses(const std::error_code& ec,
+            channel_ptr dns_seed_node);
+        void handle_send_get_address(const std::error_code& ec);
 
-    void save_seeded_addresses(const std::error_code& ec,
-        const message::address& packet, channel_ptr dns_seed_node);
-    void handle_seed_store(const std::error_code& ec);
+        void save_addresses(const std::error_code& ec,
+            const message::address& packet, channel_ptr);
+        void handle_store(const std::error_code& ec);
+
+        completion_handler handle_complete_;
+        size_t ended_paths_;
+        bool finished_;
+
+        // From parent
+        hosts_ptr hosts_;
+        handshake_ptr handshake_;
+        network_ptr network_;
+        strand_ptr strand_;
+    };
+    std::shared_ptr<seeds> load_seeds_;
+    friend class seeds;
 
     // run loop
     // Connect outwards
