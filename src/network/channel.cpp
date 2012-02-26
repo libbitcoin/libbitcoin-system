@@ -67,9 +67,12 @@ void channel_proxy::stop_impl()
     // We need this because the timeout timer shares this code with stop()
     // But sends a different error_code
     stopped_ = true;
-    timeout_->cancel();
-    heartbeat_->cancel();
-    socket_->cancel();
+    // Ignore the error_code. We don't really care at this point.
+    boost::system::error_code ret_ec;
+    timeout_->cancel(ret_ec);
+    heartbeat_->cancel(ret_ec);
+    socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ret_ec);
+    socket_->close(ret_ec);
 }
 
 bool channel_proxy::stopped() const
