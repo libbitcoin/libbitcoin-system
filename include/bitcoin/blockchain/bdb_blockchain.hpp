@@ -6,6 +6,7 @@
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/utility/threads.hpp>
 #include <bitcoin/utility/subscriber.hpp>
+#include <bitcoin/async_service.hpp>
 
 class Db;
 class DbEnv;
@@ -16,7 +17,7 @@ class bdb_common;
 typedef std::shared_ptr<bdb_common> bdb_common_ptr;
 
 class bdb_blockchain
-  : public blockchain, public threaded_service,
+  : public blockchain,
     public std::enable_shared_from_this<bdb_blockchain>
 {
 public:
@@ -24,7 +25,7 @@ public:
         const std::error_code&, const block_list&, const block_list&>
             reorganize_subscriber_type;
 
-    bdb_blockchain(const std::string& prefix);
+    bdb_blockchain(async_service& service, const std::string& prefix);
     ~bdb_blockchain();
 
     // Non-copyable
@@ -55,7 +56,7 @@ public:
     void subscribe_reorganize(reorganize_handler handle_reorganize);
 
 private:
-    bdb_blockchain();
+    bdb_blockchain(async_service& fake_service);
     bool initialize(const std::string& prefix);
 
     void do_store(const message::block& store_block,
@@ -77,6 +78,8 @@ private:
         fetch_handler_spend handle_fetch);
     void do_fetch_outputs(const short_hash& pubkey_hash,
         fetch_handler_outputs handle_fetch);
+
+    io_service::strand strand_;
 
     DbEnv* env_;
     Db* db_blocks_;

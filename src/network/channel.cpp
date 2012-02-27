@@ -16,13 +16,11 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
 const time_duration heartbeat_time = seconds(0) + minutes(30);
 
-channel_proxy::channel_proxy(socket_ptr socket, thread_core_ptr threaded,
-    exporter_ptr saver)
-  : stopped_(false), socket_(socket), export_(saver), threaded_(threaded)
+channel_proxy::channel_proxy(async_service& service, socket_ptr socket)
+  : stopped_(false), socket_(socket), strand_(service.get_service()),
+    timeout_(service.get_service()), heartbeat_(service.get_service())
 {
-    strand_ = threaded_->create_strand();
-    timeout_ = std::make_shared<deadline_timer>(*threaded_->service());
-    heartbeat_ = std::make_shared<deadline_timer>(*threaded_->service());
+    export_ = std::make_shared<satoshi_exporter>();
 
     version_subscriber_ = 
         std::make_shared<version_subscriber_type>(strand_);
@@ -69,8 +67,8 @@ void channel_proxy::stop_impl()
     stopped_ = true;
     // Ignore the error_code. We don't really care at this point.
     boost::system::error_code ret_ec;
-    timeout_->cancel(ret_ec);
-    heartbeat_->cancel(ret_ec);
+    timeout_.cancel(ret_ec);
+    heartbeat_.cancel(ret_ec);
     socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ret_ec);
     socket_->close(ret_ec);
 }
@@ -128,17 +126,17 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 void channel_proxy::set_timeout(
     const boost::posix_time::time_duration timeout)
 {
-    timeout_->cancel();
-    timeout_->expires_from_now(timeout);
-    timeout_->async_wait(std::bind(
+    timeout_.cancel();
+    timeout_.expires_from_now(timeout);
+    timeout_.async_wait(std::bind(
         &channel_proxy::handle_timeout, shared_from_this(), _1));
 }
 void channel_proxy::set_heartbeat(
     const boost::posix_time::time_duration timeout)
 {
-    heartbeat_->cancel();
-    heartbeat_->expires_from_now(timeout);
-    heartbeat_->async_wait(std::bind(
+    heartbeat_.cancel();
+    heartbeat_.expires_from_now(timeout);
+    heartbeat_.async_wait(std::bind(
         &channel_proxy::handle_heartbeat, shared_from_this(), _1));
 }
 void channel_proxy::reset_timers()
@@ -160,14 +158,14 @@ bool channel_proxy::problems_check(const boost::system::error_code& ec)
 void channel_proxy::read_header()
 {
     async_read(*socket_, buffer(inbound_header_),
-        strand_->wrap(std::bind(&channel_proxy::handle_read_header,
+        strand_.wrap(std::bind(&channel_proxy::handle_read_header,
             shared_from_this(), _1, _2)));
 }
 
 void channel_proxy::read_checksum(const message::header& header_msg)
 {
     async_read(*socket_, buffer(inbound_checksum_),
-        strand_->wrap(std::bind(&channel_proxy::handle_read_checksum, 
+        strand_.wrap(std::bind(&channel_proxy::handle_read_checksum, 
             shared_from_this(), _1, _2, header_msg)));
 }
 
@@ -175,7 +173,7 @@ void channel_proxy::read_payload(const message::header& header_msg)
 {
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
-        strand_->wrap(std::bind(&channel_proxy::handle_read_payload, 
+        strand_.wrap(std::bind(&channel_proxy::handle_read_payload, 
             shared_from_this(), _1, _2, header_msg)));
 }
 
@@ -395,7 +393,7 @@ void channel_proxy::send_raw(const message::header& packet_header,
     if (stopped_)
         handle_send(error::channel_stopped);
     else
-        strand_->post(std::bind(&channel_proxy::do_send_raw,
+        strand_.post(std::bind(&channel_proxy::do_send_raw,
             shared_from_this(), packet_header, payload, handle_send));
 }
 void channel_proxy::do_send_raw(const message::header& packet_header,
@@ -418,11 +416,10 @@ void channel_proxy::do_send_common(const data_chunk& whole_message,
 
 // channel
 
-channel::channel(socket_ptr socket,
-    thread_core_ptr threaded, exporter_ptr saver)
+channel::channel(async_service& service, socket_ptr socket)
 {
     channel_proxy_ptr proxy =
-        std::make_shared<channel_proxy>(socket, threaded, saver);
+        std::make_shared<channel_proxy>(service, socket);
     proxy->start();
     weak_proxy_ = proxy;
 }

@@ -10,10 +10,7 @@
 
 namespace libbitcoin {
 
-using std::shared_ptr;
-using boost::asio::io_service;
 using boost::asio::ip::tcp;
-using boost::asio::deadline_timer;
 
 class exporter;
 class blockchain;
@@ -42,14 +39,7 @@ typedef std::shared_ptr<poller> poller_ptr;
 typedef std::atomic<size_t> atomic_counter;
 typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
 
-typedef std::shared_ptr<io_service> service_ptr;
-typedef std::shared_ptr<io_service::work> work_ptr;
-typedef std::shared_ptr<io_service::strand> strand_ptr;
-typedef std::shared_ptr<deadline_timer> deadline_timer_ptr;
 typedef std::shared_ptr<tcp::socket> socket_ptr;
-
-typedef std::shared_ptr<tcp::resolver> resolver_ptr;
-typedef std::shared_ptr<tcp::resolver::query> query_ptr;
 
 typedef std::array<uint8_t, 32> hash_digest;
 typedef std::array<uint8_t, 20> short_hash;

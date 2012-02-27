@@ -13,15 +13,14 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-acceptor::acceptor(thread_core_ptr threaded,
-    tcp_acceptor_ptr tcp_accept, exporter_ptr saver)
-  : threaded_(threaded), tcp_accept_(tcp_accept), export_(saver)
+acceptor::acceptor(async_service& service, tcp_acceptor_ptr tcp_accept)
+  : service_(service), tcp_accept_(tcp_accept)
 {
 }
 void acceptor::accept(accept_handler handle_accept)
 {
     socket_ptr socket =
-        std::make_shared<tcp::socket>(*threaded_->service());
+        std::make_shared<tcp::socket>(service_.get_service());
     tcp_accept_->async_accept(*socket,
         std::bind(&acceptor::call_handle_accept, shared_from_this(), 
             _1, socket, handle_accept));
@@ -35,15 +34,13 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
         return;
     }
     channel_ptr channel_object =
-        std::make_shared<channel>(socket, threaded_, export_);
+        std::make_shared<channel>(service_, socket);
     handle_accept(std::error_code(), channel_object);
 }
 
-network::network()
+network::network(async_service& service)
+  : service_(service)
 {
-    threaded_ = std::make_shared<thread_core>();
-    strand_ = threaded_->create_strand();
-    export_ = std::make_shared<satoshi_exporter>();
 }
 
 void network::resolve_handler(const boost::system::error_code& ec,
@@ -55,7 +52,8 @@ void network::resolve_handler(const boost::system::error_code& ec,
         handle_connect(error::resolve_failed, nullptr);
         return;
     }
-    socket_ptr socket = std::make_shared<tcp::socket>(*threaded_->service());
+    socket_ptr socket =
+        std::make_shared<tcp::socket>(service_.get_service());
     boost::asio::async_connect(*socket, endpoint_iterator,
         std::bind(&network::call_connect_handler, shared_from_this(), 
             _1, _2, socket, handle_connect));
@@ -71,7 +69,7 @@ void network::call_connect_handler(const boost::system::error_code& ec,
         return;
     }
     channel_ptr channel_object =
-        std::make_shared<channel>(socket, threaded_, export_);
+        std::make_shared<channel>(service_, socket);
     handle_connect(std::error_code(), channel_object);
 }
 
@@ -79,7 +77,7 @@ void network::connect(const std::string& hostname, uint16_t port,
     connect_handler handle_connect)
 {
     resolver_ptr resolver =
-        std::make_shared<tcp::resolver>(*threaded_->service());
+        std::make_shared<tcp::resolver>(service_.get_service());
     query_ptr query =
         std::make_shared<tcp::resolver::query>(hostname,
             boost::lexical_cast<std::string>(port));
@@ -108,7 +106,7 @@ void network::listen(uint16_t port, listen_handler handle_listen)
 {
     tcp::endpoint endpoint(tcp::v4(), port);
     acceptor::tcp_acceptor_ptr tcp_accept =
-        std::make_shared<tcp::acceptor>(*threaded_->service());
+        std::make_shared<tcp::acceptor>(service_.get_service());
     // Need to check error codes for functions
     boost::system::error_code ec;
     tcp_accept->open(endpoint.protocol(), ec);
@@ -125,7 +123,7 @@ void network::listen(uint16_t port, listen_handler handle_listen)
         return;
 
     acceptor_ptr accept =
-        std::make_shared<acceptor>(threaded_, tcp_accept, export_);
+        std::make_shared<acceptor>(service_, tcp_accept);
     handle_listen(std::error_code(), accept);
 }
 

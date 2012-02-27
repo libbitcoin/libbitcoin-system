@@ -2,6 +2,7 @@ lib_LTLIBRARIES = libbitcoin.la
 AM_CPPFLAGS = -I$(srcdir)/../include
 AM_CXXFLAGS = ${my_CXXFLAGS}
 libbitcoin_la_SOURCES = \
+	async_service.cpp \
 	network/network.cpp  \
 	network/handshake.cpp  \
 	network/channel.cpp \
@@ -20,15 +21,13 @@ libbitcoin_la_SOURCES = \
     utility/elliptic_curve_key.cpp \
 	transaction.cpp \
 	error.cpp \
-	utility/threads.cpp \
     validate.cpp \
 	utility/base58.cpp \
 	utility/big_number.cpp \
 	utility/clock.cpp \
 	constants.cpp \
 	blockchain/organizer.cpp \
-	transaction_pool.cpp \
-	network/discovery.cpp
+	transaction_pool.cpp
 
 if DO_BDB
 libbitcoin_la_SOURCES += \

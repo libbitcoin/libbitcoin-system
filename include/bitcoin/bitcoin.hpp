@@ -7,7 +7,6 @@
 #include <bitcoin/address.hpp>
 #include <bitcoin/network/channel.hpp>
 #include <bitcoin/network/shared_const_buffer.hpp>
-#include <bitcoin/network/discovery.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/hosts.hpp>
 #include <bitcoin/network/handshake.hpp>
@@ -34,6 +33,7 @@
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/network/protocol.hpp>
+#include <bitcoin/async_service.hpp>
 
 namespace bc = libbitcoin;
 

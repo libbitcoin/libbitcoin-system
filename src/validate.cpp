@@ -22,7 +22,7 @@ constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 
 validate_transaction::validate_transaction(blockchain_ptr chain,
     exporter_ptr saver, const message::transaction& tx,
-    const pool_buffer& pool, strand_ptr async_strand)
+    const pool_buffer& pool, io_service::strand& async_strand)
   : chain_(chain), exporter_(saver), tx_(tx), tx_hash_(hash_transaction(tx)),
     pool_(pool), strand_(async_strand)
 {
@@ -39,7 +39,7 @@ void validate_transaction::start(validate_handler handle_validate)
 
     // Check for duplicates in the blockchain
     chain_->fetch_transaction(tx_hash_,
-        strand_->wrap(std::bind(
+        strand_.wrap(std::bind(
             &validate_transaction::handle_duplicate_check,
                 shared_from_this(), _1)));
 }
@@ -110,7 +110,7 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
 
     // We already know it is not a coinbase tx
 
-    chain_->fetch_last_depth(strand_->wrap(std::bind(
+    chain_->fetch_last_depth(strand_.wrap(std::bind(
         &validate_transaction::set_last_depth, shared_from_this(), _1, _2)));
 }
  
@@ -144,7 +144,7 @@ void validate_transaction::fetch_next_previous_transaction()
     BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
     chain_->fetch_transaction_index(
         tx_.inputs[current_input_].previous_output.hash,
-        strand_->wrap(std::bind(
+        strand_.wrap(std::bind(
             &validate_transaction::fetch_input_transaction_index,
                 shared_from_this(), _1, _2)));
 }
@@ -191,7 +191,7 @@ void validate_transaction::fetch_input_transaction_index(
     BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
     chain_->fetch_transaction(
         tx_.inputs[current_input_].previous_output.hash,
-        strand_->wrap(std::bind(
+        strand_.wrap(std::bind(
             &validate_transaction::fetch_input_transaction,
                 shared_from_this(), _1, _2, parent_depth)));
 }
@@ -212,7 +212,7 @@ void validate_transaction::fetch_input_transaction(const std::error_code& ec,
     }
     // Search for double spends...
     chain_->fetch_spend(tx_.inputs[current_input_].previous_output,
-        strand_->wrap(std::bind(
+        strand_.wrap(std::bind(
             &validate_transaction::check_double_spend,
                 shared_from_this(), _1)));
 }

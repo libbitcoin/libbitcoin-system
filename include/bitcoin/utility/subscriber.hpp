@@ -16,21 +16,21 @@ public:
     typedef std::function<void (Args...)> handler_type;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
-    subscriber(strand_ptr async_strand)
+    subscriber(io_service::strand& async_strand)
       : strand_(async_strand)
     {
     }
 
     void subscribe(handler_type handle)
     {
-        strand_->dispatch(
+        strand_.dispatch(
             std::bind(&subscriber<Args...>::do_subscribe,
                 this->shared_from_this(), handle));
     }
 
     void relay(Args... params)
     {
-        strand_->dispatch(
+        strand_.dispatch(
             std::bind(&subscriber<Args...>::do_relay,
                 this->shared_from_this(), std::forward<Args>(params)...));
     }
@@ -55,7 +55,7 @@ private:
         BITCOIN_ASSERT(notify_copy.empty());
     }
 
-    strand_ptr strand_;
+    io_service::strand& strand_;
     registry_stack registry_;
 };
 

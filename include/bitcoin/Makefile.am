@@ -13,6 +13,7 @@ bitcoin_include_HEADERS = \
 	types.hpp \
 	data_helpers.hpp \
 	transaction_pool.hpp \
+	async_service.hpp \
 	poller.hpp
 
 bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
@@ -36,7 +37,6 @@ bitcoin_network_include_HEADERS = \
 	network/network.hpp \
 	network/handshake.hpp \
 	network/shared_const_buffer.hpp \
-	network/discovery.hpp \
 	network/hosts.hpp \
 	network/protocol.hpp
 
@@ -44,7 +44,6 @@ bitcoin_util_includedir = $(includedir)/bitcoin/utility
 bitcoin_util_include_HEADERS = \
 	utility/elliptic_curve_key.hpp \
 	utility/sha256.hpp \
-	utility/threads.hpp \
 	utility/serializer.hpp \
 	utility/assert.hpp \
 	utility/big_number.hpp \

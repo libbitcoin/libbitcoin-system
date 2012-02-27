@@ -32,9 +32,11 @@ void mewcj(channel_ptr node)
     log_debug() << "New channel!";
     prot->subscribe_channel(mewcj);
 }
+
 int main()
 {
-    prot = std::make_shared<protocol>();
+    async_service service(1);
+    prot = std::make_shared<protocol>(service);
     prot->start(handle_start);
     prot->subscribe_channel(mewcj);
     //prot->bootstrap(handle_start);

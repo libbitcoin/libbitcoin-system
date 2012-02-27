@@ -10,15 +10,17 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 
-transaction_pool_ptr transaction_pool::create(blockchain_ptr chain)
+transaction_pool_ptr transaction_pool::create(
+    async_service& service, blockchain_ptr chain)
 {
-    transaction_pool_ptr tx_pool(new transaction_pool);
+    // make_shared cannot use private constructors
+    transaction_pool_ptr tx_pool(new transaction_pool(service));
     tx_pool->initialize(chain);
     return tx_pool;
 }
 
-transaction_pool::transaction_pool()
-  : pool_(100)
+transaction_pool::transaction_pool(async_service& service)
+  : strand_(service.get_service()), pool_(100)
 {
 }
 void transaction_pool::initialize(blockchain_ptr chain)
@@ -29,18 +31,19 @@ void transaction_pool::initialize(blockchain_ptr chain)
 void transaction_pool::store(const message::transaction& stored_transaction,
     store_handler handle_store)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&transaction_pool::do_store, shared_from_this(),
             stored_transaction, handle_store));
 }
-void transaction_pool::do_store(const message::transaction& stored_transaction,
+void transaction_pool::do_store(
+    const message::transaction& stored_transaction,
     store_handler handle_store)
 {
     exporter_ptr saver = std::make_shared<satoshi_exporter>();
     validate_transaction_ptr validate =
         std::make_shared<validate_transaction>(chain_, saver,
-            stored_transaction, pool_, strand());
-    validate->start(strand()->wrap(std::bind(
+            stored_transaction, pool_, strand_);
+    validate->start(strand_.wrap(std::bind(
         &transaction_pool::handle_delegate,
             shared_from_this(), _1, stored_transaction, handle_store)));
 }

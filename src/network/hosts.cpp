@@ -8,15 +8,15 @@
 
 namespace libbitcoin {
 
-hosts::hosts(size_t capacity)
-  : buffer_(capacity)
+hosts::hosts(async_service& service, size_t capacity)
+  : strand_(service.get_service()), buffer_(capacity)
 {
     srand(time(nullptr));
 }
 
 void hosts::load(const std::string& filename, load_handler handle_load)
 {
-    service()->post(
+    strand_.post(
         std::bind(&hosts::do_load, shared_from_this(),
             filename, handle_load));
 }
@@ -36,7 +36,7 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
             continue;
         std::copy(raw_ip.begin(), raw_ip.end(), field.ip.begin());
         field.port = boost::lexical_cast<uint16_t>(parts[1]);
-        strand()->dispatch(
+        strand_.dispatch(
             [&buffer_, field]()
             {
                 buffer_.push_back(field);
@@ -47,7 +47,7 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
 
 void hosts::save(const std::string& filename, save_handler handle_save)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&hosts::do_save, shared_from_this(),
             filename, handle_save));
 }
@@ -63,7 +63,7 @@ void hosts::do_save(const std::string& filename, save_handler handle_save)
 void hosts::store(const message::network_address address,
     store_handler handle_store)
 {
-    strand()->post(
+    strand_.post(
         [&buffer_, address, handle_store]()
         {
             buffer_.push_back(hosts_field{address.ip, address.port});
@@ -74,7 +74,7 @@ void hosts::store(const message::network_address address,
 void hosts::remove(const message::network_address address,
     remove_handler handle_remove)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&hosts::do_remove, shared_from_this(),
             address, handle_remove));
 }
@@ -98,7 +98,7 @@ void hosts::do_remove(const message::network_address address,
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&hosts::do_fetch_address, shared_from_this(),
             handle_fetch));
 }
@@ -120,7 +120,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 
 void hosts::fetch_count(fetch_count_handler handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&hosts::do_fetch_count, shared_from_this(),
             handle_fetch));
 }

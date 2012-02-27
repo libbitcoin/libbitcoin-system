@@ -20,7 +20,7 @@ public:
 
     validate_transaction(blockchain_ptr chain, exporter_ptr saver,
         const message::transaction& tx,
-        const pool_buffer& pool, strand_ptr async_strand);
+        const pool_buffer& pool, io_service::strand& async_strand);
     void start(validate_handler handle_validate);
 
     static bool check_transaction(const message::transaction& tx);
@@ -60,7 +60,7 @@ private:
     size_t last_block_depth_;
     uint64_t value_in_;
     size_t current_input_;
-    strand_ptr strand_;
+    io_service::strand& strand_;
     validate_handler handle_validate_;
 };
 

@@ -1,6 +1,7 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/handshake.hpp>
 #include <bitcoin/utility/logger.hpp>
+#include <bitcoin/async_service.hpp>
 
 #include <atomic>
 #include <functional>
@@ -82,8 +83,9 @@ void handle_init(const std::error_code& ec, handshake_ptr hs, network_ptr net)
 
 int main()
 {
-    network_ptr net = std::make_shared<network>();
-    handshake_ptr hs = std::make_shared<handshake>();
+    async_service service(1);
+    network_ptr net = std::make_shared<network>(service);
+    handshake_ptr hs = std::make_shared<handshake>(service);
     hs->start(std::bind(handle_init, _1, hs, net));
 
     std::unique_lock<std::mutex> lock(mutex);

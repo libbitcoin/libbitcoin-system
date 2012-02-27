@@ -8,12 +8,12 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/threads.hpp>
 #include <bitcoin/utility/subscriber.hpp>
+#include <bitcoin/async_service.hpp>
 
 namespace libbitcoin {
 
 class protocol
-  : public std::enable_shared_from_this<protocol>,
-    public threaded_service
+  : public std::enable_shared_from_this<protocol>
 {
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
@@ -22,7 +22,7 @@ public:
         fetch_connection_count_handler;
     typedef std::function<void (channel_ptr)> channel_handler;
 
-    protocol();
+    protocol(async_service& service);
     void start(completion_handler handle_complete);
     void stop(completion_handler handle_complete);
 
@@ -66,7 +66,8 @@ private:
       : public std::enable_shared_from_this<seeds>
     {
     public:
-        void start(protocol* parent, completion_handler handle_complete);
+        seeds(protocol* parent);
+        void start(completion_handler handle_complete);
     private:
         void error_case(const std::error_code& ec);
 
@@ -87,7 +88,7 @@ private:
         hosts_ptr hosts_;
         handshake_ptr handshake_;
         network_ptr network_;
-        strand_ptr strand_;
+        io_service::strand& strand_;
     };
     std::shared_ptr<seeds> load_seeds_;
     friend class seeds;
@@ -118,6 +119,8 @@ private:
     // fetch methods
     void do_fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
+
+    io_service::strand strand_;
 
     const std::string hosts_filename_;
     hosts_ptr hosts_;

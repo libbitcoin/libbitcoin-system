@@ -9,12 +9,12 @@
 
 #include <bitcoin/utility/threads.hpp>
 #include <bitcoin/messages.hpp>
+#include <bitcoin/async_service.hpp>
 
 namespace libbitcoin {
 
 class hosts
-  : public std::enable_shared_from_this<hosts>,
-    public threaded_service
+  : public std::enable_shared_from_this<hosts>
 {
 public:
     typedef std::function<void (const std::error_code&)> load_handler;
@@ -29,7 +29,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
 
-    hosts(size_t capacity=26000);
+    hosts(async_service& service, size_t capacity=26000);
 
     void load(const std::string& filename, load_handler handle_load);
     void save(const std::string& filename, save_handler handle_save);
@@ -57,6 +57,7 @@ private:
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);
 
+    io_service::strand strand_;
     boost::circular_buffer<hosts_field> buffer_;
 };
 

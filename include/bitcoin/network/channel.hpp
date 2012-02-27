@@ -61,8 +61,7 @@ public:
 
     typedef std::function<void (const std::error_code&)> stop_handler;
 
-    channel_proxy(socket_ptr socket,
-        thread_core_ptr threaded, exporter_ptr saver);
+    channel_proxy(async_service& service, socket_ptr socket);
     ~channel_proxy();
 
     channel_proxy(const channel_proxy&) = delete;
@@ -96,7 +95,7 @@ public:
         if (stopped_)
             handle_send(error::channel_stopped);
         else
-            strand_->post(std::bind(&channel_proxy::do_send<Message>,
+            strand_.post(std::bind(&channel_proxy::do_send<Message>,
                 shared_from_this(), packet, handle_send));
     }
     void send_raw(const message::header& packet_header,
@@ -212,6 +211,10 @@ private:
     bool problems_check(const boost::system::error_code& ec);
     void stop_impl();
 
+    // We keep the service alive for lifetime rules
+    io_service::strand strand_;
+    boost::asio::deadline_timer timeout_, heartbeat_;
+
     std::atomic<bool> stopped_;
 
     socket_ptr socket_;
@@ -225,11 +228,6 @@ private:
     boost::array<uint8_t, header_chunk_size> inbound_header_;
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;
     std::vector<uint8_t> inbound_payload_;
-
-    // We keep the service alive for lifetime rules
-    thread_core_ptr threaded_;
-    strand_ptr strand_;
-    deadline_timer_ptr timeout_, heartbeat_;
 
     version_subscriber_type::ptr version_subscriber_;
     verack_subscriber_type::ptr verack_subscriber_;
@@ -248,8 +246,7 @@ private:
 class channel
 {
 public:
-    channel(socket_ptr socket,
-        thread_core_ptr threaded, exporter_ptr saver);
+    channel(async_service& service, socket_ptr socket);
     ~channel();
 
     void stop();

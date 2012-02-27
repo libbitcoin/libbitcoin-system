@@ -5,6 +5,7 @@
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/network/network.hpp>
+#include <bitcoin/async_service.hpp>
 
 namespace libbitcoin {
 
@@ -26,7 +27,7 @@ public:
 
     typedef std::function<void (const std::error_code&)> setter_handler;
 
-    handshake();
+    handshake(async_service& service);
     void start(start_handler handle_start);
 
     void connect(network_ptr net, const std::string& hostname,
@@ -64,8 +65,7 @@ private:
     void do_set_user_agent(const std::string& user_agent,
         setter_handler handle_set);
 
-    thread_core_ptr threaded_;
-    strand_ptr strand_;
+    io_service::strand strand_;
     message::version template_version_;
 };
 

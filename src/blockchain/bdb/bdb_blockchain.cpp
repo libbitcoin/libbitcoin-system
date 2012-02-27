@@ -30,12 +30,15 @@ constexpr uint32_t env_flags =
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
-bdb_blockchain::bdb_blockchain(const std::string& prefix)
+bdb_blockchain::bdb_blockchain(async_service& service,
+    const std::string& prefix)
+  : strand_(service.get_service())
 {
     initialize(prefix);
 }
 
-bdb_blockchain::bdb_blockchain()
+bdb_blockchain::bdb_blockchain(async_service& fake_service)
+  : strand_(fake_service.get_service())
 {
     // Private method. Should never be called by user!
     // Only by factory methods
@@ -64,7 +67,8 @@ bdb_blockchain::~bdb_blockchain()
 
 bool bdb_blockchain::setup(const std::string& prefix)
 {
-    bdb_blockchain handle;
+    async_service fake_service;
+    bdb_blockchain handle(fake_service);
     if (!handle.initialize(prefix))
         return false;
     handle.db_blocks_->truncate(nullptr, 0, 0);
@@ -146,7 +150,7 @@ bool bdb_blockchain::initialize(const std::string& prefix)
         db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
 
     reorganize_subscriber_ =
-        std::make_shared<reorganize_subscriber_type>(strand());
+        std::make_shared<reorganize_subscriber_type>(strand_);
 
     orphans_ = std::make_shared<orphans_pool>(20);
     bdb_chain_keeper_ptr chainkeeper = 
@@ -162,7 +166,7 @@ bool bdb_blockchain::initialize(const std::string& prefix)
 void bdb_blockchain::store(const message::block& stored_block, 
     store_block_handler handle_store)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::do_store, shared_from_this(),
             stored_block, handle_store));
 }
@@ -205,7 +209,7 @@ bool fetch_block_impl(txn_guard_ptr txn, const Index& index,
 void bdb_blockchain::fetch_block(size_t depth,
     fetch_handler_block handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::fetch_block_by_depth, shared_from_this(),
             depth, handle_fetch));
 }
@@ -228,7 +232,7 @@ void bdb_blockchain::fetch_block_by_depth(size_t depth,
 void bdb_blockchain::fetch_block(const hash_digest& block_hash,
     fetch_handler_block handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::fetch_block_by_hash, shared_from_this(),
             block_hash, handle_fetch));
 }
@@ -251,7 +255,7 @@ void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash,
 void bdb_blockchain::fetch_block_depth(const hash_digest& block_hash,
     fetch_handler_block_depth handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::do_fetch_block_depth, shared_from_this(),
             block_hash, handle_fetch));
 }
@@ -277,7 +281,7 @@ void bdb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
 
 void bdb_blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::do_fetch_last_depth, shared_from_this(),
             handle_fetch));
 }
@@ -297,7 +301,7 @@ void bdb_blockchain::do_fetch_last_depth(fetch_handler_last_depth handle_fetch)
 void bdb_blockchain::fetch_block_locator(
     fetch_handler_block_locator handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::do_fetch_block_locator, shared_from_this(), 
             handle_fetch));
 }
@@ -340,7 +344,7 @@ void bdb_blockchain::do_fetch_block_locator(
 void bdb_blockchain::fetch_transaction(const hash_digest& transaction_hash,
     fetch_handler_transaction handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::do_fetch_transaction, shared_from_this(),
             transaction_hash, handle_fetch));
 }
@@ -364,7 +368,7 @@ void bdb_blockchain::fetch_transaction_index(
     const hash_digest& transaction_hash,
     fetch_handler_transaction_index handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::do_fetch_transaction_index,
             shared_from_this(), transaction_hash, handle_fetch));
 }
@@ -396,7 +400,7 @@ void bdb_blockchain::do_fetch_transaction_index(
 void bdb_blockchain::fetch_spend(const message::output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::do_fetch_spend, shared_from_this(),
             outpoint, handle_fetch));
 }
@@ -418,7 +422,7 @@ void bdb_blockchain::do_fetch_spend(const message::output_point& outpoint,
 void bdb_blockchain::fetch_outputs(const short_hash& pubkey_hash,
     fetch_handler_outputs handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&bdb_blockchain::do_fetch_outputs, shared_from_this(),
             pubkey_hash, handle_fetch));
 }

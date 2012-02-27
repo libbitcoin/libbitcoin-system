@@ -17,22 +17,23 @@ static std::string pretty(const message::ip_address& ip)
     return oss.str();
 }
 
-protocol::protocol()
-  : hosts_filename_("hosts"), max_outbound_(8)
+protocol::protocol(async_service& service)
+  : hosts_filename_("hosts"), max_outbound_(8),
+    strand_(service.get_service())
 {
-    hosts_ = std::make_shared<hosts>();
-    handshake_ = std::make_shared<handshake>();
-    network_ = std::make_shared<network>();
-    channel_subscribe_ = std::make_shared<channel_subscriber_type>(strand());
+    hosts_ = std::make_shared<hosts>(service);
+    handshake_ = std::make_shared<handshake>(service);
+    network_ = std::make_shared<network>(service);
+    channel_subscribe_ = std::make_shared<channel_subscriber_type>(strand_);
 }
 
 void protocol::start(completion_handler handle_complete)
 {
     atomic_counter_ptr count_paths = std::make_shared<atomic_counter>(0);
-    bootstrap(strand()->wrap(
+    bootstrap(strand_.wrap(
         std::bind(&protocol::handle_bootstrap, shared_from_this(),
             _1, count_paths, handle_complete)));
-    handshake_->start(strand()->wrap(
+    handshake_->start(strand_.wrap(
         std::bind(&protocol::handle_start_handshake_service,
             shared_from_this(), _1, count_paths, handle_complete)));
 }
@@ -74,7 +75,7 @@ void protocol::handle_start_handshake_service(const std::error_code& ec,
 void protocol::stop(completion_handler handle_complete)
 {
     hosts_->save(hosts_filename_,
-        strand()->wrap(std::bind(&protocol::handle_save, shared_from_this(),
+        strand_.wrap(std::bind(&protocol::handle_save, shared_from_this(),
             _1, handle_complete)));
 }
 void protocol::handle_save(const std::error_code& ec,
@@ -93,7 +94,7 @@ void protocol::handle_save(const std::error_code& ec,
 void protocol::bootstrap(completion_handler handle_complete)
 {
     hosts_->load(hosts_filename_,
-        strand()->wrap(std::bind(&protocol::load_hosts, shared_from_this(),
+        strand_.wrap(std::bind(&protocol::load_hosts, shared_from_this(),
             _1, handle_complete)));
 }
 void protocol::load_hosts(const std::error_code& ec,
@@ -107,7 +108,7 @@ void protocol::load_hosts(const std::error_code& ec,
         return;
     }
     hosts_->fetch_count(
-        strand()->wrap(std::bind(&protocol::if_0_seed, shared_from_this(),
+        strand_.wrap(std::bind(&protocol::if_0_seed, shared_from_this(),
             _1, _2, handle_complete)));
 }
 
@@ -123,8 +124,8 @@ void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
     }
     if (hosts_count == 0)
     {
-        load_seeds_ = std::make_shared<seeds>();
-        load_seeds_->start(this, handle_complete);
+        load_seeds_ = std::make_shared<seeds>(this);
+        load_seeds_->start(handle_complete);
     }
     else
         handle_complete(std::error_code());
@@ -138,16 +139,18 @@ const std::vector<std::string> dns_seeds
     "dnsseed.bitcoin.dashjr.org"
 };
 
-void protocol::seeds::start(protocol* parent,
-    completion_handler handle_complete)
+protocol::seeds::seeds(protocol* parent)
+  : strand_(parent->strand_)
+{
+    hosts_ = parent->hosts_;
+    handshake_ = parent->handshake_;
+    network_ = parent->network_;
+}
+void protocol::seeds::start(completion_handler handle_complete)
 {
     handle_complete_ = handle_complete;
     ended_paths_ = 0;
     finished_ = false;
-    hosts_ = parent->hosts_;
-    handshake_ = parent->handshake_;
-    network_ = parent->network_;
-    strand_ = parent->strand();
     for (const std::string& hostname: dns_seeds)
         connect_dns_seed(hostname);
 }
@@ -167,7 +170,7 @@ void protocol::seeds::error_case(const std::error_code& ec)
 void protocol::seeds::connect_dns_seed(const std::string& hostname)
 {
     handshake_->connect(network_, hostname, 8333,
-        strand_->wrap(std::bind(&protocol::seeds::request_addresses,
+        strand_.wrap(std::bind(&protocol::seeds::request_addresses,
             shared_from_this(), _1, _2)));
 }
 void protocol::seeds::request_addresses(
@@ -182,10 +185,10 @@ void protocol::seeds::request_addresses(
     else
     {
         dns_seed_node->send(message::get_address(),
-            strand_->wrap(std::bind(&protocol::seeds::handle_send_get_address,
+            strand_.wrap(std::bind(&protocol::seeds::handle_send_get_address,
                 shared_from_this(), _1)));
         dns_seed_node->subscribe_address(
-            strand_->wrap(std::bind(&protocol::seeds::save_addresses,
+            strand_.wrap(std::bind(&protocol::seeds::save_addresses,
                 shared_from_this(), _1, _2, dns_seed_node)));
     }
 
@@ -215,7 +218,7 @@ void protocol::seeds::save_addresses(const std::error_code& ec,
         log_info() << "Storing seeded addresses.";
         for (const message::network_address& net_address: packet.addresses)
             hosts_->store(net_address,
-                strand_->wrap(std::bind(&protocol::seeds::handle_store,
+                strand_.wrap(std::bind(&protocol::seeds::handle_store,
                     shared_from_this(), _1)));
 
         if (!finished_)
@@ -236,9 +239,9 @@ void protocol::seeds::handle_store(const std::error_code& ec)
 
 void protocol::run()
 {
-    strand()->dispatch(std::bind(&protocol::try_connect, shared_from_this()));
+    strand_.dispatch(std::bind(&protocol::try_connect, shared_from_this()));
     network_->listen(8333,
-        strand()->wrap(std::bind(&protocol::handle_listen,
+        strand_.wrap(std::bind(&protocol::handle_listen,
             shared_from_this(), _1, _2)));
 }
 void protocol::try_connect()
@@ -247,7 +250,7 @@ void protocol::try_connect()
         return;
     for (size_t i = connections_.size(); i < max_outbound_; ++i)
         hosts_->fetch_address(
-            strand()->wrap(std::bind(&protocol::attempt_connect,
+            strand_.wrap(std::bind(&protocol::attempt_connect,
                 shared_from_this(), _1, _2)));
 }
 void protocol::attempt_connect(const std::error_code& ec,
@@ -268,7 +271,7 @@ void protocol::attempt_connect(const std::error_code& ec,
             log_info(log_domain::protocol)
                 << "Already connected to " << pretty_hex(address.ip);
             // Retry another connection
-            strand()->post(
+            strand_.post(
                 std::bind(&protocol::try_connect, shared_from_this()));
             return;
         }
@@ -276,7 +279,7 @@ void protocol::attempt_connect(const std::error_code& ec,
     log_info(log_domain::protocol) << "Trying "
         << pretty(address.ip) << ":" << address.port;
     handshake_->connect(network_, pretty(address.ip), address.port,
-        strand()->wrap(std::bind(&protocol::handle_connect,
+        strand_.wrap(std::bind(&protocol::handle_connect,
             shared_from_this(), _1, _2, address)));
 }
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
@@ -287,7 +290,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         log_info(log_domain::protocol) << "Unable to connect to "
             << pretty(address.ip) << ":" << address.port
             << " - " << ec.message();
-        strand()->post(std::bind(&protocol::try_connect, shared_from_this()));
+        strand_.post(std::bind(&protocol::try_connect, shared_from_this()));
     }
     else
     {
@@ -309,7 +312,7 @@ void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
     else
     {
         accept->accept(
-            strand()->wrap(std::bind(&protocol::handle_accept,
+            strand_.wrap(std::bind(&protocol::handle_accept,
                 shared_from_this(), _1, _2, accept)));
     }
 }
@@ -340,7 +343,7 @@ void protocol::setup_new_channel(channel_ptr node)
 {
     // Remove channel from list of connections
     node->subscribe_stop(
-        strand()->wrap(std::bind(&protocol::channel_stopped,
+        strand_.wrap(std::bind(&protocol::channel_stopped,
             shared_from_this(), _1, node)));
     subscribe_address(node);
     node->send(message::get_address(), handle_send);
@@ -370,7 +373,7 @@ void protocol::channel_stopped(const std::error_code& ec,
 void protocol::subscribe_address(channel_ptr node)
 {
     node->subscribe_address(
-        strand()->wrap(std::bind(&protocol::receive_address_message,
+        strand_.wrap(std::bind(&protocol::receive_address_message,
             shared_from_this(), _1, _2, node)));
 }
 void protocol::receive_address_message(const std::error_code& ec,
@@ -386,7 +389,7 @@ void protocol::receive_address_message(const std::error_code& ec,
         log_info() << "Storing addresses.";
         for (const message::network_address& net_address: packet.addresses)
             hosts_->store(net_address,
-                strand()->wrap(std::bind(&protocol::handle_store_address,
+                strand_.wrap(std::bind(&protocol::handle_store_address,
                     shared_from_this(), _1)));
     }
 }
@@ -400,7 +403,7 @@ void protocol::handle_store_address(const std::error_code& ec)
 void protocol::fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
-    strand()->post(
+    strand_.post(
         std::bind(&protocol::do_fetch_connection_count,
             shared_from_this(), handle_fetch));
 }
