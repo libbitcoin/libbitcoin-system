@@ -28,8 +28,14 @@ channel_proxy::channel_proxy(async_service& service, socket_ptr socket)
         std::make_shared<verack_subscriber_type>(strand_);
     address_subscriber_ = 
         std::make_shared<address_subscriber_type>(strand_);
+    get_address_subscriber_ =
+        std::make_shared<get_address_subscriber_type>(strand_);
     inventory_subscriber_ =
         std::make_shared<inventory_subscriber_type>(strand_);
+    get_data_subscriber_ =
+        std::make_shared<get_data_subscriber_type>(strand_);
+    get_blocks_subscriber_ =
+        std::make_shared<get_blocks_subscriber_type>(strand_);
     transaction_subscriber_ = 
         std::make_shared<transaction_subscriber_type>(strand_);
     block_subscriber_ = 
@@ -71,6 +77,31 @@ void channel_proxy::stop_impl()
     heartbeat_.cancel(ret_ec);
     socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ret_ec);
     socket_->close(ret_ec);
+    clear_subscriptions();
+}
+
+void channel_proxy::clear_subscriptions()
+{
+    version_subscriber_->relay(error::channel_stopped, 
+        message::version());
+    verack_subscriber_->relay(error::channel_stopped, 
+        message::verack());
+    address_subscriber_->relay(error::channel_stopped, 
+        message::address());
+    get_address_subscriber_->relay(error::channel_stopped,
+        message::get_address());
+    inventory_subscriber_->relay(error::channel_stopped, 
+        message::inventory());
+    get_data_subscriber_->relay(error::channel_stopped, 
+        message::get_data());
+    get_blocks_subscriber_->relay(error::channel_stopped, 
+        message::get_blocks());
+    transaction_subscriber_->relay(error::channel_stopped, 
+        message::transaction());
+    block_subscriber_->relay(error::channel_stopped, 
+        message::block());
+    raw_subscriber_->relay(error::channel_stopped,
+        message::header(), data_chunk());
 }
 
 bool channel_proxy::stopped() const

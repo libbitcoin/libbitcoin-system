@@ -210,6 +210,7 @@ private:
 
     bool problems_check(const boost::system::error_code& ec);
     void stop_impl();
+    void clear_subscriptions();
 
     // We keep the service alive for lifetime rules
     io_service::strand strand_;
@@ -229,6 +230,7 @@ private:
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;
     std::vector<uint8_t> inbound_payload_;
 
+    // We should be using variadic templates for these
     version_subscriber_type::ptr version_subscriber_;
     verack_subscriber_type::ptr verack_subscriber_;
     address_subscriber_type::ptr address_subscriber_;
