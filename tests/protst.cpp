@@ -36,7 +36,10 @@ void mewcj(channel_ptr node)
 int main()
 {
     async_service service(1);
-    prot = std::make_shared<protocol>(service);
+    hosts_ptr hosts_ = std::make_shared<hosts>(service);
+    handshake_ptr handshake_ = std::make_shared<handshake>(service);
+    network_ptr network_ = std::make_shared<network>(service);
+    prot = std::make_shared<protocol>(service, hosts_, handshake_, network_);
     prot->start(handle_start);
     prot->subscribe_channel(mewcj);
     //prot->bootstrap(handle_start);

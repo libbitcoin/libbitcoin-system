@@ -17,13 +17,12 @@ static std::string pretty(const message::ip_address& ip)
     return oss.str();
 }
 
-protocol::protocol(async_service& service)
+protocol::protocol(async_service& service, hosts_ptr hosts_dir,
+    handshake_ptr handshaker, network_ptr net)
   : hosts_filename_("hosts"), max_outbound_(8),
-    strand_(service.get_service())
+    strand_(service.get_service()), hosts_(hosts_dir),
+    handshake_(handshaker), network_(net)
 {
-    hosts_ = std::make_shared<hosts>(service);
-    handshake_ = std::make_shared<handshake>(service);
-    network_ = std::make_shared<network>(service);
     channel_subscribe_ = std::make_shared<channel_subscriber_type>(strand_);
 }
 

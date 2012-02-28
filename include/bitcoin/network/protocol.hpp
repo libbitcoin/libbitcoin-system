@@ -22,7 +22,8 @@ public:
         fetch_connection_count_handler;
     typedef std::function<void (channel_ptr)> channel_handler;
 
-    protocol(async_service& service);
+    protocol(async_service& service, hosts_ptr hosts_dir,
+        handshake_ptr handshaker, network_ptr net);
     void start(completion_handler handle_complete);
     void stop(completion_handler handle_complete);
 
