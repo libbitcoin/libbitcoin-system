@@ -49,7 +49,7 @@ private:
         registry_ = registry_stack();
         while (!notify_copy.empty())
         {
-            notify_copy.top()(std::forward<Args>(params)...);
+            notify_copy.top()(params...);
             notify_copy.pop();
         }
         BITCOIN_ASSERT(notify_copy.empty());
