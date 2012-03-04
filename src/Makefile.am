@@ -22,6 +22,7 @@ libbitcoin_la_SOURCES = \
 	transaction.cpp \
 	error.cpp \
     validate.cpp \
+	session.cpp \
 	utility/base58.cpp \
 	utility/big_number.cpp \
 	utility/clock.cpp \

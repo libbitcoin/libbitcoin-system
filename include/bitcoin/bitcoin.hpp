@@ -11,6 +11,7 @@
 #include <bitcoin/network/hosts.hpp>
 #include <bitcoin/network/handshake.hpp>
 #include <bitcoin/block.hpp>
+#include <bitcoin/session.hpp>
 #include <bitcoin/poller.hpp>
 #include <bitcoin/data_helpers.hpp>
 #include <bitcoin/exporter.hpp>

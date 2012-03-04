@@ -11,6 +11,7 @@ bitcoin_include_HEADERS = \
 	block.hpp \
 	bitcoin.hpp \
 	types.hpp \
+	session.hpp \
 	data_helpers.hpp \
 	transaction_pool.hpp \
 	async_service.hpp \

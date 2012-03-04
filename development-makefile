@@ -130,6 +130,14 @@ bin/tests/protst: obj/protst.o
 
 protst: bin/tests/protst
 
+obj/sesh.o: tests/sesh.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/sesh: obj/sesh.o
+	$(CXX) -o bin/tests/sesh obj/sesh.o $(LIBBITCOIN)
+
+sesh: bin/tests/sesh
+
 obj/pol.o: tests/pol.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

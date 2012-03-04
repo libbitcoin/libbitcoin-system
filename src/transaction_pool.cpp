@@ -13,7 +13,6 @@ using std::placeholders::_1;
 transaction_pool_ptr transaction_pool::create(
     async_service& service, blockchain_ptr chain)
 {
-    // make_shared cannot use private constructors
     transaction_pool_ptr tx_pool(new transaction_pool(service));
     tx_pool->initialize(chain);
     return tx_pool;
@@ -26,6 +25,7 @@ transaction_pool::transaction_pool(async_service& service)
 void transaction_pool::initialize(blockchain_ptr chain)
 {
     chain_ = chain;
+    // subscribe reorganize
 }
 
 void transaction_pool::store(const message::transaction& stored_transaction,
