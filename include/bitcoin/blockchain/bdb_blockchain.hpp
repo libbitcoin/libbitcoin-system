@@ -21,8 +21,9 @@ class bdb_blockchain
     public std::enable_shared_from_this<bdb_blockchain>
 {
 public:
+    // Used by internal components so need public definition here
     typedef subscriber<
-        const std::error_code&, const block_list&, const block_list&>
+        const std::error_code&, size_t, const block_list&, const block_list&>
             reorganize_subscriber_type;
 
     bdb_blockchain(async_service& service, const std::string& prefix);

@@ -122,6 +122,7 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     env_ = new DbEnv(0);
     env_->set_lk_max_locks(10000);
     env_->set_lk_max_objects(10000);
+    env_->set_cachesize(1, 0, 1);
     env_->open(prefix.c_str(), env_flags, 0);
     // Create database objects
     db_blocks_ = new Db(env_, 0);

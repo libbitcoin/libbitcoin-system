@@ -12,7 +12,8 @@ enum class log_domain
     storage,
     validation,
     protocol,
-    poller
+    poller,
+    session
 };
 
 enum class logger_level

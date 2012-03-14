@@ -4,15 +4,19 @@
 #include <functional>
 #include <boost/circular_buffer.hpp>
 
+#include <bitcoin/async_service.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/threads.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/blockchain/blockchain.hpp>
 
 namespace libbitcoin {
 
 struct transaction_entry_info
 {
+    typedef std::function<void ()> monitor_handler;
+    // or use subscriber?
+
     hash_digest hash;
     message::transaction tx;
 };
@@ -24,6 +28,7 @@ class transaction_pool
 {
 public:
     typedef std::function<void (const std::error_code&)> store_handler;
+    typedef std::function<void (bool)> exists_handler;
 
     static transaction_pool_ptr create(
         async_service& service, blockchain_ptr chain);
@@ -34,6 +39,8 @@ public:
 
     void store(const message::transaction& stored_transaction,
         store_handler handle_store);
+    void exists(const hash_digest& transaction_hash,
+        exists_handler handle_exists);
 
 private:
     transaction_pool(async_service& service);
@@ -43,6 +50,14 @@ private:
         store_handler handle_store);
     void handle_delegate(const std::error_code& ec, 
         const message::transaction& tx, store_handler handle_store);
+
+    void do_exists(const hash_digest& transaction_hash,
+        exists_handler handle_exists);
+
+    void reorganize(const std::error_code& ec,
+        size_t fork_point,
+        const blockchain::block_list& new_blocks,
+        const blockchain::block_list& replaced_blocks);
 
     io_service::strand strand_;
     blockchain_ptr chain_;

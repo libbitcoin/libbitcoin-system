@@ -11,13 +11,25 @@
 
 namespace libbitcoin {
 
+struct session_params
+{
+    hosts_ptr hosts;
+    handshake_ptr handshake;
+    network_ptr network;
+    protocol_ptr protocol;
+    blockchain_ptr blockchain;
+    poller_ptr poller;
+    transaction_pool_ptr transaction_pool;
+};
+
 class session
 {
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
 
-    session();
+    session(const session_params& params);
     void start(completion_handler handle_complete);
+    void stop(completion_handler handle_complete);
 
 private:
     void download_blockchain(channel_ptr node);
@@ -30,19 +42,16 @@ private:
     void get_blocks(const std::error_code& ec,
         const message::get_blocks& packet, channel_ptr node);
 
-    async_service network_service_;
+    void request_tx_data(bool tx_exists,
+        const hash_digest& tx_hash, channel_ptr node);
 
     hosts_ptr hosts_;
     handshake_ptr handshake_;
     network_ptr network_;
     protocol_ptr protocol_;
 
-    async_service disk_service_;
-
     blockchain_ptr chain_;
     poller_ptr poll_;
-
-    async_service mempool_service_;
 
     transaction_pool_ptr tx_pool_;
 };

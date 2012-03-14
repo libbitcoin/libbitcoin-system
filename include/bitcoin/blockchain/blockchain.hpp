@@ -52,8 +52,8 @@ public:
 
     typedef std::vector<std::shared_ptr<message::block>> block_list;
     typedef std::function<
-        void (const std::error_code&, const block_list&, const block_list&)>
-            reorganize_handler;
+        void (const std::error_code&, size_t, 
+            const block_list&, const block_list&)> reorganize_handler;
 
     virtual void store(const message::block& stored_block, 
         store_block_handler handle_store) = 0;

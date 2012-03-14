@@ -138,6 +138,14 @@ bin/tests/sesh: obj/sesh.o
 
 sesh: bin/tests/sesh
 
+obj/mempool.o: tests/mempool.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/mempool: obj/mempool.o
+	$(CXX) -o bin/tests/mempool obj/mempool.o $(LIBBITCOIN)
+
+mempool: bin/tests/mempool
+
 obj/pol.o: tests/pol.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

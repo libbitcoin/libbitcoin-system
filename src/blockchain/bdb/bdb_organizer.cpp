@@ -28,10 +28,12 @@ bool bdb_organizer::verify(int fork_index,
     return validate.start();
 }
 void bdb_organizer::reorganize_occured(
+    size_t fork_point,
     const blockchain::block_list& arrivals,
     const blockchain::block_list& replaced)
 {
-    reorganize_subscriber_->relay(std::error_code(), arrivals, replaced);
+    reorganize_subscriber_->relay(std::error_code(),
+        fork_point, arrivals, replaced);
 }
 
 } // libbitcoin

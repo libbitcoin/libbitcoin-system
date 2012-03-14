@@ -183,7 +183,7 @@ void organizer::replace_chain(int fork_index,
         orphans_->add(replaced_block);
     }
     chain_->stop();
-    notify_reorganize(orphan_chain, replaced_slice);
+    notify_reorganize(fork_index, orphan_chain, replaced_slice);
 }
 
 void organizer::clip_orphans(block_detail_list& orphan_chain,
@@ -200,6 +200,7 @@ void organizer::clip_orphans(block_detail_list& orphan_chain,
 }
 
 void organizer::notify_reorganize(
+    size_t fork_point,
     const block_detail_list& orphan_chain,
     const block_detail_list& replaced_slice)
 {
@@ -212,7 +213,7 @@ void organizer::notify_reorganize(
         arrival_blocks.push_back(arrival_block->actual_ptr());
     for (block_detail_ptr replaced_block: replaced_slice)
         replaced_blocks.push_back(replaced_block->actual_ptr());
-    reorganize_occured(arrival_blocks, replaced_blocks);
+    reorganize_occured(fork_point, arrival_blocks, replaced_blocks);
 }
 
 } // libbitcoin

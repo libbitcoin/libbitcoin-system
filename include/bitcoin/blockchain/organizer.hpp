@@ -75,6 +75,7 @@ protected:
     virtual bool verify(int fork_index,
         const block_detail_list& orphan_chain, int orphan_index) = 0;
     virtual void reorganize_occured(
+        size_t fork_point,
         const blockchain::block_list& arrivals,
         const blockchain::block_list& replaced) = 0;
 
@@ -83,6 +84,7 @@ private:
     void replace_chain(int fork_index, block_detail_list& orphan_chain);
     void clip_orphans(block_detail_list& orphan_chain, int orphan_index);
     void notify_reorganize(
+        size_t fork_point,
         const block_detail_list& orphan_chain,
         const block_detail_list& replaced_slice);
 

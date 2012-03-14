@@ -18,6 +18,7 @@ void start_polling(const std::error_code& ec, channel_ptr node,
 
 int main()
 {
+    //bdb_blockchain::setup("database");
     async_service s1(1), s2(1);
     blockchain_ptr chain = std::make_shared<bdb_blockchain>(s1, "database");
     poller_ptr poll = std::make_shared<poller>(chain);
