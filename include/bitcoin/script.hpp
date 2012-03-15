@@ -18,6 +18,22 @@ enum class opcode
     pushdata1 = 76,
     pushdata2 = 77,
     pushdata4 = 78,
+    op_1 = 81,
+    op_2 = 82,
+    op_3 = 83,
+    op_4 = 84,
+    op_5 = 85,
+    op_6 = 86,
+    op_7 = 87,
+    op_8 = 88,
+    op_9 = 89,
+    op_10 = 90,
+    op_11 = 91,
+    op_12 = 92,
+    op_13 = 93,
+    op_14 = 94,
+    op_15 = 95,
+    op_16 = 96,
     nop = 97,
     drop = 117,
     dup = 118,
@@ -80,6 +96,7 @@ private:
 
     bool run(const message::transaction& parent_tx, uint32_t input_index);
 
+    bool op_x(opcode code);
     bool op_drop();
     bool op_dup();
     bool op_sha256();

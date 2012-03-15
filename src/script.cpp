@@ -92,6 +92,16 @@ data_chunk script::pop_stack()
     return value;
 }
 
+bool script::op_x(opcode code)
+{
+    uint8_t value_diff =
+        static_cast<uint8_t>(code) -
+            static_cast<uint8_t>(opcode::op_1) + 1;
+    big_number big_repr(value_diff);
+    stack_.push_back(big_repr.data());
+    return true;
+}
+
 bool script::op_drop()
 {
     if (stack_.size() < 1)
@@ -259,6 +269,24 @@ bool script::run_operation(operation op,
         case opcode::pushdata4:
             return true;
 
+        case opcode::op_1:
+        case opcode::op_2:
+        case opcode::op_3:
+        case opcode::op_4:
+        case opcode::op_5:
+        case opcode::op_6:
+        case opcode::op_7:
+        case opcode::op_8:
+        case opcode::op_9:
+        case opcode::op_10:
+        case opcode::op_11:
+        case opcode::op_12:
+        case opcode::op_13:
+        case opcode::op_14:
+        case opcode::op_15:
+        case opcode::op_16:
+            return op_x(op.code);
+
         case opcode::nop:
             return true;
 
@@ -363,6 +391,38 @@ std::string opcode_to_string(opcode code)
             return "pushdata2";
         case opcode::pushdata4:
             return "pushdata4";
+        case opcode::op_1:
+            return "1";
+        case opcode::op_2:
+            return "2";
+        case opcode::op_3:
+            return "3";
+        case opcode::op_4:
+            return "4";
+        case opcode::op_5:
+            return "5";
+        case opcode::op_6:
+            return "6";
+        case opcode::op_7:
+            return "7";
+        case opcode::op_8:
+            return "8";
+        case opcode::op_9:
+            return "9";
+        case opcode::op_10:
+            return "10";
+        case opcode::op_11:
+            return "11";
+        case opcode::op_12:
+            return "12";
+        case opcode::op_13:
+            return "13";
+        case opcode::op_14:
+            return "14";
+        case opcode::op_15:
+            return "15";
+        case opcode::op_16:
+            return "16";
         case opcode::nop:
             return "nop";
         case opcode::drop:
@@ -399,6 +459,38 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::pushdata2;
     else if (code_repr == "pushdata4")
         return opcode::pushdata4;
+    else if (code_repr == "1")
+        return opcode::op_1;
+    else if (code_repr == "2")
+        return opcode::op_2;
+    else if (code_repr == "3")
+        return opcode::op_3;
+    else if (code_repr == "4")
+        return opcode::op_4;
+    else if (code_repr == "5")
+        return opcode::op_5;
+    else if (code_repr == "6")
+        return opcode::op_6;
+    else if (code_repr == "7")
+        return opcode::op_7;
+    else if (code_repr == "8")
+        return opcode::op_8;
+    else if (code_repr == "9")
+        return opcode::op_9;
+    else if (code_repr == "10")
+        return opcode::op_10;
+    else if (code_repr == "11")
+        return opcode::op_11;
+    else if (code_repr == "12")
+        return opcode::op_12;
+    else if (code_repr == "13")
+        return opcode::op_13;
+    else if (code_repr == "14")
+        return opcode::op_14;
+    else if (code_repr == "15")
+        return opcode::op_15;
+    else if (code_repr == "16")
+        return opcode::op_16;
     else if (code_repr == "nop")
         return opcode::nop;
     else if (code_repr == "drop")
