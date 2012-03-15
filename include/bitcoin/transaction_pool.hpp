@@ -50,7 +50,7 @@ private:
     void do_store(const message::transaction& stored_transaction,
         confirm_handler handle_confirm, store_handler handle_store);
     void handle_delegate(const std::error_code& ec, 
-        const message::transaction& tx, store_handler handle_store);
+        const transaction_entry_info& tx_entry, store_handler handle_store);
 
     void do_exists(const hash_digest& transaction_hash,
         exists_handler handle_exists);

@@ -22,7 +22,7 @@ transaction_pool_ptr transaction_pool::create(
 }
 
 transaction_pool::transaction_pool(async_service& service)
-  : strand_(service.get_service()), pool_(100)
+  : strand_(service.get_service()), pool_(2000)
 {
 }
 void transaction_pool::initialize(blockchain_ptr chain)
@@ -44,20 +44,33 @@ void transaction_pool::do_store(
     const message::transaction& stored_transaction,
     confirm_handler handle_confirm, store_handler handle_store)
 {
+    transaction_entry_info new_tx_entry{
+        hash_transaction(stored_transaction),
+        stored_transaction,
+        handle_confirm};
+
+    // Does it already exist in pool?
+    for (const transaction_entry_info& entry: pool_)
+        if (entry.hash == new_tx_entry.hash)
+        {
+            handle_store(error::object_already_exists);
+            return;
+        }
+
     exporter_ptr saver = std::make_shared<satoshi_exporter>();
     validate_transaction_ptr validate =
         std::make_shared<validate_transaction>(chain_, saver,
             stored_transaction, pool_, strand_);
     validate->start(strand_.wrap(std::bind(
         &transaction_pool::handle_delegate,
-            shared_from_this(), _1, stored_transaction, handle_store)));
+            shared_from_this(), _1, new_tx_entry, handle_store)));
 }
 
 void transaction_pool::handle_delegate(const std::error_code& ec,
-    const message::transaction& tx, store_handler handle_store)
+    const transaction_entry_info& tx_entry, store_handler handle_store)
 {
     if (!ec)
-        pool_.push_back({hash_transaction(tx), tx});
+        pool_.push_back(tx_entry);
     handle_store(ec);
 }
 
