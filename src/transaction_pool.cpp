@@ -34,15 +34,15 @@ void transaction_pool::initialize(blockchain_ptr chain)
 }
 
 void transaction_pool::store(const message::transaction& stored_transaction,
-    store_handler handle_store)
+    confirm_handler handle_confirm, store_handler handle_store)
 {
     strand_.post(
         std::bind(&transaction_pool::do_store, shared_from_this(),
-            stored_transaction, handle_store));
+            stored_transaction, handle_confirm, handle_store));
 }
 void transaction_pool::do_store(
     const message::transaction& stored_transaction,
-    store_handler handle_store)
+    confirm_handler handle_confirm, store_handler handle_store)
 {
     exporter_ptr saver = std::make_shared<satoshi_exporter>();
     validate_transaction_ptr validate =
@@ -85,11 +85,48 @@ void transaction_pool::reorganize(const std::error_code& ec,
     const blockchain::block_list& new_blocks,
     const blockchain::block_list& replaced_blocks)
 {
+    if (!replaced_blocks.empty())
+        resubmit_all();
+    else
+        takeout_confirmed(new_blocks);
     // new blocks come in - remove txs in new
     // old blocks taken out - resubmit txs in old
     chain_->subscribe_reorganize(
         strand_.wrap(std::bind(&transaction_pool::reorganize,
             shared_from_this(), _1, _2, _3, _4)));
+}
+
+void handle_resubmit(const std::error_code& ec,
+    transaction_pool::confirm_handler handle_confirm)
+{
+    if (ec)
+        handle_confirm(ec);
+}
+void transaction_pool::resubmit_all()
+{
+    for (const transaction_entry_info& entry: pool_)
+        store(entry.tx, entry.handle_confirm,
+            std::bind(handle_resubmit, _1, entry.handle_confirm));
+    pool_.clear();
+}
+
+void transaction_pool::takeout_confirmed(
+    const blockchain::block_list& new_blocks)
+{
+    for (auto new_block: new_blocks)
+        for (const message::transaction& new_tx: new_block->transactions)
+            try_delete(hash_transaction(new_tx));
+}
+void transaction_pool::try_delete(const hash_digest& tx_hash)
+{
+    for (auto it = pool_.begin(); it != pool_.end(); ++it)
+        if (it->hash == tx_hash)
+        {
+            auto handle_confirm = it->handle_confirm;
+            pool_.erase(it);
+            handle_confirm(std::error_code());
+            return;
+        }
 }
 
 } // libbitcoin
