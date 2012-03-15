@@ -30,7 +30,7 @@ handshake::handshake(async_service& service)
                             0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
     template_version_.address_you.port = 8333;
     template_version_.user_agent = "/libbitcoin:0.1a/";
-    template_version_.start_height = 0;
+    template_version_.start_depth = 0;
     template_version_.nonce = rand();
 }
 
@@ -235,6 +235,18 @@ void handshake::do_set_user_agent(const std::string& user_agent,
     setter_handler handle_set)
 {
     template_version_.user_agent = user_agent;
+    handle_set(std::error_code());
+}
+
+void handshake::set_start_depth(uint32_t depth, setter_handler handle_set)
+{
+    strand_.post(
+        std::bind(&handshake::do_set_start_depth, shared_from_this(),
+            depth, handle_set));
+}
+void handshake::do_set_start_depth(uint32_t depth, setter_handler handle_set)
+{
+    template_version_.start_depth = depth;
     handle_set(std::error_code());
 }
 

@@ -58,7 +58,7 @@ struct version
     network_address address_you;
     uint64_t nonce;
     std::string user_agent;
-    uint32_t start_height;
+    uint32_t start_depth;
 };
 
 struct verack

@@ -74,7 +74,7 @@ data_chunk satoshi_exporter::save(const message::version& packet) const
     serial.write_network_address(packet.address_you);
     serial.write_8_bytes(packet.nonce);
     serial.write_string(packet.user_agent);
-    serial.write_4_bytes(packet.start_height);
+    serial.write_4_bytes(packet.start_depth);
     return serial.data();
 }
 
@@ -240,7 +240,7 @@ message::version satoshi_exporter::load_version(const data_chunk& stream) const
         BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26 + 26 + 8 + 1);
         return packet;
     }
-    packet.start_height = deserial.read_4_bytes();
+    packet.start_depth = deserial.read_4_bytes();
     BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
     return packet;
 }

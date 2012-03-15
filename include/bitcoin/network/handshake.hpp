@@ -39,6 +39,7 @@ public:
     void set_port(uint16_t port, setter_handler handle_set);
     void set_user_agent(const std::string& user_agent,
         setter_handler handle_set);
+    void set_start_depth(uint32_t depth, setter_handler handle_set);
 
 private:
     void handle_connect(const std::error_code& ec,
@@ -64,6 +65,7 @@ private:
     void do_set_port(uint16_t port, setter_handler handle_set);
     void do_set_user_agent(const std::string& user_agent,
         setter_handler handle_set);
+    void do_set_start_depth(uint32_t depth, setter_handler handle_set);
 
     io_service::strand strand_;
     message::version template_version_;
