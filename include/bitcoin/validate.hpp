@@ -78,6 +78,8 @@ protected:
     virtual uint32_t previous_block_bits() = 0;
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
     virtual uint64_t median_time_past() = 0;
+    virtual bool transaction_exists(const hash_digest& tx_hash) = 0;
+    virtual bool is_output_spent(const message::output_point& outpoint) = 0;
     // These have optional implementations that can be overriden
     virtual bool validate_inputs(const message::transaction& tx, 
         size_t index_in_parent, uint64_t& value_in);
@@ -101,6 +103,7 @@ private:
     bool passes_checkpoints();
 
     bool connect_block();
+    bool not_duplicate_or_spent(const message::transaction& tx);
 
     exporter_ptr exporter_;
     chrono_clock_ptr clock_;

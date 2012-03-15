@@ -21,6 +21,8 @@ protected:
     uint32_t previous_block_bits();
     uint64_t actual_timespan(const uint64_t interval);
     uint64_t median_time_past();
+    bool transaction_exists(const hash_digest& tx_hash);
+    bool is_output_spent(const message::output_point& outpoint);
     bool fetch_transaction(message::transaction& tx, 
         size_t& previous_depth, const hash_digest& tx_hash);
     bool is_output_spent(const message::output_point& previous_output,

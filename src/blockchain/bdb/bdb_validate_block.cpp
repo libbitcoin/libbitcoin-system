@@ -62,6 +62,18 @@ uint64_t bdb_validate_block::median_time_past()
     return times[times.size() / 2];
 }
 
+bool bdb_validate_block::transaction_exists(const hash_digest& tx_hash)
+{
+    protobuf::Transaction proto_tx =
+        common_->fetch_proto_transaction(txn_, tx_hash);
+    return proto_tx.IsInitialized();
+}
+
+bool bdb_validate_block::is_output_spent(const message::output_point& outpoint)
+{
+    return common_->is_output_spent(txn_, outpoint);
+}
+
 bool bdb_validate_block::fetch_transaction(message::transaction& tx, 
     size_t& tx_depth, const hash_digest& tx_hash)
 {

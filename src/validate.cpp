@@ -554,6 +554,11 @@ bool validate_block::passes_checkpoints()
 
 bool validate_block::connect_block()
 {
+    // BIP 30 security fix
+    for (const message::transaction& current_tx: current_block_.transactions)
+        if (!not_duplicate_or_spent(current_tx))
+            return false;
+
     uint64_t fees = 0;
     for (size_t tx_index = 1; tx_index < current_block_.transactions.size();
             ++tx_index)
@@ -569,6 +574,23 @@ bool validate_block::connect_block()
         total_output_value(current_block_.transactions[0]);
     if (coinbase_value  > block_value(depth_) + fees)
         return false;
+    return true;
+}
+
+bool validate_block::not_duplicate_or_spent(const message::transaction& tx)
+{
+    const hash_digest& tx_hash = hash_transaction(tx);
+    // Is there a matching previous tx?
+    if (!transaction_exists(tx_hash))
+        return true;
+    // Then for a duplicate transaction to exist, all its outputs
+    // must have been spent.
+    for (uint32_t output_index = 0; output_index < tx.outputs.size();
+        ++output_index)
+    {
+        if (!is_output_spent({tx_hash, output_index}))
+            return false;
+    }
     return true;
 }
 
