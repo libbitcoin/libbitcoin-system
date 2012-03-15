@@ -37,6 +37,7 @@ enum class opcode
     nop = 97,
     drop = 117,
     dup = 118,
+    min = 163,
     sha256 = 168,
     hash160 = 169,
     equal = 135,
@@ -99,6 +100,7 @@ private:
     bool op_x(opcode code);
     bool op_drop();
     bool op_dup();
+    bool op_min();
     bool op_sha256();
     bool op_hash160();
     bool op_equal();

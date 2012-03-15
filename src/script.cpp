@@ -33,6 +33,19 @@ const operation_stack& script::operations() const
     return operations_;
 }
 
+inline bool cast_to_big_number(const data_chunk& raw_number,
+    big_number& result)
+{
+    // Satoshi bitcoin does it this way.
+    // Copy its quack behaviour
+    if (raw_number.size() > 4)
+        return false;
+    big_number mid;
+    mid.set_data(raw_number);
+    result.set_data(mid.data());
+    return true;
+}
+
 inline bool cast_to_bool(const data_chunk& values)
 {
     for (auto it = values.begin(); it != values.end(); ++it)
@@ -115,6 +128,22 @@ bool script::op_dup()
     if (stack_.size() < 1)
         return false;
     stack_.push_back(stack_.back());
+    return true;
+}
+
+bool script::op_min()
+{
+    if (stack_.size() < 2)
+        return false;
+    big_number number_a, number_b;
+    if (!cast_to_big_number(pop_stack(), number_a))
+        return false;
+    if (!cast_to_big_number(pop_stack(), number_b))
+        return false;
+    if (number_a < number_b)
+        stack_.push_back(number_a.data());
+    else
+        stack_.push_back(number_b.data());
     return true;
 }
 
@@ -296,6 +325,9 @@ bool script::run_operation(operation op,
         case opcode::dup:
             return op_dup();
 
+        case opcode::min:
+            return op_min();
+
         case opcode::sha256:
             return op_sha256();
 
@@ -429,6 +461,8 @@ std::string opcode_to_string(opcode code)
             return "drop";
         case opcode::dup:
             return "dup";
+        case opcode::min:
+            return "min";
         case opcode::sha256:
             return "sha256";
         case opcode::hash160:
@@ -497,6 +531,8 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::drop;
     else if (code_repr == "dup")
         return opcode::dup;
+    else if (code_repr == "min")
+        return opcode::min;
     else if (code_repr == "sha256")
         return opcode::sha256;
     else if (code_repr == "hash160")
