@@ -24,6 +24,10 @@ public:
 
     protocol(async_service& service, hosts_ptr hosts_dir,
         handshake_ptr handshaker, network_ptr net);
+
+    protocol(const protocol&) = delete;
+    void operator=(const protocol&) = delete;
+
     void start(completion_handler handle_complete);
     void stop(completion_handler handle_complete);
 

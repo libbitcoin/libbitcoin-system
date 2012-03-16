@@ -31,6 +31,9 @@ public:
 
     hosts(async_service& service, size_t capacity=26000);
 
+    hosts(const hosts&) = delete;
+    void operator=(const hosts&) = delete;
+
     void load(const std::string& filename, load_handler handle_load);
     void save(const std::string& filename, save_handler handle_save);
 

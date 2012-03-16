@@ -28,6 +28,10 @@ public:
     typedef std::function<void (const std::error_code&)> setter_handler;
 
     handshake(async_service& service);
+
+    handshake(const handshake&) = delete;
+    void operator=(const handshake&) = delete;
+
     void start(start_handler handle_start);
 
     void connect(network_ptr net, const std::string& hostname,
