@@ -34,6 +34,9 @@ public:
 private:
     void download_blockchain(channel_ptr node);
     void new_channel(channel_ptr node);
+    void set_start_depth(const std::error_code& ec, size_t fork_point,
+        const blockchain::block_list& new_blocks,
+        const blockchain::block_list& replaced_blocks);
 
     void inventory(const std::error_code& ec,
         const message::inventory& packet, channel_ptr node);

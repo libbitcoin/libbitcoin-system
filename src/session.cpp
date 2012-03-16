@@ -7,6 +7,8 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using std::placeholders::_3;
+using std::placeholders::_4;
 
 session::session(const session_params& params)
   : hosts_(params.hosts), handshake_(params.handshake),
@@ -16,6 +18,11 @@ session::session(const session_params& params)
 {
 }
 
+void handle_set_start_depth(const std::error_code&)
+{
+    // Set start depth in handshake
+    // Do nothing
+}
 void session::start(completion_handler handle_complete)
 {
     protocol_->start(handle_complete);
@@ -23,6 +30,11 @@ void session::start(completion_handler handle_complete)
         std::bind(&session::download_blockchain, this, _1));
     protocol_->subscribe_channel(
         std::bind(&session::new_channel, this, _1));
+    chain_->fetch_last_depth(
+        std::bind(&handshake::set_start_depth,
+            handshake_, _2, handle_set_start_depth));
+    chain_->subscribe_reorganize(
+        std::bind(&session::set_start_depth, this, _1, _2, _3, _4));
 }
 
 void session::stop(completion_handler handle_complete)
@@ -48,6 +60,16 @@ void session::new_channel(channel_ptr node)
     // block
     protocol_->subscribe_channel(
         std::bind(&session::new_channel, this, _1));
+}
+
+void session::set_start_depth(const std::error_code& ec, size_t fork_point,
+    const blockchain::block_list& new_blocks,
+    const blockchain::block_list& replaced_blocks)
+{
+    size_t last_depth = fork_point + new_blocks.size();
+    handshake_->set_start_depth(last_depth, handle_set_start_depth);
+    chain_->subscribe_reorganize(
+        std::bind(&session::set_start_depth, this, _1, _2, _3, _4));
 }
 
 void session::inventory(const std::error_code& ec,
