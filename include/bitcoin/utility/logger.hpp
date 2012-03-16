@@ -2,6 +2,8 @@
 #define LIBBITCOIN_LOGGER_H
 
 #include <sstream>
+#include <map>
+#include <vector>
 
 namespace libbitcoin {
 
@@ -16,7 +18,7 @@ enum class log_domain
     session
 };
 
-enum class logger_level
+enum class log_level
 {
     null,
     debug,
@@ -29,7 +31,7 @@ enum class logger_level
 class logger_wrapper
 {
 public:
-    logger_wrapper(logger_level lev); 
+    logger_wrapper(log_level lev, log_domain domain); 
     logger_wrapper(const logger_wrapper& other);
     ~logger_wrapper();
 
@@ -39,9 +41,18 @@ public:
         stream << value;
         return *this;
     }
+
+    void alias(log_level lev, log_level map_lev);
+    // Can add optional argument later to allow re-enabling
+    void filter(log_domain domain);
 private:
+    typedef std::map<log_level, log_level> alias_mapping;
+    typedef std::map<log_domain, std::vector<log_level>> filters_map;
+    static alias_mapping aliases_;
+    static filters_map filters_;
     std::ostringstream stream;
-    logger_level lev_;
+    log_level lev_;
+    log_domain domain_;
 };
 
 logger_wrapper log_debug(log_domain domain=log_domain::normal);

@@ -138,6 +138,14 @@ bin/tests/sesh: obj/sesh.o
 
 sesh: bin/tests/sesh
 
+obj/logtst.o: tests/logtst.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/logtst: obj/logtst.o
+	$(CXX) -o bin/tests/logtst obj/logtst.o $(LIBBITCOIN)
+
+logtst: bin/tests/logtst
+
 obj/mempool.o: tests/mempool.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
