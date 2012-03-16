@@ -60,7 +60,7 @@ void hosts::do_save(const std::string& filename, save_handler handle_save)
     handle_save(std::error_code());
 }
 
-void hosts::store(const message::network_address address,
+void hosts::store(const message::network_address& address,
     store_handler handle_store)
 {
     strand_.post(
@@ -71,7 +71,7 @@ void hosts::store(const message::network_address address,
         });
 }
 
-void hosts::remove(const message::network_address address,
+void hosts::remove(const message::network_address& address,
     remove_handler handle_remove)
 {
     strand_.post(
@@ -82,7 +82,7 @@ bool hosts::hosts_field::operator==(const hosts_field& other)
 {
     return ip == other.ip && port == other.port;
 }
-void hosts::do_remove(const message::network_address address,
+void hosts::do_remove(const message::network_address& address,
     remove_handler handle_remove)
 {
     auto it = std::find(buffer_.begin(), buffer_.end(),
