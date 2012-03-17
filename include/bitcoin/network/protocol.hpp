@@ -8,6 +8,7 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/threads.hpp>
 #include <bitcoin/utility/subscriber.hpp>
+#include <bitcoin/network/channel.hpp>
 #include <bitcoin/async_service.hpp>
 
 namespace libbitcoin {
@@ -37,6 +38,14 @@ public:
     void fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
     void subscribe_channel(channel_handler handle_channel);
+
+    template <typename Message>
+    void broadcast(const Message& packet)
+    {
+        strand_.post(
+            std::bind(&protocol::do_broadcast<Message>,
+                shared_from_this(), packet));
+    }
 
 private:
     struct connection_info
@@ -124,6 +133,16 @@ private:
     // fetch methods
     void do_fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
+
+    template <typename Message>
+    void do_broadcast(const Message& packet)
+    {
+        auto null_handle = [](const std::error_code&) { };
+        for (const connection_info& connection: connections_)
+            connection.node->send(packet, null_handle);
+        for (channel_ptr node: accepted_channels_)
+            node->send(packet, null_handle);
+    }
 
     io_service::strand strand_;
 
