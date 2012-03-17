@@ -28,9 +28,9 @@ std::string encode_base58(const data_chunk& unencoded_data)
     // Leading zeroes encoded as base58 zeros                                    
     for (const byte unencoded_byte: unencoded_data)
     {
-        encoded_data += base58_chars[0];
-        if (unencoded_byte == 0)
+        if (unencoded_byte != 0)
             break;
+        encoded_data += base58_chars[0];
     }
 
     // Convert little endian std::string to big endian
@@ -43,7 +43,7 @@ data_chunk decode_base58(const std::string& encoded_data)
     big_number bn = 0;       
                                                                                  
     // Convert big endian string to bignum                                       
-    for (char current_char: encoded_data)
+    for (const byte current_char: encoded_data)
     {                                                                            
         bn *= 58;
         bn += std::string(base58_chars).find(current_char);
@@ -54,16 +54,16 @@ data_chunk decode_base58(const std::string& encoded_data)
                                                                                  
     // Trim off sign byte if present                                             
     if (temp_data.size() >= 2 && 
-            temp_data.end()[-1] == 0 && temp_data.end()[-2] >= 0x80) 
-        temp_data.erase(temp_data.end() - 1);
+            temp_data.begin()[0] == 0 && temp_data.begin()[1] >= 0x80) 
+        temp_data.erase(temp_data.begin());
                                                                                  
     // Restore leading zeros                                                     
     int leading_zeros = 0;
-    for (char current_char: encoded_data)
+    for (const byte current_char: encoded_data)
     {
-        leading_zeros++;
-        if (current_char == base58_chars[0])
+        if (current_char != base58_chars[0])
             break;
+        leading_zeros++;
     }
     data_chunk unencoded_data;
     unencoded_data.assign(leading_zeros + temp_data.size(), 0);

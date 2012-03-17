@@ -68,14 +68,6 @@ bin/examples/subvertx/balance: libbitcoin obj/balance.o
 
 balance: bin/examples/subvertx/balance
 
-obj/priv.o: examples/subvertx/priv.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
-
-bin/examples/subvertx/priv: libbitcoin obj/priv.o
-	$(CXX) -o bin/examples/subvertx/priv obj/priv.o $(LIBBITCOIN) $(LIBS)
-
-priv: bin/examples/subvertx/priv
-
 obj/poller.o: examples/poller.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
@@ -137,6 +129,22 @@ bin/tests/sesh: obj/sesh.o
 	$(CXX) -o bin/tests/sesh obj/sesh.o $(LIBBITCOIN)
 
 sesh: bin/tests/sesh
+
+obj/crap_main.o: tests/crap/main.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/crap: obj/crap_main.o
+	$(CXX) -o bin/tests/crap obj/crap_main.o $(LIBBITCOIN)
+
+crap: bin/tests/crap
+
+obj/priv.o: tests/priv.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/priv: obj/priv.o
+	$(CXX) -o bin/tests/priv obj/priv.o $(LIBBITCOIN)
+
+priv: bin/tests/priv
 
 obj/logtst.o: tests/logtst.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
