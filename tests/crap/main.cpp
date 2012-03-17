@@ -246,8 +246,12 @@ class crap_app
 {
 public:
     crap_app()
-      : tx_(nullptr)
+      : tx_(nullptr), session_(nullptr)
     {
+    }
+    ~crap_app()
+    {
+        delete session_;
     }
 
     bool initialize(const std::string& raw_private_key)
@@ -274,7 +278,14 @@ public:
         mempool_service_.spawn();
         p_.transaction_pool =
             transaction_pool::create(mempool_service_, p_.blockchain);
+
+        session_ = new session(p_);
+        session_->start(&crap_app::handle_start);
         return true;
+    }
+
+    static void handle_start(const std::error_code&)
+    {
     }
 
     int run()
@@ -394,6 +405,7 @@ private:
 
     async_service network_service_, disk_service_, mempool_service_;
     session_params p_;
+    session* session_;
 
     message::transaction* tx_;
 };
@@ -407,6 +419,13 @@ std::string read_private_key(std::ifstream& file)
 
 int main(int argc, char** argv)
 {
+    log_debug().alias(log_level::debug, log_level::null);
+    log_info().filter(log_domain::network);
+    log_info().filter(log_domain::storage);
+    log_info().filter(log_domain::validation);
+    log_info().filter(log_domain::protocol);
+    log_info().filter(log_domain::poller);
+    log_info().filter(log_domain::session);
     if (argc != 2)
     {
         std::cerr << "Need private key filename\n";
