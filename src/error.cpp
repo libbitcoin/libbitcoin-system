@@ -2,6 +2,19 @@
 
 namespace libbitcoin {
 
+namespace error
+{
+    std::error_code make_error_code(error_code_t e)
+    {
+        return std::error_code(static_cast<int>(e), error_category());
+    }
+
+    std::error_condition make_error_condition(error_condition_t e)
+    {
+        return std::error_condition(static_cast<int>(e), error_category());
+    }
+}
+
 const char* error_category_impl::name() const
 {
     return "bitcoin";
@@ -9,8 +22,7 @@ const char* error_category_impl::name() const
 
 std::string error_category_impl::message(int ev) const
 {
-    error ec = static_cast<error>(ev);
-    switch (ec)
+    switch (ev)
     {
         case error::missing_object:
             return "Object does not exist";
@@ -36,8 +48,28 @@ std::string error_category_impl::message(int ev) const
             return "Channel stopped";
         case error::channel_timeout:
             return "Channel timed out";
+        case error::check_block:
+            return "check_block() validation failed";
+        case error::accept_block:
+            return "accept_block() validation failed";
+        case error::connect_block:
+            return "connect_block() validation failed";
         default:
             return "Unknown error";
+    }
+}
+
+std::error_condition
+    error_category_impl::default_error_condition(int ev) const
+{
+    switch (ev)
+    {
+        case error::check_block:
+        case error::accept_block:
+        case error::connect_block:
+            return error::validate_failed;
+        default:
+            return std::error_condition(ev, *this);
     }
 }
 
@@ -45,16 +77,6 @@ const std::error_category& error_category()
 {
     static error_category_impl instance;
     return instance;
-}
-
-std::error_code make_error_code(error e)
-{
-    return std::error_code(static_cast<int>(e), error_category());
-}
-
-std::error_condition make_error_condition(error e)
-{
-    return std::error_condition(static_cast<int>(e), error_category());
 }
 
 } // libbitcoin
