@@ -35,7 +35,7 @@ namespace error
     enum error_condition_t
     {
         // validate
-        validate_failed
+        validate_failed = 1
     };
 
     std::error_code make_error_code(error_code_t e);
