@@ -185,7 +185,7 @@ void bdb_blockchain::do_store(const message::block& stored_block,
     }
     orphans_->add(stored_detail);
     organize_->start();
-    handle_store(std::error_code(), stored_detail->info());
+    handle_store(stored_detail->errc(), stored_detail->info());
     // Every 10 blocks, we flush database
     static size_t flush_counter = 0;
     if (++flush_counter == 2000)

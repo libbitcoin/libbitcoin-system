@@ -48,6 +48,8 @@ std::string error_category_impl::message(int ev) const
             return "Channel stopped";
         case error::channel_timeout:
             return "Channel timed out";
+        case error::previous_block_invalid:
+            return "Previous block failed to validate";
         case error::check_block:
             return "check_block() validation failed";
         case error::accept_block:
@@ -64,6 +66,7 @@ std::error_condition
 {
     switch (ev)
     {
+        case error::previous_block_invalid:
         case error::check_block:
         case error::accept_block:
         case error::connect_block:

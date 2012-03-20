@@ -38,10 +38,18 @@ void block_detail::set_info(const block_info& replace_info)
 {
     info_ = replace_info;
 }
-
 const block_info& block_detail::info() const
 {
     return info_;
+}
+
+void block_detail::set_errc(const std::error_code& ec)
+{
+    ec_ = ec;
+}
+const std::error_code& block_detail::errc() const
+{
+    return ec_;
 }
 
 orphans_pool::orphans_pool(size_t pool_size)
@@ -145,9 +153,11 @@ void organizer::replace_chain(int fork_index,
     for (int orphan_index = 0; orphan_index < orphan_chain.size();
         ++orphan_index)
     {
+        std::error_code invalid_reason =
+            verify(fork_index, orphan_chain, orphan_index);
         // Invalid block found
-        if (!verify(fork_index, orphan_chain, orphan_index))
-            clip_orphans(orphan_chain, orphan_index);
+        if (invalid_reason)
+            clip_orphans(orphan_chain, orphan_index, invalid_reason);
         const message::block& orphan_block =
             orphan_chain[orphan_index]->actual();
         orphan_work += block_work(orphan_block.bits);
@@ -187,12 +197,16 @@ void organizer::replace_chain(int fork_index,
 }
 
 void organizer::clip_orphans(block_detail_list& orphan_chain,
-    int orphan_index)
+    int orphan_index, const std::error_code& invalid_reason)
 {
     auto orphan_start = orphan_chain.begin() + orphan_index;
     // Remove from orphans pool
     for (auto it = orphan_start; it != orphan_chain.end(); ++it)
     {
+        if (it == orphan_start)
+            (*it)->set_errc(invalid_reason);
+        else
+            (*it)->set_errc(error::previous_block_invalid);
         (*it)->set_info({block_status::rejected, 0});
         orphans_->remove(*it);
     }

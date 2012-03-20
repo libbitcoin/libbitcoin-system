@@ -69,7 +69,7 @@ typedef std::shared_ptr<validate_transaction> validate_transaction_ptr;
 class validate_block
 {
 public:
-    bool start();
+    std::error_code start();
 
 protected:
     validate_block(exporter_ptr saver, size_t depth,

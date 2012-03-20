@@ -15,7 +15,7 @@ bdb_organizer::bdb_organizer(bdb_common_ptr common,
 {
 }
 
-bool bdb_organizer::verify(int fork_index,
+std::error_code bdb_organizer::verify(int fork_index,
     const block_detail_list& orphan_chain, int orphan_index)
 {
     exporter_ptr saver = std::make_shared<satoshi_exporter>();

@@ -26,6 +26,7 @@ namespace error
         channel_stopped,
         channel_timeout,
         // validate
+        previous_block_invalid,
         check_block,
         accept_block,
         connect_block

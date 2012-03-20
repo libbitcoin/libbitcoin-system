@@ -19,8 +19,8 @@ public:
         bdb_chain_keeper_ptr chain, subscriber_ptr reorganize_subscriber);
 
 protected:
-    bool verify(int fork_index, const block_detail_list& orphan_chain,
-        int orphan_index);
+    std::error_code verify(int fork_index,
+        const block_detail_list& orphan_chain, int orphan_index);
     void reorganize_occured(
         size_t fork_point,
         const blockchain::block_list& arrivals,

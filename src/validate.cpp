@@ -328,24 +328,15 @@ validate_block::validate_block(exporter_ptr saver, size_t depth,
     clock_ = std::make_shared<chrono_clock>();
 }
 
-bool validate_block::start()
+std::error_code validate_block::start()
 {
     if (!check_block())
-    {
-        log_error(log_domain::validation) << "Check block failed";
-        return false;
-    }
+        return error::check_block;
     if (!accept_block())
-    {
-        log_error(log_domain::validation) << "Accept block failed";
-        return false;
-    }
+        return error::accept_block;
     if (!connect_block())
-    {
-        log_error(log_domain::validation) << "Connect block failed";
-        return false;
-    }
-    return true;
+        return error::connect_block;
+    return std::error_code();
 }
 
 bool validate_block::check_block()
