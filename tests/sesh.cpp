@@ -86,7 +86,7 @@ int main()
         network_service, p.hosts, p.handshake, p.network);
     p.protocol->subscribe_channel(monitor_tx);
 
-    p.blockchain = std::make_shared<bdb_blockchain>(disk_service, "database");
+    p.blockchain = bdb_blockchain::create(disk_service, "database");
     p.poller = std::make_shared<poller>(p.blockchain);
 
     p.transaction_pool = transaction_pool::create(mempool_service, p.blockchain);

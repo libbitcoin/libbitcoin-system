@@ -30,18 +30,25 @@ constexpr uint32_t env_flags =
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
-bdb_blockchain::bdb_blockchain(async_service& service,
-    const std::string& prefix)
-  : strand_(service.get_service())
+blockchain_ptr bdb_blockchain::create(
+    async_service& service, const std::string& prefix)
 {
-    initialize(prefix);
+    bdb_blockchain* bdb_chain = new bdb_blockchain(service);
+    blockchain_ptr chain(bdb_chain);
+    bdb_chain->strand_.post(
+        std::bind(&bdb_blockchain::initialize,
+            bdb_chain->shared_from_this(), prefix));
+    return chain;
 }
 
-bdb_blockchain::bdb_blockchain(async_service& fake_service)
-  : strand_(fake_service.get_service())
+bdb_blockchain::bdb_blockchain(async_service& service)
+  : strand_(service.get_service())
 {
     // Private method. Should never be called by user!
     // Only by factory methods
+
+    reorganize_subscriber_ =
+        std::make_shared<reorganize_subscriber_type>(strand_);
 }
 
 template <typename Database>
@@ -149,9 +156,6 @@ bool bdb_blockchain::initialize(const std::string& prefix)
 
     common_ = std::make_shared<bdb_common>(env_,
         db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
-
-    reorganize_subscriber_ =
-        std::make_shared<reorganize_subscriber_type>(strand_);
 
     orphans_ = std::make_shared<orphans_pool>(20);
     bdb_chain_keeper_ptr chainkeeper = 

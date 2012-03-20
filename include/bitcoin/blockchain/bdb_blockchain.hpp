@@ -26,14 +26,15 @@ public:
         const std::error_code&, size_t, const block_list&, const block_list&>
             reorganize_subscriber_type;
 
-    bdb_blockchain(async_service& service, const std::string& prefix);
+    static bool setup(const std::string& prefix);
+    static blockchain_ptr create(
+        async_service& service, const std::string& prefix);
+
     ~bdb_blockchain();
 
     // Non-copyable
     bdb_blockchain(const bdb_blockchain&) = delete;
     void operator=(const bdb_blockchain&) = delete;
-
-    static bool setup(const std::string& prefix);
 
     void store(const message::block& stored_block,
         store_block_handler handle_store);
@@ -57,7 +58,7 @@ public:
     void subscribe_reorganize(reorganize_handler handle_reorganize);
 
 private:
-    bdb_blockchain(async_service& fake_service);
+    bdb_blockchain(async_service& service);
     bool initialize(const std::string& prefix);
 
     void do_store(const message::block& store_block,
