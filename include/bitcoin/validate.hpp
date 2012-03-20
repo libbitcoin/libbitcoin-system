@@ -23,7 +23,8 @@ public:
         const pool_buffer& pool, io_service::strand& async_strand);
     void start(validate_handler handle_validate);
 
-    static bool check_transaction(const message::transaction& tx);
+    static std::error_code check_transaction(
+        const message::transaction& tx);
     static size_t number_script_sig_operations(
         const message::transaction& tx);
     static bool connect_input(
@@ -93,7 +94,7 @@ protected:
         size_t index_in_parent, size_t input_index) = 0;
 
 private:
-    bool check_block();
+    std::error_code check_block();
     bool check_proof_of_work(hash_digest hash, uint32_t bits);
     bool check_transaction(const message::transaction& tx);
     size_t number_script_sig_operations();

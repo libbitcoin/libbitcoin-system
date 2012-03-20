@@ -46,7 +46,9 @@ void validate_transaction::start(validate_handler handle_validate)
 
 bool validate_transaction::basic_checks() const
 {
-    if (!check_transaction(tx_))
+    std::error_code ec;
+    ec = check_transaction(tx_);
+    if (ec)
         return false;
 
     if (is_coinbase(tx_))
@@ -262,10 +264,11 @@ void validate_transaction::check_fees()
     handle_validate_(std::error_code());
 }
 
-bool validate_transaction::check_transaction(const message::transaction& tx)
+std::error_code validate_transaction::check_transaction(
+    const message::transaction& tx)
 {
     if (tx.inputs.empty() || tx.outputs.empty())
-        return false;
+        return error::empty_transaction;
 
     // Maybe not needed since we try to serialise block in CheckBlock()
     //if (exporter_->save(tx, false).size() > max_block_size)
@@ -276,10 +279,10 @@ bool validate_transaction::check_transaction(const message::transaction& tx)
     for (message::transaction_output output: tx.outputs)
     {
         if (output.value > max_money())
-            return false;
+            return error::output_value_overflow;
         total_output_value += output.value;
         if (total_output_value > max_money())
-            return false;
+            return error::output_value_overflow;
     }
 
     if (is_coinbase(tx))
@@ -287,16 +290,16 @@ bool validate_transaction::check_transaction(const message::transaction& tx)
         const script& coinbase_script = tx.inputs[0].input_script;
         size_t coinbase_script_size = save_script(coinbase_script).size();
         if (coinbase_script_size < 2 || coinbase_script_size > 100)
-            return false;
+            return error::invalid_coinbase_script_size;
     }
     else
     {
         for (message::transaction_input input: tx.inputs)
             if (previous_output_is_null(input.previous_output))
-                return false;
+                return error::previous_output_null;
     }
 
-    return true;
+    return std::error_code();
 }
 
 inline size_t count_script_sigs(const operation_stack& operations)
@@ -330,8 +333,10 @@ validate_block::validate_block(exporter_ptr saver, size_t depth,
 
 std::error_code validate_block::start()
 {
-    if (!check_block())
-        return error::check_block;
+    std::error_code ec;
+    ec = check_block();
+    if (ec)
+        return ec;
     if (!accept_block())
         return error::accept_block;
     if (!connect_block())
@@ -339,7 +344,7 @@ std::error_code validate_block::start()
     return std::error_code();
 }
 
-bool validate_block::check_block()
+std::error_code validate_block::check_block()
 {
     // CheckBlock()
     // These are checks that are independent of context
@@ -351,63 +356,45 @@ bool validate_block::check_block()
         current_block_.transactions.size() > max_block_size ||
         exporter_->save(current_block_).size() > max_block_size)
     {
-        log_error(log_domain::validation) << "Size limits failed";
-        return false;
+        return error::size_limits;
     }
 
     const hash_digest current_block_hash = hash_block_header(current_block_);
     if (!check_proof_of_work(current_block_hash, current_block_.bits))
-    {
-        log_error(log_domain::validation) << "Proof of work failed";
-        return false;
-    }
+        return error::proof_of_work;
 
     const ptime block_time = 
             boost::posix_time::from_time_t(current_block_.timestamp);
     if (block_time > clock_->time() + hours(2))
-    {
-        log_error(log_domain::validation) << "Timestamp too far in the future";
-        return false;
-    }
+        return error::futuristic_timestamp;
 
     if (!is_coinbase(current_block_.transactions[0]))
-    {
-        log_error(log_domain::validation) 
-            << "First transaction is not a coinbase";
-        return false;
-    }
+        return error::first_not_coinbase;
     for (size_t i = 1; i < current_block_.transactions.size(); ++i)
     {
         const message::transaction& tx = current_block_.transactions[i];
         if (is_coinbase(tx))
-        {
-            log_error(log_domain::validation) << "More than one coinbase";
-            return false;
-        }
+            return error::extra_coinbases;
     }
 
     for (message::transaction tx: current_block_.transactions)
-        if (!validate_transaction::check_transaction(tx))
-        {
-            log_error(log_domain::validation) << "Transaction checks failed";
-            return false;
-        }
+    {
+        std::error_code ec = validate_transaction::check_transaction(tx);
+        if (ec)
+            return ec;
+    }
 
     // Check that it's not full of nonstandard transactions
     if (number_script_sig_operations() > max_block_script_sig_operations)
-    {
-        log_error(log_domain::validation) << "Too many script *SIG operations";
-        return false;
-    }
+        return error::too_many_sigs;
 
     if (current_block_.merkle != 
             generate_merkle_root(current_block_.transactions))
     {
-        log_error(log_domain::validation) << "Merkle root mismatch";
-        return false;
+        return error::merkle_mismatch;
     }
 
-    return true;
+    return std::error_code();
 }
 
 bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)

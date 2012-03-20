@@ -27,8 +27,22 @@ namespace error
         channel_timeout,
         // validate
         previous_block_invalid,
-        check_block,
+        // check_transaction()
+        empty_transaction,
+        output_value_overflow,
+        invalid_coinbase_script_size,
+        previous_output_null,
+        // check_block()
+        size_limits,
+        proof_of_work,
+        futuristic_timestamp,
+        first_not_coinbase,
+        extra_coinbases,
+        too_many_sigs,
+        merkle_mismatch,
+        // accept_block()
         accept_block,
+        // connect_block()
         connect_block
     };
 

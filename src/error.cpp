@@ -48,12 +48,37 @@ std::string error_category_impl::message(int ev) const
             return "Channel stopped";
         case error::channel_timeout:
             return "Channel timed out";
+        // validate
         case error::previous_block_invalid:
             return "Previous block failed to validate";
-        case error::check_block:
-            return "check_block() validation failed";
+        // check_transaction()
+        case error::empty_transaction:
+            return "Transaction inputs or outputs are empty";
+        case error::output_value_overflow:
+            return "Overflow in output value outside range";
+        case error::invalid_coinbase_script_size:
+            return "Coinbase script is too small or large";
+        case error::previous_output_null:
+            return "Non-coinbase transaction has null previous in an input";
+        // check_block()
+        case error::size_limits:
+            return "Size limits failed";
+        case error::proof_of_work:
+            return "Proof of work failed";
+        case error::futuristic_timestamp:
+            return "Timestamp too far in the future";
+        case error::first_not_coinbase:
+            return "First transaction is not a coinbase";
+        case error::extra_coinbases:
+            return "More than one coinbase";
+        case error::too_many_sigs:
+            return "Too many script *SIG operations";
+        case error::merkle_mismatch:
+            return "Merkle root mismatch";
+        // accept_block()
         case error::accept_block:
             return "accept_block() validation failed";
+        // connect_block()
         case error::connect_block:
             return "connect_block() validation failed";
         default:
@@ -67,7 +92,17 @@ std::error_condition
     switch (ev)
     {
         case error::previous_block_invalid:
-        case error::check_block:
+        case error::empty_transaction:
+        case error::output_value_overflow:
+        case error::invalid_coinbase_script_size:
+        case error::previous_output_null:
+        case error::size_limits:
+        case error::proof_of_work:
+        case error::futuristic_timestamp:
+        case error::first_not_coinbase:
+        case error::extra_coinbases:
+        case error::too_many_sigs:
+        case error::merkle_mismatch:
         case error::accept_block:
         case error::connect_block:
             return error::validate_failed;
