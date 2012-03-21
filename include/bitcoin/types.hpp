@@ -12,29 +12,24 @@ namespace libbitcoin {
 
 using boost::asio::ip::tcp;
 
-class exporter;
-class blockchain;
-class chrono_clock;
-class transaction_pool;
-class acceptor;
-class network;
-class channel;
-class handshake;
-class hosts;
-class protocol;
-class poller;
+#define DECLARE_PTR_TYPE(nametype) \
+    class nametype; \
+    typedef std::shared_ptr<nametype> nametype##_ptr
 
-typedef std::shared_ptr<exporter> exporter_ptr;
-typedef std::shared_ptr<blockchain> blockchain_ptr;
-typedef std::shared_ptr<chrono_clock> chrono_clock_ptr;
-typedef std::shared_ptr<transaction_pool> transaction_pool_ptr;
-typedef std::shared_ptr<acceptor> acceptor_ptr;
-typedef std::shared_ptr<network> network_ptr;
-typedef std::shared_ptr<channel> channel_ptr;
-typedef std::shared_ptr<handshake> handshake_ptr;
-typedef std::shared_ptr<hosts> hosts_ptr;
-typedef std::shared_ptr<protocol> protocol_ptr;
-typedef std::shared_ptr<poller> poller_ptr;
+DECLARE_PTR_TYPE(exporter);
+DECLARE_PTR_TYPE(blockchain);
+DECLARE_PTR_TYPE(chrono_clock);
+DECLARE_PTR_TYPE(transaction_pool);
+DECLARE_PTR_TYPE(acceptor);
+DECLARE_PTR_TYPE(network);
+DECLARE_PTR_TYPE(channel);
+DECLARE_PTR_TYPE(handshake);
+DECLARE_PTR_TYPE(hosts);
+DECLARE_PTR_TYPE(protocol);
+DECLARE_PTR_TYPE(poller);
+DECLARE_PTR_TYPE(session);
+
+#undef DECLARE_PTR_TYPE
 
 typedef std::atomic<size_t> atomic_counter;
 typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
@@ -69,24 +64,22 @@ struct node_address
 // Extend std namespace with our hash wrappers
 namespace std
 {
+    using libbitcoin::std_hash_wrapper;
+    using libbitcoin::hash_digest;
+    using libbitcoin::short_hash;
 
-using libbitcoin::std_hash_wrapper;
-using libbitcoin::hash_digest;
-using libbitcoin::short_hash;
+    template <>
+    struct hash<hash_digest>
+      : public std_hash_wrapper<hash_digest>
+    {
+    };
 
-template <>
-struct hash<hash_digest>
-  : public std_hash_wrapper<hash_digest>
-{
-};
-
-template <>
-struct hash<short_hash>
-  : public std_hash_wrapper<short_hash>
-{
-};
-
-} // std
+    template <>
+    struct hash<short_hash>
+      : public std_hash_wrapper<short_hash>
+    {
+    };
+} // namespace std
 
 #endif
 
