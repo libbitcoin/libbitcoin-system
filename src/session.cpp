@@ -11,10 +11,10 @@ using std::placeholders::_3;
 using std::placeholders::_4;
 
 session::session(const session_params& params)
-  : hosts_(params.hosts), handshake_(params.handshake),
-    network_(params.network), protocol_(params.protocol),
-    chain_(params.blockchain), poll_(params.poller),
-    tx_pool_(params.transaction_pool)
+  : hosts_(params.hosts_), handshake_(params.handshake_),
+    network_(params.network_), protocol_(params.protocol_),
+    chain_(params.blockchain_), poll_(params.poller_),
+    tx_pool_(params.transaction_pool_)
 {
 }
 

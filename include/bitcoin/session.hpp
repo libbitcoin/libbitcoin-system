@@ -13,13 +13,13 @@ namespace libbitcoin {
 
 struct session_params
 {
-    hosts_ptr hosts;
-    handshake_ptr handshake;
-    network_ptr network;
-    protocol_ptr protocol;
-    blockchain_ptr blockchain;
-    poller_ptr poller;
-    transaction_pool_ptr transaction_pool;
+    hosts_ptr hosts_;
+    handshake_ptr handshake_;
+    network_ptr network_;
+    protocol_ptr protocol_;
+    blockchain_ptr blockchain_;
+    poller_ptr poller_;
+    transaction_pool_ptr transaction_pool_;
 };
 
 class session

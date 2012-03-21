@@ -44,7 +44,7 @@ void handle_mempool_store(const std::error_code& ec,
 void monitor_tx(channel_ptr node)
 {
     node->subscribe_transaction(std::bind(&recv_transaction, _1, _2, node));
-    p.protocol->subscribe_channel(monitor_tx);
+    p.protocol_->subscribe_channel(monitor_tx);
 }
 
 void recv_transaction(const std::error_code& ec,
@@ -55,7 +55,7 @@ void recv_transaction(const std::error_code& ec,
         log_error() << "transaction: " << ec.message();
         return;
     }
-    p.transaction_pool->store(tx, handle_confirm,
+    p.transaction_pool_->store(tx, handle_confirm,
         std::bind(&handle_mempool_store, _1, hash_transaction(tx)));
     node->subscribe_transaction(std::bind(recv_transaction, _1, _2, node));
 }
@@ -79,17 +79,18 @@ void handle_mempool_store(const std::error_code& ec,
 int main()
 {
     async_service network_service(1), disk_service(1), mempool_service(1);
-    p.hosts = std::make_shared<hosts>(network_service);
-    p.handshake = std::make_shared<handshake>(network_service);
-    p.network = std::make_shared<network>(network_service);
-    p.protocol = std::make_shared<protocol>(
-        network_service, p.hosts, p.handshake, p.network);
-    p.protocol->subscribe_channel(monitor_tx);
+    p.hosts_ = std::make_shared<hosts>(network_service);
+    p.handshake_ = std::make_shared<handshake>(network_service);
+    p.network_ = std::make_shared<network>(network_service);
+    p.protocol_ = std::make_shared<protocol>(
+        network_service, p.hosts_, p.handshake_, p.network_);
+    p.protocol_->subscribe_channel(monitor_tx);
 
-    p.blockchain = bdb_blockchain::create(disk_service, "database");
-    p.poller = std::make_shared<poller>(p.blockchain);
+    p.blockchain_ = bdb_blockchain::create(disk_service, "database");
+    p.poller_ = std::make_shared<poller>(p.blockchain_);
 
-    p.transaction_pool = transaction_pool::create(mempool_service, p.blockchain);
+    p.transaction_pool_ =
+        transaction_pool::create(mempool_service, p.blockchain_);
 
     //bdb_blockchain::setup("database");
     session s(p);
