@@ -50,7 +50,7 @@ private:
 
 typedef std::shared_ptr<bdb_chain_keeper> bdb_chain_keeper_ptr;
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

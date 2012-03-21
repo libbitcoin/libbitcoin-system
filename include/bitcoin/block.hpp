@@ -32,7 +32,7 @@ indices_list block_locator_indices(int top_depth);
 
 message::block genesis_block();
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

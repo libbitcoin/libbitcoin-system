@@ -467,5 +467,5 @@ void bdb_blockchain::subscribe_reorganize(
     reorganize_subscriber_->subscribe(handle_reorganize);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

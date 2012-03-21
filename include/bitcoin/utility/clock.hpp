@@ -18,7 +18,7 @@ private:
     ptime offset_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

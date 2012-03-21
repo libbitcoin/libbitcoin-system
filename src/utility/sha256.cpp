@@ -27,5 +27,5 @@ uint32_t generate_sha256_checksum(const data_chunk& chunk)
     return cast_chunk<uint32_t>(begin_bytes);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

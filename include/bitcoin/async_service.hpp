@@ -33,7 +33,7 @@ private:
     std::vector<std::thread> threads_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

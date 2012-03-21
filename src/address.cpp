@@ -42,5 +42,5 @@ short_hash address_to_short_hash(const std::string& address)
     return result;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

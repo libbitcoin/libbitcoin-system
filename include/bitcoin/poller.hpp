@@ -31,7 +31,7 @@ private:
     blockchain_ptr chain_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

@@ -145,7 +145,7 @@ struct ping
 };
 
 } // message
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

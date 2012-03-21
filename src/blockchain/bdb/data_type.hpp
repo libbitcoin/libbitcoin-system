@@ -58,7 +58,7 @@ private:
     Dbt dbt_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

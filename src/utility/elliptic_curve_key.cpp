@@ -119,5 +119,5 @@ bool elliptic_curve_key::initialize()
     return key_ != nullptr;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

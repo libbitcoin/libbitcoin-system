@@ -18,7 +18,7 @@ message::block protobuf_to_block_header(const protobuf::Block& proto_block);
 message::transaction protobuf_to_transaction(
     const protobuf::Transaction& proto_tx);
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

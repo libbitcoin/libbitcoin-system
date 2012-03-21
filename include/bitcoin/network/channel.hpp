@@ -298,7 +298,7 @@ private:
     std::weak_ptr<channel_proxy> weak_proxy_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

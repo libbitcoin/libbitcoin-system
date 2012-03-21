@@ -63,7 +63,7 @@ private:
 //template <typename Handler>
 //using subscriber_ptr = std::shared_ptr<subscribe<Handler>>;
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

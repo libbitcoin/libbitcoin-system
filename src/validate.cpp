@@ -626,5 +626,5 @@ bool validate_block::connect_input(size_t index_in_parent,
     return true;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

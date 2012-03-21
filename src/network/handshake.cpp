@@ -250,5 +250,5 @@ void handshake::do_set_start_depth(uint32_t depth, setter_handler handle_set)
     handle_set(std::error_code());
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

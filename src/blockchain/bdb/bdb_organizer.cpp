@@ -36,5 +36,5 @@ void bdb_organizer::reorganize_occured(
         fork_point, arrivals, replaced);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

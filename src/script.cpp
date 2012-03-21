@@ -655,5 +655,5 @@ data_chunk save_script(const script& scr)
     return raw_script;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

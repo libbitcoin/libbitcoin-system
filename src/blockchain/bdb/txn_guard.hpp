@@ -28,7 +28,7 @@ private:
 
 typedef std::shared_ptr<txn_guard> txn_guard_ptr;
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

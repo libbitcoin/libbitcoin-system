@@ -195,5 +195,5 @@ txn_guard_ptr bdb_chain_keeper::txn()
     return txn_;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

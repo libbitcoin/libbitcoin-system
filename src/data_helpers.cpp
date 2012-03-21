@@ -23,5 +23,5 @@ data_chunk bytes_from_pretty(std::string byte_stream)
     return stack;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

@@ -24,5 +24,5 @@ short_hash generate_ripemd_hash(const data_chunk& chunk)
     return ripemd_hash;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

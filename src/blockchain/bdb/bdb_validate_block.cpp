@@ -161,5 +161,5 @@ bool bdb_validate_block::orphan_is_spent(
     return false;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

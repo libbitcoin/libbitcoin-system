@@ -33,7 +33,7 @@ private:
     subscriber_ptr reorganize_subscriber_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

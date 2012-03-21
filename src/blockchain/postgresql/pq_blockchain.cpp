@@ -972,5 +972,5 @@ pq_reader_ptr pq_blockchain::reader()
     return reader_;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

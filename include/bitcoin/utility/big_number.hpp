@@ -62,7 +62,7 @@ const big_number operator<<(const big_number& a, unsigned int shift);
 
 divmod_result divmod(const big_number& a, const big_number& b);
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

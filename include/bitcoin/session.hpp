@@ -59,7 +59,7 @@ private:
     transaction_pool_ptr tx_pool_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

@@ -220,5 +220,5 @@ divmod_result divmod(const big_number& a, const big_number& b)
     return std::make_pair(divider, remainder);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

@@ -148,7 +148,7 @@ data_chunk create_raw_message(exporter_ptr saver, const Message& packet)
     return whole_message;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

@@ -128,7 +128,7 @@ script coinbase_script(const data_chunk& raw_script);
 script parse_script(const data_chunk& raw_script);
 data_chunk save_script(const script& scr);
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

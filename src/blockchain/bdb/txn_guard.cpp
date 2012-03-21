@@ -38,5 +38,5 @@ const DbTxn* txn_guard::get() const
     return txn_;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

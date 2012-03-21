@@ -75,7 +75,7 @@ private:
     message::version template_version_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

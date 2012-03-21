@@ -87,7 +87,7 @@ public:
         reorganize_handler handle_reorganize) = 0;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

@@ -262,5 +262,5 @@ bool bdb_common::reconstruct_block(txn_guard_ptr txn,
     return true;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

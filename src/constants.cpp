@@ -9,5 +9,5 @@ big_number max_target()
     return max_target;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

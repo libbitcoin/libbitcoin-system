@@ -126,5 +126,5 @@ bool operator==(const message::output_point& output_a,
     return output_a.hash == output_b.hash && output_a.index == output_b.index;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

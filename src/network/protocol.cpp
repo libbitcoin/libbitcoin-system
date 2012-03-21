@@ -417,5 +417,5 @@ void protocol::subscribe_channel(channel_handler handle_channel)
     channel_subscribe_->subscribe(handle_channel);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

@@ -142,5 +142,5 @@ void transaction_pool::try_delete(const hash_digest& tx_hash)
         }
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

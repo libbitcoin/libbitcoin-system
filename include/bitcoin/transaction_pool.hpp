@@ -68,7 +68,7 @@ private:
     pool_buffer pool_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

@@ -133,5 +133,5 @@ void poller::ask_blocks(const std::error_code& ec,
     node->send(packet, std::bind(&handle_send_packet, _1));
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

@@ -64,7 +64,7 @@ private:
     boost::circular_buffer<hosts_field> buffer_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

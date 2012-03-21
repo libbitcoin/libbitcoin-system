@@ -365,5 +365,5 @@ void postgresql_blockchain::do_fetch_balance(const short_hash& pubkey_hash,
     handle_fetch(std::error_code(), value);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

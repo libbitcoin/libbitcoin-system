@@ -12,5 +12,5 @@ const ptime chrono_clock::time() const
     return boost::posix_time::second_clock::universal_time();
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

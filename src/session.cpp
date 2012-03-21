@@ -154,5 +154,5 @@ void session::request_tx_data(bool tx_exists,
     node->send(request_tx, handle_send_get_data);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

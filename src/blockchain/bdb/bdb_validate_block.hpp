@@ -44,7 +44,7 @@ private:
     const block_detail_list& orphan_chain_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

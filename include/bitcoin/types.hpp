@@ -59,7 +59,7 @@ struct node_address
     uint16_t port;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 // Extend std namespace with our hash wrappers
 namespace std

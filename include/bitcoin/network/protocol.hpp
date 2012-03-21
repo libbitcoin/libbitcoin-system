@@ -158,7 +158,7 @@ private:
     channel_subscriber_type::ptr channel_subscribe_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

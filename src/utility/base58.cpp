@@ -73,5 +73,5 @@ data_chunk decode_base58(const std::string& encoded_data)
     return unencoded_data;
 }                                                             
                                                                                  
-} // libbitcoin
+} // namespace libbitcoin
 

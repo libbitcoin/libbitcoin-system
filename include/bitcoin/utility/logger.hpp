@@ -61,7 +61,7 @@ logger_wrapper log_warning(log_domain domain=log_domain::normal);
 logger_wrapper log_error(log_domain domain=log_domain::normal);
 logger_wrapper log_fatal(log_domain domain=log_domain::normal);
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

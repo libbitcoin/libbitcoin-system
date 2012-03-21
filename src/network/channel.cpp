@@ -588,5 +588,5 @@ void channel::subscribe_stop(
         proxy->subscribe_stop(handle_stop);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

@@ -448,5 +448,5 @@ bool satoshi_exporter::verify_header(const message::header& header_msg) const
     return true;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

@@ -209,5 +209,5 @@ std::string deserializer::read_string()
     return read_fixed_string(string_size);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

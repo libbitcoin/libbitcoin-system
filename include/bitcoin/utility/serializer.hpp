@@ -53,7 +53,7 @@ private:
     const_iterator begin_, end_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

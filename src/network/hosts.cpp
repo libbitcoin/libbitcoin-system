@@ -129,5 +129,5 @@ void hosts::do_fetch_count(fetch_count_handler handle_fetch)
     handle_fetch(std::error_code(), buffer_.size());
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

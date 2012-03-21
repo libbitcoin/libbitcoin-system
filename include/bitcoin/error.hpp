@@ -67,7 +67,7 @@ public:
 
 const std::error_category& error_category();
 
-} // libbitcoin
+} // namespace libbitcoin
 
 namespace std
 {

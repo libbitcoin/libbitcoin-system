@@ -47,5 +47,5 @@ const io_service& async_service::get_service() const
     return service_;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

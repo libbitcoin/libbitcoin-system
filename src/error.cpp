@@ -117,5 +117,5 @@ const std::error_category& error_category()
     return instance;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

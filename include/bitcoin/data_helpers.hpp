@@ -89,7 +89,7 @@ boost::sub_range<RangeType> range(RangeType iterable,
         iterable.begin() + start_offset, iterable.end() - end_offset);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

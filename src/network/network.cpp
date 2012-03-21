@@ -127,5 +127,5 @@ void network::listen(uint16_t port, listen_handler handle_listen)
     handle_listen(std::error_code(), accept);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

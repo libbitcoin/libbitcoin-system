@@ -230,5 +230,5 @@ void organizer::notify_reorganize(
     reorganize_occured(fork_point, arrival_blocks, replaced_blocks);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

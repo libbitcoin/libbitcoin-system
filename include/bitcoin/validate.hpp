@@ -113,7 +113,7 @@ private:
     const message::block& current_block_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

@@ -12,7 +12,7 @@ constexpr size_t ripemd_length = RIPEMD160_DIGEST_LENGTH;
 
 short_hash generate_ripemd_hash(const data_chunk& chunk);
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

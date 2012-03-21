@@ -100,7 +100,7 @@ private:
 
 typedef std::shared_ptr<organizer> organizer_ptr;
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

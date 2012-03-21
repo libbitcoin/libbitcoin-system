@@ -38,7 +38,7 @@ private:
     value_type buffer_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

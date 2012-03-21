@@ -67,7 +67,7 @@ private:
     async_service& service_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

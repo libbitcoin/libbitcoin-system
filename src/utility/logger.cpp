@@ -70,5 +70,5 @@ logger_wrapper log_fatal(log_domain domain)
     return logger_wrapper(log_level::fatal, domain);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

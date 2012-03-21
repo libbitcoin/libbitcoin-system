@@ -48,7 +48,7 @@ constexpr uint64_t target_spacing = 10 * 60;
 // Two weeks worth of blocks = readjust interval = 2016
 constexpr uint64_t readjustment_interval = target_timespan / target_spacing;
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

@@ -105,5 +105,5 @@ message::transaction protobuf_to_transaction(
     return result_tx;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

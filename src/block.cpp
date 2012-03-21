@@ -124,5 +124,5 @@ message::block genesis_block()
     return genesis;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 

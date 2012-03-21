@@ -63,7 +63,7 @@ private:
     cppdb::session sql_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

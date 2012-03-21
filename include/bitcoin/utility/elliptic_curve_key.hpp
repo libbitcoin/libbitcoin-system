@@ -34,7 +34,7 @@ private:
     EC_KEY* key_;
 };
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

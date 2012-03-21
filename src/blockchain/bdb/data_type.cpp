@@ -107,5 +107,5 @@ const Dbt* empty_data_type::get() const
     return &dbt_;
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 
