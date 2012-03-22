@@ -39,19 +39,35 @@ public:
     void store(const message::block& stored_block,
         store_block_handler handle_store);
 
-    void fetch_block(size_t depth, fetch_handler_block handle_fetch);
-    void fetch_block(const hash_digest& block_hash,
-        fetch_handler_block handle_fetch);
+    // fetch block header by depth
+    void fetch_block_header(size_t depth,
+        fetch_handler_block_header handle_fetch);
+    // fetch block header by hash
+    void fetch_block_header(const hash_digest& block_hash,
+        fetch_handler_block_header handle_fetch);
+    // fetch transaction hashes in block by depth
+    void fetch_block_transaction_hashes(size_t depth,
+        fetch_handler_block_transaction_hashes handle_fetch);
+    // fetch transaction hashes in block by hash
+    void fetch_block_transaction_hashes(const hash_digest& block_hash,
+        fetch_handler_block_transaction_hashes handle_fetch);
+    // fetch depth of block by hash
     void fetch_block_depth(const hash_digest& block_hash,
         fetch_handler_block_depth handle_fetch);
+    // fetch depth of latest block
     void fetch_last_depth(fetch_handler_last_depth handle_fetch);
+    // fetch block locator
     void fetch_block_locator(fetch_handler_block_locator handle_fetch);
+    // fetch transaction by hash
     void fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch);
+    // fetch depth and offset within block of transaction by hash
     void fetch_transaction_index(const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch);
+    // fetch spend of an output point
     void fetch_spend(const message::output_point& outpoint,
         fetch_handler_spend handle_fetch);
+    // fetch outputs associated with an address
     void fetch_outputs(const short_hash& pubkey_hash,
         fetch_handler_outputs handle_fetch);
 
@@ -64,10 +80,10 @@ private:
     void do_store(const message::block& store_block,
         store_block_handler handle_store);
 
-    void fetch_block_by_depth(size_t depth, 
-        fetch_handler_block handle_fetch);
-    void fetch_block_by_hash(const hash_digest& block_hash, 
-        fetch_handler_block handle_fetch);
+    void fetch_block_header_by_depth(size_t depth, 
+        fetch_handler_block_header handle_fetch);
+    void fetch_block_header_by_hash(const hash_digest& block_hash, 
+        fetch_handler_block_header handle_fetch);
     void do_fetch_block_depth(const hash_digest& block_hash,
         fetch_handler_block_depth handle_fetch);
     void do_fetch_last_depth(fetch_handler_last_depth handle_fetch);

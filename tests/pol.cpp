@@ -20,7 +20,7 @@ int main()
 {
     //bdb_blockchain::setup("database");
     async_service s1(1), s2(1);
-    blockchain_ptr chain = std::make_shared<bdb_blockchain>(s1, "database");
+    blockchain_ptr chain = bdb_blockchain::create(s1, "database");
     poller_ptr poll = std::make_shared<poller>(chain);
     network_ptr net = std::make_shared<network>(s2);
     handshake_ptr hs = std::make_shared<handshake>(s2);

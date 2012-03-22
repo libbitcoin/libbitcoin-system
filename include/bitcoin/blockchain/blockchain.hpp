@@ -22,7 +22,11 @@ public:
 
     typedef std::function<
         void (const std::error_code&, const message::block&)>
-            fetch_handler_block;
+            fetch_handler_block_header;
+
+    typedef std::function<
+        void (const std::error_code&, const message::inventory_list&)>
+            fetch_handler_block_transaction_hashes;
 
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_handler_block_depth;
@@ -58,17 +62,30 @@ public:
     virtual void store(const message::block& stored_block, 
         store_block_handler handle_store) = 0;
 
-    virtual void fetch_block(size_t depth,
-        fetch_handler_block handle_fetch) = 0;
-    virtual void fetch_block(const hash_digest& block_hash,
-        fetch_handler_block handle_fetch) = 0;
+    // fetch block header by depth
+    virtual void fetch_block_header(size_t depth,
+        fetch_handler_block_header handle_fetch) = 0;
+    // fetch block header by hash
+    virtual void fetch_block_header(const hash_digest& block_hash,
+        fetch_handler_block_header handle_fetch) = 0;
+    // fetch transaction hashes in block by depth
+    virtual void fetch_block_transaction_hashes(size_t depth,
+        fetch_handler_block_transaction_hashes handle_fetch) = 0;
+    // fetch transaction hashes in block by hash
+    virtual void fetch_block_transaction_hashes(const hash_digest& block_hash,
+        fetch_handler_block_transaction_hashes handle_fetch) = 0;
+    // fetch depth of block by hash
     virtual void fetch_block_depth(const hash_digest& block_hash,
         fetch_handler_block_depth handle_fetch) = 0;
+    // fetch depth of latest block
     virtual void fetch_last_depth(fetch_handler_last_depth handle_fetch) = 0;
+    // fetch block locator
     virtual void fetch_block_locator(
         fetch_handler_block_locator handle_fetch) = 0;
+    // fetch transaction by hash
     virtual void fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch) = 0;
+    // fetch depth and offset within block of transaction by hash
     virtual void fetch_transaction_index(
         const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch) = 0;
@@ -76,10 +93,10 @@ public:
     // fetch of inputs and outputs is a future possibility
     // for now use fetch_transaction and lookup input/output
 
-    // Returns input_point
+    // fetch spend of an output point
     virtual void fetch_spend(const message::output_point& outpoint,
         fetch_handler_spend handle_fetch) = 0;
-    // List of output_points
+    // fetch outputs associated with an address
     virtual void fetch_outputs(const short_hash& pubkey_hash,
         fetch_handler_outputs handle_fetch) = 0;
 

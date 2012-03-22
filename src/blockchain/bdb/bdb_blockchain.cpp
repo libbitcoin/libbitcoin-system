@@ -200,31 +200,30 @@ void bdb_blockchain::do_store(const message::block& stored_block,
 }
 
 template<typename Index>
-bool fetch_block_impl(txn_guard_ptr txn, const Index& index,
+bool fetch_block_header_impl(txn_guard_ptr txn, const Index& index,
     bdb_common_ptr common, message::block& serial_block)
 {
     protobuf::Block proto_block = common->fetch_proto_block(txn, index);
     if (!proto_block.IsInitialized())
         return false;
-    if (!common->reconstruct_block(txn, proto_block, serial_block))
-        return false;
+    serial_block = protobuf_to_block_header(proto_block);
     return true;
 } 
 
-void bdb_blockchain::fetch_block(size_t depth,
-    fetch_handler_block handle_fetch)
+void bdb_blockchain::fetch_block_header(size_t depth,
+    fetch_handler_block_header handle_fetch)
 {
     strand_.post(
-        std::bind(&bdb_blockchain::fetch_block_by_depth, shared_from_this(),
-            depth, handle_fetch));
+        std::bind(&bdb_blockchain::fetch_block_header_by_depth,
+            shared_from_this(), depth, handle_fetch));
 }
 
-void bdb_blockchain::fetch_block_by_depth(size_t depth,
-    fetch_handler_block handle_fetch)
+void bdb_blockchain::fetch_block_header_by_depth(size_t depth,
+    fetch_handler_block_header handle_fetch)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
-    if (!fetch_block_impl(txn, depth, common_, serial_block))
+    if (!fetch_block_header_impl(txn, depth, common_, serial_block))
     {
         txn->abort();
         handle_fetch(error::missing_object, message::block());
@@ -234,20 +233,20 @@ void bdb_blockchain::fetch_block_by_depth(size_t depth,
     handle_fetch(std::error_code(), serial_block);
 }
 
-void bdb_blockchain::fetch_block(const hash_digest& block_hash,
-    fetch_handler_block handle_fetch)
+void bdb_blockchain::fetch_block_header(const hash_digest& block_hash,
+    fetch_handler_block_header handle_fetch)
 {
     strand_.post(
-        std::bind(&bdb_blockchain::fetch_block_by_hash, shared_from_this(),
-            block_hash, handle_fetch));
+        std::bind(&bdb_blockchain::fetch_block_header_by_hash,
+            shared_from_this(), block_hash, handle_fetch));
 }
 
-void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash, 
-    fetch_handler_block handle_fetch)
+void bdb_blockchain::fetch_block_header_by_hash(
+    const hash_digest& block_hash, fetch_handler_block_header handle_fetch)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
-    if (!fetch_block_impl(txn, block_hash, common_, serial_block))
+    if (!fetch_block_header_impl(txn, block_hash, common_, serial_block))
     {
         txn->abort();
         handle_fetch(error::missing_object, message::block());
@@ -255,6 +254,55 @@ void bdb_blockchain::fetch_block_by_hash(const hash_digest& block_hash,
     }
     txn->commit();
     handle_fetch(std::error_code(), serial_block);
+}
+
+template<typename Index, typename Handler>
+void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
+    bdb_common_ptr common, Handler handle_fetch)
+{
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env);
+    protobuf::Block proto_block = common->fetch_proto_block(txn, index);
+    if (!proto_block.IsInitialized())
+    {
+        txn->abort();
+        handle_fetch(error::missing_object, message::inventory_list());
+        return;
+    }
+    txn->commit();
+    message::inventory_list tx_hashes;
+    for (const std::string& raw_tx_hash: proto_block.transactions())
+    {
+        message::inventory_vector tx_inv;
+        tx_inv.type = message::inventory_type::transaction;
+        BITCOIN_ASSERT(raw_tx_hash.size() == tx_inv.hash.size());
+        std::copy(raw_tx_hash.begin(), raw_tx_hash.end(),
+            tx_inv.hash.begin());
+        tx_hashes.push_back(tx_inv);
+    }
+    handle_fetch(std::error_code(), tx_hashes);
+}
+
+void bdb_blockchain::fetch_block_transaction_hashes(size_t depth,
+    fetch_handler_block_transaction_hashes handle_fetch)
+{
+    auto this_ptr = shared_from_this();
+    strand_.post(
+        [&, this_ptr, depth, handle_fetch]()
+        {
+            fetch_blk_tx_hashes_impl(depth, env_, common_, handle_fetch);
+        });
+}
+
+void bdb_blockchain::fetch_block_transaction_hashes(
+    const hash_digest& block_hash,
+    fetch_handler_block_transaction_hashes handle_fetch)
+{
+    auto this_ptr = shared_from_this();
+    strand_.post(
+        [&, this_ptr, block_hash, handle_fetch]()
+        {
+            fetch_blk_tx_hashes_impl(block_hash, env_, common_, handle_fetch);
+        });
 }
 
 void bdb_blockchain::fetch_block_depth(const hash_digest& block_hash,
