@@ -28,6 +28,7 @@ libbitcoin_la_SOURCES = \
 	utility/clock.cpp \
 	constants.cpp \
 	blockchain/organizer.cpp \
+	blockchain/blockchain.cpp \
 	transaction_pool.cpp
 
 if DO_BDB

@@ -104,6 +104,21 @@ public:
         reorganize_handler handle_reorganize) = 0;
 };
 
+typedef std::function<void (const std::error_code&, const message::block&)>
+    blockchain_fetch_handler_block;
+
+void fetch_block(blockchain_ptr chain, size_t depth,
+    blockchain_fetch_handler_block handle_fetch);
+void fetch_block(blockchain_ptr chain, const hash_digest& block_hash,
+    blockchain_fetch_handler_block handle_fetch);
+
+typedef std::function<
+    void (const std::error_code&, const message::block_locator&)>
+        blockchain_fetch_handler_block_locator;
+
+void fetch_block_locator(blockchain_ptr chain,
+    blockchain_fetch_handler_block_locator handle_fetch);
+
 } // namespace libbitcoin
 
 #endif
