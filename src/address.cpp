@@ -10,9 +10,14 @@ namespace libbitcoin {
 
 std::string public_key_to_address(const data_chunk& public_key)
 {
+    return public_key_hash_to_address(generate_ripemd_hash(public_key));
+}
+
+std::string public_key_hash_to_address(const short_hash& pubkey_hash)
+{
     data_chunk unencoded_address;
     unencoded_address.push_back(0);
-    extend_data(unencoded_address, generate_ripemd_hash(public_key));
+    extend_data(unencoded_address, pubkey_hash);
     uint32_t checksum = generate_sha256_checksum(unencoded_address);
     extend_data(unencoded_address, uncast_type(checksum));
     BITCOIN_ASSERT(unencoded_address.size() == 25);
