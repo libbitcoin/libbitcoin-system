@@ -49,7 +49,8 @@ bool bdb_common::fetch_spend(txn_guard_ptr txn,
     if (db_spends_->get(txn->get(), search_spend.get(),
             raw_spend.get(), 0) != 0)
         return false;
-    deserializer deserial(raw_spend.data());
+    const data_chunk raw_spend_data = raw_spend.data();
+    deserializer deserial(raw_spend_data);
     input_spend.hash = deserial.read_hash();
     input_spend.index = deserial.read_4_bytes();
     return true;
