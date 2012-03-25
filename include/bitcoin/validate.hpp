@@ -35,7 +35,7 @@ public:
         uint64_t value_in, uint64_t& fees);
 
 private:
-    bool basic_checks() const;
+    std::error_code basic_checks() const;
     bool is_standard() const;
     bool exists(const hash_digest& tx_hash) const;
 

@@ -30,8 +30,6 @@ std::string error_category_impl::message(int ev) const
             return "Matching previous object found";
         case error::unspent_output:
             return "Unspent output";
-        case error::bad_transaction:
-            return "Transaction failed to validate";
         case error::resolve_failed:
             return "Resolving hostname failed";
         case error::network_unreachable:
@@ -48,9 +46,15 @@ std::string error_category_impl::message(int ev) const
             return "Channel stopped";
         case error::channel_timeout:
             return "Channel timed out";
-        // validate
-        case error::previous_block_invalid:
-            return "Previous block failed to validate";
+        // validate tx
+        case error::coinbase_transaction:
+            return "Memory pool coinbase transaction";
+        case error::is_not_standard:
+            return "Transaction is not standard";
+        case error::double_spend:
+            return "Double spend of input";
+        case error::input_not_found:
+            return "Spent input not found";
         // check_transaction()
         case error::empty_transaction:
             return "Transaction inputs or outputs are empty";
@@ -60,6 +64,9 @@ std::string error_category_impl::message(int ev) const
             return "Coinbase script is too small or large";
         case error::previous_output_null:
             return "Non-coinbase transaction has null previous in an input";
+        // validate block
+        case error::previous_block_invalid:
+            return "Previous block failed to validate";
         // check_block()
         case error::size_limits:
             return "Size limits failed";
@@ -101,13 +108,18 @@ std::error_condition
 {
     switch (ev)
     {
-        // validate
-        case error::previous_block_invalid:
+        // validate tx
+        case error::coinbase_transaction:
+        case error::is_not_standard:
+        case error::double_spend:
+        case error::input_not_found:
         // check_transaction()
         case error::empty_transaction:
         case error::output_value_overflow:
         case error::invalid_coinbase_script_size:
         case error::previous_output_null:
+        // validate block
+        case error::previous_block_invalid:
         // check_block()
         case error::size_limits:
         case error::proof_of_work:

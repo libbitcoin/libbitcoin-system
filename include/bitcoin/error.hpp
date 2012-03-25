@@ -14,8 +14,6 @@ namespace error
         missing_object = 1,
         object_already_exists,
         unspent_output,
-        // transaction_pool errors
-        bad_transaction,
         // network errors
         resolve_failed,
         network_unreachable,
@@ -25,13 +23,18 @@ namespace error
         bad_stream,
         channel_stopped,
         channel_timeout,
-        // validate
-        previous_block_invalid,
+        // validate tx
+        coinbase_transaction,
+        is_not_standard,
+        double_spend,
+        input_not_found,
         // check_transaction()
         empty_transaction,
         output_value_overflow,
         invalid_coinbase_script_size,
         previous_output_null,
+        // validate block
+        previous_block_invalid,
         // check_block()
         size_limits,
         proof_of_work,
