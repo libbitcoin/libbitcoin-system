@@ -49,14 +49,6 @@ void transaction_pool::do_store(
         stored_transaction,
         handle_confirm};
 
-    // Does it already exist in pool?
-    for (const transaction_entry_info& entry: pool_)
-        if (entry.hash == new_tx_entry.hash)
-        {
-            handle_store(error::object_already_exists);
-            return;
-        }
-
     exporter_ptr saver = std::make_shared<satoshi_exporter>();
     validate_transaction_ptr validate =
         std::make_shared<validate_transaction>(chain_, saver,
