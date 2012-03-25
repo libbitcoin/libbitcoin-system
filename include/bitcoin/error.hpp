@@ -41,9 +41,14 @@ namespace error
         too_many_sigs,
         merkle_mismatch,
         // accept_block()
-        accept_block,
+        incorrect_proof_of_work,
+        timestamp_too_early,
+        checkpoints_failed,
         // connect_block()
-        connect_block
+        duplicate_or_spent,
+        validate_inputs_failed,
+        fees_out_of_range,
+        coinbase_too_large
     };
 
     enum error_condition_t

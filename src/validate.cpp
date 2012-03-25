@@ -337,10 +337,12 @@ std::error_code validate_block::start()
     ec = check_block();
     if (ec)
         return ec;
-    if (!accept_block())
-        return error::accept_block;
-    if (!connect_block())
-        return error::connect_block;
+    ec = accept_block();
+    if (ec)
+        return ec;
+    ec = connect_block();
+    if (ec)
+        return ec;
     return std::error_code();
 }
 
@@ -421,19 +423,19 @@ size_t validate_block::number_script_sig_operations()
     return total_sigs;
 }
 
-bool validate_block::accept_block()
+std::error_code validate_block::accept_block()
 {
     if (current_block_.bits != work_required())
-        return false;
+        return error::incorrect_proof_of_work;
     if (current_block_.timestamp <= median_time_past())
-        return false;
+        return error::timestamp_too_early;
     // Txs should be final when included in a block
     // Do lesser check here since lock_time is currently unused in bitcoin
     for (const message::transaction& tx: current_block_.transactions)
         BITCOIN_ASSERT(tx.locktime == 0);
     if (!passes_checkpoints())
-        return false;
-    return true;
+        return error::checkpoints_failed;
+    return std::error_code();
 }
 
 template<typename Value>
@@ -530,12 +532,12 @@ bool validate_block::passes_checkpoints()
     return true;
 }
 
-bool validate_block::connect_block()
+std::error_code validate_block::connect_block()
 {
     // BIP 30 security fix
     for (const message::transaction& current_tx: current_block_.transactions)
         if (!not_duplicate_or_spent(current_tx))
-            return false;
+            return error::duplicate_or_spent;
 
     uint64_t fees = 0;
     for (size_t tx_index = 1; tx_index < current_block_.transactions.size();
@@ -544,15 +546,15 @@ bool validate_block::connect_block()
         uint64_t value_in = 0;
         const message::transaction& tx = current_block_.transactions[tx_index];
         if (!validate_inputs(tx, tx_index, value_in))
-            return false;
+            return error::validate_inputs_failed;
         if (!validate_transaction::tally_fees(tx, value_in, fees))
-            return false;
+            return error::fees_out_of_range;
     }
     uint64_t coinbase_value = 
         total_output_value(current_block_.transactions[0]);
     if (coinbase_value  > block_value(depth_) + fees)
-        return false;
-    return true;
+        return error::coinbase_too_large;
+    return std::error_code();
 }
 
 bool validate_block::not_duplicate_or_spent(const message::transaction& tx)

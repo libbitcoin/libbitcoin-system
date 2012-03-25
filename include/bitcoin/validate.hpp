@@ -99,11 +99,11 @@ private:
     bool check_transaction(const message::transaction& tx);
     size_t number_script_sig_operations();
 
-    bool accept_block();
+    std::error_code accept_block();
     uint32_t work_required();
     bool passes_checkpoints();
 
-    bool connect_block();
+    std::error_code connect_block();
     bool not_duplicate_or_spent(const message::transaction& tx);
 
     exporter_ptr exporter_;

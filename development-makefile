@@ -146,6 +146,14 @@ bin/tests/priv: obj/priv.o
 
 priv: bin/tests/priv
 
+obj/corot.o: tests/corot.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/corot: obj/corot.o
+	$(CXX) -o bin/tests/corot obj/corot.o $(LIBBITCOIN)
+
+corot: bin/tests/corot
+
 obj/logtst.o: tests/logtst.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

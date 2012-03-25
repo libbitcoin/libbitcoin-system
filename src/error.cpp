@@ -76,11 +76,21 @@ std::string error_category_impl::message(int ev) const
         case error::merkle_mismatch:
             return "Merkle root mismatch";
         // accept_block()
-        case error::accept_block:
-            return "accept_block() validation failed";
+        case error::incorrect_proof_of_work:
+            return "Proof of work does not match bits field";
+        case error::timestamp_too_early:
+            return "Block timestamp is too early";
+        case error::checkpoints_failed:
+            return "Block hash rejected by checkpoint lockins";
         // connect_block()
-        case error::connect_block:
-            return "connect_block() validation failed";
+        case error::duplicate_or_spent:
+            return "Duplicate transaction when with unspent outputs";
+        case error::validate_inputs_failed:
+            return "Validation of inputs failed";
+        case error::fees_out_of_range:
+            return "Fees are out of range";
+        case error::coinbase_too_large:
+            return "Reported coinbase value is too large";
         default:
             return "Unknown error";
     }
@@ -91,11 +101,14 @@ std::error_condition
 {
     switch (ev)
     {
+        // validate
         case error::previous_block_invalid:
+        // check_transaction()
         case error::empty_transaction:
         case error::output_value_overflow:
         case error::invalid_coinbase_script_size:
         case error::previous_output_null:
+        // check_block()
         case error::size_limits:
         case error::proof_of_work:
         case error::futuristic_timestamp:
@@ -103,8 +116,15 @@ std::error_condition
         case error::extra_coinbases:
         case error::too_many_sigs:
         case error::merkle_mismatch:
-        case error::accept_block:
-        case error::connect_block:
+        // accept_block()
+        case error::incorrect_proof_of_work:
+        case error::timestamp_too_early:
+        case error::checkpoints_failed:
+        // connect_block()
+        case error::duplicate_or_spent:
+        case error::validate_inputs_failed:
+        case error::fees_out_of_range:
+        case error::coinbase_too_large:
             return error::validate_failed;
         default:
             return std::error_condition(ev, *this);
