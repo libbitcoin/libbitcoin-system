@@ -61,28 +61,39 @@ void transaction_pool::do_store(
 void transaction_pool::handle_delegate(const std::error_code& ec,
     const transaction_entry_info& tx_entry, store_handler handle_store)
 {
-    if (!ec)
+    if (ec)
+    {
+        handle_store(ec);
+    }
+    // Re-check as another transaction might've been added in the interim
+    else if (tx_exists(tx_entry.hash))
+    {
+        handle_store(error::object_already_exists);
+    }
+    else
+    {
         pool_.push_back(tx_entry);
-    handle_store(ec);
+        handle_store(std::error_code());
+    }
+}
+
+bool transaction_pool::tx_exists(const hash_digest& tx_hash)
+{
+    for (const transaction_entry_info& entry: pool_)
+        if (entry.hash == tx_hash)
+            return true;
+    return false;
 }
 
 void transaction_pool::exists(const hash_digest& transaction_hash,
     exists_handler handle_exists)
 {
+    auto this_ptr = shared_from_this();
     strand_.post(
-        std::bind(&transaction_pool::do_exists, shared_from_this(),
-            transaction_hash, handle_exists));
-}
-void transaction_pool::do_exists(const hash_digest& transaction_hash,
-    exists_handler handle_exists)
-{
-    for (const transaction_entry_info& entry: pool_)
-        if (entry.hash == transaction_hash)
+        [&, this_ptr, transaction_hash, handle_exists]()
         {
-            handle_exists(true);
-            return;
-        }
-    handle_exists(false);
+            handle_exists(tx_exists(transaction_hash));
+        });
 }
 
 void transaction_pool::reorganize(const std::error_code& ec,

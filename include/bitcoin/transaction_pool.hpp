@@ -52,8 +52,7 @@ private:
     void handle_delegate(const std::error_code& ec, 
         const transaction_entry_info& tx_entry, store_handler handle_store);
 
-    void do_exists(const hash_digest& transaction_hash,
-        exists_handler handle_exists);
+    bool tx_exists(const hash_digest& tx_hash);
 
     void reorganize(const std::error_code& ec,
         size_t fork_point,
