@@ -1,6 +1,19 @@
 #ifndef LIBBITCOIN_BITCOIN_H
 #define LIBBITCOIN_BITCOIN_H
 
+/**
+ * @mainpage libbitcoin API dox
+ *
+ * @section intro_sec Introduction
+ *
+ * This is the intro.
+ *
+ * @section install_sec Installation
+ *
+ * @subsection step1 Step 1: Opening the box
+ *
+ */
+
 // Convenience header that includes everything
 // Not to be used internally. For API users.
 #include <bitcoin/error.hpp>
