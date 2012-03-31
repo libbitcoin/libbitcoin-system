@@ -88,10 +88,7 @@ bool script::run(script input_script,
     if (!run(parent_tx, input_index))
         return false;
     if (stack_.empty())
-    {
-        log_error() << "Script left no data on the stack";
         return false;
-    }
     if (!cast_to_bool(stack_.back()))
         return false;
     // Additional validation for spend-to-script-hash transactions
@@ -105,7 +102,13 @@ bool script::run(script input_script,
         // Pop last item and copy as starting stack to eval script
         eval_stack.pop_back();
         eval_script.stack_ = eval_stack;
+        // Run script
         log_debug() << eval_script.pretty();
+        if (!eval_script.run(parent_tx, input_index))
+            return false;
+        if (eval_script.stack_.empty())
+            return false;
+        return cast_to_bool(eval_script.stack_.back());
     }
     return true;
 }
@@ -276,7 +279,27 @@ hash_digest script::generate_signature_hash(
     return hash_transaction(tx_tmp, hash_type);
 }
 
-bool script::op_checksig(message::transaction parent_tx, uint32_t input_index)
+bool check_signature(data_chunk signature,
+    const data_chunk& pubkey, const script& script_code,
+    const message::transaction& parent_tx, uint32_t input_index)
+{
+    elliptic_curve_key key;
+    key.set_public_key(pubkey);
+
+    uint32_t hash_type = 0;
+    hash_type = signature.back();
+    signature.pop_back();
+
+    hash_digest tx_hash =
+        script::generate_signature_hash(
+            parent_tx, input_index, script_code, hash_type);
+    if (tx_hash == null_hash)
+        return false;
+    return key.verify(tx_hash, signature);
+}
+
+bool script::op_checksig(
+    const message::transaction& parent_tx, uint32_t input_index)
 {
     if (op_checksigverify(parent_tx, input_index))
         stack_.push_back(stack_true_value);
@@ -286,18 +309,11 @@ bool script::op_checksig(message::transaction parent_tx, uint32_t input_index)
 }
 
 bool script::op_checksigverify(
-    message::transaction parent_tx, uint32_t input_index)
+    const message::transaction& parent_tx, uint32_t input_index)
 {
     if (stack_.size() < 2)
         return false;
     data_chunk pubkey = pop_stack(), signature = pop_stack();
-
-    elliptic_curve_key key;
-    key.set_public_key(pubkey);
-
-    uint32_t hash_type = 0;
-    hash_type = signature.back();
-    signature.pop_back();
 
     script script_code;
     for (operation op: operations_)
@@ -306,18 +322,82 @@ bool script::op_checksigverify(
             continue;
         script_code.push_operation(op);
     }
-
-    hash_digest tx_hash =
-        generate_signature_hash(
-            parent_tx, input_index, script_code, hash_type);
-    if (tx_hash == null_hash)
-        return false;
-    return key.verify(tx_hash, signature);
+    return check_signature(signature, pubkey,
+        script_code, parent_tx, input_index);
 }
 
 bool script::op_checkmultisig(
-    message::transaction parent_tx, uint32_t input_index)
+    const message::transaction& parent_tx, uint32_t input_index)
 {
+    if (op_checkmultisigverify(parent_tx, input_index))
+        stack_.push_back(stack_true_value);
+    else
+        stack_.push_back(stack_false_value);
+    return true;
+}
+
+bool script::read_section(data_stack& section)
+{
+    if (stack_.empty())
+        return false;
+    big_number count_big_num;
+    if (!cast_to_big_number(pop_stack(), count_big_num))
+        return false;
+    const size_t count = count_big_num.uint64();
+
+    if (stack_.size() < count)
+        return false;
+    for (size_t i = 0; i < count; ++i)
+        section.push_back(pop_stack());
+    return true;
+}
+
+bool script::op_checkmultisigverify(
+    const message::transaction& parent_tx, uint32_t input_index)
+{
+    data_stack pubkeys;
+    if (!read_section(pubkeys))
+        return false;
+
+    data_stack signatures;
+    if (!read_section(signatures))
+        return false;
+
+    auto is_signature =
+        [&signatures](const data_chunk& data)
+        {
+            return std::find(signatures.begin(), signatures.end(),
+                data) != signatures.end();
+        };
+    script script_code;
+    for (operation op: operations_)
+    {
+        if (op.code == opcode::codeseparator)
+            continue;
+        if (is_signature(op.data))
+            continue;
+        script_code.push_operation(op);
+    }
+
+    for (const data_chunk& signature: signatures)
+    {
+        for (const data_chunk& pubkey: pubkeys)
+        {
+            goto next_signature;
+            if (check_signature(signature, pubkey,
+                script_code, parent_tx, input_index))
+            {
+                log_debug() << "win";
+                goto next_signature;
+            }
+            else
+                log_debug() << "fail";
+        }
+        return false;
+    next_signature:
+        continue;
+    }
+
     return true;
 }
 

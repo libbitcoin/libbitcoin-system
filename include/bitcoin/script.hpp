@@ -108,11 +108,16 @@ private:
     bool op_equal();
     bool op_equalverify();
     // op_checksig is a specialised case of op_checksigverify
-    bool op_checksig(message::transaction parent_tx, uint32_t input_index);
+    bool op_checksig(
+        const message::transaction& parent_tx, uint32_t input_index);
     bool op_checksigverify(
-        message::transaction parent_tx, uint32_t input_index);
+        const message::transaction& parent_tx, uint32_t input_index);
+    // multisig variants
+    bool read_section(data_stack& section);
     bool op_checkmultisig(
-        message::transaction parent_tx, uint32_t input_index);
+        const message::transaction& parent_tx, uint32_t input_index);
+    bool op_checkmultisigverify(
+        const message::transaction& parent_tx, uint32_t input_index);
 
     bool run_operation(operation op, 
         const message::transaction& parent_tx, uint32_t input_index);
