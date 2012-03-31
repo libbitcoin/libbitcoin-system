@@ -368,7 +368,11 @@ bool is_pubkey_hash_type(const operation_stack& ops)
 }
 bool is_script_hash_type(const operation_stack& ops)
 {
-    return false;
+    return ops.size() == 3 &&
+        ops[0].code == opcode::hash160 &&
+        ops[1].code == opcode::special &&
+        ops[1].data.size() == 0x14 &&
+        ops[2].code == opcode::equal;
 }
 bool is_multisig_type(const operation_stack& ops)
 {
