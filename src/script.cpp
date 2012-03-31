@@ -99,6 +99,13 @@ bool script::run(script input_script,
     {
         if (!is_push_only(input_script.operations()))
             return false;
+        // Load last input_script stack item as a script
+        data_stack eval_stack = input_script.stack_;
+        script eval_script = parse_script(input_script.stack_.back());
+        // Pop last item and copy as starting stack to eval script
+        eval_stack.pop_back();
+        eval_script.stack_ = eval_stack;
+        log_debug() << eval_script.pretty();
     }
     return true;
 }
@@ -395,7 +402,7 @@ bool is_script_hash_type(const operation_stack& ops)
     return ops.size() == 3 &&
         ops[0].code == opcode::hash160 &&
         ops[1].code == opcode::special &&
-        ops[1].data.size() == 0x14 &&
+        ops[1].data.size() == 20 &&
         ops[2].code == opcode::equal;
 }
 bool is_multisig_type(const operation_stack& ops)
