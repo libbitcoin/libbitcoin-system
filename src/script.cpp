@@ -61,6 +61,22 @@ inline bool cast_to_bool(const data_chunk& values)
     return false;
 }
 
+bool is_push_only(const operation_stack& operations)
+{
+    auto is_push =
+        [](opcode code)
+        {
+            return code == opcode::special
+                || code == opcode::pushdata1
+                || code == opcode::pushdata2
+                || code == opcode::pushdata4;
+        };
+    for (const operation& op: operations)
+        if (!is_push(op.code))
+            return false;
+    return true;
+}
+
 bool script::run(script input_script,
     const message::transaction& parent_tx, uint32_t input_index)
 {
@@ -76,7 +92,15 @@ bool script::run(script input_script,
         log_error() << "Script left no data on the stack";
         return false;
     }
-    return cast_to_bool(stack_.back());
+    if (!cast_to_bool(stack_.back()))
+        return false;
+    // Additional validation for spend-to-script-hash transactions
+    if (type() == payment_type::script_hash)
+    {
+        if (!is_push_only(input_script.operations()))
+            return false;
+    }
+    return true;
 }
 
 bool script::run(const message::transaction& parent_tx, uint32_t input_index)
