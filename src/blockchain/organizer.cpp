@@ -157,7 +157,11 @@ void organizer::replace_chain(int fork_index,
             verify(fork_index, orphan_chain, orphan_index);
         // Invalid block found
         if (invalid_reason)
+        {
             clip_orphans(orphan_chain, orphan_index, invalid_reason);
+            // Stop summing work once we discover an invalid block
+            break;
+        }
         const message::block& orphan_block =
             orphan_chain[orphan_index]->actual();
         orphan_work += block_work(orphan_block.bits);
@@ -196,6 +200,15 @@ void organizer::replace_chain(int fork_index,
     notify_reorganize(fork_index, orphan_chain, replaced_slice);
 }
 
+void lazy_remove(block_detail_list& process_queue,
+    block_detail_ptr remove_block)
+{
+    auto it = std::find(process_queue.begin(), process_queue.end(),
+        remove_block);
+    if (it != process_queue.end())
+        process_queue.erase(it);
+}
+
 void organizer::clip_orphans(block_detail_list& orphan_chain,
     int orphan_index, const std::error_code& invalid_reason)
 {
@@ -209,6 +222,9 @@ void organizer::clip_orphans(block_detail_list& orphan_chain,
             (*it)->set_errc(error::previous_block_invalid);
         (*it)->set_info({block_status::rejected, 0});
         orphans_->remove(*it);
+        // Also erase from process_queue so we avoid trying to re-process
+        // invalid blocks and remove try to remove non-existant blocks.
+        lazy_remove(process_queue_, *it);
     }
     orphan_chain.erase(orphan_start, orphan_chain.end());
 }
