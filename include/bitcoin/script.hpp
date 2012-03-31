@@ -43,6 +43,8 @@ enum class opcode
     equal = 135,
     equalverify = 136,
     checksig = 172,
+    checksigverify = 173,
+    checkmultisig = 174,
     codeseparator,  // Ignored
     bad_operation
 };
@@ -108,10 +110,12 @@ private:
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(message::transaction parent_tx, uint32_t input_index);
     bool op_checksigverify(
-            message::transaction parent_tx, uint32_t input_index);
+        message::transaction parent_tx, uint32_t input_index);
+    bool op_checkmultisig(
+        message::transaction parent_tx, uint32_t input_index);
 
     bool run_operation(operation op, 
-            const message::transaction& parent_tx, uint32_t input_index);
+        const message::transaction& parent_tx, uint32_t input_index);
 
     bool matches_template(operation_stack templ) const;
 

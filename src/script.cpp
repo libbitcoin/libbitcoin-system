@@ -315,6 +315,12 @@ bool script::op_checksigverify(
     return key.verify(tx_hash, signature);
 }
 
+bool script::op_checkmultisig(
+    message::transaction parent_tx, uint32_t input_index)
+{
+    return true;
+}
+
 bool script::run_operation(operation op, 
         const message::transaction& parent_tx, uint32_t input_index)
 {
@@ -373,6 +379,12 @@ bool script::run_operation(operation op,
 
         case opcode::checksig:
             return op_checksig(parent_tx, input_index);
+
+        case opcode::checksigverify:
+            return op_checksigverify(parent_tx, input_index);
+
+        case opcode::checkmultisig:
+            return op_checkmultisig(parent_tx, input_index);
 
         default:
             log_fatal() << "Unimplemented operation <none " 
@@ -508,6 +520,10 @@ std::string opcode_to_string(opcode code)
             return "equalverify";
         case opcode::checksig:
             return "checksig";
+        case opcode::checksigverify:
+            return "checksigverify";
+        case opcode::checkmultisig:
+            return "checkmultisig";
         default:
         {
             std::ostringstream ss;
@@ -578,6 +594,10 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::equalverify;
     else if (code_repr == "checksig")
         return opcode::checksig;
+    else if (code_repr == "checksigverify")
+        return opcode::checksigverify;
+    else if (code_repr == "checkmultisig")
+        return opcode::checkmultisig;
     // ERROR: unknown... 
     return opcode::bad_operation;
 }
