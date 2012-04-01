@@ -81,15 +81,18 @@ protected:
     virtual bool is_output_spent(const message::output_point& outpoint) = 0;
     // These have optional implementations that can be overriden
     virtual bool validate_inputs(const message::transaction& tx, 
-        size_t index_in_parent, uint64_t& value_in);
+        size_t index_in_parent, uint64_t& value_in, size_t& total_sigops);
     virtual bool connect_input(size_t index_in_parent,
         const message::transaction& current_tx,
-        size_t input_index, uint64_t& value_in);
+        size_t input_index, uint64_t& value_in, size_t& total_sigops);
     virtual bool fetch_transaction(message::transaction& tx, 
         size_t& previous_depth, const hash_digest& tx_hash) = 0;
     virtual bool is_output_spent(
         const message::output_point& previous_output,
         size_t index_in_parent, size_t input_index) = 0;
+
+    static size_t script_hash_signature_operations_count(
+        const script& output_script, const script& input_script);
 
 private:
     std::error_code check_block();

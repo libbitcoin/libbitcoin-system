@@ -296,17 +296,6 @@ std::error_code validate_transaction::check_transaction(
     return std::error_code();
 }
 
-inline size_t count_script_sigs(const operation_stack& operations)
-{
-    size_t total_sigs = 0;
-    for (const operation& op: operations)
-        if (op.code == opcode::checksig)
-            total_sigs++;
-        // TODO: Add OP_CHECKSIGVERIFY OP_CHECKMULTISIG OP_CHECKMULTISIGVERIFY
-        // ... they need to exist first
-    return total_sigs;
-}
-
 validate_block::validate_block(exporter_ptr saver, size_t depth,
     const message::block& current_block)
   : exporter_(saver), depth_(depth), current_block_(current_block)
@@ -398,20 +387,54 @@ bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
     return true;
 }
 
-size_t sig_operations_count(const message::transaction& tx)
+inline size_t count_script_sigops(
+    const operation_stack& operations, bool accurate)
+{
+    size_t total_sigs = 0, last_number = 0;
+    for (const operation& op: operations)
+    {
+        if (op.code == opcode::checksig ||
+            op.code == opcode::checksigverify)
+        {
+            total_sigs++;
+        }
+        else if (op.code == opcode::checkmultisig ||
+            op.code == opcode::checkmultisigverify)
+        {
+            if (accurate && last_number != 0)
+                total_sigs += last_number;
+            else
+                total_sigs += 20;
+        }
+        byte raw_code = static_cast<byte>(op.code);
+        if (static_cast<byte>(opcode::op_1) <= raw_code &&
+            static_cast<byte>(opcode::op_16) >= raw_code)
+        {
+            last_number = raw_code;
+        }
+    }
+    return total_sigs;
+}
+size_t tx_legacy_sigops_count(const message::transaction& tx)
 {
     size_t total_sigs = 0;
     for (message::transaction_input input: tx.inputs)
-        total_sigs += count_script_sigs(input.input_script.operations());
+    {
+        const operation_stack& operations = input.input_script.operations();
+        total_sigs += count_script_sigops(operations, false);
+    }
     for (message::transaction_output output: tx.outputs)
-        total_sigs += count_script_sigs(output.output_script.operations());
+    {
+        const operation_stack& operations = output.output_script.operations();
+        total_sigs += count_script_sigops(operations, false);
+    }
     return total_sigs;
 }
 size_t validate_block::legacy_sigops_count()
 {
     size_t total_sigs = 0;
     for (message::transaction tx: current_block_.transactions)
-        total_sigs += sig_operations_count(tx);
+        total_sigs += tx_legacy_sigops_count(tx);
     return total_sigs;
 }
 
@@ -532,12 +555,16 @@ std::error_code validate_block::connect_block()
             return error::duplicate_or_spent;
 
     uint64_t fees = 0;
+    size_t total_sigops = 0;
     for (size_t tx_index = 1; tx_index < current_block_.transactions.size();
             ++tx_index)
     {
         uint64_t value_in = 0;
         const message::transaction& tx = current_block_.transactions[tx_index];
-        if (!validate_inputs(tx, tx_index, value_in))
+        total_sigops += tx_legacy_sigops_count(tx);
+        if (total_sigops > max_block_script_sig_operations)
+            return error::too_many_sigs;
+        if (!validate_inputs(tx, tx_index, value_in, total_sigops))
             return error::validate_inputs_failed;
         if (!validate_transaction::tally_fees(tx, value_in, fees))
             return error::fees_out_of_range;
@@ -567,20 +594,32 @@ bool validate_block::not_duplicate_or_spent(const message::transaction& tx)
 }
 
 bool validate_block::validate_inputs(const message::transaction& tx, 
-    size_t index_in_parent, uint64_t& value_in)
+    size_t index_in_parent, uint64_t& value_in, size_t& total_sigops)
 {
     BITCOIN_ASSERT(!is_coinbase(tx));
     for (size_t input_index = 0; input_index < tx.inputs.size(); ++input_index)
     {
-        if (!connect_input(index_in_parent, tx, input_index, value_in))
+        if (!connect_input(index_in_parent, tx, input_index,
+                value_in, total_sigops))
             return false;
     }
     return true;
 }
 
+size_t validate_block::script_hash_signature_operations_count(
+    const script& output_script, const script& input_script)
+{
+    if (output_script.type() != payment_type::script_hash)
+        return count_script_sigops(output_script.operations(), true);
+    if (input_script.operations().empty())
+        return 0;
+    script eval_script = parse_script(input_script.operations().back().data);
+    return count_script_sigops(eval_script.operations(), true);
+}
+
 bool validate_block::connect_input(size_t index_in_parent,
     const message::transaction& current_tx,
-    size_t input_index, uint64_t& value_in)
+    size_t input_index, uint64_t& value_in, size_t& total_sigops)
 {
     // Lookup previous output
     BITCOIN_ASSERT(input_index < current_tx.inputs.size());
@@ -592,6 +631,12 @@ bool validate_block::connect_input(size_t index_in_parent,
         return false;
     const message::transaction_output& previous_tx_out =
         previous_tx.outputs[previous_output.index];
+    // Signature operations count
+    total_sigops +=
+        script_hash_signature_operations_count(
+            previous_tx_out.output_script, input.input_script);
+    if (total_sigops > max_block_script_sig_operations)
+        return false;
     // Get output amount
     uint64_t output_value = previous_tx_out.value;
     if (output_value > max_money())
