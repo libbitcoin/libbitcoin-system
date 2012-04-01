@@ -58,13 +58,6 @@ std::error_code validate_transaction::basic_checks() const
     // Ummm...
     //if ((int64)nLockTime > INT_MAX)
 
-    size_t transaction_byte_size = exporter_->save(tx_).size();
-    if (number_script_sig_operations(tx_) > (transaction_byte_size / 34) ||
-        transaction_byte_size < 100)
-    {
-        return error::too_many_sigs;
-    }
-
     if (!is_standard())
         return error::is_not_standard;
 
@@ -314,17 +307,6 @@ inline size_t count_script_sigs(const operation_stack& operations)
     return total_sigs;
 }
 
-size_t validate_transaction::number_script_sig_operations(
-    const message::transaction& tx)
-{
-    size_t total_sigs = 0;
-    for (message::transaction_input input: tx.inputs)
-        total_sigs += count_script_sigs(input.input_script.operations());
-    for (message::transaction_output output: tx.outputs)
-        total_sigs += count_script_sigs(output.output_script.operations());
-    return total_sigs;
-}
-
 validate_block::validate_block(exporter_ptr saver, size_t depth,
     const message::block& current_block)
   : exporter_(saver), depth_(depth), current_block_(current_block)
@@ -388,7 +370,7 @@ std::error_code validate_block::check_block()
     }
 
     // Check that it's not full of nonstandard transactions
-    if (number_script_sig_operations() > max_block_script_sig_operations)
+    if (legacy_sigops_count() > max_block_script_sig_operations)
         return error::too_many_sigs;
 
     if (current_block_.merkle != 
@@ -416,11 +398,20 @@ bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
     return true;
 }
 
-size_t validate_block::number_script_sig_operations()
+size_t sig_operations_count(const message::transaction& tx)
+{
+    size_t total_sigs = 0;
+    for (message::transaction_input input: tx.inputs)
+        total_sigs += count_script_sigs(input.input_script.operations());
+    for (message::transaction_output output: tx.outputs)
+        total_sigs += count_script_sigs(output.output_script.operations());
+    return total_sigs;
+}
+size_t validate_block::legacy_sigops_count()
 {
     size_t total_sigs = 0;
     for (message::transaction tx: current_block_.transactions)
-        total_sigs += validate_transaction::number_script_sig_operations(tx);
+        total_sigs += sig_operations_count(tx);
     return total_sigs;
 }
 

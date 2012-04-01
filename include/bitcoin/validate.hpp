@@ -25,8 +25,6 @@ public:
 
     static std::error_code check_transaction(
         const message::transaction& tx);
-    static size_t number_script_sig_operations(
-        const message::transaction& tx);
     static bool connect_input(
         const message::transaction& tx, size_t current_input,
         const message::transaction& previous_tx, size_t parent_depth,
@@ -97,7 +95,8 @@ private:
     std::error_code check_block();
     bool check_proof_of_work(hash_digest hash, uint32_t bits);
     bool check_transaction(const message::transaction& tx);
-    size_t number_script_sig_operations();
+
+    size_t legacy_sigops_count();
 
     std::error_code accept_block();
     uint32_t work_required();
