@@ -22,10 +22,10 @@ public:
     bool set_script_hash(const short_hash& script_hash);
 
     bool set_encoded(const std::string& encoded_address);
-    std::string encoded();
+    std::string encoded() const;
 
-    payment_type type();
-    const short_hash& hash();
+    payment_type type() const;
+    const short_hash& hash() const;
 private:
     enum
     {

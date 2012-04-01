@@ -60,7 +60,7 @@ bool payment_address::set_encoded(const std::string& encoded_address)
     return true;
 }
 
-std::string payment_address::encoded()
+std::string payment_address::encoded() const
 {
     data_chunk unencoded_address;
     BITCOIN_ASSERT(
@@ -80,12 +80,12 @@ std::string payment_address::encoded()
     return encode_base58(unencoded_address);
 }
 
-payment_type payment_address::type()
+payment_type payment_address::type() const
 {
     return type_;
 }
 
-const short_hash& payment_address::hash()
+const short_hash& payment_address::hash() const
 {
     return hash_;
 }
