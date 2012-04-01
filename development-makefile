@@ -146,6 +146,14 @@ bin/tests/priv: obj/priv.o
 
 priv: bin/tests/priv
 
+obj/addr.o: tests/addr.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/addr: obj/addr.o
+	$(CXX) -o bin/tests/addr obj/addr.o $(LIBBITCOIN)
+
+addr: bin/tests/addr
+
 obj/corot.o: tests/corot.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

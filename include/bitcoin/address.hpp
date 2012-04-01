@@ -8,13 +8,34 @@
  */
 
 #include <bitcoin/types.hpp>
+#include <bitcoin/script.hpp>
 
 namespace libbitcoin {
 
-std::string public_key_to_address(const data_chunk& public_key);
-std::string public_key_hash_to_address(const short_hash& pubkey_hash);
+class payment_address
+{
+public:
+    bool set_public_key(const data_chunk& public_key);
+    bool set_public_key_hash(const short_hash& public_key_hash);
 
-short_hash address_to_short_hash(const std::string& address);
+    bool set_script(const script& eval_script);
+    bool set_script_hash(const short_hash& script_hash);
+
+    bool set_encoded(const std::string& encoded_address);
+    std::string encoded();
+
+    payment_type type();
+    const short_hash& hash();
+private:
+    enum
+    {
+        pubkey_version = 0,
+        script_version = 5
+    };
+
+    payment_type type_;
+    short_hash hash_;
+};
 
 } // namespace libbitcoin
 
