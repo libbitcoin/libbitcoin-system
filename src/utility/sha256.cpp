@@ -1,5 +1,5 @@
 #include <bitcoin/utility/sha256.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 
 #include <boost/detail/endian.hpp>
 

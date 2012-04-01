@@ -5,7 +5,7 @@
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/assert.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {

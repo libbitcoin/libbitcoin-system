@@ -5,7 +5,7 @@
 #include <memory>
 
 #include <bitcoin/constants.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>

@@ -3,7 +3,7 @@
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/constants.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/transaction.hpp>
 
 namespace libbitcoin {

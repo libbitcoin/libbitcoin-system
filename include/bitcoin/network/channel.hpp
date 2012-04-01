@@ -15,7 +15,7 @@
 #include <bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/exporter.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>

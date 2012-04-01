@@ -6,7 +6,7 @@
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 
 #include "bdb_common.hpp"
 #include "bdb_chain_keeper.hpp"

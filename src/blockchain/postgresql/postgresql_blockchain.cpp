@@ -1,7 +1,7 @@
 #include <bitcoin/blockchain/postgresql_blockchain.hpp>
 
 #include <bitcoin/block.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>

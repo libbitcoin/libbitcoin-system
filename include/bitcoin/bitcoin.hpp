@@ -26,7 +26,7 @@
 #include <bitcoin/block.hpp>
 #include <bitcoin/session.hpp>
 #include <bitcoin/poller.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/exporter.hpp>
 #include <bitcoin/validate.hpp>
 #include <bitcoin/constants.hpp>

@@ -12,7 +12,7 @@ bitcoin_include_HEADERS = \
 	bitcoin.hpp \
 	types.hpp \
 	session.hpp \
-	data_helpers.hpp \
+	format.hpp \
 	transaction_pool.hpp \
 	async_service.hpp \
 	poller.hpp

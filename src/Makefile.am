@@ -14,7 +14,7 @@ libbitcoin_la_SOURCES = \
 	utility/logger.cpp \
 	utility/sha256.cpp \
 	address.cpp \
-	data_helpers.cpp \
+	format.cpp \
 	script.cpp \
 	utility/ripemd.cpp \
 	block.cpp \

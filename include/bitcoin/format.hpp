@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_DATA_HELPERS_H
-#define LIBBITCOIN_DATA_HELPERS_H
+#ifndef LIBBITCOIN_FORMAT_H
+#define LIBBITCOIN_FORMAT_H
 
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/sub_range.hpp>

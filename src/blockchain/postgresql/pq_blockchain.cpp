@@ -1,7 +1,7 @@
 #include "pq_blockchain.hpp"
 
 #include <bitcoin/constants.hpp>
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/exporter.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>

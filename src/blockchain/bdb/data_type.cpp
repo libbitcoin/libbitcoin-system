@@ -1,6 +1,6 @@
 #include "data_type.hpp"
 
-#include <bitcoin/data_helpers.hpp>
+#include <bitcoin/format.hpp>
 
 namespace libbitcoin {
 
