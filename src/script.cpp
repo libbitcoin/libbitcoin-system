@@ -103,7 +103,6 @@ bool script::run(script input_script,
         eval_stack.pop_back();
         eval_script.stack_ = eval_stack;
         // Run script
-        log_debug() << eval_script.pretty();
         if (!eval_script.run(parent_tx, input_index))
             return false;
         if (eval_script.stack_.empty())
@@ -379,23 +378,25 @@ bool script::op_checkmultisigverify(
         script_code.push_operation(op);
     }
 
+    // When checking the signatures against our public keys,
+    // we always advance forwards until we either run out of pubkeys (fail)
+    // or finish with our signatures (pass)
+    auto pubkey_current = pubkeys.begin();
     for (const data_chunk& signature: signatures)
     {
-        for (const data_chunk& pubkey: pubkeys)
+        for (auto pubkey_iter = pubkey_current; ;)
         {
-            goto next_signature;
-            if (check_signature(signature, pubkey,
+            if (check_signature(signature, *pubkey_iter,
                 script_code, parent_tx, input_index))
             {
-                log_debug() << "win";
-                goto next_signature;
+                pubkey_current = pubkey_iter;
+                break;
             }
-            else
-                log_debug() << "fail";
+            // pubkeys are only exhausted when script failed
+            ++pubkey_iter;
+            if (pubkey_iter == pubkeys.end())
+                return false;
         }
-        return false;
-    next_signature:
-        continue;
     }
 
     return true;
