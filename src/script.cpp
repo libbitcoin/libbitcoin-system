@@ -467,6 +467,9 @@ bool script::run_operation(operation op,
         case opcode::checkmultisig:
             return op_checkmultisig(parent_tx, input_index);
 
+        case opcode::checkmultisigverify:
+            return op_checkmultisigverify(parent_tx, input_index);
+
         default:
             log_fatal() << "Unimplemented operation <none " 
                 << static_cast<int>(op.code) << ">";
@@ -605,6 +608,8 @@ std::string opcode_to_string(opcode code)
             return "checksigverify";
         case opcode::checkmultisig:
             return "checkmultisig";
+        case opcode::checkmultisigverify:
+            return "checkmultisigverify";
         default:
         {
             std::ostringstream ss;
@@ -679,6 +684,8 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::checksigverify;
     else if (code_repr == "checkmultisig")
         return opcode::checkmultisig;
+    else if (code_repr == "checkmultisigverify")
+        return opcode::checkmultisigverify;
     // ERROR: unknown... 
     return opcode::bad_operation;
 }

@@ -45,6 +45,7 @@ enum class opcode
     checksig = 172,
     checksigverify = 173,
     checkmultisig = 174,
+    checkmultisigverify = 175,
     codeseparator,  // Ignored
     bad_operation
 };
