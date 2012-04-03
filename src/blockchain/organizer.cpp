@@ -143,6 +143,7 @@ void organizer::process(block_detail_ptr process_block)
         replace_chain(fork_index, orphan_chain);
     // Don't mark all orphan_chain as processed here because there might be
     // a winning fork from an earlier block
+    process_block->mark_processed();
 }
 
 void organizer::replace_chain(int fork_index,
@@ -207,6 +208,7 @@ void lazy_remove(block_detail_list& process_queue,
         remove_block);
     if (it != process_queue.end())
         process_queue.erase(it);
+    remove_block->mark_processed();
 }
 
 void organizer::clip_orphans(block_detail_list& orphan_chain,
