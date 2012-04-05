@@ -129,7 +129,7 @@ public:
     /**
      * Fetches list of transaction hashes in a block by block hash.
      *
-     * @param[in]   depth           Depth of block to fetch
+     * @param[in]   block_hash      Hash of block
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
