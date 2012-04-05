@@ -91,7 +91,8 @@ void poller::handle_store(const std::error_code& ec, block_info info,
     if (ec)
     {
         log_error(log_domain::poller)
-            << "Storing block: " << ec.message();
+            << "Storing block " << pretty_hex(block_hash)
+            << ": " << ec.message();
         return;
     }
     switch (info.status)

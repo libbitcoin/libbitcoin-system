@@ -22,8 +22,6 @@ public:
         Db* db_txs, Db* db_spends, Db* db_address);
 
     uint32_t find_last_block_depth(txn_guard_ptr txn);
-    bool is_output_spent(txn_guard_ptr txn,
-        const message::output_point& output);
     bool fetch_spend(txn_guard_ptr txn,
         const message::output_point& spent_output,
         message::input_point& input_spend);

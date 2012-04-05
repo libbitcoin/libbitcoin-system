@@ -62,16 +62,32 @@ uint64_t bdb_validate_block::median_time_past()
     return times[times.size() / 2];
 }
 
+bool tx_after_fork(const protobuf::Transaction& proto_tx, size_t fork_index)
+{
+    for (auto parent: proto_tx.parent())
+        if (parent.depth() > fork_index)
+            return true;
+    return false;
+}
+
 bool bdb_validate_block::transaction_exists(const hash_digest& tx_hash)
 {
     protobuf::Transaction proto_tx =
         common_->fetch_proto_transaction(txn_, tx_hash);
-    return proto_tx.IsInitialized();
+    if (!proto_tx.IsInitialized())
+        return false;
+    return !tx_after_fork(proto_tx, fork_index_);
 }
 
 bool bdb_validate_block::is_output_spent(const message::output_point& outpoint)
 {
-    return common_->is_output_spent(txn_, outpoint);
+    message::input_point input_spend;
+    if (!common_->fetch_spend(txn_, outpoint, input_spend))
+        return false;
+    // Lookup block depth
+    protobuf::Transaction proto_tx =
+        common_->fetch_proto_transaction(txn_, input_spend.hash);
+    return !tx_after_fork(proto_tx, fork_index_);
 }
 
 bool bdb_validate_block::fetch_transaction(message::transaction& tx, 
@@ -79,7 +95,7 @@ bool bdb_validate_block::fetch_transaction(message::transaction& tx,
 {
     protobuf::Transaction proto_tx =
         common_->fetch_proto_transaction(txn_, tx_hash);
-    if (!proto_tx.IsInitialized())
+    if (!proto_tx.IsInitialized() || tx_after_fork(proto_tx, fork_index_))
     {
         if (!fetch_orphan_transaction(tx, tx_depth, tx_hash))
             return false;
@@ -119,7 +135,7 @@ bool bdb_validate_block::is_output_spent(
     //   This must be done in both chain AND orphan
     // Searching chain when this tx is an orphan is redundant but
     // it does not happen enough to care
-    if (common_->is_output_spent(txn_, previous_output))
+    if (is_output_spent(previous_output))
         return true;
     else if (orphan_is_spent(previous_output, index_in_parent, input_index))
         return true;

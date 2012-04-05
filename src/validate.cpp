@@ -658,6 +658,7 @@ bool validate_block::connect_input(size_t index_in_parent,
     // Check coinbase maturity has been reached
     if (is_coinbase(previous_tx))
     {
+        BITCOIN_ASSERT(previous_depth <= depth_);
         uint32_t depth_difference = depth_ - previous_depth;
         if (depth_difference < coinbase_maturity)
             return false;
@@ -665,10 +666,7 @@ bool validate_block::connect_input(size_t index_in_parent,
     // Validate script
     script output_script = previous_tx_out.output_script;
     if (!output_script.run(input.input_script, current_tx, input_index))
-    {
-        log_error(log_domain::validation) << "Script failed evaluation";
         return false;
-    }
     // Search for double spends
     if (is_output_spent(previous_output, index_in_parent, input_index))
         return false;

@@ -30,15 +30,6 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
     return last_block_depth;
 }
 
-bool bdb_common::is_output_spent(txn_guard_ptr txn,
-    const message::output_point& output)
-{
-    readable_data_type search_spend;
-    search_spend.set(create_spent_key(output));
-    empty_data_type ignore_key;
-    return db_spends_->get(txn->get(),
-        search_spend.get(), ignore_key.get(), 0) == 0;
-}
 bool bdb_common::fetch_spend(txn_guard_ptr txn,
     const message::output_point& spent_output,
     message::input_point& input_spend)
