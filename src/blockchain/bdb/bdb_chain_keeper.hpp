@@ -25,7 +25,8 @@ public:
     void add(block_detail_ptr incoming_block);
     int find_index(const hash_digest& search_block_hash);
     big_number end_slice_difficulty(size_t slice_begin_index);
-    block_detail_list end_slice(size_t slice_begin_index);
+    bool end_slice(size_t slice_begin_index,
+        block_detail_list& sliced_blocks);
 
     txn_guard_ptr txn();
 

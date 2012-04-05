@@ -81,9 +81,9 @@ big_number bdb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
     return total_work;
 }
 
-block_detail_list bdb_chain_keeper::end_slice(size_t slice_begin_index)
+bool bdb_chain_keeper::end_slice(size_t slice_begin_index,
+    block_detail_list& sliced_blocks)
 {
-    block_detail_list sliced_blocks;
     Dbc* cursor;
     db_blocks_->cursor(txn_->get(), &cursor, 0);
     readable_data_type key;
@@ -92,7 +92,7 @@ block_detail_list bdb_chain_keeper::end_slice(size_t slice_begin_index)
     // Position cursor
     value = std::make_shared<writable_data_type>();
     if (cursor->get(key.get(), value->get(), DB_SET) != 0)
-        return block_detail_list();
+        return true;
     do
     {
         // Read raw value from bdb
@@ -106,23 +106,23 @@ block_detail_list bdb_chain_keeper::end_slice(size_t slice_begin_index)
         // Convert protobuf block header into actual block
         message::block sliced_block;
         if (!common_->reconstruct_block(txn_, proto_block, sliced_block))
-            return block_detail_list();
+            return false;
         // Add to list of sliced blocks
         block_detail_ptr sliced_detail =
             std::make_shared<block_detail>(sliced_block);
         sliced_blocks.push_back(sliced_detail);
         // Delete current item
         if (cursor->del(0) != 0)
-            return block_detail_list();
+            return false;
         // Remove txs + spends + addresses too
         for (const message::transaction& block_tx: sliced_block.transactions)
             if (!clear_transaction_data(block_tx))
-                return block_detail_list();
+                return false;
         // New value object ready to read next block
         value = std::make_shared<writable_data_type>();
     }
     while (cursor->get(key.get(), value->get(), DB_NEXT) == 0);
-    return sliced_blocks;
+    return true;
 }
 
 bool bdb_chain_keeper::clear_transaction_data(

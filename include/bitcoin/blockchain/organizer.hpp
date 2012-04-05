@@ -61,7 +61,8 @@ public:
     virtual void add(block_detail_ptr incoming_block) = 0;
     virtual int find_index(const hash_digest& search_block_hash) = 0;
     virtual big_number end_slice_difficulty(size_t slice_begin_index) = 0;
-    virtual block_detail_list end_slice(size_t slice_begin_index) = 0;
+    virtual bool end_slice(size_t slice_begin_index,
+        block_detail_list& sliced_blocks) = 0;
 };
 
 typedef std::shared_ptr<chain_keeper> chain_keeper_ptr;

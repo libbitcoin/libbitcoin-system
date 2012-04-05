@@ -173,7 +173,9 @@ void organizer::replace_chain(int fork_index,
     if (orphan_work <= main_work)
         return;
     // Replace! Switch!
-    block_detail_list replaced_slice = chain_->end_slice(fork_index + 1);
+    block_detail_list replaced_slice;
+    bool slice_success = chain_->end_slice(fork_index + 1, replaced_slice);
+    BITCOIN_ASSERT(slice_success);
     // We add the arriving blocks first to the main chain because if
     // we add the blocks being replaced back to the pool first then
     // the we can push the arrival blocks off the bottom of the
