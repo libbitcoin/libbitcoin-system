@@ -10,11 +10,11 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 using std::placeholders::_4;
 
-session::session(const session_params& params)
+session::session(async_service& service, const session_params& params)
   : hosts_(params.hosts_), handshake_(params.handshake_),
     network_(params.network_), protocol_(params.protocol_),
     chain_(params.blockchain_), poll_(params.poller_),
-    tx_pool_(params.transaction_pool_)
+    tx_pool_(params.transaction_pool_), strand_(service.get_service())
 {
 }
 
@@ -83,15 +83,8 @@ void session::inventory(const std::error_code& ec,
     for (const message::inventory_vector& ivec: packet.inventories)
     {
         if (ivec.type == message::inventory_type::transaction)
-        {
-            log_debug(log_domain::session)
-                << "Transaction inventory: " << pretty_hex(ivec.hash);
-            // does it exist already
-            // if not then issue getdata
-            tx_pool_->exists(ivec.hash,
-                std::bind(&session::request_tx_data, this,
-                    _1, ivec.hash, node));
-        }
+            strand_.post(
+                std::bind(&session::new_tx_inventory, this, ivec.hash, node));
         else if (ivec.type == message::inventory_type::block)
         {
             log_debug(log_domain::session)
@@ -108,6 +101,20 @@ void session::inventory(const std::error_code& ec,
     }
     node->subscribe_inventory(
         std::bind(&session::inventory, this, _1, _2, node));
+}
+
+void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
+{
+    if (grabbed_invs_.find(tx_hash) != grabbed_invs_.end())
+        return;
+    log_debug(log_domain::session)
+        << "Transaction inventory: " << pretty_hex(tx_hash);
+    // does it exist already
+    // if not then issue getdata
+    tx_pool_->exists(tx_hash,
+        strand_.wrap(std::bind(&session::request_tx_data,
+            this, _1, tx_hash, node)));
+    grabbed_invs_.insert(tx_hash);
 }
 
 void session::get_data(const std::error_code& ec,

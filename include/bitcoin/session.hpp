@@ -1,6 +1,8 @@
 #ifndef LIBBITCOIN_SESSION_H
 #define LIBBITCOIN_SESSION_H
 
+#include <set>
+
 #include <bitcoin/network/hosts.hpp>
 #include <bitcoin/network/handshake.hpp>
 #include <bitcoin/network/network.hpp>
@@ -27,7 +29,7 @@ class session
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
 
-    session(const session_params& params);
+    session(async_service& service, const session_params& params);
     void start(completion_handler handle_complete);
     void stop(completion_handler handle_complete);
 
@@ -45,6 +47,7 @@ private:
     void get_blocks(const std::error_code& ec,
         const message::get_blocks& packet, channel_ptr node);
 
+    void new_tx_inventory(const hash_digest& tx_hash, channel_ptr node);
     void request_tx_data(bool tx_exists,
         const hash_digest& tx_hash, channel_ptr node);
 
@@ -52,11 +55,13 @@ private:
     handshake_ptr handshake_;
     network_ptr network_;
     protocol_ptr protocol_;
-
     blockchain_ptr chain_;
     poller_ptr poll_;
-
     transaction_pool_ptr tx_pool_;
+
+    io_service::strand strand_;
+
+    std::set<hash_digest> grabbed_invs_;
 };
 
 } // namespace libbitcoin
