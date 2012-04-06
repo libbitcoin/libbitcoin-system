@@ -52,4 +52,7 @@ bitcoin_util_include_HEADERS = \
 	utility/base58.hpp \
 	utility/ripemd.hpp \
 	utility/subscriber.hpp \
-	utility/logger.hpp
+	utility/logger.hpp \
+	utility/coroutine.hpp \
+	utility/yield.hpp
+
