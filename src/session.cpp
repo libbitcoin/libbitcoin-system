@@ -14,7 +14,8 @@ session::session(async_service& service, const session_params& params)
   : hosts_(params.hosts_), handshake_(params.handshake_),
     network_(params.network_), protocol_(params.protocol_),
     chain_(params.blockchain_), poll_(params.poller_),
-    tx_pool_(params.transaction_pool_), strand_(service.get_service())
+    tx_pool_(params.transaction_pool_),
+    strand_(service.get_service()), grabbed_invs_(20)
 {
 }
 
@@ -105,16 +106,15 @@ void session::inventory(const std::error_code& ec,
 
 void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
 {
-    if (grabbed_invs_.find(tx_hash) != grabbed_invs_.end())
+    if (grabbed_invs_.exists(tx_hash))
         return;
     log_debug(log_domain::session)
         << "Transaction inventory: " << pretty_hex(tx_hash);
     // does it exist already
     // if not then issue getdata
     tx_pool_->exists(tx_hash,
-        strand_.wrap(std::bind(&session::request_tx_data,
-            this, _1, tx_hash, node)));
-    grabbed_invs_.insert(tx_hash);
+        std::bind(&session::request_tx_data, this, _1, tx_hash, node));
+    grabbed_invs_.store(tx_hash);
 }
 
 void session::get_data(const std::error_code& ec,

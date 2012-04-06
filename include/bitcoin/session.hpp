@@ -24,6 +24,64 @@ struct session_params
     transaction_pool_ptr transaction_pool_;
 };
 
+/**
+ * Provides a circular buffer of expiring items.
+ *
+ * The pumpkin_buffer is used to store transaction inventory hashes
+ * from the network to avoid re-requesting (and wasting bandwidth).
+ * Typically the network goes mad over new tx hashes and several nodes
+ * will notify you at once. This class avoids that.
+ *
+ * As transactions come at a fairly constant rate, we can cheat and make
+ * the items in this structure expire by using a circular buffer that
+ * overwrites old entries.
+ *
+ * Thanks copumpkin.
+ */
+template <typename Item>
+class pumpkin_buffer
+{
+public:
+    pumpkin_buffer(size_t max_size)
+      : max_size_(max_size), pointer_(0) {}
+
+    void store(const Item& item)
+    {
+        // Fill it up
+        if (expiry_.size() < max_size_)
+        {
+            lookup_.insert(item);
+            expiry_.push_back(item);
+            return;
+        }
+        // Otherwise we overwrite old entries
+        BITCOIN_ASSERT(expiry_.size() == max_size_);
+        BITCOIN_ASSERT(pointer_ < expiry_.size());
+        // First remove it from the hash lookup set
+        const Item& erase_item = expiry_[pointer_];
+        size_t number_erased = lookup_.erase(erase_item);
+        BITCOIN_ASSERT(number_erased == 1);
+        // Insert new item and overwrite it in circular buffer
+        lookup_.insert(item);
+        expiry_[pointer_] = item;
+        // Cycle pointer around
+        pointer_++;
+        if (pointer_ == expiry_.size())
+            pointer_ = 0;
+    }
+
+    bool exists(const Item& item)
+    {
+        return lookup_.find(item) != lookup_.end();
+    }
+
+private:
+    std::set<Item> lookup_;
+    std::vector<Item> expiry_;
+    size_t max_size_;
+    size_t pointer_;
+};
+
 class session
 {
 public:
@@ -61,7 +119,7 @@ private:
 
     io_service::strand strand_;
 
-    std::set<hash_digest> grabbed_invs_;
+    pumpkin_buffer<hash_digest> grabbed_invs_;
 };
 
 } // namespace libbitcoin
