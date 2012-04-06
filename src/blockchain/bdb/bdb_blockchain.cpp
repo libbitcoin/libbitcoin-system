@@ -183,7 +183,7 @@ void bdb_blockchain::do_store(const message::block& stored_block,
     int depth = chain_->find_index(hash_block_header(stored_block));
     if (depth != -1)
     {
-        handle_store(error::object_already_exists,
+        handle_store(error::duplicate,
             block_info{block_status::confirmed, depth});
         return;
     }

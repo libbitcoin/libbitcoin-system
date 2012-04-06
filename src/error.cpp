@@ -26,7 +26,7 @@ std::string error_category_impl::message(int ev) const
     {
         case error::missing_object:
             return "Object does not exist";
-        case error::object_already_exists:
+        case error::duplicate:
             return "Matching previous object found";
         case error::unspent_output:
             return "Unspent output";

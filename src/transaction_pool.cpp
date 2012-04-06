@@ -68,7 +68,7 @@ void transaction_pool::handle_delegate(const std::error_code& ec,
     // Re-check as another transaction might've been added in the interim
     else if (tx_exists(tx_entry.hash))
     {
-        handle_store(error::object_already_exists);
+        handle_store(error::duplicate);
     }
     else
     {

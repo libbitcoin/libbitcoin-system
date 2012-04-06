@@ -63,7 +63,7 @@ std::error_code validate_transaction::basic_checks() const
 
     // Check for conflicts
     if (exists(tx_hash_))
-        return error::object_already_exists;
+        return error::duplicate;
     // Check for blockchain duplicates done next in start() after
     // this function exits.
 
@@ -87,7 +87,7 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
 {
     if (ec != error::missing_object)
     {
-        handle_validate_(error::object_already_exists);
+        handle_validate_(error::duplicate);
         return;
     }
     // Check for conflicts with memory txs

@@ -12,7 +12,7 @@ namespace error
     {
         // storage errors
         missing_object = 1,
-        object_already_exists,
+        duplicate,
         unspent_output,
         // network errors
         resolve_failed,

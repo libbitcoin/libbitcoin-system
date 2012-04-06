@@ -147,10 +147,10 @@ void postgresql_blockchain::do_store_block(const message::block& block,
         check_confirmed.bind(result.get<size_t>(0));
         cppdb::result is_confirmed = check_confirmed.row();
         if (is_confirmed.empty())
-            handle_store(error::object_already_exists,
+            handle_store(error::duplicate,
                 block_info{block_status::orphan, 0});
         else
-            handle_store(error::object_already_exists,
+            handle_store(error::duplicate,
                 block_info{block_status::confirmed, 0});
         return;
     }
