@@ -15,6 +15,8 @@ namespace libbitcoin {
 class payment_address
 {
 public:
+    payment_address();
+
     bool set_public_key(const data_chunk& public_key);
     bool set_public_key_hash(const short_hash& public_key_hash);
 

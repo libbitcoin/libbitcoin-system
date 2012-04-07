@@ -8,6 +8,11 @@
 
 namespace libbitcoin {
 
+payment_address::payment_address()
+  : type_(payment_type::non_standard)
+{
+}
+
 bool payment_address::set_public_key(const data_chunk& public_key)
 {
     set_public_key_hash(generate_ripemd_hash(public_key));
