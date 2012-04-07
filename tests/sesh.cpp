@@ -91,10 +91,10 @@ int main()
         transaction_pool::create(mempool_service, p.blockchain_);
 
     //bdb_blockchain::setup("database");
-    session s(network_service, p);
-    s.start(handle_start);
+    session_ptr s = std::make_shared<session>(network_service, p);
+    s->start(handle_start);
     std::cin.get();
-    s.stop(handle_stop);
+    s->stop(handle_stop);
     log_debug() << "Exiting...";
     while (1)
         sleep(100);

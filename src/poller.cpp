@@ -19,6 +19,16 @@ void poller::query(channel_ptr node)
             shared_from_this(), _1, _2, node));
 }
 
+void poller::monitor(channel_ptr node)
+{
+    node->subscribe_inventory(
+        std::bind(&poller::receive_inv,
+            shared_from_this(), _1, _2, node));
+    node->subscribe_block(
+        std::bind(&poller::receive_block,
+            shared_from_this(), _1, _2, node));
+}
+
 void poller::initial_ask_blocks(const std::error_code& ec,
     const message::block_locator& locator, channel_ptr node)
 {
@@ -28,12 +38,6 @@ void poller::initial_ask_blocks(const std::error_code& ec,
             << "Fetching initial block locator: " << ec.message();
         return;
     }
-    node->subscribe_inventory(
-        std::bind(&poller::receive_inv,
-            shared_from_this(), _1, _2, node));
-    node->subscribe_block(
-        std::bind(&poller::receive_block,
-            shared_from_this(), _1, _2, node));
     ask_blocks(ec, locator, null_hash, node);
 }
 

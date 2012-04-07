@@ -83,6 +83,7 @@ private:
 };
 
 class session
+  : public std::enable_shared_from_this<session>
 {
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
@@ -92,7 +93,6 @@ public:
     void stop(completion_handler handle_complete);
 
 private:
-    void download_blockchain(channel_ptr node);
     void new_channel(channel_ptr node);
     void set_start_depth(const std::error_code& ec, size_t fork_point,
         const blockchain::block_list& new_blocks,

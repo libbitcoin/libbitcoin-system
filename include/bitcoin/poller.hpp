@@ -12,6 +12,7 @@ class poller
 public:
     poller(blockchain_ptr chain);
     void query(channel_ptr node);
+    void monitor(channel_ptr node);
 
 private:
     void initial_ask_blocks(const std::error_code& ec,
