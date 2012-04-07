@@ -68,7 +68,7 @@ public:
     void fetch_spend(const message::output_point& outpoint,
         fetch_handler_spend handle_fetch);
     // fetch outputs associated with an address
-    void fetch_outputs(const short_hash& pubkey_hash,
+    void fetch_outputs(const payment_address& address,
         fetch_handler_outputs handle_fetch);
 
     void subscribe_reorganize(reorganize_handler handle_reorganize);
@@ -94,7 +94,7 @@ private:
         fetch_handler_transaction_index handle_fetch);
     void do_fetch_spend(const message::output_point& outpoint,
         fetch_handler_spend handle_fetch);
-    void do_fetch_outputs(const short_hash& pubkey_hash,
+    void do_fetch_outputs(const payment_address& address,
         fetch_handler_outputs handle_fetch);
 
     io_service::strand strand_;

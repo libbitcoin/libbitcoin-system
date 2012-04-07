@@ -1,4 +1,4 @@
-CXXFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC $(CPPFLAGS)
+CXXFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC $(CPPFLAGS) -DBDB_ENABLED
 INCLUDES= -Iinclude/ -Iusr/include/
 LIBS= -Lusr/lib -lcrypto -lboost_thread -lboost_system -ldl -lz -lpthread -ldl
 BASE_MODULES= \

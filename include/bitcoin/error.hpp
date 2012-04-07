@@ -10,10 +10,11 @@ namespace error
     // Specific errors
     enum error_code_t
     {
-        // storage errors
+        // blockchain errors
         missing_object = 1,
         duplicate,
         unspent_output,
+        unsupported_payment_type,
         // network errors
         resolve_failed,
         network_unreachable,

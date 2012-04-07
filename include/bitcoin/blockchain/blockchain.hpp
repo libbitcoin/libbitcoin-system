@@ -11,6 +11,7 @@
 #include <bitcoin/block.hpp>
 #include <bitcoin/error.hpp>
 #include <bitcoin/messages.hpp>
+#include <bitcoin/address.hpp>
 
 namespace libbitcoin {
 
@@ -238,9 +239,9 @@ public:
         fetch_handler_spend handle_fetch) = 0;
 
     /**
-     * Fetches outputs associated with a unencoded bitcoin address.
+     * Fetches outputs associated with a bitcoin address.
      *
-     * @param[in]   pubkey_hash     Public key hash
+     * @param[in]   address         Bitcoin address
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
@@ -250,7 +251,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_outputs(const short_hash& pubkey_hash,
+    virtual void fetch_outputs(const payment_address& address,
         fetch_handler_outputs handle_fetch) = 0;
 
     /**

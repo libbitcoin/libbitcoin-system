@@ -472,14 +472,18 @@ void bdb_blockchain::do_fetch_spend(const message::output_point& outpoint,
     handle_fetch(std::error_code(), input_spend);
 }
 
-void bdb_blockchain::fetch_outputs(const short_hash& pubkey_hash,
+void bdb_blockchain::fetch_outputs(const payment_address& address,
     fetch_handler_outputs handle_fetch)
 {
-    strand_.post(
-        std::bind(&bdb_blockchain::do_fetch_outputs, shared_from_this(),
-            pubkey_hash, handle_fetch));
+    if (address.type() != payment_type::pubkey_hash)
+        handle_fetch(error::unsupported_payment_type,
+            message::output_point_list());
+    else
+        strand_.post(
+            std::bind(&bdb_blockchain::do_fetch_outputs,
+                shared_from_this(), address, handle_fetch));
 }
-void bdb_blockchain::do_fetch_outputs(const short_hash& pubkey_hash,
+void bdb_blockchain::do_fetch_outputs(const payment_address& address,
     fetch_handler_outputs handle_fetch)
 {
     // Associated outputs
@@ -489,7 +493,7 @@ void bdb_blockchain::do_fetch_outputs(const short_hash& pubkey_hash,
     db_address_->cursor(txn->get(), &cursor, 0);
     BITCOIN_ASSERT(cursor != nullptr);
     readable_data_type key;
-    key.set(pubkey_hash);
+    key.set(address.hash());
     writable_data_type value;
     int ret = cursor->get(key.get(), value.get(), DB_SET);
     while (ret != DB_NOTFOUND)
