@@ -61,7 +61,8 @@ void poller::receive_inv(const std::error_code& ec,
             continue;
         getdata.inventories.push_back(ivv);
     }
-    node->send(getdata, handle_send_packet);
+    if (!getdata.inventories.empty())
+        node->send(getdata, handle_send_packet);
     node->subscribe_inventory(
         std::bind(&poller::receive_inv,
             shared_from_this(), _1, _2, node));
