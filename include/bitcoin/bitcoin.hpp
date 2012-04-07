@@ -50,6 +50,9 @@
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/network/protocol.hpp>
 #include <bitcoin/async_service.hpp>
+#ifdef BDB_ENABLED
+    #include <bitcoin/blockchain/bdb_blockchain.hpp>
+#endif
 
 namespace bc = libbitcoin;
 

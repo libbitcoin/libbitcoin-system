@@ -7,7 +7,7 @@ Name: libbitcoin
 Description:  Rewrite bitcoin, make it super-pluggable, very easy to do and hack everything at every level, and very configurable.
 Version: @PACKAGE_VERSION@
 Requires: libcurl
-Cflags: -I${includedir} -std=gnu++0x
+Cflags: -I${includedir} -std=gnu++0x @CFLAG_BDB@
 Libs: -L${libdir} -lbitcoin -lboost_thread -lboost_system -lboost_regex -lpthread -lcurl @LDFLAG_BDB@ @LDFLAG_POSTGRES@
 Libs.private: -lcrypto -ldl -lz
 

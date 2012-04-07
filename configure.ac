@@ -34,6 +34,8 @@ if test "$bld_bdb" = "yes"; then
 	PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
 	AC_SUBST(LDFLAG_BDB)
 	LDFLAG_BDB="-lprotobuf $DB_CXX_LIBS"
+    AC_SUBST(CFLAG_BDB)
+    CFLAG_BDB="-DBDB_ENABLED"
 fi
 if test "$bld_postgres" = "yes"; then
 	# some checks here?
