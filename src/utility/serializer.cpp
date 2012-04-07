@@ -65,7 +65,12 @@ void serializer::write_network_address(message::network_address addr)
     extend_data(data_, uncast_type(addr.port, true));
 }
 
-void serializer::write_hash(hash_digest hash)
+void serializer::write_hash(const hash_digest& hash)
+{
+    data_.insert(data_.end(), hash.rbegin(), hash.rend());
+}
+
+void serializer::write_short_hash(const short_hash& hash)
 {
     data_.insert(data_.end(), hash.rbegin(), hash.rend());
 }
@@ -192,6 +197,13 @@ hash_digest deserializer::read_hash()
 {
     hash_digest hash;
     read_bytes<32>(begin_, end_, hash, true);
+    return hash;
+}
+
+short_hash deserializer::read_short_hash()
+{
+    short_hash hash;
+    read_bytes<20>(begin_, end_, hash, true);
     return hash;
 }
 

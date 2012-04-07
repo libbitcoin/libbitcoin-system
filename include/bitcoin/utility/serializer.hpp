@@ -20,7 +20,8 @@ public:
     void write_variable_uint(uint64_t v);
     void write_data(const data_chunk& other_data);
     void write_network_address(message::network_address addr);
-    void write_hash(hash_digest hash);
+    void write_hash(const hash_digest& hash);
+    void write_short_hash(const short_hash& hash);
     void write_fixed_string(const std::string& command, size_t string_size);
     void write_string(const std::string& str);
 
@@ -45,6 +46,7 @@ public:
     data_chunk read_data(uint64_t n_bytes);
     message::network_address read_network_address();
     hash_digest read_hash();
+    short_hash read_short_hash();
     std::string read_fixed_string(size_t len);
     std::string read_string();
 private:

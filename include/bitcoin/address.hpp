@@ -45,6 +45,8 @@ bool set_script_hash(payment_address& address,
 bool set_public_key(payment_address& address, const data_chunk& public_key);
 bool set_script(payment_address& address, const script& eval_script);
 
+bool extract(payment_address& address, const script& output_script);
+
 } // namespace libbitcoin
 
 #endif

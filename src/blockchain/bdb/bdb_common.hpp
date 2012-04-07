@@ -74,6 +74,8 @@ data_chunk create_spent_key(const Point& point)
     return serial_spend.data();
 }
 
+data_chunk create_address_key(const script& output_script);
+
 } // namespace libbitcoin
 
 #endif

@@ -170,13 +170,11 @@ bool bdb_chain_keeper::remove_spend(
 bool bdb_chain_keeper::remove_address(const script& output_script,
     const message::output_point& outpoint)
 {
-    if (output_script.type() != payment_type::pubkey_hash)
+    data_chunk raw_address = create_address_key(output_script);
+    if (raw_address.empty())
         return true;
-    BITCOIN_ASSERT(output_script.operations().size() == 5);
-    // DUP HASH <data>
-    const data_chunk& pubkey_hash = output_script.operations()[2].data;
     readable_data_type address_key, output_value;
-    address_key.set(pubkey_hash);
+    address_key.set(raw_address);
     output_value.set(create_spent_key(outpoint));
     // Perform the actual delete
     Dbc* cursor;

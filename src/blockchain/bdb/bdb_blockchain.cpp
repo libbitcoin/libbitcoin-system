@@ -493,7 +493,11 @@ void bdb_blockchain::do_fetch_outputs(const payment_address& address,
     db_address_->cursor(txn->get(), &cursor, 0);
     BITCOIN_ASSERT(cursor != nullptr);
     readable_data_type key;
-    key.set(address.hash());
+    // version byte + hash for key
+    serializer serial;
+    serial.write_byte(address.version());
+    serial.write_short_hash(address.hash());
+    key.set(serial.data());
     writable_data_type value;
     int ret = cursor->get(key.get(), value.get(), DB_SET);
     while (ret != DB_NOTFOUND)

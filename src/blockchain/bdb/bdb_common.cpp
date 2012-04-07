@@ -6,6 +6,7 @@
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/address.hpp>
 
 namespace libbitcoin {
 
@@ -157,13 +158,11 @@ bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
 bool bdb_common::add_address(txn_guard_ptr txn,
     const script& output_script, const message::output_point& outpoint)
 {
-    if (output_script.type() != payment_type::pubkey_hash)
+    data_chunk raw_address = create_address_key(output_script);
+    if (raw_address.empty())
         return true;
-    BITCOIN_ASSERT(output_script.operations().size() == 5);
-    // DUP HASH <data>
-    const data_chunk& pubkey_hash = output_script.operations()[2].data;
     readable_data_type address_key, output_value;
-    address_key.set(pubkey_hash);
+    address_key.set(raw_address);
     output_value.set(create_spent_key(outpoint));
     if (db_address_->put(txn->get(), address_key.get(),
             output_value.get(), 0) != 0)
@@ -252,6 +251,17 @@ bool bdb_common::reconstruct_block(txn_guard_ptr txn,
         result_block.transactions.push_back(protobuf_to_transaction(proto_tx));
     }
     return true;
+}
+
+data_chunk create_address_key(const script& output_script)
+{
+    payment_address address;
+    if (!extract(address, output_script))
+        return data_chunk();
+    serializer serial;
+    serial.write_byte(address.version());
+    serial.write_short_hash(address.hash());
+    return serial.data();
 }
 
 } // namespace libbitcoin

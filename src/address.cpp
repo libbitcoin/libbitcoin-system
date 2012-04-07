@@ -148,5 +148,27 @@ bool set_script(payment_address& address, const script& eval_script)
         generate_ripemd_hash(save_script(eval_script)));
 }
 
+bool extract(payment_address& address, const script& output_script)
+{
+    data_chunk raw_hash;
+    if (output_script.type() == payment_type::pubkey_hash)
+    {
+        BITCOIN_ASSERT(output_script.operations().size() == 5);
+        raw_hash = output_script.operations()[2].data;
+    }
+    else if (output_script.type() == payment_type::script_hash)
+    {
+        BITCOIN_ASSERT(output_script.operations().size() == 3);
+        raw_hash = output_script.operations()[1].data;
+    }
+    else
+        return false;
+    short_hash hash_data;
+    BITCOIN_ASSERT(raw_hash.size() == hash_data.size());
+    std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
+    address.set(output_script.type(), hash_data);
+    return true;
+}
+
 } // namespace libbitcoin
 
