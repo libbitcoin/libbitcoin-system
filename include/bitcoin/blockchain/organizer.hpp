@@ -40,7 +40,7 @@ class orphans_pool
 {
 public:
     orphans_pool(size_t pool_size);
-    void add(block_detail_ptr incoming_block);
+    bool add(block_detail_ptr incoming_block);
     block_detail_list trace(block_detail_ptr end_block);
     block_detail_list unprocessed();
     void remove(block_detail_ptr remove_block);

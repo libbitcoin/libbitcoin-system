@@ -57,13 +57,14 @@ orphans_pool::orphans_pool(size_t pool_size)
 {
 }
 
-void orphans_pool::add(block_detail_ptr incoming_block)
+bool orphans_pool::add(block_detail_ptr incoming_block)
 {
     // No duplicates
     for (block_detail_ptr current_block: pool_)
         if (current_block->actual() == incoming_block->actual())
-            return;
+            return false;
     pool_.push_back(incoming_block);
+    return true;
 }
 
 block_detail_list orphans_pool::trace(block_detail_ptr end_block)
