@@ -93,7 +93,8 @@ void poller::receive_block(const std::error_code& ec,
 void poller::handle_store(const std::error_code& ec, block_info info,
     const hash_digest& block_hash, channel_ptr node)
 {
-    if (ec)
+    // We need orphan blocks so we can do the next getblocks round
+    if (ec && info.status != block_status::orphan)
     {
         log_error(log_domain::poller)
             << "Storing block " << pretty_hex(block_hash)

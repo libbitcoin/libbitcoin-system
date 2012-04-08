@@ -15,6 +15,7 @@ namespace error
         duplicate,
         unspent_output,
         unsupported_payment_type,
+        start_failed,
         // network errors
         resolve_failed,
         network_unreachable,

@@ -74,6 +74,14 @@ void handle_mempool_store(const std::error_code& ec,
     }
 }
 
+void blockchain_started(const std::error_code& ec, blockchain_ptr)
+{
+    if (ec)
+        error_exit(ec.message());
+    else
+        log_info() << "Blockchain initialized!";
+}
+
 int main()
 {
     async_service network_service(1), disk_service(1), mempool_service(1);
@@ -84,7 +92,8 @@ int main()
         network_service, p.hosts_, p.handshake_, p.network_);
     p.protocol_->subscribe_channel(monitor_tx);
 
-    p.blockchain_ = bdb_blockchain::create(disk_service, "database");
+    p.blockchain_ = bdb_blockchain::create(
+        disk_service, "database", blockchain_started);
     p.poller_ = std::make_shared<poller>(p.blockchain_);
 
     p.transaction_pool_ =

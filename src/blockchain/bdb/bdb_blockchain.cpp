@@ -30,14 +30,19 @@ constexpr uint32_t env_flags =
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
-blockchain_ptr bdb_blockchain::create(
-    async_service& service, const std::string& prefix)
+blockchain_ptr bdb_blockchain::create(async_service& service,
+    const std::string& prefix, start_handler handle_start)
 {
     bdb_blockchain* bdb_chain = new bdb_blockchain(service);
     blockchain_ptr chain(bdb_chain);
     bdb_chain->strand_.post(
-        std::bind(&bdb_blockchain::initialize,
-            bdb_chain->shared_from_this(), prefix));
+        [chain, bdb_chain, prefix, handle_start]()
+        {
+            if (!bdb_chain->initialize(prefix))
+                handle_start(error::start_failed, nullptr);
+            else
+                handle_start(std::error_code(), chain);
+        });
     return chain;
 }
 
@@ -130,7 +135,8 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     env_->set_lk_max_locks(10000);
     env_->set_lk_max_objects(10000);
     env_->set_cachesize(1, 0, 1);
-    env_->open(prefix.c_str(), env_flags, 0);
+    if (env_->open(prefix.c_str(), env_flags, 0) != 0)
+        return false;
     // Create database objects
     db_blocks_ = new Db(env_, 0);
     db_blocks_hash_ = new Db(env_, 0);
@@ -143,15 +149,23 @@ bool bdb_blockchain::initialize(const std::string& prefix)
         return false;
     }
     txn_guard txn(env_);
-    db_blocks_->open(txn.get(), "blocks", "block-data", DB_BTREE, db_flags, 0);
-    db_blocks_hash_->open(txn.get(), "blocks", "block-hash", 
-        DB_BTREE, db_flags, 0);
+    if (db_blocks_->open(txn.get(), "blocks", "block-data",
+            DB_BTREE, db_flags, 0) != 0)
+        return false;
+    if (db_blocks_hash_->open(txn.get(), "blocks", "block-hash", 
+            DB_BTREE, db_flags, 0) != 0)
+        return false;
     db_blocks_->associate(txn.get(), db_blocks_hash_, get_block_hash, 0);
-    db_txs_->open(txn.get(), "transactions", "tx", DB_BTREE, db_flags, 0);
-    db_spends_->open(txn.get(), "transactions", "spends",
-        DB_BTREE, db_flags, 0);
+    if (db_txs_->open(txn.get(), "transactions", "tx",
+            DB_BTREE, db_flags, 0) != 0)
+        return false;
+    if (db_spends_->open(txn.get(), "transactions", "spends",
+            DB_BTREE, db_flags, 0) != 0)
+        return false;
     db_address_->set_flags(DB_DUP);
-    db_address_->open(txn.get(), "address", "address", DB_BTREE, db_flags, 0);
+    if (db_address_->open(txn.get(), "address", "address",
+            DB_BTREE, db_flags, 0) != 0)
+        return false;
     txn.commit();
 
     common_ = std::make_shared<bdb_common>(env_,
@@ -187,10 +201,14 @@ void bdb_blockchain::do_store(const message::block& stored_block,
             block_info{block_status::confirmed, depth});
         return;
     }
-    orphans_->add(stored_detail);
+    if (!orphans_->add(stored_detail))
+    {
+        handle_store(error::duplicate,
+            block_info{block_status::orphan, 0});
+    }
     organize_->start();
     handle_store(stored_detail->errc(), stored_detail->info());
-    // Every 10 blocks, we flush database
+    // Every N blocks, we flush database
     static size_t flush_counter = 0;
     if (++flush_counter == 2000)
     {

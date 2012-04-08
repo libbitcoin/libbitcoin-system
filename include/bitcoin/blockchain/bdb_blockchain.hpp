@@ -26,9 +26,12 @@ public:
         const std::error_code&, size_t, const block_list&, const block_list&>
             reorganize_subscriber_type;
 
+    typedef std::function<
+        void (const std::error_code, blockchain_ptr)> start_handler;
+
     static bool setup(const std::string& prefix);
-    static blockchain_ptr create(
-        async_service& service, const std::string& prefix);
+    static blockchain_ptr create(async_service& service,
+        const std::string& prefix, start_handler handle_start);
 
     ~bdb_blockchain();
 

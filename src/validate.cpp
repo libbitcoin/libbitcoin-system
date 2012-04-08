@@ -564,9 +564,10 @@ bool validate_block::passes_checkpoints()
 std::error_code validate_block::connect_block()
 {
     // BIP 30 security fix
-    for (const message::transaction& current_tx: current_block_.transactions)
-        if (!not_duplicate_or_spent(current_tx))
-            return error::duplicate_or_spent;
+    if (depth_ != 91842 && depth_ != 91880)
+        for (const auto& current_tx: current_block_.transactions)
+            if (!not_duplicate_or_spent(current_tx))
+                return error::duplicate_or_spent;
 
     uint64_t fees = 0;
     size_t total_sigops = 0;

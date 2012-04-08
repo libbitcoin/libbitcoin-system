@@ -32,6 +32,8 @@ std::string error_category_impl::message(int ev) const
             return "Unspent output";
         case error::unsupported_payment_type:
             return "Unsupport payment type";
+        case error::start_failed:
+            return "Failed to initialize";
         case error::resolve_failed:
             return "Resolving hostname failed";
         case error::network_unreachable:
