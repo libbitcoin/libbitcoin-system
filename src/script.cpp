@@ -490,6 +490,7 @@ bool is_pubkey_hash_type(const operation_stack& ops)
         ops[0].code == opcode::dup &&
         ops[1].code == opcode::hash160 &&
         ops[2].code == opcode::special &&
+        ops[2].data.size() == 20 &&
         ops[3].code == opcode::equalverify &&
         ops[4].code == opcode::checksig;
 }
