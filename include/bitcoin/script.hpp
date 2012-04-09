@@ -46,7 +46,16 @@ enum class opcode
     checksigverify = 173,
     checkmultisig = 174,
     checkmultisigverify = 175,
-    codeseparator,  // Ignored
+    op_nop1 = 176,
+    op_nop2 = 177,
+    op_nop3 = 178,
+    op_nop4 = 179,
+    op_nop5 = 180,
+    op_nop6 = 181,
+    op_nop7 = 182,
+    op_nop8 = 183,
+    op_nop9 = 184,
+    op_nop10 = 185,
     bad_operation
 };
 

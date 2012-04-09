@@ -470,6 +470,18 @@ bool script::run_operation(operation op,
         case opcode::checkmultisigverify:
             return op_checkmultisigverify(parent_tx, input_index);
 
+        case opcode::op_nop1:
+        case opcode::op_nop2:
+        case opcode::op_nop3:
+        case opcode::op_nop4:
+        case opcode::op_nop5:
+        case opcode::op_nop6:
+        case opcode::op_nop7:
+        case opcode::op_nop8:
+        case opcode::op_nop9:
+        case opcode::op_nop10:
+            return true;
+
         default:
             log_fatal() << "Unimplemented operation <none " 
                 << static_cast<int>(op.code) << ">";
@@ -611,6 +623,26 @@ std::string opcode_to_string(opcode code)
             return "checkmultisig";
         case opcode::checkmultisigverify:
             return "checkmultisigverify";
+        case opcode::op_nop1:
+            return "op_nop1";
+        case opcode::op_nop2:
+            return "op_nop2";
+        case opcode::op_nop3:
+            return "op_nop3";
+        case opcode::op_nop4:
+            return "op_nop4";
+        case opcode::op_nop5:
+            return "op_nop5";
+        case opcode::op_nop6:
+            return "op_nop6";
+        case opcode::op_nop7:
+            return "op_nop7";
+        case opcode::op_nop8:
+            return "op_nop8";
+        case opcode::op_nop9:
+            return "op_nop9";
+        case opcode::op_nop10:
+            return "op_nop10";
         default:
         {
             std::ostringstream ss;
@@ -687,6 +719,26 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::checkmultisig;
     else if (code_repr == "checkmultisigverify")
         return opcode::checkmultisigverify;
+    else if (code_repr == "op_nop1")
+        return opcode::op_nop1;
+    else if (code_repr == "op_nop2")
+        return opcode::op_nop2;
+    else if (code_repr == "op_nop3")
+        return opcode::op_nop3;
+    else if (code_repr == "op_nop4")
+        return opcode::op_nop4;
+    else if (code_repr == "op_nop5")
+        return opcode::op_nop5;
+    else if (code_repr == "op_nop6")
+        return opcode::op_nop6;
+    else if (code_repr == "op_nop7")
+        return opcode::op_nop7;
+    else if (code_repr == "op_nop8")
+        return opcode::op_nop8;
+    else if (code_repr == "op_nop9")
+        return opcode::op_nop9;
+    else if (code_repr == "op_nop10")
+        return opcode::op_nop10;
     // ERROR: unknown... 
     return opcode::bad_operation;
 }
