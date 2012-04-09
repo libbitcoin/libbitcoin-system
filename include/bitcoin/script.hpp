@@ -42,6 +42,7 @@ enum class opcode
     hash160 = 169,
     equal = 135,
     equalverify = 136,
+    codeseparator = 171,
     checksig = 172,
     checksigverify = 173,
     checkmultisig = 174,
@@ -138,6 +139,7 @@ private:
 
     operation_stack operations_;
     data_stack stack_;
+    operation_stack::iterator codehash_begin_;
 };
 
 std::string opcode_to_string(opcode code);

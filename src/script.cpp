@@ -114,19 +114,23 @@ bool script::run(script input_script,
 
 bool script::run(const message::transaction& parent_tx, uint32_t input_index)
 {
-    for (const operation oper: operations_)
+    codehash_begin_ = operations_.begin();
+    for (auto it = operations_.begin(); it != operations_.end(); ++it)
     {
+        const operation op = *it;
         //log_debug() << "Run: " << opcode_to_string(oper.code);
-        if (!run_operation(oper, parent_tx, input_index))
+        if (!run_operation(op, parent_tx, input_index))
             return false;
-        if (oper.data.size() > 0)
+        if (op.data.size() > 0)
         {
-            BITCOIN_ASSERT(oper.code == opcode::special ||
-                oper.code == opcode::pushdata1 ||
-                oper.code == opcode::pushdata2 ||
-                oper.code == opcode::pushdata4);
-            stack_.push_back(oper.data);
+            BITCOIN_ASSERT(op.code == opcode::special ||
+                op.code == opcode::pushdata1 ||
+                op.code == opcode::pushdata2 ||
+                op.code == opcode::pushdata4);
+            stack_.push_back(op.data);
         }
+        if (op.code == opcode::codeseparator)
+            codehash_begin_ = it;
     }
     return true;
 }
@@ -315,8 +319,9 @@ bool script::op_checksigverify(
     data_chunk pubkey = pop_stack(), signature = pop_stack();
 
     script script_code;
-    for (operation op: operations_)
+    for (auto it = codehash_begin_; it != operations_.end(); ++it)
     {
+        const operation op = *it;
         if (op.data == signature || op.code == opcode::codeseparator)
             continue;
         script_code.push_operation(op);
@@ -369,8 +374,9 @@ bool script::op_checkmultisigverify(
                 data) != signatures.end();
         };
     script script_code;
-    for (operation op: operations_)
+    for (auto it = codehash_begin_; it != operations_.end(); ++it)
     {
+        const operation op = *it;
         if (op.code == opcode::codeseparator)
             continue;
         if (is_signature(op.data))
@@ -457,6 +463,12 @@ bool script::run_operation(operation op,
 
         case opcode::equalverify:
             return op_equalverify();
+
+        case opcode::codeseparator:
+            // This is set in the main run(...) loop
+            // codehash_begin_ is updated to the current
+            // operations_ iterator
+            return true;
 
         case opcode::checksig:
             return op_checksig(parent_tx, input_index);
@@ -615,6 +627,8 @@ std::string opcode_to_string(opcode code)
             return "equal";
         case opcode::equalverify:
             return "equalverify";
+        case opcode::codeseparator:
+            return "codeseparator";
         case opcode::checksig:
             return "checksig";
         case opcode::checksigverify:
@@ -711,6 +725,8 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::equal;
     else if (code_repr == "equalverify")
         return opcode::equalverify;
+    else if (code_repr == "codeseparator")
+        return opcode::codeseparator;
     else if (code_repr == "checksig")
         return opcode::checksig;
     else if (code_repr == "checksigverify")
