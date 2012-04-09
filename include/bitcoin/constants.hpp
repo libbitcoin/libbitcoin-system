@@ -48,6 +48,10 @@ constexpr uint64_t target_spacing = 10 * 60;
 // Two weeks worth of blocks = readjust interval = 2016
 constexpr uint64_t readjustment_interval = target_timespan / target_spacing;
 
+// April 1 2012
+constexpr uint32_t bip16_switchover_timestamp = 1333238400;
+constexpr uint32_t bip16_switchover_depth = 173805;
+
 } // namespace libbitcoin
 
 #endif

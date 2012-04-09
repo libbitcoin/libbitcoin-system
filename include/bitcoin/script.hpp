@@ -93,8 +93,8 @@ class script
 public:
     void join(const script& other);
     void push_operation(operation oper);
-    bool run(script input_script,
-        const message::transaction& parent_tx, uint32_t input_index);
+    bool run(script input_script, const message::transaction& parent_tx,
+        uint32_t input_index, bool bip16_enabled=true);
 
     std::string pretty() const;
     payment_type type() const;

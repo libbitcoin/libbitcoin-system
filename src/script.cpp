@@ -77,8 +77,8 @@ bool is_push_only(const operation_stack& operations)
     return true;
 }
 
-bool script::run(script input_script,
-    const message::transaction& parent_tx, uint32_t input_index)
+bool script::run(script input_script, const message::transaction& parent_tx,
+    uint32_t input_index, bool bip16_enabled)
 {
     stack_.clear();
     input_script.stack_.clear();
@@ -92,7 +92,7 @@ bool script::run(script input_script,
     if (!cast_to_bool(stack_.back()))
         return false;
     // Additional validation for spend-to-script-hash transactions
-    if (type() == payment_type::script_hash)
+    if (bip16_enabled && type() == payment_type::script_hash)
     {
         if (!is_push_only(input_script.operations()))
             return false;

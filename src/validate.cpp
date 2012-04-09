@@ -664,9 +664,16 @@ bool validate_block::connect_input(size_t index_in_parent,
         if (depth_difference < coinbase_maturity)
             return false;
     }
+    // Pay to script hash BIP 16 scripts
+    // block 170060 contains an invalid BIP 16 transaction
+    // before the switchover date.
+    bool bip16_enabled =
+        current_block_.timestamp >= bip16_switchover_timestamp;
+    BITCOIN_ASSERT(!bip16_enabled || depth_ >= bip16_switchover_depth);
     // Validate script
     script output_script = previous_tx_out.output_script;
-    if (!output_script.run(input.input_script, current_tx, input_index))
+    if (!output_script.run(input.input_script,
+            current_tx, input_index, bip16_enabled))
         return false;
     // Search for double spends
     if (is_output_spent(previous_output, index_in_parent, input_index))
