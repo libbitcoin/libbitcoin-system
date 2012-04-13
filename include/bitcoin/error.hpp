@@ -11,7 +11,7 @@ namespace error
     enum error_code_t
     {
         // blockchain errors
-        missing_object = 1,
+        not_found = 1,
         duplicate,
         unspent_output,
         unsupported_payment_type,

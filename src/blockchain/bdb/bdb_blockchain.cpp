@@ -244,7 +244,7 @@ void bdb_blockchain::fetch_block_header_by_depth(size_t depth,
     if (!fetch_block_header_impl(txn, depth, common_, serial_block))
     {
         txn->abort();
-        handle_fetch(error::missing_object, message::block());
+        handle_fetch(error::not_found, message::block());
         return;
     }
     txn->commit();
@@ -267,7 +267,7 @@ void bdb_blockchain::fetch_block_header_by_hash(
     if (!fetch_block_header_impl(txn, block_hash, common_, serial_block))
     {
         txn->abort();
-        handle_fetch(error::missing_object, message::block());
+        handle_fetch(error::not_found, message::block());
         return;
     }
     txn->commit();
@@ -283,7 +283,7 @@ void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
     if (!proto_block.IsInitialized())
     {
         txn->abort();
-        handle_fetch(error::missing_object, message::inventory_list());
+        handle_fetch(error::not_found, message::inventory_list());
         return;
     }
     txn->commit();
@@ -342,7 +342,7 @@ void bdb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
         primary_key.get(), ignore_data.get(), 0) != 0)
     {
         txn->abort();
-        handle_fetch(error::missing_object, 0);
+        handle_fetch(error::not_found, 0);
         return;
     }
     txn->commit();
@@ -363,7 +363,7 @@ void bdb_blockchain::do_fetch_last_depth(fetch_handler_last_depth handle_fetch)
     txn->commit();
     if (last_depth == std::numeric_limits<uint32_t>::max())
     {
-        handle_fetch(error::missing_object, 0);
+        handle_fetch(error::not_found, 0);
         return;
     }
     handle_fetch(std::error_code(), last_depth);
@@ -385,7 +385,7 @@ void bdb_blockchain::do_fetch_block_locator(
     {
         log_error() << "Empty blockchain";
         txn->abort();
-        handle_fetch(error::missing_object, message::block_locator());
+        handle_fetch(error::not_found, message::block_locator());
         return;
     }
 
@@ -401,7 +401,7 @@ void bdb_blockchain::do_fetch_block_locator(
         {
             log_fatal() << "Missing block " << current_index;
             txn->abort();
-            handle_fetch(error::missing_object, message::block_locator());
+            handle_fetch(error::not_found, message::block_locator());
             return;
         }
         hash_digest current_hash = 
@@ -428,7 +428,7 @@ void bdb_blockchain::do_fetch_transaction(const hash_digest& transaction_hash,
     txn->commit();
     if (!proto_tx.IsInitialized())
     {
-        handle_fetch(error::missing_object, message::transaction());
+        handle_fetch(error::not_found, message::transaction());
         return;
     }
     message::transaction tx = protobuf_to_transaction(proto_tx);
@@ -453,7 +453,7 @@ void bdb_blockchain::do_fetch_transaction_index(
     txn->commit();
     if (!proto_tx.IsInitialized())
     {
-        handle_fetch(error::missing_object, 0, 0);
+        handle_fetch(error::not_found, 0, 0);
         return;
     }
     size_t parent_block_depth = 0, index_in_parent = 0;

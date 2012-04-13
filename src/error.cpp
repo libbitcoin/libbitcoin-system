@@ -24,7 +24,7 @@ std::string error_category_impl::message(int ev) const
 {
     switch (ev)
     {
-        case error::missing_object:
+        case error::not_found:
             return "Object does not exist";
         case error::duplicate:
             return "Matching previous object found";

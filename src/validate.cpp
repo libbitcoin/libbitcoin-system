@@ -85,7 +85,7 @@ bool validate_transaction::exists(const hash_digest& tx_hash) const
 
 void validate_transaction::handle_duplicate_check(const std::error_code& ec)
 {
-    if (ec != error::missing_object)
+    if (ec != error::not_found)
     {
         handle_validate_(error::duplicate);
         return;
@@ -230,7 +230,7 @@ void validate_transaction::check_double_spend(const std::error_code& ec)
     }
     else
     {
-        BITCOIN_ASSERT(!ec || ec != error::missing_object);
+        BITCOIN_ASSERT(!ec || ec != error::not_found);
         handle_validate_(error::double_spend);
     }
 }

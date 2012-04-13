@@ -89,7 +89,7 @@ void hosts::do_remove(const message::network_address& address,
         hosts_field{address.ip, address.port});
     if (it == buffer_.end())
     {
-        handle_remove(error::missing_object);
+        handle_remove(error::not_found);
         return;
     }
     buffer_.erase(it);
@@ -106,7 +106,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 {
     if (buffer_.empty())
     {
-        handle_fetch(error::missing_object, message::network_address());
+        handle_fetch(error::not_found, message::network_address());
         return;
     }
     size_t index = rand() % buffer_.size();
