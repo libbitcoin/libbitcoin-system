@@ -27,6 +27,8 @@ class transaction_pool
 {
 public:
     typedef std::function<void (const std::error_code&)> store_handler;
+    typedef std::function<void (
+        const std::error_code&, const message::transaction&)> fetch_handler;
     typedef std::function<void (bool)> exists_handler;
 
     typedef transaction_entry_info::confirm_handler confirm_handler;
@@ -40,6 +42,8 @@ public:
 
     void store(const message::transaction& stored_transaction,
         confirm_handler handle_confirm, store_handler handle_store);
+    void fetch(const hash_digest& transaction_hash,
+        fetch_handler handle_fetch);
     void exists(const hash_digest& transaction_hash,
         exists_handler handle_exists);
 

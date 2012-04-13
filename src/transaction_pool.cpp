@@ -85,6 +85,23 @@ bool transaction_pool::tx_exists(const hash_digest& tx_hash)
     return false;
 }
 
+void transaction_pool::fetch(const hash_digest& transaction_hash,
+    fetch_handler handle_fetch)
+{
+    auto this_ptr = shared_from_this();
+    strand_.post(
+        [&, this_ptr, transaction_hash, handle_fetch]()
+        {
+            for (const transaction_entry_info& entry: pool_)
+                if (entry.hash == transaction_hash)
+                {
+                    handle_fetch(std::error_code(), entry.tx);
+                    return;
+                }
+            handle_fetch(error::not_found, message::transaction());
+        });
+}
+
 void transaction_pool::exists(const hash_digest& transaction_hash,
     exists_handler handle_exists)
 {
