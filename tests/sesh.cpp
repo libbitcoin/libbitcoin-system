@@ -94,7 +94,7 @@ int main()
 
     p.blockchain_ = bdb_blockchain::create(
         disk_service, "database", blockchain_started);
-    p.poller_ = std::make_shared<poller>(p.blockchain_);
+    p.poller_ = std::make_shared<poller>(mempool_service, p.blockchain_);
 
     p.transaction_pool_ =
         transaction_pool::create(mempool_service, p.blockchain_);

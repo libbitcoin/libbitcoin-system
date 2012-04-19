@@ -7,8 +7,8 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-poller::poller(blockchain_ptr chain)
-  : chain_(chain)
+poller::poller(async_service& service, blockchain_ptr chain)
+  : strand_(service.get_service()), chain_(chain)
 {
 }
 
@@ -38,7 +38,8 @@ void poller::initial_ask_blocks(const std::error_code& ec,
             << "Fetching initial block locator: " << ec.message();
         return;
     }
-    ask_blocks(ec, locator, null_hash, node);
+    strand_.dispatch(std::bind(&poller::ask_blocks, shared_from_this(),
+        ec, locator, null_hash, node));
 }
 
 void handle_send_packet(const std::error_code& ec)
@@ -108,8 +109,8 @@ void poller::handle_store(const std::error_code& ec, block_info info,
             // and next time do not download orphan block again.
             // Remember to remove from list once block is no longer orphan
             chain_->fetch_block_locator(
-                std::bind(&poller::ask_blocks, shared_from_this(),
-                    _1, _2, block_hash, node));
+                strand_.wrap(std::bind(&poller::ask_blocks,
+                    shared_from_this(), _1, _2, block_hash, node)));
             break;
 
         case block_status::rejected:
@@ -134,10 +135,18 @@ void poller::ask_blocks(const std::error_code& ec,
             << "Ask for blocks: " << ec.message();
         return;
     }
+    static hash_digest last_hash_end = null_hash;
+    if (last_hash_end == locator.front())
+    {
+        log_debug(log_domain::poller) << "Skipping duplicate ask blocks: "
+            << pretty_hex(locator.front());
+        return;
+    }
     message::get_blocks packet;
     packet.start_hashes = locator;
     packet.hash_stop = hash_stop;
     node->send(packet, std::bind(&handle_send_packet, _1));
+    last_hash_end = locator.front();
 }
 
 } // namespace libbitcoin

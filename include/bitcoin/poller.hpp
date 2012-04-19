@@ -10,7 +10,7 @@ class poller
   : public std::enable_shared_from_this<poller>
 {
 public:
-    poller(blockchain_ptr chain);
+    poller(async_service& service, blockchain_ptr chain);
     void query(channel_ptr node);
     void monitor(channel_ptr node);
 
@@ -29,6 +29,7 @@ private:
         const message::block_locator& locator,
         const hash_digest& hash_stop, channel_ptr node);
 
+    io_service::strand strand_;
     blockchain_ptr chain_;
 };
 
