@@ -17,7 +17,7 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 const time_duration heartbeat_time = seconds(0) + minutes(30);
 
 channel_proxy::channel_proxy(async_service& service, socket_ptr socket)
-  : stopped_(false), socket_(socket), strand_(service.get_service()),
+  : strand_(service.get_service()), stopped_(false), socket_(socket), 
     timeout_(service.get_service()), heartbeat_(service.get_service())
 {
     export_ = std::make_shared<satoshi_exporter>();
