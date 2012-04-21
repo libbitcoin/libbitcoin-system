@@ -22,6 +22,26 @@ struct transaction_entry_info
 
 typedef boost::circular_buffer<transaction_entry_info> pool_buffer;
 
+/**
+ * Before bitcoin transactions make it into a block, they go into
+ * a transaction memory pool. This class encapsulates that functionality
+ * performing the neccessary validation of a transaction before accepting
+ * it into its internal buffer.
+ *
+ * The interface has been deliberately kept simple to minimise overhead.
+ * This class attempts no tracking of inputs or spends and only provides
+ * a store/fetch paradigm. Tracking must be performed externally and make
+ * use of store's handle_store and handle_confirm to manage changes in the
+ * state of memory pool transactions.
+ *
+ * @code
+ *  async_service service(1);
+ *  // transaction_pool needs access to the blockchain
+ *  blockchain_ptr chain = load_our_backend();
+ *  // create and initialize the transaction memory pool
+ *  transaction_pool_ptr txpool = transaction_pool::create(service, chain);
+ * @endcode
+ */
 class transaction_pool
   : public std::enable_shared_from_this<transaction_pool>
 {
@@ -36,14 +56,57 @@ public:
     static transaction_pool_ptr create(
         async_service& service, blockchain_ptr chain);
 
-    // Non-copyable
+    /// Non-copyable class
     transaction_pool(const transaction_pool&) = delete;
+    /// Non-copyable class
     void operator=(const transaction_pool&) = delete;
 
+    /**
+     * Attempt to store a transaction.
+     *
+     * @param[in]   stored_transaction  Transaction to store
+     * @param[in]   handle_confirm      Handler for when transaction
+     *                                  becomes confirmed.
+     * @code
+     *  void handle_confirm(
+     *      const std::error_code& ec    // Status of operation
+     *  );
+     * @endcode
+     * @param[in]   handle_store        Completion handler for
+     *                                  store operation.
+     * @code
+     *  void handle_confirm(
+     *      const std::error_code& ec    // Status of operation
+     *  );
+     * @endcode
+     */
     void store(const message::transaction& stored_transaction,
         confirm_handler handle_confirm, store_handler handle_store);
+
+    /**
+     * Fetch transaction by hash.
+     *
+     * @param[in]   transaction_hash  Transaction's hash
+     * @param[in]   handle_fetch      Completion handler for fetch operation.
+     * @code
+     *  void handle_fetch(
+     *      const std::error_code& ec,      // Status of operation
+     *      const message::transaction& tx  // Transaction
+     *  );
+     * @endcode
+     */
     void fetch(const hash_digest& transaction_hash,
         fetch_handler handle_fetch);
+
+    /**
+     * Is this transaction in the pool?
+     *
+     * @param[in]   transaction_hash  Transaction's hash
+     * @param[in]   handle_exists     Completion handler for exists operation.
+     * @code
+     *  void handle_exists(bool);
+     * @endcode
+     */
     void exists(const hash_digest& transaction_hash,
         exists_handler handle_exists);
 

@@ -73,7 +73,7 @@ public:
      * @param[in]   stored_block    Block to store
      * @param[in]   handle_store    Completion handler for store operation.
      * @code
-     *  void handle_reorganize(
+     *  void handle_store(
      *      const std::error_code& ec,   // Status of operation
      *      block_info info              // Status and depth of block
      *  );
