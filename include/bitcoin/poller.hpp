@@ -31,6 +31,11 @@ private:
 
     io_service::strand strand_;
     blockchain_ptr chain_;
+
+    // Last hash from a block locator
+    hash_digest last_hash_end_;
+    // Last hash from an inventory packet
+    hash_digest last_block_hash_;
 };
 
 } // namespace libbitcoin

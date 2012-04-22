@@ -76,7 +76,8 @@
  *
  * - @link libbitcoin::exporter exporter @endlink
  *   - @link libbitcoin::satoshi_exporter satoshi_exporter @endlink
- * - @link libbitcoin::serializer serializer @endlink
+ * - @link libbitcoin::serializer serializer @endlink /
+ *   @link libbitcoin::deserializer deserializer @endlink
  * - @link libbitcoin::script script @endlink
  * - @link libbitcoin::payment_address payment_address @endlink
  * - @link libbitcoin::elliptic_curve_key elliptic_curve_key @endlink

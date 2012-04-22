@@ -22,8 +22,8 @@ void poller::query(channel_ptr node)
 void poller::monitor(channel_ptr node)
 {
     node->subscribe_inventory(
-        std::bind(&poller::receive_inv,
-            shared_from_this(), _1, _2, node));
+        strand_.wrap(std::bind(&poller::receive_inv,
+            shared_from_this(), _1, _2, node)));
     node->subscribe_block(
         std::bind(&poller::receive_block,
             shared_from_this(), _1, _2, node));
@@ -64,13 +64,19 @@ void poller::receive_inv(const std::error_code& ec,
     {
         if (ivv.type != message::inventory_type::block)
             continue;
+        // Already got this block
+        if (ivv.hash == last_block_hash_)
+            continue;
         getdata.inventories.push_back(ivv);
     }
     if (!getdata.inventories.empty())
+    {
+        last_block_hash_ = getdata.inventories.back().hash;
         node->send(getdata, handle_send_packet);
+    }
     node->subscribe_inventory(
-        std::bind(&poller::receive_inv,
-            shared_from_this(), _1, _2, node));
+        strand_.wrap(std::bind(&poller::receive_inv,
+            shared_from_this(), _1, _2, node)));
 }
 
 void poller::receive_block(const std::error_code& ec,
@@ -135,8 +141,7 @@ void poller::ask_blocks(const std::error_code& ec,
             << "Ask for blocks: " << ec.message();
         return;
     }
-    static hash_digest last_hash_end = null_hash;
-    if (last_hash_end == locator.front())
+    if (last_hash_end_ == locator.front())
     {
         log_debug(log_domain::poller) << "Skipping duplicate ask blocks: "
             << pretty_hex(locator.front());
@@ -146,7 +151,7 @@ void poller::ask_blocks(const std::error_code& ec,
     packet.start_hashes = locator;
     packet.hash_stop = hash_stop;
     node->send(packet, std::bind(&handle_send_packet, _1));
-    last_hash_end = locator.front();
+    last_hash_end_ = locator.front();
 }
 
 } // namespace libbitcoin
