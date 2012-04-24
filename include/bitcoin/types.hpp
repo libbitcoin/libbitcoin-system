@@ -43,6 +43,10 @@ typedef std::array<uint8_t, 20> short_hash;
 typedef uint8_t byte;
 typedef std::vector<byte> data_chunk;
 
+// A list of indices. Used for creating block_locator objects or
+// Storing list of unconfirmed input indexes in tx pool.
+typedef std::vector<size_t> index_list;
+
 // Make hash_digest and short_hash hashable for std::*map variants
 template <typename HashType>
 struct std_hash_wrapper

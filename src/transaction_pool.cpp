@@ -55,25 +55,26 @@ void transaction_pool::do_store(
             stored_transaction, pool_, strand_);
     validate->start(strand_.wrap(std::bind(
         &transaction_pool::handle_delegate,
-            shared_from_this(), _1, new_tx_entry, handle_store)));
+            shared_from_this(), _1, _2, new_tx_entry, handle_store)));
 }
 
-void transaction_pool::handle_delegate(const std::error_code& ec,
+void transaction_pool::handle_delegate(
+    const std::error_code& ec, const index_list& unconfirmed,
     const transaction_entry_info& tx_entry, store_handler handle_store)
 {
     if (ec)
     {
-        handle_store(ec);
+        handle_store(ec, index_list());
     }
     // Re-check as another transaction might've been added in the interim
     else if (tx_exists(tx_entry.hash))
     {
-        handle_store(error::duplicate);
+        handle_store(error::duplicate, index_list());
     }
     else
     {
         pool_.push_back(tx_entry);
-        handle_store(std::error_code());
+        handle_store(std::error_code(), unconfirmed);
     }
 }
 

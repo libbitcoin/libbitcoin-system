@@ -390,7 +390,7 @@ void bdb_blockchain::do_fetch_block_locator(
     }
 
     message::block_locator locator;
-    indices_list indices = block_locator_indices(last_block_depth);
+    index_list indices = block_locator_indices(last_block_depth);
     for (size_t current_index: indices)
     {
         // bdb provides no way to lookup secondary index AFAIK

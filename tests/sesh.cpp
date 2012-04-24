@@ -37,7 +37,7 @@ void recv_transaction(const std::error_code& ec,
     const message::transaction& tx, channel_ptr node);
 void monitor_tx(channel_ptr node);
 void handle_mempool_store(const std::error_code& ec,
-    const hash_digest& tx_hash);
+    const index_list& unconfirmed, const hash_digest& tx_hash);
 
 void monitor_tx(channel_ptr node)
 {
@@ -54,12 +54,12 @@ void recv_transaction(const std::error_code& ec,
         return;
     }
     p.transaction_pool_->store(tx, handle_confirm,
-        std::bind(&handle_mempool_store, _1, hash_transaction(tx)));
+        std::bind(&handle_mempool_store, _1, _2, hash_transaction(tx)));
     node->subscribe_transaction(std::bind(recv_transaction, _1, _2, node));
 }
 
 void handle_mempool_store(const std::error_code& ec,
-    const hash_digest& tx_hash)
+    const index_list& unconfirmed, const hash_digest& tx_hash)
 {
     if (ec)
     {
@@ -69,8 +69,16 @@ void handle_mempool_store(const std::error_code& ec,
     }
     else
     {
-        log_info(log_domain::session)
-            << "Accepted transaction " << pretty_hex(tx_hash);
+        auto l = log_info(log_domain::session);
+        l << "Accepted transaction ";
+        if (!unconfirmed.empty())
+        {
+            l << "(Unconfirmed inputs";
+            for (auto idx: unconfirmed)
+                l << " " << idx;
+            l << ") ";
+        }
+        l << pretty_hex(tx_hash);
     }
 }
 

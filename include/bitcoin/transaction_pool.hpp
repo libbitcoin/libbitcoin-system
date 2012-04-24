@@ -46,9 +46,13 @@ class transaction_pool
   : public std::enable_shared_from_this<transaction_pool>
 {
 public:
-    typedef std::function<void (const std::error_code&)> store_handler;
-    typedef std::function<void (
-        const std::error_code&, const message::transaction&)> fetch_handler;
+    typedef std::function<
+        void (const std::error_code&, const index_list&)> store_handler;
+
+    typedef std::function<
+        void (const std::error_code&, const message::transaction&)>
+            fetch_handler;
+
     typedef std::function<void (bool)> exists_handler;
 
     typedef transaction_entry_info::confirm_handler confirm_handler;
@@ -64,6 +68,10 @@ public:
     /**
      * Attempt to store a transaction.
      *
+     * handle_store is called on completion. The second argument is a list
+     * of unconfirmed input indexes. These inputs refer to a transaction
+     * that is not in the blockchain and is currently in the memory pool.
+     *
      * @param[in]   stored_transaction  Transaction to store
      * @param[in]   handle_confirm      Handler for when transaction
      *                                  becomes confirmed.
@@ -75,8 +83,9 @@ public:
      * @param[in]   handle_store        Completion handler for
      *                                  store operation.
      * @code
-     *  void handle_confirm(
-     *      const std::error_code& ec    // Status of operation
+     *  void handle_store(
+     *      const std::error_code& ec,      // Status of operation
+     *      const index_list& unconfirmed   // Unconfirmed input indexes
      *  );
      * @endcode
      */
@@ -116,7 +125,8 @@ private:
 
     void do_store(const message::transaction& stored_transaction,
         confirm_handler handle_confirm, store_handler handle_store);
-    void handle_delegate(const std::error_code& ec, 
+    void handle_delegate(
+        const std::error_code& ec, const index_list& unconfirmed,
         const transaction_entry_info& tx_entry, store_handler handle_store);
 
     bool tx_exists(const hash_digest& tx_hash);

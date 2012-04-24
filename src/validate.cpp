@@ -23,8 +23,8 @@ constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 validate_transaction::validate_transaction(blockchain_ptr chain,
     exporter_ptr saver, const message::transaction& tx,
     const pool_buffer& pool, io_service::strand& async_strand)
-  : chain_(chain), exporter_(saver), tx_(tx), tx_hash_(hash_transaction(tx)),
-    pool_(pool), strand_(async_strand)
+  : strand_(async_strand), chain_(chain), exporter_(saver),
+    tx_(tx), tx_hash_(hash_transaction(tx)), pool_(pool)
 {
 }
 
@@ -34,7 +34,7 @@ void validate_transaction::start(validate_handler handle_validate)
     std::error_code ec = basic_checks();
     if (ec)
     {
-        handle_validate_(ec);
+        handle_validate_(ec, index_list());
         return;
     }
 
@@ -62,7 +62,7 @@ std::error_code validate_transaction::basic_checks() const
         return error::is_not_standard;
 
     // Check for conflicts
-    if (exists(tx_hash_))
+    if (fetch(tx_hash_))
         return error::duplicate;
     // Check for blockchain duplicates done next in start() after
     // this function exits.
@@ -75,19 +75,20 @@ bool validate_transaction::is_standard() const
     return true;
 }
 
-bool validate_transaction::exists(const hash_digest& tx_hash) const
+const message::transaction* validate_transaction::fetch(
+    const hash_digest& tx_hash) const
 {
     for (const transaction_entry_info& entry: pool_)
         if (entry.hash == tx_hash)
-            return true;
-    return false;
+            return &entry.tx;
+    return nullptr;
 }
 
 void validate_transaction::handle_duplicate_check(const std::error_code& ec)
 {
     if (ec != error::not_found)
     {
-        handle_validate_(error::duplicate);
+        handle_validate_(error::duplicate, index_list());
         return;
     }
     // Check for conflicts with memory txs
@@ -98,7 +99,7 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
             tx_.inputs[input_index].previous_output;
         if (is_spent(previous_output))
         {
-            handle_validate_(error::double_spend);
+            handle_validate_(error::double_spend, index_list());
             return;
         }
     }
@@ -124,7 +125,7 @@ void validate_transaction::set_last_depth(
 {
     if (ec)
     {
-        handle_validate_(ec);
+        handle_validate_(ec, index_list());
         return;
     }
     // Used for checking coinbase maturity
@@ -132,17 +133,78 @@ void validate_transaction::set_last_depth(
     value_in_ = 0;
     BITCOIN_ASSERT(tx_.inputs.size() > 0);
     current_input_ = 0;
-    fetch_next_previous_transaction();
+    // Begin looping through the inputs, fetching the previous tx
+    next_previous_transaction();
 }
 
-void validate_transaction::fetch_next_previous_transaction()
+void validate_transaction::next_previous_transaction()
 {
     BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
+    // First we fetch the parent block depth for a transaction.
+    // Needed for checking the coinbase maturity.
     chain_->fetch_transaction_index(
         tx_.inputs[current_input_].previous_output.hash,
         strand_.wrap(std::bind(
-            &validate_transaction::fetch_input_transaction_index,
+            &validate_transaction::previous_tx_index,
                 shared_from_this(), _1, _2)));
+}
+
+void validate_transaction::previous_tx_index(
+    const std::error_code& ec, size_t parent_depth)
+{
+    if (ec)
+    {
+        search_pool_previous_tx();
+    }
+    else
+    {
+        // Now fetch actual transaction body
+        BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
+        chain_->fetch_transaction(
+            tx_.inputs[current_input_].previous_output.hash,
+            strand_.wrap(std::bind(
+                &validate_transaction::handle_previous_tx,
+                shared_from_this(), _1, _2, parent_depth)));
+    }
+}
+
+void validate_transaction::search_pool_previous_tx()
+{
+    const hash_digest& previous_tx_hash =
+        tx_.inputs[current_input_].previous_output.hash;
+    const message::transaction* previous_tx = fetch(previous_tx_hash);
+    if (!previous_tx)
+    {
+        handle_validate_(error::input_not_found, index_list());
+        return;
+    }
+    BITCOIN_ASSERT(!is_coinbase(*previous_tx));
+    // parent_depth ignored here as memory pool transactions can
+    // never be a coinbase transaction.
+    handle_previous_tx(std::error_code(), *previous_tx, 0);
+    unconfirmed_.push_back(current_input_);
+}
+
+void validate_transaction::handle_previous_tx(const std::error_code& ec,
+    const message::transaction& previous_tx, size_t parent_depth)
+{
+    if (ec)
+    {
+        handle_validate_(error::input_not_found, index_list());
+        return;
+    }
+    // Should check for are inputs standard here...
+    if (!connect_input(tx_, current_input_, previous_tx,
+        parent_depth, last_block_depth_, value_in_))
+    {
+        handle_validate_(error::validate_inputs_failed, index_list());
+        return;
+    }
+    // Search for double spends...
+    chain_->fetch_spend(tx_.inputs[current_input_].previous_output,
+        strand_.wrap(std::bind(
+            &validate_transaction::check_double_spend,
+                shared_from_this(), _1)));
 }
 
 bool validate_transaction::connect_input(
@@ -175,44 +237,6 @@ bool validate_transaction::connect_input(
     return true;
 }
 
-void validate_transaction::fetch_input_transaction_index(
-    const std::error_code& ec, size_t parent_depth)
-{
-    if (ec)
-    {
-        handle_validate_(error::input_not_found);
-        return;
-    }
-    // Now fetch actual transaction body
-    BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
-    chain_->fetch_transaction(
-        tx_.inputs[current_input_].previous_output.hash,
-        strand_.wrap(std::bind(
-            &validate_transaction::fetch_input_transaction,
-                shared_from_this(), _1, _2, parent_depth)));
-}
-
-void validate_transaction::fetch_input_transaction(const std::error_code& ec,
-    const message::transaction& previous_tx, size_t parent_depth)
-{
-    if (ec)
-    {
-        handle_validate_(error::input_not_found);
-        return;
-    }
-    if (!connect_input(tx_, current_input_, previous_tx,
-        parent_depth, last_block_depth_, value_in_))
-    {
-        handle_validate_(error::validate_inputs_failed);
-        return;
-    }
-    // Search for double spends...
-    chain_->fetch_spend(tx_.inputs[current_input_].previous_output,
-        strand_.wrap(std::bind(
-            &validate_transaction::check_double_spend,
-                shared_from_this(), _1)));
-}
-
 void validate_transaction::check_double_spend(const std::error_code& ec)
 {
     if (ec == error::unspent_output)
@@ -225,13 +249,13 @@ void validate_transaction::check_double_spend(const std::error_code& ec)
         {
             BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
             // Keep looping
-            fetch_next_previous_transaction();
+            next_previous_transaction();
         }
     }
     else
     {
-        BITCOIN_ASSERT(!ec || ec != error::not_found);
-        handle_validate_(error::double_spend);
+        BITCOIN_ASSERT(!ec || ec != error::unspent_output);
+        handle_validate_(error::double_spend, index_list());
     }
 }
 
@@ -255,7 +279,7 @@ void validate_transaction::check_fees()
     // Who cares?
     // Fuck the police
     // Every tx equal!
-    handle_validate_(std::error_code());
+    handle_validate_(std::error_code(), unconfirmed_);
 }
 
 std::error_code validate_transaction::check_transaction(

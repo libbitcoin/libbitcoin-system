@@ -16,7 +16,8 @@ class validate_transaction
   : public std::enable_shared_from_this<validate_transaction>
 {
 public:
-    typedef std::function<void (const std::error_code&)> validate_handler;
+    typedef std::function<
+        void (const std::error_code&, const index_list&)> validate_handler;
 
     validate_transaction(blockchain_ptr chain, exporter_ptr saver,
         const message::transaction& tx,
@@ -35,31 +36,40 @@ public:
 private:
     std::error_code basic_checks() const;
     bool is_standard() const;
-    bool exists(const hash_digest& tx_hash) const;
+    const message::transaction* fetch(const hash_digest& tx_hash) const;
 
     void handle_duplicate_check(const std::error_code& ec);
     bool is_spent(const message::output_point outpoint) const;
 
+    // Used for checking coinbase maturity
     void set_last_depth(const std::error_code& ec, size_t last_depth);
-    void fetch_next_previous_transaction();
-    void fetch_input_transaction_index(const std::error_code& ec,
-        size_t parent_depth);
-    void fetch_input_transaction(const std::error_code& ec,
+    // Begin looping through the inputs, fetching the previous tx
+    void next_previous_transaction();
+    void previous_tx_index(const std::error_code& ec, size_t parent_depth);
+    // If previous_tx_index didn't find it then check in pool instead
+    void search_pool_previous_tx();
+    void handle_previous_tx(const std::error_code& ec,
         const message::transaction& previous_tx, size_t parent_depth);
-
+    // After running connect_input, we check whether this
+    // validated previous output wasn't already spent by
+    // another input in the blockchain.
+    // is_spent() earlier already checked in the pool.
     void check_double_spend(const std::error_code& ec);
+    // next_previous_transaction();
 
     void check_fees();
 
+    io_service::strand& strand_;
     blockchain_ptr chain_;
     exporter_ptr exporter_;
+
     const message::transaction tx_;
     const hash_digest tx_hash_;
     const pool_buffer& pool_;
     size_t last_block_depth_;
     uint64_t value_in_;
     size_t current_input_;
-    io_service::strand& strand_;
+    index_list unconfirmed_;
     validate_handler handle_validate_;
 };
 
