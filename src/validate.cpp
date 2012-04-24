@@ -175,7 +175,8 @@ void validate_transaction::search_pool_previous_tx()
     const message::transaction* previous_tx = fetch(previous_tx_hash);
     if (!previous_tx)
     {
-        handle_validate_(error::input_not_found, index_list());
+        handle_validate_(error::input_not_found,
+            index_list{current_input_});
         return;
     }
     BITCOIN_ASSERT(!is_coinbase(*previous_tx));
@@ -190,7 +191,8 @@ void validate_transaction::handle_previous_tx(const std::error_code& ec,
 {
     if (ec)
     {
-        handle_validate_(error::input_not_found, index_list());
+        handle_validate_(error::input_not_found,
+            index_list{current_input_});
         return;
     }
     // Should check for are inputs standard here...

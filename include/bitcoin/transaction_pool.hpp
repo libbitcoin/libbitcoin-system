@@ -72,6 +72,9 @@ public:
      * of unconfirmed input indexes. These inputs refer to a transaction
      * that is not in the blockchain and is currently in the memory pool.
      *
+     * In the case where store results in error::input_not_found, the
+     * unconfirmed field refers to the single problematic input.
+     *
      * @param[in]   stored_transaction  Transaction to store
      * @param[in]   handle_confirm      Handler for when transaction
      *                                  becomes confirmed.

@@ -62,8 +62,15 @@ void transaction_pool::handle_delegate(
     const std::error_code& ec, const index_list& unconfirmed,
     const transaction_entry_info& tx_entry, store_handler handle_store)
 {
-    if (ec)
+    if (ec == error::input_not_found)
     {
+        BITCOIN_ASSERT(unconfirmed.size() == 1);
+        BITCOIN_ASSERT(unconfirmed[0] < tx_entry.tx.inputs.size());
+        handle_store(ec, unconfirmed);
+    }
+    else if (ec)
+    {
+        BITCOIN_ASSERT(unconfirmed.empty());
         handle_store(ec, index_list());
     }
     // Re-check as another transaction might've been added in the interim
