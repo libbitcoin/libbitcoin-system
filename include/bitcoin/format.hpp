@@ -67,6 +67,10 @@ std::string pretty_hex(T data)
     return ss.str();
 }
 
+// ADL cannot work on templates
+std::ostream& operator<<(std::ostream& stream, const hash_digest& hash);
+std::ostream& operator<<(std::ostream& stream, const short_hash& hash);
+
 data_chunk bytes_from_pretty(std::string byte_stream);
 
 template <typename HashType>

@@ -4,6 +4,18 @@
 
 namespace libbitcoin {
 
+std::ostream& operator<<(std::ostream& stream, const hash_digest& hash)
+{
+    stream << pretty_hex(hash);
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, const short_hash& hash)
+{
+    stream << pretty_hex(hash);
+    return stream;
+}
+
 data_chunk bytes_from_pretty(std::string byte_stream)
 {
     data_chunk stack;
