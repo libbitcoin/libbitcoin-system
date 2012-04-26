@@ -178,6 +178,14 @@ bin/tests/mempool: obj/mempool.o
 
 mempool: bin/tests/mempool
 
+obj/getx.o: tests/getx.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/getx: obj/getx.o
+	$(CXX) -o bin/tests/getx obj/getx.o $(LIBBITCOIN)
+
+getx: bin/tests/getx
+
 obj/pol.o: tests/pol.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

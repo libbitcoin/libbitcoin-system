@@ -146,6 +146,7 @@
 #include <bitcoin/exporter.hpp>
 #include <bitcoin/validate.hpp>
 #include <bitcoin/constants.hpp>
+#include <bitcoin/getx_responder.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/blockchain/organizer.hpp>
