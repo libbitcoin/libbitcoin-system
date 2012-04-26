@@ -1,5 +1,9 @@
 #include <bitcoin/blockchain/bdb_blockchain.hpp>
 
+#include <fstream>
+
+#include <boost/filesystem.hpp>
+
 #include DB_CXX_HEADER
 
 #include <bitcoin/transaction.hpp>
@@ -130,6 +134,18 @@ int bt_compare_blocks(DB*, const DBT* dbt1, const DBT* dbt2)
 
 bool bdb_blockchain::initialize(const std::string& prefix)
 {
+    // Try to lock the directory first
+    boost::filesystem::path lock_path = prefix;
+    lock_path /= "db-lock";
+    std::ofstream touch_file(lock_path.native(), std::ios::app);
+    touch_file.close();
+    flock = lock_path.c_str();
+    if (!flock.try_lock())
+    {
+        // Database already opened elsewhere
+        return false;
+    }
+    // Continue on
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     env_ = new DbEnv(0);
     env_->set_lk_max_locks(10000);
