@@ -70,9 +70,15 @@ class error_category_impl
   : public std::error_category
 {
 public:
-    virtual const char* name() const;
-    virtual std::string message(int ev) const;
-    virtual std::error_condition default_error_condition(int ev) const;
+    #define GXX_COMPATIBILITY_HACK(func) \
+        noexcept(noexcept(std::declval<std::error_category>().func))
+    virtual const char* name() const GXX_COMPATIBILITY_HACK(name());
+    virtual std::string message(int ev) const
+        GXX_COMPATIBILITY_HACK(message(ev));
+    virtual std::error_condition
+        default_error_condition(int ev) const
+        GXX_COMPATIBILITY_HACK(default_error_condition(ev));
+    #undef GXX_COMPATIBILITY_HACK
 };
 
 const std::error_category& error_category();
