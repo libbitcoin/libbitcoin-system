@@ -4,6 +4,7 @@
 #include <string>
 #include <fstream>
 #include <functional>
+#include <system_error>
 
 #include <boost/circular_buffer.hpp>
 
