@@ -7,7 +7,6 @@
 
 #include <boost/circular_buffer.hpp>
 
-#include <bitcoin/utility/threads.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/async_service.hpp>
 

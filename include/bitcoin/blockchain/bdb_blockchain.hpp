@@ -4,7 +4,6 @@
 #include <bitcoin/blockchain/blockchain.hpp>
 
 #include <bitcoin/blockchain/organizer.hpp>
-#include <bitcoin/utility/threads.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/async_service.hpp>
 

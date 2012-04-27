@@ -6,7 +6,6 @@
 
 #include <bitcoin/types.hpp>
 #include <bitcoin/messages.hpp>
-#include <bitcoin/utility/threads.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/network/channel.hpp>
 #include <bitcoin/async_service.hpp>

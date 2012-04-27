@@ -4,6 +4,7 @@
 #include <stack>
 
 #include <bitcoin/types.hpp>
+#include <bitcoin/async_service.hpp>
 #include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {

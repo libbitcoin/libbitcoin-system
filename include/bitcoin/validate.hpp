@@ -7,7 +7,6 @@
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/utility/threads.hpp>
 #include <bitcoin/transaction_pool.hpp>
 
 namespace libbitcoin {
