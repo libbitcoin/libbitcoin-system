@@ -22,6 +22,7 @@ void hosts::load(const std::string& filename, load_handler handle_load)
 }
 void hosts::do_load(const std::string& filename, load_handler handle_load)
 {
+    auto this_ptr = shared_from_this();
     std::ifstream file_handle(filename);
     std::string line;
     while (std::getline(file_handle, line))
@@ -37,7 +38,7 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
         std::copy(raw_ip.begin(), raw_ip.end(), field.ip.begin());
         field.port = boost::lexical_cast<uint16_t>(parts[1]);
         strand_.dispatch(
-            [&buffer_, field]()
+            [this_ptr, &buffer_, field]()
             {
                 buffer_.push_back(field);
             });
@@ -63,8 +64,9 @@ void hosts::do_save(const std::string& filename, save_handler handle_save)
 void hosts::store(const message::network_address& address,
     store_handler handle_store)
 {
+    auto this_ptr = shared_from_this();
     strand_.post(
-        [&buffer_, address, handle_store]()
+        [this_ptr, &buffer_, address, handle_store]()
         {
             buffer_.push_back(hosts_field{address.ip, address.port});
             handle_store(std::error_code());
