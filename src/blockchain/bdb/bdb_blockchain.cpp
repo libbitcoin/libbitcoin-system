@@ -51,7 +51,7 @@ blockchain_ptr bdb_blockchain::create(async_service& service,
 }
 
 bdb_blockchain::bdb_blockchain(async_service& service)
-  : strand_(service.get_service())
+  : strand_(service.get_service()), env_(nullptr)
 {
     // Private method. Should never be called by user!
     // Only by factory methods
@@ -69,6 +69,9 @@ inline void shutdown_database(Database*& database)
 }
 bdb_blockchain::~bdb_blockchain()
 {
+    // Initialisation never started
+    if (!env_)
+        return;
     // Close secondaries before primaries
     shutdown_database(db_blocks_hash_);
     // Close primaries
