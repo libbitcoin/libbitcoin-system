@@ -186,6 +186,14 @@ bin/tests/pol: obj/pol.o
 
 pol: bin/tests/pol
 
+obj/1vaynert.o: tests/1vaynert.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/1vaynert: obj/1vaynert.o
+	$(CXX) -o bin/tests/1vaynert obj/1vaynert.o $(LIBBITCOIN)
+
+1vaynert: bin/tests/1vaynert
+
 obj/hosts-test.o: tests/hosts-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
