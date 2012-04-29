@@ -277,8 +277,39 @@ public:
 typedef std::function<void (const std::error_code&, const message::block&)>
     blockchain_fetch_handler_block;
 
+/**
+ * Fetch a block by depth.
+ *
+ * If the blockchain reorganises, operation may fail halfway.
+ *
+ * @param[in]   chain           Blockchain service
+ * @param[in]   depth           Depth of block to fetch.
+ * @param[in]   handle_fetch    Completion handler for fetch operation.
+ * @code
+ *  void handle_fetch(
+ *      const std::error_code& ec, // Status of operation
+ *      const message::block& blk  // Block header
+ *  );
+ * @endcode
+ */
 void fetch_block(blockchain_ptr chain, size_t depth,
     blockchain_fetch_handler_block handle_fetch);
+
+/**
+ * Fetch a block by hash.
+ *
+ * If the blockchain reorganises, operation may fail halfway.
+ *
+ * @param[in]   chain           Blockchain service
+ * @param[in]   block_hash      Hash of block to fetch.
+ * @param[in]   handle_fetch    Completion handler for fetch operation.
+ * @code
+ *  void handle_fetch(
+ *      const std::error_code& ec, // Status of operation
+ *      const message::block& blk  // Block header
+ *  );
+ * @endcode
+ */
 void fetch_block(blockchain_ptr chain, const hash_digest& block_hash,
     blockchain_fetch_handler_block handle_fetch);
 
