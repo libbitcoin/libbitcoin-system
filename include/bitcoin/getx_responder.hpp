@@ -24,6 +24,9 @@ private:
     void chain_tx(const std::error_code& ec,
         const message::transaction& tx, channel_ptr node);
 
+    void send_block(const std::error_code& ec,
+        const message::block blk, channel_ptr node);
+
     io_service& service_;
     blockchain_ptr chain_;
     transaction_pool_ptr txpool_;

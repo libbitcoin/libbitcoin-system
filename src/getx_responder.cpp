@@ -42,6 +42,10 @@ void getx_responder::receive_get_data(const std::error_code& ec,
                 break;
 
             case message::inventory_type::block:
+                fetch_block(chain_, inv.hash,
+                    service_.wrap(std::bind(
+                        &getx_responder::send_block,
+                            shared_from_this(), _1, _2, node)));
                 break;
 
             // Ignore everything else
@@ -69,7 +73,7 @@ void getx_responder::pool_tx(const std::error_code& ec,
                     shared_from_this(), _1, _2, node)));
     }
     else
-        node->send(tx, [](const std::error_code& ec) {});
+        node->send(tx, [](const std::error_code&) {});
 }
 
 void getx_responder::chain_tx(const std::error_code& ec,
@@ -77,7 +81,15 @@ void getx_responder::chain_tx(const std::error_code& ec,
 {
     if (ec)
         return;
-    node->send(tx, [](const std::error_code& ec) {});
+    node->send(tx, [](const std::error_code&) {});
+}
+
+void getx_responder::send_block(const std::error_code& ec,
+    const message::block blk, channel_ptr node)
+{
+    if (ec)
+        return;
+    node->send(blk, [](const std::error_code&) {});
 }
 
 } // libbitcoin
