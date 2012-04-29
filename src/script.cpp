@@ -770,7 +770,6 @@ inline data_chunk read_back_from_iterator(Iterator& it, size_t total)
         ++it;
         number_bytes.push_back(*it);
     }
-    std::reverse(std::begin(number_bytes), std::end(number_bytes));
     return number_bytes;
 }
 
@@ -827,7 +826,6 @@ script parse_script(const data_chunk& raw_script)
             }
             op.data.push_back(*it);
         }
-
         script_object.push_operation(op);
     }
     return script_object;
