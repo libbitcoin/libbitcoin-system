@@ -39,7 +39,8 @@ void session::start(completion_handler handle_complete)
         std::bind(&handshake::set_start_depth,
             handshake_, _2, handle_set_start_depth));
     chain_->subscribe_reorganize(
-        std::bind(&session::set_start_depth, this_ptr, _1, _2, _3, _4));
+        std::bind(&session::set_start_depth,
+            this_ptr, _1, _2, _3, _4));
 }
 
 void session::stop(completion_handler handle_complete)
@@ -73,6 +74,15 @@ void session::set_start_depth(const std::error_code& ec, size_t fork_point,
     chain_->subscribe_reorganize(
         std::bind(&session::set_start_depth,
             shared_from_this(), _1, _2, _3, _4));
+    // Broadcast invs of new blocks
+    message::inventory blocks_inv;
+    for (auto block: new_blocks)
+    {
+        blocks_inv.inventories.push_back({
+            message::inventory_type::block,
+            hash_block_header(*block)});
+    }
+    protocol_->broadcast(blocks_inv);
 }
 
 void session::inventory(const std::error_code& ec,

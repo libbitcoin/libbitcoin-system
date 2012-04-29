@@ -46,6 +46,12 @@ void handle_connect(const std::error_code& ec, channel_ptr node)
     node->send(getdat, handle_send);
 }
 
+void blkloc(const std::error_code& ec, const message::block_locator& loc)
+{
+    if (ec)
+        return;
+}
+
 void blockchain_started(const std::error_code& ec, blockchain_ptr blkchain)
 {
     if (ec)
@@ -60,6 +66,7 @@ void blockchain_started(const std::error_code& ec, blockchain_ptr blkchain)
     hs->connect(net, "localhost", 8045, handle_connect);
     txpool = transaction_pool::create(service, chain);
     getx = std::make_shared<getx_responder>(service, chain, txpool);
+    chain->fetch_block_locator(blkloc);
 }
 
 int main()
