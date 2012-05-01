@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <bitcoin/types.hpp>
+#include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {
 
@@ -13,7 +14,7 @@ namespace message {
 
 enum class opcode
 {
-    raw_data = 0,
+    zero = 0,
     special = 1,
     pushdata1 = 76,
     pushdata2 = 77,
@@ -35,13 +36,20 @@ enum class opcode
     op_15 = 95,
     op_16 = 96,
     nop = 97,
+    verify = 105,
     drop = 117,
     dup = 118,
+    over = 120,
+    roll = 122,
+    size = 130,
+    not_ = 145,
+    boolor = 155,
     min = 163,
     sha256 = 168,
     hash160 = 169,
     equal = 135,
     equalverify = 136,
+    greaterthanorequal = 162,
     codeseparator = 171,
     checksig = 172,
     checksigverify = 173,
@@ -57,7 +65,8 @@ enum class opcode
     op_nop8 = 183,
     op_nop9 = 184,
     op_nop10 = 185,
-    bad_operation
+    bad_operation,
+    raw_data
 };
 
 struct operation
@@ -110,14 +119,26 @@ private:
 
     bool run(const message::transaction& parent_tx, uint32_t input_index);
 
+    // Used by add, sub, mul, div, mod, lshift, rshift, booland, boolor,
+    // numequal, numequalverify, numnotequal, lessthan, greaterthan,
+    // lessthanorequal, greaterthanorequal, min, max
+    bool arithmetic_start(big_number& number_a, big_number& number_b);
+
     bool op_x(opcode code);
+    bool op_verify();
     bool op_drop();
     bool op_dup();
+    bool op_over();
+    bool op_roll();
+    bool op_size();
+    bool op_not();
+    bool op_boolor();
     bool op_min();
     bool op_sha256();
     bool op_hash160();
     bool op_equal();
     bool op_equalverify();
+    bool op_greaterthanorequal();
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(
         const message::transaction& parent_tx, uint32_t input_index);

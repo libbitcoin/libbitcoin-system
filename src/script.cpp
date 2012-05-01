@@ -2,6 +2,8 @@
 
 #include <stack>
 
+#include <boost/optional.hpp>
+
 #include <bitcoin/constants.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/transaction.hpp>
@@ -14,8 +16,10 @@
 
 namespace libbitcoin {
 
-static const data_chunk stack_true_value{1, 1};
-static const data_chunk stack_false_value{0};
+typedef boost::optional<size_t> optional_number;
+
+static const data_chunk stack_true_value{1};
+static const data_chunk stack_false_value;  // False is an empty
 
 void script::join(const script& other)
 {
@@ -118,10 +122,17 @@ bool script::run(const message::transaction& parent_tx, uint32_t input_index)
     for (auto it = operations_.begin(); it != operations_.end(); ++it)
     {
         const operation op = *it;
-        //log_debug() << "Run: " << opcode_to_string(oper.code);
+        //log_debug() << "--------------------";
+        //log_debug() << "Run: " << opcode_to_string(op.code);
+        //log_debug() << "Stack:";
+        //for (auto s: stack_)
+        //    log_debug() << "[" << pretty_hex(s) << "]";
         if (!run_operation(op, parent_tx, input_index))
             return false;
-        if (op.data.size() > 0)
+        // push data to the stack
+        if (op.code == opcode::zero)
+            stack_.push_back(data_chunk());
+        else if (op.data.size() > 0)
         {
             BITCOIN_ASSERT(op.code == opcode::special ||
                 op.code == opcode::pushdata1 ||
@@ -142,6 +153,17 @@ data_chunk script::pop_stack()
     return value;
 }
 
+bool script::arithmetic_start(big_number& number_a, big_number& number_b)
+{
+    if (stack_.size() < 2)
+        return false;
+    if (!cast_to_big_number(pop_stack(), number_a))
+        return false;
+    if (!cast_to_big_number(pop_stack(), number_b))
+        return false;
+    return true;
+}
+
 bool script::op_x(opcode code)
 {
     uint8_t value_diff =
@@ -149,6 +171,16 @@ bool script::op_x(opcode code)
             static_cast<uint8_t>(opcode::op_1) + 1;
     big_number big_repr(value_diff);
     stack_.push_back(big_repr.data());
+    return true;
+}
+
+bool script::op_verify()
+{
+    if (stack_.size() < 1)
+        return false;
+    if (!cast_to_bool(stack_.back()))
+        return false;
+    pop_stack();
     return true;
 }
 
@@ -168,14 +200,66 @@ bool script::op_dup()
     return true;
 }
 
-bool script::op_min()
+bool script::op_over()
 {
     if (stack_.size() < 2)
         return false;
-    big_number number_a, number_b;
-    if (!cast_to_big_number(pop_stack(), number_a))
+    stack_.push_back(*(stack_.end() - 2));
+    return true;
+}
+
+bool script::op_roll()
+{
+    if (stack_.size() < 2)
         return false;
-    if (!cast_to_big_number(pop_stack(), number_b))
+    big_number number_n;
+    if (!cast_to_big_number(pop_stack(), number_n))
+        return false;
+    uint64_t n = number_n.uint64();
+    if (n >= stack_.size())
+        return false;
+    auto slice_iter = stack_.end() - n - 1;
+    data_chunk item = *slice_iter;
+    stack_.erase(slice_iter);
+    stack_.push_back(item);
+    return true;
+}
+
+bool script::op_size()
+{
+    if (stack_.size() < 1)
+        return false;
+    big_number top_size = stack_.back().size();
+    stack_.push_back(top_size.data());
+    return true;
+}
+
+bool script::op_not()
+{
+    if (stack_.size() < 1)
+        return false;
+    big_number number_n;
+    if (!cast_to_big_number(pop_stack(), number_n))
+        return false;
+    stack_.push_back(
+        big_number(number_n == big_number(0)).data());
+    return true;
+}
+
+bool script::op_boolor()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number zero(0), result = number_a != zero || number_b != zero;
+    stack_.push_back(result.data());
+    return true;
+}
+
+bool script::op_min()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
         return false;
     if (number_a < number_b)
         stack_.push_back(number_a.data());
@@ -222,6 +306,16 @@ bool script::op_equalverify()
     if (stack_.size() < 2)
         return false;
     return pop_stack() == pop_stack();
+}
+
+bool script::op_greaterthanorequal()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a >= number_b;
+    stack_.push_back(result.data());
+    return true;
 }
 
 inline void nullify_input_sequences(
@@ -413,9 +507,7 @@ bool script::run_operation(operation op,
 {
     switch (op.code)
     {
-        case opcode::raw_data:
-            return false;
-
+        case opcode::zero:
         case opcode::special:
         case opcode::pushdata1:
         case opcode::pushdata2:
@@ -443,11 +535,29 @@ bool script::run_operation(operation op,
         case opcode::nop:
             return true;
 
+        case opcode::verify:
+            return op_verify();
+
         case opcode::drop:
             return op_drop();
 
         case opcode::dup:
             return op_dup();
+
+        case opcode::over:
+            return op_over();
+
+        case opcode::roll:
+            return op_roll();
+
+        case opcode::size:
+            return op_size();
+
+        case opcode::not_:
+            return op_not();
+
+        case opcode::boolor:
+            return op_boolor();
 
         case opcode::min:
             return op_min();
@@ -463,6 +573,9 @@ bool script::run_operation(operation op,
 
         case opcode::equalverify:
             return op_equalverify();
+
+        case opcode::greaterthanorequal:
+            return op_greaterthanorequal();
 
         case opcode::codeseparator:
             // This is set in the main run(...) loop
@@ -493,6 +606,9 @@ bool script::run_operation(operation op,
         case opcode::op_nop9:
         case opcode::op_nop10:
             return true;
+
+        case opcode::raw_data:
+            return false;
 
         default:
             log_fatal() << "Unimplemented operation <none " 
@@ -569,8 +685,8 @@ std::string opcode_to_string(opcode code)
 {
     switch (code)
     {
-        case opcode::raw_data:
-            return "raw_data";
+        case opcode::zero:
+            return "zero";
         case opcode::special:
             return "special";
         case opcode::pushdata1:
@@ -613,10 +729,22 @@ std::string opcode_to_string(opcode code)
             return "16";
         case opcode::nop:
             return "nop";
+        case opcode::verify:
+            return "verify";
         case opcode::drop:
             return "drop";
         case opcode::dup:
             return "dup";
+        case opcode::over:
+            return "over";
+        case opcode::roll:
+            return "roll";
+        case opcode::size:
+            return "size";
+        case opcode::not_:
+            return "not";
+        case opcode::boolor:
+            return "boolor";
         case opcode::min:
             return "min";
         case opcode::sha256:
@@ -627,6 +755,8 @@ std::string opcode_to_string(opcode code)
             return "equal";
         case opcode::equalverify:
             return "equalverify";
+        case opcode::greaterthanorequal:
+            return "greaterthanorequal";
         case opcode::codeseparator:
             return "codeseparator";
         case opcode::checksig:
@@ -657,6 +787,8 @@ std::string opcode_to_string(opcode code)
             return "op_nop9";
         case opcode::op_nop10:
             return "op_nop10";
+        case opcode::raw_data:
+            return "raw_data";
         default:
         {
             std::ostringstream ss;
@@ -667,8 +799,8 @@ std::string opcode_to_string(opcode code)
 }
 opcode string_to_opcode(std::string code_repr)
 {
-    if (code_repr == "raw_data")
-        return opcode::raw_data;
+    if (code_repr == "zero")
+        return opcode::zero;
     else if (code_repr == "special")
         return opcode::special;
     else if (code_repr == "pushdata1")
@@ -711,10 +843,22 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::op_16;
     else if (code_repr == "nop")
         return opcode::nop;
+    else if (code_repr == "verify")
+        return opcode::verify;
     else if (code_repr == "drop")
         return opcode::drop;
     else if (code_repr == "dup")
         return opcode::dup;
+    else if (code_repr == "over")
+        return opcode::over;
+    else if (code_repr == "roll")
+        return opcode::roll;
+    else if (code_repr == "size")
+        return opcode::size;
+    else if (code_repr == "not")
+        return opcode::not_;
+    else if (code_repr == "boolor")
+        return opcode::boolor;
     else if (code_repr == "min")
         return opcode::min;
     else if (code_repr == "sha256")
@@ -725,6 +869,8 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::equal;
     else if (code_repr == "equalverify")
         return opcode::equalverify;
+    else if (code_repr == "greaterthanorequal")
+        return opcode::greaterthanorequal;
     else if (code_repr == "codeseparator")
         return opcode::codeseparator;
     else if (code_repr == "checksig")
@@ -755,6 +901,8 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::op_nop9;
     else if (code_repr == "op_nop10")
         return opcode::op_nop10;
+    else if (code_repr == "raw_data")
+        return opcode::raw_data;
     // ERROR: unknown... 
     return opcode::bad_operation;
 }
@@ -775,10 +923,12 @@ inline data_chunk read_back_from_iterator(Iterator& it, size_t total)
 }
 
 template <typename Iterator>
-size_t number_of_bytes_from_opcode(opcode code, byte raw_byte, Iterator& it)
+optional_number number_of_bytes_from_opcode(
+    opcode code, byte raw_byte, Iterator& it)
 {
     switch (code)
     {
+        case opcode::zero:
         case opcode::special:
             return raw_byte;
         case opcode::pushdata1:
@@ -789,8 +939,9 @@ size_t number_of_bytes_from_opcode(opcode code, byte raw_byte, Iterator& it)
         case opcode::pushdata4:
             return cast_chunk<uint32_t>(read_back_from_iterator(it, 4));
         default:
-            return 0;
+            return optional_number();
     }
+    // Should never reach here!
 }
 
 script coinbase_script(const data_chunk& raw_script)
@@ -803,6 +954,23 @@ script coinbase_script(const data_chunk& raw_script)
     return script_object;
 }
 
+template <typename Iterator>
+bool read_push_data(Iterator& it, const Iterator& raw_script_end,
+    size_t read_n_bytes, data_chunk& op_data)
+{
+    for (size_t byte_count = 0; byte_count < read_n_bytes; ++byte_count)
+    {
+        ++it;
+        if (it == raw_script_end)
+        {
+            log_warning() << "Premature end of script.";
+            return false;
+        }
+        op_data.push_back(*it);
+    }
+    return true;
+}
+
 script parse_script(const data_chunk& raw_script)
 {
     script script_object;
@@ -812,22 +980,21 @@ script parse_script(const data_chunk& raw_script)
         operation op;
         op.code = static_cast<opcode>(raw_byte);
         // raw_byte is unsigned so it's always >= 0
-        if (raw_byte <= 75)
+        if (raw_byte == 0)
+            op.code = opcode::zero;
+        else if (0 < raw_byte && raw_byte <= 75)
             op.code = opcode::special;
-        size_t read_n_bytes = 
+        optional_number read_n_bytes =
             number_of_bytes_from_opcode(op.code, raw_byte, it);
-
-        for (size_t byte_count = 0; byte_count < read_n_bytes; ++byte_count)
+        if (read_n_bytes && *read_n_bytes != 0)
         {
-            ++it;
-            if (it == raw_script.cend())
-            {
-                log_warning() << "Premature end of script.";
+            // OP_0/OP_FALSE pushes a nothing to the stack
+            // op.data = data_chunk();
+            BITCOIN_ASSERT(read_n_bytes);
+            if (!read_push_data(it, raw_script.cend(),
+                    *read_n_bytes, op.data))
                 return script();
-            }
-            op.data.push_back(*it);
         }
-
         script_object.push_operation(op);
     }
     return script_object;
