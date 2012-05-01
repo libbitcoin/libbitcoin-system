@@ -381,7 +381,8 @@ bool check_signature(data_chunk signature,
     const message::transaction& parent_tx, uint32_t input_index)
 {
     elliptic_curve_key key;
-    key.set_public_key(pubkey);
+    if (!key.set_public_key(pubkey))
+        return false;
 
     uint32_t hash_type = 0;
     hash_type = signature.back();
