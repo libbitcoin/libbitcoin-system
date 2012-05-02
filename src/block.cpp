@@ -47,20 +47,20 @@ hash_digest hash_block_header(const message::block& block)
     return generate_sha256_hash(key.data());
 }
 
-index_list block_locator_indices(int top_depth)
+index_list block_locator_indexes(int top_depth)
 {
     // Start at max_depth
-    index_list indices;
-    // Push last 10 indices first
+    index_list indexes;
+    // Push last 10 indexes first
     size_t step = 1, start = 0;
     for (int i = top_depth; i > 0; i -= step, ++start)
     {
         if (start >= 10)
             step *= 2;
-        indices.push_back(i);
+        indexes.push_back(i);
     }
-    indices.push_back(0);
-    return indices;
+    indexes.push_back(0);
+    return indexes;
 }
 
 message::block genesis_block()

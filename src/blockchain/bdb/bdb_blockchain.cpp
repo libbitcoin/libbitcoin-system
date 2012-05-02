@@ -409,8 +409,8 @@ void bdb_blockchain::do_fetch_block_locator(
     }
 
     message::block_locator locator;
-    index_list indices = block_locator_indices(last_block_depth);
-    for (size_t current_index: indices)
+    index_list indexes = block_locator_indexes(last_block_depth);
+    for (size_t current_index: indexes)
     {
         // bdb provides no way to lookup secondary index AFAIK
         // we instead regenerate block hash from its header
