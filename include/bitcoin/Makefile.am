@@ -1,5 +1,6 @@
 bitcoin_includedir = $(includedir)/bitcoin
 bitcoin_include_HEADERS = \
+	getx_responder.hpp \
 	error.hpp \
 	validate.hpp \
 	messages.hpp \

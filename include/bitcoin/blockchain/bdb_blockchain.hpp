@@ -3,6 +3,8 @@
 
 #include <bitcoin/blockchain/blockchain.hpp>
 
+#include <boost/interprocess/sync/file_lock.hpp>
+
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/async_service.hpp>
@@ -100,6 +102,8 @@ private:
         fetch_handler_outputs handle_fetch);
 
     io_service::strand strand_;
+
+    boost::interprocess::file_lock flock;
 
     DbEnv* env_;
     Db* db_blocks_;

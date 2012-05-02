@@ -28,6 +28,7 @@ DECLARE_PTR_TYPE(handshake);
 DECLARE_PTR_TYPE(hosts);
 DECLARE_PTR_TYPE(protocol);
 DECLARE_PTR_TYPE(poller);
+DECLARE_PTR_TYPE(getx_responder);
 DECLARE_PTR_TYPE(session);
 
 #undef DECLARE_PTR_TYPE

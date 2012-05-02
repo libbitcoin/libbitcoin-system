@@ -109,6 +109,10 @@
  * - @link libbitcoin::block_locator_indices block_locator_indices @endlink
  * - @link libbitcoin::genesis_block genesis_block @endlink
  *
+ * @subsection blockchain Blockchain
+ *
+ * - @link libbitcoin::fetch_block fetch_block @endlink
+ *
  * @subsection format Format
  *
  * - @link libbitcoin::pretty_hex pretty_hex @endlink
@@ -146,6 +150,7 @@
 #include <bitcoin/exporter.hpp>
 #include <bitcoin/validate.hpp>
 #include <bitcoin/constants.hpp>
+#include <bitcoin/getx_responder.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/blockchain/organizer.hpp>
