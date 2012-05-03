@@ -1,5 +1,7 @@
 #include <bitcoin/validate.hpp>
 
+#include <set>
+
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/exporter.hpp>
@@ -377,12 +379,16 @@ std::error_code validate_block::check_block()
             return error::extra_coinbases;
     }
 
+    std::set<hash_digest> unique_txs;
     for (message::transaction tx: current_block_.transactions)
     {
         std::error_code ec = validate_transaction::check_transaction(tx);
         if (ec)
             return ec;
+        unique_txs.insert(hash_transaction(tx));
     }
+    if (unique_txs.size() != current_block_.transactions.size())
+        return error::duplicate;
 
     // Check that it's not full of nonstandard transactions
     if (legacy_sigops_count() > max_block_script_sig_operations)
