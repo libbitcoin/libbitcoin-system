@@ -28,12 +28,22 @@ void blockchain_started(const std::error_code& ec, blockchain_ptr)
         log_info() << "Blockchain initialized!";
 }
 
+void loc(const std::error_code& ec, const message::block_locator& ll)
+{
+    if (ec)
+        log_error() << ec.message();
+    else
+        for (auto h: ll)
+            log_debug() << h;
+}
+
 int main()
 {
     async_service service(1);
     blockchain_ptr chain =
         bdb_blockchain::create(service, "database", blockchain_started);
-    fetch_block(chain, 170, recv_block);
+    //fetch_block(chain, 170, recv_block);
+    fetch_block_locator(chain, loc);
 
     //indices_list ind = block_locator_indices(100);
     //for (size_t i: ind)
