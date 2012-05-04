@@ -14,7 +14,7 @@ poller::poller(async_service& service, blockchain_ptr chain)
 
 void poller::query(channel_ptr node)
 {
-    chain_->fetch_block_locator(
+    fetch_block_locator(chain_,
         std::bind(&poller::initial_ask_blocks,
             shared_from_this(), _1, _2, node));
 }
@@ -114,7 +114,7 @@ void poller::handle_store(const std::error_code& ec, block_info info,
             // TODO: Make more efficient by storing block hash
             // and next time do not download orphan block again.
             // Remember to remove from list once block is no longer orphan
-            chain_->fetch_block_locator(
+            fetch_block_locator(chain_,
                 strand_.wrap(std::bind(&poller::ask_blocks,
                     shared_from_this(), _1, _2, block_hash, node)));
             break;

@@ -171,21 +171,6 @@ public:
     virtual void fetch_last_depth(fetch_handler_last_depth handle_fetch) = 0;
 
     /**
-     * Creates a block_locator object used to download the blockchain.
-     * @deprecated Soon to be replaced by fetch_block_locator free function.
-     *
-     * @param[in]   handle_fetch    Completion handler for fetch operation.
-     * @code
-     *  void handle_fetch(
-     *      const std::error_code& ec,         // Status of operation
-     *      const message::block_locator& loc  // Block locator object
-     *  );
-     * @endcode
-     */
-    virtual void fetch_block_locator(
-        fetch_handler_block_locator handle_fetch) = 0;
-
-    /**
      * Fetches a transaction by hash
      *
      * @param[in]   transaction_hash  Transaction's hash
@@ -317,6 +302,17 @@ typedef std::function<
     void (const std::error_code&, const message::block_locator&)>
         blockchain_fetch_handler_block_locator;
 
+/**
+ * Creates a block_locator object used to download the blockchain.
+ *
+ * @param[in]   handle_fetch    Completion handler for fetch operation.
+ * @code
+ *  void handle_fetch(
+ *      const std::error_code& ec,         // Status of operation
+ *      const message::block_locator& loc  // Block locator object
+ *  );
+ * @endcode
+ */
 void fetch_block_locator(blockchain_ptr chain,
     blockchain_fetch_handler_block_locator handle_fetch);
 

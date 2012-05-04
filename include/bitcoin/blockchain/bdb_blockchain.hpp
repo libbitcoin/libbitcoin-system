@@ -60,8 +60,6 @@ public:
         fetch_handler_block_depth handle_fetch);
     // fetch depth of latest block
     void fetch_last_depth(fetch_handler_last_depth handle_fetch);
-    // fetch block locator
-    void fetch_block_locator(fetch_handler_block_locator handle_fetch);
     // fetch transaction by hash
     void fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch);
@@ -91,7 +89,6 @@ private:
     void do_fetch_block_depth(const hash_digest& block_hash,
         fetch_handler_block_depth handle_fetch);
     void do_fetch_last_depth(fetch_handler_last_depth handle_fetch);
-    void do_fetch_block_locator(fetch_handler_block_locator handle_fetch);
     void do_fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch);
     void do_fetch_transaction_index(const hash_digest& transaction_hash,
@@ -102,7 +99,6 @@ private:
         fetch_handler_outputs handle_fetch);
 
     io_service::strand strand_;
-
     boost::interprocess::file_lock flock;
 
     DbEnv* env_;

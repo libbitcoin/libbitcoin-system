@@ -388,49 +388,6 @@ void bdb_blockchain::do_fetch_last_depth(fetch_handler_last_depth handle_fetch)
     handle_fetch(std::error_code(), last_depth);
 }
 
-void bdb_blockchain::fetch_block_locator(
-    fetch_handler_block_locator handle_fetch)
-{
-    strand_.post(
-        std::bind(&bdb_blockchain::do_fetch_block_locator, shared_from_this(), 
-            handle_fetch));
-}
-void bdb_blockchain::do_fetch_block_locator(
-    fetch_handler_block_locator handle_fetch)
-{
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    uint32_t last_block_depth = common_->find_last_block_depth(txn);
-    if (last_block_depth == std::numeric_limits<uint32_t>::max())
-    {
-        log_error() << "Empty blockchain";
-        txn->abort();
-        handle_fetch(error::not_found, message::block_locator());
-        return;
-    }
-
-    message::block_locator locator;
-    index_list indexes = block_locator_indexes(last_block_depth);
-    for (size_t current_index: indexes)
-    {
-        // bdb provides no way to lookup secondary index AFAIK
-        // we instead regenerate block hash from its header
-        protobuf::Block proto_block =
-            common_->fetch_proto_block(txn, current_index);
-        if (!proto_block.IsInitialized())
-        {
-            log_fatal() << "Missing block " << current_index;
-            txn->abort();
-            handle_fetch(error::not_found, message::block_locator());
-            return;
-        }
-        hash_digest current_hash = 
-            hash_block_header(protobuf_to_block_header(proto_block));
-        locator.push_back(current_hash);
-    }
-    txn->commit();
-    handle_fetch(std::error_code(), locator);
-}
-
 void bdb_blockchain::fetch_transaction(const hash_digest& transaction_hash,
     fetch_handler_transaction handle_fetch)
 {
