@@ -165,7 +165,6 @@
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/utility/clock.hpp>
-#include <bitcoin/utility/yield.hpp>
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/network/protocol.hpp>
@@ -173,6 +172,7 @@
 #ifdef BDB_ENABLED
     #include <bitcoin/blockchain/bdb_blockchain.hpp>
 #endif
+#include <bitcoin/blockchain/kyoto_blockchain.hpp>
 
 namespace bc = libbitcoin;
 

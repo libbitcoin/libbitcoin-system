@@ -1,4 +1,4 @@
-CXXFLAGS= -std=c++0x -Wall -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC $(CPPFLAGS) -DBDB_ENABLED
+CXXFLAGS= -std=c++0x -Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC $(CPPFLAGS) -DBDB_ENABLED
 INCLUDES= -Iinclude/ -Iusr/include/
 LIBS= -Lusr/lib -lcrypto -lboost_thread -lboost_system -ldl -lz -lpthread -ldl
 BASE_MODULES= \
@@ -177,6 +177,22 @@ bin/tests/mempool: obj/mempool.o
 	$(CXX) -o bin/tests/mempool obj/mempool.o $(LIBBITCOIN)
 
 mempool: bin/tests/mempool
+
+obj/benchmark-chain.o: tests/benchmark-chain.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/benchmark-chain: obj/benchmark-chain.o
+	$(CXX) -o bin/tests/benchmark-chain obj/benchmark-chain.o $(LIBBITCOIN)
+
+benchmark-chain: bin/tests/benchmark-chain
+
+obj/kyot.o: tests/kyot.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/kyot: obj/kyot.o
+	$(CXX) -o bin/tests/kyot obj/kyot.o $(LIBBITCOIN)
+
+kyot: bin/tests/kyot
 
 obj/getx.o: tests/getx.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<

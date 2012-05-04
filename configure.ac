@@ -8,7 +8,7 @@ AC_PROG_CXX
 CHECK_GXX_CPP0X
 CFLAGS="-ggdb"
 CXXFLAGS="-ggdb"
-my_CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -pedantic -pthread -Wextra -fstack-protector-all"
+my_CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all"
 AC_SUBST([my_CXXFLAGS])
 
 AC_ARG_ENABLE(bdb,
@@ -30,8 +30,8 @@ AX_BOOST_BASE
 PKG_PROG_PKG_CONFIG
 
 if test "$bld_bdb" = "yes"; then
-	AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
-	PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
+    AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
+    PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
 	AC_SUBST(LDFLAG_BDB)
 	LDFLAG_BDB="-lprotobuf $DB_CXX_LIBS"
     AC_SUBST(CFLAG_BDB)
@@ -45,6 +45,7 @@ fi
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
 PKG_CHECK_MODULES([CURL], [libcurl])
+PKG_CHECK_MODULES([Kyoto_Cabinet], [kyotocabinet])
 
 AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],
     [Path to the pkgconfig directory [[LIBDIR/pkgconfig]]]),

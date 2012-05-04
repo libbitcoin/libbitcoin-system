@@ -11,7 +11,7 @@ enum class log_domain
 {
     normal,
     network,
-    storage,
+    blockchain,
     validation,
     protocol,
     poller,
