@@ -177,7 +177,7 @@ private:
         std::sort(meta_.begin(), meta_.end(),
             [](const meta_entry& entry_a, const meta_entry& entry_b)
             {
-                return entry_a.first < entry_b.first;
+                return entry_a.first > entry_b.first;
             });
         message::block_locator final_locator;
         for (const meta_entry& entry: meta_)
