@@ -32,9 +32,11 @@ libbitcoin_la_SOURCES = \
 	blockchain/blockchain.cpp \
 	transaction_pool.cpp
 
+if DO_KYOTO
 libbitcoin_la_SOURCES += \
 	blockchain/kyoto/kyoto_common.cpp \
 	blockchain/kyoto/kyoto_blockchain.cpp
+endif
 
 if DO_BDB
 libbitcoin_la_SOURCES += \

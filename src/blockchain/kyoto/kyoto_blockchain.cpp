@@ -80,13 +80,8 @@ void kyoto_blockchain::initialize(const std::string& prefix,
     handle_start(std::error_code(), shared_from_this(), newly_created);
 }
 
-void save_block(const message::block& save_block)
-{
-}
-
 void kyoto_blockchain::store(
-    const message::block& stored_block,
-    store_block_handler handle_store)
+    const message::block& stored_block, store_block_handler handle_store)
 {
 }
 
@@ -108,8 +103,7 @@ void kyoto_blockchain::fetch_block_header(size_t depth,
 
 // fetch block header by hash
 void kyoto_blockchain::fetch_block_header(
-    const hash_digest& block_hash,
-    fetch_handler_block_header handle_fetch)
+    const hash_digest& block_hash, fetch_handler_block_header handle_fetch)
 {
 }
 
