@@ -168,7 +168,7 @@ void protocol::seeds::error_case(const std::error_code& ec)
 
 void protocol::seeds::connect_dns_seed(const std::string& hostname)
 {
-    handshake_->connect(network_, hostname, 8333,
+    connect(handshake_, network_, hostname, 8333,
         strand_.wrap(std::bind(&protocol::seeds::request_addresses,
             shared_from_this(), _1, _2)));
 }
@@ -277,7 +277,7 @@ void protocol::attempt_connect(const std::error_code& ec,
     }
     log_info(log_domain::protocol) << "Trying "
         << pretty(address.ip) << ":" << address.port;
-    handshake_->connect(network_, pretty(address.ip), address.port,
+    connect(handshake_, network_, pretty(address.ip), address.port,
         strand_.wrap(std::bind(&protocol::handle_connect,
             shared_from_this(), _1, _2, address)));
 }

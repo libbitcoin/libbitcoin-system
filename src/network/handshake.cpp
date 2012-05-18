@@ -39,23 +39,6 @@ void handshake::start(start_handler handle_start)
     discover_external_ip(std::bind(handle_start, _1));
 }
 
-void handshake::connect(network_ptr net, const std::string& hostname,
-    uint16_t port, network::connect_handler handle_connect)
-{
-    net->connect(hostname, port, 
-        strand_.wrap(std::bind(&handshake::handle_connect,
-            shared_from_this(), _1, _2, handle_connect)));
-}
-
-void handshake::handle_connect(const std::error_code& ec,
-    channel_ptr node, network::connect_handler handle_connect)
-{
-    if (ec)
-        handle_connect(ec, node);
-    else
-        ready(node, std::bind(handle_connect, _1, node));
-}
-
 void handshake::ready(channel_ptr node,
     handshake::handshake_handler handle_handshake)
 {
@@ -248,6 +231,24 @@ void handshake::do_set_start_depth(uint32_t depth, setter_handler handle_set)
 {
     template_version_.start_depth = depth;
     handle_set(std::error_code());
+}
+
+void finish_connect(const std::error_code& ec,
+    channel_ptr node, handshake_ptr shake,
+    network::connect_handler handle_connect)
+{
+    if (ec)
+        handle_connect(ec, node);
+    else
+        shake->ready(node, std::bind(handle_connect, _1, node));
+}
+
+void connect(handshake_ptr shake, network_ptr net,
+    const std::string& hostname, uint16_t port,
+    network::connect_handler handle_connect)
+{
+    net->connect(hostname, port, 
+        std::bind(finish_connect, _1, _2, shake, handle_connect));
 }
 
 } // namespace libbitcoin

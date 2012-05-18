@@ -90,8 +90,7 @@ void poller::receive_block(const std::error_code& ec,
     }
     chain_->store(blk,
         std::bind(&poller::handle_store,
-            shared_from_this(), _1, _2,
-            hash_block_header(blk), node));
+            shared_from_this(), _1, _2, hash_block_header(blk), node));
     node->subscribe_block(
         std::bind(&poller::receive_block,
             shared_from_this(), _1, _2, node));

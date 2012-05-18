@@ -41,6 +41,8 @@
  * the blockchain allowing programs to utilise backends using the same
  * code.
  *
+ * - @link libbitcoin::blockchain blockchain @endlink (abstract interface
+     for blockchain backends)
  * - @link libbitcoin::bdb_blockchain bdb_blockchain @endlink
  *
  * @subsection supporting Supporting services

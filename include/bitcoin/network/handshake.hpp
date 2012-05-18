@@ -34,8 +34,6 @@ public:
 
     void start(start_handler handle_start);
 
-    void connect(network_ptr net, const std::string& hostname,
-        uint16_t port, network::connect_handler handle_connect);
     void ready(channel_ptr node, handshake_handler handle_handshake);
 
     void discover_external_ip(discover_ip_handler handle_discover);
@@ -74,6 +72,10 @@ private:
     io_service::strand strand_;
     message::version template_version_;
 };
+
+void connect(handshake_ptr shake, network_ptr net,
+    const std::string& hostname, uint16_t port,
+    network::connect_handler handle_connect);
 
 } // namespace libbitcoin
 

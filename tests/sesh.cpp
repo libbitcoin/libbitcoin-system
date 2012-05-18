@@ -20,7 +20,6 @@ void handle_stop(const std::error_code& ec)
 {
     if (ec)
         error_exit(ec.message());
-    exit(0);
 }
 
 void handle_confirm(const std::error_code& ec)
