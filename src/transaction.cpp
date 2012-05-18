@@ -69,9 +69,9 @@ hash_digest generate_merkle_root(const message::transaction_list& transactions)
 std::string pretty(const message::transaction_input& input)
 {
     std::ostringstream ss;
-    ss << "\thash = " << pretty_hex(input.previous_output.hash) << "\n"
+    ss << "\thash = " << input.previous_output.hash << "\n"
         << "\tindex = " << input.previous_output.index << "\n"
-        << "\t" << input.input_script.pretty() << "\n"
+        << "\t" << input.input_script << "\n"
         << "\tsequence = " << input.sequence << "\n";
     return ss.str();
 }
@@ -80,21 +80,21 @@ std::string pretty(const message::transaction_output& output)
 {
     std::ostringstream ss;
     ss << "\tvalue = " << output.value << "\n"
-        << "\t" << output.output_script.pretty() << "\n";
+        << "\t" << output.output_script << "\n";
     return ss.str();
 }
 
-std::string pretty(const message::transaction& transaction)
+std::string pretty(const message::transaction& tx)
 {
     std::ostringstream ss;
     ss << "Transaction:\n"
-        << "\tversion = " << transaction.version << "\n"
-        << "\tlocktime = " << transaction.locktime << "\n"
+        << "\tversion = " << tx.version << "\n"
+        << "\tlocktime = " << tx.locktime << "\n"
         << "Inputs:\n";
-    for (message::transaction_input input: transaction.inputs)
+    for (message::transaction_input input: tx.inputs)
         ss << pretty(input);
     ss << "Outputs:\n";
-    for (message::transaction_output output: transaction.outputs)
+    for (message::transaction_output output: tx.outputs)
         ss << pretty(output);
     ss << "\n";
     return ss.str();

@@ -105,7 +105,6 @@ public:
     bool run(script input_script, const message::transaction& parent_tx,
         uint32_t input_index, bool bip16_enabled=true);
 
-    std::string pretty() const;
     payment_type type() const;
 
     const operation_stack& operations() const;
@@ -165,6 +164,8 @@ private:
 
 std::string opcode_to_string(opcode code);
 opcode string_to_opcode(std::string code_repr);
+std::string pretty(const script& source_script);
+std::ostream& operator<<(std::ostream& stream, const script& source_script);
 
 script coinbase_script(const data_chunk& raw_script);
 script parse_script(const data_chunk& raw_script);

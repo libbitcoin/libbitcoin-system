@@ -138,8 +138,6 @@ int main()
     std::cin.get();
     s->stop(handle_stop);
     log_debug() << "Exiting...";
-    while (1)
-        sleep(100);
     return 0;
 }
 

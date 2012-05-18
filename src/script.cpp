@@ -666,22 +666,6 @@ bool script::matches_template(operation_stack templ) const
     return templ.size() == 0;
 }
 
-std::string script::pretty() const
-{
-    std::ostringstream ss;
-    for (auto it = operations_.begin(); it != operations_.end(); ++it)
-    {
-        if (it != operations_.begin())
-            ss << " ";
-        const operation& op = *it;
-        if (op.data.empty())
-            ss << opcode_to_string(op.code);
-        else
-            ss << "[ " << pretty_hex(op.data) << " ]";
-    }
-    return ss.str();
-}
-
 std::string opcode_to_string(opcode code)
 {
     switch (code)
@@ -906,6 +890,29 @@ opcode string_to_opcode(std::string code_repr)
         return opcode::raw_data;
     // ERROR: unknown... 
     return opcode::bad_operation;
+}
+
+std::string pretty(const script& source_script)
+{
+    const operation_stack& opers = source_script.operations();
+    std::ostringstream ss;
+    for (auto it = opers.begin(); it != opers.end(); ++it)
+    {
+        if (it != opers.begin())
+            ss << " ";
+        const operation& op = *it;
+        if (op.data.empty())
+            ss << opcode_to_string(op.code);
+        else
+            ss << "[ " << pretty_hex(op.data) << " ]";
+    }
+    return ss.str();
+}
+
+std::ostream& operator<<(std::ostream& stream, const script& source_script)
+{
+    stream << pretty(source_script);
+    return stream;
 }
 
 // Read next n bytes while advancing iterator
