@@ -57,7 +57,7 @@ bdb_blockchain::bdb_blockchain(async_service& service)
     // Only by factory methods
 
     reorganize_subscriber_ =
-        std::make_shared<reorganize_subscriber_type>(strand_);
+        std::make_shared<reorganize_subscriber_type>(service);
 }
 
 template <typename Database>

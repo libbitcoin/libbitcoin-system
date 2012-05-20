@@ -23,7 +23,7 @@ protocol::protocol(async_service& service, hosts_ptr hosts_dir,
     strand_(service.get_service()), hosts_(hosts_dir),
     handshake_(handshaker), network_(net)
 {
-    channel_subscribe_ = std::make_shared<channel_subscriber_type>(strand_);
+    channel_subscribe_ = std::make_shared<channel_subscriber_type>(service);
 }
 
 void protocol::start(completion_handler handle_complete)

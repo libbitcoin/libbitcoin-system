@@ -23,28 +23,28 @@ channel_proxy::channel_proxy(async_service& service, socket_ptr socket)
     export_ = std::make_shared<satoshi_exporter>();
 
     version_subscriber_ = 
-        std::make_shared<version_subscriber_type>(strand_);
+        std::make_shared<version_subscriber_type>(service);
     verack_subscriber_ = 
-        std::make_shared<verack_subscriber_type>(strand_);
+        std::make_shared<verack_subscriber_type>(service);
     address_subscriber_ = 
-        std::make_shared<address_subscriber_type>(strand_);
+        std::make_shared<address_subscriber_type>(service);
     get_address_subscriber_ =
-        std::make_shared<get_address_subscriber_type>(strand_);
+        std::make_shared<get_address_subscriber_type>(service);
     inventory_subscriber_ =
-        std::make_shared<inventory_subscriber_type>(strand_);
+        std::make_shared<inventory_subscriber_type>(service);
     get_data_subscriber_ =
-        std::make_shared<get_data_subscriber_type>(strand_);
+        std::make_shared<get_data_subscriber_type>(service);
     get_blocks_subscriber_ =
-        std::make_shared<get_blocks_subscriber_type>(strand_);
+        std::make_shared<get_blocks_subscriber_type>(service);
     transaction_subscriber_ = 
-        std::make_shared<transaction_subscriber_type>(strand_);
+        std::make_shared<transaction_subscriber_type>(service);
     block_subscriber_ = 
-        std::make_shared<block_subscriber_type>(strand_);
+        std::make_shared<block_subscriber_type>(service);
     raw_subscriber_ = 
-        std::make_shared<raw_subscriber_type>(strand_);
+        std::make_shared<raw_subscriber_type>(service);
 
     stop_subscriber_ =
-        std::make_shared<stop_subscriber_type>(strand_);
+        std::make_shared<stop_subscriber_type>(service);
 }
 
 channel_proxy::~channel_proxy()

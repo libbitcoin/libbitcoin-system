@@ -17,8 +17,8 @@ public:
     typedef std::function<void (Args...)> handler_type;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
-    subscriber(io_service::strand& async_strand)
-      : strand_(async_strand)
+    subscriber(async_service& service)
+      : strand_(service.get_service())
     {
     }
 
@@ -56,7 +56,7 @@ private:
         BITCOIN_ASSERT(notify_copy.empty());
     }
 
-    io_service::strand& strand_;
+    io_service::strand strand_;
     registry_stack registry_;
 };
 
