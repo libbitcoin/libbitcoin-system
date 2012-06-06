@@ -10,7 +10,6 @@ libbitcoin_la_SOURCES = \
 	network/channel.cpp \
 	network/hosts.cpp \
 	network/protocol.cpp \
-	exporter.cpp  \
 	poller.cpp \
 	utility/serializer.cpp \
 	utility/logger.cpp \

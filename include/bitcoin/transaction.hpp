@@ -5,10 +5,10 @@
 
 namespace libbitcoin {
 
-hash_digest hash_transaction(const message::transaction& transaction);
+hash_digest hash_transaction(const message::transaction& tx);
 // hash_type_code is used by OP_CHECKSIG
-hash_digest hash_transaction(const message::transaction& transaction, 
-        uint32_t hash_type_code);
+hash_digest hash_transaction(const message::transaction& tx, 
+    uint32_t hash_type_code);
 
 hash_digest generate_merkle_root(const message::transaction_list& transactions);
 

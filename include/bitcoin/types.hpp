@@ -17,7 +17,6 @@ using boost::asio::ip::tcp;
     typedef std::shared_ptr<nametype> nametype##_ptr
 
 DECLARE_PTR_TYPE(async_service);
-DECLARE_PTR_TYPE(exporter);
 DECLARE_PTR_TYPE(blockchain);
 DECLARE_PTR_TYPE(chrono_clock);
 DECLARE_PTR_TYPE(transaction_pool);

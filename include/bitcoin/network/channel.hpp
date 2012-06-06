@@ -14,7 +14,6 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/messages.hpp>
-#include <bitcoin/exporter.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/utility/assert.hpp>
@@ -23,6 +22,29 @@
 #include <bitcoin/utility/subscriber.hpp>
 
 namespace libbitcoin {
+
+template <typename Message>
+data_chunk create_raw_message(const Message& packet)
+{
+    data_chunk payload(satoshi_raw_size(packet));
+    satoshi_save(packet, payload.begin());
+    // Make the header packet and serialise it
+    message::header head;
+    head.magic = magic_value;
+    head.command = satoshi_command(packet);
+    head.payload_length = payload.size();
+    head.checksum = generate_sha256_checksum(payload);
+    data_chunk raw_header(satoshi_raw_size(head));
+    satoshi_save(head, raw_header.begin());
+    // Construct completed packet with header + payload
+    data_chunk whole_message = raw_header;
+    extend_data(whole_message, payload);
+    // Probably not the right place for this
+    // Networking output in an exporter
+    log_info(log_domain::network) << "s: " << head.command
+        << " (" << payload.size() << " bytes)";
+    return whole_message;
+}
 
 class channel_loader_module_base
 {
@@ -150,8 +172,15 @@ public:
         if (stopped_)
             handle_send(error::channel_stopped);
         else
-            strand_.post(std::bind(&channel_proxy::do_send<Message>,
-                shared_from_this(), packet, handle_send));
+        {
+            auto this_ptr = shared_from_this();
+            strand_.post(
+                [this, this_ptr, packet, handle_send]
+                {
+                    do_send_common(create_raw_message(packet),
+                        handle_send);
+                });
+        }
     }
     void send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
@@ -193,14 +222,6 @@ private:
         const message::header&, const data_chunk&> raw_subscriber_type;
     typedef subscriber<const std::error_code&> stop_subscriber_type;
 
-    template <typename Message>
-    void do_send(const Message& packet, send_handler handle_send)
-    {
-        shared_const_buffer buffer(create_raw_message(packet));
-        async_write(*socket_, buffer,
-            std::bind(&channel_proxy::call_handle_send, shared_from_this(),
-                std::placeholders::_1, handle_send));
-    }
     void do_send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
     void do_send_common(const data_chunk& whole_message,

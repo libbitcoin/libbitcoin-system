@@ -1,35 +1,35 @@
 #include <bitcoin/transaction.hpp>
 
-#include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/utility/sha256.hpp>
-#include <bitcoin/utility/logger.hpp>
-#include <bitcoin/exporter.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/format.hpp>
+#include <bitcoin/satoshi_serialize.hpp>
+#include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
 
 typedef std::vector<hash_digest> hash_list;
 
-hash_digest hash_transaction_impl(const message::transaction& transaction, 
-        uint32_t* hash_type_code)
+hash_digest hash_transaction_impl(const message::transaction& tx, 
+    uint32_t* hash_type_code)
 {
-    satoshi_exporter translator;
-    data_chunk serialized_tx = translator.save(transaction);
+    data_chunk serialized_tx(satoshi_raw_size(tx));
+    satoshi_save(tx, serialized_tx.begin());
     if (hash_type_code != nullptr)
         extend_data(serialized_tx, uncast_type(*hash_type_code));
     return generate_sha256_hash(serialized_tx);
 }
 
-hash_digest hash_transaction(const message::transaction& transaction)
+hash_digest hash_transaction(const message::transaction& tx)
 {
-    return hash_transaction_impl(transaction, nullptr);
+    return hash_transaction_impl(tx, nullptr);
 }
-hash_digest hash_transaction(const message::transaction& transaction, 
-        uint32_t hash_type_code)
+hash_digest hash_transaction(const message::transaction& tx, 
+    uint32_t hash_type_code)
 {
-    return hash_transaction_impl(transaction, &hash_type_code);
+    return hash_transaction_impl(tx, &hash_type_code);
 }
 
 hash_digest build_merkle_tree(hash_list& merkle)

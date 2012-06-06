@@ -331,29 +331,6 @@ void satoshi_load(Iterator first, Iterator last, ping& packet)
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }
 
-template <typename Message>
-data_chunk create_raw_message(const Message& packet)
-{
-    data_chunk payload(satoshi_raw_size(packet));
-    satoshi_save(packet, payload.begin());
-    // Make the header packet and serialise it
-    message::header head;
-    head.magic = magic_value;
-    head.command = satoshi_command(packet);
-    head.payload_length = payload.size();
-    head.checksum = generate_sha256_checksum(payload);
-    data_chunk raw_header(satoshi_raw_size(head));
-    satoshi_save(head, raw_header.begin());
-    // Construct completed packet with header + payload
-    data_chunk whole_message = raw_header;
-    extend_data(whole_message, payload);
-    // Probably not the right place for this
-    // Networking output in an exporter
-    log_info(log_domain::network) << "s: " << head.command
-        << " (" << payload.size() << " bytes)";
-    return whole_message;
-}
-
 } // message
 } // libbitcoin
 

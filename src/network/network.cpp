@@ -6,7 +6,6 @@
 #include <iostream>
 
 #include <bitcoin/utility/logger.hpp>
-#include <bitcoin/exporter.hpp>
 
 namespace libbitcoin {
 

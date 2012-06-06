@@ -1,7 +1,6 @@
 #include <bitcoin/transaction_pool.hpp>
 
 #include <bitcoin/error.hpp>
-#include <bitcoin/exporter.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/validate.hpp>
 #include <bitcoin/utility/assert.hpp>
@@ -49,10 +48,9 @@ void transaction_pool::do_store(
         stored_transaction,
         handle_confirm};
 
-    exporter_ptr saver = std::make_shared<satoshi_exporter>();
     validate_transaction_ptr validate =
-        std::make_shared<validate_transaction>(chain_, saver,
-            stored_transaction, pool_, strand_);
+        std::make_shared<validate_transaction>(
+            chain_, stored_transaction, pool_, strand_);
     validate->start(strand_.wrap(std::bind(
         &transaction_pool::handle_delegate,
             shared_from_this(), _1, _2, new_tx_entry, handle_store)));

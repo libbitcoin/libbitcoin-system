@@ -76,8 +76,6 @@
  *
  * These classes provide foundational functionality that is widely used.
  *
- * - @link libbitcoin::exporter exporter @endlink
- *   - @link libbitcoin::satoshi_exporter satoshi_exporter @endlink
  * - @link libbitcoin::serializer serializer @endlink /
  *   @link libbitcoin::deserializer deserializer @endlink
  * - @link libbitcoin::script script @endlink
@@ -149,7 +147,6 @@
 #include <bitcoin/session.hpp>
 #include <bitcoin/poller.hpp>
 #include <bitcoin/format.hpp>
-#include <bitcoin/exporter.hpp>
 #include <bitcoin/validate.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/getx_responder.hpp>

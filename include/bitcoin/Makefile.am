@@ -6,7 +6,6 @@ bitcoin_include_HEADERS = \
 	validate.hpp \
 	messages.hpp \
 	script.hpp \
-	exporter.hpp \
 	address.hpp \
 	transaction.hpp \
 	constants.hpp \

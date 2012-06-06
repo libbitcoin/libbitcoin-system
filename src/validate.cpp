@@ -4,9 +4,9 @@
 
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/block.hpp>
-#include <bitcoin/exporter.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/error.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
@@ -22,10 +22,10 @@ using std::placeholders::_4;
 constexpr size_t max_block_size = 1000000;
 constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 
-validate_transaction::validate_transaction(blockchain_ptr chain,
-    exporter_ptr saver, const message::transaction& tx,
+validate_transaction::validate_transaction(
+    blockchain_ptr chain, const message::transaction& tx,
     const pool_buffer& pool, io_service::strand& async_strand)
-  : strand_(async_strand), chain_(chain), exporter_(saver),
+  : strand_(async_strand), chain_(chain),
     tx_(tx), tx_hash_(hash_transaction(tx)), pool_(pool)
 {
 }
@@ -324,9 +324,9 @@ std::error_code validate_transaction::check_transaction(
     return std::error_code();
 }
 
-validate_block::validate_block(exporter_ptr saver, size_t depth,
-    const message::block& current_block)
-  : exporter_(saver), depth_(depth), current_block_(current_block)
+validate_block::validate_block(
+    size_t depth, const message::block& current_block)
+  : depth_(depth), current_block_(current_block)
 {
     clock_ = std::make_shared<chrono_clock>();
 }
@@ -356,7 +356,7 @@ std::error_code validate_block::check_block()
     // Size limits
     if (current_block_.transactions.empty() || 
         current_block_.transactions.size() > max_block_size ||
-        exporter_->save(current_block_).size() > max_block_size)
+        satoshi_raw_size(current_block_) > max_block_size)
     {
         return error::size_limits;
     }

@@ -18,8 +18,8 @@ public:
     typedef std::function<
         void (const std::error_code&, const index_list&)> validate_handler;
 
-    validate_transaction(blockchain_ptr chain, exporter_ptr saver,
-        const message::transaction& tx,
+    validate_transaction(
+        blockchain_ptr chain, const message::transaction& tx,
         const pool_buffer& pool, io_service::strand& async_strand);
     void start(validate_handler handle_validate);
 
@@ -60,7 +60,6 @@ private:
 
     io_service::strand& strand_;
     blockchain_ptr chain_;
-    exporter_ptr exporter_;
 
     const message::transaction tx_;
     const hash_digest tx_hash_;
@@ -80,8 +79,7 @@ public:
     std::error_code start();
 
 protected:
-    validate_block(exporter_ptr saver, size_t depth,
-        const message::block& current_block);
+    validate_block(size_t depth, const message::block& current_block);
 
     virtual uint32_t previous_block_bits() = 0;
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
@@ -117,7 +115,6 @@ private:
     std::error_code connect_block();
     bool not_duplicate_or_spent(const message::transaction& tx);
 
-    exporter_ptr exporter_;
     chrono_clock_ptr clock_;
 
     const size_t depth_;
