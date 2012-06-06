@@ -1,6 +1,8 @@
 #ifndef LIBBITCOIN_GETX_RESPONDER_H
 #define LIBBITCOIN_GETX_RESPONDER_H
 
+#include <system_error>
+
 #include <bitcoin/types.hpp>
 #include <bitcoin/async_service.hpp>
 #include <bitcoin/messages.hpp>

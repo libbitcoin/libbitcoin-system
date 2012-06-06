@@ -21,16 +21,11 @@ async_service::~async_service()
         t.join();
 }
 
-void async_service::run_service(io_service* service)
-{
-    service->run();
-}
-
 void async_service::spawn()
 {
     if (!work_)
         work_ = new io_service::work(service_);
-    threads_.push_back(std::thread(&async_service::run_service, &service_));
+    threads_.push_back(std::thread([this] { service_.run(); }));
 }
 void async_service::shutdown()
 {

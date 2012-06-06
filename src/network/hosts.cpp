@@ -38,7 +38,7 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
         std::copy(raw_ip.begin(), raw_ip.end(), field.ip.begin());
         field.port = boost::lexical_cast<uint16_t>(parts[1]);
         strand_.dispatch(
-            [this_ptr, &buffer_, field]()
+            [this, this_ptr, field]()
             {
                 buffer_.push_back(field);
             });
@@ -66,7 +66,7 @@ void hosts::store(const message::network_address& address,
 {
     auto this_ptr = shared_from_this();
     strand_.post(
-        [this_ptr, &buffer_, address, handle_store]()
+        [this, this_ptr, address, handle_store]()
         {
             buffer_.push_back(hosts_field{address.ip, address.port});
             handle_store(std::error_code());

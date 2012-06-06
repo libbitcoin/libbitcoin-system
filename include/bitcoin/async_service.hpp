@@ -25,9 +25,8 @@ public:
 
     io_service& get_service();
     const io_service& get_service() const;
-private:
-    static void run_service(io_service* service);
 
+private:
     io_service service_;
     io_service::work* work_;
     std::vector<std::thread> threads_;
