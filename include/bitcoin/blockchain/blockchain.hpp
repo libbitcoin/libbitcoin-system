@@ -21,43 +21,32 @@ public:
     typedef std::function<void (const std::error_code&, block_info)>
         store_block_handler;
 
-    // Not supported in g++ yet
-    //template <typename Message>
-    //using fetch_handler = std::function<void (Message)>;
+    template <typename Message>
+    using fetch_handler = std::function<
+        void (const std::error_code&, const Message&)>;
 
-    typedef std::function<
-        void (const std::error_code&, const message::block&)>
-            fetch_handler_block_header;
+    typedef fetch_handler<message::block> fetch_handler_block_header;
 
-    typedef std::function<
-        void (const std::error_code&, const message::inventory_list&)>
-            fetch_handler_block_transaction_hashes;
+    typedef fetch_handler<message::inventory_list>
+        fetch_handler_block_transaction_hashes;
 
-    typedef std::function<void (const std::error_code&, size_t)>
-        fetch_handler_block_depth;
+    typedef fetch_handler<size_t> fetch_handler_block_depth;
 
-    typedef std::function<void (const std::error_code&, size_t)>
-        fetch_handler_last_depth;
+    typedef fetch_handler<size_t> fetch_handler_last_depth;
 
-    typedef std::function<
-        void (const std::error_code&, const message::block_locator&)>
-            fetch_handler_block_locator;
+    typedef fetch_handler<message::block_locator>
+        fetch_handler_block_locator;
 
-    typedef std::function<
-        void (const std::error_code&, const message::transaction&)>
-            fetch_handler_transaction;
+    typedef fetch_handler<message::transaction> fetch_handler_transaction;
 
     typedef std::function<
         void (const std::error_code&, size_t, size_t)>
             fetch_handler_transaction_index;
 
-    typedef std::function<
-        void (const std::error_code&, const message::input_point&)>
-            fetch_handler_spend;
+    typedef fetch_handler<message::input_point> fetch_handler_spend;
 
-    typedef std::function<
-        void (const std::error_code&, const message::output_point_list&)>
-            fetch_handler_outputs;
+    typedef fetch_handler<message::output_point_list>
+        fetch_handler_outputs;
 
     typedef std::vector<std::shared_ptr<message::block>> block_list;
     typedef std::function<

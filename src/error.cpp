@@ -15,17 +15,12 @@ namespace error
     }
 }
 
-#define GXX_COMPATIBILITY_HACK(func) \
-    noexcept(noexcept(std::declval<std::error_category>().func))
-
-const char* error_category_impl::name() const
-    GXX_COMPATIBILITY_HACK(name())
+const char* error_category_impl::name() const noexcept
 {
     return "bitcoin";
 }
 
-std::string error_category_impl::message(int ev) const
-    GXX_COMPATIBILITY_HACK(message(ev))
+std::string error_category_impl::message(int ev) const noexcept
 {
     switch (ev)
     {
@@ -113,8 +108,7 @@ std::string error_category_impl::message(int ev) const
 }
 
 std::error_condition
-    error_category_impl::default_error_condition(int ev) const
-    GXX_COMPATIBILITY_HACK(default_error_condition(ev))
+    error_category_impl::default_error_condition(int ev) const noexcept
 {
     switch (ev)
     {

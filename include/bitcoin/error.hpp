@@ -70,15 +70,10 @@ class error_category_impl
   : public std::error_category
 {
 public:
-    #define GXX_COMPATIBILITY_HACK(func) \
-        noexcept(noexcept(std::declval<std::error_category>().func))
-    virtual const char* name() const GXX_COMPATIBILITY_HACK(name());
-    virtual std::string message(int ev) const
-        GXX_COMPATIBILITY_HACK(message(ev));
+    virtual const char* name() const noexcept;
+    virtual std::string message(int ev) const noexcept;
     virtual std::error_condition
-        default_error_condition(int ev) const
-        GXX_COMPATIBILITY_HACK(default_error_condition(ev));
-    #undef GXX_COMPATIBILITY_HACK
+        default_error_condition(int ev) const noexcept;
 };
 
 const std::error_category& error_category();

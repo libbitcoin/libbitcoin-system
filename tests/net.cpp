@@ -4,6 +4,7 @@
 #include <bitcoin/async_service.hpp>
 
 #include <atomic>
+#include <condition_variable>
 #include <functional>
 #include <iostream>
 
@@ -77,7 +78,7 @@ void handle_init(const std::error_code& ec, handshake_ptr hs, network_ptr net)
 {
     if (ec)
         error_exit(ec.message());
-    hs->connect(net, "localhost", 8333,
+    connect(hs, net, "localhost", 8333,
         std::bind(&handle_handshake, _1, _2, hs));
 }
 
