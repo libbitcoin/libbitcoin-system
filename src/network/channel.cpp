@@ -16,33 +16,50 @@ const time_duration disconnect_timeout = seconds(0) + minutes(90);
 
 const time_duration heartbeat_time = seconds(0) + minutes(30);
 
+channel_stream_loader::~channel_stream_loader()
+{
+    for (channel_loader_module_base* module: modules_)
+        delete module;
+}
+
+void channel_stream_loader::add(channel_loader_module_base* module)
+{
+    modules_.push_back(module);
+}
+
+void channel_stream_loader::load_lookup(const std::string& symbol,
+    const data_chunk& stream) const
+{
+    for (channel_loader_module_base* module: modules_)
+        if (module->lookup_symbol() == symbol)
+            module->attempt_load(stream);
+}
+
 channel_proxy::channel_proxy(async_service& service, socket_ptr socket)
   : strand_(service.get_service()), stopped_(false), socket_(socket), 
     timeout_(service.get_service()), heartbeat_(service.get_service())
 {
-    export_ = std::make_shared<satoshi_exporter>();
+#define CHANNEL_TRANSPORT_MECHANISM(MESSAGE_TYPE) \
+    MESSAGE_TYPE##_subscriber_ = \
+        std::make_shared<MESSAGE_TYPE##_subscriber_type>(service); \
+    loader_.add(new channel_loader_module<message::MESSAGE_TYPE>( \
+        std::bind(&MESSAGE_TYPE##_subscriber_type::relay, \
+            MESSAGE_TYPE##_subscriber_, _1, _2)));
 
-    version_subscriber_ = 
-        std::make_shared<version_subscriber_type>(service);
-    verack_subscriber_ = 
-        std::make_shared<verack_subscriber_type>(service);
-    address_subscriber_ = 
-        std::make_shared<address_subscriber_type>(service);
-    get_address_subscriber_ =
-        std::make_shared<get_address_subscriber_type>(service);
-    inventory_subscriber_ =
-        std::make_shared<inventory_subscriber_type>(service);
-    get_data_subscriber_ =
-        std::make_shared<get_data_subscriber_type>(service);
-    get_blocks_subscriber_ =
-        std::make_shared<get_blocks_subscriber_type>(service);
-    transaction_subscriber_ = 
-        std::make_shared<transaction_subscriber_type>(service);
-    block_subscriber_ = 
-        std::make_shared<block_subscriber_type>(service);
+    CHANNEL_TRANSPORT_MECHANISM(version);
+    CHANNEL_TRANSPORT_MECHANISM(verack);
+    CHANNEL_TRANSPORT_MECHANISM(address);
+    CHANNEL_TRANSPORT_MECHANISM(get_address);
+    CHANNEL_TRANSPORT_MECHANISM(inventory);
+    CHANNEL_TRANSPORT_MECHANISM(get_data);
+    CHANNEL_TRANSPORT_MECHANISM(get_blocks);
+    CHANNEL_TRANSPORT_MECHANISM(transaction);
+    CHANNEL_TRANSPORT_MECHANISM(block);
+
+#undef CHANNEL_TRANSPORT_MECHANISM
+
     raw_subscriber_ = 
         std::make_shared<raw_subscriber_type>(service);
-
     stop_subscriber_ =
         std::make_shared<stop_subscriber_type>(service);
 }
@@ -208,6 +225,40 @@ void channel_proxy::read_payload(const message::header& header_msg)
             shared_from_this(), _1, _2, header_msg)));
 }
 
+bool verify_header(const message::header& header_msg)
+{
+    if (header_msg.magic != magic_value)
+        return false;
+    if (header_msg.command == "version")
+    {
+        if (header_msg.payload_length < 85)
+            return false;
+    }
+    else if (header_msg.command == "verack"
+        || header_msg.command == "getaddr"
+        || header_msg.command == "ping")
+    {
+        if (header_msg.payload_length != 0)
+            return false;
+    }
+    else if (header_msg.command == "inv"
+        || header_msg.command == "addr"
+        || header_msg.command == "getdata"
+        || header_msg.command == "getblocks"
+        || header_msg.command == "getheaders"
+        || header_msg.command == "tx"
+        || header_msg.command == "block"
+        || header_msg.command == "headers"
+        || header_msg.command == "alert")
+    {
+        // Should check if sizes make sense
+        // i.e for addr should be multiple of 30x + 1 byte
+        // Also then add ASSERTS to handlers above.
+    }
+    // Ignore unknown headers
+    return true;
+}
+
 void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     size_t bytes_transferred)
 {
@@ -217,10 +268,10 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     data_chunk header_stream =
             data_chunk(inbound_header_.begin(), inbound_header_.end());
     BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
-    message::header header_msg =
-            export_->load_header(header_stream);
+    message::header header_msg;
+    satoshi_load(header_stream.begin(), header_stream.end(), header_msg);
 
-    if (!export_->verify_header(header_msg))
+    if (!verify_header(header_msg))
     {
         log_debug(log_domain::network) << "Bad header received.";
         stop();
@@ -272,74 +323,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     read_header();
     reset_timers();
 
-    if (header_msg.command == "version")
-    {
-        if (!transport<message::version>(payload_stream,
-            &exporter::load_version, version_subscriber_))
-        {
-            return;
-        }
-    }
-    else if (header_msg.command == "verack")
-    {
-        verack_subscriber_->relay(std::error_code(), message::verack());
-    }
-    else if (header_msg.command == "addr")
-    {
-        if (!transport<message::address>(payload_stream,
-            &exporter::load_address, address_subscriber_))
-        {
-            return;
-        }
-    }
-    else if (header_msg.command == "inv")
-    {
-        if (!transport<message::inventory>(payload_stream,
-            &exporter::load_inventory, inventory_subscriber_))
-        {
-            return;
-        }
-    }
-    else if (header_msg.command == "getdata")
-    {
-        if (!transport<message::get_data>(payload_stream,
-            &exporter::load_get_data, get_data_subscriber_))
-        {
-            return;
-        }
-    }
-    else if (header_msg.command == "getblocks")
-    {
-        if (!transport<message::get_blocks>(payload_stream,
-            &exporter::load_get_blocks, get_blocks_subscriber_))
-        {
-            return;
-        }
-    }
-    else if (header_msg.command == "tx")
-    {
-        if (!transport<message::transaction>(payload_stream,
-            &exporter::load_transaction, transaction_subscriber_))
-        {
-            return;
-        }
-    }
-    else if (header_msg.command == "block")
-    {
-        if (!transport<message::block>(payload_stream,
-            &exporter::load_block, block_subscriber_))
-        {
-            return;
-        }
-    }
-    else if (header_msg.command == "getaddr")
-    {
-        if (!transport<message::get_address>(payload_stream,
-            &exporter::load_get_address, get_address_subscriber_))
-        {
-            return;
-        }
-    }
+    loader_.load_lookup(header_msg.command, payload_stream);
 }
 
 void channel_proxy::call_handle_send(const boost::system::error_code& ec,
@@ -430,7 +414,8 @@ void channel_proxy::send_raw(const message::header& packet_header,
 void channel_proxy::do_send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
-    data_chunk raw_header = export_->save(packet_header);
+    data_chunk raw_header(satoshi_raw_size(packet_header));
+    satoshi_save(packet_header, raw_header.begin());
     // Construct completed packet with header + payload
     data_chunk whole_message = raw_header;
     extend_data(whole_message, payload);

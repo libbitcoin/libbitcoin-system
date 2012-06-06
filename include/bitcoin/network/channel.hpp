@@ -16,12 +16,67 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/exporter.hpp>
 #include <bitcoin/format.hpp>
+#include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 
 namespace libbitcoin {
+
+class channel_loader_module_base
+{
+public:
+    virtual ~channel_loader_module_base() {}
+    virtual void attempt_load(const data_chunk& stream) const = 0;
+    virtual const std::string lookup_symbol() const = 0;
+};
+
+template <typename Message>
+class channel_loader_module
+  : public channel_loader_module_base
+{
+public:
+    typedef std::function<
+        void (const std::error_code&, const Message&)> load_handler;
+
+    channel_loader_module(load_handler handle_load)
+      : handle_load_(handle_load) {}
+
+    void attempt_load(const data_chunk& stream) const
+    {
+        Message result;
+        try
+        {
+            satoshi_load(stream.begin(), stream.end(), result);
+            handle_load_(std::error_code(), result);
+        }
+        catch (end_of_stream)
+        {
+            handle_load_(error::bad_stream, Message());
+        }
+    }
+
+    const std::string lookup_symbol() const
+    {
+        return satoshi_command(Message());
+    }
+private:
+    load_handler handle_load_;
+};
+
+class channel_stream_loader
+{
+public:
+    ~channel_stream_loader();
+    void add(channel_loader_module_base* module);
+    void load_lookup(const std::string& symbol,
+        const data_chunk& stream) const;
+private:
+    typedef std::vector<channel_loader_module_base*> module_list;
+
+    module_list modules_;
+};
 
 class channel_proxy
   : public std::enable_shared_from_this<channel_proxy>
@@ -133,16 +188,15 @@ private:
         transaction_subscriber_type;
     typedef subscriber<const std::error_code&, const message::block&>
         block_subscriber_type;
+
     typedef subscriber<const std::error_code&,
         const message::header&, const data_chunk&> raw_subscriber_type;
-
     typedef subscriber<const std::error_code&> stop_subscriber_type;
 
     template <typename Message>
     void do_send(const Message& packet, send_handler handle_send)
     {
-        shared_const_buffer buffer(
-            create_raw_message(export_, packet));
+        shared_const_buffer buffer(create_raw_message(packet));
         async_write(*socket_, buffer,
             std::bind(&channel_proxy::call_handle_send, shared_from_this(),
                 std::placeholders::_1, handle_send));
@@ -174,28 +228,6 @@ private:
     void handle_read_payload(const boost::system::error_code& ec,
         size_t bytes_transferred, const message::header& header_msg);
 
-    template<typename Message, typename ExportFunc, typename SubscriberPtr>
-    bool transport(const data_chunk& payload_stream,
-        ExportFunc export_func, SubscriberPtr message_subscriber)
-    {
-        Message packet;
-        try
-        {
-            auto convert =
-                std::bind(export_func, export_, std::placeholders::_1);
-            packet = convert(payload_stream);
-        }
-        catch (end_of_stream)
-        {
-            log_warning(log_domain::network) << "Premature end of stream";
-            message_subscriber->relay(error::bad_stream, Message());
-            stop();
-            return false;
-        }
-        message_subscriber->relay(std::error_code(), packet);
-        return true;
-    }
-
     // Calls the send handler after a successful send, translating
     // the boost error_code to std::error_code
     void call_handle_send(const boost::system::error_code& ec,
@@ -219,7 +251,7 @@ private:
     std::atomic<bool> stopped_;
 
     socket_ptr socket_;
-    exporter_ptr export_;
+    channel_stream_loader loader_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes
     static constexpr size_t header_chunk_size = 20;
@@ -240,8 +272,8 @@ private:
     get_blocks_subscriber_type::ptr get_blocks_subscriber_;
     transaction_subscriber_type::ptr transaction_subscriber_;
     block_subscriber_type::ptr block_subscriber_;
-    raw_subscriber_type::ptr raw_subscriber_;
 
+    raw_subscriber_type::ptr raw_subscriber_;
     stop_subscriber_type::ptr stop_subscriber_;
 };
 

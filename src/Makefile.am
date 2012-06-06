@@ -2,6 +2,7 @@ lib_LTLIBRARIES = libbitcoin.la
 AM_CPPFLAGS = -I$(srcdir)/../include
 AM_CXXFLAGS = ${my_CXXFLAGS}
 libbitcoin_la_SOURCES = \
+    satoshi_serialize.cpp \
 	getx_responder.cpp \
 	async_service.cpp \
 	network/network.cpp  \
