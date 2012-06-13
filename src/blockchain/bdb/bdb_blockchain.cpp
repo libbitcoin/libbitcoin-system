@@ -69,6 +69,8 @@ inline void shutdown_database(Database*& database)
 }
 bdb_blockchain::~bdb_blockchain()
 {
+    reorganize_subscriber_->relay(
+        error::service_stopped, 0, block_list(), block_list());
     // Initialisation never started
     if (!env_)
         return;

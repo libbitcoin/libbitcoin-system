@@ -46,8 +46,8 @@ std::string error_category_impl::message(int ev) const noexcept
             return "Accept connection failed";
         case error::bad_stream:
             return "Bad stream";
-        case error::channel_stopped:
-            return "Channel stopped";
+        case error::service_stopped:
+            return "Service stopped";
         case error::channel_timeout:
             return "Channel timed out";
         // validate tx

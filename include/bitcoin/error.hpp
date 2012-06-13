@@ -10,8 +10,9 @@ namespace error
     // Specific errors
     enum error_code_t
     {
+        service_stopped = 1,
         // blockchain errors
-        not_found = 1,
+        not_found,
         duplicate,
         unspent_output,
         unsupported_payment_type,
@@ -23,7 +24,6 @@ namespace error
         listen_failed,
         accept_failed,
         bad_stream,
-        channel_stopped,
         channel_timeout,
         // validate tx
         coinbase_transaction,

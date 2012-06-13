@@ -170,7 +170,7 @@ public:
     void send(const Message& packet, send_handler handle_send)
     {
         if (stopped_)
-            handle_send(error::channel_stopped);
+            handle_send(error::service_stopped);
         else
         {
             auto this_ptr = shared_from_this();
@@ -233,7 +233,7 @@ private:
     {
         // Subscribing must be immediate. We cannot switch thread contexts
         if (stopped_)
-            handle_message(error::channel_stopped, Message());
+            handle_message(error::service_stopped, Message());
         else
             message_subscribe->subscribe(handle_message);
     }
@@ -313,7 +313,7 @@ public:
     {
         channel_proxy_ptr proxy = weak_proxy_.lock();
         if (!proxy)
-            handle_send(error::channel_stopped);
+            handle_send(error::service_stopped);
         else
             proxy->send(packet, handle_send);
     }

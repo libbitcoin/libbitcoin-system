@@ -81,7 +81,7 @@ void channel_proxy::stop()
     if (stopped_)
         return;
     stop_impl();
-    stop_subscriber_->relay(error::channel_stopped);
+    stop_subscriber_->relay(error::service_stopped);
 }
 void channel_proxy::stop_impl()
 {
@@ -99,25 +99,25 @@ void channel_proxy::stop_impl()
 
 void channel_proxy::clear_subscriptions()
 {
-    version_subscriber_->relay(error::channel_stopped, 
+    version_subscriber_->relay(error::service_stopped, 
         message::version());
-    verack_subscriber_->relay(error::channel_stopped, 
+    verack_subscriber_->relay(error::service_stopped, 
         message::verack());
-    address_subscriber_->relay(error::channel_stopped, 
+    address_subscriber_->relay(error::service_stopped, 
         message::address());
-    get_address_subscriber_->relay(error::channel_stopped,
+    get_address_subscriber_->relay(error::service_stopped,
         message::get_address());
-    inventory_subscriber_->relay(error::channel_stopped, 
+    inventory_subscriber_->relay(error::service_stopped, 
         message::inventory());
-    get_data_subscriber_->relay(error::channel_stopped, 
+    get_data_subscriber_->relay(error::service_stopped, 
         message::get_data());
-    get_blocks_subscriber_->relay(error::channel_stopped, 
+    get_blocks_subscriber_->relay(error::service_stopped, 
         message::get_blocks());
-    transaction_subscriber_->relay(error::channel_stopped, 
+    transaction_subscriber_->relay(error::service_stopped, 
         message::transaction());
-    block_subscriber_->relay(error::channel_stopped, 
+    block_subscriber_->relay(error::service_stopped, 
         message::block());
-    raw_subscriber_->relay(error::channel_stopped,
+    raw_subscriber_->relay(error::service_stopped,
         message::header(), data_chunk());
 }
 
@@ -330,7 +330,7 @@ void channel_proxy::call_handle_send(const boost::system::error_code& ec,
     send_handler handle_send)
 {
     if (problems_check(ec))
-        handle_send(error::channel_stopped);
+        handle_send(error::service_stopped);
     else
         handle_send(std::error_code());
 }
@@ -388,7 +388,7 @@ void channel_proxy::subscribe_get_address(
 void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 {
     if (stopped_)
-        handle_receive(error::channel_stopped,
+        handle_receive(error::service_stopped,
             message::header(), data_chunk());
     else
         raw_subscriber_->subscribe(handle_receive);
@@ -397,7 +397,7 @@ void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 void channel_proxy::subscribe_stop(stop_handler handle_stop)
 {
     if (stopped_)
-        handle_stop(error::channel_stopped);
+        handle_stop(error::service_stopped);
     else
         stop_subscriber_->subscribe(handle_stop);
 }
@@ -406,7 +406,7 @@ void channel_proxy::send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     if (stopped_)
-        handle_send(error::channel_stopped);
+        handle_send(error::service_stopped);
     else
         strand_.post(std::bind(&channel_proxy::do_send_raw,
             shared_from_this(), packet_header, payload, handle_send));
@@ -466,7 +466,7 @@ void channel::send_raw(const message::header& packet_header,
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_send(error::channel_stopped);
+        handle_send(error::service_stopped);
     else
         proxy->send_raw(packet_header, payload, handle_send);
 }
@@ -476,7 +476,7 @@ void channel::subscribe_version(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::version());
+        handle_receive(error::service_stopped, message::version());
     else
         proxy->subscribe_version(handle_receive);
 }
@@ -485,7 +485,7 @@ void channel::subscribe_verack(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::verack());
+        handle_receive(error::service_stopped, message::verack());
     else
         proxy->subscribe_verack(handle_receive);
 }
@@ -494,7 +494,7 @@ void channel::subscribe_address(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::address());
+        handle_receive(error::service_stopped, message::address());
     else
         proxy->subscribe_address(handle_receive);
 }
@@ -503,7 +503,7 @@ void channel::subscribe_get_address(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::get_address());
+        handle_receive(error::service_stopped, message::get_address());
     else
         proxy->subscribe_get_address(handle_receive);
 }
@@ -512,7 +512,7 @@ void channel::subscribe_inventory(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::inventory());
+        handle_receive(error::service_stopped, message::inventory());
     else
         proxy->subscribe_inventory(handle_receive);
 }
@@ -521,7 +521,7 @@ void channel::subscribe_get_data(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::get_data());
+        handle_receive(error::service_stopped, message::get_data());
     else
         proxy->subscribe_get_data(handle_receive);
 }
@@ -530,7 +530,7 @@ void channel::subscribe_get_blocks(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::get_blocks());
+        handle_receive(error::service_stopped, message::get_blocks());
     else
         proxy->subscribe_get_blocks(handle_receive);
 }
@@ -539,7 +539,7 @@ void channel::subscribe_transaction(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::transaction());
+        handle_receive(error::service_stopped, message::transaction());
     else
         proxy->subscribe_transaction(handle_receive);
 }
@@ -548,7 +548,7 @@ void channel::subscribe_block(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped, message::block());
+        handle_receive(error::service_stopped, message::block());
     else
         proxy->subscribe_block(handle_receive);
 }
@@ -557,7 +557,7 @@ void channel::subscribe_raw(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_receive(error::channel_stopped,
+        handle_receive(error::service_stopped,
             message::header(), data_chunk());
     else
         proxy->subscribe_raw(handle_receive);
@@ -568,7 +568,7 @@ void channel::subscribe_stop(
 {
     channel_proxy_ptr proxy = weak_proxy_.lock();
     if (!proxy)
-        handle_stop(error::channel_stopped);
+        handle_stop(error::service_stopped);
     else
         proxy->subscribe_stop(handle_stop);
 }
