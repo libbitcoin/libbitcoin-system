@@ -13,28 +13,28 @@
 
 #include <functional>
 
-template <typename Wrapper, typename Functor>
+template <typename Wrapper, typename Handler>
 struct decorator_dispatch
 {
     Wrapper wrapper;
-    Functor functor;
+    Handler handler;
 
     template <typename... Args>
     auto operator()(Args&&... args)
-        -> decltype(wrapper(functor)(std::forward<Args>(args)...))
+        -> decltype(wrapper(handler)(std::forward<Args>(args)...))
     {
-        return wrapper(functor)(std::forward<Args>(args)...);
+        return wrapper(handler)(std::forward<Args>(args)...);
     }
 };
 
-template <typename Wrapper, typename Functor>
+template <typename Wrapper, typename Handler>
 decorator_dispatch<
     Wrapper,
-    typename std::decay<Functor>::type
+    typename std::decay<Handler>::type
 >
-decorator(Wrapper&& wrapper, Functor&& functor)
+decorator(Wrapper&& wrapper, Handler&& handler)
 {
-    return {wrapper, functor};
+    return {wrapper, handler};
 }
 
 #endif
