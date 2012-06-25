@@ -28,17 +28,21 @@ public:
             reorganize_subscriber_type;
 
     typedef std::function<
-        void (const std::error_code, blockchain_ptr)> start_handler;
+        void (const std::error_code, blockchain*)> start_handler;
 
     static bool setup(const std::string& prefix);
-    static blockchain_ptr create(async_service& service,
+    // TODO: Deprecated - remove this
+    static blockchain* create(async_service& service,
         const std::string& prefix, start_handler handle_start);
 
+    bdb_blockchain(async_service& service);
     ~bdb_blockchain();
 
     // Non-copyable
     bdb_blockchain(const bdb_blockchain&) = delete;
     void operator=(const bdb_blockchain&) = delete;
+
+    void start(const std::string& prefix, start_handler handle_start);
 
     void store(const message::block& stored_block,
         store_block_handler handle_store);
@@ -76,7 +80,6 @@ public:
     void subscribe_reorganize(reorganize_handler handle_reorganize);
 
 private:
-    bdb_blockchain(async_service& service);
     bool initialize(const std::string& prefix);
 
     void do_store(const message::block& store_block,

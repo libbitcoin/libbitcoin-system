@@ -42,7 +42,7 @@ void getx_responder::receive_get_data(const std::error_code& ec,
                 break;
 
             case message::inventory_type::block:
-                fetch_block(chain_, inv.hash,
+                fetch_block(*chain_, inv.hash,
                     service_.wrap(std::bind(
                         &getx_responder::send_block,
                             shared_from_this(), _1, _2, node)));

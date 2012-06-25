@@ -266,7 +266,7 @@ typedef std::function<void (const std::error_code&, const message::block&)>
  *  );
  * @endcode
  */
-void fetch_block(blockchain_ptr chain, size_t depth,
+void fetch_block(blockchain& chain, size_t depth,
     blockchain_fetch_handler_block handle_fetch);
 
 /**
@@ -284,7 +284,7 @@ void fetch_block(blockchain_ptr chain, size_t depth,
  *  );
  * @endcode
  */
-void fetch_block(blockchain_ptr chain, const hash_digest& block_hash,
+void fetch_block(blockchain& chain, const hash_digest& block_hash,
     blockchain_fetch_handler_block handle_fetch);
 
 typedef std::function<
@@ -302,7 +302,7 @@ typedef std::function<
  *  );
  * @endcode
  */
-void fetch_block_locator(blockchain_ptr chain,
+void fetch_block_locator(blockchain& chain,
     blockchain_fetch_handler_block_locator handle_fetch);
 
 } // namespace libbitcoin

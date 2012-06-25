@@ -13,7 +13,7 @@ class fetch_block_t
   : public std::enable_shared_from_this<fetch_block_t>
 {
 public:
-    fetch_block_t(blockchain_ptr chain)
+    fetch_block_t(blockchain& chain)
       : chain_(chain), stopped_(false) {}
 
     template <typename BlockIndex>
@@ -21,7 +21,7 @@ public:
     {
         handle_ = handle;
         auto this_ptr = shared_from_this();
-        chain_->fetch_block_header(index,
+        chain_.fetch_block_header(index,
             [this, this_ptr](const std::error_code& ec,
                 const message::block& block_header)
             {
@@ -48,7 +48,7 @@ private:
 
     void fetch_hashes()
     {
-        chain_->fetch_block_transaction_hashes(
+        chain_.fetch_block_transaction_hashes(
             hash_block_header(block_),
             std::bind(&fetch_block_t::fetch_transactions,
                 shared_from_this(), _1, _2));
@@ -75,7 +75,7 @@ private:
         BITCOIN_ASSERT(inv.type ==
             message::inventory_type::transaction);
         size_t tx_hashes_size = tx_hashes.size();
-        chain_->fetch_transaction(inv.hash,
+        chain_.fetch_transaction(inv.hash,
             [this, this_ptr, tx_index, tx_hashes_size](
                 const std::error_code& ec,
                 const message::transaction& tx)
@@ -91,7 +91,7 @@ private:
             });
     }
 
-    blockchain_ptr chain_;
+    blockchain& chain_;
     handler_block handle_;
 
     message::block block_;
@@ -99,13 +99,13 @@ private:
     bool stopped_;
 };
 
-void fetch_block(blockchain_ptr chain, size_t depth,
+void fetch_block(blockchain& chain, size_t depth,
     handler_block handle_fetch)
 {
     auto fetcher = std::make_shared<fetch_block_t>(chain);
     fetcher->start(depth, handle_fetch);
 }
-void fetch_block(blockchain_ptr chain, const hash_digest& block_hash,
+void fetch_block(blockchain& chain, const hash_digest& block_hash,
     handler_block handle_fetch)
 {
     auto fetcher = std::make_shared<fetch_block_t>(chain);
@@ -119,14 +119,14 @@ class fetch_locator
   : public std::enable_shared_from_this<fetch_locator>
 {
 public:
-    fetch_locator(blockchain_ptr chain)
+    fetch_locator(blockchain& chain)
       : chain_(chain) {}
 
     void start(handler_locator handle)
     {
         handle_ = handle;
         auto this_ptr = shared_from_this();
-        chain_->fetch_last_depth(
+        chain_.fetch_last_depth(
             std::bind(&fetch_locator::populate,
                 this_ptr, _1, _2));
     }
@@ -157,7 +157,7 @@ private:
         index_list indexes = block_locator_indexes(last_depth);
         auto this_ptr = shared_from_this();
         for (size_t depth: indexes)
-            chain_->fetch_block_header(depth,
+            chain_.fetch_block_header(depth,
                 std::bind(&fetch_locator::append,
                     this_ptr, _1, _2, depth, indexes.size()));
     }
@@ -185,13 +185,13 @@ private:
         handle_(std::error_code(), final_locator);
     }
 
-    blockchain_ptr chain_;
+    blockchain& chain_;
     handler_locator handle_;
     bool stopped_;
     meta_locator meta_;
 };
 
-void fetch_block_locator(blockchain_ptr chain, handler_locator handle_fetch)
+void fetch_block_locator(blockchain& chain, handler_locator handle_fetch)
 {
     auto fetcher = std::make_shared<fetch_locator>(chain);
     fetcher->start(handle_fetch);

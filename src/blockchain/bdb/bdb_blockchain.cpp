@@ -34,19 +34,11 @@ constexpr uint32_t env_flags =
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
-blockchain_ptr bdb_blockchain::create(async_service& service,
+blockchain* bdb_blockchain::create(async_service& service,
     const std::string& prefix, start_handler handle_start)
 {
-    bdb_blockchain* bdb_chain = new bdb_blockchain(service);
-    blockchain_ptr chain(bdb_chain);
-    bdb_chain->strand_.post(
-        [chain, bdb_chain, prefix, handle_start]()
-        {
-            if (!bdb_chain->initialize(prefix))
-                handle_start(error::start_failed, nullptr);
-            else
-                handle_start(std::error_code(), chain);
-        });
+    bdb_blockchain* chain = new bdb_blockchain(service);
+    chain->start(prefix, handle_start);
     return chain;
 }
 
@@ -84,6 +76,19 @@ bdb_blockchain::~bdb_blockchain()
     shutdown_database(env_);
     // delete
     google::protobuf::ShutdownProtobufLibrary();
+}
+
+void bdb_blockchain::start(const std::string& prefix,
+    start_handler handle_start)
+{
+    strand_.post(
+        [this, prefix, handle_start]()
+        {
+            if (!initialize(prefix))
+                handle_start(error::start_failed, nullptr);
+            else
+                handle_start(std::error_code(), this);
+        });
 }
 
 bool bdb_blockchain::setup(const std::string& prefix)
@@ -207,8 +212,8 @@ void bdb_blockchain::store(const message::block& stored_block,
     store_block_handler handle_store)
 {
     strand_.post(
-        std::bind(&bdb_blockchain::do_store, shared_from_this(),
-            stored_block, handle_store));
+        std::bind(&bdb_blockchain::do_store,
+            this, stored_block, handle_store));
 }
 void bdb_blockchain::do_store(const message::block& stored_block,
     store_block_handler handle_store)
@@ -254,7 +259,7 @@ void bdb_blockchain::fetch_block_header(size_t depth,
 {
     strand_.post(
         std::bind(&bdb_blockchain::fetch_block_header_by_depth,
-            shared_from_this(), depth, handle_fetch));
+            this, depth, handle_fetch));
 }
 
 void bdb_blockchain::fetch_block_header_by_depth(size_t depth,
@@ -277,7 +282,7 @@ void bdb_blockchain::fetch_block_header(const hash_digest& block_hash,
 {
     strand_.post(
         std::bind(&bdb_blockchain::fetch_block_header_by_hash,
-            shared_from_this(), block_hash, handle_fetch));
+            this, block_hash, handle_fetch));
 }
 
 void bdb_blockchain::fetch_block_header_by_hash(
@@ -324,9 +329,8 @@ void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
 void bdb_blockchain::fetch_block_transaction_hashes(size_t depth,
     fetch_handler_block_transaction_hashes handle_fetch)
 {
-    auto this_ptr = shared_from_this();
     strand_.post(
-        [&, this_ptr, depth, handle_fetch]()
+        [this, depth, handle_fetch]()
         {
             fetch_blk_tx_hashes_impl(depth, env_, common_, handle_fetch);
         });
@@ -336,9 +340,8 @@ void bdb_blockchain::fetch_block_transaction_hashes(
     const hash_digest& block_hash,
     fetch_handler_block_transaction_hashes handle_fetch)
 {
-    auto this_ptr = shared_from_this();
     strand_.post(
-        [&, this_ptr, block_hash, handle_fetch]()
+        [this, block_hash, handle_fetch]()
         {
             fetch_blk_tx_hashes_impl(block_hash, env_, common_, handle_fetch);
         });
@@ -348,8 +351,8 @@ void bdb_blockchain::fetch_block_depth(const hash_digest& block_hash,
     fetch_handler_block_depth handle_fetch)
 {
     strand_.post(
-        std::bind(&bdb_blockchain::do_fetch_block_depth, shared_from_this(),
-            block_hash, handle_fetch));
+        std::bind(&bdb_blockchain::do_fetch_block_depth,
+            this, block_hash, handle_fetch));
 }
 void bdb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
     fetch_handler_block_depth handle_fetch)
@@ -374,8 +377,8 @@ void bdb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
 void bdb_blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
 {
     strand_.post(
-        std::bind(&bdb_blockchain::do_fetch_last_depth, shared_from_this(),
-            handle_fetch));
+        std::bind(&bdb_blockchain::do_fetch_last_depth,
+            this, handle_fetch));
 }
 void bdb_blockchain::do_fetch_last_depth(fetch_handler_last_depth handle_fetch)
 {
@@ -394,8 +397,8 @@ void bdb_blockchain::fetch_transaction(const hash_digest& transaction_hash,
     fetch_handler_transaction handle_fetch)
 {
     strand_.post(
-        std::bind(&bdb_blockchain::do_fetch_transaction, shared_from_this(),
-            transaction_hash, handle_fetch));
+        std::bind(&bdb_blockchain::do_fetch_transaction,
+            this, transaction_hash, handle_fetch));
 }
 void bdb_blockchain::do_fetch_transaction(const hash_digest& transaction_hash,
     fetch_handler_transaction handle_fetch)
@@ -419,7 +422,7 @@ void bdb_blockchain::fetch_transaction_index(
 {
     strand_.post(
         std::bind(&bdb_blockchain::do_fetch_transaction_index,
-            shared_from_this(), transaction_hash, handle_fetch));
+            this, transaction_hash, handle_fetch));
 }
 void bdb_blockchain::do_fetch_transaction_index(
     const hash_digest& transaction_hash,
@@ -450,8 +453,8 @@ void bdb_blockchain::fetch_spend(const message::output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
     strand_.post(
-        std::bind(&bdb_blockchain::do_fetch_spend, shared_from_this(),
-            outpoint, handle_fetch));
+        std::bind(&bdb_blockchain::do_fetch_spend,
+            this, outpoint, handle_fetch));
 }
 void bdb_blockchain::do_fetch_spend(const message::output_point& outpoint,
     fetch_handler_spend handle_fetch)
@@ -477,7 +480,7 @@ void bdb_blockchain::fetch_outputs(const payment_address& address,
     else
         strand_.post(
             std::bind(&bdb_blockchain::do_fetch_outputs,
-                shared_from_this(), address, handle_fetch));
+                this, address, handle_fetch));
 }
 void bdb_blockchain::do_fetch_outputs(const payment_address& address,
     fetch_handler_outputs handle_fetch)
