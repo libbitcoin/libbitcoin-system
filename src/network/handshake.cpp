@@ -48,14 +48,14 @@ void handshake::ready(channel_ptr node,
     session_version.timestamp = time(NULL);
     node->send(session_version,
         strand_.wrap(std::bind(&handshake::handle_message_sent,
-            shared_from_this(), _1, counter, handle_handshake)));
+            this, _1, counter, handle_handshake)));
 
     node->subscribe_version(
         strand_.wrap(std::bind(&handshake::receive_version,
-            shared_from_this(), _1, _2, node, counter, handle_handshake)));
+            this, _1, _2, node, counter, handle_handshake)));
     node->subscribe_verack(
         strand_.wrap(std::bind(&handshake::receive_verack,
-            shared_from_this(), _1, _2, counter, handle_handshake)));
+            this, _1, _2, counter, handle_handshake)));
 }
 
 void handshake::handle_message_sent(const std::error_code& ec,
@@ -77,7 +77,7 @@ void handshake::receive_version(const std::error_code& ec,
     else
         node->send(message::verack(),
             strand_.wrap(std::bind(&handshake::handle_message_sent,
-                shared_from_this(), _1, counter, completion_callback)));
+                this, _1, counter, completion_callback)));
 }
 
 void handshake::receive_verack(const std::error_code& ec,
@@ -104,8 +104,8 @@ int writer(char* data, size_t size, size_t count, std::string* buffer)
 void handshake::discover_external_ip(discover_ip_handler handle_discover)
 {
     strand_.post(
-        std::bind(&handshake::do_discover_external_ip, shared_from_this(),
-            handle_discover));
+        std::bind(&handshake::do_discover_external_ip,
+            this, handle_discover));
 }
 
 bool handshake::lookup_external(const std::string& website,
@@ -187,7 +187,7 @@ void handshake::fetch_network_address(
 {
     strand_.post(
         std::bind(&handshake::do_fetch_network_address,
-            shared_from_this(), handle_fetch));
+            this, handle_fetch));
 }
 void handshake::do_fetch_network_address(
     fetch_network_address_handler handle_fetch)
@@ -198,8 +198,8 @@ void handshake::do_fetch_network_address(
 void handshake::set_port(uint16_t port, setter_handler handle_set)
 {
     strand_.post(
-        std::bind(&handshake::do_set_port, shared_from_this(),
-            port, handle_set));
+        std::bind(&handshake::do_set_port,
+            this, port, handle_set));
 }
 void handshake::do_set_port(uint16_t port, setter_handler handle_set)
 {
@@ -211,8 +211,8 @@ void handshake::set_user_agent(const std::string& user_agent,
     setter_handler handle_set)
 {
     strand_.post(
-        std::bind(&handshake::do_set_user_agent, shared_from_this(),
-            user_agent, handle_set));
+        std::bind(&handshake::do_set_user_agent,
+            this, user_agent, handle_set));
 }
 void handshake::do_set_user_agent(const std::string& user_agent,
     setter_handler handle_set)
@@ -224,8 +224,8 @@ void handshake::do_set_user_agent(const std::string& user_agent,
 void handshake::set_start_depth(uint32_t depth, setter_handler handle_set)
 {
     strand_.post(
-        std::bind(&handshake::do_set_start_depth, shared_from_this(),
-            depth, handle_set));
+        std::bind(&handshake::do_set_start_depth,
+            this, depth, handle_set));
 }
 void handshake::do_set_start_depth(uint32_t depth, setter_handler handle_set)
 {
@@ -234,21 +234,21 @@ void handshake::do_set_start_depth(uint32_t depth, setter_handler handle_set)
 }
 
 void finish_connect(const std::error_code& ec,
-    channel_ptr node, handshake_ptr shake,
+    channel_ptr node, handshake& shake,
     network::connect_handler handle_connect)
 {
     if (ec)
         handle_connect(ec, node);
     else
-        shake->ready(node, std::bind(handle_connect, _1, node));
+        shake.ready(node, std::bind(handle_connect, _1, node));
 }
 
-void connect(handshake_ptr shake, network& net,
+void connect(handshake& shake, network& net,
     const std::string& hostname, uint16_t port,
     network::connect_handler handle_connect)
 {
     net.connect(hostname, port, 
-        std::bind(finish_connect, _1, _2, shake, handle_connect));
+        std::bind(finish_connect, _1, _2, std::ref(shake), handle_connect));
 }
 
 } // namespace libbitcoin

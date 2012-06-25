@@ -64,30 +64,30 @@ void show_ip(const std::error_code& ec, const message::network_address& addr)
     log_debug() << pretty_hex(addr.ip);
 }
 void handle_handshake(const std::error_code& ec, channel_ptr node,
-    handshake_ptr hs)
+    handshake& hs)
 {
     if (ec)
         error_exit(ec.message());
     node->subscribe_inventory(std::bind(&receive_inv, _1, _2, node));
     node->send(create_getblocks_message(), 
         std::bind(&handle_send_getblock, _1));
-    hs->fetch_network_address(show_ip);
+    hs.fetch_network_address(show_ip);
 }
 
-void handle_init(const std::error_code& ec, handshake_ptr hs, network& net)
+void handle_init(const std::error_code& ec, handshake& hs, network& net)
 {
     if (ec)
         error_exit(ec.message());
     connect(hs, net, "localhost", 8333,
-        std::bind(&handle_handshake, _1, _2, hs));
+        std::bind(&handle_handshake, _1, _2, std::ref(hs)));
 }
 
 int main()
 {
     async_service service(1);
     network net(service);
-    handshake_ptr hs = std::make_shared<handshake>(service);
-    hs->start(std::bind(handle_init, _1, hs, std::ref(net)));
+    handshake hs(service);
+    hs.start(std::bind(handle_init, _1, std::ref(hs), std::ref(net)));
 
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return inv_count >= 500; });

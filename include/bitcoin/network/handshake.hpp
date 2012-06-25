@@ -10,7 +10,6 @@
 namespace libbitcoin {
 
 class handshake
-  : public std::enable_shared_from_this<handshake>
 {
 public:
     typedef std::function<void (const std::error_code&)> start_handler;
@@ -73,7 +72,7 @@ private:
     message::version template_version_;
 };
 
-void connect(handshake_ptr shake, network& net,
+void connect(handshake& shake, network& net,
     const std::string& hostname, uint16_t port,
     network::connect_handler handle_connect);
 
