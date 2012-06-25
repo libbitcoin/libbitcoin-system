@@ -91,6 +91,7 @@ int main()
 
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return inv_count >= 500; });
+    service.shutdown();
     return 0;
 }
 

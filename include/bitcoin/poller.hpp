@@ -7,10 +7,9 @@
 namespace libbitcoin {
 
 class poller
-  : public std::enable_shared_from_this<poller>
 {
 public:
-    poller(async_service& service, blockchain_ptr chain);
+    poller(async_service& service, blockchain& chain);
     void query(channel_ptr node);
     void monitor(channel_ptr node);
 
@@ -30,7 +29,7 @@ private:
         const hash_digest& hash_stop, channel_ptr node);
 
     io_service::strand strand_;
-    blockchain_ptr chain_;
+    blockchain& chain_;
 
     // Last hash from a block locator
     hash_digest last_hash_end_;
