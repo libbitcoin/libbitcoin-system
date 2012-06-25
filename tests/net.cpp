@@ -74,7 +74,7 @@ void handle_handshake(const std::error_code& ec, channel_ptr node,
     hs->fetch_network_address(show_ip);
 }
 
-void handle_init(const std::error_code& ec, handshake_ptr hs, network_ptr net)
+void handle_init(const std::error_code& ec, handshake_ptr hs, network& net)
 {
     if (ec)
         error_exit(ec.message());
@@ -85,9 +85,9 @@ void handle_init(const std::error_code& ec, handshake_ptr hs, network_ptr net)
 int main()
 {
     async_service service(1);
-    network_ptr net = std::make_shared<network>(service);
+    network net(service);
     handshake_ptr hs = std::make_shared<handshake>(service);
-    hs->start(std::bind(handle_init, _1, hs, net));
+    hs->start(std::bind(handle_init, _1, hs, std::ref(net)));
 
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return inv_count >= 500; });

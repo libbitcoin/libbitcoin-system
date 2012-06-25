@@ -54,8 +54,8 @@ void network::resolve_handler(const boost::system::error_code& ec,
     socket_ptr socket =
         std::make_shared<tcp::socket>(service_.get_service());
     boost::asio::async_connect(*socket, endpoint_iterator,
-        std::bind(&network::call_connect_handler, shared_from_this(), 
-            _1, _2, socket, handle_connect));
+        std::bind(&network::call_connect_handler,
+            this, _1, _2, socket, handle_connect));
 }
 
 void network::call_connect_handler(const boost::system::error_code& ec, 
@@ -81,8 +81,8 @@ void network::connect(const std::string& hostname, uint16_t port,
         std::make_shared<tcp::resolver::query>(hostname,
             boost::lexical_cast<std::string>(port));
     resolver->async_resolve(*query,
-        std::bind(&network::resolve_handler, shared_from_this(),
-            _1, _2, handle_connect, resolver, query));
+        std::bind(&network::resolve_handler,
+            this, _1, _2, handle_connect, resolver, query));
 }
 
 // I personally don't like how exceptions mess with the program flow

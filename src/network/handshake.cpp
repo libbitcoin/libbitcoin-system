@@ -243,11 +243,11 @@ void finish_connect(const std::error_code& ec,
         shake->ready(node, std::bind(handle_connect, _1, node));
 }
 
-void connect(handshake_ptr shake, network_ptr net,
+void connect(handshake_ptr shake, network& net,
     const std::string& hostname, uint16_t port,
     network::connect_handler handle_connect)
 {
-    net->connect(hostname, port, 
+    net.connect(hostname, port, 
         std::bind(finish_connect, _1, _2, shake, handle_connect));
 }
 

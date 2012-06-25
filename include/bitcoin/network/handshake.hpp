@@ -73,7 +73,7 @@ private:
     message::version template_version_;
 };
 
-void connect(handshake_ptr shake, network_ptr net,
+void connect(handshake_ptr shake, network& net,
     const std::string& hostname, uint16_t port,
     network::connect_handler handle_connect);
 
