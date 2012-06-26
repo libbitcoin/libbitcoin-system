@@ -16,7 +16,7 @@ void start_polling(const std::error_code& ec, channel_ptr node,
     poll.monitor(node);
 }
 
-void blockchain_started(const std::error_code& ec, blockchain*)
+void blockchain_started(const std::error_code& ec)
 {
     if (ec)
         log_fatal() << "error: " << ec.message();
@@ -36,14 +36,9 @@ int main()
     connect(hs, net, "localhost", 8333,
         std::bind(start_polling, _1, _2, std::ref(poll)));
     std::cin.get();
-    std::cout << "begin close" << std::endl;
+    s1.stop();
+    s2.stop();
     chain.stop();
-    std::cout << "s1" << std::endl;
-    s1.shutdown();
-    std::cout << "s2" << std::endl;
-    s2.shutdown();
-    log_debug() << "shutdown";
-    std::cin.get();
     return 0;
 }
 
