@@ -18,8 +18,7 @@ class bdb_common;
 typedef std::shared_ptr<bdb_common> bdb_common_ptr;
 
 class bdb_blockchain
-  : public blockchain,
-    public std::enable_shared_from_this<bdb_blockchain>
+  : public blockchain
 {
 public:
     // Used by internal components so need public definition here
@@ -27,22 +26,18 @@ public:
         const std::error_code&, size_t, const block_list&, const block_list&>
             reorganize_subscriber_type;
 
-    typedef std::function<
-        void (const std::error_code, blockchain*)> start_handler;
+    typedef std::function<void (const std::error_code)> start_handler;
 
     static bool setup(const std::string& prefix);
-    // TODO: Deprecated - remove this
-    static blockchain* create(async_service& service,
-        const std::string& prefix, start_handler handle_start);
 
     bdb_blockchain(async_service& service);
-    ~bdb_blockchain();
 
     // Non-copyable
     bdb_blockchain(const bdb_blockchain&) = delete;
     void operator=(const bdb_blockchain&) = delete;
 
     void start(const std::string& prefix, start_handler handle_start);
+    void stop();
 
     void store(const message::block& stored_block,
         store_block_handler handle_store);
@@ -81,6 +76,7 @@ public:
 
 private:
     bool initialize(const std::string& prefix);
+    void shutdown();
 
     void do_store(const message::block& store_block,
         store_block_handler handle_store);
@@ -102,14 +98,14 @@ private:
         fetch_handler_outputs handle_fetch);
 
     io_service::strand strand_;
-    boost::interprocess::file_lock flock;
+    boost::interprocess::file_lock flock_;
 
-    DbEnv* env_;
-    Db* db_blocks_;
-    Db* db_blocks_hash_;
-    Db* db_txs_;
-    Db* db_spends_;
-    Db* db_address_;
+    DbEnv* env_ = nullptr;
+    Db* db_blocks_ = nullptr;
+    Db* db_blocks_hash_ = nullptr;
+    Db* db_txs_ = nullptr;
+    Db* db_spends_ = nullptr;
+    Db* db_address_ = nullptr;
 
     bdb_common_ptr common_;
 

@@ -34,22 +34,28 @@ constexpr uint32_t env_flags =
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
-blockchain* bdb_blockchain::create(async_service& service,
-    const std::string& prefix, start_handler handle_start)
-{
-    bdb_blockchain* chain = new bdb_blockchain(service);
-    chain->start(prefix, handle_start);
-    return chain;
-}
-
 bdb_blockchain::bdb_blockchain(async_service& service)
-  : strand_(service.get_service()), env_(nullptr)
+  : strand_(service.get_service())
 {
-    // Private method. Should never be called by user!
-    // Only by factory methods
-
     reorganize_subscriber_ =
         std::make_shared<reorganize_subscriber_type>(service);
+}
+
+void bdb_blockchain::start(const std::string& prefix,
+    start_handler handle_start)
+{
+    strand_.post(
+        [this, prefix, handle_start]
+        {
+            if (initialize(prefix))
+                handle_start(std::error_code());
+            else
+                handle_start(error::start_failed);
+        });
+}
+void bdb_blockchain::stop()
+{
+    shutdown();
 }
 
 template <typename Database>
@@ -59,10 +65,8 @@ inline void shutdown_database(Database*& database)
     delete database;
     database = nullptr;
 }
-bdb_blockchain::~bdb_blockchain()
+void bdb_blockchain::shutdown()
 {
-    reorganize_subscriber_->relay(
-        error::service_stopped, 0, block_list(), block_list());
     // Initialisation never started
     if (!env_)
         return;
@@ -76,19 +80,6 @@ bdb_blockchain::~bdb_blockchain()
     shutdown_database(env_);
     // delete
     google::protobuf::ShutdownProtobufLibrary();
-}
-
-void bdb_blockchain::start(const std::string& prefix,
-    start_handler handle_start)
-{
-    strand_.post(
-        [this, prefix, handle_start]()
-        {
-            if (!initialize(prefix))
-                handle_start(error::start_failed, nullptr);
-            else
-                handle_start(std::error_code(), this);
-        });
 }
 
 bool bdb_blockchain::setup(const std::string& prefix)
@@ -149,8 +140,8 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     lock_path /= "db-lock";
     std::ofstream touch_file(lock_path.native(), std::ios::app);
     touch_file.close();
-    flock = lock_path.c_str();
-    if (!flock.try_lock())
+    flock_ = lock_path.c_str();
+    if (!flock_.try_lock())
     {
         // Database already opened elsewhere
         return false;
@@ -330,7 +321,7 @@ void bdb_blockchain::fetch_block_transaction_hashes(size_t depth,
     fetch_handler_block_transaction_hashes handle_fetch)
 {
     strand_.post(
-        [this, depth, handle_fetch]()
+        [this, depth, handle_fetch]
         {
             fetch_blk_tx_hashes_impl(depth, env_, common_, handle_fetch);
         });
@@ -341,7 +332,7 @@ void bdb_blockchain::fetch_block_transaction_hashes(
     fetch_handler_block_transaction_hashes handle_fetch)
 {
     strand_.post(
-        [this, block_hash, handle_fetch]()
+        [this, block_hash, handle_fetch]
         {
             fetch_blk_tx_hashes_impl(block_hash, env_, common_, handle_fetch);
         });
