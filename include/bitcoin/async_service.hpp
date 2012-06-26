@@ -20,8 +20,10 @@ public:
     void operator=(const async_service&) = delete;
 
     void spawn();
+
     void stop();
     void shutdown();
+    void join();
 
     io_service& get_service();
     const io_service& get_service() const;

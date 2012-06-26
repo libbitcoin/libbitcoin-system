@@ -30,11 +30,11 @@ void protocol::start(completion_handler handle_complete)
 {
     atomic_counter_ptr count_paths = std::make_shared<atomic_counter>(0);
     bootstrap(strand_.wrap(
-        std::bind(&protocol::handle_bootstrap, shared_from_this(),
-            _1, count_paths, handle_complete)));
+        std::bind(&protocol::handle_bootstrap,
+            this, _1, count_paths, handle_complete)));
     handshake_.start(strand_.wrap(
         std::bind(&protocol::handle_start_handshake_service,
-            shared_from_this(), _1, count_paths, handle_complete)));
+            this, _1, count_paths, handle_complete)));
 }
 void protocol::handle_bootstrap(const std::error_code& ec,
     atomic_counter_ptr count_paths, completion_handler handle_complete)
@@ -74,8 +74,8 @@ void protocol::handle_start_handshake_service(const std::error_code& ec,
 void protocol::stop(completion_handler handle_complete)
 {
     hosts_->save(hosts_filename_,
-        strand_.wrap(std::bind(&protocol::handle_save, shared_from_this(),
-            _1, handle_complete)));
+        strand_.wrap(std::bind(&protocol::handle_save,
+            this, _1, handle_complete)));
 }
 void protocol::handle_save(const std::error_code& ec,
     completion_handler handle_complete)
@@ -93,8 +93,8 @@ void protocol::handle_save(const std::error_code& ec,
 void protocol::bootstrap(completion_handler handle_complete)
 {
     hosts_->load(hosts_filename_,
-        strand_.wrap(std::bind(&protocol::load_hosts, shared_from_this(),
-            _1, handle_complete)));
+        strand_.wrap(std::bind(&protocol::load_hosts,
+            this, _1, handle_complete)));
 }
 void protocol::load_hosts(const std::error_code& ec,
     completion_handler handle_complete)
@@ -107,8 +107,8 @@ void protocol::load_hosts(const std::error_code& ec,
         return;
     }
     hosts_->fetch_count(
-        strand_.wrap(std::bind(&protocol::if_0_seed, shared_from_this(),
-            _1, _2, handle_complete)));
+        strand_.wrap(std::bind(&protocol::if_0_seed,
+            this, _1, _2, handle_complete)));
 }
 
 void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
@@ -236,10 +236,10 @@ void protocol::seeds::handle_store(const std::error_code& ec)
 
 void protocol::run()
 {
-    strand_.dispatch(std::bind(&protocol::try_connect, shared_from_this()));
+    strand_.dispatch(std::bind(&protocol::try_connect, this));
     network_.listen(8333,
         strand_.wrap(std::bind(&protocol::handle_listen,
-            shared_from_this(), _1, _2)));
+            this, _1, _2)));
 }
 void protocol::try_connect()
 {
@@ -248,7 +248,7 @@ void protocol::try_connect()
     for (size_t i = connections_.size(); i < max_outbound_; ++i)
         hosts_->fetch_address(
             strand_.wrap(std::bind(&protocol::attempt_connect,
-                shared_from_this(), _1, _2)));
+                this, _1, _2)));
 }
 void protocol::attempt_connect(const std::error_code& ec,
     const message::network_address& address)
@@ -269,7 +269,7 @@ void protocol::attempt_connect(const std::error_code& ec,
                 << "Already connected to " << pretty_hex(address.ip);
             // Retry another connection
             strand_.post(
-                std::bind(&protocol::try_connect, shared_from_this()));
+                std::bind(&protocol::try_connect, this));
             return;
         }
     }
@@ -277,7 +277,7 @@ void protocol::attempt_connect(const std::error_code& ec,
         << pretty(address.ip) << ":" << address.port;
     connect(handshake_, network_, pretty(address.ip), address.port,
         strand_.wrap(std::bind(&protocol::handle_connect,
-            shared_from_this(), _1, _2, address)));
+            this, _1, _2, address)));
 }
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     const message::network_address& address)
@@ -287,7 +287,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         log_info(log_domain::protocol) << "Unable to connect to "
             << pretty(address.ip) << ":" << address.port
             << " - " << ec.message();
-        strand_.post(std::bind(&protocol::try_connect, shared_from_this()));
+        strand_.post(std::bind(&protocol::try_connect, this));
     }
     else
     {
@@ -310,7 +310,7 @@ void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
     {
         accept->accept(
             strand_.wrap(std::bind(&protocol::handle_accept,
-                shared_from_this(), _1, _2, accept)));
+                this, _1, _2, accept)));
     }
 }
 void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
@@ -341,7 +341,7 @@ void protocol::setup_new_channel(channel_ptr node)
     // Remove channel from list of connections
     node->subscribe_stop(
         strand_.wrap(std::bind(&protocol::channel_stopped,
-            shared_from_this(), _1, node)));
+            this, _1, node)));
     subscribe_address(node);
     node->send(message::get_address(), handle_send);
     // Notify subscribers
@@ -371,7 +371,7 @@ void protocol::subscribe_address(channel_ptr node)
 {
     node->subscribe_address(
         strand_.wrap(std::bind(&protocol::receive_address_message,
-            shared_from_this(), _1, _2, node)));
+            this, _1, _2, node)));
 }
 void protocol::receive_address_message(const std::error_code& ec,
     const message::address& packet, channel_ptr node)
@@ -387,7 +387,7 @@ void protocol::receive_address_message(const std::error_code& ec,
         for (const message::network_address& net_address: packet.addresses)
             hosts_->store(net_address,
                 strand_.wrap(std::bind(&protocol::handle_store_address,
-                    shared_from_this(), _1)));
+                    this, _1)));
     }
 }
 void protocol::handle_store_address(const std::error_code& ec)
@@ -402,7 +402,7 @@ void protocol::fetch_connection_count(
 {
     strand_.post(
         std::bind(&protocol::do_fetch_connection_count,
-            shared_from_this(), handle_fetch));
+            this, handle_fetch));
 }
 void protocol::do_fetch_connection_count(
     fetch_connection_count_handler handle_fetch)

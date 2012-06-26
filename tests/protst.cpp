@@ -1,7 +1,7 @@
 #include <bitcoin/bitcoin.hpp>
 using namespace libbitcoin;
 
-protocol_ptr prot;
+protocol* prot;
 
 void error_exit(const std::error_code& ec)
 {
@@ -39,7 +39,7 @@ int main()
     hosts_ptr hosts_ = std::make_shared<hosts>(service);
     handshake hs(service);
     network net(service);
-    prot = std::make_shared<protocol>(service, hosts_, hs, net);
+    prot = new protocol(service, hosts_, hs, net);
     prot->start(handle_start);
     prot->subscribe_channel(mewcj);
     //prot->bootstrap(handle_start);
@@ -52,7 +52,9 @@ int main()
     //    prot->fetch_connection_count(display_num_conns);
     //    sleep(1);
     //}
-    service.shutdown();
+    service.stop();
+    service.join();
+    delete prot;
     return 0;
 }
 

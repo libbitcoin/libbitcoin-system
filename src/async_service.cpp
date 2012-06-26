@@ -20,16 +20,20 @@ void async_service::spawn()
         work_ = new io_service::work(ios_);
     threads_.push_back(std::thread([this] { ios_.run(); }));
 }
+
 void async_service::stop()
 {
     ios_.stop();
-    for (std::thread& t: threads_)
-        t.join();
 }
 void async_service::shutdown()
 {
     delete work_;
     work_ = nullptr;
+}
+void async_service::join()
+{
+    for (std::thread& t: threads_)
+        t.join();
 }
 
 io_service& async_service::get_service()

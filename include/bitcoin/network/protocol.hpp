@@ -13,7 +13,6 @@
 namespace libbitcoin {
 
 class protocol
-  : public std::enable_shared_from_this<protocol>
 {
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
@@ -43,7 +42,7 @@ public:
     {
         strand_.post(
             std::bind(&protocol::do_broadcast<Message>,
-                shared_from_this(), packet));
+                this, packet));
     }
 
 private:
