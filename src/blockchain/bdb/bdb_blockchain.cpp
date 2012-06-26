@@ -35,16 +35,20 @@ constexpr uint32_t env_flags =
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
 bdb_blockchain::bdb_blockchain(async_service& service)
-  : strand_(service.get_service())
+  : async_strand(service)
 {
     reorganize_subscriber_ =
         std::make_shared<reorganize_subscriber_type>(service);
+}
+bdb_blockchain::~bdb_blockchain()
+{
+    BITCOIN_ASSERT(!env_);
 }
 
 void bdb_blockchain::start(const std::string& prefix,
     start_handler handle_start)
 {
-    strand_.post(
+    queue(
         [this, prefix, handle_start]
         {
             if (initialize(prefix))
@@ -202,7 +206,7 @@ bool bdb_blockchain::initialize(const std::string& prefix)
 void bdb_blockchain::store(const message::block& stored_block, 
     store_block_handler handle_store)
 {
-    strand_.post(
+    queue(
         std::bind(&bdb_blockchain::do_store,
             this, stored_block, handle_store));
 }
@@ -248,7 +252,7 @@ bool fetch_block_header_impl(txn_guard_ptr txn, const Index& index,
 void bdb_blockchain::fetch_block_header(size_t depth,
     fetch_handler_block_header handle_fetch)
 {
-    strand_.post(
+    queue(
         std::bind(&bdb_blockchain::fetch_block_header_by_depth,
             this, depth, handle_fetch));
 }
@@ -271,7 +275,7 @@ void bdb_blockchain::fetch_block_header_by_depth(size_t depth,
 void bdb_blockchain::fetch_block_header(const hash_digest& block_hash,
     fetch_handler_block_header handle_fetch)
 {
-    strand_.post(
+    queue(
         std::bind(&bdb_blockchain::fetch_block_header_by_hash,
             this, block_hash, handle_fetch));
 }
@@ -320,7 +324,7 @@ void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
 void bdb_blockchain::fetch_block_transaction_hashes(size_t depth,
     fetch_handler_block_transaction_hashes handle_fetch)
 {
-    strand_.post(
+    queue(
         [this, depth, handle_fetch]
         {
             fetch_blk_tx_hashes_impl(depth, env_, common_, handle_fetch);
@@ -331,7 +335,7 @@ void bdb_blockchain::fetch_block_transaction_hashes(
     const hash_digest& block_hash,
     fetch_handler_block_transaction_hashes handle_fetch)
 {
-    strand_.post(
+    queue(
         [this, block_hash, handle_fetch]
         {
             fetch_blk_tx_hashes_impl(block_hash, env_, common_, handle_fetch);
@@ -341,7 +345,7 @@ void bdb_blockchain::fetch_block_transaction_hashes(
 void bdb_blockchain::fetch_block_depth(const hash_digest& block_hash,
     fetch_handler_block_depth handle_fetch)
 {
-    strand_.post(
+    queue(
         std::bind(&bdb_blockchain::do_fetch_block_depth,
             this, block_hash, handle_fetch));
 }
@@ -367,7 +371,7 @@ void bdb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
 
 void bdb_blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
 {
-    strand_.post(
+    queue(
         std::bind(&bdb_blockchain::do_fetch_last_depth,
             this, handle_fetch));
 }
@@ -387,7 +391,7 @@ void bdb_blockchain::do_fetch_last_depth(fetch_handler_last_depth handle_fetch)
 void bdb_blockchain::fetch_transaction(const hash_digest& transaction_hash,
     fetch_handler_transaction handle_fetch)
 {
-    strand_.post(
+    queue(
         std::bind(&bdb_blockchain::do_fetch_transaction,
             this, transaction_hash, handle_fetch));
 }
@@ -411,7 +415,7 @@ void bdb_blockchain::fetch_transaction_index(
     const hash_digest& transaction_hash,
     fetch_handler_transaction_index handle_fetch)
 {
-    strand_.post(
+    queue(
         std::bind(&bdb_blockchain::do_fetch_transaction_index,
             this, transaction_hash, handle_fetch));
 }
@@ -443,7 +447,7 @@ void bdb_blockchain::do_fetch_transaction_index(
 void bdb_blockchain::fetch_spend(const message::output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
-    strand_.post(
+    queue(
         std::bind(&bdb_blockchain::do_fetch_spend,
             this, outpoint, handle_fetch));
 }
@@ -469,7 +473,7 @@ void bdb_blockchain::fetch_outputs(const payment_address& address,
         handle_fetch(error::unsupported_payment_type,
             message::output_point_list());
     else
-        strand_.post(
+        queue(
             std::bind(&bdb_blockchain::do_fetch_outputs,
                 this, address, handle_fetch));
 }

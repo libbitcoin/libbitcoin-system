@@ -14,18 +14,17 @@ async_service::async_service(size_t number_threads)
         spawn();
 }
 
-async_service::~async_service()
-{
-    service_.stop();
-    for (std::thread& t: threads_)
-        t.join();
-}
-
 void async_service::spawn()
 {
     if (!work_)
-        work_ = new io_service::work(service_);
-    threads_.push_back(std::thread([this] { service_.run(); }));
+        work_ = new io_service::work(ios_);
+    threads_.push_back(std::thread([this] { ios_.run(); }));
+}
+void async_service::stop()
+{
+    ios_.stop();
+    for (std::thread& t: threads_)
+        t.join();
 }
 void async_service::shutdown()
 {
@@ -35,11 +34,16 @@ void async_service::shutdown()
 
 io_service& async_service::get_service()
 {
-    return service_;
+    return ios_;
 }
 const io_service& async_service::get_service() const
 {
-    return service_;
+    return ios_;
+}
+
+async_strand::async_strand(async_service& service)
+  : ios_(service.get_service()), strand_(ios_)
+{
 }
 
 } // namespace libbitcoin

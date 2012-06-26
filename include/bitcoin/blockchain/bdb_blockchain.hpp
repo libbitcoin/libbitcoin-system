@@ -18,7 +18,7 @@ class bdb_common;
 typedef std::shared_ptr<bdb_common> bdb_common_ptr;
 
 class bdb_blockchain
-  : public blockchain
+  : public blockchain, public async_strand
 {
 public:
     // Used by internal components so need public definition here
@@ -31,6 +31,7 @@ public:
     static bool setup(const std::string& prefix);
 
     bdb_blockchain(async_service& service);
+    ~bdb_blockchain();
 
     // Non-copyable
     bdb_blockchain(const bdb_blockchain&) = delete;
@@ -97,7 +98,6 @@ private:
     void do_fetch_outputs(const payment_address& address,
         fetch_handler_outputs handle_fetch);
 
-    io_service::strand strand_;
     boost::interprocess::file_lock flock_;
 
     DbEnv* env_ = nullptr;

@@ -11,7 +11,7 @@ void show_last(const std::error_code& ec, size_t last_depth)
     log_info() << "Last block depth: " << last_depth;
 }
 
-void blockchain_started(const std::error_code& ec, blockchain*)
+void blockchain_started(const std::error_code& ec)
 {
     if (ec)
         log_error() << ec.message();
@@ -26,7 +26,8 @@ int main()
     chain.start("database", blockchain_started);
     chain.fetch_last_depth(show_last);
     std::cin.get();
-    service.shutdown();
+    service.stop();
+    chain.stop();
     return 0;
 }
 
