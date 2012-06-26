@@ -19,7 +19,7 @@ public:
         void (const std::error_code&, const index_list&)> validate_handler;
 
     validate_transaction(
-        blockchain_ptr chain, const message::transaction& tx,
+        blockchain& chain, const message::transaction& tx,
         const pool_buffer& pool, io_service::strand& async_strand);
     void start(validate_handler handle_validate);
 
@@ -59,7 +59,7 @@ private:
     void check_fees();
 
     io_service::strand& strand_;
-    blockchain_ptr chain_;
+    blockchain& chain_;
 
     const message::transaction tx_;
     const hash_digest tx_hash_;

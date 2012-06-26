@@ -42,7 +42,6 @@ typedef boost::circular_buffer<transaction_entry_info> pool_buffer;
  * @endcode
  */
 class transaction_pool
-  : public std::enable_shared_from_this<transaction_pool>
 {
 public:
     typedef std::function<
@@ -56,8 +55,9 @@ public:
 
     typedef transaction_entry_info::confirm_handler confirm_handler;
 
-    static transaction_pool_ptr create(
-        async_service& service, blockchain_ptr chain);
+    transaction_pool(async_service& service, blockchain& chain);
+    void start();
+
 
     /// Non-copyable class
     transaction_pool(const transaction_pool&) = delete;
@@ -122,9 +122,6 @@ public:
         exists_handler handle_exists);
 
 private:
-    transaction_pool(async_service& service);
-    void initialize(blockchain_ptr chain);
-
     void do_store(const message::transaction& stored_transaction,
         confirm_handler handle_confirm, store_handler handle_store);
     void handle_delegate(
@@ -142,7 +139,7 @@ private:
     void try_delete(const hash_digest& tx_hash);
 
     io_service::strand strand_;
-    blockchain_ptr chain_;
+    blockchain& chain_;
     pool_buffer pool_;
 };
 

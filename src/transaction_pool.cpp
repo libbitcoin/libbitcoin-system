@@ -12,32 +12,24 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 using std::placeholders::_4;
 
-transaction_pool_ptr transaction_pool::create(
-    async_service& service, blockchain_ptr chain)
-{
-    transaction_pool_ptr tx_pool(new transaction_pool(service));
-    tx_pool->initialize(chain);
-    return tx_pool;
-}
-
-transaction_pool::transaction_pool(async_service& service)
-  : strand_(service.get_service()), pool_(2000)
+transaction_pool::transaction_pool(
+    async_service& service, blockchain& chain)
+  : strand_(service.get_service()), chain_(chain), pool_(2000)
 {
 }
-void transaction_pool::initialize(blockchain_ptr chain)
+void transaction_pool::start()
 {
-    chain_ = chain;
-    chain_->subscribe_reorganize(
+    chain_.subscribe_reorganize(
         strand_.wrap(std::bind(&transaction_pool::reorganize,
-            shared_from_this(), _1, _2, _3, _4)));
+            this, _1, _2, _3, _4)));
 }
 
 void transaction_pool::store(const message::transaction& stored_transaction,
     confirm_handler handle_confirm, store_handler handle_store)
 {
     strand_.post(
-        std::bind(&transaction_pool::do_store, shared_from_this(),
-            stored_transaction, handle_confirm, handle_store));
+        std::bind(&transaction_pool::do_store,
+            this, stored_transaction, handle_confirm, handle_store));
 }
 void transaction_pool::do_store(
     const message::transaction& stored_transaction,
@@ -53,7 +45,7 @@ void transaction_pool::do_store(
             chain_, stored_transaction, pool_, strand_);
     validate->start(strand_.wrap(std::bind(
         &transaction_pool::handle_delegate,
-            shared_from_this(), _1, _2, new_tx_entry, handle_store)));
+            this, _1, _2, new_tx_entry, handle_store)));
 }
 
 void transaction_pool::handle_delegate(
@@ -94,9 +86,8 @@ bool transaction_pool::tx_exists(const hash_digest& tx_hash)
 void transaction_pool::fetch(const hash_digest& transaction_hash,
     fetch_handler handle_fetch)
 {
-    auto this_ptr = shared_from_this();
     strand_.post(
-        [&, this_ptr, transaction_hash, handle_fetch]()
+        [this, transaction_hash, handle_fetch]()
         {
             for (const transaction_entry_info& entry: pool_)
                 if (entry.hash == transaction_hash)
@@ -111,9 +102,8 @@ void transaction_pool::fetch(const hash_digest& transaction_hash,
 void transaction_pool::exists(const hash_digest& transaction_hash,
     exists_handler handle_exists)
 {
-    auto this_ptr = shared_from_this();
     strand_.post(
-        [&, this_ptr, transaction_hash, handle_exists]()
+        [this, transaction_hash, handle_exists]()
         {
             handle_exists(tx_exists(transaction_hash));
         });
@@ -130,9 +120,9 @@ void transaction_pool::reorganize(const std::error_code& ec,
         takeout_confirmed(new_blocks);
     // new blocks come in - remove txs in new
     // old blocks taken out - resubmit txs in old
-    chain_->subscribe_reorganize(
+    chain_.subscribe_reorganize(
         strand_.wrap(std::bind(&transaction_pool::reorganize,
-            shared_from_this(), _1, _2, _3, _4)));
+            this, _1, _2, _3, _4)));
 }
 
 void handle_resubmit(const std::error_code& ec,

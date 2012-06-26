@@ -38,6 +38,8 @@ int main()
     std::cin.get();
     s1.stop();
     s2.stop();
+    s1.join();
+    s2.join();
     chain.stop();
     return 0;
 }
