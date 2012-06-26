@@ -23,7 +23,7 @@ public:
     typedef std::function<void (channel_ptr)> channel_handler;
 
     protocol(async_service& service, hosts_ptr hosts_dir,
-        handshake_ptr handshaker, network_ptr net);
+        handshake& shake, network& net);
 
     protocol(const protocol&) = delete;
     void operator=(const protocol&) = delete;
@@ -99,8 +99,8 @@ private:
 
         // From parent
         hosts_ptr hosts_;
-        handshake_ptr handshake_;
-        network_ptr network_;
+        handshake& handshake_;
+        network& network_;
         io_service::strand& strand_;
     };
     std::shared_ptr<seeds> load_seeds_;
@@ -147,8 +147,8 @@ private:
 
     const std::string hosts_filename_;
     hosts_ptr hosts_;
-    handshake_ptr handshake_;
-    network_ptr network_;
+    handshake& handshake_;
+    network& network_;
 
     size_t max_outbound_;
     connection_list connections_;

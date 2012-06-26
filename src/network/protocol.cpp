@@ -18,10 +18,10 @@ static std::string pretty(const message::ip_address& ip)
 }
 
 protocol::protocol(async_service& service, hosts_ptr hosts_dir,
-    handshake_ptr handshaker, network_ptr net)
+    handshake& shake, network& net)
   : hosts_filename_("hosts"), max_outbound_(8),
     strand_(service.get_service()), hosts_(hosts_dir),
-    handshake_(handshaker), network_(net)
+    handshake_(shake), network_(net)
 {
     channel_subscribe_ = std::make_shared<channel_subscriber_type>(service);
 }
@@ -32,7 +32,7 @@ void protocol::start(completion_handler handle_complete)
     bootstrap(strand_.wrap(
         std::bind(&protocol::handle_bootstrap, shared_from_this(),
             _1, count_paths, handle_complete)));
-    handshake_->start(strand_.wrap(
+    handshake_.start(strand_.wrap(
         std::bind(&protocol::handle_start_handshake_service,
             shared_from_this(), _1, count_paths, handle_complete)));
 }
@@ -139,11 +139,9 @@ const std::vector<std::string> dns_seeds
 };
 
 protocol::seeds::seeds(protocol* parent)
-  : strand_(parent->strand_)
+  : strand_(parent->strand_), hosts_(parent->hosts_),
+    handshake_(parent->handshake_), network_(parent->network_)
 {
-    hosts_ = parent->hosts_;
-    handshake_ = parent->handshake_;
-    network_ = parent->network_;
 }
 void protocol::seeds::start(completion_handler handle_complete)
 {
@@ -168,7 +166,7 @@ void protocol::seeds::error_case(const std::error_code& ec)
 
 void protocol::seeds::connect_dns_seed(const std::string& hostname)
 {
-    connect(*handshake_, *network_, hostname, 8333,
+    connect(handshake_, network_, hostname, 8333,
         strand_.wrap(std::bind(&protocol::seeds::request_addresses,
             shared_from_this(), _1, _2)));
 }
@@ -239,7 +237,7 @@ void protocol::seeds::handle_store(const std::error_code& ec)
 void protocol::run()
 {
     strand_.dispatch(std::bind(&protocol::try_connect, shared_from_this()));
-    network_->listen(8333,
+    network_.listen(8333,
         strand_.wrap(std::bind(&protocol::handle_listen,
             shared_from_this(), _1, _2)));
 }
@@ -277,7 +275,7 @@ void protocol::attempt_connect(const std::error_code& ec,
     }
     log_info(log_domain::protocol) << "Trying "
         << pretty(address.ip) << ":" << address.port;
-    connect(*handshake_, *network_, pretty(address.ip), address.port,
+    connect(handshake_, network_, pretty(address.ip), address.port,
         strand_.wrap(std::bind(&protocol::handle_connect,
             shared_from_this(), _1, _2, address)));
 }

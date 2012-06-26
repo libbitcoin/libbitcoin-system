@@ -37,21 +37,22 @@ int main()
 {
     async_service service(1);
     hosts_ptr hosts_ = std::make_shared<hosts>(service);
-    handshake_ptr handshake_ = std::make_shared<handshake>(service);
-    network_ptr network_ = std::make_shared<network>(service);
-    prot = std::make_shared<protocol>(service, hosts_, handshake_, network_);
+    handshake hs(service);
+    network net(service);
+    prot = std::make_shared<protocol>(service, hosts_, hs, net);
     prot->start(handle_start);
     prot->subscribe_channel(mewcj);
     //prot->bootstrap(handle_start);
     //std::cin.get();
     //prot->stop(handle_stop);
     //log_debug() << "stopping.";
-    //std::cin.get();
-    while (true)
-    {
-        prot->fetch_connection_count(display_num_conns);
-        sleep(1);
-    }
+    std::cin.get();
+    //while (true)
+    //{
+    //    prot->fetch_connection_count(display_num_conns);
+    //    sleep(1);
+    //}
+    service.shutdown();
     return 0;
 }
 

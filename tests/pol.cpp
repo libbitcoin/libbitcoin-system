@@ -31,10 +31,18 @@ int main()
     bdb_blockchain chain(s1);
     chain.start("database", blockchain_started);
     poller poll(s2, chain);
-    network_ptr net = std::make_shared<network>(s2);
-    handshake_ptr hs = std::make_shared<handshake>(s2);
+    network net(s2);
+    handshake hs(s2);
     connect(hs, net, "localhost", 8333,
         std::bind(start_polling, _1, _2, std::ref(poll)));
+    std::cin.get();
+    std::cout << "begin close" << std::endl;
+    chain.stop();
+    std::cout << "s1" << std::endl;
+    s1.shutdown();
+    std::cout << "s2" << std::endl;
+    s2.shutdown();
+    log_debug() << "shutdown";
     std::cin.get();
     return 0;
 }
