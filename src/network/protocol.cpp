@@ -17,11 +17,10 @@ static std::string pretty(const message::ip_address& ip)
     return oss.str();
 }
 
-protocol::protocol(async_service& service, hosts_ptr hosts_dir,
+protocol::protocol(async_service& service, hosts& hsts,
     handshake& shake, network& net)
-  : hosts_filename_("hosts"), max_outbound_(8),
-    strand_(service.get_service()), hosts_(hosts_dir),
-    handshake_(shake), network_(net)
+  : strand_(service.get_service()), hosts_filename_("hosts"),
+    hosts_(hsts), handshake_(shake), network_(net), max_outbound_(8)
 {
     channel_subscribe_ = std::make_shared<channel_subscriber_type>(service);
 }
@@ -73,7 +72,7 @@ void protocol::handle_start_handshake_service(const std::error_code& ec,
 
 void protocol::stop(completion_handler handle_complete)
 {
-    hosts_->save(hosts_filename_,
+    hosts_.save(hosts_filename_,
         strand_.wrap(std::bind(&protocol::handle_save,
             this, _1, handle_complete)));
 }
@@ -92,7 +91,7 @@ void protocol::handle_save(const std::error_code& ec,
 
 void protocol::bootstrap(completion_handler handle_complete)
 {
-    hosts_->load(hosts_filename_,
+    hosts_.load(hosts_filename_,
         strand_.wrap(std::bind(&protocol::load_hosts,
             this, _1, handle_complete)));
 }
@@ -106,7 +105,7 @@ void protocol::load_hosts(const std::error_code& ec,
         handle_complete(ec);
         return;
     }
-    hosts_->fetch_count(
+    hosts_.fetch_count(
         strand_.wrap(std::bind(&protocol::if_0_seed,
             this, _1, _2, handle_complete)));
 }
@@ -214,7 +213,7 @@ void protocol::seeds::save_addresses(const std::error_code& ec,
     {
         log_info() << "Storing seeded addresses.";
         for (const message::network_address& net_address: packet.addresses)
-            hosts_->store(net_address,
+            hosts_.store(net_address,
                 strand_.wrap(std::bind(&protocol::seeds::handle_store,
                     shared_from_this(), _1)));
 
@@ -246,7 +245,7 @@ void protocol::try_connect()
     if (connections_.size() >= max_outbound_)
         return;
     for (size_t i = connections_.size(); i < max_outbound_; ++i)
-        hosts_->fetch_address(
+        hosts_.fetch_address(
             strand_.wrap(std::bind(&protocol::attempt_connect,
                 this, _1, _2)));
 }
@@ -385,7 +384,7 @@ void protocol::receive_address_message(const std::error_code& ec,
     {
         log_info() << "Storing addresses.";
         for (const message::network_address& net_address: packet.addresses)
-            hosts_->store(net_address,
+            hosts_.store(net_address,
                 strand_.wrap(std::bind(&protocol::handle_store_address,
                     this, _1)));
     }

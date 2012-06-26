@@ -21,7 +21,7 @@ public:
         fetch_connection_count_handler;
     typedef std::function<void (channel_ptr)> channel_handler;
 
-    protocol(async_service& service, hosts_ptr hosts_dir,
+    protocol(async_service& service, hosts& hsts,
         handshake& shake, network& net);
 
     protocol(const protocol&) = delete;
@@ -97,10 +97,10 @@ private:
         bool finished_;
 
         // From parent
-        hosts_ptr hosts_;
+        io_service::strand& strand_;
+        hosts& hosts_;
         handshake& handshake_;
         network& network_;
-        io_service::strand& strand_;
     };
     std::shared_ptr<seeds> load_seeds_;
     friend class seeds;
@@ -145,7 +145,7 @@ private:
     io_service::strand strand_;
 
     const std::string hosts_filename_;
-    hosts_ptr hosts_;
+    hosts& hosts_;
     handshake& handshake_;
     network& network_;
 

@@ -36,10 +36,10 @@ void mewcj(channel_ptr node)
 int main()
 {
     async_service service(1);
-    hosts_ptr hosts_ = std::make_shared<hosts>(service);
+    hosts hst(service);
     handshake hs(service);
     network net(service);
-    prot = new protocol(service, hosts_, hs, net);
+    prot = new protocol(service, hst, hs, net);
     prot->start(handle_start);
     prot->subscribe_channel(mewcj);
     //prot->bootstrap(handle_start);
