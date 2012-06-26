@@ -10,7 +10,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 getx_responder::getx_responder(async_service& service,
-    blockchain_ptr chain, transaction_pool_ptr txpool)
+    blockchain& chain, transaction_pool& txpool)
   : service_(service.get_service()), chain_(chain), txpool_(txpool)
 {
 }
@@ -20,7 +20,7 @@ void getx_responder::monitor(channel_ptr node)
     node->subscribe_get_data(
         service_.wrap(std::bind(
             &getx_responder::receive_get_data,
-                shared_from_this(), _1, _2, node)));
+                this, _1, _2, node)));
 }
 
 void getx_responder::receive_get_data(const std::error_code& ec,
@@ -35,17 +35,17 @@ void getx_responder::receive_get_data(const std::error_code& ec,
             case message::inventory_type::transaction:
                 // First attempt lookup in faster pool, then do slow
                 // lookup in blockchain after.
-                txpool_->fetch(inv.hash,
+                txpool_.fetch(inv.hash,
                     service_.wrap(std::bind(
                         &getx_responder::pool_tx,
-                            shared_from_this(), _1, _2, inv.hash, node)));
+                            this, _1, _2, inv.hash, node)));
                 break;
 
             case message::inventory_type::block:
-                fetch_block(*chain_, inv.hash,
+                fetch_block(chain_, inv.hash,
                     service_.wrap(std::bind(
                         &getx_responder::send_block,
-                            shared_from_this(), _1, _2, node)));
+                            this, _1, _2, node)));
                 break;
 
             // Ignore everything else
@@ -58,7 +58,7 @@ void getx_responder::receive_get_data(const std::error_code& ec,
     node->subscribe_get_data(
         service_.wrap(std::bind(
             &getx_responder::receive_get_data,
-                shared_from_this(), _1, _2, node)));
+                this, _1, _2, node)));
 }
 
 void getx_responder::pool_tx(const std::error_code& ec,
@@ -67,10 +67,10 @@ void getx_responder::pool_tx(const std::error_code& ec,
 {
     if (ec)
     {
-        chain_->fetch_transaction(tx_hash,
+        chain_.fetch_transaction(tx_hash,
             service_.wrap(std::bind(
                 &getx_responder::chain_tx,
-                    shared_from_this(), _1, _2, node)));
+                    this, _1, _2, node)));
     }
     else
         node->send(tx, [](const std::error_code&) {});

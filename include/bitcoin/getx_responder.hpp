@@ -10,11 +10,10 @@
 namespace libbitcoin {
 
 class getx_responder
-  : public std::enable_shared_from_this<getx_responder>
 {
 public:
     getx_responder(async_service& service,
-        blockchain_ptr chain, transaction_pool_ptr txpool);
+        blockchain& chain, transaction_pool& txpool);
     void monitor(channel_ptr node);
 
 private:
@@ -30,8 +29,8 @@ private:
         const message::block blk, channel_ptr node);
 
     io_service& service_;
-    blockchain_ptr chain_;
-    transaction_pool_ptr txpool_;
+    blockchain& chain_;
+    transaction_pool& txpool_;
 };
 
 } // libbitcoin
