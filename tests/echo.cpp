@@ -14,8 +14,14 @@ class echo_app
 {
 public:
     echo_app()
+      : service_(1)
     {
-        net_ = std::make_shared<network>();
+        net_ = std::make_shared<network>(service_);
+    }
+    ~echo_app()
+    {
+        service_.stop();
+        service_.join();
     }
 
     void start()
@@ -30,6 +36,8 @@ private:
             error_exit(ec);
         accept_ = accept;
         accept_->accept(std::bind(&echo_app::handle_accept, this, _1, _2));
+        net_->connect("localhost", 9292,
+            std::bind(&echo_app::handle_connect, this, _1, _2));
     }
     void handle_accept(const std::error_code& ec, channel_ptr node)
     {
@@ -40,6 +48,14 @@ private:
             std::bind(&echo_app::handle_receive_tx, this, _1, _2, node));
     }
 
+    void handle_connect(const std::error_code& ec, channel_ptr node)
+    {
+        // if this node dies then the connection is closed duh
+        // and the accepted node (recver) also closes... duh
+        sender = node;
+        node->send(message::ping(), [](const std::error_code&) {});
+    }
+
     void handle_receive_tx(const std::error_code& ec,
         const message::transaction& tx, channel_ptr node)
     {
@@ -48,8 +64,10 @@ private:
         log_info() << "Got tx " << pretty_hex(hash_transaction(tx));
     }
 
+    async_service service_;
     network_ptr net_;
     acceptor_ptr accept_;
+    channel_ptr sender, recver;
 };
 
 int main()
