@@ -15,13 +15,11 @@ namespace libbitcoin {
 
 struct session_params
 {
-    hosts_ptr hosts_;
-    handshake_ptr handshake_;
-    network_ptr network_;
-    protocol_ptr protocol_;
-    blockchain_ptr blockchain_;
-    poller_ptr poller_;
-    transaction_pool_ptr transaction_pool_;
+    handshake& handshake_;
+    protocol& protocol_;
+    blockchain& blockchain_;
+    poller& poller_;
+    transaction_pool& transaction_pool_;
 };
 
 /**
@@ -83,7 +81,6 @@ private:
 };
 
 class session
-  : public std::enable_shared_from_this<session>
 {
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
@@ -109,15 +106,13 @@ private:
     void request_tx_data(bool tx_exists,
         const hash_digest& tx_hash, channel_ptr node);
 
-    hosts_ptr hosts_;
-    handshake_ptr handshake_;
-    network_ptr network_;
-    protocol_ptr protocol_;
-    blockchain_ptr chain_;
-    poller_ptr poll_;
-    transaction_pool_ptr tx_pool_;
-
     io_service::strand strand_;
+
+    handshake& handshake_;
+    protocol& protocol_;
+    blockchain& chain_;
+    poller& poll_;
+    transaction_pool& tx_pool_;
 
     pumpkin_buffer<hash_digest> grabbed_invs_;
 };

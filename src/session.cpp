@@ -11,11 +11,11 @@ using std::placeholders::_3;
 using std::placeholders::_4;
 
 session::session(async_service& service, const session_params& params)
-  : hosts_(params.hosts_), handshake_(params.handshake_),
-    network_(params.network_), protocol_(params.protocol_),
+  : strand_(service.get_service()),
+    handshake_(params.handshake_), protocol_(params.protocol_),
     chain_(params.blockchain_), poll_(params.poller_),
     tx_pool_(params.transaction_pool_),
-    strand_(service.get_service()), grabbed_invs_(20)
+    grabbed_invs_(20)
 {
 }
 
@@ -26,43 +26,41 @@ void handle_set_start_depth(const std::error_code&)
 }
 void session::start(completion_handler handle_complete)
 {
-    auto this_ptr = shared_from_this();
-    protocol_->start(handle_complete);
-    protocol_->subscribe_channel(
-        [&, this_ptr](channel_ptr node)
+    protocol_.start(handle_complete);
+    protocol_.subscribe_channel(
+        [this](channel_ptr node)
         {
-            poll_->query(node);
+            poll_.query(node);
         });
-    protocol_->subscribe_channel(
-        std::bind(&session::new_channel, this_ptr, _1));
-    chain_->fetch_last_depth(
+    protocol_.subscribe_channel(
+        std::bind(&session::new_channel, this, _1));
+    chain_.fetch_last_depth(
         std::bind(&handshake::set_start_depth,
-            handshake_, _2, handle_set_start_depth));
-    chain_->subscribe_reorganize(
+            &handshake_, _2, handle_set_start_depth));
+    chain_.subscribe_reorganize(
         std::bind(&session::set_start_depth,
-            this_ptr, _1, _2, _3, _4));
+            this, _1, _2, _3, _4));
 }
 
 void session::stop(completion_handler handle_complete)
 {
-    protocol_->stop(handle_complete);
+    protocol_.stop(handle_complete);
 }
 
 void session::new_channel(channel_ptr node)
 {
-    auto this_ptr = shared_from_this();
     BITCOIN_ASSERT(node);
     node->subscribe_inventory(
-        std::bind(&session::inventory, this_ptr, _1, _2, node));
+        std::bind(&session::inventory, this, _1, _2, node));
     node->subscribe_get_data(
-        std::bind(&session::get_data, this_ptr, _1, _2, node));
+        std::bind(&session::get_data, this, _1, _2, node));
     node->subscribe_get_blocks(
-        std::bind(&session::get_blocks, this_ptr, _1, _2, node));
+        std::bind(&session::get_blocks, this, _1, _2, node));
     // tx
     // block
-    protocol_->subscribe_channel(
-        std::bind(&session::new_channel, this_ptr, _1));
-    poll_->monitor(node);
+    protocol_.subscribe_channel(
+        std::bind(&session::new_channel, this, _1));
+    poll_.monitor(node);
 }
 
 void session::set_start_depth(const std::error_code& ec, size_t fork_point,
@@ -70,10 +68,10 @@ void session::set_start_depth(const std::error_code& ec, size_t fork_point,
     const blockchain::block_list& replaced_blocks)
 {
     size_t last_depth = fork_point + new_blocks.size();
-    handshake_->set_start_depth(last_depth, handle_set_start_depth);
-    chain_->subscribe_reorganize(
+    handshake_.set_start_depth(last_depth, handle_set_start_depth);
+    chain_.subscribe_reorganize(
         std::bind(&session::set_start_depth,
-            shared_from_this(), _1, _2, _3, _4));
+            this, _1, _2, _3, _4));
     // Broadcast invs of new blocks
     message::inventory blocks_inv;
     for (auto block: new_blocks)
@@ -82,13 +80,12 @@ void session::set_start_depth(const std::error_code& ec, size_t fork_point,
             message::inventory_type::block,
             hash_block_header(*block)});
     }
-    protocol_->broadcast(blocks_inv);
+    protocol_.broadcast(blocks_inv);
 }
 
 void session::inventory(const std::error_code& ec,
     const message::inventory& packet, channel_ptr node)
 {
-    auto this_ptr = shared_from_this();
     if (ec)
     {
         log_error(log_domain::session) << "inventory: " << ec.message();
@@ -99,7 +96,7 @@ void session::inventory(const std::error_code& ec,
         if (ivec.type == message::inventory_type::transaction)
             strand_.post(
                 std::bind(&session::new_tx_inventory,
-                    this_ptr, ivec.hash, node));
+                    this, ivec.hash, node));
         else if (ivec.type == message::inventory_type::block);
             // Do nothing. Handled by poller.
         else
@@ -107,7 +104,7 @@ void session::inventory(const std::error_code& ec,
                 << "Ignoring unknown inventory type";
     }
     node->subscribe_inventory(
-        std::bind(&session::inventory, this_ptr, _1, _2, node));
+        std::bind(&session::inventory, this, _1, _2, node));
 }
 
 void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
@@ -118,9 +115,9 @@ void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
         << "Transaction inventory: " << pretty_hex(tx_hash);
     // does it exist already
     // if not then issue getdata
-    tx_pool_->exists(tx_hash,
+    tx_pool_.exists(tx_hash,
         std::bind(&session::request_tx_data,
-            shared_from_this(), _1, tx_hash, node));
+            this, _1, tx_hash, node));
     grabbed_invs_.store(tx_hash);
 }
 
@@ -134,7 +131,7 @@ void session::get_data(const std::error_code& ec,
     }
     // simple stuff
     node->subscribe_get_data(
-        std::bind(&session::get_data, shared_from_this(), _1, _2, node));
+        std::bind(&session::get_data, this, _1, _2, node));
 }
 
 void session::get_blocks(const std::error_code& ec,
@@ -149,7 +146,7 @@ void session::get_blocks(const std::error_code& ec,
     // have memory of last inv, ready to trigger send next 500 once
     // getdata done for it.
     node->subscribe_get_blocks(
-        std::bind(&session::get_blocks, shared_from_this(), _1, _2, node));
+        std::bind(&session::get_blocks, this, _1, _2, node));
 }
 
 void handle_send_get_data(const std::error_code& ec)
