@@ -16,8 +16,9 @@ Ubuntu Instructions
 
   $ sudo apt-get install build-essential autoconf libtool libboost-dev libdb++-dev libprotobuf-dev pkg-config libcurl4-openssl-dev
   $ autoreconf -i
+  $ ./configure --enable-bdb
   $ make
-  # make install
+  $ sudo make install
 
 pkg-config can be invoked to get the neccessary compile and build flags.
 
