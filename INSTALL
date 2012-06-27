@@ -9,6 +9,27 @@ are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.  This file is offered as-is,
 without warranty of any kind.
 
+Ubuntu Instructions
+===================
+
+*Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of libbost-dev
+
+  $ sudo apt-get install build-essential autoconf libtool libboost-dev libdb++-dev libprotobuf-dev pkg-config libcurl4-openssl-dev
+  $ autoreconf -i
+  $ make
+  # make install
+
+pkg-config can be invoked to get the neccessary compile and build flags.
+
+  $ pkg-config --cflags --libs libbitcoin
+
+To run the protocol test program:
+
+  $ mkdir -p obj/ bin/tests/
+  $ make -f development-makefile protst
+  $ export LD_LIBRARY_PATH=/usr/local/lib
+  $ ./bin/tests/protst
+
 Basic Installation
 ==================
 

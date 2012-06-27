@@ -37,6 +37,14 @@ constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 bdb_blockchain::bdb_blockchain(async_service& service)
   : async_strand(service)
 {
+#ifndef CXX_COMPAT
+    env_ = nullptr;
+    db_blocks_ = nullptr;
+    db_blocks_hash_ = nullptr;
+    db_txs_ = nullptr;
+    db_spends_ = nullptr;
+    db_address_ = nullptr;
+#endif
     reorganize_subscriber_ =
         std::make_shared<reorganize_subscriber_type>(service);
 }

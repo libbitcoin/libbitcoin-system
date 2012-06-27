@@ -100,12 +100,21 @@ private:
 
     boost::interprocess::file_lock flock_;
 
+#ifdef CXX_COMPAT
     DbEnv* env_ = nullptr;
     Db* db_blocks_ = nullptr;
     Db* db_blocks_hash_ = nullptr;
     Db* db_txs_ = nullptr;
     Db* db_spends_ = nullptr;
     Db* db_address_ = nullptr;
+#else
+    DbEnv* env_;
+    Db* db_blocks_;
+    Db* db_blocks_hash_;
+    Db* db_txs_;
+    Db* db_spends_;
+    Db* db_address_;
+#endif
 
     bdb_common_ptr common_;
 
