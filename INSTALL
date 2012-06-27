@@ -12,7 +12,7 @@ without warranty of any kind.
 Ubuntu Instructions
 ===================
 
-*Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of libbost-dev
+*Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of libboost-dev
 
   $ sudo apt-get install build-essential autoconf libtool libboost-dev libdb++-dev libprotobuf-dev pkg-config libcurl4-openssl-dev
   $ autoreconf -i
