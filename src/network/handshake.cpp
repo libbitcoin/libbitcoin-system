@@ -1,10 +1,12 @@
 #include <bitcoin/network/handshake.hpp>
-#include <bitcoin/network/network.hpp>
 
 #include <functional>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <curl/curl.h>
+
+#include <bitcoin/network/network.hpp>
+#include <bitcoin/version.hpp>
 
 namespace libbitcoin {
 
@@ -29,7 +31,7 @@ handshake::handshake(async_service& service)
         message::ip_address{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                             0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
     template_version_.address_you.port = 8333;
-    template_version_.user_agent = "/libbitcoin:0.1a/";
+    template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_LIB_VERSION "/";
     template_version_.start_depth = 0;
     template_version_.nonce = rand();
 }

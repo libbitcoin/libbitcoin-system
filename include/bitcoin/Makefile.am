@@ -16,7 +16,8 @@ bitcoin_include_HEADERS = \
 	format.hpp \
 	transaction_pool.hpp \
 	async_service.hpp \
-	poller.hpp
+	poller.hpp \
+    version.hpp
 
 bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
 bitcoin_blockchain_include_HEADERS = \
