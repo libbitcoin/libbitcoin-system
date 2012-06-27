@@ -323,12 +323,39 @@ size_t satoshi_raw_size(const ping& packet);
 template <typename Iterator>
 void satoshi_save(const ping& packet, Iterator result)
 {
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
+    serializer serial;
+    serial.write_8_bytes(packet.nonce);
+    data_chunk raw_data = serial.data();
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == raw_data.size());
+    std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, ping& packet)
 {
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
+    data_chunk stream(first, last);
+    deserializer deserial(stream);
+    packet.nonce = deserial.read_8_bytes();
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
+}
+
+const std::string satoshi_command(const pong&);
+size_t satoshi_raw_size(const pong& packet);
+template <typename Iterator>
+void satoshi_save(const pong& packet, Iterator result)
+{
+    serializer serial;
+    serial.write_8_bytes(packet.nonce);
+    data_chunk raw_data = serial.data();
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == raw_data.size());
+    std::copy(raw_data.begin(), raw_data.end(), result);
+}
+template <typename Iterator>
+void satoshi_load(Iterator first, Iterator last, pong& packet)
+{
+    data_chunk stream(first, last);
+    deserializer deserial(stream);
+    packet.nonce = deserial.read_8_bytes();
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
 } // message

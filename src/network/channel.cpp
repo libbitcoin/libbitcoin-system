@@ -235,10 +235,15 @@ bool verify_header(const message::header& header_msg)
             return false;
     }
     else if (header_msg.command == "verack"
-        || header_msg.command == "getaddr"
-        || header_msg.command == "ping")
+        || header_msg.command == "getaddr")
     {
         if (header_msg.payload_length != 0)
+            return false;
+    }
+    else if (header_msg.command == "ping"
+        || header_msg.command == "pong")
+    {
+        if (header_msg.payload_length != 8)
             return false;
     }
     else if (header_msg.command == "inv"

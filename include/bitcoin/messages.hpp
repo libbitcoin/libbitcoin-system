@@ -142,6 +142,11 @@ struct inventory
 
 struct ping
 {
+    uint64_t nonce;
+};
+struct pong
+{
+    uint64_t nonce;
 };
 
 } // message

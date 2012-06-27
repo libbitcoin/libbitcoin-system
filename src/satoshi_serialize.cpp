@@ -234,7 +234,16 @@ const std::string satoshi_command(const ping&)
 }
 size_t satoshi_raw_size(const ping& packet)
 {
-    return 0;
+    return 8;
+}
+
+const std::string satoshi_command(const pong&)
+{
+    return "pong";
+}
+size_t satoshi_raw_size(const pong& packet)
+{
+    return 8;
 }
 
 } // message
