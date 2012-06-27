@@ -114,6 +114,7 @@ bool bdb_blockchain::setup(const std::string& prefix)
         return false;
     }
     txn->commit();
+    handle.shutdown();
     return true;
 }
 
