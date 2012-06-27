@@ -67,6 +67,8 @@ void bdb_blockchain::start(const std::string& prefix,
 }
 void bdb_blockchain::stop()
 {
+    reorganize_subscriber_->relay(error::service_stopped,
+        0, block_list(), block_list());
     shutdown();
 }
 
