@@ -70,10 +70,27 @@ bool is_push_only(const operation_stack& operations)
     auto is_push =
         [](opcode code)
         {
-            return code == opcode::special
+            return code == opcode::zero
+                || code == opcode::special
                 || code == opcode::pushdata1
                 || code == opcode::pushdata2
-                || code == opcode::pushdata4;
+                || code == opcode::pushdata4
+                || code == opcode::op_1
+                || code == opcode::op_2
+                || code == opcode::op_3
+                || code == opcode::op_4
+                || code == opcode::op_5
+                || code == opcode::op_6
+                || code == opcode::op_7
+                || code == opcode::op_8
+                || code == opcode::op_9
+                || code == opcode::op_10
+                || code == opcode::op_11
+                || code == opcode::op_12
+                || code == opcode::op_13
+                || code == opcode::op_14
+                || code == opcode::op_15
+                || code == opcode::op_16;
         };
     for (const operation& op: operations)
         if (!is_push(op.code))
