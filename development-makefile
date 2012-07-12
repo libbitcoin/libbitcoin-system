@@ -98,6 +98,14 @@ bin/tests/irc: obj/irc-test.o
 
 irc: bin/tests/irc
 
+obj/minikey.o: tests/minikey.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/minikey: obj/minikey.o
+	$(CXX) -o bin/tests/minikey obj/minikey.o $(LIBBITCOIN)
+
+minikey: bin/tests/minikey
+
 obj/base58-test.o: tests/base58-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

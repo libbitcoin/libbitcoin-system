@@ -39,10 +39,10 @@ big_number::big_number(const big_number& other)
     initialize();
     copy(other);
 }
-big_number::big_number(uint64_t value)
+big_number::big_number(uint32_t value)
 {
     initialize();
-    set_uint64(value);
+    set_uint32(value);
 }
 big_number::~big_number()
 {
@@ -111,12 +111,13 @@ void big_number::set_data(data_chunk load_data)
 
 data_chunk big_number::data() const
 {
-    size_t size = BN_bn2mpi(&bignum_, NULL);
-    if (size < 4)
+    size_t size = BN_bn2mpi(&bignum_, nullptr);
+    if (size <= 4)
         return data_chunk();
     data_chunk result_data(size);
     BN_bn2mpi(&bignum_, &result_data[0]);
     result_data.erase(result_data.begin(), result_data.begin() + 4);
+    std::reverse(result_data.begin(), result_data.end());
     return result_data;
 }
 
@@ -140,14 +141,14 @@ hash_digest big_number::hash() const
     return repr;
 }
 
-void big_number::set_uint64(uint64_t value)
+void big_number::set_uint32(uint32_t value)
 {
-    set_data(uncast_type(value, true));
+    BN_set_word(&bignum_, value);
 }
 
-uint64_t big_number::uint64() const
+uint32_t big_number::uint32() const
 {
-    return cast_chunk<uint64_t>(data());
+    return BN_get_word(&bignum_);
 }
 
 bool big_number::operator==(const big_number& other) 

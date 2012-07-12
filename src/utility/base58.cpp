@@ -15,13 +15,20 @@ std::string encode_base58(const data_chunk& unencoded_data)
     // use 138% to be safe
     encoded_data.reserve((unencoded_data.size() - 1) * 138 / 100 + 1);
 
+    // Convert big endian data to little endian
+    // Extra zero at the end make sure bignum will interpret
+    // as a positive number
+    data_chunk tmp_data(unencoded_data.size() + 1, 0);
+    std::reverse_copy(unencoded_data.begin(), unencoded_data.end(),
+        tmp_data.begin());
+
     big_number long_value;
-    long_value.set_data(unencoded_data);
+    long_value.set_data(tmp_data);
     while (long_value > 0)
     {                                                                            
         auto result = divmod(long_value, 58);
         long_value = result.first;
-        size_t remainder = result.second.uint64();
+        size_t remainder = result.second.uint32();
         encoded_data += base58_chars[remainder];
     }                                                                            
                                                                                  

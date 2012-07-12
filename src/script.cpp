@@ -232,7 +232,7 @@ bool script::op_roll()
     big_number number_n;
     if (!cast_to_big_number(pop_stack(), number_n))
         return false;
-    uint64_t n = number_n.uint64();
+    uint32_t n = number_n.uint32();
     if (n >= stack_.size())
         return false;
     auto slice_iter = stack_.end() - n - 1;
@@ -459,7 +459,7 @@ bool script::read_section(data_stack& section)
     big_number count_big_num;
     if (!cast_to_big_number(pop_stack(), count_big_num))
         return false;
-    const size_t count = count_big_num.uint64();
+    const size_t count = count_big_num.uint32();
 
     if (stack_.size() < count)
         return false;

@@ -16,7 +16,7 @@ class big_number
 public:
     big_number();
     big_number(const big_number& other);
-    big_number(uint64_t value);
+    big_number(uint32_t value);
     ~big_number();
 
     big_number& operator=(const big_number& other);
@@ -27,8 +27,8 @@ public:
     data_chunk data() const;
     void set_hash(hash_digest load_hash);
     hash_digest hash() const;
-    void set_uint64(uint64_t value);
-    uint64_t uint64() const;
+    void set_uint32(uint32_t value);
+    uint32_t uint32() const;
 
     bool operator==(const big_number& other);
     bool operator!=(const big_number& other);
