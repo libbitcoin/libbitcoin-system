@@ -124,7 +124,7 @@ data_chunk big_number::data() const
 void big_number::set_hash(hash_digest load_hash)
 {
     data_chunk hash_data(load_hash.size());
-    std::copy(load_hash.begin(), load_hash.end(), hash_data.begin());
+    std::reverse_copy(load_hash.begin(), load_hash.end(), hash_data.begin());
     set_data(hash_data);
 }
 
@@ -136,7 +136,7 @@ hash_digest big_number::hash() const
     if (copy_data.size() < 4)
         return repr;
     // Copy up to end, not from start to midway
-    std::copy(copy_data.begin(), copy_data.end(),
+    std::reverse_copy(copy_data.begin(), copy_data.end(),
         repr.end() - copy_data.size());
     return repr;
 }
