@@ -97,6 +97,8 @@ uint32_t big_number::compact() const
 
 void big_number::set_data(data_chunk load_data)
 {
+    // sigh...
+    std::reverse(load_data.begin(), load_data.end());
     size_t size = load_data.size();
     // BIGNUM's byte stream format expects 4 bytes of
     // big endian size data info at the front
