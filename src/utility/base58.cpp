@@ -60,9 +60,9 @@ data_chunk decode_base58(const std::string& encoded_data)
     data_chunk temp_data = bn.data();       
                                                                                  
     // Trim off sign byte if present                                             
-    if (temp_data.size() >= 2 && 
-            temp_data.begin()[0] == 0 && temp_data.begin()[1] >= 0x80) 
-        temp_data.erase(temp_data.begin());
+    if (temp_data.size() >= 2 &&
+            temp_data.end()[-1] == 0 && temp_data.end()[-2] >= 0x80)
+        temp_data.erase(temp_data.end() - 1);
                                                                                  
     // Restore leading zeros                                                     
     int leading_zeros = 0;
@@ -72,10 +72,11 @@ data_chunk decode_base58(const std::string& encoded_data)
             break;
         leading_zeros++;
     }
+
     data_chunk unencoded_data;
     unencoded_data.assign(leading_zeros + temp_data.size(), 0);
     // Convert little endian data to big endian                                  
-    copy(temp_data.begin(), temp_data.end(), 
+    std::reverse_copy(temp_data.begin(), temp_data.end(),
         unencoded_data.end() - temp_data.size());    
     return unencoded_data;
 }                                                             
