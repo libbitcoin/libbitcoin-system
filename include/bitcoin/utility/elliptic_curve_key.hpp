@@ -9,6 +9,7 @@
 namespace libbitcoin {
 
 typedef data_chunk private_data;
+typedef hash_digest secret_parameter;
 
 class elliptic_curve_key
 {
@@ -27,6 +28,9 @@ public:
     bool set_private_key(const private_data& privkey);
     private_data private_key() const;
     data_chunk sign(hash_digest hash) const;
+
+    bool set_secret(const secret_parameter& secret);
+    secret_parameter secret() const;
 
 private:
     bool initialize();
