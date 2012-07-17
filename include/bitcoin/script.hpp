@@ -163,7 +163,7 @@ private:
 };
 
 std::string opcode_to_string(opcode code);
-opcode string_to_opcode(std::string code_repr);
+opcode string_to_opcode(const std::string& code_repr);
 std::string pretty(const script& source_script);
 std::ostream& operator<<(std::ostream& stream, const script& source_script);
 

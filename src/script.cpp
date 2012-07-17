@@ -799,7 +799,7 @@ std::string opcode_to_string(opcode code)
         }
     }
 }
-opcode string_to_opcode(std::string code_repr)
+opcode string_to_opcode(const std::string& code_repr)
 {
     if (code_repr == "zero")
         return opcode::zero;
