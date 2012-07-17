@@ -110,6 +110,73 @@ data_chunk elliptic_curve_key::sign(hash_digest hash) const
     return signature;
 }
 
+// Generate a private key from just the secret parameter
+bool EC_KEY_regenerate_key(EC_KEY *eckey, BIGNUM *priv_key)
+{
+    bool success = false;
+    BN_CTX *ctx = nullptr;
+    EC_POINT *pub_key = nullptr;
+
+    if (!eckey)
+        return 0;
+
+    const EC_GROUP *group = EC_KEY_get0_group(eckey);
+
+    ctx = BN_CTX_new();
+    if (!ctx)
+        goto error;
+
+    pub_key = EC_POINT_new(group);
+    if (!pub_key)
+        goto error;
+
+    if (!EC_POINT_mul(group, pub_key, priv_key, nullptr, nullptr, ctx))
+        goto error;
+
+    EC_KEY_set_private_key(eckey, priv_key);
+    EC_KEY_set_public_key(eckey, pub_key);
+
+    success = true;
+
+error:
+    if (pub_key)
+        EC_POINT_free(pub_key);
+    if (ctx)
+        BN_CTX_free(ctx);
+
+    return success;
+}
+
+bool elliptic_curve_key::set_secret(const secret_parameter& secret)
+{
+    key_ = EC_KEY_new_by_curve_name(NID_secp256k1);
+    if (!key_)
+        return false;
+    BIGNUM *bignum = BN_bin2bn(secret.data(), secret.size(), BN_new());
+    if (!bignum)
+        return false;
+    if (!EC_KEY_regenerate_key(key_, bignum))
+    {
+        BN_clear_free(bignum);
+        return false;
+    }
+    BN_clear_free(bignum);
+    return true;
+}
+
+secret_parameter elliptic_curve_key::secret() const
+{
+    const BIGNUM *bignum = EC_KEY_get0_private_key(key_);
+    int num_bytes = BN_num_bytes(bignum);
+    if (!bignum)
+        return secret_parameter();
+    secret_parameter secret;
+    int copied_bytes = BN_bn2bin(bignum, &secret[32 - num_bytes]);
+    if (copied_bytes != num_bytes)
+        return secret_parameter();
+    return secret;
+}
+
 bool elliptic_curve_key::initialize()
 {
     // Already initialized

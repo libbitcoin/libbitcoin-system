@@ -15,13 +15,20 @@ std::string encode_base58(const data_chunk& unencoded_data)
     // use 138% to be safe
     encoded_data.reserve((unencoded_data.size() - 1) * 138 / 100 + 1);
 
+    // Convert big endian data to little endian
+    // Extra zero at the end make sure bignum will interpret
+    // as a positive number
+    data_chunk tmp_data(unencoded_data.size() + 1, 0);
+    std::reverse_copy(unencoded_data.begin(), unencoded_data.end(),
+        tmp_data.begin());
+
     big_number long_value;
-    long_value.set_data(unencoded_data);
+    long_value.set_data(tmp_data);
     while (long_value > 0)
     {                                                                            
         auto result = divmod(long_value, 58);
         long_value = result.first;
-        size_t remainder = result.second.uint64();
+        size_t remainder = result.second.uint32();
         encoded_data += base58_chars[remainder];
     }                                                                            
                                                                                  
@@ -53,9 +60,9 @@ data_chunk decode_base58(const std::string& encoded_data)
     data_chunk temp_data = bn.data();       
                                                                                  
     // Trim off sign byte if present                                             
-    if (temp_data.size() >= 2 && 
-            temp_data.begin()[0] == 0 && temp_data.begin()[1] >= 0x80) 
-        temp_data.erase(temp_data.begin());
+    if (temp_data.size() >= 2 &&
+            temp_data.end()[-1] == 0 && temp_data.end()[-2] >= 0x80)
+        temp_data.erase(temp_data.end() - 1);
                                                                                  
     // Restore leading zeros                                                     
     int leading_zeros = 0;
@@ -65,10 +72,11 @@ data_chunk decode_base58(const std::string& encoded_data)
             break;
         leading_zeros++;
     }
+
     data_chunk unencoded_data;
     unencoded_data.assign(leading_zeros + temp_data.size(), 0);
     // Convert little endian data to big endian                                  
-    copy(temp_data.begin(), temp_data.end(), 
+    std::reverse_copy(temp_data.begin(), temp_data.end(),
         unencoded_data.end() - temp_data.size());    
     return unencoded_data;
 }                                                             

@@ -1,4 +1,5 @@
 #include <bitcoin/utility/big_number.hpp>
+
 #include <bitcoin/format.hpp>
 
 namespace libbitcoin {
@@ -39,10 +40,10 @@ big_number::big_number(const big_number& other)
     initialize();
     copy(other);
 }
-big_number::big_number(uint64_t value)
+big_number::big_number(uint32_t value)
 {
     initialize();
-    set_uint64(value);
+    set_uint32(value);
 }
 big_number::~big_number()
 {
@@ -97,6 +98,8 @@ uint32_t big_number::compact() const
 
 void big_number::set_data(data_chunk load_data)
 {
+    // sigh...
+    std::reverse(load_data.begin(), load_data.end());
     size_t size = load_data.size();
     // BIGNUM's byte stream format expects 4 bytes of
     // big endian size data info at the front
@@ -109,19 +112,20 @@ void big_number::set_data(data_chunk load_data)
 
 data_chunk big_number::data() const
 {
-    size_t size = BN_bn2mpi(&bignum_, NULL);
-    if (size < 4)
+    size_t size = BN_bn2mpi(&bignum_, nullptr);
+    if (size <= 4)
         return data_chunk();
     data_chunk result_data(size);
     BN_bn2mpi(&bignum_, &result_data[0]);
     result_data.erase(result_data.begin(), result_data.begin() + 4);
+    std::reverse(result_data.begin(), result_data.end());
     return result_data;
 }
 
 void big_number::set_hash(hash_digest load_hash)
 {
     data_chunk hash_data(load_hash.size());
-    std::copy(load_hash.begin(), load_hash.end(), hash_data.begin());
+    std::reverse_copy(load_hash.begin(), load_hash.end(), hash_data.begin());
     set_data(hash_data);
 }
 
@@ -133,19 +137,19 @@ hash_digest big_number::hash() const
     if (copy_data.size() < 4)
         return repr;
     // Copy up to end, not from start to midway
-    std::copy(copy_data.begin(), copy_data.end(),
+    std::reverse_copy(copy_data.begin(), copy_data.end(),
         repr.end() - copy_data.size());
     return repr;
 }
 
-void big_number::set_uint64(uint64_t value)
+void big_number::set_uint32(uint32_t value)
 {
-    set_data(uncast_type(value, true));
+    BN_set_word(&bignum_, value);
 }
 
-uint64_t big_number::uint64() const
+uint32_t big_number::uint32() const
 {
-    return cast_chunk<uint64_t>(data());
+    return BN_get_word(&bignum_);
 }
 
 bool big_number::operator==(const big_number& other) 
