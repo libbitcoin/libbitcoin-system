@@ -1,4 +1,5 @@
 #include <bitcoin/utility/big_number.hpp>
+
 #include <bitcoin/format.hpp>
 
 namespace libbitcoin {

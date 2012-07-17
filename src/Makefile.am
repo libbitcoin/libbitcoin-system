@@ -27,6 +27,7 @@ libbitcoin_la_SOURCES = \
 	utility/base58.cpp \
 	utility/big_number.cpp \
 	utility/clock.cpp \
+	utility/wif.cpp \
 	constants.cpp \
 	blockchain/organizer.cpp \
 	blockchain/blockchain.cpp \
