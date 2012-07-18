@@ -130,7 +130,7 @@ bool parse(script& result_script, const std::string& format)
 int main(int argc, char** argv)
 {
     if (argc != 4)
-        return 1;
+        return -1;
 
     std::string input_string = argv[1];
     std::string output_string = argv[2];
@@ -140,14 +140,14 @@ int main(int argc, char** argv)
     if (!parse(input_script, input_string))
     {
         log_error() << "Error parsing input: " << input_string;
-        return 1;
+        return -1;
     }
 
     script output_script;
     if (!parse(output_script, output_string))
     {
         log_error() << "Error parsing output: " << output_string;
-        return 1;
+        return -1;
     }
 
     log_debug() << input_string << " -> " << input_script;
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
     if (!output_script.run(input_script, tx, 0))
     {
         log_error() << "Error running scripts";
-        return -1;
+        return 1;
     }
 
     return 0;

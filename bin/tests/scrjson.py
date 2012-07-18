@@ -16,10 +16,10 @@ for counter, test in enumerate(tests[:4]):
     test = (test[0], test[1], test[2] if len(test) == 3 else "")
     arguments = '"%s" "%s" "%s"' % test
     retcode = os.system(scritp + " " + arguments)
-    assert retcode == 0 or retcode == 1
+    assert retcode == 0 or retcode == 256
     if retcode == 0:
         print "Status: pass"
-    elif retcode == 1:
+    elif retcode == 256:
         print "Status: fail"
     print
 
