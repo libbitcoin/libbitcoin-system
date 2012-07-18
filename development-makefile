@@ -106,6 +106,14 @@ bin/tests/minikey: obj/minikey.o
 
 minikey: bin/tests/minikey
 
+obj/scritp.o: tests/scritp.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/scritp: obj/scritp.o
+	$(CXX) -o bin/tests/scritp obj/scritp.o $(LIBBITCOIN)
+
+scritp: bin/tests/scritp
+
 obj/base58-test.o: tests/base58-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
