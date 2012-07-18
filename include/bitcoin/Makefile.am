@@ -51,7 +51,6 @@ bitcoin_util_include_HEADERS = \
 	utility/serializer.hpp \
 	utility/assert.hpp \
 	utility/big_number.hpp \
-	utility/clock.hpp \
 	utility/base58.hpp \
 	utility/ripemd.hpp \
 	utility/subscriber.hpp \

@@ -115,8 +115,6 @@ private:
     std::error_code connect_block();
     bool not_duplicate_or_spent(const message::transaction& tx);
 
-    chrono_clock_ptr clock_;
-
     const size_t depth_;
     const message::block& current_block_;
 };
