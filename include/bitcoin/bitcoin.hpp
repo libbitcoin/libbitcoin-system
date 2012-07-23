@@ -163,7 +163,6 @@
 #include <bitcoin/utility/big_number.hpp>
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
-#include <bitcoin/utility/clock.hpp>
 #include <bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/utility/key_formats.hpp>
 #include <bitcoin/script.hpp>

@@ -35,15 +35,15 @@ big_number::big_number()
 {
     initialize();
 }
-big_number::big_number(const big_number& other)
-{
-    initialize();
-    copy(other);
-}
 big_number::big_number(uint32_t value)
 {
     initialize();
     set_uint32(value);
+}
+big_number::big_number(const big_number& other)
+{
+    initialize();
+    copy(other);
 }
 big_number::~big_number()
 {
@@ -150,6 +150,99 @@ void big_number::set_uint32(uint32_t value)
 uint32_t big_number::uint32() const
 {
     return BN_get_word(&bignum_);
+}
+
+void big_number::set_int32(int32_t value)
+{
+    if (value >= 0)
+        set_uint32(value);
+    else
+        set_int64(value);
+}
+
+int32_t big_number::int32() const
+{
+    uint32_t value = uint32();
+    if (!BN_is_negative(&bignum_))
+    {
+        if (value > std::numeric_limits<int32_t>::max())
+            return std::numeric_limits<int32_t>::max();
+        else
+            return value;
+    }
+    else
+    {
+        if (value > std::numeric_limits<int32_t>::max())
+            return std::numeric_limits<int32_t>::min();
+        else
+            return -value;
+    }
+}
+
+void big_number::set_uint64(uint64_t value)
+{
+    set_uint64_impl(value, false);
+}
+
+void big_number::set_int64(int64_t value)
+{
+    bool is_negative;
+    uint64_t flat_value;
+
+    if (value < 0)
+    {
+        // Since the minimum signed integer cannot be represented as
+        // positive so long as its type is signed, and it's not well-defined
+        // what happens if you make it unsigned before negating it, we
+        // instead increment the negative integer by 1, convert it, then
+        // increment the (now positive) unsigned integer by 1 to compensate.
+        flat_value = -(value + 1);
+        ++flat_value;
+        is_negative = true;
+    }
+    else
+    {
+        flat_value = value;
+        is_negative = false;
+    }
+
+    set_uint64_impl(flat_value, is_negative);
+}
+
+void big_number::set_uint64_impl(uint64_t value, bool is_negative)
+{
+    // Numbers are represented in OpenSSL using the MPI format.
+    // 4 byte length
+    uint8_t raw_mpi[sizeof(value) + 6];
+    uint8_t* curr_byte = &raw_mpi[4];
+    bool leading_zeros = true;
+    for (int i = 0; i < 8; ++i)
+    {
+        uint8_t c = (value >> 56) & 0xff;
+        value <<= 8;
+        if (leading_zeros)
+        {
+            // Skip beginning zeros
+            if (c == 0)
+                continue;
+            if (c & 0x80)
+            {
+                *curr_byte = (is_negative ? 0x80 : 0);
+                ++curr_byte;
+            }
+            else if (is_negative)
+                c |= 0x80;
+            leading_zeros = false;
+        }
+        *curr_byte = c;
+        ++curr_byte;
+    }
+    uint32_t size = curr_byte - (raw_mpi + 4);
+    raw_mpi[0] = (size >> 24) & 0xff;
+    raw_mpi[1] = (size >> 16) & 0xff;
+    raw_mpi[2] = (size >> 8) & 0xff;
+    raw_mpi[3] = (size) & 0xff;
+    BN_mpi2bn(raw_mpi, curr_byte - raw_mpi, &bignum_);
 }
 
 bool big_number::operator==(const big_number& other) 
