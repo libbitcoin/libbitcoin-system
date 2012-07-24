@@ -55,8 +55,6 @@ bitcoin_util_include_HEADERS = \
 	utility/ripemd.hpp \
 	utility/subscriber.hpp \
 	utility/logger.hpp \
-	utility/coroutine.hpp \
 	utility/weak_bind.hpp \
-	utility/key_formats.hpp \
-	utility/yield.hpp
+	utility/key_formats.hpp
 
