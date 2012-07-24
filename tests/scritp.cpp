@@ -82,7 +82,9 @@ void push_data(script& result_script, const data_chunk& data)
 {
     operation op;
     // pushdata1 = 76
-    if (data.size() < 76)
+    if (data.empty())
+        op.code = opcode::zero;
+    else if (data.size() < 76)
         op.code = opcode::special;
     else if (data.size() <= 0xff)
         op.code = opcode::pushdata1;
@@ -99,7 +101,12 @@ void push_data(script& result_script, const data_chunk& data)
 
 bool parse_token(script& result_script, const std::string& token)
 {
-    if (is_number(token))
+    static data_chunk hex_raw;
+    if (token == "ENDING")
+    {
+        // Hack...
+    }
+    else if (is_number(token))
     {
         int64_t value = boost::lexical_cast<int64_t>(token);
         if (is_opx(value))
@@ -108,13 +115,16 @@ bool parse_token(script& result_script, const std::string& token)
         {
             big_number bignum;
             bignum.set_int64(value);
+            push_data(result_script, bignum.data());
         }
     }
     else if (is_hex_data(token))
     {
         std::string hex_part(token.begin() + 2, token.end());
         data_chunk raw_data = bytes_from_pretty(hex_part);
-        push_data(result_script, raw_data);
+        extend_data(hex_raw, raw_data);
+        // Avoid processing hex_raw this time
+        return true;
     }
     else if (is_quoted_string(token))
     {
@@ -131,6 +141,11 @@ bool parse_token(script& result_script, const std::string& token)
         log_error() << "Token parsing failed with: " << token;
         return false;
     }
+    if (!hex_raw.empty())
+    {
+        result_script.join(parse_script(hex_raw));
+        hex_raw.resize(0);
+    }
     return true;
 }
 
@@ -143,6 +158,7 @@ bool parse(script& result_script, const std::string& format)
     for (const auto& token: tokens)
         if (!parse_token(result_script, token))
             return false;
+    parse_token(result_script, "ENDING");
     return true;
 }
 
