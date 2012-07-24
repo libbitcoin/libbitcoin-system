@@ -140,26 +140,27 @@ bool script::run(const message::transaction& parent_tx, uint32_t input_index)
     for (auto it = operations_.begin(); it != operations_.end(); ++it)
     {
         const operation op = *it;
-        //log_debug() << "--------------------";
-        //log_debug() << "Run: " << opcode_to_string(op.code);
-        //log_debug() << "Stack:";
-        //for (auto s: stack_)
-        //    log_debug() << "[" << pretty_hex(s) << "]";
         if (!run_operation(op, parent_tx, input_index))
             return false;
         // push data to the stack
         if (op.code == opcode::zero)
             stack_.push_back(data_chunk());
-        else if (op.data.size() > 0)
-        {
-            BITCOIN_ASSERT(op.code == opcode::special ||
+        // These operations may also push empty data (opcode zero)
+        // Hence we check the opcode over the shorter !op.data.empty()
+        else if (op.code == opcode::special ||
                 op.code == opcode::pushdata1 ||
                 op.code == opcode::pushdata2 ||
-                op.code == opcode::pushdata4);
+                op.code == opcode::pushdata4)
+        {
             stack_.push_back(op.data);
         }
         if (op.code == opcode::codeseparator)
             codehash_begin_ = it;
+        //log_debug() << "--------------------";
+        //log_debug() << "Run: " << opcode_to_string(op.code);
+        //log_debug() << "Stack:";
+        //for (auto s: stack_)
+        //    log_debug() << "[" << pretty_hex(s) << "]";
     }
     return true;
 }
