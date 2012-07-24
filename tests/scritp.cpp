@@ -78,6 +78,25 @@ void push_literal(script& result_script, int64_t value)
     }
 }
 
+void push_data(script& result_script, const data_chunk& data)
+{
+    operation op;
+    // pushdata1 = 76
+    if (data.size() < 76)
+        op.code = opcode::special;
+    else if (data.size() <= 0xff)
+        op.code = opcode::pushdata1;
+    else if (data.size() <= 0xffff)
+        op.code = opcode::pushdata2;
+    else
+    {
+        BITCOIN_ASSERT(data.size() <= 0xffffffff);
+        op.code = opcode::pushdata4;
+    }
+    op.data = data;
+    result_script.push_operation(op);
+}
+
 bool parse_token(script& result_script, const std::string& token)
 {
     if (is_number(token))
@@ -87,21 +106,20 @@ bool parse_token(script& result_script, const std::string& token)
             push_literal(result_script, value);
         else
         {
-            // TODO add int64 back to big_number again :(
-            // See CScript's push_int64 and push_uint64
-            BITCOIN_ASSERT(!is_opx(value));
+            big_number bignum;
+            bignum.set_int64(value);
         }
     }
     else if (is_hex_data(token))
     {
         std::string hex_part(token.begin() + 2, token.end());
         data_chunk raw_data = bytes_from_pretty(hex_part);
-        result_script.push_operation({opcode::raw_data, raw_data});
+        push_data(result_script, raw_data);
     }
     else if (is_quoted_string(token))
     {
         data_chunk inner_value(token.begin() + 1, token.end() - 1);
-        result_script.push_operation({opcode::raw_data, inner_value});
+        push_data(result_script, inner_value);
     }
     else if (is_opcode(token))
     {
