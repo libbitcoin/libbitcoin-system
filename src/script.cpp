@@ -325,6 +325,16 @@ bool script::op_equalverify()
     return pop_stack() == pop_stack();
 }
 
+bool script::op_add()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a + number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
 bool script::op_greaterthanorequal()
 {
     big_number number_a, number_b;
@@ -592,6 +602,9 @@ bool script::run_operation(operation op,
         case opcode::equalverify:
             return op_equalverify();
 
+        case opcode::add:
+            return op_add();
+
         case opcode::greaterthanorequal:
             return op_greaterthanorequal();
 
@@ -757,6 +770,8 @@ std::string opcode_to_string(opcode code)
             return "equal";
         case opcode::equalverify:
             return "equalverify";
+        case opcode::add:
+            return "add";
         case opcode::greaterthanorequal:
             return "greaterthanorequal";
         case opcode::codeseparator:
@@ -871,6 +886,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::equal;
     else if (code_repr == "equalverify")
         return opcode::equalverify;
+    else if (code_repr == "add")
+        return opcode::add;
     else if (code_repr == "greaterthanorequal")
         return opcode::greaterthanorequal;
     else if (code_repr == "codeseparator")

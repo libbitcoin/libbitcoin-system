@@ -49,6 +49,7 @@ enum class opcode
     hash160 = 169,
     equal = 135,
     equalverify = 136,
+    add = 147,
     greaterthanorequal = 162,
     codeseparator = 171,
     checksig = 172,
@@ -137,6 +138,7 @@ private:
     bool op_hash160();
     bool op_equal();
     bool op_equalverify();
+    bool op_add();
     bool op_greaterthanorequal();
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(
