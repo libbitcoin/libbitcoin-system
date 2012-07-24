@@ -19,6 +19,8 @@ enum class opcode
     pushdata1 = 76,
     pushdata2 = 77,
     pushdata4 = 78,
+    negative_1 = 79,
+    // reserved does nothing
     op_1 = 81,
     op_2 = 82,
     op_3 = 83,
@@ -124,6 +126,7 @@ private:
     // lessthanorequal, greaterthanorequal, min, max
     bool arithmetic_start(big_number& number_a, big_number& number_b);
 
+    bool op_negative_1();
     bool op_x(opcode code);
     bool op_verify();
     bool op_drop();

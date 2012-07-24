@@ -75,6 +75,7 @@ bool is_push_only(const operation_stack& operations)
                 || code == opcode::pushdata1
                 || code == opcode::pushdata2
                 || code == opcode::pushdata4
+                || code == opcode::negative_1
                 || code == opcode::op_1
                 || code == opcode::op_2
                 || code == opcode::op_3
@@ -178,6 +179,14 @@ bool script::arithmetic_start(big_number& number_a, big_number& number_b)
         return false;
     if (!cast_to_big_number(pop_stack(), number_b))
         return false;
+    return true;
+}
+
+bool script::op_negative_1()
+{
+    big_number neg1;
+    neg1.set_int64(-1);
+    stack_.push_back(neg1.data());
     return true;
 }
 
@@ -542,6 +551,9 @@ bool script::run_operation(operation op,
         case opcode::pushdata4:
             return true;
 
+        case opcode::negative_1:
+            return op_negative_1();
+
         case opcode::op_1:
         case opcode::op_2:
         case opcode::op_3:
@@ -710,6 +722,8 @@ std::string opcode_to_string(opcode code)
             return "pushdata2";
         case opcode::pushdata4:
             return "pushdata4";
+        case opcode::negative_1:
+            return "-1";
         case opcode::op_1:
             return "1";
         case opcode::op_2:
@@ -826,6 +840,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::pushdata2;
     else if (code_repr == "pushdata4")
         return opcode::pushdata4;
+    else if (code_repr == "-1")
+        return opcode::negative_1;
     else if (code_repr == "1")
         return opcode::op_1;
     else if (code_repr == "2")
