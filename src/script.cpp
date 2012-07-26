@@ -214,6 +214,7 @@ bool script::next_step(operation_stack::iterator it,
                 || code == opcode::endif;
         };
     bool allow_execution = !conditional_stack_.has_failed_branches();
+    // continue onwards to next command.
     if (!allow_execution && !is_condition_opcode(op.code))
         return true;
     // push data to the stack
@@ -669,9 +670,8 @@ bool script::run_operation(const operation& op,
         case opcode::negative_1:
             return op_negative_1();
 
-        // As best I can tell, opcode::reserved does nothing
         case opcode::reserved:
-            return true;
+            return false;
 
         case opcode::op_1:
         case opcode::op_2:
@@ -694,11 +694,18 @@ bool script::run_operation(const operation& op,
         case opcode::nop:
             return true;
 
+        case opcode::ver:
+            return false;
+
         case opcode::if_:
             return op_if();
 
         case opcode::notif:
             return op_notif();
+
+        case opcode::verif:
+        case opcode::vernotif:
+            return false;
 
         case opcode::else_:
             return op_else();
@@ -723,6 +730,10 @@ bool script::run_operation(const operation& op,
 
         case opcode::size:
             return op_size();
+
+        case opcode::reserved1:
+        case opcode::reserved2:
+            return false;
 
         case opcode::not_:
             return op_not();
@@ -888,6 +899,8 @@ std::string opcode_to_string(opcode code)
             return "16";
         case opcode::nop:
             return "nop";
+        case opcode::ver:
+            return "ver";
         case opcode::if_:
             return "if";
         case opcode::notif:
@@ -908,6 +921,10 @@ std::string opcode_to_string(opcode code)
             return "roll";
         case opcode::size:
             return "size";
+        case opcode::reserved1:
+            return "reserved1";
+        case opcode::reserved2:
+            return "reserved2";
         case opcode::not_:
             return "not";
         case opcode::boolor:
@@ -1016,10 +1033,16 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::op_16;
     else if (code_repr == "nop")
         return opcode::nop;
+    else if (code_repr == "ver")
+        return opcode::ver;
     else if (code_repr == "if")
         return opcode::if_;
     else if (code_repr == "notif")
         return opcode::notif;
+    else if (code_repr == "verif")
+        return opcode::verif;
+    else if (code_repr == "vernotif")
+        return opcode::vernotif;
     else if (code_repr == "else")
         return opcode::else_;
     else if (code_repr == "endif")
@@ -1036,6 +1059,10 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::roll;
     else if (code_repr == "size")
         return opcode::size;
+    else if (code_repr == "reserved1")
+        return opcode::reserved1;
+    else if (code_repr == "reserved2")
+        return opcode::reserved2;
     else if (code_repr == "not")
         return opcode::not_;
     else if (code_repr == "boolor")
