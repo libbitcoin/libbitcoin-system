@@ -160,53 +160,84 @@ bool script::run(script input_script, const message::transaction& parent_tx,
     return true;
 }
 
+bool opcode_is_disabled(opcode code)
+{
+    switch (code)
+    {
+        /*cat:
+        substr:
+        left:
+        right:
+        invert:
+        and:
+        or:
+        xor:
+        2mul:
+        2div:
+        mul:
+        div:
+        mod:
+        lshift:
+        rshift:*/
+        // return true;
+
+        default:
+            return false;
+    }
+    return true;
+}
+
 bool script::run(const message::transaction& parent_tx, uint32_t input_index)
 {
     codehash_begin_ = operations_.begin();
     conditional_stack_.clear();
     for (auto it = operations_.begin(); it != operations_.end(); ++it)
-    {
-        // TODO refactor this function into smaller ones
-        const operation op = *it;
-        // TODO check for disabled opcodes
-        bool allow_execution = !conditional_stack_.has_failed_branches();
-        if (!allow_execution)
-        {
-            if (op.code == opcode::if_ ||
-                op.code == opcode::notif ||
-                op.code == opcode::else_ ||
-                op.code == opcode::endif)
-            {
-                if (!run_operation(op, parent_tx, input_index))
-                    return false;
-            }
-            continue;
-        }
-        // push data to the stack
-        if (op.code == opcode::zero)
-            stack_.push_back(data_chunk());
-        // These operations may also push empty data (opcode zero)
-        // Hence we check the opcode over the shorter !op.data.empty()
-        else if (op.code == opcode::special ||
-                op.code == opcode::pushdata1 ||
-                op.code == opcode::pushdata2 ||
-                op.code == opcode::pushdata4)
-        {
-            stack_.push_back(op.data);
-        }
-        else if (op.code == opcode::codeseparator)
-            codehash_begin_ = it;
-        // TODO opcodes above should assert inside run_operation
-        else if (!run_operation(op, parent_tx, input_index))
+        if (!next_step(it, parent_tx, input_index))
             return false;
-        //log_debug() << "--------------------";
-        //log_debug() << "Run: " << opcode_to_string(op.code);
-        //log_debug() << "Stack:";
-        //for (auto s: stack_)
-        //    log_debug() << "[" << pretty_hex(s) << "]";
-    }
     if (!conditional_stack_.closed())
         return false;
+    return true;
+}
+
+bool script::next_step(operation_stack::iterator it,
+    const message::transaction& parent_tx, uint32_t input_index)
+{
+    const operation& op = *it;
+    if (opcode_is_disabled(op.code))
+        return false;
+    auto is_condition_opcode =
+        [](opcode code)
+        {
+            return code == opcode::if_
+                || code == opcode::notif
+                || code == opcode::else_
+                || code == opcode::endif;
+        };
+    bool allow_execution = !conditional_stack_.has_failed_branches();
+    if (!allow_execution && !is_condition_opcode(op.code))
+        return true;
+    // push data to the stack
+    if (op.code == opcode::zero)
+        stack_.push_back(data_chunk());
+    // These operations may also push empty data (opcode zero)
+    // Hence we check the opcode over the shorter !op.data.empty()
+    else if (op.code == opcode::special
+        || op.code == opcode::pushdata1
+        || op.code == opcode::pushdata2
+        || op.code == opcode::pushdata4)
+    {
+        stack_.push_back(op.data);
+    }
+    else if (op.code == opcode::codeseparator)
+        codehash_begin_ = it;
+    // opcodes above should assert inside run_operation
+    else if (!run_operation(op, parent_tx, input_index))
+        return false;
+    //log_debug() << "--------------------";
+    //log_debug() << "Run: " << opcode_to_string(op.code);
+    //log_debug() << "Stack:";
+    //for (auto s: stack_)
+    //    log_debug() << "[" << pretty_hex(s) << "]";
     return true;
 }
 
@@ -621,7 +652,7 @@ bool script::op_checkmultisigverify(
     return true;
 }
 
-bool script::run_operation(operation op, 
+bool script::run_operation(const operation& op, 
         const message::transaction& parent_tx, uint32_t input_index)
 {
     switch (op.code)
@@ -631,6 +662,8 @@ bool script::run_operation(operation op,
         case opcode::pushdata1:
         case opcode::pushdata2:
         case opcode::pushdata4:
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+                "Invalid push operation for run_operation");
             return true;
 
         case opcode::negative_1:
@@ -722,6 +755,8 @@ bool script::run_operation(operation op,
             // This is set in the main run(...) loop
             // codehash_begin_ is updated to the current
             // operations_ iterator
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+                "Invalid operation (codeseparator) for run_operation");
             return true;
 
         case opcode::checksig:
@@ -754,7 +789,7 @@ bool script::run_operation(operation op,
         default:
             log_fatal() << "Unimplemented operation <none " 
                 << static_cast<int>(op.code) << ">";
-            break;
+            return false;
     }
     return false;
 }
@@ -799,11 +834,6 @@ payment_type script::type() const
     if (is_multisig_type(operations_))
         return payment_type::multisig;
     return payment_type::non_standard;
-}
-
-bool script::matches_template(operation_stack templ) const
-{
-    return templ.size() == 0;
 }
 
 std::string opcode_to_string(opcode code)
