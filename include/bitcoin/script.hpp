@@ -47,6 +47,8 @@ enum class opcode
     else_ = 103,
     endif = 104,
     verify = 105,
+    toaltstack = 107,
+    fromaltstack = 108,
     drop = 117,
     dup = 118,
     over = 120,
@@ -162,6 +164,8 @@ private:
     bool op_else();
     bool op_endif();
     bool op_verify();
+    bool op_toaltstack();
+    bool op_fromaltstack();
     bool op_drop();
     bool op_dup();
     bool op_over();
@@ -192,7 +196,7 @@ private:
 
     operation_stack operations_;
     // Used when executing the script
-    data_stack stack_;
+    data_stack stack_, alternate_stack_;
     operation_stack::iterator codehash_begin_;
     conditional_stack conditional_stack_;
 };

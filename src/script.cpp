@@ -189,6 +189,7 @@ bool opcode_is_disabled(opcode code)
 
 bool script::run(const message::transaction& parent_tx, uint32_t input_index)
 {
+    alternate_stack_.clear();
     codehash_begin_ = operations_.begin();
     conditional_stack_.clear();
     for (auto it = operations_.begin(); it != operations_.end(); ++it)
@@ -321,6 +322,24 @@ bool script::op_verify()
     if (!cast_to_bool(stack_.back()))
         return false;
     pop_stack();
+    return true;
+}
+
+bool script::op_toaltstack()
+{
+    if (stack_.size() < 1)
+        return false;
+    data_chunk move_data = pop_stack();
+    alternate_stack_.push_back(move_data);
+    return true;
+}
+
+bool script::op_fromaltstack()
+{
+    if (alternate_stack_.size() < 1)
+        return false;
+    stack_.push_back(alternate_stack_.back());
+    alternate_stack_.pop_back();
     return true;
 }
 
@@ -716,6 +735,12 @@ bool script::run_operation(const operation& op,
         case opcode::verify:
             return op_verify();
 
+        case opcode::toaltstack:
+            return op_toaltstack();
+
+        case opcode::fromaltstack:
+            return op_fromaltstack();
+
         case opcode::drop:
             return op_drop();
 
@@ -911,6 +936,10 @@ std::string opcode_to_string(opcode code)
             return "endif";
         case opcode::verify:
             return "verify";
+        case opcode::toaltstack:
+            return "toaltstack";
+        case opcode::fromaltstack:
+            return "fromaltstack";
         case opcode::drop:
             return "drop";
         case opcode::dup:
@@ -1049,6 +1078,10 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::endif;
     else if (code_repr == "verify")
         return opcode::verify;
+    else if (code_repr == "toaltstack")
+        return opcode::toaltstack;
+    else if (code_repr == "fromaltstack")
+        return opcode::fromaltstack;
     else if (code_repr == "drop")
         return opcode::drop;
     else if (code_repr == "dup")
