@@ -21,6 +21,7 @@ enum class opcode
     pushdata4 = 78,
     negative_1 = 79,
     // reserved does nothing
+    reserved = 80,
     op_1 = 81,
     op_2 = 82,
     op_3 = 83,
@@ -38,6 +39,10 @@ enum class opcode
     op_15 = 95,
     op_16 = 96,
     nop = 97,
+    if_ = 99,
+    notif = 100,
+    else_ = 103,
+    endif = 104,
     verify = 105,
     drop = 117,
     dup = 118,
@@ -119,6 +124,21 @@ public:
 private:
     typedef std::vector<data_chunk> data_stack;
 
+    class conditional_stack
+    {
+    public:
+        bool closed() const;
+        bool has_failed_branches() const;
+
+        void clear();
+        void open(bool value);
+        void else_();
+        void close();
+    private:
+        typedef std::vector<bool> bool_stack;
+        bool_stack stack_;
+    };
+
     bool run(const message::transaction& parent_tx, uint32_t input_index);
 
     // Used by add, sub, mul, div, mod, lshift, rshift, booland, boolor,
@@ -128,6 +148,10 @@ private:
 
     bool op_negative_1();
     bool op_x(opcode code);
+    bool op_if();
+    bool op_notif();
+    bool op_else();
+    bool op_endif();
     bool op_verify();
     bool op_drop();
     bool op_dup();
@@ -163,8 +187,10 @@ private:
     data_chunk pop_stack();
 
     operation_stack operations_;
+    // Used when executing the script
     data_stack stack_;
     operation_stack::iterator codehash_begin_;
+    conditional_stack conditional_stack_;
 };
 
 std::string opcode_to_string(opcode code);

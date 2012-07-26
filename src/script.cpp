@@ -21,6 +21,32 @@ typedef boost::optional<size_t> optional_number;
 static const data_chunk stack_true_value{1};
 static const data_chunk stack_false_value;  // False is an empty
 
+bool script::conditional_stack::closed() const
+{
+    return stack_.empty();
+}
+bool script::conditional_stack::has_failed_branches() const
+{
+    return std::count(stack_.begin(), stack_.end(), false) > 0;
+}
+
+void script::conditional_stack::clear()
+{
+    stack_.clear();
+}
+void script::conditional_stack::open(bool value)
+{
+    stack_.push_back(value);
+}
+void script::conditional_stack::else_()
+{
+    stack_.back() = !stack_.back();
+}
+void script::conditional_stack::close()
+{
+    stack_.pop_back();
+}
+
 void script::join(const script& other)
 {
     operations_.insert(operations_.end(),
@@ -137,11 +163,25 @@ bool script::run(script input_script, const message::transaction& parent_tx,
 bool script::run(const message::transaction& parent_tx, uint32_t input_index)
 {
     codehash_begin_ = operations_.begin();
+    conditional_stack_.clear();
     for (auto it = operations_.begin(); it != operations_.end(); ++it)
     {
+        // TODO refactor this function into smaller ones
         const operation op = *it;
-        if (!run_operation(op, parent_tx, input_index))
-            return false;
+        // TODO check for disabled opcodes
+        bool allow_execution = !conditional_stack_.has_failed_branches();
+        if (!allow_execution)
+        {
+            if (op.code == opcode::if_ ||
+                op.code == opcode::notif ||
+                op.code == opcode::else_ ||
+                op.code == opcode::endif)
+            {
+                if (!run_operation(op, parent_tx, input_index))
+                    return false;
+            }
+            continue;
+        }
         // push data to the stack
         if (op.code == opcode::zero)
             stack_.push_back(data_chunk());
@@ -154,14 +194,19 @@ bool script::run(const message::transaction& parent_tx, uint32_t input_index)
         {
             stack_.push_back(op.data);
         }
-        if (op.code == opcode::codeseparator)
+        else if (op.code == opcode::codeseparator)
             codehash_begin_ = it;
+        // TODO opcodes above should assert inside run_operation
+        else if (!run_operation(op, parent_tx, input_index))
+            return false;
         //log_debug() << "--------------------";
         //log_debug() << "Run: " << opcode_to_string(op.code);
         //log_debug() << "Stack:";
         //for (auto s: stack_)
         //    log_debug() << "[" << pretty_hex(s) << "]";
     }
+    if (!conditional_stack_.closed())
+        return false;
     return true;
 }
 
@@ -198,6 +243,42 @@ bool script::op_x(opcode code)
             static_cast<uint8_t>(opcode::op_1) + 1;
     big_number big_repr(value_diff);
     stack_.push_back(big_repr.data());
+    return true;
+}
+
+bool script::op_if()
+{
+    bool value = false;
+    if (!conditional_stack_.has_failed_branches())
+    {
+        if (stack_.size() < 1)
+            return false;
+        value = cast_to_bool(pop_stack());
+    }
+    conditional_stack_.open(value);
+    return true;
+}
+bool script::op_notif()
+{
+    // A bit hackish...
+    // Open IF statement but then invert it to get NOTIF
+    if (!op_if())
+        return false;
+    conditional_stack_.else_();
+    return true;
+}
+bool script::op_else()
+{
+    if (conditional_stack_.closed())
+        return false;
+    conditional_stack_.else_();
+    return true;
+}
+bool script::op_endif()
+{
+    if (conditional_stack_.closed())
+        return false;
+    conditional_stack_.close();
     return true;
 }
 
@@ -555,6 +636,10 @@ bool script::run_operation(operation op,
         case opcode::negative_1:
             return op_negative_1();
 
+        // As best I can tell, opcode::reserved does nothing
+        case opcode::reserved:
+            return true;
+
         case opcode::op_1:
         case opcode::op_2:
         case opcode::op_3:
@@ -575,6 +660,18 @@ bool script::run_operation(operation op,
 
         case opcode::nop:
             return true;
+
+        case opcode::if_:
+            return op_if();
+
+        case opcode::notif:
+            return op_notif();
+
+        case opcode::else_:
+            return op_else();
+
+        case opcode::endif:
+            return op_endif();
 
         case opcode::verify:
             return op_verify();
@@ -725,6 +822,8 @@ std::string opcode_to_string(opcode code)
             return "pushdata4";
         case opcode::negative_1:
             return "-1";
+        case opcode::reserved:
+            return "reserved";
         case opcode::op_1:
             return "1";
         case opcode::op_2:
@@ -759,6 +858,14 @@ std::string opcode_to_string(opcode code)
             return "16";
         case opcode::nop:
             return "nop";
+        case opcode::if_:
+            return "if";
+        case opcode::notif:
+            return "notif";
+        case opcode::else_:
+            return "else";
+        case opcode::endif:
+            return "endif";
         case opcode::verify:
             return "verify";
         case opcode::drop:
@@ -843,6 +950,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::pushdata4;
     else if (code_repr == "-1")
         return opcode::negative_1;
+    else if (code_repr == "reserved")
+        return opcode::reserved;
     else if (code_repr == "1")
         return opcode::op_1;
     else if (code_repr == "2")
@@ -877,6 +986,14 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::op_16;
     else if (code_repr == "nop")
         return opcode::nop;
+    else if (code_repr == "if")
+        return opcode::if_;
+    else if (code_repr == "notif")
+        return opcode::notif;
+    else if (code_repr == "else")
+        return opcode::else_;
+    else if (code_repr == "endif")
+        return opcode::endif;
     else if (code_repr == "verify")
         return opcode::verify;
     else if (code_repr == "drop")

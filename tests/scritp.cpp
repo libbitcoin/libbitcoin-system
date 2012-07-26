@@ -102,9 +102,17 @@ void push_data(script& result_script, const data_chunk& data)
 bool parse_token(script& result_script, const std::string& token)
 {
     static data_chunk hex_raw;
+    if (token == "ENDING" || !is_hex_data(token))
+    {
+        if (!hex_raw.empty())
+        {
+            result_script.join(parse_script(hex_raw));
+            hex_raw.resize(0);
+        }
+    }
     if (token == "ENDING")
     {
-        // Hack...
+        // Do nothing...
     }
     else if (is_number(token))
     {
@@ -123,8 +131,6 @@ bool parse_token(script& result_script, const std::string& token)
         std::string hex_part(token.begin() + 2, token.end());
         data_chunk raw_data = bytes_from_pretty(hex_part);
         extend_data(hex_raw, raw_data);
-        // Avoid processing hex_raw this time
-        return true;
     }
     else if (is_quoted_string(token))
     {
@@ -140,11 +146,6 @@ bool parse_token(script& result_script, const std::string& token)
     {
         log_error() << "Token parsing failed with: " << token;
         return false;
-    }
-    if (!hex_raw.empty())
-    {
-        result_script.join(parse_script(hex_raw));
-        hex_raw.resize(0);
     }
     return true;
 }
@@ -164,6 +165,7 @@ bool parse(script& result_script, const std::string& format)
 
 int main(int argc, char** argv)
 {
+    BITCOIN_ASSERT(argc == 4);
     if (argc != 4)
         return -1;
 
