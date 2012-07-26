@@ -49,6 +49,7 @@ enum class opcode
     verify = 105,
     toaltstack = 107,
     fromaltstack = 108,
+    ifdup = 115,
     drop = 117,
     dup = 118,
     over = 120,
@@ -166,6 +167,7 @@ private:
     bool op_verify();
     bool op_toaltstack();
     bool op_fromaltstack();
+    bool op_ifdup();
     bool op_drop();
     bool op_dup();
     bool op_over();

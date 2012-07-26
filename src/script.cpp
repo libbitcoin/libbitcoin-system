@@ -343,6 +343,15 @@ bool script::op_fromaltstack()
     return true;
 }
 
+bool script::op_ifdup()
+{
+    if (stack_.size() < 1)
+        return false;
+    if (cast_to_bool(stack_.back()))
+        stack_.push_back(stack_.back());
+    return true;
+}
+
 bool script::op_drop()
 {
     if (stack_.size() < 1)
@@ -741,6 +750,9 @@ bool script::run_operation(const operation& op,
         case opcode::fromaltstack:
             return op_fromaltstack();
 
+        case opcode::ifdup:
+            return op_ifdup();
+
         case opcode::drop:
             return op_drop();
 
@@ -940,6 +952,8 @@ std::string opcode_to_string(opcode code)
             return "toaltstack";
         case opcode::fromaltstack:
             return "fromaltstack";
+        case opcode::ifdup:
+            return "ifdup";
         case opcode::drop:
             return "drop";
         case opcode::dup:
@@ -1082,6 +1096,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::toaltstack;
     else if (code_repr == "fromaltstack")
         return opcode::fromaltstack;
+    else if (code_repr == "ifdup")
+        return opcode::ifdup;
     else if (code_repr == "drop")
         return opcode::drop;
     else if (code_repr == "dup")
