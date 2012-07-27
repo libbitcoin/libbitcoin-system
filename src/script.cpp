@@ -421,6 +421,21 @@ bool script::op_roll()
     return pick_roll_impl(stack_, true);
 }
 
+bool script::op_rot()
+{
+    // Top 3 stack items are rotated to the left.
+    // Before: x1 x2 x3
+    // After:  x2 x3 x1
+    if (stack_.size() < 3)
+        return false;
+    auto rot_first = stack_.end() - 3,
+        rot_second = stack_.end() - 2,
+        rot_third = stack_.end() - 1;
+    std::swap(*rot_first, *rot_second);
+    std::swap(*rot_second, *rot_third);
+    return true;
+}
+
 bool script::op_size()
 {
     if (stack_.size() < 1)
@@ -802,6 +817,9 @@ bool script::run_operation(const operation& op,
         case opcode::roll:
             return op_roll();
 
+        case opcode::rot:
+            return op_rot();
+
         case opcode::size:
             return op_size();
 
@@ -1005,6 +1023,8 @@ std::string opcode_to_string(opcode code)
             return "pick";
         case opcode::roll:
             return "roll";
+        case opcode::rot:
+            return "rot";
         case opcode::size:
             return "size";
         case opcode::reserved1:
@@ -1155,6 +1175,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::pick;
     else if (code_repr == "roll")
         return opcode::roll;
+    else if (code_repr == "rot")
+        return opcode::rot;
     else if (code_repr == "size")
         return opcode::size;
     else if (code_repr == "reserved1")

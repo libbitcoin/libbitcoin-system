@@ -57,6 +57,7 @@ enum class opcode
     over = 120,
     pick = 121,
     roll = 122,
+    rot = 123,
     size = 130,
     reserved1 = 137,
     reserved2 = 138,
@@ -178,6 +179,7 @@ private:
     bool op_over();
     bool op_pick();
     bool op_roll();
+    bool op_rot();
     bool op_size();
     bool op_not();
     bool op_boolor();
