@@ -352,6 +352,13 @@ bool script::op_ifdup()
     return true;
 }
 
+bool script::op_depth()
+{
+    big_number stack_size(stack_.size());
+    stack_.push_back(stack_size.data());
+    return true;
+}
+
 bool script::op_drop()
 {
     if (stack_.size() < 1)
@@ -365,6 +372,14 @@ bool script::op_dup()
     if (stack_.size() < 1)
         return false;
     stack_.push_back(stack_.back());
+    return true;
+}
+
+bool script::op_nip()
+{
+    if (stack_.size() < 2)
+        return false;
+    stack_.erase(stack_.end() - 2);
     return true;
 }
 
@@ -753,11 +768,17 @@ bool script::run_operation(const operation& op,
         case opcode::ifdup:
             return op_ifdup();
 
+        case opcode::depth:
+            return op_depth();
+
         case opcode::drop:
             return op_drop();
 
         case opcode::dup:
             return op_dup();
+
+        case opcode::nip:
+            return op_nip();
 
         case opcode::over:
             return op_over();
@@ -954,10 +975,14 @@ std::string opcode_to_string(opcode code)
             return "fromaltstack";
         case opcode::ifdup:
             return "ifdup";
+        case opcode::depth:
+            return "depth";
         case opcode::drop:
             return "drop";
         case opcode::dup:
             return "dup";
+        case opcode::nip:
+            return "nip";
         case opcode::over:
             return "over";
         case opcode::roll:
@@ -1098,10 +1123,14 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::fromaltstack;
     else if (code_repr == "ifdup")
         return opcode::ifdup;
+    else if (code_repr == "depth")
+        return opcode::depth;
     else if (code_repr == "drop")
         return opcode::drop;
     else if (code_repr == "dup")
         return opcode::dup;
+    else if (code_repr == "nip")
+        return opcode::nip;
     else if (code_repr == "over")
         return opcode::over;
     else if (code_repr == "roll")
