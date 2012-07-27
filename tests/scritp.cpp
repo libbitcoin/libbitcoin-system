@@ -50,10 +50,12 @@ bool is_opx(int64_t value)
 void push_literal(script& result_script, int64_t value)
 {
     BITCOIN_ASSERT(is_opx(value));
-    // TODO Add this opcode
-    BITCOIN_ASSERT(value != -1);
     switch (value)
     {
+        case -1:
+            result_script.push_operation({opcode::negative_1, data_chunk()});
+            return;
+
 #define PUSH_X(n) \
         case n: \
             result_script.push_operation({opcode::op_##n, data_chunk()}); \
