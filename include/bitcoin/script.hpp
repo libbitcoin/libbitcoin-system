@@ -49,6 +49,7 @@ enum class opcode
     verify = 105,
     toaltstack = 107,
     fromaltstack = 108,
+    op_2drop = 109,
     ifdup = 115,
     depth = 116,
     drop = 117,
@@ -59,6 +60,7 @@ enum class opcode
     roll = 122,
     rot = 123,
     swap = 124,
+    tuck = 125,
     size = 130,
     reserved1 = 137,
     reserved2 = 138,
@@ -172,6 +174,7 @@ private:
     bool op_verify();
     bool op_toaltstack();
     bool op_fromaltstack();
+    bool op_2drop();
     bool op_ifdup();
     bool op_depth();
     bool op_drop();
@@ -182,6 +185,7 @@ private:
     bool op_roll();
     bool op_rot();
     bool op_swap();
+    bool op_tuck();
     bool op_size();
     bool op_not();
     bool op_boolor();

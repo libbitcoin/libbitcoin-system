@@ -343,6 +343,15 @@ bool script::op_fromaltstack()
     return true;
 }
 
+bool script::op_2drop()
+{
+    if (stack_.size() < 2)
+        return false;
+    stack_.pop_back();
+    stack_.pop_back();
+    return true;
+}
+
 bool script::op_ifdup()
 {
     if (stack_.size() < 1)
@@ -443,6 +452,15 @@ bool script::op_swap()
     auto rot_first = stack_.end() - 2,
         rot_second = stack_.end() - 1;
     std::swap(*rot_first, *rot_second);
+    return true;
+}
+
+bool script::op_tuck()
+{
+    if (stack_.size() < 2)
+        return false;
+    data_chunk data = stack_.back();
+    stack_.insert(stack_.end() - 2, data);
     return true;
 }
 
@@ -803,6 +821,9 @@ bool script::run_operation(const operation& op,
         case opcode::fromaltstack:
             return op_fromaltstack();
 
+        case opcode::op_2drop:
+            return op_2drop();
+
         case opcode::ifdup:
             return op_ifdup();
 
@@ -832,6 +853,9 @@ bool script::run_operation(const operation& op,
 
         case opcode::swap:
             return op_swap();
+
+        case opcode::tuck:
+            return op_tuck();
 
         case opcode::size:
             return op_size();
@@ -1020,6 +1044,8 @@ std::string opcode_to_string(opcode code)
             return "toaltstack";
         case opcode::fromaltstack:
             return "fromaltstack";
+        case opcode::op_2drop:
+            return "op2drop";
         case opcode::ifdup:
             return "ifdup";
         case opcode::depth:
@@ -1040,6 +1066,8 @@ std::string opcode_to_string(opcode code)
             return "rot";
         case opcode::swap:
             return "swap";
+        case opcode::tuck:
+            return "tuck";
         case opcode::size:
             return "size";
         case opcode::reserved1:
@@ -1174,6 +1202,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::toaltstack;
     else if (code_repr == "fromaltstack")
         return opcode::fromaltstack;
+    else if (code_repr == "2drop")
+        return opcode::op_2drop;
     else if (code_repr == "ifdup")
         return opcode::ifdup;
     else if (code_repr == "depth")
@@ -1194,6 +1224,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::rot;
     else if (code_repr == "swap")
         return opcode::swap;
+    else if (code_repr == "tuck")
+        return opcode::tuck;
     else if (code_repr == "size")
         return opcode::size;
     else if (code_repr == "reserved1")
