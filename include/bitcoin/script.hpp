@@ -50,6 +50,8 @@ enum class opcode
     toaltstack = 107,
     fromaltstack = 108,
     op_2drop = 109,
+    op_2dup = 110,
+    op_3dup = 111,
     ifdup = 115,
     depth = 116,
     drop = 117,
@@ -175,6 +177,8 @@ private:
     bool op_toaltstack();
     bool op_fromaltstack();
     bool op_2drop();
+    bool op_2dup();
+    bool op_3dup();
     bool op_ifdup();
     bool op_depth();
     bool op_drop();

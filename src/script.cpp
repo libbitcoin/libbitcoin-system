@@ -352,6 +352,30 @@ bool script::op_2drop()
     return true;
 }
 
+bool script::op_2dup()
+{
+    if (stack_.size() < 2)
+        return false;
+    auto dup_first = *(stack_.end() - 2),
+        dup_second = *(stack_.end() - 1);
+    stack_.push_back(dup_first);
+    stack_.push_back(dup_second);
+    return true;
+}
+
+bool script::op_3dup()
+{
+    if (stack_.size() < 3)
+        return false;
+    auto dup_first = *(stack_.end() - 3),
+        dup_second = *(stack_.end() - 2),
+        dup_third = *(stack_.end() - 1);
+    stack_.push_back(dup_first);
+    stack_.push_back(dup_second);
+    stack_.push_back(dup_third);
+    return true;
+}
+
 bool script::op_ifdup()
 {
     if (stack_.size() < 1)
@@ -430,6 +454,12 @@ bool script::op_roll()
     return pick_roll_impl(stack_, true);
 }
 
+template <typename DataStack>
+void stack_swap(DataStack& stack, size_t index_a, size_t index_b)
+{
+    std::swap(*(stack.end() - index_a), *(stack.end() - index_b));
+}
+
 bool script::op_rot()
 {
     // Top 3 stack items are rotated to the left.
@@ -437,11 +467,8 @@ bool script::op_rot()
     // After:  x2 x3 x1
     if (stack_.size() < 3)
         return false;
-    auto rot_first = stack_.end() - 3,
-        rot_second = stack_.end() - 2,
-        rot_third = stack_.end() - 1;
-    std::swap(*rot_first, *rot_second);
-    std::swap(*rot_second, *rot_third);
+    stack_swap(stack_, 3, 2);
+    stack_swap(stack_, 2, 1);
     return true;
 }
 
@@ -449,9 +476,7 @@ bool script::op_swap()
 {
     if (stack_.size() < 2)
         return false;
-    auto rot_first = stack_.end() - 2,
-        rot_second = stack_.end() - 1;
-    std::swap(*rot_first, *rot_second);
+    stack_swap(stack_, 2, 1);
     return true;
 }
 
@@ -824,6 +849,12 @@ bool script::run_operation(const operation& op,
         case opcode::op_2drop:
             return op_2drop();
 
+        case opcode::op_2dup:
+            return op_2dup();
+
+        case opcode::op_3dup:
+            return op_3dup();
+
         case opcode::ifdup:
             return op_ifdup();
 
@@ -1045,7 +1076,11 @@ std::string opcode_to_string(opcode code)
         case opcode::fromaltstack:
             return "fromaltstack";
         case opcode::op_2drop:
-            return "op2drop";
+            return "2drop";
+        case opcode::op_2dup:
+            return "2dup";
+        case opcode::op_3dup:
+            return "3dup";
         case opcode::ifdup:
             return "ifdup";
         case opcode::depth:
@@ -1204,6 +1239,10 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::fromaltstack;
     else if (code_repr == "2drop")
         return opcode::op_2drop;
+    else if (code_repr == "2dup")
+        return opcode::op_2dup;
+    else if (code_repr == "3dup")
+        return opcode::op_3dup;
     else if (code_repr == "ifdup")
         return opcode::ifdup;
     else if (code_repr == "depth")
