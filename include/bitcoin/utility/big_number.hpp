@@ -48,6 +48,7 @@ public:
     bool operator>(const big_number& other);
 
     big_number& operator+=(const big_number& other);
+    big_number& operator-=(const big_number& other);
     big_number& operator*=(const big_number& other);
     big_number& operator/=(const big_number& other);
 
@@ -55,6 +56,9 @@ private:
     friend divmod_result divmod(const big_number& a, const big_number& b);
     friend const big_number operator+(
         const big_number& a, const big_number& b);
+    friend const big_number operator-(
+        const big_number& a, const big_number& b);
+    friend const big_number operator-(const big_number& number);
     friend const big_number operator/(const big_number& a,
         const big_number& b);
     friend const big_number operator<<(const big_number& a,
@@ -69,6 +73,8 @@ private:
 };
 
 const big_number operator+(const big_number& a, const big_number& b);
+const big_number operator-(const big_number& a, const big_number& b);
+const big_number operator-(const big_number& number);
 const big_number operator/(const big_number& a, const big_number& b);
 const big_number operator<<(const big_number& a, unsigned int shift);
 

@@ -69,6 +69,9 @@ enum class opcode
     size = 130,
     reserved1 = 137,
     reserved2 = 138,
+    op_1add = 139,
+    op_1sub = 140,
+    abs = 144,
     not_ = 145,
     boolor = 155,
     min = 163,
@@ -197,6 +200,9 @@ private:
     bool op_swap();
     bool op_tuck();
     bool op_size();
+    bool op_1add();
+    bool op_1sub();
+    bool op_abs();
     bool op_not();
     bool op_boolor();
     bool op_min();

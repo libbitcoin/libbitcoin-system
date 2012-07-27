@@ -536,6 +536,43 @@ bool script::op_size()
     return true;
 }
 
+bool script::op_1add()
+{
+    if (stack_.size() < 1)
+        return false;
+    big_number number_n;
+    if (!cast_to_big_number(pop_stack(), number_n))
+        return false;
+    number_n += 1;
+    stack_.push_back(number_n.data());
+    return true;
+}
+
+bool script::op_1sub()
+{
+    if (stack_.size() < 1)
+        return false;
+    big_number number_n;
+    if (!cast_to_big_number(pop_stack(), number_n))
+        return false;
+    number_n -= 1;
+    stack_.push_back(number_n.data());
+    return true;
+}
+
+bool script::op_abs()
+{
+    if (stack_.size() < 1)
+        return false;
+    big_number number_n;
+    if (!cast_to_big_number(pop_stack(), number_n))
+        return false;
+    if (number_n < 0)
+        number_n = -number_n;
+    stack_.push_back(number_n.data());
+    return true;
+}
+
 bool script::op_not()
 {
     if (stack_.size() < 1)
@@ -942,6 +979,15 @@ bool script::run_operation(const operation& op,
         case opcode::reserved2:
             return false;
 
+        case opcode::op_1add:
+            return op_1add();
+
+        case opcode::op_1sub:
+            return op_1sub();
+
+        case opcode::abs:
+            return op_abs();
+
         case opcode::not_:
             return op_not();
 
@@ -1162,6 +1208,10 @@ std::string opcode_to_string(opcode code)
             return "reserved1";
         case opcode::reserved2:
             return "reserved2";
+        case opcode::op_1add:
+            return "1add";
+        case opcode::op_1sub:
+            return "1sub";
         case opcode::not_:
             return "not";
         case opcode::boolor:
@@ -1330,6 +1380,12 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::reserved1;
     else if (code_repr == "reserved2")
         return opcode::reserved2;
+    else if (code_repr == "1add")
+        return opcode::op_1add;
+    else if (code_repr == "1sub")
+        return opcode::op_1sub;
+    else if (code_repr == "abs")
+        return opcode::abs;
     else if (code_repr == "not")
         return opcode::not_;
     else if (code_repr == "boolor")

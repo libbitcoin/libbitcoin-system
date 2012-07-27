@@ -276,6 +276,12 @@ big_number& big_number::operator+=(const big_number& other)
     return *this; 
 }
 
+big_number& big_number::operator-=(const big_number& other)
+{
+    BN_sub(&bignum_, &bignum_, &other.bignum_);
+    return *this; 
+}
+
 big_number& big_number::operator*=(const big_number& other)
 {
     big_number_context ctx;
@@ -296,10 +302,26 @@ const big_number operator+(const big_number& a, const big_number& b)
     BN_add(&result.bignum_, &a.bignum_, &b.bignum_);
     return result;
 }
+
+const big_number operator-(const big_number& a, const big_number& b)
+{
+    big_number result;
+    BN_sub(&result.bignum_, &a.bignum_, &b.bignum_);
+    return result;
+}
+
+const big_number operator-(const big_number& number)
+{
+    big_number result(number);
+    BN_set_negative(&result.bignum_, !BN_is_negative(&result.bignum_));
+    return result;
+}
+
 const big_number operator/(const big_number& a, const big_number& b)
 {
     return divmod(a, b).first;
 }
+
 const big_number operator<<(const big_number& a, unsigned int shift)
 {
     big_number result;
