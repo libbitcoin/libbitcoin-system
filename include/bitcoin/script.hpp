@@ -58,6 +58,7 @@ enum class opcode
     pick = 121,
     roll = 122,
     rot = 123,
+    swap = 124,
     size = 130,
     reserved1 = 137,
     reserved2 = 138,
@@ -180,6 +181,7 @@ private:
     bool op_pick();
     bool op_roll();
     bool op_rot();
+    bool op_swap();
     bool op_size();
     bool op_not();
     bool op_boolor();

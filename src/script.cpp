@@ -436,6 +436,16 @@ bool script::op_rot()
     return true;
 }
 
+bool script::op_swap()
+{
+    if (stack_.size() < 2)
+        return false;
+    auto rot_first = stack_.end() - 2,
+        rot_second = stack_.end() - 1;
+    std::swap(*rot_first, *rot_second);
+    return true;
+}
+
 bool script::op_size()
 {
     if (stack_.size() < 1)
@@ -820,6 +830,9 @@ bool script::run_operation(const operation& op,
         case opcode::rot:
             return op_rot();
 
+        case opcode::swap:
+            return op_swap();
+
         case opcode::size:
             return op_size();
 
@@ -1025,6 +1038,8 @@ std::string opcode_to_string(opcode code)
             return "roll";
         case opcode::rot:
             return "rot";
+        case opcode::swap:
+            return "swap";
         case opcode::size:
             return "size";
         case opcode::reserved1:
@@ -1177,6 +1192,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::roll;
     else if (code_repr == "rot")
         return opcode::rot;
+    else if (code_repr == "swap")
+        return opcode::swap;
     else if (code_repr == "size")
         return opcode::size;
     else if (code_repr == "reserved1")
