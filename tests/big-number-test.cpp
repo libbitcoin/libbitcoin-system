@@ -1,21 +1,5 @@
-#include <stdexcept>
-#include <algorithm>
-#include <vector>
-#include <iostream>
-#include <iomanip>
-#include <openssl/bn.h>
-
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/big_number.hpp>
-#include <bitcoin/utility/logger.hpp>
-#include <bitcoin/types.hpp>
-#include <bitcoin/constants.hpp>
-
-using libbitcoin::data_chunk;
-using libbitcoin::hash_digest;
-using libbitcoin::big_number;
-using libbitcoin::pretty_hex;
-using libbitcoin::log_debug;
+#include <bitcoin/bitcoin.hpp>
+using namespace bc;
 
 void test()
 {
@@ -37,9 +21,17 @@ void test()
     BITCOIN_ASSERT(bignum_max <= libbitcoin::max_target());
     BITCOIN_ASSERT(bignum < libbitcoin::max_target());
 
-    big_number arith(0x1f1f1f1f1f1f);
-    arith *= 0x1f1f1f1f1f1f;
-    BITCOIN_ASSERT((arith.data() == data_chunk{0x03, 0xc8, 0x8d, 0x52, 0x16, 0xdb, 0x98, 0xd4, 0x0f, 0x4a, 0x85, 0xc1}));
+    big_number arith, oper;
+    arith.set_uint64(0x1f1f1f1f1f1f);
+    oper.set_uint64(0x1f1f1f1f1f1f);
+    arith *= oper;
+    //BITCOIN_ASSERT((arith.data() == data_chunk{0x03, 0xc8, 0x8d, 0x52, 0x16, 0xdb, 0x98, 0xd4, 0x0f, 0x4a, 0x85, 0xc1}));
+
+    big_number a, b;
+    a.set_data({0x70});
+    b.set_data({0x0c});
+    BITCOIN_ASSERT(big_number(a - b) == 100);
+    BITCOIN_ASSERT((big_number(a - b).data() == data_chunk{100}));
 }
 
 int main()

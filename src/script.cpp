@@ -254,9 +254,9 @@ bool script::arithmetic_start(big_number& number_a, big_number& number_b)
 {
     if (stack_.size() < 2)
         return false;
-    if (!cast_to_big_number(pop_stack(), number_a))
-        return false;
     if (!cast_to_big_number(pop_stack(), number_b))
+        return false;
+    if (!cast_to_big_number(pop_stack(), number_a))
         return false;
     return true;
 }
@@ -657,6 +657,16 @@ bool script::op_add()
     return true;
 }
 
+bool script::op_sub()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a - number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
 bool script::op_greaterthanorequal()
 {
     big_number number_a, number_b;
@@ -1009,6 +1019,9 @@ bool script::run_operation(const operation& op,
         case opcode::equalverify:
             return op_equalverify();
 
+        case opcode::sub:
+            return op_sub();
+
         case opcode::add:
             return op_add();
 
@@ -1228,6 +1241,8 @@ std::string opcode_to_string(opcode code)
             return "equalverify";
         case opcode::add:
             return "add";
+        case opcode::sub:
+            return "sub";
         case opcode::greaterthanorequal:
             return "greaterthanorequal";
         case opcode::codeseparator:
@@ -1402,6 +1417,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::equalverify;
     else if (code_repr == "add")
         return opcode::add;
+    else if (code_repr == "sub")
+        return opcode::sub;
     else if (code_repr == "greaterthanorequal")
         return opcode::greaterthanorequal;
     else if (code_repr == "codeseparator")

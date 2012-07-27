@@ -80,6 +80,7 @@ enum class opcode
     equal = 135,
     equalverify = 136,
     add = 147,
+    sub = 148,
     greaterthanorequal = 162,
     codeseparator = 171,
     checksig = 172,
@@ -211,6 +212,7 @@ private:
     bool op_equal();
     bool op_equalverify();
     bool op_add();
+    bool op_sub();
     bool op_greaterthanorequal();
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(
