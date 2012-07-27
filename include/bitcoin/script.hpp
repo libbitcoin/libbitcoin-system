@@ -55,6 +55,7 @@ enum class opcode
     dup = 118,
     nip = 119,
     over = 120,
+    pick = 121,
     roll = 122,
     size = 130,
     reserved1 = 137,
@@ -175,6 +176,7 @@ private:
     bool op_dup();
     bool op_nip();
     bool op_over();
+    bool op_pick();
     bool op_roll();
     bool op_size();
     bool op_not();

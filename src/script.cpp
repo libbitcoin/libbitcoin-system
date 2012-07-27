@@ -391,21 +391,34 @@ bool script::op_over()
     return true;
 }
 
-bool script::op_roll()
+template <typename DataStack>
+bool pick_roll_impl(DataStack& stack, bool is_roll)
 {
-    if (stack_.size() < 2)
+    if (stack.size() < 2)
         return false;
     big_number number_n;
-    if (!cast_to_big_number(pop_stack(), number_n))
+    if (!cast_to_big_number(stack.back(), number_n))
         return false;
+    stack.pop_back();
     uint32_t n = number_n.uint32();
-    if (n >= stack_.size())
+    if (n >= stack.size())
         return false;
-    auto slice_iter = stack_.end() - n - 1;
+    auto slice_iter = stack.end() - n - 1;
     data_chunk item = *slice_iter;
-    stack_.erase(slice_iter);
-    stack_.push_back(item);
+    if (is_roll)
+        stack.erase(slice_iter);
+    stack.push_back(item);
     return true;
+}
+
+bool script::op_pick()
+{
+    return pick_roll_impl(stack_, false);
+}
+
+bool script::op_roll()
+{
+    return pick_roll_impl(stack_, true);
 }
 
 bool script::op_size()
@@ -783,6 +796,9 @@ bool script::run_operation(const operation& op,
         case opcode::over:
             return op_over();
 
+        case opcode::pick:
+            return op_pick();
+
         case opcode::roll:
             return op_roll();
 
@@ -985,6 +1001,8 @@ std::string opcode_to_string(opcode code)
             return "nip";
         case opcode::over:
             return "over";
+        case opcode::pick:
+            return "pick";
         case opcode::roll:
             return "roll";
         case opcode::size:
@@ -1133,6 +1151,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::nip;
     else if (code_repr == "over")
         return opcode::over;
+    else if (code_repr == "pick")
+        return opcode::pick;
     else if (code_repr == "roll")
         return opcode::roll;
     else if (code_repr == "size")
