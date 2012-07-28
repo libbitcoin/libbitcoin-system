@@ -536,6 +536,24 @@ bool script::op_size()
     return true;
 }
 
+bool script::op_equal()
+{
+    if (stack_.size() < 2)
+        return false;
+    if (pop_stack() == pop_stack())
+        stack_.push_back(stack_true_value);
+    else
+        stack_.push_back(stack_false_value);
+    return true;
+}
+
+bool script::op_equalverify()
+{
+    if (stack_.size() < 2)
+        return false;
+    return pop_stack() == pop_stack();
+}
+
 bool script::op_1add()
 {
     if (stack_.size() < 1)
@@ -556,6 +574,18 @@ bool script::op_1sub()
     if (!cast_to_big_number(pop_stack(), number_n))
         return false;
     number_n -= 1;
+    stack_.push_back(number_n.data());
+    return true;
+}
+
+bool script::op_negate()
+{
+    if (stack_.size() < 1)
+        return false;
+    big_number number_n;
+    if (!cast_to_big_number(pop_stack(), number_n))
+        return false;
+    number_n = -number_n;
     stack_.push_back(number_n.data());
     return true;
 }
@@ -585,12 +615,42 @@ bool script::op_not()
     return true;
 }
 
+bool script::op_add()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a + number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
+bool script::op_sub()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a - number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
 bool script::op_boolor()
 {
     big_number number_a, number_b;
     if (!arithmetic_start(number_a, number_b))
         return false;
     big_number zero(0), result = number_a != zero || number_b != zero;
+    stack_.push_back(result.data());
+    return true;
+}
+
+bool script::op_greaterthanorequal()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a >= number_b;
     stack_.push_back(result.data());
     return true;
 }
@@ -626,54 +686,6 @@ bool script::op_hash160()
     short_hash hash = generate_ripemd_hash(data);
     data_chunk raw_hash(hash.begin(), hash.end());
     stack_.push_back(raw_hash);
-    return true;
-}
-
-bool script::op_equal()
-{
-    if (stack_.size() < 2)
-        return false;
-    if (pop_stack() == pop_stack())
-        stack_.push_back(stack_true_value);
-    else
-        stack_.push_back(stack_false_value);
-    return true;
-}
-
-bool script::op_equalverify()
-{
-    if (stack_.size() < 2)
-        return false;
-    return pop_stack() == pop_stack();
-}
-
-bool script::op_add()
-{
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
-        return false;
-    big_number result = number_a + number_b;
-    stack_.push_back(result.data());
-    return true;
-}
-
-bool script::op_sub()
-{
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
-        return false;
-    big_number result = number_a - number_b;
-    stack_.push_back(result.data());
-    return true;
-}
-
-bool script::op_greaterthanorequal()
-{
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
-        return false;
-    big_number result = number_a >= number_b;
-    stack_.push_back(result.data());
     return true;
 }
 
@@ -985,6 +997,12 @@ bool script::run_operation(const operation& op,
         case opcode::size:
             return op_size();
 
+        case opcode::equal:
+            return op_equal();
+
+        case opcode::equalverify:
+            return op_equalverify();
+
         case opcode::reserved1:
         case opcode::reserved2:
             return false;
@@ -995,6 +1013,9 @@ bool script::run_operation(const operation& op,
         case opcode::op_1sub:
             return op_1sub();
 
+        case opcode::negate:
+            return op_negate();
+
         case opcode::abs:
             return op_abs();
 
@@ -1003,6 +1024,9 @@ bool script::run_operation(const operation& op,
 
         case opcode::boolor:
             return op_boolor();
+
+        case opcode::greaterthanorequal:
+            return op_greaterthanorequal();
 
         case opcode::min:
             return op_min();
@@ -1013,20 +1037,11 @@ bool script::run_operation(const operation& op,
         case opcode::hash160:
             return op_hash160();
 
-        case opcode::equal:
-            return op_equal();
-
-        case opcode::equalverify:
-            return op_equalverify();
-
         case opcode::sub:
             return op_sub();
 
         case opcode::add:
             return op_add();
-
-        case opcode::greaterthanorequal:
-            return op_greaterthanorequal();
 
         case opcode::codeseparator:
             // This is set in the main run(...) loop
@@ -1225,6 +1240,10 @@ std::string opcode_to_string(opcode code)
             return "1add";
         case opcode::op_1sub:
             return "1sub";
+        case opcode::negate:
+            return "negate";
+        case opcode::abs:
+            return "abs";
         case opcode::not_:
             return "not";
         case opcode::boolor:
@@ -1399,6 +1418,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::op_1add;
     else if (code_repr == "1sub")
         return opcode::op_1sub;
+    else if (code_repr == "negate")
+        return opcode::negate;
     else if (code_repr == "abs")
         return opcode::abs;
     else if (code_repr == "not")

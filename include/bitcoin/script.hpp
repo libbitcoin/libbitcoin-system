@@ -67,21 +67,22 @@ enum class opcode
     swap = 124,
     tuck = 125,
     size = 130,
+    equal = 135,
+    equalverify = 136,
     reserved1 = 137,
     reserved2 = 138,
     op_1add = 139,
     op_1sub = 140,
+    negate = 143,
     abs = 144,
     not_ = 145,
+    add = 147,
+    sub = 148,
     boolor = 155,
+    greaterthanorequal = 162,
     min = 163,
     sha256 = 168,
     hash160 = 169,
-    equal = 135,
-    equalverify = 136,
-    add = 147,
-    sub = 148,
-    greaterthanorequal = 162,
     codeseparator = 171,
     checksig = 172,
     checksigverify = 173,
@@ -201,19 +202,20 @@ private:
     bool op_swap();
     bool op_tuck();
     bool op_size();
+    bool op_equal();
+    bool op_equalverify();
     bool op_1add();
     bool op_1sub();
+    bool op_negate();
     bool op_abs();
     bool op_not();
+    bool op_add();
+    bool op_sub();
     bool op_boolor();
+    bool op_greaterthanorequal();
     bool op_min();
     bool op_sha256();
     bool op_hash160();
-    bool op_equal();
-    bool op_equalverify();
-    bool op_add();
-    bool op_sub();
-    bool op_greaterthanorequal();
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(
         const message::transaction& parent_tx, uint32_t input_index);
