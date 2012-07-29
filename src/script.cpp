@@ -181,6 +181,13 @@ bool opcode_is_disabled(opcode code)
         rshift:*/
         // return true;
 
+        // These opcodes aren't in the main Satoshi EvalScript
+        // switch-case so the script loop always fails regardless of
+        // whether these are executed or not.
+        case opcode::verif:
+        case opcode::vernotif:
+            return true;
+
         default:
             return false;
     }
@@ -1071,6 +1078,8 @@ bool script::run_operation(const operation& op,
 
         case opcode::verif:
         case opcode::vernotif:
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+                "Disabled opcodes (verif/vernotif) for run_operation");
             return false;
 
         case opcode::else_:
@@ -1370,6 +1379,10 @@ std::string opcode_to_string(opcode code)
             return "if";
         case opcode::notif:
             return "notif";
+        case opcode::verif:
+            return "verif";
+        case opcode::vernotif:
+            return "vernotif";
         case opcode::else_:
             return "else";
         case opcode::endif:
