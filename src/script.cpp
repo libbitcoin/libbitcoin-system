@@ -91,38 +91,45 @@ inline bool cast_to_bool(const data_chunk& values)
     return false;
 }
 
-bool is_push_only(const operation_stack& operations)
+bool is_push(const opcode code)
 {
-    auto is_push =
-        [](opcode code)
-        {
-            return code == opcode::zero
-                || code == opcode::special
-                || code == opcode::pushdata1
-                || code == opcode::pushdata2
-                || code == opcode::pushdata4
-                || code == opcode::negative_1
-                || code == opcode::op_1
-                || code == opcode::op_2
-                || code == opcode::op_3
-                || code == opcode::op_4
-                || code == opcode::op_5
-                || code == opcode::op_6
-                || code == opcode::op_7
-                || code == opcode::op_8
-                || code == opcode::op_9
-                || code == opcode::op_10
-                || code == opcode::op_11
-                || code == opcode::op_12
-                || code == opcode::op_13
-                || code == opcode::op_14
-                || code == opcode::op_15
-                || code == opcode::op_16;
-        };
+    return code == opcode::zero
+        || code == opcode::special
+        || code == opcode::pushdata1
+        || code == opcode::pushdata2
+        || code == opcode::pushdata4
+        || code == opcode::negative_1
+        || code == opcode::op_1
+        || code == opcode::op_2
+        || code == opcode::op_3
+        || code == opcode::op_4
+        || code == opcode::op_5
+        || code == opcode::op_6
+        || code == opcode::op_7
+        || code == opcode::op_8
+        || code == opcode::op_9
+        || code == opcode::op_10
+        || code == opcode::op_11
+        || code == opcode::op_12
+        || code == opcode::op_13
+        || code == opcode::op_14
+        || code == opcode::op_15
+        || code == opcode::op_16;
+}
+
+size_t count_non_push(const operation_stack& operations)
+{
+    size_t count;
+    // TODO use std alternative
     for (const operation& op: operations)
         if (!is_push(op.code))
-            return false;
-    return true;
+            ++count;
+    return count;
+}
+
+bool is_push_only(const operation_stack& operations)
+{
+    return count_non_push(operations) == 0;
 }
 
 bool script::run(script input_script, const message::transaction& parent_tx,
@@ -196,6 +203,8 @@ bool opcode_is_disabled(opcode code)
 
 bool script::run(const message::transaction& parent_tx, uint32_t input_index)
 {
+    if (count_non_push(operations_) > 201)
+        return false;
     alternate_stack_.clear();
     codehash_begin_ = operations_.begin();
     conditional_stack_.clear();
@@ -235,6 +244,8 @@ bool script::next_step(operation_stack::iterator it,
         || op.code == opcode::pushdata2
         || op.code == opcode::pushdata4)
     {
+        if (op.data.size() > 520)
+            return false;
         stack_.push_back(op.data);
     }
     else if (op.code == opcode::codeseparator)
