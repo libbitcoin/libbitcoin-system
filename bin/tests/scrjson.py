@@ -21,6 +21,6 @@ for counter, test in enumerate(tests):
     if retcode == 0:
         print "Status: pass"
     elif retcode == 256:
-        print "Status: fail"
+        print (counter + 1), "Status: fail", test
     print
 

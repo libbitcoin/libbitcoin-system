@@ -817,7 +817,7 @@ bool script::op_hash160()
     data_chunk data = pop_stack();
     short_hash hash = generate_ripemd_hash(data);
     // hash must be reversed
-    data_chunk raw_hash(hash.rbegin(), hash.rend());
+    data_chunk raw_hash(hash.begin(), hash.end());
     stack_.push_back(raw_hash);
     return true;
 }
