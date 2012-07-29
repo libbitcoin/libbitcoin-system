@@ -89,6 +89,7 @@ enum class opcode
     lessthanorequal = 161,
     greaterthanorequal = 162,
     min = 163,
+    max = 164,
     sha256 = 168,
     hash160 = 169,
     codeseparator = 171,
@@ -230,6 +231,7 @@ private:
     bool op_lessthanorequal();
     bool op_greaterthanorequal();
     bool op_min();
+    bool op_max();
     bool op_sha256();
     bool op_hash160();
     // op_checksig is a specialised case of op_checksigverify

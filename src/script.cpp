@@ -747,6 +747,18 @@ bool script::op_min()
     return true;
 }
 
+bool script::op_max()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    if (number_a < number_b)
+        stack_.push_back(number_b.data());
+    else
+        stack_.push_back(number_a.data());
+    return true;
+}
+
 bool script::op_sha256()
 {
     if (stack_.size() < 1)
@@ -1135,6 +1147,9 @@ bool script::run_operation(const operation& op,
         case opcode::min:
             return op_min();
 
+        case opcode::max:
+            return op_max();
+
         case opcode::sha256:
             return op_sha256();
 
@@ -1372,6 +1387,8 @@ std::string opcode_to_string(opcode code)
             return "greaterthanorequal";
         case opcode::min:
             return "min";
+        case opcode::max:
+            return "max";
         case opcode::sha256:
             return "sha256";
         case opcode::hash160:
@@ -1566,6 +1583,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::greaterthanorequal;
     else if (code_repr == "min")
         return opcode::min;
+    else if (code_repr == "max")
+        return opcode::max;
     else if (code_repr == "sha256")
         return opcode::sha256;
     else if (code_repr == "hash160")
