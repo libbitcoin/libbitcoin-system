@@ -47,6 +47,7 @@ enum class opcode
     else_ = 103,
     endif = 104,
     verify = 105,
+    return_ = 106,
     toaltstack = 107,
     fromaltstack = 108,
     op_2drop = 109,

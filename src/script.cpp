@@ -1102,6 +1102,9 @@ bool script::run_operation(const operation& op,
         case opcode::verify:
             return op_verify();
 
+        case opcode::return_:
+            return false;
+
         case opcode::toaltstack:
             return op_toaltstack();
 
@@ -1400,6 +1403,8 @@ std::string opcode_to_string(opcode code)
             return "endif";
         case opcode::verify:
             return "verify";
+        case opcode::return_:
+            return "return";
         case opcode::toaltstack:
             return "toaltstack";
         case opcode::fromaltstack:
@@ -1604,6 +1609,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::endif;
     else if (code_repr == "verify")
         return opcode::verify;
+    else if (code_repr == "return")
+        return opcode::return_;
     else if (code_repr == "toaltstack")
         return opcode::toaltstack;
     else if (code_repr == "fromaltstack")
