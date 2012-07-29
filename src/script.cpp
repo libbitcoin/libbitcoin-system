@@ -615,6 +615,18 @@ bool script::op_not()
     return true;
 }
 
+bool script::op_0notequal()
+{
+    if (stack_.size() < 1)
+        return false;
+    big_number number_n;
+    if (!cast_to_big_number(pop_stack(), number_n))
+        return false;
+    stack_.push_back(
+        big_number(number_n != big_number(0)).data());
+    return true;
+}
+
 bool script::op_add()
 {
     big_number number_a, number_b;
@@ -1022,6 +1034,9 @@ bool script::run_operation(const operation& op,
         case opcode::not_:
             return op_not();
 
+        case opcode::op_0notequal:
+            return op_0notequal();
+
         case opcode::boolor:
             return op_boolor();
 
@@ -1246,6 +1261,8 @@ std::string opcode_to_string(opcode code)
             return "abs";
         case opcode::not_:
             return "not";
+        case opcode::op_0notequal:
+            return "0notequal";
         case opcode::boolor:
             return "boolor";
         case opcode::min:
@@ -1424,6 +1441,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::abs;
     else if (code_repr == "not")
         return opcode::not_;
+    else if (code_repr == "0notequal")
+        return opcode::op_0notequal;
     else if (code_repr == "boolor")
         return opcode::boolor;
     else if (code_repr == "min")

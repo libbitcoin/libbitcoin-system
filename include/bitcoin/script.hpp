@@ -76,6 +76,7 @@ enum class opcode
     negate = 143,
     abs = 144,
     not_ = 145,
+    op_0notequal = 146,
     add = 147,
     sub = 148,
     boolor = 155,
@@ -209,6 +210,7 @@ private:
     bool op_negate();
     bool op_abs();
     bool op_not();
+    bool op_0notequal();
     bool op_add();
     bool op_sub();
     bool op_boolor();
