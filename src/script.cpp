@@ -667,6 +667,64 @@ bool script::op_boolor()
     return true;
 }
 
+bool script::op_numequal()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a == number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
+bool script::op_numequalverify()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    return number_a == number_b;
+}
+
+bool script::op_numnotequal()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a != number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
+bool script::op_lessthan()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a < number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
+bool script::op_greaterthan()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a > number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
+bool script::op_lessthanorequal()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number result = number_a <= number_b;
+    stack_.push_back(result.data());
+    return true;
+}
+
 bool script::op_greaterthanorequal()
 {
     big_number number_a, number_b;
@@ -1053,6 +1111,24 @@ bool script::run_operation(const operation& op,
         case opcode::boolor:
             return op_boolor();
 
+        case opcode::numequal:
+            return op_numequal();
+
+        case opcode::numequalverify:
+            return op_numequalverify();
+
+        case opcode::numnotequal:
+            return op_numnotequal();
+
+        case opcode::lessthan:
+            return op_lessthan();
+
+        case opcode::greaterthan:
+            return op_greaterthan();
+
+        case opcode::lessthanorequal:
+            return op_lessthanorequal();
+
         case opcode::greaterthanorequal:
             return op_greaterthanorequal();
 
@@ -1280,6 +1356,20 @@ std::string opcode_to_string(opcode code)
             return "booland";
         case opcode::boolor:
             return "boolor";
+        case opcode::numequal:
+            return "numequal";
+        case opcode::numequalverify:
+            return "numequalverify";
+        case opcode::numnotequal:
+            return "numnotequal";
+        case opcode::lessthan:
+            return "lessthan";
+        case opcode::greaterthan:
+            return "greaterthan";
+        case opcode::lessthanorequal:
+            return "lessthanorequal";
+        case opcode::greaterthanorequal:
+            return "greaterthanorequal";
         case opcode::min:
             return "min";
         case opcode::sha256:
@@ -1294,8 +1384,6 @@ std::string opcode_to_string(opcode code)
             return "add";
         case opcode::sub:
             return "sub";
-        case opcode::greaterthanorequal:
-            return "greaterthanorequal";
         case opcode::codeseparator:
             return "codeseparator";
         case opcode::checksig:
@@ -1462,6 +1550,20 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::booland;
     else if (code_repr == "boolor")
         return opcode::boolor;
+    else if (code_repr == "numequal")
+        return opcode::numequal;
+    else if (code_repr == "numequalverify")
+        return opcode::numequalverify;
+    else if (code_repr == "numnotequal")
+        return opcode::numnotequal;
+    else if (code_repr == "lessthan")
+        return opcode::lessthan;
+    else if (code_repr == "greaterthan")
+        return opcode::greaterthan;
+    else if (code_repr == "lessthanorequal")
+        return opcode::lessthanorequal;
+    else if (code_repr == "greaterthanorequal")
+        return opcode::greaterthanorequal;
     else if (code_repr == "min")
         return opcode::min;
     else if (code_repr == "sha256")
@@ -1476,8 +1578,6 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::add;
     else if (code_repr == "sub")
         return opcode::sub;
-    else if (code_repr == "greaterthanorequal")
-        return opcode::greaterthanorequal;
     else if (code_repr == "codeseparator")
         return opcode::codeseparator;
     else if (code_repr == "checksig")

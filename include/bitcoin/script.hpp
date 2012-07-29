@@ -81,6 +81,12 @@ enum class opcode
     sub = 148,
     booland = 154,
     boolor = 155,
+    numequal = 156,
+    numequalverify = 157,
+    numnotequal = 158,
+    lessthan = 159,
+    greaterthan = 160,
+    lessthanorequal = 161,
     greaterthanorequal = 162,
     min = 163,
     sha256 = 168,
@@ -216,6 +222,12 @@ private:
     bool op_sub();
     bool op_booland();
     bool op_boolor();
+    bool op_numequal();
+    bool op_numequalverify();
+    bool op_numnotequal();
+    bool op_lessthan();
+    bool op_greaterthan();
+    bool op_lessthanorequal();
     bool op_greaterthanorequal();
     bool op_min();
     bool op_sha256();
