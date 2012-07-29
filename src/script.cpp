@@ -759,6 +759,46 @@ bool script::op_max()
     return true;
 }
 
+bool script::op_within()
+{
+    big_number upper;
+    if (!cast_to_big_number(pop_stack(), upper))
+        return false;
+    big_number lower;
+    if (!cast_to_big_number(pop_stack(), lower))
+        return false;
+    big_number value;
+    if (!cast_to_big_number(pop_stack(), value))
+        return false;
+    if ((lower <= value) && (value < upper))
+        stack_.push_back(stack_true_value);
+    else
+        stack_.push_back(stack_false_value);
+    return true;
+}
+
+bool script::op_ripemd160()
+{
+    if (stack_.size() < 1)
+        return false;
+    data_chunk data = pop_stack();
+    data_chunk hash(ripemd_length);
+    RIPEMD160(data.data(), data.size(), hash.data());
+    stack_.push_back(hash);
+    return true;
+}
+
+bool script::op_sha1()
+{
+    if (stack_.size() < 1)
+        return false;
+    data_chunk data = pop_stack();
+    data_chunk hash(SHA_DIGEST_LENGTH);
+    SHA1(data.data(), data.size(), hash.data());
+    stack_.push_back(hash);
+    return true;
+}
+
 bool script::op_sha256()
 {
     if (stack_.size() < 1)
@@ -776,7 +816,20 @@ bool script::op_hash160()
         return false;
     data_chunk data = pop_stack();
     short_hash hash = generate_ripemd_hash(data);
-    data_chunk raw_hash(hash.begin(), hash.end());
+    // hash must be reversed
+    data_chunk raw_hash(hash.rbegin(), hash.rend());
+    stack_.push_back(raw_hash);
+    return true;
+}
+
+bool script::op_hash256()
+{
+    if (stack_.size() < 1)
+        return false;
+    data_chunk data = pop_stack();
+    hash_digest hash = generate_sha256_hash(data);
+    // hash must be reversed
+    data_chunk raw_hash(hash.rbegin(), hash.rend());
     stack_.push_back(raw_hash);
     return true;
 }
@@ -1150,11 +1203,23 @@ bool script::run_operation(const operation& op,
         case opcode::max:
             return op_max();
 
+        case opcode::within:
+            return op_within();
+
+        case opcode::ripemd160:
+            return op_ripemd160();
+
+        case opcode::sha1:
+            return op_sha1();
+
         case opcode::sha256:
             return op_sha256();
 
         case opcode::hash160:
             return op_hash160();
+
+        case opcode::hash256:
+            return op_hash256();
 
         case opcode::sub:
             return op_sub();
@@ -1389,10 +1454,18 @@ std::string opcode_to_string(opcode code)
             return "min";
         case opcode::max:
             return "max";
+        case opcode::within:
+            return "within";
+        case opcode::ripemd160:
+            return "ripemd160";
+        case opcode::sha1:
+            return "sha1";
         case opcode::sha256:
             return "sha256";
         case opcode::hash160:
             return "hash160";
+        case opcode::hash256:
+            return "hash256";
         case opcode::equal:
             return "equal";
         case opcode::equalverify:
@@ -1412,25 +1485,25 @@ std::string opcode_to_string(opcode code)
         case opcode::checkmultisigverify:
             return "checkmultisigverify";
         case opcode::op_nop1:
-            return "op_nop1";
+            return "nop1";
         case opcode::op_nop2:
-            return "op_nop2";
+            return "nop2";
         case opcode::op_nop3:
-            return "op_nop3";
+            return "nop3";
         case opcode::op_nop4:
-            return "op_nop4";
+            return "nop4";
         case opcode::op_nop5:
-            return "op_nop5";
+            return "nop5";
         case opcode::op_nop6:
-            return "op_nop6";
+            return "nop6";
         case opcode::op_nop7:
-            return "op_nop7";
+            return "nop7";
         case opcode::op_nop8:
-            return "op_nop8";
+            return "nop8";
         case opcode::op_nop9:
-            return "op_nop9";
+            return "nop9";
         case opcode::op_nop10:
-            return "op_nop10";
+            return "nop10";
         case opcode::raw_data:
             return "raw_data";
         default:
@@ -1585,10 +1658,18 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::min;
     else if (code_repr == "max")
         return opcode::max;
+    else if (code_repr == "within")
+        return opcode::within;
+    else if (code_repr == "ripemd160")
+        return opcode::ripemd160;
+    else if (code_repr == "sha1")
+        return opcode::sha1;
     else if (code_repr == "sha256")
         return opcode::sha256;
     else if (code_repr == "hash160")
         return opcode::hash160;
+    else if (code_repr == "hash256")
+        return opcode::hash256;
     else if (code_repr == "equal")
         return opcode::equal;
     else if (code_repr == "equalverify")
@@ -1607,25 +1688,25 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::checkmultisig;
     else if (code_repr == "checkmultisigverify")
         return opcode::checkmultisigverify;
-    else if (code_repr == "op_nop1")
+    else if (code_repr == "nop1")
         return opcode::op_nop1;
-    else if (code_repr == "op_nop2")
+    else if (code_repr == "nop2")
         return opcode::op_nop2;
-    else if (code_repr == "op_nop3")
+    else if (code_repr == "nop3")
         return opcode::op_nop3;
-    else if (code_repr == "op_nop4")
+    else if (code_repr == "nop4")
         return opcode::op_nop4;
-    else if (code_repr == "op_nop5")
+    else if (code_repr == "nop5")
         return opcode::op_nop5;
-    else if (code_repr == "op_nop6")
+    else if (code_repr == "nop6")
         return opcode::op_nop6;
-    else if (code_repr == "op_nop7")
+    else if (code_repr == "nop7")
         return opcode::op_nop7;
-    else if (code_repr == "op_nop8")
+    else if (code_repr == "nop8")
         return opcode::op_nop8;
-    else if (code_repr == "op_nop9")
+    else if (code_repr == "nop9")
         return opcode::op_nop9;
-    else if (code_repr == "op_nop10")
+    else if (code_repr == "nop10")
         return opcode::op_nop10;
     else if (code_repr == "raw_data")
         return opcode::raw_data;

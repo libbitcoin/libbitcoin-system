@@ -90,8 +90,12 @@ enum class opcode
     greaterthanorequal = 162,
     min = 163,
     max = 164,
+    within = 165,
+    ripemd160 = 166,
+    sha1 = 167,
     sha256 = 168,
     hash160 = 169,
+    hash256 = 170,
     codeseparator = 171,
     checksig = 172,
     checksigverify = 173,
@@ -232,8 +236,12 @@ private:
     bool op_greaterthanorequal();
     bool op_min();
     bool op_max();
+    bool op_within();
+    bool op_ripemd160();
+    bool op_sha1();
     bool op_sha256();
     bool op_hash160();
+    bool op_hash256();
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(
         const message::transaction& parent_tx, uint32_t input_index);
