@@ -171,22 +171,22 @@ bool opcode_is_disabled(opcode code)
 {
     switch (code)
     {
-        /*cat:
-        substr:
-        left:
-        right:
-        invert:
-        and:
-        or:
-        xor:
-        2mul:
-        2div:
-        mul:
-        div:
-        mod:
-        lshift:
-        rshift:*/
-        // return true;
+        case opcode::cat:
+        case opcode::substr:
+        case opcode::left:
+        case opcode::right:
+        case opcode::invert:
+        case opcode::and_:
+        case opcode::or_:
+        case opcode::xor_:
+        case opcode::op_2mul:
+        case opcode::op_2div:
+        case opcode::mul:
+        case opcode::div:
+        case opcode::mod:
+        case opcode::lshift:
+        case opcode::rshift:
+            return true;
 
         // These opcodes aren't in the main Satoshi EvalScript
         // switch-case so the script loop always fails regardless of
@@ -1048,7 +1048,7 @@ bool script::run_operation(const operation& op,
         case opcode::pushdata2:
         case opcode::pushdata4:
             BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
-                "Invalid push operation for run_operation");
+                "Invalid push operation in run_operation");
             return true;
 
         case opcode::negative_1:
@@ -1090,7 +1090,7 @@ bool script::run_operation(const operation& op,
         case opcode::verif:
         case opcode::vernotif:
             BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
-                "Disabled opcodes (verif/vernotif) for run_operation");
+                "Disabled opcodes (verif/vernotif) in run_operation");
             return false;
 
         case opcode::else_:
@@ -1159,11 +1159,27 @@ bool script::run_operation(const operation& op,
         case opcode::swap:
             return op_swap();
 
+        case opcode::cat:
+        case opcode::substr:
+        case opcode::left:
+        case opcode::right:
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+                "Disabled splice operations in run_operation");
+            return false;
+
         case opcode::tuck:
             return op_tuck();
 
         case opcode::size:
             return op_size();
+
+        case opcode::invert:
+        case opcode::and_:
+        case opcode::or_:
+        case opcode::xor_:
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+                "Disabled bit logic operations in run_operation");
+            return false;
 
         case opcode::equal:
             return op_equal();
@@ -1181,6 +1197,12 @@ bool script::run_operation(const operation& op,
         case opcode::op_1sub:
             return op_1sub();
 
+        case opcode::op_2mul:
+        case opcode::op_2div:
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+                "Disabled opcodes (2mul/2div) in run_operation");
+            return false;
+
         case opcode::negate:
             return op_negate();
 
@@ -1192,6 +1214,21 @@ bool script::run_operation(const operation& op,
 
         case opcode::op_0notequal:
             return op_0notequal();
+
+        case opcode::add:
+            return op_add();
+
+        case opcode::sub:
+            return op_sub();
+
+        case opcode::mul:
+        case opcode::div:
+        case opcode::mod:
+        case opcode::lshift:
+        case opcode::rshift:
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+                "Disabled numeric operations in run_operation");
+            return false;
 
         case opcode::booland:
             return op_booland();
@@ -1244,18 +1281,12 @@ bool script::run_operation(const operation& op,
         case opcode::hash256:
             return op_hash256();
 
-        case opcode::sub:
-            return op_sub();
-
-        case opcode::add:
-            return op_add();
-
         case opcode::codeseparator:
             // This is set in the main run(...) loop
             // codehash_begin_ is updated to the current
             // operations_ iterator
             BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
-                "Invalid operation (codeseparator) for run_operation");
+                "Invalid operation (codeseparator) in run_operation");
             return true;
 
         case opcode::checksig:
@@ -1443,8 +1474,28 @@ std::string opcode_to_string(opcode code)
             return "swap";
         case opcode::tuck:
             return "tuck";
+        case opcode::cat:
+            return "cat";
+        case opcode::substr:
+            return "substr";
+        case opcode::left:
+            return "left";
+        case opcode::right:
+            return "right";
         case opcode::size:
             return "size";
+        case opcode::invert:
+            return "invert";
+        case opcode::and_:
+            return "and";
+        case opcode::or_:
+            return "or";
+        case opcode::xor_:
+            return "xor";
+        case opcode::equal:
+            return "equal";
+        case opcode::equalverify:
+            return "equalverify";
         case opcode::reserved1:
             return "reserved1";
         case opcode::reserved2:
@@ -1453,6 +1504,10 @@ std::string opcode_to_string(opcode code)
             return "1add";
         case opcode::op_1sub:
             return "1sub";
+        case opcode::op_2mul:
+            return "2mul";
+        case opcode::op_2div:
+            return "2div";
         case opcode::negate:
             return "negate";
         case opcode::abs:
@@ -1461,6 +1516,20 @@ std::string opcode_to_string(opcode code)
             return "not";
         case opcode::op_0notequal:
             return "0notequal";
+        case opcode::add:
+            return "add";
+        case opcode::sub:
+            return "sub";
+        case opcode::mul:
+            return "mul";
+        case opcode::div:
+            return "div";
+        case opcode::mod:
+            return "mod";
+        case opcode::lshift:
+            return "lshift";
+        case opcode::rshift:
+            return "rshift";
         case opcode::booland:
             return "booland";
         case opcode::boolor:
@@ -1495,14 +1564,6 @@ std::string opcode_to_string(opcode code)
             return "hash160";
         case opcode::hash256:
             return "hash256";
-        case opcode::equal:
-            return "equal";
-        case opcode::equalverify:
-            return "equalverify";
-        case opcode::add:
-            return "add";
-        case opcode::sub:
-            return "sub";
         case opcode::codeseparator:
             return "codeseparator";
         case opcode::checksig:
@@ -1649,8 +1710,28 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::swap;
     else if (code_repr == "tuck")
         return opcode::tuck;
+    else if (code_repr == "cat")
+        return opcode::cat;
+    else if (code_repr == "substr")
+        return opcode::substr;
+    else if (code_repr == "left")
+        return opcode::left;
+    else if (code_repr == "right")
+        return opcode::right;
     else if (code_repr == "size")
         return opcode::size;
+    else if (code_repr == "invert")
+        return opcode::invert;
+    else if (code_repr == "and")
+        return opcode::and_;
+    else if (code_repr == "or")
+        return opcode::or_;
+    else if (code_repr == "xor")
+        return opcode::xor_;
+    else if (code_repr == "equal")
+        return opcode::equal;
+    else if (code_repr == "equalverify")
+        return opcode::equalverify;
     else if (code_repr == "reserved1")
         return opcode::reserved1;
     else if (code_repr == "reserved2")
@@ -1659,6 +1740,10 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::op_1add;
     else if (code_repr == "1sub")
         return opcode::op_1sub;
+    else if (code_repr == "2mul")
+        return opcode::op_2mul;
+    else if (code_repr == "2div")
+        return opcode::op_2div;
     else if (code_repr == "negate")
         return opcode::negate;
     else if (code_repr == "abs")
@@ -1667,6 +1752,20 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::not_;
     else if (code_repr == "0notequal")
         return opcode::op_0notequal;
+    else if (code_repr == "add")
+        return opcode::add;
+    else if (code_repr == "sub")
+        return opcode::sub;
+    else if (code_repr == "mul")
+        return opcode::mul;
+    else if (code_repr == "div")
+        return opcode::div;
+    else if (code_repr == "mod")
+        return opcode::mod;
+    else if (code_repr == "lshift")
+        return opcode::lshift;
+    else if (code_repr == "rshift")
+        return opcode::rshift;
     else if (code_repr == "booland")
         return opcode::booland;
     else if (code_repr == "boolor")
@@ -1701,14 +1800,6 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::hash160;
     else if (code_repr == "hash256")
         return opcode::hash256;
-    else if (code_repr == "equal")
-        return opcode::equal;
-    else if (code_repr == "equalverify")
-        return opcode::equalverify;
-    else if (code_repr == "add")
-        return opcode::add;
-    else if (code_repr == "sub")
-        return opcode::sub;
     else if (code_repr == "codeseparator")
         return opcode::codeseparator;
     else if (code_repr == "checksig")
