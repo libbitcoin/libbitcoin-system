@@ -79,6 +79,7 @@ enum class opcode
     op_0notequal = 146,
     add = 147,
     sub = 148,
+    booland = 154,
     boolor = 155,
     greaterthanorequal = 162,
     min = 163,
@@ -213,6 +214,7 @@ private:
     bool op_0notequal();
     bool op_add();
     bool op_sub();
+    bool op_booland();
     bool op_boolor();
     bool op_greaterthanorequal();
     bool op_min();

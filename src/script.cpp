@@ -647,6 +647,16 @@ bool script::op_sub()
     return true;
 }
 
+bool script::op_booland()
+{
+    big_number number_a, number_b;
+    if (!arithmetic_start(number_a, number_b))
+        return false;
+    big_number zero(0), result = number_a != zero && number_b != zero;
+    stack_.push_back(result.data());
+    return true;
+}
+
 bool script::op_boolor()
 {
     big_number number_a, number_b;
@@ -1037,6 +1047,9 @@ bool script::run_operation(const operation& op,
         case opcode::op_0notequal:
             return op_0notequal();
 
+        case opcode::booland:
+            return op_booland();
+
         case opcode::boolor:
             return op_boolor();
 
@@ -1263,6 +1276,8 @@ std::string opcode_to_string(opcode code)
             return "not";
         case opcode::op_0notequal:
             return "0notequal";
+        case opcode::booland:
+            return "booland";
         case opcode::boolor:
             return "boolor";
         case opcode::min:
@@ -1443,6 +1458,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::not_;
     else if (code_repr == "0notequal")
         return opcode::op_0notequal;
+    else if (code_repr == "booland")
+        return opcode::booland;
     else if (code_repr == "boolor")
         return opcode::boolor;
     else if (code_repr == "min")
