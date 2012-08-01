@@ -254,6 +254,8 @@ bool script::next_step(operation_stack::iterator it,
     //log_debug() << "Stack:";
     //for (auto s: stack_)
     //    log_debug() << "[" << pretty_hex(s) << "]";
+    if (stack_.size() + alternate_stack_.size() > 1000)
+        return false;
     return true;
 }
 
