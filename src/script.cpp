@@ -1992,7 +1992,7 @@ size_t script_size(const script& scr)
         return 0;
     else if (operations[0].code == opcode::raw_data)
         return operations[0].data.size();
-    size_t total_size;
+    size_t total_size = 0;
     for (const operation& op: scr.operations())
     {
         total_size += 1;
