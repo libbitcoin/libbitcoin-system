@@ -199,6 +199,8 @@ bool opcode_is_disabled(opcode code)
 
 bool script::run(const message::transaction& parent_tx, uint32_t input_index)
 {
+    if (script_size(*this) > 10000)
+        return false;
     if (count_non_push(operations_) > 201)
         return false;
     alternate_stack_.clear();
@@ -1981,6 +1983,37 @@ data_chunk save_script(const script& scr)
         extend_data(raw_script, op.data);
     }
     return raw_script;
+}
+
+size_t script_size(const script& scr)
+{
+    const operation_stack& operations = scr.operations();
+    if (operations.empty())
+        return 0;
+    else if (operations[0].code == opcode::raw_data)
+        return operations[0].data.size();
+    size_t total_size;
+    for (const operation& op: scr.operations())
+    {
+        total_size += 1;
+        switch (op.code)
+        {
+            case opcode::pushdata1:
+                total_size += 1;
+                break;
+            case opcode::pushdata2:
+                total_size += 2;
+                break;
+            case opcode::pushdata4:
+                total_size += 4;
+                break;
+            default:
+                // Do nothing
+                break;
+        }
+        total_size += op.data.size();
+    }
+    return total_size;
 }
 
 } // namespace libbitcoin

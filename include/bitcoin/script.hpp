@@ -287,6 +287,7 @@ std::ostream& operator<<(std::ostream& stream, const script& source_script);
 script coinbase_script(const data_chunk& raw_script);
 script parse_script(const data_chunk& raw_script);
 data_chunk save_script(const script& scr);
+size_t script_size(const script& scr);
 
 } // namespace libbitcoin
 
