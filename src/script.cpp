@@ -119,12 +119,8 @@ bool is_push(const opcode code)
 
 size_t count_non_push(const operation_stack& operations)
 {
-    size_t count = 0;
-    // TODO use std alternative
-    for (const operation& op: operations)
-        if (!is_push(op.code))
-            ++count;
-    return count;
+    return std::count_if(operations.begin(), operations.end(),
+        [](const operation& op) { return !is_push(op.code); });
 }
 
 bool is_push_only(const operation_stack& operations)
