@@ -150,24 +150,39 @@ bool set_script(payment_address& address, const script& eval_script)
 
 bool extract(payment_address& address, const script& output_script)
 {
-    data_chunk raw_hash;
-    if (output_script.type() == payment_type::pubkey_hash)
+    // Cast a data_chunk to a short_hash and set the address
+    auto set_hash_data =
+        [&address](payment_type type, const data_chunk& raw_hash)
+        {
+            short_hash hash_data;
+            BITCOIN_ASSERT(raw_hash.size() == hash_data.size());
+            std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
+            address.set(type, hash_data);
+        };
+    switch (output_script.type())
     {
-        BITCOIN_ASSERT(output_script.operations().size() == 5);
-        raw_hash = output_script.operations()[2].data;
+        case payment_type::pubkey:
+            BITCOIN_ASSERT(output_script.operations().size() == 2);
+            set_public_key(address, output_script.operations()[0].data);
+            return true;
+
+        case payment_type::pubkey_hash:
+            BITCOIN_ASSERT(output_script.operations().size() == 5);
+            set_hash_data(output_script.type(),
+                output_script.operations()[2].data);
+            return true;
+
+        case payment_type::script_hash:
+            BITCOIN_ASSERT(output_script.operations().size() == 3);
+            set_hash_data(output_script.type(),
+                output_script.operations()[1].data);
+            return true;
+
+        default:
+            return false;
     }
-    else if (output_script.type() == payment_type::script_hash)
-    {
-        BITCOIN_ASSERT(output_script.operations().size() == 3);
-        raw_hash = output_script.operations()[1].data;
-    }
-    else
-        return false;
-    short_hash hash_data;
-    BITCOIN_ASSERT(raw_hash.size() == hash_data.size());
-    std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
-    address.set(output_script.type(), hash_data);
-    return true;
+    // Should never happen!
+    return false;
 }
 
 } // namespace libbitcoin
