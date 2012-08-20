@@ -89,6 +89,8 @@ public:
         void (const std::error_code&, size_t, 
             const block_list&, const block_list&)> reorganize_handler;
 
+    virtual ~blockchain() {};
+
     /**
      * Store a new block.
      *
