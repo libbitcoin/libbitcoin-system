@@ -481,9 +481,9 @@ std::error_code validate_block::accept_block()
     if (current_block_.timestamp <= median_time_past())
         return error::timestamp_too_early;
     // Txs should be final when included in a block
-    // Do lesser check here since lock_time is currently unused in bitcoin
     for (const message::transaction& tx: current_block_.transactions)
-        BITCOIN_ASSERT(tx.locktime == 0);
+        if (!is_final(tx, depth_, current_block_.timestamp))
+            return error::non_final_transaction;
     if (!passes_checkpoints())
         return error::checkpoints_failed;
     return std::error_code();

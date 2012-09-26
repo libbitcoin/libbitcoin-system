@@ -17,6 +17,11 @@ constexpr size_t coinbase_maturity = 100;
 
 constexpr uint32_t magic_value = 0xd9b4bef9;
 
+// Threshold for nLockTime: below this value it is
+// interpreted as block number, otherwise as UNIX timestamp.
+// Tue Nov 5 00:53:20 1985 UTC
+constexpr uint32_t locktime_threshold = 500000000;
+
 constexpr uint64_t max_money_recursive(uint64_t current)
 {
     return (current > 0) ? 

@@ -126,5 +126,26 @@ bool operator==(const message::output_point& output_a,
     return output_a.hash == output_b.hash && output_a.index == output_b.index;
 }
 
+bool is_final(const message::transaction_input& tx_input)
+{
+    return tx_input.sequence == std::numeric_limits<uint32_t>::max();
+}
+
+bool is_final(const message::transaction& tx,
+    size_t block_depth, uint32_t block_time)
+{
+    if (tx.locktime == 0)
+        return true;
+    uint32_t max_locktime = block_time;
+    if (tx.locktime < locktime_threshold)
+        max_locktime = block_depth;
+    if (tx.locktime < max_locktime)
+        return true;
+    for (const message::transaction_input& tx_input: tx.inputs)
+        if (!is_final(tx_input))
+            return false;
+    return true;
+}
+
 } // namespace libbitcoin
 

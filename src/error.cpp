@@ -91,6 +91,8 @@ std::string error_category_impl::message(int ev) const noexcept
             return "Proof of work does not match bits field";
         case error::timestamp_too_early:
             return "Block timestamp is too early";
+        case error::non_final_transaction:
+            return "Contains a non-final transaction";
         case error::checkpoints_failed:
             return "Block hash rejected by checkpoint lockins";
         // connect_block()
@@ -135,6 +137,7 @@ std::error_condition
         // accept_block()
         case error::incorrect_proof_of_work:
         case error::timestamp_too_early:
+        case error::non_final_transaction:
         case error::checkpoints_failed:
         // connect_block()
         case error::duplicate_or_spent:

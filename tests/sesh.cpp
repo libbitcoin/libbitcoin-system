@@ -117,6 +117,7 @@ void blockchain_started(const std::error_code& ec)
 
 int main()
 {
+    //bdb_blockchain::setup("database");
     async_service network_service(1), disk_service(1), mempool_service(1);
     hosts hsts(network_service);
     handshake hs(network_service);

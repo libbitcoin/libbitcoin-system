@@ -48,6 +48,7 @@ namespace error
         // accept_block()
         incorrect_proof_of_work,
         timestamp_too_early,
+        non_final_transaction,
         checkpoints_failed,
         // connect_block()
         duplicate_or_spent,

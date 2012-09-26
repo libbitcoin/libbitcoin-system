@@ -22,6 +22,9 @@ uint64_t total_output_value(const message::transaction& tx);
 bool operator==(const message::output_point& output_a,
     const message::output_point& output_b);
 
+bool is_final(const message::transaction& tx,
+    size_t block_depth, uint32_t block_time);
+
 } // namespace libbitcoin
 
 #endif
