@@ -14,6 +14,11 @@ async_service::async_service(size_t number_threads)
         spawn();
 }
 
+async_service::~async_service()
+{
+    delete work_;
+}
+
 void async_service::spawn()
 {
     if (!work_)
