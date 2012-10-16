@@ -85,6 +85,7 @@ struct output_point
 
 // Not in the protocol but still useful
 typedef output_point input_point;
+typedef std::vector<input_point> input_point_list;
 typedef std::vector<output_point> output_point_list;
 
 struct transaction_input
