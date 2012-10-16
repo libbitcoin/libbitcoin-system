@@ -152,7 +152,7 @@ bool bdb_blockchain::initialize(const std::string& prefix)
 {
     // Try to lock the directory first
     boost::filesystem::path lock_path = prefix;
-    lock_path /= "db-lock";
+    lock_path = lock_path / "db-lock";
     std::ofstream touch_file(lock_path.native(), std::ios::app);
     touch_file.close();
     flock_ = lock_path.c_str();
