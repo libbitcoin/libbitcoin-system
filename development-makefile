@@ -24,9 +24,6 @@ BASE_MODULES= \
 	big_number.o \
 	clock.o \
 	constants.o
-STORAGE_BASE_MODULES = \
-	postgresql_blockchain.o \
-	postgresql_storage.o
 MODULES=$(addprefix obj/, $(BASE_MODULES))
 STORAGE_MODULES=$(addprefix obj/, $(STORAGE_BASE_MODULES))
 #OBJECTS=$(addprefix obj/, $(notdir $(SOURCES:.cpp=.o)))
@@ -139,7 +136,7 @@ bin/tests/protst: obj/protst.o
 protst: bin/tests/protst
 
 obj/sesh.o: tests/sesh.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $< -O0
 
 bin/tests/sesh: obj/sesh.o
 	$(CXX) -o bin/tests/sesh obj/sesh.o $(LIBBITCOIN)
@@ -217,6 +214,14 @@ bin/tests/getx: obj/getx.o
 	$(CXX) -o bin/tests/getx obj/getx.o $(LIBBITCOIN)
 
 getx: bin/tests/getx
+
+obj/determ.o: tests/determ.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/determ: obj/determ.o
+	$(CXX) -o bin/tests/determ obj/determ.o $(LIBBITCOIN)
+
+determ: bin/tests/determ
 
 obj/pol.o: tests/pol.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
