@@ -15,6 +15,7 @@ class async_service
 public:
     async_service();
     async_service(size_t number_threads);
+    ~async_service();
 
     async_service(const async_service&) = delete;
     void operator=(const async_service&) = delete;
