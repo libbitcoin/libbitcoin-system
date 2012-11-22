@@ -864,7 +864,19 @@ hash_digest script::generate_signature_hash(
     message::transaction parent_tx, uint32_t input_index,
     const script& script_code, uint32_t hash_type)
 {
-    BITCOIN_ASSERT(input_index < parent_tx.inputs.size());
+    if (input_index >= parent_tx.inputs.size())
+    {
+        log_fatal() << "script::op_checksig() : input_index "
+            << input_index << " is out of range.";
+        return null_hash;
+    }
+
+    // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
+
+    // Blank all other inputs' signatures
+    for (message::transaction_input& input: parent_tx.inputs)
+        input.input_script = script();
+    parent_tx.inputs[input_index].input_script = script_code;
 
     if ((hash_type & 0x1f) == sighash::none)
     {
@@ -894,20 +906,7 @@ hash_digest script::generate_signature_hash(
         parent_tx.inputs.resize(1);
     }
 
-    if (input_index >= parent_tx.inputs.size())
-    {
-        log_fatal() << "script::op_checksig() : input_index " << input_index
-                << " is out of range.";
-        return null_hash;
-    }
-
-    message::transaction tx_tmp = parent_tx;
-    // Blank all other inputs' signatures
-    for (message::transaction_input& input: tx_tmp.inputs)
-        input.input_script = script();
-    tx_tmp.inputs[input_index].input_script = script_code;
-
-    return hash_transaction(tx_tmp, hash_type);
+    return hash_transaction(parent_tx, hash_type);
 }
 
 bool check_signature(data_chunk signature,
