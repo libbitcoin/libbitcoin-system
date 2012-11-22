@@ -169,6 +169,7 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     env_->set_cachesize(1, 0, 1);
     if (env_->open(prefix.c_str(), env_flags, 0) != 0)
         return false;
+    env_->set_flags(DB_TXN_NOSYNC, 1);
     // Create database objects
     db_blocks_ = new Db(env_, 0);
     db_blocks_hash_ = new Db(env_, 0);
