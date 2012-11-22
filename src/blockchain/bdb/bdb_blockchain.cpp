@@ -28,9 +28,7 @@ constexpr uint32_t env_flags =
     DB_INIT_LOG|
     DB_INIT_TXN|
     DB_INIT_MPOOL|
-    DB_THREAD|
-    DB_TXN_NOSYNC|
-    DB_CXX_NO_EXCEPTIONS;
+    DB_THREAD;
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
@@ -163,13 +161,14 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     }
     // Continue on
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    env_ = new DbEnv(0);
+    env_ = new DbEnv(DB_CXX_NO_EXCEPTIONS);
     env_->set_lk_max_locks(10000);
     env_->set_lk_max_objects(10000);
     env_->set_cachesize(1, 0, 1);
     if (env_->open(prefix.c_str(), env_flags, 0) != 0)
         return false;
-    env_->set_flags(DB_TXN_NOSYNC, 1);
+    if (env_->set_flags(DB_TXN_NOSYNC, 1) != 0)
+        return false;
     // Create database objects
     db_blocks_ = new Db(env_, 0);
     db_blocks_hash_ = new Db(env_, 0);
@@ -195,7 +194,8 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     if (db_spends_->open(txn.get(), "transactions", "spends",
             DB_BTREE, db_flags, 0) != 0)
         return false;
-    db_address_->set_flags(DB_DUP);
+    if (db_address_->set_flags(DB_DUP) != 0)
+        return false;
     if (db_address_->open(txn.get(), "address", "address",
             DB_BTREE, db_flags, 0) != 0)
         return false;
