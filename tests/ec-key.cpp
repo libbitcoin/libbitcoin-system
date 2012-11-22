@@ -1,13 +1,5 @@
-#include <iostream>
-#include <iomanip>
-#include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/utility/elliptic_curve_key.hpp>
-#include <bitcoin/utility/sha256.hpp>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/logger.hpp>
-#include <bitcoin/types.hpp>
-
-using namespace libbitcoin;
+#include <bitcoin/bitcoin.hpp>
+using namespace bc;
 
 bool op_checksig_test()
 {
@@ -16,7 +8,7 @@ bool op_checksig_test()
     // version = 1
     ss.write_4_bytes(1);
     // 1 inputs
-    ss.write_var_uint(1);
+    ss.write_variable_uint(1);
 
     // input 0
     // prevout hash
@@ -33,13 +25,13 @@ bool op_checksig_test()
     raw_script.push_back(raw_data.size());
     libbitcoin::extend_data(raw_script, raw_data);
     raw_script.push_back(172);
-    ss.write_var_uint(raw_script.size());
+    ss.write_variable_uint(raw_script.size());
     ss.write_data(raw_script);
     // sequence
     ss.write_4_bytes(0xffffffff);
 
     // 2 outputs for this tx
-    ss.write_var_uint(2);
+    ss.write_variable_uint(2);
 
     // output 0
     ss.write_8_bytes(1000000000);
@@ -53,7 +45,7 @@ bool op_checksig_test()
     // OP_CHECKSIG
     raw_script.push_back(172);
     // now actually write the script
-    ss.write_var_uint(raw_script.size());
+    ss.write_variable_uint(raw_script.size());
     ss.write_data(raw_script);
 
     // output 0
@@ -68,7 +60,7 @@ bool op_checksig_test()
     // OP_CHECKSIG
     raw_script.push_back(172);
     // now actually write the script
-    ss.write_var_uint(raw_script.size());
+    ss.write_variable_uint(raw_script.size());
     ss.write_data(raw_script);
 
     // End of 2 outputs
