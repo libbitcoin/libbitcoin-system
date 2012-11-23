@@ -84,6 +84,13 @@
  * - @link libbitcoin::big_number big_number @endlink
  * - @link libbitcoin::async_service async_service @endlink
  *
+ * @subsection wallet Wallet
+ *
+ * - @link libbitcoin::deterministic_wallet deterministic_wallet @endlink
+ * - @link libbitcoin::secret_to_wif secret_to_wif @endlink
+ * - @link libbitcoin::wif_to_secret wif_to_secret @endlink
+ * - @link libbitcoin::minikey_to_secret minikey_to_secret @endlink
+ *
  * @section useful-funcs Useful functions
  *
  * In accordance with C++ principles of encapsulation, operations which

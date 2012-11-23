@@ -1,29 +1,53 @@
 #ifndef LIBBITCOIN_DETERMINISTIC_WALLET_H
 #define LIBBITCOIN_DETERMINISTIC_WALLET_H
 
-/**
- * Electrum compatible deterministic wallet
- */
-
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>
 
 namespace libbitcoin {
 
+/**
+ * Electrum compatible deterministic wallet.
+ */
 class deterministic_wallet
 {
 public:
     static constexpr size_t seed_size = 32;
 
+    /**
+     * Generate a new seed.
+     *
+     * @code
+     * deterministic_wallet wallet;
+     * wallet.new_seed();
+     * log_info() << "new seed: " << wallet.seed();
+     * @endcode
+     */
     void new_seed();
+
+    /**
+     * Restore wallet from seed.
+     *
+     * @code
+     * if (!wallet.set_seed("..."))
+     *   // Error...
+     * @endcode
+     */
     bool set_seed(const std::string& seed);
+
+    /**
+     * Return the wallet seed. The seed should always be
+     * deterministic_wallet::seed_size in length.
+     *
+     * @return  Wallet seed. Empty string if not existant.
+     */
     const std::string& seed() const;
 
     bool set_master_public_key(const data_chunk& mpk);
     const data_chunk& master_public_key() const;
 
     /**
-     * Generate the n'th public key.
+     * Generate the n'th public key. A seed or master_public_key must be set.
      *
      * @code
      * payment_addr addr;
@@ -34,7 +58,7 @@ public:
     data_chunk generate_public_key(size_t n, bool for_change=false);
 
     /**
-     * Generate the n'th secret.
+     * Generate the n'th secret. A seed must be set.
      *
      * The secret can be used to get the corresponding private key,
      * and also the public key. If just the public key is desired then
@@ -42,7 +66,7 @@ public:
      *
      * @code
      * elliptic_curve_key privkey;
-     * privkey.set_secret(generate_secret(2));
+     * privkey.set_secret(wallet.generate_secret(2));
      * @endcode
      */
     secret_parameter generate_secret(size_t n, bool for_change=false);
