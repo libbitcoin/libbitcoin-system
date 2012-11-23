@@ -1,6 +1,5 @@
 #include <bitcoin/network/network.hpp>
 
-#include <boost/lexical_cast.hpp>
 #include <functional>
 #include <algorithm>
 #include <iostream>
@@ -78,8 +77,7 @@ void network::connect(const std::string& hostname, uint16_t port,
     resolver_ptr resolver =
         std::make_shared<tcp::resolver>(service_.get_service());
     query_ptr query =
-        std::make_shared<tcp::resolver::query>(hostname,
-            boost::lexical_cast<std::string>(port));
+        std::make_shared<tcp::resolver::query>(hostname, std::to_string(port));
     resolver->async_resolve(*query,
         std::bind(&network::resolve_handler,
             this, _1, _2, handle_connect, resolver, query));

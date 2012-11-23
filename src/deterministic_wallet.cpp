@@ -195,7 +195,7 @@ secret_parameter deterministic_wallet::generate_secret(
 hash_digest deterministic_wallet::get_sequence(size_t n, bool for_change)
 {
     data_chunk chunk;
-    extend_data(chunk, boost::lexical_cast<std::string>(n));
+    extend_data(chunk, std::to_string(n));
     chunk.push_back(':');
     chunk.push_back(for_change ? '1' : '0');
     chunk.push_back(':');
