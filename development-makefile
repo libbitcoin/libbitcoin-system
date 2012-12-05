@@ -465,6 +465,14 @@ bin/tests/block-hash: obj/block-hash.o
 
 block-hash: bin/tests/block-hash
 
+obj/hmac512.o: tests/hmac512.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/hmac512: obj/hmac512.o
+	$(CXX) -o bin/tests/hmac512 obj/hmac512.o $(LIBBITCOIN) -lssl -lcrypto
+
+hmac512: bin/tests/hmac512
+
 obj/ec-key.o: tests/ec-key.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
