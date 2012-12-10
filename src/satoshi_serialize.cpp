@@ -156,7 +156,12 @@ data_chunk read_raw_script(deserializer& deserial)
 script read_script(deserializer& deserial)
 {
     data_chunk raw_script = read_raw_script(deserial);
-    BITCOIN_ASSERT(raw_script == save_script(parse_script(raw_script)));
+#ifndef BITCOIN_DISABLE_ASSERTS
+    std::string assert_msg = pretty_hex(raw_script);
+#endif
+    BITCOIN_ASSERT_MSG(
+        raw_script == save_script(parse_script(raw_script)),
+        assert_msg.c_str());
     // Eventually plan to move parse_script to inside here
     return parse_script(raw_script);
 }
