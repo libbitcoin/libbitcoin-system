@@ -465,6 +465,14 @@ bin/tests/block-hash: obj/block-hash.o
 
 block-hash: bin/tests/block-hash
 
+obj/feeder.o: tests/feeder.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/feeder: obj/feeder.o
+	$(CXX) -o bin/tests/feeder obj/feeder.o $(LIBBITCOIN) -lssl -lcrypto
+
+feeder: bin/tests/feeder
+
 obj/hmac512.o: tests/hmac512.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
