@@ -107,17 +107,17 @@ bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
     // Checks for duplicates first
     if (db_txs_->put(txn->get(), key.get(), value.get(), DB_NOOVERWRITE) != 0)
         return false;
-    if (is_coinbase(block_tx))
-        return true;
-    for (uint32_t input_index = 0; input_index < block_tx.inputs.size();
-        ++input_index)
-    {
-        const message::transaction_input& input = 
-            block_tx.inputs[input_index];
-        const message::input_point inpoint{tx_hash, input_index};
-        if (!mark_spent_outputs(txn, input.previous_output, inpoint))
-            return false;
-    }
+    // Coinbase inputs do not spend anything.
+    if (!is_coinbase(block_tx))
+        for (uint32_t input_index = 0; input_index < block_tx.inputs.size();
+            ++input_index)
+        {
+            const message::transaction_input& input = 
+                block_tx.inputs[input_index];
+            const message::input_point inpoint{tx_hash, input_index};
+            if (!mark_spent_outputs(txn, input.previous_output, inpoint))
+                return false;
+        }
     for (uint32_t output_index = 0; output_index < block_tx.outputs.size();
         ++output_index)
     {
