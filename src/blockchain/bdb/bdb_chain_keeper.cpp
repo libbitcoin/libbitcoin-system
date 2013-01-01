@@ -134,15 +134,17 @@ bool bdb_chain_keeper::clear_transaction_data(
     if (db_txs_->del(txn_->get(), del_tx_key.get(), 0) != 0)
         return false;
     // Remove spends
-    for (uint32_t input_index = 0; input_index < remove_tx.inputs.size();
-        ++input_index)
-    {
-        const message::transaction_input& input = 
-            remove_tx.inputs[input_index];
-        const message::input_point inpoint{tx_hash, input_index};
-        if (!remove_spend(input.previous_output, inpoint))
-            return false;
-    }
+    // ... spends don't exist for coinbase txs.
+    if (!is_coinbase(remove_tx))
+        for (uint32_t input_index = 0; input_index < remove_tx.inputs.size();
+            ++input_index)
+        {
+            const message::transaction_input& input = 
+                remove_tx.inputs[input_index];
+            const message::input_point inpoint{tx_hash, input_index};
+            if (!remove_spend(input.previous_output, inpoint))
+                return false;
+        }
     // Remove addresses
     for (uint32_t output_index = 0; output_index < remove_tx.outputs.size();
         ++output_index)
