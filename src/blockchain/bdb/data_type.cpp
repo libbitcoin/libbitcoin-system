@@ -50,7 +50,7 @@ void readable_data_type::prepare()
     dbt_.set_data(&data_buffer_[0]);
     dbt_.set_ulen(data_buffer_.size());
     dbt_.set_size(data_buffer_.size());
-    dbt_.set_flags(DB_DBT_USERMEM|DB_DBT_READONLY);
+    dbt_.set_flags(DB_DBT_USERMEM);
 }
 
 // writable_data_type

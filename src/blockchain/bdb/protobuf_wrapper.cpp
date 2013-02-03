@@ -4,6 +4,14 @@
 
 namespace libbitcoin {
 
+struct protobuf_shutdown
+{
+    ~protobuf_shutdown()
+    {
+        google::protobuf::ShutdownProtobufLibrary();
+    }
+} protobuf_shutdown_inst;
+
 protobuf::Block block_header_to_protobuf(uint32_t depth,
     const message::block serial_block)
 {
