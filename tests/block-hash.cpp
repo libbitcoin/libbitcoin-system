@@ -20,14 +20,6 @@ void recv_block(std::error_code ec, message::block block)
         std::cout << pretty(tx);
 }
 
-void blockchain_started(const std::error_code& ec, blockchain_ptr)
-{
-    if (ec)
-        log_error() << ec.message();
-    else
-        log_info() << "Blockchain initialized!";
-}
-
 void loc(const std::error_code& ec, const message::block_locator& ll)
 {
     if (ec)
@@ -37,11 +29,19 @@ void loc(const std::error_code& ec, const message::block_locator& ll)
             log_debug() << h;
 }
 
+void blockchain_started(const std::error_code& ec)
+{
+    if (ec)
+        log_info() << "Blockchain error";
+    else
+        log_info() << "Blockchain initialized!";
+}
+
 int main()
 {
     async_service service(1);
-    blockchain_ptr chain =
-        bdb_blockchain::create(service, "database", blockchain_started);
+    bdb_blockchain chain(service);
+    chain.start("database", blockchain_started);
     //fetch_block(chain, 170, recv_block);
     fetch_block_locator(chain, loc);
 
@@ -49,6 +49,9 @@ int main()
     //for (size_t i: ind)
     //    log_debug() << i;
     std::cin.get();
+    service.stop();
+    service.join();
+    chain.stop();
     return 0;
 }
 
