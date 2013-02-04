@@ -133,9 +133,9 @@ bool handshake::lookup_external(const std::string& website,
     curl_easy_setopt(curl, CURLOPT_URL, website.c_str());
     // Everything fine. Do fetch
     CURLcode result = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
     if (result != CURLE_OK)
         return false;
-    curl_easy_cleanup(curl);
     // TODO use std::regex instead ... when it work >_>
     boost::cmatch results;
     boost::regex rx("(\\d+)[.](\\d+)[.](\\d+)[.](\\d+)");
