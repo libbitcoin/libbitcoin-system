@@ -47,18 +47,18 @@ bool is_opx(int64_t value)
     return value == -1 || (1 <= value && value <= 16);
 }
 
-void push_literal(script& result_script, int64_t value)
+void push_literal(data_chunk& raw_script, int64_t value)
 {
     BITCOIN_ASSERT(is_opx(value));
     switch (value)
     {
         case -1:
-            result_script.push_operation({opcode::negative_1, data_chunk()});
+            raw_script.push_back(static_cast<byte>(opcode::negative_1));
             return;
 
 #define PUSH_X(n) \
         case n: \
-            result_script.push_operation({opcode::op_##n, data_chunk()}); \
+            raw_script.push_back(static_cast<byte>(opcode::op_##n)); \
             return;
 
         PUSH_X(1);
@@ -80,7 +80,7 @@ void push_literal(script& result_script, int64_t value)
     }
 }
 
-void push_data(script& result_script, const data_chunk& data)
+void push_data(data_chunk& raw_script, const data_chunk& data)
 {
     operation op;
     // pushdata1 = 76
@@ -98,17 +98,19 @@ void push_data(script& result_script, const data_chunk& data)
         op.code = opcode::pushdata4;
     }
     op.data = data;
-    result_script.push_operation(op);
+    script tmp_script;
+    tmp_script.push_operation(op);
+    extend_data(raw_script, save_script(tmp_script));
 }
 
-bool parse_token(script& result_script, const std::string& token)
+bool parse_token(data_chunk& raw_script, const std::string& token)
 {
     static data_chunk hex_raw;
     if (token == "ENDING" || !is_hex_data(token))
     {
         if (!hex_raw.empty())
         {
-            result_script.join(parse_script(hex_raw));
+            extend_data(raw_script, hex_raw);
             hex_raw.resize(0);
         }
     }
@@ -120,12 +122,12 @@ bool parse_token(script& result_script, const std::string& token)
     {
         int64_t value = boost::lexical_cast<int64_t>(token);
         if (is_opx(value))
-            push_literal(result_script, value);
+            push_literal(raw_script, value);
         else
         {
             big_number bignum;
             bignum.set_int64(value);
-            push_data(result_script, bignum.data());
+            push_data(raw_script, bignum.data());
         }
     }
     else if (is_hex_data(token))
@@ -137,12 +139,12 @@ bool parse_token(script& result_script, const std::string& token)
     else if (is_quoted_string(token))
     {
         data_chunk inner_value(token.begin() + 1, token.end() - 1);
-        push_data(result_script, inner_value);
+        push_data(raw_script, inner_value);
     }
     else if (is_opcode(token))
     {
         opcode tokenized_opcode = token_to_opcode(token);
-        result_script.push_operation({tokenized_opcode, data_chunk()});
+        raw_script.push_back(static_cast<byte>(tokenized_opcode));
     }
     else
     {
@@ -158,10 +160,12 @@ bool parse(script& result_script, const std::string& format)
         return true;
     std::vector<std::string> tokens;
     boost::split(tokens, format, boost::is_any_of(" "));
+    data_chunk raw_script;
     for (const auto& token: tokens)
-        if (!parse_token(result_script, token))
+        if (!parse_token(raw_script, token))
             return false;
-    parse_token(result_script, "ENDING");
+    parse_token(raw_script, "ENDING");
+    result_script = parse_script(raw_script);
     return true;
 }
 
