@@ -218,6 +218,8 @@ bool script::next_step(operation_stack::iterator it,
     const message::transaction& parent_tx, uint32_t input_index)
 {
     const operation& op = *it;
+    if (op.data.size() > 520)
+        return false;
     if (opcode_is_disabled(op.code))
         return false;
     auto is_condition_opcode =
@@ -242,8 +244,6 @@ bool script::next_step(operation_stack::iterator it,
         || op.code == opcode::pushdata2
         || op.code == opcode::pushdata4)
     {
-        if (op.data.size() > 520)
-            return false;
         stack_.push_back(op.data);
     }
     else if (op.code == opcode::codeseparator)
