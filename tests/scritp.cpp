@@ -166,6 +166,8 @@ bool parse(script& result_script, const std::string& format)
             return false;
     parse_token(raw_script, "ENDING");
     result_script = parse_script(raw_script);
+    if (result_script.operations().empty())
+        return false;
     return true;
 }
 
