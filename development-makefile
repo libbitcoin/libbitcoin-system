@@ -465,6 +465,14 @@ bin/tests/block-hash: obj/block-hash.o
 
 block-hash: bin/tests/block-hash
 
+obj/checksig.o: tests/checksig.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/checksig: obj/checksig.o
+	$(CXX) -o bin/tests/checksig obj/checksig.o $(LIBBITCOIN) -lssl -lcrypto
+
+checksig: bin/tests/checksig
+
 obj/feeder.o: tests/feeder.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
