@@ -132,8 +132,9 @@ int main()
     transaction_pool txpool(mempool_service, chain);
     txpool.start();
 
-    p = new session_params{hs, prot, chain, poll, txpool};
-    session sesh(network_service, *p);
+    session_params pp{hs, prot, chain, poll, txpool};
+    p = &pp;
+    session sesh(network_service, pp);
     sesh.start(handle_start);
 
     std::cin.get();
