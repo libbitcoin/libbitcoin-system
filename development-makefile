@@ -465,6 +465,14 @@ bin/tests/block-hash: obj/block-hash.o
 
 block-hash: bin/tests/block-hash
 
+obj/raw_tx7208e5.o: tests/bip16/raw_tx7208e5.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/raw_tx7208e5: obj/raw_tx7208e5.o
+	$(CXX) -o bin/tests/raw_tx7208e5 obj/raw_tx7208e5.o $(LIBBITCOIN) -lssl -lcrypto
+
+raw_tx7208e5: bin/tests/raw_tx7208e5
+
 obj/checksig.o: tests/checksig.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

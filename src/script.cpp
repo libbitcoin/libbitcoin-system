@@ -885,18 +885,22 @@ hash_digest script::generate_signature_hash(
     }
     else if ((hash_type & 0x1f) == sighash::single)
     {
+        message::transaction_output_list& outputs = parent_tx.outputs;
+
         uint32_t output_index = input_index;
-        if (output_index >= parent_tx.outputs.size())
+        if (output_index >= outputs.size())
         {
             log_error() << "sighash::single the output_index is out of range";
             return null_hash;
         }
-        parent_tx.outputs.resize(output_index + 1);
-        for (message::transaction_output& output: parent_tx.outputs)
+        outputs.resize(output_index + 1);
+        // Loop through outputs except the last one
+        for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
-            output.value = ~0;
-            output.output_script = script();
+            it->value = ~0;
+            it->output_script = script();
         }
+
         nullify_input_sequences(parent_tx.inputs, input_index);
     }
 
