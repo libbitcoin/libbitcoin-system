@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_VERSION_H
-#define LIBBITCOIN_VERSION_H
+#ifndef LIBBITCOIN_VERSION_HPP
+#define LIBBITCOIN_VERSION_HPP
 
 // Caution, this is the only libbitcoin header that is guarenteed
 // to change with every libbitcoin release, including this header

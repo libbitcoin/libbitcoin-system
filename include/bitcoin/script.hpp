@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_SCRIPT_H
-#define LIBBITCOIN_SCRIPT_H
+#ifndef LIBBITCOIN_SCRIPT_HPP
+#define LIBBITCOIN_SCRIPT_HPP
 
 #include <vector>
 

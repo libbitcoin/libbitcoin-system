@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_MESSAGES_H
-#define LIBBITCOIN_MESSAGES_H
+#ifndef LIBBITCOIN_MESSAGES_HPP
+#define LIBBITCOIN_MESSAGES_HPP
 
 #include <array>
 #include <cstdint>

@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_HOSTS_H
-#define LIBBITCOIN_HOSTS_H
+#ifndef LIBBITCOIN_HPPOSTS_HPP
+#define LIBBITCOIN_HPPOSTS_HPP
 
 #include <string>
 #include <fstream>

@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_SHA256_H
-#define LIBBITCOIN_SHA256_H
+#ifndef LIBBITCOIN_SHA256_HPP
+#define LIBBITCOIN_SHA256_HPP
 
 #include <openssl/sha.h>
 #include <cstdint>

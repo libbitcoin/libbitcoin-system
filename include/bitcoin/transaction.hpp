@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_TRANSACTION_H
-#define LIBBITCOIN_TRANSACTION_H
+#ifndef LIBBITCOIN_TRANSACTION_HPP
+#define LIBBITCOIN_TRANSACTION_HPP
 
 #include <bitcoin/messages.hpp>
 

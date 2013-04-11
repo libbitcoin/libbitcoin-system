@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_VALIDATE_H
-#define LIBBITCOIN_VALIDATE_H
+#ifndef LIBBITCOIN_VALIDATE_HPP
+#define LIBBITCOIN_VALIDATE_HPP
 
 #include <thread>
 #include <memory>

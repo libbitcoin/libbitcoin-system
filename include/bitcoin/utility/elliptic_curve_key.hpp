@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_ELLIPTIC_CURVE_KEY_H
-#define LIBBITCOIN_ELLIPTIC_CURVE_KEY_H
+#ifndef LIBBITCOIN_ELLIPTIC_CURVE_KEY_HPP
+#define LIBBITCOIN_ELLIPTIC_CURVE_KEY_HPP
 
 #include <openssl/ec.h>
 #include <stdexcept>

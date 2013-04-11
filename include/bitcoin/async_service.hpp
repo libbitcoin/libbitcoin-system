@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_ASYNC_SERVICE_H
-#define LIBBITCOIN_ASYNC_SERVICE_H
+#ifndef LIBBITCOIN_ASYNC_SERVICE_HPP
+#define LIBBITCOIN_ASYNC_SERVICE_HPP
 
 #include <functional>
 #include <thread>

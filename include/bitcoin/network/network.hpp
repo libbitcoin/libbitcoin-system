@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_NETWORK_NETWORK_H
-#define LIBBITCOIN_NETWORK_NETWORK_H
+#ifndef LIBBITCOIN_NETWORK_NETWORK_HPP
+#define LIBBITCOIN_NETWORK_NETWORK_HPP
 
 #include <boost/asio.hpp>
 #include <boost/utility.hpp>

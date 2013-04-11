@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_BLOCK_H
-#define LIBBITCOIN_BLOCK_H
+#ifndef LIBBITCOIN_BLOCK_HPP
+#define LIBBITCOIN_BLOCK_HPP
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/big_number.hpp>

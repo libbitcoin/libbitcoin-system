@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_BASE58_H
-#define LIBBITCOIN_BASE58_H
+#ifndef LIBBITCOIN_BASE58_HPP
+#define LIBBITCOIN_BASE58_HPP
 
 #include <bitcoin/types.hpp>
 

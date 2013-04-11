@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_BITCOIN_H
-#define LIBBITCOIN_BITCOIN_H
+#ifndef LIBBITCOIN_BITCOIN_HPP
+#define LIBBITCOIN_BITCOIN_HPP
 
 /**
  * @mainpage libbitcoin API dox

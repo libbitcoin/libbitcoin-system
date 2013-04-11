@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_TRANSACTION_POOL_H
-#define LIBBITCOIN_TRANSACTION_POOL_H
+#ifndef LIBBITCOIN_TRANSACTION_POOL_HPP
+#define LIBBITCOIN_TRANSACTION_POOL_HPP
 
 #include <functional>
 #include <boost/circular_buffer.hpp>

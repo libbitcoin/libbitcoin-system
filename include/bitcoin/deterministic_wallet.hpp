@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_DETERMINISTIC_WALLET_H
-#define LIBBITCOIN_DETERMINISTIC_WALLET_H
+#ifndef LIBBITCOIN_DETERMINISTIC_WALLET_HPP
+#define LIBBITCOIN_DETERMINISTIC_WALLET_HPP
 
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>

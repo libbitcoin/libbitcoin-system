@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_ADDRESS_H
-#define LIBBITCOIN_ADDRESS_H
+#ifndef LIBBITCOIN_ADDRESS_HPP
+#define LIBBITCOIN_ADDRESS_HPP
 
 #include <bitcoin/types.hpp>
 #include <bitcoin/script.hpp>
@@ -50,5 +50,4 @@ bool extract(payment_address& address, const script& output_script);
 } // namespace libbitcoin
 
 #endif
-
 

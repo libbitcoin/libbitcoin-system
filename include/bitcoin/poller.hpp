@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_BLOCKS_POLLER_H
-#define LIBBITCOIN_BLOCKS_POLLER_H
+#ifndef LIBBITCOIN_BLOCKS_POLLER_HPP
+#define LIBBITCOIN_BLOCKS_POLLER_HPP
 
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/network/channel.hpp>

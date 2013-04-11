@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_PROTOCOL_H
-#define LIBBITCOIN_PROTOCOL_H
+#ifndef LIBBITCOIN_PROTOCOL_HPP
+#define LIBBITCOIN_PROTOCOL_HPP
 
 #include <memory>
 #include <system_error>

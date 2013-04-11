@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_TYPES_H
-#define LIBBITCOIN_TYPES_H
+#ifndef LIBBITCOIN_TYPES_HPP
+#define LIBBITCOIN_TYPES_HPP
 
 #include <boost/asio.hpp>
 #include <array>

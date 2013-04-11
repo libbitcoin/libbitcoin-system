@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_SERIALIZER_H
-#define LIBBITCOIN_SERIALIZER_H
+#ifndef LIBBITCOIN_SERIALIZER_HPP
+#define LIBBITCOIN_SERIALIZER_HPP
 
 #include <boost/asio/streambuf.hpp>
 #include <string>

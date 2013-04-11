@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_RIPEMD_H
-#define LIBBITCOIN_RIPEMD_H
+#ifndef LIBBITCOIN_RIPEMD_HPP
+#define LIBBITCOIN_RIPEMD_HPP
 
 #include <openssl/ripemd.h>
 #include <cstdint>

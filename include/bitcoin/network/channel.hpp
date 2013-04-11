@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_NET_CHANNEL_H
-#define LIBBITCOIN_NET_CHANNEL_H
+#ifndef LIBBITCOIN_NET_CHANNEL_HPP
+#define LIBBITCOIN_NET_CHANNEL_HPP
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>

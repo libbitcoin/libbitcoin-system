@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_SATOSHI_SERIALIZE_H
-#define LIBBITCOIN_SATOSHI_SERIALIZE_H
+#ifndef LIBBITCOIN_SATOSHI_SERIALIZE_HPP
+#define LIBBITCOIN_SATOSHI_SERIALIZE_HPP
 
 #include <bitcoin/constants.hpp>
 #include <bitcoin/format.hpp>

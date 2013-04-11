@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_SESSION_H
-#define LIBBITCOIN_SESSION_H
+#ifndef LIBBITCOIN_SESSION_HPP
+#define LIBBITCOIN_SESSION_HPP
 
 #include <set>
 

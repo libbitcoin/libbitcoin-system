@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_BIG_NUMBER_H
-#define LIBBITCOIN_BIG_NUMBER_H
+#ifndef LIBBITCOIN_BIG_NUMBER_HPP
+#define LIBBITCOIN_BIG_NUMBER_HPP
 
 #include <openssl/bn.h>
 

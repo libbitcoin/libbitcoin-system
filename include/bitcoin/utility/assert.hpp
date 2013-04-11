@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_ASSERT_H
-#define LIBBITCOIN_ASSERT_H
+#ifndef LIBBITCOIN_ASSERT_HPP
+#define LIBBITCOIN_ASSERT_HPP
 
 #include <boost/assert.hpp>
 

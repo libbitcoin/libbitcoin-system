@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_LOGGER_H
-#define LIBBITCOIN_LOGGER_H
+#ifndef LIBBITCOIN_LOGGER_HPP
+#define LIBBITCOIN_LOGGER_HPP
 
 #include <sstream>
 #include <map>
