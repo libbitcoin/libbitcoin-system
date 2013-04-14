@@ -43,13 +43,15 @@ public:
     }
 
     void alias(log_level lev, log_level map_lev);
-    // Can add optional argument later to allow re-enabling
-    void filter(log_domain domain);
+    void filter(log_level lev=log_level::null);
+
 private:
     typedef std::map<log_level, log_level> alias_mapping;
-    typedef std::map<log_domain, std::vector<log_level>> filters_map;
+    typedef std::map<log_domain, log_level> filters_map;
+
     static alias_mapping aliases_;
     static filters_map filters_;
+
     std::ostringstream stream;
     log_level lev_;
     log_domain domain_;

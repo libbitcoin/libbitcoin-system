@@ -17,12 +17,10 @@ logger_wrapper::logger_wrapper(const logger_wrapper& other)
 }
 logger_wrapper::~logger_wrapper()
 {
+    if (filters_.find(domain_) != filters_.end())
+        lev_ = filters_[domain_];
     if (aliases_.find(lev_) != aliases_.end())
         lev_ = aliases_[lev_];
-    if (filters_.find(domain_) != filters_.end())
-        for (log_level filter_level: filters_[domain_])
-            if (filter_level == lev_)
-                return;
     if (lev_ == log_level::null)
         return;
     else if (lev_ == log_level::error || lev_ == log_level::fatal)
@@ -33,16 +31,11 @@ logger_wrapper::~logger_wrapper()
 
 void logger_wrapper::alias(log_level lev, log_level map_lev)
 {
-    lev_ = log_level::null;
     aliases_[lev] = map_lev;
 }
-void logger_wrapper::filter(log_domain domain)
+void logger_wrapper::filter(log_level lev)
 {
-    lev_ = log_level::null;
-    if (filters_.find(domain) == filters_.end())
-        filters_[domain] = std::vector<log_level>{lev_};
-    else
-        filters_[domain].push_back(lev_);
+    filters_[domain_] = lev;
 }
 
 logger_wrapper log_debug(log_domain domain)
