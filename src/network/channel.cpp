@@ -144,7 +144,7 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
 {
     if (timer_errors(ec, stopped_))
         return;
-    log_info(log_domain::network) << "Forcing disconnect due to timeout.";
+    log_debug(log_domain::network) << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
     boost::system::error_code ret_ec;
     tcp::endpoint remote_endpoint = socket_->remote_endpoint(ret_ec);
@@ -283,7 +283,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
         return;
     }
 
-    log_info(log_domain::network) << "r: " << header_msg.command
+    log_debug(log_domain::network) << "r: " << header_msg.command
             << " (" << header_msg.payload_length << " bytes)";
     read_checksum(header_msg);
     reset_timers();

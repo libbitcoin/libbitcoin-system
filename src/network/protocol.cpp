@@ -211,7 +211,7 @@ void protocol::seeds::save_addresses(const std::error_code& ec,
     }
     else
     {
-        log_info() << "Storing seeded addresses.";
+        log_debug(log_domain::protocol) << "Storing seeded addresses.";
         for (const message::network_address& net_address: packet.addresses)
             hosts_.store(net_address,
                 strand_.wrap(std::bind(&protocol::seeds::handle_store,
@@ -264,7 +264,7 @@ void protocol::attempt_connect(const std::error_code& ec,
         if (connection.address.ip == address.ip &&
             connection.address.port == address.port)
         {
-            log_info(log_domain::protocol)
+            log_debug(log_domain::protocol)
                 << "Already connected to " << pretty_hex(address.ip);
             // Retry another connection
             strand_.post(
@@ -272,7 +272,7 @@ void protocol::attempt_connect(const std::error_code& ec,
             return;
         }
     }
-    log_info(log_domain::protocol) << "Trying "
+    log_debug(log_domain::protocol) << "Trying "
         << pretty(address.ip) << ":" << address.port;
     connect(handshake_, network_, pretty(address.ip), address.port,
         strand_.wrap(std::bind(&protocol::handle_connect,
@@ -283,7 +283,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
 {
     if (ec)
     {
-        log_info(log_domain::protocol) << "Unable to connect to "
+        log_warning(log_domain::protocol) << "Unable to connect to "
             << pretty(address.ip) << ":" << address.port
             << " - " << ec.message();
         strand_.post(std::bind(&protocol::try_connect, this));
@@ -382,7 +382,7 @@ void protocol::receive_address_message(const std::error_code& ec,
     }
     else
     {
-        log_info() << "Storing addresses.";
+        log_debug(log_domain::protocol) << "Storing addresses.";
         for (const message::network_address& net_address: packet.addresses)
             hosts_.store(net_address,
                 strand_.wrap(std::bind(&protocol::handle_store_address,
