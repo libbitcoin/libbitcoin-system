@@ -24,6 +24,10 @@ std::string error_category_impl::message(int ev) const noexcept
 {
     switch (ev)
     {
+        case error::service_stopped:
+            return "Service stopped";
+        case error::operation_failed:
+            return "Operation failed";
         case error::not_found:
             return "Object does not exist";
         case error::duplicate:
@@ -32,8 +36,6 @@ std::string error_category_impl::message(int ev) const noexcept
             return "Unspent output";
         case error::unsupported_payment_type:
             return "Unsupport payment type";
-        case error::start_failed:
-            return "Failed to initialize";
         case error::resolve_failed:
             return "Resolving hostname failed";
         case error::network_unreachable:
@@ -46,8 +48,6 @@ std::string error_category_impl::message(int ev) const noexcept
             return "Accept connection failed";
         case error::bad_stream:
             return "Bad stream";
-        case error::service_stopped:
-            return "Service stopped";
         case error::channel_timeout:
             return "Channel timed out";
         // validate tx

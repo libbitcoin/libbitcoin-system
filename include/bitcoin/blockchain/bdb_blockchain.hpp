@@ -42,6 +42,8 @@ public:
 
     void store(const message::block& stored_block,
         store_block_handler handle_store);
+    void import(const message::block& import_block, size_t depth,
+        import_block_handler handle_import);
 
     // fetch block header by depth
     void fetch_block_header(size_t depth,
@@ -81,6 +83,8 @@ private:
 
     void do_store(const message::block& store_block,
         store_block_handler handle_store);
+    void do_import(const message::block& import_block, size_t depth,
+        import_block_handler handle_import);
 
     void fetch_block_header_by_depth(size_t depth, 
         fetch_handler_block_header handle_fetch);

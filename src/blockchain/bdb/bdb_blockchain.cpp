@@ -60,7 +60,7 @@ void bdb_blockchain::start(const std::string& prefix,
             if (initialize(prefix))
                 handle_start(std::error_code());
             else
-                handle_start(error::start_failed);
+                handle_start(error::operation_failed);
         });
 }
 void bdb_blockchain::stop()
@@ -248,6 +248,28 @@ void bdb_blockchain::do_store(const message::block& stored_block,
         env_->txn_checkpoint(0, 0, 0);
         flush_counter = 0;
     }
+}
+
+void bdb_blockchain::import(const message::block& import_block,
+    size_t depth, import_block_handler handle_import)
+{
+    queue(
+        std::bind(&bdb_blockchain::do_import,
+            this, import_block, depth, handle_import));
+}
+void bdb_blockchain::do_import(const message::block& import_block,
+    size_t depth, import_block_handler handle_import)
+{
+    // Save genesis block
+    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
+    if (!common_->save_block(txn, depth, import_block))
+    {
+        txn->abort();
+        handle_import(error::operation_failed);
+        return;
+    }
+    txn->commit();
+    handle_import(std::error_code());
 }
 
 template<typename Index>

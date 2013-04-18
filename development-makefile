@@ -111,6 +111,14 @@ bin/tests/scritp: obj/scritp.o
 
 scritp: bin/tests/scritp
 
+obj/import-test.o: tests/import-test.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
+
+bin/tests/import-test: obj/import-test.o
+	$(CXX) -o bin/tests/import-test obj/import-test.o $(LIBBITCOIN)
+
+import-test: bin/tests/import-test
+
 obj/base58-test.o: tests/base58-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 

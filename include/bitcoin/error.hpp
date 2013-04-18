@@ -11,12 +11,12 @@ namespace error
     enum error_code_t
     {
         service_stopped = 1,
+        operation_failed,
         // blockchain errors
         not_found,
         duplicate,
         unspent_output,
         unsupported_payment_type,
-        start_failed,
         // network errors
         resolve_failed,
         network_unreachable,

@@ -21,6 +21,8 @@ public:
     typedef std::function<void (const std::error_code&, block_info)>
         store_block_handler;
 
+    typedef std::function<void (const std::error_code&)> import_block_handler;
+
 #ifdef CXX_COMPAT
     template <typename Message>
     using fetch_handler = std::function<
@@ -108,6 +110,21 @@ public:
      */
     virtual void store(const message::block& stored_block, 
         store_block_handler handle_store) = 0;
+
+    /**
+     * Store a new block directly without validating it.
+     *
+     * @param[in]   import_block    Block to store
+     * @param[in]   depth           Depth of block
+     * @param[in]   handle_import   Completion handler for import operation.
+     * @code
+     *  void handle_import(
+     *      const std::error_code& ec   // Status of operation
+     *  );
+     * @encode
+     */
+    virtual void import(const message::block& import_block, size_t depth,
+        import_block_handler handle_import) = 0;
 
     /**
      * Fetches the block header by depth.
