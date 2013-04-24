@@ -135,7 +135,8 @@ const data_chunk& deterministic_wallet::master_public_key() const
     return master_public_key_;
 }
 
-data_chunk deterministic_wallet::generate_public_key(size_t n, bool for_change)
+data_chunk deterministic_wallet::generate_public_key(
+    size_t n, bool for_change) const
 {
     hash_digest sequence = get_sequence(n, for_change);
 
@@ -166,7 +167,7 @@ data_chunk deterministic_wallet::generate_public_key(size_t n, bool for_change)
 }
 
 secret_parameter deterministic_wallet::generate_secret(
-    size_t n, bool for_change)
+    size_t n, bool for_change) const
 {
     if (seed_.empty())
         return null_hash;
@@ -192,7 +193,8 @@ secret_parameter deterministic_wallet::generate_secret(
     return secret;
 }
 
-hash_digest deterministic_wallet::get_sequence(size_t n, bool for_change)
+hash_digest deterministic_wallet::get_sequence(
+    size_t n, bool for_change) const
 {
     data_chunk chunk;
     extend_data(chunk, std::to_string(n));

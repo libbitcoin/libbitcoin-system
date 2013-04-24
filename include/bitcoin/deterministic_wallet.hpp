@@ -55,7 +55,7 @@ public:
      * btc_address = addr.encoded();
      * @endcode
      */
-    data_chunk generate_public_key(size_t n, bool for_change=false);
+    data_chunk generate_public_key(size_t n, bool for_change=false) const;
 
     /**
      * Generate the n'th secret. A seed must be set.
@@ -69,10 +69,10 @@ public:
      * privkey.set_secret(wallet.generate_secret(2));
      * @endcode
      */
-    secret_parameter generate_secret(size_t n, bool for_change=false);
+    secret_parameter generate_secret(size_t n, bool for_change=false) const;
 
 private:
-    hash_digest get_sequence(size_t n, bool for_change);
+    hash_digest get_sequence(size_t n, bool for_change) const;
 
     std::string seed_;
     secret_parameter stretched_seed_;
