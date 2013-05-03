@@ -17,18 +17,6 @@ AC_ARG_ENABLE(bdb,
 	[bld_bdb="$enable_bdb"], [bld_bdb="no"])
 AM_CONDITIONAL([DO_BDB], [test "$enable_bdb" = "yes"])
 
-AC_ARG_ENABLE(postgres,
-	[AC_HELP_STRING([--enable-postgres],
-			[Build PostgreSQL support.])],
-	[bld_postgres="$enable_postgres"], [bld_postgres="no"])
-AM_CONDITIONAL([DO_POSTGRES], [test "$enable_postgres" = "yes"])
-
-AC_ARG_ENABLE(kyoto,
-	[AC_HELP_STRING([--enable-kyoto],
-			[Build Kyoto Cabinet support.])],
-	[bld_kyoto="$enable_kyoto"], [bld_kyoto="no"])
-AM_CONDITIONAL([DO_KYOTO], [test "$enable_kyoto" = "yes"])
-
 AX_BOOST_BASE
 #AX_BOOST_SYSTEM
 #AX_BOOST_THREAD
@@ -43,24 +31,9 @@ if test "$bld_bdb" = "yes"; then
     AC_SUBST(CFLAG_BDB)
     CFLAG_BDB="-DBDB_ENABLED"
 fi
-if test "$bld_postgres" = "yes"; then
-	# some checks here?
-	AC_SUBST(LDFLAG_POSTGRES)
-	LDFLAG_POSTGRES="-lpq -lcppdb"
-	AC_SUBST(PKG_DEPEND_KYOTO)
-	PKG_DEPEND_KYOTO="kyotocabinet"
-fi
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
 PKG_CHECK_MODULES([CURL], [libcurl])
-
-if test "$bld_kyoto" = "yes"; then
-    PKG_CHECK_MODULES([Kyoto_Cabinet], [kyotocabinet])
-    AC_SUBST(CFLAG_KYOTO)
-    CFLAG_KYOTO="-DKYOTO_ENABLED"
-    AC_SUBST(PKG_DEPEND_KYOTO)
-    PKG_DEPEND_KYOTO="kyotocabinet"
-fi
 
 AC_ARG_WITH([pkgconfigdir], AS_HELP_STRING([--with-pkgconfigdir=PATH],
     [Path to the pkgconfig directory [[LIBDIR/pkgconfig]]]),

@@ -23,17 +23,11 @@ bitcoin_include_HEADERS = \
 bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
 bitcoin_blockchain_include_HEADERS = \
 	blockchain/blockchain.hpp \
-	blockchain/organizer.hpp \
-	blockchain/kyoto_blockchain.hpp
+	blockchain/organizer.hpp
 
 if DO_BDB
 bitcoin_blockchain_include_HEADERS += \
 	blockchain/bdb_blockchain.hpp
-endif
-
-if DO_POSTGRES
-#bitcoin_blockchain_include_HEADERS += \
-#	blockchain/postgresql_blockchain.hpp
 endif
 
 bitcoin_network_includedir = $(includedir)/bitcoin/network

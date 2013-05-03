@@ -29,7 +29,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
 
-    hosts(async_service& service, size_t capacity=26000);
+    hosts(async_service& service, size_t capacity=1000);
 
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;

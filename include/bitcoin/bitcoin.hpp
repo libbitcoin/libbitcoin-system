@@ -180,9 +180,6 @@
 #ifdef BDB_ENABLED
     #include <bitcoin/blockchain/bdb_blockchain.hpp>
 #endif
-#ifdef KYOTO_ENABLED
-    #include <bitcoin/blockchain/kyoto_blockchain.hpp>
-#endif
 
 namespace bc = libbitcoin;
 
