@@ -17,6 +17,12 @@ AC_ARG_ENABLE(bdb,
 	[bld_bdb="$enable_bdb"], [bld_bdb="no"])
 AM_CONDITIONAL([DO_BDB], [test "$enable_bdb" = "yes"])
 
+AC_ARG_ENABLE(leveldb,
+	[AC_HELP_STRING([--enable-leveldb],
+			[Build LevelDB support.])],
+	[bld_leveldb="$enable_leveldb"], [bld_leveldb="no"])
+AM_CONDITIONAL([DO_LEVELDB], [test "$enable_leveldb" = "yes"])
+
 AX_BOOST_BASE
 #AX_BOOST_SYSTEM
 #AX_BOOST_THREAD
@@ -30,6 +36,15 @@ if test "$bld_bdb" = "yes"; then
 	LDFLAG_BDB="-lprotobuf $DB_CXX_LIBS"
     AC_SUBST(CFLAG_BDB)
     CFLAG_BDB="-DBDB_ENABLED"
+fi
+
+if test "$bld_leveldb" = "yes"; then
+    #AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
+    PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
+	AC_SUBST(LDFLAG_LEVELDB)
+	LDFLAG_LEVELDB="-lprotobuf -lleveldb"
+    AC_SUBST(CFLAG_LEVELDB)
+    CFLAG_LEVELDB="-DLEVELDB_ENABLED"
 fi
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])

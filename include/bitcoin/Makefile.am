@@ -30,6 +30,11 @@ bitcoin_blockchain_include_HEADERS += \
 	blockchain/bdb_blockchain.hpp
 endif
 
+if DO_LEVELDB
+bitcoin_blockchain_include_HEADERS += \
+	blockchain/bdb_blockchain.hpp
+endif
+
 bitcoin_network_includedir = $(includedir)/bitcoin/network
 bitcoin_network_include_HEADERS = \
 	network/channel.hpp \

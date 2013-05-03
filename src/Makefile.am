@@ -33,16 +33,29 @@ libbitcoin_la_SOURCES = \
 	blockchain/blockchain.cpp \
 	transaction_pool.cpp
 
-if DO_BDB
+#if DO_BDB
+#libbitcoin_la_SOURCES += \
+#	blockchain/bdb/data_type.cpp \
+#	blockchain/bdb/txn_guard.cpp \
+#	blockchain/bdb/bdb_blockchain.cpp \
+#	blockchain/bdb/bitcoin.pb.cc \
+#	blockchain/bdb/bdb_chain_keeper.cpp \
+#	blockchain/bdb/bdb_organizer.cpp \
+#	blockchain/bdb/bdb_validate_block.cpp \
+#	blockchain/bdb/bdb_common.cpp \
+#	blockchain/bdb/protobuf_wrapper.cpp
+#endif
+
+if DO_LEVELDB
 libbitcoin_la_SOURCES += \
-	blockchain/bdb/data_type.cpp \
-	blockchain/bdb/txn_guard.cpp \
-	blockchain/bdb/bdb_blockchain.cpp \
-	blockchain/bdb/bitcoin.pb.cc \
-	blockchain/bdb/bdb_chain_keeper.cpp \
-	blockchain/bdb/bdb_organizer.cpp \
-	blockchain/bdb/bdb_validate_block.cpp \
-	blockchain/bdb/bdb_common.cpp \
-	blockchain/bdb/protobuf_wrapper.cpp
+	blockchain/leveldb/data_type.cpp \
+	blockchain/leveldb/txn_guard.cpp \
+	blockchain/leveldb/leveldb_blockchain.cpp \
+	blockchain/leveldb/bitcoin.pb.cc \
+	blockchain/leveldb/leveldb_chain_keeper.cpp \
+	blockchain/leveldb/leveldb_organizer.cpp \
+	blockchain/leveldb/leveldb_validate_block.cpp \
+	blockchain/leveldb/leveldb_common.cpp \
+	blockchain/leveldb/protobuf_wrapper.cpp
 endif
 

@@ -180,6 +180,9 @@
 #ifdef BDB_ENABLED
     #include <bitcoin/blockchain/bdb_blockchain.hpp>
 #endif
+#ifdef LEVELDB_ENABLED
+    #include <bitcoin/blockchain/bdb_blockchain.hpp>
+#endif
 
 namespace bc = libbitcoin;
 
