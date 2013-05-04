@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <leveldb/db.h>
+#include <leveldb/write_batch.h>
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/serializer.hpp>
@@ -34,18 +35,23 @@ public:
         message::block& result_block);
 
 private:
-    bool save_transaction(uint32_t block_depth, uint32_t tx_index,
+    struct leveldb_transaction_batch
+    {
+        leveldb::WriteBatch tx_batch, spends_batch, address_batch;
+    };
+
+    bool save_transaction(leveldb_transaction_batch& batch,
+        uint32_t block_depth, uint32_t tx_index,
         const hash_digest& tx_hash, const message::transaction& block_tx);
-    bool dupli_save(const hash_digest& tx_hash,
+    bool duplicate_exists(const hash_digest& tx_hash,
         uint32_t block_depth, uint32_t tx_index);
-    bool mark_spent_outputs(
+    bool mark_spent_outputs(leveldb::WriteBatch& spends_batch,
         const message::output_point& previous_output,
         const message::input_point& current_input);
     // returns false only on database failure. It may or may not add an entry
-    bool add_address(const script& output_script,
+    bool add_address(leveldb::WriteBatch& address_batch,
+        const script& output_script,
         const message::output_point& outpoint);
-    bool rewrite_transaction(const hash_digest& tx_hash,
-        const protobuf::Transaction& replace_proto_tx);
 
     leveldb::DB* db_blocks_;
     leveldb::DB* db_blocks_hash_;
@@ -55,6 +61,13 @@ private:
 };
 
 typedef std::shared_ptr<leveldb_common> leveldb_common_ptr;
+
+template <typename Data>
+leveldb::Slice slice(const Data& data)
+{
+    return leveldb::Slice(
+        reinterpret_cast<const char*>(data.data()), data.size());
+}
 
 // Used also by leveldb_chain_keeper when deleting spends + addresses
 template <typename Point>

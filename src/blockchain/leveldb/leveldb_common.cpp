@@ -9,13 +9,6 @@
 
 namespace libbitcoin {
 
-template <typename Data>
-leveldb::Slice slice(const Data& data)
-{
-    return leveldb::Slice(
-        reinterpret_cast<const char*>(data.data()), data.size());
-}
-
 leveldb_common::leveldb_common(leveldb::DB* db_blocks,
     leveldb::DB* db_blocks_hash, leveldb::DB* db_txs,
     leveldb::DB* db_spends, leveldb::DB* db_address)
@@ -58,6 +51,7 @@ bool leveldb_common::save_block(
     uint32_t depth, const message::block& serial_block)
 {
     leveldb::WriteOptions options;
+    leveldb_transaction_batch batch;
     protobuf::Block proto_block =
         block_header_to_protobuf(depth, serial_block);
     for (uint32_t tx_index = 0;
@@ -66,11 +60,11 @@ bool leveldb_common::save_block(
         const message::transaction& block_tx =
             serial_block.transactions[tx_index];
         const hash_digest& tx_hash = hash_transaction(block_tx);
-        //if (!save_transaction(txn, depth, tx_index, tx_hash, block_tx))
-        //{
-        //    log_fatal() << "Could not save transaction";
-        //    return false;
-        //}
+        if (!save_transaction(batch, depth, tx_index, tx_hash, block_tx))
+        {
+            log_fatal() << "Could not save transaction";
+            return false;
+        }
         proto_block.add_transactions(
             std::string(tx_hash.begin(), tx_hash.end()));
     }
@@ -86,32 +80,32 @@ bool leveldb_common::save_block(
     // Write block to database.
     db_blocks_->Put(options, slice(raw_depth), slice(raw_data));
     db_blocks_hash_->Put(options, slice(block_hash), slice(raw_depth));
+    // Execute batches.
+    db_txs_->Write(options, &batch.tx_batch);
+    db_spends_->Write(options, &batch.spends_batch);
+    db_address_->Write(options, &batch.address_batch);
     return true;
 }
 
-bool leveldb_common::save_transaction(uint32_t block_depth, uint32_t tx_index,
+bool leveldb_common::save_transaction(
+    leveldb_common::leveldb_transaction_batch& batch,
+    uint32_t block_depth, uint32_t tx_index,
     const hash_digest& tx_hash, const message::transaction& block_tx)
 {
-#ifdef FOOOOOOOOOO
-    if (dupli_save(tx_hash, block_depth, tx_index))
+    if (duplicate_exists(tx_hash, block_depth, tx_index))
         return true;
     // Actually add block
     protobuf::Transaction proto_tx = transaction_to_protobuf(block_tx);
     proto_tx.set_is_coinbase(is_coinbase(block_tx));
-    // Add parent block to transaction
-    protobuf::Transaction_BlockPointer* proto_parent = proto_tx.add_parent();
-    proto_parent->set_depth(block_depth);
-    proto_parent->set_index(tx_index);
+    // Set tx's parent block.
+    proto_tx.mutable_parent()->set_depth(block_depth);
+    proto_tx.mutable_parent()->set_index(tx_index);
     // Save tx to leveldb
     std::ostringstream oss;
     if (!proto_tx.SerializeToOstream(&oss))
         return false;
-    readable_data_type key, value;
-    key.set(tx_hash);
-    value.set(oss.str());
-    // Checks for duplicates first
-    //if (db_txs_->put(txn->get(), key.get(), value.get(), DB_NOOVERWRITE) != 0)
-        return false;
+    std::string raw_data = oss.str();
+    batch.tx_batch.Put(slice(tx_hash), raw_data);
     // Coinbase inputs do not spend anything.
     if (!is_coinbase(block_tx))
         for (uint32_t input_index = 0; input_index < block_tx.inputs.size();
@@ -120,7 +114,8 @@ bool leveldb_common::save_transaction(uint32_t block_depth, uint32_t tx_index,
             const message::transaction_input& input = 
                 block_tx.inputs[input_index];
             const message::input_point inpoint{tx_hash, input_index};
-            if (!mark_spent_outputs(input.previous_output, inpoint))
+            if (!mark_spent_outputs(batch.spends_batch,
+                    input.previous_output, inpoint))
                 return false;
         }
     for (uint32_t output_index = 0; output_index < block_tx.outputs.size();
@@ -128,100 +123,49 @@ bool leveldb_common::save_transaction(uint32_t block_depth, uint32_t tx_index,
     {
         const message::transaction_output& output =
             block_tx.outputs[output_index];
-        if (!add_address(output.output_script, {tx_hash, output_index}))
+        if (!add_address(batch.address_batch,
+                output.output_script, {tx_hash, output_index}))
             return false;
     }
-#endif
     return true;
 }
 
-bool leveldb_common::dupli_save(const hash_digest& tx_hash,
+bool leveldb_common::duplicate_exists(const hash_digest& tx_hash,
     uint32_t block_depth, uint32_t tx_index)
 {
-#ifdef FOOOOOOOO
     protobuf::Transaction proto_tx = fetch_proto_transaction(tx_hash);
     if (!proto_tx.IsInitialized())
         return false;
     BITCOIN_ASSERT(block_depth == 91842 || block_depth == 91880);
-    protobuf::Transaction::BlockPointer* parent = proto_tx.add_parent();
-    parent->set_depth(block_depth);
-    parent->set_index(tx_index);
-    return rewrite_transaction(tx_hash, proto_tx);
-#endif
     return true;
 }
 
-bool leveldb_common::mark_spent_outputs(
+bool leveldb_common::mark_spent_outputs(leveldb::WriteBatch& spends_batch,
     const message::output_point& previous_output,
     const message::input_point& current_input)
 {
-#ifdef FOOOOOOOOO
-    readable_data_type spent_key, spend_value;
-    spent_key.set(create_spent_key(previous_output));
-    spend_value.set(create_spent_key(current_input));
-    //if (db_spends_->put(txn->get(), spent_key.get(), spend_value.get(),
-    //        DB_NOOVERWRITE) != 0)
-    //    return false;
-#endif
+    data_chunk spent_key = create_spent_key(previous_output),
+        spend_value = create_spent_key(current_input);
+    spends_batch.Put(slice(spent_key), slice(spend_value));
     return true;
 }
 
-bool leveldb_common::add_address(
+bool leveldb_common::add_address(leveldb::WriteBatch& address_batch,
     const script& output_script, const message::output_point& outpoint)
 {
-#ifdef FOOOOOO
     data_chunk raw_address = create_address_key(output_script);
     if (raw_address.empty())
         return true;
-    readable_data_type address_key, output_value;
-    address_key.set(raw_address);
-    output_value.set(create_spent_key(outpoint));
-    if (db_address_->put(txn->get(), address_key.get(),
-            output_value.get(), 0) != 0)
+    std::string outpoints;
+    leveldb::Status status = db_address_->Get(
+        leveldb::ReadOptions(), slice(raw_address), &outpoints);
+    if (!status.ok() && !status.IsNotFound())
         return false;
-#endif
-    return true;
-}
-
-bool leveldb_common::rewrite_transaction(
-    const hash_digest& tx_hash, const protobuf::Transaction& replace_proto_tx)
-{
-#ifdef FOOOOO
-    // Now rewrite tx
-    // First delete old
-    readable_data_type tx_key;
-    tx_key.set(tx_hash);
-    if (db_txs_->del(txn->get(), tx_key.get(), 0) != 0)
-        return false;
-    // Save tx to leveldb
-    std::ostringstream write_oss;
-    if (!replace_proto_tx.SerializeToOstream(&write_oss))
-        return false;
-    readable_data_type tx_data;
-    tx_data.set(write_oss.str());
-    // Checks for duplicates first
-    if (db_txs_->put(txn->get(), tx_key.get(), tx_data.get(),
-        DB_NOOVERWRITE) != 0)
-    {
-        return false;
-    }
-#endif
-    return true;
-}
-
-template<typename Index, typename ProtoType>
-bool proto_read(Db* database, const Index& index, ProtoType& proto_object)
-{
-    readable_data_type key;
-    key.set(index);
-    writable_data_type data;
-    //if (database->get(txn->get(), key.get(), data.get(), 0) != 0)
-    //    return false;
-    std::stringstream ss;
-    data_chunk raw_object(data.data());
-    std::copy(raw_object.begin(), raw_object.end(),
-        std::ostream_iterator<byte>(ss));
-    proto_object.ParseFromIstream(&ss);
+    // Must be a multiple of (32 + 4)
+    BITCOIN_ASSERT(outpoints.size() % (32 + 4) == 0);
+    extend_data(outpoints, create_spent_key(outpoint));
+    BITCOIN_ASSERT(outpoints.size() % (32 + 4) == 0);
+    address_batch.Put(slice(raw_address), outpoints);
     return true;
 }
 
@@ -264,9 +208,19 @@ protobuf::Block leveldb_common::fetch_proto_block(const hash_digest& block_hash)
 protobuf::Transaction leveldb_common::fetch_proto_transaction(
     const hash_digest& tx_hash)
 {
+    std::string value;
+    leveldb::Status status = db_txs_->Get(
+        leveldb::ReadOptions(), slice(tx_hash), &value);
+    if (!status.ok())
+    {
+        if (!status.IsNotFound())
+            log_fatal() << "Error fetch_proto_tx(" << tx_hash << "): "
+                << status.ToString();
+        return protobuf::Transaction();
+    }
+    std::stringstream ss(value);
     protobuf::Transaction proto_tx;
-    //if (!proto_read(db_txs_, txn, tx_hash, proto_tx))
-    //    return protobuf::Transaction();
+    proto_tx.ParseFromIstream(&ss);
     return proto_tx;
 }
 
@@ -274,16 +228,19 @@ bool leveldb_common::reconstruct_block(
     const protobuf::Block& proto_block_header,
     message::block& result_block)
 {
-#ifdef FOOOOO
     result_block = protobuf_to_block_header(proto_block_header);
     for (const std::string& raw_tx_hash: proto_block_header.transactions())
     {
-        protobuf::Transaction proto_tx;
-        if (!proto_read(db_txs_, raw_tx_hash, proto_tx))
+        // Convert protobuf hash string into internal hash format.
+        hash_digest tx_hash;
+        BITCOIN_ASSERT(raw_tx_hash.size() == tx_hash.max_size());
+        std::copy(raw_tx_hash.begin(), raw_tx_hash.end(), tx_hash.begin());
+        // Fetch the actual transaction.
+        protobuf::Transaction proto_tx = fetch_proto_transaction(tx_hash);
+        if (!proto_tx.IsInitialized())
             return false;
         result_block.transactions.push_back(protobuf_to_transaction(proto_tx));
     }
-#endif
     return true;
 }
 

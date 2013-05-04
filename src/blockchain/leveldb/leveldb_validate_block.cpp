@@ -62,9 +62,8 @@ uint64_t leveldb_validate_block::median_time_past()
 
 bool tx_after_fork(const protobuf::Transaction& proto_tx, size_t fork_index)
 {
-    for (auto parent: proto_tx.parent())
-        if (parent.depth() > fork_index)
-            return true;
+    if (proto_tx.parent().depth() > fork_index)
+        return true;
     return false;
 }
 
@@ -100,9 +99,8 @@ bool leveldb_validate_block::fetch_transaction(message::transaction& tx,
             return false;
         return true;
     }
-    BITCOIN_ASSERT(proto_tx.parent_size() > 0);
     tx = protobuf_to_transaction(proto_tx);
-    tx_depth = proto_tx.parent(0).depth();
+    tx_depth = proto_tx.parent().depth();
     return true;
 }
 

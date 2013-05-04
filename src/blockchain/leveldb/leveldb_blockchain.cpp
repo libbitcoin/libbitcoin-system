@@ -365,16 +365,8 @@ void leveldb_blockchain::do_fetch_transaction_index(
         handle_fetch(error::not_found, 0, 0);
         return;
     }
-    size_t parent_block_depth = 0, index_in_parent = 0;
-    for (auto parent: proto_tx.parent())
-    {
-        if (parent.depth() > parent_block_depth)
-        {
-            parent_block_depth = parent.depth();
-            index_in_parent = parent.index();
-        }
-    }
-    handle_fetch(std::error_code(), parent_block_depth, index_in_parent);
+    handle_fetch(std::error_code(),
+        proto_tx.parent().depth(), proto_tx.parent().index());
 }
 
 void leveldb_blockchain::fetch_spend(const message::output_point& outpoint,
@@ -413,30 +405,42 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
 {
     // Associated outputs
     message::output_point_list assoc_outs;
-    Dbc* cursor;
-    //db_address_->cursor(txn->get(), &cursor, 0);
-    BITCOIN_ASSERT(cursor != nullptr);
-    readable_data_type key;
     // version byte + hash for key
     serializer serial;
     serial.write_byte(address.version());
     serial.write_short_hash(address.hash());
-    key.set(serial.data());
-    writable_data_type value;
-    int ret = cursor->get(key.get(), value.get(), DB_SET);
-    while (ret != DB_NOTFOUND)
+    data_chunk raw_address = serial.data();
+    // Fetch outpoints as contiguous block.
+    std::string outpoints;
+    leveldb::Status status = db_address_l1->Get(
+        leveldb::ReadOptions(), slice(raw_address), &outpoints);
+    if (!status.ok())
     {
-        message::output_point outpoint;
+        if (status.IsNotFound())
+            handle_fetch(error::not_found, message::output_point_list());
+        else
+        {
+            handle_fetch(error::operation_failed,
+                message::output_point_list());
+            log_error() << "Error fetch_outputs: " << status.ToString();
+        }
+        return;
+    }
+    // Must be a multiple of (32 + 4)
+    const size_t outpoint_size = 32 + 4;
+    BITCOIN_ASSERT(outpoints.size() % outpoint_size == 0);
+    for (auto it = outpoints.begin(); it != outpoints.end();
+        it += outpoint_size)
+    {
         // We need a copy not a temporary
-        data_chunk raw_outpoint(value.data());
+        data_chunk raw_outpoint(it, it + outpoint_size);
         // Then read the value off
         deserializer deserial(raw_outpoint);
+        message::output_point outpoint;
         outpoint.hash = deserial.read_hash();
         outpoint.index = deserial.read_4_bytes();
         assoc_outs.push_back(outpoint);
-        ret = cursor->get(key.get(), value.get(), DB_NEXT_DUP);
     }
-    cursor->close();
     handle_fetch(std::error_code(), assoc_outs);
 }
 

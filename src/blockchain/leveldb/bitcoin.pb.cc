@@ -185,7 +185,7 @@ void protobuf_AddDesc_bitcoin_2eproto() {
     "block_hash\030\007 \002(\014\022\016\n\006merkle\030\010 \002(\014\022\021\n\ttime"
     "stamp\030\t \002(\r\022\014\n\004bits\030\n \002(\r\022\r\n\005nonce\030\013 \002(\r"
     "\022\024\n\014transactions\030\014 \003(\014\"\224\003\n\013Transaction\0222"
-    "\n\006parent\030\001 \003(\0132\".protobuf.Transaction.Bl"
+    "\n\006parent\030\001 \002(\0132\".protobuf.Transaction.Bl"
     "ockPointer\022+\n\006inputs\030\003 \003(\0132\033.protobuf.Tr"
     "ansaction.Input\022-\n\007outputs\030\004 \003(\0132\034.proto"
     "buf.Transaction.Output\022\017\n\007version\030\005 \002(\r\022"
@@ -1585,6 +1585,7 @@ Transaction::Transaction()
 }
 
 void Transaction::InitAsDefaultInstance() {
+  parent_ = const_cast< ::protobuf::Transaction_BlockPointer*>(&::protobuf::Transaction_BlockPointer::default_instance());
 }
 
 Transaction::Transaction(const Transaction& from)
@@ -1595,6 +1596,7 @@ Transaction::Transaction(const Transaction& from)
 
 void Transaction::SharedCtor() {
   _cached_size_ = 0;
+  parent_ = NULL;
   version_ = 0u;
   locktime_ = 0u;
   is_coinbase_ = false;
@@ -1607,6 +1609,7 @@ Transaction::~Transaction() {
 
 void Transaction::SharedDtor() {
   if (this != default_instance_) {
+    delete parent_;
   }
 }
 
@@ -1631,12 +1634,14 @@ Transaction* Transaction::New() const {
 }
 
 void Transaction::Clear() {
-  if (_has_bits_[3 / 32] & (0xffu << (3 % 32))) {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_parent()) {
+      if (parent_ != NULL) parent_->::protobuf::Transaction_BlockPointer::Clear();
+    }
     version_ = 0u;
     locktime_ = 0u;
     is_coinbase_ = false;
   }
-  parent_.Clear();
   inputs_.Clear();
   outputs_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1649,17 +1654,15 @@ bool Transaction::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .protobuf.Transaction.BlockPointer parent = 1;
+      // required .protobuf.Transaction.BlockPointer parent = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_parent:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_parent()));
+               input, mutable_parent()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(10)) goto parse_parent;
         if (input->ExpectTag(26)) goto parse_inputs;
         break;
       }
@@ -1760,10 +1763,10 @@ bool Transaction::MergePartialFromCodedStream(
 
 void Transaction::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .protobuf.Transaction.BlockPointer parent = 1;
-  for (int i = 0; i < this->parent_size(); i++) {
+  // required .protobuf.Transaction.BlockPointer parent = 1;
+  if (has_parent()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->parent(i), output);
+      1, this->parent(), output);
   }
   
   // repeated .protobuf.Transaction.Input inputs = 3;
@@ -1801,11 +1804,11 @@ void Transaction::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* Transaction::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .protobuf.Transaction.BlockPointer parent = 1;
-  for (int i = 0; i < this->parent_size(); i++) {
+  // required .protobuf.Transaction.BlockPointer parent = 1;
+  if (has_parent()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        1, this->parent(i), target);
+        1, this->parent(), target);
   }
   
   // repeated .protobuf.Transaction.Input inputs = 3;
@@ -1847,7 +1850,14 @@ void Transaction::SerializeWithCachedSizes(
 int Transaction::ByteSize() const {
   int total_size = 0;
   
-  if (_has_bits_[3 / 32] & (0xffu << (3 % 32))) {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required .protobuf.Transaction.BlockPointer parent = 1;
+    if (has_parent()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->parent());
+    }
+    
     // required uint32 version = 5;
     if (has_version()) {
       total_size += 1 +
@@ -1868,14 +1878,6 @@ int Transaction::ByteSize() const {
     }
     
   }
-  // repeated .protobuf.Transaction.BlockPointer parent = 1;
-  total_size += 1 * this->parent_size();
-  for (int i = 0; i < this->parent_size(); i++) {
-    total_size +=
-      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->parent(i));
-  }
-  
   // repeated .protobuf.Transaction.Input inputs = 3;
   total_size += 1 * this->inputs_size();
   for (int i = 0; i < this->inputs_size(); i++) {
@@ -1917,10 +1919,12 @@ void Transaction::MergeFrom(const ::google::protobuf::Message& from) {
 
 void Transaction::MergeFrom(const Transaction& from) {
   GOOGLE_CHECK_NE(&from, this);
-  parent_.MergeFrom(from.parent_);
   inputs_.MergeFrom(from.inputs_);
   outputs_.MergeFrom(from.outputs_);
-  if (from._has_bits_[3 / 32] & (0xffu << (3 % 32))) {
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_parent()) {
+      mutable_parent()->::protobuf::Transaction_BlockPointer::MergeFrom(from.parent());
+    }
     if (from.has_version()) {
       set_version(from.version());
     }
@@ -1947,10 +1951,10 @@ void Transaction::CopyFrom(const Transaction& from) {
 }
 
 bool Transaction::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000038) != 0x00000038) return false;
+  if ((_has_bits_[0] & 0x00000039) != 0x00000039) return false;
   
-  for (int i = 0; i < parent_size(); i++) {
-    if (!this->parent(i).IsInitialized()) return false;
+  if (has_parent()) {
+    if (!this->parent().IsInitialized()) return false;
   }
   for (int i = 0; i < inputs_size(); i++) {
     if (!this->inputs(i).IsInitialized()) return false;
@@ -1963,7 +1967,7 @@ bool Transaction::IsInitialized() const {
 
 void Transaction::Swap(Transaction* other) {
   if (other != this) {
-    parent_.Swap(&other->parent_);
+    std::swap(parent_, other->parent_);
     inputs_.Swap(&other->inputs_);
     outputs_.Swap(&other->outputs_);
     std::swap(version_, other->version_);

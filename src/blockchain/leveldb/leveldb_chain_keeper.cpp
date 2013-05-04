@@ -158,7 +158,7 @@ bool leveldb_chain_keeper::remove_spend(
     const message::input_point& current_input)
 {
     readable_data_type spent_key;
-    spent_key.set(create_spent_key(previous_output));
+    //spent_key.set(create_spent_key(previous_output));
     //int ret = db_spends_->del(txn_->get(), spent_key.get(), 0);
     int ret = 0;
     if (ret != 0 && ret != DB_NOTFOUND)
