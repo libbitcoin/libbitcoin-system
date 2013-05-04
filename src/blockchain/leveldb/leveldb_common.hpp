@@ -28,6 +28,7 @@ public:
 
     protobuf::Block fetch_proto_block(uint32_t depth);
     protobuf::Block fetch_proto_block(const hash_digest& block_hash);
+    uint32_t fetch_block_depth(const hash_digest& block_hash);
     protobuf::Transaction fetch_proto_transaction(const hash_digest& tx_hash);
 
     bool reconstruct_block(

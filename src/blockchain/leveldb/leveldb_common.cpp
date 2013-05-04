@@ -190,19 +190,22 @@ protobuf::Block leveldb_common::fetch_proto_block(uint32_t depth)
 
 protobuf::Block leveldb_common::fetch_proto_block(const hash_digest& block_hash)
 {
+    return fetch_proto_block(fetch_block_depth(block_hash));
+}
+
+uint32_t leveldb_common::fetch_block_depth(const hash_digest& block_hash)
+{
     std::string value;
     leveldb::Status status = db_blocks_hash_->Get(
         leveldb::ReadOptions(), slice(block_hash), &value);
     if (!status.ok())
     {
         if (!status.IsNotFound())
-            log_fatal() << "Error fetch_proto_block(" << block_hash << "): "
+            log_fatal() << "Error fetch_block_depth(" << block_hash << "): "
                 << status.ToString();
-        return protobuf::Block();
+        return std::numeric_limits<uint32_t>::max();
     }
-    uint32_t depth =
-        cast_chunk<uint32_t>(data_chunk(value.begin(), value.end()));
-    return fetch_proto_block(depth);
+    return cast_chunk<uint32_t>(data_chunk(value.begin(), value.end()));
 }
 
 protobuf::Transaction leveldb_common::fetch_proto_transaction(

@@ -237,7 +237,7 @@ void leveldb_blockchain::fetch_block_header_by_hash(
 }
 
 template<typename Index, typename Handler>
-void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
+void fetch_blk_tx_hashes_impl(const Index& index,
     leveldb_common_ptr common, Handler handle_fetch)
 {
     protobuf::Block proto_block = common->fetch_proto_block(index);
@@ -265,7 +265,7 @@ void leveldb_blockchain::fetch_block_transaction_hashes(size_t depth,
     queue(
         [this, depth, handle_fetch]
         {
-            fetch_blk_tx_hashes_impl(depth, env_, common_, handle_fetch);
+            fetch_blk_tx_hashes_impl(depth, common_, handle_fetch);
         });
 }
 
@@ -276,7 +276,7 @@ void leveldb_blockchain::fetch_block_transaction_hashes(
     queue(
         [this, block_hash, handle_fetch]
         {
-            fetch_blk_tx_hashes_impl(block_hash, env_, common_, handle_fetch);
+            fetch_blk_tx_hashes_impl(block_hash, common_, handle_fetch);
         });
 }
 
@@ -290,18 +290,11 @@ void leveldb_blockchain::fetch_block_depth(const hash_digest& block_hash,
 void leveldb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
     fetch_handler_block_depth handle_fetch)
 {
-    readable_data_type key;
-    key.set(block_hash);
-    writable_data_type primary_key;
-    empty_data_type ignore_data;
-    //if (db_blocks_hash_->pget(txn->get(), key.get(),
-    //    primary_key.get(), ignore_data.get(), 0) != 0)
-    {
+    uint32_t depth = common_->fetch_block_depth(block_hash);
+    if (depth == std::numeric_limits<uint32_t>::max())
         handle_fetch(error::not_found, 0);
-        return;
-    }
-    size_t depth = cast_chunk<uint32_t>(primary_key.data());
-    handle_fetch(std::error_code(), depth);
+    else
+        handle_fetch(std::error_code(), depth);
 }
 
 void leveldb_blockchain::fetch_last_depth(
