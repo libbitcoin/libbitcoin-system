@@ -14,8 +14,7 @@ class leveldb_validate_block
 public:
     leveldb_validate_block(leveldb_common_ptr common, int fork_index,
         const block_detail_list& orphan_chain, int orphan_index,
-        size_t depth, txn_guard_ptr txn,
-        const message::block& current_block);
+        size_t depth, const message::block& current_block);
 
 protected:
     uint32_t previous_block_bits();
@@ -37,7 +36,6 @@ private:
         size_t skip_tx, size_t skip_input);
 
     leveldb_common_ptr common_;
-    txn_guard_ptr txn_;
     size_t depth_;
 
     size_t fork_index_, orphan_index_;

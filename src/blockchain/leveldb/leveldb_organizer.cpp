@@ -22,7 +22,7 @@ std::error_code leveldb_organizer::verify(int fork_index,
     size_t depth = fork_index + orphan_index + 1;
     BITCOIN_ASSERT(depth != 0);
     leveldb_validate_block validate(common_, fork_index, orphan_chain,
-        orphan_index, depth, chain_->txn(), current_block);
+        orphan_index, depth, current_block);
     return validate.start();
 }
 void leveldb_organizer::reorganize_occured(

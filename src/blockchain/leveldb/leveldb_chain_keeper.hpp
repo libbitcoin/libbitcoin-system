@@ -7,8 +7,6 @@
 
 #include <bitcoin/blockchain/leveldb_blockchain.hpp>
 
-#include "txn_guard.hpp"
-
 namespace libbitcoin {
 
 class leveldb_chain_keeper
@@ -28,16 +26,12 @@ public:
     bool end_slice(size_t slice_begin_index,
         block_detail_list& sliced_blocks);
 
-    txn_guard_ptr txn();
-
 private:
     bool clear_transaction_data(const message::transaction& remove_tx);
     bool remove_spend(const message::output_point& previous_output,
         const message::input_point& current_input);
     bool remove_address(const script& output_script,
         const message::output_point& outpoint);
-
-    txn_guard_ptr txn_;
 
     leveldb_common_ptr common_;
 

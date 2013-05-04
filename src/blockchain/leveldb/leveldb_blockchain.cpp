@@ -18,7 +18,6 @@
 #include "leveldb_chain_keeper.hpp"
 #include "leveldb_organizer.hpp"
 #include "data_type.hpp"
-#include "txn_guard.hpp"
 #include "protobuf_wrapper.hpp"
 
 namespace libbitcoin {
@@ -295,15 +294,12 @@ void leveldb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
     key.set(block_hash);
     writable_data_type primary_key;
     empty_data_type ignore_data;
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    if (db_blocks_hash_->pget(txn->get(), key.get(),
-        primary_key.get(), ignore_data.get(), 0) != 0)
+    //if (db_blocks_hash_->pget(txn->get(), key.get(),
+    //    primary_key.get(), ignore_data.get(), 0) != 0)
     {
-        txn->abort();
         handle_fetch(error::not_found, 0);
         return;
     }
-    txn->commit();
     size_t depth = cast_chunk<uint32_t>(primary_key.data());
     handle_fetch(std::error_code(), depth);
 }
@@ -318,9 +314,7 @@ void leveldb_blockchain::fetch_last_depth(
 void leveldb_blockchain::do_fetch_last_depth(
     fetch_handler_last_depth handle_fetch)
 {
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    uint32_t last_depth = common_->find_last_block_depth(txn);
-    txn->commit();
+    uint32_t last_depth = common_->find_last_block_depth();
     if (last_depth == std::numeric_limits<uint32_t>::max())
     {
         handle_fetch(error::not_found, 0);
@@ -341,10 +335,8 @@ void leveldb_blockchain::do_fetch_transaction(
     const hash_digest& transaction_hash,
     fetch_handler_transaction handle_fetch)
 {
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn, transaction_hash);
-    txn->commit();
+        common_->fetch_proto_transaction(transaction_hash);
     if (!proto_tx.IsInitialized())
     {
         handle_fetch(error::not_found, message::transaction());
@@ -366,10 +358,8 @@ void leveldb_blockchain::do_fetch_transaction_index(
     const hash_digest& transaction_hash,
     fetch_handler_transaction_index handle_fetch)
 {
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn, transaction_hash);
-    txn->commit();
+        common_->fetch_proto_transaction(transaction_hash);
     if (!proto_tx.IsInitialized())
     {
         handle_fetch(error::not_found, 0, 0);
@@ -398,15 +388,12 @@ void leveldb_blockchain::do_fetch_spend(
     const message::output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::input_point input_spend;
-    if (!common_->fetch_spend(txn, outpoint, input_spend))
+    if (!common_->fetch_spend(outpoint, input_spend))
     {
-        txn->abort();
         handle_fetch(error::unspent_output, message::input_point());
         return;
     }
-    txn->commit();
     handle_fetch(std::error_code(), input_spend);
 }
 
@@ -426,9 +413,8 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
 {
     // Associated outputs
     message::output_point_list assoc_outs;
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     Dbc* cursor;
-    db_address_->cursor(txn->get(), &cursor, 0);
+    //db_address_->cursor(txn->get(), &cursor, 0);
     BITCOIN_ASSERT(cursor != nullptr);
     readable_data_type key;
     // version byte + hash for key
@@ -451,7 +437,6 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
         ret = cursor->get(key.get(), value.get(), DB_NEXT_DUP);
     }
     cursor->close();
-    txn->commit();
     handle_fetch(std::error_code(), assoc_outs);
 }
 

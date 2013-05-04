@@ -21,18 +21,14 @@ leveldb_chain_keeper::leveldb_chain_keeper(leveldb_common_ptr common,
 
 void leveldb_chain_keeper::start()
 {
-    txn_ = std::make_shared<txn_guard>(env_);
 }
 void leveldb_chain_keeper::stop()
 {
-    if (txn_)
-        txn_->commit();
-    txn_.reset();
 }
 
 void leveldb_chain_keeper::add(block_detail_ptr incoming_block)
 {
-    uint32_t last_block_depth = common_->find_last_block_depth(txn_);
+    uint32_t last_block_depth = common_->find_last_block_depth();
     const message::block& actual_block = incoming_block->actual();
     if (!common_->save_block(last_block_depth + 1, actual_block))
         log_fatal() << "Saving block in organizer failed";
@@ -57,7 +53,7 @@ big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 {
     big_number total_work;
     Dbc* cursor;
-    db_blocks_->cursor(txn_->get(), &cursor, 0);
+    //db_blocks_->cursor(txn_->get(), &cursor, 0);
     // Our key/value pair
     readable_data_type key;
     key.set(slice_begin_index);
@@ -85,7 +81,7 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
     block_detail_list& sliced_blocks)
 {
     Dbc* cursor;
-    db_blocks_->cursor(txn_->get(), &cursor, 0);
+    //db_blocks_->cursor(txn_->get(), &cursor, 0);
     readable_data_type key;
     key.set(slice_begin_index);
     writable_data_type_ptr value;
@@ -105,7 +101,7 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
         proto_block.ParseFromIstream(&ss);
         // Convert protobuf block header into actual block
         message::block sliced_block;
-        if (!common_->reconstruct_block(txn_, proto_block, sliced_block))
+        if (!common_->reconstruct_block(proto_block, sliced_block))
             return false;
         // Add to list of sliced blocks
         block_detail_ptr sliced_detail =
@@ -131,7 +127,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
     const hash_digest& tx_hash = hash_transaction(remove_tx);
     readable_data_type del_tx_key;
     del_tx_key.set(tx_hash);
-    if (db_txs_->del(txn_->get(), del_tx_key.get(), 0) != 0)
+    //if (db_txs_->del(txn_->get(), del_tx_key.get(), 0) != 0)
         return false;
     // Remove spends
     // ... spends don't exist for coinbase txs.
@@ -163,7 +159,8 @@ bool leveldb_chain_keeper::remove_spend(
 {
     readable_data_type spent_key;
     spent_key.set(create_spent_key(previous_output));
-    int ret = db_spends_->del(txn_->get(), spent_key.get(), 0);
+    //int ret = db_spends_->del(txn_->get(), spent_key.get(), 0);
+    int ret = 0;
     if (ret != 0 && ret != DB_NOTFOUND)
         return false;
     return true;
@@ -180,7 +177,7 @@ bool leveldb_chain_keeper::remove_address(const script& output_script,
     output_value.set(create_spent_key(outpoint));
     // Perform the actual delete
     Dbc* cursor;
-    db_address_->cursor(txn_->get(), &cursor, 0);
+    //db_address_->cursor(txn_->get(), &cursor, 0);
     BITCOIN_ASSERT(cursor != nullptr);
     if (cursor->get(address_key.get(), output_value.get(), DB_GET_BOTH) != 0)
         return false;
@@ -188,11 +185,6 @@ bool leveldb_chain_keeper::remove_address(const script& output_script,
         return false;
     cursor->close();
     return true;
-}
-
-txn_guard_ptr leveldb_chain_keeper::txn()
-{
-    return txn_;
 }
 
 } // namespace libbitcoin

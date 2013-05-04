@@ -10,10 +10,9 @@ namespace libbitcoin {
 
 leveldb_validate_block::leveldb_validate_block(leveldb_common_ptr common,
     int fork_index, const block_detail_list& orphan_chain,
-    int orphan_index, size_t depth,
-    txn_guard_ptr txn, const message::block& current_block)
+    int orphan_index, size_t depth, const message::block& current_block)
   : validate_block(depth, current_block), common_(common),
-    txn_(txn), depth_(depth), fork_index_(fork_index),
+    depth_(depth), fork_index_(fork_index),
     orphan_index_(orphan_index), orphan_chain_(orphan_chain)
 {
 }
@@ -72,7 +71,7 @@ bool tx_after_fork(const protobuf::Transaction& proto_tx, size_t fork_index)
 bool leveldb_validate_block::transaction_exists(const hash_digest& tx_hash)
 {
     protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn_, tx_hash);
+        common_->fetch_proto_transaction(tx_hash);
     if (!proto_tx.IsInitialized())
         return false;
     return !tx_after_fork(proto_tx, fork_index_);
@@ -82,11 +81,11 @@ bool leveldb_validate_block::is_output_spent(
     const message::output_point& outpoint)
 {
     message::input_point input_spend;
-    if (!common_->fetch_spend(txn_, outpoint, input_spend))
+    if (!common_->fetch_spend(outpoint, input_spend))
         return false;
     // Lookup block depth
     protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn_, input_spend.hash);
+        common_->fetch_proto_transaction(input_spend.hash);
     return !tx_after_fork(proto_tx, fork_index_);
 }
 
@@ -94,7 +93,7 @@ bool leveldb_validate_block::fetch_transaction(message::transaction& tx,
     size_t& tx_depth, const hash_digest& tx_hash)
 {
     protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn_, tx_hash);
+        common_->fetch_proto_transaction(tx_hash);
     if (!proto_tx.IsInitialized() || tx_after_fork(proto_tx, fork_index_))
     {
         if (!fetch_orphan_transaction(tx, tx_depth, tx_hash))

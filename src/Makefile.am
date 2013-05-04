@@ -49,7 +49,6 @@ libbitcoin_la_SOURCES = \
 if DO_LEVELDB
 libbitcoin_la_SOURCES += \
 	blockchain/leveldb/data_type.cpp \
-	blockchain/leveldb/txn_guard.cpp \
 	blockchain/leveldb/leveldb_blockchain.cpp \
 	blockchain/leveldb/bitcoin.pb.cc \
 	blockchain/leveldb/leveldb_chain_keeper.cpp \
