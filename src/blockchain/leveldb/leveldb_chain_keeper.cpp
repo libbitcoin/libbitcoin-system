@@ -34,7 +34,7 @@ void leveldb_chain_keeper::add(block_detail_ptr incoming_block)
 {
     uint32_t last_block_depth = common_->find_last_block_depth(txn_);
     const message::block& actual_block = incoming_block->actual();
-    if (!common_->save_block(txn_, last_block_depth + 1, actual_block))
+    if (!common_->save_block(last_block_depth + 1, actual_block))
         log_fatal() << "Saving block in organizer failed";
 }
 

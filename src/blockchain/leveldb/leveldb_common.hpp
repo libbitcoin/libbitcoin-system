@@ -2,6 +2,7 @@
 #define LIBBITCOIN_BLOCKCHAIN_BERKELEYDB_COMMON_H
 
 #include <memory>
+#include <leveldb/db.h>
 
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/serializer.hpp>
@@ -9,9 +10,6 @@
 #include "data_type.hpp"
 #include "txn_guard.hpp"
 #include "protobuf_wrapper.hpp"
-
-class DbEnv;
-class Db;
 
 namespace libbitcoin {
 
@@ -26,12 +24,10 @@ public:
         const message::output_point& spent_output,
         message::input_point& input_spend);
 
-    bool save_block(txn_guard_ptr txn,
-        uint32_t depth, const message::block& serial_block);
+    bool save_block(uint32_t depth, const message::block& serial_block);
 
-    protobuf::Block fetch_proto_block(txn_guard_ptr txn, uint32_t depth);
-    protobuf::Block fetch_proto_block(txn_guard_ptr txn,
-        const hash_digest& block_hash);
+    protobuf::Block fetch_proto_block(uint32_t depth);
+    protobuf::Block fetch_proto_block(const hash_digest& block_hash);
     protobuf::Transaction fetch_proto_transaction(txn_guard_ptr txn,
         const hash_digest& tx_hash);
 

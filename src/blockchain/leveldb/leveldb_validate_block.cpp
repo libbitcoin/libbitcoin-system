@@ -27,8 +27,7 @@ message::block leveldb_validate_block::fetch_block(size_t fetch_depth)
         BITCOIN_ASSERT(orphan_index_ < orphan_chain_.size());
         return orphan_chain_[fetch_index]->actual();
     }
-    protobuf::Block proto_block =
-        common_->fetch_proto_block(txn_, fetch_depth);
+    protobuf::Block proto_block = common_->fetch_proto_block(fetch_depth);
     BITCOIN_ASSERT(proto_block.IsInitialized());
     // We only convert the fields we actually need
     message::block result_block;

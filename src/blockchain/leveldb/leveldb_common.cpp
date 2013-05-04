@@ -1,20 +1,26 @@
 #include "leveldb_common.hpp"
 
-#include <db_cxx.h>
-
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/logger.hpp>
+#include <bitcoin/block.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/address.hpp>
+#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
+
+template <typename Data>
+leveldb::Slice slice(const Data& data)
+{
+    return leveldb::Slice(
+        reinterpret_cast<const char*>(data.data()), data.size());
+}
 
 leveldb_common::leveldb_common(leveldb::DB* db_blocks,
     leveldb::DB* db_blocks_hash, leveldb::DB* db_txs,
     leveldb::DB* db_spends, leveldb::DB* db_address)
-  : db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash), db_txs_(db_txs)
-    db_spends_(db_spends), db_address_(db_address)
+  : db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
+    db_txs_(db_txs), db_spends_(db_spends), db_address_(db_address)
 {
 }
 
@@ -54,10 +60,10 @@ bool leveldb_common::fetch_spend(txn_guard_ptr txn,
     return true;
 }
 
-bool leveldb_common::save_block(txn_guard_ptr txn,
+bool leveldb_common::save_block(
     uint32_t depth, const message::block& serial_block)
 {
-#ifdef FOOOO
+    leveldb::WriteOptions options;
     protobuf::Block proto_block =
         block_header_to_protobuf(depth, serial_block);
     for (uint32_t tx_index = 0;
@@ -66,11 +72,11 @@ bool leveldb_common::save_block(txn_guard_ptr txn,
         const message::transaction& block_tx =
             serial_block.transactions[tx_index];
         const hash_digest& tx_hash = hash_transaction(block_tx);
-        if (!save_transaction(txn, depth, tx_index, tx_hash, block_tx))
-        {
-            log_fatal() << "Could not save transaction";
-            return false;
-        }
+        //if (!save_transaction(txn, depth, tx_index, tx_hash, block_tx))
+        //{
+        //    log_fatal() << "Could not save transaction";
+        //    return false;
+        //}
         proto_block.add_transactions(
             std::string(tx_hash.begin(), tx_hash.end()));
     }
@@ -80,15 +86,12 @@ bool leveldb_common::save_block(txn_guard_ptr txn,
         log_fatal() << "Protobuf serialization failed";
         return false;
     }
-    readable_data_type key, value;
-    key.set(depth);
-    value.set(oss.str());
-    if (db_blocks_->put(txn->get(), key.get(), value.get(), 0) != 0)
-    {
-        log_fatal() << "leveldb put() failed";
-        return false;
-    }
-#endif
+    data_chunk raw_depth = uncast_type(depth);
+    std::string raw_data = oss.str();
+    hash_digest block_hash = hash_block_header(serial_block);
+    // Write block to database.
+    db_blocks_->Put(options, slice(raw_depth), slice(raw_data));
+    db_blocks_hash_->Put(options, slice(block_hash), slice(raw_depth));
     return true;
 }
 
@@ -230,12 +233,21 @@ bool proto_read(Db* database, txn_guard_ptr txn,
     return true;
 }
 
-protobuf::Block leveldb_common::fetch_proto_block(txn_guard_ptr txn,
-    uint32_t depth)
+protobuf::Block leveldb_common::fetch_proto_block(uint32_t depth)
 {
+    data_chunk raw_depth = uncast_type(depth);
+    std::string value;
+    leveldb::Status status = db_blocks_->Get(
+        leveldb::ReadOptions(), slice(raw_depth), &value);
+    if (!status.ok())
+    {
+        if (!status.IsNotFound())
+            log_fatal() << "Error fetch_proto_block: " << status.ToString();
+        return protobuf::Block();
+    }
+    std::stringstream ss(value);
     protobuf::Block proto_block;
-    //if (!proto_read(db_blocks_, txn, depth, proto_block))
-    //    return protobuf::Block();
+    proto_block.ParseFromIstream(&ss);
     return proto_block;
 }
 
@@ -248,8 +260,7 @@ protobuf::Transaction leveldb_common::fetch_proto_transaction(
     return proto_tx;
 }
 
-protobuf::Block leveldb_common::fetch_proto_block(txn_guard_ptr txn,
-    const hash_digest& block_hash)
+protobuf::Block leveldb_common::fetch_proto_block(const hash_digest& block_hash)
 {
     protobuf::Block proto_block;
     //if (!proto_read(db_blocks_hash_, txn, block_hash, proto_block))

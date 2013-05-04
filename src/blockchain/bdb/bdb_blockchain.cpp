@@ -260,7 +260,6 @@ void bdb_blockchain::import(const message::block& import_block,
 void bdb_blockchain::do_import(const message::block& import_block,
     size_t depth, import_block_handler handle_import)
 {
-    // Save genesis block
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     if (!common_->save_block(txn, depth, import_block))
     {

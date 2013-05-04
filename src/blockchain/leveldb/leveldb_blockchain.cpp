@@ -66,36 +66,6 @@ void leveldb_blockchain::stop()
     google::protobuf::ShutdownProtobufLibrary();
 }
 
-// Because BDB is dumb
-hash_digest second_hash;
-
-int get_block_hash(Db*, const Dbt*, const Dbt* data, Dbt* second_key)
-{
-    std::stringstream ss(std::string(
-        reinterpret_cast<const char*>(data->get_data()), data->get_size()));
-    protobuf::Block proto_block;
-    proto_block.ParseFromIstream(&ss);
-    message::block serial_block = protobuf_to_block_header(proto_block);
-    second_hash = hash_block_header(serial_block);
-    second_key->set_data(second_hash.data());
-    second_key->set_size(second_hash.size());
-    return 0;
-}
-
-int bt_compare_blocks(DB*, const DBT* dbt1, const DBT* dbt2)
-{
-    data_chunk key_data1(dbt1->size), key_data2(dbt2->size);
-    memcpy(key_data1.data(), dbt1->data, dbt1->size);
-    memcpy(key_data2.data(), dbt2->data, dbt2->size);
-    uint32_t depth1 = cast_chunk<uint32_t>(key_data1),
-        depth2 = cast_chunk<uint32_t>(key_data2);
-    if (depth1 < depth2)
-        return -1;
-    else if (depth1 > depth2)
-        return 1;
-    return 0;
-}
-
 bool open_db(const std::string& prefix, const std::string& db_name,
     std::unique_ptr<leveldb::DB>& db, leveldb::Options open_options)
 {
@@ -148,19 +118,18 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
         return false;
     if (!open_db(prefix, "address", db_address_l1, open_options_))
         return false;
-    return true;
-
-    common_ = std::make_shared<leveldb_common>(env_,
-        db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
-
-    orphans_ = std::make_shared<orphans_pool>(20);
-    leveldb_chain_keeper_ptr chainkeeper = 
-        std::make_shared<leveldb_chain_keeper>(common_, env_,
-            db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
-    chain_ = chainkeeper;
-    organize_ = std::make_shared<leveldb_organizer>(
-        common_, orphans_, chainkeeper, reorganize_subscriber_);
-
+    // G++ has an internal compiler error when you use the implicit * cast.
+    common_ = std::make_shared<leveldb_common>(
+        db_blocks_l1.get(), db_blocks_hash_l1.get(),
+        db_txs_l1.get(), db_spends_l1.get(), db_address_l1.get());
+    // Validate and organisation components.
+    //orphans_ = std::make_shared<orphans_pool>(20);
+    //leveldb_chain_keeper_ptr chainkeeper = 
+    //    std::make_shared<leveldb_chain_keeper>(common_, env_,
+    //        db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
+    //chain_ = chainkeeper;
+    //organize_ = std::make_shared<leveldb_organizer>(
+    //    common_, orphans_, chainkeeper, reorganize_subscriber_);
     return true;
 }
 
@@ -209,23 +178,19 @@ void leveldb_blockchain::import(const message::block& import_block,
 void leveldb_blockchain::do_import(const message::block& import_block,
     size_t depth, import_block_handler handle_import)
 {
-    // Save genesis block
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    if (!common_->save_block(txn, depth, import_block))
+    if (!common_->save_block(depth, import_block))
     {
-        txn->abort();
         handle_import(error::operation_failed);
         return;
     }
-    txn->commit();
     handle_import(std::error_code());
 }
 
 template<typename Index>
-bool fetch_block_header_impl(txn_guard_ptr txn, const Index& index,
+bool fetch_block_header_impl(const Index& index,
     leveldb_common_ptr common, message::block& serial_block)
 {
-    protobuf::Block proto_block = common->fetch_proto_block(txn, index);
+    protobuf::Block proto_block = common->fetch_proto_block(index);
     if (!proto_block.IsInitialized())
         return false;
     serial_block = protobuf_to_block_header(proto_block);
@@ -243,15 +208,12 @@ void leveldb_blockchain::fetch_block_header(size_t depth,
 void leveldb_blockchain::fetch_block_header_by_depth(size_t depth,
     fetch_handler_block_header handle_fetch)
 {
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
-    if (!fetch_block_header_impl(txn, depth, common_, serial_block))
+    if (!fetch_block_header_impl(depth, common_, serial_block))
     {
-        txn->abort();
         handle_fetch(error::not_found, message::block());
         return;
     }
-    txn->commit();
     handle_fetch(std::error_code(), serial_block);
 }
 
@@ -266,15 +228,12 @@ void leveldb_blockchain::fetch_block_header(const hash_digest& block_hash,
 void leveldb_blockchain::fetch_block_header_by_hash(
     const hash_digest& block_hash, fetch_handler_block_header handle_fetch)
 {
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     message::block serial_block;
-    if (!fetch_block_header_impl(txn, block_hash, common_, serial_block))
+    if (!fetch_block_header_impl(block_hash, common_, serial_block))
     {
-        txn->abort();
         handle_fetch(error::not_found, message::block());
         return;
     }
-    txn->commit();
     handle_fetch(std::error_code(), serial_block);
 }
 
@@ -282,15 +241,12 @@ template<typename Index, typename Handler>
 void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
     leveldb_common_ptr common, Handler handle_fetch)
 {
-    txn_guard_ptr txn = std::make_shared<txn_guard>(env);
-    protobuf::Block proto_block = common->fetch_proto_block(txn, index);
+    protobuf::Block proto_block = common->fetch_proto_block(index);
     if (!proto_block.IsInitialized())
     {
-        txn->abort();
         handle_fetch(error::not_found, message::inventory_list());
         return;
     }
-    txn->commit();
     message::inventory_list tx_hashes;
     for (const std::string& raw_tx_hash: proto_block.transactions())
     {
