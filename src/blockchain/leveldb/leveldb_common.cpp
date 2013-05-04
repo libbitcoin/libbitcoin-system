@@ -239,13 +239,31 @@ protobuf::Block leveldb_common::fetch_proto_block(uint32_t depth)
     if (!status.ok())
     {
         if (!status.IsNotFound())
-            log_fatal() << "Error fetch_proto_block: " << status.ToString();
+            log_fatal() << "Error fetch_proto_block(" << depth << "): "
+                << status.ToString();
         return protobuf::Block();
     }
     std::stringstream ss(value);
     protobuf::Block proto_block;
     proto_block.ParseFromIstream(&ss);
     return proto_block;
+}
+
+protobuf::Block leveldb_common::fetch_proto_block(const hash_digest& block_hash)
+{
+    std::string value;
+    leveldb::Status status = db_blocks_hash_->Get(
+        leveldb::ReadOptions(), slice(block_hash), &value);
+    if (!status.ok())
+    {
+        if (!status.IsNotFound())
+            log_fatal() << "Error fetch_proto_block(" << block_hash << "): "
+                << status.ToString();
+        return protobuf::Block();
+    }
+    uint32_t depth =
+        cast_chunk<uint32_t>(data_chunk(value.begin(), value.end()));
+    return fetch_proto_block(depth);
 }
 
 protobuf::Transaction leveldb_common::fetch_proto_transaction(
@@ -255,14 +273,6 @@ protobuf::Transaction leveldb_common::fetch_proto_transaction(
     //if (!proto_read(db_txs_, txn, tx_hash, proto_tx))
     //    return protobuf::Transaction();
     return proto_tx;
-}
-
-protobuf::Block leveldb_common::fetch_proto_block(const hash_digest& block_hash)
-{
-    protobuf::Block proto_block;
-    //if (!proto_read(db_blocks_hash_, txn, block_hash, proto_block))
-    //    return protobuf::Block();
-    return proto_block;
 }
 
 bool leveldb_common::reconstruct_block(
