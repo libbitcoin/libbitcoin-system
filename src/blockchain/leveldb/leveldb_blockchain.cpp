@@ -3,6 +3,8 @@
 #include <fstream>
 
 #include <boost/filesystem.hpp>
+#include <leveldb/cache.h>
+#include <leveldb/filter_policy.h>
 
 #include <db_cxx.h>
 
@@ -21,17 +23,6 @@
 
 namespace libbitcoin {
 
-constexpr uint32_t env_flags =
-    DB_CREATE|
-    DB_RECOVER|
-    DB_INIT_LOCK|
-    DB_INIT_LOG|
-    DB_INIT_TXN|
-    DB_INIT_MPOOL|
-    DB_THREAD;
-
-constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
-
 leveldb_blockchain::leveldb_blockchain(async_service& service)
   : async_strand(service)
 {
@@ -48,7 +39,6 @@ leveldb_blockchain::leveldb_blockchain(async_service& service)
 }
 leveldb_blockchain::~leveldb_blockchain()
 {
-    BITCOIN_ASSERT(!env_);
 }
 
 void leveldb_blockchain::start(const std::string& prefix,
@@ -67,53 +57,13 @@ void leveldb_blockchain::stop()
 {
     reorganize_subscriber_->relay(error::service_stopped,
         0, block_list(), block_list());
-    shutdown();
-}
-
-template <typename Database>
-inline void shutdown_database(Database*& database)
-{
-    database->close(0);
-    delete database;
-    database = nullptr;
-}
-void leveldb_blockchain::shutdown()
-{
-    // Initialisation never started
-    if (!env_)
-        return;
-    // Close secondaries before primaries
-    shutdown_database(db_blocks_hash_);
-    // Close primaries
-    shutdown_database(db_blocks_);
-    shutdown_database(db_txs_);
-    shutdown_database(db_spends_);
-    shutdown_database(db_address_);
-    shutdown_database(env_);
+    db_blocks_l1.reset();
+    db_blocks_hash_l1.reset();
+    db_txs_l1.reset();
+    db_spends_l1.reset();
+    db_address_l1.reset();
     // delete
     google::protobuf::ShutdownProtobufLibrary();
-}
-
-bool leveldb_blockchain::setup(const std::string& prefix)
-{
-    async_service fake_service;
-    leveldb_blockchain handle(fake_service);
-    if (!handle.initialize(prefix))
-        return false;
-    handle.db_blocks_->truncate(nullptr, 0, 0);
-    handle.db_txs_->truncate(nullptr, 0, 0);
-    handle.db_spends_->truncate(nullptr, 0, 0);
-    handle.db_address_->truncate(nullptr, 0, 0);
-    // Save genesis block
-    txn_guard_ptr txn = std::make_shared<txn_guard>(handle.env_);
-    if (!handle.common_->save_block(txn, 0, genesis_block()))
-    {
-        txn->abort();
-        return false;
-    }
-    txn->commit();
-    handle.shutdown();
-    return true;
 }
 
 // Because BDB is dumb
@@ -146,11 +96,30 @@ int bt_compare_blocks(DB*, const DBT* dbt1, const DBT* dbt2)
     return 0;
 }
 
+bool open_db(const std::string& prefix, const std::string& db_name,
+    std::unique_ptr<leveldb::DB>& db, leveldb::Options open_options)
+{
+    using boost::filesystem::path;
+    path db_path = path(prefix) / db_name;
+    leveldb::DB* db_base_ptr = nullptr;
+    leveldb::Status status =
+        leveldb::DB::Open(open_options, db_path.native(), &db_base_ptr);
+    if (!status.ok())
+    {
+        log_fatal() << "Internal error opening '" << db_name << "' database: "
+            << status.ToString();
+        return false;
+    }
+    // The cointainer ensures db_base_ptr is now managed.
+    db.reset(db_base_ptr);
+    return true;
+}
+
 bool leveldb_blockchain::initialize(const std::string& prefix)
 {
+    using boost::filesystem::path;
     // Try to lock the directory first
-    boost::filesystem::path lock_path = prefix;
-    lock_path = lock_path / "db-lock";
+    path lock_path = path(prefix) / "db-lock";
     std::ofstream touch_file(lock_path.native(), std::ios::app);
     touch_file.close();
     flock_ = lock_path.c_str();
@@ -161,45 +130,25 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     }
     // Continue on
     GOOGLE_PROTOBUF_VERIFY_VERSION;
-    env_ = new DbEnv(DB_CXX_NO_EXCEPTIONS);
-    env_->set_lk_max_locks(10000);
-    env_->set_lk_max_objects(10000);
-    env_->set_cachesize(1, 0, 1);
-    if (env_->open(prefix.c_str(), env_flags, 0) != 0)
+    // Open LevelDB databases
+    const size_t cache_size = 1 << 20;
+    open_options_.block_cache = leveldb::NewLRUCache(cache_size / 2);
+    open_options_.write_buffer_size = cache_size / 4;
+    open_options_.filter_policy = leveldb::NewBloomFilterPolicy(10);
+    open_options_.compression = leveldb::kNoCompression;
+    open_options_.max_open_files = 64;
+    open_options_.create_if_missing = true;
+    if (!open_db(prefix, "blocks", db_blocks_l1, open_options_))
         return false;
-    if (env_->set_flags(DB_TXN_NOSYNC, 1) != 0)
+    if (!open_db(prefix, "blocks_hash", db_blocks_hash_l1, open_options_))
         return false;
-    // Create database objects
-    db_blocks_ = new Db(env_, 0);
-    db_blocks_hash_ = new Db(env_, 0);
-    db_txs_ = new Db(env_, 0);
-    db_spends_ = new Db(env_, 0);
-    db_address_ = new Db(env_, 0);
-    if (db_blocks_->set_bt_compare(bt_compare_blocks) != 0)
-    {
-        log_fatal() << "Internal error setting BTREE comparison function";
+    if (!open_db(prefix, "txs", db_txs_l1, open_options_))
         return false;
-    }
-    txn_guard txn(env_);
-    if (db_blocks_->open(txn.get(), "blocks", "block-data",
-            DB_BTREE, db_flags, 0) != 0)
+    if (!open_db(prefix, "spends", db_spends_l1, open_options_))
         return false;
-    if (db_blocks_hash_->open(txn.get(), "blocks", "block-hash", 
-            DB_BTREE, db_flags, 0) != 0)
+    if (!open_db(prefix, "address", db_address_l1, open_options_))
         return false;
-    db_blocks_->associate(txn.get(), db_blocks_hash_, get_block_hash, 0);
-    if (db_txs_->open(txn.get(), "transactions", "tx",
-            DB_BTREE, db_flags, 0) != 0)
-        return false;
-    if (db_spends_->open(txn.get(), "transactions", "spends",
-            DB_BTREE, db_flags, 0) != 0)
-        return false;
-    if (db_address_->set_flags(DB_DUP) != 0)
-        return false;
-    if (db_address_->open(txn.get(), "address", "address",
-            DB_BTREE, db_flags, 0) != 0)
-        return false;
-    txn.commit();
+    return true;
 
     common_ = std::make_shared<leveldb_common>(env_,
         db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);

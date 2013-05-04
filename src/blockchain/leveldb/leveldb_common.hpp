@@ -18,8 +18,8 @@ namespace libbitcoin {
 class leveldb_common
 {
 public:
-    leveldb_common(DbEnv* env, Db* db_blocks, Db* db_blocks_hash,
-        Db* db_txs, Db* db_spends, Db* db_address);
+    leveldb_common(leveldb::DB* db_blocks, leveldb::DB* db_blocks_hash,
+        leveldb::DB* db_txs, leveldb::DB* db_spends, leveldb::DB* db_address);
 
     uint32_t find_last_block_depth(txn_guard_ptr txn);
     bool fetch_spend(txn_guard_ptr txn,
@@ -54,12 +54,11 @@ private:
     bool rewrite_transaction(txn_guard_ptr txn, const hash_digest& tx_hash,
         const protobuf::Transaction& replace_proto_tx);
 
-    DbEnv* env_;
-    Db* db_blocks_;
-    Db* db_blocks_hash_;
-    Db* db_txs_;
-    Db* db_spends_;
-    Db* db_address_;
+    leveldb::DB* db_blocks_;
+    leveldb::DB* db_blocks_hash_;
+    leveldb::DB* db_txs_;
+    leveldb::DB* db_spends_;
+    leveldb::DB* db_address_;
 };
 
 typedef std::shared_ptr<leveldb_common> leveldb_common_ptr;
