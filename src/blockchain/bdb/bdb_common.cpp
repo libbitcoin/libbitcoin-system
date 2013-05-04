@@ -36,7 +36,7 @@ bool bdb_common::fetch_spend(txn_guard_ptr txn,
     message::input_point& input_spend)
 {
     readable_data_type search_spend;
-    search_spend.set(create_spent_key(spent_output));
+    search_spend.set(bdb_create_spent_key(spent_output));
     writable_data_type raw_spend;
     if (db_spends_->get(txn->get(), search_spend.get(),
             raw_spend.get(), 0) != 0)
@@ -51,8 +51,8 @@ bool bdb_common::fetch_spend(txn_guard_ptr txn,
 bool bdb_common::save_block(txn_guard_ptr txn,
     uint32_t depth, const message::block& serial_block)
 {
-    protobuf::Block proto_block =
-        block_header_to_protobuf(depth, serial_block);
+    proto::Block proto_block =
+        block_header_to_proto(depth, serial_block);
     for (uint32_t tx_index = 0;
         tx_index < serial_block.transactions.size(); ++tx_index)
     {
@@ -91,10 +91,10 @@ bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
     if (dupli_save(txn, tx_hash, block_depth, tx_index))
         return true;
     // Actually add block
-    protobuf::Transaction proto_tx = transaction_to_protobuf(block_tx);
+    proto::Transaction proto_tx = transaction_to_proto(block_tx);
     proto_tx.set_is_coinbase(is_coinbase(block_tx));
     // Add parent block to transaction
-    protobuf::Transaction_BlockPointer* proto_parent = proto_tx.add_parent();
+    proto::Transaction_BlockPointer* proto_parent = proto_tx.add_parent();
     proto_parent->set_depth(block_depth);
     proto_parent->set_index(tx_index);
     // Save tx to bdb
@@ -132,11 +132,11 @@ bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
 bool bdb_common::dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
     uint32_t block_depth, uint32_t tx_index)
 {
-    protobuf::Transaction proto_tx = fetch_proto_transaction(txn, tx_hash);
+    proto::Transaction proto_tx = fetch_proto_transaction(txn, tx_hash);
     if (!proto_tx.IsInitialized())
         return false;
     BITCOIN_ASSERT(block_depth == 91842 || block_depth == 91880);
-    protobuf::Transaction::BlockPointer* parent = proto_tx.add_parent();
+    proto::Transaction::BlockPointer* parent = proto_tx.add_parent();
     parent->set_depth(block_depth);
     parent->set_index(tx_index);
     return rewrite_transaction(txn, tx_hash, proto_tx);
@@ -147,8 +147,8 @@ bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
     const message::input_point& current_input)
 {
     readable_data_type spent_key, spend_value;
-    spent_key.set(create_spent_key(previous_output));
-    spend_value.set(create_spent_key(current_input));
+    spent_key.set(bdb_create_spent_key(previous_output));
+    spend_value.set(bdb_create_spent_key(current_input));
     if (db_spends_->put(txn->get(), spent_key.get(), spend_value.get(),
             DB_NOOVERWRITE) != 0)
         return false;
@@ -158,12 +158,12 @@ bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
 bool bdb_common::add_address(txn_guard_ptr txn,
     const script& output_script, const message::output_point& outpoint)
 {
-    data_chunk raw_address = create_address_key(output_script);
+    data_chunk raw_address = bdb_create_address_key(output_script);
     if (raw_address.empty())
         return true;
     readable_data_type address_key, output_value;
     address_key.set(raw_address);
-    output_value.set(create_spent_key(outpoint));
+    output_value.set(bdb_create_spent_key(outpoint));
     if (db_address_->put(txn->get(), address_key.get(),
             output_value.get(), 0) != 0)
         return false;
@@ -171,7 +171,7 @@ bool bdb_common::add_address(txn_guard_ptr txn,
 }
 
 bool bdb_common::rewrite_transaction(txn_guard_ptr txn,
-    const hash_digest& tx_hash, const protobuf::Transaction& replace_proto_tx)
+    const hash_digest& tx_hash, const proto::Transaction& replace_proto_tx)
 {
     // Now rewrite tx
     // First delete old
@@ -211,49 +211,49 @@ bool proto_read(Db* database, txn_guard_ptr txn,
     return true;
 }
 
-protobuf::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,
+proto::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,
     uint32_t depth)
 {
-    protobuf::Block proto_block;
+    proto::Block proto_block;
     if (!proto_read(db_blocks_, txn, depth, proto_block))
-        return protobuf::Block();
+        return proto::Block();
     return proto_block;
 }
 
-protobuf::Transaction bdb_common::fetch_proto_transaction(
+proto::Transaction bdb_common::fetch_proto_transaction(
     txn_guard_ptr txn, const hash_digest& tx_hash)
 {
-    protobuf::Transaction proto_tx;
+    proto::Transaction proto_tx;
     if (!proto_read(db_txs_, txn, tx_hash, proto_tx))
-        return protobuf::Transaction();
+        return proto::Transaction();
     return proto_tx;
 }
 
-protobuf::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,
+proto::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,
     const hash_digest& block_hash)
 {
-    protobuf::Block proto_block;
+    proto::Block proto_block;
     if (!proto_read(db_blocks_hash_, txn, block_hash, proto_block))
-        return protobuf::Block();
+        return proto::Block();
     return proto_block;
 }
 
 bool bdb_common::reconstruct_block(txn_guard_ptr txn,
-    const protobuf::Block& proto_block_header,
+    const proto::Block& proto_block_header,
     message::block& result_block)
 {
-    result_block = protobuf_to_block_header(proto_block_header);
+    result_block = proto_to_block_header(proto_block_header);
     for (const std::string& raw_tx_hash: proto_block_header.transactions())
     {
-        protobuf::Transaction proto_tx;
+        proto::Transaction proto_tx;
         if (!proto_read(db_txs_, txn, raw_tx_hash, proto_tx))
             return false;
-        result_block.transactions.push_back(protobuf_to_transaction(proto_tx));
+        result_block.transactions.push_back(proto_to_transaction(proto_tx));
     }
     return true;
 }
 
-data_chunk create_address_key(const script& output_script)
+data_chunk bdb_create_address_key(const script& output_script)
 {
     payment_address address;
     if (!extract(address, output_script))

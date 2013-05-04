@@ -8,6 +8,8 @@ struct protobuf_shutdown
 {
     ~protobuf_shutdown()
     {
+        // Use this class because protobuf may be used elsewhere.
+        // Shutdown should happen on process exit.
         google::protobuf::ShutdownProtobufLibrary();
     }
 } protobuf_shutdown_inst;

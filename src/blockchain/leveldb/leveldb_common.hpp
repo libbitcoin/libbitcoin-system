@@ -8,7 +8,6 @@
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/serializer.hpp>
 
-#include "data_type.hpp"
 #include "protobuf_wrapper.hpp"
 
 namespace libbitcoin {

@@ -17,7 +17,6 @@
 #include "leveldb_common.hpp"
 #include "leveldb_chain_keeper.hpp"
 #include "leveldb_organizer.hpp"
-#include "data_type.hpp"
 #include "protobuf_wrapper.hpp"
 
 namespace libbitcoin {
@@ -25,14 +24,6 @@ namespace libbitcoin {
 leveldb_blockchain::leveldb_blockchain(async_service& service)
   : async_strand(service)
 {
-#ifndef CXX_COMPAT
-    env_ = nullptr;
-    db_blocks_ = nullptr;
-    db_blocks_hash_ = nullptr;
-    db_txs_ = nullptr;
-    db_spends_ = nullptr;
-    db_address_ = nullptr;
-#endif
     reorganize_subscriber_ =
         std::make_shared<reorganize_subscriber_type>(service);
 }
@@ -56,13 +47,11 @@ void leveldb_blockchain::stop()
 {
     reorganize_subscriber_->relay(error::service_stopped,
         0, block_list(), block_list());
-    db_blocks_l1.reset();
-    db_blocks_hash_l1.reset();
-    db_txs_l1.reset();
-    db_spends_l1.reset();
-    db_address_l1.reset();
-    // delete
-    google::protobuf::ShutdownProtobufLibrary();
+    db_blocks_.reset();
+    db_blocks_hash_.reset();
+    db_txs_.reset();
+    db_spends_.reset();
+    db_address_.reset();
 }
 
 bool open_db(const std::string& prefix, const std::string& db_name,
@@ -97,7 +86,7 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
         // Database already opened elsewhere
         return false;
     }
-    // Continue on
+    // Protobuf initial check
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     // Open LevelDB databases
     const size_t cache_size = 1 << 20;
@@ -107,20 +96,20 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     open_options_.compression = leveldb::kNoCompression;
     open_options_.max_open_files = 64;
     open_options_.create_if_missing = true;
-    if (!open_db(prefix, "blocks", db_blocks_l1, open_options_))
+    if (!open_db(prefix, "blocks", db_blocks_, open_options_))
         return false;
-    if (!open_db(prefix, "blocks_hash", db_blocks_hash_l1, open_options_))
+    if (!open_db(prefix, "blocks_hash", db_blocks_hash_, open_options_))
         return false;
-    if (!open_db(prefix, "txs", db_txs_l1, open_options_))
+    if (!open_db(prefix, "txs", db_txs_, open_options_))
         return false;
-    if (!open_db(prefix, "spends", db_spends_l1, open_options_))
+    if (!open_db(prefix, "spends", db_spends_, open_options_))
         return false;
-    if (!open_db(prefix, "address", db_address_l1, open_options_))
+    if (!open_db(prefix, "address", db_address_, open_options_))
         return false;
     // G++ has an internal compiler error when you use the implicit * cast.
     common_ = std::make_shared<leveldb_common>(
-        db_blocks_l1.get(), db_blocks_hash_l1.get(),
-        db_txs_l1.get(), db_spends_l1.get(), db_address_l1.get());
+        db_blocks_.get(), db_blocks_hash_.get(),
+        db_txs_.get(), db_spends_.get(), db_address_.get());
     // Validate and organisation components.
     //orphans_ = std::make_shared<orphans_pool>(20);
     //leveldb_chain_keeper_ptr chainkeeper = 
@@ -158,13 +147,6 @@ void leveldb_blockchain::do_store(const message::block& stored_block,
     }
     organize_->start();
     handle_store(stored_detail->errc(), stored_detail->info());
-    // Every N blocks, we flush database
-    static size_t flush_counter = 0;
-    if (++flush_counter == 2000)
-    {
-        env_->txn_checkpoint(0, 0, 0);
-        flush_counter = 0;
-    }
 }
 
 void leveldb_blockchain::import(const message::block& import_block,
@@ -405,7 +387,7 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
     data_chunk raw_address = serial.data();
     // Fetch outpoints as contiguous block.
     std::string outpoints;
-    leveldb::Status status = db_address_l1->Get(
+    leveldb::Status status = db_address_->Get(
         leveldb::ReadOptions(), slice(raw_address), &outpoints);
     if (!status.ok())
     {

@@ -10,9 +10,6 @@
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/async_service.hpp>
 
-class Db;
-class DbEnv;
-
 namespace libbitcoin {
 
 class leveldb_common;
@@ -104,28 +101,12 @@ private:
 
     boost::interprocess::file_lock flock_;
 
-#ifdef CXX_COMPAT
-    DbEnv* env_ = nullptr;
-    Db* db_blocks_ = nullptr;
-    Db* db_blocks_hash_ = nullptr;
-    Db* db_txs_ = nullptr;
-    Db* db_spends_ = nullptr;
-    Db* db_address_ = nullptr;
-#else
-    DbEnv* env_;
-    Db* db_blocks_;
-    Db* db_blocks_hash_;
-    Db* db_txs_;
-    Db* db_spends_;
-    Db* db_address_;
-#endif
-
     leveldb::Options open_options_;
-    database_ptr db_blocks_l1;
-    database_ptr db_blocks_hash_l1;
-    database_ptr db_txs_l1;
-    database_ptr db_spends_l1;
-    database_ptr db_address_l1;
+    database_ptr db_blocks_;
+    database_ptr db_blocks_hash_;
+    database_ptr db_txs_;
+    database_ptr db_spends_;
+    database_ptr db_address_;
 
     leveldb_common_ptr common_;
 

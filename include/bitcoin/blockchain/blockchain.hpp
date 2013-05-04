@@ -113,6 +113,8 @@ public:
 
     /**
      * Store a new block directly without validating it.
+     * No checks are done. Importing an already stored block
+     * is undefined.
      *
      * @param[in]   import_block    Block to store
      * @param[in]   depth           Depth of block

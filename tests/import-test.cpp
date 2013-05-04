@@ -52,9 +52,10 @@ int main()
 {
     bdb_blockchain::setup("database-copy");
     async_service service(1);
-    bdb_blockchain chain_1(service), chain_2(service);
+    bdb_blockchain chain_1(service);
+    leveldb_blockchain chain_2(service);
     chain_1.start("database", blockchain_started);
-    chain_2.start("database-copy", blockchain_started);
+    chain_2.start("/home/genjix/tmp/lvldb/database", blockchain_started);
     const size_t start_depth = 1;
     fetch_block(chain_1, start_depth,
         std::bind(copy_block, _1, _2, start_depth, &chain_1, &chain_2));

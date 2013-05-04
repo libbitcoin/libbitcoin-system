@@ -123,9 +123,9 @@ int get_block_hash(Db*, const Dbt*, const Dbt* data, Dbt* second_key)
 {
     std::stringstream ss(std::string(
         reinterpret_cast<const char*>(data->get_data()), data->get_size()));
-    protobuf::Block proto_block;
+    proto::Block proto_block;
     proto_block.ParseFromIstream(&ss);
-    message::block serial_block = protobuf_to_block_header(proto_block);
+    message::block serial_block = proto_to_block_header(proto_block);
     second_hash = hash_block_header(serial_block);
     second_key->set_data(second_hash.data());
     second_key->set_size(second_hash.size());
@@ -275,10 +275,10 @@ template<typename Index>
 bool fetch_block_header_impl(txn_guard_ptr txn, const Index& index,
     bdb_common_ptr common, message::block& serial_block)
 {
-    protobuf::Block proto_block = common->fetch_proto_block(txn, index);
+    proto::Block proto_block = common->fetch_proto_block(txn, index);
     if (!proto_block.IsInitialized())
         return false;
-    serial_block = protobuf_to_block_header(proto_block);
+    serial_block = proto_to_block_header(proto_block);
     return true;
 } 
 
@@ -333,7 +333,7 @@ void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
     bdb_common_ptr common, Handler handle_fetch)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env);
-    protobuf::Block proto_block = common->fetch_proto_block(txn, index);
+    proto::Block proto_block = common->fetch_proto_block(txn, index);
     if (!proto_block.IsInitialized())
     {
         txn->abort();
@@ -432,7 +432,7 @@ void bdb_blockchain::do_fetch_transaction(const hash_digest& transaction_hash,
     fetch_handler_transaction handle_fetch)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    protobuf::Transaction proto_tx =
+    proto::Transaction proto_tx =
         common_->fetch_proto_transaction(txn, transaction_hash);
     txn->commit();
     if (!proto_tx.IsInitialized())
@@ -440,7 +440,7 @@ void bdb_blockchain::do_fetch_transaction(const hash_digest& transaction_hash,
         handle_fetch(error::not_found, message::transaction());
         return;
     }
-    message::transaction tx = protobuf_to_transaction(proto_tx);
+    message::transaction tx = proto_to_transaction(proto_tx);
     handle_fetch(std::error_code(), tx);
 }
 
@@ -457,7 +457,7 @@ void bdb_blockchain::do_fetch_transaction_index(
     fetch_handler_transaction_index handle_fetch)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    protobuf::Transaction proto_tx =
+    proto::Transaction proto_tx =
         common_->fetch_proto_transaction(txn, transaction_hash);
     txn->commit();
     if (!proto_tx.IsInitialized())

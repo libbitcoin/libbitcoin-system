@@ -72,7 +72,7 @@ big_number bdb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
         data_chunk raw_object = value->data();
         std::copy(raw_object.begin(), raw_object.end(),
             std::ostream_iterator<byte>(ss));
-        protobuf::Block proto_block;
+        proto::Block proto_block;
         proto_block.ParseFromIstream(&ss);
         total_work += block_work(proto_block.bits());
         value = std::make_shared<writable_data_type>();
@@ -97,13 +97,13 @@ bool bdb_chain_keeper::end_slice(size_t slice_begin_index,
     {
         // Read raw value from bdb
         data_chunk raw_object = value->data();
-        // Construct protobuf header from stringstream
+        // Construct proto header from stringstream
         std::stringstream ss;
         std::copy(raw_object.begin(), raw_object.end(),
             std::ostream_iterator<byte>(ss));
-        protobuf::Block proto_block;
+        proto::Block proto_block;
         proto_block.ParseFromIstream(&ss);
-        // Convert protobuf block header into actual block
+        // Convert proto block header into actual block
         message::block sliced_block;
         if (!common_->reconstruct_block(txn_, proto_block, sliced_block))
             return false;
@@ -162,7 +162,7 @@ bool bdb_chain_keeper::remove_spend(
     const message::input_point& current_input)
 {
     readable_data_type spent_key;
-    spent_key.set(create_spent_key(previous_output));
+    spent_key.set(bdb_create_spent_key(previous_output));
     int ret = db_spends_->del(txn_->get(), spent_key.get(), 0);
     if (ret != 0 && ret != DB_NOTFOUND)
         return false;
@@ -172,12 +172,12 @@ bool bdb_chain_keeper::remove_spend(
 bool bdb_chain_keeper::remove_address(const script& output_script,
     const message::output_point& outpoint)
 {
-    data_chunk raw_address = create_address_key(output_script);
+    data_chunk raw_address = bdb_create_address_key(output_script);
     if (raw_address.empty())
         return true;
     readable_data_type address_key, output_value;
     address_key.set(raw_address);
-    output_value.set(create_spent_key(outpoint));
+    output_value.set(bdb_create_spent_key(outpoint));
     // Perform the actual delete
     Dbc* cursor;
     db_address_->cursor(txn_->get(), &cursor, 0);

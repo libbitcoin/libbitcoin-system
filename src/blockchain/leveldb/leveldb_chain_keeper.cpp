@@ -5,7 +5,6 @@
 #include <bitcoin/transaction.hpp>
 
 #include "leveldb_common.hpp"
-#include "data_type.hpp"
 #include "protobuf_wrapper.hpp"
 
 namespace libbitcoin {
@@ -36,6 +35,7 @@ void leveldb_chain_keeper::add(block_detail_ptr incoming_block)
 
 int leveldb_chain_keeper::find_index(const hash_digest& search_block_hash)
 {
+#if 0
     readable_data_type key;
     key.set(search_block_hash);
     writable_data_type primary_key;
@@ -47,11 +47,14 @@ int leveldb_chain_keeper::find_index(const hash_digest& search_block_hash)
     }
     uint32_t depth = cast_chunk<uint32_t>(primary_key.data());
     return depth;
+#endif
+    return 0;
 }
 
 big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 {
     big_number total_work;
+#if 0
     Dbc* cursor;
     //db_blocks_->cursor(txn_->get(), &cursor, 0);
     // Our key/value pair
@@ -74,12 +77,14 @@ big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
         value = std::make_shared<writable_data_type>();
     }
     while (cursor->get(key.get(), value->get(), DB_NEXT) == 0);
+#endif
     return total_work;
 }
 
 bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
     block_detail_list& sliced_blocks)
 {
+#if 0
     Dbc* cursor;
     //db_blocks_->cursor(txn_->get(), &cursor, 0);
     readable_data_type key;
@@ -118,12 +123,14 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
         value = std::make_shared<writable_data_type>();
     }
     while (cursor->get(key.get(), value->get(), DB_NEXT) == 0);
+#endif
     return true;
 }
 
 bool leveldb_chain_keeper::clear_transaction_data(
     const message::transaction& remove_tx)
 {
+#if 0
     const hash_digest& tx_hash = hash_transaction(remove_tx);
     readable_data_type del_tx_key;
     del_tx_key.set(tx_hash);
@@ -150,6 +157,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
         if (!remove_address(output.output_script, {tx_hash, output_index}))
             return false;
     }
+#endif
     return true;
 }
 
@@ -157,18 +165,21 @@ bool leveldb_chain_keeper::remove_spend(
     const message::output_point& previous_output,
     const message::input_point& current_input)
 {
+#if 0
     readable_data_type spent_key;
     //spent_key.set(create_spent_key(previous_output));
     //int ret = db_spends_->del(txn_->get(), spent_key.get(), 0);
     int ret = 0;
     if (ret != 0 && ret != DB_NOTFOUND)
         return false;
+#endif
     return true;
 }
 
 bool leveldb_chain_keeper::remove_address(const script& output_script,
     const message::output_point& outpoint)
 {
+#if 0
     data_chunk raw_address = create_address_key(output_script);
     if (raw_address.empty())
         return true;
@@ -184,6 +195,7 @@ bool leveldb_chain_keeper::remove_address(const script& output_script,
     if (cursor->del(0) != 0)
         return false;
     cursor->close();
+#endif
     return true;
 }
 

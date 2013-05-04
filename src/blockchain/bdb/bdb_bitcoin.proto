@@ -1,4 +1,4 @@
-package protobuf;
+package proto;
 
 message Block {
     required uint32 depth = 2;

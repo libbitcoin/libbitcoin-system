@@ -26,7 +26,7 @@ message::block bdb_validate_block::fetch_block(size_t fetch_depth)
         BITCOIN_ASSERT(orphan_index_ < orphan_chain_.size());
         return orphan_chain_[fetch_index]->actual();
     }
-    protobuf::Block proto_block =
+    proto::Block proto_block =
         common_->fetch_proto_block(txn_, fetch_depth);
     BITCOIN_ASSERT(proto_block.IsInitialized());
     // We only convert the fields we actually need
@@ -61,7 +61,7 @@ uint64_t bdb_validate_block::median_time_past()
     return times[times.size() / 2];
 }
 
-bool tx_after_fork(const protobuf::Transaction& proto_tx, size_t fork_index)
+bool tx_after_fork(const proto::Transaction& proto_tx, size_t fork_index)
 {
     for (auto parent: proto_tx.parent())
         if (parent.depth() > fork_index)
@@ -71,7 +71,7 @@ bool tx_after_fork(const protobuf::Transaction& proto_tx, size_t fork_index)
 
 bool bdb_validate_block::transaction_exists(const hash_digest& tx_hash)
 {
-    protobuf::Transaction proto_tx =
+    proto::Transaction proto_tx =
         common_->fetch_proto_transaction(txn_, tx_hash);
     if (!proto_tx.IsInitialized())
         return false;
@@ -84,7 +84,7 @@ bool bdb_validate_block::is_output_spent(const message::output_point& outpoint)
     if (!common_->fetch_spend(txn_, outpoint, input_spend))
         return false;
     // Lookup block depth
-    protobuf::Transaction proto_tx =
+    proto::Transaction proto_tx =
         common_->fetch_proto_transaction(txn_, input_spend.hash);
     return !tx_after_fork(proto_tx, fork_index_);
 }
@@ -92,7 +92,7 @@ bool bdb_validate_block::is_output_spent(const message::output_point& outpoint)
 bool bdb_validate_block::fetch_transaction(message::transaction& tx, 
     size_t& tx_depth, const hash_digest& tx_hash)
 {
-    protobuf::Transaction proto_tx =
+    proto::Transaction proto_tx =
         common_->fetch_proto_transaction(txn_, tx_hash);
     if (!proto_tx.IsInitialized() || tx_after_fork(proto_tx, fork_index_))
     {
@@ -101,7 +101,7 @@ bool bdb_validate_block::fetch_transaction(message::transaction& tx,
         return true;
     }
     BITCOIN_ASSERT(proto_tx.parent_size() > 0);
-    tx = protobuf_to_transaction(proto_tx);
+    tx = proto_to_transaction(proto_tx);
     tx_depth = proto_tx.parent(0).depth();
     return true;
 }
