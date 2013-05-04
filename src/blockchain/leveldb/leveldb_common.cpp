@@ -26,19 +26,14 @@ leveldb_common::leveldb_common(leveldb::DB* db_blocks,
 
 uint32_t leveldb_common::find_last_block_depth()
 {
-#ifdef FOOOOOOOOOO
-    Dbc* cursor;
-    //db_blocks_->cursor(txn->get(), &cursor, 0);
-    BITCOIN_ASSERT(cursor != nullptr);
-    writable_data_type key, data;
-    if (cursor->get(key.get(), data.get(), DB_LAST) == DB_NOTFOUND)
+    leveldb::Iterator* it = db_blocks_->NewIterator(leveldb::ReadOptions());
+    it->SeekToLast();
+    if (!it->Valid() || !it->status().ok())
         return std::numeric_limits<uint32_t>::max();
-    BITCOIN_ASSERT(key.get()->get_size() == 4);
-    uint32_t last_block_depth = cast_chunk<uint32_t>(key.data());
-    cursor->close();
-    return last_block_depth;
-#endif
-    return 0;
+    BITCOIN_ASSERT(it->key().size() == 4);
+    const uint8_t* start = reinterpret_cast<const uint8_t*>(it->key().data());
+    const uint8_t* end = start + it->key().size();
+    return cast_chunk<uint32_t>(data_chunk(start, end));
 }
 
 bool leveldb_common::fetch_spend(const message::output_point& spent_output,
