@@ -5,12 +5,15 @@
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
+#include <bitcoin/format.hpp>
 #include <bitcoin/messages.hpp>
 #include <bitcoin/utility/serializer.hpp>
 
 #include "protobuf_wrapper.hpp"
 
 namespace libbitcoin {
+
+typedef std::unique_ptr<leveldb::Iterator> leveldb_iterator;
 
 class leveldb_common
 {
@@ -67,6 +70,14 @@ leveldb::Slice slice(const Data& data)
 {
     return leveldb::Slice(
         reinterpret_cast<const char*>(data.data()), data.size());
+}
+
+template <typename Data>
+uint32_t recreate_depth(const Data& raw_data)
+{
+    const uint8_t* start = reinterpret_cast<const uint8_t*>(raw_data.data());
+    const uint8_t* end = start + raw_data.size();
+    return cast_chunk<uint32_t>(data_chunk(start, end));
 }
 
 // Used also by leveldb_chain_keeper when deleting spends + addresses

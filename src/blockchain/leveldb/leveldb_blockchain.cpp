@@ -1,12 +1,10 @@
 #include <bitcoin/blockchain/leveldb_blockchain.hpp>
 
 #include <fstream>
-
 #include <boost/filesystem.hpp>
 #include <leveldb/cache.h>
+#include <leveldb/comparator.h>
 #include <leveldb/filter_policy.h>
-
-#include <db_cxx.h>
 
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
@@ -21,6 +19,34 @@
 
 namespace libbitcoin {
 
+class depth_comparator
+  : public leveldb::Comparator
+{
+public:
+    int Compare(const leveldb::Slice& a, const leveldb::Slice& b) const;
+
+    const char* Name() const;
+    void FindShortestSeparator(std::string*, const leveldb::Slice&) const {}
+    void FindShortSuccessor(std::string*) const {}
+};
+
+int depth_comparator::Compare(
+    const leveldb::Slice& a, const leveldb::Slice& b) const
+{
+    uint32_t depth_a = recreate_depth(a), depth_b = recreate_depth(b);
+    if (depth_a < depth_b)
+        return -1;
+    else if (depth_a > depth_b)
+        return +1;
+    // a == b
+    return 0;
+}
+
+const char* depth_comparator::Name() const
+{
+    return "depth_comparator";
+}
+
 leveldb_blockchain::leveldb_blockchain(async_service& service)
   : async_strand(service)
 {
@@ -29,6 +55,8 @@ leveldb_blockchain::leveldb_blockchain(async_service& service)
 }
 leveldb_blockchain::~leveldb_blockchain()
 {
+    delete open_options_.block_cache;
+    delete open_options_.filter_policy;
 }
 
 void leveldb_blockchain::start(const std::string& prefix,
@@ -43,15 +71,21 @@ void leveldb_blockchain::start(const std::string& prefix,
                 handle_start(error::operation_failed);
         });
 }
+
+void close(std::unique_ptr<leveldb::DB>& db)
+{
+    // delete the database, closing it.
+    db.reset();
+}
 void leveldb_blockchain::stop()
 {
     reorganize_subscriber_->relay(error::service_stopped,
         0, block_list(), block_list());
-    db_blocks_.reset();
-    db_blocks_hash_.reset();
-    db_txs_.reset();
-    db_spends_.reset();
-    db_address_.reset();
+    close(db_blocks_);
+    close(db_blocks_hash_);
+    close(db_txs_);
+    close(db_spends_);
+    close(db_address_);
 }
 
 bool open_db(const std::string& prefix, const std::string& db_name,
@@ -88,15 +122,21 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     }
     // Protobuf initial check
     GOOGLE_PROTOBUF_VERIFY_VERSION;
+    // Create comparator for blocks database.
+    depth_comparator_.reset(new depth_comparator);
     // Open LevelDB databases
     const size_t cache_size = 1 << 20;
+    // block_cache, filter_policy and comparator must be deleted after use!
     open_options_.block_cache = leveldb::NewLRUCache(cache_size / 2);
     open_options_.write_buffer_size = cache_size / 4;
     open_options_.filter_policy = leveldb::NewBloomFilterPolicy(10);
     open_options_.compression = leveldb::kNoCompression;
     open_options_.max_open_files = 64;
     open_options_.create_if_missing = true;
-    if (!open_db(prefix, "blocks", db_blocks_, open_options_))
+    // The blocks database options needs its depth comparator too.
+    leveldb::Options blocks_open_options = open_options_;
+    blocks_open_options.comparator = depth_comparator_.get();
+    if (!open_db(prefix, "blocks", db_blocks_, blocks_open_options))
         return false;
     if (!open_db(prefix, "blocks_hash", db_blocks_hash_, open_options_))
         return false;

@@ -75,6 +75,7 @@ public:
 
 private:
     typedef std::unique_ptr<leveldb::DB> database_ptr;
+    typedef std::unique_ptr<leveldb::Comparator> comparator_ptr;
 
     bool initialize(const std::string& prefix);
 
@@ -101,15 +102,25 @@ private:
 
     boost::interprocess::file_lock flock_;
 
+    // Comparator to order blocks by depth logically.
+    // Otherwise the last block in the database
+    // might not be the largest depth in our blockchain.
+    comparator_ptr depth_comparator_;
     leveldb::Options open_options_;
+
+    // Blocks indexed by depth.
     database_ptr db_blocks_;
+    // Block depths indexed by hash (a secondary lookup table).
     database_ptr db_blocks_hash_;
+    // Transactions indexed by hash.
     database_ptr db_txs_;
+    // Lookup whether an output point is spent.
+    // Value is the input point spend.
     database_ptr db_spends_;
+    // Address to list of output points.
     database_ptr db_address_;
 
     leveldb_common_ptr common_;
-
     // Organize stuff
     orphans_pool_ptr orphans_;
     chain_keeper_ptr chain_;

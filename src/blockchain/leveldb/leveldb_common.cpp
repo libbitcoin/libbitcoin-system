@@ -1,7 +1,6 @@
 #include "leveldb_common.hpp"
 
 #include <bitcoin/block.hpp>
-#include <bitcoin/format.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/address.hpp>
 #include <bitcoin/utility/assert.hpp>
@@ -19,14 +18,12 @@ leveldb_common::leveldb_common(leveldb::DB* db_blocks,
 
 uint32_t leveldb_common::find_last_block_depth()
 {
-    leveldb::Iterator* it = db_blocks_->NewIterator(leveldb::ReadOptions());
+    leveldb_iterator it(db_blocks_->NewIterator(leveldb::ReadOptions()));
     it->SeekToLast();
     if (!it->Valid() || !it->status().ok())
         return std::numeric_limits<uint32_t>::max();
     BITCOIN_ASSERT(it->key().size() == 4);
-    const uint8_t* start = reinterpret_cast<const uint8_t*>(it->key().data());
-    const uint8_t* end = start + it->key().size();
-    return cast_chunk<uint32_t>(data_chunk(start, end));
+    return recreate_depth(it->key());
 }
 
 bool leveldb_common::fetch_spend(const message::output_point& spent_output,
@@ -205,7 +202,7 @@ uint32_t leveldb_common::fetch_block_depth(const hash_digest& block_hash)
                 << status.ToString();
         return std::numeric_limits<uint32_t>::max();
     }
-    return cast_chunk<uint32_t>(data_chunk(value.begin(), value.end()));
+    return recreate_depth(value);
 }
 
 protobuf::Transaction leveldb_common::fetch_proto_transaction(
