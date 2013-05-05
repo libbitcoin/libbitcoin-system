@@ -15,6 +15,11 @@ namespace libbitcoin {
 
 typedef std::unique_ptr<leveldb::Iterator> leveldb_iterator;
 
+struct leveldb_transaction_batch
+{
+    leveldb::WriteBatch tx_batch, spends_batch, address_batch;
+};
+
 class leveldb_common
 {
 public:
@@ -33,16 +38,7 @@ public:
     uint32_t fetch_block_depth(const hash_digest& block_hash);
     protobuf::Transaction fetch_proto_transaction(const hash_digest& tx_hash);
 
-    bool reconstruct_block(
-        const protobuf::Block& proto_block_header,
-        message::block& result_block);
-
 private:
-    struct leveldb_transaction_batch
-    {
-        leveldb::WriteBatch tx_batch, spends_batch, address_batch;
-    };
-
     bool save_transaction(leveldb_transaction_batch& batch,
         uint32_t block_depth, uint32_t tx_index,
         const hash_digest& tx_hash, const message::transaction& block_tx);

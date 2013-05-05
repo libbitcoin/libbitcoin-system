@@ -62,9 +62,10 @@ uint64_t leveldb_validate_block::median_time_past()
 
 bool tx_after_fork(const protobuf::Transaction& proto_tx, size_t fork_index)
 {
-    if (proto_tx.parent().depth() > fork_index)
-        return true;
-    return false;
+    message::transaction tx = protobuf_to_transaction(proto_tx);
+    if (proto_tx.parent().depth() <= fork_index)
+        return false;
+    return true;
 }
 
 bool leveldb_validate_block::transaction_exists(const hash_digest& tx_hash)

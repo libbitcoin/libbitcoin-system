@@ -94,24 +94,24 @@ class Block : public ::google::protobuf::Message {
   
   // accessors -------------------------------------------------------
   
-  // required uint32 depth = 2;
+  // required uint32 depth = 1;
   inline bool has_depth() const;
   inline void clear_depth();
-  static const int kDepthFieldNumber = 2;
+  static const int kDepthFieldNumber = 1;
   inline ::google::protobuf::uint32 depth() const;
   inline void set_depth(::google::protobuf::uint32 value);
   
-  // required uint32 version = 6;
+  // required uint32 version = 2;
   inline bool has_version() const;
   inline void clear_version();
-  static const int kVersionFieldNumber = 6;
+  static const int kVersionFieldNumber = 2;
   inline ::google::protobuf::uint32 version() const;
   inline void set_version(::google::protobuf::uint32 value);
   
-  // required bytes previous_block_hash = 7;
+  // required bytes previous_block_hash = 3;
   inline bool has_previous_block_hash() const;
   inline void clear_previous_block_hash();
-  static const int kPreviousBlockHashFieldNumber = 7;
+  static const int kPreviousBlockHashFieldNumber = 3;
   inline const ::std::string& previous_block_hash() const;
   inline void set_previous_block_hash(const ::std::string& value);
   inline void set_previous_block_hash(const char* value);
@@ -119,10 +119,10 @@ class Block : public ::google::protobuf::Message {
   inline ::std::string* mutable_previous_block_hash();
   inline ::std::string* release_previous_block_hash();
   
-  // required bytes merkle = 8;
+  // required bytes merkle = 4;
   inline bool has_merkle() const;
   inline void clear_merkle();
-  static const int kMerkleFieldNumber = 8;
+  static const int kMerkleFieldNumber = 4;
   inline const ::std::string& merkle() const;
   inline void set_merkle(const ::std::string& value);
   inline void set_merkle(const char* value);
@@ -130,31 +130,31 @@ class Block : public ::google::protobuf::Message {
   inline ::std::string* mutable_merkle();
   inline ::std::string* release_merkle();
   
-  // required uint32 timestamp = 9;
+  // required uint32 timestamp = 5;
   inline bool has_timestamp() const;
   inline void clear_timestamp();
-  static const int kTimestampFieldNumber = 9;
+  static const int kTimestampFieldNumber = 5;
   inline ::google::protobuf::uint32 timestamp() const;
   inline void set_timestamp(::google::protobuf::uint32 value);
   
-  // required uint32 bits = 10;
+  // required uint32 bits = 6;
   inline bool has_bits() const;
   inline void clear_bits();
-  static const int kBitsFieldNumber = 10;
+  static const int kBitsFieldNumber = 6;
   inline ::google::protobuf::uint32 bits() const;
   inline void set_bits(::google::protobuf::uint32 value);
   
-  // required uint32 nonce = 11;
+  // required uint32 nonce = 7;
   inline bool has_nonce() const;
   inline void clear_nonce();
-  static const int kNonceFieldNumber = 11;
+  static const int kNonceFieldNumber = 7;
   inline ::google::protobuf::uint32 nonce() const;
   inline void set_nonce(::google::protobuf::uint32 value);
   
-  // repeated bytes transactions = 12;
+  // repeated bytes transactions = 8;
   inline int transactions_size() const;
   inline void clear_transactions();
-  static const int kTransactionsFieldNumber = 12;
+  static const int kTransactionsFieldNumber = 8;
   inline const ::std::string& transactions(int index) const;
   inline ::std::string* mutable_transactions(int index);
   inline void set_transactions(int index, const ::std::string& value);
@@ -581,10 +581,10 @@ class Transaction : public ::google::protobuf::Message {
   inline ::protobuf::Transaction_BlockPointer* mutable_parent();
   inline ::protobuf::Transaction_BlockPointer* release_parent();
   
-  // repeated .protobuf.Transaction.Input inputs = 3;
+  // repeated .protobuf.Transaction.Input inputs = 2;
   inline int inputs_size() const;
   inline void clear_inputs();
-  static const int kInputsFieldNumber = 3;
+  static const int kInputsFieldNumber = 2;
   inline const ::protobuf::Transaction_Input& inputs(int index) const;
   inline ::protobuf::Transaction_Input* mutable_inputs(int index);
   inline ::protobuf::Transaction_Input* add_inputs();
@@ -593,10 +593,10 @@ class Transaction : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_Input >*
       mutable_inputs();
   
-  // repeated .protobuf.Transaction.Output outputs = 4;
+  // repeated .protobuf.Transaction.Output outputs = 3;
   inline int outputs_size() const;
   inline void clear_outputs();
-  static const int kOutputsFieldNumber = 4;
+  static const int kOutputsFieldNumber = 3;
   inline const ::protobuf::Transaction_Output& outputs(int index) const;
   inline ::protobuf::Transaction_Output* mutable_outputs(int index);
   inline ::protobuf::Transaction_Output* add_outputs();
@@ -605,24 +605,24 @@ class Transaction : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::protobuf::Transaction_Output >*
       mutable_outputs();
   
-  // required uint32 version = 5;
+  // required uint32 version = 4;
   inline bool has_version() const;
   inline void clear_version();
-  static const int kVersionFieldNumber = 5;
+  static const int kVersionFieldNumber = 4;
   inline ::google::protobuf::uint32 version() const;
   inline void set_version(::google::protobuf::uint32 value);
   
-  // required uint32 locktime = 6;
+  // required uint32 locktime = 5;
   inline bool has_locktime() const;
   inline void clear_locktime();
-  static const int kLocktimeFieldNumber = 6;
+  static const int kLocktimeFieldNumber = 5;
   inline ::google::protobuf::uint32 locktime() const;
   inline void set_locktime(::google::protobuf::uint32 value);
   
-  // required bool is_coinbase = 7;
+  // required bool is_coinbase = 6;
   inline bool has_is_coinbase() const;
   inline void clear_is_coinbase();
-  static const int kIsCoinbaseFieldNumber = 7;
+  static const int kIsCoinbaseFieldNumber = 6;
   inline bool is_coinbase() const;
   inline void set_is_coinbase(bool value);
   
@@ -663,7 +663,7 @@ class Transaction : public ::google::protobuf::Message {
 
 // Block
 
-// required uint32 depth = 2;
+// required uint32 depth = 1;
 inline bool Block::has_depth() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -685,7 +685,7 @@ inline void Block::set_depth(::google::protobuf::uint32 value) {
   depth_ = value;
 }
 
-// required uint32 version = 6;
+// required uint32 version = 2;
 inline bool Block::has_version() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -707,7 +707,7 @@ inline void Block::set_version(::google::protobuf::uint32 value) {
   version_ = value;
 }
 
-// required bytes previous_block_hash = 7;
+// required bytes previous_block_hash = 3;
 inline bool Block::has_previous_block_hash() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -765,7 +765,7 @@ inline ::std::string* Block::release_previous_block_hash() {
   }
 }
 
-// required bytes merkle = 8;
+// required bytes merkle = 4;
 inline bool Block::has_merkle() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -823,7 +823,7 @@ inline ::std::string* Block::release_merkle() {
   }
 }
 
-// required uint32 timestamp = 9;
+// required uint32 timestamp = 5;
 inline bool Block::has_timestamp() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -845,7 +845,7 @@ inline void Block::set_timestamp(::google::protobuf::uint32 value) {
   timestamp_ = value;
 }
 
-// required uint32 bits = 10;
+// required uint32 bits = 6;
 inline bool Block::has_bits() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
@@ -867,7 +867,7 @@ inline void Block::set_bits(::google::protobuf::uint32 value) {
   bits_ = value;
 }
 
-// required uint32 nonce = 11;
+// required uint32 nonce = 7;
 inline bool Block::has_nonce() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
@@ -889,7 +889,7 @@ inline void Block::set_nonce(::google::protobuf::uint32 value) {
   nonce_ = value;
 }
 
-// repeated bytes transactions = 12;
+// repeated bytes transactions = 8;
 inline int Block::transactions_size() const {
   return transactions_.size();
 }
@@ -1262,7 +1262,7 @@ inline ::protobuf::Transaction_BlockPointer* Transaction::release_parent() {
   return temp;
 }
 
-// repeated .protobuf.Transaction.Input inputs = 3;
+// repeated .protobuf.Transaction.Input inputs = 2;
 inline int Transaction::inputs_size() const {
   return inputs_.size();
 }
@@ -1287,7 +1287,7 @@ Transaction::mutable_inputs() {
   return &inputs_;
 }
 
-// repeated .protobuf.Transaction.Output outputs = 4;
+// repeated .protobuf.Transaction.Output outputs = 3;
 inline int Transaction::outputs_size() const {
   return outputs_.size();
 }
@@ -1312,7 +1312,7 @@ Transaction::mutable_outputs() {
   return &outputs_;
 }
 
-// required uint32 version = 5;
+// required uint32 version = 4;
 inline bool Transaction::has_version() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -1334,7 +1334,7 @@ inline void Transaction::set_version(::google::protobuf::uint32 value) {
   version_ = value;
 }
 
-// required uint32 locktime = 6;
+// required uint32 locktime = 5;
 inline bool Transaction::has_locktime() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -1356,7 +1356,7 @@ inline void Transaction::set_locktime(::google::protobuf::uint32 value) {
   locktime_ = value;
 }
 
-// required bool is_coinbase = 7;
+// required bool is_coinbase = 6;
 inline bool Transaction::has_is_coinbase() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }

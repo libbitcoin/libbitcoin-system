@@ -125,7 +125,7 @@ int main()
     protocol prot(network_service, hsts, hs, net);
     prot.subscribe_channel(monitor_tx);
 
-    bdb_blockchain chain(disk_service);
+    leveldb_blockchain chain(disk_service);
     chain.start("database", blockchain_started);
     poller poll(mempool_service, chain);
 

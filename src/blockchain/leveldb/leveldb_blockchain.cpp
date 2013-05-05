@@ -136,28 +136,29 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     // The blocks database options needs its depth comparator too.
     leveldb::Options blocks_open_options = open_options_;
     blocks_open_options.comparator = depth_comparator_.get();
-    if (!open_db(prefix, "blocks", db_blocks_, blocks_open_options))
+    if (!open_db(prefix, "block", db_blocks_, blocks_open_options))
         return false;
-    if (!open_db(prefix, "blocks_hash", db_blocks_hash_, open_options_))
+    if (!open_db(prefix, "block_hash", db_blocks_hash_, open_options_))
         return false;
-    if (!open_db(prefix, "txs", db_txs_, open_options_))
+    if (!open_db(prefix, "tx", db_txs_, open_options_))
         return false;
-    if (!open_db(prefix, "spends", db_spends_, open_options_))
+    if (!open_db(prefix, "spend", db_spends_, open_options_))
         return false;
-    if (!open_db(prefix, "address", db_address_, open_options_))
+    if (!open_db(prefix, "addr", db_address_, open_options_))
         return false;
     // G++ has an internal compiler error when you use the implicit * cast.
     common_ = std::make_shared<leveldb_common>(
         db_blocks_.get(), db_blocks_hash_.get(),
         db_txs_.get(), db_spends_.get(), db_address_.get());
     // Validate and organisation components.
-    //orphans_ = std::make_shared<orphans_pool>(20);
-    //leveldb_chain_keeper_ptr chainkeeper = 
-    //    std::make_shared<leveldb_chain_keeper>(common_, env_,
-    //        db_blocks_, db_blocks_hash_, db_txs_, db_spends_, db_address_);
-    //chain_ = chainkeeper;
-    //organize_ = std::make_shared<leveldb_organizer>(
-    //    common_, orphans_, chainkeeper, reorganize_subscriber_);
+    orphans_ = std::make_shared<orphans_pool>(20);
+    leveldb_chain_keeper_ptr chainkeeper =
+        std::make_shared<leveldb_chain_keeper>(common_,
+            db_blocks_.get(), db_blocks_hash_.get(),
+            db_txs_.get(), db_spends_.get(), db_address_.get());
+    chain_ = chainkeeper;
+    organize_ = std::make_shared<leveldb_organizer>(
+        common_, orphans_, chainkeeper, reorganize_subscriber_);
     return true;
 }
 
@@ -426,25 +427,25 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
     serial.write_short_hash(address.hash());
     data_chunk raw_address = serial.data();
     // Fetch outpoints as contiguous block.
-    std::string outpoints;
+    std::string raw_outpoints;
     leveldb::Status status = db_address_->Get(
-        leveldb::ReadOptions(), slice(raw_address), &outpoints);
-    if (!status.ok())
+        leveldb::ReadOptions(), slice(raw_address), &raw_outpoints);
+    if (status.IsNotFound())
     {
-        if (status.IsNotFound())
-            handle_fetch(error::not_found, message::output_point_list());
-        else
-        {
-            handle_fetch(error::operation_failed,
-                message::output_point_list());
-            log_error() << "Error fetch_outputs: " << status.ToString();
-        }
+        handle_fetch(error::not_found, message::output_point_list());
+        return;
+    }
+    else if (!status.ok())
+    {
+        handle_fetch(error::operation_failed,
+            message::output_point_list());
+        log_error() << "Error fetch_outputs: " << status.ToString();
         return;
     }
     // Must be a multiple of (32 + 4)
     const size_t outpoint_size = 32 + 4;
-    BITCOIN_ASSERT(outpoints.size() % outpoint_size == 0);
-    for (auto it = outpoints.begin(); it != outpoints.end();
+    BITCOIN_ASSERT(raw_outpoints.size() % outpoint_size == 0);
+    for (auto it = raw_outpoints.begin(); it != raw_outpoints.end();
         it += outpoint_size)
     {
         // We need a copy not a temporary

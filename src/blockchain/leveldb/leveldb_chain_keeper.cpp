@@ -4,16 +4,14 @@
 #include <bitcoin/format.hpp>
 #include <bitcoin/transaction.hpp>
 
-#include "leveldb_common.hpp"
 #include "protobuf_wrapper.hpp"
 
 namespace libbitcoin {
 
 leveldb_chain_keeper::leveldb_chain_keeper(leveldb_common_ptr common,
-    DbEnv* env, Db* db_blocks, Db* db_blocks_hash,
-    Db* db_txs, Db* db_spends, Db* db_address)
-  : common_(common), env_(env),
-    db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
+    leveldb::DB* db_blocks, leveldb::DB* db_blocks_hash,
+    leveldb::DB* db_txs, leveldb::DB* db_spends, leveldb::DB* db_address)
+  : common_(common), db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
     db_txs_(db_txs), db_spends_(db_spends), db_address_(db_address)
 {
 }
@@ -35,107 +33,95 @@ void leveldb_chain_keeper::add(block_detail_ptr incoming_block)
 
 int leveldb_chain_keeper::find_index(const hash_digest& search_block_hash)
 {
-#if 0
-    readable_data_type key;
-    key.set(search_block_hash);
-    writable_data_type primary_key;
-    empty_data_type ignore_data;
-    if (db_blocks_hash_->pget(nullptr, key.get(),
-        primary_key.get(), ignore_data.get(), 0) != 0)
-    {
+    uint32_t depth = common_->fetch_block_depth(search_block_hash);
+    if (depth == std::numeric_limits<uint32_t>::max())
         return -1;
-    }
-    uint32_t depth = cast_chunk<uint32_t>(primary_key.data());
     return depth;
-#endif
-    return 0;
 }
 
 big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 {
-    big_number total_work;
-#if 0
-    Dbc* cursor;
-    //db_blocks_->cursor(txn_->get(), &cursor, 0);
-    // Our key/value pair
-    readable_data_type key;
-    key.set(slice_begin_index);
-    writable_data_type_ptr value;
-    // Position cursor
-    value = std::make_shared<writable_data_type>();
-    if (cursor->get(key.get(), value->get(), DB_SET) != 0)
-        return 0;
-    do
+    big_number total_work = 0;
+    leveldb_iterator it(db_blocks_->NewIterator(leveldb::ReadOptions()));
+    data_chunk raw_depth = uncast_type(slice_begin_index);
+    for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
     {
         std::stringstream ss;
-        data_chunk raw_object = value->data();
-        std::copy(raw_object.begin(), raw_object.end(),
-            std::ostream_iterator<byte>(ss));
+        ss.str(it->value().ToString());
         protobuf::Block proto_block;
         proto_block.ParseFromIstream(&ss);
         total_work += block_work(proto_block.bits());
-        value = std::make_shared<writable_data_type>();
     }
-    while (cursor->get(key.get(), value->get(), DB_NEXT) == 0);
-#endif
     return total_work;
+}
+
+bool reconstruct_block(leveldb_common_ptr common,
+    const protobuf::Block& proto_block_header,
+    message::block& result_block)
+{
+    result_block = protobuf_to_block_header(proto_block_header);
+    for (const std::string& raw_tx_hash: proto_block_header.transactions())
+    {
+        // Convert protobuf hash string into internal hash format.
+        hash_digest tx_hash;
+        BITCOIN_ASSERT(raw_tx_hash.size() == tx_hash.max_size());
+        std::copy(raw_tx_hash.begin(), raw_tx_hash.end(), tx_hash.begin());
+        // Fetch the actual transaction.
+        protobuf::Transaction proto_tx =
+            common->fetch_proto_transaction(tx_hash);
+        if (!proto_tx.IsInitialized())
+            return false;
+        result_block.transactions.push_back(protobuf_to_transaction(proto_tx));
+    }
+    return true;
 }
 
 bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
     block_detail_list& sliced_blocks)
 {
-#if 0
-    Dbc* cursor;
-    //db_blocks_->cursor(txn_->get(), &cursor, 0);
-    readable_data_type key;
-    key.set(slice_begin_index);
-    writable_data_type_ptr value;
-    // Position cursor
-    value = std::make_shared<writable_data_type>();
-    if (cursor->get(key.get(), value->get(), DB_SET) != 0)
-        return true;
-    do
+    leveldb::WriteBatch blk_batch, blk_hash_batch;
+    leveldb_transaction_batch tx_batch;
+    leveldb_iterator it(db_blocks_->NewIterator(leveldb::ReadOptions()));
+    data_chunk raw_depth = uncast_type(slice_begin_index);
+    for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
     {
-        // Read raw value from leveldb
-        data_chunk raw_object = value->data();
-        // Construct protobuf header from stringstream
         std::stringstream ss;
-        std::copy(raw_object.begin(), raw_object.end(),
-            std::ostream_iterator<byte>(ss));
+        ss.str(it->value().ToString());
         protobuf::Block proto_block;
         proto_block.ParseFromIstream(&ss);
         // Convert protobuf block header into actual block
         message::block sliced_block;
-        if (!common_->reconstruct_block(proto_block, sliced_block))
+        if (!reconstruct_block(common_, proto_block, sliced_block))
             return false;
         // Add to list of sliced blocks
         block_detail_ptr sliced_detail =
             std::make_shared<block_detail>(sliced_block);
         sliced_blocks.push_back(sliced_detail);
+        // Make sure to delete hash secondary index too.
+        hash_digest block_hash = hash_block_header(sliced_block);
         // Delete current item
-        if (cursor->del(0) != 0)
-            return false;
+        blk_batch.Delete(it->key());
+        blk_batch.Delete(slice(block_hash));
         // Remove txs + spends + addresses too
         for (const message::transaction& block_tx: sliced_block.transactions)
-            if (!clear_transaction_data(block_tx))
+            if (!clear_transaction_data(tx_batch, block_tx))
                 return false;
-        // New value object ready to read next block
-        value = std::make_shared<writable_data_type>();
     }
-    while (cursor->get(key.get(), value->get(), DB_NEXT) == 0);
-#endif
+    leveldb::WriteOptions options;
+    // Execute batches.
+    db_blocks_->Write(options, &blk_batch);
+    db_blocks_hash_->Write(options, &blk_hash_batch);
+    db_txs_->Write(options, &tx_batch.tx_batch);
+    db_spends_->Write(options, &tx_batch.spends_batch);
+    db_address_->Write(options, &tx_batch.address_batch);
     return true;
 }
 
 bool leveldb_chain_keeper::clear_transaction_data(
-    const message::transaction& remove_tx)
+    leveldb_transaction_batch& batch, const message::transaction& remove_tx)
 {
-#if 0
     const hash_digest& tx_hash = hash_transaction(remove_tx);
-    readable_data_type del_tx_key;
-    del_tx_key.set(tx_hash);
-    //if (db_txs_->del(txn_->get(), del_tx_key.get(), 0) != 0)
-        return false;
+    batch.tx_batch.Delete(slice(tx_hash));
     // Remove spends
     // ... spends don't exist for coinbase txs.
     if (!is_coinbase(remove_tx))
@@ -144,9 +130,12 @@ bool leveldb_chain_keeper::clear_transaction_data(
         {
             const message::transaction_input& input = 
                 remove_tx.inputs[input_index];
-            const message::input_point inpoint{tx_hash, input_index};
-            if (!remove_spend(input.previous_output, inpoint))
-                return false;
+            // We could check if the spend matches the inpoint for safety.
+            //const message::input_point inpoint{tx_hash, input_index};
+            // Recreate the key...
+            data_chunk spent_key = create_spent_key(input.previous_output);
+            // ... Perform the delete.
+            batch.spends_batch.Delete(slice(spent_key));
         }
     // Remove addresses
     for (uint32_t output_index = 0; output_index < remove_tx.outputs.size();
@@ -154,48 +143,65 @@ bool leveldb_chain_keeper::clear_transaction_data(
     {
         const message::transaction_output& output =
             remove_tx.outputs[output_index];
-        if (!remove_address(output.output_script, {tx_hash, output_index}))
+        if (!remove_address(batch.address_batch,
+                output.output_script, {tx_hash, output_index}))
             return false;
     }
-#endif
     return true;
 }
 
-bool leveldb_chain_keeper::remove_spend(
-    const message::output_point& previous_output,
-    const message::input_point& current_input)
+bool leveldb_chain_keeper::remove_address(leveldb::WriteBatch& batch,
+    const script& output_script, const message::output_point& outpoint)
 {
-#if 0
-    readable_data_type spent_key;
-    //spent_key.set(create_spent_key(previous_output));
-    //int ret = db_spends_->del(txn_->get(), spent_key.get(), 0);
-    int ret = 0;
-    if (ret != 0 && ret != DB_NOTFOUND)
-        return false;
-#endif
-    return true;
-}
-
-bool leveldb_chain_keeper::remove_address(const script& output_script,
-    const message::output_point& outpoint)
-{
-#if 0
     data_chunk raw_address = create_address_key(output_script);
     if (raw_address.empty())
         return true;
-    readable_data_type address_key, output_value;
-    address_key.set(raw_address);
-    output_value.set(create_spent_key(outpoint));
-    // Perform the actual delete
-    Dbc* cursor;
-    //db_address_->cursor(txn_->get(), &cursor, 0);
-    BITCOIN_ASSERT(cursor != nullptr);
-    if (cursor->get(address_key.get(), output_value.get(), DB_GET_BOTH) != 0)
+    data_chunk outpoint_value = create_spent_key(outpoint);
+    // Fetch outpoints as contiguous block.
+    std::string raw_outpoints;
+    leveldb::Status status = db_address_->Get(
+        leveldb::ReadOptions(), slice(raw_address), &raw_outpoints);
+    if (!status.ok())
+    {
+        log_error() << "Error remove_address: " << status.ToString();
         return false;
-    if (cursor->del(0) != 0)
+    }
+    // Must be a multiple of (32 + 4)
+    const size_t outpoint_size = 32 + 4;
+    BITCOIN_ASSERT(raw_outpoints.size() % outpoint_size == 0);
+    // To delete this outpoint, we recreate the
+    // outpoints block missing the supplied outpoint.
+    std::string new_raw_outpoints;
+    new_raw_outpoints.reserve(raw_outpoints.size() - outpoint_size);
+    bool is_found = false;
+    for (auto it = raw_outpoints.begin(); it != raw_outpoints.end();
+        it += outpoint_size)
+    {
+        // We need a copy not a temporary
+        data_chunk raw_outpoint(it, it + outpoint_size);
+        BITCOIN_ASSERT(raw_outpoint.size() == outpoint_size);
+        // Then read the value off
+        deserializer deserial(raw_outpoint);
+        message::output_point current_outpoint;
+        current_outpoint.hash = deserial.read_hash();
+        current_outpoint.index = deserial.read_4_bytes();
+        // We continue looping so other entries still get copied and remain.
+        if (current_outpoint == outpoint)
+        {
+            BITCOIN_ASSERT(!is_found);
+            is_found = true;
+            continue;
+        }
+        new_raw_outpoints += std::string(
+            raw_outpoint.begin(), raw_outpoint.end());
+    }
+    if (!is_found)
         return false;
-    cursor->close();
-#endif
+    // Put changes into batch finally.
+    if (new_raw_outpoints.empty())
+        batch.Delete(slice(raw_address));
+    else
+        batch.Put(slice(raw_address), new_raw_outpoints);
     return true;
 }
 
