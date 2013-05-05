@@ -1,3 +1,4 @@
+#include <boost/lexical_cast.hpp>
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 
@@ -17,6 +18,21 @@ void blockchain_started(const std::error_code& ec)
         log_error() << "Blockchain init error: " << ec.message();
     else
         log_info() << "Blockchain initialized!";
+}
+
+void resume_copy(const std::error_code& ec, size_t last_depth,
+    blockchain* chain_1, blockchain* chain_2)
+{
+    size_t resume_depth = last_depth + 1;
+    if (ec == error::not_found)
+        resume_depth = 0;
+    else if (ec)
+    {
+        log_error() << "Error fetch last depth from DEST: " << ec.message();
+        return;
+    }
+    fetch_block(*chain_1, resume_depth,
+        std::bind(copy_block, _1, _2, resume_depth, chain_1, chain_2));
 }
 
 void copy_block(const std::error_code& ec, const message::block& blk,
@@ -39,26 +55,29 @@ void handle_import(const std::error_code& ec,
         return;
     }
     log_info() << "Imported block #" << depth << " " << hash;
-    if (depth == 200)
+    /*if (depth == end_depth)
     {
         log_info() << "Finished.";
         return;
-    }
+    }*/
     fetch_block(*chain_1, depth + 1,
         std::bind(copy_block, _1, _2, depth + 1, chain_1, chain_2));
 }
 
-int main()
+int main(int argc, char** argv)
 {
-    bdb_blockchain::setup("database-copy");
+    if (argc != 3)
+    {
+        log_info() << "Usage: import SOURCE DEST";
+        return 1;
+    }
     async_service service(1);
     bdb_blockchain chain_1(service);
     leveldb_blockchain chain_2(service);
-    chain_1.start("database", blockchain_started);
-    chain_2.start("/home/genjix/tmp/lvldb/database", blockchain_started);
-    const size_t start_depth = 1;
-    fetch_block(chain_1, start_depth,
-        std::bind(copy_block, _1, _2, start_depth, &chain_1, &chain_2));
+    chain_1.start(argv[1], blockchain_started);
+    chain_2.start(argv[2], blockchain_started);
+    chain_2.fetch_last_depth(
+        std::bind(resume_copy, _1, _2, &chain_1, &chain_2));
     std::cin.get();
     log_info() << "Exiting...";
     service.stop();
