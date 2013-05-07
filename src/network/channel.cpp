@@ -42,7 +42,7 @@ channel_proxy::channel_proxy(async_service& service, socket_ptr socket)
 #define CHANNEL_TRANSPORT_MECHANISM(MESSAGE_TYPE) \
     MESSAGE_TYPE##_subscriber_ = \
         std::make_shared<MESSAGE_TYPE##_subscriber_type>(service); \
-    loader_.add(new channel_loader_module<message::MESSAGE_TYPE>( \
+    loader_.add(new channel_loader_module<MESSAGE_TYPE##_type>( \
         std::bind(&MESSAGE_TYPE##_subscriber_type::relay, \
             MESSAGE_TYPE##_subscriber_, _1, _2)));
 

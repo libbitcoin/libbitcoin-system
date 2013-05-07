@@ -63,7 +63,7 @@ void poller::receive_inv(const std::error_code& ec,
     message::get_data getdata;
     for (const message::inventory_vector& ivv: packet.inventories)
     {
-        if (ivv.type != message::inventory_type::block)
+        if (ivv.type != message::inventory_type_id::block)
             continue;
         // Already got this block
         if (ivv.hash == last_block_hash_)

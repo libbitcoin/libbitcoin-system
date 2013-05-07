@@ -345,7 +345,7 @@ void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
     for (const std::string& raw_tx_hash: proto_block.transactions())
     {
         message::inventory_vector tx_inv;
-        tx_inv.type = message::inventory_type::transaction;
+        tx_inv.type = message::inventory_type_id::transaction;
         BITCOIN_ASSERT(raw_tx_hash.size() == tx_inv.hash.size());
         std::copy(raw_tx_hash.begin(), raw_tx_hash.end(),
             tx_inv.hash.begin());

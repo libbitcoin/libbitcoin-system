@@ -33,11 +33,11 @@ void handle_confirm(const std::error_code& ec)
 session_params* p;
 
 void recv_transaction(const std::error_code& ec,
-    const message::transaction& tx, channel_ptr node);
+    const transaction_type& tx, channel_ptr node);
 void monitor_tx(channel_ptr node);
 void handle_mempool_store(
     const std::error_code& ec, const index_list& unconfirmed,
-    const message::transaction& tx, channel_ptr node);
+    const transaction_type& tx, channel_ptr node);
 
 void monitor_tx(channel_ptr node)
 {
@@ -46,7 +46,7 @@ void monitor_tx(channel_ptr node)
 }
 
 void recv_transaction(const std::error_code& ec,
-    const message::transaction& tx, channel_ptr node)
+    const transaction_type& tx, channel_ptr node)
 {
     if (ec)
     {
@@ -66,7 +66,7 @@ void depends_requested(const std::error_code& ec)
 
 void handle_mempool_store(
     const std::error_code& ec, const index_list& unconfirmed,
-    const message::transaction& tx, channel_ptr node)
+    const transaction_type& tx, channel_ptr node)
 {
     const hash_digest& tx_hash = hash_transaction(tx);
     // Decided against this. Spammers can abuse us more easily.

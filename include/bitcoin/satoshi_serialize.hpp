@@ -14,13 +14,11 @@ namespace libbitcoin {
 
 size_t variable_uint_size(uint64_t v);
 
-namespace message {
-
 constexpr size_t command_size = 12;
 
-size_t satoshi_raw_size(const header& head);
+size_t satoshi_raw_size(const header_type& head);
 template <typename Iterator>
-void satoshi_save(const header& head, Iterator result)
+void satoshi_save(const header_type& head, Iterator result)
 {
     serializer serial;
     serial.write_4_bytes(head.magic);
@@ -33,7 +31,7 @@ void satoshi_save(const header& head, Iterator result)
     std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, header& head)
+void satoshi_load(Iterator first, Iterator last, header_type& head)
 {
     data_chunk stream(first, last);
     deserializer deserial(stream);
@@ -44,10 +42,10 @@ void satoshi_load(Iterator first, Iterator last, header& head)
     BITCOIN_ASSERT(satoshi_raw_size(head) == stream.size());
 }
 
-const std::string satoshi_command(const version&);
-size_t satoshi_raw_size(const version& packet);
+const std::string satoshi_command(const version_type&);
+size_t satoshi_raw_size(const version_type& packet);
 template <typename Iterator>
-void satoshi_save(const version& packet, Iterator result)
+void satoshi_save(const version_type& packet, Iterator result)
 {
     serializer serial;
     serial.write_4_bytes(packet.version);
@@ -63,7 +61,7 @@ void satoshi_save(const version& packet, Iterator result)
     std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, version& packet)
+void satoshi_load(Iterator first, Iterator last, version_type& packet)
 {
     data_chunk stream(first, last);
     deserializer deserial(stream);
@@ -93,27 +91,27 @@ void satoshi_load(Iterator first, Iterator last, version& packet)
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
-const std::string satoshi_command(const verack&);
-size_t satoshi_raw_size(const verack& packet);
+const std::string satoshi_command(const verack_type&);
+size_t satoshi_raw_size(const verack_type& packet);
 template <typename Iterator>
-void satoshi_save(const verack& packet, Iterator result)
+void satoshi_save(const verack_type& packet, Iterator result)
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, verack& packet)
+void satoshi_load(Iterator first, Iterator last, verack_type& packet)
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }
 
-const std::string satoshi_command(const address&);
-size_t satoshi_raw_size(const address& packet);
+const std::string satoshi_command(const address_type&);
+size_t satoshi_raw_size(const address_type& packet);
 template <typename Iterator>
-void satoshi_save(const address& packet, Iterator result)
+void satoshi_save(const address_type& packet, Iterator result)
 {
     serializer serial;
     serial.write_variable_uint(packet.addresses.size());
-    for (const message::network_address& net_address: packet.addresses)
+    for (const network_address_type& net_address: packet.addresses)
     {
         serial.write_4_bytes(net_address.timestamp);
         serial.write_network_address(net_address);
@@ -123,7 +121,7 @@ void satoshi_save(const address& packet, Iterator result)
     std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, address& packet)
+void satoshi_load(Iterator first, Iterator last, address_type& packet)
 {
     data_chunk stream(first, last);
     deserializer deserial(stream);
@@ -131,28 +129,28 @@ void satoshi_load(Iterator first, Iterator last, address& packet)
     for (size_t i = 0; i < count; ++i)
     {
         uint32_t timestamp = deserial.read_4_bytes();
-        message::network_address addr = deserial.read_network_address();
+        network_address_type addr = deserial.read_network_address();
         addr.timestamp = timestamp;
         packet.addresses.push_back(addr);
     }
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
-const std::string satoshi_command(const get_address&);
-size_t satoshi_raw_size(const get_address& packet);
+const std::string satoshi_command(const get_address_type&);
+size_t satoshi_raw_size(const get_address_type& packet);
 template <typename Iterator>
-void satoshi_save(const get_address& packet, Iterator result)
+void satoshi_save(const get_address_type& packet, Iterator result)
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, get_address& packet)
+void satoshi_load(Iterator first, Iterator last, get_address_type& packet)
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }
 
-uint32_t inventory_type_to_number(message::inventory_type inv_type);
-message::inventory_type inventory_type_from_number(uint32_t raw_type);
+uint32_t inventory_type_to_number(inventory_type_id inv_type);
+inventory_type_id inventory_type_from_number(uint32_t raw_type);
 
 template <typename Message>
 size_t raw_size_inventory_impl(const Message& packet)
@@ -165,7 +163,7 @@ void save_inventory_impl(const Message& packet, Iterator result)
 {
     serializer serial;
     serial.write_variable_uint(packet.inventories.size());
-    for (const message::inventory_vector inv: packet.inventories)
+    for (const inventory_vector_type inv: packet.inventories)
     {
         uint32_t raw_type = inventory_type_to_number(inv.type);
         serial.write_4_bytes(raw_type);
@@ -183,7 +181,7 @@ void load_inventory_impl(Iterator first, Iterator last, Message& packet)
     uint64_t count = deserial.read_variable_uint();
     for (size_t i = 0; i < count; ++i)
     {
-        message::inventory_vector inv;
+        inventory_vector_type inv;
         uint32_t raw_type = deserial.read_4_bytes();
         inv.type = inventory_type_from_number(raw_type);
         inv.hash = deserial.read_hash();
@@ -192,36 +190,36 @@ void load_inventory_impl(Iterator first, Iterator last, Message& packet)
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
-const std::string satoshi_command(const inventory&);
-size_t satoshi_raw_size(const inventory& packet);
+const std::string satoshi_command(const inventory_type&);
+size_t satoshi_raw_size(const inventory_type& packet);
 template <typename Iterator>
-void satoshi_save(const inventory& packet, Iterator result)
+void satoshi_save(const inventory_type& packet, Iterator result)
 {
     save_inventory_impl(packet, result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, inventory& packet)
+void satoshi_load(Iterator first, Iterator last, inventory_type& packet)
 {
     load_inventory_impl(first, last, packet);
 }
 
-const std::string satoshi_command(const get_data&);
-size_t satoshi_raw_size(const get_data& packet);
+const std::string satoshi_command(const get_data_type&);
+size_t satoshi_raw_size(const get_data_type& packet);
 template <typename Iterator>
-void satoshi_save(const get_data& packet, Iterator result)
+void satoshi_save(const get_data_type& packet, Iterator result)
 {
     save_inventory_impl(packet, result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, get_data& packet)
+void satoshi_load(Iterator first, Iterator last, get_data_type& packet)
 {
     load_inventory_impl(first, last, packet);
 }
 
-const std::string satoshi_command(const get_blocks&);
-size_t satoshi_raw_size(const get_blocks& packet);
+const std::string satoshi_command(const get_blocks_type&);
+size_t satoshi_raw_size(const get_blocks_type& packet);
 template <typename Iterator>
-void satoshi_save(const get_blocks& packet, Iterator result)
+void satoshi_save(const get_blocks_type& packet, Iterator result)
 {
     serializer serial;
     serial.write_4_bytes(protocol_version);
@@ -234,7 +232,7 @@ void satoshi_save(const get_blocks& packet, Iterator result)
     std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, get_blocks& packet)
+void satoshi_load(Iterator first, Iterator last, get_blocks_type& packet)
 {
     data_chunk stream(first, last);
     deserializer deserial(stream);
@@ -251,17 +249,17 @@ void satoshi_load(Iterator first, Iterator last, get_blocks& packet)
 }
 
 void save_transaction(
-    serializer& serial, const message::transaction& packet);
+    serializer& serial, const transaction_type& packet);
 
 data_chunk read_raw_script(deserializer& deserial);
 script read_script(deserializer& deserial);
-message::transaction read_transaction(
-    deserializer& deserial, message::transaction& packet);
+transaction_type read_transaction(
+    deserializer& deserial, transaction_type& packet);
 
-const std::string satoshi_command(const transaction&);
-size_t satoshi_raw_size(const transaction& packet);
+const std::string satoshi_command(const transaction_type&);
+size_t satoshi_raw_size(const transaction_type& packet);
 template <typename Iterator>
-void satoshi_save(const transaction& packet, Iterator result)
+void satoshi_save(const transaction_type& packet, Iterator result)
 {
     serializer serial;
     save_transaction(serial, packet);
@@ -270,7 +268,7 @@ void satoshi_save(const transaction& packet, Iterator result)
     std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, transaction& packet)
+void satoshi_load(Iterator first, Iterator last, transaction_type& packet)
 {
     data_chunk stream(first, last);
     deserializer deserial(stream);
@@ -278,10 +276,10 @@ void satoshi_load(Iterator first, Iterator last, transaction& packet)
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
-const std::string satoshi_command(const block&);
-size_t satoshi_raw_size(const block& packet);
+const std::string satoshi_command(const block_type&);
+size_t satoshi_raw_size(const block_type& packet);
 template <typename Iterator>
-void satoshi_save(const block& packet, Iterator result)
+void satoshi_save(const block_type& packet, Iterator result)
 {
     serializer serial;
     serial.write_4_bytes(packet.version);
@@ -291,14 +289,14 @@ void satoshi_save(const block& packet, Iterator result)
     serial.write_4_bytes(packet.bits);
     serial.write_4_bytes(packet.nonce);
     serial.write_variable_uint(packet.transactions.size());
-    for (const message::transaction& tx: packet.transactions)
+    for (const transaction_type& tx: packet.transactions)
         save_transaction(serial, tx);
     data_chunk raw_data = serial.data();
     BITCOIN_ASSERT(satoshi_raw_size(packet) == raw_data.size());
     std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, block& packet)
+void satoshi_load(Iterator first, Iterator last, block_type& packet)
 {
     data_chunk stream(first, last);
     deserializer deserial(stream);
@@ -311,17 +309,17 @@ void satoshi_load(Iterator first, Iterator last, block& packet)
     uint64_t tx_count = deserial.read_variable_uint();
     for (size_t tx_i = 0; tx_i < tx_count; ++tx_i)
     {
-        message::transaction tx;
+        transaction_type tx;
         read_transaction(deserial, tx);
         packet.transactions.push_back(std::move(tx));
     }
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
-const std::string satoshi_command(const ping&);
-size_t satoshi_raw_size(const ping& packet);
+const std::string satoshi_command(const ping_type&);
+size_t satoshi_raw_size(const ping_type& packet);
 template <typename Iterator>
-void satoshi_save(const ping& packet, Iterator result)
+void satoshi_save(const ping_type& packet, Iterator result)
 {
     serializer serial;
     serial.write_8_bytes(packet.nonce);
@@ -330,7 +328,7 @@ void satoshi_save(const ping& packet, Iterator result)
     std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, ping& packet)
+void satoshi_load(Iterator first, Iterator last, ping_type& packet)
 {
     data_chunk stream(first, last);
     deserializer deserial(stream);
@@ -338,10 +336,10 @@ void satoshi_load(Iterator first, Iterator last, ping& packet)
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
-const std::string satoshi_command(const pong&);
-size_t satoshi_raw_size(const pong& packet);
+const std::string satoshi_command(const pong_type&);
+size_t satoshi_raw_size(const pong_type& packet);
 template <typename Iterator>
-void satoshi_save(const pong& packet, Iterator result)
+void satoshi_save(const pong_type& packet, Iterator result)
 {
     serializer serial;
     serial.write_8_bytes(packet.nonce);
@@ -350,7 +348,7 @@ void satoshi_save(const pong& packet, Iterator result)
     std::copy(raw_data.begin(), raw_data.end(), result);
 }
 template <typename Iterator>
-void satoshi_load(Iterator first, Iterator last, pong& packet)
+void satoshi_load(Iterator first, Iterator last, pong_type& packet)
 {
     data_chunk stream(first, last);
     deserializer deserial(stream);
@@ -358,7 +356,6 @@ void satoshi_load(Iterator first, Iterator last, pong& packet)
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
-} // message
 } // libbitcoin
 
 #endif

@@ -73,7 +73,7 @@ private:
         auto this_ptr = shared_from_this();
         const message::inventory_vector& inv = tx_hashes[tx_index];
         BITCOIN_ASSERT(inv.type ==
-            message::inventory_type::transaction);
+            message::inventory_type_id::transaction);
         size_t tx_hashes_size = tx_hashes.size();
         chain_.fetch_transaction(inv.hash,
             [this, this_ptr, tx_index, tx_hashes_size](

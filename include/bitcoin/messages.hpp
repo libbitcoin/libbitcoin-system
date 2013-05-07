@@ -1,154 +1,39 @@
 #ifndef LIBBITCOIN_MESSAGES_HPP
 #define LIBBITCOIN_MESSAGES_HPP
 
-#include <array>
-#include <cstdint>
-#include <string>
-#include <vector>
-
-#include <bitcoin/types.hpp>
-#include <bitcoin/script.hpp>
+#include <bitcoin/primitives.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-typedef std::vector<hash_digest> block_locator;
-
-typedef std::array<uint8_t, 16> ip_address;
-
-struct network_address
-{
-    uint32_t timestamp;
-    uint64_t services;
-    ip_address ip;
-    uint16_t port;
-};
-
-enum class inventory_type
-{
-    error,
-    transaction,
-    block,
-    none
-};
-
-struct inventory_vector
-{
-    inventory_type type;
-    hash_digest hash;
-};
-
-typedef std::vector<inventory_vector> inventory_list;
-
-struct header
-{
-    uint32_t magic;
-    std::string command;
-    uint32_t payload_length;
-    // Ignored by version and verack commands
-    uint32_t checksum;
-};
-
-struct version
-{
-    uint32_t version;
-    uint64_t services;
-    uint64_t timestamp;
-    network_address address_me;
-    network_address address_you;
-    uint64_t nonce;
-    std::string user_agent;
-    uint32_t start_depth;
-};
-
-struct verack
-{
-};
-
-struct get_address
-{
-};
-
-
-struct get_blocks
-{
-    // 10 sequential hashes, then exponential samples until reaching genesis
-    block_locator start_hashes;
-    hash_digest hash_stop;
-};
-
-struct output_point
-{
-    hash_digest hash;
-    uint32_t index;
-};
-
-// Not in the protocol but still useful
-typedef output_point input_point;
-typedef std::vector<input_point> input_point_list;
-typedef std::vector<output_point> output_point_list;
-
-struct transaction_input
-{
-    output_point previous_output;
-    script input_script;
-    uint32_t sequence;
-};
-
-struct transaction_output
-{
-    uint64_t value;
-    script output_script;
-};
-
-typedef std::vector<transaction_input> transaction_input_list;
-typedef std::vector<transaction_output> transaction_output_list;
-
-struct transaction
-{
-    uint32_t version;
-    uint32_t locktime;
-    transaction_input_list inputs;
-    transaction_output_list outputs;
-};
-typedef std::vector<transaction> transaction_list;
-
-struct block
-{
-    uint32_t version;
-    hash_digest previous_block_hash;
-    hash_digest merkle;
-    uint32_t timestamp;
-    uint32_t bits;
-    uint32_t nonce;
-    transaction_list transactions;
-};
-
-typedef std::vector<network_address> network_address_list;
-
-struct address
-{
-    network_address_list addresses;
-};
-
-struct get_data
-{
-    inventory_list inventories;
-};
-
-struct inventory
-{
-    inventory_list inventories;
-};
-
-struct ping
-{
-    uint64_t nonce;
-};
-struct pong
-{
-    uint64_t nonce;
-};
+typedef block_locator_type block_locator;
+typedef ip_address_type ip_address;
+typedef network_address_type network_address;
+typedef inventory_type_id inventory_type_id;
+typedef inventory_vector_type inventory_vector;
+typedef inventory_list inventory_list;
+typedef header_type header;
+typedef version_type version;
+typedef verack_type verack;
+typedef get_address_type get_address;
+typedef get_blocks_type get_blocks;
+typedef output_point output_point;
+typedef input_point input_point;
+typedef input_point_list input_point_list;
+typedef output_point_list output_point_list;
+typedef transaction_input_type transaction_input;
+typedef transaction_output_type transaction_output;
+typedef transaction_input_list transaction_input_list;
+typedef transaction_output_list transaction_output_list;
+typedef transaction_type transaction;
+typedef transaction_list transaction_list;
+typedef block_type block;
+typedef network_address_list network_address_list;
+typedef address_type address;
+typedef get_data_type get_data;
+typedef inventory_type inventory;
+typedef ping_type ping;
+typedef pong_type pong;
 
 } // message
 } // namespace libbitcoin

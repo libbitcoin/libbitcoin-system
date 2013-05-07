@@ -8,8 +8,9 @@
 
 namespace libbitcoin {
 
+struct transaction_type;
 namespace message {
-    struct transaction;
+    typedef transaction_type transaction;
 }
 
 enum class opcode
