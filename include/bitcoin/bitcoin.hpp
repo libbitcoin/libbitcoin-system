@@ -61,16 +61,17 @@
  *
  * These primitives make up the corpus of libbitcoin.
  *
- * - @link libbitcoin::message::version message::version @endlink
- * - @link libbitcoin::message::verack message::verack @endlink
- * - @link libbitcoin::message::address message::address @endlink
- * - @link libbitcoin::message::inventory message::inventory @endlink
- * - @link libbitcoin::message::get_data message::get_data @endlink
- * - @link libbitcoin::message::get_blocks message::get_blocks @endlink
- * - @link libbitcoin::message::transaction message::transaction @endlink
- * - @link libbitcoin::message::block message::block @endlink
- * - @link libbitcoin::message::get_address message::get_address @endlink
- * - @link libbitcoin::message::ping message::ping @endlink
+ * - @link libbitcoin::version_type version_type @endlink
+ * - @link libbitcoin::verack_type verack_type @endlink
+ * - @link libbitcoin::address_type address_type @endlink
+ * - @link libbitcoin::inventory_type inventory_type @endlink
+ * - @link libbitcoin::get_data_type get_data_type @endlink
+ * - @link libbitcoin::get_blocks_type get_blocks_type @endlink
+ * - @link libbitcoin::transaction_type transaction_type @endlink
+ * - @link libbitcoin::block_type block_type @endlink
+ * - @link libbitcoin::get_address_type get_address_type @endlink
+ * - @link libbitcoin::ping_type ping_type @endlink
+ * - @link libbitcoin::pong_type pong_type @endlink
  *
  * @section base Foundational
  *
