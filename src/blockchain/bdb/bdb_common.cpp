@@ -32,8 +32,8 @@ uint32_t bdb_common::find_last_block_depth(txn_guard_ptr txn)
 }
 
 bool bdb_common::fetch_spend(txn_guard_ptr txn,
-    const message::output_point& spent_output,
-    message::input_point& input_spend)
+    const output_point& spent_output,
+    input_point& input_spend)
 {
     readable_data_type search_spend;
     search_spend.set(bdb_create_spent_key(spent_output));
@@ -114,7 +114,7 @@ bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
         {
             const transaction_input_type& input =
                 block_tx.inputs[input_index];
-            const message::input_point inpoint{tx_hash, input_index};
+            const input_point inpoint{tx_hash, input_index};
             if (!mark_spent_outputs(txn, input.previous_output, inpoint))
                 return false;
         }
@@ -143,8 +143,8 @@ bool bdb_common::dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
 }
 
 bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
-    const message::output_point& previous_output,
-    const message::input_point& current_input)
+    const output_point& previous_output,
+    const input_point& current_input)
 {
     readable_data_type spent_key, spend_value;
     spent_key.set(bdb_create_spent_key(previous_output));
@@ -156,7 +156,7 @@ bool bdb_common::mark_spent_outputs(txn_guard_ptr txn,
 }
 
 bool bdb_common::add_address(txn_guard_ptr txn,
-    const script& output_script, const message::output_point& outpoint)
+    const script& output_script, const output_point& outpoint)
 {
     data_chunk raw_address = bdb_create_address_key(output_script);
     if (raw_address.empty())

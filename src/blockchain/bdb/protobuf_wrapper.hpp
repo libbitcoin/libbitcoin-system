@@ -1,7 +1,7 @@
 #ifndef LIBBITCOIN_PROTOBUF_WRAPPER_H
 #define LIBBITCOIN_PROTOBUF_WRAPPER_H
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 
 #include "bdb_bitcoin.pb.h"
 

@@ -5,7 +5,7 @@
 #include <boost/optional.hpp>
 
 #include <bitcoin/constants.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>
@@ -853,7 +853,7 @@ bool script::op_hash256()
 }
 
 inline void nullify_input_sequences(
-    message::transaction_input_list& inputs, uint32_t except_input)
+    transaction_input_list& inputs, uint32_t except_input)
 {
     for (size_t i = 0; i < inputs.size(); ++i)
         if (i != except_input)
@@ -885,7 +885,7 @@ hash_digest script::generate_signature_hash(
     }
     else if ((hash_type & 0x1f) == sighash::single)
     {
-        message::transaction_output_list& outputs = parent_tx.outputs;
+        transaction_output_list& outputs = parent_tx.outputs;
 
         uint32_t output_index = input_index;
         if (output_index >= outputs.size())

@@ -32,10 +32,10 @@ public:
 
 private:
     bool clear_transaction_data(const transaction_type& remove_tx);
-    bool remove_spend(const message::output_point& previous_output,
-        const message::input_point& current_input);
+    bool remove_spend(const output_point& previous_output,
+        const input_point& current_input);
     bool remove_address(const script& output_script,
-        const message::output_point& outpoint);
+        const output_point& outpoint);
 
     txn_guard_ptr txn_;
 

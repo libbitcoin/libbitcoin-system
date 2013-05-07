@@ -65,7 +65,7 @@ public:
     void fetch_transaction_index(const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch);
     // fetch spend of an output point
-    void fetch_spend(const message::output_point& outpoint,
+    void fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch);
     // fetch outputs associated with an address
     void fetch_outputs(const payment_address& address,
@@ -95,7 +95,7 @@ private:
         fetch_handler_transaction handle_fetch);
     void do_fetch_transaction_index(const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch);
-    void do_fetch_spend(const message::output_point& outpoint,
+    void do_fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch);
     void do_fetch_outputs(const payment_address& address,
         fetch_handler_outputs handle_fetch);

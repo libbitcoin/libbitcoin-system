@@ -180,7 +180,7 @@ void protocol::seeds::request_addresses(
     }
     else
     {
-        dns_seed_node->send(message::get_address(),
+        dns_seed_node->send(get_address_type(),
             strand_.wrap(std::bind(&protocol::seeds::handle_send_get_address,
                 shared_from_this(), _1)));
         dns_seed_node->subscribe_address(
@@ -342,7 +342,7 @@ void protocol::setup_new_channel(channel_ptr node)
         strand_.wrap(std::bind(&protocol::channel_stopped,
             this, _1, node)));
     subscribe_address(node);
-    node->send(message::get_address(), handle_send);
+    node->send(get_address_type(), handle_send);
     // Notify subscribers
     channel_subscribe_->relay(node);
 }

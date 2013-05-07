@@ -106,7 +106,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 {
     if (buffer_.empty())
     {
-        handle_fetch(error::not_found, message::network_address());
+        handle_fetch(error::not_found, network_address_type());
         return;
     }
     size_t index = rand() % buffer_.size();

@@ -8,7 +8,7 @@
 
 #include <boost/circular_buffer.hpp>
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/async_service.hpp>
 
 namespace libbitcoin {

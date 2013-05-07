@@ -5,7 +5,7 @@
 #include <system_error>
 
 #include <bitcoin/types.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/network/channel.hpp>
 #include <bitcoin/async_service.hpp>

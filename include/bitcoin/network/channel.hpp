@@ -13,7 +13,7 @@
 
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/shared_const_buffer.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/utility/assert.hpp>

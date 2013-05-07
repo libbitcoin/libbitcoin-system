@@ -141,7 +141,7 @@ bool bdb_chain_keeper::clear_transaction_data(
         {
             const transaction_input_type& input =
                 remove_tx.inputs[input_index];
-            const message::input_point inpoint{tx_hash, input_index};
+            const input_point inpoint{tx_hash, input_index};
             if (!remove_spend(input.previous_output, inpoint))
                 return false;
         }
@@ -158,8 +158,8 @@ bool bdb_chain_keeper::clear_transaction_data(
 }
 
 bool bdb_chain_keeper::remove_spend(
-    const message::output_point& previous_output,
-    const message::input_point& current_input)
+    const output_point& previous_output,
+    const input_point& current_input)
 {
     readable_data_type spent_key;
     spent_key.set(bdb_create_spent_key(previous_output));
@@ -170,7 +170,7 @@ bool bdb_chain_keeper::remove_spend(
 }
 
 bool bdb_chain_keeper::remove_address(const script& output_script,
-    const message::output_point& outpoint)
+    const output_point& outpoint)
 {
     data_chunk raw_address = bdb_create_address_key(output_script);
     if (raw_address.empty())

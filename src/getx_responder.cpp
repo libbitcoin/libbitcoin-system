@@ -32,7 +32,7 @@ void getx_responder::receive_get_data(const std::error_code& ec,
     {
         switch (inv.type)
         {
-            case message::inventory_type_id::transaction:
+            case inventory_type_id::transaction:
                 // First attempt lookup in faster pool, then do slow
                 // lookup in blockchain after.
                 txpool_.fetch(inv.hash,
@@ -41,7 +41,7 @@ void getx_responder::receive_get_data(const std::error_code& ec,
                             this, _1, _2, inv.hash, node)));
                 break;
 
-            case message::inventory_type_id::block:
+            case inventory_type_id::block:
                 fetch_block(chain_, inv.hash,
                     service_.wrap(std::bind(
                         &getx_responder::send_block,
@@ -49,8 +49,8 @@ void getx_responder::receive_get_data(const std::error_code& ec,
                 break;
 
             // Ignore everything else
-            case message::inventory_type_id::error:
-            case message::inventory_type_id::none:
+            case inventory_type_id::error:
+            case inventory_type_id::none:
             default:
                 break;
         }

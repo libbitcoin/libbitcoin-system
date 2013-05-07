@@ -6,7 +6,7 @@
 
 #include <bitcoin/async_service.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
 
 namespace libbitcoin {
@@ -102,7 +102,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,      // Status of operation
-     *      const message::transaction& tx  // Transaction
+     *      const transaction_type& tx  // Transaction
      *  );
      * @endcode
      */

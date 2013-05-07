@@ -78,9 +78,9 @@ bool bdb_validate_block::transaction_exists(const hash_digest& tx_hash)
     return !tx_after_fork(proto_tx, fork_index_);
 }
 
-bool bdb_validate_block::is_output_spent(const message::output_point& outpoint)
+bool bdb_validate_block::is_output_spent(const output_point& outpoint)
 {
-    message::input_point input_spend;
+    input_point input_spend;
     if (!common_->fetch_spend(txn_, outpoint, input_spend))
         return false;
     // Lookup block depth
@@ -127,7 +127,7 @@ bool bdb_validate_block::fetch_orphan_transaction(transaction_type& tx,
 }
 
 bool bdb_validate_block::is_output_spent(
-    const message::output_point& previous_output,
+    const output_point& previous_output,
     size_t index_in_parent, size_t input_index)
 {
     // Search for double spends
@@ -142,7 +142,7 @@ bool bdb_validate_block::is_output_spent(
 }
 
 bool bdb_validate_block::orphan_is_spent(
-    const message::output_point& previous_output,
+    const output_point& previous_output,
     size_t skip_tx, size_t skip_input)
 {
     // TODO factor this to look nicer

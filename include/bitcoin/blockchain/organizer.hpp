@@ -4,7 +4,7 @@
 #include <boost/circular_buffer.hpp>
 
 #include <bitcoin/block.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/utility/big_number.hpp>
 

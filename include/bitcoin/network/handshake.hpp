@@ -3,7 +3,7 @@
 
 #include <atomic>
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/async_service.hpp>
 

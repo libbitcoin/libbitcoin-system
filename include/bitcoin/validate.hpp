@@ -5,7 +5,7 @@
 #include <memory>
 #include <boost/optional/optional.hpp>
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/transaction_pool.hpp>
 
@@ -38,7 +38,7 @@ private:
     const transaction_type* fetch(const hash_digest& tx_hash) const;
 
     void handle_duplicate_check(const std::error_code& ec);
-    bool is_spent(const message::output_point outpoint) const;
+    bool is_spent(const output_point outpoint) const;
 
     // Used for checking coinbase maturity
     void set_last_depth(const std::error_code& ec, size_t last_depth);
@@ -85,7 +85,7 @@ protected:
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
     virtual uint64_t median_time_past() = 0;
     virtual bool transaction_exists(const hash_digest& tx_hash) = 0;
-    virtual bool is_output_spent(const message::output_point& outpoint) = 0;
+    virtual bool is_output_spent(const output_point& outpoint) = 0;
     // These have optional implementations that can be overriden
     virtual bool validate_inputs(const transaction_type& tx,
         size_t index_in_parent, uint64_t& value_in, size_t& total_sigops);
@@ -95,7 +95,7 @@ protected:
     virtual bool fetch_transaction(transaction_type& tx,
         size_t& previous_depth, const hash_digest& tx_hash) = 0;
     virtual bool is_output_spent(
-        const message::output_point& previous_output,
+        const output_point& previous_output,
         size_t index_in_parent, size_t input_index) = 0;
 
     static size_t script_hash_signature_operations_count(

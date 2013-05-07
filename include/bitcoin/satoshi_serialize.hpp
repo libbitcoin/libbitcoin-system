@@ -3,7 +3,7 @@
 
 #include <bitcoin/constants.hpp>
 #include <bitcoin/format.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>

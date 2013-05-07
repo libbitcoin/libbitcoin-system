@@ -40,7 +40,7 @@ private:
         else if (ec)
         {
             stopped_ = true;
-            handle_(ec, message::block());
+            handle_(ec, block_type());
             return true;
         }
         return false;
@@ -55,7 +55,7 @@ private:
     }
 
     void fetch_transactions(const std::error_code& ec,
-        const message::inventory_list& tx_hashes)
+        const inventory_list& tx_hashes)
     {
         if (stop_on_error(ec))
             return;
@@ -68,12 +68,12 @@ private:
         }
     }
 
-    void fetch_tx(const message::inventory_list& tx_hashes, size_t tx_index)
+    void fetch_tx(const inventory_list& tx_hashes, size_t tx_index)
     {
         auto this_ptr = shared_from_this();
         const inventory_vector_type& inv = tx_hashes[tx_index];
         BITCOIN_ASSERT(inv.type ==
-            message::inventory_type_id::transaction);
+            inventory_type_id::transaction);
         size_t tx_hashes_size = tx_hashes.size();
         chain_.fetch_transaction(inv.hash,
             [this, this_ptr, tx_index, tx_hashes_size](
@@ -144,7 +144,7 @@ private:
         else if (ec)
         {
             stopped_ = true;
-            handle_(ec, message::block_locator());
+            handle_(ec, block_locator_type());
             return true;
         }
         return false;

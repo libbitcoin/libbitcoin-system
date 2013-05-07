@@ -298,7 +298,7 @@ void bdb_blockchain::fetch_block_header_by_depth(size_t depth,
     if (!fetch_block_header_impl(txn, depth, common_, serial_block))
     {
         txn->abort();
-        handle_fetch(error::not_found, message::block());
+        handle_fetch(error::not_found, block_type());
         return;
     }
     txn->commit();
@@ -321,7 +321,7 @@ void bdb_blockchain::fetch_block_header_by_hash(
     if (!fetch_block_header_impl(txn, block_hash, common_, serial_block))
     {
         txn->abort();
-        handle_fetch(error::not_found, message::block());
+        handle_fetch(error::not_found, block_type());
         return;
     }
     txn->commit();
@@ -337,15 +337,15 @@ void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
     if (!proto_block.IsInitialized())
     {
         txn->abort();
-        handle_fetch(error::not_found, message::inventory_list());
+        handle_fetch(error::not_found, inventory_list());
         return;
     }
     txn->commit();
-    message::inventory_list tx_hashes;
+    inventory_list tx_hashes;
     for (const std::string& raw_tx_hash: proto_block.transactions())
     {
         inventory_vector_type tx_inv;
-        tx_inv.type = message::inventory_type_id::transaction;
+        tx_inv.type = inventory_type_id::transaction;
         BITCOIN_ASSERT(raw_tx_hash.size() == tx_inv.hash.size());
         std::copy(raw_tx_hash.begin(), raw_tx_hash.end(),
             tx_inv.hash.begin());
@@ -437,7 +437,7 @@ void bdb_blockchain::do_fetch_transaction(const hash_digest& transaction_hash,
     txn->commit();
     if (!proto_tx.IsInitialized())
     {
-        handle_fetch(error::not_found, message::transaction());
+        handle_fetch(error::not_found, transaction_type());
         return;
     }
     transaction_type tx = proto_to_transaction(proto_tx);
@@ -477,22 +477,22 @@ void bdb_blockchain::do_fetch_transaction_index(
     handle_fetch(std::error_code(), parent_block_depth, index_in_parent);
 }
 
-void bdb_blockchain::fetch_spend(const message::output_point& outpoint,
+void bdb_blockchain::fetch_spend(const output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
     queue(
         std::bind(&bdb_blockchain::do_fetch_spend,
             this, outpoint, handle_fetch));
 }
-void bdb_blockchain::do_fetch_spend(const message::output_point& outpoint,
+void bdb_blockchain::do_fetch_spend(const output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    message::input_point input_spend;
+    input_point input_spend;
     if (!common_->fetch_spend(txn, outpoint, input_spend))
     {
         txn->abort();
-        handle_fetch(error::unspent_output, message::input_point());
+        handle_fetch(error::unspent_output, input_point());
         return;
     }
     txn->commit();
@@ -504,7 +504,7 @@ void bdb_blockchain::fetch_outputs(const payment_address& address,
 {
     if (address.type() != payment_type::pubkey_hash)
         handle_fetch(error::unsupported_payment_type,
-            message::output_point_list());
+            output_point_list());
     else
         queue(
             std::bind(&bdb_blockchain::do_fetch_outputs,
@@ -514,7 +514,7 @@ void bdb_blockchain::do_fetch_outputs(const payment_address& address,
     fetch_handler_outputs handle_fetch)
 {
     // Associated outputs
-    message::output_point_list assoc_outs;
+    output_point_list assoc_outs;
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
     Dbc* cursor;
     db_address_->cursor(txn->get(), &cursor, 0);
@@ -529,7 +529,7 @@ void bdb_blockchain::do_fetch_outputs(const payment_address& address,
     int ret = cursor->get(key.get(), value.get(), DB_SET);
     while (ret != DB_NOTFOUND)
     {
-        message::output_point outpoint;
+        output_point outpoint;
         // We need a copy not a temporary
         data_chunk raw_outpoint(value.data());
         // Then read the value off

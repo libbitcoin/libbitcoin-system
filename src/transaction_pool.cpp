@@ -95,7 +95,7 @@ void transaction_pool::fetch(const hash_digest& transaction_hash,
                     handle_fetch(std::error_code(), entry.tx);
                     return;
                 }
-            handle_fetch(error::not_found, message::transaction());
+            handle_fetch(error::not_found, transaction_type());
         });
 }
 

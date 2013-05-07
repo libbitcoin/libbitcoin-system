@@ -77,7 +77,7 @@ void session::set_start_depth(const std::error_code& ec, size_t fork_point,
     for (auto block: new_blocks)
     {
         blocks_inv.inventories.push_back({
-            message::inventory_type_id::block,
+            inventory_type_id::block,
             hash_block_header(*block)});
     }
     protocol_.broadcast(blocks_inv);
@@ -93,11 +93,11 @@ void session::inventory(const std::error_code& ec,
     }
     for (const inventory_vector_type& ivec: packet.inventories)
     {
-        if (ivec.type == message::inventory_type_id::transaction)
+        if (ivec.type == inventory_type_id::transaction)
             strand_.post(
                 std::bind(&session::new_tx_inventory,
                     this, ivec.hash, node));
-        else if (ivec.type == message::inventory_type_id::block);
+        else if (ivec.type == inventory_type_id::block);
             // Do nothing. Handled by poller.
         else
             log_warning(log_domain::session)
@@ -161,7 +161,7 @@ void session::request_tx_data(bool tx_exists,
         return;
     get_data_type request_tx;
     request_tx.inventories.push_back(
-        {message::inventory_type_id::transaction, tx_hash});
+        {inventory_type_id::transaction, tx_hash});
     node->send(request_tx, handle_send_get_data);
 }
 

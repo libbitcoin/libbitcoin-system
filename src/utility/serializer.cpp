@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <string>
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/types.hpp>

@@ -58,7 +58,7 @@ hash_digest build_merkle_tree(hash_list& merkle)
     return merkle[0];
 }
 
-hash_digest generate_merkle_root(const message::transaction_list& transactions)
+hash_digest generate_merkle_root(const transaction_list& transactions)
 {
     hash_list tx_hashes;
     for (transaction_type tx: transactions)
@@ -100,7 +100,7 @@ std::string pretty(const transaction_type& tx)
     return ss.str();
 }
 
-bool previous_output_is_null(const message::output_point& previous_output)
+bool previous_output_is_null(const output_point& previous_output)
 {
     return previous_output.index == std::numeric_limits<uint32_t>::max() &&
         previous_output.hash == null_hash;
@@ -120,8 +120,8 @@ uint64_t total_output_value(const transaction_type& tx)
     return total;
 }
 
-bool operator==(const message::output_point& output_a,
-    const message::output_point& output_b)
+bool operator==(const output_point& output_a,
+    const output_point& output_b)
 {
     return output_a.hash == output_b.hash && output_a.index == output_b.index;
 }

@@ -100,7 +100,7 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
     for (size_t input_index = 0; input_index < tx_.inputs.size(); 
         ++input_index)
     {
-        const message::output_point& previous_output =
+        const output_point& previous_output =
             tx_.inputs[input_index].previous_output;
         if (is_spent(previous_output))
         {
@@ -116,7 +116,7 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
         &validate_transaction::set_last_depth, shared_from_this(), _1, _2)));
 }
  
-bool validate_transaction::is_spent(const message::output_point outpoint) const
+bool validate_transaction::is_spent(const output_point outpoint) const
 {
     for (const transaction_entry_info& entry: pool_)
         for (const transaction_input_type current_input: entry.tx.inputs)
@@ -220,7 +220,7 @@ bool validate_transaction::connect_input(
     size_t last_block_depth, uint64_t& value_in)
 {
     const transaction_input_type& input = tx.inputs[current_input];
-    const message::output_point& previous_outpoint =
+    const output_point& previous_outpoint =
         tx.inputs[current_input].previous_output;
     if (previous_outpoint.index >= previous_tx.outputs.size())
         return false;
@@ -703,7 +703,7 @@ bool validate_block::connect_input(size_t index_in_parent,
     // Lookup previous output
     BITCOIN_ASSERT(input_index < current_tx.inputs.size());
     const transaction_input_type& input = current_tx.inputs[input_index];
-    const message::output_point& previous_output = input.previous_output;
+    const output_point& previous_output = input.previous_output;
     transaction_type previous_tx;
     size_t previous_depth;
     if (!fetch_transaction(previous_tx, previous_depth, previous_output.hash))

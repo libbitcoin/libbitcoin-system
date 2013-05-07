@@ -5,7 +5,7 @@
 
 #include <bitcoin/types.hpp>
 #include <bitcoin/async_service.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 
 namespace libbitcoin {
 

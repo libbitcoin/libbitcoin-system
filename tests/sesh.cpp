@@ -1,3 +1,4 @@
+#include <future>
 #include <bitcoin/bitcoin.hpp>
 using namespace libbitcoin;
 
@@ -107,14 +108,6 @@ void handle_mempool_store(
     }
 }
 
-void blockchain_started(const std::error_code& ec)
-{
-    if (ec)
-        error_exit(ec.message());
-    else
-        log_info() << "Blockchain initialized!";
-}
-
 int main()
 {
     //bdb_blockchain::setup("database");
@@ -126,7 +119,17 @@ int main()
     prot.subscribe_channel(monitor_tx);
 
     leveldb_blockchain chain(disk_service);
+    std::promise<std::error_code> ec_promise;
+    auto blockchain_started =
+        [&ec_promise](const std::error_code& ec)
+        {
+            ec_promise.set_value(ec);
+        };
     chain.start("database", blockchain_started);
+    std::error_code ec = ec_promise.get_future().get();
+    if (ec)
+        error_exit(ec.message());
+
     poller poll(mempool_service, chain);
 
     transaction_pool txpool(mempool_service, chain);

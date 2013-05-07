@@ -131,7 +131,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
             const transaction_input_type& input =
                 remove_tx.inputs[input_index];
             // We could check if the spend matches the inpoint for safety.
-            //const message::input_point inpoint{tx_hash, input_index};
+            //const input_point inpoint{tx_hash, input_index};
             // Recreate the key...
             data_chunk spent_key = create_spent_key(input.previous_output);
             // ... Perform the delete.
@@ -151,7 +151,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
 }
 
 bool leveldb_chain_keeper::remove_address(leveldb::WriteBatch& batch,
-    const script& output_script, const message::output_point& outpoint)
+    const script& output_script, const output_point& outpoint)
 {
     data_chunk raw_address = create_address_key(output_script);
     if (raw_address.empty())
@@ -182,7 +182,7 @@ bool leveldb_chain_keeper::remove_address(leveldb::WriteBatch& batch,
         BITCOIN_ASSERT(raw_outpoint.size() == outpoint_size);
         // Then read the value off
         deserializer deserial(raw_outpoint);
-        message::output_point current_outpoint;
+        output_point current_outpoint;
         current_outpoint.hash = deserial.read_hash();
         current_outpoint.index = deserial.read_4_bytes();
         // We continue looping so other entries still get copied and remain.

@@ -1,7 +1,7 @@
 #ifndef LIBBITCOIN_BLOCK_HPP
 #define LIBBITCOIN_BLOCK_HPP
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {

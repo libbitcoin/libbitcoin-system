@@ -28,8 +28,8 @@ handshake::handshake(async_service& service)
     template_version_.address_me.port = 8333;
     template_version_.address_you.services = template_version_.services;
     template_version_.address_you.ip = 
-        message::ip_address{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-                            0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
+        ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                        0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
     template_version_.address_you.port = 8333;
     template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_LIB_VERSION "/";
     template_version_.start_depth = 0;
@@ -77,7 +77,7 @@ void handshake::receive_version(const std::error_code& ec,
     if (ec)
         completion_callback(ec);
     else
-        node->send(message::verack(),
+        node->send(verack_type(),
             strand_.wrap(std::bind(&handshake::handle_message_sent,
                 this, _1, counter, completion_callback)));
 }
@@ -151,8 +151,8 @@ bool handshake::lookup_external(const std::string& website,
 
 ip_address_type handshake::localhost_ip()
 {
-    return message::ip_address{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-                               0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
+    return ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                           0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
 }
 
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
@@ -167,7 +167,7 @@ void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
         corroborate_ips.push_back(lookup_ip);
     if (corroborate_ips.empty())
     {
-        handle_discover(error::bad_stream, message::ip_address());
+        handle_discover(error::bad_stream, ip_address_type());
         return;
     }
     // Make sure that the IPs are the same
@@ -177,7 +177,7 @@ void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
         if (match_ip != template_version_.address_me.ip)
         {
             template_version_.address_me.ip = localhost_ip();
-            handle_discover(error::bad_stream, message::ip_address());
+            handle_discover(error::bad_stream, ip_address_type());
             return;
         }
     }

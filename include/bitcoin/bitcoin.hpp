@@ -160,7 +160,7 @@
 #include <bitcoin/constants.hpp>
 #include <bitcoin/getx_responder.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>
