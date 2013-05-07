@@ -162,14 +162,14 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     return true;
 }
 
-void leveldb_blockchain::store(const message::block& stored_block, 
+void leveldb_blockchain::store(const block_type& stored_block,
     store_block_handler handle_store)
 {
     queue(
         std::bind(&leveldb_blockchain::do_store,
             this, stored_block, handle_store));
 }
-void leveldb_blockchain::do_store(const message::block& stored_block,
+void leveldb_blockchain::do_store(const block_type& stored_block,
     store_block_handler handle_store)
 {
     block_detail_ptr stored_detail =
@@ -190,14 +190,14 @@ void leveldb_blockchain::do_store(const message::block& stored_block,
     handle_store(stored_detail->errc(), stored_detail->info());
 }
 
-void leveldb_blockchain::import(const message::block& import_block,
+void leveldb_blockchain::import(const block_type& import_block,
     size_t depth, import_block_handler handle_import)
 {
     queue(
         std::bind(&leveldb_blockchain::do_import,
             this, import_block, depth, handle_import));
 }
-void leveldb_blockchain::do_import(const message::block& import_block,
+void leveldb_blockchain::do_import(const block_type& import_block,
     size_t depth, import_block_handler handle_import)
 {
     if (!common_->save_block(depth, import_block))
@@ -210,7 +210,7 @@ void leveldb_blockchain::do_import(const message::block& import_block,
 
 template<typename Index>
 bool fetch_block_header_impl(const Index& index,
-    leveldb_common_ptr common, message::block& serial_block)
+    leveldb_common_ptr common, block_type& serial_block)
 {
     protobuf::Block proto_block = common->fetch_proto_block(index);
     if (!proto_block.IsInitialized())
@@ -230,10 +230,10 @@ void leveldb_blockchain::fetch_block_header(size_t depth,
 void leveldb_blockchain::fetch_block_header_by_depth(size_t depth,
     fetch_handler_block_header handle_fetch)
 {
-    message::block serial_block;
+    block_type serial_block;
     if (!fetch_block_header_impl(depth, common_, serial_block))
     {
-        handle_fetch(error::not_found, message::block());
+        handle_fetch(error::not_found, block_type());
         return;
     }
     handle_fetch(std::error_code(), serial_block);
@@ -250,10 +250,10 @@ void leveldb_blockchain::fetch_block_header(const hash_digest& block_hash,
 void leveldb_blockchain::fetch_block_header_by_hash(
     const hash_digest& block_hash, fetch_handler_block_header handle_fetch)
 {
-    message::block serial_block;
+    block_type serial_block;
     if (!fetch_block_header_impl(block_hash, common_, serial_block))
     {
-        handle_fetch(error::not_found, message::block());
+        handle_fetch(error::not_found, block_type());
         return;
     }
     handle_fetch(std::error_code(), serial_block);
@@ -266,14 +266,14 @@ void fetch_blk_tx_hashes_impl(const Index& index,
     protobuf::Block proto_block = common->fetch_proto_block(index);
     if (!proto_block.IsInitialized())
     {
-        handle_fetch(error::not_found, message::inventory_list());
+        handle_fetch(error::not_found, inventory_list());
         return;
     }
-    message::inventory_list tx_hashes;
+    inventory_list tx_hashes;
     for (const std::string& raw_tx_hash: proto_block.transactions())
     {
-        message::inventory_vector tx_inv;
-        tx_inv.type = message::inventory_type::transaction;
+        inventory_vector_type tx_inv;
+        tx_inv.type = inventory_type_id::transaction;
         BITCOIN_ASSERT(raw_tx_hash.size() == tx_inv.hash.size());
         std::copy(raw_tx_hash.begin(), raw_tx_hash.end(),
             tx_inv.hash.begin());
@@ -355,10 +355,10 @@ void leveldb_blockchain::do_fetch_transaction(
         common_->fetch_proto_transaction(transaction_hash);
     if (!proto_tx.IsInitialized())
     {
-        handle_fetch(error::not_found, message::transaction());
+        handle_fetch(error::not_found, transaction_type());
         return;
     }
-    message::transaction tx = protobuf_to_transaction(proto_tx);
+    transaction_type tx = protobuf_to_transaction(proto_tx);
     handle_fetch(std::error_code(), tx);
 }
 
@@ -385,7 +385,7 @@ void leveldb_blockchain::do_fetch_transaction_index(
         proto_tx.parent().depth(), proto_tx.parent().index());
 }
 
-void leveldb_blockchain::fetch_spend(const message::output_point& outpoint,
+void leveldb_blockchain::fetch_spend(const output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
     queue(
@@ -393,13 +393,13 @@ void leveldb_blockchain::fetch_spend(const message::output_point& outpoint,
             this, outpoint, handle_fetch));
 }
 void leveldb_blockchain::do_fetch_spend(
-    const message::output_point& outpoint,
+    const output_point& outpoint,
     fetch_handler_spend handle_fetch)
 {
-    message::input_point input_spend;
+    input_point input_spend;
     if (!common_->fetch_spend(outpoint, input_spend))
     {
-        handle_fetch(error::unspent_output, message::input_point());
+        handle_fetch(error::unspent_output, input_point());
         return;
     }
     handle_fetch(std::error_code(), input_spend);
@@ -410,7 +410,7 @@ void leveldb_blockchain::fetch_outputs(const payment_address& address,
 {
     if (address.type() != payment_type::pubkey_hash)
         handle_fetch(error::unsupported_payment_type,
-            message::output_point_list());
+            output_point_list());
     else
         queue(
             std::bind(&leveldb_blockchain::do_fetch_outputs,
@@ -420,7 +420,7 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
     fetch_handler_outputs handle_fetch)
 {
     // Associated outputs
-    message::output_point_list assoc_outs;
+    output_point_list assoc_outs;
     // version byte + hash for key
     serializer serial;
     serial.write_byte(address.version());
@@ -432,13 +432,13 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
         leveldb::ReadOptions(), slice(raw_address), &raw_outpoints);
     if (status.IsNotFound())
     {
-        handle_fetch(error::not_found, message::output_point_list());
+        handle_fetch(error::not_found, output_point_list());
         return;
     }
     else if (!status.ok())
     {
         handle_fetch(error::operation_failed,
-            message::output_point_list());
+            output_point_list());
         log_error() << "Error fetch_outputs: " << status.ToString();
         return;
     }
@@ -452,7 +452,7 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
         data_chunk raw_outpoint(it, it + outpoint_size);
         // Then read the value off
         deserializer deserial(raw_outpoint);
-        message::output_point outpoint;
+        output_point outpoint;
         outpoint.hash = deserial.read_hash();
         outpoint.index = deserial.read_4_bytes();
         assoc_outs.push_back(outpoint);

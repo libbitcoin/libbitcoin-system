@@ -27,9 +27,9 @@ public:
 
 private:
     bool clear_transaction_data(leveldb_transaction_batch& batch,
-        const message::transaction& remove_tx);
+        const transaction_type& remove_tx);
     bool remove_address(leveldb::WriteBatch& batch,
-        const script& output_script, const message::output_point& outpoint);
+        const script& output_script, const output_point& outpoint);
 
     leveldb_common_ptr common_;
 

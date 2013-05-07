@@ -12,7 +12,7 @@ namespace libbitcoin {
 
 typedef std::vector<hash_digest> hash_list;
 
-hash_digest hash_transaction_impl(const message::transaction& tx, 
+hash_digest hash_transaction_impl(const transaction_type& tx, 
     uint32_t* hash_type_code)
 {
     data_chunk serialized_tx(satoshi_raw_size(tx));
@@ -22,11 +22,11 @@ hash_digest hash_transaction_impl(const message::transaction& tx,
     return generate_sha256_hash(serialized_tx);
 }
 
-hash_digest hash_transaction(const message::transaction& tx)
+hash_digest hash_transaction(const transaction_type& tx)
 {
     return hash_transaction_impl(tx, nullptr);
 }
-hash_digest hash_transaction(const message::transaction& tx, 
+hash_digest hash_transaction(const transaction_type& tx,
     uint32_t hash_type_code)
 {
     return hash_transaction_impl(tx, &hash_type_code);
@@ -58,15 +58,15 @@ hash_digest build_merkle_tree(hash_list& merkle)
     return merkle[0];
 }
 
-hash_digest generate_merkle_root(const message::transaction_list& transactions)
+hash_digest generate_merkle_root(const transaction_list& transactions)
 {
     hash_list tx_hashes;
-    for (message::transaction tx: transactions)
+    for (transaction_type tx: transactions)
         tx_hashes.push_back(hash_transaction(tx));
     return build_merkle_tree(tx_hashes);
 }
 
-std::string pretty(const message::transaction_input& input)
+std::string pretty(const transaction_input_type& input)
 {
     std::ostringstream ss;
     ss << "\thash = " << input.previous_output.hash << "\n"
@@ -76,7 +76,7 @@ std::string pretty(const message::transaction_input& input)
     return ss.str();
 }
 
-std::string pretty(const message::transaction_output& output)
+std::string pretty(const transaction_output_type& output)
 {
     std::ostringstream ss;
     ss << "\tvalue = " << output.value << "\n"
@@ -84,54 +84,54 @@ std::string pretty(const message::transaction_output& output)
     return ss.str();
 }
 
-std::string pretty(const message::transaction& tx)
+std::string pretty(const transaction_type& tx)
 {
     std::ostringstream ss;
     ss << "Transaction:\n"
         << "\tversion = " << tx.version << "\n"
         << "\tlocktime = " << tx.locktime << "\n"
         << "Inputs:\n";
-    for (message::transaction_input input: tx.inputs)
+    for (transaction_input_type input: tx.inputs)
         ss << pretty(input);
     ss << "Outputs:\n";
-    for (message::transaction_output output: tx.outputs)
+    for (transaction_output_type output: tx.outputs)
         ss << pretty(output);
     ss << "\n";
     return ss.str();
 }
 
-bool previous_output_is_null(const message::output_point& previous_output)
+bool previous_output_is_null(const output_point& previous_output)
 {
     return previous_output.index == std::numeric_limits<uint32_t>::max() &&
         previous_output.hash == null_hash;
 }
 
-bool is_coinbase(const message::transaction& tx)
+bool is_coinbase(const transaction_type& tx)
 {
     return tx.inputs.size() == 1 && 
         previous_output_is_null(tx.inputs[0].previous_output);
 }
 
-uint64_t total_output_value(const message::transaction& tx)
+uint64_t total_output_value(const transaction_type& tx)
 {
     uint64_t total = 0;
-    for (const message::transaction_output& output: tx.outputs)
+    for (const transaction_output_type& output: tx.outputs)
         total += output.value;
     return total;
 }
 
-bool operator==(const message::output_point& output_a,
-    const message::output_point& output_b)
+bool operator==(const output_point& output_a,
+    const output_point& output_b)
 {
     return output_a.hash == output_b.hash && output_a.index == output_b.index;
 }
 
-bool is_final(const message::transaction_input& tx_input)
+bool is_final(const transaction_input_type& tx_input)
 {
     return tx_input.sequence == std::numeric_limits<uint32_t>::max();
 }
 
-bool is_final(const message::transaction& tx,
+bool is_final(const transaction_type& tx,
     size_t block_depth, uint32_t block_time)
 {
     if (tx.locktime == 0)
@@ -141,7 +141,7 @@ bool is_final(const message::transaction& tx,
         max_locktime = block_depth;
     if (tx.locktime < max_locktime)
         return true;
-    for (const message::transaction_input& tx_input: tx.inputs)
+    for (const transaction_input_type& tx_input: tx.inputs)
         if (!is_final(tx_input))
             return false;
     return true;

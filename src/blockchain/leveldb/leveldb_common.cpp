@@ -26,8 +26,8 @@ uint32_t leveldb_common::find_last_block_depth()
     return recreate_depth(it->key());
 }
 
-bool leveldb_common::fetch_spend(const message::output_point& spent_output,
-    message::input_point& input_spend)
+bool leveldb_common::fetch_spend(const output_point& spent_output,
+    input_point& input_spend)
 {
     data_chunk spent_key = create_spent_key(spent_output);
     std::string raw_spend;
@@ -48,7 +48,7 @@ bool leveldb_common::fetch_spend(const message::output_point& spent_output,
 }
 
 bool leveldb_common::save_block(
-    uint32_t depth, const message::block& serial_block)
+    uint32_t depth, const block_type& serial_block)
 {
     leveldb_transaction_batch batch;
     protobuf::Block proto_block =
@@ -56,7 +56,7 @@ bool leveldb_common::save_block(
     for (uint32_t tx_index = 0;
         tx_index < serial_block.transactions.size(); ++tx_index)
     {
-        const message::transaction& block_tx =
+        const transaction_type& block_tx =
             serial_block.transactions[tx_index];
         const hash_digest& tx_hash = hash_transaction(block_tx);
         if (!save_transaction(batch, depth, tx_index, tx_hash, block_tx))
@@ -90,7 +90,7 @@ bool leveldb_common::save_block(
 
 bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
     uint32_t block_depth, uint32_t tx_index,
-    const hash_digest& tx_hash, const message::transaction& block_tx)
+    const hash_digest& tx_hash, const transaction_type& block_tx)
 {
     if (duplicate_exists(tx_hash, block_depth, tx_index))
         return true;
@@ -111,9 +111,9 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
         for (uint32_t input_index = 0; input_index < block_tx.inputs.size();
             ++input_index)
         {
-            const message::transaction_input& input = 
+            const transaction_input_type& input =
                 block_tx.inputs[input_index];
-            const message::input_point inpoint{tx_hash, input_index};
+            const input_point inpoint{tx_hash, input_index};
             if (!mark_spent_outputs(batch.spends_batch,
                     input.previous_output, inpoint))
                 return false;
@@ -121,7 +121,7 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
     for (uint32_t output_index = 0; output_index < block_tx.outputs.size();
         ++output_index)
     {
-        const message::transaction_output& output =
+        const transaction_output_type& output =
             block_tx.outputs[output_index];
         if (!add_address(batch.address_batch,
                 output.output_script, {tx_hash, output_index}))
@@ -141,8 +141,8 @@ bool leveldb_common::duplicate_exists(const hash_digest& tx_hash,
 }
 
 bool leveldb_common::mark_spent_outputs(leveldb::WriteBatch& spends_batch,
-    const message::output_point& previous_output,
-    const message::input_point& current_input)
+    const output_point& previous_output,
+    const input_point& current_input)
 {
     data_chunk spent_key = create_spent_key(previous_output),
         spend_value = create_spent_key(current_input);
@@ -151,7 +151,7 @@ bool leveldb_common::mark_spent_outputs(leveldb::WriteBatch& spends_batch,
 }
 
 bool leveldb_common::add_address(leveldb::WriteBatch& address_batch,
-    const script& output_script, const message::output_point& outpoint)
+    const script& output_script, const output_point& outpoint)
 {
     data_chunk raw_address = create_address_key(output_script);
     if (raw_address.empty())

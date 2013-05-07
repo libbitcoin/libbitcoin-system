@@ -10,7 +10,7 @@
 
 #include <bitcoin/block.hpp>
 #include <bitcoin/error.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/address.hpp>
 
 namespace libbitcoin {
@@ -28,35 +28,34 @@ public:
     using fetch_handler = std::function<
         void (const std::error_code&, const Message&)>;
 
-    typedef fetch_handler<message::block> fetch_handler_block_header;
+    typedef fetch_handler<block_type> fetch_handler_block_header;
 
-    typedef fetch_handler<message::inventory_list>
+    typedef fetch_handler<inventory_list>
         fetch_handler_block_transaction_hashes;
 
     typedef fetch_handler<size_t> fetch_handler_block_depth;
 
     typedef fetch_handler<size_t> fetch_handler_last_depth;
 
-    typedef fetch_handler<message::block_locator>
+    typedef fetch_handler<block_locator_type>
         fetch_handler_block_locator;
 
-    typedef fetch_handler<message::transaction> fetch_handler_transaction;
+    typedef fetch_handler<transaction_type> fetch_handler_transaction;
 
     typedef std::function<
         void (const std::error_code&, size_t, size_t)>
             fetch_handler_transaction_index;
 
-    typedef fetch_handler<message::input_point> fetch_handler_spend;
+    typedef fetch_handler<input_point> fetch_handler_spend;
 
-    typedef fetch_handler<message::output_point_list>
-        fetch_handler_outputs;
+    typedef fetch_handler<output_point_list> fetch_handler_outputs;
 #else
     typedef std::function<
-        void (const std::error_code&, const message::block&)>
+        void (const std::error_code&, const block_type&)>
             fetch_handler_block_header;
 
     typedef std::function<
-        void (const std::error_code&, const message::inventory_list&)>
+        void (const std::error_code&, const inventory_list&)>
             fetch_handler_block_transaction_hashes;
 
     typedef std::function<void (const std::error_code&, size_t)>
@@ -66,11 +65,11 @@ public:
         fetch_handler_last_depth;
 
     typedef std::function<
-        void (const std::error_code&, const message::block_locator&)>
+        void (const std::error_code&, const block_locator_type&)>
             fetch_handler_block_locator;
 
     typedef std::function<
-        void (const std::error_code&, const message::transaction&)>
+        void (const std::error_code&, const transaction_type&)>
             fetch_handler_transaction;
 
     typedef std::function<
@@ -78,15 +77,15 @@ public:
             fetch_handler_transaction_index;
 
     typedef std::function<
-        void (const std::error_code&, const message::input_point&)>
+        void (const std::error_code&, const input_point&)>
             fetch_handler_spend;
 
     typedef std::function<
-        void (const std::error_code&, const message::output_point_list&)>
+        void (const std::error_code&, const output_point_list&)>
             fetch_handler_outputs;
 #endif
 
-    typedef std::vector<std::shared_ptr<message::block>> block_list;
+    typedef std::vector<std::shared_ptr<block_type>> block_list;
     typedef std::function<
         void (const std::error_code&, size_t, 
             const block_list&, const block_list&)> reorganize_handler;
@@ -108,7 +107,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void store(const message::block& stored_block, 
+    virtual void store(const block_type& block,
         store_block_handler handle_store) = 0;
 
     /**
@@ -125,7 +124,7 @@ public:
      *  );
      * @encode
      */
-    virtual void import(const message::block& import_block, size_t depth,
+    virtual void import(const block_type& import_block, size_t depth,
         import_block_handler handle_import) = 0;
 
     /**
@@ -135,8 +134,8 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec, // Status of operation
-     *      const message::block& blk  // Block header
+     *      const std::error_code& ec,  // Status of operation
+     *      const block_type& blk       // Block header
      *  );
      * @endcode
      */
@@ -150,8 +149,8 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec, // Status of operation
-     *      const message::block& blk  // Block header
+     *      const std::error_code& ec,  // Status of operation
+     *      const block_type& blk       // Block header
      *  );
      * @endcode
      */
@@ -165,8 +164,8 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec,             // Status of operation
-     *      const message::inventory_list& hashes  // List of hashes
+     *      const std::error_code& ec,      // Status of operation
+     *      const inventory_list& hashes    // List of hashes
      *  );
      * @endcode
      */
@@ -180,8 +179,8 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec,             // Status of operation
-     *      const message::inventory_list& hashes  // List of hashes
+     *      const std::error_code& ec,      // Status of operation
+     *      const inventory_list& hashes    // List of hashes
      *  );
      * @endcode
      */
@@ -223,8 +222,8 @@ public:
      * @param[in]   handle_fetch      Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec,      // Status of operation
-     *      const message::transaction& tx  // Transaction
+     *      const std::error_code& ec,  // Status of operation
+     *      const transaction_type& tx  // Transaction
      *  );
      * @endcode
      */
@@ -261,12 +260,12 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec,           // Status of operation
-     *      const message::input_point& inpoint  // Spend of output
+     *      const std::error_code& ec,      // Status of operation
+     *      const input_point& inpoint      // Spend of output
      *  );
      * @endcode
      */
-    virtual void fetch_spend(const message::output_point& outpoint,
+    virtual void fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch) = 0;
 
     /**
@@ -276,9 +275,8 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec, // Status of operation
-     *      // Outputs
-     *      const message::output_point_list& outpoints
+     *      const std::error_code& ec,          // Status of operation
+     *      const output_point_list& outpoints  // Outputs
      *  );
      * @endcode
      */
@@ -305,7 +303,7 @@ public:
         reorganize_handler handle_reorganize) = 0;
 };
 
-typedef std::function<void (const std::error_code&, const message::block&)>
+typedef std::function<void (const std::error_code&, const block_type&)>
     blockchain_fetch_handler_block;
 
 /**
@@ -318,8 +316,8 @@ typedef std::function<void (const std::error_code&, const message::block&)>
  * @param[in]   handle_fetch    Completion handler for fetch operation.
  * @code
  *  void handle_fetch(
- *      const std::error_code& ec, // Status of operation
- *      const message::block& blk  // Block header
+ *      const std::error_code& ec,  // Status of operation
+ *      const block_type& blk       // Block header
  *  );
  * @endcode
  */
@@ -336,8 +334,8 @@ void fetch_block(blockchain& chain, size_t depth,
  * @param[in]   handle_fetch    Completion handler for fetch operation.
  * @code
  *  void handle_fetch(
- *      const std::error_code& ec, // Status of operation
- *      const message::block& blk  // Block header
+ *      const std::error_code& ec,  // Status of operation
+ *      const block_type& blk       // Block header
  *  );
  * @endcode
  */
@@ -345,7 +343,7 @@ void fetch_block(blockchain& chain, const hash_digest& block_hash,
     blockchain_fetch_handler_block handle_fetch);
 
 typedef std::function<
-    void (const std::error_code&, const message::block_locator&)>
+    void (const std::error_code&, const block_locator_type&)>
         blockchain_fetch_handler_block_locator;
 
 /**
@@ -354,8 +352,8 @@ typedef std::function<
  * @param[in]   handle_fetch    Completion handler for fetch operation.
  * @code
  *  void handle_fetch(
- *      const std::error_code& ec,         // Status of operation
- *      const message::block_locator& loc  // Block locator object
+ *      const std::error_code& ec,      // Status of operation
+ *      const block_locator_type& loc   // Block locator object
  *  );
  * @endcode
  */

@@ -5,7 +5,7 @@ bitcoin_include_HEADERS = \
 	getx_responder.hpp \
 	error.hpp \
 	validate.hpp \
-	messages.hpp \
+	primitives.hpp \
 	script.hpp \
 	address.hpp \
 	transaction.hpp \

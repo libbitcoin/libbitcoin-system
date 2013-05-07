@@ -3,7 +3,7 @@
 
 #include <atomic>
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/async_service.hpp>
 
@@ -17,11 +17,11 @@ public:
     typedef std::function<void (const std::error_code&)> handshake_handler;
 
     typedef std::function<void (
-        const std::error_code&, const message::ip_address&)>
+        const std::error_code&, const ip_address_type&)>
             discover_ip_handler;
 
     typedef std::function<void (
-        const std::error_code&, const message::network_address&)>
+        const std::error_code&, const network_address_type&)>
             fetch_network_address_handler;
 
     typedef std::function<void (const std::error_code&)> setter_handler;
@@ -51,16 +51,16 @@ private:
         handshake::handshake_handler completion_callback);
 
     void receive_version(const std::error_code& ec,
-        const message::version&, channel_ptr node, atomic_counter_ptr counter,
+        const version_type&, channel_ptr node, atomic_counter_ptr counter,
         handshake::handshake_handler completion_callback);
 
     void receive_verack(const std::error_code& ec,
-        const message::verack&, atomic_counter_ptr counter,
+        const verack_type&, atomic_counter_ptr counter,
         handshake::handshake_handler completion_callback);
 
     bool lookup_external(const std::string& website,
-        message::ip_address& ip);
-    message::ip_address localhost_ip();
+        ip_address_type& ip);
+    ip_address_type localhost_ip();
     void do_discover_external_ip(discover_ip_handler handler_discover);
     void do_fetch_network_address(fetch_network_address_handler handle_fetch);
     void do_set_port(uint16_t port, setter_handler handle_set);
@@ -69,7 +69,7 @@ private:
     void do_set_start_depth(uint32_t depth, setter_handler handle_set);
 
     io_service::strand strand_;
-    message::version template_version_;
+    version_type template_version_;
 };
 
 void connect(handshake& shake, network& net,

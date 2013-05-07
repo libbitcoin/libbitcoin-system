@@ -10,14 +10,14 @@ namespace libbitcoin {
 
 bdb_validate_block::bdb_validate_block(bdb_common_ptr common, int fork_index,
     const block_detail_list& orphan_chain, int orphan_index, size_t depth,
-    txn_guard_ptr txn, const message::block& current_block)
+    txn_guard_ptr txn, const block_type& current_block)
   : validate_block(depth, current_block), common_(common),
     txn_(txn), depth_(depth), fork_index_(fork_index),
     orphan_index_(orphan_index), orphan_chain_(orphan_chain)
 {
 }
 
-message::block bdb_validate_block::fetch_block(size_t fetch_depth)
+block_type bdb_validate_block::fetch_block(size_t fetch_depth)
 {
     if (fetch_depth > fork_index_)
     {
@@ -30,7 +30,7 @@ message::block bdb_validate_block::fetch_block(size_t fetch_depth)
         common_->fetch_proto_block(txn_, fetch_depth);
     BITCOIN_ASSERT(proto_block.IsInitialized());
     // We only convert the fields we actually need
-    message::block result_block;
+    block_type result_block;
     result_block.bits = proto_block.bits();
     result_block.timestamp = proto_block.timestamp();
     return result_block;
@@ -78,9 +78,9 @@ bool bdb_validate_block::transaction_exists(const hash_digest& tx_hash)
     return !tx_after_fork(proto_tx, fork_index_);
 }
 
-bool bdb_validate_block::is_output_spent(const message::output_point& outpoint)
+bool bdb_validate_block::is_output_spent(const output_point& outpoint)
 {
-    message::input_point input_spend;
+    input_point input_spend;
     if (!common_->fetch_spend(txn_, outpoint, input_spend))
         return false;
     // Lookup block depth
@@ -89,7 +89,7 @@ bool bdb_validate_block::is_output_spent(const message::output_point& outpoint)
     return !tx_after_fork(proto_tx, fork_index_);
 }
 
-bool bdb_validate_block::fetch_transaction(message::transaction& tx, 
+bool bdb_validate_block::fetch_transaction(transaction_type& tx,
     size_t& tx_depth, const hash_digest& tx_hash)
 {
     proto::Transaction proto_tx =
@@ -106,14 +106,14 @@ bool bdb_validate_block::fetch_transaction(message::transaction& tx,
     return true;
 }
 
-bool bdb_validate_block::fetch_orphan_transaction(message::transaction& tx, 
+bool bdb_validate_block::fetch_orphan_transaction(transaction_type& tx,
     size_t& tx_depth, const hash_digest& tx_hash)
 {
     for (size_t orphan_iter = 0; orphan_iter <= orphan_index_; ++orphan_iter)
     {
-        const message::block& orphan_block =
+        const block_type& orphan_block =
             orphan_chain_[orphan_iter]->actual();
-        for (const message::transaction& orphan_tx: orphan_block.transactions)
+        for (const transaction_type& orphan_tx: orphan_block.transactions)
         {
             if (hash_transaction(orphan_tx) == tx_hash)
             {
@@ -127,7 +127,7 @@ bool bdb_validate_block::fetch_orphan_transaction(message::transaction& tx,
 }
 
 bool bdb_validate_block::is_output_spent(
-    const message::output_point& previous_output,
+    const output_point& previous_output,
     size_t index_in_parent, size_t input_index)
 {
     // Search for double spends
@@ -142,13 +142,13 @@ bool bdb_validate_block::is_output_spent(
 }
 
 bool bdb_validate_block::orphan_is_spent(
-    const message::output_point& previous_output,
+    const output_point& previous_output,
     size_t skip_tx, size_t skip_input)
 {
     // TODO factor this to look nicer
     for (size_t orphan_iter = 0; orphan_iter <= orphan_index_; ++orphan_iter)
     {
-        const message::block& orphan_block =
+        const block_type& orphan_block =
             orphan_chain_[orphan_iter]->actual();
         // Skip coinbase
         BITCOIN_ASSERT(orphan_block.transactions.size() >= 1);
@@ -156,12 +156,12 @@ bool bdb_validate_block::orphan_is_spent(
         for (size_t tx_index = 0; tx_index < orphan_block.transactions.size();
             ++tx_index)
         {
-            const message::transaction& orphan_tx =
+            const transaction_type& orphan_tx =
                 orphan_block.transactions[tx_index];
             for (size_t input_index = 0; input_index < orphan_tx.inputs.size();
                 ++input_index)
             {
-                const message::transaction_input& orphan_input =
+                const transaction_input_type& orphan_input =
                     orphan_tx.inputs[input_index];
                 if (orphan_iter == orphan_index_ && tx_index == skip_tx &&
                     input_index == skip_input)

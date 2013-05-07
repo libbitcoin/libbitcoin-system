@@ -9,7 +9,7 @@
 
 namespace libbitcoin {
 
-bool operator==(const message::block block_a, const message::block& block_b)
+bool operator==(const block_type block_a, const block_type& block_b)
 {
     return block_a.version == block_b.version &&
         block_a.previous_block_hash == block_b.previous_block_hash &&
@@ -35,7 +35,7 @@ big_number block_work(uint32_t bits)
     return (big_number(1) << 256) / (target + 1);
 }
 
-hash_digest hash_block_header(const message::block& block)
+hash_digest hash_block_header(const block_type& block)
 {
     serializer key;
     key.write_4_bytes(block.version);
@@ -63,9 +63,9 @@ index_list block_locator_indexes(int top_depth)
     return indexes;
 }
 
-message::block genesis_block()
+block_type genesis_block()
 {
-    message::block genesis;
+    block_type genesis;
     genesis.version = 1;
     genesis.previous_block_hash = null_hash;
     genesis.merkle = 
@@ -77,11 +77,11 @@ message::block genesis_block()
     genesis.bits = 0x1d00ffff;
     genesis.nonce = 2083236893;
 
-    message::transaction coinbase_tx;
+    transaction_type coinbase_tx;
     coinbase_tx.version = 1;
     coinbase_tx.locktime = 0;
 
-    message::transaction_input coinbase_input;
+    transaction_input_type coinbase_input;
     coinbase_input.previous_output.hash = null_hash;
     coinbase_input.previous_output.index = 
         std::numeric_limits<uint32_t>::max();
@@ -100,7 +100,7 @@ message::block genesis_block()
     coinbase_input.sequence = std::numeric_limits<uint32_t>::max();
     coinbase_tx.inputs.push_back(coinbase_input);
 
-    message::transaction_output coinbase_output;
+    transaction_output_type coinbase_output;
     coinbase_output.value = coin_price(50);
     coinbase_output.output_script.push_operation(
         operation{opcode::special, 

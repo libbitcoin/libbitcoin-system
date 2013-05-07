@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
@@ -19,7 +19,7 @@ public:
     void write_8_bytes(uint64_t v);
     void write_variable_uint(uint64_t v);
     void write_data(const data_chunk& other_data);
-    void write_network_address(message::network_address addr);
+    void write_network_address(network_address_type addr);
     void write_hash(const hash_digest& hash);
     void write_short_hash(const short_hash& hash);
     void write_fixed_string(const std::string& command, size_t string_size);
@@ -44,7 +44,7 @@ public:
     uint64_t read_8_bytes();
     uint64_t read_variable_uint();
     data_chunk read_data(uint64_t n_bytes);
-    message::network_address read_network_address();
+    network_address_type read_network_address();
     hash_digest read_hash();
     short_hash read_short_hash();
     std::string read_fixed_string(size_t len);

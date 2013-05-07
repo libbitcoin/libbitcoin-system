@@ -1,3 +1,4 @@
+#include <future>
 #include <bitcoin/bitcoin.hpp>
 using namespace libbitcoin;
 
@@ -33,11 +34,11 @@ void handle_confirm(const std::error_code& ec)
 session_params* p;
 
 void recv_transaction(const std::error_code& ec,
-    const message::transaction& tx, channel_ptr node);
+    const transaction_type& tx, channel_ptr node);
 void monitor_tx(channel_ptr node);
 void handle_mempool_store(
     const std::error_code& ec, const index_list& unconfirmed,
-    const message::transaction& tx, channel_ptr node);
+    const transaction_type& tx, channel_ptr node);
 
 void monitor_tx(channel_ptr node)
 {
@@ -46,7 +47,7 @@ void monitor_tx(channel_ptr node)
 }
 
 void recv_transaction(const std::error_code& ec,
-    const message::transaction& tx, channel_ptr node)
+    const transaction_type& tx, channel_ptr node)
 {
     if (ec)
     {
@@ -66,7 +67,7 @@ void depends_requested(const std::error_code& ec)
 
 void handle_mempool_store(
     const std::error_code& ec, const index_list& unconfirmed,
-    const message::transaction& tx, channel_ptr node)
+    const transaction_type& tx, channel_ptr node)
 {
     const hash_digest& tx_hash = hash_transaction(tx);
     // Decided against this. Spammers can abuse us more easily.
@@ -107,14 +108,6 @@ void handle_mempool_store(
     }
 }
 
-void blockchain_started(const std::error_code& ec)
-{
-    if (ec)
-        error_exit(ec.message());
-    else
-        log_info() << "Blockchain initialized!";
-}
-
 int main()
 {
     //bdb_blockchain::setup("database");
@@ -126,7 +119,17 @@ int main()
     prot.subscribe_channel(monitor_tx);
 
     leveldb_blockchain chain(disk_service);
+    std::promise<std::error_code> ec_promise;
+    auto blockchain_started =
+        [&ec_promise](const std::error_code& ec)
+        {
+            ec_promise.set_value(ec);
+        };
     chain.start("database", blockchain_started);
+    std::error_code ec = ec_promise.get_future().get();
+    if (ec)
+        error_exit(ec.message());
+
     poller poll(mempool_service, chain);
 
     transaction_pool txpool(mempool_service, chain);

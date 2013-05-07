@@ -26,7 +26,7 @@ constexpr size_t max_block_size = 1000000;
 constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 
 validate_transaction::validate_transaction(
-    blockchain& chain, const message::transaction& tx,
+    blockchain& chain, const transaction_type& tx,
     const pool_buffer& pool, io_service::strand& async_strand)
   : strand_(async_strand), chain_(chain),
     tx_(tx), tx_hash_(hash_transaction(tx)), pool_(pool)
@@ -80,7 +80,7 @@ bool validate_transaction::is_standard() const
     return true;
 }
 
-const message::transaction* validate_transaction::fetch(
+const transaction_type* validate_transaction::fetch(
     const hash_digest& tx_hash) const
 {
     for (const transaction_entry_info& entry: pool_)
@@ -100,7 +100,7 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
     for (size_t input_index = 0; input_index < tx_.inputs.size(); 
         ++input_index)
     {
-        const message::output_point& previous_output =
+        const output_point& previous_output =
             tx_.inputs[input_index].previous_output;
         if (is_spent(previous_output))
         {
@@ -116,10 +116,10 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
         &validate_transaction::set_last_depth, shared_from_this(), _1, _2)));
 }
  
-bool validate_transaction::is_spent(const message::output_point outpoint) const
+bool validate_transaction::is_spent(const output_point outpoint) const
 {
     for (const transaction_entry_info& entry: pool_)
-        for (const message::transaction_input current_input: entry.tx.inputs)
+        for (const transaction_input_type current_input: entry.tx.inputs)
             if (current_input.previous_output == outpoint)
                 return true;
     return false;
@@ -177,7 +177,7 @@ void validate_transaction::search_pool_previous_tx()
 {
     const hash_digest& previous_tx_hash =
         tx_.inputs[current_input_].previous_output.hash;
-    const message::transaction* previous_tx = fetch(previous_tx_hash);
+    const transaction_type* previous_tx = fetch(previous_tx_hash);
     if (!previous_tx)
     {
         handle_validate_(error::input_not_found,
@@ -192,7 +192,7 @@ void validate_transaction::search_pool_previous_tx()
 }
 
 void validate_transaction::handle_previous_tx(const std::error_code& ec,
-    const message::transaction& previous_tx, size_t parent_depth)
+    const transaction_type& previous_tx, size_t parent_depth)
 {
     if (ec)
     {
@@ -215,16 +215,16 @@ void validate_transaction::handle_previous_tx(const std::error_code& ec,
 }
 
 bool validate_transaction::connect_input(
-    const message::transaction& tx, size_t current_input,
-    const message::transaction& previous_tx, size_t parent_depth,
+    const transaction_type& tx, size_t current_input,
+    const transaction_type& previous_tx, size_t parent_depth,
     size_t last_block_depth, uint64_t& value_in)
 {
-    const message::transaction_input& input = tx.inputs[current_input];
-    const message::output_point& previous_outpoint =
+    const transaction_input_type& input = tx.inputs[current_input];
+    const output_point& previous_outpoint =
         tx.inputs[current_input].previous_output;
     if (previous_outpoint.index >= previous_tx.outputs.size())
         return false;
-    const message::transaction_output& previous_output =
+    const transaction_output_type& previous_output =
         previous_tx.outputs[previous_outpoint.index];
     uint64_t output_value = previous_output.value;
     if (output_value > max_money())
@@ -266,7 +266,7 @@ void validate_transaction::check_double_spend(const std::error_code& ec)
     }
 }
 
-bool validate_transaction::tally_fees(const message::transaction& tx,
+bool validate_transaction::tally_fees(const transaction_type& tx,
     uint64_t value_in, uint64_t& total_fees)
 {
     uint64_t value_out = total_output_value(tx);
@@ -290,7 +290,7 @@ void validate_transaction::check_fees()
 }
 
 std::error_code validate_transaction::check_transaction(
-    const message::transaction& tx)
+    const transaction_type& tx)
 {
     if (tx.inputs.empty() || tx.outputs.empty())
         return error::empty_transaction;
@@ -301,7 +301,7 @@ std::error_code validate_transaction::check_transaction(
 
     // Check for negative or overflow output values
     uint64_t total_output_value = 0;
-    for (message::transaction_output output: tx.outputs)
+    for (transaction_output_type output: tx.outputs)
     {
         if (output.value > max_money())
             return error::output_value_overflow;
@@ -319,7 +319,7 @@ std::error_code validate_transaction::check_transaction(
     }
     else
     {
-        for (message::transaction_input input: tx.inputs)
+        for (transaction_input_type input: tx.inputs)
             if (previous_output_is_null(input.previous_output))
                 return error::previous_output_null;
     }
@@ -328,7 +328,7 @@ std::error_code validate_transaction::check_transaction(
 }
 
 validate_block::validate_block(
-    size_t depth, const message::block& current_block)
+    size_t depth, const block_type& current_block)
   : depth_(depth), current_block_(current_block)
 {
 }
@@ -378,13 +378,13 @@ std::error_code validate_block::check_block()
         return error::first_not_coinbase;
     for (size_t i = 1; i < current_block_.transactions.size(); ++i)
     {
-        const message::transaction& tx = current_block_.transactions[i];
+        const transaction_type& tx = current_block_.transactions[i];
         if (is_coinbase(tx))
             return error::extra_coinbases;
     }
 
     std::set<hash_digest> unique_txs;
-    for (message::transaction tx: current_block_.transactions)
+    for (transaction_type tx: current_block_.transactions)
     {
         std::error_code ec = validate_transaction::check_transaction(tx);
         if (ec)
@@ -451,15 +451,15 @@ inline size_t count_script_sigops(
     }
     return total_sigs;
 }
-size_t tx_legacy_sigops_count(const message::transaction& tx)
+size_t tx_legacy_sigops_count(const transaction_type& tx)
 {
     size_t total_sigs = 0;
-    for (message::transaction_input input: tx.inputs)
+    for (transaction_input_type input: tx.inputs)
     {
         const operation_stack& operations = input.input_script.operations();
         total_sigs += count_script_sigops(operations, false);
     }
-    for (message::transaction_output output: tx.outputs)
+    for (transaction_output_type output: tx.outputs)
     {
         const operation_stack& operations = output.output_script.operations();
         total_sigs += count_script_sigops(operations, false);
@@ -469,7 +469,7 @@ size_t tx_legacy_sigops_count(const message::transaction& tx)
 size_t validate_block::legacy_sigops_count()
 {
     size_t total_sigs = 0;
-    for (message::transaction tx: current_block_.transactions)
+    for (transaction_type tx: current_block_.transactions)
         total_sigs += tx_legacy_sigops_count(tx);
     return total_sigs;
 }
@@ -481,7 +481,7 @@ std::error_code validate_block::accept_block()
     if (current_block_.timestamp <= median_time_past())
         return error::timestamp_too_early;
     // Txs should be final when included in a block
-    for (const message::transaction& tx: current_block_.transactions)
+    for (const transaction_type& tx: current_block_.transactions)
         if (!is_final(tx, depth_, current_block_.timestamp))
             return error::non_final_transaction;
     if (!passes_checkpoints())
@@ -639,7 +639,7 @@ std::error_code validate_block::connect_block()
             ++tx_index)
     {
         uint64_t value_in = 0;
-        const message::transaction& tx = current_block_.transactions[tx_index];
+        const transaction_type& tx = current_block_.transactions[tx_index];
         total_sigops += tx_legacy_sigops_count(tx);
         if (total_sigops > max_block_script_sig_operations)
             return error::too_many_sigs;
@@ -655,7 +655,7 @@ std::error_code validate_block::connect_block()
     return std::error_code();
 }
 
-bool validate_block::not_duplicate_or_spent(const message::transaction& tx)
+bool validate_block::not_duplicate_or_spent(const transaction_type& tx)
 {
     const hash_digest& tx_hash = hash_transaction(tx);
     // Is there a matching previous tx?
@@ -672,7 +672,7 @@ bool validate_block::not_duplicate_or_spent(const message::transaction& tx)
     return true;
 }
 
-bool validate_block::validate_inputs(const message::transaction& tx, 
+bool validate_block::validate_inputs(const transaction_type& tx,
     size_t index_in_parent, uint64_t& value_in, size_t& total_sigops)
 {
     BITCOIN_ASSERT(!is_coinbase(tx));
@@ -697,18 +697,18 @@ size_t validate_block::script_hash_signature_operations_count(
 }
 
 bool validate_block::connect_input(size_t index_in_parent,
-    const message::transaction& current_tx,
+    const transaction_type& current_tx,
     size_t input_index, uint64_t& value_in, size_t& total_sigops)
 {
     // Lookup previous output
     BITCOIN_ASSERT(input_index < current_tx.inputs.size());
-    const message::transaction_input& input = current_tx.inputs[input_index];
-    const message::output_point& previous_output = input.previous_output;
-    message::transaction previous_tx;
+    const transaction_input_type& input = current_tx.inputs[input_index];
+    const output_point& previous_output = input.previous_output;
+    transaction_type previous_tx;
     size_t previous_depth;
     if (!fetch_transaction(previous_tx, previous_depth, previous_output.hash))
         return false;
-    const message::transaction_output& previous_tx_out =
+    const transaction_output_type& previous_tx_out =
         previous_tx.outputs[previous_output.index];
     // Signature operations count
     total_sigops +=

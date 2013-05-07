@@ -73,31 +73,31 @@ void session::set_start_depth(const std::error_code& ec, size_t fork_point,
         std::bind(&session::set_start_depth,
             this, _1, _2, _3, _4));
     // Broadcast invs of new blocks
-    message::inventory blocks_inv;
+    inventory_type blocks_inv;
     for (auto block: new_blocks)
     {
         blocks_inv.inventories.push_back({
-            message::inventory_type::block,
+            inventory_type_id::block,
             hash_block_header(*block)});
     }
     protocol_.broadcast(blocks_inv);
 }
 
 void session::inventory(const std::error_code& ec,
-    const message::inventory& packet, channel_ptr node)
+    const inventory_type& packet, channel_ptr node)
 {
     if (ec)
     {
         log_error(log_domain::session) << "inventory: " << ec.message();
         return;
     }
-    for (const message::inventory_vector& ivec: packet.inventories)
+    for (const inventory_vector_type& ivec: packet.inventories)
     {
-        if (ivec.type == message::inventory_type::transaction)
+        if (ivec.type == inventory_type_id::transaction)
             strand_.post(
                 std::bind(&session::new_tx_inventory,
                     this, ivec.hash, node));
-        else if (ivec.type == message::inventory_type::block);
+        else if (ivec.type == inventory_type_id::block);
             // Do nothing. Handled by poller.
         else
             log_warning(log_domain::session)
@@ -122,7 +122,7 @@ void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
 }
 
 void session::get_data(const std::error_code& ec,
-    const message::get_data& packet, channel_ptr node)
+    const get_data_type& packet, channel_ptr node)
 {
     if (ec)
     {
@@ -135,7 +135,7 @@ void session::get_data(const std::error_code& ec,
 }
 
 void session::get_blocks(const std::error_code& ec,
-    const message::get_blocks& packet, channel_ptr node)
+    const get_blocks_type& packet, channel_ptr node)
 {
     if (ec)
     {
@@ -159,9 +159,9 @@ void session::request_tx_data(bool tx_exists,
 {
     if (tx_exists)
         return;
-    message::get_data request_tx;
+    get_data_type request_tx;
     request_tx.inventories.push_back(
-        {message::inventory_type::transaction, tx_hash});
+        {inventory_type_id::transaction, tx_hash});
     node->send(request_tx, handle_send_get_data);
 }
 

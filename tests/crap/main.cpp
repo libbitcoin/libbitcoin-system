@@ -147,14 +147,14 @@ public:
             else
                 selected[opt] = !selected[opt];
         }
-        message::transaction tx;
+        transaction_type tx;
         tx.version = 1;
         tx.locktime = 0;
         for (size_t i = 0; i < selected.size(); ++i)
         {
             if (!selected[i])
                 continue;
-            message::transaction_input input;
+            transaction_input_type input;
             input.previous_output = outpoints.first[i];
             input.sequence = 4294967295;
             input.input_script.push_operation(
@@ -176,7 +176,7 @@ public:
             std::cout << "Enter amount: ";
             std::string amount_str;
             std::cin >> amount_str;
-            message::transaction_output output;
+            transaction_output_type output;
             output.value = convert_amount(amount_str);
             short_hash dest_pubkey_hash = address_to_short_hash(address);
             output.output_script = build_output_script(dest_pubkey_hash);
@@ -222,7 +222,7 @@ protected:
     virtual std::string pretty_tx() = 0;
     virtual void do_broadcast() = 0;
     virtual data_chunk get_public_key() = 0;
-    virtual void sign_and_store(const message::transaction& new_tx) = 0;
+    virtual void sign_and_store(const transaction_type& new_tx) = 0;
 private:
     int get_option()
     {
@@ -349,7 +349,7 @@ protected:
         return ec_.public_key();
     }
 
-    void sign_and_store(const message::transaction& new_tx)
+    void sign_and_store(const transaction_type& new_tx)
     {
         if (tx_)
             delete tx_;
@@ -357,7 +357,7 @@ protected:
 
         for (size_t i = 0; i < tx_->inputs.size(); ++i)
         {
-            message::transaction_input& input = tx_->inputs[i];
+            transaction_input_type& input = tx_->inputs[i];
             // Rebuild previous output script
             data_chunk public_key = ec_.public_key();
             script script_code = 
@@ -382,7 +382,7 @@ protected:
 
 private:
     void handle_outputs(const std::error_code& ec,
-        const message::output_point_list& points,
+        const output_point_list& points,
         std::promise<outpoints_info>* promise_outpoints)
     {
         if (ec)
@@ -392,7 +392,7 @@ private:
         promise_outpoints->set_value(info);
     }
     void extract_value(const std::error_code& ec,
-        const message::transaction& tx,
+        const transaction_type& tx,
         std::promise<uint64_t>* promise_value, uint32_t index)
     {
         if (ec)
@@ -407,7 +407,7 @@ private:
     session_params p_;
     session* session_;
 
-    message::transaction* tx_;
+    transaction_type* tx_;
 };
 
 std::string read_private_key(std::ifstream& file)

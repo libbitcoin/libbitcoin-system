@@ -28,8 +28,8 @@ handshake::handshake(async_service& service)
     template_version_.address_me.port = 8333;
     template_version_.address_you.services = template_version_.services;
     template_version_.address_you.ip = 
-        message::ip_address{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-                            0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
+        ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+                        0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
     template_version_.address_you.port = 8333;
     template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_LIB_VERSION "/";
     template_version_.start_depth = 0;
@@ -46,7 +46,7 @@ void handshake::ready(channel_ptr node,
 {
     atomic_counter_ptr counter = std::make_shared<atomic_counter>(0);
 
-    message::version session_version = template_version_;
+    version_type session_version = template_version_;
     session_version.timestamp = time(NULL);
     node->send(session_version,
         strand_.wrap(std::bind(&handshake::handle_message_sent,
@@ -71,19 +71,19 @@ void handshake::handle_message_sent(const std::error_code& ec,
 }
 
 void handshake::receive_version(const std::error_code& ec,
-    const message::version&, channel_ptr node, atomic_counter_ptr counter,
+    const version_type&, channel_ptr node, atomic_counter_ptr counter,
     handshake::handshake_handler completion_callback)
 {
     if (ec)
         completion_callback(ec);
     else
-        node->send(message::verack(),
+        node->send(verack_type(),
             strand_.wrap(std::bind(&handshake::handle_message_sent,
                 this, _1, counter, completion_callback)));
 }
 
 void handshake::receive_verack(const std::error_code& ec,
-    const message::verack&, atomic_counter_ptr counter,
+    const verack_type&, atomic_counter_ptr counter,
     handshake::handshake_handler completion_callback)
 {
     if (ec)
@@ -111,7 +111,7 @@ void handshake::discover_external_ip(discover_ip_handler handle_discover)
 }
 
 bool handshake::lookup_external(const std::string& website,
-    message::ip_address& ip)
+    ip_address_type& ip)
 {
     // Initialise CURL with our various options.
     CURL* curl = curl_easy_init();
@@ -149,35 +149,35 @@ bool handshake::lookup_external(const std::string& website,
     return true;
 }
 
-message::ip_address handshake::localhost_ip()
+ip_address_type handshake::localhost_ip()
 {
-    return message::ip_address{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-                               0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
+    return ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                           0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
 }
 
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
 {
     template_version_.address_me.ip = localhost_ip();
-    std::vector<message::ip_address> corroborate_ips;
+    std::vector<ip_address_type> corroborate_ips;
     // Lookup our IP address from a bunch of hosts
-    message::ip_address lookup_ip;
+    ip_address_type lookup_ip;
     if (lookup_external("checkip.dyndns.org", lookup_ip))
         corroborate_ips.push_back(lookup_ip);
     if (lookup_external("whatismyip.org", lookup_ip))
         corroborate_ips.push_back(lookup_ip);
     if (corroborate_ips.empty())
     {
-        handle_discover(error::bad_stream, message::ip_address());
+        handle_discover(error::bad_stream, ip_address_type());
         return;
     }
     // Make sure that the IPs are the same
     template_version_.address_me.ip = corroborate_ips[0];
-    for (const message::ip_address& match_ip: corroborate_ips)
+    for (const ip_address_type& match_ip: corroborate_ips)
     {
         if (match_ip != template_version_.address_me.ip)
         {
             template_version_.address_me.ip = localhost_ip();
-            handle_discover(error::bad_stream, message::ip_address());
+            handle_discover(error::bad_stream, ip_address_type());
             return;
         }
     }

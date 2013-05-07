@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/serializer.hpp>
 
 #include "data_type.hpp"
@@ -23,11 +23,11 @@ public:
 
     uint32_t find_last_block_depth(txn_guard_ptr txn);
     bool fetch_spend(txn_guard_ptr txn,
-        const message::output_point& spent_output,
-        message::input_point& input_spend);
+        const output_point& spent_output,
+        input_point& input_spend);
 
     bool save_block(txn_guard_ptr txn,
-        uint32_t depth, const message::block& serial_block);
+        uint32_t depth, const block_type& serial_block);
 
     proto::Block fetch_proto_block(txn_guard_ptr txn, uint32_t depth);
     proto::Block fetch_proto_block(txn_guard_ptr txn,
@@ -37,20 +37,20 @@ public:
 
     bool reconstruct_block(txn_guard_ptr txn,
         const proto::Block& proto_block_header,
-        message::block& result_block);
+        block_type& result_block);
 
 private:
     bool save_transaction(txn_guard_ptr txn, uint32_t block_depth,
         uint32_t tx_index, const hash_digest& tx_hash,
-        const message::transaction& block_tx);
+        const transaction_type& block_tx);
     bool dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
         uint32_t block_depth, uint32_t tx_index);
     bool mark_spent_outputs(txn_guard_ptr txn,
-        const message::output_point& previous_output,
-        const message::input_point& current_input);
+        const output_point& previous_output,
+        const input_point& current_input);
     // returns false only on database failure. It may or may not add an entry
     bool add_address(txn_guard_ptr txn, const script& output_script,
-        const message::output_point& outpoint);
+        const output_point& outpoint);
     bool rewrite_transaction(txn_guard_ptr txn, const hash_digest& tx_hash,
         const proto::Transaction& replace_proto_tx);
 

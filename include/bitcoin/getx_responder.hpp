@@ -5,7 +5,7 @@
 
 #include <bitcoin/types.hpp>
 #include <bitcoin/async_service.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 
 namespace libbitcoin {
 
@@ -18,15 +18,15 @@ public:
 
 private:
     void receive_get_data(const std::error_code& ec,
-        const message::get_data packet, channel_ptr node);
+        const get_data_type packet, channel_ptr node);
 
-    void pool_tx(const std::error_code& ec, const message::transaction& tx,
+    void pool_tx(const std::error_code& ec, const transaction_type& tx,
         const hash_digest& tx_hash, channel_ptr node);
     void chain_tx(const std::error_code& ec,
-        const message::transaction& tx, channel_ptr node);
+        const transaction_type& tx, channel_ptr node);
 
     void send_block(const std::error_code& ec,
-        const message::block blk, channel_ptr node);
+        const block_type blk, channel_ptr node);
 
     io_service& service_;
     blockchain& chain_;

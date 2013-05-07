@@ -40,9 +40,9 @@ public:
     void start(const std::string& prefix, start_handler handle_start);
     void stop();
 
-    void store(const message::block& stored_block,
+    void store(const block_type& block,
         store_block_handler handle_store);
-    void import(const message::block& import_block, size_t depth,
+    void import(const block_type& block, size_t depth,
         import_block_handler handle_import);
 
     // fetch block header by depth
@@ -69,7 +69,7 @@ public:
     void fetch_transaction_index(const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch);
     // fetch spend of an output point
-    void fetch_spend(const message::output_point& outpoint,
+    void fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch);
     // fetch outputs associated with an address
     void fetch_outputs(const payment_address& address,
@@ -81,9 +81,9 @@ private:
     bool initialize(const std::string& prefix);
     void shutdown();
 
-    void do_store(const message::block& store_block,
+    void do_store(const block_type& block,
         store_block_handler handle_store);
-    void do_import(const message::block& import_block, size_t depth,
+    void do_import(const block_type& block, size_t depth,
         import_block_handler handle_import);
 
     void fetch_block_header_by_depth(size_t depth, 
@@ -97,7 +97,7 @@ private:
         fetch_handler_transaction handle_fetch);
     void do_fetch_transaction_index(const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch);
-    void do_fetch_spend(const message::output_point& outpoint,
+    void do_fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch);
     void do_fetch_outputs(const payment_address& address,
         fetch_handler_outputs handle_fetch);

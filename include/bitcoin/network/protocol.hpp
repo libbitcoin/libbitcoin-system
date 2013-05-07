@@ -5,7 +5,7 @@
 #include <system_error>
 
 #include <bitcoin/types.hpp>
-#include <bitcoin/messages.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/network/channel.hpp>
 #include <bitcoin/async_service.hpp>
@@ -48,7 +48,7 @@ public:
 private:
     struct connection_info
     {
-        message::network_address address;
+        network_address_type address;
         channel_ptr node;
     };
     typedef std::vector<connection_info> connection_list;
@@ -89,7 +89,7 @@ private:
         void handle_send_get_address(const std::error_code& ec);
 
         void save_addresses(const std::error_code& ec,
-            const message::address& packet, channel_ptr);
+            const address_type& packet, channel_ptr);
         void handle_store(const std::error_code& ec);
 
         completion_handler handle_complete_;
@@ -109,9 +109,9 @@ private:
     // Connect outwards
     void try_connect();
     void attempt_connect(const std::error_code& ec,
-        const message::network_address& packet);
+        const network_address_type& packet);
     void handle_connect(const std::error_code& ec, channel_ptr node,
-        const message::network_address& address);
+        const network_address_type& address);
 
     // Accept inwards connections
     void handle_listen(const std::error_code& ec, acceptor_ptr accept);
@@ -125,7 +125,7 @@ private:
 
     void subscribe_address(channel_ptr node);
     void receive_address_message(const std::error_code& ec,
-        const message::address& addr, channel_ptr node);
+        const address_type& addr, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
     // fetch methods

@@ -9,7 +9,7 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-static std::string pretty(const message::ip_address& ip)
+static std::string pretty(const ip_address_type& ip)
 {
     std::ostringstream oss;
     oss << (int)ip[12] << '.' << (int)ip[13] << '.'
@@ -180,7 +180,7 @@ void protocol::seeds::request_addresses(
     }
     else
     {
-        dns_seed_node->send(message::get_address(),
+        dns_seed_node->send(get_address_type(),
             strand_.wrap(std::bind(&protocol::seeds::handle_send_get_address,
                 shared_from_this(), _1)));
         dns_seed_node->subscribe_address(
@@ -200,7 +200,7 @@ void protocol::seeds::handle_send_get_address(const std::error_code& ec)
 }
 
 void protocol::seeds::save_addresses(const std::error_code& ec,
-    const message::address& packet, channel_ptr)
+    const address_type& packet, channel_ptr)
 {
     if (ec)
     {
@@ -212,7 +212,7 @@ void protocol::seeds::save_addresses(const std::error_code& ec,
     else
     {
         log_debug(log_domain::protocol) << "Storing seeded addresses.";
-        for (const message::network_address& net_address: packet.addresses)
+        for (const network_address_type& net_address: packet.addresses)
             hosts_.store(net_address,
                 strand_.wrap(std::bind(&protocol::seeds::handle_store,
                     shared_from_this(), _1)));
@@ -250,7 +250,7 @@ void protocol::try_connect()
                 this, _1, _2)));
 }
 void protocol::attempt_connect(const std::error_code& ec,
-    const message::network_address& address)
+    const network_address_type& address)
 {
     if (ec)
     {
@@ -279,7 +279,7 @@ void protocol::attempt_connect(const std::error_code& ec,
             this, _1, _2, address)));
 }
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
-    const message::network_address& address)
+    const network_address_type& address)
 {
     if (ec)
     {
@@ -342,7 +342,7 @@ void protocol::setup_new_channel(channel_ptr node)
         strand_.wrap(std::bind(&protocol::channel_stopped,
             this, _1, node)));
     subscribe_address(node);
-    node->send(message::get_address(), handle_send);
+    node->send(get_address_type(), handle_send);
     // Notify subscribers
     channel_subscribe_->relay(node);
 }
@@ -373,7 +373,7 @@ void protocol::subscribe_address(channel_ptr node)
             this, _1, _2, node)));
 }
 void protocol::receive_address_message(const std::error_code& ec,
-    const message::address& packet, channel_ptr node)
+    const address_type& packet, channel_ptr node)
 {
     if (ec)
     {
@@ -383,7 +383,7 @@ void protocol::receive_address_message(const std::error_code& ec,
     else
     {
         log_debug(log_domain::protocol) << "Storing addresses.";
-        for (const message::network_address& net_address: packet.addresses)
+        for (const network_address_type& net_address: packet.addresses)
             hosts_.store(net_address,
                 strand_.wrap(std::bind(&protocol::handle_store_address,
                     this, _1)));

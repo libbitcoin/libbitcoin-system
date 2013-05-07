@@ -33,7 +33,7 @@ void bdb_chain_keeper::stop()
 void bdb_chain_keeper::add(block_detail_ptr incoming_block)
 {
     uint32_t last_block_depth = common_->find_last_block_depth(txn_);
-    const message::block& actual_block = incoming_block->actual();
+    const block_type& actual_block = incoming_block->actual();
     if (!common_->save_block(txn_, last_block_depth + 1, actual_block))
         log_fatal() << "Saving block in organizer failed";
 }
@@ -104,7 +104,7 @@ bool bdb_chain_keeper::end_slice(size_t slice_begin_index,
         proto::Block proto_block;
         proto_block.ParseFromIstream(&ss);
         // Convert proto block header into actual block
-        message::block sliced_block;
+        block_type sliced_block;
         if (!common_->reconstruct_block(txn_, proto_block, sliced_block))
             return false;
         // Add to list of sliced blocks
@@ -115,7 +115,7 @@ bool bdb_chain_keeper::end_slice(size_t slice_begin_index,
         if (cursor->del(0) != 0)
             return false;
         // Remove txs + spends + addresses too
-        for (const message::transaction& block_tx: sliced_block.transactions)
+        for (const transaction_type& block_tx: sliced_block.transactions)
             if (!clear_transaction_data(block_tx))
                 return false;
         // New value object ready to read next block
@@ -126,7 +126,7 @@ bool bdb_chain_keeper::end_slice(size_t slice_begin_index,
 }
 
 bool bdb_chain_keeper::clear_transaction_data(
-    const message::transaction& remove_tx)
+    const transaction_type& remove_tx)
 {
     const hash_digest& tx_hash = hash_transaction(remove_tx);
     readable_data_type del_tx_key;
@@ -139,9 +139,9 @@ bool bdb_chain_keeper::clear_transaction_data(
         for (uint32_t input_index = 0; input_index < remove_tx.inputs.size();
             ++input_index)
         {
-            const message::transaction_input& input = 
+            const transaction_input_type& input =
                 remove_tx.inputs[input_index];
-            const message::input_point inpoint{tx_hash, input_index};
+            const input_point inpoint{tx_hash, input_index};
             if (!remove_spend(input.previous_output, inpoint))
                 return false;
         }
@@ -149,7 +149,7 @@ bool bdb_chain_keeper::clear_transaction_data(
     for (uint32_t output_index = 0; output_index < remove_tx.outputs.size();
         ++output_index)
     {
-        const message::transaction_output& output =
+        const transaction_output_type& output =
             remove_tx.outputs[output_index];
         if (!remove_address(output.output_script, {tx_hash, output_index}))
             return false;
@@ -158,8 +158,8 @@ bool bdb_chain_keeper::clear_transaction_data(
 }
 
 bool bdb_chain_keeper::remove_spend(
-    const message::output_point& previous_output,
-    const message::input_point& current_input)
+    const output_point& previous_output,
+    const input_point& current_input)
 {
     readable_data_type spent_key;
     spent_key.set(bdb_create_spent_key(previous_output));
@@ -170,7 +170,7 @@ bool bdb_chain_keeper::remove_spend(
 }
 
 bool bdb_chain_keeper::remove_address(const script& output_script,
-    const message::output_point& outpoint)
+    const output_point& outpoint)
 {
     data_chunk raw_address = bdb_create_address_key(output_script);
     if (raw_address.empty())

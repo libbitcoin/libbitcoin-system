@@ -6,7 +6,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 void blockchain_started(const std::error_code& ec);
-void copy_block(const std::error_code& ec, const message::block& blk,
+void copy_block(const std::error_code& ec, const block_type& blk,
     size_t depth, blockchain* chain_1, blockchain* chain_2);
 void handle_import(const std::error_code& ec,
     size_t depth, const hash_digest& hash,
@@ -35,7 +35,7 @@ void resume_copy(const std::error_code& ec, size_t last_depth,
         std::bind(copy_block, _1, _2, resume_depth, chain_1, chain_2));
 }
 
-void copy_block(const std::error_code& ec, const message::block& blk,
+void copy_block(const std::error_code& ec, const block_type& blk,
     size_t depth, blockchain* chain_1, blockchain* chain_2)
 {
     if (ec)

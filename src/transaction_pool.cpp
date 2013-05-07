@@ -24,7 +24,7 @@ void transaction_pool::start()
             this, _1, _2, _3, _4)));
 }
 
-void transaction_pool::store(const message::transaction& stored_transaction,
+void transaction_pool::store(const transaction_type& stored_transaction,
     confirm_handler handle_confirm, store_handler handle_store)
 {
     strand_.post(
@@ -32,7 +32,7 @@ void transaction_pool::store(const message::transaction& stored_transaction,
             this, stored_transaction, handle_confirm, handle_store));
 }
 void transaction_pool::do_store(
-    const message::transaction& stored_transaction,
+    const transaction_type& stored_transaction,
     confirm_handler handle_confirm, store_handler handle_store)
 {
     transaction_entry_info new_tx_entry{
@@ -95,7 +95,7 @@ void transaction_pool::fetch(const hash_digest& transaction_hash,
                     handle_fetch(std::error_code(), entry.tx);
                     return;
                 }
-            handle_fetch(error::not_found, message::transaction());
+            handle_fetch(error::not_found, transaction_type());
         });
 }
 
@@ -143,7 +143,7 @@ void transaction_pool::takeout_confirmed(
     const blockchain::block_list& new_blocks)
 {
     for (auto new_block: new_blocks)
-        for (const message::transaction& new_tx: new_block->transactions)
+        for (const transaction_type& new_tx: new_block->transactions)
             try_delete(hash_transaction(new_tx));
 }
 void transaction_pool::try_delete(const hash_digest& tx_hash)
