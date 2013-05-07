@@ -181,15 +181,15 @@ void protobuf_AddDesc_bitcoin_2eproto() {
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\rbitcoin.proto\022\010protobuf\"\232\001\n\005Block\022\r\n\005d"
-    "epth\030\002 \002(\r\022\017\n\007version\030\006 \002(\r\022\033\n\023previous_"
-    "block_hash\030\007 \002(\014\022\016\n\006merkle\030\010 \002(\014\022\021\n\ttime"
-    "stamp\030\t \002(\r\022\014\n\004bits\030\n \002(\r\022\r\n\005nonce\030\013 \002(\r"
-    "\022\024\n\014transactions\030\014 \003(\014\"\224\003\n\013Transaction\0222"
-    "\n\006parent\030\001 \003(\0132\".protobuf.Transaction.Bl"
-    "ockPointer\022+\n\006inputs\030\003 \003(\0132\033.protobuf.Tr"
-    "ansaction.Input\022-\n\007outputs\030\004 \003(\0132\034.proto"
-    "buf.Transaction.Output\022\017\n\007version\030\005 \002(\r\022"
-    "\020\n\010locktime\030\006 \002(\r\022\023\n\013is_coinbase\030\007 \002(\010\032,"
+    "epth\030\001 \002(\r\022\017\n\007version\030\002 \002(\r\022\033\n\023previous_"
+    "block_hash\030\003 \002(\014\022\016\n\006merkle\030\004 \002(\014\022\021\n\ttime"
+    "stamp\030\005 \002(\r\022\014\n\004bits\030\006 \002(\r\022\r\n\005nonce\030\007 \002(\r"
+    "\022\024\n\014transactions\030\010 \003(\014\"\224\003\n\013Transaction\0222"
+    "\n\006parent\030\001 \002(\0132\".protobuf.Transaction.Bl"
+    "ockPointer\022+\n\006inputs\030\002 \003(\0132\033.protobuf.Tr"
+    "ansaction.Input\022-\n\007outputs\030\003 \003(\0132\034.proto"
+    "buf.Transaction.Output\022\017\n\007version\030\004 \002(\r\022"
+    "\020\n\010locktime\030\005 \002(\r\022\023\n\013is_coinbase\030\006 \002(\010\032,"
     "\n\014BlockPointer\022\r\n\005depth\030\001 \002(\r\022\r\n\005index\030\002"
     " \002(\r\032f\n\005Input\022\034\n\024previous_output_hash\030\001 "
     "\002(\014\022\035\n\025previous_output_index\030\002 \002(\r\022\016\n\006sc"
@@ -321,8 +321,8 @@ bool Block::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required uint32 depth = 2;
-      case 2: {
+      // required uint32 depth = 1;
+      case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
@@ -332,12 +332,12 @@ bool Block::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(48)) goto parse_version;
+        if (input->ExpectTag(16)) goto parse_version;
         break;
       }
       
-      // required uint32 version = 6;
-      case 6: {
+      // required uint32 version = 2;
+      case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_version:
@@ -348,12 +348,12 @@ bool Block::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(58)) goto parse_previous_block_hash;
+        if (input->ExpectTag(26)) goto parse_previous_block_hash;
         break;
       }
       
-      // required bytes previous_block_hash = 7;
-      case 7: {
+      // required bytes previous_block_hash = 3;
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_previous_block_hash:
@@ -362,12 +362,12 @@ bool Block::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(66)) goto parse_merkle;
+        if (input->ExpectTag(34)) goto parse_merkle;
         break;
       }
       
-      // required bytes merkle = 8;
-      case 8: {
+      // required bytes merkle = 4;
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_merkle:
@@ -376,12 +376,12 @@ bool Block::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(72)) goto parse_timestamp;
+        if (input->ExpectTag(40)) goto parse_timestamp;
         break;
       }
       
-      // required uint32 timestamp = 9;
-      case 9: {
+      // required uint32 timestamp = 5;
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_timestamp:
@@ -392,12 +392,12 @@ bool Block::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(80)) goto parse_bits;
+        if (input->ExpectTag(48)) goto parse_bits;
         break;
       }
       
-      // required uint32 bits = 10;
-      case 10: {
+      // required uint32 bits = 6;
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_bits:
@@ -408,12 +408,12 @@ bool Block::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(88)) goto parse_nonce;
+        if (input->ExpectTag(56)) goto parse_nonce;
         break;
       }
       
-      // required uint32 nonce = 11;
-      case 11: {
+      // required uint32 nonce = 7;
+      case 7: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_nonce:
@@ -424,12 +424,12 @@ bool Block::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(98)) goto parse_transactions;
+        if (input->ExpectTag(66)) goto parse_transactions;
         break;
       }
       
-      // repeated bytes transactions = 12;
-      case 12: {
+      // repeated bytes transactions = 8;
+      case 8: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_transactions:
@@ -438,7 +438,7 @@ bool Block::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(98)) goto parse_transactions;
+        if (input->ExpectTag(66)) goto parse_transactions;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -461,47 +461,47 @@ bool Block::MergePartialFromCodedStream(
 
 void Block::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required uint32 depth = 2;
+  // required uint32 depth = 1;
   if (has_depth()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->depth(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->depth(), output);
   }
   
-  // required uint32 version = 6;
+  // required uint32 version = 2;
   if (has_version()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->version(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->version(), output);
   }
   
-  // required bytes previous_block_hash = 7;
+  // required bytes previous_block_hash = 3;
   if (has_previous_block_hash()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytes(
-      7, this->previous_block_hash(), output);
+      3, this->previous_block_hash(), output);
   }
   
-  // required bytes merkle = 8;
+  // required bytes merkle = 4;
   if (has_merkle()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytes(
-      8, this->merkle(), output);
+      4, this->merkle(), output);
   }
   
-  // required uint32 timestamp = 9;
+  // required uint32 timestamp = 5;
   if (has_timestamp()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(9, this->timestamp(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->timestamp(), output);
   }
   
-  // required uint32 bits = 10;
+  // required uint32 bits = 6;
   if (has_bits()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(10, this->bits(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->bits(), output);
   }
   
-  // required uint32 nonce = 11;
+  // required uint32 nonce = 7;
   if (has_nonce()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(11, this->nonce(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(7, this->nonce(), output);
   }
   
-  // repeated bytes transactions = 12;
+  // repeated bytes transactions = 8;
   for (int i = 0; i < this->transactions_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteBytes(
-      12, this->transactions(i), output);
+      8, this->transactions(i), output);
   }
   
   if (!unknown_fields().empty()) {
@@ -512,49 +512,49 @@ void Block::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* Block::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required uint32 depth = 2;
+  // required uint32 depth = 1;
   if (has_depth()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->depth(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->depth(), target);
   }
   
-  // required uint32 version = 6;
+  // required uint32 version = 2;
   if (has_version()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->version(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->version(), target);
   }
   
-  // required bytes previous_block_hash = 7;
+  // required bytes previous_block_hash = 3;
   if (has_previous_block_hash()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        7, this->previous_block_hash(), target);
+        3, this->previous_block_hash(), target);
   }
   
-  // required bytes merkle = 8;
+  // required bytes merkle = 4;
   if (has_merkle()) {
     target =
       ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        8, this->merkle(), target);
+        4, this->merkle(), target);
   }
   
-  // required uint32 timestamp = 9;
+  // required uint32 timestamp = 5;
   if (has_timestamp()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(9, this->timestamp(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->timestamp(), target);
   }
   
-  // required uint32 bits = 10;
+  // required uint32 bits = 6;
   if (has_bits()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(10, this->bits(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->bits(), target);
   }
   
-  // required uint32 nonce = 11;
+  // required uint32 nonce = 7;
   if (has_nonce()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(11, this->nonce(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(7, this->nonce(), target);
   }
   
-  // repeated bytes transactions = 12;
+  // repeated bytes transactions = 8;
   for (int i = 0; i < this->transactions_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
-      WriteBytesToArray(12, this->transactions(i), target);
+      WriteBytesToArray(8, this->transactions(i), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -568,49 +568,49 @@ int Block::ByteSize() const {
   int total_size = 0;
   
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required uint32 depth = 2;
+    // required uint32 depth = 1;
     if (has_depth()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->depth());
     }
     
-    // required uint32 version = 6;
+    // required uint32 version = 2;
     if (has_version()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->version());
     }
     
-    // required bytes previous_block_hash = 7;
+    // required bytes previous_block_hash = 3;
     if (has_previous_block_hash()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->previous_block_hash());
     }
     
-    // required bytes merkle = 8;
+    // required bytes merkle = 4;
     if (has_merkle()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::BytesSize(
           this->merkle());
     }
     
-    // required uint32 timestamp = 9;
+    // required uint32 timestamp = 5;
     if (has_timestamp()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->timestamp());
     }
     
-    // required uint32 bits = 10;
+    // required uint32 bits = 6;
     if (has_bits()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->bits());
     }
     
-    // required uint32 nonce = 11;
+    // required uint32 nonce = 7;
     if (has_nonce()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
@@ -618,7 +618,7 @@ int Block::ByteSize() const {
     }
     
   }
-  // repeated bytes transactions = 12;
+  // repeated bytes transactions = 8;
   total_size += 1 * this->transactions_size();
   for (int i = 0; i < this->transactions_size(); i++) {
     total_size += ::google::protobuf::internal::WireFormatLite::BytesSize(
@@ -1585,6 +1585,7 @@ Transaction::Transaction()
 }
 
 void Transaction::InitAsDefaultInstance() {
+  parent_ = const_cast< ::protobuf::Transaction_BlockPointer*>(&::protobuf::Transaction_BlockPointer::default_instance());
 }
 
 Transaction::Transaction(const Transaction& from)
@@ -1595,6 +1596,7 @@ Transaction::Transaction(const Transaction& from)
 
 void Transaction::SharedCtor() {
   _cached_size_ = 0;
+  parent_ = NULL;
   version_ = 0u;
   locktime_ = 0u;
   is_coinbase_ = false;
@@ -1607,6 +1609,7 @@ Transaction::~Transaction() {
 
 void Transaction::SharedDtor() {
   if (this != default_instance_) {
+    delete parent_;
   }
 }
 
@@ -1631,12 +1634,14 @@ Transaction* Transaction::New() const {
 }
 
 void Transaction::Clear() {
-  if (_has_bits_[3 / 32] & (0xffu << (3 % 32))) {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_parent()) {
+      if (parent_ != NULL) parent_->::protobuf::Transaction_BlockPointer::Clear();
+    }
     version_ = 0u;
     locktime_ = 0u;
     is_coinbase_ = false;
   }
-  parent_.Clear();
   inputs_.Clear();
   outputs_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
@@ -1649,23 +1654,21 @@ bool Transaction::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // repeated .protobuf.Transaction.BlockPointer parent = 1;
+      // required .protobuf.Transaction.BlockPointer parent = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_parent:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-                input, add_parent()));
+               input, mutable_parent()));
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(10)) goto parse_parent;
-        if (input->ExpectTag(26)) goto parse_inputs;
+        if (input->ExpectTag(18)) goto parse_inputs;
         break;
       }
       
-      // repeated .protobuf.Transaction.Input inputs = 3;
-      case 3: {
+      // repeated .protobuf.Transaction.Input inputs = 2;
+      case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_inputs:
@@ -1674,13 +1677,13 @@ bool Transaction::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_inputs;
-        if (input->ExpectTag(34)) goto parse_outputs;
+        if (input->ExpectTag(18)) goto parse_inputs;
+        if (input->ExpectTag(26)) goto parse_outputs;
         break;
       }
       
-      // repeated .protobuf.Transaction.Output outputs = 4;
-      case 4: {
+      // repeated .protobuf.Transaction.Output outputs = 3;
+      case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_outputs:
@@ -1689,13 +1692,13 @@ bool Transaction::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(34)) goto parse_outputs;
-        if (input->ExpectTag(40)) goto parse_version;
+        if (input->ExpectTag(26)) goto parse_outputs;
+        if (input->ExpectTag(32)) goto parse_version;
         break;
       }
       
-      // required uint32 version = 5;
-      case 5: {
+      // required uint32 version = 4;
+      case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_version:
@@ -1706,12 +1709,12 @@ bool Transaction::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(48)) goto parse_locktime;
+        if (input->ExpectTag(40)) goto parse_locktime;
         break;
       }
       
-      // required uint32 locktime = 6;
-      case 6: {
+      // required uint32 locktime = 5;
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_locktime:
@@ -1722,12 +1725,12 @@ bool Transaction::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(56)) goto parse_is_coinbase;
+        if (input->ExpectTag(48)) goto parse_is_coinbase;
         break;
       }
       
-      // required bool is_coinbase = 7;
-      case 7: {
+      // required bool is_coinbase = 6;
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_is_coinbase:
@@ -1760,37 +1763,37 @@ bool Transaction::MergePartialFromCodedStream(
 
 void Transaction::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // repeated .protobuf.Transaction.BlockPointer parent = 1;
-  for (int i = 0; i < this->parent_size(); i++) {
+  // required .protobuf.Transaction.BlockPointer parent = 1;
+  if (has_parent()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      1, this->parent(i), output);
+      1, this->parent(), output);
   }
   
-  // repeated .protobuf.Transaction.Input inputs = 3;
+  // repeated .protobuf.Transaction.Input inputs = 2;
   for (int i = 0; i < this->inputs_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, this->inputs(i), output);
+      2, this->inputs(i), output);
   }
   
-  // repeated .protobuf.Transaction.Output outputs = 4;
+  // repeated .protobuf.Transaction.Output outputs = 3;
   for (int i = 0; i < this->outputs_size(); i++) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      4, this->outputs(i), output);
+      3, this->outputs(i), output);
   }
   
-  // required uint32 version = 5;
+  // required uint32 version = 4;
   if (has_version()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->version(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(4, this->version(), output);
   }
   
-  // required uint32 locktime = 6;
+  // required uint32 locktime = 5;
   if (has_locktime()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->locktime(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->locktime(), output);
   }
   
-  // required bool is_coinbase = 7;
+  // required bool is_coinbase = 6;
   if (has_is_coinbase()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->is_coinbase(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(6, this->is_coinbase(), output);
   }
   
   if (!unknown_fields().empty()) {
@@ -1801,40 +1804,40 @@ void Transaction::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* Transaction::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // repeated .protobuf.Transaction.BlockPointer parent = 1;
-  for (int i = 0; i < this->parent_size(); i++) {
+  // required .protobuf.Transaction.BlockPointer parent = 1;
+  if (has_parent()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        1, this->parent(i), target);
+        1, this->parent(), target);
   }
   
-  // repeated .protobuf.Transaction.Input inputs = 3;
+  // repeated .protobuf.Transaction.Input inputs = 2;
   for (int i = 0; i < this->inputs_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        3, this->inputs(i), target);
+        2, this->inputs(i), target);
   }
   
-  // repeated .protobuf.Transaction.Output outputs = 4;
+  // repeated .protobuf.Transaction.Output outputs = 3;
   for (int i = 0; i < this->outputs_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        4, this->outputs(i), target);
+        3, this->outputs(i), target);
   }
   
-  // required uint32 version = 5;
+  // required uint32 version = 4;
   if (has_version()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->version(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(4, this->version(), target);
   }
   
-  // required uint32 locktime = 6;
+  // required uint32 locktime = 5;
   if (has_locktime()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->locktime(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->locktime(), target);
   }
   
-  // required bool is_coinbase = 7;
+  // required bool is_coinbase = 6;
   if (has_is_coinbase()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->is_coinbase(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(6, this->is_coinbase(), target);
   }
   
   if (!unknown_fields().empty()) {
@@ -1847,36 +1850,35 @@ void Transaction::SerializeWithCachedSizes(
 int Transaction::ByteSize() const {
   int total_size = 0;
   
-  if (_has_bits_[3 / 32] & (0xffu << (3 % 32))) {
-    // required uint32 version = 5;
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required .protobuf.Transaction.BlockPointer parent = 1;
+    if (has_parent()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->parent());
+    }
+    
+    // required uint32 version = 4;
     if (has_version()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->version());
     }
     
-    // required uint32 locktime = 6;
+    // required uint32 locktime = 5;
     if (has_locktime()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->locktime());
     }
     
-    // required bool is_coinbase = 7;
+    // required bool is_coinbase = 6;
     if (has_is_coinbase()) {
       total_size += 1 + 1;
     }
     
   }
-  // repeated .protobuf.Transaction.BlockPointer parent = 1;
-  total_size += 1 * this->parent_size();
-  for (int i = 0; i < this->parent_size(); i++) {
-    total_size +=
-      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        this->parent(i));
-  }
-  
-  // repeated .protobuf.Transaction.Input inputs = 3;
+  // repeated .protobuf.Transaction.Input inputs = 2;
   total_size += 1 * this->inputs_size();
   for (int i = 0; i < this->inputs_size(); i++) {
     total_size +=
@@ -1884,7 +1886,7 @@ int Transaction::ByteSize() const {
         this->inputs(i));
   }
   
-  // repeated .protobuf.Transaction.Output outputs = 4;
+  // repeated .protobuf.Transaction.Output outputs = 3;
   total_size += 1 * this->outputs_size();
   for (int i = 0; i < this->outputs_size(); i++) {
     total_size +=
@@ -1917,10 +1919,12 @@ void Transaction::MergeFrom(const ::google::protobuf::Message& from) {
 
 void Transaction::MergeFrom(const Transaction& from) {
   GOOGLE_CHECK_NE(&from, this);
-  parent_.MergeFrom(from.parent_);
   inputs_.MergeFrom(from.inputs_);
   outputs_.MergeFrom(from.outputs_);
-  if (from._has_bits_[3 / 32] & (0xffu << (3 % 32))) {
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_parent()) {
+      mutable_parent()->::protobuf::Transaction_BlockPointer::MergeFrom(from.parent());
+    }
     if (from.has_version()) {
       set_version(from.version());
     }
@@ -1947,10 +1951,10 @@ void Transaction::CopyFrom(const Transaction& from) {
 }
 
 bool Transaction::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000038) != 0x00000038) return false;
+  if ((_has_bits_[0] & 0x00000039) != 0x00000039) return false;
   
-  for (int i = 0; i < parent_size(); i++) {
-    if (!this->parent(i).IsInitialized()) return false;
+  if (has_parent()) {
+    if (!this->parent().IsInitialized()) return false;
   }
   for (int i = 0; i < inputs_size(); i++) {
     if (!this->inputs(i).IsInitialized()) return false;
@@ -1963,7 +1967,7 @@ bool Transaction::IsInitialized() const {
 
 void Transaction::Swap(Transaction* other) {
   if (other != this) {
-    parent_.Swap(&other->parent_);
+    std::swap(parent_, other->parent_);
     inputs_.Swap(&other->inputs_);
     outputs_.Swap(&other->outputs_);
     std::swap(version_, other->version_);

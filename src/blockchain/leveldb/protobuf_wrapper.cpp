@@ -4,18 +4,20 @@
 
 namespace libbitcoin {
 
-struct bdb_proto_shutdown
+struct protobuf_shutdown
 {
-    ~bdb_proto_shutdown()
+    ~protobuf_shutdown()
     {
+        // Use this class because protobuf may be used elsewhere.
+        // Shutdown should happen on process exit.
         google::protobuf::ShutdownProtobufLibrary();
     }
-} proto_shutdown_inst;
+} protobuf_shutdown_inst;
 
-proto::Block block_header_to_proto(uint32_t depth,
+protobuf::Block block_header_to_protobuf(uint32_t depth,
     const message::block serial_block)
 {
-    proto::Block proto_block;
+    protobuf::Block proto_block;
     proto_block.set_depth(depth);
     proto_block.set_version(serial_block.version);
     proto_block.set_previous_block_hash(
@@ -29,15 +31,15 @@ proto::Block block_header_to_proto(uint32_t depth,
     return proto_block;
 }
 
-proto::Transaction transaction_to_proto(
+protobuf::Transaction transaction_to_protobuf(
     const message::transaction& block_tx)
 {
-    proto::Transaction proto_tx;
+    protobuf::Transaction proto_tx;
     proto_tx.set_version(block_tx.version);
     proto_tx.set_locktime(block_tx.locktime);
     for (const message::transaction_input& block_input: block_tx.inputs)
     {
-        proto::Transaction::Input& proto_input = *proto_tx.add_inputs();
+        protobuf::Transaction::Input& proto_input = *proto_tx.add_inputs();
         proto_input.set_previous_output_hash(
             block_input.previous_output.hash.data(),
             block_input.previous_output.hash.size());
@@ -49,7 +51,7 @@ proto::Transaction transaction_to_proto(
     }
     for (const message::transaction_output& block_output: block_tx.outputs)
     {
-        proto::Transaction::Output& proto_output = *proto_tx.add_outputs();
+        protobuf::Transaction::Output& proto_output = *proto_tx.add_outputs();
         proto_output.set_value(block_output.value);
         data_chunk raw_script = save_script(block_output.output_script);
         proto_output.set_script(&raw_script[0], raw_script.size());
@@ -57,7 +59,7 @@ proto::Transaction transaction_to_proto(
     return proto_tx;
 }
 
-message::block proto_to_block_header(const proto::Block& proto_block)
+message::block protobuf_to_block_header(const protobuf::Block& proto_block)
 {
     message::block result_block;
     result_block.version = proto_block.version();
@@ -80,15 +82,15 @@ data_chunk read_raw_script(const InOut& inout)
     return data_chunk(script_str.begin(), script_str.end());
 }
 
-message::transaction proto_to_transaction(
-    const proto::Transaction& proto_tx)
+message::transaction protobuf_to_transaction(
+    const protobuf::Transaction& proto_tx)
 {
     message::transaction result_tx;
     result_tx.version = proto_tx.version();
     result_tx.locktime = proto_tx.locktime();
     for (size_t i = 0; i < proto_tx.inputs_size(); ++i)
     {
-        const proto::Transaction::Input& proto_input = proto_tx.inputs(i);
+        const protobuf::Transaction::Input& proto_input = proto_tx.inputs(i);
         message::transaction_input tx_input;
         const std::string& prev_out_hash = proto_input.previous_output_hash();
         std::copy(prev_out_hash.begin(), prev_out_hash.end(),
@@ -104,7 +106,7 @@ message::transaction proto_to_transaction(
     }
     for (size_t i = 0; i < proto_tx.outputs_size(); ++i)
     {
-        const proto::Transaction::Output& proto_output = proto_tx.outputs(i);
+        const protobuf::Transaction::Output& proto_output = proto_tx.outputs(i);
         message::transaction_output tx_output;
         tx_output.value = proto_output.value();
         tx_output.output_script = parse_script(read_raw_script(proto_output));

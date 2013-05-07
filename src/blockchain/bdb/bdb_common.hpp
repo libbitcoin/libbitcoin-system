@@ -29,14 +29,14 @@ public:
     bool save_block(txn_guard_ptr txn,
         uint32_t depth, const message::block& serial_block);
 
-    protobuf::Block fetch_proto_block(txn_guard_ptr txn, uint32_t depth);
-    protobuf::Block fetch_proto_block(txn_guard_ptr txn,
+    proto::Block fetch_proto_block(txn_guard_ptr txn, uint32_t depth);
+    proto::Block fetch_proto_block(txn_guard_ptr txn,
         const hash_digest& block_hash);
-    protobuf::Transaction fetch_proto_transaction(txn_guard_ptr txn,
+    proto::Transaction fetch_proto_transaction(txn_guard_ptr txn,
         const hash_digest& tx_hash);
 
     bool reconstruct_block(txn_guard_ptr txn,
-        const protobuf::Block& proto_block_header,
+        const proto::Block& proto_block_header,
         message::block& result_block);
 
 private:
@@ -52,7 +52,7 @@ private:
     bool add_address(txn_guard_ptr txn, const script& output_script,
         const message::output_point& outpoint);
     bool rewrite_transaction(txn_guard_ptr txn, const hash_digest& tx_hash,
-        const protobuf::Transaction& replace_proto_tx);
+        const proto::Transaction& replace_proto_tx);
 
     DbEnv* env_;
     Db* db_blocks_;
@@ -66,7 +66,7 @@ typedef std::shared_ptr<bdb_common> bdb_common_ptr;
 
 // Used also by bdb_chain_keeper when deleting spends + addresses
 template <typename Point>
-data_chunk create_spent_key(const Point& point)
+data_chunk bdb_create_spent_key(const Point& point)
 {
     serializer serial_spend;
     serial_spend.write_hash(point.hash);
@@ -74,7 +74,7 @@ data_chunk create_spent_key(const Point& point)
     return serial_spend.data();
 }
 
-data_chunk create_address_key(const script& output_script);
+data_chunk bdb_create_address_key(const script& output_script);
 
 } // namespace libbitcoin
 

@@ -1,4 +1,4 @@
-#include "bdb_validate_block.hpp"
+#include "leveldb_validate_block.hpp"
 
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
@@ -8,16 +8,16 @@
 
 namespace libbitcoin {
 
-bdb_validate_block::bdb_validate_block(bdb_common_ptr common, int fork_index,
-    const block_detail_list& orphan_chain, int orphan_index, size_t depth,
-    txn_guard_ptr txn, const message::block& current_block)
+leveldb_validate_block::leveldb_validate_block(leveldb_common_ptr common,
+    int fork_index, const block_detail_list& orphan_chain,
+    int orphan_index, size_t depth, const message::block& current_block)
   : validate_block(depth, current_block), common_(common),
-    txn_(txn), depth_(depth), fork_index_(fork_index),
+    depth_(depth), fork_index_(fork_index),
     orphan_index_(orphan_index), orphan_chain_(orphan_chain)
 {
 }
 
-message::block bdb_validate_block::fetch_block(size_t fetch_depth)
+message::block leveldb_validate_block::fetch_block(size_t fetch_depth)
 {
     if (fetch_depth > fork_index_)
     {
@@ -26,8 +26,7 @@ message::block bdb_validate_block::fetch_block(size_t fetch_depth)
         BITCOIN_ASSERT(orphan_index_ < orphan_chain_.size());
         return orphan_chain_[fetch_index]->actual();
     }
-    proto::Block proto_block =
-        common_->fetch_proto_block(txn_, fetch_depth);
+    protobuf::Block proto_block = common_->fetch_proto_block(fetch_depth);
     BITCOIN_ASSERT(proto_block.IsInitialized());
     // We only convert the fields we actually need
     message::block result_block;
@@ -36,20 +35,20 @@ message::block bdb_validate_block::fetch_block(size_t fetch_depth)
     return result_block;
 }
 
-uint32_t bdb_validate_block::previous_block_bits()
+uint32_t leveldb_validate_block::previous_block_bits()
 {
     // Read block d - 1 and return bits
     return fetch_block(depth_ - 1).bits;
 }
 
-uint64_t bdb_validate_block::actual_timespan(const uint64_t interval)
+uint64_t leveldb_validate_block::actual_timespan(const uint64_t interval)
 {
     // depth - interval and depth - 1, return time difference
     return fetch_block(depth_ - 1).timestamp - 
         fetch_block(depth_ - interval).timestamp;
 }
 
-uint64_t bdb_validate_block::median_time_past()
+uint64_t leveldb_validate_block::median_time_past()
 {
     // read last 11 block times into array and select median value
     std::vector<uint64_t> times;
@@ -61,53 +60,53 @@ uint64_t bdb_validate_block::median_time_past()
     return times[times.size() / 2];
 }
 
-bool tx_after_fork(const proto::Transaction& proto_tx, size_t fork_index)
+bool tx_after_fork(const protobuf::Transaction& proto_tx, size_t fork_index)
 {
-    for (auto parent: proto_tx.parent())
-        if (parent.depth() > fork_index)
-            return true;
-    return false;
+    message::transaction tx = protobuf_to_transaction(proto_tx);
+    if (proto_tx.parent().depth() <= fork_index)
+        return false;
+    return true;
 }
 
-bool bdb_validate_block::transaction_exists(const hash_digest& tx_hash)
+bool leveldb_validate_block::transaction_exists(const hash_digest& tx_hash)
 {
-    proto::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn_, tx_hash);
+    protobuf::Transaction proto_tx =
+        common_->fetch_proto_transaction(tx_hash);
     if (!proto_tx.IsInitialized())
         return false;
     return !tx_after_fork(proto_tx, fork_index_);
 }
 
-bool bdb_validate_block::is_output_spent(const message::output_point& outpoint)
+bool leveldb_validate_block::is_output_spent(
+    const message::output_point& outpoint)
 {
     message::input_point input_spend;
-    if (!common_->fetch_spend(txn_, outpoint, input_spend))
+    if (!common_->fetch_spend(outpoint, input_spend))
         return false;
     // Lookup block depth
-    proto::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn_, input_spend.hash);
+    protobuf::Transaction proto_tx =
+        common_->fetch_proto_transaction(input_spend.hash);
     return !tx_after_fork(proto_tx, fork_index_);
 }
 
-bool bdb_validate_block::fetch_transaction(message::transaction& tx, 
+bool leveldb_validate_block::fetch_transaction(message::transaction& tx, 
     size_t& tx_depth, const hash_digest& tx_hash)
 {
-    proto::Transaction proto_tx =
-        common_->fetch_proto_transaction(txn_, tx_hash);
+    protobuf::Transaction proto_tx =
+        common_->fetch_proto_transaction(tx_hash);
     if (!proto_tx.IsInitialized() || tx_after_fork(proto_tx, fork_index_))
     {
         if (!fetch_orphan_transaction(tx, tx_depth, tx_hash))
             return false;
         return true;
     }
-    BITCOIN_ASSERT(proto_tx.parent_size() > 0);
-    tx = proto_to_transaction(proto_tx);
-    tx_depth = proto_tx.parent(0).depth();
+    tx = protobuf_to_transaction(proto_tx);
+    tx_depth = proto_tx.parent().depth();
     return true;
 }
 
-bool bdb_validate_block::fetch_orphan_transaction(message::transaction& tx, 
-    size_t& tx_depth, const hash_digest& tx_hash)
+bool leveldb_validate_block::fetch_orphan_transaction(
+    message::transaction& tx, size_t& tx_depth, const hash_digest& tx_hash)
 {
     for (size_t orphan_iter = 0; orphan_iter <= orphan_index_; ++orphan_iter)
     {
@@ -126,7 +125,7 @@ bool bdb_validate_block::fetch_orphan_transaction(message::transaction& tx,
     return false;
 }
 
-bool bdb_validate_block::is_output_spent(
+bool leveldb_validate_block::is_output_spent(
     const message::output_point& previous_output,
     size_t index_in_parent, size_t input_index)
 {
@@ -141,7 +140,7 @@ bool bdb_validate_block::is_output_spent(
     return false;
 }
 
-bool bdb_validate_block::orphan_is_spent(
+bool leveldb_validate_block::orphan_is_spent(
     const message::output_point& previous_output,
     size_t skip_tx, size_t skip_input)
 {
