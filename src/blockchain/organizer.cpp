@@ -4,18 +4,18 @@
 
 namespace libbitcoin {
 
-block_detail::block_detail(const message::block& actual_block)
+block_detail::block_detail(const block_type& actual_block)
   : block_hash_(hash_block_header(actual_block)),
     processed_(false), info_{block_status::orphan, 0}
 {
-    actual_block_ = std::make_shared<message::block>(actual_block);
+    actual_block_ = std::make_shared<block_type>(actual_block);
 }
 
-const message::block& block_detail::actual() const
+const block_type& block_detail::actual() const
 {
     return *actual_block_;
 }
-std::shared_ptr<message::block> block_detail::actual_ptr() const
+std::shared_ptr<block_type> block_detail::actual_ptr() const
 {
     return actual_block_;
 }
@@ -164,7 +164,7 @@ void organizer::replace_chain(int fork_index,
             // Stop summing work once we discover an invalid block
             break;
         }
-        const message::block& orphan_block =
+        const block_type& orphan_block =
             orphan_chain[orphan_index]->actual();
         orphan_work += block_work(orphan_block.bits);
     }

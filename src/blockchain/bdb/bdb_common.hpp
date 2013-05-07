@@ -27,7 +27,7 @@ public:
         message::input_point& input_spend);
 
     bool save_block(txn_guard_ptr txn,
-        uint32_t depth, const message::block& serial_block);
+        uint32_t depth, const block_type& serial_block);
 
     proto::Block fetch_proto_block(txn_guard_ptr txn, uint32_t depth);
     proto::Block fetch_proto_block(txn_guard_ptr txn,
@@ -37,12 +37,12 @@ public:
 
     bool reconstruct_block(txn_guard_ptr txn,
         const proto::Block& proto_block_header,
-        message::block& result_block);
+        block_type& result_block);
 
 private:
     bool save_transaction(txn_guard_ptr txn, uint32_t block_depth,
         uint32_t tx_index, const hash_digest& tx_hash,
-        const message::transaction& block_tx);
+        const transaction_type& block_tx);
     bool dupli_save(txn_guard_ptr txn, const hash_digest& tx_hash,
         uint32_t block_depth, uint32_t tx_index);
     bool mark_spent_outputs(txn_guard_ptr txn,

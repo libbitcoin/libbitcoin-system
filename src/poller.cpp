@@ -31,7 +31,7 @@ void poller::monitor(channel_ptr node)
 }
 
 void poller::initial_ask_blocks(const std::error_code& ec,
-    const message::block_locator& locator, channel_ptr node)
+    const block_locator_type& locator, channel_ptr node)
 {
     if (ec)
     {
@@ -51,7 +51,7 @@ void handle_send_packet(const std::error_code& ec)
 }
 
 void poller::receive_inv(const std::error_code& ec,
-    const message::inventory& packet, channel_ptr node)
+    const inventory_type& packet, channel_ptr node)
 {
     if (ec)
     {
@@ -60,8 +60,8 @@ void poller::receive_inv(const std::error_code& ec,
         return;
     }
     // Filter out only block inventories
-    message::get_data getdata;
-    for (const message::inventory_vector& ivv: packet.inventories)
+    get_data_type getdata;
+    for (const inventory_vector_type& ivv: packet.inventories)
     {
         if (ivv.type != message::inventory_type_id::block)
             continue;
@@ -81,7 +81,7 @@ void poller::receive_inv(const std::error_code& ec,
 }
 
 void poller::receive_block(const std::error_code& ec,
-    const message::block& blk, channel_ptr node)
+    const block_type& blk, channel_ptr node)
 {
     if (ec)
     {
@@ -132,7 +132,7 @@ void poller::handle_store(const std::error_code& ec, block_info info,
 }
 
 void poller::ask_blocks(const std::error_code& ec,
-    const message::block_locator& locator,
+    const block_locator_type& locator,
     const hash_digest& hash_stop, channel_ptr node)
 {
     if (ec)
@@ -147,7 +147,7 @@ void poller::ask_blocks(const std::error_code& ec,
             << pretty_hex(locator.front());
         return;
     }
-    message::get_blocks packet;
+    get_blocks_type packet;
     packet.start_hashes = locator;
     packet.hash_stop = hash_stop;
     node->send(packet, std::bind(&handle_send_packet, _1));

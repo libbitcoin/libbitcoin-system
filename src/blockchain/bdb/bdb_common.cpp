@@ -49,14 +49,14 @@ bool bdb_common::fetch_spend(txn_guard_ptr txn,
 }
 
 bool bdb_common::save_block(txn_guard_ptr txn,
-    uint32_t depth, const message::block& serial_block)
+    uint32_t depth, const block_type& serial_block)
 {
     proto::Block proto_block =
         block_header_to_proto(depth, serial_block);
     for (uint32_t tx_index = 0;
         tx_index < serial_block.transactions.size(); ++tx_index)
     {
-        const message::transaction& block_tx =
+        const transaction_type& block_tx =
             serial_block.transactions[tx_index];
         const hash_digest& tx_hash = hash_transaction(block_tx);
         if (!save_transaction(txn, depth, tx_index, tx_hash, block_tx))
@@ -86,7 +86,7 @@ bool bdb_common::save_block(txn_guard_ptr txn,
 
 bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
     uint32_t tx_index, const hash_digest& tx_hash,
-    const message::transaction& block_tx)
+    const transaction_type& block_tx)
 {
     if (dupli_save(txn, tx_hash, block_depth, tx_index))
         return true;
@@ -112,7 +112,7 @@ bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
         for (uint32_t input_index = 0; input_index < block_tx.inputs.size();
             ++input_index)
         {
-            const message::transaction_input& input = 
+            const transaction_input_type& input =
                 block_tx.inputs[input_index];
             const message::input_point inpoint{tx_hash, input_index};
             if (!mark_spent_outputs(txn, input.previous_output, inpoint))
@@ -121,7 +121,7 @@ bool bdb_common::save_transaction(txn_guard_ptr txn, uint32_t block_depth,
     for (uint32_t output_index = 0; output_index < block_tx.outputs.size();
         ++output_index)
     {
-        const message::transaction_output& output =
+        const transaction_output_type& output =
             block_tx.outputs[output_index];
         if (!add_address(txn, output.output_script, {tx_hash, output_index}))
             return false;
@@ -240,7 +240,7 @@ proto::Block bdb_common::fetch_proto_block(txn_guard_ptr txn,
 
 bool bdb_common::reconstruct_block(txn_guard_ptr txn,
     const proto::Block& proto_block_header,
-    message::block& result_block)
+    block_type& result_block)
 {
     result_block = proto_to_block_header(proto_block_header);
     for (const std::string& raw_tx_hash: proto_block_header.transactions())

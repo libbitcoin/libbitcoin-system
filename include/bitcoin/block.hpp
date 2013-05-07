@@ -19,16 +19,16 @@ struct block_info
     size_t depth;
 };
 
-bool operator==(const message::block block_a, const message::block& block_b);
+bool operator==(const block_type block_a, const block_type& block_b);
 
 uint64_t block_value(size_t depth);
 big_number block_work(uint32_t bits);
 
-hash_digest hash_block_header(const message::block& block);
+hash_digest hash_block_header(const block_type& block);
 
 index_list block_locator_indexes(int top_depth);
 
-message::block genesis_block();
+block_type genesis_block();
 
 } // namespace libbitcoin
 

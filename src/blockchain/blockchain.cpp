@@ -23,7 +23,7 @@ public:
         auto this_ptr = shared_from_this();
         chain_.fetch_block_header(index,
             [this, this_ptr](const std::error_code& ec,
-                const message::block& block_header)
+                const block_type& block_header)
             {
                 if (stop_on_error(ec))
                     return;
@@ -71,14 +71,14 @@ private:
     void fetch_tx(const message::inventory_list& tx_hashes, size_t tx_index)
     {
         auto this_ptr = shared_from_this();
-        const message::inventory_vector& inv = tx_hashes[tx_index];
+        const inventory_vector_type& inv = tx_hashes[tx_index];
         BITCOIN_ASSERT(inv.type ==
             message::inventory_type_id::transaction);
         size_t tx_hashes_size = tx_hashes.size();
         chain_.fetch_transaction(inv.hash,
             [this, this_ptr, tx_index, tx_hashes_size](
                 const std::error_code& ec,
-                const message::transaction& tx)
+                const transaction_type& tx)
             {
                 if (stop_on_error(ec))
                     return;
@@ -94,7 +94,7 @@ private:
     blockchain& chain_;
     handler_block handle_;
 
-    message::block block_;
+    block_type block_;
     size_t count_;
     bool stopped_;
 };
@@ -163,7 +163,7 @@ private:
     }
 
     void append(const std::error_code& ec,
-        const message::block& block_header, size_t depth, size_t entries)
+        const block_type& block_header, size_t depth, size_t entries)
     {
         if (stop_on_error(ec))
             return;
@@ -179,7 +179,7 @@ private:
             {
                 return entry_a.first > entry_b.first;
             });
-        message::block_locator final_locator;
+        block_locator_type final_locator;
         for (const meta_entry& entry: meta_)
             final_locator.push_back(entry.second);
         handle_(std::error_code(), final_locator);

@@ -15,7 +15,7 @@ struct protobuf_shutdown
 } protobuf_shutdown_inst;
 
 protobuf::Block block_header_to_protobuf(uint32_t depth,
-    const message::block serial_block)
+    const block_type serial_block)
 {
     protobuf::Block proto_block;
     proto_block.set_depth(depth);
@@ -32,12 +32,12 @@ protobuf::Block block_header_to_protobuf(uint32_t depth,
 }
 
 protobuf::Transaction transaction_to_protobuf(
-    const message::transaction& block_tx)
+    const transaction_type& block_tx)
 {
     protobuf::Transaction proto_tx;
     proto_tx.set_version(block_tx.version);
     proto_tx.set_locktime(block_tx.locktime);
-    for (const message::transaction_input& block_input: block_tx.inputs)
+    for (const transaction_input_type& block_input: block_tx.inputs)
     {
         protobuf::Transaction::Input& proto_input = *proto_tx.add_inputs();
         proto_input.set_previous_output_hash(
@@ -49,7 +49,7 @@ protobuf::Transaction transaction_to_protobuf(
         proto_input.set_script(&raw_script[0], raw_script.size());
         proto_input.set_sequence(block_input.sequence);
     }
-    for (const message::transaction_output& block_output: block_tx.outputs)
+    for (const transaction_output_type& block_output: block_tx.outputs)
     {
         protobuf::Transaction::Output& proto_output = *proto_tx.add_outputs();
         proto_output.set_value(block_output.value);
@@ -59,9 +59,9 @@ protobuf::Transaction transaction_to_protobuf(
     return proto_tx;
 }
 
-message::block protobuf_to_block_header(const protobuf::Block& proto_block)
+block_type protobuf_to_block_header(const protobuf::Block& proto_block)
 {
-    message::block result_block;
+    block_type result_block;
     result_block.version = proto_block.version();
     const std::string& previous_block_hash = proto_block.previous_block_hash();
     std::copy(previous_block_hash.begin(), previous_block_hash.end(),
@@ -82,16 +82,16 @@ data_chunk read_raw_script(const InOut& inout)
     return data_chunk(script_str.begin(), script_str.end());
 }
 
-message::transaction protobuf_to_transaction(
+transaction_type protobuf_to_transaction(
     const protobuf::Transaction& proto_tx)
 {
-    message::transaction result_tx;
+    transaction_type result_tx;
     result_tx.version = proto_tx.version();
     result_tx.locktime = proto_tx.locktime();
     for (size_t i = 0; i < proto_tx.inputs_size(); ++i)
     {
         const protobuf::Transaction::Input& proto_input = proto_tx.inputs(i);
-        message::transaction_input tx_input;
+        transaction_input_type tx_input;
         const std::string& prev_out_hash = proto_input.previous_output_hash();
         std::copy(prev_out_hash.begin(), prev_out_hash.end(),
             tx_input.previous_output.hash.begin());
@@ -107,7 +107,7 @@ message::transaction protobuf_to_transaction(
     for (size_t i = 0; i < proto_tx.outputs_size(); ++i)
     {
         const protobuf::Transaction::Output& proto_output = proto_tx.outputs(i);
-        message::transaction_output tx_output;
+        transaction_output_type tx_output;
         tx_output.value = proto_output.value();
         tx_output.output_script = parse_script(read_raw_script(proto_output));
         result_tx.outputs.push_back(tx_output);

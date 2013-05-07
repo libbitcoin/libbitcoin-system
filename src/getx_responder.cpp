@@ -24,11 +24,11 @@ void getx_responder::monitor(channel_ptr node)
 }
 
 void getx_responder::receive_get_data(const std::error_code& ec,
-    const message::get_data packet, channel_ptr node)
+    const get_data_type packet, channel_ptr node)
 {
     if (ec)
         return;
-    for (const message::inventory_vector& inv: packet.inventories)
+    for (const inventory_vector_type& inv: packet.inventories)
     {
         switch (inv.type)
         {
@@ -62,7 +62,7 @@ void getx_responder::receive_get_data(const std::error_code& ec,
 }
 
 void getx_responder::pool_tx(const std::error_code& ec,
-    const message::transaction& tx, const hash_digest& tx_hash,
+    const transaction_type& tx, const hash_digest& tx_hash,
     channel_ptr node)
 {
     if (ec)
@@ -77,7 +77,7 @@ void getx_responder::pool_tx(const std::error_code& ec,
 }
 
 void getx_responder::chain_tx(const std::error_code& ec,
-    const message::transaction& tx, channel_ptr node)
+    const transaction_type& tx, channel_ptr node)
 {
     if (ec)
         return;
@@ -85,7 +85,7 @@ void getx_responder::chain_tx(const std::error_code& ec,
 }
 
 void getx_responder::send_block(const std::error_code& ec,
-    const message::block blk, channel_ptr node)
+    const block_type blk, channel_ptr node)
 {
     if (ec)
         return;

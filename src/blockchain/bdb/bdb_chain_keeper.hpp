@@ -31,7 +31,7 @@ public:
     txn_guard_ptr txn();
 
 private:
-    bool clear_transaction_data(const message::transaction& remove_tx);
+    bool clear_transaction_data(const transaction_type& remove_tx);
     bool remove_spend(const message::output_point& previous_output,
         const message::input_point& current_input);
     bool remove_address(const script& output_script,

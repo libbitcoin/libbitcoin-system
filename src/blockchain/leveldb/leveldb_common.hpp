@@ -31,7 +31,7 @@ public:
         const message::output_point& spent_output,
         message::input_point& input_spend);
 
-    bool save_block(uint32_t depth, const message::block& serial_block);
+    bool save_block(uint32_t depth, const block_type& serial_block);
 
     protobuf::Block fetch_proto_block(uint32_t depth);
     protobuf::Block fetch_proto_block(const hash_digest& block_hash);
@@ -41,7 +41,7 @@ public:
 private:
     bool save_transaction(leveldb_transaction_batch& batch,
         uint32_t block_depth, uint32_t tx_index,
-        const hash_digest& tx_hash, const message::transaction& block_tx);
+        const hash_digest& tx_hash, const transaction_type& block_tx);
     bool duplicate_exists(const hash_digest& tx_hash,
         uint32_t block_depth, uint32_t tx_index);
     bool mark_spent_outputs(leveldb::WriteBatch& spends_batch,

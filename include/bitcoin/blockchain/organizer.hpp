@@ -14,9 +14,9 @@ namespace libbitcoin {
 class block_detail
 {
 public:
-    block_detail(const message::block& actual_block);
-    const message::block& actual() const;
-    std::shared_ptr<message::block> actual_ptr() const;
+    block_detail(const block_type& actual_block);
+    const block_type& actual() const;
+    std::shared_ptr<block_type> actual_ptr() const;
     void mark_processed();
     bool is_processed();
     const hash_digest& hash() const;
@@ -25,7 +25,7 @@ public:
     void set_errc(const std::error_code& ec);
     const std::error_code& errc() const;
 private:
-    std::shared_ptr<message::block> actual_block_;
+    std::shared_ptr<block_type> actual_block_;
     const hash_digest block_hash_;
     bool processed_;
     block_info info_;

@@ -28,7 +28,7 @@ public:
     using fetch_handler = std::function<
         void (const std::error_code&, const Message&)>;
 
-    typedef fetch_handler<message::block> fetch_handler_block_header;
+    typedef fetch_handler<block_type> fetch_handler_block_header;
 
     typedef fetch_handler<message::inventory_list>
         fetch_handler_block_transaction_hashes;
@@ -37,10 +37,10 @@ public:
 
     typedef fetch_handler<size_t> fetch_handler_last_depth;
 
-    typedef fetch_handler<message::block_locator>
+    typedef fetch_handler<block_locator_type>
         fetch_handler_block_locator;
 
-    typedef fetch_handler<message::transaction> fetch_handler_transaction;
+    typedef fetch_handler<transaction_type> fetch_handler_transaction;
 
     typedef std::function<
         void (const std::error_code&, size_t, size_t)>
@@ -52,7 +52,7 @@ public:
         fetch_handler_outputs;
 #else
     typedef std::function<
-        void (const std::error_code&, const message::block&)>
+        void (const std::error_code&, const block_type&)>
             fetch_handler_block_header;
 
     typedef std::function<
@@ -66,11 +66,11 @@ public:
         fetch_handler_last_depth;
 
     typedef std::function<
-        void (const std::error_code&, const message::block_locator&)>
+        void (const std::error_code&, const block_locator_type&)>
             fetch_handler_block_locator;
 
     typedef std::function<
-        void (const std::error_code&, const message::transaction&)>
+        void (const std::error_code&, const transaction_type&)>
             fetch_handler_transaction;
 
     typedef std::function<
@@ -86,7 +86,7 @@ public:
             fetch_handler_outputs;
 #endif
 
-    typedef std::vector<std::shared_ptr<message::block>> block_list;
+    typedef std::vector<std::shared_ptr<block_type>> block_list;
     typedef std::function<
         void (const std::error_code&, size_t, 
             const block_list&, const block_list&)> reorganize_handler;
@@ -108,7 +108,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void store(const message::block& block,
+    virtual void store(const block_type& block,
         store_block_handler handle_store) = 0;
 
     /**
@@ -125,7 +125,7 @@ public:
      *  );
      * @encode
      */
-    virtual void import(const message::block& import_block, size_t depth,
+    virtual void import(const block_type& import_block, size_t depth,
         import_block_handler handle_import) = 0;
 
     /**
@@ -305,7 +305,7 @@ public:
         reorganize_handler handle_reorganize) = 0;
 };
 
-typedef std::function<void (const std::error_code&, const message::block&)>
+typedef std::function<void (const std::error_code&, const block_type&)>
     blockchain_fetch_handler_block;
 
 /**
@@ -345,7 +345,7 @@ void fetch_block(blockchain& chain, const hash_digest& block_hash,
     blockchain_fetch_handler_block handle_fetch);
 
 typedef std::function<
-    void (const std::error_code&, const message::block_locator&)>
+    void (const std::error_code&, const block_locator_type&)>
         blockchain_fetch_handler_block_locator;
 
 /**

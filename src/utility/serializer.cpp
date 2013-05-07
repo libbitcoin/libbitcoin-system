@@ -58,7 +58,7 @@ void serializer::write_data(const data_chunk& other_data)
     extend_data(data_, other_data);
 }
 
-void serializer::write_network_address(message::network_address addr)
+void serializer::write_network_address(network_address_type addr)
 {
     write_8_bytes(addr.services);
     extend_data(data_, addr.ip);
@@ -183,9 +183,9 @@ data_chunk deserializer::read_data(uint64_t n_bytes)
     return raw_bytes;
 }
 
-message::network_address deserializer::read_network_address()
+network_address_type deserializer::read_network_address()
 {
-    message::network_address addr;
+    network_address_type addr;
     addr.services = read_8_bytes();
     // Read IP address
     read_bytes<16>(begin_, end_, addr.ip);

@@ -18,7 +18,7 @@ std::error_code leveldb_organizer::verify(int fork_index,
     const block_detail_list& orphan_chain, int orphan_index)
 {
     BITCOIN_ASSERT(orphan_index < orphan_chain.size());
-    const message::block& current_block = orphan_chain[orphan_index]->actual();
+    const block_type& current_block = orphan_chain[orphan_index]->actual();
     size_t depth = fork_index + orphan_index + 1;
     BITCOIN_ASSERT(depth != 0);
     leveldb_validate_block validate(common_, fork_index, orphan_chain,

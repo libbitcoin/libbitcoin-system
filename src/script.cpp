@@ -128,7 +128,7 @@ bool is_push_only(const operation_stack& operations)
     return count_non_push(operations) == 0;
 }
 
-bool script::run(script input_script, const message::transaction& parent_tx,
+bool script::run(script input_script, const transaction_type& parent_tx,
     uint32_t input_index, bool bip16_enabled)
 {
     stack_.clear();
@@ -197,7 +197,7 @@ bool opcode_is_disabled(opcode code)
     return true;
 }
 
-bool script::run(const message::transaction& parent_tx, uint32_t input_index)
+bool script::run(const transaction_type& parent_tx, uint32_t input_index)
 {
     if (script_size(*this) > 10000)
         return false;
@@ -215,7 +215,7 @@ bool script::run(const message::transaction& parent_tx, uint32_t input_index)
 }
 
 bool script::next_step(operation_stack::iterator it,
-    const message::transaction& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index)
 {
     const operation& op = *it;
     if (op.data.size() > 520)
@@ -861,7 +861,7 @@ inline void nullify_input_sequences(
 }
 
 hash_digest script::generate_signature_hash(
-    message::transaction parent_tx, uint32_t input_index,
+    transaction_type parent_tx, uint32_t input_index,
     const script& script_code, uint32_t hash_type)
 {
     if (input_index >= parent_tx.inputs.size())
@@ -874,7 +874,7 @@ hash_digest script::generate_signature_hash(
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 
     // Blank all other inputs' signatures
-    for (message::transaction_input& input: parent_tx.inputs)
+    for (transaction_input_type& input: parent_tx.inputs)
         input.input_script = script();
     parent_tx.inputs[input_index].input_script = script_code;
 
@@ -915,7 +915,7 @@ hash_digest script::generate_signature_hash(
 
 bool check_signature(data_chunk signature,
     const data_chunk& pubkey, const script& script_code,
-    const message::transaction& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index)
 {
     elliptic_curve_key key;
     if (!key.set_public_key(pubkey))
@@ -934,7 +934,7 @@ bool check_signature(data_chunk signature,
 }
 
 bool script::op_checksig(
-    const message::transaction& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index)
 {
     if (op_checksigverify(parent_tx, input_index))
         stack_.push_back(stack_true_value);
@@ -944,7 +944,7 @@ bool script::op_checksig(
 }
 
 bool script::op_checksigverify(
-    const message::transaction& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index)
 {
     if (stack_.size() < 2)
         return false;
@@ -963,7 +963,7 @@ bool script::op_checksigverify(
 }
 
 bool script::op_checkmultisig(
-    const message::transaction& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index)
 {
     if (op_checkmultisigverify(parent_tx, input_index))
         stack_.push_back(stack_true_value);
@@ -989,7 +989,7 @@ bool script::read_section(data_stack& section)
 }
 
 bool script::op_checkmultisigverify(
-    const message::transaction& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index)
 {
     data_stack pubkeys;
     if (!read_section(pubkeys))
@@ -1041,7 +1041,7 @@ bool script::op_checkmultisigverify(
 }
 
 bool script::run_operation(const operation& op, 
-        const message::transaction& parent_tx, uint32_t input_index)
+        const transaction_type& parent_tx, uint32_t input_index)
 {
     switch (op.code)
     {

@@ -29,7 +29,7 @@ data_chunk create_raw_message(const Message& packet)
     data_chunk payload(satoshi_raw_size(packet));
     satoshi_save(packet, payload.begin());
     // Make the header packet and serialise it
-    message::header head;
+    header_type head;
     head.magic = magic_value;
     head.command = satoshi_command(packet);
     head.payload_length = payload.size();
@@ -107,34 +107,34 @@ public:
     typedef std::function<void (const std::error_code&)> send_handler;
 
     typedef std::function<void (const std::error_code&, 
-        const message::version&)> receive_version_handler;
+        const version_type&)> receive_version_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::verack&)> receive_verack_handler;
+        const verack_type&)> receive_verack_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::address&)> receive_address_handler;
+        const address_type&)> receive_address_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::get_address&)> receive_get_address_handler;
+        const get_address_type&)> receive_get_address_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::inventory&)> receive_inventory_handler;
+        const inventory_type&)> receive_inventory_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::get_data&)> receive_get_data_handler;
+        const get_data_type&)> receive_get_data_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::get_blocks&)> receive_get_blocks_handler;
+        const get_blocks_type&)> receive_get_blocks_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::transaction&)> receive_transaction_handler;
+        const transaction_type&)> receive_transaction_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::block&)> receive_block_handler;
+        const block_type&)> receive_block_handler;
 
     typedef std::function<void (const std::error_code&,
-        const message::header&, const data_chunk&)> receive_raw_handler;
+        const header_type&, const data_chunk&)> receive_raw_handler;
 
     typedef std::function<void (const std::error_code&)> stop_handler;
 
@@ -182,7 +182,7 @@ public:
                 });
         }
     }
-    void send_raw(const message::header& packet_header,
+    void send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
     void subscribe_version(receive_version_handler handle_receive);
@@ -199,30 +199,30 @@ public:
     void subscribe_stop(stop_handler handle_stop);
 
 private:
-    typedef subscriber<const std::error_code&, const message::version&>
+    typedef subscriber<const std::error_code&, const version_type&>
         version_subscriber_type;
-    typedef subscriber<const std::error_code&, const message::verack&>
+    typedef subscriber<const std::error_code&, const verack_type&>
         verack_subscriber_type;
-    typedef subscriber<const std::error_code&, const message::address&>
+    typedef subscriber<const std::error_code&, const address_type&>
         address_subscriber_type;
-    typedef subscriber<const std::error_code&, const message::get_address&>
+    typedef subscriber<const std::error_code&, const get_address_type&>
         get_address_subscriber_type;
-    typedef subscriber<const std::error_code&, const message::inventory&>
+    typedef subscriber<const std::error_code&, const inventory_type&>
         inventory_subscriber_type;
-    typedef subscriber<const std::error_code&, const message::get_data&>
+    typedef subscriber<const std::error_code&, const get_data_type&>
         get_data_subscriber_type;
-    typedef subscriber<const std::error_code&, const message::get_blocks&>
+    typedef subscriber<const std::error_code&, const get_blocks_type&>
         get_blocks_subscriber_type;
-    typedef subscriber<const std::error_code&, const message::transaction&>
+    typedef subscriber<const std::error_code&, const transaction_type&>
         transaction_subscriber_type;
-    typedef subscriber<const std::error_code&, const message::block&>
+    typedef subscriber<const std::error_code&, const block_type&>
         block_subscriber_type;
 
     typedef subscriber<const std::error_code&,
-        const message::header&, const data_chunk&> raw_subscriber_type;
+        const header_type&, const data_chunk&> raw_subscriber_type;
     typedef subscriber<const std::error_code&> stop_subscriber_type;
 
-    void do_send_raw(const message::header& packet_header,
+    void do_send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
     void do_send_common(const data_chunk& whole_message,
         send_handler handle_send);
@@ -239,15 +239,15 @@ private:
     }
 
     void read_header();
-    void read_checksum(const message::header& header_msg);
-    void read_payload(const message::header& header_msg);
+    void read_checksum(const header_type& header_msg);
+    void read_payload(const header_type& header_msg);
 
     void handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred);
     void handle_read_checksum(const boost::system::error_code& ec,
-        size_t bytes_transferred, message::header& header_msg);
+        size_t bytes_transferred, header_type& header_msg);
     void handle_read_payload(const boost::system::error_code& ec,
-        size_t bytes_transferred, const message::header& header_msg);
+        size_t bytes_transferred, const header_type& header_msg);
 
     // Calls the send handler after a successful send, translating
     // the boost error_code to std::error_code
@@ -318,7 +318,7 @@ public:
             proxy->send(packet, handle_send);
     }
 
-    void send_raw(const message::header& packet_header,
+    void send_raw(const header_type& packet_header,
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
     void subscribe_version(

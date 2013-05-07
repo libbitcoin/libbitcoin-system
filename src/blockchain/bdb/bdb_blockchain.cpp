@@ -125,7 +125,7 @@ int get_block_hash(Db*, const Dbt*, const Dbt* data, Dbt* second_key)
         reinterpret_cast<const char*>(data->get_data()), data->get_size()));
     proto::Block proto_block;
     proto_block.ParseFromIstream(&ss);
-    message::block serial_block = proto_to_block_header(proto_block);
+    block_type serial_block = proto_to_block_header(proto_block);
     second_hash = hash_block_header(serial_block);
     second_key->set_data(second_hash.data());
     second_key->set_size(second_hash.size());
@@ -215,14 +215,14 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     return true;
 }
 
-void bdb_blockchain::store(const message::block& block, 
+void bdb_blockchain::store(const block_type& block,
     store_block_handler handle_store)
 {
     queue(
         std::bind(&bdb_blockchain::do_store,
             this, block, handle_store));
 }
-void bdb_blockchain::do_store(const message::block& block,
+void bdb_blockchain::do_store(const block_type& block,
     store_block_handler handle_store)
 {
     block_detail_ptr stored_detail =
@@ -250,14 +250,14 @@ void bdb_blockchain::do_store(const message::block& block,
     }
 }
 
-void bdb_blockchain::import(const message::block& block,
+void bdb_blockchain::import(const block_type& block,
     size_t depth, import_block_handler handle_import)
 {
     queue(
         std::bind(&bdb_blockchain::do_import,
             this, block, depth, handle_import));
 }
-void bdb_blockchain::do_import(const message::block& block,
+void bdb_blockchain::do_import(const block_type& block,
     size_t depth, import_block_handler handle_import)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
@@ -273,7 +273,7 @@ void bdb_blockchain::do_import(const message::block& block,
 
 template<typename Index>
 bool fetch_block_header_impl(txn_guard_ptr txn, const Index& index,
-    bdb_common_ptr common, message::block& serial_block)
+    bdb_common_ptr common, block_type& serial_block)
 {
     proto::Block proto_block = common->fetch_proto_block(txn, index);
     if (!proto_block.IsInitialized())
@@ -294,7 +294,7 @@ void bdb_blockchain::fetch_block_header_by_depth(size_t depth,
     fetch_handler_block_header handle_fetch)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    message::block serial_block;
+    block_type serial_block;
     if (!fetch_block_header_impl(txn, depth, common_, serial_block))
     {
         txn->abort();
@@ -317,7 +317,7 @@ void bdb_blockchain::fetch_block_header_by_hash(
     const hash_digest& block_hash, fetch_handler_block_header handle_fetch)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    message::block serial_block;
+    block_type serial_block;
     if (!fetch_block_header_impl(txn, block_hash, common_, serial_block))
     {
         txn->abort();
@@ -344,7 +344,7 @@ void fetch_blk_tx_hashes_impl(const Index& index, DbEnv* env,
     message::inventory_list tx_hashes;
     for (const std::string& raw_tx_hash: proto_block.transactions())
     {
-        message::inventory_vector tx_inv;
+        inventory_vector_type tx_inv;
         tx_inv.type = message::inventory_type_id::transaction;
         BITCOIN_ASSERT(raw_tx_hash.size() == tx_inv.hash.size());
         std::copy(raw_tx_hash.begin(), raw_tx_hash.end(),
@@ -440,7 +440,7 @@ void bdb_blockchain::do_fetch_transaction(const hash_digest& transaction_hash,
         handle_fetch(error::not_found, message::transaction());
         return;
     }
-    message::transaction tx = proto_to_transaction(proto_tx);
+    transaction_type tx = proto_to_transaction(proto_tx);
     handle_fetch(std::error_code(), tx);
 }
 

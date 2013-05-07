@@ -15,7 +15,7 @@ struct transaction_entry_info
 {
     typedef std::function<void (const std::error_code&)> confirm_handler;
     hash_digest hash;
-    message::transaction tx;
+    transaction_type tx;
     confirm_handler handle_confirm;
 };
 
@@ -48,7 +48,7 @@ public:
         void (const std::error_code&, const index_list&)> store_handler;
 
     typedef std::function<
-        void (const std::error_code&, const message::transaction&)>
+        void (const std::error_code&, const transaction_type&)>
             fetch_handler;
 
     typedef std::function<void (bool)> exists_handler;
@@ -91,7 +91,7 @@ public:
      *  );
      * @endcode
      */
-    void store(const message::transaction& stored_transaction,
+    void store(const transaction_type& stored_transaction,
         confirm_handler handle_confirm, store_handler handle_store);
 
     /**
@@ -122,7 +122,7 @@ public:
         exists_handler handle_exists);
 
 private:
-    void do_store(const message::transaction& stored_transaction,
+    void do_store(const transaction_type& stored_transaction,
         confirm_handler handle_confirm, store_handler handle_store);
     void handle_delegate(
         const std::error_code& ec, const index_list& unconfirmed,

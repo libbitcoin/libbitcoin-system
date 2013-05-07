@@ -60,7 +60,7 @@ void hosts::do_save(const std::string& filename, save_handler handle_save)
     handle_save(std::error_code());
 }
 
-void hosts::store(const message::network_address& address,
+void hosts::store(const network_address_type& address,
     store_handler handle_store)
 {
     queue(
@@ -71,7 +71,7 @@ void hosts::store(const message::network_address& address,
         });
 }
 
-void hosts::remove(const message::network_address& address,
+void hosts::remove(const network_address_type& address,
     remove_handler handle_remove)
 {
     queue(
@@ -82,7 +82,7 @@ bool hosts::hosts_field::operator==(const hosts_field& other)
 {
     return ip == other.ip && port == other.port;
 }
-void hosts::do_remove(const message::network_address& address,
+void hosts::do_remove(const network_address_type& address,
     remove_handler handle_remove)
 {
     auto it = std::find(buffer_.begin(), buffer_.end(),
@@ -110,7 +110,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
         return;
     }
     size_t index = rand() % buffer_.size();
-    message::network_address address;
+    network_address_type address;
     address.timestamp = 0;
     address.services = 0;
     address.ip = buffer_[index].ip;

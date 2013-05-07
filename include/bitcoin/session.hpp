@@ -96,11 +96,11 @@ private:
         const blockchain::block_list& replaced_blocks);
 
     void inventory(const std::error_code& ec,
-        const message::inventory& packet, channel_ptr node);
+        const inventory_type& packet, channel_ptr node);
     void get_data(const std::error_code& ec,
-        const message::get_data& packet, channel_ptr node);
+        const get_data_type& packet, channel_ptr node);
     void get_blocks(const std::error_code& ec,
-        const message::get_blocks& packet, channel_ptr node);
+        const get_blocks_type& packet, channel_ptr node);
 
     void new_tx_inventory(const hash_digest& tx_hash, channel_ptr node);
     void request_tx_data(bool tx_exists,

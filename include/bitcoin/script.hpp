@@ -165,7 +165,7 @@ class script
 public:
     void join(const script& other);
     void push_operation(operation oper);
-    bool run(script input_script, const message::transaction& parent_tx,
+    bool run(script input_script, const transaction_type& parent_tx,
         uint32_t input_index, bool bip16_enabled=true);
 
     payment_type type() const;
@@ -173,7 +173,7 @@ public:
     const operation_stack& operations() const;
 
     static hash_digest generate_signature_hash(
-        message::transaction parent_tx, uint32_t input_index,
+        transaction_type parent_tx, uint32_t input_index,
         const script& script_code, uint32_t hash_type);
 
 private:
@@ -194,11 +194,11 @@ private:
         bool_stack stack_;
     };
 
-    bool run(const message::transaction& parent_tx, uint32_t input_index);
+    bool run(const transaction_type& parent_tx, uint32_t input_index);
     bool next_step(operation_stack::iterator it,
-        const message::transaction& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index);
     bool run_operation(const operation& op, 
-        const message::transaction& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index);
 
     // Used by add, sub, mul, div, mod, lshift, rshift, booland, boolor,
     // numequal, numequalverify, numnotequal, lessthan, greaterthan,
@@ -261,15 +261,15 @@ private:
     bool op_hash256();
     // op_checksig is a specialised case of op_checksigverify
     bool op_checksig(
-        const message::transaction& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index);
     bool op_checksigverify(
-        const message::transaction& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index);
     // multisig variants
     bool read_section(data_stack& section);
     bool op_checkmultisig(
-        const message::transaction& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index);
     bool op_checkmultisigverify(
-        const message::transaction& parent_tx, uint32_t input_index);
+        const transaction_type& parent_tx, uint32_t input_index);
 
     data_chunk pop_stack();
 

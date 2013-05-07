@@ -26,7 +26,7 @@ void leveldb_chain_keeper::stop()
 void leveldb_chain_keeper::add(block_detail_ptr incoming_block)
 {
     uint32_t last_block_depth = common_->find_last_block_depth();
-    const message::block& actual_block = incoming_block->actual();
+    const block_type& actual_block = incoming_block->actual();
     if (!common_->save_block(last_block_depth + 1, actual_block))
         log_fatal() << "Saving block in organizer failed";
 }
@@ -57,7 +57,7 @@ big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 
 bool reconstruct_block(leveldb_common_ptr common,
     const protobuf::Block& proto_block_header,
-    message::block& result_block)
+    block_type& result_block)
 {
     result_block = protobuf_to_block_header(proto_block_header);
     for (const std::string& raw_tx_hash: proto_block_header.transactions())
@@ -90,7 +90,7 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
         protobuf::Block proto_block;
         proto_block.ParseFromIstream(&ss);
         // Convert protobuf block header into actual block
-        message::block sliced_block;
+        block_type sliced_block;
         if (!reconstruct_block(common_, proto_block, sliced_block))
             return false;
         // Add to list of sliced blocks
@@ -103,7 +103,7 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
         blk_batch.Delete(it->key());
         blk_batch.Delete(slice(block_hash));
         // Remove txs + spends + addresses too
-        for (const message::transaction& block_tx: sliced_block.transactions)
+        for (const transaction_type& block_tx: sliced_block.transactions)
             if (!clear_transaction_data(tx_batch, block_tx))
                 return false;
     }
@@ -118,7 +118,7 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
 }
 
 bool leveldb_chain_keeper::clear_transaction_data(
-    leveldb_transaction_batch& batch, const message::transaction& remove_tx)
+    leveldb_transaction_batch& batch, const transaction_type& remove_tx)
 {
     const hash_digest& tx_hash = hash_transaction(remove_tx);
     batch.tx_batch.Delete(slice(tx_hash));
@@ -128,7 +128,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
         for (uint32_t input_index = 0; input_index < remove_tx.inputs.size();
             ++input_index)
         {
-            const message::transaction_input& input = 
+            const transaction_input_type& input =
                 remove_tx.inputs[input_index];
             // We could check if the spend matches the inpoint for safety.
             //const message::input_point inpoint{tx_hash, input_index};
@@ -141,7 +141,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
     for (uint32_t output_index = 0; output_index < remove_tx.outputs.size();
         ++output_index)
     {
-        const message::transaction_output& output =
+        const transaction_output_type& output =
             remove_tx.outputs[output_index];
         if (!remove_address(batch.address_batch,
                 output.output_script, {tx_hash, output_index}))
