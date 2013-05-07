@@ -40,9 +40,9 @@ public:
     void start(const std::string& prefix, start_handler handle_start);
     void stop();
 
-    void store(const message::block& stored_block,
+    void store(const message::block& block,
         store_block_handler handle_store);
-    void import(const message::block& import_block, size_t depth,
+    void import(const message::block& block, size_t depth,
         import_block_handler handle_import);
 
     // fetch block header by depth
@@ -81,9 +81,9 @@ private:
     bool initialize(const std::string& prefix);
     void shutdown();
 
-    void do_store(const message::block& store_block,
+    void do_store(const message::block& block,
         store_block_handler handle_store);
-    void do_import(const message::block& import_block, size_t depth,
+    void do_import(const message::block& block, size_t depth,
         import_block_handler handle_import);
 
     void fetch_block_header_by_depth(size_t depth, 

@@ -108,7 +108,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void store(const message::block& stored_block, 
+    virtual void store(const message::block& block,
         store_block_handler handle_store) = 0;
 
     /**

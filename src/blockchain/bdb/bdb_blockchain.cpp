@@ -215,19 +215,19 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     return true;
 }
 
-void bdb_blockchain::store(const message::block& stored_block, 
+void bdb_blockchain::store(const message::block& block, 
     store_block_handler handle_store)
 {
     queue(
         std::bind(&bdb_blockchain::do_store,
-            this, stored_block, handle_store));
+            this, block, handle_store));
 }
-void bdb_blockchain::do_store(const message::block& stored_block,
+void bdb_blockchain::do_store(const message::block& block,
     store_block_handler handle_store)
 {
     block_detail_ptr stored_detail =
-        std::make_shared<block_detail>(stored_block);
-    int depth = chain_->find_index(hash_block_header(stored_block));
+        std::make_shared<block_detail>(block);
+    int depth = chain_->find_index(hash_block_header(block));
     if (depth != -1)
     {
         handle_store(error::duplicate,
@@ -250,18 +250,18 @@ void bdb_blockchain::do_store(const message::block& stored_block,
     }
 }
 
-void bdb_blockchain::import(const message::block& import_block,
+void bdb_blockchain::import(const message::block& block,
     size_t depth, import_block_handler handle_import)
 {
     queue(
         std::bind(&bdb_blockchain::do_import,
-            this, import_block, depth, handle_import));
+            this, block, depth, handle_import));
 }
-void bdb_blockchain::do_import(const message::block& import_block,
+void bdb_blockchain::do_import(const message::block& block,
     size_t depth, import_block_handler handle_import)
 {
     txn_guard_ptr txn = std::make_shared<txn_guard>(env_);
-    if (!common_->save_block(txn, depth, import_block))
+    if (!common_->save_block(txn, depth, block))
     {
         txn->abort();
         handle_import(error::operation_failed);
