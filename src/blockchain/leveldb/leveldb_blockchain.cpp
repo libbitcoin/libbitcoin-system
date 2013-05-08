@@ -432,6 +432,7 @@ void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
         output_point outpoint = slice_to_output_point(it->value());
         assoc_outs.push_back(outpoint);
     }
+    BITCOIN_ASSERT(it->status().ok());
     handle_fetch(std::error_code(), assoc_outs);
 }
 

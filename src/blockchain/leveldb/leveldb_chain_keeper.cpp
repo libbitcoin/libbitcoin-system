@@ -171,6 +171,7 @@ bool leveldb_chain_keeper::remove_address(leveldb::WriteBatch& batch,
         batch.Delete(it->key());
         break;
     }
+    BITCOIN_ASSERT(it->status().ok());
     if (!is_found)
         return false;
     return true;
