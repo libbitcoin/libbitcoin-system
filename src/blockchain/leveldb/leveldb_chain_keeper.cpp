@@ -99,9 +99,10 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
         sliced_blocks.push_back(sliced_detail);
         // Make sure to delete hash secondary index too.
         hash_digest block_hash = hash_block_header(sliced_block);
-        // Delete current item
+        // Delete block header...
         blk_batch.Delete(it->key());
-        blk_batch.Delete(slice(block_hash));
+        // And it's secondary index.
+        blk_hash_batch.Delete(slice_block_hash(block_hash));
         // Remove txs + spends + addresses too
         for (const transaction_type& block_tx: sliced_block.transactions)
             if (!clear_transaction_data(tx_batch, block_tx))

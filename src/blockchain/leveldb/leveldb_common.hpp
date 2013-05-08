@@ -76,6 +76,8 @@ uint32_t recreate_depth(const Data& raw_data)
     return cast_chunk<uint32_t>(data_chunk(start, end));
 }
 
+leveldb::Slice slice_block_hash(const hash_digest& block_hash);
+
 // Used also by leveldb_chain_keeper when deleting spends + addresses
 template <typename Point>
 data_chunk create_spent_key(const Point& point)

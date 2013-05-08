@@ -80,7 +80,8 @@ bool leveldb_common::save_block(
     leveldb::WriteOptions options;
     // Write block to database.
     db_blocks_->Put(options, slice(raw_depth), slice(raw_data));
-    db_blocks_hash_->Put(options, slice(block_hash), slice(raw_depth));
+    db_blocks_hash_->Put(options,
+        slice_block_hash(block_hash), slice(raw_depth));
     // Execute batches.
     db_txs_->Write(options, &batch.tx_batch);
     db_spends_->Write(options, &batch.spends_batch);
@@ -198,7 +199,7 @@ uint32_t leveldb_common::fetch_block_depth(const hash_digest& block_hash)
 {
     std::string value;
     leveldb::Status status = db_blocks_hash_->Get(
-        leveldb::ReadOptions(), slice(block_hash), &value);
+        leveldb::ReadOptions(), slice_block_hash(block_hash), &value);
     if (status.IsNotFound())
         return std::numeric_limits<uint32_t>::max();
     else if (!status.ok())
@@ -228,6 +229,14 @@ protobuf::Transaction leveldb_common::fetch_proto_transaction(
     protobuf::Transaction proto_tx;
     proto_tx.ParseFromIstream(&ss);
     return proto_tx;
+}
+
+leveldb::Slice slice_block_hash(const hash_digest& block_hash)
+{
+    // Cut first 16 bytes of block hash
+    BITCOIN_ASSERT(block_hash.size() == 32);
+    return leveldb::Slice(
+        reinterpret_cast<const char*>(block_hash.data() + 16), 16);
 }
 
 data_chunk create_address_key(const script& output_script)
