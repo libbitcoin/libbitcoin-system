@@ -40,6 +40,8 @@ void copy_block(const std::error_code& ec, const block_type& blk,
 {
     if (ec)
         log_error() << "Fetch error: " << ec.message();
+    log_info() << "Fetched block.";
+    log_info() << "Importing...";
     chain_2->import(blk, depth,
         std::bind(&handle_import, _1,
             depth, hash_block_header(blk), chain_1, chain_2));
@@ -55,6 +57,7 @@ void handle_import(const std::error_code& ec,
         return;
     }
     log_info() << "Imported block #" << depth << " " << hash;
+    log_info() << "Fetching...";
     /*if (depth == end_depth)
     {
         log_info() << "Finished.";
