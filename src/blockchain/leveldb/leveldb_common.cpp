@@ -158,27 +158,7 @@ bool leveldb_common::add_address(leveldb::WriteBatch& address_batch,
     if (raw_address.empty())
         return true;
     // Count the number of outpoints for this address.
-    uint32_t counter = 0;
-    // We iterate through the outs for this address looking
-    // for the maximum counter.
-    leveldb_iterator it(address_iterator(db_address_, raw_address));
-    for (; valid_address_iterator(it, raw_address); it->Next())
-    {
-        // Read last 3 bytes of the key.
-        const uint8_t* value_start =
-            reinterpret_cast<const uint8_t*>(it->key().data());
-        size_t value_size = it->key().size();
-        BITCOIN_ASSERT(value_size == (1 + 20 + 3));
-        data_chunk raw_count(value_start + 21, value_start + 24);
-        // Add a null byte to the end (make it 4 bytes).
-        raw_count.push_back(0x00);
-        BITCOIN_ASSERT(raw_count.size() == 4);
-        // Get the counter.
-        uint32_t current_count = cast_chunk<uint32_t>(raw_count);
-        if (counter <= current_count)
-            counter = current_count + 1;
-    }
-    BITCOIN_ASSERT(it->status().ok());
+    uint32_t counter = rand();
     // Add counter to raw_address key because leveldb
     // doesn't support duplicate keys.
     data_chunk raw_counter = uncast_type(counter);
