@@ -120,10 +120,13 @@ uint64_t total_output_value(const transaction_type& tx)
     return total;
 }
 
-bool operator==(const output_point& output_a,
-    const output_point& output_b)
+bool operator==(const output_point& output_a, const output_point& output_b)
 {
     return output_a.hash == output_b.hash && output_a.index == output_b.index;
+}
+bool operator!=(const output_point& output_a, const output_point& output_b)
+{
+    return !(output_a == output_b);
 }
 
 bool is_final(const transaction_input_type& tx_input)

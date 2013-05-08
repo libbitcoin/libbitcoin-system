@@ -88,7 +88,14 @@ data_chunk create_spent_key(const Point& point)
     return serial_spend.data();
 }
 
+output_point slice_to_output_point(const leveldb::Slice& out_slice);
+
 data_chunk create_address_key(const script& output_script);
+
+leveldb::Iterator* address_iterator(leveldb::DB* db_address,
+    const data_chunk& raw_address);
+bool valid_address_iterator(leveldb_iterator& it,
+    const data_chunk& raw_address);
 
 } // namespace libbitcoin
 

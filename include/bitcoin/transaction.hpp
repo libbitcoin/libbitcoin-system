@@ -19,8 +19,8 @@ bool is_coinbase(const transaction_type& tx);
 
 uint64_t total_output_value(const transaction_type& tx);
 
-bool operator==(const output_point& output_a,
-    const output_point& output_b);
+bool operator==(const output_point& output_a, const output_point& output_b);
+bool operator!=(const output_point& output_a, const output_point& output_b);
 
 bool is_final(const transaction_type& tx,
     size_t block_depth, uint32_t block_time);

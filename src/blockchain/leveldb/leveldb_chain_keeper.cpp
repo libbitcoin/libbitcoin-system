@@ -158,51 +158,21 @@ bool leveldb_chain_keeper::remove_address(leveldb::WriteBatch& batch,
     if (raw_address.empty())
         return true;
     data_chunk outpoint_value = create_spent_key(outpoint);
-    // Fetch outpoints as contiguous block.
-    std::string raw_outpoints;
-    leveldb::Status status = db_address_->Get(
-        leveldb::ReadOptions(), slice(raw_address), &raw_outpoints);
-    if (!status.ok())
-    {
-        log_error() << "Error remove_address: " << status.ToString();
-        return false;
-    }
-    // Must be a multiple of (32 + 4)
-    const size_t outpoint_size = 32 + 4;
-    BITCOIN_ASSERT(raw_outpoints.size() % outpoint_size == 0);
-    // To delete this outpoint, we recreate the
-    // outpoints block missing the supplied outpoint.
-    std::string new_raw_outpoints;
-    new_raw_outpoints.reserve(raw_outpoints.size() - outpoint_size);
     bool is_found = false;
-    for (auto it = raw_outpoints.begin(); it != raw_outpoints.end();
-        it += outpoint_size)
+    leveldb_iterator it(address_iterator(db_address_, raw_address));
+    for (; valid_address_iterator(it, raw_address); it->Next())
     {
-        // We need a copy not a temporary
-        data_chunk raw_outpoint(it, it + outpoint_size);
-        BITCOIN_ASSERT(raw_outpoint.size() == outpoint_size);
-        // Then read the value off
-        deserializer deserial(raw_outpoint);
-        output_point current_outpoint;
-        current_outpoint.hash = deserial.read_hash();
-        current_outpoint.index = deserial.read_4_bytes();
-        // We continue looping so other entries still get copied and remain.
-        if (current_outpoint == outpoint)
-        {
-            BITCOIN_ASSERT(!is_found);
-            is_found = true;
+        if (slice_to_output_point(it->value()) != outpoint)
             continue;
-        }
-        new_raw_outpoints += std::string(
-            raw_outpoint.begin(), raw_outpoint.end());
+        // We found the address entry we were looking for.
+        BITCOIN_ASSERT(!is_found);
+        is_found = true;
+        // Put changes into batch finally.
+        batch.Delete(it->key());
+        break;
     }
     if (!is_found)
         return false;
-    // Put changes into batch finally.
-    if (new_raw_outpoints.empty())
-        batch.Delete(slice(raw_address));
-    else
-        batch.Put(slice(raw_address), new_raw_outpoints);
     return true;
 }
 

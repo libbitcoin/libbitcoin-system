@@ -157,16 +157,24 @@ bool leveldb_common::add_address(leveldb::WriteBatch& address_batch,
     data_chunk raw_address = create_address_key(output_script);
     if (raw_address.empty())
         return true;
-    std::string outpoints;
-    leveldb::Status status = db_address_->Get(
-        leveldb::ReadOptions(), slice(raw_address), &outpoints);
-    if (!status.ok() && !status.IsNotFound())
-        return false;
+    // Count the number of outpoints for this address.
+    uint32_t counter = 0;
+    leveldb_iterator it(address_iterator(db_address_, raw_address));
+    for (; valid_address_iterator(it, raw_address); it->Next())
+        ++counter;
+    BITCOIN_ASSERT(it->status().ok());
+    // Add counter to raw_address key because leveldb
+    // doesn't support duplicate keys.
+    data_chunk raw_counter = uncast_type(counter);
+    BITCOIN_ASSERT(raw_counter.size() == 3);
+    // Use 3 bytes so key size is 24 bytes for alignment.
+    raw_counter.pop_back();
+    extend_data(raw_address, raw_counter);
+    BITCOIN_ASSERT(raw_address.size() == (1 + 20 + 3));
     // Must be a multiple of (32 + 4)
-    BITCOIN_ASSERT(outpoints.size() % (32 + 4) == 0);
-    extend_data(outpoints, create_spent_key(outpoint));
-    BITCOIN_ASSERT(outpoints.size() % (32 + 4) == 0);
-    address_batch.Put(slice(raw_address), outpoints);
+    data_chunk raw_outpoint = create_spent_key(outpoint);
+    BITCOIN_ASSERT(raw_outpoint.size() == (32 + 4));
+    address_batch.Put(slice(raw_address), slice(raw_outpoint));
     return true;
 }
 
@@ -239,6 +247,22 @@ leveldb::Slice slice_block_hash(const hash_digest& block_hash)
         reinterpret_cast<const char*>(block_hash.data() + 16), 16);
 }
 
+output_point slice_to_output_point(const leveldb::Slice& out_slice)
+{
+    // We need a copy not a temporary
+    data_chunk raw_outpoint;
+    const uint8_t* value_start =
+        reinterpret_cast<const uint8_t*>(out_slice.data());
+    raw_outpoint.insert(raw_outpoint.end(),
+        value_start, value_start + out_slice.size());
+    // Then read the value off
+    deserializer deserial(raw_outpoint);
+    output_point outpoint;
+    outpoint.hash = deserial.read_hash();
+    outpoint.index = deserial.read_4_bytes();
+    return outpoint;
+}
+
 data_chunk create_address_key(const script& output_script)
 {
     payment_address address;
@@ -248,6 +272,19 @@ data_chunk create_address_key(const script& output_script)
     serial.write_byte(address.version());
     serial.write_short_hash(address.hash());
     return serial.data();
+}
+
+leveldb::Iterator* address_iterator(leveldb::DB* db_address,
+    const data_chunk& raw_address)
+{
+    leveldb::Iterator* it = db_address->NewIterator(leveldb::ReadOptions());
+    it->Seek(slice(raw_address));
+    return it;
+}
+bool valid_address_iterator(leveldb_iterator& it,
+    const data_chunk& raw_address)
+{
+    return it->Valid() && it->key().starts_with(slice(raw_address));
 }
 
 } // namespace libbitcoin

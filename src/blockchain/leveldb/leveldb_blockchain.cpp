@@ -419,42 +419,17 @@ void leveldb_blockchain::fetch_outputs(const payment_address& address,
 void leveldb_blockchain::do_fetch_outputs(const payment_address& address,
     fetch_handler_outputs handle_fetch)
 {
-    // Associated outputs
-    output_point_list assoc_outs;
     // version byte + hash for key
     serializer serial;
     serial.write_byte(address.version());
     serial.write_short_hash(address.hash());
     data_chunk raw_address = serial.data();
-    // Fetch outpoints as contiguous block.
-    std::string raw_outpoints;
-    leveldb::Status status = db_address_->Get(
-        leveldb::ReadOptions(), slice(raw_address), &raw_outpoints);
-    if (status.IsNotFound())
+    // Associated outputs
+    output_point_list assoc_outs;
+    leveldb_iterator it(address_iterator(db_address_.get(), raw_address));
+    for (; valid_address_iterator(it, raw_address); it->Next())
     {
-        handle_fetch(error::not_found, output_point_list());
-        return;
-    }
-    else if (!status.ok())
-    {
-        handle_fetch(error::operation_failed,
-            output_point_list());
-        log_error() << "Error fetch_outputs: " << status.ToString();
-        return;
-    }
-    // Must be a multiple of (32 + 4)
-    const size_t outpoint_size = 32 + 4;
-    BITCOIN_ASSERT(raw_outpoints.size() % outpoint_size == 0);
-    for (auto it = raw_outpoints.begin(); it != raw_outpoints.end();
-        it += outpoint_size)
-    {
-        // We need a copy not a temporary
-        data_chunk raw_outpoint(it, it + outpoint_size);
-        // Then read the value off
-        deserializer deserial(raw_outpoint);
-        output_point outpoint;
-        outpoint.hash = deserial.read_hash();
-        outpoint.index = deserial.read_4_bytes();
+        output_point outpoint = slice_to_output_point(it->value());
         assoc_outs.push_back(outpoint);
     }
     handle_fetch(std::error_code(), assoc_outs);
