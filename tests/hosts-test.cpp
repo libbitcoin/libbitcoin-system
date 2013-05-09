@@ -1,7 +1,7 @@
 #include <bitcoin/bitcoin.hpp>
 using namespace libbitcoin;
 
-async_service s;
+threadpool s;
 hosts_ptr h = std::make_shared<hosts>(s);
 
 void handle_store(const std::error_code& ec)

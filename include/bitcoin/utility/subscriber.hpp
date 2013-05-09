@@ -4,7 +4,7 @@
 #include <stack>
 
 #include <bitcoin/types.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 #include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -17,8 +17,8 @@ public:
     typedef std::function<void (Args...)> handler_type;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
-    subscriber(async_service& service)
-      : strand_(service.get_service())
+    subscriber(threadpool& pool)
+      : strand_(pool.service())
     {
     }
 

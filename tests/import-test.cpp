@@ -74,17 +74,17 @@ int main(int argc, char** argv)
         log_info() << "Usage: import SOURCE DEST";
         return 1;
     }
-    async_service service(1);
-    bdb_blockchain chain_1(service);
-    leveldb_blockchain chain_2(service);
+    threadpool pool(1);
+    bdb_blockchain chain_1(pool);
+    leveldb_blockchain chain_2(pool);
     chain_1.start(argv[1], blockchain_started);
     chain_2.start(argv[2], blockchain_started);
     chain_2.fetch_last_depth(
         std::bind(resume_copy, _1, _2, &chain_1, &chain_2));
     std::cin.get();
     log_info() << "Exiting...";
-    service.stop();
-    service.join();
+    pool.stop();
+    pool.join();
     chain_1.stop();
     chain_2.stop();
     return 0;

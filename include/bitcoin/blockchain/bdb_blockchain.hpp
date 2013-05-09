@@ -7,7 +7,7 @@
 
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 
 class Db;
 class DbEnv;
@@ -30,7 +30,7 @@ public:
 
     static bool setup(const std::string& prefix);
 
-    bdb_blockchain(async_service& service);
+    bdb_blockchain(threadpool& pool);
     ~bdb_blockchain();
 
     // Non-copyable

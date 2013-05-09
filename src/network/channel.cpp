@@ -35,13 +35,13 @@ void channel_stream_loader::load_lookup(const std::string& symbol,
             module->attempt_load(stream);
 }
 
-channel_proxy::channel_proxy(async_service& service, socket_ptr socket)
-  : strand_(service.get_service()), stopped_(false), socket_(socket), 
-    timeout_(service.get_service()), heartbeat_(service.get_service())
+channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
+  : strand_(pool.service()), stopped_(false), socket_(socket), 
+    timeout_(pool.service()), heartbeat_(pool.service())
 {
 #define CHANNEL_TRANSPORT_MECHANISM(MESSAGE_TYPE) \
     MESSAGE_TYPE##_subscriber_ = \
-        std::make_shared<MESSAGE_TYPE##_subscriber_type>(service); \
+        std::make_shared<MESSAGE_TYPE##_subscriber_type>(pool); \
     loader_.add(new channel_loader_module<MESSAGE_TYPE##_type>( \
         std::bind(&MESSAGE_TYPE##_subscriber_type::relay, \
             MESSAGE_TYPE##_subscriber_, _1, _2)));
@@ -58,10 +58,8 @@ channel_proxy::channel_proxy(async_service& service, socket_ptr socket)
 
 #undef CHANNEL_TRANSPORT_MECHANISM
 
-    raw_subscriber_ = 
-        std::make_shared<raw_subscriber_type>(service);
-    stop_subscriber_ =
-        std::make_shared<stop_subscriber_type>(service);
+    raw_subscriber_ = std::make_shared<raw_subscriber_type>(pool);
+    stop_subscriber_ = std::make_shared<stop_subscriber_type>(pool);
 }
 
 channel_proxy::~channel_proxy()
@@ -435,10 +433,10 @@ void channel_proxy::do_send_common(const data_chunk& whole_message,
 
 // channel
 
-channel::channel(async_service& service, socket_ptr socket)
+channel::channel(threadpool& pool, socket_ptr socket)
 {
     channel_proxy_ptr proxy =
-        std::make_shared<channel_proxy>(service, socket);
+        std::make_shared<channel_proxy>(pool, socket);
     proxy->start();
     weak_proxy_ = proxy;
 }

@@ -27,7 +27,7 @@ void blockchain_started(const std::error_code& ec)
 int main()
 {
     //bdb_blockchain::setup("database");
-    async_service s1(1), s2(1);
+    threadpool s1(1), s2(1);
     bdb_blockchain chain(s1);
     chain.start("database", blockchain_started);
     poller poll(s2, chain);

@@ -1,5 +1,5 @@
-#ifndef LIBBITCOIN_ASYNC_SERVICE_HPP
-#define LIBBITCOIN_ASYNC_SERVICE_HPP
+#ifndef LIBBITCOIN_THREADPOOL_HPP
+#define LIBBITCOIN_THREADPOOL_HPP
 
 #include <functional>
 #include <thread>
@@ -10,15 +10,15 @@ namespace libbitcoin {
 
 using boost::asio::io_service;
 
-class async_service
+class threadpool
 {
 public:
-    async_service();
-    async_service(size_t number_threads);
-    ~async_service();
+    threadpool();
+    threadpool(size_t number_threads);
+    ~threadpool();
 
-    async_service(const async_service&) = delete;
-    void operator=(const async_service&) = delete;
+    threadpool(const threadpool&) = delete;
+    void operator=(const threadpool&) = delete;
 
     void spawn();
 
@@ -26,8 +26,8 @@ public:
     void shutdown();
     void join();
 
-    io_service& get_service();
-    const io_service& get_service() const;
+    io_service& service();
+    const io_service& service() const;
 
 private:
     io_service ios_;
@@ -38,7 +38,7 @@ private:
 class async_strand
 {
 public:
-    async_strand(async_service& service);
+    async_strand(threadpool& pool);
 
     template <typename Handler>
     void queue(Handler handler)

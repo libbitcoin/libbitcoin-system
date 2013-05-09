@@ -80,9 +80,9 @@ void blockchain_started(const std::error_code& ec, blockchain_ptr)
 
 int main()
 {
-    async_service service(1);
+    threadpool pool(1);
     blockchain_ptr chain =
-        bdb_blockchain::create(service, "database", blockchain_started);
+        bdb_blockchain::create(pool, "database", blockchain_started);
     auto f = std::make_shared<fetch_block_t>(chain);
     f->run();
     std::cin.get();

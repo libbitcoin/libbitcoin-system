@@ -8,8 +8,8 @@
 
 namespace libbitcoin {
 
-hosts::hosts(async_service& service, size_t capacity)
-  : async_strand(service), buffer_(capacity)
+hosts::hosts(threadpool& pool, size_t capacity)
+  : async_strand(pool), buffer_(capacity)
 {
     srand(time(nullptr));
 }

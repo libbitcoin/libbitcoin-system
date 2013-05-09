@@ -4,7 +4,7 @@ using boost::asio::io_service;
 #include <bitcoin/utility/logger.hpp>
 //#include <bitcoin/utility/subscriber.hpp>
 #include "../include/bitcoin/utility/subscriber.hpp"
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 using namespace libbitcoin;
 
 namespace libbitcoin {
@@ -48,8 +48,8 @@ void callall(subscribe_ver_ptr s)
 
 int main()
 {
-    async_service service(1);
-    io_service::strand str(service.get_service());
+    threadpool pool(1);
+    io_service::strand str(pool.service());
     auto sub = std::make_shared<subscriber<abc_ptr>>(str);
     str.post(std::bind(defer_sub, sub, foo));
     str.post(std::bind(callall, sub));

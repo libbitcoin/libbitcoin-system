@@ -14,14 +14,14 @@ class echo_app
 {
 public:
     echo_app()
-      : service_(1)
+      : pool_(1)
     {
-        net_ = std::make_shared<network>(service_);
+        net_ = std::make_shared<network>(pool_);
     }
     ~echo_app()
     {
-        service_.stop();
-        service_.join();
+        pool_.stop();
+        pool_.join();
     }
 
     void start()
@@ -64,7 +64,7 @@ private:
         log_info() << "Got tx " << pretty_hex(hash_transaction(tx));
     }
 
-    async_service service_;
+    threadpool pool_;
     network_ptr net_;
     acceptor_ptr accept_;
     channel_ptr sender, recver;

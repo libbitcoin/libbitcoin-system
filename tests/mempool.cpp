@@ -78,24 +78,24 @@ void blockchain_started(const std::error_code& ec)
 
 int main()
 {
-    async_service service(1), chain_service(1);
-    network net(service);
-    handshake hs(service);
+    threadpool pool(1), chain_pool(1);
+    network net(pool);
+    handshake hs(pool);
     connect(hs, net, "localhost", 8333,
         std::bind(connected, _1, _2));
 
-    bdb_blockchain chain(chain_service);
+    bdb_blockchain chain(chain_pool);
     chain.start("database", blockchain_started);
 
-    txpool = new transaction_pool(service, chain);
+    txpool = new transaction_pool(pool, chain);
     txpool->start();
 
     std::cin.get();
 
-    service.stop();
-    chain_service.stop();
-    service.join();
-    chain_service.join();
+    pool.stop();
+    chain_pool.stop();
+    pool.join();
+    chain_pool.join();
 
     chain.stop();
 

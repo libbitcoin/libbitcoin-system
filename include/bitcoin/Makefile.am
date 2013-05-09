@@ -16,7 +16,7 @@ bitcoin_include_HEADERS = \
 	session.hpp \
 	format.hpp \
 	transaction_pool.hpp \
-	async_service.hpp \
+	threadpool.hpp \
 	poller.hpp \
     version.hpp
 

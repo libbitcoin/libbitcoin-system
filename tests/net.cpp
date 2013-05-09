@@ -1,7 +1,7 @@
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/handshake.hpp>
 #include <bitcoin/utility/logger.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 
 #include <atomic>
 #include <condition_variable>
@@ -22,13 +22,13 @@ std::mutex mutex;
 std::condition_variable condition;
 size_t inv_count = 0;
 
-void receive_inv(const std::error_code &ec, const message::inventory& packet,
+void receive_inv(const std::error_code &ec, const inventory_type& packet,
     channel_ptr node)
 {
     log_info() << "Received:";
-    for (const message::inventory_vector& ivv: packet.inventories)
+    for (const inventory_vector_type& ivv: packet.inventories)
     {
-        if (ivv.type != message::inventory_type::block)
+        if (ivv.type != inventory_type_id::block)
             log_info() << "  --";
         else
             log_info() << "  " << pretty_hex(ivv.hash);
@@ -45,9 +45,9 @@ void handle_send_getblock(const std::error_code& ec)
         error_exit(ec.message());
 }
 
-message::get_blocks create_getblocks_message()
+get_blocks_type create_getblocks_message()
 {
-    message::get_blocks packet;
+    get_blocks_type packet;
     hash_digest genesis{0x00, 0x00, 0x00, 0x00, 0x00, 0x19, 0xd6, 0x68, 
                         0x9c, 0x08, 0x5a, 0xe1, 0x65, 0x83, 0x1e, 0x93, 
                         0x4f, 0xf7, 0x63, 0xae, 0x46, 0xa2, 0xa6, 0xc1, 
@@ -57,7 +57,7 @@ message::get_blocks create_getblocks_message()
     return packet;
 }
 
-void show_ip(const std::error_code& ec, const message::network_address& addr)
+void show_ip(const std::error_code& ec, const network_address_type& addr)
 {
     if (ec)
         error_exit(ec.message());
@@ -84,15 +84,15 @@ void handle_init(const std::error_code& ec, handshake& hs, network& net)
 
 int main()
 {
-    async_service service(1);
-    network net(service);
-    handshake hs(service);
+    threadpool pool(1);
+    network net(pool);
+    handshake hs(pool);
     hs.start(std::bind(handle_init, _1, std::ref(hs), std::ref(net)));
 
     std::unique_lock<std::mutex> lock(mutex);
     condition.wait(lock, []{ return inv_count >= 500; });
-    service.stop();
-    service.join();
+    pool.stop();
+    pool.join();
     return 0;
 }
 

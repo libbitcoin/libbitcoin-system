@@ -17,12 +17,12 @@ static std::string pretty(const ip_address_type& ip)
     return oss.str();
 }
 
-protocol::protocol(async_service& service, hosts& hsts,
+protocol::protocol(threadpool& pool, hosts& hsts,
     handshake& shake, network& net)
-  : strand_(service.get_service()), hosts_filename_("hosts"),
+  : strand_(pool.service()), hosts_filename_("hosts"),
     hosts_(hsts), handshake_(shake), network_(net), max_outbound_(8)
 {
-    channel_subscribe_ = std::make_shared<channel_subscriber_type>(service);
+    channel_subscribe_ = std::make_shared<channel_subscriber_type>(pool);
 }
 
 void protocol::start(completion_handler handle_complete)

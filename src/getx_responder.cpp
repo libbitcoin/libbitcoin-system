@@ -9,9 +9,9 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-getx_responder::getx_responder(async_service& service,
+getx_responder::getx_responder(threadpool& pool,
     blockchain& chain, transaction_pool& txpool)
-  : service_(service.get_service()), chain_(chain), txpool_(txpool)
+  : service_(pool.service()), chain_(chain), txpool_(txpool)
 {
 }
 

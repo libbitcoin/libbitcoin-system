@@ -39,8 +39,8 @@ void blockchain_started(const std::error_code& ec)
 
 int main()
 {
-    async_service service(1);
-    bdb_blockchain chain(service);
+    threadpool pool(1);
+    bdb_blockchain chain(pool);
     chain.start("database", blockchain_started);
     //fetch_block(chain, 170, recv_block);
     fetch_block_locator(chain, loc);
@@ -49,8 +49,8 @@ int main()
     //for (size_t i: ind)
     //    log_debug() << i;
     std::cin.get();
-    service.stop();
-    service.join();
+    pool.stop();
+    pool.join();
     chain.stop();
     return 0;
 }

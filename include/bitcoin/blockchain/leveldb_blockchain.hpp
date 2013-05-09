@@ -8,7 +8,7 @@
 
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 
 namespace libbitcoin {
 
@@ -26,7 +26,7 @@ public:
 
     typedef std::function<void (const std::error_code)> start_handler;
 
-    leveldb_blockchain(async_service& service);
+    leveldb_blockchain(threadpool& pool);
     ~leveldb_blockchain();
 
     // Non-copyable

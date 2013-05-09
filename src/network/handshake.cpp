@@ -15,8 +15,8 @@ using std::placeholders::_2;
 
 const size_t clearance_count = 3;
 
-handshake::handshake(async_service& service)
-  : strand_(service.get_service())
+handshake::handshake(threadpool& pool)
+  : strand_(pool.service())
 {
     // Setup template version packet with defaults
     template_version_.version = protocol_version;

@@ -1,57 +1,57 @@
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 
 namespace libbitcoin {
 
-async_service::async_service()
+threadpool::threadpool()
   : work_(nullptr)
 {
 }
 
-async_service::async_service(size_t number_threads)
+threadpool::threadpool(size_t number_threads)
   : work_(nullptr)
 {
     for (size_t i = 0; i < number_threads; ++i)
         spawn();
 }
 
-async_service::~async_service()
+threadpool::~threadpool()
 {
     delete work_;
 }
 
-void async_service::spawn()
+void threadpool::spawn()
 {
     if (!work_)
         work_ = new io_service::work(ios_);
     threads_.push_back(std::thread([this] { ios_.run(); }));
 }
 
-void async_service::stop()
+void threadpool::stop()
 {
     ios_.stop();
 }
-void async_service::shutdown()
+void threadpool::shutdown()
 {
     delete work_;
     work_ = nullptr;
 }
-void async_service::join()
+void threadpool::join()
 {
     for (std::thread& t: threads_)
         t.join();
 }
 
-io_service& async_service::get_service()
+io_service& threadpool::service()
 {
     return ios_;
 }
-const io_service& async_service::get_service() const
+const io_service& threadpool::service() const
 {
     return ios_;
 }
 
-async_strand::async_strand(async_service& service)
-  : ios_(service.get_service()), strand_(ios_)
+async_strand::async_strand(threadpool& pool)
+  : ios_(pool.service()), strand_(ios_)
 {
 }
 

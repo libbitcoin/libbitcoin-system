@@ -38,8 +38,8 @@ void test_checksig(const std::error_code& ec,
 
 int main()
 {
-    async_service service(1);
-    bdb_blockchain chain(service);
+    threadpool pool(1);
+    bdb_blockchain chain(pool);
     chain.start("database", blockchain_started);
     chain.fetch_transaction(
         hash_digest{0xd2, 0xb5, 0x46, 0x8c, 0xbd, 0x19, 0x4d, 0x7e,
@@ -48,8 +48,8 @@ int main()
                     0xe4, 0x11, 0xa8, 0x32, 0x68, 0x9b, 0xe7, 0x36},
         test_checksig);
     std::cin.get();
-    service.stop();
-    service.join();
+    pool.stop();
+    pool.join();
     chain.stop();
     return 0;
 }

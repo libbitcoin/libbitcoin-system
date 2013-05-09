@@ -9,7 +9,7 @@
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/error.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 
 #include <bitcoin/network/channel.hpp>
 
@@ -24,14 +24,14 @@ public:
     typedef std::function<
         void (const std::error_code&, channel_ptr)> accept_handler;
 
-    acceptor(async_service& service, tcp_acceptor_ptr tcp_accept);
+    acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept);
     void accept(accept_handler handle_accept);
 
 private:
     void call_handle_accept(const boost::system::error_code& ec,
         socket_ptr socket, accept_handler handle_accept);
 
-    async_service& service_;
+    threadpool& threadpool_;
     tcp_acceptor_ptr tcp_accept_;
 };
 
@@ -43,7 +43,7 @@ public:
     typedef std::function<
         void (const std::error_code&, acceptor_ptr)> listen_handler;
 
-    network(async_service& service);
+    network(threadpool& pool);
 
     network(const network&) = delete;
     void operator=(const network&) = delete;
@@ -63,7 +63,7 @@ private:
         tcp::resolver::iterator, socket_ptr socket,
         connect_handler handle_connect);
 
-    async_service& service_;
+    threadpool& threadpool_;
 };
 
 } // namespace libbitcoin

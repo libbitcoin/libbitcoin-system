@@ -8,7 +8,7 @@
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/network/channel.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 
 namespace libbitcoin {
 
@@ -21,7 +21,7 @@ public:
         fetch_connection_count_handler;
     typedef std::function<void (channel_ptr)> channel_handler;
 
-    protocol(async_service& service, hosts& hsts,
+    protocol(threadpool& pool, hosts& hsts,
         handshake& shake, network& net);
 
     protocol(const protocol&) = delete;

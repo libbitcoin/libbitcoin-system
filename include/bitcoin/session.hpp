@@ -85,7 +85,7 @@ class session
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
 
-    session(async_service& service, const session_params& params);
+    session(threadpool& pool, const session_params& params);
     void start(completion_handler handle_complete);
     void stop(completion_handler handle_complete);
 

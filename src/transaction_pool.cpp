@@ -12,9 +12,8 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 using std::placeholders::_4;
 
-transaction_pool::transaction_pool(
-    async_service& service, blockchain& chain)
-  : strand_(service.get_service()), chain_(chain), pool_(2000)
+transaction_pool::transaction_pool(threadpool& pool, blockchain& chain)
+  : strand_(pool.service()), chain_(chain), pool_(2000)
 {
 }
 void transaction_pool::start()

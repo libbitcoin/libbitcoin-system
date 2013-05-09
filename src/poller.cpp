@@ -7,8 +7,8 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-poller::poller(async_service& service, blockchain& chain)
-  : strand_(service.get_service()), chain_(chain),
+poller::poller(threadpool& pool, blockchain& chain)
+  : strand_(pool.service()), chain_(chain),
     last_hash_end_(null_hash), last_block_hash_(null_hash)
 {
 }

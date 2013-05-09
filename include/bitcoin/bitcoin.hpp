@@ -83,7 +83,7 @@
  * - @link libbitcoin::payment_address payment_address @endlink
  * - @link libbitcoin::elliptic_curve_key elliptic_curve_key @endlink
  * - @link libbitcoin::big_number big_number @endlink
- * - @link libbitcoin::async_service async_service @endlink
+ * - @link libbitcoin::threadpool threadpool @endlink
  *
  * @subsection wallet Wallet
  *
@@ -177,7 +177,7 @@
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/network/protocol.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 #ifdef BDB_ENABLED
     #include <bitcoin/blockchain/bdb_blockchain.hpp>
 #endif

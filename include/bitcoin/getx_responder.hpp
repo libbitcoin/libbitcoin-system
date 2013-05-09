@@ -4,7 +4,7 @@
 #include <system_error>
 
 #include <bitcoin/types.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 #include <bitcoin/primitives.hpp>
 
 namespace libbitcoin {
@@ -12,7 +12,7 @@ namespace libbitcoin {
 class getx_responder
 {
 public:
-    getx_responder(async_service& service,
+    getx_responder(threadpool& pool,
         blockchain& chain, transaction_pool& txpool);
     void monitor(channel_ptr node);
 

@@ -20,9 +20,9 @@ void handle_fetch(const std::error_code& ec,
 
 int main()
 {
-    async_service service(1);
+    threadpool pool(1);
     blockchain_ptr chain =
-        bdb_blockchain::create(service, "database", blockchain_started);
+        bdb_blockchain::create(pool, "database", blockchain_started);
     payment_address address("1VayNert3x1KzbpzMGt2qdqrAThiRovi8");
     start_time = time(nullptr);
     chain->fetch_outputs(address, handle_fetch);

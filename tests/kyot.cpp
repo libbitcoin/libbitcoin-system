@@ -18,9 +18,9 @@ void blockchain_started(const std::error_code& ec, blockchain_ptr chain, bool is
 
 int main()
 {
-    async_service service(10);
+    threadpool pool(10);
     blockchain_ptr chain =
-        kyoto_blockchain::create(service, "kydb", blockchain_started);
+        kyoto_blockchain::create(pool, "kydb", blockchain_started);
     std::cin.get();
     return 0;
 }

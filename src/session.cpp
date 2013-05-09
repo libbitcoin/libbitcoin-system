@@ -10,8 +10,8 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 using std::placeholders::_4;
 
-session::session(async_service& service, const session_params& params)
-  : strand_(service.get_service()),
+session::session(threadpool& pool, const session_params& params)
+  : strand_(pool.service()),
     handshake_(params.handshake_), protocol_(params.protocol_),
     chain_(params.blockchain_), poll_(params.poller_),
     tx_pool_(params.transaction_pool_),

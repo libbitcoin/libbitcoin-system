@@ -9,7 +9,7 @@ namespace libbitcoin {
 class poller
 {
 public:
-    poller(async_service& service, blockchain& chain);
+    poller(threadpool& pool, blockchain& chain);
     void query(channel_ptr node);
     void monitor(channel_ptr node);
 

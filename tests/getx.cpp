@@ -1,7 +1,7 @@
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 
-async_service service(4);
+threadpool pool(4);
 network_ptr net;
 acceptor_ptr acc;
 channel_ptr send_node, recv_node;
@@ -60,18 +60,18 @@ void blockchain_started(const std::error_code& ec, blockchain_ptr blkchain)
         return;
     }
     chain = blkchain;
-    net = std::make_shared<network>(service);
+    net = std::make_shared<network>(pool);
     net->listen(8045, handle_listen);
-    hs = std::make_shared<handshake>(service);
+    hs = std::make_shared<handshake>(pool);
     hs->connect(net, "localhost", 8045, handle_connect);
-    txpool = transaction_pool::create(service, chain);
-    getx = std::make_shared<getx_responder>(service, chain, txpool);
+    txpool = transaction_pool::create(pool, chain);
+    getx = std::make_shared<getx_responder>(pool, chain, txpool);
     chain->fetch_block_locator(blkloc);
 }
 
 int main()
 {
-    chain = bdb_blockchain::create(service, "database", blockchain_started);
+    chain = bdb_blockchain::create(pool, "database", blockchain_started);
     std::cin.get();
     return 0;
 }

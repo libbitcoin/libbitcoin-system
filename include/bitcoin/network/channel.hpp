@@ -138,7 +138,7 @@ public:
 
     typedef std::function<void (const std::error_code&)> stop_handler;
 
-    channel_proxy(async_service& service, socket_ptr socket);
+    channel_proxy(threadpool& pool, socket_ptr socket);
     ~channel_proxy();
 
     channel_proxy(const channel_proxy&) = delete;
@@ -301,7 +301,7 @@ private:
 class channel
 {
 public:
-    channel(async_service& service, socket_ptr socket);
+    channel(threadpool& pool, socket_ptr socket);
     ~channel();
 
     void stop();

@@ -35,11 +35,11 @@ void mewcj(channel_ptr node)
 
 int main()
 {
-    async_service service(1);
-    hosts hst(service);
-    handshake hs(service);
-    network net(service);
-    prot = new protocol(service, hst, hs, net);
+    threadpool pool(1);
+    hosts hst(pool);
+    handshake hs(pool);
+    network net(pool);
+    prot = new protocol(pool, hst, hs, net);
     prot->start(handle_start);
     prot->subscribe_channel(mewcj);
     //prot->bootstrap(handle_start);
@@ -52,8 +52,8 @@ int main()
     //    prot->fetch_connection_count(display_num_conns);
     //    sleep(1);
     //}
-    service.stop();
-    service.join();
+    pool.stop();
+    pool.join();
     delete prot;
     return 0;
 }

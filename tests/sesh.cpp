@@ -111,14 +111,14 @@ void handle_mempool_store(
 int main()
 {
     //bdb_blockchain::setup("database");
-    async_service network_service(1), disk_service(1), mempool_service(1);
-    hosts hsts(network_service);
-    handshake hs(network_service);
-    network net(network_service);
-    protocol prot(network_service, hsts, hs, net);
+    threadpool network_pool(1), disk_pool(1), mempool_pool(1);
+    hosts hsts(network_pool);
+    handshake hs(network_pool);
+    network net(network_pool);
+    protocol prot(network_pool, hsts, hs, net);
     prot.subscribe_channel(monitor_tx);
 
-    leveldb_blockchain chain(disk_service);
+    leveldb_blockchain chain(disk_pool);
     std::promise<std::error_code> ec_promise;
     auto blockchain_started =
         [&ec_promise](const std::error_code& ec)
@@ -130,26 +130,26 @@ int main()
     if (ec)
         error_exit(ec.message());
 
-    poller poll(mempool_service, chain);
+    poller poll(mempool_pool, chain);
 
-    transaction_pool txpool(mempool_service, chain);
+    transaction_pool txpool(mempool_pool, chain);
     txpool.start();
 
     session_params pp{hs, prot, chain, poll, txpool};
     p = &pp;
-    session sesh(network_service, pp);
+    session sesh(network_pool, pp);
     sesh.start(handle_start);
 
     std::cin.get();
 
     sesh.stop(handle_stop);
 
-    network_service.stop();
-    disk_service.stop();
-    mempool_service.stop();
-    network_service.join();
-    disk_service.join();
-    mempool_service.join();
+    network_pool.stop();
+    disk_pool.stop();
+    mempool_pool.stop();
+    network_pool.join();
+    disk_pool.join();
+    mempool_pool.join();
 
     chain.stop();
     log_debug() << "Exiting...";

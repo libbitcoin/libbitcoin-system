@@ -49,8 +49,8 @@ int main(int argc, char** argv)
 {
     if (argc < 2)
         return 1;
-    async_service service(1);
-    bdb_blockchain chain(service);
+    threadpool pool(1);
+    bdb_blockchain chain(pool);
     chain.start("database", blockchain_started);
     for (int i = 1; i < argc; ++i)
     {
@@ -65,8 +65,8 @@ int main(int argc, char** argv)
         chain.store(blk, block_stored);
     }
     std::cin.get();
-    service.stop();
-    service.join();
+    pool.stop();
+    pool.join();
     chain.stop();
     log_info() << "Exiting...";
     return 0;

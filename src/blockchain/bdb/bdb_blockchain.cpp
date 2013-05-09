@@ -32,8 +32,8 @@ constexpr uint32_t env_flags =
 
 constexpr uint32_t db_flags = DB_CREATE|DB_THREAD;
 
-bdb_blockchain::bdb_blockchain(async_service& service)
-  : async_strand(service)
+bdb_blockchain::bdb_blockchain(threadpool& pool)
+  : async_strand(pool)
 {
 #ifndef CXX_COMPAT
     env_ = nullptr;
@@ -44,7 +44,7 @@ bdb_blockchain::bdb_blockchain(async_service& service)
     db_address_ = nullptr;
 #endif
     reorganize_subscriber_ =
-        std::make_shared<reorganize_subscriber_type>(service);
+        std::make_shared<reorganize_subscriber_type>(pool);
 }
 bdb_blockchain::~bdb_blockchain()
 {
@@ -96,8 +96,8 @@ void bdb_blockchain::shutdown()
 
 bool bdb_blockchain::setup(const std::string& prefix)
 {
-    async_service fake_service;
-    bdb_blockchain handle(fake_service);
+    threadpool fake_pool;
+    bdb_blockchain handle(fake_pool);
     if (!handle.initialize(prefix))
         return false;
     handle.db_blocks_->truncate(nullptr, 0, 0);

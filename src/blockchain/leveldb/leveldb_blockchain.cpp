@@ -47,11 +47,11 @@ const char* depth_comparator::Name() const
     return "depth_comparator";
 }
 
-leveldb_blockchain::leveldb_blockchain(async_service& service)
-  : async_strand(service)
+leveldb_blockchain::leveldb_blockchain(threadpool& pool)
+  : async_strand(pool)
 {
     reorganize_subscriber_ =
-        std::make_shared<reorganize_subscriber_type>(service);
+        std::make_shared<reorganize_subscriber_type>(pool);
 }
 leveldb_blockchain::~leveldb_blockchain()
 {

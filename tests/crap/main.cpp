@@ -262,22 +262,22 @@ public:
             std::cerr << "Error: bad private key provided\n";
             return false;
         }
-        network_service_.spawn();
-        p_.hosts = std::make_shared<hosts>(network_service_);
-        p_.handshake = std::make_shared<handshake>(network_service_);
-        p_.network = std::make_shared<network>(network_service_);
+        network_pool_.spawn();
+        p_.hosts = std::make_shared<hosts>(network_pool_);
+        p_.handshake = std::make_shared<handshake>(network_pool_);
+        p_.network = std::make_shared<network>(network_pool_);
         p_.protocol = std::make_shared<protocol>(
-            network_service_, p_.hosts, p_.handshake, p_.network);
+            network_pool_, p_.hosts, p_.handshake, p_.network);
         //p_.protocol->subscribe_channel(monitor_tx);
 
-        disk_service_.spawn();
+        disk_pool_.spawn();
         p_.blockchain = 
-            std::make_shared<bdb_blockchain>(disk_service_, "database");
+            std::make_shared<bdb_blockchain>(disk_pool_, "database");
         p_.poller = std::make_shared<poller>(p_.blockchain);
 
-        mempool_service_.spawn();
+        mempool_pool_.spawn();
         p_.transaction_pool =
-            transaction_pool::create(mempool_service_, p_.blockchain);
+            transaction_pool::create(mempool_pool_, p_.blockchain);
 
         session_ = new session(p_);
         session_->start(&crap_app::handle_start);
@@ -403,7 +403,7 @@ private:
 
     elliptic_curve_key ec_;
 
-    async_service network_service_, disk_service_, mempool_service_;
+    threadpool network_pool_, disk_pool_, mempool_pool_;
     session_params p_;
     session* session_;
 

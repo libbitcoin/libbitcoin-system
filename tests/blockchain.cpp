@@ -1,5 +1,5 @@
 #include "../src/storage/postgresql_blockchain.hpp"
-#include <bitcoin/utility/threaded_service.hpp>
+#include <bitcoin/utility/threaded_pool.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/storage/postgresql_storage.hpp>
@@ -31,7 +31,7 @@ public:
 
 // Tee hee 
 class dummy_psql
- : public threaded_service
+ : public threaded_pool
 {
 public:
     dummy_psql();
@@ -81,7 +81,7 @@ private:
 dummy_psql::dummy_psql()
  : sql_("postgresql:dbname=bitcoin;user=genjix")
 {
-    blockchain_.reset(new postgresql_blockchain(sql_, service()));
+    blockchain_.reset(new postgresql_blockchain(sql_, pool()));
     deletor_.reset(new override_delete(sql_));
     blockchain_->set_clearance(4);
 }

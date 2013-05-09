@@ -31,14 +31,14 @@ void blockchain_started(const std::error_code& ec)
 
 int main()
 {
-    async_service service(1);
-    bdb_blockchain chain(service);
+    threadpool pool(1);
+    bdb_blockchain chain(pool);
     chain.start("database", blockchain_started);
     chain.fetch_last_depth(show_last);
     chain.fetch_block_header(191810, show_blk_hash);
     std::cin.get();
-    service.stop();
-    service.join();
+    pool.stop();
+    pool.join();
     chain.stop();
     return 0;
 }

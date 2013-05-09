@@ -4,7 +4,7 @@
 #include <functional>
 #include <boost/circular_buffer.hpp>
 
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
@@ -34,11 +34,12 @@ typedef boost::circular_buffer<transaction_entry_info> pool_buffer;
  * state of memory pool transactions.
  *
  * @code
- *  async_service service(1);
+ *  threadpool pool(1);
  *  // transaction_pool needs access to the blockchain
- *  blockchain_ptr chain = load_our_backend();
+ *  blockchain* chain = load_our_backend();
  *  // create and initialize the transaction memory pool
- *  transaction_pool_ptr txpool = transaction_pool::create(service, chain);
+ *  transaction_pool txpool(pool, *chain);
+ *  txpool.start();
  * @endcode
  */
 class transaction_pool
@@ -55,7 +56,7 @@ public:
 
     typedef transaction_entry_info::confirm_handler confirm_handler;
 
-    transaction_pool(async_service& service, blockchain& chain);
+    transaction_pool(threadpool& pool, blockchain& chain);
     void start();
 
 

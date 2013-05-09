@@ -5,7 +5,7 @@
 
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/network/network.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 
 namespace libbitcoin {
 
@@ -26,7 +26,7 @@ public:
 
     typedef std::function<void (const std::error_code&)> setter_handler;
 
-    handshake(async_service& service);
+    handshake(threadpool& pool);
 
     handshake(const handshake&) = delete;
     void operator=(const handshake&) = delete;

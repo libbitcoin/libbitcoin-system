@@ -7,7 +7,7 @@ libbitcoin_la_SOURCES = \
     satoshi_serialize.cpp \
     deterministic_wallet.cpp \
 	getx_responder.cpp \
-	async_service.cpp \
+	threadpool.cpp \
 	network/network.cpp  \
 	network/handshake.cpp  \
 	network/channel.cpp \

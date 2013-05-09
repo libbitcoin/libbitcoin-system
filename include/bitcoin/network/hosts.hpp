@@ -9,7 +9,7 @@
 #include <boost/circular_buffer.hpp>
 
 #include <bitcoin/primitives.hpp>
-#include <bitcoin/async_service.hpp>
+#include <bitcoin/threadpool.hpp>
 
 namespace libbitcoin {
 
@@ -29,7 +29,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
 
-    hosts(async_service& service, size_t capacity=1000);
+    hosts(threadpool& pool, size_t capacity=1000);
 
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
