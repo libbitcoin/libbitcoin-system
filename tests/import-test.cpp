@@ -6,6 +6,8 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 void blockchain_started(const std::error_code& ec);
+void resume_copy(const std::error_code& ec, size_t last_depth,
+    blockchain* chain_1, blockchain* chain_2);
 void copy_block(const std::error_code& ec, const block_type& blk,
     size_t depth, blockchain* chain_1, blockchain* chain_2);
 void handle_import(const std::error_code& ec,
@@ -18,6 +20,22 @@ void blockchain_started(const std::error_code& ec)
         log_error() << "Blockchain init error: " << ec.message();
     else
         log_info() << "Blockchain initialized!";
+}
+
+size_t end_depth = 0;
+
+void begin_import(const std::error_code& ec, size_t last_depth,
+    blockchain* chain_1, blockchain* chain_2)
+{
+    if (ec)
+    {
+        log_error() << "Fetching stop depth: " << last_depth;
+        return;
+    }
+    end_depth = last_depth;
+    log_info() << "Stopping at block #" << end_depth;
+    chain_2->fetch_last_depth(
+        std::bind(resume_copy, _1, _2, chain_1, chain_2));
 }
 
 void resume_copy(const std::error_code& ec, size_t last_depth,
@@ -58,11 +76,11 @@ void handle_import(const std::error_code& ec,
     }
     log_info() << "Imported block #" << depth << " " << hash;
     log_info() << "Fetching...";
-    /*if (depth == end_depth)
+    if (depth == end_depth)
     {
         log_info() << "Finished.";
         return;
-    }*/
+    }
     fetch_block(*chain_1, depth + 1,
         std::bind(copy_block, _1, _2, depth + 1, chain_1, chain_2));
 }
@@ -79,8 +97,8 @@ int main(int argc, char** argv)
     leveldb_blockchain chain_2(pool);
     chain_1.start(argv[1], blockchain_started);
     chain_2.start(argv[2], blockchain_started);
-    chain_2.fetch_last_depth(
-        std::bind(resume_copy, _1, _2, &chain_1, &chain_2));
+    chain_1.fetch_last_depth(
+        std::bind(begin_import, _1, _2, &chain_1, &chain_2));
     std::cin.get();
     log_info() << "Exiting...";
     pool.stop();
