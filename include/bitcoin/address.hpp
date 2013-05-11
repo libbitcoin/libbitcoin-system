@@ -6,6 +6,26 @@
 
 namespace libbitcoin {
 
+/**
+ * A class for handling Bitcoin addresses. Supports encoding and decoding
+ * Bitcoin string addresses.
+ *
+ * To validate a Bitcoin address we can try to set a string address.
+ *
+ * @code
+ *   payment_address payaddr;
+ *   if (!payaddr.set_encoded("155GwFbFET2HCT6r6jHAHUoxc897sSdjaq"))
+ *       // Address is invalid
+ * @endcode
+ *
+ * To check whether a payment_address has successfully been set, the
+ * hash value can be compared to null_short_hash (defined in constants.hpp).
+ *
+ * @code
+ *   if (payaddr.hash() == null_short_hash)
+ *       // This payment_address is empty.
+ * @endcode
+ */
 class payment_address
 {
 public:
@@ -16,10 +36,10 @@ public:
     };
 
     payment_address();
-    payment_address(payment_type address_type, const short_hash& hash);
+    payment_address(payment_type type, const short_hash& hash);
     payment_address(const std::string& encoded_address);
 
-    bool set(payment_type address_type, const short_hash& hash);
+    bool set(payment_type type, const short_hash& hash);
     bool set_raw(byte version_byte, const short_hash& hash);
 
     const short_hash& hash() const;

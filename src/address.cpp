@@ -12,11 +12,10 @@ payment_address::payment_address()
   : type_(payment_type::non_standard), hash_(null_short_hash)
 {
 }
-payment_address::payment_address(
-    payment_type address_type, const short_hash& hash)
+payment_address::payment_address(payment_type type, const short_hash& hash)
   : payment_address()
 {
-    set(address_type, hash);
+    set(type, hash);
 }
 payment_address::payment_address(const std::string& encoded_address)
   : payment_address()
@@ -24,9 +23,9 @@ payment_address::payment_address(const std::string& encoded_address)
     set_encoded(encoded_address);
 }
 
-bool payment_address::set(payment_type address_type, const short_hash& hash)
+bool payment_address::set(payment_type type, const short_hash& hash)
 {
-    type_ = address_type;
+    type_ = type;
     hash_ = hash;
     return true;
 }
