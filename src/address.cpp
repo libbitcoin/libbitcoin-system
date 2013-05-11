@@ -9,15 +9,17 @@
 namespace libbitcoin {
 
 payment_address::payment_address()
-  : type_(payment_type::non_standard)
+  : type_(payment_type::non_standard), hash_(null_short_hash)
 {
 }
 payment_address::payment_address(
     payment_type address_type, const short_hash& hash)
+  : payment_address()
 {
     set(address_type, hash);
 }
 payment_address::payment_address(const std::string& encoded_address)
+  : payment_address()
 {
     set_encoded(encoded_address);
 }
