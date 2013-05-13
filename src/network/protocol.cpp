@@ -40,8 +40,7 @@ void protocol::handle_bootstrap(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
-            << "Failed to bootstrap: " << ec.message();
+        log_error(LOG_PROTOCOL) << "Failed to bootstrap: " << ec.message();
         handle_complete(ec);
         return;
     }
@@ -57,7 +56,7 @@ void protocol::handle_start_handshake_service(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Failed to start handshake service: " << ec.message();
         handle_complete(ec);
         return;
@@ -81,7 +80,7 @@ void protocol::handle_save(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::protocol) << "Failed to save hosts '"
+        log_error(LOG_PROTOCOL) << "Failed to save hosts '"
             << hosts_filename_ << "': " << ec.message();
         handle_complete(ec);
         return;
@@ -100,7 +99,7 @@ void protocol::load_hosts(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Could not load hosts file: " << ec.message();
         handle_complete(ec);
         return;
@@ -115,7 +114,7 @@ void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
 {
     if (ec)
     {
-        log_error(log_domain::protocol) 
+        log_error(LOG_PROTOCOL)
             << "Unable to check hosts empty: " << ec.message();
         handle_complete(ec);
         return;
@@ -174,7 +173,7 @@ void protocol::seeds::request_addresses(
 {
     if (ec)
     {
-        log_error(log_domain::protocol) 
+        log_error(LOG_PROTOCOL)
             << "Failed to connect to seed node: " << ec.message();
         error_case(ec);
     }
@@ -193,7 +192,7 @@ void protocol::seeds::handle_send_get_address(const std::error_code& ec)
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Sending get_address message failed: " << ec.message();
         error_case(ec);
     }
@@ -204,14 +203,14 @@ void protocol::seeds::save_addresses(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Problem receiving addresses from seed nodes: "
             << ec.message();
         error_case(ec);
     }
     else
     {
-        log_debug(log_domain::protocol) << "Storing seeded addresses.";
+        log_debug(LOG_PROTOCOL) << "Storing seeded addresses.";
         for (const network_address_type& net_address: packet.addresses)
             hosts_.store(net_address,
                 strand_.wrap(std::bind(&protocol::seeds::handle_store,
@@ -228,7 +227,7 @@ void protocol::seeds::save_addresses(const std::error_code& ec,
 void protocol::seeds::handle_store(const std::error_code& ec)
 {
     if (ec)
-        log_error(log_domain::protocol) 
+        log_error(LOG_PROTOCOL)
             << "Failed to store addresses from seed nodes: "
             << ec.message();
 }
@@ -254,7 +253,7 @@ void protocol::attempt_connect(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Problem fetching random address: " << ec.message();
         return;
     }
@@ -264,7 +263,7 @@ void protocol::attempt_connect(const std::error_code& ec,
         if (connection.address.ip == address.ip &&
             connection.address.port == address.port)
         {
-            log_debug(log_domain::protocol)
+            log_debug(LOG_PROTOCOL)
                 << "Already connected to " << pretty_hex(address.ip);
             // Retry another connection
             strand_.post(
@@ -272,7 +271,7 @@ void protocol::attempt_connect(const std::error_code& ec,
             return;
         }
     }
-    log_debug(log_domain::protocol) << "Trying "
+    log_debug(LOG_PROTOCOL) << "Trying "
         << pretty(address.ip) << ":" << address.port;
     connect(handshake_, network_, pretty(address.ip), address.port,
         strand_.wrap(std::bind(&protocol::handle_connect,
@@ -283,7 +282,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
 {
     if (ec)
     {
-        log_warning(log_domain::protocol) << "Unable to connect to "
+        log_warning(LOG_PROTOCOL) << "Unable to connect to "
             << pretty(address.ip) << ":" << address.port
             << " - " << ec.message();
         strand_.post(std::bind(&protocol::try_connect, this));
@@ -291,7 +290,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     else
     {
         connections_.push_back({address, node});
-        log_info(log_domain::protocol) << "Connected to "
+        log_info(LOG_PROTOCOL) << "Connected to "
             << pretty(address.ip) << ":" << address.port
             << " (" << connections_.size() << " connections)";
         setup_new_channel(node);
@@ -302,7 +301,7 @@ void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Error while listening: " << ec.message();
     }
     else
@@ -317,13 +316,13 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Problem accepting connection: " << ec.message();
     }
     else
     {
         accepted_channels_.push_back(node);
-        log_info(log_domain::protocol) << "Accepted connection: "
+        log_info(LOG_PROTOCOL) << "Accepted connection: "
             << accepted_channels_.size();
         setup_new_channel(node);
     }
@@ -332,7 +331,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 void handle_send(const std::error_code& ec)
 {
     if (ec)
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Sending error: " << ec.message();
 }
 void protocol::setup_new_channel(channel_ptr node)
@@ -377,12 +376,12 @@ void protocol::receive_address_message(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::protocol)
+        log_error(LOG_PROTOCOL)
             << "Problem receiving addresses: " << ec.message();
     }
     else
     {
-        log_debug(log_domain::protocol) << "Storing addresses.";
+        log_debug(LOG_PROTOCOL) << "Storing addresses.";
         for (const network_address_type& net_address: packet.addresses)
             hosts_.store(net_address,
                 strand_.wrap(std::bind(&protocol::handle_store_address,
@@ -392,8 +391,7 @@ void protocol::receive_address_message(const std::error_code& ec,
 void protocol::handle_store_address(const std::error_code& ec)
 {
     if (ec)
-        log_error(log_domain::protocol) 
-            << "Failed to store address: " << ec.message();
+        log_error(LOG_PROTOCOL) << "Failed to store address: " << ec.message();
 }
 
 void protocol::fetch_connection_count(

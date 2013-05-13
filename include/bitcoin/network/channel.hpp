@@ -41,7 +41,7 @@ data_chunk create_raw_message(const Message& packet)
     extend_data(whole_message, payload);
     // Probably not the right place for this
     // Networking output in an exporter
-    log_info(log_domain::network) << "s: " << head.command
+    log_debug(LOG_NETWORK) << "s: " << head.command
         << " (" << payload.size() << " bytes)";
     return whole_message;
 }

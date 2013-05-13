@@ -61,7 +61,7 @@ bool bdb_common::save_block(txn_guard_ptr txn,
         const hash_digest& tx_hash = hash_transaction(block_tx);
         if (!save_transaction(txn, depth, tx_index, tx_hash, block_tx))
         {
-            log_fatal() << "Could not save transaction";
+            log_fatal(LOG_BLOCKCHAIN) << "Could not save transaction";
             return false;
         }
         proto_block.add_transactions(
@@ -70,7 +70,7 @@ bool bdb_common::save_block(txn_guard_ptr txn,
     std::ostringstream oss;
     if (!proto_block.SerializeToOstream(&oss))
     {
-        log_fatal() << "Protobuf serialization failed";
+        log_fatal(LOG_BLOCKCHAIN) << "Protobuf serialization failed";
         return false;
     }
     readable_data_type key, value;
@@ -78,7 +78,7 @@ bool bdb_common::save_block(txn_guard_ptr txn,
     value.set(oss.str());
     if (db_blocks_->put(txn->get(), key.get(), value.get(), 0) != 0)
     {
-        log_fatal() << "bdb put() failed";
+        log_fatal(LOG_BLOCKCHAIN) << "bdb put() failed";
         return false;
     }
     return true;

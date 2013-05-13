@@ -866,7 +866,7 @@ hash_digest script::generate_signature_hash(
 {
     if (input_index >= parent_tx.inputs.size())
     {
-        log_fatal() << "script::op_checksig() : input_index "
+        log_fatal(LOG_SCRIPT) << "script::op_checksig() : input_index "
             << input_index << " is out of range.";
         return null_hash;
     }
@@ -890,7 +890,8 @@ hash_digest script::generate_signature_hash(
         uint32_t output_index = input_index;
         if (output_index >= outputs.size())
         {
-            log_error() << "sighash::single the output_index is out of range";
+            log_error(LOG_SCRIPT)
+                << "sighash::single the output_index is out of range";
             return null_hash;
         }
         outputs.resize(output_index + 1);
@@ -1320,7 +1321,7 @@ bool script::run_operation(const operation& op,
             return false;
 
         default:
-            log_fatal() << "Unimplemented operation <none " 
+            log_fatal(LOG_SCRIPT) << "Unimplemented operation <none "
                 << static_cast<int>(op.code) << ">";
             return false;
     }
@@ -1917,7 +1918,7 @@ bool read_push_data(Iterator& it, const Iterator& raw_script_end,
         ++it;
         if (it == raw_script_end)
         {
-            log_warning() << "Premature end of script.";
+            log_warning(LOG_SCRIPT) << "Premature end of script.";
             return false;
         }
         op_data.push_back(*it);

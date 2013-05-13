@@ -98,8 +98,8 @@ bool open_db(const std::string& prefix, const std::string& db_name,
         leveldb::DB::Open(open_options, db_path.native(), &db_base_ptr);
     if (!status.ok())
     {
-        log_fatal() << "Internal error opening '" << db_name << "' database: "
-            << status.ToString();
+        log_fatal(LOG_BLOCKCHAIN) << "Internal error opening '"
+            << db_name << "' database: " << status.ToString();
         return false;
     }
     // The cointainer ensures db_base_ptr is now managed.

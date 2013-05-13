@@ -177,7 +177,8 @@ bool bdb_blockchain::initialize(const std::string& prefix)
     db_address_ = new Db(env_, 0);
     if (db_blocks_->set_bt_compare(bt_compare_blocks) != 0)
     {
-        log_fatal() << "Internal error setting BTREE comparison function";
+        log_fatal(LOG_BLOCKCHAIN)
+            << "Internal error setting BTREE comparison function";
         return false;
     }
     txn_guard txn(env_);

@@ -4,6 +4,7 @@ using namespace bc;
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using std::placeholders::_3;
 
 void blockchain_started(const std::error_code& ec);
 void resume_copy(const std::error_code& ec, size_t last_depth,
@@ -85,8 +86,43 @@ void handle_import(const std::error_code& ec,
         std::bind(copy_block, _1, _2, depth + 1, chain_1, chain_2));
 }
 
+void output_to_file(std::ofstream& file, log_level level,
+    const std::string& domain, const std::string& body)
+{
+    if (body.empty())
+        return;
+    file << level_repr(level);
+    if (!domain.empty())
+        file << " [" << domain << "]";
+    file << ": " << body << std::endl;
+}
+void output_cerr_and_file(std::ofstream& file, log_level level,
+    const std::string& domain, const std::string& body)
+{
+    if (body.empty())
+        return;
+    std::ostringstream output;
+    output << level_repr(level);
+    if (!domain.empty())
+        output << " [" << domain << "]";
+    output << ": " << body;
+    std::cerr << output.str() << std::endl;
+}
+
 int main(int argc, char** argv)
 {
+    std::ofstream outfile("debug.log"), errfile("error.log");
+    log_debug().set_output_function(
+        std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+    log_info().set_output_function(
+        std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+    log_warning().set_output_function(
+        std::bind(output_to_file, std::ref(errfile), _1, _2, _3));
+    log_error().set_output_function(
+        std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
+    log_fatal().set_output_function(
+        std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
+
     if (argc != 3)
     {
         log_info() << "Usage: import SOURCE DEST";

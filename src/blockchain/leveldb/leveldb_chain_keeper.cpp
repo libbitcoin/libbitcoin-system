@@ -28,7 +28,7 @@ void leveldb_chain_keeper::add(block_detail_ptr incoming_block)
     uint32_t last_block_depth = common_->find_last_block_depth();
     const block_type& actual_block = incoming_block->actual();
     if (!common_->save_block(last_block_depth + 1, actual_block))
-        log_fatal() << "Saving block in organizer failed";
+        log_fatal(LOG_BLOCKCHAIN) << "Saving block in organizer failed";
 }
 
 int leveldb_chain_keeper::find_index(const hash_digest& search_block_hash)

@@ -128,7 +128,7 @@ bool timer_errors(const boost::system::error_code& ec, bool stopped)
         return true;
     else if (ec)
     {
-        log_error(log_domain::network) << ec.message();
+        log_error(LOG_NETWORK) << ec.message();
         return true;
     }
     else if (stopped)
@@ -140,12 +140,12 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
 {
     if (timer_errors(ec, stopped_))
         return;
-    log_debug(log_domain::network) << "Forcing disconnect due to timeout.";
+    log_debug(LOG_NETWORK) << "Forcing disconnect due to timeout.";
     // No response for a while so disconnect
     boost::system::error_code ret_ec;
     tcp::endpoint remote_endpoint = socket_->remote_endpoint(ret_ec);
     if (!ec)
-        log_debug(log_domain::network) << "Closing channel "
+        log_debug(LOG_NETWORK) << "Closing channel "
             << remote_endpoint.address().to_string();
     ret_ec = boost::system::error_code();
     // Force the socket closed
@@ -274,12 +274,12 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
 
     if (!verify_header(header_msg))
     {
-        log_debug(log_domain::network) << "Bad header received.";
+        log_debug(LOG_NETWORK) << "Bad header received.";
         stop();
         return;
     }
 
-    log_debug(log_domain::network) << "r: " << header_msg.command
+    log_debug(LOG_NETWORK) << "r: " << header_msg.command
             << " (" << header_msg.payload_length << " bytes)";
     read_checksum(header_msg);
     reset_timers();
@@ -310,7 +310,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
     if (header_msg.checksum != generate_sha256_checksum(payload_stream))
     {
-        log_warning(log_domain::network) << "Bad checksum!";
+        log_warning(LOG_NETWORK) << "Bad checksum!";
         raw_subscriber_->relay(error::bad_stream,
             header_type(), data_chunk());
         stop();

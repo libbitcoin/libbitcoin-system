@@ -88,7 +88,7 @@ void session::inventory(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::session) << "inventory: " << ec.message();
+        log_error(LOG_SESSION) << "inventory: " << ec.message();
         return;
     }
     for (const inventory_vector_type& ivec: packet.inventories)
@@ -100,8 +100,7 @@ void session::inventory(const std::error_code& ec,
         else if (ivec.type == inventory_type_id::block);
             // Do nothing. Handled by poller.
         else
-            log_warning(log_domain::session)
-                << "Ignoring unknown inventory type";
+            log_warning(LOG_SESSION) << "Ignoring unknown inventory type";
     }
     node->subscribe_inventory(
         std::bind(&session::inventory, this, _1, _2, node));
@@ -111,7 +110,7 @@ void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
 {
     if (grabbed_invs_.exists(tx_hash))
         return;
-    log_debug(log_domain::session)
+    log_debug(LOG_SESSION)
         << "Transaction inventory: " << pretty_hex(tx_hash);
     // does it exist already
     // if not then issue getdata
@@ -126,7 +125,7 @@ void session::get_data(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::session) << "get_data: " << ec.message();
+        log_error(LOG_SESSION) << "get_data: " << ec.message();
         return;
     }
     // simple stuff
@@ -139,7 +138,7 @@ void session::get_blocks(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::session) << "get_blocks: " << ec.message();
+        log_error(LOG_SESSION) << "get_blocks: " << ec.message();
         return;
     }
     // send 500 invs from last fork point
@@ -152,7 +151,7 @@ void session::get_blocks(const std::error_code& ec,
 void handle_send_get_data(const std::error_code& ec)
 {
     if (ec)
-        log_error(log_domain::session) << "Requesting data: " << ec.message();
+        log_error(LOG_SESSION) << "Requesting data: " << ec.message();
 }
 void session::request_tx_data(bool tx_exists,
     const hash_digest& tx_hash, channel_ptr node)

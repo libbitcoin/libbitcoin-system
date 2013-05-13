@@ -35,7 +35,7 @@ void poller::initial_ask_blocks(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::poller)
+        log_error(LOG_POLLER)
             << "Fetching initial block locator: " << ec.message();
         return;
     }
@@ -46,8 +46,7 @@ void poller::initial_ask_blocks(const std::error_code& ec,
 void handle_send_packet(const std::error_code& ec)
 {
     if (ec)
-        log_error(log_domain::poller)
-            << "Send problem: " << ec.message();
+        log_error(LOG_POLLER) << "Send problem: " << ec.message();
 }
 
 void poller::receive_inv(const std::error_code& ec,
@@ -55,8 +54,7 @@ void poller::receive_inv(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::poller)
-            << "Received bad inventory: " << ec.message();
+        log_error(LOG_POLLER) << "Received bad inventory: " << ec.message();
         return;
     }
     // Filter out only block inventories
@@ -85,8 +83,7 @@ void poller::receive_block(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::poller)
-            << "Received bad block: " << ec.message();
+        log_error(LOG_POLLER) << "Received bad block: " << ec.message();
         return;
     }
     chain_.store(blk,
@@ -103,7 +100,7 @@ void poller::handle_store(const std::error_code& ec, block_info info,
     // We need orphan blocks so we can do the next getblocks round
     if (ec && info.status != block_status::orphan)
     {
-        log_error(log_domain::poller)
+        log_error(LOG_POLLER)
             << "Storing block " << pretty_hex(block_hash)
             << ": " << ec.message();
         return;
@@ -120,12 +117,12 @@ void poller::handle_store(const std::error_code& ec, block_info info,
             break;
 
         case block_status::rejected:
-            log_error(log_domain::poller)
+            log_error(LOG_POLLER)
                 << "Rejected block " << pretty_hex(block_hash);
             break;
 
         case block_status::confirmed:
-            log_info(log_domain::poller)
+            log_info(LOG_POLLER)
                 << "Block #" << info.depth << " " << pretty_hex(block_hash);
             break;
     }
@@ -137,13 +134,12 @@ void poller::ask_blocks(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(log_domain::poller)
-            << "Ask for blocks: " << ec.message();
+        log_error(LOG_POLLER) << "Ask for blocks: " << ec.message();
         return;
     }
     if (last_hash_end_ == locator.front())
     {
-        log_debug(log_domain::poller) << "Skipping duplicate ask blocks: "
+        log_debug(LOG_POLLER) << "Skipping duplicate ask blocks: "
             << pretty_hex(locator.front());
         return;
     }

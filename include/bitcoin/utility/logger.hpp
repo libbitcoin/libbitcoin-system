@@ -1,22 +1,19 @@
 #ifndef LIBBITCOIN_LOGGER_HPP
 #define LIBBITCOIN_LOGGER_HPP
 
+#include <functional>
 #include <sstream>
 #include <map>
-#include <vector>
 
 namespace libbitcoin {
 
-enum class log_domain
-{
-    normal,
-    network,
-    blockchain,
-    validation,
-    protocol,
-    poller,
-    session
-};
+#define LOG_NETWORK     "network"
+#define LOG_BLOCKCHAIN  "blockchain"
+#define LOG_VALIDATE    "validate"
+#define LOG_PROTOCOL    "protocol"
+#define LOG_POLLER      "poller"
+#define LOG_SESSION     "session"
+#define LOG_SCRIPT      "script"
 
 enum class log_level
 {
@@ -28,40 +25,42 @@ enum class log_level
     fatal
 };
 
+std::string level_repr(log_level level);
+
 class logger_wrapper
 {
 public:
-    logger_wrapper(log_level lev, log_domain domain); 
-    logger_wrapper(const logger_wrapper& other);
+    typedef std::function<void (
+        log_level, const std::string&, const std::string&)> logger_output_func;
+
+    logger_wrapper(log_level lev, const std::string& token);
+    logger_wrapper(logger_wrapper&& other);
     ~logger_wrapper();
 
     template <typename T>
     logger_wrapper& operator<<(T const& value) 
     {
-        stream << value;
+        stream_ << value;
         return *this;
     }
 
-    void alias(log_level lev, log_level map_lev);
-    void filter(log_level lev=log_level::null);
+    void set_output_function(logger_output_func outfunc);
 
 private:
-    typedef std::map<log_level, log_level> alias_mapping;
-    typedef std::map<log_domain, log_level> filters_map;
+    typedef std::map<log_level, logger_output_func> destination_map;
 
-    static alias_mapping aliases_;
-    static filters_map filters_;
+    static destination_map dests_;
 
-    std::ostringstream stream;
-    log_level lev_;
-    log_domain domain_;
+    log_level level_;
+    std::string domain_;
+    std::ostringstream stream_;
 };
 
-logger_wrapper log_debug(log_domain domain=log_domain::normal);
-logger_wrapper log_info(log_domain domain=log_domain::normal);
-logger_wrapper log_warning(log_domain domain=log_domain::normal);
-logger_wrapper log_error(log_domain domain=log_domain::normal);
-logger_wrapper log_fatal(log_domain domain=log_domain::normal);
+logger_wrapper log_debug(const std::string& domain="");
+logger_wrapper log_info(const std::string& domain="");
+logger_wrapper log_warning(const std::string& domain="");
+logger_wrapper log_error(const std::string& domain="");
+logger_wrapper log_fatal(const std::string& domain="");
 
 } // namespace libbitcoin
 

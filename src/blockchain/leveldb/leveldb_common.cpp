@@ -37,7 +37,7 @@ bool leveldb_common::fetch_spend(const output_point& spent_output,
         return false;
     else if (!status.ok())
     {
-        log_fatal() << "Error fetch_spend: " << status.ToString();
+        log_fatal(LOG_BLOCKCHAIN) << "fetch_spend: " << status.ToString();
         return false;
     }
     const data_chunk raw_spend_data(raw_spend.begin(), raw_spend.end());
@@ -61,7 +61,7 @@ bool leveldb_common::save_block(
         const hash_digest& tx_hash = hash_transaction(block_tx);
         if (!save_transaction(batch, depth, tx_index, tx_hash, block_tx))
         {
-            log_fatal() << "Could not save transaction";
+            log_fatal(LOG_BLOCKCHAIN) << "Could not save transaction";
             return false;
         }
         proto_block.add_transactions(
@@ -70,7 +70,7 @@ bool leveldb_common::save_block(
     std::ostringstream oss;
     if (!proto_block.SerializeToOstream(&oss))
     {
-        log_fatal() << "Protobuf serialization failed";
+        log_fatal(LOG_BLOCKCHAIN) << "Protobuf serialization failed";
         return false;
     }
     data_chunk raw_depth = uncast_type(depth);
@@ -184,8 +184,8 @@ protobuf::Block leveldb_common::fetch_proto_block(uint32_t depth)
         return protobuf::Block();
     else if (!status.ok())
     {
-        log_fatal() << "Error fetch_proto_block(" << depth << "): "
-            << status.ToString();
+        log_fatal(LOG_BLOCKCHAIN) << "fetch_proto_block("
+            << depth << "): " << status.ToString();
         return protobuf::Block();
     }
     std::stringstream ss(value);
@@ -208,8 +208,8 @@ uint32_t leveldb_common::fetch_block_depth(const hash_digest& block_hash)
         return std::numeric_limits<uint32_t>::max();
     else if (!status.ok())
     {
-        log_fatal() << "Error fetch_block_depth(" << block_hash << "): "
-            << status.ToString();
+        log_fatal(LOG_BLOCKCHAIN) << "fetch_block_depth("
+            << block_hash << "): " << status.ToString();
         return std::numeric_limits<uint32_t>::max();
     }
     return recreate_depth(value);
@@ -225,8 +225,8 @@ protobuf::Transaction leveldb_common::fetch_proto_transaction(
         return protobuf::Transaction();
     else if (!status.ok())
     {
-        log_fatal() << "Error fetch_proto_tx(" << tx_hash << "): "
-            << status.ToString();
+        log_fatal(LOG_BLOCKCHAIN) << "fetch_proto_tx("
+            << tx_hash << "): " << status.ToString();
         return protobuf::Transaction();
     }
     std::stringstream ss(value);
