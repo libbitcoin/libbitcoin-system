@@ -179,28 +179,26 @@ Different Key Formats
 Hex-Encoded Secret
 ------------------
 
+reading the private key directly, a value called the *secret parameter* is
+created by the deterministic wallet. This is put into the elliptic curve
+formula and used to create the private key.
+::
+
+    secret_parameter secret = bytes_to_hash<secret_parameter>("33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
+    // The secret parameter is used to compute the private key
+    // by the elliptic curve formula.
+    elliptic_curve_key privkey;
+    if (!privkey.set_secret(secret))
+        log_error() << "Error set private key.";
+
+::
+
+    // Display the secret parameter.
+    std::cout << privkey.secret() << std::endl;
+
 Wallet Import Format
 --------------------
 
 Casascius Minikey
 -----------------
-
-If you do much work on computers, eventually you find that there's some task
-you'd like to automate.  For example, you may wish to perform a
-search-and-replace over a large number of text files, or rename and rearrange a
-bunch of photo files in a complicated way. Perhaps you'd like to write a small
-custom database, or a specialized GUI application, or a simple game.
-
-
-Python enables programs to be written compactly and readably.  Programs written
-in Python are typically much shorter than equivalent C,  C++, or Java programs,
-for several reasons:
-
-* the high-level data types allow you to express complex operations in a single
-  statement;
-
-* statement grouping is done by indentation instead of beginning and ending
-  brackets;
-
-* no variable or argument declarations are necessary.
 
