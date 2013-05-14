@@ -10,6 +10,17 @@ Source Code
 Explanation
 ===========
 
+Basic Outline
+-------------
+
+Unconfirmed Transactions
+------------------------
+
+.. Need whole blockchain to validate transactions.
+
+Requesting Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^
+
 If you do much work on computers, eventually you find that there's some task
 you'd like to automate.  For example, you may wish to perform a
 search-and-replace over a large number of text files, or rename and rearrange a

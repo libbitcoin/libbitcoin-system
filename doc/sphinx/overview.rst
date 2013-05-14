@@ -27,9 +27,17 @@ Threadpools and Services
 Data Types
 ----------
 
+Logging
+-------
+
 std::error_code
 ---------------
 
 std::bind
 ---------
+
+std::promise
+------------
+
+.. synchronising asynchronous calls.
 

@@ -22,4 +22,5 @@ Contents:
    blockchain
    network
    fullnode
+   offlinetx
 
