@@ -12,6 +12,9 @@
 
 namespace libbitcoin {
 
+class hosts;
+class handshake;
+
 class protocol
 {
 public:

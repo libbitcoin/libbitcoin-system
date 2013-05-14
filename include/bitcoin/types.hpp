@@ -16,19 +16,8 @@ using boost::asio::ip::tcp;
     class nametype; \
     typedef std::shared_ptr<nametype> nametype##_ptr
 
-DECLARE_PTR_TYPE(threadpool);
-DECLARE_PTR_TYPE(blockchain);
-DECLARE_PTR_TYPE(chrono_clock);
-DECLARE_PTR_TYPE(transaction_pool);
 DECLARE_PTR_TYPE(acceptor);
-DECLARE_PTR_TYPE(network);
 DECLARE_PTR_TYPE(channel);
-DECLARE_PTR_TYPE(handshake);
-DECLARE_PTR_TYPE(hosts);
-DECLARE_PTR_TYPE(protocol);
-DECLARE_PTR_TYPE(poller);
-DECLARE_PTR_TYPE(getx_responder);
-DECLARE_PTR_TYPE(session);
 
 #undef DECLARE_PTR_TYPE
 

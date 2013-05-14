@@ -9,6 +9,9 @@
 
 namespace libbitcoin {
 
+class blockchain;
+class transaction_pool;
+
 class getx_responder
 {
 public:
