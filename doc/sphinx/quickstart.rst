@@ -4,26 +4,21 @@
 Quickstart
 **********
 
-If you do much work on computers, eventually you find that there's some task
-you'd like to automate.  For example, you may wish to perform a
-search-and-replace over a large number of text files, or rename and rearrange a
-bunch of photo files in a complicated way. Perhaps you'd like to write a small
-custom database, or a specialized GUI application, or a simple game.
+::
 
+    #include <bitcoin/bitcoin.hpp>
+    using namespace bc;
 
-Python enables programs to be written compactly and readably.  Programs written
-in Python are typically much shorter than equivalent C,  C++, or Java programs,
-for several reasons:
+    int main()
+    {
+        block_type blk = genesis_block();
+        std::cout << pretty_hex(hash_block_header(blk)) << std::endl;
+        return 0;
+    }
 
-* the high-level data types allow you to express complex operations in a single
-  statement;
+::
 
-* statement grouping is done by indentation instead of beginning and ending
-  brackets;
-
-* no variable or argument declarations are necessary.
-
-.. function:: len(s)
-
-   Return the length.
+    $ g++ -o test main.cpp $(pkg-config --cflags --libs libbitcoin)
+    $ ./test
+    000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
 
