@@ -62,7 +62,7 @@ Additionally helper functions exist for working with these types.
 
    Convert chunk to and from different integer types. i.e
    ``cast_chunk<uint32_t>(chunk)`` converts *chunk* into a 4 byte
-   integer. Assumes *chunk.size()* >= 4 bytes.
+   integer. Assumes ``chunk.size() >= 4`` bytes.
 
 .. cpp:function:: std::string pretty_hex<T>(T data)
 
@@ -79,8 +79,8 @@ Additionally helper functions exist for working with these types.
 
 .. cpp:function:: HashType hash_from_pretty<HashType>(std::string byte_stream)
 
-   Decode hex string into a hash type (either ``hash_digest`` or
-   ``short_hash``).
+   Decode hex string into a hash type (either :type:`hash_digest` or
+   :type:`short_hash`).
 
 Logging
 -------
@@ -91,7 +91,7 @@ std::error_code
 ---------------
 
 libbitcoin generally does not use exceptions, instead relying on
-``std::error_code`` objects. Objects of this type hold an error code value.
+:class:`std::error_code` objects. Objects of this type hold an error code value.
 ::
 
     #include <bitcoin/bitcoin.hpp>
@@ -118,7 +118,7 @@ Output::
 std::bind
 ---------
 
-``std::bind`` is for `partial function application <http://en.wikipedia.org/wiki/Partial_application>`_.
+:func:`std::bind` is for `partial function application <http://en.wikipedia.org/wiki/Partial_application>`_.
 
 Suppose you have a function object f which takes 3 arguments::
 
@@ -137,7 +137,7 @@ You can use ``std::bind`` to get ``g``::
 
 This enables libbitcoin methods that expect one function type to be mapped
 to different methods that expect different or additional arguments.
-``std::bind`` allows data to be bound to a function only for the duration of
+:func:`std::bind` allows data to be bound to a function only for the duration of
 that function object.
 ::
 
@@ -166,10 +166,10 @@ To bind class methods, pass the class pointer in as the second argument::
     std::bind(&my_class::foo, this, _1, _2, "somedata", _3);
 
 If you want to keep the object alive until the end of the function object,
-then pass an ``std::shared_ptr`` instead. You can use ``shared_from_this()``
-to return an object's ``std::shared_ptr`` if needed. See
+then pass an :class:`std::shared_ptr` instead. You can use :func:`shared_from_this`
+to return an object's :class:`std::shared_ptr` if needed. See
 `here <http://en.cppreference.com/w/cpp/memory/enable_shared_from_this>`_ for
-info on ``std::enable_shared_from_this``.
+info on :class:`std::enable_shared_from_this`.
 
 The equivalent using C++ lambdas of above would be::
 
@@ -190,11 +190,11 @@ The equivalent using C++ lambdas of above would be::
 std::promise and std::future
 ----------------------------
 
-The class ``std::promise`` provides a facility to store a value that is
-later acquired asynchronously via a ``std::future`` object, that the
-``std::promise`` can supply. 
+The class :class:`std::promise` provides a facility to store a value that is
+later acquired asynchronously via a :class:`std::future` object, that the
+:class:`std::promise` can supply. 
 
-``std::promise`` and ``std::future`` enable you to turn asynchronous methods
+:class:`std::promise` and :class:`std::future` enable you to turn asynchronous methods
 into synchronous ones. libbitcoin makes extensive use of completion handlers
 to signal the result of a method invocation. Combining these classes enables
 you to block in the same thread of control until the result is returned.

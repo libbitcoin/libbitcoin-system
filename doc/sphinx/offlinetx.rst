@@ -1,4 +1,4 @@
-.. _tut-fullnode:
+.. _tut-offlinetx:
 
 ********************
 Offline Transactions

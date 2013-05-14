@@ -7,6 +7,11 @@ Network Protocol
 Simple Network Application
 ==========================
 
+handshake Service
+-----------------
+
+.. mention is a composed operation. link to blockchain section on this.
+
 Network Services
 ================
 
