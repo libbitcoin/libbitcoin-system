@@ -16,6 +16,15 @@ Deterministic Wallets
 Different Key Formats
 =====================
 
+Hex-Encoded Secret
+------------------
+
+Wallet Import Format
+--------------------
+
+Casascius Minikey
+-----------------
+
 If you do much work on computers, eventually you find that there's some task
 you'd like to automate.  For example, you may wish to perform a
 search-and-replace over a large number of text files, or rename and rearrange a
