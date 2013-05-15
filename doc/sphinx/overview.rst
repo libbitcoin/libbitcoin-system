@@ -4,6 +4,15 @@
 Overview
 ********
 
+Rationale
+=========
+
+Core Concepts and Functionality
+===============================
+
+Basic libbitcoin Anatomy
+------------------------
+
 Broadly speaking the main services in libbitcoin can be divided down three
 lines.
 
@@ -34,17 +43,6 @@ functionality. They can be thought of as composed services.
 * :class:`poller`
 * :class:`transaction_pool`
 * :class:`session`
-
-.. C++11 library.
-
-Rationale
-=========
-
-Core Concepts and Functionality
-===============================
-
-Basic libbitcoin Anatomy
-------------------------
 
 Threadpools and Services
 ------------------------
