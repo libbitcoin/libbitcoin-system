@@ -44,6 +44,7 @@
  * - @link libbitcoin::blockchain blockchain @endlink (abstract interface
      for blockchain backends)
  * - @link libbitcoin::bdb_blockchain bdb_blockchain @endlink
+ * - @link libbitcoin::leveldb_blockchain leveldb_blockchain @endlink
  *
  * @subsection supporting Supporting services
  *
