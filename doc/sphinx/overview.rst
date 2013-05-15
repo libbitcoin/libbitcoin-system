@@ -7,16 +7,42 @@ Overview
 Rationale
 =========
 
+As libbitcoin is an asynchronous *toolkit*, there is no one way of developing
+programs - it is up to the individual author. Different approaches are better
+for different situations.
+
 Core Concepts and Functionality
 ===============================
 
 Basic libbitcoin Anatomy
 ------------------------
 
-Broadly speaking the main services in libbitcoin can be divided down three
-lines.
+Before using libbitcoin it may be useful to get a conceptual picture of the
+various parts of libbitcoin, your program, and how they work together.
 
-*Network services*:
+libbitcoin is centered around various components that provide critical
+infrastructure for bitcoin functionality. These components are called
+*services*. Services run inside their own thread contexts and can exist in
+multiple threads. Interacting with a service is done through their interface.
+
+Services implement thread-safe interfaces as a strict rule. Tasks are submitted
+to services and upon completion, your program will be notified. Services are
+self contained units and are locally encapsulated. They implement an interface
+for which various implementations may exist- the blockchain service has an
+implementation for BerkeleyDB and LevelDB.
+
+There are two basic service actions in libbitcoin:
+
+* **Operation**. Perform operation. Notified upon completion.
+* **Subscribe**. Subscribe to possible event. Notified upon event.
+
+All methods on services return immediately.
+
+Broadly speaking the main services in libbitcoin can be divided down three
+lines into network, blockchain and supporting services.
+
+Network services
+^^^^^^^^^^^^^^^^
 
 these services are concerned with the network side of things.
 
@@ -26,7 +52,8 @@ these services are concerned with the network side of things.
 * :class:`hosts`
 * :class:`handshake`
 
-*Blockchain services*:
+Blockchain services
+^^^^^^^^^^^^^^^^^^^
 
 Bitcoin's blockchain is usually disk oriented. Backends all implement the
 blockchain interface allowing programs to utilise backends using the same code.
@@ -35,10 +62,11 @@ blockchain interface allowing programs to utilise backends using the same code.
 * :class:`bdb_blockchain`
 * :class:`leveldb_blockchain`
 
-*Supporting services*:
+Supporting services
+^^^^^^^^^^^^^^^^^^^
 
-These services utilise other services and provide additional
-functionality. They can be thought of as composed services.
+These services utilise other services and provide additional functionality.
+They can be thought of as wrapper services composed of other services.
 
 * :class:`poller`
 * :class:`transaction_pool`
@@ -50,8 +78,62 @@ Threadpools and Services
 Theory
 ^^^^^^
 
+When calling a method on a service to initiate an action, your program is
+submitting a piece of work to that service’s proactor engine to complete.
+Once the program is ready, it will take that piece of work from the queue,
+complete it and then call the completion handler passed to it.
+
+.. image:: img/operations.png
+
+This program calls send on the :class:`network` service passing a data
+type to be sent, and a completion handler. The send function call returns
+immediately and the program continues on.
+
+The task gets submitted to the service. Once the
+service is ready and has completed its previous tasks,
+it awakens and grabs the latest piece of work from the queue (send object).
+
+The :class:`network` service sends the packet to the bitcoin network asynchronously.
+Upon completion it calls the completion handler passed to it, and fetches the
+next piece of work to complete. The program continues on from where it left off.
+
+Note that this service can exist in multiple threads, and it may be
+performing another piece of work while doing this send. Scalability is resolved
+in this way by having services able to run with any defined number of threads
+using a :class:`threadpool` object.
+
 Practice
 ^^^^^^^^
+
+Services are objects inside libbitcoin that perform asynchronous operations
+like doing a long disk operation or calling other services. Their constructor
+accepts a :class:`threadpool` object.
+
+Work that is submitted to the services is added to that :class:`threadpool`,
+and will be queued in that context.
+
+::
+
+    // Define 2 threadpools with 6 threads in total.
+    // disk_pool has 4 threads, and net_pool has 2.
+    // Operations submitted to net_pool will only run in those 2 threads
+    // spawned by net_pool.
+    threadpool disk_pool(4), net_pool(2);
+    // This blockchain service will submit work to disk_pool
+    blockchain chain(disk_pool);
+    // Completion handler.
+    auto blockchain_started = [](const std::error_code&)
+        {
+            // Check whether the status was successful.
+            if (ec)
+                log_error() << "Starting blockchain: " << ec.message();
+            // ... do stuff
+        };
+    // Invoke the call. Returns immediately.
+    chain.start("database/", blockchain_started);
+
+Dependency Injection
+^^^^^^^^^^^^^^^^^^^^
 
 Data Types
 ----------
