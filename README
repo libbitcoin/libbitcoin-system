@@ -6,41 +6,35 @@ everybody to access.
 
 You will need:
 
-  - GCC 4.6 or newer
+  - GCC 4.7 or newer
   - Boost 1.48 or newer
   - OpenSSL 0.9 or newer
-  * for PostgreSQL support:
-    - cppdb (with postgres enabled)
   * for BerkeleyDB support:
     - berkdb 5.1 or newer
     - protobuf
+  - LevelDB
 
-Ubuntu users:
+Ubuntu Instructions
+===================
 
-  $ sudo apt-get install build-essential autoconf libtool libdb++-dev protobuf pkg-config libboost-all-dev
+*Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of libboost-all-dev
+
+  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev libdb++-dev libprotobuf-dev pkg-config libcurl4-openssl-dev libleveldb-dev
   $ autoreconf -i
-
-Build cppdb using the instructions on their site.
-
-  $ svn co http://cppcms.svn.sourceforge.net/svnroot/cppcms/cppdb/trunk cppdb-trunk
-  $ cd cppdb-trunk
-  $ mkdir build
-  $ cd build
-  $ cmake -DCMAKE_INSTALL_PREFIX=/home/smf/libbitcoin/usr/ ..  -DPQ_BACKEND_INTERNAL=1
+  $ ./configure --enable-bdb --enable-leveldb
   $ make
-  # make install
+  $ sudo make install
+
+pkg-config can be invoked to get the neccessary compile and build flags.
+
+  $ pkg-config --cflags --libs libbitcoin
+
+To run the protocol test program:
+
+  $ mkdir -p obj/ bin/tests/
+  $ make -f development-makefile protst
+  $ export LD_LIBRARY_PATH=/usr/local/lib
+  $ ./bin/tests/protst
 
 Gentoo users: just use the ebuild from the bitcoin overlay.
-
-Edit the Makefile CFLAGS and LIBS variables to get the project to compile.
-Import the database too.
-
-  $ psql bitcoin < bitcoin.sql
-
-A good place to start is to run:
-
-  $ make net
-  $ ./bin/tests/nettest
-
-This is still a work in progress.
 
