@@ -17,7 +17,7 @@ for counter, test in enumerate(tests):
     test = (test[0], test[1], test[2] if len(test) == 3 else "")
     arguments = '"%s" "%s" "%s"' % test
     retcode = os.system(scritp + " " + arguments)
-    success = bool(open("/tmp/script_status").read())
+    success = bool(int(open("/tmp/script_status").read()))
     if success:
         print "Status: pass"
     else:
