@@ -4,13 +4,38 @@
 Overview
 ********
 
-If you do much work on computers, eventually you find that there's some task
-you'd like to automate.  For example, you may wish to perform a
-search-and-replace over a large number of text files, or rename and rearrange a
-bunch of photo files in a complicated way. Perhaps you'd like to write a small
-custom database, or a specialized GUI application, or a simple game.
+Broadly speaking the main services in libbitcoin can be divided down three
+lines.
 
-C++11 library.
+*Network services*:
+
+these services are concerned with the network side of things.
+
+* :class:`channel`
+* :class:`network`
+* :class:`protocol`
+* :class:`hosts`
+* :class:`handshake`
+
+*Blockchain services*:
+
+Bitcoin's blockchain is usually disk oriented. Backends all implement the
+blockchain interface allowing programs to utilise backends using the same code.
+
+* :class:`blockchain` (abstract interface for blockchain backends)
+* :class:`bdb_blockchain`
+* :class:`leveldb_blockchain`
+
+*Supporting services*:
+
+These services utilise other services and provide additional
+functionality. They can be thought of as composed services.
+
+* :class:`poller`
+* :class:`transaction_pool`
+* :class:`session`
+
+.. C++11 library.
 
 Rationale
 =========

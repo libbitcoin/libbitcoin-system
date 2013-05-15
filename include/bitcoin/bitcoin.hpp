@@ -38,8 +38,8 @@
  * @subsection blockchain Blockchain service
  *
  * Bitcoin's blockchain is usually disk oriented. Backends all implement
- * the blockchain allowing programs to utilise backends using the same
- * code.
+ * the blockchain interface allowing programs to utilise backends using the
+ * same code.
  *
  * - @link libbitcoin::blockchain blockchain @endlink (abstract interface
      for blockchain backends)
@@ -55,10 +55,10 @@
  * - @link libbitcoin::transaction_pool transaction_pool @endlink
  * - @link libbitcoin::session session @endlink
  *
- * @section message Message
+ * @section primitive Primitive
  *
- * libbitcoin operates around messages. Each message corresponds to
- * one of the packets in the bitcoin network protocol.
+ * libbitcoin operates around primitives. Each primitive corresponds to
+ * one of the messages in the bitcoin network protocol.
  *
  * These primitives make up the corpus of libbitcoin.
  *

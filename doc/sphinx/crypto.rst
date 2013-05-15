@@ -44,7 +44,7 @@ A version byte is prepended, usually :type:`payment_address::pubkey_version`.
 Finally the whole byte array is encoded in base58 using :func:`encode_base58`.
 
 Bitcoin addresses are between 27-34 alphanumeric characters. The
-:class:`payment_address` represents a Bitcoin address.
+:class:`payment_address` class represents a Bitcoin address.
 ::
 
     // Takes a raw private key, loads it using the elliptic_curve_key class,
