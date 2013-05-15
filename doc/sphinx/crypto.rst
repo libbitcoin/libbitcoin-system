@@ -142,7 +142,7 @@ formula and used to create the private key.
     assert(privkey.public_key() == pubkey);
 
 Master Public Key
-^^^^^^^^^^^^^^^^^
+-----------------
 
 The master public key is an interesting concept. A :class:`deterministic_wallet`
 can be initialized with a master public key that allows generating all the
@@ -179,12 +179,11 @@ Different Key Formats
 Hex-Encoded Secret
 ------------------
 
-reading the private key directly, a value called the *secret parameter* is
-created by the deterministic wallet. This is put into the elliptic curve
-formula and used to create the private key.
+The *secret parameter* is a value used by the elliptic curve formula to
+compute the private key.
 ::
 
-    secret_parameter secret = bytes_to_hash<secret_parameter>("33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
+    secret_parameter secret = hash_from_pretty<secret_parameter>("33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
     // The secret parameter is used to compute the private key
     // by the elliptic curve formula.
     elliptic_curve_key privkey;
@@ -199,6 +198,44 @@ formula and used to create the private key.
 Wallet Import Format
 --------------------
 
+Wallet Import Format (WIF) is a way to encode the secret parameter to make
+copying the private key easier.
+
+.. cpp:function:: std::string secret_to_wif(const secret_parameter& secret)
+
+   Convert a secret parameter to the wallet import format.
+   Returns an empty string on error.
+   ::
+
+    std::string wif = secret_to_wif(secret);
+    if (wif.empty())
+        // Error...
+
+.. cpp:function:: secret_parameter wif_to_secret(const std::string& wif)
+
+   Convert wallet import format key to secret parameter.
+   Returns a nulled secret on error.
+   ::
+
+    secret_parameter secret = wif_to_secret(
+        "5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ");
+    if (secret == null_hash)
+        // Error...
+
 Casascius Minikey
 -----------------
+
+Casascius coins encode private keys in a format known as Casascius minikey.
+:func:`minikey_to_secret` converts a Casascius minikey to a secret parameter.
+
+.. cpp:function:: secret_parameter minikey_to_secret(const std::string& minikey)
+
+   Convert Cascasius minikey to secret parameter.
+   Returns a nulled secret on error.
+   ::
+
+    secret_parameter secret =
+        minikey_to_secret("S6c56bnXQiBjk9mqSYE7ykVQ7NzrRy");
+    if (secret == null_hash)
+        // Error...
 
