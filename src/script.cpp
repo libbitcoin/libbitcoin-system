@@ -779,6 +779,8 @@ bool script::op_max()
 
 bool script::op_within()
 {
+    if (stack_.size() < 3)
+        return false;
     big_number upper;
     if (!cast_to_big_number(pop_stack(), upper))
         return false;
