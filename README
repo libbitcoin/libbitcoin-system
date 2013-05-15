@@ -1,6 +1,8 @@
 All files in this repository fall under the license specified in LICENSE
-Right now, the project is licensed under the AGPL but we're still working
-on a different license and plan to relicense the project at a later date.
+The project is licensed as AGPL with a lesser clause. It may be used within
+a proprietary project, but the core library and any changes to it must be
+published online. Source code for this library must always remain free for
+everybody to access.
 
 You will need:
 
