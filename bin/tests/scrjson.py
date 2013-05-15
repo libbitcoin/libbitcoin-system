@@ -17,10 +17,11 @@ for counter, test in enumerate(tests):
     test = (test[0], test[1], test[2] if len(test) == 3 else "")
     arguments = '"%s" "%s" "%s"' % test
     retcode = os.system(scritp + " " + arguments)
-    assert retcode == 0 or retcode == 256
-    if retcode == 0:
+    success = bool(open("/tmp/script_status").read())
+    if success:
         print "Status: pass"
-    elif retcode == 256:
+    else:
         print (counter + 1), "Status: fail", test
+    assert success
     print
 
