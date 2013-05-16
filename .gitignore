@@ -3,6 +3,7 @@
 *.la
 *.lo
 *.o
+*.pyc
 Makefile
 Makefile.in
 libbitcoin.pc
