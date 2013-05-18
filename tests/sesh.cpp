@@ -130,6 +130,7 @@ void output_cerr_and_file(std::ofstream& file, log_level level,
         output << " [" << domain << "]";
     output << ": " << body;
     std::cerr << output.str() << std::endl;
+    file << output.str() << std::endl;
 }
 
 int main()
