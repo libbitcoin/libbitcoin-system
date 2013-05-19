@@ -7,6 +7,42 @@ Fun With The Bitcoin Blockchain
 Initialization: Importing The Genesis Block
 ===========================================
 
+::
+
+    #include <future>
+    #include <bitcoin/bitcoin.hpp>
+    using namespace bc;
+
+    int main(int argc, char** argv)
+    {
+        if (argc != 2)
+            return 1;
+        const std::string dbpath = argv[1];
+        threadpool pool(1);
+        leveldb_blockchain chain(pool);
+        auto blockchain_start = [](const std::error_code& ec) {};
+        chain.start(dbpath, blockchain_start);
+        block_type first_block = genesis_block();
+        std::promise<std::error_code> ec_promise;
+        auto import_finished = 
+            [&ec_promise](const std::error_code& ec)
+            {
+                ec_promise.set_value(ec);
+            };
+        chain.import(first_block, 0, import_finished);
+        std::error_code ec = ec_promise.get_future().get();
+        if (ec)
+        {
+            log_error() << "Importing genesis block failed: " << ec.message();
+            return -1;
+        }
+        log_info() << "Imported genesis block " << hash_block_header(first_block);
+        pool.stop();
+        pool.join();
+        chain.stop();
+        return 0;
+    }
+
 Fetch and Display Block Info
 ============================
 
@@ -29,22 +65,4 @@ Polling Blocks From Nodes
 -------------------------
 
 .. Briefly mention poller here.
-
-If you do much work on computers, eventually you find that there's some task
-you'd like to automate.  For example, you may wish to perform a
-search-and-replace over a large number of text files, or rename and rearrange a
-bunch of photo files in a complicated way. Perhaps you'd like to write a small
-custom database, or a specialized GUI application, or a simple game.
-
-Python enables programs to be written compactly and readably.  Programs written
-in Python are typically much shorter than equivalent C,  C++, or Java programs,
-for several reasons:
-
-* the high-level data types allow you to express complex operations in a single
-  statement;
-
-* statement grouping is done by indentation instead of beginning and ending
-  brackets;
-
-* no variable or argument declarations are necessary.
 
