@@ -34,6 +34,10 @@ To load the private_key, we can use the :func:`set_private_key` member function.
 Using private key functionality when a public key is set is undefined, and
 most operations will likely fail.
 
+:ref:`examples_priv` is an example program for working with Bitcoin private keys.
+The example shows generating private keys, showing the address and
+signing/verifying of a hash digest.
+
 Show Your Bitcoin Address
 -------------------------
 
@@ -140,6 +144,8 @@ formula and used to create the private key.
     // Wallet generated public key should match corresponding public key
     // in the private key.
     assert(privkey.public_key() == pubkey);
+
+To see all this working together, view :ref:`examples_determ`.
 
 Master Public Key
 -----------------

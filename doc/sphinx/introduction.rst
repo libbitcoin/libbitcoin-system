@@ -51,12 +51,12 @@ Examples
 Each section comes with its own example code listing. These can be found in
 the examples/ directory of the source libbitcoin package.
 
-* **priv.cpp** generates new private keys, shows a Bitcoin address and sign or
+* :ref:`priv.cpp <examples_priv>` generates new private keys, shows a Bitcoin address and sign or
   verify data using the private key.
-* **determ.cpp** show working with deterministic wallets, generating both
+* :ref:`determ.cpp <examples_determ>` shows working with deterministic wallets, generating both
   public and private keys.
-* **initchain.cpp**, initialize :class:`leveldb_blockchain` by creating a
+* :ref:`initchain.cpp <examples_initchain>`, initialize :class:`leveldb_blockchain` by creating a
   blank new database and adding the genesis block at depth 0.
-* **fullnode.cpp** is a full node Bitcoin implementation. Blocks and
+* :ref:`fullnode.cpp <examples_fullnode>` is a full node Bitcoin implementation. Blocks and
   unconfirmed transactions are validated.
 

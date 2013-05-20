@@ -15,11 +15,11 @@ Initialization: Importing The Genesis Block
 Before we can use :class:`leveldb_blockchain`, the database needs to be
 initialised.
 
-1. Create a :class:`leveldb_blockchain` object. If no database exists in the
+#. Create a :class:`leveldb_blockchain` object. If no database exists in the
    specified path, it will automatically be created.
-2. Recreate the genesis block. The first block in the Bitcoin blockchain is
+#. Recreate the genesis block. The first block in the Bitcoin blockchain is
    part of the specification for the Bitcoin standard.
-3. Import the genesis block at depth 0 in the blockchain.
+#. Import the genesis block at depth 0 in the blockchain.
 
 You now have a working :class:`leveldb_blockchain`.
 
@@ -98,7 +98,7 @@ handlers.
        block_info info              // Status and depth of block
    );
 
-The full sourcecode can be found in examples/initchain.cpp.
+The full sourcecode can be found in :ref:`examples_initchain`.
 
 Fetch and Display Block Info
 ============================

@@ -20,3 +20,11 @@ Contents:
    fullnode
    offlinetx
 
+.. toctree::
+   :hidden:
+
+   examples/priv
+   examples/determ
+   examples/initchain
+   examples/fullnode
+
