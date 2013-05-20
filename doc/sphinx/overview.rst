@@ -56,7 +56,7 @@ Blockchain services
 ^^^^^^^^^^^^^^^^^^^
 
 Bitcoin's blockchain is usually disk oriented. Backends all implement the
-blockchain interface allowing programs to utilise backends using the same code.
+:class:`blockchain` interface allowing programs to utilise backends using the same code.
 
 * :class:`blockchain` (abstract interface for blockchain backends)
 * :class:`bdb_blockchain`
