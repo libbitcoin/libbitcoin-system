@@ -47,7 +47,7 @@ The function :func:`genesis_block` returns a genesis block.
     // First block is the genesis block.
     block_type first_block = genesis_block();
 
-We call :func:`leveldb_blockchain::import` to save a block in the blockchain
+We call :func:`blockchain::import` to save a block in the blockchain
 at a specified depth directly. It doesn't validate or perform any safety
 checks on the imported block. Instead the block is written directly.
 
@@ -83,6 +83,20 @@ be closed properly so we first stop the threadpool before calling
     pool.join();
     // Now safely close leveldb_blockchain.
     chain.stop();
+
+:func:`blockchain::store` is the recommended way to add new blocks to
+the blockchain. It finds the correct depth by looking up the previous block,
+handles reorganisations, validates the blocks and calls the subscription
+handlers.
+
+.. cpp:function:: void blockchain::store(const block_type& block, store_block_handler handle_store)
+
+::
+
+   void handle_store(
+       const std::error_code& ec,   // Status of operation
+       block_info info              // Status and depth of block
+   );
 
 The full sourcecode can be found in examples/initchain.cpp.
 

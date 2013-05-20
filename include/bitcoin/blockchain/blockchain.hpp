@@ -98,7 +98,7 @@ public:
      * Subscriber is notified exactly once of changes to the blockchain
      * and needs to re-subscribe to continue being notified.
      *
-     * @param[in]   stored_block    Block to store
+     * @param[in]   block           Block to store
      * @param[in]   handle_store    Completion handler for store operation.
      * @code
      *  void handle_store(
