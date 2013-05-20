@@ -21,5 +21,5 @@ priv.o: priv.cpp
 priv: priv.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: priv determ
+all: priv determ initchain
 
