@@ -78,28 +78,53 @@ private:
     typedef std::unique_ptr<leveldb::DB> database_ptr;
     typedef std::unique_ptr<leveldb::Comparator> comparator_ptr;
 
+    typedef std::function<bool (size_t)> perform_read_functor;
+
     bool initialize(const std::string& prefix);
+
+    void begin_write();
+
+    template <typename Handler, typename... Args>
+    void finish_write(Handler handler, Args&&... args)
+    {
+        ++seqlock_;
+        // seqlock is now even again.
+        BITCOIN_ASSERT(seqlock_ % 2 == 0);
+        handler(std::forward<Args>(args)...);
+    }
 
     void do_store(const block_type& block,
         store_block_handler handle_store);
     void do_import(const block_type& block, size_t depth,
         import_block_handler handle_import);
 
-    void fetch_block_header_by_depth(size_t depth, 
-        fetch_handler_block_header handle_fetch);
-    void fetch_block_header_by_hash(const hash_digest& block_hash, 
-        fetch_handler_block_header handle_fetch);
-    void do_fetch_block_depth(const hash_digest& block_hash,
-        fetch_handler_block_depth handle_fetch);
-    void do_fetch_last_depth(fetch_handler_last_depth handle_fetch);
-    void do_fetch_transaction(const hash_digest& transaction_hash,
-        fetch_handler_transaction handle_fetch);
-    void do_fetch_transaction_index(const hash_digest& transaction_hash,
-        fetch_handler_transaction_index handle_fetch);
-    void do_fetch_spend(const output_point& outpoint,
-        fetch_handler_spend handle_fetch);
-    void do_fetch_outputs(const payment_address& address,
-        fetch_handler_outputs handle_fetch);
+    void fetch(perform_read_functor perform_read);
+
+    template <typename Handler, typename... Args>
+    bool finish_fetch(size_t slock, Handler handler, Args&&... args)
+    {
+        if (slock != seqlock_)
+            return false;
+        handler(std::forward<Args>(args)...);
+        return true;
+    }
+
+    bool fetch_block_header_by_depth(size_t depth, 
+        fetch_handler_block_header handle_fetch, size_t slock);
+    bool fetch_block_header_by_hash(const hash_digest& block_hash, 
+        fetch_handler_block_header handle_fetch, size_t slock);
+    bool do_fetch_block_depth(const hash_digest& block_hash,
+        fetch_handler_block_depth handle_fetch, size_t slock);
+    bool do_fetch_last_depth(
+        fetch_handler_last_depth handle_fetch, size_t slock);
+    bool do_fetch_transaction(const hash_digest& transaction_hash,
+        fetch_handler_transaction handle_fetch, size_t slock);
+    bool do_fetch_transaction_index(const hash_digest& transaction_hash,
+        fetch_handler_transaction_index handle_fetch, size_t slock);
+    bool do_fetch_spend(const output_point& outpoint,
+        fetch_handler_spend handle_fetch, size_t slock);
+    bool do_fetch_outputs(const payment_address& address,
+        fetch_handler_outputs handle_fetch, size_t slock);
 
     io_service& ios_;
     boost::interprocess::file_lock flock_;
