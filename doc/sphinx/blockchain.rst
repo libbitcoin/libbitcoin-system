@@ -111,7 +111,7 @@ Services like blockchain do not block. Methods return immediately and upon
 completion call a completion handler. The semantics of the blockchain reflect
 this with the ``set/get_*`` methods being equivalently called ``store/fetch_*``.
 
-We only store new blocks in the blockchain. There is one method called
+The only thing we add to the blockchain is new blocks. There is one method called
 :func:`blockchain::store`. This method handles the internal details of
 validating the block against the current blockchain, returning competing blocks
 to the orphan pool (if needed), insertion into the database and processing
