@@ -23,7 +23,6 @@ public:
 
     typedef std::function<void (const std::error_code&)> import_block_handler;
 
-#ifdef CXX_COMPAT
     template <typename Message>
     using fetch_handler = std::function<
         void (const std::error_code&, const Message&)>;
@@ -49,41 +48,6 @@ public:
     typedef fetch_handler<input_point> fetch_handler_spend;
 
     typedef fetch_handler<output_point_list> fetch_handler_outputs;
-#else
-    typedef std::function<
-        void (const std::error_code&, const block_type&)>
-            fetch_handler_block_header;
-
-    typedef std::function<
-        void (const std::error_code&, const inventory_list&)>
-            fetch_handler_block_transaction_hashes;
-
-    typedef std::function<void (const std::error_code&, size_t)>
-        fetch_handler_block_depth;
-
-    typedef std::function<void (const std::error_code&, size_t)>
-        fetch_handler_last_depth;
-
-    typedef std::function<
-        void (const std::error_code&, const block_locator_type&)>
-            fetch_handler_block_locator;
-
-    typedef std::function<
-        void (const std::error_code&, const transaction_type&)>
-            fetch_handler_transaction;
-
-    typedef std::function<
-        void (const std::error_code&, size_t, size_t)>
-            fetch_handler_transaction_index;
-
-    typedef std::function<
-        void (const std::error_code&, const input_point&)>
-            fetch_handler_spend;
-
-    typedef std::function<
-        void (const std::error_code&, const output_point_list&)>
-            fetch_handler_outputs;
-#endif
 
     typedef std::vector<std::shared_ptr<block_type>> block_list;
     typedef std::function<
