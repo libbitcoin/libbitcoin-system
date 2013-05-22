@@ -222,20 +222,19 @@ void leveldb_blockchain::do_import(const block_type& import_block,
 
 void leveldb_blockchain::fetch(perform_read_functor perform_read)
 {
-    ios_.post(
-        [this, perform_read]
+    auto try_read = [this, perform_read]()
         {
-            while (true)
-            {
-                size_t slock = seqlock_;
-                if (slock % 2 == 1)
-                {
-                    usleep(100000);
-                    continue;
-                }
-                if (perform_read(slock))
-                    break;
-            }
+            size_t slock = seqlock_;
+            if (slock % 2 == 1)
+                return false;
+            if (perform_read(slock))
+                return true;
+            return false;
+        };
+    ios_.post([this, try_read]
+        {
+            while (!try_read())
+                usleep(100000);
         });
 }
 
