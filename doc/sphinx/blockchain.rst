@@ -91,26 +91,100 @@ handlers.
 
 .. cpp:function:: void blockchain::store(const block_type& block, store_block_handler handle_store)
 
-::
+   Store a new block.
+   
+   Subscriber is notified exactly once of changes to the blockchain
+   and needs to re-subscribe to continue being notified.
+   ::
 
-   void handle_store(
-       const std::error_code& ec,   // Status of operation
-       block_info info              // Status and depth of block
-   );
+    void handle_store(
+        const std::error_code& ec,   // Status of operation
+        block_info info              // Status and depth of block
+    );
 
 The full sourcecode can be found in :ref:`examples_initchain`.
 
 Fetch and Display Block Info
 ============================
 
+Services like blockchain do not block. Methods return immediately and upon
+completion call a completion handler. The semantics of the blockchain reflect
+this with the ``set/get_*`` methods being equivalently called ``store/fetch_*``.
+
+We only store new blocks in the blockchain. There is one method called
+:func:`blockchain::store`. This method handles the internal details of
+validating the block against the current blockchain, returning competing blocks
+to the orphan pool (if needed), insertion into the database and processing
+any dependent blocks.
+
+.. cpp:function:: void blockchain::fetch_block_header(size_t depth, fetch_handler_block_header handle_fetch)
+
+   Fetches the block header by depth.
+   ::
+   
+    void handle_fetch(
+        const std::error_code& ec,  // Status of operation
+        const block_type& blk       // Block header
+    );
+
+.. cpp:function:: void blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
+
+   Fetches the depth of the last block in our blockchain.
+   ::
+
+    void handle_fetch(
+        const std::error_code& ec, // Status of operation
+        size_t block_depth         // Depth of last block
+    );
+
+These methods give you access to all of the data in the blockchain to
+reconstruct or link any piece of data.
+
 Message from Satoshi, Bitcoin's creator
 ------------------------------------------------
+
+message from satoshi in tx 0 coinbase
 
 Reconstruct Block Transactions
 ==============================
 
-fetch_block() and Composed Operations
--------------------------------------
+.. cpp:function:: void blockchain::fetch_block_transaction_hashes(const hash_digest &block_hash, fetch_handler_block_transaction_hashes handle_fetch)
+
+   Fetches list of transaction hashes in a block by block hash.
+   ::
+
+    void handle_fetch(
+        const std::error_code& ec,      // Status of operation
+        const inventory_list& hashes    // List of hashes
+    );
+
+.. cpp:function:: void blockchain::fetch_transaction(const hash_digest &transaction_hash, fetch_handler_transaction handle_fetch)
+
+   Fetches a transaction by hash
+   ::
+
+    void handle_fetch(
+        const std::error_code& ec,  // Status of operation
+        const transaction_type& tx  // Transaction
+    );
+
+:func:`fetch_block` and Composed Operations
+-------------------------------------------
+
+A general :ref:`design principle of libbitcoin <intro_design>` is to keep the implementation simple
+and not pollute class interfaces. Instead composed operations wrap lower
+level class methods to simplify common operations.
+
+.. cpp:function:: void fetch_block(blockchain& chain, size_t depth, blockchain_fetch_handler_block handle_fetch)
+
+   Fetch a block by depth.
+   If the blockchain reorganises, operation may fail halfway.
+   ::
+
+    void handle_fetch(
+        const std::error_code& ec,  // Status of operation
+        const block_type& blk       // Block header
+    );
 
 Fetch and Dump Transactions
 ===========================

@@ -132,9 +132,6 @@ and will be queued in that context.
     // Invoke the call. Returns immediately.
     chain.start("database/", blockchain_started);
 
-Dependency Injection
-^^^^^^^^^^^^^^^^^^^^
-
 Data Types
 ----------
 

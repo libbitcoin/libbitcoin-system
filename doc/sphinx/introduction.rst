@@ -22,13 +22,78 @@ around tasks. On a finer level: operations. libbitcoin is a toolkit library that
 uses the proactor design pattern. It implements the proactor pattern through the
 use of completion handlers like in boost::asio.
 
-* **Portability**. The library should support a range of commonly used operating systems, and provide consistent behaviour across these operating systems.
-* **Scalability**. The library should facilitate the development of network applications that scale to thousands of concurrent connections. The library implementation for each operating system should use the mechanism that best enables this scalability.
-* **Efficiency**. The library should support techniques such as scatter-gather I/O, and allow programs to minimise data copying.
-* **Model concepts in an intuitive manner**. The library models different subsystems of Bitcoin in a clear and intuitive manner. We choose abstractions that allow designing a wide range of applications that rely on Bitcoin.
-* **Basis for further abstraction**. The library should permit the development of other libraries that provide higher levels of abstraction. For example, implementations of the Bitcoin protocol in other networks such as Tor.
-* **No blocking**. No blocking ever occurs waiting for another thread to complete (except possibly on a low level within boost dispatches- but that is uncommon).
-* **UNIX approach**. The library attempts to provide small units of functionality that perform one single task. Our philosophy is to break down higher level functionality into small parts and to simply provide those parts. The cost is inconvenience. The benefit is flexibility.
+* **Scalability**. The library should facilitate the development of applications
+  that scale to thousands of concurrent operations.
+* **Model concepts in an intuitive manner**. The library models different
+  subsystems of Bitcoin in a clear and intuitive manner. We choose abstractions
+  that allow designing a wide range of applications that rely on Bitcoin.
+* **Basis for further abstraction**. The library should permit the development
+  of other libraries that provide higher levels of abstraction. For example,
+  implementations of the Bitcoin protocol in other networks such as Tor.
+* **No blocking**. No blocking ever occurs waiting for another thread to complete
+  (except possibly on a low level within boost dispatches- but that is uncommon).
+* **UNIX approach**. The library attempts to provide small units of
+  functionality that perform one single task. Our philosophy is to break down
+  higher level functionality into small parts and to simply provide those
+  parts. The cost is inconvenience. The benefit is flexibility.
+
+.. _intro_design:
+
+Design
+======
+
+libbitcoin follows a few basic code design principles that quality does not
+necessarily increase with functionality. There is a point where less
+functionality is a preferable option in terms of practicality and usability.
+
+* **Simplicity**. It is more important for the implementation to be simple than
+  the interface. Simplicity is the most important consideration in a design.
+* **Correctness**. The design should be correct in all aspects.
+* **Consistency**. The design must not be overly inconsistent. Consistency can
+  be sacrificed for simplicity in some cases, but it is better to drop those
+  parts of the design that deal with less common circumstances than to
+  introduce either complexity or inconsistency in the implementation.
+* **Completeness**. The design must cover as many important situations as is
+  practical. Completeness must be sacrificed whenever implementation simplicity
+  is jeopardized.
+
+Unix and C are examples of this design. Small building blocks that are flexible
+in how they combine together.
+
+Generally the API focuses on implementation simplicity and only implements the
+bare neccessary functionality. Keep implementation simple and don't pollute
+class interfaces. Instead composed operations wrap lower level class methods
+to simplify common operations.
+::
+
+    threadpool pool(1);
+    network net(pool);
+    handshake shake(pool);
+    // ...
+    connect(shake, net, "localhost", 8333, handle_handshake);
+
+Composed operations take the services they wrap as their primary arguments
+before their function parameters.
+
+**Classes do not implement more functionality than is neccessary.**
+
+Dependency Injection
+--------------------
+
+Dependency injection is a software design pattern that allows removing
+hard-coded dependencies and making it possible to change them, whether at
+run-time or compile-time.
+
+Instead of having your objects creating a dependency or asking a factory
+object to make one for them, you pass the needed dependencies into the
+constructor.
+::
+
+    threadpool pool(1);
+    leveldb_blockchain chain(pool);
+    // The dependencies for transaction_pool are passed into its constructor.
+    // We could instead pass in a bdb_blockchain.
+    transaction_pool txpool(pool, chain);
 
 The Zen of libbitcoin
 =====================
