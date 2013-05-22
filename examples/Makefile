@@ -21,5 +21,11 @@ priv.o: priv.cpp
 priv: priv.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: priv determ initchain
+fullnode.o: fullnode.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+fullnode: fullnode.o
+	$(CXX) -o $@ $< $(LIBS)
+
+all: priv determ initchain fullnode
 

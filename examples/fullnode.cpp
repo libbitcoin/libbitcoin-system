@@ -1,113 +1,9 @@
-#include <future>
 #include <bitcoin/bitcoin.hpp>
-using namespace libbitcoin;
+using namespace bc;
 
 using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
-
-void error_exit(const std::string& message, int status=1)
-{
-    log_error() << "session: " << message;
-    exit(status);
-}
-
-void handle_start(const std::error_code& ec)
-{
-    if (ec)
-        error_exit(ec.message());
-}
-
-void handle_stop(const std::error_code& ec)
-{
-    if (ec)
-        error_exit(ec.message());
-}
-
-void handle_confirm(const std::error_code& ec)
-{
-    if (ec)
-        log_error() << "Confirm error: " << ec.message();
-    else
-        log_error() << "Confirmed.";
-}
-
-session_params* p;
-
-void recv_transaction(const std::error_code& ec,
-    const transaction_type& tx, channel_ptr node);
-void monitor_tx(channel_ptr node);
-void handle_mempool_store(
-    const std::error_code& ec, const index_list& unconfirmed,
-    const transaction_type& tx, channel_ptr node);
-
-void monitor_tx(channel_ptr node)
-{
-    node->subscribe_transaction(std::bind(&recv_transaction, _1, _2, node));
-    p->protocol_.subscribe_channel(monitor_tx);
-}
-
-void recv_transaction(const std::error_code& ec,
-    const transaction_type& tx, channel_ptr node)
-{
-    if (ec)
-    {
-        log_error() << "transaction: " << ec.message();
-        return;
-    }
-    p->transaction_pool_.store(tx, handle_confirm,
-        std::bind(&handle_mempool_store, _1, _2, tx, node));
-    node->subscribe_transaction(std::bind(recv_transaction, _1, _2, node));
-}
-
-void depends_requested(const std::error_code& ec)
-{
-    if (ec)
-        log_error() << "depends_requested: " << ec.message();
-}
-
-void handle_mempool_store(
-    const std::error_code& ec, const index_list& unconfirmed,
-    const transaction_type& tx, channel_ptr node)
-{
-    const hash_digest& tx_hash = hash_transaction(tx);
-    // Decided against this. Spammers can abuse us more easily.
-    /*if (ec == error::input_not_found)
-    {
-        BITCOIN_ASSERT(unconfirmed.size() == 1);
-        BITCOIN_ASSERT(unconfirmed[0] < tx.inputs.size());
-        const auto& prevout = tx.inputs[unconfirmed[0]].previous_output;
-        log_info() << "Requesting dependency " << pretty_hex(prevout.hash)
-            << " for " << pretty_hex(tx_hash);
-        message::get_data getdat;
-        getdat.inventories.push_back(
-            {message::inventory_type::transaction, prevout.hash});
-        //getdat.inventories.push_back(
-        //    {message::inventory_type::transaction, tx_hash});
-        node->send(getdat, depends_requested);
-    }
-    else if (ec)*/
-    if (ec)
-    {
-        //BITCOIN_ASSERT(unconfirmed.size() == 0);
-        log_error()
-            << "Error storing memory pool transaction "
-            << pretty_hex(tx_hash) << ": " << ec.message();
-    }
-    else
-    {
-        auto l = log_info();
-        l << "Accepted transaction ";
-        if (!unconfirmed.empty())
-        {
-            l << "(Unconfirmed inputs";
-            for (auto idx: unconfirmed)
-                l << " " << idx;
-            l << ") ";
-        }
-        l << pretty_hex(tx_hash);
-    }
-}
 
 void output_to_file(std::ofstream& file, log_level level,
     const std::string& domain, const std::string& body)
@@ -132,12 +28,25 @@ void output_cerr_and_file(std::ofstream& file, log_level level,
     std::cerr << output.str() << std::endl;
 }
 
-class fullnode_app
+class fullnode
 {
 public:
-    fullnode_app();
+    fullnode();
+    void start();
+    void stop();
+
 private:
-    threadpool network_pool_, disk_pool_, mempool_pool_;
+    void handle_start(const std::error_code& ec);
+
+    void monitor_tx(channel_ptr node);
+    void recv_tx(const std::error_code& ec,
+        const transaction_type& tx, channel_ptr node);
+
+    void new_unconfirm_valid_tx(
+        const std::error_code& ec, const index_list& unconfirmed,
+        const transaction_type& tx, channel_ptr node);
+
+    threadpool net_pool_, disk_pool_, mem_pool_;
     hosts hosts_;
     handshake handshake_;
     network network_;
@@ -148,9 +57,105 @@ private:
     session session_;
 };
 
-fullnode_app::fullnode_app()
-  : network_pool_(1), disk_pool_(1), mempool_pool_(1)
+fullnode::fullnode()
+  : net_pool_(1), disk_pool_(1), mem_pool_(1),
+    hosts_(net_pool_), handshake_(net_pool_), network_(net_pool_),
+    protocol_(net_pool_, hosts_, handshake_, network_),
+    chain_(disk_pool_),
+    poller_(mem_pool_, chain_), txpool_(mem_pool_, chain_),
+    session_(net_pool_, {
+        handshake_, protocol_, chain_, poller_, txpool_})
 {
+}
+
+void fullnode::start()
+{
+    protocol_.subscribe_channel(
+        std::bind(&fullnode::monitor_tx, this, _1));
+    auto handle_start =
+        std::bind(&fullnode::handle_start, this, _1);
+    // Initialize blockchain
+    chain_.start("database", handle_start);
+    // Start transaction pool
+    txpool_.start();
+    // Fire off app.
+    session_.start(handle_start);
+}
+
+void fullnode::stop()
+{
+    session_.stop([](const std::error_code&) {});
+
+    net_pool_.stop();
+    disk_pool_.stop();
+    mem_pool_.stop();
+    net_pool_.join();
+    disk_pool_.join();
+    mem_pool_.join();
+
+    chain_.stop();
+}
+
+void fullnode::handle_start(const std::error_code& ec)
+{
+    if (ec)
+    {
+        log_error() << "fullnode: " << ec.message();
+        stop();
+        exit(1);
+    }
+}
+
+void fullnode::monitor_tx(channel_ptr node)
+{
+    node->subscribe_transaction(
+        std::bind(&fullnode::recv_tx, this, _1, _2, node));
+    protocol_.subscribe_channel(
+        std::bind(&fullnode::monitor_tx, this, _1));
+}
+void fullnode::recv_tx(const std::error_code& ec,
+    const transaction_type& tx, channel_ptr node)
+{
+    if (ec)
+    {
+        log_error() << "Receive transaction: " << ec.message();
+        return;
+    }
+    auto handle_confirm = [](const std::error_code& ec)
+        {
+            if (ec)
+                log_error() << "Confirm error: " << ec.message();
+        };
+    txpool_.store(tx, handle_confirm,
+        std::bind(&fullnode::new_unconfirm_valid_tx, this, _1, _2, tx, node));
+    node->subscribe_transaction(
+        std::bind(&fullnode::recv_tx, this, _1, _2, node));
+}
+
+void fullnode::new_unconfirm_valid_tx(
+    const std::error_code& ec, const index_list& unconfirmed,
+    const transaction_type& tx, channel_ptr node)
+{
+    const hash_digest& tx_hash = hash_transaction(tx);
+    if (ec)
+    {
+        log_error()
+            << "Error storing memory pool transaction "
+            << pretty_hex(tx_hash) << ": " << ec.message();
+    }
+    else
+    {
+        auto l = log_info();
+        l << "Accepted transaction ";
+        if (!unconfirmed.empty())
+        {
+            l << "(Unconfirmed inputs";
+            for (auto idx: unconfirmed)
+                l << " " << idx;
+            l << ") ";
+        }
+        l << pretty_hex(tx_hash);
+    }
 }
 
 int main()
@@ -167,49 +172,10 @@ int main()
     log_fatal().set_output_function(
         std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
 
-    //bdb_blockchain::setup("database");
-    threadpool network_pool(1), disk_pool(1), mempool_pool(1);
-    hosts hsts(network_pool);
-    handshake hs(network_pool);
-    network net(network_pool);
-    protocol prot(network_pool, hsts, hs, net);
-    prot.subscribe_channel(monitor_tx);
-
-    leveldb_blockchain chain(disk_pool);
-    std::promise<std::error_code> ec_promise;
-    auto blockchain_started =
-        [&ec_promise](const std::error_code& ec)
-        {
-            ec_promise.set_value(ec);
-        };
-    chain.start("database", blockchain_started);
-    std::error_code ec = ec_promise.get_future().get();
-    if (ec)
-        error_exit(ec.message());
-
-    poller poll(mempool_pool, chain);
-
-    transaction_pool txpool(mempool_pool, chain);
-    txpool.start();
-
-    session_params pp{hs, prot, chain, poll, txpool};
-    p = &pp;
-    session sesh(network_pool, pp);
-    sesh.start(handle_start);
-
+    fullnode app;
+    app.start();
     std::cin.get();
-
-    sesh.stop(handle_stop);
-
-    network_pool.stop();
-    disk_pool.stop();
-    mempool_pool.stop();
-    network_pool.join();
-    disk_pool.join();
-    mempool_pool.join();
-
-    chain.stop();
-    log_debug() << "Exiting...";
+    app.stop();
 
     return 0;
 }
