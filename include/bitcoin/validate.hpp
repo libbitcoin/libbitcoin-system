@@ -111,6 +111,7 @@ private:
     std::error_code accept_block();
     uint32_t work_required();
     bool passes_checkpoints();
+    bool coinbase_depth_match();
 
     std::error_code connect_block();
     bool not_duplicate_or_spent(const transaction_type& tx);

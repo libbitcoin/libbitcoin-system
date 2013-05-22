@@ -486,6 +486,12 @@ std::error_code validate_block::accept_block()
             return error::non_final_transaction;
     if (!passes_checkpoints())
         return error::checkpoints_failed;
+    // Reject version=1 blocks after switchover point.
+    if (depth_ > 237370 && current_block_.version < 2)
+        return error::old_version_block;
+    // Enforce version=2 rule that coinbase starts with serialized depth.
+    else if (!coinbase_depth_match())
+        return error::coinbase_depth_mismatch;
     return std::error_code();
 }
 
@@ -623,6 +629,20 @@ bool validate_block::passes_checkpoints()
         return false;
 
     return true;
+}
+
+bool validate_block::coinbase_depth_match()
+{
+    BITCOIN_ASSERT(current_block_.version >= 2);
+    BITCOIN_ASSERT(current_block_.transactions.size() > 0);
+    BITCOIN_ASSERT(current_block_.transactions[0].inputs.size() > 0);
+    const script& coinbase_script =
+        current_block_.transactions[0].inputs[0].input_script;
+    const data_chunk raw_coinbase = save_script(coinbase_script);
+    big_number expect_number;
+    expect_number.set_int64(depth_);
+    const data_chunk expect = expect_number.data();
+    return std::equal(expect.begin(), expect.end(), raw_coinbase.begin());
 }
 
 std::error_code validate_block::connect_block()
