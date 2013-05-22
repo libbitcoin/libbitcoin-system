@@ -633,15 +633,25 @@ bool validate_block::passes_checkpoints()
 
 bool validate_block::coinbase_depth_match()
 {
+    // Checks whether the block depth is in the coinbase
+    // transaction input script.
+    // Version 2 blocks and onwards.
     BITCOIN_ASSERT(current_block_.version >= 2);
     BITCOIN_ASSERT(current_block_.transactions.size() > 0);
     BITCOIN_ASSERT(current_block_.transactions[0].inputs.size() > 0);
+    // First get the serialized coinbase input script as a series of bytes.
     const script& coinbase_script =
         current_block_.transactions[0].inputs[0].input_script;
     const data_chunk raw_coinbase = save_script(coinbase_script);
+    // Try to recreate the expected bytes.
     big_number expect_number;
     expect_number.set_int64(depth_);
-    const data_chunk expect = expect_number.data();
+    script expect_coinbase;
+    expect_coinbase.push_operation({opcode::special, expect_number.data()});
+    // Save the expected coinbase script.
+    const data_chunk expect = save_script(expect_coinbase);
+    // Perform comparison of the first bytes with raw_coinbase.
+    BITCOIN_ASSERT(expect.size() <= raw_coinbase.size());
     return std::equal(expect.begin(), expect.end(), raw_coinbase.begin());
 }
 
