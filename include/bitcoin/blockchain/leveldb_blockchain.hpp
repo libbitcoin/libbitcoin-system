@@ -74,6 +74,7 @@ public:
     void subscribe_reorganize(reorganize_handler handle_reorganize);
 
 private:
+    typedef std::atomic<size_t> seqlock_type;
     typedef std::unique_ptr<leveldb::DB> database_ptr;
     typedef std::unique_ptr<leveldb::Comparator> comparator_ptr;
 
@@ -100,7 +101,9 @@ private:
     void do_fetch_outputs(const payment_address& address,
         fetch_handler_outputs handle_fetch);
 
+    io_service& ios_;
     boost::interprocess::file_lock flock_;
+    seqlock_type seqlock_;
 
     // Comparator to order blocks by depth logically.
     // Otherwise the last block in the database

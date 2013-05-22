@@ -135,17 +135,17 @@ void output_cerr_and_file(std::ofstream& file, log_level level,
 
 int main()
 {
-    std::ofstream outfile("debug.log"), errfile("error.log");
-    log_debug().set_output_function(
-        std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
-    log_info().set_output_function(
-        std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
-    log_warning().set_output_function(
-        std::bind(output_to_file, std::ref(errfile), _1, _2, _3));
-    log_error().set_output_function(
-        std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
-    log_fatal().set_output_function(
-        std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
+    //std::ofstream outfile("debug.log"), errfile("error.log");
+    //log_debug().set_output_function(
+    //    std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+    //log_info().set_output_function(
+    //    std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+    //log_warning().set_output_function(
+    //    std::bind(output_to_file, std::ref(errfile), _1, _2, _3));
+    //log_error().set_output_function(
+    //    std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
+    //log_fatal().set_output_function(
+    //    std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
 
     //bdb_blockchain::setup("database");
     threadpool network_pool(1), disk_pool(1), mempool_pool(1);

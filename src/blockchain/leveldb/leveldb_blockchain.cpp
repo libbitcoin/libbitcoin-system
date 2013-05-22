@@ -48,7 +48,7 @@ const char* depth_comparator::Name() const
 }
 
 leveldb_blockchain::leveldb_blockchain(threadpool& pool)
-  : async_strand(pool)
+  : async_strand(pool), seqlock_(0), ios_(pool.service())
 {
     reorganize_subscriber_ =
         std::make_shared<reorganize_subscriber_type>(pool);
@@ -223,6 +223,21 @@ bool fetch_block_header_impl(const Index& index,
 void leveldb_blockchain::fetch_block_header(size_t depth,
     fetch_handler_block_header handle_fetch)
 {
+    auto perform_read = 
+        std::bind(&leveldb_blockchain::fetch_block_header_by_depth,
+            this, depth, handle_fetch);
+    ios_.post(
+        [this]()
+        {
+            while (true)
+            {
+                if (seqlock % 2 == 1)
+                {
+                    sleep(0);
+                    continue;
+                }
+            }
+        });
     queue(
         std::bind(&leveldb_blockchain::fetch_block_header_by_depth,
             this, depth, handle_fetch));

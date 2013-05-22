@@ -11,16 +11,6 @@ void show_last(const std::error_code& ec, size_t last_depth)
     log_info() << "Last block depth: " << last_depth;
 }
 
-void show_blk_hash(const std::error_code& ec, const message::block& blk)
-{
-    if (ec)
-    {
-        log_fatal() << ec.message();
-        return;
-    }
-    log_info() << hash_block_header(blk);
-}
-
 void blockchain_started(const std::error_code& ec)
 {
     if (ec)
@@ -32,10 +22,9 @@ void blockchain_started(const std::error_code& ec)
 int main()
 {
     threadpool pool(1);
-    bdb_blockchain chain(pool);
+    leveldb_blockchain chain(pool);
     chain.start("database", blockchain_started);
     chain.fetch_last_depth(show_last);
-    chain.fetch_block_header(191810, show_blk_hash);
     std::cin.get();
     pool.stop();
     pool.join();
