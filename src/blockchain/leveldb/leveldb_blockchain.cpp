@@ -185,6 +185,7 @@ void leveldb_blockchain::do_store(const block_type& stored_block,
     {
         handle_store(error::duplicate,
             block_info{block_status::orphan, 0});
+        return;
     }
     organize_->start();
     handle_store(stored_detail->errc(), stored_detail->info());
