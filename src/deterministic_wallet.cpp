@@ -78,8 +78,8 @@ void deterministic_wallet::new_seed()
     constexpr size_t bits_needed = 8 * seed_size / 2;
     ssl_bignum rand_value;
     BN_rand(rand_value, bits_needed, 0, 0);
-    seed_ = bignum_hex(rand_value);
-    BITCOIN_ASSERT(seed_.size() == seed_size);
+    bool set_success = set_seed(bignum_hex(rand_value));
+    BITCOIN_ASSERT(set_success);
 }
 
 secret_parameter stretch_seed(const std::string& seed)
