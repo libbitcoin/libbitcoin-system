@@ -65,7 +65,7 @@ void store(blockchain& chain, const block_type& blk)
     {
         log_info() << "  NOT stored.";
     }
-    else
+    else if (info.status == block_status::confirmed)
     {
         log_info() << "  Stored at " << info.depth << ".";
     }
@@ -152,7 +152,6 @@ int main()
         log_info() << "i = " << i;
         for (size_t cidx = 0; cidx < 3; ++cidx)
         {
-            log_info() << cidx;
             BITCOIN_ASSERT(cidx < sizeof(chain));
             BITCOIN_ASSERT(i < chain[cidx].size());
             store(blkchain, *chain[cidx][i]);
