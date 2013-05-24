@@ -71,6 +71,52 @@ void store(blockchain& chain, const block_type& blk)
     }
 }
 
+size_t last_depth(blockchain& chain)
+{
+    std::promise<std::error_code> ec_promise;
+    std::promise<size_t> depth_promise;
+    auto fetch_depth =
+        [&ec_promise, &depth_promise](
+            const std::error_code& ec, size_t block_depth)
+        {
+            ec_promise.set_value(ec);
+            depth_promise.set_value(block_depth);
+        };
+    std::error_code ec = ec_promise.get_future().get();
+    size_t block_depth = depth_promise.get_future().get();
+    if (ec)
+        log_error() << "last_depth: " << ec.message();
+    return block_depth;
+}
+
+block_type get_block(blockchain& chain, size_t depth)
+{
+    std::promise<std::error_code> ec_promise;
+    std::promise<block_type> block_promise;
+    auto fetch_block =
+        [&ec_promise, &block_promise](
+            const std::error_code& ec, const block_type& blk)
+        {
+            ec_promise.set_value(ec);
+            block_promise.set_value(blk);
+        };
+    std::error_code ec = ec_promise.get_future().get();
+    const block_type& blk = block_promise.get_future().get();
+    if (ec)
+        log_error() << "last_depth: " << ec.message();
+    return blk;
+}
+
+void show_chain(blockchain& chain)
+{
+    size_t depth = last_depth(chain);
+    for (size_t i = 0; i < depth; ++i)
+    {
+        block_type blk = get_block(chain, i);
+        log_info() << hash_block_header(blk);
+    }
+}
+
 int main()
 {
     system("rm -fr database/*");
@@ -112,7 +158,11 @@ int main()
             store(blkchain, *chain[cidx][i]);
         }
     }
-
+    store(blkchain, *chain[1][6]);
+    show_chain(blkchain);
+    pool.stop();
+    pool.join();
+    blkchain.stop();
     return 0;
 }
 
