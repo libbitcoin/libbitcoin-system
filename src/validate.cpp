@@ -490,7 +490,7 @@ std::error_code validate_block::accept_block()
     if (depth_ > 237370 && current_block_.version < 2)
         return error::old_version_block;
     // Enforce version=2 rule that coinbase starts with serialized depth.
-    else if (!coinbase_depth_match())
+    if (current_block_.version >= 2 && !coinbase_depth_match())
         return error::coinbase_depth_mismatch;
     return std::error_code();
 }
