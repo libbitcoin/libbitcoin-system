@@ -32,7 +32,7 @@ private:
     blockchain& chain_;
 
     // Last hash from a block locator
-    hash_digest last_hash_end_;
+    hash_digest last_locator_begin_, last_hash_stop_;
     // Last hash from an inventory packet
     hash_digest last_block_hash_;
 };

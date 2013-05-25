@@ -9,7 +9,8 @@ using std::placeholders::_2;
 
 poller::poller(threadpool& pool, blockchain& chain)
   : strand_(pool.service()), chain_(chain),
-    last_hash_end_(null_hash), last_block_hash_(null_hash)
+    last_locator_begin_(null_hash), last_hash_stop_(null_hash),
+    last_block_hash_(null_hash)
 {
 }
 
@@ -137,7 +138,7 @@ void poller::ask_blocks(const std::error_code& ec,
         log_error(LOG_POLLER) << "Ask for blocks: " << ec.message();
         return;
     }
-    if (last_hash_end_ == locator.front())
+    if (last_locator_begin_ == locator.front() && last_hash_stop_ == hash_stop)
     {
         log_debug(LOG_POLLER) << "Skipping duplicate ask blocks: "
             << pretty_hex(locator.front());
@@ -147,7 +148,8 @@ void poller::ask_blocks(const std::error_code& ec,
     packet.start_hashes = locator;
     packet.hash_stop = hash_stop;
     node->send(packet, std::bind(&handle_send_packet, _1));
-    last_hash_end_ = locator.front();
+    last_locator_begin_ = locator.front();
+    last_hash_stop_ = hash_stop;
 }
 
 } // namespace libbitcoin
