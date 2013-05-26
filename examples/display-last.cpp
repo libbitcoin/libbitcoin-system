@@ -78,7 +78,7 @@ int main()
     leveldb_blockchain ldb_chain(pool);
     // Initialize our global 'chain' pointer from above.
     chain = &ldb_chain;
-    // Start the database using it's implementation specific method.
+    // Start the database using its implementation specific method.
     ldb_chain.start("../database", blockchain_started);
     // Keep running until the user presses enter.
     // Since libbitcoin is asynchronous, you need to synchronise with

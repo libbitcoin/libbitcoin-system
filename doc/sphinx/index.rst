@@ -26,5 +26,6 @@ Contents:
    examples/priv
    examples/determ
    examples/initchain
+   examples/display-last
    examples/fullnode
 
