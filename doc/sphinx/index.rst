@@ -27,5 +27,6 @@ Contents:
    examples/determ
    examples/initchain
    examples/display-last
+   examples/satoshiwords
    examples/fullnode
 

@@ -296,16 +296,69 @@ by the composed operation :func:`fetch_block`.
 The full example is in :ref:`examples/display-last.cpp <examples_display-last>`.
 
 Message from Satoshi, Bitcoin's creator
-------------------------------------------------
+=======================================
 
-message from satoshi in tx 0 coinbase
+Satoshi left us a message inside the first Bitcoin *genesis* block.
+::
+
+    // The Times 03/Jan/2009 Chancellor on brink of second bailout for banks
+
+The message is inside the first input, of the first transaction, of the
+first Bitcoin block.
+
+Block 0 is predefined by Bitcoin. All blockchains must begin with
+the same block otherwise they aren't Bitcoin. :func:`genesis_block`
+recreates a copy of block 0.
+
+#. Create genesis block.
+#. Lookup first transaction in block (the coinbase transaction).
+#. Get the first input from the coinbase transaction.
+#. Serialize the input's script back into raw form.
+#. Display the raw input script.
+
+The input script for the first input of the coinbase transaction inside the
+genesis block contains the message from Satoshi.
+
+::
+
+    #include <bitcoin/bitcoin.hpp>
+    using namespace bc;
+    
+    int main()
+    {
+        // Create genesis block.
+        block_type genblk = genesis_block();
+        // Genesis block contains a single coinbase transaction.
+        assert(genblk.transactions.size() == 1);
+        // Get first transaction in block (coinbase).
+        const transaction_type& coinbase_tx = genblk.transactions[0];
+        // Coinbase tx has a single input.
+        assert(coinbase_tx.inputs.size() == 1);
+        const transaction_input_type& coinbase_input = coinbase_tx.inputs[0];
+        // Get the input script (sometimes called scriptSig).
+        const script& input_script = coinbase_input.input_script;
+        // Convert this to its raw format.
+        const data_chunk& raw_block_message = save_script(input_script);
+        // Convert this to an std::string.
+        std::string message;
+        message.resize(raw_block_message.size());
+        std::copy(raw_block_message.begin(), raw_block_message.end(),
+            message.begin());
+        // Display the genesis block message.
+        std::cout << message << std::endl;
+        return 0;
+    }
 
 Reconstruct Block Transactions
 ==============================
 
+To reconstruct an entire block from a block header, first obtain a list of
+transaction hashes that makeup that block. Then iterate the list of
+transaction hashes, fetching the transactions one by one.
+
 .. cpp:function:: void blockchain::fetch_block_transaction_hashes(const hash_digest &block_hash, fetch_handler_block_transaction_hashes handle_fetch)
 
-   Fetches list of transaction hashes in a block by block hash.
+   Fetches list of transaction hashes in a block given the block hash.
    ::
 
     void handle_fetch(
@@ -326,6 +379,10 @@ Reconstruct Block Transactions
 :func:`fetch_block` and Composed Operations
 -------------------------------------------
 
+libbitcoin provides a convenience function :func:`fetch_block` to wrap the
+details of fetching a full block. These kind of operations that wrap a bunch
+of other operations are called *composed operations*.
+
 A general :ref:`design principle of libbitcoin <intro_design>` is to keep the implementation simple
 and not pollute class interfaces. Instead composed operations wrap lower
 level class methods to simplify common operations.
@@ -341,14 +398,7 @@ level class methods to simplify common operations.
         const block_type& blk       // Block header
     );
 
-Fetch and Dump Transactions
-===========================
-
-Store More Blocks
-=================
-
 Polling Blocks From Nodes
--------------------------
+=========================
 
-.. Briefly mention poller here.
-
+Use :class:`poller`.

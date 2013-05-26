@@ -3,6 +3,12 @@ LIBS=$(shell pkg-config --libs libbitcoin)
 
 default: all
 
+satoshiwords.o: satoshiwords.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+satoshiwords: satoshiwords.o
+	$(CXX) -o $@ $< $(LIBS)
+
 initchain.o: initchain.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
@@ -33,5 +39,5 @@ display-last.o: display-last.cpp
 display-last: display-last.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: priv determ initchain fullnode display-last
+all: priv determ initchain fullnode display-last satoshiwords
 

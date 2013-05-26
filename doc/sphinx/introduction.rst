@@ -124,6 +124,8 @@ the examples/ directory of the source libbitcoin package.
   blank new database and adding the genesis block at depth 0.
 * :ref:`display-last.cpp <examples_display-last>` fetches and displays the last
   block in a blockchain database.
+* :ref:`satoshiwords.cpp <examples_satoshiwords>` displays the genesis block
+  message from Satoshi.
 * :ref:`fullnode.cpp <examples_fullnode>` is a full node Bitcoin implementation. Blocks and
   unconfirmed transactions are validated.
 
