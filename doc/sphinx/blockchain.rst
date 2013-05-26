@@ -321,6 +321,7 @@ genesis block contains the message from Satoshi.
 
 ::
 
+    // examples/satoshiwords.cpp
     #include <bitcoin/bitcoin.hpp>
     using namespace bc;
     
@@ -401,4 +402,34 @@ level class methods to simplify common operations.
 Polling Blocks From Nodes
 =========================
 
-Use :class:`poller`.
+The :class:`poller` service downloads blocks from nodes into the blockchain.
+::
+
+    // ...
+
+    void connection_established(const std::error_code& ec, channel_ptr node,
+        poller& poll)
+    {
+        // ...
+        // getblocks request asking node for a list of blocks to download.
+        // Usually you call query() on the first node you connect to.
+        poll.query(node);
+        // Monitor for inventory packets containing blocks we don't have.
+        // Then request and attempt to store the blocks in the blockchain.
+        poll.monitor(node);
+    }
+
+    int main()
+    {
+        threadpool pool(2);
+        leveldb_blockchain chain(pool);
+        // ...
+        poller poll(pool, chain);
+        // ...
+        return 0;
+    }
+
+:class:`poller` handles the details of watching for notification of new blocks,
+sending requests as needed and storing them in the blockchain by calling
+:func:`blockchain::store`.
+
