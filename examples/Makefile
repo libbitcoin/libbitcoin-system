@@ -27,5 +27,11 @@ fullnode.o: fullnode.cpp
 fullnode: fullnode.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: priv determ initchain fullnode
+display-last.o: display-last.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+display-last: display-last.o
+	$(CXX) -o $@ $< $(LIBS)
+
+all: priv determ initchain fullnode display-last
 
