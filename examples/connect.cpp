@@ -22,8 +22,6 @@ void connect_started(const std::error_code& ec, channel_ptr node)
     version_type version;
     version.version = 60000;
     version.services = 1;
-    // non-constant field
-    //template_version_.timestamp = time(NULL);
     version.address_me.services = version.services;
     version.address_me.ip =
         ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
