@@ -3,6 +3,18 @@ LIBS=$(shell pkg-config --libs libbitcoin)
 
 default: all
 
+connect.o: connect.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+connect: connect.o
+	$(CXX) -o $@ $< $(LIBS)
+
+accept.o: accept.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+accept: accept.o
+	$(CXX) -o $@ $< $(LIBS)
+
 satoshiwords.o: satoshiwords.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
@@ -39,5 +51,5 @@ display-last.o: display-last.cpp
 display-last: display-last.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: priv determ initchain fullnode display-last satoshiwords
+all: priv determ initchain fullnode display-last satoshiwords connect accept
 
