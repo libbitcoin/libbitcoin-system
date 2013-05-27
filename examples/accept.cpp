@@ -4,9 +4,15 @@ using namespace bc;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+// Listening has started.
+// Wait to accept a connection.
 void listening_started(const std::error_code& ec, acceptor_ptr accept);
+// Connection to another Bitcoin node has been established.
+// Wait for version message.
 void accepted_connection(const std::error_code& ec, channel_ptr node,
     acceptor_ptr accept);
+// Version message received.
+// Display the user agent.
 void version_received(const std::error_code& ec, const version_type& version,
     channel_ptr node);
 void node_stopped(const std::error_code& ec);
@@ -18,6 +24,7 @@ void listening_started(const std::error_code& ec, acceptor_ptr accept)
         log_error() << "Listen: " << ec.message();
         return;
     }
+    // Accept first connection.
     accept->accept(
         std::bind(accepted_connection, _1, _2, accept));
 }
@@ -35,6 +42,7 @@ void accepted_connection(const std::error_code& ec, channel_ptr node,
     // Now we need to keep it alive otherwise the connection is closed.
     node->subscribe_version(
         std::bind(version_received, _1, _2, node));
+    // Keep accepting more connections.
     accept->accept(
         std::bind(accepted_connection, _1, _2, accept));
 }
@@ -42,6 +50,7 @@ void accepted_connection(const std::error_code& ec, channel_ptr node,
 void version_received(const std::error_code& ec, const version_type& version,
     channel_ptr node)
 {
+    // error::service_stopped means the connection was closed.
     if (ec == error::service_stopped)
         return;
     else if (ec)

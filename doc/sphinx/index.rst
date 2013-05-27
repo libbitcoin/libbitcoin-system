@@ -28,5 +28,7 @@ Contents:
    examples/initchain
    examples/display-last
    examples/satoshiwords
+   examples/connect
+   examples/accept
    examples/fullnode
 

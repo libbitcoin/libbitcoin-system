@@ -129,3 +129,9 @@ the examples/ directory of the source libbitcoin package.
 * :ref:`fullnode.cpp <examples_fullnode>` is a full node Bitcoin implementation. Blocks and
   unconfirmed transactions are validated.
 
+To run the examples invoke ``make`` in the ``examples/`` directory.
+::
+
+    $ cd examples/
+    $ make
+
