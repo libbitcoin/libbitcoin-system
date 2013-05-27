@@ -89,7 +89,7 @@ We then send the message by calling :func:`channel::send` on the
     // Calls version_sent callback when complete.
     node->send(version, std::bind(version_sent, _1, node));
 
-The full source code listing can be found in :ref:`examples_connect`.
+See :ref:`examples_connect` for the full source code.
 
 Accept Connections
 ------------------
