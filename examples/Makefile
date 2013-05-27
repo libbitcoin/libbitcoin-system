@@ -51,5 +51,11 @@ display-last.o: display-last.cpp
 display-last: display-last.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: priv determ initchain fullnode display-last satoshiwords connect accept
+proto.o: proto.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+proto: proto.o
+	$(CXX) -o $@ $< $(LIBS)
+
+all: priv determ initchain fullnode display-last satoshiwords connect accept proto
 
