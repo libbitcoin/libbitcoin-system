@@ -215,6 +215,44 @@ use the :ref:`composed operation<composed_operations>` :func:`connect`.
 Network Services
 ================
 
+Here is a list of the network-related services present in ``<bitcoin/network/*.hpp>``.
+
+* :class:`channel`: a basic communication channel to a node. Allows you to
+  send and receive messages from Bitcoin nodes (see
+  ``<bitcoin/primitives.hpp>``).
+* :class:`acceptor`: allows you to accept inbound connections from other nodes.
+* :class:`network`: creates connections and spawns :class:`acceptor` instances.
+* :class:`handshake`: handles the initialization handshake.
+* :class:`hosts`: stores a list of all nodes and allows random fetches from that list.
+* :class:`protocol`: handles the node discovery mechanism, negotiation
+  through the protocol and managing a consistent number of connections.
+
+:class:`protocol` is the class most developers will use to create a bunch of
+connections to the network and manage them.
+
+.. cpp:function:: void protocol::subscribe_channel(channel_handler handle_channel)
+
+   Tell us about new connections to the Bitcoin network.
+   ::
+
+    void handle_channel(
+        channel_ptr node    // New connection
+    );
+
+.. cpp:function:: void protocol::fetch_connection_count(fetch_connection_count_handler handle_fetch)
+
+   Fetch the number of connections we have to the network.
+   ::
+
+    void handle_fetch(
+        const std::error_code& ec,  // Status of operation
+        size_t connection_count
+    );
+
+.. cpp:function:: void protocol::broadcast<Message>(const Message& packet)
+
+   Broadcast packet to all our connected nodes.
+
 Join the Peer To Peer Network
 =============================
 
