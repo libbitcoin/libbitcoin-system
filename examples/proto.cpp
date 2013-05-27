@@ -24,6 +24,14 @@ void display_number_of_connections(
     log_debug() << connection_count << " CONNECTIONS";
 }
 
+// Needed for the C callback capturing the signals.
+bool stopped = false;
+void signal_handler(int sig)
+{
+    log_info() << "Caught signal: " << sig;
+    stopped = true;
+}
+
 int main()
 {
     threadpool pool(1);
@@ -33,14 +41,17 @@ int main()
     network net(pool);
     // protocol service.
     protocol prot(pool, hst, hs, net);
+    // Perform node discovery if needed and then creating connections.
     prot.start(handle_start);
-    while (true)
+    signal(SIGABRT, signal_handler);
+    signal(SIGTERM, signal_handler);
+    signal(SIGINT, signal_handler);
+    while (!stopped)
     {
         prot.fetch_connection_count(display_number_of_connections);
         sleep(1);
     }
-    // Never reaches here.
-    // Shown for example sake.
+    // Safely close down.
     pool.stop();
     pool.join();
     return 0;
