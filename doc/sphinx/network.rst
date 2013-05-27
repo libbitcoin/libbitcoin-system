@@ -196,7 +196,21 @@ See :ref:`examples_connect` for the full source code.
 handshake Service
 -----------------
 
-.. mention is a composed operation. link to blockchain section on this.
+Before a node will respond to your traffic, you must complete the version
+handshake which is swapping a verack (version acknowledgement) with their
+version, and giving a version and getting a verack in response.
+
+We can do this ourselves, but then there are other tasks like fetching our
+IP address (which is done from a few websites). We can only speculate why
+Satoshi decided to require such a strange task. libbitcoin stays faithful
+to the Bitcoin protocol by Satoshi and conforms to this requirement.
+
+For this libbitcoin provides a :class:`handshake` service which performs
+the composed operation of doing the initial handshake.
+
+If you're not interested in the process of creating your own network
+connection channel and then calling the :class:`handshake` service, then
+use the :ref:`composed operation<composed_operations>` :func:`connect`.
 
 Network Services
 ================

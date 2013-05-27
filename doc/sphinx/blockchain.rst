@@ -377,6 +377,8 @@ transaction hashes, fetching the transactions one by one.
         const transaction_type& tx  // Transaction
     );
 
+.. _composed_operations:
+
 :func:`fetch_block` and Composed Operations
 -------------------------------------------
 
