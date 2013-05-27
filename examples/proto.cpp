@@ -43,6 +43,7 @@ int main()
     protocol prot(pool, hst, hs, net);
     // Perform node discovery if needed and then creating connections.
     prot.start(handle_start);
+    // Catch C signals for stopping the program.
     signal(SIGABRT, signal_handler);
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
