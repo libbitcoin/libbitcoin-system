@@ -321,3 +321,27 @@ the network. It displays the connection count every second.
         return 0;
     }
 
+For notifications about new connections, :func:`protocol::subscribe_channel`
+calls a given notification handler when a new channel becomes available.
+::
+
+    // ...
+    prot.start(handle_start);
+    // Notify us of new connections.
+    // We can subscribe to protocol at any time after start() is called.
+    prot.subscribe_channel(
+        std::bind(connection_started, _1, std::ref(prot)));
+
+We pass the :class:`protocol` service in by reference and resubscribe.
+:func:`connection_started` is *continuously* notified of new
+communication channels when they are opened.
+::
+
+    void connection_started(channel_ptr node, protocol& prot)
+    {
+        log_info() << "Connection established.";
+        // Resubscribe to new nodes.
+        prot.subscribe_channel(
+            std::bind(connection_started, _1, std::ref(prot)));
+    }
+
