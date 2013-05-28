@@ -30,16 +30,81 @@ public:
     protocol(const protocol&) = delete;
     void operator=(const protocol&) = delete;
 
+    /**
+     * Perform full initialization sequence.
+     * Internally calls bootstrap() and then run().
+     *
+     * @param[in]   handle_complete     Completion handler for start operation.
+     * @code
+     *  void handle_complete(
+     *      const std::error_code& ec   // Status of operation
+     *  );
+     * @endcode
+     */
     void start(completion_handler handle_complete);
+
+    /**
+     * Gracefully close down.
+     *
+     * @param[in]   handle_complete     Completion handler for start operation.
+     * @code
+     *  void handle_complete(
+     *      const std::error_code& ec   // Status of operation
+     *  );
+     * @endcode
+     */
     void stop(completion_handler handle_complete);
 
+    /**
+     * Begin initialization sequence of performing node discovery and
+     * starting other network services.
+     *
+     * @param[in]   handle_complete     Completion handler for start operation.
+     * @code
+     *  void handle_complete(
+     *      const std::error_code& ec   // Status of operation
+     *  );
+     * @endcode
+     */
     void bootstrap(completion_handler handle_complete);
+
+    /**
+     * Starts the internal run loop for this service.
+     */
     void run();
 
+    /**
+     * Fetch number of connections maintained by this service.
+     *
+     * @param[in]   handle_fetch    Completion handler for fetch operation.
+     * @code
+     *  void handle_fetch(
+     *      const std::error_code& ec,  // Status of operation
+     *      size_t connection_count     // Number of connections
+     *  );
+     * @endcode
+     */
     void fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
+
+    /**
+     * Begin initialization sequence of performing node discovery and
+     * starting other network services.
+     *
+     * @param[in]   handle_channel      Handler for new connection.
+     * @code
+     *  void handle_channel(
+     *      channel_ptr node    // Communication channel to new node
+     *  );
+     * @endcode
+     */
     void subscribe_channel(channel_handler handle_channel);
 
+    /**
+     * Broadcast a message to all nodes in our connection list.
+     *
+     * @param[in]   packet      Message packet to broadcast
+     */
     template <typename Message>
     void broadcast(const Message& packet)
     {
