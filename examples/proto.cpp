@@ -1,6 +1,8 @@
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 
+using std::placeholders::_1;
+
 // We don't have a database open, and aren't doing any critical file
 // operations so we aren't worried about exiting suddenly.
 void check_error(const std::error_code& ec)
@@ -10,6 +12,21 @@ void check_error(const std::error_code& ec)
     log_fatal() << ec.message();
     exit(-1);
 }
+
+// Needed for the C callback capturing the signals.
+bool stopped = false;
+void signal_handler(int sig)
+{
+    log_info() << "Caught signal: " << sig;
+    stopped = true;
+}
+
+// Started protocol. Node discovery complete.
+void handle_start(const std::error_code& ec);
+// After number of connections is fetched, this completion handler is called
+// and the number of connections is displayed.
+void display_number_of_connections(
+    const std::error_code& ec, size_t connection_count);
 
 void handle_start(const std::error_code& ec)
 {
@@ -24,12 +41,12 @@ void display_number_of_connections(
     log_debug() << connection_count << " CONNECTIONS";
 }
 
-// Needed for the C callback capturing the signals.
-bool stopped = false;
-void signal_handler(int sig)
+void connection_started(channel_ptr node, protocol& prot)
 {
-    log_info() << "Caught signal: " << sig;
-    stopped = true;
+    log_info() << "Connection established.";
+    // Resubscribe to new nodes.
+    prot.subscribe_channel(
+        std::bind(connection_started, _1, std::ref(prot)));
 }
 
 int main()
@@ -43,6 +60,9 @@ int main()
     protocol prot(pool, hst, hs, net);
     // Perform node discovery if needed and then creating connections.
     prot.start(handle_start);
+    // Notify us of new connections.
+    prot.subscribe_channel(
+        std::bind(connection_started, _1, std::ref(prot)));
     // Catch C signals for stopping the program.
     signal(SIGABRT, signal_handler);
     signal(SIGTERM, signal_handler);
