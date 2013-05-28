@@ -2,7 +2,7 @@
 using namespace bc;
 
 // We don't have a database open, and aren't doing any critical file
-// operations so we aren't worries about exiting suddenly.
+// operations so we aren't worried about exiting suddenly.
 void check_error(const std::error_code& ec)
 {
     if (!ec)
