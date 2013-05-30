@@ -54,7 +54,7 @@ private:
     leveldb_blockchain chain_;
     poller poller_;
     transaction_pool txpool_;
-    session session_;
+    bc::session session_;
 };
 
 fullnode::fullnode()
