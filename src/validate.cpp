@@ -633,8 +633,8 @@ bool validate_block::passes_checkpoints()
 
 bool validate_block::coinbase_depth_match()
 {
-    // There is one block with version incorrectly set to 2
-    if (depth_ == 189565)
+    // There are old blocks with version incorrectly set to 2. Ignore them.
+    if (depth_ < 237370)
         return true;
     // Checks whether the block depth is in the coinbase
     // transaction input script.
