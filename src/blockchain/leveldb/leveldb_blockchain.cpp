@@ -233,6 +233,8 @@ void leveldb_blockchain::fetch(perform_read_functor perform_read)
         };
     ios_.post([this, try_read]
         {
+            // Sleeping inside seqlock loop is fine since we
+            // need to finish write op before we can read anyway.
             while (!try_read())
                 usleep(100000);
         });
