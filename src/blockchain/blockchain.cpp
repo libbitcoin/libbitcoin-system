@@ -132,18 +132,10 @@ public:
     }
 
 private:
-    // An intermediate type used to keep metadata about the locator
-    // so we can sort the locator before returning.
-    typedef std::pair<size_t, hash_digest> meta_entry;
-    typedef std::vector<meta_entry> meta_locator;
-
     bool stop_on_error(const std::error_code& ec)
     {
-        if (stopped_)
-            return true;
-        else if (ec)
+        if (ec)
         {
-            stopped_ = true;
             handle_(ec, block_locator_type());
             return true;
         }
@@ -154,41 +146,45 @@ private:
     {
         if (stop_on_error(ec))
             return;
-        index_list indexes = block_locator_indexes(last_depth);
-        auto this_ptr = shared_from_this();
-        for (size_t depth: indexes)
-            chain_.fetch_block_header(depth,
-                std::bind(&fetch_locator::append,
-                    this_ptr, _1, _2, depth, indexes.size()));
+        indexes_ = block_locator_indexes(last_depth);
+        // We reverse our list so we can pop items off the top
+        // as we need to get them, and push items to our locator.
+        // The order of items in the locator should match
+        // the order of items in our index.
+        std::reverse(indexes_.begin(), indexes_.end());
+        loop();
     }
 
-    void append(const std::error_code& ec,
-        const block_type& block_header, size_t depth, size_t entries)
+    void loop()
+    {
+        // Stop looping and finish.
+        if (indexes_.empty())
+        {
+            handle_(std::error_code(), locator_);
+            return;
+        }
+        auto this_ptr = shared_from_this();
+        size_t depth = indexes_.back();
+        indexes_.pop_back();
+        chain_.fetch_block_header(depth,
+            std::bind(&fetch_locator::append, this_ptr, _1, _2, depth));
+    }
+
+    void append(const std::error_code& ec, const block_type& block_header,
+        size_t depth)
     {
         if (stop_on_error(ec))
             return;
-        meta_.push_back(std::make_pair(depth, hash_block_header(block_header)));
-        if (meta_.size() == entries)
-            final();
-    }
-
-    void final()
-    {
-        std::sort(meta_.begin(), meta_.end(),
-            [](const meta_entry& entry_a, const meta_entry& entry_b)
-            {
-                return entry_a.first > entry_b.first;
-            });
-        block_locator_type final_locator;
-        for (const meta_entry& entry: meta_)
-            final_locator.push_back(entry.second);
-        handle_(std::error_code(), final_locator);
+        hash_digest block_hash = hash_block_header(block_header);
+        locator_.push_back(block_hash);
+        // Continue the loop.
+        loop();
     }
 
     blockchain& chain_;
     handler_locator handle_;
-    bool stopped_;
-    meta_locator meta_;
+    index_list indexes_;
+    block_locator_type locator_;
 };
 
 void fetch_block_locator(blockchain& chain, handler_locator handle_fetch)
