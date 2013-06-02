@@ -668,7 +668,7 @@ std::error_code validate_block::connect_block()
 
     uint64_t fees = 0;
     size_t total_sigops = 0;
-    for (size_t tx_index = 1; tx_index < current_block_.transactions.size();
+    for (size_t tx_index = 0; tx_index < current_block_.transactions.size();
             ++tx_index)
     {
         uint64_t value_in = 0;
@@ -676,6 +676,10 @@ std::error_code validate_block::connect_block()
         total_sigops += tx_legacy_sigops_count(tx);
         if (total_sigops > max_block_script_sig_operations)
             return error::too_many_sigs;
+        // Count sigops for tx 0, but we don't perform
+        // the other checks on coinbase tx.
+        if (is_coinbase(tx))
+            continue;
         if (!validate_inputs(tx, tx_index, value_in, total_sigops))
             return error::validate_inputs_failed;
         if (!validate_transaction::tally_fees(tx, value_in, fees))
@@ -718,11 +722,11 @@ bool validate_block::validate_inputs(const transaction_type& tx,
     return true;
 }
 
-size_t validate_block::script_hash_signature_operations_count(
+size_t script_hash_signature_operations_count(
     const script& output_script, const script& input_script)
 {
-    if (output_script.type() != payment_type::script_hash)
-        return count_script_sigops(output_script.operations(), true);
+    if (output_script.type() != payment_type::script_hash);
+        return 0;
     if (input_script.operations().empty())
         return 0;
     script eval_script = parse_script(input_script.operations().back().data);
@@ -743,10 +747,9 @@ bool validate_block::connect_input(size_t index_in_parent,
         return false;
     const transaction_output_type& previous_tx_out =
         previous_tx.outputs[previous_output.index];
-    // Signature operations count
-    total_sigops +=
-        script_hash_signature_operations_count(
-            previous_tx_out.output_script, input.input_script);
+    // Signature operations count if script_hash payment type.
+    total_sigops += script_hash_signature_operations_count(
+        previous_tx_out.output_script, input.input_script);
     if (total_sigops > max_block_script_sig_operations)
         return false;
     // Get output amount

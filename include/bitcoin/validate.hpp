@@ -98,9 +98,6 @@ protected:
         const output_point& previous_output,
         size_t index_in_parent, size_t input_index) = 0;
 
-    static size_t script_hash_signature_operations_count(
-        const script& output_script, const script& input_script);
-
 private:
     std::error_code check_block();
     bool check_proof_of_work(hash_digest hash, uint32_t bits);
