@@ -50,7 +50,7 @@ const char* depth_comparator::Name() const
 }
 
 leveldb_blockchain::leveldb_blockchain(threadpool& pool)
-  : async_strand(pool), seqlock_(0), ios_(pool.service())
+  : async_strand(pool), ios_(pool.service()), seqlock_(0)
 {
     reorganize_subscriber_ =
         std::make_shared<reorganize_subscriber_type>(pool);
