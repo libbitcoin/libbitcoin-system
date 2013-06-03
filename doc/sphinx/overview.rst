@@ -187,7 +187,41 @@ Additionally helper functions exist for working with these types.
 Logging
 -------
 
-.. log levels. log domains. setting output function.
+libbitcoin internally uses its own logging system. There are five
+:class:`log_level`.
+::
+
+    log_debug() << "Internal debug output.";
+    log_info() << "Info to user.";
+    log_warning() << "Warnings.";
+    log_error() << "Errors.";
+    log_fatal() << "Fatal errors.";
+
+The log output can be redirected for a :class:`log_level` using
+:func:`log_X::set_output_function`. The output function follows this
+format::
+
+    void output(log_level level, const std::string& domain,
+        const std::string& body);
+
+By defining a custom function and using :func:`std::bind`, we can send
+output of a certain :class:`log_level` to a file.
+See :ref:`examples_fullnode` for a demonstration.
+::
+
+    std::ofstream outfile("debug.log");
+    log_debug().set_output_function(
+        std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+
+:func:`log_X` functions optionally take a ``domain`` argument. This specifies
+the context where the message originates from.
+::
+
+    #define LOG_NETWORK     "network"
+    
+    ...
+
+    log_debug(LOG_NETWORK) << "Forcing disconnect due to timeout.";
 
 std::error_code
 ---------------
