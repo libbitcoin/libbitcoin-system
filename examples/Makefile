@@ -3,6 +3,12 @@ LIBS=$(shell pkg-config --libs libbitcoin)
 
 default: all
 
+txrad.o: txrad.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+txrad: txrad.o
+	$(CXX) -o $@ $< $(LIBS)
+
 connect.o: connect.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
@@ -57,5 +63,5 @@ proto.o: proto.cpp
 proto: proto.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: priv determ initchain fullnode display-last satoshiwords connect accept proto
+all: priv determ initchain fullnode display-last satoshiwords connect accept proto txrad
 
