@@ -435,3 +435,35 @@ The :class:`poller` service downloads blocks from nodes into the blockchain.
 sending requests as needed and storing them in the blockchain by calling
 :func:`blockchain::store`.
 
+Reorganizations And New Blocks
+------------------------------
+
+While polling new blocks from the network, callbacks registered with
+:func:`blockchain::subscribe_reorganize` will be notified of any changes
+to the blockchain.
+
+.. cpp:function:: void blockchain::subscribe_reorganize(reorganize_handler handle_reorganize)
+
+   Be notified of the next blockchain change.
+   
+   Subscriber is notified exactly once of changes to the blockchain
+   and needs to re-subscribe to continue being notified.
+   ::
+   
+    void handle_reorganize(
+        const std::error_code& ec,   // Status of operation
+        size_t fork_point,           // Index where blockchain forks
+        const block_list& added,     // New blocks added to blockchain
+        const block_list& removed    // Blocks removed (empty if none)
+    );
+
+The ``fork_point`` gives the depth of the ancestor block before the split.
+Both lists are ordered from lowest depth first.
+::
+
+    for (size_t i = 0; i < added_blocks.size(); ++i)
+    {
+        size_t depth = fork_point + 1 + i;
+        const block_type& blk = *added_blocks[i];
+    }
+
