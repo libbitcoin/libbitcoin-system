@@ -30,5 +30,7 @@ Contents:
    examples/satoshiwords
    examples/connect
    examples/accept
+   examples/proto
+   examples/txrad
    examples/fullnode
 

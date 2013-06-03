@@ -151,6 +151,7 @@ void inventory_received(const std::error_code& ec, const inventory_type& inv,
 void connection_started(channel_ptr node, protocol& prot, tx_watch& watch)
 {
     log_info() << "Connection established.";
+    // Subscribe to inventory packets.
     node->subscribe_inventory(
         std::bind(inventory_received, _1, _2, node, std::ref(watch)));
     // Resubscribe to new nodes.
@@ -162,12 +163,15 @@ void inventory_received(const std::error_code& ec, const inventory_type& inv,
     channel_ptr node, tx_watch& watch)
 {
     check_error(ec);
+    // Loop through inventory hashes.
     for (const inventory_vector_type& ivec: inv.inventories)
     {
+        // We're only interested in transactions. Discard everything else.
         if (ivec.type != inventory_type_id::transaction)
             continue;
         watch.push(ivec.hash);
     }
+    // Resubscribe to inventory packets.
     node->subscribe_inventory(
         std::bind(inventory_received, _1, _2, node, std::ref(watch)));
 }
@@ -183,6 +187,7 @@ int main()
     protocol prot(pool, hst, hs, net);
     // Perform node discovery if needed and then creating connections.
     prot.start(handle_start);
+    // Our table tracking transaction counts.
     tx_watch watch(pool, 200);
     // Notify us of new connections.
     prot.subscribe_channel(
