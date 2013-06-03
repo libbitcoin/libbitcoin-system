@@ -258,8 +258,8 @@ public:
      *  void handle_reorganize(
      *      const std::error_code& ec,   // Status of operation
      *      size_t fork_point,           // Index where blockchain forks
-     *      const block_list& arrivals,  // New blocks added to blockchain
-     *      const block_list& replaced   // Blocks removed (empty if none)
+     *      const block_list& added,     // New blocks added to blockchain
+     *      const block_list& removed    // Blocks removed (empty if none)
      *  );
      * @endcode
      */
