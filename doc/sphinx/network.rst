@@ -410,15 +410,18 @@ to display.
         time_t timeout_;
     };
 
-The implementation is standard C++.
+The implementation for this class is standard C++. We try to find the
+relevant entry when :func:`push` is called, otherwise we create a new one.
+:func:`cleanup` looks for expired items and erases them. :func:`display`
+orders the entry table and displays the top 20 items.
 
 Note the usage of :class:`async_strand` which depends on :class:`threadpool`.
-It provides an :func:`async_strand::queue` method which executes a callback
+It provides a :func:`async_strand::queue` method which executes callbacks
 asynchronously. Callbacks called in the same :class:`async_strand` will
 **not** execute in parallel. In this way race conditions are avoided around
-shared class members without the use of locks. The :class:`threadpool` will
-simply execute another operation that doesn't conflict, if the
-:class:`async_strand` is busy.
+shared class members without the use of locks. If an :class:`async_strand`
+is busy then the :class:`threadpool` will simply execute another operation
+that doesn't conflict.
 ::
 
     tx_watch::tx_watch(threadpool& pool, time_t timeout)
