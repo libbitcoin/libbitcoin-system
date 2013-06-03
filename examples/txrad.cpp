@@ -1,3 +1,6 @@
+/*
+  Transaction radar.
+*/
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 

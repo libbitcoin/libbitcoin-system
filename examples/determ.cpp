@@ -1,3 +1,6 @@
+/*
+  Demonstration of deterministic wallet.
+*/
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 

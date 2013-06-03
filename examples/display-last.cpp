@@ -1,3 +1,6 @@
+/*
+  Display info from the last block in our blockchain at "./database/"
+*/
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 

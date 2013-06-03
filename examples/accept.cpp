@@ -1,3 +1,6 @@
+/*
+  Accept connections from Bitcoin nodes on port 8333.
+*/
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 

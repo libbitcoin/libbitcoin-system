@@ -1,3 +1,6 @@
+/*
+  Create a new leveldb blockchain database.
+*/
 #include <future>
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;

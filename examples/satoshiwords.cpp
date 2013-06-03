@@ -1,3 +1,6 @@
+/*
+  Display the genesis block message by Satoshi.
+*/
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 

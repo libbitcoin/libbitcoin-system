@@ -1,3 +1,7 @@
+/*
+  Full node implementation. Expects the blockchain to be present in
+  "./database/" and initialized using ./initchain
+*/
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 
