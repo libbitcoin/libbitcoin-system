@@ -4,7 +4,10 @@
   The libbitcoin Tutorial
 ###########################
 
-Work in progress.
+Welcome to the online version of The libbitcoin Tutorial, a free tutorial about
+the libbitcoin library for the Bitcoin cryptocurrency.
+
+Progress: chapters 1 - 6 completed. TODO: chapters 7 - 8 underway.
 
 Contents:
 
