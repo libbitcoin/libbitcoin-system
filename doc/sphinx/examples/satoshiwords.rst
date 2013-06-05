@@ -1,7 +1,7 @@
 .. _examples_satoshiwords:
 
 examples/satoshiwords.cpp
-######################
+#########################
 
 ::
 

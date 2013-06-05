@@ -1,7 +1,7 @@
 .. _examples_display-last:
 
 examples/display-last.cpp
-#####################
+#########################
 
 Fetches and displays info about the last block in a blockchain.
 
