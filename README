@@ -38,3 +38,18 @@ To run the protocol test program:
 
 Gentoo users: just use the ebuild from the bitcoin overlay.
 
+Mac OSX Instructions
+====================
+
+To build on Mac OSX, you will need to download and compile your own boost,
+leveldb and protobuf using gcc 4.7 before building libbitcoin. Then set the
+following environment variables before running the build process.
+
+  CC=/usr/local/bin/gcc-4.7
+  CXX=/usr/local/bin/g++-4.7
+
+  $ autoreconf -i
+  $ ./configure --enable-leveldb
+  $ make
+  $ sudo make install
+
