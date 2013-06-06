@@ -401,6 +401,8 @@ level class methods to simplify common operations.
         const block_type& blk       // Block header
     );
 
+.. _tut-poller:
+
 Polling Blocks From Nodes
 =========================
 

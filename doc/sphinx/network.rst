@@ -253,6 +253,8 @@ connections to the network and manage them.
 
    Broadcast packet to all our connected nodes.
 
+.. _tut-protocol:
+
 Join the Peer To Peer Network
 =============================
 
