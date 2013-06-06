@@ -45,14 +45,14 @@ as those licenses appear in the file LICENSE-OPENSSL.
 1. Exception
 
 You have permission to copy, modify, propagate, and distribute a work
-formed by combining OpenSSL with Vidalia, or a work derivative of such a
+formed by combining OpenSSL with libbitcoin, or a work derivative of such a
 combination, even if such copying, modification, propagation, or
 distribution would otherwise violate the terms of the AGPL. You must
 comply with the AGPL in all respects for all of the code used other than
 OpenSSL.
 
 You may include this OpenSSL Exception and its grant of permissions when
-you distribute Vidalia.  Inclusion of this notice with such a
+you distribute libbitcoin.  Inclusion of this notice with such a
 distribution constitutes a grant of such permission.  If you do not wish
 to grant these permissions, remove this section entitled "OpenSSL
 Exception" from your distribution.
