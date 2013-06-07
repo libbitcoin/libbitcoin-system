@@ -185,15 +185,9 @@ Unconfirmed Transactions
 ========================
 
 Before bitcoin transactions make it into a block, they go into
-a transaction memory pool. This class encapsulates that functionality
+a transaction memory pool. :class:`transaction_pool` encapsulates that functionality
 performing the neccessary validation of a transaction before accepting
 it into its internal buffer.
-
-The interface has been deliberately kept simple to minimise overhead.
-This class attempts no tracking of inputs or spends and only provides
-a store/fetch paradigm. Tracking must be performed externally and make
-use of :func:`transaction_pool::store`'s ``handle_store`` and
-``handle_confirm`` to manage changes in the state of memory pool transactions.
 ::
 
     threadpool pool(1);
@@ -264,6 +258,12 @@ connections.
 
 Validating The Transaction
 --------------------------
+
+The :class:`transaction_pool` interface is deliberately simple to minimise overhead.
+This class attempts no tracking of inputs or spends and only provides
+a store/fetch paradigm. Tracking must be performed externally and make
+use of :func:`transaction_pool::store`'s ``handle_store`` and
+``handle_confirm`` to manage changes in the state of memory pool transactions.
 
 .. cpp:function:: void transaction_pool::store(const transaction_type& stored_transaction, confirm_handler handle_confirm, store_handler handle_store)
 
@@ -370,4 +370,9 @@ missing dependency from the network.
             {inventory_type_id::transaction, prevout.hash});
         node->send(getdata, depends_requested);
     }
+
+Upon receipt of the dependency transaction from the remote host, and its
+successful validation in the :class:`transaction_pool`, we must resubmit this
+transaction. Assuming no other inputs are missing, the resubmitted
+transaction should then pass validation.
 
