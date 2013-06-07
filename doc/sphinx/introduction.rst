@@ -126,6 +126,12 @@ the examples/ directory of the source libbitcoin package.
   block in a blockchain database.
 * :ref:`satoshiwords.cpp <examples_satoshiwords>` displays the genesis block
   message from Satoshi.
+* :ref:`accept.cpp <examples_accept>` listens for connections on port 8333,
+  displaying the version's user agent.
+* :ref:`connect.cpp <examples_connect>` connects to localhost on port 8333,
+  and sends a single version message.
+* :ref:`proto.cpp <examples_proto>` joins to the p2p Bitcoin network.
+* :ref:`txrad.cpp <examples_txrad>` implements a simple transaction radar.
 * :ref:`fullnode.cpp <examples_fullnode>` is a full node Bitcoin implementation. Blocks and
   unconfirmed transactions are validated.
 
