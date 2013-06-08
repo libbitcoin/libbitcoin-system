@@ -24,20 +24,24 @@ std::string level_repr(log_level level)
     return "";
 }
 
-void output_to_cout(log_level level,
-    const std::string& domain, const std::string& body)
-{
-    if (!domain.empty())
-        std::cout << "[" << domain << "] ";
-    std::cout << body << std::endl;
-}
-void output_to_cerr(log_level level,
+void output_to_ostream(std::ostream& ostr, log_level level,
     const std::string& domain, const std::string& body)
 {
     std::cerr << level_repr(level);
     if (!domain.empty())
         std::cerr << " [" << domain << "]";
     std::cerr << ": " << body << std::endl;
+}
+
+void output_to_cout(log_level level,
+    const std::string& domain, const std::string& body)
+{
+    output_to_ostream(std::cout, level, domain, body);
+}
+void output_to_cerr(log_level level,
+    const std::string& domain, const std::string& body)
+{
+    output_to_ostream(std::cout, level, domain, body);
 }
 
 logger_wrapper::destination_map logger_wrapper::dests_{
