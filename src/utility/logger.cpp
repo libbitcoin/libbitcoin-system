@@ -24,7 +24,7 @@ std::string level_repr(log_level level)
     return "";
 }
 
-void output_to_ostream(std::ostream& ostr, log_level level,
+void output_ostream(std::ostream& ostr, log_level level,
     const std::string& domain, const std::string& body)
 {
     std::cerr << level_repr(level);
@@ -33,23 +33,23 @@ void output_to_ostream(std::ostream& ostr, log_level level,
     std::cerr << ": " << body << std::endl;
 }
 
-void output_to_cout(log_level level,
+void output_cout(log_level level,
     const std::string& domain, const std::string& body)
 {
-    output_to_ostream(std::cout, level, domain, body);
+    output_ostream(std::cout, level, domain, body);
 }
-void output_to_cerr(log_level level,
+void output_cerr(log_level level,
     const std::string& domain, const std::string& body)
 {
-    output_to_ostream(std::cout, level, domain, body);
+    output_ostream(std::cout, level, domain, body);
 }
 
 logger_wrapper::destination_map logger_wrapper::dests_{
-    std::make_pair(log_level::debug, output_to_cout),
-    std::make_pair(log_level::info, output_to_cout),
-    std::make_pair(log_level::warning, output_to_cerr),
-    std::make_pair(log_level::error, output_to_cerr),
-    std::make_pair(log_level::fatal, output_to_cerr)
+    std::make_pair(log_level::debug, output_cout),
+    std::make_pair(log_level::info, output_cout),
+    std::make_pair(log_level::warning, output_cerr),
+    std::make_pair(log_level::error, output_cerr),
+    std::make_pair(log_level::fatal, output_cerr)
 };
 
 logger_wrapper::logger_wrapper(log_level lev, const std::string& domain)
