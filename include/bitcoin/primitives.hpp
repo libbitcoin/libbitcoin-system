@@ -58,6 +58,7 @@ struct version_type
     uint64_t nonce;
     std::string user_agent;
     uint32_t start_depth;
+    bool relay_transactions;
 };
 
 struct verack_type

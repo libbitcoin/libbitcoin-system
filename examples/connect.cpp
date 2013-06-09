@@ -23,7 +23,7 @@ void connect_started(const std::error_code& ec, channel_ptr node)
     // Create our version message we want to send.
     // Fill in a bunch of fields.
     version_type version;
-    version.version = 60000;
+    version.version = 70001;
     version.services = 1;
     version.address_me.services = version.services;
     version.address_me.ip =
@@ -35,10 +35,11 @@ void connect_started(const std::error_code& ec, channel_ptr node)
         ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                         0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
     version.address_you.port = 8333;
+    version.nonce = rand();
     // Set the user agent.
     version.user_agent = "/libbitcoin/connect-test/";
     version.start_depth = 0;
-    version.nonce = rand();
+    version.relay_transactions = true;
     // Begin the send.
     // Calls version_sent callback when complete.
     node->send(version, std::bind(version_sent, _1, node));

@@ -76,10 +76,11 @@ for this field.
         ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                         0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
     version.address_you.port = 8333;
+    version.nonce = rand();
     // Set the user agent.
     version.user_agent = "/libbitcoin/connect-test/";
     version.start_depth = 0;
-    version.nonce = rand();
+    version.relay_transactions = true;
 
 We then send the message by calling :func:`channel::send` on the
 :class:`channel_ptr` object.

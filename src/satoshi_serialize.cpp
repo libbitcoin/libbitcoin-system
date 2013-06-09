@@ -25,7 +25,7 @@ const std::string satoshi_command(const version_type&)
 }
 size_t satoshi_raw_size(const version_type& packet)
 {
-    return 84 +
+    return 85 +
         variable_uint_size(packet.user_agent.size()) +
         packet.user_agent.size();
 }

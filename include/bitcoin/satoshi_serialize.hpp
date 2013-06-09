@@ -56,6 +56,7 @@ void satoshi_save(const version_type& packet, Iterator result)
     serial.write_8_bytes(packet.nonce);
     serial.write_string(packet.user_agent);
     serial.write_4_bytes(packet.start_depth);
+    serial.write_byte(packet.relay_transactions);
     data_chunk raw_data = serial.data();
     BITCOIN_ASSERT(satoshi_raw_size(packet) == raw_data.size());
     std::copy(raw_data.begin(), raw_data.end(), result);
@@ -87,7 +88,13 @@ void satoshi_load(Iterator first, Iterator last, version_type& packet)
         return;
     }
     packet.start_depth = deserial.read_4_bytes();
-    BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
+    if (packet.version < 70001)
+    {
+        BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
+        return;
+    }
+    packet.relay_transactions = deserial.read_byte();
+    BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4 + 1);
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
 
