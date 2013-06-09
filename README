@@ -14,6 +14,11 @@ You will need:
     - protobuf
   - LevelDB
 
+For the blockchain database, set the max open files limit higher.
+The default limit on most Linux systems is too low.
+
+  $ ulimit -n 4096
+
 Ubuntu Instructions
 ===================
 
