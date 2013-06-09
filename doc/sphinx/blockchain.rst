@@ -9,6 +9,19 @@ uses the LevelDB database to store the Bitcoin blockchain.
 Backends implement the :class:`blockchain` interface. Starting and stopping
 a backend is down to the individual implementation.
 
+The blockchain can consume a large number of open file handles during normal
+operation. In particular, the LevelDB backend may accumulate a number of data
+files. The creation of numerous data files is normal. Most operating
+systems can change the open-files limit using the ``ulimit -n`` command.
+Example::
+
+    ulimit -n 4096
+
+However, this only changes the limit for the current shell session. Changing the
+limit on a system-wide, permanent basis varies more between systems. See
+`this guide <http://docs.basho.com/riak/latest/cookbooks/Open-Files-Limit/>`_
+for more information on open files limits.
+
 Initialization: Importing The Genesis Block
 ===========================================
 
