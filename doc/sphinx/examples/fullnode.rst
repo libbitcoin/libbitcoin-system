@@ -94,13 +94,26 @@ examples/fullnode.cpp
         // Subscribe to new connections.
         protocol_.subscribe_channel(
             std::bind(&fullnode::connection_started, this, _1));
-        auto handle_start =
-            std::bind(&fullnode::handle_start, this, _1);
-        // Initialize blockchain
-        chain_.start("database", handle_start);
+        // Start blockchain. Must finish before any operations
+        // are performed on the database (or they will fail).
+        std::promise<std::error_code> ec_chain;
+        auto blockchain_started =
+            [&](const std::error_code& ec)
+            {
+                ec_chain.set_value(ec);
+            };
+        chain_.start("database", blockchain_started);
+        std::error_code ec = ec_chain.get_future().get();
+        if (ec)
+        {
+            stop();
+            return;
+        }
         // Start transaction pool
         txpool_.start();
         // Fire off app.
+        auto handle_start =
+            std::bind(&fullnode::handle_start, this, _1);
         session_.start(handle_start);
     }
     

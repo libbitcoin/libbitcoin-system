@@ -92,7 +92,8 @@ void fullnode::start()
     // Subscribe to new connections.
     protocol_.subscribe_channel(
         std::bind(&fullnode::connection_started, this, _1));
-    // Start blockchain.
+    // Start blockchain. Must finish before any operations
+    // are performed on the database (or they will fail).
     std::promise<std::error_code> ec_chain;
     auto blockchain_started =
         [&](const std::error_code& ec)
