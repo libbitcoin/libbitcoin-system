@@ -133,7 +133,7 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     open_options_.write_buffer_size = cache_size / 4;
     open_options_.filter_policy = leveldb::NewBloomFilterPolicy(10);
     open_options_.compression = leveldb::kNoCompression;
-    open_options_.max_open_files = 64;
+    open_options_.max_open_files = 150;
     open_options_.create_if_missing = true;
     // The blocks database options needs its depth comparator too.
     leveldb::Options blocks_open_options = open_options_;
