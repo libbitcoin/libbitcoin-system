@@ -469,3 +469,15 @@ Both lists are ordered from lowest depth first.
         const block_type& blk = *added_blocks[i];
     }
 
+Optimization Techniques
+=======================
+
+* Create a separate partition for the database directory with the
+  *noatime* parameter set.
+* Lower VM `swappiness <http://en.wikipedia.org/wiki/Swappiness>`_.
+* Increase the `max number of open files <http://stackoverflow.com/questions/34588/how-do-i-change-the-number-of-open-files-limit-in-linux>`_.
+* Disable filesystem caching to prevent double caching by database and
+  operating system.
+* Make heavy use of replication i.e multiple :class:`blockchain` instances
+  each with their own database.
+
