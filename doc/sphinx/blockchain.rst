@@ -493,4 +493,5 @@ Optimization Techniques
   operating system.
 * Make heavy use of replication i.e multiple :class:`blockchain` instances
   each with their own database.
+* Follow the `guidelines here <http://docs.basho.com/riak/latest/tutorials/choosing-a-backend/LevelDB/>`_.
 
