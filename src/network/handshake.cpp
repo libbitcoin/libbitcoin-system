@@ -31,10 +31,9 @@ handshake::handshake(threadpool& pool)
         ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                         0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
     template_version_.address_you.port = 8333;
-    template_version_.nonce = rand();
     template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_LIB_VERSION "/";
     template_version_.start_depth = 0;
-    template_version_.relay_transactions = true;
+    template_version_.nonce = rand();
 }
 
 void handshake::start(start_handler handle_start)
