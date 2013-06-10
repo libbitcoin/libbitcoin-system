@@ -74,6 +74,8 @@ to :func:`start` and :func:`stop` it respectively.
     public:
         fullnode();
         void start();
+        // Should only be called from the main thread.
+        // It's an error to join() a thread from inside it.
         void stop();
     
     private:
@@ -135,11 +137,13 @@ constructor for specifying their dependencies.
 We also define the :func:`start` and :func:`stop` methods of the
 :class:`fullnode`. If :func:`start` fails then :func:`fullnode::handle_start`
 will be called with :class:`std::error_code` set. If the
-:class:`std::error_code` is set then the error message is displayed, the
-:class:`fullnode` will stop itself and then :func:`exit` gracefully. We can
-guarantee that :func:`fullnode::stop` finishes because :func:`threadpool::join`
-is called which waits until the :class:`threadpool` has finished its tasks
-before returning.
+:class:`std::error_code` is set then the error message is displayed.
+
+It's a mistake to call :func:`fullnode::stop` from within the same completion
+handler as we would then try to call :func:`threadpool::join` within the
+same thread causing a resource deadlock. Instead it is preferable to use
+:class:`std::condition_variable` to signal to :func:`main` that it's time
+to exit. We leave this as an exercise to the reader.
 ::
 
     void fullnode::start()
@@ -156,7 +160,7 @@ before returning.
         std::error_code ec = ec_chain.get_future().get();
         if (ec)
         {
-            stop();
+            log_error() << "Problem starting blockchain: " << ec.message();
             return;
         }
         // Start transaction pool
@@ -187,11 +191,7 @@ before returning.
     void fullnode::handle_start(const std::error_code& ec)
     {
         if (ec)
-        {
             log_error() << "fullnode: " << ec.message();
-            stop();
-            exit(1);
-        }
     }
 
 Unconfirmed Transactions

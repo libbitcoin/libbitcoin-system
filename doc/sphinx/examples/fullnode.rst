@@ -5,13 +5,14 @@ examples/fullnode.cpp
 
 ::
 
+    #include <future>
     #include <bitcoin/bitcoin.hpp>
     using namespace bc;
-    
+
     using std::placeholders::_1;
     using std::placeholders::_2;
     using std::placeholders::_3;
-    
+
     void output_to_file(std::ofstream& file, log_level level,
         const std::string& domain, const std::string& body)
     {
@@ -34,17 +35,19 @@ examples/fullnode.cpp
         output << ": " << body;
         std::cerr << output.str() << std::endl;
     }
-    
+
     class fullnode
     {
     public:
         fullnode();
         void start();
+        // Should only be called from the main thread.
+        // It's an error to join() a thread from inside it.
         void stop();
-    
+
     private:
         void handle_start(const std::error_code& ec);
-    
+
         // New connection has been started.
         // Subscribe to new transaction messages from the network.
         void connection_started(channel_ptr node);
@@ -56,7 +59,7 @@ examples/fullnode.cpp
         void new_unconfirm_valid_tx(
             const std::error_code& ec, const index_list& unconfirmed,
             const transaction_type& tx);
-    
+
         // Threadpools
         threadpool net_pool_, disk_pool_, mem_pool_;
         // Services
@@ -71,7 +74,7 @@ examples/fullnode.cpp
         // Other systems should be OK.
         bc::session session_;
     };
-    
+
     fullnode::fullnode()
         // Threadpools and the number of threads they spawn.
         // 6 threads spawned in total.
@@ -88,7 +91,7 @@ examples/fullnode.cpp
             handshake_, protocol_, chain_, poller_, txpool_})
     {
     }
-    
+
     void fullnode::start()
     {
         // Subscribe to new connections.
@@ -106,7 +109,7 @@ examples/fullnode.cpp
         std::error_code ec = ec_chain.get_future().get();
         if (ec)
         {
-            stop();
+            log_error() << "Problem starting blockchain: " << ec.message();
             return;
         }
         // Start transaction pool
@@ -116,11 +119,11 @@ examples/fullnode.cpp
             std::bind(&fullnode::handle_start, this, _1);
         session_.start(handle_start);
     }
-    
+
     void fullnode::stop()
     {
         session_.stop([](const std::error_code&) {});
-    
+
         // Stop threadpools.
         net_pool_.stop();
         disk_pool_.stop();
@@ -129,21 +132,17 @@ examples/fullnode.cpp
         net_pool_.join();
         disk_pool_.join();
         mem_pool_.join();
-    
+
         // Safely close blockchain database.
         chain_.stop();
     }
-    
+
     void fullnode::handle_start(const std::error_code& ec)
     {
         if (ec)
-        {
             log_error() << "fullnode: " << ec.message();
-            stop();
-            exit(1);
-        }
     }
-    
+
     void fullnode::connection_started(channel_ptr node)
     {
         // Subscribe to transaction messages from this node.
@@ -153,7 +152,7 @@ examples/fullnode.cpp
         protocol_.subscribe_channel(
             std::bind(&fullnode::connection_started, this, _1));
     }
-    
+
     void fullnode::recv_tx(const std::error_code& ec,
         const transaction_type& tx, channel_ptr node)
     {
@@ -176,7 +175,7 @@ examples/fullnode.cpp
         node->subscribe_transaction(
             std::bind(&fullnode::recv_tx, this, _1, _2, node));
     }
-    
+
     void fullnode::new_unconfirm_valid_tx(
         const std::error_code& ec, const index_list& unconfirmed,
         const transaction_type& tx)
@@ -202,7 +201,7 @@ examples/fullnode.cpp
             l << tx_hash;
         }
     }
-    
+
     int main()
     {
         std::ofstream outfile("debug.log"), errfile("error.log");
@@ -216,12 +215,12 @@ examples/fullnode.cpp
             std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
         log_fatal().set_output_function(
             std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
-    
+
         fullnode app;
         app.start();
         std::cin.get();
         app.stop();
-    
+
         return 0;
     }
 

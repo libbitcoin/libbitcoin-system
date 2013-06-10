@@ -38,6 +38,8 @@ class fullnode
 public:
     fullnode();
     void start();
+    // Should only be called from the main thread.
+    // It's an error to join() a thread from inside it.
     void stop();
 
 private:
@@ -104,7 +106,7 @@ void fullnode::start()
     std::error_code ec = ec_chain.get_future().get();
     if (ec)
     {
-        stop();
+        log_error() << "Problem starting blockchain: " << ec.message();
         return;
     }
     // Start transaction pool
@@ -135,11 +137,7 @@ void fullnode::stop()
 void fullnode::handle_start(const std::error_code& ec)
 {
     if (ec)
-    {
         log_error() << "fullnode: " << ec.message();
-        stop();
-        exit(1);
-    }
 }
 
 void fullnode::connection_started(channel_ptr node)
