@@ -133,7 +133,11 @@ const std::vector<std::string> dns_seeds
     "bitseed.xf2.org",
     "dnsseed.bluematt.me",
     "seed.bitcoin.sipa.be",
-    "dnsseed.bitcoin.dashjr.org"
+    "dnsseed.bitcoin.dashjr.org",
+    "archivum.info",
+    "progressbar.sk",
+    "faucet.bitcoin.st",
+    "bitcoin.securepayment.cc"
 };
 
 protocol::seeds::seeds(protocol* parent)
