@@ -725,7 +725,7 @@ bool validate_block::validate_inputs(const transaction_type& tx,
 size_t script_hash_signature_operations_count(
     const script& output_script, const script& input_script)
 {
-    if (output_script.type() != payment_type::script_hash);
+    if (output_script.type() != payment_type::script_hash)
         return 0;
     if (input_script.operations().empty())
         return 0;
