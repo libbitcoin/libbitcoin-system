@@ -237,7 +237,8 @@ connections to the network and manage them.
    handlers are deregistered after being called.
    
    When this protocol service is stopped, any subscribed handlers
-   will be called with the error_code set to error::service_stopped.
+   will be called with the :class:`std::error_code` set to
+   :class:`error::service_stopped`.
    ::
 
     void handle_channel(
