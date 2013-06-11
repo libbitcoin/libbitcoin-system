@@ -58,7 +58,7 @@ int main(int argc, char** argv)
         std::string pretty_rep;
         std::getline(inf, pretty_rep);
         message::block blk;
-        data_chunk blockdat = bytes_from_pretty(pretty_rep);
+        data_chunk blockdat = decode_hex(pretty_rep);
         satoshi_load(blockdat.begin(), blockdat.end(), blk);
         BITCOIN_ASSERT(blk.merkle == generate_merkle_root(blk.transactions));
         log_info() << "Loaded " << hash_block_header(blk);

@@ -22,7 +22,7 @@ void handle_fetch(const std::error_code& ec,
         log_fatal() << ec.message();
         return;
     }
-    log_debug() << pretty_hex(netaddr.ip) << ' ' << netaddr.port;
+    log_debug() << encode_hex(netaddr.ip) << ' ' << netaddr.port;
 }
 
 int main()

@@ -133,7 +133,7 @@ bool parse_token(data_chunk& raw_script, const std::string& token)
     else if (is_hex_data(token))
     {
         std::string hex_part(token.begin() + 2, token.end());
-        data_chunk raw_data = bytes_from_pretty(hex_part);
+        data_chunk raw_data = decode_hex(hex_part);
         extend_data(hex_raw, raw_data);
     }
     else if (is_quoted_string(token))

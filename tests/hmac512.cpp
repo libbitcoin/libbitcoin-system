@@ -169,17 +169,17 @@ data_chunk string_data(const std::string& str)
 int main()
 {
     BITCOIN_ASSERT(single_sha512_hash({0x12, 0x13}) ==
-        hash_from_pretty<long_hash>("1b09a411dc31ee2284e642a05fd2657ff4a117916e8c16e8fd4b5af5778f91eb4283b01667e388c5aa757172496d41cc209faf6697bc0b371e414175f205dfec"));
+        decode_hex_digest<long_hash>("1b09a411dc31ee2284e642a05fd2657ff4a117916e8c16e8fd4b5af5778f91eb4283b01667e388c5aa757172496d41cc209faf6697bc0b371e414175f205dfec"));
     data_chunk key, data;
     long_hash brown_fox = generate_hmac_sha512(string_data("key"),
         string_data("The quick brown fox jumps over the lazy dog"));
-    BITCOIN_ASSERT(brown_fox == hash_from_pretty<long_hash>("b42af09057bac1e2d41708e48a902e09b5ff7f12ab428a4fe86653c73dd248fb82f948a549f7b791a5b41915ee4d1ec3935357e4e2317250d0372afa2ebeeb3a"));
+    BITCOIN_ASSERT(brown_fox == decode_hex_digest<long_hash>("b42af09057bac1e2d41708e48a902e09b5ff7f12ab428a4fe86653c73dd248fb82f948a549f7b791a5b41915ee4d1ec3935357e4e2317250d0372afa2ebeeb3a"));
 
     for (int n=0; n<sizeof(vtest)/sizeof(vtest[0]); n++)
     {
-        data_chunk key = bytes_from_pretty(vtest[n].pszKey);
-        data_chunk data = bytes_from_pretty(vtest[n].pszData);
-        long_hash hmac = hash_from_pretty<long_hash>(vtest[n].pszMAC);
+        data_chunk key = decode_hex(vtest[n].pszKey);
+        data_chunk data = decode_hex(vtest[n].pszData);
+        long_hash hmac = decode_hex_digest<long_hash>(vtest[n].pszMAC);
 
         long_hash temp = generate_hmac_sha512(key, data);
         BITCOIN_ASSERT(temp == hmac);

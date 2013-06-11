@@ -11,7 +11,7 @@ blockchain::block_list load_chain(const string_list& raw_chain)
     for (const std::string& raw_repr: raw_chain)
     {
         auto block = std::make_shared<block_type>();
-        data_chunk raw_block = bytes_from_pretty(raw_repr);
+        data_chunk raw_block = decode_hex(raw_repr);
         satoshi_load(raw_block.begin(), raw_block.end(), *block);
         blks.push_back(block);
     }

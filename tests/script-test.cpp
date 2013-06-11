@@ -45,7 +45,7 @@ void run_script_from_block(libbitcoin::message::transaction tx, libbitcoin::mess
     }
     libbitcoin::script script = input.input_script;
     BITCOIN_ASSERT(input.previous_output.hash == tx.inputs[0].previous_output.hash);
-    std::cout << pretty_hex(hash_transaction(tx)) << "\n";
+    std::cout << encode_hex(hash_transaction(tx)) << "\n";
     std::cout << script.pretty() << "\n";
     std::cout << "Returned: " << (output.output_script.run(script, tx, 0) ? "true" : "false") << "\n";
 }

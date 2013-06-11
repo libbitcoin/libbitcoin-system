@@ -39,20 +39,20 @@ examples/priv.cpp
 
     int sign(const std::string input_data, const std::string raw_private_key)
     {
-        hash_digest digest = hash_from_pretty<hash_digest>(input_data);
+        hash_digest digest = decode_hex_digest<hash_digest>(input_data);
         elliptic_curve_key ec;
         if (!ec.set_private_key(
                 private_data(raw_private_key.begin(), raw_private_key.end())))
             error_exit("bad private key");
-        log_info() << pretty_hex(ec.sign(digest));
+        log_info() << encode_hex(ec.sign(digest));
         return 0;
     }
 
     int verify(const std::string input_data, const std::string& signature_data,
         const std::string raw_private_key)
     {
-        hash_digest digest = hash_from_pretty<hash_digest>(input_data);
-        data_chunk signature = bytes_from_pretty(signature_data);
+        hash_digest digest = decode_hex_digest<hash_digest>(input_data);
+        data_chunk signature = decode_hex(signature_data);
         elliptic_curve_key ec;
         if (!ec.set_private_key(
                 private_data(raw_private_key.begin(), raw_private_key.end())))

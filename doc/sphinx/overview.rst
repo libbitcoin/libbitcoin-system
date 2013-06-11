@@ -166,20 +166,20 @@ Additionally helper functions exist for working with these types.
    ``cast_chunk<uint32_t>(chunk)`` converts *chunk* into a 4 byte
    integer. Assumes ``chunk.size() >= 4`` bytes.
 
-.. cpp:function:: std::string pretty_hex<T>(T data)
+.. cpp:function:: std::string encode_hex<T>(T data)
 
    Encode *data* into a hex string.
    ::
 
     hash_digest block_hash = hash_block_header(genesis_block());
     // Displays 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
-    std::cout << pretty_hex(block_hash) << std::endl;
+    std::cout << encode_hex(block_hash) << std::endl;
 
-.. cpp:function:: data_chunk bytes_from_pretty(std::string byte_stream)
+.. cpp:function:: data_chunk decode_hex(std::string byte_stream)
 
    Decode hex string into raw data.
 
-.. cpp:function:: HashType hash_from_pretty<HashType>(std::string byte_stream)
+.. cpp:function:: HashType decode_hex_digest<HashType>(std::string byte_stream)
 
    Decode hex string into a hash type (either :type:`hash_digest` or
    :type:`short_hash`).

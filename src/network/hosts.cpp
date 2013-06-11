@@ -30,7 +30,7 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
         boost::split(parts, line, boost::is_any_of(" "));
         if (parts.size() != 2)
             continue;
-        data_chunk raw_ip = bytes_from_pretty(parts[0]);
+        data_chunk raw_ip = decode_hex(parts[0]);
         hosts_field field;
         if (raw_ip.size() != field.ip.size())
             continue;
@@ -55,7 +55,7 @@ void hosts::do_save(const std::string& filename, save_handler handle_save)
 {
     std::ofstream file_handle(filename);
     for (const hosts_field& field: buffer_)
-        file_handle << pretty_hex(field.ip) << ' '
+        file_handle << encode_hex(field.ip) << ' '
             << field.port << std::endl;
     handle_save(std::error_code());
 }

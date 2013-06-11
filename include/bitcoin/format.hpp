@@ -58,7 +58,7 @@ data_chunk uncast_type(T value, bool reverse=false)
 }
 
 template<typename T>
-std::string pretty_hex(T data)
+std::string encode_hex(T data)
 {
     std::stringstream ss;
     ss << std::hex;
@@ -72,12 +72,14 @@ std::ostream& operator<<(std::ostream& stream, const data_chunk& data);
 std::ostream& operator<<(std::ostream& stream, const hash_digest& hash);
 std::ostream& operator<<(std::ostream& stream, const short_hash& hash);
 
-data_chunk bytes_from_pretty(std::string byte_stream);
+data_chunk decode_hex(std::string byte_stream);
 
+// Turns a hash hex string into HashType.
+// byte_stream.size() == 2 * HashType.size()
 template <typename HashType>
-HashType hash_from_pretty(std::string byte_stream)
+HashType decode_hex_digest(std::string byte_stream)
 {
-    data_chunk raw_bytes = bytes_from_pretty(byte_stream);
+    data_chunk raw_bytes = decode_hex(byte_stream);
     HashType result;
     BITCOIN_ASSERT(raw_bytes.size() == result.size());
     std::copy(raw_bytes.begin(), raw_bytes.end(), result.begin());

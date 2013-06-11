@@ -269,7 +269,7 @@ void protocol::attempt_connect(const std::error_code& ec,
             connection.address.port == address.port)
         {
             log_debug(LOG_PROTOCOL)
-                << "Already connected to " << pretty_hex(address.ip);
+                << "Already connected to " << encode_hex(address.ip);
             // Retry another connection
             strand_.post(
                 std::bind(&protocol::try_connect, this));

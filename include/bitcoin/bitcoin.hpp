@@ -124,9 +124,9 @@
  *
  * @subsection format Format
  *
- * - @link libbitcoin::pretty_hex pretty_hex @endlink
- * - @link libbitcoin::bytes_from_pretty bytes_from_pretty @endlink
- * - @link libbitcoin::hash_from_pretty hash_from_pretty @endlink
+ * - @link libbitcoin::encode_hex pretty_hex @endlink
+ * - @link libbitcoin::decode_hex bytes_from_pretty @endlink
+ * - @link libbitcoin::decode_hex_digest hash_from_pretty @endlink
  * - @link libbitcoin::extend_data extend_data @endlink
  * - @link libbitcoin::cast_chunk cast_chunk @endlink
  * - @link libbitcoin::uncast_chunk uncast_chunk @endlink

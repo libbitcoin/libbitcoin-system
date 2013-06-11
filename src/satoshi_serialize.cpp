@@ -155,7 +155,7 @@ script read_script(deserializer& deserial)
 {
     data_chunk raw_script = read_raw_script(deserial);
 #ifndef BITCOIN_DISABLE_ASSERTS
-    std::string assert_msg = pretty_hex(raw_script);
+    std::string assert_msg = encode_hex(raw_script);
 #endif
     BITCOIN_ASSERT_MSG(
         raw_script == save_script(parse_script(raw_script)),

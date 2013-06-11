@@ -116,7 +116,7 @@ void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
     if (grabbed_invs_.exists(tx_hash))
         return;
     log_debug(LOG_SESSION)
-        << "Transaction inventory: " << pretty_hex(tx_hash);
+        << "Transaction inventory: " << encode_hex(tx_hash);
     // does it exist already
     // if not then issue getdata
     tx_pool_.exists(tx_hash,

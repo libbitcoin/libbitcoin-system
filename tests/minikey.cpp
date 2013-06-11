@@ -342,7 +342,7 @@ void test_minikey_samples()
     {
         const auto& baddr = sample[0];
         const auto& minikey = sample[1];
-        data_chunk pubkey = bytes_from_pretty(sample[2]);
+        data_chunk pubkey = decode_hex(sample[2]);
         secret_parameter secret = minikey_to_secret(minikey);
         BITCOIN_ASSERT(secret != null_hash);
         elliptic_curve_key ec;

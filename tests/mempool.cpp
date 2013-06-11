@@ -52,7 +52,7 @@ void receive_inv(const std::error_code &ec, const message::inventory& packet,
         if (ivv.type != message::inventory_type::transaction)
             log_info() << "  --";
         else
-            log_info() << "  " << pretty_hex(ivv.hash);
+            log_info() << "  " << encode_hex(ivv.hash);
     }
     message::get_data getdat;
     getdat.inventories = packet.inventories;

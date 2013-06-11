@@ -102,7 +102,7 @@ void poller::handle_store(const std::error_code& ec, block_info info,
     if (ec && info.status != block_status::orphan)
     {
         log_error(LOG_POLLER)
-            << "Storing block " << pretty_hex(block_hash)
+            << "Storing block " << encode_hex(block_hash)
             << ": " << ec.message();
         return;
     }
@@ -119,12 +119,12 @@ void poller::handle_store(const std::error_code& ec, block_info info,
 
         case block_status::rejected:
             log_error(LOG_POLLER)
-                << "Rejected block " << pretty_hex(block_hash);
+                << "Rejected block " << encode_hex(block_hash);
             break;
 
         case block_status::confirmed:
             log_info(LOG_POLLER)
-                << "Block #" << info.depth << " " << pretty_hex(block_hash);
+                << "Block #" << info.depth << " " << encode_hex(block_hash);
             break;
     }
 }
@@ -141,7 +141,7 @@ void poller::ask_blocks(const std::error_code& ec,
     if (last_locator_begin_ == locator.front() && last_hash_stop_ == hash_stop)
     {
         log_debug(LOG_POLLER) << "Skipping duplicate ask blocks: "
-            << pretty_hex(locator.front());
+            << encode_hex(locator.front());
         return;
     }
     get_blocks_type packet;

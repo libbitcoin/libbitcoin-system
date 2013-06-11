@@ -288,12 +288,12 @@ by the composed operation :func:`fetch_block`.
         // 32 byte std::array of uint8_t
         const hash_digest& blk_hash = hash_block_header(blk);
         // Encode block hash into a pretty hex string.
-        log_info() << "hash: " << pretty_hex(blk_hash);
+        log_info() << "hash: " << encode_hex(blk_hash);
         // Display a few fields from the block header.
         // See <bitcoin/primitives.hpp> for the definition of block_type.
         log_info() << "version: " << blk.version;
         // hash_digest can be used directly in log_info(),
-        // implicity calling pretty_hex() on the hash_digest.
+        // implicity calling encode_hex() on the hash_digest.
         log_info() << "previous_block_hash: " << blk.previous_block_hash;
         log_info() << "merkle: " << blk.merkle;
         log_info() << "timestamp: " << blk.timestamp;

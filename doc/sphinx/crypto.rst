@@ -135,7 +135,7 @@ formula and used to create the private key.
     // ... Get the corresponding private key.
     // Extract the secret parameter.
     secret_parameter secret = wallet.generate_secret(2);
-    assert(pretty_hex(secret) == "33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
+    assert(encode_hex(secret) == "33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
     // The secret parameter is used to compute the private key
     // by the elliptic curve formula.
     elliptic_curve_key privkey;
@@ -166,7 +166,7 @@ offline), nobody can spend their Bitcoins.
 ::
 
     data_chunk mpk = wallet.master_public_key();
-    assert(pretty_hex(mpk) == "d996c1a50ca4a57a9dface614338a1d837cb339e08361cfaf66ffd7da8e21786a7142a014056439d579654d7bb58dd5724b93372b5efae62e76783300f2b6cb5");
+    assert(encode_hex(mpk) == "d996c1a50ca4a57a9dface614338a1d837cb339e08361cfaf66ffd7da8e21786a7142a014056439d579654d7bb58dd5724b93372b5efae62e76783300f2b6cb5");
 
 A master key can only generate public keys but never the private keys.
 Calls to :func:`deterministic_wallet::generate_secret` will always return
@@ -189,7 +189,7 @@ The *secret parameter* is a value used by the elliptic curve formula to
 compute the private key.
 ::
 
-    secret_parameter secret = hash_from_pretty<secret_parameter>("33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
+    secret_parameter secret = decode_hex_digest<secret_parameter>("33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
     // The secret parameter is used to compute the private key
     // by the elliptic curve formula.
     elliptic_curve_key privkey;

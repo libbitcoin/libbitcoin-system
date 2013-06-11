@@ -376,8 +376,8 @@ missing dependency from the network.
         BITCOIN_ASSERT(unconfirmed[0] < tx.inputs.size());
         size_t missing_index = unconfirmed[0];
         const auto& prevout = tx.inputs[missing_index].previous_output;
-        log_info() << "Requesting dependency " << pretty_hex(prevout.hash)
-            << " for " << pretty_hex(tx_hash);
+        log_info() << "Requesting dependency " << encode_hex(prevout.hash)
+            << " for " << encode_hex(tx_hash);
         get_data_type getdata;
         getdata.inventories.push_back(
             {inventory_type_id::transaction, prevout.hash});

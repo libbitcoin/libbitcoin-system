@@ -255,7 +255,7 @@ bool script::next_step(operation_stack::iterator it,
     //log_debug() << "Run: " << opcode_to_string(op.code);
     //log_debug() << "Stack:";
     //for (auto s: stack_)
-    //    log_debug() << "[" << pretty_hex(s) << "]";
+    //    log_debug() << "[" << encode_hex(s) << "]";
     if (stack_.size() + alternate_stack_.size() > 1000)
         return false;
     return true;
@@ -1854,7 +1854,7 @@ std::string pretty(const script& source_script)
         if (op.data.empty())
             ss << opcode_to_string(op.code);
         else
-            ss << "[ " << pretty_hex(op.data) << " ]";
+            ss << "[ " << encode_hex(op.data) << " ]";
     }
     return ss.str();
 }

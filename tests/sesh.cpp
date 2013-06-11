@@ -77,8 +77,8 @@ void handle_mempool_store(
         BITCOIN_ASSERT(unconfirmed.size() == 1);
         BITCOIN_ASSERT(unconfirmed[0] < tx.inputs.size());
         const auto& prevout = tx.inputs[unconfirmed[0]].previous_output;
-        log_info() << "Requesting dependency " << pretty_hex(prevout.hash)
-            << " for " << pretty_hex(tx_hash);
+        log_info() << "Requesting dependency " << encode_hex(prevout.hash)
+            << " for " << encode_hex(tx_hash);
         message::get_data getdat;
         getdat.inventories.push_back(
             {message::inventory_type::transaction, prevout.hash});
@@ -92,7 +92,7 @@ void handle_mempool_store(
         //BITCOIN_ASSERT(unconfirmed.size() == 0);
         log_error()
             << "Error storing memory pool transaction "
-            << pretty_hex(tx_hash) << ": " << ec.message();
+            << encode_hex(tx_hash) << ": " << ec.message();
     }
     else
     {
@@ -105,7 +105,7 @@ void handle_mempool_store(
                 l << " " << idx;
             l << ") ";
         }
-        l << pretty_hex(tx_hash);
+        l << encode_hex(tx_hash);
     }
 }
 

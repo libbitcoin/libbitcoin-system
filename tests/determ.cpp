@@ -10,7 +10,7 @@ int main()
     // master public key
     data_chunk mpk = wallet.master_public_key();
     log_info() << "mpk: " << mpk;
-    BITCOIN_ASSERT(pretty_hex(mpk) == "d996c1a50ca4a57a9dface614338a1d837cb339e08361cfaf66ffd7da8e21786a7142a014056439d579654d7bb58dd5724b93372b5efae62e76783300f2b6cb5");
+    BITCOIN_ASSERT(encode_hex(mpk) == "d996c1a50ca4a57a9dface614338a1d837cb339e08361cfaf66ffd7da8e21786a7142a014056439d579654d7bb58dd5724b93372b5efae62e76783300f2b6cb5");
     // get an address
     payment_address addr;
     data_chunk pubkey = wallet.generate_public_key(2, true);
@@ -21,7 +21,7 @@ int main()
     // get privkey
     secret_parameter secret = wallet.generate_secret(2, true);
     log_info() << "secret: " << secret;
-    BITCOIN_ASSERT(pretty_hex(secret) == "d5c41f9c49ecbe48eb6fad73f6bc4a795dd1698813892cb0eeaa8362f85c83bc");
+    BITCOIN_ASSERT(encode_hex(secret) == "d5c41f9c49ecbe48eb6fad73f6bc4a795dd1698813892cb0eeaa8362f85c83bc");
     elliptic_curve_key privkey;
     bool set_secret_success = privkey.set_secret(secret);
     BITCOIN_ASSERT(set_secret_success);

@@ -28,7 +28,7 @@ void fetch_block_t::run(const std::error_code& ec, stack_ptr stack)
 {
     auto this_ptr = shared_from_this();
     message::output_point outpoint;
-    outpoint.hash = hash_from_pretty<hash_digest>("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16");
+    outpoint.hash = decode_hex_digest<hash_digest>("f4184fc596403b9d638783cf57adfe4c75c605f6356fbc91338530e9831e9e16");
     outpoint.index = 1;
     reenter(this)
     {
@@ -54,7 +54,7 @@ void fetch_block_t::run(const std::error_code& ec, stack_ptr stack)
                 stack->blk = blk;
                 this_ptr->run(ec, stack);
             });
-        log_debug() << pretty_hex(hash_block_header(stack->blk));
+        log_debug() << encode_hex(hash_block_header(stack->blk));
         yield blockchain_->fetch_spend(outpoint,
             [this_ptr, stack](const std::error_code& ec,
                 const message::input_point& inp)
@@ -63,7 +63,7 @@ void fetch_block_t::run(const std::error_code& ec, stack_ptr stack)
                 this_ptr->run(ec, stack);
             });
         if (!ec)
-            log_debug() << pretty_hex(stack->inp.hash);
+            log_debug() << encode_hex(stack->inp.hash);
         else
             log_error() << ec.message();
     }

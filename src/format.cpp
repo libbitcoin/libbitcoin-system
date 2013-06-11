@@ -6,23 +6,23 @@ namespace libbitcoin {
 
 std::ostream& operator<<(std::ostream& stream, const data_chunk& data)
 {
-    stream << pretty_hex(data);
+    stream << encode_hex(data);
     return stream;
 }
 
 std::ostream& operator<<(std::ostream& stream, const hash_digest& hash)
 {
-    stream << pretty_hex(hash);
+    stream << encode_hex(hash);
     return stream;
 }
 
 std::ostream& operator<<(std::ostream& stream, const short_hash& hash)
 {
-    stream << pretty_hex(hash);
+    stream << encode_hex(hash);
     return stream;
 }
 
-data_chunk bytes_from_pretty(std::string byte_stream)
+data_chunk decode_hex(std::string byte_stream)
 {
     data_chunk stack;
     for (auto it = byte_stream.begin(); it != byte_stream.end(); it += 2)

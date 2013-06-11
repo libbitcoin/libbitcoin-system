@@ -61,7 +61,7 @@ private:
     {
         if (ec)
             error_exit(ec);
-        log_info() << "Got tx " << pretty_hex(hash_transaction(tx));
+        log_info() << "Got tx " << encode_hex(hash_transaction(tx));
     }
 
     threadpool pool_;

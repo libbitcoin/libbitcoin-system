@@ -31,7 +31,7 @@ void receive_inv(const std::error_code &ec, const inventory_type& packet,
         if (ivv.type != inventory_type_id::block)
             log_info() << "  --";
         else
-            log_info() << "  " << pretty_hex(ivv.hash);
+            log_info() << "  " << encode_hex(ivv.hash);
     }
     //node->subscribe_inventory(std::bind(&receive_inv, _1, _2, node));
     std::unique_lock<std::mutex> lock(mutex);
@@ -61,7 +61,7 @@ void show_ip(const std::error_code& ec, const network_address_type& addr)
 {
     if (ec)
         error_exit(ec.message());
-    log_debug() << pretty_hex(addr.ip);
+    log_debug() << encode_hex(addr.ip);
 }
 void handle_handshake(const std::error_code& ec, channel_ptr node,
     handshake& hs)

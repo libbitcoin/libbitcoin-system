@@ -45,9 +45,9 @@ void show_block(const std::error_code& ec, const message::block& blk)
         return;
     }
     log_debug() << "Fetch";
-    log_debug() << pretty_hex(blk.merkle);
+    log_debug() << encode_hex(blk.merkle);
     log_debug() << blk.transactions.size();
-    log_debug() << pretty_hex(hash_transaction(blk.transactions[0]));
+    log_debug() << encode_hex(hash_transaction(blk.transactions[0]));
 }
 
 transaction_pool_ptr tx_pool;
@@ -90,7 +90,7 @@ void show_spend(const std::error_code& ec, const message::input_point& spend)
         return;
     }
     log_debug() << "SPEND:";
-    log_debug() << pretty_hex(spend.hash);
+    log_debug() << encode_hex(spend.hash);
     log_debug() << spend.index;
 }
 
@@ -99,7 +99,7 @@ void handle_store(const std::error_code& ec, block_info info,
 {
     if (ec)
     {
-        log_error() << "handle store " << ec.message() << " for " << pretty_hex(block_hash);
+        log_error() << "handle store " << ec.message() << " for " << encode_hex(block_hash);
         return;
     }
     else if (info.status != block_status::confirmed)
@@ -113,7 +113,7 @@ void handle_store(const std::error_code& ec, block_info info,
                 break;
 
             case block_status::rejected:
-                log_debug() << "bad: " << pretty_hex(block_hash);
+                log_debug() << "bad: " << encode_hex(block_hash);
                 exit(0);
                 break;
         }
@@ -231,7 +231,7 @@ void show_outputs(const std::error_code& ec,
     }
     for (auto o: outs)
     {
-        log_debug() << pretty_hex(o.hash) << " : " << o.index;
+        log_debug() << encode_hex(o.hash) << " : " << o.index;
     }
 }
 

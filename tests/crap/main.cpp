@@ -102,7 +102,7 @@ public:
         {
             auto outpoint = outpoints.first[i];
             auto value = outpoints.second[i];
-            std::cout << pretty_hex(outpoint.hash) << ":" << outpoint.index
+            std::cout << encode_hex(outpoint.hash) << ":" << outpoint.index
                 << " " << pretty_amount(value) << " BTC" << std::endl;
         }
         begin();
@@ -136,7 +136,7 @@ public:
                 auto value = outpoints.second[i];
                 std::cout << (i + 1) << ". " 
                     << (selected[i] ? "[X]" : "[ ]") << " "
-                    << pretty_hex(outpoint.hash) << ":" << outpoint.index
+                    << encode_hex(outpoint.hash) << ":" << outpoint.index
                     << " " << pretty_amount(value) << " BTC" << std::endl;
             }
             std::cout << selected.size() + 1 << ". Continue" << std::endl;
@@ -322,7 +322,7 @@ protected:
             return "No transaction created";
         satoshi_exporter ex;
         auto raw = ex.save(*tx_);
-        return pretty_hex(raw);
+        return encode_hex(raw);
     }
     std::string pretty_tx()
     {
@@ -340,7 +340,7 @@ protected:
             satoshi_exporter convert_tx;
             data_chunk raw_tx = convert_tx.save(*tx_);
             p_.protocol->broadcast(*tx_);
-            std::cout << pretty_hex(hash_transaction(*tx_)) << std::endl;
+            std::cout << encode_hex(hash_transaction(*tx_)) << std::endl;
         }
     }
 
