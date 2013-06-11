@@ -229,7 +229,7 @@ transaction memory pool with :func:`transaction_pool::store`.
     
         // New connection has been started.
         // Subscribe to new transaction messages from the network.
-        void connection_started(channel_ptr node);
+        void connection_started(const std::error_code& ec, channel_ptr node);
         // New transaction message from the network.
         // Attempt to validate it by storing it in the transaction pool.
         void recv_tx(const std::error_code& ec,
@@ -249,7 +249,7 @@ At the beginning of start, we subscribe to new connections.
     {
         // Subscribe to new connections.
         protocol_.subscribe_channel(
-            std::bind(&fullnode::connection_started, this, _1));
+            std::bind(&fullnode::connection_started, this, _1, _2));
         // ...
     }
 
@@ -261,12 +261,17 @@ connections.
 
     void fullnode::connection_started(channel_ptr node)
     {
+        if (ec)
+        {
+            log_warning() << "Couldn't start connection: " << ec.message();
+            return;
+        }
         // Subscribe to transaction messages from this node.
         node->subscribe_transaction(
             std::bind(&fullnode::recv_tx, this, _1, _2, node));
         // Stay subscribed to new connections.
         protocol_.subscribe_channel(
-            std::bind(&fullnode::connection_started, this, _1));
+            std::bind(&fullnode::connection_started, this, _1, _2));
     }
 
 Validating The Transaction

@@ -147,7 +147,7 @@ examples/fullnode.cpp
     {
         if (ec)
         {
-            log_warning() << "Connection started: " << ec.message();
+            log_warning() << "Couldn't start connection: " << ec.message();
             return;
         }
         // Subscribe to transaction messages from this node.
