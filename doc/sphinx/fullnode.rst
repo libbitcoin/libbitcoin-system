@@ -259,7 +259,7 @@ network by calling :func:`channel::subscribe_transaction`. We again call
 connections.
 ::
 
-    void fullnode::connection_started(channel_ptr node)
+    void fullnode::connection_started(const std::error_code& ec, channel_ptr node)
     {
         if (ec)
         {
