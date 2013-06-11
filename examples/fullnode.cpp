@@ -47,7 +47,7 @@ private:
 
     // New connection has been started.
     // Subscribe to new transaction messages from the network.
-    void connection_started(channel_ptr node);
+    void connection_started(const std::error_code& ec, channel_ptr node);
     // New transaction message from the network.
     // Attempt to validate it by storing it in the transaction pool.
     void recv_tx(const std::error_code& ec,
@@ -93,7 +93,7 @@ void fullnode::start()
 {
     // Subscribe to new connections.
     protocol_.subscribe_channel(
-        std::bind(&fullnode::connection_started, this, _1));
+        std::bind(&fullnode::connection_started, this, _1, _2));
     // Start blockchain. Must finish before any operations
     // are performed on the database (or they will fail).
     std::promise<std::error_code> ec_chain;
@@ -140,14 +140,19 @@ void fullnode::handle_start(const std::error_code& ec)
         log_error() << "fullnode: " << ec.message();
 }
 
-void fullnode::connection_started(channel_ptr node)
+void fullnode::connection_started(const std::error_code& ec, channel_ptr node)
 {
+    if (ec)
+    {
+        log_warning() << "Connection started: " << ec.message();
+        return;
+    }
     // Subscribe to transaction messages from this node.
     node->subscribe_transaction(
         std::bind(&fullnode::recv_tx, this, _1, _2, node));
     // Stay subscribed to new connections.
     protocol_.subscribe_channel(
-        std::bind(&fullnode::connection_started, this, _1));
+        std::bind(&fullnode::connection_started, this, _1, _2));
 }
 
 void fullnode::recv_tx(const std::error_code& ec,

@@ -28,12 +28,12 @@ void session::start(completion_handler handle_complete)
 {
     protocol_.start(handle_complete);
     protocol_.subscribe_channel(
-        [this](channel_ptr node)
+        [this](const std::error_code& ec, channel_ptr node)
         {
             poll_.query(node);
         });
     protocol_.subscribe_channel(
-        std::bind(&session::new_channel, this, _1));
+        std::bind(&session::new_channel, this, _1, _2));
     chain_.fetch_last_depth(
         std::bind(&handshake::set_start_depth,
             &handshake_, _2, handle_set_start_depth));
@@ -47,8 +47,13 @@ void session::stop(completion_handler handle_complete)
     protocol_.stop(handle_complete);
 }
 
-void session::new_channel(channel_ptr node)
+void session::new_channel(const std::error_code& ec, channel_ptr node)
 {
+    if (ec)
+    {
+        log_warning(LOG_SESSION) << "New channel: " << ec.message();
+        return;
+    }
     BITCOIN_ASSERT(node);
     node->subscribe_inventory(
         std::bind(&session::inventory, this, _1, _2, node));
@@ -59,7 +64,7 @@ void session::new_channel(channel_ptr node)
     // tx
     // block
     protocol_.subscribe_channel(
-        std::bind(&session::new_channel, this, _1));
+        std::bind(&session::new_channel, this, _1, _2));
     poll_.monitor(node);
 }
 

@@ -22,7 +22,8 @@ public:
 
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_connection_count_handler;
-    typedef std::function<void (channel_ptr)> channel_handler;
+    typedef std::function<void (const std::error_code&,
+        channel_ptr)> channel_handler;
 
     protocol(threadpool& pool, hosts& hsts,
         handshake& shake, network& net);
@@ -88,13 +89,18 @@ public:
         fetch_connection_count_handler handle_fetch);
 
     /**
-     * Begin initialization sequence of performing node discovery and
-     * starting other network services.
+     * Subscribe to new connections established to other nodes.
+     * This method must be called again to stay subscribed as
+     * handlers are deregistered after being called.
+     *
+     * When this protocol service is stopped, any subscribed handlers
+     * will be called with the error_code set to error::service_stopped.
      *
      * @param[in]   handle_channel      Handler for new connection.
      * @code
      *  void handle_channel(
-     *      channel_ptr node    // Communication channel to new node
+     *      const std::error_code& ec,  // Status of operation
+     *      channel_ptr node            // Communication channel to new node
      *  );
      * @endcode
      */
@@ -123,7 +129,8 @@ private:
     // Accepted connections
     typedef std::vector<channel_ptr> channel_ptr_list;
 
-    typedef subscriber<channel_ptr> channel_subscriber_type;
+    typedef subscriber<const std::error_code&, channel_ptr>
+        channel_subscriber_type;
 
     // start sequence
     void handle_bootstrap(const std::error_code& ec,

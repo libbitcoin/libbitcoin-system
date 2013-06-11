@@ -232,11 +232,17 @@ connections to the network and manage them.
 
 .. cpp:function:: void protocol::subscribe_channel(channel_handler handle_channel)
 
-   Tell us about new connections to the Bitcoin network.
+   Subscribe to new connections established to other nodes.
+   This method must be called again to stay subscribed as
+   handlers are deregistered after being called.
+   
+   When this protocol service is stopped, any subscribed handlers
+   will be called with the error_code set to error::service_stopped.
    ::
 
     void handle_channel(
-        channel_ptr node    // New connection
+        const std::error_code& ec,  // Status of operation
+        channel_ptr node            // Communication channel to new node
     );
 
 .. cpp:function:: void protocol::fetch_connection_count(fetch_connection_count_handler handle_fetch)
@@ -332,7 +338,7 @@ calls a given notification handler when a new channel becomes available.
     // Notify us of new connections.
     // We can subscribe to protocol at any time after start() is called.
     prot.subscribe_channel(
-        std::bind(connection_started, _1, std::ref(prot)));
+        std::bind(connection_started, _1, _2, std::ref(prot)));
 
 We pass the :class:`protocol` service in by reference and resubscribe.
 :func:`connection_started` is *continuously* notified of new
@@ -341,10 +347,15 @@ communication channels when they are opened.
 
     void connection_started(channel_ptr node, protocol& prot)
     {
+        if (ec)
+        {
+            log_warning() << "Couldn't start connection: " << ec.message();
+            return;
+        }
         log_info() << "Connection established.";
         // Resubscribe to new nodes.
         prot.subscribe_channel(
-            std::bind(connection_started, _1, std::ref(prot)));
+            std::bind(connection_started, _1, _2, std::ref(prot)));
     }
 
 See :ref:`examples_proto` for the full source code.
@@ -503,13 +514,18 @@ add it to our :class:`tx_watch` object.
     
     void connection_started(channel_ptr node, protocol& prot, tx_watch& watch)
     {
+        if (ec)
+        {
+            log_warning() << "Couldn't start connection: " << ec.message();
+            return;
+        }
         log_info() << "Connection established.";
         // Subscribe to inventory packets.
         node->subscribe_inventory(
             std::bind(inventory_received, _1, _2, node, std::ref(watch)));
         // Resubscribe to new nodes.
         prot.subscribe_channel(
-            std::bind(connection_started, _1, std::ref(prot), std::ref(watch)));
+            std::bind(connection_started, _1, _2, std::ref(prot), std::ref(watch)));
     }
     
     void inventory_received(const std::error_code& ec, const inventory_type& inv,
@@ -536,7 +552,7 @@ In the main runloop, we display the transaction radar table periodically.
     tx_watch watch(pool, 200);
     // Notify us of new connections.
     prot.subscribe_channel(
-        std::bind(connection_started, _1, std::ref(prot), std::ref(watch)));
+        std::bind(connection_started, _1, _2, std::ref(prot), std::ref(watch)));
     // ...
     while (!stopped)
     {

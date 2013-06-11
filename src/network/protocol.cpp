@@ -85,6 +85,7 @@ void protocol::handle_save(const std::error_code& ec,
         handle_complete(ec);
         return;
     }
+    channel_subscribe_->relay(error::service_stopped, nullptr);
     handle_complete(std::error_code());
 }
 
@@ -347,7 +348,7 @@ void protocol::setup_new_channel(channel_ptr node)
     subscribe_address(node);
     node->send(get_address_type(), handle_send);
     // Notify subscribers
-    channel_subscribe_->relay(node);
+    channel_subscribe_->relay(std::error_code(), node);
 }
 void protocol::channel_stopped(const std::error_code& ec,
     channel_ptr which_node)

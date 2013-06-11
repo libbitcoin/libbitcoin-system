@@ -5,6 +5,7 @@
 using namespace bc;
 
 using std::placeholders::_1;
+using std::placeholders::_2;
 
 // We don't have a database open, and aren't doing any critical file
 // operations so we aren't worried about exiting suddenly.
@@ -44,12 +45,18 @@ void display_number_of_connections(
     log_debug() << connection_count << " CONNECTIONS";
 }
 
-void connection_started(channel_ptr node, protocol& prot)
+void connection_started(const std::error_code& ec, channel_ptr node,
+    protocol& prot)
 {
+    if (ec)
+    {
+        log_warning() << "Couldn't start connection: " << ec.message();
+        return;
+    }
     log_info() << "Connection established.";
     // Resubscribe to new nodes.
     prot.subscribe_channel(
-        std::bind(connection_started, _1, std::ref(prot)));
+        std::bind(connection_started, _1, _2, std::ref(prot)));
 }
 
 int main()
@@ -65,7 +72,7 @@ int main()
     prot.start(handle_start);
     // Notify us of new connections.
     prot.subscribe_channel(
-        std::bind(connection_started, _1, std::ref(prot)));
+        std::bind(connection_started, _1, _2, std::ref(prot)));
     // Catch C signals for stopping the program.
     signal(SIGABRT, signal_handler);
     signal(SIGTERM, signal_handler);

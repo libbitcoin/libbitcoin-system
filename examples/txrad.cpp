@@ -144,19 +144,26 @@ void handle_start(const std::error_code& ec)
     log_debug() << "Started.";
 }
 
-void connection_started(channel_ptr node, protocol& prot, tx_watch& watch);
+void connection_started(const std::error_code& ec, channel_ptr node,
+    protocol& prot, tx_watch& watch);
 void inventory_received(const std::error_code& ec, const inventory_type& inv,
     channel_ptr node, tx_watch& watch);
 
-void connection_started(channel_ptr node, protocol& prot, tx_watch& watch)
+void connection_started(const std::error_code& ec, channel_ptr node,
+    protocol& prot, tx_watch& watch)
 {
+    if (ec)
+    {
+        log_warning() << "Couldn't start connection: " << ec.message();
+        return;
+    }
     log_info() << "Connection established.";
     // Subscribe to inventory packets.
     node->subscribe_inventory(
         std::bind(inventory_received, _1, _2, node, std::ref(watch)));
     // Resubscribe to new nodes.
     prot.subscribe_channel(
-        std::bind(connection_started, _1, std::ref(prot), std::ref(watch)));
+        std::bind(connection_started, _1, _2, std::ref(prot), std::ref(watch)));
 }
 
 void inventory_received(const std::error_code& ec, const inventory_type& inv,
@@ -191,7 +198,7 @@ int main()
     tx_watch watch(pool, 200);
     // Notify us of new connections.
     prot.subscribe_channel(
-        std::bind(connection_started, _1, std::ref(prot), std::ref(watch)));
+        std::bind(connection_started, _1, _2, std::ref(prot), std::ref(watch)));
     // Catch C signals for stopping the program.
     signal(SIGABRT, signal_handler);
     signal(SIGTERM, signal_handler);

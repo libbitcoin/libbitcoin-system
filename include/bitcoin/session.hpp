@@ -90,7 +90,7 @@ public:
     void stop(completion_handler handle_complete);
 
 private:
-    void new_channel(channel_ptr node);
+    void new_channel(const std::error_code& ec, channel_ptr node);
     void set_start_depth(const std::error_code& ec, size_t fork_point,
         const blockchain::block_list& new_blocks,
         const blockchain::block_list& replaced_blocks);
