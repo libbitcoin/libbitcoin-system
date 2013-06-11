@@ -88,7 +88,7 @@ void satoshi_load(Iterator first, Iterator last, version_type& packet)
     }
     packet.start_depth = deserial.read_4_bytes();
     BITCOIN_ASSERT(stream.size() >= 4 + 8 + 8 + 26 + 26 + 8 + 1 + 4);
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
+    //BITCOIN_ASSERT(satoshi_raw_size(packet) <= stream.size());
 }
 
 const std::string satoshi_command(const verack_type&);
