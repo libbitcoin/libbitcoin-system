@@ -76,9 +76,9 @@ private:
         const inventory_vector_type& inv = tx_hashes[tx_index];
         BITCOIN_ASSERT(inv.type ==
             inventory_type_id::transaction);
-        size_t tx_hashes_size = tx_hashes.size();
+        BITCOIN_ASSERT(block_.transactions.size() == tx_hashes.size());
         chain_.fetch_transaction(inv.hash,
-            [this, this_ptr, tx_index, tx_hashes_size](
+            [this, this_ptr, tx_index](
                 const std::error_code& ec,
                 const transaction_type& tx)
             {
@@ -86,10 +86,10 @@ private:
                     return;
                 BITCOIN_ASSERT(tx_index < block_.transactions.size());
                 block_.transactions[tx_index] = tx;
-                ++count_;
-                BITCOIN_ASSERT(block_.transactions.size() == tx_hashes_size);
-                if (count_ == tx_hashes_size)
+                if (++count_ == block_.transactions.size())
+                {
                     handle_(std::error_code(), block_);
+                }
             });
     }
 
@@ -256,8 +256,7 @@ private:
             return;
         else
             inpoints_[i] = inpoint;
-        ++count_;
-        if (count_ == inpoints_.size())
+        if (++count_ == inpoints_.size())
         {
             BITCOIN_ASSERT(inpoints_.size() == outpoints_.size());
             handle_(std::error_code(), outpoints_, inpoints_);
@@ -331,8 +330,7 @@ private:
             return;
         BITCOIN_ASSERT(output_index < tx.outputs.size());
         values_[index] = tx.outputs[output_index].value;
-        ++count_;
-        if (count_ == values_.size())
+        if (++count_ == values_.size())
             handle_(std::error_code(), values_);
     }
 
