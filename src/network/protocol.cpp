@@ -44,8 +44,7 @@ void protocol::handle_bootstrap(const std::error_code& ec,
         handle_complete(ec);
         return;
     }
-    ++(*count_paths);
-    if (*count_paths == 2)
+    if (++(*count_paths) == 2)
     {
         handle_complete(std::error_code());
         run();
