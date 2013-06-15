@@ -14,6 +14,15 @@ You will need:
     - protobuf
   - LevelDB
 
+'configure' accepted a --prefix switch. Use this if you want to install the
+project locally. Then add these environment variables to your ~/.bashrc
+
+  $ export LD_LIBRARY_PATH=~/usr/lib/
+  $ export PKG_CONFIG_PATH=~/usr/lib/pkgconfig/
+
+Use `pkg-config --cflags --libs libbitcoin' for getting compile/build
+parameters.
+
 For the blockchain database, set the max open files limit higher.
 The default limit on most Linux systems is too low.
 
@@ -52,6 +61,16 @@ following environment variables before running the build process.
 
   CC=/usr/local/bin/gcc-4.7
   CXX=/usr/local/bin/g++-4.7
+
+For Mac OSX Mountain Lion, you need to follow these brew commands:
+
+  $ brew install boost openssl leveldb
+  $ brew tap homebrew/versions
+  $ brew install gcc48
+  # Can be replaced back later if you prefer, but
+  # keeping the new g++ is a good idea.
+  $ sudo ln -sf /usr/local/bin/g++-4.8 /usr/bin/g++
+
 
   $ autoreconf -i
   $ ./configure --enable-leveldb
