@@ -97,11 +97,13 @@ private:
 
 /**
  * Convenience class for objects wishing to synchronize operations around
- * shared data. Objects can inherit this class and call queue() to pass
- * in their handlers.
+ * shared data.
+ *
+ * push() guarantees that any handlers passed to it will never execute
+ * at the same time.
  *
  * queue() guarantees that any handlers passed to it will never execute
- * at the same time.
+ * at the same time, and they will be called in sequential order.
  */
 class async_strand
 {
@@ -109,7 +111,7 @@ public:
     async_strand(threadpool& pool);
 
     /*
-     * queue() guarantees that any handlers passed to it will never execute
+     * push() guarantees that any handlers passed to it will never execute
      * at the same time.
      *
      * @param[in]   handler     Handler to execute operation.
@@ -118,14 +120,16 @@ public:
      * @endcode
      */
     template <typename Handler>
-    void queue(Handler handler)
+    void push(Handler handler)
     {
         ios_.post(strand_.wrap(handler));
     }
 
     /*
-     * post() guarantees that any handlers passed to it will never execute
+     * queue() guarantees that any handlers passed to it will never execute
      * at the same time, and they will be called in sequential order.
+     *
+     * Guarantees ordering.
      *
      * @param[in]   handler     Handler to execute operation.
      * @code
@@ -133,7 +137,7 @@ public:
      * @endcode
      */
     template <typename Handler>
-    void post(Handler handler)
+    void queue(Handler handler)
     {
         strand_.post(handler);
     }

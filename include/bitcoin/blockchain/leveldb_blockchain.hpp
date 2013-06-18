@@ -128,10 +128,12 @@ private:
 
     io_service& ios_;
     // Queue for writes to the blockchain.
-    async_strand queue_;
+    async_strand strand_;
     // Queue for serializing reorganization handler calls.
-    async_strand reorg_queue_;
+    async_strand reorg_strand_;
+    // Lock the database directory with a file lock.
     boost::interprocess::file_lock flock_;
+    // seqlock used for writes.
     seqlock_type seqlock_;
 
     // Comparator to order blocks by depth logically.

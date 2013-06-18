@@ -9,14 +9,14 @@
 namespace libbitcoin {
 
 hosts::hosts(threadpool& pool, size_t capacity)
-  : async_strand(pool), buffer_(capacity)
+  : strand_(pool), buffer_(capacity)
 {
     srand(time(nullptr));
 }
 
 void hosts::load(const std::string& filename, load_handler handle_load)
 {
-    queue(
+    strand_.push(
         std::bind(&hosts::do_load,
             this, filename, handle_load));
 }
@@ -36,7 +36,7 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
             continue;
         std::copy(raw_ip.begin(), raw_ip.end(), field.ip.begin());
         field.port = boost::lexical_cast<uint16_t>(parts[1]);
-        queue(
+        strand_.push(
             [this, field]()
             {
                 buffer_.push_back(field);
@@ -47,7 +47,7 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
 
 void hosts::save(const std::string& filename, save_handler handle_save)
 {
-    queue(
+    strand_.push(
         std::bind(&hosts::do_save,
             this, filename, handle_save));
 }
@@ -63,7 +63,7 @@ void hosts::do_save(const std::string& filename, save_handler handle_save)
 void hosts::store(const network_address_type& address,
     store_handler handle_store)
 {
-    queue(
+    strand_.push(
         [this, address, handle_store]()
         {
             buffer_.push_back(hosts_field{address.ip, address.port});
@@ -74,7 +74,7 @@ void hosts::store(const network_address_type& address,
 void hosts::remove(const network_address_type& address,
     remove_handler handle_remove)
 {
-    queue(
+    strand_.push(
         std::bind(&hosts::do_remove,
             this, address, handle_remove));
 }
@@ -98,7 +98,7 @@ void hosts::do_remove(const network_address_type& address,
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)
 {
-    queue(
+    strand_.push(
         std::bind(&hosts::do_fetch_address,
             this, handle_fetch));
 }
@@ -120,7 +120,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 
 void hosts::fetch_count(fetch_count_handler handle_fetch)
 {
-    queue(
+    strand_.push(
         std::bind(&hosts::do_fetch_count,
             this, handle_fetch));
 }

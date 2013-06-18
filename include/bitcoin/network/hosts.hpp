@@ -14,7 +14,6 @@
 namespace libbitcoin {
 
 class hosts
-  : public async_strand
 {
 public:
     typedef std::function<void (const std::error_code&)> load_handler;
@@ -60,6 +59,7 @@ private:
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);
 
+    async_strand strand_;
     boost::circular_buffer<hosts_field> buffer_;
 };
 
