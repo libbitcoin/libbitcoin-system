@@ -7,10 +7,7 @@ AM_PROG_AR
 LT_INIT
 AC_PROG_CXX
 CHECK_GXX_CPP0X
-CFLAGS="-ggdb"
-CXXFLAGS="-ggdb"
-my_CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all"
-AC_SUBST([my_CXXFLAGS])
+CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all"
 
 AC_ARG_ENABLE(bdb,
 	[AC_HELP_STRING([--enable-bdb],
@@ -23,6 +20,15 @@ AC_ARG_ENABLE(leveldb,
 			[Build LevelDB support.])],
 	[bld_leveldb="$enable_leveldb"], [bld_leveldb="no"])
 AM_CONDITIONAL([DO_LEVELDB], [test "$enable_leveldb" = "yes"])
+
+AC_ARG_ENABLE([debug],
+[  --enable-debug    Turn on debugging],
+[case "${enableval}" in
+  yes) debug=true ;;
+  no)  debug=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
+esac],[debug=false])
+AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
 AX_BOOST_BASE
 #AX_BOOST_SYSTEM
@@ -46,6 +52,11 @@ if test "$bld_leveldb" = "yes"; then
 	LDFLAG_LEVELDB="-lprotobuf -lleveldb"
     AC_SUBST(CFLAG_LEVELDB)
     CFLAG_LEVELDB="-DLEVELDB_ENABLED"
+fi
+
+if test x$debug = xtrue; then
+    my_CXXFLAGS="-g3 -DDEBUG"
+    AC_SUBST([my_CXXFLAGS])
 fi
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])

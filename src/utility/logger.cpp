@@ -33,6 +33,10 @@ void output_ostream(std::ostream& ostr, log_level level,
     std::cerr << ": " << body << std::endl;
 }
 
+void ignore_output(log_level level,
+    const std::string& domain, const std::string& body)
+{
+}
 void output_cout(log_level level,
     const std::string& domain, const std::string& body)
 {
@@ -45,7 +49,11 @@ void output_cerr(log_level level,
 }
 
 logger_wrapper::destination_map logger_wrapper::dests_{
+#ifdef DEBUG
+    std::make_pair(log_level::debug, ignore_output),
+#else
     std::make_pair(log_level::debug, output_cout),
+#endif
     std::make_pair(log_level::info, output_cout),
     std::make_pair(log_level::warning, output_cerr),
     std::make_pair(log_level::error, output_cerr),
