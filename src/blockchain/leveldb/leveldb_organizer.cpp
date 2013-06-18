@@ -8,9 +8,8 @@ namespace libbitcoin {
 
 leveldb_organizer::leveldb_organizer(leveldb_common_ptr common,
     orphans_pool_ptr orphans, leveldb_chain_keeper_ptr chain,
-    subscriber_ptr reorganize_subscriber)
-  : organizer(orphans, chain), common_(common), chain_(chain),
-    reorganize_subscriber_(reorganize_subscriber)
+    reorganize_handler handler)
+  : organizer(orphans, chain), common_(common), chain_(chain), handler_(handler)
 {
 }
 
@@ -30,8 +29,7 @@ void leveldb_organizer::reorganize_occured(
     const blockchain::block_list& arrivals,
     const blockchain::block_list& replaced)
 {
-    reorganize_subscriber_->relay(std::error_code(),
-        fork_point, arrivals, replaced);
+    handler_(std::error_code(), fork_point, arrivals, replaced);
 }
 
 } // namespace libbitcoin

@@ -50,7 +50,7 @@ const char* depth_comparator::Name() const
 }
 
 leveldb_blockchain::leveldb_blockchain(threadpool& pool)
-  : async_strand(pool), ios_(pool.service()), seqlock_(0)
+  : ios_(pool.service()), queue_(pool), reorg_queue_(pool), seqlock_(0)
 {
     reorganize_subscriber_ =
         std::make_shared<reorganize_subscriber_type>(pool);
@@ -64,7 +64,7 @@ leveldb_blockchain::~leveldb_blockchain()
 void leveldb_blockchain::start(const std::string& prefix,
     start_handler handle_start)
 {
-    queue(
+    queue_.queue(
         [this, prefix, handle_start]
         {
             if (initialize(prefix))
@@ -159,8 +159,23 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
             db_blocks_.get(), db_blocks_hash_.get(),
             db_txs_.get(), db_spends_.get(), db_address_.get());
     chain_ = chainkeeper;
+    auto reorg_handler = [this](
+        const std::error_code& ec, size_t fork_point,
+        const blockchain::block_list& arrivals,
+        const blockchain::block_list& replaced)
+    {
+        // Post this operation without using the strand. Therefore
+        // calling the reorganize callbacks won't prevent store() from
+        // continuing.
+        reorg_queue_.post(
+            [=]()
+            {
+                reorganize_subscriber_->relay(
+                    ec, fork_point, arrivals, replaced);
+            });
+    };
     organize_ = std::make_shared<leveldb_organizer>(
-        common_, orphans_, chainkeeper, reorganize_subscriber_);
+        common_, orphans_, chainkeeper, reorg_handler);
     return true;
 }
 
@@ -174,7 +189,7 @@ void leveldb_blockchain::begin_write()
 void leveldb_blockchain::store(const block_type& stored_block,
     store_block_handler handle_store)
 {
-    queue(
+    queue_.queue(
         std::bind(&leveldb_blockchain::do_store,
             this, stored_block, handle_store));
 }
@@ -204,7 +219,7 @@ void leveldb_blockchain::do_store(const block_type& stored_block,
 void leveldb_blockchain::import(const block_type& import_block,
     size_t depth, import_block_handler handle_import)
 {
-    queue(
+    queue_.queue(
         std::bind(&leveldb_blockchain::do_import,
             this, import_block, depth, handle_import));
 }

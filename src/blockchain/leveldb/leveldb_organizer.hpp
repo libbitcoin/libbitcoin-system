@@ -12,11 +12,10 @@ class leveldb_organizer
   : public organizer
 {
 public:
-    typedef leveldb_blockchain::reorganize_subscriber_type::ptr
-        subscriber_ptr;
+    typedef blockchain::reorganize_handler reorganize_handler;
 
     leveldb_organizer(leveldb_common_ptr common, orphans_pool_ptr orphans,
-        leveldb_chain_keeper_ptr chain, subscriber_ptr reorganize_subscriber);
+        leveldb_chain_keeper_ptr chain, reorganize_handler handler);
 
 protected:
     std::error_code verify(int fork_index,
@@ -29,8 +28,7 @@ protected:
 private:
     leveldb_common_ptr common_;
     leveldb_chain_keeper_ptr chain_;
-
-    subscriber_ptr reorganize_subscriber_;
+    reorganize_handler handler_;
 };
 
 } // namespace libbitcoin

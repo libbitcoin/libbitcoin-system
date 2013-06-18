@@ -16,7 +16,7 @@ class leveldb_common;
 typedef std::shared_ptr<leveldb_common> leveldb_common_ptr;
 
 class leveldb_blockchain
-  : public blockchain, public async_strand
+  : public blockchain
 {
 public:
     // Used by internal components so need public definition here
@@ -127,6 +127,10 @@ private:
         fetch_handler_outputs handle_fetch, size_t slock);
 
     io_service& ios_;
+    // Queue for writes to the blockchain.
+    async_strand queue_;
+    // Queue for serializing reorganization handler calls.
+    async_strand reorg_queue_;
     boost::interprocess::file_lock flock_;
     seqlock_type seqlock_;
 

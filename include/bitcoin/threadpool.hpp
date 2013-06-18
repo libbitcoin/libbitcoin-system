@@ -123,6 +123,21 @@ public:
         ios_.post(strand_.wrap(handler));
     }
 
+    /*
+     * post() guarantees that any handlers passed to it will never execute
+     * at the same time, and they will be called in sequential order.
+     *
+     * @param[in]   handler     Handler to execute operation.
+     * @code
+     *  void handler();
+     * @endcode
+     */
+    template <typename Handler>
+    void post(Handler handler)
+    {
+        strand_.post(handler);
+    }
+
 private:
     io_service& ios_;
     io_service::strand strand_;
