@@ -141,6 +141,9 @@
  *
  * - @link libbitcoin::encode_base58 encode_base58 @endlink
  * - @link libbitcoin::decode_base58 decode_base58 @endlink
+ *
+ * @author Amir Taaki <amir@unsystem.net>
+ *
  */
 
 // Convenience header that includes everything
