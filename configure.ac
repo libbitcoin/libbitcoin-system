@@ -1,4 +1,5 @@
 AC_INIT([libbitcoin], [0.1], [genjix@riseup.net])
+AC_USE_SYSTEM_EXTENSIONS
 AC_LANG(C++)
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
@@ -6,8 +7,9 @@ AM_INIT_AUTOMAKE([-Wall -Werror])
 AM_PROG_AR
 LT_INIT
 AC_PROG_CXX
-CHECK_GXX_CPP0X
-CXXFLAGS="$ac_cv_cxx_cpp0x_flag -Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all"
+AC_GNU_SOURCE
+AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
+#CXXFLAGS="-Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all"
 
 AC_ARG_ENABLE(bdb,
 	[AC_HELP_STRING([--enable-bdb],
