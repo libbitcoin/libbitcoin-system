@@ -215,7 +215,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'libbitcoin', u'libbitcoin Documentation',
-     [u'libbitcoin'], 1)
+     [u'Amir Taaki <amir@unsystem.net>'], 1)
 ]
 
 # If true, show URL addresses after external links.

@@ -37,3 +37,5 @@ Contents:
    examples/txrad
    examples/fullnode
 
+Author: Amir Taaki <amir@unsystem.net>
+
