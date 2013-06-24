@@ -7,7 +7,7 @@
 Welcome to the online version of The libbitcoin Tutorial, a free tutorial about
 the libbitcoin library for the Bitcoin cryptocurrency.
 
-TODO: chapter 8 in progress.
+.. TODO: chapter 8 in progress.
 
 Contents:
 
@@ -21,7 +21,7 @@ Contents:
    blockchain
    network
    fullnode
-   offlinetx
+   .. offlinetx
 
 .. toctree::
    :hidden:
