@@ -34,6 +34,25 @@ private:
 class end_of_stream
   : std::exception {};
 
+/**
+ * Deserializer that uses iterators and is oblivious to the underlying
+ * container type. Is not threadsafe.
+ *
+ * Use the helper make_deserializer to construct a deserializer without
+ * needing to specify the Iterator type.
+ *
+ * Throws end_of_stream exception upon early termination during deserialize.
+ * For example, calling read_8_bytes() with only 5 bytes remaining will throw.
+ *
+ * @code
+ *  auto deserial = make_deserializer(data.begin(), data.end());
+ *  try {
+ *    uint64_t value = deserial.read_8_bytes();
+ *  } catch (end_of_stream) {
+ *    // ...
+ *  }
+ * @endcode
+ */
 template <typename Iterator>
 class deserializer
 {
@@ -124,7 +143,8 @@ public:
 private:
     // Try to advance iterator 'distance' incremenets forwards.
     // Throw if we prematurely reach the end.
-    static void check_distance(Iterator begin, Iterator end, size_t distance)
+    static void check_distance(
+        Iterator begin, const Iterator end, size_t distance)
     {
         for (size_t i = 0; i < distance; ++i)
         {
@@ -137,7 +157,8 @@ private:
     }
 
     template<typename T>
-    static T read_data_impl(Iterator& begin, Iterator end, bool reverse=false)
+    static T read_data_impl(
+        Iterator& begin, const Iterator end, bool reverse=false)
     {
         check_distance(begin, end, sizeof(T));
         data_chunk chunk(begin, begin + sizeof(T));
@@ -167,7 +188,8 @@ private:
         begin += byte_array.size();
     }
 
-    Iterator begin_, end_;
+    Iterator begin_;
+    const Iterator end_;
 };
 
 template <typename Iterator>
