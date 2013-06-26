@@ -717,7 +717,11 @@ bool validate_block::validate_inputs(const transaction_type& tx,
     {
         if (!connect_input(index_in_parent, tx, input_index,
                 value_in, total_sigops))
+        {
+            log_warning(LOG_VALIDATE) << "Validate input "
+                << hash_transaction(tx) << ":" << input_index << " failed";
             return false;
+        }
     }
     return true;
 }
@@ -744,18 +748,27 @@ bool validate_block::connect_input(size_t index_in_parent,
     transaction_type previous_tx;
     size_t previous_depth;
     if (!fetch_transaction(previous_tx, previous_depth, previous_output.hash))
+    {
+        log_warning(LOG_VALIDATE) << "Unable to fetch input transaction";
         return false;
+    }
     const transaction_output_type& previous_tx_out =
         previous_tx.outputs[previous_output.index];
     // Signature operations count if script_hash payment type.
     total_sigops += script_hash_signature_operations_count(
         previous_tx_out.output_script, input.input_script);
     if (total_sigops > max_block_script_sig_operations)
+    {
+        log_warning(LOG_VALIDATE) << "Total sigops exceeds block maximum";
         return false;
+    }
     // Get output amount
     uint64_t output_value = previous_tx_out.value;
     if (output_value > max_money())
+    {
+        log_warning(LOG_VALIDATE) << "Total sigops exceeds block maximum";
         return false;
+    }
     // Check coinbase maturity has been reached
     if (is_coinbase(previous_tx))
     {
@@ -774,14 +787,23 @@ bool validate_block::connect_input(size_t index_in_parent,
     script output_script = previous_tx_out.output_script;
     if (!output_script.run(input.input_script,
             current_tx, input_index, bip16_enabled))
+    {
+        log_warning(LOG_VALIDATE) << "Input script evaluation failed";
         return false;
+    }
     // Search for double spends
     if (is_output_spent(previous_output, index_in_parent, input_index))
+    {
+        log_warning(LOG_VALIDATE) << "Double spend detected";
         return false;
+    }
     // Increase value_in by this output's value
     value_in += output_value;
     if (value_in > max_money())
+    {
+        log_warning(LOG_VALIDATE) << "Total input money over 21 million";
         return false;
+    }
     return true;
 }
 
