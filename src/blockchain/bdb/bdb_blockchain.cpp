@@ -534,7 +534,8 @@ void bdb_blockchain::do_fetch_outputs(const payment_address& address,
         // We need a copy not a temporary
         data_chunk raw_outpoint(value.data());
         // Then read the value off
-        deserializer deserial(raw_outpoint);
+        auto deserial = make_deserializer(
+            raw_outpoint.begin(), raw_outpoint.end());
         outpoint.hash = deserial.read_hash();
         outpoint.index = deserial.read_4_bytes();
         assoc_outs.push_back(outpoint);

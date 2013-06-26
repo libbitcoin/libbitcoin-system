@@ -41,7 +41,8 @@ bool leveldb_common::fetch_spend(const output_point& spent_output,
         return false;
     }
     const data_chunk raw_spend_data(raw_spend.begin(), raw_spend.end());
-    deserializer deserial(raw_spend_data);
+    auto deserial = make_deserializer(
+        raw_spend_data.begin(), raw_spend_data.end());
     input_spend.hash = deserial.read_hash();
     input_spend.index = deserial.read_4_bytes();
     return true;
@@ -252,7 +253,7 @@ output_point slice_to_output_point(const leveldb::Slice& out_slice)
     raw_outpoint.insert(raw_outpoint.end(),
         value_start, value_start + out_slice.size());
     // Then read the value off
-    deserializer deserial(raw_outpoint);
+    auto deserial = make_deserializer(raw_outpoint.begin(), raw_outpoint.end());
     output_point outpoint;
     outpoint.hash = deserial.read_hash();
     outpoint.index = deserial.read_4_bytes();

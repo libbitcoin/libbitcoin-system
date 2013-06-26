@@ -34,7 +34,7 @@ template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, header_type& head)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     head.magic = deserial.read_4_bytes();
     head.command = deserial.read_fixed_string(command_size);
     head.payload_length = deserial.read_4_bytes();
@@ -64,7 +64,7 @@ template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, version_type& packet)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     packet.version = deserial.read_4_bytes();
     packet.services = deserial.read_8_bytes();
     packet.timestamp = deserial.read_8_bytes();
@@ -124,7 +124,7 @@ template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, address_type& packet)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     uint64_t count = deserial.read_variable_uint();
     for (size_t i = 0; i < count; ++i)
     {
@@ -177,7 +177,7 @@ template <typename Message, typename Iterator>
 void load_inventory_impl(Iterator first, Iterator last, Message& packet)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     uint64_t count = deserial.read_variable_uint();
     for (size_t i = 0; i < count; ++i)
     {
@@ -235,7 +235,7 @@ template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, get_blocks_type& packet)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     // Discard protocol version because it is stupid
     deserial.read_4_bytes();
     uint32_t count = deserial.read_variable_uint();
@@ -251,10 +251,57 @@ void satoshi_load(Iterator first, Iterator last, get_blocks_type& packet)
 void save_transaction(
     serializer& serial, const transaction_type& packet);
 
-data_chunk read_raw_script(deserializer& deserial);
-script read_script(deserializer& deserial);
+template <typename Deserializer>
+data_chunk read_raw_script(Deserializer& deserial)
+{
+    data_chunk raw_script;
+    uint64_t script_length = deserial.read_variable_uint();
+    return deserial.read_data(script_length);
+}
+
+template <typename Deserializer>
+script read_script(Deserializer& deserial)
+{
+    data_chunk raw_script = read_raw_script(deserial);
+#ifndef BITCOIN_DISABLE_ASSERTS
+    std::string assert_msg = encode_hex(raw_script);
+#endif
+    BITCOIN_ASSERT_MSG(
+        raw_script == save_script(parse_script(raw_script)),
+        assert_msg.c_str());
+    // Eventually plan to move parse_script to inside here
+    return parse_script(raw_script);
+}
+
+template <typename Deserializer>
 transaction_type read_transaction(
-    deserializer& deserial, transaction_type& packet);
+    Deserializer& deserial, transaction_type& packet)
+{
+    packet.version = deserial.read_4_bytes();
+    uint64_t tx_in_count = deserial.read_variable_uint();
+    for (size_t tx_in_i = 0; tx_in_i < tx_in_count; ++tx_in_i)
+    {
+        transaction_input_type input;
+        input.previous_output.hash = deserial.read_hash();
+        input.previous_output.index = deserial.read_4_bytes();
+        if (previous_output_is_null(input.previous_output))
+            input.input_script = coinbase_script(read_raw_script(deserial));
+        else
+            input.input_script = read_script(deserial);
+        input.sequence = deserial.read_4_bytes();
+        packet.inputs.push_back(input);
+    }
+    uint64_t tx_out_count = deserial.read_variable_uint();
+    for (size_t tx_out_i = 0; tx_out_i < tx_out_count; ++tx_out_i)
+    {
+        transaction_output_type output;
+        output.value = deserial.read_8_bytes();
+        output.output_script = read_script(deserial);
+        packet.outputs.push_back(output);
+    }
+    packet.locktime = deserial.read_4_bytes();
+    return packet;
+}
 
 const std::string satoshi_command(const transaction_type&);
 size_t satoshi_raw_size(const transaction_type& packet);
@@ -271,7 +318,7 @@ template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, transaction_type& packet)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     read_transaction(deserial, packet);
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
@@ -299,7 +346,7 @@ template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, block_type& packet)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     packet.version = deserial.read_4_bytes();
     packet.previous_block_hash = deserial.read_hash();
     packet.merkle = deserial.read_hash();
@@ -331,7 +378,7 @@ template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, ping_type& packet)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     packet.nonce = deserial.read_8_bytes();
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }
@@ -351,7 +398,7 @@ template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, pong_type& packet)
 {
     data_chunk stream(first, last);
-    deserializer deserial(stream);
+    auto deserial = make_deserializer(stream.begin(), stream.end());
     packet.nonce = deserial.read_8_bytes();
     BITCOIN_ASSERT(satoshi_raw_size(packet) == stream.size());
 }

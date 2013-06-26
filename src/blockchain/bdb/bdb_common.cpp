@@ -42,7 +42,8 @@ bool bdb_common::fetch_spend(txn_guard_ptr txn,
             raw_spend.get(), 0) != 0)
         return false;
     const data_chunk raw_spend_data = raw_spend.data();
-    deserializer deserial(raw_spend_data);
+    auto deserial = make_deserializer(
+        raw_spend_data.begin(), raw_spend_data.end());
     input_spend.hash = deserial.read_hash();
     input_spend.index = deserial.read_4_bytes();
     return true;

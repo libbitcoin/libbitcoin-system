@@ -5,8 +5,8 @@ int main()
 {
     data_chunk rawdat(decode_hex("46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"));
     BITCOIN_ASSERT((rawdat == data_chunk{0x46, 0x68, 0x24, 0x88, 0xf0, 0xa7, 0x21, 0x12, 0x4a, 0x39, 0x05, 0xa1, 0xbb, 0x72, 0x44, 0x5b, 0xf1, 0x34, 0x93, 0xe2, 0xcd, 0x46, 0xc5, 0xc0, 0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00}));
-    deserializer deserial(rawdat);
-    message::output_point outpoint;
+    auto deserial = make_deserializer(rawdat.begin(), rawdat.end());
+    output_point outpoint;
     outpoint.hash = deserial.read_hash();
     outpoint.index = deserial.read_4_bytes();
     log_debug() << encode_hex(outpoint.hash) << " : " << outpoint.index;
