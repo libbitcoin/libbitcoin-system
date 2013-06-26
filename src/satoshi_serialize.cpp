@@ -119,31 +119,6 @@ size_t satoshi_raw_size(const get_blocks_type& packet)
         32 * packet.start_hashes.size();
 }
 
-void save_transaction(
-    serializer& serial, const transaction_type& packet)
-{
-    serial.write_4_bytes(packet.version);
-    serial.write_variable_uint(packet.inputs.size());
-    for (const transaction_input_type& input: packet.inputs)
-    {
-        serial.write_hash(input.previous_output.hash);
-        serial.write_4_bytes(input.previous_output.index);
-        data_chunk raw_script = save_script(input.input_script);
-        serial.write_variable_uint(raw_script.size());
-        serial.write_data(raw_script);
-        serial.write_4_bytes(input.sequence);
-    }
-    serial.write_variable_uint(packet.outputs.size());
-    for (const transaction_output_type& output: packet.outputs)
-    {
-        serial.write_8_bytes(output.value);
-        data_chunk raw_script = save_script(output.output_script);
-        serial.write_variable_uint(raw_script.size());
-        serial.write_data(raw_script);
-    }
-    serial.write_4_bytes(packet.locktime);
-}
-
 const std::string satoshi_command(const transaction_type&)
 {
     return "tx";

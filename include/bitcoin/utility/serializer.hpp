@@ -31,6 +31,148 @@ private:
     data_chunk data_;
 };
 
+/**
+ * Serializer that uses iterators and is oblivious to the underlying
+ * container type. Is not threadsafe.
+ *
+ * Use the helper make_serializer() to construct a serializer without
+ * needing to specify the Iterator type.
+ *
+ * Makes no assumptions about the size of the underlying container type.
+ * User is responsible for allocating enough space prior to serialization.
+ *
+ * @code
+ *  data_chunk buffer(8);
+ *  auto serial = make_serializer(buffer.begin());
+ *  serial.write_8_bytes(110);
+ * @endcode
+ */
+template <typename Iterator>
+class serializer2
+{
+public:
+    serializer2(const Iterator begin)
+      : iter_(begin) {}
+
+    void write_byte(uint8_t value)
+    {
+        *iter_ = value;
+        ++iter_;
+    }
+    void write_2_bytes(uint16_t value)
+    {
+        write_data_impl(value);
+    }
+    void write_4_bytes(uint32_t value)
+    {
+        write_data_impl(value);
+    }
+    void write_8_bytes(uint64_t value)
+    {
+        write_data_impl(value);
+    }
+
+    void write_variable_uint(uint64_t value)
+    {
+        if (value < 0xfd)
+        {
+            write_byte(value);
+        }
+        else if (value <= 0xffff)
+        {
+            write_byte(0xfd);
+            write_2_bytes(value);
+        }
+        else if (value <= 0xffffffff)
+        {
+            write_byte(0xfe);
+            write_4_bytes(value);
+        }
+        else
+        {
+            write_byte(0xff);
+            write_8_bytes(value);
+        }
+    }
+
+    template <typename T>
+    void write_data(const T& data)
+    {
+        copy(data.begin(), data.end());
+    }
+
+    void write_network_address(network_address_type addr)
+    {
+        write_8_bytes(addr.services);
+        write_data(addr.ip);
+        write_data(uncast_type(addr.port, true));
+    }
+
+    void write_hash(const hash_digest& hash)
+    {
+        write_data_reverse(hash);
+    }
+
+    void write_short_hash(const short_hash& hash)
+    {
+        write_data_reverse(hash);
+    }
+
+    void write_fixed_string(const std::string& command, size_t string_size)
+    {
+        BITCOIN_ASSERT(command.size() <= string_size);
+        data_chunk raw_string(string_size);
+        std::copy(command.begin(), command.end(), raw_string.begin());
+        write_data(raw_string);
+    }
+
+    void write_string(const std::string& str)
+    {
+        write_variable_uint(str.size());
+        write_data(str);
+    }
+
+    /**
+     * Returns underlying iterator.
+     */
+    Iterator iterator()
+    {
+        return iter_;
+    }
+
+private:
+    template <typename T>
+    void write_data_impl(T value)
+    {
+        write_data(uncast_type(value));
+    }
+
+    template <typename T>
+    void write_data_reverse(const T& data)
+    {
+        copy(data.rbegin(), data.rend());
+    }
+
+    template <typename InputIterator>
+    void copy(InputIterator first, InputIterator last)
+    {
+        while (first != last)
+        {
+            *iter_ = *first;
+            ++first;
+            ++iter_;
+        }
+    }
+
+    Iterator iter_;
+};
+
+template <typename Iterator>
+serializer2<Iterator> make_serializer(Iterator begin)
+{
+    return serializer2<Iterator>(begin);
+}
+
 class end_of_stream
   : std::exception {};
 
@@ -38,7 +180,7 @@ class end_of_stream
  * Deserializer that uses iterators and is oblivious to the underlying
  * container type. Is not threadsafe.
  *
- * Use the helper make_deserializer to construct a deserializer without
+ * Use the helper make_deserializer() to construct a deserializer without
  * needing to specify the Iterator type.
  *
  * Throws end_of_stream exception upon early termination during deserialize.
@@ -156,7 +298,7 @@ private:
         }
     }
 
-    template<typename T>
+    template <typename T>
     static T read_data_impl(
         Iterator& begin, const Iterator end, bool reverse=false)
     {
@@ -167,7 +309,7 @@ private:
         return val;
     }
 
-    template<unsigned int N>
+    template <unsigned int N>
     static void read_bytes(Iterator& begin, const Iterator& end,
         std::array<uint8_t, N>& byte_array, bool reverse=false)
     {
