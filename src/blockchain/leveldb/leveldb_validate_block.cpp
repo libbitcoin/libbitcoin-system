@@ -60,21 +60,20 @@ uint64_t leveldb_validate_block::median_time_past()
     return times[times.size() / 2];
 }
 
-bool tx_after_fork(const protobuf::Transaction& proto_tx, size_t fork_index)
+bool tx_after_fork(const optional_transaction& tx, size_t fork_index)
 {
-    transaction_type tx = protobuf_to_transaction(proto_tx);
-    if (proto_tx.parent().depth() <= fork_index)
+    if (tx->depth <= fork_index)
         return false;
     return true;
 }
 
 bool leveldb_validate_block::transaction_exists(const hash_digest& tx_hash)
 {
-    protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(tx_hash);
-    if (!proto_tx.IsInitialized())
+    optional_transaction tx(
+        common_->get_transaction(tx_hash, true, false));
+    if (!tx)
         return false;
-    return !tx_after_fork(proto_tx, fork_index_);
+    return !tx_after_fork(tx, fork_index_);
 }
 
 bool leveldb_validate_block::is_output_spent(
@@ -83,25 +82,23 @@ bool leveldb_validate_block::is_output_spent(
     input_point input_spend;
     if (!common_->fetch_spend(outpoint, input_spend))
         return false;
-    // Lookup block depth
-    protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(input_spend.hash);
-    return !tx_after_fork(proto_tx, fork_index_);
+    // Lookup block depth. Is the spend after the fork point?
+    return transaction_exists(input_spend.hash);
 }
 
 bool leveldb_validate_block::fetch_transaction(transaction_type& tx,
     size_t& tx_depth, const hash_digest& tx_hash)
 {
-    protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(tx_hash);
-    if (!proto_tx.IsInitialized() || tx_after_fork(proto_tx, fork_index_))
+    optional_transaction opt_tx(
+        common_->get_transaction(tx_hash, true, true));
+    if (!opt_tx || tx_after_fork(opt_tx, fork_index_))
     {
         if (!fetch_orphan_transaction(tx, tx_depth, tx_hash))
             return false;
         return true;
     }
-    tx = protobuf_to_transaction(proto_tx);
-    tx_depth = proto_tx.parent().depth();
+    tx = opt_tx->tx;
+    tx_depth = opt_tx->depth;
     return true;
 }
 

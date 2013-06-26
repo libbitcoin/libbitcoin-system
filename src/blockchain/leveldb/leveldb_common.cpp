@@ -3,6 +3,7 @@
 #include <bitcoin/block.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/address.hpp>
+#include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 
@@ -96,18 +97,17 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
 {
     if (duplicate_exists(tx_hash, block_depth, tx_index))
         return true;
-    // Actually add block
-    protobuf::Transaction proto_tx = transaction_to_protobuf(block_tx);
-    proto_tx.set_is_coinbase(is_coinbase(block_tx));
-    // Set tx's parent block.
-    proto_tx.mutable_parent()->set_depth(block_depth);
-    proto_tx.mutable_parent()->set_index(tx_index);
+    // Serialize tx.
+    serializer serial;
+    serial.write_4_bytes(block_depth);
+    serial.write_4_bytes(tx_index);
+    // Actual tx data.
+    data_chunk raw_tx(satoshi_raw_size(block_tx));
+    satoshi_save(block_tx, raw_tx.begin());
+    serial.write_data(raw_tx);
     // Save tx to leveldb
-    std::ostringstream oss;
-    if (!proto_tx.SerializeToOstream(&oss))
-        return false;
-    std::string raw_data = oss.str();
-    batch.tx_batch.Put(slice(tx_hash), raw_data);
+    batch.tx_batch.Put(slice(tx_hash), slice(serial.data()));
+    // Add inputs to spends database.
     // Coinbase inputs do not spend anything.
     if (!is_coinbase(block_tx))
         for (uint32_t input_index = 0; input_index < block_tx.inputs.size();
@@ -120,6 +120,7 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
                     input.previous_output, inpoint))
                 return false;
         }
+    // Save address -> output mappings.
     for (uint32_t output_index = 0; output_index < block_tx.outputs.size();
         ++output_index)
     {
@@ -135,8 +136,8 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
 bool leveldb_common::duplicate_exists(const hash_digest& tx_hash,
     uint32_t block_depth, uint32_t tx_index)
 {
-    protobuf::Transaction proto_tx = fetch_proto_transaction(tx_hash);
-    if (!proto_tx.IsInitialized())
+    optional_transaction tx(get_transaction(tx_hash, false, false));
+    if (!tx)
         return false;
     BITCOIN_ASSERT(block_depth == 91842 || block_depth == 91880);
     return true;
@@ -234,6 +235,44 @@ protobuf::Transaction leveldb_common::fetch_proto_transaction(
     protobuf::Transaction proto_tx;
     proto_tx.ParseFromIstream(&ss);
     return proto_tx;
+}
+
+leveldb_tx_info* leveldb_common::get_transaction(
+    const hash_digest& tx_hash, bool read_parent, bool read_tx)
+{
+    std::string value;
+    leveldb::Status status = db_txs_->Get(
+        leveldb::ReadOptions(), slice(tx_hash), &value);
+    if (status.IsNotFound())
+        return nullptr;
+    else if (!status.ok())
+    {
+        log_fatal(LOG_BLOCKCHAIN) << "get_transaction("
+            << tx_hash << "): " << status.ToString();
+        return nullptr;
+    }
+    leveldb_tx_info* tx_info = new leveldb_tx_info;
+    BITCOIN_ASSERT(value.size() > 8);
+    if (read_parent)
+    {
+        auto deserial = make_deserializer(value.begin(), value.begin() + 8);
+        tx_info->depth = deserial.read_4_bytes();
+        tx_info->index = deserial.read_4_bytes();
+    }
+    if (!read_tx)
+        return tx_info;
+    try
+    {
+        BITCOIN_ASSERT(value.size() > 8);
+        satoshi_load(value.begin() + 8, value.end(), tx_info->tx);
+    }
+    catch (end_of_stream)
+    {
+        return nullptr;
+    }
+    BITCOIN_ASSERT(satoshi_raw_size(tx_info->tx) + 8 == value.size());
+    BITCOIN_ASSERT(hash_transaction(tx_info->tx) == tx_hash);
+    return tx_info;
 }
 
 leveldb::Slice slice_block_hash(const hash_digest& block_hash)

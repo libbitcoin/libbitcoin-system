@@ -66,12 +66,12 @@ bool reconstruct_block(leveldb_common_ptr common,
         hash_digest tx_hash;
         BITCOIN_ASSERT(raw_tx_hash.size() == tx_hash.max_size());
         std::copy(raw_tx_hash.begin(), raw_tx_hash.end(), tx_hash.begin());
-        // Fetch the actual transaction.
-        protobuf::Transaction proto_tx =
-            common->fetch_proto_transaction(tx_hash);
-        if (!proto_tx.IsInitialized())
+        // Get the actual transaction.
+        optional_transaction tx(
+            common->get_transaction(tx_hash, false, true));
+        if (!tx)
             return false;
-        result_block.transactions.push_back(protobuf_to_transaction(proto_tx));
+        result_block.transactions.push_back(tx->tx);
     }
     return true;
 }

@@ -237,7 +237,8 @@ void leveldb_blockchain::do_import(const block_type& import_block,
 
 void leveldb_blockchain::fetch(perform_read_functor perform_read)
 {
-    auto try_read = [this, perform_read]()
+    // Implements the seqlock counter logic.
+    auto try_read = [this, perform_read]
         {
             size_t slock = seqlock_;
             if (slock % 2 == 1)
@@ -246,6 +247,7 @@ void leveldb_blockchain::fetch(perform_read_functor perform_read)
                 return true;
             return false;
         };
+    // Initiate async read operation.
     ios_.post([this, try_read]
         {
             // Sleeping inside seqlock loop is fine since we
@@ -401,13 +403,12 @@ bool leveldb_blockchain::do_fetch_transaction(
     const hash_digest& transaction_hash,
     fetch_handler_transaction handle_fetch, size_t slock)
 {
-    protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(transaction_hash);
-    if (!proto_tx.IsInitialized())
+    optional_transaction tx(
+        common_->get_transaction(transaction_hash, false, true));
+    if (!tx)
         return finish_fetch(slock, handle_fetch,
             error::not_found, transaction_type());
-    transaction_type tx = protobuf_to_transaction(proto_tx);
-    return finish_fetch(slock, handle_fetch, std::error_code(), tx);
+    return finish_fetch(slock, handle_fetch, std::error_code(), tx->tx);
 }
 
 void leveldb_blockchain::fetch_transaction_index(
@@ -422,12 +423,12 @@ bool leveldb_blockchain::do_fetch_transaction_index(
     const hash_digest& transaction_hash,
     fetch_handler_transaction_index handle_fetch, size_t slock)
 {
-    protobuf::Transaction proto_tx =
-        common_->fetch_proto_transaction(transaction_hash);
-    if (!proto_tx.IsInitialized())
+    optional_transaction tx(
+        common_->get_transaction(transaction_hash, true, false));
+    if (!tx)
         return finish_fetch(slock, handle_fetch, error::not_found, 0, 0);
     return finish_fetch(slock, handle_fetch, std::error_code(),
-        proto_tx.parent().depth(), proto_tx.parent().index());
+        tx->depth, tx->index);
 }
 
 void leveldb_blockchain::fetch_spend(const output_point& outpoint,

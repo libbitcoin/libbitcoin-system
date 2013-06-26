@@ -2,6 +2,7 @@
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_COMMON_H
 
 #include <memory>
+#include <boost/optional.hpp>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
@@ -13,7 +14,16 @@
 
 namespace libbitcoin {
 
+struct leveldb_tx_info
+{
+    // The info that connects it to block parent.
+    size_t depth, index;
+    transaction_type tx;
+};
+
 typedef std::unique_ptr<leveldb::Iterator> leveldb_iterator;
+
+typedef std::unique_ptr<leveldb_tx_info> optional_transaction;
 
 struct leveldb_transaction_batch
 {
@@ -37,6 +47,9 @@ public:
     protobuf::Block fetch_proto_block(const hash_digest& block_hash);
     uint32_t fetch_block_depth(const hash_digest& block_hash);
     protobuf::Transaction fetch_proto_transaction(const hash_digest& tx_hash);
+
+    leveldb_tx_info* get_transaction(
+        const hash_digest& tx_hash, bool read_parent, bool read_tx);
 
 private:
     bool save_transaction(leveldb_transaction_batch& batch,

@@ -195,7 +195,7 @@ public:
         fetch_handler_transaction handle_fetch) = 0;
 
     /**
-     * Fetch the block depth that contains a transaction and its offset
+     * Fetch the block depth that contains a transaction and its index
      * within a block.
      *
      * @param[in]   transaction_hash  Transaction's hash
@@ -205,7 +205,7 @@ public:
      *      const std::error_code& ec, // Status of operation
      *      size_t block_depth,        // Depth of block containing
      *                                 // the transaction.
-     *      size_t offset              // Offset of transaction within
+     *      size_t index               // Index of transaction within
      *                                 // the block.
      *  );
      * @endcode

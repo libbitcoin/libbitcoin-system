@@ -98,6 +98,9 @@ private:
     void do_import(const block_type& block, size_t depth,
         import_block_handler handle_import);
 
+    // Uses sequence looks to try to read shared data.
+    // Try to initiate asynchronous read operation. If it fails then
+    // sleep for a small amount of time and then retry read operation.
     void fetch(perform_read_functor perform_read);
 
     template <typename Handler, typename... Args>
