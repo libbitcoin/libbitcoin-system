@@ -13,7 +13,7 @@ hash_digest generate_sha256_hash(const data_chunk& chunk)
     SHA256_Update(&ctx, &chunk[0], chunk.size());
     SHA256_Final(digest.data(), &ctx);
     SHA256_Init(&ctx);
-    SHA256_Update(&ctx, digest.data(), sha256_length);
+    SHA256_Update(&ctx, digest.data(), sha256_digest_size);
     SHA256_Final(digest.data(), &ctx);
     // SSL gives us the hash backwards
     std::reverse(digest.begin(), digest.end());

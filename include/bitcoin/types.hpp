@@ -26,8 +26,10 @@ typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
 
 typedef std::shared_ptr<tcp::socket> socket_ptr;
 
-typedef std::array<uint8_t, 32> hash_digest;
-typedef std::array<uint8_t, 20> short_hash;
+constexpr size_t hash_digest_size = 32;
+constexpr size_t short_hash_size = 20;
+typedef std::array<uint8_t, hash_digest_size> hash_digest;
+typedef std::array<uint8_t, short_hash_size> short_hash;
 
 typedef uint8_t byte;
 typedef std::vector<byte> data_chunk;

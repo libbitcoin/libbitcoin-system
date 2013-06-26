@@ -11,12 +11,6 @@ AC_GNU_SOURCE
 AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
 #CXXFLAGS="-Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all"
 
-AC_ARG_ENABLE(bdb,
-	[AC_HELP_STRING([--enable-bdb],
-			[Build Berkeley DB support.])],
-	[bld_bdb="$enable_bdb"], [bld_bdb="no"])
-AM_CONDITIONAL([DO_BDB], [test "$enable_bdb" = "yes"])
-
 AC_ARG_ENABLE(leveldb,
 	[AC_HELP_STRING([--enable-leveldb],
 			[Build LevelDB support.])],
@@ -37,15 +31,6 @@ AX_BOOST_BASE
 #AX_BOOST_THREAD
 
 PKG_PROG_PKG_CONFIG
-
-if test "$bld_bdb" = "yes"; then
-    AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
-    PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
-	AC_SUBST(LDFLAG_BDB)
-	LDFLAG_BDB="-lprotobuf $DB_CXX_LIBS"
-    AC_SUBST(CFLAG_BDB)
-    CFLAG_BDB="-DBDB_ENABLED"
-fi
 
 if test "$bld_leveldb" = "yes"; then
     #AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])

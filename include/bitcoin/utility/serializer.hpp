@@ -11,26 +11,6 @@
 
 namespace libbitcoin {
 
-class serializer
-{
-public:
-    void write_byte(uint8_t v);
-    void write_2_bytes(uint16_t v);
-    void write_4_bytes(uint32_t v);
-    void write_8_bytes(uint64_t v);
-    void write_variable_uint(uint64_t v);
-    void write_data(const data_chunk& other_data);
-    void write_network_address(network_address_type addr);
-    void write_hash(const hash_digest& hash);
-    void write_short_hash(const short_hash& hash);
-    void write_fixed_string(const std::string& command, size_t string_size);
-    void write_string(const std::string& str);
-
-    data_chunk data() const;
-private:
-    data_chunk data_;
-};
-
 /**
  * Serializer that uses iterators and is oblivious to the underlying
  * container type. Is not threadsafe.

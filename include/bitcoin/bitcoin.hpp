@@ -182,9 +182,6 @@
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/network/protocol.hpp>
 #include <bitcoin/threadpool.hpp>
-#ifdef BDB_ENABLED
-    #include <bitcoin/blockchain/bdb_blockchain.hpp>
-#endif
 #ifdef LEVELDB_ENABLED
     #include <bitcoin/blockchain/leveldb_blockchain.hpp>
 #endif

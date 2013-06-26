@@ -47,10 +47,14 @@ hash_digest build_merkle_tree(hash_list& merkle)
         hash_list new_merkle;
         for (auto it = merkle.begin(); it != merkle.end(); it += 2)
         {
-            serializer concat;
+            data_chunk concat_data(hash_digest_size * 2);
+            auto concat = make_serializer(concat_data.begin());
             concat.write_hash(*it);
             concat.write_hash(*(it + 1));
-            hash_digest new_root = generate_sha256_hash(concat.data());
+            BITCOIN_ASSERT(
+                std::distance(concat_data.begin(), concat.iterator()) ==
+                hash_digest_size * 2);
+            hash_digest new_root = generate_sha256_hash(concat_data);
             new_merkle.push_back(new_root);
         }
         merkle = new_merkle;

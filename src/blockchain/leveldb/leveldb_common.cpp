@@ -97,16 +97,18 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
 {
     if (duplicate_exists(tx_hash, block_depth, tx_index))
         return true;
+    data_chunk tx_data(8 + satoshi_raw_size(block_tx));
     // Serialize tx.
-    serializer serial;
+    auto serial = make_serializer(tx_data.begin());
     serial.write_4_bytes(block_depth);
     serial.write_4_bytes(tx_index);
     // Actual tx data.
-    data_chunk raw_tx(satoshi_raw_size(block_tx));
-    satoshi_save(block_tx, raw_tx.begin());
-    serial.write_data(raw_tx);
+    auto end_iter = satoshi_save(block_tx, serial.iterator());
+    BITCOIN_ASSERT(
+        std::distance(tx_data.begin(), end_iter) ==
+        8 + satoshi_raw_size(block_tx));
     // Save tx to leveldb
-    batch.tx_batch.Put(slice(tx_hash), slice(serial.data()));
+    batch.tx_batch.Put(slice(tx_hash), slice(tx_data));
     // Add inputs to spends database.
     // Coinbase inputs do not spend anything.
     if (!is_coinbase(block_tx))
@@ -304,10 +306,14 @@ data_chunk create_address_key(const script& output_script)
     payment_address address;
     if (!extract(address, output_script))
         return data_chunk();
-    serializer serial;
+    data_chunk result(1 + short_hash_size);
+    auto serial = make_serializer(result.begin());
     serial.write_byte(address.version());
     serial.write_short_hash(address.hash());
-    return serial.data();
+    BITCOIN_ASSERT(
+        std::distance(result.begin(), serial.iterator()) ==
+        1 + short_hash_size);
+    return result;
 }
 
 leveldb::Iterator* address_iterator(leveldb::DB* db_address,

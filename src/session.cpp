@@ -1,8 +1,5 @@
 #include <bitcoin/session.hpp>
 
-#include <bitcoin/blockchain/bdb_blockchain.hpp>
-#include <bitcoin/transaction.hpp>
-
 namespace libbitcoin {
 
 using std::placeholders::_1;

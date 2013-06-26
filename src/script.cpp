@@ -802,7 +802,7 @@ bool script::op_ripemd160()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    data_chunk hash(ripemd_length);
+    data_chunk hash(ripemd_digest_size);
     RIPEMD160(data.data(), data.size(), hash.data());
     stack_.push_back(hash);
     return true;
@@ -824,7 +824,7 @@ bool script::op_sha256()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    data_chunk hash(sha256_length);
+    data_chunk hash(sha256_digest_size);
     SHA256(data.data(), data.size(), hash.data());
     stack_.push_back(hash);
     return true;

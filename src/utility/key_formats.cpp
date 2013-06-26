@@ -19,7 +19,7 @@ secret_parameter wif_to_secret(const std::string& wif)
 {
     private_data decoded = decode_base58(wif);
     // 1 marker, 32 byte secret, 4 checksum bytes
-    if (decoded.size() != 1 + sha256_length + 4)
+    if (decoded.size() != 1 + sha256_digest_size + 4)
         return secret_parameter();
     // Check first byte is valid and remove it
     if (decoded[0] != 0x80)

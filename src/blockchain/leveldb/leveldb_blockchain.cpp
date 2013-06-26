@@ -463,10 +463,13 @@ bool leveldb_blockchain::do_fetch_outputs(const payment_address& address,
     fetch_handler_outputs handle_fetch, size_t slock)
 {
     // version byte + hash for key
-    serializer serial;
+    data_chunk raw_address(1 + short_hash_size);
+    auto serial = make_serializer(raw_address.begin());
     serial.write_byte(address.version());
     serial.write_short_hash(address.hash());
-    data_chunk raw_address = serial.data();
+    BITCOIN_ASSERT(
+        std::distance(raw_address.begin(), serial.iterator()) == 
+        1 + short_hash_size);
     // Associated outputs
     output_point_list assoc_outs;
     leveldb_iterator it(address_iterator(db_address_.get(), raw_address));

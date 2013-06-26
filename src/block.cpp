@@ -37,14 +37,15 @@ big_number block_work(uint32_t bits)
 
 hash_digest hash_block_header(const block_type& block)
 {
-    serializer key;
-    key.write_4_bytes(block.version);
-    key.write_hash(block.previous_block_hash);
-    key.write_hash(block.merkle);
-    key.write_4_bytes(block.timestamp);
-    key.write_4_bytes(block.bits);
-    key.write_4_bytes(block.nonce);
-    return generate_sha256_hash(key.data());
+    data_chunk raw_block_header(80);
+    auto serial = make_serializer(raw_block_header.begin());
+    serial.write_4_bytes(block.version);
+    serial.write_hash(block.previous_block_hash);
+    serial.write_hash(block.merkle);
+    serial.write_4_bytes(block.timestamp);
+    serial.write_4_bytes(block.bits);
+    serial.write_4_bytes(block.nonce);
+    return generate_sha256_hash(raw_block_header);
 }
 
 index_list block_locator_indexes(int top_depth)

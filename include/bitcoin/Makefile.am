@@ -25,11 +25,6 @@ bitcoin_blockchain_include_HEADERS = \
 	blockchain/blockchain.hpp \
 	blockchain/organizer.hpp
 
-if DO_BDB
-bitcoin_blockchain_include_HEADERS += \
-	blockchain/bdb_blockchain.hpp
-endif
-
 if DO_LEVELDB
 bitcoin_blockchain_include_HEADERS += \
 	blockchain/leveldb_blockchain.hpp
