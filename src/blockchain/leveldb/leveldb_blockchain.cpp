@@ -103,6 +103,7 @@ bool open_db(const std::string& prefix, const std::string& db_name,
             << db_name << "' database: " << status.ToString();
         return false;
     }
+    BITCOIN_ASSERT(db_base_ptr);
     // The cointainer ensures db_base_ptr is now managed.
     db.reset(db_base_ptr);
     return true;
