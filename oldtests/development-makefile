@@ -1,6 +1,7 @@
-CXXFLAGS= -std=c++0x -Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all -ggdb -fPIC $(CPPFLAGS) -DBDB_ENABLED -DLEVELDB_ENABLED
-INCLUDES= -Iinclude/ -Iusr/include/
-LIBS= -Lusr/lib -lcrypto -lboost_thread -lboost_system -ldl -lz -lpthread -ldl
+CXXFLAGS=$(shell pkg-config --cflags --libs libbitcoin) -ggdb
+INCLUDES=
+LIBS=$(shell pkg-config --libs libbitcoin)
+LIBBITCOIN=$(shell pkg-config --libs libbitcoin)
 BASE_MODULES= \
 	network.o  \
 	handshake.o  \
@@ -79,7 +80,7 @@ bin/examples/accounting: libbitcoin obj/accounting.o
 
 accounting: bin/examples/accounting
 
-obj/exporter-test.o: tests/exporter-test.cpp
+obj/exporter-test.o: exporter-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/exporter-test: obj/exporter-test.o
@@ -87,7 +88,7 @@ bin/tests/exporter-test: obj/exporter-test.o
 
 exporter-test: bin/tests/exporter-test
 
-obj/irc-test.o: tests/irc.cpp
+obj/irc-test.o: irc.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/irc: obj/irc-test.o
@@ -95,7 +96,7 @@ bin/tests/irc: obj/irc-test.o
 
 irc: bin/tests/irc
 
-obj/minikey.o: tests/minikey.cpp
+obj/minikey.o: minikey.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/minikey: obj/minikey.o
@@ -103,7 +104,7 @@ bin/tests/minikey: obj/minikey.o
 
 minikey: bin/tests/minikey
 
-obj/scritp.o: tests/scritp.cpp
+obj/scritp.o: scritp.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/scritp: obj/scritp.o
@@ -111,7 +112,7 @@ bin/tests/scritp: obj/scritp.o
 
 scritp: bin/tests/scritp
 
-obj/import-test.o: tests/import-test.cpp
+obj/import-test.o: import-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/import-test: obj/import-test.o
@@ -119,7 +120,7 @@ bin/tests/import-test: obj/import-test.o
 
 import-test: bin/tests/import-test
 
-obj/base58-test.o: tests/base58-test.cpp
+obj/base58-test.o: base58-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/base58-test: obj/base58-test.o
@@ -127,7 +128,7 @@ bin/tests/base58-test: obj/base58-test.o
 
 base58-test: bin/tests/base58-test
 
-obj/chanstop.o: tests/chanstop.cpp
+obj/chanstop.o: chanstop.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/chanstop: obj/chanstop.o
@@ -135,7 +136,7 @@ bin/tests/chanstop: obj/chanstop.o
 
 chanstop: bin/tests/chanstop
 
-obj/protst.o: tests/protst.cpp
+obj/protst.o: protst.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/protst: obj/protst.o
@@ -143,7 +144,7 @@ bin/tests/protst: obj/protst.o
 
 protst: bin/tests/protst
 
-obj/sesh.o: tests/sesh.cpp
+obj/sesh.o: sesh.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $< -O0
 
 bin/tests/sesh: obj/sesh.o
@@ -151,7 +152,7 @@ bin/tests/sesh: obj/sesh.o
 
 sesh: bin/tests/sesh
 
-obj/crap_main.o: tests/crap/main.cpp
+obj/crap_main.o: crap/main.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/crap: obj/crap_main.o
@@ -159,7 +160,7 @@ bin/tests/crap: obj/crap_main.o
 
 crap: bin/tests/crap
 
-obj/priv.o: tests/priv.cpp
+obj/priv.o: priv.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/priv: obj/priv.o
@@ -167,7 +168,7 @@ bin/tests/priv: obj/priv.o
 
 priv: bin/tests/priv
 
-obj/addr.o: tests/addr.cpp
+obj/addr.o: addr.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/addr: obj/addr.o
@@ -175,7 +176,7 @@ bin/tests/addr: obj/addr.o
 
 addr: bin/tests/addr
 
-obj/corot.o: tests/corot.cpp
+obj/corot.o: corot.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/corot: obj/corot.o
@@ -183,7 +184,7 @@ bin/tests/corot: obj/corot.o
 
 corot: bin/tests/corot
 
-obj/logtst.o: tests/logtst.cpp
+obj/logtst.o: logtst.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/logtst: obj/logtst.o
@@ -191,7 +192,7 @@ bin/tests/logtst: obj/logtst.o
 
 logtst: bin/tests/logtst
 
-obj/mempool.o: tests/mempool.cpp
+obj/mempool.o: mempool.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/mempool: obj/mempool.o
@@ -199,7 +200,7 @@ bin/tests/mempool: obj/mempool.o
 
 mempool: bin/tests/mempool
 
-obj/benchmark-chain.o: tests/benchmark-chain.cpp
+obj/benchmark-chain.o: benchmark-chain.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/benchmark-chain: obj/benchmark-chain.o
@@ -207,7 +208,7 @@ bin/tests/benchmark-chain: obj/benchmark-chain.o
 
 benchmark-chain: bin/tests/benchmark-chain
 
-obj/kyot.o: tests/kyot.cpp
+obj/kyot.o: kyot.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/kyot: obj/kyot.o
@@ -215,7 +216,7 @@ bin/tests/kyot: obj/kyot.o
 
 kyot: bin/tests/kyot
 
-obj/getx.o: tests/getx.cpp
+obj/getx.o: getx.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/getx: obj/getx.o
@@ -223,7 +224,7 @@ bin/tests/getx: obj/getx.o
 
 getx: bin/tests/getx
 
-obj/determ.o: tests/determ.cpp
+obj/determ.o: determ.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/determ: obj/determ.o
@@ -231,7 +232,7 @@ bin/tests/determ: obj/determ.o
 
 determ: bin/tests/determ
 
-obj/pol.o: tests/pol.cpp
+obj/pol.o: pol.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/pol: obj/pol.o
@@ -239,7 +240,7 @@ bin/tests/pol: obj/pol.o
 
 pol: bin/tests/pol
 
-obj/1vaynert.o: tests/1vaynert.cpp
+obj/1vaynert.o: 1vaynert.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/1vaynert: obj/1vaynert.o
@@ -247,7 +248,7 @@ bin/tests/1vaynert: obj/1vaynert.o
 
 1vaynert: bin/tests/1vaynert
 
-obj/hosts-test.o: tests/hosts-test.cpp
+obj/hosts-test.o: hosts-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/hosts-test: obj/hosts-test.o
@@ -255,7 +256,7 @@ bin/tests/hosts-test: obj/hosts-test.o
 
 hosts-test: bin/tests/hosts-test
 
-obj/serial-test.o: tests/serial-test.cpp
+obj/serial-test.o: serial-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/serial-test: obj/serial-test.o
@@ -263,7 +264,7 @@ bin/tests/serial-test: obj/serial-test.o
 
 serial-test: bin/tests/serial-test
 
-obj/echo.o: tests/echo.cpp
+obj/echo.o: echo.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/echo: obj/echo.o
@@ -271,7 +272,7 @@ bin/tests/echo: obj/echo.o
 
 echo: bin/tests/echo
 
-obj/big-number-test.o: tests/big-number-test.cpp
+obj/big-number-test.o: big-number-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/big-number-test: obj/big-number-test.o
@@ -279,10 +280,10 @@ bin/tests/big-number-test: obj/big-number-test.o
 
 big-number-test: bin/tests/big-number-test
 
-obj/tx-hash.o: tests/tx-hash.cpp
+obj/tx-hash.o: tx-hash.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/subscribe.o: tests/subscribe.cpp
+obj/subscribe.o: subscribe.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/subscribe: obj/subscribe.o
@@ -290,7 +291,7 @@ bin/tests/subscribe: obj/subscribe.o
 
 subscribe: bin/tests/subscribe
 
-obj/bdb-test.o: tests/bdb-test.cpp
+obj/bdb-test.o: bdb-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/bdb-test: obj/bdb-test.o
@@ -298,7 +299,7 @@ bin/tests/bdb-test: obj/bdb-test.o
 
 bdb-test: bin/tests/bdb-test
 
-obj/bdb-last.o: tests/bdb-last.cpp
+obj/bdb-last.o: bdb-last.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/bdb-last: obj/bdb-last.o
@@ -306,7 +307,7 @@ bin/tests/bdb-last: obj/bdb-last.o
 
 bdb-last: bin/tests/bdb-last
 
-obj/bdb-poller.o: tests/bdb-poller.cpp
+obj/bdb-poller.o: bdb-poller.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/bdb-poller: obj/bdb-poller.o
@@ -327,7 +328,7 @@ net: bin/tests/nettest
 bin/tests/blockchain: libbitcoin.so obj/blockchain.o
 	$(CXX) -o bin/tests/blockchain obj/blockchain.o $(LIBBITCOIN)
 
-obj/script-test.o: tests/script-test.cpp
+obj/script-test.o: script-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/script-test: obj/script-test.o
@@ -335,7 +336,7 @@ bin/tests/script-test: obj/script-test.o
 
 script-test: bin/tests/script-test
 
-obj/clock-test.o: tests/clock-test.cpp
+obj/clock-test.o: clock-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/clock-test: obj/clock-test.o
@@ -343,7 +344,7 @@ bin/tests/clock-test: obj/clock-test.o
 
 clock-test: bin/tests/clock-test
 
-obj/merkle.o: tests/merkle.cpp
+obj/merkle.o: merkle.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/merkle: obj/merkle.o
@@ -402,7 +403,7 @@ obj/serializer.o: src/util/serializer.cpp include/bitcoin/util/serializer.hpp
 
 libbitcoin.a: obj/serializer.o obj/error.o
 
-obj/nettest.o: tests/net.cpp
+obj/nettest.o: net.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 obj/bdb_storage.o: src/storage/bdb/bdb_storage.cpp include/bitcoin/storage/bdb_storage.hpp 
@@ -427,7 +428,7 @@ obj/address.o: src/address.cpp include/bitcoin/address.hpp
 obj/types.o: src/types.cpp include/bitcoin/types.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/gengen.o: tests/gengen.cpp
+obj/gengen.o: gengen.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/gengen: obj/gengen.o obj/logger.o obj/sha256.o  obj/types.o obj/serializer.o obj/types.o
@@ -438,7 +439,7 @@ gengen: bin/tests/gengen
 obj/script.o: src/script.cpp include/bitcoin/script.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/postbind.o: tests/postbind.cpp
+obj/postbind.o: postbind.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/postbind: obj/postbind.o
@@ -446,7 +447,7 @@ bin/tests/postbind: obj/postbind.o
 
 postbind: bin/tests/postbind
 
-obj/psql.o: tests/psql.cpp
+obj/psql.o: psql.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/psql: obj/postgresql_storage.o obj/psql.o obj/logger.o obj/script.o obj/ripemd.o obj/block.o obj/serializer.o obj/sha256.o obj/types.o obj/transaction.o obj/error.o obj/elliptic_curve_key.o obj/threaded_service.o
@@ -454,7 +455,7 @@ bin/tests/psql: obj/postgresql_storage.o obj/psql.o obj/logger.o obj/script.o ob
 
 psql: bin/tests/psql
 
-obj/types-test.o: tests/types-test.cpp
+obj/types-test.o: types-test.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/types-test: obj/types.o obj/types-test.o
@@ -465,7 +466,7 @@ types-test: bin/tests/types-test
 obj/transaction.o: src/transaction.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/block-hash.o: tests/block-hash.cpp
+obj/block-hash.o: block-hash.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/block-hash: obj/block-hash.o
@@ -473,7 +474,7 @@ bin/tests/block-hash: obj/block-hash.o
 
 block-hash: bin/tests/block-hash
 
-obj/raw_tx7208e5.o: tests/bip16/raw_tx7208e5.cpp
+obj/raw_tx7208e5.o: bip16/raw_tx7208e5.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/raw_tx7208e5: obj/raw_tx7208e5.o
@@ -481,7 +482,7 @@ bin/tests/raw_tx7208e5: obj/raw_tx7208e5.o
 
 raw_tx7208e5: bin/tests/raw_tx7208e5
 
-obj/checksig.o: tests/checksig.cpp
+obj/checksig.o: checksig.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/checksig: obj/checksig.o
@@ -489,7 +490,7 @@ bin/tests/checksig: obj/checksig.o
 
 checksig: bin/tests/checksig
 
-obj/feeder.o: tests/feeder.cpp
+obj/feeder.o: feeder.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/feeder: obj/feeder.o
@@ -497,7 +498,7 @@ bin/tests/feeder: obj/feeder.o
 
 feeder: bin/tests/feeder
 
-obj/hmac512.o: tests/hmac512.cpp
+obj/hmac512.o: hmac512.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/hmac512: obj/hmac512.o
@@ -505,7 +506,7 @@ bin/tests/hmac512: obj/hmac512.o
 
 hmac512: bin/tests/hmac512
 
-obj/ec-key.o: tests/ec-key.cpp
+obj/ec-key.o: ec-key.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/ec-key: obj/ec-key.o
@@ -519,7 +520,7 @@ obj/clock.o: src/util/clock.cpp include/bitcoin/util/clock.hpp
 obj/constants.o: src/constants.cpp include/bitcoin/constants.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/validate-block.o: tests/validate-block.cpp
+obj/validate-block.o: validate-block.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 bin/tests/validate-block: obj/validate-block.o obj/postgresql_storage.o obj/logger.o obj/serializer.o obj/elliptic_curve_key.o obj/sha256.o obj/ripemd.o obj/types.o obj/block.o obj/error.o obj/validate.o obj/exporter.o obj/constants.o obj/big_number.o obj/clock.o
@@ -539,7 +540,7 @@ poller: bin/examples/poller
 obj/postgresql_blockchain.o: src/storage/postgresql/postgresql_blockchain.cpp src/storage/postgresql/postgresql_blockchain.hpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
-obj/blockchain.o: tests/blockchain.cpp
+obj/blockchain.o: blockchain.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c -o $@ $<
 
 blockchain: bin/tests/blockchain
