@@ -5,7 +5,7 @@
 namespace libbitcoin {
 
 block_detail::block_detail(const block_type& actual_block)
-  : block_hash_(hash_block_header(actual_block)),
+  : block_hash_(hash_block_header(actual_block.header)),
     processed_(false), info_{block_status::orphan, 0}
 {
     actual_block_ = std::make_shared<block_type>(actual_block);
@@ -75,7 +75,7 @@ block_detail_list orphans_pool::trace(block_detail_ptr end_block)
     {
     resume_loop:
         const hash_digest& previous_hash =
-            traced_chain.back()->actual().previous_block_hash;
+            traced_chain.back()->actual().header.previous_block_hash;
         for (const block_detail_ptr current_block: pool_)
             if (current_block->hash() == previous_hash)
             {
@@ -137,8 +137,8 @@ void organizer::process(block_detail_ptr process_block)
 {
     // Trace the chain in the orphan pool
     block_detail_list orphan_chain = orphans_->trace(process_block);
-    int fork_index =
-        chain_->find_index(orphan_chain[0]->actual().previous_block_hash);
+    int fork_index = chain_->find_index(
+        orphan_chain[0]->actual().header.previous_block_hash);
     if (fork_index != -1)
         // replace_chain will call chain_->stop()
         replace_chain(fork_index, orphan_chain);
@@ -166,7 +166,7 @@ void organizer::replace_chain(int fork_index,
         }
         const block_type& orphan_block =
             orphan_chain[orphan_index]->actual();
-        orphan_work += block_work(orphan_block.bits);
+        orphan_work += block_work(orphan_block.header.bits);
     }
     // All remaining blocks in orphan_chain should all be valid now
     // Compare the difficulty of the 2 forks (original and orphan)

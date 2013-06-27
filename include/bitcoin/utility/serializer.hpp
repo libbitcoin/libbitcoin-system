@@ -180,24 +180,24 @@ class deserializer
 {
 public:
     deserializer(const Iterator begin, const Iterator end)
-      : begin_(begin), end_(end) {}
+      : iter_(begin), end_(end) {}
 
     uint8_t read_byte()
     {
-        check_distance(begin_, end_, 1);
-        return *(begin_++);
+        check_distance(iter_, end_, 1);
+        return *(iter_++);
     }
     uint16_t read_2_bytes()
     {
-        return read_data_impl<uint16_t>(begin_, end_);
+        return read_data_impl<uint16_t>(iter_, end_);
     }
     uint32_t read_4_bytes()
     {
-        return read_data_impl<uint32_t>(begin_, end_);
+        return read_data_impl<uint32_t>(iter_, end_);
     }
     uint64_t read_8_bytes()
     {
-        return read_data_impl<uint64_t>(begin_, end_);
+        return read_data_impl<uint64_t>(iter_, end_);
     }
 
     uint64_t read_variable_uint()
@@ -217,7 +217,7 @@ public:
 
     data_chunk read_data(uint64_t n_bytes)
     {
-        check_distance(begin_, end_, n_bytes);
+        check_distance(iter_, end_, n_bytes);
         data_chunk raw_bytes;
         for (uint64_t i = 0; i < n_bytes; ++i)
             raw_bytes.push_back(read_byte());
@@ -229,22 +229,22 @@ public:
         network_address_type addr;
         addr.services = read_8_bytes();
         // Read IP address
-        read_bytes<16>(begin_, end_, addr.ip);
-        addr.port = read_data_impl<uint16_t>(begin_, end_, true);
+        read_bytes<16>(iter_, end_, addr.ip);
+        addr.port = read_data_impl<uint16_t>(iter_, end_, true);
         return addr;
     }
 
     hash_digest read_hash()
     {
         hash_digest hash;
-        read_bytes<32>(begin_, end_, hash, true);
+        read_bytes<32>(iter_, end_, hash, true);
         return hash;
     }
 
     short_hash read_short_hash()
     {
         short_hash hash;
-        read_bytes<20>(begin_, end_, hash, true);
+        read_bytes<20>(iter_, end_, hash, true);
         return hash;
     }
 
@@ -310,7 +310,7 @@ private:
         begin += byte_array.size();
     }
 
-    Iterator begin_;
+    Iterator iter_;
     const Iterator end_;
 };
 

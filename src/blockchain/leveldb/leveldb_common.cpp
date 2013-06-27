@@ -53,8 +53,17 @@ bool leveldb_common::save_block(
     uint32_t depth, const block_type& serial_block)
 {
     leveldb_transaction_batch batch;
-    protobuf::Block proto_block =
-        block_header_to_protobuf(depth, serial_block);
+    // Write block header + tx hashes
+    data_chunk raw_block_data(
+        80 + 4 + serial_block.transactions.size() * hash_digest_size);
+    // Downcast to base header type so serializer selects that.
+    auto header_end = satoshi_save(
+        serial_block.header, raw_block_data.begin());
+    BITCOIN_ASSERT(std::distance(raw_block_data.begin(), header_end) == 80);
+    auto serial_hashes = make_serializer(header_end);
+    // Write the number of transactions...
+    serial_hashes.write_4_bytes(serial_block.transactions.size());
+    // ... And now the tx themselves.
     for (uint32_t tx_index = 0;
         tx_index < serial_block.transactions.size(); ++tx_index)
     {
@@ -66,22 +75,17 @@ bool leveldb_common::save_block(
             log_fatal(LOG_BLOCKCHAIN) << "Could not save transaction";
             return false;
         }
-        proto_block.add_transactions(
-            std::string(tx_hash.begin(), tx_hash.end()));
+        serial_hashes.write_hash(tx_hash);
     }
-    std::ostringstream oss;
-    if (!proto_block.SerializeToOstream(&oss))
-    {
-        log_fatal(LOG_BLOCKCHAIN) << "Protobuf serialization failed";
-        return false;
-    }
+    BITCOIN_ASSERT(
+        std::distance(raw_block_data.begin(), serial_hashes.iterator()) ==
+        80 + 4 + serial_block.transactions.size() * hash_digest_size);
     data_chunk raw_depth = uncast_type(depth);
-    std::string raw_data = oss.str();
-    hash_digest block_hash = hash_block_header(serial_block);
+    hash_digest block_hash = hash_block_header(serial_block.header);
     // Begin commiting changes to database.
     leveldb::WriteOptions options;
     // Write block to database.
-    db_blocks_->Put(options, slice(raw_depth), slice(raw_data));
+    db_blocks_->Put(options, slice(raw_depth), slice(raw_block_data));
     db_blocks_hash_->Put(options,
         slice_block_hash(block_hash), slice(raw_depth));
     // Execute batches.
@@ -138,8 +142,8 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
 bool leveldb_common::duplicate_exists(const hash_digest& tx_hash,
     uint32_t block_depth, uint32_t tx_index)
 {
-    optional_transaction tx(get_transaction(tx_hash, false, false));
-    if (!tx)
+    leveldb_tx_info tx;
+    if (!get_transaction(tx, tx_hash, false, false))
         return false;
     BITCOIN_ASSERT(block_depth == 91842 || block_depth == 91880);
     return true;
@@ -178,32 +182,7 @@ bool leveldb_common::add_address(leveldb::WriteBatch& address_batch,
     return true;
 }
 
-protobuf::Block leveldb_common::fetch_proto_block(uint32_t depth)
-{
-    data_chunk raw_depth = uncast_type(depth);
-    std::string value;
-    leveldb::Status status = db_blocks_->Get(
-        leveldb::ReadOptions(), slice(raw_depth), &value);
-    if (status.IsNotFound())
-        return protobuf::Block();
-    else if (!status.ok())
-    {
-        log_fatal(LOG_BLOCKCHAIN) << "fetch_proto_block("
-            << depth << "): " << status.ToString();
-        return protobuf::Block();
-    }
-    std::stringstream ss(value);
-    protobuf::Block proto_block;
-    proto_block.ParseFromIstream(&ss);
-    return proto_block;
-}
-
-protobuf::Block leveldb_common::fetch_proto_block(const hash_digest& block_hash)
-{
-    return fetch_proto_block(fetch_block_depth(block_hash));
-}
-
-uint32_t leveldb_common::fetch_block_depth(const hash_digest& block_hash)
+uint32_t leveldb_common::get_block_depth(const hash_digest& block_hash)
 {
     std::string value;
     leveldb::Status status = db_blocks_hash_->Get(
@@ -219,62 +198,84 @@ uint32_t leveldb_common::fetch_block_depth(const hash_digest& block_hash)
     return recreate_depth(value);
 }
 
-protobuf::Transaction leveldb_common::fetch_proto_transaction(
-    const hash_digest& tx_hash)
+bool leveldb_common::get_block(leveldb_block_info& blk_info,
+    uint32_t depth, bool read_header, bool read_tx_hashes)
 {
+    // First we try to read the bytes from the database.
+    data_chunk raw_depth = uncast_type(depth);
     std::string value;
-    leveldb::Status status = db_txs_->Get(
-        leveldb::ReadOptions(), slice(tx_hash), &value);
+    leveldb::Status status = db_blocks_->Get(
+        leveldb::ReadOptions(), slice(raw_depth), &value);
     if (status.IsNotFound())
-        return protobuf::Transaction();
+        return false;
     else if (!status.ok())
     {
-        log_fatal(LOG_BLOCKCHAIN) << "fetch_proto_tx("
-            << tx_hash << "): " << status.ToString();
-        return protobuf::Transaction();
+        log_fatal(LOG_BLOCKCHAIN) << "fetch_proto_block("
+            << depth << "): " << status.ToString();
+        return false;
     }
-    std::stringstream ss(value);
-    protobuf::Transaction proto_tx;
-    proto_tx.ParseFromIstream(&ss);
-    return proto_tx;
+    return deserialize_block(blk_info, value, read_header, read_tx_hashes);
+}
+bool leveldb_common::deserialize_block(leveldb_block_info& blk_info,
+    const std::string& raw_data, bool read_header, bool read_tx_hashes)
+{
+    // Read the header (if neccessary).
+    // There is always at least one tx in a block.
+    BITCOIN_ASSERT(raw_data.size() >= 80 + 4 + hash_digest_size);
+    BITCOIN_ASSERT((raw_data.size() - 84) % hash_digest_size == 0);
+    if (read_header)
+        satoshi_load(raw_data.begin(), raw_data.begin() + 80, blk_info.header);
+    if (!read_tx_hashes)
+        return true;
+    // Read the tx hashes for this block (if neccessary).
+    auto deserial = make_deserializer(raw_data.begin() + 80, raw_data.end());
+    uint32_t tx_count = deserial.read_4_bytes();
+    for (size_t i = 0; i < tx_count; ++i)
+    {
+        const hash_digest& tx_hash = deserial.read_hash();
+        blk_info.tx_hashes.push_back(tx_hash);
+    }
+    return true;
 }
 
-leveldb_tx_info* leveldb_common::get_transaction(
+bool leveldb_common::get_transaction(leveldb_tx_info& tx_info,
     const hash_digest& tx_hash, bool read_parent, bool read_tx)
 {
+    // First we try to read the bytes from the database.
     std::string value;
     leveldb::Status status = db_txs_->Get(
         leveldb::ReadOptions(), slice(tx_hash), &value);
     if (status.IsNotFound())
-        return nullptr;
+        return false;
     else if (!status.ok())
     {
         log_fatal(LOG_BLOCKCHAIN) << "get_transaction("
             << tx_hash << "): " << status.ToString();
-        return nullptr;
+        return false;
     }
-    leveldb_tx_info* tx_info = new leveldb_tx_info;
+    // Read the parent block depth and our index in that block (if neccessary).
     BITCOIN_ASSERT(value.size() > 8);
     if (read_parent)
     {
         auto deserial = make_deserializer(value.begin(), value.begin() + 8);
-        tx_info->depth = deserial.read_4_bytes();
-        tx_info->index = deserial.read_4_bytes();
+        tx_info.depth = deserial.read_4_bytes();
+        tx_info.index = deserial.read_4_bytes();
     }
     if (!read_tx)
-        return tx_info;
+        return true;
+    // Read the actual transaction (if neccessary).
     try
     {
         BITCOIN_ASSERT(value.size() > 8);
-        satoshi_load(value.begin() + 8, value.end(), tx_info->tx);
+        satoshi_load(value.begin() + 8, value.end(), tx_info.tx);
     }
     catch (end_of_stream)
     {
-        return nullptr;
+        return false;
     }
-    BITCOIN_ASSERT(satoshi_raw_size(tx_info->tx) + 8 == value.size());
-    BITCOIN_ASSERT(hash_transaction(tx_info->tx) == tx_hash);
-    return tx_info;
+    BITCOIN_ASSERT(satoshi_raw_size(tx_info.tx) + 8 == value.size());
+    BITCOIN_ASSERT(hash_transaction(tx_info.tx) == tx_hash);
+    return true;
 }
 
 leveldb::Slice slice_block_hash(const hash_digest& block_hash)

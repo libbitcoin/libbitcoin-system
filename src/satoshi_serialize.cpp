@@ -145,6 +145,11 @@ size_t satoshi_raw_size(const transaction_type& packet)
     return tx_size;
 }
 
+size_t satoshi_raw_size(const block_header_type& packet)
+{
+    return 80;
+}
+
 const std::string satoshi_command(const block_type&)
 {
     return "block";

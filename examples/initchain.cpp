@@ -39,7 +39,8 @@ int main(int argc, char** argv)
         log_error() << "Importing genesis block failed: " << ec.message();
         return -1;
     }
-    log_info() << "Imported genesis block " << hash_block_header(first_block);
+    log_info() << "Imported genesis block "
+        << hash_block_header(first_block.header);
     // All threadpools stopping in parallel...
     pool.stop();
     // ... Make them all join main thread and wait until they finish.

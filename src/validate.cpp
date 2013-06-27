@@ -363,12 +363,14 @@ std::error_code validate_block::check_block()
         return error::size_limits;
     }
 
-    const hash_digest current_block_hash = hash_block_header(current_block_);
-    if (!check_proof_of_work(current_block_hash, current_block_.bits))
+    const block_header_type& blk_header = current_block_.header;
+    const hash_digest current_block_hash =
+        hash_block_header(blk_header);
+    if (!check_proof_of_work(current_block_hash, blk_header.bits))
         return error::proof_of_work;
 
     const posix_time::ptime block_time =
-        posix_time::from_time_t(current_block_.timestamp);
+        posix_time::from_time_t(blk_header.timestamp);
     const posix_time::ptime two_hour_future =
         posix_time::second_clock::universal_time() + posix_time::hours(2);
     if (block_time > two_hour_future)
@@ -398,8 +400,7 @@ std::error_code validate_block::check_block()
     if (legacy_sigops_count() > max_block_script_sig_operations)
         return error::too_many_sigs;
 
-    if (current_block_.merkle != 
-            generate_merkle_root(current_block_.transactions))
+    if (blk_header.merkle != generate_merkle_root(current_block_.transactions))
     {
         return error::merkle_mismatch;
     }
@@ -476,21 +477,22 @@ size_t validate_block::legacy_sigops_count()
 
 std::error_code validate_block::accept_block()
 {
-    if (current_block_.bits != work_required())
+    const block_header_type& blk_header = current_block_.header;
+    if (blk_header.bits != work_required())
         return error::incorrect_proof_of_work;
-    if (current_block_.timestamp <= median_time_past())
+    if (blk_header.timestamp <= median_time_past())
         return error::timestamp_too_early;
     // Txs should be final when included in a block
     for (const transaction_type& tx: current_block_.transactions)
-        if (!is_final(tx, depth_, current_block_.timestamp))
+        if (!is_final(tx, depth_, blk_header.timestamp))
             return error::non_final_transaction;
     if (!passes_checkpoints())
         return error::checkpoints_failed;
     // Reject version=1 blocks after switchover point.
-    if (depth_ > 237370 && current_block_.version < 2)
+    if (depth_ > 237370 && blk_header.version < 2)
         return error::old_version_block;
     // Enforce version=2 rule that coinbase starts with serialized depth.
-    if (current_block_.version >= 2 && !coinbase_depth_match())
+    if (blk_header.version >= 2 && !coinbase_depth_match())
         return error::coinbase_depth_mismatch;
     return std::error_code();
 }
@@ -528,7 +530,7 @@ uint32_t validate_block::work_required()
 
 bool validate_block::passes_checkpoints()
 {
-    const hash_digest block_hash = hash_block_header(current_block_);
+    const hash_digest block_hash = hash_block_header(current_block_.header);
 
     if (depth_ == 11111 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x69, 0xe2, 0x44, 0xf7, 
@@ -639,7 +641,7 @@ bool validate_block::coinbase_depth_match()
     // Checks whether the block depth is in the coinbase
     // transaction input script.
     // Version 2 blocks and onwards.
-    BITCOIN_ASSERT(current_block_.version >= 2);
+    BITCOIN_ASSERT(current_block_.header.version >= 2);
     BITCOIN_ASSERT(current_block_.transactions.size() > 0);
     BITCOIN_ASSERT(current_block_.transactions[0].inputs.size() > 0);
     // First get the serialized coinbase input script as a series of bytes.
@@ -781,7 +783,7 @@ bool validate_block::connect_input(size_t index_in_parent,
     // block 170060 contains an invalid BIP 16 transaction
     // before the switchover date.
     bool bip16_enabled =
-        current_block_.timestamp >= bip16_switchover_timestamp;
+        current_block_.header.timestamp >= bip16_switchover_timestamp;
     BITCOIN_ASSERT(!bip16_enabled || depth_ >= bip16_switchover_depth);
     // Validate script
     script output_script = previous_tx_out.output_script;

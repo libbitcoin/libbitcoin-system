@@ -1,4 +1,4 @@
-CXXFLAGS=$(shell pkg-config --cflags libbitcoin)
+CXXFLAGS=$(shell pkg-config --cflags libbitcoin) -ggdb
 LIBS=$(shell pkg-config --libs libbitcoin)
 
 default: all

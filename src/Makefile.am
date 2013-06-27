@@ -37,11 +37,9 @@ libbitcoin_la_SOURCES = \
 if DO_LEVELDB
 libbitcoin_la_SOURCES += \
 	blockchain/leveldb/leveldb_blockchain.cpp \
-	blockchain/leveldb/bitcoin.pb.cc \
 	blockchain/leveldb/leveldb_chain_keeper.cpp \
 	blockchain/leveldb/leveldb_organizer.cpp \
 	blockchain/leveldb/leveldb_validate_block.cpp \
-	blockchain/leveldb/leveldb_common.cpp \
-	blockchain/leveldb/protobuf_wrapper.cpp
+	blockchain/leveldb/leveldb_common.cpp
 endif
 

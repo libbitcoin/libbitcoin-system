@@ -80,7 +80,7 @@ void session::set_start_depth(const std::error_code& ec, size_t fork_point,
     {
         blocks_inv.inventories.push_back({
             inventory_type_id::block,
-            hash_block_header(*block)});
+            hash_block_header(block->header)});
     }
     protocol_.broadcast(blocks_inv);
 }

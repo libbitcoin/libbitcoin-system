@@ -4,8 +4,6 @@
 #include <bitcoin/format.hpp>
 #include <bitcoin/transaction.hpp>
 
-#include "protobuf_wrapper.hpp"
-
 namespace libbitcoin {
 
 leveldb_chain_keeper::leveldb_chain_keeper(leveldb_common_ptr common,
@@ -33,10 +31,10 @@ void leveldb_chain_keeper::add(block_detail_ptr incoming_block)
 
 int leveldb_chain_keeper::find_index(const hash_digest& search_block_hash)
 {
-    uint32_t depth = common_->fetch_block_depth(search_block_hash);
+    uint32_t depth = common_->get_block_depth(search_block_hash);
     if (depth == std::numeric_limits<uint32_t>::max())
         return -1;
-    return depth;
+    return static_cast<int>(depth);
 }
 
 big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
@@ -46,34 +44,36 @@ big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
     data_chunk raw_depth = uncast_type(slice_begin_index);
     for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
     {
-        std::stringstream ss;
-        ss.str(it->value().ToString());
-        protobuf::Block proto_block;
-        proto_block.ParseFromIstream(&ss);
-        total_work += block_work(proto_block.bits());
+        constexpr size_t bits_offset = 4 + 2 * hash_digest_size + 4;
+        BITCOIN_ASSERT(it->value().size() >= 84);
+        // Deserialize only the bits field of block header.
+        std::string raw_bits(it->value().data(), 4);
+        auto deserial = make_deserializer(raw_bits.begin(), raw_bits.end());
+        uint32_t bits = deserial.read_4_bytes();
+        // Accumulate the total work.
+        total_work += block_work(bits);
     }
     return total_work;
 }
 
-bool reconstruct_block(leveldb_common_ptr common,
-    const protobuf::Block& proto_block_header,
-    block_type& result_block)
+block_detail_ptr reconstruct_block(
+    leveldb_common_ptr common, const std::string& value)
 {
-    result_block = protobuf_to_block_header(proto_block_header);
-    for (const std::string& raw_tx_hash: proto_block_header.transactions())
+    leveldb_block_info blk;
+    if (!common->deserialize_block(blk, value, true, true))
+        return nullptr;
+    block_type compat;
+    compat.header = blk.header;
+    block_detail_ptr sliced_block = std::make_shared<block_detail>(compat);
+    for (const hash_digest& tx_hash: blk.tx_hashes)
     {
-        // Convert protobuf hash string into internal hash format.
-        hash_digest tx_hash;
-        BITCOIN_ASSERT(raw_tx_hash.size() == tx_hash.max_size());
-        std::copy(raw_tx_hash.begin(), raw_tx_hash.end(), tx_hash.begin());
         // Get the actual transaction.
-        optional_transaction tx(
-            common->get_transaction(tx_hash, false, true));
-        if (!tx)
-            return false;
-        result_block.transactions.push_back(tx->tx);
+        leveldb_tx_info tx;
+        if (!common->get_transaction(tx, tx_hash, false, true))
+            return nullptr;
+        sliced_block->actual_ptr()->transactions.push_back(tx.tx);
     }
-    return true;
+    return sliced_block;
 }
 
 bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
@@ -85,26 +85,21 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
     data_chunk raw_depth = uncast_type(slice_begin_index);
     for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
     {
-        std::stringstream ss;
-        ss.str(it->value().ToString());
-        protobuf::Block proto_block;
-        proto_block.ParseFromIstream(&ss);
-        // Convert protobuf block header into actual block
-        block_type sliced_block;
-        if (!reconstruct_block(common_, proto_block, sliced_block))
+        block_detail_ptr sliced_block =
+            reconstruct_block(common_, it->value().ToString());
+        if (!sliced_block)
             return false;
         // Add to list of sliced blocks
-        block_detail_ptr sliced_detail =
-            std::make_shared<block_detail>(sliced_block);
-        sliced_blocks.push_back(sliced_detail);
+        sliced_blocks.push_back(sliced_block);
         // Make sure to delete hash secondary index too.
-        hash_digest block_hash = hash_block_header(sliced_block);
+        const hash_digest& block_hash = sliced_block->hash();
         // Delete block header...
         blk_batch.Delete(it->key());
         // And it's secondary index.
         blk_hash_batch.Delete(slice_block_hash(block_hash));
         // Remove txs + spends + addresses too
-        for (const transaction_type& block_tx: sliced_block.transactions)
+        const auto& transactions = sliced_block->actual().transactions;
+        for (const transaction_type& block_tx: transactions)
             if (!clear_transaction_data(tx_batch, block_tx))
                 return false;
     }

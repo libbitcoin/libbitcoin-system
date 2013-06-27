@@ -17,22 +17,19 @@ leveldb_validate_block::leveldb_validate_block(leveldb_common_ptr common,
 {
 }
 
-block_type leveldb_validate_block::fetch_block(size_t fetch_depth)
+block_header_type leveldb_validate_block::fetch_block(size_t fetch_depth)
 {
     if (fetch_depth > fork_index_)
     {
         size_t fetch_index = fetch_depth - fork_index_ - 1;
         BITCOIN_ASSERT(fetch_index <= orphan_index_);
         BITCOIN_ASSERT(orphan_index_ < orphan_chain_.size());
-        return orphan_chain_[fetch_index]->actual();
+        return orphan_chain_[fetch_index]->actual().header;
     }
-    protobuf::Block proto_block = common_->fetch_proto_block(fetch_depth);
-    BITCOIN_ASSERT(proto_block.IsInitialized());
-    // We only convert the fields we actually need
-    block_type result_block;
-    result_block.bits = proto_block.bits();
-    result_block.timestamp = proto_block.timestamp();
-    return result_block;
+    leveldb_block_info blk;
+    bool get_status = common_->get_block(blk, fetch_depth, true, false);
+    BITCOIN_ASSERT(get_status);
+    return blk.header;
 }
 
 uint32_t leveldb_validate_block::previous_block_bits()
@@ -60,18 +57,17 @@ uint64_t leveldb_validate_block::median_time_past()
     return times[times.size() / 2];
 }
 
-bool tx_after_fork(const optional_transaction& tx, size_t fork_index)
+bool tx_after_fork(const leveldb_tx_info& tx, size_t fork_index)
 {
-    if (tx->depth <= fork_index)
+    if (tx.depth <= fork_index)
         return false;
     return true;
 }
 
 bool leveldb_validate_block::transaction_exists(const hash_digest& tx_hash)
 {
-    optional_transaction tx(
-        common_->get_transaction(tx_hash, true, false));
-    if (!tx)
+    leveldb_tx_info tx;
+    if (!common_->get_transaction(tx, tx_hash, false, true))
         return false;
     return !tx_after_fork(tx, fork_index_);
 }
@@ -89,16 +85,16 @@ bool leveldb_validate_block::is_output_spent(
 bool leveldb_validate_block::fetch_transaction(transaction_type& tx,
     size_t& tx_depth, const hash_digest& tx_hash)
 {
-    optional_transaction opt_tx(
-        common_->get_transaction(tx_hash, true, true));
-    if (!opt_tx || tx_after_fork(opt_tx, fork_index_))
+    leveldb_tx_info tx_info;
+    bool tx_exists = common_->get_transaction(tx_info, tx_hash, true, true);
+    if (!tx_exists || tx_after_fork(tx_info, fork_index_))
     {
         if (!fetch_orphan_transaction(tx, tx_depth, tx_hash))
             return false;
         return true;
     }
-    tx = opt_tx->tx;
-    tx_depth = opt_tx->depth;
+    tx = tx_info.tx;
+    tx_depth = tx_info.depth;
     return true;
 }
 

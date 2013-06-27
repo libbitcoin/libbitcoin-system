@@ -25,11 +25,11 @@ public:
         auto this_ptr = shared_from_this();
         chain_.fetch_block_header(index,
             [this, this_ptr](const std::error_code& ec,
-                const block_type& block_header)
+                const block_header_type& block_header)
             {
                 if (stop_on_error(ec))
                     return;
-                block_ = block_header;
+                block_.header = block_header;
                 fetch_hashes();
             });
     }
@@ -51,13 +51,13 @@ private:
     void fetch_hashes()
     {
         chain_.fetch_block_transaction_hashes(
-            hash_block_header(block_),
+            hash_block_header(block_.header),
             std::bind(&fetch_block_t::fetch_transactions,
                 shared_from_this(), _1, _2));
     }
 
     void fetch_transactions(const std::error_code& ec,
-        const inventory_list& tx_hashes)
+        const hash_digest_list& tx_hashes)
     {
         if (stop_on_error(ec))
             return;
@@ -66,18 +66,14 @@ private:
         for (size_t tx_index = 0;
             tx_index < tx_hashes.size(); ++tx_index)
         {
-            fetch_tx(tx_hashes, tx_index);
+            fetch_tx(tx_hashes[tx_index], tx_index);
         }
     }
 
-    void fetch_tx(const inventory_list& tx_hashes, size_t tx_index)
+    void fetch_tx(const hash_digest& tx_hash, size_t tx_index)
     {
         auto this_ptr = shared_from_this();
-        const inventory_vector_type& inv = tx_hashes[tx_index];
-        BITCOIN_ASSERT(inv.type ==
-            inventory_type_id::transaction);
-        BITCOIN_ASSERT(block_.transactions.size() == tx_hashes.size());
-        chain_.fetch_transaction(inv.hash,
+        chain_.fetch_transaction(tx_hash,
             [this, this_ptr, tx_index](
                 const std::error_code& ec,
                 const transaction_type& tx)
@@ -172,12 +168,12 @@ private:
             std::bind(&fetch_locator::append, this_ptr, _1, _2, depth));
     }
 
-    void append(const std::error_code& ec, const block_type& block_header,
+    void append(const std::error_code& ec, const block_header_type& blk_header,
         size_t depth)
     {
         if (stop_on_error(ec))
             return;
-        hash_digest block_hash = hash_block_header(block_header);
+        hash_digest block_hash = hash_block_header(blk_header);
         locator_.push_back(block_hash);
         // Continue the loop.
         loop();

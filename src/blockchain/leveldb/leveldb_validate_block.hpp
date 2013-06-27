@@ -28,7 +28,7 @@ protected:
         size_t index_in_parent, size_t input_index);
 
 private:
-    block_type fetch_block(size_t fetch_depth);
+    block_header_type fetch_block(size_t fetch_depth);
 
     bool fetch_orphan_transaction(transaction_type& tx,
         size_t& previous_depth, const hash_digest& tx_hash);

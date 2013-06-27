@@ -323,10 +323,9 @@ void satoshi_load(Iterator first, Iterator last, transaction_type& packet)
     BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
 }
 
-const std::string satoshi_command(const block_type&);
-size_t satoshi_raw_size(const block_type& packet);
+size_t satoshi_raw_size(const block_header_type& packet);
 template <typename Iterator>
-Iterator satoshi_save(const block_type& packet, Iterator result)
+Iterator satoshi_save(const block_header_type& packet, Iterator result)
 {
     auto serial = make_serializer(result);
     serial.write_4_bytes(packet.version);
@@ -335,6 +334,28 @@ Iterator satoshi_save(const block_type& packet, Iterator result)
     serial.write_4_bytes(packet.timestamp);
     serial.write_4_bytes(packet.bits);
     serial.write_4_bytes(packet.nonce);
+    BITCOIN_ASSERT(std::distance(result, serial.iterator()) == 80);
+    return serial.iterator();
+}
+template <typename Iterator>
+void satoshi_load(Iterator first, Iterator last, block_header_type& packet)
+{
+    auto deserial = make_deserializer(first, last);
+    packet.version = deserial.read_4_bytes();
+    packet.previous_block_hash = deserial.read_hash();
+    packet.merkle = deserial.read_hash();
+    packet.timestamp = deserial.read_4_bytes();
+    packet.bits = deserial.read_4_bytes();
+    packet.nonce = deserial.read_4_bytes();
+}
+
+const std::string satoshi_command(const block_type&);
+size_t satoshi_raw_size(const block_type& packet);
+template <typename Iterator>
+Iterator satoshi_save(const block_type& packet, Iterator result)
+{
+    satoshi_save(packet.header, result);
+    auto serial = make_serializer(result + 80);
     serial.write_variable_uint(packet.transactions.size());
     Iterator write_iter = serial.iterator();
     for (const transaction_type& tx: packet.transactions)
@@ -344,13 +365,8 @@ Iterator satoshi_save(const block_type& packet, Iterator result)
 template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, block_type& packet)
 {
-    auto deserial = make_deserializer(first, last);
-    packet.version = deserial.read_4_bytes();
-    packet.previous_block_hash = deserial.read_hash();
-    packet.merkle = deserial.read_hash();
-    packet.timestamp = deserial.read_4_bytes();
-    packet.bits = deserial.read_4_bytes();
-    packet.nonce = deserial.read_4_bytes();
+    satoshi_load(first, first + 80, packet.header);
+    auto deserial = make_deserializer(first + 80, last);
     uint64_t tx_count = deserial.read_variable_uint();
     for (size_t tx_i = 0; tx_i < tx_count; ++tx_i)
     {

@@ -33,10 +33,8 @@ AX_BOOST_BASE
 PKG_PROG_PKG_CONFIG
 
 if test "$bld_leveldb" = "yes"; then
-    #AX_BERKELEY_DB_CXX([5.1], [], [AC_MSG_ERROR(Could not find a version of the library)])
-    PKG_CHECK_MODULES([protobuf], [protobuf >= 2.4])
 	AC_SUBST(LDFLAG_LEVELDB)
-	LDFLAG_LEVELDB="-lprotobuf -lleveldb"
+	LDFLAG_LEVELDB="-lleveldb"
     AC_SUBST(CFLAG_LEVELDB)
     CFLAG_LEVELDB="-DLEVELDB_ENABLED"
 fi

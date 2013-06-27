@@ -1,15 +1,17 @@
 #include <bitcoin/block.hpp>
 
-#include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/utility/sha256.hpp>
-#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
-bool operator==(const block_type block_a, const block_type& block_b)
+bool operator==(
+    const block_header_type block_a, const block_header_type& block_b)
 {
     return block_a.version == block_b.version &&
         block_a.previous_block_hash == block_b.previous_block_hash &&
@@ -17,6 +19,11 @@ bool operator==(const block_type block_a, const block_type& block_b)
         block_a.timestamp == block_b.timestamp &&
         block_a.bits == block_b.bits &&
         block_a.nonce == block_b.nonce;
+}
+bool operator==(
+    const block_type block_a, const block_type& block_b)
+{
+    return block_a.header == block_b.header;
 }
 
 uint64_t block_value(size_t depth)
@@ -35,16 +42,10 @@ big_number block_work(uint32_t bits)
     return (big_number(1) << 256) / (target + 1);
 }
 
-hash_digest hash_block_header(const block_type& block)
+hash_digest hash_block_header(const block_header_type& header)
 {
     data_chunk raw_block_header(80);
-    auto serial = make_serializer(raw_block_header.begin());
-    serial.write_4_bytes(block.version);
-    serial.write_hash(block.previous_block_hash);
-    serial.write_hash(block.merkle);
-    serial.write_4_bytes(block.timestamp);
-    serial.write_4_bytes(block.bits);
-    serial.write_4_bytes(block.nonce);
+    satoshi_save(header, raw_block_header.begin());
     return generate_sha256_hash(raw_block_header);
 }
 
@@ -66,17 +67,17 @@ index_list block_locator_indexes(int top_depth)
 
 block_type genesis_block()
 {
-    block_type genesis;
-    genesis.version = 1;
-    genesis.previous_block_hash = null_hash;
-    genesis.merkle = 
+    block_header_type header;
+    header.version = 1;
+    header.previous_block_hash = null_hash;
+    header.merkle =
         hash_digest{0x4a, 0x5e, 0x1e, 0x4b, 0xaa, 0xb8, 0x9f, 0x3a,
                     0x32, 0x51, 0x8a, 0x88, 0xc3, 0x1b, 0xc8, 0x7f,
                     0x61, 0x8f, 0x76, 0x67, 0x3e, 0x2c, 0xc7, 0x7a, 
                     0xb2, 0x12, 0x7b, 0x7a, 0xfd, 0xed, 0xa3, 0x3b};
-    genesis.timestamp = 1231006505;
-    genesis.bits = 0x1d00ffff;
-    genesis.nonce = 2083236893;
+    header.timestamp = 1231006505;
+    header.bits = 0x1d00ffff;
+    header.nonce = 2083236893;
 
     transaction_type coinbase_tx;
     coinbase_tx.version = 1;
@@ -118,10 +119,12 @@ block_type genesis_block()
         operation{opcode::checksig, data_chunk()});
     coinbase_tx.outputs.push_back(coinbase_output);
 
+    block_type genesis;
+    genesis.header = header;
     genesis.transactions.push_back(coinbase_tx);
     BITCOIN_ASSERT(genesis.transactions.size() == 1);
     BITCOIN_ASSERT(
-        generate_merkle_root(genesis.transactions) == genesis.merkle);
+        generate_merkle_root(genesis.transactions) == genesis.header.merkle);
     return genesis;
 }
 

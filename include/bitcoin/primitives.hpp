@@ -111,7 +111,7 @@ struct transaction_type
 };
 typedef std::vector<transaction_type> transaction_list;
 
-struct block_type
+struct block_header_type
 {
     uint32_t version;
     hash_digest previous_block_hash;
@@ -119,6 +119,11 @@ struct block_type
     uint32_t timestamp;
     uint32_t bits;
     uint32_t nonce;
+};
+
+struct block_type
+{
+    block_header_type header;
     transaction_list transactions;
 };
 

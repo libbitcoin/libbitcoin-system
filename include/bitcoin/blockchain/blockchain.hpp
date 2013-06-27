@@ -27,9 +27,9 @@ public:
     using fetch_handler = std::function<
         void (const std::error_code&, const Message&)>;
 
-    typedef fetch_handler<block_type> fetch_handler_block_header;
+    typedef fetch_handler<block_header_type> fetch_handler_block_header;
 
-    typedef fetch_handler<inventory_list>
+    typedef fetch_handler<hash_digest_list>
         fetch_handler_block_transaction_hashes;
 
     typedef fetch_handler<size_t> fetch_handler_block_depth;
@@ -98,8 +98,8 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec,  // Status of operation
-     *      const block_type& blk       // Block header
+     *      const std::error_code& ec,      // Status of operation
+     *      const block_header_type& blk    // Block header
      *  );
      * @endcode
      */
@@ -113,8 +113,8 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec,  // Status of operation
-     *      const block_type& blk       // Block header
+     *      const std::error_code& ec,      // Status of operation
+     *      const block_header_type& blk    // Block header
      *  );
      * @endcode
      */
@@ -129,7 +129,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,      // Status of operation
-     *      const inventory_list& hashes    // List of hashes
+     *      const hash_digest_list& hashes  // List of hashes
      *  );
      * @endcode
      */
@@ -144,7 +144,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,      // Status of operation
-     *      const inventory_list& hashes    // List of hashes
+     *      const hash_digest_list& hashes  // List of hashes
      *  );
      * @endcode
      */
