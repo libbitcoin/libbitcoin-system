@@ -21,7 +21,7 @@ Contents:
    blockchain
    network
    fullnode
-   .. offlinetx
+.. offlinetx
 
 .. toctree::
    :hidden:

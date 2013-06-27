@@ -141,8 +141,8 @@ the block header for a depth number, we use
    ::
    
     void handle_fetch(
-        const std::error_code& ec,  // Status of operation
-        const block_type& blk       // Block header
+        const std::error_code& ec,      // Status of operation
+        const block_header_type& blk    // Block header
     );
 
 .. cpp:function:: void blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
@@ -224,7 +224,8 @@ block header to the screen.
     // Fetch tbe last block now that we have the depth.
     void depth_fetched(const std::error_code& ec, size_t last_depth);
     // Result: print the block header.
-    void display_block_header(const std::error_code& ec, const block_type& blk);
+    void display_block_header(const std::error_code& ec,
+        const block_header_type& header);
 
 After the blockchain has started, we begin the operation to fetch the last
 depth, calling :func:`depth_fetched` after it's finished.
@@ -275,10 +276,10 @@ As we only requested the block header, the transactions list will be
 empty. Getting a full block involves getting the transaction hashes
 associated with that block, and fetching each one which is provided
 by the composed operation :func:`fetch_block`.
-
 ::
 
-    void display_block_header(const std::error_code& ec, const block_type& blk)
+    void display_block_header(const std::error_code& ec,
+        const block_header_type& header)
     {
         if (ec)
         {
@@ -286,22 +287,19 @@ by the composed operation :func:`fetch_block`.
             return;
         }
         // 32 byte std::array of uint8_t
-        const hash_digest& blk_hash = hash_block_header(blk);
+        const hash_digest& blk_hash = hash_block_header(header);
         // Encode block hash into a pretty hex string.
         log_info() << "hash: " << encode_hex(blk_hash);
         // Display a few fields from the block header.
         // See <bitcoin/primitives.hpp> for the definition of block_type.
-        log_info() << "version: " << blk.version;
+        log_info() << "version: " << header.version;
         // hash_digest can be used directly in log_info(),
         // implicity calling encode_hex() on the hash_digest.
-        log_info() << "previous_block_hash: " << blk.previous_block_hash;
-        log_info() << "merkle: " << blk.merkle;
-        log_info() << "timestamp: " << blk.timestamp;
-        log_info() << "bits: " << blk.bits;
-        log_info() << "nonce: " << blk.nonce;
-        // This is not the full block, only the header.
-        // For the full block use fetch_block() instead.
-        assert(blk.transactions.size() == 0);
+        log_info() << "previous_block_hash: " << header.previous_block_hash;
+        log_info() << "merkle: " << header.merkle;
+        log_info() << "timestamp: " << header.timestamp;
+        log_info() << "bits: " << header.bits;
+        log_info() << "nonce: " << header.nonce;
         // A goodbye message.
         log_info() << "Finished.";
     }
