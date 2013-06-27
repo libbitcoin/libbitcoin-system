@@ -11,6 +11,10 @@ block_detail::block_detail(const block_type& actual_block)
     actual_block_ = std::make_shared<block_type>(actual_block);
 }
 
+block_type& block_detail::actual()
+{
+    return *actual_block_;
+}
 const block_type& block_detail::actual() const
 {
     return *actual_block_;

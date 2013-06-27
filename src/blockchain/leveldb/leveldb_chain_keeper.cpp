@@ -62,9 +62,9 @@ block_detail_ptr reconstruct_block(
     leveldb_block_info blk;
     if (!common->deserialize_block(blk, value, true, true))
         return nullptr;
-    block_type compat;
-    compat.header = blk.header;
-    block_detail_ptr sliced_block = std::make_shared<block_detail>(compat);
+    block_detail_ptr sliced_block =
+        std::make_shared<block_detail>(block_type());
+    sliced_block->actual().header = blk.header;
     for (const hash_digest& tx_hash: blk.tx_hashes)
     {
         // Get the actual transaction.

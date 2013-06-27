@@ -15,6 +15,7 @@ class block_detail
 {
 public:
     block_detail(const block_type& actual_block);
+    block_type& actual();
     const block_type& actual() const;
     std::shared_ptr<block_type> actual_ptr() const;
     void mark_processed();
