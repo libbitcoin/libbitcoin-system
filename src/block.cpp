@@ -20,11 +20,6 @@ bool operator==(
         block_a.bits == block_b.bits &&
         block_a.nonce == block_b.nonce;
 }
-bool operator==(
-    const block_type block_a, const block_type& block_b)
-{
-    return block_a.header == block_b.header;
-}
 
 uint64_t block_value(size_t depth)
 {

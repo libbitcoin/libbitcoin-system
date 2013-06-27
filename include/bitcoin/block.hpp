@@ -21,8 +21,6 @@ struct block_info
 
 bool operator==(
     const block_header_type block_a, const block_header_type& block_b);
-bool operator==(
-    const block_type block_a, const block_type& block_b);
 
 uint64_t block_value(size_t depth);
 big_number block_work(uint32_t bits);

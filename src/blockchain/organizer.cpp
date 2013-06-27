@@ -61,7 +61,7 @@ bool orphans_pool::add(block_detail_ptr incoming_block)
 {
     // No duplicates
     for (block_detail_ptr current_block: pool_)
-        if (current_block->actual() == incoming_block->actual())
+        if (current_block->actual().header == incoming_block->actual().header)
             return false;
     pool_.push_back(incoming_block);
     return true;
