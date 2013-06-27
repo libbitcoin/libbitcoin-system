@@ -5,10 +5,16 @@
 namespace libbitcoin {
 
 block_detail::block_detail(const block_type& actual_block)
-  : block_hash_(hash_block_header(actual_block.header)),
-    processed_(false), info_{block_status::orphan, 0}
+  : block_hash_(hash_block_header(actual_block.header))
 {
     actual_block_ = std::make_shared<block_type>(actual_block);
+}
+block_detail::block_detail(const block_header_type& header)
+  : block_hash_(hash_block_header(header))
+{
+    block_type blk;
+    blk.header = header;
+    actual_block_ = std::make_shared<block_type>(blk);
 }
 
 block_type& block_detail::actual()

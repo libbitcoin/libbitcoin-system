@@ -27,6 +27,7 @@ block_header_type leveldb_validate_block::fetch_block(size_t fetch_depth)
         return orphan_chain_[fetch_index]->actual().header;
     }
     leveldb_block_info blk;
+    // We only really need the bits and timestamp fields.
     bool get_status = common_->get_block(blk, fetch_depth, true, false);
     BITCOIN_ASSERT(get_status);
     return blk.header;

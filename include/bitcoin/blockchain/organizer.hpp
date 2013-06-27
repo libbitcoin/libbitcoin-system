@@ -15,6 +15,7 @@ class block_detail
 {
 public:
     block_detail(const block_type& actual_block);
+    block_detail(const block_header_type& header);
     block_type& actual();
     const block_type& actual() const;
     std::shared_ptr<block_type> actual_ptr() const;
@@ -28,8 +29,8 @@ public:
 private:
     std::shared_ptr<block_type> actual_block_;
     const hash_digest block_hash_;
-    bool processed_;
-    block_info info_;
+    bool processed_ = false;
+    block_info info_{block_status::orphan, 0};
     std::error_code ec_;
 };
 
