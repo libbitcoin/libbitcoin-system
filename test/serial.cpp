@@ -24,3 +24,22 @@ BOOST_AUTO_TEST_CASE(serialize)
     BOOST_REQUIRE(buff == rawdat);
 }
 
+BOOST_AUTO_TEST_CASE(genesis_block_serialize)
+{
+    block_type genblk = genesis_block();
+    BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk), 285);
+    BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk.header), 80);
+    data_chunk rawblk(285);
+    BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), rawblk.end()), 285);
+    // Save genesis block.
+    auto end_iter = satoshi_save(genblk, rawblk.begin());
+    BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), end_iter), 285);
+    BOOST_REQUIRE(end_iter == rawblk.end());
+    // Reload genesis block.
+    block_type blk;
+    satoshi_load(rawblk.begin(), rawblk.end(), blk);
+    BOOST_REQUIRE(genblk.header == blk.header);
+    const hash_digest& merkle = generate_merkle_root(blk.transactions);
+    BOOST_REQUIRE(genblk.header.merkle == merkle);
+}
+
