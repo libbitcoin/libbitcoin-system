@@ -140,9 +140,11 @@ bool leveldb_chain_keeper::clear_transaction_data(
 bool leveldb_chain_keeper::remove_address(leveldb::WriteBatch& batch,
     const script& output_script, const output_point& outpoint)
 {
-    data_chunk raw_address = create_address_key(output_script);
-    if (raw_address.empty())
-        return true;
+    payment_address address;
+    if (!extract(address, output_script))
+        return false;
+    data_chunk raw_address = create_address_key(address);
+    BITCOIN_ASSERT(!raw_address.empty());
     data_chunk outpoint_value = create_spent_key(outpoint);
     bool is_found = false;
     leveldb_iterator it(address_iterator(db_.addr, raw_address));

@@ -156,6 +156,8 @@ private:
     database_ptr db_spend_;
     // Address to list of output points.
     database_ptr db_addr_;
+    // Address to list of input points.
+    database_ptr db_debit_;
 
     leveldb_common_ptr common_;
     // Organize stuff

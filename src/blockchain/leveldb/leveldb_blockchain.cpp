@@ -87,6 +87,7 @@ void leveldb_blockchain::stop()
     close(db_tx_);
     close(db_spend_);
     close(db_addr_);
+    close(db_debit_);
 }
 
 bool open_db(const std::string& prefix, const std::string& db_name,
@@ -146,9 +147,11 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
         return false;
     if (!open_db(prefix, "addr", db_addr_, open_options_))
         return false;
+    if (!open_db(prefix, "debit", db_debit_, open_options_))
+        return false;
     leveldb_databases databases{
         db_block_.get(), db_block_hash_.get(), db_tx_.get(),
-        db_spend_.get(), db_addr_.get()};
+        db_spend_.get(), db_addr_.get(), db_debit_.get()};
     // G++ has an internal compiler error when you use the implicit * cast.
     common_ = std::make_shared<leveldb_common>(databases);
     // Validate and organisation components.

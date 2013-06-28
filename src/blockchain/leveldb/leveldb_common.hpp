@@ -5,6 +5,7 @@
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
 
+#include <bitcoin/address.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/serializer.hpp>
@@ -42,6 +43,7 @@ struct leveldb_databases
     leveldb::DB* tx;
     leveldb::DB* spend;
     leveldb::DB* addr;
+    leveldb::DB* debit;
 
     void write(leveldb_transaction_batch& batch);
 };
@@ -74,13 +76,6 @@ private:
         const hash_digest& tx_hash, const transaction_type& block_tx);
     bool duplicate_exists(const hash_digest& tx_hash,
         uint32_t block_depth, uint32_t tx_index);
-    bool mark_spent_outputs(leveldb::WriteBatch& spends_batch,
-        const output_point& previous_output,
-        const input_point& current_input);
-    // returns false only on database failure. It may or may not add an entry
-    bool add_address(leveldb::WriteBatch& address_batch,
-        const script& output_script,
-        const output_point& outpoint);
 
     leveldb_databases db_;
 };
@@ -117,7 +112,7 @@ data_chunk create_spent_key(const Point& point)
 
 output_point slice_to_output_point(const leveldb::Slice& out_slice);
 
-data_chunk create_address_key(const script& output_script);
+data_chunk create_address_key(const payment_address& address);
 
 leveldb::Iterator* address_iterator(leveldb::DB* db_address,
     const data_chunk& raw_address);
