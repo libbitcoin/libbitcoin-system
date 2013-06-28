@@ -360,7 +360,7 @@ Iterator satoshi_save(const block_type& packet, Iterator result)
     Iterator write_iter = serial.iterator();
     for (const transaction_type& tx: packet.transactions)
         write_iter = satoshi_save(tx, write_iter);
-    return serial.iterator();
+    return write_iter;
 }
 template <typename Iterator>
 void satoshi_load(Iterator first, Iterator last, block_type& packet)
@@ -374,7 +374,6 @@ void satoshi_load(Iterator first, Iterator last, block_type& packet)
         read_transaction(deserial, tx);
         packet.transactions.push_back(std::move(tx));
     }
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
 }
 
 const std::string satoshi_command(const ping_type&);
