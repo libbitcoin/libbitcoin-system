@@ -146,16 +146,16 @@ private:
     leveldb::Options open_options_;
 
     // Blocks indexed by depth.
-    database_ptr db_blocks_;
+    database_ptr db_block_;
     // Block depths indexed by hash (a secondary lookup table).
-    database_ptr db_blocks_hash_;
+    database_ptr db_block_hash_;
     // Transactions indexed by hash.
-    database_ptr db_txs_;
+    database_ptr db_tx_;
     // Lookup whether an output point is spent.
     // Value is the input point spend.
-    database_ptr db_spends_;
+    database_ptr db_spend_;
     // Address to list of output points.
-    database_ptr db_address_;
+    database_ptr db_addr_;
 
     leveldb_common_ptr common_;
     // Organize stuff

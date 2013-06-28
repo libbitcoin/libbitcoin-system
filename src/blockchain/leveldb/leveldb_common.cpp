@@ -9,17 +9,14 @@
 
 namespace libbitcoin {
 
-leveldb_common::leveldb_common(leveldb::DB* db_blocks,
-    leveldb::DB* db_blocks_hash, leveldb::DB* db_txs,
-    leveldb::DB* db_spends, leveldb::DB* db_address)
-  : db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
-    db_txs_(db_txs), db_spends_(db_spends), db_address_(db_address)
+leveldb_common::leveldb_common(leveldb_databases db)
+  : db_(db)
 {
 }
 
 uint32_t leveldb_common::find_last_block_depth()
 {
-    leveldb_iterator it(db_blocks_->NewIterator(leveldb::ReadOptions()));
+    leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
     it->SeekToLast();
     if (!it->Valid() || !it->status().ok())
         return std::numeric_limits<uint32_t>::max();
@@ -32,7 +29,7 @@ bool leveldb_common::fetch_spend(const output_point& spent_output,
 {
     data_chunk spent_key = create_spent_key(spent_output);
     std::string raw_spend;
-    leveldb::Status status = db_spends_->Get(
+    leveldb::Status status = db_.spend->Get(
         leveldb::ReadOptions(), slice(spent_key), &raw_spend);
     if (status.IsNotFound())
         return false;
@@ -85,13 +82,13 @@ bool leveldb_common::save_block(
     // Begin commiting changes to database.
     leveldb::WriteOptions options;
     // Write block to database.
-    db_blocks_->Put(options, slice(raw_depth), slice(raw_block_data));
-    db_blocks_hash_->Put(options,
+    db_.block->Put(options, slice(raw_depth), slice(raw_block_data));
+    db_.block_hash->Put(options,
         slice_block_hash(block_hash), slice(raw_depth));
     // Execute batches.
-    db_txs_->Write(options, &batch.tx_batch);
-    db_spends_->Write(options, &batch.spends_batch);
-    db_address_->Write(options, &batch.address_batch);
+    db_.tx->Write(options, &batch.tx_batch);
+    db_.spend->Write(options, &batch.spends_batch);
+    db_.addr->Write(options, &batch.address_batch);
     return true;
 }
 
@@ -185,7 +182,7 @@ bool leveldb_common::add_address(leveldb::WriteBatch& address_batch,
 uint32_t leveldb_common::get_block_depth(const hash_digest& block_hash)
 {
     std::string value;
-    leveldb::Status status = db_blocks_hash_->Get(
+    leveldb::Status status = db_.block_hash->Get(
         leveldb::ReadOptions(), slice_block_hash(block_hash), &value);
     if (status.IsNotFound())
         return std::numeric_limits<uint32_t>::max();
@@ -204,7 +201,7 @@ bool leveldb_common::get_block(leveldb_block_info& blk_info,
     // First we try to read the bytes from the database.
     data_chunk raw_depth = uncast_type(depth);
     std::string value;
-    leveldb::Status status = db_blocks_->Get(
+    leveldb::Status status = db_.block->Get(
         leveldb::ReadOptions(), slice(raw_depth), &value);
     if (status.IsNotFound())
         return false;
@@ -243,7 +240,7 @@ bool leveldb_common::get_transaction(leveldb_tx_info& tx_info,
 {
     // First we try to read the bytes from the database.
     std::string value;
-    leveldb::Status status = db_txs_->Get(
+    leveldb::Status status = db_.tx->Get(
         leveldb::ReadOptions(), slice(tx_hash), &value);
     if (status.IsNotFound())
         return false;

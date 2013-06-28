@@ -30,11 +30,19 @@ struct leveldb_transaction_batch
     leveldb::WriteBatch tx_batch, spends_batch, address_batch;
 };
 
+struct leveldb_databases
+{
+    leveldb::DB* block;
+    leveldb::DB* block_hash;
+    leveldb::DB* tx;
+    leveldb::DB* spend;
+    leveldb::DB* addr;
+};
+
 class leveldb_common
 {
 public:
-    leveldb_common(leveldb::DB* db_blocks, leveldb::DB* db_blocks_hash,
-        leveldb::DB* db_txs, leveldb::DB* db_spends, leveldb::DB* db_address);
+    leveldb_common(leveldb_databases db);
 
     uint32_t find_last_block_depth();
     bool fetch_spend(
@@ -67,11 +75,7 @@ private:
         const script& output_script,
         const output_point& outpoint);
 
-    leveldb::DB* db_blocks_;
-    leveldb::DB* db_blocks_hash_;
-    leveldb::DB* db_txs_;
-    leveldb::DB* db_spends_;
-    leveldb::DB* db_address_;
+    leveldb_databases db_;
 };
 
 typedef std::shared_ptr<leveldb_common> leveldb_common_ptr;

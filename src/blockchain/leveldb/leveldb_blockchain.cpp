@@ -82,11 +82,11 @@ void leveldb_blockchain::stop()
 {
     reorganize_subscriber_->relay(error::service_stopped,
         0, block_list(), block_list());
-    close(db_blocks_);
-    close(db_blocks_hash_);
-    close(db_txs_);
-    close(db_spends_);
-    close(db_address_);
+    close(db_block_);
+    close(db_block_hash_);
+    close(db_tx_);
+    close(db_spend_);
+    close(db_addr_);
 }
 
 bool open_db(const std::string& prefix, const std::string& db_name,
@@ -136,26 +136,25 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     // The blocks database options needs its depth comparator too.
     leveldb::Options blocks_open_options = open_options_;
     blocks_open_options.comparator = depth_comparator_.get();
-    if (!open_db(prefix, "block", db_blocks_, blocks_open_options))
+    if (!open_db(prefix, "block", db_block_, blocks_open_options))
         return false;
-    if (!open_db(prefix, "block_hash", db_blocks_hash_, open_options_))
+    if (!open_db(prefix, "block_hash", db_block_hash_, open_options_))
         return false;
-    if (!open_db(prefix, "tx", db_txs_, open_options_))
+    if (!open_db(prefix, "tx", db_tx_, open_options_))
         return false;
-    if (!open_db(prefix, "spend", db_spends_, open_options_))
+    if (!open_db(prefix, "spend", db_spend_, open_options_))
         return false;
-    if (!open_db(prefix, "addr", db_address_, open_options_))
+    if (!open_db(prefix, "addr", db_addr_, open_options_))
         return false;
+    leveldb_databases databases{
+        db_block_.get(), db_block_hash_.get(), db_tx_.get(),
+        db_spend_.get(), db_addr_.get()};
     // G++ has an internal compiler error when you use the implicit * cast.
-    common_ = std::make_shared<leveldb_common>(
-        db_blocks_.get(), db_blocks_hash_.get(),
-        db_txs_.get(), db_spends_.get(), db_address_.get());
+    common_ = std::make_shared<leveldb_common>(databases);
     // Validate and organisation components.
     orphans_ = std::make_shared<orphans_pool>(20);
     leveldb_chain_keeper_ptr chainkeeper =
-        std::make_shared<leveldb_chain_keeper>(common_,
-            db_blocks_.get(), db_blocks_hash_.get(),
-            db_txs_.get(), db_spends_.get(), db_address_.get());
+        std::make_shared<leveldb_chain_keeper>(common_, databases);
     chain_ = chainkeeper;
     auto reorg_handler = [this](
         const std::error_code& ec, size_t fork_point,
@@ -461,7 +460,7 @@ bool leveldb_blockchain::do_fetch_outputs(const payment_address& address,
         1 + short_hash_size);
     // Associated outputs
     output_point_list assoc_outs;
-    leveldb_iterator it(address_iterator(db_address_.get(), raw_address));
+    leveldb_iterator it(address_iterator(db_addr_.get(), raw_address));
     for (; valid_address_iterator(it, raw_address); it->Next())
     {
         output_point outpoint = slice_to_output_point(it->value());

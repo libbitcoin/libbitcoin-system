@@ -12,9 +12,7 @@ class leveldb_chain_keeper
   : public chain_keeper
 {
 public:
-    leveldb_chain_keeper(leveldb_common_ptr common,
-        leveldb::DB* db_blocks, leveldb::DB* db_blocks_hash,
-        leveldb::DB* db_txs, leveldb::DB* db_spends, leveldb::DB* db_address);
+    leveldb_chain_keeper(leveldb_common_ptr common, leveldb_databases db);
 
     void start();
     void stop();
@@ -32,12 +30,7 @@ private:
         const script& output_script, const output_point& outpoint);
 
     leveldb_common_ptr common_;
-
-    leveldb::DB* db_blocks_;
-    leveldb::DB* db_blocks_hash_;
-    leveldb::DB* db_txs_;
-    leveldb::DB* db_spends_;
-    leveldb::DB* db_address_;
+    leveldb_databases db_;
 };
 
 typedef std::shared_ptr<leveldb_chain_keeper> leveldb_chain_keeper_ptr;

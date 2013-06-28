@@ -6,11 +6,9 @@
 
 namespace libbitcoin {
 
-leveldb_chain_keeper::leveldb_chain_keeper(leveldb_common_ptr common,
-    leveldb::DB* db_blocks, leveldb::DB* db_blocks_hash,
-    leveldb::DB* db_txs, leveldb::DB* db_spends, leveldb::DB* db_address)
-  : common_(common), db_blocks_(db_blocks), db_blocks_hash_(db_blocks_hash),
-    db_txs_(db_txs), db_spends_(db_spends), db_address_(db_address)
+leveldb_chain_keeper::leveldb_chain_keeper(
+    leveldb_common_ptr common, leveldb_databases db)
+  : common_(common), db_(db)
 {
 }
 
@@ -40,7 +38,7 @@ int leveldb_chain_keeper::find_index(const hash_digest& search_block_hash)
 big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 {
     big_number total_work = 0;
-    leveldb_iterator it(db_blocks_->NewIterator(leveldb::ReadOptions()));
+    leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
     data_chunk raw_depth = uncast_type(slice_begin_index);
     for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
     {
@@ -79,7 +77,7 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
 {
     leveldb::WriteBatch blk_batch, blk_hash_batch;
     leveldb_transaction_batch tx_batch;
-    leveldb_iterator it(db_blocks_->NewIterator(leveldb::ReadOptions()));
+    leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
     data_chunk raw_depth = uncast_type(slice_begin_index);
     for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
     {
@@ -103,11 +101,11 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
     }
     leveldb::WriteOptions options;
     // Execute batches.
-    db_blocks_->Write(options, &blk_batch);
-    db_blocks_hash_->Write(options, &blk_hash_batch);
-    db_txs_->Write(options, &tx_batch.tx_batch);
-    db_spends_->Write(options, &tx_batch.spends_batch);
-    db_address_->Write(options, &tx_batch.address_batch);
+    db_.block->Write(options, &blk_batch);
+    db_.block_hash->Write(options, &blk_hash_batch);
+    db_.tx->Write(options, &tx_batch.tx_batch);
+    db_.spend->Write(options, &tx_batch.spends_batch);
+    db_.addr->Write(options, &tx_batch.address_batch);
     return true;
 }
 
@@ -152,7 +150,7 @@ bool leveldb_chain_keeper::remove_address(leveldb::WriteBatch& batch,
         return true;
     data_chunk outpoint_value = create_spent_key(outpoint);
     bool is_found = false;
-    leveldb_iterator it(address_iterator(db_address_, raw_address));
+    leveldb_iterator it(address_iterator(db_.addr, raw_address));
     for (; valid_address_iterator(it, raw_address); it->Next())
     {
         if (slice_to_output_point(it->value()) != outpoint)
