@@ -27,7 +27,12 @@ typedef std::unique_ptr<leveldb::Iterator> leveldb_iterator;
 
 struct leveldb_transaction_batch
 {
-    leveldb::WriteBatch tx_batch, spends_batch, address_batch;
+    leveldb::WriteBatch block;
+    leveldb::WriteBatch block_hash;
+    leveldb::WriteBatch tx;
+    leveldb::WriteBatch spend;
+    leveldb::WriteBatch addr;
+    leveldb::WriteBatch debit;
 };
 
 struct leveldb_databases
@@ -37,6 +42,8 @@ struct leveldb_databases
     leveldb::DB* tx;
     leveldb::DB* spend;
     leveldb::DB* addr;
+
+    void write(leveldb_transaction_batch& batch);
 };
 
 class leveldb_common

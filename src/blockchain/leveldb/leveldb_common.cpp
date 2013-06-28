@@ -9,6 +9,17 @@
 
 namespace libbitcoin {
 
+void leveldb_databases::write(leveldb_transaction_batch& batch)
+{
+    leveldb::WriteOptions options;
+    // Begin commiting changes to database.
+    block->Write(options, &batch.block);
+    block_hash->Write(options, &batch.block_hash);
+    tx->Write(options, &batch.tx);
+    spend->Write(options, &batch.spend);
+    addr->Write(options, &batch.addr);
+}
+
 leveldb_common::leveldb_common(leveldb_databases db)
   : db_(db)
 {
@@ -79,16 +90,11 @@ bool leveldb_common::save_block(
         80 + 4 + serial_block.transactions.size() * hash_digest_size);
     data_chunk raw_depth = uncast_type(depth);
     hash_digest block_hash = hash_block_header(serial_block.header);
-    // Begin commiting changes to database.
-    leveldb::WriteOptions options;
-    // Write block to database.
-    db_.block->Put(options, slice(raw_depth), slice(raw_block_data));
-    db_.block_hash->Put(options,
-        slice_block_hash(block_hash), slice(raw_depth));
+    // Write block header
+    batch.block.Put(slice(raw_depth), slice(raw_block_data));
+    batch.block_hash.Put(slice_block_hash(block_hash), slice(raw_depth));
     // Execute batches.
-    db_.tx->Write(options, &batch.tx_batch);
-    db_.spend->Write(options, &batch.spends_batch);
-    db_.addr->Write(options, &batch.address_batch);
+    db_.write(batch);
     return true;
 }
 
@@ -109,7 +115,7 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
         std::distance(tx_data.begin(), end_iter) ==
         8 + satoshi_raw_size(block_tx));
     // Save tx to leveldb
-    batch.tx_batch.Put(slice(tx_hash), slice(tx_data));
+    batch.tx.Put(slice(tx_hash), slice(tx_data));
     // Add inputs to spends database.
     // Coinbase inputs do not spend anything.
     if (!is_coinbase(block_tx))
@@ -119,7 +125,7 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
             const transaction_input_type& input =
                 block_tx.inputs[input_index];
             const input_point inpoint{tx_hash, input_index};
-            if (!mark_spent_outputs(batch.spends_batch,
+            if (!mark_spent_outputs(batch.spend,
                     input.previous_output, inpoint))
                 return false;
         }
@@ -129,7 +135,7 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
     {
         const transaction_output_type& output =
             block_tx.outputs[output_index];
-        if (!add_address(batch.address_batch,
+        if (!add_address(batch.addr,
                 output.output_script, {tx_hash, output_index}))
             return false;
     }
@@ -146,17 +152,17 @@ bool leveldb_common::duplicate_exists(const hash_digest& tx_hash,
     return true;
 }
 
-bool leveldb_common::mark_spent_outputs(leveldb::WriteBatch& spends_batch,
+bool leveldb_common::mark_spent_outputs(leveldb::WriteBatch& spend_batch,
     const output_point& previous_output,
     const input_point& current_input)
 {
     data_chunk spent_key = create_spent_key(previous_output),
         spend_value = create_spent_key(current_input);
-    spends_batch.Put(slice(spent_key), slice(spend_value));
+    spend_batch.Put(slice(spent_key), slice(spend_value));
     return true;
 }
 
-bool leveldb_common::add_address(leveldb::WriteBatch& address_batch,
+bool leveldb_common::add_address(leveldb::WriteBatch& addr_batch,
     const script& output_script, const output_point& outpoint)
 {
     data_chunk raw_address = create_address_key(output_script);
@@ -175,7 +181,7 @@ bool leveldb_common::add_address(leveldb::WriteBatch& address_batch,
     // Must be a multiple of (32 + 4)
     data_chunk raw_outpoint = create_spent_key(outpoint);
     BITCOIN_ASSERT(raw_outpoint.size() == (32 + 4));
-    address_batch.Put(slice(raw_address), slice(raw_outpoint));
+    addr_batch.Put(slice(raw_address), slice(raw_outpoint));
     return true;
 }
 

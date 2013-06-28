@@ -75,8 +75,7 @@ block_detail_ptr reconstruct_block(
 bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
     block_detail_list& sliced_blocks)
 {
-    leveldb::WriteBatch blk_batch, blk_hash_batch;
-    leveldb_transaction_batch tx_batch;
+    leveldb_transaction_batch batch;
     leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
     data_chunk raw_depth = uncast_type(slice_begin_index);
     for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
@@ -90,22 +89,18 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
         // Make sure to delete hash secondary index too.
         const hash_digest& block_hash = sliced_block->hash();
         // Delete block header...
-        blk_batch.Delete(it->key());
+        batch.block.Delete(it->key());
         // And it's secondary index.
-        blk_hash_batch.Delete(slice_block_hash(block_hash));
+        batch.block_hash.Delete(slice_block_hash(block_hash));
         // Remove txs + spends + addresses too
         const auto& transactions = sliced_block->actual().transactions;
         for (const transaction_type& block_tx: transactions)
-            if (!clear_transaction_data(tx_batch, block_tx))
+            if (!clear_transaction_data(batch, block_tx))
                 return false;
     }
     leveldb::WriteOptions options;
     // Execute batches.
-    db_.block->Write(options, &blk_batch);
-    db_.block_hash->Write(options, &blk_hash_batch);
-    db_.tx->Write(options, &tx_batch.tx_batch);
-    db_.spend->Write(options, &tx_batch.spends_batch);
-    db_.addr->Write(options, &tx_batch.address_batch);
+    db_.write(batch);
     return true;
 }
 
@@ -113,7 +108,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
     leveldb_transaction_batch& batch, const transaction_type& remove_tx)
 {
     const hash_digest& tx_hash = hash_transaction(remove_tx);
-    batch.tx_batch.Delete(slice(tx_hash));
+    batch.tx.Delete(slice(tx_hash));
     // Remove spends
     // ... spends don't exist for coinbase txs.
     if (!is_coinbase(remove_tx))
@@ -127,7 +122,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
             // Recreate the key...
             data_chunk spent_key = create_spent_key(input.previous_output);
             // ... Perform the delete.
-            batch.spends_batch.Delete(slice(spent_key));
+            batch.spend.Delete(slice(spent_key));
         }
     // Remove addresses
     for (uint32_t output_index = 0; output_index < remove_tx.outputs.size();
@@ -135,7 +130,7 @@ bool leveldb_chain_keeper::clear_transaction_data(
     {
         const transaction_output_type& output =
             remove_tx.outputs[output_index];
-        if (!remove_address(batch.address_batch,
+        if (!remove_address(batch.addr,
                 output.output_script, {tx_hash, output_index}))
             return false;
     }
