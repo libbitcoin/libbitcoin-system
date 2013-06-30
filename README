@@ -27,7 +27,7 @@ Ubuntu Instructions
 
 *Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of libboost-all-dev
 
-  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev libprotobuf-dev pkg-config libcurl4-openssl-dev libleveldb-dev
+  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev
   $ autoreconf -i
   $ ./configure --enable-leveldb
   $ make
