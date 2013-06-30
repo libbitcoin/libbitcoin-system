@@ -9,9 +9,6 @@ You will need:
   - GCC 4.7 or newer
   - Boost 1.48 or newer
   - OpenSSL 0.9 or newer
-  * for BerkeleyDB support:
-    - berkdb 5.1 or newer
-    - protobuf
   - LevelDB
 
 'configure' accepted a --prefix switch. Use this if you want to install the
@@ -35,7 +32,7 @@ Ubuntu Instructions
 
   $ sudo apt-get install build-essential autoconf libtool libboost-all-dev libdb++-dev libprotobuf-dev pkg-config libcurl4-openssl-dev libleveldb-dev
   $ autoreconf -i
-  $ ./configure --enable-bdb --enable-leveldb
+  $ ./configure --enable-leveldb
   $ make
   $ sudo make install
 
@@ -43,14 +40,17 @@ pkg-config can be invoked to get the neccessary compile and build flags.
 
   $ pkg-config --cflags --libs libbitcoin
 
-To run the protocol test program:
+Start with the examples/ to see a few sample programs:
 
-  $ mkdir -p obj/ bin/tests/
-  $ make -f development-makefile protst
-  $ export LD_LIBRARY_PATH=/usr/local/lib
-  $ ./bin/tests/protst
-
-Gentoo users: just use the ebuild from the bitcoin overlay.
+  $ cd examples/
+  $ make
+  # Play around with private keys.
+  $ ./priv
+  # Initialize a new LevelDB blockchain database.
+  $ mkdir database
+  $ ./initchain database/
+  # Run the fullnode example (validates blocks and transactions).
+  $ ./fullnode
 
 Mac OSX Instructions
 ====================
