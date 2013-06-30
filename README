@@ -11,11 +11,8 @@ You will need:
   - OpenSSL 0.9 or newer
   - LevelDB
 
+The './configure' command in the install instructions below.
 'configure' accepted a --prefix switch. Use this if you want to install the
-project locally. Then add these environment variables to your ~/.bashrc
-
-  $ export LD_LIBRARY_PATH=~/usr/lib/
-  $ export PKG_CONFIG_PATH=~/usr/lib/pkgconfig/
 
 Use `pkg-config --cflags --libs libbitcoin' for getting compile/build
 parameters.
@@ -30,11 +27,25 @@ Ubuntu Instructions
 
 *Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of libboost-all-dev
 
-  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev libdb++-dev libprotobuf-dev pkg-config libcurl4-openssl-dev libleveldb-dev
+  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev libprotobuf-dev pkg-config libcurl4-openssl-dev libleveldb-dev
   $ autoreconf -i
   $ ./configure --enable-leveldb
   $ make
   $ sudo make install
+
+'./configure' accepts a --prefix switch. This is useful if you prefer to
+install libbitcoin to a local directory instead.
+
+  $ ./configure --enable-leveldb --prefix /home/genjix/usr/
+  $ make
+  $ make install
+
+Then add these environment variables to your ~/.bashrc to point software to
+your local installation. Otherwise software will have trouble finding the
+libbitcoin install.
+
+  export LD_LIBRARY_PATH=~/usr/lib/
+  export PKG_CONFIG_PATH=~/usr/lib/pkgconfig/
 
 pkg-config can be invoked to get the neccessary compile and build flags.
 
