@@ -40,9 +40,9 @@ install libbitcoin to a local directory instead.
   $ make
   $ make install
 
-Then add these environment variables to your ~/.bashrc to point software to
-your local installation. Otherwise software will have trouble finding the
-libbitcoin install.
+Then add these environment variables to the end of your ~/.bashrc to point
+software to your local installation. Otherwise software will have trouble
+finding the libbitcoin install.
 
   export LD_LIBRARY_PATH=~/usr/lib/
   export PKG_CONFIG_PATH=~/usr/lib/pkgconfig/
