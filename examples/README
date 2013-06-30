@@ -1,0 +1,10 @@
+Run these commands to start the fullnode after installing libbitcoin:
+
+  $ make
+  $ mkdir database
+  $ ./initchain database
+  $ screen -S fullnode
+  $ ./fullnode
+  ... press CTRL-A, D
+  $ ./blocks.sh
+
