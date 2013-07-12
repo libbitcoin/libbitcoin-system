@@ -67,9 +67,9 @@ public:
     // fetch spend of an output point
     void fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch);
-    // fetch outputs associated with an address
-    void fetch_outputs(const payment_address& address,
-        fetch_handler_outputs handle_fetch);
+    // fetch outputs, values and spends for an address.
+    void fetch_history(const payment_address& address,
+        fetch_handler_history handle_fetch);
 
     void subscribe_reorganize(reorganize_handler handle_reorganize);
 
@@ -126,8 +126,8 @@ private:
         fetch_handler_transaction_index handle_fetch, size_t slock);
     bool do_fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch, size_t slock);
-    bool do_fetch_outputs(const payment_address& address,
-        fetch_handler_outputs handle_fetch, size_t slock);
+    bool do_fetch_history(const payment_address& address,
+        fetch_handler_history handle_fetch, size_t slock);
 
     io_service& ios_;
     // Queue for writes to the blockchain.
@@ -154,9 +154,9 @@ private:
     // Lookup whether an output point is spent.
     // Value is the input point spend.
     database_ptr db_spend_;
-    // Address to list of output points.
-    database_ptr db_addr_;
-    // Address to list of input points.
+    // Address to list of output points + values
+    database_ptr db_credit_;
+    // Address to list of spend input points.
     database_ptr db_debit_;
 
     leveldb_common_ptr common_;

@@ -68,7 +68,7 @@ bool tx_after_fork(const leveldb_tx_info& tx, size_t fork_index)
 bool leveldb_validate_block::transaction_exists(const hash_digest& tx_hash)
 {
     leveldb_tx_info tx;
-    if (!common_->get_transaction(tx, tx_hash, false, true))
+    if (!common_->get_transaction(tx, tx_hash, true, false))
         return false;
     return !tx_after_fork(tx, fork_index_);
 }

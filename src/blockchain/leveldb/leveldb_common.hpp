@@ -32,7 +32,7 @@ struct leveldb_transaction_batch
     leveldb::WriteBatch block_hash;
     leveldb::WriteBatch tx;
     leveldb::WriteBatch spend;
-    leveldb::WriteBatch addr;
+    leveldb::WriteBatch credit;
     leveldb::WriteBatch debit;
 };
 
@@ -42,7 +42,7 @@ struct leveldb_databases
     leveldb::DB* block_hash;
     leveldb::DB* tx;
     leveldb::DB* spend;
-    leveldb::DB* addr;
+    leveldb::DB* credit;
     leveldb::DB* debit;
 
     void write(leveldb_transaction_batch& batch);
@@ -110,14 +110,11 @@ data_chunk create_spent_key(const Point& point)
     return spent_key;
 }
 
-output_point slice_to_output_point(const leveldb::Slice& out_slice);
-
-data_chunk create_address_key(const payment_address& address);
-
-leveldb::Iterator* address_iterator(leveldb::DB* db_address,
-    const data_chunk& raw_address);
-bool valid_address_iterator(leveldb_iterator& it,
-    const data_chunk& raw_address);
+// Given an input_script, extract the Bitcoin address from the pubkey.
+bool extract_input_address(
+    payment_address& address, const script& input_script);
+data_chunk create_address_key(
+    const payment_address& address, const output_point& outpoint);
 
 } // namespace libbitcoin
 

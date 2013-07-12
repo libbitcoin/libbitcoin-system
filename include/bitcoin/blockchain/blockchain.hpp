@@ -12,6 +12,7 @@
 #include <bitcoin/error.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/address.hpp>
+#include <bitcoin/transaction.hpp>
 
 namespace libbitcoin {
 
@@ -47,7 +48,9 @@ public:
 
     typedef fetch_handler<input_point> fetch_handler_spend;
 
-    typedef fetch_handler<output_point_list> fetch_handler_outputs;
+    typedef std::function<void (const std::error_code&,
+        const output_point_list&, const output_value_list&,
+        const input_point_list&)> fetch_handler_history;
 
     typedef std::vector<std::shared_ptr<block_type>> block_list;
     typedef std::function<
@@ -233,19 +236,37 @@ public:
         fetch_handler_spend handle_fetch) = 0;
 
     /**
-     * Fetches outputs associated with a bitcoin address.
+     * Fetches the output points, output values and corresponding
+     * input point spends associated with a Bitcoin address.
+     * The length of all lists should always be equal.
+     *
+     * Output points and input points are matched by their corresponding index.
+     * The spend of outpoint[i] is inpoint[i]. Same for the output values.
+     *
+     * If an output is unspent then the corresponding input spend hash
+     * will be equivalent to null_hash.
+     *
+     * @code
+     *  if (inpoints[i].hash == null_hash)
+     *    // The ith output point is unspent.
+     * @endcode
+     *
+     * Summing the list of values for unspent outpoints gives the balance
+     * for an address.
      *
      * @param[in]   address         Bitcoin address
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,          // Status of operation
-     *      const output_point_list& outpoints  // Outputs
+     *      const output_point_list& outpoints, // Outputs
+     *      const output_value_list& values,    // Values for outputs.
+     *      const input_point_list& inpoint     // Input points (spends)
      *  );
      * @endcode
      */
-    virtual void fetch_outputs(const payment_address& address,
-        fetch_handler_outputs handle_fetch) = 0;
+    virtual void fetch_history(const payment_address& address,
+        fetch_handler_history handle_fetch) = 0;
 
     /**
      * Be notified of the next blockchain change.
@@ -327,58 +348,6 @@ void fetch_block_locator(blockchain& chain,
 typedef std::function<void (const std::error_code&,
     const output_point_list&, const input_point_list&)>
         blockchain_fetch_handler_history;
-
-/**
- * Fetches the output points and corresponding input point spends
- * associated with a Bitcoin address. The length of the fetched
- * outputs should always match the length of the inputs.
- *
- * Output points and input points are matched by their corresponding index.
- * The spend of outpoint[i] is inpoint[i].
- *
- * If an output is unspent then the corresponding input spend hash
- * will be equivalent to null_hash.
- *
- * @code
- *  if (inpoints[i].hash == null_hash)
- *    // The ith output point is unspent.
- * @endcode
- *
- * @param[in]   chain           Blockchain service
- * @param[in]   address         Bitcoin address to fetch history for.
- * @param[in]   handle_fetch    Completion handler for fetch operation.
- * @code
- *  void handle_fetch(
- *      const std::error_code& ec,          // Status of operation
- *      const output_point_list& outpoints, // Output points (deposits)
- *      const input_point_list& inpoint     // Input points (spends)
- *  );
- * @endcode
- */
-void fetch_history(blockchain& chain, const payment_address& address,
-    blockchain_fetch_handler_history handle_fetch);
-
-typedef std::vector<uint64_t> output_value_list;
-typedef std::function<
-    void (const std::error_code&, const output_value_list&)>
-        blockchain_fetch_handler_output_values;
-
-/**
- * Fetches the output values given a list of output points. These can
- * be summed to give the balance for a list of outputs.
- *
- * @param[in]   chain           Blockchain service
- * @param[in]   outpoints       Output points to fetch values for.
- * @param[in]   handle_fetch    Completion handler for fetch operation.
- * @code
- *  void handle_fetch(
- *      const std::error_code& ec,          // Status of operation
- *      const output_value_list& values     // Values for outputs.
- *  );
- * @encode
- */
-void fetch_output_values(blockchain& chain, const output_point_list& outpoints,
-    blockchain_fetch_handler_output_values handle_fetch);
 
 } // namespace libbitcoin
 

@@ -5,6 +5,8 @@
 
 namespace libbitcoin {
 
+typedef std::vector<uint64_t> output_value_list;
+
 hash_digest hash_transaction(const transaction_type& tx);
 // hash_type_code is used by OP_CHECKSIG
 hash_digest hash_transaction(const transaction_type& tx,

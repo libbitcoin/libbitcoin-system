@@ -84,13 +84,8 @@ int main()
     chain = &ldb_chain;
     // Start the database using its implementation specific method.
     ldb_chain.start("database", blockchain_started);
-    // Keep running until the user presses enter.
-    // Since libbitcoin is asynchronous, you need to synchronise with
-    // them to know when to exit safely.
-    // For these examples we just pause until enter for simplicity sake.
-    std::cin.get();
-    // Begin stopping the threadpools in parallel (only 1 here).
-    pool.stop();
+    // Don't wait after all current operations have completed.
+    pool.shutdown();
     // Join them one by one.
     pool.join();
     // Finally stop the blockchain safely now everything has stopped.

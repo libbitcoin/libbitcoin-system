@@ -262,6 +262,14 @@ public:
         return read_fixed_string(string_size);
     }
 
+    /**
+     * Returns underlying iterator.
+     */
+    Iterator iterator()
+    {
+        return iter_;
+    }
+
 private:
     // Try to advance iterator 'distance' incremenets forwards.
     // Throw if we prematurely reach the end.

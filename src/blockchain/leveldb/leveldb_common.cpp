@@ -17,17 +17,18 @@ void leveldb_databases::write(leveldb_transaction_batch& batch)
     block_hash->Write(options, &batch.block_hash);
     tx->Write(options, &batch.tx);
     spend->Write(options, &batch.spend);
-    addr->Write(options, &batch.addr);
+    credit->Write(options, &batch.credit);
     debit->Write(options, &batch.debit);
 }
 
 bool mark_spent_outputs(leveldb::WriteBatch& spend_batch,
     const output_point& previous_output, const input_point& spent_inpoint);
-bool add_debit(leveldb::WriteBatch& debit_batch,
-    const script& input_script, const input_point& inpoint);
-// returns false only on database failure. It may or may not add an entry
-bool add_address(leveldb::WriteBatch& addr_batch,
-    const script& output_script, const output_point& outpoint);
+// Both functions return false only on database failure.
+// They may or may not add an entry
+bool add_debit(leveldb::WriteBatch& batch, const transaction_input_type& input);
+bool add_credit(leveldb::WriteBatch& batch,
+    const transaction_output_type& output, const output_point& outpoint,
+    uint32_t block_depth);
 
 leveldb_common::leveldb_common(leveldb_databases db)
   : db_(db)
@@ -137,7 +138,7 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
             if (!mark_spent_outputs(batch.spend,
                     input.previous_output, inpoint))
                 return false;
-            if (!add_debit(batch.debit, input.input_script, inpoint))
+            if (!add_debit(batch.debit, input))
                 return false;
         }
     // Save address -> output mappings.
@@ -146,8 +147,8 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
     {
         const transaction_output_type& output =
             block_tx.outputs[output_index];
-        if (!add_address(batch.addr,
-                output.output_script, {tx_hash, output_index}))
+        if (!add_credit(batch.credit,
+                output, {tx_hash, output_index}, block_depth))
             return false;
     }
     return true;
@@ -172,57 +173,69 @@ bool mark_spent_outputs(leveldb::WriteBatch& spend_batch,
     return true;
 }
 
-template <typename Point>
-bool add_credit_or_debit(leveldb::WriteBatch& batch,
-    const payment_address& address, const Point& point)
-{
-    data_chunk raw_address = create_address_key(address);
-    BITCOIN_ASSERT(!raw_address.empty());
-    // Count the number of outpoints for this address.
-    uint32_t counter = rand();
-    // Add counter to raw_address key because leveldb
-    // doesn't support duplicate keys.
-    data_chunk raw_counter = uncast_type(counter);
-    // Use 3 bytes so key size is 24 bytes for alignment.
-    raw_counter.pop_back();
-    BITCOIN_ASSERT(raw_counter.size() == 3);
-    extend_data(raw_address, raw_counter);
-    BITCOIN_ASSERT(raw_address.size() == (1 + 20 + 3));
-    // Must be a multiple of (32 + 4)
-    data_chunk raw_outpoint = create_spent_key(point);
-    BITCOIN_ASSERT(raw_outpoint.size() == (32 + 4));
-    batch.Put(slice(raw_address), slice(raw_outpoint));
-    return true;
-}
-
 bool input_has_pubkey(const operation_stack& ops)
 {
     return ops.size() == 2 &&
         ops[0].code == opcode::special &&
         ops[1].code == opcode::special;
 }
-bool add_debit(leveldb::WriteBatch& debit_batch,
-    const script& input_script, const input_point& inpoint)
+bool extract_input_address(
+    payment_address& address, const script& input_script)
 {
     const operation_stack& ops = input_script.operations();
     if (!input_has_pubkey(ops))
-        return true;
+        return false;
     BITCOIN_ASSERT(ops.size() == 2);
     const data_chunk& pubkey = ops[1].data;
-    payment_address address;
-    // Not a normal Bitcoin address. Ignore this entry.
     if (!set_public_key(address, pubkey))
-        return true;
-    return add_credit_or_debit(debit_batch, address, inpoint);
+        return false;
+    return true;
 }
 
-bool add_address(leveldb::WriteBatch& addr_batch,
-    const script& output_script, const output_point& outpoint)
+bool add_debit(leveldb::WriteBatch& batch, const transaction_input_type& input)
+{
+    const output_point& outpoint = input.previous_output;
+    payment_address address;
+    // Not a Bitcoin address so skip this output.
+    if (!extract_input_address(address, input.input_script))
+        return true;
+    data_chunk addr_key = create_address_key(address, outpoint);
+    // outpoint, value, inpoint
+    data_chunk row_info(36);
+    auto serial = make_serializer(row_info.begin());
+    // outpoint
+    serial.write_hash(outpoint.hash);
+    serial.write_4_bytes(outpoint.index);
+    BITCOIN_ASSERT(
+        std::distance(row_info.begin(), serial.iterator()) == 36);
+    batch.Put(slice(addr_key), slice(row_info));
+    return true;
+}
+
+bool add_credit(leveldb::WriteBatch& batch,
+    const transaction_output_type& output, const output_point& outpoint,
+    uint32_t block_depth)
 {
     payment_address address;
-    if (!extract(address, output_script))
+    // Not a Bitcoin address so skip this output.
+    if (!extract(address, output.output_script))
         return true;
-    return add_credit_or_debit(addr_batch, address, outpoint);
+    data_chunk addr_key = create_address_key(address, outpoint);
+    // outpoint, value, inpoint
+    data_chunk row_info(36 + 8 + 4);
+    auto serial = make_serializer(row_info.begin());
+    // outpoint
+    serial.write_hash(outpoint.hash);
+    serial.write_4_bytes(outpoint.index);
+    // value
+    serial.write_8_bytes(output.value);
+    // block_depth
+    // We add the block depth for reordering.
+    serial.write_4_bytes(block_depth);
+    BITCOIN_ASSERT(
+        std::distance(row_info.begin(), serial.iterator()) == 36 + 8 + 4);
+    batch.Put(slice(addr_key), slice(row_info));
+    return true;
 }
 
 uint32_t leveldb_common::get_block_depth(const hash_digest& block_hash)
@@ -329,45 +342,29 @@ leveldb::Slice slice_block_hash(const hash_digest& block_hash)
         reinterpret_cast<const char*>(block_hash.data() + 16), 16);
 }
 
-output_point slice_to_output_point(const leveldb::Slice& out_slice)
+uint32_t addr_key_checksum(const output_point& outpoint)
 {
-    // We need a copy not a temporary
-    data_chunk raw_outpoint;
-    const uint8_t* value_start =
-        reinterpret_cast<const uint8_t*>(out_slice.data());
-    raw_outpoint.insert(raw_outpoint.end(),
-        value_start, value_start + out_slice.size());
-    // Then read the value off
-    auto deserial = make_deserializer(raw_outpoint.begin(), raw_outpoint.end());
-    output_point outpoint;
-    outpoint.hash = deserial.read_hash();
-    outpoint.index = deserial.read_4_bytes();
-    return outpoint;
+    data_chunk chksum_data(hash_digest_size + 4);
+    auto serial = make_serializer(chksum_data.begin());
+    serial.write_hash(outpoint.hash);
+    serial.write_4_bytes(outpoint.index);
+    BITCOIN_ASSERT(
+        std::distance(chksum_data.begin(), serial.iterator()) ==
+        hash_digest_size + 4);
+    return generate_sha256_checksum(chksum_data);
 }
-
-data_chunk create_address_key(const payment_address& address)
+data_chunk create_address_key(
+    const payment_address& address, const output_point& outpoint)
 {
-    data_chunk result(1 + short_hash_size);
+    data_chunk result(1 + short_hash_size + 4);
     auto serial = make_serializer(result.begin());
     serial.write_byte(address.version());
     serial.write_short_hash(address.hash());
+    serial.write_4_bytes(addr_key_checksum(outpoint));
     BITCOIN_ASSERT(
         std::distance(result.begin(), serial.iterator()) ==
-        1 + short_hash_size);
+        1 + short_hash_size + 4);
     return result;
-}
-
-leveldb::Iterator* address_iterator(leveldb::DB* db_address,
-    const data_chunk& raw_address)
-{
-    leveldb::Iterator* it = db_address->NewIterator(leveldb::ReadOptions());
-    it->Seek(slice(raw_address));
-    return it;
-}
-bool valid_address_iterator(leveldb_iterator& it,
-    const data_chunk& raw_address)
-{
-    return it->Valid() && it->key().starts_with(slice(raw_address));
 }
 
 } // namespace libbitcoin

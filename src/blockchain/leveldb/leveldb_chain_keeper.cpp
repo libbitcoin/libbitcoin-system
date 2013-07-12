@@ -6,6 +6,11 @@
 
 namespace libbitcoin {
 
+bool remove_debit(leveldb::WriteBatch& batch,
+    const transaction_input_type& input);
+bool remove_credit(leveldb::WriteBatch& batch,
+    const transaction_output_type& output, const output_point& outpoint);
+
 leveldb_chain_keeper::leveldb_chain_keeper(
     leveldb_common_ptr common, leveldb_databases db)
   : common_(common), db_(db)
@@ -123,6 +128,8 @@ bool leveldb_chain_keeper::clear_transaction_data(
             data_chunk spent_key = create_spent_key(input.previous_output);
             // ... Perform the delete.
             batch.spend.Delete(slice(spent_key));
+            if (!remove_debit(batch.debit, input))
+                return false;
         }
     // Remove addresses
     for (uint32_t output_index = 0; output_index < remove_tx.outputs.size();
@@ -130,38 +137,34 @@ bool leveldb_chain_keeper::clear_transaction_data(
     {
         const transaction_output_type& output =
             remove_tx.outputs[output_index];
-        if (!remove_address(batch.addr,
-                output.output_script, {tx_hash, output_index}))
+        if (!remove_credit(batch.credit, output, {tx_hash, output_index}))
             return false;
     }
     return true;
 }
 
-bool leveldb_chain_keeper::remove_address(leveldb::WriteBatch& batch,
-    const script& output_script, const output_point& outpoint)
+bool remove_debit(leveldb::WriteBatch& batch,
+    const transaction_input_type& input)
+{
+    const output_point& outpoint = input.previous_output;
+    payment_address address;
+    // Not a Bitcoin address so skip this output.
+    if (!extract_input_address(address, input.input_script))
+        return true;
+    data_chunk addr_key = create_address_key(address, outpoint);
+    batch.Delete(slice(addr_key));
+    return true;
+}
+
+bool remove_credit(leveldb::WriteBatch& batch,
+    const transaction_output_type& output, const output_point& outpoint)
 {
     payment_address address;
-    if (!extract(address, output_script))
-        return false;
-    data_chunk raw_address = create_address_key(address);
-    BITCOIN_ASSERT(!raw_address.empty());
-    data_chunk outpoint_value = create_spent_key(outpoint);
-    bool is_found = false;
-    leveldb_iterator it(address_iterator(db_.addr, raw_address));
-    for (; valid_address_iterator(it, raw_address); it->Next())
-    {
-        if (slice_to_output_point(it->value()) != outpoint)
-            continue;
-        // We found the address entry we were looking for.
-        BITCOIN_ASSERT(!is_found);
-        is_found = true;
-        // Put changes into batch finally.
-        batch.Delete(it->key());
-        break;
-    }
-    BITCOIN_ASSERT(it->status().ok());
-    if (!is_found)
-        return false;
+    // Not a Bitcoin address so skip this output.
+    if (!extract(address, output.output_script))
+        return true;
+    data_chunk addr_key = create_address_key(address, outpoint);
+    batch.Delete(slice(addr_key));
     return true;
 }
 

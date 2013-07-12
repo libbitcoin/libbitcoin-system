@@ -6,6 +6,7 @@
 #include <leveldb/comparator.h>
 #include <leveldb/filter_policy.h>
 
+#include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
@@ -86,7 +87,7 @@ void leveldb_blockchain::stop()
     close(db_block_hash_);
     close(db_tx_);
     close(db_spend_);
-    close(db_addr_);
+    close(db_credit_);
     close(db_debit_);
 }
 
@@ -145,13 +146,13 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
         return false;
     if (!open_db(prefix, "spend", db_spend_, open_options_))
         return false;
-    if (!open_db(prefix, "addr", db_addr_, open_options_))
+    if (!open_db(prefix, "credit", db_credit_, open_options_))
         return false;
     if (!open_db(prefix, "debit", db_debit_, open_options_))
         return false;
     leveldb_databases databases{
         db_block_.get(), db_block_hash_.get(), db_tx_.get(),
-        db_spend_.get(), db_addr_.get(), db_debit_.get()};
+        db_spend_.get(), db_credit_.get(), db_debit_.get()};
     // G++ has an internal compiler error when you use the implicit * cast.
     common_ = std::make_shared<leveldb_common>(databases);
     // Validate and organisation components.
@@ -439,38 +440,199 @@ bool leveldb_blockchain::do_fetch_spend(const output_point& outpoint,
     return finish_fetch(slock, handle_fetch, std::error_code(), input_spend);
 }
 
-void leveldb_blockchain::fetch_outputs(const payment_address& address,
-    fetch_handler_outputs handle_fetch)
+const uint8_t* slice_begin(const leveldb::Slice& data_slice)
+{
+    return reinterpret_cast<const uint8_t*>(data_slice.data());
+}
+
+class point_iterator
+{
+public:
+    typedef std::unique_ptr<leveldb::DB> database_ptr;
+
+    point_iterator(database_ptr& db, const payment_address& address)
+      : raw_address_(1 + short_hash_size)
+    {
+        set_raw_address(address);
+        set_iterator(db, raw_address_);
+    }
+    ~point_iterator()
+    {
+        BITCOIN_ASSERT(it_->status().ok());
+    }
+
+    bool valid()
+    {
+        return it_->Valid() && it_->key().starts_with(slice(raw_address_));
+    }
+
+    void load()
+    {
+        // Deserialize
+        load_checksum(it_->key());
+        load_data(it_->value());
+    }
+
+    void operator++()
+    {
+        it_->Next();
+    }
+
+    uint32_t checksum() const
+    {
+        return checksum_;
+    }
+
+protected:
+    virtual void load_data(leveldb::Slice data) = 0;
+
+private:
+    void set_raw_address(const payment_address& address)
+    {
+        BITCOIN_ASSERT(raw_address_.size() == 1 + short_hash_size);
+        auto serial = make_serializer(raw_address_.begin());
+        serial.write_byte(address.version());
+        serial.write_short_hash(address.hash());
+        BITCOIN_ASSERT(
+            std::distance(raw_address_.begin(), serial.iterator()) == 
+            1 + short_hash_size);
+    }
+
+    void set_iterator(database_ptr& db, const data_chunk& raw_address)
+    {
+        it_.reset(db->NewIterator(leveldb::ReadOptions()));
+        it_->Seek(slice(raw_address));
+    }
+
+    void load_checksum(leveldb::Slice key)
+    {
+        const uint8_t* begin = slice_begin(key.data());
+        const uint8_t* end = begin + key.size();
+        BITCOIN_ASSERT(key.size() == 1 + short_hash_size + 4);
+        auto deserial = make_deserializer(begin + 1 + short_hash_size, end);
+        checksum_ = deserial.read_4_bytes();
+        BITCOIN_ASSERT(deserial.iterator() == end);
+    }
+
+    leveldb_iterator it_;
+    data_chunk raw_address_;
+
+    uint32_t checksum_;
+};
+    
+class outpoint_iterator
+  : public point_iterator
+{
+public:
+    outpoint_iterator(database_ptr& db, const payment_address& address)
+      : point_iterator(db, address) {}
+
+    const output_point& outpoint() const
+    {
+        return outpoint_;
+    }
+    uint64_t value() const
+    {
+        return value_;
+    }
+
+protected:
+    void load_data(leveldb::Slice data)
+    {
+        const uint8_t* begin = slice_begin(data.data());
+        const uint8_t* end = begin + data.size();
+        BITCOIN_ASSERT(data.size() == 36 + 8 + 4);
+        auto deserial = make_deserializer(begin, end);
+        outpoint_.hash = deserial.read_hash();
+        outpoint_.index = deserial.read_4_bytes();
+        value_ = deserial.read_8_bytes();
+        uint32_t depth = deserial.read_4_bytes();
+        BITCOIN_ASSERT(deserial.iterator() == end);
+    }
+
+private:
+    output_point outpoint_;
+    uint64_t value_;
+};
+
+class inpoint_iterator
+  : public point_iterator
+{
+public:
+    inpoint_iterator(database_ptr& db, const payment_address& address)
+      : point_iterator(db, address) {}
+
+    const input_point& inpoint() const
+    {
+        return inpoint_;
+    }
+
+protected:
+    void load_data(leveldb::Slice data)
+    {
+        const uint8_t* begin = slice_begin(data.data());
+        const uint8_t* end = begin + data.size();
+        BITCOIN_ASSERT(data.size() == 36);
+        auto deserial = make_deserializer(begin, end);
+        inpoint_.hash = deserial.read_hash();
+        inpoint_.index = deserial.read_4_bytes();
+        BITCOIN_ASSERT(deserial.iterator() == end);
+    }
+
+private:
+    input_point inpoint_;
+};
+
+void leveldb_blockchain::fetch_history(const payment_address& address,
+    fetch_handler_history handle_fetch)
 {
     if (address.type() != payment_type::pubkey_hash)
         handle_fetch(error::unsupported_payment_type,
-            output_point_list());
+            output_point_list(), output_value_list(), input_point_list());
     else
         fetch(
-            std::bind(&leveldb_blockchain::do_fetch_outputs,
+            std::bind(&leveldb_blockchain::do_fetch_history,
                 this, address, handle_fetch, _1));
 }
-bool leveldb_blockchain::do_fetch_outputs(const payment_address& address,
-    fetch_handler_outputs handle_fetch, size_t slock)
+bool leveldb_blockchain::do_fetch_history(const payment_address& address,
+    fetch_handler_history handle_fetch, size_t slock)
 {
-    // version byte + hash for key
-    data_chunk raw_address(1 + short_hash_size);
-    auto serial = make_serializer(raw_address.begin());
-    serial.write_byte(address.version());
-    serial.write_short_hash(address.hash());
-    BITCOIN_ASSERT(
-        std::distance(raw_address.begin(), serial.iterator()) == 
-        1 + short_hash_size);
-    // Associated outputs
-    output_point_list assoc_outs;
-    leveldb_iterator it(address_iterator(db_addr_.get(), raw_address));
-    for (; valid_address_iterator(it, raw_address); it->Next())
+    constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
+    // Declare return objects.
+    output_point_list outpoints;
+    output_value_list values;
+    input_point_list inpoints;
+    // 1. Load output data
+    std::vector<uint32_t> checksums;
+    for (outpoint_iterator it(db_credit_, address); it.valid(); ++it)
     {
-        output_point outpoint = slice_to_output_point(it->value());
-        assoc_outs.push_back(outpoint);
+        it.load();
+        outpoints.push_back(it.outpoint());
+        values.push_back(it.value());
+        checksums.push_back(it.checksum());
     }
-    BITCOIN_ASSERT(it->status().ok());
-    return finish_fetch(slock, handle_fetch, std::error_code(), assoc_outs);
+    // 2. Load input data
+    std::map<uint32_t, input_point> inpoint_map;
+    for (inpoint_iterator it(db_debit_, address); it.valid(); ++it)
+    {
+        it.load();
+        inpoint_map[it.checksum()] = it.inpoint();
+    }
+    // 3. Create inpoints list.
+    BITCOIN_ASSERT(outpoints.size() == values.size());
+    BITCOIN_ASSERT(outpoints.size() == checksums.size());
+    for (const uint32_t checksum: checksums)
+    {
+        auto it = inpoint_map.find(checksum);
+        if (it == inpoint_map.end())
+            inpoints.push_back({null_hash, max_index});
+        else
+            inpoints.push_back(it->second);
+    }
+    BITCOIN_ASSERT(inpoints.size() == outpoints.size());
+    // Finish.
+    return finish_fetch(slock, handle_fetch, std::error_code(),
+        outpoints, values, inpoints);
 }
 
 void leveldb_blockchain::subscribe_reorganize(
