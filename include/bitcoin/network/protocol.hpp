@@ -32,6 +32,11 @@ public:
     void operator=(const protocol&) = delete;
 
     /**
+     * Set max_outbound connections soft limit.
+     */
+    void set_max_outbound(size_t max_outbound);
+
+    /**
      * Perform full initialization sequence.
      * Internally calls bootstrap() and then run().
      *
@@ -224,7 +229,7 @@ private:
     handshake& handshake_;
     network& network_;
 
-    size_t max_outbound_;
+    size_t max_outbound_ = 8;
     connection_list connections_;
     channel_ptr_list accepted_channels_;
 

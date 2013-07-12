@@ -20,9 +20,14 @@ static std::string pretty(const ip_address_type& ip)
 protocol::protocol(threadpool& pool, hosts& hsts,
     handshake& shake, network& net)
   : strand_(pool.service()), hosts_filename_("hosts"),
-    hosts_(hsts), handshake_(shake), network_(net), max_outbound_(8)
+    hosts_(hsts), handshake_(shake), network_(net)
 {
     channel_subscribe_ = std::make_shared<channel_subscriber_type>(pool);
+}
+
+void protocol::set_max_outbound(size_t max_outbound)
+{
+    max_outbound_ = max_outbound;
 }
 
 void protocol::start(completion_handler handle_complete)
