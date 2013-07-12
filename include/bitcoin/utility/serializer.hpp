@@ -28,10 +28,10 @@ namespace libbitcoin {
  * @endcode
  */
 template <typename Iterator>
-class serializer2
+class serializer
 {
 public:
-    serializer2(const Iterator begin)
+    serializer(const Iterator begin)
       : iter_(begin) {}
 
     void write_byte(uint8_t value)
@@ -148,9 +148,9 @@ private:
 };
 
 template <typename Iterator>
-serializer2<Iterator> make_serializer(Iterator begin)
+serializer<Iterator> make_serializer(Iterator begin)
 {
-    return serializer2<Iterator>(begin);
+    return serializer<Iterator>(begin);
 }
 
 class end_of_stream
