@@ -25,7 +25,8 @@ bool mark_spent_outputs(leveldb::WriteBatch& spend_batch,
     const output_point& previous_output, const input_point& spent_inpoint);
 // Both functions return false only on database failure.
 // They may or may not add an entry
-bool add_debit(leveldb::WriteBatch& batch, const transaction_input_type& input);
+bool add_debit(leveldb::WriteBatch& batch,
+    const transaction_input_type& input, const input_point& inpoint);
 bool add_credit(leveldb::WriteBatch& batch,
     const transaction_output_type& output, const output_point& outpoint,
     uint32_t block_depth);
@@ -138,7 +139,7 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
             if (!mark_spent_outputs(batch.spend,
                     input.previous_output, inpoint))
                 return false;
-            if (!add_debit(batch.debit, input))
+            if (!add_debit(batch.debit, input, {tx_hash, input_index}))
                 return false;
         }
     // Save address -> output mappings.
@@ -192,20 +193,20 @@ bool extract_input_address(
     return true;
 }
 
-bool add_debit(leveldb::WriteBatch& batch, const transaction_input_type& input)
+bool add_debit(leveldb::WriteBatch& batch,
+    const transaction_input_type& input, const input_point& inpoint)
 {
-    const output_point& outpoint = input.previous_output;
     payment_address address;
     // Not a Bitcoin address so skip this output.
     if (!extract_input_address(address, input.input_script))
         return true;
-    data_chunk addr_key = create_address_key(address, outpoint);
-    // outpoint, value, inpoint
+    data_chunk addr_key = create_address_key(address, input.previous_output);
+    // inpoint
     data_chunk row_info(36);
     auto serial = make_serializer(row_info.begin());
-    // outpoint
-    serial.write_hash(outpoint.hash);
-    serial.write_4_bytes(outpoint.index);
+    // inpoint
+    serial.write_hash(inpoint.hash);
+    serial.write_4_bytes(inpoint.index);
     BITCOIN_ASSERT(
         std::distance(row_info.begin(), serial.iterator()) == 36);
     batch.Put(slice(addr_key), slice(row_info));
@@ -221,7 +222,7 @@ bool add_credit(leveldb::WriteBatch& batch,
     if (!extract(address, output.output_script))
         return true;
     data_chunk addr_key = create_address_key(address, outpoint);
-    // outpoint, value, inpoint
+    // outpoint, value, block_depth
     data_chunk row_info(36 + 8 + 4);
     auto serial = make_serializer(row_info.begin());
     // outpoint
