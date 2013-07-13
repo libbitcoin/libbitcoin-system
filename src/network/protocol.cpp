@@ -294,7 +294,9 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         log_warning(LOG_PROTOCOL) << "Unable to connect to "
             << pretty(address.ip) << ":" << address.port
             << " - " << ec.message();
-        strand_.post(std::bind(&protocol::try_connect, this));
+        hosts_.fetch_address(
+            strand_.wrap(std::bind(&protocol::attempt_connect,
+                this, _1, _2)));
     }
     else
     {

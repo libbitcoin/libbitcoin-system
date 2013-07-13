@@ -25,6 +25,9 @@ public:
     typedef std::function<void (const std::error_code&,
         channel_ptr)> channel_handler;
 
+    typedef std::function<void (const std::error_code&, size_t)>
+        broadcast_handler;
+
     protocol(threadpool& pool, hosts& hsts,
         handshake& shake, network& net);
 
@@ -115,13 +118,21 @@ public:
      * Broadcast a message to all nodes in our connection list.
      *
      * @param[in]   packet      Message packet to broadcast
+     * @param[in]   handle_send Called after every send operation.
+     * @code
+     *  void handle_send(
+     *      const std::error_code& ec,  // Status of operation
+     *      size_t total_nodes          // Total number of connected nodes
+     *                                  // when the operation began.
+     *  );
+     * @endcode
      */
     template <typename Message>
-    void broadcast(const Message& packet)
+    void broadcast(const Message& packet, broadcast_handler handle_send)
     {
         strand_.post(
             std::bind(&protocol::do_broadcast<Message>,
-                this, packet));
+                this, packet, handle_send));
     }
 
 private:
@@ -213,13 +224,15 @@ private:
         fetch_connection_count_handler handle_fetch);
 
     template <typename Message>
-    void do_broadcast(const Message& packet)
+    void do_broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        auto null_handle = [](const std::error_code&) { };
+        size_t total_nodes = connections_.size() + accepted_channels_.size();
+        auto send_handler =
+            std::bind(handle_send, std::placeholders::_1, total_nodes);
         for (const connection_info& connection: connections_)
-            connection.node->send(packet, null_handle);
+            connection.node->send(packet, send_handler);
         for (channel_ptr node: accepted_channels_)
-            node->send(packet, null_handle);
+            node->send(packet, send_handler);
     }
 
     io_service::strand strand_;
