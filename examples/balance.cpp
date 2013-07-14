@@ -35,16 +35,22 @@ void history_fetched(const std::error_code& ec,
         log_error() << "Failed to fetch history: " << ec.message();
         return;
     }
+    BITCOIN_ASSERT(outpoints.size() == values.size());
+    BITCOIN_ASSERT(outpoints.size() == inpoints.size());
 #define LOG_RESULT "result"
-    log_debug(LOG_RESULT) << "outpoints:";
-    for (const output_point& outpoint: outpoints)
-        log_debug(LOG_RESULT) << "  " << outpoint.hash << ":" << outpoint.index;
-    log_debug(LOG_RESULT) << "values:";
-    for (const uint64_t value: values)
-        log_debug(LOG_RESULT) << "  " << value;
-    log_debug(LOG_RESULT) << "inpoints:";
-    for (const input_point& inpoint: inpoints)
-        log_debug(LOG_RESULT) << "  " << inpoint.hash << ":" << inpoint.index;
+    uint64_t total_recv = 0, balance = 0;
+    for (size_t i = 0; i < outpoints.size(); ++i)
+    {
+        uint64_t value = values[i];
+        BITCOIN_ASSERT(value >= 0);
+        total_recv += value;
+        if (inpoints[i].hash == null_hash)
+            balance += value;
+    }
+    log_debug(LOG_RESULT) << "Queried " << outpoints.size()
+        << " outpoints, values and their spends.";
+    log_debug(LOG_RESULT) << "Total received: " << total_recv;
+    log_debug(LOG_RESULT) << "Balance: " << balance;
     log_info(LOG_RESULT) << "History fetched";
 }
 
