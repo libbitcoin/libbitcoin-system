@@ -186,5 +186,24 @@ bool extract(payment_address& address, const script& output_script)
     return false;
 }
 
+bool input_has_pubkey(const operation_stack& ops)
+{
+    return ops.size() == 2 &&
+        ops[0].code == opcode::special &&
+        ops[1].code == opcode::special;
+}
+bool extract_input_address(
+    payment_address& address, const script& input_script)
+{
+    const operation_stack& ops = input_script.operations();
+    if (!input_has_pubkey(ops))
+        return false;
+    BITCOIN_ASSERT(ops.size() == 2);
+    const data_chunk& pubkey = ops[1].data;
+    if (!set_public_key(address, pubkey))
+        return false;
+    return true;
+}
+
 } // namespace libbitcoin
 
