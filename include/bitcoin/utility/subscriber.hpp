@@ -60,9 +60,8 @@ private:
     registry_stack registry_;
 };
 
-// C++11 - not in g++ yet!
-//template <typename Handler>
-//using subscriber_ptr = std::shared_ptr<subscribe<Handler>>;
+template <typename... Args>
+using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
 
 } // namespace libbitcoin
 
