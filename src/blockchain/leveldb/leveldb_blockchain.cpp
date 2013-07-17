@@ -562,9 +562,21 @@ public:
     inpoint_iterator(database_ptr& db, const payment_address& address)
       : point_iterator(db, address) {}
 
-    const input_point& inpoint() const
+    input_point next_inpoint(uint32_t credit_checksum)
     {
-        return inpoint_;
+        constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
+        // Check if there's an equivalent spend for this credit.
+        if (!valid())
+            return {null_hash, max_index};
+        // Valid iterator so load the data.
+        load();
+        // The next spend in the iterator is not for this output point.
+        if (checksum() != credit_checksum)
+            return {null_hash, max_index};
+        // Checksums match. Spend for this output exists.
+        input_point result = inpoint_;
+        ++(*this);
+        return result;
     }
 
 protected:
@@ -597,38 +609,23 @@ void leveldb_blockchain::fetch_history(const payment_address& address,
 bool leveldb_blockchain::do_fetch_history(const payment_address& address,
     fetch_handler_history handle_fetch, size_t slock)
 {
-    constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
     // Declare return objects.
     output_point_list outpoints;
     output_value_list values;
     input_point_list inpoints;
-    // 1. Load output data
-    std::vector<uint32_t> checksums;
-    for (outpoint_iterator it(db_credit_, address); it.valid(); ++it)
+    // Load output data
+    inpoint_iterator debit_it(db_debit_, address);
+    for (outpoint_iterator credit_it(db_credit_, address);
+        credit_it.valid(); ++credit_it)
     {
-        it.load();
-        outpoints.push_back(it.outpoint());
-        values.push_back(it.value());
-        checksums.push_back(it.checksum());
+        credit_it.load();
+        outpoints.push_back(credit_it.outpoint());
+        values.push_back(credit_it.value());
+        uint32_t checksum = credit_it.checksum();
+        inpoints.push_back(debit_it.next_inpoint(checksum));
     }
-    // 2. Load input data
-    std::map<uint32_t, input_point> inpoint_map;
-    for (inpoint_iterator it(db_debit_, address); it.valid(); ++it)
-    {
-        it.load();
-        inpoint_map[it.checksum()] = it.inpoint();
-    }
-    // 3. Create inpoints list.
-    BITCOIN_ASSERT(outpoints.size() == values.size());
-    BITCOIN_ASSERT(outpoints.size() == checksums.size());
-    for (const uint32_t checksum: checksums)
-    {
-        auto it = inpoint_map.find(checksum);
-        if (it == inpoint_map.end())
-            inpoints.push_back({null_hash, max_index});
-        else
-            inpoints.push_back(it->second);
-    }
+    // All the debits should have been loaded.
+    BITCOIN_ASSERT(!debit_it.valid());
     BITCOIN_ASSERT(inpoints.size() == outpoints.size());
     // Finish.
     return finish_fetch(slock, handle_fetch, std::error_code(),
