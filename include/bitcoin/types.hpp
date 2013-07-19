@@ -31,8 +31,7 @@ constexpr size_t short_hash_size = 20;
 typedef std::array<uint8_t, hash_digest_size> hash_digest;
 typedef std::array<uint8_t, short_hash_size> short_hash;
 
-typedef uint8_t byte;
-typedef std::vector<byte> data_chunk;
+typedef std::vector<uint8_t> data_chunk;
 
 // A list of indices. Used for creating block_locator objects or
 // Storing list of unconfirmed input indexes in tx pool.

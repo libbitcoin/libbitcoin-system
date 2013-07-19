@@ -30,7 +30,7 @@ bool payment_address::set(payment_type type, const short_hash& hash)
     return true;
 }
 
-bool payment_address::set_raw(byte version_byte, const short_hash& hash)
+bool payment_address::set_raw(uint8_t version_byte, const short_hash& hash)
 {
     switch (version_byte)
     {
@@ -65,7 +65,7 @@ bool payment_address::set_encoded(const std::string& encoded_address)
     // version + 20 bytes short hash + 4 bytes checksum
     if (decoded_address.size() != 25)
         return false;
-    const byte version = decoded_address[0];
+    const uint8_t version = decoded_address[0];
     if (!set_version(version))
         return false;
     const data_chunk checksum_bytes(
@@ -96,7 +96,7 @@ std::string payment_address::encoded() const
     return encode_base58(unencoded_address);
 }
 
-byte payment_address::version() const
+uint8_t payment_address::version() const
 {
     switch (type_)
     {
@@ -110,11 +110,11 @@ byte payment_address::version() const
         case payment_type::multisig:
         case payment_type::non_standard:
         default:
-            return std::numeric_limits<byte>::max();
+            return std::numeric_limits<uint8_t>::max();
     }
 }
 
-bool payment_address::set_version(byte version_byte)
+bool payment_address::set_version(uint8_t version_byte)
 {
     if (version_byte == pubkey_version)
         type_ = payment_type::pubkey_hash;

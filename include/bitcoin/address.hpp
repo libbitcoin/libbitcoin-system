@@ -40,7 +40,7 @@ public:
     payment_address(const std::string& encoded_address);
 
     bool set(payment_type type, const short_hash& hash);
-    bool set_raw(byte version_byte, const short_hash& hash);
+    bool set_raw(uint8_t version_byte, const short_hash& hash);
 
     const short_hash& hash() const;
     payment_type type() const;
@@ -48,10 +48,10 @@ public:
     bool set_encoded(const std::string& encoded_address);
     std::string encoded() const;
 
-    byte version() const;
+    uint8_t version() const;
 
 private:
-    bool set_version(byte version_byte);
+    bool set_version(uint8_t version_byte);
 
     payment_type type_;
     short_hash hash_;

@@ -33,7 +33,7 @@ std::string encode_base58(const data_chunk& unencoded_data)
     }                                                                            
                                                                                  
     // Leading zeroes encoded as base58 zeros                                    
-    for (const byte unencoded_byte: unencoded_data)
+    for (const uint8_t unencoded_byte: unencoded_data)
     {
         if (unencoded_byte != 0)
             break;
@@ -50,7 +50,7 @@ data_chunk decode_base58(const std::string& encoded_data)
     big_number bn = 0;       
                                                                                  
     // Convert big endian string to bignum                                       
-    for (const byte current_char: encoded_data)
+    for (const uint8_t current_char: encoded_data)
     {                                                                            
         bn *= 58;
         bn += std::string(base58_chars).find(current_char);
@@ -66,7 +66,7 @@ data_chunk decode_base58(const std::string& encoded_data)
                                                                                  
     // Restore leading zeros                                                     
     int leading_zeros = 0;
-    for (const byte current_char: encoded_data)
+    for (const uint8_t current_char: encoded_data)
     {
         if (current_char != base58_chars[0])
             break;

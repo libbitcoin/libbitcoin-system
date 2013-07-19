@@ -49,7 +49,7 @@ data_chunk uncast_type(T value, bool reverse=false)
     #endif
 
     data_chunk chunk(sizeof(T));
-    byte* value_begin = reinterpret_cast<byte*>(&value);
+    uint8_t* value_begin = reinterpret_cast<uint8_t*>(&value);
     std::copy(value_begin, value_begin + sizeof(T), chunk.begin());
 
     if (reverse)

@@ -1881,7 +1881,7 @@ inline data_chunk read_back_from_iterator(Iterator& it, size_t total)
 
 template <typename Iterator>
 optional_number number_of_bytes_from_opcode(
-    opcode code, byte raw_byte, Iterator& it)
+    opcode code, uint8_t raw_byte, Iterator& it)
 {
     switch (code)
     {
@@ -1933,7 +1933,7 @@ script parse_script(const data_chunk& raw_script)
     script script_object;
     for (auto it = raw_script.begin(); it != raw_script.end(); ++it)
     {
-        byte raw_byte = *it;
+        uint8_t raw_byte = *it;
         operation op;
         op.code = static_cast<opcode>(raw_byte);
         // raw_byte is unsigned so it's always >= 0
@@ -1981,7 +1981,7 @@ data_chunk save_script(const script& scr)
     data_chunk raw_script;
     for (const operation& op: scr.operations())
     {
-        byte raw_byte = static_cast<byte>(op.code);
+        uint8_t raw_byte = static_cast<uint8_t>(op.code);
         if (op.code == opcode::special)
             raw_byte = op.data.size();
         raw_script.push_back(raw_byte);

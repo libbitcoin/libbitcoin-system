@@ -443,9 +443,9 @@ inline size_t count_script_sigops(
             else
                 total_sigs += 20;
         }
-        byte raw_code = static_cast<byte>(op.code);
-        if (static_cast<byte>(opcode::op_1) <= raw_code &&
-            static_cast<byte>(opcode::op_16) >= raw_code)
+        uint8_t raw_code = static_cast<uint8_t>(op.code);
+        if (static_cast<uint8_t>(opcode::op_1) <= raw_code &&
+            static_cast<uint8_t>(opcode::op_16) >= raw_code)
         {
             last_number = raw_code;
         }

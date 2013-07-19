@@ -47,7 +47,7 @@ data_chunk elliptic_curve_key::public_key() const
     if (!length)
         return private_data();
     data_chunk pubkey(length, 0);
-    byte* pubkey_begin = pubkey.data();
+    uint8_t* pubkey_begin = pubkey.data();
     if (i2o_ECPublicKey(key_, &pubkey_begin) != length)
         return data_chunk();
     return pubkey;
@@ -78,7 +78,7 @@ bool elliptic_curve_key::set_private_key(const private_data& privkey)
 {
     if (!initialize())
         return false;
-    const byte* privkey_begin = privkey.data();
+    const uint8_t* privkey_begin = privkey.data();
     if (!d2i_ECPrivateKey(&key_, &privkey_begin, privkey.size()))
         return false;
     return true;
@@ -90,7 +90,7 @@ private_data elliptic_curve_key::private_key() const
     if (!length)
         return private_data();
     private_data privkey(length, 0);
-    byte* privkey_begin = privkey.data();
+    uint8_t* privkey_begin = privkey.data();
     if (i2d_ECPrivateKey(key_, &privkey_begin) != length)
         return private_data();
     return privkey;
