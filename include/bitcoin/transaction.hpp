@@ -25,7 +25,7 @@ bool operator==(const output_point& output_a, const output_point& output_b);
 bool operator!=(const output_point& output_a, const output_point& output_b);
 
 bool is_final(const transaction_type& tx,
-    size_t block_depth, uint32_t block_time);
+    size_t block_height, uint32_t block_time);
 
 } // namespace libbitcoin
 

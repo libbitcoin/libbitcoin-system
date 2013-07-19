@@ -55,7 +55,7 @@ enum class opcode
     op_2rot = 113,
     op_2swap = 114,
     ifdup = 115,
-    depth = 116,
+    height = 116,
     drop = 117,
     dup = 118,
     nip = 119,
@@ -218,7 +218,7 @@ private:
     bool op_2rot();
     bool op_2swap();
     bool op_ifdup();
-    bool op_depth();
+    bool op_height();
     bool op_drop();
     bool op_dup();
     bool op_nip();

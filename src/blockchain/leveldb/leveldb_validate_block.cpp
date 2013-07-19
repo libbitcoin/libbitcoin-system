@@ -10,25 +10,25 @@ namespace libbitcoin {
 
 leveldb_validate_block::leveldb_validate_block(leveldb_common_ptr common,
     int fork_index, const block_detail_list& orphan_chain,
-    int orphan_index, size_t depth, const block_type& current_block)
-  : validate_block(depth, current_block), common_(common),
-    depth_(depth), fork_index_(fork_index),
+    int orphan_index, size_t height, const block_type& current_block)
+  : validate_block(height, current_block), common_(common),
+    height_(height), fork_index_(fork_index),
     orphan_index_(orphan_index), orphan_chain_(orphan_chain)
 {
 }
 
-block_header_type leveldb_validate_block::fetch_block(size_t fetch_depth)
+block_header_type leveldb_validate_block::fetch_block(size_t fetch_height)
 {
-    if (fetch_depth > fork_index_)
+    if (fetch_height > fork_index_)
     {
-        size_t fetch_index = fetch_depth - fork_index_ - 1;
+        size_t fetch_index = fetch_height - fork_index_ - 1;
         BITCOIN_ASSERT(fetch_index <= orphan_index_);
         BITCOIN_ASSERT(orphan_index_ < orphan_chain_.size());
         return orphan_chain_[fetch_index]->actual().header;
     }
     leveldb_block_info blk;
     // We only really need the bits and timestamp fields.
-    bool get_status = common_->get_block(blk, fetch_depth, true, false);
+    bool get_status = common_->get_block(blk, fetch_height, true, false);
     BITCOIN_ASSERT(get_status);
     return blk.header;
 }
@@ -36,31 +36,31 @@ block_header_type leveldb_validate_block::fetch_block(size_t fetch_depth)
 uint32_t leveldb_validate_block::previous_block_bits()
 {
     // Read block d - 1 and return bits
-    return fetch_block(depth_ - 1).bits;
+    return fetch_block(height_ - 1).bits;
 }
 
 uint64_t leveldb_validate_block::actual_timespan(const uint64_t interval)
 {
-    // depth - interval and depth - 1, return time difference
-    return fetch_block(depth_ - 1).timestamp - 
-        fetch_block(depth_ - interval).timestamp;
+    // height - interval and height - 1, return time difference
+    return fetch_block(height_ - 1).timestamp - 
+        fetch_block(height_ - interval).timestamp;
 }
 
 uint64_t leveldb_validate_block::median_time_past()
 {
     // read last 11 block times into array and select median value
     std::vector<uint64_t> times;
-    for (int i = depth_ - 1; i >= 0 && i >= (int)depth_ - 11; --i)
+    for (int i = height_ - 1; i >= 0 && i >= (int)height_ - 11; --i)
         times.push_back(fetch_block(i).timestamp);
     BITCOIN_ASSERT(
-        (depth_ < 11 && times.size() == depth_) || times.size() == 11);
+        (height_ < 11 && times.size() == height_) || times.size() == 11);
     std::sort(times.begin(), times.end());
     return times[times.size() / 2];
 }
 
 bool tx_after_fork(const leveldb_tx_info& tx, size_t fork_index)
 {
-    if (tx.depth <= fork_index)
+    if (tx.height <= fork_index)
         return false;
     return true;
 }
@@ -79,28 +79,28 @@ bool leveldb_validate_block::is_output_spent(
     input_point input_spend;
     if (!common_->fetch_spend(outpoint, input_spend))
         return false;
-    // Lookup block depth. Is the spend after the fork point?
+    // Lookup block height. Is the spend after the fork point?
     return transaction_exists(input_spend.hash);
 }
 
 bool leveldb_validate_block::fetch_transaction(transaction_type& tx,
-    size_t& tx_depth, const hash_digest& tx_hash)
+    size_t& tx_height, const hash_digest& tx_hash)
 {
     leveldb_tx_info tx_info;
     bool tx_exists = common_->get_transaction(tx_info, tx_hash, true, true);
     if (!tx_exists || tx_after_fork(tx_info, fork_index_))
     {
-        if (!fetch_orphan_transaction(tx, tx_depth, tx_hash))
+        if (!fetch_orphan_transaction(tx, tx_height, tx_hash))
             return false;
         return true;
     }
     tx = tx_info.tx;
-    tx_depth = tx_info.depth;
+    tx_height = tx_info.height;
     return true;
 }
 
 bool leveldb_validate_block::fetch_orphan_transaction(
-    transaction_type& tx, size_t& tx_depth, const hash_digest& tx_hash)
+    transaction_type& tx, size_t& tx_height, const hash_digest& tx_hash)
 {
     for (size_t orphan_iter = 0; orphan_iter <= orphan_index_; ++orphan_iter)
     {
@@ -111,7 +111,7 @@ bool leveldb_validate_block::fetch_orphan_transaction(
             if (hash_transaction(orphan_tx) == tx_hash)
             {
                 tx = orphan_tx;
-                tx_depth = fork_index_ + orphan_iter + 1;
+                tx_height = fork_index_ + orphan_iter + 1;
                 return true;
             }
         }

@@ -33,9 +33,9 @@ public:
     typedef fetch_handler<hash_digest_list>
         fetch_handler_block_transaction_hashes;
 
-    typedef fetch_handler<size_t> fetch_handler_block_depth;
+    typedef fetch_handler<size_t> fetch_handler_block_height;
 
-    typedef fetch_handler<size_t> fetch_handler_last_depth;
+    typedef fetch_handler<size_t> fetch_handler_last_height;
 
     typedef fetch_handler<block_locator_type>
         fetch_handler_block_locator;
@@ -70,7 +70,7 @@ public:
      * @code
      *  void handle_store(
      *      const std::error_code& ec,   // Status of operation
-     *      block_info info              // Status and depth of block
+     *      block_info info              // Status and height of block
      *  );
      * @endcode
      */
@@ -83,7 +83,7 @@ public:
      * is undefined.
      *
      * @param[in]   import_block    Block to store
-     * @param[in]   depth           Depth of block
+     * @param[in]   height           Height of block
      * @param[in]   handle_import   Completion handler for import operation.
      * @code
      *  void handle_import(
@@ -91,13 +91,13 @@ public:
      *  );
      * @encode
      */
-    virtual void import(const block_type& import_block, size_t depth,
+    virtual void import(const block_type& import_block, size_t height,
         import_block_handler handle_import) = 0;
 
     /**
-     * Fetches the block header by depth.
+     * Fetches the block header by height.
      *
-     * @param[in]   depth           Depth of block to fetch
+     * @param[in]   height           Height of block to fetch
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
@@ -106,7 +106,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_block_header(size_t depth,
+    virtual void fetch_block_header(size_t height,
         fetch_handler_block_header handle_fetch) = 0;
 
     /**
@@ -125,9 +125,9 @@ public:
         fetch_handler_block_header handle_fetch) = 0;
 
     /**
-     * Fetches list of transaction hashes in a block by depth.
+     * Fetches list of transaction hashes in a block by height.
      *
-     * @param[in]   depth           Depth of block containing transactions.
+     * @param[in]   height          Height of block containing transactions.
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
@@ -136,7 +136,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_block_transaction_hashes(size_t depth,
+    virtual void fetch_block_transaction_hashes(size_t height,
         fetch_handler_block_transaction_hashes handle_fetch) = 0;
 
     /**
@@ -155,32 +155,32 @@ public:
         fetch_handler_block_transaction_hashes handle_fetch) = 0;
 
     /**
-     * Fetches the depth of a block given its hash.
+     * Fetches the height of a block given its hash.
      *
      * @param[in]   block_hash      Hash of block
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec, // Status of operation
-     *      size_t block_depth         // Depth of block
+     *      size_t block_height         // Height of block
      *  );
      * @endcode
      */
-    virtual void fetch_block_depth(const hash_digest& block_hash,
-        fetch_handler_block_depth handle_fetch) = 0;
+    virtual void fetch_block_height(const hash_digest& block_hash,
+        fetch_handler_block_height handle_fetch) = 0;
 
     /**
-     * Fetches the depth of the last block in our blockchain.
+     * Fetches the height of the last block in our blockchain.
      *
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec, // Status of operation
-     *      size_t block_depth         // Depth of last block
+     *      size_t block_height         // Height of last block
      *  );
      * @endcode
      */
-    virtual void fetch_last_depth(fetch_handler_last_depth handle_fetch) = 0;
+    virtual void fetch_last_height(fetch_handler_last_height handle_fetch) = 0;
 
     /**
      * Fetches a transaction by hash
@@ -198,7 +198,7 @@ public:
         fetch_handler_transaction handle_fetch) = 0;
 
     /**
-     * Fetch the block depth that contains a transaction and its index
+     * Fetch the block height that contains a transaction and its index
      * within a block.
      *
      * @param[in]   transaction_hash  Transaction's hash
@@ -206,7 +206,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec, // Status of operation
-     *      size_t block_depth,        // Depth of block containing
+     *      size_t block_height,        // Height of block containing
      *                                 // the transaction.
      *      size_t index               // Index of transaction within
      *                                 // the block.
@@ -292,12 +292,12 @@ typedef std::function<void (const std::error_code&, const block_type&)>
     blockchain_fetch_handler_block;
 
 /**
- * Fetch a block by depth.
+ * Fetch a block by height.
  *
  * If the blockchain reorganises, operation may fail halfway.
  *
  * @param[in]   chain           Blockchain service
- * @param[in]   depth           Depth of block to fetch.
+ * @param[in]   height          Height of block to fetch.
  * @param[in]   handle_fetch    Completion handler for fetch operation.
  * @code
  *  void handle_fetch(
@@ -306,7 +306,7 @@ typedef std::function<void (const std::error_code&, const block_type&)>
  *  );
  * @endcode
  */
-void fetch_block(blockchain& chain, size_t depth,
+void fetch_block(blockchain& chain, size_t height,
     blockchain_fetch_handler_block handle_fetch);
 
 /**

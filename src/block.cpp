@@ -21,10 +21,10 @@ bool operator==(
         block_a.nonce == block_b.nonce;
 }
 
-uint64_t block_value(size_t depth)
+uint64_t block_value(size_t height)
 {
     uint64_t subsidy = coin_price(block_reward);
-    subsidy >>= (depth / reward_interval);
+    subsidy >>= (height / reward_interval);
     return subsidy;
 }
 
@@ -44,13 +44,13 @@ hash_digest hash_block_header(const block_header_type& header)
     return generate_sha256_hash(raw_block_header);
 }
 
-index_list block_locator_indexes(int top_depth)
+index_list block_locator_indexes(int top_height)
 {
-    // Start at max_depth
+    // Start at max_height
     index_list indexes;
     // Push last 10 indexes first
     size_t step = 1, start = 0;
-    for (int i = top_depth; i > 0; i -= step, ++start)
+    for (int i = top_height; i > 0; i -= step, ++start)
     {
         if (start >= 10)
             step *= 2;

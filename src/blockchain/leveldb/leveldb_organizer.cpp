@@ -18,10 +18,10 @@ std::error_code leveldb_organizer::verify(int fork_index,
 {
     BITCOIN_ASSERT(orphan_index < orphan_chain.size());
     const block_type& current_block = orphan_chain[orphan_index]->actual();
-    size_t depth = fork_index + orphan_index + 1;
-    BITCOIN_ASSERT(depth != 0);
+    size_t height = fork_index + orphan_index + 1;
+    BITCOIN_ASSERT(height != 0);
     leveldb_validate_block validate(common_, fork_index, orphan_chain,
-        orphan_index, depth, current_block);
+        orphan_index, height, current_block);
     return validate.start();
 }
 void leveldb_organizer::reorganize_occured(

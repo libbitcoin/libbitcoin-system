@@ -29,21 +29,21 @@ bool add_debit(leveldb::WriteBatch& batch,
     const transaction_input_type& input, const input_point& inpoint);
 bool add_credit(leveldb::WriteBatch& batch,
     const transaction_output_type& output, const output_point& outpoint,
-    uint32_t block_depth);
+    uint32_t block_height);
 
 leveldb_common::leveldb_common(leveldb_databases db)
   : db_(db)
 {
 }
 
-uint32_t leveldb_common::find_last_block_depth()
+uint32_t leveldb_common::find_last_block_height()
 {
     leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
     it->SeekToLast();
     if (!it->Valid() || !it->status().ok())
         return std::numeric_limits<uint32_t>::max();
     BITCOIN_ASSERT(it->key().size() == 4);
-    return recreate_depth(it->key());
+    return recreate_height(it->key());
 }
 
 bool leveldb_common::fetch_spend(const output_point& spent_output,
@@ -69,7 +69,7 @@ bool leveldb_common::fetch_spend(const output_point& spent_output,
 }
 
 bool leveldb_common::save_block(
-    uint32_t depth, const block_type& serial_block)
+    uint32_t height, const block_type& serial_block)
 {
     leveldb_transaction_batch batch;
     // Write block header + tx hashes
@@ -89,7 +89,7 @@ bool leveldb_common::save_block(
         const transaction_type& block_tx =
             serial_block.transactions[tx_index];
         const hash_digest& tx_hash = hash_transaction(block_tx);
-        if (!save_transaction(batch, depth, tx_index, tx_hash, block_tx))
+        if (!save_transaction(batch, height, tx_index, tx_hash, block_tx))
         {
             log_fatal(LOG_BLOCKCHAIN) << "Could not save transaction";
             return false;
@@ -99,26 +99,26 @@ bool leveldb_common::save_block(
     BITCOIN_ASSERT(
         std::distance(raw_block_data.begin(), serial_hashes.iterator()) ==
         80 + 4 + serial_block.transactions.size() * hash_digest_size);
-    data_chunk raw_depth = uncast_type(depth);
+    data_chunk raw_height = uncast_type(height);
     hash_digest block_hash = hash_block_header(serial_block.header);
     // Write block header
-    batch.block.Put(slice(raw_depth), slice(raw_block_data));
-    batch.block_hash.Put(slice_block_hash(block_hash), slice(raw_depth));
+    batch.block.Put(slice(raw_height), slice(raw_block_data));
+    batch.block_hash.Put(slice_block_hash(block_hash), slice(raw_height));
     // Execute batches.
     db_.write(batch);
     return true;
 }
 
 bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
-    uint32_t block_depth, uint32_t tx_index,
+    uint32_t block_height, uint32_t tx_index,
     const hash_digest& tx_hash, const transaction_type& block_tx)
 {
-    if (duplicate_exists(tx_hash, block_depth, tx_index))
+    if (duplicate_exists(tx_hash, block_height, tx_index))
         return true;
     data_chunk tx_data(8 + satoshi_raw_size(block_tx));
     // Serialize tx.
     auto serial = make_serializer(tx_data.begin());
-    serial.write_4_bytes(block_depth);
+    serial.write_4_bytes(block_height);
     serial.write_4_bytes(tx_index);
     // Actual tx data.
     auto end_iter = satoshi_save(block_tx, serial.iterator());
@@ -149,19 +149,19 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
         const transaction_output_type& output =
             block_tx.outputs[output_index];
         if (!add_credit(batch.credit,
-                output, {tx_hash, output_index}, block_depth))
+                output, {tx_hash, output_index}, block_height))
             return false;
     }
     return true;
 }
 
 bool leveldb_common::duplicate_exists(const hash_digest& tx_hash,
-    uint32_t block_depth, uint32_t tx_index)
+    uint32_t block_height, uint32_t tx_index)
 {
     leveldb_tx_info tx;
     if (!get_transaction(tx, tx_hash, false, false))
         return false;
-    BITCOIN_ASSERT(block_depth == 91842 || block_depth == 91880);
+    BITCOIN_ASSERT(block_height == 91842 || block_height == 91880);
     return true;
 }
 
@@ -196,14 +196,14 @@ bool add_debit(leveldb::WriteBatch& batch,
 
 bool add_credit(leveldb::WriteBatch& batch,
     const transaction_output_type& output, const output_point& outpoint,
-    uint32_t block_depth)
+    uint32_t block_height)
 {
     payment_address address;
     // Not a Bitcoin address so skip this output.
     if (!extract(address, output.output_script))
         return true;
     data_chunk addr_key = create_address_key(address, outpoint);
-    // outpoint, value, block_depth
+    // outpoint, value, block_height
     data_chunk row_info(36 + 8 + 4);
     auto serial = make_serializer(row_info.begin());
     // outpoint
@@ -211,16 +211,16 @@ bool add_credit(leveldb::WriteBatch& batch,
     serial.write_4_bytes(outpoint.index);
     // value
     serial.write_8_bytes(output.value);
-    // block_depth
-    // We add the block depth for reordering.
-    serial.write_4_bytes(block_depth);
+    // block_height
+    // We add the block height for reordering.
+    serial.write_4_bytes(block_height);
     BITCOIN_ASSERT(
         std::distance(row_info.begin(), serial.iterator()) == 36 + 8 + 4);
     batch.Put(slice(addr_key), slice(row_info));
     return true;
 }
 
-uint32_t leveldb_common::get_block_depth(const hash_digest& block_hash)
+uint32_t leveldb_common::get_block_height(const hash_digest& block_hash)
 {
     std::string value;
     leveldb::Status status = db_.block_hash->Get(
@@ -229,27 +229,27 @@ uint32_t leveldb_common::get_block_depth(const hash_digest& block_hash)
         return std::numeric_limits<uint32_t>::max();
     else if (!status.ok())
     {
-        log_fatal(LOG_BLOCKCHAIN) << "fetch_block_depth("
+        log_fatal(LOG_BLOCKCHAIN) << "fetch_block_height("
             << block_hash << "): " << status.ToString();
         return std::numeric_limits<uint32_t>::max();
     }
-    return recreate_depth(value);
+    return recreate_height(value);
 }
 
 bool leveldb_common::get_block(leveldb_block_info& blk_info,
-    uint32_t depth, bool read_header, bool read_tx_hashes)
+    uint32_t height, bool read_header, bool read_tx_hashes)
 {
     // First we try to read the bytes from the database.
-    data_chunk raw_depth = uncast_type(depth);
+    data_chunk raw_height = uncast_type(height);
     std::string value;
     leveldb::Status status = db_.block->Get(
-        leveldb::ReadOptions(), slice(raw_depth), &value);
+        leveldb::ReadOptions(), slice(raw_height), &value);
     if (status.IsNotFound())
         return false;
     else if (!status.ok())
     {
         log_fatal(LOG_BLOCKCHAIN) << "fetch_proto_block("
-            << depth << "): " << status.ToString();
+            << height << "): " << status.ToString();
         return false;
     }
     return deserialize_block(blk_info, value, read_header, read_tx_hashes);
@@ -291,12 +291,12 @@ bool leveldb_common::get_transaction(leveldb_tx_info& tx_info,
             << tx_hash << "): " << status.ToString();
         return false;
     }
-    // Read the parent block depth and our index in that block (if neccessary).
+    // Read the parent block height and our index in that block (if neccessary).
     BITCOIN_ASSERT(value.size() > 8);
     if (read_parent)
     {
         auto deserial = make_deserializer(value.begin(), value.begin() + 8);
-        tx_info.depth = deserial.read_4_bytes();
+        tx_info.height = deserial.read_4_bytes();
         tx_info.index = deserial.read_4_bytes();
     }
     if (!read_tx)

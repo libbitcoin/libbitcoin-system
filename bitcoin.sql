@@ -62,7 +62,7 @@ CREATE TABLE blocks (
     block_id INT NOT NULL DEFAULT NEXTVAL('blocks_block_id_sequence') PRIMARY KEY,
     block_hash hash_type NOT NULL UNIQUE,
     space INT NOT NULL,
-    depth INT NOT NULL,
+    height INT NOT NULL,
     span_left INT NOT NULL,
     span_right INT NOT NULL,
     version BIGINT NOT NULL,
@@ -79,7 +79,7 @@ CREATE TABLE blocks (
 INSERT INTO blocks (
     block_hash,
     space,
-    depth,
+    height,
     span_left,
     span_right,
     version,
@@ -106,7 +106,7 @@ INSERT INTO blocks (
 
 CREATE INDEX ON blocks (block_hash);
 CREATE INDEX ON blocks (space);
-CREATE INDEX ON blocks (depth);
+CREATE INDEX ON blocks (height);
 
 DROP TABLE IF EXISTS chains;
 DROP VIEW IF EXISTS main_chain;
@@ -114,13 +114,13 @@ DROP VIEW IF EXISTS main_chain;
 CREATE TABLE chains (
     work difficulty_type NOT NULL,
     chain_id INT NOT NULL,
-    depth INT NOT NULL
+    height INT NOT NULL
 );
 
 INSERT INTO chains (
     work,
     chain_id,
-    depth
+    height
 ) SELECT
     difficulty(bits_head, bits_body),
     0,
@@ -132,7 +132,7 @@ CREATE VIEW main_chain AS
     WITH main_chain_id AS (
         SELECT 
             chain_id, 
-            depth
+            height
         FROM chains
         ORDER BY work DESC
         LIMIT 1
@@ -141,7 +141,7 @@ CREATE VIEW main_chain AS
     FROM blocks, main_chain_id
     WHERE
         space=0
-        AND blocks.depth <= main_chain_id.depth
+        AND blocks.height <= main_chain_id.height
         AND span_left >= chain_id
         AND span_right <= chain_id;
 

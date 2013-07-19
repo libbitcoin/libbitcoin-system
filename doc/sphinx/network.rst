@@ -78,7 +78,7 @@ for this field.
     version.address_you.port = 8333;
     // Set the user agent.
     version.user_agent = "/libbitcoin/connect-test/";
-    version.start_depth = 0;
+    version.start_height = 0;
     version.nonce = rand();
 
 We then send the message by calling :func:`channel::send` on the

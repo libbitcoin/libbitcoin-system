@@ -28,7 +28,7 @@ int main(int argc, char** argv)
         {
             ec_promise.set_value(ec);
         };
-    // Import the genesis block at depth 0.
+    // Import the genesis block at height 0.
     // Doesn't validate or perform checks on the block.
     chain.import(first_block, 0, import_finished);
     // Wait until std::error_code is set by

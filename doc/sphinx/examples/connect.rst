@@ -41,7 +41,7 @@ examples/connect.cpp
         version.address_you.port = 8333;
         // Set the user agent.
         version.user_agent = "/libbitcoin/connect-test/";
-        version.start_depth = 0;
+        version.start_height = 0;
         version.nonce = rand();
         // Begin the send.
         // Calls version_sent callback when complete.

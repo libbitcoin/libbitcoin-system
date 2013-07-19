@@ -52,7 +52,7 @@ Iterator satoshi_save(const version_type& packet, Iterator result)
     serial.write_network_address(packet.address_you);
     serial.write_8_bytes(packet.nonce);
     serial.write_string(packet.user_agent);
-    serial.write_4_bytes(packet.start_depth);
+    serial.write_4_bytes(packet.start_height);
     return serial.iterator();
 }
 template <typename Iterator>
@@ -80,7 +80,7 @@ void satoshi_load(Iterator first, Iterator last, version_type& packet)
         BITCOIN_ASSERT(std::distance(first, last) >= 46 + 26 + 8 + 1);
         return;
     }
-    packet.start_depth = deserial.read_4_bytes();
+    packet.start_height = deserial.read_4_bytes();
     BITCOIN_ASSERT(std::distance(first, last) >= 81 + 4);
     //BITCOIN_ASSERT(satoshi_raw_size(packet) <= std::distance(first, last));
 }

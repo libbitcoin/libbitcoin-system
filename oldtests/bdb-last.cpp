@@ -1,14 +1,14 @@
 #include <bitcoin/bitcoin.hpp>
 using namespace libbitcoin;
 
-void show_last(const std::error_code& ec, size_t last_depth)
+void show_last(const std::error_code& ec, size_t last_height)
 {
     if (ec)
     {
         log_fatal() << ec.message();
         return;
     }
-    log_info() << "Last block depth: " << last_depth;
+    log_info() << "Last block height: " << last_height;
 }
 
 void blockchain_started(const std::error_code& ec)
@@ -24,7 +24,7 @@ int main()
     threadpool pool(1);
     leveldb_blockchain chain(pool);
     chain.start("database", blockchain_started);
-    chain.fetch_last_depth(show_last);
+    chain.fetch_last_height(show_last);
     std::cin.get();
     pool.stop();
     pool.join();

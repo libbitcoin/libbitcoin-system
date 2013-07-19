@@ -36,11 +36,11 @@ void fetch_block_t::run(const std::error_code& ec, stack_ptr stack)
         {
             auto count = std::make_shared<atomic_counter>(0);
             for (size_t i = 0; i < 4; ++i)
-                blockchain_->fetch_last_depth(
+                blockchain_->fetch_last_height(
                     [this_ptr, stack, count](
-                        const std::error_code& ec, size_t depth)
+                        const std::error_code& ec, size_t height)
                     {
-                        stack->last = depth;
+                        stack->last = height;
                         ++(*count);
                         if (*count == 4)
                             this_ptr->run(ec, stack);

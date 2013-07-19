@@ -74,32 +74,32 @@ void store(blockchain& chain, const block_type& blk)
     }
     else if (info.status == block_status::confirmed)
     {
-        log_info() << "  Stored at " << info.depth << ".";
+        log_info() << "  Stored at " << info.height << ".";
     }
 }
 
-size_t last_depth(blockchain& chain)
+size_t last_height(blockchain& chain)
 {
     std::error_code ec;
-    size_t depth;
+    size_t height;
     std::promise<bool> promise;
-    auto fetch_depth =
-        [&ec, &depth, &promise](
-            const std::error_code& cec, size_t cdepth)
+    auto fetch_height =
+        [&ec, &height, &promise](
+            const std::error_code& cec, size_t cheight)
         {
             ec = cec;
-            depth = cdepth;
+            height = cheight;
             promise.set_value(true);
         };
-    chain.fetch_last_depth(fetch_depth);
+    chain.fetch_last_height(fetch_height);
     bool success = promise.get_future().get();
     BITCOIN_ASSERT(success);
     if (ec)
-        log_error() << "last_depth: " << ec.message();
-    return depth;
+        log_error() << "last_height: " << ec.message();
+    return height;
 }
 
-block_header_type get_block(blockchain& chain, size_t depth)
+block_header_type get_block(blockchain& chain, size_t height)
 {
     std::error_code ec;
     block_header_type block;
@@ -112,18 +112,18 @@ block_header_type get_block(blockchain& chain, size_t depth)
             block = cblk;
             promise.set_value(true);
         };
-    chain.fetch_block_header(depth, fetch_block);
+    chain.fetch_block_header(height, fetch_block);
     bool success = promise.get_future().get();
     BITCOIN_ASSERT(success);
     if (ec)
-        log_error() << "last_depth: " << ec.message();
+        log_error() << "last_height: " << ec.message();
     return block;
 }
 
 void show_chain(blockchain& chain)
 {
-    size_t depth = last_depth(chain);
-    for (size_t i = 0; i < depth; ++i)
+    size_t height = last_height(chain);
+    for (size_t i = 0; i < height; ++i)
     {
         block_header_type blk_header = get_block(chain, i);
         log_info() << hash_block_header(blk_header);

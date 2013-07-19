@@ -20,7 +20,7 @@ struct leveldb_block_info
 struct leveldb_tx_info
 {
     // The info that connects it to block parent.
-    size_t depth, index;
+    size_t height, index;
     transaction_type tx;
 };
 
@@ -53,16 +53,16 @@ class leveldb_common
 public:
     leveldb_common(leveldb_databases db);
 
-    uint32_t find_last_block_depth();
+    uint32_t find_last_block_height();
     bool fetch_spend(
         const output_point& spent_output,
         input_point& input_spend);
 
-    bool save_block(uint32_t depth, const block_type& serial_block);
+    bool save_block(uint32_t height, const block_type& serial_block);
 
-    uint32_t get_block_depth(const hash_digest& block_hash);
+    uint32_t get_block_height(const hash_digest& block_hash);
     bool get_block(leveldb_block_info& blk_info,
-        uint32_t depth, bool read_header, bool read_tx_hashes);
+        uint32_t height, bool read_header, bool read_tx_hashes);
     // Used by chain_keeper when iterating through blocks.
     // get_block isn't sufficient by itself.
     bool deserialize_block(leveldb_block_info& blk_info,
@@ -72,10 +72,10 @@ public:
 
 private:
     bool save_transaction(leveldb_transaction_batch& batch,
-        uint32_t block_depth, uint32_t tx_index,
+        uint32_t block_height, uint32_t tx_index,
         const hash_digest& tx_hash, const transaction_type& block_tx);
     bool duplicate_exists(const hash_digest& tx_hash,
-        uint32_t block_depth, uint32_t tx_index);
+        uint32_t block_height, uint32_t tx_index);
 
     leveldb_databases db_;
 };
@@ -90,7 +90,7 @@ leveldb::Slice slice(const Data& data)
 }
 
 template <typename Data>
-uint32_t recreate_depth(const Data& raw_data)
+uint32_t recreate_height(const Data& raw_data)
 {
     const uint8_t* start = reinterpret_cast<const uint8_t*>(raw_data.data());
     const uint8_t* end = start + raw_data.size();

@@ -121,7 +121,7 @@ the examples/ directory of the source libbitcoin package.
 * :ref:`determ.cpp <examples_determ>` shows working with deterministic wallets, generating both
   public and private keys.
 * :ref:`initchain.cpp <examples_initchain>`, initialize :class:`leveldb_blockchain` by creating a
-  blank new database and adding the genesis block at depth 0.
+  blank new database and adding the genesis block at height 0.
 * :ref:`display-last.cpp <examples_display-last>` fetches and displays the last
   block in a blockchain database.
 * :ref:`satoshiwords.cpp <examples_satoshiwords>` displays the genesis block

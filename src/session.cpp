@@ -16,9 +16,9 @@ session::session(threadpool& pool, const session_params& params)
 {
 }
 
-void handle_set_start_depth(const std::error_code&)
+void handle_set_start_height(const std::error_code&)
 {
-    // Set start depth in handshake
+    // Set start height in handshake
     // Do nothing
 }
 void session::start(completion_handler handle_complete)
@@ -31,11 +31,11 @@ void session::start(completion_handler handle_complete)
         });
     protocol_.subscribe_channel(
         std::bind(&session::new_channel, this, _1, _2));
-    chain_.fetch_last_depth(
-        std::bind(&handshake::set_start_depth,
-            &handshake_, _2, handle_set_start_depth));
+    chain_.fetch_last_height(
+        std::bind(&handshake::set_start_height,
+            &handshake_, _2, handle_set_start_height));
     chain_.subscribe_reorganize(
-        std::bind(&session::set_start_depth,
+        std::bind(&session::set_start_height,
             this, _1, _2, _3, _4));
 }
 
@@ -65,14 +65,14 @@ void session::new_channel(const std::error_code& ec, channel_ptr node)
     poll_.monitor(node);
 }
 
-void session::set_start_depth(const std::error_code& ec, size_t fork_point,
+void session::set_start_height(const std::error_code& ec, size_t fork_point,
     const blockchain::block_list& new_blocks,
     const blockchain::block_list& replaced_blocks)
 {
-    size_t last_depth = fork_point + new_blocks.size();
-    handshake_.set_start_depth(last_depth, handle_set_start_depth);
+    size_t last_height = fork_point + new_blocks.size();
+    handshake_.set_start_height(last_height, handle_set_start_height);
     chain_.subscribe_reorganize(
-        std::bind(&session::set_start_depth,
+        std::bind(&session::set_start_height,
             this, _1, _2, _3, _4));
     // Broadcast invs of new blocks
     inventory_type blocks_inv;

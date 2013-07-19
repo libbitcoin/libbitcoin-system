@@ -124,7 +124,7 @@ void poller::handle_store(const std::error_code& ec, block_info info,
 
         case block_status::confirmed:
             log_info(LOG_POLLER)
-                << "Block #" << info.depth << " " << encode_hex(block_hash);
+                << "Block #" << info.height << " " << encode_hex(block_hash);
             break;
     }
 }

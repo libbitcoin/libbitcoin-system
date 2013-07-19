@@ -40,7 +40,7 @@ int main()
     storage_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
     exporter_ptr exporter(new satoshi_exporter);
     verify_block_ptr verif(new verify_block(psql, exporter));
-    psql->fetch_block_by_depth(2, std::bind(recv_block, _1, _2, verif));
+    psql->fetch_block_by_height(2, std::bind(recv_block, _1, _2, verif));
     std::cin.get();
     return 0;
 }

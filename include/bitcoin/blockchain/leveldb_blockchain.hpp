@@ -38,30 +38,30 @@ public:
 
     void store(const block_type& block,
         store_block_handler handle_store);
-    void import(const block_type& block, size_t depth,
+    void import(const block_type& block, size_t height,
         import_block_handler handle_import);
 
-    // fetch block header by depth
-    void fetch_block_header(size_t depth,
+    // fetch block header by height
+    void fetch_block_header(size_t height,
         fetch_handler_block_header handle_fetch);
     // fetch block header by hash
     void fetch_block_header(const hash_digest& block_hash,
         fetch_handler_block_header handle_fetch);
-    // fetch transaction hashes in block by depth
-    void fetch_block_transaction_hashes(size_t depth,
+    // fetch transaction hashes in block by height
+    void fetch_block_transaction_hashes(size_t height,
         fetch_handler_block_transaction_hashes handle_fetch);
     // fetch transaction hashes in block by hash
     void fetch_block_transaction_hashes(const hash_digest& block_hash,
         fetch_handler_block_transaction_hashes handle_fetch);
-    // fetch depth of block by hash
-    void fetch_block_depth(const hash_digest& block_hash,
-        fetch_handler_block_depth handle_fetch);
-    // fetch depth of latest block
-    void fetch_last_depth(fetch_handler_last_depth handle_fetch);
+    // fetch height of block by hash
+    void fetch_block_height(const hash_digest& block_hash,
+        fetch_handler_block_height handle_fetch);
+    // fetch height of latest block
+    void fetch_last_height(fetch_handler_last_height handle_fetch);
     // fetch transaction by hash
     void fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch);
-    // fetch depth and offset within block of transaction by hash
+    // fetch height and offset within block of transaction by hash
     void fetch_transaction_index(const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch);
     // fetch spend of an output point
@@ -95,7 +95,7 @@ private:
 
     void do_store(const block_type& block,
         store_block_handler handle_store);
-    void do_import(const block_type& block, size_t depth,
+    void do_import(const block_type& block, size_t height,
         import_block_handler handle_import);
 
     // Uses sequence looks to try to read shared data.
@@ -112,14 +112,14 @@ private:
         return true;
     }
 
-    bool fetch_block_header_by_depth(size_t depth, 
+    bool fetch_block_header_by_height(size_t height, 
         fetch_handler_block_header handle_fetch, size_t slock);
     bool fetch_block_header_by_hash(const hash_digest& block_hash, 
         fetch_handler_block_header handle_fetch, size_t slock);
-    bool do_fetch_block_depth(const hash_digest& block_hash,
-        fetch_handler_block_depth handle_fetch, size_t slock);
-    bool do_fetch_last_depth(
-        fetch_handler_last_depth handle_fetch, size_t slock);
+    bool do_fetch_block_height(const hash_digest& block_hash,
+        fetch_handler_block_height handle_fetch, size_t slock);
+    bool do_fetch_last_height(
+        fetch_handler_last_height handle_fetch, size_t slock);
     bool do_fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch, size_t slock);
     bool do_fetch_transaction_index(const hash_digest& transaction_hash,
@@ -139,15 +139,15 @@ private:
     // seqlock used for writes.
     seqlock_type seqlock_;
 
-    // Comparator to order blocks by depth logically.
+    // Comparator to order blocks by height logically.
     // Otherwise the last block in the database
-    // might not be the largest depth in our blockchain.
-    comparator_ptr depth_comparator_;
+    // might not be the largest height in our blockchain.
+    comparator_ptr height_comparator_;
     leveldb::Options open_options_;
 
-    // Blocks indexed by depth.
+    // Blocks indexed by height.
     database_ptr db_block_;
-    // Block depths indexed by hash (a secondary lookup table).
+    // Block heights indexed by hash (a secondary lookup table).
     database_ptr db_block_hash_;
     // Transactions indexed by hash.
     database_ptr db_tx_;

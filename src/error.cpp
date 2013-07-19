@@ -97,8 +97,8 @@ std::string error_category_impl::message(int ev) const noexcept
             return "Block hash rejected by checkpoint lockins";
         case error::old_version_block:
             return "Reject version=1 block";
-        case error::coinbase_depth_mismatch:
-            return "Block depth mismatch in coinbase";
+        case error::coinbase_height_mismatch:
+            return "Block height mismatch in coinbase";
         // connect_block()
         case error::duplicate_or_spent:
             return "Duplicate transaction when with unspent outputs";
@@ -144,7 +144,7 @@ std::error_condition
         case error::non_final_transaction:
         case error::checkpoints_failed:
         case error::old_version_block:
-        case error::coinbase_depth_mismatch:
+        case error::coinbase_height_mismatch:
         // connect_block()
         case error::duplicate_or_spent:
         case error::validate_inputs_failed:

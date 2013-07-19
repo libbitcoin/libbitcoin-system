@@ -139,13 +139,13 @@ bool is_final(const transaction_input_type& tx_input)
 }
 
 bool is_final(const transaction_type& tx,
-    size_t block_depth, uint32_t block_time)
+    size_t block_height, uint32_t block_time)
 {
     if (tx.locktime == 0)
         return true;
     uint32_t max_locktime = block_time;
     if (tx.locktime < locktime_threshold)
-        max_locktime = block_depth;
+        max_locktime = block_height;
     if (tx.locktime < max_locktime)
         return true;
     for (const transaction_input_type& tx_input: tx.inputs)

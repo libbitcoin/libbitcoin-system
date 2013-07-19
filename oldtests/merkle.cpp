@@ -60,8 +60,8 @@ int main()
     test_build_merkle();
 
     //psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
-    //psql->fetch_block_by_depth(170, recv_block);
-    //psql->fetch_block_by_depth(2, test_match_merkles);
+    //psql->fetch_block_by_height(170, recv_block);
+    //psql->fetch_block_by_height(2, test_match_merkles);
     return 0;
 }
 

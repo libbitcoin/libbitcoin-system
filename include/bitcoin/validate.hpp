@@ -27,8 +27,8 @@ public:
         const transaction_type& tx);
     static bool connect_input(
         const transaction_type& tx, size_t current_input,
-        const transaction_type& previous_tx, size_t parent_depth,
-        size_t last_block_depth, uint64_t& value_in);
+        const transaction_type& previous_tx, size_t parent_height,
+        size_t last_block_height, uint64_t& value_in);
     static bool tally_fees(const transaction_type& tx,
         uint64_t value_in, uint64_t& fees);
 
@@ -41,14 +41,14 @@ private:
     bool is_spent(const output_point outpoint) const;
 
     // Used for checking coinbase maturity
-    void set_last_depth(const std::error_code& ec, size_t last_depth);
+    void set_last_height(const std::error_code& ec, size_t last_height);
     // Begin looping through the inputs, fetching the previous tx
     void next_previous_transaction();
-    void previous_tx_index(const std::error_code& ec, size_t parent_depth);
+    void previous_tx_index(const std::error_code& ec, size_t parent_height);
     // If previous_tx_index didn't find it then check in pool instead
     void search_pool_previous_tx();
     void handle_previous_tx(const std::error_code& ec,
-        const transaction_type& previous_tx, size_t parent_depth);
+        const transaction_type& previous_tx, size_t parent_height);
     // After running connect_input, we check whether this
     // validated previous output wasn't already spent by
     // another input in the blockchain.
@@ -64,7 +64,7 @@ private:
     const transaction_type tx_;
     const hash_digest tx_hash_;
     const pool_buffer& pool_;
-    size_t last_block_depth_;
+    size_t last_block_height_;
     uint64_t value_in_;
     size_t current_input_;
     index_list unconfirmed_;
@@ -79,7 +79,7 @@ public:
     std::error_code start();
 
 protected:
-    validate_block(size_t depth, const block_type& current_block);
+    validate_block(size_t height, const block_type& current_block);
 
     virtual uint32_t previous_block_bits() = 0;
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
@@ -93,7 +93,7 @@ protected:
         const transaction_type& current_tx,
         size_t input_index, uint64_t& value_in, size_t& total_sigops);
     virtual bool fetch_transaction(transaction_type& tx,
-        size_t& previous_depth, const hash_digest& tx_hash) = 0;
+        size_t& previous_height, const hash_digest& tx_hash) = 0;
     virtual bool is_output_spent(
         const output_point& previous_output,
         size_t index_in_parent, size_t input_index) = 0;
@@ -108,12 +108,12 @@ private:
     std::error_code accept_block();
     uint32_t work_required();
     bool passes_checkpoints();
-    bool coinbase_depth_match();
+    bool coinbase_height_match();
 
     std::error_code connect_block();
     bool not_duplicate_or_spent(const transaction_type& tx);
 
-    const size_t depth_;
+    const size_t height_;
     const block_type& current_block_;
 };
 

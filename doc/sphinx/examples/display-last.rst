@@ -17,8 +17,8 @@ Maybe even download a few blocks into the database.
     
     // Completion handler for when the blockchain has finished initializing.
     void blockchain_started(const std::error_code& ec);
-    // Fetch tbe last block now that we have the depth.
-    void depth_fetched(const std::error_code& ec, size_t last_depth);
+    // Fetch tbe last block now that we have the height.
+    void height_fetched(const std::error_code& ec, size_t last_height);
     // Result: print the block header.
     void display_block_header(const std::error_code& ec,
         const block_header_type& header);
@@ -37,22 +37,22 @@ Maybe even download a few blocks into the database.
         log_info() << "Blockchain started.";
         // chain should've been set inside main().
         assert(chain);
-        // Begin fetching the last depth number.
-        chain->fetch_last_depth(depth_fetched);
+        // Begin fetching the last height number.
+        chain->fetch_last_height(height_fetched);
     }
     
-    void depth_fetched(const std::error_code& ec, size_t last_depth)
+    void height_fetched(const std::error_code& ec, size_t last_height)
     {
         if (ec)
         {
-            log_error() << "Failed to fetch last depth: " << ec.message();
+            log_error() << "Failed to fetch last height: " << ec.message();
             return;
         }
         // Display the block number.
-        log_info() << "depth: " << last_depth;
+        log_info() << "height: " << last_height;
         assert(chain);
         // Begin fetching the block header.
-        chain->fetch_block_header(last_depth, display_block_header);
+        chain->fetch_block_header(last_height, display_block_header);
     }
     
     // This is not the full block, only the header.

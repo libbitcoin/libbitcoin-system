@@ -112,8 +112,8 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
 
     // We already know it is not a coinbase tx
 
-    chain_.fetch_last_depth(strand_.wrap(std::bind(
-        &validate_transaction::set_last_depth, shared_from_this(), _1, _2)));
+    chain_.fetch_last_height(strand_.wrap(std::bind(
+        &validate_transaction::set_last_height, shared_from_this(), _1, _2)));
 }
  
 bool validate_transaction::is_spent(const output_point outpoint) const
@@ -125,8 +125,8 @@ bool validate_transaction::is_spent(const output_point outpoint) const
     return false;
 }
 
-void validate_transaction::set_last_depth(
-    const std::error_code& ec, size_t last_depth)
+void validate_transaction::set_last_height(
+    const std::error_code& ec, size_t last_height)
 {
     if (ec)
     {
@@ -134,7 +134,7 @@ void validate_transaction::set_last_depth(
         return;
     }
     // Used for checking coinbase maturity
-    last_block_depth_ = last_depth;
+    last_block_height_ = last_height;
     value_in_ = 0;
     BITCOIN_ASSERT(tx_.inputs.size() > 0);
     current_input_ = 0;
@@ -145,7 +145,7 @@ void validate_transaction::set_last_depth(
 void validate_transaction::next_previous_transaction()
 {
     BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
-    // First we fetch the parent block depth for a transaction.
+    // First we fetch the parent block height for a transaction.
     // Needed for checking the coinbase maturity.
     chain_.fetch_transaction_index(
         tx_.inputs[current_input_].previous_output.hash,
@@ -155,7 +155,7 @@ void validate_transaction::next_previous_transaction()
 }
 
 void validate_transaction::previous_tx_index(
-    const std::error_code& ec, size_t parent_depth)
+    const std::error_code& ec, size_t parent_height)
 {
     if (ec)
     {
@@ -169,7 +169,7 @@ void validate_transaction::previous_tx_index(
             tx_.inputs[current_input_].previous_output.hash,
             strand_.wrap(std::bind(
                 &validate_transaction::handle_previous_tx,
-                    shared_from_this(), _1, _2, parent_depth)));
+                    shared_from_this(), _1, _2, parent_height)));
     }
 }
 
@@ -185,14 +185,14 @@ void validate_transaction::search_pool_previous_tx()
         return;
     }
     BITCOIN_ASSERT(!is_coinbase(*previous_tx));
-    // parent_depth ignored here as memory pool transactions can
+    // parent_height ignored here as memory pool transactions can
     // never be a coinbase transaction.
     handle_previous_tx(std::error_code(), *previous_tx, 0);
     unconfirmed_.push_back(current_input_);
 }
 
 void validate_transaction::handle_previous_tx(const std::error_code& ec,
-    const transaction_type& previous_tx, size_t parent_depth)
+    const transaction_type& previous_tx, size_t parent_height)
 {
     if (ec)
     {
@@ -202,7 +202,7 @@ void validate_transaction::handle_previous_tx(const std::error_code& ec,
     }
     // Should check for are inputs standard here...
     if (!connect_input(tx_, current_input_, previous_tx,
-        parent_depth, last_block_depth_, value_in_))
+        parent_height, last_block_height_, value_in_))
     {
         handle_validate_(error::validate_inputs_failed, index_list());
         return;
@@ -216,8 +216,8 @@ void validate_transaction::handle_previous_tx(const std::error_code& ec,
 
 bool validate_transaction::connect_input(
     const transaction_type& tx, size_t current_input,
-    const transaction_type& previous_tx, size_t parent_depth,
-    size_t last_block_depth, uint64_t& value_in)
+    const transaction_type& previous_tx, size_t parent_height,
+    size_t last_block_height, uint64_t& value_in)
 {
     const transaction_input_type& input = tx.inputs[current_input];
     const output_point& previous_outpoint =
@@ -231,8 +231,8 @@ bool validate_transaction::connect_input(
         return false;
     if (is_coinbase(previous_tx))
     {
-        size_t depth_difference = last_block_depth - parent_depth;
-        if (depth_difference < coinbase_maturity)
+        size_t height_difference = last_block_height - parent_height;
+        if (height_difference < coinbase_maturity)
             return false;
     }
     script output_script = previous_output.output_script;
@@ -328,8 +328,8 @@ std::error_code validate_transaction::check_transaction(
 }
 
 validate_block::validate_block(
-    size_t depth, const block_type& current_block)
-  : depth_(depth), current_block_(current_block)
+    size_t height, const block_type& current_block)
+  : height_(height), current_block_(current_block)
 {
 }
 
@@ -484,16 +484,16 @@ std::error_code validate_block::accept_block()
         return error::timestamp_too_early;
     // Txs should be final when included in a block
     for (const transaction_type& tx: current_block_.transactions)
-        if (!is_final(tx, depth_, blk_header.timestamp))
+        if (!is_final(tx, height_, blk_header.timestamp))
             return error::non_final_transaction;
     if (!passes_checkpoints())
         return error::checkpoints_failed;
     // Reject version=1 blocks after switchover point.
-    if (depth_ > 237370 && blk_header.version < 2)
+    if (height_ > 237370 && blk_header.version < 2)
         return error::old_version_block;
-    // Enforce version=2 rule that coinbase starts with serialized depth.
-    if (blk_header.version >= 2 && !coinbase_depth_match())
-        return error::coinbase_depth_mismatch;
+    // Enforce version=2 rule that coinbase starts with serialized height.
+    if (blk_header.version >= 2 && !coinbase_height_match())
+        return error::coinbase_height_mismatch;
     return std::error_code();
 }
 
@@ -509,9 +509,9 @@ inline Value range_constraint(Value value, Value minimum, Value maximum)
 
 uint32_t validate_block::work_required()
 {
-    if (depth_ == 0)
+    if (height_ == 0)
         return max_bits;
-    else if (depth_ % readjustment_interval != 0)
+    else if (height_ % readjustment_interval != 0)
         return previous_block_bits();
 
     uint64_t actual = actual_timespan(readjustment_interval);
@@ -532,98 +532,98 @@ bool validate_block::passes_checkpoints()
 {
     const hash_digest block_hash = hash_block_header(current_block_.header);
 
-    if (depth_ == 11111 && block_hash !=
+    if (height_ == 11111 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x69, 0xe2, 0x44, 0xf7, 
                         0x3d, 0x78, 0xe8, 0xfd, 0x29, 0xba, 0x2f, 0xd2, 
                         0xed, 0x61, 0x8b, 0xd6, 0xfa, 0x2e, 0xe9, 0x25, 
                         0x59, 0xf5, 0x42, 0xfd, 0xb2, 0x6e, 0x7c, 0x1d})
         return false;
 
-    if (depth_ ==  33333 && block_hash !=
+    if (height_ ==  33333 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x2d, 0xd5, 0x58, 0x8a, 
                         0x74, 0x78, 0x4e, 0xaa, 0x7a, 0xb0, 0x50, 0x7a, 
                         0x18, 0xad, 0x16, 0xa2, 0x36, 0xe7, 0xb1, 0xce, 
                         0x69, 0xf0, 0x0d, 0x7d, 0xdf, 0xb5, 0xd0, 0xa6})
         return false;
 
-    if (depth_ ==  68555 && block_hash !=
+    if (height_ ==  68555 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x1e, 0x1b, 0x49, 
                         0x03, 0x55, 0x0a, 0x0b, 0x96, 0xe9, 0xa9, 0x40, 
                         0x5c, 0x8a, 0x95, 0xf3, 0x87, 0x16, 0x2e, 0x49, 
                         0x44, 0xe8, 0xd9, 0xfb, 0xe5, 0x01, 0xcd, 0x6a})
         return false;
 
-    if (depth_ ==  70567 && block_hash !=
+    if (height_ ==  70567 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x6a, 0x49, 0xb1, 
                         0x4b, 0xcf, 0x27, 0x46, 0x20, 0x68, 0xf1, 0x26, 
                         0x4c, 0x96, 0x1f, 0x11, 0xfa, 0x2e, 0x0e, 0xdd, 
                         0xd2, 0xbe, 0x07, 0x91, 0xe1, 0xd4, 0x12, 0x4a})
         return false;
 
-    if (depth_ ==  74000 && block_hash !=
+    if (height_ ==  74000 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x57, 0x39, 0x93, 
                         0xa3, 0xc9, 0xe4, 0x1c, 0xe3, 0x44, 0x71, 0xc0, 
                         0x79, 0xdc, 0xf5, 0xf5, 0x2a, 0x0e, 0x82, 0x4a, 
                         0x81, 0xe7, 0xf9, 0x53, 0xb8, 0x66, 0x1a, 0x20})
         return false;
 
-    if (depth_ == 105000 && block_hash !=
+    if (height_ == 105000 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x91, 0xce, 
                         0x28, 0x02, 0x7f, 0xae, 0xa3, 0x20, 0xc8, 0xd2, 
                         0xb0, 0x54, 0xb2, 0xe0, 0xfe, 0x44, 0xa7, 0x73, 
                         0xf3, 0xee, 0xfb, 0x15, 0x1d, 0x6b, 0xdc, 0x97})
         return false;
 
-    if (depth_ == 118000 && block_hash !=
+    if (height_ == 118000 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x77, 0x4a, 
                         0x7f, 0x8a, 0x7a, 0x12, 0xdc, 0x90, 0x6d, 0xdb, 
                         0x9e, 0x17, 0xe7, 0x5d, 0x68, 0x4f, 0x15, 0xe0, 
                         0x0f, 0x87, 0x67, 0xf9, 0xe8, 0xf3, 0x65, 0x53})
         return false;
 
-    if (depth_ == 134444 && block_hash !=
+    if (height_ == 134444 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0xb1, 
                         0x2f, 0xfd, 0x4c, 0xd3, 0x15, 0xcd, 0x34, 0xff, 
                         0xd4, 0xa5, 0x94, 0xf4, 0x30, 0xac, 0x81, 0x4c, 
                         0x91, 0x18, 0x4a, 0x0d, 0x42, 0xd2, 0xb0, 0xfe})
         return false;
 
-    if (depth_ == 140700 && block_hash !=
+    if (height_ == 140700 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x3b,
                         0x51, 0x20, 0x28, 0xab, 0xb9, 0x0e, 0x16, 0x26,
                         0xd8, 0xb3, 0x46, 0xfd, 0x0e, 0xd5, 0x98, 0xac, 
                         0x0a, 0x3c, 0x37, 0x11, 0x38, 0xdc, 0xe2, 0xbd})
         return false;
 
-    if (depth_ == 168000 && block_hash !=
+    if (height_ == 168000 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x9e,
                         0x61, 0xea, 0x72, 0x01, 0x5e, 0x79, 0x63, 0x2f,
                         0x21, 0x6f, 0xe6, 0xcb, 0x33, 0xd7, 0x89, 0x9a,
                         0xcb, 0x35, 0xb7, 0x5c, 0x83, 0x03, 0xb7, 0x63})
         return false;
 
-    if (depth_ == 193000 && block_hash !=
+    if (height_ == 193000 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x9f,
                         0x45, 0x2a, 0x5f, 0x73, 0x40, 0xde, 0x66, 0x82,
                         0xa9, 0x77, 0x38, 0x7c, 0x17, 0x01, 0x0f, 0xf6,
                         0xe6, 0xc3, 0xbd, 0x83, 0xca, 0x8b, 0x13, 0x17})
         return false;
 
-    if (depth_ == 210000 && block_hash !=
+    if (height_ == 210000 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x8b,
                         0x95, 0x34, 0x7e, 0x83, 0x19, 0x2f, 0x69, 0xcf,
                         0x03, 0x66, 0x07, 0x63, 0x36, 0xc6, 0x39, 0xf9,
                         0xb7, 0x22, 0x8e, 0x9b, 0xa1, 0x71, 0x34, 0x2e})
         return false;
 
-    if (depth_ == 216116 && block_hash !=
+    if (height_ == 216116 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xb4,
                         0xf4, 0xb4, 0x33, 0xe8, 0x1e, 0xe4, 0x64, 0x94,
                         0xaf, 0x94, 0x5c, 0xf9, 0x60, 0x14, 0x81, 0x6a,
                         0x4e, 0x23, 0x70, 0xf1, 0x1b, 0x23, 0xdf, 0x4e})
         return false;
 
-    if (depth_ == 225430 && block_hash !=
+    if (height_ == 225430 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0xc1,
                         0x08, 0x38, 0x43, 0x50, 0xf7, 0x40, 0x90, 0x43,
                         0x3e, 0x7f, 0xcf, 0x79, 0xa6, 0x06, 0xb8, 0xe7,
@@ -633,12 +633,12 @@ bool validate_block::passes_checkpoints()
     return true;
 }
 
-bool validate_block::coinbase_depth_match()
+bool validate_block::coinbase_height_match()
 {
     // There are old blocks with version incorrectly set to 2. Ignore them.
-    if (depth_ < 237370)
+    if (height_ < 237370)
         return true;
-    // Checks whether the block depth is in the coinbase
+    // Checks whether the block height is in the coinbase
     // transaction input script.
     // Version 2 blocks and onwards.
     BITCOIN_ASSERT(current_block_.header.version >= 2);
@@ -650,7 +650,7 @@ bool validate_block::coinbase_depth_match()
     const data_chunk raw_coinbase = save_script(coinbase_script);
     // Try to recreate the expected bytes.
     big_number expect_number;
-    expect_number.set_int64(depth_);
+    expect_number.set_int64(height_);
     script expect_coinbase;
     expect_coinbase.push_operation({opcode::special, expect_number.data()});
     // Save the expected coinbase script.
@@ -663,7 +663,7 @@ bool validate_block::coinbase_depth_match()
 std::error_code validate_block::connect_block()
 {
     // BIP 30 security fix
-    if (depth_ != 91842 && depth_ != 91880)
+    if (height_ != 91842 && height_ != 91880)
         for (const auto& current_tx: current_block_.transactions)
             if (!not_duplicate_or_spent(current_tx))
                 return error::duplicate_or_spent;
@@ -689,7 +689,7 @@ std::error_code validate_block::connect_block()
     }
     uint64_t coinbase_value = 
         total_output_value(current_block_.transactions[0]);
-    if (coinbase_value  > block_value(depth_) + fees)
+    if (coinbase_value  > block_value(height_) + fees)
         return error::coinbase_too_large;
     return std::error_code();
 }
@@ -748,8 +748,8 @@ bool validate_block::connect_input(size_t index_in_parent,
     const transaction_input_type& input = current_tx.inputs[input_index];
     const output_point& previous_output = input.previous_output;
     transaction_type previous_tx;
-    size_t previous_depth;
-    if (!fetch_transaction(previous_tx, previous_depth, previous_output.hash))
+    size_t previous_height;
+    if (!fetch_transaction(previous_tx, previous_height, previous_output.hash))
     {
         log_warning(LOG_VALIDATE) << "Unable to fetch input transaction";
         return false;
@@ -774,9 +774,9 @@ bool validate_block::connect_input(size_t index_in_parent,
     // Check coinbase maturity has been reached
     if (is_coinbase(previous_tx))
     {
-        BITCOIN_ASSERT(previous_depth <= depth_);
-        uint32_t depth_difference = depth_ - previous_depth;
-        if (depth_difference < coinbase_maturity)
+        BITCOIN_ASSERT(previous_height <= height_);
+        uint32_t height_difference = height_ - previous_height;
+        if (height_difference < coinbase_maturity)
             return false;
     }
     // Pay to script hash BIP 16 scripts
@@ -784,7 +784,7 @@ bool validate_block::connect_input(size_t index_in_parent,
     // before the switchover date.
     bool bip16_enabled =
         current_block_.header.timestamp >= bip16_switchover_timestamp;
-    BITCOIN_ASSERT(!bip16_enabled || depth_ >= bip16_switchover_depth);
+    BITCOIN_ASSERT(!bip16_enabled || height_ >= bip16_switchover_height);
     // Validate script
     script output_script = previous_tx_out.output_script;
     if (!output_script.run(input.input_script,

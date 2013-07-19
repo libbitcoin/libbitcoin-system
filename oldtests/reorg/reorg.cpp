@@ -66,7 +66,7 @@ void handle_final_store(const std::error_code& ec, block_info info,
     }
     else if (info.status == block_status::confirmed)
     {
-        log_info() << "  Stored at " << info.depth << ".";
+        log_info() << "  Stored at " << info.height << ".";
     }
 }
 
@@ -81,7 +81,7 @@ void next_store(const std::error_code& ec, block_info info,
     }
     else if (info.status == block_status::confirmed)
     {
-        log_info() << "  Stored at " << info.depth << ".";
+        log_info() << "  Stored at " << info.height << ".";
     }
     ++cidx;
     if (cidx >= 3)

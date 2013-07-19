@@ -21,11 +21,11 @@ public:
       : postgresql_organizer(sql)
     {
     }
-    void delete_branch(size_t space, size_t depth, 
+    void delete_branch(size_t space, size_t height, 
         size_t span_left, size_t span_right)
     {
         postgresql_organizer::delete_branch(
-            space, depth, span_left, span_right);
+            space, height, span_left, span_right);
     }
 };
 
@@ -70,7 +70,7 @@ private:
         nodes.push_back(n);
     }
 
-    void display_branch(size_t depth, size_t left, size_t right);
+    void display_branch(size_t height, size_t left, size_t right);
 
     cppdb::session sql_;
     postgresql_blockchain_ptr blockchain_;
@@ -111,7 +111,7 @@ void dummy_psql::reset_database()
         "INSERT INTO chains ( \
             work, \
             chain_id, \
-            depth \
+            height \
         ) VALUES ( \
             difficulty(29, 65535), \
             0, \
@@ -125,7 +125,7 @@ void dummy_psql::save_nodes()
         "INSERT INTO blocks( \
             block_hash, \
             space, \
-            depth, \
+            height, \
             span_left, \
             span_right, \
             version, \
@@ -174,18 +174,18 @@ void dummy_psql::display_nodes()
 {
 }
 
-void dummy_psql::display_branch(size_t depth, size_t left, size_t right)
+void dummy_psql::display_branch(size_t height, size_t left, size_t right)
 {
     static cppdb::statement stat = sql_.prepare(
         "SELECT block_hash \
         FROM blocks \
         WHERE \
-            depth=? \
+            height=? \
             AND span_left >= ? \
             AND span_right <= ?"
         );
     stat.reset();
-    stat.bind(depth);
+    stat.bind(height);
     stat.bind(left);
     stat.bind(right);
     cppdb::result r = stat.query();
@@ -199,7 +199,7 @@ void dummy_psql::delete_branch(std::string name)
     static cppdb::statement stat = sql_.prepare(
         "SELECT \
             space, \
-            depth, \
+            height, \
             span_left, \
             span_right \
         FROM blocks \
@@ -213,12 +213,12 @@ void dummy_psql::delete_branch(std::string name)
         log_error() << "Bad name for delete_branch()";
         return;
     }
-    size_t space = r.get<size_t>(0), depth = r.get<size_t>(1), 
+    size_t space = r.get<size_t>(0), height = r.get<size_t>(1), 
         span_left = r.get<size_t>(2), span_right = r.get<size_t>(3);
-    log_debug() << "Deleting depth of " << depth
+    log_debug() << "Deleting height of " << height
         << " [" << span_left << ", " << span_right << "]";
 
-    deletor_->delete_branch(space, depth, span_left, span_right);
+    deletor_->delete_branch(space, height, span_left, span_right);
 }
 
 void dummy_psql::fake_verify()
@@ -231,7 +231,7 @@ void dummy_psql::fake_verify()
         WHERE \
             status='orphan' \
             AND space=0  \
-        ORDER BY depth ASC"
+        ORDER BY height ASC"
         );
     statement.reset();
     cppdb::result result = statement.query();
@@ -243,13 +243,13 @@ void dummy_psql::fake_verify()
             "UPDATE chains \
             SET \
                 work = work + difficulty(?, ?), \
-                depth = ? \
+                height = ? \
             WHERE \
                 chain_id >= ? \
                 AND chain_id <= ?" 
             << result.get<size_t>("bits_head")
             << result.get<size_t>("bits_body")
-            << result.get<size_t>("depth")
+            << result.get<size_t>("height")
             << result.get<size_t>("span_left")
             << result.get<size_t>("span_right")
             << cppdb::exec;
@@ -268,7 +268,7 @@ void dummy_psql::check_chains()
     while (result.next())
     {
         size_t chain_id = result.get<size_t>("chain_id");
-        size_t depth = result.get<size_t>("depth");
+        size_t height = result.get<size_t>("height");
         cppdb::result verres = sql_ <<
             "SELECT \
                 SUM(difficulty(bits_head, bits_body)) * 10000 AS work, \
@@ -276,11 +276,11 @@ void dummy_psql::check_chains()
             FROM blocks \
             WHERE \
                 space=0 \
-                AND depth <= ? \
+                AND height <= ? \
                 AND span_left <= ? \
                 AND span_right >= ? \
                 AND status='valid'"
-            << depth
+            << height
             << chain_id
             << chain_id
             << cppdb::row;

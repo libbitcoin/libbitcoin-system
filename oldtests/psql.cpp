@@ -91,26 +91,26 @@ void create_fake_stuff(psql_ptr psql)
     psql->store(blk, null);
 }
 
-void recv_block(std::error_code ec, libbitcoin::message::block block, psql_ptr psql, size_t block_depth)
+void recv_block(std::error_code ec, libbitcoin::message::block block, psql_ptr psql, size_t block_height)
 {
     if (ec)
     {
         log_error() << ec.message();
         exit(0);
     }
-    if (block_depth == (180 + 100))
+    if (block_height == (180 + 100))
     {
         exit(0);
     }
-    block_depth++;
-    psql->fetch_block_by_depth(block_depth, std::bind(recv_block, _1, _2, psql, block_depth));
+    block_height++;
+    psql->fetch_block_by_height(block_height, std::bind(recv_block, _1, _2, psql, block_height));
 }
 
 int main()
 {
     psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
     //psql->organize_block_chain();
-    psql->fetch_block_by_depth(180, std::bind(recv_block, _1, _2, psql, 180));
+    psql->fetch_block_by_height(180, std::bind(recv_block, _1, _2, psql, 180));
     while (true)
         sleep(10);
     return 0;

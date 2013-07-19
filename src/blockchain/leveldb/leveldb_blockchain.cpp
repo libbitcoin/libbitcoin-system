@@ -21,7 +21,7 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 
-class depth_comparator
+class height_comparator
   : public leveldb::Comparator
 {
 public:
@@ -32,20 +32,21 @@ public:
     void FindShortSuccessor(std::string*) const {}
 };
 
-int depth_comparator::Compare(
+int height_comparator::Compare(
     const leveldb::Slice& a, const leveldb::Slice& b) const
 {
-    uint32_t depth_a = recreate_depth(a), depth_b = recreate_depth(b);
-    if (depth_a < depth_b)
+    uint32_t height_a = recreate_height(a), height_b = recreate_height(b);
+    if (height_a < height_b)
         return -1;
-    else if (depth_a > depth_b)
+    else if (height_a > height_b)
         return +1;
     // a == b
     return 0;
 }
 
-const char* depth_comparator::Name() const
+const char* height_comparator::Name() const
 {
+    // Named this way for historical reasons.
     return "depth_comparator";
 }
 
@@ -125,7 +126,7 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
         return false;
     }
     // Create comparator for blocks database.
-    depth_comparator_.reset(new depth_comparator);
+    height_comparator_.reset(new height_comparator);
     // Open LevelDB databases
     const size_t cache_size = 1 << 20;
     // block_cache, filter_policy and comparator must be deleted after use!
@@ -135,9 +136,9 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     open_options_.compression = leveldb::kNoCompression;
     open_options_.max_open_files = 256;
     open_options_.create_if_missing = true;
-    // The blocks database options needs its depth comparator too.
+    // The blocks database options needs its height comparator too.
     leveldb::Options blocks_open_options = open_options_;
-    blocks_open_options.comparator = depth_comparator_.get();
+    blocks_open_options.comparator = height_comparator_.get();
     if (!open_db(prefix, "block", db_block_, blocks_open_options))
         return false;
     if (!open_db(prefix, "block_hash", db_block_hash_, open_options_))
@@ -200,11 +201,11 @@ void leveldb_blockchain::do_store(const block_type& stored_block,
     begin_write();
     block_detail_ptr stored_detail =
         std::make_shared<block_detail>(stored_block);
-    int depth = chain_->find_index(hash_block_header(stored_block.header));
-    if (depth != -1)
+    int height = chain_->find_index(hash_block_header(stored_block.header));
+    if (height != -1)
     {
         finish_write(handle_store, error::duplicate,
-            block_info{block_status::confirmed, static_cast<size_t>(depth)});
+            block_info{block_status::confirmed, static_cast<size_t>(height)});
         return;
     }
     if (!orphans_->add(stored_detail))
@@ -218,17 +219,17 @@ void leveldb_blockchain::do_store(const block_type& stored_block,
 }
 
 void leveldb_blockchain::import(const block_type& import_block,
-    size_t depth, import_block_handler handle_import)
+    size_t height, import_block_handler handle_import)
 {
     strand_.push(
         std::bind(&leveldb_blockchain::do_import,
-            this, import_block, depth, handle_import));
+            this, import_block, height, handle_import));
 }
 void leveldb_blockchain::do_import(const block_type& import_block,
-    size_t depth, import_block_handler handle_import)
+    size_t height, import_block_handler handle_import)
 {
     begin_write();
-    if (!common_->save_block(depth, import_block))
+    if (!common_->save_block(height, import_block))
     {
         finish_write(handle_import, error::operation_failed);
         return;
@@ -258,7 +259,7 @@ void leveldb_blockchain::fetch(perform_read_functor perform_read)
         });
 }
 
-bool get_block_header_impl(size_t depth,
+bool get_block_header_impl(size_t height,
     leveldb_common_ptr common, leveldb_block_info& blk)
 {
 } 
@@ -267,19 +268,19 @@ bool get_block_header_impl(const hash_digest& hash,
 {
 } 
 
-void leveldb_blockchain::fetch_block_header(size_t depth,
+void leveldb_blockchain::fetch_block_header(size_t height,
     fetch_handler_block_header handle_fetch)
 {
     fetch(
-        std::bind(&leveldb_blockchain::fetch_block_header_by_depth,
-            this, depth, handle_fetch, _1));
+        std::bind(&leveldb_blockchain::fetch_block_header_by_height,
+            this, height, handle_fetch, _1));
 }
 
-bool leveldb_blockchain::fetch_block_header_by_depth(size_t depth,
+bool leveldb_blockchain::fetch_block_header_by_height(size_t height,
     fetch_handler_block_header handle_fetch, size_t slock)
 {
     leveldb_block_info blk;
-    if (!common_->get_block(blk, depth, true, false))
+    if (!common_->get_block(blk, height, true, false))
         return finish_fetch(slock, handle_fetch,
             error::not_found, block_header_type());
     return finish_fetch(slock, handle_fetch, std::error_code(), blk.header);
@@ -298,9 +299,9 @@ bool leveldb_blockchain::fetch_block_header_by_hash(
     fetch_handler_block_header handle_fetch, size_t slock)
 {
     leveldb_block_info blk;
-    uint32_t depth = common_->get_block_depth(block_hash);
-    if (depth == std::numeric_limits<uint32_t>::max() ||
-        !common_->get_block(blk, depth, true, false))
+    uint32_t height = common_->get_block_height(block_hash);
+    if (height == std::numeric_limits<uint32_t>::max() ||
+        !common_->get_block(blk, height, true, false))
     {
         return finish_fetch(slock, handle_fetch,
             error::not_found, block_header_type());
@@ -309,12 +310,12 @@ bool leveldb_blockchain::fetch_block_header_by_hash(
 }
 
 template<typename Handler, typename SeqLockPtr>
-bool fetch_blk_tx_hashes_impl(size_t depth,
+bool fetch_blk_tx_hashes_impl(size_t height,
     leveldb_common_ptr common, Handler handle_fetch,
     size_t slock, SeqLockPtr seqlock)
 {
     leveldb_block_info blk;
-    if (!common->get_block(blk, depth, false, true))
+    if (!common->get_block(blk, height, false, true))
     {
         if (slock != *seqlock)
             return false;
@@ -327,14 +328,14 @@ bool fetch_blk_tx_hashes_impl(size_t depth,
     return true;
 }
 
-void leveldb_blockchain::fetch_block_transaction_hashes(size_t depth,
+void leveldb_blockchain::fetch_block_transaction_hashes(size_t height,
     fetch_handler_block_transaction_hashes handle_fetch)
 {
     fetch(
-        [this, depth, handle_fetch](size_t slock)
+        [this, height, handle_fetch](size_t slock)
         {
             return fetch_blk_tx_hashes_impl(
-                depth, common_, handle_fetch, slock, &seqlock_);
+                height, common_, handle_fetch, slock, &seqlock_);
         });
 }
 
@@ -345,44 +346,44 @@ void leveldb_blockchain::fetch_block_transaction_hashes(
     fetch(
         [this, block_hash, handle_fetch](size_t slock)
         {
-            uint32_t depth = common_->get_block_depth(block_hash);
-            if (depth == std::numeric_limits<uint32_t>::max())
+            uint32_t height = common_->get_block_height(block_hash);
+            if (height == std::numeric_limits<uint32_t>::max())
                 return false;
             return fetch_blk_tx_hashes_impl(
-                depth, common_, handle_fetch, slock, &seqlock_);
+                height, common_, handle_fetch, slock, &seqlock_);
         });
 }
 
-void leveldb_blockchain::fetch_block_depth(const hash_digest& block_hash,
-    fetch_handler_block_depth handle_fetch)
+void leveldb_blockchain::fetch_block_height(const hash_digest& block_hash,
+    fetch_handler_block_height handle_fetch)
 {
     fetch(
-        std::bind(&leveldb_blockchain::do_fetch_block_depth,
+        std::bind(&leveldb_blockchain::do_fetch_block_height,
             this, block_hash, handle_fetch, _1));
 }
-bool leveldb_blockchain::do_fetch_block_depth(const hash_digest& block_hash,
-    fetch_handler_block_depth handle_fetch, size_t slock)
+bool leveldb_blockchain::do_fetch_block_height(const hash_digest& block_hash,
+    fetch_handler_block_height handle_fetch, size_t slock)
 {
-    uint32_t depth = common_->get_block_depth(block_hash);
-    if (depth == std::numeric_limits<uint32_t>::max())
+    uint32_t height = common_->get_block_height(block_hash);
+    if (height == std::numeric_limits<uint32_t>::max())
         return finish_fetch(slock, handle_fetch, error::not_found, 0);
-    return finish_fetch(slock, handle_fetch, std::error_code(), depth);
+    return finish_fetch(slock, handle_fetch, std::error_code(), height);
 }
 
-void leveldb_blockchain::fetch_last_depth(
-    fetch_handler_last_depth handle_fetch)
+void leveldb_blockchain::fetch_last_height(
+    fetch_handler_last_height handle_fetch)
 {
     fetch(
-        std::bind(&leveldb_blockchain::do_fetch_last_depth,
+        std::bind(&leveldb_blockchain::do_fetch_last_height,
             this, handle_fetch, _1));
 }
-bool leveldb_blockchain::do_fetch_last_depth(
-    fetch_handler_last_depth handle_fetch, size_t slock)
+bool leveldb_blockchain::do_fetch_last_height(
+    fetch_handler_last_height handle_fetch, size_t slock)
 {
-    uint32_t last_depth = common_->find_last_block_depth();
-    if (last_depth == std::numeric_limits<uint32_t>::max())
+    uint32_t last_height = common_->find_last_block_height();
+    if (last_height == std::numeric_limits<uint32_t>::max())
         return finish_fetch(slock, handle_fetch, error::not_found, 0);
-    return finish_fetch(slock, handle_fetch, std::error_code(), last_depth);
+    return finish_fetch(slock, handle_fetch, std::error_code(), last_height);
 }
 
 void leveldb_blockchain::fetch_transaction(
@@ -420,7 +421,7 @@ bool leveldb_blockchain::do_fetch_transaction_index(
     if (!common_->get_transaction(tx, transaction_hash, true, false))
         return finish_fetch(slock, handle_fetch, error::not_found, 0, 0);
     return finish_fetch(slock, handle_fetch, std::error_code(),
-        tx.depth, tx.index);
+        tx.height, tx.index);
 }
 
 void leveldb_blockchain::fetch_spend(const output_point& outpoint,
@@ -546,7 +547,7 @@ protected:
         outpoint_.hash = deserial.read_hash();
         outpoint_.index = deserial.read_4_bytes();
         value_ = deserial.read_8_bytes();
-        uint32_t depth = deserial.read_4_bytes();
+        uint32_t height = deserial.read_4_bytes();
         BITCOIN_ASSERT(deserial.iterator() == end);
     }
 

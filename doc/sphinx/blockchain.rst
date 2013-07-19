@@ -32,7 +32,7 @@ initialised.
    specified path, it will automatically be created.
 #. Recreate the genesis block. The first block in the Bitcoin blockchain is
    part of the specification for the Bitcoin standard.
-#. Import the genesis block at depth 0 in the blockchain.
+#. Import the genesis block at height 0 in the blockchain.
 
 You now have a working :class:`leveldb_blockchain`.
 
@@ -61,7 +61,7 @@ The function :func:`genesis_block` returns a genesis block.
     block_type first_block = genesis_block();
 
 We call :func:`blockchain::import` to save a block in the blockchain
-at a specified depth directly. It doesn't validate or perform any safety
+at a specified height directly. It doesn't validate or perform any safety
 checks on the imported block. Instead the block is written directly.
 
 ::
@@ -72,7 +72,7 @@ checks on the imported block. Instead the block is written directly.
         {
             ec_promise.set_value(ec);
         };
-    // Import the genesis block at depth 0.
+    // Import the genesis block at height 0.
     // Doesn't validate or perform checks on the block.
     chain.import(first_block, 0, import_finished);
     // Wait until std::error_code is set by
@@ -98,7 +98,7 @@ be closed properly so we first stop the threadpool before calling
     chain.stop();
 
 :func:`blockchain::store` is the recommended way to add new blocks to
-the blockchain. It finds the correct depth by looking up the previous block,
+the blockchain. It finds the correct height by looking up the previous block,
 handles reorganisations, validates the blocks and calls the subscription
 handlers.
 
@@ -112,7 +112,7 @@ handlers.
 
     void handle_store(
         const std::error_code& ec,   // Status of operation
-        block_info info              // Status and depth of block
+        block_info info              // Status and height of block
     );
 
 The full sourcecode can be found in :ref:`examples_initchain`.
@@ -131,13 +131,13 @@ to the orphan pool (if needed), insertion into the database and processing
 any dependent blocks.
 
 In our example we want to fetch and display the last block header. To fetch
-the last depth number, we use :func:`blockchain::fetch_last_depth`. To fetch
-the block header for a depth number, we use
+the last height number, we use :func:`blockchain::fetch_last_height`. To fetch
+the block header for a height number, we use
 :func:`blockchain::fetch_block_header`.
 
-.. cpp:function:: void blockchain::fetch_block_header(size_t depth, fetch_handler_block_header handle_fetch)
+.. cpp:function:: void blockchain::fetch_block_header(size_t height, fetch_handler_block_header handle_fetch)
 
-   Fetches the block header by depth.
+   Fetches the block header by height.
    ::
    
     void handle_fetch(
@@ -145,14 +145,14 @@ the block header for a depth number, we use
         const block_header_type& blk    // Block header
     );
 
-.. cpp:function:: void blockchain::fetch_last_depth(fetch_handler_last_depth handle_fetch)
+.. cpp:function:: void blockchain::fetch_last_height(fetch_handler_last_height handle_fetch)
 
-   Fetches the depth of the last block in our blockchain.
+   Fetches the height of the last block in our blockchain.
    ::
 
     void handle_fetch(
         const std::error_code& ec, // Status of operation
-        size_t block_depth         // Depth of last block
+        size_t block_height         // Height of last block
     );
 
 All the blockchain fetch methods give you access to all of the data in the
@@ -213,22 +213,22 @@ close the blockchain.
     }
 
 After the blockchain has started, we want to begin the entire process.
-The process starts with getting the last depth in our blockchain, then
-fetching the block header at that depth, and finally displaying the
+The process starts with getting the last height in our blockchain, then
+fetching the block header at that height, and finally displaying the
 block header to the screen.
 
 ::
 
     // Completion handler for when the blockchain has finished initializing.
     void blockchain_started(const std::error_code& ec);
-    // Fetch tbe last block now that we have the depth.
-    void depth_fetched(const std::error_code& ec, size_t last_depth);
+    // Fetch tbe last block now that we have the height.
+    void height_fetched(const std::error_code& ec, size_t last_height);
     // Result: print the block header.
     void display_block_header(const std::error_code& ec,
         const block_header_type& header);
 
 After the blockchain has started, we begin the operation to fetch the last
-depth, calling :func:`depth_fetched` after it's finished.
+height, calling :func:`height_fetched` after it's finished.
 
 ::
 
@@ -246,27 +246,27 @@ depth, calling :func:`depth_fetched` after it's finished.
         log_info() << "Blockchain started.";
         // chain should've been set inside main().
         assert(chain);
-        // Begin fetching the last depth number.
-        chain->fetch_last_depth(depth_fetched);
+        // Begin fetching the last height number.
+        chain->fetch_last_height(height_fetched);
     }
 
-After :func:`depth_fetched` has been called, we know the block number and
+After :func:`height_fetched` has been called, we know the block number and
 begin fetching the block header.
 
 ::
 
-    void depth_fetched(const std::error_code& ec, size_t last_depth)
+    void height_fetched(const std::error_code& ec, size_t last_height)
     {
         if (ec)
         {
-            log_error() << "Failed to fetch last depth: " << ec.message();
+            log_error() << "Failed to fetch last height: " << ec.message();
             return;
         }
         // Display the block number.
-        log_info() << "Depth: " << last_depth;
+        log_info() << "Height: " << last_height;
         assert(chain);
         // Begin fetching the block header.
-        chain->fetch_block_header(last_depth, display_block_header);
+        chain->fetch_block_header(last_height, display_block_header);
     }
 
 Now finally the block header is received, and can be displayed. This is
@@ -401,9 +401,9 @@ A general :ref:`design principle of libbitcoin <intro_design>` is to keep the im
 and not pollute class interfaces. Instead composed operations wrap lower
 level class methods to simplify common operations.
 
-.. cpp:function:: void fetch_block(blockchain& chain, size_t depth, blockchain_fetch_handler_block handle_fetch)
+.. cpp:function:: void fetch_block(blockchain& chain, size_t height, blockchain_fetch_handler_block handle_fetch)
 
-   Fetch a block by depth.
+   Fetch a block by height.
    If the blockchain reorganises, operation may fail halfway.
    ::
 
@@ -470,13 +470,13 @@ to the blockchain.
         const block_list& removed    // Blocks removed (empty if none)
     );
 
-The ``fork_point`` gives the depth of the ancestor block before the split.
-Both lists are ordered from lowest depth first.
+The ``fork_point`` gives the height of the ancestor block before the split.
+Both lists are ordered from lowest height first.
 ::
 
     for (size_t i = 0; i < added_blocks.size(); ++i)
     {
-        size_t depth = fork_point + 1 + i;
+        size_t height = fork_point + 1 + i;
         const block_type& blk = *added_blocks[i];
     }
 

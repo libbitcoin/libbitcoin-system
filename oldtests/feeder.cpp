@@ -41,7 +41,7 @@ void block_stored(const std::error_code& ec, block_info info)
         return;
     }
     log_info() << "Block stored:";
-    log_info() << "    Depth: " << info.depth;
+    log_info() << "    Height: " << info.height;
     log_info() << "    Status: " << status_str(info.status);
 }
 

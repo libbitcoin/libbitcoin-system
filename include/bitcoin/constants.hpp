@@ -55,7 +55,7 @@ constexpr uint64_t readjustment_interval = target_timespan / target_spacing;
 
 // April 1 2012
 constexpr uint32_t bip16_switchover_timestamp = 1333238400;
-constexpr uint32_t bip16_switchover_depth = 173805;
+constexpr uint32_t bip16_switchover_height = 173805;
 
 } // namespace libbitcoin
 

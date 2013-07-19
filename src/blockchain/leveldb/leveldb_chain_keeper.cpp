@@ -26,26 +26,26 @@ void leveldb_chain_keeper::stop()
 
 void leveldb_chain_keeper::add(block_detail_ptr incoming_block)
 {
-    uint32_t last_block_depth = common_->find_last_block_depth();
+    uint32_t last_block_height = common_->find_last_block_height();
     const block_type& actual_block = incoming_block->actual();
-    if (!common_->save_block(last_block_depth + 1, actual_block))
+    if (!common_->save_block(last_block_height + 1, actual_block))
         log_fatal(LOG_BLOCKCHAIN) << "Saving block in organizer failed";
 }
 
 int leveldb_chain_keeper::find_index(const hash_digest& search_block_hash)
 {
-    uint32_t depth = common_->get_block_depth(search_block_hash);
-    if (depth == std::numeric_limits<uint32_t>::max())
+    uint32_t height = common_->get_block_height(search_block_hash);
+    if (height == std::numeric_limits<uint32_t>::max())
         return -1;
-    return static_cast<int>(depth);
+    return static_cast<int>(height);
 }
 
 big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 {
     big_number total_work = 0;
     leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
-    data_chunk raw_depth = uncast_type(slice_begin_index);
-    for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
+    data_chunk raw_height = uncast_type(slice_begin_index);
+    for (it->Seek(slice(raw_height)); it->Valid(); it->Next())
     {
         constexpr size_t bits_offset = 4 + 2 * hash_digest_size + 4;
         BITCOIN_ASSERT(it->value().size() >= 84);
@@ -82,8 +82,8 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
 {
     leveldb_transaction_batch batch;
     leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
-    data_chunk raw_depth = uncast_type(slice_begin_index);
-    for (it->Seek(slice(raw_depth)); it->Valid(); it->Next())
+    data_chunk raw_height = uncast_type(slice_begin_index);
+    for (it->Seek(slice(raw_height)); it->Valid(); it->Next())
     {
         block_detail_ptr sliced_block =
             reconstruct_block(common_, it->value().ToString());

@@ -51,7 +51,7 @@ namespace error
         non_final_transaction,
         checkpoints_failed,
         old_version_block,
-        coinbase_depth_mismatch,
+        coinbase_height_mismatch,
         // connect_block()
         duplicate_or_spent,
         validate_inputs_failed,

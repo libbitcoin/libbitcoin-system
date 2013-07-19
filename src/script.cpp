@@ -447,7 +447,7 @@ bool script::op_ifdup()
     return true;
 }
 
-bool script::op_depth()
+bool script::op_height()
 {
     big_number stack_size(stack_.size());
     stack_.push_back(stack_size.data());
@@ -1138,8 +1138,8 @@ bool script::run_operation(const operation& op,
         case opcode::ifdup:
             return op_ifdup();
 
-        case opcode::depth:
-            return op_depth();
+        case opcode::height:
+            return op_height();
 
         case opcode::drop:
             return op_drop();
@@ -1460,8 +1460,8 @@ std::string opcode_to_string(opcode code)
             return "2swap";
         case opcode::ifdup:
             return "ifdup";
-        case opcode::depth:
-            return "depth";
+        case opcode::height:
+            return "height";
         case opcode::drop:
             return "drop";
         case opcode::dup:
@@ -1696,8 +1696,8 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::op_2swap;
     else if (code_repr == "ifdup")
         return opcode::ifdup;
-    else if (code_repr == "depth")
-        return opcode::depth;
+    else if (code_repr == "height")
+        return opcode::height;
     else if (code_repr == "drop")
         return opcode::drop;
     else if (code_repr == "dup")

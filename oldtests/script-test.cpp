@@ -89,7 +89,7 @@ int main()
     type_test();
     //test_tx_31ef018c55dad667e2c2e276fbb641f4b6ace07ca57fdcb86cb4b9a8ff7f20eb();
     //psql_ptr psql(new postgresql_storage("bitcoin", "genjix", ""));
-    //psql->fetch_block_by_depth(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
+    //psql->fetch_block_by_height(170, std::bind(recv_block, psql, std::placeholders::_1, std::placeholders::_2));
     //sleep(6);
     return 0;
 }

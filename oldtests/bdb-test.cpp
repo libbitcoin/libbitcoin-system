@@ -118,14 +118,14 @@ void handle_store(const std::error_code& ec, block_info info,
                 break;
         }
     }
-    log_debug() << "added " << info.depth;
-    if (info.depth == 170 - 1)
+    log_debug() << "added " << info.height;
+    if (info.height == 170 - 1)
     {
         //log_debug() << "proc tx";
         ////tx.outputs[0].value += coin_price(1);
         //tx_pool->store(tx, handle_txpl);
     }
-    else if (info.depth == 20)
+    else if (info.height == 20)
     {
         chain->fetch_transaction(
             hash_digest{0xdf, 0x2b, 0x06, 0x0f, 0xa2, 0xe5, 0xe9, 0xc8, 
@@ -134,7 +134,7 @@ void handle_store(const std::error_code& ec, block_info info,
                         0x2e, 0xba, 0x40, 0xcd, 0x98, 0xea, 0x06, 0x7a},
             show_tx);
     }
-    if (info.depth == 400)
+    if (info.height == 400)
     {
         chain->fetch_block(
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x83, 0x9a, 0x8e, 0x68,
@@ -143,7 +143,7 @@ void handle_store(const std::error_code& ec, block_info info,
                         0x20, 0x16, 0x1b, 0xbf, 0x18, 0xeb, 0x60, 0x48},
             show_block);
     }
-    else if (info.depth == 200)
+    else if (info.height == 200)
     {
         chain->fetch_spend(
             message::output_point{

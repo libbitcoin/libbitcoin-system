@@ -91,7 +91,7 @@ public:
 
 private:
     void new_channel(const std::error_code& ec, channel_ptr node);
-    void set_start_depth(const std::error_code& ec, size_t fork_point,
+    void set_start_height(const std::error_code& ec, size_t fork_point,
         const blockchain::block_list& new_blocks,
         const blockchain::block_list& replaced_blocks);
 

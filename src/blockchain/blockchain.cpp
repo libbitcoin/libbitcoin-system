@@ -97,11 +97,11 @@ private:
     bool stopped_;
 };
 
-void fetch_block(blockchain& chain, size_t depth,
+void fetch_block(blockchain& chain, size_t height,
     handler_block handle_fetch)
 {
     auto fetcher = std::make_shared<fetch_block_t>(chain);
-    fetcher->start(depth, handle_fetch);
+    fetcher->start(height, handle_fetch);
 }
 void fetch_block(blockchain& chain, const hash_digest& block_hash,
     handler_block handle_fetch)
@@ -124,7 +124,7 @@ public:
     {
         handle_ = handle;
         auto this_ptr = shared_from_this();
-        chain_.fetch_last_depth(
+        chain_.fetch_last_height(
             std::bind(&fetch_locator::populate,
                 this_ptr, _1, _2));
     }
@@ -140,11 +140,11 @@ private:
         return false;
     }
 
-    void populate(const std::error_code& ec, size_t last_depth)
+    void populate(const std::error_code& ec, size_t last_height)
     {
         if (stop_on_error(ec))
             return;
-        indexes_ = block_locator_indexes(last_depth);
+        indexes_ = block_locator_indexes(last_height);
         // We reverse our list so we can pop items off the top
         // as we need to get them, and push items to our locator.
         // The order of items in the locator should match
@@ -162,14 +162,14 @@ private:
             return;
         }
         auto this_ptr = shared_from_this();
-        size_t depth = indexes_.back();
+        size_t height = indexes_.back();
         indexes_.pop_back();
-        chain_.fetch_block_header(depth,
-            std::bind(&fetch_locator::append, this_ptr, _1, _2, depth));
+        chain_.fetch_block_header(height,
+            std::bind(&fetch_locator::append, this_ptr, _1, _2, height));
     }
 
     void append(const std::error_code& ec, const block_header_type& blk_header,
-        size_t depth)
+        size_t height)
     {
         if (stop_on_error(ec))
             return;
