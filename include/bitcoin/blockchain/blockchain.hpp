@@ -48,9 +48,17 @@ public:
 
     typedef fetch_handler<input_point> fetch_handler_spend;
 
-    typedef std::function<void (const std::error_code&,
-        const output_point_list&, const output_value_list&,
-        const input_point_list&)> fetch_handler_history;
+    struct history_row
+    {
+        output_point output;
+        size_t output_height;
+        uint64_t value;
+        input_point spend;
+        size_t spend_height;
+    };
+    typedef std::vector<history_row> history_list;
+    typedef std::function<void (const std::error_code&, const history_list&)>
+        fetch_handler_history;
 
     typedef std::vector<std::shared_ptr<block_type>> block_list;
     typedef std::function<
@@ -236,19 +244,27 @@ public:
         fetch_handler_spend handle_fetch) = 0;
 
     /**
-     * Fetches the output points, output values and corresponding
-     * input point spends associated with a Bitcoin address.
-     * The length of all lists should always be equal.
-     *
-     * Output points and input points are matched by their corresponding index.
-     * The spend of outpoint[i] is inpoint[i]. Same for the output values.
-     *
-     * If an output is unspent then the corresponding input spend hash
-     * will be equivalent to null_hash.
+     * Fetches the output points, output values, corresponding input point
+     * spends and the block heights associated with a Bitcoin address.
+     * The returned history is a list of rows with the following fields:
      *
      * @code
-     *  if (inpoints[i].hash == null_hash)
-     *    // The ith output point is unspent.
+     *  struct history_row
+     *  {
+     *      output_point output;
+     *      size_t output_height;
+     *      uint64_t value;
+     *      input_point spend;
+     *      size_t spend_height;
+     *  };
+     * @endcode
+     *
+     * If an output is unspent then the input spend hash will be equivalent
+     * to null_hash.
+     *
+     * @code
+     *  if (history.spend.hash == null_hash)
+     *    // The history.output point is unspent.
      * @endcode
      *
      * Summing the list of values for unspent outpoints gives the balance
@@ -258,10 +274,8 @@ public:
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec,          // Status of operation
-     *      const output_point_list& outpoints, // Outputs
-     *      const output_value_list& values,    // Values for outputs.
-     *      const input_point_list& inpoint     // Input points (spends)
+     *      const std::error_code& ec,              // Status of operation
+     *      const blockchain::history_list& history // History
      *  );
      * @endcode
      */

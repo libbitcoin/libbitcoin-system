@@ -536,6 +536,10 @@ public:
     {
         return value_;
     }
+    uint32_t height() const
+    {
+        return height_;
+    }
 
 protected:
     void load_data(leveldb::Slice data)
@@ -547,13 +551,14 @@ protected:
         outpoint_.hash = deserial.read_hash();
         outpoint_.index = deserial.read_4_bytes();
         value_ = deserial.read_8_bytes();
-        uint32_t height = deserial.read_4_bytes();
+        height_ = deserial.read_4_bytes();
         BITCOIN_ASSERT(deserial.iterator() == end);
     }
 
 private:
     output_point outpoint_;
     uint64_t value_;
+    uint32_t height_;
 };
 
 class inpoint_iterator
@@ -579,6 +584,10 @@ public:
         ++(*this);
         return result;
     }
+    uint32_t height() const
+    {
+        return height_;
+    }
 
 protected:
     void load_data(leveldb::Slice data)
@@ -589,20 +598,20 @@ protected:
         auto deserial = make_deserializer(begin, end);
         inpoint_.hash = deserial.read_hash();
         inpoint_.index = deserial.read_4_bytes();
-        uint32_t height = deserial.read_4_bytes();
+        height_ = deserial.read_4_bytes();
         BITCOIN_ASSERT(deserial.iterator() == end);
     }
 
 private:
     input_point inpoint_;
+    uint32_t height_;
 };
 
 void leveldb_blockchain::fetch_history(const payment_address& address,
     fetch_handler_history handle_fetch)
 {
     if (address.type() != payment_type::pubkey_hash)
-        handle_fetch(error::unsupported_payment_type,
-            output_point_list(), output_value_list(), input_point_list());
+        handle_fetch(error::unsupported_payment_type, history_list());
     else
         fetch(
             std::bind(&leveldb_blockchain::do_fetch_history,
@@ -611,27 +620,26 @@ void leveldb_blockchain::fetch_history(const payment_address& address,
 bool leveldb_blockchain::do_fetch_history(const payment_address& address,
     fetch_handler_history handle_fetch, size_t slock)
 {
-    // Declare return objects.
-    output_point_list outpoints;
-    output_value_list values;
-    input_point_list inpoints;
+    history_list history;
     // Load output data
     inpoint_iterator debit_it(db_debit_, address);
     for (outpoint_iterator credit_it(db_credit_, address);
         credit_it.valid(); ++credit_it)
     {
         credit_it.load();
-        outpoints.push_back(credit_it.outpoint());
-        values.push_back(credit_it.value());
         uint32_t checksum = credit_it.checksum();
-        inpoints.push_back(debit_it.next_inpoint(checksum));
+        history.push_back({
+            credit_it.outpoint(),
+            credit_it.height(),
+            credit_it.value(),
+            debit_it.next_inpoint(checksum),
+            debit_it.height()
+        });
     }
     // All the debits should have been loaded.
     BITCOIN_ASSERT(!debit_it.valid());
-    BITCOIN_ASSERT(inpoints.size() == outpoints.size());
     // Finish.
-    return finish_fetch(slock, handle_fetch, std::error_code(),
-        outpoints, values, inpoints);
+    return finish_fetch(slock, handle_fetch, std::error_code(), history);
 }
 
 void leveldb_blockchain::subscribe_reorganize(

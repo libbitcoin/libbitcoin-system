@@ -6,8 +6,7 @@ std::string addr;
 
 void blockchain_started(const std::error_code& ec);
 void history_fetched(const std::error_code& ec,
-    const output_point_list& outpoints, const output_value_list& values,
-    const input_point_list& inpoint);
+    const blockchain::history_list& history);
 
 void blockchain_started(const std::error_code& ec)
 {
@@ -27,27 +26,24 @@ void blockchain_started(const std::error_code& ec)
 }
 
 void history_fetched(const std::error_code& ec,
-    const output_point_list& outpoints, const output_value_list& values,
-    const input_point_list& inpoints)
+    const blockchain::history_list& history)
 {
     if (ec)
     {
         log_error() << "Failed to fetch history: " << ec.message();
         return;
     }
-    BITCOIN_ASSERT(outpoints.size() == values.size());
-    BITCOIN_ASSERT(outpoints.size() == inpoints.size());
 #define LOG_RESULT "result"
     uint64_t total_recv = 0, balance = 0;
-    for (size_t i = 0; i < outpoints.size(); ++i)
+    for (const auto& row: history)
     {
-        uint64_t value = values[i];
+        uint64_t value = row.value;
         BITCOIN_ASSERT(value >= 0);
         total_recv += value;
-        if (inpoints[i].hash == null_hash)
+        if (row.spend.hash == null_hash)
             balance += value;
     }
-    log_debug(LOG_RESULT) << "Queried " << outpoints.size()
+    log_debug(LOG_RESULT) << "Queried " << history.size()
         << " outpoints, values and their spends.";
     log_debug(LOG_RESULT) << "Total received: " << total_recv;
     log_debug(LOG_RESULT) << "Balance: " << balance;
