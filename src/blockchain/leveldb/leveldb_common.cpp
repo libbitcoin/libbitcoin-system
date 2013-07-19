@@ -26,7 +26,8 @@ bool mark_spent_outputs(leveldb::WriteBatch& spend_batch,
 // Both functions return false only on database failure.
 // They may or may not add an entry
 bool add_debit(leveldb::WriteBatch& batch,
-    const transaction_input_type& input, const input_point& inpoint);
+    const transaction_input_type& input, const input_point& inpoint,
+    uint32_t block_height);
 bool add_credit(leveldb::WriteBatch& batch,
     const transaction_output_type& output, const output_point& outpoint,
     uint32_t block_height);
@@ -139,7 +140,8 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
             if (!mark_spent_outputs(batch.spend,
                     input.previous_output, inpoint))
                 return false;
-            if (!add_debit(batch.debit, input, {tx_hash, input_index}))
+            if (!add_debit(batch.debit,
+                    input, {tx_hash, input_index}, block_height))
                 return false;
         }
     // Save address -> output mappings.
@@ -175,7 +177,8 @@ bool mark_spent_outputs(leveldb::WriteBatch& spend_batch,
 }
 
 bool add_debit(leveldb::WriteBatch& batch,
-    const transaction_input_type& input, const input_point& inpoint)
+    const transaction_input_type& input, const input_point& inpoint,
+    uint32_t block_height)
 {
     payment_address address;
     // Not a Bitcoin address so skip this output.
@@ -183,13 +186,15 @@ bool add_debit(leveldb::WriteBatch& batch,
         return true;
     data_chunk addr_key = create_address_key(address, input.previous_output);
     // inpoint
-    data_chunk row_info(36);
+    data_chunk row_info(36 + 4);
     auto serial = make_serializer(row_info.begin());
     // inpoint
     serial.write_hash(inpoint.hash);
     serial.write_4_bytes(inpoint.index);
+    // block_height
+    serial.write_4_bytes(block_height);
     BITCOIN_ASSERT(
-        std::distance(row_info.begin(), serial.iterator()) == 36);
+        std::distance(row_info.begin(), serial.iterator()) == 36 + 4);
     batch.Put(slice(addr_key), slice(row_info));
     return true;
 }
@@ -212,7 +217,6 @@ bool add_credit(leveldb::WriteBatch& batch,
     // value
     serial.write_8_bytes(output.value);
     // block_height
-    // We add the block height for reordering.
     serial.write_4_bytes(block_height);
     BITCOIN_ASSERT(
         std::distance(row_info.begin(), serial.iterator()) == 36 + 8 + 4);
