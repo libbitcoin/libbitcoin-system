@@ -585,10 +585,11 @@ protected:
     {
         const uint8_t* begin = slice_begin(data.data());
         const uint8_t* end = begin + data.size();
-        BITCOIN_ASSERT(data.size() == 36);
+        BITCOIN_ASSERT(data.size() == 36 + 4);
         auto deserial = make_deserializer(begin, end);
         inpoint_.hash = deserial.read_hash();
         inpoint_.index = deserial.read_4_bytes();
+        uint32_t height = deserial.read_4_bytes();
         BITCOIN_ASSERT(deserial.iterator() == end);
     }
 
