@@ -152,7 +152,7 @@ the block header for a height number, we use
 
     void handle_fetch(
         const std::error_code& ec, // Status of operation
-        size_t block_height         // Height of last block
+        size_t block_height        // Height of last block
     );
 
 All the blockchain fetch methods give you access to all of the data in the

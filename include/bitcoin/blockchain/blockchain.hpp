@@ -83,7 +83,7 @@ public:
      * is undefined.
      *
      * @param[in]   import_block    Block to store
-     * @param[in]   height           Height of block
+     * @param[in]   height          Height of block
      * @param[in]   handle_import   Completion handler for import operation.
      * @code
      *  void handle_import(
@@ -97,7 +97,7 @@ public:
     /**
      * Fetches the block header by height.
      *
-     * @param[in]   height           Height of block to fetch
+     * @param[in]   height          Height of block to fetch
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
@@ -162,7 +162,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec, // Status of operation
-     *      size_t block_height         // Height of block
+     *      size_t block_height        // Height of block
      *  );
      * @endcode
      */
@@ -176,7 +176,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec, // Status of operation
-     *      size_t block_height         // Height of last block
+     *      size_t block_height        // Height of last block
      *  );
      * @endcode
      */
@@ -206,7 +206,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec, // Status of operation
-     *      size_t block_height,        // Height of block containing
+     *      size_t block_height,       // Height of block containing
      *                                 // the transaction.
      *      size_t index               // Index of transaction within
      *                                 // the block.
