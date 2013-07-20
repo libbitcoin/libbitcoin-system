@@ -174,8 +174,6 @@ public:
         const script& script_code, uint32_t hash_type);
 
 private:
-    typedef std::vector<data_chunk> data_stack;
-
     class conditional_stack
     {
     public:

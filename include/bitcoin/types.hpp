@@ -32,6 +32,7 @@ typedef std::array<uint8_t, hash_digest_size> hash_digest;
 typedef std::array<uint8_t, short_hash_size> short_hash;
 
 typedef std::vector<uint8_t> data_chunk;
+typedef std::vector<data_chunk> data_stack;
 
 // A list of indices. Used for creating block_locator objects or
 // Storing list of unconfirmed input indexes in tx pool.
