@@ -4,6 +4,38 @@ a proprietary project, but the core library and any changes to it must be
 published online. Source code for this library must always remain free for
 everybody to access.
 
+==========================
+Debian/Ubuntu Instructions
+==========================
+
+  VVVVVVVVVVV
+> Start Here! <
+  ^^^^^^^^^^^
+
+  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev
+  $ autoreconf -i
+  $ ./configure --enable-leveldb
+  $ make
+  $ sudo make install
+
+* Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of
+  libboost-all-dev above.
+
+--------
+Advanced
+--------
+
+Files Open Limit
+----------------
+
+For the blockchain database, set the max open files limit higher.
+The default limit on most Linux systems is too low.
+
+  $ ulimit -n 4096
+
+Core Dependencies
+-----------------
+
 You will need:
 
   - GCC 4.7 or newer
@@ -11,27 +43,8 @@ You will need:
   - OpenSSL 0.9 or newer
   - LevelDB
 
-The './configure' command in the install instructions below.
-'configure' accepted a --prefix switch. Use this if you want to install the
-
-Use `pkg-config --cflags --libs libbitcoin' for getting compile/build
-parameters.
-
-For the blockchain database, set the max open files limit higher.
-The default limit on most Linux systems is too low.
-
-  $ ulimit -n 4096
-
-Ubuntu Instructions
-===================
-
-*Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of libboost-all-dev
-
-  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev
-  $ autoreconf -i
-  $ ./configure --enable-leveldb
-  $ make
-  $ sudo make install
+Install Prefix
+--------------
 
 './configure' accepts a --prefix switch. This is useful if you prefer to
 install libbitcoin to a local directory instead.
@@ -47,9 +60,17 @@ finding the libbitcoin install.
   export LD_LIBRARY_PATH=~/usr/lib/
   export PKG_CONFIG_PATH=~/usr/lib/pkgconfig/
 
-pkg-config can be invoked to get the neccessary compile and build flags.
+Compile/Build Flags
+-------------------
+
+pkg-config can be invoked to get the neccessary compile and build flags
+for creating software using libbitcoin.
 
   $ pkg-config --cflags --libs libbitcoin
+
+--------
+Examples
+--------
 
 Start with the examples/ to see a few sample programs:
 
@@ -63,6 +84,7 @@ Start with the examples/ to see a few sample programs:
   # Run the fullnode example (validates blocks and transactions).
   $ ./fullnode
 
+====================
 Mac OSX Instructions
 ====================
 
