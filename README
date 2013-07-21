@@ -19,6 +19,8 @@ Debian/Ubuntu Instructions
   $ sudo make install
   $ sudo ldconfig
 
+libbitcoin is now installed in /usr/local/.
+
 * Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of
   libboost-all-dev above.
 
