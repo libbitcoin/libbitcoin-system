@@ -54,39 +54,6 @@ public:
     virtual const std::string lookup_symbol() const = 0;
 };
 
-template <typename Message>
-class channel_loader_module
-  : public channel_loader_module_base
-{
-public:
-    typedef std::function<
-        void (const std::error_code&, const Message&)> load_handler;
-
-    channel_loader_module(load_handler handle_load)
-      : handle_load_(handle_load) {}
-
-    void attempt_load(const data_chunk& stream) const
-    {
-        Message result;
-        try
-        {
-            satoshi_load(stream.begin(), stream.end(), result);
-            handle_load_(std::error_code(), result);
-        }
-        catch (end_of_stream)
-        {
-            handle_load_(error::bad_stream, Message());
-        }
-    }
-
-    const std::string lookup_symbol() const
-    {
-        return satoshi_command(Message());
-    }
-private:
-    load_handler handle_load_;
-};
-
 class channel_stream_loader
 {
 public:
