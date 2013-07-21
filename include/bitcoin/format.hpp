@@ -72,14 +72,14 @@ std::ostream& operator<<(std::ostream& stream, const data_chunk& data);
 std::ostream& operator<<(std::ostream& stream, const hash_digest& hash);
 std::ostream& operator<<(std::ostream& stream, const short_hash& hash);
 
-data_chunk decode_hex(std::string byte_stream);
+data_chunk decode_hex(std::string hex_str);
 
 // Turns a hash hex string into HashType.
 // byte_stream.size() == 2 * HashType.size()
 template <typename HashType>
-HashType decode_hex_digest(std::string byte_stream)
+HashType decode_hex_digest(std::string hex_str)
 {
-    data_chunk raw_bytes = decode_hex(byte_stream);
+    data_chunk raw_bytes = decode_hex(hex_str);
     HashType result;
     BITCOIN_ASSERT(raw_bytes.size() == result.size());
     std::copy(raw_bytes.begin(), raw_bytes.end(), result.begin());

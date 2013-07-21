@@ -1,5 +1,6 @@
 #include <bitcoin/utility/base58.hpp>
 
+#include <boost/algorithm/string.hpp>
 #include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {
@@ -45,8 +46,11 @@ std::string encode_base58(const data_chunk& unencoded_data)
     return encoded_data;
 }                                                                                
 
-data_chunk decode_base58(const std::string& encoded_data)
+data_chunk decode_base58(std::string encoded_data)
 {                                                                                
+    // Trim spaces and newlines around the string.
+    boost::algorithm::trim(encoded_data);
+    // We're building a big number.
     big_number bn = 0;       
                                                                                  
     // Convert big endian string to bignum                                       

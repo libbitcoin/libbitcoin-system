@@ -2,11 +2,9 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-
 #include <openssl/ec.h>
 #include <openssl/obj_mac.h>
 #include <openssl/sha.h>
-
 #include <bitcoin/constants.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/utility/assert.hpp>
@@ -107,8 +105,10 @@ data_chunk pubkey_from_secret(const secret_parameter& secret)
     return privkey.public_key();
 }
 
-bool deterministic_wallet::set_seed(const std::string& seed)
+bool deterministic_wallet::set_seed(std::string seed)
 {
+    // Trim spaces and newlines around the string.
+    boost::algorithm::trim(seed);
     if (seed.size() != seed_size)
         return false;
     seed_ = seed;

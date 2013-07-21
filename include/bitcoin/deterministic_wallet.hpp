@@ -33,7 +33,7 @@ public:
      *   // Error...
      * @endcode
      */
-    bool set_seed(const std::string& seed);
+    bool set_seed(std::string seed);
 
     /**
      * Return the wallet seed. The seed should always be

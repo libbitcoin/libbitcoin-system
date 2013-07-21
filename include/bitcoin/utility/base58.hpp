@@ -7,7 +7,7 @@ namespace libbitcoin {
 
 std::string encode_base58(const data_chunk& unencoded_data);
 
-data_chunk decode_base58(const std::string& encoded_data);
+data_chunk decode_base58(std::string encoded_data);
 
 } // namespace libbitcoin
 
