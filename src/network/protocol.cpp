@@ -325,18 +325,27 @@ void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
 void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
     acceptor_ptr accept)
 {
+    accept->accept(
+        strand_.wrap(std::bind(&protocol::handle_accept,
+            this, _1, _2, accept)));
     if (ec)
     {
         log_error(LOG_PROTOCOL)
             << "Problem accepting connection: " << ec.message();
+        return;
     }
-    else
+    accepted_channels_.push_back(node);
+    log_info(LOG_PROTOCOL) << "Accepted connection: "
+        << accepted_channels_.size();
+    auto handshake_complete = [this, node](const std::error_code& ec)
     {
-        accepted_channels_.push_back(node);
-        log_info(LOG_PROTOCOL) << "Accepted connection: "
-            << accepted_channels_.size();
-        setup_new_channel(node);
-    }
+        if (ec)
+            log_error(LOG_PROTOCOL) << "Problem with handshake: "
+                << ec.message();
+        else
+            setup_new_channel(node);
+    };
+    handshake_.ready(node, handshake_complete);
 }
 
 void handle_send(const std::error_code& ec)
