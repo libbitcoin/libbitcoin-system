@@ -17,6 +17,7 @@ Debian/Ubuntu Instructions
   $ ./configure --enable-leveldb
   $ make
   $ sudo make install
+  $ sudo ldconfig
 
 * Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of
   libboost-all-dev above.
