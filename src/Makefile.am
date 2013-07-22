@@ -29,6 +29,7 @@ libbitcoin_la_SOURCES = \
 	utility/base58.cpp \
 	utility/big_number.cpp \
 	utility/key_formats.cpp \
+	utility/mnemonic.cpp \
 	constants.cpp \
 	blockchain/organizer.cpp \
 	blockchain/blockchain.cpp \

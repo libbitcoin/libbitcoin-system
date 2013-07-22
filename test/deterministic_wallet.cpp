@@ -29,3 +29,13 @@ BOOST_AUTO_TEST_CASE(detwallet)
     BOOST_REQUIRE(wallet2.generate_secret(2) == null_hash);
 }
 
+BOOST_AUTO_TEST_CASE(mnemonic)
+{
+    const std::string seed = "148f0a1d77e20dbaee3ff920ca40240d";
+    string_list words{
+        "people", "blonde", "admit", "dart", "couple", "different",
+        "truth", "common", "alas", "stumble", "time", "cookie"};
+    BOOST_REQUIRE(encode_mnemonic(seed) == words);
+    BOOST_REQUIRE(decode_mnemonic(words) == seed);
+}
+

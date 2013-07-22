@@ -178,6 +178,7 @@
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/utility/key_formats.hpp>
+#include <bitcoin/utility/mnemonic.hpp>
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/network/protocol.hpp>

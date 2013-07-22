@@ -64,6 +64,5 @@ secret_parameter minikey_to_secret(const std::string& minikey)
     return single_sha256(minikey);
 }
 
-
 } // libbitcoin
 
