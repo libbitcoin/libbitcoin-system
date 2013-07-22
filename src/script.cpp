@@ -862,6 +862,12 @@ inline void nullify_input_sequences(
             inputs[i].sequence = 0;
 }
 
+inline hash_digest one_hash()
+{
+    return hash_digest{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+                       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+}
+
 hash_digest script::generate_signature_hash(
     transaction_type parent_tx, uint32_t input_index,
     const script& script_code, uint32_t hash_type)
@@ -870,7 +876,7 @@ hash_digest script::generate_signature_hash(
     {
         log_fatal(LOG_SCRIPT) << "script::op_checksig() : input_index "
             << input_index << " is out of range.";
-        return null_hash;
+        return one_hash();
     }
 
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
@@ -894,7 +900,7 @@ hash_digest script::generate_signature_hash(
         {
             log_error(LOG_SCRIPT)
                 << "sighash::single the output_index is out of range";
-            return null_hash;
+            return one_hash();
         }
         outputs.resize(output_index + 1);
         // Loop through outputs except the last one
@@ -931,8 +937,6 @@ bool check_signature(data_chunk signature,
     hash_digest tx_hash =
         script::generate_signature_hash(
             parent_tx, input_index, script_code, hash_type);
-    if (tx_hash == null_hash)
-        return false;
     return key.verify(tx_hash, signature);
 }
 
