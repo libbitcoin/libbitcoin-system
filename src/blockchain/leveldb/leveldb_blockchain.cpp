@@ -561,6 +561,8 @@ private:
     uint32_t height_;
 };
 
+constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
+
 class inpoint_iterator
   : public point_iterator
 {
@@ -570,18 +572,20 @@ public:
 
     input_point next_inpoint(uint32_t credit_checksum)
     {
-        constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
         // Check if there's an equivalent spend for this credit.
         if (!valid())
             return {null_hash, max_index};
         // Valid iterator so load the data.
-        load();
+        if (height_ = max_index)
+            load();
         // The next spend in the iterator is not for this output point.
         if (checksum() != credit_checksum)
             return {null_hash, max_index};
         // Checksums match. Spend for this output exists.
         input_point result = inpoint_;
         ++(*this);
+        // Dirty height so we reload next time.
+        height_ = max_index;
         return result;
     }
     uint32_t height() const
@@ -604,21 +608,21 @@ protected:
 
 private:
     input_point inpoint_;
-    uint32_t height_;
+    uint32_t height_ = max_index;
 };
 
 void leveldb_blockchain::fetch_history(const payment_address& address,
-    fetch_handler_history handle_fetch)
+    fetch_handler_history handle_fetch, size_t from_height)
 {
     if (address.type() != payment_type::pubkey_hash)
         handle_fetch(error::unsupported_payment_type, history_list());
     else
         fetch(
             std::bind(&leveldb_blockchain::do_fetch_history,
-                this, address, handle_fetch, _1));
+                this, address, handle_fetch, from_height, _1));
 }
 bool leveldb_blockchain::do_fetch_history(const payment_address& address,
-    fetch_handler_history handle_fetch, size_t slock)
+    fetch_handler_history handle_fetch, size_t from_height, size_t slock)
 {
     history_list history;
     // Load output data
@@ -628,13 +632,21 @@ bool leveldb_blockchain::do_fetch_history(const payment_address& address,
     {
         credit_it.load();
         uint32_t checksum = credit_it.checksum();
-        history.push_back({
+        history_row row{
             credit_it.outpoint(),
             credit_it.height(),
             credit_it.value(),
             debit_it.next_inpoint(checksum),
             debit_it.height()
-        });
+        };
+        BITCOIN_ASSERT(row.spend.hash == null_hash ||
+            row.spend_height >= row.output_height);
+        // Filter entries below the from_height.
+        if (row.output_height >= from_height ||
+            row.spend_height >= from_height)
+        {
+            history.push_back(row);
+        }
     }
     // All the debits should have been loaded.
     BITCOIN_ASSERT(!debit_it.valid());

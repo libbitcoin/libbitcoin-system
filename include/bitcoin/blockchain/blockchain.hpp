@@ -272,6 +272,9 @@ public:
      *
      * @param[in]   address         Bitcoin address
      * @param[in]   handle_fetch    Completion handler for fetch operation.
+     * @param[in]   from_height     Starting block height for history.
+     *                              Useful to filter entries or to fetch
+     *                              the history in chunks.
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,              // Status of operation
@@ -280,7 +283,7 @@ public:
      * @endcode
      */
     virtual void fetch_history(const payment_address& address,
-        fetch_handler_history handle_fetch) = 0;
+        fetch_handler_history handle_fetch, size_t from_height=0) = 0;
 
     /**
      * Be notified of the next blockchain change.

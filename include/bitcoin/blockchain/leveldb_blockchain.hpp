@@ -69,7 +69,7 @@ public:
         fetch_handler_spend handle_fetch);
     // fetch outputs, values and spends for an address.
     void fetch_history(const payment_address& address,
-        fetch_handler_history handle_fetch);
+        fetch_handler_history handle_fetch, size_t from_height=0);
 
     void subscribe_reorganize(reorganize_handler handle_reorganize);
 
@@ -127,7 +127,7 @@ private:
     bool do_fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch, size_t slock);
     bool do_fetch_history(const payment_address& address,
-        fetch_handler_history handle_fetch, size_t slock);
+        fetch_handler_history handle_fetch, size_t from_height, size_t slock);
 
     io_service& ios_;
     // Queue for writes to the blockchain.
