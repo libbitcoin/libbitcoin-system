@@ -1,0 +1,6 @@
+libbitcoin (1.0.10-1) unstable; urgency=low
+
+  * Initial release.
+  Closes: bug#670701
+
+ -- Pablo Castellano (Debian packages) <pablo@anche.no>  Tue, 23 Jul 2013 12:53:05 +0200
