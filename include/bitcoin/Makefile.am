@@ -20,6 +20,11 @@ bitcoin_include_HEADERS = \
 	poller.hpp \
     version.hpp
 
+bitcoin_impl_serialize_includedir = $(includedir)/bitcoin/impl/serialize
+bitcoin_impl_serialize_include_HEADERS = \
+    impl/serialize/misc.ipp \
+    impl/serialize/block.ipp
+
 bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
 bitcoin_blockchain_include_HEADERS = \
 	blockchain/blockchain.hpp \

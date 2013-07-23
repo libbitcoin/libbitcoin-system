@@ -1,0 +1,273 @@
+#ifndef LIBBITCOIN_IMPL_SATOSHI_SERIALIZE_IPP
+#define LIBBITCOIN_IMPL_SATOSHI_SERIALIZE_IPP
+
+#include <boost/optional.hpp>
+
+namespace libbitcoin {
+
+// message headers
+template <typename Iterator>
+Iterator satoshi_save(const header_type& head, Iterator result)
+{
+    auto serial = make_serializer(result);
+    serial.write_4_bytes(head.magic);
+    serial.write_fixed_string(head.command, command_size);
+    serial.write_4_bytes(head.payload_length);
+    if (head.checksum != 0)
+        serial.write_4_bytes(head.checksum);
+    return serial.iterator();
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    header_type& head)
+{
+    auto deserial = make_deserializer(first, last);
+    head.magic = deserial.read_4_bytes();
+    head.command = deserial.read_fixed_string(command_size);
+    head.payload_length = deserial.read_4_bytes();
+    head.checksum = 0;
+    BITCOIN_ASSERT(satoshi_raw_size(head) == std::distance(first, last));
+}
+
+// version messages
+template <typename Iterator>
+Iterator satoshi_save(const version_type& packet, Iterator result)
+{
+    auto serial = make_serializer(result);
+    serial.write_4_bytes(packet.version);
+    serial.write_8_bytes(packet.services);
+    serial.write_8_bytes(packet.timestamp);
+    serial.write_network_address(packet.address_me);
+    serial.write_network_address(packet.address_you);
+    serial.write_8_bytes(packet.nonce);
+    serial.write_string(packet.user_agent);
+    serial.write_4_bytes(packet.start_height);
+    return serial.iterator();
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    version_type& packet)
+{
+    auto deserial = make_deserializer(first, last);
+    packet.version = deserial.read_4_bytes();
+    packet.services = deserial.read_8_bytes();
+    packet.timestamp = deserial.read_8_bytes();
+    packet.address_me = deserial.read_network_address();
+    // Ignored field
+    packet.address_me.timestamp = 0;
+    if (packet.version < 106)
+    {
+        BITCOIN_ASSERT(std::distance(first, last) >= 46);
+        return;
+    }
+    packet.address_you = deserial.read_network_address();
+    // Ignored field
+    packet.address_you.timestamp = 0;
+    packet.nonce = deserial.read_8_bytes();
+    packet.user_agent = deserial.read_string();
+    if (packet.version < 209)
+    {
+        BITCOIN_ASSERT(std::distance(first, last) >= 46 + 26 + 8 + 1);
+        return;
+    }
+    packet.start_height = deserial.read_4_bytes();
+    BITCOIN_ASSERT(std::distance(first, last) >= 81 + 4);
+    //BITCOIN_ASSERT(satoshi_raw_size(packet) <= std::distance(first, last));
+}
+
+// verack messages
+template <typename Iterator>
+Iterator satoshi_save(const verack_type& packet, Iterator result)
+{
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
+    return result;
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    verack_type& packet)
+{
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
+}
+
+// addr messages
+template <typename Iterator>
+Iterator satoshi_save(const address_type& packet, Iterator result)
+{
+    auto serial = make_serializer(result);
+    serial.write_variable_uint(packet.addresses.size());
+    for (const network_address_type& net_address: packet.addresses)
+    {
+        serial.write_4_bytes(net_address.timestamp);
+        serial.write_network_address(net_address);
+    }
+    return serial.iterator();
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    address_type& packet)
+{
+    auto deserial = make_deserializer(first, last);
+    uint64_t count = deserial.read_variable_uint();
+    for (size_t i = 0; i < count; ++i)
+    {
+        uint32_t timestamp = deserial.read_4_bytes();
+        network_address_type addr = deserial.read_network_address();
+        addr.timestamp = timestamp;
+        packet.addresses.push_back(addr);
+    }
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+}
+
+// getaddr messages
+template <typename Iterator>
+Iterator satoshi_save(const get_address_type& packet, Iterator result)
+{
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
+    return result;
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    get_address_type& packet)
+{
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
+}
+
+// inventory related stuff
+uint32_t inventory_type_to_number(inventory_type_id inv_type);
+inventory_type_id inventory_type_from_number(uint32_t raw_type);
+
+template <typename Message>
+size_t raw_size_inventory_impl(const Message& packet)
+{
+    return variable_uint_size(packet.inventories.size()) +
+        36 * packet.inventories.size();
+}
+template <typename Message, typename Iterator>
+Iterator save_inventory_impl(const Message& packet, Iterator result)
+{
+    auto serial = make_serializer(result);
+    serial.write_variable_uint(packet.inventories.size());
+    for (const inventory_vector_type inv: packet.inventories)
+    {
+        uint32_t raw_type = inventory_type_to_number(inv.type);
+        serial.write_4_bytes(raw_type);
+        serial.write_hash(inv.hash);
+    }
+    return serial.iterator();
+}
+template <typename Message, typename Iterator>
+void load_inventory_impl(const Iterator first, const Iterator last,
+    Message& packet)
+{
+    auto deserial = make_deserializer(first, last);
+    uint64_t count = deserial.read_variable_uint();
+    for (size_t i = 0; i < count; ++i)
+    {
+        inventory_vector_type inv;
+        uint32_t raw_type = deserial.read_4_bytes();
+        inv.type = inventory_type_from_number(raw_type);
+        inv.hash = deserial.read_hash();
+        packet.inventories.push_back(inv);
+    }
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+}
+
+// inv messages
+template <typename Iterator>
+Iterator satoshi_save(const inventory_type& packet, Iterator result)
+{
+    return save_inventory_impl(packet, result);
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    inventory_type& packet)
+{
+    load_inventory_impl(first, last, packet);
+}
+
+// getdata messages
+template <typename Iterator>
+Iterator satoshi_save(const get_data_type& packet, Iterator result)
+{
+    return save_inventory_impl(packet, result);
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    get_data_type& packet)
+{
+    load_inventory_impl(first, last, packet);
+}
+
+// getblocks messages
+const std::string satoshi_command(const get_blocks_type&);
+size_t satoshi_raw_size(const get_blocks_type& packet);
+template <typename Iterator>
+Iterator satoshi_save(const get_blocks_type& packet, Iterator result)
+{
+    auto serial = make_serializer(result);
+    serial.write_4_bytes(protocol_version);
+    serial.write_variable_uint(packet.start_hashes.size());
+    for (hash_digest start_hash: packet.start_hashes)
+        serial.write_hash(start_hash);
+    serial.write_hash(packet.hash_stop);
+    return serial.iterator();
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    get_blocks_type& packet)
+{
+    auto deserial = make_deserializer(first, last);
+    // Discard protocol version because it is stupid
+    deserial.read_4_bytes();
+    uint32_t count = deserial.read_variable_uint();
+    for (size_t i = 0; i < count; ++i)
+    {
+        hash_digest start_hash = deserial.read_hash();
+        packet.start_hashes.push_back(start_hash);
+    }
+    packet.hash_stop = deserial.read_hash();
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+}
+
+// ping messages
+const std::string satoshi_command(const ping_type&);
+size_t satoshi_raw_size(const ping_type& packet);
+template <typename Iterator>
+Iterator satoshi_save(const ping_type& packet, Iterator result)
+{
+    auto serial = make_serializer(result);
+    serial.write_8_bytes(packet.nonce);
+    return serial.iterator();
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    ping_type& packet)
+{
+    auto deserial = make_deserializer(first, last);
+    packet.nonce = deserial.read_8_bytes();
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+}
+
+// pong messages
+const std::string satoshi_command(const pong_type&);
+size_t satoshi_raw_size(const pong_type& packet);
+template <typename Iterator>
+Iterator satoshi_save(const pong_type& packet, Iterator result)
+{
+    auto serial = make_serializer(result);
+    serial.write_8_bytes(packet.nonce);
+    return serial.iterator();
+}
+template <typename Iterator>
+void satoshi_load(const Iterator first, const Iterator last,
+    pong_type& packet)
+{
+    auto deserial = make_deserializer(first, last);
+    packet.nonce = deserial.read_8_bytes();
+    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+}
+
+} // libbitcoin
+
+#endif
+

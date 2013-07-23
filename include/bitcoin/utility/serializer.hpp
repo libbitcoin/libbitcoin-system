@@ -218,9 +218,9 @@ public:
     data_chunk read_data(uint64_t n_bytes)
     {
         check_distance(iter_, end_, n_bytes);
-        data_chunk raw_bytes;
+        data_chunk raw_bytes(n_bytes);
         for (uint64_t i = 0; i < n_bytes; ++i)
-            raw_bytes.push_back(read_byte());
+            raw_bytes[0] = read_byte();
         return raw_bytes;
     }
 
@@ -265,24 +265,33 @@ public:
     /**
      * Returns underlying iterator.
      */
-    Iterator iterator()
+    Iterator iterator() const
     {
         return iter_;
+    }
+
+    /**
+     * Useful if you advance the iterator using other serialization
+     * methods or objects.
+     */
+    void set_iterator(const Iterator iter)
+    {
+        iter_ = iter;
     }
 
 private:
     // Try to advance iterator 'distance' incremenets forwards.
     // Throw if we prematurely reach the end.
     static void check_distance(
-        Iterator begin, const Iterator end, size_t distance)
+        Iterator it, const Iterator end, size_t distance)
     {
         for (size_t i = 0; i < distance; ++i)
         {
             // Is this a valid byte?
-            if (begin == end)
+            if (it == end)
                 throw end_of_stream();
             // If so move to next value.
-            ++begin;
+            ++it;
         }
     }
 
