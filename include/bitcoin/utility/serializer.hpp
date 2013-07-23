@@ -220,7 +220,7 @@ public:
         check_distance(iter_, end_, n_bytes);
         data_chunk raw_bytes(n_bytes);
         for (uint64_t i = 0; i < n_bytes; ++i)
-            raw_bytes[0] = read_byte();
+            raw_bytes[i] = read_byte();
         return raw_bytes;
     }
 

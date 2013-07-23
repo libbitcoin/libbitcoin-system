@@ -43,19 +43,12 @@ BOOST_AUTO_TEST_CASE(genesis_block_serialize)
     BOOST_REQUIRE(genblk.header.merkle == merkle);
 }
 
-BOOST_AUTO_TEST_CASE(tx)
-{
-    //auto deserial = make_deserializer(first, last);
-    //read_transaction(deserial, packet);
-    //BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
-}
-
 BOOST_AUTO_TEST_CASE(junk)
 {
     data_chunk junk = decode_hex(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
     transaction_type tx;
-    satoshi_load(junk.begin(), junk.end(), tx);
+    //satoshi_load(junk.begin(), junk.end(), tx);
 }
 

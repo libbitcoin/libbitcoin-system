@@ -134,7 +134,7 @@ void satoshi_load(const Iterator first, const Iterator last,
 } // libbitcoin
 
 #include <bitcoin/impl/serialize/misc.ipp>
-#include <bitcoin/impl/serialize/script.ipp>
+#include <bitcoin/impl/serialize/block.ipp>
 
 #endif
 
