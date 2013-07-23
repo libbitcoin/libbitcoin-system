@@ -29,7 +29,8 @@ Services implement thread-safe interfaces as a strict rule. Tasks are submitted
 to services and upon completion, your program will be notified. Services are
 self contained units and are locally encapsulated. They implement an interface
 for which various implementations may exist- the blockchain service has an
-implementation for BerkeleyDB and LevelDB.
+implementation for `LevelDB <http://code.google.com/p/leveldb/>`_ and
+`BerkeleyDB <http://www.oracle.com/us/products/database/berkeley-db/overview/index.html>`_.
 
 There are two basic service actions in libbitcoin:
 

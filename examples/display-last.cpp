@@ -8,7 +8,7 @@ blockchain* chain = nullptr;
 
 // Completion handler for when the blockchain has finished initializing.
 void blockchain_started(const std::error_code& ec);
-// Fetch tbe last block now that we have the height.
+// Fetch the last block now that we have the height.
 void height_fetched(const std::error_code& ec, size_t last_height);
 // Result: print the block header.
 void display_block_header(const std::error_code& ec,
