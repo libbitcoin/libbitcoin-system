@@ -89,7 +89,8 @@ void satoshi_load(const Iterator first, const Iterator last,
 {
     auto deserial = make_deserializer(first, last);
     read_transaction(deserial, packet);
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+    // Only true for valid transaction streams.
+    //BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
 }
 
 size_t satoshi_raw_size(const block_header_type& packet);
@@ -117,6 +118,7 @@ void satoshi_load(const Iterator first, const Iterator last,
     packet.timestamp = deserial.read_4_bytes();
     packet.bits = deserial.read_4_bytes();
     packet.nonce = deserial.read_4_bytes();
+    BITCOIN_ASSERT(std::distance(first, deserial.iterator()) == 80);
 }
 
 const std::string satoshi_command(const block_type&);

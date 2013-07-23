@@ -49,6 +49,6 @@ BOOST_AUTO_TEST_CASE(junk)
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
     transaction_type tx;
-    //satoshi_load(junk.begin(), junk.end(), tx);
+    satoshi_load(junk.begin(), junk.end(), tx);
 }
 
