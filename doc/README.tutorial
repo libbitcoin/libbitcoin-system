@@ -1,4 +1,8 @@
-To generate the documentation install python-sphinx.
+You can view the libbitcoin documentation online:
+
+  http://libbitcoin.dyne.org/doc/
+
+If you prefer to generate the documentation install python-sphinx.
 
   $ cd sphinx
   $ make html

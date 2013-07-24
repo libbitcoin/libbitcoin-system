@@ -9,27 +9,25 @@ are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.  This file is offered as-is,
 without warranty of any kind.
 
-Ubuntu Instructions
-===================
+==========================
+Debian/Ubuntu Instructions
+==========================
 
-*Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of libboost-all-dev
+  VVVVVVVVVVV
+> Start Here! <
+  ^^^^^^^^^^^
 
-  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev libdb++-dev libprotobuf-dev pkg-config libcurl4-openssl-dev libleveldb-dev
+  $ sudo apt-get install build-essential autoconf libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev
   $ autoreconf -i
-  $ ./configure --enable-bdb --enable-leveldb
+  $ ./configure --enable-leveldb
   $ make
   $ sudo make install
+  $ sudo ldconfig
 
-pkg-config can be invoked to get the neccessary compile and build flags.
+libbitcoin is now installed in /usr/local/.
 
-  $ pkg-config --cflags --libs libbitcoin
-
-To run the protocol test program:
-
-  $ mkdir -p obj/ bin/tests/
-  $ make -f development-makefile protst
-  $ export LD_LIBRARY_PATH=/usr/local/lib
-  $ ./bin/tests/protst
+* Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of
+  libboost-all-dev above.
 
 Basic Installation
 ==================
