@@ -31,7 +31,8 @@ doc_DATA = README INSTALL COPYING doc/README.tutorial
 #    doc/sphinx/examples/display-last.rst \
 #    doc/sphinx/examples/proto.rst
 
-bin_DATA = bin/download-blockchain.sh
+bin_SCRIPTS = bin/download-blockchain.sh
+
 pkgconfig_DATA = libbitcoin.pc
 
 SUBDIRS = include/bitcoin src
