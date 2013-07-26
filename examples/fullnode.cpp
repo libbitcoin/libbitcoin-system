@@ -242,7 +242,13 @@ int main()
 
     fullnode app;
     app.start();
-    std::cin.get();
+    while (true)
+    {
+        std::string addr;
+        std::getline(std::cin, addr);
+        if (addr == "stop")
+            break;
+    }
     app.stop();
 
     return 0;
