@@ -10,7 +10,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 
-void output_to_file(std::ofstream& file, log_level level,
+void log_to_file(std::ofstream& file, log_level level,
     const std::string& domain, const std::string& body)
 {
     if (body.empty())
@@ -20,7 +20,7 @@ void output_to_file(std::ofstream& file, log_level level,
         file << " [" << domain << "]";
     file << ": " << body << std::endl;
 }
-void output_cerr_and_file(std::ofstream& file, log_level level,
+void log_to_both(std::ostream& device, std::ofstream& file, log_level level,
     const std::string& domain, const std::string& body)
 {
     if (body.empty())
@@ -30,7 +30,29 @@ void output_cerr_and_file(std::ofstream& file, log_level level,
     if (!domain.empty())
         output << " [" << domain << "]";
     output << ": " << body;
-    std::cerr << output.str() << std::endl;
+    device << output.str() << std::endl;
+}
+
+void output_file(std::ofstream& file, log_level level,
+    const std::string& domain, const std::string& body)
+{
+    log_to_file(file, level, domain, body);
+}
+void output_both(std::ofstream& file, log_level level,
+    const std::string& domain, const std::string& body)
+{
+    log_to_both(std::cout, file, level, domain, body);
+}
+
+void error_file(std::ofstream& file, log_level level,
+    const std::string& domain, const std::string& body)
+{
+    log_to_file(file, level, domain, body);
+}
+void error_both(std::ofstream& file, log_level level,
+    const std::string& domain, const std::string& body)
+{
+    log_to_both(std::cerr, file, level, domain, body);
 }
 
 class fullnode
@@ -191,7 +213,7 @@ void fullnode::new_unconfirm_valid_tx(
     }
     else
     {
-        auto l = log_info();
+        auto l = log_debug();
         l << "Accepted transaction ";
         if (!unconfirmed.empty())
         {
@@ -208,15 +230,15 @@ int main()
 {
     std::ofstream outfile("debug.log"), errfile("error.log");
     log_debug().set_output_function(
-        std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+        std::bind(output_file, std::ref(outfile), _1, _2, _3));
     log_info().set_output_function(
-        std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+        std::bind(output_both, std::ref(outfile), _1, _2, _3));
     log_warning().set_output_function(
-        std::bind(output_to_file, std::ref(errfile), _1, _2, _3));
+        std::bind(error_file, std::ref(errfile), _1, _2, _3));
     log_error().set_output_function(
-        std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
+        std::bind(error_both, std::ref(errfile), _1, _2, _3));
     log_fatal().set_output_function(
-        std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
+        std::bind(error_both, std::ref(errfile), _1, _2, _3));
 
     fullnode app;
     app.start();
