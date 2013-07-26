@@ -1,6 +1,7 @@
 #include <bitcoin/format.hpp>
 
 #include <boost/algorithm/string.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -21,6 +22,17 @@ std::ostream& operator<<(std::ostream& stream, const short_hash& hash)
 {
     stream << encode_hex(hash);
     return stream;
+}
+
+template <typename Point>
+std::ostream& concat_point(std::ostream& stream, const Point& point)
+{
+    stream << point.hash << ":" << point.index;
+    return stream;
+}
+std::ostream& operator<<(std::ostream& stream, const output_point& point)
+{
+    return concat_point(stream, point);
 }
 
 data_chunk decode_hex(std::string hex_str)

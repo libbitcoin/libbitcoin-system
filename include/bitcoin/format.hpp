@@ -10,6 +10,11 @@
 
 namespace libbitcoin {
 
+// Forwarding definitions because primitives.hpp depends on this header.
+struct output_point;
+// We don't need a stream operator for input_point:
+typedef output_point input_point;
+
 template<typename D, typename T>
 void extend_data(D& chunk, const T& other)
 {
@@ -71,6 +76,7 @@ std::string encode_hex(T data)
 std::ostream& operator<<(std::ostream& stream, const data_chunk& data);
 std::ostream& operator<<(std::ostream& stream, const hash_digest& hash);
 std::ostream& operator<<(std::ostream& stream, const short_hash& hash);
+std::ostream& operator<<(std::ostream& stream, const output_point& point);
 
 data_chunk decode_hex(std::string hex_str);
 
