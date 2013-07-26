@@ -64,6 +64,8 @@ public:
     // It's an error to join() a thread from inside it.
     void stop();
 
+    transaction_indexer& txidx();
+
 private:
     void handle_start(const std::error_code& ec);
 
@@ -89,6 +91,7 @@ private:
     leveldb_blockchain chain_;
     poller poller_;
     transaction_pool txpool_;
+    transaction_indexer txidx_;
     // Mac OSX needs the bc:: namespace qualifier to compile.
     // Other systems should be OK.
     bc::session session_;
@@ -104,7 +107,7 @@ fullnode::fullnode()
     // Blockchain database service.
     chain_(disk_pool_),
     // Poll new blocks, and transaction memory pool.
-    poller_(mem_pool_, chain_), txpool_(mem_pool_, chain_),
+    poller_(mem_pool_, chain_), txpool_(mem_pool_, chain_), txidx_(mem_pool_),
     // Session manager service. Convenience wrapper.
     session_(net_pool_, {
         handshake_, protocol_, chain_, poller_, txpool_})
@@ -156,6 +159,11 @@ void fullnode::stop()
     chain_.stop();
 }
 
+transaction_indexer& fullnode::txidx()
+{
+    return txidx_;
+}
+
 void fullnode::handle_start(const std::error_code& ec)
 {
     if (ec)
@@ -185,11 +193,19 @@ void fullnode::recv_tx(const std::error_code& ec,
         log_error() << "Receive transaction: " << ec.message();
         return;
     }
+    auto handle_deindex = [](const std::error_code& ec)
+        {
+            if (ec)
+                log_error() << "Deindex error: " << ec.message();
+        };
     // Called when the transaction becomes confirmed in a block.
-    auto handle_confirm = [](const std::error_code& ec)
+    auto handle_confirm = [this, tx, handle_deindex](
+        const std::error_code& ec)
         {
             if (ec)
                 log_error() << "Confirm error: " << ec.message();
+            else
+                txidx_.deindex(tx, handle_deindex);
         };
     // Validate the transaction from the network.
     // Attempt to store in the transaction pool and check the result.
@@ -204,6 +220,11 @@ void fullnode::new_unconfirm_valid_tx(
     const std::error_code& ec, const index_list& unconfirmed,
     const transaction_type& tx)
 {
+    auto handle_index = [](const std::error_code& ec)
+        {
+            if (ec)
+                log_error() << "Index error: " << ec.message();
+        };
     const hash_digest& tx_hash = hash_transaction(tx);
     if (ec)
     {
@@ -223,7 +244,24 @@ void fullnode::new_unconfirm_valid_tx(
             l << ") ";
         }
         l << tx_hash;
+        txidx_.index(tx, handle_index);
     }
+}
+
+void pool_addr_transactions(const std::error_code& ec,
+    const spend_info_list& spends, const output_info_list& outputs)
+{
+    if (ec)
+    {
+        log_error() << "Error querying address in memory pool:"
+            << ec.message();
+        return;
+    }
+    log_info() << "Query fine.";
+    for (const auto& spend: spends)
+        log_info() << spend.point << " -> " << spend.previous_output;
+    for (const auto& output: outputs)
+        log_info() << output.point << " -> " << output.value;
 }
 
 int main()
@@ -248,6 +286,13 @@ int main()
         std::getline(std::cin, addr);
         if (addr == "stop")
             break;
+        payment_address payaddr;
+        if (!payaddr.set_encoded(addr))
+        {
+            log_error() << "Skipping invalid Bitcoin address.";
+            continue;
+        }
+        app.txidx().query(payaddr, pool_addr_transactions);
     }
     app.stop();
 
