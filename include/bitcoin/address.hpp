@@ -77,7 +77,31 @@ bool extract(payment_address& address, const script& output_script);
 bool extract_input_address(
     payment_address& address, const script& input_script);
 
+bool operator==(const payment_address& lhs, const payment_address& rhs);
+
 } // namespace libbitcoin
+
+// Allow payment_address to be in indexed in std::*map classes.
+namespace std
+{
+    template <>
+    struct hash<libbitcoin::payment_address>
+    {
+        size_t operator()(const libbitcoin::payment_address& payaddr) const
+        {
+            using libbitcoin::short_hash;
+            using libbitcoin::short_hash_size;
+            std::string raw_addr;
+            raw_addr.resize(short_hash_size + 1);
+            raw_addr[0] = payaddr.version();
+            const short_hash& addr_hash = payaddr.hash();
+            std::copy(addr_hash.begin(), addr_hash.end(),
+                raw_addr.begin() + 1);
+            std::hash<std::string> hash_fn;
+            return hash_fn(raw_addr);
+        }
+    };
+}
 
 #endif
 

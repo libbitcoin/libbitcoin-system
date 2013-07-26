@@ -74,7 +74,7 @@ bool payment_address::set_encoded(const std::string& encoded_address)
     const data_chunk main_body(
         decoded_address.begin(), decoded_address.end() - 4);
     // verify checksum bytes
-    if (generate_sha256_checksum(main_body) != 
+    if (generate_sha256_checksum(main_body) !=
             cast_chunk<uint32_t>(checksum_bytes))
         return false;
     std::copy(main_body.begin() + 1, main_body.end(), hash_.begin());
@@ -203,6 +203,11 @@ bool extract_input_address(
     if (!set_public_key(address, pubkey))
         return false;
     return true;
+}
+
+bool operator==(const payment_address& lhs, const payment_address& rhs)
+{
+    return lhs.hash() == rhs.hash() && lhs.version() == rhs.version();
 }
 
 } // namespace libbitcoin
