@@ -181,6 +181,8 @@
 #include <bitcoin/utility/mnemonic.hpp>
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/transaction_pool.hpp>
+#include <bitcoin/transaction_indexer.hpp>
 #include <bitcoin/network/protocol.hpp>
 #include <bitcoin/threadpool.hpp>
 #ifdef LEVELDB_ENABLED

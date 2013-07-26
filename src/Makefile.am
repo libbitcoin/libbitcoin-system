@@ -33,7 +33,8 @@ libbitcoin_la_SOURCES = \
 	constants.cpp \
 	blockchain/organizer.cpp \
 	blockchain/blockchain.cpp \
-	transaction_pool.cpp
+	transaction_pool.cpp \
+	transaction_indexer.cpp
 
 if DO_LEVELDB
 libbitcoin_la_SOURCES += \

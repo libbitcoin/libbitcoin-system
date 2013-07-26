@@ -102,7 +102,7 @@ public:
      * @param[in]   handle_fetch      Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
-     *      const std::error_code& ec,      // Status of operation
+     *      const std::error_code& ec,  // Status of operation
      *      const transaction_type& tx  // Transaction
      *  );
      * @endcode
