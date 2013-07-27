@@ -262,11 +262,11 @@ void leveldb_blockchain::fetch(perform_read_functor perform_read)
 bool get_block_header_impl(size_t height,
     leveldb_common_ptr common, leveldb_block_info& blk)
 {
-} 
+}
 bool get_block_header_impl(const hash_digest& hash,
     leveldb_common_ptr common, leveldb_block_info& blk)
 {
-} 
+}
 
 void leveldb_blockchain::fetch_block_header(size_t height,
     fetch_handler_block_header handle_fetch)
@@ -495,7 +495,7 @@ private:
         serial.write_byte(address.version());
         serial.write_short_hash(address.hash());
         BITCOIN_ASSERT(
-            std::distance(raw_address_.begin(), serial.iterator()) == 
+            std::distance(raw_address_.begin(), serial.iterator()) ==
             1 + short_hash_size);
     }
 
@@ -520,7 +520,7 @@ private:
 
     uint32_t checksum_;
 };
-    
+
 class outpoint_iterator
   : public point_iterator
 {
@@ -562,6 +562,7 @@ private:
 };
 
 constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
 
 class inpoint_iterator
   : public point_iterator
@@ -576,21 +577,30 @@ public:
         if (!valid())
             return {null_hash, max_index};
         // Valid iterator so load the data.
-        if (height_ = max_index)
+        if (dirty_)
+        {
             load();
+            dirty_ = false;
+        }
         // The next spend in the iterator is not for this output point.
         if (checksum() != credit_checksum)
             return {null_hash, max_index};
         // Checksums match. Spend for this output exists.
         input_point result = inpoint_;
         ++(*this);
-        // Dirty height so we reload next time.
-        height_ = max_index;
         return result;
     }
-    uint32_t height() const
+    uint32_t height(uint32_t credit_checksum) const
     {
+        if (checksum() != credit_checksum)
+            return max_height;
         return height_;
+    }
+
+    void make_dirty()
+    {
+        // Dirty so we reload next time.
+        dirty_ = true;
     }
 
 protected:
@@ -607,6 +617,7 @@ protected:
     }
 
 private:
+    bool dirty_ = true;
     input_point inpoint_;
     uint32_t height_ = max_index;
 };
@@ -637,8 +648,9 @@ bool leveldb_blockchain::do_fetch_history(const payment_address& address,
             credit_it.height(),
             credit_it.value(),
             debit_it.next_inpoint(checksum),
-            debit_it.height()
+            debit_it.height(checksum)
         };
+        debit_it.make_dirty();
         BITCOIN_ASSERT(row.spend.hash == null_hash ||
             row.spend_height >= row.output_height);
         // Filter entries below the from_height.
