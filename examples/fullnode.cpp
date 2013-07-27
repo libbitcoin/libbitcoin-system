@@ -31,6 +31,7 @@ void log_to_both(std::ostream& device, std::ofstream& file, log_level level,
         output << " [" << domain << "]";
     output << ": " << body;
     device << output.str() << std::endl;
+    file << output.str() << std::endl;
 }
 
 void output_file(std::ofstream& file, log_level level,
