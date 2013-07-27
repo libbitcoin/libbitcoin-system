@@ -1,9 +1,14 @@
 #include <bitcoin/transaction_indexer.hpp>
 
+#include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
+
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
 
 namespace posix_time = boost::posix_time;
 using posix_time::time_duration;
@@ -182,6 +187,78 @@ void transaction_indexer::periodic_update()
     }
     // Now actually erase the expired entries from the queue.
     expiry_queue_.erase_after(expiry_queue_.before_begin(), unexpired_begin);
+}
+
+void blockchain_history_fetched(const std::error_code& ec,
+    const blockchain::history_list& history,
+    transaction_indexer& indexer, const payment_address& address,
+    blockchain::fetch_handler_history handle_fetch);
+void indexer_history_fetched(const std::error_code& ec,
+    const spend_info_list& spends, const output_info_list& outputs,
+    blockchain::history_list history,
+    blockchain::fetch_handler_history handle_fetch);
+// Fetch the history first from the blockchain and then from the indexer.
+void fetch_history(blockchain& chain, transaction_indexer& indexer,
+    const payment_address& address,
+    blockchain::fetch_handler_history handle_fetch, size_t from_height)
+{
+    chain.fetch_history(address,
+        std::bind(blockchain_history_fetched, _1, _2,
+            std::ref(indexer), address, handle_fetch), from_height);
+}
+void blockchain_history_fetched(const std::error_code& ec,
+    const blockchain::history_list& history,
+    transaction_indexer& indexer, const payment_address& address,
+    blockchain::fetch_handler_history handle_fetch)
+{
+    if (ec)
+        handle_fetch(ec, blockchain::history_list());
+    else
+        indexer.query(address,
+            std::bind(indexer_history_fetched, _1, _2, _3,
+                history, handle_fetch));
+}
+void indexer_history_fetched(const std::error_code& ec,
+    const spend_info_list& spends, const output_info_list& outputs,
+    blockchain::history_list history,
+    blockchain::fetch_handler_history handle_fetch)
+{
+    if (ec)
+    {
+        handle_fetch(ec, blockchain::history_list());
+        return;
+    }
+    // Just add in outputs.
+    for (const output_info_type& output_info: outputs)
+    {
+        history.emplace_back(blockchain::history_row{
+            output_info.point,
+            0,
+            output_info.value,
+            {null_hash, max_index},
+            0
+        });
+    }
+    // Now mark spends.
+    for (const spend_info_type& spend_info: spends)
+    {
+        // Iterate history looking for the output we need.
+        bool found = false;
+        for (blockchain::history_row& row: history)
+        {
+            if (row.output != spend_info.previous_output)
+                continue;
+            BITCOIN_ASSERT((
+                row.spend == input_point{null_hash, max_index}) &&
+                row.spend_height == 0);
+            row.spend = spend_info.point;
+            row.spend_height = 0;
+            found = true;
+            break;
+        }
+        BITCOIN_ASSERT_MSG(found, "Couldn't find output for adding spend");
+    }
+    handle_fetch(std::error_code(), history);
 }
 
 } // namespace libbitcoin

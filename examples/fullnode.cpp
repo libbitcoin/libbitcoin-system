@@ -64,7 +64,8 @@ public:
     // It's an error to join() a thread from inside it.
     void stop();
 
-    transaction_indexer& txidx();
+    blockchain& chain();
+    transaction_indexer& indexer();
 
 private:
     void handle_start(const std::error_code& ec);
@@ -159,7 +160,11 @@ void fullnode::stop()
     chain_.stop();
 }
 
-transaction_indexer& fullnode::txidx()
+blockchain& fullnode::chain()
+{
+    return chain_;
+}
+transaction_indexer& fullnode::indexer()
 {
     return txidx_;
 }
@@ -248,20 +253,27 @@ void fullnode::new_unconfirm_valid_tx(
     }
 }
 
-void pool_addr_transactions(const std::error_code& ec,
-    const spend_info_list& spends, const output_info_list& outputs)
+void history_fetched(const std::error_code& ec,
+    const blockchain::history_list& history)
 {
     if (ec)
     {
-        log_error() << "Error querying address in memory pool:"
-            << ec.message();
+        log_error() << "Failed to fetch history: " << ec.message();
         return;
     }
     log_info() << "Query fine.";
-    for (const auto& spend: spends)
-        log_info() << spend.point << " -> " << spend.previous_output;
-    for (const auto& output: outputs)
-        log_info() << output.point << " -> " << output.value;
+    for (const auto& row: history)
+    {
+        log_info() << "output: " << row.output
+            << "  height: " << row.output_height;
+        log_info() << "value:  " << row.value;
+        auto l = log_info();
+        l << "spend:  ";
+        if (row.spend.hash == null_hash)
+            l << "Unspent";
+        else
+            l << row.spend << "  height: " << row.spend_height;
+    }
 }
 
 int main()
@@ -292,7 +304,8 @@ int main()
             log_error() << "Skipping invalid Bitcoin address.";
             continue;
         }
-        app.txidx().query(payaddr, pool_addr_transactions);
+        fetch_history(app.chain(), app.indexer(),
+            payaddr, history_fetched);
     }
     app.stop();
 

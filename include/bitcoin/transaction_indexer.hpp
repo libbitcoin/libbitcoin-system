@@ -9,6 +9,7 @@
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/threadpool.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/blockchain/blockchain.hpp>
 
 namespace libbitcoin {
 
@@ -148,6 +149,10 @@ private:
     // be in a block at all.
     const time_duration transaction_lifetime_ = hours(1);
 };
+
+void fetch_history(blockchain& chain, transaction_indexer& indexer,
+    const payment_address& address,
+    blockchain::fetch_handler_history handle_fetch, size_t from_height=0);
 
 } // namespace libbitcoin
 

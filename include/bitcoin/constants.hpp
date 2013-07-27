@@ -24,7 +24,7 @@ constexpr uint32_t locktime_threshold = 500000000;
 
 constexpr uint64_t max_money_recursive(uint64_t current)
 {
-    return (current > 0) ? 
+    return (current > 0) ?
         current + max_money_recursive(current >> 1) : 0;
 }
 
@@ -38,13 +38,15 @@ constexpr uint64_t max_money()
     return reward_interval * max_money_recursive(coin_price(block_reward));
 }
 
-const hash_digest null_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+const hash_digest null_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 const short_hash null_short_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 constexpr uint32_t max_bits = 0x1d00ffff;
 big_number max_target();
+
+constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
 
 // Every two weeks we readjust target
 constexpr uint64_t target_timespan = 14 * 24 * 60 * 60;

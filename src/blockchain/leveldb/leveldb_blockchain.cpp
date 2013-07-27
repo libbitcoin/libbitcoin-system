@@ -561,9 +561,6 @@ private:
     uint32_t height_;
 };
 
-constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
-constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
-
 class inpoint_iterator
   : public point_iterator
 {
@@ -593,7 +590,7 @@ public:
     uint32_t height(uint32_t credit_checksum) const
     {
         if (checksum() != credit_checksum)
-            return max_height;
+            return 0;
         return height_;
     }
 
