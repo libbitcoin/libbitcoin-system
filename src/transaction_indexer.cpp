@@ -231,6 +231,12 @@ void indexer_history_fetched(const std::error_code& ec,
     // Just add in outputs.
     for (const output_info_type& output_info: outputs)
     {
+        // Compiler should be smart enough to optimise this out
+        // if contains an empty body.
+        for (const blockchain::history_row& row: history)
+        {
+            BITCOIN_ASSERT(row.output != output_info.point);
+        }
         history.emplace_back(blockchain::history_row{
             output_info.point,
             0,
