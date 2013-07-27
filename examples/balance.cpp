@@ -61,7 +61,7 @@ int main(int argc, char** argv)
     threadpool pool(1);
     leveldb_blockchain chain(pool);
     c = &chain;
-    chain.start("database", blockchain_started);
+    chain.start("blockchain", blockchain_started);
     pool.shutdown();
     pool.join();
     chain.stop();

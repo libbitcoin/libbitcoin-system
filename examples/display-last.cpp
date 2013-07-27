@@ -1,5 +1,5 @@
 /*
-  Display info from the last block in our blockchain at "./database/"
+  Display info from the last block in our blockchain at "./blockchain/"
 */
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
@@ -83,7 +83,7 @@ int main()
     // Initialize our global 'chain' pointer from above.
     chain = &ldb_chain;
     // Start the database using its implementation specific method.
-    ldb_chain.start("database", blockchain_started);
+    ldb_chain.start("blockchain", blockchain_started);
     // Don't wait after all current operations have completed.
     pool.shutdown();
     // Join them one by one.

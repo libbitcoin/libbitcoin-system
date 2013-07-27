@@ -1,6 +1,6 @@
 /*
   Full node implementation. Expects the blockchain to be present in
-  "./database/" and initialized using ./initchain
+  "./blockchain/" and initialized using ./initchain
 */
 #include <future>
 #include <bitcoin/bitcoin.hpp>
@@ -129,7 +129,7 @@ void fullnode::start()
         {
             ec_chain.set_value(ec);
         };
-    chain_.start("database", blockchain_started);
+    chain_.start("blockchain", blockchain_started);
     std::error_code ec = ec_chain.get_future().get();
     if (ec)
     {
