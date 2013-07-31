@@ -222,8 +222,8 @@ void leveldb_blockchain::import(const block_type& import_block,
     size_t height, import_block_handler handle_import)
 {
     strand_.push(
-        std::bind(&leveldb_blockchain::do_import,
-            this, import_block, height, handle_import));
+        &leveldb_blockchain::do_import,
+            this, import_block, height, handle_import);
 }
 void leveldb_blockchain::do_import(const block_type& import_block,
     size_t height, import_block_handler handle_import)

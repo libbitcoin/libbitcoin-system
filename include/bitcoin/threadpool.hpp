@@ -80,6 +80,18 @@ public:
      */
     void join();
 
+    template <typename... Args>
+    void push(Args&&... args)
+    {
+        ios_.post(std::bind(std::forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    void dispatch(Args&&... args)
+    {
+        ios_.dispatch(std::bind(std::forward<Args>(args)...));
+    }
+
     /**
      * Underlying boost::io_service object.
      */
@@ -93,6 +105,21 @@ private:
     io_service ios_;
     io_service::work* work_;
     std::vector<std::thread> threads_;
+};
+
+
+template <typename Handler>
+struct wrapped_handler_impl
+{
+    Handler handler;
+    io_service::strand& strand;
+
+    template <typename... Args>
+    void operator()(Args&&... args)
+    {
+        strand.dispatch(std::bind(
+            handler, std::forward<Args>(args)...));
+    }
 };
 
 /**
@@ -111,6 +138,25 @@ public:
     async_strand(threadpool& pool);
 
     /*
+     * wrap() returns a new handler that guarantees that the handler it
+     * encapsulates will never execute at the same time as another handler
+     * passing through this class.
+     *
+     * @param[in]   handler     Handler to execute operation.
+     * @code
+     *  void handler();
+     * @endcode
+     */
+    template <typename... Args>
+    auto wrap(Args&&... args)
+      -> wrapped_handler_impl<
+            decltype(std::bind(std::forward<Args>(args)...))>
+    {
+        auto handler = std::bind(std::forward<Args>(args)...);
+        return {handler, strand_};
+    }
+
+    /*
      * push() guarantees that any handlers passed to it will never execute
      * at the same time.
      *
@@ -119,10 +165,10 @@ public:
      *  void handler();
      * @endcode
      */
-    template <typename Handler>
-    void push(Handler handler)
+    template <typename... Args>
+    void push(Args&&... args)
     {
-        ios_.post(strand_.wrap(handler));
+        ios_.post(strand_.wrap(std::bind(std::forward<Args>(args)...)));
     }
 
     /*
@@ -136,10 +182,10 @@ public:
      *  void handler();
      * @endcode
      */
-    template <typename Handler>
-    void queue(Handler handler)
+    template <typename... Args>
+    void queue(Args&&... args)
     {
-        strand_.post(handler);
+        strand_.post(std::bind(std::forward<Args>(args)...));
     }
 
 private:

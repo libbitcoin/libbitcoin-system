@@ -17,8 +17,7 @@ hosts::hosts(threadpool& pool, size_t capacity)
 void hosts::load(const std::string& filename, load_handler handle_load)
 {
     strand_.push(
-        std::bind(&hosts::do_load,
-            this, filename, handle_load));
+        &hosts::do_load, this, filename, handle_load);
 }
 void hosts::do_load(const std::string& filename, load_handler handle_load)
 {
