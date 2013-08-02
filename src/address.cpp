@@ -145,10 +145,8 @@ bool set_public_key(payment_address& address, const data_chunk& public_key)
 
 bool set_script(payment_address& address, const script& eval_script)
 {
-    if (eval_script.operations().empty())
-        return false;
-    return set_script_hash(address,
-        generate_ripemd_hash(eval_script.operations().back().data));
+    return address.set(payment_type::script_hash,
+        generate_ripemd_hash(save_script(eval_script)));
 }
 
 bool extract(payment_address& address, const script& output_script)
