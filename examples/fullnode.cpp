@@ -234,7 +234,7 @@ void fullnode::new_unconfirm_valid_tx(
     const hash_digest& tx_hash = hash_transaction(tx);
     if (ec)
     {
-        log_error()
+        log_warning()
             << "Error storing memory pool transaction "
             << tx_hash << ": " << ec.message();
     }
