@@ -150,10 +150,12 @@ typedef std::vector<operation> operation_stack;
 
 enum class payment_type
 {
-    pubkey,
-    pubkey_hash,
-    script_hash,
-    multisig,
+    pubkey,             // Pubkey and checksig in output.
+    pubkey_hash,        // Payment to hash of pubkey
+    script_hash,        // Payment to multisig address
+    multisig,           // Multisig
+    script_code_sig,    // BIP16 input script code.
+    pubkey_hash_sig,    // Pubkey hash input script.
     non_standard
 };
 
@@ -192,7 +194,7 @@ private:
     bool run(const transaction_type& parent_tx, uint32_t input_index);
     bool next_step(operation_stack::iterator it,
         const transaction_type& parent_tx, uint32_t input_index);
-    bool run_operation(const operation& op, 
+    bool run_operation(const operation& op,
         const transaction_type& parent_tx, uint32_t input_index);
 
     // Used by add, sub, mul, div, mod, lshift, rshift, booland, boolor,

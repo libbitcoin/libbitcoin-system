@@ -864,7 +864,7 @@ inline void nullify_input_sequences(
 
 inline hash_digest one_hash()
 {
-    return hash_digest{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+    return hash_digest{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 }
 
@@ -1047,7 +1047,7 @@ bool script::op_checkmultisigverify(
     return true;
 }
 
-bool script::run_operation(const operation& op, 
+bool script::run_operation(const operation& op,
         const transaction_type& parent_tx, uint32_t input_index)
 {
     switch (op.code)
@@ -1362,6 +1362,32 @@ bool is_multisig_type(const operation_stack& ops)
 {
     return false;
 }
+bool is_pubkey_hash_sig_type(const operation_stack& ops)
+{
+    if (ops.size() != 2 || !is_push_only(ops))
+        return false;
+    const data_chunk& last_data = ops.back().data;
+    if (last_data.empty())
+        return false;
+    // Test if last item is a public key.
+    elliptic_curve_key tmp_key;
+    return tmp_key.set_public_key(last_data);
+}
+bool is_script_code_sig_type(const operation_stack& ops)
+{
+    if (ops.size() < 2 || !is_push_only(ops))
+        return false;
+    const data_chunk& last_data = ops.back().data;
+    if (last_data.empty())
+        return false;
+    script script_code = parse_script(last_data);
+    const operation_stack& code_ops = script_code.operations();
+    // Minimum size is 4
+    // M [SIG]... N checkmultisig
+    return code_ops.size() >= 4 &&
+        count_non_push(code_ops) == 1 &&
+        code_ops.back().code == opcode::checkmultisig;
+}
 
 payment_type script::type() const
 {
@@ -1373,6 +1399,10 @@ payment_type script::type() const
         return payment_type::script_hash;
     if (is_multisig_type(operations_))
         return payment_type::multisig;
+    if (is_pubkey_hash_sig_type(operations_))
+        return payment_type::pubkey_hash_sig;
+    if (is_script_code_sig_type(operations_))
+        return payment_type::script_code_sig;
     return payment_type::non_standard;
 }
 
@@ -1842,7 +1872,7 @@ opcode string_to_opcode(const std::string& code_repr)
         return opcode::op_nop10;
     else if (code_repr == "raw_data")
         return opcode::raw_data;
-    // ERROR: unknown... 
+    // ERROR: unknown...
     return opcode::bad_operation;
 }
 
@@ -1923,10 +1953,7 @@ bool read_push_data(Iterator& it, const Iterator& raw_script_end,
     {
         ++it;
         if (it == raw_script_end)
-        {
-            log_warning(LOG_SCRIPT) << "Premature end of script.";
             return false;
-        }
         op_data.push_back(*it);
     }
     return true;
