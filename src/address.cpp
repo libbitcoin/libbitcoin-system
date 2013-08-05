@@ -149,34 +149,50 @@ bool set_script(payment_address& address, const script& eval_script)
         generate_ripemd_hash(save_script(eval_script)));
 }
 
-bool extract(payment_address& address, const script& output_script)
+bool extract(payment_address& address, const script& scr)
 {
     // Cast a data_chunk to a short_hash and set the address
     auto set_hash_data =
-        [&address](payment_type type, const data_chunk& raw_hash)
+        [&address](payment_type pay_type, const data_chunk& raw_hash)
         {
             short_hash hash_data;
             BITCOIN_ASSERT(raw_hash.size() == hash_data.size());
             std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
-            address.set(type, hash_data);
+            address.set(pay_type, hash_data);
         };
-    switch (output_script.type())
+    const operation_stack& ops = scr.operations();
+    payment_type pay_type = scr.type();
+    switch (pay_type)
     {
         case payment_type::pubkey:
-            BITCOIN_ASSERT(output_script.operations().size() == 2);
-            set_public_key(address, output_script.operations()[0].data);
+            BITCOIN_ASSERT(ops.size() == 2);
+            set_public_key(address, ops[0].data);
             return true;
 
         case payment_type::pubkey_hash:
-            BITCOIN_ASSERT(output_script.operations().size() == 5);
-            set_hash_data(output_script.type(),
-                output_script.operations()[2].data);
+            BITCOIN_ASSERT(ops.size() == 5);
+            set_hash_data(pay_type, ops[2].data);
             return true;
 
         case payment_type::script_hash:
-            BITCOIN_ASSERT(output_script.operations().size() == 3);
-            set_hash_data(output_script.type(),
-                output_script.operations()[1].data);
+            BITCOIN_ASSERT(ops.size() == 3);
+            set_hash_data(pay_type, ops[1].data);
+            return true;
+
+        case payment_type::multisig:
+            // Unimplemented...
+            return false;
+
+        case payment_type::pubkey_hash_sig:
+            BITCOIN_ASSERT(ops.size() == 2);
+            set_public_key(address, ops[1].data);
+            return true;
+
+        case payment_type::script_code_sig:
+            // Should have a minimum of 4 ops.
+            BITCOIN_ASSERT(ops.size() >= 4);
+            set_script_hash(address,
+                generate_ripemd_hash(ops.back().data));
             return true;
 
         default:

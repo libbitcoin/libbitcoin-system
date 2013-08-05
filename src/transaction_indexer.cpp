@@ -68,7 +68,7 @@ void transaction_indexer::do_index(const transaction_type& tx,
         const transaction_input_type& input = tx.inputs[i];
         payment_address payaddr;
         // Nothing to see here folks. Move along.
-        if (!extract_input_address(payaddr, input.input_script))
+        if (!extract(payaddr, input.input_script))
             continue;
         spends_map_.emplace(payaddr,
             spend_info_type{input_point{tx_hash, i}, input.previous_output});
@@ -115,7 +115,7 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
         const transaction_input_type& input = tx.inputs[i];
         payment_address payaddr;
         // Nothing to see here folks. Move along.
-        if (!extract_input_address(payaddr, input.input_script))
+        if (!extract(payaddr, input.input_script))
             continue;
         auto it = find_entry(payaddr,
             input_point{tx_hash, i}, spends_map_);

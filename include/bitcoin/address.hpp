@@ -66,16 +66,10 @@ bool set_public_key(payment_address& address, const data_chunk& public_key);
 bool set_script(payment_address& address, const script& eval_script);
 
 /**
- * Extract a Bitcoin address from an output script.
+ * Extract a Bitcoin address from an input or output script.
  * Returns false on failure.
  */
-bool extract(payment_address& address, const script& output_script);
-/**
- * Extract a Bitcoin address from an input script.
- * Returns false on failure.
- */
-bool extract_input_address(
-    payment_address& address, const script& input_script);
+bool extract(payment_address& address, const script& scr);
 
 bool operator==(const payment_address& lhs, const payment_address& rhs);
 

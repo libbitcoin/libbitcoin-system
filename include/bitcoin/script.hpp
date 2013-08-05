@@ -154,8 +154,8 @@ enum class payment_type
     pubkey_hash,        // Payment to hash of pubkey
     script_hash,        // Payment to multisig address
     multisig,           // Multisig
-    script_code_sig,    // BIP16 input script code.
     pubkey_hash_sig,    // Pubkey hash input script.
+    script_code_sig,    // BIP16 input script code.
     non_standard
 };
 
