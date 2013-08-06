@@ -189,8 +189,8 @@ bool extract(payment_address& address, const script& scr)
             return true;
 
         case payment_type::script_code_sig:
-            // Should have a minimum of 4 ops.
-            BITCOIN_ASSERT(ops.size() >= 4);
+            // Should have at least 1 sig and the script code.
+            BITCOIN_ASSERT(ops.size() > 1);
             set_script_hash(address,
                 generate_ripemd_hash(ops.back().data));
             return true;
