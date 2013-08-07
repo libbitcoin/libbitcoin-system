@@ -169,10 +169,6 @@ public:
 
     payment_type type() const;
 
-    /**
-     * Does this script have an operations?
-     */
-    bool empty() const;
     const operation_stack& operations() const;
 
     static hash_digest generate_signature_hash(
@@ -287,14 +283,6 @@ std::string pretty(const script& source_script);
 std::ostream& operator<<(std::ostream& stream, const script& source_script);
 
 script coinbase_script(const data_chunk& raw_script);
-/**
- * Returns an empty script on failure.
- * @code
- *   script parsed = parse_script(data);
- *   if (parsed.empty())
- *     // Parsing failed...
- * @endcode
- */
 script parse_script(const data_chunk& raw_script);
 data_chunk save_script(const script& scr);
 size_t script_size(const script& scr);

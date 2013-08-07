@@ -57,10 +57,6 @@ void script::push_operation(operation oper)
     operations_.push_back(oper);
 }
 
-bool script::empty() const
-{
-    return operations_.empty();
-}
 const operation_stack& script::operations() const
 {
     return operations_;
@@ -152,7 +148,16 @@ bool script::run(script input_script, const transaction_type& parent_tx,
             return false;
         // Load last input_script stack item as a script
         data_stack eval_stack = input_script.stack_;
-        script eval_script = parse_script(input_script.stack_.back());
+        script eval_script;
+        try
+        {
+            eval_script = parse_script(input_script.stack_.back());
+        }
+        catch (end_of_stream)
+        {
+            // Invalid script.
+            return false;
+        }
         // Pop last item and copy as starting stack to eval script
         eval_stack.pop_back();
         eval_script.stack_ = eval_stack;
@@ -1383,7 +1388,16 @@ bool is_script_code_sig_type(const operation_stack& ops)
     const data_chunk& last_data = ops.back().data;
     if (last_data.empty())
         return false;
-    script script_code = parse_script(last_data);
+    script script_code;
+    try
+    {
+        script_code = parse_script(last_data);
+    }
+    catch (end_of_stream)
+    {
+        // Not a valid script.
+        return false;
+    }
     const operation_stack& code_ops = script_code.operations();
     // Minimum size is 4
     // M [SIG]... N checkmultisig
