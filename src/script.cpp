@@ -13,10 +13,9 @@
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/ripemd.hpp>
 #include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
-
-typedef boost::optional<size_t> optional_number;
 
 static const data_chunk stack_true_value{1};
 static const data_chunk stack_false_value;  // False is an empty
@@ -1903,42 +1902,6 @@ std::ostream& operator<<(std::ostream& stream, const script& source_script)
     return stream;
 }
 
-// Read next n bytes while advancing iterator
-// Used for seeing length of data to push to stack with pushdata2/4
-template <typename Iterator>
-inline data_chunk read_back_from_iterator(Iterator& it, size_t total)
-{
-    data_chunk number_bytes;
-    for (size_t i = 0; i < total; ++i)
-    {
-        ++it;
-        number_bytes.push_back(*it);
-    }
-    return number_bytes;
-}
-
-template <typename Iterator>
-optional_number number_of_bytes_from_opcode(
-    opcode code, uint8_t raw_byte, Iterator& it)
-{
-    switch (code)
-    {
-        case opcode::zero:
-        case opcode::special:
-            return raw_byte;
-        case opcode::pushdata1:
-            ++it;
-            return static_cast<uint8_t>(*it);
-        case opcode::pushdata2:
-            return cast_chunk<uint16_t>(read_back_from_iterator(it, 2));
-        case opcode::pushdata4:
-            return cast_chunk<uint32_t>(read_back_from_iterator(it, 4));
-        default:
-            return optional_number();
-    }
-    // Should never reach here!
-}
-
 script coinbase_script(const data_chunk& raw_script)
 {
     script script_object;
@@ -1949,43 +1912,52 @@ script coinbase_script(const data_chunk& raw_script)
     return script_object;
 }
 
-template <typename Iterator>
-bool read_push_data(Iterator& it, const Iterator& raw_script_end,
-    size_t read_n_bytes, data_chunk& op_data)
+// Differs from is_push in that we only check for a subset
+// of ops that will actually read data.
+bool must_read_data(opcode code)
 {
-    for (size_t byte_count = 0; byte_count < read_n_bytes; ++byte_count)
+    return code == opcode::special
+        || code == opcode::pushdata1
+        || code == opcode::pushdata2
+        || code == opcode::pushdata4;
+}
+
+template <typename Deserializer>
+size_t number_bytes_to_read(
+    opcode code, uint8_t raw_byte, Deserializer& deserial)
+{
+    switch (code)
     {
-        ++it;
-        if (it == raw_script_end)
-            return false;
-        op_data.push_back(*it);
+        case opcode::special:
+            return raw_byte;
+        case opcode::pushdata1:
+            return deserial.read_byte();
+        case opcode::pushdata2:
+            return deserial.read_2_bytes();
+        case opcode::pushdata4:
+            return deserial.read_4_bytes();
     }
-    return true;
+    BITCOIN_ASSERT_MSG(false, "Invalid opcode passed to function.");
 }
 
 script parse_script(const data_chunk& raw_script)
 {
     script script_object;
-    for (auto it = raw_script.begin(); it != raw_script.end(); ++it)
+    auto deserial = make_deserializer(raw_script.begin(), raw_script.end());
+    while (deserial.iterator() != raw_script.end())
     {
-        uint8_t raw_byte = *it;
+        uint8_t raw_byte = deserial.read_byte();
         operation op;
         op.code = static_cast<opcode>(raw_byte);
-        // raw_byte is unsigned so it's always >= 0
-        if (raw_byte == 0)
-            op.code = opcode::zero;
-        else if (0 < raw_byte && raw_byte <= 75)
+        BITCOIN_ASSERT(raw_byte != 0 || op.code == opcode::zero);
+        if (0 < raw_byte && raw_byte <= 75)
             op.code = opcode::special;
-        optional_number read_n_bytes =
-            number_of_bytes_from_opcode(op.code, raw_byte, it);
-        if (read_n_bytes && *read_n_bytes != 0)
+        if (must_read_data(op.code))
         {
-            // OP_0/OP_FALSE pushes a nothing to the stack
-            // op.data = data_chunk();
-            BITCOIN_ASSERT(read_n_bytes);
-            if (!read_push_data(it, raw_script.cend(),
-                    *read_n_bytes, op.data))
-                return script();
+            size_t read_n_bytes =
+                number_bytes_to_read(op.code, raw_byte, deserial);
+            op.data = deserial.read_data(read_n_bytes);
+            BITCOIN_ASSERT(read_n_bytes || op.data.empty());
         }
         script_object.push_operation(op);
     }
