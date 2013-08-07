@@ -58,6 +58,10 @@ void script::push_operation(operation oper)
     operations_.push_back(oper);
 }
 
+bool script::empty() const
+{
+    return operations_.empty();
+}
 const operation_stack& script::operations() const
 {
     return operations_;

@@ -106,3 +106,11 @@ BOOST_AUTO_TEST_CASE(tx)
     BOOST_REQUIRE(resave_2 == raw_tx_2);
 }
 
+BOOST_AUTO_TEST_CASE(script_parse_save)
+{
+    script psc = parse_script(decode_hex(
+        "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
+        "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
+        "b2c8d9febfb84d01"));
+}
+
