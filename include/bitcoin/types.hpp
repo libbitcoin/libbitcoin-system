@@ -3,6 +3,7 @@
 
 #include <boost/asio.hpp>
 #include <array>
+#include <atomic>
 #include <memory>
 #include <sstream>
 #include <iomanip>
