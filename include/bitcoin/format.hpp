@@ -86,9 +86,9 @@ data_chunk decode_hex(std::string hex_str);
 template <typename HashType>
 HashType decode_hex_digest(std::string hex_str)
 {
-    if (hex_str.size() != hash_digest_size * 2)
-        return null_hash;
     data_chunk raw_bytes = decode_hex(hex_str);
+    if (raw_bytes.size() != hash_digest_size)
+        return null_hash;
     HashType result;
     BITCOIN_ASSERT(raw_bytes.size() == result.size());
     std::copy(raw_bytes.begin(), raw_bytes.end(), result.begin());
