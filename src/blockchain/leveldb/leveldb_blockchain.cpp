@@ -622,12 +622,9 @@ private:
 void leveldb_blockchain::fetch_history(const payment_address& address,
     fetch_handler_history handle_fetch, size_t from_height)
 {
-    if (address.type() != payment_type::pubkey_hash)
-        handle_fetch(error::unsupported_payment_type, history_list());
-    else
-        fetch(
-            std::bind(&leveldb_blockchain::do_fetch_history,
-                this, address, handle_fetch, from_height, _1));
+    fetch(
+        std::bind(&leveldb_blockchain::do_fetch_history,
+            this, address, handle_fetch, from_height, _1));
 }
 bool leveldb_blockchain::do_fetch_history(const payment_address& address,
     fetch_handler_history handle_fetch, size_t from_height, size_t slock)
