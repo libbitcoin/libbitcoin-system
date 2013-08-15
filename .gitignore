@@ -23,3 +23,5 @@ obj
 /config.*
 /configure
 /libtool
+.dirstamp
+libbitcoin_1.0.10-1_amd64.deb

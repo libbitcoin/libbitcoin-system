@@ -188,7 +188,7 @@ secret_parameter deterministic_wallet::generate_secret(
     BN_mod(secexp, secexp, order, ctx);
 
     secret_parameter secret;
-    BITCOIN_ASSERT(BN_num_bytes(secexp) == secret.size());
+    BITCOIN_ASSERT(BN_num_bytes(secexp) <= secret.size());
     BN_bn2bin(secexp, secret.data());
     return secret;
 }
