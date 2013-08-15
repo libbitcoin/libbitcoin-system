@@ -39,3 +39,11 @@ BOOST_AUTO_TEST_CASE(mnemonic)
     BOOST_REQUIRE(decode_mnemonic(words) == seed);
 }
 
+BOOST_AUTO_TEST_CASE(nullbyte)
+{
+     deterministic_wallet wallet;
+     wallet.set_seed("a219213f9b12422aa206d988e3e49607");
+     secret_parameter secret = wallet.generate_secret(10);
+     BOOST_REQUIRE(secret[0] == 0x00);
+}
+

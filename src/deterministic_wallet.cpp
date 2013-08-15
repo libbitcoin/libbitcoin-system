@@ -189,7 +189,10 @@ secret_parameter deterministic_wallet::generate_secret(
 
     secret_parameter secret;
     BITCOIN_ASSERT(BN_num_bytes(secexp) <= secret.size());
-    BN_bn2bin(secexp, secret.data());
+    // If bignum value begins with 0x00, then
+    // SSL will skip to the first significant digit.
+    size_t copy_offset = secret.size() - BN_num_bytes(secexp);
+    BN_bn2bin(secexp, secret.data() + copy_offset);
     return secret;
 }
 
