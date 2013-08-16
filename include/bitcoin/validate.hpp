@@ -7,10 +7,15 @@
 
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/threadpool.hpp>
 #include <bitcoin/transaction_pool.hpp>
 
 namespace libbitcoin {
 
+/**
+ * If you're looking to validate a transaction, then use the simpler
+ * transaction_pool::validate() method instead.
+ */
 class validate_transaction
   : public std::enable_shared_from_this<validate_transaction>
 {
@@ -20,7 +25,7 @@ public:
 
     validate_transaction(
         blockchain& chain, const transaction_type& tx,
-        const pool_buffer& pool, io_service::strand& async_strand);
+        const pool_buffer& pool, async_strand& strand);
     void start(validate_handler handle_validate);
 
     static std::error_code check_transaction(
@@ -58,7 +63,7 @@ private:
 
     void check_fees();
 
-    io_service::strand& strand_;
+    async_strand& strand_;
     blockchain& chain_;
 
     const transaction_type tx_;

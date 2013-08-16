@@ -14,69 +14,56 @@ using std::placeholders::_4;
 
 transaction_pool::transaction_pool(
     threadpool& pool, blockchain& chain, size_t capacity)
-  : strand_(pool.service()), chain_(chain), pool_(capacity)
+  : strand_(pool), chain_(chain), pool_(capacity)
 {
 }
 void transaction_pool::start()
 {
     chain_.subscribe_reorganize(
-        strand_.wrap(std::bind(&transaction_pool::reorganize,
-            this, _1, _2, _3, _4)));
+        strand_.wrap(&transaction_pool::reorganize,
+            this, _1, _2, _3, _4));
 }
 
-void transaction_pool::store(const transaction_type& stored_transaction,
-    confirm_handler handle_confirm, store_handler handle_store)
+void transaction_pool::validate(const transaction_type& tx,
+    validate_handler handle_validate)
 {
-    strand_.post(
-        std::bind(&transaction_pool::do_store,
-            this, stored_transaction, handle_confirm, handle_store));
+    strand_.queue(&transaction_pool::do_validate,
+        this, tx, handle_validate);
 }
-void transaction_pool::do_store(
-    const transaction_type& stored_transaction,
-    confirm_handler handle_confirm, store_handler handle_store)
+void transaction_pool::do_validate(const transaction_type& tx,
+    validate_handler handle_validate)
 {
-    transaction_entry_info new_tx_entry{
-        hash_transaction(stored_transaction),
-        stored_transaction,
-        handle_confirm};
-
     validate_transaction_ptr validate =
         std::make_shared<validate_transaction>(
-            chain_, stored_transaction, pool_, strand_);
-    validate->start(strand_.wrap(std::bind(
-        &transaction_pool::handle_delegate,
-            this, _1, _2, new_tx_entry, handle_store)));
+            chain_, tx, pool_, strand_);
+    validate->start(strand_.wrap(
+        &transaction_pool::validation_complete,
+            this, _1, _2, hash_transaction(tx), handle_validate));
 }
 
-void transaction_pool::handle_delegate(
+void transaction_pool::validation_complete(
     const std::error_code& ec, const index_list& unconfirmed,
-    const transaction_entry_info& tx_entry, store_handler handle_store)
+    const hash_digest& tx_hash, validate_handler handle_validate)
 {
     if (ec == error::input_not_found)
     {
         BITCOIN_ASSERT(unconfirmed.size() == 1);
-        BITCOIN_ASSERT(unconfirmed[0] < tx_entry.tx.inputs.size());
-        handle_store(ec, unconfirmed);
+        //BITCOIN_ASSERT(unconfirmed[0] < tx.inputs.size());
+        handle_validate(ec, unconfirmed);
     }
     else if (ec)
     {
         BITCOIN_ASSERT(unconfirmed.empty());
-        handle_store(ec, index_list());
+        handle_validate(ec, index_list());
     }
     // Re-check as another transaction might've been added in the interim
-    else if (tx_exists(tx_entry.hash))
+    else if (tx_exists(tx_hash))
     {
-        handle_store(error::duplicate, index_list());
+        handle_validate(error::duplicate, index_list());
     }
     else
     {
-        if (pool_.size() == pool_.capacity())
-        {
-            auto handle_confirm = pool_.front().handle_confirm;
-            handle_confirm(error::forced_removal);
-        }
-        pool_.push_back(tx_entry);
-        handle_store(std::error_code(), unconfirmed);
+        handle_validate(std::error_code(), index_list());
     }
 }
 
@@ -88,10 +75,39 @@ bool transaction_pool::tx_exists(const hash_digest& tx_hash)
     return false;
 }
 
+void transaction_pool::store(const transaction_type& tx,
+    confirm_handler handle_confirm, validate_handler handle_validate)
+{
+    auto perform_store =
+        [this, tx, handle_confirm]
+        {
+            // When new tx are added to the circular buffer,
+            // any tx at the front will be droppped.
+            // We notify the API user of this through the handler.
+            if (pool_.size() == pool_.capacity())
+            {
+                auto handle_confirm = pool_.front().handle_confirm;
+                handle_confirm(error::forced_removal);
+            }
+            // We store a precomputed tx hash to make lookups faster.
+            pool_.push_back(
+                {hash_transaction(tx), tx, handle_confirm});
+        };
+    auto wrap_handle_validate =
+        [perform_store, handle_validate](
+            const std::error_code& ec, const index_list& unconfirmed)
+        {
+            if (!ec)
+                perform_store();
+            handle_validate(ec, unconfirmed);
+        };
+    validate(tx, wrap_handle_validate);
+}
+
 void transaction_pool::fetch(const hash_digest& transaction_hash,
     fetch_handler handle_fetch)
 {
-    strand_.post(
+    strand_.queue(
         [this, transaction_hash, handle_fetch]()
         {
             for (const transaction_entry_info& entry: pool_)
@@ -107,7 +123,7 @@ void transaction_pool::fetch(const hash_digest& transaction_hash,
 void transaction_pool::exists(const hash_digest& transaction_hash,
     exists_handler handle_exists)
 {
-    strand_.post(
+    strand_.queue(
         [this, transaction_hash, handle_exists]()
         {
             handle_exists(tx_exists(transaction_hash));
@@ -126,8 +142,8 @@ void transaction_pool::reorganize(const std::error_code& ec,
     // new blocks come in - remove txs in new
     // old blocks taken out - resubmit txs in old
     chain_.subscribe_reorganize(
-        strand_.wrap(std::bind(&transaction_pool::reorganize,
-            this, _1, _2, _3, _4)));
+        strand_.wrap(&transaction_pool::reorganize,
+            this, _1, _2, _3, _4));
 }
 
 void handle_resubmit(const std::error_code& ec,
