@@ -12,8 +12,9 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 using std::placeholders::_4;
 
-transaction_pool::transaction_pool(threadpool& pool, blockchain& chain)
-  : strand_(pool.service()), chain_(chain), pool_(2000)
+transaction_pool::transaction_pool(
+    threadpool& pool, blockchain& chain, size_t capacity)
+  : strand_(pool.service()), chain_(chain), pool_(capacity)
 {
 }
 void transaction_pool::start()
@@ -69,6 +70,11 @@ void transaction_pool::handle_delegate(
     }
     else
     {
+        if (pool_.size() == pool_.capacity())
+        {
+            auto handle_confirm = pool_.front().handle_confirm;
+            handle_confirm(error::forced_removal);
+        }
         pool_.push_back(tx_entry);
         handle_store(std::error_code(), unconfirmed);
     }

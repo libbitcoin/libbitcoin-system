@@ -50,6 +50,8 @@ std::string error_category_impl::message(int ev) const noexcept
             return "Bad stream";
         case error::channel_timeout:
             return "Channel timed out";
+        case error::forced_removal:
+            return "Forced removal of transaction";
         // validate tx
         case error::coinbase_transaction:
             return "Memory pool coinbase transaction";

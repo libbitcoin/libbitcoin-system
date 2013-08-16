@@ -25,6 +25,8 @@ namespace error
         accept_failed,
         bad_stream,
         channel_timeout,
+        // transaction pool
+        forced_removal,
         // validate tx
         coinbase_transaction,
         is_not_standard,

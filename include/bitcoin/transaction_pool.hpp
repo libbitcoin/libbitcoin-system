@@ -56,9 +56,8 @@ public:
 
     typedef transaction_entry_info::confirm_handler confirm_handler;
 
-    transaction_pool(threadpool& pool, blockchain& chain);
+    transaction_pool(threadpool& pool, blockchain& chain, size_t capacity=2000);
     void start();
-
 
     /// Non-copyable class
     transaction_pool(const transaction_pool&) = delete;
@@ -74,6 +73,10 @@ public:
      *
      * In the case where store results in error::input_not_found, the
      * unconfirmed field refers to the single problematic input.
+     *
+     * If the maximum capacity of this container is reached and a
+     * transaction is removed prematurely, then handle_confirm()
+     * will be called with the error_code error::forced_removal.
      *
      * @param[in]   stored_transaction  Transaction to store
      * @param[in]   handle_confirm      Handler for when transaction

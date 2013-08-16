@@ -235,6 +235,9 @@ void indexer_history_fetched(const std::error_code& ec,
         // if contains an empty body.
         for (const blockchain::history_row& row: history)
         {
+            // If the indexer and memory pool are working properly,
+            // then there shouldn't be any transactions indexed
+            // that are already confirmed and in the blockchain.
             BITCOIN_ASSERT(row.output != output_info.point);
         }
         history.emplace_back(blockchain::history_row{
