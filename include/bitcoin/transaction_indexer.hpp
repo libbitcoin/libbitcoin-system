@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <forward_list>
 #include <system_error>
-#include <boost/date_time/posix_time/posix_time.hpp>
 #include <bitcoin/address.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/threadpool.hpp>
@@ -103,25 +102,12 @@ public:
         completion_handler handle_deindex);
 
 private:
-    typedef boost::posix_time::ptime ptime;
-    typedef boost::posix_time::time_duration time_duration;
-    typedef boost::posix_time::hours hours;
-
     // addr -> spend
     typedef std::unordered_multimap<payment_address, spend_info_type>
         spends_multimap;
     // addr -> output
     typedef std::unordered_multimap<payment_address, output_info_type>
         outputs_multimap;
-
-    struct timestamped_transaction_entry
-    {
-        boost::posix_time::ptime timestamp_;
-        hash_digest tx_hash;
-    };
-
-    typedef std::forward_list<timestamped_transaction_entry>
-        transaction_time_queue;
 
     void do_query(const payment_address& payaddr,
         query_handler handle_query);
@@ -132,22 +118,8 @@ private:
     void do_deindex(const transaction_type& tx,
         completion_handler handle_deindex);
 
-    // De-index expired transactions.
-    // Not threadsafe. Must be called within queue().
-    void periodic_update();
-
     spends_multimap spends_map_;
     outputs_multimap outputs_map_;
-
-    // Old transactions from the front of the queue get deindexed.
-    // New transactions go at the end.
-    transaction_time_queue expiry_queue_;
-    // Update queue when we haven't done so for a while.
-    ptime last_expiry_update_;
-
-    // If a transaction is not in a block within 1 hour, then it probably won't
-    // be in a block at all.
-    const time_duration transaction_lifetime_ = hours(1);
 };
 
 void fetch_history(blockchain& chain, transaction_indexer& indexer,

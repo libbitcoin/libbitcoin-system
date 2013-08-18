@@ -10,20 +10,9 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 
-namespace posix_time = boost::posix_time;
-using posix_time::time_duration;
-using posix_time::minutes;
-using posix_time::second_clock;
-
-const time_duration update_interval = minutes(20);
-
-auto now = []() { return second_clock::universal_time(); };
-
 transaction_indexer::transaction_indexer(threadpool& pool)
   : async_strand(pool)
 {
-    // The queue is empty so no point processing expired items right away.
-    last_expiry_update_ = now();
 }
 
 void transaction_indexer::query(const payment_address& payaddr,
@@ -136,57 +125,6 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
             "Can't deindex transaction twice");
         outputs_map_.erase(it);
     }
-    periodic_update();
-}
-
-template <typename Iterator>
-Iterator find_unexpired_begin(const Iterator first, const Iterator last,
-    const time_duration transaction_lifetime)
-{
-    auto current_time = now();
-    auto unexpired_begin = last;
-    for (auto it = first; it != last; ++it)
-        // First transaction
-        if (it->timestamp_ > current_time - transaction_lifetime)
-        {
-            unexpired_begin = it;
-            break;
-        }
-    return unexpired_begin;
-}
-template <typename Multimap>
-void delete_tx(const hash_digest& tx_hash, Multimap& map)
-{
-    for (auto it = map.begin(); it != map.end(); ++it)
-    {
-        const auto& point = it->second.point;
-        if (point.hash == tx_hash)
-            map.erase(it);
-    }
-}
-void transaction_indexer::periodic_update()
-{
-    if (last_expiry_update_ < now() + update_interval)
-        return;
-    auto unexpired_begin = find_unexpired_begin(
-        expiry_queue_.begin(), expiry_queue_.end(), transaction_lifetime_);
-    // No expired transactions exist.
-    if (unexpired_begin == expiry_queue_.end())
-    {
-        BITCOIN_ASSERT(expiry_queue_.empty() ||
-            expiry_queue_.front().timestamp_ > now() - transaction_lifetime_);
-        return;
-    }
-    BITCOIN_ASSERT(!expiry_queue_.empty());
-    BITCOIN_ASSERT(
-        expiry_queue_.front().timestamp_ <= now() - transaction_lifetime_);
-    for (auto it = expiry_queue_.begin(); it != unexpired_begin; ++it)
-    {
-        delete_tx(it->tx_hash, spends_map_);
-        delete_tx(it->tx_hash, outputs_map_);
-    }
-    // Now actually erase the expired entries from the queue.
-    expiry_queue_.erase_after(expiry_queue_.before_begin(), unexpired_begin);
 }
 
 void blockchain_history_fetched(const std::error_code& ec,
