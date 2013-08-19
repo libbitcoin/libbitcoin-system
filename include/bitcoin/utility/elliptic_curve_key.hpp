@@ -34,6 +34,7 @@ public:
 
 private:
     bool initialize();
+    void use_compressed();
 
     EC_KEY* key_;
 };
