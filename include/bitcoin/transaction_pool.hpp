@@ -56,13 +56,18 @@ public:
 
     typedef transaction_entry_info::confirm_handler confirm_handler;
 
-    transaction_pool(threadpool& pool, blockchain& chain, size_t capacity=2000);
+    transaction_pool(threadpool& pool, blockchain& chain);
     void start();
 
     /// Non-copyable class
     transaction_pool(const transaction_pool&) = delete;
     /// Non-copyable class
     void operator=(const transaction_pool&) = delete;
+
+    /**
+     * Set the size of the circular buffer. Defaults to 2000.
+     */
+    void set_capacity(size_t capacity);
 
     /**
      * Validate a transaction without storing it.

@@ -13,10 +13,16 @@ using std::placeholders::_3;
 using std::placeholders::_4;
 
 transaction_pool::transaction_pool(
-    threadpool& pool, blockchain& chain, size_t capacity)
-  : strand_(pool), chain_(chain), pool_(capacity)
+    threadpool& pool, blockchain& chain)
+  : strand_(pool), chain_(chain), pool_(2000)
 {
 }
+
+void transaction_pool::set_capacity(size_t capacity)
+{
+    pool_.set_capacity(capacity);
+}
+
 void transaction_pool::start()
 {
     chain_.subscribe_reorganize(
