@@ -51,7 +51,7 @@ void transaction_pool::validation_complete(
     const std::error_code& ec, const index_list& unconfirmed,
     const hash_digest& tx_hash, validate_handler handle_validate)
 {
-    if (ec == error::input_not_found)
+    if (ec == error::input_not_found || ec == error::validate_inputs_failed)
     {
         BITCOIN_ASSERT(unconfirmed.size() == 1);
         //BITCOIN_ASSERT(unconfirmed[0] < tx.inputs.size());

@@ -204,7 +204,7 @@ void validate_transaction::handle_previous_tx(const std::error_code& ec,
     if (!connect_input(tx_, current_input_, previous_tx,
         parent_height, last_block_height_, value_in_))
     {
-        handle_validate_(error::validate_inputs_failed, index_list());
+        handle_validate_(error::validate_inputs_failed, {current_input_});
         return;
     }
     // Search for double spends...
