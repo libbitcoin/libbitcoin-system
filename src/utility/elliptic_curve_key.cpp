@@ -37,8 +37,6 @@ bool elliptic_curve_key::set_public_key(const data_chunk& pubkey)
     const unsigned char* pubkey_bytes = pubkey.data();
     if (!o2i_ECPublicKey(&key_, &pubkey_bytes, pubkey.size()))
         return false;
-    if (pubkey.size() == 33)
-        use_compressed();
     return true;
 }
 
@@ -61,7 +59,7 @@ bool elliptic_curve_key::verify(hash_digest hash, const data_chunk& signature)
     // SSL likes a reversed hash
     std::reverse(hash.begin(), hash.end());
     // -1 = error, 0 = bad sig, 1 = good
-    if (ECDSA_verify(0, hash.data(), hash.size(),
+    if (ECDSA_verify(0, hash.data(), hash.size(), 
             signature.data(), signature.size(), key_) == 1)
         return true;
     return false;
@@ -73,7 +71,6 @@ bool elliptic_curve_key::new_key_pair()
         return false;
     if (!EC_KEY_generate_key(key_))
         return false;
-    use_compressed();
     return true;
 }
 
@@ -84,7 +81,6 @@ bool elliptic_curve_key::set_private_key(const private_data& privkey)
     const uint8_t* privkey_begin = privkey.data();
     if (!d2i_ECPrivateKey(&key_, &privkey_begin, privkey.size()))
         return false;
-    use_compressed();
     return true;
 }
 
@@ -107,7 +103,7 @@ data_chunk elliptic_curve_key::sign(hash_digest hash) const
     std::reverse(hash.begin(), hash.end());
     data_chunk signature(ECDSA_size(key_));
     unsigned int signature_length = signature.size();
-    if (!ECDSA_sign(0, hash.data(), hash.size(),
+    if (!ECDSA_sign(0, hash.data(), hash.size(), 
             signature.data(), &signature_length, key_))
         return data_chunk();
     signature.resize(signature_length);
@@ -164,7 +160,6 @@ bool elliptic_curve_key::set_secret(const secret_parameter& secret)
         BN_clear_free(bignum);
         return false;
     }
-    use_compressed();
     BN_clear_free(bignum);
     return true;
 }
@@ -189,11 +184,6 @@ bool elliptic_curve_key::initialize()
         return true;
     key_ = EC_KEY_new_by_curve_name(NID_secp256k1);
     return key_ != nullptr;
-}
-
-void elliptic_curve_key::use_compressed()
-{
-    EC_KEY_set_conv_form(key_, POINT_CONVERSION_COMPRESSED);
 }
 
 } // namespace libbitcoin
