@@ -110,9 +110,6 @@ data_chunk create_spent_key(const Point& point)
     return spent_key;
 }
 
-// Given an input_script, extract the Bitcoin address from the pubkey.
-bool extract_input_address(
-    payment_address& address, const script& input_script);
 data_chunk create_address_key(
     const payment_address& address, const output_point& outpoint);
 

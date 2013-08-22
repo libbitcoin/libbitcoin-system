@@ -159,12 +159,13 @@ enum class payment_type
     non_standard
 };
 
-class script
+class script_type
 {
 public:
-    void join(const script& other);
+    void join(const script_type& other);
     void push_operation(operation oper);
-    bool run(script input_script, const transaction_type& parent_tx,
+    bool run(
+        script_type input_script, const transaction_type& parent_tx,
         uint32_t input_index, bool bip16_enabled=true);
 
     payment_type type() const;
@@ -173,7 +174,7 @@ public:
 
     static hash_digest generate_signature_hash(
         transaction_type parent_tx, uint32_t input_index,
-        const script& script_code, uint32_t hash_type);
+        const script_type& script_code, uint32_t hash_type);
 
 private:
     class conditional_stack
@@ -279,13 +280,13 @@ private:
 
 std::string opcode_to_string(opcode code);
 opcode string_to_opcode(const std::string& code_repr);
-std::string pretty(const script& source_script);
-std::ostream& operator<<(std::ostream& stream, const script& source_script);
+std::string pretty(const script_type& script);
+std::ostream& operator<<(std::ostream& stream, const script_type& script);
 
-script coinbase_script(const data_chunk& raw_script);
-script parse_script(const data_chunk& raw_script);
-data_chunk save_script(const script& scr);
-size_t script_size(const script& scr);
+script_type coinbase_script(const data_chunk& raw_script);
+script_type parse_script(const data_chunk& raw_script);
+data_chunk save_script(const script_type& script);
+size_t script_size(const script_type& script);
 
 } // namespace libbitcoin
 

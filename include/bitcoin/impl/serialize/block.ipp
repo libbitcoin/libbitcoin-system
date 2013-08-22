@@ -12,7 +12,7 @@ data_chunk read_raw_script(Deserializer& deserial)
 }
 
 template <typename Deserializer>
-script read_script(Deserializer& deserial)
+script_type read_script(Deserializer& deserial)
 {
     data_chunk raw_script = read_raw_script(deserial);
 #ifndef BITCOIN_DISABLE_ASSERTS

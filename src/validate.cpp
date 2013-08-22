@@ -235,7 +235,7 @@ bool validate_transaction::connect_input(
         if (height_difference < coinbase_maturity)
             return false;
     }
-    script output_script = previous_output.output_script;
+    script_type output_script = previous_output.output_script;
     if (!output_script.run(input.input_script, tx, current_input))
         return false;
     value_in += output_value;
@@ -312,7 +312,7 @@ std::error_code validate_transaction::check_transaction(
 
     if (is_coinbase(tx))
     {
-        const script& coinbase_script = tx.inputs[0].input_script;
+        const script_type& coinbase_script = tx.inputs[0].input_script;
         size_t coinbase_script_size = save_script(coinbase_script).size();
         if (coinbase_script_size < 2 || coinbase_script_size > 100)
             return error::invalid_coinbase_script_size;
@@ -645,13 +645,13 @@ bool validate_block::coinbase_height_match()
     BITCOIN_ASSERT(current_block_.transactions.size() > 0);
     BITCOIN_ASSERT(current_block_.transactions[0].inputs.size() > 0);
     // First get the serialized coinbase input script as a series of bytes.
-    const script& coinbase_script =
+    const script_type& coinbase_script =
         current_block_.transactions[0].inputs[0].input_script;
     const data_chunk raw_coinbase = save_script(coinbase_script);
     // Try to recreate the expected bytes.
     big_number expect_number;
     expect_number.set_int64(height_);
-    script expect_coinbase;
+    script_type expect_coinbase;
     expect_coinbase.push_operation({opcode::special, expect_number.data()});
     // Save the expected coinbase script.
     const data_chunk expect = save_script(expect_coinbase);
@@ -729,13 +729,14 @@ bool validate_block::validate_inputs(const transaction_type& tx,
 }
 
 size_t script_hash_signature_operations_count(
-    const script& output_script, const script& input_script)
+    const script_type& output_script, const script_type& input_script)
 {
     if (output_script.type() != payment_type::script_hash)
         return 0;
     if (input_script.operations().empty())
         return 0;
-    script eval_script = parse_script(input_script.operations().back().data);
+    const data_chunk& last_data = input_script.operations().back().data;
+    script_type eval_script = parse_script(last_data);
     return count_script_sigops(eval_script.operations(), true);
 }
 
@@ -794,7 +795,7 @@ bool validate_block::connect_input(size_t index_in_parent,
         current_block_.header.timestamp >= bip16_switchover_timestamp;
     BITCOIN_ASSERT(!bip16_enabled || height_ >= bip16_switchover_height);
     // Validate script
-    script output_script = previous_tx_out.output_script;
+    script_type output_script = previous_tx_out.output_script;
     if (!output_script.run(input.input_script,
             current_tx, input_index, bip16_enabled))
     {

@@ -89,14 +89,14 @@ typedef std::vector<output_point> output_point_list;
 struct transaction_input_type
 {
     output_point previous_output;
-    script input_script;
+    script_type input_script;
     uint32_t sequence;
 };
 
 struct transaction_output_type
 {
     uint64_t value;
-    script output_script;
+    script_type output_script;
 };
 
 typedef std::vector<transaction_input_type> transaction_input_list;

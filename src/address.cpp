@@ -88,13 +88,13 @@ void set_public_key(payment_address& address, const data_chunk& public_key)
         generate_ripemd_hash(public_key));
 }
 
-void set_script(payment_address& address, const script& eval_script)
+void set_script(payment_address& address, const script_type& eval_script)
 {
     address.set(payment_address::script_version,
         generate_ripemd_hash(save_script(eval_script)));
 }
 
-bool extract(payment_address& address, const script& scr)
+bool extract(payment_address& address, const script_type& script)
 {
     // Cast a data_chunk to a short_hash and set the address
     auto set_hash_data =
@@ -105,8 +105,8 @@ bool extract(payment_address& address, const script& scr)
             std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
             address.set(version, hash_data);
         };
-    const operation_stack& ops = scr.operations();
-    payment_type pay_type = scr.type();
+    const operation_stack& ops = script.operations();
+    payment_type pay_type = script.type();
     switch (pay_type)
     {
         case payment_type::pubkey:
@@ -145,24 +145,6 @@ bool extract(payment_address& address, const script& scr)
     }
     // Should never happen!
     return false;
-}
-
-bool input_has_pubkey(const operation_stack& ops)
-{
-    return ops.size() == 2 &&
-        ops[0].code == opcode::special &&
-        ops[1].code == opcode::special;
-}
-bool extract_input_address(
-    payment_address& address, const script& input_script)
-{
-    const operation_stack& ops = input_script.operations();
-    if (!input_has_pubkey(ops))
-        return false;
-    BITCOIN_ASSERT(ops.size() == 2);
-    const data_chunk& pubkey = ops[1].data;
-    set_public_key(address, pubkey);
-    return true;
 }
 
 bool operator==(const payment_address& lhs, const payment_address& rhs)

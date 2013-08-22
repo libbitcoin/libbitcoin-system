@@ -58,13 +58,13 @@ void set_script_hash(payment_address& address,
     const short_hash& script_hash);
 
 void set_public_key(payment_address& address, const data_chunk& public_key);
-void set_script(payment_address& address, const script& eval_script);
+void set_script(payment_address& address, const script_type& eval_script);
 
 /**
  * Extract a Bitcoin address from an input or output script.
  * Returns false on failure.
  */
-bool extract(payment_address& address, const script& scr);
+bool extract(payment_address& address, const script_type& script);
 
 bool operator==(const payment_address& lhs, const payment_address& rhs);
 
