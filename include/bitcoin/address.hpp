@@ -36,34 +36,29 @@ public:
     };
 
     payment_address();
-    payment_address(payment_type type, const short_hash& hash);
+    payment_address(uint8_t version, const short_hash& hash);
     payment_address(const std::string& encoded_address);
 
-    bool set(payment_type type, const short_hash& hash);
-    bool set_raw(uint8_t version_byte, const short_hash& hash);
+    void set(uint8_t version, const short_hash& hash);
 
+    uint8_t version() const;
     const short_hash& hash() const;
-    payment_type type() const;
 
     bool set_encoded(const std::string& encoded_address);
     std::string encoded() const;
 
-    uint8_t version() const;
-
 private:
-    bool set_version(uint8_t version_byte);
-
-    payment_type type_;
+    uint8_t version_;
     short_hash hash_;
 };
 
-bool set_public_key_hash(payment_address& address,
+void set_public_key_hash(payment_address& address,
     const short_hash& pubkey_hash);
-bool set_script_hash(payment_address& address,
+void set_script_hash(payment_address& address,
     const short_hash& script_hash);
 
-bool set_public_key(payment_address& address, const data_chunk& public_key);
-bool set_script(payment_address& address, const script& eval_script);
+void set_public_key(payment_address& address, const data_chunk& public_key);
+void set_script(payment_address& address, const script& eval_script);
 
 /**
  * Extract a Bitcoin address from an input or output script.
