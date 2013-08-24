@@ -149,7 +149,7 @@ bool remove_debit(leveldb::WriteBatch& batch,
     const output_point& outpoint = input.previous_output;
     payment_address address;
     // Not a Bitcoin address so skip this output.
-    if (!extract(address, input.input_script))
+    if (!extract(address, input.script))
         return true;
     data_chunk addr_key = create_address_key(address, outpoint);
     batch.Delete(slice(addr_key));
@@ -161,7 +161,7 @@ bool remove_credit(leveldb::WriteBatch& batch,
 {
     payment_address address;
     // Not a Bitcoin address so skip this output.
-    if (!extract(address, output.output_script))
+    if (!extract(address, output.script))
         return true;
     data_chunk addr_key = create_address_key(address, outpoint);
     batch.Delete(slice(addr_key));

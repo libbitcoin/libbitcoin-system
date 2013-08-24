@@ -182,7 +182,7 @@ bool add_debit(leveldb::WriteBatch& batch,
 {
     payment_address address;
     // Not a Bitcoin address so skip this output.
-    if (!extract(address, input.input_script))
+    if (!extract(address, input.script))
         return true;
     data_chunk addr_key = create_address_key(address, input.previous_output);
     // inpoint
@@ -205,7 +205,7 @@ bool add_credit(leveldb::WriteBatch& batch,
 {
     payment_address address;
     // Not a Bitcoin address so skip this output.
-    if (!extract(address, output.output_script))
+    if (!extract(address, output.script))
         return true;
     data_chunk addr_key = create_address_key(address, outpoint);
     // outpoint, value, block_height

@@ -12,7 +12,7 @@ namespace libbitcoin {
 
 typedef std::vector<hash_digest> hash_list;
 
-hash_digest hash_transaction_impl(const transaction_type& tx, 
+hash_digest hash_transaction_impl(const transaction_type& tx,
     uint32_t* hash_type_code)
 {
     data_chunk serialized_tx(satoshi_raw_size(tx));
@@ -75,7 +75,7 @@ std::string pretty(const transaction_input_type& input)
     std::ostringstream ss;
     ss << "\thash = " << input.previous_output.hash << "\n"
         << "\tindex = " << input.previous_output.index << "\n"
-        << "\t" << input.input_script << "\n"
+        << "\t" << input.script << "\n"
         << "\tsequence = " << input.sequence << "\n";
     return ss.str();
 }
@@ -84,7 +84,7 @@ std::string pretty(const transaction_output_type& output)
 {
     std::ostringstream ss;
     ss << "\tvalue = " << output.value << "\n"
-        << "\t" << output.output_script << "\n";
+        << "\t" << output.script << "\n";
     return ss.str();
 }
 
@@ -112,7 +112,7 @@ bool previous_output_is_null(const output_point& previous_output)
 
 bool is_coinbase(const transaction_type& tx)
 {
-    return tx.inputs.size() == 1 && 
+    return tx.inputs.size() == 1 &&
         previous_output_is_null(tx.inputs[0].previous_output);
 }
 

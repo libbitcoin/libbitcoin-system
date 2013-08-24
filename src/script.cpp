@@ -892,8 +892,8 @@ hash_digest script_type::generate_signature_hash(
 
     // Blank all other inputs' signatures
     for (transaction_input_type& input: parent_tx.inputs)
-        input.input_script = script_type();
-    parent_tx.inputs[input_index].input_script = script_code;
+        input.script = script_type();
+    parent_tx.inputs[input_index].script = script_code;
 
     if ((hash_type & 0x1f) == sighash::none)
     {
@@ -916,7 +916,7 @@ hash_digest script_type::generate_signature_hash(
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
             it->value = ~0;
-            it->output_script = script_type();
+            it->script = script_type();
         }
 
         nullify_input_sequences(parent_tx.inputs, input_index);

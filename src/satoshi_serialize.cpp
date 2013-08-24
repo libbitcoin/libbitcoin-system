@@ -129,7 +129,7 @@ size_t satoshi_raw_size(const transaction_type& packet)
     tx_size += variable_uint_size(packet.inputs.size());
     for (const transaction_input_type& input: packet.inputs)
     {
-        data_chunk raw_script = save_script(input.input_script);
+        data_chunk raw_script = save_script(input.script);
         tx_size += 40 +
             variable_uint_size(raw_script.size()) +
             raw_script.size();
@@ -137,7 +137,7 @@ size_t satoshi_raw_size(const transaction_type& packet)
     tx_size += variable_uint_size(packet.outputs.size());
     for (const transaction_output_type& output: packet.outputs)
     {
-        data_chunk raw_script = save_script(output.output_script);
+        data_chunk raw_script = save_script(output.script);
         tx_size += 8 +
             variable_uint_size(raw_script.size()) +
             raw_script.size();

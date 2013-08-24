@@ -15,10 +15,8 @@ int main()
     // Coinbase tx has a single input.
     assert(coinbase_tx.inputs.size() == 1);
     const transaction_input_type& coinbase_input = coinbase_tx.inputs[0];
-    // Get the input script (sometimes called scriptSig).
-    const script_type& input_script = coinbase_input.input_script;
-    // Convert this to its raw format.
-    const data_chunk& raw_block_message = save_script(input_script);
+    // Convert the input script to its raw format.
+    const data_chunk& raw_block_message = save_script(coinbase_input.script);
     // Convert this to an std::string.
     std::string message;
     message.resize(raw_block_message.size());

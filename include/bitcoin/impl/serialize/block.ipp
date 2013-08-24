@@ -37,9 +37,9 @@ transaction_type read_transaction(
         input.previous_output.hash = deserial.read_hash();
         input.previous_output.index = deserial.read_4_bytes();
         if (previous_output_is_null(input.previous_output))
-            input.input_script = coinbase_script(read_raw_script(deserial));
+            input.script = coinbase_script(read_raw_script(deserial));
         else
-            input.input_script = read_script(deserial);
+            input.script = read_script(deserial);
         input.sequence = deserial.read_4_bytes();
         packet.inputs.push_back(input);
     }
@@ -48,7 +48,7 @@ transaction_type read_transaction(
     {
         transaction_output_type output;
         output.value = deserial.read_8_bytes();
-        output.output_script = read_script(deserial);
+        output.script = read_script(deserial);
         packet.outputs.push_back(output);
     }
     packet.locktime = deserial.read_4_bytes();
@@ -67,7 +67,7 @@ Iterator satoshi_save(const transaction_type& packet, Iterator result)
     {
         serial.write_hash(input.previous_output.hash);
         serial.write_4_bytes(input.previous_output.index);
-        data_chunk raw_script = save_script(input.input_script);
+        data_chunk raw_script = save_script(input.script);
         serial.write_variable_uint(raw_script.size());
         serial.write_data(raw_script);
         serial.write_4_bytes(input.sequence);
@@ -76,7 +76,7 @@ Iterator satoshi_save(const transaction_type& packet, Iterator result)
     for (const transaction_output_type& output: packet.outputs)
     {
         serial.write_8_bytes(output.value);
-        data_chunk raw_script = save_script(output.output_script);
+        data_chunk raw_script = save_script(output.script);
         serial.write_variable_uint(raw_script.size());
         serial.write_data(raw_script);
     }
