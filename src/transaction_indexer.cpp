@@ -195,9 +195,8 @@ void indexer_history_fetched(const std::error_code& ec,
         {
             if (row.output != spend_info.previous_output)
                 continue;
-            BITCOIN_ASSERT((
-                row.spend == input_point{null_hash, max_index}) &&
-                row.spend_height == 0);
+            BITCOIN_ASSERT(row.spend_height == 0);
+            BITCOIN_ASSERT((row.spend == input_point{null_hash, max_index}));
             row.spend = spend_info.point;
             row.spend_height = 0;
             found = true;
