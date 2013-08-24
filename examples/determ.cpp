@@ -14,8 +14,7 @@ int main()
     // Get an address from wallet...
     data_chunk pubkey = wallet.generate_public_key(2);
     payment_address addr;
-    if (!set_public_key(addr, pubkey))
-        log_error() << "Error setting public key.";
+    set_public_key(addr, pubkey);
     assert(addr.encoded() == "1E4vM9q25xsyDwWwdqHUWnwshdWC9PykmL");
 
     // ... Get the corresponding private key.

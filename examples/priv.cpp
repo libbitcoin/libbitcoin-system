@@ -64,8 +64,7 @@ int address(const std::string raw_private_key)
             private_data(raw_private_key.begin(), raw_private_key.end())))
         error_exit("bad private key");
     payment_address address;
-    if (!set_public_key(address, ec.public_key()))
-        error_exit("set public key on address");
+    set_public_key(address, ec.public_key());
     log_info() << address.encoded();
     return 0;
 }
@@ -99,7 +98,7 @@ int main(int argc, char** argv)
     {
         if (number_args != 2)
             error_exit("verify requires argument data and signature");
-        std::string input_data = argv[arg_index], 
+        std::string input_data = argv[arg_index],
             signature = argv[arg_index + 1];
         return verify(input_data, signature, read_private_key());
     }
