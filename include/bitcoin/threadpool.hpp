@@ -157,25 +157,10 @@ public:
     }
 
     /*
-     * push() guarantees that any handlers passed to it will never execute
-     * at the same time.
+     * queue() guarantees that any handlers passed to it will
+     * never execute at the same time in sequential order.
      *
-     * @param[in]   handler     Handler to execute operation.
-     * @code
-     *  void handler();
-     * @endcode
-     */
-    template <typename... Args>
-    void push(Args&&... args)
-    {
-        ios_.post(strand_.wrap(std::bind(std::forward<Args>(args)...)));
-    }
-
-    /*
-     * queue() guarantees that any handlers passed to it will never execute
-     * at the same time, and they will be called in sequential order.
-     *
-     * Guarantees ordering.
+     * Guarantees sequential calling order.
      *
      * @param[in]   handler     Handler to execute operation.
      * @code
@@ -186,6 +171,23 @@ public:
     void queue(Args&&... args)
     {
         strand_.post(std::bind(std::forward<Args>(args)...));
+    }
+
+    /*
+     * randomly_queue() guarantees that any handlers passed to it will
+     * never execute at the same time.
+     *
+     * Does not guarantee sequential calling order.
+     *
+     * @param[in]   handler     Handler to execute operation.
+     * @code
+     *  void handler();
+     * @endcode
+     */
+    template <typename... Args>
+    void randomly_queue(Args&&... args)
+    {
+        ios_.post(strand_.wrap(std::bind(std::forward<Args>(args)...)));
     }
 
 private:

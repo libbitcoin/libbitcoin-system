@@ -65,7 +65,7 @@ leveldb_blockchain::~leveldb_blockchain()
 void leveldb_blockchain::start(const std::string& prefix,
     start_handler handle_start)
 {
-    strand_.push(
+    strand_.randomly_queue(
         [this, prefix, handle_start]
         {
             if (initialize(prefix))
@@ -191,7 +191,7 @@ void leveldb_blockchain::begin_write()
 void leveldb_blockchain::store(const block_type& stored_block,
     store_block_handler handle_store)
 {
-    strand_.push(
+    strand_.randomly_queue(
         std::bind(&leveldb_blockchain::do_store,
             this, stored_block, handle_store));
 }
@@ -221,7 +221,7 @@ void leveldb_blockchain::do_store(const block_type& stored_block,
 void leveldb_blockchain::import(const block_type& import_block,
     size_t height, import_block_handler handle_import)
 {
-    strand_.push(
+    strand_.randomly_queue(
         &leveldb_blockchain::do_import,
             this, import_block, height, handle_import);
 }
