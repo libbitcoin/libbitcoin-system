@@ -40,13 +40,20 @@ data_chunk decode_hex(std::string hex_str)
     // Trim the fat.
     boost::algorithm::trim(hex_str);
     data_chunk result(hex_str.size() / 2);
+    std::stringstream converter;
     for (size_t i = 0; i + 1 < hex_str.size(); i += 2)
     {
         BITCOIN_ASSERT(hex_str.size() - i >= 2);
         auto byte_begin = hex_str.begin() + i;
         auto byte_end = hex_str.begin() + i + 2;
-        int val = stoi(std::string(byte_begin, byte_end), 0, 16);
+        // Perform conversion.
+        int val = -1;
+        converter << std::hex << std::string(byte_begin, byte_end);
+        converter >> val;
+        if (val == -1)
+            return data_chunk();
         BITCOIN_ASSERT(val <= 0xff);
+        // Set byte.
         result[i / 2] = val;
     }
     return result;
