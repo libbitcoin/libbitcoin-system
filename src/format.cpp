@@ -40,7 +40,6 @@ data_chunk decode_hex(std::string hex_str)
     // Trim the fat.
     boost::algorithm::trim(hex_str);
     data_chunk result(hex_str.size() / 2);
-    std::stringstream converter;
     for (size_t i = 0; i + 1 < hex_str.size(); i += 2)
     {
         BITCOIN_ASSERT(hex_str.size() - i >= 2);
@@ -48,6 +47,7 @@ data_chunk decode_hex(std::string hex_str)
         auto byte_end = hex_str.begin() + i + 2;
         // Perform conversion.
         int val = -1;
+        std::stringstream converter;
         converter << std::hex << std::string(byte_begin, byte_end);
         converter >> val;
         if (val == -1)

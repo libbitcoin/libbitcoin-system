@@ -12,7 +12,7 @@ BOOST_AUTO_TEST_CASE(detwallet)
     // get an address
     payment_address addr;
     data_chunk pubkey = wallet.generate_public_key(2, true);
-    BOOST_REQUIRE(set_public_key(addr, pubkey));
+    set_public_key(addr, pubkey);
     BOOST_REQUIRE(addr.encoded() == "1MstsXwLK8pH7jxpG5HYettWVPSUxwdwgY");
     // get privkey
     secret_parameter secret = wallet.generate_secret(2, true);

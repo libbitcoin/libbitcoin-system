@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(tx)
 BOOST_AUTO_TEST_CASE(script_parse_save)
 {
     BOOST_REQUIRE_THROW(
-    script psc = parse_script(decode_hex(
+    script_type psc = parse_script(decode_hex(
         "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
         "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
         "b2c8d9febfb84d01")),
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(script_parse_save)
 
     data_chunk normal_output_script = decode_hex(
         "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac");
-    script out_scr = parse_script(normal_output_script);
+    script_type out_scr = parse_script(normal_output_script);
     BOOST_REQUIRE(save_script(out_scr) == normal_output_script);
 }
 
