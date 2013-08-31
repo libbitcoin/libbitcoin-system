@@ -1,4 +1,4 @@
-Format: http://dep.debian.net/deps/dep5
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: libbitcoin
 Source: https://github.com/spesmilo/libbitcoin
 
@@ -7,7 +7,6 @@ Copyright: 2011-2013 Amir Taaki (genjix) <genjix@riseup.net>
            2011-2012 Kamil Domański (kdomanski)
            2011 Jan Engelhardt (se7) <jengelh@medozas.de>
            2011 Patrick Strateman (phantomcircuit)
-
 License: AGPL3
  Note that this is AGPLv3 with an extra clause
 

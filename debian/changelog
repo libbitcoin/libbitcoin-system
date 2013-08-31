@@ -1,4 +1,4 @@
-libbitcoin (1.0.10-1) unstable; urgency=low
+libbitcoin (1.0.10-1+nmu1) unstable; urgency=low
 
   * Initial release.
   Closes: bug#670701
