@@ -12,7 +12,7 @@ else
   confflags += --build $(DEB_BUILD_GNU_TYPE) --host $(DEB_HOST_GNU_TYPE)
 endif
 
-confflags += --enable-bdb --enable-leveldb
+confflags += --enable-leveldb
 confflags += --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
 
 configure: configure-stamp
