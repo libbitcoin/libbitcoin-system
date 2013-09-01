@@ -70,13 +70,14 @@ block_type genesis_block()
                     0x32, 0x51, 0x8a, 0x88, 0xc3, 0x1b, 0xc8, 0x7f,
                     0x61, 0x8f, 0x76, 0x67, 0x3e, 0x2c, 0xc7, 0x7a,
                     0xb2, 0x12, 0x7b, 0x7a, 0xfd, 0xed, 0xa3, 0x3b};
-    header.timestamp = 1231006505;
     header.bits = 0x1d00ffff;
-    header.nonce = 2083236893;
-    #ifdef ENABLE_TESTNET
+#ifdef ENABLE_TESTNET
     header.timestamp = 1296688602;
-    header.nonce = 414098458;    
-    #endif
+    header.nonce = 414098458;
+#else
+    header.timestamp = 1231006505;
+    header.nonce = 2083236893;
+#endif
 
     transaction_type coinbase_tx;
     coinbase_tx.version = 1;

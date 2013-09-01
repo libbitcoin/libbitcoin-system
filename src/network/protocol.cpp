@@ -135,9 +135,11 @@ void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
 
 #ifdef ENABLE_TESTNET
 const std::vector<std::string> dns_seeds
-{   
+{
     "testnet.mojocoin.com",
-    "54.243.211.176" // tpfaucet.appspot.com only provides an ip adddress for their node, no dns record.
+    // tpfaucet.appspot.com only provides an
+    // IP adddress for their node, no DNS record.
+    "54.243.211.176"
 };
 #else
 const std::vector<std::string> dns_seeds

@@ -62,7 +62,8 @@ constexpr uint64_t target_spacing = 10 * 60;
 constexpr uint64_t readjustment_interval = target_timespan / target_spacing;
 
 #ifdef ENABLE_TESTNET
-// Block 514 is the first block after Feb 15 2014. Testnet started bip16 before mainnet
+// Block 514 is the first block after Feb 15 2014.
+// Testnet started bip16 before mainnet.
 constexpr uint32_t bip16_switchover_timestamp = 1333238400;
 constexpr uint32_t bip16_switchover_height = 514;
 #else
@@ -70,6 +71,7 @@ constexpr uint32_t bip16_switchover_height = 514;
 constexpr uint32_t bip16_switchover_timestamp = 1333238400;
 constexpr uint32_t bip16_switchover_height = 173805;
 #endif
+
 } // namespace libbitcoin
 
 #endif

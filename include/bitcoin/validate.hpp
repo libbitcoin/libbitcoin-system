@@ -103,6 +103,7 @@ protected:
         const output_point& previous_output,
         size_t index_in_parent, size_t input_index) = 0;
     virtual block_header_type fetch_block(size_t fetch_height) = 0;
+
 private:
     std::error_code check_block();
     bool check_proof_of_work(hash_digest hash, uint32_t bits);

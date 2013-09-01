@@ -509,29 +509,40 @@ inline Value range_constraint(Value value, Value minimum, Value maximum)
 
 uint32_t validate_block::work_required()
 {
+#ifdef ENABLE_TESTNET
+    auto last_non_special_bits = [this]
+    {
+        // Return the last non-special block
+        block_header_type pblock;
+        size_t pheight = height_;
+        while (true)
+        {
+            --pheight;
+            pblock = fetch_block(pheight);
+            if (pheight % readjustment_interval == 0)
+               break;
+            if (pblock.bits == max_bits)
+               break;
+        }
+        return pblock.bits;
+    };
+#endif
+
     if (height_ == 0)
         return max_bits;
     else if (height_ % readjustment_interval != 0)
     {
-    #ifdef ENABLE_TESTNET
-        if (current_block_.header.timestamp > fetch_block(height_ - 1).timestamp + 2 * target_spacing)
+#ifdef ENABLE_TESTNET
+        uint32_t max_time_gap =
+            fetch_block(height_ - 1).timestamp + 2 * target_spacing;
+        if (current_block_.header.timestamp > max_time_gap)
             return max_bits;
-        else {
-            // Return the last non-special block
-            block_header_type pblock;
-            size_t pheight = height_;
-            do {
-                pblock = fetch_block(--pheight);                
-            } while(pheight % readjustment_interval != 0 && pblock.bits == max_bits);
-            
-            return pblock.bits;
-
-        }
-    #else        
+        return last_non_special_bits();
+#else
         return previous_block_bits();
-    #endif
-    } 
-        
+#endif
+    }
+
     uint64_t actual = actual_timespan(readjustment_interval);
     actual = range_constraint(actual, target_timespan / 4, target_timespan * 4);
 
@@ -550,15 +561,16 @@ bool validate_block::passes_checkpoints()
 {
     const hash_digest block_hash = hash_block_header(current_block_.header);
 
-    #ifdef ENABLE_TESTNET
+#ifdef ENABLE_TESTNET
     if (height_ == 546 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x2a, 0x93, 0x6c, 0xa7,
                         0x63, 0x90, 0x4c, 0x3c, 0x35, 0xfc, 0xe2, 0xf3,
                         0x55, 0x6c, 0x55, 0x9c, 0x02, 0x14, 0x34, 0x5d,
                         0x31, 0xb1, 0xbc, 0xeb, 0xf7, 0x6a, 0xcb, 0x70})
         return false;
-    #else
 
+    return true;
+#else
     if (height_ == 11111 && block_hash !=
             hash_digest{0x00, 0x00, 0x00, 0x00, 0x69, 0xe2, 0x44, 0xf7,
                         0x3d, 0x78, 0xe8, 0xfd, 0x29, 0xba, 0x2f, 0xd2,
@@ -656,9 +668,9 @@ bool validate_block::passes_checkpoints()
                         0x3e, 0x7f, 0xcf, 0x79, 0xa6, 0x06, 0xb8, 0xe7,
                         0x97, 0xf0, 0x65, 0xb1, 0x30, 0x57, 0x59, 0x32})
         return false;
-    #endif
 
     return true;
+#endif
 }
 
 bool validate_block::coinbase_height_match()
