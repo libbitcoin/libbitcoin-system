@@ -87,6 +87,12 @@ Start with the examples/ to see a few sample programs:
   # Run the fullnode example (validates blocks and transactions).
   $ ./fullnode
 
+=======================
+Arch Linux Instructions
+=======================
+
+Libbitcoin is available from the AUR: https://aur.archlinux.org/packages/libbitcoin-leveldb-git/ 
+
 ====================
 Mac OSX Instructions
 ====================
