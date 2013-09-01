@@ -133,6 +133,13 @@ void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
         handle_complete(std::error_code());
 }
 
+#ifdef ENABLE_TESTNET
+const std::vector<std::string> dns_seeds
+{   
+    "testnet.mojocoin.com",
+    "54.243.211.176" // tpfaucet.appspot.com only provides an ip adddress for their node, no dns record.
+};
+#else
 const std::vector<std::string> dns_seeds
 {
     "bitseed.xf2.org",
@@ -144,6 +151,7 @@ const std::vector<std::string> dns_seeds
     "faucet.bitcoin.st",
     "bitcoin.securepayment.cc"
 };
+#endif
 
 protocol::seeds::seeds(protocol* parent)
   : strand_(parent->strand_), hosts_(parent->hosts_),
@@ -173,7 +181,7 @@ void protocol::seeds::error_case(const std::error_code& ec)
 
 void protocol::seeds::connect_dns_seed(const std::string& hostname)
 {
-    connect(handshake_, network_, hostname, 8333,
+    connect(handshake_, network_, hostname, protocol_port,
         strand_.wrap(std::bind(&protocol::seeds::request_addresses,
             shared_from_this(), _1, _2)));
 }
@@ -244,7 +252,7 @@ void protocol::seeds::handle_store(const std::error_code& ec)
 void protocol::run()
 {
     strand_.dispatch(std::bind(&protocol::try_connect, this));
-    network_.listen(8333,
+    network_.listen(protocol_port,
         strand_.wrap(std::bind(&protocol::handle_listen,
             this, _1, _2)));
 }

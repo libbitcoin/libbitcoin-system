@@ -25,12 +25,12 @@ handshake::handshake(threadpool& pool)
     //template_version_.timestamp = time(NULL);
     template_version_.address_me.services = template_version_.services;
     template_version_.address_me.ip = localhost_ip();
-    template_version_.address_me.port = 8333;
+    template_version_.address_me.port = protocol_port;
     template_version_.address_you.services = template_version_.services;
     template_version_.address_you.ip = 
         ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
                         0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
-    template_version_.address_you.port = 8333;
+    template_version_.address_you.port = protocol_port;
     template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_LIB_VERSION "/";
     template_version_.start_height = 0;
     template_version_.nonce = rand();

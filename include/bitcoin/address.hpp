@@ -29,12 +29,19 @@ namespace libbitcoin {
 class payment_address
 {
 public:
+    #ifdef ENABLE_TESTNET
     enum
     {
-        pubkey_version = 0,
+        pubkey_version = 0x6f,
         script_version = 5
     };
-
+    #else
+    enum
+    {
+        pubkey_version = 0x00,
+        script_version = 5
+    };
+    #endif
     payment_address();
     payment_address(uint8_t version, const short_hash& hash);
     payment_address(const std::string& encoded_address);

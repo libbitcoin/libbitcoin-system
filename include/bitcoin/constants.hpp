@@ -15,7 +15,13 @@ constexpr uint64_t reward_interval = 210000;
 
 constexpr size_t coinbase_maturity = 100;
 
+#ifdef ENABLE_TESTNET
+constexpr uint32_t magic_value = 0x0709110b;
+constexpr uint32_t protocol_port = 18333;
+#else
 constexpr uint32_t magic_value = 0xd9b4bef9;
+constexpr uint32_t protocol_port = 8333;
+#endif
 
 // Threshold for nLockTime: below this value it is
 // interpreted as block number, otherwise as UNIX timestamp.
@@ -55,10 +61,15 @@ constexpr uint64_t target_spacing = 10 * 60;
 // Two weeks worth of blocks = readjust interval = 2016
 constexpr uint64_t readjustment_interval = target_timespan / target_spacing;
 
+#ifdef ENABLE_TESTNET
+// Block 514 is the first block after Feb 15 2014. Testnet started bip16 before mainnet
+constexpr uint32_t bip16_switchover_timestamp = 1333238400;
+constexpr uint32_t bip16_switchover_height = 514;
+#else
 // April 1 2012
 constexpr uint32_t bip16_switchover_timestamp = 1333238400;
 constexpr uint32_t bip16_switchover_height = 173805;
-
+#endif
 } // namespace libbitcoin
 
 #endif

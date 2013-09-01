@@ -73,6 +73,10 @@ block_type genesis_block()
     header.timestamp = 1231006505;
     header.bits = 0x1d00ffff;
     header.nonce = 2083236893;
+    #ifdef ENABLE_TESTNET
+    header.timestamp = 1296688602;
+    header.nonce = 414098458;    
+    #endif
 
     transaction_type coinbase_tx;
     coinbase_tx.version = 1;

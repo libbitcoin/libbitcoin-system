@@ -26,6 +26,16 @@ AC_ARG_ENABLE([debug],
 esac],[debug=false])
 AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
+AC_MSG_CHECKING(--enable-testnet argument)
+AC_ARG_ENABLE(testnet,
+    [  --enable-testnet        Enable testnet],
+    [enable_testnet=$enableval],
+    [enable_testnet="no"])
+AC_MSG_RESULT($enable_testnet)
+if test "$enable_testnet" = "yes"; then
+  AC_DEFINE(ENABLE_TESTNET)
+fi
+
 AX_BOOST_BASE
 #AX_BOOST_SYSTEM
 #AX_BOOST_THREAD
