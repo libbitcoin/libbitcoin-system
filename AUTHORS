@@ -1,13 +1,23 @@
-Developers/contributors:
+Authors:
 
-Kamil Domański (kdomanski)
-Jan Engelhardt (se7) <jengelh@medozas.de>
-Patrick Strateman (phantomcircuit)
-Denis Roio (jaromil)
-Amir Taaki (genjix) <genjix@riseup.net>
+* Robert Williamson
+  Development. Added support for testnet.
+
+* Amir Taaki (genjix)
+  Development
+  amir@unsystem.net
+
+* Patrick Strateman (phantomcircuit)
+  Development. Early contributor.
+
+* Denis Roio (jaromil)
+  Hosting.
 
 Thanks:
 
+Kamil Domański (kdomanski)
+Jan Engelhardt (se7) <jengelh@medozas.de>
+
 Aaron Williamson (SFLC) and Richard Stallman (FSF) for the license,
-Luke Dashjr for pointing out OpenSSL license conflict that needed resolving
+Luke Dashjr for pointing out OpenSSL license conflict.
 
