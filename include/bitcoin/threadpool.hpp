@@ -141,11 +141,6 @@ public:
      * wrap() returns a new handler that guarantees that the handler it
      * encapsulates will never execute at the same time as another handler
      * passing through this class.
-     *
-     * @param[in]   handler     Handler to execute operation.
-     * @code
-     *  void handler();
-     * @endcode
      */
     template <typename... Args>
     auto wrap(Args&&... args)
@@ -162,9 +157,8 @@ public:
      *
      * Guarantees sequential calling order.
      *
-     * @param[in]   handler     Handler to execute operation.
      * @code
-     *  void handler();
+     *   strand.queue(handler);
      * @endcode
      */
     template <typename... Args>
@@ -179,15 +173,15 @@ public:
      *
      * Does not guarantee sequential calling order.
      *
-     * @param[in]   handler     Handler to execute operation.
      * @code
-     *  void handler();
+     *   strand.randomly_queue(handler);
      * @endcode
      */
     template <typename... Args>
     void randomly_queue(Args&&... args)
     {
-        ios_.post(strand_.wrap(std::bind(std::forward<Args>(args)...)));
+        ios_.post(strand_.wrap(
+            std::bind(std::forward<Args>(args)...)));
     }
 
 private:

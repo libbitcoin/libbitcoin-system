@@ -73,7 +73,7 @@ class channel_proxy
 public:
     typedef std::function<void (const std::error_code&)> send_handler;
 
-    typedef std::function<void (const std::error_code&, 
+    typedef std::function<void (const std::error_code&,
         const version_type&)> receive_version_handler;
 
     typedef std::function<void (const std::error_code&,
@@ -223,7 +223,7 @@ private:
 
     void handle_timeout(const boost::system::error_code& ec);
     void handle_heartbeat(const boost::system::error_code& ec);
-    
+
     void set_timeout(const boost::posix_time::time_duration timeout);
     void set_heartbeat(const boost::posix_time::time_duration timeout);
     void reset_timers();
@@ -268,7 +268,9 @@ private:
 class channel
 {
 public:
-    channel(threadpool& pool, socket_ptr socket);
+    typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
+
+    channel(channel_proxy_ptr proxy);
     ~channel();
 
     void stop();
@@ -313,8 +315,6 @@ public:
         channel_proxy::stop_handler handle_stop);
 
 private:
-    typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
-
     std::weak_ptr<channel_proxy> weak_proxy_;
 };
 

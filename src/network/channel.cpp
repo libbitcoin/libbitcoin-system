@@ -68,7 +68,7 @@ void channel_stream_loader::load_lookup(const std::string& symbol,
 }
 
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
-  : strand_(pool.service()), stopped_(false), socket_(socket), 
+  : strand_(pool.service()), stopped_(false), socket_(socket),
     timeout_(pool.service()), heartbeat_(pool.service())
 {
 #define CHANNEL_TRANSPORT_MECHANISM(MESSAGE_TYPE) \
@@ -241,7 +241,7 @@ void channel_proxy::read_header()
 void channel_proxy::read_checksum(const header_type& header_msg)
 {
     async_read(*socket_, buffer(inbound_checksum_),
-        strand_.wrap(std::bind(&channel_proxy::handle_read_checksum, 
+        strand_.wrap(std::bind(&channel_proxy::handle_read_checksum,
             shared_from_this(), _1, _2, header_msg)));
 }
 
@@ -249,7 +249,7 @@ void channel_proxy::read_payload(const header_type& header_msg)
 {
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
-        strand_.wrap(std::bind(&channel_proxy::handle_read_payload, 
+        strand_.wrap(std::bind(&channel_proxy::handle_read_payload,
             shared_from_this(), _1, _2, header_msg)));
 }
 
@@ -465,11 +465,8 @@ void channel_proxy::do_send_common(const data_chunk& whole_message,
 
 // channel
 
-channel::channel(threadpool& pool, socket_ptr socket)
+channel::channel(channel_proxy_ptr proxy)
 {
-    channel_proxy_ptr proxy =
-        std::make_shared<channel_proxy>(pool, socket);
-    proxy->start();
     weak_proxy_ = proxy;
 }
 channel::~channel()
