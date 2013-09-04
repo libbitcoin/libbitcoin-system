@@ -268,7 +268,9 @@ private:
 class channel
 {
 public:
-    channel(threadpool& pool, socket_ptr socket);
+    typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
+
+    channel(channel_proxy_ptr proxy);
     ~channel();
 
     void stop();
@@ -313,8 +315,6 @@ public:
         channel_proxy::stop_handler handle_stop);
 
 private:
-    typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
-
     std::weak_ptr<channel_proxy> weak_proxy_;
 };
 

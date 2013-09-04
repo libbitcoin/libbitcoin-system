@@ -465,11 +465,8 @@ void channel_proxy::do_send_common(const data_chunk& whole_message,
 
 // channel
 
-channel::channel(threadpool& pool, socket_ptr socket)
+channel::channel(channel_proxy_ptr proxy)
 {
-    channel_proxy_ptr proxy =
-        std::make_shared<channel_proxy>(pool, socket);
-    proxy->start();
     weak_proxy_ = proxy;
 }
 channel::~channel()

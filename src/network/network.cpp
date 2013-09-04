@@ -31,8 +31,9 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
         handle_accept(error::accept_failed, nullptr);
         return;
     }
-    channel_ptr channel_object =
-        std::make_shared<channel>(pool_, socket);
+    auto proxy = std::make_shared<channel_proxy>(pool_, socket);
+    proxy->start();
+    channel_ptr channel_object = std::make_shared<channel>(proxy);
     handle_accept(std::error_code(), channel_object);
 }
 
@@ -41,9 +42,10 @@ class perform_connect_with_timeout
 {
 public:
     perform_connect_with_timeout(threadpool& pool)
-      : pool_(pool), timer_(pool.service())
+      : timer_(pool.service())
     {
         socket_ = std::make_shared<tcp::socket>(pool.service());
+        proxy_ = std::make_shared<channel_proxy>(pool, socket_);
     }
 
     void start(tcp::resolver::iterator endpoint_iterator, size_t timeout,
@@ -67,8 +69,8 @@ private:
             handle_connect(error::network_unreachable, nullptr);
             return;
         }
-        channel_ptr channel_object =
-            std::make_shared<channel>(pool_, socket_);
+        proxy_->start();
+        channel_ptr channel_object = std::make_shared<channel>(proxy_);
         handle_connect(std::error_code(), channel_object);
     }
 
@@ -76,11 +78,11 @@ private:
     {
         if (ec)
             // should be boost::asio::error::operation_aborted)
-            socket_->close();
+            proxy_->stop();
     }
 
-    threadpool& pool_;
     socket_ptr socket_;
+    channel::channel_proxy_ptr proxy_;
     boost::asio::deadline_timer timer_;
 };
 
