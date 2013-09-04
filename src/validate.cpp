@@ -515,6 +515,8 @@ uint32_t validate_block::work_required()
         // Return the last non-special block
         block_header_type previous_block;
         size_t previous_height = height_;
+        // Loop backwards until we find a difficulty change point,
+        // or we find a block which does not have max_bits (is not special).
         while (true)
         {
             --previous_height;
