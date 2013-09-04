@@ -513,18 +513,18 @@ uint32_t validate_block::work_required()
     auto last_non_special_bits = [this]
     {
         // Return the last non-special block
-        block_header_type pblock;
-        size_t pheight = height_;
+        block_header_type previous_block;
+        size_t previous_height = height_;
         while (true)
         {
-            --pheight;
-            pblock = fetch_block(pheight);
-            if (pheight % readjustment_interval == 0)
+            --previous_height;
+            previous_block = fetch_block(previous_height);
+            if (previous_height % readjustment_interval == 0)
                break;
-            if (pblock.bits != max_bits)
+            if (previous_block.bits != max_bits)
                break;
         }
-        return pblock.bits;
+        return previous_block.bits;
     };
 #endif
 
