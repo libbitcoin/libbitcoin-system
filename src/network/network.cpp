@@ -76,8 +76,8 @@ private:
 
     void close(const boost::system::error_code& ec)
     {
-        if (ec)
-            // should be boost::asio::error::operation_aborted)
+        // ec should be boost::asio::error::operation_aborted or nothing.
+        if (!ec)
             proxy_->stop();
     }
 
