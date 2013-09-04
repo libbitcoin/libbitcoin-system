@@ -69,6 +69,7 @@ private:
             handle_connect(error::network_unreachable, nullptr);
             return;
         }
+        timer_.cancel();
         proxy_->start();
         channel_ptr channel_object = std::make_shared<channel>(proxy_);
         handle_connect(std::error_code(), channel_object);
