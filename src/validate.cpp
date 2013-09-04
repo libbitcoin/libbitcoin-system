@@ -521,7 +521,7 @@ uint32_t validate_block::work_required()
             pblock = fetch_block(pheight);
             if (pheight % readjustment_interval == 0)
                break;
-            if (pblock.bits == max_bits)
+            if (pblock.bits != max_bits)
                break;
         }
         return pblock.bits;
