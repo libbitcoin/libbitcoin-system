@@ -31,7 +31,7 @@ private:
     void call_handle_accept(const boost::system::error_code& ec,
         socket_ptr socket, accept_handler handle_accept);
 
-    threadpool& threadpool_;
+    threadpool& pool_;
     tcp_acceptor_ptr tcp_accept_;
 };
 
@@ -49,7 +49,7 @@ public:
     void operator=(const network&) = delete;
 
     void listen(uint16_t port, listen_handler handle_listen);
-    void connect(const std::string& hostname, uint16_t port, 
+    void connect(const std::string& hostname, uint16_t port,
         connect_handler handle_connect);
 
 private:
@@ -59,11 +59,8 @@ private:
     void resolve_handler(const boost::system::error_code& ec,
         tcp::resolver::iterator endpoint_iterator,
         connect_handler handle_connect, resolver_ptr, query_ptr);
-    void call_connect_handler(const boost::system::error_code& ec, 
-        tcp::resolver::iterator, socket_ptr socket,
-        connect_handler handle_connect);
 
-    threadpool& threadpool_;
+    threadpool& pool_;
 };
 
 } // namespace libbitcoin
