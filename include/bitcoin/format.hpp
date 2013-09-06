@@ -95,6 +95,8 @@ HashType decode_hex_digest(std::string hex_str)
     return result;
 }
 
+std::string satoshi_to_btc(uint64_t value);
+
 // Python like range
 //   for (char c: range(str, 0, 2))
 template <typename RangeType>
