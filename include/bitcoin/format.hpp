@@ -81,15 +81,25 @@ std::ostream& operator<<(std::ostream& stream, const output_point& point);
 
 data_chunk decode_hex(std::string hex_str);
 
-// Turns a hash hex string into HashType.
-// byte_stream.size() == 2 * HashType.size()
+/**
+ * Turns a hash hex string into HashType.
+ * byte_stream.size() == 2 * HashType.size()
+ *
+ * On error, returns null_hash for hash_digest, or
+ * null_short_hash for short_hash.
+ */
 template <typename HashType>
 HashType decode_hex_digest(std::string hex_str)
 {
     data_chunk raw_bytes = decode_hex(hex_str);
-    if (raw_bytes.size() != hash_digest_size)
-        return null_hash;
     HashType result;
+    if (raw_bytes.size() != result.size())
+    {
+        // null_hash for hash_digest
+        // null_short_hash for short_hash
+        result.fill(0);
+        return result;
+    }
     BITCOIN_ASSERT(raw_bytes.size() == result.size());
     std::copy(raw_bytes.begin(), raw_bytes.end(), result.begin());
     return result;
