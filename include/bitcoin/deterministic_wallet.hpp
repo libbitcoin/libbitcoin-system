@@ -50,7 +50,7 @@ public:
      * Generate the n'th public key. A seed or master_public_key must be set.
      *
      * @code
-     * payment_addr addr;
+     * payment_address addr;
      * set_public_key(addr, wallet.generate_public_key(2));
      * btc_address = addr.encoded();
      * @endcode

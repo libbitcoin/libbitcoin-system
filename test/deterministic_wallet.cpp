@@ -47,3 +47,21 @@ BOOST_AUTO_TEST_CASE(nullbyte)
      BOOST_REQUIRE(secret[0] == 0x00);
 }
 
+BOOST_AUTO_TEST_CASE(copying)
+{
+    data_chunk mpk = bc::decode_hex(
+        "3315ae236373067ea27d92f10f9475b1ff727eebe45f4ce4dd21cf548a237755397"
+        "548d57fdb94610aef20993b4ff4695cae581d3be98743593336b21090c7d2");
+    // Setting MPK.
+    deterministic_wallet wallet1;
+    wallet1.set_master_public_key(mpk);
+    BOOST_REQUIRE(wallet1.master_public_key() == mpk);
+    // Copying MPK.
+    deterministic_wallet wallet2;
+    wallet2.set_master_public_key(wallet1.master_public_key());
+    BOOST_REQUIRE(wallet1.master_public_key() == wallet2.master_public_key());
+    // Copy construction.
+    deterministic_wallet wallet3 = wallet1;
+    BOOST_REQUIRE(wallet1.master_public_key() == wallet3.master_public_key());
+}
+
