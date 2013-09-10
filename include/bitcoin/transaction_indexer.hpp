@@ -18,14 +18,7 @@ struct spend_info_type
     output_point previous_output;
 };
 
-struct output_info_type
-{
-    output_point point;
-    uint64_t value;
-};
-
 typedef std::vector<spend_info_type> spend_info_list;
-typedef std::vector<output_info_type> output_info_list;
 
 class transaction_indexer
   : public async_strand
