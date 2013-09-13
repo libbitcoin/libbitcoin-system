@@ -12,6 +12,8 @@
 
 namespace libbitcoin {
 
+// output_info_type is defined in <bitcoin/transaction.hpp>
+
 struct spend_info_type
 {
     input_point point;

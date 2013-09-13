@@ -41,6 +41,27 @@ void transaction_indexer::do_query(const payment_address& payaddr,
         get_info_list<output_info_list>(payaddr, outputs_map_));
 }
 
+template <typename Point, typename EntryMultimap>
+auto find_entry(const payment_address& key,
+    const Point& value_point, EntryMultimap& map) -> decltype(map.begin())
+{
+    auto iter_pair = map.equal_range(key);
+    for (auto it = iter_pair.first; it != iter_pair.second; ++it)
+    {
+        // This entry should only occur once in the multimap.
+        if (it->second.point == value_point)
+            return it;
+    }
+    return map.end();
+}
+
+template <typename Point, typename EntryMultimap>
+bool index_does_not_exist(const payment_address& key,
+    const Point& value_point, EntryMultimap& map)
+{
+    return find_entry(key, value_point, map) == map.end();
+}
+
 void transaction_indexer::index(const transaction_type& tx,
     completion_handler handle_index)
 {
@@ -59,8 +80,12 @@ void transaction_indexer::do_index(const transaction_type& tx,
         // Nothing to see here folks. Move along.
         if (!extract(payaddr, input.script))
             continue;
+        input_point point{tx_hash, i};
+        BITCOIN_ASSERT_MSG(
+            index_does_not_exist(payaddr, point, spends_map_),
+            "Transaction is indexed duplicate times!");
         spends_map_.emplace(payaddr,
-            spend_info_type{input_point{tx_hash, i}, input.previous_output});
+            spend_info_type{point, input.previous_output});
     }
     for (uint32_t i = 0; i < tx.outputs.size(); ++i)
     {
@@ -69,23 +94,13 @@ void transaction_indexer::do_index(const transaction_type& tx,
         // Nothing to see here folks. Move along.
         if (!extract(payaddr, output.script))
             continue;
+        output_point point{tx_hash, i};
+        BITCOIN_ASSERT_MSG(
+            index_does_not_exist(payaddr, point, outputs_map_),
+            "Transaction is indexed duplicate times!");
         outputs_map_.emplace(payaddr,
-            output_info_type{output_point{tx_hash, i}, output.value});
+            output_info_type{point, output.value});
     }
-}
-
-template <typename Point, typename EntryMultimap>
-auto find_entry(const payment_address& key, const Point& value_point,
-    EntryMultimap& map) -> decltype(map.begin())
-{
-    auto iter_pair = map.equal_range(key);
-    for (auto it = iter_pair.first; it != iter_pair.second; ++it)
-    {
-        // This entry should only occur once in the multimap.
-        if (it->second.point == value_point)
-            return it;
-    }
-    return map.end();
 }
 
 void transaction_indexer::deindex(const transaction_type& tx,
@@ -106,11 +121,14 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
         // Nothing to see here folks. Move along.
         if (!extract(payaddr, input.script))
             continue;
-        auto it = find_entry(payaddr,
-            input_point{tx_hash, i}, spends_map_);
+        input_point point{tx_hash, i};
+        auto it = find_entry(payaddr, point, spends_map_);
         BITCOIN_ASSERT_MSG(it != spends_map_.end(),
             "Can't deindex transaction twice");
         spends_map_.erase(it);
+        BITCOIN_ASSERT_MSG(
+            index_does_not_exist(payaddr, point, spends_map_),
+            "Transaction is indexed duplicate times!");
     }
     for (uint32_t i = 0; i < tx.outputs.size(); ++i)
     {
@@ -119,11 +137,14 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
         // Nothing to see here folks. Move along.
         if (!extract(payaddr, output.script))
             continue;
-        auto it = find_entry(payaddr,
-            output_point{tx_hash, i}, outputs_map_);
+        output_point point{tx_hash, i};
+        auto it = find_entry(payaddr, point, outputs_map_);
         BITCOIN_ASSERT_MSG(it != outputs_map_.end(),
             "Can't deindex transaction twice");
         outputs_map_.erase(it);
+        BITCOIN_ASSERT_MSG(
+            index_does_not_exist(payaddr, point, outputs_map_),
+            "Transaction is indexed duplicate times!");
     }
 }
 
