@@ -11,14 +11,14 @@ using std::placeholders::_2;
 using std::placeholders::_3;
 
 transaction_indexer::transaction_indexer(threadpool& pool)
-  : async_strand(pool)
+  : strand_(pool)
 {
 }
 
 void transaction_indexer::query(const payment_address& payaddr,
     query_handler handle_query)
 {
-    queue(
+    strand_.queue(
         std::bind(&transaction_indexer::do_query,
             this, payaddr, handle_query));
 }
@@ -44,7 +44,7 @@ void transaction_indexer::do_query(const payment_address& payaddr,
 void transaction_indexer::index(const transaction_type& tx,
     completion_handler handle_index)
 {
-    queue(
+    strand_.queue(
         std::bind(&transaction_indexer::do_index,
             this, tx, handle_index));
 }
@@ -91,7 +91,7 @@ auto find_entry(const payment_address& key, const Point& value_point,
 void transaction_indexer::deindex(const transaction_type& tx,
     completion_handler handle_deindex)
 {
-    queue(
+    strand_.queue(
         std::bind(&transaction_indexer::do_deindex,
             this, tx, handle_deindex));
 }

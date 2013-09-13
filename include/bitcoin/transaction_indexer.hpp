@@ -21,7 +21,6 @@ struct spend_info_type
 typedef std::vector<spend_info_type> spend_info_list;
 
 class transaction_indexer
-  : public async_strand
 {
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
@@ -111,6 +110,7 @@ private:
     void do_deindex(const transaction_type& tx,
         completion_handler handle_deindex);
 
+    async_strand strand_;
     spends_multimap spends_map_;
     outputs_multimap outputs_map_;
 };
