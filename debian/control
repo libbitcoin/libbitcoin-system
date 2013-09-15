@@ -1,4 +1,4 @@
-Source: libbitcoin
+Source: libbitcoin0
 Section: libs
 Priority: optional
 Maintainer: Pablo Castellano <pablo@anche.no>
@@ -11,7 +11,7 @@ Homepage: http://libbitcoin.dyne.org/
 Package: libbitcoin-dev
 Section: libdevel
 Architecture: any
-Depends: libbitcoin (= ${binary:Version}), ${misc:Depends}
+Depends: libbitcoin0 (= ${binary:Version}), ${misc:Depends}
 Description: development files for libbitcoin
  libbitcoin is a bitcoin library targeted towards high end use. The library
  places a heavy focus around asychronicity. This enables a big scope for
@@ -29,7 +29,7 @@ Description: development files for libbitcoin
  This package provides the development files (ie. includes, static library),
  that allow to build software which uses libbitcoin.
 
-Package: libbitcoin
+Package: libbitcoin0
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}

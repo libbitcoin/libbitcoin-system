@@ -50,7 +50,7 @@ install: build
 	dh_testdir
 	dh_testroot
 	dh_prep
-	dh_installdirs usr/lib -plibbitcoin
+	dh_installdirs usr/lib -plibbitcoin0
 	dh_installdirs -plibbitcoin-dev
 	$(MAKE) install DESTDIR=`pwd`/debian/tmp
 	dh_install --sourcedir=debian/tmp --list-missing
@@ -66,7 +66,7 @@ binary-arch: build install
 	dh_testroot
 #	dh_installdebconf
 	dh_installdocs -p libbitcoin-dev -A README AUTHORS NEWS
-	dh_installdocs -p libbitcoin
+	dh_installdocs -p libbitcoin0
 #	dh_installexamples
 	dh_installmenu
 #	dh_installemacsen
@@ -78,12 +78,12 @@ binary-arch: build install
 	dh_installmime
 #	dh_undocumented
 	dh_installchangelogs -p libbitcoin-dev ChangeLog
-	dh_installchangelogs -p libbitcoin ChangeLog
+	dh_installchangelogs -p libbitcoin0 ChangeLog
 	dh_link
 	dh_strip
 	dh_compress
 	dh_fixperms
-	dh_makeshlibs -p libbitcoin -V 'libbitcoin'
+	dh_makeshlibs -p libbitcoin0 -V 'libbitcoin0'
 	dh_installdeb
 #	dh_perl
 	dh_shlibdeps -L libbitcoin -l debian/libbitcoin/usr/lib/$(DEB_HOST_MULTIARCH)/ -X /usr/lib/$(DEB_HOST_MULTIARCH)/bitcoin/
