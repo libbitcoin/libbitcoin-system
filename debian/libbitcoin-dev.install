@@ -1,6 +1,7 @@
 usr/include/bitcoin/*.hpp
 usr/include/bitcoin/blockchain/*.hpp
 usr/include/bitcoin/network/*.hpp
+usr/include/bitcoin/impl/serialize/*.ipp
 usr/include/bitcoin/utility/*.hpp
 usr/lib/*/lib*.so
 usr/lib/*/lib*.a
