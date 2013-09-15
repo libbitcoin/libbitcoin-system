@@ -53,12 +53,12 @@ void push_literal(data_chunk& raw_script, int64_t value)
     switch (value)
     {
         case -1:
-            raw_script.push_back(static_cast<byte>(opcode::negative_1));
+            raw_script.push_back(static_cast<uint8_t>(opcode::negative_1));
             return;
 
 #define PUSH_X(n) \
         case n: \
-            raw_script.push_back(static_cast<byte>(opcode::op_##n)); \
+            raw_script.push_back(static_cast<uint8_t>(opcode::op_##n)); \
             return;
 
         PUSH_X(1);
@@ -98,7 +98,7 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
         op.code = opcode::pushdata4;
     }
     op.data = data;
-    script tmp_script;
+    script_type tmp_script;
     tmp_script.push_operation(op);
     extend_data(raw_script, save_script(tmp_script));
 }
@@ -144,7 +144,7 @@ bool parse_token(data_chunk& raw_script, const std::string& token)
     else if (is_opcode(token))
     {
         opcode tokenized_opcode = token_to_opcode(token);
-        raw_script.push_back(static_cast<byte>(tokenized_opcode));
+        raw_script.push_back(static_cast<uint8_t>(tokenized_opcode));
     }
     else
     {
@@ -154,7 +154,7 @@ bool parse_token(data_chunk& raw_script, const std::string& token)
     return true;
 }
 
-bool parse(script& result_script, const std::string& format)
+bool parse(script_type& result_script, const std::string& format)
 {
     if (format.empty())
         return true;
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
     std::string output_string = argv[2];
     std::string description = argv[3];
 
-    script input_script;
+    script_type input_script;
     if (!parse(input_script, input_string))
     {
         log_error() << "Error parsing input: " << input_string;
@@ -195,7 +195,7 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    script output_script;
+    script_type output_script;
     if (!parse(output_script, output_string))
     {
         log_error() << "Error parsing output: " << output_string;
