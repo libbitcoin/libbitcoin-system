@@ -41,6 +41,8 @@ block_type mine_next(const block_type& current_block,
         hash_block_header(next_block.header), next_block.header.bits))
     {
         ++next_block.header.nonce;
+        BITCOIN_ASSERT(next_block.header.nonce !=
+            std::numeric_limits<uint32_t>::max());
     }
     return next_block;
 }
@@ -84,6 +86,68 @@ std::error_code store(blockchain& chain, const block_type& blk)
     return ec;
 }
 
+// Maybe should also be in libbitcoin too?
+script_type build_pubkey_hash_script(const short_hash& pubkey_hash)
+{
+    script_type result;
+    result.push_operation({opcode::dup, data_chunk()});
+    result.push_operation({opcode::hash160, data_chunk()});
+    result.push_operation({opcode::special,
+        data_chunk(pubkey_hash.begin(), pubkey_hash.end())});
+    result.push_operation({opcode::equalverify, data_chunk()});
+    result.push_operation({opcode::checksig, data_chunk()});
+    return result;
+}
+
+script_type build_script_hash_script(const short_hash& script_hash)
+{
+    script_type result;
+    result.push_operation({opcode::hash160, data_chunk()});
+    result.push_operation({opcode::special,
+        data_chunk(script_hash.begin(), script_hash.end())});
+    result.push_operation({opcode::equal, data_chunk()});
+    return result;
+}
+
+bool build_output_script(
+    script_type& out_script, const payment_address& payaddr)
+{
+    switch (payaddr.version())
+    {
+        case payment_address::pubkey_version:
+            out_script = build_pubkey_hash_script(payaddr.hash());
+            return true;
+
+        case payment_address::script_version:
+            out_script = build_script_hash_script(payaddr.hash());
+            return true;
+    }
+    return false;
+}
+
+bool make_signature(transaction_type& tx, size_t input_index,
+    const elliptic_curve_key& key, const script_type& script_code)
+{
+    transaction_input_type& input = tx.inputs[input_index];
+
+    const data_chunk public_key = key.public_key();
+    if (public_key.empty())
+        return false;
+    hash_digest tx_hash =
+        script_type::generate_signature_hash(tx, input_index, script_code, 1);
+    if (tx_hash == null_hash)
+        return false;
+    data_chunk signature = key.sign(tx_hash);
+    signature.push_back(0x01);
+    //std::cout << signature << std::endl;
+    script_type& script = tx.inputs[input_index].script;
+    // signature
+    script.push_operation({opcode::special, signature});
+    // public key
+    script.push_operation({opcode::special, public_key});
+    return true;
+}
+
 transaction_type create_coinbase(const data_chunk& public_key)
 {
     transaction_type coinbase_tx;
@@ -98,8 +162,10 @@ transaction_type create_coinbase(const data_chunk& public_key)
     transaction_output_type output;
     // Ahh the good old days!
     output.value = coin_price(50);
-    output.script.push_operation({opcode::special, public_key});
-    output.script.push_operation({opcode::checksig, data_chunk()});
+    payment_address addr;
+    set_public_key(addr, public_key);
+    bool build_output_success = build_output_script(output.script, addr);
+    BITCOIN_ASSERT(build_output_success);
     coinbase_tx.outputs.push_back(output);
     return coinbase_tx;
 }
@@ -111,14 +177,17 @@ struct block_point
     block_point* parent = nullptr;
     block_type blk;
     block_point_list children;
+    std::error_code ec;
 };
 
 void display_full_chain(const block_point& point, size_t indent=0)
 {
     for (size_t i = 0; i < indent; ++i)
         std::cout << "  ";
-    std::cout << indent << ": "
-        << hash_block_header(point.blk.header) << std::endl;
+    std::cout << indent << ": " << hash_block_header(point.blk.header);
+    if (point.ec)
+        std::cout << " [" << point.ec.message() << "]";
+    std::cout << std::endl;
     for (const auto& child: point.children)
         display_full_chain(child, indent + 1);
 }
@@ -194,17 +263,17 @@ int main()
         current_block = step(root_block, *head_block, i);
         std::error_code ec = store(chain, current_block);
         if (ec)
-        {
             log_error() << ec.message();
-            break;
-        }
+        // Add to index
         block_point new_point;
         new_point.parent = head_block;
         new_point.blk = current_block;
+        new_point.ec = ec;
         block_point* parent = find_parent(root_block, current_block);
         BITCOIN_ASSERT(parent != nullptr);
         parent->children.push_back(new_point);
-        head_block = &parent->children.back();
+        if (!ec)
+            head_block = &parent->children.back();
     }
     display_full_chain(root_block);
     pool.stop();
