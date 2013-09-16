@@ -178,6 +178,7 @@ struct block_point
     // Only used in root node.
     block_list prefix_chain;
 
+    size_t i;
     block_point* parent = nullptr;
     block_type blk;
     block_point_list children;
@@ -191,6 +192,7 @@ void display_full_chain(const block_point& point,
         std::cout << i << ": "
             << hash_block_header(point.prefix_chain[i].header) << std::endl;
     offset += point.prefix_chain.size();
+    std::cout << point.i;
     for (size_t i = 0; i < indent; ++i)
         std::cout << "  ";
     std::cout << (offset + indent) << ": "
@@ -210,6 +212,56 @@ const block_type* lookup(const block_point& root, const point_coord& coord)
     for (size_t idx: coord)
         result = &result->children[idx];
     return &result->blk;
+}
+
+const std::string private_key =
+    "5KL628YQwEi1Czo9e2CFTcSMmaZXpqLgmEofyhpFqTvkgzv4MbG";
+
+const data_chunk public_key()
+{
+    elliptic_curve_key key;
+    const secret_parameter secret = wif_to_secret(private_key);
+    BITCOIN_ASSERT(secret != null_hash);
+    bool set_secret_success = key.set_secret(secret);
+    BITCOIN_ASSERT(set_secret_success);
+    return key.public_key();
+}
+
+transaction_type construct_transaction(const output_point& prevout)
+{
+    transaction_type tx;
+    tx.version = 1;
+    tx.locktime = 0;
+    // Outputs
+    transaction_output_type output;
+    output.value = coin_price(50);
+    payment_address addr;
+    set_public_key(addr, public_key());
+    bool build_output_success = build_output_script(output.script, addr);
+    BITCOIN_ASSERT(build_output_success);
+    tx.outputs.push_back(output);
+    // Inputs
+    transaction_input_type input;
+    input.previous_output = prevout;
+    input.sequence = 4294967295;
+    tx.inputs.push_back(input);
+    // Sign inputs
+    for (size_t i = 0; i < tx.inputs.size(); ++i)
+    {
+        bc::transaction_input_type& input = tx.inputs[i];
+        const secret_parameter secret = wif_to_secret(private_key);
+        elliptic_curve_key key;
+        bool set_secret_success = key.set_secret(secret);
+        BITCOIN_ASSERT(set_secret_success);
+        payment_address address;
+        set_public_key(address, key.public_key());
+        script_type prevout_script_code;
+        bool prevout_script_code_success =
+            build_output_script(prevout_script_code, address);
+        BITCOIN_ASSERT(prevout_script_code_success);
+        bool sign_success = make_signature(tx, i, key, prevout_script_code);
+    }
+    return tx;
 }
 
 #include "step.hpp"
@@ -277,7 +329,7 @@ int main()
     }
     // Steal the last block as our new root
     root_block.blk = current_block;
-    for (size_t i = 0; i < 20; ++i)
+    for (size_t i = 0; i < 30; ++i)
     {
         current_block = step(root_block, *head_block, i);
         std::error_code ec = store(chain, current_block);
@@ -285,6 +337,7 @@ int main()
             log_error() << ec.message();
         // Add to index
         block_point new_point;
+        new_point.i = i;
         new_point.parent = head_block;
         new_point.blk = current_block;
         new_point.ec = ec;
