@@ -828,7 +828,10 @@ bool validate_block::connect_input(size_t index_in_parent,
         BITCOIN_ASSERT(previous_height <= height_);
         uint32_t height_difference = height_ - previous_height;
         if (height_difference < coinbase_maturity)
+        {
+            log_warning(LOG_VALIDATE) << "Spends immature coinbase";
             return false;
+        }
     }
     // Pay to script hash BIP 16 scripts
     // block 170060 contains an invalid BIP 16 transaction
