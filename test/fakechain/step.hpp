@@ -55,7 +55,8 @@ block_type step(const block_point& root, const block_point& head, size_t n)
     if (n == 4)
     {
         prev_blk = lookup(root, {0, 0, 0});
-        output_point prevout{hash_transaction(prev_blk->transactions[0]), 0};
+        output_point prevout{
+            hash_transaction(root.prefix_chain[1].transactions[0]), 0};
         transaction_type tx = construct_transaction(prevout);
         return mine_next(*prev_blk, {coinbase_tx, tx});
     }

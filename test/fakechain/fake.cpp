@@ -173,6 +173,10 @@ transaction_type create_coinbase(const data_chunk& public_key)
 struct block_point
 {
     typedef std::vector<block_point> block_point_list;
+    typedef std::vector<block_type> block_list;
+
+    // Only used in root node.
+    block_list prefix_chain;
 
     block_point* parent = nullptr;
     block_type blk;
@@ -180,16 +184,22 @@ struct block_point
     std::error_code ec;
 };
 
-void display_full_chain(const block_point& point, size_t indent=0)
+void display_full_chain(const block_point& point,
+    size_t offset=0, size_t indent=0)
 {
+    for (size_t i = 0; i < point.prefix_chain.size(); ++i)
+        std::cout << i << ": "
+            << hash_block_header(point.prefix_chain[i].header) << std::endl;
+    offset += point.prefix_chain.size();
     for (size_t i = 0; i < indent; ++i)
         std::cout << "  ";
-    std::cout << indent << ": " << hash_block_header(point.blk.header);
+    std::cout << (offset + indent) << ": "
+        << hash_block_header(point.blk.header);
     if (point.ec)
         std::cout << " [" << point.ec.message() << "]";
     std::cout << std::endl;
     for (const auto& child: point.children)
-        display_full_chain(child, indent + 1);
+        display_full_chain(child, offset, indent + 1);
 }
 
 typedef std::vector<size_t> point_coord;
@@ -256,8 +266,17 @@ int main()
     chain.subscribe_reorganize(
         std::bind(reorganize, _1, _2, _3, _4, std::ref(chain)));
     // Now create blocks and store them in the database.
-    root_block.blk = genesis_block();
-    block_type current_block = root_block.blk;
+    block_type current_block = genesis_block();
+    for (size_t i = 0; i < 100; ++i)
+    {
+        root_block.prefix_chain.push_back(current_block);
+        transaction_type coinbase_tx = create_coinbase(public_key());
+        current_block = mine_next(current_block, {coinbase_tx});
+        std::error_code ec = store(chain, current_block);
+        BITCOIN_ASSERT(!ec);
+    }
+    // Steal the last block as our new root
+    root_block.blk = current_block;
     for (size_t i = 0; i < 20; ++i)
     {
         current_block = step(root_block, *head_block, i);

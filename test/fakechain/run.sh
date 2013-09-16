@@ -3,5 +3,5 @@ mkdir -p blockchain/
 rm -fr blockchain/*
 sx initchain blockchain/
 make
-./fake
+./fake 2>&1 | tee out
 
