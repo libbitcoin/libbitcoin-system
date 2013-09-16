@@ -171,12 +171,6 @@ bool parse(script_type& result_script, const std::string& format)
     return true;
 }
 
-void write_out(bool success)
-{
-    std::ofstream result_file("/tmp/script_status");
-    result_file << (success ? "1" : "0");
-}
-
 int main(int argc, char** argv)
 {
     BITCOIN_ASSERT(argc == 4);
@@ -191,7 +185,6 @@ int main(int argc, char** argv)
     if (!parse(input_script, input_string))
     {
         log_error() << "Error parsing input: " << input_string;
-        write_out(false);
         return -1;
     }
 
@@ -199,7 +192,6 @@ int main(int argc, char** argv)
     if (!parse(output_script, output_string))
     {
         log_error() << "Error parsing output: " << output_string;
-        write_out(false);
         return -1;
     }
 
@@ -210,11 +202,9 @@ int main(int argc, char** argv)
     if (!output_script.run(input_script, tx, 0))
     {
         log_error() << "Error running scripts";
-        write_out(false);
         return 1;
     }
 
-    write_out(true);
     return 0;
 }
 

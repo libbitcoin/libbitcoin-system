@@ -1,10 +1,18 @@
 import json
 import os
 import sys
+import subprocess
 
-bpath = "/home/genjix/src/bitcoin/src/test/data/"
+bpath = "/path/to/bitcoind/src/test/data/"
+# Try valid or invalid json?
+check_valid = False
 
-with open(bpath + "script_valid.json") as f:
+def call(command):
+    return subprocess.call(command, shell=True)
+
+json_path = "script_valid.json" if check_valid else "script_invalid.json"
+
+with open(bpath + json_path) as f:
     tests = json.loads(f.read())
 
 prefix_path = os.path.dirname(sys.argv[0])
@@ -16,12 +24,15 @@ for counter, test in enumerate(tests):
     print "====", (counter + 1), "of", len(tests), "===="
     test = (test[0], test[1], test[2] if len(test) == 3 else "")
     arguments = '"%s" "%s" "%s"' % test
-    retcode = os.system(scritp + " " + arguments)
-    success = bool(int(open("/tmp/script_status").read()))
+    retcode = call(scritp + " " + arguments)
+    success = bool(retcode == 0)
     if success:
         print "Status: pass"
     else:
         print (counter + 1), "Status: fail", test
-    assert success
+    if check_valid:
+        assert success
+    else:
+        assert not success
     print
 
