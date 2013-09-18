@@ -178,7 +178,7 @@ struct block_point
     // Only used in root node.
     block_list prefix_chain;
 
-    size_t i;
+    int i = -1; // Disregard field if -1
     block_point* parent = nullptr;
     block_type blk;
     block_point_list children;
@@ -192,7 +192,8 @@ void display_full_chain(const block_point& point,
         std::cout << i << ": "
             << hash_block_header(point.prefix_chain[i].header) << std::endl;
     offset += point.prefix_chain.size();
-    std::cout << point.i;
+    if (point.i != -1)
+        std::cout << point.i;
     for (size_t i = 0; i < indent; ++i)
         std::cout << "  ";
     std::cout << (offset + indent) << ": "
@@ -200,6 +201,15 @@ void display_full_chain(const block_point& point,
     if (point.ec)
         std::cout << " [" << point.ec.message() << "]";
     std::cout << std::endl;
+    for (size_t i = 1; i < point.blk.transactions.size(); ++i)
+    {
+        const transaction_type& tx = point.blk.transactions[i];
+        std::cout << "  ";
+        for (size_t i = 0; i < indent; ++i)
+            std::cout << "  ";
+        std::cout << "* " << hash_transaction(tx) << " (spending "
+            << tx.inputs[0].previous_output.hash << std::endl;
+    }
     for (const auto& child: point.children)
         display_full_chain(child, offset, indent + 1);
 }
@@ -210,7 +220,10 @@ const block_type* lookup(const block_point& root, const point_coord& coord)
 {
     const block_point* result = &root;
     for (size_t idx: coord)
+    {
+        BITCOIN_ASSERT(idx < result->children.size());
         result = &result->children[idx];
+    }
     return &result->blk;
 }
 
@@ -307,7 +320,7 @@ void reorganize(
         std::bind(reorganize, _1, _2, _3, _4, std::ref(chain)));
 }
 
-int main()
+void full_test()
 {
     block_point root_block, *head_block = &root_block;
     // Init blockchain.
@@ -351,6 +364,62 @@ int main()
     pool.stop();
     pool.join();
     chain.stop();
+}
+
+void generate_only()
+{
+    block_point root_block, *head_block = &root_block;
+    // Init blockchain.
+    //threadpool pool(1);
+    //leveldb_blockchain chain(pool);
+    //auto blockchain_start = [](const std::error_code& ec) {};
+    //chain.start("blockchain", blockchain_start);
+    //chain.subscribe_reorganize(
+    //    std::bind(reorganize, _1, _2, _3, _4, std::ref(chain)));
+    // Now create blocks and store them in the database.
+    block_type current_block = genesis_block();
+    for (size_t i = 0; i < 100; ++i)
+    {
+        root_block.prefix_chain.push_back(current_block);
+        transaction_type coinbase_tx = create_coinbase(public_key());
+        current_block = mine_next(current_block, {coinbase_tx});
+        //std::error_code ec = store(chain, current_block);
+        //BITCOIN_ASSERT(!ec);
+    }
+    // Steal the last block as our new root
+    root_block.blk = current_block;
+    for (size_t i = 0; i < 30; ++i)
+    {
+        current_block = step(root_block, *head_block, i);
+        std::cout << "FOO" << std::endl;
+        //std::error_code ec = store(chain, current_block);
+        //if (ec)
+        //    log_error() << ec.message();
+        // Add to index
+        block_point new_point;
+        new_point.i = i;
+        new_point.parent = head_block;
+        new_point.blk = current_block;
+        //new_point.ec = ec;
+        block_point* parent = find_parent(root_block, current_block);
+        BITCOIN_ASSERT(parent != nullptr);
+        parent->children.push_back(new_point);
+        //if (!ec)
+        //    head_block = &parent->children.back();
+        // Risky business - beware that in full test this might not
+        // get set if there's a validation error with the block.
+        head_block = &parent->children.back();
+    }
+    display_full_chain(root_block);
+    //pool.stop();
+    //pool.join();
+    //chain.stop();
+}
+
+int main()
+{
+    //generate_only();
+    full_test();
     return 0;
 }
 
