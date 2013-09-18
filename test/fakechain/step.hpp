@@ -7,6 +7,11 @@ block_type step(const block_point& root, const block_point& head, size_t n)
     if (n == 4)
     {
         prev_blk = lookup(root, {0, 0, 0});
+        output_point prevout{
+            hash_transaction(root.prefix_chain[2].transactions[0]), 0};
+        transaction_type tx = construct_transaction(prevout);
+        txh6 = hash_transaction(tx);
+        return mine_next(*prev_blk, {coinbase_tx, tx});
     }
     else if (n == 5)
     {
@@ -42,9 +47,18 @@ block_type step(const block_point& root, const block_point& head, size_t n)
     {
         prev_blk = lookup(root, {0, 0, 0, 1});
     }
+    else if (n == 15)
+    {
+        // Attempt double spend.
+        output_point prevout{
+            hash_transaction(root.prefix_chain[2].transactions[0]), 0};
+        transaction_type tx = construct_transaction(prevout);
+        txh6 = hash_transaction(tx);
+        return mine_next(*prev_blk, {coinbase_tx, tx});
+    }
     else if (n == 16)
     {
-        //prev_blk = lookup(root, {0, 0, 0, 2, 0, 0});
+        prev_blk = lookup(root, {0, 0, 0, 2, 0});
     }
     else if (n == 20)
     {

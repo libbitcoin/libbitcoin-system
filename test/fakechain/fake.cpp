@@ -201,14 +201,14 @@ void display_full_chain(const block_point& point,
     if (point.ec)
         std::cout << " [" << point.ec.message() << "]";
     std::cout << std::endl;
-    for (size_t i = 1; i < point.blk.transactions.size(); ++i)
+    for (size_t i = 0; i < point.blk.transactions.size(); ++i)
     {
         const transaction_type& tx = point.blk.transactions[i];
         std::cout << "  ";
         for (size_t i = 0; i < indent; ++i)
             std::cout << "  ";
         std::cout << "* " << hash_transaction(tx) << " (spending "
-            << tx.inputs[0].previous_output.hash << std::endl;
+            << tx.inputs[0].previous_output.hash << ")" << std::endl;
     }
     for (const auto& child: point.children)
         display_full_chain(child, offset, indent + 1);
