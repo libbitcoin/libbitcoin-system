@@ -209,9 +209,9 @@ void fullnode::recv_tx(const std::error_code& ec,
         const std::error_code& ec)
         {
             if (ec)
-                log_error() << "Confirm error: " << ec.message();
-            else
-                txidx_.deindex(tx, handle_deindex);
+                log_error() << "Confirm error ("
+                    << hash_transaction(tx) << "): " << ec.message();
+            txidx_.deindex(tx, handle_deindex);
         };
     // Validate the transaction from the network.
     // Attempt to store in the transaction pool and check the result.
