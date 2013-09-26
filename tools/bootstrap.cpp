@@ -5,6 +5,7 @@
 */
 #include <future>
 #include <bitcoin/bitcoin.hpp>
+#include <time.h>
 
 #define LOG_BOOTSTRAP "bootstrap"
 
@@ -133,26 +134,23 @@ int main(int argc, char** argv)
 
     // This will return false when there are not enough bytes left
     // in the file to fill the buffer, meaning we may miss the last block
-    std::cout << "entering loop" << std::endl;
-
     while(!stopped)
     {
-        std::cout << "started1" << std::endl;
-
         fin.read((char*) &buffer[0], buffer_size);
         buffer_position = 0;
 
-        std::cout << "started" << std::endl;
-
         while(buffer_position < buffer_size - 8 && !stopped)
         {
-            // Assert we have the magic bytes.
-            BITCOIN_ASSERT(
-                buffer[buffer_position] == 0xf9 &&
-                buffer[buffer_position + 1] == 0xbe &&
-                buffer[buffer_position + 2] == 0xb4 &&
-                buffer[buffer_position + 3] == 0xd9);
-
+            // Check we have the magic bytes. This will automatically exit
+            // if reach an incorrect part or the end of the file. 
+            if (buffer[buffer_position] != 0xf9 ||
+                buffer[buffer_position + 1] != 0xbe ||
+                buffer[buffer_position + 2] != 0xb4 ||
+                buffer[buffer_position + 3] != 0xd9)
+            {
+                stopped = true;
+                break;
+            }
             // Get the block size from the reversed endain field.
             block_size = get_block_size(buffer, buffer_position + 4);
 
@@ -182,12 +180,14 @@ int main(int argc, char** argv)
                 finished = true;
             };
 
-            log_debug(LOG_BOOTSTRAP) << "Storing block. Parse count = "
-                << blocks_parsed;
             chain.store(blk, block_imported);
 
+            struct timespec ts;
+            ts.tv_sec = 0;
+            ts.tv_nsec = 1;
+
             while (!finished)
-                usleep(1000);
+                nanosleep(&ts, NULL);
 
             hash_digest block_hash = hash_block_header(blk.header);
             // We need orphan blocks so we can do the next getblocks round
@@ -222,7 +222,8 @@ int main(int argc, char** argv)
             buffer_position += block_size + 8;
             blocks_parsed++;
         }
-
+        log_info(LOG_BOOTSTRAP)
+                            << "Rewinding file buffer";
         // Rewind to the last good magic bytes, which didn't have enough space
         // left in the buffer for the block
         fin.seekg(buffer_position - buffer_size, std::ios::cur);
