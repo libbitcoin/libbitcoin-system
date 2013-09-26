@@ -70,7 +70,7 @@ void transaction_pool::validation_complete(
     }
     else
     {
-        handle_validate(std::error_code(), index_list());
+        handle_validate(std::error_code(), unconfirmed);
     }
 }
 
