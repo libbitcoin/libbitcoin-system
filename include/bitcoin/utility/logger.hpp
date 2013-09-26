@@ -14,6 +14,7 @@ namespace libbitcoin {
 #define LOG_POLLER      "poller"
 #define LOG_SESSION     "session"
 #define LOG_SCRIPT      "script"
+#define LOG_TXPOOL      "transaction_pool"
 
 enum class log_level
 {

@@ -4,6 +4,7 @@
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/validate.hpp>
 #include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
 
@@ -69,7 +70,7 @@ void transaction_pool::validation_complete(
     }
     else
     {
-        handle_validate(std::error_code(), index_list());
+        handle_validate(std::error_code(), unconfirmed);
     }
 }
 
@@ -84,29 +85,31 @@ bool transaction_pool::tx_exists(const hash_digest& tx_hash)
 void transaction_pool::store(const transaction_type& tx,
     confirm_handler handle_confirm, validate_handler handle_validate)
 {
-    auto perform_store =
-        [this, tx, handle_confirm]
+    auto perform_store = [this, tx, handle_confirm]
+    {
+        log_debug(LOG_TXPOOL) << "txpool::store() ["
+            << pool_.size() << " / " << pool_.capacity() << "]";
+        // When new tx are added to the circular buffer,
+        // any tx at the front will be droppped.
+        // We notify the API user of this through the handler.
+        if (pool_.size() == pool_.capacity())
         {
-            // When new tx are added to the circular buffer,
-            // any tx at the front will be droppped.
-            // We notify the API user of this through the handler.
-            if (pool_.size() == pool_.capacity())
-            {
-                auto handle_confirm = pool_.front().handle_confirm;
-                handle_confirm(error::forced_removal);
-            }
-            // We store a precomputed tx hash to make lookups faster.
-            pool_.push_back(
-                {hash_transaction(tx), tx, handle_confirm});
-        };
-    auto wrap_handle_validate =
-        [perform_store, handle_validate](
-            const std::error_code& ec, const index_list& unconfirmed)
-        {
-            if (!ec)
-                perform_store();
-            handle_validate(ec, unconfirmed);
-        };
+            log_debug(LOG_TXPOOL)
+                << "handle_confirm(error::forced_removal)";
+            auto handle_confirm = pool_.front().handle_confirm;
+            handle_confirm(error::forced_removal);
+        }
+        // We store a precomputed tx hash to make lookups faster.
+        pool_.push_back(
+            {hash_transaction(tx), tx, handle_confirm});
+    };
+    auto wrap_handle_validate = [perform_store, handle_validate](
+        const std::error_code& ec, const index_list& unconfirmed)
+    {
+        if (!ec)
+            perform_store();
+        handle_validate(ec, unconfirmed);
+    };
     validate(tx, wrap_handle_validate);
 }
 
