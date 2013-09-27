@@ -72,5 +72,5 @@ proto: proto.o
 all: balance priv determ initchain fullnode display-last satoshiwords connect accept proto txrad
 
 clean:
-	rm -f accept connect determ display-last fullnode initchain priv proto satoshiwords txrad
+	rm -f accept balance connect determ display-last fullnode initchain priv proto satoshiwords txrad
 	rm -f *.o
