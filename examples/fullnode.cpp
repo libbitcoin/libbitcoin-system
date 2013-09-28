@@ -123,14 +123,14 @@ void fullnode::start()
         std::bind(&fullnode::connection_started, this, _1, _2));
     // Start blockchain. Must finish before any operations
     // are performed on the database (or they will fail).
-    std::promise<std::error_code> ec_chain;
+    std::promise<std::error_code> ec_promise;
     auto blockchain_started =
-        [&](const std::error_code& ec)
+        [&ec_promise](const std::error_code& ec)
         {
-            ec_chain.set_value(ec);
+            ec_promise.set_value(ec);
         };
     chain_.start("blockchain", blockchain_started);
-    std::error_code ec = ec_chain.get_future().get();
+    std::error_code ec = ec_promise.get_future().get();
     if (ec)
     {
         log_error() << "Problem starting blockchain: " << ec.message();
@@ -146,7 +146,16 @@ void fullnode::start()
 
 void fullnode::stop()
 {
-    session_.stop([](const std::error_code&) {});
+    std::promise<std::error_code> ec_promise;
+    auto session_stopped =
+        [&ec_promise](const std::error_code& ec)
+        {
+            ec_promise.set_value(ec);
+        };
+    session_.stop(session_stopped);
+    std::error_code ec = ec_promise.get_future().get();
+    if (ec)
+        log_error() << "Problem stopping session: " << ec.message();
 
     // Stop threadpools.
     net_pool_.stop();
