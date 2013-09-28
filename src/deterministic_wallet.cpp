@@ -193,6 +193,8 @@ secret_parameter deterministic_wallet::generate_secret(
     // SSL will skip to the first significant digit.
     size_t copy_offset = secret.size() - BN_num_bytes(secexp);
     BN_bn2bin(secexp, secret.data() + copy_offset);
+    // Zero out beginning 0x00 bytes (if they exist).
+    std::fill(secret.begin(), secret.begin() + copy_offset, 0x00);
     return secret;
 }
 
