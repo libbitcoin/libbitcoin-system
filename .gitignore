@@ -25,3 +25,17 @@ obj
 /libtool
 .dirstamp
 libbitcoin_1.0.10-1_amd64.deb
+
+/examples/accept
+/examples/balance
+/examples/connect
+/examples/determ
+/examples/display-last
+/examples/fullnode
+/examples/initchain
+/examples/priv
+/examples/proto
+/examples/satoshiwords
+/examples/txrad
+/examples/error.log
+/examples/debug.log

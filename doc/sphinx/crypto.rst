@@ -89,7 +89,7 @@ ever gets lost, all private and public keys can be regenerated from the initial
 seed.
 
 Also, multiple devices could host the same wallet based off of the same seed and
-automatically stay in sync with eachother. Non-critical information such as
+automatically stay in sync with each other. Non-critical information such as
 address books would need to be stored and copied between wallets. 
 
 libbitcoin implements the same compatible deterministic wallet algorithm as `Electrum <http://electrum.org/>`_.
