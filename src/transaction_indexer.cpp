@@ -37,8 +37,8 @@ void transaction_indexer::do_query(const payment_address& payaddr,
     query_handler handle_query)
 {
     handle_query(std::error_code(),
-        get_info_list<spend_info_list>(payaddr, spends_map_),
-        get_info_list<output_info_list>(payaddr, outputs_map_));
+        get_info_list<output_info_list>(payaddr, outputs_map_),
+        get_info_list<spend_info_list>(payaddr, spends_map_));
 }
 
 template <typename Point, typename EntryMultimap>
@@ -153,7 +153,7 @@ void blockchain_history_fetched(const std::error_code& ec,
     transaction_indexer& indexer, const payment_address& address,
     blockchain::fetch_handler_history handle_fetch);
 void indexer_history_fetched(const std::error_code& ec,
-    const spend_info_list& spends, const output_info_list& outputs,
+    const output_info_list& outputs, const spend_info_list& spends,
     blockchain::history_list history,
     blockchain::fetch_handler_history handle_fetch);
 // Fetch the history first from the blockchain and then from the indexer.
@@ -178,7 +178,7 @@ void blockchain_history_fetched(const std::error_code& ec,
                 history, handle_fetch));
 }
 void indexer_history_fetched(const std::error_code& ec,
-    const spend_info_list& spends, const output_info_list& outputs,
+    const output_info_list& outputs, const spend_info_list& spends,
     blockchain::history_list history,
     blockchain::fetch_handler_history handle_fetch)
 {

@@ -28,7 +28,7 @@ public:
     typedef std::function<void (const std::error_code&)> completion_handler;
 
     typedef std::function<void (const std::error_code& ec,
-        const spend_info_list& spends, const output_info_list& outputs)>
+        const output_info_list& outputs, const spend_info_list& spends)>
             query_handler;
 
     transaction_indexer(threadpool& pool);
@@ -46,21 +46,21 @@ public:
      * @code
      *  void handle_query(
      *      const std::error_code& ec,       // Status of operation
-     *      const spend_info_list& spends,   // Inputs
-     *      const output_info_list& outputs  // Outputs
+     *      const output_info_list& outputs, // Outputs
+     *      const spend_info_list& spends    // Inputs
      *  );
      * @endcode
      * @code
-     *  struct spend_info_type
-     *  {
-     *      input_point point;
-     *      output_point previous_output;
-     *  };
-     *
      *  struct output_info_type
      *  {
      *      output_point point;
      *      uint64_t value;
+     *  };
+     *
+     *  struct spend_info_type
+     *  {
+     *      input_point point;
+     *      output_point previous_output;
      *  };
      * @endcode
      */
