@@ -163,7 +163,9 @@ bool leveldb_common::duplicate_exists(const hash_digest& tx_hash,
     leveldb_tx_info tx;
     if (!get_transaction(tx, tx_hash, false, false))
         return false;
-    BITCOIN_ASSERT(block_height == 91842 || block_height == 91880);
+    BITCOIN_ASSERT(
+        (block_height == 91842 || block_height == 91880) &&
+        tx_index == 0);
     return true;
 }
 
@@ -328,28 +330,26 @@ leveldb::Slice slice_block_hash(const hash_digest& block_hash)
         reinterpret_cast<const char*>(block_hash.data() + 16), 16);
 }
 
-uint32_t addr_key_checksum(const output_point& outpoint)
+uint64_t addr_key_checksum(const output_point& outpoint)
 {
-    data_chunk chksum_data(hash_digest_size + 4);
-    auto serial = make_serializer(chksum_data.begin());
+    data_chunk checksum_data(hash_digest_size + 4);
+    auto serial = make_serializer(checksum_data.begin());
     serial.write_hash(outpoint.hash);
     serial.write_4_bytes(outpoint.index);
-    BITCOIN_ASSERT(
-        std::distance(chksum_data.begin(), serial.iterator()) ==
-        hash_digest_size + 4);
-    return generate_sha256_checksum(chksum_data);
+    BITCOIN_ASSERT(serial.iterator() == checksum_data.end());
+    hash_digest hash = generate_sha256_hash(checksum_data);
+    data_chunk raw_checksum(hash.begin(), hash.begin() + 8);
+    return cast_chunk<uint64_t>(raw_checksum);
 }
 data_chunk create_address_key(
     const payment_address& address, const output_point& outpoint)
 {
-    data_chunk result(1 + short_hash_size + 4);
+    data_chunk result(1 + short_hash_size + 8);
     auto serial = make_serializer(result.begin());
     serial.write_byte(address.version());
     serial.write_short_hash(address.hash());
-    serial.write_4_bytes(addr_key_checksum(outpoint));
-    BITCOIN_ASSERT(
-        std::distance(result.begin(), serial.iterator()) ==
-        1 + short_hash_size + 4);
+    serial.write_8_bytes(addr_key_checksum(outpoint));
+    BITCOIN_ASSERT(serial.iterator() == result.end());
     return result;
 }
 

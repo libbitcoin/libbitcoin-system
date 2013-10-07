@@ -479,7 +479,7 @@ public:
         it_->Next();
     }
 
-    uint32_t checksum() const
+    uint64_t checksum() const
     {
         return checksum_;
     }
@@ -509,16 +509,16 @@ private:
     {
         const uint8_t* begin = slice_begin(key.data());
         const uint8_t* end = begin + key.size();
-        BITCOIN_ASSERT(key.size() == 1 + short_hash_size + 4);
+        BITCOIN_ASSERT(key.size() == 1 + short_hash_size + 8);
         auto deserial = make_deserializer(begin + 1 + short_hash_size, end);
-        checksum_ = deserial.read_4_bytes();
+        checksum_ = deserial.read_8_bytes();
         BITCOIN_ASSERT(deserial.iterator() == end);
     }
 
     leveldb_iterator it_;
     data_chunk raw_address_;
 
-    uint32_t checksum_;
+    uint64_t checksum_;
 };
 
 class outpoint_iterator
@@ -568,7 +568,7 @@ public:
     inpoint_iterator(database_ptr& db, const payment_address& address)
       : point_iterator(db, address) {}
 
-    input_point next_inpoint(uint32_t credit_checksum)
+    input_point next_inpoint(uint64_t credit_checksum)
     {
         // Check if there's an equivalent spend for this credit.
         if (!valid())
@@ -587,7 +587,7 @@ public:
         ++(*this);
         return result;
     }
-    uint32_t height(uint32_t credit_checksum) const
+    uint32_t height(uint64_t credit_checksum) const
     {
         if (checksum() != credit_checksum)
             return 0;
@@ -636,7 +636,7 @@ bool leveldb_blockchain::do_fetch_history(const payment_address& address,
         credit_it.valid(); ++credit_it)
     {
         credit_it.load();
-        uint32_t checksum = credit_it.checksum();
+        uint64_t checksum = credit_it.checksum();
         history_row row{
             credit_it.outpoint(),
             credit_it.height(),
