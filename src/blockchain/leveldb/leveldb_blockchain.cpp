@@ -1,6 +1,7 @@
 #include <bitcoin/blockchain/leveldb_blockchain.hpp>
 
 #include <fstream>
+#include <unordered_map>
 #include <boost/filesystem.hpp>
 #include <leveldb/cache.h>
 #include <leveldb/comparator.h>
@@ -474,7 +475,7 @@ public:
         load_data(it_->value());
     }
 
-    void operator++()
+    void next()
     {
         it_->Next();
     }
@@ -568,36 +569,13 @@ public:
     inpoint_iterator(database_ptr& db, const payment_address& address)
       : point_iterator(db, address) {}
 
-    input_point next_inpoint(uint64_t credit_checksum)
+    input_point inpoint()
     {
-        // Check if there's an equivalent spend for this credit.
-        if (!valid())
-            return {null_hash, max_index};
-        // Valid iterator so load the data.
-        if (dirty_)
-        {
-            load();
-            dirty_ = false;
-        }
-        // The next spend in the iterator is not for this output point.
-        if (checksum() != credit_checksum)
-            return {null_hash, max_index};
-        // Checksums match. Spend for this output exists.
-        input_point result = inpoint_;
-        ++(*this);
-        return result;
+        return inpoint_;
     }
-    uint32_t height(uint64_t credit_checksum) const
+    uint32_t height() const
     {
-        if (checksum() != credit_checksum)
-            return 0;
         return height_;
-    }
-
-    void make_dirty()
-    {
-        // Dirty so we reload next time.
-        dirty_ = true;
     }
 
 protected:
@@ -614,7 +592,6 @@ protected:
     }
 
 private:
-    bool dirty_ = true;
     input_point inpoint_;
     uint32_t height_ = max_index;
 };
@@ -629,24 +606,49 @@ void leveldb_blockchain::fetch_history(const payment_address& address,
 bool leveldb_blockchain::do_fetch_history(const payment_address& address,
     fetch_handler_history handle_fetch, size_t from_height, size_t slock)
 {
+    constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
+    struct spend_data
+    {
+        input_point point;
+        uint32_t height;
+    };
+    typedef std::unordered_map<uint64_t, spend_data> spend_map;
+
+    // First we create map of spends...
+    spend_map spends;
+    for (inpoint_iterator debit_it(db_debit_, address);
+        debit_it.valid(); debit_it.next())
+    {
+        debit_it.load();
+        uint64_t checksum = debit_it.checksum();
+        spends.emplace(checksum,
+            spend_data{debit_it.inpoint(), debit_it.height()});
+    }
+    // ... Then we load outputs.
     history_list history;
-    // Load output data
-    inpoint_iterator debit_it(db_debit_, address);
     for (outpoint_iterator credit_it(db_credit_, address);
-        credit_it.valid(); ++credit_it)
+        credit_it.valid(); credit_it.next())
     {
         credit_it.load();
-        uint64_t checksum = credit_it.checksum();
+        // Row with no spend (yet)
         history_row row{
             credit_it.outpoint(),
             credit_it.height(),
             credit_it.value(),
-            debit_it.next_inpoint(checksum),
-            debit_it.height(checksum)
+            input_point{null_hash, max_index},
+            max_height
         };
-        debit_it.make_dirty();
-        BITCOIN_ASSERT(row.spend.hash == null_hash ||
-            row.spend_height >= row.output_height);
+        // Now search for the spend. If it exists,
+        // then load and add it to the row.
+        uint64_t checksum = credit_it.checksum();
+        auto it = spends.find(checksum);
+        if (it != spends.end())
+        {
+            const spend_data& data = it->second;
+            row.spend = data.point;
+            row.spend_height = data.height;
+            BITCOIN_ASSERT(row.spend_height >= row.output_height);
+        }
         // Filter entries below the from_height.
         if (row.output_height >= from_height ||
             row.spend_height >= from_height)
@@ -654,8 +656,6 @@ bool leveldb_blockchain::do_fetch_history(const payment_address& address,
             history.push_back(row);
         }
     }
-    // All the debits should have been loaded.
-    BITCOIN_ASSERT(!debit_it.valid());
     // Finish.
     return finish_fetch(slock, handle_fetch, std::error_code(), history);
 }
