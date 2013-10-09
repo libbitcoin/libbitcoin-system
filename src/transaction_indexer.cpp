@@ -182,6 +182,7 @@ void indexer_history_fetched(const std::error_code& ec,
     blockchain::history_list history,
     blockchain::fetch_handler_history handle_fetch)
 {
+    constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
     if (ec)
     {
         handle_fetch(ec, blockchain::history_list());
@@ -204,7 +205,7 @@ void indexer_history_fetched(const std::error_code& ec,
             0,
             output_info.value,
             {null_hash, max_index},
-            0
+            max_height
         });
     }
     // Now mark spends.
@@ -216,7 +217,7 @@ void indexer_history_fetched(const std::error_code& ec,
         {
             if (row.output != spend_info.previous_output)
                 continue;
-            BITCOIN_ASSERT(row.spend_height == 0);
+            BITCOIN_ASSERT(row.spend_height == max_height);
             BITCOIN_ASSERT((row.spend == input_point{null_hash, max_index}));
             row.spend = spend_info.point;
             row.spend_height = 0;
