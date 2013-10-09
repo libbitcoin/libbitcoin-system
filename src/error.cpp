@@ -50,8 +50,11 @@ std::string error_category_impl::message(int ev) const noexcept
             return "Bad stream";
         case error::channel_timeout:
             return "Channel timed out";
-        case error::forced_removal:
-            return "Forced removal of transaction";
+        // transaction pool
+        case error::blockchain_reorganized:
+            return "Transactions invalidated from blockchain reorganization";
+        case error::pool_filled:
+            return "Forced removal of old transaction from full pool";
         // validate tx
         case error::coinbase_transaction:
             return "Memory pool coinbase transaction";
@@ -153,6 +156,9 @@ std::error_condition
         case error::fees_out_of_range:
         case error::coinbase_too_large:
             return error::validate_failed;
+        case error::blockchain_reorganized:
+        case error::pool_filled:
+            return error::forced_removal;
         default:
             return std::error_condition(ev, *this);
     }

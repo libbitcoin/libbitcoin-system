@@ -26,7 +26,8 @@ namespace error
         bad_stream,
         channel_timeout,
         // transaction pool
-        forced_removal,
+        blockchain_reorganized,
+        pool_filled,
         // validate tx
         coinbase_transaction,
         is_not_standard,
@@ -64,7 +65,8 @@ namespace error
     enum error_condition_t
     {
         // validate
-        validate_failed = 1
+        validate_failed = 1,
+        forced_removal
     };
 
     std::error_code make_error_code(error_code_t e);

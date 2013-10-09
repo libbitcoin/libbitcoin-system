@@ -87,17 +87,13 @@ void transaction_pool::store(const transaction_type& tx,
 {
     auto perform_store = [this, tx, handle_confirm]
     {
-        log_debug(LOG_TXPOOL) << "txpool::store() ["
-            << pool_.size() << " / " << pool_.capacity() << "]";
         // When new tx are added to the circular buffer,
         // any tx at the front will be droppped.
         // We notify the API user of this through the handler.
         if (pool_.size() == pool_.capacity())
         {
-            log_debug(LOG_TXPOOL)
-                << "handle_confirm(error::forced_removal)";
             auto handle_confirm = pool_.front().handle_confirm;
-            handle_confirm(error::forced_removal);
+            handle_confirm(error::pool_filled);
         }
         // We store a precomputed tx hash to make lookups faster.
         pool_.push_back(
@@ -145,7 +141,7 @@ void transaction_pool::reorganize(const std::error_code& ec,
     const blockchain::block_list& replaced_blocks)
 {
     if (!replaced_blocks.empty())
-        resubmit_all();
+        invalidate_pool();
     else
         takeout_confirmed(new_blocks);
     // new blocks come in - remove txs in new
@@ -155,17 +151,13 @@ void transaction_pool::reorganize(const std::error_code& ec,
             this, _1, _2, _3, _4));
 }
 
-void handle_resubmit(const std::error_code& ec,
-    transaction_pool::confirm_handler handle_confirm)
+void transaction_pool::invalidate_pool()
 {
-    if (ec)
-        handle_confirm(ec);
-}
-void transaction_pool::resubmit_all()
-{
+    // See http://www.jwz.org/doc/worse-is-better.html
+    // for why we take this approach.
+    // We return with an error_code and don't handle this case.
     for (const transaction_entry_info& entry: pool_)
-        store(entry.tx, entry.handle_confirm,
-            std::bind(handle_resubmit, _1, entry.handle_confirm));
+        entry.handle_confirm(error::blockchain_reorganized);
     pool_.clear();
 }
 

@@ -177,7 +177,7 @@ private:
         size_t fork_point,
         const blockchain::block_list& new_blocks,
         const blockchain::block_list& replaced_blocks);
-    void resubmit_all();
+    void invalidate_pool();
     void takeout_confirmed(const blockchain::block_list& new_blocks);
     void try_delete(const hash_digest& tx_hash);
 
