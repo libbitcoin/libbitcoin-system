@@ -217,6 +217,8 @@ void fullnode::recv_tx(const std::error_code& ec,
     auto handle_confirm = [this, tx, handle_deindex](
         const std::error_code& ec)
         {
+            log_debug() << "handle_confirm ec = " << ec.message()
+                << " " << hash_transaction(tx);
             if (ec)
                 log_error() << "Confirm error ("
                     << hash_transaction(tx) << "): " << ec.message();

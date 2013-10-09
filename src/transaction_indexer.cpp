@@ -3,6 +3,8 @@
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/logger.hpp>
+#include <bitcoin/format.hpp>
 
 namespace libbitcoin {
 
@@ -13,11 +15,13 @@ using std::placeholders::_3;
 transaction_indexer::transaction_indexer(threadpool& pool)
   : strand_(pool)
 {
+    log_debug() << "transaction_indexer()";
 }
 
 void transaction_indexer::query(const payment_address& payaddr,
     query_handler handle_query)
 {
+    log_debug() << "transaction_indexer::query(" << payaddr.encoded() << ")";
     strand_.queue(
         std::bind(&transaction_indexer::do_query,
             this, payaddr, handle_query));
@@ -36,6 +40,7 @@ InfoList get_info_list(const payment_address& payaddr,
 void transaction_indexer::do_query(const payment_address& payaddr,
     query_handler handle_query)
 {
+    log_debug() << "transaction_indexer::do_query(" << payaddr.encoded() << ")";
     handle_query(std::error_code(),
         get_info_list<output_info_list>(payaddr, outputs_map_),
         get_info_list<spend_info_list>(payaddr, spends_map_));
@@ -65,6 +70,8 @@ bool index_does_not_exist(const payment_address& key,
 void transaction_indexer::index(const transaction_type& tx,
     completion_handler handle_index)
 {
+    log_debug() << "transaction_indexer::index("
+        << hash_transaction(tx) << ")";
     strand_.queue(
         std::bind(&transaction_indexer::do_index,
             this, tx, handle_index));
@@ -72,14 +79,19 @@ void transaction_indexer::index(const transaction_type& tx,
 void transaction_indexer::do_index(const transaction_type& tx,
     completion_handler handle_index)
 {
+    log_debug() << "transaction_indexer::do_index("
+        << hash_transaction(tx) << ")";
     hash_digest tx_hash = hash_transaction(tx);
     for (uint32_t i = 0; i < tx.inputs.size(); ++i)
     {
+        auto l = log_debug();
+        l << "  " << i;
         const transaction_input_type& input = tx.inputs[i];
         payment_address payaddr;
         // Nothing to see here folks. Move along.
         if (!extract(payaddr, input.script))
             continue;
+        l << "  " << payaddr.encoded();
         input_point point{tx_hash, i};
         BITCOIN_ASSERT_MSG(
             index_does_not_exist(payaddr, point, spends_map_),
@@ -89,11 +101,14 @@ void transaction_indexer::do_index(const transaction_type& tx,
     }
     for (uint32_t i = 0; i < tx.outputs.size(); ++i)
     {
+        auto l = log_debug();
+        l << "  " << i;
         const transaction_output_type& output = tx.outputs[i];
         payment_address payaddr;
         // Nothing to see here folks. Move along.
         if (!extract(payaddr, output.script))
             continue;
+        l << "  " << payaddr.encoded();
         output_point point{tx_hash, i};
         BITCOIN_ASSERT_MSG(
             index_does_not_exist(payaddr, point, outputs_map_),
@@ -106,6 +121,8 @@ void transaction_indexer::do_index(const transaction_type& tx,
 void transaction_indexer::deindex(const transaction_type& tx,
     completion_handler handle_deindex)
 {
+    log_debug() << "transaction_indexer::deindex("
+        << hash_transaction(tx) << ")";
     strand_.queue(
         std::bind(&transaction_indexer::do_deindex,
             this, tx, handle_deindex));
@@ -113,14 +130,19 @@ void transaction_indexer::deindex(const transaction_type& tx,
 void transaction_indexer::do_deindex(const transaction_type& tx,
     completion_handler handle_deindex)
 {
+    log_debug() << "transaction_indexer::do_deindex("
+        << hash_transaction(tx) << ")";
     hash_digest tx_hash = hash_transaction(tx);
     for (uint32_t i = 0; i < tx.inputs.size(); ++i)
     {
+        auto l = log_debug();
+        l << "  " << i;
         const transaction_input_type& input = tx.inputs[i];
         payment_address payaddr;
         // Nothing to see here folks. Move along.
         if (!extract(payaddr, input.script))
             continue;
+        l << "  " << payaddr.encoded();
         input_point point{tx_hash, i};
         auto it = find_entry(payaddr, point, spends_map_);
         BITCOIN_ASSERT_MSG(it != spends_map_.end(),
@@ -132,11 +154,14 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
     }
     for (uint32_t i = 0; i < tx.outputs.size(); ++i)
     {
+        auto l = log_debug();
+        l << "  " << i;
         const transaction_output_type& output = tx.outputs[i];
         payment_address payaddr;
         // Nothing to see here folks. Move along.
         if (!extract(payaddr, output.script))
             continue;
+        l << "  " << payaddr.encoded();
         output_point point{tx_hash, i};
         auto it = find_entry(payaddr, point, outputs_map_);
         BITCOIN_ASSERT_MSG(it != outputs_map_.end(),
@@ -161,6 +186,8 @@ void fetch_history(blockchain& chain, transaction_indexer& indexer,
     const payment_address& address,
     blockchain::fetch_handler_history handle_fetch, size_t from_height)
 {
+    log_debug() << "fetch_history(chain, idx, " << address.encoded()
+        << ", from_height=" << from_height << ")";
     chain.fetch_history(address,
         std::bind(blockchain_history_fetched, _1, _2,
             std::ref(indexer), address, handle_fetch), from_height);
@@ -170,6 +197,8 @@ void blockchain_history_fetched(const std::error_code& ec,
     transaction_indexer& indexer, const payment_address& address,
     blockchain::fetch_handler_history handle_fetch)
 {
+    log_debug() << "blockchain_history_fetched(" << ec.message()
+        << ", history(" << history.size() << "), " << address.encoded() << ")";
     if (ec)
         handle_fetch(ec, blockchain::history_list());
     else
@@ -183,6 +212,9 @@ void indexer_history_fetched(const std::error_code& ec,
     blockchain::fetch_handler_history handle_fetch)
 {
     constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
+    log_debug() << "indexer_history_fetched(" << ec.message()
+        << ", spends(" << spends.size() << "), outputs(" << outputs.size()
+        << "), history(" << history.size() << "))";
     if (ec)
     {
         handle_fetch(ec, blockchain::history_list());
