@@ -18,18 +18,19 @@ transaction_pool::transaction_pool(
     threadpool& pool, blockchain& chain)
   : strand_(pool), chain_(chain), pool_(2000)
 {
-    log_debug() << "transaction_pool()";
+    log_debug(LOG_TXPOOL) << "transaction_pool()";
 }
 
 void transaction_pool::set_capacity(size_t capacity)
 {
-    log_debug() << "transaction_pool::set_capacity(" << capacity << ")";
+    log_debug(LOG_TXPOOL) << "transaction_pool::set_capacity("
+        << capacity << ")";
     pool_.set_capacity(capacity);
 }
 
 void transaction_pool::start()
 {
-    log_debug() << "start()";
+    log_debug(LOG_TXPOOL) << "start()";
     chain_.subscribe_reorganize(
         std::bind(&transaction_pool::reorganize, this, _1, _2, _3, _4));
 }
@@ -37,7 +38,7 @@ void transaction_pool::start()
 void transaction_pool::validate(const transaction_type& tx,
     validate_handler handle_validate)
 {
-    log_debug() << "transaction_pool::validate("
+    log_debug(LOG_TXPOOL) << "transaction_pool::validate("
         << hash_transaction(tx) << ")";
     strand_.queue(&transaction_pool::do_validate,
         this, tx, handle_validate);
@@ -45,7 +46,7 @@ void transaction_pool::validate(const transaction_type& tx,
 void transaction_pool::do_validate(const transaction_type& tx,
     validate_handler handle_validate)
 {
-    log_debug() << "transaction_pool::do_validate("
+    log_debug(LOG_TXPOOL) << "transaction_pool::do_validate("
         << hash_transaction(tx) << ")";
     validate_transaction_ptr validate =
         std::make_shared<validate_transaction>(
@@ -59,31 +60,31 @@ void transaction_pool::validation_complete(
     const std::error_code& ec, const index_list& unconfirmed,
     const hash_digest& tx_hash, validate_handler handle_validate)
 {
-    log_debug() << "transaction_pool::validation_complete("
+    log_debug(LOG_TXPOOL) << "transaction_pool::validation_complete("
         << ec.message() << ", unconfirmed(" << unconfirmed.size() << "), "
         << tx_hash << ")";
     if (ec == error::input_not_found || ec == error::validate_inputs_failed)
     {
-        log_debug() << "  missing input";
+        log_debug(LOG_TXPOOL) << "  missing input";
         BITCOIN_ASSERT(unconfirmed.size() == 1);
         //BITCOIN_ASSERT(unconfirmed[0] < tx.inputs.size());
         handle_validate(ec, unconfirmed);
     }
     else if (ec)
     {
-        log_debug() << "  other error";
+        log_debug(LOG_TXPOOL) << "  other error";
         BITCOIN_ASSERT(unconfirmed.empty());
         handle_validate(ec, index_list());
     }
     // Re-check as another transaction might've been added in the interim
     else if (tx_exists(tx_hash))
     {
-        log_debug() << "  duplicate tx";
+        log_debug(LOG_TXPOOL) << "  duplicate tx";
         handle_validate(error::duplicate, index_list());
     }
     else
     {
-        log_debug() << "  tx OK passed";
+        log_debug(LOG_TXPOOL) << "  tx OK passed";
         handle_validate(std::error_code(), unconfirmed);
     }
 }
@@ -116,32 +117,34 @@ void transaction_pool::store(const transaction_type& tx,
     auto wrap_handle_validate = [perform_store, handle_validate](
         const std::error_code& ec, const index_list& unconfirmed)
     {
-        log_debug() << "wrap_handle_validate ec = " << ec.message();
+        log_debug(LOG_TXPOOL) << "wrap_handle_validate ec = " << ec.message();
         if (!ec)
             perform_store();
         handle_validate(ec, unconfirmed);
     };
-    log_debug() << "transaction_pool::store(" << hash_transaction(tx) << ")";
+    log_debug(LOG_TXPOOL) << "transaction_pool::store("
+        << hash_transaction(tx) << ")";
     validate(tx, wrap_handle_validate);
 }
 
 void transaction_pool::fetch(const hash_digest& transaction_hash,
     fetch_handler handle_fetch)
 {
-    log_debug() << "transaction_pool::fetch(" << transaction_hash << ")";
+    log_debug(LOG_TXPOOL) << "transaction_pool::fetch("
+        << transaction_hash << ")";
     strand_.queue(
         [this, transaction_hash, handle_fetch]()
         {
-            log_debug() << "transaction_pool::do_fetch("
+            log_debug(LOG_TXPOOL) << "transaction_pool::do_fetch("
                 << transaction_hash << ")";
             for (const transaction_entry_info& entry: pool_)
                 if (entry.hash == transaction_hash)
                 {
-                    log_debug() << "  found!";
+                    log_debug(LOG_TXPOOL) << "  found!";
                     handle_fetch(std::error_code(), entry.tx);
                     return;
                 }
-            log_debug() << "  not found...";
+            log_debug(LOG_TXPOOL) << "  not found...";
             handle_fetch(error::not_found, transaction_type());
         });
 }
@@ -149,12 +152,12 @@ void transaction_pool::fetch(const hash_digest& transaction_hash,
 void transaction_pool::exists(const hash_digest& transaction_hash,
     exists_handler handle_exists)
 {
-    log_debug() << "transaction_pool::exists("
+    log_debug(LOG_TXPOOL) << "transaction_pool::exists("
         << transaction_hash << ")";
     strand_.queue(
         [this, transaction_hash, handle_exists]()
         {
-            log_debug() << "transaction_pool::do_exists("
+            log_debug(LOG_TXPOOL) << "transaction_pool::do_exists("
                 << transaction_hash << ")";
             handle_exists(tx_exists(transaction_hash));
         });
@@ -165,15 +168,15 @@ void transaction_pool::reorganize(const std::error_code& ec,
     const blockchain::block_list& new_blocks,
     const blockchain::block_list& replaced_blocks)
 {
-    log_debug() << "transaction_pool::reorganize(" << ec.message()
+    log_debug(LOG_TXPOOL) << "transaction_pool::reorganize(" << ec.message()
         << ", " << fork_point << ", new_blocks(" << new_blocks.size()
         << "), replaced_blocks(" << replaced_blocks.size() << "))";
     if (!new_blocks.empty())
-        log_debug() << "  new_blocks from "
+        log_debug(LOG_TXPOOL) << "  new_blocks from "
             << hash_block_header(new_blocks.front()->header) << " to "
             << hash_block_header(new_blocks.back()->header);
     if (!replaced_blocks.empty())
-        log_debug() << "  replaced_blocks from "
+        log_debug(LOG_TXPOOL) << "  replaced_blocks from "
             << hash_block_header(replaced_blocks.front()->header) << " to "
             << hash_block_header(replaced_blocks.back()->header);
     if (!replaced_blocks.empty())
@@ -188,13 +191,13 @@ void transaction_pool::reorganize(const std::error_code& ec,
 
 void transaction_pool::invalidate_pool()
 {
-    log_debug() << "transaction_pool::invalidate_pool()";
+    log_debug(LOG_TXPOOL) << "transaction_pool::invalidate_pool()";
     // See http://www.jwz.org/doc/worse-is-better.html
     // for why we take this approach.
     // We return with an error_code and don't handle this case.
     for (const transaction_entry_info& entry: pool_)
     {
-        log_debug() << "  clearing " << hash_transaction(entry.tx);
+        log_debug(LOG_TXPOOL) << "  clearing " << hash_transaction(entry.tx);
         entry.handle_confirm(error::blockchain_reorganized);
     }
     pool_.clear();
@@ -203,7 +206,7 @@ void transaction_pool::invalidate_pool()
 void transaction_pool::takeout_confirmed(
     const blockchain::block_list& new_blocks)
 {
-    log_debug() << "transaction_pool::takeout_confirmed()";
+    log_debug(LOG_TXPOOL) << "transaction_pool::takeout_confirmed()";
     for (auto new_block: new_blocks)
         for (const transaction_type& new_tx: new_block->transactions)
             try_delete(hash_transaction(new_tx));
