@@ -31,8 +31,7 @@ void transaction_pool::start()
 {
     log_debug() << "start()";
     chain_.subscribe_reorganize(
-        strand_.wrap(&transaction_pool::reorganize,
-            this, _1, _2, _3, _4));
+        std::bind(&transaction_pool::reorganize, this, _1, _2, _3, _4));
 }
 
 void transaction_pool::validate(const transaction_type& tx,
@@ -178,14 +177,13 @@ void transaction_pool::reorganize(const std::error_code& ec,
             << hash_block_header(replaced_blocks.front()->header) << " to "
             << hash_block_header(replaced_blocks.back()->header);
     if (!replaced_blocks.empty())
-        invalidate_pool();
+        strand_.queue(&transaction_pool::invalidate_pool, this);
     else
-        takeout_confirmed(new_blocks);
+        strand_.queue(&transaction_pool::takeout_confirmed, this, new_blocks);
     // new blocks come in - remove txs in new
     // old blocks taken out - resubmit txs in old
     chain_.subscribe_reorganize(
-        strand_.wrap(&transaction_pool::reorganize,
-            this, _1, _2, _3, _4));
+        std::bind(&transaction_pool::reorganize, this, _1, _2, _3, _4));
 }
 
 void transaction_pool::invalidate_pool()
