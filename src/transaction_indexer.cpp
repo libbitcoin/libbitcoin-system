@@ -272,7 +272,11 @@ void indexer_history_fetched(const std::error_code& ec,
             // We just avoid this spend and assume the blockchain
             // one is the correct one.
             if (row.spend_height != max_height)
-                continue;
+            {
+                // Don't insert.
+                found = true;
+                break;
+            }
             BITCOIN_ASSERT((row.spend == input_point{null_hash, max_index}));
             // Everything OK. Insert spend.
             row.spend = spend_info.point;
