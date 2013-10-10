@@ -225,19 +225,32 @@ void indexer_history_fetched(const std::error_code& ec,
     // Just add in outputs.
     for (const output_info_type& output_info: outputs)
     {
-#ifndef BITCOIN_DISABLE_ASSERTS
-        // Compiler should be smart enough to optimise this out
-        // if contains an empty body.
+        // There is always a chance of inconsistency.
+        // So we resolve these and move on.
+        // This can happen when new blocks arrive in, and indexer.query()
+        // is called midway through a bunch of txpool.try_delete()
+        // operations.
+        // If do_query() is queued before the last do_doindex() and there's
+        // a transaction in our query in that block, then we will have
+        // a conflict.
+        bool is_conflict = false;
         for (const blockchain::history_row& row: history)
         {
-            // If the indexer and memory pool are working properly,
-            // then there shouldn't be any transactions indexed
-            // that are already confirmed and in the blockchain.
+            // Usually the indexer and memory doesn't have any
+            // transactions indexed that are already confirmed
+            // and in the blockchain.
+            // This is a rare corner case.
             if (row.output == output_info.point)
+            {
                 log_debug(LOG_TXIDX) << "  conflict " << row.output;
-            BITCOIN_ASSERT(row.output != output_info.point);
+                is_conflict = true;
+                break;
+            }
+            //BITCOIN_ASSERT(row.output != output_info.point);
         }
-#endif
+        if (is_conflict)
+            continue;
+        // Everything OK. Insert outpoint.
         history.emplace_back(blockchain::history_row{
             output_info.point,
             0,
@@ -255,8 +268,13 @@ void indexer_history_fetched(const std::error_code& ec,
         {
             if (row.output != spend_info.previous_output)
                 continue;
-            BITCOIN_ASSERT(row.spend_height == max_height);
+            // Another consistency check. This time for spends.
+            // We just avoid this spend and assume the blockchain
+            // one is the correct one.
+            if (row.spend_height != max_height)
+                continue;
             BITCOIN_ASSERT((row.spend == input_point{null_hash, max_index}));
+            // Everything OK. Insert spend.
             row.spend = spend_info.point;
             row.spend_height = 0;
             found = true;
