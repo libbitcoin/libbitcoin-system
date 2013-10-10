@@ -1,6 +1,10 @@
 #ifndef LIBBITCOIN_UTILITY_DECORATOR_HPP
 #define LIBBITCOIN_UTILITY_DECORATOR_HPP
 
+#include <functional>
+
+namespace libbitcoin {
+
 /*
  * Defines a function decorator ala Python
  *
@@ -10,8 +14,6 @@
  *   auto f = decorator(wrapper, bind(foo, 110, _1));
  *   f();
  */
-
-#include <functional>
 
 template <typename Wrapper, typename Handler>
 struct decorator_dispatch
@@ -36,6 +38,8 @@ decorator(Wrapper&& wrapper, Handler&& handler)
 {
     return {wrapper, handler};
 }
+
+} // namespace libbitcoin
 
 #endif
 
