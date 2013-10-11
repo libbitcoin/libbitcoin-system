@@ -74,8 +74,6 @@ private:
     bool save_transaction(leveldb_transaction_batch& batch,
         uint32_t block_height, uint32_t tx_index,
         const hash_digest& tx_hash, const transaction_type& block_tx);
-    bool duplicate_exists(const hash_digest& tx_hash,
-        uint32_t block_height, uint32_t tx_index);
 
     leveldb_databases db_;
 };

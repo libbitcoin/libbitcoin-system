@@ -110,11 +110,19 @@ bool leveldb_common::save_block(
     return true;
 }
 
+// There are 2 duplicated transactions in the blockchain.
+// Since then this part of Bitcoin was changed to disallow duplicates.
+bool is_special_duplicate(uint32_t block_height, uint32_t tx_index)
+{
+    return (block_height == 91842 || block_height == 91880) &&
+        tx_index == 0;
+}
+
 bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
     uint32_t block_height, uint32_t tx_index,
     const hash_digest& tx_hash, const transaction_type& block_tx)
 {
-    if (duplicate_exists(tx_hash, block_height, tx_index))
+    if (is_special_duplicate(block_height, tx_index))
         return true;
     data_chunk tx_data(8 + satoshi_raw_size(block_tx));
     // Serialize tx.
@@ -154,18 +162,6 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
                 output, {tx_hash, output_index}, block_height))
             return false;
     }
-    return true;
-}
-
-bool leveldb_common::duplicate_exists(const hash_digest& tx_hash,
-    uint32_t block_height, uint32_t tx_index)
-{
-    leveldb_tx_info tx;
-    if (!get_transaction(tx, tx_hash, false, false))
-        return false;
-    BITCOIN_ASSERT(
-        (block_height == 91842 || block_height == 91880) &&
-        tx_index == 0);
     return true;
 }
 
