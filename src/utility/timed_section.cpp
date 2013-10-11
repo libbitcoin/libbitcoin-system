@@ -13,7 +13,7 @@ timed_section::timed_section(
 
 timed_section::~timed_section()
 {
-    log_debug(context_) << section_ << " " << std::fixed << elapsed;
+    log_debug(context_) << section_ << " " << std::fixed << elapsed();
 }
 
 double timed_section::elapsed() const
