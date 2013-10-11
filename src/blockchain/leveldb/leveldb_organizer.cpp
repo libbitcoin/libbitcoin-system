@@ -22,7 +22,19 @@ std::error_code leveldb_organizer::verify(int fork_index,
     BITCOIN_ASSERT(height != 0);
     leveldb_validate_block validate(common_, fork_index, orphan_chain,
         orphan_index, height, current_block);
-    return validate.start();
+    // Perform checks.
+    std::error_code ec;
+    ec = validate.check_block();
+    if (ec)
+        return ec;
+    ec = validate.accept_block();
+    if (ec)
+        return ec;
+    // Skip non-essential checks if before last checkpoint.
+    if (fork_index < 250000)
+        return std::error_code();
+    // Perform strict but slow tests - connect_block()
+    return validate.connect_block();
 }
 void leveldb_organizer::reorganize_occured(
     size_t fork_point,

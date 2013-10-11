@@ -81,7 +81,9 @@ typedef std::shared_ptr<validate_transaction> validate_transaction_ptr;
 class validate_block
 {
 public:
-    std::error_code start();
+    std::error_code check_block();
+    std::error_code accept_block();
+    std::error_code connect_block();
 
 protected:
     validate_block(size_t height, const block_type& current_block);
@@ -105,18 +107,18 @@ protected:
     virtual block_header_type fetch_block(size_t fetch_height) = 0;
 
 private:
-    std::error_code check_block();
+    // check_block()
     bool check_proof_of_work(hash_digest hash, uint32_t bits);
     bool check_transaction(const transaction_type& tx);
 
     size_t legacy_sigops_count();
 
-    std::error_code accept_block();
+    // accept_block()
     uint32_t work_required();
     bool passes_checkpoints();
     bool coinbase_height_match();
 
-    std::error_code connect_block();
+    // connect_block()
     bool not_duplicate_or_spent(const transaction_type& tx);
 
     const size_t height_;

@@ -333,21 +333,6 @@ validate_block::validate_block(
 {
 }
 
-std::error_code validate_block::start()
-{
-    std::error_code ec;
-    ec = check_block();
-    if (ec)
-        return ec;
-    ec = accept_block();
-    if (ec)
-        return ec;
-    ec = connect_block();
-    if (ec)
-        return ec;
-    return std::error_code();
-}
-
 std::error_code validate_block::check_block()
 {
     // CheckBlock()
