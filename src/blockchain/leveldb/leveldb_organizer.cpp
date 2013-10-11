@@ -31,7 +31,7 @@ std::error_code leveldb_organizer::verify(int fork_index,
     if (ec)
         return ec;
     // Skip non-essential checks if before last checkpoint.
-    if (fork_index < 250000)
+    if (fork_index < 262835)
         return std::error_code();
     // Perform strict but slow tests - connect_block()
     return validate.connect_block();
