@@ -13,12 +13,15 @@ timed_section::timed_section(
 
 timed_section::~timed_section()
 {
+    log_debug(context_) << section_ << " " << std::fixed << elapsed;
+}
+
+double timed_section::elapsed() const
+{
     timespec end;
     clock_gettime(CLOCK_REALTIME, &end);
-    double duration =
-        1e3 * (end.tv_sec - start_.tv_sec) +
+    return 1e3 * (end.tv_sec - start_.tv_sec) +
         1e-6 * (end.tv_nsec - start_.tv_nsec);
-    log_debug(context_) << section_ << " " << std::fixed << duration;
 }
 
 } // namespace libbitcoin

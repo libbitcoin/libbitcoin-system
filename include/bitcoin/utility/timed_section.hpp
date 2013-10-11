@@ -11,6 +11,7 @@ class timed_section
 public:
     timed_section(const std::string& context, const std::string& section);
     ~timed_section();
+    double elapsed() const;
 private:
     const std::string context_, section_;
     timespec start_;
