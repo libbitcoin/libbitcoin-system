@@ -2,6 +2,8 @@
   Imports blocks from bootstrap.dat
   bootstrap.dat is the raw blocks in the format
   [magic bytes] [block length] [serialized block]
+
+  No validation is performed on the blocks, ensure the data is correct.
 */
 #include <future>
 #include <bitcoin/bitcoin.hpp>
@@ -26,7 +28,9 @@ int main(int argc, char** argv)
     if (argc != 3)
     {
         std::cout << "Usage: "
-            "bootstrap BLOCKCHAIN_DIR BOOTSTRAP_DATFILE" << std::endl;
+            "bootstrap-fast BLOCKCHAIN_DIR BOOTSTRAP_DATFILE" << std::endl <<
+            "Ensure the BLOCKCHAIN_DIR is empty and the " << std::endl <<
+            "BOOTSTRAP_DATFILE is correct, no validation is done" << std::endl;
         return 1;
     }
 
@@ -51,52 +55,6 @@ int main(int argc, char** argv)
 
     // position of the pointer in the buffer
     int buffer_position = 0;
-
-    block_header_type blk_header;
-    std::promise<std::error_code> ec_fetch_promise;
-
-    auto genesis_block_fetched_handler =
-        [&ec_fetch_promise, &blk_header](
-            const std::error_code& ec, const block_header_type& header)
-        {
-            blk_header = header;
-            ec_fetch_promise.set_value(ec);
-        };
-
-    // See if we can fetch the genesis block from the leveldb database
-    chain.fetch_block_header(0, genesis_block_fetched_handler);
-
-    std::error_code ec = ec_fetch_promise.get_future().get();
-    if (ec)
-    {
-        BITCOIN_ASSERT(ec == error::not_found);
-        //Import the genesis_block() if it does not yet exist in the leveldb
-        std::promise<std::error_code> ec_import_promise;
-
-        auto genesis_block_imported_handler =
-            [&ec_import_promise](const std::error_code& ec)
-            {
-                ec_import_promise.set_value(ec);
-            };
-
-        chain.import(first_block, 0, genesis_block_imported_handler);
-        ec = ec_import_promise.get_future().get();
-
-        if (ec)
-        {
-            log_error(LOG_BOOTSTRAP)
-                << "Importing genesis block failed: " << ec.message();
-            return -1;
-        }
-
-        log_info(LOG_BOOTSTRAP) << "Imported genesis block";
-    }
-    else
-    {
-        // If we already have a block stored in the leveldb, check its hash
-        // matches the one coded into genesis_block()
-        BITCOIN_ASSERT(hash_block_header(blk_header) == genesis_hash);
-    }
 
     std::ifstream fin(bootstrapfile, std::ios::in | std::ios::binary);
 
@@ -174,53 +132,25 @@ int main(int argc, char** argv)
             block_info info;
             bool finished = false;
 
-            auto block_imported = [&ec, &info, &finished](
-                const std::error_code& cec, const block_info blk_info)
+            auto block_imported = [&ec, &blocks_parsed, &finished](
+                const std::error_code& cec)
             {
-                log_debug(LOG_BOOTSTRAP) << "Block imported.";
-                info = blk_info;
+                log_debug(LOG_BOOTSTRAP) << blocks_parsed << " Block imported.";
+                // info = blk_info;
                 ec = cec;
                 finished = true;
             };
 
-            chain.store(blk, block_imported);
+            chain.import(blk, blocks_parsed ,block_imported);
 
             struct timespec ts;
             ts.tv_sec = 0;
-            ts.tv_nsec = 1;
+            ts.tv_nsec = 10;
 
             while (!finished)
                 nanosleep(&ts, NULL);
 
             hash_digest block_hash = hash_block_header(blk.header);
-            // We need orphan blocks so we can do the next getblocks round
-            if (ec && info.status != block_status::orphan)
-            {
-                log_error(LOG_BOOTSTRAP)
-                    << "Storing block " << encode_hex(block_hash)
-                    << ": " << ec.message();
-            }
-            else
-            {
-                switch (info.status)
-                {
-                    // There should be no orphans
-                    case block_status::orphan:
-                        log_error(LOG_BOOTSTRAP)
-                            << "Orphan block " << block_hash;
-                    break;
-
-                    case block_status::rejected:
-                        log_error(LOG_BOOTSTRAP)
-                            << "Rejected block " << block_hash;
-                    break;
-
-                    case block_status::confirmed:
-                        log_info(LOG_BOOTSTRAP)
-                            << "Block #" << info.height << " " << block_hash;
-                    break;
-                }
-            }
 
             buffer_position += block_size + 8;
             blocks_parsed++;

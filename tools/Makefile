@@ -9,4 +9,10 @@ bootstrap.o: bootstrap.cpp
 bootstrap: bootstrap.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: bootstrap
+bootstrap-fast.o: bootstrap-fast.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+bootstrap-fast: bootstrap-fast.o
+	$(CXX) -o $@ $< $(LIBS)
+
+all: bootstrap bootstrap-fast  
