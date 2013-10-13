@@ -30,7 +30,7 @@ data_chunk create_raw_message(const Message& packet)
     satoshi_save(packet, payload.begin());
     // Make the header packet and serialise it
     header_type head;
-    head.magic = magic_value;
+    head.magic = magic_value();
     head.command = satoshi_command(packet);
     head.payload_length = payload.size();
     head.checksum = generate_sha256_checksum(payload);

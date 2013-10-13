@@ -16,10 +16,8 @@ constexpr uint64_t reward_interval = 210000;
 constexpr size_t coinbase_maturity = 100;
 
 #ifdef ENABLE_TESTNET
-constexpr uint32_t magic_value = 0x0709110b;
 constexpr uint32_t protocol_port = 18333;
 #else
-constexpr uint32_t magic_value = 0xd9b4bef9;
 constexpr uint32_t protocol_port = 8333;
 #endif
 
@@ -51,7 +49,7 @@ const short_hash null_short_hash{0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 constexpr uint32_t max_bits = 0x1d00ffff;
 big_number max_target();
-
+uint32_t magic_value();
 constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
 
 // Every two weeks we readjust target

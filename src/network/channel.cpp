@@ -255,7 +255,7 @@ void channel_proxy::read_payload(const header_type& header_msg)
 
 bool verify_header(const header_type& header_msg)
 {
-    if (header_msg.magic != magic_value)
+    if (header_msg.magic != magic_value())
         return false;
     if (header_msg.command == "version")
     {
