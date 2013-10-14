@@ -10,8 +10,7 @@ threadpool::threadpool()
 threadpool::threadpool(size_t number_threads)
   : work_(nullptr)
 {
-    for (size_t i = 0; i < number_threads; ++i)
-        spawn();
+    spawn(number_threads);
 }
 
 threadpool::~threadpool()
@@ -19,7 +18,12 @@ threadpool::~threadpool()
     delete work_;
 }
 
-void threadpool::spawn()
+void threadpool::spawn(size_t number_threads)
+{
+    for (size_t i = 0; i < number_threads; ++i)
+        spawn_once();
+}
+void threadpool::spawn_once()
 {
     if (!work_)
         work_ = new io_service::work(ios_);

@@ -44,9 +44,9 @@ public:
     void operator=(const threadpool&) = delete;
 
     /**
-     * Add a thread to this threadpool.
+     * Add n threads to this threadpool.
      */
-    void spawn();
+    void spawn(size_t number_threads=1);
 
     /**
      * Stop the threadpool. All remaining operations on the queue are dropped.
@@ -102,6 +102,8 @@ public:
     const io_service& service() const;
 
 private:
+    void spawn_once();
+
     io_service ios_;
     io_service::work* work_;
     std::vector<std::thread> threads_;
