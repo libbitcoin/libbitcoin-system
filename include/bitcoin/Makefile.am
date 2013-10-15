@@ -58,5 +58,6 @@ bitcoin_util_include_HEADERS = \
 	utility/logger.hpp \
 	utility/weak_bind.hpp \
 	utility/key_formats.hpp \
-	utility/mnemonic.hpp
+	utility/mnemonic.hpp \
+    utility/timed_section.hpp
 
