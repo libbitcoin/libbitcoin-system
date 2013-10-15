@@ -11,6 +11,8 @@
 
 namespace libbitcoin {
 
+size_t variable_uint_size(uint64_t v);
+
 /**
  * Serializer that uses iterators and is oblivious to the underlying
  * container type. Is not threadsafe.
@@ -118,6 +120,15 @@ public:
     Iterator iterator()
     {
         return iter_;
+    }
+
+    /**
+     * Useful if you want to serialize some data using another
+     * routine and then continue with this serializer.
+     */
+    void set_iterator(Iterator iter)
+    {
+        iter_ = iter;
     }
 
 private:
@@ -311,13 +322,13 @@ private:
         std::array<uint8_t, N>& byte_array, bool reverse=false)
     {
         check_distance(begin, end, byte_array.size());
-        #ifdef BOOST_LITTLE_ENDIAN
-            // do nothing
-        #elif BOOST_BIG_ENDIAN
-            reverse = !reverse;
-        #else
-            #error "Endian isn't defined!"
-        #endif
+    #ifdef BOOST_LITTLE_ENDIAN
+        // do nothing
+    #elif BOOST_BIG_ENDIAN
+        reverse = !reverse;
+    #else
+        #error "Endian isn't defined!"
+    #endif
 
         if (reverse)
             std::reverse_copy(

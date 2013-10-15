@@ -12,8 +12,6 @@
 
 namespace libbitcoin {
 
-size_t variable_uint_size(uint64_t v);
-
 constexpr size_t command_size = 12;
 
 // message headers
