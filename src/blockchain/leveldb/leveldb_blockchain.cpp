@@ -260,15 +260,6 @@ void leveldb_blockchain::fetch(perform_read_functor perform_read)
         });
 }
 
-bool get_block_header_impl(size_t height,
-    leveldb_common_ptr common, leveldb_block_info& blk)
-{
-}
-bool get_block_header_impl(const hash_digest& hash,
-    leveldb_common_ptr common, leveldb_block_info& blk)
-{
-}
-
 void leveldb_blockchain::fetch_block_header(size_t height,
     fetch_handler_block_header handle_fetch)
 {

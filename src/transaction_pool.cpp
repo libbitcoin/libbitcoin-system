@@ -134,10 +134,15 @@ void transaction_pool::exists(const hash_digest& transaction_hash,
 }
 
 void transaction_pool::reorganize(const std::error_code& ec,
-    size_t fork_point,
+    size_t /* fork_point */,
     const blockchain::block_list& new_blocks,
     const blockchain::block_list& replaced_blocks)
 {
+    if (ec)
+    {
+        BITCOIN_ASSERT(ec == error::service_stopped);
+        return;
+    }
     if (!replaced_blocks.empty())
         strand_.queue(&transaction_pool::invalidate_pool, this);
     else

@@ -1367,7 +1367,7 @@ bool is_script_hash_type(const operation_stack& ops)
         ops[1].data.size() == 20 &&
         ops[2].code == opcode::equal;
 }
-bool is_multisig_type(const operation_stack& ops)
+bool is_multisig_type(const operation_stack&)
 {
     return false;
 }
@@ -1951,8 +1951,11 @@ size_t number_bytes_to_read(
             return deserial.read_2_bytes();
         case opcode::pushdata4:
             return deserial.read_4_bytes();
+        default:
+            break;
     }
     BITCOIN_ASSERT_MSG(false, "Invalid opcode passed to function.");
+    return 0;
 }
 
 script_type parse_script(const data_chunk& raw_script)

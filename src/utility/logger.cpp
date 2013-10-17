@@ -33,8 +33,8 @@ void output_ostream(std::ostream& ostr, log_level level,
     ostr << ": " << body << std::endl;
 }
 
-void ignore_output(log_level level,
-    const std::string& domain, const std::string& body)
+void ignore_output(log_level,
+    const std::string&, const std::string&)
 {
 }
 void output_cout(log_level level,
@@ -49,7 +49,7 @@ void output_cerr(log_level level,
 }
 
 logger_wrapper::destination_map logger_wrapper::dests_{
-#ifdef ENABLE_DEBUG
+#ifdef DEBUG
     std::make_pair(log_level::debug, output_cout),
 #else
     std::make_pair(log_level::debug, ignore_output),
@@ -68,8 +68,8 @@ logger_wrapper::logger_wrapper(log_level lev, const std::string& domain)
 // It should be: stream_(std::move(other.stream_))
 // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=54316
 logger_wrapper::logger_wrapper(logger_wrapper&& other)
-  : level_(other.level_), stream_(other.stream_.str()),
-    domain_(std::move(other.domain_))
+  : level_(other.level_), domain_(std::move(other.domain_)),
+    stream_(other.stream_.str())
 {
 }
 logger_wrapper::~logger_wrapper()

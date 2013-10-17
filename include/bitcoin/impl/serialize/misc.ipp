@@ -26,7 +26,6 @@ void satoshi_load(const Iterator first, const Iterator last,
     head.command = deserial.read_fixed_string(command_size);
     head.payload_length = deserial.read_4_bytes();
     head.checksum = 0;
-    BITCOIN_ASSERT(satoshi_raw_size(head) == std::distance(first, last));
 }
 
 // version messages
@@ -72,7 +71,6 @@ void satoshi_load(const Iterator first, const Iterator last,
     }
     packet.start_height = deserial.read_4_bytes();
     BITCOIN_ASSERT(std::distance(first, last) >= 81 + 4);
-    //BITCOIN_ASSERT(satoshi_raw_size(packet) <= std::distance(first, last));
 }
 
 // verack messages
@@ -83,8 +81,7 @@ Iterator satoshi_save(const verack_type& packet, Iterator result)
     return result;
 }
 template <typename Iterator>
-void satoshi_load(const Iterator first, const Iterator last,
-    verack_type& packet)
+void satoshi_load(const Iterator, const Iterator, verack_type& packet)
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }
@@ -115,7 +112,8 @@ void satoshi_load(const Iterator first, const Iterator last,
         addr.timestamp = timestamp;
         packet.addresses.push_back(addr);
     }
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+    BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));
+    BITCOIN_ASSERT(deserial.iterator() == last);
 }
 
 // getaddr messages
@@ -126,8 +124,7 @@ Iterator satoshi_save(const get_address_type& packet, Iterator result)
     return result;
 }
 template <typename Iterator>
-void satoshi_load(const Iterator first, const Iterator last,
-    get_address_type& packet)
+void satoshi_load(const Iterator, const Iterator, get_address_type& packet)
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }
@@ -169,7 +166,8 @@ void load_inventory_impl(const Iterator first, const Iterator last,
         inv.hash = deserial.read_hash();
         packet.inventories.push_back(inv);
     }
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+    BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));
+    BITCOIN_ASSERT(deserial.iterator() == last);
 }
 
 // inv messages
@@ -226,7 +224,8 @@ void satoshi_load(const Iterator first, const Iterator last,
         packet.start_hashes.push_back(start_hash);
     }
     packet.hash_stop = deserial.read_hash();
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+    BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));
+    BITCOIN_ASSERT(deserial.iterator() == last);
 }
 
 // ping messages
@@ -245,7 +244,8 @@ void satoshi_load(const Iterator first, const Iterator last,
 {
     auto deserial = make_deserializer(first, last);
     packet.nonce = deserial.read_8_bytes();
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+    BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));
+    BITCOIN_ASSERT(deserial.iterator() == last);
 }
 
 // pong messages
@@ -264,7 +264,8 @@ void satoshi_load(const Iterator first, const Iterator last,
 {
     auto deserial = make_deserializer(first, last);
     packet.nonce = deserial.read_8_bytes();
-    BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
+    BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));
+    BITCOIN_ASSERT(deserial.iterator() == last);
 }
 
 } // libbitcoin

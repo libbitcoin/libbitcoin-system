@@ -162,6 +162,7 @@ void organizer::replace_chain(int fork_index,
 {
     big_number orphan_work = 0;
     // Starting from beginning of the chain, validate blocks
+    // Q: Why am I using an int here? TODO: investigate.
     for (int orphan_index = 0; orphan_index < orphan_chain.size();
         ++orphan_index)
     {

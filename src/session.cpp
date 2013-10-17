@@ -27,7 +27,9 @@ void session::start(completion_handler handle_complete)
     protocol_.subscribe_channel(
         [this](const std::error_code& ec, channel_ptr node)
         {
-            poll_.query(node);
+            BITCOIN_ASSERT(!ec || ec == error::service_stopped);
+            if (!ec)
+                poll_.query(node);
         });
     protocol_.subscribe_channel(
         std::bind(&session::new_channel, this, _1, _2));
@@ -67,8 +69,13 @@ void session::new_channel(const std::error_code& ec, channel_ptr node)
 
 void session::set_start_height(const std::error_code& ec, size_t fork_point,
     const blockchain::block_list& new_blocks,
-    const blockchain::block_list& replaced_blocks)
+    const blockchain::block_list& /* replaced_blocks */)
 {
+    if (ec)
+    {
+        BITCOIN_ASSERT(ec == error::service_stopped);
+        return;
+    }
     size_t last_height = fork_point + new_blocks.size();
     handshake_.set_start_height(last_height, handle_set_start_height);
     chain_.subscribe_reorganize(
@@ -131,6 +138,7 @@ void session::get_data(const std::error_code& ec,
         log_error(LOG_SESSION) << "get_data: " << ec.message();
         return;
     }
+    // TODO: Implement.
     // simple stuff
     node->subscribe_get_data(
         std::bind(&session::get_data, this, _1, _2, node));
@@ -144,6 +152,7 @@ void session::get_blocks(const std::error_code& ec,
         log_error(LOG_SESSION) << "get_blocks: " << ec.message();
         return;
     }
+    // TODO: Implement.
     // send 500 invs from last fork point
     // have memory of last inv, ready to trigger send next 500 once
     // getdata done for it.

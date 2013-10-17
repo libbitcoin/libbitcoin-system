@@ -378,6 +378,12 @@ void protocol::setup_new_channel(channel_ptr node)
 void protocol::channel_stopped(const std::error_code& ec,
     channel_ptr which_node)
 {
+    if (ec)
+    {
+        log_error(LOG_PROTOCOL)
+            << "Channel stopped internal error: " << ec.message();
+        return;
+    }
     auto it = connections_.begin();
     for (; it != connections_.end(); ++it)
         if (it->node == which_node)
@@ -409,14 +415,14 @@ void protocol::receive_address_message(const std::error_code& ec,
         log_error(LOG_PROTOCOL)
             << "Problem receiving addresses: " << ec.message();
     }
-    else
-    {
-        log_debug(LOG_PROTOCOL) << "Storing addresses.";
-        for (const network_address_type& net_address: packet.addresses)
-            hosts_.store(net_address,
-                strand_.wrap(std::bind(&protocol::handle_store_address,
-                    this, _1)));
-    }
+    log_debug(LOG_PROTOCOL) << "Storing addresses.";
+    for (const network_address_type& net_address: packet.addresses)
+        hosts_.store(net_address,
+            strand_.wrap(std::bind(&protocol::handle_store_address,
+                this, _1)));
+    node->subscribe_address(
+        strand_.wrap(std::bind(&protocol::receive_address_message,
+            this, _1, _2, node)));
 }
 void protocol::handle_store_address(const std::error_code& ec)
 {

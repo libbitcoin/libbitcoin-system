@@ -232,13 +232,12 @@ private:
     void stop_impl();
     void clear_subscriptions();
 
-    // We keep the service alive for lifetime rules
     io_service::strand strand_;
+    socket_ptr socket_;
+    // We keep the service alive for lifetime rules
     boost::asio::deadline_timer timeout_, heartbeat_;
-
     std::atomic<bool> stopped_;
 
-    socket_ptr socket_;
     channel_stream_loader loader_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes

@@ -9,7 +9,6 @@ LT_INIT
 AC_PROG_CXX
 AC_GNU_SOURCE
 AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
-#CXXFLAGS="-Wall -Wno-unused-parameter -pedantic -pthread -Wextra -fstack-protector-all"
 
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -18,15 +17,6 @@ AC_ARG_ENABLE(leveldb,
 			[Build LevelDB support.])],
 	[bld_leveldb="$enable_leveldb"], [bld_leveldb="no"])
 AM_CONDITIONAL([DO_LEVELDB], [test "$enable_leveldb" = "yes"])
-
-AC_ARG_ENABLE([debug],
-[  --enable-debug    Turn on debugging],
-[case "${enableval}" in
-  yes) debug=true ;;
-  no)  debug=false ;;
-  *) AC_MSG_ERROR([bad value ${enableval} for --enable-debug]) ;;
-esac],[debug=false])
-AM_CONDITIONAL([DEBUG], [test x$debug = xtrue])
 
 AC_MSG_CHECKING(--enable-testnet argument)
 AC_ARG_ENABLE(testnet,
@@ -51,10 +41,8 @@ if test "$bld_leveldb" = "yes"; then
     CFLAG_LEVELDB="-DLEVELDB_ENABLED"
 fi
 
-if test x$debug = xtrue; then
-    my_CXXFLAGS="-g3 -DDEBUG"
-    AC_SUBST([my_CXXFLAGS])
-fi
+AM_CXXFLAGS="-ggdb -g3 -Wall -Wno-missing-braces -pedantic -Wextra -fstack-protector-all -DDEBUG"
+AC_SUBST([AM_CXXFLAGS])
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
 PKG_CHECK_MODULES([CURL], [libcurl])

@@ -97,9 +97,9 @@ bool leveldb_common::save_block(
         }
         serial_hashes.write_hash(tx_hash);
     }
-    BITCOIN_ASSERT(
-        std::distance(raw_block_data.begin(), serial_hashes.iterator()) ==
-        80 + 4 + serial_block.transactions.size() * hash_digest_size);
+    BITCOIN_ASSERT(serial_hashes.iterator() ==
+        raw_block_data.begin() + 80 + 4 +
+            serial_block.transactions.size() * hash_digest_size);
     data_chunk raw_height = uncast_type(height);
     hash_digest block_hash = hash_block_header(serial_block.header);
     // Write block header
@@ -132,8 +132,7 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
     // Actual tx data.
     auto end_iter = satoshi_save(block_tx, serial.iterator());
     BITCOIN_ASSERT(
-        std::distance(tx_data.begin(), end_iter) ==
-        8 + satoshi_raw_size(block_tx));
+        tx_data.begin() + 8 + satoshi_raw_size(block_tx) == end_iter);
     // Save tx to leveldb
     batch.tx.Put(slice(tx_hash), slice(tx_data));
     // Add inputs to spends database.

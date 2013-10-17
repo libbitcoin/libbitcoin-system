@@ -168,8 +168,8 @@ private:
             std::bind(&fetch_locator::append, this_ptr, _1, _2, height));
     }
 
-    void append(const std::error_code& ec, const block_header_type& blk_header,
-        size_t height)
+    void append(const std::error_code& ec,
+        const block_header_type& blk_header, size_t /* height */)
     {
         if (stop_on_error(ec))
             return;

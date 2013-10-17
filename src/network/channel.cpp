@@ -68,8 +68,8 @@ void channel_stream_loader::load_lookup(const std::string& symbol,
 }
 
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
-  : strand_(pool.service()), stopped_(false), socket_(socket),
-    timeout_(pool.service()), heartbeat_(pool.service())
+  : strand_(pool.service()), socket_(socket),
+    timeout_(pool.service()), heartbeat_(pool.service()), stopped_(false)
 {
 #define CHANNEL_TRANSPORT_MECHANISM(MESSAGE_TYPE) \
     MESSAGE_TYPE##_subscriber_ = \

@@ -162,18 +162,19 @@ void big_number::set_int32(int32_t value)
 
 int32_t big_number::int32() const
 {
+    constexpr uint32_t max_int32 = std::numeric_limits<int32_t>::max();
     uint32_t value = uint32();
     if (!BN_is_negative(&bignum_))
     {
-        if (value > std::numeric_limits<int32_t>::max())
-            return std::numeric_limits<int32_t>::max();
+        if (value > max_int32)
+            return max_int32;
         else
             return value;
     }
     else
     {
-        if (value > std::numeric_limits<int32_t>::max())
-            return std::numeric_limits<int32_t>::min();
+        if (value > max_int32)
+            return max_int32;
         else
             return -value;
     }

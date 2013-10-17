@@ -2,7 +2,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 lib_LTLIBRARIES = libbitcoin.la
 AM_CPPFLAGS = -I$(srcdir)/../include
-AM_CXXFLAGS = ${my_CXXFLAGS}
 libbitcoin_la_SOURCES = \
     satoshi_serialize.cpp \
     deterministic_wallet.cpp \

@@ -34,7 +34,7 @@ const std::string satoshi_command(const verack_type&)
 {
     return "verack";
 }
-size_t satoshi_raw_size(const verack_type& packet)
+size_t satoshi_raw_size(const verack_type&)
 {
     return 0;
 }
@@ -53,7 +53,7 @@ const std::string satoshi_command(const get_address_type&)
 {
     return "getaddr";
 }
-size_t satoshi_raw_size(const get_address_type& packet)
+size_t satoshi_raw_size(const get_address_type&)
 {
     return 0;
 }
@@ -145,7 +145,7 @@ size_t satoshi_raw_size(const transaction_type& packet)
     return tx_size;
 }
 
-size_t satoshi_raw_size(const block_header_type& packet)
+size_t satoshi_raw_size(const block_header_type&)
 {
     return 80;
 }
@@ -166,7 +166,7 @@ const std::string satoshi_command(const ping_type&)
 {
     return "ping";
 }
-size_t satoshi_raw_size(const ping_type& packet)
+size_t satoshi_raw_size(const ping_type&)
 {
     return 8;
 }
@@ -175,7 +175,7 @@ const std::string satoshi_command(const pong_type&)
 {
     return "pong";
 }
-size_t satoshi_raw_size(const pong_type& packet)
+size_t satoshi_raw_size(const pong_type&)
 {
     return 8;
 }

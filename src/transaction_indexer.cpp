@@ -101,6 +101,7 @@ void transaction_indexer::do_index(const transaction_type& tx,
         outputs_map_.emplace(payaddr,
             output_info_type{point, output.value});
     }
+    handle_index(std::error_code());
 }
 
 void transaction_indexer::deindex(const transaction_type& tx,
@@ -146,6 +147,7 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
             index_does_not_exist(payaddr, point, outputs_map_),
             "Transaction is indexed duplicate times!");
     }
+    handle_deindex(std::error_code());
 }
 
 void blockchain_history_fetched(const std::error_code& ec,

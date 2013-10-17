@@ -62,7 +62,7 @@ public:
 
 private:
     void call_connect_handler(const boost::system::error_code& ec,
-        tcp::resolver::iterator next, network::connect_handler handle_connect)
+        tcp::resolver::iterator, network::connect_handler handle_connect)
     {
         if (ec)
         {
