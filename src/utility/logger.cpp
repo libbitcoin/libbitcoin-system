@@ -27,10 +27,10 @@ std::string level_repr(log_level level)
 void output_ostream(std::ostream& ostr, log_level level,
     const std::string& domain, const std::string& body)
 {
-    std::cerr << level_repr(level);
+    ostr << level_repr(level);
     if (!domain.empty())
-        std::cerr << " [" << domain << "]";
-    std::cerr << ": " << body << std::endl;
+        ostr << " [" << domain << "]";
+    ostr << ": " << body << std::endl;
 }
 
 void ignore_output(log_level level,
@@ -45,14 +45,14 @@ void output_cout(log_level level,
 void output_cerr(log_level level,
     const std::string& domain, const std::string& body)
 {
-    output_ostream(std::cout, level, domain, body);
+    output_ostream(std::cerr, level, domain, body);
 }
 
 logger_wrapper::destination_map logger_wrapper::dests_{
-#ifdef DEBUG
-    std::make_pair(log_level::debug, ignore_output),
-#else
+#ifdef ENABLE_DEBUG
     std::make_pair(log_level::debug, output_cout),
+#else
+    std::make_pair(log_level::debug, ignore_output),
 #endif
     std::make_pair(log_level::info, output_cout),
     std::make_pair(log_level::warning, output_cerr),
