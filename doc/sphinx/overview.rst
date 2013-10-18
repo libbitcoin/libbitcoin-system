@@ -122,13 +122,14 @@ and will be queued in that context.
     // This blockchain service will submit work to disk_pool
     blockchain chain(disk_pool);
     // Completion handler.
-    auto blockchain_started = [](const std::error_code&)
-        {
-            // Check whether the status was successful.
-            if (ec)
-                log_error() << "Starting blockchain: " << ec.message();
-            // ... do stuff
-        };
+    auto blockchain_started = [](
+        const std::error_code&)
+    {
+        // Check whether the status was successful.
+        if (ec)
+            log_error() << "Starting blockchain: " << ec.message();
+        // ... do stuff
+    };
     // Invoke the call. Returns immediately.
     chain.start("database/", blockchain_started);
 
