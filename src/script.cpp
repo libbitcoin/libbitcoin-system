@@ -1999,6 +1999,7 @@ inline data_chunk operation_metadata(const opcode code, size_t data_size)
 data_chunk save_script(const script_type& script)
 {
     const operation_stack& operations = script.operations();
+    // Nedded otherwise the next conditional would crash.
     if (operations.empty())
         return data_chunk();
     else if (operations[0].code == opcode::raw_data)

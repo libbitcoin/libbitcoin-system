@@ -414,6 +414,7 @@ void protocol::receive_address_message(const std::error_code& ec,
     {
         log_error(LOG_PROTOCOL)
             << "Problem receiving addresses: " << ec.message();
+        return;
     }
     log_debug(LOG_PROTOCOL) << "Storing addresses.";
     for (const network_address_type& net_address: packet.addresses)
