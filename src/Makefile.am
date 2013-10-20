@@ -45,3 +45,7 @@ libbitcoin_la_SOURCES += \
 	blockchain/leveldb/leveldb_common.cpp
 endif
 
+libbitcoin_la_LIBADD = \
+    -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread \
+    -lcurl @LDFLAG_LEVELDB@ -lcrypto -ldl -lz
+
