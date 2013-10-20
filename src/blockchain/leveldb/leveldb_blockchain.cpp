@@ -633,7 +633,8 @@ bool leveldb_blockchain::do_fetch_history(const payment_address& address,
         // then load and add it to the row.
         uint64_t checksum = credit_it.checksum();
         auto it = spends.find(checksum);
-        if (it != spends.end())
+        const bool spend_exists = it != spends.end();
+        if (spend_exists)
         {
             const spend_data& data = it->second;
             row.spend = data.point;
@@ -642,7 +643,7 @@ bool leveldb_blockchain::do_fetch_history(const payment_address& address,
         }
         // Filter entries below the from_height.
         if (row.output_height >= from_height ||
-            row.spend_height >= from_height)
+            (spend_exists && row.spend_height >= from_height))
         {
             history.push_back(row);
         }
