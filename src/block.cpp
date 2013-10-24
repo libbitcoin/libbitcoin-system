@@ -88,7 +88,7 @@ block_type genesis_block()
     coinbase_input.previous_output.index =
         std::numeric_limits<uint32_t>::max();
     // The Times 03/Jan/2009 Chancellor on brink of second bailout for banks
-    coinbase_input.script = coinbase_script(
+    coinbase_input.script = raw_data_script(
         data_chunk{0x04, 0xff, 0xff, 0x00, 0x1d, 0x01, 0x04, 0x45,
                    0x54, 0x68, 0x65, 0x20, 0x54, 0x69, 0x6d, 0x65,
                    0x73, 0x20, 0x30, 0x33, 0x2f, 0x4a, 0x61, 0x6e,

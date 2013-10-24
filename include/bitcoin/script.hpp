@@ -283,7 +283,7 @@ opcode string_to_opcode(const std::string& code_repr);
 std::string pretty(const script_type& script);
 std::ostream& operator<<(std::ostream& stream, const script_type& script);
 
-script_type coinbase_script(const data_chunk& raw_script);
+script_type raw_data_script(const data_chunk& raw_script);
 script_type parse_script(const data_chunk& raw_script);
 data_chunk save_script(const script_type& script);
 size_t script_size(const script_type& script);

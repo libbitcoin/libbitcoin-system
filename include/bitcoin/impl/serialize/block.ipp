@@ -37,7 +37,7 @@ transaction_type read_transaction(
         input.previous_output.hash = deserial.read_hash();
         input.previous_output.index = deserial.read_4_bytes();
         if (previous_output_is_null(input.previous_output))
-            input.script = coinbase_script(read_raw_script(deserial));
+            input.script = raw_data_script(read_raw_script(deserial));
         else
             input.script = read_script(deserial);
         input.sequence = deserial.read_4_bytes();

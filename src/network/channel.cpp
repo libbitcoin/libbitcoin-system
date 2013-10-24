@@ -257,12 +257,7 @@ bool verify_header(const header_type& header_msg)
 {
     if (header_msg.magic != magic_value())
         return false;
-    if (header_msg.command == "version")
-    {
-        if (header_msg.payload_length < 85)
-            return false;
-    }
-    else if (header_msg.command == "verack"
+    if (header_msg.command == "verack"
         || header_msg.command == "getaddr")
     {
         if (header_msg.payload_length != 0)
@@ -274,7 +269,8 @@ bool verify_header(const header_type& header_msg)
         if (header_msg.payload_length != 8)
             return false;
     }
-    else if (header_msg.command == "inv"
+    else if (header_msg.command == "version"
+        || header_msg.command == "inv"
         || header_msg.command == "addr"
         || header_msg.command == "getdata"
         || header_msg.command == "getblocks"
@@ -324,7 +320,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
         return;
     BITCOIN_ASSERT(bytes_transferred == header_checksum_size);
     data_chunk checksum_stream = data_chunk(
-            inbound_checksum_.begin(), inbound_checksum_.end());
+        inbound_checksum_.begin(), inbound_checksum_.end());
     BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
     header_msg.checksum = cast_chunk<uint32_t>(checksum_stream);
     read_payload(header_msg);

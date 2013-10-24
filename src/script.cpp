@@ -1917,7 +1917,7 @@ std::ostream& operator<<(std::ostream& stream, const script_type& script)
     return stream;
 }
 
-script_type coinbase_script(const data_chunk& raw_script)
+script_type raw_data_script(const data_chunk& raw_script)
 {
     script_type script_object;
     operation op;
