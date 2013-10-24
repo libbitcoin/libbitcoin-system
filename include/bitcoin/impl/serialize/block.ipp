@@ -15,14 +15,24 @@ template <typename Deserializer>
 script_type read_script(Deserializer& deserial)
 {
     data_chunk raw_script = read_raw_script(deserial);
+    // Output scripts can be empty so we attempt to parse them.
+    // If unsuccessful then they can't be spent and we just return
+    // a raw_data script.
+    script_type result;
+    try
+    {
+        result = parse_script(raw_script);
+    }
+    catch (end_of_stream)
+    {
+        return raw_data_script(raw_script);
+    }
 #ifndef BITCOIN_DISABLE_ASSERTS
     std::string assert_msg = encode_hex(raw_script);
-#endif
     BITCOIN_ASSERT_MSG(
-        raw_script == save_script(parse_script(raw_script)),
-        assert_msg.c_str());
-    // Eventually plan to move parse_script to inside here
-    return parse_script(raw_script);
+        raw_script == save_script(result), assert_msg.c_str());
+#endif
+    return result;
 }
 
 template <typename Deserializer>
