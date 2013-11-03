@@ -32,14 +32,16 @@ public:
 #ifdef ENABLE_TESTNET
     enum
     {
-        pubkey_version = 0x6f,
-        script_version = 5
+        pubkey_version = 0x6F,
+        script_version = 0xC4,
+        wif_version = 0xEF
     };
 #else
     enum
     {
         pubkey_version = 0x00,
-        script_version = 5
+        script_version = 0x05,
+        wif_version = 0x80
     };
 #endif
     payment_address();

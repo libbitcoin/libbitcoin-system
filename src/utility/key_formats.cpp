@@ -3,13 +3,14 @@
 #include <bitcoin/format.hpp>
 #include <bitcoin/utility/base58.hpp>
 #include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/address.hpp>
 
 namespace libbitcoin {
 
 std::string secret_to_wif(const secret_parameter& secret)
 {
     private_data unencoded_data(secret.begin(), secret.end());
-    unencoded_data.insert(unencoded_data.begin(), 0x80);
+    unencoded_data.insert(unencoded_data.begin(), payment_address::wif_version);
     uint32_t checksum = generate_sha256_checksum(unencoded_data);
     extend_data(unencoded_data, uncast_type(checksum));
     return encode_base58(unencoded_data);
@@ -22,7 +23,7 @@ secret_parameter wif_to_secret(const std::string& wif)
     if (decoded.size() != 1 + sha256_digest_size + 4)
         return secret_parameter();
     // Check first byte is valid and remove it
-    if (decoded[0] != 0x80)
+    if (decoded[0] != payment_address::wif_version)
         return secret_parameter();
     // Proceed to verify the checksum
     private_data checksum_bytes(decoded.end() - 4, decoded.end());
