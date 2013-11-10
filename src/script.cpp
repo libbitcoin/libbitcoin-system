@@ -939,6 +939,8 @@ bool check_signature(data_chunk signature,
     if (!key.set_public_key(pubkey))
         return false;
 
+    if (signature.empty())
+        return false;
     uint32_t hash_type = 0;
     hash_type = signature.back();
     signature.pop_back();
