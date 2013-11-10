@@ -251,7 +251,10 @@ void indexer_history_fetched(const std::error_code& ec,
             found = true;
             break;
         }
-        BITCOIN_ASSERT_MSG(found, "Couldn't find output for adding spend");
+        // This assert can be triggered if the pool fills and starts
+        // dropping transactions.
+        // In practice this should not happen often and isn't a problem.
+        //BITCOIN_ASSERT_MSG(found, "Couldn't find output for adding spend");
     }
     handle_fetch(std::error_code(), history);
 }
