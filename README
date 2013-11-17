@@ -63,6 +63,10 @@ finding the libbitcoin install.
   export LD_LIBRARY_PATH=~/usr/lib/
   export PKG_CONFIG_PATH=~/usr/lib/pkgconfig/
 
+'./configure' also accepts the following flags:
+  --enable-testnet (enables the alternative blockchain used for testing)
+  --enable-debug   (verbose output)
+
 Compile/Build Flags
 -------------------
 
