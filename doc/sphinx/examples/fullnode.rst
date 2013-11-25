@@ -3,6 +3,9 @@
 examples/fullnode.cpp
 #####################
 
+Full node implementation. Expects the blockchain to be present in
+"./blockchain/" and initialized using ./initchain
+
 ::
 
     #include <future>
@@ -13,7 +16,7 @@ examples/fullnode.cpp
     using std::placeholders::_2;
     using std::placeholders::_3;
 
-    void output_to_file(std::ofstream& file, log_level level,
+    void log_to_file(std::ofstream& file, log_level level,
         const std::string& domain, const std::string& body)
     {
         if (body.empty())
@@ -23,7 +26,7 @@ examples/fullnode.cpp
             file << " [" << domain << "]";
         file << ": " << body << std::endl;
     }
-    void output_cerr_and_file(std::ofstream& file, log_level level,
+    void log_to_both(std::ostream& device, std::ofstream& file, log_level level,
         const std::string& domain, const std::string& body)
     {
         if (body.empty())
@@ -33,7 +36,30 @@ examples/fullnode.cpp
         if (!domain.empty())
             output << " [" << domain << "]";
         output << ": " << body;
-        std::cerr << output.str() << std::endl;
+        device << output.str() << std::endl;
+        file << output.str() << std::endl;
+    }
+
+    void output_file(std::ofstream& file, log_level level,
+        const std::string& domain, const std::string& body)
+    {
+        log_to_file(file, level, domain, body);
+    }
+    void output_both(std::ofstream& file, log_level level,
+        const std::string& domain, const std::string& body)
+    {
+        log_to_both(std::cout, file, level, domain, body);
+    }
+
+    void error_file(std::ofstream& file, log_level level,
+        const std::string& domain, const std::string& body)
+    {
+        log_to_file(file, level, domain, body);
+    }
+    void error_both(std::ofstream& file, log_level level,
+        const std::string& domain, const std::string& body)
+    {
+        log_to_both(std::cerr, file, level, domain, body);
     }
 
     class fullnode
@@ -44,6 +70,9 @@ examples/fullnode.cpp
         // Should only be called from the main thread.
         // It's an error to join() a thread from inside it.
         void stop();
+
+        blockchain& chain();
+        transaction_indexer& indexer();
 
     private:
         void handle_start(const std::error_code& ec);
@@ -70,6 +99,7 @@ examples/fullnode.cpp
         leveldb_blockchain chain_;
         poller poller_;
         transaction_pool txpool_;
+        transaction_indexer txidx_;
         // Mac OSX needs the bc:: namespace qualifier to compile.
         // Other systems should be OK.
         bc::session session_;
@@ -85,7 +115,7 @@ examples/fullnode.cpp
         // Blockchain database service.
         chain_(disk_pool_),
         // Poll new blocks, and transaction memory pool.
-        poller_(mem_pool_, chain_), txpool_(mem_pool_, chain_),
+        poller_(mem_pool_, chain_), txpool_(mem_pool_, chain_), txidx_(mem_pool_),
         // Session manager service. Convenience wrapper.
         session_(net_pool_, {
             handshake_, protocol_, chain_, poller_, txpool_})
@@ -99,14 +129,14 @@ examples/fullnode.cpp
             std::bind(&fullnode::connection_started, this, _1, _2));
         // Start blockchain. Must finish before any operations
         // are performed on the database (or they will fail).
-        std::promise<std::error_code> ec_chain;
+        std::promise<std::error_code> ec_promise;
         auto blockchain_started =
-            [&](const std::error_code& ec)
+            [&ec_promise](const std::error_code& ec)
             {
-                ec_chain.set_value(ec);
+                ec_promise.set_value(ec);
             };
-        chain_.start("database", blockchain_started);
-        std::error_code ec = ec_chain.get_future().get();
+        chain_.start("blockchain", blockchain_started);
+        std::error_code ec = ec_promise.get_future().get();
         if (ec)
         {
             log_error() << "Problem starting blockchain: " << ec.message();
@@ -122,7 +152,16 @@ examples/fullnode.cpp
 
     void fullnode::stop()
     {
-        session_.stop([](const std::error_code&) {});
+        std::promise<std::error_code> ec_promise;
+        auto session_stopped =
+            [&ec_promise](const std::error_code& ec)
+            {
+                ec_promise.set_value(ec);
+            };
+        session_.stop(session_stopped);
+        std::error_code ec = ec_promise.get_future().get();
+        if (ec)
+            log_error() << "Problem stopping session: " << ec.message();
 
         // Stop threadpools.
         net_pool_.stop();
@@ -135,6 +174,15 @@ examples/fullnode.cpp
 
         // Safely close blockchain database.
         chain_.stop();
+    }
+
+    blockchain& fullnode::chain()
+    {
+        return chain_;
+    }
+    transaction_indexer& fullnode::indexer()
+    {
+        return txidx_;
     }
 
     void fullnode::handle_start(const std::error_code& ec)
@@ -166,11 +214,21 @@ examples/fullnode.cpp
             log_error() << "Receive transaction: " << ec.message();
             return;
         }
-        // Called when the transaction becomes confirmed in a block.
-        auto handle_confirm = [](const std::error_code& ec)
+        auto handle_deindex = [](const std::error_code& ec)
             {
                 if (ec)
-                    log_error() << "Confirm error: " << ec.message();
+                    log_error() << "Deindex error: " << ec.message();
+            };
+        // Called when the transaction becomes confirmed in a block.
+        auto handle_confirm = [this, tx, handle_deindex](
+            const std::error_code& ec)
+            {
+                log_debug() << "handle_confirm ec = " << ec.message()
+                    << " " << hash_transaction(tx);
+                if (ec)
+                    log_error() << "Confirm error ("
+                        << hash_transaction(tx) << "): " << ec.message();
+                txidx_.deindex(tx, handle_deindex);
             };
         // Validate the transaction from the network.
         // Attempt to store in the transaction pool and check the result.
@@ -185,16 +243,21 @@ examples/fullnode.cpp
         const std::error_code& ec, const index_list& unconfirmed,
         const transaction_type& tx)
     {
+        auto handle_index = [](const std::error_code& ec)
+            {
+                if (ec)
+                    log_error() << "Index error: " << ec.message();
+            };
         const hash_digest& tx_hash = hash_transaction(tx);
         if (ec)
         {
-            log_error()
+            log_warning()
                 << "Error storing memory pool transaction "
                 << tx_hash << ": " << ec.message();
         }
         else
         {
-            auto l = log_info();
+            auto l = log_debug();
             l << "Accepted transaction ";
             if (!unconfirmed.empty())
             {
@@ -204,6 +267,30 @@ examples/fullnode.cpp
                 l << ") ";
             }
             l << tx_hash;
+            txidx_.index(tx, handle_index);
+        }
+    }
+
+    void history_fetched(const std::error_code& ec,
+        const blockchain::history_list& history)
+    {
+        if (ec)
+        {
+            log_error() << "Failed to fetch history: " << ec.message();
+            return;
+        }
+        log_info() << "Query fine.";
+        for (const auto& row: history)
+        {
+            log_info() << "output: " << row.output
+                << "  height: " << row.output_height;
+            log_info() << "value:  " << row.value;
+            auto l = log_info();
+            l << "spend:  ";
+            if (row.spend.hash == null_hash)
+                l << "Unspent";
+            else
+                l << row.spend << "  height: " << row.spend_height;
         }
     }
 
@@ -211,19 +298,33 @@ examples/fullnode.cpp
     {
         std::ofstream outfile("debug.log"), errfile("error.log");
         log_debug().set_output_function(
-            std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+            std::bind(output_file, std::ref(outfile), _1, _2, _3));
         log_info().set_output_function(
-            std::bind(output_to_file, std::ref(outfile), _1, _2, _3));
+            std::bind(output_both, std::ref(outfile), _1, _2, _3));
         log_warning().set_output_function(
-            std::bind(output_to_file, std::ref(errfile), _1, _2, _3));
+            std::bind(error_file, std::ref(errfile), _1, _2, _3));
         log_error().set_output_function(
-            std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
+            std::bind(error_both, std::ref(errfile), _1, _2, _3));
         log_fatal().set_output_function(
-            std::bind(output_cerr_and_file, std::ref(errfile), _1, _2, _3));
+            std::bind(error_both, std::ref(errfile), _1, _2, _3));
 
         fullnode app;
         app.start();
-        std::cin.get();
+        while (true)
+        {
+            std::string addr;
+            std::getline(std::cin, addr);
+            if (addr == "stop")
+                break;
+            payment_address payaddr;
+            if (!payaddr.set_encoded(addr))
+            {
+                log_error() << "Skipping invalid Bitcoin address.";
+                continue;
+            }
+            fetch_history(app.chain(), app.indexer(),
+                payaddr, history_fetched);
+        }
         app.stop();
 
         return 0;

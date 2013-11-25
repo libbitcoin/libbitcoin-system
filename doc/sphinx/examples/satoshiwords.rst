@@ -3,6 +3,8 @@
 examples/satoshiwords.cpp
 #########################
 
+Display the genesis block message by Satoshi.
+
 ::
 
     #include <bitcoin/bitcoin.hpp>

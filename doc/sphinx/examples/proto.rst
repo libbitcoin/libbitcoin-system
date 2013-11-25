@@ -3,6 +3,8 @@
 examples/proto.cpp
 #####################
 
+Join the Bitcoin network.
+
 ::
 
     #include <bitcoin/bitcoin.hpp>

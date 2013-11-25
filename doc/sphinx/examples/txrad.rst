@@ -3,6 +3,8 @@
 examples/txrad.cpp
 #####################
 
+Transaction radar.
+
 ::
 
     #include <bitcoin/bitcoin.hpp>

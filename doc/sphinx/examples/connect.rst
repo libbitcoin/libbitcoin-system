@@ -3,6 +3,8 @@
 examples/connect.cpp
 #####################
 
+Connect to a Bitcoin node on localhost, port 8333.
+
 ::
 
     #include <bitcoin/bitcoin.hpp>

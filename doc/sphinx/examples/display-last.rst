@@ -3,18 +3,19 @@
 examples/display-last.cpp
 #########################
 
-Fetches and displays info about the last block in a blockchain.
+Display info from the last block in our blockchain at "./blockchain/"
 
 You will need to call initchain on the database first before using this.
-Maybe even download a few blocks into the database.
+Maybe even download a few blocks into the database. See the section on
+the blockchain in the docs.
 
 ::
 
     #include <bitcoin/bitcoin.hpp>
     using namespace bc;
-    
+
     blockchain* chain = nullptr;
-    
+
     // Completion handler for when the blockchain has finished initializing.
     void blockchain_started(const std::error_code& ec);
     // Fetch the last block now that we have the height.
@@ -22,7 +23,7 @@ Maybe even download a few blocks into the database.
     // Result: print the block header.
     void display_block_header(const std::error_code& ec,
         const block_header_type& header);
-    
+
     void blockchain_started(const std::error_code& ec)
     {
         // std::error_code's can be tested like bools, and
@@ -40,7 +41,7 @@ Maybe even download a few blocks into the database.
         // Begin fetching the last height number.
         chain->fetch_last_height(height_fetched);
     }
-    
+
     void height_fetched(const std::error_code& ec, size_t last_height)
     {
         if (ec)
@@ -54,7 +55,7 @@ Maybe even download a few blocks into the database.
         // Begin fetching the block header.
         chain->fetch_block_header(last_height, display_block_header);
     }
-    
+
     // This is not the full block, only the header.
     // For the full block use fetch_block() instead.
     void display_block_header(const std::error_code& ec,
@@ -82,7 +83,7 @@ Maybe even download a few blocks into the database.
         // A goodbye message.
         log_info() << "Finished.";
     }
-    
+
     int main()
     {
         // Define a threadpool with 1 thread.
@@ -92,14 +93,9 @@ Maybe even download a few blocks into the database.
         // Initialize our global 'chain' pointer from above.
         chain = &ldb_chain;
         // Start the database using its implementation specific method.
-        ldb_chain.start("database", blockchain_started);
-        // Keep running until the user presses enter.
-        // Since libbitcoin is asynchronous, you need to synchronise with
-        // them to know when to exit safely.
-        // For these examples we just pause until enter for simplicity sake.
-        std::cin.get();
-        // Begin stopping the threadpools in parallel (only 1 here).
-        pool.stop();
+        ldb_chain.start("blockchain", blockchain_started);
+        // Don't wait after all current operations have completed.
+        pool.shutdown();
         // Join them one by one.
         pool.join();
         // Finally stop the blockchain safely now everything has stopped.

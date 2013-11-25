@@ -124,6 +124,8 @@ the examples/ directory of the source libbitcoin package.
   blank new database and adding the genesis block at height 0.
 * :ref:`display-last.cpp <examples_display-last>` fetches and displays the last
   block in a blockchain database.
+* :ref:`balance.cpp <examples_balance>` displays the balance of an address
+  passed in as a command line argument.
 * :ref:`satoshiwords.cpp <examples_satoshiwords>` displays the genesis block
   message from Satoshi.
 * :ref:`accept.cpp <examples_accept>` listens for connections on port 8333,
