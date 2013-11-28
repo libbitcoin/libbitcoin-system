@@ -214,16 +214,14 @@ public:
     uint64_t read_variable_uint()
     {
         uint8_t length = read_byte();
-        uint64_t value = 0;
         if (length < 0xfd)
-            value = length;
+            return length;
         else if (length == 0xfd)
-            value += read_2_bytes();
+            return read_2_bytes();
         else if (length == 0xfe)
-            value += read_4_bytes();
-        else if (length == 0xff)
-            value += read_8_bytes();
-        return value;
+            return read_4_bytes();
+        // length should be 0xff
+        return read_8_bytes();
     }
 
     data_chunk read_data(uint64_t n_bytes)
