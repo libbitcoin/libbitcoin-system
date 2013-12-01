@@ -191,7 +191,7 @@ public:
     virtual void fetch_last_height(fetch_handler_last_height handle_fetch) = 0;
 
     /**
-     * Fetches a transaction by hash
+     * Fetches a transaction by hash.
      *
      * @param[in]   transaction_hash  Transaction's hash
      * @param[in]   handle_fetch      Completion handler for fetch operation.

@@ -409,10 +409,25 @@ bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
     return true;
 }
 
+inline bool within_op_n(opcode code)
+{
+    uint8_t raw_code = static_cast<uint8_t>(code);
+    return static_cast<uint8_t>(opcode::op_1) <= raw_code &&
+        raw_code <= static_cast<uint8_t>(opcode::op_16);
+}
+inline uint8_t decode_op_n(opcode code)
+{
+    uint8_t raw_code = static_cast<uint8_t>(code);
+    BITCOIN_ASSERT(within_op_n(code));
+    // Add 1 because we minus opcode::op_1, not the value before.
+    return raw_code - static_cast<uint8_t>(opcode::op_1) + 1;
+}
+
 inline size_t count_script_sigops(
     const operation_stack& operations, bool accurate)
 {
-    size_t total_sigs = 0, last_number = 0;
+    size_t total_sigs = 0;
+    opcode last_opcode = opcode::bad_operation;
     for (const operation& op: operations)
     {
         if (op.code == opcode::checksig ||
@@ -423,17 +438,12 @@ inline size_t count_script_sigops(
         else if (op.code == opcode::checkmultisig ||
             op.code == opcode::checkmultisigverify)
         {
-            if (accurate && last_number != 0)
-                total_sigs += last_number;
+            if (accurate && within_op_n(last_opcode))
+                total_sigs += decode_op_n(last_opcode);
             else
                 total_sigs += 20;
         }
-        uint8_t raw_code = static_cast<uint8_t>(op.code);
-        if (static_cast<uint8_t>(opcode::op_1) <= raw_code &&
-            static_cast<uint8_t>(opcode::op_16) >= raw_code)
-        {
-            last_number = raw_code;
-        }
+        last_opcode = op.code;
     }
     return total_sigs;
 }
