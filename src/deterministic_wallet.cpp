@@ -66,8 +66,11 @@ const std::string bignum_hex(BIGNUM* bn)
 
 const data_chunk bignum_data(BIGNUM* bn)
 {
-    data_chunk result(BN_num_bytes(bn));
-    BN_bn2bin(bn, result.data());
+    data_chunk result(32);
+    size_t copy_offset = result.size() - BN_num_bytes(bn);
+    BN_bn2bin(bn, result.data() + copy_offset);
+    // Zero out beginning 0x00 bytes (if they exist).
+    std::fill(result.begin(), result.begin() + copy_offset, 0x00);
     return result;
 }
 
