@@ -8,6 +8,8 @@ everybody to access.
 Debian/Ubuntu Instructions
 ==========================
 
+Note that you need g++ 4.7 or higher. For this reason Ubuntu 12.04 and older are not supported.
+
   VVVVVVVVVVV
 > Start Here! <
   ^^^^^^^^^^^
