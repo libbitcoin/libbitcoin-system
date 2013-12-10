@@ -198,7 +198,18 @@ private:
 
     // run loop
     // Connect outwards
-    void try_connect();
+    void try_outbound_connects();
+    // This function is called in these places:
+    //
+    // 1. try_outbound_connects() calls it n times.
+    // Called by run() at the start.
+    // 2. If we fetch a random node address that we are already
+    // connected to in attempt_connect().
+    // 3. If we fail to connect to said address in handle_connect().
+    // 4. If the channel is stopped manually or there is an error
+    // (such as a disconnect). See setup_new_channel() for the
+    // subscribe call.
+    void try_connect_once();
     void attempt_connect(const std::error_code& ec,
         const network_address_type& packet);
     void handle_connect(const std::error_code& ec, channel_ptr node,
@@ -242,8 +253,10 @@ private:
     handshake& handshake_;
     network& network_;
 
+    // There's a fixed number of slots that are always trying to reconnect.
     size_t max_outbound_ = 8;
     connection_list connections_;
+    // Inbound connections from the p2p network.
     channel_ptr_list accepted_channels_;
 
     channel_subscriber_type::ptr channel_subscribe_;

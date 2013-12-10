@@ -253,19 +253,22 @@ void protocol::seeds::handle_store(const std::error_code& ec)
 
 void protocol::run()
 {
-    strand_.dispatch(std::bind(&protocol::try_connect, this));
+    strand_.dispatch(std::bind(&protocol::try_outbound_connects, this));
     network_.listen(protocol_port,
         strand_.wrap(std::bind(&protocol::handle_listen,
             this, _1, _2)));
 }
-void protocol::try_connect()
+void protocol::try_outbound_connects()
 {
-    if (connections_.size() >= max_outbound_)
-        return;
     for (size_t i = connections_.size(); i < max_outbound_; ++i)
-        hosts_.fetch_address(
-            strand_.wrap(std::bind(&protocol::attempt_connect,
-                this, _1, _2)));
+        try_connect_once();
+}
+void protocol::try_connect_once()
+{
+    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
+    hosts_.fetch_address(
+        strand_.wrap(std::bind(&protocol::attempt_connect,
+            this, _1, _2)));
 }
 void protocol::attempt_connect(const std::error_code& ec,
     const network_address_type& address)
@@ -286,7 +289,7 @@ void protocol::attempt_connect(const std::error_code& ec,
                 << "Already connected to " << encode_hex(address.ip);
             // Retry another connection
             strand_.post(
-                std::bind(&protocol::try_connect, this));
+                std::bind(&protocol::try_connect_once, this));
             return;
         }
     }
@@ -299,14 +302,15 @@ void protocol::attempt_connect(const std::error_code& ec,
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     const network_address_type& address)
 {
+    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
     if (ec)
     {
         log_warning(LOG_PROTOCOL) << "Unable to connect to "
             << pretty(address.ip) << ":" << address.port
             << " - " << ec.message();
-        hosts_.fetch_address(
-            strand_.wrap(std::bind(&protocol::attempt_connect,
-                this, _1, _2)));
+        // Retry another connection
+        strand_.post(
+            std::bind(&protocol::try_connect_once, this));
     }
     else
     {
@@ -378,27 +382,40 @@ void protocol::setup_new_channel(channel_ptr node)
 void protocol::channel_stopped(const std::error_code& ec,
     channel_ptr which_node)
 {
-    if (ec)
+    // We must always attempt a reconnection if this was an
+    // outbound connection.
+    if (ec) 
     {
         log_error(LOG_PROTOCOL)
             << "Channel stopped internal error: " << ec.message();
-        return;
     }
+    // Erase this channel from our connections list.
+    bool channel_erased = false;
+    // Erase from outbound_connects if it exists.
+    // And then attempt a reconnection.
     auto it = connections_.begin();
     for (; it != connections_.end(); ++it)
         if (it->node == which_node)
             break;
     if (it != connections_.end())
     {
+        channel_erased = true;
         connections_.erase(it);
-        // Recreate connections if need be
-        try_connect();
+        // Attempt a reconnection.
+        // Recreate 1 new connection always.
+        try_connect_once();
     }
+    // Or from accepted connections.
     auto acc_it = std::find(
         accepted_channels_.begin(),
         accepted_channels_.end(), which_node);
     if (acc_it != accepted_channels_.end())
+    {
+        channel_erased = true;
         accepted_channels_.erase(acc_it);
+    }
+    // Logic error if channel doesn't exist in either list.
+    BITCOIN_ASSERT(channel_erased);
 }
 
 void protocol::subscribe_address(channel_ptr node)
