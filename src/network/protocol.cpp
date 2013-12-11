@@ -295,7 +295,7 @@ bool already_connected(
     const ConnectionList& connections)
 {
     // Are we already connected to this address?
-    for (const connection_info& connection: connections)
+    for (const auto& connection: connections)
     {
         if (connection.address.ip == address.ip &&
             connection.address.port == address.port)
