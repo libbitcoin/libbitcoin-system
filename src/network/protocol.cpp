@@ -288,6 +288,24 @@ void protocol::try_connect_once()
         strand_.wrap(std::bind(&protocol::attempt_connect,
             this, _1, _2)));
 }
+
+template <typename ConnectionList>
+bool already_connected(
+    const network_address_type& address,
+    const ConnectionList& connections)
+{
+    // Are we already connected to this address?
+    for (const connection_info& connection: connections)
+    {
+        if (connection.address.ip == address.ip &&
+            connection.address.port == address.port)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void protocol::attempt_connect(const std::error_code& ec,
     const network_address_type& address)
 {
@@ -297,19 +315,14 @@ void protocol::attempt_connect(const std::error_code& ec,
             << "Problem fetching random address: " << ec.message();
         return;
     }
-    // Are we already connected to shared_from_this() address?
-    for (const connection_info& connection: connections_)
+    if (already_connected(address, connections_))
     {
-        if (connection.address.ip == address.ip &&
-            connection.address.port == address.port)
-        {
-            log_debug(LOG_PROTOCOL)
-                << "Already connected to " << encode_hex(address.ip);
-            // Retry another connection
-            strand_.post(
-                std::bind(&protocol::try_connect_once, this));
-            return;
-        }
+        log_debug(LOG_PROTOCOL)
+            << "Already connected to " << encode_hex(address.ip);
+        // Retry another connection
+        // Still in same strand.
+        try_connect_once();
+        return;
     }
     log_debug(LOG_PROTOCOL) << "Trying "
         << pretty(address.ip) << ":" << address.port;
@@ -327,8 +340,8 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
             << pretty(address.ip) << ":" << address.port
             << " - " << ec.message();
         // Retry another connection
-        strand_.post(
-            std::bind(&protocol::try_connect_once, this));
+        // Still in same strand.
+        try_connect_once();
     }
     else
     {
@@ -421,6 +434,7 @@ void protocol::channel_stopped(const std::error_code& ec,
         connections_.erase(it);
         // Attempt a reconnection.
         // Recreate 1 new connection always.
+        // Still in same strand.
         try_connect_once();
     }
     // Or from accepted connections.
