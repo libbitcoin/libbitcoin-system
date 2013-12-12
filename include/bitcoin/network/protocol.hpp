@@ -250,10 +250,13 @@ private:
         acceptor_ptr accept);
 
     // Channel setup
-    void setup_new_channel(channel_ptr node, slot_index slot=0);
-    // slow_index is ignored for accepted connections.
-    void channel_stopped(const std::error_code& ec,
-        channel_ptr which_node, slot_index slot);
+    void setup_new_channel(channel_ptr node);
+
+    // Remove channels when disconnected.
+    void outbound_channel_stopped(
+        const std::error_code& ec, channel_ptr which_node, slot_index slot);
+    void inbound_channel_stopped(
+        const std::error_code& ec, channel_ptr which_node);
 
     void subscribe_address(channel_ptr node);
     void receive_address_message(const std::error_code& ec,
@@ -285,7 +288,7 @@ private:
 
     // There's a fixed number of slots that are always trying to reconnect.
     size_t max_outbound_ = 8;
-    connection_list connections_;
+    connection_list connections_, manual_connections_;
     // Simply a debugging tool to enforce correct state transition behaviour
     // for maintaining connections.
     connect_state_list connect_states_;

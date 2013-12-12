@@ -361,7 +361,11 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         log_info(LOG_PROTOCOL) << "Connected to "
             << pretty(address.ip) << ":" << address.port
             << " (" << connections_.size() << " connections)";
-        setup_new_channel(node, slot);
+        // Remove channel from list of connections
+        node->subscribe_stop(
+            strand_.wrap(std::bind(&protocol::outbound_channel_stopped,
+                this, _1, node, slot)));
+        setup_new_channel(node);
     }
 }
 
@@ -397,10 +401,16 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
     auto handshake_complete = [this, node](const std::error_code& ec)
     {
         if (ec)
+        {
             log_error(LOG_PROTOCOL) << "Problem with handshake: "
                 << ec.message();
-        else
-            setup_new_channel(node);
+            return;
+        }
+        // Remove channel from list of connections
+        node->subscribe_stop(
+            strand_.wrap(std::bind(&protocol::inbound_channel_stopped,
+                this, _1, node)));
+        setup_new_channel(node);
     };
     handshake_.ready(node, handshake_complete);
 }
@@ -411,19 +421,28 @@ void handle_send(const std::error_code& ec)
         log_error(LOG_PROTOCOL)
             << "Sending error: " << ec.message();
 }
-void protocol::setup_new_channel(channel_ptr node, slot_index slot)
+void protocol::setup_new_channel(channel_ptr node)
 {
-    // Remove channel from list of connections
-    node->subscribe_stop(
-        strand_.wrap(std::bind(&protocol::channel_stopped,
-            this, _1, node, slot)));
     subscribe_address(node);
     node->send(get_address_type(), handle_send);
     // Notify subscribers
     channel_subscribe_->relay(std::error_code(), node);
 }
-void protocol::channel_stopped(const std::error_code& ec,
-    channel_ptr which_node, slot_index slot)
+
+template <typename ConnectionsList>
+bool remove_connection(ConnectionsList& connections, channel_ptr which_node)
+{
+    auto it = connections.begin();
+    for (; it != connections.end(); ++it)
+        if (it->node == which_node)
+            break;
+    if (it == connections.end())
+        return false;
+    connections.erase(it);
+    return true;
+}
+void protocol::outbound_channel_stopped(
+    const std::error_code& ec, channel_ptr which_node, slot_index slot)
 {
     // We must always attempt a reconnection if this was an
     // outbound connection.
@@ -433,35 +452,33 @@ void protocol::channel_stopped(const std::error_code& ec,
             << "Channel stopped internal error: " << ec.message();
     }
     // Erase this channel from our connections list.
-    bool channel_erased = false;
-    // Erase from outbound_connects if it exists.
     // And then attempt a reconnection.
-    auto it = connections_.begin();
-    for (; it != connections_.end(); ++it)
-        if (it->node == which_node)
-            break;
-    if (it != connections_.end())
+    bool remove_success = remove_connection(connections_, which_node);
+    BITCOIN_ASSERT(remove_success);
+    BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
+    connect_states_[slot] = connect_state::stopped;
+    // Attempt a reconnection.
+    // Recreate 1 new connection always.
+    // Still in same strand.
+    try_connect_once(slot);
+}
+
+void protocol::inbound_channel_stopped(
+    const std::error_code& ec, channel_ptr which_node)
+{
+    // We must always attempt a reconnection if this was an
+    // outbound connection.
+    if (ec) 
     {
-        BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
-        connect_states_[slot] = connect_state::stopped;
-        channel_erased = true;
-        connections_.erase(it);
-        // Attempt a reconnection.
-        // Recreate 1 new connection always.
-        // Still in same strand.
-        try_connect_once(slot);
+        log_error(LOG_PROTOCOL)
+            << "Channel stopped internal error: " << ec.message();
     }
     // Or from accepted connections.
     auto acc_it = std::find(
         accepted_channels_.begin(),
         accepted_channels_.end(), which_node);
-    if (acc_it != accepted_channels_.end())
-    {
-        channel_erased = true;
-        accepted_channels_.erase(acc_it);
-    }
-    // Logic error if channel doesn't exist in either list.
-    BITCOIN_ASSERT(channel_erased);
+    BITCOIN_ASSERT(acc_it != accepted_channels_.end());
+    accepted_channels_.erase(acc_it);
 }
 
 void protocol::subscribe_address(channel_ptr node)
