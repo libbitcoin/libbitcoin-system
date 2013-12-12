@@ -31,8 +31,6 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-const size_t clearance_count = 3;
-
 handshake::handshake(threadpool& pool)
   : strand_(pool.service())
 {
@@ -62,52 +60,45 @@ void handshake::start(start_handler handle_start)
 void handshake::ready(channel_ptr node,
     handshake::handshake_handler handle_handshake)
 {
-    atomic_counter_ptr counter = std::make_shared<atomic_counter>(0);
+    auto completion_callback = async_parallel(handle_handshake, 3);
 
     version_type session_version = template_version_;
     session_version.timestamp = time(NULL);
     node->send(session_version,
         strand_.wrap(std::bind(&handshake::handle_message_sent,
-            this, _1, counter, handle_handshake)));
+            this, _1, completion_callback)));
 
     node->subscribe_version(
         strand_.wrap(std::bind(&handshake::receive_version,
-            this, _1, _2, node, counter, handle_handshake)));
+            this, _1, _2, node, completion_callback)));
     node->subscribe_verack(
         strand_.wrap(std::bind(&handshake::receive_verack,
-            this, _1, _2, counter, handle_handshake)));
+            this, _1, _2, completion_callback)));
 }
 
 void handshake::handle_message_sent(const std::error_code& ec,
-    atomic_counter_ptr counter,
     handshake::handshake_handler completion_callback)
 {
-    if (ec)
-        completion_callback(ec);
-    else if (++(*counter) == clearance_count)
-        completion_callback(std::error_code());
+    completion_callback(ec);
 }
 
-void handshake::receive_version(const std::error_code& ec,
-    const version_type&, channel_ptr node, atomic_counter_ptr counter,
-    handshake::handshake_handler completion_callback)
+void handshake::receive_version(
+    const std::error_code& ec, const version_type&,
+    channel_ptr node, handshake::handshake_handler completion_callback)
 {
     if (ec)
         completion_callback(ec);
     else
         node->send(verack_type(),
             strand_.wrap(std::bind(&handshake::handle_message_sent,
-                this, _1, counter, completion_callback)));
+                this, _1, completion_callback)));
 }
 
-void handshake::receive_verack(const std::error_code& ec,
-    const verack_type&, atomic_counter_ptr counter,
+void handshake::receive_verack(
+    const std::error_code& ec, const verack_type&,
     handshake::handshake_handler completion_callback)
 {
-    if (ec)
-        completion_callback(ec);
-    else if (++(*counter) == clearance_count)
-        completion_callback(std::error_code());
+    completion_callback(ec);
 }
 
 int writer(char* data, size_t size, size_t count, std::string* buffer)

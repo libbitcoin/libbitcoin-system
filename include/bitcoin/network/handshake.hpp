@@ -66,15 +66,12 @@ private:
         channel_ptr node, network::connect_handler handle_connect);
 
     void handle_message_sent(const std::error_code& ec,
-        atomic_counter_ptr counter,
         handshake::handshake_handler completion_callback);
 
-    void receive_version(const std::error_code& ec,
-        const version_type&, channel_ptr node, atomic_counter_ptr counter,
-        handshake::handshake_handler completion_callback);
+    void receive_version(const std::error_code& ec, const version_type&,
+        channel_ptr node, handshake::handshake_handler completion_callback);
 
-    void receive_verack(const std::error_code& ec,
-        const verack_type&, atomic_counter_ptr counter,
+    void receive_verack(const std::error_code& ec, const verack_type&,
         handshake::handshake_handler completion_callback);
 
     bool lookup_external(const std::string& website,
