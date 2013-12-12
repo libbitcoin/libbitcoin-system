@@ -106,7 +106,6 @@
  *
  * @subsection wallet Wallet
  *
- * - @link libbitcoin::deterministic_wallet deterministic_wallet @endlink
  * - @link libbitcoin::secret_to_wif secret_to_wif @endlink
  * - @link libbitcoin::wif_to_secret wif_to_secret @endlink
  * - @link libbitcoin::minikey_to_secret minikey_to_secret @endlink
@@ -168,7 +167,6 @@
 // Not to be used internally. For API users.
 #include <bitcoin/error.hpp>
 #include <bitcoin/address.hpp>
-#include <bitcoin/deterministic_wallet.hpp>
 #include <bitcoin/network/channel.hpp>
 #include <bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/network/network.hpp>

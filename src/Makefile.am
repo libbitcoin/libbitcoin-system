@@ -4,7 +4,6 @@ lib_LTLIBRARIES = libbitcoin.la
 AM_CPPFLAGS = -I$(srcdir)/../include
 libbitcoin_la_SOURCES = \
     satoshi_serialize.cpp \
-    deterministic_wallet.cpp \
 	getx_responder.cpp \
 	threadpool.cpp \
 	network/network.cpp  \
