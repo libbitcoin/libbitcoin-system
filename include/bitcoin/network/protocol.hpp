@@ -59,6 +59,11 @@ public:
     void set_max_outbound(size_t max_outbound);
 
     /**
+     * Set the filename to load the hosts file from.
+     */
+    void set_hosts_filename(const std::string& hosts_filename);
+
+    /**
      * If called, then this service will not listen for incoming
      * connections. Must be called before start().
      */
@@ -120,6 +125,15 @@ public:
      */
     void fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
+
+    /**
+     * Create a manual connection to a specific node. If disconnected
+     * this service will keep attempting to reconnect until successful.
+     *
+     * @param[in]   hostname            // Hostname
+     * @param[in]   port                // Port
+     */
+    void maintain_connection(const std::string& hostname, uint16_t port);
 
     /**
      * Subscribe to new connections established to other nodes.
@@ -250,6 +264,10 @@ private:
     void handle_connect(const std::error_code& ec, channel_ptr node,
         const network_address_type& address, slot_index slot);
 
+    // Manual connections
+    void handle_manual_connect(const std::error_code& ec, channel_ptr node,
+        const std::string& hostname, uint16_t port);
+
     // Accept inwards connections
     void handle_listen(const std::error_code& ec, acceptor_ptr accept);
     void handle_accept(const std::error_code& ec, channel_ptr node,
@@ -258,9 +276,12 @@ private:
     // Channel setup
     void setup_new_channel(channel_ptr node);
 
-    // Remove channels when disconnected.
+    // Remove channels from lists when disconnected.
     void outbound_channel_stopped(
         const std::error_code& ec, channel_ptr which_node, slot_index slot);
+    void manual_channel_stopped(
+        const std::error_code& ec, channel_ptr which_node,
+        const std::string& hostname, uint16_t port);
     void inbound_channel_stopped(
         const std::error_code& ec, channel_ptr which_node);
 
@@ -287,17 +308,19 @@ private:
 
     io_service::strand strand_;
 
-    const std::string hosts_filename_;
+    std::string hosts_filename_ = "hosts";
     hosts& hosts_;
     handshake& handshake_;
     network& network_;
 
     // There's a fixed number of slots that are always trying to reconnect.
     size_t max_outbound_ = 8;
-    connection_list connections_, manual_connections_;
+    connection_list connections_;
     // Simply a debugging tool to enforce correct state transition behaviour
     // for maintaining connections.
     connect_state_list connect_states_;
+    // Manual connections created by user themselves.
+    channel_ptr_list manual_connections_;
     // Inbound connections from the p2p network.
     bool listen_is_enabled_ = true;
     channel_ptr_list accepted_channels_;
