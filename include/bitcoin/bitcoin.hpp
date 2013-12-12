@@ -185,6 +185,7 @@
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/ripemd.hpp>

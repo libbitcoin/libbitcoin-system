@@ -47,6 +47,7 @@ bitcoin_network_include_HEADERS = \
 
 bitcoin_util_includedir = $(includedir)/bitcoin/utility
 bitcoin_util_include_HEADERS = \
+	utility/async_parallel.hpp \
 	utility/elliptic_curve_key.hpp \
 	utility/sha256.hpp \
 	utility/serializer.hpp \

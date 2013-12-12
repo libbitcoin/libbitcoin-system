@@ -24,9 +24,10 @@
 
 #include <bitcoin/types.hpp>
 #include <bitcoin/primitives.hpp>
-#include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/network/channel.hpp>
 #include <bitcoin/threadpool.hpp>
+#include <bitcoin/utility/subscriber.hpp>
+#include <bitcoin/utility/async_parallel.hpp>
 
 namespace libbitcoin {
 

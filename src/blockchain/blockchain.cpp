@@ -20,6 +20,7 @@
 
 #include <bitcoin/constants.hpp>
 #include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/async_parallel.hpp>
 
 namespace libbitcoin {
 

@@ -21,7 +21,6 @@
 
 #include <boost/asio.hpp>
 #include <array>
-#include <atomic>
 #include <memory>
 #include <sstream>
 #include <iomanip>
@@ -39,9 +38,6 @@ DECLARE_PTR_TYPE(acceptor);
 DECLARE_PTR_TYPE(channel);
 
 #undef DECLARE_PTR_TYPE
-
-typedef std::atomic<size_t> atomic_counter;
-typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
 
 typedef std::shared_ptr<tcp::socket> socket_ptr;
 

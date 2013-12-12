@@ -24,6 +24,7 @@
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/threadpool.hpp>
+#include <bitcoin/utility/async_parallel.hpp>
 
 namespace libbitcoin {
 
