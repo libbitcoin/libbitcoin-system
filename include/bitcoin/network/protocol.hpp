@@ -160,6 +160,16 @@ private:
         channel_ptr node;
     };
     typedef std::vector<connection_info> connection_list;
+    enum class connect_state
+    {
+        none,
+        finding_peer,
+        connecting,
+        established,
+        stopped
+    };
+    typedef std::vector<connect_state> connect_state_list;
+    typedef size_t slot_index;
     // Accepted connections
     typedef std::vector<channel_ptr> channel_ptr_list;
 
@@ -227,11 +237,11 @@ private:
     // 4. If the channel is stopped manually or there is an error
     // (such as a disconnect). See setup_new_channel() for the
     // subscribe call.
-    void try_connect_once();
+    void try_connect_once(slot_index slot);
     void attempt_connect(const std::error_code& ec,
-        const network_address_type& packet);
+        const network_address_type& packet, slot_index slot);
     void handle_connect(const std::error_code& ec, channel_ptr node,
-        const network_address_type& address);
+        const network_address_type& address, slot_index slot);
 
     // Accept inwards connections
     void handle_listen(const std::error_code& ec, acceptor_ptr accept);
@@ -239,9 +249,10 @@ private:
         acceptor_ptr accept);
 
     // Channel setup
-    void setup_new_channel(channel_ptr node);
+    void setup_new_channel(channel_ptr node, slot_index slot=0);
+    // slow_index is ignored for accepted connections.
     void channel_stopped(const std::error_code& ec,
-        channel_ptr which_node);
+        channel_ptr which_node, slot_index slot);
 
     void subscribe_address(channel_ptr node);
     void receive_address_message(const std::error_code& ec,
@@ -274,6 +285,9 @@ private:
     // There's a fixed number of slots that are always trying to reconnect.
     size_t max_outbound_ = 8;
     connection_list connections_;
+    // Simply a debugging tool to enforce correct state transition behaviour
+    // for maintaining connections.
+    connect_state_list connect_states_;
     // Inbound connections from the p2p network.
     channel_ptr_list accepted_channels_;
 
