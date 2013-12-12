@@ -26,6 +26,28 @@
 
 namespace libbitcoin {
 
+/*
+ * async_parallel(completion_handler, clearance_count)
+ *
+ * Returns a callback that will stop when:
+ *
+ * 1. An error is passed as the first argument.
+ * 2. It has been called clearance_count number of times.
+ *
+ * This is useful when we have a piece of code that forks into several
+ * asynchronous code paths. This utility ensures that all code paths
+ * are completed before calling the completion_handler.
+ *
+ *   auto complete = [](std::error_code ec, std::string s) { ... };
+ *   auto cb = async_parallel(complete, 3);
+ *   cb(std::error_code, "hello");
+ *   // Calling cb(error::service_stopped, "") here will
+ *   // call complete(error::service_stopped, "")
+ *   cb(std::error_code, "world");
+ *   // Calls complete(std::error_code, "final")
+ *   cb(std::error_code, "final");
+ */
+
 typedef std::atomic<size_t> atomic_counter;
 typedef std::shared_ptr<atomic_counter> atomic_counter_ptr;
 
