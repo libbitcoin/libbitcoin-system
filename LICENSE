@@ -21,6 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Additional permission under the GNU Affero GPL version 3 section 7:
 
+If the covered work has no means of communicating an offer to provide
+Corresponding Source to the users interacting with it remotely over a
+computer network, then you may comply with this requirement by making
+the Corresponding Source for your version available for anyone to copy,
+free of charge and under the terms of this License, through a publicly
+available network server or other readily accessible means.
+
 If you modify this Program, or any covered work, by linking or
 combining it with other code, such other code is not for that reason
 alone subject to any of the requirements of the GNU Affero GPL
@@ -404,13 +411,6 @@ it.  (Additional permissions may be written to require their own
 removal in certain cases when you modify the work.)  You may place
 additional permissions on material, added by you to a covered work,
 for which you have or can give appropriate copyright permission.
-
-  If the covered work has no means of communicating an offer to provide
-Corresponding Source to the users interacting with it remotely over a
-computer network, then you may comply with this requirement by making
-the Corresponding Source for your version available for anyone to copy,
-free of charge and under the terms of this License, through a publicly
-available network server or other readily accessible means.
 
   Notwithstanding any other provision of this License, for material you
 add to a covered work, you may (if authorized by the copyright holders of
