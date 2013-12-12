@@ -47,6 +47,10 @@ void protocol::set_max_outbound(size_t max_outbound)
 {
     max_outbound_ = max_outbound;
 }
+void protocol::disable_listener()
+{
+    listen_is_enabled_ = false;
+}
 
 void protocol::start(completion_handler handle_complete)
 {
@@ -275,9 +279,9 @@ void protocol::run()
     BITCOIN_ASSERT(!running);
     running = true;
     strand_.dispatch(std::bind(&protocol::try_outbound_connects, this));
-    network_.listen(protocol_port,
-        strand_.wrap(std::bind(&protocol::handle_listen,
-            this, _1, _2)));
+    if (listen_is_enabled_)
+        network_.listen(protocol_port,
+            strand_.wrap(std::bind(&protocol::handle_listen, this, _1, _2)));
 }
 void protocol::try_outbound_connects()
 {

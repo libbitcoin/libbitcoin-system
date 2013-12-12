@@ -59,6 +59,12 @@ public:
     void set_max_outbound(size_t max_outbound);
 
     /**
+     * If called, then this service will not listen for incoming
+     * connections. Must be called before start().
+     */
+    void disable_listener();
+
+    /**
      * Perform full initialization sequence.
      * Internally calls bootstrap() and then run().
      *
@@ -293,6 +299,7 @@ private:
     // for maintaining connections.
     connect_state_list connect_states_;
     // Inbound connections from the p2p network.
+    bool listen_is_enabled_ = true;
     channel_ptr_list accepted_channels_;
 
     channel_subscriber_type::ptr channel_subscribe_;
