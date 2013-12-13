@@ -8,7 +8,10 @@ Copyright: 2011-2013 Amir Taaki (genjix) <genjix@riseup.net>
            2011 Jan Engelhardt (se7) <jengelh@medozas.de>
            2011 Patrick Strateman (phantomcircuit)
 License: AGPL3
- Note that this is AGPLv3 with an extra clause
+ Note that this is AGPLv3 with additional permissions.
+ .
+ For more information, see:
+ <https://wiki.unsystem.net/index.php/Libbitcoin/License>
 
 Files: debian/*
 Copyright: 2013 Pablo Castellano <pablo@anche.no>
