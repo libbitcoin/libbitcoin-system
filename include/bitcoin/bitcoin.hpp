@@ -105,12 +105,6 @@
  * - @link libbitcoin::big_number big_number @endlink
  * - @link libbitcoin::threadpool threadpool @endlink
  *
- * @subsection wallet Wallet
- *
- * - @link libbitcoin::secret_to_wif secret_to_wif @endlink
- * - @link libbitcoin::wif_to_secret wif_to_secret @endlink
- * - @link libbitcoin::minikey_to_secret minikey_to_secret @endlink
- *
  * @section useful-funcs Useful functions
  *
  * In accordance with C++ principles of encapsulation, operations which
@@ -195,7 +189,6 @@
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/utility/weak_bind.hpp>
-#include <bitcoin/utility/key_formats.hpp>
 #include <bitcoin/utility/mnemonic.hpp>
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>
