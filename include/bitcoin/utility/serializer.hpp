@@ -62,15 +62,15 @@ public:
     }
     void write_2_bytes(uint16_t value)
     {
-        write_data_impl(value);
+        write_uint(value);
     }
     void write_4_bytes(uint32_t value)
     {
-        write_data_impl(value);
+        write_uint(value);
     }
     void write_8_bytes(uint64_t value)
     {
-        write_data_impl(value);
+        write_uint(value);
     }
 
     void write_variable_uint(uint64_t value)
@@ -99,7 +99,7 @@ public:
     template <typename T>
     void write_data(const T& data)
     {
-        copy(data.begin(), data.end());
+        internal_copy(data.begin(), data.end());
     }
 
     void write_network_address(network_address_type addr)
@@ -152,7 +152,7 @@ public:
 
 private:
     template <typename T>
-    void write_data_impl(T value)
+    void write_uint(T value)
     {
         write_data(uncast_type(value));
     }
@@ -160,11 +160,13 @@ private:
     template <typename T>
     void write_data_reverse(const T& data)
     {
-        copy(data.rbegin(), data.rend());
+        internal_copy(data.rbegin(), data.rend());
     }
 
+    // We need to advance the internal iterator.
+    // std::copy gives no info on length of the data copied.
     template <typename InputIterator>
-    void copy(InputIterator first, InputIterator last)
+    void internal_copy(InputIterator first, InputIterator last)
     {
         while (first != last)
         {
