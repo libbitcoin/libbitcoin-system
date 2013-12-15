@@ -265,24 +265,22 @@ bool validate_transaction::connect_input(
 
 void validate_transaction::check_double_spend(const std::error_code& ec)
 {
-    if (ec == error::unspent_output)
-    {
-        // End of connect_input checks
-        ++current_input_;
-        if (current_input_ == tx_.inputs.size())
-            check_fees();
-        else
-        {
-            BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
-            // Keep looping
-            next_previous_transaction();
-        }
-    }
-    else
+    if (ec != error::unspent_output)
     {
         BITCOIN_ASSERT(!ec || ec != error::unspent_output);
         handle_validate_(error::double_spend, index_list());
+        return;
     }
+    // End of connect_input checks
+    ++current_input_;
+    if (current_input_ < tx_.inputs.size())
+    {
+        BITCOIN_ASSERT(current_input_ < tx_.inputs.size());
+        // Keep looping
+        next_previous_transaction();
+        return;
+    }
+    check_fees();
 }
 
 bool validate_transaction::tally_fees(const transaction_type& tx,
@@ -301,7 +299,11 @@ bool validate_transaction::tally_fees(const transaction_type& tx,
 void validate_transaction::check_fees()
 {
     uint64_t fee = 0;
-    tally_fees(tx_, value_in_, fee);
+    if (!tally_fees(tx_, value_in_, fee))
+    {
+        handle_validate_(error::fees_out_of_range, index_list());
+        return;
+    }
     // Who cares?
     // Fuck the police
     // Every tx equal!
