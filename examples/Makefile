@@ -39,12 +39,6 @@ initchain.o: initchain.cpp
 initchain: initchain.o
 	$(CXX) -o $@ $< $(LIBS)
 
-determ.o: determ.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
-
-determ: determ.o
-	$(CXX) -o $@ $< $(LIBS)
-
 priv.o: priv.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
@@ -69,7 +63,7 @@ proto.o: proto.cpp
 proto: proto.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: balance priv determ initchain fullnode display-last satoshiwords connect accept proto txrad
+all: balance priv initchain fullnode display-last satoshiwords connect accept proto txrad
 
 clean:
 	rm -f accept balance connect determ display-last fullnode initchain priv proto satoshiwords txrad
