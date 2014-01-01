@@ -12,7 +12,7 @@ Quickstart
     int main()
     {
         block_type blk = genesis_block();
-        std::cout << encode_hex(hash_block_header(blk)) << std::endl;
+        std::cout << encode_hex(hash_block_header(blk.header)) << std::endl;
         return 0;
     }
 
