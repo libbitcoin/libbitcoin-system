@@ -75,6 +75,19 @@ Bitcoin address such as its payment type.
     // payment_type enum is defined in script.hpp
     assert(address.type() == payment_type::pubkey_hash);
 
+libwallet
+=========
+
+libwallet is an additional library that extends libbitcoin with support for
+old-style pre-HE deterministic wallets, and working with various key formats.
+
+The `libwallet repo <https://github.com/spesmilo/libwallet>`_ was originally
+part of libbitcoin but was split for modularity and maintenance. To use it
+in your project add these lines to source files::
+
+    #include <wallet/wallet.hpp>
+    using namespace libwallet;
+
 Deterministic Wallets
 =====================
 
@@ -92,8 +105,8 @@ Also, multiple devices could host the same wallet based off of the same seed and
 automatically stay in sync with each other. Non-critical information such as
 address books would need to be stored and copied between wallets. 
 
-libbitcoin implements the same compatible deterministic wallet algorithm as `Electrum <http://electrum.org/>`_.
-Wallet seeds from the Bitcoin client Electrum are usable in libbitcoin.
+libwallet implements the same compatible deterministic wallet algorithm as `Electrum <http://electrum.org/>`_.
+Wallet seeds from the Bitcoin client Electrum are usable in libwallet.
 Deterministic wallets are always initialized with a seed whether newly
 generated or set.
 ::
