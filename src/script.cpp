@@ -914,11 +914,18 @@ hash_digest script_type::generate_signature_hash(
         input.script = script_type();
     parent_tx.inputs[input_index].script = script_code;
 
+    // The default sighash::all signs all outputs, and the current input.
+    // Transaction cannot be updated without resigning the input.
+    // (note the lack of nullify_input_sequences() call)
+
+    // sighash::none signs no outputs so they can be changed.
     if ((hash_type & 0x1f) == sighash::none)
     {
         parent_tx.outputs.clear();
         nullify_input_sequences(parent_tx.inputs, input_index);
     }
+    // Sign the single corresponding output to our index.
+    // We don't care about additional inputs or outputs to the tx.
     else if ((hash_type & 0x1f) == sighash::single)
     {
         transaction_output_list& outputs = parent_tx.outputs;
@@ -934,13 +941,14 @@ hash_digest script_type::generate_signature_hash(
         // Loop through outputs except the last one
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
-            it->value = ~0;
+            it->value = std::numeric_limits<uint64_t>::max();
             it->script = script_type();
         }
 
         nullify_input_sequences(parent_tx.inputs, input_index);
     }
 
+    // Modifier to ignore the other inputs except our own.
     if (hash_type & sighash::anyone_can_pay)
     {
         parent_tx.inputs[0] = parent_tx.inputs[input_index];
