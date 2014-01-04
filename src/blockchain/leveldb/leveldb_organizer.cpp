@@ -28,7 +28,7 @@ namespace libbitcoin {
 leveldb_organizer::leveldb_organizer(leveldb_common_ptr common,
     orphans_pool_ptr orphans, leveldb_chain_keeper_ptr chain,
     reorganize_handler handler)
-  : organizer(orphans, chain), common_(common), chain_(chain), handler_(handler)
+  : organizer(orphans, chain), common_(common), handler_(handler)
 {
 }
 

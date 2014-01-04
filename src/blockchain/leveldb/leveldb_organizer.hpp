@@ -46,7 +46,6 @@ protected:
 
 private:
     leveldb_common_ptr common_;
-    leveldb_chain_keeper_ptr chain_;
     reorganize_handler handler_;
 };
 

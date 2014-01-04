@@ -164,15 +164,21 @@ private:
     comparator_ptr height_comparator_;
     leveldb::Options open_options_;
 
+
     // Blocks indexed by height.
+    //   block height -> block header + list(tx_hashes)
     database_ptr db_block_;
     // Block heights indexed by hash (a secondary lookup table).
+    //   block hash -> block height
     database_ptr db_block_hash_;
     // Transactions indexed by hash.
+    //   tx hash -> tx height + tx index + tx
     database_ptr db_tx_;
     // Lookup whether an output point is spent.
     // Value is the input point spend.
+    //   outpoint -> inpoint spend
     database_ptr db_spend_;
+
     // Address to list of output points + values
     database_ptr db_credit_;
     // Address to list of spend input points.
