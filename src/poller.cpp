@@ -137,7 +137,7 @@ void poller::handle_store(const std::error_code& ec, block_info info,
             break;
 
         case block_status::rejected:
-            log_error(LOG_POLLER)
+            log_warning(LOG_POLLER)
                 << "Rejected block " << encode_hex(block_hash);
             break;
 
