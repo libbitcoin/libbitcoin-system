@@ -120,7 +120,7 @@ void poller::handle_store(const std::error_code& ec, block_info info,
     // We need orphan blocks so we can do the next getblocks round
     if (ec && info.status != block_status::orphan)
     {
-        log_error(LOG_POLLER)
+        log_warning(LOG_POLLER)
             << "Storing block " << encode_hex(block_hash)
             << ": " << ec.message();
         return;
