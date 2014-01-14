@@ -75,8 +75,6 @@ void session::new_channel(const std::error_code& ec, channel_ptr node)
     BITCOIN_ASSERT(node);
     node->subscribe_inventory(
         std::bind(&session::inventory, this, _1, _2, node));
-    node->subscribe_get_data(
-        std::bind(&session::get_data, this, _1, _2, node));
     node->subscribe_get_blocks(
         std::bind(&session::get_blocks, this, _1, _2, node));
     // tx
@@ -147,20 +145,6 @@ void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
         std::bind(&session::request_tx_data,
             this, _1, tx_hash, node));
     grabbed_invs_.store(tx_hash);
-}
-
-void session::get_data(const std::error_code& ec,
-    const get_data_type& packet, channel_ptr node)
-{
-    if (ec)
-    {
-        log_error(LOG_SESSION) << "get_data: " << ec.message();
-        return;
-    }
-    // TODO: Implement.
-    // simple stuff
-    node->subscribe_get_data(
-        std::bind(&session::get_data, this, _1, _2, node));
 }
 
 void session::get_blocks(const std::error_code& ec,
