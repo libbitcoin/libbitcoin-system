@@ -49,84 +49,14 @@ elliptic_curve_key& elliptic_curve_key::operator=(
     return *this;
 }
 
-bool elliptic_curve_key::set_public_key(const data_chunk& pubkey)
-{
-    if (!initialize())
-        return false;
-    const unsigned char* pubkey_bytes = pubkey.data();
-    if (!o2i_ECPublicKey(&key_, &pubkey_bytes, pubkey.size()))
-        return false;
-    return true;
-}
-
-data_chunk elliptic_curve_key::public_key() const
-{
-    // same as get_private_key
-    int length = i2o_ECPublicKey(key_, NULL);
-    if (!length)
-        return private_data();
-    data_chunk pubkey(length, 0);
-    uint8_t* pubkey_begin = pubkey.data();
-    if (i2o_ECPublicKey(key_, &pubkey_begin) != length)
-        return data_chunk();
-    return pubkey;
-}
-
-bool elliptic_curve_key::verify(hash_digest hash, const data_chunk& signature)
-{
-    BITCOIN_ASSERT(key_ != nullptr);
-    // SSL likes a reversed hash
-    std::reverse(hash.begin(), hash.end());
-    // -1 = error, 0 = bad sig, 1 = good
-    if (ECDSA_verify(0, hash.data(), hash.size(), 
-            signature.data(), signature.size(), key_) == 1)
-        return true;
-    return false;
-}
-
-bool elliptic_curve_key::new_key_pair()
+bool elliptic_curve_key::new_keypair()
 {
     if (!initialize())
         return false;
     if (!EC_KEY_generate_key(key_))
         return false;
+    use_compressed();
     return true;
-}
-
-bool elliptic_curve_key::set_private_key(const private_data& privkey)
-{
-    if (!initialize())
-        return false;
-    const uint8_t* privkey_begin = privkey.data();
-    if (!d2i_ECPrivateKey(&key_, &privkey_begin, privkey.size()))
-        return false;
-    return true;
-}
-
-private_data elliptic_curve_key::private_key() const
-{
-    int length = i2d_ECPrivateKey(key_, NULL);
-    if (!length)
-        return private_data();
-    private_data privkey(length, 0);
-    uint8_t* privkey_begin = privkey.data();
-    if (i2d_ECPrivateKey(key_, &privkey_begin) != length)
-        return private_data();
-    return privkey;
-}
-
-data_chunk elliptic_curve_key::sign(hash_digest hash) const
-{
-    BITCOIN_ASSERT(key_ != nullptr);
-    // SSL likes a reversed hash
-    std::reverse(hash.begin(), hash.end());
-    data_chunk signature(ECDSA_size(key_));
-    unsigned int signature_length = signature.size();
-    if (!ECDSA_sign(0, hash.data(), hash.size(), 
-            signature.data(), &signature_length, key_))
-        return data_chunk();
-    signature.resize(signature_length);
-    return signature;
 }
 
 // Generate a private key from just the secret parameter
@@ -180,6 +110,7 @@ bool elliptic_curve_key::set_secret(const secret_parameter& secret)
         return false;
     }
     BN_clear_free(bignum);
+    use_compressed();
     return true;
 }
 
@@ -196,6 +127,57 @@ secret_parameter elliptic_curve_key::secret() const
     return secret;
 }
 
+data_chunk elliptic_curve_key::sign(hash_digest hash) const
+{
+    BITCOIN_ASSERT(key_ != nullptr);
+    // SSL likes a reversed hash
+    std::reverse(hash.begin(), hash.end());
+    data_chunk signature(ECDSA_size(key_));
+    unsigned int signature_length = signature.size();
+    if (!ECDSA_sign(0, hash.data(), hash.size(), 
+            signature.data(), &signature_length, key_))
+        return data_chunk();
+    signature.resize(signature_length);
+    return signature;
+}
+
+bool elliptic_curve_key::set_public_key(const data_chunk& pubkey)
+{
+    if (!initialize())
+        return false;
+    const unsigned char* pubkey_bytes = pubkey.data();
+    if (!o2i_ECPublicKey(&key_, &pubkey_bytes, pubkey.size()))
+        return false;
+    if (pubkey.size() == 33)
+        use_compressed();
+    return true;
+}
+
+data_chunk elliptic_curve_key::public_key() const
+{
+    // same as get_private_key
+    int length = i2o_ECPublicKey(key_, NULL);
+    if (!length)
+        return data_chunk();
+    data_chunk pubkey(length, 0);
+    uint8_t* pubkey_begin = pubkey.data();
+    if (i2o_ECPublicKey(key_, &pubkey_begin) != length)
+        return data_chunk();
+    return pubkey;
+}
+
+bool elliptic_curve_key::verify(hash_digest hash, const data_chunk& signature)
+{
+    BITCOIN_ASSERT(key_ != nullptr);
+    // SSL likes a reversed hash
+    std::reverse(hash.begin(), hash.end());
+    // -1 = error, 0 = bad sig, 1 = good
+    if (ECDSA_verify(0, hash.data(), hash.size(), 
+            signature.data(), signature.size(), key_) == 1)
+        return true;
+    return false;
+}
+
 bool elliptic_curve_key::initialize()
 {
     // Already initialized
@@ -203,6 +185,12 @@ bool elliptic_curve_key::initialize()
         return true;
     key_ = EC_KEY_new_by_curve_name(NID_secp256k1);
     return key_ != nullptr;
+}
+void elliptic_curve_key::use_compressed()
+{
+    // Use POINT_CONVERSION_UNCOMPRESSED for old style uncompressed keys.
+    // Or just comment out the line below:
+    EC_KEY_set_conv_form(key_, POINT_CONVERSION_COMPRESSED);
 }
 
 } // namespace libbitcoin
