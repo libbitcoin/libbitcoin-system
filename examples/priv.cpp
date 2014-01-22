@@ -46,8 +46,9 @@ void error_exit(const char* message, int status=1)
 int new_keypair()
 {
     elliptic_curve_key ec;
-    ec.new_key_pair();
-    private_data raw_private_key = ec.private_key();
+    if (!ec.new_keypair())
+        error_exit("could not create new key pair");
+    secret_parameter raw_private_key = ec.secret();
     std::cout << std::string(raw_private_key.begin(), raw_private_key.end());
     return 0;
 }
@@ -55,9 +56,9 @@ int new_keypair()
 int sign(const std::string input_data, const std::string raw_private_key)
 {
     hash_digest digest = decode_hex_digest<hash_digest>(input_data);
+    hash_digest privkey = decode_hex_digest<hash_digest>(raw_private_key);
     elliptic_curve_key ec;
-    if (!ec.set_private_key(
-            private_data(raw_private_key.begin(), raw_private_key.end())))
+    if (!ec.set_secret(privkey))
         error_exit("bad private key");
     log_info() << encode_hex(ec.sign(digest));
     return 0;
@@ -68,9 +69,9 @@ int verify(const std::string input_data, const std::string& signature_data,
 {
     hash_digest digest = decode_hex_digest<hash_digest>(input_data);
     data_chunk signature = decode_hex(signature_data);
+    hash_digest privkey = decode_hex_digest<hash_digest>(raw_private_key);
     elliptic_curve_key ec;
-    if (!ec.set_private_key(
-            private_data(raw_private_key.begin(), raw_private_key.end())))
+    if (!ec.set_secret(privkey))
         error_exit("bad private key");
     log_info() << (ec.verify(digest, signature) ? '1' : '0');
     return 0;
@@ -78,9 +79,9 @@ int verify(const std::string input_data, const std::string& signature_data,
 
 int address(const std::string raw_private_key)
 {
+    hash_digest privkey = decode_hex_digest<hash_digest>(raw_private_key);
     elliptic_curve_key ec;
-    if (!ec.set_private_key(
-            private_data(raw_private_key.begin(), raw_private_key.end())))
+    if (!ec.set_secret(privkey))
         error_exit("bad private key");
     payment_address address;
     set_public_key(address, ec.public_key());
