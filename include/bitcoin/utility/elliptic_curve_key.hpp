@@ -38,8 +38,8 @@ public:
     elliptic_curve_key(const elliptic_curve_key& other);
     elliptic_curve_key& operator=(const elliptic_curve_key& other);
 
-    bool new_keypair();
-    bool set_secret(const secret_parameter& secret);
+    bool new_keypair(bool compressed=true);
+    bool set_secret(const secret_parameter& secret, bool compressed=true);
     secret_parameter secret() const;
     data_chunk sign(hash_digest hash) const;
 

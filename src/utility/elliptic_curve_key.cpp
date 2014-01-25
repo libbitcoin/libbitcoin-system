@@ -49,13 +49,14 @@ elliptic_curve_key& elliptic_curve_key::operator=(
     return *this;
 }
 
-bool elliptic_curve_key::new_keypair()
+bool elliptic_curve_key::new_keypair(bool compressed)
 {
     if (!initialize())
         return false;
     if (!EC_KEY_generate_key(key_))
         return false;
-    use_compressed();
+    if (compressed)
+        use_compressed();
     return true;
 }
 
@@ -96,7 +97,7 @@ error:
     return success;
 }
 
-bool elliptic_curve_key::set_secret(const secret_parameter& secret)
+bool elliptic_curve_key::set_secret(const secret_parameter& secret, bool compressed)
 {
     key_ = EC_KEY_new_by_curve_name(NID_secp256k1);
     if (!key_)
@@ -110,7 +111,8 @@ bool elliptic_curve_key::set_secret(const secret_parameter& secret)
         return false;
     }
     BN_clear_free(bignum);
-    use_compressed();
+    if (compressed)
+        use_compressed();
     return true;
 }
 
