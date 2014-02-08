@@ -309,7 +309,7 @@ private:
 
     io_service::strand strand_;
 
-    std::string hosts_filename_ = "hosts";
+    std::string hosts_filename_ = "hosts.p2p";
     hosts& hosts_;
     handshake& handshake_;
     network& network_;
