@@ -199,10 +199,8 @@ private:
         channel_subscriber_type;
 
     // start sequence
-    void handle_bootstrap(const std::error_code& ec,
-        atomic_counter_ptr count_paths, completion_handler handle_complete);
-    void handle_start_handshake_service(const std::error_code& ec,
-        atomic_counter_ptr count_paths, completion_handler handle_complete);
+    void handle_bootstrap(
+        const std::error_code& ec, completion_handler handle_complete);
 
     // stop sequence
     void handle_save(const std::error_code& ec,

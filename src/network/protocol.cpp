@@ -58,16 +58,21 @@ void protocol::disable_listener()
 
 void protocol::start(completion_handler handle_complete)
 {
-    atomic_counter_ptr count_paths = std::make_shared<atomic_counter>(0);
+    // Bootstrap from seeds if neccessary.
     bootstrap(strand_.wrap(
-        std::bind(&protocol::handle_bootstrap,
-            this, _1, count_paths, handle_complete)));
-    handshake_.start(strand_.wrap(
-        std::bind(&protocol::handle_start_handshake_service,
-            this, _1, count_paths, handle_complete)));
+        std::bind(&protocol::handle_bootstrap, this, _1, handle_complete)));
+    // Start handshake service, but if it fails to start
+    // then it's not a critical error.
+    auto handshake_service_started = [](const std::error_code& ec)
+    {
+        if (ec)
+            log_error(LOG_PROTOCOL)
+                << "Failed to start handshake service: " << ec.message();
+    };
+    handshake_.start(handshake_service_started);
 }
-void protocol::handle_bootstrap(const std::error_code& ec,
-    atomic_counter_ptr count_paths, completion_handler handle_complete)
+void protocol::handle_bootstrap(
+    const std::error_code& ec, completion_handler handle_complete)
 {
     if (ec)
     {
@@ -75,28 +80,8 @@ void protocol::handle_bootstrap(const std::error_code& ec,
         handle_complete(ec);
         return;
     }
-    if (++(*count_paths) == 2)
-    {
-        handle_complete(std::error_code());
-        run();
-    }
-}
-void protocol::handle_start_handshake_service(const std::error_code& ec,
-    atomic_counter_ptr count_paths, completion_handler handle_complete)
-{
-    if (ec)
-    {
-        log_error(LOG_PROTOCOL)
-            << "Failed to start handshake service: " << ec.message();
-        handle_complete(ec);
-        return;
-    }
-    ++(*count_paths);
-    if (*count_paths == 2)
-    {
-        handle_complete(std::error_code());
-        run();
-    }
+    handle_complete(std::error_code());
+    run();
 }
 
 void protocol::stop(completion_handler handle_complete)
