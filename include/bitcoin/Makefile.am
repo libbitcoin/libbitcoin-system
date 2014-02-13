@@ -9,6 +9,7 @@ bitcoin_include_HEADERS = \
 	script.hpp \
 	address.hpp \
 	transaction.hpp \
+	stealth.hpp \
 	constants.hpp \
 	block.hpp \
 	bitcoin.hpp \
@@ -57,6 +58,5 @@ bitcoin_util_include_HEADERS = \
 	utility/subscriber.hpp \
 	utility/logger.hpp \
 	utility/weak_bind.hpp \
-	utility/mnemonic.hpp \
     utility/timed_section.hpp
 

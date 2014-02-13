@@ -21,13 +21,13 @@ libbitcoin_la_SOURCES = \
 	block.cpp \
     utility/elliptic_curve_key.cpp \
 	transaction.cpp \
+	stealth.cpp \
 	error.cpp \
     validate.cpp \
 	session.cpp \
 	utility/base58.cpp \
 	utility/big_number.cpp \
 	utility/timed_section.cpp \
-	utility/mnemonic.cpp \
 	constants.cpp \
 	blockchain/organizer.cpp \
 	blockchain/blockchain.cpp \

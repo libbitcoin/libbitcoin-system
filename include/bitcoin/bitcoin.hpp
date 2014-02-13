@@ -189,8 +189,8 @@
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/utility/weak_bind.hpp>
-#include <bitcoin/utility/mnemonic.hpp>
 #include <bitcoin/script.hpp>
+#include <bitcoin/stealth.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/transaction_pool.hpp>
 #include <bitcoin/transaction_indexer.hpp>
