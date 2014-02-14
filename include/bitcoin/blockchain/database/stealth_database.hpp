@@ -25,6 +25,8 @@
 
 namespace libbitcoin {
 
+// https://wiki.unsystem.net/index.php/DarkWallet/Stealth#Database_file_format
+
 class stealth_database
 {
 public:
