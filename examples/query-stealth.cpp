@@ -34,7 +34,7 @@ void stealth_fetched(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error() << "Blockchain failed to start: " << ec.message();
+        log_error() << "Stealth fetch failed: " << ec.message();
         return;
     }
     for (const blockchain::stealth_row& row: stealth_results)
