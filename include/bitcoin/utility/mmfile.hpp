@@ -33,7 +33,7 @@ public:
     ~mmfile();
     uint8_t* data();
     const uint8_t* data() const;
-    const size_t size() const;
+    size_t size() const;
 private:
     int file_handle_ = 0;
     uint8_t* data_ = nullptr;

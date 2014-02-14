@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #ifndef LIBBITCOIN_STEALTH_DATABASE_HPP
-#define LIBBITCOIN_SSTEALTH_DATABASE_HPP
+#define LIBBITCOIN_STEALTH_DATABASE_HPP
 
 #include <functional>
 #include <bitcoin/utility/mmfile.hpp>
