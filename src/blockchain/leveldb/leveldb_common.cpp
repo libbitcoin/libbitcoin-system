@@ -23,6 +23,8 @@
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/address.hpp>
 #include <bitcoin/satoshi_serialize.hpp>
+#include <bitcoin/transaction.hpp>
+#include <bitcoin/blockchain/database/stealth_database.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 
@@ -47,12 +49,18 @@ bool mark_spent_outputs(leveldb::WriteBatch& spend_batch,
 bool add_debit(leveldb::WriteBatch& batch,
     const transaction_input_type& input, const input_point& inpoint,
     uint32_t block_height);
+bool process_stealth_output_info(const transaction_output_type& output,
+    data_chunk& stealth_data_store);
+void add_stealth_info(const data_chunk& stealth_data,
+    const payment_address& address, const hash_digest& tx_hash,
+    stealth_database& db);
 bool add_credit(leveldb::WriteBatch& batch,
-    const transaction_output_type& output, const output_point& outpoint,
-    uint32_t block_height);
+    const payment_address& address, uint64_t output_value,
+    const output_point& outpoint, uint32_t block_height);
 
-leveldb_common::leveldb_common(leveldb_databases db)
-  : db_(db)
+leveldb_common::leveldb_common(
+    leveldb_databases db, special_databases special_dbs)
+  : db_(db), db_stealth_(special_dbs.stealth)
 {
 }
 
@@ -126,6 +134,8 @@ bool leveldb_common::save_block(
     batch.block_hash.Put(slice_block_hash(block_hash), slice(raw_height));
     // Execute batches.
     db_.write(batch);
+    // Sync stealth database.
+    db_stealth_->sync(height);
     return true;
 }
 
@@ -170,14 +180,32 @@ bool leveldb_common::save_transaction(leveldb_transaction_batch& batch,
                     input, {tx_hash, input_index}, block_height))
                 return false;
         }
+    // A stack of size 1. Keep the stealth_data from
+    // one iteration to the next.
+    data_chunk stealth_data_store;
+    auto unload_stealth_store = [&]()
+    {
+        return std::move(stealth_data_store);
+    };
     // Save address -> output mappings.
     for (uint32_t output_index = 0; output_index < block_tx.outputs.size();
         ++output_index)
     {
         const transaction_output_type& output =
             block_tx.outputs[output_index];
-        if (!add_credit(batch.credit,
-                output, {tx_hash, output_index}, block_height))
+        // If a stealth output then skip processing.
+        if (process_stealth_output_info(output, stealth_data_store))
+            continue;
+        data_chunk stealth_data = unload_stealth_store();
+        // Try to extract an address.
+        payment_address address;
+        if (!extract(address, output.script))
+            continue;
+        // Process this output.
+        if (!stealth_data.empty())
+            add_stealth_info(stealth_data, address, tx_hash, *db_stealth_);
+        if (!add_credit(batch.credit, address, output.value,
+                {tx_hash, output_index}, block_height))
             return false;
     }
     return true;
@@ -215,14 +243,57 @@ bool add_debit(leveldb::WriteBatch& batch,
     return true;
 }
 
-bool add_credit(leveldb::WriteBatch& batch,
-    const transaction_output_type& output, const output_point& outpoint,
-    uint32_t block_height)
+bool process_stealth_output_info(const transaction_output_type& output,
+    data_chunk& stealth_data_store)
 {
-    payment_address address;
-    // Not a Bitcoin address so skip this output.
-    if (!extract(address, output.script))
-        return true;
+    // Return false when we want the main loop to skip pass this
+    // output and not process it any further.
+    if (output.script.type() != payment_type::stealth_info)
+        return false;
+    BITCOIN_ASSERT(output.script.operations().size() == 2);
+    stealth_data_store = output.script.operations()[1].data;
+    return true;
+}
+
+uint32_t calculate_bitfield(const data_chunk& stealth_data)
+{
+    // Calculate stealth bitfield
+    const hash_digest index = generate_sha256_hash(stealth_data);
+    auto deserial = make_deserializer(index.begin(), index.begin() + 4);
+    uint32_t bitfield = deserial.read_4_bytes();
+    return bitfield;
+}
+data_chunk read_ephemkey(const data_chunk& stealth_data)
+{
+    // Read ephemkey
+    BITCOIN_ASSERT(stealth_data.size() == 1 + 4 + 33);
+    data_chunk ephemkey(stealth_data.begin() + 5, stealth_data.end());
+    BITCOIN_ASSERT(ephemkey.size() == 33);
+    return ephemkey;
+}
+void add_stealth_info(const data_chunk& stealth_data,
+    const payment_address& address, const hash_digest& tx_hash,
+    stealth_database& db)
+{
+    const uint32_t bitfield = calculate_bitfield(stealth_data);
+    const data_chunk ephemkey = read_ephemkey(stealth_data);
+    auto write_func = [&](uint8_t *it)
+    {
+        auto serial = make_serializer(it);
+        serial.write_4_bytes(bitfield);
+        serial.write_data(ephemkey);
+        serial.write_byte(address.version());
+        serial.write_short_hash(address.hash());
+        serial.write_hash(tx_hash);
+        BITCOIN_ASSERT(serial.iterator() == it + 4 + 33 + 21 + 32);
+    };
+    db.store(write_func);
+}
+
+bool add_credit(leveldb::WriteBatch& batch,
+    const payment_address& address, uint64_t output_value,
+    const output_point& outpoint, uint32_t block_height)
+{
     data_chunk addr_key = create_address_key(address, outpoint);
     // outpoint, value, block_height
     data_chunk row_info(36 + 8 + 4);
@@ -231,7 +302,7 @@ bool add_credit(leveldb::WriteBatch& batch,
     serial.write_hash(outpoint.hash);
     serial.write_4_bytes(outpoint.index);
     // value
-    serial.write_8_bytes(output.value);
+    serial.write_8_bytes(output_value);
     // block_height
     serial.write_4_bytes(block_height);
     BITCOIN_ASSERT(

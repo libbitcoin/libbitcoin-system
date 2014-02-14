@@ -187,8 +187,10 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
     leveldb_databases databases{
         db_block_.get(), db_block_hash_.get(), db_tx_.get(),
         db_spend_.get(), db_credit_.get(), db_debit_.get()};
+    special_databases special_dbs{
+        db_stealth_.get()};
     // G++ has an internal compiler error when you use the implicit * cast.
-    common_ = std::make_shared<leveldb_common>(databases);
+    common_ = std::make_shared<leveldb_common>(databases, special_dbs);
     // Validate and organisation components.
     orphans_ = std::make_shared<orphans_pool>(20);
     leveldb_chain_keeper_ptr chainkeeper =

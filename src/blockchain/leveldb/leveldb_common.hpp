@@ -31,6 +31,8 @@
 
 namespace libbitcoin {
 
+class stealth_database;
+
 struct leveldb_block_info
 {
     block_header_type header;
@@ -67,10 +69,15 @@ struct leveldb_databases
     void write(leveldb_transaction_batch& batch);
 };
 
+struct special_databases
+{
+    stealth_database* stealth;
+};
+
 class leveldb_common
 {
 public:
-    leveldb_common(leveldb_databases db);
+    leveldb_common(leveldb_databases db, special_databases special_dbs);
 
     uint32_t find_last_block_height();
     bool fetch_spend(
@@ -95,6 +102,7 @@ private:
         const hash_digest& tx_hash, const transaction_type& block_tx);
 
     leveldb_databases db_;
+    stealth_database* db_stealth_;
 };
 
 typedef std::shared_ptr<leveldb_common> leveldb_common_ptr;
