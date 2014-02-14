@@ -1396,6 +1396,15 @@ bool is_script_hash_type(const operation_stack& ops)
         ops[1].data.size() == 20 &&
         ops[2].code == opcode::equal;
 }
+bool is_stealth_info_type(const operation_stack& ops)
+{
+    return ops.size() == 2 &&
+        ops[0].code == opcode::return_ &&
+        ops[1].code == opcode::special &&
+        ops[1].data.size() == 1 + 4 + 33 &&
+        ops[1].data[0] == 0x06 &&
+        (ops[1].data[5] == 0x02 || ops[1].data[5] == 0x03);
+}
 bool is_multisig_type(const operation_stack&)
 {
     return false;
@@ -1444,6 +1453,8 @@ payment_type script_type::type() const
         return payment_type::pubkey_hash;
     if (is_script_hash_type(operations_))
         return payment_type::script_hash;
+    if (is_stealth_info_type(operations_))
+        return payment_type::stealth_info;
     if (is_multisig_type(operations_))
         return payment_type::multisig;
     if (is_pubkey_hash_sig_type(operations_))

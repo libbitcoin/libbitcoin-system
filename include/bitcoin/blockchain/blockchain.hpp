@@ -32,6 +32,7 @@
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/address.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/stealth.hpp>
 
 namespace libbitcoin {
 
@@ -78,6 +79,16 @@ public:
     typedef std::vector<history_row> history_list;
     typedef std::function<void (const std::error_code&, const history_list&)>
         fetch_handler_history;
+
+    struct stealth_row
+    {
+        data_chunk ephemkey;
+        payment_address address;
+        hash_digest transaction_hash;
+    };
+    typedef std::vector<stealth_row> stealth_list;
+    typedef std::function<void (const std::error_code&, const stealth_list&)>
+        fetch_handler_stealth;
 
     typedef std::vector<std::shared_ptr<block_type>> block_list;
     typedef std::function<
@@ -303,6 +314,33 @@ public:
      */
     virtual void fetch_history(const payment_address& address,
         fetch_handler_history handle_fetch, size_t from_height=0) = 0;
+
+    /**
+     * Fetch possible stealth results. These results can then be iterated
+     * to discover new payments belonging to a particular stealth address.
+     * This is for recipient privacy.
+     *
+     * The prefix is a special value that can be adjusted to provide
+     * greater precision at the expense of deniability.
+     *
+     * from_height is not guaranteed to only return results from that
+     * height, and may also include results from earlier blocks.
+     * It is provided as an optimisation. All results at and after
+     * from_height are guaranteed to be returned however.
+     *
+     * @param[in]   prefix          Stealth prefix information.
+     * @param[in]   handle_fetch    Completion handler for fetch operation.
+     * @param[in]   from_height     Starting block height for stealth results.
+     *
+     * @code
+     *  void handle_fetch(
+     *      const std::error_code& ec,                   // Status of operation
+     *      const blockchain::stealth_list& stealth_rows // Stealth result rows
+     *  );
+     * @endcode
+     */
+    virtual void fetch_stealth(const stealth_prefix& prefix,
+        fetch_handler_stealth handle_fetch, size_t from_height=0) = 0;
 
     /**
      * Be notified of the next blockchain change.

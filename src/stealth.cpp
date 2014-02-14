@@ -31,7 +31,7 @@ uint8_t bitfield_mask(uint8_t bitfield_byte, uint8_t number_bits)
     return bitfield_byte & mask;
 }
 
-bool stealth_match(const stealth_prefix& prefix, uint8_t* raw_bitfield)
+bool stealth_match(const stealth_prefix& prefix, const uint8_t* raw_bitfield)
 {
     BITCOIN_ASSERT(prefix.number_bits <= sizeof(prefix.bitfield) * 8);
     // Perform comparison of byte.

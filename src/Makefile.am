@@ -32,6 +32,7 @@ libbitcoin_la_SOURCES = \
 	constants.cpp \
 	blockchain/organizer.cpp \
 	blockchain/blockchain.cpp \
+    blockchain/database/stealth_database.cpp \
 	transaction_pool.cpp \
 	transaction_indexer.cpp
 

@@ -30,7 +30,7 @@ struct stealth_prefix
     uint32_t bitfield;
 };
 
-bool stealth_match(const stealth_prefix& prefix, uint8_t* raw_bitfield);
+bool stealth_match(const stealth_prefix& prefix, const uint8_t* raw_bitfield);
 
 } // namespace libbitcoin
 

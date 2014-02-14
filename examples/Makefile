@@ -51,6 +51,12 @@ fullnode.o: fullnode.cpp
 fullnode: fullnode.o
 	$(CXX) -o $@ $< $(LIBS)
 
+query-stealth.o: query-stealth.cpp
+	$(CXX) -o $@ -c $< $(CXXFLAGS)
+
+query-stealth: query-stealth.o
+	$(CXX) -o $@ $< $(LIBS)
+
 display-last.o: display-last.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
@@ -63,8 +69,8 @@ proto.o: proto.cpp
 proto: proto.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: balance priv initchain fullnode display-last satoshiwords connect accept proto txrad
+all: balance priv initchain fullnode display-last satoshiwords connect accept proto txrad query-stealth
 
 clean:
-	rm -f accept balance connect determ display-last fullnode initchain priv proto satoshiwords txrad
+	rm -f accept balance connect determ display-last fullnode query-stealth initchain priv proto satoshiwords txrad
 	rm -f *.o

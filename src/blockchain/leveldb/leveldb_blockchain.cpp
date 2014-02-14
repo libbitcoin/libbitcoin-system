@@ -132,6 +132,16 @@ bool open_db(const std::string& prefix, const std::string& db_name,
     return true;
 }
 
+void open_stealth_db(const std::string& prefix,
+    std::unique_ptr<mmfile>& file, std::unique_ptr<stealth_database>& db)
+{
+    using boost::filesystem::path;
+    path db_path = path(prefix) / "stealth.db";
+    file.reset(new mmfile(db_path.c_str()));
+    db.reset(new stealth_database(*file));
+}
+
+
 bool leveldb_blockchain::initialize(const std::string& prefix)
 {
     using boost::filesystem::path;
@@ -171,6 +181,9 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
         return false;
     if (!open_db(prefix, "debit", db_debit_, open_options_))
         return false;
+    // Open custom databases.
+    open_stealth_db(prefix, stealth_file_, db_stealth_);
+    // Initialize other components.
     leveldb_databases databases{
         db_block_.get(), db_block_hash_.get(), db_tx_.get(),
         db_spend_.get(), db_credit_.get(), db_debit_.get()};
@@ -669,6 +682,39 @@ bool leveldb_blockchain::do_fetch_history(const payment_address& address,
     }
     // Finish.
     return finish_fetch(slock, handle_fetch, std::error_code(), history);
+}
+
+void leveldb_blockchain::fetch_stealth(const stealth_prefix& prefix,
+    fetch_handler_stealth handle_fetch, size_t from_height)
+{
+    fetch(
+        std::bind(&leveldb_blockchain::do_fetch_stealth,
+            this, prefix, handle_fetch, from_height, _1));
+}
+bool leveldb_blockchain::do_fetch_stealth(const stealth_prefix& prefix,
+    fetch_handler_stealth handle_fetch, size_t from_height, size_t slock)
+{
+    stealth_list results;
+    auto read_func = [&results, prefix](const uint8_t* it)
+    {
+        if (!stealth_match(prefix, it))
+            return;
+        constexpr uint32_t row_size = 4 + 33 + 21 + 32;
+        // Skip bitfield value since we don't need it.
+        auto deserial = make_deserializer(it + 4, it + row_size);
+        stealth_row row;
+        row.ephemkey = deserial.read_data(33);
+        uint8_t address_version = deserial.read_byte();
+        const short_hash address_hash = deserial.read_short_hash();
+        row.address.set(address_version, address_hash);
+        row.transaction_hash = deserial.read_hash();
+        BITCOIN_ASSERT(deserial.iterator() == it + row_size);
+        results.push_back(row);
+    };
+    BITCOIN_ASSERT(db_stealth_);
+    db_stealth_->scan(read_func, from_height);
+    // Finish.
+    return finish_fetch(slock, handle_fetch, std::error_code(), results);
 }
 
 void leveldb_blockchain::subscribe_reorganize(
