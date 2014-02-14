@@ -25,6 +25,7 @@
 #include <bitcoin/types.hpp>
 #include <bitcoin/threadpool.hpp>
 #include <bitcoin/primitives.hpp>
+#include <bitcoin/constants.hpp>
 
 namespace libbitcoin {
 
@@ -34,13 +35,20 @@ class transaction_pool;
 class getx_responder
 {
 public:
-    getx_responder(threadpool& pool,
-        blockchain& chain, transaction_pool& txpool);
+    getx_responder(blockchain& chain, transaction_pool& txpool);
     void monitor(channel_ptr node);
 
 private:
+    // We use this object to keep track of the hash_continue and add
+    // a shared state to our channel object.
+    struct channel_with_state
+    {
+        channel_ptr node;
+        hash_digest hash_continue = null_hash;
+    };
+
     void receive_get_data(const std::error_code& ec,
-        const get_data_type packet, channel_ptr node);
+        const get_data_type packet, channel_with_state special);
 
     void pool_tx(const std::error_code& ec, const transaction_type& tx,
         const hash_digest& tx_hash, channel_ptr node);
@@ -50,7 +58,6 @@ private:
     void send_block(const std::error_code& ec,
         const block_type blk, channel_ptr node);
 
-    io_service& service_;
     blockchain& chain_;
     transaction_pool& txpool_;
 };

@@ -28,22 +28,26 @@ namespace libbitcoin {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-getx_responder::getx_responder(threadpool& pool,
-    blockchain& chain, transaction_pool& txpool)
-  : service_(pool.service()), chain_(chain), txpool_(txpool)
+getx_responder::getx_responder(blockchain& chain, transaction_pool& txpool)
+  : chain_(chain), txpool_(txpool)
 {
 }
 
 void getx_responder::monitor(channel_ptr node)
 {
+    // Use this wrapper to add shared state to our node for inv
+    // requests to trigger getblocks requests so a node can continue
+    // downloading blocks.
+    channel_with_state special;
+    special.node = node;
+    // Serve tx and blocks to nodes.
     node->subscribe_get_data(
-        service_.wrap(std::bind(
-            &getx_responder::receive_get_data,
-                this, _1, _2, node)));
+        std::bind(&getx_responder::receive_get_data,
+            this, _1, _2, special));
 }
 
 void getx_responder::receive_get_data(const std::error_code& ec,
-    const get_data_type packet, channel_ptr node)
+    const get_data_type packet, channel_with_state special)
 {
     if (ec)
         return;
@@ -55,16 +59,14 @@ void getx_responder::receive_get_data(const std::error_code& ec,
                 // First attempt lookup in faster pool, then do slow
                 // lookup in blockchain after.
                 txpool_.fetch(inv.hash,
-                    service_.wrap(std::bind(
-                        &getx_responder::pool_tx,
-                            this, _1, _2, inv.hash, node)));
+                    std::bind(&getx_responder::pool_tx,
+                        this, _1, _2, inv.hash, special.node));
                 break;
 
             case inventory_type_id::block:
                 fetch_block(chain_, inv.hash,
-                    service_.wrap(std::bind(
-                        &getx_responder::send_block,
-                            this, _1, _2, node)));
+                    std::bind(&getx_responder::send_block,
+                        this, _1, _2, special.node));
                 break;
 
             // Ignore everything else
@@ -74,10 +76,9 @@ void getx_responder::receive_get_data(const std::error_code& ec,
                 break;
         }
     }
-    node->subscribe_get_data(
-        service_.wrap(std::bind(
-            &getx_responder::receive_get_data,
-                this, _1, _2, node)));
+    special.node->subscribe_get_data(
+        std::bind(&getx_responder::receive_get_data,
+            this, _1, _2, special));
 }
 
 void getx_responder::pool_tx(const std::error_code& ec,
@@ -87,9 +88,8 @@ void getx_responder::pool_tx(const std::error_code& ec,
     if (ec)
     {
         chain_.fetch_transaction(tx_hash,
-            service_.wrap(std::bind(
-                &getx_responder::chain_tx,
-                    this, _1, _2, node)));
+            std::bind(&getx_responder::chain_tx,
+                this, _1, _2, node));
     }
     else
         node->send(tx, [](const std::error_code&) {});
