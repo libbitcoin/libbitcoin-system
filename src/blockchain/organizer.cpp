@@ -215,7 +215,7 @@ void organizer::replace_chain(int fork_index,
     // if will fail to find it. I would rather not add an exception
     // there so that problems will show earlier.
     // All arrival_blocks should be blocks from the pool.
-    int arrival_index = fork_index;
+    size_t arrival_index = fork_index;
     for (block_detail_ptr arrival_block: orphan_chain)
     {
         orphans_->remove(arrival_block);

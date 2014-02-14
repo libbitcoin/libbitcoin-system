@@ -44,9 +44,9 @@ handshake::handshake(threadpool& pool)
     template_version_.address_me.ip = localhost_ip();
     template_version_.address_me.port = protocol_port;
     template_version_.address_you.services = template_version_.services;
-    template_version_.address_you.ip = 
-        ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
-                        0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
+    template_version_.address_you.ip =
+        ip_address_type{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                         0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01}};
     template_version_.address_you.port = protocol_port;
     template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_LIB_VERSION "/";
     template_version_.start_height = 0;
@@ -161,8 +161,8 @@ bool handshake::lookup_external(const std::string& website,
 
 ip_address_type handshake::localhost_ip()
 {
-    return ip_address_type{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                           0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01};
+    return ip_address_type{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                            0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01}};
 }
 
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)

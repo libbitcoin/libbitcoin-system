@@ -150,8 +150,8 @@ void big_number::set_hash(hash_digest load_hash)
 
 hash_digest big_number::hash() const
 {
-    hash_digest repr{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    hash_digest repr{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
     data_chunk copy_data = data();
     if (copy_data.size() < 4)
         return repr;

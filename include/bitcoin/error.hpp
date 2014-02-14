@@ -21,6 +21,7 @@
 #define LIBBITCOIN_STORAGE_ERRORS_HPP
 
 #include <system_error>
+#include <string>
 
 namespace libbitcoin {
 
