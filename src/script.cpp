@@ -1041,32 +1041,54 @@ bool script_type::op_checkmultisig(
     return true;
 }
 
-bool script_type::read_section(data_stack& section)
+bool script_type::read_value(size_t& value)
 {
     if (stack_.empty())
         return false;
-    big_number count_big_num;
-    if (!cast_to_big_number(pop_stack(), count_big_num))
+    big_number value_big_num;
+    if (!cast_to_big_number(pop_stack(), value_big_num))
         return false;
-    const size_t count = count_big_num.uint32();
-
+    value = value_big_num.uint32();
+    return true;
+}
+bool script_type::read_section(data_stack& section, size_t count)
+{
     if (stack_.size() < count)
         return false;
     for (size_t i = 0; i < count; ++i)
         section.push_back(pop_stack());
     return true;
 }
-
 bool script_type::op_checkmultisigverify(
     const transaction_type& parent_tx, uint32_t input_index)
 {
+    size_t pubkeys_count;
+    if (!read_value(pubkeys_count))
+        return false;
+
+    if (pubkeys_count > 20)
+        return false;
+    op_counter_ += pubkeys_count;
+    if (op_counter_ > op_counter_limit)
+        return false;
+
     data_stack pubkeys;
-    if (!read_section(pubkeys))
+    if (!read_section(pubkeys, pubkeys_count))
+        return false;
+
+    size_t sigs_count;
+    if (!read_value(sigs_count))
         return false;
 
     data_stack signatures;
-    if (!read_section(signatures))
+    if (!read_section(signatures, sigs_count))
         return false;
+
+    // Due to a bug in bitcoind, we need to read an extra null value
+    // which we discard after.
+    if (stack_.empty())
+        return false;
+    stack_.pop_back();
 
     auto is_signature =
         [&signatures](const data_chunk& data)

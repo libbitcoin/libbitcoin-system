@@ -284,7 +284,8 @@ private:
     bool op_checksigverify(
         const transaction_type& parent_tx, uint32_t input_index);
     // multisig variants
-    bool read_section(data_stack& section);
+    bool read_value(size_t& value);
+    bool read_section(data_stack& section, size_t count);
     bool op_checkmultisig(
         const transaction_type& parent_tx, uint32_t input_index);
     bool op_checkmultisigverify(
