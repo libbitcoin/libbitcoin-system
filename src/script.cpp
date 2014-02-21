@@ -20,9 +20,8 @@
 #include <bitcoin/script.hpp>
 
 #include <stack>
-
+#include <type_traits>
 #include <boost/optional.hpp>
-
 #include <bitcoin/constants.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/transaction.hpp>
@@ -38,6 +37,16 @@ namespace libbitcoin {
 
 static const data_chunk stack_true_value{1};
 static const data_chunk stack_false_value;  // False is an empty
+
+constexpr size_t op_counter_limit = 201;
+
+// Convert opcode to its actual numeric value.
+template<typename OpCode>
+constexpr auto base_value(OpCode code)
+  -> typename std::underlying_type<OpCode>::type 
+{
+    return static_cast<typename std::underlying_type<OpCode>::type>(code);
+}
 
 bool script_type::conditional_stack::closed() const
 {
@@ -229,8 +238,7 @@ bool script_type::run(const transaction_type& parent_tx, uint32_t input_index)
 {
     if (script_size(*this) > 10000)
         return false;
-    if (count_non_push(operations_) > 201)
-        return false;
+    op_counter_ = 0;
     alternate_stack_.clear();
     codehash_begin_ = operations_.begin();
     conditional_stack_.clear();
@@ -248,16 +256,18 @@ bool script_type::next_step(operation_stack::iterator it,
     const operation& op = *it;
     if (op.data.size() > 520)
         return false;
+    if (!increment_op_counter(op.code))
+        return false;
     if (opcode_is_disabled(op.code))
         return false;
     auto is_condition_opcode =
         [](opcode code)
-        {
-            return code == opcode::if_
-                || code == opcode::notif
-                || code == opcode::else_
-                || code == opcode::endif;
-        };
+    {
+        return code == opcode::if_
+            || code == opcode::notif
+            || code == opcode::else_
+            || code == opcode::endif;
+    };
     bool allow_execution = !conditional_stack_.has_failed_branches();
     // continue onwards to next command.
     if (!allow_execution && !is_condition_opcode(op.code))
@@ -285,6 +295,20 @@ bool script_type::next_step(operation_stack::iterator it,
     //for (auto s: stack_)
     //    log_debug() << "[" << encode_hex(s) << "]";
     if (stack_.size() + alternate_stack_.size() > 1000)
+        return false;
+    return true;
+}
+
+bool script_type::increment_op_counter(opcode code)
+{
+    auto greater_op_16 =
+        [](opcode code)
+    {
+        return base_value(code) > base_value(opcode::op_16);
+    };
+    if (greater_op_16(code))
+        ++op_counter_;
+    if (op_counter_ > op_counter_limit)
         return false;
     return true;
 }

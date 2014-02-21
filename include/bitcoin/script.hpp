@@ -29,7 +29,7 @@ namespace libbitcoin {
 
 struct transaction_type;
 
-enum class opcode
+enum class opcode : uint8_t
 {
     zero = 0,
     special = 1,
@@ -215,6 +215,7 @@ private:
     bool run(const transaction_type& parent_tx, uint32_t input_index);
     bool next_step(operation_stack::iterator it,
         const transaction_type& parent_tx, uint32_t input_index);
+    bool increment_op_counter(opcode code);
     bool run_operation(const operation& op,
         const transaction_type& parent_tx, uint32_t input_index);
 
@@ -294,6 +295,7 @@ private:
     operation_stack operations_;
     // Used when executing the script
     data_stack stack_, alternate_stack_;
+    size_t op_counter_ = 0;
     operation_stack::iterator codehash_begin_;
     conditional_stack conditional_stack_;
 };
