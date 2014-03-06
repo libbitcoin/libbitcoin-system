@@ -59,6 +59,8 @@ const short_hash& payment_address::hash() const
 
 bool payment_address::set_encoded(const std::string& encoded_address)
 {
+    if (!is_base58(encoded_address))
+        return false;
     const data_chunk decoded_address = decode_base58(encoded_address);
     // version + 20 bytes short hash + 4 bytes checksum
     if (decoded_address.size() != 25)
