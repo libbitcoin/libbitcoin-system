@@ -87,8 +87,9 @@ data_chunk decode_base58(std::string encoded_data)
     for (const uint8_t current_char: encoded_data)
     {                                                                            
         bn *= 58;
-        bn += std::string(base58_chars).find(current_char);
-    }                                                                            
+        bn += std::lower_bound(base58_chars, std::end(base58_chars) - 1,
+            current_char) - base58_chars;
+    }
                                                                                  
     // Get bignum as little endian data                                          
     data_chunk temp_data = bn.data();       
