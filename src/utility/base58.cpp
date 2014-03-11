@@ -26,7 +26,18 @@ namespace libbitcoin {
 
 // Thanks for all the wonderful bitcoin hackers
 
-const char* base58_chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const char base58_chars[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+
+bool is_base58(char c)
+{
+    // This works because the base58 characters happen to be in sorted order
+    return std::binary_search(base58_chars, std::end(base58_chars) - 1, c);
+}
+bool is_base58(std::string const& text)
+{
+    return std::all_of(text.begin(), text.end(),
+        [](char c) { return is_base58(c); });
+}
 
 std::string encode_base58(const data_chunk& unencoded_data)
 {                                                                                
@@ -76,8 +87,9 @@ data_chunk decode_base58(std::string encoded_data)
     for (const uint8_t current_char: encoded_data)
     {                                                                            
         bn *= 58;
-        bn += std::string(base58_chars).find(current_char);
-    }                                                                            
+        bn += std::lower_bound(base58_chars, std::end(base58_chars) - 1,
+            current_char) - base58_chars;
+    }
                                                                                  
     // Get bignum as little endian data                                          
     data_chunk temp_data = bn.data();       
