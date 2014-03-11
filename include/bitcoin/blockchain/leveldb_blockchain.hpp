@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_BLOCKCHAIN_LEVELDB_BLOCKCHAIN_HPP
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_BLOCKCHAIN_HPP
 
+#include <atomic>
+
 #include <bitcoin/blockchain/blockchain.hpp>
 
 #include <boost/interprocess/sync/file_lock.hpp>

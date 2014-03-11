@@ -23,6 +23,16 @@
 #include <ctime>
 #include <string>
 
+#ifdef _WINDOWS
+#include <stdint.h>
+#include <windows.h>
+#define CLOCK_REALTIME 0
+typedef struct {
+    time_t tv_sec;
+    int32_t tv_nsec;
+} timespec;
+#endif
+
 namespace libbitcoin {
 
 class timed_section

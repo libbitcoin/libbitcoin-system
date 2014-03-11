@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_BLOCKCHAIN_ORGANIZER_HPP
 #define LIBBITCOIN_BLOCKCHAIN_ORGANIZER_HPP
 
+#include <memory>
+
 #include <boost/circular_buffer.hpp>
 
 #include <bitcoin/block.hpp>
@@ -49,7 +51,12 @@ private:
     std::shared_ptr<block_type> actual_block_;
     const hash_digest block_hash_;
     bool processed_ = false;
-    block_info info_{block_status::orphan, 0};
+
+	// Syntax change is woraround for compiler bug as of VS2013 C++11 NOV CTP:
+    // http://connect.microsoft.com/VisualStudio/feedback/details/792161/constructor-initializer-list-does-not-support-braced-init-list-form
+    // block_info info_{block_status::orphan, 0};
+	block_info info_ = block_info{ block_status::orphan, 0 };
+
     std::error_code ec_;
 };
 
@@ -97,8 +104,8 @@ public:
     void start();
 
 protected:
-    virtual std::error_code verify(int fork_index,
-        const block_detail_list& orphan_chain, int orphan_index) = 0;
+    virtual std::error_code verify(size_t fork_index,
+        const block_detail_list& orphan_chain, size_t orphan_index) = 0;
     virtual void reorganize_occured(
         size_t fork_point,
         const blockchain::block_list& arrivals,
@@ -106,7 +113,7 @@ protected:
 
 private:
     void process(block_detail_ptr process_block);
-    void replace_chain(int fork_index, block_detail_list& orphan_chain);
+    void replace_chain(size_t fork_index, block_detail_list& orphan_chain);
     void clip_orphans(block_detail_list& orphan_chain,
         int orphan_index, const std::error_code& invalid_reason);
     void notify_reorganize(

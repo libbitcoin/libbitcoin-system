@@ -60,9 +60,13 @@ uint32_t leveldb_validate_block::previous_block_bits()
 
 uint64_t leveldb_validate_block::actual_timespan(const uint64_t interval)
 {
+    // Warning: conversion from 'uint64_t' to 'uint32_t', 
+    // possible loss of data in fetch_block parameterization.
+    BITCOIN_ASSERT(interval <= UINT32_MAX);
+
     // height - interval and height - 1, return time difference
-    return fetch_block(height_ - 1).timestamp - 
-        fetch_block(height_ - interval).timestamp;
+    return fetch_block(height_ - 1).timestamp -
+        fetch_block(height_ - (uint32_t)interval).timestamp;
 }
 
 uint64_t leveldb_validate_block::median_time_past()

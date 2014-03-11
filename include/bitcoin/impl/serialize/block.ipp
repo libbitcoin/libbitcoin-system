@@ -26,7 +26,8 @@ template <typename Deserializer>
 data_chunk read_raw_script(Deserializer& deserial)
 {
     data_chunk raw_script;
-    uint64_t script_length = deserial.read_variable_uint();
+    // Note: changed to uint32_t to make cast explicit, possible loss of data.
+    auto script_length = (uint32_t)deserial.read_variable_uint();
     return deserial.read_data(script_length);
 }
 

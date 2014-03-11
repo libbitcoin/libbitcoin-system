@@ -170,19 +170,20 @@ void organizer::process(block_detail_ptr process_block)
         orphan_chain[0]->actual().header.previous_block_hash);
     if (fork_index != -1)
         // replace_chain will call chain_->stop()
-        replace_chain(fork_index, orphan_chain);
+        replace_chain((size_t)fork_index, orphan_chain);
     // Don't mark all orphan_chain as processed here because there might be
     // a winning fork from an earlier block
     process_block->mark_processed();
 }
 
-void organizer::replace_chain(int fork_index,
+void organizer::replace_chain(size_t fork_index,
     block_detail_list& orphan_chain)
 {
     big_number orphan_work = 0;
     // Starting from beginning of the chain, validate blocks
     // Q: Why am I using an int here? TODO: investigate.
-    for (int orphan_index = 0; orphan_index < orphan_chain.size();
+    // Note: '<' : signed/unsigned mismatch, changed to size/unsigned.
+    for (size_t orphan_index = 0; orphan_index < orphan_chain.size();
         ++orphan_index)
     {
         std::error_code invalid_reason =

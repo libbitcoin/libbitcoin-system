@@ -20,6 +20,8 @@
 #include <bitcoin/utility/mnemonic.hpp>
 
 #include <algorithm>
+#include <cstdint>
+#include <iostream>
 #include <sstream>
 #include <bitcoin/utility/assert.hpp>
 

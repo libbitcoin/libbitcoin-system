@@ -236,8 +236,10 @@ void satoshi_load(const Iterator first, const Iterator last,
     auto deserial = make_deserializer(first, last);
     // Discard protocol version because it is stupid
     deserial.read_4_bytes();
-    uint32_t count = deserial.read_variable_uint();
-    for (size_t i = 0; i < count; ++i)
+    
+    // Note: changed to uint64_t to preclude possible loss of data.
+    uint64_t count = deserial.read_variable_uint();
+    for (uint64_t i = 0; i < count; ++i)
     {
         hash_digest start_hash = deserial.read_hash();
         packet.start_hashes.push_back(start_hash);

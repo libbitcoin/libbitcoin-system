@@ -77,17 +77,17 @@ public:
     {
         if (value < 0xfd)
         {
-            write_byte(value);
+            write_byte((uint8_t)value);
         }
         else if (value <= 0xffff)
         {
             write_byte(0xfd);
-            write_2_bytes(value);
+            write_2_bytes((uint16_t)value);
         }
         else if (value <= 0xffffffff)
         {
             write_byte(0xfe);
-            write_4_bytes(value);
+            write_4_bytes((uint32_t)value);
         }
         else
         {
@@ -245,11 +245,12 @@ public:
         return read_8_bytes();
     }
 
-    data_chunk read_data(uint64_t n_bytes)
+    // NOTE: n_bytes changed to uint32_t to prevent array overflow.
+    data_chunk read_data(uint32_t n_bytes)
     {
         check_distance(iter_, end_, n_bytes);
         data_chunk raw_bytes(n_bytes);
-        for (uint64_t i = 0; i < n_bytes; ++i)
+        for (uint32_t i = 0; i < n_bytes; ++i)
             raw_bytes[i] = read_byte();
         return raw_bytes;
     }
@@ -289,7 +290,8 @@ public:
     std::string read_string()
     {
         uint64_t string_size = read_variable_uint();
-        return read_fixed_string(string_size);
+        // Warning: conversion from uint64_t to size_t, possible loss of data.
+        return read_fixed_string((size_t)string_size);
     }
 
     /**
