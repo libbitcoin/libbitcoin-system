@@ -184,8 +184,8 @@ void big_number::set_int32(int32_t value)
 
 int32_t big_number::int32() const
 {
-	constexpr uint32_t max_int32 = UINT_LEAST32_MAX;
-	// illegal initialization of 'constexpr' entity with a non-constant expression
+    constexpr uint32_t max_int32 = UINT_LEAST32_MAX;
+    // illegal initialization of 'constexpr' entity with a non-constant expression
     // constexpr uint32_t max_int32 = std::numeric_limits<int32_t>::max();
 
     int32_t value = uint32();

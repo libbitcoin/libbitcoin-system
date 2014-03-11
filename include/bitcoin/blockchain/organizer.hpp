@@ -52,10 +52,10 @@ private:
     const hash_digest block_hash_;
     bool processed_ = false;
 
-	// Syntax change is woraround for compiler bug as of VS2013 C++11 NOV CTP:
+    // Syntax change is woraround for compiler bug as of VS2013 C++11 NOV CTP:
     // http://connect.microsoft.com/VisualStudio/feedback/details/792161/constructor-initializer-list-does-not-support-braced-init-list-form
     // block_info info_{block_status::orphan, 0};
-	block_info info_ = block_info{ block_status::orphan, 0 };
+    block_info info_ = block_info{ block_status::orphan, 0 };
 
     std::error_code ec_;
 };
