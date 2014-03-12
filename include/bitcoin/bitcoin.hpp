@@ -201,5 +201,7 @@
     #include <bitcoin/blockchain/leveldb_blockchain.hpp>
 #endif
 
+namespace bc = libbitcoin;
+
 #endif
 
