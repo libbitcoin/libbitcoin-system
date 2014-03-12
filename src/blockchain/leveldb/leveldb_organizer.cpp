@@ -32,10 +32,9 @@ leveldb_organizer::leveldb_organizer(leveldb_common_ptr common,
 {
 }
 
-std::error_code leveldb_organizer::verify(int fork_index,
-    const block_detail_list& orphan_chain, int orphan_index)
+std::error_code leveldb_organizer::verify(size_t fork_index,
+    const block_detail_list& orphan_chain, size_t orphan_index)
 {
-    BITCOIN_ASSERT(orphan_index >= 0);
     BITCOIN_ASSERT(orphan_index < orphan_chain.size());
     const block_type& current_block = orphan_chain[orphan_index]->actual();
     size_t height = fork_index + orphan_index + 1;

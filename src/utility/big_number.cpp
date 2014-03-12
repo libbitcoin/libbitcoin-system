@@ -150,8 +150,9 @@ void big_number::set_hash(hash_digest load_hash)
 
 hash_digest big_number::hash() const
 {
-    hash_digest repr{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+    hash_digest repr = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     data_chunk copy_data = data();
     if (copy_data.size() < 4)
         return repr;
@@ -181,8 +182,11 @@ void big_number::set_int32(int32_t value)
 
 int32_t big_number::int32() const
 {
-    constexpr uint32_t max_int32 = std::numeric_limits<int32_t>::max();
-    uint32_t value = uint32();
+    constexpr uint32_t max_int32 = UINT_LEAST32_MAX;
+    // illegal initialization of 'constexpr' entity with a non-constant expression
+    // constexpr uint32_t max_int32 = std::numeric_limits<int32_t>::max();
+
+    int32_t value = uint32();
     if (!BN_is_negative(&bignum_))
     {
         if (value > max_int32)
@@ -195,6 +199,7 @@ int32_t big_number::int32() const
         if (value > max_int32)
             return max_int32;
         else
+            // Note: unary minus operator applied to unsigned type, so changed value to int32_t.
             return -value;
     }
 }

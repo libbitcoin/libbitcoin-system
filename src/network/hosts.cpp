@@ -30,7 +30,7 @@ namespace libbitcoin {
 hosts::hosts(threadpool& pool, size_t capacity)
   : strand_(pool), buffer_(capacity)
 {
-    srand(time(nullptr));
+    srand((unsigned int)time(nullptr));
 }
 
 void hosts::load(const std::string& filename, load_handler handle_load)

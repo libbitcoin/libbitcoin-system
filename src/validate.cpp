@@ -562,11 +562,14 @@ uint32_t validate_block::work_required()
     }
 
     uint64_t actual = actual_timespan(readjustment_interval);
-    actual = range_constraint(actual, target_timespan / 4, target_timespan * 4);
+
+    // Warning: conversion from uint64_t to uint32_t, possible loss of data.
+    auto actual32 = (uint32_t)range_constraint(actual, target_timespan / 4, target_timespan * 4);
 
     big_number retarget;
     retarget.set_compact(previous_block_bits());
-    retarget *= actual;
+
+    retarget *= actual32;
     retarget /= target_timespan;
 
     if (retarget > max_target())
