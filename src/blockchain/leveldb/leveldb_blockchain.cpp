@@ -25,14 +25,12 @@
 #include <leveldb/cache.h>
 #include <leveldb/comparator.h>
 #include <leveldb/filter_policy.h>
-
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/format.hpp>
-
 #include "leveldb_common.hpp"
 #include "leveldb_chain_keeper.hpp"
 #include "leveldb_organizer.hpp"
@@ -119,13 +117,15 @@ bool open_db(const std::string& prefix, const std::string& db_name,
     path db_path = path(prefix) / db_name;
     leveldb::DB* db_base_ptr = nullptr;
 
-    // LevelDB does not accept UNICODE strings for operating systems that support them,
-    // so we must explicity pass an non-UNICODE string for the name and home it works out.
-    // Also we must normalize the path name format (e.g. backslashes on Windows).
+    // LevelDB does not accept UNICODE strings for operating systems that
+    // support them, so we must explicity pass an non-UNICODE string for the
+    // name and home it works out.
+    // Also we must normalize the path name format
+    // (e.g. backslashes on Windows).
     // http://www.boost.org/doc/libs/1_46_0/libs/filesystem/v3/doc/reference.html#generic-pathname-format
     // Note: this change should have no effect on a POSIX system.
     leveldb::Status status = leveldb::DB::Open(open_options, 
-        db_path.generic_string(), /*db_path.native(),*/ &db_base_ptr);
+        db_path.generic_string(), &db_base_ptr);
 
     if (!status.ok())
     {
@@ -157,14 +157,13 @@ bool leveldb_blockchain::initialize(const std::string& prefix)
 
     // See related comments above
     std::ofstream touch_file(
-        lock_path.generic_string() /*lock_path.native()*/, std::ios::app);
+        lock_path.generic_string(), std::ios::app);
 
     touch_file.close();
 
     // See related comments above, and
     // http://stackoverflow.com/questions/11352641/boostfilesystempath-and-fopen
     flock_ = lock_path.generic_string().c_str();
-    // flock_ = lock_path.c_str();
 
     if (!flock_.try_lock())
     {
@@ -306,9 +305,6 @@ void leveldb_blockchain::fetch(perform_read_functor perform_read)
             // Sleeping inside seqlock loop is fine since we
             // need to finish write op before we can read anyway.
             while (!try_read())
-
-                // Not supported on Windows 
-                // usleep(100000);
                 std::this_thread::sleep_for(std::chrono::microseconds(100000));
         });
 }
@@ -650,9 +646,11 @@ void leveldb_blockchain::fetch_history(const payment_address& address,
 bool leveldb_blockchain::do_fetch_history(const payment_address& address,
     fetch_handler_history handle_fetch, size_t from_height, size_t slock)
 {
+#ifdef _WINDOWS
     constexpr uint32_t max_height = UINT_LEAST32_MAX;
-    // illegal initialization of 'constexpr' entity with a non-constant expression
-    // constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
+#else
+    constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
+#endif
 
     struct spend_data
     {

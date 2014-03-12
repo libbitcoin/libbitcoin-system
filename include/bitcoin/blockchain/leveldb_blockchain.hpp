@@ -21,12 +21,9 @@
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_BLOCKCHAIN_HPP
 
 #include <atomic>
-
-#include <bitcoin/blockchain/blockchain.hpp>
-
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <leveldb/db.h>
-
+#include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/database/stealth_database.hpp>
 #include <bitcoin/utility/subscriber.hpp>

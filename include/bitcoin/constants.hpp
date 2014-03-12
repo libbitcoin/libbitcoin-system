@@ -71,9 +71,11 @@ constexpr uint32_t max_bits = 0x1d00ffff;
 big_number max_target();
 uint32_t magic_value();
 
+#ifdef _WINDOWS
 constexpr uint32_t max_index = UINT_LEAST32_MAX;
-// illegal initialization of 'constexpr' entity with a non-constant expression
-// constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
+#else
+constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
+#endif
 
 // Every two weeks we readjust target
 constexpr uint64_t target_timespan = 14 * 24 * 60 * 60;

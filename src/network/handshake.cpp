@@ -23,7 +23,6 @@
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <curl/curl.h>
-
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/version.hpp>
 
