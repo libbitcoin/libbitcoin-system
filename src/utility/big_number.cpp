@@ -201,7 +201,7 @@ int32_t big_number::int32() const
         if (value > max_int32)
             return max_int32;
         else
-			// Note: unary minus operator applied to unsigned type, so changed value to int32_t.
+            // Note: unary minus operator applied to unsigned type, so changed value to int32_t.
             return -value;
     }
 }
