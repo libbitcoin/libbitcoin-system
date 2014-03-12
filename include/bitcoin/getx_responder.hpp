@@ -48,7 +48,7 @@ private:
     };
 
     void receive_get_data(const std::error_code& ec,
-        const get_data_type packet, channel_with_state special);
+        const get_data_type& packet, channel_with_state special);
 
     void pool_tx(const std::error_code& ec, const transaction_type& tx,
         const hash_digest& tx_hash, channel_ptr node);
@@ -56,7 +56,7 @@ private:
         const transaction_type& tx, channel_ptr node);
 
     void send_block(const std::error_code& ec,
-        const block_type blk, channel_ptr node);
+        const block_type& blk, channel_ptr node);
 
     blockchain& chain_;
     transaction_pool& txpool_;

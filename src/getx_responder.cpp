@@ -47,7 +47,7 @@ void getx_responder::monitor(channel_ptr node)
 }
 
 void getx_responder::receive_get_data(const std::error_code& ec,
-    const get_data_type packet, channel_with_state special)
+    const get_data_type& packet, channel_with_state special)
 {
     if (ec)
         return;
@@ -104,7 +104,7 @@ void getx_responder::chain_tx(const std::error_code& ec,
 }
 
 void getx_responder::send_block(const std::error_code& ec,
-    const block_type blk, channel_ptr node)
+    const block_type& blk, channel_ptr node)
 {
     if (ec)
         return;
