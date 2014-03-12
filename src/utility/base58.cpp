@@ -30,13 +30,14 @@ const char base58_chars[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrs
 
 bool is_base58(char c)
 {
+    auto last = std::end(base58_chars) - 1;
     // This works because the base58 characters happen to be in sorted order
-    return std::binary_search(base58_chars, std::end(base58_chars) - 1, c);
+    return std::binary_search(base58_chars, last, c);
 }
-bool is_base58(std::string const& text)
+bool is_base58(const std::string& text)
 {
     return std::all_of(text.begin(), text.end(),
-        [](char c) { return is_base58(c); });
+        [](char c){ return is_base58(c); });
 }
 
 std::string encode_base58(const data_chunk& unencoded_data)
