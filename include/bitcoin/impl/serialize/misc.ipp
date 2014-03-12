@@ -186,7 +186,6 @@ void load_inventory_impl(const Iterator first, const Iterator last,
         packet.inventories.push_back(inv);
     }
     BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));
-    BITCOIN_ASSERT(deserial.iterator() == last);
 }
 
 // inv messages
