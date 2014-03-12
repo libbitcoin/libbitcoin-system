@@ -113,7 +113,7 @@ void stealth_database::advise_kernel()
     uint64_t end_offset = calculate_entry_offset(entries_count_);
     uint64_t entries_size = end_offset - start_offset;
     madvise(file_.data() + start_offset, entries_size,
-        POSIX_MADV_SEQUENTIAL);
+        MADV_SEQUENTIAL);
 }
 
 } // namespace libbitcoin
