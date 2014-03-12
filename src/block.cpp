@@ -30,7 +30,7 @@
 namespace libbitcoin {
 
 bool operator==(
-    const block_header_type block_a, const block_header_type& block_b)
+    const block_header_type& block_a, const block_header_type& block_b)
 {
     return block_a.version == block_b.version &&
         block_a.previous_block_hash == block_b.previous_block_hash &&
