@@ -92,9 +92,6 @@
     <ClCompile Include="..\..\..\src\constants.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\utility\mnemonic.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\src\utility\ripemd.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -231,9 +228,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\include\bitcoin\constants.hpp">
       <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\include\bitcoin\utility\mnemonic.hpp">
-      <Filter>include\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\include\bitcoin\utility\ripemd.hpp">
       <Filter>include\utility</Filter>

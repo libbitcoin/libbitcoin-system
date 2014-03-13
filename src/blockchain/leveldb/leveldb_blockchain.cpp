@@ -144,10 +144,9 @@ void open_stealth_db(const std::string& prefix,
 {
     using boost::filesystem::path;
     path db_path = path(prefix) / "stealth.db";
-    file.reset(new mmfile(db_path.c_str()));
+    file.reset(new mmfile(db_path.generic_string().c_str()));
     db.reset(new stealth_database(*file));
 }
-
 
 bool leveldb_blockchain::initialize(const std::string& prefix)
 {

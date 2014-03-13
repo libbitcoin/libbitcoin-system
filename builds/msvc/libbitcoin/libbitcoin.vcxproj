@@ -57,7 +57,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions>_USRDLL;_DEBUG;_WINDOWS;WIN32;_WIN32_WINNT=0x0600;%(PreprocessorDefinitions);LEVELDB_ENABLED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USRDLL;_DEBUG;_WINDOWS;WIN32;_WIN32_WINNT=0x0600;LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -74,7 +74,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions>_USRDLL;NDEBUG;_WINDOWS;WIN32;_WIN32_WINNT=0x0600;%(PreprocessorDefinitions);LEVELDB_ENABLED</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_USRDLL;NDEBUG;_WINDOWS;WIN32;_WIN32_WINNT=0x0600;LEVELDB_ENABLED;BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -122,7 +122,6 @@
     <ClCompile Include="..\..\..\src\utility\big_number.cpp" />
     <ClCompile Include="..\..\..\src\utility\elliptic_curve_key.cpp" />
     <ClCompile Include="..\..\..\src\utility\logger.cpp" />
-    <ClCompile Include="..\..\..\src\utility\mnemonic.cpp" />
     <ClCompile Include="..\..\..\src\utility\ripemd.cpp" />
     <ClCompile Include="..\..\..\src\utility\sha256.cpp" />
     <ClCompile Include="..\..\..\src\utility\timed_section.cpp" />
@@ -162,7 +161,6 @@
     <ClInclude Include="..\..\..\include\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\include\bitcoin\utility\elliptic_curve_key.hpp" />
     <ClInclude Include="..\..\..\include\bitcoin\utility\logger.hpp" />
-    <ClInclude Include="..\..\..\include\bitcoin\utility\mnemonic.hpp" />
     <ClInclude Include="..\..\..\include\bitcoin\utility\ripemd.hpp" />
     <ClInclude Include="..\..\..\include\bitcoin\utility\serializer.hpp" />
     <ClInclude Include="..\..\..\include\bitcoin\utility\sha256.hpp" />
