@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_BLOCKCHAIN_LEVELDB_VALIDATE_BLOCK_H
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_VALIDATE_BLOCK_H
 
+#ifdef LEVELDB_ENABLED
+
 #include <bitcoin/validate.hpp>
 
 #include "leveldb_common.hpp"
@@ -65,3 +67,4 @@ private:
 
 #endif
 
+#endif

@@ -14,6 +14,7 @@
     <ProjectGuid>{39F60708-FF48-4C22-952D-43470866F684}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>libbitcoin</RootNamespace>
+    <ProjectName>libbitcoin</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -31,16 +32,16 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)../../../bin/$(PlatformName)/$(Configuration)/</OutDir>
-    <IntDir>$(ProjectDir)../../../obj/$(PlatformName)/$(Configuration)/$(ProjectName)/</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\$(PlatformName)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\..\obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(ProjectDir)../../../bin/$(PlatformName)/$(Configuration)/</OutDir>
-    <IntDir>$(ProjectDir)../../../obj/$(PlatformName)/$(Configuration)/$(ProjectName)/</IntDir>
+    <OutDir>$(ProjectDir)..\..\..\bin\$(PlatformName)\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)..\..\..\obj\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
     <TargetName>$(ProjectName)</TargetName>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -57,9 +58,10 @@
       <MinimalRebuild>false</MinimalRebuild>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions>_USRDLL;_DEBUG;_WINDOWS;WIN32;_WIN32_WINNT=0x0600;LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_WIN32;WIN32;_WIN32_WINNT=0x0600;LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -74,9 +76,10 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions>_USRDLL;NDEBUG;_WINDOWS;WIN32;_WIN32_WINNT=0x0600;LEVELDB_ENABLED;BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;_WIN32;WIN32;_WIN32_WINNT=0x0600;-LEVELDB_ENABLED;BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -174,8 +177,12 @@
     <ClInclude Include="..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp" />
     <ClInclude Include="..\..\..\src\blockchain\leveldb\leveldb_validate_block.hpp" />
   </ItemGroup>
+  <Import Project="..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')">
+      <!-- This import is required by LevelDB. However the LevelDB conditional compilation is triggered on a preprocessor definition. 
+      This import causes Snappy to compile regardless. It might be possible to extned the Condition attribute to prevent this, 
+      but apparently not using a preprocessor definition. -->
+  </Import>
   <Import Project="..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props" Condition="Exists('..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" />
-  <Import Project="..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')" />
   <Import Project="..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props" Condition="Exists('..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props')" />
   <Import Project="..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props" Condition="Exists('..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_BLOCKCHAIN_LEVELDB_ORGANIZER_H
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_ORGANIZER_H
 
+#ifdef LEVELDB_ENABLED
+
 #include <bitcoin/blockchain/organizer.hpp>
 
 #include "leveldb_common.hpp"
@@ -53,3 +55,4 @@ private:
 
 #endif
 
+#endif

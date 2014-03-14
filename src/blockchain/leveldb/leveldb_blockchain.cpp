@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#ifdef LEVELDB_ENABLED
+
 #include <bitcoin/blockchain/leveldb_blockchain.hpp>
 
 #include <fstream>
@@ -746,3 +748,4 @@ void leveldb_blockchain::subscribe_reorganize(
 
 } // namespace libbitcoin
 
+#endif
