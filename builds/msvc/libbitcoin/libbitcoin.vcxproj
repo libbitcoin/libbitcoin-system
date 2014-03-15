@@ -177,11 +177,7 @@
     <ClInclude Include="..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp" />
     <ClInclude Include="..\..\..\src\blockchain\leveldb\leveldb_validate_block.hpp" />
   </ItemGroup>
-  <Import Project="..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')">
-    <!-- This import is required by LevelDB. However the LevelDB conditional compilation is triggered on a preprocessor definition. 
-      This import causes Snappy to compile regardless. It might be possible to extend the Condition attribute to prevent this, 
-      but apparently not using a preprocessor definition. -->
-  </Import>
+  <Import Project="..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')" />
   <Import Project="..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props" Condition="Exists('..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" />
   <Import Project="..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props" Condition="Exists('..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props')" />
   <Import Project="..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props" Condition="Exists('..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props')" />
