@@ -76,7 +76,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PreprocessorDefinitions>_WINDOWS;_WIN32;WIN32;_WIN32_WINNT=0x0600;-LEVELDB_ENABLED;BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDOWS;_WIN32;WIN32;_WIN32_WINNT=0x0600;LEVELDB_ENABLED;BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\..\..\include\</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -179,7 +179,7 @@
   </ItemGroup>
   <Import Project="..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')">
     <!-- This import is required by LevelDB. However the LevelDB conditional compilation is triggered on a preprocessor definition. 
-      This import causes Snappy to compile regardless. It might be possible to extned the Condition attribute to prevent this, 
+      This import causes Snappy to compile regardless. It might be possible to extend the Condition attribute to prevent this, 
       but apparently not using a preprocessor definition. -->
   </Import>
   <Import Project="..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props" Condition="Exists('..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" />
