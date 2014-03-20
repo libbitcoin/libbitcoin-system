@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_ADDRESS_HPP
 #define LIBBITCOIN_ADDRESS_HPP
 
+#include <bitcoin/constants.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/script.hpp>
 
@@ -41,7 +42,7 @@ namespace libbitcoin {
  * hash value can be compared to null_short_hash (defined in constants.hpp).
  *
  * @code
- *   if (payaddr.hash() == null_short_hash)
+ *   if (payaddr.version() == payment_address::invalid_version)
  *       // This payment_address is empty.
  * @endcode
  */
@@ -51,16 +52,18 @@ public:
 #ifdef ENABLE_TESTNET
     enum
     {
-        pubkey_version = 0x6F,
-        script_version = 0xC4,
-        wif_version = 0xEF
+        pubkey_version = 0x6f,
+        script_version = 0xc4,
+        wif_version = 0xef,
+        invalid_version = 0xff
     };
 #else
     enum
     {
         pubkey_version = 0x00,
         script_version = 0x05,
-        wif_version = 0x80
+        wif_version = 0x80,
+        invalid_version = 0xff
     };
 #endif
     payment_address();
@@ -76,8 +79,8 @@ public:
     std::string encoded() const;
 
 private:
-    uint8_t version_;
-    short_hash hash_;
+    uint8_t version_ = invalid_version;
+    short_hash hash_ = null_short_hash;
 };
 
 void set_public_key_hash(payment_address& address,
