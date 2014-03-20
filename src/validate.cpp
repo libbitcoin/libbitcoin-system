@@ -135,7 +135,7 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
         &validate_transaction::set_last_height, shared_from_this(), _1, _2));
 }
 
-bool validate_transaction::is_spent(const output_point outpoint) const
+bool validate_transaction::is_spent(const output_point& outpoint) const
 {
     for (const transaction_entry_info& entry: pool_)
         for (const transaction_input_type current_input: entry.tx.inputs)
