@@ -97,6 +97,7 @@ private:
     void close(const boost::system::error_code& ec)
     {
         // ec should be boost::asio::error::operation_aborted or nothing.
+        BITCOIN_ASSERT(!ec || ec == boost::asio::error::operation_aborted);
         if (!ec)
             proxy_->stop();
     }
