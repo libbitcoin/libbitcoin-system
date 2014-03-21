@@ -27,6 +27,8 @@
 
 namespace libbitcoin {
 
+constexpr size_t connect_timeout = 5;
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -123,7 +125,7 @@ void network::resolve_handler(const boost::system::error_code& ec,
     }
     auto connect =
         std::make_shared<perform_connect_with_timeout>(pool_);
-    connect->start(endpoint_iterator, 5, handle_connect);
+    connect->start(endpoint_iterator, connect_timeout, handle_connect);
 }
 
 void network::connect(const std::string& hostname, uint16_t port,
