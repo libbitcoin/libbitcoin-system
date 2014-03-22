@@ -25,6 +25,9 @@
 
 namespace libbitcoin {
 
+constexpr size_t watermark_limit = 2000;
+const boost::posix_time::seconds watermark_reset_interval(5);
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -38,7 +41,8 @@ static std::string pretty(const ip_address_type& ip)
 
 protocol::protocol(threadpool& pool, hosts& hsts,
     handshake& shake, network& net)
-  : strand_(pool.service()), hosts_(hsts), handshake_(shake), network_(net)
+  : strand_(pool.service()), hosts_(hsts), handshake_(shake), network_(net),
+    watermark_timer_(pool.service())
 {
     channel_subscribe_ = std::make_shared<channel_subscriber_type>(pool);
 }
@@ -264,27 +268,65 @@ void protocol::seeds::handle_store(const std::error_code& ec)
 
 void protocol::run()
 {
-    strand_.dispatch(std::bind(&protocol::try_outbound_connects, this));
+    strand_.dispatch(std::bind(&protocol::start_connecting, this));
     if (listen_is_enabled_)
         network_.listen(protocol_port,
             strand_.wrap(std::bind(&protocol::handle_listen, this, _1, _2)));
 }
-void protocol::try_outbound_connects()
+void protocol::start_connecting()
 {
+    // Initialize the connection slots.
     BITCOIN_ASSERT(connections_.empty());
     BITCOIN_ASSERT(connect_states_.empty());
     connect_states_.resize(max_outbound_);
-    for (size_t i = 0; i < max_outbound_; ++i)
-        try_connect_once(i);
+    for (slot_index slot = 0; slot < max_outbound_; ++slot)
+        connect_states_[slot] = connect_state::stopped;
+    // Start the main outbound connect loop.
+    start_stopped_connects();
+    start_watermark_reset_timer();
+}
+void protocol::start_stopped_connects()
+{
+    for (slot_index slot = 0; slot < max_outbound_; ++slot)
+        if (connect_states_[slot] == connect_state::stopped)
+            try_connect_once(slot);
 }
 void protocol::try_connect_once(slot_index slot)
 {
+    ++watermark_count_;
+    if (watermark_count_ > watermark_limit)
+        return;
     BITCOIN_ASSERT(connections_.size() <= max_outbound_);
-    // Any state can call this method.
+    BITCOIN_ASSERT(connect_states_[slot] == connect_state::stopped);
+    // Begin connection flow: finding_peer -> connecting -> established.
+    // Failures end with connect_state::stopped and loop back here again.
     connect_states_[slot] = connect_state::finding_peer;
     hosts_.fetch_address(
         strand_.wrap(std::bind(&protocol::attempt_connect,
             this, _1, _2, slot)));
+}
+
+void protocol::start_watermark_reset_timer()
+{
+    // This timer just loops continuously at fixed intervals
+    // resetting the watermark_count_ variable and starting stopped slots.
+    auto reset_watermark = [this](const boost::system::error_code& ec)
+    {
+        if (ec)
+        {
+            BITCOIN_ASSERT(ec == boost::asio::error::operation_aborted);
+            return;
+        }
+        if (watermark_count_ > watermark_limit)
+            log_debug(LOG_PROTOCOL) << "Resuming connection attempts.";
+        // Perform the reset, and hence reallow connections again.
+        watermark_count_ = 0;
+        start_stopped_connects();
+        // Looping timer...
+        start_watermark_reset_timer();
+    };
+    watermark_timer_.expires_from_now(watermark_reset_interval);
+    watermark_timer_.async_wait(strand_.wrap(reset_watermark));
 }
 
 template <typename ConnectionList>
@@ -321,6 +363,7 @@ void protocol::attempt_connect(const std::error_code& ec,
             << "Already connected to " << encode_hex(address.ip);
         // Retry another connection
         // Still in same strand.
+        connect_states_[slot] = connect_state::stopped;
         try_connect_once(slot);
         return;
     }
@@ -344,6 +387,7 @@ void protocol::handle_connect(
             << " - " << ec.message();
         // Retry another connection
         // Still in same strand.
+        connect_states_[slot] = connect_state::stopped;
         try_connect_once(slot);
         return;
     }
