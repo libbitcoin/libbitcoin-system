@@ -34,15 +34,15 @@
 
 namespace libbitcoin {
 
+constexpr size_t max_block_size = 1000000;
+constexpr size_t max_block_script_sig_operations = max_block_size / 50;
+
 using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 using std::placeholders::_4;
 
 namespace posix_time = boost::posix_time;
-
-constexpr size_t max_block_size = 1000000;
-constexpr size_t max_block_script_sig_operations = max_block_size / 50;
 
 validate_transaction::validate_transaction(
     blockchain& chain, const transaction_type& tx,
