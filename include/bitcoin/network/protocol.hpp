@@ -170,9 +170,8 @@ public:
     template <typename Message>
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        strand_.post(
-            std::bind(&protocol::do_broadcast<Message>,
-                this, packet, handle_send));
+        strand_.queue(
+            &protocol::do_broadcast<Message>, this, packet, handle_send);
     }
 
 private:
@@ -235,7 +234,7 @@ private:
         bool finished_;
 
         // From parent
-        io_service::strand& strand_;
+        async_strand& strand_;
         hosts& hosts_;
         handshake& handshake_;
         network& network_;
@@ -311,7 +310,7 @@ private:
             node->send(packet, send_handler);
     }
 
-    io_service::strand strand_;
+    async_strand strand_;
 
     std::string hosts_filename_ = "hosts.p2p";
     hosts& hosts_;
