@@ -25,11 +25,13 @@
 
 namespace libbitcoin {
 
-constexpr size_t watermark_limit = 2000;
-const boost::posix_time::seconds watermark_reset_interval(5);
-
 using std::placeholders::_1;
 using std::placeholders::_2;
+using boost::posix_time::time_duration;
+using boost::posix_time::seconds;
+
+constexpr size_t watermark_limit = 2000;
+const time_duration watermark_reset_interval = seconds(5);
 
 static std::string pretty(const ip_address_type& ip)
 {

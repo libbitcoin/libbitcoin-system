@@ -27,10 +27,12 @@
 
 namespace libbitcoin {
 
-constexpr size_t connect_timeout = 5;
-
 using std::placeholders::_1;
 using std::placeholders::_2;
+using boost::posix_time::time_duration;
+using boost::posix_time::seconds;
+
+const time_duration connect_timeout = seconds(5);
 
 acceptor::acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept)
   : pool_(pool), tcp_accept_(tcp_accept)
@@ -69,10 +71,10 @@ public:
         proxy_ = std::make_shared<channel_proxy>(pool, socket_);
     }
 
-    void start(tcp::resolver::iterator endpoint_iterator, size_t timeout,
-        network::connect_handler handle_connect)
+    void start(tcp::resolver::iterator endpoint_iterator,
+        time_duration timeout, network::connect_handler handle_connect)
     {
-        timer_.expires_from_now(boost::posix_time::seconds(timeout));
+        timer_.expires_from_now(timeout);
         timer_.async_wait(std::bind(
             &perform_connect_with_timeout::close, shared_from_this(), _1));
 
