@@ -35,9 +35,9 @@ session::session(threadpool& pool, const session_params& params)
 {
 }
 
-void handle_set_start_height(const std::error_code&)
+void handle_handshake_height_set(const std::error_code&)
 {
-    // Set start height in handshake
+    // Start height now set in handshake
     // Do nothing
 }
 void session::start(completion_handler handle_complete)
@@ -54,7 +54,7 @@ void session::start(completion_handler handle_complete)
         std::bind(&session::new_channel, this, _1, _2));
     chain_.fetch_last_height(
         std::bind(&handshake::set_start_height,
-            &handshake_, _2, handle_set_start_height));
+            &handshake_, _2, handle_handshake_height_set));
     chain_.subscribe_reorganize(
         std::bind(&session::set_start_height,
             this, _1, _2, _3, _4));
@@ -94,7 +94,7 @@ void session::set_start_height(const std::error_code& ec, size_t fork_point,
         return;
     }
     size_t last_height = fork_point + new_blocks.size();
-    handshake_.set_start_height(last_height, handle_set_start_height);
+    handshake_.set_start_height(last_height, handle_handshake_height_set);
     chain_.subscribe_reorganize(
         std::bind(&session::set_start_height,
             this, _1, _2, _3, _4));

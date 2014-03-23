@@ -23,10 +23,9 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-
-using boost::posix_time::seconds;
-using boost::posix_time::minutes;
 using boost::posix_time::time_duration;
+using boost::posix_time::minutes;
+using boost::posix_time::seconds;
 using boost::asio::buffer;
 
 // Connection timeout time
@@ -218,16 +217,14 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
     send(ping_type(), handle_ping);
 }
 
-void channel_proxy::set_timeout(
-    const boost::posix_time::time_duration timeout)
+void channel_proxy::set_timeout(const time_duration timeout)
 {
     timeout_.cancel();
     timeout_.expires_from_now(timeout);
     timeout_.async_wait(std::bind(
         &channel_proxy::handle_timeout, shared_from_this(), _1));
 }
-void channel_proxy::set_heartbeat(
-    const boost::posix_time::time_duration timeout)
+void channel_proxy::set_heartbeat(const time_duration timeout)
 {
     heartbeat_.cancel();
     heartbeat_.expires_from_now(timeout);
