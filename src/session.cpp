@@ -109,7 +109,7 @@ void session::set_start_height(const std::error_code& ec, size_t fork_point,
     auto ignore_handler = [](const std::error_code&, size_t) {};
 
 #ifdef _MSC_VER
-#pragma message( "Warning: line temporarily disabled, work in progress." )
+#pragma message( "WARNING: line temporarily disabled, work in progress." )
 #else
     // THIS LINE CONSISTENTLY CRASHES CTP_Nov2013 COMPILER (CL.EXE)
     protocol_.broadcast(blocks_inv, ignore_handler);
