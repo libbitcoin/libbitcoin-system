@@ -27,7 +27,7 @@ using std::placeholders::_3;
 using std::placeholders::_4;
 
 session::session(threadpool& pool, const session_params& params)
-    : strand_(pool.service()),
+  : strand_(pool.service()),
     handshake_(params.handshake_), protocol_(params.protocol_),
     chain_(params.blockchain_), poll_(params.poller_),
     tx_pool_(params.transaction_pool_),
@@ -45,19 +45,19 @@ void session::start(completion_handler handle_complete)
     protocol_.start(handle_complete);
     protocol_.subscribe_channel(
         [this](const std::error_code& ec, channel_ptr node)
-    {
-        BITCOIN_ASSERT(!ec || ec == error::service_stopped);
-        if (!ec)
-            poll_.query(node);
-    });
+        {
+            BITCOIN_ASSERT(!ec || ec == error::service_stopped);
+            if (!ec)
+                poll_.query(node);
+        });
     protocol_.subscribe_channel(
         std::bind(&session::new_channel, this, _1, _2));
     chain_.fetch_last_height(
         std::bind(&handshake::set_start_height,
-        &handshake_, _2, handle_handshake_height_set));
+            &handshake_, _2, handle_handshake_height_set));
     chain_.subscribe_reorganize(
         std::bind(&session::set_start_height,
-        this, _1, _2, _3, _4));
+            this, _1, _2, _3, _4));
 }
 
 void session::stop(completion_handler handle_complete)
@@ -97,14 +97,14 @@ void session::set_start_height(const std::error_code& ec, size_t fork_point,
     handshake_.set_start_height(last_height, handle_handshake_height_set);
     chain_.subscribe_reorganize(
         std::bind(&session::set_start_height,
-        this, _1, _2, _3, _4));
+            this, _1, _2, _3, _4));
     // Broadcast invs of new blocks
     inventory_type blocks_inv;
-    for (auto block : new_blocks)
+    for (auto block: new_blocks)
     {
         blocks_inv.inventories.push_back({
             inventory_type_id::block,
-            hash_block_header(block->header) });
+            hash_block_header(block->header)});
     }
     auto ignore_handler = [](const std::error_code&, size_t) {};
 
@@ -124,14 +124,14 @@ void session::inventory(const std::error_code& ec,
         log_error(LOG_SESSION) << "inventory: " << ec.message();
         return;
     }
-    for (const inventory_vector_type& ivec : packet.inventories)
+    for (const inventory_vector_type& ivec: packet.inventories)
     {
         if (ivec.type == inventory_type_id::transaction)
             strand_.post(
-            std::bind(&session::new_tx_inventory,
-            this, ivec.hash, node));
+                std::bind(&session::new_tx_inventory,
+                    this, ivec.hash, node));
         else if (ivec.type == inventory_type_id::block);
-        // Do nothing. Handled by poller.
+            // Do nothing. Handled by poller.
         else
             log_warning(LOG_SESSION) << "Ignoring unknown inventory type";
     }
@@ -149,7 +149,7 @@ void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
     // if not then issue getdata
     tx_pool_.exists(tx_hash,
         std::bind(&session::request_tx_data,
-        this, _1, tx_hash, node));
+            this, _1, tx_hash, node));
     grabbed_invs_.store(tx_hash);
 }
 
@@ -181,7 +181,7 @@ void session::request_tx_data(bool tx_exists,
         return;
     get_data_type request_tx;
     request_tx.inventories.push_back(
-    { inventory_type_id::transaction, tx_hash });
+        {inventory_type_id::transaction, tx_hash});
     node->send(request_tx, handle_send_get_data);
 }
 
