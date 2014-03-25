@@ -14,8 +14,8 @@ namespace libbitcoin {
 
 mmfile::mmfile(const std::string& filename)
 {
-#ifndef _WIN32
-    // Not yet Windows portable.
+#ifndef _MSC_VER
+    // Not yet MSVC portable (maybe windows).
     file_handle_ = open(filename.c_str(),
         O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (file_handle_ == -1)

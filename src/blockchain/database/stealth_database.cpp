@@ -105,17 +105,15 @@ uint64_t stealth_database::calculate_entry_offset(uint32_t index)
 {
     return entries_sector_ + index * entry_row_size;
 }
-
 void stealth_database::advise_kernel()
 {
     uint64_t start_offset = calculate_entry_offset(0);
     uint64_t end_offset = calculate_entry_offset(entries_count_);
     uint64_t entries_size = end_offset - start_offset;
 
-#ifndef _WIN32
-    // Not yet Windows portable.
-    madvise(file_.data() + start_offset, entries_size,
-        MADV_SEQUENTIAL);
+#ifndef _MSC_VER
+    // Not yet MSVC portable (maybe windows).
+    madvise(file_.data() + start_offset, entries_size, MADV_SEQUENTIAL);
 #endif
 }
 

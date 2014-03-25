@@ -42,9 +42,13 @@ constexpr size_t op_counter_limit = 201;
 
 // Convert opcode to its actual numeric value.
 template<typename OpCode>
+
+#ifndef _MSC_VER
 // Workaround for CTP_Nov2013 compile error: 
 // std::underlying_type<_Ty>::type': type not allowed for 'constexpr'
-/* constexpr */ auto base_value(OpCode code)
+constexpr
+#endif
+auto base_value(OpCode code)
   -> typename std::underlying_type<OpCode>::type 
 {
     return static_cast<typename std::underlying_type<OpCode>::type>(code);
