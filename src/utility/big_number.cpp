@@ -184,9 +184,9 @@ void big_number::set_int32(int32_t value)
 int32_t big_number::int32() const
 {
 #ifdef _WIN32
-    constexpr uint32_t max_int32 = UINT_LEAST32_MAX;
+    constexpr int32_t max_int32 = UINT_LEAST32_MAX;
 #else
-    constexpr uint32_t max_int32 = std::numeric_limits<int32_t>::max();
+    constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
 #endif
 
     int32_t value = uint32();
