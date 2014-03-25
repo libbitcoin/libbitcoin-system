@@ -183,8 +183,8 @@ void big_number::set_int32(int32_t value)
 
 int32_t big_number::int32() const
 {
-#ifdef _WIN32
-    constexpr int32_t max_int32 = UINT_LEAST32_MAX;
+#ifdef _MSC_VER
+    constexpr int32_t max_int32 = INT_LEAST32_MAX;
 #else
     constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
 #endif
