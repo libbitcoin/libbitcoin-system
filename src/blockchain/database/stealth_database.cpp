@@ -1,4 +1,8 @@
 #include <bitcoin/blockchain/database/stealth_database.hpp>
+
+#ifndef _MSC_VER
+#include <sys/mman.h>
+#endif
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/serializer.hpp>
 
