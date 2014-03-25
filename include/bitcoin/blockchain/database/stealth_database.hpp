@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_STEALTH_DATABASE_HPP
 #define LIBBITCOIN_STEALTH_DATABASE_HPP
 
+#include <stdint.h>
 #include <functional>
 #include <bitcoin/utility/mmfile.hpp>
 
@@ -32,7 +33,6 @@ class stealth_database
 public:
     typedef std::function<void (uint8_t*)> write_function;
     typedef std::function<void (const uint8_t*)> read_function;
-
     stealth_database(mmfile& file);
     void store(write_function write);
     void sync(uint32_t block_height);
@@ -53,7 +53,6 @@ private:
     // scan() sub-methods
     uint32_t read_start_entry_index(uint32_t from_height);
     void read_entry(uint32_t entry_index, read_function read);
-
     mmfile& file_;
     // Sector offsets
     uint64_t metadata_sector_ = 0;
@@ -72,4 +71,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

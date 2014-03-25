@@ -38,7 +38,7 @@ void clock_gettime(int ign, struct timespec* ts)
 }
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 // THIS SECTION IS UNTESTED
 // Windows clock_gettime from: http://stackoverflow.com/a/5404467/1172329
 #define CLOCK_REALTIME 0

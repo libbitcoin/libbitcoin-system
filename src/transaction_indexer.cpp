@@ -203,7 +203,7 @@ void indexer_history_fetched(const std::error_code& ec,
     blockchain::history_list history,
     blockchain::fetch_handler_history handle_fetch)
 {
-#ifdef _WINDOWS
+#ifdef _WIN32
     constexpr uint32_t max_height = UINT_LEAST32_MAX;
 #else
     constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();

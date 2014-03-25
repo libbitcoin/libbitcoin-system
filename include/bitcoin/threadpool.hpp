@@ -147,11 +147,11 @@ struct wrapped_handler_impl
  * Convenience class for objects wishing to synchronize operations around
  * shared data.
  *
- * push() guarantees that any handlers passed to it will never execute
- * at the same time.
+ * queue() guarantees that any handlers passed to it will never
+ * execute at the same time, and they will be called in sequential order.
  *
- * queue() guarantees that any handlers passed to it will never execute
- * at the same time, and they will be called in sequential order.
+ * randomly_queue() guarantees that any handlers passed to it will never
+ * execute at the same time.
  */
 class async_strand
 {
@@ -163,12 +163,14 @@ public:
      * encapsulates will never execute at the same time as another handler
      * passing through this class.
      */
-    template <typename... Args>
-    auto wrap(Args&&... args)
+    template <typename Function, typename... Args>
+    auto wrap(Function&& func, Args&&... args)
       -> wrapped_handler_impl<
-            decltype(std::bind(std::forward<Args>(args)...))>
+            decltype(std::bind(
+                std::forward<Function>(func), std::forward<Args>(args)...))>
     {
-        auto handler = std::bind(std::forward<Args>(args)...);
+        auto handler = std::bind(
+            std::forward<Function>(func), std::forward<Args>(args)...);
         return {handler, strand_};
     }
 

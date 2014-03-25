@@ -170,9 +170,8 @@ public:
     template <typename Message>
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        strand_.post(
-            std::bind(&protocol::do_broadcast<Message>,
-                this, packet, handle_send));
+        strand_.queue(
+            &protocol::do_broadcast<Message>, this, packet, handle_send);
     }
 
 private:
@@ -184,7 +183,6 @@ private:
     typedef std::vector<connection_info> connection_list;
     enum class connect_state
     {
-        none,
         finding_peer,
         connecting,
         established,
@@ -236,7 +234,7 @@ private:
         bool finished_;
 
         // From parent
-        io_service::strand& strand_;
+        async_strand& strand_;
         hosts& hosts_;
         handshake& handshake_;
         network& network_;
@@ -245,8 +243,9 @@ private:
     friend class seeds;
 
     // run loop
+    void start_connecting();
     // Connect outwards
-    void try_outbound_connects();
+    void start_stopped_connects();
     // This function is called in these places:
     //
     // 1. try_outbound_connects() calls it n times.
@@ -262,6 +261,12 @@ private:
         const network_address_type& packet, slot_index slot);
     void handle_connect(const std::error_code& ec, channel_ptr node,
         const network_address_type& address, slot_index slot);
+
+    // Periodically call this method to reset the watermark and reallow
+    // connections. This prevents too many connection attempts from
+    // exhausting resources by putting a limit on connection attempts
+    // within a certain time interval.
+    void start_watermark_reset_timer();
 
     // Manual connections
     void handle_manual_connect(const std::error_code& ec, channel_ptr node,
@@ -305,7 +310,7 @@ private:
             node->send(packet, send_handler);
     }
 
-    io_service::strand strand_;
+    async_strand strand_;
 
     std::string hosts_filename_ = "hosts.p2p";
     hosts& hosts_;
@@ -318,8 +323,14 @@ private:
     // Simply a debugging tool to enforce correct state transition behaviour
     // for maintaining connections.
     connect_state_list connect_states_;
+    // Used to prevent too many connection attempts from exhausting resources.
+    // The watermark is refreshed every interval.
+    boost::asio::deadline_timer watermark_timer_;
+    size_t watermark_count_ = 0;
+
     // Manual connections created by user themselves.
     channel_ptr_list manual_connections_;
+
     // Inbound connections from the p2p network.
     bool listen_is_enabled_ = true;
     channel_ptr_list accepted_channels_;

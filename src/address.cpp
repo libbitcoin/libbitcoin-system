@@ -19,7 +19,6 @@
  */
 #include <bitcoin/address.hpp>
 
-#include <bitcoin/constants.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/utility/base58.hpp>
 #include <bitcoin/utility/ripemd.hpp>
@@ -28,7 +27,6 @@
 namespace libbitcoin {
 
 payment_address::payment_address()
-  : version_(pubkey_version), hash_(null_short_hash)
 {
 }
 payment_address::payment_address(uint8_t version, const short_hash& hash)

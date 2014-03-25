@@ -62,7 +62,7 @@ private:
     const transaction_type* fetch(const hash_digest& tx_hash) const;
 
     void handle_duplicate_check(const std::error_code& ec);
-    bool is_spent(const output_point outpoint) const;
+    bool is_spent(const output_point& outpoint) const;
 
     // Used for checking coinbase maturity
     void set_last_height(const std::error_code& ec, size_t last_height);

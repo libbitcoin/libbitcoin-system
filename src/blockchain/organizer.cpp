@@ -180,9 +180,6 @@ void organizer::replace_chain(size_t fork_index,
     block_detail_list& orphan_chain)
 {
     big_number orphan_work = 0;
-    // Starting from beginning of the chain, validate blocks
-    // Q: Why am I using an int here? TODO: investigate.
-    // Note: '<' : signed/unsigned mismatch, changed to size/unsigned.
     for (size_t orphan_index = 0; orphan_index < orphan_chain.size();
         ++orphan_index)
     {
@@ -246,7 +243,7 @@ void lazy_remove(block_detail_list& process_queue,
 }
 
 void organizer::clip_orphans(block_detail_list& orphan_chain,
-    int orphan_index, const std::error_code& invalid_reason)
+    size_t orphan_index, const std::error_code& invalid_reason)
 {
     auto orphan_start = orphan_chain.begin() + orphan_index;
     // Remove from orphans pool

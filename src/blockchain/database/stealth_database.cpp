@@ -1,6 +1,4 @@
 #include <bitcoin/blockchain/database/stealth_database.hpp>
-
-#include <sys/mman.h>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/serializer.hpp>
 
@@ -44,7 +42,7 @@ stealth_database::stealth_database(mmfile& file)
 void stealth_database::store(write_function write)
 {
     uint64_t next_offset = calculate_entry_offset(
-        (entries_count_ + entries_written_count_));
+        entries_count_ + entries_written_count_);
     uint8_t* iter = file_.data() + next_offset;
     write(iter);
     ++entries_written_count_;
@@ -107,14 +105,18 @@ uint64_t stealth_database::calculate_entry_offset(uint32_t index)
 {
     return entries_sector_ + index * entry_row_size;
 }
+
 void stealth_database::advise_kernel()
 {
     uint64_t start_offset = calculate_entry_offset(0);
     uint64_t end_offset = calculate_entry_offset(entries_count_);
     uint64_t entries_size = end_offset - start_offset;
+
+#ifndef _WIN32
+    // Not yet Windows portable.
     madvise(file_.data() + start_offset, entries_size,
-        POSIX_MADV_SEQUENTIAL);
+        MADV_SEQUENTIAL);
+#endif
 }
 
 } // namespace libbitcoin
-

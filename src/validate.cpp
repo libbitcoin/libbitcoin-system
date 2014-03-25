@@ -20,9 +20,7 @@
 #include <bitcoin/validate.hpp>
 
 #include <set>
-
 #include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/constants.hpp>
@@ -38,8 +36,10 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
 using std::placeholders::_4;
-
-namespace posix_time = boost::posix_time;
+using boost::posix_time::ptime;
+using boost::posix_time::from_time_t;
+using boost::posix_time::second_clock;
+using boost::posix_time::hours;
 
 constexpr size_t max_block_size = 1000000;
 constexpr size_t max_block_script_sig_operations = max_block_size / 50;
@@ -135,7 +135,7 @@ void validate_transaction::handle_duplicate_check(const std::error_code& ec)
         &validate_transaction::set_last_height, shared_from_this(), _1, _2));
 }
 
-bool validate_transaction::is_spent(const output_point outpoint) const
+bool validate_transaction::is_spent(const output_point& outpoint) const
 {
     for (const transaction_entry_info& entry: pool_)
         for (const transaction_input_type current_input: entry.tx.inputs)
@@ -375,10 +375,9 @@ std::error_code validate_block::check_block()
     if (!check_proof_of_work(current_block_hash, blk_header.bits))
         return error::proof_of_work;
 
-    const posix_time::ptime block_time =
-        posix_time::from_time_t(blk_header.timestamp);
-    const posix_time::ptime two_hour_future =
-        posix_time::second_clock::universal_time() + posix_time::hours(2);
+    const ptime block_time = from_time_t(blk_header.timestamp);
+    const ptime two_hour_future =
+        second_clock::universal_time() + hours(2);
     if (block_time > two_hour_future)
         return error::futuristic_timestamp;
 
