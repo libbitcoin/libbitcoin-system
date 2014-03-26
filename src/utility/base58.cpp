@@ -28,20 +28,20 @@ namespace libbitcoin {
 
 const char base58_chars[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-bool is_base58(char c)
+bool is_base58(const std::string& text)
+{
+    return std::all_of(text.begin(), text.end(),
+        [](const char c){ return is_base58_char(c); });
+}
+bool is_base58_char(const char c)
 {
     auto last = std::end(base58_chars) - 1;
     // This works because the base58 characters happen to be in sorted order
     return std::binary_search(base58_chars, last, c);
 }
-bool is_base58(const std::string& text)
-{
-    return std::all_of(text.begin(), text.end(),
-        [](char c){ return is_base58(c); });
-}
 
 std::string encode_base58(const data_chunk& unencoded_data)
-{                                                                                
+{
     std::string encoded_data;
     // Expected size increase from base58 conversion is approximately 137%
     // use 138% to be safe
@@ -82,7 +82,7 @@ data_chunk decode_base58(std::string encoded_data)
     // Trim spaces and newlines around the string.
     boost::algorithm::trim(encoded_data);
     // We're building a big number.
-    big_number bn = 0;       
+    big_number bn = 0;
                                                                                  
     // Convert big endian string to bignum                                       
     for (const uint8_t current_char: encoded_data)
