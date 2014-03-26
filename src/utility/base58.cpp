@@ -28,16 +28,16 @@ namespace libbitcoin {
 
 const char base58_chars[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
-bool is_base58(const std::string& text)
-{
-    return std::all_of(text.begin(), text.end(),
-        [](const char c){ return is_base58_char(c); });
-}
-bool is_base58_char(const char c)
+bool is_base58(const char c)
 {
     auto last = std::end(base58_chars) - 1;
     // This works because the base58 characters happen to be in sorted order
     return std::binary_search(base58_chars, last, c);
+}
+bool is_base58(const std::string& text)
+{
+    return std::all_of(text.begin(), text.end(),
+        [](const char c){ return is_base58(c); });
 }
 
 std::string encode_base58(const data_chunk& unencoded_data)

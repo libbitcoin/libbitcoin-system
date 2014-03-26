@@ -24,8 +24,8 @@
 
 namespace libbitcoin {
 
+bool is_base58(const char c);
 bool is_base58(const std::string& text);
-bool is_base58_char(const char c);
 
 std::string encode_base58(const data_chunk& unencoded_data);
 
