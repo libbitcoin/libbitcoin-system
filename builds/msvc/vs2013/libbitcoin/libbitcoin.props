@@ -23,4 +23,17 @@
     </ClCompile>
   </ItemDefinitionGroup>
 
+  <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='StaticLibrary'">
+    <ClCompile>
+      <PreprocessorDefinitions>CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
+    <Message Text="Linkage-curl      : $(Linkage-curl)" Importance="high"/>
+    <Message Text="Linkage-zlib      : $(Linkage-zlib)" Importance="high"/>
+    <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
+    <Message Text="Linkage-libssh2   : $(Linkage-libssh2)" Importance="high"/>
+  </Target>
+
 </Project>

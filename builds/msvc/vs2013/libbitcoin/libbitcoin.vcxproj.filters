@@ -320,4 +320,7 @@
       <Filter>src\blockchain\database</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
+  </ItemGroup>
 </Project>

@@ -13,7 +13,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalOptions>/Oy- %(AdditionalOptions)</AdditionalOptions>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <!--<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>-->
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
@@ -26,6 +26,7 @@
     </ResourceCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <!--<GenerateDebugInformation>true</GenerateDebugInformation>-->
       <ImportLibrary>$(ProjectDir)..\..\..\..\bin\$(PlatformName)\Release\$(RootNamespace)\$(TargetName).imp.lib</ImportLibrary>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>

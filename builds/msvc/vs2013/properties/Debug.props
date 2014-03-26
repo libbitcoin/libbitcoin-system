@@ -11,7 +11,7 @@
   </PropertyGroup>
   
   <ItemDefinitionGroup>
-    <ClCompile>
+    <ClCompile><DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -22,6 +22,7 @@
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>$(ProjectDir)..\..\..\..\bin\$(PlatformName)\Debug\$(RootNamespace)\$(TargetName).imp.lib</ImportLibrary>
     </Link>
   </ItemDefinitionGroup>
