@@ -170,8 +170,10 @@ public:
     template <typename Message>
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        strand_.queue(
-            &protocol::do_broadcast<Message>, this, packet, handle_send);
+        // The intermediate variable 'lambda' is a workaround for a
+        // limitation of the VC++ CTP_Nov2013 generic lambda support.
+        auto lambda = &protocol::do_broadcast<Message>;
+        strand_.queue(lambda, this, packet, handle_send);
     }
 
 private:
