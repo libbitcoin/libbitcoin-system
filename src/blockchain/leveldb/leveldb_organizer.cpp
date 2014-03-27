@@ -17,8 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifdef LEVELDB_ENABLED
-
 #include "leveldb_organizer.hpp"
 
 #include <bitcoin/utility/assert.hpp>
@@ -66,5 +64,3 @@ void leveldb_organizer::reorganize_occured(
 }
 
 } // namespace libbitcoin
-
-#endif

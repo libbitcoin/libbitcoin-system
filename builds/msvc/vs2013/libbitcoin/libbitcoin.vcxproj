@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props" Condition="Exists('..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props')" />
   <PropertyGroup Label="Globals">
     <ProjectGuid>{39F60708-FF48-4C22-952D-43470866F684}</ProjectGuid>
     <ProjectName>libbitcoin</ProjectName>
@@ -217,6 +216,30 @@
     <Linkage-openssl>static</Linkage-openssl>
     <Linkage-zlib>static</Linkage-zlib>
   </PropertyGroup>
+  <ItemGroup Label="BuildOptionsExtension">
+    <PropertyPageSchema Include="$(ProjectName).xml" />
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_blockchain.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions Condition="'$(Option-testnet)' == 'true'">ENABLE_TESTNET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-leveldb)' == 'true'">LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp" />
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\misc.ipp" />
@@ -228,11 +251,6 @@
     <ClCompile Include="..\..\..\..\src\blockchain\blockchain.cpp" />
     <ClCompile Include="..\..\..\..\src\blockchain\database\mman_win32.c" />
     <ClCompile Include="..\..\..\..\src\blockchain\database\stealth_database.cpp" />
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_blockchain.cpp" />
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.cpp" />
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.cpp" />
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.cpp" />
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.cpp" />
     <ClCompile Include="..\..\..\..\src\blockchain\organizer.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
@@ -319,6 +337,7 @@
   <Import Project="..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')" />
   <Import Project="..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props" Condition="Exists('..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" />
   <Import Project="..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props" Condition="Exists('..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props')" />
+  <Import Project="..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props" Condition="Exists('..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">

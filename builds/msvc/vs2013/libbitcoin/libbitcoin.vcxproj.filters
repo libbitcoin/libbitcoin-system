@@ -18,9 +18,6 @@
     <Filter Include="src\blockchain">
       <UniqueIdentifier>{cfa7bc5d-1852-4eae-836d-7ca997d7eb24}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\blockchain\levldb">
-      <UniqueIdentifier>{61f50a9e-d52f-4336-820e-3ac84f2305d4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\blockchain">
       <UniqueIdentifier>{812d0350-06b8-414d-b0d8-d8de8110c38c}</UniqueIdentifier>
     </Filter>
@@ -41,6 +38,9 @@
     </Filter>
     <Filter Include="src\blockchain\database">
       <UniqueIdentifier>{441e5e7d-632f-4dcb-b342-06f5795d3f19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\blockchain\leveldb">
+      <UniqueIdentifier>{61f50a9e-d52f-4336-820e-3ac84f2305d4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -138,19 +138,19 @@
       <Filter>src\blockchain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.cpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.cpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_blockchain.cpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.cpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.cpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\snappy-single-file.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\leveldb-single-file.cpp" />
@@ -173,16 +173,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.hpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.hpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.hpp">
-      <Filter>src\blockchain\levldb</Filter>
+      <Filter>src\blockchain\leveldb</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\error.hpp">
       <Filter>include</Filter>

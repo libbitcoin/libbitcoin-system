@@ -20,8 +20,6 @@
 #ifndef LIBBITCOIN_BLOCKCHAIN_LEVELDB_CHAIN_KEEPER_H
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_CHAIN_KEEPER_H
 
-#ifdef LEVELDB_ENABLED
-
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/leveldb_blockchain.hpp>
 
@@ -55,7 +53,5 @@ private:
 typedef std::shared_ptr<leveldb_chain_keeper> leveldb_chain_keeper_ptr;
 
 } // namespace libbitcoin
-
-#endif
 
 #endif

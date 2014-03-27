@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/utility/timed_section.hpp>
+
 #include <bitcoin/utility/logger.hpp>
 
 #ifdef __MACH__

@@ -20,8 +20,6 @@
 #ifndef LIBBITCOIN_BLOCKCHAIN_LEVELDB_COMMON_H
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_COMMON_H
 
-#ifdef LEVELDB_ENABLED
-
 #include <memory>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
@@ -141,7 +139,5 @@ data_chunk create_address_key(
     const payment_address& address, const output_point& outpoint);
 
 } // namespace libbitcoin
-
-#endif
 
 #endif
