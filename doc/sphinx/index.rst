@@ -21,7 +21,7 @@ Contents:
    blockchain
    network
    fullnode
-.. offlinetx
+   offlinetx
 
 .. toctree::
    :hidden:
@@ -30,6 +30,7 @@ Contents:
    examples/determ
    examples/initchain
    examples/display-last
+   examples/balance
    examples/satoshiwords
    examples/connect
    examples/accept
