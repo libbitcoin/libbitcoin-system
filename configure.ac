@@ -14,9 +14,9 @@ AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 AC_ARG_ENABLE(leveldb,
-	[AC_HELP_STRING([--enable-leveldb],
-			[Build LevelDB support.])],
-	[bld_leveldb="$enable_leveldb"], [bld_leveldb="no"])
+    [AC_HELP_STRING([--enable-leveldb],
+        [Build LevelDB support.])],
+    [bld_leveldb="$enable_leveldb"], [bld_leveldb="no"])
 AM_CONDITIONAL([DO_LEVELDB], [test "$enable_leveldb" = "yes"])
 
 AC_MSG_CHECKING(--enable-testnet argument)
@@ -36,8 +36,8 @@ AX_BOOST_BASE
 PKG_PROG_PKG_CONFIG
 
 if test "$bld_leveldb" = "yes"; then
-	AC_SUBST(LDFLAG_LEVELDB)
-	LDFLAG_LEVELDB="-lleveldb"
+    AC_SUBST(LDFLAG_LEVELDB)
+    LDFLAG_LEVELDB="-lleveldb"
     AC_SUBST(CFLAG_LEVELDB)
     CFLAG_LEVELDB="-DLEVELDB_ENABLED"
 fi
