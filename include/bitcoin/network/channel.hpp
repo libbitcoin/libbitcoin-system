@@ -163,8 +163,7 @@ public:
             strand_.post(
                 [this, this_ptr, packet, handle_send]
                 {
-                    do_send_common(create_raw_message(packet),
-                        handle_send);
+                    do_send_common(create_raw_message(packet), handle_send);
                 });
         }
     }

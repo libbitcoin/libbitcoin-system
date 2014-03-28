@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_STEALTH_DATABASE_HPP
 #define LIBBITCOIN_STEALTH_DATABASE_HPP
 
+#include <stdint.h>
 #include <functional>
 #include <bitcoin/utility/mmfile.hpp>
 
@@ -72,4 +73,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

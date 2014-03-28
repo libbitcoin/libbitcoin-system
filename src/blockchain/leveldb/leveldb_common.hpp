@@ -141,4 +141,3 @@ data_chunk create_address_key(
 } // namespace libbitcoin
 
 #endif
-

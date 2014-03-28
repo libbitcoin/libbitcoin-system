@@ -103,7 +103,7 @@ void handshake::receive_verack(
 
 int writer(char* data, size_t size, size_t count, std::string* buffer)
 {
-    int result = 0;
+    size_t result = 0;
     if (buffer != NULL)
     {
         result = count * size;
@@ -153,7 +153,7 @@ bool handshake::lookup_external(const std::string& website,
         return false;
     }
     ip = localhost_ip();
-    for (size_t i = 0; i < 4; ++i)
+    for (int i = 0; i < 4; ++i)
         ip[i + 12] = boost::lexical_cast<unsigned>(results[i + 1]);
     return true;
 }

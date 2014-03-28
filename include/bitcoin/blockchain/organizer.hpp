@@ -113,7 +113,7 @@ private:
     void process(block_detail_ptr process_block);
     void replace_chain(size_t fork_index, block_detail_list& orphan_chain);
     void clip_orphans(block_detail_list& orphan_chain,
-        int orphan_index, const std::error_code& invalid_reason);
+        size_t orphan_index, const std::error_code& invalid_reason);
     void notify_reorganize(
         size_t fork_point,
         const block_detail_list& orphan_chain,

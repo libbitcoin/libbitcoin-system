@@ -64,4 +64,3 @@ void leveldb_organizer::reorganize_occured(
 }
 
 } // namespace libbitcoin
-

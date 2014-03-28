@@ -23,7 +23,7 @@
 #include <ctime>
 #include <string>
 
-#ifdef _WINDOWS
+#ifdef _WIN32
 #include <stdint.h>
 #include <windows.h>
 #define CLOCK_REALTIME 0

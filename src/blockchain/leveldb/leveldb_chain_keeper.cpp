@@ -189,4 +189,3 @@ bool remove_credit(leveldb::WriteBatch& batch,
 }
 
 } // namespace libbitcoin
-

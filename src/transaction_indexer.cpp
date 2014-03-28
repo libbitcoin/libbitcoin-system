@@ -203,7 +203,7 @@ void indexer_history_fetched(const std::error_code& ec,
     blockchain::history_list history,
     blockchain::fetch_handler_history handle_fetch)
 {
-#ifdef _WINDOWS
+#ifdef _MSC_VER
     constexpr uint32_t max_height = UINT_LEAST32_MAX;
 #else
     constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
@@ -253,7 +253,7 @@ void indexer_history_fetched(const std::error_code& ec,
     for (const spend_info_type& spend_info: spends)
     {
         // Iterate history looking for the output we need.
-        bool found = false;
+        //bool found = false;
         for (blockchain::history_row& row: history)
         {
             if (row.output != spend_info.previous_output)
@@ -264,14 +264,14 @@ void indexer_history_fetched(const std::error_code& ec,
             if (row.spend_height != max_height)
             {
                 // Don't insert.
-                found = true;
+                //found = true;
                 break;
             }
             BITCOIN_ASSERT((row.spend == input_point{null_hash, max_index}));
             // Everything OK. Insert spend.
             row.spend = spend_info.point;
             row.spend_height = 0;
-            found = true;
+            //found = true;
             break;
         }
         // This assert can be triggered if the pool fills and starts

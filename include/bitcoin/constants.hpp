@@ -71,7 +71,7 @@ constexpr uint32_t max_bits = 0x1d00ffff;
 big_number max_target();
 uint32_t magic_value();
 
-#ifdef _WINDOWS
+#ifdef _MSC_VER
 constexpr uint32_t max_index = UINT_LEAST32_MAX;
 #else
 constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();

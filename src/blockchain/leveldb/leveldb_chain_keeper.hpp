@@ -55,4 +55,3 @@ typedef std::shared_ptr<leveldb_chain_keeper> leveldb_chain_keeper_ptr;
 } // namespace libbitcoin
 
 #endif
-

@@ -87,16 +87,16 @@ big_number& big_number::operator=(const big_number& other)
 
 void big_number::set_compact(uint32_t compact)
 {
-    size_t size = compact >> 24;
+    uint8_t size = compact >> 24;
     data_chunk number_repr(4 + size);
     number_repr[3] = size;
-    if (size >= 1) 
+    if (size >= 1)
         number_repr[4] = (compact >> 16) & 0xff;
     if (size >= 2) 
         number_repr[5] = (compact >> 8) & 0xff;
     if (size >= 3) 
         number_repr[6] = (compact >> 0) & 0xff;
-    BN_mpi2bn(&number_repr[0], number_repr.size(), &bignum_);
+    BN_mpi2bn(&number_repr[0], (int)number_repr.size(), &bignum_);
 }
 
 uint32_t big_number::compact() const
@@ -105,7 +105,7 @@ uint32_t big_number::compact() const
     data_chunk number_repr(size);
     size -= 4;
     BN_bn2mpi(&bignum_, &number_repr[0]);
-    uint32_t compact = size << 24;
+    uint32_t compact = (uint32_t)(size << 24);
     if (size >= 1) 
         compact |= (number_repr[4] << 16);
     if (size >= 2) 
@@ -126,7 +126,7 @@ void big_number::set_data(data_chunk load_data)
     load_data.insert(load_data.begin() + 1, (size >> 16) & 0xff);
     load_data.insert(load_data.begin() + 2, (size >> 8) & 0xff);
     load_data.insert(load_data.begin() + 3, (size >> 0) & 0xff);
-    BN_mpi2bn(&load_data[0], load_data.size(), &bignum_);
+    BN_mpi2bn(&load_data[0], (int)load_data.size(), &bignum_);
 }
 
 data_chunk big_number::data() const
@@ -169,6 +169,7 @@ void big_number::set_uint32(uint32_t value)
 
 uint32_t big_number::uint32() const
 {
+    // Is this safe in 64 bit?
     return BN_get_word(&bignum_);
 }
 
@@ -182,10 +183,10 @@ void big_number::set_int32(int32_t value)
 
 int32_t big_number::int32() const
 {
-#ifdef _WINDOWS
-    constexpr uint32_t max_int32 = UINT_LEAST32_MAX;
+#ifdef _MSC_VER
+    constexpr int32_t max_int32 = INT_LEAST32_MAX;
 #else
-    constexpr uint32_t max_int32 = std::numeric_limits<int32_t>::max();
+    constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
 #endif
 
     int32_t value = uint32();
@@ -264,12 +265,12 @@ void big_number::set_uint64_impl(uint64_t value, bool is_negative)
         *curr_byte = c;
         ++curr_byte;
     }
-    uint32_t size = curr_byte - (raw_mpi + 4);
+    uint32_t size = (uint32_t)(curr_byte - (raw_mpi + 4));
     raw_mpi[0] = (size >> 24) & 0xff;
     raw_mpi[1] = (size >> 16) & 0xff;
     raw_mpi[2] = (size >> 8) & 0xff;
     raw_mpi[3] = (size) & 0xff;
-    BN_mpi2bn(raw_mpi, curr_byte - raw_mpi, &bignum_);
+    BN_mpi2bn(raw_mpi, (int)(curr_byte - raw_mpi), &bignum_);
 }
 
 bool big_number::operator==(const big_number& other) 

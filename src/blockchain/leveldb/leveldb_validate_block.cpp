@@ -73,7 +73,7 @@ uint64_t leveldb_validate_block::median_time_past()
 {
     // read last 11 block times into array and select median value
     std::vector<uint64_t> times;
-    for (int i = height_ - 1; i >= 0 && i >= (int)height_ - 11; --i)
+    for (int i = (int)(height_ - 1); i >= 0 && i >= (int)(height_ - 11); --i)
         times.push_back(fetch_block(i).timestamp);
     BITCOIN_ASSERT(
         (height_ < 11 && times.size() == height_) || times.size() == 11);
@@ -193,4 +193,3 @@ bool leveldb_validate_block::orphan_is_spent(
 }
 
 } // namespace libbitcoin
-

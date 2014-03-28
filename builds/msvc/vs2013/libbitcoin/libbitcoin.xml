@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Build Options Extension -->
+<ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework">
+  <Rule Name="leveldb-uiextension" PageTemplate="tool" DisplayName="Build Options" SwitchPrefix="/" Order="1">
+    <Rule.Categories>
+      <Category Name="leveldb" DisplayName="leveldb" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+      <EnumProperty Name="Option-leveldb" DisplayName="Enable LevelDB" Description="Enable the LevelDB build option" Category="leveldb">
+        <EnumValue Name="" DisplayName="No" />
+        <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+  </Rule>
+  <Rule Name="testnet-uiextension" PageTemplate="tool" DisplayName="Build Options" SwitchPrefix="/" Order="2">
+    <Rule.Categories>
+      <Category Name="testnet" DisplayName="testnet" />
+    </Rule.Categories>
+    <Rule.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="" />
+    </Rule.DataSource>
+    <EnumProperty Name="Option-testnet" DisplayName="Enable Testnet" Description="Enable the Testnet build option" Category="testnet">
+      <EnumValue Name="" DisplayName="No" />
+      <EnumValue Name="true" DisplayName="Yes" />
+    </EnumProperty>
+  </Rule>
+</ProjectSchemaDefinitions>
