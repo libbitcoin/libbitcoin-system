@@ -28,6 +28,7 @@
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -35,6 +36,7 @@ mmfile::mmfile(const std::string& filename)
 {
 #ifndef _MSC_VER
     // Not yet MSVC portable (maybe windows).
+    BITCOIN_ASSERT_MSG(sizeof (void*) == 8, "Not a 64bit system!");
     file_handle_ = open(filename.c_str(),
         O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (file_handle_ == -1)
