@@ -3,6 +3,12 @@ Authors:
 * Robert Williamson
   Development. Added support for testnet.
 
+* Eric Voskuil
+  Windows port and code cleanup.
+
+* William Swanson
+  Android port and wallet code development.
+
 * Amir Taaki (genjix)
   Development
   amir@unsystem.net
