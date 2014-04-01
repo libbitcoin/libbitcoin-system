@@ -319,6 +319,16 @@ public:
      * Fetch possible stealth results. These results can then be iterated
      * to discover new payments belonging to a particular stealth address.
      * This is for recipient privacy.
+     * The result is a list of rows with the following fields:
+     *
+     * @code
+     *  struct stealth_row
+     *  {
+     *      data_chunk ephemkey;
+     *      payment_address address;
+     *      hash_digest transaction_hash;
+     *  };
+     * @endcode
      *
      * The prefix is a special value that can be adjusted to provide
      * greater precision at the expense of deniability.
