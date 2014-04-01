@@ -54,6 +54,11 @@ class serializer
 public:
     serializer(const Iterator begin);
 
+    /**
+     * Equivalent to calling write_byte/write_N_bytes depending
+     * on the size of the passed value.
+     * For instance a uint32_t value is equivalent to write_4_bytes(value).
+     */
     template <typename T>
     void write_uint_auto(T value);
 
@@ -62,19 +67,27 @@ public:
     void write_4_bytes(uint32_t value);
     void write_8_bytes(uint64_t value);
 
+    /**
+     * Variable uints are usually used for sizes.
+     * They're encoded using fewer bytes depending on the value itself.
+     */
     void write_variable_uint(uint64_t value);
 
     template <typename T>
     void write_data(const T& data);
+    void write_hash(const hash_digest& hash);
+    void write_short_hash(const short_hash& hash);
 
     void write_network_address(network_address_type addr);
 
-    void write_hash(const hash_digest& hash);
-
-    void write_short_hash(const short_hash& hash);
-
+    /**
+     * Write a fixed size string padded with zeroes.
+     */
     void write_fixed_string(const std::string& command, size_t string_size);
 
+    /**
+     * Write a variable length string.
+     */
     void write_string(const std::string& str);
 
     /**
@@ -131,6 +144,11 @@ class deserializer
 public:
     deserializer(const Iterator begin, const Iterator end);
 
+    /**
+     * Equivalent to calling read_byte/read_N_bytes depending
+     * on the size of the template parameter.
+     * For instance a uint32_t parameter is equivalent to read_4_bytes().
+     */
     template <typename T>
     const T read_uint_auto();
 
@@ -139,19 +157,26 @@ public:
     uint32_t read_4_bytes();
     uint64_t read_8_bytes();
 
+    /**
+     * Variable uints are usually used for sizes.
+     * They're encoded using fewer bytes depending on the value itself.
+     */
     uint64_t read_variable_uint();
 
-    // NOTE: n_bytes changed to uint32_t to prevent array overflow.
     data_chunk read_data(uint32_t n_bytes);
+    hash_digest read_hash();
+    short_hash read_short_hash();
 
     network_address_type read_network_address();
 
-    hash_digest read_hash();
-
-    short_hash read_short_hash();
-
+    /**
+     * Read a fixed size string padded with zeroes.
+     */
     std::string read_fixed_string(size_t len);
 
+    /**
+     * Read a variable length string.
+     */
     std::string read_string();
 
     /**

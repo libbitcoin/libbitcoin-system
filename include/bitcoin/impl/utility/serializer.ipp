@@ -113,7 +113,7 @@ void serializer<Iterator>::write_fixed_string(
     const std::string& command, size_t string_size)
 {
     BITCOIN_ASSERT(command.size() <= string_size);
-    data_chunk raw_string(string_size);
+    data_chunk raw_string(string_size, 0);
     std::copy(command.begin(), command.end(), raw_string.begin());
     write_data(raw_string);
 }
