@@ -99,6 +99,16 @@ Arch Linux Instructions
 
 Libbitcoin is available from the AUR: https://aur.archlinux.org/packages/libbitcoin-leveldb-git/ 
 
+=======================
+Gentoo Linux Instructions
+=======================
+
+Libbitcoin is available in the 'bitcoin' overlay. Use layman to fetch
+the overlay then emerge as usual.
+
+If you want to use live build, unlock the '**' keyword for net-p2p/libbitcoin
+in /etc/portage/package.accept_keywords
+
 ====================
 Mac OSX Instructions
 ====================
