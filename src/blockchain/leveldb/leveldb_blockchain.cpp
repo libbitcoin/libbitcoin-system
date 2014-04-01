@@ -720,9 +720,10 @@ bool leveldb_blockchain::do_fetch_stealth(const stealth_prefix& prefix,
     {
         if (!stealth_match(prefix, it))
             return;
-        constexpr uint32_t row_size = 4 + 33 + 21 + 32;
+        constexpr size_t bitfield_size = sizeof(stealth_bitfield);
+        constexpr size_t row_size = bitfield_size + 33 + 21 + 32;
         // Skip bitfield value since we don't need it.
-        auto deserial = make_deserializer(it + 4, it + row_size);
+        auto deserial = make_deserializer(it + bitfield_size, it + row_size);
         stealth_row row;
         row.ephemkey = deserial.read_data(33);
         uint8_t address_version = deserial.read_byte();
@@ -745,3 +746,4 @@ void leveldb_blockchain::subscribe_reorganize(
 }
 
 } // namespace libbitcoin
+

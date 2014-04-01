@@ -55,6 +55,12 @@ public:
     serializer(const Iterator begin)
       : iter_(begin) {}
 
+    template <typename T>
+    void write_uint_auto(T value)
+    {
+        write_data(uncast_type(value));
+    }
+
     void write_byte(uint8_t value)
     {
         *iter_ = value;
@@ -62,15 +68,15 @@ public:
     }
     void write_2_bytes(uint16_t value)
     {
-        write_uint(value);
+        write_uint_auto(value);
     }
     void write_4_bytes(uint32_t value)
     {
-        write_uint(value);
+        write_uint_auto(value);
     }
     void write_8_bytes(uint64_t value)
     {
-        write_uint(value);
+        write_uint_auto(value);
     }
 
     void write_variable_uint(uint64_t value)
@@ -152,12 +158,6 @@ public:
 
 private:
     template <typename T>
-    void write_uint(T value)
-    {
-        write_data(uncast_type(value));
-    }
-
-    template <typename T>
     void write_data_reverse(const T& data)
     {
         internal_copy(data.rbegin(), data.rend());
@@ -214,6 +214,12 @@ public:
     deserializer(const Iterator begin, const Iterator end)
       : iter_(begin), end_(end) {}
 
+    template <typename T>
+    const T read_uint_auto()
+    {
+        return read_data_impl<T>(iter_, end_);
+    }
+
     uint8_t read_byte()
     {
         check_distance(iter_, end_, 1);
@@ -221,15 +227,15 @@ public:
     }
     uint16_t read_2_bytes()
     {
-        return read_data_impl<uint16_t>(iter_, end_);
+        return read_uint_auto<uint16_t>();
     }
     uint32_t read_4_bytes()
     {
-        return read_data_impl<uint32_t>(iter_, end_);
+        return read_uint_auto<uint32_t>();
     }
     uint64_t read_8_bytes()
     {
-        return read_data_impl<uint64_t>(iter_, end_);
+        return read_uint_auto<uint64_t>();
     }
 
     uint64_t read_variable_uint()
