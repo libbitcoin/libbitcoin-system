@@ -11,7 +11,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <!-- Windows and CRT definitions for unicode. Note that Linux only supports unicode so char is UCS-16. -->
+      <!-- Windows and CRT definitions for unicode. Note that Linux only supports unicode so char is 16 bit. -->
       <PreprocessorDefinitions>UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
