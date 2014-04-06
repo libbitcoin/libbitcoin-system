@@ -300,7 +300,7 @@ void big_number::set_uint64_impl(uint64_t value, bool is_negative)
         *curr_byte = c;
         ++curr_byte;
     }
-    uint32_t size = (uint32_t)(curr_byte - (raw_mpi + 4));
+    uint32_t size = static_cast<uint32_t>(curr_byte - (raw_mpi + 4));
     raw_mpi[0] = (size >> 24) & 0xff;
     raw_mpi[1] = (size >> 16) & 0xff;
     raw_mpi[2] = (size >> 8) & 0xff;
