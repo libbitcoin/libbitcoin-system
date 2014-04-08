@@ -1,5 +1,6 @@
 bitcoin_includedir = $(includedir)/bitcoin
 bitcoin_include_HEADERS = \
+    define.hpp \
     transaction_indexer.hpp \
     satoshi_serialize.hpp \
 	getx_responder.hpp \

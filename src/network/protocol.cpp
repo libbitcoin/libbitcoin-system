@@ -263,6 +263,30 @@ void protocol::seeds::handle_store(const std::error_code& ec)
             << ec.message();
 }
 
+std::string protocol::state_to_string(connect_state state)
+{
+    switch (state)
+    {
+    case connect_state::finding_peer:
+        return "Finding peer";
+    case connect_state::connecting:
+        return "Connecting to peer";
+    case connect_state::established:
+        return "Established connection";
+    case connect_state::stopped:
+        return "Stopped";
+    }
+    // Unhandled state!
+    BITCOIN_ASSERT(false);
+    return std::string();
+}
+void protocol::modify_slot(slot_index slot, connect_state state)
+{
+    connect_states_[slot] = state;
+    log_debug(LOG_PROTOCOL) << "Outbound connection " << slot
+        << ": " << state_to_string(state) << ".";
+}
+
 void protocol::run()
 {
     strand_.queue(&protocol::start_connecting, this);
@@ -277,7 +301,7 @@ void protocol::start_connecting()
     BITCOIN_ASSERT(connect_states_.empty());
     connect_states_.resize(max_outbound_);
     for (slot_index slot = 0; slot < max_outbound_; ++slot)
-        connect_states_[slot] = connect_state::stopped;
+        modify_slot(slot, connect_state::stopped);
     // Start the main outbound connect loop.
     start_stopped_connects();
     start_watermark_reset_timer();
@@ -297,7 +321,7 @@ void protocol::try_connect_once(slot_index slot)
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::stopped);
     // Begin connection flow: finding_peer -> connecting -> established.
     // Failures end with connect_state::stopped and loop back here again.
-    connect_states_[slot] = connect_state::finding_peer;
+    modify_slot(slot, connect_state::finding_peer);
     hosts_.fetch_address(strand_.wrap(
         &protocol::attempt_connect, this, _1, _2, slot));
 }
@@ -346,7 +370,7 @@ void protocol::attempt_connect(const std::error_code& ec,
     const network_address_type& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
-    connect_states_[slot] = connect_state::connecting;
+    modify_slot(slot, connect_state::connecting);
     if (ec)
     {
         log_error(LOG_PROTOCOL)
@@ -359,7 +383,7 @@ void protocol::attempt_connect(const std::error_code& ec,
             << "Already connected to " << encode_hex(address.ip);
         // Retry another connection
         // Still in same strand.
-        connect_states_[slot] = connect_state::stopped;
+        modify_slot(slot, connect_state::stopped);
         try_connect_once(slot);
         return;
     }
@@ -373,8 +397,6 @@ void protocol::handle_connect(
     const network_address_type& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
-    connect_states_[slot] = connect_state::established;
-    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
     if (ec)
     {
         log_warning(LOG_PROTOCOL) << "Unable to connect to "
@@ -382,10 +404,12 @@ void protocol::handle_connect(
             << " - " << ec.message();
         // Retry another connection
         // Still in same strand.
-        connect_states_[slot] = connect_state::stopped;
+        modify_slot(slot, connect_state::stopped);
         try_connect_once(slot);
         return;
     }
+    modify_slot(slot, connect_state::established);
+    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
     connections_.push_back({address, node});
     log_info(LOG_PROTOCOL) << "Connected to "
         << pretty(address.ip) << ":" << address.port
@@ -501,7 +525,7 @@ void protocol::outbound_channel_stopped(
     // And then attempt a reconnection.
     remove_connection(connections_, which_node);
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
-    connect_states_[slot] = connect_state::stopped;
+    modify_slot(slot, connect_state::stopped);
     // Attempt a reconnection.
     // Recreate 1 new connection always.
     // Still in same strand.
