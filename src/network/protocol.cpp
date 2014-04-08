@@ -397,8 +397,6 @@ void protocol::handle_connect(
     const network_address_type& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
-    modify_slot(slot, connect_state::established);
-    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
     if (ec)
     {
         log_warning(LOG_PROTOCOL) << "Unable to connect to "
@@ -410,6 +408,8 @@ void protocol::handle_connect(
         try_connect_once(slot);
         return;
     }
+    modify_slot(slot, connect_state::established);
+    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
     connections_.push_back({address, node});
     log_info(LOG_PROTOCOL) << "Connected to "
         << pretty(address.ip) << ":" << address.port
