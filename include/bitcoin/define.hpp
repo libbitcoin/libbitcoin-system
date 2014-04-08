@@ -31,7 +31,7 @@
     #if __GNUC__ >= 4
         #define BC_HELPER_DLL_IMPORT __attribute__ ((visibility ("default")))
         #define BC_HELPER_DLL_EXPORT __attribute__ ((visibility ("default")))
-        #define BC_HELPER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+        #define BC_HELPER_DLL_LOCAL  __attribute__ ((visibility ("internal")))
     #else
         #define BC_HELPER_DLL_IMPORT
         #define BC_HELPER_DLL_EXPORT
