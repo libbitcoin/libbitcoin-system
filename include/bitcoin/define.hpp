@@ -40,23 +40,23 @@
 #endif
 
 // Now we use the generic helper definitions above to
-// define BC_PUBLIC and BC_PRIVATE.
-// BC_PUBLIC is used for the public API symbols. It either DLL imports or
+// define BC_API and BC_HIDDEN.
+// BC_API is used for the public API symbols. It either DLL imports or
 // DLL exports (or does nothing for static build)
-// BC_PRIVATE is used for non-api symbols.
+// BC_HIDDEN is used for non-api symbols.
 
 #ifdef BC_DLL
     #ifdef BC_DLL_EXPORTS
         // Being compiled as a DLL (instead of using it)
-        #define BC_PUBLIC BC_HELPER_DLL_EXPORT
+        #define BC_API BC_HELPER_DLL_EXPORT
     #else
-        #define BC_PUBLIC BC_HELPER_DLL_IMPORT
+        #define BC_API BC_HELPER_DLL_IMPORT
     #endif
-    #define BC_PRIVATE BC_HELPER_DLL_LOCAL
+    #define BC_HIDDEN BC_HELPER_DLL_LOCAL
 #else
     // BC_DLL is not defined: this means this is a static lib.
-    #define BC_PUBLIC
-    #define BC_PRIVATE
+    #define BC_API
+    #define BC_HIDDEN
 #endif
 
 #endif
