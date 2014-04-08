@@ -54,7 +54,7 @@
     #endif
     #define BC_PRIVATE BC_HELPER_DLL_LOCAL
 #else
-    // BC_DLL is not defined: this means FOX is a static lib.
+    // BC_DLL is not defined: this means this is a static lib.
     #define BC_PUBLIC
     #define BC_PRIVATE
 #endif
