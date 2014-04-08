@@ -244,6 +244,9 @@ private:
     std::shared_ptr<seeds> load_seeds_;
     friend class seeds;
 
+    std::string state_to_string(connect_state state);
+    void modify_slot(slot_index slot, connect_state state);
+
     // run loop
     void start_connecting();
     // Connect outwards
