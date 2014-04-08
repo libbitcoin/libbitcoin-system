@@ -65,3 +65,7 @@ bitcoin_util_include_HEADERS = \
 	utility/weak_bind.hpp \
     utility/timed_section.hpp
 
+bitcoin_impl_utility_includedir = $(includedir)/bitcoin/impl/utility
+bitcoin_impl_utility_include_HEADERS = \
+    impl/utility/serializer.ipp
+

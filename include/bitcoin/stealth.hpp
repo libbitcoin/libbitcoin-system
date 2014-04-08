@@ -24,10 +24,12 @@
 
 namespace libbitcoin {
 
+typedef uint32_t stealth_bitfield;
+
 struct stealth_prefix
 {
     uint8_t number_bits;
-    uint32_t bitfield;
+    stealth_bitfield bitfield;
 };
 
 bool stealth_match(const stealth_prefix& prefix, const uint8_t* raw_bitfield);

@@ -69,7 +69,7 @@ index_list block_locator_indexes(int top_height)
     index_list indexes;
     // Push last 10 indexes first
     size_t step = 1, start = 0;
-    for (size_t i = top_height; i > 0; i -= step, ++start)
+    for (int i = top_height; i > 0; i -= step, ++start)
     {
         if (start >= 10)
             step *= 2;

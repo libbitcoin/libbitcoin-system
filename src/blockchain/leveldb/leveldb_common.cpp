@@ -24,6 +24,7 @@
 #include <bitcoin/address.hpp>
 #include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/stealth.hpp>
 #include <bitcoin/blockchain/database/stealth_database.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
@@ -246,7 +247,7 @@ bool add_debit(leveldb::WriteBatch& batch,
 bool process_stealth_output_info(const transaction_output_type& output,
     data_chunk& stealth_data_store)
 {
-    // Return false when we want the main loop to skip pass this
+    // Return true when we want the main loop to skip past this
     // output and not process it any further.
     if (output.script.type() != payment_type::stealth_info)
         return false;
@@ -255,12 +256,15 @@ bool process_stealth_output_info(const transaction_output_type& output,
     return true;
 }
 
-uint32_t calculate_bitfield(const data_chunk& stealth_data)
+constexpr size_t bitfield_size = sizeof(stealth_bitfield);
+
+stealth_bitfield calculate_bitfield(const data_chunk& stealth_data)
 {
     // Calculate stealth bitfield
     const hash_digest index = generate_sha256_hash(stealth_data);
-    auto deserial = make_deserializer(index.begin(), index.begin() + 4);
-    uint32_t bitfield = deserial.read_4_bytes();
+    auto deserial = make_deserializer(
+        index.begin(), index.begin() + bitfield_size);
+    stealth_bitfield bitfield = deserial.read_uint_auto<stealth_bitfield>();
     return bitfield;
 }
 data_chunk read_ephemkey(const data_chunk& stealth_data)
@@ -275,17 +279,17 @@ void add_stealth_info(const data_chunk& stealth_data,
     const payment_address& address, const hash_digest& tx_hash,
     stealth_database& db)
 {
-    const uint32_t bitfield = calculate_bitfield(stealth_data);
+    const stealth_bitfield bitfield = calculate_bitfield(stealth_data);
     const data_chunk ephemkey = read_ephemkey(stealth_data);
     auto write_func = [&](uint8_t *it)
     {
         auto serial = make_serializer(it);
-        serial.write_4_bytes(bitfield);
+        serial.write_uint_auto(bitfield);
         serial.write_data(ephemkey);
         serial.write_byte(address.version());
         serial.write_short_hash(address.hash());
         serial.write_hash(tx_hash);
-        BITCOIN_ASSERT(serial.iterator() == it + 4 + 33 + 21 + 32);
+        BITCOIN_ASSERT(serial.iterator() == it + bitfield_size + 33 + 21 + 32);
     };
     db.store(write_func);
 }
@@ -439,3 +443,4 @@ data_chunk create_address_key(
 }
 
 } // namespace libbitcoin
+

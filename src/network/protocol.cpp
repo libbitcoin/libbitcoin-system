@@ -30,8 +30,8 @@ using std::placeholders::_2;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-constexpr size_t watermark_limit = 2000;
-const time_duration watermark_reset_interval = seconds(5);
+constexpr size_t watermark_limit = 10;
+const time_duration watermark_reset_interval = seconds(1);
 
 static std::string pretty(const ip_address_type& ip)
 {

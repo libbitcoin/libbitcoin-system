@@ -85,33 +85,68 @@ big_number& big_number::operator=(const big_number& other)
     return *this;
 }
 
+// The "compact" format is a representation of a whole
+// number N using an unsigned 32bit number similar to a
+// floating point format.
+// The most significant 8 bits are the unsigned exponent of base 256.
+// This exponent can be thought of as "number of bytes of N".
+// The lower 23 bits are the mantissa.
+// Bit number 24 (0x800000) represents the sign of N.
+// N = (-1^sign) * mantissa * 256^(exponent-3)
+//
+// Satoshi's original implementation used BN_bn2mpi() and BN_mpi2bn().
+// MPI uses the most significant bit of the first byte as sign.
+// Thus 0x1234560000 is compact (0x05123456)
+// and  0xc0de000000 is compact (0x0600c0de)
+// (0x05c0de00) would be -0x40de000000
+//
+// Bitcoin only uses this "compact" format for encoding difficulty
+// targets, which are unsigned 256bit quantities.  Thus, all the
+// complexities of the sign bit and using base 256 are probably an
+// implementation accident.
+//
+// This implementation directly uses shifts instead of going
+// through an intermediate MPI representation.
+
 void big_number::set_compact(uint32_t compact)
 {
-    uint8_t size = compact >> 24;
-    data_chunk number_repr(4 + size);
-    number_repr[3] = size;
-    if (size >= 1)
-        number_repr[4] = (compact >> 16) & 0xff;
-    if (size >= 2) 
-        number_repr[5] = (compact >> 8) & 0xff;
-    if (size >= 3) 
-        number_repr[6] = (compact >> 0) & 0xff;
-    BN_mpi2bn(&number_repr[0], (int)number_repr.size(), &bignum_);
+    uint32_t size = compact >> 24;
+    bool is_negative = (compact & 0x00800000) != 0;
+    uint32_t word = compact & 0x007fffff;
+    if (size <= 3)
+    {
+        word >>= 8 * (3 - size);
+        BN_set_word(&bignum_, word);
+    }
+    else
+    {
+        BN_set_word(&bignum_, word);
+        BN_lshift(&bignum_, &bignum_, 8 * (size - 3));
+    }
+    BN_set_negative(&bignum_, is_negative);
 }
-
 uint32_t big_number::compact() const
 {
-    size_t size = BN_bn2mpi(&bignum_, NULL);
-    data_chunk number_repr(size);
-    size -= 4;
-    BN_bn2mpi(&bignum_, &number_repr[0]);
-    uint32_t compact = (uint32_t)(size << 24);
-    if (size >= 1) 
-        compact |= (number_repr[4] << 16);
-    if (size >= 2) 
-        compact |= (number_repr[5] << 8);
-    if (size >= 3) 
-        compact |= (number_repr[6] << 0);
+    uint32_t size = BN_num_bytes(&bignum_);
+    uint32_t compact = 0;
+    if (size <= 3)
+        compact = BN_get_word(&bignum_) << 8 * (3 - size);
+    else
+    {
+        big_number tmp_number;
+        BN_rshift(&tmp_number.bignum_, &bignum_, 8 * (size - 3));
+        compact = BN_get_word(&tmp_number.bignum_);
+    }
+    // The 0x00800000 bit denotes the sign.
+    // Thus, if it is already set, divide the mantissa by 256
+    // and increase the exponent.
+    if (compact & 0x00800000)
+    {
+        compact >>= 8;
+        size++;
+    }
+    compact |= size << 24;
+    compact |= (BN_is_negative(&bignum_) ? 0x00800000 : 0);
     return compact;
 }
 
@@ -265,7 +300,7 @@ void big_number::set_uint64_impl(uint64_t value, bool is_negative)
         *curr_byte = c;
         ++curr_byte;
     }
-    uint32_t size = (uint32_t)(curr_byte - (raw_mpi + 4));
+    uint32_t size = static_cast<uint32_t>(curr_byte - (raw_mpi + 4));
     raw_mpi[0] = (size >> 24) & 0xff;
     raw_mpi[1] = (size >> 16) & 0xff;
     raw_mpi[2] = (size >> 8) & 0xff;
