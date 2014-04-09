@@ -45,18 +45,15 @@
 // DLL exports (or does nothing for static build)
 // BC_INTERNAL is used for non-api symbols.
 
-#ifdef BC_DLL
-    #ifdef BC_DLL_EXPORTS
-        // Being compiled as a DLL (instead of using it)
-        #define BC_API BC_HELPER_DLL_EXPORT
-    #else
-        #define BC_API BC_HELPER_DLL_IMPORT
-    #endif
-    #define BC_INTERNAL BC_HELPER_DLL_LOCAL
-#else
-    // BC_DLL is not defined: this means this is a static lib.
+#if defined BC_STATIC
     #define BC_API
     #define BC_INTERNAL
+#elif defined BC_DLL
+    #define BC_API      BC_HELPER_DLL_EXPORT
+    #define BC_INTERNAL BC_HELPER_DLL_LOCAL
+#else
+    #define BC_API      BC_HELPER_DLL_IMPORT
+    #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
 #endif
