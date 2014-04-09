@@ -319,6 +319,9 @@
     <ClInclude Include="..\..\..\..\src\blockchain\database\mman_win32.h">
       <Filter>src\blockchain\database</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\define.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
