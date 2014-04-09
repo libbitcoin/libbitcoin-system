@@ -96,13 +96,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(ProjectDir)$(ProjectName).props" />
     <Import Project="$(ProjectDir)..\properties\DynamicDebug.props" />
     <Import Project="$(ProjectDir)..\properties\Win32.props" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'">
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDLL|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(ProjectDir)$(ProjectName).props" />
     <Import Project="$(ProjectDir)..\properties\DynamicRelease.props" />
@@ -168,83 +168,6 @@
     <Import Project="$(ProjectDir)..\properties\StaticRelease.props" />
     <Import Project="$(ProjectDir)..\properties\x64.props" />
   </ImportGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLTCG|Win32'">
-    <Linkage-libssh2>ltcg</Linkage-libssh2>
-    <Linkage-curl>ltcg</Linkage-curl>
-    <Linkage-openssl>ltcg</Linkage-openssl>
-    <Linkage-zlib>ltcg</Linkage-zlib>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|Win32'">
-    <Linkage-libssh2>ltcg</Linkage-libssh2>
-    <Linkage-curl>ltcg</Linkage-curl>
-    <Linkage-openssl>ltcg</Linkage-openssl>
-    <Linkage-zlib>ltcg</Linkage-zlib>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLTCG|x64'">
-    <Linkage-libssh2>ltcg</Linkage-libssh2>
-    <Linkage-curl>ltcg</Linkage-curl>
-    <Linkage-openssl>ltcg</Linkage-openssl>
-    <Linkage-zlib>ltcg</Linkage-zlib>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLTCG|x64'">
-    <Linkage-libssh2>ltcg</Linkage-libssh2>
-    <Linkage-curl>ltcg</Linkage-curl>
-    <Linkage-openssl>ltcg</Linkage-openssl>
-    <Linkage-zlib>ltcg</Linkage-zlib>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLIB|Win32'">
-    <Linkage-libssh2>static</Linkage-libssh2>
-    <Linkage-curl>static</Linkage-curl>
-    <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-zlib>static</Linkage-zlib>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLIB|Win32'">
-    <Linkage-libssh2>static</Linkage-libssh2>
-    <Linkage-curl>static</Linkage-curl>
-    <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-zlib>static</Linkage-zlib>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLIB|x64'">
-    <Linkage-libssh2>static</Linkage-libssh2>
-    <Linkage-curl>static</Linkage-curl>
-    <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-zlib>static</Linkage-zlib>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLIB|x64'">
-    <Linkage-libssh2>static</Linkage-libssh2>
-    <Linkage-curl>static</Linkage-curl>
-    <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-zlib>static</Linkage-zlib>
-  </PropertyGroup>
-  <ItemGroup Label="BuildOptionsExtension">
-    <PropertyPageSchema Include="$(ProjectName).xml" />
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_blockchain.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-  </ItemGroup>
-  <ItemDefinitionGroup>
-    <ClCompile>
-      <PreprocessorDefinitions Condition="'$(Option-testnet)' == 'true'">ENABLE_TESTNET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-leveldb)' == 'true'">LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemGroup>
-    <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\impl\serialize\misc.ipp" />
-    <None Include="packages.config" />
-  </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\address.cpp" />
     <ClCompile Include="..\..\..\..\src\block.cpp" />
@@ -331,6 +254,28 @@
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.hpp" />
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp" />
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_blockchain.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.cpp">
+      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\impl\serialize\misc.ipp" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
