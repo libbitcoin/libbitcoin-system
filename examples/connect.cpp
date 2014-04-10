@@ -20,6 +20,10 @@
 /*
   Connect to a Bitcoin node on localhost, port 8333.
 */
+#ifdef _MSC_VER
+#include <iostream>
+#endif
+
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 

@@ -12,7 +12,11 @@
 
   <ItemGroup Label="BuildOptionsExtension">
     <PropertyPageSchema Include="$(MSBuildThisFileDirectory)$(ProjectName).xml" />
-  </ItemGroup>  
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Option-leveldb>true</Option-leveldb>
+  </PropertyGroup>
 
   <!-- Configuration -->
 

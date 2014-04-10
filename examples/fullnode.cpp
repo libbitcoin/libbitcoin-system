@@ -22,6 +22,10 @@
   "./blockchain/" and initialized using ./initchain
 */
 #include <future>
+#ifdef _MSC_VER
+#include <iostream>
+#endif
+
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 
