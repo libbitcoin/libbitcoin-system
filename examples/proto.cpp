@@ -99,7 +99,7 @@ int main()
     while (!stopped)
     {
         prot.fetch_connection_count(display_number_of_connections);
-        sleep(1);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
     // Safely close down.
     pool.stop();

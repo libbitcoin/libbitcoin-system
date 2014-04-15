@@ -1,12 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
     <_PropertySheetDisplayName>Libbitcoin Library Common Settings</_PropertySheetDisplayName>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
+  
+  <!-- User Interface -->
+
+  <ItemGroup Label="BuildOptionsExtension">
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)$(ProjectName).xml" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Option-leveldb>true</Option-leveldb>
+  </PropertyGroup>
+
+  <!-- Configuration -->
 
   <ItemDefinitionGroup>
     <ClCompile>
@@ -14,20 +25,41 @@
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-testnet)' == 'true'">ENABLE_TESTNET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-leveldb)' == 'true'">LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">BC_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- HACK : CURL_STATICLIB should be injected by the cURL package. -->
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">BC_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
+ 
+  <!-- Dependencies -->
+  
+  <PropertyGroup Condition="$(Configuration.IndexOf('DLL')) != -1">
+    <Linkage-curl>dynamic</Linkage-curl>
+    <Linkage-zlib>dynamic</Linkage-zlib>
+    <Linkage-openssl>dynamic</Linkage-openssl>
+    <Linkage-libssh2>dynamic</Linkage-libssh2>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.IndexOf('LTCG')) != -1">
+    <Linkage-curl>ltcg</Linkage-curl>
+    <Linkage-zlib>ltcg</Linkage-zlib>
+    <Linkage-openssl>ltcg</Linkage-openssl>
+    <Linkage-libssh2>ltcg</Linkage-libssh2>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(Configuration.IndexOf('LIB')) != -1">
+    <Linkage-curl>static</Linkage-curl>
+    <Linkage-zlib>static</Linkage-zlib>
+    <Linkage-openssl>static</Linkage-openssl>
+    <Linkage-libssh2>static</Linkage-libssh2>
+  </PropertyGroup>
 
-  <ItemDefinitionGroup Condition="$(Configuration.IndexOf('Release')) != -1">
-    <ClCompile>
-      <PreprocessorDefinitions>BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemDefinitionGroup>
+  <!-- Messages -->
 
-  <ItemDefinitionGroup Condition="'$(ConfigurationType)'=='StaticLibrary'">
-    <ClCompile>
-      <PreprocessorDefinitions>CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
-  </ItemDefinitionGroup>
+  <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
+    <Message Text="Option-leveldb    : $(Option-leveldb)" Importance="high"/>
+    <Message Text="Option-testnet    : $(Option-testnet)" Importance="high"/>
+  </Target>
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Linkage-curl      : $(Linkage-curl)" Importance="high"/>

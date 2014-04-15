@@ -20,6 +20,9 @@
 /*
   Display the genesis block message by Satoshi.
 */
+#ifdef _MSC_VER
+#include <iostream>
+#endif
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 

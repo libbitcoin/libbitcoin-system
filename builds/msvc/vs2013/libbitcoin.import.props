@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Label="Globals">
+    <_PropertySheetDisplayName>Libbitcoin Import Settings</_PropertySheetDisplayName>
+  </PropertyGroup>
+  
+  <!-- User Interface -->
+
+  <ItemGroup Label="BuildOptionsExtension">
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)libbitcoin.import.xml" />
+  </ItemGroup>
+
+  <!-- Configuration -->
+  
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\..\libbitcoin\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions Condition="'$(Option-testnet)' == 'true'">ENABLE_TESTNET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Option-leveldb)' == 'true'">LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Release')) != -1">BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin)' == 'static' Or '$(Linkage-libbitcoin)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+
+  <!-- Linkage -->  
+
+  <ItemDefinitionGroup Condition="'$(Linkage-libbitcoin)' == 'dynamic'">
+    <Link Condition="$(Configuration.IndexOf('Debug')) != -1">
+      <AdditionalDependencies>$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Debug\libbitcoin12\libbitcoin.imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Link Condition="$(Configuration.IndexOf('Release')) != -1">
+      <AdditionalDependencies>$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Release\libbitcoin12\libbitcoin.imp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Linkage-libbitcoin)' == 'static'">
+    <Link Condition="$(Configuration.IndexOf('Debug')) != -1">
+      <AdditionalDependencies>$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Debug\libbitcoin12\libbitcoin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Link Condition="$(Configuration.IndexOf('Release')) != -1">
+      <AdditionalDependencies>$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Release\libbitcoin12\libbitcoin.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <ItemDefinitionGroup Condition="'$(Linkage-libbitcoin)' == 'ltcg'">
+    <Link Condition="$(Configuration.IndexOf('Debug')) != -1">
+      <AdditionalDependencies>$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Debug\libbitcoin12\libbitcoin.ltcg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Link Condition="$(Configuration.IndexOf('Release')) != -1">
+      <AdditionalDependencies>$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Release\libbitcoin12\libbitcoin.ltcg.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
+  <!-- Copy -->
+
+  <Target Name="Linkage-libbitcoin-dynamic" AfterTargets="AfterBuild" Condition="'$(Linkage-libbitcoin)' == 'dynamic'">
+    <Copy Condition="$(Configuration.IndexOf('Debug')) != -1"
+          SourceFiles="$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Debug\libbitcoin12\libbitcoin.dll"
+          DestinationFiles="$(TargetDir)libbitcoin.dll"
+          SkipUnchangedFiles="true" />
+    <Copy Condition="$(Configuration.IndexOf('Debug')) != -1"
+          SourceFiles="$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Debug\libbitcoin12\libbitcoin.pdb"
+          DestinationFiles="$(TargetDir)libbitcoin.pdb"
+          SkipUnchangedFiles="true" />
+    <Copy Condition="$(Configuration.IndexOf('Release')) != -1"
+          SourceFiles="$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Release\libbitcoin12\libbitcoin.dll"
+          DestinationFiles="$(TargetDir)libbitcoin.dll"
+          SkipUnchangedFiles="true" />
+  </Target>
+
+  <!-- Messages -->
+
+  <Target Name="libbitcoin-info" BeforeTargets="AfterBuild" Condition="'$(Linkage-libbitcoin)' == 'dynamic'">
+    <Message Text="Copying libbitcoin.dll -&gt; $(TargetDir)libbitcoin.dll" Importance="high"/>
+    <Message Text="Copying libbitcoin.pdb -&gt; $(TargetDir)libbitcoin.pdb" Importance="high" Condition="$(Configuration.IndexOf('Debug')) != -1" />
+  </Target>
+
+</Project>
