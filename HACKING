@@ -1,0 +1,15 @@
+Releasing
+=========
+
+We use the git flow branching model, so you can assume that the code in the
+master branch is stable and the bleeding edge is in the develop branch.
+
+http://nvie.com/posts/a-successful-git-branching-model/
+
+Style
+=====
+
+See our style guide here:
+
+https://wiki.unsystem.net/index.php/Libbitcoin/Style
+
