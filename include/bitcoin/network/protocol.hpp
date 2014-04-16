@@ -22,7 +22,7 @@
 
 #include <memory>
 #include <system_error>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/network/channel.hpp>
@@ -48,7 +48,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    protocol(threadpool& pool, hosts& hsts,
+    BC_API protocol(threadpool& pool, hosts& hsts,
         handshake& shake, network& net);
 
     protocol(const protocol&) = delete;
@@ -57,18 +57,18 @@ public:
     /**
      * Set max_outbound connections soft limit.
      */
-    void set_max_outbound(size_t max_outbound);
+    BC_API void set_max_outbound(size_t max_outbound);
 
     /**
      * Set the filename to load the hosts file from.
      */
-    void set_hosts_filename(const std::string& hosts_filename);
+    BC_API void set_hosts_filename(const std::string& hosts_filename);
 
     /**
      * If called, then this service will not listen for incoming
      * connections. Must be called before start().
      */
-    void disable_listener();
+    BC_API void disable_listener();
 
     /**
      * Perform full initialization sequence.
@@ -81,7 +81,7 @@ public:
      *  );
      * @endcode
      */
-    void start(completion_handler handle_complete);
+    BC_API void start(completion_handler handle_complete);
 
     /**
      * Gracefully close down.
@@ -93,7 +93,7 @@ public:
      *  );
      * @endcode
      */
-    void stop(completion_handler handle_complete);
+    BC_API void stop(completion_handler handle_complete);
 
     /**
      * Begin initialization sequence of performing node discovery and
@@ -106,12 +106,12 @@ public:
      *  );
      * @endcode
      */
-    void bootstrap(completion_handler handle_complete);
+    BC_API void bootstrap(completion_handler handle_complete);
 
     /**
      * Starts the internal run loop for this service.
      */
-    void run();
+    BC_API void run();
 
     /**
      * Fetch number of connections maintained by this service.
@@ -124,7 +124,7 @@ public:
      *  );
      * @endcode
      */
-    void fetch_connection_count(
+    BC_API void fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
 
     /**
@@ -134,7 +134,8 @@ public:
      * @param[in]   hostname            // Hostname
      * @param[in]   port                // Port
      */
-    void maintain_connection(const std::string& hostname, uint16_t port);
+    BC_API void maintain_connection(
+        const std::string& hostname, uint16_t port);
 
     /**
      * Subscribe to new connections established to other nodes.
@@ -152,7 +153,7 @@ public:
      *  );
      * @endcode
      */
-    void subscribe_channel(channel_handler handle_channel);
+    BC_API void subscribe_channel(channel_handler handle_channel);
 
     /**
      * Broadcast a message to all nodes in our connection list.

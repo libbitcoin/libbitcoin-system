@@ -32,7 +32,7 @@
 
 namespace libbitcoin {
 
-struct session_params
+struct BC_API session_params
 {
     handshake& handshake_;
     protocol& protocol_;
@@ -104,9 +104,9 @@ class session
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
 
-    session(threadpool& pool, const session_params& params);
-    void start(completion_handler handle_complete);
-    void stop(completion_handler handle_complete);
+    BC_API session(threadpool& pool, const session_params& params);
+    BC_API void start(completion_handler handle_complete);
+    BC_API void stop(completion_handler handle_complete);
 
 private:
     void new_channel(const std::error_code& ec, channel_ptr node);

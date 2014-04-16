@@ -29,7 +29,7 @@
 #include <memory>
 #include <mutex>
 #include <stack>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/primitives.hpp>
@@ -209,7 +209,7 @@ private:
 
     void do_send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
-    void do_send_common(const data_chunk& whole_message,
+    BC_API void do_send_common(const data_chunk& whole_message,
         send_handler handle_send);
 
     template <typename Message, typename Callback, typename SubscriberPtr>
@@ -287,11 +287,11 @@ class channel
 public:
     typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
 
-    channel(channel_proxy_ptr proxy);
-    ~channel();
+    BC_API channel(channel_proxy_ptr proxy);
+    BC_API ~channel();
 
-    void stop();
-    bool stopped() const;
+    BC_API void stop();
+    BC_API bool stopped() const;
 
     template <typename Message>
     void send(const Message& packet,
@@ -304,31 +304,31 @@ public:
             proxy->send(packet, handle_send);
     }
 
-    void send_raw(const header_type& packet_header,
+    BC_API void send_raw(const header_type& packet_header,
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
-    void subscribe_version(
+    BC_API void subscribe_version(
         channel_proxy::receive_version_handler handle_receive);
-    void subscribe_verack(
+    BC_API void subscribe_verack(
         channel_proxy::receive_verack_handler handle_receive);
-    void subscribe_address(
+    BC_API void subscribe_address(
         channel_proxy::receive_address_handler handle_receive);
-    void subscribe_get_address(
+    BC_API void subscribe_get_address(
         channel_proxy::receive_get_address_handler handle_receive);
-    void subscribe_inventory(
+    BC_API void subscribe_inventory(
         channel_proxy::receive_inventory_handler handle_receive);
-    void subscribe_get_data(
+    BC_API void subscribe_get_data(
         channel_proxy::receive_get_data_handler handle_receive);
-    void subscribe_get_blocks(
+    BC_API void subscribe_get_blocks(
         channel_proxy::receive_get_blocks_handler handle_receive);
-    void subscribe_transaction(
+    BC_API void subscribe_transaction(
         channel_proxy::receive_transaction_handler handle_receive);
-    void subscribe_block(
+    BC_API void subscribe_block(
         channel_proxy::receive_block_handler handle_receive);
-    void subscribe_raw(
+    BC_API void subscribe_raw(
         channel_proxy::receive_raw_handler handle_receive);
 
-    void subscribe_stop(
+    BC_API void subscribe_stop(
         channel_proxy::stop_handler handle_stop);
 
 private:

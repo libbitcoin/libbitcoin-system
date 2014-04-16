@@ -30,7 +30,7 @@
 
 namespace libbitcoin {
 
-struct transaction_entry_info
+struct BC_API transaction_entry_info
 {
     typedef std::function<void (const std::error_code&)> confirm_handler;
     hash_digest hash;
@@ -75,8 +75,8 @@ public:
 
     typedef transaction_entry_info::confirm_handler confirm_handler;
 
-    transaction_pool(threadpool& pool, blockchain& chain);
-    void start();
+    BC_API transaction_pool(threadpool& pool, blockchain& chain);
+    BC_API void start();
 
     /// Non-copyable class
     transaction_pool(const transaction_pool&) = delete;
@@ -86,7 +86,7 @@ public:
     /**
      * Set the size of the circular buffer. Defaults to 2000.
      */
-    void set_capacity(size_t capacity);
+    BC_API void set_capacity(size_t capacity);
 
     /**
      * Validate a transaction without storing it.
@@ -119,7 +119,7 @@ public:
      *  );
      * @endcode
      */
-    void validate(const transaction_type& tx,
+    BC_API void validate(const transaction_type& tx,
         validate_handler handle_validate);
 
     /**
@@ -153,7 +153,7 @@ public:
      *  );
      * @endcode
      */
-    void store(const transaction_type& tx,
+    BC_API void store(const transaction_type& tx,
         confirm_handler handle_confirm, validate_handler handle_validate);
 
     /**
@@ -168,7 +168,7 @@ public:
      *  );
      * @endcode
      */
-    void fetch(const hash_digest& transaction_hash,
+    BC_API void fetch(const hash_digest& transaction_hash,
         fetch_handler handle_fetch);
 
     /**
@@ -180,7 +180,7 @@ public:
      *  void handle_exists(bool);
      * @endcode
      */
-    void exists(const hash_digest& transaction_hash,
+    BC_API void exists(const hash_digest& transaction_hash,
         exists_handler handle_exists);
 
 private:

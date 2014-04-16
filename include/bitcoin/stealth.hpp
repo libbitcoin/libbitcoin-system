@@ -26,13 +26,14 @@ namespace libbitcoin {
 
 typedef uint32_t stealth_bitfield;
 
-struct stealth_prefix
+struct BC_API stealth_prefix
 {
     uint8_t number_bits;
     stealth_bitfield bitfield;
 };
 
-bool stealth_match(const stealth_prefix& prefix, const uint8_t* raw_bitfield);
+BC_API bool stealth_match(
+    const stealth_prefix& prefix, const uint8_t* raw_bitfield);
 
 } // namespace libbitcoin
 

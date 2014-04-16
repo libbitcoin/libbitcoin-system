@@ -26,7 +26,7 @@
 
 #include <boost/utility.hpp>
 #include <functional>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/error.hpp>
 #include <bitcoin/primitives.hpp>
@@ -68,7 +68,7 @@ public:
 
     typedef fetch_handler<input_point> fetch_handler_spend;
 
-    struct history_row
+    BC_API struct history_row
     {
         output_point output;
         size_t output_height;
@@ -80,7 +80,7 @@ public:
     typedef std::function<void (const std::error_code&, const history_list&)>
         fetch_handler_history;
 
-    struct stealth_row
+    BC_API struct stealth_row
     {
         data_chunk ephemkey;
         payment_address address;
@@ -95,7 +95,7 @@ public:
         void (const std::error_code&, size_t, 
             const block_list&, const block_list&)> reorganize_handler;
 
-    virtual ~blockchain() {};
+    BC_API virtual ~blockchain() {};
 
     /**
      * Store a new block.
@@ -112,7 +112,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void store(const block_type& block,
+    BC_API virtual void store(const block_type& block,
         store_block_handler handle_store) = 0;
 
     /**
@@ -129,7 +129,7 @@ public:
      *  );
      * @encode
      */
-    virtual void import(const block_type& import_block, size_t height,
+    BC_API virtual void import(const block_type& import_block, size_t height,
         import_block_handler handle_import) = 0;
 
     /**
@@ -144,7 +144,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_block_header(size_t height,
+    BC_API virtual void fetch_block_header(size_t height,
         fetch_handler_block_header handle_fetch) = 0;
 
     /**
@@ -159,7 +159,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_block_header(const hash_digest& block_hash,
+    BC_API virtual void fetch_block_header(const hash_digest& block_hash,
         fetch_handler_block_header handle_fetch) = 0;
 
     /**
@@ -174,7 +174,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_block_transaction_hashes(size_t height,
+    BC_API virtual void fetch_block_transaction_hashes(size_t height,
         fetch_handler_block_transaction_hashes handle_fetch) = 0;
 
     /**
@@ -189,7 +189,8 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_block_transaction_hashes(const hash_digest& block_hash,
+    BC_API virtual void fetch_block_transaction_hashes(
+        const hash_digest& block_hash,
         fetch_handler_block_transaction_hashes handle_fetch) = 0;
 
     /**
@@ -204,7 +205,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_block_height(const hash_digest& block_hash,
+    BC_API virtual void fetch_block_height(const hash_digest& block_hash,
         fetch_handler_block_height handle_fetch) = 0;
 
     /**
@@ -218,7 +219,8 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_last_height(fetch_handler_last_height handle_fetch) = 0;
+    BC_API virtual void fetch_last_height(
+        fetch_handler_last_height handle_fetch) = 0;
 
     /**
      * Fetches a transaction by hash.
@@ -232,7 +234,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_transaction(const hash_digest& transaction_hash,
+    BC_API virtual void fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch) = 0;
 
     /**
@@ -251,7 +253,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_transaction_index(
+    BC_API virtual void fetch_transaction_index(
         const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch) = 0;
 
@@ -270,7 +272,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_spend(const output_point& outpoint,
+    BC_API virtual void fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch) = 0;
 
     /**
@@ -312,7 +314,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_history(const payment_address& address,
+    BC_API virtual void fetch_history(const payment_address& address,
         fetch_handler_history handle_fetch, size_t from_height=0) = 0;
 
     /**
@@ -349,7 +351,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void fetch_stealth(const stealth_prefix& prefix,
+    BC_API virtual void fetch_stealth(const stealth_prefix& prefix,
         fetch_handler_stealth handle_fetch, size_t from_height=0) = 0;
 
     /**
@@ -368,7 +370,7 @@ public:
      *  );
      * @endcode
      */
-    virtual void subscribe_reorganize(
+    BC_API virtual void subscribe_reorganize(
         reorganize_handler handle_reorganize) = 0;
 };
 
@@ -390,7 +392,7 @@ typedef std::function<void (const std::error_code&, const block_type&)>
  *  );
  * @endcode
  */
-void fetch_block(blockchain& chain, size_t height,
+BC_API void fetch_block(blockchain& chain, size_t height,
     blockchain_fetch_handler_block handle_fetch);
 
 /**
@@ -408,7 +410,7 @@ void fetch_block(blockchain& chain, size_t height,
  *  );
  * @endcode
  */
-void fetch_block(blockchain& chain, const hash_digest& block_hash,
+BC_API void fetch_block(blockchain& chain, const hash_digest& block_hash,
     blockchain_fetch_handler_block handle_fetch);
 
 typedef std::function<
@@ -426,7 +428,7 @@ typedef std::function<
  *  );
  * @endcode
  */
-void fetch_block_locator(blockchain& chain,
+BC_API void fetch_block_locator(blockchain& chain,
     blockchain_fetch_handler_block_locator handle_fetch);
 
 typedef std::function<void (const std::error_code&,

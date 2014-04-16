@@ -26,6 +26,7 @@
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <bitcoin/define.hpp>
 
 namespace libbitcoin {
 
@@ -69,7 +70,7 @@ struct std_hash_wrapper
     }
 };
 
-struct node_address
+struct BC_API node_address
 {
     std::string hostname;
     uint16_t port;

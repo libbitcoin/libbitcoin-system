@@ -23,6 +23,7 @@
 #include <functional>
 #include <sstream>
 #include <map>
+#include <bitcoin/define.hpp>
 
 namespace libbitcoin {
 
@@ -46,7 +47,7 @@ enum class log_level
     fatal
 };
 
-std::string level_repr(log_level level);
+BC_API std::string level_repr(log_level level);
 
 class logger_wrapper
 {
@@ -56,7 +57,7 @@ public:
 
     logger_wrapper(log_level lev, const std::string& token);
     logger_wrapper(logger_wrapper&& other);
-    ~logger_wrapper();
+    BC_API ~logger_wrapper();
 
     template <typename T>
     logger_wrapper& operator<<(T const& value) 
@@ -65,7 +66,7 @@ public:
         return *this;
     }
 
-    void set_output_function(logger_output_func outfunc);
+    BC_API void set_output_function(logger_output_func outfunc);
 
 private:
     typedef std::map<log_level, logger_output_func> destination_map;
@@ -77,11 +78,11 @@ private:
     std::ostringstream stream_;
 };
 
-logger_wrapper log_debug(const std::string& domain="");
-logger_wrapper log_info(const std::string& domain="");
-logger_wrapper log_warning(const std::string& domain="");
-logger_wrapper log_error(const std::string& domain="");
-logger_wrapper log_fatal(const std::string& domain="");
+BC_API logger_wrapper log_debug(const std::string& domain="");
+BC_API logger_wrapper log_info(const std::string& domain="");
+BC_API logger_wrapper log_warning(const std::string& domain="");
+BC_API logger_wrapper log_error(const std::string& domain="");
+BC_API logger_wrapper log_fatal(const std::string& domain="");
 
 } // namespace libbitcoin
 

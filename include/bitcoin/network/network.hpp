@@ -24,12 +24,11 @@
 #include <boost/utility.hpp>
 #include <memory>
 #include <thread>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/error.hpp>
 #include <bitcoin/threadpool.hpp>
-
 #include <bitcoin/network/channel.hpp>
 
 namespace libbitcoin {
@@ -43,8 +42,8 @@ public:
     typedef std::function<
         void (const std::error_code&, channel_ptr)> accept_handler;
 
-    acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept);
-    void accept(accept_handler handle_accept);
+    BC_API acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept);
+    BC_API void accept(accept_handler handle_accept);
 
 private:
     void call_handle_accept(const boost::system::error_code& ec,
@@ -62,13 +61,13 @@ public:
     typedef std::function<
         void (const std::error_code&, acceptor_ptr)> listen_handler;
 
-    network(threadpool& pool);
+    BC_API network(threadpool& pool);
 
     network(const network&) = delete;
     void operator=(const network&) = delete;
 
-    void listen(uint16_t port, listen_handler handle_listen);
-    void connect(const std::string& hostname, uint16_t port,
+    BC_API void listen(uint16_t port, listen_handler handle_listen);
+    BC_API void connect(const std::string& hostname, uint16_t port,
         connect_handler handle_connect);
 
 private:

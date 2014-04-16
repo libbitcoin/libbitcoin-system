@@ -33,7 +33,7 @@ namespace libbitcoin {
 
 // output_info_type is defined in <bitcoin/transaction.hpp>
 
-struct spend_info_type
+struct BC_API spend_info_type
 {
     input_point point;
     output_point previous_output;
@@ -50,7 +50,7 @@ public:
         const output_info_list& outputs, const spend_info_list& spends)>
             query_handler;
 
-    transaction_indexer(threadpool& pool);
+    BC_API transaction_indexer(threadpool& pool);
 
     /// Non-copyable class
     transaction_indexer(const transaction_indexer&) = delete;
@@ -83,7 +83,7 @@ public:
      *  };
      * @endcode
      */
-    void query(const payment_address& payaddr,
+    BC_API void query(const payment_address& payaddr,
         query_handler handle_query);
 
     /**
@@ -97,7 +97,7 @@ public:
      *  );
      * @endcode
      */
-    void index(const transaction_type& tx,
+    BC_API void index(const transaction_type& tx,
         completion_handler handle_index);
 
     /**
@@ -111,7 +111,7 @@ public:
      *  );
      * @endcode
      */
-    void deindex(const transaction_type& tx,
+    BC_API void deindex(const transaction_type& tx,
         completion_handler handle_deindex);
 
 private:
@@ -136,7 +136,7 @@ private:
     outputs_multimap outputs_map_;
 };
 
-void fetch_history(blockchain& chain, transaction_indexer& indexer,
+BC_API void fetch_history(blockchain& chain, transaction_indexer& indexer,
     const payment_address& address,
     blockchain::fetch_handler_history handle_fetch, size_t from_height=0);
 

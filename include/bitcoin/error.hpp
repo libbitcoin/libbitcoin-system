@@ -22,6 +22,7 @@
 
 #include <system_error>
 #include <string>
+#include <bitcoin/define.hpp>
 
 namespace libbitcoin {
 
@@ -89,17 +90,17 @@ namespace error
         forced_removal
     };
 
-    std::error_code make_error_code(error_code_t e);
-    std::error_condition make_error_condition(error_condition_t e);
+    BC_API std::error_code make_error_code(error_code_t e);
+    BC_API std::error_condition make_error_condition(error_condition_t e);
 }
 
 class error_category_impl
   : public std::error_category
 {
 public:
-    virtual const char* name() const noexcept;
-    virtual std::string message(int ev) const noexcept;
-    virtual std::error_condition
+    BC_API virtual const char* name() const noexcept;
+    BC_API virtual std::string message(int ev) const noexcept;
+    BC_API virtual std::error_condition
         default_error_condition(int ev) const noexcept;
 };
 
@@ -110,11 +111,13 @@ const std::error_category& error_category();
 namespace std
 {
     template <>
-    struct is_error_code_enum<libbitcoin::error::error_code_t>
+    struct BC_API is_error_code_enum<
+        libbitcoin::error::error_code_t>
       : public true_type {};
 
     template <>
-    struct is_error_condition_enum<libbitcoin::error::error_condition_t>
+    struct BC_API is_error_condition_enum<
+        libbitcoin::error::error_condition_t>
       : public true_type {};
 }
 

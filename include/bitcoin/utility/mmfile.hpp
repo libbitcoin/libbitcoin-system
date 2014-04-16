@@ -23,17 +23,18 @@
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <bitcoin/define.hpp>
 
 namespace libbitcoin {
 
 class mmfile
 {
 public:
-    mmfile(const std::string& filename);
-    ~mmfile();
-    uint8_t* data();
-    const uint8_t* data() const;
-    size_t size() const;
+    BC_API mmfile(const std::string& filename);
+    BC_API ~mmfile();
+    BC_API uint8_t* data();
+    BC_API const uint8_t* data() const;
+    BC_API size_t size() const;
 private:
     int file_handle_ = 0;
     uint8_t* data_ = nullptr;

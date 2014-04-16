@@ -21,7 +21,7 @@
 #define LIBBITCOIN_CONSTANTS_HPP
 
 #include <cstdint>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {
@@ -68,8 +68,8 @@ const short_hash null_short_hash = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 constexpr uint32_t max_bits = 0x1d00ffff;
-big_number max_target();
-uint32_t magic_value();
+BC_API big_number max_target();
+BC_API uint32_t magic_value();
 
 #ifdef _MSC_VER
 constexpr uint32_t max_index = UINT_LEAST32_MAX;

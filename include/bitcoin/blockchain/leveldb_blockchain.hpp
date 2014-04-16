@@ -23,6 +23,7 @@
 #include <atomic>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <leveldb/db.h>
+#include <bitcoin/define.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/database/stealth_database.hpp>
@@ -45,55 +46,55 @@ public:
 
     typedef std::function<void (const std::error_code)> start_handler;
 
-    leveldb_blockchain(threadpool& pool);
-    ~leveldb_blockchain();
+    BC_API leveldb_blockchain(threadpool& pool);
+    BC_API ~leveldb_blockchain();
 
     // Non-copyable
     leveldb_blockchain(const leveldb_blockchain&) = delete;
     void operator=(const leveldb_blockchain&) = delete;
 
-    void start(const std::string& prefix, start_handler handle_start);
-    void stop();
+    BC_API void start(const std::string& prefix, start_handler handle_start);
+    BC_API void stop();
 
-    void store(const block_type& block,
+    BC_API void store(const block_type& block,
         store_block_handler handle_store);
-    void import(const block_type& block, size_t height,
+    BC_API void import(const block_type& block, size_t height,
         import_block_handler handle_import);
 
     // fetch block header by height
-    void fetch_block_header(size_t height,
+    BC_API void fetch_block_header(size_t height,
         fetch_handler_block_header handle_fetch);
     // fetch block header by hash
-    void fetch_block_header(const hash_digest& block_hash,
+    BC_API void fetch_block_header(const hash_digest& block_hash,
         fetch_handler_block_header handle_fetch);
     // fetch transaction hashes in block by height
-    void fetch_block_transaction_hashes(size_t height,
+    BC_API void fetch_block_transaction_hashes(size_t height,
         fetch_handler_block_transaction_hashes handle_fetch);
     // fetch transaction hashes in block by hash
-    void fetch_block_transaction_hashes(const hash_digest& block_hash,
+    BC_API void fetch_block_transaction_hashes(const hash_digest& block_hash,
         fetch_handler_block_transaction_hashes handle_fetch);
     // fetch height of block by hash
-    void fetch_block_height(const hash_digest& block_hash,
+    BC_API void fetch_block_height(const hash_digest& block_hash,
         fetch_handler_block_height handle_fetch);
     // fetch height of latest block
-    void fetch_last_height(fetch_handler_last_height handle_fetch);
+    BC_API void fetch_last_height(fetch_handler_last_height handle_fetch);
     // fetch transaction by hash
-    void fetch_transaction(const hash_digest& transaction_hash,
+    BC_API void fetch_transaction(const hash_digest& transaction_hash,
         fetch_handler_transaction handle_fetch);
     // fetch height and offset within block of transaction by hash
-    void fetch_transaction_index(const hash_digest& transaction_hash,
+    BC_API void fetch_transaction_index(const hash_digest& transaction_hash,
         fetch_handler_transaction_index handle_fetch);
     // fetch spend of an output point
-    void fetch_spend(const output_point& outpoint,
+    BC_API void fetch_spend(const output_point& outpoint,
         fetch_handler_spend handle_fetch);
     // fetch outputs, values and spends for an address.
-    void fetch_history(const payment_address& address,
+    BC_API void fetch_history(const payment_address& address,
         fetch_handler_history handle_fetch, size_t from_height=0);
     // fetch stealth results.
-    void fetch_stealth(const stealth_prefix& prefix,
+    BC_API void fetch_stealth(const stealth_prefix& prefix,
         fetch_handler_stealth handle_fetch, size_t from_height=0);
 
-    void subscribe_reorganize(reorganize_handler handle_reorganize);
+    BC_API void subscribe_reorganize(reorganize_handler handle_reorganize);
 
 private:
     typedef std::atomic<size_t> seqlock_type;

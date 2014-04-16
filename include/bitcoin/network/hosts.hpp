@@ -24,9 +24,8 @@
 #include <fstream>
 #include <functional>
 #include <system_error>
-
 #include <boost/circular_buffer.hpp>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/threadpool.hpp>
 
@@ -47,20 +46,20 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
 
-    hosts(threadpool& pool, size_t capacity=1000);
+    BC_API hosts(threadpool& pool, size_t capacity=1000);
 
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
 
-    void load(const std::string& filename, load_handler handle_load);
-    void save(const std::string& filename, save_handler handle_save);
+    BC_API void load(const std::string& filename, load_handler handle_load);
+    BC_API void save(const std::string& filename, save_handler handle_save);
 
-    void store(const network_address_type& address,
+    BC_API void store(const network_address_type& address,
         store_handler handle_store);
-    void remove(const network_address_type& address,
+    BC_API void remove(const network_address_type& address,
         remove_handler handle_remove);
-    void fetch_address(fetch_address_handler handle_fetch);
-    void fetch_count(fetch_count_handler handle_fetch);
+    BC_API void fetch_address(fetch_address_handler handle_fetch);
+    BC_API void fetch_count(fetch_count_handler handle_fetch);
 
 private:
     struct hosts_field

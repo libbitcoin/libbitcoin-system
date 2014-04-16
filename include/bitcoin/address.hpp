@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_ADDRESS_HPP
 #define LIBBITCOIN_ADDRESS_HPP
 
+#include <bitcoin/define.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/script.hpp>
@@ -66,38 +67,40 @@ public:
         invalid_version = 0xff
     };
 #endif
-    payment_address();
-    payment_address(uint8_t version, const short_hash& hash);
-    payment_address(const std::string& encoded_address);
+    BC_API payment_address();
+    BC_API payment_address(uint8_t version, const short_hash& hash);
+    BC_API payment_address(const std::string& encoded_address);
 
-    void set(uint8_t version, const short_hash& hash);
+    BC_API void set(uint8_t version, const short_hash& hash);
 
-    uint8_t version() const;
-    const short_hash& hash() const;
+    BC_API uint8_t version() const;
+    BC_API const short_hash& hash() const;
 
-    bool set_encoded(const std::string& encoded_address);
-    std::string encoded() const;
+    BC_API bool set_encoded(const std::string& encoded_address);
+    BC_API std::string encoded() const;
 
 private:
     uint8_t version_ = invalid_version;
     short_hash hash_ = null_short_hash;
 };
 
-void set_public_key_hash(payment_address& address,
+BC_API void set_public_key_hash(payment_address& address,
     const short_hash& pubkey_hash);
-void set_script_hash(payment_address& address,
+BC_API void set_script_hash(payment_address& address,
     const short_hash& script_hash);
 
-void set_public_key(payment_address& address, const data_chunk& public_key);
-void set_script(payment_address& address, const script_type& eval_script);
+BC_API void set_public_key(payment_address& address,
+    const data_chunk& public_key);
+BC_API void set_script(payment_address& address,
+    const script_type& eval_script);
 
 /**
  * Extract a Bitcoin address from an input or output script.
  * Returns false on failure.
  */
-bool extract(payment_address& address, const script_type& script);
+BC_API bool extract(payment_address& address, const script_type& script);
 
-bool operator==(const payment_address& lhs, const payment_address& rhs);
+BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
 
 } // namespace libbitcoin
 
@@ -105,7 +108,7 @@ bool operator==(const payment_address& lhs, const payment_address& rhs);
 namespace std
 {
     template <>
-    struct hash<libbitcoin::payment_address>
+    struct BC_API hash<libbitcoin::payment_address>
     {
         size_t operator()(const libbitcoin::payment_address& payaddr) const
         {

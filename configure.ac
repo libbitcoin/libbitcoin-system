@@ -42,7 +42,7 @@ if test "$bld_leveldb" = "yes"; then
     CFLAG_LEVELDB="-DLEVELDB_ENABLED"
 fi
 
-AM_CXXFLAGS="-ggdb -g3 -Wall -Wno-missing-braces -pedantic -Wextra -fstack-protector-all -DDEBUG"
+AM_CXXFLAGS="-ggdb -g3 -Wall -Wno-missing-braces -pedantic -Wextra -fstack-protector-all -DDEBUG -fvisibility=internal -fvisibility-inlines-hidden"
 AC_SUBST([AM_CXXFLAGS])
 
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])

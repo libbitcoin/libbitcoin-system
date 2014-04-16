@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_BLOCK_HPP
 #define LIBBITCOIN_BLOCK_HPP
 
+#include <bitcoin/define.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/utility/big_number.hpp>
 
@@ -38,17 +39,17 @@ struct block_info
     size_t height;
 };
 
-bool operator==(
+BC_API bool operator==(
     const block_header_type& block_a, const block_header_type& block_b);
 
-uint64_t block_value(size_t height);
-big_number block_work(uint32_t bits);
+BC_API uint64_t block_value(size_t height);
+BC_API big_number block_work(uint32_t bits);
 
-hash_digest hash_block_header(const block_header_type& header);
+BC_API hash_digest hash_block_header(const block_header_type& header);
 
-index_list block_locator_indexes(int top_height);
+BC_API index_list block_locator_indexes(int top_height);
 
-block_type genesis_block();
+BC_API block_type genesis_block();
 
 } // namespace libbitcoin
 

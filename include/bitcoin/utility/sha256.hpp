@@ -22,16 +22,17 @@
 
 #include <openssl/sha.h>
 #include <cstdint>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 
 constexpr size_t sha256_digest_size = SHA256_DIGEST_LENGTH;
-static_assert(sha256_digest_size == 32, "SHA256_DIGEST_LENGTH not defined correctly!");
+static_assert(sha256_digest_size == 32,
+    "SHA256_DIGEST_LENGTH not defined correctly!");
 
-hash_digest generate_sha256_hash(const data_chunk& data);
-uint32_t generate_sha256_checksum(const data_chunk& data);
+BC_API hash_digest generate_sha256_hash(const data_chunk& data);
+BC_API uint32_t generate_sha256_checksum(const data_chunk& data);
 
 } // namespace libbitcoin
 

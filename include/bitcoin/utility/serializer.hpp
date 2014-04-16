@@ -23,14 +23,13 @@
 #include <boost/asio/streambuf.hpp>
 #include <string>
 #include <vector>
-
 #include <bitcoin/format.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 
-size_t variable_uint_size(uint64_t v);
+BC_API size_t variable_uint_size(uint64_t v);
 
 /**
  * Serializer that uses iterators and is oblivious to the underlying
@@ -116,7 +115,7 @@ private:
 template <typename Iterator>
 serializer<Iterator> make_serializer(Iterator begin);
 
-class end_of_stream
+class BC_API end_of_stream
   : std::exception {};
 
 /**

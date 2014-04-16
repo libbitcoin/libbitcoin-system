@@ -22,8 +22,8 @@
 
 #include <functional>
 #include <thread>
-
 #include <boost/asio.hpp>
+#include <bitcoin/define.hpp>
 
 namespace libbitcoin {
 
@@ -50,14 +50,14 @@ public:
      * Default constructor. Threadpool has no threads.
      * Call spawn() to start threads.
      */
-    threadpool();
+    BC_API threadpool();
     /**
      * Convenience constructor. spawn()s number_threads threads.
      *
      * @param[in]   number_threads  Number of threads to spawn.
      */
-    threadpool(size_t number_threads);
-    ~threadpool();
+    BC_API threadpool(size_t number_threads);
+    BC_API ~threadpool();
 
     threadpool(const threadpool&) = delete;
     void operator=(const threadpool&) = delete;
@@ -65,17 +65,17 @@ public:
     /**
      * Add n threads to this threadpool.
      */
-    void spawn(size_t number_threads=1);
+    BC_API void spawn(size_t number_threads=1);
 
     /**
      * Stop the threadpool. All remaining operations on the queue are dropped.
      */
-    void stop();
+    BC_API void stop();
     /**
      * Finish executing all remaining operations in the queue.
      * Adding more operations keeps the threadpool running.
      */
-    void shutdown();
+    BC_API void shutdown();
     /**
      * Join all the threads in this threadpool with the current thread,
      * This method will hang until all the threads in this threadpool have
@@ -97,7 +97,7 @@ public:
      *  pool.join();
      * @endcode
      */
-    void join();
+    BC_API void join();
 
     template <typename... Args>
     void push(Args&&... args)
@@ -114,11 +114,11 @@ public:
     /**
      * Underlying boost::io_service object.
      */
-    io_service& service();
+    BC_API io_service& service();
     /**
      * Underlying boost::io_service object.
      */
-    const io_service& service() const;
+    BC_API const io_service& service() const;
 
 private:
     void spawn_once();
@@ -156,7 +156,7 @@ struct wrapped_handler_impl
 class async_strand
 {
 public:
-    async_strand(threadpool& pool);
+    BC_API async_strand(threadpool& pool);
 
     /*
      * wrap() returns a new handler that guarantees that the handler it

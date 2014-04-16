@@ -20,16 +20,17 @@
 #ifndef LIBBITCOIN_BASE58_HPP
 #define LIBBITCOIN_BASE58_HPP
 
+#include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 
-bool is_base58(const char c);
-bool is_base58(const std::string& text);
+BC_API bool is_base58(const char c);
+BC_API bool is_base58(const std::string& text);
 
-std::string encode_base58(const data_chunk& unencoded_data);
+BC_API std::string encode_base58(const data_chunk& unencoded_data);
 
-data_chunk decode_base58(std::string encoded_data);
+BC_API data_chunk decode_base58(std::string encoded_data);
 
 } // namespace libbitcoin
 

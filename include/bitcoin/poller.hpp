@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_BLOCKS_POLLER_HPP
 #define LIBBITCOIN_BLOCKS_POLLER_HPP
 
+#include <bitcoin/define.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/network/channel.hpp>
 
@@ -28,9 +29,9 @@ namespace libbitcoin {
 class poller
 {
 public:
-    poller(threadpool& pool, blockchain& chain);
-    void query(channel_ptr node);
-    void monitor(channel_ptr node);
+    BC_API poller(threadpool& pool, blockchain& chain);
+    BC_API void query(channel_ptr node);
+    BC_API void monitor(channel_ptr node);
 
 private:
     void initial_ask_blocks(const std::error_code& ec,

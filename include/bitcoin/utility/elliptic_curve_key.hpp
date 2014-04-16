@@ -22,7 +22,7 @@
 
 #include <openssl/ec.h>
 #include <stdexcept>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
@@ -32,22 +32,23 @@ typedef hash_digest secret_parameter;
 class elliptic_curve_key
 {
 public:
-    elliptic_curve_key();
-    ~elliptic_curve_key();
+    BC_API elliptic_curve_key();
+    BC_API ~elliptic_curve_key();
 
-    elliptic_curve_key(const elliptic_curve_key& other);
-    elliptic_curve_key& operator=(const elliptic_curve_key& other);
+    BC_API elliptic_curve_key(const elliptic_curve_key& other);
+    BC_API elliptic_curve_key& operator=(const elliptic_curve_key& other);
 
-    bool new_keypair(bool compressed=true);
-    bool set_secret(const secret_parameter& secret, bool compressed=true);
-    secret_parameter secret() const;
-    data_chunk sign(hash_digest hash) const;
+    BC_API bool new_keypair(bool compressed=true);
+    BC_API bool set_secret(
+        const secret_parameter& secret, bool compressed=true);
+    BC_API secret_parameter secret() const;
+    BC_API data_chunk sign(hash_digest hash) const;
 
-    bool set_public_key(const data_chunk& pubkey);
-    data_chunk public_key() const;
-    bool verify(hash_digest hash, const data_chunk& signature);
+    BC_API bool set_public_key(const data_chunk& pubkey);
+    BC_API data_chunk public_key() const;
+    BC_API bool verify(hash_digest hash, const data_chunk& signature);
 
-    void set_compressed(bool compressed);
+    BC_API void set_compressed(bool compressed);
 
 private:
     bool initialize();

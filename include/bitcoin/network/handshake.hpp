@@ -21,7 +21,7 @@
 #define LIBBITCOIN_NETWORK_HANDSHAKE_HPP
 
 #include <atomic>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/threadpool.hpp>
@@ -46,21 +46,22 @@ public:
 
     typedef std::function<void (const std::error_code&)> setter_handler;
 
-    handshake(threadpool& pool);
+    BC_API handshake(threadpool& pool);
 
     handshake(const handshake&) = delete;
     void operator=(const handshake&) = delete;
 
-    void start(start_handler handle_start);
+    BC_API void start(start_handler handle_start);
 
-    void ready(channel_ptr node, handshake_handler handle_handshake);
+    BC_API void ready(channel_ptr node, handshake_handler handle_handshake);
 
-    void discover_external_ip(discover_ip_handler handle_discover);
-    void fetch_network_address(fetch_network_address_handler handle_fetch);
-    void set_port(uint16_t port, setter_handler handle_set);
-    void set_user_agent(const std::string& user_agent,
+    BC_API void discover_external_ip(discover_ip_handler handle_discover);
+    BC_API void fetch_network_address(
+        fetch_network_address_handler handle_fetch);
+    BC_API void set_port(uint16_t port, setter_handler handle_set);
+    BC_API void set_user_agent(const std::string& user_agent,
         setter_handler handle_set);
-    void set_start_height(uint32_t height, setter_handler handle_set);
+    BC_API void set_start_height(uint32_t height, setter_handler handle_set);
 
 private:
     void handle_connect(const std::error_code& ec,
@@ -89,7 +90,7 @@ private:
     version_type template_version_;
 };
 
-void connect(handshake& shake, network& net,
+BC_API void connect(handshake& shake, network& net,
     const std::string& hostname, uint16_t port,
     network::connect_handler handle_connect);
 

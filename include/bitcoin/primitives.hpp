@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/script.hpp>
 
@@ -34,7 +34,7 @@ typedef std::vector<hash_digest> block_locator_type;
 
 typedef std::array<uint8_t, 16> ip_address_type;
 
-struct network_address_type
+struct BC_API network_address_type
 {
     uint32_t timestamp;
     uint64_t services;
@@ -50,7 +50,7 @@ enum class inventory_type_id
     none
 };
 
-struct inventory_vector_type
+struct BC_API inventory_vector_type
 {
     inventory_type_id type;
     hash_digest hash;
@@ -58,7 +58,7 @@ struct inventory_vector_type
 
 typedef std::vector<inventory_vector_type> inventory_list;
 
-struct header_type
+struct BC_API header_type
 {
     uint32_t magic;
     std::string command;
@@ -67,7 +67,7 @@ struct header_type
     uint32_t checksum;
 };
 
-struct version_type
+struct BC_API version_type
 {
     uint32_t version;
     uint64_t services;
@@ -79,23 +79,23 @@ struct version_type
     uint32_t start_height;
 };
 
-struct verack_type
+struct BC_API verack_type
 {
 };
 
-struct get_address_type
+struct BC_API get_address_type
 {
 };
 
 
-struct get_blocks_type
+struct BC_API get_blocks_type
 {
     // 10 sequential hashes, then exponential samples until reaching genesis
     block_locator_type start_hashes;
     hash_digest hash_stop;
 };
 
-struct output_point
+struct BC_API output_point
 {
     hash_digest hash;
     uint32_t index;
@@ -105,14 +105,14 @@ typedef output_point input_point;
 typedef std::vector<input_point> input_point_list;
 typedef std::vector<output_point> output_point_list;
 
-struct transaction_input_type
+struct BC_API transaction_input_type
 {
     output_point previous_output;
     script_type script;
     uint32_t sequence;
 };
 
-struct transaction_output_type
+struct BC_API transaction_output_type
 {
     uint64_t value;
     script_type script;
@@ -121,7 +121,7 @@ struct transaction_output_type
 typedef std::vector<transaction_input_type> transaction_input_list;
 typedef std::vector<transaction_output_type> transaction_output_list;
 
-struct transaction_type
+struct BC_API transaction_type
 {
     uint32_t version;
     uint32_t locktime;
@@ -130,7 +130,7 @@ struct transaction_type
 };
 typedef std::vector<transaction_type> transaction_list;
 
-struct block_header_type
+struct BC_API block_header_type
 {
     uint32_t version;
     hash_digest previous_block_hash;
@@ -140,7 +140,7 @@ struct block_header_type
     uint32_t nonce;
 };
 
-struct block_type
+struct BC_API block_type
 {
     block_header_type header;
     transaction_list transactions;
@@ -148,26 +148,26 @@ struct block_type
 
 typedef std::vector<network_address_type> network_address_list;
 
-struct address_type
+struct BC_API address_type
 {
     network_address_list addresses;
 };
 
-struct get_data_type
+struct BC_API get_data_type
 {
     inventory_list inventories;
 };
 
-struct inventory_type
+struct BC_API inventory_type
 {
     inventory_list inventories;
 };
 
-struct ping_type
+struct BC_API ping_type
 {
     uint64_t nonce;
 };
-struct pong_type
+struct BC_API pong_type
 {
     uint64_t nonce;
 };

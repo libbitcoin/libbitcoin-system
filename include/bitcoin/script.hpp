@@ -148,7 +148,7 @@ enum class opcode : uint8_t
     raw_data
 };
 
-struct operation
+struct BC_API operation
 {
     opcode code;
     data_chunk data;
@@ -182,17 +182,17 @@ enum class payment_type
 class script_type
 {
 public:
-    void join(const script_type& other);
-    void push_operation(operation oper);
-    bool run(
+    BC_API void join(const script_type& other);
+    BC_API void push_operation(operation oper);
+    BC_API bool run(
         script_type input_script, const transaction_type& parent_tx,
         uint32_t input_index, bool bip16_enabled=true);
 
-    payment_type type() const;
+    BC_API payment_type type() const;
 
-    const operation_stack& operations() const;
+    BC_API const operation_stack& operations() const;
 
-    static hash_digest generate_signature_hash(
+    BC_API static hash_digest generate_signature_hash(
         transaction_type parent_tx, uint32_t input_index,
         const script_type& script_code, uint32_t hash_type);
 
@@ -301,15 +301,16 @@ private:
     conditional_stack conditional_stack_;
 };
 
-std::string opcode_to_string(opcode code);
-opcode string_to_opcode(const std::string& code_repr);
-std::string pretty(const script_type& script);
-std::ostream& operator<<(std::ostream& stream, const script_type& script);
+BC_API std::string opcode_to_string(opcode code);
+BC_API opcode string_to_opcode(const std::string& code_repr);
+BC_API std::string pretty(const script_type& script);
+BC_API std::ostream& operator<<(
+    std::ostream& stream, const script_type& script);
 
-script_type raw_data_script(const data_chunk& raw_script);
-script_type parse_script(const data_chunk& raw_script);
-data_chunk save_script(const script_type& script);
-size_t script_size(const script_type& script);
+BC_API script_type raw_data_script(const data_chunk& raw_script);
+BC_API script_type parse_script(const data_chunk& raw_script);
+BC_API data_chunk save_script(const script_type& script);
+BC_API size_t script_size(const script_type& script);
 
 } // namespace libbitcoin
 

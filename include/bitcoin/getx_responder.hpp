@@ -21,7 +21,7 @@
 #define LIBBITCOIN_GETX_RESPONDER_HPP
 
 #include <system_error>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/threadpool.hpp>
 #include <bitcoin/primitives.hpp>
@@ -35,8 +35,8 @@ class transaction_pool;
 class getx_responder
 {
 public:
-    getx_responder(blockchain& chain, transaction_pool& txpool);
-    void monitor(channel_ptr node);
+    BC_API getx_responder(blockchain& chain, transaction_pool& txpool);
+    BC_API void monitor(channel_ptr node);
 
 private:
     // We use this object to keep track of the hash_continue and add

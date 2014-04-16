@@ -23,7 +23,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/sub_range.hpp>
 #include <boost/detail/endian.hpp>
-
+#include <bitcoin/define.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/assert.hpp>
@@ -93,12 +93,16 @@ std::string encode_hex(T data)
 }
 
 // ADL cannot work on templates
-std::ostream& operator<<(std::ostream& stream, const data_chunk& data);
-std::ostream& operator<<(std::ostream& stream, const hash_digest& hash);
-std::ostream& operator<<(std::ostream& stream, const short_hash& hash);
-std::ostream& operator<<(std::ostream& stream, const output_point& point);
+BC_API std::ostream& operator<<(
+    std::ostream& stream, const data_chunk& data);
+BC_API std::ostream& operator<<(
+    std::ostream& stream, const hash_digest& hash);
+BC_API std::ostream& operator<<(
+    std::ostream& stream, const short_hash& hash);
+BC_API std::ostream& operator<<(
+    std::ostream& stream, const output_point& point);
 
-data_chunk decode_hex(std::string hex_str);
+BC_API data_chunk decode_hex(std::string hex_str);
 
 /**
  * Turns a hash hex string into HashType.
@@ -124,7 +128,7 @@ HashType decode_hex_digest(std::string hex_str)
     return result;
 }
 
-std::string satoshi_to_btc(uint64_t value);
+BC_API std::string satoshi_to_btc(uint64_t value);
 
 // Python like range
 //   for (char c: range(str, 0, 2))
