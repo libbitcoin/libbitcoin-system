@@ -215,8 +215,6 @@ void satoshi_load(const Iterator first, const Iterator last,
 }
 
 // getblocks messages
-BC_API const std::string satoshi_command(const get_blocks_type&);
-BC_API size_t satoshi_raw_size(const get_blocks_type& packet);
 template <typename Iterator>
 Iterator satoshi_save(const get_blocks_type& packet, Iterator result)
 {
@@ -249,8 +247,6 @@ void satoshi_load(const Iterator first, const Iterator last,
 }
 
 // ping messages
-BC_API const std::string satoshi_command(const ping_type&);
-BC_API size_t satoshi_raw_size(const ping_type& packet);
 template <typename Iterator>
 Iterator satoshi_save(const ping_type& packet, Iterator result)
 {
@@ -269,8 +265,6 @@ void satoshi_load(const Iterator first, const Iterator last,
 }
 
 // pong messages
-BC_API const std::string satoshi_command(const pong_type&);
-BC_API size_t satoshi_raw_size(const pong_type& packet);
 template <typename Iterator>
 Iterator satoshi_save(const pong_type& packet, Iterator result)
 {
