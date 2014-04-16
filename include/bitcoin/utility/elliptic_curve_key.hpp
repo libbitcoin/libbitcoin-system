@@ -47,6 +47,8 @@ public:
     data_chunk public_key() const;
     bool verify(hash_digest hash, const data_chunk& signature);
 
+    void set_compressed(bool compressed);
+
 private:
     bool initialize();
     void use_compressed();

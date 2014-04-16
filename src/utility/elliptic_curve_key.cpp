@@ -180,6 +180,14 @@ bool elliptic_curve_key::verify(hash_digest hash, const data_chunk& signature)
     return false;
 }
 
+void elliptic_curve_key::set_compressed(bool compressed)
+{
+    if (compressed)
+        EC_KEY_set_conv_form(key_, POINT_CONVERSION_COMPRESSED);
+    else
+        EC_KEY_set_conv_form(key_, POINT_CONVERSION_UNCOMPRESSED);
+}
+
 bool elliptic_curve_key::initialize()
 {
     // Already initialized
