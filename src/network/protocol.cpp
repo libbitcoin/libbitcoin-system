@@ -165,7 +165,8 @@ const std::vector<std::string> dns_seeds
     "archivum.info",
     "progressbar.sk",
     "faucet.bitcoin.st",
-    "bitcoin.securepayment.cc"
+    "bitcoin.securepayment.cc",
+    "seed.bitnodes.io"
 };
 #endif
 
