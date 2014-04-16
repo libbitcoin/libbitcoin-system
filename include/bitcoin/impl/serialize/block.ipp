@@ -85,8 +85,8 @@ transaction_type read_transaction(
     return packet;
 }
 
-const std::string satoshi_command(const transaction_type&);
-size_t satoshi_raw_size(const transaction_type& packet);
+BC_API const std::string satoshi_command(const transaction_type&);
+BC_API size_t satoshi_raw_size(const transaction_type& packet);
 template <typename Iterator>
 Iterator satoshi_save(const transaction_type& packet, Iterator result)
 {
@@ -123,7 +123,7 @@ void satoshi_load(const Iterator first, const Iterator last,
     //BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));
 }
 
-size_t satoshi_raw_size(const block_header_type& packet);
+BC_API size_t satoshi_raw_size(const block_header_type& packet);
 template <typename Iterator>
 Iterator satoshi_save(const block_header_type& packet, Iterator result)
 {
@@ -151,8 +151,8 @@ void satoshi_load(const Iterator first, const Iterator last,
     BITCOIN_ASSERT(std::distance(first, deserial.iterator()) == 80);
 }
 
-const std::string satoshi_command(const block_type&);
-size_t satoshi_raw_size(const block_type& packet);
+BC_API const std::string satoshi_command(const block_type&);
+BC_API size_t satoshi_raw_size(const block_type& packet);
 template <typename Iterator>
 Iterator satoshi_save(const block_type& packet, Iterator result)
 {
