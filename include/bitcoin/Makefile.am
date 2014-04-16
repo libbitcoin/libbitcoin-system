@@ -64,7 +64,8 @@ bitcoin_util_include_HEADERS = \
 	utility/subscriber.hpp \
 	utility/logger.hpp \
 	utility/weak_bind.hpp \
-    utility/timed_section.hpp
+    utility/timed_section.hpp \
+    utility/ripemd160.hpp
 
 bitcoin_impl_utility_includedir = $(includedir)/bitcoin/impl/utility
 bitcoin_impl_utility_include_HEADERS = \

@@ -26,7 +26,7 @@
 * RSA Laboratories, CryptoBytes, Volume 3, Number 2, Autumn 1997,
 * ftp://ftp.rsasecurity.com/pub/cryptobytes/crypto3n2.pdf
 */
-#include <bitcoin/utility/ripemd160.h>
+#include <bitcoin/utility/ripemd160.hpp>
 
 #include <string.h>
 #include <sys/types.h>
@@ -35,22 +35,22 @@
 
 #define PUT_64BIT_LE(cp, value) do                                  \
 {                                                                   \
-    (cp)[7] = (uint8_t)((value) >> bytelen * 7);                   \
-    (cp)[6] = (uint8_t)((value) >> bytelen * 6);                   \
-    (cp)[5] = (uint8_t)((value) >> bytelen * 5);                   \
-    (cp)[4] = (uint8_t)((value) >> bytelen * 4);                   \
-    (cp)[3] = (uint8_t)((value) >> bytelen * 3);                   \
-    (cp)[2] = (uint8_t)((value) >> bytelen * 2);                   \
-    (cp)[1] = (uint8_t)((value) >> bytelen * 1);                   \
-    (cp)[0] = (uint8_t)((value) >> bytelen * 0);                   \
+    (cp)[7] = (uint8_t)((value) >> bytelen * 7);                    \
+    (cp)[6] = (uint8_t)((value) >> bytelen * 6);                    \
+    (cp)[5] = (uint8_t)((value) >> bytelen * 5);                    \
+    (cp)[4] = (uint8_t)((value) >> bytelen * 4);                    \
+    (cp)[3] = (uint8_t)((value) >> bytelen * 3);                    \
+    (cp)[2] = (uint8_t)((value) >> bytelen * 2);                    \
+    (cp)[1] = (uint8_t)((value) >> bytelen * 1);                    \
+    (cp)[0] = (uint8_t)((value) >> bytelen * 0);                    \
 } while (0)
 
 #define PUT_32BIT_LE(cp, value) do                                  \
 {                                                                   \
-    (cp)[3] = (uint8_t)((value) >> bytelen * 3);                   \
-    (cp)[2] = (uint8_t)((value) >> bytelen * 2);                   \
-    (cp)[1] = (uint8_t)((value) >> bytelen * 1);                   \
-    (cp)[0] = (uint8_t)((value) >> bytelen * 0);                   \
+    (cp)[3] = (uint8_t)((value) >> bytelen * 3);                    \
+    (cp)[2] = (uint8_t)((value) >> bytelen * 2);                    \
+    (cp)[1] = (uint8_t)((value) >> bytelen * 1);                    \
+    (cp)[0] = (uint8_t)((value) >> bytelen * 0);                    \
 } while (0)
 
 #define	H0	0x67452301U

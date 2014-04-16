@@ -170,6 +170,9 @@
     <ClCompile Include="..\..\..\..\src\session.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\ripemd160.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp">
@@ -321,6 +324,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\define.hpp">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\ripemd160.hpp">
+      <Filter>include\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

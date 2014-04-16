@@ -199,6 +199,7 @@
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\mmfile.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ripemd.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\ripemd160.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\sha256.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
     <ClCompile Include="..\..\..\..\src\validate.cpp" />
@@ -242,6 +243,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\logger.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\mmfile.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\ripemd.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\ripemd160.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\serializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\sha256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\subscriber.hpp" />

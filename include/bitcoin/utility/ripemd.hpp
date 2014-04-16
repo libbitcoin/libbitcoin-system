@@ -20,17 +20,15 @@
 #ifndef LIBBITCOIN_RIPEMD_HPP
 #define LIBBITCOIN_RIPEMD_HPP
 
-#include <openssl/ripemd.h>
-#include <cstdint>
 #include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
+#include <bitcoin/utility/ripemd160.hpp>
 
 namespace libbitcoin {
 
-constexpr size_t ripemd_digest_size = RIPEMD160_DIGEST_LENGTH;
-static_assert(ripemd_digest_size == 20,
-    "RIPEMD160_DIGEST_LENGTH not defined correctly!");
+constexpr size_t ripemd_digest_size = RMD160_DIGEST_LENGTH;
 
+BC_API void RIPEMD160(const uint8_t* data, const uint32_t size, uint8_t* hash);
 BC_API short_hash generate_ripemd_hash(const data_chunk& chunk);
 
 } // namespace libbitcoin

@@ -18,13 +18,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/utility/ripemd.hpp>
+#include <bitcoin/utility/sha256.hpp>
 
 #include <boost/detail/endian.hpp>
 #include <openssl/sha.h>
 
-#include <bitcoin/utility/logger.hpp>
-
 namespace libbitcoin {
+
+void RIPEMD160(const uint8_t* data, const uint32_t size, uint8_t* hash)
+{
+    RMD160_CTX ripemd_ctx;
+    RMD160Init(&ripemd_ctx);
+    RMD160Update(&ripemd_ctx, data, size);
+    RMD160Final(hash, &ripemd_ctx);
+}
 
 short_hash generate_ripemd_hash(const data_chunk& chunk)
 {
@@ -35,13 +42,10 @@ short_hash generate_ripemd_hash(const data_chunk& chunk)
     SHA256_Final(sha_hash.data(), &sha_ctx);
 
     short_hash ripemd_hash;
-    RIPEMD160_CTX ripemd_ctx;
-    RIPEMD160_Init(&ripemd_ctx);
-    RIPEMD160_Update(&ripemd_ctx, sha_hash.data(), SHA256_DIGEST_LENGTH);
-    RIPEMD160_Final(ripemd_hash.data(), &ripemd_ctx);
+    RIPEMD160(sha_hash.data(), static_cast<uint32_t>(ripemd_hash.size()),
+        ripemd_hash.data());
 
     return ripemd_hash;
 }
 
 } // namespace libbitcoin
-

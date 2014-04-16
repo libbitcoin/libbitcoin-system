@@ -34,7 +34,8 @@ libbitcoin_la_SOURCES = \
 	blockchain/blockchain.cpp \
     blockchain/database/stealth_database.cpp \
 	transaction_pool.cpp \
-	transaction_indexer.cpp
+	transaction_indexer.cpp \
+    utility/ripemd160.cpp
 
 if DO_LEVELDB
 libbitcoin_la_SOURCES += \
