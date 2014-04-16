@@ -72,15 +72,15 @@ public:
     BC_API big_number& operator/=(const big_number& other);
 
 private:
-    friend divmod_result divmod(const big_number& a, const big_number& b);
-    friend const big_number operator+(
+    BC_API friend divmod_result divmod(const big_number& a, const big_number& b);
+    BC_API friend const big_number operator+(
         const big_number& a, const big_number& b);
-    friend const big_number operator-(
+    BC_API friend const big_number operator-(
         const big_number& a, const big_number& b);
-    friend const big_number operator-(const big_number& number);
-    friend const big_number operator/(const big_number& a,
+    BC_API friend const big_number operator-(const big_number& number);
+    BC_API friend const big_number operator/(const big_number& a,
         const big_number& b);
-    friend const big_number operator<<(const big_number& a,
+    BC_API friend const big_number operator<<(const big_number& a,
         unsigned int shift);
 
     void initialize();
