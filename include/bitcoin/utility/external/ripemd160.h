@@ -28,22 +28,6 @@
 #include <stdint.h>
 #include <boost/detail/endian.hpp>
 
-// TODO: this needs work.
-// BYTE_ORDER and LITTLE_ENDIAN definitions required by ripemd160.
-#define LITTLE_ENDIAN BOOST_ENDIAN_LITTLE_BYTE
-
-#if BOOST_ENDIAN_BIG_BYTE
-#   define BYTE_ORDER BOOST_ENDIAN_BIG_BYTE
-#elif BOOST_ENDIAN_LITTLE_BYTE
-#   define BYTE_ORDER BOOST_ENDIAN_LITTLE_BYTE
-#elif BOOST_ENDIAN_LITTLE_WORD
-#   error BOOST_ENDIAN_LITTLE_WORD byte order is not supported.
-#elif BOOST_ENDIAN_BIG_WORD
-#   error BOOST_ENDIAN_BIG_WORD byte order is not supported.
-#else
-#   error BOOST_ENDIAN symbol is required.
-#endif
-
 #define RMD160_BLOCK_LENGTH  64U
 #define RMD160_DIGEST_LENGTH 20U
 

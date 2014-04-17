@@ -145,7 +145,8 @@ void RMD160Transform(uint32_t state[5],
 {
     uint32_t a, b, c, d, e, aa, bb, cc, dd, ee, t, x[16];
 
-#if BYTE_ORDER == LITTLE_ENDIAN
+//#if BYTE_ORDER == LITTLE_ENDIAN
+#ifdef BOOST_ENDIAN_LITTLE_BYTE
     memcpy(x, block, RMD160_BLOCK_LENGTH);
 #else
     int i;
