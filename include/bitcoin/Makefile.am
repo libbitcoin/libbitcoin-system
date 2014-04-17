@@ -63,7 +63,10 @@ bitcoin_util_include_HEADERS = \
 	utility/logger.hpp \
 	utility/weak_bind.hpp \
     utility/timed_section.hpp \
-	utility/hash.hpp \
+	utility/hash.hpp
+
+bitcoin_util_external_includedir = $(includedir)/bitcoin/utility/external/
+bitcoin_util_external_include_HEADERS = \
     utility/external/ripemd160.h \
     utility/external/sha1.h \
     utility/external/sha256.h \
