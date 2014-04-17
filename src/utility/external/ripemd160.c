@@ -37,22 +37,22 @@
 
 #define PUT_64BIT_LE(cp, value) do                                  \
 {                                                                   \
-    (cp)[7] = (uint8_t)(value >> (bytelength * 7));                 \
-    (cp)[6] = (uint8_t)(value >> (bytelength * 6));                 \
-    (cp)[5] = (uint8_t)(value >> (bytelength * 5));                 \
-    (cp)[4] = (uint8_t)(value >> (bytelength * 4));                 \
-    (cp)[3] = (uint8_t)(value >> (bytelength * 3));                 \
-    (cp)[2] = (uint8_t)(value >> (bytelength * 2));                 \
-    (cp)[1] = (uint8_t)(value >> (bytelength * 1));                 \
-    (cp)[0] = (uint8_t)(value >> (bytelength * 0));                 \
+    (cp)[7] = (uint8_t)((value) >> (bytelength * 7));               \
+    (cp)[6] = (uint8_t)((value) >> (bytelength * 6));               \
+    (cp)[5] = (uint8_t)((value) >> (bytelength * 5));               \
+    (cp)[4] = (uint8_t)((value) >> (bytelength * 4));               \
+    (cp)[3] = (uint8_t)((value) >> (bytelength * 3));               \
+    (cp)[2] = (uint8_t)((value) >> (bytelength * 2));               \
+    (cp)[1] = (uint8_t)((value) >> (bytelength * 1));               \
+    (cp)[0] = (uint8_t)((value) >> (bytelength * 0));               \
 } while (0)
 
 #define PUT_32BIT_LE(cp, value) do                                  \
 {                                                                   \
-    (cp)[3] = (uint8_t)(value >> (bytelength * 3));                 \
-    (cp)[2] = (uint8_t)(value >> (bytelength * 2));                 \
-    (cp)[1] = (uint8_t)(value >> (bytelength * 1));                 \
-    (cp)[0] = (uint8_t)(value >> (bytelength * 0));                 \
+    (cp)[3] = (uint8_t)((value) >> (bytelength * 3));               \
+    (cp)[2] = (uint8_t)((value) >> (bytelength * 2));               \
+    (cp)[1] = (uint8_t)((value) >> (bytelength * 1));               \
+    (cp)[0] = (uint8_t)((value) >> (bytelength * 0));               \
 } while (0)
 
 #define	H0	0x67452301U
