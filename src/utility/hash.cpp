@@ -19,10 +19,9 @@
  */
 #include <bitcoin/utility/hash.hpp>
 
+#include <boost/detail/endian.hpp>
 #include <bitcoin/utility/external/ripemd160.h>
 #include <bitcoin/utility/external/sha256.h>
-
-#include <boost/detail/endian.hpp>
 #include <bitcoin/format.hpp>
 
 namespace libbitcoin {
@@ -50,7 +49,6 @@ hash_digest generate_hash(const data_chunk& chunk)
     SHA256__(first_hash.data(), static_cast<uint32_t>(first_hash.size()),
         second_hash.data());
 
-    // *** TODO: VERIFY - this is not OpenSSL ***
     // SSL gives us the hash backwards
     std::reverse(second_hash.begin(), second_hash.end());
     return second_hash;
@@ -64,3 +62,4 @@ uint32_t generate_checksum(const data_chunk& chunk)
 }
 
 } // namespace libbitcoin
+
