@@ -107,8 +107,9 @@ void RMD160(const uint8_t* input, uint32_t length,
 
 void RMD160Final(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
 {
+    int i;
     RMD160Pad(context);
-    for (int i = 0; i < 5; i++)
+    for (i = 0; i < 5; i++)
         PUT_32BIT_LE(digest + i * 4, context->state[i]);
     zeroize(context, sizeof *context);
 }

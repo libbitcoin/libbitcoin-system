@@ -53,8 +53,9 @@ void SHA1(const uint8_t* input, uint32_t length,
 
 void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH])
 {
+    uint8_t i;
     SHA1Pad(context);
-    for (uint8_t i = 0; i < SHA1_DIGEST_LENGTH; i++)
+    for (i = 0; i < SHA1_DIGEST_LENGTH; i++)
     {
         digest[i] = (uint8_t)
             ((context->state[i >> 2] >> ((3 - (i & 3)) * 8)) & 255);
@@ -75,9 +76,10 @@ void SHA1Init(SHA1CTX* context)
 
 void SHA1Pad(SHA1CTX* context)
 {
+    uint8_t i;
     uint8_t finalcount[8];
 
-    for (uint8_t i = 0; i < 8; i++)
+    for (i = 0; i < 8; i++)
     {
         finalcount[i] = (uint8_t)((context->count >>
             ((7 - (i & 7)) * 8)) & 255);

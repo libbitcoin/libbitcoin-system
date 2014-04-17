@@ -49,7 +49,8 @@ void be32enc(void* pp, uint32_t x)
 
 void be32enc_vect(uint8_t* dst, const uint32_t* src, size_t len)
 {
-    for (size_t i = 0; i < len / 4; i++) 
+    size_t i;
+    for (i = 0; i < len / 4; i++) 
     {
         be32enc(dst + i * 4, src[i]);
     }
@@ -57,7 +58,8 @@ void be32enc_vect(uint8_t* dst, const uint32_t* src, size_t len)
 
 void be32dec_vect(uint32_t* dst, const uint8_t* src, size_t len)
 {
-    for (size_t i = 0; i < len / 4; i++) 
+    size_t i;
+    for (i = 0; i < len / 4; i++) 
     {
         dst[i] = be32dec(src + i * 4);
     }
@@ -141,12 +143,13 @@ void SHA256Pad(SHA256CTX* context)
 void SHA256Transform(uint32_t state[8],
     const uint8_t block[SHA256_BLOCK_LENGTH])
 {
+    int i;
     uint32_t W[64];
     uint32_t S[8];
     uint32_t t0, t1;
     be32dec_vect(W, block, 64);
 
-    for (int i = 16; i < 64; i++)
+    for (i = 16; i < 64; i++)
     {
         W[i] = s1(W[i - 2]) + W[i - 7] + s0(W[i - 15]) + W[i - 16];
     }
@@ -218,7 +221,7 @@ void SHA256Transform(uint32_t state[8],
     RNDr(S, W, 62, 0xbef9a3f7);
     RNDr(S, W, 63, 0xc67178f2);
 
-    for (int i = 0; i < 8; i++) {
+    for (i = 0; i < 8; i++) {
         state[i] += S[i];
     }
 
