@@ -18,7 +18,7 @@
 #ifndef LIBBITCOIN_ZEROIZE_HPP
 #define LIBBITCOIN_ZEROIZE_HPP
 
-#include <stdint.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {

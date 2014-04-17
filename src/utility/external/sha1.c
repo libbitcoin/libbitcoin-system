@@ -136,10 +136,10 @@ void SHA1Transform(uint32_t state[5], const uint8_t block[SHA1_BLOCK_LENGTH])
 
     a = b = c = d = e = 0;
 }
-void SHA1Update(SHA1CTX* context, const uint8_t* input, size_t length)
+void SHA1Update(SHA1CTX* context, const uint8_t* input, uint32_t length)
 {
-    size_t i = 0;
-    size_t j = (size_t)((context->count >> 3) & 63);
+    uint32_t i = 0;
+    uint32_t j = (uint32_t)((context->count >> 3) & 63);
 
     context->count += (length << 3);
 
