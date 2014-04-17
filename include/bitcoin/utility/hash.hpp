@@ -29,23 +29,27 @@
 
 namespace libbitcoin {
 
-//BC_API short_hash generate_ripemd160_hash(const data_chunk& chunk);
-//BC_API short_hash generate_sha1_hash(const data_chunk& chunk);
-//BC_API hash_digest generate_sha256_hash(const data_chunk& chunk);
-BC_API short_hash generate_ripemd160_on_sha256_hash(const data_chunk& chunk);
-BC_API hash_digest generate_sha256_on_sha256_hash(const data_chunk& chunk);
-BC_API uint32_t generate_sha256_on_sha256_checksum(const data_chunk& chunk);
-
-// @genjix - my proposal are these function names:
-
-// This hash function is used in a few specific cases
-// where short hashes are desired.
-//   ripemd(sha256(data))
+/**
+ * Generate a short_hash. This hash function is used in a
+ * few specific cases where short hashes are desired.
+ *
+ * ripemd(sha256(data))
+ */
 BC_API short_hash generate_short_hash(const data_chunk& chunk);
-// This is the most widely used hash function in Bitcoin.
-//   sha256(sha256(data))
+
+/**
+ * Generate a normal hash. This is the most widely used
+ * hash function in Bitcoin.
+ *
+ * sha256(sha256(data))
+ */
 BC_API hash_digest generate_hash(const data_chunk& chunk);
-// Last 4 bytes of sha256(sha256(data))
+
+/**
+ * Generate a checksum. Last 4 bytes of sha256(sha256(data))
+ *
+ * int(sha256(sha256(data))[-4:])
+ */
 BC_API uint32_t generate_checksum(const data_chunk& chunk);
 
 } // namespace libbitcoin

@@ -889,7 +889,7 @@ bool script_type::op_hash160()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    short_hash hash = generate_ripemd160_on_sha256_hash(data);
+    short_hash hash = generate_short_hash(data);
     // hash must be reversed
     data_chunk raw_hash(hash.begin(), hash.end());
     stack_.push_back(raw_hash);
@@ -901,7 +901,7 @@ bool script_type::op_hash256()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    hash_digest hash = generate_sha256_on_sha256_hash(data);
+    hash_digest hash = generate_hash(data);
     // hash must be reversed
     data_chunk raw_hash(hash.rbegin(), hash.rend());
     stack_.push_back(raw_hash);

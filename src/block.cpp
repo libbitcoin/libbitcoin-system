@@ -60,7 +60,7 @@ hash_digest hash_block_header(const block_header_type& header)
 {
     data_chunk raw_block_header(80);
     satoshi_save(header, raw_block_header.begin());
-    return generate_sha256_on_sha256_hash(raw_block_header);
+    return generate_hash(raw_block_header);
 }
 
 index_list block_locator_indexes(int top_height)

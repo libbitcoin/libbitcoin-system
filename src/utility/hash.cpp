@@ -48,7 +48,7 @@ namespace libbitcoin {
 //    return hash;
 //}
 
-short_hash generate_ripemd160_on_sha256_hash(const data_chunk& chunk)
+short_hash generate_short_hash(const data_chunk& chunk)
 {
     hash_digest sha_hash;
     SHA256__(chunk.data(), static_cast<uint32_t>(chunk.size()),
@@ -61,7 +61,7 @@ short_hash generate_ripemd160_on_sha256_hash(const data_chunk& chunk)
     return ripemd_hash;
 }
 
-hash_digest generate_sha256_on_sha256_hash(const data_chunk& chunk)
+hash_digest generate_hash(const data_chunk& chunk)
 {
     hash_digest first_hash;
     SHA256__(chunk.data(), static_cast<uint32_t>(chunk.size()),
@@ -77,9 +77,9 @@ hash_digest generate_sha256_on_sha256_hash(const data_chunk& chunk)
     return second_hash;
 }
 
-uint32_t generate_sha256_on_sha256_checksum(const data_chunk& chunk)
+uint32_t generate_checksum(const data_chunk& chunk)
 {
-    hash_digest hash = generate_sha256_on_sha256_hash(chunk);
+    hash_digest hash = generate_hash(chunk);
     data_chunk begin_bytes(hash.rbegin(), hash.rbegin() + 4);
     return cast_chunk<uint32_t>(begin_bytes);
 }
