@@ -25,17 +25,17 @@
     #define blk0(b,i) (b->l[i] = \
     (rol(b->l[i],24)&0xFF00FF00)|(rol(b->l[i],8)&0x00FF00FF))
 #else
-    # define blk0(i) block->l[i]
+    # define blk0(b,i) b->l[i]
 #endif
 
 #define blk(b,i) (b->l[i&15] = \
     rol(b->l[(i+13)&15]^b->l[(i+8)&15]^b->l[(i+2)&15]^b->l[i&15],1))
 
-#define R0(b,v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(b, i)+0x5A827999+rol(v,5); w=rol(w,30);
-#define R1(b,v,w,x,y,z,i) z+=((w&(x^y))^y)+blk(b, i)+0x5A827999+rol(v,5); w=rol(w,30);
-#define R2(b,v,w,x,y,z,i) z+=(w^x^y)+blk(b, i)+0x6ED9EBA1+rol(v,5); w=rol(w,30);
-#define R3(b,v,w,x,y,z,i) z+=(((w|x)&y)|(w&x))+blk(b, i)+0x8F1BBCDC+rol(v,5); w=rol(w,30);
-#define R4(b,v,w,x,y,z,i) z+=(w^x^y)+blk(b, i)+0xCA62C1D6+rol(v,5); w=rol(w,30);
+#define R0(b,v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(b,i)+0x5A827999+rol(v,5); w=rol(w,30);
+#define R1(b,v,w,x,y,z,i) z+=((w&(x^y))^y)+blk(b,i)+0x5A827999+rol(v,5); w=rol(w,30);
+#define R2(b,v,w,x,y,z,i) z+=(w^x^y)+blk(b,i)+0x6ED9EBA1+rol(v,5); w=rol(w,30);
+#define R3(b,v,w,x,y,z,i) z+=(((w|x)&y)|(w&x))+blk(b,i)+0x8F1BBCDC+rol(v,5); w=rol(w,30);
+#define R4(b,v,w,x,y,z,i) z+=(w^x^y)+blk(b,i)+0xCA62C1D6+rol(v,5); w=rol(w,30);
 
 typedef union {
     uint8_t c[64];
