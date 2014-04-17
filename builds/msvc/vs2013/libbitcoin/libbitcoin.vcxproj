@@ -196,10 +196,13 @@
     <ClCompile Include="..\..\..\..\src\utility\base58.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\big_number.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\elliptic_curve_key.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\external\ripemd160.c" />
+    <ClCompile Include="..\..\..\..\src\utility\external\sha1.c" />
+    <ClCompile Include="..\..\..\..\src\utility\external\sha256.c" />
+    <ClCompile Include="..\..\..\..\src\utility\external\zeroize.c" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\mmfile.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\ripemd.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\sha256.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
     <ClCompile Include="..\..\..\..\src\validate.cpp" />
   </ItemGroup>
@@ -239,11 +242,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\big_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\elliptic_curve_key.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\ripemd160.h" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha1.h" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha256.h" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\zeroize.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\logger.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\mmfile.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\ripemd.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\serializer.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\sha256.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\subscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\timed_section.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\weak_bind.hpp" />

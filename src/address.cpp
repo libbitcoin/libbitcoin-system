@@ -21,8 +21,7 @@
 
 #include <bitcoin/format.hpp>
 #include <bitcoin/utility/base58.hpp>
-#include <bitcoin/utility/ripemd.hpp>
-#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/hash.hpp>
 
 namespace libbitcoin {
 
@@ -70,7 +69,7 @@ bool payment_address::set_encoded(const std::string& encoded_address)
     const data_chunk main_body(
         decoded_address.begin(), decoded_address.end() - 4);
     // verify checksum bytes
-    if (generate_sha256_checksum(main_body) !=
+    if (generate_sha256_on_sha256_checksum(main_body) !=
             cast_chunk<uint32_t>(checksum_bytes))
         return false;
     std::copy(main_body.begin() + 1, main_body.end(), hash_.begin());
@@ -83,7 +82,7 @@ std::string payment_address::encoded() const
     // Type, Hash, Checksum doth make thy address
     unencoded_address.push_back(version_);
     extend_data(unencoded_address, hash_);
-    uint32_t checksum = generate_sha256_checksum(unencoded_address);
+    uint32_t checksum = generate_sha256_on_sha256_checksum(unencoded_address);
     extend_data(unencoded_address, uncast_type(checksum));
     BITCOIN_ASSERT(unencoded_address.size() == 25);
     return encode_base58(unencoded_address);
@@ -104,13 +103,13 @@ void set_script_hash(payment_address& address,
 void set_public_key(payment_address& address, const data_chunk& public_key)
 {
     address.set(payment_address::pubkey_version,
-        generate_ripemd_hash(public_key));
+        generate_ripemd160_on_sha256_hash(public_key));
 }
 
 void set_script(payment_address& address, const script_type& eval_script)
 {
     address.set(payment_address::script_version,
-        generate_ripemd_hash(save_script(eval_script)));
+        generate_ripemd160_on_sha256_hash(save_script(eval_script)));
 }
 
 bool extract(payment_address& address, const script_type& script)
@@ -156,7 +155,7 @@ bool extract(payment_address& address, const script_type& script)
             // Should have at least 1 sig and the script code.
             BITCOIN_ASSERT(ops.size() > 1);
             set_script_hash(address,
-                generate_ripemd_hash(ops.back().data));
+                generate_ripemd160_on_sha256_hash(ops.back().data));
             return true;
 
         default:

@@ -28,6 +28,7 @@
 #include <bitcoin/blockchain/database/stealth_database.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
+#include <bitcoin/utility/hash.hpp>
 
 namespace libbitcoin {
 
@@ -261,7 +262,7 @@ constexpr size_t bitfield_size = sizeof(stealth_bitfield);
 stealth_bitfield calculate_bitfield(const data_chunk& stealth_data)
 {
     // Calculate stealth bitfield
-    const hash_digest index = generate_sha256_hash(stealth_data);
+    const hash_digest index = generate_sha256_on_sha256_hash(stealth_data);
     auto deserial = make_deserializer(
         index.begin(), index.begin() + bitfield_size);
     stealth_bitfield bitfield = deserial.read_uint_auto<stealth_bitfield>();
@@ -426,7 +427,7 @@ uint64_t addr_key_checksum(const output_point& outpoint)
     serial.write_hash(outpoint.hash);
     serial.write_4_bytes(outpoint.index);
     BITCOIN_ASSERT(serial.iterator() == checksum_data.end());
-    hash_digest hash = generate_sha256_hash(checksum_data);
+    hash_digest hash = generate_sha256_on_sha256_hash(checksum_data);
     data_chunk raw_checksum(hash.begin(), hash.begin() + 8);
     return cast_chunk<uint64_t>(raw_checksum);
 }

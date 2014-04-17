@@ -54,17 +54,20 @@ bitcoin_util_includedir = $(includedir)/bitcoin/utility
 bitcoin_util_include_HEADERS = \
 	utility/async_parallel.hpp \
 	utility/elliptic_curve_key.hpp \
-	utility/sha256.hpp \
 	utility/serializer.hpp \
 	utility/assert.hpp \
 	utility/big_number.hpp \
 	utility/mmfile.hpp \
 	utility/base58.hpp \
-	utility/ripemd.hpp \
 	utility/subscriber.hpp \
 	utility/logger.hpp \
 	utility/weak_bind.hpp \
-    utility/timed_section.hpp
+    utility/timed_section.hpp \
+	utility/hash.hpp \
+    utility/external/ripemd160.h \
+    utility/external/sha1.h \
+    utility/external/sha256.h \
+    utility/external/zeroize.h
 
 bitcoin_impl_utility_includedir = $(includedir)/bitcoin/impl/utility
 bitcoin_impl_utility_include_HEADERS = \
