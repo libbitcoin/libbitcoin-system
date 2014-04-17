@@ -36,6 +36,11 @@ BC_API short_hash generate_ripemd160_on_sha256_hash(const data_chunk& chunk);
 BC_API hash_digest generate_sha256_on_sha256_hash(const data_chunk& chunk);
 BC_API uint32_t generate_sha256_on_sha256_checksum(const data_chunk& chunk);
 
+// @genjix - my proposal are these function names:
+BC_API short_hash generate_short_hash(const data_chunk& chunk);
+BC_API hash_digest generate_hash_digest(const data_chunk& chunk);
+BC_API uint32_t generate_checksum(const data_chunk& chunk);
+
 } // namespace libbitcoin
 
 #endif
