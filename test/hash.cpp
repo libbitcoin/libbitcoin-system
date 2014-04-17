@@ -27,5 +27,8 @@ BOOST_AUTO_TEST_CASE(sha256_hash)
     auto genesis_hash = hash_block_header(genesis.header);
     BOOST_REQUIRE(encode_hex(genesis_hash) ==
         "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+    auto ripemd_hash = generate_short_hash(data_chunk{{110}});
+    BOOST_REQUIRE(encode_hex(ripemd_hash) ==
+        "17d040b739d639c729daaf627eaff88cfe4207f4");
 }
 
