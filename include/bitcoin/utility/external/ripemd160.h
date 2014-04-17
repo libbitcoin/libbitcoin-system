@@ -1,6 +1,6 @@
-/*	$OpenBSD: rmd160.h,v 1.5 2009/07/05 19:33:46 millert Exp $	*/
+/* OpenBSD: rmd160.h, v1.5 2009/07/05 */
 /*
- * Copyright (c) 2001 Markus Friedl.  All rights reserved.
+ * Copyright (c) 2001 Markus Friedl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -25,12 +25,10 @@
 #ifndef LIBBITCOIN_RIPEMD160_H
 #define LIBBITCOIN_RIPEMD160_H
 
-#ifdef _WIN32
 #include <stdint.h>
-#endif
-
 #include <boost/detail/endian.hpp>
 
+// TODO: this needs work.
 // BYTE_ORDER and LITTLE_ENDIAN definitions required by ripemd160.
 #define LITTLE_ENDIAN BOOST_ENDIAN_LITTLE_BYTE
 
@@ -39,28 +37,38 @@
 #elif BOOST_ENDIAN_LITTLE_BYTE
 #   define BYTE_ORDER BOOST_ENDIAN_LITTLE_BYTE
 #elif BOOST_ENDIAN_LITTLE_WORD
-    // TODO: compiler assert if not supported by ripemd160.c.
-#   define BYTE_ORDER BOOST_ENDIAN_LITTLE_WORD
+#   error BOOST_ENDIAN_LITTLE_WORD byte order is not supported.
 #elif BOOST_ENDIAN_BIG_WORD
-    // TODO: compiler assert if not supported by ripemd160.c.
-#   define BYTE_ORDER BOOST_ENDIAN_BIG_WORD
+#   error BOOST_ENDIAN_BIG_WORD byte order is not supported.
+#else
+#   error BOOST_ENDIAN symbol is required.
 #endif
 
-#define RMD160_BLOCK_LENGTH     64
-#define RMD160_DIGEST_LENGTH    20
+#define RMD160_BLOCK_LENGTH  64U
+#define RMD160_DIGEST_LENGTH 20U
 
-// count: number of bits, mod 2^64
-typedef struct RMD160Context 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef struct RMD160CTX
 {
     uint32_t state[5];
-    uint32_t count;
+    uint64_t count;
     uint8_t buffer[RMD160_BLOCK_LENGTH];
-} RMD160_CTX;
+} RMD160CTX;
 
-void RMD160Init(RMD160_CTX*);
-void RMD160Pad(RMD160_CTX* ctx);
-void RMD160Transform(uint32_t[5], const uint8_t[RMD160_BLOCK_LENGTH]);
-void RMD160Update(RMD160_CTX*, const uint8_t*, uint32_t);
-void RMD160Final(uint8_t[RMD160_DIGEST_LENGTH], RMD160_CTX*);
+void RMD160(const uint8_t* input, uint32_t length, 
+    uint8_t digest[RMD160_DIGEST_LENGTH]);
+void RMD160Final(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH]);
+void RMD160Init(RMD160CTX* context);
+void RMD160Pad(RMD160CTX* context);
+void RMD160Transform(uint32_t state[5], 
+    const uint8_t block[RMD160_BLOCK_LENGTH]);
+void RMD160Update(RMD160CTX* context, const uint8_t* input, uint32_t length);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

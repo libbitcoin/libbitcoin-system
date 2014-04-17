@@ -182,9 +182,8 @@
 #include <bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>
 #include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/ripemd.hpp>
 #include <bitcoin/utility/logger.hpp>
-#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/base58.hpp>
 #include <bitcoin/utility/big_number.hpp>
 #include <bitcoin/utility/mmfile.hpp>

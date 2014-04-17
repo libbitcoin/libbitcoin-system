@@ -28,7 +28,6 @@
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/utility/sha256.hpp>
 
 namespace libbitcoin {
 

@@ -21,6 +21,8 @@
 
 #include <bitcoin/format.hpp>
 
+#include <openssl/bn.h>
+
 namespace libbitcoin {
 
 class big_number_context

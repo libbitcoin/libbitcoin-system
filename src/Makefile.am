@@ -13,11 +13,9 @@ libbitcoin_la_SOURCES = \
 	network/protocol.cpp \
 	poller.cpp \
 	utility/logger.cpp \
-	utility/sha256.cpp \
 	address.cpp \
 	format.cpp \
 	script.cpp \
-	utility/ripemd.cpp \
 	block.cpp \
     utility/elliptic_curve_key.cpp \
 	transaction.cpp \
@@ -35,7 +33,11 @@ libbitcoin_la_SOURCES = \
     blockchain/database/stealth_database.cpp \
 	transaction_pool.cpp \
 	transaction_indexer.cpp \
-    utility/ripemd160.cpp
+	utility/hash.cpp \
+    utility/external/ripemd160.c \
+    utility/external/sha1.c \
+    utility/external/sha256.c \
+    utility/external/zeroize.c
 
 if DO_LEVELDB
 libbitcoin_la_SOURCES += \

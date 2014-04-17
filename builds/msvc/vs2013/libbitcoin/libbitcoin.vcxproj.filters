@@ -42,6 +42,12 @@
     <Filter Include="src\blockchain\leveldb">
       <UniqueIdentifier>{61f50a9e-d52f-4336-820e-3ac84f2305d4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\utility\external">
+      <UniqueIdentifier>{f8a260ce-e8da-4a00-8d29-1927686a2488}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\utility\external">
+      <UniqueIdentifier>{3809494a-8698-4eac-a36b-582fb2e54e42}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp">
@@ -94,12 +100,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\constants.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\ripemd.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\sha256.cpp">
-      <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp">
       <Filter>src\utility</Filter>
@@ -170,7 +170,19 @@
     <ClCompile Include="..\..\..\..\src\session.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\ripemd160.cpp">
+    <ClCompile Include="..\..\..\..\src\utility\external\sha1.c">
+      <Filter>src\utility\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\external\zeroize.c">
+      <Filter>src\utility\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\external\ripemd160.c">
+      <Filter>src\utility\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\external\sha256.c">
+      <Filter>src\utility\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\hash.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
   </ItemGroup>
@@ -244,13 +256,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\constants.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\ripemd.hpp">
-      <Filter>include\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\serializer.hpp">
-      <Filter>include\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\sha256.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\subscriber.hpp">
@@ -325,7 +331,19 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\define.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\ripemd160.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\ripemd160.h">
+      <Filter>include\utility\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha256.h">
+      <Filter>include\utility\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha1.h">
+      <Filter>include\utility\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\zeroize.h">
+      <Filter>include\utility\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
   </ItemGroup>

@@ -38,6 +38,7 @@
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 
 namespace libbitcoin {
@@ -52,7 +53,7 @@ data_chunk create_raw_message(const Message& packet)
     head.magic = magic_value();
     head.command = satoshi_command(packet);
     head.payload_length = payload.size();
-    head.checksum = generate_sha256_checksum(payload);
+    head.checksum = generate_sha256_on_sha256_checksum(payload);
     data_chunk raw_header(satoshi_raw_size(head));
     satoshi_save(head, raw_header.begin());
     // Construct completed packet with header + payload

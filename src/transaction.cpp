@@ -24,7 +24,7 @@
 #include <bitcoin/format.hpp>
 #include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
@@ -38,7 +38,7 @@ hash_digest hash_transaction_impl(const transaction_type& tx,
     satoshi_save(tx, serialized_tx.begin());
     if (hash_type_code != nullptr)
         extend_data(serialized_tx, uncast_type(*hash_type_code));
-    return generate_sha256_hash(serialized_tx);
+    return generate_sha256_on_sha256_hash(serialized_tx);
 }
 
 hash_digest hash_transaction(const transaction_type& tx)
@@ -73,7 +73,7 @@ hash_digest build_merkle_tree(hash_list& merkle)
             BITCOIN_ASSERT(
                 std::distance(concat_data.begin(), concat.iterator()) ==
                 hash_digest_size * 2);
-            hash_digest new_root = generate_sha256_hash(concat_data);
+            hash_digest new_root = generate_sha256_on_sha256_hash(concat_data);
             new_merkle.push_back(new_root);
         }
         merkle = new_merkle;

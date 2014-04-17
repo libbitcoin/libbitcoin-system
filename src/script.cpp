@@ -19,6 +19,8 @@
  */
 #include <bitcoin/script.hpp>
 
+// #include <openssl/sha.h>
+
 #include <stack>
 #include <type_traits>
 #include <boost/optional.hpp>
@@ -29,8 +31,7 @@
 #include <bitcoin/utility/elliptic_curve_key.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
-#include <bitcoin/utility/ripemd.hpp>
-#include <bitcoin/utility/sha256.hpp>
+#include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -855,8 +856,8 @@ bool script_type::op_ripemd160()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    data_chunk hash(ripemd_digest_size);
-    RIPEMD160(data.data(), data.size(), hash.data());
+    data_chunk hash(RMD160_DIGEST_LENGTH);
+    RMD160(data.data(), static_cast<uint32_t>(data.size()), hash.data());
     stack_.push_back(hash);
     return true;
 }
@@ -866,8 +867,8 @@ bool script_type::op_sha1()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    data_chunk hash(SHA_DIGEST_LENGTH);
-    SHA1(data.data(), data.size(), hash.data());
+    data_chunk hash(SHA1_DIGEST_LENGTH);
+    SHA1(data.data(), static_cast<uint32_t>(data.size()), hash.data());
     stack_.push_back(hash);
     return true;
 }
@@ -877,8 +878,8 @@ bool script_type::op_sha256()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    data_chunk hash(sha256_digest_size);
-    SHA256(data.data(), data.size(), hash.data());
+    data_chunk hash(SHA256_DIGEST_LENGTH);
+    SHA256__(data.data(), static_cast<uint32_t>(data.size()), hash.data());
     stack_.push_back(hash);
     return true;
 }
@@ -888,7 +889,7 @@ bool script_type::op_hash160()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    short_hash hash = generate_ripemd_hash(data);
+    short_hash hash = generate_ripemd160_on_sha256_hash(data);
     // hash must be reversed
     data_chunk raw_hash(hash.begin(), hash.end());
     stack_.push_back(raw_hash);
@@ -900,7 +901,7 @@ bool script_type::op_hash256()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    hash_digest hash = generate_sha256_hash(data);
+    hash_digest hash = generate_sha256_on_sha256_hash(data);
     // hash must be reversed
     data_chunk raw_hash(hash.rbegin(), hash.rend());
     stack_.push_back(raw_hash);

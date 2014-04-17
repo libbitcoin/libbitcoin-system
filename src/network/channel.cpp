@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/network/channel.hpp>
+#include <bitcoin/utility/hash.hpp>
 
 namespace libbitcoin {
 
@@ -352,7 +353,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     data_chunk payload_stream = data_chunk(
         inbound_payload_.begin(), inbound_payload_.end());
     BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
-    if (header_msg.checksum != generate_sha256_checksum(payload_stream))
+    if (header_msg.checksum != generate_sha256_on_sha256_checksum(payload_stream))
     {
         log_warning(LOG_NETWORK) << "Bad checksum!";
         raw_subscriber_->relay(error::bad_stream,

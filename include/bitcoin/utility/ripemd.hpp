@@ -22,13 +22,10 @@
 
 #include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/utility/ripemd160.hpp>
+#include <bitcoin/utility/external/ripemd160.h>
 
 namespace libbitcoin {
 
-constexpr size_t ripemd_digest_size = RMD160_DIGEST_LENGTH;
-
-BC_API void RIPEMD160(const uint8_t* data, const uint32_t size, uint8_t* hash);
 BC_API short_hash generate_ripemd_hash(const data_chunk& chunk);
 
 } // namespace libbitcoin

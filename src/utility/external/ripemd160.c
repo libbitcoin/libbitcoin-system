@@ -1,3 +1,4 @@
+/* OpenBSD: rmd160.h, v 1.5 2009/07/05 */
 /*
  * Copyright (c) 2001 Markus Friedl.  All rights reserved.
  *
@@ -26,31 +27,32 @@
 * RSA Laboratories, CryptoBytes, Volume 3, Number 2, Autumn 1997,
 * ftp://ftp.rsasecurity.com/pub/cryptobytes/crypto3n2.pdf
 */
-#include <bitcoin/utility/ripemd160.hpp>
+#include <bitcoin/utility/external/ripemd160.h>
+#include <bitcoin/utility/external/zeroize.h>
 
 #include <string.h>
-#include <sys/types.h>
+#include <stdint.h>
 
-#define bytelen sizeof(uint8_t)
+#define bytelength 8
 
 #define PUT_64BIT_LE(cp, value) do                                  \
 {                                                                   \
-    (cp)[7] = (uint8_t)((value) >> bytelen * 7);                    \
-    (cp)[6] = (uint8_t)((value) >> bytelen * 6);                    \
-    (cp)[5] = (uint8_t)((value) >> bytelen * 5);                    \
-    (cp)[4] = (uint8_t)((value) >> bytelen * 4);                    \
-    (cp)[3] = (uint8_t)((value) >> bytelen * 3);                    \
-    (cp)[2] = (uint8_t)((value) >> bytelen * 2);                    \
-    (cp)[1] = (uint8_t)((value) >> bytelen * 1);                    \
-    (cp)[0] = (uint8_t)((value) >> bytelen * 0);                    \
+    (cp)[7] = (uint8_t)(value >> (bytelength * 7));                 \
+    (cp)[6] = (uint8_t)(value >> (bytelength * 6));                 \
+    (cp)[5] = (uint8_t)(value >> (bytelength * 5));                 \
+    (cp)[4] = (uint8_t)(value >> (bytelength * 4));                 \
+    (cp)[3] = (uint8_t)(value >> (bytelength * 3));                 \
+    (cp)[2] = (uint8_t)(value >> (bytelength * 2));                 \
+    (cp)[1] = (uint8_t)(value >> (bytelength * 1));                 \
+    (cp)[0] = (uint8_t)(value >> (bytelength * 0));                 \
 } while (0)
 
 #define PUT_32BIT_LE(cp, value) do                                  \
 {                                                                   \
-    (cp)[3] = (uint8_t)((value) >> bytelen * 3);                    \
-    (cp)[2] = (uint8_t)((value) >> bytelen * 2);                    \
-    (cp)[1] = (uint8_t)((value) >> bytelen * 1);                    \
-    (cp)[0] = (uint8_t)((value) >> bytelen * 0);                    \
+    (cp)[3] = (uint8_t)(value >> (bytelength * 3));                 \
+    (cp)[2] = (uint8_t)(value >> (bytelength * 2));                 \
+    (cp)[1] = (uint8_t)(value >> (bytelength * 1));                 \
+    (cp)[0] = (uint8_t)(value >> (bytelength * 0));                 \
 } while (0)
 
 #define	H0	0x67452301U
@@ -71,7 +73,6 @@
 #define	KK3	0x7A6D76E9U
 #define	KK4	0x00000000U
 
-/* rotate x left n bits.  */
 #define ROL(n, x) (((x) << (n)) | ((x) >> (32-(n))))
 
 #define F0(x, y, z) ((x) ^ (y) ^ (z))
@@ -95,73 +96,52 @@ static uint8_t PADDING[RMD160_BLOCK_LENGTH] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void RMD160Init(RMD160_CTX* ctx)
+void RMD160(const uint8_t* input, uint32_t length,
+    uint8_t digest[RMD160_DIGEST_LENGTH])
 {
-    ctx->count = 0;
-    ctx->state[0] = H0;
-    ctx->state[1] = H1;
-    ctx->state[2] = H2;
-    ctx->state[3] = H3;
-    ctx->state[4] = H4;
+    RMD160CTX ctx;
+    RMD160Init(&ctx);
+    RMD160Update(&ctx, input, length);
+    RMD160Final(&ctx, digest);
 }
 
-void RMD160Update(RMD160_CTX* ctx, const uint8_t* input, uint32_t len)
+void RMD160Final(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
 {
-    uint32_t have, off, need;
-
-    have = (ctx->count / 8) % RMD160_BLOCK_LENGTH;
-    need = RMD160_BLOCK_LENGTH - have;
-    ctx->count += 8 * len;
-    off = 0;
-
-    if (len >= need) 
-    {
-        if (have) 
-        {
-            memcpy(ctx->buffer + have, input, need);
-            RMD160Transform(ctx->state, ctx->buffer);
-            off = need;
-            have = 0;
-        }
-
-        /* now the buffer is empty */
-        while (off + RMD160_BLOCK_LENGTH <= len) {
-            RMD160Transform(ctx->state, input + off);
-            off += RMD160_BLOCK_LENGTH;
-        }
-    }
-
-    if (off < len)
-        memcpy(ctx->buffer + have, input + off, len - off);
+    RMD160Pad(context);
+    for (int i = 0; i < 5; i++)
+        PUT_32BIT_LE(digest + i * 4, context->state[i]);
+    zeroize(context, sizeof *context);
 }
 
-void RMD160Pad(RMD160_CTX* ctx)
+void RMD160Init(RMD160CTX* context)
+{
+    context->count = 0;
+    context->state[0] = H0;
+    context->state[1] = H1;
+    context->state[2] = H2;
+    context->state[3] = H3;
+    context->state[4] = H4;
+}
+
+void RMD160Pad(RMD160CTX* context)
 {
     uint8_t size[8];
-    uint32_t padlen;
+    uint32_t padlength;
 
-    PUT_64BIT_LE(size, ctx->count);
+    PUT_64BIT_LE(size, context->count);
 
-    /*
-    * pad to RMD160_BLOCK_LENGTH byte blocks, at least one byte from
-    * PADDING plus 8 bytes for the size
-    */
-    padlen = RMD160_BLOCK_LENGTH - ((ctx->count / 8) % RMD160_BLOCK_LENGTH);
-    if (padlen < 1 + 8)
-        padlen += RMD160_BLOCK_LENGTH;
-    RMD160Update(ctx, PADDING, padlen - 8);		/* padlen - 8 <= 64 */
-    RMD160Update(ctx, size, 8);
+    padlength = RMD160_BLOCK_LENGTH - ((context->count / 8) %
+        RMD160_BLOCK_LENGTH);
+
+    if (padlength < 1 + 8)
+        padlength += RMD160_BLOCK_LENGTH;
+
+    RMD160Update(context, PADDING, padlength - 8);
+    RMD160Update(context, size, 8);
 }
 
-void RMD160Final(uint8_t digest[RMD160_DIGEST_LENGTH], RMD160_CTX* ctx)
-{
-    RMD160Pad(ctx);
-    for (int i = 0; i < 5; i++)
-        PUT_32BIT_LE(digest + i * 4, ctx->state[i]);
-    memset(ctx, 0, sizeof(*ctx));
-}
-
-void RMD160Transform(uint32_t state[5], const uint8_t block[RMD160_BLOCK_LENGTH])
+void RMD160Transform(uint32_t state[5], 
+    const uint8_t block[RMD160_BLOCK_LENGTH])
 {
     uint32_t a, b, c, d, e, aa, bb, cc, dd, ee, t, x[16];
 
@@ -173,9 +153,9 @@ void RMD160Transform(uint32_t state[5], const uint8_t block[RMD160_BLOCK_LENGTH]
     for (i = 0; i < 16; i++)
         x[i] = (uint32_t)(
         (uint32_t)(block[i * 4 + 0]) |
-        (uint32_t)(block[i * 4 + 1]) << bytelen * 1 |
-        (uint32_t)(block[i * 4 + 2]) << bytelen * 2 |
-        (uint32_t)(block[i * 4 + 3]) << bytelen * 3);
+        (uint32_t)(block[i * 4 + 1]) << bytelength * 1 |
+        (uint32_t)(block[i * 4 + 2]) << bytelength * 2 |
+        (uint32_t)(block[i * 4 + 3]) << bytelength * 3);
 #endif
 
     a = state[0];
@@ -370,4 +350,34 @@ void RMD160Transform(uint32_t state[5], const uint8_t block[RMD160_BLOCK_LENGTH]
     state[3] = state[4] + aa + b;
     state[4] = state[0] + bb + c;
     state[0] = t;
+}
+
+void RMD160Update(RMD160CTX* context, const uint8_t* input, uint32_t length)
+{
+    uint32_t have, off, need;
+
+    have = (context->count / 8) % RMD160_BLOCK_LENGTH;
+    need = RMD160_BLOCK_LENGTH - have;
+    context->count += 8 * length;
+    off = 0;
+
+    if (length >= need)
+    {
+        if (have)
+        {
+            memcpy(context->buffer + have, input, need);
+            RMD160Transform(context->state, context->buffer);
+            off = need;
+            have = 0;
+        }
+
+        while (off + RMD160_BLOCK_LENGTH <= length) 
+        {
+            RMD160Transform(context->state, input + off);
+            off += RMD160_BLOCK_LENGTH;
+        }
+    }
+
+    if (off < length)
+        memcpy(context->buffer + have, input + off, length - off);
 }
