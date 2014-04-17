@@ -37,8 +37,12 @@ BC_API hash_digest generate_sha256_on_sha256_hash(const data_chunk& chunk);
 BC_API uint32_t generate_sha256_on_sha256_checksum(const data_chunk& chunk);
 
 // @genjix - my proposal are these function names:
+
+// This hash function is used in a few specific cases
+// where short hashes are desired.
 BC_API short_hash generate_short_hash(const data_chunk& chunk);
-BC_API hash_digest generate_hash_digest(const data_chunk& chunk);
+// This is the most widely used hash function in Bitcoin.
+BC_API hash_digest generate_hash(const data_chunk& chunk);
 BC_API uint32_t generate_checksum(const data_chunk& chunk);
 
 } // namespace libbitcoin
