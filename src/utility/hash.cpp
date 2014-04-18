@@ -33,8 +33,7 @@ short_hash generate_short_hash(const data_chunk& chunk)
         sha_hash.data());
 
     short_hash ripemd_hash;
-    RMD160(sha_hash.data(), static_cast<uint32_t>(ripemd_hash.size()), 
-        ripemd_hash.data());
+    RMD160(sha_hash.data(), hash_digest_size, ripemd_hash.data());
 
     return ripemd_hash;
 }
