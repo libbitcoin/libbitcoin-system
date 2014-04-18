@@ -21,6 +21,7 @@
 #include <stdlib.h>
 
 // TODO: deal with determination of HAVE_SECUREZEROMEMORY and HAVE_MEMSET_S
+// These are performance optimizations, not required for security.
 void zeroize(void* const buffer, const size_t length)
 {
 #ifdef HAVE_SECUREZEROMEMORY
@@ -36,7 +37,7 @@ void zeroize(void* const buffer, const size_t length)
 
     for (i = 0; i < length; i++)
     {
-        vbuffer[i] = 0U;
+        vbuffer[i] = 0;
     }
 #endif
 }

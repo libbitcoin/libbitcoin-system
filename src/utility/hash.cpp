@@ -33,7 +33,8 @@ short_hash generate_short_hash(const data_chunk& chunk)
         sha_hash.data());
 
     short_hash ripemd_hash;
-    RMD160(sha_hash.data(), hash_digest_size, ripemd_hash.data());
+    RMD160(sha_hash.data(), static_cast<uint32_t>(sha_hash.size()),
+        ripemd_hash.data());
 
     return ripemd_hash;
 }
@@ -48,7 +49,7 @@ hash_digest generate_hash(const data_chunk& chunk)
     SHA256__(first_hash.data(), static_cast<uint32_t>(first_hash.size()),
         second_hash.data());
 
-    // SSL gives us the hash backwards
+    // The hash is in the reverse of the expected order.
     std::reverse(second_hash.begin(), second_hash.end());
     return second_hash;
 }

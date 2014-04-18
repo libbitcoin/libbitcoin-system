@@ -35,43 +35,43 @@
 
 #define bytelength 8
 
-#define PUT_64BIT_LE(cp, value) do                                  \
-{                                                                   \
-    (cp)[7] = (uint8_t)((value) >> (bytelength * 7));               \
-    (cp)[6] = (uint8_t)((value) >> (bytelength * 6));               \
-    (cp)[5] = (uint8_t)((value) >> (bytelength * 5));               \
-    (cp)[4] = (uint8_t)((value) >> (bytelength * 4));               \
-    (cp)[3] = (uint8_t)((value) >> (bytelength * 3));               \
-    (cp)[2] = (uint8_t)((value) >> (bytelength * 2));               \
-    (cp)[1] = (uint8_t)((value) >> (bytelength * 1));               \
-    (cp)[0] = (uint8_t)((value) >> (bytelength * 0));               \
+#define PUT_64BIT_LE(cp, value) do \
+{ \
+    (cp)[7] = (uint8_t)((value) >> (bytelength * 7)); \
+    (cp)[6] = (uint8_t)((value) >> (bytelength * 6)); \
+    (cp)[5] = (uint8_t)((value) >> (bytelength * 5)); \
+    (cp)[4] = (uint8_t)((value) >> (bytelength * 4)); \
+    (cp)[3] = (uint8_t)((value) >> (bytelength * 3)); \
+    (cp)[2] = (uint8_t)((value) >> (bytelength * 2)); \
+    (cp)[1] = (uint8_t)((value) >> (bytelength * 1)); \
+    (cp)[0] = (uint8_t)((value) >> (bytelength * 0)); \
 } while (0)
 
-#define PUT_32BIT_LE(cp, value) do                                  \
-{                                                                   \
-    (cp)[3] = (uint8_t)((value) >> (bytelength * 3));               \
-    (cp)[2] = (uint8_t)((value) >> (bytelength * 2));               \
-    (cp)[1] = (uint8_t)((value) >> (bytelength * 1));               \
-    (cp)[0] = (uint8_t)((value) >> (bytelength * 0));               \
+#define PUT_32BIT_LE(cp, value) do \
+{ \
+    (cp)[3] = (uint8_t)((value) >> (bytelength * 3)); \
+    (cp)[2] = (uint8_t)((value) >> (bytelength * 2)); \
+    (cp)[1] = (uint8_t)((value) >> (bytelength * 1)); \
+    (cp)[0] = (uint8_t)((value) >> (bytelength * 0)); \
 } while (0)
 
-#define	H0	0x67452301U
-#define	H1	0xEFCDAB89U
-#define	H2	0x98BADCFEU
-#define	H3	0x10325476U
-#define	H4	0xC3D2E1F0U
+#define	H0 0x67452301U
+#define	H1 0xEFCDAB89U
+#define	H2 0x98BADCFEU
+#define	H3 0x10325476U
+#define	H4 0xC3D2E1F0U
 
-#define	K0	0x00000000U
-#define	K1	0x5A827999U
-#define	K2	0x6ED9EBA1U
-#define	K3	0x8F1BBCDCU
-#define	K4	0xA953FD4EU
+#define	K0 0x00000000U
+#define	K1 0x5A827999U
+#define	K2 0x6ED9EBA1U
+#define	K3 0x8F1BBCDCU
+#define	K4 0xA953FD4EU
 
-#define	KK0	0x50A28BE6U
-#define	KK1	0x5C4DD124U
-#define	KK2	0x6D703EF3U
-#define	KK3	0x7A6D76E9U
-#define	KK4	0x00000000U
+#define	KK0 0x50A28BE6U
+#define	KK1 0x5C4DD124U
+#define	KK2 0x6D703EF3U
+#define	KK3 0x7A6D76E9U
+#define	KK4 0x00000000U
 
 #define ROL(n, x) (((x) << (n)) | ((x) >> (32-(n))))
 
@@ -81,10 +81,10 @@
 #define F3(x, y, z) (((x) & (z)) | ((y) & (~z)))
 #define F4(x, y, z) ((x) ^ ((y) | (~z)))
 
-#define R(a, b, c, d, e, Fj, Kj, sj, rj) do                         \
-{                                                                   \
-    a = ROL(sj, a + Fj(b,c,d) + X(rj) + Kj) + e;                    \
-    c = ROL(10, c);                                                 \
+#define R(a, b, c, d, e, Fj, Kj, sj, rj) do \
+{ \
+    a = ROL(sj, a + Fj(b, c, d) + X(rj) + Kj) + e; \
+    c = ROL(10, c); \
 } while(0)
 
 #define X(i) x[i]
@@ -146,10 +146,9 @@ void RMD160Transform(uint32_t state[5],
 {
     uint32_t a, b, c, d, e, aa, bb, cc, dd, ee, t, x[16];
 
-//#if BYTE_ORDER == LITTLE_ENDIAN
 #ifdef BOOST_ENDIAN_LITTLE_BYTE
     memcpy(x, block, RMD160_BLOCK_LENGTH);
-#else
+#elif BOOST_ENDIAN_BIG_BYTE
     int i;
 
     for (i = 0; i < 16; i++)
@@ -158,6 +157,8 @@ void RMD160Transform(uint32_t state[5],
         (uint32_t)(block[i * 4 + 1]) << bytelength * 1 |
         (uint32_t)(block[i * 4 + 2]) << bytelength * 2 |
         (uint32_t)(block[i * 4 + 3]) << bytelength * 3);
+#else
+    #error Endianess not supported.
 #endif
 
     a = state[0];
@@ -166,7 +167,6 @@ void RMD160Transform(uint32_t state[5],
     d = state[3];
     e = state[4];
 
-    /* Round 1 */
     R(a, b, c, d, e, F0, K0, 11, 0);
     R(e, a, b, c, d, F0, K0, 14, 1);
     R(d, e, a, b, c, F0, K0, 15, 2);
@@ -182,8 +182,8 @@ void RMD160Transform(uint32_t state[5],
     R(d, e, a, b, c, F0, K0, 6, 12);
     R(c, d, e, a, b, F0, K0, 7, 13);
     R(b, c, d, e, a, F0, K0, 9, 14);
-    R(a, b, c, d, e, F0, K0, 8, 15); /* #15 */
-    /* Round 2 */
+    R(a, b, c, d, e, F0, K0, 8, 15);
+
     R(e, a, b, c, d, F1, K1, 7, 7);
     R(d, e, a, b, c, F1, K1, 6, 4);
     R(c, d, e, a, b, F1, K1, 8, 13);
@@ -199,8 +199,8 @@ void RMD160Transform(uint32_t state[5],
     R(c, d, e, a, b, F1, K1, 11, 2);
     R(b, c, d, e, a, F1, K1, 7, 14);
     R(a, b, c, d, e, F1, K1, 13, 11);
-    R(e, a, b, c, d, F1, K1, 12, 8); /* #31 */
-    /* Round 3 */
+    R(e, a, b, c, d, F1, K1, 12, 8);
+
     R(d, e, a, b, c, F2, K2, 11, 3);
     R(c, d, e, a, b, F2, K2, 13, 10);
     R(b, c, d, e, a, F2, K2, 6, 14);
@@ -216,8 +216,8 @@ void RMD160Transform(uint32_t state[5],
     R(b, c, d, e, a, F2, K2, 5, 13);
     R(a, b, c, d, e, F2, K2, 12, 11);
     R(e, a, b, c, d, F2, K2, 7, 5);
-    R(d, e, a, b, c, F2, K2, 5, 12); /* #47 */
-    /* Round 4 */
+    R(d, e, a, b, c, F2, K2, 5, 12);
+
     R(c, d, e, a, b, F3, K3, 11, 1);
     R(b, c, d, e, a, F3, K3, 12, 9);
     R(a, b, c, d, e, F3, K3, 14, 11);
@@ -233,8 +233,8 @@ void RMD160Transform(uint32_t state[5],
     R(a, b, c, d, e, F3, K3, 8, 14);
     R(e, a, b, c, d, F3, K3, 6, 5);
     R(d, e, a, b, c, F3, K3, 5, 6);
-    R(c, d, e, a, b, F3, K3, 12, 2); /* #63 */
-    /* Round 5 */
+    R(c, d, e, a, b, F3, K3, 12, 2);
+
     R(b, c, d, e, a, F4, K4, 9, 4);
     R(a, b, c, d, e, F4, K4, 15, 0);
     R(e, a, b, c, d, F4, K4, 5, 5);
@@ -250,7 +250,7 @@ void RMD160Transform(uint32_t state[5],
     R(e, a, b, c, d, F4, K4, 11, 11);
     R(d, e, a, b, c, F4, K4, 8, 6);
     R(c, d, e, a, b, F4, K4, 5, 15);
-    R(b, c, d, e, a, F4, K4, 6, 13); /* #79 */
+    R(b, c, d, e, a, F4, K4, 6, 13);
 
     aa = a; bb = b; cc = c; dd = d; ee = e;
 
@@ -260,7 +260,6 @@ void RMD160Transform(uint32_t state[5],
     d = state[3];
     e = state[4];
 
-    /* Parallel round 1 */
     R(a, b, c, d, e, F4, KK0, 8, 5);
     R(e, a, b, c, d, F4, KK0, 9, 14);
     R(d, e, a, b, c, F4, KK0, 9, 7);
@@ -276,8 +275,8 @@ void RMD160Transform(uint32_t state[5],
     R(d, e, a, b, c, F4, KK0, 14, 1);
     R(c, d, e, a, b, F4, KK0, 14, 10);
     R(b, c, d, e, a, F4, KK0, 12, 3);
-    R(a, b, c, d, e, F4, KK0, 6, 12); /* #15 */
-    /* Parallel round 2 */
+    R(a, b, c, d, e, F4, KK0, 6, 12);
+
     R(e, a, b, c, d, F3, KK1, 9, 6);
     R(d, e, a, b, c, F3, KK1, 13, 11);
     R(c, d, e, a, b, F3, KK1, 15, 3);
@@ -293,8 +292,8 @@ void RMD160Transform(uint32_t state[5],
     R(c, d, e, a, b, F3, KK1, 6, 4);
     R(b, c, d, e, a, F3, KK1, 15, 9);
     R(a, b, c, d, e, F3, KK1, 13, 1);
-    R(e, a, b, c, d, F3, KK1, 11, 2); /* #31 */
-    /* Parallel round 3 */
+    R(e, a, b, c, d, F3, KK1, 11, 2);
+
     R(d, e, a, b, c, F2, KK2, 9, 15);
     R(c, d, e, a, b, F2, KK2, 7, 5);
     R(b, c, d, e, a, F2, KK2, 15, 1);
@@ -310,8 +309,8 @@ void RMD160Transform(uint32_t state[5],
     R(b, c, d, e, a, F2, KK2, 13, 10);
     R(a, b, c, d, e, F2, KK2, 13, 0);
     R(e, a, b, c, d, F2, KK2, 7, 4);
-    R(d, e, a, b, c, F2, KK2, 5, 13); /* #47 */
-    /* Parallel round 4 */
+    R(d, e, a, b, c, F2, KK2, 5, 13);
+
     R(c, d, e, a, b, F1, KK3, 15, 8);
     R(b, c, d, e, a, F1, KK3, 5, 6);
     R(a, b, c, d, e, F1, KK3, 8, 4);
@@ -327,8 +326,8 @@ void RMD160Transform(uint32_t state[5],
     R(a, b, c, d, e, F1, KK3, 12, 9);
     R(e, a, b, c, d, F1, KK3, 5, 7);
     R(d, e, a, b, c, F1, KK3, 15, 10);
-    R(c, d, e, a, b, F1, KK3, 8, 14); /* #63 */
-    /* Parallel round 5 */
+    R(c, d, e, a, b, F1, KK3, 8, 14);
+
     R(b, c, d, e, a, F0, KK4, 8, 12);
     R(a, b, c, d, e, F0, KK4, 5, 15);
     R(e, a, b, c, d, F0, KK4, 12, 10);
@@ -344,7 +343,7 @@ void RMD160Transform(uint32_t state[5],
     R(e, a, b, c, d, F0, KK4, 15, 0);
     R(d, e, a, b, c, F0, KK4, 13, 3);
     R(c, d, e, a, b, F0, KK4, 11, 9);
-    R(b, c, d, e, a, F0, KK4, 11, 11); /* #79 */
+    R(b, c, d, e, a, F0, KK4, 11, 11);
 
     t = state[1] + cc + d;
     state[1] = state[2] + dd + e;
