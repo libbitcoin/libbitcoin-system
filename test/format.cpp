@@ -21,7 +21,7 @@
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 
-BOOST_AUTO_TEST_CASE(encode)
+BOOST_AUTO_TEST_CASE(encode_test)
 {
     const std::string hex_str = "10a7fd15cb45bda9e90e19a15f";
     BOOST_REQUIRE(hex_str.size() % 2 == 0);

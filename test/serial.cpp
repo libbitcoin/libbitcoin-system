@@ -21,7 +21,7 @@
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 
-BOOST_AUTO_TEST_CASE(serialize)
+BOOST_AUTO_TEST_CASE(serialize_test)
 {
     const std::string rawdat_repr =
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000";
