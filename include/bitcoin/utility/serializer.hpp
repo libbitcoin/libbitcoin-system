@@ -53,18 +53,23 @@ class serializer
 public:
     serializer(const Iterator begin);
 
-    /**
-     * Equivalent to calling write_byte/write_N_bytes depending
-     * on the size of the passed value.
-     * For instance a uint32_t value is equivalent to write_4_bytes(value).
-     */
-    template <typename T>
-    void write_uint_auto(T value);
-
+    /* These write data in little endian format: */
     void write_byte(uint8_t value);
     void write_2_bytes(uint16_t value);
     void write_4_bytes(uint32_t value);
     void write_8_bytes(uint64_t value);
+
+    /**
+     * Encodes an unsigned integer in big-endian format.
+     */
+    template <typename T>
+    void write_big_endian(T n);
+
+    /**
+     * Encodes an unsigned integer in little-endian format.
+     */
+    template <typename T>
+    void write_little_endian(T n);
 
     /**
      * Variable uints are usually used for sizes.
@@ -143,18 +148,23 @@ class deserializer
 public:
     deserializer(const Iterator begin, const Iterator end);
 
-    /**
-     * Equivalent to calling read_byte/read_N_bytes depending
-     * on the size of the template parameter.
-     * For instance a uint32_t parameter is equivalent to read_4_bytes().
-     */
-    template <typename T>
-    const T read_uint_auto();
-
+    /* These read data in little endian format: */
     uint8_t read_byte();
     uint16_t read_2_bytes();
     uint32_t read_4_bytes();
     uint64_t read_8_bytes();
+
+    /**
+     * Reads an unsigned integer that has been encoded in big endian format.
+     */
+    template <typename T>
+    T read_big_endian();
+
+    /**
+     * Reads an unsigned integer that has been encoded in little endian format.
+     */
+    template <typename T>
+    T read_little_endian();
 
     /**
      * Variable uints are usually used for sizes.
@@ -179,6 +189,15 @@ public:
     std::string read_string();
 
     /**
+     * Read a fixed-length data block.
+     */
+    template<unsigned N>
+    byte_array<N> read_bytes();
+
+    template<unsigned N>
+    byte_array<N> read_bytes_reverse();
+
+    /**
      * Returns underlying iterator.
      */
     Iterator iterator() const;
@@ -194,14 +213,6 @@ private:
     // Throw if we prematurely reach the end.
     static void check_distance(
         Iterator it, const Iterator end, size_t distance);
-
-    template <typename T>
-    static T read_data_impl(
-        Iterator& begin, const Iterator end, bool reverse=false);
-
-    template <unsigned int N>
-    static void read_bytes(Iterator& begin, const Iterator& end,
-        std::array<uint8_t, N>& byte_array, bool reverse=false);
 
     Iterator iter_;
     const Iterator end_;

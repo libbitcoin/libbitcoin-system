@@ -265,7 +265,7 @@ stealth_bitfield calculate_bitfield(const data_chunk& stealth_data)
     const hash_digest index = bitcoin_hash(stealth_data);
     auto deserial = make_deserializer(
         index.begin(), index.begin() + bitfield_size);
-    stealth_bitfield bitfield = deserial.read_uint_auto<stealth_bitfield>();
+    auto bitfield = deserial.read_little_endian<stealth_bitfield>();
     return bitfield;
 }
 data_chunk read_ephemkey(const data_chunk& stealth_data)
@@ -285,7 +285,7 @@ void add_stealth_info(const data_chunk& stealth_data,
     auto write_func = [&](uint8_t *it)
     {
         auto serial = make_serializer(it);
-        serial.write_uint_auto(bitfield);
+        serial.write_little_endian(bitfield);
         serial.write_data(ephemkey);
         serial.write_byte(address.version());
         serial.write_short_hash(address.hash());

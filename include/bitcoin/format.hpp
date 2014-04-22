@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_FORMAT_HPP
 #define LIBBITCOIN_FORMAT_HPP
 
+#include <type_traits>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/sub_range.hpp>
 #include <boost/detail/endian.hpp>
@@ -41,45 +42,75 @@ void extend_data(D& chunk, const T& other)
     chunk.insert(std::end(chunk), std::begin(other), std::end(other));
 }
 
+#define VERIFY_UNSIGNED(T) static_assert(std::is_unsigned<T>::value, \
+    "The endian functions only work on unsigned types")
+
+template<typename T, typename Iterator>
+T from_big_endian(Iterator in)
+{
+    VERIFY_UNSIGNED(T);
+    T out = 0;
+    size_t i = sizeof(T);
+    while (0 < i)
+        out |= static_cast<T>(*in++) << (8 * --i);
+    return out;
+}
+
+template<typename T, typename Iterator>
+T from_little_endian(Iterator in)
+{
+    VERIFY_UNSIGNED(T);
+    T out = 0;
+    size_t i = 0;
+    while (i < sizeof(T))
+        out |= static_cast<T>(*in++) << (8 * i++);
+    return out;
+}
+
+template<typename T>
+byte_array<sizeof(T)> to_big_endian(T n)
+{
+    VERIFY_UNSIGNED(T);
+    byte_array<sizeof(T)> out;
+    for (auto i = out.rbegin(); i != out.rend(); ++i)
+    {
+        *i = n;
+        n >>= 8;
+    }
+    return out;
+}
+
+template<typename T>
+byte_array<sizeof(T)> to_little_endian(T n)
+{
+    VERIFY_UNSIGNED(T);
+    byte_array<sizeof(T)> out;
+    for (auto i = out.begin(); i != out.end(); ++i)
+    {
+        *i = n;
+        n >>= 8;
+    }
+    return out;
+}
+
+#undef VERIFY_UNSIGNED
+
 template<typename T>
 T cast_chunk(data_chunk chunk, bool reverse=false)
 {
-    #ifdef BOOST_LITTLE_ENDIAN
-        // do nothing
-    #elif BOOST_BIG_ENDIAN
-        reverse = !reverse;
-    #else
-        #error "Endian isn't defined!"
-    #endif
-
     if (reverse)
-        std::reverse(begin(chunk), end(chunk));
-
-    T value = 0;
-    for (size_t i = 0; i < sizeof(T) && i < chunk.size(); ++i)
-        value += static_cast<T>(chunk[i]) << (i * 8);
-    return value;
+        return from_big_endian<T>(chunk.begin());
+    else
+        return from_little_endian<T>(chunk.begin());
 }
 
 template<typename T>
 data_chunk uncast_type(T value, bool reverse=false)
 {
-    // TODO Future versions of boost will have boost::native_to_little(value);
-    #ifdef BOOST_LITTLE_ENDIAN
-        // do nothing
-    #elif BOOST_BIG_ENDIAN
-        reverse = !reverse;
-    #else
-        #error "Endian isn't defined!"
-    #endif
-
-    data_chunk chunk(sizeof(T));
-    uint8_t* value_begin = reinterpret_cast<uint8_t*>(&value);
-    std::copy(value_begin, value_begin + sizeof(T), chunk.begin());
-
     if (reverse)
-        std::reverse(begin(chunk), end(chunk));
-    return chunk;
+        return to_data_chunk(to_big_endian(value));
+    else
+        return to_data_chunk(to_little_endian(value));
 }
 
 template<typename T>

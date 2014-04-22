@@ -29,13 +29,6 @@ serializer<Iterator>::serializer(const Iterator begin)
 }
 
 template <typename Iterator>
-template <typename T>
-void serializer<Iterator>::write_uint_auto(T value)
-{
-    write_data(uncast_type(value));
-}
-
-template <typename Iterator>
 void serializer<Iterator>::write_byte(uint8_t value)
 {
     *iter_ = value;
@@ -44,17 +37,30 @@ void serializer<Iterator>::write_byte(uint8_t value)
 template <typename Iterator>
 void serializer<Iterator>::write_2_bytes(uint16_t value)
 {
-    write_uint_auto(value);
+    write_little_endian(value);
 }
 template <typename Iterator>
 void serializer<Iterator>::write_4_bytes(uint32_t value)
 {
-    write_uint_auto(value);
+    write_little_endian(value);
 }
 template <typename Iterator>
 void serializer<Iterator>::write_8_bytes(uint64_t value)
 {
-    write_uint_auto(value);
+    write_little_endian(value);
+}
+
+template <typename Iterator>
+template <typename T>
+void serializer<Iterator>::write_big_endian(T n)
+{
+    return write_data(to_big_endian(n));
+}
+template <typename Iterator>
+template <typename T>
+void serializer<Iterator>::write_little_endian(T n)
+{
+    return write_data(to_little_endian(n));
 }
 
 template <typename Iterator>
@@ -93,7 +99,7 @@ void serializer<Iterator>::write_network_address(network_address_type addr)
 {
     write_8_bytes(addr.services);
     write_data(addr.ip);
-    write_data(uncast_type(addr.port, true));
+    write_big_endian<uint16_t>(addr.port);
 }
 
 template <typename Iterator>
@@ -179,13 +185,6 @@ deserializer<Iterator>::deserializer(const Iterator begin, const Iterator end)
 }
 
 template <typename Iterator>
-template <typename T>
-const T deserializer<Iterator>::read_uint_auto()
-{
-    return read_data_impl<T>(iter_, end_);
-}
-
-template <typename Iterator>
 uint8_t deserializer<Iterator>::read_byte()
 {
     check_distance(iter_, end_, 1);
@@ -194,17 +193,30 @@ uint8_t deserializer<Iterator>::read_byte()
 template <typename Iterator>
 uint16_t deserializer<Iterator>::read_2_bytes()
 {
-    return read_uint_auto<uint16_t>();
+    return read_little_endian<uint16_t>();
 }
 template <typename Iterator>
 uint32_t deserializer<Iterator>::read_4_bytes()
 {
-    return read_uint_auto<uint32_t>();
+    return read_little_endian<uint32_t>();
 }
 template <typename Iterator>
 uint64_t deserializer<Iterator>::read_8_bytes()
 {
-    return read_uint_auto<uint64_t>();
+    return read_little_endian<uint64_t>();
+}
+
+template <typename Iterator>
+template <typename T>
+T deserializer<Iterator>::read_big_endian()
+{
+    return from_big_endian<T>(read_bytes<sizeof(T)>().begin());
+}
+template <typename Iterator>
+template <typename T>
+T deserializer<Iterator>::read_little_endian()
+{
+    return from_little_endian<T>(read_bytes<sizeof(T)>().begin());
 }
 
 template <typename Iterator>
@@ -238,25 +250,21 @@ network_address_type deserializer<Iterator>::read_network_address()
     network_address_type addr;
     addr.services = read_8_bytes();
     // Read IP address
-    read_bytes<16>(iter_, end_, addr.ip);
-    addr.port = read_data_impl<uint16_t>(iter_, end_, true);
+    addr.ip = read_bytes<16>();
+    addr.port = read_big_endian<uint16_t>();
     return addr;
 }
 
 template <typename Iterator>
 hash_digest deserializer<Iterator>::read_hash()
 {
-    hash_digest hash;
-    read_bytes<32>(iter_, end_, hash, true);
-    return hash;
+    return read_bytes_reverse<hash_size>();
 }
 
 template <typename Iterator>
 short_hash deserializer<Iterator>::read_short_hash()
 {
-    short_hash hash;
-    read_bytes<20>(iter_, end_, hash, true);
-    return hash;
+    return read_bytes_reverse<short_hash_size>();
 }
 
 template <typename Iterator>
@@ -274,6 +282,28 @@ std::string deserializer<Iterator>::read_string()
     uint64_t string_size = read_variable_uint();
     // Warning: conversion from uint64_t to size_t, possible loss of data.
     return read_fixed_string((size_t)string_size);
+}
+
+template <typename Iterator>
+template<unsigned N>
+byte_array<N> deserializer<Iterator>::read_bytes()
+{
+    check_distance(iter_, end_, N);
+    byte_array<N> out;
+    std::copy(iter_, iter_ + N, out.begin());
+    iter_ += N;
+    return out;
+}
+
+template <typename Iterator>
+template<unsigned N>
+byte_array<N> deserializer<Iterator>::read_bytes_reverse()
+{
+    check_distance(iter_, end_, N);
+    byte_array<N> out;
+    std::reverse_copy(iter_, iter_ + N, out.begin());
+    iter_ += N;
+    return out;
 }
 
 /**
@@ -309,41 +339,6 @@ void deserializer<Iterator>::check_distance(
         // If so move to next value.
         ++it;
     }
-}
-
-template <typename Iterator>
-template <typename T>
-T deserializer<Iterator>::read_data_impl(
-    Iterator& begin, const Iterator end, bool reverse)
-{
-    check_distance(begin, end, sizeof(T));
-    data_chunk chunk(begin, begin + sizeof(T));
-    T val = cast_chunk<T>(chunk, reverse);
-    begin += sizeof(T);
-    return val;
-}
-
-template <typename Iterator>
-template <unsigned int N>
-void deserializer<Iterator>::read_bytes(
-    Iterator& begin, const Iterator& end,
-    std::array<uint8_t, N>& bytes, bool reverse)
-{
-    check_distance(begin, end, bytes.size());
-#ifdef BOOST_LITTLE_ENDIAN
-    // do nothing
-#elif BOOST_BIG_ENDIAN
-    reverse = !reverse;
-#else
-    #error "Endian isn't defined!"
-#endif
-
-    if (reverse)
-        std::reverse_copy(
-            begin, begin + bytes.size(), bytes.begin());
-    else
-        std::copy(begin, begin + bytes.size(), bytes.begin());
-    begin += bytes.size();
 }
 
 template <typename Iterator>
