@@ -139,6 +139,11 @@ Data Types
 These core types are used around the library in multiple places where
 working with hashes or raw data chunks.
 
+.. cpp:type:: byte_array<size>
+
+   A fixed-length array of raw bytes. This is the same as
+   ``std::array<uint8_t, size>``.
+
 .. cpp:type:: data_chunk
 
    Raw bytes. A chunk of data. This type is equivalent to
@@ -146,13 +151,13 @@ working with hashes or raw data chunks.
 
 .. cpp:type:: hash_digest
 
-   32 byte result of a SHA256 hash. Same type as ``std::array<uint8_t, 32>``.
+   32 byte result of a SHA256 hash. Same type as ``byte_array<32>``.
 
 .. cpp:type:: short_hash
 
    20 byte result of a RIPEMD hash. Typically used for decoded
    Bitcoin addresses (RIPEMD hash of public key). Same as
-   ``std::array<uint8_t, 20>``.
+   ``byte_array<20>``.
 
 Additionally helper functions exist for working with these types.
 

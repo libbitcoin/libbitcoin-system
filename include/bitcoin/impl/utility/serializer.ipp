@@ -327,9 +327,9 @@ template <typename Iterator>
 template <unsigned int N>
 void deserializer<Iterator>::read_bytes(
     Iterator& begin, const Iterator& end,
-    std::array<uint8_t, N>& byte_array, bool reverse)
+    std::array<uint8_t, N>& bytes, bool reverse)
 {
-    check_distance(begin, end, byte_array.size());
+    check_distance(begin, end, bytes.size());
 #ifdef BOOST_LITTLE_ENDIAN
     // do nothing
 #elif BOOST_BIG_ENDIAN
@@ -340,10 +340,10 @@ void deserializer<Iterator>::read_bytes(
 
     if (reverse)
         std::reverse_copy(
-            begin, begin + byte_array.size(), byte_array.begin());
+            begin, begin + bytes.size(), bytes.begin());
     else
-        std::copy(begin, begin + byte_array.size(), byte_array.begin());
-    begin += byte_array.size();
+        std::copy(begin, begin + bytes.size(), bytes.begin());
+    begin += bytes.size();
 }
 
 template <typename Iterator>

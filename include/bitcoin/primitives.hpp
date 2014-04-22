@@ -32,7 +32,7 @@ namespace libbitcoin {
 
 typedef std::vector<hash_digest> block_locator_type;
 
-typedef std::array<uint8_t, 16> ip_address_type;
+typedef byte_array<16> ip_address_type;
 
 struct BC_API network_address_type
 {

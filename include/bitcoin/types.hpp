@@ -43,18 +43,26 @@ DECLARE_PTR_TYPE(channel);
 
 typedef std::shared_ptr<tcp::socket> socket_ptr;
 
+template<size_t size> using byte_array = std::array<uint8_t, size>;
+
 constexpr size_t short_hash_size = 20;
 constexpr size_t hash_size = 32;
 constexpr size_t long_hash_size = 64;
 
 // Standard hash containers.
-typedef std::array<uint8_t, short_hash_size> short_hash;
-typedef std::array<uint8_t, hash_size> hash_digest;
-typedef std::array<uint8_t, long_hash_size> long_hash;
+typedef byte_array<short_hash_size> short_hash;
+typedef byte_array<hash_size> hash_digest;
+typedef byte_array<long_hash_size> long_hash;
 
 // Arbitrary byte storage.
 typedef std::vector<uint8_t> data_chunk;
 typedef std::vector<data_chunk> data_stack;
+
+template<typename T>
+data_chunk to_data_chunk(T iterable)
+{
+    return data_chunk(std::begin(iterable), std::end(iterable));
+}
 
 // A list of indices. Used for creating block_locator objects or
 // Storing list of unconfirmed input indexes in tx pool.

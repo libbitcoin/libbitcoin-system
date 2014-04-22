@@ -23,7 +23,7 @@ using namespace bc;
 constexpr size_t sha512_length = SHA512_DIGEST_LENGTH;
 constexpr size_t sha512_block_size = 128;
 
-typedef std::array<uint8_t, sha512_length> long_hash;
+typedef byte_array<sha512_length> long_hash;
 
 template <typename HashType, size_t block_size>
 HashType generate_hmac(const data_chunk& key, const data_chunk& data,
