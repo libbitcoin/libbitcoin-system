@@ -19,10 +19,12 @@
  */
 #include <bitcoin/network/handshake.hpp>
 
+#ifndef NO_CURL
+#include <curl/curl.h>
+#endif
 #include <functional>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
-#include <curl/curl.h>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/version.hpp>
 
@@ -119,6 +121,7 @@ void handshake::discover_external_ip(discover_ip_handler handle_discover)
             this, handle_discover));
 }
 
+#ifndef NO_CURL
 bool handshake::lookup_external(const std::string& website,
     ip_address_type& ip)
 {
@@ -157,6 +160,7 @@ bool handshake::lookup_external(const std::string& website,
         ip[i + 12] = boost::lexical_cast<unsigned int>(results[i + 1]);
     return true;
 }
+#endif
 
 ip_address_type handshake::localhost_ip()
 {
@@ -167,13 +171,18 @@ ip_address_type handshake::localhost_ip()
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
 {
     template_version_.address_me.ip = localhost_ip();
+
+#ifndef NO_CURL
     std::vector<ip_address_type> corroborate_ips;
+
     // Lookup our IP address from a bunch of hosts
     ip_address_type lookup_ip;
     if (lookup_external("checkip.dyndns.org", lookup_ip))
         corroborate_ips.push_back(lookup_ip);
     if (lookup_external("whatismyip.org", lookup_ip))
         corroborate_ips.push_back(lookup_ip);
+
+
     if (corroborate_ips.empty())
     {
         handle_discover(error::bad_stream, ip_address_type());
@@ -190,6 +199,8 @@ void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
             return;
         }
     }
+#endif
+
     handle_discover(std::error_code(), template_version_.address_me.ip);
 }
 

@@ -128,7 +128,7 @@ leveldb::Slice slice_block_hash(const hash_digest& block_hash);
 template <typename Point>
 data_chunk create_spent_key(const Point& point)
 {
-    data_chunk spent_key(hash_digest_size + 4);
+    data_chunk spent_key(hash_size + 4);
     auto serial = make_serializer(spent_key.begin());
     serial.write_hash(point.hash);
     serial.write_4_bytes(point.index);

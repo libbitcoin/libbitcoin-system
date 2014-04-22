@@ -145,9 +145,14 @@
  *
  * @subsection hashing Hashing
  *
- * - @link libbitcoin::generate_ripemd_hash generate_ripemd_hash @endlink
- * - @link libbitcoin::generate_sha256_hash generate_sha256_hash @endlink
- * - @link libbitcoin::generate_sha256_checksum generate_sha256_checksum @endlink
+ * - @link libbitcoin::short_hash ripemd160_hash @endlink
+ * - @link libbitcoin::short_hash sha1_hash @endlink
+ * - @link libbitcoin::hash_digest sha256_hash @endlink
+ * - @link libbitcoin::long_hash sha512_hash @endlink
+ * - @link libbitcoin::long_hash hmac_sha512_hash @endlink
+ * - @link libbitcoin::hash_digest bitcoin_hash @endlink
+ * - @link libbitcoin::short_hash bitcoin_short_hash @endlink
+ * - @link libbitcoin::uint32_t bitcoin_checksum @endlink
  *
  * @subsection base58 Base58
  *

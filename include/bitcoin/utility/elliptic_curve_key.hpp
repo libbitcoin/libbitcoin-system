@@ -38,21 +38,21 @@ public:
     BC_API elliptic_curve_key(const elliptic_curve_key& other);
     BC_API elliptic_curve_key& operator=(const elliptic_curve_key& other);
 
-    BC_API bool new_keypair(bool compressed=true);
-    BC_API bool set_secret(
-        const secret_parameter& secret, bool compressed=true);
+    BC_API void set_compressed(bool compressed = true);
+    BC_API bool compressed() const;
+
+    BC_API bool set_secret(const secret_parameter& secret);
     BC_API secret_parameter secret() const;
-    BC_API data_chunk sign(hash_digest hash) const;
 
     BC_API bool set_public_key(const data_chunk& pubkey);
     BC_API data_chunk public_key() const;
-    BC_API bool verify(hash_digest hash, const data_chunk& signature);
 
-    BC_API void set_compressed(bool compressed);
+    BC_API bool new_keypair();
+    BC_API data_chunk sign(hash_digest hash) const;
+    BC_API bool verify(hash_digest hash, const data_chunk& signature);
 
 private:
     bool initialize();
-    void use_compressed();
 
     EC_KEY* key_;
 };

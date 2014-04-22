@@ -1,4 +1,4 @@
-/* libsodium: crypto_hash_sha256.h, v0.4.5 2014/04/16 */
+/* libsodium: crypto_auth_hmacsha512.h, v0.4.5 2014/04/16 */
 /*
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
@@ -23,43 +23,40 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef LIBBITCOIN_SHA256_H
-#define LIBBITCOIN_SHA256_H
+#ifndef LIBBITCOIN_HMACSHA512_H
+#define LIBBITCOIN_HMACSHA512_H
+
+#include <bitcoin/utility/external/sha512.h>
+#include <bitcoin/utility/external/hmac_sha512.h>
 
 #include <stdint.h>
 #include <stddef.h>
 
-#define SHA256_STATE_LENGTH 8U
-#define SHA256_COUNT_LENGTH 2U
-#define SHA256_BLOCK_LENGTH 64U
-#define SHA256_DIGEST_LENGTH 32U
+#define HMACSHA512_KEY_LENGTH 32U
+#define HMACSHA512_DIGEST_LENGTH 64U
 
 #ifdef __cplusplus
 extern "C" 
 {
 #endif
 
-typedef struct SHA256CTX
+typedef struct HMACSHA512CTX
 {
-    uint32_t state[SHA256_STATE_LENGTH];
-    uint32_t count[SHA256_COUNT_LENGTH];
-    uint8_t buf[SHA256_BLOCK_LENGTH];
-} SHA256CTX;
+    SHA512CTX ictx;
+    SHA512CTX octx;
+} HMACSHA512CTX;
 
-/* Name is temporarily deconflicted with openssl using __. */
-void SHA256__(const uint8_t* input, size_t length,
-    uint8_t digest[SHA256_DIGEST_LENGTH]);
+void HMACSHA512(const uint8_t* input, size_t length, const uint8_t* key,
+    size_t key_lengt, uint8_t digest[HMACSHA512_DIGEST_LENGTH]);
 
-void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH]);
+void HMACSHA512Final(HMACSHA512CTX* context,
+    uint8_t digest[HMACSHA512_DIGEST_LENGTH]);
 
-void SHA256Init(SHA256CTX* context);
+void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
+    size_t key_length);
 
-void SHA256Pad(SHA256CTX* context);
-
-void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
-    const uint8_t block[SHA256_BLOCK_LENGTH]);
-
-void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length);
+void HMACSHA512Update(HMACSHA512CTX* context, const uint8_t* input,
+    size_t length);
 
 #ifdef __cplusplus
 }

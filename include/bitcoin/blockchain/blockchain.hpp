@@ -68,7 +68,7 @@ public:
 
     typedef fetch_handler<input_point> fetch_handler_spend;
 
-    BC_API struct history_row
+    struct BC_API history_row
     {
         output_point output;
         size_t output_height;
@@ -80,7 +80,7 @@ public:
     typedef std::function<void (const std::error_code&, const history_list&)>
         fetch_handler_history;
 
-    BC_API struct stealth_row
+    struct BC_API stealth_row
     {
         data_chunk ephemkey;
         payment_address address;

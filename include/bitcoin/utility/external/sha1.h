@@ -8,29 +8,37 @@
 #define LIBBITCOIN_SHA1_H
 
 #include <stdint.h>
-#include <boost/detail/endian.hpp>
+#include <stddef.h>
 
-#define SHA1_BLOCK_LENGTH  64U
+#define SHA1_STATE_LENGTH 5U
+#define SHA1_BLOCK_LENGTH 64U
 #define SHA1_DIGEST_LENGTH 20U
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
 
 typedef struct SHA1CTX
 {
-    uint32_t state[5];
+    uint32_t state[SHA1_STATE_LENGTH];
     uint64_t count;
     uint8_t buffer[SHA1_BLOCK_LENGTH];
 } SHA1CTX;
 
-void SHA1(const uint8_t* input, uint32_t length,
+void SHA1(const uint8_t* input, size_t length,
     uint8_t digest[SHA1_DIGEST_LENGTH]);
+
 void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH]);
+
 void SHA1Init(SHA1CTX* context);
+
 void SHA1Pad(SHA1CTX* context);
-void SHA1Transform(uint32_t state[5], const uint8_t block[SHA1_BLOCK_LENGTH]);
-void SHA1Update(SHA1CTX* context, const uint8_t* input, uint32_t length);
+
+void SHA1Transform(uint32_t state[SHA1_STATE_LENGTH], 
+    const uint8_t block[SHA1_BLOCK_LENGTH]);
+
+void SHA1Update(SHA1CTX* context, const uint8_t* input, size_t length);
 
 #ifdef __cplusplus
 }

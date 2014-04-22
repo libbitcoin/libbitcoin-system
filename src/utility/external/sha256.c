@@ -1,4 +1,4 @@
-/* libsodium: crypto_hash_sha256.h, v0.4.5 2014/04/16 */
+/* libsodium: hash_sha256.c, v0.4.5 2014/04/16 */
 /*
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
@@ -29,7 +29,7 @@
 #include <string.h>
 #include <stdint.h>
 
-uint32_t be32dec(const void* pp)
+static uint32_t be32dec(const void* pp)
 {
     const uint8_t* p = (uint8_t const*)pp;
 
@@ -37,7 +37,7 @@ uint32_t be32dec(const void* pp)
         ((uint32_t)(p[1]) << 16) + ((uint32_t)(p[0]) << 24));
 }
 
-void be32enc(void* pp, uint32_t x)
+static void be32enc(void* pp, uint32_t x)
 {
     uint8_t* p = (uint8_t*)pp;
 
@@ -47,7 +47,7 @@ void be32enc(void* pp, uint32_t x)
     p[0] = (x >> 24) & 0xff;
 }
 
-void be32enc_vect(uint8_t* dst, const uint32_t* src, size_t len)
+static void be32enc_vect(uint8_t* dst, const uint32_t* src, size_t len)
 {
     size_t i;
     for (i = 0; i < len / 4; i++) 
@@ -56,7 +56,7 @@ void be32enc_vect(uint8_t* dst, const uint32_t* src, size_t len)
     }
 }
 
-void be32dec_vect(uint32_t* dst, const uint8_t* src, size_t len)
+static void be32dec_vect(uint32_t* dst, const uint8_t* src, size_t len)
 {
     size_t i;
     for (i = 0; i < len / 4; i++) 
@@ -65,29 +65,29 @@ void be32dec_vect(uint32_t* dst, const uint8_t* src, size_t len)
     }
 }
 
-#define Ch(x, y, z)     ((x & (y ^ z)) ^ z)
-#define Maj(x, y, z)    ((x & (y | z)) | (y & z))
-#define SHR(x, n)       (x >> n)
-#define ROTR(x, n)      ((x >> n) | (x << (32 - n)))
-#define S0(x)           (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
-#define S1(x)           (ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
-#define s0(x)           (ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3))
-#define s1(x)           (ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10))
+#define Ch(x, y, z)  ((x & (y ^ z)) ^ z)
+#define Maj(x, y, z) ((x & (y | z)) | (y & z))
+#define SHR(x, n)    (x >> n)
+#define ROTR(x, n)   ((x >> n) | (x << (32 - n)))
+#define S0(x)        (ROTR(x, 2) ^ ROTR(x, 13) ^ ROTR(x, 22))
+#define S1(x)        (ROTR(x, 6) ^ ROTR(x, 11) ^ ROTR(x, 25))
+#define s0(x)        (ROTR(x, 7) ^ ROTR(x, 18) ^ SHR(x, 3))
+#define s1(x)        (ROTR(x, 17) ^ ROTR(x, 19) ^ SHR(x, 10))
 
-#define RND(a, b, c, d, e, f, g, h, k)                              \
-    t0 = h + S1(e) + Ch(e, f, g) + k;                               \
-    t1 = S0(a) + Maj(a, b, c);                                      \
-    d += t0;                                                        \
-    h  = t0 + t1;
+#define RND(a, b, c, d, e, f, g, h, k) \
+    t0 = h + S1(e) + Ch(e, f, g) + k;  \
+    t1 = S0(a) + Maj(a, b, c); \
+    d += t0; \
+    h = t0 + t1;
 
-#define RNDr(S, W, i, k)                                            \
-    RND(S[(64 - i) % 8], S[(65 - i) % 8],                           \
-    S[(66 - i) % 8], S[(67 - i) % 8],                               \
-    S[(68 - i) % 8], S[(69 - i) % 8],                               \
-    S[(70 - i) % 8], S[(71 - i) % 8],                               \
+#define RNDr(S, W, i, k) \
+    RND(S[(64 - i) % 8], S[(65 - i) % 8], \
+    S[(66 - i) % 8], S[(67 - i) % 8], \
+    S[(68 - i) % 8], S[(69 - i) % 8], \
+    S[(70 - i) % 8], S[(71 - i) % 8], \
     W[i] + k)
 
-static unsigned char PAD[64] =
+static unsigned char PAD[SHA256_BLOCK_LENGTH] =
 {
     0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -95,8 +95,7 @@ static unsigned char PAD[64] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-/* Name is temporarily deconflicted with openssl using __. */
-void SHA256__(const uint8_t* input, uint32_t length,
+void SHA256__(const uint8_t* input, size_t length,
     uint8_t digest[SHA256_DIGEST_LENGTH])
 {
     SHA256CTX context;
@@ -105,8 +104,7 @@ void SHA256__(const uint8_t* input, uint32_t length,
     SHA256Final(&context, digest);
 }
 
-void SHA256Final(SHA256CTX* context, 
-    uint8_t digest[SHA256_DIGEST_LENGTH])
+void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH])
 {
     SHA256Pad(context);
     be32enc_vect(digest, context->state, SHA256_DIGEST_LENGTH);
@@ -136,18 +134,20 @@ void SHA256Pad(SHA256CTX* context)
 
     r = (context->count[1] >> 3) & 0x3f;
     plen = (r < 56) ? (56 - r) : (120 - r);
-    SHA256Update(context, PAD, (uint64_t)plen);
+
+    SHA256Update(context, PAD, plen);
     SHA256Update(context, len, 8);
 }
 
-void SHA256Transform(uint32_t state[8],
+void SHA256Transform(uint32_t state[SHA256_STATE_LENGTH],
     const uint8_t block[SHA256_BLOCK_LENGTH])
 {
     int i;
     uint32_t W[64];
     uint32_t S[8];
     uint32_t t0, t1;
-    be32dec_vect(W, block, 64);
+
+    be32dec_vect(W, block, SHA256_BLOCK_LENGTH);
 
     for (i = 16; i < 64; i++)
     {
@@ -221,7 +221,8 @@ void SHA256Transform(uint32_t state[8],
     RNDr(S, W, 62, 0xbef9a3f7);
     RNDr(S, W, 63, 0xc67178f2);
 
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < 8; i++) 
+    {
         state[i] += S[i];
     }
 
@@ -231,20 +232,20 @@ void SHA256Transform(uint32_t state[8],
     zeroize((void*)&t1, sizeof t1);
 }
 
-void SHA256Update(SHA256CTX* context, const uint8_t* input, uint32_t length)
+void SHA256Update(SHA256CTX* context, const uint8_t* input, size_t length)
 {
-    uint32_t bitlength[2];
+    uint32_t bitlen[2];
     uint32_t r = (context->count[1] >> 3) & 0x3f;
 
-    bitlength[1] = length << 3;
-    bitlength[0] = length >> 29;
+    bitlen[1] = ((uint32_t)length) << 3;
+    bitlen[0] = (uint32_t)(length >> 29);
 
-    if ((context->count[1] += bitlength[1]) < bitlength[1])
+    if ((context->count[1] += bitlen[1]) < bitlen[1])
     {
         context->count[0]++;
     }
 
-    context->count[0] += bitlength[0];
+    context->count[0] += bitlen[0];
 
     if (length < 64 - r)
     {
@@ -254,6 +255,7 @@ void SHA256Update(SHA256CTX* context, const uint8_t* input, uint32_t length)
 
     memcpy(&context->buf[r], input, 64 - r);
     SHA256Transform(context->state, context->buf);
+
     input += 64 - r;
     length -= 64 - r;
 

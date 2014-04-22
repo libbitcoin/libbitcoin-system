@@ -17,38 +17,59 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <boost/detail/endian.hpp>
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
-//#if BYTE_ORDER == LITTLE_ENDIAN
-#ifdef BOOST_ENDIAN_LITTLE_BYTE
-    #define blk0(b,i) (b->l[i] = \
-    (rol(b->l[i],24)&0xFF00FF00)|(rol(b->l[i],8)&0x00FF00FF))
+#if defined(BOOST_ENDIAN_LITTLE_BYTE) || defined(BOOST_ENDIAN_LITTLE_WORD)
+    #define blk0(b, i) (b->l[i] = \
+        (rol(b->l[i], 24) & 0xFF00FF00) | \
+        (rol(b->l[i], 8) & 0x00FF00FF))
+//#elif BOOST_ENDIAN_BIG_BYTE
 #else
-    # define blk0(b,i) b->l[i]
+    #define blk0(b, i) b->l[i]
+//#else
+//    #error Endianess not supported.
 #endif
 
-#define blk(b,i) (b->l[i&15] = \
-    rol(b->l[(i+13)&15]^b->l[(i+8)&15]^b->l[(i+2)&15]^b->l[i&15],1))
+#define blk(b, i) (b->l[i & 15] = \
+    rol(b->l[(i + 13) & 15]^ \
+        b->l[(i + 8) & 15]^ \
+        b->l[(i + 2) & 15]^ \
+        b->l[i & 15], 1))
 
-#define R0(b,v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(b,i)+0x5A827999+rol(v,5); w=rol(w,30);
-#define R1(b,v,w,x,y,z,i) z+=((w&(x^y))^y)+blk(b,i)+0x5A827999+rol(v,5); w=rol(w,30);
-#define R2(b,v,w,x,y,z,i) z+=(w^x^y)+blk(b,i)+0x6ED9EBA1+rol(v,5); w=rol(w,30);
-#define R3(b,v,w,x,y,z,i) z+=(((w|x)&y)|(w&x))+blk(b,i)+0x8F1BBCDC+rol(v,5); w=rol(w,30);
-#define R4(b,v,w,x,y,z,i) z+=(w^x^y)+blk(b,i)+0xCA62C1D6+rol(v,5); w=rol(w,30);
+#define R0(b, v, w, x, y, z, i) \
+    z += ((w & (x ^ y)) ^ y) + blk0(b, i) + 0x5A827999 + rol(v, 5); \
+    w = rol(w, 30);
+
+#define R1(b, v, w, x, y, z, i) \
+    z += ((w & (x ^ y)) ^ y) + blk(b, i) + 0x5A827999 + rol(v, 5); \
+    w = rol(w, 30);
+
+#define R2(b, v, w, x, y, z, i) \
+    z += (w ^ x ^ y) + blk(b, i) + 0x6ED9EBA1 + rol(v, 5); \
+    w = rol(w, 30);
+
+#define R3(b, v, w, x, y, z, i) \
+    z += (((w | x) & y) | (w & x)) + blk(b, i) + 0x8F1BBCDC + rol(v, 5); \
+    w = rol(w, 30);
+
+#define R4(b, v, w, x, y, z, i) \
+    z += (w ^ x ^ y) + blk(b, i)+ 0xCA62C1D6 + rol(v, 5); \
+    w = rol(w, 30);
 
 typedef union {
     uint8_t c[64];
     uint32_t l[16];
 } CHAR64LONG16;
 
-void SHA1(const uint8_t* input, uint32_t length,
+void SHA1(const uint8_t* input, size_t length,
     uint8_t digest[SHA1_DIGEST_LENGTH])
 {
-    SHA1CTX ctx;
-    SHA1Init(&ctx);
-    SHA1Update(&ctx, input, length);
-    SHA1Final(&ctx, digest);
+    SHA1CTX context;
+    SHA1Init(&context);
+    SHA1Update(&context, input, length);
+    SHA1Final(&context, digest);
 }
 
 void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH])
@@ -67,6 +88,7 @@ void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH])
 void SHA1Init(SHA1CTX* context)
 {
     context->count = 0;
+
     context->state[0] = 0x67452301;
     context->state[1] = 0xEFCDAB89;
     context->state[2] = 0x98BADCFE;
@@ -77,23 +99,26 @@ void SHA1Init(SHA1CTX* context)
 void SHA1Pad(SHA1CTX* context)
 {
     uint8_t i;
-    uint8_t finalcount[8];
+    uint8_t len[8];
 
     for (i = 0; i < 8; i++)
     {
-        finalcount[i] = (uint8_t)((context->count >>
-            ((7 - (i & 7)) * 8)) & 255);
+        len[i] = (uint8_t)
+            ((context->count >> ((7 - (i & 7)) * 8)) & 255);
     }
 
     SHA1Update(context, (uint8_t*)"\200", 1);
 
     while ((context->count & 504) != 448)
+    {
         SHA1Update(context, (uint8_t*)"\0", 1);
+    }
 
-    SHA1Update(context, finalcount, 8);
+    SHA1Update(context, len, 8);
 }
 
-void SHA1Transform(uint32_t state[5], const uint8_t block[SHA1_BLOCK_LENGTH])
+void SHA1Transform(uint32_t state[SHA1_STATE_LENGTH], 
+    const uint8_t block[SHA1_BLOCK_LENGTH])
 {
     uint32_t a, b, c, d, e;
     uint8_t workspace[SHA1_BLOCK_LENGTH];
@@ -107,26 +132,86 @@ void SHA1Transform(uint32_t state[5], const uint8_t block[SHA1_BLOCK_LENGTH])
     d = state[3];
     e = state[4];
 
-    R0(w, a, b, c, d, e, 0);  R0(w, e, a, b, c, d, 1);  R0(w, d, e, a, b, c, 2);  R0(w, c, d, e, a, b, 3);
-    R0(w, b, c, d, e, a, 4);  R0(w, a, b, c, d, e, 5);  R0(w, e, a, b, c, d, 6);  R0(w, d, e, a, b, c, 7);
-    R0(w, c, d, e, a, b, 8);  R0(w, b, c, d, e, a, 9);  R0(w, a, b, c, d, e, 10); R0(w, e, a, b, c, d, 11);
-    R0(w, d, e, a, b, c, 12); R0(w, c, d, e, a, b, 13); R0(w, b, c, d, e, a, 14); R0(w, a, b, c, d, e, 15);
-    R1(w, e, a, b, c, d, 16); R1(w, d, e, a, b, c, 17); R1(w, c, d, e, a, b, 18); R1(w, b, c, d, e, a, 19);
-    R2(w, a, b, c, d, e, 20); R2(w, e, a, b, c, d, 21); R2(w, d, e, a, b, c, 22); R2(w, c, d, e, a, b, 23);
-    R2(w, b, c, d, e, a, 24); R2(w, a, b, c, d, e, 25); R2(w, e, a, b, c, d, 26); R2(w, d, e, a, b, c, 27);
-    R2(w, c, d, e, a, b, 28); R2(w, b, c, d, e, a, 29); R2(w, a, b, c, d, e, 30); R2(w, e, a, b, c, d, 31);
-    R2(w, d, e, a, b, c, 32); R2(w, c, d, e, a, b, 33); R2(w, b, c, d, e, a, 34); R2(w, a, b, c, d, e, 35);
-    R2(w, e, a, b, c, d, 36); R2(w, d, e, a, b, c, 37); R2(w, c, d, e, a, b, 38); R2(w, b, c, d, e, a, 39);
-    R3(w, a, b, c, d, e, 40); R3(w, e, a, b, c, d, 41); R3(w, d, e, a, b, c, 42); R3(w, c, d, e, a, b, 43);
-    R3(w, b, c, d, e, a, 44); R3(w, a, b, c, d, e, 45); R3(w, e, a, b, c, d, 46); R3(w, d, e, a, b, c, 47);
-    R3(w, c, d, e, a, b, 48); R3(w, b, c, d, e, a, 49); R3(w, a, b, c, d, e, 50); R3(w, e, a, b, c, d, 51);
-    R3(w, d, e, a, b, c, 52); R3(w, c, d, e, a, b, 53); R3(w, b, c, d, e, a, 54); R3(w, a, b, c, d, e, 55);
-    R3(w, e, a, b, c, d, 56); R3(w, d, e, a, b, c, 57); R3(w, c, d, e, a, b, 58); R3(w, b, c, d, e, a, 59);
-    R4(w, a, b, c, d, e, 60); R4(w, e, a, b, c, d, 61); R4(w, d, e, a, b, c, 62); R4(w, c, d, e, a, b, 63);
-    R4(w, b, c, d, e, a, 64); R4(w, a, b, c, d, e, 65); R4(w, e, a, b, c, d, 66); R4(w, d, e, a, b, c, 67);
-    R4(w, c, d, e, a, b, 68); R4(w, b, c, d, e, a, 69); R4(w, a, b, c, d, e, 70); R4(w, e, a, b, c, d, 71);
-    R4(w, d, e, a, b, c, 72); R4(w, c, d, e, a, b, 73); R4(w, b, c, d, e, a, 74); R4(w, a, b, c, d, e, 75);
-    R4(w, e, a, b, c, d, 76); R4(w, d, e, a, b, c, 77); R4(w, c, d, e, a, b, 78); R4(w, b, c, d, e, a, 79);
+    R0(w, a, b, c, d, e, 0);
+    R0(w, e, a, b, c, d, 1);  
+    R0(w, d, e, a, b, c, 2);
+    R0(w, c, d, e, a, b, 3);
+    R0(w, b, c, d, e, a, 4);
+    R0(w, a, b, c, d, e, 5);  
+    R0(w, e, a, b, c, d, 6);
+    R0(w, d, e, a, b, c, 7);
+    R0(w, c, d, e, a, b, 8);
+    R0(w, b, c, d, e, a, 9);  
+    R0(w, a, b, c, d, e, 10);
+    R0(w, e, a, b, c, d, 11);
+    R0(w, d, e, a, b, c, 12);
+    R0(w, c, d, e, a, b, 13); 
+    R0(w, b, c, d, e, a, 14);
+    R0(w, a, b, c, d, e, 15);
+    R1(w, e, a, b, c, d, 16);
+    R1(w, d, e, a, b, c, 17); 
+    R1(w, c, d, e, a, b, 18);
+    R1(w, b, c, d, e, a, 19);
+    R2(w, a, b, c, d, e, 20);
+    R2(w, e, a, b, c, d, 21); 
+    R2(w, d, e, a, b, c, 22);
+    R2(w, c, d, e, a, b, 23);
+    R2(w, b, c, d, e, a, 24);
+    R2(w, a, b, c, d, e, 25); 
+    R2(w, e, a, b, c, d, 26);
+    R2(w, d, e, a, b, c, 27);
+    R2(w, c, d, e, a, b, 28);
+    R2(w, b, c, d, e, a, 29); 
+    R2(w, a, b, c, d, e, 30);
+    R2(w, e, a, b, c, d, 31);
+    R2(w, d, e, a, b, c, 32);
+    R2(w, c, d, e, a, b, 33); 
+    R2(w, b, c, d, e, a, 34);
+    R2(w, a, b, c, d, e, 35);
+    R2(w, e, a, b, c, d, 36);
+    R2(w, d, e, a, b, c, 37); 
+    R2(w, c, d, e, a, b, 38);
+    R2(w, b, c, d, e, a, 39);
+    R3(w, a, b, c, d, e, 40);
+    R3(w, e, a, b, c, d, 41); 
+    R3(w, d, e, a, b, c, 42);
+    R3(w, c, d, e, a, b, 43);
+    R3(w, b, c, d, e, a, 44);
+    R3(w, a, b, c, d, e, 45); 
+    R3(w, e, a, b, c, d, 46);
+    R3(w, d, e, a, b, c, 47);
+    R3(w, c, d, e, a, b, 48);
+    R3(w, b, c, d, e, a, 49); 
+    R3(w, a, b, c, d, e, 50);
+    R3(w, e, a, b, c, d, 51);
+    R3(w, d, e, a, b, c, 52);
+    R3(w, c, d, e, a, b, 53); 
+    R3(w, b, c, d, e, a, 54);
+    R3(w, a, b, c, d, e, 55);
+    R3(w, e, a, b, c, d, 56);
+    R3(w, d, e, a, b, c, 57); 
+    R3(w, c, d, e, a, b, 58);
+    R3(w, b, c, d, e, a, 59);
+    R4(w, a, b, c, d, e, 60);
+    R4(w, e, a, b, c, d, 61); 
+    R4(w, d, e, a, b, c, 62);
+    R4(w, c, d, e, a, b, 63);
+    R4(w, b, c, d, e, a, 64);
+    R4(w, a, b, c, d, e, 65); 
+    R4(w, e, a, b, c, d, 66);
+    R4(w, d, e, a, b, c, 67);
+    R4(w, c, d, e, a, b, 68);
+    R4(w, b, c, d, e, a, 69); 
+    R4(w, a, b, c, d, e, 70);
+    R4(w, e, a, b, c, d, 71);
+    R4(w, d, e, a, b, c, 72);
+    R4(w, c, d, e, a, b, 73); 
+    R4(w, b, c, d, e, a, 74);
+    R4(w, a, b, c, d, e, 75);
+    R4(w, e, a, b, c, d, 76);
+    R4(w, d, e, a, b, c, 77); 
+    R4(w, c, d, e, a, b, 78);
+    R4(w, b, c, d, e, a, 79);
 
     state[0] += a;
     state[1] += b;
@@ -136,7 +221,7 @@ void SHA1Transform(uint32_t state[5], const uint8_t block[SHA1_BLOCK_LENGTH])
 
     a = b = c = d = e = 0;
 }
-void SHA1Update(SHA1CTX* context, const uint8_t* input, uint32_t length)
+void SHA1Update(SHA1CTX* context, const uint8_t* input, size_t length)
 {
     uint32_t i = 0;
     uint32_t j = (uint32_t)((context->count >> 3) & 63);

@@ -43,11 +43,16 @@ DECLARE_PTR_TYPE(channel);
 
 typedef std::shared_ptr<tcp::socket> socket_ptr;
 
-constexpr size_t hash_digest_size = 32;
 constexpr size_t short_hash_size = 20;
-typedef std::array<uint8_t, hash_digest_size> hash_digest;
-typedef std::array<uint8_t, short_hash_size> short_hash;
+constexpr size_t hash_size = 32;
+constexpr size_t long_hash_size = 64;
 
+// Standard hash containers.
+typedef std::array<uint8_t, short_hash_size> short_hash;
+typedef std::array<uint8_t, hash_size> hash_digest;
+typedef std::array<uint8_t, long_hash_size> long_hash;
+
+// Arbitrary byte storage.
 typedef std::vector<uint8_t> data_chunk;
 typedef std::vector<data_chunk> data_stack;
 

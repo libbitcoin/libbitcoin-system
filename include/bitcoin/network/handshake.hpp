@@ -76,8 +76,11 @@ private:
     void receive_verack(const std::error_code& ec, const verack_type&,
         handshake::handshake_handler completion_callback);
 
+#ifndef NO_CURL
     bool lookup_external(const std::string& website,
         ip_address_type& ip);
+#endif
+
     ip_address_type localhost_ip();
     void do_discover_external_ip(discover_ip_handler handler_discover);
     void do_fetch_network_address(fetch_network_address_handler handle_fetch);
