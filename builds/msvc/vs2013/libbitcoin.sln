@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin", "libbitcoin\li
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin_examples", "examples\libbitcoin_examples.vcxproj", "{15BF93A0-69D3-4723-9FDE-EB8B73C69E09}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin_test", "test\libbitcoin_test.vcxproj", "{51A424A9-2C12-4211-8D40-E49D1534C541}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		DynDebug|Win32 = DynDebug|Win32
@@ -71,6 +73,30 @@ Global
 		{15BF93A0-69D3-4723-9FDE-EB8B73C69E09}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
 		{15BF93A0-69D3-4723-9FDE-EB8B73C69E09}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
 		{15BF93A0-69D3-4723-9FDE-EB8B73C69E09}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.DynDebug|Win32.ActiveCfg = DebugDEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.DynDebug|Win32.Build.0 = DebugDEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.DynDebug|x64.ActiveCfg = DebugDEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.DynDebug|x64.Build.0 = DebugDEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.DynRelease|Win32.ActiveCfg = ReleaseDEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.DynRelease|Win32.Build.0 = ReleaseDEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.DynRelease|x64.ActiveCfg = ReleaseDEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.DynRelease|x64.Build.0 = ReleaseDEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.LtcgDebug|Win32.ActiveCfg = DebugLEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.LtcgDebug|Win32.Build.0 = DebugLEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.LtcgDebug|x64.ActiveCfg = DebugLEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.LtcgDebug|x64.Build.0 = DebugLEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.LtcgRelease|Win32.ActiveCfg = ReleaseLEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.LtcgRelease|Win32.Build.0 = ReleaseLEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.LtcgRelease|x64.ActiveCfg = ReleaseLEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.LtcgRelease|x64.Build.0 = ReleaseLEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticDebug|Win32.ActiveCfg = DebugSEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticDebug|Win32.Build.0 = DebugSEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticDebug|x64.ActiveCfg = DebugSEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticDebug|x64.Build.0 = DebugSEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticRelease|Win32.ActiveCfg = ReleaseSEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
+		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

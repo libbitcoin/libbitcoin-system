@@ -21,7 +21,7 @@
 #include <bitcoin/bitcoin.hpp>
 using namespace bc;
 
-BOOST_AUTO_TEST_CASE(bitfield)
+BOOST_AUTO_TEST_CASE(bitfield_test)
 {
     stealth_prefix prefix{27, 0x691cf48b};
     data_chunk raw_bitfield{0x8b, 0xf4, 0x1c, 0x79};
