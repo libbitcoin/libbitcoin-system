@@ -190,7 +190,6 @@
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/base58.hpp>
-#include <bitcoin/utility/bigint.hpp>
 #include <bitcoin/utility/big_number.hpp>
 #include <bitcoin/utility/mmfile.hpp>
 #include <bitcoin/utility/serializer.hpp>
