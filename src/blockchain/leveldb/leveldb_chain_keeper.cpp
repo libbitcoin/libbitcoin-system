@@ -66,7 +66,7 @@ big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
     data_chunk raw_height = uncast_type(slice_begin_index);
     for (it->Seek(slice(raw_height)); it->Valid(); it->Next())
     {
-        constexpr size_t bits_field_offset = 4 + 2 * hash_digest_size + 4;
+        constexpr size_t bits_field_offset = 4 + 2 * hash_size + 4;
         BITCOIN_ASSERT(it->value().size() >= 84);
         // Deserialize only the bits field of block header.
         const char* bits_field_begin = it->value().data() + bits_field_offset;

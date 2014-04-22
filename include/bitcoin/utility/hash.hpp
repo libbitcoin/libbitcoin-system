@@ -23,34 +23,80 @@
 #include <cstdint>
 #include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/utility/external/ripemd160.h>
-#include <bitcoin/utility/external/sha1.h>
-#include <bitcoin/utility/external/sha256.h>
 
 namespace libbitcoin {
 
 /**
- * Generate a short_hash. This hash function is used in a
- * few specific cases where short hashes are desired.
- *
- * ripemd(sha256(data))
- */
-BC_API short_hash generate_short_hash(const data_chunk& chunk);
+* Generate a ripemd160 hash. This hash function is used in script for 
+* op_ripemd160.
+*
+* ripemd160(data)
+*/
+BC_API short_hash ripemd160_hash(const data_chunk& chunk);
 
 /**
- * Generate a normal hash. This is the most widely used
+ * Generate a sha1 hash. This hash function is used in script for op_sha1.
+ *
+ * sha1(data)
+ */
+BC_API short_hash sha1_hash(const data_chunk& chunk);
+
+/**
+ * Generate a sha256 hash. This hash function is used in mini keys,
+ * currently only by libwallet.
+ *
+ * sha256(data)
+ */
+BC_API hash_digest sha256_hash(const data_chunk& chunk);
+
+/**
+ * Generate a sha256 hash. This hash function is used in electrum seed 
+ * stretching, currently only by libwallet.
+ *
+ * sha256(data)
+ */
+BC_API hash_digest sha256_hash(const data_chunk& first_chunk,
+    const data_chunk& second_chunk);
+
+/**
+ * Generate a sha512 hash. This hash function is used in bip32 keys,
+ * currently only by libwallet.
+ *
+ * sha512(data)
+ */
+BC_API long_hash sha512_hash(const data_chunk& chunk);
+
+/**
+* Generate a hmac sha512 hash. This hash function is used in bip32 keys,
+* currently only by libwallet.
+*
+* hmac-sha512(data, key)
+*/
+BC_API long_hash hmac_sha512_hash(const data_chunk& chunk,
+    const data_chunk& key);
+
+/**
+ * Generate a typical bitcoin hash. This is the most widely used
  * hash function in Bitcoin.
  *
  * sha256(sha256(data))
  */
-BC_API hash_digest generate_hash(const data_chunk& chunk);
+BC_API hash_digest bitcoin_hash(const data_chunk& chunk);
 
 /**
- * Generate a checksum. Last 4 bytes of sha256(sha256(data))
+* Generate a bitcoin short hash. This hash function is used in a
+* few specific cases where short hashes are desired.
+*
+* ripemd(sha256(data))
+*/
+BC_API short_hash bitcoin_short_hash(const data_chunk& chunk);
+
+/**
+ * Generate a bitcoin hash checksum. Last 4 bytes of sha256(sha256(data))
  *
  * int(sha256(sha256(data))[-4:])
  */
-BC_API uint32_t generate_checksum(const data_chunk& chunk);
+BC_API uint32_t bitcoin_checksum(const data_chunk& chunk);
 
 } // namespace libbitcoin
 

@@ -104,7 +104,7 @@ bool leveldb_common::save_block(
     leveldb_transaction_batch batch;
     // Write block header + tx hashes
     data_chunk raw_block_data(
-        80 + 4 + serial_block.transactions.size() * hash_digest_size);
+        80 + 4 + serial_block.transactions.size() * hash_size);
     // Downcast to base header type so serializer selects that.
     auto header_end = satoshi_save(
         serial_block.header, raw_block_data.begin());
@@ -128,7 +128,7 @@ bool leveldb_common::save_block(
     }
     BITCOIN_ASSERT(serial_hashes.iterator() ==
         raw_block_data.begin() + 80 + 4 +
-            serial_block.transactions.size() * hash_digest_size);
+        serial_block.transactions.size() * hash_size);
     data_chunk raw_height = uncast_type(height);
     hash_digest block_hash = hash_block_header(serial_block.header);
     // Write block header
@@ -262,7 +262,7 @@ constexpr size_t bitfield_size = sizeof(stealth_bitfield);
 stealth_bitfield calculate_bitfield(const data_chunk& stealth_data)
 {
     // Calculate stealth bitfield
-    const hash_digest index = generate_hash(stealth_data);
+    const hash_digest index = bitcoin_hash(stealth_data);
     auto deserial = make_deserializer(
         index.begin(), index.begin() + bitfield_size);
     stealth_bitfield bitfield = deserial.read_uint_auto<stealth_bitfield>();
@@ -355,8 +355,8 @@ bool leveldb_common::deserialize_block(leveldb_block_info& blk_info,
 {
     // Read the header (if neccessary).
     // There is always at least one tx in a block.
-    BITCOIN_ASSERT(raw_data.size() >= 80 + 4 + hash_digest_size);
-    BITCOIN_ASSERT((raw_data.size() - 84) % hash_digest_size == 0);
+    BITCOIN_ASSERT(raw_data.size() >= 80 + 4 + hash_size);
+    BITCOIN_ASSERT((raw_data.size() - 84) % hash_size == 0);
     if (read_header)
         satoshi_load(raw_data.begin(), raw_data.begin() + 80, blk_info.header);
     if (!read_tx_hashes)
@@ -422,12 +422,12 @@ leveldb::Slice slice_block_hash(const hash_digest& block_hash)
 
 uint64_t addr_key_checksum(const output_point& outpoint)
 {
-    data_chunk checksum_data(hash_digest_size + 4);
+    data_chunk checksum_data(hash_size + 4);
     auto serial = make_serializer(checksum_data.begin());
     serial.write_hash(outpoint.hash);
     serial.write_4_bytes(outpoint.index);
     BITCOIN_ASSERT(serial.iterator() == checksum_data.end());
-    hash_digest hash = generate_hash(checksum_data);
+    hash_digest hash = bitcoin_hash(checksum_data);
     data_chunk raw_checksum(hash.begin(), hash.begin() + 8);
     return cast_chunk<uint64_t>(raw_checksum);
 }

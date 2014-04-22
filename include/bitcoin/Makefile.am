@@ -67,9 +67,11 @@ bitcoin_util_include_HEADERS = \
 
 bitcoin_util_external_includedir = $(includedir)/bitcoin/utility/external/
 bitcoin_util_external_include_HEADERS = \
+    utility/external/hmac_sha512.h \
     utility/external/ripemd160.h \
     utility/external/sha1.h \
     utility/external/sha256.h \
+    utility/external/sha512.h \
     utility/external/zeroize.h
 
 bitcoin_impl_utility_includedir = $(includedir)/bitcoin/impl/utility

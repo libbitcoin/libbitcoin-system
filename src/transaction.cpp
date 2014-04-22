@@ -38,7 +38,7 @@ hash_digest hash_transaction_impl(const transaction_type& tx,
     satoshi_save(tx, serialized_tx.begin());
     if (hash_type_code != nullptr)
         extend_data(serialized_tx, uncast_type(*hash_type_code));
-    return generate_hash(serialized_tx);
+    return bitcoin_hash(serialized_tx);
 }
 
 hash_digest hash_transaction(const transaction_type& tx)
@@ -66,14 +66,14 @@ hash_digest build_merkle_tree(hash_list& merkle)
         hash_list new_merkle;
         for (auto it = merkle.begin(); it != merkle.end(); it += 2)
         {
-            data_chunk concat_data(hash_digest_size * 2);
+            data_chunk concat_data(hash_size * 2);
             auto concat = make_serializer(concat_data.begin());
             concat.write_hash(*it);
             concat.write_hash(*(it + 1));
             BITCOIN_ASSERT(
                 std::distance(concat_data.begin(), concat.iterator()) ==
-                hash_digest_size * 2);
-            hash_digest new_root = generate_hash(concat_data);
+                hash_size * 2);
+            hash_digest new_root = bitcoin_hash(concat_data);
             new_merkle.push_back(new_root);
         }
         merkle = new_merkle;

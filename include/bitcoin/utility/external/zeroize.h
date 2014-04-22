@@ -18,10 +18,12 @@
 #ifndef LIBBITCOIN_ZEROIZE_HPP
 #define LIBBITCOIN_ZEROIZE_HPP
 
+#include <stddef.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
 
 void zeroize(void* const buffer, const size_t length);

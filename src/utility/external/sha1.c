@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <boost/detail/endian.hpp>
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
@@ -30,7 +31,7 @@
     #error Endianess not supported.
 #endif
 
-#define blk(b, i) (b->l[i&15] = \
+#define blk(b, i) (b->l[i & 15] = \
     rol(b->l[(i + 13) & 15]^ \
         b->l[(i + 8) & 15]^ \
         b->l[(i + 2) & 15]^ \
@@ -61,7 +62,7 @@ typedef union {
     uint32_t l[16];
 } CHAR64LONG16;
 
-void SHA1(const uint8_t* input, uint32_t length,
+void SHA1(const uint8_t* input, size_t length,
     uint8_t digest[SHA1_DIGEST_LENGTH])
 {
     SHA1CTX context;
@@ -86,6 +87,7 @@ void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH])
 void SHA1Init(SHA1CTX* context)
 {
     context->count = 0;
+
     context->state[0] = 0x67452301;
     context->state[1] = 0xEFCDAB89;
     context->state[2] = 0x98BADCFE;
@@ -96,23 +98,26 @@ void SHA1Init(SHA1CTX* context)
 void SHA1Pad(SHA1CTX* context)
 {
     uint8_t i;
-    uint8_t finalcount[8];
+    uint8_t len[8];
 
     for (i = 0; i < 8; i++)
     {
-        finalcount[i] = (uint8_t)((context->count >>
-            ((7 - (i & 7)) * 8)) & 255);
+        len[i] = (uint8_t)
+            ((context->count >> ((7 - (i & 7)) * 8)) & 255);
     }
 
     SHA1Update(context, (uint8_t*)"\200", 1);
 
     while ((context->count & 504) != 448)
+    {
         SHA1Update(context, (uint8_t*)"\0", 1);
+    }
 
-    SHA1Update(context, finalcount, 8);
+    SHA1Update(context, len, 8);
 }
 
-void SHA1Transform(uint32_t state[5], const uint8_t block[SHA1_BLOCK_LENGTH])
+void SHA1Transform(uint32_t state[SHA1_STATE_LENGTH], 
+    const uint8_t block[SHA1_BLOCK_LENGTH])
 {
     uint32_t a, b, c, d, e;
     uint8_t workspace[SHA1_BLOCK_LENGTH];
@@ -215,7 +220,7 @@ void SHA1Transform(uint32_t state[5], const uint8_t block[SHA1_BLOCK_LENGTH])
 
     a = b = c = d = e = 0;
 }
-void SHA1Update(SHA1CTX* context, const uint8_t* input, uint32_t length)
+void SHA1Update(SHA1CTX* context, const uint8_t* input, size_t length)
 {
     uint32_t i = 0;
     uint32_t j = (uint32_t)((context->count >> 3) & 63);

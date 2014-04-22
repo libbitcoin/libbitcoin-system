@@ -26,9 +26,9 @@
 #define LIBBITCOIN_RIPEMD160_H
 
 #include <stdint.h>
-#include <boost/detail/endian.hpp>
 
-#define RMD160_BLOCK_LENGTH  64U
+#define RMD160_STATE_LENGTH 5U
+#define RMD160_BLOCK_LENGTH 64U
 #define RMD160_DIGEST_LENGTH 20U
 
 #ifdef __cplusplus
@@ -37,19 +37,24 @@ extern "C" {
 
 typedef struct RMD160CTX
 {
-    uint32_t state[5];
+    uint32_t state[RMD160_STATE_LENGTH];
     uint64_t count;
     uint8_t buffer[RMD160_BLOCK_LENGTH];
 } RMD160CTX;
 
-void RMD160(const uint8_t* input, uint32_t length, 
+void RMD160(const uint8_t* input, size_t length,
     uint8_t digest[RMD160_DIGEST_LENGTH]);
+
 void RMD160Final(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH]);
+
 void RMD160Init(RMD160CTX* context);
+
 void RMD160Pad(RMD160CTX* context);
-void RMD160Transform(uint32_t state[5], 
+
+void RMD160Transform(uint32_t state[RMD160_STATE_LENGTH],
     const uint8_t block[RMD160_BLOCK_LENGTH]);
-void RMD160Update(RMD160CTX* context, const uint8_t* input, uint32_t length);
+
+void RMD160Update(RMD160CTX* context, const uint8_t* input, size_t length);
 
 #ifdef __cplusplus
 }

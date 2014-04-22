@@ -34,9 +34,11 @@ libbitcoin_la_SOURCES = \
 	transaction_pool.cpp \
 	transaction_indexer.cpp \
 	utility/hash.cpp \
+    utility/external/hmac_sha512.c \
     utility/external/ripemd160.c \
     utility/external/sha1.c \
     utility/external/sha256.c \
+    utility/external/sha512.c \
     utility/external/zeroize.c
 
 if DO_LEVELDB

@@ -19,8 +19,6 @@
  */
 #include <bitcoin/script.hpp>
 
-// #include <openssl/sha.h>
-
 #include <stack>
 #include <type_traits>
 #include <boost/optional.hpp>
@@ -28,11 +26,11 @@
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/format.hpp>
-#include <bitcoin/utility/elliptic_curve_key.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
-#include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/utility/hash.hpp>
+#include <bitcoin/utility/elliptic_curve_key.hpp>
 
 namespace libbitcoin {
 
@@ -855,10 +853,9 @@ bool script_type::op_ripemd160()
 {
     if (stack_.size() < 1)
         return false;
-    data_chunk data = pop_stack();
-    data_chunk hash(RMD160_DIGEST_LENGTH);
-    RMD160(data.data(), static_cast<uint32_t>(data.size()), hash.data());
-    stack_.push_back(hash);
+    short_hash hash = ripemd160_hash(pop_stack());
+    data_chunk chunk = data_chunk(hash.begin(), hash.end());
+    stack_.push_back(chunk);
     return true;
 }
 
@@ -866,10 +863,9 @@ bool script_type::op_sha1()
 {
     if (stack_.size() < 1)
         return false;
-    data_chunk data = pop_stack();
-    data_chunk hash(SHA1_DIGEST_LENGTH);
-    SHA1(data.data(), static_cast<uint32_t>(data.size()), hash.data());
-    stack_.push_back(hash);
+    short_hash hash = sha1_hash(pop_stack());
+    data_chunk chunk = data_chunk(hash.begin(), hash.end());
+    stack_.push_back(chunk);
     return true;
 }
 
@@ -877,10 +873,9 @@ bool script_type::op_sha256()
 {
     if (stack_.size() < 1)
         return false;
-    data_chunk data = pop_stack();
-    data_chunk hash(SHA256_DIGEST_LENGTH);
-    SHA256__(data.data(), static_cast<uint32_t>(data.size()), hash.data());
-    stack_.push_back(hash);
+    hash_digest hash = sha256_hash(pop_stack());
+    data_chunk chunk = data_chunk(hash.begin(), hash.end());
+    stack_.push_back(chunk);
     return true;
 }
 
@@ -888,11 +883,12 @@ bool script_type::op_hash160()
 {
     if (stack_.size() < 1)
         return false;
-    data_chunk data = pop_stack();
-    short_hash hash = generate_short_hash(data);
+    short_hash hash = bitcoin_short_hash(pop_stack());
     // hash must be reversed
-    data_chunk raw_hash(hash.begin(), hash.end());
-    stack_.push_back(raw_hash);
+    // NOTE: the above comment said this needed reversing, 
+    // but the line below was previously not reversed - verify.
+    data_chunk chunk(hash.rbegin(), hash.rend());
+    stack_.push_back(chunk);
     return true;
 }
 
@@ -901,10 +897,10 @@ bool script_type::op_hash256()
     if (stack_.size() < 1)
         return false;
     data_chunk data = pop_stack();
-    hash_digest hash = generate_hash(data);
+    hash_digest hash = bitcoin_hash(pop_stack());
     // hash must be reversed
-    data_chunk raw_hash(hash.rbegin(), hash.rend());
-    stack_.push_back(raw_hash);
+    data_chunk chunk(hash.rbegin(), hash.rend());
+    stack_.push_back(chunk);
     return true;
 }
 

@@ -18,6 +18,7 @@
 #include <bitcoin/utility/external/zeroize.h>
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 // TODO: deal with determination of HAVE_SECUREZEROMEMORY and HAVE_MEMSET_S

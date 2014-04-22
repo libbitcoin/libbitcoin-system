@@ -56,5 +56,8 @@
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
+// Remove this when cURL dependency is fully removed.
+#define NO_CURL
+
 #endif
 

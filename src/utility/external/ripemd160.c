@@ -32,27 +32,28 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <boost/detail/endian.hpp>
 
-#define bytelength 8
+#define byte_length 8
 
 #define PUT_64BIT_LE(cp, value) do \
 { \
-    (cp)[7] = (uint8_t)((value) >> (bytelength * 7)); \
-    (cp)[6] = (uint8_t)((value) >> (bytelength * 6)); \
-    (cp)[5] = (uint8_t)((value) >> (bytelength * 5)); \
-    (cp)[4] = (uint8_t)((value) >> (bytelength * 4)); \
-    (cp)[3] = (uint8_t)((value) >> (bytelength * 3)); \
-    (cp)[2] = (uint8_t)((value) >> (bytelength * 2)); \
-    (cp)[1] = (uint8_t)((value) >> (bytelength * 1)); \
-    (cp)[0] = (uint8_t)((value) >> (bytelength * 0)); \
+    (cp)[7] = (uint8_t)((value) >> (byte_length * 7)); \
+    (cp)[6] = (uint8_t)((value) >> (byte_length * 6)); \
+    (cp)[5] = (uint8_t)((value) >> (byte_length * 5)); \
+    (cp)[4] = (uint8_t)((value) >> (byte_length * 4)); \
+    (cp)[3] = (uint8_t)((value) >> (byte_length * 3)); \
+    (cp)[2] = (uint8_t)((value) >> (byte_length * 2)); \
+    (cp)[1] = (uint8_t)((value) >> (byte_length * 1)); \
+    (cp)[0] = (uint8_t)((value) >> (byte_length * 0)); \
 } while (0)
 
 #define PUT_32BIT_LE(cp, value) do \
 { \
-    (cp)[3] = (uint8_t)((value) >> (bytelength * 3)); \
-    (cp)[2] = (uint8_t)((value) >> (bytelength * 2)); \
-    (cp)[1] = (uint8_t)((value) >> (bytelength * 1)); \
-    (cp)[0] = (uint8_t)((value) >> (bytelength * 0)); \
+    (cp)[3] = (uint8_t)((value) >> (byte_length * 3)); \
+    (cp)[2] = (uint8_t)((value) >> (byte_length * 2)); \
+    (cp)[1] = (uint8_t)((value) >> (byte_length * 1)); \
+    (cp)[0] = (uint8_t)((value) >> (byte_length * 0)); \
 } while (0)
 
 #define	H0 0x67452301U
@@ -89,14 +90,14 @@
 
 #define X(i) x[i]
 
-static uint8_t PADDING[RMD160_BLOCK_LENGTH] = 
+static uint8_t PAD[RMD160_BLOCK_LENGTH] = 
 {
     0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void RMD160(const uint8_t* input, uint32_t length,
+void RMD160(const uint8_t* input, size_t length,
     uint8_t digest[RMD160_DIGEST_LENGTH])
 {
     RMD160CTX ctx;
@@ -110,13 +111,17 @@ void RMD160Final(RMD160CTX* context, uint8_t digest[RMD160_DIGEST_LENGTH])
     int i;
     RMD160Pad(context);
     for (i = 0; i < 5; i++)
+    {
         PUT_32BIT_LE(digest + i * 4, context->state[i]);
+    }
+
     zeroize(context, sizeof *context);
 }
 
 void RMD160Init(RMD160CTX* context)
 {
     context->count = 0;
+
     context->state[0] = H0;
     context->state[1] = H1;
     context->state[2] = H2;
@@ -126,22 +131,24 @@ void RMD160Init(RMD160CTX* context)
 
 void RMD160Pad(RMD160CTX* context)
 {
-    uint8_t size[8];
-    uint32_t padlength;
+    uint8_t len[8];
+    uint32_t plen;
 
-    PUT_64BIT_LE(size, context->count);
+    PUT_64BIT_LE(len, context->count);
 
-    padlength = RMD160_BLOCK_LENGTH - ((context->count / 8) %
-        RMD160_BLOCK_LENGTH);
+    plen = RMD160_BLOCK_LENGTH -
+        ((context->count / 8) % RMD160_BLOCK_LENGTH);
 
-    if (padlength < 1 + 8)
-        padlength += RMD160_BLOCK_LENGTH;
+    if (plen < 1 + 8)
+    {
+        plen += RMD160_BLOCK_LENGTH;
+    }
 
-    RMD160Update(context, PADDING, padlength - 8);
-    RMD160Update(context, size, 8);
+    RMD160Update(context, PAD, plen - 8);
+    RMD160Update(context, len, 8);
 }
 
-void RMD160Transform(uint32_t state[5], 
+void RMD160Transform(uint32_t state[RMD160_STATE_LENGTH],
     const uint8_t block[RMD160_BLOCK_LENGTH])
 {
     uint32_t a, b, c, d, e, aa, bb, cc, dd, ee, t, x[16];
@@ -150,13 +157,14 @@ void RMD160Transform(uint32_t state[5],
     memcpy(x, block, RMD160_BLOCK_LENGTH);
 #elif BOOST_ENDIAN_BIG_BYTE
     int i;
-
     for (i = 0; i < 16; i++)
+    {
         x[i] = (uint32_t)(
         (uint32_t)(block[i * 4 + 0]) |
-        (uint32_t)(block[i * 4 + 1]) << bytelength * 1 |
-        (uint32_t)(block[i * 4 + 2]) << bytelength * 2 |
-        (uint32_t)(block[i * 4 + 3]) << bytelength * 3);
+        (uint32_t)(block[i * 4 + 1]) << byte_length * 1 |
+        (uint32_t)(block[i * 4 + 2]) << byte_length * 2 |
+        (uint32_t)(block[i * 4 + 3]) << byte_length * 3);
+    }
 #else
     #error Endianess not supported.
 #endif
@@ -353,7 +361,7 @@ void RMD160Transform(uint32_t state[5],
     state[0] = t;
 }
 
-void RMD160Update(RMD160CTX* context, const uint8_t* input, uint32_t length)
+void RMD160Update(RMD160CTX* context, const uint8_t* input, size_t length)
 {
     uint32_t have, off, need;
 
@@ -380,5 +388,7 @@ void RMD160Update(RMD160CTX* context, const uint8_t* input, uint32_t length)
     }
 
     if (off < length)
+    {
         memcpy(context->buffer + have, input + off, length - off);
+    }
 }
