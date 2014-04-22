@@ -27,6 +27,7 @@
 #define LIBBITCOIN_SHA256_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define SHA256_STATE_LENGTH 8U
 #define SHA256_COUNT_LENGTH 2U

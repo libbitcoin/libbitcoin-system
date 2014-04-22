@@ -8,6 +8,7 @@
 #define LIBBITCOIN_SHA1_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define SHA1_STATE_LENGTH 5U
 #define SHA1_BLOCK_LENGTH 64U

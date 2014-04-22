@@ -26,6 +26,7 @@
 #define LIBBITCOIN_RIPEMD160_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define RMD160_STATE_LENGTH 5U
 #define RMD160_BLOCK_LENGTH 64U

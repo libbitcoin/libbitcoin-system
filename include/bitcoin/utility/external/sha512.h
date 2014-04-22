@@ -27,6 +27,7 @@
 #define LIBBITCOIN_SHA512_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #define SHA512_STATE_LENGTH 8U
 #define SHA512_COUNT_LENGTH 2U
