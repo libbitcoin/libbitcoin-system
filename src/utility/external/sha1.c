@@ -21,14 +21,15 @@
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
-#ifdef BOOST_ENDIAN_LITTLE_BYTE
+#if defined(BOOST_ENDIAN_LITTLE_BYTE) || defined(BOOST_ENDIAN_LITTLE_WORD)
     #define blk0(b, i) (b->l[i] = \
         (rol(b->l[i], 24) & 0xFF00FF00) | \
         (rol(b->l[i], 8) & 0x00FF00FF))
-#elif BOOST_ENDIAN_BIG_BYTE
-    #define blk0(b, i) b->l[i]
+//#elif BOOST_ENDIAN_BIG_BYTE
 #else
-    #error Endianess not supported.
+    #define blk0(b, i) b->l[i]
+//#else
+//    #error Endianess not supported.
 #endif
 
 #define blk(b, i) (b->l[i & 15] = \

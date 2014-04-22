@@ -153,9 +153,10 @@ void RMD160Transform(uint32_t state[RMD160_STATE_LENGTH],
 {
     uint32_t a, b, c, d, e, aa, bb, cc, dd, ee, t, x[16];
 
-#ifdef BOOST_ENDIAN_LITTLE_BYTE
+#if defined(BOOST_ENDIAN_LITTLE_BYTE) || defined(BOOST_ENDIAN_LITTLE_WORD)
     memcpy(x, block, RMD160_BLOCK_LENGTH);
-#elif BOOST_ENDIAN_BIG_BYTE
+//#elif BOOST_ENDIAN_BIG_BYTE
+#else
     int i;
     for (i = 0; i < 16; i++)
     {
@@ -165,8 +166,8 @@ void RMD160Transform(uint32_t state[RMD160_STATE_LENGTH],
         (uint32_t)(block[i * 4 + 2]) << byte_length * 2 |
         (uint32_t)(block[i * 4 + 3]) << byte_length * 3);
     }
-#else
-    #error Endianess not supported.
+//#else
+//    #error Endianess not supported.
 #endif
 
     a = state[0];
