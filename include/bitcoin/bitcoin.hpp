@@ -140,8 +140,10 @@
  * - @link libbitcoin::decode_hex bytes_from_pretty @endlink
  * - @link libbitcoin::decode_hex_digest hash_from_pretty @endlink
  * - @link libbitcoin::extend_data extend_data @endlink
- * - @link libbitcoin::cast_chunk cast_chunk @endlink
- * - @link libbitcoin::uncast_chunk uncast_chunk @endlink
+ * - @link libbitcoin::to_little_endian to_little_endian @endlink
+ * - @link libbitcoin::to_big_endian to_big_endian @endlink
+ * - @link libbitcoin::from_little_endian from_little_endian @endlink
+ * - @link libbitcoin::from_big_endian from_big_endian @endlink
  *
  * @subsection hashing Hashing
  *

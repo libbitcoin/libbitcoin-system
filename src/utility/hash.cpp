@@ -108,8 +108,7 @@ short_hash bitcoin_short_hash(const data_chunk& chunk)
 uint32_t bitcoin_checksum(const data_chunk& chunk)
 {
     hash_digest hash = bitcoin_hash(chunk);
-    data_chunk begin_bytes(hash.rbegin(), hash.rbegin() + 4);
-    return cast_chunk<uint32_t>(begin_bytes);
+    return from_little_endian<uint32_t>(hash.rbegin());
 }
 
 } // namespace libbitcoin

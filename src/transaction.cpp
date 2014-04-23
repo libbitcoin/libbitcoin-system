@@ -37,7 +37,7 @@ hash_digest hash_transaction_impl(const transaction_type& tx,
     data_chunk serialized_tx(satoshi_raw_size(tx));
     satoshi_save(tx, serialized_tx.begin());
     if (hash_type_code != nullptr)
-        extend_data(serialized_tx, uncast_type(*hash_type_code));
+        extend_data(serialized_tx, to_little_endian(*hash_type_code));
     return bitcoin_hash(serialized_tx);
 }
 

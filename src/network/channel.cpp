@@ -336,10 +336,8 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_checksum_size);
-    data_chunk checksum_stream = data_chunk(
-        inbound_checksum_.begin(), inbound_checksum_.end());
-    BITCOIN_ASSERT(checksum_stream.size() == header_checksum_size);
-    header_msg.checksum = cast_chunk<uint32_t>(checksum_stream);
+    header_msg.checksum =
+        from_little_endian<uint32_t>(inbound_checksum_.begin());
     read_payload(header_msg);
     reset_timers();
 }

@@ -41,9 +41,8 @@ constexpr size_t op_counter_limit = 201;
 
 // Convert opcode to its actual numeric value.
 template<typename OpCode>
-
 auto base_value(OpCode code)
-  -> typename std::underlying_type<OpCode>::type 
+  -> typename std::underlying_type<OpCode>::type
 {
     return static_cast<typename std::underlying_type<OpCode>::type>(code);
 }
@@ -885,7 +884,7 @@ bool script_type::op_hash160()
         return false;
     short_hash hash = bitcoin_short_hash(pop_stack());
     // hash must be reversed
-    // NOTE: the above comment said this needed reversing, 
+    // NOTE: the above comment said this needed reversing,
     // but the line below was previously not reversed - verify.
     data_chunk chunk(hash.rbegin(), hash.rend());
     stack_.push_back(chunk);
@@ -2071,11 +2070,11 @@ inline data_chunk operation_metadata(const opcode code, size_t data_size)
     switch (code)
     {
         case opcode::pushdata1:
-            return uncast_type<uint8_t>(data_size);
+            return to_data_chunk(to_big_endian<uint8_t>(data_size));
         case opcode::pushdata2:
-            return uncast_type<uint16_t>(data_size);
+            return to_data_chunk(to_big_endian<uint16_t>(data_size));
         case opcode::pushdata4:
-            return uncast_type<uint32_t>(data_size);
+            return to_data_chunk(to_big_endian<uint32_t>(data_size));
         default:
             return data_chunk();
     }

@@ -129,7 +129,7 @@ bool leveldb_common::save_block(
     BITCOIN_ASSERT(serial_hashes.iterator() ==
         raw_block_data.begin() + 80 + 4 +
         serial_block.transactions.size() * hash_size);
-    data_chunk raw_height = uncast_type(height);
+    auto raw_height = to_little_endian(height);
     hash_digest block_hash = hash_block_header(serial_block.header);
     // Write block header
     batch.block.Put(slice(raw_height), slice(raw_block_data));
@@ -336,7 +336,7 @@ bool leveldb_common::get_block(leveldb_block_info& blk_info,
     uint32_t height, bool read_header, bool read_tx_hashes)
 {
     // First we try to read the bytes from the database.
-    data_chunk raw_height = uncast_type(height);
+    auto raw_height = to_little_endian(height);
     std::string value;
     leveldb::Status status = db_.block->Get(
         leveldb::ReadOptions(), slice(raw_height), &value);
@@ -428,8 +428,7 @@ uint64_t addr_key_checksum(const output_point& outpoint)
     serial.write_4_bytes(outpoint.index);
     BITCOIN_ASSERT(serial.iterator() == checksum_data.end());
     hash_digest hash = bitcoin_hash(checksum_data);
-    data_chunk raw_checksum(hash.begin(), hash.begin() + 8);
-    return cast_chunk<uint64_t>(raw_checksum);
+    return from_little_endian<uint64_t>(hash.begin());
 }
 data_chunk create_address_key(
     const payment_address& address, const output_point& outpoint)

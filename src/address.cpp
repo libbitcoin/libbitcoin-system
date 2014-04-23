@@ -70,7 +70,7 @@ bool payment_address::set_encoded(const std::string& encoded_address)
         decoded_address.begin(), decoded_address.end() - 4);
     // verify checksum bytes
     if (bitcoin_checksum(main_body) !=
-            cast_chunk<uint32_t>(checksum_bytes))
+            from_little_endian<uint32_t>(checksum_bytes.begin()))
         return false;
     std::copy(main_body.begin() + 1, main_body.end(), hash_.begin());
     return true;
@@ -79,11 +79,12 @@ bool payment_address::set_encoded(const std::string& encoded_address)
 std::string payment_address::encoded() const
 {
     data_chunk unencoded_address;
+    unencoded_address.reserve(25);
     // Type, Hash, Checksum doth make thy address
     unencoded_address.push_back(version_);
     extend_data(unencoded_address, hash_);
     uint32_t checksum = bitcoin_checksum(unencoded_address);
-    extend_data(unencoded_address, uncast_type(checksum));
+    extend_data(unencoded_address, to_little_endian(checksum));
     BITCOIN_ASSERT(unencoded_address.size() == 25);
     return encode_base58(unencoded_address);
 }

@@ -165,12 +165,14 @@ Additionally helper functions exist for working with these types.
 
    Insert *other* at the end of *chunk*.
 
-.. cpp:function:: T cast_chunk<T>(data_chunk chunk, bool reverse=false)
-.. cpp:function:: data_chunk uncast_type<T>(T value, bool reverse=false)
+.. cpp:function:: T from_big_endian<T>(Iterator in)
+.. cpp:function:: T from_little_endian<T>(Iterator in)
+.. cpp:function:: byte_array<sizeof(T)> to_big_endian(T n)
+.. cpp:function:: byte_array<sizeof(T)> to_little_endian(T n)
 
-   Convert chunk to and from different integer types. i.e
-   ``cast_chunk<uint32_t>(chunk)`` converts *chunk* into a 4 byte
-   integer. Assumes ``chunk.size() >= 4`` bytes.
+   Convert raw bytes to and from different integer types. i.e
+   ``from_little_endian<uint32_t>(chunk.begin())`` converts *chunk*
+   into a 4 byte integer. Assumes ``chunk.size() >= 4`` bytes.
 
 .. cpp:function:: std::string encode_hex<T>(T data)
 

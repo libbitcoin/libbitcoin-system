@@ -35,7 +35,7 @@ int main()
     bs.push_back(0x00);
     bs.push_back(0x00);
 
-    uint64_t val = cast_chunk<uint64_t>(bs);
+    uint64_t val = from_little_endian<uint64_t>(bs.begin());
     std::cout << val << "\n";
     std::cout << std::hex << val << "\n";
 

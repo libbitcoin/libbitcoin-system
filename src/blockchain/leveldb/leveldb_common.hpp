@@ -118,8 +118,7 @@ template <typename Data>
 uint32_t recreate_height(const Data& raw_data)
 {
     const uint8_t* start = reinterpret_cast<const uint8_t*>(raw_data.data());
-    const uint8_t* end = start + raw_data.size();
-    return cast_chunk<uint32_t>(data_chunk(start, end));
+    return from_little_endian<uint32_t>(start);
 }
 
 leveldb::Slice slice_block_hash(const hash_digest& block_hash);

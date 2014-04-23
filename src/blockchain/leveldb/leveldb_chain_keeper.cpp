@@ -63,7 +63,7 @@ big_number leveldb_chain_keeper::end_slice_difficulty(size_t slice_begin_index)
 {
     big_number total_work = 0;
     leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
-    data_chunk raw_height = uncast_type(slice_begin_index);
+    auto raw_height = to_little_endian(slice_begin_index);
     for (it->Seek(slice(raw_height)); it->Valid(); it->Next())
     {
         constexpr size_t bits_field_offset = 4 + 2 * hash_size + 4;
@@ -102,7 +102,7 @@ bool leveldb_chain_keeper::end_slice(size_t slice_begin_index,
 {
     leveldb_transaction_batch batch;
     leveldb_iterator it(db_.block->NewIterator(leveldb::ReadOptions()));
-    data_chunk raw_height = uncast_type(slice_begin_index);
+    auto raw_height = to_little_endian(slice_begin_index);
     for (it->Seek(slice(raw_height)); it->Valid(); it->Next())
     {
         block_detail_ptr sliced_block =
