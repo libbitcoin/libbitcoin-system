@@ -36,15 +36,12 @@ BOOST_AUTO_TEST_CASE(ripemd_hash_test)
         "17d040b739d639c729daaf627eaff88cfe4207f4");
 }
 
-#include <iostream>
-
 BOOST_AUTO_TEST_CASE(hmac_sha512_hash_test)
 {
     data_chunk chunk{'d', 'a', 't', 'a'};
     data_chunk key{'k', 'e', 'y'};
 
     auto long_hash = hmac_sha512_hash(chunk, key);
-    std::cout << encode_hex(long_hash) << std::endl;
     BOOST_REQUIRE(encode_hex(long_hash) ==
         "3c5953a18f7303ec653ba170ae334fafa08e3846f2efe317b87efce82376253c"
         "b52a8c31ddcde5a3a2eee183c2b34cb91f85e64ddbc325f7692b199473579c58");
