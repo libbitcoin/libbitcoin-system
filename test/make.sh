@@ -27,7 +27,7 @@ for i in $(ls *.cpp); do
     OBJ_FILE=obj/${i%.cpp}.o
     if test $i -nt $OBJ_FILE; then
         echo "Compiling $i..."
-        $CXX $CXXFLAGS -c $i -o $OBJ_FILE
+        $CXX $CXXFLAGS -c $i -o $OBJ_FILE -DBOOST_TEST_DYN_LINK
     fi
 done
 echo "Linking..."
