@@ -43,7 +43,7 @@ DECLARE_PTR_TYPE(channel);
 
 typedef std::shared_ptr<tcp::socket> socket_ptr;
 
-template<size_t size> using byte_array = std::array<uint8_t, size>;
+template<size_t Size> using byte_array = std::array<uint8_t, Size>;
 
 constexpr size_t short_hash_size = 20;
 constexpr size_t hash_size = 32;
