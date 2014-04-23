@@ -275,6 +275,7 @@ void SHA512Update(SHA512CTX* context, const uint8_t* input, size_t length)
     if (length < 128 - r) 
     {
         memcpy(&context->buf[r], input, length);
+        return;
     }
 
     memcpy(&context->buf[r], input, 128 - r);
