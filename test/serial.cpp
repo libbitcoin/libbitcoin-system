@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(serialize_test)
     BOOST_REQUIRE(buff == rawdat);
 }
 
-BOOST_AUTO_TEST_CASE(genesis_block_serialize)
+BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
 {
     block_type genblk = genesis_block();
     BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk), 285);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(genesis_block_serialize)
     BOOST_REQUIRE(genblk.header.merkle == merkle);
 }
 
-BOOST_AUTO_TEST_CASE(junk)
+BOOST_AUTO_TEST_CASE(junk_test)
 {
     data_chunk junk = decode_hex(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(junk)
     satoshi_load(junk.begin(), junk.end(), tx);
 }
 
-BOOST_AUTO_TEST_CASE(tx)
+BOOST_AUTO_TEST_CASE(tx_test)
 {
     hash_digest tx_hash_1 = decode_hex_digest<hash_digest>(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(tx)
     BOOST_REQUIRE(resave_2 == raw_tx_2);
 }
 
-BOOST_AUTO_TEST_CASE(script_parse_save)
+BOOST_AUTO_TEST_CASE(script_parse_save_test)
 {
     BOOST_REQUIRE_THROW(
     script_type psc = parse_script(decode_hex(
