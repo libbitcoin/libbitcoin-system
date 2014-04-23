@@ -110,6 +110,7 @@ error:
 
 void elliptic_curve_key::set_compressed(bool compressed)
 {
+    initialize();
     EC_KEY_set_conv_form(key_, compressed ? POINT_CONVERSION_COMPRESSED :
         POINT_CONVERSION_UNCOMPRESSED);
 }
