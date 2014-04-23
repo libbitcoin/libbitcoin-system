@@ -45,7 +45,7 @@ void HMACSHA512Final(HMACSHA512CTX* context,
     uint8_t hash[HMACSHA512_DIGEST_LENGTH];
 
     SHA512Final(&context->ictx, hash);
-    SHA512Update(&context->octx, hash, HMACSHA512_KEY_LENGTH);
+    SHA512Update(&context->octx, hash, HMACSHA512_DIGEST_LENGTH);
     SHA512Final(&context->octx, digest);
 
     zeroize((void*)hash, sizeof hash);
