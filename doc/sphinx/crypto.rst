@@ -8,35 +8,23 @@ Vanilla Private Keys
 ====================
 
 Bitcoin uses a form of encryption called elliptic curve cryptography.
-libbitcoin represents this type of private key using the
-:class:`elliptic_curve_key` class.
+This form of crytography involves private keys, which are used to create
+signatures, and public keys, which are used to verity signatures.
+libbitcoin represents these keys using the :type:`ec_secret` and
+:type:`ec_point` types.
 ::
 
-    // Generate new private key and echo to STDOUT.
-    bool new_keypair()
+    // Generate new keypair from a seed and echo to STDOUT.
+    void new_keypair(const std::string& seed)
     {
-        elliptic_curve_key ec;
-        if (!ec.new_key_pair())
-            return false;
-        private_data raw_private_key = ec.private_key();
-        std::cout << std::string(raw_private_key.begin(), raw_private_key.end());
-        return true;
+        ec_secret private_key = sha256_hash(to_data_chunk(seed));
+        ec_point public_key = secret_to_public_key(private_key);
+
+        std::cout << encode_hex(private_key) << std::endl;
+        std::cout << encode_hex(public_key) << std::endl;
     }
 
-To load the private_key, we can use the :func:`set_private_key` member function.
-
-.. cpp:function:: bool elliptic_curve_key::set_public_key(const data_chunk& pubkey)
-.. cpp:function:: data_chunk elliptic_curve_key::public_key() const
-
-.. cpp:function:: bool elliptic_curve_key::set_private_key(const private_data& privkey)
-.. cpp:function:: private_data elliptic_curve_key::private_key() const
-
-Using private key functionality when a public key is set is undefined, and
-most operations will likely fail.
-
-:ref:`examples_priv` is an example program for working with Bitcoin private keys.
-The example shows generating private keys, showing the address and
-signing/verifying of a hash digest.
+The :ref:`ec_keys` unit test has examples of working with these data types.
 
 Show Your Bitcoin Address
 -------------------------
@@ -53,16 +41,15 @@ Bitcoin addresses are between 27-34 alphanumeric characters. The
 
     // Takes a raw private key, loads it using the elliptic_curve_key class,
     // and displays the Bitcoin address for it.
-    bool display_address(const std::string raw_private_key)
+    bool display_address(const std::string& seed)
     {
-        elliptic_curve_key ec;
-        if (!ec.set_private_key(
-                private_data(raw_private_key.begin(), raw_private_key.end())))
-            return false;
+        ec_secret private_key = sha256_hash(to_data_chunk(seed));
+        ec_point public_key = secret_to_public_key(private_key);
+
         payment_address address;
-        if (!set_public_key(address, ec.public_key()))
+        if (!set_public_key(address, public_key))
             return false;
-        log_info() << address.encoded();
+        std::cout << address.encoded() << std::endl;
         return true;
     }
 
@@ -103,7 +90,7 @@ seed.
 
 Also, multiple devices could host the same wallet based off of the same seed and
 automatically stay in sync with each other. Non-critical information such as
-address books would need to be stored and copied between wallets. 
+address books would need to be stored and copied between wallets.
 
 libwallet implements the same compatible deterministic wallet algorithm as `Electrum <http://electrum.org/>`_.
 Wallet seeds from the Bitcoin client Electrum are usable in libwallet.
@@ -202,12 +189,7 @@ The *secret parameter* is a value used by the elliptic curve formula to
 compute the private key.
 ::
 
-    secret_parameter secret = decode_hex_digest<secret_parameter>("33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
-    // The secret parameter is used to compute the private key
-    // by the elliptic curve formula.
-    elliptic_curve_key privkey;
-    if (!privkey.set_secret(secret))
-        log_error() << "Error set private key.";
+    ec_secret secret = decode_hex_digest<ec_secret>("33cc7e35fbb78d17d207e53d0fe950d1db571be889b3ff87aec653e501759264");
 
 ::
 
@@ -220,7 +202,7 @@ Wallet Import Format
 Wallet Import Format (WIF) is a way to encode the secret parameter to make
 copying the private key easier.
 
-.. cpp:function:: std::string secret_to_wif(const secret_parameter& secret)
+.. cpp:function:: std::string secret_to_wif(const ec_secret& secret)
 
    Convert a secret parameter to the wallet import format.
    Returns an empty string on error.
@@ -230,13 +212,13 @@ copying the private key easier.
     if (wif.empty())
         // Error...
 
-.. cpp:function:: secret_parameter wif_to_secret(const std::string& wif)
+.. cpp:function:: ec_secret wif_to_secret(const std::string& wif)
 
    Convert wallet import format key to secret parameter.
    Returns a nulled secret on error.
    ::
 
-    secret_parameter secret = wif_to_secret(
+    ec_secret secret = wif_to_secret(
         "5HueCGU8rMjxEXxiPuD5BDku4MkFqeZyd4dZ1jvhTVqvbTLvyTJ");
     if (secret == null_hash)
         // Error...
@@ -247,13 +229,13 @@ Casascius Minikey
 Casascius coins encode private keys in a format known as Casascius minikey.
 :func:`minikey_to_secret` converts a Casascius minikey to a secret parameter.
 
-.. cpp:function:: secret_parameter minikey_to_secret(const std::string& minikey)
+.. cpp:function:: ec_secret minikey_to_secret(const std::string& minikey)
 
    Convert Cascasius minikey to secret parameter.
    Returns a nulled secret on error.
    ::
 
-    secret_parameter secret =
+    ec_secret secret =
         minikey_to_secret("S6c56bnXQiBjk9mqSYE7ykVQ7NzrRy");
     if (secret == null_hash)
         // Error...
