@@ -29,6 +29,7 @@ libbitcoin_la_SOURCES = \
 	utility/base58.cpp \
 	utility/big_number.cpp \
 	utility/checksum.cpp \
+	utility/ec_keys.cpp \
 	utility/elliptic_curve_key.cpp \
 	utility/external/hmac_sha512.c \
 	utility/external/ripemd160.c \
@@ -53,5 +54,5 @@ endif
 
 libbitcoin_la_LIBADD = \
     -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread \
-    -lcurl @LDFLAG_LEVELDB@ -lcrypto -ldl -lz
+    -lcurl -lsecp256k1 @LDFLAG_LEVELDB@ -lcrypto -ldl -lz
 

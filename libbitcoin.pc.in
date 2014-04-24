@@ -9,6 +9,6 @@ URL: http://libbitcoin.dyne.org
 Version: @PACKAGE_VERSION@
 Requires: libcurl
 Cflags: -I${includedir} -std=c++11 @CFLAG_LEVELDB@
-Libs: -L${libdir} -lbitcoin -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread -lcurl @LDFLAG_LEVELDB@
+Libs: -L${libdir} -lbitcoin -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread -lcurl -lsecp256k1 @LDFLAG_LEVELDB@
 Libs.private: -lcrypto -ldl -lz
 

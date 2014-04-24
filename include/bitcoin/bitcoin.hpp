@@ -196,6 +196,7 @@
 #include <bitcoin/utility/base58.hpp>
 #include <bitcoin/utility/big_number.hpp>
 #include <bitcoin/utility/checksum.hpp>
+#include <bitcoin/utility/ec_keys.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>
 #include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/logger.hpp>
