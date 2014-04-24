@@ -1,31 +1,31 @@
 bitcoin_includedir = $(includedir)/bitcoin
 bitcoin_include_HEADERS = \
-    define.hpp \
-    transaction_indexer.hpp \
-    satoshi_serialize.hpp \
-	getx_responder.hpp \
-	error.hpp \
-	validate.hpp \
-	primitives.hpp \
-	script.hpp \
 	address.hpp \
-	transaction.hpp \
-	stealth.hpp \
-	constants.hpp \
-	block.hpp \
 	bitcoin.hpp \
-	types.hpp \
-	session.hpp \
+	block.hpp \
+	constants.hpp \
+	define.hpp \
+	error.hpp \
 	format.hpp \
-	transaction_pool.hpp \
-	threadpool.hpp \
+	getx_responder.hpp \
 	poller.hpp \
-    version.hpp
+	primitives.hpp \
+	satoshi_serialize.hpp \
+	script.hpp \
+	session.hpp \
+	stealth.hpp \
+	threadpool.hpp \
+	transaction.hpp \
+	transaction_indexer.hpp \
+	transaction_pool.hpp \
+	types.hpp \
+	validate.hpp \
+	version.hpp
 
 bitcoin_impl_serialize_includedir = $(includedir)/bitcoin/impl/serialize
 bitcoin_impl_serialize_include_HEADERS = \
-    impl/serialize/misc.ipp \
-    impl/serialize/block.ipp
+	impl/serialize/block.ipp \
+	impl/serialize/misc.ipp
 
 bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
 bitcoin_blockchain_include_HEADERS = \
@@ -44,26 +44,26 @@ endif
 bitcoin_network_includedir = $(includedir)/bitcoin/network
 bitcoin_network_include_HEADERS = \
 	network/channel.hpp \
-	network/network.hpp \
 	network/handshake.hpp \
-	network/shared_const_buffer.hpp \
 	network/hosts.hpp \
-	network/protocol.hpp
+	network/network.hpp \
+	network/protocol.hpp \
+	network/shared_const_buffer.hpp
 
 bitcoin_util_includedir = $(includedir)/bitcoin/utility
 bitcoin_util_include_HEADERS = \
-	utility/async_parallel.hpp \
-	utility/elliptic_curve_key.hpp \
-	utility/serializer.hpp \
 	utility/assert.hpp \
-	utility/big_number.hpp \
-	utility/mmfile.hpp \
+	utility/async_parallel.hpp \
 	utility/base58.hpp \
-	utility/subscriber.hpp \
+	utility/big_number.hpp \
+	utility/elliptic_curve_key.hpp \
+	utility/hash.hpp \
 	utility/logger.hpp \
-	utility/weak_bind.hpp \
-    utility/timed_section.hpp \
-	utility/hash.hpp
+	utility/mmfile.hpp \
+	utility/serializer.hpp \
+	utility/subscriber.hpp \
+	utility/timed_section.hpp \
+	utility/weak_bind.hpp
 
 bitcoin_util_external_includedir = $(includedir)/bitcoin/utility/external/
 bitcoin_util_external_include_HEADERS = \
