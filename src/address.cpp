@@ -21,6 +21,7 @@
 
 #include <bitcoin/format.hpp>
 #include <bitcoin/utility/base58.hpp>
+#include <bitcoin/utility/checksum.hpp>
 #include <bitcoin/utility/hash.hpp>
 
 namespace libbitcoin {
@@ -62,17 +63,11 @@ bool payment_address::set_encoded(const std::string& encoded_address)
     // version + 20 bytes short hash + 4 bytes checksum
     if (decoded_address.size() != 25)
         return false;
-    version_ = decoded_address[0];
-    const data_chunk checksum_bytes(
-        decoded_address.end() - 4, decoded_address.end());
-    // version + short hash
-    const data_chunk main_body(
-        decoded_address.begin(), decoded_address.end() - 4);
-    // verify checksum bytes
-    if (bitcoin_checksum(main_body) !=
-            from_little_endian<uint32_t>(checksum_bytes.begin()))
+    if (!verify_checksum(decoded_address))
         return false;
-    std::copy(main_body.begin() + 1, main_body.end(), hash_.begin());
+
+    version_ = decoded_address[0];
+    std::copy_n(decoded_address.begin() + 1, hash_.size(), hash_.begin());
     return true;
 }
 
@@ -83,8 +78,7 @@ std::string payment_address::encoded() const
     // Type, Hash, Checksum doth make thy address
     unencoded_address.push_back(version_);
     extend_data(unencoded_address, hash_);
-    uint32_t checksum = bitcoin_checksum(unencoded_address);
-    extend_data(unencoded_address, to_little_endian(checksum));
+    append_checksum(unencoded_address);
     BITCOIN_ASSERT(unencoded_address.size() == 25);
     return encode_base58(unencoded_address);
 }

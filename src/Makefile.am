@@ -28,6 +28,7 @@ libbitcoin_la_SOURCES = \
 	transaction_pool.cpp \
 	utility/base58.cpp \
 	utility/big_number.cpp \
+	utility/checksum.cpp \
 	utility/elliptic_curve_key.cpp \
 	utility/external/hmac_sha512.c \
 	utility/external/ripemd160.c \
