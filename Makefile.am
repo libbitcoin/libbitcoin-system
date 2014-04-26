@@ -49,7 +49,7 @@ bitcoin_includedir = ${includedir}/bitcoin
 
 bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin.hpp
-    
+
 bitcoin_bitcoin_includedir = ${includedir}/bitcoin/bitcoin
 bitcoin_bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin/address.hpp \
@@ -89,6 +89,7 @@ bitcoin_bitcoin_network_include_HEADERS = \
 
 bitcoin_bitcoin_util_includedir = ${includedir}/bitcoin/bitcoin/utility
 bitcoin_bitcoin_util_include_HEADERS = \
+    include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
     include/bitcoin/bitcoin/utility/base58.hpp \
@@ -117,6 +118,7 @@ bitcoin_bitcoin_util_external_include_HEADERS = \
 
 bitcoin_bitcoin_impl_utility_includedir = ${includedir}/bitcoin/bitcoin/impl/utility
 bitcoin_bitcoin_impl_utility_include_HEADERS = \
+    include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
@@ -183,7 +185,7 @@ src_libbitcoin_la_LIBADD = \
     -lpthread \
     ${secp256k1_LIBS} \
     ${gmp_LIBS}
-    
+
 if USE_LIBRT
 src_libbitcoin_la_LIBADD += \
     ${rt_LIBS}
@@ -202,7 +204,7 @@ test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/include \
     -I${srcdir}/test \
     ${secp256k1_CFLAGS}
-    
+
 if SET_BOOST_TEST_DYN_LINK
 test_libbitcoin_test_CPPFLAGS += \
     -DBOOST_TEST_DYN_LINK

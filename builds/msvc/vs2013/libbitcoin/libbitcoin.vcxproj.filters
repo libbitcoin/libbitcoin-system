@@ -60,6 +60,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\format.ipp">
       <Filter>include\bitcoin\impl</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
@@ -178,6 +181,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
