@@ -312,6 +312,8 @@ private:
             std::bind(handle_send, std::placeholders::_1, total_nodes);
         for (const connection_info& connection: connections_)
             connection.node->send(packet, send_handler);
+        for (channel_ptr node: manual_connections_)
+            node->send(packet, send_handler);
         for (channel_ptr node: accepted_channels_)
             node->send(packet, send_handler);
     }
