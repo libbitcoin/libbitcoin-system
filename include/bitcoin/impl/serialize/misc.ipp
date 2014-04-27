@@ -149,8 +149,8 @@ void satoshi_load(const Iterator, const Iterator, get_address_type& packet)
 }
 
 // inventory related stuff
-uint32_t inventory_type_to_number(inventory_type_id inv_type);
-inventory_type_id inventory_type_from_number(uint32_t raw_type);
+BC_API uint32_t inventory_type_to_number(inventory_type_id inv_type);
+BC_API inventory_type_id inventory_type_from_number(uint32_t raw_type);
 
 template <typename Message>
 size_t raw_size_inventory_impl(const Message& packet)
