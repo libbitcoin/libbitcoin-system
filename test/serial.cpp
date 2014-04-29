@@ -138,6 +138,27 @@ BOOST_AUTO_TEST_CASE(script_parse_save_test)
         "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac");
     script_type out_scr = parse_script(normal_output_script);
     BOOST_REQUIRE(save_script(out_scr) == normal_output_script);
+
+    data_chunk weird_script = decode_hex(
+        "0c49206c69656b20636174732e483045022100c7387f64e1f4"
+        "cf654cae3b28a15f7572106d6c1319ddcdc878e636ccb83845"
+        "e30220050ebf440160a4c0db5623e0cb1562f46401a7ff5b87"
+        "7aa03415ae134e8c71c901534d4f0176519c6375522103b124"
+        "c48bbff7ebe16e7bd2b2f2b561aa53791da678a73d2777cc1c"
+        "a4619ab6f72103ad6bb76e00d124f07a22680e39debd4dc4bd"
+        "b1aa4b893720dd05af3c50560fdd52af67529c63552103b124"
+        "c48bbff7ebe16e7bd2b2f2b561aa53791da678a73d2777cc1c"
+        "a4619ab6f721025098a1d5a338592bf1e015468ec5a8fafc1f"
+        "c9217feb5cb33597f3613a2165e9210360cfabc01d52eaaeb3"
+        "976a5de05ff0cfa76d0af42d3d7e1b4c233ee8a00655ed2103"
+        "f571540c81fd9dbf9622ca00cfe95762143f2eab6b65150365"
+        "bb34ac533160432102bc2b4be1bca32b9d97e2d6fb255504f4"
+        "bc96e01aaca6e29bfa3f8bea65d8865855af672103ad6bb76e"
+        "00d124f07a22680e39debd4dc4bdb1aa4b893720dd05af3c50"
+        "560fddada820a4d933888318a23c28fb5fc67aca8530524e20"
+        "74b1d185dbf5b4db4ddb0642848868685174519c6351670068");
+    script_type weird = parse_script(weird_script);
+    BOOST_REQUIRE(save_script(weird) == weird_script);
 }
 
 BOOST_AUTO_TEST_CASE(serialize_deserialize)
