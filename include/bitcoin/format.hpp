@@ -36,7 +36,7 @@ struct output_point;
 // We don't need a stream operator for input_point:
 typedef output_point input_point;
 
-template<typename D, typename T>
+template <typename D, typename T>
 void extend_data(D& chunk, const T& other)
 {
     chunk.insert(std::end(chunk), std::begin(other), std::end(other));
@@ -45,7 +45,7 @@ void extend_data(D& chunk, const T& other)
 #define VERIFY_UNSIGNED(T) static_assert(std::is_unsigned<T>::value, \
     "The endian functions only work on unsigned types")
 
-template<typename T, typename Iterator>
+template <typename T, typename Iterator>
 T from_big_endian(Iterator in)
 {
     VERIFY_UNSIGNED(T);
@@ -56,7 +56,7 @@ T from_big_endian(Iterator in)
     return out;
 }
 
-template<typename T, typename Iterator>
+template <typename T, typename Iterator>
 T from_little_endian(Iterator in)
 {
     VERIFY_UNSIGNED(T);
@@ -67,7 +67,7 @@ T from_little_endian(Iterator in)
     return out;
 }
 
-template<typename T>
+template <typename T>
 byte_array<sizeof(T)> to_big_endian(T n)
 {
     VERIFY_UNSIGNED(T);
@@ -80,7 +80,7 @@ byte_array<sizeof(T)> to_big_endian(T n)
     return out;
 }
 
-template<typename T>
+template <typename T>
 byte_array<sizeof(T)> to_little_endian(T n)
 {
     VERIFY_UNSIGNED(T);
@@ -95,7 +95,7 @@ byte_array<sizeof(T)> to_little_endian(T n)
 
 #undef VERIFY_UNSIGNED
 
-template<typename T>
+template <typename T>
 T cast_chunk(data_chunk chunk, bool reverse=false)
 {
     if (reverse)
@@ -104,7 +104,7 @@ T cast_chunk(data_chunk chunk, bool reverse=false)
         return from_little_endian<T>(chunk.begin());
 }
 
-template<typename T>
+template <typename T>
 data_chunk uncast_type(T value, bool reverse=false)
 {
     if (reverse)
@@ -113,7 +113,7 @@ data_chunk uncast_type(T value, bool reverse=false)
         return to_data_chunk(to_little_endian(value));
 }
 
-template<typename T>
+template <typename T>
 std::string encode_hex(T data)
 {
     std::stringstream ss;
