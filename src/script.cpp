@@ -2070,11 +2070,11 @@ inline data_chunk operation_metadata(const opcode code, size_t data_size)
     switch (code)
     {
         case opcode::pushdata1:
-            return to_data_chunk(to_big_endian<uint8_t>(data_size));
+            return to_data_chunk(to_little_endian<uint8_t>(data_size));
         case opcode::pushdata2:
-            return to_data_chunk(to_big_endian<uint16_t>(data_size));
+            return to_data_chunk(to_little_endian<uint16_t>(data_size));
         case opcode::pushdata4:
-            return to_data_chunk(to_big_endian<uint32_t>(data_size));
+            return to_data_chunk(to_little_endian<uint32_t>(data_size));
         default:
             return data_chunk();
     }
