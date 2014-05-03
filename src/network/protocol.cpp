@@ -386,9 +386,9 @@ void protocol::attempt_connect(const std::error_code& ec,
         try_connect_once(slot);
         return;
     }
-    log_debug(LOG_PROTOCOL) << "Trying "
-        << pretty(address.ip) << ":" << address.port;
-    connect(handshake_, network_, pretty(address.ip), address.port,
+    const std::string hostname = pretty(address.ip);
+    log_debug(LOG_PROTOCOL) << "Trying " << hostname << ":" << address.port;
+    connect(handshake_, network_, hostname, address.port,
         strand_.wrap(&protocol::handle_connect, this, _1, _2, address, slot));
 }
 void protocol::handle_connect(
