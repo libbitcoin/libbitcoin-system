@@ -883,10 +883,7 @@ bool script_type::op_hash160()
     if (stack_.size() < 1)
         return false;
     short_hash hash = bitcoin_short_hash(pop_stack());
-    // hash must be reversed
-    // NOTE: the above comment said this needed reversing,
-    // but the line below was previously not reversed - verify.
-    data_chunk chunk(hash.rbegin(), hash.rend());
+    data_chunk chunk(hash.begin(), hash.end());
     stack_.push_back(chunk);
     return true;
 }
