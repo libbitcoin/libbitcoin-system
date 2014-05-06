@@ -35,6 +35,9 @@ struct BC_API stealth_prefix
 BC_API bool stealth_match(
     const stealth_prefix& prefix, const uint8_t* raw_bitfield);
 
+BC_API stealth_bitfield calculate_stealth_bitfield(
+    const data_chunk& stealth_data);
+
 } // namespace libbitcoin
 
 #endif

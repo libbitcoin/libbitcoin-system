@@ -259,15 +259,6 @@ bool process_stealth_output_info(const transaction_output_type& output,
 
 constexpr size_t bitfield_size = sizeof(stealth_bitfield);
 
-stealth_bitfield calculate_bitfield(const data_chunk& stealth_data)
-{
-    // Calculate stealth bitfield
-    const hash_digest index = bitcoin_hash(stealth_data);
-    auto deserial = make_deserializer(
-        index.begin(), index.begin() + bitfield_size);
-    auto bitfield = deserial.read_little_endian<stealth_bitfield>();
-    return bitfield;
-}
 data_chunk read_ephemkey(const data_chunk& stealth_data)
 {
     // Read ephemkey
@@ -280,7 +271,7 @@ void add_stealth_info(const data_chunk& stealth_data,
     const payment_address& address, const hash_digest& tx_hash,
     stealth_database& db)
 {
-    const stealth_bitfield bitfield = calculate_bitfield(stealth_data);
+    const stealth_bitfield bitfield = calculate_stealth_bitfield(stealth_data);
     const data_chunk ephemkey = read_ephemkey(stealth_data);
     auto write_func = [&](uint8_t *it)
     {

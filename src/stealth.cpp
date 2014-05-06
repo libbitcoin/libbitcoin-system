@@ -20,6 +20,8 @@
 #include <bitcoin/stealth.hpp>
 
 #include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/hash.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 
@@ -56,6 +58,17 @@ bool stealth_match(const stealth_prefix& prefix, const uint8_t* raw_bitfield)
     if (masked_a != masked_b)
         return false;
     return true;
+}
+
+stealth_bitfield calculate_stealth_bitfield(const data_chunk& stealth_data)
+{
+    constexpr size_t bitfield_size = sizeof(stealth_bitfield);
+    // Calculate stealth bitfield
+    const hash_digest index = bitcoin_hash(stealth_data);
+    auto deserial = make_deserializer(
+        index.begin(), index.begin() + bitfield_size);
+    auto bitfield = deserial.read_little_endian<stealth_bitfield>();
+    return bitfield;
 }
 
 } // namespace libbitcoin
