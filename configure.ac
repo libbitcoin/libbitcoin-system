@@ -45,6 +45,19 @@ fi
 AM_CXXFLAGS="-ggdb -g3 -Wall -Wno-missing-braces -pedantic -Wextra -fstack-protector-all -DDEBUG -fvisibility=internal -fvisibility-inlines-hidden"
 AC_SUBST([AM_CXXFLAGS])
 
+# Allow libsecp256k1 to be installed in a custom path:
+AC_ARG_WITH([libsecp256k1],
+            [AS_HELP_STRING([--with-libsecp256k1],
+                            [Specify libsecp256k1 prefix])],
+            [bc_search_libsecp256k1="yes"],
+            [])
+if test "x$bc_search_libsecp256k1" = "xyes"; then
+    if test -r "${with_libsecp256k1}/include/secp256k1.h"; then
+        CXXFLAGS="-I${with_libsecp256k1}/include ${CXXFLAGS}"
+        LDFLAGS="-L${with_libsecp256k1}/lib ${LDFLAGS}"
+    fi
+fi
+
 PKG_CHECK_MODULES([SSL], [libssl >= 0.9])
 PKG_CHECK_MODULES([CURL], [libcurl])
 
