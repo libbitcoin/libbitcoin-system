@@ -67,13 +67,13 @@ BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
  * Computes the sum A += G*b, where G is the curve's generator point.
  * @return false on failure (such as infinity or zero).
  */
-BC_API bool tweak_add(ec_point& A, const ec_secret& b);
+BC_API bool ec_tweak_add(ec_point& a, const ec_secret& b);
 
 /**
  * Computes the product A *= b.
  * @return false on failure (such as infinity or zero).
  */
-BC_API bool ec_mul(ec_point& A, const ec_secret& b);
+BC_API bool ec_multiply(ec_point& a, const ec_secret& b);
 
 /**
  * Computes the sum a = (a + b) % n, where n is the curve order.
@@ -85,7 +85,7 @@ BC_API bool ec_add(ec_secret& a, const ec_secret& b);
  * Computes the sum a = (a * b) % n, where n is the curve order.
  * @return false on failure (such as a zero result).
  */
-BC_API bool ec_mul(ec_secret& a, const ec_secret& b);
+BC_API bool ec_multiply(ec_secret& a, const ec_secret& b);
 
 } // namespace libbitcoin
 
