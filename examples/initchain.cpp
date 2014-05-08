@@ -33,8 +33,8 @@ void initialize_new_stealth_database(const std::string& filename)
     mmfile file(filename);
     auto serial = make_serializer(file.data());
     serial.write_4_bytes(1);
-    // should last us a decade
-    size_t max_header_rows = 10000;
+    // 1 million blocks should last us a decade.
+    size_t max_header_rows = 1000000;
     serial.write_4_bytes(max_header_rows);
     serial.write_4_bytes(0);
     for (size_t i = 0; i < max_header_rows; ++i)
