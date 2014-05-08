@@ -66,11 +66,11 @@ BOOST_AUTO_TEST_CASE(ec_add_test)
     ec_secret secret_b{{3, 2, 1}};
     ec_point public_a = secret_to_public_key(secret_a, true);
 
-    secret_a += secret_b;
+    BOOST_REQUIRE(ec_add(secret_a, secret_b));
     BOOST_REQUIRE(encode_hex(secret_a) ==
         "0404040000000000000000000000000000000000000000000000000000000000");
 
-    public_a += secret_b;
+    BOOST_REQUIRE(tweak_add(public_a, secret_b));
     ec_point public_sum = secret_to_public_key(secret_a, true);
     BOOST_REQUIRE(std::equal(public_a.begin(), public_a.end(),
         public_sum.begin()));
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(ec_add_bad_test)
     secret_b[31] = 1;
     ec_point public_a = secret_to_public_key(secret_a, true);
 
-    BOOST_REQUIRE(!(secret_a += secret_b));
-    BOOST_REQUIRE(!(public_a += secret_b));
+    BOOST_REQUIRE(!ec_add(secret_a, secret_b));
+    BOOST_REQUIRE(!tweak_add(public_a, secret_b));
 }
 
 BOOST_AUTO_TEST_CASE(ec_mul_test)
@@ -101,48 +101,11 @@ BOOST_AUTO_TEST_CASE(ec_mul_test)
     secret_b[31] = 22;
     ec_point public_a = secret_to_public_key(secret_a, true);
 
-    secret_a *= secret_b;
+    BOOST_REQUIRE(ec_mul(secret_a, secret_b));
     BOOST_REQUIRE(secret_a[31] = 242);
 
-    public_a *= secret_b;
+    BOOST_REQUIRE(ec_mul(public_a, secret_b));
     ec_point public_sum = secret_to_public_key(secret_a, true);
     BOOST_REQUIRE(std::equal(public_a.begin(), public_a.end(),
         public_sum.begin()));
 }
-
-BOOST_AUTO_TEST_CASE(ec_add_test2)
-{
-    ec_secret secret_a
-    {{
-         0xdc, 0xc1, 0x25, 0x0b, 0x51, 0xc0, 0xf0, 0x3a,
-         0xe4, 0xe9, 0x78, 0xe0, 0x25, 0x6e, 0xde, 0x51,
-         0xdc, 0x11, 0x44, 0xe3, 0x45, 0xc9, 0x26, 0x26,
-         0x2b, 0x97, 0x17, 0xb1, 0xbc, 0xc9, 0xbd, 0x1b
-    }};
-    ec_secret secret_b
-    {{
-         0x4b, 0x49, 0x74, 0x26, 0x6e, 0xe6, 0xc8, 0xbe,
-         0xd9, 0xef, 0xf2, 0xcd, 0x10, 0x87, 0xbb, 0xc1,
-         0x10, 0x1f, 0x17, 0xba, 0xd9, 0xc3, 0x78, 0x14,
-         0xf8, 0x56, 0x1b, 0x67, 0xf5, 0x50, 0xc5, 0x44
-    }};
-    ec_secret expected_result
-    {{
-         0x28, 0x0a, 0x99, 0x31, 0xc0, 0xa7, 0xb8, 0xf9,
-         0xbe, 0xd9, 0x6b, 0xad, 0x35, 0xf6, 0x9a, 0x14,
-         0x31, 0x81, 0x7f, 0xb7, 0x70, 0x43, 0xfd, 0xff,
-         0x64, 0x1a, 0xd4, 0x8c, 0xe1, 0xe4, 0x41, 0x1e
-    }};
-    secret_a += secret_b;
-    BOOST_REQUIRE(secret_a == expected_result);
-    ec_point expected_sum
-    {{
-         0x03, 0x05, 0xf6, 0xb9, 0x9a, 0x44, 0xa2, 0xbd,
-         0xec, 0x8b, 0x48, 0x4f, 0xfc, 0xee, 0x56, 0x1c,
-         0xf9, 0xa0, 0xc3, 0xb7, 0xea, 0x92, 0xea, 0x8e,
-         0x63, 0x34, 0xe6, 0xfb, 0xc4, 0xf1, 0xc1, 0x78, 0x99
-    }};
-    ec_point public_sum = secret_to_public_key(secret_a, true);
-    BOOST_REQUIRE(public_sum == expected_sum);
-}
-

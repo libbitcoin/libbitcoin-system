@@ -22,11 +22,6 @@
 #include <secp256k1.h>
 #include <bitcoin/utility/assert.hpp>
 
-// TODO: temporary! Remove once adding points is resolved!
-#include <openssl/ec.h>
-#include <openssl/bn.h>
-// -------------------------------
-
 namespace libbitcoin {
 
 /**
@@ -114,55 +109,25 @@ BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
     );
 }
 
-BC_API bool operator+=(ec_point& a, const ec_point& b)
-{
-#define NID_secp256k1 714
-    bool success = false;
-    EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
-    BN_CTX* ctx = BN_CTX_new();
-    EC_POINT* point_a = EC_POINT_new(group);
-    EC_POINT* point_b = EC_POINT_new(group);
-    size_t data_size = 0;
-    if (!EC_POINT_oct2point(group, point_a, a.data(), a.size(), ctx))
-        goto fail;
-    if (!EC_POINT_oct2point(group, point_b, b.data(), b.size(), ctx))
-        goto fail;
-    if (!EC_POINT_add(group, point_a, point_a, point_b, ctx))
-        goto fail;
-    data_size = EC_POINT_point2oct(group, point_a,
-        POINT_CONVERSION_COMPRESSED, NULL, 0, ctx);
-    a.resize(data_size);
-    if (!EC_POINT_point2oct(group, point_a,
-        POINT_CONVERSION_COMPRESSED, a.data(), a.size(), ctx))
-        goto fail;
-    success = true;
-fail:
-    EC_POINT_free(point_b);
-    EC_POINT_free(point_a);
-    BN_CTX_free(ctx);
-    EC_GROUP_free(group);
-    return success;
-}
-
-BC_API bool operator+=(ec_point& a, const ec_secret& b)
+BC_API bool tweak_add(ec_point& A, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ecdsa_pubkey_tweak_add(a.data(), a.size(), b.data());
+    return secp256k1_ecdsa_pubkey_tweak_add(A.data(), A.size(), b.data());
 }
 
-BC_API bool operator*=(ec_point& a, const ec_secret& b)
+BC_API bool ec_mul(ec_point& A, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ecdsa_pubkey_tweak_mul(a.data(), a.size(), b.data());
+    return secp256k1_ecdsa_pubkey_tweak_mul(A.data(), A.size(), b.data());
 }
 
-BC_API bool operator+=(ec_secret& a, const ec_secret& b)
+BC_API bool ec_add(ec_secret& a, const ec_secret& b)
 {
     init.init();
     return secp256k1_ecdsa_privkey_tweak_add(a.data(), b.data());
 }
 
-BC_API bool operator*=(ec_secret& a, const ec_secret& b)
+BC_API bool ec_mul(ec_secret& a, const ec_secret& b)
 {
     init.init();
     return secp256k1_ecdsa_privkey_tweak_mul(a.data(), b.data());
