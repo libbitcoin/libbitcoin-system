@@ -65,8 +65,6 @@ BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
 
 // Math:
 // These return false if the inputs or outputs are out of range.
-BC_API bool operator+=(ec_point& a, const ec_point& b);
-// Is this allowed?
 BC_API bool operator+=(ec_point& a, const ec_secret& b);
 BC_API bool operator*=(ec_point& a, const ec_secret& b);
 BC_API bool operator+=(ec_secret& a, const ec_secret& b);
