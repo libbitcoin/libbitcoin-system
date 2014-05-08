@@ -15,10 +15,7 @@
       <EnablePREfast>false</EnablePREfast>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Release')) != -1">BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <!-- HACK : CURL_STATICLIB should be injected by the cURL package. -->
-      <PreprocessorDefinitions Condition="$(Configuration.IndexOf('SEXE')) != -1 Or $(Configuration.IndexOf('LEXE')) != -1">CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <!-- BUGBUG: there are linker errors in two examples. -->
     <Link>
       <AdditionalOptions Condition="$(Configuration.IndexOf('Debug')) != -1">/OPT:NOLBR /IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -36,24 +33,19 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="$(Configuration.IndexOf('DEXE')) != -1">
-    <Linkage-curl>dynamic</Linkage-curl>
-    <Linkage-libssh2>dynamic</Linkage-libssh2>
     <Linkage-openssl>dynamic</Linkage-openssl>
-    <Linkage-zlib>dynamic</Linkage-zlib>
+    <!--<Linkage-secp256k1>dynamic</Linkage-secp256k1>-->
+    <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-libbitcoin>dynamic</Linkage-libbitcoin>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.IndexOf('LEXE')) != -1">
-    <Linkage-curl>ltcg</Linkage-curl>
-    <Linkage-libssh2>ltcg</Linkage-libssh2>
-    <Linkage-openssl>ltcg</Linkage-openssl>
-    <Linkage-zlib>ltcg</Linkage-zlib>
+    <Linkage-openssl>static</Linkage-openssl>
+    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
     <Linkage-libbitcoin>ltcg</Linkage-libbitcoin>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.IndexOf('SEXE')) != -1">
-    <Linkage-curl>static</Linkage-curl>
-    <Linkage-libssh2>static</Linkage-libssh2>
     <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-zlib>static</Linkage-zlib>
+    <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-libbitcoin>static</Linkage-libbitcoin>
   </PropertyGroup>
 
@@ -65,16 +57,11 @@
   </Target>
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
-    <!--<Message Text="Linkage-curl      : $(Linkage-curl)" Importance="high"/>-->
-    <!--<Message Text="Linkage-libssh2   : $(Linkage-libssh2)" Importance="high"/>-->
     <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
-    <Message Text="Linkage-zlib      : $(Linkage-zlib)" Importance="high"/>
     <Message Text="Linkage-libbitcoin: $(Linkage-libbitcoin)" Importance="high"/>
+    <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
   </Target>
   
-  <Target Name="CustomInfo" AfterTargets="Build" Condition="$(Configuration.IndexOf('SEXE')) != -1">
-    <Message Text="A LTCG warning on 'libeay32.lib' is a the result of a COAPP OpenSSL packaging error and can be safely ignored." Importance="high"/>
-  </Target>
 
 </Project>
 
