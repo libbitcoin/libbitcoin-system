@@ -185,14 +185,14 @@
     <ClCompile Include="..\..\..\..\src\utility\hash.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\external\bigint.c">
-      <Filter>src\utility\external</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\external\hmac_sha512.c">
       <Filter>src\utility\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\external\sha512.c">
       <Filter>src\utility\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\checksum.cpp">
+      <Filter>src\utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -354,9 +354,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash.hpp">
       <Filter>include\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\bigint.h">
-      <Filter>include\utility\external</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\bigint.hpp">
       <Filter>include\utility</Filter>

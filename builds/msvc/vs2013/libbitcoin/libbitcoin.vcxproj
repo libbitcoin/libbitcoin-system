@@ -57,7 +57,7 @@
   </ItemGroup>
   <PropertyGroup Label="Configuration">
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
-    <NuGetPackageImportStamp>eee9f37d</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>8cae15bd</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -199,8 +199,8 @@
     <ClCompile Include="..\..\..\..\src\transaction_pool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\base58.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\big_number.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\elliptic_curve_key.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\external\bigint.c" />
     <ClCompile Include="..\..\..\..\src\utility\external\sha512.c" />
     <ClCompile Include="..\..\..\..\src\utility\external\hmac_sha512.c" />
     <ClCompile Include="..\..\..\..\src\utility\external\ripemd160.c" />
@@ -250,7 +250,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\big_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\elliptic_curve_key.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\bigint.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\hmac_sha512.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\ripemd160.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha1.h" />
@@ -300,7 +299,6 @@
   <Import Project="..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')" />
   <Import Project="..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props" Condition="Exists('..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" />
   <Import Project="..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props" Condition="Exists('..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props')" />
-  <Import Project="..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props" Condition="Exists('..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
@@ -309,11 +307,8 @@
     <Import Project="..\..\..\..\..\..\nuget\boost_date_time-vc120.1.55.0.16\build\native\boost_date_time-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_date_time-vc120.1.55.0.16\build\native\boost_date_time-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost_regex-vc120.1.55.0.16\build\native\boost_regex-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.55.0.16\build\native\boost_regex-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.55.0.16\build\native\boost_filesystem-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.55.0.16\build\native\boost_filesystem-vc120.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\zlib.redist.1.2.8.6\build\native\zlib.redist.targets" Condition="Exists('..\..\..\..\..\..\nuget\zlib.redist.1.2.8.6\build\native\zlib.redist.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\zlib.1.2.8.6\build\native\zlib.targets" Condition="Exists('..\..\..\..\..\..\nuget\zlib.1.2.8.6\build\native\zlib.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\openssl.redist.1.0.1.24\build\native\openssl.redist.targets" Condition="Exists('..\..\..\..\..\..\nuget\openssl.redist.1.0.1.24\build\native\openssl.redist.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.targets" Condition="Exists('..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\secp256k1_openssl_vc120.0.1.0.0\build\native\secp256k1_openssl_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\secp256k1_openssl_vc120.0.1.0.0\build\native\secp256k1_openssl_vc120.targets')" />
+    <Import Project="..\..\..\..\..\..\nuget\openssl_no-asm_vc120.1.0.1.700\build\native\openssl_no-asm_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\openssl_no-asm_vc120.1.0.1.700\build\native\openssl_no-asm_vc120.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -327,11 +322,7 @@
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_date_time-vc120.1.55.0.16\build\native\boost_date_time-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_date_time-vc120.1.55.0.16\build\native\boost_date_time-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.55.0.16\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_regex-vc120.1.55.0.16\build\native\boost_regex-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.55.0.16\build\native\boost_filesystem-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.55.0.16\build\native\boost_filesystem-vc120.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\zlib.redist.1.2.8.6\build\native\zlib.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\zlib.redist.1.2.8.6\build\native\zlib.redist.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\zlib.1.2.8.6\build\native\zlib.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\zlib.1.2.8.6\build\native\zlib.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\openssl.redist.1.0.1.24\build\native\openssl.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\openssl.redist.1.0.1.24\build\native\openssl.redist.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.props'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\openssl.1.0.1.24\build\native\openssl.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\secp256k1_openssl_vc120.0.1.0.0\build\native\secp256k1_openssl_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\secp256k1_openssl_vc120.0.1.0.0\build\native\secp256k1_openssl_vc120.targets'))" />
+    <Error Condition="!Exists('..\..\..\..\..\..\nuget\openssl_no-asm_vc120.1.0.1.700\build\native\openssl_no-asm_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\openssl_no-asm_vc120.1.0.1.700\build\native\openssl_no-asm_vc120.targets'))" />
   </Target>
 </Project>
