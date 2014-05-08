@@ -63,12 +63,29 @@ BC_API data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce);
 BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
     const data_chunk& signature);
 
-// Math:
-// These return false if the inputs or outputs are out of range.
-BC_API bool operator+=(ec_point& a, const ec_secret& b);
-BC_API bool operator*=(ec_point& a, const ec_secret& b);
-BC_API bool operator+=(ec_secret& a, const ec_secret& b);
-BC_API bool operator*=(ec_secret& a, const ec_secret& b);
+/**
+ * Computes the sum A += G*b, where G is the curve's generator point.
+ * @return false on failure (such as infinity or zero).
+ */
+BC_API bool tweak_add(ec_point& A, const ec_secret& b);
+
+/**
+ * Computes the product A *= b.
+ * @return false on failure (such as infinity or zero).
+ */
+BC_API bool ec_mul(ec_point& A, const ec_secret& b);
+
+/**
+ * Computes the sum a = (a + b) % n, where n is the curve order.
+ * @return false on failure (such as a zero result).
+ */
+BC_API bool ec_add(ec_secret& a, const ec_secret& b);
+
+/**
+ * Computes the sum a = (a * b) % n, where n is the curve order.
+ * @return false on failure (such as a zero result).
+ */
+BC_API bool ec_mul(ec_secret& a, const ec_secret& b);
 
 } // namespace libbitcoin
 

@@ -109,25 +109,25 @@ BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
     );
 }
 
-BC_API bool operator+=(ec_point& a, const ec_secret& b)
+BC_API bool tweak_add(ec_point& A, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ecdsa_pubkey_tweak_add(a.data(), a.size(), b.data());
+    return secp256k1_ecdsa_pubkey_tweak_add(A.data(), A.size(), b.data());
 }
 
-BC_API bool operator*=(ec_point& a, const ec_secret& b)
+BC_API bool ec_mul(ec_point& A, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ecdsa_pubkey_tweak_mul(a.data(), a.size(), b.data());
+    return secp256k1_ecdsa_pubkey_tweak_mul(A.data(), A.size(), b.data());
 }
 
-BC_API bool operator+=(ec_secret& a, const ec_secret& b)
+BC_API bool ec_add(ec_secret& a, const ec_secret& b)
 {
     init.init();
     return secp256k1_ecdsa_privkey_tweak_add(a.data(), b.data());
 }
 
-BC_API bool operator*=(ec_secret& a, const ec_secret& b)
+BC_API bool ec_mul(ec_secret& a, const ec_secret& b)
 {
     init.init();
     return secp256k1_ecdsa_privkey_tweak_mul(a.data(), b.data());

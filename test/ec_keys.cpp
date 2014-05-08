@@ -66,11 +66,11 @@ BOOST_AUTO_TEST_CASE(ec_add_test)
     ec_secret secret_b{{3, 2, 1}};
     ec_point public_a = secret_to_public_key(secret_a, true);
 
-    secret_a += secret_b;
+    BOOST_REQUIRE(ec_add(secret_a, secret_b));
     BOOST_REQUIRE(encode_hex(secret_a) ==
         "0404040000000000000000000000000000000000000000000000000000000000");
 
-    public_a += secret_b;
+    BOOST_REQUIRE(tweak_add(public_a, secret_b));
     ec_point public_sum = secret_to_public_key(secret_a, true);
     BOOST_REQUIRE(std::equal(public_a.begin(), public_a.end(),
         public_sum.begin()));
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(ec_add_bad_test)
     secret_b[31] = 1;
     ec_point public_a = secret_to_public_key(secret_a, true);
 
-    BOOST_REQUIRE(!(secret_a += secret_b));
-    BOOST_REQUIRE(!(public_a += secret_b));
+    BOOST_REQUIRE(!ec_add(secret_a, secret_b));
+    BOOST_REQUIRE(!tweak_add(public_a, secret_b));
 }
 
 BOOST_AUTO_TEST_CASE(ec_mul_test)
@@ -101,10 +101,10 @@ BOOST_AUTO_TEST_CASE(ec_mul_test)
     secret_b[31] = 22;
     ec_point public_a = secret_to_public_key(secret_a, true);
 
-    secret_a *= secret_b;
+    BOOST_REQUIRE(ec_mul(secret_a, secret_b));
     BOOST_REQUIRE(secret_a[31] = 242);
 
-    public_a *= secret_b;
+    BOOST_REQUIRE(ec_mul(public_a, secret_b));
     ec_point public_sum = secret_to_public_key(secret_a, true);
     BOOST_REQUIRE(std::equal(public_a.begin(), public_a.end(),
         public_sum.begin()));
