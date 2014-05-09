@@ -82,24 +82,6 @@ byte_array<sizeof(T)> to_little_endian(T n)
 #undef VERIFY_UNSIGNED
 
 template <typename T>
-T cast_chunk(data_chunk chunk, bool reverse=false)
-{
-    if (reverse)
-        return from_big_endian<T>(chunk.begin());
-    else
-        return from_little_endian<T>(chunk.begin());
-}
-
-template <typename T>
-data_chunk uncast_type(T value, bool reverse=false)
-{
-    if (reverse)
-        return to_data_chunk(to_big_endian(value));
-    else
-        return to_data_chunk(to_little_endian(value));
-}
-
-template <typename T>
 std::string encode_hex(T data)
 {
     std::stringstream ss;

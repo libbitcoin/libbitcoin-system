@@ -52,12 +52,6 @@ byte_array<sizeof(T)> to_big_endian(T n);
 template <typename T>
 byte_array<sizeof(T)> to_little_endian(T n);
 
-// TODO: remove these deprecated functions
-template <typename T>
-T cast_chunk(data_chunk chunk, bool reverse=false);
-template <typename T>
-data_chunk uncast_type(T value, bool reverse=false);
-
 template <typename T>
 std::string encode_hex(T data);
 

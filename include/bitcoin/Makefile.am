@@ -22,6 +22,10 @@ bitcoin_include_HEADERS = \
 	validate.hpp \
 	version.hpp
 
+bitcoin_impl_includedir = $(includedir)/bitcoin/impl/
+bitcoin_impl_include_HEADERS = \
+	impl/format.ipp
+
 bitcoin_impl_serialize_includedir = $(includedir)/bitcoin/impl/serialize
 bitcoin_impl_serialize_include_HEADERS = \
 	impl/serialize/block.ipp \
