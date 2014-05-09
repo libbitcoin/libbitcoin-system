@@ -79,6 +79,16 @@ data_chunk decode_hex(std::string hex_str)
     return result;
 }
 
+hash_digest decode_hash(const std::string& hex)
+{
+    return decode_hex_digest<hash_digest>(hex);
+}
+
+short_hash decode_short_hash(const std::string& hex)
+{
+    return decode_hex_digest<short_hash>(hex);
+}
+
 std::string satoshi_to_btc(uint64_t value)
 {
     uint64_t major = value / coin_price(1);

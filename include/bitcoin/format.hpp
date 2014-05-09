@@ -159,17 +159,19 @@ HashType decode_hex_digest(std::string hex_str)
     return result;
 }
 
-BC_API std::string satoshi_to_btc(uint64_t value);
+/**
+ * Convert a hex string into hash bytes.
+ * On error, returns null_hash.
+ */
+BC_API hash_digest decode_hash(const std::string& hex);
 
-// Python like range
-//   for (char c: range(str, 0, 2))
-template <typename RangeType>
-boost::sub_range<RangeType> range(RangeType iterable,
-    size_t start_offset=0, size_t end_offset=0)
-{
-    return boost::sub_range<RangeType>(
-        iterable.begin() + start_offset, iterable.end() - end_offset);
-}
+/**
+ * Convert a hex string into short hash bytes.
+ * On error, returns null_short_hash.
+ */
+BC_API short_hash decode_short_hash(const std::string& hex);
+
+BC_API std::string satoshi_to_btc(uint64_t value);
 
 } // namespace libbitcoin
 
