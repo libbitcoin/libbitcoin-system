@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(junk_test)
 
 BOOST_AUTO_TEST_CASE(tx_test)
 {
-    hash_digest tx_hash_1 = decode_hex_digest<hash_digest>(
+    hash_digest tx_hash_1 = decode_hash(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
     data_chunk raw_tx_1 = decode_hex(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(tx_test)
     satoshi_save(tx_1, resave_1.begin());
     BOOST_REQUIRE(resave_1 == raw_tx_1);
 
-    hash_digest tx_hash_2 = decode_hex_digest<hash_digest>(
+    hash_digest tx_hash_2 = decode_hash(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
     data_chunk raw_tx_2 = decode_hex(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
@@ -171,7 +171,7 @@ BOOST_AUTO_TEST_CASE(serialize_deserialize)
     s.write_8_bytes(0x8040201011223344);
     s.write_big_endian<uint32_t>(0x80402010);
     s.write_variable_uint(1234);
-    s.write_data(uncast_type<uint32_t>(0xbadf00d));
+    s.write_data(to_data_chunk(to_little_endian<uint32_t>(0xbadf00d)));
     s.write_string("hello");
     auto ds = make_deserializer(data.begin(), s.iterator());
     BOOST_REQUIRE(ds.read_byte() == 0x80);
@@ -180,7 +180,9 @@ BOOST_AUTO_TEST_CASE(serialize_deserialize)
     BOOST_REQUIRE(ds.read_8_bytes() == 0x8040201011223344);
     BOOST_REQUIRE(ds.read_big_endian<uint32_t>() == 0x80402010);
     BOOST_REQUIRE(ds.read_variable_uint() == 1234);
-    BOOST_REQUIRE(cast_chunk<uint32_t>(ds.read_data(4)) == 0xbadf00d);
+    BOOST_REQUIRE(from_little_endian<uint32_t>(
+        ds.read_data(4).begin()) == 0xbadf00d);
     BOOST_REQUIRE(ds.read_string() == "hello");
     BOOST_REQUIRE_THROW(ds.read_byte(), end_of_stream);
 }
+

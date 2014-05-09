@@ -79,6 +79,23 @@ data_chunk decode_hex(std::string hex)
     return result;
 }
 
+template <typename HashType>
+HashType decode_hex_digest(const std::string& hex)
+{
+    data_chunk raw_bytes = decode_hex(hex);
+    HashType result;
+    if (raw_bytes.size() != result.size())
+    {
+        // null_hash for hash_digest
+        // null_short_hash for short_hash
+        result.fill(0);
+        return result;
+    }
+    BITCOIN_ASSERT(raw_bytes.size() == result.size());
+    std::copy(raw_bytes.begin(), raw_bytes.end(), result.begin());
+    return result;
+}
+
 hash_digest decode_hash(const std::string& hex)
 {
     return decode_hex_digest<hash_digest>(hex);

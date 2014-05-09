@@ -55,8 +55,8 @@ int new_keypair()
 
 int sign(const std::string input_data, const std::string raw_private_key)
 {
-    hash_digest digest = decode_hex_digest<hash_digest>(input_data);
-    hash_digest privkey = decode_hex_digest<hash_digest>(raw_private_key);
+    hash_digest digest = decode_hash(input_data);
+    hash_digest privkey = decode_hash(raw_private_key);
     elliptic_curve_key ec;
     if (!ec.set_secret(privkey))
         error_exit("bad private key");
@@ -67,9 +67,9 @@ int sign(const std::string input_data, const std::string raw_private_key)
 int verify(const std::string input_data, const std::string& signature_data,
     const std::string raw_private_key)
 {
-    hash_digest digest = decode_hex_digest<hash_digest>(input_data);
+    hash_digest digest = decode_hash(input_data);
     data_chunk signature = decode_hex(signature_data);
-    hash_digest privkey = decode_hex_digest<hash_digest>(raw_private_key);
+    hash_digest privkey = decode_hash(raw_private_key);
     elliptic_curve_key ec;
     if (!ec.set_secret(privkey))
         error_exit("bad private key");
@@ -79,7 +79,7 @@ int verify(const std::string input_data, const std::string& signature_data,
 
 int address(const std::string raw_private_key)
 {
-    hash_digest privkey = decode_hex_digest<hash_digest>(raw_private_key);
+    hash_digest privkey = decode_hash(raw_private_key);
     elliptic_curve_key ec;
     if (!ec.set_secret(privkey))
         error_exit("bad private key");

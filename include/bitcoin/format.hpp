@@ -68,16 +68,6 @@ BC_API std::ostream& operator<<(
 BC_API data_chunk decode_hex(std::string hex);
 
 /**
- * Turns a hash hex string into HashType.
- * byte_stream.size() == 2 * HashType.size()
- *
- * On error, returns null_hash for hash_digest, or
- * null_short_hash for short_hash.
- */
-template <typename HashType>
-HashType decode_hex_digest(const std::string& hex);
-
-/**
  * Convert a hex string into hash bytes.
  * On error, returns null_hash.
  */
