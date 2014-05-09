@@ -36,7 +36,7 @@ struct output_point;
 // We don't need a stream operator for input_point:
 typedef output_point input_point;
 
-// Extend the data by appending other.
+/// Extend the data by appending other.
 template <typename D, typename T>
 void extend_data(D& data, const T& other);
 
@@ -52,6 +52,7 @@ byte_array<sizeof(T)> to_big_endian(T n);
 template <typename T>
 byte_array<sizeof(T)> to_little_endian(T n);
 
+/// Convert data into a user readable hex string.
 template <typename T>
 std::string encode_hex(T data);
 
@@ -65,6 +66,10 @@ BC_API std::ostream& operator<<(
 BC_API std::ostream& operator<<(
     std::ostream& stream, const output_point& point);
 
+/**
+ * Convert a hex string into bytes.
+ * On error, result.empty() is true.
+ */
 BC_API data_chunk decode_hex(std::string hex);
 
 /**
@@ -79,6 +84,7 @@ BC_API hash_digest decode_hash(const std::string& hex);
  */
 BC_API short_hash decode_short_hash(const std::string& hex);
 
+/// Convert satoshis into human readable BTC string value.
 BC_API std::string satoshi_to_btc(uint64_t value);
 
 } // namespace libbitcoin
