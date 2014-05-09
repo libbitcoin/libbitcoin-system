@@ -55,16 +55,16 @@ std::ostream& operator<<(std::ostream& stream, const output_point& point)
     return concat_point(stream, point);
 }
 
-data_chunk decode_hex(std::string hex_str)
+data_chunk decode_hex(std::string hex)
 {
     // Trim the fat.
-    boost::algorithm::trim(hex_str);
-    data_chunk result(hex_str.size() / 2);
-    for (size_t i = 0; i + 1 < hex_str.size(); i += 2)
+    boost::algorithm::trim(hex);
+    data_chunk result(hex.size() / 2);
+    for (size_t i = 0; i + 1 < hex.size(); i += 2)
     {
-        BITCOIN_ASSERT(hex_str.size() - i >= 2);
-        auto byte_begin = hex_str.begin() + i;
-        auto byte_end = hex_str.begin() + i + 2;
+        BITCOIN_ASSERT(hex.size() - i >= 2);
+        auto byte_begin = hex.begin() + i;
+        auto byte_end = hex.begin() + i + 2;
         // Perform conversion.
         int val = -1;
         std::stringstream converter;
