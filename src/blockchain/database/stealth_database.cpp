@@ -9,8 +9,6 @@
 namespace libbitcoin {
 
 constexpr uint32_t metadata_size = 12;
-// We save the entry offset every 100 blocks.
-constexpr uint32_t block_page_interval = 100;
 constexpr uint32_t entry_row_size = 4 + 33 + 21 + 32;
 
 stealth_database::stealth_database(mmfile& file)
@@ -56,15 +54,15 @@ void stealth_database::sync(uint32_t block_height)
 {
     // Add start index for entries at a block_height.
     // This way we can skip entries and start reading.
-    if (block_height % block_page_interval == 0)
-        add_header_entry_index(block_height);
+    add_header_entry_index(block_height);
     modify_entries_count();
     // Ready for next batch of writes.
     reset();
 }
 void stealth_database::add_header_entry_index(uint32_t block_height)
 {
-    uint32_t interval = block_height / block_page_interval;
+    const uint32_t interval = block_height;
+    BITCOIN_ASSERT(interval < max_header_rows_);
     uint64_t offset = header_sector_ + interval * 4;
     uint8_t* iter = file_.data() + offset;
     auto serial = make_serializer(iter);
@@ -91,7 +89,8 @@ void stealth_database::scan(read_function read, uint32_t from_height)
 }
 uint32_t stealth_database::read_start_entry_index(uint32_t from_height)
 {
-    uint32_t interval = from_height / block_page_interval;
+    const uint32_t interval = from_height;
+    BITCOIN_ASSERT(interval < max_header_rows_);
     uint64_t offset = header_sector_ + interval * 4;
     uint8_t* iter = file_.data() + offset;
     auto deserial = make_deserializer(iter, iter + 4);
@@ -122,3 +121,4 @@ void stealth_database::advise_kernel()
 }
 
 } // namespace libbitcoin
+
