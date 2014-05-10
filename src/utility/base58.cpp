@@ -20,6 +20,7 @@
 #include <bitcoin/utility/base58.hpp>
 
 #include <boost/algorithm/string.hpp>
+#include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {
@@ -40,81 +41,100 @@ bool is_base58(const std::string& text)
         [](const char c){ return is_base58(c); });
 }
 
+std::string EncodeBase58(const unsigned char* pbegin, const unsigned char* pend) {
+    // Skip & count leading zeroes.
+    int zeroes = 0;
+    while (pbegin != pend && *pbegin == 0) {
+        pbegin++;
+        zeroes++;
+    }
+    // Allocate enough space in big-endian base58 representation.
+    std::vector<unsigned char> b58((pend - pbegin) * 138 / 100 + 1); // log(256) / log(58), rounded up.
+    // Process the bytes.
+    while (pbegin != pend) {
+        int carry = *pbegin;
+        // Apply "b58 = b58 * 256 + ch".
+        for (std::vector<unsigned char>::reverse_iterator it = b58.rbegin(); it != b58.rend(); it++) {
+            carry += 256 * (*it);
+            *it = carry % 58;
+            carry /= 58;
+        }
+        assert(carry == 0);
+        pbegin++;
+    }
+    // Skip leading zeroes in base58 result.
+    std::vector<unsigned char>::iterator it = b58.begin();
+    while (it != b58.end() && *it == 0)
+        it++;
+    // Translate the result into a string.
+    std::string str;
+    str.reserve(zeroes + (b58.end() - it));
+    str.assign(zeroes, '1');
+    while (it != b58.end())
+        str += base58_chars[*(it++)];
+    return str;
+}
+
 std::string encode_base58(const data_chunk& unencoded_data)
 {
-    std::string encoded_data;
-    // Expected size increase from base58 conversion is approximately 137%
-    // use 138% to be safe
-    encoded_data.reserve((unencoded_data.size() - 1) * 138 / 100 + 1);
+    const unsigned char* pbegin = unencoded_data.data();
+    const unsigned char* pend = pbegin + unencoded_data.size();
+    return EncodeBase58(pbegin, pend);
+}
 
-    // Convert big endian data to little endian
-    // Extra zero at the end make sure bignum will interpret
-    // as a positive number
-    data_chunk tmp_data(unencoded_data.size() + 1, 0);
-    std::reverse_copy(unencoded_data.begin(), unencoded_data.end(),
-        tmp_data.begin());
-
-    big_number long_value;
-    long_value.set_data(tmp_data);
-    while (long_value > 0)
-    {                                                                            
-        auto result = divmod(long_value, 58);
-        long_value = result.first;
-        size_t remainder = result.second.uint32();
-        encoded_data += base58_chars[remainder];
-    }                                                                            
-                                                                                 
-    // Leading zeroes encoded as base58 zeros                                    
-    for (const uint8_t unencoded_byte: unencoded_data)
-    {
-        if (unencoded_byte != 0)
-            break;
-        encoded_data += base58_chars[0];
+bool DecodeBase58(const char *psz, std::vector<unsigned char>& vch) {
+    // Skip leading spaces.
+    while (*psz && isspace(*psz))
+        psz++;
+    // Skip and count leading '1's.
+    int zeroes = 0;
+    while (*psz == '1') {
+        zeroes++;
+        psz++;
     }
-
-    // Convert little endian std::string to big endian
-    reverse(encoded_data.begin(), encoded_data.end());
-    return encoded_data;
-}                                                                                
+    // Allocate enough space in big-endian base256 representation.
+    std::vector<unsigned char> b256(strlen(psz) * 733 / 1000 + 1); // log(58) / log(256), rounded up.
+    // Process the characters.
+    while (*psz && !isspace(*psz)) {
+        // Decode base58 character
+        const char *ch = strchr(base58_chars, *psz);
+        if (ch == NULL)
+            return false;
+        // Apply "b256 = b256 * 58 + ch".
+        int carry = ch - base58_chars;
+        for (std::vector<unsigned char>::reverse_iterator it = b256.rbegin(); it != b256.rend(); it++) {
+            carry += 58 * (*it);
+            *it = carry % 256;
+            carry /= 256;
+        }
+        assert(carry == 0);
+        psz++;
+    }
+    // Skip trailing spaces.
+    while (isspace(*psz))
+        psz++;
+    if (*psz != 0)
+        return false;
+    // Skip leading zeroes in b256.
+    std::vector<unsigned char>::iterator it = b256.begin();
+    while (it != b256.end() && *it == 0)
+        it++;
+    // Copy result into output vector.
+    vch.reserve(zeroes + (b256.end() - it));
+    vch.assign(zeroes, 0x00);
+    while (it != b256.end())
+      vch.push_back(*(it++));
+    return true;
+}
 
 data_chunk decode_base58(std::string encoded_data)
 {                                                                                
     // Trim spaces and newlines around the string.
     boost::algorithm::trim(encoded_data);
-    // We're building a big number.
-    big_number bn = 0;
-                                                                                 
-    // Convert big endian string to bignum                                       
-    for (const uint8_t current_char: encoded_data)
-    {                                                                            
-        bn *= 58;
-        bn += std::lower_bound(base58_chars, std::end(base58_chars) - 1,
-            current_char) - base58_chars;
-    }
-                                                                                 
-    // Get bignum as little endian data                                          
-    data_chunk temp_data = bn.data();       
-                                                                                 
-    // Trim off sign byte if present                                             
-    if (temp_data.size() >= 2 &&
-            temp_data.end()[-1] == 0 && temp_data.end()[-2] >= 0x80)
-        temp_data.erase(temp_data.end() - 1);
-                                                                                 
-    // Restore leading zeros                                                     
-    int leading_zeros = 0;
-    for (const uint8_t current_char: encoded_data)
-    {
-        if (current_char != base58_chars[0])
-            break;
-        leading_zeros++;
-    }
-
-    data_chunk unencoded_data;
-    unencoded_data.assign(leading_zeros + temp_data.size(), 0);
-    // Convert little endian data to big endian                                  
-    std::reverse_copy(temp_data.begin(), temp_data.end(),
-        unencoded_data.end() - temp_data.size());    
-    return unencoded_data;
+    data_chunk result;
+    if (!DecodeBase58(encoded_data.c_str(), result))
+        return data_chunk();
+    return result;
 }                                                             
                                                                                  
 } // namespace libbitcoin
