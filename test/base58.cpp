@@ -24,6 +24,7 @@
 using namespace libbitcoin;
 
 // For some reason boost test seg faults if I use a function.
+// Only when using libsecp256k1 with the SSL implementation.
 #define encdec_test(hex, encoded) \
 { \
     data_chunk data = decode_hex(hex); \

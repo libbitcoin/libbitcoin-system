@@ -21,7 +21,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/utility/assert.hpp>
-#include <bitcoin/format.hpp>
 
 namespace libbitcoin {
 
