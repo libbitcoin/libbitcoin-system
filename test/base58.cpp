@@ -23,12 +23,14 @@
 
 using namespace libbitcoin;
 
+BOOST_AUTO_TEST_SUITE( test_suite )
+
 // For some reason boost test seg faults if I use a function.
-#define encdec_test(hex, encoded) \
-{ \
-    data_chunk data = decode_hex(hex); \
-    BOOST_REQUIRE(encode_base58(data) == encoded); \
-    BOOST_REQUIRE(decode_base58(encoded) == data); \
+void encdec_test(const std::string& hex, const std::string& encoded)
+{
+    data_chunk data = decode_hex(hex);
+    BOOST_REQUIRE(encode_base58(data) == encoded);
+    BOOST_REQUIRE(decode_base58(encoded) == data);
 }
 
 BOOST_AUTO_TEST_CASE(base58_test)
@@ -68,4 +70,6 @@ BOOST_AUTO_TEST_CASE(is_b58)
     BOOST_REQUIRE(is_base58("abcdjkk11"));
     BOOST_REQUIRE(!is_base58("abcdjkk011"));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
