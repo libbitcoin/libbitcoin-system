@@ -183,42 +183,11 @@ script_number script_number::operator-(const script_number& other) const
     return operator-(other.value_);
 }
 
-#if 0
-inline CScriptNum& operator+=( const CScriptNum& rhs)       { return operator+=(rhs.m_value);  }
-inline CScriptNum& operator-=( const CScriptNum& rhs)       { return operator-=(rhs.m_value);  }
-
-#endif
-
 script_number script_number::operator-() const
 {
     BITCOIN_ASSERT(value_ != std::numeric_limits<int64_t>::min());
     return script_number(-value_);
 }
-
-#if 0
-
-inline CScriptNum& operator=( const int64_t& rhs)
-{
-    m_value = rhs;
-    return *this;
-}
-
-inline CScriptNum& operator+=( const int64_t& rhs)
-{
-    assert(rhs == 0 || (rhs > 0 && m_value <= std::numeric_limits<int64_t>::max() - rhs) ||
-                       (rhs < 0 && m_value >= std::numeric_limits<int64_t>::min() - rhs));
-    m_value += rhs;
-    return *this;
-}
-
-inline CScriptNum& operator-=( const int64_t& rhs)
-{
-    assert(rhs == 0 || (rhs > 0 && m_value >= std::numeric_limits<int64_t>::min() + rhs) ||
-                       (rhs < 0 && m_value <= std::numeric_limits<int64_t>::max() + rhs));
-    m_value -= rhs;
-    return *this;
-}
-#endif
 
 script_number& script_number::operator+=(const int64_t value)
 {

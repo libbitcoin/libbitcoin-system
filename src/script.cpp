@@ -90,19 +90,6 @@ const operation_stack& script_type::operations() const
     return operations_;
 }
 
-inline bool cast_to_big_number(const data_chunk& raw_number,
-    big_number& result)
-{
-    // Satoshi bitcoin does it this way.
-    // Copy its quack behaviour
-    if (raw_number.size() > 4)
-        return false;
-    big_number mid;
-    mid.set_data(raw_number);
-    result.set_data(mid.data());
-    return true;
-}
-
 inline bool cast_to_bool(const data_chunk& values)
 {
     for (auto it = values.begin(); it != values.end(); ++it)
@@ -359,8 +346,7 @@ bool read_value(DataStack& stack, int32_t& value)
 
 bool script_type::op_negative_1()
 {
-    big_number neg1;
-    neg1.set_int64(-1);
+    script_number neg1(-1);
     stack_.push_back(neg1.data());
     return true;
 }
