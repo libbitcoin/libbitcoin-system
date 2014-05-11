@@ -64,10 +64,14 @@ BOOST_AUTO_TEST_CASE(is_b58)
     const std::string base58_chars =
         "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     for (char c: base58_chars)
+    {
         BOOST_REQUIRE(is_base58(c));
+    }
     const std::string non_base58_chars = "0OIl+- //#";
     for (char c: non_base58_chars)
+    {
         BOOST_REQUIRE(!is_base58(c));
+    }
     BOOST_REQUIRE(is_base58("abcdjkk11"));
     BOOST_REQUIRE(!is_base58("abcdjkk011"));
 }
