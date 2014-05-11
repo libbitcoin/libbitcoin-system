@@ -61,8 +61,8 @@
 
 // Tag to deprecate functions and methods.
 // Gives a compiler warning when they are used.
-#if defined _WIN32 || defined __CYGWIN__
-    #define BC_DEPRECATED
+#if defined _MSC_VER || defined __CYGWIN__
+    #define BC_DEPRECATED __declspec(deprecated)
 #else
     #if __GNUC__ >= 4
         #define BC_DEPRECATED __attribute__((deprecated))
