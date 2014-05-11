@@ -77,6 +77,12 @@ for creating software using libbitcoin.
 
   $ pkg-config --cflags --libs libbitcoin
 
+Build Debian package
+---------------------
+
+  $ sudo apt-get install libboost-all-dev libdb++-dev libcurl4-openssl-dev libleveldb-dev fakeroot
+  $ dpkg-buildpackage -rfakeroot
+
 --------
 Examples
 --------

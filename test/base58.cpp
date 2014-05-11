@@ -26,6 +26,7 @@ using namespace libbitcoin;
 BOOST_AUTO_TEST_SUITE( test_suite )
 
 // For some reason boost test seg faults if I use a function.
+// Only when using libsecp256k1 with the SSL implementation.
 void encdec_test(const std::string& hex, const std::string& encoded)
 {
     data_chunk data = decode_hex(hex);

@@ -59,5 +59,17 @@
 // Remove this when cURL dependency is fully removed.
 #define NO_CURL
 
+// Tag to deprecate functions and methods.
+// Gives a compiler warning when they are used.
+#if defined _WIN32 || defined __CYGWIN__
+    #define BC_DEPRECATED
+#else
+    #if __GNUC__ >= 4
+        #define BC_DEPRECATED __attribute__((deprecated))
+    #else
+        #define BC_DEPRECATED
+    #endif
+#endif
+
 #endif
 
