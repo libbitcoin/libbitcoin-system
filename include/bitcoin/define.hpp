@@ -23,7 +23,7 @@
 // See http://gcc.gnu.org/wiki/Visibility
 
 // Generic helper definitions for shared library support
-#if defined _WIN32 || defined __CYGWIN__
+#if defined _MSC_VER || defined __CYGWIN__
     #define BC_HELPER_DLL_IMPORT __declspec(dllimport)
     #define BC_HELPER_DLL_EXPORT __declspec(dllexport)
     #define BC_HELPER_DLL_LOCAL
