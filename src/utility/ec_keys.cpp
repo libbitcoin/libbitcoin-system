@@ -72,13 +72,14 @@ BC_API ec_point secret_to_public_key(const ec_secret& secret,
 BC_API bool verify_public_key(const ec_point& public_key)
 {
     init.init();
-    return secp256k1_ecdsa_pubkey_verify(public_key.data(), public_key.size());
+    return secp256k1_ecdsa_pubkey_verify(public_key.data(), public_key.size())
+        == 1;
 }
 
 BC_API bool verify_private_key(const ec_secret& private_key)
 {
     init.init();
-    return secp256k1_ecdsa_seckey_verify(private_key.data());
+    return secp256k1_ecdsa_seckey_verify(private_key.data()) == 1;
 }
 
 BC_API data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce)
@@ -90,7 +91,7 @@ BC_API data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce)
     if (!verify_private_key(nonce)) // Needed because of upstream bug
         return data_chunk();
     bool valid = secp256k1_ecdsa_sign(hash.data(), hash.size(),
-        signature.data(), &out_size, secret.data(), nonce.data());
+        signature.data(), &out_size, secret.data(), nonce.data()) == 1;
     if (!valid)
         return data_chunk();
 
@@ -112,25 +113,25 @@ BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
 BC_API bool ec_tweak_add(ec_point& a, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ecdsa_pubkey_tweak_add(a.data(), a.size(), b.data());
+    return secp256k1_ecdsa_pubkey_tweak_add(a.data(), a.size(), b.data()) == 1;
 }
 
 BC_API bool ec_multiply(ec_point& a, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ecdsa_pubkey_tweak_mul(a.data(), a.size(), b.data());
+    return secp256k1_ecdsa_pubkey_tweak_mul(a.data(), a.size(), b.data()) == 1;
 }
 
 BC_API bool ec_add(ec_secret& a, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ecdsa_privkey_tweak_add(a.data(), b.data());
+    return secp256k1_ecdsa_privkey_tweak_add(a.data(), b.data()) == 1;
 }
 
 BC_API bool ec_multiply(ec_secret& a, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ecdsa_privkey_tweak_mul(a.data(), b.data());
+    return secp256k1_ecdsa_privkey_tweak_mul(a.data(), b.data()) == 1;
 }
 
 } // namespace libbitcoin
