@@ -23,6 +23,9 @@
 
 namespace libbitcoin {
 
+constexpr int64_t max_int64 = std::numeric_limits<int64_t>::max();
+constexpr int64_t min_int64 = std::numeric_limits<int64_t>::min();
+
 data_chunk script_number_serialize(const int64_t value)
 {
     if(value == 0)
@@ -216,6 +219,31 @@ inline CScriptNum& operator-=( const int64_t& rhs)
     return *this;
 }
 #endif
+
+script_number& script_number::operator+=(const int64_t value)
+{
+    BITCOIN_ASSERT(value == 0 ||
+        (value > 0 && value_ <= max_int64 - value) ||
+        (value < 0 && value_ >= min_int64 - value));
+    value_ += value;
+    return *this;
+}
+script_number& script_number::operator-=(const int64_t value)
+{
+    BITCOIN_ASSERT(value == 0 ||
+        (value > 0 && value_ <= max_int64 + value) ||
+        (value < 0 && value_ >= min_int64 + value));
+    value_ -= value;
+    return *this;
+}
+script_number& script_number::operator+=(const script_number& other)
+{
+    return operator+=(other.value_);
+}
+script_number& script_number::operator-=(const script_number& other)
+{
+    return operator+=(other.value_);
+}
 
 } // namespace libbitcoin
 

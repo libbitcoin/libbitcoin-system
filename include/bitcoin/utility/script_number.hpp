@@ -73,6 +73,11 @@ public:
     BC_API bool operator>=(const script_number& other) const;
     BC_API bool operator>(const script_number& other) const;
 
+    BC_API script_number& operator+=(const int64_t value);
+    BC_API script_number& operator-=(const int64_t value);
+    BC_API script_number& operator+=(const script_number& other);
+    BC_API script_number& operator-=(const script_number& other);
+
 private:
     int64_t value_;
 };
