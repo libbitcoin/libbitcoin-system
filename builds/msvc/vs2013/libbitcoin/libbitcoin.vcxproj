@@ -200,6 +200,7 @@
     <ClCompile Include="..\..\..\..\src\utility\base58.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\big_number.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\ec_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\elliptic_curve_key.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\external\sha512.c" />
     <ClCompile Include="..\..\..\..\src\utility\external\hmac_sha512.c" />
@@ -249,6 +250,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\bigint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\big_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\decorator.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\ec_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\elliptic_curve_key.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\hmac_sha512.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\ripemd160.h" />

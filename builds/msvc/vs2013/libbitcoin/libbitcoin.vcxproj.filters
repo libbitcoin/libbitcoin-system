@@ -194,6 +194,9 @@
     <ClCompile Include="..\..\..\..\src\utility\checksum.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\ec_keys.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp">
@@ -363,6 +366,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\hmac_sha512.h">
       <Filter>include\utility\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\ec_keys.hpp">
+      <Filter>include\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
