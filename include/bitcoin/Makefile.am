@@ -60,6 +60,7 @@ bitcoin_util_include_HEADERS = \
 	utility/async_parallel.hpp \
 	utility/base58.hpp \
 	utility/big_number.hpp \
+	utility/script_number.hpp \
 	utility/checksum.hpp \
 	utility/ec_keys.hpp \
 	utility/elliptic_curve_key.hpp \
