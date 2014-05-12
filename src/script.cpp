@@ -642,7 +642,7 @@ bool script_type::op_1add()
     script_number number;
     if (!number.set_data(pop_stack()))
         return false;
-    const script_number one(0);
+    const script_number one(1);
     number += one;
     stack_.push_back(number.data());
     return true;
@@ -655,7 +655,7 @@ bool script_type::op_1sub()
     script_number number;
     if (!number.set_data(pop_stack()))
         return false;
-    const script_number one(0);
+    const script_number one(1);
     number -= one;
     stack_.push_back(number.data());
     return true;

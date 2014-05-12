@@ -200,8 +200,8 @@ script_number& script_number::operator+=(const int64_t value)
 script_number& script_number::operator-=(const int64_t value)
 {
     BITCOIN_ASSERT(value == 0 ||
-        (value > 0 && value_ <= max_int64 + value) ||
-        (value < 0 && value_ >= min_int64 + value));
+        (value > 0 && value_ >= min_int64 + value) ||
+        (value < 0 && value_ <= max_int64 + value));
     value_ -= value;
     return *this;
 }
@@ -211,7 +211,7 @@ script_number& script_number::operator+=(const script_number& other)
 }
 script_number& script_number::operator-=(const script_number& other)
 {
-    return operator+=(other.value_);
+    return operator-=(other.value_);
 }
 
 } // namespace libbitcoin
