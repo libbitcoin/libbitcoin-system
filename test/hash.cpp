@@ -19,7 +19,18 @@
  */
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
+#include "hash_data/vectors.hpp"
 using namespace bc;
+
+BOOST_AUTO_TEST_CASE(sha1_hash_test)
+{
+    for (const hash_result& result: sha1_tests)
+    {
+        data_chunk data = decode_hex(result.input);
+        short_hash hash = decode_short_hash(result.result);
+        BOOST_REQUIRE(sha1_hash(data) == hash);
+    }
+}
 
 BOOST_AUTO_TEST_CASE(sha256_hash_test)
 {
