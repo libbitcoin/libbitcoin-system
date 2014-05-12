@@ -169,9 +169,6 @@
     <Import Project="$(ProjectDir)..\properties\StaticRelease.props" />
     <Import Project="$(ProjectDir)..\properties\x64.props" />
   </ImportGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLIB|Win32'">
-    <Linkage-secp256k1>dynamic</Linkage-secp256k1>
-  </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\address.cpp" />
     <ClCompile Include="..\..\..\..\src\block.cpp" />
