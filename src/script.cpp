@@ -872,8 +872,8 @@ bool script_type::op_ripemd160()
     if (stack_.size() < 1)
         return false;
     short_hash hash = ripemd160_hash(pop_stack());
-    data_chunk chunk = data_chunk(hash.begin(), hash.end());
-    stack_.push_back(chunk);
+    data_chunk data(hash.begin(), hash.end());
+    stack_.push_back(data);
     return true;
 }
 
@@ -882,8 +882,8 @@ bool script_type::op_sha1()
     if (stack_.size() < 1)
         return false;
     short_hash hash = sha1_hash(pop_stack());
-    data_chunk chunk = data_chunk(hash.begin(), hash.end());
-    stack_.push_back(chunk);
+    data_chunk data(hash.begin(), hash.end());
+    stack_.push_back(data);
     return true;
 }
 
@@ -892,8 +892,8 @@ bool script_type::op_sha256()
     if (stack_.size() < 1)
         return false;
     hash_digest hash = sha256_hash(pop_stack());
-    data_chunk chunk = data_chunk(hash.begin(), hash.end());
-    stack_.push_back(chunk);
+    data_chunk data(hash.begin(), hash.end());
+    stack_.push_back(data);
     return true;
 }
 
@@ -902,8 +902,8 @@ bool script_type::op_hash160()
     if (stack_.size() < 1)
         return false;
     short_hash hash = bitcoin_short_hash(pop_stack());
-    data_chunk chunk(hash.begin(), hash.end());
-    stack_.push_back(chunk);
+    data_chunk data(hash.begin(), hash.end());
+    stack_.push_back(data);
     return true;
 }
 
@@ -913,8 +913,8 @@ bool script_type::op_hash256()
         return false;
     hash_digest hash = bitcoin_hash(pop_stack());
     // hash must be reversed
-    data_chunk chunk(hash.rbegin(), hash.rend());
-    stack_.push_back(chunk);
+    data_chunk data(hash.rbegin(), hash.rend());
+    stack_.push_back(data);
     return true;
 }
 
