@@ -36,12 +36,13 @@
   
   <PropertyGroup Condition="$(Configuration.IndexOf('DLL')) != -1">
     <Linkage-openssl>dynamic</Linkage-openssl>
-    <!--<Linkage-secp256k1>dynamic</Linkage-secp256k1>-->
+    <!-- There is not yet a dynamic build for secp256k1 -->
+    <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-mpir>dynamic</Linkage-mpir>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.IndexOf('LTCG')) != -1">
     <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
+    <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-mpir>static</Linkage-mpir>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.IndexOf('LIB')) != -1">
