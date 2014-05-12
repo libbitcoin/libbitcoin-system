@@ -222,7 +222,9 @@ BOOST_AUTO_TEST_SUITE(script_tests)
 BOOST_AUTO_TEST_CASE(script_json_valid)
 {
     for (const script_test& test: valid_scripts)
+    {
         BOOST_REQUIRE(run_script(test));
+    }
 }
 
 void ignore_output(log_level,
@@ -235,7 +237,9 @@ BOOST_AUTO_TEST_CASE(script_json_invalid)
     // Shut up!
     log_fatal().set_output_function(ignore_output);
     for (const script_test& test: invalid_scripts)
+    {
         BOOST_REQUIRE(!run_script(test));
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
