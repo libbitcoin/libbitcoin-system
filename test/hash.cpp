@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(sha1_hash_test)
     {
         data_chunk data = decode_hex(result.input);
         short_hash hash = decode_short_hash(result.result);
-        //BOOST_REQUIRE(sha1_hash(data) == hash);
+        BOOST_REQUIRE(sha1_hash(data) == hash);
     }
 }
 
