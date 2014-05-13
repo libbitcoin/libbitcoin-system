@@ -35,6 +35,7 @@ public:
     BC_API uint8_t* data();
     BC_API const uint8_t* data() const;
     BC_API size_t size() const;
+    BC_API bool resize(size_t new_size);
 private:
     int file_handle_ = 0;
     uint8_t* data_ = nullptr;
