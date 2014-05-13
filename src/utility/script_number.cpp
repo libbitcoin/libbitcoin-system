@@ -23,8 +23,13 @@
 
 namespace libbitcoin {
 
-constexpr int64_t max_int64 = std::numeric_limits<int64_t>::max();
-constexpr int64_t min_int64 = std::numeric_limits<int64_t>::min();
+#ifdef _MSC_VER
+    constexpr int64_t max_int64 = INT64_MAX;
+    constexpr int64_t min_int64 = INT64_MIN;
+#else
+    constexpr int64_t max_int64 = std::numeric_limits<int64_t>::max();
+    constexpr int64_t min_int64 = std::numeric_limits<int64_t>::min();
+#endif
 
 data_chunk script_number_serialize(const int64_t value)
 {
@@ -104,13 +109,18 @@ data_chunk script_number::data() const
 
 int32_t script_number::int32() const
 {
+#ifdef _MSC_VER
+    constexpr int32_t max_int32 = INT32_MAX;
+    constexpr int32_t min_int32 = INT32_MIN;
+#else
     constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
     constexpr int32_t min_int32 = std::numeric_limits<int32_t>::min();
+#endif
     if (value_ > max_int32)
         return max_int32;
     else if (value_ < min_int32)
         return min_int32;
-    return value_;
+    return static_cast<int32_t>(value_);
 }
 
 bool script_number::operator==(const int64_t value) const

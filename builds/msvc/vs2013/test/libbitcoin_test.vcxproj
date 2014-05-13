@@ -179,10 +179,17 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\test\base58.cpp" />
     <ClCompile Include="..\..\..\..\test\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\format.cpp" />
     <ClCompile Include="..\..\..\..\test\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
+    <ClCompile Include="..\..\..\..\test\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\scriptnum.cpp" />
     <ClCompile Include="..\..\..\..\test\serial.cpp" />
     <ClCompile Include="..\..\..\..\test\stealth.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\test\hash_data\vectors.hpp" />
+    <ClInclude Include="..\..\..\..\test\script_json\vectors.hpp" />
   </ItemGroup>
 </Project>

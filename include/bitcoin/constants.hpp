@@ -72,7 +72,7 @@ BC_API big_number max_target();
 BC_API uint32_t magic_value();
 
 #ifdef _MSC_VER
-constexpr uint32_t max_index = UINT_LEAST32_MAX;
+constexpr uint32_t max_index = UINT32_MAX;
 #else
 constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
 #endif

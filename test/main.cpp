@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 // Can't wire this into source as the type of linkage will vary.
-// #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE libbitcoin tests
 #include <boost/test/unit_test.hpp>
 

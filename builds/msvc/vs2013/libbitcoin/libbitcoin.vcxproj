@@ -169,9 +169,6 @@
     <Import Project="$(ProjectDir)..\properties\StaticRelease.props" />
     <Import Project="$(ProjectDir)..\properties\x64.props" />
   </ImportGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLIB|Win32'">
-    <Linkage-secp256k1>dynamic</Linkage-secp256k1>
-  </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\address.cpp" />
     <ClCompile Include="..\..\..\..\src\block.cpp" />
@@ -211,6 +208,7 @@
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\mmfile.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\hash.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\script_number.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
     <ClCompile Include="..\..\..\..\src\validate.cpp" />
   </ItemGroup>
@@ -260,6 +258,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\zeroize.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\logger.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\mmfile.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\script_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\serializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\subscriber.hpp" />
