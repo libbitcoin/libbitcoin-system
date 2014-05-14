@@ -169,6 +169,7 @@
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.hpp" />
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp" />
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.hpp" />
+    <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_blockchain.cpp">
@@ -194,6 +195,9 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\resource.rc" />
   </ItemGroup>
   <Import Project="..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')" />
   <Import Project="..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props" Condition="Exists('..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" />
