@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
+    <ConfigurationType>Application</ConfigurationType>
+    <NuGetPackageImportStamp>4d39fb9b</NuGetPackageImportStamp>
+    <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <ProjectGuid>{51A424A9-2C12-4211-8D40-E49D1534C541}</ProjectGuid>
     <ProjectName>libbitcoin_test</ProjectName>
-    <RootNamespace>libbitcoin_test12</RootNamespace>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugDEXE|Win32">
@@ -55,90 +57,38 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Configuration">
-    <PlatformToolset>CTP_Nov2013</PlatformToolset>
-    <ConfigurationType>Application</ConfigurationType>
-    <NuGetPackageImportStamp>4d39fb9b</NuGetPackageImportStamp>
-  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='DebugDEXE|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(ProjectDir)..\..\properties\$(Configuration).props" />
+    <Import Project="$(ProjectDir)..\..\properties\Output.props" />
     <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleDebugDynamic.props" />
-    <Import Project="$(ProjectDir)..\properties\Win32.props" />
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='ReleaseDEXE|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleReleaseDynamic.props" />
-    <Import Project="$(ProjectDir)..\properties\Win32.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugDEXE|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleDebugDynamic.props" />
-    <Import Project="$(ProjectDir)..\properties\x64.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDEXE|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleReleaseDynamic.props" />
-    <Import Project="$(ProjectDir)..\properties\x64.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugLEXE|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleDebugLinkTimeCodeGeneration.props" />
-    <Import Project="$(ProjectDir)..\properties\Win32.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLEXE|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleReleaseLinkTimeCodeGeneration.props" />
-    <Import Project="$(ProjectDir)..\properties\Win32.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugLEXE|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleDebugLinkTimeCodeGeneration.props" />
-    <Import Project="$(ProjectDir)..\properties\x64.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseLEXE|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleReleaseLinkTimeCodeGeneration.props" />
-    <Import Project="$(ProjectDir)..\properties\x64.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugSEXE|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleDebugStatic.props" />
-    <Import Project="$(ProjectDir)..\properties\Win32.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleReleaseStatic.props" />
-    <Import Project="$(ProjectDir)..\properties\Win32.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='DebugSEXE|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleDebugStatic.props" />
-    <Import Project="$(ProjectDir)..\properties\x64.props" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseSEXE|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(ProjectDir)$(ProjectName).props" />
-    <Import Project="$(ProjectDir)..\properties\ConsoleReleaseStatic.props" />
-    <Import Project="$(ProjectDir)..\properties\x64.props" />
-  </ImportGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\base58.cpp" />
+    <ClCompile Include="..\..\..\..\test\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\format.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash.cpp" />
+    <ClCompile Include="..\..\..\..\test\main.cpp" />
+    <ClCompile Include="..\..\..\..\test\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\scriptnum.cpp" />
+    <ClCompile Include="..\..\..\..\test\serial.cpp" />
+    <ClCompile Include="..\..\..\..\test\stealth.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\test\hash_data\vectors.hpp" />
+    <ClInclude Include="..\..\..\..\test\script_json\vectors.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
   <Import Project="..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props" Condition="Exists('..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" />
   <Import Project="..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')" />
   <Import Project="..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props" Condition="Exists('..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props')" />
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="..\..\..\..\..\..\nuget\boost.1.55.0.16\build\native\boost.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost.1.55.0.16\build\native\boost.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost_system-vc120.1.55.0.16\build\native\boost_system-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.55.0.16\build\native\boost_system-vc120.targets')" />
@@ -168,28 +118,8 @@
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\secp256k1_gmp_vc120.0.1.0.1\build\native\secp256k1_gmp_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\secp256k1_gmp_vc120.0.1.0.1\build\native\secp256k1_gmp_vc120.targets'))" />
   </Target>
   <ItemGroup>
-    <None Include="packages.config">
-    </None>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\libbitcoin\libbitcoin.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\test\base58.cpp" />
-    <ClCompile Include="..\..\..\..\test\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
-    <ClCompile Include="..\..\..\..\test\format.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash.cpp" />
-    <ClCompile Include="..\..\..\..\test\main.cpp" />
-    <ClCompile Include="..\..\..\..\test\script.cpp" />
-    <ClCompile Include="..\..\..\..\test\scriptnum.cpp" />
-    <ClCompile Include="..\..\..\..\test\serial.cpp" />
-    <ClCompile Include="..\..\..\..\test\stealth.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\..\test\hash_data\vectors.hpp" />
-    <ClInclude Include="..\..\..\..\test\script_json\vectors.hpp" />
   </ItemGroup>
 </Project>

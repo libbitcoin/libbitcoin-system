@@ -14,10 +14,10 @@
       <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="$(Configuration.IndexOf('Release')) != -1">BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(DebugOrRelease)' == 'Release'">BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalOptions Condition="$(Configuration.IndexOf('Debug')) != -1">/OPT:NOLBR /IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(DebugOrRelease)' == 'Debug'">/OPT:NOLBR /IGNORE:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
 
@@ -28,28 +28,29 @@
   </ImportGroup>
 
   <PropertyGroup>
-    <!-- Libbitcoin must also be built with leveldb. -->
+    <!-- Libbitcoin must also have been built with leveldb. -->
     <Option-leveldb>true</Option-leveldb>
   </PropertyGroup>
   
-  <PropertyGroup Condition="$(Configuration.IndexOf('DEXE')) != -1">
-    <Linkage-openssl>dynamic</Linkage-openssl>
-    <!-- There is not yet a dynamic build for secp256k1 -->
+    <!-- Dependencies -->
+  
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
+    <Linkage-mpir>$(DefaultLinkage)</Linkage-mpir>
     <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-mpir>dynamic</Linkage-mpir>
-    <Linkage-libbitcoin>dynamic</Linkage-libbitcoin>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.IndexOf('LEXE')) != -1">
-    <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-mpir>static</Linkage-mpir>
-    <Linkage-libbitcoin>ltcg</Linkage-libbitcoin>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.IndexOf('SEXE')) != -1">
-    <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-mpir>static</Linkage-mpir>
+    <Linkage-openssl>$(DefaultLinkage)</Linkage-openssl>
     <Linkage-libbitcoin>static</Linkage-libbitcoin>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
+    <Linkage-mpir>static</Linkage-mpir>
+    <Linkage-secp256k1>$(DefaultLinkage)</Linkage-secp256k1>
+    <Linkage-openssl>static</Linkage-openssl>
+    <Linkage-libbitcoin>$(DefaultLinkage)</Linkage-libbitcoin>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
+    <Linkage-mpir>$(DefaultLinkage)</Linkage-mpir>
+    <Linkage-secp256k1>$(DefaultLinkage)</Linkage-secp256k1>
+    <Linkage-openssl>$(DefaultLinkage)</Linkage-openssl>
+    <Linkage-libbitcoin>$(DefaultLinkage)</Linkage-libbitcoin>
   </PropertyGroup>
 
   <!-- Messages -->
@@ -60,9 +61,9 @@
   </Target>
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
-    <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
     <Message Text="Linkage-mpir      : $(Linkage-mpir)" Importance="high"/>
+    <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
+    <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
     <Message Text="Linkage-libbitcoin: $(Linkage-libbitcoin)" Importance="high"/>
   </Target>
 
