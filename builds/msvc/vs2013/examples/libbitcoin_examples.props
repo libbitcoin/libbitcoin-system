@@ -35,22 +35,22 @@
     <!-- Dependencies -->
   
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-mpir>$(DefaultLinkage)</Linkage-mpir>
+    <Linkage-mpir>dynamic</Linkage-mpir>
     <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-openssl>$(DefaultLinkage)</Linkage-openssl>
+    <Linkage-openssl>dynamic</Linkage-openssl>
     <Linkage-libbitcoin>static</Linkage-libbitcoin>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
     <Linkage-mpir>static</Linkage-mpir>
     <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-libbitcoin>$(DefaultLinkage)</Linkage-libbitcoin>
+    <Linkage-libbitcoin>ltcg</Linkage-libbitcoin>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
-    <Linkage-mpir>$(DefaultLinkage)</Linkage-mpir>
-    <Linkage-secp256k1>$(DefaultLinkage)</Linkage-secp256k1>
-    <Linkage-openssl>$(DefaultLinkage)</Linkage-openssl>
-    <Linkage-libbitcoin>$(DefaultLinkage)</Linkage-libbitcoin>
+    <Linkage-mpir>static</Linkage-mpir>
+    <Linkage-secp256k1>static</Linkage-secp256k1>
+    <Linkage-openssl>static</Linkage-openssl>
+    <Linkage-libbitcoin>static</Linkage-libbitcoin>
   </PropertyGroup>
 
   <!-- Messages -->
