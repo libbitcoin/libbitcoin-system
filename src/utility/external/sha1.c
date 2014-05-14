@@ -6,6 +6,11 @@
 #include <stdint.h>
 #include <string.h>
 
+// There is no <endian.h> for Windows 
+// but it is safe to treat Windows as little endian.
+#ifdef _MSC_VER
+# define __LITTLE_ENDIAN__
+#endif
 
 #ifdef __BIG_ENDIAN__
 # define SHA_BIG_ENDIAN
