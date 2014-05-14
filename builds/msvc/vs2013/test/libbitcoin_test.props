@@ -45,7 +45,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
     <Linkage-mpir>static</Linkage-mpir>
-    <Linkage-secp256k1>$(DefaultLinkage)</Linkage-secp256k1>
+    <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-openssl>static</Linkage-openssl>
     <Linkage-libbitcoin>$(DefaultLinkage)</Linkage-libbitcoin>
   </PropertyGroup>
