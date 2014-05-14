@@ -48,6 +48,9 @@
     <Filter Include="include\utility\external">
       <UniqueIdentifier>{3809494a-8698-4eac-a36b-582fb2e54e42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{cfaa1015-d7a4-4d44-bd05-0178121b816c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp">
@@ -376,8 +379,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\script_number.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\resource.h">
+      <Filter>resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\resource.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

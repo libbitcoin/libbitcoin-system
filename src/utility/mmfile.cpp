@@ -54,8 +54,11 @@ mmfile::mmfile(const std::string& filename)
 }
 mmfile::~mmfile()
 {
+#ifndef _MSC_VER
+    // Not yet MSVC portable (maybe windows).
     munmap(data_, size_);
     close(file_handle_);
+#endif
 }
 
 uint8_t* mmfile::data()
@@ -73,6 +76,8 @@ size_t mmfile::size() const
 
 bool mmfile::resize(size_t new_size)
 {
+#ifndef _MSC_VER
+    // Not yet MSVC portable (maybe windows).
     // Resize underlying file.
     if (ftruncate(file_handle_, new_size) == -1)
         return false;
@@ -83,6 +88,9 @@ bool mmfile::resize(size_t new_size)
         return false;
     size_ = new_size;
     return true;
+#else
+    return false;
+#endif
 }
 
 } // namespace libbitcoin

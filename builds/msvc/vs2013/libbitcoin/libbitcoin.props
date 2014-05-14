@@ -21,7 +21,7 @@
 
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(RepoRoot)include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -34,21 +34,20 @@
  
   <!-- Dependencies -->
   
-  <PropertyGroup Condition="$(Configuration.IndexOf('DLL')) != -1">
-    <Linkage-openssl>dynamic</Linkage-openssl>
-    <!-- There is not yet a dynamic build for secp256k1 -->
-    <Linkage-secp256k1>static</Linkage-secp256k1>
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
     <Linkage-mpir>dynamic</Linkage-mpir>
-  </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.IndexOf('LTCG')) != -1">
-    <Linkage-openssl>static</Linkage-openssl>
     <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-mpir>static</Linkage-mpir>
+    <Linkage-openssl>dynamic</Linkage-openssl>
   </PropertyGroup>
-  <PropertyGroup Condition="$(Configuration.IndexOf('LIB')) != -1">
-    <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-secp256k1>static</Linkage-secp256k1>
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
     <Linkage-mpir>static</Linkage-mpir>
+    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
+    <Linkage-openssl>static</Linkage-openssl>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
+    <Linkage-mpir>static</Linkage-mpir>
+    <Linkage-secp256k1>static</Linkage-secp256k1>
+    <Linkage-openssl>static</Linkage-openssl>
   </PropertyGroup>
 
   <!-- Messages -->
@@ -59,9 +58,9 @@
   </Target>
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
-    <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
     <Message Text="Linkage-mpir      : $(Linkage-mpir)" Importance="high"/>
+    <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
+    <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
   </Target>
 
 </Project>
