@@ -17,24 +17,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/constants.hpp>
+#include <bitcoin/utility/hash_number.hpp>
 
 namespace libbitcoin {
 
-hash_number max_target()
+hash_number::hash_number()
 {
-    hash_number max_target;
-    max_target.set_compact(max_bits);
-    return max_target;
+}
+hash_number::hash_number(const uint64_t value)
+  : hash_(value)
+{
+}
+void hash_number::set_compact(uint32_t compact)
+{
+    hash_.SetCompact(compact);
+}
+uint32_t hash_number::compact() const
+{
+    return hash_.GetCompact();
+}
+void hash_number::set_hash(const hash_digest& hash)
+{
+    std::copy(hash.begin(), hash.end(), hash_.begin());
 }
 
-uint32_t magic_value()
+void hash_number::operator*=(uint32_t value)
 {
-#ifdef ENABLE_TESTNET
-    return 0x0709110b;
-#else
-    return 0xd9b4bef9;
-#endif
+    hash_ *= value;
 }
+void hash_number::operator/=(uint32_t value)
+{
+    hash_ /= value;
+}
+
+bool operator>(const hash_number& number_a, const hash_number& number_b)
+{
+    return number_a.hash_.CompareTo(number_b.hash_) > 0;
+}
+bool operator<=(const hash_number& number_a, const hash_number& number_b)
+{
+    return number_a.hash_.CompareTo(number_b.hash_) <= 0;
+}
+
 } // namespace libbitcoin
 
