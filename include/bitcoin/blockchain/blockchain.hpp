@@ -370,6 +370,9 @@ public:
      */
     BC_API virtual void subscribe_reorganize(
         reorganize_handler handle_reorganize) = 0;
+
+    // .stop()
+    // .shutdown() // close all file descriptors, called once threadpool has stopped.
 };
 
 typedef std::function<void (const std::error_code&, const block_type&)>
