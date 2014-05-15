@@ -29,6 +29,8 @@
 #include <bitcoin/error.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
+#include <bitcoin/utility/hash_number.hpp>
+#include <bitcoin/utility/script_number.hpp>
 
 namespace libbitcoin {
 
@@ -415,13 +417,13 @@ std::error_code validate_block::check_block()
 
 bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
 {
-    big_number target;
+    hash_number target;
     target.set_compact(bits);
 
     if (target <= 0 || target > max_target())
         return false;
 
-    big_number our_value;
+    hash_number our_value;
     our_value.set_hash(block_hash);
     if (our_value > target)
         return false;
@@ -560,15 +562,16 @@ uint32_t validate_block::work_required()
 #endif
     }
 
+    // This is the total time it took for the last 2016 blocks.
     uint64_t actual = actual_timespan(readjustment_interval);
+    // Now constrain the time between an upper and lower bound.
+    actual = range_constraint(
+        actual, target_timespan / 4, target_timespan * 4);
 
-    // Warning: conversion from uint64_t to uint32_t, possible loss of data.
-    auto actual32 = (uint32_t)range_constraint(actual, target_timespan / 4, target_timespan * 4);
-
-    big_number retarget;
+    hash_number retarget;
     retarget.set_compact(previous_block_bits());
 
-    retarget *= actual32;
+    retarget *= actual;
     retarget /= target_timespan;
 
     if (retarget > max_target())
@@ -723,8 +726,7 @@ bool validate_block::coinbase_height_match()
         current_block_.transactions[0].inputs[0].script;
     const data_chunk raw_coinbase = save_script(coinbase_script);
     // Try to recreate the expected bytes.
-    big_number expect_number;
-    expect_number.set_int64(height_);
+    script_number expect_number(height_);
     script_type expect_coinbase;
     expect_coinbase.push_operation({opcode::special, expect_number.data()});
     // Save the expected coinbase script.

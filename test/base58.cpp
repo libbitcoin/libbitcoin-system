@@ -18,9 +18,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/utility/base58.hpp>
 
 using namespace libbitcoin;
+
+BOOST_AUTO_TEST_SUITE( test_suite )
+
+// For some reason boost test seg faults if I use a function.
+// Only when using libsecp256k1 with the SSL implementation.
+void encdec_test(const std::string& hex, const std::string& encoded)
+{
+    data_chunk data = decode_hex(hex);
+    BOOST_REQUIRE(encode_base58(data) == encoded);
+    BOOST_REQUIRE(decode_base58(encoded) == data);
+}
 
 BOOST_AUTO_TEST_CASE(base58_test)
 {
@@ -33,4 +45,36 @@ BOOST_AUTO_TEST_CASE(base58_test)
     std::string address = "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT";
     BOOST_REQUIRE(encode_base58(pubkey) == address);
     BOOST_REQUIRE(decode_base58(address) == pubkey);
+    encdec_test("", "");
+    encdec_test("61", "2g");
+    encdec_test("626262", "a3gV");
+    encdec_test("636363", "aPEr");
+    encdec_test("73696d706c792061206c6f6e6720737472696e67", "2cFupjhnEsSn59qHXstmK2ffpLv2");
+    encdec_test("00eb15231dfceb60925886b67d065299925915aeb172c06647", "1NS17iag9jJgTHD1VXjvLCEnZuQ3rJDE9L");
+    encdec_test("516b6fcd0f", "ABnLTmg");
+    encdec_test("bf4f89001e670274dd", "3SEo3LWLoPntC");
+    encdec_test("572e4794", "3EFU7m");
+    encdec_test("ecac89cad93923c02321", "EJDM8drfXA6uyA");
+    encdec_test("10c8511e", "Rt5zm");
+    encdec_test("00000000000000000000", "1111111111");
 }
+
+BOOST_AUTO_TEST_CASE(is_b58)
+{
+    const std::string base58_chars =
+        "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+    for (char c: base58_chars)
+    {
+        BOOST_REQUIRE(is_base58(c));
+    }
+    const std::string non_base58_chars = "0OIl+- //#";
+    for (char c: non_base58_chars)
+    {
+        BOOST_REQUIRE(!is_base58(c));
+    }
+    BOOST_REQUIRE(is_base58("abcdjkk11"));
+    BOOST_REQUIRE(!is_base58("abcdjkk011"));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+

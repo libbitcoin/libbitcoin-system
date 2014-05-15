@@ -23,7 +23,7 @@
 // See http://gcc.gnu.org/wiki/Visibility
 
 // Generic helper definitions for shared library support
-#if defined _WIN32 || defined __CYGWIN__
+#if defined _MSC_VER || defined __CYGWIN__
     #define BC_HELPER_DLL_IMPORT __declspec(dllimport)
     #define BC_HELPER_DLL_EXPORT __declspec(dllexport)
     #define BC_HELPER_DLL_LOCAL
@@ -58,6 +58,18 @@
 
 // Remove this when cURL dependency is fully removed.
 #define NO_CURL
+
+// Tag to deprecate functions and methods.
+// Gives a compiler warning when they are used.
+#if defined _MSC_VER || defined __CYGWIN__
+    #define BC_DEPRECATED __declspec(deprecated)
+#else
+    #if __GNUC__ >= 4
+        #define BC_DEPRECATED __attribute__((deprecated))
+    #else
+        #define BC_DEPRECATED
+    #endif
+#endif
 
 #endif
 

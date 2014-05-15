@@ -44,18 +44,18 @@ mmfile::mmfile(const std::string& filename)
     struct stat sbuf;
     if (fstat(file_handle_, &sbuf) == -1)
         return;
-    size_ = (long long)sbuf.st_size;
+    size_ = sbuf.st_size;
     // You can static_cast void* pointers.
     data_ = static_cast<uint8_t*>(mmap(
         0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, file_handle_, 0));
     if (data_ == MAP_FAILED)
         data_ = nullptr;
-    // mmap opens its own file handle.
-    close(file_handle_);
 #endif
 }
 mmfile::~mmfile()
 {
+    munmap(data_, size_);
+    close(file_handle_);
 }
 
 uint8_t* mmfile::data()
@@ -69,6 +69,20 @@ const uint8_t* mmfile::data() const
 size_t mmfile::size() const
 {
     return size_;
+}
+
+bool mmfile::resize(size_t new_size)
+{
+    // Resize underlying file.
+    if (ftruncate(file_handle_, new_size) == -1)
+        return false;
+    // Readjust memory map.
+    data_ = static_cast<uint8_t*>(mremap(
+        data_, size_, new_size, MREMAP_MAYMOVE));
+    if (data_ == MAP_FAILED)
+        return false;
+    size_ = new_size;
+    return true;
 }
 
 } // namespace libbitcoin

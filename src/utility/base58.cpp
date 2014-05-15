@@ -20,19 +20,18 @@
 #include <bitcoin/utility/base58.hpp>
 
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/utility/big_number.hpp>
+#include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
-// Thanks for all the wonderful bitcoin hackers
-
-const char base58_chars[] = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const std::string base58_chars =
+    "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 bool is_base58(const char c)
 {
-    auto last = std::end(base58_chars) - 1;
     // This works because the base58 characters happen to be in sorted order
-    return std::binary_search(base58_chars, last, c);
+    return std::binary_search(
+        base58_chars.begin(), base58_chars.end(), c);
 }
 bool is_base58(const std::string& text)
 {
@@ -40,82 +39,132 @@ bool is_base58(const std::string& text)
         [](const char c){ return is_base58(c); });
 }
 
-std::string encode_base58(const data_chunk& unencoded_data)
+template <typename Data>
+auto search_first_nonzero(const Data& data)
+    -> decltype(data.cbegin())
 {
-    std::string encoded_data;
-    // Expected size increase from base58 conversion is approximately 137%
-    // use 138% to be safe
-    encoded_data.reserve((unencoded_data.size() - 1) * 138 / 100 + 1);
+    auto first_nonzero = data.cbegin();
+    while (first_nonzero != data.end() && *first_nonzero == 0)
+        ++first_nonzero;
+    return first_nonzero;
+}
 
-    // Convert big endian data to little endian
-    // Extra zero at the end make sure bignum will interpret
-    // as a positive number
-    data_chunk tmp_data(unencoded_data.size() + 1, 0);
-    std::reverse_copy(unencoded_data.begin(), unencoded_data.end(),
-        tmp_data.begin());
-
-    big_number long_value;
-    long_value.set_data(tmp_data);
-    while (long_value > 0)
-    {                                                                            
-        auto result = divmod(long_value, 58);
-        long_value = result.first;
-        size_t remainder = result.second.uint32();
-        encoded_data += base58_chars[remainder];
-    }                                                                            
-                                                                                 
-    // Leading zeroes encoded as base58 zeros                                    
-    for (const uint8_t unencoded_byte: unencoded_data)
+size_t count_leading_zeros(const data_chunk& unencoded)
+{
+    // Skip and count leading '1's.
+    size_t leading_zeros = 0;
+    for (const uint8_t byte: unencoded)
     {
-        if (unencoded_byte != 0)
+        if (byte != 0)
             break;
-        encoded_data += base58_chars[0];
+        ++leading_zeros;
+    }
+    return leading_zeros;
+}
+
+void pack_value(data_chunk& indexes, int carry)
+{
+    // Apply "b58 = b58 * 256 + ch".
+    for (auto it = indexes.rbegin(); it != indexes.rend(); ++it)
+    {
+        carry += 256 * (*it);
+        *it = carry % 58;
+        carry /= 58;
+    }
+    BITCOIN_ASSERT(carry == 0);
+}
+
+std::string encode_base58(const data_chunk& unencoded)
+{
+    size_t leading_zeros = count_leading_zeros(unencoded);
+
+    // size = log(256) / log(58), rounded up.
+    const size_t number_nonzero = unencoded.size() - leading_zeros;
+    const size_t indexes_size = number_nonzero * 138 / 100 + 1;
+    // Allocate enough space in big-endian base58 representation.
+    data_chunk indexes(indexes_size);
+
+    // Process the bytes.
+    for (auto it = unencoded.begin() + leading_zeros;
+        it != unencoded.end(); ++it)
+    {
+        pack_value(indexes, *it);
     }
 
-    // Convert little endian std::string to big endian
-    reverse(encoded_data.begin(), encoded_data.end());
-    return encoded_data;
-}                                                                                
+    // Skip leading zeroes in base58 result.
+    auto first_nonzero = search_first_nonzero(indexes);
 
-data_chunk decode_base58(std::string encoded_data)
-{                                                                                
+    // Translate the result into a string.
+    std::string encoded;
+    const size_t estimated_size =
+        leading_zeros + (indexes.end() - first_nonzero);
+    encoded.reserve(estimated_size);
+    encoded.assign(leading_zeros, '1');
+    // Set actual main bytes.
+    for (auto it = first_nonzero; it != indexes.end(); ++it)
+    {
+        const size_t index = *it;
+        encoded += base58_chars[index];
+    }
+    return encoded;
+}
+
+size_t count_leading_zeros(const std::string& encoded)
+{
+    // Skip and count leading '1's.
+    size_t leading_zeros = 0;
+    for (const uint8_t digit: encoded)
+    {
+        if (digit != base58_chars[0])
+            break;
+        ++leading_zeros;
+    }
+    return leading_zeros;
+}
+
+void unpack_char(data_chunk& data, int carry)
+{
+    for (auto it = data.rbegin(); it != data.rend(); it++)
+    {
+        carry += 58 * (*it);
+        *it = carry % 256;
+        carry /= 256;
+    }
+    BITCOIN_ASSERT(carry == 0);
+}
+
+data_chunk decode_base58(std::string encoded)
+{
     // Trim spaces and newlines around the string.
-    boost::algorithm::trim(encoded_data);
-    // We're building a big number.
-    big_number bn = 0;
-                                                                                 
-    // Convert big endian string to bignum                                       
-    for (const uint8_t current_char: encoded_data)
-    {                                                                            
-        bn *= 58;
-        bn += std::lower_bound(base58_chars, std::end(base58_chars) - 1,
-            current_char) - base58_chars;
-    }
-                                                                                 
-    // Get bignum as little endian data                                          
-    data_chunk temp_data = bn.data();       
-                                                                                 
-    // Trim off sign byte if present                                             
-    if (temp_data.size() >= 2 &&
-            temp_data.end()[-1] == 0 && temp_data.end()[-2] >= 0x80)
-        temp_data.erase(temp_data.end() - 1);
-                                                                                 
-    // Restore leading zeros                                                     
-    int leading_zeros = 0;
-    for (const uint8_t current_char: encoded_data)
+    boost::algorithm::trim(encoded);
+    size_t leading_zeros = count_leading_zeros(encoded);
+
+    // log(58) / log(256), rounded up.
+    const size_t data_size = encoded.size() * 733 / 1000 + 1;
+    // Allocate enough space in big-endian base256 representation.
+    data_chunk data(data_size);
+
+    // Process the characters.
+    for (auto it = encoded.begin() + leading_zeros; it != encoded.end(); ++it)
     {
-        if (current_char != base58_chars[0])
-            break;
-        leading_zeros++;
+        size_t carry = base58_chars.find(*it);
+        if (carry == std::string::npos)
+            return data_chunk();
+        unpack_char(data, carry);
     }
 
-    data_chunk unencoded_data;
-    unencoded_data.assign(leading_zeros + temp_data.size(), 0);
-    // Convert little endian data to big endian                                  
-    std::reverse_copy(temp_data.begin(), temp_data.end(),
-        unencoded_data.end() - temp_data.size());    
-    return unencoded_data;
-}                                                             
-                                                                                 
+    // Skip leading zeroes in data.
+    auto first_nonzero = search_first_nonzero(data);
+
+    // Copy result into output vector.
+    data_chunk decoded;
+    const size_t estimated_size =
+        leading_zeros + (data.end() - first_nonzero);
+    decoded.reserve(estimated_size);
+    decoded.assign(leading_zeros, 0x00);
+    decoded.insert(decoded.end(), first_nonzero, data.cend());
+    return decoded;
+}
+
 } // namespace libbitcoin
 

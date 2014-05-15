@@ -335,10 +335,8 @@ public:
      * The prefix is a special value that can be adjusted to provide
      * greater precision at the expense of deniability.
      *
-     * from_height is not guaranteed to only return results from that
-     * height, and may also include results from earlier blocks.
-     * It is provided as an optimisation. All results at and after
-     * from_height are guaranteed to be returned however.
+     * from_height is guarantees to return results from that height.
+     * It is provided as an optimisation.
      *
      * @param[in]   prefix          Stealth prefix information.
      * @param[in]   handle_fetch    Completion handler for fetch operation.
@@ -372,6 +370,9 @@ public:
      */
     BC_API virtual void subscribe_reorganize(
         reorganize_handler handle_reorganize) = 0;
+
+    // .stop()
+    // .shutdown() // close all file descriptors, called once threadpool has stopped.
 };
 
 typedef std::function<void (const std::error_code&, const block_type&)>

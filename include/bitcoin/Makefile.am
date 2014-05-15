@@ -60,6 +60,8 @@ bitcoin_util_include_HEADERS = \
 	utility/async_parallel.hpp \
 	utility/base58.hpp \
 	utility/big_number.hpp \
+	utility/hash_number.hpp \
+	utility/script_number.hpp \
 	utility/checksum.hpp \
 	utility/ec_keys.hpp \
 	utility/elliptic_curve_key.hpp \
@@ -78,7 +80,8 @@ bitcoin_util_external_include_HEADERS = \
     utility/external/sha1.h \
     utility/external/sha256.h \
     utility/external/sha512.h \
-    utility/external/zeroize.h
+    utility/external/zeroize.h \
+    utility/external/uint256.h
 
 bitcoin_impl_utility_includedir = $(includedir)/bitcoin/impl/utility
 bitcoin_impl_utility_include_HEADERS = \

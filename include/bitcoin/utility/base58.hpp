@@ -28,9 +28,9 @@ namespace libbitcoin {
 BC_API bool is_base58(const char c);
 BC_API bool is_base58(const std::string& text);
 
-BC_API std::string encode_base58(const data_chunk& unencoded_data);
+BC_API std::string encode_base58(const data_chunk& unencoded);
 
-BC_API data_chunk decode_base58(std::string encoded_data);
+BC_API data_chunk decode_base58(std::string encoded);
 
 } // namespace libbitcoin
 

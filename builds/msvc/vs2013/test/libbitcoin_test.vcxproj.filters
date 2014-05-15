@@ -25,13 +25,39 @@
     <ClCompile Include="..\..\..\..\test\checksum.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\scriptnum.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\script.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\ec_keys.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
       <UniqueIdentifier>{9a1b1e98-7cf9-47aa-9449-1f27fe15f5a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{5e0e641a-cd44-4412-822b-aa5da59dff51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\hash_data">
+      <UniqueIdentifier>{e8ff7175-d87b-4bd4-8ea9-8ba853008c26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\script_json">
+      <UniqueIdentifier>{68ea129e-823c-49f5-9a78-933c3a53fac9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\test\hash_data\vectors.hpp">
+      <Filter>include\hash_data</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\script_json\vectors.hpp">
+      <Filter>include\script_json</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

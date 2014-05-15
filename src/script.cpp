@@ -31,6 +31,7 @@
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>
+#include <bitcoin/utility/script_number.hpp>
 
 namespace libbitcoin {
 
@@ -87,19 +88,6 @@ void script_type::push_operation(operation oper)
 const operation_stack& script_type::operations() const
 {
     return operations_;
-}
-
-inline bool cast_to_big_number(const data_chunk& raw_number,
-    big_number& result)
-{
-    // Satoshi bitcoin does it this way.
-    // Copy its quack behaviour
-    if (raw_number.size() > 4)
-        return false;
-    big_number mid;
-    mid.set_data(raw_number);
-    result.set_data(mid.data());
-    return true;
 }
 
 inline bool cast_to_bool(const data_chunk& values)
@@ -312,39 +300,64 @@ bool script_type::increment_op_counter(opcode code)
     return true;
 }
 
-data_chunk script_type::pop_stack()
+template <typename DataStack>
+data_chunk pop_item(DataStack& stack)
 {
-    data_chunk value = stack_.back();
-    stack_.pop_back();
+    data_chunk value = stack.back();
+    stack.pop_back();
     return value;
 }
-
-bool script_type::arithmetic_start(big_number& number_a, big_number& number_b)
+data_chunk script_type::pop_stack()
 {
-    if (stack_.size() < 2)
+    return pop_item(stack_);
+}
+
+// Used by add, sub, mul, div, mod, lshift, rshift, booland, boolor,
+// numequal, numequalverify, numnotequal, lessthan, greaterthan,
+// lessthanorequal, greaterthanorequal, min, max
+template <typename DataStack>
+bool arithmetic_start_new(DataStack& stack,
+    script_number& number_a, script_number& number_b)
+{
+    if (stack.size() < 2)
         return false;
-    if (!cast_to_big_number(pop_stack(), number_b))
+    // The second number is at the top of the stack.
+    if (!number_b.set_data(pop_item(stack)))
         return false;
-    if (!cast_to_big_number(pop_stack(), number_a))
+    // The first is at the second position.
+    if (!number_a.set_data(pop_item(stack)))
         return false;
     return true;
 }
 
+// Used by pick, roll and checkmultisig*
+template <typename DataStack>
+bool read_value(DataStack& stack, int32_t& value)
+{
+    if (stack.empty())
+        return false;
+    script_number mid;
+    if (!mid.set_data(pop_item(stack)))
+        return false;
+    value = mid.int32();
+    return true;
+}
+
+
 bool script_type::op_negative_1()
 {
-    big_number neg1;
-    neg1.set_int64(-1);
+    script_number neg1(-1);
     stack_.push_back(neg1.data());
     return true;
 }
 
 bool script_type::op_x(opcode code)
 {
-    uint8_t value_diff =
+    uint8_t difference =
         static_cast<uint8_t>(code) -
             static_cast<uint8_t>(opcode::op_1) + 1;
-    big_number big_repr(value_diff);
-    stack_.push_back(big_repr.data());
+    script_number value(difference);
+    stack_.push_back(value.data());
     return true;
 }
 
@@ -500,7 +513,7 @@ bool script_type::op_ifdup()
 
 bool script_type::op_depth()
 {
-    big_number stack_size(stack_.size());
+    script_number stack_size(stack_.size());
     stack_.push_back(stack_size.data());
     return true;
 }
@@ -542,12 +555,11 @@ bool pick_roll_impl(DataStack& stack, bool is_roll)
 {
     if (stack.size() < 2)
         return false;
-    big_number number_n;
-    if (!cast_to_big_number(stack.back(), number_n))
+    int32_t n;
+    if (!read_value(stack, n))
         return false;
-    stack.pop_back();
-    uint32_t n = number_n.uint32();
-    if (n >= stack.size())
+    int32_t stack_size = static_cast<int32_t>(stack.size());
+    if (n < 0 || n >= stack_size)
         return false;
     auto slice_iter = stack.end() - n - 1;
     data_chunk item = *slice_iter;
@@ -600,8 +612,8 @@ bool script_type::op_size()
 {
     if (stack_.size() < 1)
         return false;
-    big_number top_size = stack_.back().size();
-    stack_.push_back(top_size.data());
+    script_number top_item_size(stack_.back().size());
+    stack_.push_back(top_item_size.data());
     return true;
 }
 
@@ -627,11 +639,12 @@ bool script_type::op_1add()
 {
     if (stack_.size() < 1)
         return false;
-    big_number number_n;
-    if (!cast_to_big_number(pop_stack(), number_n))
+    script_number number;
+    if (!number.set_data(pop_stack()))
         return false;
-    number_n += 1;
-    stack_.push_back(number_n.data());
+    const script_number one(1);
+    number += one;
+    stack_.push_back(number.data());
     return true;
 }
 
@@ -639,11 +652,12 @@ bool script_type::op_1sub()
 {
     if (stack_.size() < 1)
         return false;
-    big_number number_n;
-    if (!cast_to_big_number(pop_stack(), number_n))
+    script_number number;
+    if (!number.set_data(pop_stack()))
         return false;
-    number_n -= 1;
-    stack_.push_back(number_n.data());
+    const script_number one(1);
+    number -= one;
+    stack_.push_back(number.data());
     return true;
 }
 
@@ -651,11 +665,11 @@ bool script_type::op_negate()
 {
     if (stack_.size() < 1)
         return false;
-    big_number number_n;
-    if (!cast_to_big_number(pop_stack(), number_n))
+    script_number number;
+    if (!number.set_data(pop_stack()))
         return false;
-    number_n = -number_n;
-    stack_.push_back(number_n.data());
+    number = -number;
+    stack_.push_back(number.data());
     return true;
 }
 
@@ -663,12 +677,13 @@ bool script_type::op_abs()
 {
     if (stack_.size() < 1)
         return false;
-    big_number number_n;
-    if (!cast_to_big_number(pop_stack(), number_n))
+    script_number number;
+    if (!number.set_data(pop_stack()))
         return false;
-    if (number_n < 0)
-        number_n = -number_n;
-    stack_.push_back(number_n.data());
+    const script_number zero(0);
+    if (number < zero)
+        number = -number;
+    stack_.push_back(number.data());
     return true;
 }
 
@@ -676,11 +691,12 @@ bool script_type::op_not()
 {
     if (stack_.size() < 1)
         return false;
-    big_number number_n;
-    if (!cast_to_big_number(pop_stack(), number_n))
+    script_number number;
+    if (!number.set_data(pop_stack()))
         return false;
+    const script_number zero(0);
     stack_.push_back(
-        big_number(number_n == big_number(0)).data());
+        script_number(number == zero).data());
     return true;
 }
 
@@ -688,126 +704,129 @@ bool script_type::op_0notequal()
 {
     if (stack_.size() < 1)
         return false;
-    big_number number_n;
-    if (!cast_to_big_number(pop_stack(), number_n))
+    script_number number;
+    if (!number.set_data(pop_stack()))
         return false;
+    const script_number zero(0);
     stack_.push_back(
-        big_number(number_n != big_number(0)).data());
+        script_number(number != zero).data());
     return true;
 }
 
 bool script_type::op_add()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number result = number_a + number_b;
+    const script_number result = number_a + number_b;
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_sub()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number result = number_a - number_b;
+    const script_number result = number_a - number_b;
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_booland()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number zero(0), result = number_a != zero && number_b != zero;
+    const script_number zero(0);
+    const script_number result(number_a != zero && number_b != zero);
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_boolor()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number zero(0), result = number_a != zero || number_b != zero;
+    const script_number zero(0);
+    const script_number result(number_a != zero || number_b != zero);
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_numequal()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number result = number_a == number_b;
+    const script_number result(number_a == number_b);
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_numequalverify()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
     return number_a == number_b;
 }
 
 bool script_type::op_numnotequal()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number result = number_a != number_b;
+    const script_number result(number_a != number_b);
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_lessthan()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number result = number_a < number_b;
+    const script_number result(number_a < number_b);
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_greaterthan()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number result = number_a > number_b;
+    const script_number result(number_a > number_b);
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_lessthanorequal()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number result = number_a <= number_b;
+    const script_number result(number_a <= number_b);
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_greaterthanorequal()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
-    big_number result = number_a >= number_b;
+    const script_number result(number_a >= number_b);
     stack_.push_back(result.data());
     return true;
 }
 
 bool script_type::op_min()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
     if (number_a < number_b)
         stack_.push_back(number_a.data());
@@ -818,8 +837,8 @@ bool script_type::op_min()
 
 bool script_type::op_max()
 {
-    big_number number_a, number_b;
-    if (!arithmetic_start(number_a, number_b))
+    script_number number_a, number_b;
+    if (!arithmetic_start_new(stack_, number_a, number_b))
         return false;
     if (number_a < number_b)
         stack_.push_back(number_b.data());
@@ -832,14 +851,14 @@ bool script_type::op_within()
 {
     if (stack_.size() < 3)
         return false;
-    big_number upper;
-    if (!cast_to_big_number(pop_stack(), upper))
+    script_number upper;
+    if (!upper.set_data(pop_stack()))
         return false;
-    big_number lower;
-    if (!cast_to_big_number(pop_stack(), lower))
+    script_number lower;
+    if (!lower.set_data(pop_stack()))
         return false;
-    big_number value;
-    if (!cast_to_big_number(pop_stack(), value))
+    script_number value;
+    if (!value.set_data(pop_stack()))
         return false;
     if ((lower <= value) && (value < upper))
         stack_.push_back(stack_true_value);
@@ -853,8 +872,8 @@ bool script_type::op_ripemd160()
     if (stack_.size() < 1)
         return false;
     short_hash hash = ripemd160_hash(pop_stack());
-    data_chunk chunk = data_chunk(hash.begin(), hash.end());
-    stack_.push_back(chunk);
+    data_chunk data(hash.begin(), hash.end());
+    stack_.push_back(data);
     return true;
 }
 
@@ -863,8 +882,8 @@ bool script_type::op_sha1()
     if (stack_.size() < 1)
         return false;
     short_hash hash = sha1_hash(pop_stack());
-    data_chunk chunk = data_chunk(hash.begin(), hash.end());
-    stack_.push_back(chunk);
+    data_chunk data(hash.begin(), hash.end());
+    stack_.push_back(data);
     return true;
 }
 
@@ -873,8 +892,8 @@ bool script_type::op_sha256()
     if (stack_.size() < 1)
         return false;
     hash_digest hash = sha256_hash(pop_stack());
-    data_chunk chunk = data_chunk(hash.begin(), hash.end());
-    stack_.push_back(chunk);
+    data_chunk data(hash.begin(), hash.end());
+    stack_.push_back(data);
     return true;
 }
 
@@ -883,8 +902,8 @@ bool script_type::op_hash160()
     if (stack_.size() < 1)
         return false;
     short_hash hash = bitcoin_short_hash(pop_stack());
-    data_chunk chunk(hash.begin(), hash.end());
-    stack_.push_back(chunk);
+    data_chunk data(hash.begin(), hash.end());
+    stack_.push_back(data);
     return true;
 }
 
@@ -892,11 +911,10 @@ bool script_type::op_hash256()
 {
     if (stack_.size() < 1)
         return false;
-    data_chunk data = pop_stack();
     hash_digest hash = bitcoin_hash(pop_stack());
     // hash must be reversed
-    data_chunk chunk(hash.rbegin(), hash.rend());
-    stack_.push_back(chunk);
+    data_chunk data(hash.rbegin(), hash.rend());
+    stack_.push_back(data);
     return true;
 }
 
@@ -1035,16 +1053,6 @@ bool script_type::op_checkmultisig(
     return true;
 }
 
-bool script_type::read_value(size_t& value)
-{
-    if (stack_.empty())
-        return false;
-    big_number value_big_num;
-    if (!cast_to_big_number(pop_stack(), value_big_num))
-        return false;
-    value = value_big_num.uint32();
-    return true;
-}
 bool script_type::read_section(data_stack& section, size_t count)
 {
     if (stack_.size() < count)
@@ -1056,11 +1064,11 @@ bool script_type::read_section(data_stack& section, size_t count)
 bool script_type::op_checkmultisigverify(
     const transaction_type& parent_tx, uint32_t input_index)
 {
-    size_t pubkeys_count;
-    if (!read_value(pubkeys_count))
+    int32_t pubkeys_count;
+    if (!read_value(stack_, pubkeys_count))
         return false;
 
-    if (pubkeys_count > 20)
+    if (pubkeys_count < 0 || pubkeys_count > 20)
         return false;
     op_counter_ += pubkeys_count;
     if (op_counter_ > op_counter_limit)
@@ -1070,8 +1078,10 @@ bool script_type::op_checkmultisigverify(
     if (!read_section(pubkeys, pubkeys_count))
         return false;
 
-    size_t sigs_count;
-    if (!read_value(sigs_count))
+    int32_t sigs_count;
+    if (!read_value(stack_, sigs_count))
+        return false;
+    if (sigs_count < 0 || sigs_count > pubkeys_count)
         return false;
 
     data_stack signatures;

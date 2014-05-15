@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-
 #include <bitcoin/bitcoin.hpp>
+#include "script_json/vectors.hpp"
+
 using namespace bc;
 
 bool is_number(const std::string& token)
@@ -122,8 +124,12 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
     extend_data(raw_script, save_script(tmp_script));
 }
 
-bool parse_token(data_chunk& raw_script, const std::string& token)
+bool parse_token(data_chunk& raw_script, std::string token)
 {
+    boost::algorithm::trim(token);
+    // skip this
+    if (token.empty())
+        return true;
     static data_chunk hex_raw;
     if (token == "ENDING" || !is_hex_data(token))
     {
@@ -173,8 +179,9 @@ bool parse_token(data_chunk& raw_script, const std::string& token)
     return true;
 }
 
-bool parse(script_type& result_script, const std::string& format)
+bool parse(script_type& result_script, std::string format)
 {
+    boost::algorithm::trim(format);
     if (format.empty())
         return true;
     std::vector<std::string> tokens;
@@ -184,46 +191,56 @@ bool parse(script_type& result_script, const std::string& format)
         if (!parse_token(raw_script, token))
             return false;
     parse_token(raw_script, "ENDING");
-    result_script = parse_script(raw_script);
+    try
+    {
+        result_script = parse_script(raw_script);
+    }
+    catch (end_of_stream)
+    {
+        return false;
+    }
     if (result_script.operations().empty())
         return false;
     return true;
 }
 
-int main(int argc, char** argv)
+bool run_script(const script_test& test)
 {
-    BITCOIN_ASSERT(argc == 4);
-    if (argc != 4)
-        return -1;
-
-    std::string input_string = argv[1];
-    std::string output_string = argv[2];
-    std::string description = argv[3];
-
-    script_type input_script;
-    if (!parse(input_script, input_string))
-    {
-        log_error() << "Error parsing input: " << input_string;
-        return -1;
-    }
-
-    script_type output_script;
-    if (!parse(output_script, output_string))
-    {
-        log_error() << "Error parsing output: " << output_string;
-        return -1;
-    }
-
-    log_debug() << input_string << " -> " << input_script;
-    log_debug() << output_string << " -> " << output_script;
-
+    script_type input, output;
+    if (!parse(input, test.input))
+        return false;
+    if (!parse(output, test.output))
+        return false;
     transaction_type tx;
-    if (!output_script.run(input_script, tx, 0))
-    {
-        log_error() << "Error running scripts";
-        return 1;
-    }
-
-    return 0;
+    //log_debug() << test.input << " -> " << input;
+    //log_debug() << test.output << " -> " << output;
+    return output.run(input, tx, 0);
 }
+
+BOOST_AUTO_TEST_SUITE(script_tests)
+
+BOOST_AUTO_TEST_CASE(script_json_valid)
+{
+    for (const script_test& test: valid_scripts)
+    {
+        BOOST_REQUIRE(run_script(test));
+    }
+}
+
+void ignore_output(log_level,
+    const std::string&, const std::string&)
+{
+}
+
+BOOST_AUTO_TEST_CASE(script_json_invalid)
+{
+    // Shut up!
+    log_fatal().set_output_function(ignore_output);
+    for (const script_test& test: invalid_scripts)
+    {
+        BOOST_REQUIRE(!run_script(test));
+    }
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 

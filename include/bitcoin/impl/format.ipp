@@ -60,7 +60,7 @@ byte_array<sizeof(T)> to_big_endian(T n)
     byte_array<sizeof(T)> out;
     for (auto i = out.rbegin(); i != out.rend(); ++i)
     {
-        *i = n;
+        *i = static_cast<uint8_t>(n);
         n >>= 8;
     }
     return out;
@@ -73,7 +73,7 @@ byte_array<sizeof(T)> to_little_endian(T n)
     byte_array<sizeof(T)> out;
     for (auto i = out.begin(); i != out.end(); ++i)
     {
-        *i = n;
+        *i = static_cast<uint8_t>(n);
         n >>= 8;
     }
     return out;

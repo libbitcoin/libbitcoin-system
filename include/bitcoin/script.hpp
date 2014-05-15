@@ -219,11 +219,6 @@ private:
     bool run_operation(const operation& op,
         const transaction_type& parent_tx, uint32_t input_index);
 
-    // Used by add, sub, mul, div, mod, lshift, rshift, booland, boolor,
-    // numequal, numequalverify, numnotequal, lessthan, greaterthan,
-    // lessthanorequal, greaterthanorequal, min, max
-    bool arithmetic_start(big_number& number_a, big_number& number_b);
-
     bool op_negative_1();
     bool op_x(opcode code);
     bool op_if();
@@ -284,7 +279,6 @@ private:
     bool op_checksigverify(
         const transaction_type& parent_tx, uint32_t input_index);
     // multisig variants
-    bool read_value(size_t& value);
     bool read_section(data_stack& section, size_t count);
     bool op_checkmultisig(
         const transaction_type& parent_tx, uint32_t input_index);

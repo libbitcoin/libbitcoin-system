@@ -221,26 +221,25 @@ void big_number::set_int32(int32_t value)
 int32_t big_number::int32() const
 {
 #ifdef _MSC_VER
-    constexpr int32_t max_int32 = INT_LEAST32_MAX;
+    constexpr int32_t max_int32 = INT32_MAX;
 #else
     constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
 #endif
 
-    int32_t value = uint32();
+    BN_ULONG value = BN_get_word(&bignum_);
     if (!BN_is_negative(&bignum_))
     {
         if (value > max_int32)
             return max_int32;
-        else
-            return value;
+        return value;
     }
     else
     {
         if (value > max_int32)
-            return max_int32;
-        else
-            // Note: unary minus operator applied to unsigned type, so changed value to int32_t.
-            return -value;
+            return std::numeric_limits<int32_t>::min();
+        // MSVC warning C4146: unary minus operator applied to unsigned type,
+        // result still unsigned.
+        return -value;
     }
 }
 
