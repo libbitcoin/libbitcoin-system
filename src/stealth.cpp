@@ -25,38 +25,20 @@
 
 namespace libbitcoin {
 
-uint8_t bitfield_mask(uint8_t bitfield_byte, uint8_t number_bits)
-{
-    BITCOIN_ASSERT(number_bits < 8);
-    // https://wiki.unsystem.net/index.php/DarkWallet/Stealth#Comparing_prefixes
-    uint8_t mask = 0xff & ((1 << number_bits) - 1);
-    return bitfield_byte & mask;
-}
-
 bool stealth_match(const stealth_prefix& prefix, const uint8_t* raw_bitfield)
 {
-    BITCOIN_ASSERT(prefix.number_bits <= sizeof(prefix.bitfield) * 8);
-    // Perform comparison of byte.
-    const uint8_t* prefix_bitfield_byte =
-        reinterpret_cast<const uint8_t*>(&prefix.bitfield);
-    // Byte by byte comparison until we need to compare on the bit level.
-    uint8_t compare_bits = prefix.number_bits;
-    for (; compare_bits >= 8; compare_bits -= 8)
+    constexpr size_t byte_size = 8;
+    for (size_t i = 0; i < prefix.size(); ++i)
     {
-        if (*prefix_bitfield_byte != *raw_bitfield)
+        if (i > 0 && i % byte_size == 0)
+            ++raw_bitfield;
+        size_t current_block = i / byte_size;
+        size_t bit_offset = i - current_block * byte_size;
+        BITCOIN_ASSERT(bit_offset < byte_size);
+        bool value = (*raw_bitfield & (1 << bit_offset)) > 0;
+        if (value != prefix[i])
             return false;
-        ++prefix_bitfield_byte;
-        ++raw_bitfield;
     }
-    if (compare_bits == 0)
-        return true;
-    // Perform bit comparison for remaining bits.
-    // Mask of the prefix provided.
-    uint8_t masked_a = bitfield_mask(*prefix_bitfield_byte, compare_bits);
-    // Mask of the value's bitfield.
-    uint8_t masked_b = bitfield_mask(*raw_bitfield, compare_bits);
-    if (masked_a != masked_b)
-        return false;
     return true;
 }
 

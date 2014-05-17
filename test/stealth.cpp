@@ -23,9 +23,36 @@ using namespace bc;
 
 BOOST_AUTO_TEST_CASE(bitfield_test)
 {
-    stealth_prefix prefix{27, 0x691cf48b};
+    stealth_prefix prefix(27, 0x691cf48b);
     data_chunk raw_bitfield{0x8b, 0xf4, 0x1c, 0x79};
-    BITCOIN_ASSERT(raw_bitfield.size() == sizeof(prefix.bitfield));
+    BITCOIN_ASSERT(raw_bitfield.size() * 8 >= prefix.size());
     BOOST_REQUIRE(stealth_match(prefix, raw_bitfield.data()));
+
+    stealth_prefix prefix_bs(32, 0x691cf48b);
+    BOOST_REQUIRE(!stealth_match(prefix_bs, raw_bitfield.data()));
+
+    stealth_prefix prefix_b(29, 0x691cf48b);
+    BOOST_REQUIRE(!stealth_match(prefix_b, raw_bitfield.data()));
+
+#if 0
+    // Display stealth_prefix bits
+    std::cout << prefix_bs << std::endl;
+    for (size_t i = 0; i < prefix_bs.size(); ++i)
+        std::cout << prefix_bs[i];
+    std::cout << std::endl;
+
+    // Display raw_bitfield bits
+    uint8_t* bf = raw_bitfield.data();
+    for (size_t i = 0; i < 4; ++i)
+    {
+        for (size_t of = 0; of < 8; ++of)
+        {
+            bool value = (*bf & (1 << of)) > 0;
+            std::cout << (value ? "1" : "0");
+        }
+        ++bf;
+    }
+    std::cout << std::endl;
+#endif
 }
 

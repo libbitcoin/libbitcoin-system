@@ -20,17 +20,13 @@
 #ifndef LIBBITCOIN_STEALTH_HPP
 #define LIBBITCOIN_STEALTH_HPP
 
+#include <boost/dynamic_bitset.hpp>
 #include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 
+typedef boost::dynamic_bitset<uint8_t> stealth_prefix;
 typedef uint32_t stealth_bitfield;
-
-struct BC_API stealth_prefix
-{
-    uint8_t number_bits;
-    stealth_bitfield bitfield;
-};
 
 BC_API bool stealth_match(
     const stealth_prefix& prefix, const uint8_t* raw_bitfield);
