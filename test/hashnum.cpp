@@ -17,47 +17,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <boost/test/unit_test.hpp>
+#include <bitcoin/format.hpp>
 #include <bitcoin/utility/hash_number.hpp>
 
-namespace libbitcoin {
+using namespace libbitcoin;
 
-hash_number::hash_number()
-{
-}
-hash_number::hash_number(const uint64_t value)
-  : hash_(value)
-{
-}
-void hash_number::set_compact(uint32_t compact)
-{
-    hash_.SetCompact(compact);
-}
-uint32_t hash_number::compact() const
-{
-    return hash_.GetCompact();
-}
-void hash_number::set_hash(const hash_digest& hash)
-{
-    std::copy(hash.rbegin(), hash.rend(), hash_.begin());
-}
+BOOST_AUTO_TEST_SUITE(hashnum_tests)
 
-void hash_number::operator*=(uint32_t value)
+BOOST_AUTO_TEST_CASE(simple)
 {
-    hash_ *= value;
-}
-void hash_number::operator/=(uint32_t value)
-{
-    hash_ /= value;
+    hash_digest block_hash = decode_hash(
+        "00000000b873e79784647a6c82962c70d228557d24a747ea4d1b8bbe878e1206");
+    uint32_t bits = 486604799;
+
+    hash_number target;
+    target.set_compact(bits);
+
+    BOOST_REQUIRE((target <= 0) == false);
+    BOOST_REQUIRE((target > max_target()) == false);
+
+    hash_number our_value;
+    our_value.set_hash(block_hash);
+    BOOST_REQUIRE((our_value > target) == false);
 }
 
-bool operator>(const hash_number& number_a, const hash_number& number_b)
-{
-    return number_a.hash_.CompareTo(number_b.hash_) > 0;
-}
-bool operator<=(const hash_number& number_a, const hash_number& number_b)
-{
-    return number_a.hash_.CompareTo(number_b.hash_) <= 0;
-}
-
-} // namespace libbitcoin
+BOOST_AUTO_TEST_SUITE_END()
 

@@ -33,15 +33,15 @@ namespace libbitcoin {
 class hash_number
 {
 public:
-    hash_number();
-    hash_number(const uint64_t value);
-    void set_compact(uint32_t compact);
-    uint32_t compact() const;
-    void set_hash(const hash_digest& hash);
+    BC_API hash_number();
+    BC_API hash_number(const uint64_t value);
+    BC_API void set_compact(uint32_t compact);
+    BC_API uint32_t compact() const;
+    BC_API void set_hash(const hash_digest& hash);
 
     // int64_t resolves to this in Satoshi's GetNextWorkRequired()
-    void operator*=(uint32_t value);
-    void operator/=(uint32_t value);
+    BC_API void operator*=(uint32_t value);
+    BC_API void operator/=(uint32_t value);
 private:
     friend bool operator>(
         const hash_number& number_a, const hash_number& number_b);
@@ -51,8 +51,8 @@ private:
     uint256 hash_;
 };
 
-bool operator>(const hash_number& number_a, const hash_number& number_b);
-bool operator<=(const hash_number& number_a, const hash_number& number_b);
+BC_API bool operator>(const hash_number& number_a, const hash_number& number_b);
+BC_API bool operator<=(const hash_number& number_a, const hash_number& number_b);
 
 } // namespace libbitcoin
 
