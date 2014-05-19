@@ -53,6 +53,8 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
         if (raw_ip.size() != field.ip.size())
             continue;
         std::copy(raw_ip.begin(), raw_ip.end(), field.ip.begin());
+        // Trim CR if using CRLF Windows style line endings.
+        boost::trim_if(parts[1], boost::is_any_of("\r"));
         field.port = boost::lexical_cast<uint16_t>(parts[1]);
         strand_.randomly_queue(
             [this, field]()
