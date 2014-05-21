@@ -571,6 +571,8 @@ uint32_t validate_block::work_required()
     hash_number retarget;
     retarget.set_compact(previous_block_bits());
 
+    // MSVC warning C4244: 'argument' : conversion from 'uint64_t' to 
+    // 'uint32_t', possible loss of data
     retarget *= actual;
     retarget /= target_timespan;
 

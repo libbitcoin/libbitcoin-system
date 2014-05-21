@@ -469,11 +469,11 @@ public:
         int nSize = (bits() + 7) / 8;
         uint32_t nCompact = 0;
         if (nSize <= 3)
-            nCompact = GetLow64() << 8*(3-nSize);
+            nCompact = static_cast<uint32_t>(GetLow64() << 8 * (3 - nSize));
         else
         {
             uint256 bn = *this >> 8*(nSize-3);
-            nCompact = bn.GetLow64();
+            nCompact = static_cast<uint32_t>(bn.GetLow64());
         }
         // The 0x00800000 bit denotes the sign.
         // Thus, if it is already set, divide the mantissa by 256 and increase the exponent.
