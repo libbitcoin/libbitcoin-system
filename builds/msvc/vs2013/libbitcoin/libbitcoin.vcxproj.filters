@@ -203,6 +203,9 @@
     <ClCompile Include="..\..\..\..\src\utility\script_number.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\hash_number.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp">
@@ -364,9 +367,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\bigint.hpp">
-      <Filter>include\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha512.h">
       <Filter>include\utility\external</Filter>
     </ClInclude>
@@ -381,6 +381,9 @@
     </ClInclude>
     <ClInclude Include="..\..\resource.h">
       <Filter>resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash_number.hpp">
+      <Filter>include\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
