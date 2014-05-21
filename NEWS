@@ -1,0 +1,13 @@
+libbitcoin NEWS - History of user-visible changes.      -*- outline -*-
+Copyright 2011 - present libbitcoin developers
+
+Version 2.0 - Jan 2014, by Amir Taaki
+
+* Migrated crypto stuff to new library libwallet.
+
+* Rework protocol code to have fixed connection slots.
+
+* tools/detect-network to see network libbitcoin is compiled for.
+
+* bootstrap blockchain from .dat tool.
+
