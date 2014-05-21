@@ -565,15 +565,13 @@ uint32_t validate_block::work_required()
     // This is the total time it took for the last 2016 blocks.
     uint64_t actual = actual_timespan(readjustment_interval);
     // Now constrain the time between an upper and lower bound.
-    actual = range_constraint(
-        actual, target_timespan / 4, target_timespan * 4);
+    uint32_t constrained_actual = static_cast<uint32_t>(range_constraint(
+        actual, target_timespan / 4, target_timespan * 4));
 
     hash_number retarget;
     retarget.set_compact(previous_block_bits());
 
-    // MSVC warning C4244: 'argument' : conversion from 'uint64_t' to 
-    // 'uint32_t', possible loss of data
-    retarget *= actual;
+    retarget *= constrained_actual;
     retarget /= target_timespan;
 
     if (retarget > max_target())
