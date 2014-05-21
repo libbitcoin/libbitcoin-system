@@ -103,6 +103,7 @@
     <ClCompile Include="..\..\..\..\src\utility\external\sha1.c" />
     <ClCompile Include="..\..\..\..\src\utility\external\sha256.c" />
     <ClCompile Include="..\..\..\..\src\utility\external\zeroize.c" />
+    <ClCompile Include="..\..\..\..\src\utility\hash_number.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\mmfile.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\hash.cpp" />
@@ -143,7 +144,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\async_parallel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\base58.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\bigint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\big_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\ec_keys.hpp" />
@@ -154,6 +154,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha256.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha512.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\zeroize.h" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\logger.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\mmfile.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\script_number.hpp" />
