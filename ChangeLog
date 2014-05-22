@@ -1,4 +1,10 @@
-4ae40d1 (HEAD, origin/develop, develop) added NEWS file.
+Updated on Thu May 22 09:35:11 CEST 2014
+
+If working with git repository, use command 'git log --oneline --decorate' for latest change log
+
+1554046 (HEAD, 2014_05_changelog) add a script for ChangeLog regeneration
+7810d7f (origin/develop, master) generate changelog using 'git log --oneline --decorate'
+4ae40d1 added NEWS file.
 5efb64e Track previous stable release, not next version.
 cf72d8d next release is 3.0
 6d77dea Merge pull request #21 from evoskuil/develop
@@ -67,7 +73,7 @@ bc34a8d add BC_DEPRECATED macro to mark objects as deprecated for removal.
 c1ea202 tidied up base58 encoding.
 942783a copied non-ssl base58 functions from satoshi src + added unit tests.
 b516ec5 added doxygen comments to format.hpp functions
-7de56a8 (origin/master, origin/HEAD, master) remove decode_hex_digest<HashType> from public API. use decode_hash or decode_short_hash specialisations instead.
+7de56a8 (origin/master) remove decode_hex_digest<HashType> from public API. use decode_hash or decode_short_hash specialisations instead.
 719563b remove cast_chunk and uncast_type
 fad8bdb clean up format.hpp, move functions to format.ipp
 0c40f04 decode_hash() / decode_short_hash() aliases for decode_hex_digest<foobar>()
@@ -83,7 +89,7 @@ b13e476 Clarify the EC math operations
 4f83cd1 Remove comment-only bigint files.
 5cee9bb add *temporary* ec addition function (using OpenSSL).
 3324ae0 allow to select custom path for libsecp256k1 during configure.
-39453db (origin/libsecp256k1) Update the documentation for the new ec_keys types
+39453db Update the documentation for the new ec_keys types
 382fa8c Integrate the secp256k1 library
 d317f26 move calculate_stealth_bitfield() into public API.
 b43f411 dont reverse bytes in script::op_hash160
@@ -301,7 +307,7 @@ cbce83c enable compressed keys, and remove redundant/obsolete set_private_key()/
 e90de86 remove get_data from session: already implemented in getx_responder.
 7d2a34a downgrade error to warning (thanks Noel Maersk): http://lists.dyne.org/lurker/message/20140113.093843.531c548b.en.html
 79d6eb0 downgrade scary looking error to warning.
-03d769e (tag: v2.0, 2.0) bump version number to 2.0
+03d769e (tag: v2.0) bump version number to 2.0
 e0aac62 set checkpoint to 702
 fa76ee0 update last checkpoint to block 278700
 3a07aa4 remove redundant chain reference in leveldb_organizer (only base organizer needs it)
