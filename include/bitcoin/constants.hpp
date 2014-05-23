@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CONSTANTS_HPP
 
 #include <cstdint>
+#include <bitcoin/compat.h>
 #include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/hash_number.hpp>
@@ -72,11 +73,14 @@ constexpr uint32_t max_bits = 0x1d00ffff;
 BC_API hash_number max_target();
 BC_API uint32_t magic_value();
 
-#ifdef _MSC_VER
-constexpr uint32_t max_index = UINT32_MAX;
-#else
-constexpr uint32_t max_index = std::numeric_limits<uint32_t>::max();
-#endif
+constexpr int64_t min_int64 = MIN_INT64;
+constexpr int64_t max_int64 = MAX_INT64;
+
+constexpr int32_t min_int32 = MIN_INT32;
+constexpr int32_t max_int32 = MAX_INT32;
+
+constexpr uint32_t max_index = MAX_INDEX_UINT32;
+constexpr uint32_t max_height = MAX_HEIGHT_UINT32;
 
 // Every two weeks we readjust target
 constexpr uint64_t target_timespan = 14 * 24 * 60 * 60;

@@ -220,12 +220,6 @@ void big_number::set_int32(int32_t value)
 
 int32_t big_number::int32() const
 {
-#ifdef _MSC_VER
-    constexpr int32_t max_int32 = INT32_MAX;
-#else
-    constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
-#endif
-
     BN_ULONG value = BN_get_word(&bignum_);
     if (!BN_is_negative(&bignum_))
     {
