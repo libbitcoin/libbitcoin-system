@@ -27,12 +27,27 @@
 * RSA Laboratories, CryptoBytes, Volume 3, Number 2, Autumn 1997,
 * ftp://ftp.rsasecurity.com/pub/cryptobytes/crypto3n2.pdf
 */
+#include <bitcoin/compat.h>
 #include <bitcoin/utility/external/ripemd160.h>
 #include <bitcoin/utility/external/zeroize.h>
 
 #include <string.h>
 #include <stdint.h>
-#include <boost/detail/endian.hpp>
+
+#ifdef __BIG_ENDIAN__
+# define RIPEMD160_BIG_ENDIAN
+#elif defined __LITTLE_ENDIAN__
+/* override */
+#elif defined __BYTE_ORDER
+# if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
+# define RIPEMD160_BIG_ENDIAN
+# endif
+#else // ! defined __LITTLE_ENDIAN__
+# include <endian.h> // machine/endian.h
+# if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
+#  define RIPEMD160_BIG_ENDIAN
+# endif
+#endif
 
 #define byte_length 8
 
@@ -153,9 +168,8 @@ void RMD160Transform(uint32_t state[RMD160_STATE_LENGTH],
 {
     uint32_t a, b, c, d, e, aa, bb, cc, dd, ee, t, x[16];
 
-#if defined(BOOST_ENDIAN_LITTLE_BYTE) || defined(BOOST_ENDIAN_LITTLE_WORD)
+#ifdef RIPEMD160_BIG_ENDIAN
     memcpy(x, block, RMD160_BLOCK_LENGTH);
-//#elif BOOST_ENDIAN_BIG_BYTE
 #else
     int i;
     for (i = 0; i < 16; i++)
@@ -166,8 +180,6 @@ void RMD160Transform(uint32_t state[RMD160_STATE_LENGTH],
         (uint32_t)(block[i * 4 + 2]) << byte_length * 2 |
         (uint32_t)(block[i * 4 + 3]) << byte_length * 3);
     }
-//#else
-//    #error Endianess not supported.
 #endif
 
     a = state[0];

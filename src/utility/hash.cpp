@@ -38,13 +38,8 @@ short_hash ripemd160_hash(const data_chunk& chunk)
 
 short_hash sha1_hash(const data_chunk& chunk)
 {
-    sha1nfo nfo;
-    sha1_init(&nfo);
-    const char* data = reinterpret_cast<const char*>(chunk.data());
-    sha1_write(&nfo, data, chunk.size());
-    uint8_t* result = sha1_result(&nfo);
     short_hash hash;
-    std::copy(result, result + 20, hash.begin());
+    SHA1(chunk.data(), chunk.size(), hash.data());
     return hash;
 }
 

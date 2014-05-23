@@ -385,6 +385,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash_number.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\compat.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt" />

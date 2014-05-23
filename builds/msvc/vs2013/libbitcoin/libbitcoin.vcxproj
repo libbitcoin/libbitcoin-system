@@ -119,6 +119,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\database\stealth_database.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\leveldb_blockchain.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\organizer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\compat.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\define.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\error.hpp" />
