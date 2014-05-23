@@ -17,7 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#pragma warning(push)
+#pragma warning(disable: 4996)
+// choorucode.com/2010/08/30/visual-c-c4996-warning-on-copy-with-array-parameters
 #include <boost/test/unit_test.hpp>
+#pragma warning(pop)
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <bitcoin/bitcoin.hpp>
