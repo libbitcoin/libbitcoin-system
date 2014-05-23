@@ -30,23 +30,17 @@
 
 #define MIN_INT64 INT64_MIN
 #define MAX_INT64 INT64_MAX
-
 #define MIN_INT32 INT32_MIN
 #define MAX_INT32 INT32_MAX
-
-#define MAX_HEIGHT_UINT32 UINT32_MAX
-#define MAX_INDEX_UINT32 UINT32_MAX
+#define MAX_UINT32 UINT32_MAX
 
 #else  // _MSC_VER
 
 #define MIN_INT64 std::numeric_limits<int64_t>::min()
 #define MAX_INT64 std::numeric_limits<int64_t>::max()
-
 #define MIN_INT32 std::numeric_limits<int32_t>::min()
 #define MAX_INT32 std::numeric_limits<int32_t>::max()
-
-#define MAX_HEIGHT_UINT32 std::numeric_limits<uint32_t>::max()
-#define MAX_INDEX_UINT32 std::numeric_limits<uint32_t>::max()
+#define MAX_UINT32 std::numeric_limits<uint32_t>::max()
 
 #endif // _MSC_VER
 
