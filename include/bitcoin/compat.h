@@ -50,4 +50,4 @@
 
 #endif // _MSC_VER
 
-#endif // LIBBITCOIN_COMPAT_H
+#endif
