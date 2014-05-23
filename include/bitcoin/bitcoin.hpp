@@ -201,6 +201,7 @@
 #include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/mmfile.hpp>
+#include <bitcoin/utility/script_number.hpp>
 #include <bitcoin/utility/serializer.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/utility/weak_bind.hpp>
