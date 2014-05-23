@@ -645,12 +645,6 @@ void leveldb_blockchain::fetch_history(const payment_address& address,
 bool leveldb_blockchain::do_fetch_history(const payment_address& address,
     fetch_handler_history handle_fetch, size_t from_height, size_t slock)
 {
-#ifdef _MSC_VER
-    constexpr uint32_t max_height = UINT32_MAX;
-#else
-    constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
-#endif
-
     struct spend_data
     {
         input_point point;

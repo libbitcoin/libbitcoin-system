@@ -203,11 +203,6 @@ void indexer_history_fetched(const std::error_code& ec,
     blockchain::history_list history,
     blockchain::fetch_handler_history handle_fetch)
 {
-#ifdef _MSC_VER
-    constexpr uint32_t max_height = UINT32_MAX;
-#else
-    constexpr uint32_t max_height = std::numeric_limits<uint32_t>::max();
-#endif
     if (ec)
     {
         handle_fetch(ec, blockchain::history_list());

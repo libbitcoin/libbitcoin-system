@@ -3,6 +3,7 @@ bitcoin_include_HEADERS = \
 	address.hpp \
 	bitcoin.hpp \
 	block.hpp \
+	compat.h \
 	constants.hpp \
 	define.hpp \
 	error.hpp \

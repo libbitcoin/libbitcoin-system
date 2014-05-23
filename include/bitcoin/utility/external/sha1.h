@@ -1,34 +1,44 @@
-/* This code is public-domain - it is based on libcrypt
- * placed in the public domain by Wei Dai and other contributors.
- */
+/* OpenBSD: sha1.h, v1.5 2007/09/10 */
+/*
+* SHA-1 in C
+* By Steve Reid <steve@edmweb.com>
+* 100% Public Domain
+*/
 #ifndef LIBBITCOIN_SHA1_H
 #define LIBBITCOIN_SHA1_H
 
 #include <stdint.h>
-#include <string.h>
+#include <stddef.h>
+
+#define SHA1_STATE_LENGTH 5U
+#define SHA1_BLOCK_LENGTH 64U
+#define SHA1_DIGEST_LENGTH 20U
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 
-/* header */
+    typedef struct SHA1CTX
+    {
+        uint32_t state[SHA1_STATE_LENGTH];
+        uint64_t count;
+        uint8_t buffer[SHA1_BLOCK_LENGTH];
+    } SHA1CTX;
 
-#define HASH_LENGTH 20
-#define BLOCK_LENGTH 64
+    void SHA1(const uint8_t* input, size_t length,
+        uint8_t digest[SHA1_DIGEST_LENGTH]);
 
-typedef struct sha1nfo {
-    uint32_t buffer[BLOCK_LENGTH/4];
-    uint32_t state[HASH_LENGTH/4];
-    uint32_t byteCount;
-    uint8_t bufferOffset;
-    uint8_t keyBuffer[BLOCK_LENGTH];
-    uint8_t innerHash[HASH_LENGTH];
-} sha1nfo;
+    void SHA1Final(SHA1CTX* context, uint8_t digest[SHA1_DIGEST_LENGTH]);
 
-void sha1_init(sha1nfo *s);
-void sha1_write(sha1nfo *s, const char *data, size_t len);
-uint8_t* sha1_result(sha1nfo *s);
+    void SHA1Init(SHA1CTX* context);
+
+    void SHA1Pad(SHA1CTX* context);
+
+    void SHA1Transform(uint32_t state[SHA1_STATE_LENGTH],
+        const uint8_t block[SHA1_BLOCK_LENGTH]);
+
+    void SHA1Update(SHA1CTX* context, const uint8_t* input, size_t length);
 
 #ifdef __cplusplus
 }
