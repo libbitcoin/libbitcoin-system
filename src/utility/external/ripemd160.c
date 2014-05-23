@@ -27,12 +27,11 @@
 * RSA Laboratories, CryptoBytes, Volume 3, Number 2, Autumn 1997,
 * ftp://ftp.rsasecurity.com/pub/cryptobytes/crypto3n2.pdf
 */
+#include <stdint.h>
+#include <string.h>
 #include <bitcoin/compat.h>
 #include <bitcoin/utility/external/ripemd160.h>
 #include <bitcoin/utility/external/zeroize.h>
-
-#include <string.h>
-#include <stdint.h>
 
 #ifdef __BIG_ENDIAN__
 # define RIPEMD160_BIG_ENDIAN

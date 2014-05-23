@@ -20,10 +20,9 @@
 #ifndef LIBBITCOIN_VALIDATE_HPP
 #define LIBBITCOIN_VALIDATE_HPP
 
-#include <thread>
 #include <memory>
+#include <thread>
 #include <boost/optional/optional.hpp>
-
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/threadpool.hpp>

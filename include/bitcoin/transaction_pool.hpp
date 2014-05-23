@@ -22,11 +22,10 @@
 
 #include <functional>
 #include <boost/circular_buffer.hpp>
-
+#include <bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/primitives.hpp>
 #include <bitcoin/threadpool.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/primitives.hpp>
-#include <bitcoin/blockchain/blockchain.hpp>
 
 namespace libbitcoin {
 

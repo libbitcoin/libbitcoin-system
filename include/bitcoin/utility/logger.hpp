@@ -21,8 +21,8 @@
 #define LIBBITCOIN_LOGGER_HPP
 
 #include <functional>
-#include <sstream>
 #include <map>
+#include <sstream>
 #include <bitcoin/define.hpp>
 
 namespace libbitcoin {

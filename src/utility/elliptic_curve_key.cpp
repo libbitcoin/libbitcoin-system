@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/utility/elliptic_curve_key.hpp>
-
 #include <algorithm>
 #include <iostream>
 #include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
-
 #include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/elliptic_curve_key.hpp>
 
 namespace libbitcoin {
 

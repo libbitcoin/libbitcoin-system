@@ -17,17 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/network/handshake.hpp>
-
-#ifndef NO_CURL
-#include <curl/curl.h>
-#endif
 #include <functional>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
+#include <bitcoin/define.hpp>
+#include <bitcoin/network/handshake.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/version.hpp>
-
+#ifndef NO_CURL
+#include <curl/curl.h>
+#endif
 namespace libbitcoin {
 
 using std::placeholders::_1;

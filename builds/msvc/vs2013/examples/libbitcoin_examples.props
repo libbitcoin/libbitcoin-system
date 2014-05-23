@@ -35,7 +35,7 @@
     <!-- Dependencies -->
   
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-mpir>dynamic</Linkage-mpir>
+    <Linkage-mpir>static</Linkage-mpir>
     <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-openssl>dynamic</Linkage-openssl>
     <Linkage-libbitcoin>static</Linkage-libbitcoin>

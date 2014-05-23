@@ -27,21 +27,22 @@
       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-testnet)' == 'true'">ENABLE_TESTNET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-leveldb)' == 'true'">LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='DynamicLibrary'">BC_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(ConfigurationType)'=='StaticLibrary'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'DynamicLibrary'">BC_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(DebugOrRelease)' == 'Release'">BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
  
   <!-- Dependencies -->
   
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-mpir>dynamic</Linkage-mpir>
+    <Linkage-mpir>static</Linkage-mpir>
     <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-openssl>dynamic</Linkage-openssl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
     <Linkage-mpir>static</Linkage-mpir>
-    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
+    <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-openssl>static</Linkage-openssl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">

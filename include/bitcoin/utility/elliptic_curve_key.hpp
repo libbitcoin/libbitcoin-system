@@ -20,8 +20,8 @@
 #ifndef LIBBITCOIN_ELLIPTIC_CURVE_KEY_HPP
 #define LIBBITCOIN_ELLIPTIC_CURVE_KEY_HPP
 
-#include <openssl/ec.h>
 #include <stdexcept>
+#include <openssl/ec.h>
 #include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 

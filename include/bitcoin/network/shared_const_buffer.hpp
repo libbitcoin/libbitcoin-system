@@ -21,7 +21,6 @@
 #define LIBBITCOIN_NET_SHARED_CONST_BUFFER_HPP
 
 #include <boost/asio.hpp>
-
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/serializer.hpp>
 

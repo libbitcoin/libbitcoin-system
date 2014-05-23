@@ -20,8 +20,8 @@
 #ifndef LIBBITCOIN_BLOCKS_POLLER_HPP
 #define LIBBITCOIN_BLOCKS_POLLER_HPP
 
-#include <bitcoin/define.hpp>
 #include <bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/define.hpp>
 #include <bitcoin/network/channel.hpp>
 
 namespace libbitcoin {

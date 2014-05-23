@@ -18,14 +18,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/block.hpp>
-
-#include <bitcoin/satoshi_serialize.hpp>
-#include <bitcoin/types.hpp>
 #include <bitcoin/constants.hpp>
+#include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/transaction.hpp>
-#include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/utility/hash.hpp>
+#include <bitcoin/types.hpp>
 #include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/hash.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 

@@ -20,10 +20,10 @@
 #ifndef LIBBITCOIN_NETWORK_NETWORK_HPP
 #define LIBBITCOIN_NETWORK_NETWORK_HPP
 
-#include <boost/asio.hpp>
-#include <boost/utility.hpp>
 #include <memory>
 #include <thread>
+#include <boost/asio.hpp>
+#include <boost/utility.hpp>
 #include <bitcoin/define.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>

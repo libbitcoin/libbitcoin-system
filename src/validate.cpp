@@ -17,20 +17,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/validate.hpp>
-
 #include <set>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/block.hpp>
+#include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/constants.hpp>
-#include <bitcoin/transaction.hpp>
-#include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/error.hpp>
+#include <bitcoin/satoshi_serialize.hpp>
+#include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/hash_number.hpp>
 #include <bitcoin/utility/script_number.hpp>
+#include <bitcoin/validate.hpp>
 
 namespace libbitcoin {
 

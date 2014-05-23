@@ -23,8 +23,8 @@
 #ifdef _MSC_VER
 #include <iostream>
 #endif
-
 #include <bitcoin/bitcoin.hpp>
+
 using namespace bc;
 
 using std::placeholders::_1;

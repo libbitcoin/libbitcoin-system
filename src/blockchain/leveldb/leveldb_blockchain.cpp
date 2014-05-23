@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/blockchain/leveldb_blockchain.hpp>
 
 #include <fstream>
 #include <unordered_map>
@@ -25,6 +24,7 @@
 #include <leveldb/cache.h>
 #include <leveldb/comparator.h>
 #include <leveldb/filter_policy.h>
+#include <bitcoin/blockchain/leveldb_blockchain.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>

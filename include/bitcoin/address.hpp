@@ -20,8 +20,8 @@
 #ifndef LIBBITCOIN_ADDRESS_HPP
 #define LIBBITCOIN_ADDRESS_HPP
 
-#include <bitcoin/define.hpp>
 #include <bitcoin/constants.hpp>
+#include <bitcoin/define.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/script.hpp>
 

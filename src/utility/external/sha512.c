@@ -23,11 +23,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include <bitcoin/utility/external/sha512.h>
-#include <bitcoin/utility/external/zeroize.h>
-
 #include <string.h>
 #include <stdint.h>
+#include <bitcoin/utility/external/sha512.h>
+#include <bitcoin/utility/external/zeroize.h>
 
 static uint64_t be64dec(const void* pp)
 {

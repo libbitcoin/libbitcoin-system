@@ -19,6 +19,7 @@
  */
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
+
 using namespace bc;
 
 static const ec_secret secret

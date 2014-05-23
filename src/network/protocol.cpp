@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/network/protocol.hpp>
-
-#include <bitcoin/network/hosts.hpp>
 #include <bitcoin/network/handshake.hpp>
+#include <bitcoin/network/hosts.hpp>
 #include <bitcoin/utility/logger.hpp>
+#include <bitcoin/network/protocol.hpp>
 
 namespace libbitcoin {
 

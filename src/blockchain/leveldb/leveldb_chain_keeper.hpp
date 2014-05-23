@@ -20,9 +20,8 @@
 #ifndef LIBBITCOIN_BLOCKCHAIN_LEVELDB_CHAIN_KEEPER_H
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_CHAIN_KEEPER_H
 
-#include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/blockchain/leveldb_blockchain.hpp>
-
+#include <bitcoin/blockchain/organizer.hpp>
 #include "leveldb_common.hpp"
 
 namespace libbitcoin {

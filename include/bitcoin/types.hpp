@@ -20,12 +20,12 @@
 #ifndef LIBBITCOIN_TYPES_HPP
 #define LIBBITCOIN_TYPES_HPP
 
-#include <boost/asio.hpp>
 #include <array>
+#include <iomanip>
 #include <memory>
 #include <sstream>
-#include <iomanip>
 #include <vector>
+#include <boost/asio.hpp>
 #include <bitcoin/define.hpp>
 
 namespace libbitcoin {

@@ -20,9 +20,9 @@
 #ifndef LIBBITCOIN_SERIALIZER_HPP
 #define LIBBITCOIN_SERIALIZER_HPP
 
-#include <boost/asio/streambuf.hpp>
 #include <string>
 #include <vector>
+#include <boost/asio/streambuf.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>

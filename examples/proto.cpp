@@ -21,6 +21,7 @@
   Join the Bitcoin network.
 */
 #include <bitcoin/bitcoin.hpp>
+
 using namespace bc;
 
 using std::placeholders::_1;

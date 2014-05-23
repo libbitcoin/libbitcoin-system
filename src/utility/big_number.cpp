@@ -17,11 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/utility/big_number.hpp>
-
-#include <bitcoin/format.hpp>
-
 #include <openssl/bn.h>
+#include <bitcoin/format.hpp>
+#include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {
 

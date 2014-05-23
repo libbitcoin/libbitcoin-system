@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/blockchain/blockchain.hpp>
-
 #include <bitcoin/constants.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/async_parallel.hpp>

@@ -56,9 +56,6 @@
     #define BC_INTERNAL BC_HELPER_DLL_LOCAL
 #endif
 
-// Remove this when cURL dependency is fully removed.
-#define NO_CURL
-
 // Tag to deprecate functions and methods.
 // Gives a compiler warning when they are used.
 #if defined _MSC_VER || defined __CYGWIN__
@@ -70,6 +67,9 @@
         #define BC_DEPRECATED
     #endif
 #endif
+
+// Remove this when cURL dependency is fully removed.
+#define NO_CURL
 
 #endif
 

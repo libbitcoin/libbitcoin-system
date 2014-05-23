@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/stealth.hpp>
-
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/serializer.hpp>

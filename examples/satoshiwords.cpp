@@ -24,6 +24,7 @@
 #include <iostream>
 #endif
 #include <bitcoin/bitcoin.hpp>
+
 using namespace bc;
 
 int main()

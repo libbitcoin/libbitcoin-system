@@ -20,14 +20,14 @@
 #ifndef LIBBITCOIN_TRANSACTION_INDEXER_HPP
 #define LIBBITCOIN_TRANSACTION_INDEXER_HPP
 
-#include <unordered_map>
 #include <forward_list>
 #include <system_error>
+#include <unordered_map>
+#include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/address.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/threadpool.hpp>
 #include <bitcoin/types.hpp>
-#include <bitcoin/blockchain/blockchain.hpp>
 
 namespace libbitcoin {
 

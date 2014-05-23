@@ -21,9 +21,8 @@
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_ORGANIZER_H
 
 #include <bitcoin/blockchain/organizer.hpp>
-
-#include "leveldb_common.hpp"
 #include "leveldb_chain_keeper.hpp"
+#include "leveldb_common.hpp"
 
 namespace libbitcoin {
 

@@ -23,7 +23,6 @@
 #include <memory>
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
-
 #include <bitcoin/address.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/primitives.hpp>

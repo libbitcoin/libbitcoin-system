@@ -20,6 +20,7 @@
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
 #include "hash_data/vectors.hpp"
+
 using namespace bc;
 
 BOOST_AUTO_TEST_CASE(sha1_hash_test)

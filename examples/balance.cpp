@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin.hpp>
+
 using namespace bc;
 
 blockchain* c = nullptr;

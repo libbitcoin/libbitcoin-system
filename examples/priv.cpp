@@ -22,8 +22,8 @@
 */
 #include <iostream>
 #include <sstream>
-
 #include <bitcoin/bitcoin.hpp>
+
 using namespace bc;
 
 void display_help()
