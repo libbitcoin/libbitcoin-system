@@ -19,7 +19,6 @@
  */
 #include <bitcoin/utility/hash.hpp>
 
-#include <boost/detail/endian.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/utility/external/hmac_sha512.h>
 #include <bitcoin/utility/external/ripemd160.h>
