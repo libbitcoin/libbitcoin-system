@@ -52,7 +52,7 @@ data_chunk create_raw_message(const Message& packet)
     header_type head;
     head.magic = magic_value();
     head.command = satoshi_command(packet);
-    head.payload_length = payload.size();
+    head.payload_length = static_cast<uint32_t>(payload.size());
     head.checksum = bitcoin_checksum(payload);
     data_chunk raw_header(satoshi_raw_size(head));
     satoshi_save(head, raw_header.begin());
