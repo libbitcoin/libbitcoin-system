@@ -21,12 +21,11 @@
 #define LIBBITCOIN_SESSION_HPP
 
 #include <set>
-
+#include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/network/hosts.hpp>
 #include <bitcoin/network/handshake.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/protocol.hpp>
-#include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/poller.hpp>
 #include <bitcoin/transaction_pool.hpp>
 

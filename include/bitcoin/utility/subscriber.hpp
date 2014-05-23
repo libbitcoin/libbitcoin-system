@@ -21,7 +21,6 @@
 #define  LIBBITCOIN_UTILITY_SUBSCRIBER_HPP
 
 #include <stack>
-
 #include <bitcoin/types.hpp>
 #include <bitcoin/threadpool.hpp>
 #include <bitcoin/utility/assert.hpp>

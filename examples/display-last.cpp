@@ -21,6 +21,7 @@
   Display info from the last block in our blockchain at "./blockchain/"
 */
 #include <bitcoin/bitcoin.hpp>
+
 using namespace bc;
 
 blockchain* chain = nullptr;

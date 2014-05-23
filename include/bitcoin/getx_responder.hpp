@@ -21,11 +21,11 @@
 #define LIBBITCOIN_GETX_RESPONDER_HPP
 
 #include <system_error>
-#include <bitcoin/define.hpp>
-#include <bitcoin/types.hpp>
-#include <bitcoin/threadpool.hpp>
-#include <bitcoin/primitives.hpp>
 #include <bitcoin/constants.hpp>
+#include <bitcoin/define.hpp>
+#include <bitcoin/primitives.hpp>
+#include <bitcoin/threadpool.hpp>
+#include <bitcoin/types.hpp>
 
 namespace libbitcoin {
 

@@ -20,8 +20,8 @@
 #ifndef LIBBITCOIN_STORAGE_ERRORS_HPP
 #define LIBBITCOIN_STORAGE_ERRORS_HPP
 
-#include <system_error>
 #include <string>
+#include <system_error>
 #include <bitcoin/define.hpp>
 
 namespace libbitcoin {

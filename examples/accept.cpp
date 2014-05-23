@@ -20,11 +20,10 @@
 /*
   Accept connections from Bitcoin nodes on port 8333.
 */
-#include <bitcoin/bitcoin.hpp>
-
 #ifdef _WIN32
 #include <iostream>
 #endif
+#include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
 

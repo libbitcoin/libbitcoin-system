@@ -20,15 +20,15 @@
 #ifndef LIBBITCOIN_NET_CHANNEL_HPP
 #define LIBBITCOIN_NET_CHANNEL_HPP
 
-#include <boost/asio.hpp>
-#include <boost/array.hpp>
-#include <boost/utility.hpp>
-#include <boost/asio/streambuf.hpp>
 #include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
 #include <stack>
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+#include <boost/utility.hpp>
+#include <boost/asio/streambuf.hpp>
 #include <bitcoin/define.hpp>
 #include <bitcoin/network/network.hpp>
 #include <bitcoin/network/shared_const_buffer.hpp>

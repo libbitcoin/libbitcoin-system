@@ -21,7 +21,6 @@
 #define LIBBITCOIN_SCRIPT_HPP
 
 #include <vector>
-
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/big_number.hpp>
 

@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "leveldb_organizer.hpp"
-
 #include <bitcoin/utility/assert.hpp>
-
+#include "leveldb_organizer.hpp"
 #include "leveldb_validate_block.hpp"
 
 namespace libbitcoin {

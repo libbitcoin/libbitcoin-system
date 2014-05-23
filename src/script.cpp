@@ -17,21 +17,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/script.hpp>
 
 #include <stack>
 #include <type_traits>
 #include <boost/optional.hpp>
 #include <bitcoin/constants.hpp>
-#include <bitcoin/primitives.hpp>
-#include <bitcoin/transaction.hpp>
 #include <bitcoin/format.hpp>
+#include <bitcoin/primitives.hpp>
+#include <bitcoin/script.hpp>
+#include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/logger.hpp>
-#include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/elliptic_curve_key.hpp>
+#include <bitcoin/utility/hash.hpp>
+#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/script_number.hpp>
+#include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 

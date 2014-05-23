@@ -12,12 +12,11 @@
 * A million repetitions of "a"
 *   34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F
 */
+#include <stdint.h>
+#include <string.h>
 #include <bitcoin/compat.h>
 #include <bitcoin/utility/external/sha1.h>
 #include <bitcoin/utility/external/zeroize.h>
-
-#include <string.h>
-#include <stdint.h>
 
 #ifdef __BIG_ENDIAN__
 # define SHA1_BIG_ENDIAN

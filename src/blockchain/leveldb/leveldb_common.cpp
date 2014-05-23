@@ -17,18 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "leveldb_common.hpp"
-
-#include <bitcoin/block.hpp>
-#include <bitcoin/transaction.hpp>
 #include <bitcoin/address.hpp>
-#include <bitcoin/satoshi_serialize.hpp>
-#include <bitcoin/transaction.hpp>
-#include <bitcoin/stealth.hpp>
+#include <bitcoin/block.hpp>
 #include <bitcoin/blockchain/database/stealth_database.hpp>
+#include <bitcoin/satoshi_serialize.hpp>
+#include <bitcoin/stealth.hpp>
+#include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/hash.hpp>
+#include "leveldb_common.hpp"
 
 namespace libbitcoin {
 

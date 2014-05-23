@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "leveldb_chain_keeper.hpp"
-
-#include <bitcoin/utility/logger.hpp>
 #include <bitcoin/format.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/utility/logger.hpp>
+#include "leveldb_chain_keeper.hpp"
 
 namespace libbitcoin {
 

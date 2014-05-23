@@ -17,10 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/transaction_indexer.hpp>
-
 #include <bitcoin/constants.hpp>
 #include <bitcoin/transaction.hpp>
+#include <bitcoin/transaction_indexer.hpp>
 #include <bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {

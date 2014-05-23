@@ -26,11 +26,10 @@
 #ifndef LIBBITCOIN_HMACSHA512_H
 #define LIBBITCOIN_HMACSHA512_H
 
-#include <bitcoin/utility/external/sha512.h>
-#include <bitcoin/utility/external/hmac_sha512.h>
-
 #include <stdint.h>
 #include <stddef.h>
+#include <bitcoin/utility/external/sha512.h>
+#include <bitcoin/utility/external/hmac_sha512.h>
 
 #define HMACSHA512_KEY_LENGTH 32U
 #define HMACSHA512_DIGEST_LENGTH 64U

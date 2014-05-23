@@ -21,7 +21,6 @@
 #define LIBBITCOIN_BLOCKCHAIN_LEVELDB_VALIDATE_BLOCK_H
 
 #include <bitcoin/validate.hpp>
-
 #include "leveldb_common.hpp"
 #include "leveldb_organizer.hpp"
 
