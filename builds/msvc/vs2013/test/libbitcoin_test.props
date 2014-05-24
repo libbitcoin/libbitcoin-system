@@ -70,7 +70,6 @@
     <Message Text="Linkage-libbitcoin: $(Linkage-libbitcoin)" Importance="high"/>
   </Target>
   
-
 </Project>
 
 
