@@ -68,7 +68,7 @@ libwallet
 libwallet is an additional library that extends libbitcoin with support for
 old-style pre-HE deterministic wallets, and working with various key formats.
 
-The `libwallet repo <https://github.com/spesmilo/libwallet>`_ was originally
+The `libwallet repo <https://github.com/libbitcoin/libwallet>`_ was originally
 part of libbitcoin but was split for modularity and maintenance. To use it
 in your project add these lines to source files::
 
