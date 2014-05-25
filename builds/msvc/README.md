@@ -5,3 +5,7 @@ There are a number of NuGet packages required to compile. Several inject source 
 I have packaged most of the necessary packages [here](http://www.nuget.org/profiles/evoskuil/) (you won't need all of these). You will also need various [Boost packages](http://sergey-shandar.blogspot.com/2013/08/boost-on-nugetorg.html) and [LevelDB](http://www.nuget.org/packages/LevelDB/), also available via NuGet.
 
 It's easy to identify the necessary packages, just inspect the project's `packages.config` file.
+
+Note that the dynamic builds are available but are not yet functional. The develop branch is more current and it contains a build script for all non-dynamic build variants.
+
+Not all examples are expected to work presently, try `satoshiswords` and the unit tests.
