@@ -6,6 +6,6 @@ I have packaged most of the necessary packages [here](http://www.nuget.org/profi
 
 It's easy to identify the necessary packages, just inspect the project's `packages.config` file.
 
-Note that the dynamic builds are available but are not yet functional. The develop branch is more current and it contains a build script for all non-dynamic build variants.
+Dynamic builds are available but not yet functional. The develop branch is more current and contains a build script for all non-dynamic build variants.
 
 Not all examples are expected to work presently, try `satoshiwords` and the unit tests.
