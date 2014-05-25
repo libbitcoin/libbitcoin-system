@@ -8,4 +8,4 @@ It's easy to identify the necessary packages, just inspect the project's `packag
 
 Note that the dynamic builds are available but are not yet functional. The develop branch is more current and it contains a build script for all non-dynamic build variants.
 
-Not all examples are expected to work presently, try `satoshiswords` and the unit tests.
+Not all examples are expected to work presently, try `satoshiwords` and the unit tests.
