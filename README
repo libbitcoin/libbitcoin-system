@@ -14,6 +14,18 @@ Note that you need g++ 4.7 or higher. For this reason Ubuntu 12.04 and older are
 > Start Here! <
   ^^^^^^^^^^^
 
+You will need libsecp256k1:
+
+  $ git clone https://github.com/bitcoin/secp256k1.git
+  $ cd secp256k1
+  $ autoreconf -i
+  $ ./configure --prefix $INSTALL_PREFIX
+  $ make
+  $ make install
+  $ ldconfig
+
+Then install libbitcoin:
+
   $ sudo apt-get install build-essential autoconf automake libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev
   $ autoreconf -i
   $ ./configure --enable-leveldb
