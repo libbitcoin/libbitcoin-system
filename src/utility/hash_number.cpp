@@ -28,9 +28,11 @@ hash_number::hash_number(const uint64_t value)
   : hash_(value)
 {
 }
-void hash_number::set_compact(uint32_t compact)
+bool hash_number::set_compact(uint32_t compact)
 {
-    hash_.SetCompact(compact);
+    bool is_negative = true, is_overflow = true;
+    hash_.SetCompact(compact, &is_negative, &is_overflow);
+    return is_negative || is_overflow;
 }
 uint32_t hash_number::compact() const
 {

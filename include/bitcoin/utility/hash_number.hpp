@@ -35,7 +35,8 @@ class hash_number
 public:
     BC_API hash_number();
     BC_API hash_number(const uint64_t value);
-    BC_API void set_compact(uint32_t compact);
+    // Returns false if negative or overflowed.
+    BC_API bool set_compact(uint32_t compact);
     BC_API uint32_t compact() const;
     BC_API void set_hash(const hash_digest& hash);
 

@@ -417,7 +417,8 @@ std::error_code validate_block::check_block()
 bool validate_block::check_proof_of_work(hash_digest block_hash, uint32_t bits)
 {
     hash_number target;
-    target.set_compact(bits);
+    if (!target.set_compact(bits))
+        return false;
 
     if (target <= 0 || target > max_target())
         return false;
