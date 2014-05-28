@@ -45,6 +45,7 @@ mmfile::mmfile(const std::string& filename)
     if (fstat(file_handle_, &sbuf) == -1)
         return;
     size_ = sbuf.st_size;
+    BITCOIN_ASSERT_MSG(size_ > 0, "Filesize cannot be 0 bytes.");
     // You can static_cast void* pointers.
     data_ = static_cast<uint8_t*>(mmap(
         0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, file_handle_, 0));
