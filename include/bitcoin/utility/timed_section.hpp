@@ -33,14 +33,17 @@ typedef struct {
 } timespec;
 #endif
 
+#include <bitcoin/define.hpp>
+
 namespace libbitcoin {
 
 class timed_section
 {
 public:
-    timed_section(const std::string& context, const std::string& section);
-    ~timed_section();
-    double elapsed() const;
+    BC_API timed_section(
+        const std::string& context, const std::string& section);
+    BC_API ~timed_section();
+    BC_API double elapsed() const;
 private:
     const std::string context_, section_;
     timespec start_;
