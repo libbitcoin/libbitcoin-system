@@ -28,8 +28,6 @@
 
 namespace libbitcoin {
 
-typedef std::vector<hash_digest> hash_list;
-
 hash_digest hash_transaction_impl(const transaction_type& tx,
     uint32_t* hash_type_code)
 {
@@ -50,7 +48,7 @@ hash_digest hash_transaction(const transaction_type& tx,
     return hash_transaction_impl(tx, &hash_type_code);
 }
 
-hash_digest build_merkle_tree(hash_list& merkle)
+hash_digest build_merkle_tree(hash_digest_list& merkle)
 {
     if (merkle.empty())
         return null_hash;
@@ -62,16 +60,14 @@ hash_digest build_merkle_tree(hash_list& merkle)
         if (merkle.size() % 2 != 0)
             merkle.push_back(merkle.back());
 
-        hash_list new_merkle;
+        hash_digest_list new_merkle;
         for (auto it = merkle.begin(); it != merkle.end(); it += 2)
         {
             data_chunk concat_data(hash_size * 2);
             auto concat = make_serializer(concat_data.begin());
             concat.write_hash(*it);
             concat.write_hash(*(it + 1));
-            BITCOIN_ASSERT(
-                std::distance(concat_data.begin(), concat.iterator()) ==
-                hash_size * 2);
+            BITCOIN_ASSERT(concat.iterator() == concat_data.end());
             hash_digest new_root = bitcoin_hash(concat_data);
             new_merkle.push_back(new_root);
         }
@@ -82,7 +78,7 @@ hash_digest build_merkle_tree(hash_list& merkle)
 
 hash_digest generate_merkle_root(const transaction_list& transactions)
 {
-    hash_list tx_hashes;
+    hash_digest_list tx_hashes;
     for (transaction_type tx: transactions)
         tx_hashes.push_back(hash_transaction(tx));
     return build_merkle_tree(tx_hashes);
