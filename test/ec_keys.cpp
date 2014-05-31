@@ -61,6 +61,21 @@ BOOST_AUTO_TEST_CASE(ec_signature_test)
     BOOST_REQUIRE(!sign(secret, hash, nonce).size());
 }
 
+BOOST_AUTO_TEST_CASE(ec_verify_test)
+{
+    ec_point pubkey = decode_hex(
+        "03bc88a1bd6ebac38e9a9ed58eda735352ad10650e235499b7318315cc26c9b55b");
+    hash_digest sighash = decode_hash(
+        "ed8f9b40c2d349c8a7e58cebe79faa25c21b6bb85b874901f72a1b3f1ad0a67f");
+    data_chunk signature = decode_hex(
+        "3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33"
+        "a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f"
+        "6b8bb67d");
+    BOOST_REQUIRE(verify_signature(pubkey, sighash, signature));
+    signature[10] = 110;
+    BOOST_REQUIRE(!verify_signature(pubkey, sighash, signature));
+}
+
 BOOST_AUTO_TEST_CASE(ec_add_test)
 {
     ec_secret secret_a{{1, 2, 3}};

@@ -92,6 +92,7 @@ bool verify_private_key(const ec_secret& private_key)
 
 data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 {
+    std::reverse(hash.begin(), hash.end());
     init.init();
     int out_size = 72;
     data_chunk signature(out_size);
@@ -110,6 +111,7 @@ data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 bool verify_signature(const ec_point& public_key, hash_digest hash,
     const data_chunk& signature)
 {
+    std::reverse(hash.begin(), hash.end());
     init.init();
     return 1 == secp256k1_ecdsa_verify(
         hash.data(), hash.size(),
