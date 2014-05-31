@@ -1,6 +1,11 @@
 libbitcoin NEWS - History of user-visible changes.      -*- outline -*-
 Copyright 2011 - present libbitcoin developers
 
+Version XXX - replace this as needed
+
+* elliptic_curve_key no longer used inside libbitcoin. Deprecated in favour
+  of <bitcoin/utility/ec_keys.hpp> instead.
+
 Version 2.0 - Jan 2014, by Amir Taaki
 
 * Migrated crypto stuff to new library libwallet.
