@@ -27,7 +27,7 @@
 #include <bitcoin/script.hpp>
 #include <bitcoin/transaction.hpp>
 #include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/elliptic_curve_key.hpp>
+#include <bitcoin/utility/ec_keys.hpp>
 #include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/script_number.hpp>
@@ -995,23 +995,19 @@ hash_digest script_type::generate_signature_hash(
 }
 
 bool check_signature(data_chunk signature,
-    const data_chunk& pubkey, const script_type& script_code,
+    const ec_point& public_key, const script_type& script_code,
     const transaction_type& parent_tx, uint32_t input_index)
 {
-    elliptic_curve_key key;
-    if (!key.set_public_key(pubkey))
-        return false;
-
     if (signature.empty())
         return false;
     uint32_t hash_type = 0;
     hash_type = signature.back();
     signature.pop_back();
 
-    hash_digest tx_hash =
+    hash_digest sighash =
         script_type::generate_signature_hash(
             parent_tx, input_index, script_code, hash_type);
-    return key.verify(tx_hash, signature);
+    return verify_signature(public_key, sighash, signature);
 }
 
 bool script_type::op_checksig(
@@ -1463,12 +1459,8 @@ bool is_pubkey_hash_sig_type(const operation_stack& ops)
 {
     if (ops.size() != 2 || !is_push_only(ops))
         return false;
-    const data_chunk& last_data = ops.back().data;
-    if (last_data.empty())
-        return false;
-    // Test if last item is a public key.
-    elliptic_curve_key tmp_key;
-    return tmp_key.set_public_key(last_data);
+    const ec_point& last_data = ops.back().data;
+    return verify_public_key_fast(last_data);
 }
 bool is_script_code_sig_type(const operation_stack& ops)
 {
