@@ -75,6 +75,15 @@ BC_API bool verify_public_key(const ec_point& public_key)
         == 1;
 }
 
+bool verify_public_key_fast(const ec_point& public_key)
+{
+    if (public_key.size() == ec_compressed_size)
+        return public_key[0] == 0x02 || public_key[0] == 0x03;
+    if (public_key.size() == ec_uncompressed_size)
+        return public_key[0] == 0x04;
+    return false;
+}
+
 BC_API bool verify_private_key(const ec_secret& private_key)
 {
     init.init();

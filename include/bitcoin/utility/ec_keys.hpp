@@ -44,6 +44,12 @@ BC_API ec_point secret_to_public_key(const ec_secret& secret,
 BC_API bool verify_public_key(const ec_point& public_key);
 
 /**
+ * Verifies that a data chunk looks like a valid EC point.
+ * Avoid allocations and point arithmetic.
+ */
+BC_API bool verify_public_key_fast(const ec_point& public_key);
+
+/**
  * Verifies that a private key is within the valid range.
  */
 BC_API bool verify_private_key(const ec_secret& private_key);
