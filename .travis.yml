@@ -1,0 +1,15 @@
+os:
+- linux
+- osx
+language: cpp
+compiler:
+- gcc
+#- clang
+install: ./travis/install-deps.sh "${TRAVIS_OS_NAME}"
+script:
+#- ./travis/cppcheck_wrapper.sh ./src -I ./include --check-config
+- autoreconf -i && ./configure --enable-leveldb && make -j 2
+branches:
+  only:
+  - master
+  - develop
