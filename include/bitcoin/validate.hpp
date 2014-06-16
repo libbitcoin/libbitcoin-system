@@ -103,6 +103,8 @@ public:
     std::error_code accept_block();
     std::error_code connect_block();
 
+    BC_API static bool check_proof_of_work(hash_digest hash, uint32_t bits);
+
 protected:
     validate_block(size_t height, const block_type& current_block);
 
@@ -125,10 +127,6 @@ protected:
     virtual block_header_type fetch_block(size_t fetch_height) = 0;
 
 private:
-    // check_block()
-    bool check_proof_of_work(hash_digest hash, uint32_t bits);
-    bool check_transaction(const transaction_type& tx);
-
     size_t legacy_sigops_count();
 
     // accept_block()
