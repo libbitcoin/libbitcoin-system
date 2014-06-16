@@ -23,6 +23,7 @@
 #include <memory>
 #include <thread>
 #include <boost/optional/optional.hpp>
+#include <bitcoin/define.hpp>
 #include <bitcoin/primitives.hpp>
 #include <bitcoin/types.hpp>
 #include <bitcoin/threadpool.hpp>
@@ -96,17 +97,20 @@ private:
 
 typedef std::shared_ptr<validate_transaction> validate_transaction_ptr;
 
-class validate_block
+
+// Temporary, find why 'typeinfo' error exists.
+// Remove BC_API from class declaration.
+class BC_API validate_block
 {
 public:
-    std::error_code check_block();
-    std::error_code accept_block();
-    std::error_code connect_block();
+    BC_API std::error_code check_block();
+    BC_API std::error_code accept_block();
+    BC_API std::error_code connect_block();
 
     BC_API static bool check_proof_of_work(hash_digest hash, uint32_t bits);
 
 protected:
-    validate_block(size_t height, const block_type& current_block);
+    BC_API validate_block(size_t height, const block_type& current_block);
 
     virtual uint32_t previous_block_bits() = 0;
     virtual uint64_t actual_timespan(const uint64_t interval) = 0;
@@ -114,9 +118,9 @@ protected:
     virtual bool transaction_exists(const hash_digest& tx_hash) = 0;
     virtual bool is_output_spent(const output_point& outpoint) = 0;
     // These have optional implementations that can be overriden
-    virtual bool validate_inputs(const transaction_type& tx,
+    BC_API virtual bool validate_inputs(const transaction_type& tx,
         size_t index_in_parent, uint64_t& value_in, size_t& total_sigops);
-    virtual bool connect_input(size_t index_in_parent,
+    BC_API virtual bool connect_input(size_t index_in_parent,
         const transaction_type& current_tx,
         size_t input_index, uint64_t& value_in, size_t& total_sigops);
     virtual bool fetch_transaction(transaction_type& tx,
