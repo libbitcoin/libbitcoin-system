@@ -5,8 +5,6 @@ AM_CPPFLAGS = -I$(srcdir)/../include
 libbitcoin_la_SOURCES = \
 	address.cpp \
 	blockchain/blockchain.cpp \
-	blockchain/database/stealth_database.cpp \
-	blockchain/organizer.cpp \
 	block.cpp \
 	constants.cpp \
 	error.cpp \
@@ -44,15 +42,6 @@ libbitcoin_la_SOURCES = \
 	utility/mmfile.cpp \
 	utility/timed_section.cpp \
 	validate.cpp
-
-if DO_LEVELDB
-libbitcoin_la_SOURCES += \
-	blockchain/leveldb/leveldb_blockchain.cpp \
-	blockchain/leveldb/leveldb_chain_keeper.cpp \
-	blockchain/leveldb/leveldb_common.cpp \
-	blockchain/leveldb/leveldb_organizer.cpp \
-	blockchain/leveldb/leveldb_validate_block.cpp
-endif
 
 libbitcoin_la_LIBADD = \
     -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread \

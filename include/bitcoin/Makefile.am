@@ -34,17 +34,7 @@ bitcoin_impl_serialize_include_HEADERS = \
 
 bitcoin_blockchain_includedir = $(includedir)/bitcoin/blockchain
 bitcoin_blockchain_include_HEADERS = \
-	blockchain/blockchain.hpp \
-	blockchain/organizer.hpp
-
-bitcoin_blockchain_database_includedir = $(includedir)/bitcoin/blockchain/database
-bitcoin_blockchain_database_include_HEADERS = \
-	blockchain/database/stealth_database.hpp
-
-if DO_LEVELDB
-bitcoin_blockchain_include_HEADERS += \
-	blockchain/leveldb_blockchain.hpp
-endif
+	blockchain/blockchain.hpp
 
 bitcoin_network_includedir = $(includedir)/bitcoin/network
 bitcoin_network_include_HEADERS = \
