@@ -14,7 +14,7 @@ Note that you need g++ 4.7 or higher. For this reason Ubuntu 12.04 and older are
 > Start Here! <
   ^^^^^^^^^^^
 
-  $ sudo apt-get install build-essential autoconf automake libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev
+  $ sudo apt-get install build-essential autoconf automake libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev libssl-dev
   $ autoreconf -i
   $ ./configure --enable-leveldb
   $ make
