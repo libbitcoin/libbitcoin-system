@@ -26,7 +26,7 @@ You will need libsecp256k1:
 
 Then install libbitcoin:
 
-  $ sudo apt-get install build-essential autoconf automake libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev
+  $ sudo apt-get install build-essential autoconf automake libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev libssl-dev
   $ autoreconf -i
   $ ./configure --enable-leveldb
   $ make
