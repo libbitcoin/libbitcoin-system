@@ -27,16 +27,6 @@
 
 namespace libbitcoin {
 
-#define LOG_NETWORK     "network"
-#define LOG_BLOCKCHAIN  "blockchain"
-#define LOG_VALIDATE    "validate"
-#define LOG_PROTOCOL    "protocol"
-#define LOG_POLLER      "poller"
-#define LOG_SESSION     "session"
-#define LOG_SCRIPT      "script"
-#define LOG_TXPOOL      "transaction_pool"
-#define LOG_TXIDX       "transaction_indexer"
-
 enum class log_level
 {
     null,
