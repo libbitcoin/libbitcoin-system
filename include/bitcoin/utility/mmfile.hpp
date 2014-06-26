@@ -31,7 +31,12 @@ class mmfile
 {
 public:
     BC_API mmfile(const std::string& filename);
+    BC_API mmfile(mmfile&& file);
     BC_API ~mmfile();
+
+    mmfile(const mmfile&) = delete;
+    void operator=(const mmfile&) = delete;
+
     BC_API uint8_t* data();
     BC_API const uint8_t* data() const;
     BC_API size_t size() const;
@@ -39,7 +44,7 @@ public:
 private:
     int file_handle_ = 0;
     uint8_t* data_ = nullptr;
-    size_t size_;
+    size_t size_ = 0;
 };
 
 } // namespace libbitcoin

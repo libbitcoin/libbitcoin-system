@@ -53,6 +53,13 @@ mmfile::mmfile(const std::string& filename)
         data_ = nullptr;
 #endif
 }
+mmfile::mmfile(mmfile&& file)
+  : file_handle_(file.file_handle_), data_(file.data_), size_(file.size_)
+{
+    file.file_handle_ = 0;
+    file.data_ = nullptr;
+    file.size_ = 0;
+}
 mmfile::~mmfile()
 {
 #ifndef _MSC_VER
