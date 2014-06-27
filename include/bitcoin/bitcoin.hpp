@@ -54,17 +54,6 @@
  * - @link libbitcoin::hosts hosts @endlink
  * - @link libbitcoin::handshake handshake @endlink
  *
- * @subsection blockchain Blockchain service
- *
- * Bitcoin's blockchain is usually disk oriented. Backends all implement
- * the blockchain interface allowing programs to utilise backends using the
- * same code.
- *
- * - @link libbitcoin::blockchain blockchain @endlink (abstract interface
-     for blockchain backends)
- * - @link libbitcoin::bdb_blockchain bdb_blockchain @endlink
- * - @link libbitcoin::leveldb_blockchain leveldb_blockchain @endlink
- *
  * @subsection supporting Supporting services
  *
  * These services utilise other services and provide additional
@@ -206,9 +195,6 @@
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/validate.hpp>
-#ifdef LEVELDB_ENABLED
-    #include <bitcoin/blockchain/leveldb_blockchain.hpp>
-#endif
 
 namespace bc = libbitcoin;
 
