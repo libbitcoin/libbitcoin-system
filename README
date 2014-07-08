@@ -153,3 +153,7 @@ For Mac OSX Mountain Lion, you need to follow these brew commands:
   $ make
   $ sudo make install
 
+If you get the error message "No package 'libcurl' found" you can set the following environment variables:
+
+  $ export CURL_CFLAGS=-I/usr/local/opt/curl/include
+  $ export CURL_LIBS=-L/usr/local/opt/curl/lib
