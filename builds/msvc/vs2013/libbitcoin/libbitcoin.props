@@ -13,10 +13,6 @@
     <PropertyPageSchema Include="$(MSBuildThisFileDirectory)$(ProjectName).xml" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <Option-leveldb>true</Option-leveldb>
-  </PropertyGroup>
-
   <!-- Configuration -->
 
   <ItemDefinitionGroup>
@@ -26,7 +22,6 @@
       <EnablePREfast>false</EnablePREfast>
       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-testnet)' == 'true'">ENABLE_TESTNET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PreprocessorDefinitions Condition="'$(Option-leveldb)' == 'true'">LEVELDB_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'DynamicLibrary'">BC_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(ConfigurationType)' == 'StaticLibrary'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(DebugOrRelease)' == 'Release'">BITCOIN_DISABLE_ASSERTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -54,7 +49,6 @@
   <!-- Messages -->
 
   <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Option-leveldb    : $(Option-leveldb)" Importance="high"/>
     <Message Text="Option-testnet    : $(Option-testnet)" Importance="high"/>
   </Target>
 

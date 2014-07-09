@@ -10,9 +10,6 @@
     <ClCompile Include="..\..\..\..\examples\fullnode.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\examples\initchain.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\examples\priv.cpp">
       <Filter>src</Filter>
     </ClCompile>

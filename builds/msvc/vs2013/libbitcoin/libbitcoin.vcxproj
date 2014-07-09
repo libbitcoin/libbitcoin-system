@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-    <NuGetPackageImportStamp>69cee577</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>52be2a37</NuGetPackageImportStamp>
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <ProjectGuid>{39F60708-FF48-4C22-952D-43470866F684}</ProjectGuid>
     <ProjectName>libbitcoin</ProjectName>
@@ -71,9 +71,6 @@
     <ClCompile Include="..\..\..\..\src\address.cpp" />
     <ClCompile Include="..\..\..\..\src\block.cpp" />
     <ClCompile Include="..\..\..\..\src\blockchain\blockchain.cpp" />
-    <ClCompile Include="..\..\..\..\src\blockchain\database\mman_win32.c" />
-    <ClCompile Include="..\..\..\..\src\blockchain\database\stealth_database.cpp" />
-    <ClCompile Include="..\..\..\..\src\blockchain\organizer.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
     <ClCompile Include="..\..\..\..\src\format.cpp" />
@@ -116,9 +113,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\blockchain.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\database\stealth_database.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\leveldb_blockchain.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\organizer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\compat.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\define.hpp" />
@@ -166,29 +160,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\weak_bind.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\validate.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\version.hpp" />
-    <ClInclude Include="..\..\..\..\src\blockchain\database\mman_win32.h" />
-    <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.hpp" />
-    <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.hpp" />
-    <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp" />
-    <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.hpp" />
     <ClInclude Include="..\..\resource.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_blockchain.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.cpp">
-      <ExcludedFromBuild Condition="'$(Option-leveldb)' != 'true'">true</ExcludedFromBuild>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp" />
@@ -201,9 +173,6 @@
   <ItemGroup>
     <ResourceCompile Include="..\..\resource.rc" />
   </ItemGroup>
-  <Import Project="..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props" Condition="Exists('..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')" />
-  <Import Project="..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props" Condition="Exists('..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" />
-  <Import Project="..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props" Condition="Exists('..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props')" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
   <ImportGroup Label="ExtensionSettings">
@@ -220,9 +189,6 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\Crc32C.1.0.4\build\native\Crc32C.props'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\Snappy.1.1.1.7\build\native\Snappy.props'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\LevelDB.1.16.0.5\build\native\LevelDB.props'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost.1.55.0.16\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost.1.55.0.16\build\native\boost.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.55.0.16\build\native\boost_system-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_system-vc120.1.55.0.16\build\native\boost_system-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_date_time-vc120.1.55.0.16\build\native\boost_date_time-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_date_time-vc120.1.55.0.16\build\native\boost_date_time-vc120.targets'))" />
