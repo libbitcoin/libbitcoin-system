@@ -26,11 +26,6 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(SolutionDir)libbitcoin.import.props" />
   </ImportGroup>
-
-  <PropertyGroup>
-    <!-- Libbitcoin must also have been built with leveldb. -->
-    <Option-leveldb>true</Option-leveldb>
-  </PropertyGroup>
   
     <!-- Dependencies -->
   
@@ -56,7 +51,6 @@
   <!-- Messages -->
 
   <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Option-leveldb    : $(Option-leveldb)" Importance="high"/>
     <Message Text="Option-testnet    : $(Option-testnet)" Importance="high"/>
   </Target>
 

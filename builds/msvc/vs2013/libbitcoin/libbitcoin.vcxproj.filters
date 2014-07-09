@@ -33,15 +33,6 @@
     <Filter Include="include\impl\serialize">
       <UniqueIdentifier>{849640c1-d79f-4baa-bfb5-0ea86d1c9988}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\blockchain\database">
-      <UniqueIdentifier>{a20c92ac-7138-4374-9d06-e95d1df0ecc5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\blockchain\database">
-      <UniqueIdentifier>{441e5e7d-632f-4dcb-b342-06f5795d3f19}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\blockchain\leveldb">
-      <UniqueIdentifier>{61f50a9e-d52f-4336-820e-3ac84f2305d4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\utility\external">
       <UniqueIdentifier>{f8a260ce-e8da-4a00-8d29-1927686a2488}</UniqueIdentifier>
     </Filter>
@@ -137,24 +128,6 @@
     <ClCompile Include="..\..\..\..\src\blockchain\blockchain.cpp">
       <Filter>src\blockchain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\organizer.cpp">
-      <Filter>src\blockchain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.cpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.cpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_blockchain.cpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.cpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.cpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\snappy-single-file.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\leveldb-single-file.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\crc32c.cpp" />
@@ -163,12 +136,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\mmfile.cpp">
       <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\database\stealth_database.cpp">
-      <Filter>src\blockchain\database</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\database\mman_win32.c">
-      <Filter>src\blockchain\database</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\session.cpp">
       <Filter>src</Filter>
@@ -208,18 +175,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_organizer.hpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_validate_block.hpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_chain_keeper.hpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\blockchain\leveldb\leveldb_common.hpp">
-      <Filter>src\blockchain\leveldb</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\error.hpp">
       <Filter>include</Filter>
     </ClInclude>
@@ -310,12 +265,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\logger.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\leveldb_blockchain.hpp">
-      <Filter>include\blockchain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\organizer.hpp">
-      <Filter>include\blockchain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\blockchain.hpp">
       <Filter>include\blockchain</Filter>
     </ClInclude>
@@ -337,17 +286,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\network\hosts.hpp">
       <Filter>include\network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\blockchain\database\stealth_database.hpp">
-      <Filter>include\blockchain\database</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\stealth.hpp">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\mmfile.hpp">
       <Filter>include\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\blockchain\database\mman_win32.h">
-      <Filter>src\blockchain\database</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\define.hpp">
       <Filter>include</Filter>

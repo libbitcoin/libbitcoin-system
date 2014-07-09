@@ -157,7 +157,6 @@
 // Convenience header that includes everything
 // Not to be used internally. For API users.
 #include <bitcoin/blockchain/blockchain.hpp>
-#include <bitcoin/blockchain/organizer.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/define.hpp>
