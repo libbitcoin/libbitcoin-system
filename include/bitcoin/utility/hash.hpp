@@ -27,11 +27,11 @@
 namespace libbitcoin {
 
 /**
-* Generate a ripemd160 hash. This hash function is used in script for 
-* op_ripemd160.
-*
-* ripemd160(data)
-*/
+ * Generate a ripemd160 hash. This hash function is used in script for 
+ * op_ripemd160.
+ *
+ * ripemd160(data)
+ */
 BC_API short_hash ripemd160_hash(const data_chunk& chunk);
 
 /**
@@ -67,11 +67,11 @@ BC_API hash_digest sha256_hash(const data_chunk& first_chunk,
 BC_API long_hash sha512_hash(const data_chunk& chunk);
 
 /**
-* Generate a hmac sha512 hash. This hash function is used in bip32 keys,
-* currently only by libwallet.
-*
-* hmac-sha512(data, key)
-*/
+ * Generate a hmac sha512 hash. This hash function is used in bip32 keys,
+ * currently only by libwallet.
+ *
+ * hmac-sha512(data, key)
+ */
 BC_API long_hash hmac_sha512_hash(const data_chunk& chunk,
     const data_chunk& key);
 
@@ -84,11 +84,11 @@ BC_API long_hash hmac_sha512_hash(const data_chunk& chunk,
 BC_API hash_digest bitcoin_hash(const data_chunk& chunk);
 
 /**
-* Generate a bitcoin short hash. This hash function is used in a
-* few specific cases where short hashes are desired.
-*
-* ripemd(sha256(data))
-*/
+ * Generate a bitcoin short hash. This hash function is used in a
+ * few specific cases where short hashes are desired.
+ *
+ * ripemd160(sha256(data))
+ */
 BC_API short_hash bitcoin_short_hash(const data_chunk& chunk);
 
 /**
