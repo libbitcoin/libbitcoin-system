@@ -55,16 +55,16 @@ ec_point secret_to_public_key(const ec_secret& secret,
     bool compressed)
 {
     init.init();
-    size_t size = ec_uncompressed_size;
+    size_t public_key_size = ec_uncompressed_size;
     if (compressed)
-        size = ec_compressed_size;
+        public_key_size = ec_compressed_size;
 
-    ec_point out(size);
+    ec_point out(public_key_size);
     int out_size;
     if (!secp256k1_ecdsa_pubkey_create(out.data(), &out_size, secret.data(),
             compressed))
         return ec_point();
-    BITCOIN_ASSERT(size == static_cast<size_t>(out_size));
+    BITCOIN_ASSERT(public_key_size == static_cast<size_t>(out_size));
     return out;
 }
 
