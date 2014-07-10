@@ -120,22 +120,22 @@ bool verify_signature(const ec_point& public_key, hash_digest hash,
     );
 }
 
-bool ec_tweak_add(ec_point& a, const ec_secret& b)
+bool ec_add(ec_point& a, const ec_secret& b)
 {
     init.init();
     return secp256k1_ecdsa_pubkey_tweak_add(a.data(), a.size(), b.data()) == 1;
-}
-
-bool ec_multiply(ec_point& a, const ec_secret& b)
-{
-    init.init();
-    return secp256k1_ecdsa_pubkey_tweak_mul(a.data(), a.size(), b.data()) == 1;
 }
 
 bool ec_add(ec_secret& a, const ec_secret& b)
 {
     init.init();
     return secp256k1_ecdsa_privkey_tweak_add(a.data(), b.data()) == 1;
+}
+
+bool ec_multiply(ec_point& a, const ec_secret& b)
+{
+    init.init();
+    return secp256k1_ecdsa_pubkey_tweak_mul(a.data(), a.size(), b.data()) == 1;
 }
 
 bool ec_multiply(ec_secret& a, const ec_secret& b)
