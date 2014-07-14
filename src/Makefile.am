@@ -30,7 +30,6 @@ libbitcoin_la_SOURCES = \
 	utility/script_number.cpp \
 	utility/checksum.cpp \
 	utility/ec_keys.cpp \
-	utility/elliptic_curve_key.cpp \
 	utility/external/hmac_sha512.c \
 	utility/external/ripemd160.c \
 	utility/external/sha1.c \

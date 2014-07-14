@@ -93,9 +93,6 @@
     <ClCompile Include="..\..\..\..\src\utility\big_number.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ec_keys.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\elliptic_curve_key.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\external\sha512.c" />
     <ClCompile Include="..\..\..\..\src\utility\external\hmac_sha512.c" />
     <ClCompile Include="..\..\..\..\src\utility\external\ripemd160.c" />

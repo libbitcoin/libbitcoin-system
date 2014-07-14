@@ -104,9 +104,6 @@
     <ClCompile Include="..\..\..\..\src\utility\big_number.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\elliptic_curve_key.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
