@@ -210,13 +210,19 @@ template <typename Iterator>
 template <typename T>
 T deserializer<Iterator>::read_big_endian()
 {
-    return from_big_endian<T>(read_bytes<sizeof(T)>().begin());
+    const auto begin = iter_;
+    check_distance(iter_, end_, sizeof(T));
+    iter_ += sizeof(T);
+    return from_big_endian<T>(begin);
 }
 template <typename Iterator>
 template <typename T>
 T deserializer<Iterator>::read_little_endian()
 {
-    return from_little_endian<T>(read_bytes<sizeof(T)>().begin());
+    const auto begin = iter_;
+    check_distance(iter_, end_, sizeof(T));
+    iter_ += sizeof(T);
+    return from_little_endian<T>(begin);
 }
 
 template <typename Iterator>
