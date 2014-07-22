@@ -26,23 +26,23 @@ libbitcoin_la_SOURCES = \
 	transaction_pool.cpp \
 	utility/base58.cpp \
 	utility/big_number.cpp \
-	utility/hash_number.cpp \
-	utility/script_number.cpp \
 	utility/checksum.cpp \
 	utility/ec_keys.cpp \
+	utility/hash.cpp \
+	utility/hash_number.cpp \
+	utility/logger.cpp \
+	utility/mmfile.cpp \
+	utility/script_number.cpp \
+	utility/timed_section.cpp \
 	utility/external/hmac_sha512.c \
 	utility/external/ripemd160.c \
 	utility/external/sha1.c \
 	utility/external/sha256.c \
 	utility/external/sha512.c \
 	utility/external/zeroize.c \
-	utility/hash.cpp \
-	utility/logger.cpp \
-	utility/mmfile.cpp \
-	utility/timed_section.cpp \
 	validate.cpp
 
 libbitcoin_la_LIBADD = \
     -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread \
-    -lcurl -lsecp256k1 @LDFLAG_LEVELDB@ -lcrypto -ldl -lz
+    -lsecp256k1 -lcrypto -ldl -lz
 
