@@ -51,14 +51,14 @@ bitcoin_util_include_HEADERS = \
 	utility/async_parallel.hpp \
 	utility/base58.hpp \
 	utility/big_number.hpp \
-	utility/hash_number.hpp \
-	utility/script_number.hpp \
 	utility/checksum.hpp \
+	utility/decorator.hpp \
 	utility/ec_keys.hpp \
-	utility/elliptic_curve_key.hpp \
 	utility/hash.hpp \
+	utility/hash_number.hpp \
 	utility/logger.hpp \
 	utility/mmfile.hpp \
+	utility/script_number.hpp \
 	utility/serializer.hpp \
 	utility/subscriber.hpp \
 	utility/timed_section.hpp \

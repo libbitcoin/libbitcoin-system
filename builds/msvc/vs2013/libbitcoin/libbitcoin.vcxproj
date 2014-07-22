@@ -139,14 +139,15 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\async_parallel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\base58.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\big_number.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\ec_keys.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\elliptic_curve_key.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\hmac_sha512.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\ripemd160.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha1.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha256.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\sha512.h" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\uint256.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\zeroize.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\hash_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\logger.hpp" />
@@ -162,8 +163,10 @@
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\include\bitcoin\impl\format.ipp" />
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp" />
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\misc.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\impl\utility\serializer.ipp" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
