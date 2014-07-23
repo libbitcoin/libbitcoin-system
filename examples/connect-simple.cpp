@@ -35,6 +35,12 @@ void connect_established(const std::error_code& ec, channel_ptr node)
         return;
     }
     // ...
+    // You could start downloading blocks here:
+    //
+    // get_blocks_type getblocks;
+    // getblocks.start_hashes.push_back(decode_hash("..."));
+    // getblocks.hash_stop = decode_hash("...");
+    // node->send(getblocks, std::bind(getblocks_sent, _1, node));
 }
 
 int main()
