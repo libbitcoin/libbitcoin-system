@@ -20,13 +20,9 @@
 /*
   Accept connections from Bitcoin nodes on port 8333.
 */
-#ifdef _WIN32
 #include <iostream>
-#endif
 #include <bitcoin/bitcoin.hpp>
-
 using namespace bc;
-
 using std::placeholders::_1;
 using std::placeholders::_2;
 
@@ -47,7 +43,7 @@ void listening_started(const std::error_code& ec, acceptor_ptr accept)
 {
     if (ec)
     {
-        log_error() << "Listen: " << ec.message();
+        log_error() << "Listen failed: " << ec.message();
         return;
     }
     // Accept first connection.
@@ -66,6 +62,8 @@ void accepted_connection(const std::error_code& ec, channel_ptr node,
     log_info() << "Accepted connection!";
     node->subscribe_stop(node_stopped);
     // Now we need to keep it alive otherwise the connection is closed.
+    // So we bind node to function call. Once all references expire,
+    // the connection is closed.
     node->subscribe_version(
         std::bind(version_received, _1, _2, node));
     // Keep accepting more connections.
@@ -84,6 +82,7 @@ void version_received(const std::error_code& ec, const version_type& version,
         log_error() << "Version message: " << ec.message();
         return;
     }
+    // Display user agent field.
     log_info() << "User agent: " << version.user_agent;
 }
 
@@ -97,10 +96,15 @@ void node_stopped(const std::error_code& ec)
 
 int main()
 {
+    // Start a threadpool with 4 threads.
     threadpool pool(4);
+    // Networking component.
     network net(pool);
+    // Start a listener on port 8333
     net.listen(8333, listening_started);
+    // Wait...
     std::cin.get();
+    // Stop threadpool and join threads.
     pool.stop();
     pool.join();
     return 0;
