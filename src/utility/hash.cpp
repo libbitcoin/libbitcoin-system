@@ -102,12 +102,5 @@ short_hash bitcoin_short_hash(const data_chunk& chunk)
     return ripemd_hash;
 }
 
-
-uint32_t bitcoin_checksum(const data_chunk& chunk)
-{
-    hash_digest hash = bitcoin_hash(chunk);
-    return from_little_endian<uint32_t>(hash.rbegin());
-}
-
 } // namespace libbitcoin
 

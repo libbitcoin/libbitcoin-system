@@ -143,7 +143,9 @@
  * - @link libbitcoin::long_hash hmac_sha512_hash @endlink
  * - @link libbitcoin::hash_digest bitcoin_hash @endlink
  * - @link libbitcoin::short_hash bitcoin_short_hash @endlink
+ * - @link libbitcoin::append_checksum append_checksum @endlink
  * - @link libbitcoin::uint32_t bitcoin_checksum @endlink
+ * - @link libbitcoin::bool verify_checksum @endlink
  *
  * @subsection base58 Base58
  *
