@@ -142,7 +142,7 @@ class BC_API end_of_stream
  *  }
  * @endcode
  */
-template <typename Iterator>
+template <typename Iterator, bool CheckDistance>
 class deserializer
 {
 public:
@@ -209,8 +209,8 @@ public:
     void set_iterator(const Iterator iter);
 
 private:
-    // Try to advance iterator 'distance' incremenets forwards.
-    // Throw if we prematurely reach the end.
+    // The compiler will optimise out all calls to this function
+    // if CheckDistance is false.
     static void check_distance(
         Iterator it, const Iterator end, size_t distance);
 
@@ -218,9 +218,20 @@ private:
     const Iterator end_;
 };
 
+/**
+ * Deserializer which performs bounds checking and throws end_of_stream
+ * if the iterator exceeds 'end'.
+ */
 template <typename Iterator>
-deserializer<Iterator> make_deserializer(
+deserializer<Iterator, true> make_deserializer(
     const Iterator begin, const Iterator end);
+
+/**
+ * Faster deserializer with no bounds checking.
+ */
+template <typename Iterator>
+deserializer<Iterator, false> make_deserializer_unsafe(
+    const Iterator begin);
 
 } // namespace libbitcoin
 
