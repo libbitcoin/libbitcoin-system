@@ -20,13 +20,9 @@
 /*
   Connect to a Bitcoin node on localhost, port 8333.
 */
-#ifdef _MSC_VER
 #include <iostream>
-#endif
 #include <bitcoin/bitcoin.hpp>
-
 using namespace bc;
-
 using std::placeholders::_1;
 
 // Connection is established.
@@ -35,6 +31,8 @@ void connect_started(const std::error_code& ec, channel_ptr node);
 // Verson message finished sending.
 // Program completed.
 void version_sent(const std::error_code& ec, channel_ptr node);
+// Display message when connection is stopped.
+void connect_stopped(const std::error_code& ec);
 
 void connect_started(const std::error_code& ec, channel_ptr node)
 {
@@ -65,6 +63,8 @@ void connect_started(const std::error_code& ec, channel_ptr node)
     // Begin the send.
     // Calls version_sent callback when complete.
     node->send(version, std::bind(version_sent, _1, node));
+    // Calls connect_stopped() when connection closes.
+    node->subscribe_stop(connect_stopped);
 }
 
 void version_sent(const std::error_code& ec, channel_ptr node)
@@ -73,6 +73,11 @@ void version_sent(const std::error_code& ec, channel_ptr node)
         log_error() << "Sending version: " << ec.message();
     else
         log_info() << "Version sent.";
+}
+
+void connect_stopped(const std::error_code& ec)
+{
+    log_error() << "Connection stopped: " << ec.message();
 }
 
 int main()
