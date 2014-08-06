@@ -134,7 +134,7 @@ std::string pretty(const transaction_type& tx)
 
 bool previous_output_is_null(const output_point& previous_output)
 {
-    return previous_output.index == std::numeric_limits<uint32_t>::max() &&
+    return previous_output.index == max_index &&
         previous_output.hash == null_hash;
 }
 
@@ -163,7 +163,7 @@ bool operator!=(const output_point& output_a, const output_point& output_b)
 
 bool is_final(const transaction_input_type& tx_input)
 {
-    return tx_input.sequence == std::numeric_limits<uint32_t>::max();
+    return tx_input.sequence == max_sequence;
 }
 
 bool is_final(const transaction_type& tx,

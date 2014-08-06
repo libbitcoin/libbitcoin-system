@@ -81,6 +81,7 @@ constexpr int32_t max_uint32 = MAX_UINT32;
 
 constexpr uint32_t max_index = max_uint32;
 constexpr uint32_t max_height = max_uint32;
+constexpr uint32_t max_sequence = max_uint32;
 
 // Every two weeks we readjust target
 constexpr uint64_t target_timespan = 14 * 24 * 60 * 60;
