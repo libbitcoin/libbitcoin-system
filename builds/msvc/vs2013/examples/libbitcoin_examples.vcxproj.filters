@@ -31,9 +31,6 @@
     <ClCompile Include="..\..\..\..\examples\connect.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\leveldb-single-file.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\snappy-single-file.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\crc32c.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
