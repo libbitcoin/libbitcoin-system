@@ -144,23 +144,6 @@ bool is_coinbase(const transaction_type& tx)
         previous_output_is_null(tx.inputs[0].previous_output);
 }
 
-uint64_t total_output_value(const transaction_type& tx)
-{
-    uint64_t total = 0;
-    for (const transaction_output_type& output: tx.outputs)
-        total += output.value;
-    return total;
-}
-
-bool operator==(const output_point& output_a, const output_point& output_b)
-{
-    return output_a.hash == output_b.hash && output_a.index == output_b.index;
-}
-bool operator!=(const output_point& output_a, const output_point& output_b)
-{
-    return !(output_a == output_b);
-}
-
 bool is_final(const transaction_input_type& tx_input)
 {
     return tx_input.sequence == max_sequence;
@@ -180,6 +163,34 @@ bool is_final(const transaction_type& tx,
         if (!is_final(tx_input))
             return false;
     return true;
+}
+
+bool is_locktime_conflict(const transaction_type& tx)
+{
+    auto locktime_set = tx.locktime != 0;
+    if (locktime_set)
+        for (const auto& input: tx.inputs)
+            if (input.sequence < max_sequence)
+                return false;
+
+    return !locktime_set;
+}
+
+uint64_t total_output_value(const transaction_type& tx)
+{
+    uint64_t total = 0;
+    for (const transaction_output_type& output: tx.outputs)
+        total += output.value;
+    return total;
+}
+
+bool operator==(const output_point& output_a, const output_point& output_b)
+{
+    return output_a.hash == output_b.hash && output_a.index == output_b.index;
+}
+bool operator!=(const output_point& output_a, const output_point& output_b)
+{
+    return !(output_a == output_b);
 }
 
 } // namespace libbitcoin

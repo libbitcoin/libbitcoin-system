@@ -46,6 +46,9 @@ BC_API std::string pretty(const transaction_type& transaction);
 
 BC_API bool previous_output_is_null(const output_point& previous_output);
 BC_API bool is_coinbase(const transaction_type& tx);
+BC_API bool is_final(const transaction_type& tx, size_t block_height, 
+    uint32_t block_time);
+BC_API bool is_locktime_conflict(const transaction_type& tx);
 
 BC_API uint64_t total_output_value(const transaction_type& tx);
 
@@ -53,10 +56,6 @@ BC_API bool operator==(
     const output_point& output_a, const output_point& output_b);
 BC_API bool operator!=(
     const output_point& output_a, const output_point& output_b);
-
-BC_API bool is_final(const transaction_type& tx,
-    size_t block_height, uint32_t block_time);
-
 } // namespace libbitcoin
 
 #endif
