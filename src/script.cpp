@@ -20,6 +20,7 @@
 
 #include <stack>
 #include <type_traits>
+#include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
 #include <bitcoin/constants.hpp>
 #include <bitcoin/format.hpp>
@@ -1991,6 +1992,59 @@ std::string pretty(const script_type& script)
             ss << "[ " << encode_hex(op.data) << " ]";
     }
     return ss.str();
+}
+
+opcode data_to_opcode(const data_chunk& data)
+{
+    opcode code;
+    constexpr size_t limit = 76;
+    if (data.size() < limit)
+        code = opcode::special;
+    else if (data.size() < max_uint8)
+        code = opcode::pushdata1;
+    else if (data.size() < max_uint16)
+        code = opcode::pushdata2;
+    else if (data.size() < max_uint32)
+        code = opcode::pushdata4;
+    else
+        code = opcode::bad_operation;
+    return code;
+}
+
+script_type unpretty(const std::string& pretty)
+{
+    script_type script;
+    std::vector<std::string> tokens;
+    boost::split(tokens, pretty, boost::is_any_of(" "),
+        boost::token_compress_on);
+    for (auto& token = tokens.begin(); token != tokens.end(); token++)
+    {
+        operation op;
+        if (*token != "[")
+        {
+            const auto& data = decode_hex(*++token);
+            if (data.empty() || *++token != "]")
+                return script_type();
+            op.code = data_to_opcode(data);
+            if (op.code == opcode::bad_operation)
+                return script_type();
+            op.data = data;
+        }
+        else
+        {
+            op.code = string_to_opcode(*token);
+        }
+        script.push_operation(op);
+    }
+    return script;
+}
+
+std::istream& operator>>(std::istream& stream, script_type& script)
+{
+    std::string text;
+    stream >> text;
+    script = unpretty(text);
+    return stream;
 }
 
 std::ostream& operator<<(std::ostream& stream, const script_type& script)
