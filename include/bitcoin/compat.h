@@ -33,6 +33,8 @@
 #define MIN_INT32 INT32_MIN
 #define MAX_INT32 INT32_MAX
 #define MAX_UINT32 UINT32_MAX
+#define MAX_UINT16 UINT16_MAX
+#define MAX_UINT8 UINT8_MAX
 
 #else  // _MSC_VER
 
@@ -41,6 +43,8 @@
 #define MIN_INT32 std::numeric_limits<int32_t>::min()
 #define MAX_INT32 std::numeric_limits<int32_t>::max()
 #define MAX_UINT32 std::numeric_limits<uint32_t>::max()
+#define MAX_UINT16 std::numeric_limits<uint16_t>::max()
+#define MAX_UINT8 std::numeric_limits<uint8_t>::max()
 
 #endif // _MSC_VER
 

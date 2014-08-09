@@ -69,6 +69,7 @@ const hash_digest null_hash = {
 const short_hash null_short_hash = { 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
+constexpr size_t byte_size = 8;
 constexpr uint32_t max_bits = 0x1d00ffff;
 BC_API hash_number max_target();
 BC_API uint32_t magic_value();
@@ -78,6 +79,8 @@ constexpr int64_t max_int64 = MAX_INT64;
 constexpr int32_t min_int32 = MIN_INT32;
 constexpr int32_t max_int32 = MAX_INT32;
 constexpr int32_t max_uint32 = MAX_UINT32;
+constexpr int16_t max_uint16 = MAX_UINT16;
+constexpr int8_t max_uint8 = MAX_UINT8;
 
 constexpr uint32_t max_index = max_uint32;
 constexpr uint32_t max_height = max_uint32;
