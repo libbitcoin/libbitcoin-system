@@ -142,7 +142,7 @@ class BC_API end_of_stream
  *  }
  * @endcode
  */
-template <typename Iterator, bool CheckDistance>
+template <typename Iterator, bool SafeCheckLast>
 class deserializer
 {
 public:
@@ -210,7 +210,7 @@ public:
 
 private:
     // The compiler will optimise out all calls to this function
-    // if CheckDistance is false.
+    // if SafeCheckLast is false.
     static void check_distance(
         Iterator it, const Iterator end, size_t distance);
 
