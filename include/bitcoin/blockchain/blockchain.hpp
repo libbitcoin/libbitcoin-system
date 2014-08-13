@@ -432,10 +432,6 @@ typedef std::function<
 BC_API void fetch_block_locator(blockchain& chain,
     blockchain_fetch_handler_block_locator handle_fetch);
 
-typedef std::function<void (const std::error_code&,
-    const output_point_list&, const input_point_list&)>
-        blockchain_fetch_handler_history;
-
 } // namespace libbitcoin
 
 #endif
