@@ -153,16 +153,13 @@ struct BC_API operation
     data_chunk data;
 };
 
-namespace sighash
+typedef enum sighash_ : uint32_t
 {
-    enum : uint32_t
-    {
-        all = 1,
-        none = 2,
-        single = 3,
-        anyone_can_pay = 0x80
-    };
-}
+    all = 1,
+    none = 2,
+    single = 3,
+    anyone_can_pay = 0x80
+} sighash;
 
 typedef std::vector<operation> operation_stack;
 
