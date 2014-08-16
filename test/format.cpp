@@ -49,3 +49,44 @@ BOOST_AUTO_TEST_CASE(endian_test)
     BOOST_REQUIRE(from_little_endian<uint64_t>(quad.begin()) ==
         0x1122334455667788);
 }
+
+BOOST_AUTO_TEST_CASE(satoshi_to_btc_0satoshi_test)
+{
+    BOOST_REQUIRE_EQUAL(satoshi_to_btc(0), "0");
+}
+
+BOOST_AUTO_TEST_CASE(btc_to_satoshi_0btc_test)
+{
+    uint64_t satoshi;
+    BOOST_REQUIRE(btc_to_satoshi(satoshi, "0"));
+    BOOST_REQUIRE_EQUAL(satoshi, 0);
+}
+
+BOOST_AUTO_TEST_CASE(satoshi_to_btc_42satoshi_test)
+{
+    uint64_t satoshi = 42 * coin_price(1);
+    BOOST_REQUIRE_EQUAL(satoshi_to_btc(satoshi), "42");
+}
+
+BOOST_AUTO_TEST_CASE(btc_to_satoshi_42btc_test)
+{
+    uint64_t satoshi;
+    uint64_t expected = 42 * coin_price(1);
+    BOOST_REQUIRE(btc_to_satoshi(satoshi, "42"));
+    BOOST_REQUIRE_EQUAL(satoshi, expected);
+}
+
+BOOST_AUTO_TEST_CASE(satoshi_to_btc_max_money_satoshi_test)
+{
+    uint64_t satoshi = max_money();
+    BOOST_REQUIRE_EQUAL(satoshi_to_btc(satoshi), "20999999.9769");
+}
+
+BOOST_AUTO_TEST_CASE(btc_to_satoshi_max_money_bitcoin_test)
+{
+    uint64_t satoshi;
+    uint64_t expected = max_money();
+    BOOST_REQUIRE(btc_to_satoshi(satoshi, "20999999.9769"));
+    BOOST_REQUIRE_EQUAL(satoshi, expected);
+}
+
