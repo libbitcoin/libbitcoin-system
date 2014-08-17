@@ -109,11 +109,6 @@ private:
     template <typename T>
     void write_data_reverse(const T& data);
 
-    // We need to advance the internal iterator.
-    // std::copy gives no info on length of the data copied.
-    template <typename InputIterator>
-    void internal_copy(InputIterator first, InputIterator last);
-
     Iterator iter_;
 };
 

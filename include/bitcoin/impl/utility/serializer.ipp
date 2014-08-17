@@ -91,7 +91,7 @@ template <typename Iterator>
 template <typename T>
 void serializer<Iterator>::write_data(const T& data)
 {
-    internal_copy(data.begin(), data.end());
+    iter_ = std::copy(data.begin(), data.end(), iter_);
 }
 
 template <typename Iterator>
@@ -154,22 +154,7 @@ template <typename Iterator>
 template <typename T>
 void serializer<Iterator>::write_data_reverse(const T& data)
 {
-    internal_copy(data.rbegin(), data.rend());
-}
-
-// We need to advance the internal iterator.
-// std::copy gives no info on length of the data copied.
-template <typename Iterator>
-template <typename InputIterator>
-void serializer<Iterator>::internal_copy(
-    InputIterator first, InputIterator last)
-{
-    while (first != last)
-    {
-        *iter_ = *first;
-        ++first;
-        ++iter_;
-    }
+    iter_ = std::copy(data.rbegin(), data.rend(), iter_);
 }
 
 template <typename Iterator>
