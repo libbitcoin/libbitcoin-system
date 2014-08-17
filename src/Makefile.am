@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
 lib_LTLIBRARIES = libbitcoin.la
-AM_CPPFLAGS = -I$(srcdir)/../include
+AM_CPPFLAGS = -I$(srcdir)/../include ${libsecp256k1_CFLAGS}
 libbitcoin_la_SOURCES = \
 	address.cpp \
 	blockchain/blockchain.cpp \

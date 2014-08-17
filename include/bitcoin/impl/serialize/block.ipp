@@ -111,11 +111,11 @@ Iterator satoshi_save(const transaction_type& packet, Iterator result)
     serial.write_4_bytes(packet.locktime);
     return serial.iterator();
 }
-template <typename Iterator>
+template <typename Iterator, bool SafeCheckLast>
 void satoshi_load(const Iterator first, const Iterator last,
     transaction_type& packet)
 {
-    auto deserial = make_deserializer(first, last);
+    auto deserial = deserializer<Iterator, SafeCheckLast>(first, last);
     read_transaction(deserial, packet);
     // Only true for valid transaction streams.
     //BITCOIN_ASSERT(satoshi_raw_size(packet) == std::distance(first, last));

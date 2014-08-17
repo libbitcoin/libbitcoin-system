@@ -91,7 +91,7 @@ template <typename Iterator>
 template <typename T>
 void serializer<Iterator>::write_data(const T& data)
 {
-    internal_copy(data.begin(), data.end());
+    iter_ = std::copy(data.begin(), data.end(), iter_);
 }
 
 template <typename Iterator>
@@ -154,22 +154,7 @@ template <typename Iterator>
 template <typename T>
 void serializer<Iterator>::write_data_reverse(const T& data)
 {
-    internal_copy(data.rbegin(), data.rend());
-}
-
-// We need to advance the internal iterator.
-// std::copy gives no info on length of the data copied.
-template <typename Iterator>
-template <typename InputIterator>
-void serializer<Iterator>::internal_copy(
-    InputIterator first, InputIterator last)
-{
-    while (first != last)
-    {
-        *iter_ = *first;
-        ++first;
-        ++iter_;
-    }
+    iter_ = std::copy(data.rbegin(), data.rend(), iter_);
 }
 
 template <typename Iterator>
@@ -179,61 +164,61 @@ serializer<Iterator> make_serializer(Iterator begin)
 }
 
 // Macro used so that compiler will optimise out function calls to
-// check_distance() if CheckDistance is false.
-#define CHECK_DISTANCE(N) \
-    if (CheckDistance) \
+// check_distance() if SafeCheckLast is false.
+#define SAFE_CHECK_DISTANCE(N) \
+    if (SafeCheckLast) \
         check_distance(iter_, end_, N);
 
-template <typename Iterator, bool CheckDistance>
-deserializer<Iterator, CheckDistance>::deserializer(
+template <typename Iterator, bool SafeCheckLast>
+deserializer<Iterator, SafeCheckLast>::deserializer(
     const Iterator begin, const Iterator end)
   : iter_(begin), end_(end)
 {
 }
 
-template <typename Iterator, bool CheckDistance>
-uint8_t deserializer<Iterator, CheckDistance>::read_byte()
+template <typename Iterator, bool SafeCheckLast>
+uint8_t deserializer<Iterator, SafeCheckLast>::read_byte()
 {
-    CHECK_DISTANCE(1);
+    SAFE_CHECK_DISTANCE(1);
     return *(iter_++);
 }
-template <typename Iterator, bool CheckDistance>
-uint16_t deserializer<Iterator, CheckDistance>::read_2_bytes()
+template <typename Iterator, bool SafeCheckLast>
+uint16_t deserializer<Iterator, SafeCheckLast>::read_2_bytes()
 {
     return read_little_endian<uint16_t>();
 }
-template <typename Iterator, bool CheckDistance>
-uint32_t deserializer<Iterator, CheckDistance>::read_4_bytes()
+template <typename Iterator, bool SafeCheckLast>
+uint32_t deserializer<Iterator, SafeCheckLast>::read_4_bytes()
 {
     return read_little_endian<uint32_t>();
 }
-template <typename Iterator, bool CheckDistance>
-uint64_t deserializer<Iterator, CheckDistance>::read_8_bytes()
+template <typename Iterator, bool SafeCheckLast>
+uint64_t deserializer<Iterator, SafeCheckLast>::read_8_bytes()
 {
     return read_little_endian<uint64_t>();
 }
 
-template <typename Iterator, bool CheckDistance>
+template <typename Iterator, bool SafeCheckLast>
 template <typename T>
-T deserializer<Iterator, CheckDistance>::read_big_endian()
+T deserializer<Iterator, SafeCheckLast>::read_big_endian()
 {
     const auto begin = iter_;
-    CHECK_DISTANCE(sizeof(T));
+    SAFE_CHECK_DISTANCE(sizeof(T));
     iter_ += sizeof(T);
     return from_big_endian<T>(begin);
 }
-template <typename Iterator, bool CheckDistance>
+template <typename Iterator, bool SafeCheckLast>
 template <typename T>
-T deserializer<Iterator, CheckDistance>::read_little_endian()
+T deserializer<Iterator, SafeCheckLast>::read_little_endian()
 {
     const auto begin = iter_;
-    CHECK_DISTANCE(sizeof(T));
+    SAFE_CHECK_DISTANCE(sizeof(T));
     iter_ += sizeof(T);
     return from_little_endian<T>(begin);
 }
 
-template <typename Iterator, bool CheckDistance>
-uint64_t deserializer<Iterator, CheckDistance>::read_variable_uint()
+template <typename Iterator, bool SafeCheckLast>
+uint64_t deserializer<Iterator, SafeCheckLast>::read_variable_uint()
 {
     uint8_t length = read_byte();
     if (length < 0xfd)
@@ -247,20 +232,20 @@ uint64_t deserializer<Iterator, CheckDistance>::read_variable_uint()
 }
 
 // NOTE: n_bytes changed to uint32_t to prevent array overflow.
-template <typename Iterator, bool CheckDistance>
+template <typename Iterator, bool SafeCheckLast>
 data_chunk deserializer<
-    Iterator, CheckDistance>::read_data(uint32_t n_bytes)
+    Iterator, SafeCheckLast>::read_data(uint32_t n_bytes)
 {
-    CHECK_DISTANCE(n_bytes);
+    SAFE_CHECK_DISTANCE(n_bytes);
     data_chunk raw_bytes(n_bytes);
     for (uint32_t i = 0; i < n_bytes; ++i)
         raw_bytes[i] = read_byte();
     return raw_bytes;
 }
 
-template <typename Iterator, bool CheckDistance>
+template <typename Iterator, bool SafeCheckLast>
 network_address_type deserializer<
-    Iterator, CheckDistance>::read_network_address()
+    Iterator, SafeCheckLast>::read_network_address()
 {
     network_address_type addr;
     addr.services = read_8_bytes();
@@ -270,21 +255,21 @@ network_address_type deserializer<
     return addr;
 }
 
-template <typename Iterator, bool CheckDistance>
-hash_digest deserializer<Iterator, CheckDistance>::read_hash()
+template <typename Iterator, bool SafeCheckLast>
+hash_digest deserializer<Iterator, SafeCheckLast>::read_hash()
 {
     return read_bytes_reverse<hash_size>();
 }
 
-template <typename Iterator, bool CheckDistance>
-short_hash deserializer<Iterator, CheckDistance>::read_short_hash()
+template <typename Iterator, bool SafeCheckLast>
+short_hash deserializer<Iterator, SafeCheckLast>::read_short_hash()
 {
     return read_bytes_reverse<short_hash_size>();
 }
 
-template <typename Iterator, bool CheckDistance>
+template <typename Iterator, bool SafeCheckLast>
 std::string deserializer<
-    Iterator, CheckDistance>::read_fixed_string(size_t len)
+    Iterator, SafeCheckLast>::read_fixed_string(size_t len)
 {
     data_chunk string_bytes = read_data(len);
     std::string result(string_bytes.begin(), string_bytes.end());
@@ -292,30 +277,30 @@ std::string deserializer<
     return result.c_str();
 }
 
-template <typename Iterator, bool CheckDistance>
-std::string deserializer<Iterator, CheckDistance>::read_string()
+template <typename Iterator, bool SafeCheckLast>
+std::string deserializer<Iterator, SafeCheckLast>::read_string()
 {
     uint64_t string_size = read_variable_uint();
     // Warning: conversion from uint64_t to size_t, possible loss of data.
     return read_fixed_string((size_t)string_size);
 }
 
-template <typename Iterator, bool CheckDistance>
+template <typename Iterator, bool SafeCheckLast>
 template<unsigned N>
-byte_array<N> deserializer<Iterator, CheckDistance>::read_bytes()
+byte_array<N> deserializer<Iterator, SafeCheckLast>::read_bytes()
 {
-    CHECK_DISTANCE(N);
+    SAFE_CHECK_DISTANCE(N);
     byte_array<N> out;
     std::copy(iter_, iter_ + N, out.begin());
     iter_ += N;
     return out;
 }
 
-template <typename Iterator, bool CheckDistance>
+template <typename Iterator, bool SafeCheckLast>
 template<unsigned N>
-byte_array<N> deserializer<Iterator, CheckDistance>::read_bytes_reverse()
+byte_array<N> deserializer<Iterator, SafeCheckLast>::read_bytes_reverse()
 {
-    CHECK_DISTANCE(N);
+    SAFE_CHECK_DISTANCE(N);
     byte_array<N> out;
     std::reverse_copy(iter_, iter_ + N, out.begin());
     iter_ += N;
@@ -325,8 +310,8 @@ byte_array<N> deserializer<Iterator, CheckDistance>::read_bytes_reverse()
 /**
  * Returns underlying iterator.
  */
-template <typename Iterator, bool CheckDistance>
-Iterator deserializer<Iterator, CheckDistance>::iterator() const
+template <typename Iterator, bool SafeCheckLast>
+Iterator deserializer<Iterator, SafeCheckLast>::iterator() const
 {
     return iter_;
 }
@@ -335,19 +320,19 @@ Iterator deserializer<Iterator, CheckDistance>::iterator() const
  * Useful if you advance the iterator using other serialization
  * methods or objects.
  */
-template <typename Iterator, bool CheckDistance>
-void deserializer<Iterator, CheckDistance>::set_iterator(const Iterator iter)
+template <typename Iterator, bool SafeCheckLast>
+void deserializer<Iterator, SafeCheckLast>::set_iterator(const Iterator iter)
 {
     iter_ = iter;
 }
 
 // Try to advance iterator 'distance' increments forwards.
 // Throw if we prematurely reach the end.
-template <typename Iterator, bool CheckDistance>
-void deserializer<Iterator, CheckDistance>::check_distance(
+template <typename Iterator, bool SafeCheckLast>
+void deserializer<Iterator, SafeCheckLast>::check_distance(
     Iterator it, const Iterator end, size_t distance)
 {
-    BITCOIN_ASSERT(CheckDistance);
+    BITCOIN_ASSERT(SafeCheckLast);
     for (size_t i = 0; i < distance; ++i)
     {
         // Is this a valid byte?
@@ -358,7 +343,7 @@ void deserializer<Iterator, CheckDistance>::check_distance(
     }
 }
 
-#undef CHECK_DISTANCE
+#undef SAFE_CHECK_DISTANCE
 
 template <typename Iterator>
 deserializer<Iterator, true> make_deserializer(
