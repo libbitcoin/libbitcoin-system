@@ -134,11 +134,11 @@ Iterator satoshi_save(const block_header_type& packet, Iterator result)
     BITCOIN_ASSERT(std::distance(result, serial.iterator()) == 80);
     return serial.iterator();
 }
-template <typename Iterator>
+template <typename Iterator, bool SafeCheckLast>
 void satoshi_load(const Iterator first, const Iterator last,
     block_header_type& packet)
 {
-    auto deserial = make_deserializer(first, last);
+    auto deserial = deserializer<Iterator, SafeCheckLast>(first, last);
     packet.version = deserial.read_4_bytes();
     packet.previous_block_hash = deserial.read_hash();
     packet.merkle = deserial.read_hash();
