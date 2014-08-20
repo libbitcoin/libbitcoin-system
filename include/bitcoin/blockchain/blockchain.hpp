@@ -68,6 +68,7 @@ public:
 
     typedef fetch_handler<input_point> fetch_handler_spend;
 
+    typedef size_t index_type;
     struct BC_API history_row
     {
         output_point output;
@@ -77,8 +78,9 @@ public:
         size_t spend_height;
     };
     typedef std::vector<history_row> history_list;
-    typedef std::function<void (const std::error_code&, const history_list&)>
-        fetch_handler_history;
+    typedef std::function<void (
+        const std::error_code&, const history_list&, index_type)>
+            fetch_handler_history;
 
     struct BC_API stealth_row
     {
@@ -91,8 +93,8 @@ public:
         fetch_handler_stealth;
 
     typedef std::vector<std::shared_ptr<block_type>> block_list;
-    typedef std::function<
-        void (const std::error_code&, size_t, 
+    typedef std::function<void (
+        const std::error_code&, size_t, 
             const block_list&, const block_list&)> reorganize_handler;
 
     BC_API virtual ~blockchain() {};
