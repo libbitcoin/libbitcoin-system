@@ -105,14 +105,6 @@ public:
      */
     void set_iterator(Iterator iter);
 
-    /**
-     * Returns underlying iterator end.
-     */
-    Iterator end() const
-    {
-        return end_;
-    }
-
 private:
     template <typename T>
     void write_data_reverse(const T& data);
@@ -210,6 +202,14 @@ public:
      * methods or objects.
      */
     void set_iterator(const Iterator iter);
+
+    /**
+     * Returns underlying iterator end.
+     */
+    Iterator end() const
+    {
+        return end_;
+    }
 
 private:
     // The compiler will optimise out all calls to this function
