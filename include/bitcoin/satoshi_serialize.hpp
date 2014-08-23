@@ -117,7 +117,7 @@ void satoshi_load(const Iterator first, const Iterator last,
 BC_API size_t satoshi_raw_size(const block_header_type& packet);
 template <typename Iterator>
 Iterator satoshi_save(const block_header_type& packet, Iterator result);
-template <typename Iterator>
+template <typename Iterator, bool SafeCheckLast=true>
 void satoshi_load(const Iterator first, const Iterator last,
     block_header_type& packet);
 

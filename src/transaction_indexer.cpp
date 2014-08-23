@@ -170,11 +170,13 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
 
 void blockchain_history_fetched(const std::error_code& ec,
     const blockchain::history_list& history,
+    const blockchain::index_type stop,
     transaction_indexer& indexer, const payment_address& address,
     blockchain::fetch_handler_history handle_fetch);
 void indexer_history_fetched(const std::error_code& ec,
     const output_info_list& outputs, const spend_info_list& spends,
     blockchain::history_list history,
+    const blockchain::index_type stop,
     blockchain::fetch_handler_history handle_fetch);
 // Fetch the history first from the blockchain and then from the indexer.
 void fetch_history(blockchain& chain, transaction_indexer& indexer,
@@ -182,29 +184,31 @@ void fetch_history(blockchain& chain, transaction_indexer& indexer,
     blockchain::fetch_handler_history handle_fetch, size_t from_height)
 {
     chain.fetch_history(address,
-        std::bind(blockchain_history_fetched, _1, _2,
+        std::bind(blockchain_history_fetched, _1, _2, _3,
             std::ref(indexer), address, handle_fetch), from_height);
 }
 void blockchain_history_fetched(const std::error_code& ec,
     const blockchain::history_list& history,
+    const blockchain::index_type stop,
     transaction_indexer& indexer, const payment_address& address,
     blockchain::fetch_handler_history handle_fetch)
 {
     if (ec)
-        handle_fetch(ec, blockchain::history_list());
+        handle_fetch(ec, blockchain::history_list(), 0);
     else
         indexer.query(address,
             std::bind(indexer_history_fetched, _1, _2, _3,
-                history, handle_fetch));
+                history, stop, handle_fetch));
 }
 void indexer_history_fetched(const std::error_code& ec,
     const output_info_list& outputs, const spend_info_list& spends,
     blockchain::history_list history,
+    const blockchain::index_type stop,
     blockchain::fetch_handler_history handle_fetch)
 {
     if (ec)
     {
-        handle_fetch(ec, blockchain::history_list());
+        handle_fetch(ec, blockchain::history_list(), 0);
         return;
     }
     // Just add in outputs.
@@ -273,7 +277,7 @@ void indexer_history_fetched(const std::error_code& ec,
         // In practice this should not happen often and isn't a problem.
         //BITCOIN_ASSERT_MSG(found, "Couldn't find output for adding spend");
     }
-    handle_fetch(std::error_code(), history);
+    handle_fetch(std::error_code(), history, stop);
 }
 
 } // namespace libbitcoin
