@@ -2017,7 +2017,7 @@ script_type unpretty(const std::string& pretty)
     std::vector<std::string> tokens;
     boost::split(tokens, pretty, boost::is_any_of(" "),
         boost::token_compress_on);
-    for (auto& token = tokens.begin(); token != tokens.end(); token++)
+    for (auto token = tokens.begin(); token != tokens.end(); token++)
     {
         operation op;
         if (*token != "[")
