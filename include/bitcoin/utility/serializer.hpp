@@ -105,6 +105,14 @@ public:
      */
     void set_iterator(Iterator iter);
 
+    /**
+     * Returns underlying iterator end.
+     */
+    Iterator end() const
+    {
+        return end_;
+    }
+
 private:
     template <typename T>
     void write_data_reverse(const T& data);
