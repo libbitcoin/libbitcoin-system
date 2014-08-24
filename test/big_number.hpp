@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BIG_NUMBER_HPP
-#define LIBBITCOIN_BIG_NUMBER_HPP
+#ifndef LIBBITCOIN_TEST_BIG_NUMBER_HPP
+#define LIBBITCOIN_TEST_BIG_NUMBER_HPP
 
 #include <openssl/bn.h>
 #include <bitcoin/define.hpp>

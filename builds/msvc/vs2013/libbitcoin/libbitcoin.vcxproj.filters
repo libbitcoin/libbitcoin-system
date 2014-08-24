@@ -110,9 +110,6 @@
     <ClCompile Include="..\..\..\..\src\utility\base58.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\big_number.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -254,9 +251,6 @@
       <Filter>include\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\base58.hpp">
-      <Filter>include\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\big_number.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\decorator.hpp">

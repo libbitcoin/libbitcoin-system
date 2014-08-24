@@ -19,6 +19,7 @@
  */
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
+#include "big_number.hpp"
 
 using namespace libbitcoin;
 

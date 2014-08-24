@@ -31,6 +31,9 @@
     <ClCompile Include="..\..\..\..\test\ec_keys.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\big_number.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -55,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\script_json\vectors.hpp">
       <Filter>include\script_json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\big_number.hpp">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

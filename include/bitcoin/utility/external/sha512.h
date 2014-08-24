@@ -46,8 +46,7 @@ typedef struct SHA512CTX
     uint8_t buf[SHA512_BLOCK_LENGTH];
 } SHA512CTX;
 
-/* Name is temporarily deconflicted with openssl using __. */
-void SHA512__(const uint8_t* input, size_t length,
+void SHA512(const uint8_t* input, size_t length,
     uint8_t digest[SHA512_DIGEST_LENGTH]);
 
 void SHA512Final(SHA512CTX* context, uint8_t digest[SHA512_DIGEST_LENGTH]);

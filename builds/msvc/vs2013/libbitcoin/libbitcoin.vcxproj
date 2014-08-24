@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
-    <NuGetPackageImportStamp>9b453362</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>cc731f84</NuGetPackageImportStamp>
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <ProjectGuid>{39F60708-FF48-4C22-952D-43470866F684}</ProjectGuid>
     <ProjectName>libbitcoin</ProjectName>
@@ -90,7 +90,6 @@
     <ClCompile Include="..\..\..\..\src\transaction_indexer.cpp" />
     <ClCompile Include="..\..\..\..\src\transaction_pool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\base58.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\big_number.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ec_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\external\sha512.c" />
@@ -138,7 +137,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\async_parallel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\base58.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\big_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\ec_keys.hpp" />
@@ -185,7 +183,6 @@
     <Import Project="..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets')" />
-    <Import Project="..\..\..\..\..\..\nuget\openssl_no-asm_vc120.1.0.1.800\build\native\openssl_no-asm_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\openssl_no-asm_vc120.1.0.1.800\build\native\openssl_no-asm_vc120.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -198,6 +195,5 @@
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\..\..\nuget\openssl_no-asm_vc120.1.0.1.800\build\native\openssl_no-asm_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\openssl_no-asm_vc120.1.0.1.800\build\native\openssl_no-asm_vc120.targets'))" />
   </Target>
 </Project>

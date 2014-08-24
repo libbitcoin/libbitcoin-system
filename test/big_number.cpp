@@ -19,7 +19,7 @@
  */
 #include <openssl/bn.h>
 #include <bitcoin/format.hpp>
-#include <bitcoin/utility/big_number.hpp>
+#include "big_number.hpp"
 
 namespace libbitcoin {
 

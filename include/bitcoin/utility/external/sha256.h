@@ -46,8 +46,7 @@ typedef struct SHA256CTX
     uint8_t buf[SHA256_BLOCK_LENGTH];
 } SHA256CTX;
 
-/* Name is temporarily deconflicted with openssl using __. */
-void SHA256__(const uint8_t* input, size_t length,
+void SHA256(const uint8_t* input, size_t length,
     uint8_t digest[SHA256_DIGEST_LENGTH]);
 
 void SHA256Final(SHA256CTX* context, uint8_t digest[SHA256_DIGEST_LENGTH]);

@@ -22,7 +22,7 @@
 
 #include <bitcoin/define.hpp>
 #include <bitcoin/primitives.hpp>
-#include <bitcoin/utility/big_number.hpp>
+#include <bitcoin/utility/hash_number.hpp>
 
 namespace libbitcoin {
 
@@ -43,7 +43,7 @@ BC_API bool operator==(
     const block_header_type& block_a, const block_header_type& block_b);
 
 BC_API uint64_t block_value(size_t height);
-BC_API big_number block_work(uint32_t bits);
+BC_API hash_number block_work(uint32_t bits);
 
 BC_API hash_digest hash_block_header(const block_header_type& header);
 

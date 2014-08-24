@@ -91,7 +91,7 @@
  * - @link libbitcoin::script script @endlink
  * - @link libbitcoin::payment_address payment_address @endlink
  * - @link libbitcoin::elliptic_curve_key elliptic_curve_key @endlink
- * - @link libbitcoin::big_number big_number @endlink
+ * - @link libbitcoin::script_number script_number @endlink
  * - @link libbitcoin::threadpool threadpool @endlink
  *
  * @section useful-funcs Useful functions
@@ -184,7 +184,6 @@
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/utility/base58.hpp>
-#include <bitcoin/utility/big_number.hpp>
 #include <bitcoin/utility/checksum.hpp>
 #include <bitcoin/utility/ec_keys.hpp>
 #include <bitcoin/utility/hash.hpp>

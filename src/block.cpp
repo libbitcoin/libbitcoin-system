@@ -24,6 +24,7 @@
 #include <bitcoin/types.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/hash.hpp>
+#include <bitcoin/utility/hash_number.hpp>
 #include <bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -46,13 +47,13 @@ uint64_t block_value(size_t height)
     return subsidy;
 }
 
-big_number block_work(uint32_t bits)
+hash_number block_work(uint32_t bits)
 {
-    big_number target;
+    hash_number target;
     target.set_compact(bits);
     if (target <= 0)
         return 0;
-    return (big_number(1) << 256) / (target + 1);
+    return (hash_number(1) << 256) / (target + 1);
 }
 
 hash_digest hash_block_header(const block_header_type& header)
