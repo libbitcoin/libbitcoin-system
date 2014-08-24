@@ -33,17 +33,14 @@
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
     <Linkage-mpir>static</Linkage-mpir>
     <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-openssl>dynamic</Linkage-openssl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
     <Linkage-mpir>static</Linkage-mpir>
     <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-openssl>static</Linkage-openssl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
     <Linkage-mpir>static</Linkage-mpir>
     <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-openssl>static</Linkage-openssl>
   </PropertyGroup>
 
   <!-- Messages -->
@@ -55,7 +52,6 @@
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Linkage-mpir      : $(Linkage-mpir)" Importance="high"/>
     <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
-    <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
   </Target>
 
 </Project>
