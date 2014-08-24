@@ -25,7 +25,6 @@ libbitcoin_la_SOURCES = \
 	transaction_indexer.cpp \
 	transaction_pool.cpp \
 	utility/base58.cpp \
-	utility/big_number.cpp \
 	utility/checksum.cpp \
 	utility/ec_keys.cpp \
 	utility/hash.cpp \

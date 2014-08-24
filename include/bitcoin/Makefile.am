@@ -50,7 +50,6 @@ bitcoin_util_include_HEADERS = \
 	utility/assert.hpp \
 	utility/async_parallel.hpp \
 	utility/base58.hpp \
-	utility/big_number.hpp \
 	utility/checksum.hpp \
 	utility/decorator.hpp \
 	utility/ec_keys.hpp \
