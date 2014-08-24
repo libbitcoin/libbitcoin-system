@@ -18,11 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <openssl/bn.h>
-#include <bitcoin/format.hpp>
+#include <bitcoin/bitcoin.hpp>
 #include "big_number.hpp"
 
-namespace libbitcoin {
+using namespace bc;
 
+// DEPRECATED: ONLY FOR TEST VALIDATION OF OPENSSL REMOVAL.
 class big_number_context
 {
 public:
@@ -394,6 +395,3 @@ divmod_result divmod(const big_number& a, const big_number& b)
         &a.bignum_, &b.bignum_, ctx.context());
     return std::make_pair(divider, remainder);
 }
-
-} // namespace libbitcoin
-

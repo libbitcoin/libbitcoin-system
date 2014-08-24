@@ -21,15 +21,12 @@
 #define LIBBITCOIN_TEST_BIG_NUMBER_HPP
 
 #include <openssl/bn.h>
-#include <bitcoin/define.hpp>
-#include <bitcoin/types.hpp>
-
-namespace libbitcoin {
+#include <bitcoin/bitcoin.hpp>
 
 class big_number;
 typedef std::pair<big_number, big_number> divmod_result;
 
-// TODO: Lots of things *should* throw on error in this class
+// DEPRECATED: ONLY FOR TEST VALIDATION OF OPENSSL REMOVAL.
 class big_number
 {
 public:
@@ -43,11 +40,11 @@ public:
     BC_API void set_compact(uint32_t compact);
     BC_API uint32_t compact() const;
 
-    BC_API void set_data(data_chunk load_data);
-    BC_API data_chunk data() const;
+    BC_API void set_data(bc::data_chunk load_data);
+    BC_API bc::data_chunk data() const;
 
-    BC_API void set_hash(hash_digest load_hash);
-    BC_API hash_digest hash() const;
+    BC_API void set_hash(bc::hash_digest load_hash);
+    BC_API bc::hash_digest hash() const;
 
     BC_API void set_uint32(uint32_t value);
     BC_API uint32_t uint32() const;
@@ -98,8 +95,6 @@ BC_API const big_number operator/(const big_number& a, const big_number& b);
 BC_API const big_number operator<<(const big_number& a, unsigned int shift);
 
 BC_API divmod_result divmod(const big_number& a, const big_number& b);
-
-} // namespace libbitcoin
 
 #endif
 

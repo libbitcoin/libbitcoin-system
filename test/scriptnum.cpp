@@ -21,13 +21,15 @@
 #include <bitcoin/bitcoin.hpp>
 #include "big_number.hpp"
 
-using namespace libbitcoin;
+using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(scriptnum_tests)
 
 static const int64_t values[] = \
-{ 0, 1, CHAR_MIN, CHAR_MAX, UCHAR_MAX, SHRT_MIN, USHRT_MAX, INT_MIN, INT_MAX, UINT_MAX, LONG_MIN, LONG_MAX };
-static const int64_t offsets[] = { 1, 0x79, 0x80, 0x81, 0xFF, 0x7FFF, 0x8000, 0xFFFF, 0x10000};
+{ 0, 1, CHAR_MIN, CHAR_MAX, UCHAR_MAX, SHRT_MIN, USHRT_MAX, INT_MIN, INT_MAX,
+  UINT_MAX, LONG_MIN, LONG_MAX };
+static const int64_t offsets[] = \
+{ 1, 0x79, 0x80, 0x81, 0xFF, 0x7FFF, 0x8000, 0xFFFF, 0x10000};
 
 static bool verify(const big_number& bignum, const script_number& scriptnum)
 {
