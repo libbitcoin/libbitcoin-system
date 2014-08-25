@@ -203,6 +203,14 @@ public:
      */
     void set_iterator(const Iterator iter);
 
+    /**
+     * Returns underlying iterator end.
+     */
+    Iterator end() const
+    {
+        return end_;
+    }
+
 private:
     // The compiler will optimise out all calls to this function
     // if SafeCheckLast is false.

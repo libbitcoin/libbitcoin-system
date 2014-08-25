@@ -94,7 +94,7 @@ static unsigned char PAD[SHA256_BLOCK_LENGTH] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void SHA256__(const uint8_t* input, size_t length,
+void SHA256(const uint8_t* input, size_t length,
     uint8_t digest[SHA256_DIGEST_LENGTH])
 {
     SHA256CTX context;

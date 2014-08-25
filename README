@@ -138,6 +138,16 @@ environment variables before running the build process.
   CC=/usr/local/bin/gcc-4.7
   CXX=/usr/local/bin/g++-4.7
 
+You will need secp256k1 as a library dependency, if you don't have
+it already in your system this is how you get/build/install it from source code.
+
+  $ git clone https://github.com/bitcoin/secp256k1
+  $ cd secp256k1
+  $ ./autogen.sh
+  $ ./configure
+  $ make
+  $ sudo make install
+
 For Mac OSX Mountain Lion, you need to follow these brew commands:
 
   $ brew install boost openssl leveldb

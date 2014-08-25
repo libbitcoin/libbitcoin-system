@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <string>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <bitcoin/format.hpp>
@@ -105,23 +106,61 @@ short_hash decode_short_hash(const std::string& hex)
     return decode_hex_digest<short_hash>(hex);
 }
 
-std::string satoshi_to_btc(uint64_t value)
+static std::string pad_left_8_zeroes_trim_right(const std::string& value)
 {
-    uint64_t major = value / coin_price(1);
-    std::string result = boost::lexical_cast<std::string>(major);
-    BITCOIN_ASSERT(value >= major);
-    uint64_t minor = value - (major * coin_price(1));
+    using namespace boost;
+    BITCOIN_ASSERT(value.size() <= 8);
+    std::string result(8 - value.size(), '0');
+    result += value;
+    algorithm::trim_right_if(result, is_any_of("0"));
+    return result;
+}
+
+static std::string pad_right_8_zeroes_trim_left(const std::string& value)
+{
+    using namespace boost;
+    BITCOIN_ASSERT(value.size() <= 8);
+    auto result = value + std::string(8 - value.size(), '0');
+    algorithm::trim_left_if(result, is_any_of("0"));
+    return result;
+}
+
+std::string satoshi_to_btc(uint64_t satoshi)
+{
+    using namespace boost;
+    auto major = satoshi / coin_price(1);
+    BITCOIN_ASSERT(satoshi >= major);
+    auto minor = satoshi - (major * coin_price(1));
     BITCOIN_ASSERT(minor < coin_price(1));
+    auto result = lexical_cast<std::string>(major);
     if (minor > 0)
     {
-        std::string minor_str = boost::lexical_cast<std::string>(minor);
-        std::string padded_minor(8 - minor_str.size(), '0');
-        padded_minor += minor_str;
-        boost::algorithm::trim_right_if(padded_minor,
-            boost::is_any_of("0"));
-        result = result + "." + padded_minor;
+        auto minor_str = lexical_cast<std::string>(minor);
+        result = result + "." + pad_left_8_zeroes_trim_right(minor_str);
     }
     return result;
+}
+
+bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
+{
+    using namespace boost;
+    std::vector<std::string> parts;
+    boost::split(parts, btc, is_any_of("."));
+    if (parts.size() > 2)
+        return 0;
+    try
+    {
+        auto total = lexical_cast<int64_t>(parts.front()) * coin_price(1);
+        if (parts.size() == 2)
+            total += lexical_cast<int64_t>(
+                pad_right_8_zeroes_trim_left(parts.back()));
+        satoshi = total;
+        return true;
+    }
+    catch (bad_lexical_cast&)
+    {
+        return false;
+    }
 }
 
 } // namespace libbitcoin

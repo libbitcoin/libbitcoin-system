@@ -36,9 +36,9 @@
 #include <bitcoin/format.hpp>
 #include <bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/utility/assert.hpp>
+#include <bitcoin/utility/checksum.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/serializer.hpp>
-#include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/subscriber.hpp>
 
 namespace libbitcoin {

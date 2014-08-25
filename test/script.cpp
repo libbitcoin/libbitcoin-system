@@ -154,8 +154,7 @@ bool parse_token(data_chunk& raw_script, std::string token)
             push_literal(raw_script, value);
         else
         {
-            big_number bignum;
-            bignum.set_int64(value);
+            script_number bignum(value);
             push_data(raw_script, bignum.data());
         }
     }

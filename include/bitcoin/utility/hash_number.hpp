@@ -41,21 +41,39 @@ public:
     BC_API void set_hash(const hash_digest& hash);
 
     // int64_t resolves to this in Satoshi's GetNextWorkRequired()
-    BC_API void operator*=(uint32_t value);
-    BC_API void operator/=(uint32_t value);
+    BC_API hash_number& operator*=(uint32_t value);
+    BC_API hash_number& operator/=(uint32_t value);
+    BC_API hash_number& operator<<=(uint32_t shift);
+
+    BC_API hash_number& operator/=(const hash_number& number_b);
+    BC_API hash_number& operator+=(const hash_number& number_b);
+
 private:
     friend bool operator>(
         const hash_number& number_a, const hash_number& number_b);
     friend bool operator<=(
         const hash_number& number_a, const hash_number& number_b);
+    friend const hash_number operator<<(
+        const hash_number& number_a, int shift);
+    friend const hash_number operator/(
+        const hash_number& number_a, const hash_number& number_b);
+    friend const hash_number operator+(
+        const hash_number& number_a, const hash_number& number_b);
 
     uint256 hash_;
 };
 
-BC_API bool operator>(const hash_number& number_a, const hash_number& number_b);
-BC_API bool operator<=(const hash_number& number_a, const hash_number& number_b);
+BC_API bool operator>(
+    const hash_number& number_a, const hash_number& number_b);
+BC_API bool operator<=(
+    const hash_number& number_a, const hash_number& number_b);
+BC_API const hash_number operator<<(
+    const hash_number& number_a, int shift);
+BC_API const hash_number operator/(
+    const hash_number& number_a, const hash_number& number_b);
+BC_API const hash_number operator+(
+    const hash_number& number_a, const hash_number& number_b);
 
 } // namespace libbitcoin
 
 #endif
-

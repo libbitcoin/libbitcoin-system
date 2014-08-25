@@ -91,7 +91,7 @@
  * - @link libbitcoin::script script @endlink
  * - @link libbitcoin::payment_address payment_address @endlink
  * - @link libbitcoin::elliptic_curve_key elliptic_curve_key @endlink
- * - @link libbitcoin::big_number big_number @endlink
+ * - @link libbitcoin::script_number script_number @endlink
  * - @link libbitcoin::threadpool threadpool @endlink
  *
  * @section useful-funcs Useful functions
@@ -143,7 +143,9 @@
  * - @link libbitcoin::long_hash hmac_sha512_hash @endlink
  * - @link libbitcoin::hash_digest bitcoin_hash @endlink
  * - @link libbitcoin::short_hash bitcoin_short_hash @endlink
+ * - @link libbitcoin::append_checksum append_checksum @endlink
  * - @link libbitcoin::uint32_t bitcoin_checksum @endlink
+ * - @link libbitcoin::bool verify_checksum @endlink
  *
  * @subsection base58 Base58
  *
@@ -182,10 +184,8 @@
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/utility/base58.hpp>
-#include <bitcoin/utility/big_number.hpp>
 #include <bitcoin/utility/checksum.hpp>
 #include <bitcoin/utility/ec_keys.hpp>
-#include <bitcoin/utility/elliptic_curve_key.hpp>
 #include <bitcoin/utility/hash.hpp>
 #include <bitcoin/utility/logger.hpp>
 #include <bitcoin/utility/mmfile.hpp>

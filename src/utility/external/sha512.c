@@ -104,7 +104,7 @@ static unsigned char PAD[SHA512_BLOCK_LENGTH] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void SHA512__(const uint8_t* input, size_t length,
+void SHA512(const uint8_t* input, size_t length,
     uint8_t digest[SHA512_DIGEST_LENGTH])
 {
     SHA512CTX context;

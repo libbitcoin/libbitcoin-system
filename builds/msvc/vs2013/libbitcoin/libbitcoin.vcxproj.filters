@@ -42,6 +42,9 @@
     <Filter Include="resource">
       <UniqueIdentifier>{cfaa1015-d7a4-4d44-bd05-0178121b816c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\impl\utility">
+      <UniqueIdentifier>{9217c7da-0161-45fe-90d7-9e6b602aec57}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp">
@@ -51,6 +54,12 @@
       <Filter>include\impl\serialize</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="..\..\..\..\include\bitcoin\impl\format.ipp">
+      <Filter>include\impl</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\impl\utility\serializer.ipp">
+      <Filter>include\impl\utility</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\error.cpp">
@@ -99,12 +108,6 @@
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\base58.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\big_number.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\elliptic_curve_key.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp">
@@ -250,13 +253,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\base58.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\big_number.hpp">
-      <Filter>include\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\decorator.hpp">
-      <Filter>include\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\utility\elliptic_curve_key.hpp">
       <Filter>include\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\logger.hpp">
@@ -327,6 +324,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\compat.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\external\uint256.h">
+      <Filter>include\utility\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\utility\checksum.hpp">
+      <Filter>include\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -55,16 +55,16 @@ ec_point secret_to_public_key(const ec_secret& secret,
     bool compressed)
 {
     init.init();
-    size_t size = ec_uncompressed_size;
+    size_t public_key_size = ec_uncompressed_size;
     if (compressed)
-        size = ec_compressed_size;
+        public_key_size = ec_compressed_size;
 
-    ec_point out(size);
+    ec_point out(public_key_size);
     int out_size;
     if (!secp256k1_ecdsa_pubkey_create(out.data(), &out_size, secret.data(),
             compressed))
         return ec_point();
-    BITCOIN_ASSERT(size == static_cast<size_t>(out_size));
+    BITCOIN_ASSERT(public_key_size == static_cast<size_t>(out_size));
     return out;
 }
 
@@ -120,22 +120,22 @@ bool verify_signature(const ec_point& public_key, hash_digest hash,
     );
 }
 
-bool ec_tweak_add(ec_point& a, const ec_secret& b)
+bool ec_add(ec_point& a, const ec_secret& b)
 {
     init.init();
     return secp256k1_ecdsa_pubkey_tweak_add(a.data(), a.size(), b.data()) == 1;
-}
-
-bool ec_multiply(ec_point& a, const ec_secret& b)
-{
-    init.init();
-    return secp256k1_ecdsa_pubkey_tweak_mul(a.data(), a.size(), b.data()) == 1;
 }
 
 bool ec_add(ec_secret& a, const ec_secret& b)
 {
     init.init();
     return secp256k1_ecdsa_privkey_tweak_add(a.data(), b.data()) == 1;
+}
+
+bool ec_multiply(ec_point& a, const ec_secret& b)
+{
+    init.init();
+    return secp256k1_ecdsa_pubkey_tweak_mul(a.data(), a.size(), b.data()) == 1;
 }
 
 bool ec_multiply(ec_secret& a, const ec_secret& b)

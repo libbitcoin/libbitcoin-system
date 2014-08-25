@@ -134,7 +134,7 @@ std::string pretty(const transaction_type& tx)
 
 bool previous_output_is_null(const output_point& previous_output)
 {
-    return previous_output.index == std::numeric_limits<uint32_t>::max() &&
+    return previous_output.index == max_index &&
         previous_output.hash == null_hash;
 }
 
@@ -142,6 +142,38 @@ bool is_coinbase(const transaction_type& tx)
 {
     return tx.inputs.size() == 1 &&
         previous_output_is_null(tx.inputs[0].previous_output);
+}
+
+bool is_final(const transaction_input_type& tx_input)
+{
+    return tx_input.sequence == max_sequence;
+}
+
+bool is_final(const transaction_type& tx,
+    size_t block_height, uint32_t block_time)
+{
+    if (tx.locktime == 0)
+        return true;
+    uint32_t max_locktime = block_time;
+    if (tx.locktime < locktime_threshold)
+        max_locktime = block_height;
+    if (tx.locktime < max_locktime)
+        return true;
+    for (const transaction_input_type& tx_input: tx.inputs)
+        if (!is_final(tx_input))
+            return false;
+    return true;
+}
+
+bool is_locktime_conflict(const transaction_type& tx)
+{
+    auto locktime_set = tx.locktime != 0;
+    if (locktime_set)
+        for (const auto& input: tx.inputs)
+            if (input.sequence < max_sequence)
+                return false;
+
+    return !locktime_set;
 }
 
 uint64_t total_output_value(const transaction_type& tx)
@@ -159,27 +191,6 @@ bool operator==(const output_point& output_a, const output_point& output_b)
 bool operator!=(const output_point& output_a, const output_point& output_b)
 {
     return !(output_a == output_b);
-}
-
-bool is_final(const transaction_input_type& tx_input)
-{
-    return tx_input.sequence == std::numeric_limits<uint32_t>::max();
-}
-
-bool is_final(const transaction_type& tx,
-    size_t block_height, uint32_t block_time)
-{
-    if (tx.locktime == 0)
-        return true;
-    uint32_t max_locktime = block_time;
-    if (tx.locktime < locktime_threshold)
-        max_locktime = block_height;
-    if (tx.locktime < max_locktime)
-        return true;
-    for (const transaction_input_type& tx_input: tx.inputs)
-        if (!is_final(tx_input))
-            return false;
-    return true;
 }
 
 } // namespace libbitcoin

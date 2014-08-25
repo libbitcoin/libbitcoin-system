@@ -22,7 +22,6 @@
 
 #include <vector>
 #include <bitcoin/types.hpp>
-#include <bitcoin/utility/big_number.hpp>
 
 namespace libbitcoin {
 
@@ -153,16 +152,13 @@ struct BC_API operation
     data_chunk data;
 };
 
-namespace sighash
+typedef enum sighash_ : uint32_t
 {
-    enum : uint32_t
-    {
-        all = 1,
-        none = 2,
-        single = 3,
-        anyone_can_pay = 0x80
-    };
-}
+    all = 1,
+    none = 2,
+    single = 3,
+    anyone_can_pay = 0x80
+} sighash;
 
 typedef std::vector<operation> operation_stack;
 
@@ -294,9 +290,13 @@ private:
     conditional_stack conditional_stack_;
 };
 
+BC_API opcode data_to_opcode(const data_chunk& data);
 BC_API std::string opcode_to_string(opcode code);
 BC_API opcode string_to_opcode(const std::string& code_repr);
 BC_API std::string pretty(const script_type& script);
+BC_API script_type unpretty(const std::string& pretty);
+BC_API std::istream& operator>>(
+    std::istream& stream, script_type& script);
 BC_API std::ostream& operator<<(
     std::ostream& stream, const script_type& script);
 

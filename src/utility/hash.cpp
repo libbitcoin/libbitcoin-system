@@ -44,7 +44,7 @@ short_hash sha1_hash(const data_chunk& chunk)
 hash_digest sha256_hash(const data_chunk& chunk)
 {
     hash_digest hash;
-    SHA256__(chunk.data(), chunk.size(), hash.data());
+    SHA256(chunk.data(), chunk.size(), hash.data());
     return hash;
 }
 
@@ -65,7 +65,7 @@ hash_digest sha256_hash(const data_chunk& first_chunk,
 long_hash sha512_hash(const data_chunk& chunk)
 {
     long_hash hash;
-    SHA512__(chunk.data(), chunk.size(), hash.data());
+    SHA512(chunk.data(), chunk.size(), hash.data());
     return hash;
 }
 
@@ -81,10 +81,10 @@ long_hash hmac_sha512_hash(const data_chunk& chunk,
 hash_digest bitcoin_hash(const data_chunk& chunk)
 {
     hash_digest first_hash;
-    SHA256__(chunk.data(), chunk.size(), first_hash.data());
+    SHA256(chunk.data(), chunk.size(), first_hash.data());
 
     hash_digest second_hash;
-    SHA256__(first_hash.data(), first_hash.size(), second_hash.data());
+    SHA256(first_hash.data(), first_hash.size(), second_hash.data());
 
     // The hash is in the reverse of the expected order.
     std::reverse(second_hash.begin(), second_hash.end());
@@ -94,19 +94,12 @@ hash_digest bitcoin_hash(const data_chunk& chunk)
 short_hash bitcoin_short_hash(const data_chunk& chunk)
 {
     hash_digest sha_hash;
-    SHA256__(chunk.data(), chunk.size(), sha_hash.data());
+    SHA256(chunk.data(), chunk.size(), sha_hash.data());
 
     short_hash ripemd_hash;
     RMD160(sha_hash.data(), sha_hash.size(), ripemd_hash.data());
 
     return ripemd_hash;
-}
-
-
-uint32_t bitcoin_checksum(const data_chunk& chunk)
-{
-    hash_digest hash = bitcoin_hash(chunk);
-    return from_little_endian<uint32_t>(hash.rbegin());
 }
 
 } // namespace libbitcoin

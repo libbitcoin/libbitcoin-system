@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <bitcoin/constants.hpp>
 #include <bitcoin/stealth.hpp>
 #include <bitcoin/utility/assert.hpp>
 #include <bitcoin/utility/hash.hpp>
@@ -26,14 +27,13 @@ namespace libbitcoin {
 
 bool stealth_match(const stealth_prefix& prefix, const uint8_t* raw_bitfield)
 {
-    constexpr size_t byte_size = 8;
     for (size_t i = 0; i < prefix.size(); ++i)
     {
-        if (i > 0 && i % byte_size == 0)
+        if (i > 0 && i % byte_bits == 0)
             ++raw_bitfield;
-        size_t current_block = i / byte_size;
-        size_t bit_offset = i - current_block * byte_size;
-        BITCOIN_ASSERT(bit_offset < byte_size);
+        size_t current_block = i / byte_bits;
+        size_t bit_offset = i - current_block * byte_bits;
+        BITCOIN_ASSERT(bit_offset < byte_bits);
         bool value = (*raw_bitfield & (1 << bit_offset)) > 0;
         if (value != prefix[i])
             return false;

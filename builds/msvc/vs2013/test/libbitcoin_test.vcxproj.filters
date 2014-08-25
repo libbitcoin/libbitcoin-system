@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\leveldb-single-file.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\snappy-single-file.cpp" />
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\..\lib\native\src\crc32c.cpp" />
     <ClCompile Include="..\..\..\..\test\format.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -34,6 +31,9 @@
     <ClCompile Include="..\..\..\..\test\ec_keys.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\big_number.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -58,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\test\script_json\vectors.hpp">
       <Filter>include\script_json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\big_number.hpp">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

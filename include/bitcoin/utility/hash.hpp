@@ -91,13 +91,6 @@ BC_API hash_digest bitcoin_hash(const data_chunk& chunk);
  */
 BC_API short_hash bitcoin_short_hash(const data_chunk& chunk);
 
-/**
- * Generate a bitcoin hash checksum. Last 4 bytes of sha256(sha256(data))
- *
- * int(sha256(sha256(data))[-4:])
- */
-BC_API uint32_t bitcoin_checksum(const data_chunk& chunk);
-
 } // namespace libbitcoin
 
 #endif
