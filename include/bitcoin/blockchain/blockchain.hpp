@@ -50,8 +50,7 @@ public:
 
     typedef fetch_handler<block_header_type> fetch_handler_block_header;
 
-    typedef fetch_handler<hash_digest_list>
-        fetch_handler_block_transaction_hashes;
+    typedef fetch_handler<index_list> fetch_handler_block_transaction_indexes;
 
     typedef fetch_handler<size_t> fetch_handler_block_height;
 
@@ -152,7 +151,7 @@ public:
     /**
      * Fetches the block header by hash.
      *
-     * @param[in]   block_hash      Hash of block
+     * @param[in]   hash            Block hash
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
@@ -161,28 +160,13 @@ public:
      *  );
      * @endcode
      */
-    BC_API virtual void fetch_block_header(const hash_digest& block_hash,
+    BC_API virtual void fetch_block_header(const hash_digest& hash,
         fetch_handler_block_header handle_fetch) = 0;
-
-    /**
-     * Fetches list of transaction hashes in a block by height.
-     *
-     * @param[in]   height          Height of block containing transactions.
-     * @param[in]   handle_fetch    Completion handler for fetch operation.
-     * @code
-     *  void handle_fetch(
-     *      const std::error_code& ec,      // Status of operation
-     *      const hash_digest_list& hashes  // List of hashes
-     *  );
-     * @endcode
-     */
-    BC_API virtual void fetch_block_transaction_hashes(size_t height,
-        fetch_handler_block_transaction_hashes handle_fetch) = 0;
 
     /**
      * Fetches list of transaction hashes in a block by block hash.
      *
-     * @param[in]   block_hash      Hash of block
+     * @param[in]   hash            Block hash
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
@@ -191,14 +175,14 @@ public:
      *  );
      * @endcode
      */
-    BC_API virtual void fetch_block_transaction_hashes(
-        const hash_digest& block_hash,
-        fetch_handler_block_transaction_hashes handle_fetch) = 0;
+    BC_API virtual void fetch_block_transaction_indexes(
+        const hash_digest& hash,
+        fetch_handler_block_transaction_indexes handle_fetch) = 0;
 
     /**
      * Fetches the height of a block given its hash.
      *
-     * @param[in]   block_hash      Hash of block
+     * @param[in]   hash            Block hash
      * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
@@ -207,7 +191,7 @@ public:
      *  );
      * @endcode
      */
-    BC_API virtual void fetch_block_height(const hash_digest& block_hash,
+    BC_API virtual void fetch_block_height(const hash_digest& hash,
         fetch_handler_block_height handle_fetch) = 0;
 
     /**
@@ -225,10 +209,10 @@ public:
         fetch_handler_last_height handle_fetch) = 0;
 
     /**
-     * Fetches a transaction by hash.
+     * Fetches a transaction by unique assigned index.
      *
-     * @param[in]   transaction_hash  Transaction's hash
-     * @param[in]   handle_fetch      Completion handler for fetch operation.
+     * @param[in]   index           Index
+     * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,  // Status of operation
@@ -236,15 +220,30 @@ public:
      *  );
      * @endcode
      */
-    BC_API virtual void fetch_transaction(const hash_digest& transaction_hash,
+    BC_API virtual void fetch_transaction(const index_type index,
+        fetch_handler_transaction handle_fetch) = 0;
+
+    /**
+     * Fetches a transaction by hash.
+     *
+     * @param[in]   hash            Transaction hash
+     * @param[in]   handle_fetch    Completion handler for fetch operation.
+     * @code
+     *  void handle_fetch(
+     *      const std::error_code& ec,  // Status of operation
+     *      const transaction_type& tx  // Transaction
+     *  );
+     * @endcode
+     */
+    BC_API virtual void fetch_transaction(const hash_digest& hash,
         fetch_handler_transaction handle_fetch) = 0;
 
     /**
      * Fetch the block height that contains a transaction and its index
      * within a block.
      *
-     * @param[in]   transaction_hash  Transaction's hash
-     * @param[in]   handle_fetch      Completion handler for fetch operation.
+     * @param[in]   hash            Transaction hash
+     * @param[in]   handle_fetch    Completion handler for fetch operation.
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec, // Status of operation
@@ -256,7 +255,7 @@ public:
      * @endcode
      */
     BC_API virtual void fetch_transaction_index(
-        const hash_digest& transaction_hash,
+        const hash_digest& hash,
         fetch_handler_transaction_index handle_fetch) = 0;
 
     // fetch of inputs and outputs is a future possibility
@@ -404,7 +403,7 @@ BC_API void fetch_block(blockchain& chain, size_t height,
  * If the blockchain reorganises, operation may fail halfway.
  *
  * @param[in]   chain           Blockchain service
- * @param[in]   block_hash      Hash of block to fetch.
+ * @param[in]   hash            Block hash
  * @param[in]   handle_fetch    Completion handler for fetch operation.
  * @code
  *  void handle_fetch(
@@ -413,7 +412,7 @@ BC_API void fetch_block(blockchain& chain, size_t height,
  *  );
  * @endcode
  */
-BC_API void fetch_block(blockchain& chain, const hash_digest& block_hash,
+BC_API void fetch_block(blockchain& chain, const hash_digest& hash,
     blockchain_fetch_handler_block handle_fetch);
 
 typedef std::function<

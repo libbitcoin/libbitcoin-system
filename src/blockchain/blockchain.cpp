@@ -69,10 +69,10 @@ private:
 
     void fetch_hashes()
     {
-        chain_.fetch_block_transaction_hashes(
-            hash_block_header(block_.header),
-            std::bind(&fetch_block_t::fetch_transactions,
-                shared_from_this(), _1, _2));
+        //chain_.fetch_block_transaction_hashes(
+        //    hash_block_header(block_.header),
+        //    std::bind(&fetch_block_t::fetch_transactions,
+        //        shared_from_this(), _1, _2));
     }
 
     void fetch_transactions(const std::error_code& ec,
