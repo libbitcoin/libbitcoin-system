@@ -122,7 +122,6 @@ public:
      * is undefined.
      *
      * @param[in]   import_block    Block to store
-     * @param[in]   height          Height of block
      * @param[in]   handle_import   Completion handler for import operation.
      * @code
      *  void handle_import(
@@ -130,7 +129,7 @@ public:
      *  );
      * @encode
      */
-    BC_API virtual void import(const block_type& import_block, size_t height,
+    BC_API virtual void import(const block_type& import_block,
         import_block_handler handle_import) = 0;
 
     /**
