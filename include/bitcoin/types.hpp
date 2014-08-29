@@ -30,8 +30,6 @@
 
 namespace libbitcoin {
 
-using boost::asio::ip::tcp;
-
 #define DECLARE_PTR_TYPE(nametype) \
     class nametype; \
     typedef std::shared_ptr<nametype> nametype##_ptr
@@ -41,7 +39,7 @@ DECLARE_PTR_TYPE(channel);
 
 #undef DECLARE_PTR_TYPE
 
-typedef std::shared_ptr<tcp::socket> socket_ptr;
+typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
 
 template<size_t Size> using byte_array = std::array<uint8_t, Size>;
 

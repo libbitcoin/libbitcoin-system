@@ -74,7 +74,7 @@ private:
         BITCOIN_ASSERT(notify_copy.empty());
     }
 
-    io_service::strand strand_;
+    boost::asio::io_service::strand strand_;
     registry_stack registry_;
 };
 

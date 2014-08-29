@@ -21,6 +21,8 @@
 
 namespace libbitcoin {
 
+using boost::asio::io_service;
+
 threadpool::threadpool()
   : work_(nullptr)
 {

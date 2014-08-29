@@ -27,8 +27,6 @@
 
 namespace libbitcoin {
 
-using boost::asio::io_service;
-
 /**
  * Threadpool represents a collection of running threads which can
  * be passed operations through their io_service.
@@ -114,17 +112,17 @@ public:
     /**
      * Underlying boost::io_service object.
      */
-    BC_API io_service& service();
+    BC_API boost::asio::io_service& service();
     /**
      * Underlying boost::io_service object.
      */
-    BC_API const io_service& service() const;
+    BC_API const boost::asio::io_service& service() const;
 
 private:
     void spawn_once();
 
-    io_service ios_;
-    io_service::work* work_;
+    boost::asio::io_service ios_;
+    boost::asio::io_service::work* work_;
     std::vector<std::thread> threads_;
 };
 
@@ -133,7 +131,7 @@ template <typename Handler>
 struct wrapped_handler_impl
 {
     Handler handler;
-    io_service::strand& strand;
+    boost::asio::io_service::strand& strand;
 
     template <typename... Args>
     void operator()(Args&&... args)
@@ -208,8 +206,8 @@ public:
     }
 
 private:
-    io_service& ios_;
-    io_service::strand strand_;
+    boost::asio::io_service& ios_;
+    boost::asio::io_service::strand strand_;
 };
 
 } // namespace libbitcoin

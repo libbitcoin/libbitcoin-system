@@ -37,7 +37,7 @@ class acceptor
   : public std::enable_shared_from_this<acceptor>
 {
 public:
-    typedef std::shared_ptr<tcp::acceptor> tcp_acceptor_ptr;
+    typedef std::shared_ptr<boost::asio::ip::tcp::acceptor> tcp_acceptor_ptr;
 
     typedef std::function<
         void (const std::error_code&, channel_ptr)> accept_handler;
@@ -71,11 +71,11 @@ public:
         connect_handler handle_connect);
 
 private:
-    typedef std::shared_ptr<tcp::resolver> resolver_ptr;
-    typedef std::shared_ptr<tcp::resolver::query> query_ptr;
+    typedef std::shared_ptr<boost::asio::ip::tcp::resolver> resolver_ptr;
+    typedef std::shared_ptr<boost::asio::ip::tcp::resolver::query> query_ptr;
 
     void resolve_handler(const boost::system::error_code& ec,
-        tcp::resolver::iterator endpoint_iterator,
+        boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
         connect_handler handle_connect, resolver_ptr, query_ptr);
 
     threadpool& pool_;
