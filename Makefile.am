@@ -1,4 +1,4 @@
-doc_DATA = README INSTALL COPYING doc/README.tutorial
+doc_DATA = README.md INSTALL COPYING doc/README.tutorial
 
 #doc_sphinxdir = $(docdir)/sphinx/
 #doc_sphinx_DATA = \
