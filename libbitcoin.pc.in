@@ -8,11 +8,11 @@ Description: Simple and extensible Bitcoin software development toolkit.
 URL: https://github.com/libbitcoin/libbitcoin
 Version: @PACKAGE_VERSION@
 
-# Our own include directory and any other compiler flags we require.
-Cflags: -I${includedir} -std=c++11
-
 # Our dependencies that publish package configuration.
 Requires: libcrypto >= 1.0.1 libsecp256k1 >= 0.0.1
+
+# Our own include directory and any other compiler flags we require.
+Cflags: -I${includedir} -std=c++11
 
 # Our own lib and any we require that do not publish package configuration.
 Libs: -L${libdir} -lbitcoin -lgmp -lboost_date_time -lboost_filesystem \
