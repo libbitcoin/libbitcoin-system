@@ -23,7 +23,7 @@ bitcoin_include_HEADERS = \
 	validate.hpp \
 	version.hpp
 
-bitcoin_impl_includedir = $(includedir)/bitcoin/impl/
+bitcoin_impl_includedir = $(includedir)/bitcoin/impl
 bitcoin_impl_include_HEADERS = \
 	impl/format.ipp
 
@@ -63,7 +63,7 @@ bitcoin_util_include_HEADERS = \
 	utility/timed_section.hpp \
 	utility/weak_bind.hpp
 
-bitcoin_util_external_includedir = $(includedir)/bitcoin/utility/external/
+bitcoin_util_external_includedir = $(includedir)/bitcoin/utility/external
 bitcoin_util_external_include_HEADERS = \
     utility/external/hmac_sha512.h \
     utility/external/ripemd160.h \

@@ -20,8 +20,8 @@
 #
 TESTBINARY=test_libbitcoin
 CXX=g++
-CXXFLAGS=$(pkg-config --cflags libbitcoin)
-LDFLAGS="$(pkg-config --libs libbitcoin libcrypto) -lboost_unit_test_framework"
+CXXFLAGS=$(pkg-config --cflags libbitcoin libcrypto libboost_unit_test_framework)
+LDFLAGS="$(pkg-config --libs libbitcoin libcrypto libboost_unit_test_framework)"
 mkdir -p obj/
 for i in $(ls *.cpp); do
     OBJ_FILE=obj/${i%.cpp}.o
