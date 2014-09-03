@@ -1,7 +1,11 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
 lib_LTLIBRARIES = libbitcoin.la
-AM_CPPFLAGS = -I$(srcdir)/../include ${libsecp256k1_CFLAGS}
+
+AM_CPPFLAGS = \
+    -I$(srcdir)/../include \
+    ${secp256k1_CFLAGS}
+
 libbitcoin_la_SOURCES = \
 	address.cpp \
 	blockchain/blockchain.cpp \
@@ -42,6 +46,5 @@ libbitcoin_la_SOURCES = \
 	validate.cpp
 
 libbitcoin_la_LIBADD = \
-    -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread \
-    -lsecp256k1 -lcrypto -ldl -lz
+    ${secp256k1_LIBS}
 

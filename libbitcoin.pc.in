@@ -4,10 +4,17 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: libbitcoin
-Description:  Rewrite bitcoin, make it super-pluggable, very easy to do and hack everything at every level, and very configurable.
-URL: http://libbitcoin.dyne.org
+Description: Simple and extensible Bitcoin software development toolkit.
+URL: https://github.com/libbitcoin/libbitcoin
 Version: @PACKAGE_VERSION@
+
+# Our own include directory and any other compiler flags we require.
 Cflags: -I${includedir} -std=c++11
-Libs: -L${libdir} -lbitcoin -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread -lsecp256k1
-Libs.private: -ldl
+
+# Our dependencies that publish package configuration.
+Requires: libcrypto >= 1.0.1 libsecp256k1 >= 0.0.1
+
+# Our own lib and any we require that do not publish package configuration.
+Libs: -L${libdir} -lbitcoin -lgmp -lboost_date_time -lboost_filesystem \
+    -lboost_regex -lboost_system -lboost_unit_test_framework
 
