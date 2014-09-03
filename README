@@ -1,4 +1,4 @@
-All files in this repository fall under the license specified in LICENSE
+All files in this repository fall under the license specified in COPYING
 The project is licensed as AGPL with a lesser clause. It may be used within
 a proprietary project, but the core library and any changes to it must be
 published online. Source code for this library must always remain free for
@@ -8,76 +8,72 @@ everybody to access.
 Debian/Ubuntu Instructions
 ==========================
 
-Note that you need g++ 4.7 or higher. For this reason Ubuntu 12.04 and older are not supported.
+Libbitcoin requires a modern c/c++ compiler (GCC 4.7.0 minimum). For this
+reason Ubuntu before 12.04 is not supported. To see your compiler version:
 
-  VVVVVVVVVVV
-> Start Here! <
-  ^^^^^^^^^^^
+  $ gcc --version
 
-You will need libsecp256k1:
+If necessary, upgrade your compiler as follows (http://bit.ly/1vXaaQL):
+
+  $ sudo apt-get install g++-4.8
+  $ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+  $ sudo update-alternatives --config g++
+
+Next get the build toolchain (tip: this can also be done on one line):
+
+  $ sudo apt-get install build-essential
+  $ sudo apt-get install autoconf
+  $ sudo apt-get install automake
+  $ sudo apt-get install libtool
+  $ sudo apt-get install pkg-config
+
+Next install standard Boost (1.48.0 or newer) and OpenSSL (0.9.0 or newer) 
+packages. Note that OpenSSL is deprecated and is currently used only for
+test validation.
+
+  $ sudo apt-get install libboost-all-dev
+  $ sudo apt-get install libssl-dev
+
+Next download, build and install the Bitcoin elliptic curve library, Secp256k1
+(0.1.0 or newer):
 
   $ git clone https://github.com/bitcoin/secp256k1.git
   $ cd secp256k1
-  $ autoreconf -i
-  $ ./configure --prefix $INSTALL_PREFIX
+  $ ./autogen.sh
+  $ ./configure
   $ make
   $ make install
   $ ldconfig
+  $ cd ..
 
-Then install libbitcoin:
+Finally, build and install libbitcoin:
 
-  $ sudo apt-get install build-essential autoconf automake libtool libboost-all-dev pkg-config libcurl4-openssl-dev libleveldb-dev libssl-dev
-  $ autoreconf -i
-  $ ./configure --enable-leveldb
+  $ ./autogen.sh
+  $ ./configure
   $ make
   $ sudo make install
   $ sudo ldconfig
 
 libbitcoin is now installed in /usr/local/.
 
-* Ubuntu Precise Pangolin requires libboost1.48-all-dev instead of
-  libboost-all-dev above.
-
---------
-Advanced
---------
-
-Files Open Limit
-----------------
-
-For the blockchain database, set the max open files limit higher.
-The default limit on most Linux systems is too low.
-
-  $ ulimit -n 4096
-
-Core Dependencies
+Configure Options
 -----------------
 
-You will need:
+Configure (./configure) accepts a --prefix switch. This is useful if you prefer
+to install libbitcoin to a local directory instead of globally. To install to a
+local directory substitute the following line in the instructions above, 
+replacing the specified directory with your own.
 
-  - GCC 4.7 or newer
-  - Boost 1.48 or newer
-  - OpenSSL 0.9 or newer
-  - LevelDB
+  $ ./configure --prefix /home/genjix/usr/
 
-Install Prefix
---------------
-
-'./configure' accepts a --prefix switch. This is useful if you prefer to
-install libbitcoin to a local directory instead.
-
-  $ ./configure --enable-leveldb --prefix /home/genjix/usr/
-  $ make
-  $ make install
-
-Then add these environment variables to the end of your ~/.bashrc to point
-software to your local installation. Otherwise software will have trouble
-finding the libbitcoin install.
+If you set the prefix you must add these environment variables to the end 
+of your ~/.bashrc to point software to your local installation. Otherwise
+software will not find the libbitcoin install.
 
   export LD_LIBRARY_PATH=~/usr/lib/
   export PKG_CONFIG_PATH=~/usr/lib/pkgconfig/
 
-'./configure' also accepts the following flags:
+Configure also accepts the following flags:
   --enable-testnet (enables the alternative blockchain used for testing)
   --enable-debug   (verbose output)
 
@@ -89,12 +85,6 @@ for creating software using libbitcoin.
 
   $ pkg-config --cflags --libs libbitcoin
 
-Build Debian package
----------------------
-
-  $ sudo apt-get install libboost-all-dev libdb++-dev libcurl4-openssl-dev libleveldb-dev fakeroot
-  $ dpkg-buildpackage -rfakeroot
-
 --------
 Examples
 --------
@@ -105,24 +95,26 @@ Start with the examples/ to see a few sample programs:
   $ make
   # Play around with private keys.
   $ ./priv
-  # Initialize a new LevelDB blockchain database.
-  $ mkdir database
-  $ ./initchain database/
-  # Run the fullnode example (validates blocks and transactions).
-  $ ./fullnode
+
+Build the Debian package
+------------------------
+
+  $ sudo apt-get install libboost-all-dev fakeroot
+  $ dpkg-buildpackage -rfakeroot
 
 =======================
 Arch Linux Instructions
 =======================
 
-Libbitcoin is available from the AUR: https://aur.archlinux.org/packages/libbitcoin-leveldb-git/ 
+Libbitcoin is available from the AUR: 
+https://aur.archlinux.org/packages/libbitcoin-leveldb-git/ 
 
-=======================
+=========================
 Gentoo Linux Instructions
-=======================
+=========================
 
-Libbitcoin is available in the 'bitcoin' overlay. Use layman to fetch
-the overlay then emerge as usual.
+Libbitcoin is available in the 'bitcoin' overlay. Use layman to fetch the 
+overlay then emerge as usual.
 
 If you want to use live build, unlock the '**' keyword for net-p2p/libbitcoin
 in /etc/portage/package.accept_keywords
@@ -131,15 +123,16 @@ in /etc/portage/package.accept_keywords
 Mac OSX Instructions
 ====================
 
-To build on Mac OSX, you will need to download and compile your own boost,
-leveldb using gcc 4.7 before building libbitcoin. Then set the following
-environment variables before running the build process.
+To build on Mac OSX, you will need to download and compile your own boost
+using gcc (4.7.0 or later) before building libbitcoin. Then set the following
+environment variables (matching your gcc version) before running the build 
+process.
 
   CC=/usr/local/bin/gcc-4.7
   CXX=/usr/local/bin/g++-4.7
 
-You will need secp256k1 as a library dependency, if you don't have
-it already in your system this is how you get/build/install it from source code.
+You will need secp256k1 as a library dependency, if you don't have it already 
+in your system this is how you get/build/install it from source code.
 
   $ git clone https://github.com/bitcoin/secp256k1
   $ cd secp256k1
@@ -150,20 +143,36 @@ it already in your system this is how you get/build/install it from source code.
 
 For Mac OSX Mountain Lion, you need to follow these brew commands:
 
-  $ brew install boost openssl leveldb
+  $ brew install boost openssl
   $ brew tap homebrew/versions
   $ brew install gcc48
   # Can be replaced back later if you prefer, but
   # keeping the new g++ is a good idea.
   $ sudo ln -sf /usr/local/bin/g++-4.8 /usr/bin/g++
 
-
-  $ autoreconf -i
-  $ ./configure --enable-leveldb
+  $ ./autogen.sh
+  $ ./configure
   $ make
   $ sudo make install
 
-If you get the error message "No package 'libcurl' found" you can set the following environment variables:
+====================
+Windows Instructions
+====================
 
-  $ export CURL_CFLAGS=-I/usr/local/opt/curl/include
-  $ export CURL_LIBS=-L/usr/local/opt/curl/lib
+Visual Studio solutions are provided for all libbitcoin libraries and 
+dependencies. Because libbitcoin requires a C++11 compiler, Visual Studio
+ 2013 is the most recent supported version and requires a modified 
+ pre-release compiler.
+
+Visual Studio 2013 Express is available for download and is free of charge.
+The November 2013 CTP Compiler must be downloaded and installed as well.
+
+Dependencies apart from the libbitcoin repo are available on NuGet. 
+Eventually the libbitcoin libraries and tools will be published as well. 
+The solution files are already configured with references to the NuGet 
+packages and expect a central NuGet repo. You should be able to restore 
+the packages to the repo once it is properly configured.
+
+Once the dependencies have been downloaded select a statically-linked 
+build and build the solution. The DLL build configurations do not compile,
+as the exports have not yet been completed.

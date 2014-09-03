@@ -4,7 +4,7 @@ Authors:
   Development. Added support for testnet.
 
 * Eric Voskuil
-  Windows port and code cleanup.
+  Windows ports, OpenSSL removal, build and documentation updates.
 
 * William Swanson
   Android port and wallet code development.
