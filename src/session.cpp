@@ -148,7 +148,7 @@ void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
 }
 
 void session::get_blocks(const std::error_code& ec,
-    const get_blocks_type& packet, channel_ptr node)
+    const get_blocks_type& /* packet */, channel_ptr node)
 {
     if (ec)
     {
