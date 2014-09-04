@@ -32,5 +32,5 @@ for i in $(ls *.cpp); do
 done
 echo "Linking..."
 $CXX -o $TESTBINARY obj/*.o $LDFLAGS
-./$TESTBINARY
+#./$TESTBINARY
 

@@ -78,8 +78,9 @@ build_explorer()
     # Build only develop, and the above dependencies as necessary.
     github_build libbitcoin libbitcoin develop "$@"
     
-    # Run unit tests.
+    # Build and run unit tests.
     cd libbitcoin/test
+    ./make.sh
     ./test_libbitcoin $BOOST_UNIT_TEST_PARAMETERS
     cd ../..
 }
