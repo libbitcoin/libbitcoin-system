@@ -124,7 +124,7 @@ private:
     void request_tx_data(bool tx_exists,
         const hash_digest& tx_hash, channel_ptr node);
 
-    io_service::strand strand_;
+    boost::asio::io_service::strand strand_;
 
     handshake& handshake_;
     protocol& protocol_;

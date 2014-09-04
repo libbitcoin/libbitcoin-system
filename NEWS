@@ -3,8 +3,15 @@ Copyright 2011 - present libbitcoin developers
 
 Version XXX - replace this as needed
 
-* elliptic_curve_key no longer used inside libbitcoin. Deprecated in favour
-  of <bitcoin/utility/ec_keys.hpp> instead.
+Version 2.x - Aug 2014, by Amir Taaki and Eric Voskuil
+
+* openssl no longer used inside libbitcoin. Replaced by libgmp-dev and 
+  libsecp256k1. openssl remains as a dependency for validation of test results.
+
+* elliptic_curve_key no longer used inside libbitcoin. Replaced by 
+  the new ec_keys class, which is based on libsecp256k1. elliptic_curve_key
+  now lives in test as a means to compare the test results against the new
+  implementation.
 
 Version 2.0 - Jan 2014, by Amir Taaki
 

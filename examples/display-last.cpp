@@ -22,6 +22,8 @@
 */
 #include <bitcoin/bitcoin.hpp>
 
+// THIS FILE IS CURRENTLY BUILD DISABLED CAUSE OF EXTERNAL BREAKING CHANGES.
+
 using namespace bc;
 
 blockchain* chain = nullptr;

@@ -27,6 +27,8 @@
 #endif
 #include <bitcoin/bitcoin.hpp>
 
+// THIS FILE IS CURRENTLY BUILD DISABLED CAUSE OF EXTERNAL BREAKING CHANGES.
+
 using namespace bc;
 
 using std::placeholders::_1;

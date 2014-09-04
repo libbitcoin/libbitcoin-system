@@ -3,11 +3,11 @@ LIBS=$(shell pkg-config --libs libbitcoin)
 
 default: all
 
-balance.o: balance.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
+#balance.o: balance.cpp
+#	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
-balance: balance.o
-	$(CXX) -o $@ $< $(LIBS)
+#balance: balance.o
+#	$(CXX) -o $@ $< $(LIBS)
 
 txrad.o: txrad.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
@@ -33,29 +33,29 @@ satoshiwords.o: satoshiwords.cpp
 satoshiwords: satoshiwords.o
 	$(CXX) -o $@ $< $(LIBS)
 
-priv.o: priv.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
+#priv.o: priv.cpp
+#	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
-priv: priv.o
-	$(CXX) -o $@ $< $(LIBS)
+#priv: priv.o
+#	$(CXX) -o $@ $< $(LIBS)
 
-fullnode.o: fullnode.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
+#fullnode.o: fullnode.cpp
+#	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
-fullnode: fullnode.o
-	$(CXX) -o $@ $< $(LIBS)
+#fullnode: fullnode.o
+#	$(CXX) -o $@ $< $(LIBS)
 
-query-stealth.o: query-stealth.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
+#query-stealth.o: query-stealth.cpp
+#	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
-query-stealth: query-stealth.o
-	$(CXX) -o $@ $< $(LIBS)
+#query-stealth: query-stealth.o
+#	$(CXX) -o $@ $< $(LIBS)
 
-display-last.o: display-last.cpp
-	$(CXX) -o $@ -c $< $(CXXFLAGS)
+#display-last.o: display-last.cpp
+#	$(CXX) -o $@ -c $< $(CXXFLAGS)
 
-display-last: display-last.o
-	$(CXX) -o $@ $< $(LIBS)
+#display-last: display-last.o
+#	$(CXX) -o $@ $< $(LIBS)
 
 proto.o: proto.cpp
 	$(CXX) -o $@ -c $< $(CXXFLAGS)
@@ -63,8 +63,8 @@ proto.o: proto.cpp
 proto: proto.o
 	$(CXX) -o $@ $< $(LIBS)
 
-all: balance priv fullnode display-last satoshiwords connect accept proto txrad query-stealth
+all: satoshiwords connect accept proto txrad
 
 clean:
-	rm -f accept balance connect determ display-last fullnode query-stealth priv proto satoshiwords txrad
+	rm -f satoshiwords connect accept proto txrad
 	rm -f *.o

@@ -27,8 +27,9 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using boost::posix_time::time_duration;
+using boost::asio::ip::tcp;
 using boost::posix_time::seconds;
+using boost::posix_time::time_duration;
 
 const time_duration connect_timeout = seconds(5);
 

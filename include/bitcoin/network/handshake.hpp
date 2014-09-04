@@ -89,7 +89,7 @@ private:
         setter_handler handle_set);
     void do_set_start_height(uint32_t height, setter_handler handle_set);
 
-    io_service::strand strand_;
+    boost::asio::io_service::strand strand_;
     version_type template_version_;
 };
 

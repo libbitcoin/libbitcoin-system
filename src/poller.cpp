@@ -24,6 +24,7 @@ namespace libbitcoin {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using boost::asio::io_service;
 
 poller::poller(threadpool& pool, blockchain& chain)
   : strand_(pool.service()), chain_(chain),

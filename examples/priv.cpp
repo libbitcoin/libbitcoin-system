@@ -24,6 +24,8 @@
 #include <sstream>
 #include <bitcoin/bitcoin.hpp>
 
+// THIS FILE IS CURRENTLY BUILD DISABLED CAUSE OF EXTERNAL BREAKING CHANGES.
+
 using namespace bc;
 
 void display_help()
