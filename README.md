@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/libbitcoin/libbitcoin.svg?branch=develop)](https://travis-ci.org/libbitcoin/libbitcoin)
 # Libbitcoin
 
 All files in this repository fall under the license specified in 
