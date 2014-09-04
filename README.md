@@ -1,7 +1,7 @@
 # Libbitcoin
 
 All files in this repository fall under the license specified in 
-[COPYING](COPYING) The project is licensed as [AGPL with a lesser clause](https://wiki.unsystem.net/en/index.php/Libbitcoin/License).
+[COPYING](COPYING). The project is licensed as [AGPL with a lesser clause](https://wiki.unsystem.net/en/index.php/Libbitcoin/License).
 It may be used within a proprietary project, but the core library and any
 changes to it must be published online. Source code for this library must 
 always remain free for everybody to access.
