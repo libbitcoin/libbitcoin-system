@@ -44,9 +44,9 @@ Libbitcoin is now installed in `/usr/local/`.
 
 ### Notes
 
-You can run the build script from any directory on your system. This will build and install libbitcoin in a new subdirectory named BUILD. If you are missing dependencies the build will terminate and you will be shown what is missing.
+You can run the build script from any directory on your system. This will build libbitcoin in a new subdirectory named BUILD and install it to `/usr/local/`. If you are missing dependencies the build will terminate and you will be shown what is missing. Once the installation is complete you can safely delete the BUILD subdirectory. 
 
-It should not normally be executed using sudo. It will immediately prompt you for a super user password if required. This ensures that only the necessary installation steps are executed as a super user, as opposed to the entire build process.
+The build script should not normally be executed using sudo. Instead it will immediately prompt you for a super user password if required. This ensures that only the necessary installation steps are executed as a super user, as opposed to the entire build process.
 
 In addition to the packaged dependencies above, the build script clones, builds and installs two repositories, namely:
 
