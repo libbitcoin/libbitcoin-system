@@ -69,10 +69,6 @@ build_explorer()
 
     # Download, build and install all unpackaged dependencies.
     # This script args are passed to configure of each build.
-    github_build jedisct1 libsodium master "$@"
-    github_build zeromq libzmq master "$@"
-    github_build zeromq czmq master "$@"
-    github_build zeromq czmqpp master "$@"
     github_build bitcoin secp256k1 master "$@" $SECP256K1_OPTIONS
     
     # Build only develop, and the above dependencies as necessary.
