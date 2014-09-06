@@ -14,8 +14,9 @@
 #  5. Use Least Privilege: don't require sudo for the entire script.
 #  6. Do Not Repeat Yourself: do not repeat yourself.
 
-# This script will build boost in this relative directory.
-BUILD_DIRECTORY="BUILD"
+# This script will build libbitcoin using this relative directory.
+# This is meant to be temporary, just to facilitate the install.
+BUILD_DIRECTORY="libbitcoin_build"
 
 # https://github.com/bitcoin/secp256k1
 SECP256K1_OPTIONS=\
@@ -45,19 +46,23 @@ github_build()
     # Shift the first three parameters out of @.
     shift 3
 
-    # Do the standard stuff.
     FORK=$ACCOUNT"/"$REPO
     echo
     echo "******************* install" $FORK"/"$BRANCH "**********************"
-    echo 
+    echo
+    
+    # git clone the repo.
     rm -rf $REPO
     git clone --branch $BRANCH --single-branch "https://github.com/"$FORK
     cd $REPO
+    
+    # Do the standard stuff.
     ./autogen.sh
     ./configure "$@"
     make
     sudo make install
     sudo ldconfig
+    
     cd ..
 }
 
@@ -96,3 +101,9 @@ cd $BUILD_DIRECTORY
 # Build explorer.
 build_explorer "$@"
 
+# If we succeed clean up the build directory.
+# This precludes use of 'make uninstall' however that would need to be applied
+# to dependencies as well. Typically each time a git pull occurs into a build
+# directory the uninstall is potentially invalidated. This approach allows us
+# to provide a script which performs a complete uninstall across all versions.
+sudo rm -rf $BUILD_DIRECTORY
