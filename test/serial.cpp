@@ -22,6 +22,8 @@
 
 using namespace bc;
 
+BOOST_AUTO_TEST_SUITE(serialize_tests)
+
 BOOST_AUTO_TEST_CASE(serialize_test)
 {
     const std::string rawdat_repr =
@@ -187,3 +189,4 @@ BOOST_AUTO_TEST_CASE(serialize_deserialize)
     BOOST_REQUIRE_THROW(ds.read_byte(), end_of_stream);
 }
 
+BOOST_AUTO_TEST_SUITE_END()

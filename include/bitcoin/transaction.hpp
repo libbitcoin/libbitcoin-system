@@ -20,20 +20,15 @@
 #ifndef LIBBITCOIN_TRANSACTION_HPP
 #define LIBBITCOIN_TRANSACTION_HPP
 
+#include <cstdint>
 #include <bitcoin/primitives.hpp>
 
 namespace libbitcoin {
 
-typedef std::vector<uint64_t> output_value_list;
-
-// Used by transaction_indexer
-struct BC_API output_info_type
+enum class select_outputs_algorithm
 {
-    output_point point;
-    uint64_t value;
+    greedy
 };
-
-typedef std::vector<output_info_type> output_info_list;
 
 BC_API hash_digest hash_transaction(const transaction_type& tx);
 // hash_type_code is used by OP_CHECKSIG
@@ -43,7 +38,9 @@ BC_API hash_digest hash_transaction(const transaction_type& tx,
 BC_API hash_digest generate_merkle_root(const transaction_list& transactions);
 
 BC_API std::string pretty(const transaction_type& transaction);
+// BC_API transaction_type unpretty(const std::string& pretty);
 
+// TODO: rename to is_previous_output_null (API consistency)
 BC_API bool previous_output_is_null(const output_point& previous_output);
 BC_API bool is_coinbase(const transaction_type& tx);
 BC_API bool is_final(const transaction_type& tx, size_t block_height, 
@@ -51,6 +48,15 @@ BC_API bool is_final(const transaction_type& tx, size_t block_height,
 BC_API bool is_locktime_conflict(const transaction_type& tx);
 
 BC_API uint64_t total_output_value(const transaction_type& tx);
+
+/**
+ * Select optimal outputs for a send from unspent outputs list.
+ * Returns output list and remaining change to be sent to
+ * a change address.
+ */
+BC_API select_outputs_result select_outputs(
+    output_info_list unspent, uint64_t min_value,
+    select_outputs_algorithm algorithm=select_outputs_algorithm::greedy);
 
 BC_API bool operator==(
     const output_point& output_a, const output_point& output_b);

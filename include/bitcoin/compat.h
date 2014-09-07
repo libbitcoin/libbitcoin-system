@@ -32,6 +32,7 @@
 #define MAX_INT64 INT64_MAX
 #define MIN_INT32 INT32_MIN
 #define MAX_INT32 INT32_MAX
+#define MAX_UINT64 UINT64_MAX
 #define MAX_UINT32 UINT32_MAX
 #define MAX_UINT16 UINT16_MAX
 #define MAX_UINT8 UINT8_MAX
@@ -42,6 +43,7 @@
 #define MAX_INT64 std::numeric_limits<int64_t>::max()
 #define MIN_INT32 std::numeric_limits<int32_t>::min()
 #define MAX_INT32 std::numeric_limits<int32_t>::max()
+#define MAX_UINT64 std::numeric_limits<uint64_t>::max()
 #define MAX_UINT32 std::numeric_limits<uint32_t>::max()
 #define MAX_UINT16 std::numeric_limits<uint16_t>::max()
 #define MAX_UINT8 std::numeric_limits<uint8_t>::max()

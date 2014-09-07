@@ -69,17 +69,22 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\amount.cpp" />
     <ClCompile Include="..\..\..\..\test\base58.cpp" />
     <ClCompile Include="..\..\..\..\test\big_number.cpp" />
     <ClCompile Include="..\..\..\..\test\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\format.cpp" />
     <ClCompile Include="..\..\..\..\test\hash.cpp" />
+    <ClCompile Include="..\..\..\..\test\hd_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\key_formats.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\script.cpp" />
     <ClCompile Include="..\..\..\..\test\scriptnum.cpp" />
     <ClCompile Include="..\..\..\..\test\serial.cpp" />
     <ClCompile Include="..\..\..\..\test\stealth.cpp" />
+    <ClCompile Include="..\..\..\..\test\stealth_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\uri.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\big_number.hpp" />

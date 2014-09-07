@@ -22,7 +22,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE( test_suite )
+BOOST_AUTO_TEST_SUITE(base58_tests)
 
 // For some reason boost test seg faults if I use a function.
 // Only when using libsecp256k1 with the SSL implementation.
@@ -76,4 +76,3 @@ BOOST_AUTO_TEST_CASE(is_b58)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

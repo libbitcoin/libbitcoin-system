@@ -220,6 +220,11 @@ bool run_script(const script_test& test)
     return output.run(input, tx, 0);
 }
 
+void ignore_output(log_level,
+    const std::string&, const std::string&)
+{
+}
+
 BOOST_AUTO_TEST_SUITE(script_tests)
 
 BOOST_AUTO_TEST_CASE(script_json_valid)
@@ -228,11 +233,6 @@ BOOST_AUTO_TEST_CASE(script_json_valid)
     {
         BOOST_REQUIRE(run_script(test));
     }
-}
-
-void ignore_output(log_level,
-    const std::string&, const std::string&)
-{
 }
 
 BOOST_AUTO_TEST_CASE(script_json_invalid)
@@ -246,4 +246,3 @@ BOOST_AUTO_TEST_CASE(script_json_invalid)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

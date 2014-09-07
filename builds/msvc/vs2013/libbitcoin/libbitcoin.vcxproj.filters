@@ -45,6 +45,12 @@
     <Filter Include="include\impl\utility">
       <UniqueIdentifier>{9217c7da-0161-45fe-90d7-9e6b602aec57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\wallet">
+      <UniqueIdentifier>{1e18bec0-9406-43b2-bcac-b3d9f43a3f35}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\wallet">
+      <UniqueIdentifier>{b2e7788e-4e44-4bbd-b5ba-5de47b5a1022}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\impl\serialize\block.ipp">
@@ -172,6 +178,24 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\hash_number.cpp">
       <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\key_formats.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\mnemonic.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\uri.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\amount.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp">
+      <Filter>src\wallet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -330,6 +354,24 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\utility\checksum.hpp">
       <Filter>include\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\wallet\hd_keys.hpp">
+      <Filter>include\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\wallet\key_formats.hpp">
+      <Filter>include\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\wallet\mnemonic.hpp">
+      <Filter>include\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\wallet\uri.hpp">
+      <Filter>include\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\wallet\amount.hpp">
+      <Filter>include\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\wallet\stealth_address.hpp">
+      <Filter>include\wallet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -90,7 +90,6 @@
  *   @link libbitcoin::deserializer deserializer @endlink
  * - @link libbitcoin::script script @endlink
  * - @link libbitcoin::payment_address payment_address @endlink
- * - @link libbitcoin::elliptic_curve_key elliptic_curve_key @endlink
  * - @link libbitcoin::script_number script_number @endlink
  * - @link libbitcoin::threadpool threadpool @endlink
  *
@@ -133,6 +132,8 @@
  * - @link libbitcoin::to_big_endian to_big_endian @endlink
  * - @link libbitcoin::from_little_endian from_little_endian @endlink
  * - @link libbitcoin::from_big_endian from_big_endian @endlink
+ * - @link libbitcoin::btc_to_satoshi btc_to_satoshi @endlink
+ * - @link libbitcoin::satoshi_to_btc satoshi_to_btc @endlink
  *
  * @subsection hashing Hashing
  *
@@ -152,6 +153,8 @@
  * - @link libbitcoin::encode_base58 encode_base58 @endlink
  * - @link libbitcoin::decode_base58 decode_base58 @endlink
  *
+ * @subsection wallet Wallet
+ * 
  * @author Amir Taaki <amir@unsystem.net>
  *
  */
@@ -194,6 +197,12 @@
 #include <bitcoin/utility/subscriber.hpp>
 #include <bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/validate.hpp>
+#include <bitcoin/wallet/amount.hpp>
+#include <bitcoin/wallet/hd_keys.hpp>
+#include <bitcoin/wallet/key_formats.hpp>
+#include <bitcoin/wallet/mnemonic.hpp>
+#include <bitcoin/wallet/stealth_address.hpp>
+#include <bitcoin/wallet/uri.hpp>
 
 namespace bc = libbitcoin;
 

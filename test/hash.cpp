@@ -23,6 +23,8 @@
 
 using namespace bc;
 
+BOOST_AUTO_TEST_SUITE(hash_tests)
+
 BOOST_AUTO_TEST_CASE(sha1_hash_test)
 {
     for (const hash_result& result: sha1_tests)
@@ -85,3 +87,4 @@ BOOST_AUTO_TEST_CASE(sha512_hash_test)
         "b7e4416aea397db91b4ac0e5dd56b8ef7e4b066162ab1fdc088319ce6defc876");
 }
 
+BOOST_AUTO_TEST_SUITE_END()
