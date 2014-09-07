@@ -22,9 +22,6 @@
     <ClCompile Include="..\..\..\..\test\checksum.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\scriptnum.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\script.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -47,6 +44,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hd_keys.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\script_number.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
