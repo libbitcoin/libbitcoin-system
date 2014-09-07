@@ -22,6 +22,8 @@
 
 using namespace bc;
 
+BOOST_AUTO_TEST_SUITE(stealth_tests)
+
 BOOST_AUTO_TEST_CASE(bitfield_test)
 {
     stealth_prefix prefix(27, 0x691cf48b);
@@ -57,3 +59,4 @@ BOOST_AUTO_TEST_CASE(bitfield_test)
 #endif
 }
 
+BOOST_AUTO_TEST_SUITE_END()

@@ -77,3 +77,11 @@ bitcoin_impl_utility_includedir = $(includedir)/bitcoin/impl/utility
 bitcoin_impl_utility_include_HEADERS = \
     impl/utility/serializer.ipp
 
+bitcoin_wallet_includedir = $(includedir)/bitcoin/wallet
+bitcoin_wallet_include_HEADERS = \
+    wallet/amount.hpp \
+    wallet/hd_keys.hpp \
+    wallet/key_formats.hpp \
+    wallet/mnemonic.hpp \
+    wallet/stealth_address.hpp \
+    wallet/uri.hpp

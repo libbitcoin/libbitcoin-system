@@ -43,7 +43,13 @@ libbitcoin_la_SOURCES = \
 	utility/external/sha256.c \
 	utility/external/sha512.c \
 	utility/external/zeroize.c \
-	validate.cpp
+	validate.cpp \
+    wallet/amount.cpp \
+    wallet/hd_keys.cpp \
+    wallet/key_formats.cpp \
+    wallet/mnemonic.cpp \
+    wallet/stealth_address.cpp \
+    wallet/uri.cpp
 
 libbitcoin_la_LIBADD = \
     ${secp256k1_LIBS}

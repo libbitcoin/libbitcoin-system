@@ -42,8 +42,7 @@ BC_API short_hash ripemd160_hash(const data_chunk& chunk);
 BC_API short_hash sha1_hash(const data_chunk& chunk);
 
 /**
- * Generate a sha256 hash. This hash function is used in mini keys,
- * currently only by libwallet.
+ * Generate a sha256 hash. This hash function is used in mini keys.
  *
  * sha256(data)
  */
@@ -51,7 +50,7 @@ BC_API hash_digest sha256_hash(const data_chunk& chunk);
 
 /**
  * Generate a sha256 hash. This hash function is used in electrum seed 
- * stretching, currently only by libwallet.
+ * stretching (deprecated).
  *
  * sha256(data)
  */
@@ -59,16 +58,14 @@ BC_API hash_digest sha256_hash(const data_chunk& first_chunk,
     const data_chunk& second_chunk);
 
 /**
- * Generate a sha512 hash. This hash function is used in bip32 keys,
- * currently only by libwallet.
+ * Generate a sha512 hash. This hash function is used in bip32 keys.
  *
  * sha512(data)
  */
 BC_API long_hash sha512_hash(const data_chunk& chunk);
 
 /**
- * Generate a hmac sha512 hash. This hash function is used in bip32 keys,
- * currently only by libwallet.
+ * Generate a hmac sha512 hash. This hash function is used in bip32 keys.
  *
  * hmac-sha512(data, key)
  */

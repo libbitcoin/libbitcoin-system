@@ -22,6 +22,8 @@
 
 using namespace bc;
 
+BOOST_AUTO_TEST_SUITE(format_tests)
+
 BOOST_AUTO_TEST_CASE(encode_test)
 {
     const std::string hex_str = "10a7fd15cb45bda9e90e19a15f";
@@ -90,3 +92,4 @@ BOOST_AUTO_TEST_CASE(btc_to_satoshi_max_money_bitcoin_test)
     BOOST_REQUIRE_EQUAL(satoshi, expected);
 }
 
+BOOST_AUTO_TEST_SUITE_END()

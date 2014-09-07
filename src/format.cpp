@@ -125,22 +125,6 @@ static std::string pad_right_8_zeroes_trim_left(const std::string& value)
     return result;
 }
 
-std::string satoshi_to_btc(uint64_t satoshi)
-{
-    using namespace boost;
-    auto major = satoshi / coin_price(1);
-    BITCOIN_ASSERT(satoshi >= major);
-    auto minor = satoshi - (major * coin_price(1));
-    BITCOIN_ASSERT(minor < coin_price(1));
-    auto result = lexical_cast<std::string>(major);
-    if (minor > 0)
-    {
-        auto minor_str = lexical_cast<std::string>(minor);
-        result = result + "." + pad_left_8_zeroes_trim_right(minor_str);
-    }
-    return result;
-}
-
 bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
 {
     using namespace boost;
@@ -161,6 +145,22 @@ bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
     {
         return false;
     }
+}
+
+std::string satoshi_to_btc(uint64_t satoshi)
+{
+    using namespace boost;
+    auto major = satoshi / coin_price(1);
+    BITCOIN_ASSERT(satoshi >= major);
+    auto minor = satoshi - (major * coin_price(1));
+    BITCOIN_ASSERT(minor < coin_price(1));
+    auto result = lexical_cast<std::string>(major);
+    if (minor > 0)
+    {
+        auto minor_str = lexical_cast<std::string>(minor);
+        result = result + "." + pad_left_8_zeroes_trim_right(minor_str);
+    }
+    return result;
 }
 
 } // namespace libbitcoin

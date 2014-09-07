@@ -21,6 +21,9 @@
 #include <bitcoin/bitcoin.hpp>
 #include "big_number.hpp"
 
+// These tests fail on Windows x64.
+// https://github.com/libbitcoin/libbitcoin/issues/26
+
 using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(scriptnum_tests)
@@ -262,4 +265,3 @@ BOOST_AUTO_TEST_CASE(operators)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

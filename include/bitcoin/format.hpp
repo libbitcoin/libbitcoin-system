@@ -85,14 +85,14 @@ BC_API hash_digest decode_hash(const std::string& hex);
 BC_API short_hash decode_short_hash(const std::string& hex);
 
 /**
- * Convert satoshis into human readable BTC string value.
- */
-BC_API std::string satoshi_to_btc(uint64_t satoshi);
-
-/**
  * Convert BTC into number of satoshi. Returns true if successul.
  */
 BC_API bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc);
+
+/**
+ * Convert satoshis into human readable BTC string value.
+ */
+BC_API std::string satoshi_to_btc(uint64_t satoshi);
 
 } // namespace libbitcoin
 

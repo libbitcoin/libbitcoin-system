@@ -30,6 +30,8 @@ static const ec_secret secret
     0x2C, 0xB1, 0xB9, 0x58, 0x2C, 0xF0, 0x35, 0x36
 }};
 
+BOOST_AUTO_TEST_SUITE(ec_keys_tests)
+
 BOOST_AUTO_TEST_CASE(secret_to_public_key_test)
 {
     ec_point compressed = secret_to_public_key(secret, true);
@@ -125,3 +127,5 @@ BOOST_AUTO_TEST_CASE(ec_multiply_test)
     BOOST_REQUIRE(std::equal(public_a.begin(), public_a.end(),
         public_sum.begin()));
 }
+
+BOOST_AUTO_TEST_SUITE_END()

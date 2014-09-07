@@ -62,9 +62,15 @@ proto.o: proto.cpp
 
 proto: proto.o
 	$(CXX) -o $@ $< $(LIBS)
+    
+hd: hd_keys.o
+	$(CXX) -o $@ $< $(LIBS)
 
-all: satoshiwords connect accept proto txrad
+uri: uri.o
+	$(CXX) -o $@ $< $(LIBS)    
+
+all: satoshiwords connect accept proto txrad hd_keys uri
 
 clean:
-	rm -f satoshiwords connect accept proto txrad
+	rm -f satoshiwords connect accept proto txrad hd_keys uri
 	rm -f *.o
