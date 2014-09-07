@@ -44,7 +44,7 @@ libbitcoin_la_SOURCES = \
 	utility/external/sha512.c \
 	utility/external/zeroize.c \
 	validate.cpp \
-    wallet/amount.hpp \
+    wallet/amount.cpp \
     wallet/hd_keys.cpp \
     wallet/key_formats.cpp \
     wallet/mnemonic.cpp \
