@@ -149,10 +149,11 @@ BC_API bool uri_parse_result::got_address(std::string& address)
 
 BC_API bool uri_parse_result::got_param(std::string& key, std::string& value)
 {
+    const uint64_t invalid_amount = MAX_UINT64;
     if (key == "amount")
     {
         uint64_t amount = parse_amount(value);
-        if (MAXUINT64 == amount)
+        if (invalid_amount  == amount)
             return false;
         this->amount.reset(amount);
     }

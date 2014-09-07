@@ -26,8 +26,9 @@ BOOST_AUTO_TEST_SUITE(parse_amount_tests)
 
 BOOST_AUTO_TEST_CASE(parse_amount_test)
 {
+    const uint64_t invalid_amount = MAX_UINT64;
     BOOST_REQUIRE(parse_amount("4.432") == 443200000);
-    BOOST_REQUIRE(parse_amount("4.432.") == MAXUINT64);
+    BOOST_REQUIRE(parse_amount("4.432.") == invalid_amount);
     BOOST_REQUIRE(parse_amount("4")  == 400000000);
     BOOST_REQUIRE(parse_amount("4.") == 400000000);
     BOOST_REQUIRE(parse_amount(".4") == 40000000);
@@ -44,13 +45,14 @@ BOOST_AUTO_TEST_CASE(parse_amount_test)
 
 BOOST_AUTO_TEST_CASE(parse_amount_overflow_test)
 {
+    const uint64_t invalid_amount = MAX_UINT64;
     BOOST_REQUIRE(parse_amount("9999999999999999999", 0) ==
         9999999999999999999U);
     BOOST_REQUIRE(parse_amount("18446744073709551614", 0) ==
         18446744073709551614U);
-    BOOST_REQUIRE(parse_amount("18446744073709551615", 0) == MAXUINT64);
-    BOOST_REQUIRE(parse_amount("18446744073709551616", 0) == MAXUINT64);
-    BOOST_REQUIRE(parse_amount("99999999999999999999", 0) == MAXUINT64);
+    BOOST_REQUIRE(parse_amount("18446744073709551615", 0) == invalid_amount);
+    BOOST_REQUIRE(parse_amount("18446744073709551616", 0) == invalid_amount);
+    BOOST_REQUIRE(parse_amount("99999999999999999999", 0) == invalid_amount);
 }
 
 BOOST_AUTO_TEST_CASE(format_amount_test)
