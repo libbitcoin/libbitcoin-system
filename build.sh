@@ -36,6 +36,22 @@ BOOST_UNIT_TEST_PARAMETERS=\
 "--report_level=no "\
 "--build_info=yes"
 
+# The source repository for the main build.
+# This will be adjusted to the Travis build if running in Travis.
+BUILD_ACCOUNT="libbitcoin"
+BUILD_REPO="libbitcoin"
+BUILD_BRANCH="develop"
+
+check_travis()
+{
+    # If this is a Travis build switch to the requested repo/branch.
+    if [ "x$TRAVIS_REPO_SLUG" != "x" ]; then
+	    BUILD_ACCOUNT=`echo $TRAVIS_REPO_SLUG | cut -d'/' -f1`
+	    BUILD_REPO=`echo $TRAVIS_REPO_SLUG | cut -d'/' -f2`
+	    BUILD_BRANCH=$TRAVIS_BRANCH
+    fi
+}
+
 github_build()
 {
     # This function parameters.
@@ -68,6 +84,9 @@ github_build()
 
 build_explorer()
 {
+    # Modify $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH if running in Travis.
+    check_travis
+
     # Initialize git repository at the root of the build directory.
     git init
     git config user.name anonymous
@@ -75,19 +94,7 @@ build_explorer()
     # Download, build and install all unpackaged dependencies.
     # This script args are passed to configure of each build.
     github_build bitcoin secp256k1 master "$@" $SECP256K1_OPTIONS
-    
-    # If this is a Travis build, build the appropriate repo/branch.
-    # Otherwise, build libbitcoin/libbitcoin/develop.
-    if [ "x$TRAVIS_REPO_SLUG" != "x" ]; then
-	ACCOUNT=`echo $TRAVIS_REPO_SLUG | cut -d'/' -f1`
-	REPO=`echo $TRAVIS_REPO_SLUG | cut -d'/' -f2`
-	BRANCH=$TRAVIS_BRANCH
-    else
-	ACCOUNT='libbitcoin'
-	REPO='libbitcoin'
-	BRANCH='develop'
-    fi
-    github_build $ACCOUNT $REPO $BRANCH "$@"
+    github_build $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH "$@"
     
     # Build and run unit tests.
     cd libbitcoin/test
