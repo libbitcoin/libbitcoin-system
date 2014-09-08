@@ -76,8 +76,18 @@ build_explorer()
     # This script args are passed to configure of each build.
     github_build bitcoin secp256k1 master "$@" $SECP256K1_OPTIONS
     
-    # Build only develop, and the above dependencies as necessary.
-    github_build libbitcoin libbitcoin develop "$@"
+    # If this is a Travis build, build the appropriate repo/branch.
+    # Otherwise, build libbitcoin/libbitcoin/develop.
+    if [ "x$TRAVIS_REPO_SLUG" != "x" ]; then
+	ACCOUNT=`echo $TRAVIS_REPO_SLUG | cut -d'/' -f1`
+	REPO=`echo $TRAVIS_REPO_SLUG | cut -d'/' -f2`
+	BRANCH=$TRAVIS_BRANCH
+    else
+	ACCOUNT='libbitcoin'
+	REPO='libbitcoin'
+	BRANCH='develop'
+    fi
+    github_build $ACCOUNT $REPO $BRANCH "$@"
     
     # Build and run unit tests.
     cd libbitcoin/test

@@ -2,10 +2,6 @@ language: cpp
 
 compiler: gcc
 
-branches:
-  # Build only from develop, when develop changes.
-  only: develop
-    
 before_install:
   # Set package repoository.
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
