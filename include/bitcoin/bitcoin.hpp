@@ -161,6 +161,14 @@
 
 // Convenience header that includes everything
 // Not to be used internally. For API users.
+
+#ifdef _MSC_VER
+// Suppressing msvc warnings from boost that are heard to deal with
+// because boost/algorithm carelessly defines _SCL_SECURE_NO_WARNINGS
+// without first testing it.
+#pragma warning(push) 
+#pragma warning(disable : 4267)
+#endif
 #include <bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/block.hpp>
 #include <bitcoin/constants.hpp>
@@ -203,6 +211,9 @@
 #include <bitcoin/wallet/mnemonic.hpp>
 #include <bitcoin/wallet/stealth_address.hpp>
 #include <bitcoin/wallet/uri.hpp>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace bc = libbitcoin;
 
