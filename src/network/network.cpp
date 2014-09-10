@@ -20,8 +20,8 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include <bitcoin/network/network.hpp>
-#include <bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
 

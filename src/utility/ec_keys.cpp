@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <secp256k1.h>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/ec_keys.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/ec_keys.hpp>
 
 namespace libbitcoin {
 

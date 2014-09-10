@@ -18,7 +18,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <bitcoin/utility/external/zeroize.h>
+#include <bitcoin/bitcoin/utility/external/zeroize.h>
 
 // TODO: deal with determination of HAVE_SECUREZEROMEMORY and HAVE_MEMSET_S
 // These are performance optimizations, not required for security.

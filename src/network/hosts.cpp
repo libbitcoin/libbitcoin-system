@@ -19,9 +19,9 @@
  */
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <bitcoin/format.hpp>
-#include <bitcoin/error.hpp>
-#include <bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/hosts.hpp>
 
 namespace libbitcoin {
 

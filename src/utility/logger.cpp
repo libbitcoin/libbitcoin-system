@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
 

@@ -22,17 +22,17 @@
 #include <type_traits>
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
-#include <bitcoin/constants.hpp>
-#include <bitcoin/format.hpp>
-#include <bitcoin/primitives.hpp>
-#include <bitcoin/script.hpp>
-#include <bitcoin/transaction.hpp>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/ec_keys.hpp>
-#include <bitcoin/utility/hash.hpp>
-#include <bitcoin/utility/logger.hpp>
-#include <bitcoin/utility/script_number.hpp>
-#include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/script.hpp>
+#include <bitcoin/bitcoin/transaction.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/ec_keys.hpp>
+#include <bitcoin/bitcoin/utility/hash.hpp>
+#include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/script_number.hpp>
+#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 
