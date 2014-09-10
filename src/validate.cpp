@@ -19,17 +19,17 @@
  */
 #include <set>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <bitcoin/block.hpp>
-#include <bitcoin/blockchain/blockchain.hpp>
-#include <bitcoin/constants.hpp>
-#include <bitcoin/error.hpp>
-#include <bitcoin/satoshi_serialize.hpp>
-#include <bitcoin/transaction.hpp>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/logger.hpp>
-#include <bitcoin/utility/hash_number.hpp>
-#include <bitcoin/utility/script_number.hpp>
-#include <bitcoin/validate.hpp>
+#include <bitcoin/bitcoin/block.hpp>
+#include <bitcoin/bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/satoshi_serialize.hpp>
+#include <bitcoin/bitcoin/transaction.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/hash_number.hpp>
+#include <bitcoin/bitcoin/utility/script_number.hpp>
+#include <bitcoin/bitcoin/validate.hpp>
 
 namespace libbitcoin {
 

@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/block.hpp>
-#include <bitcoin/constants.hpp>
-#include <bitcoin/satoshi_serialize.hpp>
-#include <bitcoin/transaction.hpp>
-#include <bitcoin/types.hpp>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/hash.hpp>
-#include <bitcoin/utility/hash_number.hpp>
-#include <bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/block.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/satoshi_serialize.hpp>
+#include <bitcoin/bitcoin/transaction.hpp>
+#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/hash.hpp>
+#include <bitcoin/bitcoin/utility/hash_number.hpp>
+#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 

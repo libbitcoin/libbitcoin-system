@@ -25,8 +25,8 @@
  */
 #include <stdint.h>
 #include <string.h>
-#include <bitcoin/utility/external/sha256.h>
-#include <bitcoin/utility/external/zeroize.h>
+#include <bitcoin/bitcoin/utility/external/sha256.h>
+#include <bitcoin/bitcoin/utility/external/zeroize.h>
 
 static uint32_t be32dec(const void* pp)
 {

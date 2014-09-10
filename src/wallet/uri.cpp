@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/wallet/uri.hpp>
+#include <bitcoin/bitcoin/wallet/uri.hpp>
 
 #include <cstdint>
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/define.hpp>
-#include <bitcoin/utility/base58.hpp>
-#include <bitcoin/wallet/amount.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/base58.hpp>
+#include <bitcoin/bitcoin/wallet/amount.hpp>
 
 namespace libbitcoin {
 

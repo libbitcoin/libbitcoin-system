@@ -29,9 +29,9 @@
 */
 #include <stdint.h>
 #include <string.h>
-#include <bitcoin/compat.h>
-#include <bitcoin/utility/external/ripemd160.h>
-#include <bitcoin/utility/external/zeroize.h>
+#include <bitcoin/bitcoin/compat.h>
+#include <bitcoin/bitcoin/utility/external/ripemd160.h>
+#include <bitcoin/bitcoin/utility/external/zeroize.h>
 
 #ifdef __BIG_ENDIAN__
 # define RIPEMD160_BIG_ENDIAN

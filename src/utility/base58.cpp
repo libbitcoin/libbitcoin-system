@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/utility/base58.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/base58.hpp>
 
 namespace libbitcoin {
 

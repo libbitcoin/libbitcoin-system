@@ -20,9 +20,9 @@
 #include <string>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <bitcoin/format.hpp>
-#include <bitcoin/primitives.hpp>
-#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 

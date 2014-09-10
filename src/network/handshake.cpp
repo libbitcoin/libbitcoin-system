@@ -20,10 +20,10 @@
 #include <functional>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
-#include <bitcoin/define.hpp>
-#include <bitcoin/network/handshake.hpp>
-#include <bitcoin/network/network.hpp>
-#include <bitcoin/version.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/handshake.hpp>
+#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/version.hpp>
 #ifndef NO_CURL
 #include <curl/curl.h>
 #endif

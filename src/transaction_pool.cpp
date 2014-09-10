@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/error.hpp>
-#include <bitcoin/transaction.hpp>
-#include <bitcoin/transaction_pool.hpp>
-#include <bitcoin/utility/assert.hpp>
-#include <bitcoin/validate.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/transaction.hpp>
+#include <bitcoin/bitcoin/transaction_pool.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/validate.hpp>
 
 namespace libbitcoin {
 

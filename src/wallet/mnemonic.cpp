@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/wallet/mnemonic.hpp>
+#include <bitcoin/bitcoin/wallet/mnemonic.hpp>
 
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
 #include <sstream>
-#include <bitcoin/define.hpp>
-#include <bitcoin/format.hpp>
-#include <bitcoin/types.hpp>
-#include <bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
