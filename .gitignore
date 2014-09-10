@@ -38,5 +38,6 @@ libbitcoin_1.0.10-1_amd64.deb
 /examples/proto
 /examples/satoshiwords
 /examples/txrad
+/examples/uri
 /examples/error.log
 /examples/debug.log
