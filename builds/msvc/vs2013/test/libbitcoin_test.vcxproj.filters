@@ -10,9 +10,6 @@
     <ClCompile Include="..\..\..\..\test\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\serial.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stealth.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -47,6 +44,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\script_number.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\serialize.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\hash_number.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
