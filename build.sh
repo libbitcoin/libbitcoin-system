@@ -54,13 +54,12 @@ check_travis()
 
 clean_usr_local()
 {
-    # Remove previous usr/local installations.
-    # Only installations conforming to the directory structure (with /bitcoin
-    # at the root of all libraries) are fully cleaned.
+    # Remove previous usr/local libbitcoin installations.
+    # Only installations conforming to the directory structure are cleaned.
 
     # Includes
-    sudo rm --recursive --force /usr/local/include/bitcoin/bitcoin
     sudo rm --force /usr/local/include/bitcoin/bitcoin.hpp
+    sudo rm --force --recursive /usr/local/include/bitcoin/bitcoin
 
     # Archives
     sudo rm --force /usr/local/lib/libbitcoin.a
@@ -105,7 +104,7 @@ create_build_directory()
     echo "This script will erase and build in: "$BUILD_DIRECTORY
 
     # Cache credentials for subsequent sudo calls.
-    sudo rm --recursive --force $BUILD_DIRECTORY
+    sudo rm --force --recursive $BUILD_DIRECTORY
     mkdir $BUILD_DIRECTORY
     cd $BUILD_DIRECTORY
 
@@ -136,12 +135,11 @@ build_library()
 
 delete_build_directory()
 {
-    # If we succeed clean up the build directory.
-    # This precludes use of 'make uninstall' however that would need to be 
+    # This precludes use of a 'make uninstall' however that would need to be 
     # applied to dependencies as well. Typically each time a git pull occurs 
     # into a build directory the uninstall is potentially invalidated. This 
     # approach allows us to perform a complete uninstall across all versions.
-    sudo rm --recursive --force $BUILD_DIRECTORY
+    sudo rm --force --recursive $BUILD_DIRECTORY
 }
 
 # Exit this script on the first error (any statement returns non-true value).
@@ -153,6 +151,6 @@ create_build_directory
 # Build libbitcoin.
 build_library "$@"
 
-# Clean up
+# If the build succeeded clean up the build directory.
 delete_build_directory
 
