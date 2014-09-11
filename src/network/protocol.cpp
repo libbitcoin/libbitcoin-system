@@ -23,6 +23,7 @@
 #include <bitcoin/bitcoin/network/protocol.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -611,5 +612,5 @@ void protocol::subscribe_channel(channel_handler handle_channel)
     channel_subscribe_->subscribe(handle_channel);
 }
 
+} // namespace network
 } // namespace libbitcoin
-

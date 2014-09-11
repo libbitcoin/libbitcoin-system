@@ -33,14 +33,14 @@ poller::poller(threadpool& pool, blockchain& chain)
 {
 }
 
-void poller::query(channel_ptr node)
+void poller::query(network::channel_ptr node)
 {
     fetch_block_locator(chain_,
         std::bind(&poller::initial_ask_blocks,
             this, _1, _2, node));
 }
 
-void poller::monitor(channel_ptr node)
+void poller::monitor(network::channel_ptr node)
 {
     node->subscribe_inventory(
         strand_.wrap(std::bind(&poller::receive_inv,
@@ -51,7 +51,7 @@ void poller::monitor(channel_ptr node)
 }
 
 void poller::initial_ask_blocks(const std::error_code& ec,
-    const block_locator_type& locator, channel_ptr node)
+    const block_locator_type& locator, network::channel_ptr node)
 {
     if (ec)
     {
@@ -70,7 +70,7 @@ void handle_send_packet(const std::error_code& ec)
 }
 
 void poller::receive_inv(const std::error_code& ec,
-    const inventory_type& packet, channel_ptr node)
+    const inventory_type& packet, network::channel_ptr node)
 {
     if (ec)
     {
@@ -99,7 +99,7 @@ void poller::receive_inv(const std::error_code& ec,
 }
 
 void poller::receive_block(const std::error_code& ec,
-    const block_type& blk, channel_ptr node)
+    const block_type& blk, network::channel_ptr node)
 {
     if (ec)
     {
@@ -115,7 +115,7 @@ void poller::receive_block(const std::error_code& ec,
 }
 
 void poller::handle_store(const std::error_code& ec, block_info info,
-    const hash_digest& block_hash, channel_ptr node)
+    const hash_digest& block_hash, network::channel_ptr node)
 {
     // We need orphan blocks so we can do the next getblocks round
     if (ec && info.status != block_status::orphan)
@@ -150,7 +150,7 @@ void poller::handle_store(const std::error_code& ec, block_info info,
 
 void poller::ask_blocks(const std::error_code& ec,
     const block_locator_type& locator,
-    const hash_digest& hash_stop, channel_ptr node)
+    const hash_digest& hash_stop, network::channel_ptr node)
 {
     if (ec)
     {

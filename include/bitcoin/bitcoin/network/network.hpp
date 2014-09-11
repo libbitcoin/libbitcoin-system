@@ -32,6 +32,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 class acceptor
   : public std::enable_shared_from_this<acceptor>
@@ -81,6 +82,7 @@ private:
     threadpool& pool_;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

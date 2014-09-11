@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/threadpool.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 class hosts
 {
@@ -81,6 +82,7 @@ private:
     boost::circular_buffer<hosts_field> buffer_;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

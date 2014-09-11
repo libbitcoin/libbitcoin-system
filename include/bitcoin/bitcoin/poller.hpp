@@ -30,23 +30,23 @@ class poller
 {
 public:
     BC_API poller(threadpool& pool, blockchain& chain);
-    BC_API void query(channel_ptr node);
-    BC_API void monitor(channel_ptr node);
+    BC_API void query(network::channel_ptr node);
+    BC_API void monitor(network::channel_ptr node);
 
 private:
     void initial_ask_blocks(const std::error_code& ec,
-        const block_locator_type& locator, channel_ptr node);
+        const block_locator_type& locator, network::channel_ptr node);
 
     void receive_inv(const std::error_code& ec,
-        const inventory_type& packet, channel_ptr node);
+        const inventory_type& packet, network::channel_ptr node);
     void receive_block(const std::error_code& ec,
-        const block_type& blk, channel_ptr node);
+        const block_type& blk, network::channel_ptr node);
 
     void handle_store(const std::error_code& ec, block_info info,
-        const hash_digest& block_hash, channel_ptr node);
+        const hash_digest& block_hash, network::channel_ptr node);
     void ask_blocks(const std::error_code& ec,
         const block_locator_type& locator,
-        const hash_digest& hash_stop, channel_ptr node);
+        const hash_digest& hash_stop, network::channel_ptr node);
 
     boost::asio::io_service::strand strand_;
     blockchain& chain_;

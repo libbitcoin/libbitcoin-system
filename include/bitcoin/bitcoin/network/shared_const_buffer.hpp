@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 // A reference-counted non-modifiable buffer class.
 class shared_const_buffer
@@ -56,6 +57,7 @@ private:
     value_type buffer_;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

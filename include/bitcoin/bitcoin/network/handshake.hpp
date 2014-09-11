@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 class handshake
 {
@@ -97,6 +98,7 @@ BC_API void connect(handshake& shake, network& net,
     const std::string& hostname, uint16_t port,
     network::connect_handler handle_connect);
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

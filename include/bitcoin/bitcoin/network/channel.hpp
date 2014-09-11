@@ -42,6 +42,7 @@
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 template <typename Message>
 data_chunk create_raw_message(const Message& packet)
@@ -336,6 +337,7 @@ private:
     std::weak_ptr<channel_proxy> weak_proxy_;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

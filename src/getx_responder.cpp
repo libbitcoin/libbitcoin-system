@@ -32,7 +32,7 @@ getx_responder::getx_responder(blockchain& chain, transaction_pool& txpool)
 {
 }
 
-void getx_responder::monitor(channel_ptr node)
+void getx_responder::monitor(network::channel_ptr node)
 {
     // Use this wrapper to add shared state to our node for inv
     // requests to trigger getblocks requests so a node can continue
@@ -82,7 +82,7 @@ void getx_responder::receive_get_data(const std::error_code& ec,
 
 void getx_responder::pool_tx(const std::error_code& ec,
     const transaction_type& tx, const hash_digest& tx_hash,
-    channel_ptr node)
+    network::channel_ptr node)
 {
     if (ec)
     {
@@ -95,7 +95,7 @@ void getx_responder::pool_tx(const std::error_code& ec,
 }
 
 void getx_responder::chain_tx(const std::error_code& ec,
-    const transaction_type& tx, channel_ptr node)
+    const transaction_type& tx, network::channel_ptr node)
 {
     if (ec)
         return;
@@ -103,7 +103,7 @@ void getx_responder::chain_tx(const std::error_code& ec,
 }
 
 void getx_responder::send_block(const std::error_code& ec,
-    const block_type& blk, channel_ptr node)
+    const block_type& blk, network::channel_ptr node)
 {
     if (ec)
         return;

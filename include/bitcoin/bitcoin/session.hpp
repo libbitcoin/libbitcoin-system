@@ -33,8 +33,8 @@ namespace libbitcoin {
 
 struct BC_API session_params
 {
-    handshake& handshake_;
-    protocol& protocol_;
+    network::handshake& handshake_;
+    network::protocol& protocol_;
     blockchain& blockchain_;
     poller& poller_;
     transaction_pool& transaction_pool_;
@@ -108,26 +108,26 @@ public:
     BC_API void stop(completion_handler handle_complete);
 
 private:
-    void new_channel(const std::error_code& ec, channel_ptr node);
+    void new_channel(const std::error_code& ec, network::channel_ptr node);
     void set_start_height(const std::error_code& ec, size_t fork_point,
         const blockchain::block_list& new_blocks,
         const blockchain::block_list& replaced_blocks);
 
     void inventory(const std::error_code& ec,
-        const inventory_type& packet, channel_ptr node);
+        const inventory_type& packet, network::channel_ptr node);
     void get_data(const std::error_code& ec,
-        const get_data_type& packet, channel_ptr node);
+        const get_data_type& packet, network::channel_ptr node);
     void get_blocks(const std::error_code& ec,
-        const get_blocks_type& packet, channel_ptr node);
+        const get_blocks_type& packet, network::channel_ptr node);
 
-    void new_tx_inventory(const hash_digest& tx_hash, channel_ptr node);
+    void new_tx_inventory(const hash_digest& tx_hash, network::channel_ptr node);
     void request_tx_data(bool tx_exists,
-        const hash_digest& tx_hash, channel_ptr node);
+        const hash_digest& tx_hash, network::channel_ptr node);
 
     boost::asio::io_service::strand strand_;
 
-    handshake& handshake_;
-    protocol& protocol_;
+    network::handshake& handshake_;
+    network::protocol& protocol_;
     blockchain& chain_;
     poller& poll_;
     transaction_pool& tx_pool_;
