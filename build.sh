@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script to build and install Bitcoin Explorer and unpackaged dependencies.
+# Script to build and install Libbitcoin and unpackaged dependencies.
 #
 # This build script is based on a few ideas.
 # -----------------------------------------------------------------------------
@@ -85,14 +85,20 @@ build_primary()
 {
     # Remain in the primary directory after completing the build.
     if [ "$TRAVIS" = "true" ]; then
-        # If the environment is Travis just build the parent directory.
+        # If the environment is Travis drop out of build directory.
         cd ..
         display_message "Local $TRAVIS_REPO_SLUG"
 	    automake_current_directory "$@"
+        build_tests
     else
         # Otherwise we pull the primary repo down for the single file install.
         build_from_github $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH "$@"
-        cd $BUILD_REPO
+
+        # Build the tests and drop out of build directory.
+        pushd $BUILD_REPO
+        build_tests
+        popd
+        cd ..
     fi
 }
 
@@ -149,9 +155,6 @@ build_library()
 
     # The primary build is not downloaded if we are running in Travis.
     build_primary "$@"
-    
-    # Build and run unit tests.
-    build_tests
 
     # If the build succeeded clean up the build directory.
     delete_build_directory
