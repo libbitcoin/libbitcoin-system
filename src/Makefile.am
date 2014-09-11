@@ -10,6 +10,7 @@ libbitcoin_la_SOURCES = \
 	address.cpp \
 	blockchain/blockchain.cpp \
 	block.cpp \
+	compat.cpp \
 	constants.cpp \
 	error.cpp \
 	format.cpp \

@@ -8,6 +8,7 @@ bitcoin_bitcoin_include_HEADERS = \
     bitcoin/address.hpp \
     bitcoin/block.hpp \
     bitcoin/compat.h \
+    bitcoin/compat.hpp \
     bitcoin/constants.hpp \
     bitcoin/define.hpp \
     bitcoin/error.hpp \

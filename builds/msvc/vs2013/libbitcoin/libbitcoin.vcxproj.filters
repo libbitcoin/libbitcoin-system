@@ -200,6 +200,9 @@
     <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\compat.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp">
@@ -259,9 +262,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\sha256.h">
       <Filter>include\bitcoin\utility\external</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\sha1.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\zeroize.h">
       <Filter>include\bitcoin\utility\external</Filter>
     </ClInclude>
@@ -314,9 +314,6 @@
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\block.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp">
@@ -375,6 +372,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin.hpp">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\sha1.h">
+      <Filter>include\bitcoin\utility\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.hpp">
+      <Filter>include\bitcoin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h">
+      <Filter>include\bitcoin</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
