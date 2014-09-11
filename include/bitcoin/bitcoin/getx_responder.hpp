@@ -36,14 +36,14 @@ class getx_responder
 {
 public:
     BC_API getx_responder(blockchain& chain, transaction_pool& txpool);
-    BC_API void monitor(channel_ptr node);
+    BC_API void monitor(network::channel_ptr node);
 
 private:
     // We use this object to keep track of the hash_continue and add
     // a shared state to our channel object.
     struct channel_with_state
     {
-        channel_ptr node;
+        network::channel_ptr node;
         hash_digest hash_continue = null_hash;
     };
 
@@ -51,12 +51,12 @@ private:
         const get_data_type& packet, channel_with_state special);
 
     void pool_tx(const std::error_code& ec, const transaction_type& tx,
-        const hash_digest& tx_hash, channel_ptr node);
+        const hash_digest& tx_hash, network::channel_ptr node);
     void chain_tx(const std::error_code& ec,
-        const transaction_type& tx, channel_ptr node);
+        const transaction_type& tx, network::channel_ptr node);
 
     void send_block(const std::error_code& ec,
-        const block_type& blk, channel_ptr node);
+        const block_type& blk, network::channel_ptr node);
 
     blockchain& chain_;
     transaction_pool& txpool_;

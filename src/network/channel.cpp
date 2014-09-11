@@ -21,6 +21,7 @@
 #include <bitcoin/bitcoin/utility/checksum.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -616,5 +617,5 @@ void channel::subscribe_stop(
         proxy->subscribe_stop(handle_stop);
 }
 
+} // namespace network
 } // namespace libbitcoin
-

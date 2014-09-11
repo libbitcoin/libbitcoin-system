@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_NETWORK_HPP
-#define LIBBITCOIN_NETWORK_NETWORK_HPP
+#ifndef LIBBITCOIN_NETWORK_HPP
+#define LIBBITCOIN_NETWORK_HPP
 
 #include <memory>
 #include <thread>
@@ -32,6 +32,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 class acceptor
   : public std::enable_shared_from_this<acceptor>
@@ -81,6 +82,7 @@ private:
     threadpool& pool_;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

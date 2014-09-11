@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NET_CHANNEL_HPP
-#define LIBBITCOIN_NET_CHANNEL_HPP
+#ifndef LIBBITCOIN_CHANNEL_HPP
+#define LIBBITCOIN_CHANNEL_HPP
 
 #include <atomic>
 #include <cstdint>
@@ -42,6 +42,7 @@
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 template <typename Message>
 data_chunk create_raw_message(const Message& packet)
@@ -336,6 +337,7 @@ private:
     std::weak_ptr<channel_proxy> weak_proxy_;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

@@ -17,14 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NET_SHARED_CONST_BUFFER_HPP
-#define LIBBITCOIN_NET_SHARED_CONST_BUFFER_HPP
+#ifndef LIBBITCOIN_SHARED_CONST_BUFFER_HPP
+#define LIBBITCOIN_SHARED_CONST_BUFFER_HPP
 
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 // A reference-counted non-modifiable buffer class.
 class shared_const_buffer
@@ -56,6 +57,7 @@ private:
     value_type buffer_;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

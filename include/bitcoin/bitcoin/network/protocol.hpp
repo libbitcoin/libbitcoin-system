@@ -31,6 +31,7 @@
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 class hosts;
 class handshake;
@@ -346,6 +347,7 @@ private:
     channel_subscriber_type::ptr channel_subscribe_;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif

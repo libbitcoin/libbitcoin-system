@@ -48,11 +48,11 @@
  *
  * These services are concerned with the network side of things.
  *
- * - @link libbitcoin::channel channel @endlink
- * - @link libbitcoin::network network @endlink
- * - @link libbitcoin::protocol protocol @endlink
- * - @link libbitcoin::hosts hosts @endlink
- * - @link libbitcoin::handshake handshake @endlink
+ * - @link libbitcoin::network::channel channel @endlink
+ * - @link libbitcoin::network::network network @endlink
+ * - @link libbitcoin::network::protocol protocol @endlink
+ * - @link libbitcoin::network::hosts hosts @endlink
+ * - @link libbitcoin::network::handshake handshake @endlink
  *
  * @subsection supporting Supporting services
  *
@@ -171,6 +171,7 @@
 #endif
 #include <bitcoin/bitcoin/blockchain/blockchain.hpp>
 #include <bitcoin/bitcoin/block.hpp>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>

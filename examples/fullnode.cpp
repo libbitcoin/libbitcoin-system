@@ -22,9 +22,7 @@
   "./blockchain/" and initialized using ./initchain
 */
 #include <future>
-#ifdef _MSC_VER
 #include <iostream>
-#endif
 #include <bitcoin/bitcoin.hpp>
 
 // THIS FILE IS CURRENTLY BUILD DISABLED CAUSE OF EXTERNAL BREAKING CHANGES.

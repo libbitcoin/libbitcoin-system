@@ -44,7 +44,7 @@ void session::start(completion_handler handle_complete)
 {
     protocol_.start(handle_complete);
     protocol_.subscribe_channel(
-        [this](const std::error_code& ec, channel_ptr node)
+        [this](const std::error_code& ec, network::channel_ptr node)
         {
             BITCOIN_ASSERT(!ec || ec == error::service_stopped);
             if (!ec)
@@ -53,7 +53,7 @@ void session::start(completion_handler handle_complete)
     protocol_.subscribe_channel(
         std::bind(&session::new_channel, this, _1, _2));
     chain_.fetch_last_height(
-        std::bind(&handshake::set_start_height,
+        std::bind(&network::handshake::set_start_height,
             &handshake_, _2, handle_handshake_height_set));
     chain_.subscribe_reorganize(
         std::bind(&session::set_start_height,
@@ -65,7 +65,7 @@ void session::stop(completion_handler handle_complete)
     protocol_.stop(handle_complete);
 }
 
-void session::new_channel(const std::error_code& ec, channel_ptr node)
+void session::new_channel(const std::error_code& ec, network::channel_ptr node)
 {
     if (ec)
     {
@@ -111,7 +111,7 @@ void session::set_start_height(const std::error_code& ec, size_t fork_point,
 }
 
 void session::inventory(const std::error_code& ec,
-    const inventory_type& packet, channel_ptr node)
+    const inventory_type& packet, network::channel_ptr node)
 {
     if (ec)
     {
@@ -133,7 +133,8 @@ void session::inventory(const std::error_code& ec,
         std::bind(&session::inventory, this, _1, _2, node));
 }
 
-void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
+void session::new_tx_inventory(const hash_digest& tx_hash, 
+    network::channel_ptr node)
 {
     if (grabbed_invs_.exists(tx_hash))
         return;
@@ -148,7 +149,7 @@ void session::new_tx_inventory(const hash_digest& tx_hash, channel_ptr node)
 }
 
 void session::get_blocks(const std::error_code& ec,
-    const get_blocks_type& /* packet */, channel_ptr node)
+    const get_blocks_type& /* packet */, network::channel_ptr node)
 {
     if (ec)
     {
@@ -169,7 +170,7 @@ void handle_send_get_data(const std::error_code& ec)
         log_error(LOG_SESSION) << "Requesting data: " << ec.message();
 }
 void session::request_tx_data(bool tx_exists,
-    const hash_digest& tx_hash, channel_ptr node)
+    const hash_digest& tx_hash, network::channel_ptr node)
 {
     if (tx_exists)
         return;

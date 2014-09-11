@@ -17,95 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/timed_section.hpp>
 
-#ifdef __MACH__
-// Mac clock_gettime
-#include <mach/clock.h>
-#include <mach/mach.h>
-#define CLOCK_REALTIME 0
-
-void clock_gettime(int ign, struct timespec* ts)
-{
-    clock_serv_t cclock;
-    mach_timespec_t mts;
-    host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
-    clock_get_time(cclock, &mts);
-    mach_port_deallocate(mach_task_self(), cclock);
-    ts->tv_sec = mts.tv_sec;
-    ts->tv_nsec = mts.tv_nsec;
-}
-#endif
-
-#ifdef _WIN32
-// THIS SECTION IS UNTESTED
-// Windows clock_gettime from: http://stackoverflow.com/a/5404467/1172329
-#define CLOCK_REALTIME 0
-
-LARGE_INTEGER getFILETIMEoffset()
-{
-    FILETIME filetime;
-    SYSTEMTIME systime;
-    LARGE_INTEGER time;
-    systime.wYear = 1970;
-    systime.wMonth = 1;
-    systime.wDay = 1;
-    systime.wHour = 0;
-    systime.wMinute = 0;
-    systime.wSecond = 0;
-    systime.wMilliseconds = 0;
-    SystemTimeToFileTime(&systime, &filetime);
-    time.QuadPart = filetime.dwHighDateTime;
-    time.QuadPart <<= 32;
-    time.QuadPart |= filetime.dwLowDateTime;
-    return time;
-}
-
-void clock_gettime(int ign, timespec* ts)
-{
-    static bool initialized = false;
-    static bool usePerformanceCounter = false;
-    static double frequencyToNanoseconds;
-    static LARGE_INTEGER offset;
-
-    // Initialize statics
-    if (!initialized) {
-        initialized = true;
-
-        LARGE_INTEGER performanceFrequency;
-        usePerformanceCounter = QueryPerformanceFrequency(&performanceFrequency) != FALSE;
-
-        if (usePerformanceCounter) {
-            QueryPerformanceCounter(&offset);
-            frequencyToNanoseconds = (double)performanceFrequency.QuadPart / 1000000000.0;
-        } else {
-            offset = getFILETIMEoffset();
-
-            // A file time is a 64-bit value that represents the number of 100-nanosecond intervals.
-            // This was a factor of 10 for conversion to ms so must divide by 100 to convert to ns.
-            frequencyToNanoseconds = .01;
-        }
-    }
-
-    FILETIME ft;
-    LARGE_INTEGER time;
-
-    if (usePerformanceCounter) 
-        QueryPerformanceCounter(&time);
-    else {
-        GetSystemTimeAsFileTime(&ft);
-        time.QuadPart = ft.dwHighDateTime;
-        time.QuadPart <<= 32;
-        time.QuadPart |= ft.dwLowDateTime;
-    }
-
-    time.QuadPart -= offset.QuadPart;
-    double nanoseconds = (double)time.QuadPart / frequencyToNanoseconds;
-    ts->tv_sec = (time_t)(nanoseconds / 1000000000);
-    ts->tv_nsec = (int32_t)(((int64_t)nanoseconds) % 1000000000);
-}
-#endif
+#include <bitcoin/bitcoin/compat.h>
+#include <bitcoin/bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
 

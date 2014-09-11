@@ -28,6 +28,7 @@
 #include <curl/curl.h>
 #endif
 namespace libbitcoin {
+namespace network {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -272,5 +273,6 @@ void connect(handshake& shake, network& net,
         std::bind(finish_connect, _1, _2, std::ref(shake), handle_connect));
 }
 
+} // namespace network
 } // namespace libbitcoin
 

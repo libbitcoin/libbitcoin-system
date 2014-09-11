@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/utility/logger.hpp>
 
 namespace libbitcoin {
+namespace network {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -182,5 +183,6 @@ void network::listen(uint16_t port, listen_handler handle_listen)
     handle_listen(std::error_code(), accept);
 }
 
+} // namespace network
 } // namespace libbitcoin
 

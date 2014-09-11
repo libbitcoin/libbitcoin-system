@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_IMPL_SERIALIZE_BLOCK_IPP
-#define LIBBITCOIN_IMPL_SERIALIZE_BLOCK_IPP
+#ifndef LIBBITCOIN_BLOCK_IPP
+#define LIBBITCOIN_BLOCK_IPP
 
 namespace libbitcoin {
 

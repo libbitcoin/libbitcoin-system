@@ -71,6 +71,7 @@
     <ClCompile Include="..\..\..\..\src\address.cpp" />
     <ClCompile Include="..\..\..\..\src\block.cpp" />
     <ClCompile Include="..\..\..\..\src\blockchain\blockchain.cpp" />
+    <ClCompile Include="..\..\..\..\src\compat.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
     <ClCompile Include="..\..\..\..\src\format.cpp" />
@@ -118,6 +119,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\blockchain\blockchain.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\define.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\error.hpp" />

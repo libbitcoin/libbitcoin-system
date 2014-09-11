@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef  LIBBITCOIN_UTILITY_SUBSCRIBER_HPP
-#define  LIBBITCOIN_UTILITY_SUBSCRIBER_HPP
+#ifndef  LIBBITCOIN_SUBSCRIBER_HPP
+#define  LIBBITCOIN_SUBSCRIBER_HPP
 
 #include <stack>
 #include <bitcoin/bitcoin/types.hpp>

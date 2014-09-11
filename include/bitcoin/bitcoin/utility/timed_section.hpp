@@ -17,22 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_UTILITY_TIMED_SECTION_HPP
-#define LIBBITCOIN_UTILITY_TIMED_SECTION_HPP
+#ifndef LIBBITCOIN_TIMED_SECTION_HPP
+#define LIBBITCOIN_TIMED_SECTION_HPP
 
 #include <ctime>
 #include <string>
-
-#ifdef _WIN32
-#include <stdint.h>
-#include <windows.h>
-#define CLOCK_REALTIME 0
-typedef struct {
-    time_t tv_sec;
-    int32_t tv_nsec;
-} timespec;
-#endif
-
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
@@ -44,6 +34,7 @@ public:
         const std::string& context, const std::string& section);
     BC_API ~timed_section();
     BC_API double elapsed() const;
+
 private:
     const std::string context_, section_;
     timespec start_;
