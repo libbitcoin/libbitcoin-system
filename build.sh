@@ -83,6 +83,7 @@ build_from_github()
 
 build_primary()
 {
+    # Remain in the primary directory after completing the build.
     if [ "$TRAVIS" = "true" ]; then
         # If the environment is Travis just build the parent directory.
         cd ..
@@ -91,13 +92,14 @@ build_primary()
     else
         # Otherwise we pull the primary repo down for the single file install.
         build_from_github $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH "$@"
+        cd $BUILD_REPO
     fi
 }
 
 build_tests()
 {
     # Build and run unit tests relative to the primary directory.
-    pushd libbitcoin/test
+    pushd test
     ./make.sh
     ./test_libbitcoin $BOOST_UNIT_TEST_PARAMETERS
     popd
