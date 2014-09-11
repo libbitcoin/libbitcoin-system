@@ -83,7 +83,6 @@ build_from_github()
 
 build_primary()
 {
-    # Remain in the primary directory after completing the build.
     if [ "$TRAVIS" = "true" ]; then
         # If the environment is Travis drop out of build directory.
         cd ..
