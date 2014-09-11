@@ -23,7 +23,7 @@
 
 namespace libbitcoin {
 
-BC_API void append_checksum(data_chunk& data)
+void append_checksum(data_chunk& data)
 {
     uint32_t checksum = bitcoin_checksum(data);
     extend_data(data, to_little_endian(checksum));
@@ -35,7 +35,7 @@ uint32_t bitcoin_checksum(const data_chunk& chunk)
     return from_little_endian<uint32_t>(hash.rbegin());
 }
 
-BC_API bool verify_checksum(const data_chunk& data)
+bool verify_checksum(const data_chunk& data)
 {
     const size_t checksum_length = 4;
 

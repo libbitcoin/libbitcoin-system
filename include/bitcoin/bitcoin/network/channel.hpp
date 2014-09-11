@@ -70,17 +70,17 @@ data_chunk create_raw_message(const Message& packet)
 class channel_loader_module_base
 {
 public:
-    virtual ~channel_loader_module_base() {}
-    virtual void attempt_load(const data_chunk& stream) const = 0;
-    virtual const std::string lookup_symbol() const = 0;
+    BC_API virtual ~channel_loader_module_base() {}
+    BC_API virtual void attempt_load(const data_chunk& stream) const = 0;
+    BC_API virtual const std::string lookup_symbol() const = 0;
 };
 
 class channel_stream_loader
 {
 public:
     ~channel_stream_loader();
-    void add(channel_loader_module_base* module);
-    void load_lookup(const std::string& symbol,
+    BC_API void add(channel_loader_module_base* module);
+    BC_API void load_lookup(const std::string& symbol,
         const data_chunk& stream) const;
 private:
     typedef std::vector<channel_loader_module_base*> module_list;
@@ -126,15 +126,15 @@ public:
 
     typedef std::function<void (const std::error_code&)> stop_handler;
 
-    channel_proxy(threadpool& pool, socket_ptr socket);
-    ~channel_proxy();
+    BC_API channel_proxy(threadpool& pool, socket_ptr socket);
+    BC_API ~channel_proxy();
 
-    channel_proxy(const channel_proxy&) = delete;
-    void operator=(const channel_proxy&) = delete;
+    BC_API channel_proxy(const channel_proxy&) = delete;
+    BC_API void operator=(const channel_proxy&) = delete;
 
-    void start();
-    void stop();
-    bool stopped() const;
+    BC_API void start();
+    BC_API void stop();
+    BC_API bool stopped() const;
 
     // List of bitcoin messages
     // version
@@ -169,21 +169,24 @@ public:
                 });
         }
     }
-    void send_raw(const header_type& packet_header,
+    BC_API void send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
-    void subscribe_version(receive_version_handler handle_receive);
-    void subscribe_verack(receive_verack_handler handle_receive);
-    void subscribe_address(receive_address_handler handle_receive);
-    void subscribe_get_address(receive_get_address_handler handle_receive);
-    void subscribe_inventory(receive_inventory_handler handle_receive);
-    void subscribe_get_data(receive_get_data_handler handle_receive);
-    void subscribe_get_blocks(receive_get_blocks_handler handle_receive);
-    void subscribe_transaction(receive_transaction_handler handle_receive);
-    void subscribe_block(receive_block_handler handle_receive);
-    void subscribe_raw(receive_raw_handler handle_receive);
+    BC_API void subscribe_version(receive_version_handler handle_receive);
+    BC_API void subscribe_verack(receive_verack_handler handle_receive);
+    BC_API void subscribe_address(receive_address_handler handle_receive);
+    BC_API void subscribe_get_address(
+        receive_get_address_handler handle_receive);
+    BC_API void subscribe_inventory(receive_inventory_handler handle_receive);
+    BC_API void subscribe_get_data(receive_get_data_handler handle_receive);
+    BC_API void subscribe_get_blocks(
+        receive_get_blocks_handler handle_receive);
+    BC_API void subscribe_transaction(
+        receive_transaction_handler handle_receive);
+    BC_API void subscribe_block(receive_block_handler handle_receive);
+    BC_API void subscribe_raw(receive_raw_handler handle_receive);
 
-    void subscribe_stop(stop_handler handle_stop);
+    BC_API void subscribe_stop(stop_handler handle_stop);
 
 private:
     typedef subscriber<const std::error_code&, const version_type&>
@@ -211,7 +214,7 @@ private:
 
     void do_send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
-    BC_API void do_send_common(const data_chunk& whole_message,
+    void do_send_common(const data_chunk& whole_message,
         send_handler handle_send);
 
     template <typename Message, typename Callback, typename SubscriberPtr>

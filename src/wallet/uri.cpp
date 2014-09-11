@@ -92,7 +92,7 @@ static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
     return out;
 }
 
-BC_API bool uri_parse(const std::string& uri, uri_visitor& result,
+bool uri_parse(const std::string& uri, uri_visitor& result,
     bool strict)
 {
     auto i = uri.begin();
@@ -138,7 +138,7 @@ BC_API bool uri_parse(const std::string& uri, uri_visitor& result,
     return true;
 }
 
-BC_API bool uri_parse_result::got_address(std::string& address)
+bool uri_parse_result::got_address(std::string& address)
 {
     payment_address payaddr;
     if (!payaddr.set_encoded(address))
@@ -147,7 +147,7 @@ BC_API bool uri_parse_result::got_address(std::string& address)
     return true;
 }
 
-BC_API bool uri_parse_result::got_param(std::string& key, std::string& value)
+bool uri_parse_result::got_param(std::string& key, std::string& value)
 {
     const uint64_t invalid_amount = MAX_UINT64;
     if (key == "amount")
@@ -186,43 +186,43 @@ static std::string escape(const std::string& in, bool (*is_valid)(char))
     return stream.str();
 }
 
-BC_API uri_writer::uri_writer()
+uri_writer::uri_writer()
   : first_param_{true}
 {
     stream_ << "bitcoin:";
 }
 
-BC_API void uri_writer::write_address(const payment_address& address)
+void uri_writer::write_address(const payment_address& address)
 {
     write_address(address.encoded());
 }
 
-BC_API void uri_writer::write_amount(uint64_t satoshis)
+void uri_writer::write_amount(uint64_t satoshis)
 {
     write_param("amount", format_amount(satoshis));
 }
 
-BC_API void uri_writer::write_label(const std::string& label)
+void uri_writer::write_label(const std::string& label)
 {
     write_param("label", label);
 }
 
-BC_API void uri_writer::write_message(const std::string& message)
+void uri_writer::write_message(const std::string& message)
 {
     write_param("message", message);
 }
 
-BC_API void uri_writer::write_r(const std::string& r)
+void uri_writer::write_r(const std::string& r)
 {
     write_param("r", r);
 }
 
-BC_API void uri_writer::write_address(const std::string& address)
+void uri_writer::write_address(const std::string& address)
 {
     stream_ << address;
 }
 
-BC_API void uri_writer::write_param(const std::string& key,
+void uri_writer::write_param(const std::string& key,
     const std::string& value)
 {
     if (first_param_)
@@ -233,7 +233,7 @@ BC_API void uri_writer::write_param(const std::string& key,
     stream_ << escape(key, is_qchar) << '=' << escape(value, is_qchar);
 }
 
-BC_API std::string uri_writer::string() const
+std::string uri_writer::string() const
 {
     return stream_.str();
 }

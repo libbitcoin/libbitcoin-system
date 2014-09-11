@@ -184,7 +184,7 @@ uint64_t total_output_value(const transaction_type& tx)
     return total;
 }
 
-BC_API select_outputs_result select_outputs(
+select_outputs_result select_outputs(
     output_info_list unspent, uint64_t min_value,
     select_outputs_algorithm algorithm)
 {

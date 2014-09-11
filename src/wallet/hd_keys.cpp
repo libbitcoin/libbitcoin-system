@@ -57,38 +57,38 @@ static split_long_hash split(const long_hash& hmac)
     return I;
 }
 
-BC_API hd_public_key::hd_public_key()
+hd_public_key::hd_public_key()
   : valid_(false)
 {
 }
 
-BC_API hd_public_key::hd_public_key(const ec_point& public_key,
+hd_public_key::hd_public_key(const ec_point& public_key,
     const chain_code_type& chain_code, hd_key_lineage lineage)
   : valid_(true), K_(public_key), c_(chain_code), lineage_(lineage)
 {
 }
 
-BC_API bool hd_public_key::valid() const
+bool hd_public_key::valid() const
 {
     return valid_;
 }
 
-BC_API const ec_point& hd_public_key::public_key() const
+const ec_point& hd_public_key::public_key() const
 {
     return K_;
 }
 
-BC_API const chain_code_type& hd_public_key::chain_code() const
+const chain_code_type& hd_public_key::chain_code() const
 {
     return c_;
 }
 
-BC_API const hd_key_lineage& hd_public_key::lineage() const
+const hd_key_lineage& hd_public_key::lineage() const
 {
     return lineage_;
 }
 
-BC_API bool hd_public_key::set_encoded(std::string encoded)
+bool hd_public_key::set_encoded(std::string encoded)
 {
     if (!is_base58(encoded))
         return false;
@@ -113,7 +113,7 @@ BC_API bool hd_public_key::set_encoded(std::string encoded)
     return true;
 }
 
-BC_API std::string hd_public_key::encoded() const
+std::string hd_public_key::encoded() const
 {
     data_chunk data;
     data.reserve(serialized_length);
@@ -132,20 +132,20 @@ BC_API std::string hd_public_key::encoded() const
     return encode_base58(data);
 }
 
-BC_API uint32_t hd_public_key::fingerprint() const
+uint32_t hd_public_key::fingerprint() const
 {
     short_hash md = bitcoin_short_hash(K_);
     return from_little_endian<uint32_t>(md.begin());
 }
 
-BC_API payment_address hd_public_key::address() const
+payment_address hd_public_key::address() const
 {
     payment_address address;
     set_public_key(address, K_);
     return address;
 }
 
-BC_API hd_public_key hd_public_key::generate_public_key(uint32_t i) const
+hd_public_key hd_public_key::generate_public_key(uint32_t i) const
 {
     if (!valid_)
         return hd_private_key();
@@ -172,19 +172,19 @@ BC_API hd_public_key hd_public_key::generate_public_key(uint32_t i) const
     return hd_public_key(Ki, I.R, lineage);
 }
 
-BC_API hd_private_key::hd_private_key()
+hd_private_key::hd_private_key()
   : hd_public_key()
 {
 }
 
-BC_API hd_private_key::hd_private_key(const ec_secret& private_key,
+hd_private_key::hd_private_key(const ec_secret& private_key,
     const chain_code_type& chain_code, hd_key_lineage lineage)
   : hd_public_key(secret_to_public_key(private_key), chain_code, lineage),
     k_(private_key)
 {
 }
 
-BC_API hd_private_key::hd_private_key(const data_chunk& seed, bool testnet)
+hd_private_key::hd_private_key(const data_chunk& seed, bool testnet)
   : hd_public_key()
 {
     std::string key("Bitcoin seed");
@@ -198,12 +198,12 @@ BC_API hd_private_key::hd_private_key(const data_chunk& seed, bool testnet)
     *this = hd_private_key(I.L, I.R, lineage);
 }
 
-BC_API const ec_secret& hd_private_key::private_key() const
+const ec_secret& hd_private_key::private_key() const
 {
     return k_;
 }
 
-BC_API bool hd_private_key::set_encoded(std::string encoded)
+bool hd_private_key::set_encoded(std::string encoded)
 {
     if (!is_base58(encoded))
         return false;
@@ -230,7 +230,7 @@ BC_API bool hd_private_key::set_encoded(std::string encoded)
     return true;
 }
 
-BC_API std::string hd_private_key::encoded() const
+std::string hd_private_key::encoded() const
 {
     data_chunk data;
     data.reserve(4 + 1 + 4 + 4 + 32 + 33 + 4);
@@ -250,7 +250,7 @@ BC_API std::string hd_private_key::encoded() const
     return encode_base58(data);
 }
 
-BC_API hd_private_key hd_private_key::generate_private_key(uint32_t i) const
+hd_private_key hd_private_key::generate_private_key(uint32_t i) const
 {
     if (!valid_)
         return hd_private_key();
@@ -285,7 +285,7 @@ BC_API hd_private_key hd_private_key::generate_private_key(uint32_t i) const
     return hd_private_key(ki, I.R, lineage);
 }
 
-BC_API hd_public_key hd_private_key::generate_public_key(uint32_t i) const
+hd_public_key hd_private_key::generate_public_key(uint32_t i) const
 {
     return generate_private_key(i);
 }

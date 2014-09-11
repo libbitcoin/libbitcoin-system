@@ -24,7 +24,7 @@
     #include <mach/clock.h>
     #include <mach/mach.h>
 
-    BC_API void clock_gettime(int ign, timespec* ts)
+    void clock_gettime(int ign, timespec* ts)
     {
         clock_serv_t cclock;
         mach_timespec_t mts;
@@ -41,7 +41,7 @@
 #ifdef _MSC_VER
     #include <windows.h>
 
-    BC_API LARGE_INTEGER getFILETIMEoffset()
+    LARGE_INTEGER getFILETIMEoffset()
     {
         FILETIME filetime;
         SYSTEMTIME systime;
@@ -60,7 +60,7 @@
         return time;
     }
 
-    BC_API void clock_gettime(int ign, timespec* ts)
+    void clock_gettime(int ign, timespec* ts)
     {
         static bool initialized = false;
         static bool usePerformanceCounter = false;
