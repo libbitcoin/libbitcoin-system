@@ -18,6 +18,11 @@
 # This is meant to be temporary, just to facilitate the install.
 BUILD_DIRECTORY="libbitcoin_build"
 
+# The source repository for the primary build (when not running in Travis).
+BUILD_ACCOUNT="libbitcoin"
+BUILD_REPO="libbitcoin"
+BUILD_BRANCH="develop"
+
 # https://github.com/bitcoin/secp256k1
 SECP256K1_OPTIONS=\
 "--with-bignum=gmp "\
@@ -36,25 +41,71 @@ BOOST_UNIT_TEST_PARAMETERS=\
 "--report_level=no "\
 "--build_info=yes"
 
-# The source repository for the main build.
-# This will be adjusted to the Travis build if running in Travis.
-BUILD_ACCOUNT="libbitcoin"
-BUILD_REPO="libbitcoin"
-BUILD_BRANCH="develop"
-
-check_travis()
+display_message()
 {
-    # If this is a Travis build switch to the requested repo/branch.
-    if [ "x$TRAVIS_REPO_SLUG" != "x" ]; then
-	    BUILD_ACCOUNT=`echo $TRAVIS_REPO_SLUG | cut -d'/' -f1`
-	    BUILD_REPO=`echo $TRAVIS_REPO_SLUG | cut -d'/' -f2`
-	    BUILD_BRANCH=$TRAVIS_BRANCH
+    MESSAGE=$1
+    echo
+    echo "********************** $MESSAGE **********************"
+    echo
+}
+
+automake_current_directory()
+{
+    ./autogen.sh
+    ./configure "$@"
+    make
+    sudo make install
+    sudo ldconfig
+}
+
+build_from_github()
+{
+    ACCOUNT=$1
+    REPO=$2
+    BRANCH=$3
+
+    # Shift the first three parameters out of @.
+    shift 3
+
+    # Show the user what repo we are building.
+    FORK="$ACCOUNT/$REPO"
+    display_message "Download $FORK/$BRANCH"
+    
+    # Clone the repo locally.
+    rm -rf $REPO
+    git clone --branch $BRANCH --single-branch "https://github.com/$FORK"
+
+    # Build the local repo clone.
+    pushd $REPO
+    automake_current_directory "$@"
+    popd
+}
+
+build_primary()
+{
+    if [ "$TRAVIS" = "true" ]; then
+        # If the environment is Travis just build the parent directory.
+        cd ..
+        display_message "Local $TRAVIS_REPO_SLUG"
+	    automake_current_directory "$@"
+    else
+        # Otherwise we pull the primary repo down for the single file install.
+        build_from_github $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH "$@"
     fi
+}
+
+build_tests()
+{
+    # Build and run unit tests relative to the primary directory.
+    pushd libbitcoin/test
+    ./make.sh
+    ./test_libbitcoin $BOOST_UNIT_TEST_PARAMETERS
+    popd
 }
 
 clean_usr_local()
 {
-    # Remove previous usr/local libbitcoin installations.
+    # Remove previous usr/local libbitcoin installs (not all dependencies).
     # Only installations conforming to the directory structure are cleaned.
 
     # Includes
@@ -68,40 +119,10 @@ clean_usr_local()
     sudo rm --force /usr/local/lib/libbitcoin.so.*
 }
 
-github_build()
-{
-    # This function parameters.
-    ACCOUNT=$1
-    REPO=$2
-    BRANCH=$3
-
-    # Shift the first three parameters out of @.
-    shift 3
-
-    FORK=$ACCOUNT"/"$REPO
-    echo
-    echo "******************* install" $FORK"/"$BRANCH "**********************"
-    echo
-    
-    # git clone the repo.
-    rm -rf $REPO
-    git clone --branch $BRANCH --single-branch "https://github.com/"$FORK
-    cd $REPO
-    
-    # Do the standard stuff.
-    ./autogen.sh
-    ./configure "$@"
-    make
-    sudo make install
-    sudo ldconfig
-    
-    cd ..
-}
-
 create_build_directory()
 {
     # Notify that this script will do something destructive.
-    echo "This script will erase and build in: "$BUILD_DIRECTORY
+    echo "This script will erase and build in: $BUILD_DIRECTORY"
 
     # Cache credentials for subsequent sudo calls.
     sudo rm --force --recursive $BUILD_DIRECTORY
@@ -115,22 +136,23 @@ create_build_directory()
 
 build_library()
 {
-    # Modify build targets if running in Travis.
-    check_travis
-
     # Purge previous installations.
     clean_usr_local
 
+    # Create and move to a temporary build directory.
+    create_build_directory
+
     # Download, build and install all unpackaged dependencies.
-    # This script args are passed to configure of each build.
-    github_build bitcoin secp256k1 master "$@" $SECP256K1_OPTIONS
-    github_build $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH "$@"
+    build_from_github bitcoin secp256k1 master "$@" $SECP256K1_OPTIONS
+
+    # The primary build is not downloaded if we are running in Travis.
+    build_primary "$@"
     
     # Build and run unit tests.
-    cd libbitcoin/test
-    ./make.sh
-    ./test_libbitcoin $BOOST_UNIT_TEST_PARAMETERS
-    cd ../..
+    build_tests
+
+    # If the build succeeded clean up the build directory.
+    delete_build_directory
 }
 
 delete_build_directory()
@@ -145,12 +167,6 @@ delete_build_directory()
 # Exit this script on the first error (any statement returns non-true value).
 set -e
 
-# Create and move to a temporary build directory.
-create_build_directory
-
-# Build libbitcoin.
+# Build the primary library and its unpackaged dependencies.
 build_library "$@"
-
-# If the build succeeded clean up the build directory.
-delete_build_directory
 
