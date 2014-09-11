@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_UTILITY_TIMED_SECTION_HPP
-#define LIBBITCOIN_UTILITY_TIMED_SECTION_HPP
+#ifndef LIBBITCOIN_TIMED_SECTION_HPP
+#define LIBBITCOIN_TIMED_SECTION_HPP
 
 #include <ctime>
 #include <string>

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BLOCKCHAIN_BLOCKCHAIN_HPP
-#define LIBBITCOIN_BLOCKCHAIN_BLOCKCHAIN_HPP
+#ifndef LIBBITCOIN_BLOCKCHAIN_HPP
+#define LIBBITCOIN_BLOCKCHAIN_HPP
 
 /**
  * Represents an interface to a blockchain backend.
