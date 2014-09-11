@@ -36,9 +36,9 @@ Next install [Boost](http://www.boost.org) (1.50.0 or newer), [GMP](https://gmpl
 ```
   $ sudo apt-get install libboost-all-dev libgmp-dev libssl-dev
 ```
-Finally, execute the [build script](https://raw.githubusercontent.com/evoskuil/libbitcoin/develop/build.sh). This single file will download, build, install and test libbitcoin.
+Finally, execute the [build script](https://raw.githubusercontent.com/evoskuil/libbitcoin/develop/install-libbitcoin.sh). This single file will download, build, install and test libbitcoin.
 ```
-  $ ./build.sh
+  $ ./install-libbitcoin.sh
 ```
 Libbitcoin is now installed in `/usr/local/`.
 
@@ -58,14 +58,14 @@ In addition to the packaged dependencies above, the build script clones, builds 
 Any set of `./configure` options can be passed via the build script, for example:
 
 ```
-  $ ./build.sh CPPFLAGS=-DDEBUG CFLAGS="-Og -g"
+  $ ./install-libbitcoin.sh CPPFLAGS=-DDEBUG CFLAGS="-Og -g"
 ```
 
 ### Compiling for Testnet
 
 Currently libbitcoin cannot work with both the **Test Network** (testnet) and mainnet. This restriction will be lifted in a future version. In order to work with testnet in the interim libbitcoin must be recompiled with the testnet option.:
 ```
-  $ ./build.sh --enable-testnet
+  $ ./install-libbitcoin.sh --enable-testnet
 ```
 ### Packaging Instructions
 To build the Debian package execute the following commands:
@@ -78,7 +78,7 @@ To build the Debian package execute the following commands:
 
 The OSX installation differs from Linux in the installation of the compiler and packaged dependencies.
 
-To upgrade GCC first set the folloing environment variables:
+To upgrade GCC first set the following environment variables:
 ```
   CC=/usr/local/bin/gcc-4.8
   CXX=/usr/local/bin/g++-4.8
@@ -92,7 +92,7 @@ Next execute the following commands:
 ```
 Finally, invoke the installation script:
 ```
-  $ ./build.sh
+  $ ./install-libbitcoin.sh
 ```
 
 ## Windows

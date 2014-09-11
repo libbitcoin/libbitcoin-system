@@ -3,7 +3,7 @@ language: cpp
 compiler: gcc
 
 before_install:
-  # Set package repoository.
+  # Set package repository.
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   
   # Update the system.
@@ -18,9 +18,9 @@ install:
   # Get OpenSSL (for test validation only)
   - sudo apt-get -qq install libgmp-dev libssl-dev
 
-  # Install required boost components at the minimum version required.
-  - ./boost.sh
+  # Download and install boost components at the minimum version required.
+  - ./install-boost.sh
 
 script:
-  # Build the develop branch and all locally-built dependencies.
-  - ./build.sh CFLAGS="-s"
+  # Download and build unpackaged dependencies and build libbitcoin.
+  - ./install-libbitcoin.sh CFLAGS="-s"
