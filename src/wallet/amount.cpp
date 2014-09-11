@@ -50,7 +50,7 @@ Int add_clamp(Int a, Int b, Int max)
         return a + b;
 }
 
-BC_API uint64_t parse_amount(const std::string& amount, uint8_t decmial_places)
+uint64_t parse_amount(const std::string& amount, uint8_t decmial_places)
 {
     auto i = amount.begin();
     uint64_t value = 0;
@@ -89,7 +89,7 @@ BC_API uint64_t parse_amount(const std::string& amount, uint8_t decmial_places)
     return value;
 }
 
-BC_API std::string format_amount(uint64_t amount, uint8_t decimal_places)
+std::string format_amount(uint64_t amount, uint8_t decimal_places)
 {
     // Get the integer and fractional parts:
     uint64_t factor = 1;

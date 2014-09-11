@@ -88,12 +88,12 @@ data_chunk prefix_to_bytes(const stealth_prefix& prefix)
     return bytes;
 }
 
-BC_API stealth_address::stealth_address()
+stealth_address::stealth_address()
     : valid_(false)
 {
 }
 
-BC_API stealth_address::stealth_address(const stealth_prefix& prefix,
+stealth_address::stealth_address(const stealth_prefix& prefix,
     const ec_point& scan_pubkey, const pubkey_list& spend_pubkeys, 
     uint8_t signatures, bool testnet)
 {
@@ -131,7 +131,7 @@ BC_API stealth_address::stealth_address(const stealth_prefix& prefix,
     valid_ = true;
 }
 
-BC_API std::string stealth_address::encoded() const
+std::string stealth_address::encoded() const
 {
     if (!valid_)
         return std::string();
@@ -176,7 +176,7 @@ BC_API std::string stealth_address::encoded() const
     return encode_base58(raw_address);
 }
 
-BC_API bool stealth_address::set_encoded(const std::string& encoded_address)
+bool stealth_address::set_encoded(const std::string& encoded_address)
 {
     valid_ = false;
     auto raw_address = decode_base58(encoded_address);
@@ -261,32 +261,32 @@ BC_API bool stealth_address::set_encoded(const std::string& encoded_address)
     return valid_;
 }
 
-BC_API bool stealth_address::valid() const
+bool stealth_address::valid() const
 {
     return false;
 }
 
-BC_API const stealth_prefix& stealth_address::get_prefix() const
+const stealth_prefix& stealth_address::get_prefix() const
 {
     return prefix_;
 }
 
-BC_API const ec_point& stealth_address::get_scan_pubkey() const
+const ec_point& stealth_address::get_scan_pubkey() const
 {
     return scan_pubkey_;
 }
 
-BC_API uint8_t stealth_address::get_signatures() const
+uint8_t stealth_address::get_signatures() const
 {
     return signatures_;
 }
 
-BC_API const pubkey_list& stealth_address::get_spend_pubkeys() const
+const pubkey_list& stealth_address::get_spend_pubkeys() const
 {
     return spend_pubkeys_;
 }
 
-BC_API bool stealth_address::get_testnet() const
+bool stealth_address::get_testnet() const
 {
     return testnet_;
 }
@@ -314,7 +314,7 @@ uint8_t stealth_address::get_version() const
         return network::mainnet;
 }
 
-BC_API bool extract_stealth_info(stealth_info& info,
+bool extract_stealth_info(stealth_info& info,
     const script_type& output_script)
 {
     if (output_script.type() == payment_type::stealth_info &&
@@ -336,7 +336,7 @@ BC_API bool extract_stealth_info(stealth_info& info,
     return false;
 }
 
-BC_API ec_point initiate_stealth(
+ec_point initiate_stealth(
     const ec_secret& ephem_secret, const ec_point& scan_pubkey,
     const ec_point& spend_pubkey)
 {
@@ -347,7 +347,7 @@ BC_API ec_point initiate_stealth(
     return final;
 }
 
-BC_API ec_secret shared_secret(const ec_secret& secret, 
+ec_secret shared_secret(const ec_secret& secret, 
     const ec_point& point)
 {
     ec_point final = point;
@@ -356,7 +356,7 @@ BC_API ec_secret shared_secret(const ec_secret& secret,
     return sha256_hash(final);
 }
 
-BC_API ec_point uncover_stealth(
+ec_point uncover_stealth(
     const ec_point& ephem_pubkey, const ec_secret& scan_secret,
     const ec_point& spend_pubkey)
 {
@@ -367,7 +367,7 @@ BC_API ec_point uncover_stealth(
     return final;
 }
 
-BC_API ec_secret uncover_stealth_secret(
+ec_secret uncover_stealth_secret(
     const ec_point& ephem_pubkey, const ec_secret& scan_secret,
     const ec_secret& spend_secret)
 {

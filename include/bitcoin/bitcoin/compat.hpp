@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_COMPAT_HPP
 #define LIBBITCOIN_COMPAT_HPP
 
-#include <bitcoin\bitcoin\define.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 
 #ifdef __MACH__
     // Mac clock_gettime

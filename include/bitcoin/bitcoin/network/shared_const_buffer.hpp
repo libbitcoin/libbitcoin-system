@@ -32,7 +32,7 @@ class shared_const_buffer
 {
 public:
     // Construct from a stream object
-    explicit shared_const_buffer(const data_chunk& user_data)
+    BC_API explicit shared_const_buffer(const data_chunk& user_data)
      : data_(std::make_shared<data_chunk>(
             std::begin(user_data), std::end(user_data))),
         buffer_(boost::asio::buffer(*data_))
@@ -43,11 +43,11 @@ public:
     typedef boost::asio::const_buffer value_type;
     typedef const value_type* const_iterator;
 
-    const_iterator begin() const
+    BC_API const_iterator begin() const
     { 
         return &buffer_; 
     }
-    const_iterator end() const 
+    BC_API const_iterator end() const
     { 
         return &buffer_ + 1; 
     }
