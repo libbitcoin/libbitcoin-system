@@ -2020,9 +2020,9 @@ script_type unpretty(const std::string& pretty)
     for (auto token = tokens.begin(); token != tokens.end(); ++token)
     {
         operation op;
-        if (*token != "[")
+        if (*token == "[")
         {
-            const auto& data = decode_hex(*++token);
+            const auto data = decode_hex(*++token);
             if (data.empty() || *++token != "]")
                 return script_type();
             op.code = data_to_opcode(data);
