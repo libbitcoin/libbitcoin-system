@@ -458,6 +458,7 @@ void channel_proxy::send_raw(const header_type& packet_header,
         strand_.post(std::bind(&channel_proxy::do_send_raw,
             shared_from_this(), packet_header, payload, handle_send));
 }
+
 void channel_proxy::do_send_raw(const header_type& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
@@ -468,6 +469,25 @@ void channel_proxy::do_send_raw(const header_type& packet_header,
     extend_data(whole_message, payload);
     do_send_common(whole_message, handle_send);
 }
+
+void channel_proxy::send_common(const data_chunk& whole_message,
+    send_handler handle_send)
+{
+    if (stopped_)
+    {
+        handle_send(error::service_stopped);
+    }
+    else
+    {
+        auto this_ptr = shared_from_this();
+        strand_.post(
+            [this, this_ptr, whole_message, handle_send]
+            {
+                do_send_common(whole_message, handle_send);
+            });
+    }
+}
+
 void channel_proxy::do_send_common(const data_chunk& whole_message,
     send_handler handle_send)
 {
