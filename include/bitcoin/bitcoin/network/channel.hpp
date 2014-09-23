@@ -157,20 +157,14 @@ public:
     template <typename Message>
     void send(const Message& packet, send_handler handle_send)
     {
-        if (stopped_)
-            handle_send(error::service_stopped);
-        else
-        {
-            auto this_ptr = shared_from_this();
-            strand_.post(
-                [this, this_ptr, packet, handle_send]
-                {
-                    do_send_common(create_raw_message(packet), handle_send);
-                });
-        }
+        send_common(create_raw_message(packet), handle_send);
     }
+
     BC_API void send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
+
+    BC_API void send_common(const data_chunk& whole_message,
+        send_handler handle_send);
 
     BC_API void subscribe_version(receive_version_handler handle_receive);
     BC_API void subscribe_verack(receive_verack_handler handle_receive);
