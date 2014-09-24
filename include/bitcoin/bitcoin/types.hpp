@@ -69,7 +69,7 @@ data_chunk to_data_chunk(T iterable)
 typedef std::vector<size_t> index_list;
 
 // List of hashes. Useful primitive.
-typedef std::vector<hash_digest> hash_digest_list;
+typedef std::vector<hash_digest> hash_list;
 typedef std::vector<short_hash> short_hash_list;
 
 // Make hash_digest and short_hash hashable for std::*map variants

@@ -48,7 +48,7 @@ hash_digest hash_transaction(const transaction_type& tx,
     return hash_transaction_impl(tx, &hash_type_code);
 }
 
-hash_digest build_merkle_tree(hash_digest_list& merkle)
+hash_digest build_merkle_tree(hash_list& merkle)
 {
     // Stop if hash list is empty.
     if (merkle.empty())
@@ -66,7 +66,7 @@ hash_digest build_merkle_tree(hash_digest_list& merkle)
         BITCOIN_ASSERT(merkle.size() % 2 == 0);
 
         // New hash list.
-        hash_digest_list new_merkle;
+        hash_list new_merkle;
         // Loop through hashes 2 at a time.
         for (auto it = merkle.begin(); it != merkle.end(); it += 2)
         {
@@ -91,7 +91,7 @@ hash_digest build_merkle_tree(hash_digest_list& merkle)
 hash_digest generate_merkle_root(const transaction_list& transactions)
 {
     // Generate list of transaction hashes.
-    hash_digest_list tx_hashes;
+    hash_list tx_hashes;
     for (transaction_type tx: transactions)
         tx_hashes.push_back(hash_transaction(tx));
     // Build merkle tree.

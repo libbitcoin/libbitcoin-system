@@ -50,7 +50,7 @@ public:
 
     typedef fetch_handler<block_header_type> fetch_handler_block_header;
 
-    typedef fetch_handler<hash_digest_list>
+    typedef fetch_handler<hash_list>
         fetch_handler_block_transaction_hashes;
 
     typedef fetch_handler<size_t> fetch_handler_block_height;
@@ -171,7 +171,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,      // Status of operation
-     *      const hash_digest_list& hashes  // List of hashes
+     *      const hash_list& hashes  // List of hashes
      *  );
      * @endcode
      */

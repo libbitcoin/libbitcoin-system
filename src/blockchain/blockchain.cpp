@@ -76,7 +76,7 @@ private:
     }
 
     void fetch_transactions(const std::error_code& ec,
-        const hash_digest_list& tx_hashes)
+        const hash_list& tx_hashes)
     {
         if (stop_on_error(ec))
             return;
