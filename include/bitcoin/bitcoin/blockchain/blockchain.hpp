@@ -50,7 +50,8 @@ public:
 
     typedef fetch_handler<block_header_type> fetch_handler_block_header;
 
-    typedef fetch_handler<index_list> fetch_handler_block_transaction_indexes;
+    typedef fetch_handler<hash_digest_list>
+        fetch_handler_block_transaction_hashes;
 
     typedef fetch_handler<size_t> fetch_handler_block_height;
 
@@ -174,9 +175,9 @@ public:
      *  );
      * @endcode
      */
-    BC_API virtual void fetch_block_transaction_indexes(
+    BC_API virtual void fetch_block_transaction_hashes(
         const hash_digest& hash,
-        fetch_handler_block_transaction_indexes handle_fetch) = 0;
+        fetch_handler_block_transaction_hashes handle_fetch) = 0;
 
     /**
      * Fetches the height of a block given its hash.
