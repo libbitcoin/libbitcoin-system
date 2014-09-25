@@ -81,7 +81,7 @@ void script_type::join(const script_type& other)
         other.operations_.begin(), other.operations_.end());
 }
 
-void script_type::push_operation(operation oper)
+void script_type::push_operation(const operation& oper)
 {
     operations_.push_back(oper);
 }
