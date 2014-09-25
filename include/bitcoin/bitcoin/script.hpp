@@ -178,7 +178,7 @@ class script_type
 {
 public:
     BC_API void join(const script_type& other);
-    BC_API void push_operation(operation oper);
+    BC_API void push_operation(const operation& oper);
     BC_API bool run(
         script_type input_script, const transaction_type& parent_tx,
         uint32_t input_index, bool bip16_enabled=true);

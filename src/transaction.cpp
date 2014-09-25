@@ -173,7 +173,7 @@ bool is_locktime_conflict(const transaction_type& tx)
             if (input.sequence < max_sequence)
                 return false;
 
-    return !locktime_set;
+    return locktime_set;
 }
 
 uint64_t total_output_value(const transaction_type& tx)
