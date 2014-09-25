@@ -47,6 +47,7 @@ bitcoin_bitcoin_includedir = $(includedir)/bitcoin/bitcoin
 bitcoin_bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin/address.hpp \
     include/bitcoin/bitcoin/block.hpp \
+    include/bitcoin/bitcoin/blockchain.hpp \
     include/bitcoin/bitcoin/compat.h \
     include/bitcoin/bitcoin/compat.hpp \
     include/bitcoin/bitcoin/constants.hpp \
@@ -76,10 +77,6 @@ bitcoin_bitcoin_impl_serialize_includedir = $(includedir)/bitcoin/bitcoin/impl/s
 bitcoin_bitcoin_impl_serialize_include_HEADERS = \
     include/bitcoin/bitcoin/impl/serialize/block.ipp \
     include/bitcoin/bitcoin/impl/serialize/misc.ipp
-
-bitcoin_bitcoin_blockchain_includedir = $(includedir)/bitcoin/bitcoin/blockchain
-bitcoin_bitcoin_blockchain_include_HEADERS = \
-    include/bitcoin/bitcoin/blockchain/blockchain.hpp
 
 bitcoin_bitcoin_network_includedir = $(includedir)/bitcoin/bitcoin/network
 bitcoin_bitcoin_network_include_HEADERS = \

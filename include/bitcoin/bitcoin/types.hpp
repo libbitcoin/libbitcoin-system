@@ -30,13 +30,16 @@
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
-namespace network {
-#define DECLARE_PTR_TYPE(nametype) \
-    class nametype; \
-    typedef std::shared_ptr<nametype> nametype##_ptr
 
-DECLARE_PTR_TYPE(acceptor);
-DECLARE_PTR_TYPE(channel);
+namespace network {
+
+    #define DECLARE_PTR_TYPE(nametype) \
+        class nametype; \
+        typedef std::shared_ptr<nametype> nametype##_ptr
+
+    DECLARE_PTR_TYPE(acceptor);
+    DECLARE_PTR_TYPE(channel);
+
 } // namespace network
 
 #undef DECLARE_PTR_TYPE
