@@ -937,12 +937,10 @@ hash_digest script_type::generate_signature_hash(
     transaction_type parent_tx, uint32_t input_index,
     const script_type& script_code, uint32_t hash_type)
 {
+    // This is NOT considered an error result and callers should not test
+    // for one_hash. This is a bitcoind bug we perpetuate.
     if (input_index >= parent_tx.inputs.size())
-    {
-        log_fatal(LOG_SCRIPT) << "script_type::op_checksig() : input_index "
-            << input_index << " is out of range.";
         return one_hash();
-    }
 
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 
@@ -966,14 +964,13 @@ hash_digest script_type::generate_signature_hash(
     else if ((hash_type & 0x1f) == sighash::single)
     {
         transaction_output_list& outputs = parent_tx.outputs;
-
         uint32_t output_index = input_index;
+
+        // This is NOT considered an error result and callers should not test
+        // for one_hash. This is a bitcoind bug we perpetuate.
         if (output_index >= outputs.size())
-        {
-            log_error(LOG_SCRIPT)
-                << "sighash::single the output_index is out of range";
             return one_hash();
-        }
+
         outputs.resize(output_index + 1);
         // Loop through outputs except the last one
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
@@ -1001,11 +998,11 @@ bool check_signature(data_chunk signature,
 {
     if (signature.empty())
         return false;
-    uint32_t hash_type = 0;
-    hash_type = signature.back();
+    auto hash_type = signature.back();
     signature.pop_back();
 
-    hash_digest sighash =
+    // This always produces a valid signature hash.
+    const auto sighash = 
         script_type::generate_signature_hash(
             parent_tx, input_index, script_code, hash_type);
     return verify_signature(public_key, sighash, signature);
