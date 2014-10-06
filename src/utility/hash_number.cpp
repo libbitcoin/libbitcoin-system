@@ -42,6 +42,19 @@ void hash_number::set_hash(const hash_digest& hash)
 {
     std::copy(hash.rbegin(), hash.rend(), hash_.begin());
 }
+hash_digest hash_number::hash() const
+{
+    hash_digest result;
+    std::copy(hash_.begin(), hash_.end(), result.begin());
+    return result;
+}
+
+const hash_number hash_number::operator~() const
+{
+    hash_number result;
+    result.hash_ = ~hash_;
+    return result;
+}
 
 hash_number& hash_number::operator*=(uint32_t value)
 {
@@ -90,6 +103,11 @@ const hash_number operator+(
     const hash_number& number_a, const hash_number& number_b)
 {
     return hash_number(number_a) += number_b;
+}
+bool operator==(
+    const hash_number& number, uint64_t value)
+{
+    return number.hash_.EqualTo(value);
 }
 
 } // namespace libbitcoin

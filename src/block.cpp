@@ -50,10 +50,15 @@ uint64_t block_value(size_t height)
 hash_number block_work(uint32_t bits)
 {
     hash_number target;
-    target.set_compact(bits);
-    if (target <= 0)
+    if (!target.set_compact(bits))
         return 0;
-    return (hash_number(1) << 256) / (target + 1);
+    if (target == 0)
+        return 0;
+    // We need to compute 2**256 / (bnTarget+1), but we can't represent 2**256
+    // as it's too large for a uint256. However, as 2**256 is at least as large
+    // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,
+    // or ~bnTarget / (nTarget+1) + 1.
+    return (~target / (target + 1)) + 1;
 }
 
 hash_digest hash_block_header(const block_header_type& header)
