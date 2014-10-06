@@ -41,5 +41,16 @@ BOOST_AUTO_TEST_CASE(simple)
     BOOST_REQUIRE((our_value > target) == false);
 }
 
+BOOST_AUTO_TEST_CASE(work)
+{
+    hash_number orphan_work = 0;
+    BOOST_REQUIRE(orphan_work.hash() == null_hash);
+    orphan_work += block_work(486604799);
+    BOOST_REQUIRE(orphan_work.hash() == decode_hash(
+        "0100010001000000000000000000000000000000000000000000000000000000"));
+    hash_number main_work = 0;
+    BOOST_REQUIRE(orphan_work <= main_work);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
