@@ -33,6 +33,158 @@ doc_DATA = README.md INSTALL COPYING doc/README.tutorial
 
 pkgconfig_DATA = libbitcoin.pc
 
-SUBDIRS = include/bitcoin src
 ACLOCAL_AMFLAGS = -I m4
 
+#
+# headers
+#
+bitcoin_includedir = $(includedir)/bitcoin
+
+bitcoin_include_HEADERS = \
+    include/bitcoin/bitcoin.hpp
+    
+bitcoin_bitcoin_includedir = $(includedir)/bitcoin/bitcoin
+bitcoin_bitcoin_include_HEADERS = \
+    include/bitcoin/bitcoin/address.hpp \
+    include/bitcoin/bitcoin/block.hpp \
+    include/bitcoin/bitcoin/compat.h \
+    include/bitcoin/bitcoin/compat.hpp \
+    include/bitcoin/bitcoin/constants.hpp \
+    include/bitcoin/bitcoin/define.hpp \
+    include/bitcoin/bitcoin/error.hpp \
+    include/bitcoin/bitcoin/format.hpp \
+    include/bitcoin/bitcoin/getx_responder.hpp \
+    include/bitcoin/bitcoin/poller.hpp \
+    include/bitcoin/bitcoin/primitives.hpp \
+    include/bitcoin/bitcoin/satoshi_serialize.hpp \
+    include/bitcoin/bitcoin/script.hpp \
+    include/bitcoin/bitcoin/session.hpp \
+    include/bitcoin/bitcoin/stealth.hpp \
+    include/bitcoin/bitcoin/threadpool.hpp \
+    include/bitcoin/bitcoin/transaction.hpp \
+    include/bitcoin/bitcoin/transaction_indexer.hpp \
+    include/bitcoin/bitcoin/transaction_pool.hpp \
+    include/bitcoin/bitcoin/types.hpp \
+    include/bitcoin/bitcoin/validate.hpp \
+    include/bitcoin/bitcoin/version.hpp
+
+bitcoin_bitcoin_impl_includedir = $(includedir)/bitcoin/bitcoin/impl
+bitcoin_bitcoin_impl_include_HEADERS = \
+    include/bitcoin/bitcoin/impl/format.ipp
+
+bitcoin_bitcoin_impl_serialize_includedir = $(includedir)/bitcoin/bitcoin/impl/serialize
+bitcoin_bitcoin_impl_serialize_include_HEADERS = \
+    include/bitcoin/bitcoin/impl/serialize/block.ipp \
+    include/bitcoin/bitcoin/impl/serialize/misc.ipp
+
+bitcoin_bitcoin_blockchain_includedir = $(includedir)/bitcoin/bitcoin/blockchain
+bitcoin_bitcoin_blockchain_include_HEADERS = \
+    include/bitcoin/bitcoin/blockchain/blockchain.hpp
+
+bitcoin_bitcoin_network_includedir = $(includedir)/bitcoin/bitcoin/network
+bitcoin_bitcoin_network_include_HEADERS = \
+    include/bitcoin/bitcoin/network/channel.hpp \
+    include/bitcoin/bitcoin/network/handshake.hpp \
+    include/bitcoin/bitcoin/network/hosts.hpp \
+    include/bitcoin/bitcoin/network/network.hpp \
+    include/bitcoin/bitcoin/network/protocol.hpp \
+    include/bitcoin/bitcoin/network/shared_const_buffer.hpp
+
+bitcoin_bitcoin_util_includedir = $(includedir)/bitcoin/bitcoin/utility
+bitcoin_bitcoin_util_include_HEADERS = \
+    include/bitcoin/bitcoin/utility/assert.hpp \
+    include/bitcoin/bitcoin/utility/async_parallel.hpp \
+    include/bitcoin/bitcoin/utility/base58.hpp \
+    include/bitcoin/bitcoin/utility/checksum.hpp \
+    include/bitcoin/bitcoin/utility/decorator.hpp \
+    include/bitcoin/bitcoin/utility/ec_keys.hpp \
+    include/bitcoin/bitcoin/utility/hash.hpp \
+    include/bitcoin/bitcoin/utility/hash_number.hpp \
+    include/bitcoin/bitcoin/utility/logger.hpp \
+    include/bitcoin/bitcoin/utility/mmfile.hpp \
+    include/bitcoin/bitcoin/utility/script_number.hpp \
+    include/bitcoin/bitcoin/utility/serializer.hpp \
+    include/bitcoin/bitcoin/utility/subscriber.hpp \
+    include/bitcoin/bitcoin/utility/timed_section.hpp \
+    include/bitcoin/bitcoin/utility/weak_bind.hpp
+
+bitcoin_bitcoin_util_external_includedir = $(includedir)/bitcoin/bitcoin/utility/external
+bitcoin_bitcoin_util_external_include_HEADERS = \
+    include/bitcoin/bitcoin/utility/external/hmac_sha512.h \
+    include/bitcoin/bitcoin/utility/external/ripemd160.h \
+    include/bitcoin/bitcoin/utility/external/sha1.h \
+    include/bitcoin/bitcoin/utility/external/sha256.h \
+    include/bitcoin/bitcoin/utility/external/sha512.h \
+    include/bitcoin/bitcoin/utility/external/zeroize.h \
+    include/bitcoin/bitcoin/utility/external/uint256.h
+
+bitcoin_bitcoin_impl_utility_includedir = $(includedir)/bitcoin/bitcoin/impl/utility
+bitcoin_bitcoin_impl_utility_include_HEADERS = \
+    include/bitcoin/bitcoin/impl/utility/serializer.ipp
+
+bitcoin_bitcoin_wallet_includedir = $(includedir)/bitcoin/bitcoin/wallet
+bitcoin_bitcoin_wallet_include_HEADERS = \
+    include/bitcoin/bitcoin/wallet/amount.hpp \
+    include/bitcoin/bitcoin/wallet/hd_keys.hpp \
+    include/bitcoin/bitcoin/wallet/key_formats.hpp \
+    include/bitcoin/bitcoin/wallet/mnemonic.hpp \
+    include/bitcoin/bitcoin/wallet/stealth_address.hpp \
+    include/bitcoin/bitcoin/wallet/uri.hpp
+
+#
+# binaries
+#
+lib_LTLIBRARIES = libbitcoin.la
+
+libbitcoin_la_CPPFLAGS = \
+    -I$(srcdir)/include \
+    ${secp256k1_CFLAGS}
+
+libbitcoin_la_SOURCES = \
+    src/address.cpp \
+    src/blockchain/blockchain.cpp \
+    src/block.cpp \
+    src/compat.cpp \
+    src/constants.cpp \
+    src/error.cpp \
+    src/format.cpp \
+    src/getx_responder.cpp \
+    src/network/channel.cpp \
+    src/network/handshake.cpp  \
+    src/network/hosts.cpp \
+    src/network/network.cpp  \
+    src/network/protocol.cpp \
+    src/poller.cpp \
+    src/satoshi_serialize.cpp \
+    src/script.cpp \
+    src/session.cpp \
+    src/stealth.cpp \
+    src/threadpool.cpp \
+    src/transaction.cpp \
+    src/transaction_indexer.cpp \
+    src/transaction_pool.cpp \
+    src/utility/base58.cpp \
+    src/utility/checksum.cpp \
+    src/utility/ec_keys.cpp \
+    src/utility/hash.cpp \
+    src/utility/hash_number.cpp \
+    src/utility/logger.cpp \
+    src/utility/mmfile.cpp \
+    src/utility/script_number.cpp \
+    src/utility/timed_section.cpp \
+    src/utility/external/hmac_sha512.c \
+    src/utility/external/ripemd160.c \
+    src/utility/external/sha1.c \
+    src/utility/external/sha256.c \
+    src/utility/external/sha512.c \
+    src/utility/external/zeroize.c \
+    src/validate.cpp \
+    src/wallet/amount.cpp \
+    src/wallet/hd_keys.cpp \
+    src/wallet/key_formats.cpp \
+    src/wallet/mnemonic.cpp \
+    src/wallet/stealth_address.cpp \
+    src/wallet/uri.cpp
+
+libbitcoin_la_LIBADD = \
+    ${secp256k1_LIBS}
