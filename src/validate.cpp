@@ -20,7 +20,7 @@
 #include <set>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <bitcoin/bitcoin/block.hpp>
-#include <bitcoin/bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/bitcoin/blockchain.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>

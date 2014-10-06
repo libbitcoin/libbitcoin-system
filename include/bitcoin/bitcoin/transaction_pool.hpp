@@ -22,7 +22,7 @@
 
 #include <functional>
 #include <boost/circular_buffer.hpp>
-#include <bitcoin/bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/bitcoin/blockchain.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/threadpool.hpp>
 #include <bitcoin/bitcoin/types.hpp>

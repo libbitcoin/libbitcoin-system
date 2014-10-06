@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_POLLER_HPP
 #define LIBBITCOIN_POLLER_HPP
 
-#include <bitcoin/bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/bitcoin/blockchain.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 

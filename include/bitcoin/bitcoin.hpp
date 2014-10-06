@@ -169,7 +169,7 @@
 #pragma warning(push) 
 #pragma warning(disable : 4267)
 #endif
-#include <bitcoin/bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/bitcoin/blockchain.hpp>
 #include <bitcoin/bitcoin/block.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/constants.hpp>

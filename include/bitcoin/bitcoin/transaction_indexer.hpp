@@ -23,7 +23,7 @@
 #include <forward_list>
 #include <system_error>
 #include <unordered_map>
-#include <bitcoin/bitcoin/blockchain/blockchain.hpp>
+#include <bitcoin/bitcoin/blockchain.hpp>
 #include <bitcoin/bitcoin/address.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/threadpool.hpp>
