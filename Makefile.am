@@ -184,4 +184,6 @@ libbitcoin_la_SOURCES = \
     src/wallet/uri.cpp
 
 libbitcoin_la_LIBADD = \
-    ${secp256k1_LIBS}
+    ${secp256k1_LIBS} -lboost_thread -lboost_system -lboost_regex \
+    -lboost_filesystem -lpthread -lcrypto -ldl -lz
+
