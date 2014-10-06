@@ -139,7 +139,7 @@ libbitcoin_la_CPPFLAGS = \
 
 libbitcoin_la_SOURCES = \
     src/address.cpp \
-    src/blockchain/blockchain.cpp \
+    src/blockchain.cpp \
     src/block.cpp \
     src/compat.cpp \
     src/constants.cpp \
