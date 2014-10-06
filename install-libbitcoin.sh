@@ -123,10 +123,7 @@ build_tests()
     JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    pushd test
-    ./make.sh
-    ./test_libbitcoin $BOOST_UNIT_TEST_PARAMETERS
-    popd
+    TEST_FLAGS="$BOOST_UNIT_TEST_PARAMETERS" make check "-j$JOBS"
 }
 
 clean_usr_local()

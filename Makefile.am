@@ -184,6 +184,49 @@ libbitcoin_la_SOURCES = \
     src/wallet/uri.cpp
 
 libbitcoin_la_LIBADD = \
-    ${secp256k1_LIBS} -lboost_thread -lboost_system -lboost_regex \
-    -lboost_filesystem -lpthread -lcrypto -ldl -lz
+    -lboost_system \
+    -lboost_regex \
+    -lboost_filesystem \
+    -lpthread \
+    ${secp256k1_LIBS}
+
+#
+# tests
+#
+TESTS = libbitcoin_test
+
+check_PROGRAMS = libbitcoin_test
+
+libbitcoin_test_CPPFLAGS = \
+    -I$(srcdir)/include \
+    -I$(srcdir)/test \
+    $(secp256k1_CFLAGS) \
+    $(crypto_CFLAGS) \
+    -DBOOST_TEST_DYN_LINK
+
+libbitcoin_test_SOURCES = \
+    test/amount.cpp \
+    test/base58.cpp \
+    test/big_number.cpp \
+    test/checksum.cpp \
+    test/ec_keys.cpp \
+    test/format.cpp \
+    test/hash_number.cpp \
+    test/hash.cpp \
+    test/hd_keys.cpp \
+    test/key_formats.cpp \
+    test/main.cpp \
+    test/script_number.cpp \
+    test/script.cpp \
+    test/serialize.cpp \
+    test/stealth_address.cpp \
+    test/stealth.cpp \
+    test/uri.cpp
+
+libbitcoin_test_LDADD = \
+    libbitcoin.la \
+    -lboost_system \
+    -lboost_unit_test_framework \
+    ${crypto_LIBS} \
+    ${secp256k1_LIBS}
 
