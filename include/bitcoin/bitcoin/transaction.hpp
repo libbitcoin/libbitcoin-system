@@ -62,6 +62,7 @@ BC_API bool operator==(
     const output_point& output_a, const output_point& output_b);
 BC_API bool operator!=(
     const output_point& output_a, const output_point& output_b);
+
 } // namespace libbitcoin
 
 #endif
