@@ -18,7 +18,7 @@
 # This is meant to be temporary, just to facilitate the install.
 
 if [ "$TRAVIS" = "true" ]; then
-    PARALLEL="4"
+    PARALLEL="1"
 else
     NPROC=$(nproc)
     PARALLEL="$NPROC"
