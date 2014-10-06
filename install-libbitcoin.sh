@@ -16,6 +16,16 @@
 
 # This script will build libbitcoin using this relative directory.
 # This is meant to be temporary, just to facilitate the install.
+
+if [ "$TRAVIS" = "true" ]; then
+    PARALLEL_MAKE="-j2"
+else
+    NPROC=$(nproc)
+    PARALLEL_MAKE="-j$NPROC"
+fi
+
+SEQUENTIAL_MAKE="-j1"
+
 BUILD_DIRECTORY="libbitcoin_build"
 
 # The source repository for the primary build (when not running in Travis).
@@ -51,9 +61,12 @@ display_message()
 
 automake_current_directory()
 {
+    MAKE_ARGS=$1
+    shift 1
+
     ./autogen.sh
     ./configure "$@"
-    make
+    make "$MAKE_ARGS"
     sudo make install
     sudo ldconfig
 }
@@ -63,13 +76,14 @@ build_from_github()
     ACCOUNT=$1
     REPO=$2
     BRANCH=$3
+    MAKE_ARGS=$4
 
     # Shift the first three parameters out of @.
-    shift 3
+    shift 4
 
     # Show the user what repo we are building.
     FORK="$ACCOUNT/$REPO"
-    display_message "Download $FORK/$BRANCH"
+    display_message "Download $FORK/$BRANCH/$MAKE_ARGS"
     
     # Clone the repo locally.
     rm -rf $REPO
@@ -77,7 +91,7 @@ build_from_github()
 
     # Build the local repo clone.
     pushd $REPO
-    automake_current_directory "$@"
+    automake_current_directory "$MAKE_ARGS" "$@"
     popd
 }
 
@@ -150,10 +164,10 @@ build_library()
     create_build_directory
 
     # Download, build and install all unpackaged dependencies.
-    build_from_github bitcoin secp256k1 master "$@" $SECP256K1_OPTIONS
+    build_from_github bitcoin secp256k1 master "$SEQUENTIAL_MAKE" "$@" $SECP256K1_OPTIONS
 
     # The primary build is not downloaded if we are running in Travis.
-    build_primary "$@"
+    build_primary "$PARALLEL_MAKE" "$@"
 
     # If the build succeeded clean up the build directory.
     delete_build_directory
