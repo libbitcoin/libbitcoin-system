@@ -18,7 +18,7 @@
 # This is meant to be temporary, just to facilitate the install.
 
 if [ "$TRAVIS" = "true" ]; then
-    PARALLEL_MAKE="-j2"
+    PARALLEL_MAKE="-j4"
 else
     NPROC=$(nproc)
     PARALLEL_MAKE="-j$NPROC"
