@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(work)
     BOOST_REQUIRE(orphan_work.hash() == decode_hash(
         "0100010001000000000000000000000000000000000000000000000000000000"));
     hash_number main_work = 0;
-    BOOST_REQUIRE(orphan_work <= main_work);
+    BOOST_REQUIRE(!(orphan_work <= main_work));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
