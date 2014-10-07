@@ -19,9 +19,13 @@
 
 if [ "$TRAVIS" = "true" ]; then
     PARALLEL="1"
+
+    echo "Detected travis install, setting to non-parallel: $PARALLEL"
 else
     NPROC=$(nproc)
     PARALLEL="$NPROC"
+
+    echo "Detected cores for parallel make: $PARALLEL"
 fi
 
 SEQUENTIAL="1"
@@ -66,7 +70,13 @@ automake_current_directory()
 
     ./autogen.sh
     ./configure "$@"
-    make "-j$JOBS"
+
+    if [ "$JOBS" -gt "$SEQUENTIAL" ]; then
+        make "-j$JOBS"
+    else
+        make 
+    fi
+
     sudo make install
     sudo ldconfig
 }
@@ -123,7 +133,11 @@ build_tests()
     JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    TEST_FLAGS="$BOOST_UNIT_TEST_PARAMETERS" make check "-j$JOBS"
+    if [ "$JOBS" -gt "$SEQUENTIAL" ]; then
+        TEST_FLAGS="$BOOST_UNIT_TEST_PARAMETERS" make check "-j$JOBS"
+    else
+        TEST_FLAGS="$BOOST_UNIT_TEST_PARAMETERS" make check
+    fi
 }
 
 clean_usr_local()
