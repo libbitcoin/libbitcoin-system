@@ -15,9 +15,6 @@
     <Filter Include="src\network">
       <UniqueIdentifier>{785639c3-4aba-44db-9501-9797e573c681}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\blockchain">
-      <UniqueIdentifier>{cfa7bc5d-1852-4eae-836d-7ca997d7eb24}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\utility\external">
       <UniqueIdentifier>{f8a260ce-e8da-4a00-8d29-1927686a2488}</UniqueIdentifier>
     </Filter>
@@ -29,9 +26,6 @@
     </Filter>
     <Filter Include="include\bitcoin">
       <UniqueIdentifier>{b2bbb7a8-a286-4f49-b511-48c4e179f7e3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\blockchain">
-      <UniqueIdentifier>{812d0350-06b8-414d-b0d8-d8de8110c38c}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\impl">
       <UniqueIdentifier>{5afb9fba-cd2c-438a-aedd-39c8acc14af4}</UniqueIdentifier>
@@ -137,9 +131,6 @@
     <ClCompile Include="..\..\..\..\src\network\handshake.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain\blockchain.cpp">
-      <Filter>src\blockchain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\stealth.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -203,6 +194,9 @@
     <ClCompile Include="..\..\..\..\src\compat.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\blockchain.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp">
@@ -231,9 +225,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp">
       <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\blockchain\blockchain.hpp">
-      <Filter>include\bitcoin\blockchain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network.hpp">
       <Filter>include\bitcoin\network</Filter>
@@ -380,6 +371,9 @@
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h">
+      <Filter>include\bitcoin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\blockchain.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
   </ItemGroup>
