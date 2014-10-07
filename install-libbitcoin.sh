@@ -71,7 +71,7 @@ automake_current_directory()
     ./autogen.sh
     ./configure "$@"
 
-    if [ "$JOBS" -gt "$SEQUENTIAL" ]; then
+    if [[ "$JOBS" -gt "$SEQUENTIAL" ]]; then
         make "-j$JOBS"
     else
         make 
@@ -133,7 +133,7 @@ build_tests()
     JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    if [ "$JOBS" -gt "$SEQUENTIAL" ]; then
+    if [[ "$JOBS" -gt "$SEQUENTIAL" ]]; then
         TEST_FLAGS="$BOOST_UNIT_TEST_PARAMETERS" make check "-j$JOBS"
     else
         TEST_FLAGS="$BOOST_UNIT_TEST_PARAMETERS" make check
