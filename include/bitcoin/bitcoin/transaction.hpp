@@ -30,6 +30,12 @@ enum class select_outputs_algorithm
     greedy
 };
 
+struct BC_API select_outputs_result
+{
+    output_point_list points;
+    uint64_t change;
+};
+
 BC_API hash_digest hash_transaction(const transaction_type& tx);
 // hash_type_code is used by OP_CHECKSIG
 BC_API hash_digest hash_transaction(const transaction_type& tx,

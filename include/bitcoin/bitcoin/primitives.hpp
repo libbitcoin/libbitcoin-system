@@ -101,24 +101,21 @@ struct BC_API output_point
     uint32_t index;
 };
 
-// Used by transaction_indexer
+typedef output_point input_point;
+typedef std::vector<input_point> input_point_list;
+typedef std::vector<output_point> output_point_list;
+
+// Used by transaction_indexer and select_outputs()
 struct BC_API output_info_type
 {
     output_point point;
     uint64_t value;
 };
 
-typedef output_point input_point;
-typedef std::vector<input_point> input_point_list;
-typedef std::vector<output_point> output_point_list;
-typedef std::vector<uint64_t> output_value_list;
 typedef std::vector<output_info_type> output_info_list;
-
-struct BC_API select_outputs_result
-{
-    output_point_list points;
-    uint64_t change;
-};
+// Where is this used?
+// TODO: Remove otherwise.
+//typedef std::vector<uint64_t> output_value_list;
 
 struct BC_API transaction_input_type
 {
