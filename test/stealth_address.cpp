@@ -44,9 +44,9 @@ BOOST_AUTO_TEST_CASE(stealth_address_test)
     BOOST_REQUIRE(ephem_privkey.size() == ec_secret_size);
     BOOST_REQUIRE(scan_privkey.size() == ec_secret_size);
     BOOST_REQUIRE(spend_privkey.size() == ec_secret_size);
-    ec_secret c{{
-        75,73,116,38,110,230,200,190,217,239,242,205,16,135,187,193,16,31,23,
-        186,217,195,120,20,248,86,27,103,245,80,197,68}};
+    //ec_secret c{{
+    //    75,73,116,38,110,230,200,190,217,239,242,205,16,135,187,193,16,31,23,
+    //    186,217,195,120,20,248,86,27,103,245,80,197,68}};
 
     ec_point scan_pubkey = secret_to_public_key(scan_privkey);
     BOOST_REQUIRE(scan_pubkey.size() == ec_compressed_size);
