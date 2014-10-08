@@ -17,7 +17,7 @@
 # This script will build libbitcoin using this relative directory.
 # This is meant to be temporary, just to facilitate the install.
 
-BUILD_DIRECTORY="libbitcoin_build"
+BUILD_DIRECTORY="libbitcoin-build"
 
 # The source repository for the primary build (when not running in Travis).
 BUILD_ACCOUNT="libbitcoin"
