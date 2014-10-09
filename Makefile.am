@@ -1,3 +1,6 @@
+#
+# documentation
+#
 doc_DATA = README.md INSTALL COPYING doc/README.tutorial
 
 #doc_sphinxdir = $(docdir)/sphinx/
@@ -31,8 +34,12 @@ doc_DATA = README.md INSTALL COPYING doc/README.tutorial
 #    doc/sphinx/examples/display-last.rst \
 #    doc/sphinx/examples/proto.rst
 
+#
+# pkg-config
+#
 pkgconfig_DATA = libbitcoin.pc
 
+# look for macros in the m4 subdirectory
 ACLOCAL_AMFLAGS = -I m4
 
 #
@@ -129,7 +136,7 @@ bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/uri.hpp
 
 #
-# binaries
+# libraries
 #
 lib_LTLIBRARIES = libbitcoin.la
 
@@ -189,6 +196,11 @@ libbitcoin_la_LIBADD = \
     -lboost_filesystem \
     -lpthread \
     ${secp256k1_LIBS}
+    
+#
+# examples
+#
+# TODO
 
 #
 # tests
