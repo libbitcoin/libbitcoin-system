@@ -209,21 +209,6 @@ public:
         fetch_handler_last_height handle_fetch) = 0;
 
     /**
-     * Fetches a transaction by unique assigned index.
-     *
-     * @param[in]   index           Index
-     * @param[in]   handle_fetch    Completion handler for fetch operation.
-     * @code
-     *  void handle_fetch(
-     *      const std::error_code& ec,  // Status of operation
-     *      const transaction_type& tx  // Transaction
-     *  );
-     * @endcode
-     */
-    BC_API virtual void fetch_transaction(const index_type index,
-        fetch_handler_transaction handle_fetch) = 0;
-
-    /**
      * Fetches a transaction by hash.
      *
      * @param[in]   hash            Transaction hash
