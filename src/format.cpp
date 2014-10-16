@@ -126,6 +126,10 @@ static std::string pad_right_8_zeroes_trim_left(const std::string& value)
     return result;
 }
 
+// There are a number of places in libbitcoin where overflowable operations,
+// either signed or unsigned, may causes errors. See discussion for more info:
+// www.securecoding.cert.org/confluence/display/seccode/
+// INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow
 static inline bool sum_will_overflow(uint64_t addend1, uint64_t addend2)
 {
     return addend1 > (max_uint64 - addend2);
