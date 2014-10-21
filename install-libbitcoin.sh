@@ -77,10 +77,11 @@ automake_current_directory()
         make --silent
     fi
 
-    make install
+    # Sudo can be removed here if installing to a local directory (--prefix).
+    sudo make install
     
-    # Enable this line to register dynamic libraries.
-    # sudo ldconfig
+    # This line can be removed it dynamic linking is not required.
+    sudo ldconfig
 }
 
 build_from_github()
