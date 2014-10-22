@@ -11,7 +11,7 @@
 #  3. Validate Deployment: this file is both deployment and verification build.
 #  3. Be Declarative: make behavior obvious by not using conditional statements.
 #  4. Be Explicit: not everyone speaks the same code or human languages.
-#  5. Use Least Privilege: don't require sudo for the entire script.
+#  5. Enable Least Privilege: don't require more privilege than necessary.
 #  6. Do Not Repeat Yourself: do not repeat yourself.
 
 # This script will build libbitcoin using this relative directory.
@@ -69,15 +69,18 @@ automake_current_directory()
     shift 1
 
     ./autogen.sh
-    ./configure "$@"
+    ./configure --enable-silent-rules "$@"
 
     if [[ "$JOBS" -gt "$SEQUENTIAL" ]]; then
-        make "-j$JOBS"
+        make --silent "-j$JOBS"
     else
-        make 
+        make --silent
     fi
 
+    # Sudo can be removed here if installing to a local directory (--prefix).
     sudo make install
+    
+    # This line can be removed it dynamic linking is not required.
     sudo ldconfig
 }
 
@@ -145,8 +148,7 @@ create_build_directory()
     # Notify that this script will do something destructive.
     echo "This script will erase and build in: $BUILD_DIRECTORY"
 
-    # Cache credentials for subsequent sudo calls.
-    sudo rm --force --recursive $BUILD_DIRECTORY
+    rm --force --recursive $BUILD_DIRECTORY
     mkdir $BUILD_DIRECTORY
     cd $BUILD_DIRECTORY
 
@@ -176,7 +178,7 @@ delete_build_directory()
     # applied to dependencies as well. Typically each time a git pull occurs 
     # into a build directory the uninstall is potentially invalidated. This 
     # approach allows us to perform a complete uninstall across all versions.
-    sudo rm --force --recursive $BUILD_DIRECTORY
+    rm --force --recursive $BUILD_DIRECTORY
 }
 
 # Exit this script on the first error (any statement returns non-true value).
