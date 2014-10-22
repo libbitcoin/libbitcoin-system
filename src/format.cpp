@@ -139,7 +139,7 @@ bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
 {
     using namespace boost;
     std::vector<std::string> parts;
-    boost::split(parts, btc, is_any_of("."));
+    boost::split(parts, "0" + btc, is_any_of("."));
     if (parts.size() > 2)
         return false;
 
