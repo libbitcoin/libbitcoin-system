@@ -1042,6 +1042,8 @@ bool check_signature(const data_chunk& signature, const ec_point& public_key,
     const auto sighash = 
         script_type::generate_signature_hash(
             parent_tx, input_index, script_code, hash_type);
+
+    // Validate the EC signature.
     return verify_signature(public_key, sighash, ec_signature);
 }
 
