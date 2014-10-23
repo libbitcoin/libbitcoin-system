@@ -11,14 +11,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin_test", "test\lib
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		DynDebug|Win32 = DynDebug|Win32
-		DynDebug|x64 = DynDebug|x64
-		DynRelease|Win32 = DynRelease|Win32
-		DynRelease|x64 = DynRelease|x64
-		LtcgDebug|Win32 = LtcgDebug|Win32
-		LtcgDebug|x64 = LtcgDebug|x64
-		LtcgRelease|Win32 = LtcgRelease|Win32
-		LtcgRelease|x64 = LtcgRelease|x64
 		StaticDebug|Win32 = StaticDebug|Win32
 		StaticDebug|x64 = StaticDebug|x64
 		StaticRelease|Win32 = StaticRelease|Win32
