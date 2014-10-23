@@ -20,8 +20,10 @@
 #ifndef LIBBITCOIN_SCRIPT_HPP
 #define LIBBITCOIN_SCRIPT_HPP
 
+#include <cstdint>
 #include <vector>
 #include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/ec_keys.hpp>
 
 namespace libbitcoin {
 
@@ -304,6 +306,17 @@ BC_API script_type raw_data_script(const data_chunk& raw_script);
 BC_API script_type parse_script(const data_chunk& raw_script);
 BC_API data_chunk save_script(const script_type& script);
 BC_API size_t script_size(const script_type& script);
+
+BC_API bool check_signature(const data_chunk& signature,
+    const ec_point& public_key, const script_type& script_code,
+    const transaction_type& parent_tx, uint32_t input_index);
+BC_API bool create_signature(data_chunk& signature, 
+    const ec_secret& private_key, const script_type& prevout_script,
+    const transaction_type& tx, uint32_t input_index, uint32_t hash_type);
+BC_API bool create_signature(data_chunk& signature, 
+    const ec_secret& private_key, const script_type& prevout_script,
+    const transaction_type& tx, uint32_t input_index, uint32_t hash_type,
+    const ec_secret& nonce);
 
 } // namespace libbitcoin
 
