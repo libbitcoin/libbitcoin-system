@@ -992,20 +992,21 @@ hash_digest script_type::generate_signature_hash(
     return hash_transaction(parent_tx, hash_type);
 }
 
-bool check_signature(data_chunk signature,
+bool check_signature(const data_chunk& signature,
     const ec_point& public_key, const script_type& script_code,
     const transaction_type& parent_tx, uint32_t input_index)
 {
     if (signature.empty())
         return false;
-    auto hash_type = signature.back();
-    signature.pop_back();
+    data_chunk ec_signature(signature);
+    const auto hash_type = ec_signature.back();
+    ec_signature.pop_back();
 
     // This always produces a valid signature hash.
     const auto sighash = 
         script_type::generate_signature_hash(
             parent_tx, input_index, script_code, hash_type);
-    return verify_signature(public_key, sighash, signature);
+    return verify_signature(public_key, sighash, ec_signature);
 }
 
 bool script_type::op_checksig(
@@ -1033,8 +1034,8 @@ bool script_type::op_checksigverify(
             continue;
         script_code.push_operation(op);
     }
-    return check_signature(signature, pubkey,
-        script_code, parent_tx, input_index);
+    return check_signature(signature, pubkey, script_code, parent_tx,
+        input_index);
 }
 
 bool script_type::op_checkmultisig(
