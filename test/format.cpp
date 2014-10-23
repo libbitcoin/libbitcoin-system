@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(btc_to_satoshi_overflow_precision_test)
 BOOST_AUTO_TEST_CASE(btc_to_satoshi_no_leading_zero_test)
 {
     uint64_t satoshi;
-    uint64_t expected = .5 * coin_price(1);
+    uint64_t expected = coin_price(1) / 2;
     BOOST_REQUIRE(btc_to_satoshi(satoshi, ".5"));
     BOOST_REQUIRE_EQUAL(satoshi, expected);
 }
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(btc_to_satoshi_no_leading_zero_test)
 BOOST_AUTO_TEST_CASE(btc_to_satoshi_trailing_zero_test)
 {
     uint64_t satoshi;
-    uint64_t expected = .5 * coin_price(1);
+    uint64_t expected = coin_price(1) / 2;
     BOOST_REQUIRE(btc_to_satoshi(satoshi, "0.50"));
     BOOST_REQUIRE_EQUAL(satoshi, expected);
 }
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(btc_to_satoshi_trailing_zero_test)
 BOOST_AUTO_TEST_CASE(btc_to_satoshi_offset_zero_test)
 {
     uint64_t satoshi;
-    uint64_t expected = .05 * coin_price(1);
+    uint64_t expected = coin_price(1) / 20;
     BOOST_REQUIRE(btc_to_satoshi(satoshi, "0.05"));
     BOOST_REQUIRE_EQUAL(satoshi, expected);
 }
