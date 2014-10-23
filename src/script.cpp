@@ -992,12 +992,48 @@ hash_digest script_type::generate_signature_hash(
     return hash_transaction(parent_tx, hash_type);
 }
 
-bool check_signature(const data_chunk& signature,
-    const ec_point& public_key, const script_type& script_code,
-    const transaction_type& parent_tx, uint32_t input_index)
+bool create_signature(data_chunk& signature, const ec_secret& private_key,
+    const script_type& prevout_script, const transaction_type& new_tx,
+    uint32_t input_index, uint32_t hash_type)
+{
+    BOOST_ASSERT_MSG(false, "Deterministic signature is not yet implemented.");
+    return false;
+
+    // TODO: calculate this.
+    ec_secret deterministic_nonce;
+
+    // Pass through to legacy technique.
+    create_signature(signature, private_key, prevout_script, new_tx,
+        input_index, hash_type, deterministic_nonce);
+}
+
+bool create_signature(data_chunk& signature, const ec_secret& private_key,
+    const script_type& prevout_script, const transaction_type& new_tx, 
+    uint32_t input_index, uint32_t hash_type, const ec_secret& nonce)
+{
+    // This always produces a valid signature hash.
+    const auto sighash =
+        script_type::generate_signature_hash(
+            new_tx, input_index, prevout_script, hash_type);
+
+    // Create the EC signature.
+    signature = sign(private_key, sighash, nonce);
+    if (signature.empty())
+        return false;
+
+    // Add the sighash type to the end of the signature.
+    signature.push_back(hash_type);
+    return true;
+}
+
+bool check_signature(const data_chunk& signature, const ec_point& public_key,
+    const script_type& script_code, const transaction_type& parent_tx, 
+    uint32_t input_index)
 {
     if (signature.empty())
         return false;
+
+    // Remove the sighash type from the end of the signature.
     data_chunk ec_signature(signature);
     const auto hash_type = ec_signature.back();
     ec_signature.pop_back();
