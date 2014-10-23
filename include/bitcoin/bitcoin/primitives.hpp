@@ -25,8 +25,8 @@
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/script.hpp>
+#include <bitcoin/bitcoin/types.hpp>
 
 namespace libbitcoin {
 
@@ -113,8 +113,7 @@ struct BC_API output_info_type
 };
 
 typedef std::vector<output_info_type> output_info_list;
-// Where is this used?
-// TODO: Remove otherwise.
+// Not used
 //typedef std::vector<uint64_t> output_value_list;
 
 struct BC_API transaction_input_type
