@@ -1,4 +1,4 @@
-AC_INIT([libbitcoin], [2.4.0], [genjix@riseup.net])
+AC_INIT([libbitcoin], [2.5.0], [genjix@riseup.net])
 AC_USE_SYSTEM_EXTENSIONS
 AC_LANG(C++)
 AC_CONFIG_AUX_DIR([build-aux])
