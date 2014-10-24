@@ -59,10 +59,16 @@ data_chunk decode_hex(std::string hex)
 {
     // Trim the fat.
     boost::algorithm::trim(hex);
+    auto size = hex.size();
+
+    // This prevents a last odd character from being ignored.
+    if (size % 2 != 0)
+        return data_chunk();
+
     data_chunk result(hex.size() / 2);
-    for (size_t i = 0; i + 1 < hex.size(); i += 2)
+    for (size_t i = 0; i + 1 < size; i += 2)
     {
-        BITCOIN_ASSERT(hex.size() - i >= 2);
+        BITCOIN_ASSERT(size - i >= 2);
         auto byte_begin = hex.begin() + i;
         auto byte_end = hex.begin() + i + 2;
         // Perform conversion.

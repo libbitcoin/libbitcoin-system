@@ -25,6 +25,13 @@ using namespace bc;
 BOOST_AUTO_TEST_SUITE(format_tests)
 
 // encode_hex/decode_hex
+
+BOOST_AUTO_TEST_CASE(encode_test_odd_length_returns_empty)
+{
+    const auto& hex_str = "10a7fd15cb45bda9e90e19a15";
+    BOOST_REQUIRE_EQUAL(encode_hex(decode_hex(hex_str)), "");
+}
+
 // TODO: these should be tested for correctness, not just round-tripping.
 
 BOOST_AUTO_TEST_CASE(encode_test_round_trips)
