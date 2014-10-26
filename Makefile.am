@@ -138,13 +138,13 @@ bitcoin_bitcoin_wallet_include_HEADERS = \
 #
 # libraries
 #
-lib_LTLIBRARIES = libbitcoin.la
+lib_LTLIBRARIES = src/libbitcoin.la
 
-libbitcoin_la_CPPFLAGS = \
+src_libbitcoin_la_CPPFLAGS = \
     -I$(srcdir)/include \
     ${secp256k1_CFLAGS}
 
-libbitcoin_la_SOURCES = \
+src_libbitcoin_la_SOURCES = \
     src/address.cpp \
     src/blockchain.cpp \
     src/block.cpp \
@@ -190,7 +190,7 @@ libbitcoin_la_SOURCES = \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
 
-libbitcoin_la_LIBADD = \
+src_libbitcoin_la_LIBADD = \
     -lboost_system \
     -lboost_regex \
     -lboost_filesystem \
@@ -205,18 +205,18 @@ libbitcoin_la_LIBADD = \
 #
 # tests
 #
-TESTS = libbitcoin_test
+TESTS = test/libbitcoin_test
 
-check_PROGRAMS = libbitcoin_test
+check_PROGRAMS = test/libbitcoin_test
 
-libbitcoin_test_CPPFLAGS = \
+test_libbitcoin_test_CPPFLAGS = \
     -I$(srcdir)/include \
     -I$(srcdir)/test \
     ${crypto_CFLAGS} \
     ${secp256k1_CFLAGS} \
     -DBOOST_TEST_DYN_LINK
 
-libbitcoin_test_SOURCES = \
+test_libbitcoin_test_SOURCES = \
     test/amount.cpp \
     test/base58.cpp \
     test/big_number.cpp \
@@ -235,8 +235,8 @@ libbitcoin_test_SOURCES = \
     test/stealth.cpp \
     test/uri.cpp
 
-libbitcoin_test_LDADD = \
-    libbitcoin.la \
+test_libbitcoin_test_LDADD = \
+    src/libbitcoin.la \
     -lrt \
     -lboost_system \
     -lboost_unit_test_framework \
