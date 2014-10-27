@@ -1030,6 +1030,8 @@ bool check_signature(const data_chunk& signature, const ec_point& public_key,
     const script_type& script_code, const transaction_type& parent_tx, 
     uint32_t input_index)
 {
+    if (public_key.empty())
+        return false;
     if (signature.empty())
         return false;
 
