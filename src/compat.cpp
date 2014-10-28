@@ -20,9 +20,11 @@
 #include <bitcoin/bitcoin/compat.hpp>
 
 #ifdef __MACH__
-    // Mac clock_gettime
+    // Mac clock_gettime from gist.github.com/jbenet/1087739
     #include <mach/clock.h>
     #include <mach/mach.h>
+    #include <time.h>
+    #include <sys/time.h>
 
     void clock_gettime(int ign, timespec* ts)
     {

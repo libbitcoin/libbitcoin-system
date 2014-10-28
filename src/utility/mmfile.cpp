@@ -19,22 +19,21 @@
  */
 #include <bitcoin/bitcoin/utility/mmfile.hpp>
 
+#ifdef HAVE_BLOCKCHAIN
+
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#include <sys/mman.h>
-#endif
 #include <sys/types.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
 mmfile::mmfile(const std::string& filename)
 {
-#ifndef _MSC_VER
     // Not yet MSVC portable (maybe windows).
     BITCOIN_ASSERT_MSG(sizeof (void*) == 8, "Not a 64bit system!");
     file_handle_ = open(filename.c_str(),
@@ -51,7 +50,6 @@ mmfile::mmfile(const std::string& filename)
         0, size_, PROT_READ | PROT_WRITE, MAP_SHARED, file_handle_, 0));
     if (data_ == MAP_FAILED)
         data_ = nullptr;
-#endif
 }
 mmfile::mmfile(mmfile&& file)
   : file_handle_(file.file_handle_), data_(file.data_), size_(file.size_)
@@ -62,11 +60,9 @@ mmfile::mmfile(mmfile&& file)
 }
 mmfile::~mmfile()
 {
-#ifndef _MSC_VER
     // Not yet MSVC portable (maybe windows).
     munmap(data_, size_);
     close(file_handle_);
-#endif
 }
 
 uint8_t* mmfile::data()
@@ -84,7 +80,6 @@ size_t mmfile::size() const
 
 bool mmfile::resize(size_t new_size)
 {
-#ifndef _MSC_VER
     // Not yet MSVC portable (maybe windows).
     // Resize underlying file.
     if (ftruncate(file_handle_, new_size) == -1)
@@ -96,9 +91,8 @@ bool mmfile::resize(size_t new_size)
         return false;
     size_ = new_size;
     return true;
-#else
-    return false;
-#endif
 }
 
 } // namespace libbitcoin
+
+#endif
