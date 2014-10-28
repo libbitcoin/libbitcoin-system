@@ -205,6 +205,7 @@ src_libbitcoin_la_LIBADD = \
 #
 # tests
 #
+if ENABLE_TESTS
 TESTS = test/libbitcoin_test
 
 check_PROGRAMS = test/libbitcoin_test
@@ -242,4 +243,4 @@ test_libbitcoin_test_LDADD = \
     -lboost_unit_test_framework \
     ${crypto_LIBS} \
     ${secp256k1_LIBS}
-
+endif

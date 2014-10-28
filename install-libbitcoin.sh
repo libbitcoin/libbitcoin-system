@@ -24,6 +24,10 @@ BUILD_ACCOUNT="libbitcoin"
 BUILD_REPO="libbitcoin"
 BUILD_BRANCH="develop"
 
+# enable testing
+TEST_OPTIONS=\
+"--with-tests=yes"
+
 # https://github.com/bitcoin/secp256k1
 SECP256K1_OPTIONS=\
 "--with-bignum=gmp "\
@@ -166,7 +170,7 @@ build_library()
     build_from_github bitcoin secp256k1 master "$SEQUENTIAL" "$@" $SECP256K1_OPTIONS
 
     # The primary build is not downloaded if we are running in Travis.
-    build_primary "$PARALLEL" "$@"
+    build_primary "$PARALLEL" "$@" $TEST_OPTIONS
 
     # If the build succeeded clean up the build directory.
     delete_build_directory
