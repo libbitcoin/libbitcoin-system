@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_MMFILE_HPP
 #define LIBBITCOIN_MMFILE_HPP
 
+#ifdef HAVE_BLOCKCHAIN
+
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -48,5 +50,7 @@ private:
 };
 
 } // namespace libbitcoin
+
+#endif
 
 #endif
