@@ -36,7 +36,6 @@ AX_BOOST_DATE_TIME
 AX_BOOST_FILESYSTEM
 AX_BOOST_REGEX
 AX_BOOST_SYSTEM
-AX_BOOST_UNIT_TEST_FRAMEWORK
 
 PKG_PROG_PKG_CONFIG
 
@@ -49,8 +48,23 @@ AC_CHECK_LIB(gmp,__gmpz_init,,
 # TODO: We require secp256k1 to require GMP (over OpenSSL).
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
-# libcrypto (from OpenSSL) is currently required for test validation only.
-PKG_CHECK_MODULES([crypto], [libcrypto >= 1.0.1])
+# build tests
+AC_ARG_WITH([tests], [AS_HELP_STRING([--with-tests],
+    [require build with tests. Requires pkg-config [default=no]])],
+    [enable_tests_ext=$withval],
+    [enable_tests_ext=no])
+
+# conditionally require test dependencies
+if test "x$enable_tests_ext" != "xno"; then
+    AX_BOOST_UNIT_TEST_FRAMEWORK
+
+    # libcrypto (from OpenSSL) is currently required for test validation only.
+    PKG_CHECK_MODULES([crypto], [libcrypto >= 1.0.1])
+fi
+
+AM_CONDITIONAL(ENABLE_TESTS, test "x$enable_tests_ext" != "xno")
+
+
 
 # Do not add contextual build parameters in configuration.
 # http://stackoverflow.com/a/4680578
