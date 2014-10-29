@@ -30,8 +30,8 @@ fi
 
 # Boost doesn't publish package configs but has m4 tests.
 # The current versions produce incorrect error message text.
-AX_BOOST_BASE([1.50],,
-    [AC_MSG_ERROR([Boost 1.50 or later is required but was not found.])])
+AX_BOOST_BASE([1.49],,
+    [AC_MSG_ERROR([Boost 1.49 or later is required but was not found.])])
 AX_BOOST_DATE_TIME
 AX_BOOST_FILESYSTEM
 AX_BOOST_REGEX

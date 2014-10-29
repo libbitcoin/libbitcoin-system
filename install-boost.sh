@@ -19,12 +19,11 @@ build_boost()
     echo '*************************** install boost **************************'
 
     # Establish boost build parameters.
-    # Boost program_options.option_descriptions.canonical_display_name (1.50)
-    # Boost thread (although not currently used) with gcc7/8 (1.49)
+    # Boost thread (not currently used) with gcc7/8 requires (1.49)
     # For more information see: https://svn.boost.org/trac/boost/ticket/6165
     BOOST_LIBS="date_time,filesystem,regex,system,test"
-    BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.50.0/boost_1_50_0.tar.bz2/download"
-    BOOST_ARCHIVE="boost_1_50_0.tar.bz2"
+    BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download"
+    BOOST_ARCHIVE="boost_1_49_0.tar.bz2"
 
     # Download archive.
     wget --output-document $BOOST_ARCHIVE $BOOST_URL
