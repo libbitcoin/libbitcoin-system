@@ -29,7 +29,7 @@
     #include <time.h>
     #include <sys/time.h>
     #define CLOCK_REALTIME 0
-    BC_API void clock_gettime(int ign, timespec* ts);
+    BC_API void clock_gettime(int, timespec* ts);
 #endif
 
 #ifdef _MSC_VER
@@ -41,7 +41,7 @@
         int32_t tv_nsec;
     } timespec;
     #define CLOCK_REALTIME 0
-    BC_API void clock_gettime(int ign, timespec* ts);
+    BC_API void clock_gettime(int, timespec* ts);
 #endif
 
 #ifdef _MSC_VER

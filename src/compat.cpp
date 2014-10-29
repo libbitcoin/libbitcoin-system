@@ -26,7 +26,7 @@
     #include <time.h>
     #include <sys/time.h>
 
-    void clock_gettime(int ign, timespec* ts)
+    void clock_gettime(int, timespec* ts)
     {
         clock_serv_t cclock;
         mach_timespec_t mts;
@@ -62,7 +62,7 @@
         return time;
     }
 
-    void clock_gettime(int ign, timespec* ts)
+    void clock_gettime(int, timespec* ts)
     {
         static bool initialized = false;
         static bool usePerformanceCounter = false;
