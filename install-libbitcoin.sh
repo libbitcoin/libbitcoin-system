@@ -1,32 +1,16 @@
 #!/bin/bash
 #
-# Script to build and install Libbitcoin and unpackaged dependencies.
+# Script to build and install libbitcoin and unpackaged dependencies.
 #
-# This build script is based on a few ideas.
-# -----------------------------------------------------------------------------
-#  0. Start Clean: make reliable by never building from cached results.
-#  1. Fail Fast: make all errors fail the build so that none are overlooked.
-#  3. Self-Contain: build everything that needs to be built from one file.
-#  2. Validate Dependencies: detect dependency breaks before they ship.
-#  3. Validate Deployment: this file is both deployment and verification build.
-#  3. Be Declarative: make behavior obvious by not using conditional statements.
-#  4. Be Explicit: not everyone speaks the same code or human languages.
-#  5. Enable Least Privilege: don't require more privilege than necessary.
-#  6. Do Not Repeat Yourself: do not repeat yourself.
-
-# This script will build libbitcoin using this relative directory.
-# This is meant to be temporary, just to facilitate the install.
-
-BUILD_DIRECTORY="libbitcoin-build"
 
 # The source repository for the primary build (when not running in Travis).
 BUILD_ACCOUNT="libbitcoin"
 BUILD_REPO="libbitcoin"
 BUILD_BRANCH="develop"
 
-# enable testing
-TEST_OPTIONS=\
-"--with-tests=yes"
+# This script will build using this relative directory.
+# This is meant to be temporary, just to facilitate the install.
+BUILD_DIRECTORY="libbitcoin-build"
 
 # https://github.com/bitcoin/secp256k1
 SECP256K1_OPTIONS=\
@@ -36,27 +20,40 @@ SECP256K1_OPTIONS=\
 "--enable-tests=no "\
 "--enable-endomorphism=no"
 
-# http://bit.ly/1pKbuFP
-BOOST_UNIT_TEST_PARAMETERS=\
-"--run_test=* "\
-"--random=1 "\
-"--show_progress=yes "\
-"--result_code=no "\
-"--detect_memory_leak=0 "\
-"--report_level=no "\
-"--build_info=yes"
+# Enable test compile in the primary build.
+TEST_OPTIONS=\
+"--with-tests=yes"
 
-SEQUENTIAL="1"
-
-if [ "$TRAVIS" = "true" ]; then
-    PARALLEL="$SEQUENTIAL"
-
-    echo "Detected travis install, setting to non-parallel: $PARALLEL"
+# Set SEQUENTIAL (always 1), PARALLEL (number of concurrent jobs) and OS.
+SEQUENTIAL=1
+PARALLEL=2
+OS=$(uname -s)
+if [[ $TRAVIS = "true" ]]; then
+    PARALLEL=$SEQUENTIAL
+elif [[ $OS = "Linux" ]]; then
+    PARALLEL=$(nproc)
+elif [[ $OS = "Darwin" ]]; then
+    PARALLEL=2
+    PREFIX="/usr/local"
 else
-    NPROC=$(nproc)
-    PARALLEL="$NPROC"
+    echo "Unsupported system: $OS"
+    exit 1
+fi
+echo "Allocated jobs: $PARALLEL"
+echo "Making for system: $OS"
+echo "Temporary build location: $BUILD_DIRECTORY"
 
-    echo "Detected cores for parallel make: $PARALLEL"
+# Set PREFIX and PKG_CONFIG_PATH from --prefix=path option.
+for i in "$@"; do
+    case $i in
+        (--prefix=*) PREFIX="${i#*=}";;
+    esac
+done
+if [[ $PREFIX ]]; then
+    export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+    echo "Package config path: $PKG_CONFIG_PATH"
+else
+    echo "No --prefix specified, installing to: /usr/local"
 fi
 
 display_message()
@@ -75,17 +72,20 @@ automake_current_directory()
     ./autogen.sh
     ./configure --enable-silent-rules "$@"
 
-    if [[ "$JOBS" -gt "$SEQUENTIAL" ]]; then
-        make --silent "-j$JOBS"
+    # Avoid setting -j1.
+    if [[ $JOBS -gt $SEQUENTIAL ]]; then
+        make --silent -j$JOBS
     else
         make --silent
     fi
 
-    # Sudo can be removed here if installing to a local directory (--prefix).
-    sudo make install
-    
-    # This line can be removed it dynamic linking is not required.
-    sudo ldconfig
+    make install
+
+    # If sudo is required the caller should sudo the script.
+    # Use ldconfig only in case of non --prefix installation on Linux.    
+    if [[ ($OS == "Linux") && !($PREFIX)]]; then
+        ldconfig
+    fi
 }
 
 build_from_github()
@@ -94,8 +94,6 @@ build_from_github()
     REPO=$2
     BRANCH=$3
     JOBS=$4
-
-    # Shift the first three parameters out of @.
     shift 4
 
     # Show the user what repo we are building.
@@ -108,7 +106,7 @@ build_from_github()
 
     # Build the local repo clone.
     pushd $REPO
-    automake_current_directory "$JOBS" "$@"
+    automake_current_directory $JOBS "$@"
     popd
 }
 
@@ -117,19 +115,19 @@ build_primary()
     JOBS=$1
     shift 1
 
-    if [ "$TRAVIS" = "true" ]; then
+    if [[ $TRAVIS == "true" ]]; then
         # If the environment is Travis drop out of build directory.
         cd ..
         display_message "Local $TRAVIS_REPO_SLUG"
-	    automake_current_directory "$JOBS" "$@"
+        automake_current_directory $JOBS "$@"
         build_tests
     else
         # Otherwise we pull the primary repo down for the single file install.
-        build_from_github $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH "$JOBS" "$@"
+        build_from_github $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH $JOBS "$@"
 
         # Build the tests and drop out of build directory.
         pushd $BUILD_REPO
-        build_tests "$JOBS"
+        build_tests $JOBS
         popd
         cd ..
     fi
@@ -140,19 +138,17 @@ build_tests()
     JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    if [[ "$JOBS" -gt "$SEQUENTIAL" ]]; then
-        TEST_FLAGS="$BOOST_UNIT_TEST_PARAMETERS" make check "-j$JOBS"
+    if [[ $JOBS -gt $SEQUENTIAL ]]; then
+        make check -j$JOBS
     else
-        TEST_FLAGS="$BOOST_UNIT_TEST_PARAMETERS" make check
+        make check
     fi
 }
 
 create_build_directory()
 {
-    # Notify that this script will do something destructive.
-    echo "This script will erase and build in: $BUILD_DIRECTORY"
-
-    rm --force --recursive $BUILD_DIRECTORY
+    # By default will require privilege, use --prefix=<directory> to avoid.
+    rm -rf $BUILD_DIRECTORY
     mkdir $BUILD_DIRECTORY
     cd $BUILD_DIRECTORY
 
@@ -167,10 +163,10 @@ build_library()
     create_build_directory
 
     # Download, build and install all unpackaged dependencies.
-    build_from_github bitcoin secp256k1 master "$SEQUENTIAL" "$@" $SECP256K1_OPTIONS
+    build_from_github evoskuil secp256k1 osx-patch $SEQUENTIAL "$@" $SECP256K1_OPTIONS
 
     # The primary build is not downloaded if we are running in Travis.
-    build_primary "$PARALLEL" "$@" $TEST_OPTIONS
+    build_primary $PARALLEL "$@" $TEST_OPTIONS
 
     # If the build succeeded clean up the build directory.
     delete_build_directory
@@ -182,7 +178,7 @@ delete_build_directory()
     # applied to dependencies as well. Typically each time a git pull occurs 
     # into a build directory the uninstall is potentially invalidated. This 
     # approach allows us to perform a complete uninstall across all versions.
-    rm --force --recursive $BUILD_DIRECTORY
+    rm -rf $BUILD_DIRECTORY
 }
 
 # Exit this script on the first error (any statement returns non-true value).

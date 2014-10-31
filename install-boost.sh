@@ -2,17 +2,6 @@
 #
 # Script to build and install selected Boost features.
 #
-# This build script is based on a few ideas.
-# -----------------------------------------------------------------------------
-#  0. Start Clean: make reliable by never building from cached results.
-#  1. Fail Fast: make all errors fail the build so that none are overlooked.
-#  3. Self-Contain: build everything that needs to be built from one file.
-#  2. Validate Dependencies: detect dependency breaks before they ship.
-#  3. Validate Deployment: this file is both deployment and verification build.
-#  3. Be Declarative: make behavior obvious by not using conditional statements.
-#  4. Be Explicit: not everyone speaks the same code or human languages.
-#  5. Use Least Privilege: don't require sudo for the entire script.
-#  6. Do Not Repeat Yourself: do not repeat yourself.
 
 build_boost()
 {
@@ -35,7 +24,7 @@ build_boost()
     ./bootstrap.sh --with-libraries=$BOOST_LIBS
     
     # Build and install, disabling ICU for build consistency across platforms.
-    sudo ./b2 -d0 -q --disable-icu install
+    ./b2 -d0 -q --disable-icu install
 }
 
 # Establish shared build parameters.
@@ -48,8 +37,7 @@ set -e
 echo "This script will erase and build in the subdirectory: "$BUILD_DIRECTORY
 
 # Create and move to the build directory.
-# Cache credentials for subsequent sudo calls and clean the build directory.
-sudo rm -rf $BUILD_DIRECTORY
+rm -rf $BUILD_DIRECTORY
 mkdir $BUILD_DIRECTORY
 cd $BUILD_DIRECTORY
 
