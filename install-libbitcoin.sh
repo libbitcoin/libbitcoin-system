@@ -163,11 +163,10 @@ build_library()
     create_build_directory
 
     # Download, build and install all unpackaged dependencies.
-
-    build_from_github evoskuil secp256k1 osx-patch "$SEQUENTIAL" "$@" $SECP256K1_OPTIONS
+    build_from_github evoskuil secp256k1 osx-patch $SEQUENTIAL "$@" $SECP256K1_OPTIONS
 
     # The primary build is not downloaded if we are running in Travis.
-    build_primary "$PARALLEL" "$@" $TEST_OPTIONS
+    build_primary $PARALLEL "$@" $TEST_OPTIONS
 
     # If the build succeeded clean up the build directory.
     delete_build_directory
