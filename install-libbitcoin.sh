@@ -6,7 +6,7 @@
 # The source repository for the primary build (when not running in Travis).
 BUILD_ACCOUNT="libbitcoin"
 BUILD_REPO="libbitcoin"
-BUILD_BRANCH="master"
+BUILD_BRANCH="develop"
 
 # This script will build using this relative directory.
 # This is meant to be temporary, just to facilitate the install.
@@ -24,7 +24,7 @@ SECP256K1_OPTIONS=\
 TEST_OPTIONS=\
 "--with-tests=yes"
 
-# Set SEQUENTIAL (always 1), PARALLEL (number of cores to use) and OS.
+# Set SEQUENTIAL (always 1), PARALLEL (number of concurrent jobs) and OS.
 SEQUENTIAL=1
 PARALLEL=2
 OS=$(uname -s)
@@ -94,8 +94,6 @@ build_from_github()
     REPO=$2
     BRANCH=$3
     JOBS=$4
-
-    # Shift the first three parameters out of @.
     shift 4
 
     # Show the user what repo we are building.
