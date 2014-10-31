@@ -23,4 +23,4 @@ install:
 
 script:
   # Download and build unpackaged dependencies and build libbitcoin.
-  - sudo ./install-libbitcoin.sh CPPFLAGS="-Os -s"
+  - sudo ./install-libbitcoin.sh CXXFLAGS="-Os -s"
