@@ -19,8 +19,8 @@ install:
   - sudo apt-get -qq install libgmp-dev libssl-dev
 
   # Download and install boost components at the minimum version required.
-  - ./install-boost.sh
+  - sudo ./install-boost.sh
 
 script:
   # Download and build unpackaged dependencies and build libbitcoin.
-  - ./install-libbitcoin.sh CFLAGS="-s"
+  - sudo ./install-libbitcoin.sh CPPFLAGS="-Os -s"
