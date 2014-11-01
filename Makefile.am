@@ -238,9 +238,15 @@ test_libbitcoin_test_SOURCES = \
 
 test_libbitcoin_test_LDADD = \
     src/libbitcoin.la \
-    -lrt \
     -lboost_system \
     -lboost_unit_test_framework \
     ${crypto_LIBS} \
     ${secp256k1_LIBS}
+
+if USE_LIBRT
+test_libbitcoin_test_LDADD += \
+    @rtlib@
+
+endif
+
 endif
