@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(ripemd_hash_test)
         short_hash hash = decode_short_hash(result.result);
         BOOST_REQUIRE(ripemd160_hash(data) == hash);
     }
-    auto ripemd_hash = bitcoin_short_hash(data_chunk{{110}});
+    auto ripemd_hash = bitcoin_short_hash(data_chunk{110});
     BOOST_REQUIRE(encode_hex(ripemd_hash) ==
         "17d040b739d639c729daaf627eaff88cfe4207f4");
     data_chunk foo = decode_hex(

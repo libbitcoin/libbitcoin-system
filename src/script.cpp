@@ -2161,7 +2161,7 @@ inline data_chunk operation_metadata(const opcode code, size_t data_size)
     switch (code)
     {
         case opcode::pushdata1:
-            return to_data_chunk(to_little_endian<uint8_t>(data_size));
+            return data_chunk{ static_cast<uint8_t>(data_size) };
         case opcode::pushdata2:
             return to_data_chunk(to_little_endian<uint16_t>(data_size));
         case opcode::pushdata4:
