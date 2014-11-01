@@ -64,7 +64,32 @@ fi
 
 AM_CONDITIONAL(ENABLE_TESTS, test "x$enable_tests_ext" != "xno")
 
+# host type checks
+AC_CANONICAL_HOST
 
+require_librt=no
+
+# OS specific tests
+case ${host_os} in
+    *darwin*)
+        require_librt=no
+        ;;
+    *)
+        require_librt=yes
+        ;;
+esac
+
+# librt conditional check
+librt_libs=""
+
+if test "x$require_librt" != "xno"; then
+    AC_CHECK_LIB([rt], [clock_gettime],
+        [ librt_libs="-lrt" ],
+        [ AC_MSG_ERROR([rt library is required but was not found.]) ])
+fi
+
+AM_CONDITIONAL(USE_LIBRT, test "x$librt_libs" != "x")
+AC_SUBST([rtlib], ["$librt_libs"])
 
 # Do not add contextual build parameters in configuration.
 # http://stackoverflow.com/a/4680578
