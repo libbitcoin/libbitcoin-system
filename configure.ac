@@ -40,6 +40,9 @@ AC_CANONICAL_HOST
 # Check for baseline language coverage in the compiler for the C++11 standard.
 AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 
+# Enable silent rules option.
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+
 # Declare environment variables that affect the build.
 #------------------------------------------------------------------------------
 AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
@@ -128,11 +131,11 @@ AS_IF([test x$with_tests != xno],
 AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 AM_COND_IF([WITH_TESTS], [AC_MSG_NOTICE([WITH_TESTS defined])])
 
-# Require librt if on linux, setting USE_LIBRT and @rt_libs@.
+# Require librt if on linux.
 #------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*], 
+AS_CASE([${host_os}], [*linux*],
     AC_CHECK_LIB([rt], [clock_gettime],
-        [AC_SUBST([rt_libs], [-lrt]) clock_gettime_defined=yes],
+        [AC_SUBST([rt_LIBS], [-lrt]) clock_gettime_defined=yes],
         [AC_MSG_ERROR([rt library is required but was not found.])]))
 AM_CONDITIONAL([USE_LIBRT], [test x$clock_gettime_defined = xyes])
 AM_COND_IF([USE_LIBRT], [AC_MSG_NOTICE([USE_LIBRT defined])])
