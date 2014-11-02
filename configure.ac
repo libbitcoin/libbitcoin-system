@@ -49,7 +49,7 @@ AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
-# Support --with-pkgconfigdir option (after verifying package config install)
+# Support --with-pkgconfigdir option (after verifying package config install).
 #------------------------------------------------------------------------------
 PKG_PROG_PKG_CONFIG
 AC_MSG_CHECKING(--with-pkgconfigdir option)
