@@ -3,7 +3,7 @@
 #
 doc_DATA = README.md INSTALL COPYING doc/README.tutorial
 
-#doc_sphinxdir = $(docdir)/sphinx/
+#doc_sphinxdir = ${docdir}/sphinx/
 #doc_sphinx_DATA = \
 #    doc/sphinx/Makefile \
 #    doc/sphinx/overview.rst \
@@ -18,10 +18,10 @@ doc_DATA = README.md INSTALL COPYING doc/README.tutorial
 #    doc/sphinx/conf.py \
 #    doc/sphinx/introduction.rst
 #
-#doc_sphinx_imgdir = $(docdir)/sphinx/img/
+#doc_sphinx_imgdir = ${docdir}/sphinx/img/
 #doc_sphinx_img_DATA = doc/sphinx/img/operations.png
 #
-#doc_sphinx_examplesdir = $(docdir)/sphinx/examples/
+#doc_sphinx_examplesdir = ${docdir}/sphinx/examples/
 #doc_sphinx_examples_DATA = \
 #    doc/sphinx/examples/connect.rst \
 #    doc/sphinx/examples/initchain.rst \
@@ -45,12 +45,12 @@ ACLOCAL_AMFLAGS = -I m4
 #
 # headers
 #
-bitcoin_includedir = $(includedir)/bitcoin
+bitcoin_includedir = ${includedir}/bitcoin
 
 bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin.hpp
     
-bitcoin_bitcoin_includedir = $(includedir)/bitcoin/bitcoin
+bitcoin_bitcoin_includedir = ${includedir}/bitcoin/bitcoin
 bitcoin_bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin/address.hpp \
     include/bitcoin/bitcoin/block.hpp \
@@ -76,16 +76,16 @@ bitcoin_bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin/validate.hpp \
     include/bitcoin/bitcoin/version.hpp
 
-bitcoin_bitcoin_impl_includedir = $(includedir)/bitcoin/bitcoin/impl
+bitcoin_bitcoin_impl_includedir = ${includedir}/bitcoin/bitcoin/impl
 bitcoin_bitcoin_impl_include_HEADERS = \
     include/bitcoin/bitcoin/impl/format.ipp
 
-bitcoin_bitcoin_impl_serialize_includedir = $(includedir)/bitcoin/bitcoin/impl/serialize
+bitcoin_bitcoin_impl_serialize_includedir = ${includedir}/bitcoin/bitcoin/impl/serialize
 bitcoin_bitcoin_impl_serialize_include_HEADERS = \
     include/bitcoin/bitcoin/impl/serialize/block.ipp \
     include/bitcoin/bitcoin/impl/serialize/misc.ipp
 
-bitcoin_bitcoin_network_includedir = $(includedir)/bitcoin/bitcoin/network
+bitcoin_bitcoin_network_includedir = ${includedir}/bitcoin/bitcoin/network
 bitcoin_bitcoin_network_include_HEADERS = \
     include/bitcoin/bitcoin/network/channel.hpp \
     include/bitcoin/bitcoin/network/handshake.hpp \
@@ -94,7 +94,7 @@ bitcoin_bitcoin_network_include_HEADERS = \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
-bitcoin_bitcoin_util_includedir = $(includedir)/bitcoin/bitcoin/utility
+bitcoin_bitcoin_util_includedir = ${includedir}/bitcoin/bitcoin/utility
 bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
@@ -112,7 +112,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
     include/bitcoin/bitcoin/utility/weak_bind.hpp
 
-bitcoin_bitcoin_util_external_includedir = $(includedir)/bitcoin/bitcoin/utility/external
+bitcoin_bitcoin_util_external_includedir = ${includedir}/bitcoin/bitcoin/utility/external
 bitcoin_bitcoin_util_external_include_HEADERS = \
     include/bitcoin/bitcoin/utility/external/hmac_sha512.h \
     include/bitcoin/bitcoin/utility/external/ripemd160.h \
@@ -122,11 +122,11 @@ bitcoin_bitcoin_util_external_include_HEADERS = \
     include/bitcoin/bitcoin/utility/external/zeroize.h \
     include/bitcoin/bitcoin/utility/external/uint256.h
 
-bitcoin_bitcoin_impl_utility_includedir = $(includedir)/bitcoin/bitcoin/impl/utility
+bitcoin_bitcoin_impl_utility_includedir = ${includedir}/bitcoin/bitcoin/impl/utility
 bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
-bitcoin_bitcoin_wallet_includedir = $(includedir)/bitcoin/bitcoin/wallet
+bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/amount.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
@@ -141,7 +141,7 @@ bitcoin_bitcoin_wallet_include_HEADERS = \
 lib_LTLIBRARIES = src/libbitcoin.la
 
 src_libbitcoin_la_CPPFLAGS = \
-    -I$(srcdir)/include \
+    -I${srcdir}/include \
     ${secp256k1_CFLAGS}
 
 src_libbitcoin_la_SOURCES = \
@@ -218,8 +218,8 @@ TESTS = test/libbitcoin_test
 check_PROGRAMS = test/libbitcoin_test
 
 test_libbitcoin_test_CPPFLAGS = \
-    -I$(srcdir)/include \
-    -I$(srcdir)/test \
+    -I${srcdir}/include \
+    -I${srcdir}/test \
     ${crypto_CFLAGS} \
     ${secp256k1_CFLAGS} \
     -DBOOST_TEST_DYN_LINK
