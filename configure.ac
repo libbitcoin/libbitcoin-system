@@ -1,3 +1,5 @@
+AC_PREREQ(2.61)
+
 AC_INIT([libbitcoin], [2.5.0], [genjix@riseup.net])
 AC_USE_SYSTEM_EXTENSIONS
 AC_LANG(C++)
@@ -40,10 +42,14 @@ AX_BOOST_SYSTEM
 PKG_PROG_PKG_CONFIG
 
 # GMP does not publish a package config, so we do a header and library test.
-AC_CHECK_HEADER(gmp.h,,
-    [AC_MSG_ERROR([GMP header is required but was not found.])],-)
-AC_CHECK_LIB(gmp,__gmpz_init,,
-    [AC_MSG_ERROR([GMP library is required but was not found.])])
+AC_CHECK_HEADER([gmp.h],,
+    [ AC_MSG_ERROR([GMP header is required but was not found.]) ],-)
+
+AC_CHECK_LIB([gmp],[__gmpz_init],
+    [
+        AC_SUBST([gmp_LIBS], ["-lgmp"])
+    ],
+    [ AC_MSG_ERROR([GMP library is required but was not found.]) ])
 
 # TODO: We require secp256k1 to require GMP (over OpenSSL).
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
@@ -80,16 +86,18 @@ case ${host_os} in
 esac
 
 # librt conditional check
-librt_libs=""
+rt_LIBS=""
 
 if test "x$require_librt" != "xno"; then
     AC_CHECK_LIB([rt], [clock_gettime],
-        [ librt_libs="-lrt" ],
+        [
+            rt_LIBS="-lrt"
+        ],
         [ AC_MSG_ERROR([rt library is required but was not found.]) ])
 fi
 
-AM_CONDITIONAL(USE_LIBRT, test "x$librt_libs" != "x")
-AC_SUBST([rtlib], ["$librt_libs"])
+AM_CONDITIONAL(USE_LIBRT, test "x$rt_LIBS" != "x")
+AC_SUBST([rt_LIBS], ["$rt_LIBS"])
 
 # Do not add contextual build parameters in configuration.
 # http://stackoverflow.com/a/4680578

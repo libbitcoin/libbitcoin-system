@@ -15,6 +15,6 @@ Requires: libsecp256k1 >= 0.0.1
 Cflags: -I${includedir} -std=c++11
 
 # Our own lib and any we require that do not publish package configuration.
-Libs: -L${libdir} -lbitcoin -lgmp -lboost_date_time -lboost_filesystem \
-    -lboost_regex -lboost_system -lboost_unit_test_framework @rtlib@
+Libs: -L${libdir} -lbitcoin -lboost_date_time -lboost_filesystem \
+    -lboost_regex -lboost_system @gmp_LIBS@ @rt_LIBS@
 
