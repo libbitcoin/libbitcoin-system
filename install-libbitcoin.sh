@@ -12,6 +12,13 @@ BUILD_BRANCH="develop"
 # This is meant to be temporary, just to facilitate the install.
 BUILD_DIRECTORY="libbitcoin-build"
 
+HOMEBREW_BOOST_ROOT_PATH=\
+"/usr/local/opt/boost"
+
+HOMEBREW_PKG_CONFIG_PATHS=\
+"/usr/local/opt/gmp/lib/pkgconfig:"\
+"/usr/local/opt/openssl/lib/pkgconfig"
+
 # https://github.com/bitcoin/secp256k1
 SECP256K1_OPTIONS=\
 "--with-bignum=gmp "\
@@ -39,23 +46,33 @@ else
     echo "Unsupported system: $OS"
     exit 1
 fi
-echo "Allocated jobs: $PARALLEL"
-echo "Making for system: $OS"
-echo "Temporary build location: $BUILD_DIRECTORY"
 
-# Set PREFIX and PKG_CONFIG_PATH from --prefix=path option.
+# Set PREFIX from --prefix=path option.
 for i in "$@"; do
     case $i in
         (--prefix=*) PREFIX="${i#*=}";;
     esac
 done
+
+# Set PKG_CONFIG_PATH, BOOST_ROOT, CC and CXX
+if [[ $OS == "Darwin" ]]; then
+    export CC=clang
+    export CXX=clang++
+    export BOOST_ROOT=$HOMEBREW_BOOST_ROOT_PATH
+    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_PKG_CONFIG_PATHS"
+fi
 if [[ $PREFIX ]]; then
-    export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
-    echo "Package config path: $PKG_CONFIG_PATH"
-else
-    echo "No --prefix specified, installing to: /usr/local"
+    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX/lib/pkgconfig"
 fi
 
+# Give user feedback on build configuration.
+echo "Install prefix: $PREFIX"
+echo "Allocated jobs: $PARALLEL"
+echo "Making for system: $OS"
+echo "Temp directory: $BUILD_DIRECTORY"
+echo "Homebrew boost path: $BOOST_ROOT"
+echo "Package config path: $PKG_CONFIG_PATH"
+    
 display_message()
 {
     MESSAGE=$1

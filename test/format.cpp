@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(endian_test)
     std::reverse(le.begin(), le.end());
     BOOST_REQUIRE(from_big_endian<uint32_t>(le.begin()) == 123456789);
 
-    auto byte = to_little_endian<uint8_t>(0xff);
-    BOOST_REQUIRE(from_big_endian<uint8_t>(byte.begin()) == 0xff);
+    auto bytes = data_chunk{ 0xff };
+    BOOST_REQUIRE(from_big_endian<uint8_t>(bytes.begin()) == 0xff);
 
     auto quad = to_little_endian<uint64_t>(0x1122334455667788);
     BOOST_REQUIRE(from_little_endian<uint64_t>(quad.begin()) ==

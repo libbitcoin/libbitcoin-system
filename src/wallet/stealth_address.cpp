@@ -39,8 +39,6 @@ constexpr uint8_t number_sigs_size = sizeof(uint8_t);
 constexpr uint8_t prefix_length_size = sizeof(uint8_t);
 constexpr uint8_t checksum_size = sizeof(uint32_t);
 constexpr uint8_t max_spend_key_count = sizeof(uint8_t) * byte_bits;
-constexpr uint8_t max_prefix_bytes = stealth_address::max_prefix_bits / 
-    byte_bits;
 
 // wiki.unsystem.net/index.php/DarkWallet/Stealth#Address_format
 // [version:1=0x2a][options:1][scan_pubkey:33][N:1][spend_pubkey_1:33]..

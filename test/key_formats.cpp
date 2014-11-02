@@ -33,10 +33,18 @@ BOOST_AUTO_TEST_CASE(wif_test)
         0xB1, 0xB3, 0x61, 0x4B, 0x34, 0x59, 0x74, 0x33,
         0x2C, 0xB1, 0xB9, 0x58, 0x2C, 0xF0, 0x35, 0x36
     }};
+
+#ifdef ENABLE_TESTNET
+    std::string compressed =
+        "cRseHatKciTzFiXnoDjt5pWE3j3N2Hgd8qsVsCD4Ljv2DCwuD1V6";
+    std::string uncompressed =
+        "92ZKR9aqAuSbirHVW3tQMaRJ1AXScBaSrosQkzpbHhzKrVBsZBL";
+#else
     std::string compressed =
         "L1WepftUBemj6H4XQovkiW1ARVjxMqaw4oj2kmkYqdG1xTnBcHfC";
     std::string uncompressed =
         "5JngqQmHagNTknnCshzVUysLMWAjT23FWs1TgNU5wyFH5SB3hrP";
+#endif
 
     BOOST_REQUIRE(secret_to_wif(secret, true) == compressed);
     BOOST_REQUIRE(secret_to_wif(secret, false) == uncompressed);
