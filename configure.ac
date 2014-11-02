@@ -4,13 +4,10 @@ AC_PREREQ([2.65])
 # Process command-line arguments and perform initialization and verification.
 AC_INIT([libbitcoin], [2.5.0], [genjix@riseup.net])
 
-# Enable C and Posix extensions that may be disabled on certain platforms.
-AC_USE_SYSTEM_EXTENSIONS
-
 # Do compilation tests.
 AC_LANG(C++)
 
-# Specify the directory for build tools.
+# Specify the temporary directory for build tools.
 AC_CONFIG_AUX_DIR([build-aux])
 
 # Specify the directory of additional local Autoconf macros.
@@ -18,6 +15,9 @@ AC_CONFIG_MACRO_DIR([m4])
 
 # Run macros for operation of generated Makefiles, enable non-recursive make.
 AM_INIT_AUTOMAKE([subdir-objects])
+
+# Enable C and Posix extensions that may be disabled on certain platforms.
+AC_USE_SYSTEM_EXTENSIONS
 
 # Enable the archiver.
 AM_PROG_AR
@@ -38,7 +38,7 @@ AC_GNU_SOURCE
 AC_CANONICAL_HOST
 
 # Check for baseline language coverage in the compiler for the C++11 standard.
-AX_CXX_COMPILE_STDCXX_11(noext,mandatory)
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 
 # Declare environment variables that affect the build.
 #------------------------------------------------------------------------------
