@@ -195,8 +195,14 @@ src_libbitcoin_la_LIBADD = \
     -lboost_regex \
     -lboost_filesystem \
     -lpthread \
-    ${secp256k1_LIBS}
-    
+    ${secp256k1_LIBS} \
+    ${gmp_LIBS}
+
+if USE_LIBRT
+src_libbitcoin_la_LIBADD += \
+    ${rt_LIBS}
+endif
+
 #
 # examples
 #
@@ -245,8 +251,7 @@ test_libbitcoin_test_LDADD = \
 
 if USE_LIBRT
 test_libbitcoin_test_LDADD += \
-    @rtlib@
-
+    ${rt_LIBS}
 endif
 
 endif
