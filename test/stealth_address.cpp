@@ -75,7 +75,14 @@ BOOST_AUTO_TEST_CASE(stealth_address_test)
 
     payment_address payaddr;
     set_public_key(payaddr, pubkey_1);
+
+    auto foo = payaddr.encoded();
+
+#ifdef ENABLE_TESTNET
+    BOOST_REQUIRE(payaddr.encoded() == "mwSnRsXSEq3d7LTGqe7AtJYNqhATwHdhMb");
+#else
     BOOST_REQUIRE(payaddr.encoded() == "1Gvq8pSTRocNLDyf858o4PL3yhZm5qQDgB");
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_mainnet__round_trips)

@@ -60,10 +60,19 @@ BOOST_AUTO_TEST_CASE(sha256_hash_test)
         hash_digest hash = decode_hash(result.result);
         BOOST_REQUIRE(sha256_hash(data) == hash);
     }
+
+    // This changes based on ENABLE_TESTNET, so the test condition must vary.
     auto genesis = genesis_block();
+
     auto genesis_hash = hash_block_header(genesis.header);
+
+#ifdef ENABLE_TESTNET
+    BOOST_REQUIRE(encode_hex(genesis_hash) ==
+        "000000000933ea01ad0ee984209779baaec3ced90fa3f408719526f8d77f4943");
+#else
     BOOST_REQUIRE(encode_hex(genesis_hash) ==
         "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+#endif
 }
 
 BOOST_AUTO_TEST_CASE(hmac_sha512_hash_test)
