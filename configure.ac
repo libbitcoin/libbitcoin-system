@@ -126,6 +126,7 @@ AS_IF([test x$with_tests != xno],
         PKG_CHECK_MODULES([crypto], [libcrypto >= 1.0.1])
     ])
 AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
+AM_COND_IF([WITH_TESTS], [AC_MSG_NOTICE([WITH_TESTS defined])])
 
 # Require librt if on linux, setting USE_LIBRT and @rt_libs@.
 #------------------------------------------------------------------------------
@@ -134,6 +135,7 @@ AS_CASE([${host_os}], [*linux*],
         [AC_SUBST([rt_libs], [-lrt]) clock_gettime_defined=yes],
         [AC_MSG_ERROR([rt library is required but was not found.])]))
 AM_CONDITIONAL([USE_LIBRT], [test x$clock_gettime_defined = xyes])
+AM_COND_IF([USE_LIBRT], [AC_MSG_NOTICE([USE_LIBRT defined])])
 
 # Set warning levels.
 #------------------------------------------------------------------------------
