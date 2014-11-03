@@ -8,13 +8,14 @@ BUILD_ACCOUNT="libbitcoin"
 BUILD_REPO="libbitcoin"
 BUILD_BRANCH="develop"
 
-# This script will build using this relative directory.
-# This is meant to be temporary, just to facilitate the install.
+# This script will build using this relative temporary directory.
 BUILD_DIRECTORY="libbitcoin-build"
 
+# Boost osx discovery code assumes boost is in the MacPorts package path.
 HOMEBREW_BOOST_ROOT_PATH=\
 "/usr/local/opt/boost"
 
+# A package config path is not set by default on osx.
 HOMEBREW_PKG_CONFIG_PATHS=\
 "/usr/local/opt/gmp/lib/pkgconfig:"\
 "/usr/local/opt/openssl/lib/pkgconfig"
@@ -54,12 +55,13 @@ for i in "$@"; do
     esac
 done
 
-# Set PKG_CONFIG_PATH, BOOST_ROOT, CC and CXX.
+# Set PKG_CONFIG_PATH, BOOST_ROOT, CC, CXX and set clang flags.
 if [[ $OS == "Darwin" ]]; then
     export CC=clang
     export CXX=clang++
     export BOOST_ROOT=$HOMEBREW_BOOST_ROOT_PATH
     export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_PKG_CONFIG_PATHS"
+    SECP256K1_OPTIONS="$SECP256K1_OPTIONS CPPFLAGS=-Wno-unused-value"
 fi
 if [[ $PREFIX ]]; then
     export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX/lib/pkgconfig"
@@ -76,9 +78,7 @@ echo "Package config path: $PKG_CONFIG_PATH"
 display_message()
 {
     MESSAGE=$1
-    echo
-    echo "********************** $MESSAGE **********************"
-    echo
+    echo "\n********************** $MESSAGE **********************\n"
 }
 
 automake_current_directory()
