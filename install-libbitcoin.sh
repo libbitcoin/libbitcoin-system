@@ -54,7 +54,7 @@ for i in "$@"; do
     esac
 done
 
-# Set PKG_CONFIG_PATH, BOOST_ROOT, CC and CXX
+# Set PKG_CONFIG_PATH, BOOST_ROOT, CC and CXX.
 if [[ $OS == "Darwin" ]]; then
     export CC=clang
     export CXX=clang++
