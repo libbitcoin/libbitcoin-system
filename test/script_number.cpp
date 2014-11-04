@@ -189,11 +189,9 @@ BOOST_AUTO_TEST_CASE(check_operators)
     {
         for (size_t j = 0; j < script_number_offsets_count; ++j)
         {
-
             auto a = script_number_values[i];
             auto b = script_number_offsets[j];
 
-            // scenarios_count [0 .. 11]
             RunOperators(a, +a,         i, j, 0);
             RunOperators(a, -a,         i, j, 1);
             RunOperators(a, +b,         i, j, 2);
