@@ -26,15 +26,9 @@
 using namespace bc;
 
 // DEPRECATED: ONLY FOR TEST VALIDATION OF OPENSSL REMOVAL.
-class big_number_context
-{
-public:
-    big_number_context();
-    ~big_number_context();
-    BN_CTX* context();
-private:
-    BN_CTX* ctx_;
-};
+
+// big_number_context
+//-------------------
 
 big_number_context::big_number_context()
 {
@@ -51,6 +45,7 @@ BN_CTX* big_number_context::context()
     return ctx_;
 }
 
+// big_number
 //------------
 
 big_number::big_number()

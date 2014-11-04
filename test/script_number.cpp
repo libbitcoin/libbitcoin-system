@@ -26,6 +26,9 @@
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
 #include "script_number.hpp"
+#ifdef ENABLE_DATAGEN
+#include "big_number.hpp"
+#endif
 
 using namespace bc;
 
@@ -65,6 +68,7 @@ static bool negate_overflow64(const int64_t number)
 {
     return number == std::numeric_limits<int64_t>::min();
 }
+
 // Operators
 // ----------------------------------------------------------------------------
 
@@ -206,7 +210,6 @@ BOOST_AUTO_TEST_CASE(check_operators)
 }
 
 #ifdef ENABLE_DATAGEN
-#include "big_number.hpp"
 std::stringstream expectations;
 
 static std::string format_bytes(bc::data_chunk chunk)
@@ -333,7 +336,7 @@ static script_number_compare MakeCompare(const int64_t num1,
 static void MakeOperators(const int64_t num1, const int64_t num2)
 {
     // Enable individually to build expectation vector.
-    //CheckAdd(num1, num2, MakeAdd(num1, num2));
+    CheckAdd(num1, num2, MakeAdd(num1, num2));
     //CheckSubtract(num1, num2, MakeSubtract(num1, num2));
     //CheckNegate(num1, MakeNegate(num1));
     //CheckCompare(num1, num2, MakeCompare(num1, num2));

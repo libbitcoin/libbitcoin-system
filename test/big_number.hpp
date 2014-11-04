@@ -25,8 +25,20 @@
 #include <openssl/bn.h>
 #include <bitcoin/bitcoin.hpp>
 
+// DEPRECATED: ONLY FOR TEST VALIDATION OF OPENSSL REMOVAL.
+
 class big_number;
 typedef std::pair<big_number, big_number> divmod_result;
+
+class big_number_context
+{
+public:
+    big_number_context();
+    ~big_number_context();
+    BN_CTX* context();
+private:
+    BN_CTX* ctx_;
+};
 
 // DEPRECATED: ONLY FOR TEST VALIDATION OF OPENSSL REMOVAL.
 class big_number
