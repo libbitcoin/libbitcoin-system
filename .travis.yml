@@ -15,8 +15,7 @@ before_install:
   
 install:
   # Get GMP (GNU Multiprecision Arithmetic Library)
-  # Get OpenSSL (for test validation only)
-  - sudo apt-get -qq install libgmp-dev libssl-dev
+  - sudo apt-get -qq install libgmp-dev
 
   # Download and install boost components at the minimum version required.
   - sudo ./install-boost.sh
