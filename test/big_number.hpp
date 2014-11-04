@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_TEST_BIG_NUMBER_HPP
 #define LIBBITCOIN_TEST_BIG_NUMBER_HPP
 
-#ifdef false
+#ifdef ENABLE_DATAGEN
 
 #include <openssl/bn.h>
 #include <bitcoin/bitcoin.hpp>

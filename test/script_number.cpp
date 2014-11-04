@@ -27,9 +27,6 @@
 #include <bitcoin/bitcoin.hpp>
 #include "script_number.hpp"
 
-// If defined this creates a dependency on OpenSSL and requires big_number.
-#undef MAKE_EXPECTATIONS
-
 using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(scriptnum_tests)
@@ -208,7 +205,7 @@ BOOST_AUTO_TEST_CASE(check_operators)
     }
 }
 
-#ifdef MAKE_EXPECTATIONS
+#ifdef ENABLE_DATAGEN
 #include "big_number.hpp"
 std::stringstream expectations;
 
@@ -394,88 +391,5 @@ BOOST_AUTO_TEST_CASE(make_operator_expectations)
     const auto& dump = expectations.str();
 }
 #endif
-
-// Creation
-// ----------------------------------------------------------------------------
-//
-//static void CheckCreateVch(const int64_t num)
-//{
-//    big_number bignum;
-//    bignum.set_int64(num);
-//    script_number scriptnum(num);
-//    BOOST_CHECK(verify(bignum, scriptnum));
-//
-//    big_number bignum2;
-//    bignum2.set_data(bignum.data());
-//    script_number scriptnum2;
-//    BOOST_CHECK(scriptnum2.set_data(scriptnum.data()));
-//    BOOST_CHECK(verify(bignum2, scriptnum2));
-//
-//    big_number bignum3;
-//    bignum3.set_data(scriptnum2.data());
-//    script_number scriptnum3;
-//    BOOST_CHECK(scriptnum3.set_data(bignum2.data()));
-//    BOOST_CHECK(verify(bignum3, scriptnum3));
-//}
-//
-//static void CheckCreateVch_bad_set_data(const int64_t num)
-//{
-//    big_number bignum;
-//    bignum.set_int64(num);
-//    script_number scriptnum(num);
-//    BOOST_CHECK(verify(bignum, scriptnum));
-//
-//    big_number bignum2;
-//    bignum2.set_data(bignum.data());
-//    script_number scriptnum2;
-//    BOOST_CHECK(!scriptnum2.set_data(scriptnum.data()));
-//
-//    big_number bignum3;
-//    bignum3.set_data(scriptnum2.data());
-//    script_number scriptnum3;
-//    BOOST_CHECK(!scriptnum3.set_data(bignum2.data()));
-//}
-//
-//static void CheckCreateInt(const int64_t num)
-//{
-//    big_number bignum;
-//    bignum.set_int64(num);
-//    script_number scriptnum(num);
-//    BOOST_CHECK(verify(bignum, scriptnum));
-//
-//    big_number bignum1;
-//    bignum1.set_int64(scriptnum.int32());
-//
-//    BOOST_CHECK(verify(bignum1, script_number(scriptnum.int32())));
-//    BOOST_CHECK(bignum.int32() == scriptnum.int32());
-//    BOOST_CHECK(verify(bignum1, script_number(bignum.int32())));
-//    BOOST_CHECK(verify(bignum1, script_number(script_number(bignum.int32()).int32())));
-//}
-//
-//static void RunCreate(const int64_t num)
-//{
-//    CheckCreateInt(num);
-//    script_number scriptnum(num);
-//    if (scriptnum.data().size() <= max_script_number_size)
-//        CheckCreateVch(num);
-//    else
-//        CheckCreateVch_bad_set_data(num);
-//}
-//
-//BOOST_AUTO_TEST_CASE(creation)
-//{
-//    size_t count_values = sizeof(values) / sizeof(values[0]);
-//    size_t count_offsets = sizeof(offsets) / sizeof(offsets[0]);
-//
-//    for (size_t i = 0; i < count_values; ++i)
-//    {
-//        for (size_t j = 0; j < count_offsets; ++j)
-//        {
-//            RunCreate(values[i]);
-//            RunCreate(values[i] + offsets[j]);
-//            RunCreate(values[i] - offsets[j]);
-//        }
-//    }
-//}
 
 BOOST_AUTO_TEST_SUITE_END()

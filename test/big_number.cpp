@@ -17,10 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#ifdef ENABLE_DATAGEN
+
 #include "big_number.hpp"
-
-#ifdef false
-
 #include <openssl/bn.h>
 #include <bitcoin/bitcoin.hpp>
 
