@@ -63,7 +63,7 @@
     <Message Text="Linkage-mpir      : $(Linkage-mpir)" Importance="high"/>
     <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
     <Message Text="Linkage-libbitcoin: $(Linkage-libbitcoin)" Importance="high"/>
-    <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
+    <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high" Condition="'$(Option-datagen)' == 'true'"/>
   </Target>
   
 </Project>
