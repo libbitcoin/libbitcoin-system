@@ -2,7 +2,7 @@
 AC_PREREQ([2.65])
 
 # Process command-line arguments and perform initialization and verification.
-AC_INIT([libbitcoin], [2.5.0], [genjix@riseup.net])
+AC_INIT([libbitcoin], [2.6.0], [genjix@riseup.net])
 
 # Do compilation tests.
 AC_LANG(C++)
@@ -123,11 +123,7 @@ PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
 # Require test dependencies if $with_tests is set.
 #------------------------------------------------------------------------------
-AS_IF([test x$with_tests != xno], 
-    [
-        AX_BOOST_UNIT_TEST_FRAMEWORK
-        PKG_CHECK_MODULES([crypto], [libcrypto >= 1.0.1])
-    ])
+AS_IF([test x$with_tests != xno], [ AX_BOOST_UNIT_TEST_FRAMEWORK])
 AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 AM_COND_IF([WITH_TESTS], [AC_MSG_NOTICE([WITH_TESTS defined])])
 

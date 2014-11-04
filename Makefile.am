@@ -220,7 +220,6 @@ check_PROGRAMS = test/libbitcoin_test
 test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/include \
     -I${srcdir}/test \
-    ${crypto_CFLAGS} \
     ${secp256k1_CFLAGS} \
     -DBOOST_TEST_DYN_LINK
 
@@ -247,7 +246,6 @@ test_libbitcoin_test_LDADD = \
     src/libbitcoin.la \
     -lboost_system \
     -lboost_unit_test_framework \
-    ${crypto_LIBS} \
     ${secp256k1_LIBS} \
     ${gmp_LIBS}
 
