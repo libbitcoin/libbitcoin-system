@@ -19,6 +19,8 @@
  */
 #include "big_number.hpp"
 
+#ifdef false
+
 #include <openssl/bn.h>
 #include <bitcoin/bitcoin.hpp>
 
@@ -396,3 +398,5 @@ divmod_result divmod(const big_number& a, const big_number& b)
         &a.bignum_, &b.bignum_, ctx.context());
     return std::make_pair(divider, remainder);
 }
+
+#endif

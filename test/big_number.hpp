@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_TEST_BIG_NUMBER_HPP
 #define LIBBITCOIN_TEST_BIG_NUMBER_HPP
 
+#ifdef false
+
 #include <openssl/bn.h>
 #include <bitcoin/bitcoin.hpp>
 
@@ -30,43 +32,43 @@ typedef std::pair<big_number, big_number> divmod_result;
 class big_number
 {
 public:
-    BC_API big_number();
-    BC_API big_number(uint32_t value);
-    BC_API big_number(const big_number& other);
-    BC_API ~big_number();
+    big_number();
+    big_number(uint32_t value);
+    big_number(const big_number& other);
+    ~big_number();
 
-    BC_API big_number& operator=(const big_number& other);
+    big_number& operator=(const big_number& other);
 
-    BC_API void set_compact(uint32_t compact);
-    BC_API uint32_t compact() const;
+    void set_compact(uint32_t compact);
+    uint32_t compact() const;
 
-    BC_API void set_data(bc::data_chunk load_data);
-    BC_API bc::data_chunk data() const;
+    void set_data(bc::data_chunk load_data);
+    bc::data_chunk data() const;
 
-    BC_API void set_hash(bc::hash_digest load_hash);
-    BC_API bc::hash_digest hash() const;
+    void set_hash(bc::hash_digest load_hash);
+    bc::hash_digest hash() const;
 
-    BC_API void set_uint32(uint32_t value);
-    BC_API uint32_t uint32() const;
+    void set_uint32(uint32_t value);
+    uint32_t uint32() const;
 
-    BC_API void set_int32(int32_t value);
-    BC_API int32_t int32() const;
+    void set_int32(int32_t value);
+    int32_t int32() const;
 
     // Used by script system
-    BC_API void set_uint64(uint64_t value);
-    BC_API void set_int64(int64_t value);
+    void set_uint64(uint64_t value);
+    void set_int64(int64_t value);
 
-    BC_API bool operator==(const big_number& other);
-    BC_API bool operator!=(const big_number& other);
-    BC_API bool operator<=(const big_number& other);
-    BC_API bool operator>=(const big_number& other);
-    BC_API bool operator<(const big_number& other);
-    BC_API bool operator>(const big_number& other);
+    bool operator==(const big_number& other);
+    bool operator!=(const big_number& other);
+    bool operator<=(const big_number& other);
+    bool operator>=(const big_number& other);
+    bool operator<(const big_number& other);
+    bool operator>(const big_number& other);
 
-    BC_API big_number& operator+=(const big_number& other);
-    BC_API big_number& operator-=(const big_number& other);
-    BC_API big_number& operator*=(const big_number& other);
-    BC_API big_number& operator/=(const big_number& other);
+    big_number& operator+=(const big_number& other);
+    big_number& operator-=(const big_number& other);
+    big_number& operator*=(const big_number& other);
+    big_number& operator/=(const big_number& other);
 
 private:
     friend divmod_result divmod(const big_number& a, const big_number& b);
@@ -88,13 +90,15 @@ private:
     BIGNUM bignum_;
 };
 
-BC_API const big_number operator+(const big_number& a, const big_number& b);
-BC_API const big_number operator-(const big_number& a, const big_number& b);
-BC_API const big_number operator-(const big_number& number);
-BC_API const big_number operator/(const big_number& a, const big_number& b);
-BC_API const big_number operator<<(const big_number& a, unsigned int shift);
+const big_number operator+(const big_number& a, const big_number& b);
+const big_number operator-(const big_number& a, const big_number& b);
+const big_number operator-(const big_number& number);
+const big_number operator/(const big_number& a, const big_number& b);
+const big_number operator<<(const big_number& a, unsigned int shift);
 
-BC_API divmod_result divmod(const big_number& a, const big_number& b);
+divmod_result divmod(const big_number& a, const big_number& b);
+
+#endif
 
 #endif
 
