@@ -123,7 +123,7 @@ PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
 # Require test dependencies if $with_tests is set.
 #------------------------------------------------------------------------------
-AS_IF([test x$with_tests != xno], [ AX_BOOST_UNIT_TEST_FRAMEWORK])
+AS_IF([test x$with_tests != xno], [AX_BOOST_UNIT_TEST_FRAMEWORK])
 AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 AM_COND_IF([WITH_TESTS], [AC_MSG_NOTICE([WITH_TESTS defined])])
 
