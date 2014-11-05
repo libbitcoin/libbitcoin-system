@@ -37,16 +37,14 @@ BOOST_AUTO_TEST_SUITE(scriptnum_tests)
 // Helpers
 // ----------------------------------------------------------------------------
 
+#define BC_SCRIPT_NUMBER_REQUIRE_EQ(buffer_num, script_num) \
+    BOOST_REQUIRE_EQUAL(bc::encode_hex((buffer_num).bytes), \
+        bc::encode_hex((script_num).data())); \
+    BOOST_REQUIRE_EQUAL((buffer_num).number, (script_num).int32())
+
 static bool is(const uint8_t byte)
 {
     return byte != 0;
-}
-
-static bool verify(const script_number_buffer& buffer,
-    const script_number& script_num)
-{
-    return buffer.bytes == script_num.data() &&
-        buffer.number == script_num.int32();
 }
 
 // check left - right
@@ -72,12 +70,6 @@ static bool negate_overflow64(const int64_t number)
 // Operators
 // ----------------------------------------------------------------------------
 
-static script_number_buffer GetAdd(const size_t value,
-    const size_t offset, const size_t scenario)
-{
-    return script_number_adds[value][offset][scenario];
-}
-
 static void CheckAdd(const int64_t num1, const int64_t num2,
     const script_number_buffer& add)
 {
@@ -86,16 +78,16 @@ static void CheckAdd(const int64_t num1, const int64_t num2,
 
     if (!add_overflow64(num1, num2))
     {
-        BOOST_CHECK(verify(add, scriptnum1 + scriptnum2));
-        BOOST_CHECK(verify(add, scriptnum1 + num2));
-        BOOST_CHECK(verify(add, scriptnum2 + num1));
-    }
-}
+        auto sum = (scriptnum1 + scriptnum2).int32();
+        if (add.number != sum)
+        {
+            const auto foo = sum;
+        }
 
-static script_number_buffer GetNegate(const size_t value,
-    const size_t offset, const size_t scenario)
-{
-    return script_number_negates[value][offset][scenario];
+        BC_SCRIPT_NUMBER_REQUIRE_EQ(add, scriptnum1 + scriptnum2);
+        BC_SCRIPT_NUMBER_REQUIRE_EQ(add, scriptnum1 + num2);
+        BC_SCRIPT_NUMBER_REQUIRE_EQ(add, scriptnum2 + num1);
+    }
 }
 
 static void CheckNegate(const int64_t number,
@@ -105,14 +97,8 @@ static void CheckNegate(const int64_t number,
 
     if (!negate_overflow64(number))
     {
-        BOOST_CHECK(verify(negated, -scriptnum));
+        BC_SCRIPT_NUMBER_REQUIRE_EQ(negated, -scriptnum);
     }
-}
-
-static script_number_subtract GetSubtract(const size_t value,
-    const size_t offset, const size_t scenario)
-{
-    return script_number_subtracts[value][offset][scenario];
 }
 
 static void CheckSubtract(const int64_t num1, const int64_t num2,
@@ -123,21 +109,15 @@ static void CheckSubtract(const int64_t num1, const int64_t num2,
 
     if (!subtract_overflow64(num1, num2))
     {
-        BOOST_CHECK(verify(subtract.forward, scriptnum1 - scriptnum2));
-        BOOST_CHECK(verify(subtract.forward, scriptnum1 - num2));
+        BC_SCRIPT_NUMBER_REQUIRE_EQ(subtract.forward, scriptnum1 - scriptnum2);
+        BC_SCRIPT_NUMBER_REQUIRE_EQ(subtract.forward, scriptnum1 - num2);
     }
     
     if (!subtract_overflow64(num2, num1))
     {
-        BOOST_CHECK(verify(subtract.reverse, scriptnum2 - scriptnum1));
-        BOOST_CHECK(verify(subtract.reverse, scriptnum2 - num1));
+        BC_SCRIPT_NUMBER_REQUIRE_EQ(subtract.reverse, scriptnum2 - scriptnum1);
+        BC_SCRIPT_NUMBER_REQUIRE_EQ(subtract.reverse, scriptnum2 - num1);
     }
-}
-
-static script_number_compare GetCompare(const size_t value,
-    const size_t offset, const size_t scenario)
-{
-    return script_number_compares[value][offset][scenario];
 }
 
 static void CheckCompare(const int64_t num1, const int64_t num2,
@@ -146,42 +126,44 @@ static void CheckCompare(const int64_t num1, const int64_t num2,
     const script_number scriptnum1(num1);
     const script_number scriptnum2(num2);
 
-    BOOST_CHECK(scriptnum1 == scriptnum1);
-    BOOST_CHECK(scriptnum1 >= scriptnum1);
-    BOOST_CHECK(scriptnum1 <= scriptnum1);
-    BOOST_CHECK(!(scriptnum1 != scriptnum1));
-    BOOST_CHECK(!(scriptnum1 < scriptnum1));
-    BOOST_CHECK(!(scriptnum1 > scriptnum1));
+    BOOST_REQUIRE(scriptnum1 == scriptnum1);
+    BOOST_REQUIRE(scriptnum1 >= scriptnum1);
+    BOOST_REQUIRE(scriptnum1 <= scriptnum1);
+    BOOST_REQUIRE(!(scriptnum1 != scriptnum1));
+    BOOST_REQUIRE(!(scriptnum1 < scriptnum1));
+    BOOST_REQUIRE(!(scriptnum1 > scriptnum1));
 
-    BOOST_CHECK(scriptnum1 == num1);
-    BOOST_CHECK(scriptnum1 >= num1);
-    BOOST_CHECK(scriptnum1 <= num1);
-    BOOST_CHECK(!(scriptnum1 != num1));
-    BOOST_CHECK(!(scriptnum1 < num1));
-    BOOST_CHECK(!(scriptnum1 > num1));
+    BOOST_REQUIRE(scriptnum1 == num1);
+    BOOST_REQUIRE(scriptnum1 >= num1);
+    BOOST_REQUIRE(scriptnum1 <= num1);
+    BOOST_REQUIRE(!(scriptnum1 != num1));
+    BOOST_REQUIRE(!(scriptnum1 < num1));
+    BOOST_REQUIRE(!(scriptnum1 > num1));
 
-    BOOST_CHECK(is(compare.eq) == (scriptnum1 == scriptnum2));
-    BOOST_CHECK(is(compare.ne) == (scriptnum1 != scriptnum2));
-    BOOST_CHECK(is(compare.lt) == (scriptnum1 < scriptnum2));
-    BOOST_CHECK(is(compare.gt) == (scriptnum1 > scriptnum2));
-    BOOST_CHECK(is(compare.ge) == (scriptnum1 >= scriptnum2));
-    BOOST_CHECK(is(compare.le) == (scriptnum1 <= scriptnum2));
+    BOOST_REQUIRE_EQUAL(is(compare.eq), (scriptnum1 == scriptnum2));
+    BOOST_REQUIRE_EQUAL(is(compare.ne), (scriptnum1 != scriptnum2));
+    BOOST_REQUIRE_EQUAL(is(compare.lt), (scriptnum1 < scriptnum2));
+    BOOST_REQUIRE_EQUAL(is(compare.gt), (scriptnum1 > scriptnum2));
+    BOOST_REQUIRE_EQUAL(is(compare.ge), (scriptnum1 >= scriptnum2));
+    BOOST_REQUIRE_EQUAL(is(compare.le), (scriptnum1 <= scriptnum2));
 
-    BOOST_CHECK(is(compare.eq) == (scriptnum1 == num2));
-    BOOST_CHECK(is(compare.ne) == (scriptnum1 != num2));
-    BOOST_CHECK(is(compare.lt) == (scriptnum1 < num2));
-    BOOST_CHECK(is(compare.gt) == (scriptnum1 > num2));
-    BOOST_CHECK(is(compare.ge) == (scriptnum1 >= num2));
-    BOOST_CHECK(is(compare.le) == (scriptnum1 <= num2));
+    BOOST_REQUIRE_EQUAL(is(compare.eq), (scriptnum1 == num2));
+    BOOST_REQUIRE_EQUAL(is(compare.ne), (scriptnum1 != num2));
+    BOOST_REQUIRE_EQUAL(is(compare.lt), (scriptnum1 < num2));
+    BOOST_REQUIRE_EQUAL(is(compare.gt), (scriptnum1 > num2));
+    BOOST_REQUIRE_EQUAL(is(compare.ge), (scriptnum1 >= num2));
+    BOOST_REQUIRE_EQUAL(is(compare.le), (scriptnum1 <= num2));
 }
 
+#ifndef ENABLE_DATAGEN
+
 static void RunOperators(const int64_t num1, const int64_t num2,
-    const size_t value, const size_t offset, const size_t scenario)
+    const size_t value, const size_t offset, const size_t test)
 {
-    CheckAdd(num1, num2, GetAdd(value, offset, scenario));
-    CheckSubtract(num1, num2, GetSubtract(value, offset, scenario));
-    CheckNegate(num1, GetNegate(value, offset, scenario));
-    CheckCompare(num1, num2, GetCompare(value, offset, scenario));
+    CheckAdd(num1, num2, script_number_adds[value][offset][test]);
+    CheckSubtract(num1, num2, script_number_subtracts[value][offset][test]);
+    CheckNegate(num1, script_number_negates[value][offset][test]);
+    CheckCompare(num1, num2, script_number_compares[value][offset][test]);
 }
 
 BOOST_AUTO_TEST_CASE(check_operators)
@@ -209,7 +191,8 @@ BOOST_AUTO_TEST_CASE(check_operators)
     }
 }
 
-#ifdef ENABLE_DATAGEN
+#else
+
 std::stringstream expectations;
 
 static std::string format_bytes(bc::data_chunk chunk)
@@ -334,7 +317,7 @@ static script_number_compare MakeCompare(const int64_t num1,
 static void MakeOperators(const int64_t num1, const int64_t num2)
 {
     // Enable individually to build expectation vector.
-    //CheckAdd(num1, num2, MakeAdd(num1, num2));
+    CheckAdd(num1, num2, MakeAdd(num1, num2));
     //CheckSubtract(num1, num2, MakeSubtract(num1, num2));
     //CheckNegate(num1, MakeNegate(num1));
     //CheckCompare(num1, num2, MakeCompare(num1, num2));
@@ -342,11 +325,10 @@ static void MakeOperators(const int64_t num1, const int64_t num2)
 
 BOOST_AUTO_TEST_CASE(make_operator_expectations)
 {
-    expectations << boost::format("const script_number_xxxxxx "\
-        "script_number_xxxxxxs[%1%][%2%][%3%]=\n{\n") %
+    expectations << boost::format("[%1%][%2%][%3%]=\n{\n") %
         script_number_values_count % script_number_offsets_count % 12;
 
-    for (size_t i = 0; i < script_number_values_count; ++i)
+    for (size_t i = 7; i < script_number_values_count; ++i)
     {
         expectations << "    {\n";
         for (size_t j = 0; j < script_number_offsets_count; ++j)
