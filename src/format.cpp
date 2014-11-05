@@ -114,21 +114,19 @@ short_hash decode_short_hash(const std::string& hex)
 
 static std::string pad_left_8_zeroes_trim_right(const std::string& value)
 {
-    using namespace boost;
     BITCOIN_ASSERT(value.size() <= 8);
     std::string result(8 - value.size(), '0');
     result += value;
-    algorithm::trim_right_if(result, is_any_of("0"));
+    boost::algorithm::trim_right_if(result, boost::is_any_of("0"));
     return result;
 }
 
 static std::string pad_right_8_zeroes_trim_left(const std::string& value)
 {
-    using namespace boost;
     if (value.size() > 8)
-        throw bad_lexical_cast();
+        throw boost::bad_lexical_cast();
     auto result = value + std::string(8 - value.size(), '0');
-    algorithm::trim_left_if(result, is_any_of("0"));
+    boost::algorithm::trim_left_if(result, boost::is_any_of("0"));
     return result;
 }
 
@@ -143,9 +141,8 @@ static inline bool sum_will_overflow(uint64_t addend1, uint64_t addend2)
 
 bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
 {
-    using namespace boost;
     std::vector<std::string> parts;
-    boost::split(parts, btc, is_any_of("."));
+    boost::split(parts, btc, boost::is_any_of("."));
     if (parts.size() > 2)
         return false;
 
@@ -154,12 +151,12 @@ bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
     try
     {
         if (parts.front().size() > 0)
-            major = lexical_cast<int64_t>(parts.front()) * coin_price(1);
+            major = boost::lexical_cast<int64_t>(parts.front()) * coin_price(1);
         if (parts.size() == 2)
-            minor = lexical_cast<uint64_t>(
+            minor = boost::lexical_cast<uint64_t>(
                 pad_right_8_zeroes_trim_left(parts.back()));
     }
-    catch (bad_lexical_cast&)
+    catch (boost::bad_lexical_cast&)
     {
         return false;
     }
@@ -173,15 +170,14 @@ bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
 
 std::string satoshi_to_btc(uint64_t satoshi)
 {
-    using namespace boost;
     uint64_t major = satoshi / coin_price(1);
     BITCOIN_ASSERT(satoshi >= major);
     uint64_t minor = satoshi - (major * coin_price(1));
     BITCOIN_ASSERT(minor < coin_price(1));
-    const auto result = lexical_cast<std::string>(major);
+    const auto result = boost::lexical_cast<std::string>(major);
     if (minor > 0)
     {
-        const auto minor_str = lexical_cast<std::string>(minor);
+        const auto minor_str = boost::lexical_cast<std::string>(minor);
         return result + "." + pad_left_8_zeroes_trim_right(minor_str);
     }
     return result;
