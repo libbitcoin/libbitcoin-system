@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(btc_to_satoshi_0_btc_test)
 {
     uint64_t satoshi;
     BOOST_REQUIRE(btc_to_satoshi(satoshi, "0"));
-    BOOST_REQUIRE_EQUAL(satoshi, 0);
+    BOOST_REQUIRE_EQUAL(satoshi, 0u);
 }
 
 BOOST_AUTO_TEST_CASE(btc_to_satoshi_42_btc_test)

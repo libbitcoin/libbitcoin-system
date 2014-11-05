@@ -49,8 +49,8 @@ BOOST_AUTO_TEST_CASE(serialize_test)
 BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
 {
     block_type genblk = genesis_block();
-    BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk), 285);
-    BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk.header), 80);
+    BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk), 285u);
+    BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk.header), 80u);
     data_chunk rawblk(285);
     BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), rawblk.end()), 285);
     // Save genesis block.
