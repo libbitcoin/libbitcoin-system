@@ -36,6 +36,37 @@
 
 namespace libbitcoin {
 
+enum class history_row_id
+{
+    output,
+    spend
+};
+
+struct BC_API history_row
+{
+    /// Is this an output or spend
+    history_row_id id;
+    /// input/output point
+    point_type point;
+    /// Block height of transaction
+    size_t height;
+    union
+    {
+        /// If output, then satoshis value of output.
+        uint64_t value;
+        /// If spend, then checksum hash of previous output_point
+        uint64_t previous_checksum;
+    };
+};
+
+typedef std::vector<history_row> history_list;
+
+/**
+ * Create checksum so spend can be matched with corresponding
+ * output point without needing the whole previous outpoint.
+ */
+BC_API uint64_t spend_checksum(output_point outpoint);
+
 class blockchain
 {
 public:
@@ -68,18 +99,8 @@ public:
 
     typedef fetch_handler<input_point> fetch_handler_spend;
 
-    typedef size_t index_type;
-    struct BC_API history_row
-    {
-        output_point output;
-        size_t output_height;
-        uint64_t value;
-        input_point spend;
-        size_t spend_height;
-    };
-    typedef std::vector<history_row> history_list;
     typedef std::function<void (
-        const std::error_code&, const history_list&, index_type)>
+        const std::error_code&, const history_list&, size_t)>
             fetch_handler_history;
 
     struct BC_API stealth_row
@@ -262,46 +283,48 @@ public:
         fetch_handler_spend handle_fetch) = 0;
 
     /**
-     * Fetches the output points, output values, corresponding input point
-     * spends and the block heights associated with a Bitcoin address.
+     * Fetches history list for a Bitcoin address of output or input data,
+     * with the block heights and output values associated.
      * The returned history is a list of rows with the following fields:
      *
      * @code
      *  struct history_row
      *  {
-     *      output_point output;
-     *      size_t output_height;
-     *      uint64_t value;
-     *      input_point spend;
-     *      size_t spend_height;
+     *      history_row_id id;
+     *      output_point point;
+     *      size_t height;
+     *      union
+     *      {
+     *          uint64_t value;
+     *          uint64_t previous_checksum;
+     *      };
      *  };
      * @endcode
      *
-     * If an output is unspent then the input spend hash will be equivalent
-     * to null_hash.
-     *
-     * @code
-     *  if (history.spend.hash == null_hash)
-     *    // The history.output point is unspent.
-     * @endcode
+     * If id == history_row_id::credit, then the row is an output,
+     * and the value field in the union is valid.
+     * Else if id == history_row_id::debit, then use previous_checksum
+     * to match the spend with the previous output.
      *
      * Summing the list of values for unspent outpoints gives the balance
      * for an address.
      *
      * @param[in]   address         Bitcoin address
      * @param[in]   handle_fetch    Completion handler for fetch operation.
-     * @param[in]   from_height     Starting block height for history.
-     *                              Useful to filter entries or to fetch
-     *                              the history in chunks.
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,              // Status of operation
      *      const blockchain::history_list& history // History
      *  );
      * @endcode
+     * @param[in]   from_height     Starting block height for history.
+     *                              Useful to filter entries or to fetch
+     *                              the history in chunks.
+     * @param[in]   limit           Limit number of returned entries.
      */
     BC_API virtual void fetch_history(const payment_address& address,
-        fetch_handler_history handle_fetch, size_t from_height=0) = 0;
+        fetch_handler_history handle_fetch,
+        size_t from_height=0, size_t limit=0) = 0;
 
     /**
      * Fetch possible stealth results. These results can then be iterated

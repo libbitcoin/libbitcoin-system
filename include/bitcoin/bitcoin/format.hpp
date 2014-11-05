@@ -32,9 +32,10 @@
 namespace libbitcoin {
 
 // Forwarding definitions because primitives.hpp depends on this header.
-struct output_point;
-// We don't need a stream operator for input_point:
-typedef output_point input_point;
+struct point_type;
+// We don't need a stream operator for input/output_point:
+typedef point_type output_point;
+typedef point_type input_point;
 
 /// Extend the data by appending other.
 template <typename D, typename T>

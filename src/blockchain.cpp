@@ -18,14 +18,39 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/blockchain.hpp>
+
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/format.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
+#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+
+/**
+ * Fast modulus calculation where divisor is a power of 2.
+ */
+uint64_t remainder_fast(const hash_digest& value, const uint64_t divisor)
+{
+    BITCOIN_ASSERT(divisor % 2 == 0);
+    // Only use the first 8 bytes of hash value for this calculation.
+    uint64_t hash_value = from_little_endian<uint64_t>(value.begin());
+    // x mod 2**n == x & (2**n - 1)
+    return hash_value & (divisor - 1);
+}
+
+uint64_t spend_checksum(output_point outpoint)
+{
+    // Assuming outpoint hash is sufficiently random,
+    // this method should work well for generating row checksums.
+    constexpr uint64_t divisor = std::pow(2, 63);
+    auto serial = make_serializer(outpoint.hash.begin());
+    serial.write_4_bytes(outpoint.index);
+    return remainder_fast(outpoint.hash, divisor);
+}
 
 // fetch_block
 typedef blockchain_fetch_handler_block handler_block;

@@ -169,14 +169,12 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
 }
 
 void blockchain_history_fetched(const std::error_code& ec,
-    const blockchain::history_list& history,
-    const blockchain::index_type stop,
+    const history_list& history, const size_t stop_height,
     transaction_indexer& indexer, const payment_address& address,
     blockchain::fetch_handler_history handle_fetch);
 void indexer_history_fetched(const std::error_code& ec,
     const output_info_list& outputs, const spend_info_list& spends,
-    blockchain::history_list history,
-    const blockchain::index_type stop,
+    history_list history, const size_t stop_height,
     blockchain::fetch_handler_history handle_fetch);
 // Fetch the history first from the blockchain and then from the indexer.
 void fetch_history(blockchain& chain, transaction_indexer& indexer,
@@ -188,29 +186,28 @@ void fetch_history(blockchain& chain, transaction_indexer& indexer,
             std::ref(indexer), address, handle_fetch), from_height);
 }
 void blockchain_history_fetched(const std::error_code& ec,
-    const blockchain::history_list& history,
-    const blockchain::index_type stop,
+    const history_list& history, const size_t stop_height,
     transaction_indexer& indexer, const payment_address& address,
     blockchain::fetch_handler_history handle_fetch)
 {
     if (ec)
-        handle_fetch(ec, blockchain::history_list(), 0);
+        handle_fetch(ec, history_list(), 0);
     else
         indexer.query(address,
             std::bind(indexer_history_fetched, _1, _2, _3,
-                history, stop, handle_fetch));
+                history, stop_height, handle_fetch));
 }
 void indexer_history_fetched(const std::error_code& ec,
     const output_info_list& outputs, const spend_info_list& spends,
-    blockchain::history_list history,
-    const blockchain::index_type stop,
+    history_list history, const size_t stop_height,
     blockchain::fetch_handler_history handle_fetch)
 {
     if (ec)
     {
-        handle_fetch(ec, blockchain::history_list(), 0);
+        handle_fetch(ec, history_list(), 0);
         return;
     }
+    BITCOIN_ASSERT_MSG(false, "This code is untested.");
     // Just add in outputs.
     for (const output_info_type& output_info: outputs)
     {
@@ -223,61 +220,62 @@ void indexer_history_fetched(const std::error_code& ec,
         // a transaction in our query in that block, then we will have
         // a conflict.
         bool is_conflict = false;
-        for (const blockchain::history_row& row: history)
+        for (const history_row& row: history)
         {
+            // Loop over outputs only.
+            if (row.id != history_row_id::output)
+                continue;
             // Usually the indexer and memory doesn't have any
             // transactions indexed that are already confirmed
             // and in the blockchain.
             // This is a rare corner case.
-            if (row.output == output_info.point)
+            if (row.point == output_info.point)
             {
                 is_conflict = true;
                 break;
             }
-            //BITCOIN_ASSERT(row.output != output_info.point);
         }
         if (is_conflict)
             continue;
         // Everything OK. Insert outpoint.
-        history.emplace_back(blockchain::history_row{
+        history.emplace_back(history_row{
+            history_row_id::output,
             output_info.point,
             0,
-            output_info.value,
-            {null_hash, max_index},
-            max_height
+            output_info.value
         });
     }
     // Now mark spends.
     for (const spend_info_type& spend_info: spends)
     {
         // Iterate history looking for the output we need.
-        //bool found = false;
-        for (blockchain::history_row& row: history)
+        bool is_conflict = false;
+        for (const history_row& row: history)
         {
-            if (row.output != spend_info.previous_output)
+            // Loop over inputs only.
+            if (row.id != history_row_id::spend)
                 continue;
-            // Another consistency check. This time for spends.
-            // We just avoid this spend and assume the blockchain
-            // one is the correct one.
-            if (row.spend_height != max_height)
+            if (row.point == spend_info.point)
             {
-                // Don't insert.
-                //found = true;
+                is_conflict = true;
                 break;
             }
-            BITCOIN_ASSERT((row.spend == input_point{null_hash, max_index}));
-            // Everything OK. Insert spend.
-            row.spend = spend_info.point;
-            row.spend_height = 0;
-            //found = true;
-            break;
         }
+        if (is_conflict)
+            continue;
+        // Everything OK. Insert spend.
+        history.emplace_back(history_row{
+            history_row_id::spend,
+            spend_info.point,
+            0,
+            spend_checksum(spend_info.previous_output)
+        });
         // This assert can be triggered if the pool fills and starts
         // dropping transactions.
         // In practice this should not happen often and isn't a problem.
         //BITCOIN_ASSERT_MSG(found, "Couldn't find output for adding spend");
     }
-    handle_fetch(std::error_code(), history, stop);
+    handle_fetch(std::error_code(), history, stop_height);
 }
 
 } // namespace libbitcoin
