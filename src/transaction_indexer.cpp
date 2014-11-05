@@ -168,43 +168,41 @@ void transaction_indexer::do_deindex(const transaction_type& tx,
     handle_deindex(std::error_code());
 }
 
-void blockchain_history_fetched(const std::error_code& ec,
-    const history_list& history, const size_t stop_height,
+void blockchain_history_fetched(
+    const std::error_code& ec, const history_list& history,
     transaction_indexer& indexer, const payment_address& address,
     blockchain::fetch_handler_history handle_fetch);
 void indexer_history_fetched(const std::error_code& ec,
     const output_info_list& outputs, const spend_info_list& spends,
-    history_list history, const size_t stop_height,
-    blockchain::fetch_handler_history handle_fetch);
+    history_list history, blockchain::fetch_handler_history handle_fetch);
 // Fetch the history first from the blockchain and then from the indexer.
 void fetch_history(blockchain& chain, transaction_indexer& indexer,
     const payment_address& address,
     blockchain::fetch_handler_history handle_fetch, size_t from_height)
 {
     chain.fetch_history(address,
-        std::bind(blockchain_history_fetched, _1, _2, _3,
+        std::bind(blockchain_history_fetched, _1, _2,
             std::ref(indexer), address, handle_fetch), from_height);
 }
-void blockchain_history_fetched(const std::error_code& ec,
-    const history_list& history, const size_t stop_height,
+void blockchain_history_fetched(
+    const std::error_code& ec, const history_list& history,
     transaction_indexer& indexer, const payment_address& address,
     blockchain::fetch_handler_history handle_fetch)
 {
     if (ec)
-        handle_fetch(ec, history_list(), 0);
+        handle_fetch(ec, history_list());
     else
         indexer.query(address,
             std::bind(indexer_history_fetched, _1, _2, _3,
-                history, stop_height, handle_fetch));
+                history, handle_fetch));
 }
 void indexer_history_fetched(const std::error_code& ec,
     const output_info_list& outputs, const spend_info_list& spends,
-    history_list history, const size_t stop_height,
-    blockchain::fetch_handler_history handle_fetch)
+    history_list history, blockchain::fetch_handler_history handle_fetch)
 {
     if (ec)
     {
-        handle_fetch(ec, history_list(), 0);
+        handle_fetch(ec, history_list());
         return;
     }
     BITCOIN_ASSERT_MSG(false, "This code is untested.");
@@ -275,7 +273,7 @@ void indexer_history_fetched(const std::error_code& ec,
         // In practice this should not happen often and isn't a problem.
         //BITCOIN_ASSERT_MSG(found, "Couldn't find output for adding spend");
     }
-    handle_fetch(std::error_code(), history, stop_height);
+    handle_fetch(std::error_code(), history);
 }
 
 } // namespace libbitcoin

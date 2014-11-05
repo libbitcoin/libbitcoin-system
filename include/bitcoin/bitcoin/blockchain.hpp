@@ -99,9 +99,8 @@ public:
 
     typedef fetch_handler<input_point> fetch_handler_spend;
 
-    typedef std::function<void (
-        const std::error_code&, const history_list&, size_t)>
-            fetch_handler_history;
+    typedef std::function<void (const std::error_code&, const history_list&)>
+        fetch_handler_history;
 
     struct BC_API stealth_row
     {
@@ -317,14 +316,14 @@ public:
      *      const blockchain::history_list& history // History
      *  );
      * @endcode
+     * @param[in]   limit           Limit number of returned entries.
      * @param[in]   from_height     Starting block height for history.
      *                              Useful to filter entries or to fetch
      *                              the history in chunks.
-     * @param[in]   limit           Limit number of returned entries.
      */
     BC_API virtual void fetch_history(const payment_address& address,
         fetch_handler_history handle_fetch,
-        size_t from_height=0, size_t limit=0) = 0;
+        const size_t limit=0, const size_t from_height=0) = 0;
 
     /**
      * Fetch possible stealth results. These results can then be iterated
