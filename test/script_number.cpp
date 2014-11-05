@@ -409,7 +409,7 @@ BOOST_AUTO_TEST_CASE(make_operator_expectations)
         write("    },\n", add_out, neg_out, sub_out, cmp_out);
     }
 
-    write("};\n", add_out, neg_out, sub_out, cmp_out);
+    write("};\n\n", add_out, neg_out, sub_out, cmp_out);
 
     std::stringstream dump;
     dump << add_out.str();
