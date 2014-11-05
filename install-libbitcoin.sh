@@ -11,14 +11,17 @@ BUILD_BRANCH="develop"
 # This script will build using this relative temporary directory.
 BUILD_DIRECTORY="libbitcoin-build"
 
-# Boost osx discovery code assumes boost is in the MacPorts package path.
-HOMEBREW_BOOST_ROOT_PATH=\
-"/usr/local/opt/boost"
+# Homebrew: places each package in a distinct pkg-config path.
+# Unlike other pkg managers Homebrew declares a package for GMP.
+# Boost M4 discovery code assumes boost is in the MacPorts package path.
+HOMEBREW_BOOST_ROOT_PATH="/usr/local/opt/boost"
+HOMEBREW_PKG_CONFIG_PATHS="/usr/local/opt/gmp/lib/pkgconfig"
 
-# A package config path is not set by default on osx.
-HOMEBREW_PKG_CONFIG_PATHS=\
-"/usr/local/opt/gmp/lib/pkgconfig:"\
-"/usr/local/opt/openssl/lib/pkgconfig"
+# MacPorts: necessary for GMP and Boost (no packages, paths only).
+MACPORTS_LDFLAGS="-L/opt/local/lib"
+MACPORTS_CPPFLAGS="-I/opt/local/include"
+MACPORTS_LD_LIBRARY_PATH="/opt/local/lib"
+MACPORTS_LD_INCLUDE_PATH="/opt/local/include"
 
 # https://github.com/bitcoin/secp256k1
 SECP256K1_OPTIONS=\
@@ -55,14 +58,31 @@ for i in "$@"; do
     esac
 done
 
-# Set PKG_CONFIG_PATH, BOOST_ROOT, CC, CXX and set clang flags.
+# Set up the OSX environment, for either Homebrew or MacPorts.
 if [[ $OS == "Darwin" ]]; then
+
+    # Always require CLang on OSX, common lib linking will otherwise fail.
     export CC=clang
     export CXX=clang++
-    export BOOST_ROOT=$HOMEBREW_BOOST_ROOT_PATH
+    
+    # Prefer Homebrew Boost path if it exists.
+    if [[ -d "$HOMEBREW_BOOST_ROOT_PATH" ]]; then
+        export BOOST_ROOT="$HOMEBREW_BOOST_ROOT_PATH"
+    fi
+    # Set up default Homebrew repository, in case it exists.
     export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_PKG_CONFIG_PATHS"
+    
+    # Set up default MacPorts repository, in case it exists.
+    export LDFLAGS="$LDFLAGS $MACPORTS_LDFLAGS"
+    export CPPFLAGS="$CPPFLAGS $MACPORTS_CPPFLAGS"
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MACPORTS_LD_LIBRARY_PATH"
+    export LD_INCLUDE_PATH="$LD_INCLUDE_PATH:$MACPORTS_LD_INCLUDE_PATH"
+    
+    # Suppress CLang warnings.
     SECP256K1_OPTIONS="$SECP256K1_OPTIONS CPPFLAGS=-Wno-unused-value"
 fi
+
+# Augment PKG_CONFIG_PATH with prefix-based path, for our own packages. 
 if [[ $PREFIX ]]; then
     export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX/lib/pkgconfig"
 fi
@@ -72,8 +92,6 @@ echo "Install prefix: $PREFIX"
 echo "Allocated jobs: $PARALLEL"
 echo "Making for system: $OS"
 echo "Temp directory: $BUILD_DIRECTORY"
-echo "Homebrew boost path: $BOOST_ROOT"
-echo "Package config path: $PKG_CONFIG_PATH"
     
 display_message()
 {
