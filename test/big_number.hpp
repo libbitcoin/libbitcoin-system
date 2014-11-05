@@ -83,16 +83,13 @@ public:
     big_number& operator/=(const big_number& other);
 
 private:
+    friend big_number operator-(const big_number& number);
+    friend big_number operator+(big_number a, const big_number& b);
+    friend big_number operator-(big_number a, const big_number& b);
+    friend big_number operator*(big_number a, const big_number& b);
+    friend big_number operator/(big_number a, const big_number& b);
+    friend big_number operator<<(const big_number& a, unsigned int shift);
     friend divmod_result divmod(const big_number& a, const big_number& b);
-    friend const big_number operator+(
-        const big_number& a, const big_number& b);
-    friend const big_number operator-(
-        const big_number& a, const big_number& b);
-    friend const big_number operator-(const big_number& number);
-    friend const big_number operator/(const big_number& a,
-        const big_number& b);
-    friend const big_number operator<<(const big_number& a,
-        unsigned int shift);
 
     void initialize();
     void copy(const big_number& other);
@@ -102,12 +99,12 @@ private:
     BIGNUM bignum_;
 };
 
-const big_number operator+(const big_number& a, const big_number& b);
-const big_number operator-(const big_number& a, const big_number& b);
-const big_number operator-(const big_number& number);
-const big_number operator/(const big_number& a, const big_number& b);
-const big_number operator<<(const big_number& a, unsigned int shift);
-
+big_number operator-(const big_number& number);
+big_number operator+(big_number a, const big_number& b);
+big_number operator-(big_number a, const big_number& b);
+big_number operator*(big_number a, const big_number& b);
+big_number operator/(big_number a, const big_number& b);
+big_number operator<<(const big_number& a, unsigned int shift);
 divmod_result divmod(const big_number& a, const big_number& b);
 
 #endif

@@ -350,33 +350,34 @@ big_number& big_number::operator/=(const big_number& other)
     return *this;
 }
 
-const big_number operator+(const big_number& a, const big_number& b)
-{
-    big_number result;
-    BN_add(&result.bignum_, &a.bignum_, &b.bignum_);
-    return result;
-}
-
-const big_number operator-(const big_number& a, const big_number& b)
-{
-    big_number result;
-    BN_sub(&result.bignum_, &a.bignum_, &b.bignum_);
-    return result;
-}
-
-const big_number operator-(const big_number& number)
+big_number operator-(const big_number& number)
 {
     big_number result(number);
     BN_set_negative(&result.bignum_, !BN_is_negative(&result.bignum_));
     return result;
 }
 
-const big_number operator/(const big_number& a, const big_number& b)
+big_number operator+(big_number a, const big_number& b)
 {
-    return divmod(a, b).first;
+    return a += b;
 }
 
-const big_number operator<<(const big_number& a, unsigned int shift)
+big_number operator-(big_number a, const big_number& b)
+{
+    return a -= b;
+}
+
+big_number operator*(big_number a, const big_number& b)
+{
+    return a *= b;
+}
+
+big_number operator/(big_number a, const big_number& b)
+{
+    return a /= b;
+}
+
+big_number operator<<(const big_number& a, unsigned int shift)
 {
     big_number result;
     BN_lshift(&result.bignum_, &a.bignum_, shift);
@@ -388,8 +389,8 @@ divmod_result divmod(const big_number& a, const big_number& b)
     big_number divider;
     big_number remainder;
     big_number_context ctx;
-    BN_div(&divider.bignum_, &remainder.bignum_, 
-        &a.bignum_, &b.bignum_, ctx.context());
+    BN_div(&divider.bignum_, &remainder.bignum_, &a.bignum_, &b.bignum_,
+        ctx.context());
     return std::make_pair(divider, remainder);
 }
 
