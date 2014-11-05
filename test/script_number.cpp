@@ -218,9 +218,7 @@ static std::string format_bytes(bc::data_chunk chunk)
     buffer << "{";
 
     for (const auto& byte : chunk)
-    {
         buffer << (boost::format(" 0x%02x, ") % static_cast<uint16_t>(byte));
-    }
 
     buffer << "}";
     return buffer.str();
@@ -336,7 +334,7 @@ static script_number_compare MakeCompare(const int64_t num1,
 static void MakeOperators(const int64_t num1, const int64_t num2)
 {
     // Enable individually to build expectation vector.
-    CheckAdd(num1, num2, MakeAdd(num1, num2));
+    //CheckAdd(num1, num2, MakeAdd(num1, num2));
     //CheckSubtract(num1, num2, MakeSubtract(num1, num2));
     //CheckNegate(num1, MakeNegate(num1));
     //CheckCompare(num1, num2, MakeCompare(num1, num2));
