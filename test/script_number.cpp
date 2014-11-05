@@ -37,10 +37,10 @@ BOOST_AUTO_TEST_SUITE(scriptnum_tests)
 // Helpers
 // ----------------------------------------------------------------------------
 
-#define BC_SCRIPT_NUMBER_REQUIRE_EQ(buffer_num, script_num) \
-    BOOST_REQUIRE_EQUAL(bc::encode_hex((buffer_num).bytes), \
+#define BC_SCRIPT_NUMBER_CHECK_EQ(buffer_num, script_num) \
+    BOOST_CHECK_EQUAL(bc::encode_hex((buffer_num).bytes), \
         bc::encode_hex((script_num).data())); \
-    BOOST_REQUIRE_EQUAL((buffer_num).number, (script_num).int32())
+    BOOST_CHECK_EQUAL((buffer_num).number, (script_num).int32())
 
 static bool is(const uint8_t byte)
 {
@@ -78,15 +78,9 @@ static void CheckAdd(const int64_t num1, const int64_t num2,
 
     if (!add_overflow64(num1, num2))
     {
-        auto sum = (scriptnum1 + scriptnum2).int32();
-        if (add.number != sum)
-        {
-            const auto foo = sum;
-        }
-
-        BC_SCRIPT_NUMBER_REQUIRE_EQ(add, scriptnum1 + scriptnum2);
-        BC_SCRIPT_NUMBER_REQUIRE_EQ(add, scriptnum1 + num2);
-        BC_SCRIPT_NUMBER_REQUIRE_EQ(add, scriptnum2 + num1);
+        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + scriptnum2);
+        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum1 + num2);
+        BC_SCRIPT_NUMBER_CHECK_EQ(add, scriptnum2 + num1);
     }
 }
 
@@ -97,7 +91,7 @@ static void CheckNegate(const int64_t number,
 
     if (!negate_overflow64(number))
     {
-        BC_SCRIPT_NUMBER_REQUIRE_EQ(negated, -scriptnum);
+        BC_SCRIPT_NUMBER_CHECK_EQ(negated, -scriptnum);
     }
 }
 
@@ -109,14 +103,14 @@ static void CheckSubtract(const int64_t num1, const int64_t num2,
 
     if (!subtract_overflow64(num1, num2))
     {
-        BC_SCRIPT_NUMBER_REQUIRE_EQ(subtract.forward, scriptnum1 - scriptnum2);
-        BC_SCRIPT_NUMBER_REQUIRE_EQ(subtract.forward, scriptnum1 - num2);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - scriptnum2);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - num2);
     }
     
     if (!subtract_overflow64(num2, num1))
     {
-        BC_SCRIPT_NUMBER_REQUIRE_EQ(subtract.reverse, scriptnum2 - scriptnum1);
-        BC_SCRIPT_NUMBER_REQUIRE_EQ(subtract.reverse, scriptnum2 - num1);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - scriptnum1);
+        BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - num1);
     }
 }
 
@@ -126,33 +120,33 @@ static void CheckCompare(const int64_t num1, const int64_t num2,
     const script_number scriptnum1(num1);
     const script_number scriptnum2(num2);
 
-    BOOST_REQUIRE(scriptnum1 == scriptnum1);
-    BOOST_REQUIRE(scriptnum1 >= scriptnum1);
-    BOOST_REQUIRE(scriptnum1 <= scriptnum1);
-    BOOST_REQUIRE(!(scriptnum1 != scriptnum1));
-    BOOST_REQUIRE(!(scriptnum1 < scriptnum1));
-    BOOST_REQUIRE(!(scriptnum1 > scriptnum1));
+    BOOST_CHECK(scriptnum1 == scriptnum1);
+    BOOST_CHECK(scriptnum1 >= scriptnum1);
+    BOOST_CHECK(scriptnum1 <= scriptnum1);
+    BOOST_CHECK(!(scriptnum1 != scriptnum1));
+    BOOST_CHECK(!(scriptnum1 < scriptnum1));
+    BOOST_CHECK(!(scriptnum1 > scriptnum1));
 
-    BOOST_REQUIRE(scriptnum1 == num1);
-    BOOST_REQUIRE(scriptnum1 >= num1);
-    BOOST_REQUIRE(scriptnum1 <= num1);
-    BOOST_REQUIRE(!(scriptnum1 != num1));
-    BOOST_REQUIRE(!(scriptnum1 < num1));
-    BOOST_REQUIRE(!(scriptnum1 > num1));
+    BOOST_CHECK(scriptnum1 == num1);
+    BOOST_CHECK(scriptnum1 >= num1);
+    BOOST_CHECK(scriptnum1 <= num1);
+    BOOST_CHECK(!(scriptnum1 != num1));
+    BOOST_CHECK(!(scriptnum1 < num1));
+    BOOST_CHECK(!(scriptnum1 > num1));
 
-    BOOST_REQUIRE_EQUAL(is(compare.eq), (scriptnum1 == scriptnum2));
-    BOOST_REQUIRE_EQUAL(is(compare.ne), (scriptnum1 != scriptnum2));
-    BOOST_REQUIRE_EQUAL(is(compare.lt), (scriptnum1 < scriptnum2));
-    BOOST_REQUIRE_EQUAL(is(compare.gt), (scriptnum1 > scriptnum2));
-    BOOST_REQUIRE_EQUAL(is(compare.ge), (scriptnum1 >= scriptnum2));
-    BOOST_REQUIRE_EQUAL(is(compare.le), (scriptnum1 <= scriptnum2));
+    BOOST_CHECK_EQUAL(is(compare.eq), (scriptnum1 == scriptnum2));
+    BOOST_CHECK_EQUAL(is(compare.ne), (scriptnum1 != scriptnum2));
+    BOOST_CHECK_EQUAL(is(compare.lt), (scriptnum1 < scriptnum2));
+    BOOST_CHECK_EQUAL(is(compare.gt), (scriptnum1 > scriptnum2));
+    BOOST_CHECK_EQUAL(is(compare.ge), (scriptnum1 >= scriptnum2));
+    BOOST_CHECK_EQUAL(is(compare.le), (scriptnum1 <= scriptnum2));
 
-    BOOST_REQUIRE_EQUAL(is(compare.eq), (scriptnum1 == num2));
-    BOOST_REQUIRE_EQUAL(is(compare.ne), (scriptnum1 != num2));
-    BOOST_REQUIRE_EQUAL(is(compare.lt), (scriptnum1 < num2));
-    BOOST_REQUIRE_EQUAL(is(compare.gt), (scriptnum1 > num2));
-    BOOST_REQUIRE_EQUAL(is(compare.ge), (scriptnum1 >= num2));
-    BOOST_REQUIRE_EQUAL(is(compare.le), (scriptnum1 <= num2));
+    BOOST_CHECK_EQUAL(is(compare.eq), (scriptnum1 == num2));
+    BOOST_CHECK_EQUAL(is(compare.ne), (scriptnum1 != num2));
+    BOOST_CHECK_EQUAL(is(compare.lt), (scriptnum1 < num2));
+    BOOST_CHECK_EQUAL(is(compare.gt), (scriptnum1 > num2));
+    BOOST_CHECK_EQUAL(is(compare.ge), (scriptnum1 >= num2));
+    BOOST_CHECK_EQUAL(is(compare.le), (scriptnum1 <= num2));
 }
 
 #ifndef ENABLE_DATAGEN
@@ -160,6 +154,12 @@ static void CheckCompare(const int64_t num1, const int64_t num2,
 static void RunOperators(const int64_t num1, const int64_t num2,
     const size_t value, const size_t offset, const size_t test)
 {
+    std::stringstream message;
+    std::cout << boost::format(
+        ">>> RunOperators: %1% : %2% : %3% : %4% : %5%\n")
+        % num1 % num2 % value % offset % test;
+    BOOST_MESSAGE(message.str());
+
     CheckAdd(num1, num2, script_number_adds[value][offset][test]);
     CheckSubtract(num1, num2, script_number_subtracts[value][offset][test]);
     CheckNegate(num1, script_number_negates[value][offset][test]);
