@@ -151,18 +151,22 @@ static void CheckCompare(const int64_t num1, const int64_t num2,
 
 #ifndef ENABLE_DATAGEN
 
+// Test
+// ----------------------------------------------------------------------------
+
 static void RunOperators(const int64_t num1, const int64_t num2,
     const size_t value, const size_t offset, const size_t test)
 {
-    std::stringstream message;
-    std::cout << boost::format(
-        ">>> RunOperators: %1% : %2% : %3% : %4% : %5%\n")
-        % num1 % num2 % value % offset % test;
-    BOOST_MESSAGE(message.str());
+    //// Diagnostics
+    //std::stringstream message;
+    //std::cout << boost::format(
+    //    ">>> RunOperators: %1% : %2% : %3% : %4% : %5%\n")
+    //    % num1 % num2 % value % offset % test;
+    //BOOST_MESSAGE(message.str());
 
     CheckAdd(num1, num2, script_number_adds[value][offset][test]);
-    CheckSubtract(num1, num2, script_number_subtracts[value][offset][test]);
     CheckNegate(num1, script_number_negates[value][offset][test]);
+    CheckSubtract(num1, num2, script_number_subtracts[value][offset][test]);
     CheckCompare(num1, num2, script_number_compares[value][offset][test]);
 }
 
@@ -193,19 +197,8 @@ BOOST_AUTO_TEST_CASE(check_operators)
 
 #else
 
-std::stringstream expectations;
-
-static std::string format_bytes(bc::data_chunk chunk)
-{
-    std::stringstream buffer;
-    buffer << "{";
-
-    for (const auto& byte : chunk)
-        buffer << (boost::format(" 0x%02x, ") % static_cast<uint16_t>(byte));
-
-    buffer << "}";
-    return buffer.str();
-}
+// big_number value generators
+// ----------------------------------------------------------------------------
 
 static script_number_buffer MakeAdd(const int64_t num1, const int64_t num2)
 {
@@ -214,7 +207,6 @@ static script_number_buffer MakeAdd(const int64_t num1, const int64_t num2)
 
     big_number bignum1;
     bignum1.set_int64(num1);
-
     big_number bignum2;
     bignum2.set_int64(num2);
 
@@ -225,11 +217,6 @@ static script_number_buffer MakeAdd(const int64_t num1, const int64_t num2)
         sum.data()
     };
 
-    // Side effect is used to generate the test expectation vector.
-    expectations << boost::format("{ %1%, %2% }, ") %
-        add.number % format_bytes(add.bytes);
-
-    // Return value is used for verifying the result.
     return add;
 }
 
@@ -248,11 +235,6 @@ static script_number_buffer MakeNegate(const int64_t number)
         negative.data()
     };
 
-    // Side effect is used to generate the test expectation vector.
-    expectations << boost::format("{ %1%, %2% }, ") %
-        negated.number % format_bytes(negated.bytes);
-
-    // Return value is used for verifying the result.
     return negated;
 }
 
@@ -278,12 +260,6 @@ static script_number_subtract MakeSubtract(const int64_t num1,
         { reverse.int32(), reverse.data() }
     };
 
-    // Side effect is used to generate the test expectation vector.
-    expectations << boost::format("{ { %1%, %2% }, { %3%, %4% } }, ") %
-        subtract.forward.number % format_bytes(subtract.forward.bytes) %
-        subtract.reverse.number % format_bytes(subtract.reverse.bytes);
-
-    // Return value is used for verifying the result.
     return subtract;
 }
 
@@ -305,73 +281,145 @@ static script_number_compare MakeCompare(const int64_t num1,
         bignum1 >= bignum2
     };
 
-    // Side effect is used to generate the test expectation vector.
-    expectations <<
-        boost::format("{ %1%, %2%, %3%, %4%, %5%, %6% },") % compare.eq %
-        compare.ne % compare.lt % compare.gt % compare.le % compare.ge;
-
-    // Return value is used for verifying the result.
     return compare;
 }
 
-static void MakeOperators(const int64_t num1, const int64_t num2)
+// Formatter Helpers
+// ----------------------------------------------------------------------------
+
+static void write_bytes(bc::data_chunk chunk, std::ostream& out)
 {
-    // Enable individually to build expectation vector.
-    CheckAdd(num1, num2, MakeAdd(num1, num2));
-    //CheckSubtract(num1, num2, MakeSubtract(num1, num2));
-    //CheckNegate(num1, MakeNegate(num1));
-    //CheckCompare(num1, num2, MakeCompare(num1, num2));
+    for (const auto& byte : chunk)
+        out << (boost::format(" 0x%02x, ") % static_cast<uint16_t>(byte));
+}
+
+static void write_buffer(script_number_buffer buffer, std::ostream& out)
+{
+    out << boost::format("{ %1%, {") % buffer.number;
+    write_bytes(buffer.bytes, out);
+    out << "} }, ";
+}
+
+static void write_compare(script_number_compare compare, std::ostream& out)
+{
+    out << boost::format("{ %1%, %2%, %3%, %4%, %5%, %6% }, ") % compare.eq %
+        compare.ne % compare.lt % compare.gt % compare.le % compare.ge;
+}
+
+static void write_subtract(script_number_subtract subtract, std::ostream& out)
+{
+    out << "{ ";
+    write_buffer(subtract.forward, out);
+    write_buffer(subtract.reverse, out);
+    out << "}, ";
+}
+
+static void write_names(const std::string& name, size_t count,
+    std::ostream& out)
+{
+    out << boost::format("const %1%[%2%][%3%][%4%]=\n{\n") % name %
+        script_number_values_count % script_number_offsets_count % count;
+}
+
+static void write(const std::string& text, std::ostream& add_out,
+    std::ostream& neg_out, std::ostream& sub_out, std::ostream& cmp_out)
+{
+    add_out << text;
+    neg_out << text;
+    sub_out << text;
+    cmp_out << text;
+}
+
+static void replace(std::string& buffer, const std::string& find,
+    const std::string& replacement)
+{
+    size_t pos = 0;
+    while ((pos = buffer.find(find, pos)) != std::string::npos)
+    {
+        buffer.replace(pos, find.length(), replacement);
+        pos += replacement.length();
+    }
+}
+
+// Maker
+// ----------------------------------------------------------------------------
+
+static void MakeOperators(const int64_t num1, const int64_t num2,
+    std::ostream& add_out, std::ostream& neg_out, std::ostream& sub_out,
+    std::ostream& cmp_out)
+{
+    write("\n              ", add_out, neg_out, sub_out, cmp_out);
+
+    auto add = MakeAdd(num1, num2);
+    CheckAdd(num1, num2, add);
+    write_buffer(add, add_out);
+
+    auto negate = MakeNegate(num1);
+    CheckNegate(num1, negate);
+    write_buffer(negate, neg_out);
+
+    auto subtract = MakeSubtract(num1, num2);
+    CheckSubtract(num1, num2, subtract);
+    write_subtract(subtract, sub_out);
+
+    auto compare = MakeCompare(num1, num2);
+    CheckCompare(num1, num2, compare);
+    write_compare(compare, cmp_out);
 }
 
 BOOST_AUTO_TEST_CASE(make_operator_expectations)
 {
-    expectations << boost::format("[%1%][%2%][%3%]=\n{\n") %
-        script_number_values_count % script_number_offsets_count % 12;
+    std::stringstream add_out;
+    std::stringstream neg_out;
+    std::stringstream sub_out;
+    std::stringstream cmp_out;
 
-    for (size_t i = 7; i < script_number_values_count; ++i)
+    write_names("script_number_buffer script_number_adds", 12, add_out);
+    write_names("script_number_buffer script_number_negates", 12, neg_out);
+    write_names("script_number_subtract script_number_subtracts", 12, sub_out);
+    write_names("script_number_compare script_number_compares", 12, cmp_out);
+
+    for (size_t i = 0; i < script_number_values_count; ++i)
     {
-        expectations << "    {\n";
+        write("    {\n", add_out, neg_out, sub_out, cmp_out);
+
         for (size_t j = 0; j < script_number_offsets_count; ++j)
         {
-            expectations << "        {";
+            write("        {", add_out, neg_out, sub_out, cmp_out);
 
             auto a = script_number_values[i];
             auto b = script_number_offsets[j];
 
-            expectations << "\n              ";
-            MakeOperators(a, +a);
-            expectations << "\n              ";
-            MakeOperators(a, -a);
-            expectations << "\n              ";
-            MakeOperators(a, +b);
-            expectations << "\n              ";
-            MakeOperators(a, -b);
-            expectations << "\n              ";
-            MakeOperators(a + b, +b);
-            expectations << "\n              ";
-            MakeOperators(a + b, -b);
-            expectations << "\n              ";
-            MakeOperators(a - b, +b);
-            expectations << "\n              ";
-            MakeOperators(a - b, -b);
-            expectations << "\n              ";
-            MakeOperators(a + b, +a + b);
-            expectations << "\n              ";
-            MakeOperators(a + b, +a - b);
-            expectations << "\n              ";
-            MakeOperators(a - b, +a + b);
-            expectations << "\n              ";
-            MakeOperators(a - b, +a - b);
-            expectations << "\n        },\n";
+            MakeOperators(a, +a, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a, -a, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a, +b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a, -b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a + b, +b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a + b, -b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a - b, +b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a - b, -b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a + b, +a + b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a + b, +a - b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a - b, +a + b, add_out, neg_out, sub_out, cmp_out);
+            MakeOperators(a - b, +a - b, add_out, neg_out, sub_out, cmp_out);
+
+            write("\n        },\n", add_out, neg_out, sub_out, cmp_out);
         }
 
-        expectations << "    },\n";
+        write("    },\n", add_out, neg_out, sub_out, cmp_out);
     }
 
-    expectations << "};\n";
+    write("};\n", add_out, neg_out, sub_out, cmp_out);
 
-    // Copy from debug buffer to source code expectation vector.
-    const auto& dump = expectations.str();
+    std::stringstream dump;
+    dump << add_out.str();
+    dump << neg_out.str();
+    dump << sub_out.str();
+    dump << cmp_out.str();
+
+    auto source = dump.str();
+    replace(source, "-2147483648", "(-2147483647 - 1)");
+    replace(source, "-9223372036854775808", "(-9223372036854775807 - 1)");
 }
 #endif
 
