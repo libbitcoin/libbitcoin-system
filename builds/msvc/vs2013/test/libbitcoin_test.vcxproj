@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
     <ConfigurationType>Application</ConfigurationType>
-    <NuGetPackageImportStamp>f8ab50de</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>84952b6c</NuGetPackageImportStamp>
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <ProjectGuid>{51A424A9-2C12-4211-8D40-E49D1534C541}</ProjectGuid>
     <ProjectName>libbitcoin_test</ProjectName>
@@ -91,6 +91,7 @@
     <ClInclude Include="..\..\..\..\test\big_number.hpp" />
     <ClInclude Include="..\..\..\..\test\hash_data\vectors.hpp" />
     <ClInclude Include="..\..\..\..\test\script_json\vectors.hpp" />
+    <ClInclude Include="..\..\..\..\test\script_number.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

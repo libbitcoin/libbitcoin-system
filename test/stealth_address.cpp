@@ -159,9 +159,9 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__zero_bits__round_trips)
     auto prefix = bytes_to_prefix(0, bytes);
     std::stringstream stream;
     stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.size(), 0);
-    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 0);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0x00000000);
+    BOOST_REQUIRE_EQUAL(prefix.size(), 0u);
+    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 0u);
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0u);
     BOOST_REQUIRE(stream.str().empty());
 }
 
@@ -171,9 +171,9 @@ BOOST_AUTO_TEST_CASE(prefix_to_bytes__zero_bits__round_trips)
     auto bytes = prefix_to_bytes(prefix);
     std::stringstream stream;
     stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.size(), 0);
-    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 0);
-    BOOST_REQUIRE_EQUAL(bytes.size(), 0);
+    BOOST_REQUIRE_EQUAL(prefix.size(), 0u);
+    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 0u);
+    BOOST_REQUIRE_EQUAL(bytes.size(), 0u);
     BOOST_REQUIRE(stream.str().empty());
 }
 
@@ -183,9 +183,9 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__one_bit__round_trips)
     auto prefix = bytes_to_prefix(1, bytes);
     std::stringstream stream;
     stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.size(), 1);
-    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0x00000001);
+    BOOST_REQUIRE_EQUAL(prefix.size(), 1u);
+    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1u);
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 1u);
     BOOST_REQUIRE_EQUAL(stream.str(), "1");
 }
 
@@ -195,9 +195,9 @@ BOOST_AUTO_TEST_CASE(prefix_to_bytes__one_bit__round_trips)
     auto bytes = prefix_to_bytes(prefix);
     std::stringstream stream;
     stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.size(), 1);
-    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1);
-    BOOST_REQUIRE_EQUAL(bytes.size(), 1);
+    BOOST_REQUIRE_EQUAL(prefix.size(), 1u);
+    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1u);
+    BOOST_REQUIRE_EQUAL(bytes.size(), 1u);
     BOOST_REQUIRE_EQUAL(stream.str(), "1");
 }
 
@@ -207,9 +207,9 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bits_leading_zero__round_trips)
     auto prefix = bytes_to_prefix(2, bytes);
     std::stringstream stream;
     stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.size(), 2);
-    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0x00000001);
+    BOOST_REQUIRE_EQUAL(prefix.size(), 2u);
+    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1u);
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 1u);
     BOOST_REQUIRE_EQUAL(stream.str(), "01");
 }
 
@@ -219,9 +219,9 @@ BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bits_leading_zero__round_trips)
     auto bytes = prefix_to_bytes(prefix);
     std::stringstream stream;
     stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.size(), 2);
-    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1);
-    BOOST_REQUIRE_EQUAL(bytes.size(), 1);
+    BOOST_REQUIRE_EQUAL(prefix.size(), 2u);
+    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1u);
+    BOOST_REQUIRE_EQUAL(bytes.size(), 1u);
     BOOST_REQUIRE_EQUAL(stream.str(), "01");
 }
 
@@ -231,8 +231,8 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bytes_leading_null_byte__round_trips)
     auto prefix = bytes_to_prefix(16, bytes);
     std::stringstream stream;
     stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.size(), 16);
-    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 2);
+    BOOST_REQUIRE_EQUAL(prefix.size(), 16u);
+    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 2u);
     BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0x000000FF);
     BOOST_REQUIRE_EQUAL(stream.str(), "0000000011111111");
 }
@@ -243,7 +243,7 @@ BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bytes_leading_null_byte__round_trips)
     auto bytes = prefix_to_bytes(prefix);
     std::stringstream stream;
     stream << prefix;
-    BOOST_REQUIRE_EQUAL(prefix.size(), 16);
+    BOOST_REQUIRE_EQUAL(prefix.size(), 16u);
     BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 2);
     BOOST_REQUIRE_EQUAL(bytes.size(), 2);
     BOOST_REQUIRE_EQUAL(stream.str(), "0000000011111111");
