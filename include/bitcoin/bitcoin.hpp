@@ -169,29 +169,23 @@
 #pragma warning(push) 
 #pragma warning(disable : 4267)
 #endif
-#include <bitcoin/bitcoin/blockchain.hpp>
 #include <bitcoin/bitcoin/block.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/format.hpp>
-#include <bitcoin/bitcoin/getx_responder.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
-#include <bitcoin/bitcoin/poller.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/script.hpp>
-#include <bitcoin/bitcoin/session.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
 #include <bitcoin/bitcoin/threadpool.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
-#include <bitcoin/bitcoin/transaction_indexer.hpp>
-#include <bitcoin/bitcoin/transaction_pool.hpp>
 #include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
@@ -205,7 +199,6 @@
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/weak_bind.hpp>
-#include <bitcoin/bitcoin/validate.hpp>
 #include <bitcoin/bitcoin/wallet/amount.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
