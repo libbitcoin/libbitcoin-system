@@ -313,7 +313,7 @@ public:
      * @code
      *  void handle_fetch(
      *      const std::error_code& ec,              // Status of operation
-     *      const blockchain::history_list& history // History
+     *      const history_list& history // History
      *  );
      * @endcode
      * @param[in]   limit           Limit number of returned entries.
