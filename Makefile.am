@@ -54,26 +54,19 @@ bitcoin_bitcoin_includedir = ${includedir}/bitcoin/bitcoin
 bitcoin_bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin/address.hpp \
     include/bitcoin/bitcoin/block.hpp \
-    include/bitcoin/bitcoin/blockchain.hpp \
     include/bitcoin/bitcoin/compat.h \
     include/bitcoin/bitcoin/compat.hpp \
     include/bitcoin/bitcoin/constants.hpp \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
     include/bitcoin/bitcoin/format.hpp \
-    include/bitcoin/bitcoin/getx_responder.hpp \
-    include/bitcoin/bitcoin/poller.hpp \
     include/bitcoin/bitcoin/primitives.hpp \
     include/bitcoin/bitcoin/satoshi_serialize.hpp \
     include/bitcoin/bitcoin/script.hpp \
-    include/bitcoin/bitcoin/session.hpp \
     include/bitcoin/bitcoin/stealth.hpp \
     include/bitcoin/bitcoin/threadpool.hpp \
     include/bitcoin/bitcoin/transaction.hpp \
-    include/bitcoin/bitcoin/transaction_indexer.hpp \
-    include/bitcoin/bitcoin/transaction_pool.hpp \
     include/bitcoin/bitcoin/types.hpp \
-    include/bitcoin/bitcoin/validate.hpp \
     include/bitcoin/bitcoin/version.hpp
 
 bitcoin_bitcoin_impl_includedir = ${includedir}/bitcoin/bitcoin/impl
@@ -146,27 +139,21 @@ src_libbitcoin_la_CPPFLAGS = \
 
 src_libbitcoin_la_SOURCES = \
     src/address.cpp \
-    src/blockchain.cpp \
     src/block.cpp \
     src/compat.cpp \
     src/constants.cpp \
     src/error.cpp \
     src/format.cpp \
-    src/getx_responder.cpp \
     src/network/channel.cpp \
     src/network/handshake.cpp  \
     src/network/hosts.cpp \
     src/network/network.cpp  \
     src/network/protocol.cpp \
-    src/poller.cpp \
     src/satoshi_serialize.cpp \
     src/script.cpp \
-    src/session.cpp \
     src/stealth.cpp \
     src/threadpool.cpp \
     src/transaction.cpp \
-    src/transaction_indexer.cpp \
-    src/transaction_pool.cpp \
     src/utility/base58.cpp \
     src/utility/checksum.cpp \
     src/utility/ec_keys.cpp \
@@ -182,7 +169,6 @@ src_libbitcoin_la_SOURCES = \
     src/utility/external/sha256.c \
     src/utility/external/sha512.c \
     src/utility/external/zeroize.c \
-    src/validate.cpp \
     src/wallet/amount.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
