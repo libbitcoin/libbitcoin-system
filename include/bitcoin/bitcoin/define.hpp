@@ -32,12 +32,6 @@
 #define LOG_TXPOOL      "transaction_pool"
 #define LOG_TXIDX       "transaction_indexer"
 
-// TODO: move mmfile to libbitcoin-blockchain.
-// mmfile does not build on Windows or OSX and is only for blockchain.
-#if !defined(_MSC_VER) && !defined(__MACH__)
-#define HAVE_BLOCKCHAIN
-#endif
-
 // See http://gcc.gnu.org/wiki/Visibility
 
 // Generic helper definitions for shared library support
