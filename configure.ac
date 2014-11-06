@@ -90,7 +90,7 @@ AC_ARG_WITH([tests],
     AS_HELP_STRING([--with-tests], 
         [Compile with unit tests.]),
     [with_tests=$withval],
-    [with_tests=no])
+    [with_tests=yes])
 AC_MSG_RESULT($with_tests)
 
 # Require boost min version.
