@@ -31,10 +31,6 @@ SECP256K1_OPTIONS=\
 "--enable-tests=no "\
 "--enable-endomorphism=no"
 
-# Enable test compile in the primary build.
-TEST_OPTIONS=\
-"--with-tests=yes"
-
 # Set SEQUENTIAL (always 1), PARALLEL (number of concurrent jobs) and OS.
 SEQUENTIAL=1
 PARALLEL=2
@@ -203,7 +199,7 @@ build_library()
     build_from_github bitcoin secp256k1 master $SEQUENTIAL "$@" $SECP256K1_OPTIONS
 
     # The primary build is not downloaded if we are running in Travis.
-    build_primary $PARALLEL "$@" $TEST_OPTIONS
+    build_primary $PARALLEL "$@" 
 
     # If the build succeeded clean up the build directory.
     delete_build_directory
