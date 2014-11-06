@@ -46,8 +46,8 @@ BOOST_AUTO_TEST_CASE(wif_test)
         "5JngqQmHagNTknnCshzVUysLMWAjT23FWs1TgNU5wyFH5SB3hrP";
 #endif
 
-    BOOST_REQUIRE(secret_to_wif(secret, true) == compressed);
-    BOOST_REQUIRE(secret_to_wif(secret, false) == uncompressed);
+    BOOST_REQUIRE_EQUAL(secret_to_wif(secret, true), compressed);
+    BOOST_REQUIRE_EQUAL(secret_to_wif(secret, false), uncompressed);
 
     BOOST_REQUIRE(is_wif_compressed(compressed));
     BOOST_REQUIRE(!is_wif_compressed(uncompressed));

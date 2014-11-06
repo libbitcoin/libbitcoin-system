@@ -26,28 +26,27 @@ BOOST_AUTO_TEST_SUITE(hashnum_tests)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
+    hash_number target;
+    uint32_t bits = 486604799;
+    target.set_compact(bits);
     hash_digest block_hash = decode_hash(
         "00000000b873e79784647a6c82962c70d228557d24a747ea4d1b8bbe878e1206");
-    uint32_t bits = 486604799;
 
-    hash_number target;
-    target.set_compact(bits);
-
-    BOOST_REQUIRE((target <= 0) == false);
-    BOOST_REQUIRE((target > max_target()) == false);
+    BOOST_REQUIRE(!(target <= 0));
+    BOOST_REQUIRE(!(target > max_target()));
 
     hash_number our_value;
     our_value.set_hash(block_hash);
-    BOOST_REQUIRE((our_value > target) == false);
+    BOOST_REQUIRE(!(our_value > target));
 }
 
 BOOST_AUTO_TEST_CASE(work)
 {
     hash_number orphan_work = 0;
-    BOOST_REQUIRE(orphan_work.hash() == null_hash);
+    BOOST_REQUIRE_EQUAL(encode_hex(orphan_work.hash()), encode_hex(null_hash));
     orphan_work += block_work(486604799);
-    BOOST_REQUIRE(orphan_work.hash() == decode_hash(
-        "0100010001000000000000000000000000000000000000000000000000000000"));
+    BOOST_REQUIRE_EQUAL(encode_hex(orphan_work.hash()),
+        "0100010001000000000000000000000000000000000000000000000000000000");
     hash_number main_work = 0;
     BOOST_REQUIRE(!(orphan_work <= main_work));
 }

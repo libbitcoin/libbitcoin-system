@@ -123,7 +123,7 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
         op.code = opcode::pushdata2;
     else
     {
-        BITCOIN_ASSERT(data.size() <= 0xffffffff);
+        BOOST_REQUIRE_LE(data.size(), 0xffffffffu);
         op.code = opcode::pushdata4;
     }
     op.data = data;
