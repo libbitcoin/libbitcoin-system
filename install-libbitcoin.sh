@@ -6,7 +6,7 @@
 # The source repository for the primary build (when not running in Travis).
 BUILD_ACCOUNT="libbitcoin"
 BUILD_REPO="libbitcoin"
-BUILD_BRANCH="develop"
+BUILD_BRANCH="version2"
 
 # This script will build using this relative temporary directory.
 BUILD_DIRECTORY="libbitcoin-build"
@@ -200,7 +200,7 @@ build_library()
     create_build_directory
 
     # Download, build and install all unpackaged dependencies.
-    build_from_github evoskuil secp256k1 osx-patch $SEQUENTIAL "$@" $SECP256K1_OPTIONS
+    build_from_github bitcoin secp256k1 master $SEQUENTIAL "$@" $SECP256K1_OPTIONS
 
     # The primary build is not downloaded if we are running in Travis.
     build_primary $PARALLEL "$@" $TEST_OPTIONS
