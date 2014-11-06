@@ -41,19 +41,19 @@ BOOST_AUTO_TEST_CASE(stealth_address_test)
         220, 193, 37, 11, 81, 192, 240, 58, 228, 233, 120, 224, 37, 110, 222,
         81, 220, 17, 68, 227, 69, 201, 38, 38, 43, 151, 23, 177, 188, 201,
         189, 27}};
-    BOOST_REQUIRE(ephem_privkey.size() == ec_secret_size);
-    BOOST_REQUIRE(scan_privkey.size() == ec_secret_size);
-    BOOST_REQUIRE(spend_privkey.size() == ec_secret_size);
+    BOOST_REQUIRE_EQUAL(ephem_privkey.size(), ec_secret_size);
+    BOOST_REQUIRE_EQUAL(scan_privkey.size(), ec_secret_size);
+    BOOST_REQUIRE_EQUAL(spend_privkey.size(), ec_secret_size);
     //ec_secret c{{
     //    75,73,116,38,110,230,200,190,217,239,242,205,16,135,187,193,16,31,23,
     //    186,217,195,120,20,248,86,27,103,245,80,197,68}};
 
     ec_point scan_pubkey = secret_to_public_key(scan_privkey);
-    BOOST_REQUIRE(scan_pubkey.size() == ec_compressed_size);
+    BOOST_REQUIRE_EQUAL(scan_pubkey.size(), ec_compressed_size);
     ec_point spend_pubkey = secret_to_public_key(spend_privkey);
-    BOOST_REQUIRE(spend_pubkey.size() == ec_compressed_size);
+    BOOST_REQUIRE_EQUAL(spend_pubkey.size(), ec_compressed_size);
     ec_point ephem_pubkey = secret_to_public_key(ephem_privkey);
-    BOOST_REQUIRE(ephem_pubkey.size() == ec_compressed_size);
+    BOOST_REQUIRE_EQUAL(ephem_pubkey.size(), ec_compressed_size);
 
     // Sender
     ec_point pubkey_1 = initiate_stealth(
@@ -79,9 +79,9 @@ BOOST_AUTO_TEST_CASE(stealth_address_test)
     auto foo = payaddr.encoded();
 
 #ifdef ENABLE_TESTNET
-    BOOST_REQUIRE(payaddr.encoded() == "mwSnRsXSEq3d7LTGqe7AtJYNqhATwHdhMb");
+    BOOST_REQUIRE_EQUAL(payaddr.encoded(), "mwSnRsXSEq3d7LTGqe7AtJYNqhATwHdhMb");
 #else
-    BOOST_REQUIRE(payaddr.encoded() == "1Gvq8pSTRocNLDyf858o4PL3yhZm5qQDgB");
+    BOOST_REQUIRE_EQUAL(payaddr.encoded(), "1Gvq8pSTRocNLDyf858o4PL3yhZm5qQDgB");
 #endif
 }
 
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_mainnet__round_trips)
         "MSad5KyPbve7uyH6eswYAxLHRVSbWgNUeoGuXp";
     stealth_address address;
     address.set_encoded(encoded);
-    BOOST_REQUIRE(address.encoded() == encoded);
+    BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_testnet__round_trips)
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_testnet__round_trips)
         "91Vpvshm2TDER8b9ZryuZ8VSzz8ywzNzX8NqF4";
     stealth_address address;
     address.set_encoded(encoded);
-    BOOST_REQUIRE(address.encoded() == encoded);
+    BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_pub_mainnet__round_trips)
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_pub_mainnet__round_trips)
         "hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i";
     stealth_address address;
     address.set_encoded(encoded);
-    BOOST_REQUIRE(address.encoded() == encoded);
+    BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_pub_testnet__round_trip)
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_pub_testnet__round_trip)
         "idPayBqZUpZH7Y5GTaoEyGxDsEmU377JUmhtqG8yoHCkfGfhnAHmGUJbL";
     stealth_address address;
     address.set_encoded(encoded);
-    BOOST_REQUIRE(address.encoded() == encoded);
+    BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_string__32_bits__little_endian)
@@ -136,14 +136,14 @@ BOOST_AUTO_TEST_CASE(string_to_prefix__32_bits__little_endian)
     std::stringstream stream;
     stream << "10111010101011011111000000001101";
     stealth_prefix prefix(stream.str());
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0xbaadf00d);
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0xbaadf00du);
 }
 
 BOOST_AUTO_TEST_CASE(bytes_to_prefix__32_bits__ittle_endian)
 {
     data_chunk bytes({ 0x0d, 0xf0, 0xad, 0xba });
     auto prefix = bytes_to_prefix(32, bytes);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0xbaadf00d);
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0xbaadf00du);
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__32_bits__little_endian)
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bytes_leading_null_byte__round_trips)
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 16u);
     BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 2u);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0x000000FF);
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 255u);
     BOOST_REQUIRE_EQUAL(stream.str(), "0000000011111111");
 }
 
@@ -244,8 +244,8 @@ BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bytes_leading_null_byte__round_trips)
     std::stringstream stream;
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 16u);
-    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 2);
-    BOOST_REQUIRE_EQUAL(bytes.size(), 2);
+    BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 2u);
+    BOOST_REQUIRE_EQUAL(bytes.size(), 2u);
     BOOST_REQUIRE_EQUAL(stream.str(), "0000000011111111");
 }
 

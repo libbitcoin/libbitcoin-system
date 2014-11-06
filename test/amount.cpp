@@ -27,39 +27,37 @@ BOOST_AUTO_TEST_SUITE(parse_amount_tests)
 BOOST_AUTO_TEST_CASE(parse_amount_test)
 {
     const uint64_t invalid_amount = MAX_UINT64;
-    BOOST_REQUIRE(parse_amount("4.432") == 443200000);
-    BOOST_REQUIRE(parse_amount("4.432.") == invalid_amount);
-    BOOST_REQUIRE(parse_amount("4")  == 400000000);
-    BOOST_REQUIRE(parse_amount("4.") == 400000000);
-    BOOST_REQUIRE(parse_amount(".4") == 40000000);
-    BOOST_REQUIRE(parse_amount(".")  == 0);
-    BOOST_REQUIRE(parse_amount("0.00000004")  == 4);
-    BOOST_REQUIRE(parse_amount("0.000000044") == 4);
-    BOOST_REQUIRE(parse_amount("0.000000045") == 5);
-    BOOST_REQUIRE(parse_amount("0.000000049") == 5);
-    BOOST_REQUIRE(parse_amount("4.432112395") == 443211240);
-    BOOST_REQUIRE(parse_amount("21000000") == 2100000000000000);
-    BOOST_REQUIRE(parse_amount("1234.9", 0) == 1235);
-    BOOST_REQUIRE(parse_amount("64.25", 5) == 6425000);
+    BOOST_REQUIRE_EQUAL(parse_amount("4.432"), 443200000u);
+    BOOST_REQUIRE_EQUAL(parse_amount("4.432."), invalid_amount);
+    BOOST_REQUIRE_EQUAL(parse_amount("4"), 400000000u);
+    BOOST_REQUIRE_EQUAL(parse_amount("4."), 400000000u);
+    BOOST_REQUIRE_EQUAL(parse_amount(".4"), 40000000u);
+    BOOST_REQUIRE_EQUAL(parse_amount("."), 0u);
+    BOOST_REQUIRE_EQUAL(parse_amount("0.00000004"), 4u);
+    BOOST_REQUIRE_EQUAL(parse_amount("0.000000044"), 4u);
+    BOOST_REQUIRE_EQUAL(parse_amount("0.000000045"), 5u);
+    BOOST_REQUIRE_EQUAL(parse_amount("0.000000049"), 5u);
+    BOOST_REQUIRE_EQUAL(parse_amount("4.432112395"), 443211240u);
+    BOOST_REQUIRE_EQUAL(parse_amount("21000000"), 2100000000000000u);
+    BOOST_REQUIRE_EQUAL(parse_amount("1234.9", 0), 1235u);
+    BOOST_REQUIRE_EQUAL(parse_amount("64.25", 5), 6425000u);
 }
 
 BOOST_AUTO_TEST_CASE(parse_amount_overflow_test)
 {
     const uint64_t invalid_amount = MAX_UINT64;
-    BOOST_REQUIRE(parse_amount("9999999999999999999", 0) ==
-        9999999999999999999U);
-    BOOST_REQUIRE(parse_amount("18446744073709551614", 0) ==
-        18446744073709551614U);
-    BOOST_REQUIRE(parse_amount("18446744073709551615", 0) == invalid_amount);
-    BOOST_REQUIRE(parse_amount("18446744073709551616", 0) == invalid_amount);
-    BOOST_REQUIRE(parse_amount("99999999999999999999", 0) == invalid_amount);
+    BOOST_REQUIRE_EQUAL(parse_amount("9999999999999999999", 0), 9999999999999999999u);
+    BOOST_REQUIRE_EQUAL(parse_amount("18446744073709551614", 0), 18446744073709551614u);
+    BOOST_REQUIRE_EQUAL(parse_amount("18446744073709551615", 0), invalid_amount);
+    BOOST_REQUIRE_EQUAL(parse_amount("18446744073709551616", 0), invalid_amount);
+    BOOST_REQUIRE_EQUAL(parse_amount("99999999999999999999", 0), invalid_amount);
 }
 
 BOOST_AUTO_TEST_CASE(format_amount_test)
 {
-    BOOST_REQUIRE(format_amount(123, 0) == "123");
-    BOOST_REQUIRE(format_amount(123, 2) == "1.23");
-    BOOST_REQUIRE(format_amount(123, 4) == "0.0123");
+    BOOST_REQUIRE_EQUAL(format_amount(123, 0), "123");
+    BOOST_REQUIRE_EQUAL(format_amount(123, 2), "1.23");
+    BOOST_REQUIRE_EQUAL(format_amount(123, 4), "0.0123");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

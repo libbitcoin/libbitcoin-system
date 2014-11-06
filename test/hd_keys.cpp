@@ -42,22 +42,22 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_1)
     auto m0h12h2  = m0h12h. generate_private_key(2);
     auto m0h12h2x = m0h12h2.generate_private_key(1000000000);
 
-    BITCOIN_ASSERT(m.encoded() ==
+    BOOST_REQUIRE_EQUAL(m.encoded(),
         "xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPP"
         "qjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi");
-    BITCOIN_ASSERT(m0h.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h.encoded(),
         "xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvU"
         "xt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7");
-    BITCOIN_ASSERT(m0h1.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h1.encoded(),
         "xprv9wTYmMFdV23N2TdNG573QoEsfRrWKQgWeibmLntzniatZvR9BmLn"
         "vSxqu53Kw1UmYPxLgboyZQaXwTCg8MSY3H2EU4pWcQDnRnrVA1xe8fs");
-    BITCOIN_ASSERT(m0h12h.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h12h.encoded(),
         "xprv9z4pot5VBttmtdRTWfWQmoH1taj2axGVzFqSb8C9xaxKymcFzXBD"
         "ptWmT7FwuEzG3ryjH4ktypQSAewRiNMjANTtpgP4mLTj34bhnZX7UiM");
-    BITCOIN_ASSERT(m0h12h2.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h12h2.encoded(),
         "xprvA2JDeKCSNNZky6uBCviVfJSKyQ1mDYahRjijr5idH2WwLsEd4Hsb"
         "2Tyh8RfQMuPh7f7RtyzTtdrbdqqsunu5Mm3wDvUAKRHSC34sJ7in334");
-    BITCOIN_ASSERT(m0h12h2x.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h12h2x.encoded(),
         "xprvA41z7zogVVwxVSgdKUHDy1SKmdb533PjDz7J6N6mV6uS3ze1ai8F"
         "Ha8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76");
 
@@ -70,23 +70,23 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_1)
     auto m0h12h2_pub  = m0h12h_pub. generate_public_key(2);
     auto m0h12h2x_pub = m0h12h2_pub.generate_public_key(1000000000);
 
-    BITCOIN_ASSERT(!m0h_bad.valid());
-    BITCOIN_ASSERT(m_pub.encoded() ==
+    BOOST_REQUIRE(!m0h_bad.valid());
+    BOOST_REQUIRE_EQUAL(m_pub.encoded(),
         "xpub661MyMwAqRbcFtXgS5sYJABqqG9YLmC4Q1Rdap9gSE8NqtwybGhe"
         "PY2gZ29ESFjqJoCu1Rupje8YtGqsefD265TMg7usUDFdp6W1EGMcet8");
-    BITCOIN_ASSERT(m0h_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h_pub.encoded(),
         "xpub68Gmy5EdvgibQVfPdqkBBCHxA5htiqg55crXYuXoQRKfDBFA1WEj"
         "WgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw");
-    BITCOIN_ASSERT(m0h1_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h1_pub.encoded(),
         "xpub6ASuArnXKPbfEwhqN6e3mwBcDTgzisQN1wXN9BJcM47sSikHjJf3"
         "UFHKkNAWbWMiGj7Wf5uMash7SyYq527Hqck2AxYysAA7xmALppuCkwQ");
-    BITCOIN_ASSERT(m0h12h_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h12h_pub.encoded(),
         "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VU"
         "NgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5");
-    BITCOIN_ASSERT(m0h12h2_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h12h2_pub.encoded(),
         "xpub6FHa3pjLCk84BayeJxFW2SP4XRrFd1JYnxeLeU8EqN3vDfZmbqBq"
         "aGJAyiLjTAwm6ZLRQUMv1ZACTj37sR62cfN7fe5JnJ7dh8zL4fiyLHV");
-    BITCOIN_ASSERT(m0h12h2x_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0h12h2x_pub.encoded(),
         "xpub6H1LXWLaKsWFhvm6RVpEL9P4KfRZSW7abD2ttkWP3SSQvnyA8FSV"
         "qNTEcYFgJS2UaFcxupHiYkro49S8yGasTvXEYBVPamhGW6cFJodrTHy");
 }
@@ -115,22 +115,22 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_2)
     auto m0xH1yH  = m0xH1.  generate_private_key(2147483646 + hard);
     auto m0xH1yH2 = m0xH1yH.generate_private_key(2);
 
-    BITCOIN_ASSERT(m.encoded() ==
+    BOOST_REQUIRE_EQUAL(m.encoded(),
         "xprv9s21ZrQH143K31xYSDQpPDxsXRTUcvj2iNHm5NUtrGiGG5e2DtAL"
         "Gdso3pGz6ssrdK4PFmM8NSpSBHNqPqm55Qn3LqFtT2emdEXVYsCzC2U");
-    BITCOIN_ASSERT(m0.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0.encoded(),
         "xprv9vHkqa6EV4sPZHYqZznhT2NPtPCjKuDKGY38FBWLvgaDx45zo9WQ"
         "RUT3dKYnjwih2yJD9mkrocEZXo1ex8G81dwSM1fwqWpWkeS3v86pgKt");
-    BITCOIN_ASSERT(m0xH.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0xH.encoded(),
         "xprv9wSp6B7kry3Vj9m1zSnLvN3xH8RdsPP1Mh7fAaR7aRLcQMKTR2vi"
         "dYEeEg2mUCTAwCd6vnxVrcjfy2kRgVsFawNzmjuHc2YmYRmagcEPdU9");
-    BITCOIN_ASSERT(m0xH1.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0xH1.encoded(),
         "xprv9zFnWC6h2cLgpmSA46vutJzBcfJ8yaJGg8cX1e5StJh45BBciYTR"
         "XSd25UEPVuesF9yog62tGAQtHjXajPPdbRCHuWS6T8XA2ECKADdw4Ef");
-    BITCOIN_ASSERT(m0xH1yH.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0xH1yH.encoded(),
         "xprvA1RpRA33e1JQ7ifknakTFpgNXPmW2YvmhqLQYMmrj4xJXXWYpDPS"
         "3xz7iAxn8L39njGVyuoseXzU6rcxFLJ8HFsTjSyQbLYnMpCqE2VbFWc");
-    BITCOIN_ASSERT(m0xH1yH2.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0xH1yH2.encoded(),
         "xprvA2nrNbFZABcdryreWet9Ea4LvTJcGsqrMzxHx98MMrotbir7yrKC"
         "EXw7nadnHM8Dq38EGfSh6dqA9QWTyefMLEcBYJUuekgW4BYPJcr9E7j");
 
@@ -142,22 +142,22 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_2)
     auto m0xH1yH_pub  = m0xH1.      generate_public_key(2147483646 + hard);
     auto m0xH1yH2_pub = m0xH1yH_pub.generate_public_key(2);
 
-    BITCOIN_ASSERT(m_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m_pub.encoded(),
         "xpub661MyMwAqRbcFW31YEwpkMuc5THy2PSt5bDMsktWQcFF8syAmRUa"
         "pSCGu8ED9W6oDMSgv6Zz8idoc4a6mr8BDzTJY47LJhkJ8UB7WEGuduB");
-    BITCOIN_ASSERT(m0_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0_pub.encoded(),
         "xpub69H7F5d8KSRgmmdJg2KhpAK8SR3DjMwAdkxj3ZuxV27CprR9Lgpe"
         "yGmXUbC6wb7ERfvrnKZjXoUmmDznezpbZb7ap6r1D3tgFxHmwMkQTPH");
-    BITCOIN_ASSERT(m0xH_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0xH_pub.encoded(),
         "xpub6ASAVgeehLbnwdqV6UKMHVzgqAG8Gr6riv3Fxxpj8ksbH9ebxaEy"
         "BLZ85ySDhKiLDBrQSARLq1uNRts8RuJiHjaDMBU4Zn9h8LZNnBC5y4a");
-    BITCOIN_ASSERT(m0xH1_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0xH1_pub.encoded(),
         "xpub6DF8uhdarytz3FWdA8TvFSvvAh8dP3283MY7p2V4SeE2wyWmG5mg"
         "5EwVvmdMVCQcoNJxGoWaU9DCWh89LojfZ537wTfunKau47EL2dhHKon");
-    BITCOIN_ASSERT(m0xH1yH_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0xH1yH_pub.encoded(),
         "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhg"
         "bmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL");
-    BITCOIN_ASSERT(m0xH1yH2_pub.encoded() ==
+    BOOST_REQUIRE_EQUAL(m0xH1yH2_pub.encoded(),
         "xpub6FnCn6nSzZAw5Tw7cgR9bi15UV96gLZhjDstkXXxvCLsUXBGXPdS"
         "nLFbdpq8p9HmGsApME5hQTZ3emM2rnY5agb9rXpVGyy3bdW6EEgAtqt");
 }

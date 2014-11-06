@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(uri_write_test)
     writer.write_message("hello bitcoin");
     writer.write_r("http://example.com?purchase=shoes&user=bob");
 
-    BOOST_REQUIRE(writer.string() ==
+    BOOST_REQUIRE_EQUAL(writer.string(),
         "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?"
         "amount=0.0012&amount=100&"
         "label=%26%3D%0A&"

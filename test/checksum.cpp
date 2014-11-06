@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(checksum_test)
 
     // Valid checksum:
     append_checksum(data);
-    BOOST_REQUIRE(data.size() == 8);
+    BOOST_REQUIRE_EQUAL(data.size(), 8u);
     BOOST_REQUIRE(verify_checksum(data));
 
     // Data corruption:

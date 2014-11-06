@@ -135,18 +135,18 @@ static void CheckCompare(const int64_t num1, const int64_t num2,
     BOOST_CHECK(!(scriptnum1 > num1));
 
     BOOST_CHECK_EQUAL(is(compare.eq), (scriptnum1 == scriptnum2));
+    BOOST_CHECK_EQUAL(is(compare.ge), (scriptnum1 >= scriptnum2));
+    BOOST_CHECK_EQUAL(is(compare.le), (scriptnum1 <= scriptnum2));
     BOOST_CHECK_EQUAL(is(compare.ne), (scriptnum1 != scriptnum2));
     BOOST_CHECK_EQUAL(is(compare.lt), (scriptnum1 < scriptnum2));
     BOOST_CHECK_EQUAL(is(compare.gt), (scriptnum1 > scriptnum2));
-    BOOST_CHECK_EQUAL(is(compare.ge), (scriptnum1 >= scriptnum2));
-    BOOST_CHECK_EQUAL(is(compare.le), (scriptnum1 <= scriptnum2));
-
+    
     BOOST_CHECK_EQUAL(is(compare.eq), (scriptnum1 == num2));
+    BOOST_CHECK_EQUAL(is(compare.ge), (scriptnum1 >= num2));
+    BOOST_CHECK_EQUAL(is(compare.le), (scriptnum1 <= num2));
     BOOST_CHECK_EQUAL(is(compare.ne), (scriptnum1 != num2));
     BOOST_CHECK_EQUAL(is(compare.lt), (scriptnum1 < num2));
     BOOST_CHECK_EQUAL(is(compare.gt), (scriptnum1 > num2));
-    BOOST_CHECK_EQUAL(is(compare.ge), (scriptnum1 >= num2));
-    BOOST_CHECK_EQUAL(is(compare.le), (scriptnum1 <= num2));
 }
 
 #ifndef ENABLE_DATAGEN
