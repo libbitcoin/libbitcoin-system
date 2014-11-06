@@ -221,7 +221,7 @@ void indexer_history_fetched(const std::error_code& ec,
         for (const history_row& row: history)
         {
             // Loop over outputs only.
-            if (row.id != history_row_id::output)
+            if (row.id != point_ident::output)
                 continue;
             // Usually the indexer and memory doesn't have any
             // transactions indexed that are already confirmed
@@ -237,7 +237,7 @@ void indexer_history_fetched(const std::error_code& ec,
             continue;
         // Everything OK. Insert outpoint.
         history.emplace_back(history_row{
-            history_row_id::output,
+            point_ident::output,
             output_info.point,
             0,
             output_info.value
@@ -251,7 +251,7 @@ void indexer_history_fetched(const std::error_code& ec,
         for (const history_row& row: history)
         {
             // Loop over inputs only.
-            if (row.id != history_row_id::spend)
+            if (row.id != point_ident::spend)
                 continue;
             if (row.point == spend_info.point)
             {
@@ -263,7 +263,7 @@ void indexer_history_fetched(const std::error_code& ec,
             continue;
         // Everything OK. Insert spend.
         history.emplace_back(history_row{
-            history_row_id::spend,
+            point_ident::spend,
             spend_info.point,
             0,
             spend_checksum(spend_info.previous_output)

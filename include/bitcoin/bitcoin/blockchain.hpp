@@ -36,7 +36,7 @@
 
 namespace libbitcoin {
 
-enum class history_row_id
+enum class point_ident
 {
     output,
     spend
@@ -45,7 +45,7 @@ enum class history_row_id
 struct BC_API history_row
 {
     /// Is this an output or spend
-    history_row_id id;
+    point_ident id;
     /// input/output point
     point_type point;
     /// Block height of transaction
