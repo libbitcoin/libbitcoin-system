@@ -50,7 +50,7 @@ std::ostream& concat_point(std::ostream& stream, const Point& point)
     stream << point.hash << ":" << point.index;
     return stream;
 }
-std::ostream& operator<<(std::ostream& stream, const output_point& point)
+std::ostream& operator<<(std::ostream& stream, const point_type& point)
 {
     return concat_point(stream, point);
 }
