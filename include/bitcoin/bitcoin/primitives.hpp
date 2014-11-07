@@ -95,13 +95,14 @@ struct BC_API get_blocks_type
     hash_digest hash_stop;
 };
 
-struct BC_API output_point
+struct BC_API point_type
 {
     hash_digest hash;
     uint32_t index;
 };
 
-typedef output_point input_point;
+typedef point_type input_point;
+typedef point_type output_point;
 typedef std::vector<input_point> input_point_list;
 typedef std::vector<output_point> output_point_list;
 

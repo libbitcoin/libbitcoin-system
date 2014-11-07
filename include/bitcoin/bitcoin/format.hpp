@@ -32,9 +32,7 @@
 namespace libbitcoin {
 
 // Forwarding definitions because primitives.hpp depends on this header.
-struct output_point;
-// We don't need a stream operator for input_point:
-typedef output_point input_point;
+struct point_type;
 
 /// Extend the data by appending other.
 template <typename D, typename T>
@@ -64,7 +62,7 @@ BC_API std::ostream& operator<<(
 BC_API std::ostream& operator<<(
     std::ostream& stream, const short_hash& hash);
 BC_API std::ostream& operator<<(
-    std::ostream& stream, const output_point& point);
+    std::ostream& stream, const point_type& point);
 
 /**
  * Convert a hex string into bytes.
