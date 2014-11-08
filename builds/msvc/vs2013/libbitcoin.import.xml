@@ -3,16 +3,11 @@
   <Rule Name="libbitcoin-options-uiextension" PageTemplate="tool" DisplayName="Bitcoin Options" SwitchPrefix="/" Order="1">
     <Rule.Categories>
       <Category Name="testnet" DisplayName="testnet" />
-      <Category Name="datagen" DisplayName="datagen" />
     </Rule.Categories>
     <Rule.DataSource>
       <DataSource Persistence="ProjectFile" ItemType="" />
     </Rule.DataSource>
     <EnumProperty Name="Option-testnet" DisplayName="Enable Testnet" Description="Enable the Testnet build option" Category="testnet">
-      <EnumValue Name="" DisplayName="No" />
-      <EnumValue Name="true" DisplayName="Yes" />
-    </EnumProperty>
-    <EnumProperty Name="Option-datagen" DisplayName="Enable Test Data Generation" Description="Enable the Test Data Generation build option" Category="datagen">
       <EnumValue Name="" DisplayName="No" />
       <EnumValue Name="true" DisplayName="Yes" />
     </EnumProperty>
