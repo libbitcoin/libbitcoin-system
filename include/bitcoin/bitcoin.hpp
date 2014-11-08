@@ -118,10 +118,6 @@
  * - @link libbitcoin::block_locator_indices block_locator_indices @endlink
  * - @link libbitcoin::genesis_block genesis_block @endlink
  *
- * @subsection blockchain Blockchain
- *
- * - @link libbitcoin::fetch_block fetch_block @endlink
- *
  * @subsection format Format
  *
  * - @link libbitcoin::encode_hex pretty_hex @endlink
