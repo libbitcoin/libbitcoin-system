@@ -67,6 +67,17 @@ typedef std::vector<history_row> history_list;
  */
 BC_API uint64_t spend_checksum(output_point outpoint);
 
+struct BC_API stealth_row
+{
+    // No sign byte in public key.
+    hash_digest ephemkey;
+    // No version byte in address.
+    short_hash address;
+    hash_digest transaction_hash;
+};
+
+typedef std::vector<stealth_row> stealth_list;
+
 class blockchain
 {
 public:
@@ -102,13 +113,6 @@ public:
     typedef std::function<void (const std::error_code&, const history_list&)>
         fetch_handler_history;
 
-    struct BC_API stealth_row
-    {
-        data_chunk ephemkey;
-        payment_address address;
-        hash_digest transaction_hash;
-    };
-    typedef std::vector<stealth_row> stealth_list;
     typedef std::function<void (const std::error_code&, const stealth_list&)>
         fetch_handler_stealth;
 
