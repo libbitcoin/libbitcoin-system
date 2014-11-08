@@ -71,12 +71,6 @@
     <ClCompile Include="..\..\..\..\src\format.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\getx_responder.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\poller.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\satoshi_serialize.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -87,15 +81,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\transaction.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\transaction_indexer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\transaction_pool.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\validate.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\address.cpp">
@@ -132,12 +117,6 @@
       <Filter>src\network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\stealth.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\mmfile.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\session.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\external\sha1.c">
@@ -194,9 +173,6 @@
     <ClCompile Include="..\..\..\..\src\compat.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\blockchain.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp">
@@ -243,9 +219,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp">
       <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\mmfile.hpp">
-      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\ripemd160.h">
       <Filter>include\bitcoin\utility\external</Filter>
@@ -319,12 +292,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\format.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\getx_responder.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\poller.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\primitives.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
@@ -332,9 +299,6 @@
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\session.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\stealth.hpp">
@@ -346,16 +310,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\transaction.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\transaction_indexer.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\transaction_pool.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\types.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\validate.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp">
@@ -371,9 +326,6 @@
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\blockchain.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
   </ItemGroup>
