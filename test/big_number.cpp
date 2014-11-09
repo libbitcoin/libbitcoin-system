@@ -20,6 +20,7 @@
 #ifdef ENABLE_DATAGEN
 
 #include "big_number.hpp"
+
 #include <openssl/bn.h>
 #include <bitcoin/bitcoin.hpp>
 
