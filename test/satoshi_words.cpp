@@ -22,8 +22,7 @@
 
 BOOST_AUTO_TEST_SUITE(satoshi_words)
 
-#ifndef ENABLE_TESTNET
-BOOST_AUTO_TEST_CASE(satoshi_words_mainnet)
+BOOST_AUTO_TEST_CASE(satoshi_words_mainnet_or_testnet)
 {
     // Create genesis block.
     auto block = bc::genesis_block();
@@ -49,6 +48,5 @@ BOOST_AUTO_TEST_CASE(satoshi_words_mainnet)
 
     BOOST_REQUIRE_EQUAL(message, "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks");
 }
-#endif
 
 BOOST_AUTO_TEST_SUITE_END()
