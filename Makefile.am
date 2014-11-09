@@ -98,7 +98,6 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/hash.hpp \
     include/bitcoin/bitcoin/utility/hash_number.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
-    include/bitcoin/bitcoin/utility/mmfile.hpp \
     include/bitcoin/bitcoin/utility/script_number.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
@@ -160,7 +159,6 @@ src_libbitcoin_la_SOURCES = \
     src/utility/hash.cpp \
     src/utility/hash_number.cpp \
     src/utility/logger.cpp \
-    src/utility/mmfile.cpp \
     src/utility/script_number.cpp \
     src/utility/timed_section.cpp \
     src/utility/external/hmac_sha512.c \

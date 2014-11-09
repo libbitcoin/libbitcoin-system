@@ -26,13 +26,11 @@
 #include <boost/detail/endian.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
-
-// Forwarding definitions because primitives.hpp depends on this header.
-struct point_type;
 
 /// Extend the data by appending other.
 template <typename D, typename T>
