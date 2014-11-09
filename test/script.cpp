@@ -19,17 +19,9 @@
  */
 #include "script.hpp"
 
-#ifdef _MSC_VER
-#pragma warning(push)
-// choorucode.com/2010/08/30/visual-c-c4996-warning-on-copy-with-array-parameters
-#pragma warning(disable: 4996)
-#endif
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
