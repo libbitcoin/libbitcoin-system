@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include "hash.hpp"
+
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
-#include "hash_data/vectors.hpp"
 
 using namespace bc;
 

@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include "script.hpp"
+
 #ifdef _MSC_VER
 #pragma warning(push)
 // choorucode.com/2010/08/30/visual-c-c4996-warning-on-copy-with-array-parameters
@@ -29,7 +31,6 @@
 #pragma warning(pop)
 #endif
 #include <bitcoin/bitcoin.hpp>
-#include "script_json/vectors.hpp"
 
 using namespace bc;
 
