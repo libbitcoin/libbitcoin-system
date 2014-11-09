@@ -103,17 +103,6 @@ void handshake::receive_verack(
     completion_callback(ec);
 }
 
-int writer(char* data, size_t size, size_t count, std::string* buffer)
-{
-    size_t result = 0;
-    if (buffer != NULL)
-    {
-        result = count * size;
-        *buffer = std::string(data, result);
-    }
-    return result;
-}
-
 void handshake::discover_external_ip(discover_ip_handler handle_discover)
 {
     strand_.post(

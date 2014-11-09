@@ -2,10 +2,10 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
     <ConfigurationType>Application</ConfigurationType>
-    <NuGetPackageImportStamp>4e174375</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>71de251b</NuGetPackageImportStamp>
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
-    <ProjectGuid>{15BF93A0-69D3-4723-9FDE-EB8B73C69E09}</ProjectGuid>
-    <ProjectName>libbitcoin_examples</ProjectName>
+    <ProjectGuid>{51A424A9-2C12-4211-8D40-E49D1534C541}</ProjectGuid>
+    <ProjectName>libbitcoin_test</ProjectName>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugDEXE|Win32">
@@ -65,25 +65,34 @@
     <Import Project="$(ProjectDir)$(ProjectName).props" />
   </ImportGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\examples\priv.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\examples\proto.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\examples\satoshiwords.cpp">
-      <ExcludedFromBuild>false</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\examples\txrad.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\examples\uri.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="packages.config">
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\amount.cpp" />
+    <ClCompile Include="..\..\..\..\test\base58.cpp" />
+    <ClCompile Include="..\..\..\..\test\big_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\format.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\hd_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\key_formats.cpp" />
+    <ClCompile Include="..\..\..\..\test\main.cpp" />
+    <ClCompile Include="..\..\..\..\test\satoshi_words.cpp" />
+    <ClCompile Include="..\..\..\..\test\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\script_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\serialize.cpp" />
+    <ClCompile Include="..\..\..\..\test\stealth.cpp" />
+    <ClCompile Include="..\..\..\..\test\stealth_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\uri.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\test\big_number.hpp" />
+    <ClInclude Include="..\..\..\..\test\hash.hpp" />
+    <ClInclude Include="..\..\..\..\test\script.hpp" />
+    <ClInclude Include="..\..\..\..\test\script_number.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
@@ -93,6 +102,7 @@
     <Import Project="..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.56.0.0\build\native\boost_filesystem-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.56.0.0\build\native\boost_filesystem-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets')" />
+    <Import Project="..\..\..\..\..\..\nuget\boost_unit_test_framework-vc120.1.56.0.0\build\native\boost_unit_test_framework-vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost_unit_test_framework-vc120.1.56.0.0\build\native\boost_unit_test_framework-vc120.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets" Condition="Exists('..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets')" />
     <Import Project="..\..\..\..\..\..\nuget\secp256k1_gmp_vc120.0.1.0.3\build\native\secp256k1_gmp_vc120.targets" Condition="Exists('..\..\..\..\..\..\nuget\secp256k1_gmp_vc120.0.1.0.3\build\native\secp256k1_gmp_vc120.targets')" />
   </ImportGroup>
@@ -105,6 +115,7 @@
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.56.0.0\build\native\boost_filesystem-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_filesystem-vc120.1.56.0.0\build\native\boost_filesystem-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_regex-vc120.1.56.0.0\build\native\boost_regex-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_system-vc120.1.56.0.0\build\native\boost_system-vc120.targets'))" />
+    <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost_unit_test_framework-vc120.1.56.0.0\build\native\boost_unit_test_framework-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost_unit_test_framework-vc120.1.56.0.0\build\native\boost_unit_test_framework-vc120.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\boost.1.56.0.0\build\native\boost.targets'))" />
     <Error Condition="!Exists('..\..\..\..\..\..\nuget\secp256k1_gmp_vc120.0.1.0.3\build\native\secp256k1_gmp_vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\..\..\nuget\secp256k1_gmp_vc120.0.1.0.3\build\native\secp256k1_gmp_vc120.targets'))" />
   </Target>
