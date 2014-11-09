@@ -190,7 +190,6 @@
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/hash.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/mmfile.hpp>
 #include <bitcoin/bitcoin/utility/script_number.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
