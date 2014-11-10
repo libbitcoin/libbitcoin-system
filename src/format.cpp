@@ -152,7 +152,7 @@ bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
     {
         if (parts.front().size() > 0)
             major = boost::lexical_cast<int64_t>(parts.front()) * coin_price(1);
-        if (parts.size() == 2)
+        if (parts.size() == 2 && parts.back().size() > 0)
             minor = boost::lexical_cast<uint64_t>(
                 pad_right_8_zeroes_trim_left(parts.back()));
     }
