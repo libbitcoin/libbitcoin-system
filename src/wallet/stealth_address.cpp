@@ -261,7 +261,7 @@ bool stealth_address::set_encoded(const std::string& encoded_address)
 
 bool stealth_address::valid() const
 {
-    return false;
+    return valid_;
 }
 
 const stealth_prefix& stealth_address::get_prefix() const
