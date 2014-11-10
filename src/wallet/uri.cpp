@@ -22,8 +22,9 @@
 #include <cstdint>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/format.hpp>
 #include <bitcoin/bitcoin/utility/base58.hpp>
-#include <bitcoin/bitcoin/wallet/amount.hpp>
+#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 
@@ -141,10 +142,22 @@ bool uri_parse(const std::string& uri, uri_visitor& result,
 bool uri_parse_result::got_address(std::string& address)
 {
     payment_address payaddr;
-    if (!payaddr.set_encoded(address))
-        return false;
-    this->address.reset(payaddr);
-    return true;
+    if (payaddr.set_encoded(address))
+    {
+        this->address.reset(payaddr);
+        this->stealth.reset();
+        return true;
+    }
+
+    stealth_address stealthaddr;
+    if (stealthaddr.set_encoded(address))
+    {
+        this->stealth.reset(stealthaddr);
+        this->address.reset();
+        return true;
+    }
+
+    return false;
 }
 
 bool uri_parse_result::got_param(std::string& key, std::string& value)
@@ -152,8 +165,8 @@ bool uri_parse_result::got_param(std::string& key, std::string& value)
     const uint64_t invalid_amount = MAX_UINT64;
     if (key == "amount")
     {
-        uint64_t amount = parse_amount(value);
-        if (invalid_amount  == amount)
+        uint64_t amount;
+        if (!btc_to_satoshi(amount, value))
             return false;
         this->amount.reset(amount);
     }
@@ -197,9 +210,14 @@ void uri_writer::write_address(const payment_address& address)
     write_address(address.encoded());
 }
 
+void uri_writer::write_address(const stealth_address& address)
+{
+    write_address(address.encoded());
+}
+
 void uri_writer::write_amount(uint64_t satoshis)
 {
-    write_param("amount", format_amount(satoshis));
+    write_param("amount", satoshi_to_btc(satoshis));
 }
 
 void uri_writer::write_label(const std::string& label)

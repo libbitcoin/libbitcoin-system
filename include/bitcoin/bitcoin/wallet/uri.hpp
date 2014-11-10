@@ -26,6 +26,7 @@
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/address.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 
@@ -48,10 +49,12 @@ class BC_API uri_parse_result
 {
 public:
     typedef boost::optional<payment_address> optional_address;
+    typedef boost::optional<stealth_address> optional_stealth;
     typedef boost::optional<uint64_t> optional_amount;
     typedef boost::optional<std::string> optional_string;
 
     optional_address address;
+    optional_stealth stealth;
     optional_amount amount;
     optional_string label;
     optional_string message;
@@ -81,6 +84,7 @@ public:
 
     // Formatted:
     BC_API void write_address(const payment_address& address);
+    BC_API void write_address(const stealth_address& stealth);
     BC_API void write_amount(uint64_t satoshis);
     BC_API void write_label(const std::string& label);
     BC_API void write_message(const std::string& message);
