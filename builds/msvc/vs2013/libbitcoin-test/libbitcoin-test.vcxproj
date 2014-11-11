@@ -5,7 +5,7 @@
     <NuGetPackageImportStamp>71de251b</NuGetPackageImportStamp>
     <PlatformToolset>CTP_Nov2013</PlatformToolset>
     <ProjectGuid>{51A424A9-2C12-4211-8D40-E49D1534C541}</ProjectGuid>
-    <ProjectName>libbitcoin_test</ProjectName>
+    <ProjectName>libbitcoin-test</ProjectName>
   </PropertyGroup>
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="DebugDEXE|Win32">
