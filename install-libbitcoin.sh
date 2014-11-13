@@ -39,14 +39,7 @@ DARWIN_BOOST=\
 
 # Homebrew: places each package in a distinct pkg-config path.
 # Unlike other pkg managers Homebrew declares a package for GMP.
-HOMEBREW_BOOST_ROOT_PATH="/usr/local/opt/boost"
 HOMEBREW_PKG_CONFIG_PATHS="/usr/local/opt/gmp/lib/pkgconfig"
-
-# MacPorts: necessary for GMP and Boost (no packages, paths only).
-MACPORTS_LDFLAGS="-L/opt/local/lib"
-MACPORTS_CPPFLAGS="-I/opt/local/include"
-MACPORTS_LD_LIBRARY_PATH="/opt/local/lib"
-MACPORTS_LD_INCLUDE_PATH="/opt/local/include"
 
 # Set libbitcoin common options.
 BITCOIN_OPTIONS=\
@@ -142,21 +135,19 @@ if [[ $OS == "Darwin" ]]; then
     BOOST_OPTIONS="$BOOST_OPTIONS $DARWIN_BOOST"
     GMP_OPTIONS="$GMP_OPTIONS CPPFLAGS=-Wno-parentheses"
     SECP256K1_OPTIONS="$SECP256K1_OPTIONS CPPFLAGS=-Wno-unused-value"
-
-    # Set up default Homebrew repository, if it exists.
+    
+    # Set up Homebrew packages, if Homebrew exists (GMP pkg-config).
     if [[ -d "/usr/local/opt" ]]; then
-        export BOOST_ROOT="$HOMEBREW_BOOST_ROOT_PATH"
         export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_PKG_CONFIG_PATHS"
     fi
-
-    # Set up default MacPorts repository, if it exists.
-    if [[ -d "/opt/local" ]]; then
-        export LDFLAGS="$LDFLAGS $MACPORTS_LDFLAGS"
-        export CPPFLAGS="$CPPFLAGS $MACPORTS_CPPFLAGS"
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MACPORTS_LD_LIBRARY_PATH"
-        export LD_INCLUDE_PATH="$LD_INCLUDE_PATH:$MACPORTS_LD_INCLUDE_PATH"
-    fi
     
+    # Set up default MacPorts paths for GMP and Boost (no pkg-config).
+    if [[ -d "/opt/local" ]]; then
+        export LDFLAGS="$LDFLAGS -L/opt/local/lib"
+        export CPPFLAGS="$CPPFLAGS -I/opt/local/include"
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/local/lib"
+        export LD_INCLUDE_PATH="$LD_INCLUDE_PATH:/opt/local/include"
+    fi
 fi
 
 # Expose the prefix.
@@ -202,6 +193,18 @@ create_directory()
     mkdir $DIRECTORY
 }
 
+display_linkage()
+{
+    LIBRARY=$1
+    
+    # Display shared library links.
+    if [[ $OS == "Darwin" ]]; then
+        otool -L $LIBRARY
+    else
+        ldd --verbose $LIBRARY
+    fi
+}
+
 display_message()
 {
     MESSAGE=$1
@@ -244,6 +247,14 @@ make_silent()
     else
         make --silent
     fi
+}
+
+make_tests()
+{
+    JOBS=$1
+
+    # Build and run unit tests relative to the primary directory.
+    make_silent $JOBS check
 }
 
 build_from_tarball_boost()
@@ -353,22 +364,14 @@ build_from_travis()
     if [[ $TRAVIS == "true" ]]; then
         cd ..
         build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "$@"
-        build_tests
+        make_tests
         cd $BUILD_DIR
     else
         build_from_github $ACCOUNT $REPO $BRANCH $JOBS "$@"
         pushd $REPO
-        build_tests $JOBS
+        make_tests $JOBS
         popd
     fi
-}
-
-build_tests()
-{
-    JOBS=$1
-
-    # Build and run unit tests relative to the primary directory.
-    make_silent $JOBS check 
 }
 
 build_library()

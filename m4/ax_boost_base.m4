@@ -11,9 +11,9 @@
 #   Test for the Boost C++ libraries of a particular version (or newer)
 #
 #   If no path to the installed boost library is given the macro searchs
-#   under /usr, /usr/local, /opt and /opt/local and evaluates the
-#   $BOOST_ROOT environment variable. Further documentation is available at
-#   <http://randspringer.de/boost/index.html>.
+#   under /usr, /usr/local, /usr/local/opt/boost, /opt and /opt/local and
+#   evaluates the $BOOST_ROOT environment variable. Further documentation 
+#   is available at <http://randspringer.de/boost/index.html>.
 #
 #   This macro calls:
 #
@@ -27,13 +27,14 @@
 #
 #   Copyright (c) 2008 Thomas Porschberg <thomas@randspringer.de>
 #   Copyright (c) 2009 Peter Adolphs
+#   Copyright (c) 2014 Eric Voskuil
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
 #   and this notice are preserved. This file is offered as-is, without any
 #   warranty.
 
-#serial 23
+#serial 23 (?)
 
 AC_DEFUN([AX_BOOST_BASE],
 [
@@ -121,7 +122,7 @@ if test "x$want_boost" = "xyes"; then
                 fi
         done
     elif test "$cross_compiling" != yes; then
-        for ac_boost_path_tmp in /usr /usr/local /opt /opt/local ; do
+        for ac_boost_path_tmp in /usr /usr/local /usr/local/opt/boost /opt /opt/local ; do
             if test -d "$ac_boost_path_tmp/include/boost" && test -r "$ac_boost_path_tmp/include/boost"; then
                 for libsubdir in $libsubdirs ; do
                     if ls "$ac_boost_path_tmp/$libsubdir/libboost_"* >/dev/null 2>&1 ; then break; fi
@@ -185,7 +186,7 @@ if test "x$want_boost" = "xyes"; then
             fi
         else
             if test "$cross_compiling" != yes; then
-                for ac_boost_path in /usr /usr/local /opt /opt/local ; do
+                for ac_boost_path in /usr /usr/local /usr/local/opt/boost /opt /opt/local ; do
                     if test -d "$ac_boost_path" && test -r "$ac_boost_path"; then
                         for i in `ls -d $ac_boost_path/include/boost-* 2>/dev/null`; do
                             _version_tmp=`echo $i | sed "s#$ac_boost_path##" | sed 's/\/include\/boost-//' | sed 's/_/./'`
