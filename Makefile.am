@@ -188,11 +188,6 @@ src_libbitcoin_la_LIBADD += \
 endif
 
 #
-# examples
-#
-# TODO
-
-#
 # tests
 #
 if WITH_TESTS
@@ -204,8 +199,12 @@ check_PROGRAMS = test/libbitcoin_test
 test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/include \
     -I${srcdir}/test \
-    ${secp256k1_CFLAGS} \
+    ${secp256k1_CFLAGS}
+    
+if SET_BOOST_TEST_DYN_LINK
+test_libbitcoin_test_CPPFLAGS += \
     -DBOOST_TEST_DYN_LINK
+endif
 
 test_libbitcoin_test_SOURCES = \
     test/amount.cpp \
@@ -229,7 +228,10 @@ test_libbitcoin_test_SOURCES = \
 test_libbitcoin_test_LDADD = \
     src/libbitcoin.la \
     -lboost_system \
+    -lboost_regex \
+    -lboost_filesystem \
     -lboost_unit_test_framework \
+    -lpthread \
     ${secp256k1_LIBS} \
     ${gmp_LIBS}
 
