@@ -188,11 +188,6 @@ src_libbitcoin_la_LIBADD += \
 endif
 
 #
-# examples
-#
-# TODO
-
-#
 # tests
 #
 if WITH_TESTS
@@ -233,7 +228,10 @@ test_libbitcoin_test_SOURCES = \
 test_libbitcoin_test_LDADD = \
     src/libbitcoin.la \
     -lboost_system \
+    -lboost_regex \
+    -lboost_filesystem \
     -lboost_unit_test_framework \
+    -lpthread \
     ${secp256k1_LIBS} \
     ${gmp_LIBS}
 
