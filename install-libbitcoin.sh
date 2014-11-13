@@ -384,7 +384,7 @@ build_library()
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
     build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
     build_from_github bitcoin secp256k1 master $PARALLEL "$@" $SECP256K1_OPTIONS
-    build_from_travis evoskuil libbitcoin version2 $PARALLEL "$@" $BITCOIN_PRIMARY_OPTIONS
+    build_from_travis libbitcoin libbitcoin version2 $PARALLEL "$@" $BITCOIN_PRIMARY_OPTIONS
 
     popd
 }

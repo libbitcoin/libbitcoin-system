@@ -206,7 +206,7 @@ test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/test \
     ${secp256k1_CFLAGS}
     
-if SET_TEST_DYN_LINK
+if SET_BOOST_TEST_DYN_LINK
 test_libbitcoin_test_CPPFLAGS += \
     -DBOOST_TEST_DYN_LINK
 endif
