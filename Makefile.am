@@ -204,8 +204,12 @@ check_PROGRAMS = test/libbitcoin_test
 test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/include \
     -I${srcdir}/test \
-    ${secp256k1_CFLAGS} \
+    ${secp256k1_CFLAGS}
+    
+if SET_TEST_DYN_LINK
+test_libbitcoin_test_CPPFLAGS += \
     -DBOOST_TEST_DYN_LINK
+endif
 
 test_libbitcoin_test_SOURCES = \
     test/amount.cpp \

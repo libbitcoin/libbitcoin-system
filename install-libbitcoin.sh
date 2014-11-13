@@ -1,19 +1,44 @@
 #!/bin/bash
 #
-# Script to build and install libbitcoin and unpackaged dependencies.
+# Script to build and install libbitcoin.
 #
+# Script options:
+# --build-gmp              Builds GMP library.
+# --build-boost            Builds Boost libraries.
+# --build-dir=<path>       Location of downloaded and intermediate files.
+# --prefix=<absolute-path> Library install location (defaults to /usr/local).
+# --disable-shared         Disables shared library builds.
+# --disable-static         Disables static library builds.
 
-# The source repository for the primary build (when not running in Travis).
-BUILD_ACCOUNT="libbitcoin"
-BUILD_REPO="libbitcoin"
-BUILD_BRANCH="version2"
+# Verified on Ubuntu 14.04, requires gcc-4.8 or newer.
+# Verified on OSX 10.10, using MacPorts and Homebrew repositories, requires
+# Apple LLVM version 6.0 (clang-600.0.54) (based on LLVM 3.5svn) or newer.
+# This script does not like spaces in the --prefix or --build-dir, sorry.
+# Values (e.g. yes|no) in the boolean options are not supported by the script.
+# All command line options are passed to 'configure' of each repository, with
+# the exception of the --build-<item> options, which are for the script only.
+# Depending on the caller's permission to the --prefix or --build-dir
+# directory, the script may need to be sudo'd.
 
-# This script will build using this relative temporary directory.
-BUILD_DIRECTORY="libbitcoin-build"
+# The default build directory.
+BUILD_DIR="libbitcoin-build"
+
+# Boost v1.49 (minimum)
+BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download"
+BOOST_ARCHIVE="boost_1_49_0.tar.bz2"
+
+# GMP v6.0.0a (5.0.0 minimum)
+GMP_URL="https://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.bz2"
+GMP_ARCHIVE="gmp-6.0.0a.tar.bz2"
+
+# OSX: Boost configuration options.
+DARWIN_BOOST=\
+"toolset=clang "\
+"cxxflags=-stdlib=libc++ "\
+"linkflags=-stdlib=libc++"
 
 # Homebrew: places each package in a distinct pkg-config path.
 # Unlike other pkg managers Homebrew declares a package for GMP.
-# Boost M4 discovery code assumes boost is in the MacPorts package path.
 HOMEBREW_BOOST_ROOT_PATH="/usr/local/opt/boost"
 HOMEBREW_PKG_CONFIG_PATHS="/usr/local/opt/gmp/lib/pkgconfig"
 
@@ -23,7 +48,34 @@ MACPORTS_CPPFLAGS="-I/opt/local/include"
 MACPORTS_LD_LIBRARY_PATH="/opt/local/lib"
 MACPORTS_LD_INCLUDE_PATH="/opt/local/include"
 
-# https://github.com/bitcoin/secp256k1
+# Set libbitcoin common options.
+BITCOIN_OPTIONS=\
+"--without-tests "\
+"--enable-silent-rules"
+
+# Set libbitcoin primary build options (build tests).
+BITCOIN_PRIMARY_OPTIONS=\
+"--enable-silent-rules"
+
+# Set Boost options.
+# threading=single,multiple variant=release|debug
+# Supress all informational messages (-d0), and stop at the first error (-q).
+BOOST_OPTIONS=\
+"threading=single "\
+"variant=release "\
+"--disable-icu "\
+"--with-date_time "\
+"--with-filesystem "\
+"--with-regex "\
+"--with-system "\
+"--with-test "\
+"-d0 "\
+"-q"
+
+# Set GMP options (used in CLang only, see below).
+GMP_OPTIONS=""
+
+# Set secp256k1 options (require GMP).
 SECP256K1_OPTIONS=\
 "--with-bignum=gmp "\
 "--with-field=gmp "\
@@ -31,7 +83,8 @@ SECP256K1_OPTIONS=\
 "--enable-tests=no "\
 "--enable-endomorphism=no"
 
-# Set SEQUENTIAL (always 1), PARALLEL (number of concurrent jobs) and OS.
+# Always initialize PREFIX to /usr/local on OSX.
+# Define SEQUENTIAL (1), PARALLEL (# of concurrent jobs) and OS (Linux|Darwin).
 SEQUENTIAL=1
 PARALLEL=2
 OS=$(uname -s)
@@ -46,49 +99,109 @@ else
     echo "Unsupported system: $OS"
     exit 1
 fi
-
-# Set PREFIX from --prefix=path option.
+ 
+# Parse command line options that are handled by this script.
 for i in "$@"; do
     case $i in
         (--prefix=*) PREFIX="${i#*=}";;
+        (--build-dir=*) BUILD_DIR="${i#*=}";;
+
+        (--build-gmp) BUILD_GMP="yes";;
+        (--build-boost) BUILD_BOOST="yes";;
+        
+        (--disable-shared) DISABLE_SHARED="yes";;
+        (--disable-static) DISABLE_STATIC="yes";;
     esac
 done
 
-# Set up the OSX environment, for either Homebrew or MacPorts.
+# Purge our custom options so they don't go to configure.
+CONFIGURE_OPTIONS=( "$@" )
+CUSTOM_OPTIONS=( "--build-dir=$BUILD_DIR" "--build-boost" "--build-gmp" )
+for OPTION in ${CUSTOM_OPTIONS[@]}
+do
+    CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$OPTION}" )
+done
+
+# Map standard options to Boost link option.
+BOOST_LINK="static,shared"
+if [[ $DISABLE_STATIC ]]; then
+    BOOST_LINK="shared"
+elif [[ $DISABLE_SHARED ]]; then
+    BOOST_LINK="static"
+fi
+BOOST_OPTIONS="link=$BOOST_LINK $BOOST_OPTIONS"
+
+# Configure OSX settings.
 if [[ $OS == "Darwin" ]]; then
 
-    # Always require CLang on OSX, common lib linking will otherwise fail.
-    export CC=clang
-    export CXX=clang++
+    # Always require CLang, common lib linking will otherwise fail.
+    export CC="clang"
+    export CXX="clang++"
     
-    # Prefer Homebrew Boost path if it exists.
-    if [[ -d "$HOMEBREW_BOOST_ROOT_PATH" ]]; then
-        export BOOST_ROOT="$HOMEBREW_BOOST_ROOT_PATH"
-    fi
-    # Set up default Homebrew repository, in case it exists.
-    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_PKG_CONFIG_PATHS"
-    
-    # Set up default MacPorts repository, in case it exists.
-    export LDFLAGS="$LDFLAGS $MACPORTS_LDFLAGS"
-    export CPPFLAGS="$CPPFLAGS $MACPORTS_CPPFLAGS"
-    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MACPORTS_LD_LIBRARY_PATH"
-    export LD_INCLUDE_PATH="$LD_INCLUDE_PATH:$MACPORTS_LD_INCLUDE_PATH"
-    
-    # Suppress CLang warnings.
+    # Set up OSX-only cofiguration for various repos.
+    BOOST_OPTIONS="$BOOST_OPTIONS $DARWIN_BOOST"
+    GMP_OPTIONS="$GMP_OPTIONS CPPFLAGS=-Wno-parentheses"
     SECP256K1_OPTIONS="$SECP256K1_OPTIONS CPPFLAGS=-Wno-unused-value"
-fi
 
-# Augment PKG_CONFIG_PATH with prefix-based path, for our own packages. 
-if [[ $PREFIX ]]; then
-    export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$PREFIX/lib/pkgconfig"
-fi
+    # Set up default Homebrew repository, if it exists.
+    if [[ -d "/usr/local/opt" ]]; then
+        export BOOST_ROOT="$HOMEBREW_BOOST_ROOT_PATH"
+        export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:$HOMEBREW_PKG_CONFIG_PATHS"
+    fi
 
-# Give user feedback on build configuration.
-echo "Install prefix: $PREFIX"
-echo "Allocated jobs: $PARALLEL"
-echo "Making for system: $OS"
-echo "Temp directory: $BUILD_DIRECTORY"
+    # Set up default MacPorts repository, if it exists.
+    if [[ -d "/opt/local" ]]; then
+        export LDFLAGS="$LDFLAGS $MACPORTS_LDFLAGS"
+        export CPPFLAGS="$CPPFLAGS $MACPORTS_CPPFLAGS"
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MACPORTS_LD_LIBRARY_PATH"
+        export LD_INCLUDE_PATH="$LD_INCLUDE_PATH:$MACPORTS_LD_INCLUDE_PATH"
+    fi
     
+fi
+
+# Expose the prefix.
+if [[ $PREFIX ]]; then
+
+    # Add the prefix to the Boost build options (for Boost output).
+    BOOST_OPTIONS="$BOOST_OPTIONS --prefix=$PREFIX"
+
+    # Augment PKG_CONFIG_PATH with prefix path, for pkg-config packages. 
+    export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
+
+    # Boost M4 discovery searches in the following order:
+    # --with-boost=<path>, /usr, /usr/local, /opt, /opt/local, BOOST_ROOT.
+    # These work for MacPorts, Linux (system) and Homebrew (BOOST_ROOT).
+    # Below we incorporate and prioritize the --prefix path for Boost.
+
+    # Set Boost discovery in the case of an internal build (no pkg-config).
+    if [[ $BUILD_BOOST ]]; then
+        WITH_BOOST="--with-boost=$PREFIX"
+    fi
+    
+    # Set GMP discovery in the case of an internal build (no pkg-config).
+    if [[ $BUILD_GMP ]]; then    
+        WITH_GMP="CPPFLAGS=-I$PREFIX/include LDFLAGS=-L$PREFIX/lib"
+    fi
+    
+    # Set Boost and GMP discovery information into dependent builds.
+    SECP256K1_OPTIONS="$SECP256K1_OPTIONS $WITH_GMP"
+    BITCOIN_OPTIONS="$BITCOIN_OPTIONS $WITH_GMP $WITH_BOOST"
+fi
+
+configure_options()
+{
+    echo "configure: $@"
+    ./configure "$@"
+}
+
+create_directory()
+{
+    DIRECTORY=$1
+
+    rm -rf $DIRECTORY
+    mkdir $DIRECTORY
+}
+
 display_message()
 {
     MESSAGE=$1
@@ -97,28 +210,103 @@ display_message()
     echo
 }
 
-automake_current_directory()
+initialize_git()
+{
+    # Initialize git repository at the root of the current directory.
+    git init
+    git config user.name anonymous
+}
+
+make_current_directory()
 {
     JOBS=$1
     shift 1
 
     ./autogen.sh
-    ./configure --enable-silent-rules "$@"
-
-    # Avoid setting -j1.
-    if [[ $JOBS -gt $SEQUENTIAL ]]; then
-        make --silent -j$JOBS
-    else
-        make --silent
-    fi
-
+    configure_options "$@"
+    make_silent $JOBS
     make install
 
-    # If sudo is required the caller should sudo the script.
     # Use ldconfig only in case of non --prefix installation on Linux.    
     if [[ ($OS == "Linux") && !($PREFIX)]]; then
         ldconfig
     fi
+}
+
+make_silent()
+{
+    JOBS=$1
+    TARGET=$2
+    
+    # Avoid setting -j1 (causes problems on Travis).
+    if [[ $JOBS -gt $SEQUENTIAL ]]; then
+        make --silent -j$JOBS $TARGET
+    else
+        make --silent
+    fi
+}
+
+build_from_tarball_boost()
+{
+    URL=$1
+    ARCHIVE=$2
+    REPO=$3
+    JOBS=$4
+    shift 4
+
+    if [[ !($BUILD_BOOST) ]]; then
+        display_message "Boost build not enabled"
+        return
+    fi
+    
+    display_message "Download $ARCHIVE"
+
+    create_directory $REPO
+    pushd $REPO
+
+    # Extract the source locally.
+    wget --output-document $ARCHIVE $URL
+    tar --extract --file $ARCHIVE --bzip2 --strip-components=1
+
+    echo "configure: $@"
+    echo
+
+    # Build and install (note that "$@" is not from script args).
+    ./bootstrap.sh
+    ./b2 install -j $JOBS "$@"
+
+    popd
+}
+
+build_from_tarball_gmp()
+{
+    URL=$1
+    ARCHIVE=$2
+    REPO=$3
+    JOBS=$4
+    shift 4
+
+    if [[ !($BUILD_GMP) ]]; then
+        display_message "GMP build not enabled"
+        return
+    fi
+
+    display_message "Download $ARCHIVE"
+    
+    create_directory $REPO
+    pushd $REPO
+    
+    # Extract the source locally.
+    wget --output-document $ARCHIVE $URL
+    tar --extract --file $ARCHIVE --bzip2 --strip-components=1
+
+    # Build the local sources.
+    # GMP does not provide autogen.sh or package config.
+    configure_options "$@"
+    make_silent $JOBS
+    make install
+
+    popd
 }
 
 build_from_github()
@@ -129,40 +317,49 @@ build_from_github()
     JOBS=$4
     shift 4
 
-    # Show the user what repo we are building.
     FORK="$ACCOUNT/$REPO"
     display_message "Download $FORK/$BRANCH"
     
     # Clone the repo locally.
-    rm -rf $REPO
     git clone --branch $BRANCH --single-branch "https://github.com/$FORK"
 
     # Build the local repo clone.
     pushd $REPO
-    automake_current_directory $JOBS "$@"
+    make_current_directory $JOBS "$@"
     popd
 }
 
-build_primary()
+build_from_local()
 {
-    JOBS=$1
-    shift 1
+    MESSAGE=$1
+    JOBS=$2
+    shift 2
 
+    display_message $MESSAGE
+
+    # Build the current directory.
+    make_current_directory $JOBS "$@"
+}
+
+build_from_travis()
+{
+    ACCOUNT=$1
+    REPO=$2
+    BRANCH=$3
+    JOBS=$4
+    shift 4
+    
+    # The primary build is not downloaded if we are running in Travis.
     if [[ $TRAVIS == "true" ]]; then
-        # If the environment is Travis drop out of build directory.
         cd ..
-        display_message "Local $TRAVIS_REPO_SLUG"
-        automake_current_directory $JOBS "$@"
+        build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "$@"
         build_tests
+        cd $BUILD_DIR
     else
-        # Otherwise we pull the primary repo down for the single file install.
-        build_from_github $BUILD_ACCOUNT $BUILD_REPO $BUILD_BRANCH $JOBS "$@"
-
-        # Build the tests and drop out of build directory.
-        pushd $BUILD_REPO
+        build_from_github $ACCOUNT $REPO $BRANCH $JOBS "$@"
+        pushd $REPO
         build_tests $JOBS
         popd
-        cd ..
     fi
 }
 
@@ -171,52 +368,32 @@ build_tests()
     JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    if [[ $JOBS -gt $SEQUENTIAL ]]; then
-        make check -j$JOBS
-    else
-        make check
-    fi
-}
-
-create_build_directory()
-{
-    # By default will require privilege, use --prefix=<directory> to avoid.
-    rm -rf $BUILD_DIRECTORY
-    mkdir $BUILD_DIRECTORY
-    cd $BUILD_DIRECTORY
-
-    # Initialize git repository at the root of the build directory.
-    git init
-    git config user.name anonymous
+    make_silent $JOBS check 
 }
 
 build_library()
 {
-    # Create and move to a temporary build directory.
-    create_build_directory
+    create_directory $BUILD_DIR
+    pushd $BUILD_DIR
+    initialize_git
 
-    # Download, build and install all unpackaged dependencies.
-    build_from_github bitcoin secp256k1 master $SEQUENTIAL "$@" $SECP256K1_OPTIONS
+    # Build all dependencies and primary library.
+    build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
+    build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
+    build_from_github bitcoin secp256k1 master $PARALLEL "$@" $SECP256K1_OPTIONS
+    build_from_travis evoskuil libbitcoin version2 $PARALLEL "$@" $BITCOIN_PRIMARY_OPTIONS
 
-    # The primary build is not downloaded if we are running in Travis.
-    build_primary $PARALLEL "$@" 
-
-    # If the build succeeded clean up the build directory.
-    delete_build_directory
+    popd
 }
 
-delete_build_directory()
-{
-    # This precludes use of a 'make uninstall' however that would need to be 
-    # applied to dependencies as well. Typically each time a git pull occurs 
-    # into a build directory the uninstall is potentially invalidated. This 
-    # approach allows us to perform a complete uninstall across all versions.
-    rm -rf $BUILD_DIRECTORY
-}
+# Give user feedback on the basic build configuration.
+echo "Making for system: $OS"
+echo "Allocated jobs: $PARALLEL"
+echo "Build directory: $BUILD_DIR"
+echo "Prefix directory: $PREFIX"
 
-# Exit this script on the first error (any statement returns non-true value).
+# Exit this script on the first build error.
 set -e
 
-# Build the primary library and its unpackaged dependencies.
-build_library "$@"
-
+# Build the primary library and all dependencies.
+time build_library "${CONFIGURE_OPTIONS[@]}"
