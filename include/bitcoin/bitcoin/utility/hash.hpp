@@ -58,6 +58,15 @@ BC_API hash_digest sha256_hash(const data_chunk& first_chunk,
     const data_chunk& second_chunk);
 
 /**
+ * Generate a hmac sha256 hash. This hash function is used in deterministic 
+ * signing.
+ *
+ * hmac-sha256(data, key)
+ */
+BC_API long_hash hmac_sha256_hash(const data_chunk& chunk,
+    const data_chunk& key);
+
+/**
  * Generate a sha512 hash. This hash function is used in bip32 keys.
  *
  * sha512(data)

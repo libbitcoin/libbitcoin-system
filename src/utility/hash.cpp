@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/utility/external/hmac_sha256.h>
 #include <bitcoin/bitcoin/utility/external/hmac_sha512.h>
 #include <bitcoin/bitcoin/utility/external/ripemd160.h>
 #include <bitcoin/bitcoin/utility/external/sha1.h>
@@ -59,6 +60,15 @@ hash_digest sha256_hash(const data_chunk& first_chunk,
     SHA256Update(&context, second_chunk.data(), second_chunk.size());
     SHA256Final(&context, hash.data());
 
+    return hash;
+}
+
+long_hash hmac_sha256_hash(const data_chunk& chunk, 
+    const data_chunk& key)
+{
+    long_hash hash;
+    HMACSHA256(chunk.data(), chunk.size(), key.data(),
+        key.size(), hash.data());
     return hash;
 }
 

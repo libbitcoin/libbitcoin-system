@@ -1,4 +1,4 @@
-/* libsodium: hmac_hmacsha512.c, v0.4.5 2014/04/16 */
+/* libsodium: hmac_hmacsha256.c, v0.4.5 2014/04/16 */
 /*
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
@@ -25,66 +25,66 @@
  */
 #include <stdint.h>
 #include <string.h>
-#include <bitcoin/bitcoin/utility/external/hmac_sha512.h>
-#include <bitcoin/bitcoin/utility/external/sha512.h>
+#include <bitcoin/bitcoin/utility/external/hmac_sha256.h>
+#include <bitcoin/bitcoin/utility/external/sha256.h>
 #include <bitcoin/bitcoin/utility/external/zeroize.h>
 
-void HMACSHA512(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA512_DIGEST_LENGTH])
+void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
+    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH])
 {
-    HMACSHA512CTX context;
-    HMACSHA512Init(&context, key, key_length);
-    HMACSHA512Update(&context, input, length);
-    HMACSHA512Final(&context, digest);
+    HMACSHA256CTX context;
+    HMACSHA256Init(&context, key, key_length);
+    HMACSHA256Update(&context, input, length);
+    HMACSHA256Final(&context, digest);
 }
 
-void HMACSHA512Final(HMACSHA512CTX* context, 
-    uint8_t digest[HMACSHA512_DIGEST_LENGTH])
+void HMACSHA256Final(HMACSHA256CTX* context, 
+    uint8_t digest[HMACSHA256_DIGEST_LENGTH])
 {
-    uint8_t hash[HMACSHA512_DIGEST_LENGTH];
+    uint8_t hash[HMACSHA256_DIGEST_LENGTH];
 
-    SHA512Final(&context->ictx, hash);
-    SHA512Update(&context->octx, hash, HMACSHA512_DIGEST_LENGTH);
-    SHA512Final(&context->octx, digest);
+    SHA256Final(&context->ictx, hash);
+    SHA256Update(&context->octx, hash, HMACSHA256_DIGEST_LENGTH);
+    SHA256Final(&context->octx, digest);
 
     zeroize((void*)hash, sizeof hash);
 }
 
-void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key, 
+void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key, 
     size_t key_length)
 {
     size_t i;
-    uint8_t pad[SHA512_BLOCK_LENGTH];
-    uint8_t key_hash[SHA512_DIGEST_LENGTH];
+    uint8_t pad[SHA256_BLOCK_LENGTH];
+    uint8_t key_hash[SHA256_DIGEST_LENGTH];
 
-    if (key_length > SHA512_BLOCK_LENGTH)
+    if (key_length > SHA256_BLOCK_LENGTH)
     {
-        SHA512Init(&context->ictx);
-        SHA512Update(&context->ictx, key, key_length);
-        SHA512Final(&context->ictx, key_hash);
+        SHA256Init(&context->ictx);
+        SHA256Update(&context->ictx, key, key_length);
+        SHA256Final(&context->ictx, key_hash);
         key = key_hash;
-        key_length = SHA512_DIGEST_LENGTH;
+        key_length = SHA256_DIGEST_LENGTH;
     }
 
-    SHA512Init(&context->ictx);
-    memset(pad, 0x36, SHA512_BLOCK_LENGTH);
+    SHA256Init(&context->ictx);
+    memset(pad, 0x36, SHA256_BLOCK_LENGTH);
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];
 
-    SHA512Update(&context->ictx, pad, SHA512_BLOCK_LENGTH);
-    SHA512Init(&context->octx);
-    memset(pad, 0x5c, SHA512_BLOCK_LENGTH);
+    SHA256Update(&context->ictx, pad, SHA256_BLOCK_LENGTH);
+    SHA256Init(&context->octx);
+    memset(pad, 0x5c, SHA256_BLOCK_LENGTH);
 
     for (i = 0; i < key_length; i++) 
         pad[i] ^= key[i];
 
-    SHA512Update(&context->octx, pad, SHA512_BLOCK_LENGTH);
+    SHA256Update(&context->octx, pad, SHA256_BLOCK_LENGTH);
     zeroize((void*)key_hash, sizeof key_hash);
 }
 
-void HMACSHA512Update(HMACSHA512CTX* context, const uint8_t* input,
+void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,
     size_t length)
 {
-    SHA512Update(&context->ictx, input, length);
+    SHA256Update(&context->ictx, input, length);
 }

@@ -106,6 +106,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
 
 bitcoin_bitcoin_util_external_includedir = ${includedir}/bitcoin/bitcoin/utility/external
 bitcoin_bitcoin_util_external_include_HEADERS = \
+    include/bitcoin/bitcoin/utility/external/hmac_sha256.h \
     include/bitcoin/bitcoin/utility/external/hmac_sha512.h \
     include/bitcoin/bitcoin/utility/external/ripemd160.h \
     include/bitcoin/bitcoin/utility/external/sha1.h \
@@ -161,6 +162,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/logger.cpp \
     src/utility/script_number.cpp \
     src/utility/timed_section.cpp \
+    src/utility/external/hmac_sha256.c \
     src/utility/external/hmac_sha512.c \
     src/utility/external/ripemd160.c \
     src/utility/external/sha1.c \
