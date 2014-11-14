@@ -63,7 +63,7 @@ BC_API hash_digest sha256_hash(const data_chunk& first_chunk,
  *
  * hmac-sha256(data, key)
  */
-BC_API long_hash hmac_sha256_hash(const data_chunk& chunk,
+BC_API hash_digest hmac_sha256_hash(const data_chunk& chunk,
     const data_chunk& key);
 
 /**

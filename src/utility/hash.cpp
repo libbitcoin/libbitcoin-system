@@ -63,10 +63,10 @@ hash_digest sha256_hash(const data_chunk& first_chunk,
     return hash;
 }
 
-long_hash hmac_sha256_hash(const data_chunk& chunk, 
+hash_digest hmac_sha256_hash(const data_chunk& chunk,
     const data_chunk& key)
 {
-    long_hash hash;
+    hash_digest hash;
     HMACSHA256(chunk.data(), chunk.size(), key.data(),
         key.size(), hash.data());
     return hash;
