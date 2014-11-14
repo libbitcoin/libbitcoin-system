@@ -173,6 +173,9 @@
     <ClCompile Include="..\..\..\..\src\compat.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\external\hmac_sha256.c">
+      <Filter>src\utility\external</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp">
@@ -327,6 +330,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h">
       <Filter>include\bitcoin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\hmac_sha256.h">
+      <Filter>include\bitcoin\utility\external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
