@@ -54,7 +54,14 @@ struct BC_API history_row
     {
         /// If output, then satoshis value of output.
         uint64_t value;
-        /// If spend, then checksum hash of previous output_point
+        /**
+         * If spend, then checksum hash of previous output point
+         * To match up this row with the output, recompute the
+         * checksum from the output row with:
+         * @code
+         *  spend_checksum(row.point)
+         * @endcode
+         */
         uint64_t previous_checksum;
     };
 };
@@ -308,6 +315,12 @@ public:
      * and the value field in the union is valid.
      * Else if id == history_row_id::debit, then use previous_checksum
      * to match the spend with the previous output.
+     *
+     * To match up the spend row with the output, recompute the
+     * checksum from the output row with:
+     * @code
+     *  spend_checksum(row.point)
+     * @endcode
      *
      * Summing the list of values for unspent outpoints gives the balance
      * for an address.
