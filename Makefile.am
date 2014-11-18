@@ -176,18 +176,11 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
 
+# The rt_LIBS symbol may be empty, keep on shared line.
 src_libbitcoin_la_LIBADD = \
-    -lboost_system \
-    -lboost_regex \
-    -lboost_filesystem \
-    -lpthread \
+    ${boost_LIBS} \
     ${secp256k1_LIBS} \
-    ${gmp_LIBS}
-    
-if USE_LIBRT
-src_libbitcoin_la_LIBADD += \
-    ${rt_LIBS}
-endif
+    ${gmp_LIBS} ${rt_LIBS}
 
 #
 # tests
@@ -202,11 +195,6 @@ test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/include \
     -I${srcdir}/test \
     ${secp256k1_CFLAGS}
-    
-if SET_BOOST_TEST_DYN_LINK
-test_libbitcoin_test_CPPFLAGS += \
-    -DBOOST_TEST_DYN_LINK
-endif
 
 test_libbitcoin_test_SOURCES = \
     test/amount.cpp \
@@ -227,19 +215,13 @@ test_libbitcoin_test_SOURCES = \
     test/stealth.cpp \
     test/uri.cpp
 
+# The rt_LIBS symbol may be empty, keep on shared line.
 test_libbitcoin_test_LDADD = \
     src/libbitcoin.la \
-    -lboost_system \
-    -lboost_regex \
-    -lboost_filesystem \
+    ${boost_LIBS} \
     -lboost_unit_test_framework \
     -lpthread \
     ${secp256k1_LIBS} \
-    ${gmp_LIBS}
-
-if USE_LIBRT
-test_libbitcoin_test_LDADD += \
-    ${rt_LIBS}
-endif
+    ${gmp_LIBS} ${rt_LIBS}
 
 endif

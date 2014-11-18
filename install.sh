@@ -1,5 +1,10 @@
 #!/bin/bash
+###############################################################################
+# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
 #
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
 # Script to build and install libbitcoin.
 #
 # Script options:
@@ -9,46 +14,44 @@
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
 # --disable-shared         Disables shared library builds.
 # --disable-static         Disables static library builds.
-
+#
 # Verified on Ubuntu 14.04, requires gcc-4.8 or newer.
 # Verified on OSX 10.10, using MacPorts and Homebrew repositories, requires
 # Apple LLVM version 6.0 (clang-600.0.54) (based on LLVM 3.5svn) or newer.
 # This script does not like spaces in the --prefix or --build-dir, sorry.
 # Values (e.g. yes|no) in the boolean options are not supported by the script.
-# All command line options are passed to 'configure' of each repository, with
+# All command line options are passed to 'configure' of each repo, with
 # the exception of the --build-<item> options, which are for the script only.
 # Depending on the caller's permission to the --prefix or --build-dir
 # directory, the script may need to be sudo'd.
 
-# Declare common values.
-#------------------------------------------------------------------------------
-
+# Define common values.
+#==============================================================================
 # The default build directory.
+#------------------------------------------------------------------------------
 BUILD_DIR="libbitcoin-build"
 
-# GCC minimum Boost v1.49.
-BOOST_URL="http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download"
-BOOST_ARCHIVE="boost_1_49_0.tar.bz2"
+# Boost archives for linux.
+#------------------------------------------------------------------------------
+BOOST_URL_LINUX="http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download"
+BOOST_ARCHIVE_LINUX="boost_1_49_0.tar.bz2"
 
-# CLang minimum Boost v1.54.
+# Boost archives for darwin.
+#------------------------------------------------------------------------------
 BOOST_URL_DARWIN="http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download"
 BOOST_ARCHIVE_DARWIN="boost_1_54_0.tar.bz2"
 
-# GMP minimum v6.0.0a (version cannot be detected).
+# GMP archives.
+#------------------------------------------------------------------------------
 GMP_URL="https://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.bz2"
 GMP_ARCHIVE="gmp-6.0.0a.tar.bz2"
 
-# Declare configure options per build.
+
+# Define build options.
+#==============================================================================
+# Define boost options for linux.
 #------------------------------------------------------------------------------
-
-# Set libbitcoin common options.
-BITCOIN_OPTIONS=\
-"--enable-silent-rules"
-
-# Set Boost options.
-# threading=single,multiple variant=release|debug
-# Supress all informational messages (-d0) and stop at the first error (-q).
-BOOST_OPTIONS=\
+BOOST_OPTIONS_LINUX=\
 "threading=single "\
 "variant=release "\
 "--disable-icu "\
@@ -58,49 +61,67 @@ BOOST_OPTIONS=\
 "--with-system "\
 "--with-test "\
 "-d0 "\
-"-q"
+"-q "
 
-# CLang required on OSX.
+# Define boost options for darwin.
+#------------------------------------------------------------------------------
 BOOST_OPTIONS_DARWIN=\
 "toolset=clang "\
 "cxxflags=-stdlib=libc++ "\
-"linkflags=-stdlib=libc++"
+"linkflags=-stdlib=libc++ "\
+"threading=single "\
+"variant=release "\
+"--disable-icu "\
+"--with-date_time "\
+"--with-filesystem "\
+"--with-regex "\
+"--with-system "\
+"--with-test "\
+"-d0 "\
+"-q "
 
-# Set GMP options.
+# Define gmp options.
+#------------------------------------------------------------------------------
 GMP_OPTIONS=\
-"CPPFLAGS=-w"
+"CPPFLAGS=-w "
 
-# Set secp256k1 options.
+# Define secp256k1 options.
+#------------------------------------------------------------------------------
 SECP256K1_OPTIONS=\
 "CPPFLAGS=-w "\
 "--with-bignum=gmp "\
 "--with-field=gmp "\
 "--enable-benchmark=no "\
 "--enable-tests=no "\
-"--enable-endomorphism=no"
+"--enable-endomorphism=no "
 
-# Option to build libbitcoin libs without compiling tests.
+# Define bitcoin options.
+#------------------------------------------------------------------------------
+BITCOIN_OPTIONS=\
+"--enable-silent-rules "
+
+# Define option to build without compiling tests.
+#------------------------------------------------------------------------------
 WITHOUT_TESTS=\
 "--without-tests"
 
-# Initialize values conditioned on build environment.
-#------------------------------------------------------------------------------
 
+# Initialize values conditioned on build environment.
+#==============================================================================
 # Exit this script on the first build error.
+#------------------------------------------------------------------------------
 set -e
 
-# Always initialize PREFIX to /usr/local on OSX.
-# Define SEQUENTIAL (1), PARALLEL (# of concurrent jobs) and OS (Linux|Darwin).
+# Initialize build parallelism.
+#------------------------------------------------------------------------------
 SEQUENTIAL=1
-PARALLEL=2
-OS=$(uname -s)
+OS=`uname -s`
 if [[ $TRAVIS = "true" ]]; then
     PARALLEL=$SEQUENTIAL
 elif [[ $OS = "Linux" ]]; then
-    PARALLEL=$(nproc)
+    PARALLEL=`nproc`
 elif [[ $OS = "Darwin" ]]; then
-    PARALLEL=2
-    PREFIX="/usr/local"
+    PARALLEL=2 #TODO
 else
     echo "Unsupported system: $OS"
     exit 1
@@ -109,21 +130,30 @@ echo "Making for system: $OS"
 echo "Allocated jobs: $PARALLEL"
 
 # Configure OSX settings.
+#------------------------------------------------------------------------------
 if [[ $OS == "Darwin" ]]; then
 
     # Always require CLang, common lib linking will otherwise fail.
     export CC="clang"
     export CXX="clang++"
     
+    # Always initialize prefix on OSX so default is consistent.
+    PREFIX="/usr/local"
+    
     BOOST_URL="$BOOST_URL_DARWIN"
     BOOST_ARCHIVE="$BOOST_ARCHIVE_DARWIN"
-    BOOST_OPTIONS="$BOOST_OPTIONS $BOOST_OPTIONS_DARWIN"
+    BOOST_OPTIONS="$BOOST_OPTIONS_DARWIN"
+else
+    BOOST_URL="$BOOST_URL_LINUX"
+    BOOST_ARCHIVE="$BOOST_ARCHIVE_LINUX"
+    BOOST_OPTIONS="$BOOST_OPTIONS_LINUX"
 fi
 
+
 # Initialize values conditioned on command line arguments.
-#------------------------------------------------------------------------------
- 
+#==============================================================================
 # Parse command line options that are handled by this script.
+#------------------------------------------------------------------------------
 for OPTION in "$@"; do
     case $OPTION in
         (--prefix=*) PREFIX="${OPTION#*=}";;
@@ -140,6 +170,7 @@ echo "Build directory: $BUILD_DIR"
 echo "Prefix directory: $PREFIX"
 
 # Purge our custom options so they don't go to configure.
+#------------------------------------------------------------------------------
 CONFIGURE_OPTIONS=( "$@" )
 CUSTOM_OPTIONS=( "--build-dir=$BUILD_DIR" "--build-boost" "--build-gmp" )
 for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
@@ -147,6 +178,7 @@ for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
 done
 
 # Map standard libtool options to Boost link option.
+#------------------------------------------------------------------------------
 BOOST_LINK="static,shared"
 if [[ $DISABLE_STATIC ]]; then
     BOOST_LINK="shared"
@@ -156,6 +188,7 @@ fi
 BOOST_OPTIONS="link=$BOOST_LINK $BOOST_OPTIONS"
 
 # Incorporate the prefix.
+#------------------------------------------------------------------------------
 if [[ $PREFIX ]]; then
 
     # Add the prefix to the Boost build options (for Boost output).
@@ -186,9 +219,9 @@ if [[ $PREFIX ]]; then
     BITCOIN_OPTIONS="$BITCOIN_OPTIONS $WITH_GMP $WITH_BOOST"
 fi
 
-# Utility functions.
-#------------------------------------------------------------------------------
 
+# Utility functions.
+#==============================================================================
 configure_options()
 {
     echo "configure: $@"
@@ -279,9 +312,9 @@ push_directory()
     pushd "$DIRECTORY" >/dev/null
 }
 
-# Build helpers.
-#------------------------------------------------------------------------------
 
+# Build functions.
+#==============================================================================
 build_from_tarball_boost()
 {
     URL=$1
@@ -403,23 +436,22 @@ build_from_travis()
     fi
 }
 
-# The build function.
-#------------------------------------------------------------------------------
 
-build_library()
+# The master build function.
+#==============================================================================
+build_all()
 {
-    create_directory "$BUILD_DIR"
-    push_directory "$BUILD_DIR"
-    initialize_git
-
-    # Build all dependencies and primary library.
     build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
     build_from_github bitcoin secp256k1 master $PARALLEL "$@" $SECP256K1_OPTIONS
     build_from_travis libbitcoin libbitcoin version2 $PARALLEL "$@" $BITCOIN_OPTIONS
-
-    pop_directory
 }
 
+
 # Build the primary library and all dependencies.
-time build_library "${CONFIGURE_OPTIONS[@]}"
+#==============================================================================
+create_directory "$BUILD_DIR"
+push_directory "$BUILD_DIR"
+initialize_git   
+time build_all "${CONFIGURE_OPTIONS[@]}"
+pop_directory    
