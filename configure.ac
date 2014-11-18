@@ -223,13 +223,13 @@ AX_CHECK_COMPILE_FLAG([-Wno-unknown-warning-option],
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-fstack-protector],
     [AX_CHECK_LINK_FLAG([-fstack-protector],
-        [CXXFLAGS="$CXXFLAGS -fstack-protector])])
+        [CXXFLAGS="$CXXFLAGS -fstack-protector"])])
 
 # Protect stack comprehensively.
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
     [AX_CHECK_LINK_FLAG([-fstack-protector-all],
-        [CXXFLAGS="$CXXFLAGS -fstack-protector-all])])
+        [CXXFLAGS="$CXXFLAGS -fstack-protector-all"])])
 
 # Hide inlines from external libs.
 #------------------------------------------------------------------------------
