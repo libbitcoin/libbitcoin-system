@@ -88,7 +88,6 @@ GMP_OPTIONS=\
 # Define secp256k1 options.
 #------------------------------------------------------------------------------
 SECP256K1_OPTIONS=\
-"CPPFLAGS=-w "\
 "--with-bignum=gmp "\
 "--with-field=gmp "\
 "--enable-benchmark=no "\
