@@ -99,11 +99,6 @@ SECP256K1_OPTIONS=\
 BITCOIN_OPTIONS=\
 "--enable-silent-rules "
 
-# Define option to build without compiling tests.
-#------------------------------------------------------------------------------
-WITHOUT_TESTS=\
-"--without-tests"
-
 
 # Initialize values conditioned on build environment.
 #==============================================================================
