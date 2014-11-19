@@ -177,7 +177,7 @@ PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
 # Output ${boost_LIBS}
 #------------------------------------------------------------------------------
-AC_SUBST([boost_LIBS], [-lboost_date_time -lboost_filesystem -lboost_regex -lboost_system])
+AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_regex -lboost_system"])
 
 
 # Set flags.
@@ -230,18 +230,6 @@ AX_CHECK_COMPILE_FLAG([-fstack-protector],
 AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
     [AX_CHECK_LINK_FLAG([-fstack-protector-all],
         [CXXFLAGS="$CXXFLAGS -fstack-protector-all"])])
-
-# Hide inlines from external libs.
-#------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-fvisibility-inlines-hidden],
-    [CXXFLAGS="$CXXFLAGS -fvisibility-inlines-hidden"])
-
-# Set visibility to internal or hidden.
-#------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-fvisibility=internal],
-    [CXXFLAGS="$CXXFLAGS -fvisibility=internal"],
-    [AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
-        [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"])])
 
 
 # Process outputs into templates.
