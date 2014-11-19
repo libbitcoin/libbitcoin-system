@@ -118,14 +118,14 @@ AM_CONDITIONAL([ENABLE_SHARED], [test x$enable_shared != xno])
 # Require Boost of at least version 1.49.0 if on linux.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*linux*],
-    AX_BOOST_BASE([1.49.0], [], [AC_MSG_ERROR(
-        [Boost 1.49.0 or later is required but was not found.])]))
+    [AX_BOOST_BASE([1.49.0], [], [AC_MSG_ERROR(
+        [Boost 1.49.0 or later is required but was not found.])])])
 
 # Require Boost of at least version 1.54.0 if on darwin.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*darwin*],
-    AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
-        [Boost 1.54.0 or later is required but was not found.])]))
+    [AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
+        [Boost 1.54.0 or later is required but was not found.])])])
 
 AX_BOOST_DATE_TIME
 
@@ -140,36 +140,36 @@ AS_IF([test x$with_tests != xno], [AX_BOOST_UNIT_TEST_FRAMEWORK])
 # Require rt if on linux and output ${rt_LIBS}.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*linux*], 
-    AC_CHECK_LIB([rt],[clock_gettime],
+    [AC_CHECK_LIB([rt],[clock_gettime],
         [AC_SUBST([rt_LIBS], [-lrt])],
         [AC_SUBST([rt_LIBS], [])
-            AC_MSG_ERROR([rt library is required but was not found.])])
+            AC_MSG_ERROR([rt library is required but was not found.])])])
 
 # Require gmp if on linux and output ${gmp_LIBS}.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*linux*], 
-    AC_CHECK_HEADER([gmp.h], [],
-        [AC_MSG_ERROR([gmp header is required but was not found.])],-)
+    [AC_CHECK_HEADER([gmp.h], [],
+        [AC_MSG_ERROR([gmp header is required but was not found.])],-)])
 AS_CASE([${host_os}], [*linux*], 
-    AC_CHECK_LIB([gmp],[__gmpz_init],
+    [AC_CHECK_LIB([gmp],[__gmpz_init],
         [AC_SUBST([gmp_LIBS], [-lgmp])],
         [AC_SUBST([gmp_LIBS], [])
-            AC_MSG_ERROR([gmp library is required but was not found.])])
+            AC_MSG_ERROR([gmp library is required but was not found.])])])
 
 # Require gmp if on darwin and output ${gmp_LIBS}.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*darwin*], 
     [CPPFLAGS="$CPPFLAGS -I//opt/local/include"])
 AS_CASE([${host_os}], [*darwin*], 
-    AC_CHECK_HEADER([gmp.h], [],
-        [AC_MSG_ERROR([gmp header is required but was not found.])],-)
+    [AC_CHECK_HEADER([gmp.h], [],
+        [AC_MSG_ERROR([gmp header is required but was not found.])],-)])
 AS_CASE([${host_os}], [*darwin*], 
     [LDFLAGS="$LDFLAGS -L/opt/local/lib"])
 AS_CASE([${host_os}], [*darwin*], 
-    AC_CHECK_LIB([gmp],[__gmpz_init],
+    [AC_CHECK_LIB([gmp],[__gmpz_init],
         [AC_SUBST([gmp_LIBS], [-lgmp])],
         [AC_SUBST([gmp_LIBS], [])
-            AC_MSG_ERROR([gmp library is required but was not found.])])
+            AC_MSG_ERROR([gmp library is required but was not found.])])])
 
 # Require secp256k1 of at least version 0.0.1 and output ${secp256k1}.
 #------------------------------------------------------------------------------
@@ -196,8 +196,8 @@ AX_CHECK_COMPILE_FLAG([-Wextra],
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wpedantic],
     [CXXFLAGS="$CXXFLAGS -Wpedantic"],
-    AX_CHECK_COMPILE_FLAG([-pedantic],
-        [CXXFLAGS="$CXXFLAGS -pedantic"]))
+    [AX_CHECK_COMPILE_FLAG([-pedantic],
+        [CXXFLAGS="$CXXFLAGS -pedantic"])])
 
 # Conform to style.
 #------------------------------------------------------------------------------
@@ -240,8 +240,8 @@ AX_CHECK_COMPILE_FLAG([-fvisibility-inlines-hidden],
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-fvisibility=internal],
     [CXXFLAGS="$CXXFLAGS -fvisibility=internal"],
-    AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
-        [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"]))
+    [AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
+        [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"])])
 
 
 # Process outputs into templates.
