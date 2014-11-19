@@ -99,11 +99,6 @@ SECP256K1_OPTIONS=\
 BITCOIN_OPTIONS=\
 "--enable-silent-rules "
 
-# Define option to build without compiling tests.
-#------------------------------------------------------------------------------
-WITHOUT_TESTS=\
-"--without-tests"
-
 
 # Initialize values conditioned on build environment.
 #==============================================================================
@@ -425,7 +420,7 @@ build_from_travis()
     if [[ $TRAVIS == "true" ]]; then
         cd ..
         build_from_local "Local $TRAVIS_REPO_SLUG" $JOBS "$@"
-        make_tests
+        make_tests $JOBS
         cd "$BUILD_DIR"
     else
         build_from_github $ACCOUNT $REPO $BRANCH $JOBS "$@"
