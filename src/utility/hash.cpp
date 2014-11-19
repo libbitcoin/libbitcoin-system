@@ -28,70 +28,67 @@
 
 namespace libbitcoin {
 
-short_hash ripemd160_hash(const data_chunk& chunk)
+short_hash ripemd160_hash(data_slice data)
 {
     short_hash hash;
-    RMD160(chunk.data(), chunk.size(), hash.data());
+    RMD160(data.data(), data.size(), hash.data());
     return hash;
 }
 
-short_hash sha1_hash(const data_chunk& chunk)
+short_hash sha1_hash(data_slice data)
 {
     short_hash hash;
-    SHA1(chunk.data(), chunk.size(), hash.data());
+    SHA1(data.data(), data.size(), hash.data());
     return hash;
 }
 
-hash_digest sha256_hash(const data_chunk& chunk)
+hash_digest sha256_hash(data_slice data)
 {
     hash_digest hash;
-    SHA256(chunk.data(), chunk.size(), hash.data());
+    SHA256(data.data(), data.size(), hash.data());
     return hash;
 }
 
-hash_digest sha256_hash(const data_chunk& first_chunk,
-    const data_chunk& second_chunk)
+hash_digest sha256_hash(data_slice first, data_slice second)
 {
     hash_digest hash;
 
     SHA256CTX context;
     SHA256Init(&context);
-    SHA256Update(&context, first_chunk.data(), first_chunk.size());
-    SHA256Update(&context, second_chunk.data(), second_chunk.size());
+    SHA256Update(&context, first.data(), first.size());
+    SHA256Update(&context, second.data(), second.size());
     SHA256Final(&context, hash.data());
 
     return hash;
 }
 
-hash_digest hmac_sha256_hash(const data_chunk& chunk,
-    const data_chunk& key)
+hash_digest hmac_sha256_hash(data_slice data, data_slice key)
 {
     hash_digest hash;
-    HMACSHA256(chunk.data(), chunk.size(), key.data(),
+    HMACSHA256(data.data(), data.size(), key.data(),
         key.size(), hash.data());
     return hash;
 }
 
-long_hash sha512_hash(const data_chunk& chunk)
+long_hash sha512_hash(data_slice data)
 {
     long_hash hash;
-    SHA512(chunk.data(), chunk.size(), hash.data());
+    SHA512(data.data(), data.size(), hash.data());
     return hash;
 }
 
-long_hash hmac_sha512_hash(const data_chunk& chunk, 
-    const data_chunk& key)
+long_hash hmac_sha512_hash(data_slice data, data_slice key)
 {
     long_hash hash;
-    HMACSHA512(chunk.data(), chunk.size(), key.data(),
+    HMACSHA512(data.data(), data.size(), key.data(),
         key.size(), hash.data());
     return hash;
 }
 
-hash_digest bitcoin_hash(const data_chunk& chunk)
+hash_digest bitcoin_hash(data_slice data)
 {
     hash_digest first_hash;
-    SHA256(chunk.data(), chunk.size(), first_hash.data());
+    SHA256(data.data(), data.size(), first_hash.data());
 
     hash_digest second_hash;
     SHA256(first_hash.data(), first_hash.size(), second_hash.data());
@@ -101,10 +98,10 @@ hash_digest bitcoin_hash(const data_chunk& chunk)
     return second_hash;
 }
 
-short_hash bitcoin_short_hash(const data_chunk& chunk)
+short_hash bitcoin_short_hash(data_slice data)
 {
     hash_digest sha_hash;
-    SHA256(chunk.data(), chunk.size(), sha_hash.data());
+    SHA256(data.data(), data.size(), sha_hash.data());
 
     short_hash ripemd_hash;
     RMD160(sha_hash.data(), sha_hash.size(), ripemd_hash.data());
