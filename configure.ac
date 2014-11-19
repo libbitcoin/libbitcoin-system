@@ -1,3 +1,12 @@
+###############################################################################
+# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
+#
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
+
+# Standard declarations.
+#==============================================================================
 # Declare the required version of autoconf.
 AC_PREREQ([2.65])
 
@@ -52,158 +61,190 @@ AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 
-# Support --with-pkgconfigdir option (default to ${libdir}/pkgconfig).
+
+# Process options.
+#==============================================================================
+# Implement --with-pkgconfigdir and output ${pkgconfigdir}.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING(--with-pkgconfigdir option)
-AC_ARG_WITH([pkgconfigdir], 
-    AS_HELP_STRING([--with-pkgconfigdir=PATH], 
+AC_ARG_WITH([pkgconfigdir],
+    AS_HELP_STRING([--with-pkgconfigdir=PATH],
         [Path to pkgconfig directory.]),
-    [pkgconfigdir=$withval], 
+    [pkgconfigdir=$withval],
     [pkgconfigdir=${libdir}/pkgconfig])
 AC_MSG_RESULT([$pkgconfigdir])
 AC_SUBST([pkgconfigdir])
 
-# Support --enable-debug option (default to no).
+# Implement --with-tests and declare WITH_TESTS.
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING(--with-tests option)
+AC_ARG_WITH([tests],
+    AS_HELP_STRING([--with-tests],
+        [Compile with unit tests.]),
+    [with_tests=$withval],
+    [with_tests=yes])
+AC_MSG_RESULT([$with_tests])
+AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
+
+# Implement --enable-debug option and define DEBUG.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING(--enable-debug option)
 AC_ARG_ENABLE([debug],
-    AS_HELP_STRING([--enable-debug], 
+    AS_HELP_STRING([--enable-debug],
         [Compile with debug assertions.]),
     [enable_debug=$enableval],
     [enable_debug=no])
 AC_MSG_RESULT([$enable_debug])
 AS_IF([test x$enable_debug != xno], AC_DEFINE([DEBUG]))
 
-# Support --enable-testnet option (default to no).
+# Implement --enable-testnet option and define ENABLE_TESTNET.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING(--enable-testnet option)
 AC_ARG_ENABLE([testnet],
-    AS_HELP_STRING([--enable-testnet], 
-        [Compile for testnet.]),
+    AS_HELP_STRING([--enable-testnet],
+        [Compile for testnet (deprecated).]),
     [enable_testnet=$enableval],
     [enable_testnet=no])
 AC_MSG_RESULT([$enable_testnet])
 AS_IF([test x$enable_testnet != xno], AC_DEFINE([ENABLE_TESTNET]))
 
-# Support --with-tests option (default to yes).
+# Inherit --enable-shared option and declare ENABLE_SHARED.
 #------------------------------------------------------------------------------
-AC_MSG_CHECKING(--with-tests option)
-AC_ARG_WITH([tests],
-    AS_HELP_STRING([--with-tests], 
-        [Compile with unit tests.]),
-    [with_tests=$withval],
-    [with_tests=yes])
-AC_MSG_RESULT([$with_tests])
+AM_CONDITIONAL([ENABLE_SHARED], [test x$enable_shared != xno])
 
-# Require secp256k1 package min version.
+
+# Check dependencies.
+#==============================================================================
+# Require Boost of at least version 1.49.0 if on linux.
+#------------------------------------------------------------------------------
+AS_CASE([${host_os}], [*linux*],
+    [AX_BOOST_BASE([1.49.0], [], [AC_MSG_ERROR(
+        [Boost 1.49.0 or later is required but was not found.])])])
+
+# Require Boost of at least version 1.54.0 if on darwin.
+#------------------------------------------------------------------------------
+AS_CASE([${host_os}], [*darwin*],
+    [AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
+        [Boost 1.54.0 or later is required but was not found.])])])
+
+AX_BOOST_DATE_TIME
+
+AX_BOOST_FILESYSTEM
+
+AX_BOOST_REGEX
+
+AX_BOOST_SYSTEM
+
+AS_IF([test x$with_tests != xno], [AX_BOOST_UNIT_TEST_FRAMEWORK])
+
+# Require rt if on linux and output ${rt_LIBS}.
+#------------------------------------------------------------------------------
+AS_CASE([${host_os}], [*linux*], 
+    [AC_CHECK_LIB([rt],[clock_gettime],
+        [AC_SUBST([rt_LIBS], [-lrt])],
+        [AC_SUBST([rt_LIBS], [])
+            AC_MSG_ERROR([rt library is required but was not found.])])])
+
+# Require gmp if on linux and output ${gmp_LIBS}.
+#------------------------------------------------------------------------------
+AS_CASE([${host_os}], [*linux*], 
+    [AC_CHECK_HEADER([gmp.h], [],
+        [AC_MSG_ERROR([gmp header is required but was not found.])],-)])
+AS_CASE([${host_os}], [*linux*], 
+    [AC_CHECK_LIB([gmp],[__gmpz_init],
+        [AC_SUBST([gmp_LIBS], [-lgmp])],
+        [AC_SUBST([gmp_LIBS], [])
+            AC_MSG_ERROR([gmp library is required but was not found.])])])
+
+# Require gmp if on darwin and output ${gmp_LIBS}.
+#------------------------------------------------------------------------------
+AS_CASE([${host_os}], [*darwin*], 
+    [CPPFLAGS="$CPPFLAGS -I//opt/local/include"])
+AS_CASE([${host_os}], [*darwin*], 
+    [AC_CHECK_HEADER([gmp.h], [],
+        [AC_MSG_ERROR([gmp header is required but was not found.])],-)])
+AS_CASE([${host_os}], [*darwin*], 
+    [LDFLAGS="$LDFLAGS -L/opt/local/lib"])
+AS_CASE([${host_os}], [*darwin*], 
+    [AC_CHECK_LIB([gmp],[__gmpz_init],
+        [AC_SUBST([gmp_LIBS], [-lgmp])],
+        [AC_SUBST([gmp_LIBS], [])
+            AC_MSG_ERROR([gmp library is required but was not found.])])])
+
+# Require secp256k1 of at least version 0.0.1 and output ${secp256k1}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
-# Require Boost min version (GCC/Linux 1.49, CLang/OSX 1.54).
+# Output ${boost_LIBS}
 #------------------------------------------------------------------------------
-# Boost does not publish package configs but has m4 tests.
-AS_CASE([${host_os}], 
-    [*linux*], [AX_BOOST_BASE([1.49], [], 
-        [AC_MSG_ERROR([Boost 1.49 or later is required but was not found.])])],
-    [*darwin*], [AX_BOOST_BASE([1.54], [], 
-        [AC_MSG_ERROR([Boost 1.54 or later is required but was not found.])])],
-    [AC_MSG_ERROR([Unsupported build platform: ${host_os}])])
-    
-# These m4 scripts may identify the incorrect library in error message text.
-AX_BOOST_DATE_TIME
-AX_BOOST_FILESYSTEM
-AX_BOOST_REGEX
-AX_BOOST_SYSTEM
-AS_IF([test x$with_tests != xno], [AX_BOOST_UNIT_TEST_FRAMEWORK])
+AC_SUBST([boost_LIBS], [-lboost_date_time -lboost_filesystem -lboost_regex -lboost_system])
 
-# Require librt if on Linux (any version with clock_gettime).
-#------------------------------------------------------------------------------
-AS_CASE([${host_os}], 
-    [*linux*], AC_CHECK_LIB([rt], [clock_gettime],
-        [AC_SUBST([rt_LIBS], [-lrt]) clock_gettime_defined=yes],
-        [AC_MSG_ERROR([rt library is required but was not found.])]))
-       
-# Require GMP (any version with __gmpz_init).
-#------------------------------------------------------------------------------
-# If on OSX configure the MacPorts repository, do last since it's over-broad.
-AS_CASE([${host_os}],
-    [*darwin*],
-        [LDFLAGS="$LDFLAGS -L/opt/local/lib" 
-        CPPFLAGS="$CPPFLAGS -I/opt/local/include"])
-        
-# GMP does not publish a package config.
-AC_CHECK_HEADER([gmp.h], [],
-    [AC_MSG_ERROR([GMP header is required but was not found.])],-)
-AC_CHECK_LIB([gmp],[__gmpz_init],
-    [AC_SUBST([gmp_LIBS], [-lgmp])],
-    [AC_MSG_ERROR([GMP library is required but was not found.])])
 
-# Set WITH_TESTS if $with_tests != no.
-#------------------------------------------------------------------------------
-AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
-AM_COND_IF([WITH_TESTS], [AC_MSG_NOTICE([WITH_TESTS defined])])
-
-# Set SET_BOOST_TEST_DYN_LINK if $enable_shared != no.
-#------------------------------------------------------------------------------
-AM_CONDITIONAL([SET_BOOST_TEST_DYN_LINK], [test x$enable_shared != xno])
-AM_COND_IF([SET_BOOST_TEST_DYN_LINK],
-    [AC_MSG_NOTICE([BOOST_TEST_DYN_LINK defined])])
-    
-# Set USE_LIBRT if $clock_gettime_defined == yes.
-#------------------------------------------------------------------------------
-AM_CONDITIONAL([USE_LIBRT], [test x$clock_gettime_defined = xyes])
-AM_COND_IF([USE_LIBRT], [AC_MSG_NOTICE([USE_LIBRT defined])])
-
-# Set warning levels.
+# Set flags.
+#==============================================================================
+# Warn on all stuff.
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wall],
     [CXXFLAGS="$CXXFLAGS -Wall"])
 
+# Warn on extra stuff.
+#------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wextra],
     [CXXFLAGS="$CXXFLAGS -Wextra"])
-    
+
+# Be really annoying.
+#------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wpedantic],
     [CXXFLAGS="$CXXFLAGS -Wpedantic"],
-    AX_CHECK_COMPILE_FLAG([-pedantic],
-        [CXXFLAGS="$CXXFLAGS -pedantic"]))
-   
-# Suppress warnings.
+    [AX_CHECK_COMPILE_FLAG([-pedantic],
+        [CXXFLAGS="$CXXFLAGS -pedantic"])])
+
+# Conform to style.
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wno-missing-braces],
     [CXXFLAGS="$CXXFLAGS -Wno-missing-braces"])
 
-# This cleans up for boost 1.49 (gcc).
-AX_CHECK_COMPILE_FLAG([-Wno-unused-local-typedefs],
-    [CXXFLAGS="$CXXFLAGS -Wno-unused-local-typedefs"])
-    
-# This cleans up for boost 1.54 (clang).
+# Clean up Boost 1.54 headers (clang).
+#------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wno-deprecated-register],
     [CXXFLAGS="$CXXFLAGS -Wno-deprecated-register"])
 
-# Prevent clang from warning about unknown warnings (even though checked),
-# specifically -Wno-unused-local-typedefs.
+# Clean up Boost 1.49 headers (gcc).
+#------------------------------------------------------------------------------
+AX_CHECK_COMPILE_FLAG([-Wno-unused-local-typedefs],
+    [CXXFLAGS="$CXXFLAGS -Wno-unused-local-typedefs"])
+
+# Clean up on OSX (clang).
+#------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wno-unknown-warning-option],
     [CXXFLAGS="$CXXFLAGS -Wno-unknown-warning-option"])
 
-# Set compiler flags.
+# Protect stack.
 #------------------------------------------------------------------------------
-#AX_CHECK_COMPILE_FLAG([-fvisibility-inlines-hidden],
-#    [CXXFLAGS="$CXXFLAGS -fvisibility-inlines-hidden"])
-
-#AX_CHECK_COMPILE_FLAG([-fvisibility=internal],
-#    [CXXFLAGS="$CXXFLAGS -fvisibility=internal"],
-#    AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
-#        [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"]))
-
 AX_CHECK_COMPILE_FLAG([-fstack-protector],
-    [AX_CHECK_LINK_FLAG([-fstack-protector], 
+    [AX_CHECK_LINK_FLAG([-fstack-protector],
         [CXXFLAGS="$CXXFLAGS -fstack-protector"])])
 
+# Protect stack comprehensively.
+#------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
     [AX_CHECK_LINK_FLAG([-fstack-protector-all],
         [CXXFLAGS="$CXXFLAGS -fstack-protector-all"])])
 
-# Generate output files.
+# Hide inlines from external libs.
 #------------------------------------------------------------------------------
-AC_CONFIG_FILES([Makefile libbitcoin.pc])
+AX_CHECK_COMPILE_FLAG([-fvisibility-inlines-hidden],
+    [CXXFLAGS="$CXXFLAGS -fvisibility-inlines-hidden"])
+
+# Set visibility to internal or hidden.
+#------------------------------------------------------------------------------
+AX_CHECK_COMPILE_FLAG([-fvisibility=internal],
+    [CXXFLAGS="$CXXFLAGS -fvisibility=internal"],
+    [AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
+        [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"])])
+
+
+# Process outputs into templates.
+#==============================================================================
+AC_CONFIG_FILES([Makefile libbitcoin.pc ])
 AC_OUTPUT

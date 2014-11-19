@@ -1,25 +1,31 @@
-language: cpp
+###############################################################################
+# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
+#
+#         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
+#
+###############################################################################
 
-compiler: gcc
-   
+language:
+    - cpp
+
+compiler:
+    - gcc
+
 before_install:
-  # Set package repository.
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  
-  # Update the system.
-  - sudo apt-get -qq update
-  
-  # Get GCC 4.8 (for C++11 support)
-  - sudo apt-get -qq install g++-4.8
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
-  
-install:
-  # Get GNU Multiprecision Arithmetic Library (v5.0.2 on Travis).
-  # - sudo apt-get -qq install libgmp-dev
 
-  # Get Boost (v1.46 on Travis, we require 1.49).
-  # - sudo apt-get -qq install libboost-dev
+    # Set package repository.
+    - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+
+    # Update the system.
+    - sudo apt-get -qq update
+
+    # Install GCC 4.8 (for C++11 support).
+    - sudo apt-get -qq install g++-4.8
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
 
 script:
-  # Download and build all dependencies and libbitcoin.
-  - sudo ./install-libbitcoin.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
+
+    # Download and build libbitcoin and all dependencies.
+    - sudo ./install.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
+    
+
