@@ -87,26 +87,16 @@ long_hash hmac_sha512_hash(data_slice data, data_slice key)
 
 hash_digest bitcoin_hash(data_slice data)
 {
-    hash_digest first_hash;
-    SHA256(data.data(), data.size(), first_hash.data());
-
-    hash_digest second_hash;
-    SHA256(first_hash.data(), first_hash.size(), second_hash.data());
+    auto hash = sha256_hash(sha256_hash(data));
 
     // The hash is in the reverse of the expected order.
-    std::reverse(second_hash.begin(), second_hash.end());
-    return second_hash;
+    std::reverse(hash.begin(), hash.end());
+    return hash;
 }
 
 short_hash bitcoin_short_hash(data_slice data)
 {
-    hash_digest sha_hash;
-    SHA256(data.data(), data.size(), sha_hash.data());
-
-    short_hash ripemd_hash;
-    RMD160(sha_hash.data(), sha_hash.size(), ripemd_hash.data());
-
-    return ripemd_hash;
+    return ripemd160_hash(sha256_hash(data));
 }
 
 } // namespace libbitcoin
