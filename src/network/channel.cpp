@@ -314,9 +314,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
-    data_chunk header_stream =
-            data_chunk(inbound_header_.begin(), inbound_header_.end());
-    BITCOIN_ASSERT(header_stream.size() == header_chunk_size);
+    data_slice header_stream(inbound_header_);
     header_type header_msg;
     satoshi_load(header_stream.begin(), header_stream.end(), header_msg);
 
