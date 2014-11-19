@@ -28,6 +28,7 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/array_slice.hpp>
 
 namespace libbitcoin {
 
@@ -58,6 +59,7 @@ typedef byte_array<hash_size> hash_digest;
 typedef byte_array<long_hash_size> long_hash;
 
 // Arbitrary byte storage.
+typedef array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;
 typedef std::vector<data_chunk> data_stack;
 
