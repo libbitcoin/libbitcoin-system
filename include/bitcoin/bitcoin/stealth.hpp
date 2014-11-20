@@ -60,8 +60,7 @@ BC_API bool operator==(
 BC_API std::ostream& operator<<(
     std::ostream& stream, const stealth_prefix& prefix);
 
-BC_API bool stealth_match(
-    const stealth_prefix& prefix, const uint8_t* raw_bitfield);
+BC_API bool match(const data_chunk& bytes, const stealth_prefix& prefix);
 
 BC_API stealth_bitfield calculate_stealth_bitfield(
     const data_chunk& stealth_data);

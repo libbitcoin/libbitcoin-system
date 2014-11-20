@@ -120,7 +120,10 @@ size_t stealth_prefix::size() const
 bool operator==(
     const stealth_prefix& prefix_a, const stealth_prefix& prefix_b)
 {
-    return prefix_a.blocks_ == prefix_b.blocks_;
+    for (size_t i = 0; i < prefix_a.size() && i < prefix_b.size(); ++i)
+        if (prefix_a[i] != prefix_b[i])
+            return false;
+    return true;
 }
 std::ostream& operator<<(
     std::ostream& stream, const stealth_prefix& prefix)
@@ -133,25 +136,10 @@ std::ostream& operator<<(
     return stream;
 }
 
-bool stealth_match(const stealth_prefix& prefix, const uint8_t* raw_bitfield)
+bool match(const data_chunk& bytes, const stealth_prefix& prefix)
 {
-    size_t current_bit = 0;
-    for (size_t i = 0; i < prefix.size(); ++i)
-    {
-        if (i > 0 && i % byte_bits == 0)
-        {
-            // Move to next byte.
-            ++raw_bitfield;
-            current_bit = 0;
-        }
-        BITCOIN_ASSERT(current_bit < byte_bits);
-        const uint32_t bitmask = 1 << (byte_bits - current_bit - 1);
-        bool value = (*raw_bitfield & bitmask) > 0;
-        if (value != prefix[i])
-            return false;
-        ++current_bit;
-    }
-    return true;
+    stealth_prefix compare(prefix.size(), bytes);
+    return compare == prefix;
 }
 
 stealth_bitfield calculate_stealth_bitfield(const data_chunk& stealth_data)
