@@ -55,26 +55,7 @@ static_assert(stealth_prefix::bits_per_block == byte_bits,
 
 data_chunk prefix_to_bytes(const stealth_prefix& prefix)
 {
-    const size_t prefix_bytes = prefix.num_blocks();
-    data_chunk bytes(prefix_bytes);
-
-    // The prefix must be guarded against a size greater than 32
-    // so that the bitfield can convert into uint32_t, which also ensures
-    // that number of bits doesn't exceed uint8_t.
-    const auto prefix_bit_field = prefix.to_ulong();
-
-    for (uint8_t index = 0; index < prefix_bytes; ++index)
-    {
-        // 0, 8, 16, 24
-        uint16_t block = index * byte_bits;
-
-        // 0x000000FF, 0x0000FF00, 0x00FF0000, 0xFF000000
-        uint32_t mask = 0x000000FF << block;
-        uint32_t value = (prefix_bit_field & mask) >> block;
-        bytes[index] = static_cast<uint8_t>(value);
-    }
-
-    return bytes;
+    return prefix.blocks();
 }
 
 stealth_address::stealth_address()

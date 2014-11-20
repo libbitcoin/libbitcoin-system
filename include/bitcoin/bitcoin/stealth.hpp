@@ -20,7 +20,6 @@
 #ifndef LIBBITCOIN_STEALTH_HPP
 #define LIBBITCOIN_STEALTH_HPP
 
-#include <boost/dynamic_bitset.hpp>
 #include <bitcoin/bitcoin/types.hpp>
 
 namespace libbitcoin {
@@ -30,28 +29,21 @@ typedef uint32_t stealth_bitfield;
 class BC_API stealth_prefix
 {
 public:
-    typedef boost::dynamic_bitset<uint8_t> bitset_type;
-    static const int bits_per_block = bitset_type::bits_per_block;
+    static constexpr size_t bits_per_block = byte_bits;
 
     stealth_prefix();
-    stealth_prefix(const std::string& repr);
-    stealth_prefix(size_t number_bits, uint32_t value);
-    stealth_prefix(size_t number_bits, data_chunk data);
+    stealth_prefix(const std::string& bitstring);
+    stealth_prefix(size_t size, uint32_t value);
+    stealth_prefix(size_t size, const data_chunk& blocks);
 
-    template <typename BlockIter>
-    void init_from_block_range(BlockIter first, BlockIter last)
-    {
-        bitset_.init_from_block_range(first, last);
-    }
-
-    void resize(size_t num_bits);
+    void resize(size_t size);
 
     bool operator[](size_t i) const;
 
-    uint32_t to_ulong() const;
+    uint32_t uint32() const;
+    const data_chunk& blocks() const;
 
     size_t size() const;
-    size_t num_blocks() const;
 
 private:
     friend bool operator==(
@@ -59,7 +51,8 @@ private:
     friend std::ostream& operator<<(
         std::ostream& stream, const stealth_prefix& prefix);
 
-    bitset_type bitset_;
+    size_t size_;
+    data_chunk blocks_;
 };
 
 BC_API bool operator==(
