@@ -104,8 +104,6 @@ BC_API ec_secret uncover_stealth_secret(
     const ec_point& ephem_pubkey, const ec_secret& scan_secret,
     const ec_secret& spend_secret);
 
-BC_API stealth_prefix bytes_to_prefix(uint8_t prefix_number_bits,
-    const data_chunk& bytes);
 BC_API data_chunk prefix_to_bytes(const stealth_prefix& prefix);
 
 } // namespace libbitcoin
