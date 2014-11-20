@@ -43,6 +43,62 @@ BOOST_AUTO_TEST_CASE(secret_to_public_key_test)
         "8c3a6ec6acd33c36328b8fb4349b31671bcd3a192316ea4f6236ee1ae4a7d8c9");
 }
 
+BOOST_AUTO_TEST_CASE(rfc6979_nonce_test)
+{
+    struct rfc6979_test
+    {
+        std::string secret;
+        std::string message;
+        std::string nonce;
+    };
+
+    // These test vectors are taken from python-ecdsa
+    // https://github.com/warner/python-ecdsa
+    const std::vector<rfc6979_test> rfc6979_tests
+    {
+        {
+            "000000000000000000000000000000009d0219792467d7d37b4d43298a7d0c05",
+            "sample",
+            "8fa1f95d514760e498f28957b824ee6ec39ed64826ff4fecc2b5739ec45b91cd"
+        },
+        {
+            "cca9fbcc1b41e5a95d369eaa6ddcff73b61a4efaa279cfc6567e8daa39cbaf50",
+            "sample",
+            "2df40ca70e639d89528a6b670d9d48d9165fdc0febc0974056bdce192b8e16a3"
+        },
+        {
+            "0000000000000000000000000000000000000000000000000000000000000001",
+            "Satoshi Nakamoto",
+            "8F8A276C19F4149656B280621E358CCE24F5F52542772691EE69063B74F15D15"
+        },
+        {
+            "0000000000000000000000000000000000000000000000000000000000000001",
+            "All those moments will be lost in time, like tears in rain. Time to die...",
+            "38AA22D72376B4DBC472E06C3BA403EE0A394DA63FC58D88686C611ABA98D6B3"
+        },
+        {
+            "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364140",
+            "Satoshi Nakamoto",
+            "33A19B60E25FB6F4435AF53A3D42D493644827367E6453928554F43E49AA6F90"
+        },
+        {
+            "f8b8af8ce3c7cca5e300d33939540c10d45ce001b8f252bfbc57ba0342904181",
+            "Alan Turing",
+            "525A82B70E67874398067543FD84C83D30C175FDC45FDEEE082FE13B1D7CFDF1"
+        }
+    };
+
+    for (auto& test: rfc6979_tests)
+    {
+        ec_secret secret = decode_hash(test.secret);
+        hash_digest hash = sha256_hash(to_data_chunk(test.message));
+        std::reverse(hash.begin(), hash.end());
+
+        ec_secret nonce = create_nonce(secret, hash);
+        BOOST_REQUIRE(nonce == decode_hash(test.nonce));
+    }
+}
+
 BOOST_AUTO_TEST_CASE(ec_signature_test)
 {
     ec_point public_key = secret_to_public_key(secret, true);
