@@ -55,9 +55,15 @@ BC_API bool verify_public_key_fast(const ec_point& public_key);
 BC_API bool verify_private_key(const ec_secret& private_key);
 
 /**
+ * Create a deterministic signature nonce according to rfc6979.
+ */
+BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash);
+
+/**
  * Create an EC signature using a private key. The nonce must be a
  * cryptographically-secure random number, or the signature will leak
- * information about the private key.
+ * information about the private key. Consider using the `create_nonce`
+ * function here.
  * @return an EC signature, or a zero-length chunk if something goes wrong.
  * Try another nonce if this happens.
  */

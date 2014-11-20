@@ -20,6 +20,7 @@
 #include <secp256k1.h>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
+#include <bitcoin/bitcoin/utility/hash.hpp>
 
 namespace libbitcoin {
 
@@ -95,22 +96,84 @@ bool verify_private_key(const ec_secret& private_key)
     return secp256k1_ec_seckey_verify(private_key.data()) == 1;
 }
 
+BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash)
+{
+    std::reverse(hash.begin(), hash.end());
+    init.init();
+
+    hash_digest K
+    {{
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    }};
+    hash_digest V
+    {{
+        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
+        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
+    }};
+
+    // K = HMAC_K(V || 0x00 || int2octets(x) || bits2octets(h1)):
+    data_chunk temp;
+    temp.reserve(V.size() + 1 + secret.size() + hash.size());
+    temp.insert(temp.end(), V.begin(), V.end());
+    temp.push_back(0x00);
+    temp.insert(temp.end(), secret.begin(), secret.end());
+    temp.insert(temp.end(), hash.begin(), hash.end());
+    K = hmac_sha256_hash(temp, K);
+
+    // V = HMAC_K(V):
+    V = hmac_sha256_hash(V, K);
+
+    // K = HMAC_K(V || 0x01 || int2octets(x) || bits2octets(h1)):
+    temp.clear();
+    temp.insert(temp.end(), V.begin(), V.end());
+    temp.push_back(0x01);
+    temp.insert(temp.end(), secret.begin(), secret.end());
+    temp.insert(temp.end(), hash.begin(), hash.end());
+    K = hmac_sha256_hash(temp, K);
+
+    // V = HMAC_K(V):
+    V = hmac_sha256_hash(V, K);
+
+    while (true)
+    {
+        // V = HMAC_K(V):
+        V = hmac_sha256_hash(V, K);
+
+        if (verify_private_key(V))
+            return V;
+
+        // K = HMAC_K(V || 0x00):
+        temp.clear();
+        temp.insert(temp.end(), V.begin(), V.end());
+        temp.push_back(0x00);
+        K = hmac_sha256_hash(temp, K);
+
+        // V = HMAC_K(V):
+        V = hmac_sha256_hash(V, K);
+    }
+}
+
 data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 {
     std::reverse(hash.begin(), hash.end());
     init.init();
+
     int out_size = 72;
     data_chunk signature(out_size);
+    if (secp256k1_ecdsa_sign(hash.data(), hash.size(),
+        signature.data(), &out_size, secret.data(), nonce.data()) == 1)
+    {
+        signature.resize(out_size);
+        return signature;
+    }
 
-    if (!verify_private_key(nonce)) // Needed because of upstream bug
-        return data_chunk();
-    bool valid = secp256k1_ecdsa_sign(hash.data(), hash.size(),
-        signature.data(), &out_size, secret.data(), nonce.data()) == 1;
-    if (!valid)
-        return data_chunk();
-
-    signature.resize(out_size);
-    return signature;
+    // Error case:
+    return data_chunk();
 }
 
 bool verify_signature(const ec_point& public_key, hash_digest hash,
