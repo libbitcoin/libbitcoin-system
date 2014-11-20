@@ -69,6 +69,15 @@ data_chunk to_data_chunk(T iterable)
     return data_chunk(std::begin(iterable), std::end(iterable));
 }
 
+inline data_chunk operator +(data_slice a, data_slice b)
+{
+    data_chunk out;
+    out.reserve(a.size() + b.size());
+    out.insert(out.end(), a.begin(), a.end());
+    out.insert(out.end(), b.begin(), b.end());
+    return out;
+}
+
 // A list of indices. Used for creating block_locator objects or
 // Storing list of unconfirmed input indexes in tx pool.
 typedef std::vector<size_t> index_list;

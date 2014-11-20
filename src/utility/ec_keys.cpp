@@ -116,44 +116,19 @@ BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash)
         0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
     }};
 
-    // K = HMAC_K(V || 0x00 || int2octets(x) || bits2octets(h1)):
-    data_chunk temp;
-    temp.reserve(V.size() + 1 + secret.size() + hash.size());
-    temp.insert(temp.end(), V.begin(), V.end());
-    temp.push_back(0x00);
-    temp.insert(temp.end(), secret.begin(), secret.end());
-    temp.insert(temp.end(), hash.begin(), hash.end());
-    K = hmac_sha256_hash(temp, K);
-
-    // V = HMAC_K(V):
+    K = hmac_sha256_hash(V + byte_array<1>{{0x00}} + secret + hash, K);
     V = hmac_sha256_hash(V, K);
-
-    // K = HMAC_K(V || 0x01 || int2octets(x) || bits2octets(h1)):
-    temp.clear();
-    temp.insert(temp.end(), V.begin(), V.end());
-    temp.push_back(0x01);
-    temp.insert(temp.end(), secret.begin(), secret.end());
-    temp.insert(temp.end(), hash.begin(), hash.end());
-    K = hmac_sha256_hash(temp, K);
-
-    // V = HMAC_K(V):
+    K = hmac_sha256_hash(V + byte_array<1>{{0x01}} + secret + hash, K);
     V = hmac_sha256_hash(V, K);
 
     while (true)
     {
-        // V = HMAC_K(V):
         V = hmac_sha256_hash(V, K);
 
         if (verify_private_key(V))
             return V;
 
-        // K = HMAC_K(V || 0x00):
-        temp.clear();
-        temp.insert(temp.end(), V.begin(), V.end());
-        temp.push_back(0x00);
-        K = hmac_sha256_hash(temp, K);
-
-        // V = HMAC_K(V):
+        K = hmac_sha256_hash(V + byte_array<1>{{0x00}}, K);
         V = hmac_sha256_hash(V, K);
     }
 }
