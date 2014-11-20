@@ -77,6 +77,16 @@ BOOST_AUTO_TEST_CASE(sha256_hash_test)
 #endif
 }
 
+BOOST_AUTO_TEST_CASE(hmac_sha256_hash_test)
+{
+    data_chunk chunk{'d', 'a', 't', 'a'};
+    data_chunk key{'k', 'e', 'y'};
+
+    auto hash = hmac_sha256_hash(chunk, key);
+    BOOST_REQUIRE_EQUAL(encode_hex(hash),
+        "5031fe3d989c6d1537a013fa6e739da23463fdaec3b70137d828e36ace221bd0");
+}
+
 BOOST_AUTO_TEST_CASE(hmac_sha512_hash_test)
 {
     data_chunk chunk{'d', 'a', 't', 'a'};

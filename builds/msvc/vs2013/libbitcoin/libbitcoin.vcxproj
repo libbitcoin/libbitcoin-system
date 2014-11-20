@@ -129,6 +129,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\threadpool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\types.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_parallel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\base58.hpp" />
@@ -164,6 +165,7 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\format.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\block.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\misc.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="packages.config" />
   </ItemGroup>

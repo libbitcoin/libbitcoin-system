@@ -28,6 +28,7 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/array_slice.hpp>
 
 namespace libbitcoin {
 
@@ -58,6 +59,7 @@ typedef byte_array<hash_size> hash_digest;
 typedef byte_array<long_hash_size> long_hash;
 
 // Arbitrary byte storage.
+typedef array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;
 typedef std::vector<data_chunk> data_stack;
 
@@ -65,6 +67,15 @@ template<typename T>
 data_chunk to_data_chunk(T iterable)
 {
     return data_chunk(std::begin(iterable), std::end(iterable));
+}
+
+inline data_chunk operator +(data_slice a, data_slice b)
+{
+    data_chunk out;
+    out.reserve(a.size() + b.size());
+    out.insert(out.end(), a.begin(), a.end());
+    out.insert(out.end(), b.begin(), b.end());
+    return out;
 }
 
 // A list of indices. Used for creating block_locator objects or
