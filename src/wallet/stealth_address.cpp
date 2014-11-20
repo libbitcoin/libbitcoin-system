@@ -53,11 +53,6 @@ constexpr size_t min_address_size = version_size + options_size +
 static_assert(stealth_prefix::bits_per_block == byte_bits, 
     "The declaraction of stealh_prefix must have an 8 bit block size.");
 
-data_chunk prefix_to_bytes(const stealth_prefix& prefix)
-{
-    return prefix.blocks();
-}
-
 stealth_address::stealth_address()
     : valid_(false)
 {
@@ -139,8 +134,7 @@ std::string stealth_address::encoded() const
 
     // Serialize the prefix bytes/blocks.
     raw_address.push_back(prefix_number_bits);
-    auto raw_prefix = prefix_to_bytes(prefix_);
-    extend_data(raw_address, raw_prefix);
+    extend_data(raw_address, prefix_.blocks());
 
     append_checksum(raw_address);
     return encode_base58(raw_address);

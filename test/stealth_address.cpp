@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__32_bits__ittle_endian)
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__32_bits__little_endian)
 {
     stealth_prefix prefix(32, 0xbaadf00d);
-    auto bytes = prefix_to_bytes(prefix);
+    auto bytes = prefix.blocks();
     BOOST_REQUIRE(bytes == data_chunk({ 0xba, 0xad, 0xf0, 0x0d }));
 }
 
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__zero_bits__round_trips)
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__zero_bits__round_trips)
 {
     stealth_prefix prefix(0, 0x00000000);
-    auto bytes = prefix_to_bytes(prefix);
+    auto bytes = prefix.blocks();
     std::stringstream stream;
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 0u);
@@ -193,7 +193,7 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__one_bit__round_trips)
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__one_bit__round_trips)
 {
     stealth_prefix prefix(1, 0xFFFFFFFF);
-    auto bytes = prefix_to_bytes(prefix);
+    auto bytes = prefix.blocks();
     std::stringstream stream;
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 1u);
@@ -217,7 +217,7 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bits_leading_zero__round_trips)
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bits_leading_zero__round_trips)
 {
     stealth_prefix prefix(2, 0x42424201);
-    auto bytes = prefix_to_bytes(prefix);
+    auto bytes = prefix.blocks();
     std::stringstream stream;
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 2u);
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bytes_leading_null_byte__round_trips)
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bytes_leading_null_byte__round_trips)
 {
     stealth_prefix prefix(16, 0x000000FF);
-    auto bytes = prefix_to_bytes(prefix);
+    auto bytes = prefix.blocks();
     std::stringstream stream;
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 16u);
