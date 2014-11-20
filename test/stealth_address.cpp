@@ -143,7 +143,7 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__32_bits__ittle_endian)
 {
     data_chunk bytes({ 0x0d, 0xf0, 0xad, 0xba });
     auto prefix = bytes_to_prefix(32, bytes);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0xbaadf00du);
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0x0df0adba);
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__32_bits__little_endian)
@@ -185,7 +185,8 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__one_bit__round_trips)
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 1u);
     BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1u);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 1u);
+    // 2147483648 = 0b1000000000000...
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 2147483648);
     BOOST_REQUIRE_EQUAL(stream.str(), "1");
 }
 
@@ -209,8 +210,8 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bits_leading_zero__round_trips)
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 2u);
     BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 1u);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 1u);
-    BOOST_REQUIRE_EQUAL(stream.str(), "01");
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 0);
+    BOOST_REQUIRE_EQUAL(stream.str(), "00");
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bits_leading_zero__round_trips)
@@ -233,8 +234,9 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bytes_leading_null_byte__round_trips)
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 16u);
     BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 2u);
-    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 255u);
-    BOOST_REQUIRE_EQUAL(stream.str(), "0000000011111111");
+    // 0b11111111000000000000000000000000
+    BOOST_REQUIRE_EQUAL(prefix.to_ulong(), 4278190080);
+    BOOST_REQUIRE_EQUAL(stream.str(), "1111111100000000");
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bytes_leading_null_byte__round_trips)
@@ -246,7 +248,7 @@ BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bytes_leading_null_byte__round_trips)
     BOOST_REQUIRE_EQUAL(prefix.size(), 16u);
     BOOST_REQUIRE_EQUAL(prefix.num_blocks(), 2u);
     BOOST_REQUIRE_EQUAL(bytes.size(), 2u);
-    BOOST_REQUIRE_EQUAL(stream.str(), "0000000011111111");
+    BOOST_REQUIRE_EQUAL(stream.str(), "0000000000000000");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

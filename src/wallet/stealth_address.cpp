@@ -56,10 +56,7 @@ static_assert(stealth_prefix::bits_per_block == byte_bits,
 stealth_prefix bytes_to_prefix(const uint8_t prefix_number_bits,
     const data_chunk& bytes)
 {
-    stealth_prefix prefix;
-    prefix.init_from_block_range(bytes.begin(), bytes.end());
-    prefix.resize(prefix_number_bits);
-    return prefix;
+    return stealth_prefix(prefix_number_bits, bytes);
 }
 
 data_chunk prefix_to_bytes(const stealth_prefix& prefix)
