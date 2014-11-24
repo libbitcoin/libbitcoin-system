@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(string_to_prefix__32_bits__little_endian)
     BOOST_REQUIRE_EQUAL(prefix.uint32(), 0xbaadf00du);
 }
 
-BOOST_AUTO_TEST_CASE(bytes_to_prefix__32_bits__ittle_endian)
+BOOST_AUTO_TEST_CASE(bytes_to_prefix__32_bits__little_endian)
 {
     data_chunk bytes({ 0x0d, 0xf0, 0xad, 0xba });
     auto prefix = stealth_prefix(32, bytes);
