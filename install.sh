@@ -282,7 +282,7 @@ make_silent()
     if [[ $JOBS -gt $SEQUENTIAL ]]; then
         make --silent -j$JOBS $TARGET
     else
-        make --silent
+        make --silent $TARGET
     fi
 }
 

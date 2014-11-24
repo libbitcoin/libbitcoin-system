@@ -27,5 +27,3 @@ script:
 
     # Download and build libbitcoin and all dependencies.
     - sudo ./install.sh CXXFLAGS="-Os -s" --disable-shared --enable-static --build-gmp --build-boost
-    
-
