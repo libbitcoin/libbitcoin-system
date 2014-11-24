@@ -1486,9 +1486,7 @@ bool is_stealth_info_type(const operation_stack& ops)
     return ops.size() == 2 &&
         ops[0].code == opcode::return_ &&
         ops[1].code == opcode::special &&
-        ops[1].data.size() == 1 + 4 + 33 &&
-        ops[1].data[0] == 0x06 &&
-        (ops[1].data[5] == 0x02 || ops[1].data[5] == 0x03);
+        ops[1].data.size() >= hash_size;
 }
 bool is_multisig_type(const operation_stack&)
 {
