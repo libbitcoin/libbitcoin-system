@@ -25,12 +25,22 @@
 
 namespace libbitcoin {
 
+// Private keys:
 constexpr size_t ec_secret_size = 32;
+typedef byte_array<ec_secret_size> ec_secret;
+
+// Public keys:
 constexpr size_t ec_compressed_size = 33;
 constexpr size_t ec_uncompressed_size = 65;
-
-typedef byte_array<ec_secret_size> ec_secret;
 typedef data_chunk ec_point;
+
+// Compact signature for message signing:
+constexpr size_t compact_signature_size = 64;
+struct compact_signature
+{
+    byte_array<compact_signature_size> signature;
+    int recid;
+};
 
 /**
  * Converts a secret parameter to a public point.
@@ -60,20 +70,38 @@ BC_API bool verify_private_key(const ec_secret& private_key);
 BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash);
 
 /**
- * Create an EC signature using a private key. The nonce must be a
- * cryptographically-secure random number, or the signature will leak
- * information about the private key. Consider using the `create_nonce`
- * function here.
+ * Create an EC signature using a private key.
+ * The nonce must be a cryptographically-secure random number,
+ * or the signature will leak information about the private key.
+ * Consider using the `create_nonce` function here.
  * @return an EC signature, or a zero-length chunk if something goes wrong.
  * Try another nonce if this happens.
  */
 BC_API data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce);
 
 /**
+ * Create an compact EC signature for use in message signing.
+ * The nonce must be a cryptographically-secure random number,
+ * or the signature will leak information about the private key.
+ * Consider using the `create_nonce` function here.
+ * @return a compact signature. This will be all-zero if something goes wrong.
+ * Try another nonce if this happens.
+ */
+BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash,
+    ec_secret nonce);
+
+/**
  * Verifies an EC signature using a public key.
  */
 BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
     const data_chunk& signature);
+
+/**
+ * Recovers the public key from a compact message signature.
+ * @return a public point, or a zero-length chunk if something goes wrong.
+ */
+BC_API ec_point recover_compact(compact_signature signature,
+    hash_digest hash, bool compressed=true);
 
 /**
  * Computes the sum a += G*b, where G is the curve's generator point.

@@ -96,7 +96,7 @@ bool verify_private_key(const ec_secret& private_key)
     return secp256k1_ec_seckey_verify(private_key.data()) == 1;
 }
 
-BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash)
+ec_secret create_nonce(ec_secret secret, hash_digest hash)
 {
     std::reverse(hash.begin(), hash.end());
     init.init();
@@ -140,8 +140,8 @@ data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 
     int out_size = 72;
     data_chunk signature(out_size);
-    if (secp256k1_ecdsa_sign(hash.data(), hash.size(),
-        signature.data(), &out_size, secret.data(), nonce.data()) == 1)
+    if (0 < secp256k1_ecdsa_sign(hash.data(), hash.size(),
+        signature.data(), &out_size, secret.data(), nonce.data()))
     {
         signature.resize(out_size);
         return signature;
@@ -149,6 +149,23 @@ data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 
     // Error case:
     return data_chunk();
+}
+
+compact_signature sign_compact(ec_secret secret, hash_digest hash,
+    ec_secret nonce)
+{
+    std::reverse(hash.begin(), hash.end());
+    init.init();
+
+    compact_signature out;
+    if (0 < secp256k1_ecdsa_sign_compact(hash.data(), hash.size(),
+        out.signature.data(), secret.data(), nonce.data(), &out.recid))
+    {
+        return out;
+    }
+
+    // Error case:
+    return compact_signature{{{0}}, 0};
 }
 
 bool verify_signature(const ec_point& public_key, hash_digest hash,
@@ -161,6 +178,30 @@ bool verify_signature(const ec_point& public_key, hash_digest hash,
         signature.data(), signature.size(),
         public_key.data(), public_key.size()
     );
+}
+
+ec_point recover_compact(compact_signature signature,
+    hash_digest hash, bool compressed)
+{
+    std::reverse(hash.begin(), hash.end());
+    init.init();
+
+    size_t public_key_size = ec_uncompressed_size;
+    if (compressed)
+        public_key_size = ec_compressed_size;
+
+    ec_point out(public_key_size);
+    int out_size;
+    if (0 < secp256k1_ecdsa_recover_compact(
+        hash.data(), hash.size(), signature.signature.data(),
+        out.data(), &out_size, compressed, signature.recid))
+    {
+        BITCOIN_ASSERT(public_key_size == static_cast<size_t>(out_size));
+        return out;
+    }
+
+    // Error case:
+    return ec_point();
 }
 
 bool ec_add(ec_point& a, const ec_secret& b)
