@@ -68,10 +68,8 @@ stealth_prefix::stealth_prefix(const std::string& bitstring)
     }
 
     // Block wasn't finished but push it back.
-    if (bit_iter != (bits_per_block))
-    {
+    if (bit_iter != bits_per_block)
         blocks_.push_back(block);
-    }
 }
 stealth_prefix::stealth_prefix(size_t size, uint32_t value)
   : stealth_prefix(size, value_to_blocks(value))
@@ -89,14 +87,7 @@ stealth_prefix::stealth_prefix(size_t size, const data_chunk& blocks)
 void stealth_prefix::resize(size_t size)
 {
     size_ = size;
-    if (size == 0)
-    {
-        blocks_.clear();
-        return;
-    }
-    const size_t num_blocks = (size - 1) / bits_per_block + 1;
-    blocks_.resize(num_blocks);
-
+    blocks_.resize(stealth_blocks_size(size_));
 }
 
 bool stealth_prefix::operator[](size_t i) const
@@ -156,6 +147,13 @@ bool match(const data_chunk& bytes, const stealth_prefix& prefix)
 {
     stealth_prefix compare(prefix.size(), bytes);
     return compare == prefix;
+}
+
+size_t stealth_blocks_size(const size_t bitsize)
+{
+    if (bitsize == 0)
+        return 0;
+    return (bitsize - 1) / stealth_prefix::bits_per_block + 1;
 }
 
 stealth_bitfield calculate_stealth_bitfield(const data_chunk& stealth_data)
