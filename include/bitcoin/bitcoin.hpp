@@ -197,6 +197,7 @@
 #include <bitcoin/bitcoin/wallet/amount.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
+#include <bitcoin/bitcoin/wallet/message.hpp>
 #include <bitcoin/bitcoin/wallet/mnemonic.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 #include <bitcoin/bitcoin/wallet/uri.hpp>

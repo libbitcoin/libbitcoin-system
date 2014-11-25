@@ -126,6 +126,7 @@ bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/amount.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
+    include/bitcoin/bitcoin/wallet/message.hpp \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
@@ -174,6 +175,7 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/amount.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
+    src/wallet/message.cpp \
     src/wallet/mnemonic.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
@@ -215,6 +217,7 @@ test_libbitcoin_test_SOURCES = \
     test/hd_keys.cpp \
     test/key_formats.cpp \
     test/main.cpp \
+    test/message.cpp \
     test/script_number.cpp \
     test/script.cpp \
     test/serialize.cpp \

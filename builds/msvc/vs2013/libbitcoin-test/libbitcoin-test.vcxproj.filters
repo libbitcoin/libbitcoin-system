@@ -34,6 +34,9 @@
     <ClCompile Include="..\..\..\..\test\key_formats.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\stealth_address.cpp">
       <Filter>src</Filter>
     </ClCompile>

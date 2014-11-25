@@ -80,6 +80,7 @@
     <ClCompile Include="..\..\..\..\test\hd_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\key_formats.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
+    <ClCompile Include="..\..\..\..\test\message.cpp" />
     <ClCompile Include="..\..\..\..\test\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\script.cpp" />
     <ClCompile Include="..\..\..\..\test\script_number.cpp" />

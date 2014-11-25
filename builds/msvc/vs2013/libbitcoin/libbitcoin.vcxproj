@@ -102,6 +102,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\amount.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\key_formats.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\mnemonic.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\uri.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\amount.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\key_formats.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\message.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri.hpp" />
