@@ -38,7 +38,8 @@ stealth_prefix::stealth_prefix(const std::string& bitstring)
 {
     size_ = bitstring.size();
     uint8_t block = 0;
-    size_t bit_iter = bits_per_block - 1;
+    size_t bit_iter = bits_per_block;
+
     for (const char repr: bitstring)
     {
         if (repr != '0' && repr != '1')
@@ -46,25 +47,31 @@ stealth_prefix::stealth_prefix(const std::string& bitstring)
             blocks_.clear();
             return;
         }
+
         // Set bit to 1
         if (repr == '1')
         {
-            const uint8_t bitmask = 1 << bit_iter;
+            const uint8_t bitmask = 1 << (bit_iter - 1);
             block |= bitmask;
         }
+
         // Next bit
         --bit_iter;
+
         if (bit_iter == 0)
         {
             // Move to the next block.
             blocks_.push_back(block);
             block = 0;
-            bit_iter = bits_per_block - 1;
+            bit_iter = bits_per_block;
         }
     }
+
     // Block wasn't finished but push it back.
-    if (bit_iter != 0)
+    if (bit_iter != (bits_per_block))
+    {
         blocks_.push_back(block);
+    }
 }
 stealth_prefix::stealth_prefix(size_t size, uint32_t value)
   : stealth_prefix(size, value_to_blocks(value))
