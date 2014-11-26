@@ -69,7 +69,7 @@ data_chunk to_data_chunk(T iterable)
     return data_chunk(std::begin(iterable), std::end(iterable));
 }
 
-inline data_chunk operator +(data_slice a, data_slice b)
+inline data_chunk operator+(data_slice a, data_slice b)
 {
     data_chunk out;
     out.reserve(a.size() + b.size());
