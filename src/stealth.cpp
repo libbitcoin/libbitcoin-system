@@ -75,9 +75,11 @@ stealth_prefix::stealth_prefix(size_t size, uint32_t value)
   : stealth_prefix(size, value_to_blocks(value))
 {
 }
-stealth_prefix::stealth_prefix(size_t size, const data_chunk& blocks)
-  : blocks_(blocks)
+stealth_prefix::stealth_prefix(size_t size, const data_slice& blocks)
 {
+    // Copy blocks
+    blocks_.resize(blocks.size());
+    std::copy(blocks.begin(), blocks.end(), blocks_.begin());
     // Pad with 00 for safety.
     while (blocks_.size() * bits_per_block < size)
         blocks_.push_back(0x00);
@@ -143,7 +145,7 @@ std::ostream& operator<<(
     return stream;
 }
 
-bool match(const data_chunk& bytes, const stealth_prefix& prefix)
+bool match(const data_slice& bytes, const stealth_prefix& prefix)
 {
     stealth_prefix compare(prefix.size(), bytes);
     return compare == prefix;

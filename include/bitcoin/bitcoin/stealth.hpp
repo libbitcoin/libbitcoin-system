@@ -34,7 +34,7 @@ public:
     stealth_prefix();
     stealth_prefix(const std::string& bitstring);
     stealth_prefix(size_t size, uint32_t value);
-    stealth_prefix(size_t size, const data_chunk& blocks);
+    stealth_prefix(size_t size, const data_slice& blocks);
 
     void resize(size_t size);
 
@@ -60,7 +60,7 @@ BC_API bool operator==(
 BC_API std::ostream& operator<<(
     std::ostream& stream, const stealth_prefix& prefix);
 
-BC_API bool match(const data_chunk& bytes, const stealth_prefix& prefix);
+BC_API bool match(const data_slice& bytes, const stealth_prefix& prefix);
 
 BC_API size_t stealth_blocks_size(const size_t bitsize);
 
