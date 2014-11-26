@@ -52,18 +52,23 @@ BOOST_AUTO_TEST_CASE(bitfield_test)
     stealth_prefix prefix("01100110001");
     data_chunk raw_bitfield{{102, 32, 0, 0}};
     BITCOIN_ASSERT(raw_bitfield.size() * 8 >= prefix.size());
-    BOOST_REQUIRE(match(raw_bitfield, prefix));
+    stealth_prefix compare(prefix.size(), raw_bitfield);
+    BOOST_REQUIRE(prefix == compare);
 
     stealth_prefix prefix1(27, 0x8bf41c69);
-    data_chunk raw_bitfield1{0x8b, 0xf4, 0x1c, 0x79};
+    data_chunk raw_bitfield1{{0x8b, 0xf4, 0x1c, 0x79}};
     BITCOIN_ASSERT(raw_bitfield1.size() * 8 >= prefix1.size());
-    BOOST_REQUIRE(match(raw_bitfield1, prefix1));
+    stealth_prefix compare1(prefix1.size(), raw_bitfield1);
+    BOOST_REQUIRE(prefix1 == compare1);
 
     stealth_prefix prefix_bs(32, 0x691cf48b);
-    BOOST_REQUIRE(!match(raw_bitfield, prefix_bs));
+    data_chunk raw_bitfield_bs{{0x69, 0x1c, 0xf4, 0x8b}};
+    stealth_prefix compare_bs(prefix_bs.size(), raw_bitfield_bs);
+    BOOST_REQUIRE(prefix_bs == compare_bs);
 
     stealth_prefix prefix_b(29, 0x691cf48b);
-    BOOST_REQUIRE(!match(raw_bitfield, prefix_b));
+    stealth_prefix compare_b(prefix_b.size(), raw_bitfield_bs);
+    BOOST_REQUIRE(prefix_b == compare_b);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

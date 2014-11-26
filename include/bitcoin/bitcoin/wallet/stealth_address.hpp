@@ -36,7 +36,7 @@ typedef std::vector<ec_point> pubkey_list;
 struct BC_API stealth_info
 {
     hash_digest ephem_pubkey;
-    stealth_bitfield bitfield;
+    stealth_prefix bitfield;
 };
 
 // Supports testnet and mainnet addresses but not prefix > 0

@@ -283,7 +283,7 @@ bool extract_stealth_info(stealth_info& info,
 {
     if (output_script.type() != payment_type::stealth_info)
         return false;
-    info.bitfield = calculate_stealth_bitfield(output_script);
+    info.bitfield = calculate_stealth_prefix(output_script);
     BITCOIN_ASSERT(output_script.operations().size() >= 2);
     const data_chunk& data = output_script.operations()[1].data;
     BITCOIN_ASSERT(data.size() >= hash_size);

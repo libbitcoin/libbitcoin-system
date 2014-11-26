@@ -89,7 +89,7 @@ stealth_prefix::stealth_prefix(size_t size, const data_slice& blocks)
 void stealth_prefix::resize(size_t size)
 {
     size_ = size;
-    blocks_.resize(stealth_blocks_size(size_));
+    blocks_.resize(stealth_blocks_size(size_), 0);
 }
 
 bool stealth_prefix::operator[](size_t i) const
@@ -151,12 +151,6 @@ std::ostream& operator<<(
     return stream;
 }
 
-bool match(const data_slice& bytes, const stealth_prefix& prefix)
-{
-    stealth_prefix compare(prefix.size(), bytes);
-    return compare == prefix;
-}
-
 size_t stealth_blocks_size(const size_t bitsize)
 {
     if (bitsize == 0)
@@ -164,17 +158,13 @@ size_t stealth_blocks_size(const size_t bitsize)
     return (bitsize - 1) / stealth_prefix::bits_per_block + 1;
 }
 
-stealth_bitfield calculate_stealth_bitfield(
+stealth_prefix calculate_stealth_prefix(
     const script_type& stealth_script)
 {
     const data_chunk stealth_data = save_script(stealth_script);
-    constexpr size_t bitfield_size = sizeof(stealth_bitfield);
-    // Calculate stealth bitfield
     const hash_digest index = bitcoin_hash(stealth_data);
-    auto deserial = make_deserializer(
-        index.begin(), index.begin() + bitfield_size);
-    auto bitfield = deserial.read_little_endian<stealth_bitfield>();
-    return bitfield;
+    const size_t bitsize = stealth_prefix::bits_per_block * sizeof(uint32_t);
+    return stealth_prefix(bitsize, index);
 }
 
 } // namespace libbitcoin
