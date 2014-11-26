@@ -125,7 +125,8 @@ BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_pub_testnet__round_trip)
 
 BOOST_AUTO_TEST_CASE(prefix_to_string__32_bits__little_endian)
 {
-    stealth_prefix prefix(32, 0xbaadf00d);
+    data_chunk blocks{{0xba, 0xad, 0xf0, 0x0d}};
+    stealth_prefix prefix(32, blocks);
     std::stringstream stream;
     stream << prefix;
     BOOST_REQUIRE_EQUAL(stream.str(), "10111010101011011111000000001101");
@@ -136,19 +137,20 @@ BOOST_AUTO_TEST_CASE(string_to_prefix__32_bits__little_endian)
     std::stringstream stream;
     stream << "10111010101011011111000000001101";
     stealth_prefix prefix(stream.str());
-    BOOST_REQUIRE_EQUAL(prefix.uint32(), 0xbaadf00du);
+    //BOOST_REQUIRE_EQUAL(prefix.uint32(), 0xbaadf00du);
 }
 
 BOOST_AUTO_TEST_CASE(bytes_to_prefix__32_bits__little_endian)
 {
     data_chunk bytes({ 0x0d, 0xf0, 0xad, 0xba });
     auto prefix = stealth_prefix(32, bytes);
-    BOOST_REQUIRE_EQUAL(prefix.uint32(), 0x0df0adbau);
+    //BOOST_REQUIRE_EQUAL(prefix.uint32(), 0x0df0adbau);
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__32_bits__little_endian)
 {
-    stealth_prefix prefix(32, 0xbaadf00d);
+    data_chunk blocks{{0xba, 0xad, 0xf0, 0x0d}};
+    stealth_prefix prefix(32, blocks);
     auto bytes = prefix.blocks();
     BOOST_REQUIRE(bytes == data_chunk({ 0xba, 0xad, 0xf0, 0x0d }));
 }
@@ -161,13 +163,14 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__zero_bits__round_trips)
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 0u);
     BOOST_REQUIRE_EQUAL(prefix.blocks().size(), 0u);
-    BOOST_REQUIRE_EQUAL(prefix.uint32(), 0u);
+    //BOOST_REQUIRE_EQUAL(prefix.uint32(), 0u);
     BOOST_REQUIRE(stream.str().empty());
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__zero_bits__round_trips)
 {
-    stealth_prefix prefix(0, 0x00000000);
+    data_chunk blocks{{0x00, 0x00, 0x00, 0x00}};
+    stealth_prefix prefix(0, blocks);
     auto bytes = prefix.blocks();
     std::stringstream stream;
     stream << prefix;
@@ -186,13 +189,14 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__one_bit__round_trips)
     BOOST_REQUIRE_EQUAL(prefix.size(), 1u);
     BOOST_REQUIRE_EQUAL(prefix.blocks().size(), 1u);
     // 2147483648 = 0b1000000000000...
-    BOOST_REQUIRE_EQUAL(prefix.uint32(), 2147483648u);
+    //BOOST_REQUIRE_EQUAL(prefix.uint32(), 2147483648u);
     BOOST_REQUIRE_EQUAL(stream.str(), "1");
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__one_bit__round_trips)
 {
-    stealth_prefix prefix(1, 0xFFFFFFFF);
+    data_chunk blocks{{0xff, 0xff, 0xff, 0xff}};
+    stealth_prefix prefix(1, blocks);
     auto bytes = prefix.blocks();
     std::stringstream stream;
     stream << prefix;
@@ -210,13 +214,14 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bits_leading_zero__round_trips)
     stream << prefix;
     BOOST_REQUIRE_EQUAL(prefix.size(), 2u);
     BOOST_REQUIRE_EQUAL(prefix.blocks().size(), 1u);
-    BOOST_REQUIRE_EQUAL(prefix.uint32(), 0u);
+    //BOOST_REQUIRE_EQUAL(prefix.uint32(), 0u);
     BOOST_REQUIRE_EQUAL(stream.str(), "00");
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bits_leading_zero__round_trips)
 {
-    stealth_prefix prefix(2, 0x42424201);
+    data_chunk blocks{{0x42, 0x42, 0x42, 0x01}};
+    stealth_prefix prefix(2, blocks);
     auto bytes = prefix.blocks();
     std::stringstream stream;
     stream << prefix;
@@ -235,13 +240,14 @@ BOOST_AUTO_TEST_CASE(bytes_to_prefix__two_bytes_leading_null_byte__round_trips)
     BOOST_REQUIRE_EQUAL(prefix.size(), 16u);
     BOOST_REQUIRE_EQUAL(prefix.blocks().size(), 2u);
     // 0b11111111000000000000000000000000
-    BOOST_REQUIRE_EQUAL(prefix.uint32(), 4278190080u);
+    //BOOST_REQUIRE_EQUAL(prefix.uint32(), 4278190080u);
     BOOST_REQUIRE_EQUAL(stream.str(), "1111111100000000");
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bytes_leading_null_byte__round_trips)
 {
-    stealth_prefix prefix(16, 0x000000FF);
+    data_chunk blocks{{0x00, 0x00}};
+    stealth_prefix prefix(16, blocks);
     auto bytes = prefix.blocks();
     std::stringstream stream;
     stream << prefix;

@@ -25,8 +25,6 @@
 
 namespace libbitcoin {
 
-typedef uint32_t stealth_bitfield;
-
 class BC_API stealth_prefix
 {
 public:
@@ -34,16 +32,15 @@ public:
 
     stealth_prefix();
     stealth_prefix(const std::string& bitstring);
-    stealth_prefix(size_t size, uint32_t value);
     stealth_prefix(size_t size, const data_slice& blocks);
 
     void resize(size_t size);
 
     bool operator[](size_t i) const;
 
-    uint32_t uint32() const;
     const data_chunk& blocks() const;
 
+    /// size in bits
     size_t size() const;
 
 private:
@@ -52,7 +49,7 @@ private:
     friend std::ostream& operator<<(
         std::ostream& stream, const stealth_prefix& prefix);
 
-    size_t size_;
+    size_t size_ = 0;
     data_chunk blocks_;
 };
 

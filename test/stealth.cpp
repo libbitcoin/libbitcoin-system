@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE(value_init)
     stealth_prefix prefix(repr);
     // Binary repr as a value on the left, padded with zeros to the right.
     //  repr + 0000....000
-    const uint32_t value = 1711276032;
-    stealth_prefix prefix2(repr.size(), value);
+    data_chunk blocks{{102, 0}};
+    stealth_prefix prefix2(repr.size(), blocks);
     BOOST_REQUIRE(prefix == prefix2);
 }
 
@@ -55,18 +55,21 @@ BOOST_AUTO_TEST_CASE(bitfield_test)
     stealth_prefix compare(prefix.size(), raw_bitfield);
     BOOST_REQUIRE(prefix == compare);
 
-    stealth_prefix prefix1(27, 0x8bf41c69);
+    data_chunk blocks1{{0x8b, 0xf4, 0x1c, 0x69}};
+    stealth_prefix prefix1(27, blocks1);
     data_chunk raw_bitfield1{{0x8b, 0xf4, 0x1c, 0x79}};
     BITCOIN_ASSERT(raw_bitfield1.size() * 8 >= prefix1.size());
     stealth_prefix compare1(prefix1.size(), raw_bitfield1);
     BOOST_REQUIRE(prefix1 == compare1);
 
-    stealth_prefix prefix_bs(32, 0x691cf48b);
+    data_chunk blocks_bs{{0x69, 0x1c, 0xf4, 0x8b}};
+    stealth_prefix prefix_bs(32, blocks_bs);
     data_chunk raw_bitfield_bs{{0x69, 0x1c, 0xf4, 0x8b}};
     stealth_prefix compare_bs(prefix_bs.size(), raw_bitfield_bs);
     BOOST_REQUIRE(prefix_bs == compare_bs);
 
-    stealth_prefix prefix_b(29, 0x691cf48b);
+    data_chunk blocks_b{{0x69, 0x1c, 0xf4, 0x8b}};
+    stealth_prefix prefix_b(29, blocks_b);
     stealth_prefix compare_b(prefix_b.size(), raw_bitfield_bs);
     BOOST_REQUIRE(prefix_b == compare_b);
 }

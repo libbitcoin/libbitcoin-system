@@ -25,12 +25,6 @@
 
 namespace libbitcoin {
 
-data_chunk value_to_blocks(uint32_t value)
-{
-    auto array = to_big_endian(value);
-    return data_chunk(array.begin(), array.end());
-}
-
 stealth_prefix::stealth_prefix()
 {
 }
@@ -71,10 +65,6 @@ stealth_prefix::stealth_prefix(const std::string& bitstring)
     if (bit_iter != bits_per_block)
         blocks_.push_back(block);
 }
-stealth_prefix::stealth_prefix(size_t size, uint32_t value)
-  : stealth_prefix(size, value_to_blocks(value))
-{
-}
 stealth_prefix::stealth_prefix(size_t size, const data_slice& blocks)
 {
     // Copy blocks
@@ -100,20 +90,6 @@ bool stealth_prefix::operator[](size_t i) const
     const size_t offset = i - (block_index * bits_per_block);
     const uint8_t bitmask = 1 << (bits_per_block - offset - 1);
     return (block & bitmask) > 0;
-}
-
-uint32_t stealth_prefix::uint32() const
-{
-    if (blocks_.empty())
-        return 0;
-    uint32_t value = from_big_endian<uint32_t>(blocks_.begin());
-    // Zero remaining bits
-    for (size_t i = size_; i < 32; ++i)
-    {
-        const uint32_t bitmask = 1 << (32 - i - 1);
-        value &= ~bitmask;
-    }
-    return value;
 }
 
 const data_chunk& stealth_prefix::blocks() const
