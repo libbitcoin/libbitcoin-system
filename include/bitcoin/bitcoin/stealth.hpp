@@ -57,6 +57,9 @@ private:
 
 BC_API bool operator==(
     const stealth_prefix& prefix_a, const stealth_prefix& prefix_b);
+BC_API bool operator!=(
+    const stealth_prefix& prefix_a, const stealth_prefix& prefix_b);
+
 BC_API std::ostream& operator<<(
     std::ostream& stream, const stealth_prefix& prefix);
 

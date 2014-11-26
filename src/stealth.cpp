@@ -134,6 +134,12 @@ bool operator==(
             return false;
     return true;
 }
+bool operator!=(
+    const stealth_prefix& prefix_a, const stealth_prefix& prefix_b)
+{
+    return !(prefix_a == prefix_b);
+}
+
 std::ostream& operator<<(
     std::ostream& stream, const stealth_prefix& prefix)
 {
