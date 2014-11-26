@@ -21,6 +21,7 @@
 #define LIBBITCOIN_STEALTH_HPP
 
 #include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/script.hpp>
 
 namespace libbitcoin {
 
@@ -68,7 +69,7 @@ BC_API bool match(const data_slice& bytes, const stealth_prefix& prefix);
 BC_API size_t stealth_blocks_size(const size_t bitsize);
 
 BC_API stealth_bitfield calculate_stealth_bitfield(
-    const data_chunk& stealth_data);
+    const script_type& stealth_script);
 
 } // namespace libbitcoin
 

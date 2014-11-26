@@ -281,23 +281,15 @@ uint8_t stealth_address::get_version() const
 bool extract_stealth_info(stealth_info& info,
     const script_type& output_script)
 {
-    if (output_script.type() == payment_type::stealth_info &&
-        output_script.operations().size() > 1)
-    {
-        const auto& data = output_script.operations()[1].data;
-        auto valid = data.size() == version_size + nonce_size + 
-            compressed_pubkey_size;
-
-        if (valid)
-        {
-            info.bitfield = calculate_stealth_bitfield(data);
-            info.ephem_pubkey.assign(data.begin() + version_size + nonce_size,
-                data.end());
-            return true;
-        }
-    }
-
-    return false;
+    if (output_script.type() != payment_type::stealth_info)
+        return false;
+    info.bitfield = calculate_stealth_bitfield(output_script);
+    BITCOIN_ASSERT(output_script.operations().size() >= 2);
+    const data_chunk& data = output_script.operations()[1].data;
+    BITCOIN_ASSERT(data.size() >= hash_size);
+    std::copy(data.begin(), data.begin() + hash_size,
+        info.ephem_pubkey.begin());
+    return true;
 }
 
 // TODO: deprecate this as it is identical to uncover_stealth(), only the

@@ -164,8 +164,10 @@ size_t stealth_blocks_size(const size_t bitsize)
     return (bitsize - 1) / stealth_prefix::bits_per_block + 1;
 }
 
-stealth_bitfield calculate_stealth_bitfield(const data_chunk& stealth_data)
+stealth_bitfield calculate_stealth_bitfield(
+    const script_type& stealth_script)
 {
+    const data_chunk stealth_data = save_script(stealth_script);
     constexpr size_t bitfield_size = sizeof(stealth_bitfield);
     // Calculate stealth bitfield
     const hash_digest index = bitcoin_hash(stealth_data);
