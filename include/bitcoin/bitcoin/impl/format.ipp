@@ -32,7 +32,29 @@ void extend_data(D& data, const T& other)
     "The endian functions only work on unsigned types")
 
 template <typename T, typename Iterator>
-T from_big_endian(Iterator in)
+T from_big_endian(Iterator start, const Iterator end)
+{
+    VERIFY_UNSIGNED(T);
+    T out = 0;
+    size_t i = sizeof(T);
+    while (0 < i && start != end)
+        out |= static_cast<T>(*start++) << (8 * --i);
+    return out;
+}
+
+template <typename T, typename Iterator>
+T from_little_endian(Iterator start, const Iterator end)
+{
+    VERIFY_UNSIGNED(T);
+    T out = 0;
+    size_t i = 0;
+    while (i < sizeof(T) && start != end)
+        out |= static_cast<T>(*start++) << (8 * i++);
+    return out;
+}
+
+template <typename T, typename Iterator>
+T from_big_endian_unsafe(Iterator in)
 {
     VERIFY_UNSIGNED(T);
     T out = 0;
@@ -43,7 +65,7 @@ T from_big_endian(Iterator in)
 }
 
 template <typename T, typename Iterator>
-T from_little_endian(Iterator in)
+T from_little_endian_unsafe(Iterator in)
 {
     VERIFY_UNSIGNED(T);
     T out = 0;

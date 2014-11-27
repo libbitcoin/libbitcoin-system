@@ -192,8 +192,8 @@ BOOST_AUTO_TEST_CASE(serialize_deserialize)
     BOOST_REQUIRE_EQUAL(ds.read_8_bytes(), 0x8040201011223344u);
     BOOST_REQUIRE_EQUAL(ds.read_big_endian<uint32_t>(),  0x80402010u);
     BOOST_REQUIRE_EQUAL(ds.read_variable_uint(), 1234u);
-    BOOST_REQUIRE_EQUAL(from_little_endian<uint32_t>(ds.read_data(4).begin()),
-        0xbadf00du);
+    BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint32_t>(
+        ds.read_data(4).begin()), 0xbadf00du);
     BOOST_REQUIRE_EQUAL(ds.read_string(), "hello");
     BOOST_REQUIRE_THROW(ds.read_byte(), end_of_stream);
 }

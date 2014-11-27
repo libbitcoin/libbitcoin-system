@@ -205,7 +205,7 @@ T deserializer<Iterator, SafeCheckLast>::read_big_endian()
     const auto begin = iter_;
     SAFE_CHECK_DISTANCE(sizeof(T));
     iter_ += sizeof(T);
-    return from_big_endian<T>(begin);
+    return from_big_endian_unsafe<T>(begin);
 }
 template <typename Iterator, bool SafeCheckLast>
 template <typename T>
@@ -214,7 +214,7 @@ T deserializer<Iterator, SafeCheckLast>::read_little_endian()
     const auto begin = iter_;
     SAFE_CHECK_DISTANCE(sizeof(T));
     iter_ += sizeof(T);
-    return from_little_endian<T>(begin);
+    return from_little_endian_unsafe<T>(begin);
 }
 
 template <typename Iterator, bool SafeCheckLast>
