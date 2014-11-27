@@ -46,6 +46,8 @@ public:
 private:
     friend bool operator==(
         const stealth_prefix& prefix_a, const stealth_prefix& prefix_b);
+    friend std::istream& operator>>(
+        std::istream& stream, stealth_prefix& prefix);
     friend std::ostream& operator<<(
         std::ostream& stream, const stealth_prefix& prefix);
 
@@ -58,11 +60,12 @@ BC_API bool operator==(
 BC_API bool operator!=(
     const stealth_prefix& prefix_a, const stealth_prefix& prefix_b);
 
+BC_API std::istream& operator>>(
+    std::istream& stream, stealth_prefix& prefix);
 BC_API std::ostream& operator<<(
     std::ostream& stream, const stealth_prefix& prefix);
 
 BC_API size_t stealth_blocks_size(const size_t bitsize);
-
 BC_API stealth_prefix calculate_stealth_prefix(
     const script_type& stealth_script);
 
