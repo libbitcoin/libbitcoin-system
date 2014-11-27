@@ -40,7 +40,7 @@ public:
 
     const data_chunk& blocks() const;
 
-    /// size in bits
+    // size in bits
     size_t size() const;
 
 private:
