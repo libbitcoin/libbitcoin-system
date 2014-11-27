@@ -288,7 +288,7 @@ bool extract_stealth_info(stealth_info& info,
     const data_chunk& data = output_script.operations()[1].data;
     BITCOIN_ASSERT(data.size() >= hash_size);
     std::copy(data.begin(), data.begin() + hash_size,
-        info.ephem_pubkey.begin());
+        info.ephem_pubkey_hash.begin());
     return true;
 }
 
