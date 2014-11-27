@@ -30,40 +30,7 @@ stealth_prefix::stealth_prefix()
 }
 stealth_prefix::stealth_prefix(const std::string& bitstring)
 {
-    size_ = bitstring.size();
-    uint8_t block = 0;
-    size_t bit_iter = bits_per_block;
-
-    for (const char repr: bitstring)
-    {
-        if (repr != '0' && repr != '1')
-        {
-            blocks_.clear();
-            return;
-        }
-
-        // Set bit to 1
-        if (repr == '1')
-        {
-            const uint8_t bitmask = 1 << (bit_iter - 1);
-            block |= bitmask;
-        }
-
-        // Next bit
-        --bit_iter;
-
-        if (bit_iter == 0)
-        {
-            // Move to the next block.
-            blocks_.push_back(block);
-            block = 0;
-            bit_iter = bits_per_block;
-        }
-    }
-
-    // Block wasn't finished but push it back.
-    if (bit_iter != bits_per_block)
-        blocks_.push_back(block);
+    std::stringstream(bitstring) >> *this;
 }
 stealth_prefix::stealth_prefix(size_t size, const data_slice& blocks)
 {
@@ -114,6 +81,53 @@ bool operator!=(
     const stealth_prefix& prefix_a, const stealth_prefix& prefix_b)
 {
     return !(prefix_a == prefix_b);
+}
+
+std::istream& operator>>(
+    std::istream& stream, stealth_prefix& prefix)
+{
+    std::string bitstring;
+    stream >> bitstring;
+
+    prefix.size_ = 0;
+    prefix.blocks_.clear();
+
+    uint8_t block = 0;
+    size_t bit_iter = stealth_prefix::bits_per_block;
+
+    for (const char repr: bitstring)
+    {
+        if (repr != '0' && repr != '1')
+        {
+            prefix.blocks_.clear();
+            return stream;
+        }
+
+        // Set bit to 1
+        if (repr == '1')
+        {
+            const uint8_t bitmask = 1 << (bit_iter - 1);
+            block |= bitmask;
+        }
+
+        // Next bit
+        --bit_iter;
+
+        if (bit_iter == 0)
+        {
+            // Move to the next block.
+            prefix.blocks_.push_back(block);
+            block = 0;
+            bit_iter = stealth_prefix::bits_per_block;
+        }
+    }
+
+    // Block wasn't finished but push it back.
+    if (bit_iter != stealth_prefix::bits_per_block)
+        prefix.blocks_.push_back(block);
+
+    prefix.size_ = bitstring.size();
+    return stream;
 }
 
 std::ostream& operator<<(

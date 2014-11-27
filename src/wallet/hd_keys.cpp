@@ -135,7 +135,7 @@ std::string hd_public_key::encoded() const
 uint32_t hd_public_key::fingerprint() const
 {
     short_hash md = bitcoin_short_hash(K_);
-    return from_little_endian<uint32_t>(md.begin());
+    return from_little_endian_unsafe<uint32_t>(md.begin());
 }
 
 payment_address hd_public_key::address() const

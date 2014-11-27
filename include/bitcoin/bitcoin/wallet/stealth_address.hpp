@@ -35,7 +35,7 @@ typedef std::vector<ec_point> pubkey_list;
 
 struct BC_API stealth_info
 {
-    hash_digest ephem_pubkey;
+    hash_digest ephem_pubkey_hash;
     stealth_prefix bitfield;
 };
 

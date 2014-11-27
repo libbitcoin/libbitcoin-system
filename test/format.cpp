@@ -47,24 +47,28 @@ BOOST_AUTO_TEST_CASE(encode_test_padded_round_trips_value)
     BOOST_REQUIRE_EQUAL(encode_hex(decode_hex(padded_hex)), unpadded_hex);
 }
 
-// from_little_endian/from_big_endian/to_little_endian/to_big_endian
+// from_little_endian_unsafe/from_big_endian_unsafe/to_little_endian/to_big_endian
 
 BOOST_AUTO_TEST_CASE(endian_test)
 {
     auto le = to_little_endian<uint32_t>(123456789);
-    BOOST_REQUIRE_EQUAL(from_little_endian<uint32_t>(le.begin()), 123456789u);
+    BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint32_t>(le.begin()),
+        123456789u);
 
     auto be = to_big_endian<uint32_t>(123456789);
-    BOOST_REQUIRE_EQUAL(from_big_endian<uint32_t>(be.begin()), 123456789u);
+    BOOST_REQUIRE_EQUAL(from_big_endian_unsafe<uint32_t>(be.begin()),
+        123456789u);
 
     std::reverse(le.begin(), le.end());
-    BOOST_REQUIRE_EQUAL(from_big_endian<uint32_t>(le.begin()), 123456789u);
+    BOOST_REQUIRE_EQUAL(from_big_endian_unsafe<uint32_t>(le.begin()),
+        123456789u);
 
     auto bytes = data_chunk{ 0xff };
-    BOOST_REQUIRE_EQUAL(from_big_endian<uint8_t>(bytes.begin()), 255u);
+    BOOST_REQUIRE_EQUAL(from_big_endian_unsafe<uint8_t>(bytes.begin()),
+        255u);
 
     auto quad = to_little_endian<uint64_t>(0x1122334455667788);
-    BOOST_REQUIRE_EQUAL(from_little_endian<uint64_t>(quad.begin()),
+    BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint64_t>(quad.begin()),
         0x1122334455667788u);
 }
 
