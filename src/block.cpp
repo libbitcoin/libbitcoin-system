@@ -21,7 +21,6 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/hash.hpp>
 #include <bitcoin/bitcoin/utility/hash_number.hpp>

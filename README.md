@@ -25,7 +25,7 @@ The libbitcoin toolkit is a set of cross platform C++ libraries for building bit
 
 ### Debian/Ubuntu
 
-Libbitcoin requires a C++11 compiler, which means [GCC 4.7.0](https://gcc.gnu.org/projects/cxx0x.html) minimum.
+Libbitcoin requires a C++11 compiler, currently [GCC 4.8.0](https://gcc.gnu.org/projects/cxx0x.html) minimum.
 
 > For this reason Ubuntu is not supported prior to version 12.04.
 

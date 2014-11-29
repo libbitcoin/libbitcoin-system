@@ -20,8 +20,8 @@
 #ifndef  LIBBITCOIN_SUBSCRIBER_HPP
 #define  LIBBITCOIN_SUBSCRIBER_HPP
 
+#include <memory>
 #include <stack>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 

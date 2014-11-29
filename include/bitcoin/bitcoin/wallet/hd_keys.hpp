@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/address.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
 
 namespace libbitcoin {
@@ -83,7 +83,7 @@ public:
     BC_API hd_private_key();
     BC_API hd_private_key(const ec_secret& private_key,
         const chain_code_type& chain_code, hd_key_lineage lineage);
-    BC_API hd_private_key(const data_chunk& seed, bool testnet=false);
+    BC_API hd_private_key(data_slice seed, bool testnet=false);
 
     BC_API const ec_secret& private_key() const;
 

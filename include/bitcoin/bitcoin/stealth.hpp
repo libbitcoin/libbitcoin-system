@@ -22,11 +22,11 @@
 
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/script.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-BC_API binary_type calculate_stealth_prefix(
-    const script_type& stealth_script);
+BC_API binary_type calculate_stealth_prefix(const script_type& stealth_script);
 
 } // namespace libbitcoin
 

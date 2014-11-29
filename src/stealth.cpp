@@ -23,8 +23,7 @@
 
 namespace libbitcoin {
 
-binary_type calculate_stealth_prefix(
-    const script_type& stealth_script)
+binary_type calculate_stealth_prefix(const script_type& stealth_script)
 {
     const data_chunk stealth_data = save_script(stealth_script);
     const hash_digest index = bitcoin_hash(stealth_data);

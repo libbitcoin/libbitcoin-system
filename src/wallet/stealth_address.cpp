@@ -37,7 +37,6 @@ constexpr uint8_t compressed_pubkey_size = 33;
 constexpr uint8_t number_keys_size = sizeof(uint8_t);
 constexpr uint8_t number_sigs_size = sizeof(uint8_t);
 constexpr uint8_t prefix_length_size = sizeof(uint8_t);
-constexpr uint8_t checksum_size = sizeof(uint32_t);
 constexpr uint8_t max_spend_key_count = sizeof(uint8_t) * byte_bits;
 
 // wiki.unsystem.net/index.php/DarkWallet/Stealth#Address_format
@@ -46,7 +45,7 @@ constexpr uint8_t max_spend_key_count = sizeof(uint8_t) * byte_bits;
 // [prefix:prefix_number_bits / 8, round up][checksum:4]
 // Estimate assumes N = 0 and prefix_length = 0:
 constexpr size_t min_address_size = version_size + options_size +
-    compressed_pubkey_size + number_keys_size + number_sigs_size + 
+    compressed_pubkey_size + number_keys_size + number_sigs_size +
     prefix_length_size + checksum_size;
 
 // Document the assumption that the prefix is defined with an 8 bit block size.
@@ -144,7 +143,7 @@ bool stealth_address::set_encoded(const std::string& encoded_address)
 {
     valid_ = false;
     auto raw_address = decode_base58(encoded_address);
-    
+
     // Size is guarded until we get to N.
     auto required_size = min_address_size;
     if (raw_address.size() < required_size)
@@ -258,7 +257,7 @@ bool stealth_address::get_testnet() const
 bool stealth_address::get_reuse_key() const
 {
     // If the spend_pubkeys_ contains the scan_pubkey_ then the key is reused.
-    return std::find(spend_pubkeys_.begin(), spend_pubkeys_.end(), 
+    return std::find(spend_pubkeys_.begin(), spend_pubkeys_.end(),
         scan_pubkey_) != spend_pubkeys_.end();
 }
 
@@ -283,12 +282,17 @@ bool extract_stealth_info(stealth_info& info,
 {
     if (output_script.type() != payment_type::stealth_info)
         return false;
+
     info.bitfield = calculate_stealth_prefix(output_script);
-    BITCOIN_ASSERT(output_script.operations().size() >= 2);
+    if (output_script.operations().size() < 2)
+        return false;
+
     const data_chunk& data = output_script.operations()[1].data;
-    BITCOIN_ASSERT(data.size() >= hash_size);
+    if (data.size() < hash_size)
+        return false;
+
     std::copy(data.begin(), data.begin() + hash_size,
-        info.ephem_pubkey.begin());
+        info.ephem_pubkey_hash.begin());
     return true;
 }
 
@@ -303,7 +307,7 @@ ec_point initiate_stealth(
     return uncover_stealth(scan_pubkey, ephem_secret, spend_pubkey);
 }
 
-ec_secret shared_secret(const ec_secret& secret, 
+ec_secret shared_secret(const ec_secret& secret,
     const ec_point& point)
 {
     ec_point final = point;

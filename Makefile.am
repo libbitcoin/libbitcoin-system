@@ -95,6 +95,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/base58.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/checksum.hpp \
+    include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
     include/bitcoin/bitcoin/utility/ec_keys.hpp \
     include/bitcoin/bitcoin/utility/hash.hpp \
@@ -120,6 +121,7 @@ bitcoin_bitcoin_util_external_include_HEADERS = \
 bitcoin_bitcoin_impl_utility_includedir = ${includedir}/bitcoin/bitcoin/impl/utility
 bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
+    include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
@@ -201,7 +203,7 @@ test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/include \
     -I${srcdir}/test \
     ${secp256k1_CFLAGS}
-    
+
 if ENABLE_SHARED
 test_libbitcoin_test_CPPFLAGS += \
     -DBOOST_TEST_DYN_LINK

@@ -17,7 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <algorithm>
 #include <secp256k1.h>
+#include <bitcoin/bitcoin/format.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/hash.hpp>
@@ -116,9 +119,9 @@ ec_secret create_nonce(ec_secret secret, hash_digest hash)
         0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
     }};
 
-    K = hmac_sha256_hash(V + byte_array<1>{{0x00}} + secret + hash, K);
+    K = hmac_sha256_hash(build_data({V, to_byte(0x00), secret, hash}), K);
     V = hmac_sha256_hash(V, K);
-    K = hmac_sha256_hash(V + byte_array<1>{{0x01}} + secret + hash, K);
+    K = hmac_sha256_hash(build_data({V, to_byte(0x01), secret, hash}), K);
     V = hmac_sha256_hash(V, K);
 
     while (true)
@@ -128,7 +131,7 @@ ec_secret create_nonce(ec_secret secret, hash_digest hash)
         if (verify_private_key(V))
             return V;
 
-        K = hmac_sha256_hash(V + byte_array<1>{{0x00}}, K);
+        K = hmac_sha256_hash(build_data({V, to_byte(0x00)}), K);
         V = hmac_sha256_hash(V, K);
     }
 }

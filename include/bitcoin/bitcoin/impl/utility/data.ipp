@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2014 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,22 +17,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BASE58_HPP
-#define LIBBITCOIN_BASE58_HPP
-
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#ifndef LIBBITCOIN_DATA_IPP
+#define LIBBITCOIN_DATA_IPP
 
 namespace libbitcoin {
 
-BC_API bool is_base58(const char c);
-BC_API bool is_base58(const std::string& text);
+template<typename T>
+data_chunk to_data_chunk(T iterable)
+{
+    return data_chunk(std::begin(iterable), std::end(iterable));
+}
 
-BC_API std::string encode_base58(data_slice unencoded);
+inline
+data_chunk build_data(std::initializer_list<data_slice> slices,
+    size_t extra_space)
+{
+    size_t size = 0;
+    for (auto slice: slices)
+        size += slice.size();
 
-BC_API data_chunk decode_base58(std::string encoded);
+    data_chunk out;
+    out.reserve(size + extra_space);
+    for (auto slice: slices)
+        out.insert(out.end(), slice.begin(), slice.end());
 
-} // namespace libbitcoin
+    return out;
+}
+
+} // libbitcoin
 
 #endif
 

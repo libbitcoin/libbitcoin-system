@@ -23,12 +23,11 @@
 #include <type_traits>
 #include <boost/range/iterator_range.hpp>
 #include <boost/range/sub_range.hpp>
-#include <boost/detail/endian.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -37,16 +36,24 @@ template <typename D, typename T>
 void extend_data(D& data, const T& other);
 
 template <typename T, typename Iterator>
-T from_big_endian(Iterator in);
+T from_big_endian(Iterator start, Iterator end);
 
 template <typename T, typename Iterator>
-T from_little_endian(Iterator in);
+T from_little_endian(Iterator start, Iterator end);
+
+template <typename T, typename Iterator>
+T from_big_endian_unsafe(Iterator in);
+
+template <typename T, typename Iterator>
+T from_little_endian_unsafe(Iterator in);
 
 template <typename T>
 byte_array<sizeof(T)> to_big_endian(T n);
 
 template <typename T>
 byte_array<sizeof(T)> to_little_endian(T n);
+
+byte_array<1> to_byte(uint8_t byte);
 
 /// Convert data into a user readable hex string.
 template <typename T>

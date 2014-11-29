@@ -32,13 +32,13 @@ namespace libbitcoin {
 
 std::string secret_to_wif(const ec_secret& secret, bool compressed)
 {
+    auto version = to_byte(payment_address::wif_version);
     data_chunk data;
-    data.reserve(1 + hash_size + 1 + 4);
 
-    data.push_back(payment_address::wif_version);
-    extend_data(data, secret);
     if (compressed)
-        data.push_back(0x01);
+        data = build_data({version, secret, to_byte(0x01)}, checksum_size);
+    else
+        data = build_data({version, secret}, checksum_size);
 
     append_checksum(data);
     return encode_base58(data);

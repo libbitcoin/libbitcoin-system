@@ -29,22 +29,20 @@ void append_checksum(data_chunk& data)
     extend_data(data, to_little_endian(checksum));
 }
 
-uint32_t bitcoin_checksum(const data_chunk& chunk)
+uint32_t bitcoin_checksum(data_slice chunk)
 {
     hash_digest hash = bitcoin_hash(chunk);
-    return from_little_endian<uint32_t>(hash.rbegin());
+    return from_little_endian_unsafe<uint32_t>(hash.rbegin());
 }
 
-bool verify_checksum(const data_chunk& data)
+bool verify_checksum(data_slice data)
 {
-    const size_t checksum_length = 4;
-
     // guard against insufficient data length
-    if (data.size() < checksum_length)
+    if (data.size() < checksum_size)
         return false;
 
-    data_chunk body(data.begin(), data.end() - checksum_length);
-    auto checksum = from_little_endian<uint32_t>(data.end() - checksum_length);
+    data_slice body(data.begin(), data.end() - checksum_size);
+    auto checksum = from_little_endian_unsafe<uint32_t>(data.end() - checksum_size);
     return bitcoin_checksum(body) == checksum;
 }
 
