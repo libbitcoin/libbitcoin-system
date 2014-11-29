@@ -22,6 +22,7 @@
 
 #include <array>
 #include <cstdint>
+#include <initializer_list>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
@@ -38,7 +39,11 @@ typedef std::vector<data_chunk> data_stack;
 template<typename T>
 data_chunk to_data_chunk(T iterable);
 
-data_chunk operator+(data_slice a, data_slice b);
+/**
+ * Concatenates several data slices into a single data_chunk.
+ */
+data_chunk build_data(std::initializer_list<data_slice> slices,
+    size_t extra_space=0);
 
 } // namespace libbitcoin
 

@@ -72,14 +72,10 @@ bool payment_address::set_encoded(const std::string& encoded_address)
 
 std::string payment_address::encoded() const
 {
-    data_chunk unencoded_address;
-    unencoded_address.reserve(25);
-    // Type, Hash, Checksum doth make thy address
-    unencoded_address.push_back(version_);
-    extend_data(unencoded_address, hash_);
-    append_checksum(unencoded_address);
-    BITCOIN_ASSERT(unencoded_address.size() == 25);
-    return encode_base58(unencoded_address);
+    auto data = build_data({to_byte(version_), hash_}, checksum_size);
+    append_checksum(data);
+    BITCOIN_ASSERT(data.size() == 25);
+    return encode_base58(data);
 }
 
 void set_public_key_hash(payment_address& address,

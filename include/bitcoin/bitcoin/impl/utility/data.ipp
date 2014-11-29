@@ -29,12 +29,18 @@ data_chunk to_data_chunk(T iterable)
 }
 
 inline
-data_chunk operator+(data_slice a, data_slice b)
+data_chunk build_data(std::initializer_list<data_slice> slices,
+    size_t extra_space)
 {
+    size_t size = 0;
+    for (auto slice: slices)
+        size += slice.size();
+
     data_chunk out;
-    out.reserve(a.size() + b.size());
-    out.insert(out.end(), a.begin(), a.end());
-    out.insert(out.end(), b.begin(), b.end());
+    out.reserve(size + extra_space);
+    for (auto slice: slices)
+        out.insert(out.end(), slice.begin(), slice.end());
+
     return out;
 }
 

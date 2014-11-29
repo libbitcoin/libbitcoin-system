@@ -115,19 +115,18 @@ bool hd_public_key::set_encoded(std::string encoded)
 
 std::string hd_public_key::encoded() const
 {
-    data_chunk data;
-    data.reserve(serialized_length);
     auto prefix = mainnet_public_prefix;
     if (lineage_.testnet)
         prefix = testnet_public_prefix;
 
-    extend_data(data, to_big_endian(prefix));
-    data.push_back(lineage_.depth);
-    extend_data(data, to_little_endian(lineage_.parent_fingerprint));
-    extend_data(data, to_big_endian(lineage_.child_number));
-    extend_data(data, c_);
-    extend_data(data, K_);
-
+    auto data = build_data({
+        to_big_endian(prefix),
+        to_byte(lineage_.depth),
+        to_little_endian(lineage_.parent_fingerprint),
+        to_big_endian(lineage_.child_number),
+        c_,
+        K_
+    }, checksum_size);
     append_checksum(data);
     return encode_base58(data);
 }
@@ -152,10 +151,7 @@ hd_public_key hd_public_key::generate_public_key(uint32_t i) const
     if (first_hardened_key <= i)
         return hd_public_key();
 
-    data_chunk data;
-    data.reserve(33 + 4);
-    extend_data(data, K_);
-    extend_data(data, to_big_endian(i));
+    auto data = build_data({K_, to_big_endian(i)});
     auto I = split(hmac_sha512_hash(data, c_));
 
     // The returned child key Ki is point(parse256(IL)) + Kpar.
@@ -232,20 +228,19 @@ bool hd_private_key::set_encoded(std::string encoded)
 
 std::string hd_private_key::encoded() const
 {
-    data_chunk data;
-    data.reserve(4 + 1 + 4 + 4 + 32 + 33 + 4);
     auto prefix = mainnet_private_prefix;
     if (lineage_.testnet)
         prefix = testnet_private_prefix;
 
-    extend_data(data, to_big_endian(prefix));
-    data.push_back(lineage_.depth);
-    extend_data(data, to_little_endian(lineage_.parent_fingerprint));
-    extend_data(data, to_big_endian(lineage_.child_number));
-    extend_data(data, c_);
-    data.push_back(0x00);
-    extend_data(data, k_);
-
+    auto data = build_data({
+        to_big_endian(prefix),
+        to_byte(lineage_.depth),
+        to_little_endian(lineage_.parent_fingerprint),
+        to_big_endian(lineage_.child_number),
+        c_,
+        to_byte(0x00),
+        k_
+    }, checksum_size);
     append_checksum(data);
     return encode_base58(data);
 }
@@ -256,18 +251,10 @@ hd_private_key hd_private_key::generate_private_key(uint32_t i) const
         return hd_private_key();
 
     data_chunk data;
-    data.reserve(33 + 4);
     if (first_hardened_key <= i)
-    {
-        data.push_back(0x00);
-        extend_data(data, k_);
-        extend_data(data, to_big_endian(i));
-    }
+        data = build_data({to_byte(0x00), k_, to_big_endian(i)});
     else
-    {
-        extend_data(data, K_);
-        extend_data(data, to_big_endian(i));
-    }
+        data = build_data({K_, to_big_endian(i)});
     auto I = split(hmac_sha512_hash(data, c_));
 
     // The child key ki is (parse256(IL) + kpar) mod n:
