@@ -21,7 +21,7 @@
 #define LIBBITCOIN_BASE58_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 

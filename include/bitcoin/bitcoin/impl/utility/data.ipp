@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2014 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,22 +17,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MNEMONIC_HPP
-#define LIBBITCOIN_MNEMONIC_HPP
-
-#include <string>
-#include <vector>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#ifndef LIBBITCOIN_DATA_IPP
+#define LIBBITCOIN_DATA_IPP
 
 namespace libbitcoin {
 
-typedef std::vector<std::string> string_list;
+template<typename T>
+data_chunk to_data_chunk(T iterable)
+{
+    return data_chunk(std::begin(iterable), std::end(iterable));
+}
 
-BC_API string_list encode_mnemonic(const data_chunk& seed);
-BC_API const std::string decode_mnemonic(const string_list& words);
+inline
+data_chunk operator+(data_slice a, data_slice b)
+{
+    data_chunk out;
+    out.reserve(a.size() + b.size());
+    out.insert(out.end(), a.begin(), a.end());
+    out.insert(out.end(), b.begin(), b.end());
+    return out;
+}
 
-} // namespace libbitcoin
+} // libbitcoin
 
 #endif
 

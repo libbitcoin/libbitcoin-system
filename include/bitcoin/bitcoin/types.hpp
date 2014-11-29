@@ -20,15 +20,12 @@
 #ifndef LIBBITCOIN_TYPES_HPP
 #define LIBBITCOIN_TYPES_HPP
 
-#include <array>
-#include <cstdint>
 #include <iomanip>
 #include <memory>
 #include <sstream>
-#include <vector>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/array_slice.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -47,8 +44,6 @@ namespace network {
 
 typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
 
-template<size_t Size> using byte_array = std::array<uint8_t, Size>;
-
 constexpr size_t short_hash_size = 20;
 constexpr size_t hash_size = 32;
 constexpr size_t long_hash_size = 64;
@@ -57,26 +52,6 @@ constexpr size_t long_hash_size = 64;
 typedef byte_array<short_hash_size> short_hash;
 typedef byte_array<hash_size> hash_digest;
 typedef byte_array<long_hash_size> long_hash;
-
-// Arbitrary byte storage.
-typedef array_slice<uint8_t> data_slice;
-typedef std::vector<uint8_t> data_chunk;
-typedef std::vector<data_chunk> data_stack;
-
-template<typename T>
-data_chunk to_data_chunk(T iterable)
-{
-    return data_chunk(std::begin(iterable), std::end(iterable));
-}
-
-inline data_chunk operator+(data_slice a, data_slice b)
-{
-    data_chunk out;
-    out.reserve(a.size() + b.size());
-    out.insert(out.end(), a.begin(), a.end());
-    out.insert(out.end(), b.begin(), b.end());
-    return out;
-}
 
 // A list of indices. Used for creating block_locator objects or
 // Storing list of unconfirmed input indexes in tx pool.

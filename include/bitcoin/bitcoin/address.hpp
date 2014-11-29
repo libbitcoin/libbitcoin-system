@@ -90,7 +90,7 @@ BC_API void set_script_hash(payment_address& address,
     const short_hash& script_hash);
 
 BC_API void set_public_key(payment_address& address,
-    const data_chunk& public_key);
+    const ec_point& public_key);
 BC_API void set_script(payment_address& address,
     const script_type& eval_script);
 

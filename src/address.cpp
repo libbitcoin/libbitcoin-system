@@ -94,7 +94,7 @@ void set_script_hash(payment_address& address,
     address.set(payment_address::script_version, script_hash);
 }
 
-void set_public_key(payment_address& address, const data_chunk& public_key)
+void set_public_key(payment_address& address, const ec_point& public_key)
 {
     address.set(payment_address::pubkey_version,
         bitcoin_short_hash(public_key));

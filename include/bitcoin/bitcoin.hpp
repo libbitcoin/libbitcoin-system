@@ -150,7 +150,7 @@
  * - @link libbitcoin::decode_base58 decode_base58 @endlink
  *
  * @subsection wallet Wallet
- * 
+ *
  * @author Amir Taaki <amir@unsystem.net>
  *
  */
@@ -162,7 +162,7 @@
 // Suppressing msvc warnings from boost that are heard to deal with
 // because boost/algorithm carelessly defines _SCL_SECURE_NO_WARNINGS
 // without first testing it.
-#pragma warning(push) 
+#pragma warning(push)
 #pragma warning(disable : 4267)
 #endif
 #include <bitcoin/bitcoin/block.hpp>
@@ -187,6 +187,7 @@
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/base58.hpp>
 #include <bitcoin/bitcoin/utility/checksum.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/hash.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>

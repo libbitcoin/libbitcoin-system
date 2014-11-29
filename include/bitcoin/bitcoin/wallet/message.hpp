@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/address.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
 
 namespace libbitcoin {
