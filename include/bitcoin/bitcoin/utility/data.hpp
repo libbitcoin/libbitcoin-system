@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2014 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,18 +17,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_RIPEMD_HPP
-#define LIBBITCOIN_RIPEMD_HPP
+#ifndef LIBBITCOIN_DATA_HPP
+#define LIBBITCOIN_DATA_HPP
 
-#include <bitcoin/define.hpp>
-#include <bitcoin/types.hpp>
-#include <bitcoin/utility/external/ripemd160.h>
+#include <array>
+#include <cstdint>
+#include <initializer_list>
+#include <vector>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/array_slice.hpp>
 
 namespace libbitcoin {
 
-BC_API short_hash generate_ripemd_hash(const data_chunk& chunk);
+template<size_t Size> using byte_array = std::array<uint8_t, Size>;
+
+// Arbitrary byte storage.
+typedef array_slice<uint8_t> data_slice;
+typedef std::vector<uint8_t> data_chunk;
+typedef std::vector<data_chunk> data_stack;
+
+template<typename T>
+data_chunk to_data_chunk(T iterable);
+
+/**
+ * Concatenates several data slices into a single data_chunk.
+ */
+data_chunk build_data(std::initializer_list<data_slice> slices,
+    size_t extra_space=0);
 
 } // namespace libbitcoin
+
+#include <bitcoin/bitcoin/impl/utility/data.ipp>
 
 #endif
 

@@ -25,7 +25,7 @@
 #include <boost/asio/streambuf.hpp>
 #include <bitcoin/bitcoin/format.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 

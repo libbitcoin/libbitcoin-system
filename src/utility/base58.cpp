@@ -48,7 +48,7 @@ auto search_first_nonzero(const Data& data)
     return first_nonzero;
 }
 
-size_t count_leading_zeros(const data_chunk& unencoded)
+size_t count_leading_zeros(data_slice unencoded)
 {
     // Skip and count leading '1's.
     size_t leading_zeros = 0;
@@ -73,7 +73,7 @@ void pack_value(data_chunk& indexes, int carry)
     BITCOIN_ASSERT(carry == 0);
 }
 
-std::string encode_base58(const data_chunk& unencoded)
+std::string encode_base58(data_slice unencoded)
 {
     size_t leading_zeros = count_leading_zeros(unencoded);
 

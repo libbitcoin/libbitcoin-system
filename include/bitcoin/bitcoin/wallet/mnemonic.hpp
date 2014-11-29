@@ -6,7 +6,7 @@
  * libbitcoin is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License with
  * additional permissions to the one published by the Free Software
- * Foundation, either version 3 of the License, or (at your option) 
+ * Foundation, either version 3 of the License, or (at your option)
  * any later version. For more information see LICENSE.
  *
  * This program is distributed in the hope that it will be useful,
@@ -23,13 +23,13 @@
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
 typedef std::vector<std::string> string_list;
 
-BC_API string_list encode_mnemonic(const data_chunk& seed);
+BC_API string_list encode_mnemonic(data_slice seed);
 BC_API const std::string decode_mnemonic(const string_list& words);
 
 } // namespace libbitcoin

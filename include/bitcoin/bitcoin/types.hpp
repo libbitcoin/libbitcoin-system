@@ -20,15 +20,12 @@
 #ifndef LIBBITCOIN_TYPES_HPP
 #define LIBBITCOIN_TYPES_HPP
 
-#include <array>
-#include <cstdint>
 #include <iomanip>
 #include <memory>
 #include <sstream>
-#include <vector>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/array_slice.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -47,55 +44,9 @@ namespace network {
 
 typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
 
-template<size_t Size> using byte_array = std::array<uint8_t, Size>;
-
-constexpr size_t short_hash_size = 20;
-constexpr size_t hash_size = 32;
-constexpr size_t long_hash_size = 64;
-
-// Standard hash containers.
-typedef byte_array<short_hash_size> short_hash;
-typedef byte_array<hash_size> hash_digest;
-typedef byte_array<long_hash_size> long_hash;
-
-// Arbitrary byte storage.
-typedef array_slice<uint8_t> data_slice;
-typedef std::vector<uint8_t> data_chunk;
-typedef std::vector<data_chunk> data_stack;
-
-template<typename T>
-data_chunk to_data_chunk(T iterable)
-{
-    return data_chunk(std::begin(iterable), std::end(iterable));
-}
-
-inline data_chunk operator+(data_slice a, data_slice b)
-{
-    data_chunk out;
-    out.reserve(a.size() + b.size());
-    out.insert(out.end(), a.begin(), a.end());
-    out.insert(out.end(), b.begin(), b.end());
-    return out;
-}
-
 // A list of indices. Used for creating block_locator objects or
 // Storing list of unconfirmed input indexes in tx pool.
 typedef std::vector<size_t> index_list;
-
-// List of hashes. Useful primitive.
-typedef std::vector<hash_digest> hash_list;
-typedef std::vector<short_hash> short_hash_list;
-
-// Make hash_digest and short_hash hashable for std::*map variants
-template <typename HashType>
-struct std_hash_wrapper
-{
-    size_t operator()(const HashType& h) const
-    {
-        std::hash<std::string> functor;
-        return functor(std::string(std::begin(h), std::end(h)));
-    }
-};
 
 struct BC_API node_address
 {
@@ -104,26 +55,6 @@ struct BC_API node_address
 };
 
 } // namespace libbitcoin
-
-// Extend std namespace with our hash wrappers
-namespace std
-{
-    using libbitcoin::std_hash_wrapper;
-    using libbitcoin::hash_digest;
-    using libbitcoin::short_hash;
-
-    template <>
-    struct hash<hash_digest>
-      : public std_hash_wrapper<hash_digest>
-    {
-    };
-
-    template <>
-    struct hash<short_hash>
-      : public std_hash_wrapper<short_hash>
-    {
-    };
-} // namespace std
 
 #endif
 

@@ -20,8 +20,8 @@
 #ifndef LIBBITCOIN_STEALTH_HPP
 #define LIBBITCOIN_STEALTH_HPP
 
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/script.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -32,7 +32,7 @@ public:
 
     stealth_prefix();
     stealth_prefix(const std::string& bitstring);
-    stealth_prefix(size_t size, const data_slice& blocks);
+    stealth_prefix(size_t size, data_slice blocks);
 
     void resize(size_t size);
 

@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_COMPAT_HPP
 #define LIBBITCOIN_COMPAT_HPP
 
+#include <limits>
 #include <bitcoin/bitcoin/define.hpp>
 
 #ifdef __MACH__
