@@ -283,10 +283,15 @@ bool extract_stealth_info(stealth_info& info,
 {
     if (output_script.type() != payment_type::stealth_info)
         return false;
+
     info.bitfield = calculate_stealth_prefix(output_script);
-    BITCOIN_ASSERT(output_script.operations().size() >= 2);
+    if (output_script.operations().size() < 2)
+        return false;
+
     const data_chunk& data = output_script.operations()[1].data;
-    BITCOIN_ASSERT(data.size() >= hash_size);
+    if (data.size() < hash_size)
+        return false;
+
     std::copy(data.begin(), data.begin() + hash_size,
         info.ephem_pubkey_hash.begin());
     return true;
