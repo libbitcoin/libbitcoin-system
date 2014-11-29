@@ -25,6 +25,8 @@
 
 namespace libbitcoin {
 
+constexpr size_t checksum_size = sizeof(uint32_t);
+
 /**
  * Appends a four-byte checksum to a data chunk.
  */
