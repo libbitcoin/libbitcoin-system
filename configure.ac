@@ -206,20 +206,10 @@ AX_CHECK_COMPILE_FLAG([-Wpedantic],
 AX_CHECK_COMPILE_FLAG([-Wno-missing-braces],
     [CXXFLAGS="$CXXFLAGS -Wno-missing-braces"])
 
-# Clean up Boost 1.54 headers (clang).
-#------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wno-deprecated-register],
-    [CXXFLAGS="$CXXFLAGS -Wno-deprecated-register"])
-
 # Clean up Boost 1.49 headers (gcc).
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wno-unused-local-typedefs],
     [CXXFLAGS="$CXXFLAGS -Wno-unused-local-typedefs"])
-
-# Clean up on OSX (clang).
-#------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wno-unknown-warning-option],
-    [CXXFLAGS="$CXXFLAGS -Wno-unknown-warning-option"])
 
 # Protect stack.
 #------------------------------------------------------------------------------
