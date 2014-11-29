@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/hash_number.hpp>
 
 namespace libbitcoin {
@@ -63,10 +62,10 @@ constexpr uint64_t max_money()
     return reward_interval * max_money_recursive(coin_price(block_reward));
 }
 
-const hash_digest null_hash = { 
+const hash_digest null_hash = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-const short_hash null_short_hash = { 
+const short_hash null_short_hash = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 constexpr uint8_t byte_bits = 8;

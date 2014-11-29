@@ -22,8 +22,8 @@
 
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/script.hpp>
+#include <bitcoin/bitcoin/utility/hash.hpp>
 
 namespace libbitcoin {
 
