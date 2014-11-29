@@ -36,7 +36,7 @@ typedef std::vector<ec_point> pubkey_list;
 struct BC_API stealth_info
 {
     hash_digest ephem_pubkey;
-    stealth_prefix bitfield;
+    binary_type bitfield;
 };
 
 // Supports testnet and mainnet addresses but not prefix > 0
@@ -60,7 +60,7 @@ public:
 
     // Construction
     BC_API stealth_address();
-    BC_API stealth_address(const stealth_prefix& prefix,
+    BC_API stealth_address(const binary_type& prefix,
         const ec_point& scan_pubkey, const pubkey_list& spend_pubkeys,
         uint8_t signatures, bool testnet);
 
@@ -70,7 +70,7 @@ public:
     BC_API bool valid() const;
 
     // Properties
-    BC_API const stealth_prefix& get_prefix() const;
+    BC_API const binary_type& get_prefix() const;
     BC_API const ec_point& get_scan_pubkey() const;
     BC_API uint8_t get_signatures() const;
     BC_API const pubkey_list& get_spend_pubkeys() const;
@@ -86,7 +86,7 @@ protected:
     uint8_t signatures_ = 0;
     ec_point scan_pubkey_;
     pubkey_list spend_pubkeys_;
-    stealth_prefix prefix_;
+    binary_type prefix_;
 };
 
 // See libbitcoin::extract()
