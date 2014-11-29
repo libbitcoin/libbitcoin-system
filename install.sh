@@ -49,6 +49,11 @@ GMP_ARCHIVE="gmp-6.0.0a.tar.bz2"
 
 # Define build options.
 #==============================================================================
+# Define gmp options.
+#------------------------------------------------------------------------------
+GMP_OPTIONS=\
+"CPPFLAGS=-w "
+
 # Define boost options for linux.
 #------------------------------------------------------------------------------
 BOOST_OPTIONS_LINUX=\
@@ -79,11 +84,6 @@ BOOST_OPTIONS_DARWIN=\
 "--with-test "\
 "-d0 "\
 "-q "
-
-# Define gmp options.
-#------------------------------------------------------------------------------
-GMP_OPTIONS=\
-"CPPFLAGS=-w "
 
 # Define secp256k1 options.
 #------------------------------------------------------------------------------
@@ -277,7 +277,7 @@ make_silent()
 {
     JOBS=$1
     TARGET=$2
-    
+
     # Avoid setting -j1 (causes problems on Travis).
     if [[ $JOBS -gt $SEQUENTIAL ]]; then
         make --silent -j$JOBS $TARGET
