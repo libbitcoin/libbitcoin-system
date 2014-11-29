@@ -32,7 +32,7 @@ stealth_prefix::stealth_prefix(const std::string& bitstring)
 {
     std::stringstream(bitstring) >> *this;
 }
-stealth_prefix::stealth_prefix(size_t size, const data_slice& blocks)
+stealth_prefix::stealth_prefix(size_t size, data_slice blocks)
 {
     // Copy blocks
     blocks_.resize(blocks.size());

@@ -1661,7 +1661,7 @@ string_list common_words{
 "weary"
 };
 
-string_list encode_mnemonic(const data_chunk& seed)
+string_list encode_mnemonic(data_slice seed)
 {
     BITCOIN_ASSERT(common_words.size() == 1626);
     string_list result;

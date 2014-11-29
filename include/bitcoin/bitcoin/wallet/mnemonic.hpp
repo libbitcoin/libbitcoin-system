@@ -29,7 +29,7 @@ namespace libbitcoin {
 
 typedef std::vector<std::string> string_list;
 
-BC_API string_list encode_mnemonic(const data_chunk& seed);
+BC_API string_list encode_mnemonic(data_slice seed);
 BC_API const std::string decode_mnemonic(const string_list& words);
 
 } // namespace libbitcoin

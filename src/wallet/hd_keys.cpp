@@ -184,7 +184,7 @@ hd_private_key::hd_private_key(const ec_secret& private_key,
 {
 }
 
-hd_private_key::hd_private_key(const data_chunk& seed, bool testnet)
+hd_private_key::hd_private_key(data_slice seed, bool testnet)
   : hd_public_key()
 {
     std::string key("Bitcoin seed");
