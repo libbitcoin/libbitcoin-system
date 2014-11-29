@@ -24,7 +24,7 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(stealth_tests)
 
-BOOST_AUTO_TEST_CASE(repr_test)
+BOOST_AUTO_TEST_CASE(verify_string_constructor)
 {
     std::string repr = "01100110000";
     stealth_prefix prefix(repr);
@@ -36,21 +36,21 @@ BOOST_AUTO_TEST_CASE(repr_test)
     }
 }
 
-BOOST_AUTO_TEST_CASE(value_init)
+BOOST_AUTO_TEST_CASE(compare_constructor_results)
 {
-    std::string repr = "01100110000";
+    std::string repr = "01100111000";
     stealth_prefix prefix(repr);
     // Binary repr as a value on the left, padded with zeros to the right.
     //  repr + 0000....000
-    data_chunk blocks{{102, 0}};
+    data_chunk blocks{{0x67, 0x00}};
     stealth_prefix prefix2(repr.size(), blocks);
     BOOST_REQUIRE_EQUAL(prefix, prefix2);
 }
 
 BOOST_AUTO_TEST_CASE(bitfield_test1)
 {
-    stealth_prefix prefix("01100110001");
-    data_chunk raw_bitfield{{102, 32, 0, 0}};
+    stealth_prefix prefix("01100111001");
+    data_chunk raw_bitfield{{0x67, 0x20, 0x00, 0x0}};
     BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.size());
     stealth_prefix compare(prefix.size(), raw_bitfield);
     BOOST_REQUIRE_EQUAL(prefix, compare);
