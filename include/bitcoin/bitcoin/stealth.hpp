@@ -25,8 +25,6 @@
 
 namespace libbitcoin {
 
-BC_API size_t stealth_blocks_size(const size_t bitsize);
-
 BC_API binary_type calculate_stealth_prefix(
     const script_type& stealth_script);
 
