@@ -93,6 +93,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
     include/bitcoin/bitcoin/utility/base58.hpp \
+    include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/checksum.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
@@ -160,6 +161,7 @@ src_libbitcoin_la_SOURCES = \
     src/threadpool.cpp \
     src/transaction.cpp \
     src/utility/base58.cpp \
+    src/utility/binary.cpp \
     src/utility/checksum.cpp \
     src/utility/ec_keys.cpp \
     src/utility/hash.cpp \

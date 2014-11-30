@@ -49,7 +49,7 @@ constexpr size_t min_address_size = version_size + options_size +
     prefix_length_size + checksum_size;
 
 // Document the assumption that the prefix is defined with an 8 bit block size.
-static_assert(stealth_prefix::bits_per_block == byte_bits,
+static_assert(binary_type::bits_per_block == byte_bits, 
     "The declaraction of stealh_prefix must have an 8 bit block size.");
 
 stealth_address::stealth_address()
@@ -57,8 +57,8 @@ stealth_address::stealth_address()
 {
 }
 
-stealth_address::stealth_address(const stealth_prefix& prefix,
-    const ec_point& scan_pubkey, const pubkey_list& spend_pubkeys,
+stealth_address::stealth_address(const binary_type& prefix,
+    const ec_point& scan_pubkey, const pubkey_list& spend_pubkeys, 
     uint8_t signatures, bool testnet)
 {
     // Guard against uncompressed pubkey or junk data.
@@ -218,7 +218,7 @@ bool stealth_address::set_encoded(const std::string& encoded_address)
 
     // Deserialize the prefix bytes/blocks.
     data_chunk raw_prefix(iter, iter + prefix_bytes);
-    prefix_ = stealth_prefix(prefix_number_bits, raw_prefix);
+    prefix_ = binary_type(prefix_number_bits, raw_prefix);
 
     valid_ = true;
     return valid_;
@@ -229,7 +229,7 @@ bool stealth_address::valid() const
     return valid_;
 }
 
-const stealth_prefix& stealth_address::get_prefix() const
+const binary_type& stealth_address::get_prefix() const
 {
     return prefix_;
 }
@@ -292,7 +292,7 @@ bool extract_stealth_info(stealth_info& info,
         return false;
 
     std::copy(data.begin(), data.begin() + hash_size,
-        info.ephem_pubkey_hash.begin());
+        info.ephem_pubkey.begin());
     return true;
 }
 
