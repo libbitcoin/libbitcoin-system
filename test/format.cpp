@@ -148,6 +148,19 @@ BOOST_AUTO_TEST_CASE(btc_to_satoshi_overflow_int64_test)
     BOOST_REQUIRE(!btc_to_satoshi(satoshi, "184467440737.09551616"));
 }
 
+BOOST_AUTO_TEST_CASE(btc_to_satoshi_lexical_cast_fail)
+{
+    uint64_t satoshi;
+    BOOST_REQUIRE(!btc_to_satoshi(satoshi, "0.-1"));
+}
+
+BOOST_AUTO_TEST_CASE(btc_to_satoshi_harmless_zeros)
+{
+    uint64_t satoshi;
+    BOOST_REQUIRE(btc_to_satoshi(satoshi, "0.0000000100"));
+    BOOST_REQUIRE_EQUAL(satoshi, 1);
+}
+
 // satoshi_to_btc
 
 BOOST_AUTO_TEST_CASE(satoshi_to_btc_0_satoshi_test)
