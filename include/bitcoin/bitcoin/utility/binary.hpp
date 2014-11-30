@@ -34,7 +34,7 @@ public:
 
     binary_type();
     binary_type(const std::string& bitstring);
-    binary_type(size_t size, const data_slice& blocks);
+    binary_type(size_t size, data_slice blocks);
 
     void resize(size_t size);
 
