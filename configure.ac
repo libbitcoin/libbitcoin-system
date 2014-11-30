@@ -23,6 +23,8 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 
 # Run macros for operation of generated Makefiles, enable non-recursive make.
+# Unless [foreign] is specified standard GNU files will be required,
+# specifically: AUTHORS, COPYING, INSTALL, NEWS, README and ChangeLog.
 AM_INIT_AUTOMAKE([subdir-objects])
 
 # Enable C and Posix extensions that may be disabled on certain platforms.
@@ -204,20 +206,10 @@ AX_CHECK_COMPILE_FLAG([-Wpedantic],
 AX_CHECK_COMPILE_FLAG([-Wno-missing-braces],
     [CXXFLAGS="$CXXFLAGS -Wno-missing-braces"])
 
-# Clean up Boost 1.54 headers (clang).
-#------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wno-deprecated-register],
-    [CXXFLAGS="$CXXFLAGS -Wno-deprecated-register"])
-
 # Clean up Boost 1.49 headers (gcc).
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wno-unused-local-typedefs],
     [CXXFLAGS="$CXXFLAGS -Wno-unused-local-typedefs"])
-
-# Clean up on OSX (clang).
-#------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wno-unknown-warning-option],
-    [CXXFLAGS="$CXXFLAGS -Wno-unknown-warning-option"])
 
 # Protect stack.
 #------------------------------------------------------------------------------

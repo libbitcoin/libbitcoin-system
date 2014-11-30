@@ -185,6 +185,9 @@
     <ClCompile Include="..\..\..\..\src\utility\external\hmac_sha256.c">
       <Filter>src\utility\external</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp">
@@ -351,6 +354,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\hmac_sha256.h">
       <Filter>include\bitcoin\utility\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp">
+      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

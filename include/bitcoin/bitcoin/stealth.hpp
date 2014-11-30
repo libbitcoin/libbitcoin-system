@@ -20,53 +20,14 @@
 #ifndef LIBBITCOIN_STEALTH_HPP
 #define LIBBITCOIN_STEALTH_HPP
 
+#include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/script.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-class BC_API stealth_prefix
-{
-public:
-    static constexpr size_t bits_per_block = byte_bits;
-
-    stealth_prefix();
-    stealth_prefix(const std::string& bitstring);
-    stealth_prefix(size_t size, data_slice blocks);
-
-    void resize(size_t size);
-
-    bool operator[](size_t i) const;
-
-    const data_chunk& blocks() const;
-
-    // size in bits
-    size_t size() const;
-
-private:
-    friend bool operator==(
-        const stealth_prefix& prefix_a, const stealth_prefix& prefix_b);
-    friend std::istream& operator>>(
-        std::istream& stream, stealth_prefix& prefix);
-    friend std::ostream& operator<<(
-        std::ostream& stream, const stealth_prefix& prefix);
-
-    size_t size_ = 0;
-    data_chunk blocks_;
-};
-
-BC_API bool operator==(
-    const stealth_prefix& prefix_a, const stealth_prefix& prefix_b);
-BC_API bool operator!=(
-    const stealth_prefix& prefix_a, const stealth_prefix& prefix_b);
-
-BC_API std::istream& operator>>(
-    std::istream& stream, stealth_prefix& prefix);
-BC_API std::ostream& operator<<(
-    std::ostream& stream, const stealth_prefix& prefix);
-
 BC_API size_t stealth_blocks_size(const size_t bitsize);
-BC_API stealth_prefix calculate_stealth_prefix(
+
+BC_API binary_type calculate_stealth_prefix(
     const script_type& stealth_script);
 
 } // namespace libbitcoin
