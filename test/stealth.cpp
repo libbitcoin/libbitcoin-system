@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(stealth_tests)
 BOOST_AUTO_TEST_CASE(verify_string_constructor)
 {
     std::string repr = "01100110000";
-    stealth_prefix prefix(repr);
+    binary_type prefix(repr);
     BOOST_REQUIRE_EQUAL(repr.size(), prefix.size());
     for (size_t i = 0; i < repr.size(); ++i)
     {
@@ -39,48 +39,48 @@ BOOST_AUTO_TEST_CASE(verify_string_constructor)
 BOOST_AUTO_TEST_CASE(compare_constructor_results)
 {
     std::string repr = "01100111000";
-    stealth_prefix prefix(repr);
+    binary_type prefix(repr);
     // Binary repr as a value on the left, padded with zeros to the right.
     //  repr + 0000....000
     data_chunk blocks{{0x67, 0x00}};
-    stealth_prefix prefix2(repr.size(), blocks);
+    binary_type prefix2(repr.size(), blocks);
     BOOST_REQUIRE_EQUAL(prefix, prefix2);
 }
 
 BOOST_AUTO_TEST_CASE(bitfield_test1)
 {
-    stealth_prefix prefix("01100111001");
+    binary_type prefix("01100111001");
     data_chunk raw_bitfield{{0x67, 0x20, 0x00, 0x0}};
     BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.size());
-    stealth_prefix compare(prefix.size(), raw_bitfield);
+    binary_type compare(prefix.size(), raw_bitfield);
     BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 
 BOOST_AUTO_TEST_CASE(bitfield_test2)
 {
     data_chunk blocks1{{0x8b, 0xf4, 0x1c, 0x69}};
-    stealth_prefix prefix1(27, blocks1);
+    binary_type prefix1(27, blocks1);
     data_chunk raw_bitfield1{ { 0x8b, 0xf4, 0x1c, 0x79 } };
     BOOST_REQUIRE_GE(raw_bitfield1.size() * 8, prefix1.size());
-    stealth_prefix compare1(prefix1.size(), raw_bitfield1);
+    binary_type compare1(prefix1.size(), raw_bitfield1);
     BOOST_REQUIRE_EQUAL(prefix1, compare1);
 }
 
 BOOST_AUTO_TEST_CASE(bitfield_test3)
 {
     data_chunk blocks_bs{{0x69, 0x1c, 0xf4, 0x8b}};
-    stealth_prefix prefix_bs(32, blocks_bs);
+    binary_type prefix_bs(32, blocks_bs);
     data_chunk raw_bitfield_bs{{0x69, 0x1c, 0xf4, 0x8b}};
-    stealth_prefix compare_bs(prefix_bs.size(), raw_bitfield_bs);
+    binary_type compare_bs(prefix_bs.size(), raw_bitfield_bs);
     BOOST_REQUIRE_EQUAL(prefix_bs, compare_bs);
 }
 
 BOOST_AUTO_TEST_CASE(bitfield_test4)
 {
     data_chunk blocks_b{{0x69, 0x1c, 0xf4, 0x8b}};
-    stealth_prefix prefix_b(29, blocks_b);
+    binary_type prefix_b(29, blocks_b);
     data_chunk raw_bitfield_bs{ { 0x69, 0x1c, 0xf4, 0x8b } };
-    stealth_prefix compare_b(prefix_b.size(), raw_bitfield_bs);
+    binary_type compare_b(prefix_b.size(), raw_bitfield_bs);
     BOOST_REQUIRE_EQUAL(prefix_b, compare_b);
 }
 
