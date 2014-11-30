@@ -292,7 +292,7 @@ bool extract_stealth_info(stealth_info& info,
         return false;
 
     std::copy(data.begin(), data.begin() + hash_size,
-        info.ephem_pubkey_hash.begin());
+        info.ephem_pubkey.begin());
     return true;
 }
 
