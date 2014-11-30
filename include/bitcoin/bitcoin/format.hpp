@@ -20,14 +20,9 @@
 #ifndef LIBBITCOIN_FORMAT_HPP
 #define LIBBITCOIN_FORMAT_HPP
 
-#include <type_traits>
-#include <boost/range/iterator_range.hpp>
-#include <boost/range/sub_range.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 

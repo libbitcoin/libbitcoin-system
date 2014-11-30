@@ -21,7 +21,7 @@
 #define LIBBITCOIN_BINARY_HPP
 
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 

@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/utility/binary.hpp>
 
+#include <sstream>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {

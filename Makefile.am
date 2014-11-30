@@ -64,7 +64,6 @@ bitcoin_bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin/script.hpp \
     include/bitcoin/bitcoin/stealth.hpp \
     include/bitcoin/bitcoin/transaction.hpp \
-    include/bitcoin/bitcoin/types.hpp \
     include/bitcoin/bitcoin/version.hpp
 
 bitcoin_bitcoin_impl_includedir = ${includedir}/bitcoin/bitcoin/impl

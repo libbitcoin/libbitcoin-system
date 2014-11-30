@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <bitcoin/bitcoin/network/handshake.hpp>
+
 #include <functional>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/handshake.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 #ifndef NO_CURL
@@ -258,7 +260,7 @@ void connect(handshake& shake, network& net,
     const std::string& hostname, uint16_t port,
     network::connect_handler handle_connect)
 {
-    net.connect(hostname, port, 
+    net.connect(hostname, port,
         std::bind(finish_connect, _1, _2, std::ref(shake), handle_connect));
 }
 

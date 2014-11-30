@@ -21,7 +21,6 @@
 #define LIBBITCOIN_SHARED_CONST_BUFFER_HPP
 
 #include <boost/asio.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -44,12 +43,12 @@ public:
     typedef const value_type* const_iterator;
 
     BC_API const_iterator begin() const
-    { 
-        return &buffer_; 
+    {
+        return &buffer_;
     }
     BC_API const_iterator end() const
-    { 
-        return &buffer_ + 1; 
+    {
+        return &buffer_ + 1;
     }
 
 private:

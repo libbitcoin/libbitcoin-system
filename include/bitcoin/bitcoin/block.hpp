@@ -22,10 +22,13 @@
 
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
 
 namespace libbitcoin {
+
+// A list of indices. Used for creating block_locator objects or
+// Storing list of unconfirmed input indexes in tx pool.
+typedef std::vector<size_t> index_list;
 
 enum class block_status
 {

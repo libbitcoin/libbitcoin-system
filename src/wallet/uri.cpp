@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 
 #include <cstdint>
+#include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/format.hpp>

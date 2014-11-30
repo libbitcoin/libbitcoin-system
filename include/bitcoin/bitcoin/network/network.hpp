@@ -26,13 +26,15 @@
 #include <boost/utility.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
+
+class channel;
+typedef std::shared_ptr<channel> channel_ptr;
+typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
 
 class acceptor
   : public std::enable_shared_from_this<acceptor>
@@ -53,6 +55,8 @@ private:
     threadpool& pool_;
     tcp_acceptor_ptr tcp_accept_;
 };
+
+typedef std::shared_ptr<acceptor> acceptor_ptr;
 
 class network
 {

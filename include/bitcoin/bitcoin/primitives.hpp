@@ -20,13 +20,11 @@
 #ifndef LIBBITCOIN_PRIMITIVES_HPP
 #define LIBBITCOIN_PRIMITIVES_HPP
 
-#include <array>
 #include <cstdint>
-#include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/script.hpp>
-#include <bitcoin/bitcoin/types.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 

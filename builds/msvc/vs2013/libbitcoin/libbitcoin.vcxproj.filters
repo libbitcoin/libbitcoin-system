@@ -295,9 +295,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\transaction.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\types.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>

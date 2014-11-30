@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_SERIALIZER_IPP
 #define LIBBITCOIN_SERIALIZER_IPP
 
+#include <bitcoin/bitcoin/utility/assert.hpp>
+
 namespace libbitcoin {
 
 template <typename Iterator>

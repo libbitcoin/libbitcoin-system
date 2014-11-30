@@ -23,7 +23,6 @@
 #include <memory>
 #include <system_error>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>

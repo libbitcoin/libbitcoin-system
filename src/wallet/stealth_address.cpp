@@ -18,6 +18,7 @@
  */
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/format.hpp>

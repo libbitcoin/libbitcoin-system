@@ -186,7 +186,6 @@
 #include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
-#include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
