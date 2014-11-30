@@ -22,8 +22,8 @@
 
 #include <memory>
 #include <stack>
-#include <bitcoin/bitcoin/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 

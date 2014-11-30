@@ -28,8 +28,8 @@
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/threadpool.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {

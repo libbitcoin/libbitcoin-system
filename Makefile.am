@@ -63,7 +63,6 @@ bitcoin_bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin/satoshi_serialize.hpp \
     include/bitcoin/bitcoin/script.hpp \
     include/bitcoin/bitcoin/stealth.hpp \
-    include/bitcoin/bitcoin/threadpool.hpp \
     include/bitcoin/bitcoin/transaction.hpp \
     include/bitcoin/bitcoin/types.hpp \
     include/bitcoin/bitcoin/version.hpp
@@ -102,6 +101,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/script_number.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
+    include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
     include/bitcoin/bitcoin/utility/weak_bind.hpp
 
@@ -157,7 +157,6 @@ src_libbitcoin_la_SOURCES = \
     src/satoshi_serialize.cpp \
     src/script.cpp \
     src/stealth.cpp \
-    src/threadpool.cpp \
     src/transaction.cpp \
     src/utility/binary.cpp \
     src/utility/checksum.cpp \
@@ -166,6 +165,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/hash_number.cpp \
     src/utility/logger.cpp \
     src/utility/script_number.cpp \
+    src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
     src/utility/external/hmac_sha256.c \
     src/utility/external/hmac_sha512.c \

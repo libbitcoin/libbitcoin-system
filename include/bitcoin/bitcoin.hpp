@@ -180,7 +180,6 @@
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
-#include <bitcoin/bitcoin/threadpool.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/types.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -193,6 +192,7 @@
 #include <bitcoin/bitcoin/utility/script_number.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
 #include <bitcoin/bitcoin/wallet/amount.hpp>

@@ -81,7 +81,6 @@
     <ClCompile Include="..\..\..\..\src\satoshi_serialize.cpp" />
     <ClCompile Include="..\..\..\..\src\script.cpp" />
     <ClCompile Include="..\..\..\..\src\stealth.cpp" />
-    <ClCompile Include="..\..\..\..\src\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\checksum.cpp" />
@@ -97,6 +96,7 @@
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\script_number.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\amount.cpp" />
@@ -127,7 +127,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\satoshi_serialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\stealth.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\threadpool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\transaction.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\types.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp" />
@@ -152,6 +151,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\subscriber.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timed_section.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\weak_bind.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />
