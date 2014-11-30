@@ -204,11 +204,6 @@ test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/test \
     ${secp256k1_CFLAGS}
 
-if ENABLE_SHARED
-test_libbitcoin_test_CPPFLAGS += \
-    -DBOOST_TEST_DYN_LINK
-endif
-
 test_libbitcoin_test_SOURCES = \
     test/amount.cpp \
     test/base58.cpp \

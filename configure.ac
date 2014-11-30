@@ -110,9 +110,9 @@ AC_ARG_ENABLE([testnet],
 AC_MSG_RESULT([$enable_testnet])
 AS_IF([test x$enable_testnet != xno], AC_DEFINE([ENABLE_TESTNET]))
 
-# Inherit --enable-shared option and declare ENABLE_SHARED.
+# Inherit --enable-shared option and define BOOST_TEST_DYN_LINK.
 #------------------------------------------------------------------------------
-AM_CONDITIONAL([ENABLE_SHARED], [test x$enable_shared != xno])
+AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 
 # Check dependencies.
