@@ -23,26 +23,36 @@
 #include <cstdint>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 
-/**
- * Validates and parses an amount string according to the BIP 21 grammar.
- * @param decmial_places the location of the decimal point. The default
- * value converts bitcoins to satoshis.
- * @return parsed value, or invalid_amount for failure.
- */
-BC_API uint64_t parse_amount(const std::string& amount,
-    uint8_t decimal_places=8);
+constexpr uint8_t btc_decimal_places = 8;
+constexpr uint8_t mbtc_decimal_places = 5;
+constexpr uint8_t ubtc_decimal_places = 2;
 
 /**
- * Writes a Bitcoin amount to a string, following the BIP 21 grmmar.
- * Avoids the rounding issues often seen with floating-point methods.
- * @param decmial_places the location of the decimal point. The default
- * value converts satoshis to bitcoins.
+ * Validates and parses an amount string according to the BIP 21 grammar.
+ * @param strict true to treat unrepresentable fractions as an error,
+ * or false to round them upwards.
+ * @param decmial_places the location of the decimal point.
+ * The default value converts bitcoins to satoshis.
+ * @return false for failure.
  */
-BC_API std::string format_amount(uint64_t amount, uint8_t decimal_places=8);
+BC_API bool parse_amount(uint64_t& out, std::string amount,
+    bool strict=true, uint8_t decimal_places=btc_decimal_places);
+
+/**
+ * Writes a Bitcoin amount to a string, following the BIP 21 grammar.
+ * Avoids the rounding issues often seen with floating-point methods.
+ * @param decmial_places the location of the decimal point.
+ * The default value converts satoshis to bitcoins.
+ */
+BC_API std::string format_amount(uint64_t amount,
+    uint8_t decimal_places=btc_decimal_places);
+
+// Old names:
+BC_API bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc);
+BC_API std::string satoshi_to_btc(uint64_t satoshi);
 
 } // namespace libbitcoin
 

@@ -24,40 +24,78 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(parse_amount_tests)
 
-BOOST_AUTO_TEST_CASE(parse_amount_test)
-{
-    const uint64_t invalid_amount = MAX_UINT64;
-    BOOST_REQUIRE_EQUAL(parse_amount("4.432"), 443200000u);
-    BOOST_REQUIRE_EQUAL(parse_amount("4.432."), invalid_amount);
-    BOOST_REQUIRE_EQUAL(parse_amount("4"), 400000000u);
-    BOOST_REQUIRE_EQUAL(parse_amount("4."), 400000000u);
-    BOOST_REQUIRE_EQUAL(parse_amount(".4"), 40000000u);
-    BOOST_REQUIRE_EQUAL(parse_amount("."), 0u);
-    BOOST_REQUIRE_EQUAL(parse_amount("0.00000004"), 4u);
-    BOOST_REQUIRE_EQUAL(parse_amount("0.000000044"), 4u);
-    BOOST_REQUIRE_EQUAL(parse_amount("0.000000045"), 5u);
-    BOOST_REQUIRE_EQUAL(parse_amount("0.000000049"), 5u);
-    BOOST_REQUIRE_EQUAL(parse_amount("4.432112395"), 443211240u);
-    BOOST_REQUIRE_EQUAL(parse_amount("21000000"), 2100000000000000u);
-    BOOST_REQUIRE_EQUAL(parse_amount("1234.9", 0), 1235u);
-    BOOST_REQUIRE_EQUAL(parse_amount("64.25", 5), 6425000u);
-}
+#define TEST(name, expected, ...) \
+    BOOST_AUTO_TEST_CASE(parse_amount_##name##_test) \
+    { \
+        uint64_t result; \
+        BOOST_REQUIRE(parse_amount(result, __VA_ARGS__)); \
+        BOOST_REQUIRE_EQUAL(result, expected); \
+    }
 
-BOOST_AUTO_TEST_CASE(parse_amount_overflow_test)
-{
-    const uint64_t invalid_amount = MAX_UINT64;
-    BOOST_REQUIRE_EQUAL(parse_amount("9999999999999999999", 0), 9999999999999999999u);
-    BOOST_REQUIRE_EQUAL(parse_amount("18446744073709551614", 0), 18446744073709551614u);
-    BOOST_REQUIRE_EQUAL(parse_amount("18446744073709551615", 0), invalid_amount);
-    BOOST_REQUIRE_EQUAL(parse_amount("18446744073709551616", 0), invalid_amount);
-    BOOST_REQUIRE_EQUAL(parse_amount("99999999999999999999", 0), invalid_amount);
-}
+#define TEST_ERROR(name, ...) \
+    BOOST_AUTO_TEST_CASE(parse_amount_##name##_test) \
+    { \
+        uint64_t result; \
+        BOOST_REQUIRE(!parse_amount(result, __VA_ARGS__)); \
+    }
 
-BOOST_AUTO_TEST_CASE(format_amount_test)
-{
-    BOOST_REQUIRE_EQUAL(format_amount(123, 0), "123");
-    BOOST_REQUIRE_EQUAL(format_amount(123, 2), "1.23");
-    BOOST_REQUIRE_EQUAL(format_amount(123, 4), "0.0123");
-}
+// Limits:
+TEST(zero,                      0, "0")
+TEST(max_uint64,                max_uint64, "184467440737.09551615")
+TEST(max_money,                 max_money(), "20999999.9769")
+TEST(overflow_max_money,        max_money() + 1, "20999999.97690001")
+
+// Decimal points:
+TEST(pure_integer,              42, "42.0",         true, 0)
+TEST(no_decimal,                1000000, "10",      true, mbtc_decimal_places)
+TEST(normal_decimal,            420000, "4.2",      true, mbtc_decimal_places)
+TEST(leading_decimal,           50000, ".5",        true, mbtc_decimal_places)
+TEST(trailing_decial,           500000, "5.",       true, mbtc_decimal_places)
+TEST(extra_zeros,               1002000, "010.020", true, mbtc_decimal_places)
+TEST(decimal_point_only,        0, ".")
+TEST(harmless_zeros,            1, "0.0000000100")
+
+// Rounding:
+TEST(rounding,                  11, "0.101",   false, ubtc_decimal_places)
+TEST(rounding_carry,            1000, "9.991", false, ubtc_decimal_places)
+TEST(zero_past_max,             max_uint64, "184467440737.095516150")
+
+// Format errors:
+TEST_ERROR(lexical_cast_fail,   "0.-1")
+TEST_ERROR(extra_decimal,       "0.0.0")
+TEST_ERROR(bad_characters,      "0x0ff")
+
+// Numeric errors:
+TEST_ERROR(overflow,            "184467440737.09551616")
+TEST_ERROR(rounding_overflow,   "184467440737.095516151", false)
+TEST_ERROR(fractional_amount,   "0.999999999")
+
+#undef TEST
+#undef TEST_ERROR
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(format_amount_tests)
+
+#define TEST(name, expected, ...) \
+    BOOST_AUTO_TEST_CASE(format_amount_##name##_test) \
+    { \
+        BOOST_REQUIRE_EQUAL(format_amount(__VA_ARGS__), expected); \
+    }
+
+// Limits:
+TEST(zero,                      "0", 0)
+TEST(max_uint64,                "184467440737.09551615", max_uint64)
+TEST(max_money,                 "20999999.9769", max_money())
+TEST(overflow_max_money,        "20999999.97690001", max_money() + 1)
+
+// Decimal points:
+TEST(pure_integer,              "42", 42, 0)
+TEST(no_decimal,                "10", 1000000, mbtc_decimal_places)
+TEST(normal_decimal,            "4.2", 420000, mbtc_decimal_places)
+TEST(leading_zero,              "0.42", 42000, mbtc_decimal_places)
+TEST(internal_leading_zero,     "0.042", 4200, mbtc_decimal_places)
+
+#undef TEST
 
 BOOST_AUTO_TEST_SUITE_END()
