@@ -91,7 +91,6 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
-    include/bitcoin/bitcoin/utility/base58.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/checksum.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
@@ -127,6 +126,7 @@ bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/address.hpp \
     include/bitcoin/bitcoin/wallet/amount.hpp \
+    include/bitcoin/bitcoin/wallet/base58.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
@@ -159,7 +159,6 @@ src_libbitcoin_la_SOURCES = \
     src/stealth.cpp \
     src/threadpool.cpp \
     src/transaction.cpp \
-    src/utility/base58.cpp \
     src/utility/binary.cpp \
     src/utility/checksum.cpp \
     src/utility/ec_keys.cpp \
@@ -177,6 +176,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/external/zeroize.c \
     src/wallet/address.cpp \
     src/wallet/amount.cpp \
+    src/wallet/base58.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \

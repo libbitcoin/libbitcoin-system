@@ -21,12 +21,12 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/format.hpp>
-#include <bitcoin/bitcoin/utility/base58.hpp>
 #include <bitcoin/bitcoin/utility/checksum.hpp>
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/hash.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/base58.hpp>
 
 namespace libbitcoin {
 
