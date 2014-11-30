@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/utility/checksum.hpp>
 
 namespace libbitcoin {
 namespace network {

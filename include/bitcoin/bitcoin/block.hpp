@@ -23,7 +23,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/types.hpp>
-#include <bitcoin/bitcoin/utility/hash_number.hpp>
+#include <bitcoin/bitcoin/math/hash_number.hpp>
 
 namespace libbitcoin {
 

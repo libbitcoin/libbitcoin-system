@@ -19,7 +19,6 @@
 #include <bitcoin/bitcoin/wallet/message.hpp>
 
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/hash.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {

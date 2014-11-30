@@ -20,8 +20,7 @@
 #include <bitcoin/bitcoin/wallet/address.hpp>
 
 #include <bitcoin/bitcoin/format.hpp>
-#include <bitcoin/bitcoin/utility/checksum.hpp>
-#include <bitcoin/bitcoin/utility/hash.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/wallet/base58.hpp>
 
 namespace libbitcoin {

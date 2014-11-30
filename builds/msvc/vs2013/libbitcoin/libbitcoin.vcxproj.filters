@@ -17,14 +17,17 @@
     <Filter Include="include\bitcoin\impl\utility">
       <UniqueIdentifier>{9217c7da-0161-45fe-90d7-9e6b602aec57}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\math">
+      <UniqueIdentifier>{00705853-92d1-443c-8745-44d63a658d31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\math\external">
+      <UniqueIdentifier>{3809494a-8698-4eac-a36b-582fb2e54e42}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\bitcoin\network">
       <UniqueIdentifier>{86cf2b40-4c9c-4858-80f7-7bb8c4d06b36}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\utility">
       <UniqueIdentifier>{67a8f56c-9dc0-4c44-a5ff-020667929caa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\bitcoin\utility\external">
-      <UniqueIdentifier>{3809494a-8698-4eac-a36b-582fb2e54e42}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\wallet">
       <UniqueIdentifier>{1e18bec0-9406-43b2-bcac-b3d9f43a3f35}</UniqueIdentifier>
@@ -36,14 +39,17 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="src\math">
+      <UniqueIdentifier>{2fe97318-6a5c-42db-a6aa-4ab97b592991}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\math\external">
+      <UniqueIdentifier>{f8a260ce-e8da-4a00-8d29-1927686a2488}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\network">
       <UniqueIdentifier>{785639c3-4aba-44db-9501-9797e573c681}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\utility">
       <UniqueIdentifier>{8d26a34b-6f23-4d66-8d64-6b50feadc4db}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\utility\external">
-      <UniqueIdentifier>{f8a260ce-e8da-4a00-8d29-1927686a2488}</UniqueIdentifier>
     </Filter>
     <Filter Include="src\wallet">
       <UniqueIdentifier>{b2e7788e-4e44-4bbd-b5ba-5de47b5a1022}</UniqueIdentifier>
@@ -86,6 +92,42 @@
     <ClCompile Include="..\..\..\..\src\format.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\checksum.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\ec_keys.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\hmac_sha256.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\hmac_sha512.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\ripemd160.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\sha1.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\sha256.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\sha512.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\zeroize.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\hash.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\hash_number.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\script_number.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\channel.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
@@ -116,43 +158,7 @@
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\checksum.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\ec_keys.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\external\hmac_sha256.c">
-      <Filter>src\utility\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\external\hmac_sha512.c">
-      <Filter>src\utility\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\external\ripemd160.c">
-      <Filter>src\utility\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\external\sha1.c">
-      <Filter>src\utility\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\external\sha256.c">
-      <Filter>src\utility\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\external\sha512.c">
-      <Filter>src\utility\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\external\zeroize.c">
-      <Filter>src\utility\external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\hash.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\hash_number.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\script_number.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp">
@@ -217,6 +223,45 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\format.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp">
+      <Filter>include\bitcoin\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_keys.hpp">
+      <Filter>include\bitcoin\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha256.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha512.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\ripemd160.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha1.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha256.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha512.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\uint256.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\zeroize.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp">
+      <Filter>include\bitcoin\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash_number.hpp">
+      <Filter>include\bitcoin\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\script_number.hpp">
+      <Filter>include\bitcoin\math</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
@@ -265,55 +310,16 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\checksum.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\ec_keys.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\hmac_sha256.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\hmac_sha512.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\ripemd160.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\sha1.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\sha256.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\sha512.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\uint256.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\external\zeroize.h">
-      <Filter>include\bitcoin\utility\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\hash.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\hash_number.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\script_number.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\subscriber.hpp">

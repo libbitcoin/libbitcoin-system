@@ -20,8 +20,8 @@
 #define LIBBITCOIN_MESSAGE_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
 
 namespace libbitcoin {

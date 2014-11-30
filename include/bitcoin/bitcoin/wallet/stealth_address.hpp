@@ -19,15 +19,13 @@
 #ifndef LIBBITCOIN_STEALTH_ADDRESS_HPP
 #define LIBBITCOIN_STEALTH_ADDRESS_HPP
 
-#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
-
 #include <cstdint>
 #include <vector>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
-#include <bitcoin/bitcoin/utility/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/ec_keys.hpp>
 
 namespace libbitcoin {
 

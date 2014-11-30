@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/hash_number.hpp>
+#include <bitcoin/bitcoin/math/hash_number.hpp>
 
 namespace libbitcoin {
 

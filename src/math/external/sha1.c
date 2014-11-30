@@ -15,8 +15,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <bitcoin/bitcoin/compat.h>
-#include <bitcoin/bitcoin/utility/external/sha1.h>
-#include <bitcoin/bitcoin/utility/external/zeroize.h>
+#include <bitcoin/bitcoin/math/external/sha1.h>
+#include <bitcoin/bitcoin/math/external/zeroize.h>
 
 #ifdef __BIG_ENDIAN__
 # define SHA1_BIG_ENDIAN
