@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/utility/format.hpp>
 
+#include <iomanip>
+#include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
@@ -51,6 +53,15 @@ std::ostream& concat_point(std::ostream& stream, const Point& point)
 std::ostream& operator<<(std::ostream& stream, const point_type& point)
 {
     return concat_point(stream, point);
+}
+
+std::string encode_hex(data_slice data)
+{
+    std::stringstream ss;
+    ss << std::hex;
+    for (int val: data)
+        ss << std::setw(2) << std::setfill('0') << val;
+    return ss.str();
 }
 
 data_chunk decode_hex(std::string hex)

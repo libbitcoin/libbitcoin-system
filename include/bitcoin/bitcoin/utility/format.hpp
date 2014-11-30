@@ -50,10 +50,6 @@ byte_array<sizeof(T)> to_little_endian(T n);
 
 byte_array<1> to_byte(uint8_t byte);
 
-/// Convert data into a user readable hex string.
-template <typename T>
-std::string encode_hex(T data);
-
 // ADL cannot work on templates
 BC_API std::ostream& operator<<(
     std::ostream& stream, const data_chunk& data);
@@ -63,6 +59,11 @@ BC_API std::ostream& operator<<(
     std::ostream& stream, const short_hash& hash);
 BC_API std::ostream& operator<<(
     std::ostream& stream, const point_type& point);
+
+/**
+ * Convert data into a user readable hex string.
+ */
+BC_API std::string encode_hex(data_slice data);
 
 /**
  * Convert a hex string into bytes.
