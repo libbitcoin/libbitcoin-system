@@ -22,4 +22,4 @@ Requires: libsecp256k1 >= 0.0.1
 Cflags: -I${includedir} -std=c++11
 
 # Our own lib and any we require that do not publish package configuration.
-Libs: -L${libdir} -lbitcoin @boost_LIBS@ @rt_LIBS@ @gmp_LIBS@
+Libs: -L${libdir} -lbitcoin -lpthread @boost_LIBS@ @rt_LIBS@ @gmp_LIBS@
