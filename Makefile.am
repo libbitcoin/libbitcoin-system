@@ -52,7 +52,6 @@ bitcoin_include_HEADERS = \
 
 bitcoin_bitcoin_includedir = ${includedir}/bitcoin/bitcoin
 bitcoin_bitcoin_include_HEADERS = \
-    include/bitcoin/bitcoin/address.hpp \
     include/bitcoin/bitcoin/block.hpp \
     include/bitcoin/bitcoin/compat.h \
     include/bitcoin/bitcoin/compat.hpp \
@@ -126,6 +125,7 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
 
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
+    include/bitcoin/bitcoin/wallet/address.hpp \
     include/bitcoin/bitcoin/wallet/amount.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
@@ -144,7 +144,6 @@ src_libbitcoin_la_CPPFLAGS = \
     ${secp256k1_CFLAGS}
 
 src_libbitcoin_la_SOURCES = \
-    src/address.cpp \
     src/block.cpp \
     src/compat.cpp \
     src/constants.cpp \
@@ -176,6 +175,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/external/sha256.c \
     src/utility/external/sha512.c \
     src/utility/external/zeroize.c \
+    src/wallet/address.cpp \
     src/wallet/amount.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \

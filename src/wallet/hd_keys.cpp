@@ -19,7 +19,6 @@
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
 
 #include <cstdint>
-#include <bitcoin/bitcoin/address.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/format.hpp>
 #include <bitcoin/bitcoin/utility/base58.hpp>
@@ -27,6 +26,7 @@
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/hash.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/wallet/address.hpp>
 
 namespace libbitcoin {
 

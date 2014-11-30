@@ -19,11 +19,10 @@
 #ifndef LIBBITCOIN_MESSAGE_HPP
 #define LIBBITCOIN_MESSAGE_HPP
 
-#include <cstdint>
-#include <bitcoin/bitcoin/address.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/ec_keys.hpp>
+#include <bitcoin/bitcoin/wallet/address.hpp>
 
 namespace libbitcoin {
 

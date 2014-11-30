@@ -24,8 +24,8 @@
 #include <string>
 #include <sstream>
 #include <boost/optional.hpp>
-#include <bitcoin/bitcoin/address.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/wallet/address.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
