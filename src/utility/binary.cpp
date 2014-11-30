@@ -38,7 +38,7 @@ binary_type::binary_type(const std::string& bitstring)
 {
     std::stringstream(bitstring) >> *this;
 }
-binary_type::binary_type(size_t size, const data_slice& blocks)
+binary_type::binary_type(size_t size, data_slice blocks)
 {
     // Copy blocks
     blocks_.resize(blocks.size());
