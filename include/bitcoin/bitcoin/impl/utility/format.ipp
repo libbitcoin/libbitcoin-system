@@ -20,8 +20,6 @@
 #ifndef LIBBITCOIN_FORMAT_IPP
 #define LIBBITCOIN_FORMAT_IPP
 
-#include <iomanip>
-#include <sstream>
 #include <type_traits>
 
 namespace libbitcoin {
@@ -112,16 +110,6 @@ byte_array<1> to_byte(uint8_t byte)
 }
 
 #undef VERIFY_UNSIGNED
-
-template <typename T>
-std::string encode_hex(T data)
-{
-    std::stringstream ss;
-    ss << std::hex;
-    for (int val: data)
-        ss << std::setw(2) << std::setfill('0') << val;
-    return ss.str();
-}
 
 } // libbitcoin
 
