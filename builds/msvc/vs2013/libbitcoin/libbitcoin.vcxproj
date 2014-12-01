@@ -72,7 +72,6 @@
     <ClCompile Include="..\..\..\..\src\compat.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
-    <ClCompile Include="..\..\..\..\src\format.cpp" />
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\math\ec_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha256.c" />
@@ -95,6 +94,7 @@
     <ClCompile Include="..\..\..\..\src\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\format.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
@@ -116,7 +116,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\define.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\error.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\format.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha256.h" />
@@ -147,6 +146,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\format.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\subscriber.hpp" />
@@ -166,11 +166,11 @@
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\format.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\block.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\misc.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\format.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="packages.config" />
   </ItemGroup>

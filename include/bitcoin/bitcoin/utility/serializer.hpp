@@ -21,9 +21,6 @@
 #define LIBBITCOIN_SERIALIZER_HPP
 
 #include <string>
-#include <vector>
-#include <boost/asio/streambuf.hpp>
-#include <bitcoin/bitcoin/format.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 

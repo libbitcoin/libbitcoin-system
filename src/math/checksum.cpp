@@ -19,8 +19,8 @@
  */
 #include <bitcoin/bitcoin/math/checksum.hpp>
 
-#include <bitcoin/bitcoin/format.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/format.hpp>
 
 namespace libbitcoin {
 

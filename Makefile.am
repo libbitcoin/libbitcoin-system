@@ -58,17 +58,12 @@ bitcoin_bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin/constants.hpp \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
-    include/bitcoin/bitcoin/format.hpp \
     include/bitcoin/bitcoin/primitives.hpp \
     include/bitcoin/bitcoin/satoshi_serialize.hpp \
     include/bitcoin/bitcoin/script.hpp \
     include/bitcoin/bitcoin/stealth.hpp \
     include/bitcoin/bitcoin/transaction.hpp \
     include/bitcoin/bitcoin/version.hpp
-
-bitcoin_bitcoin_impl_includedir = ${includedir}/bitcoin/bitcoin/impl
-bitcoin_bitcoin_impl_include_HEADERS = \
-    include/bitcoin/bitcoin/impl/format.ipp
 
 bitcoin_bitcoin_impl_serialize_includedir = ${includedir}/bitcoin/bitcoin/impl/serialize
 bitcoin_bitcoin_impl_serialize_include_HEADERS = \
@@ -111,6 +106,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
+    include/bitcoin/bitcoin/utility/format.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
@@ -122,6 +118,7 @@ bitcoin_bitcoin_impl_utility_includedir = ${includedir}/bitcoin/bitcoin/impl/uti
 bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
+    include/bitcoin/bitcoin/impl/utility/format.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
@@ -150,7 +147,6 @@ src_libbitcoin_la_SOURCES = \
     src/compat.cpp \
     src/constants.cpp \
     src/error.cpp \
-    src/format.cpp \
     src/math/checksum.cpp \
     src/math/ec_keys.cpp \
     src/math/external/hmac_sha256.c \
@@ -173,6 +169,7 @@ src_libbitcoin_la_SOURCES = \
     src/stealth.cpp \
     src/transaction.cpp \
     src/utility/binary.cpp \
+    src/utility/format.cpp \
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \

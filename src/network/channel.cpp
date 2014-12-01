@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/network/channel.hpp>
 
+#include <bitcoin/bitcoin/utility/format.hpp>
+
 namespace libbitcoin {
 namespace network {
 

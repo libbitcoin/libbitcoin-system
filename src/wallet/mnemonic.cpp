@@ -24,7 +24,7 @@
 #include <iostream>
 #include <sstream>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {

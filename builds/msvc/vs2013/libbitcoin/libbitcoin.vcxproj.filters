@@ -57,9 +57,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\format.ipp">
-      <Filter>include\bitcoin\impl</Filter>
-    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\block.ipp">
       <Filter>include\bitcoin\impl\serialize</Filter>
     </None>
@@ -70,6 +67,9 @@
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\format.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp">
@@ -87,9 +87,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\error.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\format.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp">
@@ -158,6 +155,9 @@
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\format.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -218,9 +218,6 @@
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\error.hpp">
-      <Filter>include\bitcoin</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\format.hpp">
       <Filter>include\bitcoin</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp">
@@ -311,6 +308,9 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\format.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp">

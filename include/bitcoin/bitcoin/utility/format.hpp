@@ -94,6 +94,6 @@ BC_API std::string satoshi_to_btc(uint64_t satoshi);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/format.ipp>
+#include <bitcoin/bitcoin/impl/utility/format.ipp>
 
 #endif
