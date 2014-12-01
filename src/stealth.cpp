@@ -19,7 +19,7 @@
  */
 #include <bitcoin/bitcoin/stealth.hpp>
 
-#include <bitcoin/bitcoin/utility/hash.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 

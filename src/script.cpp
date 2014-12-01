@@ -23,15 +23,14 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/ec_keys.hpp>
-#include <bitcoin/bitcoin/utility/hash.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/script_number.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -1008,7 +1007,7 @@ bool create_signature(data_chunk& signature, const ec_secret& private_key,
 }
 
 bool create_signature(data_chunk& signature, const ec_secret& private_key,
-    const script_type& prevout_script, const transaction_type& new_tx, 
+    const script_type& prevout_script, const transaction_type& new_tx,
     uint32_t input_index, uint32_t hash_type, const ec_secret& nonce)
 {
     // This always produces a valid signature hash.
@@ -1027,7 +1026,7 @@ bool create_signature(data_chunk& signature, const ec_secret& private_key,
 }
 
 bool check_signature(const data_chunk& signature, const ec_point& public_key,
-    const script_type& script_code, const transaction_type& parent_tx, 
+    const script_type& script_code, const transaction_type& parent_tx,
     uint32_t input_index)
 {
     if (public_key.empty())
@@ -1041,7 +1040,7 @@ bool check_signature(const data_chunk& signature, const ec_point& public_key,
     ec_signature.pop_back();
 
     // This always produces a valid signature hash.
-    const auto sighash = 
+    const auto sighash =
         script_type::generate_signature_hash(
             parent_tx, input_index, script_code, hash_type);
 

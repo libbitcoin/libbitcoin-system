@@ -20,8 +20,8 @@
 #ifndef LIBBITCOIN_HASH_NUMBER_HPP
 #define LIBBITCOIN_HASH_NUMBER_HPP
 
-#include <bitcoin/bitcoin/utility/external/uint256.h>
-#include <bitcoin/bitcoin/utility/hash.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/math/external/uint256.h>
 
 namespace libbitcoin {
 

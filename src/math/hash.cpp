@@ -17,14 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <bitcoin/bitcoin/math/hash.hpp>
+
 #include <algorithm>
-#include <bitcoin/bitcoin/utility/external/hmac_sha256.h>
-#include <bitcoin/bitcoin/utility/external/hmac_sha512.h>
-#include <bitcoin/bitcoin/utility/external/ripemd160.h>
-#include <bitcoin/bitcoin/utility/external/sha1.h>
-#include <bitcoin/bitcoin/utility/external/sha256.h>
-#include <bitcoin/bitcoin/utility/external/sha512.h>
-#include <bitcoin/bitcoin/utility/hash.hpp>
+#include <bitcoin/bitcoin/math/external/hmac_sha256.h>
+#include <bitcoin/bitcoin/math/external/hmac_sha512.h>
+#include <bitcoin/bitcoin/math/external/ripemd160.h>
+#include <bitcoin/bitcoin/math/external/sha1.h>
+#include <bitcoin/bitcoin/math/external/sha256.h>
+#include <bitcoin/bitcoin/math/external/sha512.h>
 
 namespace libbitcoin {
 

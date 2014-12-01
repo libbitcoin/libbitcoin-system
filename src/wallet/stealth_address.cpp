@@ -18,15 +18,16 @@
  */
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/base58.hpp>
-#include <bitcoin/bitcoin/utility/checksum.hpp>
-#include <bitcoin/bitcoin/utility/ec_keys.hpp>
-#include <bitcoin/bitcoin/utility/hash.hpp>
+#include <bitcoin/bitcoin/wallet/base58.hpp>
 
 namespace libbitcoin {
 

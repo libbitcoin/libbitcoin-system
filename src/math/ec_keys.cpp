@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <bitcoin/bitcoin/math/ec_keys.hpp>
 
 #include <algorithm>
 #include <secp256k1.h>
-#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/utility/format.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/ec_keys.hpp>
-#include <bitcoin/bitcoin/utility/hash.hpp>
 
 namespace libbitcoin {
 

@@ -52,31 +52,42 @@ bitcoin_include_HEADERS = \
 
 bitcoin_bitcoin_includedir = ${includedir}/bitcoin/bitcoin
 bitcoin_bitcoin_include_HEADERS = \
-    include/bitcoin/bitcoin/address.hpp \
     include/bitcoin/bitcoin/block.hpp \
     include/bitcoin/bitcoin/compat.h \
     include/bitcoin/bitcoin/compat.hpp \
     include/bitcoin/bitcoin/constants.hpp \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
-    include/bitcoin/bitcoin/format.hpp \
     include/bitcoin/bitcoin/primitives.hpp \
     include/bitcoin/bitcoin/satoshi_serialize.hpp \
     include/bitcoin/bitcoin/script.hpp \
     include/bitcoin/bitcoin/stealth.hpp \
-    include/bitcoin/bitcoin/threadpool.hpp \
     include/bitcoin/bitcoin/transaction.hpp \
-    include/bitcoin/bitcoin/types.hpp \
     include/bitcoin/bitcoin/version.hpp
-
-bitcoin_bitcoin_impl_includedir = ${includedir}/bitcoin/bitcoin/impl
-bitcoin_bitcoin_impl_include_HEADERS = \
-    include/bitcoin/bitcoin/impl/format.ipp
 
 bitcoin_bitcoin_impl_serialize_includedir = ${includedir}/bitcoin/bitcoin/impl/serialize
 bitcoin_bitcoin_impl_serialize_include_HEADERS = \
     include/bitcoin/bitcoin/impl/serialize/block.ipp \
     include/bitcoin/bitcoin/impl/serialize/misc.ipp
+
+bitcoin_bitcoin_math_includedir = ${includedir}/bitcoin/bitcoin/math
+bitcoin_bitcoin_math_include_HEADERS = \
+    include/bitcoin/bitcoin/math/checksum.hpp \
+    include/bitcoin/bitcoin/math/ec_keys.hpp \
+    include/bitcoin/bitcoin/math/hash.hpp \
+    include/bitcoin/bitcoin/math/hash_number.hpp \
+    include/bitcoin/bitcoin/math/script_number.hpp
+
+bitcoin_bitcoin_math_external_includedir = ${includedir}/bitcoin/bitcoin/math/external
+bitcoin_bitcoin_math_external_include_HEADERS = \
+    include/bitcoin/bitcoin/math/external/hmac_sha256.h \
+    include/bitcoin/bitcoin/math/external/hmac_sha512.h \
+    include/bitcoin/bitcoin/math/external/ripemd160.h \
+    include/bitcoin/bitcoin/math/external/sha1.h \
+    include/bitcoin/bitcoin/math/external/sha256.h \
+    include/bitcoin/bitcoin/math/external/sha512.h \
+    include/bitcoin/bitcoin/math/external/uint256.h \
+    include/bitcoin/bitcoin/math/external/zeroize.h
 
 bitcoin_bitcoin_network_includedir = ${includedir}/bitcoin/bitcoin/network
 bitcoin_bitcoin_network_include_HEADERS = \
@@ -92,41 +103,29 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
-    include/bitcoin/bitcoin/utility/base58.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
-    include/bitcoin/bitcoin/utility/checksum.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
-    include/bitcoin/bitcoin/utility/ec_keys.hpp \
-    include/bitcoin/bitcoin/utility/hash.hpp \
-    include/bitcoin/bitcoin/utility/hash_number.hpp \
+    include/bitcoin/bitcoin/utility/format.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
-    include/bitcoin/bitcoin/utility/script_number.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
+    include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
     include/bitcoin/bitcoin/utility/weak_bind.hpp
-
-bitcoin_bitcoin_util_external_includedir = ${includedir}/bitcoin/bitcoin/utility/external
-bitcoin_bitcoin_util_external_include_HEADERS = \
-    include/bitcoin/bitcoin/utility/external/hmac_sha256.h \
-    include/bitcoin/bitcoin/utility/external/hmac_sha512.h \
-    include/bitcoin/bitcoin/utility/external/ripemd160.h \
-    include/bitcoin/bitcoin/utility/external/sha1.h \
-    include/bitcoin/bitcoin/utility/external/sha256.h \
-    include/bitcoin/bitcoin/utility/external/sha512.h \
-    include/bitcoin/bitcoin/utility/external/zeroize.h \
-    include/bitcoin/bitcoin/utility/external/uint256.h
 
 bitcoin_bitcoin_impl_utility_includedir = ${includedir}/bitcoin/bitcoin/impl/utility
 bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
+    include/bitcoin/bitcoin/impl/utility/format.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
+    include/bitcoin/bitcoin/wallet/address.hpp \
     include/bitcoin/bitcoin/wallet/amount.hpp \
+    include/bitcoin/bitcoin/wallet/base58.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
@@ -144,12 +143,22 @@ src_libbitcoin_la_CPPFLAGS = \
     ${secp256k1_CFLAGS}
 
 src_libbitcoin_la_SOURCES = \
-    src/address.cpp \
     src/block.cpp \
     src/compat.cpp \
     src/constants.cpp \
     src/error.cpp \
-    src/format.cpp \
+    src/math/checksum.cpp \
+    src/math/ec_keys.cpp \
+    src/math/external/hmac_sha256.c \
+    src/math/external/hmac_sha512.c \
+    src/math/external/ripemd160.c \
+    src/math/external/sha1.c \
+    src/math/external/sha256.c \
+    src/math/external/sha512.c \
+    src/math/external/zeroize.c \
+    src/math/hash.cpp \
+    src/math/hash_number.cpp \
+    src/math/script_number.cpp \
     src/network/channel.cpp \
     src/network/handshake.cpp  \
     src/network/hosts.cpp \
@@ -158,25 +167,15 @@ src_libbitcoin_la_SOURCES = \
     src/satoshi_serialize.cpp \
     src/script.cpp \
     src/stealth.cpp \
-    src/threadpool.cpp \
     src/transaction.cpp \
-    src/utility/base58.cpp \
     src/utility/binary.cpp \
-    src/utility/checksum.cpp \
-    src/utility/ec_keys.cpp \
-    src/utility/hash.cpp \
-    src/utility/hash_number.cpp \
+    src/utility/format.cpp \
     src/utility/logger.cpp \
-    src/utility/script_number.cpp \
+    src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
-    src/utility/external/hmac_sha256.c \
-    src/utility/external/hmac_sha512.c \
-    src/utility/external/ripemd160.c \
-    src/utility/external/sha1.c \
-    src/utility/external/sha256.c \
-    src/utility/external/sha512.c \
-    src/utility/external/zeroize.c \
+    src/wallet/address.cpp \
     src/wallet/amount.cpp \
+    src/wallet/base58.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \

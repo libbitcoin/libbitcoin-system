@@ -25,9 +25,9 @@
  */
 #include <stdint.h>
 #include <string.h>
-#include <bitcoin/bitcoin/utility/external/hmac_sha256.h>
-#include <bitcoin/bitcoin/utility/external/sha256.h>
-#include <bitcoin/bitcoin/utility/external/zeroize.h>
+#include <bitcoin/bitcoin/math/external/hmac_sha256.h>
+#include <bitcoin/bitcoin/math/external/sha256.h>
+#include <bitcoin/bitcoin/math/external/zeroize.h>
 
 void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
     size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH])

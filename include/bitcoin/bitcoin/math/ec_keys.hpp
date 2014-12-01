@@ -21,7 +21,7 @@
 #define LIBBITCOIN_EC_KEYS_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/hash.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 

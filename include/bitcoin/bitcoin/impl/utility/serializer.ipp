@@ -20,6 +20,10 @@
 #ifndef LIBBITCOIN_SERIALIZER_IPP
 #define LIBBITCOIN_SERIALIZER_IPP
 
+#include <boost/asio/streambuf.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/format.hpp>
+
 namespace libbitcoin {
 
 template <typename Iterator>

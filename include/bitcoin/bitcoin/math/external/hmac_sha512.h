@@ -1,4 +1,4 @@
-/* libsodium: hmac_hmacsha512.c, v0.4.5 2014/04/16 */
+/* libsodium: crypto_auth_hmacsha512.h, v0.4.5 2014/04/16 */
 /*
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
@@ -23,38 +23,37 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef LIBBITCOIN_HMACSHA256_H
-#define LIBBITCOIN_HMACSHA256_H
+#ifndef LIBBITCOIN_HMACSHA512_H
+#define LIBBITCOIN_HMACSHA512_H
 
 #include <stdint.h>
 #include <stddef.h>
-#include <bitcoin/bitcoin/utility/external/sha256.h>
-#include <bitcoin/bitcoin/utility/external/hmac_sha256.h>
+#include <bitcoin/bitcoin/math/external/sha512.h>
+#include <bitcoin/bitcoin/math/external/hmac_sha512.h>
 
-#define HMACSHA256_DIGEST_LENGTH 32U
+#define HMACSHA512_DIGEST_LENGTH 64U
 
 #ifdef __cplusplus
 extern "C" 
 {
 #endif
 
-typedef struct HMACSHA256CTX
+typedef struct HMACSHA512CTX
 {
-    SHA256CTX ctx;
-    SHA256CTX ictx;
-    SHA256CTX octx;
-} HMACSHA256CTX;
+    SHA512CTX ictx;
+    SHA512CTX octx;
+} HMACSHA512CTX;
 
-void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
-    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH]);
+void HMACSHA512(const uint8_t* input, size_t length, const uint8_t* key,
+    size_t key_length, uint8_t digest[HMACSHA512_DIGEST_LENGTH]);
 
-void HMACSHA256Final(HMACSHA256CTX* context,
-    uint8_t digest[HMACSHA256_DIGEST_LENGTH]);
+void HMACSHA512Final(HMACSHA512CTX* context,
+    uint8_t digest[HMACSHA512_DIGEST_LENGTH]);
 
-void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
+void HMACSHA512Init(HMACSHA512CTX* context, const uint8_t* key,
     size_t key_length);
 
-void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,
+void HMACSHA512Update(HMACSHA512CTX* context, const uint8_t* input,
     size_t length);
 
 #ifdef __cplusplus

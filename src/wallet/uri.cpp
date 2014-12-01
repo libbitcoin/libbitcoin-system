@@ -20,10 +20,11 @@
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 
 #include <cstdint>
+#include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/format.hpp>
-#include <bitcoin/bitcoin/utility/base58.hpp>
+#include <bitcoin/bitcoin/utility/format.hpp>
+#include <bitcoin/bitcoin/wallet/base58.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {

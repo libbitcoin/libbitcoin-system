@@ -22,8 +22,8 @@
 
 #include <cstdint>
 #include <vector>
+#include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/ec_keys.hpp>
 
 namespace libbitcoin {
 

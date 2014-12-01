@@ -20,6 +20,10 @@
 #ifndef LIBBITCOIN_FORMAT_IPP
 #define LIBBITCOIN_FORMAT_IPP
 
+#include <iomanip>
+#include <sstream>
+#include <type_traits>
+
 namespace libbitcoin {
 
 template <typename D, typename T>

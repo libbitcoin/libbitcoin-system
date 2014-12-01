@@ -19,7 +19,7 @@
  */
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <bitcoin/bitcoin/format.hpp>
+#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 
