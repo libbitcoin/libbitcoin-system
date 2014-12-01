@@ -173,7 +173,7 @@ AS_CASE([${host_os}], [*darwin*],
         [AC_SUBST([gmp_LIBS], [])
             AC_MSG_ERROR([gmp library is required but was not found.])])])
 
-# Require secp256k1 of at least version 0.0.1 and output ${secp256k1}.
+# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS} and ${secp256k1_LIBS}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
