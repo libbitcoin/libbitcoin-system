@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/amount.hpp>
+#include <bitcoin/bitcoin/wallet/base10.hpp>
 
 #include <iomanip>
 #include <sstream>
@@ -37,8 +37,8 @@ bool char_is(const char c)
     return c == C;
 }
 
-bool parse_amount(uint64_t& out, std::string amount,
-    bool strict, uint8_t decimal_places)
+bool decode_base10(uint64_t& out, std::string amount,
+    uint8_t decimal_places, bool strict)
 {
     // Get rid of the decimal point:
     auto point = std::find(amount.begin(), amount.end(), '.');
@@ -78,7 +78,7 @@ bool parse_amount(uint64_t& out, std::string amount,
     return true;
 }
 
-std::string format_amount(uint64_t amount, uint8_t decimal_places)
+std::string encode_base10(uint64_t amount, uint8_t decimal_places)
 {
     std::ostringstream stream;
     stream << std::setfill('0') << std::setw(1 + decimal_places) << amount;
@@ -92,12 +92,12 @@ std::string format_amount(uint64_t amount, uint8_t decimal_places)
 
 bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
 {
-    return parse_amount(satoshi, btc);
+    return decode_base10(satoshi, btc, btc_decimal_places);
 }
 
 std::string satoshi_to_btc(uint64_t satoshi)
 {
-    return format_amount(satoshi);
+    return encode_base10(satoshi, btc_decimal_places);
 }
 
 } // namespace libbitcoin

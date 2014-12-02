@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_AMOUNT_HPP
-#define LIBBITCOIN_AMOUNT_HPP
+#ifndef LIBBITCOIN_BASE10_HPP
+#define LIBBITCOIN_BASE10_HPP
 
 #include <cstdint>
 #include <string>
@@ -32,23 +32,23 @@ constexpr uint8_t ubtc_decimal_places = 2;
 
 /**
  * Validates and parses an amount string according to the BIP 21 grammar.
- * @param strict true to treat unrepresentable fractions as an error,
- * or false to round them upwards.
  * @param decmial_places the location of the decimal point.
- * The default value converts bitcoins to satoshis.
+ * The default is 0, which treats the input as a normal integer.
+ * @param strict true to treat fractional results as an error,
+ * or false to round them upwards.
  * @return false for failure.
  */
-BC_API bool parse_amount(uint64_t& out, std::string amount,
-    bool strict=true, uint8_t decimal_places=btc_decimal_places);
+BC_API bool decode_base10(uint64_t& out, std::string amount,
+    uint8_t decimal_places=0, bool strict=true);
 
 /**
  * Writes a Bitcoin amount to a string, following the BIP 21 grammar.
  * Avoids the rounding issues often seen with floating-point methods.
  * @param decmial_places the location of the decimal point.
- * The default value converts satoshis to bitcoins.
+ * The default is 0, which treats the input as a normal integer.
  */
-BC_API std::string format_amount(uint64_t amount,
-    uint8_t decimal_places=btc_decimal_places);
+BC_API std::string encode_base10(uint64_t amount,
+    uint8_t decimal_places=0);
 
 // Old names:
 BC_API bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc);

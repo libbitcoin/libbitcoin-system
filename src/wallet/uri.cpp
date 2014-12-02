@@ -23,7 +23,7 @@
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/wallet/amount.hpp>
+#include <bitcoin/bitcoin/wallet/base10.hpp>
 #include <bitcoin/bitcoin/wallet/base58.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
@@ -166,7 +166,7 @@ bool uri_parse_result::got_param(std::string& key, std::string& value)
     if (key == "amount")
     {
         uint64_t amount;
-        if (!btc_to_satoshi(amount, value))
+        if (!decode_base10(amount, value, btc_decimal_places))
             return false;
         this->amount.reset(amount);
     }
@@ -217,7 +217,7 @@ void uri_writer::write_address(const stealth_address& address)
 
 void uri_writer::write_amount(uint64_t satoshis)
 {
-    write_param("amount", format_amount(satoshis));
+    write_param("amount", encode_base10(satoshis, btc_decimal_places));
 }
 
 void uri_writer::write_label(const std::string& label)

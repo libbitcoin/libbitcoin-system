@@ -195,7 +195,7 @@
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
-#include <bitcoin/bitcoin/wallet/amount.hpp>
+#include <bitcoin/bitcoin/wallet/base10.hpp>
 #include <bitcoin/bitcoin/wallet/base58.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>

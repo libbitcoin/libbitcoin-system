@@ -170,7 +170,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\amount.cpp">
+    <ClCompile Include="..\..\..\..\src\wallet\base10.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\base58.cpp">
@@ -334,7 +334,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\address.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\amount.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\base10.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\base58.hpp">

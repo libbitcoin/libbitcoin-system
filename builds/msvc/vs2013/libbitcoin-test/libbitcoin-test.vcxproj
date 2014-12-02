@@ -69,7 +69,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\test\amount.cpp" />
+    <ClCompile Include="..\..\..\..\test\base10.cpp" />
     <ClCompile Include="..\..\..\..\test\base58.cpp" />
     <ClCompile Include="..\..\..\..\test\big_number.cpp" />
     <ClCompile Include="..\..\..\..\test\checksum.cpp" />
