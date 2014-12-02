@@ -142,9 +142,7 @@ fi
 
 # Echo build options.
 #------------------------------------------------------------------------------
-echo "Building from:"
-echo "  $BUILD_DIR"
-echo "Published variable options:"
+echo "Published dynamic options:"
 echo "  link: $link"
 echo "  prefix: $prefix"
 echo "  prefix_flags: $prefix_flags"
