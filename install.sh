@@ -147,7 +147,7 @@ echo "  $BUILD_DIR"
 echo "Published variable options:"
 echo "  link: $link"
 echo "  prefix: $prefix"
-echo "  prefix_flags: $prefix"
+echo "  prefix_flags: $prefix_flags"
 echo "  with_boost: $with_boost"
 echo "  with_pkgconfigdir: $with_pkgconfigdir"
 
