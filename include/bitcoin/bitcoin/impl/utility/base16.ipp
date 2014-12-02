@@ -20,20 +20,18 @@
 #ifndef LIBBITCOIN_BASE16_IPP
 #define LIBBITCOIN_BASE16_IPP
 
-#include <algorithm>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
+// Private helper:
+bool decode_base16_raw(uint8_t* out, size_t out_size, const char* in);
+
 template<size_t Size>
 byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
 {
-    data_chunk data;
-    BITCOIN_ASSERT(decode_base16(data, string));
-
     byte_array<(Size - 1) / 2> out;
-    BITCOIN_ASSERT(data.size() == out.size());
-    std::copy(data.begin(), data.end(), out.begin());
+    BITCOIN_ASSERT(decode_base16_raw(out.data(), out.size(), string));
     return out;
 }
 

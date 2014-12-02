@@ -19,11 +19,11 @@
  */
 #include <bitcoin/bitcoin/utility/base16.hpp>
 
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -37,52 +37,57 @@ bool is_base16(const char c)
 std::string encode_base16(data_slice data)
 {
     std::stringstream ss;
-    ss << std::hex;
+    ss << std::hex << std::setfill('0');
     for (int val: data)
-        ss << std::setw(2) << std::setfill('0') << val;
+        ss << std::setw(2) << val;
     return ss.str();
+}
+
+static unsigned from_hex(const char c)
+{
+    if ('A' <= c && c <= 'F')
+        return 10 + c - 'A';
+    if ('a' <= c && c <= 'f')
+        return 10 + c - 'a';
+    return c - '0';
+}
+
+bool decode_base16_raw(uint8_t* out, size_t out_size, const char* in)
+{
+    if (!std::all_of(in, in + 2*out_size, is_base16))
+        return false;
+
+    for (size_t i = 0; i < out_size; ++i)
+    {
+        out[i] = (from_hex(in[0]) << 4) + from_hex(in[1]);
+        in += 2;
+    }
+    return true;
 }
 
 bool decode_base16(data_chunk& out, const std::string& in)
 {
-    auto size = in.size();
-
-    // This prevents a last odd character from being ignored.
-    if (size % 2 != 0)
+    // This prevents a last odd character from being ignored:
+    if (in.size() % 2 != 0)
         return false;
 
     data_chunk result(in.size() / 2);
-    for (size_t i = 0; i + 1 < size; i += 2)
-    {
-        BITCOIN_ASSERT(size - i >= 2);
-        auto byte_begin = in.begin() + i;
-        auto byte_end = in.begin() + i + 2;
-        // Perform conversion.
-        int val = -1;
-        std::stringstream converter;
-        converter << std::hex << std::string(byte_begin, byte_end);
-        converter >> val;
-        if (val == -1)
-            return false;
-        BITCOIN_ASSERT(val <= 0xff);
-        // Set byte.
-        result[i / 2] = val;
-    }
+    if (!decode_base16_raw(result.data(), result.size(), in.data()))
+        return false;
+
     out = result;
     return true;
 }
 
 hash_digest decode_hash(const std::string& in)
 {
-    data_chunk data;
-    if (!decode_base16(data, in))
+    if (in.size() != 2*hash_size)
         return null_hash;
 
     hash_digest result;
-    if (data.size() != result.size())
+    if (!decode_base16_raw(result.data(), result.size(), in.data()))
         return null_hash;
 
-    std::copy(data.begin(), data.end(), result.begin());
     return result;
 }
 
