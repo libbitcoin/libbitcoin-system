@@ -28,7 +28,8 @@ BOOST_AUTO_TEST_SUITE(base58_tests)
 // Only when using libsecp256k1 with the SSL implementation.
 void encdec_test(const std::string& hex, const std::string& encoded)
 {
-    data_chunk data = decode_hex(hex);
+    data_chunk data;
+    BITCOIN_ASSERT(decode_base16(data, hex));
     BOOST_REQUIRE(encode_base58(data) == encoded);
     BOOST_REQUIRE(decode_base58(encoded) == data);
 }

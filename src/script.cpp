@@ -23,13 +23,13 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/base16.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -280,7 +280,7 @@ bool script_type::next_step(operation_stack::iterator it,
     //log_debug() << "Run: " << opcode_to_string(op.code);
     //log_debug() << "Stack:";
     //for (auto s: stack_)
-    //    log_debug() << "[" << encode_hex(s) << "]";
+    //    log_debug() << "[" << encode_base16(s) << "]";
     if (stack_.size() + alternate_stack_.size() > 1000)
         return false;
     return true;
@@ -2020,7 +2020,7 @@ std::string pretty(const script_type& script)
         if (op.data.empty())
             ss << opcode_to_string(op.code);
         else
-            ss << "[ " << encode_hex(op.data) << " ]";
+            ss << "[ " << encode_base16(op.data) << " ]";
     }
     return ss.str();
 }
@@ -2053,7 +2053,9 @@ script_type unpretty(const std::string& pretty)
         operation op;
         if (*token == "[")
         {
-            const auto data = decode_hex(*++token);
+            data_chunk data;
+            if (!decode_base16(data, *++token))
+                return script_type();
             if (data.empty() || *++token != "]")
                 return script_type();
             op.code = data_to_opcode(data);

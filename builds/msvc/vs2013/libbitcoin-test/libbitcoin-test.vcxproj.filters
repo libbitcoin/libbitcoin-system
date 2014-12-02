@@ -4,6 +4,9 @@
     <ClCompile Include="..\..\..\..\test\base10.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\base16.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\base58.cpp">
       <Filter>src</Filter>
     </ClCompile>

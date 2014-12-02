@@ -103,6 +103,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
+    include/bitcoin/bitcoin/utility/base16.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
@@ -168,6 +169,7 @@ src_libbitcoin_la_SOURCES = \
     src/script.cpp \
     src/stealth.cpp \
     src/transaction.cpp \
+    src/utility/base16.cpp \
     src/utility/binary.cpp \
     src/utility/format.cpp \
     src/utility/logger.cpp \
@@ -205,6 +207,7 @@ test_libbitcoin_test_CPPFLAGS = \
 
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
+    test/base16.cpp \
     test/base58.cpp \
     test/big_number.cpp \
     test/checksum.cpp \

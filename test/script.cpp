@@ -158,7 +158,9 @@ bool parse_token(data_chunk& raw_script, std::string token)
     else if (is_hex_data(token))
     {
         std::string hex_part(token.begin() + 2, token.end());
-        data_chunk raw_data = decode_hex(hex_part);
+        data_chunk raw_data;
+        if (!decode_base16(raw_data, hex_part))
+            return false;
         extend_data(hex_raw, raw_data);
     }
     else if (is_quoted_string(token))

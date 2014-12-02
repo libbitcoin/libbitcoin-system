@@ -22,31 +22,32 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(format_tests)
+BOOST_AUTO_TEST_SUITE(base16_tests)
 
-// to_{big,little}_endian, from_{big,little}_endian_unsafe
-
-BOOST_AUTO_TEST_CASE(endian_test)
+BOOST_AUTO_TEST_CASE(base16_odd_length_invalid_test)
 {
-    auto le = to_little_endian<uint32_t>(123456789);
-    BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint32_t>(le.begin()),
-        123456789u);
+    const auto& hex_str = "10a7fd15cb45bda9e90e19a15";
+    data_chunk data;
+    BOOST_REQUIRE(!decode_base16(data, hex_str));
+}
 
-    auto be = to_big_endian<uint32_t>(123456789);
-    BOOST_REQUIRE_EQUAL(from_big_endian_unsafe<uint32_t>(be.begin()),
-        123456789u);
+// TODO: these should be tested for correctness, not just round-tripping.
 
-    std::reverse(le.begin(), le.end());
-    BOOST_REQUIRE_EQUAL(from_big_endian_unsafe<uint32_t>(le.begin()),
-        123456789u);
+BOOST_AUTO_TEST_CASE(base16_round_trip_test)
+{
+    const auto& hex_str = "10a7fd15cb45bda9e90e19a15f";
+    data_chunk data;
+    BOOST_REQUIRE(decode_base16(data, hex_str));
+    BOOST_REQUIRE_EQUAL(encode_base16(data), hex_str);
+}
 
-    auto bytes = data_chunk{ 0xff };
-    BOOST_REQUIRE_EQUAL(from_big_endian_unsafe<uint8_t>(bytes.begin()),
-        255u);
+BOOST_AUTO_TEST_CASE(base16_legacy_padded_round_trip_test)
+{
+    const auto& padded_hex = "  \n\t10a7fd15cb45bda9e90e19a15f\n  \t";
+    data_chunk data = decode_hex(padded_hex);
 
-    auto quad = to_little_endian<uint64_t>(0x1122334455667788);
-    BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint64_t>(quad.begin()),
-        0x1122334455667788u);
+    const auto& unpadded_hex = "10a7fd15cb45bda9e90e19a15f";
+    BOOST_REQUIRE_EQUAL(encode_hex(data), unpadded_hex);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

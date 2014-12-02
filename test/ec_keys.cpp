@@ -35,10 +35,10 @@ BOOST_AUTO_TEST_SUITE(ec_keys_tests)
 BOOST_AUTO_TEST_CASE(secret_to_public_key_test)
 {
     ec_point compressed = secret_to_public_key(secret, true);
-    BOOST_REQUIRE_EQUAL(encode_hex(compressed),
+    BOOST_REQUIRE_EQUAL(encode_base16(compressed),
         "0309ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731");
     ec_point uncompressed = secret_to_public_key(secret, false);
-    BOOST_REQUIRE_EQUAL(encode_hex(uncompressed),
+    BOOST_REQUIRE_EQUAL(encode_base16(uncompressed),
         "0409ba8621aefd3b6ba4ca6d11a4746e8df8d35d9b51b383338f627ba7fc732731"
         "8c3a6ec6acd33c36328b8fb4349b31671bcd3a192316ea4f6236ee1ae4a7d8c9");
 }
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(ec_add_test)
     ec_point public_a = secret_to_public_key(secret_a, true);
 
     BOOST_REQUIRE(ec_add(secret_a, secret_b));
-    BOOST_REQUIRE_EQUAL(encode_hex(secret_a),
+    BOOST_REQUIRE_EQUAL(encode_base16(secret_a),
         "0404040000000000000000000000000000000000000000000000000000000000");
 
     BOOST_REQUIRE(ec_add(public_a, secret_b));

@@ -93,6 +93,7 @@
     <ClCompile Include="..\..\..\..\src\script.cpp" />
     <ClCompile Include="..\..\..\..\src\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\transaction.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\format.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
@@ -143,6 +144,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_parallel.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\base16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp" />

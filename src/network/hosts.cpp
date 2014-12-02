@@ -19,9 +19,9 @@
  */
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/utility/base16.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -47,7 +47,9 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
         boost::split(parts, line, boost::is_any_of(" "));
         if (parts.size() != 2)
             continue;
-        data_chunk raw_ip = decode_hex(parts[0]);
+        data_chunk raw_ip;
+        if (!decode_base16(raw_ip, parts[0]))
+            continue;
         hosts_field field;
         if (raw_ip.size() != field.ip.size())
             continue;
@@ -74,7 +76,7 @@ void hosts::do_save(const std::string& filename, save_handler handle_save)
 {
     std::ofstream file_handle(filename);
     for (const hosts_field& field: buffer_)
-        file_handle << encode_hex(field.ip) << ' '
+        file_handle << encode_base16(field.ip) << ' '
             << field.port << std::endl;
     handle_save(std::error_code());
 }

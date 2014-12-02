@@ -23,24 +23,19 @@
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/base16.hpp>
 #include <bitcoin/bitcoin/wallet/base10.hpp>
 #include <bitcoin/bitcoin/wallet/base58.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 
-static bool is_digit(const char c)
-{
-    return '0' <= c && c <= '9';
-}
-static bool is_hex(const char c)
-{
-    return is_digit(c) || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f');
-}
 static bool is_qchar(const char c)
 {
     return
-        ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || is_digit(c) ||
+        ('0' <= c && c <= '9') ||
+        ('A' <= c && c <= 'Z') ||
+        ('a' <= c && c <= 'z') ||
         '-' == c || '.' == c || '_' == c || '~' == c || // unreserved
         '!' == c || '$' == c || '\'' == c || '(' == c || ')' == c ||
         '*' == c || '+' == c || ',' == c || ';' == c || // sub-delims
@@ -69,9 +64,11 @@ typedef std::string::const_iterator sci;
 static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
 {
     auto j = i;
+
+    // Find the end of the valid-character run:
     size_t count = 0;
     while (end != i && (is_valid(i[0]) ||
-        ('%' == *i && 2 < end - i && is_hex(i[1]) && is_hex(i[2]))))
+        ('%' == *i && 2 < end - i && is_base16(i[1]) && is_base16(i[2]))))
     {
         ++count;
         if ('%' == *i)
@@ -79,6 +76,8 @@ static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
         else
             ++i;
     }
+
+    // Do the conversion:
     std::string out;
     out.reserve(count);
     while (j != i)

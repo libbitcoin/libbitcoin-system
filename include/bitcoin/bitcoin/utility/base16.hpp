@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2014 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,39 +17,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/format.hpp>
+#ifndef LIBBITCOIN_BASE16_HPP
+#define LIBBITCOIN_BASE16_HPP
 
-#include <iomanip>
-#include <sstream>
-#include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/base16.hpp>
+#include <string>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
 
-std::ostream& operator<<(std::ostream& stream, const data_chunk& data)
-{
-    stream << encode_base16(data);
-    return stream;
-}
+BC_API bool is_base16(const char c);
 
-std::ostream& operator<<(std::ostream& stream, const hash_digest& hash)
-{
-    stream << encode_base16(hash);
-    return stream;
-}
+/**
+ * Convert data into a user-readable hex string.
+ */
+BC_API std::string encode_base16(data_slice data);
 
-std::ostream& operator<<(std::ostream& stream, const short_hash& hash)
-{
-    stream << encode_base16(hash);
-    return stream;
-}
+/**
+ * Convert a hex string into bytes.
+ * @return false if the input is malformed.
+ */
+BC_API bool decode_base16(data_chunk& out, const std::string &in);
 
-std::ostream& operator<<(std::ostream& stream, const point_type& point)
-{
-    stream << point.hash << ":" << point.index;
-    return stream;
-}
+/**
+ * Convert a hex string into hash bytes.
+ * On error, returns null_hash.
+ */
+BC_API hash_digest decode_hash(const std::string& hex);
+
+// Old names:
+std::string encode_hex(data_slice in);
+data_chunk decode_hex(std::string in);
 
 } // namespace libbitcoin
+
+#endif
 
