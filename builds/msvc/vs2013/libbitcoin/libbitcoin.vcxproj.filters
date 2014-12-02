@@ -66,6 +66,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\base16.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>

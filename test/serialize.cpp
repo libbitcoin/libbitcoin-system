@@ -26,9 +26,9 @@ BOOST_AUTO_TEST_SUITE(serialize_tests)
 
 BOOST_AUTO_TEST_CASE(serialize_test)
 {
-    const std::string rawdat_repr =
-        "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000";
-    data_chunk rawdat(decode_hex(rawdat_repr));
+    data_chunk rawdat = to_data_chunk(base16_literal(
+        "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
+    ));
     BOOST_REQUIRE(rawdat == (data_chunk
     {
         0x46, 0x68, 0x24, 0x88, 0xf0, 0xa7, 0x21, 0x12, 0x4a, 0x39, 0x05, 0xa1,
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
 
 BOOST_AUTO_TEST_CASE(junk_test)
 {
-    data_chunk junk = decode_hex(
+    auto junk = base16_literal(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
     transaction_type tx;
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(tx_test)
 {
     hash_digest tx_hash_1 = decode_hash(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx_1 = decode_hex(
+    data_chunk raw_tx_1 = to_data_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(tx_test)
         "12c517b7a482a203c8b2742985da0ac72cc078f2ffffffff02f0c9c467000000"
         "001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac80c4600f00"
         "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
-        "00");
+        "00"));
     BOOST_REQUIRE_EQUAL(raw_tx_1.size(), 225u);
     transaction_type tx_1;
     satoshi_load(raw_tx_1.begin(), raw_tx_1.end(), tx_1);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(tx_test)
 
     hash_digest tx_hash_2 = decode_hash(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx_2 = decode_hex(
+    data_chunk raw_tx_2 = to_data_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(tx_test)
         "5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b8066c9c585f9ffff"
         "ffff02c0e1e400000000001976a914884c09d7e1f6420976c40e040c30b2b622"
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
-        "e61e66fe5d88ac00000000");
+        "e61e66fe5d88ac00000000"));
     BOOST_REQUIRE_EQUAL(raw_tx_2.size(), 523u);
     transaction_type tx_2;
     satoshi_load(raw_tx_2.begin(), raw_tx_2.end(), tx_2);
@@ -134,18 +134,18 @@ BOOST_AUTO_TEST_CASE(tx_test)
 BOOST_AUTO_TEST_CASE(script_parse_save_test)
 {
     BOOST_REQUIRE_THROW(
-    script_type psc = parse_script(decode_hex(
+    script_type psc = parse_script(base16_literal(
         "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
         "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
         "b2c8d9febfb84d01")),
     end_of_stream);
 
-    data_chunk normal_output_script = decode_hex(
-        "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac");
+    data_chunk normal_output_script = to_data_chunk(base16_literal(
+        "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
     script_type out_scr = parse_script(normal_output_script);
     BOOST_REQUIRE(save_script(out_scr) == normal_output_script);
 
-    data_chunk weird_script = decode_hex(
+    data_chunk weird_script = to_data_chunk(base16_literal(
         "0c49206c69656b20636174732e483045022100c7387f64e1f4"
         "cf654cae3b28a15f7572106d6c1319ddcdc878e636ccb83845"
         "e30220050ebf440160a4c0db5623e0cb1562f46401a7ff5b87"
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE(script_parse_save_test)
         "bc96e01aaca6e29bfa3f8bea65d8865855af672103ad6bb76e"
         "00d124f07a22680e39debd4dc4bdb1aa4b893720dd05af3c50"
         "560fddada820a4d933888318a23c28fb5fc67aca8530524e20"
-        "74b1d185dbf5b4db4ddb0642848868685174519c6351670068");
+        "74b1d185dbf5b4db4ddb0642848868685174519c6351670068"));
     script_type weird = parse_script(weird_script);
     BOOST_REQUIRE(save_script(weird) == weird_script);
 }

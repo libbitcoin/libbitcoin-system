@@ -45,12 +45,12 @@ BOOST_AUTO_TEST_CASE(ripemd_hash_test)
         BOOST_REQUIRE_EQUAL(encode_base16(ripemd160_hash(data)),
             result.result);
     }
-    auto ripemd_hash = bitcoin_short_hash(data_chunk{110});
+    auto ripemd_hash = bitcoin_short_hash(to_byte(110));
     BOOST_REQUIRE_EQUAL(encode_base16(ripemd_hash),
         "17d040b739d639c729daaf627eaff88cfe4207f4");
-    data_chunk foo = decode_hex(
-        "020641fde3a85beb8321033516de7ec01c35de96e945bf76c3768784a905471986");
-    BOOST_REQUIRE_EQUAL(encode_base16(bitcoin_short_hash(foo)),
+    auto foo = bitcoin_short_hash(base16_literal(
+        "020641fde3a85beb8321033516de7ec01c35de96e945bf76c3768784a905471986"));
+    BOOST_REQUIRE_EQUAL(encode_base16(foo),
         "c23e37c6fad06deab545f952992c8f28cb02bbe5");
 }
 

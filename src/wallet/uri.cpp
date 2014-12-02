@@ -47,15 +47,6 @@ static bool isnt_amp(const char c)
     return '&' != c;
 }
 
-static unsigned from_hex(const char c)
-{
-    if ('A' <= c && c <= 'F')
-        return 10 + c - 'A';
-    if ('a' <= c && c <= 'f')
-        return 10 + c - 'a';
-    return c - '0';
-}
-
 /**
  * Unescapes a percent-encoded string while advancing the iterator.
  * @param i set to one-past the last-read character on return.
@@ -84,7 +75,8 @@ static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
     {
         if ('%' == *j)
         {
-            out.push_back(from_hex(j[1]) << 4 | from_hex(j[2]));
+            const char temp[] = {j[1], j[2], 0};
+            out.push_back(base16_literal(temp)[0]);
             j += 3;
         }
         else

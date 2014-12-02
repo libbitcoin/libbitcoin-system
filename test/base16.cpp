@@ -24,6 +24,13 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(base16_tests)
 
+BOOST_AUTO_TEST_CASE(base16_literal_test)
+{
+    auto result = base16_literal("01ff42bc");
+    byte_array<4> expected = {{0x01, 0xff, 0x42, 0xbc}};
+    BOOST_REQUIRE(result == expected);
+}
+
 BOOST_AUTO_TEST_CASE(base16_odd_length_invalid_test)
 {
     const auto& hex_str = "10a7fd15cb45bda9e90e19a15";

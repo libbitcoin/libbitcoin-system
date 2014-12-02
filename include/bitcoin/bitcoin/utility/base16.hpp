@@ -40,6 +40,14 @@ BC_API std::string encode_base16(data_slice data);
 BC_API bool decode_base16(data_chunk& out, const std::string &in);
 
 /**
+ * Converts a hex string literal to a data array.
+ * This would be better as a C++11 user-defined literal,
+ * but MSVC doesn't support those.
+ */
+template <size_t Size>
+byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size]);
+
+/**
  * Convert a hex string into hash bytes.
  * On error, returns null_hash.
  */
@@ -50,6 +58,8 @@ std::string encode_hex(data_slice in);
 data_chunk decode_hex(std::string in);
 
 } // namespace libbitcoin
+
+#include <bitcoin/bitcoin/impl/utility/base16.ipp>
 
 #endif
 

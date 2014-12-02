@@ -118,6 +118,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
 bitcoin_bitcoin_impl_utility_includedir = ${includedir}/bitcoin/bitcoin/impl/utility
 bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
+    include/bitcoin/bitcoin/impl/utility/base16.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/format.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
