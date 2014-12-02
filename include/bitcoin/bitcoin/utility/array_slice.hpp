@@ -43,6 +43,7 @@ public:
     const T* end() const;
     const T* data() const;
     std::size_t size() const;
+    bool empty() const;
 
 private:
     const T* begin_;
