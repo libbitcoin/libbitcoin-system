@@ -91,8 +91,6 @@ BOOST_AUTO_TEST_CASE(rfc6979_nonce_test)
     for (auto& test: rfc6979_tests)
     {
         hash_digest hash = sha256_hash(to_data_chunk(test.message));
-        std::reverse(hash.begin(), hash.end());
-
         ec_secret nonce = create_nonce(test.secret, hash);
         BOOST_REQUIRE_EQUAL(encode_base16(nonce), test.nonce);
     }

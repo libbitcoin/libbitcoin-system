@@ -81,6 +81,7 @@ bool decode_base16(data_chunk& out, const std::string& in)
 // Bitcoin hash format (these are all reversed):
 std::string encode_hash(hash_digest hash)
 {
+    std::reverse(hash.begin(), hash.end());
     return encode_base16(hash);
 }
 
@@ -93,7 +94,8 @@ bool decode_hash(hash_digest& out, const std::string& in)
     if (!decode_base16_private(result.data(), result.size(), in.data()))
         return false;
 
-    out = result;
+    // Reverse:
+    std::reverse_copy(result.begin(), result.end(), out.begin());
     return true;
 }
 
@@ -101,6 +103,7 @@ hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
 {
     hash_digest out;
     BITCOIN_ASSERT(decode_base16_private(out.data(), out.size(), string));
+    std::reverse(out.begin(), out.end());
     return out;
 }
 

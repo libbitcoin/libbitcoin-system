@@ -33,7 +33,7 @@ void append_checksum(data_chunk& data)
 uint32_t bitcoin_checksum(data_slice chunk)
 {
     hash_digest hash = bitcoin_hash(chunk);
-    return from_little_endian_unsafe<uint32_t>(hash.rbegin());
+    return from_little_endian_unsafe<uint32_t>(hash.begin());
 }
 
 bool verify_checksum(data_slice data)

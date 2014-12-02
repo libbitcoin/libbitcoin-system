@@ -109,12 +109,17 @@ void serializer<Iterator>::write_network_address(network_address_type addr)
 template <typename Iterator>
 void serializer<Iterator>::write_hash(const hash_digest& hash)
 {
-    write_data_reverse(hash);
+    write_data(hash);
 }
 
 template <typename Iterator>
 void serializer<Iterator>::write_short_hash(const short_hash& hash)
 {
+    // There is no reason for this to be reversed!
+    // The only reason it is still reversed is because the old
+    // obelisk protocol expects it that way.
+    // Fortunately, the old obelisk protocol is the only thing
+    // that currently uses this function.
     write_data_reverse(hash);
 }
 
@@ -158,7 +163,7 @@ template <typename Iterator>
 template <typename T>
 void serializer<Iterator>::write_data_reverse(const T& data)
 {
-    iter_ = std::copy(data.rbegin(), data.rend(), iter_);
+    iter_ = std::reverse_copy(data.begin(), data.end(), iter_);
 }
 
 template <typename Iterator>
@@ -262,12 +267,13 @@ network_address_type deserializer<
 template <typename Iterator, bool SafeCheckLast>
 hash_digest deserializer<Iterator, SafeCheckLast>::read_hash()
 {
-    return read_bytes_reverse<hash_size>();
+    return read_bytes<hash_size>();
 }
 
 template <typename Iterator, bool SafeCheckLast>
 short_hash deserializer<Iterator, SafeCheckLast>::read_short_hash()
 {
+    // See the note in serializer::write_short_hash:
     return read_bytes_reverse<short_hash_size>();
 }
 

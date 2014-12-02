@@ -908,9 +908,7 @@ bool script_type::op_hash256()
     if (stack_.size() < 1)
         return false;
     hash_digest hash = bitcoin_hash(pop_stack());
-    // hash must be reversed
-    data_chunk data(hash.rbegin(), hash.rend());
-    stack_.push_back(data);
+    stack_.push_back(to_data_chunk(hash));
     return true;
 }
 
