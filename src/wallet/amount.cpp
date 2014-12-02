@@ -20,10 +20,9 @@
 #include <bitcoin/bitcoin/wallet/amount.hpp>
 
 #include <iomanip>
-#include <cstdint>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 
@@ -32,80 +31,73 @@ static bool is_digit(const char c)
     return '0' <= c && c <= '9';
 }
 
-template <typename Int>
-Int multiply_clamp(Int a, Int b, Int max)
+template<char C>
+bool char_is(const char c)
 {
-    if (a > max / b)
-        return max;
-    else
-        return a * b;
+    return c == C;
 }
 
-template <typename Int>
-Int add_clamp(Int a, Int b, Int max)
+bool parse_amount(uint64_t& out, std::string amount,
+    bool strict, uint8_t decimal_places)
 {
-    if (a > max - b)
-        return max;
-    else
-        return a + b;
-}
+    // Get rid of the decimal point:
+    auto point = std::find(amount.begin(), amount.end(), '.');
+    if (point != amount.end())
+        point = amount.erase(point);
 
-uint64_t parse_amount(const std::string& amount, uint8_t decmial_places)
-{
-    auto i = amount.begin();
+    // Only digits should remain:
+    if (!std::all_of(amount.begin(), amount.end(), is_digit))
+        return false;
+
+    // Add digits to the end if there are too few:
+    auto actual_places = amount.end() - point;
+    if (actual_places < decimal_places)
+        amount.append(decimal_places - actual_places, '0');
+
+    // Remove digits from the end if there are too many:
+    bool round = false;
+    if (actual_places > decimal_places)
+    {
+        auto end = point + decimal_places;
+        round = !std::all_of(end, amount.end(), char_is<'0'>);
+        amount.erase(end, amount.end());
+    }
+    if (strict && round)
+        return false;
+
+    // Convert to an integer:
+    std::istringstream stream(amount);
     uint64_t value = 0;
-    unsigned places = 0;
-    const uint64_t invalid_amount = MAX_UINT64;
+    if (!(stream >> value))
+        return false;
 
-    while (amount.end() != i && is_digit(*i))
-    {
-        auto x10 = multiply_clamp<uint64_t>(value, 10, invalid_amount);
-        value = add_clamp<uint64_t>(x10, (*i - '0'), invalid_amount);
-        ++i;
-    }
-    if (amount.end() != i && '.' == *i)
-    {
-        ++i;
-        while (amount.end() != i && is_digit(*i))
-        {
-            if (places < decmial_places)
-            {
-                auto x10 = multiply_clamp<uint64_t>(value, 10, invalid_amount);
-                value = add_clamp<uint64_t>(x10, (*i - '0'), invalid_amount);
-            }
-            else if (places == decmial_places && '5' <= *i)
-                value = add_clamp<uint64_t>(value, 1, invalid_amount);
-            ++places;
-            ++i;
-        }
-    }
-    while (places < decmial_places)
-    {
-        value = multiply_clamp<uint64_t>(value, 10, invalid_amount);
-        ++places;
-    }
-    if (amount.end() != i)
-        return invalid_amount;
-    return value;
+    // Round and return:
+    if (round && value == max_uint64)
+        return false;
+    out = value + round;
+    return true;
 }
 
 std::string format_amount(uint64_t amount, uint8_t decimal_places)
 {
-    // Get the integer and fractional parts:
-    uint64_t factor = 1;
-    for (unsigned i = 0; i < decimal_places; ++i)
-        factor *= 10;
-    uint64_t int_part = amount / factor;
-    uint64_t decimal_part = amount % factor;
-    // Format as a fixed-point number:
     std::ostringstream stream;
-    stream << int_part << '.';
-    stream << std::setw(decimal_places) << std::setfill('0') << decimal_part;
-    // Trim trailing zeros:
+    stream << std::setfill('0') << std::setw(1 + decimal_places) << amount;
+
     auto string = stream.str();
-    boost::algorithm::trim_right_if(string, [](char c){ return '0' == c; });
-    boost::algorithm::trim_right_if(string, [](char c){ return '.' == c; });
+    string.insert(string.size() - decimal_places, 1, '.');
+    boost::algorithm::trim_right_if(string, char_is<'0'>);
+    boost::algorithm::trim_right_if(string, char_is<'.'>);
     return string;
+}
+
+bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
+{
+    return parse_amount(satoshi, btc);
+}
+
+std::string satoshi_to_btc(uint64_t satoshi)
+{
+    return format_amount(satoshi);
 }
 
 } // namespace libbitcoin

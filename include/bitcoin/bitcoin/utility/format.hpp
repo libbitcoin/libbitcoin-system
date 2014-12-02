@@ -50,10 +50,6 @@ byte_array<sizeof(T)> to_little_endian(T n);
 
 byte_array<1> to_byte(uint8_t byte);
 
-/// Convert data into a user readable hex string.
-template <typename T>
-std::string encode_hex(T data);
-
 // ADL cannot work on templates
 BC_API std::ostream& operator<<(
     std::ostream& stream, const data_chunk& data);
@@ -63,6 +59,11 @@ BC_API std::ostream& operator<<(
     std::ostream& stream, const short_hash& hash);
 BC_API std::ostream& operator<<(
     std::ostream& stream, const point_type& point);
+
+/**
+ * Convert data into a user readable hex string.
+ */
+BC_API std::string encode_hex(data_slice data);
 
 /**
  * Convert a hex string into bytes.
@@ -81,16 +82,6 @@ BC_API hash_digest decode_hash(const std::string& hex);
  * On error, returns null_short_hash.
  */
 BC_API short_hash decode_short_hash(const std::string& hex);
-
-/**
- * Convert BTC into number of satoshi. Returns true if successul.
- */
-BC_API bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc);
-
-/**
- * Convert satoshis into human readable BTC string value.
- */
-BC_API std::string satoshi_to_btc(uint64_t satoshi);
 
 } // namespace libbitcoin
 

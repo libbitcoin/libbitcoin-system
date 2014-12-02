@@ -19,9 +19,9 @@
  */
 #include <bitcoin/bitcoin/utility/format.hpp>
 
+#include <iomanip>
+#include <sstream>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -44,15 +44,19 @@ std::ostream& operator<<(std::ostream& stream, const short_hash& hash)
     return stream;
 }
 
-template <typename Point>
-std::ostream& concat_point(std::ostream& stream, const Point& point)
+std::ostream& operator<<(std::ostream& stream, const point_type& point)
 {
     stream << point.hash << ":" << point.index;
     return stream;
 }
-std::ostream& operator<<(std::ostream& stream, const point_type& point)
+
+std::string encode_hex(data_slice data)
 {
-    return concat_point(stream, point);
+    std::stringstream ss;
+    ss << std::hex;
+    for (int val: data)
+        ss << std::setw(2) << std::setfill('0') << val;
+    return ss.str();
 }
 
 data_chunk decode_hex(std::string hex)
@@ -110,77 +114,6 @@ hash_digest decode_hash(const std::string& hex)
 short_hash decode_short_hash(const std::string& hex)
 {
     return decode_hex_digest<short_hash>(hex);
-}
-
-static std::string pad_left_8_zeroes_trim_right(const std::string& value)
-{
-    BITCOIN_ASSERT(value.size() <= 8);
-    std::string result(8 - value.size(), '0');
-    result += value;
-    boost::algorithm::trim_right_if(result, boost::is_any_of("0"));
-    return result;
-}
-
-static std::string pad_right_8_zeroes_trim_left(const std::string& value)
-{
-    if (value.size() > 8)
-        throw boost::bad_lexical_cast();
-    auto result = value + std::string(8 - value.size(), '0');
-    boost::algorithm::trim_left_if(result, boost::is_any_of("0"));
-    return result;
-}
-
-// There are a number of places in libbitcoin where overflowable operations,
-// either signed or unsigned, may causes errors. See discussion for more info:
-// www.securecoding.cert.org/confluence/display/seccode/
-// INT32-C.+Ensure+that+operations+on+signed+integers+do+not+result+in+overflow
-static inline bool sum_will_overflow(uint64_t addend1, uint64_t addend2)
-{
-    return addend1 > (max_uint64 - addend2);
-}
-
-bool btc_to_satoshi(uint64_t& satoshi, const std::string& btc)
-{
-    std::vector<std::string> parts;
-    boost::split(parts, btc, boost::is_any_of("."));
-    if (parts.size() > 2)
-        return false;
-
-    uint64_t minor = 0;
-    uint64_t major = 0;
-    try
-    {
-        if (parts.front().size() > 0)
-            major = boost::lexical_cast<int64_t>(parts.front()) * coin_price(1);
-        if (parts.size() == 2 && parts.back().size() > 0)
-            minor = boost::lexical_cast<uint64_t>(
-                pad_right_8_zeroes_trim_left(parts.back()));
-    }
-    catch (boost::bad_lexical_cast&)
-    {
-        return false;
-    }
-
-    if (sum_will_overflow(major, minor))
-        return false;
-
-    satoshi = major + minor;
-    return true;
-}
-
-std::string satoshi_to_btc(uint64_t satoshi)
-{
-    uint64_t major = satoshi / coin_price(1);
-    BITCOIN_ASSERT(satoshi >= major);
-    uint64_t minor = satoshi - (major * coin_price(1));
-    BITCOIN_ASSERT(minor < coin_price(1));
-    const auto result = boost::lexical_cast<std::string>(major);
-    if (minor > 0)
-    {
-        const auto minor_str = boost::lexical_cast<std::string>(minor);
-        return result + "." + pad_left_8_zeroes_trim_right(minor_str);
-    }
-    return result;
 }
 
 } // namespace libbitcoin

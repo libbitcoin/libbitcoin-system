@@ -23,7 +23,7 @@
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
+#include <bitcoin/bitcoin/wallet/amount.hpp>
 #include <bitcoin/bitcoin/wallet/base58.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
@@ -217,7 +217,7 @@ void uri_writer::write_address(const stealth_address& address)
 
 void uri_writer::write_amount(uint64_t satoshis)
 {
-    write_param("amount", satoshi_to_btc(satoshis));
+    write_param("amount", format_amount(satoshis));
 }
 
 void uri_writer::write_label(const std::string& label)
