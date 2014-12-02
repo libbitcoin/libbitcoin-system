@@ -44,9 +44,9 @@ Next install the [build system](http://en.wikipedia.org/wiki/GNU_build_system):
 ```sh
   $ sudo apt-get install build-essential autoconf automake libtool pkg-config
 ```
-Next install [Boost](http://www.boost.org) (1.50.0 or newer), [GMP](https://gmplib.org/)  (5.0.0 or newer), and [OpenSSL](https://www.openssl.org) (0.9.0 or newer) development packages. Note that we have [deprecated](https://www.peereboom.us/assl/assl/html/openssl.html) OpenSSL and it is currently used only for test validation.
+Next install [Boost](http://www.boost.org) (1.50.0 or newer) and [GMP](https://gmplib.org/)  (5.0.0 or newer).
 ```sh
-  $ sudo apt-get install libboost-all-dev libgmp-dev libssl-dev
+  $ sudo apt-get install libboost-all-dev libgmp-dev
 ```
 Finally, execute the [install script](https://raw.githubusercontent.com/evoskuil/libbitcoin/develop/install-libbitcoin.sh). This single file will download, build, install and test libbitcoin.
 ```sh
@@ -100,7 +100,7 @@ To upgrade GCC first set the following environment variables:
 ```
 Next execute the following commands:
 ```sh
-  $ brew install boost gmp openssl
+  $ brew install boost gmp
   $ brew tap homebrew/versions
   $ brew install gcc48
   $ sudo ln -sf /usr/local/bin/g++-4.8 /usr/bin/g++
