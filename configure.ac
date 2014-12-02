@@ -71,7 +71,7 @@ AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
 AC_MSG_CHECKING(--with-pkgconfigdir option)
 AC_ARG_WITH([pkgconfigdir],
     AS_HELP_STRING([--with-pkgconfigdir=PATH],
-        [Path to pkgconfig directory.]),
+        [Path to pkgconfig directory. @<:@default=${libdir}/pkgconfig@:>@]),
     [pkgconfigdir=$withval],
     [pkgconfigdir=${libdir}/pkgconfig])
 AC_MSG_RESULT([$pkgconfigdir])
@@ -82,7 +82,7 @@ AC_SUBST([pkgconfigdir])
 AC_MSG_CHECKING(--with-tests option)
 AC_ARG_WITH([tests],
     AS_HELP_STRING([--with-tests],
-        [Compile with unit tests.]),
+        [Compile with unit tests. @<:@default=yes@:>@]),
     [with_tests=$withval],
     [with_tests=yes])
 AC_MSG_RESULT([$with_tests])
@@ -93,7 +93,7 @@ AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 AC_MSG_CHECKING(--enable-debug option)
 AC_ARG_ENABLE([debug],
     AS_HELP_STRING([--enable-debug],
-        [Compile with debug assertions.]),
+        [Compile with debug assertions. @<:@default=no@:>@]),
     [enable_debug=$enableval],
     [enable_debug=no])
 AC_MSG_RESULT([$enable_debug])
@@ -104,7 +104,7 @@ AS_IF([test x$enable_debug != xno], AC_DEFINE([DEBUG]))
 AC_MSG_CHECKING(--enable-testnet option)
 AC_ARG_ENABLE([testnet],
     AS_HELP_STRING([--enable-testnet],
-        [Compile for testnet (deprecated).]),
+        [Compile for testnet (deprecated). @<:@default=no@:>@]),
     [enable_testnet=$enableval],
     [enable_testnet=no])
 AC_MSG_RESULT([$enable_testnet])
@@ -137,7 +137,7 @@ AX_BOOST_REGEX
 
 AX_BOOST_SYSTEM
 
-AS_IF([test x$with_tests != xno], [AX_BOOST_UNIT_TEST_FRAMEWORK])
+AS_IF([test x$with_tests = xyes], [AX_BOOST_UNIT_TEST_FRAMEWORK])
 
 # Require rt if on linux and output ${rt_LIBS}.
 #------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ AS_CASE([${host_os}], [*darwin*],
         [AC_SUBST([gmp_LIBS], [])
             AC_MSG_ERROR([gmp library is required but was not found.])])])
 
-# Require secp256k1 of at least version 0.0.1 and output ${secp256k1}.
+# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS} and ${secp256k1_LIBS}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
