@@ -6,6 +6,9 @@
 #include <stdint.h>
 #include <string.h>
 
+#ifdef _MSC_VER
+#define __LITTLE_ENDIAN__
+#endif
 
 #ifdef __BIG_ENDIAN__
 # define SHA_BIG_ENDIAN

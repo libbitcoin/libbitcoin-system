@@ -35,13 +35,12 @@
   <!-- Dependencies -->
   
   <PropertyGroup Condition="$(Configuration.IndexOf('DLL')) != -1">
-    <!--<Linkage-openssl>dynamic</Linkage-openssl>-->
+    <Linkage-openssl>static</Linkage-openssl>
     <Linkage-secp256k1>static</Linkage-secp256k1>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.IndexOf('LTCG')) != -1">
-    <!--<Linkage-openssl>ltcg</Linkage-openssl>-->
     <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
+    <Linkage-secp256k1>static</Linkage-secp256k1>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.IndexOf('LIB')) != -1">
     <Linkage-openssl>static</Linkage-openssl>

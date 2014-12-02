@@ -33,14 +33,13 @@
   </PropertyGroup>
   
   <PropertyGroup Condition="$(Configuration.IndexOf('DEXE')) != -1">
-    <Linkage-openssl>dynamic</Linkage-openssl>
-    <!--<Linkage-secp256k1>dynamic</Linkage-secp256k1>-->
+    <Linkage-openssl>static</Linkage-openssl>
     <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-libbitcoin>dynamic</Linkage-libbitcoin>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.IndexOf('LEXE')) != -1">
     <Linkage-openssl>static</Linkage-openssl>
-    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
+    <Linkage-secp256k1>static</Linkage-secp256k1>
     <Linkage-libbitcoin>ltcg</Linkage-libbitcoin>
   </PropertyGroup>
   <PropertyGroup Condition="$(Configuration.IndexOf('SEXE')) != -1">
@@ -58,10 +57,9 @@
 
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Linkage-openssl   : $(Linkage-openssl)" Importance="high"/>
-    <Message Text="Linkage-libbitcoin: $(Linkage-libbitcoin)" Importance="high"/>
     <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>
+    <Message Text="Linkage-libbitcoin: $(Linkage-libbitcoin)" Importance="high"/>
   </Target>
-  
 
 </Project>
 
