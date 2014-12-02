@@ -56,6 +56,7 @@ TEST(decimal_point_only,        0, ".")
 TEST(harmless_zeros,            1, "0.0000000100")
 
 // Rounding:
+TEST(pure_integer_rounding,     1, ".1", 0, false)
 TEST(rounding,                  11, "0.101",   false, ubtc_decimal_places)
 TEST(rounding_carry,            1000, "9.991", false, ubtc_decimal_places)
 TEST(zero_past_max,             max_uint64, "184467440737.095516150")

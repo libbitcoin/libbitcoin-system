@@ -68,7 +68,7 @@ bool parse_amount(uint64_t& out, std::string amount,
     // Convert to an integer:
     std::istringstream stream(amount);
     uint64_t value = 0;
-    if (!(stream >> value))
+    if (amount.size() && !(stream >> value))
         return false;
 
     // Round and return:
