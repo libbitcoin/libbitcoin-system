@@ -127,8 +127,6 @@ Libbitcoin requires a C++11 compiler, which means **Visual Studio 2013** minimum
 
 Dependencies apart from the libbitcoin libraries are available as [NuGet packages](https://www.nuget.org/packages?q=evoskuil). The libbitcoin solution files are configured with references to these packages. To avoid redundancies these references expect a [NuGet.config](http://docs.nuget.org/docs/release-notes/nuget-2.1) in a central location.
 
-> TODO: provide instructions for creation of the central NuGet repository.
-
 The required set of NuGet packages can be viewed using the [NuGet package manager](http://docs.nuget.org/docs/start-here/managing-nuget-packages-using-the-dialog) from the libbitcoin solution. The NuGet package manager will automatically download missing packages, either from the build scripts or after prompting you in the Visual Studio environment. For your reference these are the required packages:
 
 * Packages maintained by [sergey.shandar](http://www.nuget.org/profiles/sergey.shandar)
