@@ -24,16 +24,16 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(parse_amount_tests)
 
-#define TEST(name, expected, ...) \
-    BOOST_AUTO_TEST_CASE(parse_amount_##name##_test) \
+#define TEST(NAME, EXPECTED, ...) \
+    BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
     { \
-        uint64_t result; \
+        uint64_t result, expected = EXPECTED; \
         BOOST_REQUIRE(parse_amount(result, __VA_ARGS__)); \
         BOOST_REQUIRE_EQUAL(result, expected); \
     }
 
-#define TEST_ERROR(name, ...) \
-    BOOST_AUTO_TEST_CASE(parse_amount_##name##_test) \
+#define TEST_ERROR(NAME, ...) \
+    BOOST_AUTO_TEST_CASE(parse_amount_##NAME##_test) \
     { \
         uint64_t result; \
         BOOST_REQUIRE(!parse_amount(result, __VA_ARGS__)); \
@@ -77,10 +77,12 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(format_amount_tests)
 
-#define TEST(name, expected, ...) \
-    BOOST_AUTO_TEST_CASE(format_amount_##name##_test) \
+#define TEST(NAME, EXPECTED, ...) \
+    BOOST_AUTO_TEST_CASE(format_amount_##NAME##_test) \
     { \
-        BOOST_REQUIRE_EQUAL(format_amount(__VA_ARGS__), expected); \
+        std::string expected = EXPECTED; \
+        std::string result = format_amount(__VA_ARGS__); \
+        BOOST_REQUIRE_EQUAL(result, expected); \
     }
 
 // Limits:
