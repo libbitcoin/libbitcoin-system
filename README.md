@@ -48,9 +48,9 @@ Next install [Boost](http://www.boost.org) (1.50.0 or newer) and [GMP](https://g
 ```sh
   $ sudo apt-get install libboost-all-dev libgmp-dev
 ```
-Finally, execute the [install script](https://raw.githubusercontent.com/evoskuil/libbitcoin/develop/install-libbitcoin.sh). This single file will download, build, install and test libbitcoin.
+Finally, execute the [install script](https://raw.githubusercontent.com/evoskuil/libbitcoin/develop/install.sh). This single file will download, build, install and test libbitcoin.
 ```sh
-  $ ./install-libbitcoin.sh
+  $ ./install.sh
 ```
 Libbitcoin is now installed in `/usr/local/`.
 
@@ -72,14 +72,14 @@ The build script clones, builds and installs two unpackaged repositories, namely
 Any set of `./configure` options can be passed via the build script, for example:
 
 ```sh
-  $ ./install-libbitcoin.sh CPPFLAGS=-DDEBUG CFLAGS="-Og -g"
+  $ ./install.sh CPPFLAGS=-DDEBUG CFLAGS="-Og -g"
 ```
 
 #### Compiling for Testnet
 
 Currently libbitcoin cannot work with both [testnet](https://en.bitcoin.it/wiki/Testnet) and mainnet. This restriction will be lifted in a future version. In order to work with testnet in the interim libbitcoin must be recompiled with the testnet option:
 ```sh
-  $ ./install-libbitcoin.sh --enable-testnet
+  $ ./install.sh --enable-testnet
 ```
 #### Packaging Instructions
 
@@ -107,7 +107,7 @@ Next execute the following commands:
 ```
 Finally, invoke the install script:
 ```sh
-  $ ./install-libbitcoin.sh
+  $ ./install.sh
 ```
 
 ### Windows
