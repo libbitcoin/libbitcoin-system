@@ -48,10 +48,23 @@ template <size_t Size>
 byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size]);
 
 /**
- * Convert a hex string into hash bytes.
- * On error, returns null_hash.
+ * Converts a bitcoin_hash to a hex string.
+ * The bitcoin_hash format is like base16, but with the bytes reversed.
  */
-BC_API hash_digest decode_hash(const std::string& hex);
+BC_API std::string encode_hash(hash_digest hash);
+
+/**
+ * Convert a hex string into a bitcoin_hash.
+ * The bitcoin_hash format is like base16, but with the bytes reversed.
+ * @return false if the input is malformed.
+ */
+BC_API bool decode_hash(hash_digest& out, const std::string& in);
+
+/**
+ * Convert a hex string literal into a bitcoin_hash.
+ * The bitcoin_hash format is like base16, but with the bytes reversed.
+ */
+BC_API hash_digest hash_literal(const char (&string)[2*hash_size + 1]);
 
 // Old names:
 std::string encode_hex(data_slice in);

@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(ec_verify_test)
 {
     ec_point pubkey = to_data_chunk(base16_literal(
         "03bc88a1bd6ebac38e9a9ed58eda735352ad10650e235499b7318315cc26c9b55b"));
-    hash_digest sighash = decode_hash(
+    hash_digest sighash = hash_literal(
         "ed8f9b40c2d349c8a7e58cebe79faa25c21b6bb85b874901f72a1b3f1ad0a67f");
     data_chunk signature = to_data_chunk(base16_literal(
         "3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33"

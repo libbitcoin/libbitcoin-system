@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(serialize_test)
     output_point outpoint;
     outpoint.hash = deserial.read_hash();
     outpoint.index = deserial.read_4_bytes();
-    BOOST_REQUIRE_EQUAL(encode_base16(outpoint.hash),
+    BOOST_REQUIRE_EQUAL(encode_hash(outpoint.hash),
         "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
     BOOST_REQUIRE(outpoint.index == 0);
     data_chunk buff(36);
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(junk_test)
 
 BOOST_AUTO_TEST_CASE(tx_test)
 {
-    hash_digest tx_hash_1 = decode_hash(
+    hash_digest tx_hash_1 = hash_literal(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
     data_chunk raw_tx_1 = to_data_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(tx_test)
     satoshi_save(tx_1, resave_1.begin());
     BOOST_REQUIRE(resave_1 == raw_tx_1);
 
-    hash_digest tx_hash_2 = decode_hash(
+    hash_digest tx_hash_2 = hash_literal(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
     data_chunk raw_tx_2 = to_data_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"

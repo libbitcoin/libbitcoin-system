@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(simple)
     hash_number target;
     uint32_t bits = 486604799;
     target.set_compact(bits);
-    hash_digest block_hash = decode_hash(
+    hash_digest block_hash = hash_literal(
         "00000000b873e79784647a6c82962c70d228557d24a747ea4d1b8bbe878e1206");
 
     BOOST_REQUIRE(!(target <= 0));

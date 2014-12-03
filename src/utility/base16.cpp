@@ -23,7 +23,6 @@
 #include <iomanip>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
 
 namespace libbitcoin {
 
@@ -79,16 +78,29 @@ bool decode_base16(data_chunk& out, const std::string& in)
     return true;
 }
 
-hash_digest decode_hash(const std::string& in)
+BC_API std::string encode_hash(hash_digest hash)
+{
+    return encode_base16(hash);
+}
+
+bool decode_hash(hash_digest& out, const std::string& in)
 {
     if (in.size() != 2*hash_size)
-        return null_hash;
+        return false;
 
     hash_digest result;
     if (!decode_base16_raw(result.data(), result.size(), in.data()))
-        return null_hash;
+        return false;
 
-    return result;
+    out = result;
+    return true;
+}
+
+hash_digest hash_literal(const char (&string)[2*hash_size + 1])
+{
+    hash_digest out;
+    BITCOIN_ASSERT(decode_base16_raw(out.data(), out.size(), string));
+    return out;
 }
 
 std::string encode_hex(data_slice in)
