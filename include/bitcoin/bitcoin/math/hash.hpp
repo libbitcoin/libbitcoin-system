@@ -21,6 +21,7 @@
 #define LIBBITCOIN_HASH_HPP
 
 #include <cstddef>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 

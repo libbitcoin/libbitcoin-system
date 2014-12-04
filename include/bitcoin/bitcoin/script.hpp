@@ -21,6 +21,7 @@
 #define LIBBITCOIN_SCRIPT_HPP
 
 #include <cstdint>
+#include <string>
 #include <vector>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>

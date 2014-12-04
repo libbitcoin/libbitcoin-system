@@ -33,7 +33,6 @@ namespace libbitcoin {
 
 constexpr uint8_t options_size = sizeof(uint8_t);
 constexpr uint8_t version_size = sizeof(uint8_t);
-constexpr uint8_t nonce_size = sizeof(uint32_t);
 constexpr uint8_t compressed_pubkey_size = 33;
 constexpr uint8_t number_keys_size = sizeof(uint8_t);
 constexpr uint8_t number_sigs_size = sizeof(uint8_t);
