@@ -117,13 +117,13 @@ AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.49.0 if on gcc.
+# Require Boost of at least version 1.49.0 if in gcc.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*gcc*],
     [AX_BOOST_BASE([1.49.0], [], [AC_MSG_ERROR(
         [Boost 1.49.0 or later is required but was not found.])])])
 
-# Require Boost of at least version 1.54.0 if on clang.
+# Require Boost of at least version 1.54.0 if in clang.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*clang*],
     [AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
@@ -186,37 +186,69 @@ AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_regex -lbo
 #==============================================================================
 # Warn on all stuff.
 #------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wall],
-    [CXXFLAGS="$CXXFLAGS -Wall"])
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-Wall],
+        [CXXFLAGS="$CXXFLAGS -Wall"])])
 
 # Warn on extra stuff.
 #------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wextra],
-    [CXXFLAGS="$CXXFLAGS -Wextra"])
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-Wextra],
+        [CXXFLAGS="$CXXFLAGS -Wextra"])])
 
 # Be really annoying.
 #------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wpedantic],
-    [CXXFLAGS="$CXXFLAGS -Wpedantic"],
-    [AX_CHECK_COMPILE_FLAG([-pedantic],
-        [CXXFLAGS="$CXXFLAGS -pedantic"])])
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-Wpedantic],
+        [CXXFLAGS="$CXXFLAGS -Wpedantic"],
+        [AX_CHECK_COMPILE_FLAG([-pedantic],
+            [CXXFLAGS="$CXXFLAGS -pedantic"])])])
 
 # Conform to style.
 #------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wno-missing-braces],
-    [CXXFLAGS="$CXXFLAGS -Wno-missing-braces"])
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-Wno-missing-braces],
+        [CXXFLAGS="$CXXFLAGS -Wno-missing-braces"])])
+
+# Clean up Boost 1.54 headers. Enabled in clang only.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*clang*],
+    [AX_CHECK_COMPILE_FLAG([-Wno-deprecated-register],
+        [CXXFLAGS="$CXXFLAGS -Wno-deprecated-register"])])
+
+# Clean up Boost 1.49 headers. Enabled in gcc only.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*gcc*],
+    [AX_CHECK_COMPILE_FLAG([-Wno-unused-local-typedefs],
+        [CXXFLAGS="$CXXFLAGS -Wno-unused-local-typedefs"])])
 
 # Protect stack.
 #------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-fstack-protector],
-    [AX_CHECK_LINK_FLAG([-fstack-protector],
-        [CXXFLAGS="$CXXFLAGS -fstack-protector"])])
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-fstack-protector],
+        [AX_CHECK_LINK_FLAG([-fstack-protector],
+            [CXXFLAGS="$CXXFLAGS -fstack-protector"])])])
 
 # Protect stack comprehensively.
 #------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
-    [AX_CHECK_LINK_FLAG([-fstack-protector-all],
-        [CXXFLAGS="$CXXFLAGS -fstack-protector-all"])])
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
+        [AX_CHECK_LINK_FLAG([-fstack-protector-all],
+            [CXXFLAGS="$CXXFLAGS -fstack-protector-all"])])])
+
+# Hide inlines from external libs (disabled pending review).
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*disabled*],
+    [AX_CHECK_COMPILE_FLAG([-fvisibility-inlines-hidden],
+        [CXXFLAGS="$CXXFLAGS -fvisibility-inlines-hidden"])])
+
+# Set visibility to internal or hidden (disabled pending review).
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*disabled*],
+    [AX_CHECK_COMPILE_FLAG([-fvisibility=internal],
+        [CXXFLAGS="$CXXFLAGS -fvisibility=internal"],
+        [AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
+            [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"])])])
 
 
 # Process outputs into templates.
