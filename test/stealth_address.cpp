@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_pub_testnet__round_trip)
     BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
 }
 
-BOOST_AUTO_TEST_CASE(prefix_to_string__32_bits__little_endian)
+BOOST_AUTO_TEST_CASE(prefix_to_string__32_bits__expected_value)
 {
     data_chunk blocks{{0xba, 0xad, 0xf0, 0x0d}};
     binary_type prefix(32, blocks);
@@ -132,15 +132,13 @@ BOOST_AUTO_TEST_CASE(prefix_to_string__32_bits__little_endian)
     BOOST_REQUIRE_EQUAL(stream.str(), "10111010101011011111000000001101");
 }
 
-BOOST_AUTO_TEST_CASE(string_to_prefix__32_bits__little_endian)
+BOOST_AUTO_TEST_CASE(string_to_prefix__32_bits__expected_value)
 {
-    std::stringstream stream;
-    stream << "10111010101011011111000000001101";
-    binary_type prefix(stream.str());
+    binary_type prefix("10111010101011011111000000001101");
     BOOST_REQUIRE(prefix.blocks() == data_chunk({ 0xba, 0xad, 0xf0, 0x0d }));
 }
 
-BOOST_AUTO_TEST_CASE(prefix_to_bytes__32_bits__little_endian)
+BOOST_AUTO_TEST_CASE(prefix_to_bytes__32_bits__expected_value)
 {
     data_chunk blocks{{0xba, 0xad, 0xf0, 0x0d}};
     binary_type prefix(32, blocks);

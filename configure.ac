@@ -117,15 +117,15 @@ AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.49.0 if on linux.
+# Require Boost of at least version 1.49.0 if on gcc.
 #------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*],
+AS_CASE([${CC}], [*gcc*],
     [AX_BOOST_BASE([1.49.0], [], [AC_MSG_ERROR(
         [Boost 1.49.0 or later is required but was not found.])])])
 
-# Require Boost of at least version 1.54.0 if on darwin.
+# Require Boost of at least version 1.54.0 if on clang.
 #------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*darwin*],
+AS_CASE([${CC}], [*clang*],
     [AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
         [Boost 1.54.0 or later is required but was not found.])])])
 
@@ -161,12 +161,12 @@ AS_CASE([${host_os}], [*linux*],
 # Require gmp if on darwin and output ${gmp_LIBS}.
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*darwin*], 
-    [CPPFLAGS="$CPPFLAGS -I//opt/local/include"])
+    [CPPFLAGS="$CPPFLAGS -I/opt/local/include"])
+AS_CASE([${host_os}], [*darwin*], 
+    [LDFLAGS="$LDFLAGS -L/opt/local/lib"])
 AS_CASE([${host_os}], [*darwin*], 
     [AC_CHECK_HEADER([gmp.h], [],
         [AC_MSG_ERROR([gmp header is required but was not found.])],-)])
-AS_CASE([${host_os}], [*darwin*], 
-    [LDFLAGS="$LDFLAGS -L/opt/local/lib"])
 AS_CASE([${host_os}], [*darwin*], 
     [AC_CHECK_LIB([gmp],[__gmpz_init],
         [AC_SUBST([gmp_LIBS], [-lgmp])],
@@ -205,11 +205,6 @@ AX_CHECK_COMPILE_FLAG([-Wpedantic],
 #------------------------------------------------------------------------------
 AX_CHECK_COMPILE_FLAG([-Wno-missing-braces],
     [CXXFLAGS="$CXXFLAGS -Wno-missing-braces"])
-
-# Clean up Boost 1.49 headers (gcc).
-#------------------------------------------------------------------------------
-AX_CHECK_COMPILE_FLAG([-Wno-unused-local-typedefs],
-    [CXXFLAGS="$CXXFLAGS -Wno-unused-local-typedefs"])
 
 # Protect stack.
 #------------------------------------------------------------------------------

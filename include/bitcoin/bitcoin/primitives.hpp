@@ -21,6 +21,7 @@
 #define LIBBITCOIN_PRIMITIVES_HPP
 
 #include <cstdint>
+#include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/script.hpp>
