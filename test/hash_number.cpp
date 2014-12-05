@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(simple)
     hash_number target;
     uint32_t bits = 486604799;
     target.set_compact(bits);
-    hash_digest block_hash = decode_hash(
+    hash_digest block_hash = hash_literal(
         "00000000b873e79784647a6c82962c70d228557d24a747ea4d1b8bbe878e1206");
 
     BOOST_REQUIRE(!(target <= 0));
@@ -43,9 +43,9 @@ BOOST_AUTO_TEST_CASE(simple)
 BOOST_AUTO_TEST_CASE(work)
 {
     hash_number orphan_work = 0;
-    BOOST_REQUIRE_EQUAL(encode_hex(orphan_work.hash()), encode_hex(null_hash));
+    BOOST_REQUIRE_EQUAL(encode_base16(orphan_work.hash()), encode_base16(null_hash));
     orphan_work += block_work(486604799);
-    BOOST_REQUIRE_EQUAL(encode_hex(orphan_work.hash()),
+    BOOST_REQUIRE_EQUAL(encode_base16(orphan_work.hash()),
         "0100010001000000000000000000000000000000000000000000000000000000");
     hash_number main_work = 0;
     BOOST_REQUIRE(!(orphan_work <= main_work));

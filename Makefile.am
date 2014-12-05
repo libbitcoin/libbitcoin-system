@@ -103,6 +103,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
+    include/bitcoin/bitcoin/utility/base16.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
@@ -117,6 +118,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
 bitcoin_bitcoin_impl_utility_includedir = ${includedir}/bitcoin/bitcoin/impl/utility
 bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
+    include/bitcoin/bitcoin/impl/utility/base16.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/format.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
@@ -124,7 +126,7 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/address.hpp \
-    include/bitcoin/bitcoin/wallet/amount.hpp \
+    include/bitcoin/bitcoin/wallet/base10.hpp \
     include/bitcoin/bitcoin/wallet/base58.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
@@ -168,13 +170,14 @@ src_libbitcoin_la_SOURCES = \
     src/script.cpp \
     src/stealth.cpp \
     src/transaction.cpp \
+    src/utility/base16.cpp \
     src/utility/binary.cpp \
     src/utility/format.cpp \
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
     src/wallet/address.cpp \
-    src/wallet/amount.cpp \
+    src/wallet/base10.cpp \
     src/wallet/base58.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
@@ -204,7 +207,8 @@ test_libbitcoin_test_CPPFLAGS = \
     ${secp256k1_CFLAGS}
 
 test_libbitcoin_test_SOURCES = \
-    test/amount.cpp \
+    test/base10.cpp \
+    test/base16.cpp \
     test/base58.cpp \
     test/big_number.cpp \
     test/checksum.cpp \

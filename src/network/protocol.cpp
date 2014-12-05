@@ -379,7 +379,7 @@ void protocol::attempt_connect(const std::error_code& ec,
     if (already_connected(address, connections_))
     {
         log_debug(LOG_PROTOCOL)
-            << "Already connected to " << encode_hex(address.ip);
+            << "Already connected to " << encode_base16(address.ip);
         // Retry another connection
         // Still in same strand.
         modify_slot(slot, connect_state::stopped);

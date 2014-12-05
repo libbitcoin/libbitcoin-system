@@ -23,13 +23,13 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/base16.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -280,7 +280,7 @@ bool script_type::next_step(operation_stack::iterator it,
     //log_debug() << "Run: " << opcode_to_string(op.code);
     //log_debug() << "Stack:";
     //for (auto s: stack_)
-    //    log_debug() << "[" << encode_hex(s) << "]";
+    //    log_debug() << "[" << encode_base16(s) << "]";
     if (stack_.size() + alternate_stack_.size() > 1000)
         return false;
     return true;
@@ -872,8 +872,7 @@ bool script_type::op_ripemd160()
     if (stack_.size() < 1)
         return false;
     short_hash hash = ripemd160_hash(pop_stack());
-    data_chunk data(hash.begin(), hash.end());
-    stack_.push_back(data);
+    stack_.push_back(to_data_chunk(hash));
     return true;
 }
 
@@ -882,8 +881,7 @@ bool script_type::op_sha1()
     if (stack_.size() < 1)
         return false;
     short_hash hash = sha1_hash(pop_stack());
-    data_chunk data(hash.begin(), hash.end());
-    stack_.push_back(data);
+    stack_.push_back(to_data_chunk(hash));
     return true;
 }
 
@@ -892,8 +890,7 @@ bool script_type::op_sha256()
     if (stack_.size() < 1)
         return false;
     hash_digest hash = sha256_hash(pop_stack());
-    data_chunk data(hash.begin(), hash.end());
-    stack_.push_back(data);
+    stack_.push_back(to_data_chunk(hash));
     return true;
 }
 
@@ -902,8 +899,7 @@ bool script_type::op_hash160()
     if (stack_.size() < 1)
         return false;
     short_hash hash = bitcoin_short_hash(pop_stack());
-    data_chunk data(hash.begin(), hash.end());
-    stack_.push_back(data);
+    stack_.push_back(to_data_chunk(hash));
     return true;
 }
 
@@ -1025,7 +1021,7 @@ bool create_signature(data_chunk& signature, const ec_secret& private_key,
     return true;
 }
 
-bool check_signature(const data_chunk& signature, const ec_point& public_key,
+bool check_signature(data_slice signature, const ec_point& public_key,
     const script_type& script_code, const transaction_type& parent_tx,
     uint32_t input_index)
 {
@@ -1035,7 +1031,7 @@ bool check_signature(const data_chunk& signature, const ec_point& public_key,
         return false;
 
     // Remove the sighash type from the end of the signature.
-    data_chunk ec_signature(signature);
+    data_chunk ec_signature = to_data_chunk(signature);
     const auto hash_type = ec_signature.back();
     ec_signature.pop_back();
 
@@ -2024,7 +2020,7 @@ std::string pretty(const script_type& script)
         if (op.data.empty())
             ss << opcode_to_string(op.code);
         else
-            ss << "[ " << encode_hex(op.data) << " ]";
+            ss << "[ " << encode_base16(op.data) << " ]";
     }
     return ss.str();
 }
@@ -2057,7 +2053,9 @@ script_type unpretty(const std::string& pretty)
         operation op;
         if (*token == "[")
         {
-            const auto data = decode_hex(*++token);
+            data_chunk data;
+            if (!decode_base16(data, *++token))
+                return script_type();
             if (data.empty() || *++token != "]")
                 return script_type();
             op.code = data_to_opcode(data);
@@ -2088,12 +2086,12 @@ std::ostream& operator<<(std::ostream& stream, const script_type& script)
     return stream;
 }
 
-script_type raw_data_script(const data_chunk& raw_script)
+script_type raw_data_script(data_slice raw_script)
 {
     script_type script_object;
     operation op;
     op.code = opcode::raw_data;
-    op.data = raw_script;
+    op.data = to_data_chunk(raw_script);
     script_object.push_operation(op);
     return script_object;
 }
@@ -2129,7 +2127,7 @@ size_t number_bytes_to_read(
     return 0;
 }
 
-script_type parse_script(const data_chunk& raw_script)
+script_type parse_script(data_slice raw_script)
 {
     script_type script_object;
     auto deserial = make_deserializer(raw_script.begin(), raw_script.end());

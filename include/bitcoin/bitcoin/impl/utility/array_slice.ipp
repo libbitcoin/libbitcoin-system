@@ -59,6 +59,12 @@ std::size_t array_slice<T>::size() const
     return end_ - begin_;
 }
 
+template<typename T>
+bool array_slice<T>::empty() const
+{
+    return end_ == begin_;
+}
+
 } // namespace libbitcoin
 
 #endif

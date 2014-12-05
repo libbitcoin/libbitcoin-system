@@ -38,8 +38,8 @@ BOOST_AUTO_TEST_SUITE(scriptnum_tests)
 // ----------------------------------------------------------------------------
 
 #define BC_SCRIPT_NUMBER_CHECK_EQ(buffer_num, script_num) \
-    BOOST_CHECK_EQUAL(bc::encode_hex((buffer_num).bytes), \
-        bc::encode_hex((script_num).data())); \
+    BOOST_CHECK_EQUAL(encode_base16((buffer_num).bytes), \
+        encode_base16((script_num).data())); \
     BOOST_CHECK_EQUAL((buffer_num).number, (script_num).int32())
 
 static bool is(const uint8_t byte)
@@ -106,7 +106,7 @@ static void CheckSubtract(const int64_t num1, const int64_t num2,
         BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - scriptnum2);
         BC_SCRIPT_NUMBER_CHECK_EQ(subtract.forward, scriptnum1 - num2);
     }
-    
+
     if (!subtract_overflow64(num2, num1))
     {
         BC_SCRIPT_NUMBER_CHECK_EQ(subtract.reverse, scriptnum2 - scriptnum1);
@@ -140,7 +140,7 @@ static void CheckCompare(const int64_t num1, const int64_t num2,
     BOOST_CHECK_EQUAL(is(compare.ne), (scriptnum1 != scriptnum2));
     BOOST_CHECK_EQUAL(is(compare.lt), (scriptnum1 < scriptnum2));
     BOOST_CHECK_EQUAL(is(compare.gt), (scriptnum1 > scriptnum2));
-    
+
     BOOST_CHECK_EQUAL(is(compare.eq), (scriptnum1 == num2));
     BOOST_CHECK_EQUAL(is(compare.ge), (scriptnum1 >= num2));
     BOOST_CHECK_EQUAL(is(compare.le), (scriptnum1 <= num2));

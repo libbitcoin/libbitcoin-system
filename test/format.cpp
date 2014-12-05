@@ -24,30 +24,7 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(format_tests)
 
-// encode_hex/decode_hex
-
-BOOST_AUTO_TEST_CASE(encode_test_odd_length_returns_empty)
-{
-    const auto& hex_str = "10a7fd15cb45bda9e90e19a15";
-    BOOST_REQUIRE_EQUAL(encode_hex(decode_hex(hex_str)), "");
-}
-
-// TODO: these should be tested for correctness, not just round-tripping.
-
-BOOST_AUTO_TEST_CASE(encode_test_round_trips)
-{
-    const auto& hex_str = "10a7fd15cb45bda9e90e19a15f";
-    BOOST_REQUIRE_EQUAL(encode_hex(decode_hex(hex_str)), hex_str);
-}
-
-BOOST_AUTO_TEST_CASE(encode_test_padded_round_trips_value)
-{
-    const auto& unpadded_hex = "10a7fd15cb45bda9e90e19a15f";
-    const auto& padded_hex = "  \n\t10a7fd15cb45bda9e90e19a15f\n  \t";
-    BOOST_REQUIRE_EQUAL(encode_hex(decode_hex(padded_hex)), unpadded_hex);
-}
-
-// from_little_endian_unsafe/from_big_endian_unsafe/to_little_endian/to_big_endian
+// to_{big,little}_endian, from_{big,little}_endian_unsafe
 
 BOOST_AUTO_TEST_CASE(endian_test)
 {

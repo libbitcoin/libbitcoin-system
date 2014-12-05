@@ -48,7 +48,7 @@ script_type read_script(Deserializer& deserial)
         return raw_data_script(raw_script);
     }
 #ifndef BITCOIN_DISABLE_ASSERTS
-    std::string assert_msg = encode_hex(raw_script);
+    std::string assert_msg = encode_base16(raw_script);
     BITCOIN_ASSERT_MSG(
         raw_script == save_script(result), assert_msg.c_str());
 #endif

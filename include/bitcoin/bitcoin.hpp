@@ -120,9 +120,9 @@
  *
  * @subsection format Format
  *
- * - @link libbitcoin::encode_hex pretty_hex @endlink
- * - @link libbitcoin::decode_hex bytes_from_pretty @endlink
- * - @link libbitcoin::decode_hex_digest hash_from_pretty @endlink
+ * - @link libbitcoin::encode_base16 encode_base16 @endlink
+ * - @link libbitcoin::decode_base16 decode_base16 @endlink
+ * - @link libbitcoin::decode_hash decode_hash @endlink
  * - @link libbitcoin::extend_data extend_data @endlink
  * - @link libbitcoin::to_little_endian to_little_endian @endlink
  * - @link libbitcoin::to_big_endian to_big_endian @endlink
@@ -187,6 +187,7 @@
 #include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
+#include <bitcoin/bitcoin/utility/base16.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -195,7 +196,7 @@
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
-#include <bitcoin/bitcoin/wallet/amount.hpp>
+#include <bitcoin/bitcoin/wallet/base10.hpp>
 #include <bitcoin/bitcoin/wallet/base58.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>

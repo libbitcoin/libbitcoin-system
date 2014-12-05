@@ -66,6 +66,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\base16.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
@@ -152,6 +155,9 @@
     <ClCompile Include="..\..\..\..\src\transaction.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\base16.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -170,7 +176,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\amount.cpp">
+    <ClCompile Include="..\..\..\..\src\wallet\base10.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\base58.cpp">
@@ -301,6 +307,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\base16.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
@@ -334,7 +343,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\address.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\amount.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\base10.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\base58.hpp">

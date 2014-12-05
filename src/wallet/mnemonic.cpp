@@ -24,8 +24,8 @@
 #include <iostream>
 #include <sstream>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/base16.hpp>
 
 namespace libbitcoin {
 
@@ -1665,7 +1665,7 @@ string_list encode_mnemonic(data_slice seed)
 {
     BITCOIN_ASSERT(common_words.size() == 1626);
     string_list result;
-    std::string string_seed(encode_hex(seed));
+    std::string string_seed(encode_base16(seed));
     const auto seed_end = string_seed.end() - string_seed.size() % 8;
     for (auto it = string_seed.begin(); it != seed_end; it += 8)
     {

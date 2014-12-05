@@ -23,24 +23,19 @@
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/wallet/amount.hpp>
+#include <bitcoin/bitcoin/utility/base16.hpp>
+#include <bitcoin/bitcoin/wallet/base10.hpp>
 #include <bitcoin/bitcoin/wallet/base58.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 
-static bool is_digit(const char c)
-{
-    return '0' <= c && c <= '9';
-}
-static bool is_hex(const char c)
-{
-    return is_digit(c) || ('A' <= c && c <= 'F') || ('a' <= c && c <= 'f');
-}
 static bool is_qchar(const char c)
 {
     return
-        ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || is_digit(c) ||
+        ('0' <= c && c <= '9') ||
+        ('A' <= c && c <= 'Z') ||
+        ('a' <= c && c <= 'z') ||
         '-' == c || '.' == c || '_' == c || '~' == c || // unreserved
         '!' == c || '$' == c || '\'' == c || '(' == c || ')' == c ||
         '*' == c || '+' == c || ',' == c || ';' == c || // sub-delims
@@ -52,15 +47,6 @@ static bool isnt_amp(const char c)
     return '&' != c;
 }
 
-static unsigned from_hex(const char c)
-{
-    if ('A' <= c && c <= 'F')
-        return 10 + c - 'A';
-    if ('a' <= c && c <= 'f')
-        return 10 + c - 'a';
-    return c - '0';
-}
-
 /**
  * Unescapes a percent-encoded string while advancing the iterator.
  * @param i set to one-past the last-read character on return.
@@ -69,9 +55,11 @@ typedef std::string::const_iterator sci;
 static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
 {
     auto j = i;
+
+    // Find the end of the valid-character run:
     size_t count = 0;
     while (end != i && (is_valid(i[0]) ||
-        ('%' == *i && 2 < end - i && is_hex(i[1]) && is_hex(i[2]))))
+        ('%' == *i && 2 < end - i && is_base16(i[1]) && is_base16(i[2]))))
     {
         ++count;
         if ('%' == *i)
@@ -79,13 +67,16 @@ static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
         else
             ++i;
     }
+
+    // Do the conversion:
     std::string out;
     out.reserve(count);
     while (j != i)
     {
         if ('%' == *j)
         {
-            out.push_back(from_hex(j[1]) << 4 | from_hex(j[2]));
+            const char temp[] = {j[1], j[2], 0};
+            out.push_back(base16_literal(temp)[0]);
             j += 3;
         }
         else
@@ -166,7 +157,7 @@ bool uri_parse_result::got_param(std::string& key, std::string& value)
     if (key == "amount")
     {
         uint64_t amount;
-        if (!btc_to_satoshi(amount, value))
+        if (!decode_base10(amount, value, btc_decimal_places))
             return false;
         this->amount.reset(amount);
     }
@@ -217,7 +208,7 @@ void uri_writer::write_address(const stealth_address& address)
 
 void uri_writer::write_amount(uint64_t satoshis)
 {
-    write_param("amount", format_amount(satoshis));
+    write_param("amount", encode_base10(satoshis, btc_decimal_places));
 }
 
 void uri_writer::write_label(const std::string& label)

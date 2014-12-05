@@ -303,12 +303,12 @@ BC_API std::istream& operator>>(
 BC_API std::ostream& operator<<(
     std::ostream& stream, const script_type& script);
 
-BC_API script_type raw_data_script(const data_chunk& raw_script);
-BC_API script_type parse_script(const data_chunk& raw_script);
+BC_API script_type raw_data_script(data_slice raw_script);
+BC_API script_type parse_script(data_slice raw_script);
 BC_API data_chunk save_script(const script_type& script);
 BC_API size_t script_size(const script_type& script);
 
-BC_API bool check_signature(const data_chunk& signature,
+BC_API bool check_signature(data_slice signature,
     const ec_point& public_key, const script_type& script_code,
     const transaction_type& parent_tx, uint32_t input_index);
 BC_API bool create_signature(data_chunk& signature,

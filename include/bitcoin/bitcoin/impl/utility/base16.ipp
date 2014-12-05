@@ -17,42 +17,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ARRAY_SLICE_HPP
-#define LIBBITCOIN_ARRAY_SLICE_HPP
+#ifndef LIBBITCOIN_BASE16_IPP
+#define LIBBITCOIN_BASE16_IPP
 
-#include <cstddef>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
-/**
- * An read-only STL-style wrapper for array-style collections.
- *
- * This class allows std::array, std::vector, std::string, and c-style arrays
- * to be used interchangeably in functions that expect raw data.
- */
-template<typename T>
-class array_slice
+// Private helper:
+bool decode_base16_raw(uint8_t* out, size_t out_size, const char* in);
+
+template<size_t Size>
+byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
 {
-public:
-    template<typename Container>
-    array_slice(const Container& container);
+    byte_array<(Size - 1) / 2> out;
+    BITCOIN_ASSERT(decode_base16_raw(out.data(), out.size(), string));
+    return out;
+}
 
-    array_slice(const T* begin, const T* end);
-
-    const T* begin() const;
-    const T* end() const;
-    const T* data() const;
-    std::size_t size() const;
-    bool empty() const;
-
-private:
-    const T* begin_;
-    const T* end_;
-};
-
-} // namespace libbitcoin
-
-#include <bitcoin/bitcoin/impl/utility/array_slice.ipp>
+} // libbitcoin
 
 #endif
 

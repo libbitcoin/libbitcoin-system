@@ -60,29 +60,6 @@ BC_API std::ostream& operator<<(
 BC_API std::ostream& operator<<(
     std::ostream& stream, const point_type& point);
 
-/**
- * Convert data into a user readable hex string.
- */
-BC_API std::string encode_hex(data_slice data);
-
-/**
- * Convert a hex string into bytes.
- * On error, result.empty() is true.
- */
-BC_API data_chunk decode_hex(std::string hex);
-
-/**
- * Convert a hex string into hash bytes.
- * On error, returns null_hash.
- */
-BC_API hash_digest decode_hash(const std::string& hex);
-
-/**
- * Convert a hex string into short hash bytes.
- * On error, returns null_short_hash.
- */
-BC_API short_hash decode_short_hash(const std::string& hex);
-
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/format.ipp>
