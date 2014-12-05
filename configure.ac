@@ -43,7 +43,7 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 # Declare using the GNU C library (glibc).
-AC_GNU_SOURCE
+#AC_GNU_SOURCE
 
 # Compute the canonical host-system type variable host, including host_os.
 AC_CANONICAL_HOST
@@ -113,6 +113,19 @@ AS_IF([test x$enable_testnet != xno], AC_DEFINE([ENABLE_TESTNET]))
 # Inherit --enable-shared option and define BOOST_TEST_DYN_LINK.
 #------------------------------------------------------------------------------
 AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
+
+
+# Set unconditional preprocessor defines.
+#==============================================================================
+# Unconditionally define the preprocessor symbol BOOST_NO_EXCEPTIONS.
+#------------------------------------------------------------------------------
+# Capture exceptional conditions in callback function.
+AC_DEFINE([BOOST_NO_EXCEPTIONS])
+
+# Unconditionally define the preprocessor symbol BOOST_EXCEPTION_DISABLE.
+#------------------------------------------------------------------------------
+# Disable boost exception augmentation.
+AC_DEFINE([BOOST_EXCEPTION_DISABLE])
 
 
 # Check dependencies.
