@@ -42,9 +42,6 @@ AC_PROG_CXX
 # Enable shared libraries if available, and static if they don't conflict.
 AC_PROG_LIBTOOL
 
-# Declare using the GNU C library (glibc).
-#AC_GNU_SOURCE
-
 # Compute the canonical host-system type variable host, including host_os.
 AC_CANONICAL_HOST
 
