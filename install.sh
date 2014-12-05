@@ -219,7 +219,8 @@ SECP256K1_OPTIONS=\
 BITCOIN_OPTIONS=\
 "${prefix_flags} "\
 "${with_boost} "\
-"${with_pkgconfigdir} "
+"${with_pkgconfigdir} "\
+"LDFLAGS=-nodefaultlibs "
 
 
 # Define compiler settings.
