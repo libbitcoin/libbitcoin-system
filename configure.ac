@@ -115,19 +115,6 @@ AS_IF([test x$enable_testnet != xno], AC_DEFINE([ENABLE_TESTNET]))
 AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 
-# Set unconditional preprocessor defines.
-#==============================================================================
-# Unconditionally define the preprocessor symbol BOOST_NO_EXCEPTIONS.
-#------------------------------------------------------------------------------
-# Capture exceptional conditions in callback function.
-AC_DEFINE([BOOST_NO_EXCEPTIONS])
-
-# Unconditionally define the preprocessor symbol BOOST_EXCEPTION_DISABLE.
-#------------------------------------------------------------------------------
-# Disable boost exception augmentation.
-AC_DEFINE([BOOST_EXCEPTION_DISABLE])
-
-
 # Check dependencies.
 #==============================================================================
 # Require Boost of at least version 1.49.0 if in gcc.
