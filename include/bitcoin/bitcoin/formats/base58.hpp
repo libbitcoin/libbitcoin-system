@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_BASE58_HPP
 #define LIBBITCOIN_BASE58_HPP
 
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -28,6 +29,10 @@ namespace libbitcoin {
 BC_API bool is_base58(const char c);
 BC_API bool is_base58(const std::string& text);
 
+/**
+ * Encode data as base58.
+ * @return the base58 encoded string.
+ */
 BC_API std::string encode_base58(data_slice unencoded);
 
 /**
