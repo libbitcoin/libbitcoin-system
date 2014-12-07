@@ -23,9 +23,9 @@
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/base16.hpp>
-#include <bitcoin/bitcoin/wallet/base10.hpp>
-#include <bitcoin/bitcoin/wallet/base58.hpp>
+#include <bitcoin/bitcoin/formats/base10.hpp>
+#include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {

@@ -70,6 +70,16 @@ bitcoin_bitcoin_impl_serialize_include_HEADERS = \
     include/bitcoin/bitcoin/impl/serialize/block.ipp \
     include/bitcoin/bitcoin/impl/serialize/misc.ipp
 
+bitcoin_bitcoin_formats_includedir = ${includedir}/bitcoin/bitcoin/formats
+bitcoin_bitcoin_formats_include_HEADERS = \
+    include/bitcoin/bitcoin/formats/base10.hpp \
+    include/bitcoin/bitcoin/formats/base16.hpp \
+    include/bitcoin/bitcoin/formats/base58.hpp
+
+bitcoin_bitcoin_impl_formats_includedir = ${includedir}/bitcoin/bitcoin/impl/formats
+bitcoin_bitcoin_impl_formats_include_HEADERS = \
+    include/bitcoin/bitcoin/impl/formats/base16.ipp
+
 bitcoin_bitcoin_math_includedir = ${includedir}/bitcoin/bitcoin/math
 bitcoin_bitcoin_math_include_HEADERS = \
     include/bitcoin/bitcoin/math/checksum.hpp \
@@ -103,7 +113,6 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
-    include/bitcoin/bitcoin/utility/base16.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
@@ -118,7 +127,6 @@ bitcoin_bitcoin_util_include_HEADERS = \
 bitcoin_bitcoin_impl_utility_includedir = ${includedir}/bitcoin/bitcoin/impl/utility
 bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
-    include/bitcoin/bitcoin/impl/utility/base16.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
@@ -126,8 +134,6 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/address.hpp \
-    include/bitcoin/bitcoin/wallet/base10.hpp \
-    include/bitcoin/bitcoin/wallet/base58.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
@@ -149,6 +155,9 @@ src_libbitcoin_la_SOURCES = \
     src/compat.cpp \
     src/constants.cpp \
     src/error.cpp \
+    src/formats/base10.cpp \
+    src/formats/base16.cpp \
+    src/formats/base58.cpp \
     src/math/checksum.cpp \
     src/math/ec_keys.cpp \
     src/math/external/hmac_sha256.c \
@@ -170,14 +179,11 @@ src_libbitcoin_la_SOURCES = \
     src/script.cpp \
     src/stealth.cpp \
     src/transaction.cpp \
-    src/utility/base16.cpp \
     src/utility/binary.cpp \
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
     src/wallet/address.cpp \
-    src/wallet/base10.cpp \
-    src/wallet/base58.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
