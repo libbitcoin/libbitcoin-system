@@ -26,10 +26,6 @@
 
 namespace libbitcoin {
 
-/// Extend the data by appending other.
-template <typename D, typename T>
-void extend_data(D& data, const T& other);
-
 template <typename T, typename Iterator>
 T from_big_endian(Iterator start, Iterator end);
 

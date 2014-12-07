@@ -41,9 +41,17 @@ data_chunk to_data_chunk(T iterable);
 
 /**
  * Concatenates several data slices into a single data_chunk.
+ * @param extra_space include this much extra space when calling
+ * `reserve` on the data_chunk (as an optimization).
  */
 data_chunk build_data(std::initializer_list<data_slice> slices,
     size_t extra_space=0);
+
+/**
+ * Extend `data` by appending `other`.
+ */
+template <typename D, typename T>
+void extend_data(D& data, const T& other);
 
 } // namespace libbitcoin
 

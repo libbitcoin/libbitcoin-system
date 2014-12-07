@@ -24,12 +24,6 @@
 
 namespace libbitcoin {
 
-template <typename D, typename T>
-void extend_data(D& data, const T& other)
-{
-    data.insert(std::end(data), std::begin(other), std::end(other));
-}
-
 #define VERIFY_UNSIGNED(T) static_assert(std::is_unsigned<T>::value, \
     "The endian functions only work on unsigned types")
 
