@@ -72,7 +72,7 @@ data_chunk decode_hex(std::string in);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/base16.ipp>
+#include <bitcoin/bitcoin/impl/formats/base16.ipp>
 
 #endif
 

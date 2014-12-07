@@ -8,8 +8,14 @@
     <Filter Include="include\bitcoin">
       <UniqueIdentifier>{b2bbb7a8-a286-4f49-b511-48c4e179f7e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\formats">
+      <UniqueIdentifier>{80b43390-b9a5-4c01-952a-2b589c3bdc20}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\bitcoin\impl">
       <UniqueIdentifier>{5afb9fba-cd2c-438a-aedd-39c8acc14af4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\impl\formats">
+      <UniqueIdentifier>{78a30d1f-2532-4945-a8aa-d8227a8df38d}</UniqueIdentifier>
     </Filter>
     <Filter Include="include\bitcoin\impl\serialize">
       <UniqueIdentifier>{849640c1-d79f-4baa-bfb5-0ea86d1c9988}</UniqueIdentifier>
@@ -39,6 +45,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="src\formats">
+      <UniqueIdentifier>{d8cc8c0d-5a89-4c99-a119-bee06babc686}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src\math">
       <UniqueIdentifier>{2fe97318-6a5c-42db-a6aa-4ab97b592991}</UniqueIdentifier>
     </Filter>
@@ -57,6 +66,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base16.ipp">
+      <Filter>include\bitcoin\impl\formats</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\block.ipp">
       <Filter>include\bitcoin\impl\serialize</Filter>
     </None>
@@ -66,13 +78,10 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\base16.ipp">
-      <Filter>include\bitcoin\impl\utility</Filter>
-    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\format.ipp">
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\endian.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp">
@@ -91,6 +100,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\error.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base10.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base16.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base58.cpp">
+      <Filter>src\formats</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp">
       <Filter>src\math</Filter>
@@ -155,13 +173,7 @@
     <ClCompile Include="..\..\..\..\src\transaction.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\base16.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\format.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp">
@@ -174,12 +186,6 @@
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\base10.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\base58.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp">
@@ -225,6 +231,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\error.hpp">
       <Filter>include\bitcoin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base10.hpp">
+      <Filter>include\bitcoin\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base16.hpp">
+      <Filter>include\bitcoin\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base58.hpp">
+      <Filter>include\bitcoin\formats</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp">
       <Filter>include\bitcoin\math</Filter>
@@ -307,9 +322,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\base16.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
@@ -319,7 +331,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\format.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\endian.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp">
@@ -341,12 +353,6 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\address.hpp">
-      <Filter>include\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\base10.hpp">
-      <Filter>include\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\base58.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_keys.hpp">

@@ -44,6 +44,12 @@ data_chunk build_data(std::initializer_list<data_slice> slices,
     return out;
 }
 
+template <typename D, typename T>
+void extend_data(D& data, const T& other)
+{
+    data.insert(std::end(data), std::begin(other), std::end(other));
+}
+
 } // libbitcoin
 
 #endif

@@ -20,13 +20,13 @@
 
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
+#include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
-#include <bitcoin/bitcoin/wallet/base58.hpp>
 
 namespace libbitcoin {
 
@@ -90,9 +90,9 @@ const hd_key_lineage& hd_public_key::lineage() const
 
 bool hd_public_key::set_encoded(std::string encoded)
 {
-    if (!is_base58(encoded))
+    data_chunk decoded;
+    if (!decode_base58(decoded, encoded))
         return false;
-    const data_chunk decoded = decode_base58(encoded);
     if (decoded.size() != serialized_length)
         return false;
     if (!verify_checksum(decoded))
@@ -201,9 +201,9 @@ const ec_secret& hd_private_key::private_key() const
 
 bool hd_private_key::set_encoded(std::string encoded)
 {
-    if (!is_base58(encoded))
+    data_chunk decoded;
+    if (!decode_base58(decoded, encoded))
         return false;
-    const data_chunk decoded = decode_base58(encoded);
     if (decoded.size() != serialized_length)
         return false;
     if (!verify_checksum(decoded))

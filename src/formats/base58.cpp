@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/base58.hpp>
+#include <bitcoin/bitcoin/formats/base58.hpp>
 
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -133,23 +133,22 @@ void unpack_char(data_chunk& data, int carry)
     BITCOIN_ASSERT(carry == 0);
 }
 
-data_chunk decode_base58(std::string encoded)
+bool decode_base58(data_chunk& out, const std::string& in)
 {
     // Trim spaces and newlines around the string.
-    boost::algorithm::trim(encoded);
-    size_t leading_zeros = count_leading_zeros(encoded);
+    size_t leading_zeros = count_leading_zeros(in);
 
     // log(58) / log(256), rounded up.
-    const size_t data_size = encoded.size() * 733 / 1000 + 1;
+    const size_t data_size = in.size() * 733 / 1000 + 1;
     // Allocate enough space in big-endian base256 representation.
     data_chunk data(data_size);
 
     // Process the characters.
-    for (auto it = encoded.begin() + leading_zeros; it != encoded.end(); ++it)
+    for (auto it = in.begin() + leading_zeros; it != in.end(); ++it)
     {
         size_t carry = base58_chars.find(*it);
         if (carry == std::string::npos)
-            return data_chunk();
+            return false;
         unpack_char(data, carry);
     }
 
@@ -163,7 +162,20 @@ data_chunk decode_base58(std::string encoded)
     decoded.reserve(estimated_size);
     decoded.assign(leading_zeros, 0x00);
     decoded.insert(decoded.end(), first_nonzero, data.cend());
-    return decoded;
+
+    out = decoded;
+    return true;
+}
+
+data_chunk decode_base58(std::string encoded)
+{
+    // Trim spaces and newlines around the string.
+    boost::algorithm::trim(encoded);
+
+    data_chunk out;
+    if (!decode_base58(out, encoded))
+        return data_chunk();
+    return out;
 }
 
 } // namespace libbitcoin

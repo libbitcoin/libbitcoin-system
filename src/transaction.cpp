@@ -20,9 +20,9 @@
 #include <bitcoin/bitcoin/transaction.hpp>
 
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -101,7 +101,7 @@ hash_digest generate_merkle_root(const transaction_list& transactions)
 std::string pretty(const transaction_input_type& input)
 {
     std::ostringstream ss;
-    ss << "\thash = " << input.previous_output.hash << "\n"
+    ss << "\thash = " << encode_hash(input.previous_output.hash) << "\n"
         << "\tindex = " << input.previous_output.index << "\n"
         << "\t" << input.script << "\n"
         << "\tsequence = " << input.sequence << "\n";

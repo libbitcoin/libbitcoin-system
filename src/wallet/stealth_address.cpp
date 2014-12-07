@@ -21,13 +21,13 @@
 #include <algorithm>
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
+#include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/wallet/base58.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
@@ -45,11 +45,11 @@ constexpr uint8_t max_spend_key_count = sizeof(uint8_t) * byte_bits;
 // [prefix:prefix_number_bits / 8, round up][checksum:4]
 // Estimate assumes N = 0 and prefix_length = 0:
 constexpr size_t min_address_size = version_size + options_size +
-    compressed_pubkey_size + number_keys_size + number_sigs_size + 
+    compressed_pubkey_size + number_keys_size + number_sigs_size +
     prefix_length_size + checksum_size;
 
 // Document the assumption that the prefix is defined with an 8 bit block size.
-static_assert(binary_type::bits_per_block == byte_bits, 
+static_assert(binary_type::bits_per_block == byte_bits,
     "The declaraction of stealh_prefix must have an 8 bit block size.");
 
 stealth_address::stealth_address()
@@ -58,7 +58,7 @@ stealth_address::stealth_address()
 }
 
 stealth_address::stealth_address(const binary_type& prefix,
-    const ec_point& scan_pubkey, const pubkey_list& spend_pubkeys, 
+    const ec_point& scan_pubkey, const pubkey_list& spend_pubkeys,
     uint8_t signatures, bool testnet)
 {
     // Guard against uncompressed pubkey or junk data.
@@ -142,7 +142,9 @@ std::string stealth_address::encoded() const
 bool stealth_address::set_encoded(const std::string& encoded_address)
 {
     valid_ = false;
-    auto raw_address = decode_base58(encoded_address);
+    data_chunk raw_address;
+    if (!decode_base58(raw_address, encoded_address))
+        return false;
 
     // Size is guarded until we get to N.
     auto required_size = min_address_size;

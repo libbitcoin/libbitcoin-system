@@ -20,10 +20,10 @@
 #include <bitcoin/bitcoin/wallet/address.hpp>
 
 #include <algorithm>
-#include <bitcoin/bitcoin/utility/format.hpp>
+#include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/wallet/base58.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
@@ -58,9 +58,9 @@ const short_hash& payment_address::hash() const
 
 bool payment_address::set_encoded(const std::string& encoded_address)
 {
-    if (!is_base58(encoded_address))
+    data_chunk decoded_address;
+    if (!decode_base58(decoded_address, encoded_address))
         return false;
-    const data_chunk decoded_address = decode_base58(encoded_address);
     // version + 20 bytes short hash + 4 bytes checksum
     if (decoded_address.size() != 25)
         return false;

@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 

@@ -17,18 +17,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_FORMAT_IPP
-#define LIBBITCOIN_FORMAT_IPP
+#ifndef LIBBITCOIN_ENDIAN_IPP
+#define LIBBITCOIN_ENDIAN_IPP
 
 #include <type_traits>
 
 namespace libbitcoin {
-
-template <typename D, typename T>
-void extend_data(D& data, const T& other)
-{
-    data.insert(std::end(data), std::begin(other), std::end(other));
-}
 
 #define VERIFY_UNSIGNED(T) static_assert(std::is_unsigned<T>::value, \
     "The endian functions only work on unsigned types")

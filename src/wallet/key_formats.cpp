@@ -20,13 +20,13 @@
 
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
+#include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
-#include <bitcoin/bitcoin/wallet/base58.hpp>
 
 namespace libbitcoin {
 
@@ -46,9 +46,9 @@ std::string secret_to_wif(const ec_secret& secret, bool compressed)
 
 ec_secret wif_to_secret(const std::string& wif)
 {
-    if (!is_base58(wif))
+    data_chunk decoded;
+    if (!decode_base58(decoded, wif))
         return ec_secret();
-    data_chunk decoded = decode_base58(wif);
     // 1 marker, 32 byte secret, optional 1 compressed flag, 4 checksum bytes
     if (decoded.size() != 1 + hash_size + 4 &&
         decoded.size() != 1 + hash_size + 1 + 4)
@@ -71,8 +71,11 @@ ec_secret wif_to_secret(const std::string& wif)
     return secret;
 }
 
-bool is_wif_compressed(const std::string& wif) {
-    data_chunk decoded = decode_base58(wif);
+bool is_wif_compressed(const std::string& wif)
+{
+    data_chunk decoded;
+    if (!decode_base58(decoded, wif))
+        return false;
     return decoded.size() == (1 + hash_size + 1 + 4) &&
         decoded[33] == (uint8_t)0x01;
 }

@@ -21,9 +21,9 @@
 
 #include <algorithm>
 #include <secp256k1.h>
-#include <bitcoin/bitcoin/utility/format.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
