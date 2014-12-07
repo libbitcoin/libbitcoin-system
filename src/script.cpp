@@ -987,21 +987,29 @@ hash_digest script_type::generate_signature_hash(
     return hash_transaction(parent_tx, hash_type);
 }
 
+// This uses the simpler and more secure deterministic nonce technique.
 bool create_signature(data_chunk& signature, const ec_secret& private_key,
     const script_type& prevout_script, const transaction_type& new_tx,
     uint32_t input_index, uint32_t hash_type)
 {
-    BOOST_ASSERT_MSG(false, "Deterministic signature is not yet implemented.");
-    return false;
+    // This always produces a valid signature hash.
+    const auto sighash =
+        script_type::generate_signature_hash(
+            new_tx, input_index, prevout_script, hash_type);
 
-    // TODO: calculate this.
-    ec_secret deterministic_nonce;
+    const auto deterministic_nonce = create_nonce(private_key, sighash);
 
-    // Pass through to legacy technique.
-    create_signature(signature, private_key, prevout_script, new_tx,
-        input_index, hash_type, deterministic_nonce);
+    // Create the EC signature.
+    signature = sign(private_key, sighash, deterministic_nonce);
+    if (signature.empty())
+        return false;
+
+    // Add the sighash type to the end of the signature.
+    signature.push_back(hash_type);
+    return true;
 }
 
+// This uses the legacy non-deterministic nonce technique.
 bool create_signature(data_chunk& signature, const ec_secret& private_key,
     const script_type& prevout_script, const transaction_type& new_tx,
     uint32_t input_index, uint32_t hash_type, const ec_secret& nonce)

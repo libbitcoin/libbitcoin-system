@@ -19,6 +19,7 @@
 #ifndef LIBBITCOIN_MESSAGE_HPP
 #define LIBBITCOIN_MESSAGE_HPP
 
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -37,13 +38,22 @@ BC_API hash_digest hash_message(data_slice message);
 /**
  * Signs a message.
  * Uses deterministic signatures.
+ * @return a signature in Bitcoin's own format.
+ * This should be base64 encoded for presentation to the user.
+ */
+BC_API message_signature sign_message(data_slice message,
+    const std::string& wif);
+
+/**
+ * Signs a message.
+ * Uses deterministic signatures.
  * @param compressed true if the bitcoin address derived from the
  * private key is in compressed format.
  * @return a signature in Bitcoin's own format.
  * This should be base64 encoded for presentation to the user.
  */
 BC_API message_signature sign_message(data_slice message,
-    const ec_secret& secret, bool compressed = true);
+    const ec_secret& secret, bool compressed=true);
 
 /**
  * Verifies a message.

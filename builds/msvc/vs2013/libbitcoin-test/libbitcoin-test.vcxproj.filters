@@ -10,6 +10,9 @@
     <ClCompile Include="..\..\..\..\test\base58.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\base64.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\big_number.cpp">
       <Filter>src</Filter>
     </ClCompile>

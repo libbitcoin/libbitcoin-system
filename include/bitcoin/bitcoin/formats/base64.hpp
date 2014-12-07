@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BASE58_HPP
-#define LIBBITCOIN_BASE58_HPP
+#ifndef LIBBITCOIN_BASE64_HPP
+#define LIBBITCOIN_BASE64_HPP
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
@@ -26,23 +26,17 @@
 
 namespace libbitcoin {
 
-BC_API bool is_base58(const char c);
-BC_API bool is_base58(const std::string& text);
-
 /**
  * Encode data as base58.
  * @return the base58 encoded string.
  */
-BC_API std::string encode_base58(data_slice unencoded);
+BC_API std::string encode_base64(data_slice unencoded);
 
 /**
  * Attempt to decode base58 data.
  * @return false if the input contains non-base58 characters.
  */
-BC_API bool decode_base58(data_chunk& out, const std::string& in);
-
-// Old prototype:
-BC_API data_chunk decode_base58(std::string encoded);
+BC_API bool decode_base64(data_chunk& out, const std::string& in);
 
 } // namespace libbitcoin
 

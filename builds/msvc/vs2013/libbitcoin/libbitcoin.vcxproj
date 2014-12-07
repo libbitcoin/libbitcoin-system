@@ -75,6 +75,7 @@
     <ClCompile Include="..\..\..\..\src\formats\base10.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base58.cpp" />
+    <ClCompile Include="..\..\..\..\src\formats\base64.cpp" />
     <ClCompile Include="..\..\..\..\src\math\checksum.cpp" />
     <ClCompile Include="..\..\..\..\src\math\ec_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha256.c" />
@@ -119,6 +120,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base10.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base16.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base58.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base64.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha256.h" />
