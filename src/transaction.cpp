@@ -101,7 +101,7 @@ hash_digest generate_merkle_root(const transaction_list& transactions)
 std::string pretty(const transaction_input_type& input)
 {
     std::ostringstream ss;
-    ss << "\thash = " << input.previous_output.hash << "\n"
+    ss << "\thash = " << encode_hash(input.previous_output.hash) << "\n"
         << "\tindex = " << input.previous_output.index << "\n"
         << "\t" << input.script << "\n"
         << "\tsequence = " << input.sequence << "\n";

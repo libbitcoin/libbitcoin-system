@@ -172,7 +172,6 @@ src_libbitcoin_la_SOURCES = \
     src/transaction.cpp \
     src/utility/base16.cpp \
     src/utility/binary.cpp \
-    src/utility/format.cpp \
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \

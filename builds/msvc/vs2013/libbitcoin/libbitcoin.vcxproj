@@ -95,7 +95,6 @@
     <ClCompile Include="..\..\..\..\src\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\format.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />

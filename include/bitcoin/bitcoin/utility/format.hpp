@@ -46,16 +46,6 @@ byte_array<sizeof(T)> to_little_endian(T n);
 
 byte_array<1> to_byte(uint8_t byte);
 
-// ADL cannot work on templates
-BC_API std::ostream& operator<<(
-    std::ostream& stream, const data_chunk& data);
-BC_API std::ostream& operator<<(
-    std::ostream& stream, const hash_digest& hash);
-BC_API std::ostream& operator<<(
-    std::ostream& stream, const short_hash& hash);
-BC_API std::ostream& operator<<(
-    std::ostream& stream, const point_type& point);
-
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/format.ipp>

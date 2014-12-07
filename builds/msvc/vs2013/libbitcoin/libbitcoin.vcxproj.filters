@@ -161,9 +161,6 @@
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\format.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
