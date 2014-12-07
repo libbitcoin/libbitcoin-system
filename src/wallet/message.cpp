@@ -20,6 +20,7 @@
 
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/wallet/key_formats.hpp>
 
 namespace libbitcoin {
 
@@ -37,6 +38,18 @@ hash_digest hash_message(data_slice message)
     ser.write_data(message);
 
     return bitcoin_hash(data);
+}
+
+// This is convenient thought not as efficient as the other override.
+message_signature sign_message(data_slice message, const std::string& wif)
+{
+    auto secret = wif_to_secret(wif);
+    if (secret == ec_secret())
+        return message_signature();
+
+    bool compressed = is_wif_compressed(wif);
+
+    return sign_message(message, secret, compressed);
 }
 
 message_signature sign_message(data_slice message,

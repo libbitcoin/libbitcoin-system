@@ -32,6 +32,11 @@ static const ec_secret secret
     0xe3, 0x88, 0x5f, 0xa2, 0x54, 0xd7, 0xe3, 0x93
 }};
 
+const char wif_uncompressed[] = 
+    "5HpMRgt5u8yyU1AfPwcgLGphD5Qu4ka4v7McE4jKrGNpQPyRqXC";
+const char wif_compressed[] = 
+    "KwE19y2Ud8EUEBjeUG4Uc4qWUJUUoZJxHR3xUfTpCSsJEDv2o8fu";
+
 BOOST_AUTO_TEST_SUITE(message_tests)
 
 BOOST_AUTO_TEST_CASE(message_sign_uncompressed_test)
@@ -53,6 +58,31 @@ BOOST_AUTO_TEST_CASE(message_sign_compressed_test)
     auto signature = sign_message(message, secret, true);
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
+
+BOOST_AUTO_TEST_CASE(message_sign_wif_uncompressed_test)
+{
+    static const auto secret = wif_to_secret(wif_uncompressed);
+    static const auto message = to_data_chunk(std::string("Nakomoto"));
+
+    payment_address address(payment_address::pubkey_version,
+        bitcoin_short_hash(secret_to_public_key(secret, false)));
+
+    auto signature = sign_message(message, wif_uncompressed);
+    BOOST_REQUIRE(verify_message(message, address, signature));
+}
+
+BOOST_AUTO_TEST_CASE(message_sign_wif_compressed_test)
+{
+    static const auto secret = wif_to_secret(wif_compressed);
+    static const auto message = to_data_chunk(std::string("Nakomoto"));
+
+    payment_address address(payment_address::pubkey_version,
+        bitcoin_short_hash(secret_to_public_key(secret, true)));
+
+    auto signature = sign_message(message, wif_compressed);
+    BOOST_REQUIRE(verify_message(message, address, signature));
+}
+
 
 BOOST_AUTO_TEST_CASE(message_electrum_test)
 {
