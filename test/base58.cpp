@@ -24,8 +24,6 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(base58_tests)
 
-// For some reason boost test seg faults if I use a function.
-// Only when using libsecp256k1 with the SSL implementation.
 void encdec_test(const std::string& hex, const std::string& encoded)
 {
     data_chunk data, decoded;
