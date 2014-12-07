@@ -66,6 +66,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\base16.ipp">
+      <Filter>include\bitcoin\impl\formats</Filter>
+    </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\block.ipp">
       <Filter>include\bitcoin\impl\serialize</Filter>
     </None>
@@ -84,7 +87,6 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\base16.ipp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\block.cpp">
