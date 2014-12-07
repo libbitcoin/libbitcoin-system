@@ -53,7 +53,7 @@ static unsigned from_hex(const char c)
 
 bool decode_base16_raw(uint8_t* out, size_t out_size, const char* in)
 {
-    if (!std::all_of(in, in + 2*out_size, is_base16))
+    if (!std::all_of(in, in + 2 * out_size, is_base16))
         return false;
 
     for (size_t i = 0; i < out_size; ++i)
@@ -78,14 +78,37 @@ bool decode_base16(data_chunk& out, const std::string& in)
     return true;
 }
 
-BC_API std::string encode_hash(hash_digest hash)
+std::string encode_hash(short_hash hash)
 {
     return encode_base16(hash);
 }
 
+std::string encode_hash(hash_digest hash)
+{
+    return encode_base16(hash);
+}
+
+std::string encode_hash(long_hash hash)
+{
+    return encode_base16(hash);
+}
+
+bool decode_hash(short_hash& out, const std::string& in)
+{
+    if (in.size() != 2 * short_hash_size)
+        return false;
+
+    short_hash result;
+    if (!decode_base16_raw(result.data(), result.size(), in.data()))
+        return false;
+
+    out = result;
+    return true;
+}
+
 bool decode_hash(hash_digest& out, const std::string& in)
 {
-    if (in.size() != 2*hash_size)
+    if (in.size() != 2 * hash_size)
         return false;
 
     hash_digest result;
@@ -96,7 +119,20 @@ bool decode_hash(hash_digest& out, const std::string& in)
     return true;
 }
 
-hash_digest hash_literal(const char (&string)[2*hash_size + 1])
+bool decode_hash(long_hash& out, const std::string& in)
+{
+    if (in.size() != 2 * long_hash_size)
+        return false;
+
+    long_hash result;
+    if (!decode_base16_raw(result.data(), result.size(), in.data()))
+        return false;
+
+    out = result;
+    return true;
+}
+
+hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
 {
     hash_digest out;
     BITCOIN_ASSERT(decode_base16_raw(out.data(), out.size(), string));
