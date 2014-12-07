@@ -120,8 +120,14 @@
  *
  * @subsection format Format
  *
+ * - @link libbitcoin::encode_base10 encode_base10 @endlink
+ * - @link libbitcoin::decode_base10 decode_base10 @endlink
  * - @link libbitcoin::encode_base16 encode_base16 @endlink
  * - @link libbitcoin::decode_base16 decode_base16 @endlink
+ * - @link libbitcoin::encode_base58 encode_base58 @endlink
+ * - @link libbitcoin::decode_base58 decode_base58 @endlink
+ * - @link libbitcoin::encode_base64 encode_base64 @endlink
+ * - @link libbitcoin::decode_base64 decode_base64 @endlink
  * - @link libbitcoin::decode_hash decode_hash @endlink
  * - @link libbitcoin::extend_data extend_data @endlink
  * - @link libbitcoin::to_little_endian to_little_endian @endlink
@@ -143,11 +149,6 @@
  * - @link libbitcoin::append_checksum append_checksum @endlink
  * - @link libbitcoin::uint32_t bitcoin_checksum @endlink
  * - @link libbitcoin::bool verify_checksum @endlink
- *
- * @subsection base58 Base58
- *
- * - @link libbitcoin::encode_base58 encode_base58 @endlink
- * - @link libbitcoin::decode_base58 decode_base58 @endlink
  *
  * @subsection wallet Wallet
  *
@@ -173,6 +174,7 @@
 #include <bitcoin/bitcoin/formats/base10.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
+#include <bitcoin/bitcoin/formats/base64.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
