@@ -90,9 +90,9 @@ const hd_key_lineage& hd_public_key::lineage() const
 
 bool hd_public_key::set_encoded(std::string encoded)
 {
-    if (!is_base58(encoded))
+    data_chunk decoded;
+    if (!decode_base58(decoded, encoded))
         return false;
-    const data_chunk decoded = decode_base58(encoded);
     if (decoded.size() != serialized_length)
         return false;
     if (!verify_checksum(decoded))
@@ -201,9 +201,9 @@ const ec_secret& hd_private_key::private_key() const
 
 bool hd_private_key::set_encoded(std::string encoded)
 {
-    if (!is_base58(encoded))
+    data_chunk decoded;
+    if (!decode_base58(decoded, encoded))
         return false;
-    const data_chunk decoded = decode_base58(encoded);
     if (decoded.size() != serialized_length)
         return false;
     if (!verify_checksum(decoded))

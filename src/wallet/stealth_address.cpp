@@ -142,7 +142,9 @@ std::string stealth_address::encoded() const
 bool stealth_address::set_encoded(const std::string& encoded_address)
 {
     valid_ = false;
-    auto raw_address = decode_base58(encoded_address);
+    data_chunk raw_address;
+    if (!decode_base58(raw_address, encoded_address))
+        return false;
 
     // Size is guarded until we get to N.
     auto required_size = min_address_size;
