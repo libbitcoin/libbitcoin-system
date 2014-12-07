@@ -22,7 +22,7 @@
 
 #include <boost/asio/streambuf.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/format.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 

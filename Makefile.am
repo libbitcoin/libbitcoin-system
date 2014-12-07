@@ -107,7 +107,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
-    include/bitcoin/bitcoin/utility/format.hpp \
+    include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
@@ -120,7 +120,7 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
     include/bitcoin/bitcoin/impl/utility/base16.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
-    include/bitcoin/bitcoin/impl/utility/format.ipp \
+    include/bitcoin/bitcoin/impl/utility/endian.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet

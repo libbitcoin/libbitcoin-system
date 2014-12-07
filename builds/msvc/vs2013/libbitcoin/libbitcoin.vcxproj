@@ -147,7 +147,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\format.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\endian.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\subscriber.hpp" />
@@ -172,7 +172,7 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\base16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\format.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\endian.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="packages.config" />
   </ItemGroup>

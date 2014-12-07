@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_FORMAT_HPP
-#define LIBBITCOIN_FORMAT_HPP
+#ifndef LIBBITCOIN_ENDIAN_HPP
+#define LIBBITCOIN_ENDIAN_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -48,6 +47,6 @@ byte_array<1> to_byte(uint8_t byte);
 
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/format.ipp>
+#include <bitcoin/bitcoin/impl/utility/endian.ipp>
 
 #endif
