@@ -24,14 +24,17 @@
 
 namespace libbitcoin {
 
-// Private helper:
-bool decode_base16_raw(uint8_t* out, size_t out_size, const char* in);
+/**
+ * This is a private helper function, so please do not use it.
+ * It is only exposed here to help template implementation.
+ */
+BC_API bool decode_base16_private(uint8_t* out, size_t out_size, const char* in);
 
 template<size_t Size>
 byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
 {
     byte_array<(Size - 1) / 2> out;
-    BITCOIN_ASSERT(decode_base16_raw(out.data(), out.size(), string));
+    BITCOIN_ASSERT(decode_base16_private(out.data(), out.size(), string));
     return out;
 }
 
