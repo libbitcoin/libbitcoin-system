@@ -88,7 +88,7 @@ const hd_key_lineage& hd_public_key::lineage() const
     return lineage_;
 }
 
-bool hd_public_key::set_encoded(std::string encoded)
+bool hd_public_key::set_encoded(const std::string& encoded)
 {
     data_chunk decoded;
     if (!decode_base58(decoded, encoded))
@@ -199,7 +199,7 @@ const ec_secret& hd_private_key::private_key() const
     return k_;
 }
 
-bool hd_private_key::set_encoded(std::string encoded)
+bool hd_private_key::set_encoded(const std::string& encoded)
 {
     data_chunk decoded;
     if (!decode_base58(decoded, encoded))
