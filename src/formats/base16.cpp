@@ -51,7 +51,7 @@ static unsigned from_hex(const char c)
     return c - '0';
 }
 
-bool decode_base16_raw(uint8_t* out, size_t out_size, const char* in)
+bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
 {
     if (!std::all_of(in, in + 2 * out_size, is_base16))
         return false;
@@ -71,39 +71,17 @@ bool decode_base16(data_chunk& out, const std::string& in)
         return false;
 
     data_chunk result(in.size() / 2);
-    if (!decode_base16_raw(result.data(), result.size(), in.data()))
+    if (!decode_base16_private(result.data(), result.size(), in.data()))
         return false;
 
     out = result;
     return true;
 }
 
-std::string encode_hash(short_hash hash)
-{
-    return encode_base16(hash);
-}
-
+// Bitcoin hash format (these are all reversed):
 std::string encode_hash(hash_digest hash)
 {
     return encode_base16(hash);
-}
-
-std::string encode_hash(long_hash hash)
-{
-    return encode_base16(hash);
-}
-
-bool decode_hash(short_hash& out, const std::string& in)
-{
-    if (in.size() != 2 * short_hash_size)
-        return false;
-
-    short_hash result;
-    if (!decode_base16_raw(result.data(), result.size(), in.data()))
-        return false;
-
-    out = result;
-    return true;
 }
 
 bool decode_hash(hash_digest& out, const std::string& in)
@@ -112,20 +90,7 @@ bool decode_hash(hash_digest& out, const std::string& in)
         return false;
 
     hash_digest result;
-    if (!decode_base16_raw(result.data(), result.size(), in.data()))
-        return false;
-
-    out = result;
-    return true;
-}
-
-bool decode_hash(long_hash& out, const std::string& in)
-{
-    if (in.size() != 2 * long_hash_size)
-        return false;
-
-    long_hash result;
-    if (!decode_base16_raw(result.data(), result.size(), in.data()))
+    if (!decode_base16_private(result.data(), result.size(), in.data()))
         return false;
 
     out = result;
@@ -135,10 +100,11 @@ bool decode_hash(long_hash& out, const std::string& in)
 hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
 {
     hash_digest out;
-    BITCOIN_ASSERT(decode_base16_raw(out.data(), out.size(), string));
+    BITCOIN_ASSERT(decode_base16_private(out.data(), out.size(), string));
     return out;
 }
 
+// Old names for backwards-compatibility:
 std::string encode_hex(data_slice in)
 {
     return encode_base16(in);
