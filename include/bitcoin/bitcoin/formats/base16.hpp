@@ -40,6 +40,13 @@ BC_API std::string encode_base16(data_slice data);
 BC_API bool decode_base16(data_chunk& out, const std::string &in);
 
 /**
+ * Converts a hex string to a number of bytes.
+ * @return false if the input is malformed, or the wrong length.
+ */
+template <size_t Size>
+bool decode_base16(byte_array<Size>& out, const std::string &in);
+
+/**
  * Converts a hex string literal to a data array.
  * This would be better as a C++11 user-defined literal,
  * but MSVC doesn't support those.
@@ -48,29 +55,10 @@ template <size_t Size>
 byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size]);
 
 /**
- * Converts a short_hash to a string.
- * The short_hash format is base16.
- */
-BC_API std::string encode_hash(short_hash hash);
-
-/**
  * Converts a bitcoin_hash to a string.
  * The bitcoin_hash format is like base16, but with the bytes reversed.
  */
 BC_API std::string encode_hash(hash_digest hash);
-
-/**
- * Converts a long_hash to a string.
- * The short_hash format is base16.
- */
-BC_API std::string encode_hash(long_hash hash);
-
-/**
- * Convert a string into a short_hash.
- * The short_hash format is base16.
- * @return false if the input is malformed.
- */
-BC_API bool decode_hash(short_hash& out, const std::string& in);
 
 /**
  * Convert a string into a bitcoin_hash.
@@ -78,13 +66,6 @@ BC_API bool decode_hash(short_hash& out, const std::string& in);
  * @return false if the input is malformed.
  */
 BC_API bool decode_hash(hash_digest& out, const std::string& in);
-
-/**
- * Convert a string into a long_hash.
- * The long_hash format is base16.
- * @return false if the input is malformed.
- */
-BC_API bool decode_hash(long_hash& out, const std::string& in);
 
 /**
  * Convert a hex string literal into a bitcoin_hash.

@@ -30,6 +30,20 @@ namespace libbitcoin {
  */
 BC_API bool decode_base16_private(uint8_t* out, size_t out_size, const char* in);
 
+template <size_t Size>
+bool decode_base16(byte_array<Size>& out, const std::string &in)
+{
+    if (in.size() != 2 * Size)
+        return false;
+
+    byte_array<Size> result;
+    if (!decode_base16_private(result.data(), result.size(), in.data()))
+        return false;
+
+    out = result;
+    return true;
+}
+
 template<size_t Size>
 byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
 {
