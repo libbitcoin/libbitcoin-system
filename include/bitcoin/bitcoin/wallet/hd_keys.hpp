@@ -59,7 +59,7 @@ public:
     BC_API const chain_code_type& chain_code() const;
     BC_API const hd_key_lineage& lineage() const;
 
-    BC_API bool set_encoded(std::string encoded);
+    BC_API bool set_encoded(const std::string& encoded);
     BC_API std::string encoded() const;
     BC_API uint32_t fingerprint() const;
     BC_API payment_address address() const;
@@ -87,7 +87,7 @@ public:
 
     BC_API const ec_secret& private_key() const;
 
-    BC_API bool set_encoded(std::string encoded);
+    BC_API bool set_encoded(const std::string& encoded);
     BC_API std::string encoded() const;
 
     BC_API hd_private_key generate_private_key(uint32_t i) const;

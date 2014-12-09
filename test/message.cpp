@@ -32,6 +32,20 @@ static const ec_secret secret
     0xe3, 0x88, 0x5f, 0xa2, 0x54, 0xd7, 0xe3, 0x93
 }};
 
+// Generated using Electrum and above key (compressed):
+static const message_signature electrum_signature
+{{
+    0x1f,
+    0x14, 0x29, 0xdd, 0xc5, 0xe0, 0x38, 0x88, 0x41,
+    0x10, 0x65, 0xe4, 0xb3, 0x6e, 0xec, 0x7d, 0xe4,
+    0x90, 0x1d, 0x58, 0x0d, 0x51, 0xe6, 0x20, 0x97,
+    0x98, 0xb9, 0xc0, 0x6f, 0xdd, 0x39, 0x46, 0x1a,
+    0x48, 0x84, 0x67, 0x9f, 0x35, 0xd1, 0xe8, 0xd7,
+    0x32, 0x1f, 0xe0, 0x1f, 0x34, 0x01, 0xed, 0x91,
+    0x67, 0x32, 0x38, 0x3f, 0x6b, 0x5f, 0x8a, 0x68,
+    0x8e, 0xa9, 0xae, 0x43, 0x21, 0xfb, 0xf4, 0xae
+}};
+
 const char wif_uncompressed[] = 
     "5HpMRgt5u8yyU1AfPwcgLGphD5Qu4ka4v7McE4jKrGNpQPyRqXC";
 const char wif_compressed[] = 
@@ -39,7 +53,7 @@ const char wif_compressed[] =
 
 BOOST_AUTO_TEST_SUITE(message_tests)
 
-BOOST_AUTO_TEST_CASE(message_sign_uncompressed_test)
+BOOST_AUTO_TEST_CASE(message_sign_uncompressed_round_trip)
 {
     static const auto message = to_data_chunk(std::string("Bitcoin"));
     payment_address address(payment_address::pubkey_version,
@@ -49,7 +63,7 @@ BOOST_AUTO_TEST_CASE(message_sign_uncompressed_test)
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
 
-BOOST_AUTO_TEST_CASE(message_sign_compressed_test)
+BOOST_AUTO_TEST_CASE(message_sign_compressed_round_trip)
 {
     static const auto message = to_data_chunk(std::string("Nakomoto"));
     payment_address address(payment_address::pubkey_version,
@@ -59,7 +73,7 @@ BOOST_AUTO_TEST_CASE(message_sign_compressed_test)
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
 
-BOOST_AUTO_TEST_CASE(message_sign_wif_uncompressed_test)
+BOOST_AUTO_TEST_CASE(message_sign_wif_uncompressed_round_trip)
 {
     static const auto secret = wif_to_secret(wif_uncompressed);
     static const auto message = to_data_chunk(std::string("Nakomoto"));
@@ -71,7 +85,7 @@ BOOST_AUTO_TEST_CASE(message_sign_wif_uncompressed_test)
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
 
-BOOST_AUTO_TEST_CASE(message_sign_wif_compressed_test)
+BOOST_AUTO_TEST_CASE(message_sign_wif_compressed_round_trip)
 {
     static const auto secret = wif_to_secret(wif_compressed);
     static const auto message = to_data_chunk(std::string("Nakomoto"));
@@ -83,26 +97,22 @@ BOOST_AUTO_TEST_CASE(message_sign_wif_compressed_test)
     BOOST_REQUIRE(verify_message(message, address, signature));
 }
 
-
-BOOST_AUTO_TEST_CASE(message_electrum_test)
+BOOST_AUTO_TEST_CASE(message_electrum_compressed_okay)
 {
-    // Generated using Electrum:
-    message_signature signature =
-    {{
-        0x1f,
-        0x14, 0x29, 0xdd, 0xc5, 0xe0, 0x38, 0x88, 0x41,
-        0x10, 0x65, 0xe4, 0xb3, 0x6e, 0xec, 0x7d, 0xe4,
-        0x90, 0x1d, 0x58, 0x0d, 0x51, 0xe6, 0x20, 0x97,
-        0x98, 0xb9, 0xc0, 0x6f, 0xdd, 0x39, 0x46, 0x1a,
-        0x48, 0x84, 0x67, 0x9f, 0x35, 0xd1, 0xe8, 0xd7,
-        0x32, 0x1f, 0xe0, 0x1f, 0x34, 0x01, 0xed, 0x91,
-        0x67, 0x32, 0x38, 0x3f, 0x6b, 0x5f, 0x8a, 0x68,
-        0x8e, 0xa9, 0xae, 0x43, 0x21, 0xfb, 0xf4, 0xae
-    }};
-    auto message = to_data_chunk(std::string("Nakomoto"));
+    // Address of the compressed public key of the message signer.
     payment_address address("1PeChFbhxDD9NLbU21DfD55aQBC4ZTR3tE");
+    auto message = to_data_chunk(std::string("Nakomoto"));
 
-    BOOST_REQUIRE(verify_message(message, address, signature));
+    BOOST_REQUIRE(verify_message(message, address, electrum_signature));
+}
+
+BOOST_AUTO_TEST_CASE(message_electrum_uncompressed_failure)
+{
+    // Address of the uncompressed public key of the message signer.
+    payment_address address("1Em1SX7qQq1pTmByqLRafhL1ypx2V786tP");
+    auto message = to_data_chunk(std::string("Nakomoto"));
+
+    BOOST_REQUIRE(!verify_message(message, address, electrum_signature));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
