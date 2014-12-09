@@ -164,7 +164,7 @@ This change is properly accomplished by disabling the "NuGet Dependencies" in th
 
 ### Arch Linux
 
-Libbitcoin is available from the [AUR](https://aur.archlinux.org/packages/libbitcoin-leveldb-git).
+Libbitcoin is available from the [AUR](https://aur.archlinux.org/packages/libbitcoin-git).
 
 ### Gentoo Linux
 
