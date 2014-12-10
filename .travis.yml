@@ -98,7 +98,7 @@ install:
 script:
 
     # Download and build libbitcoin and all dependencies.
-    - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix; fi
+    - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --enable-testnet --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix; fi
     - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --disable-silent-rules --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix CXXFLAGS='-Os -stdlib=libc++' LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix --build-dir=my-build CXXFLAGS='-Os -s'; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then ./install.sh ; fi
