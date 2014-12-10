@@ -85,16 +85,16 @@ AC_ARG_WITH([tests],
 AC_MSG_RESULT([$with_tests])
 AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 
-# Implement --enable-debug option and define DEBUG.
+# Implement --enable-ndebug option and define NDEBUG.
 #------------------------------------------------------------------------------
-AC_MSG_CHECKING(--enable-debug option)
-AC_ARG_ENABLE([debug],
-    AS_HELP_STRING([--enable-debug],
-        [Compile with debug assertions. @<:@default=no@:>@]),
-    [enable_debug=$enableval],
-    [enable_debug=no])
-AC_MSG_RESULT([$enable_debug])
-AS_IF([test x$enable_debug != xno], AC_DEFINE([DEBUG]))
+AC_MSG_CHECKING(--enable-ndebug option)
+AC_ARG_ENABLE([ndebug],
+    AS_HELP_STRING([--enable-ndebug],
+        [Compile without debug assertions. @<:@default=yes@:>@]),
+    [enable_ndebug=$enableval],
+    [enable_ndebug=yes])
+AC_MSG_RESULT([$enable_ndebug])
+AS_IF([test x$enable_ndebug != xno], AC_DEFINE([NDEBUG]))
 
 # Implement --enable-testnet option and define ENABLE_TESTNET.
 #------------------------------------------------------------------------------
