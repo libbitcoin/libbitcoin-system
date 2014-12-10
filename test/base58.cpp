@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(base58_tests)
 void encdec_test(const std::string& hex, const std::string& encoded)
 {
     data_chunk data, decoded;
-    BITCOIN_ASSERT(decode_base16(data, hex));
+    BOOST_REQUIRE(decode_base16(data, hex));
     BOOST_REQUIRE_EQUAL(encode_base58(data), encoded);
     BOOST_REQUIRE(decode_base58(decoded, encoded));
     BOOST_REQUIRE(decoded == data);
