@@ -31,12 +31,6 @@ namespace libbitcoin {
 
 typedef std::vector<ec_point> pubkey_list;
 
-struct BC_API stealth_info
-{
-    hash_digest ephem_pubkey_hash;
-    binary_type bitfield;
-};
-
 // Supports testnet and mainnet addresses but not prefix > 0
 class stealth_address
 {
@@ -86,21 +80,6 @@ protected:
     pubkey_list spend_pubkeys_;
     binary_type prefix_;
 };
-
-// See libbitcoin::extract()
-BC_API bool extract_stealth_info(stealth_info& info,
-    const script_type& output_script);
-BC_API ec_point initiate_stealth(
-    const ec_secret& ephem_secret, const ec_point& scan_pubkey,
-    const ec_point& spend_pubkey);
-BC_API ec_secret shared_secret(const ec_secret& secret,
-    const ec_point& point);
-BC_API ec_point uncover_stealth(
-    const ec_point& ephem_pubkey, const ec_secret& scan_secret,
-    const ec_point& spend_pubkey);
-BC_API ec_secret uncover_stealth_secret(
-    const ec_point& ephem_pubkey, const ec_secret& scan_secret,
-    const ec_secret& spend_secret);
 
 } // namespace libbitcoin
 
