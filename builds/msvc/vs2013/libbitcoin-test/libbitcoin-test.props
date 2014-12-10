@@ -61,10 +61,6 @@
 
   <!-- Messages -->
 
-  <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
-    <Message Text="Option-testnet    : $(Option-testnet)" Importance="high"/>
-  </Target>
-
   <Target Name="LinkageInfo" BeforeTargets="PrepareForBuild">
     <Message Text="Linkage-mpir      : $(Linkage-mpir)" Importance="high"/>
     <Message Text="Linkage-secp256k1 : $(Linkage-secp256k1)" Importance="high"/>

@@ -35,7 +35,8 @@ class init_singleton
 public:
     init_singleton()
       : init_done_(false)
-    {}
+    {
+    }
     ~init_singleton()
     {
         if (init_done_)
@@ -136,22 +137,22 @@ ec_secret create_nonce(ec_secret secret, hash_digest hash)
     }
 }
 
-data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce)
+endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 {
     std::reverse(hash.begin(), hash.end());
     init.init();
 
-    int out_size = 72;
-    data_chunk signature(out_size);
-    if (0 < secp256k1_ecdsa_sign(hash.data(), hash.size(),
-        signature.data(), &out_size, secret.data(), nonce.data()))
+    int out_size = max_endorsement_size;
+    endorsement signature(out_size);
+    if (0 < secp256k1_ecdsa_sign(hash.data(), hash.size(), signature.data(),
+        &out_size, secret.data(), nonce.data()))
     {
         signature.resize(out_size);
         return signature;
     }
 
     // Error case:
-    return data_chunk();
+    return endorsement();
 }
 
 compact_signature sign_compact(ec_secret secret, hash_digest hash,
@@ -172,14 +173,13 @@ compact_signature sign_compact(ec_secret secret, hash_digest hash,
 }
 
 bool verify_signature(const ec_point& public_key, hash_digest hash,
-    const data_chunk& signature)
+    const endorsement& signature)
 {
     std::reverse(hash.begin(), hash.end());
     init.init();
-    return 1 == secp256k1_ecdsa_verify(
-        hash.data(), hash.size(),
-        signature.data(), signature.size(),
-        public_key.data(), public_key.size()
+    return 1 == secp256k1_ecdsa_verify(hash.data(), hash.size(),
+        signature.data(), signature.size(), public_key.data(),
+        public_key.size()
     );
 }
 
@@ -195,9 +195,9 @@ ec_point recover_compact(compact_signature signature,
 
     ec_point out(public_key_size);
     int out_size;
-    if (0 < secp256k1_ecdsa_recover_compact(
-        hash.data(), hash.size(), signature.signature.data(),
-        out.data(), &out_size, compressed, signature.recid))
+    if (0 < secp256k1_ecdsa_recover_compact(hash.data(), hash.size(),
+        signature.signature.data(), out.data(), &out_size, compressed,
+        signature.recid))
     {
         BITCOIN_ASSERT(public_key_size == static_cast<size_t>(out_size));
         return out;

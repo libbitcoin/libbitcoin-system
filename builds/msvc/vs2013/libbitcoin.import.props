@@ -49,6 +49,10 @@
   </Target>
 
   <!-- Messages -->
+  
+  <Target Name="OptionInfo" BeforeTargets="PrepareForBuild">
+    <Message Text="Option-testnet    : $(Option-testnet)" Importance="high"/>
+  </Target>  
 
   <Target Name="libbitcoin-info" BeforeTargets="AfterBuild" Condition="'$(Linkage-libbitcoin)' == 'dynamic'">
     <Message Text="Copying libbitcoin.dll -&gt; $(TargetDir)libbitcoin.dll" Importance="high"/>

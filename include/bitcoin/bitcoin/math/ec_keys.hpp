@@ -34,7 +34,11 @@ constexpr size_t ec_compressed_size = 33;
 constexpr size_t ec_uncompressed_size = 65;
 typedef data_chunk ec_point;
 
-// Compact signature for message signing:
+// Full ecdsa signatures for input endorsement:
+constexpr size_t max_endorsement_size = 72;
+typedef data_chunk endorsement;
+
+// Compact ecdsa signature for message signing:
 constexpr size_t compact_signature_size = 64;
 struct compact_signature
 {
@@ -77,7 +81,7 @@ BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash);
  * @return an EC signature, or a zero-length chunk if something goes wrong.
  * Try another nonce if this happens.
  */
-BC_API data_chunk sign(ec_secret secret, hash_digest hash, ec_secret nonce);
+BC_API endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce);
 
 /**
  * Create an compact EC signature for use in message signing.
@@ -94,7 +98,7 @@ BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash,
  * Verifies an EC signature using a public key.
  */
 BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
-    const data_chunk& signature);
+    const endorsement& signature);
 
 /**
  * Recovers the public key from a compact message signature.
