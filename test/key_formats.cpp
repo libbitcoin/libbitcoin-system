@@ -24,38 +24,44 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(key_formats_tests)
 
-BOOST_AUTO_TEST_CASE(wif_test)
-{
-    ec_secret secret =
-    {{
-        0x80, 0x10, 0xB1, 0xBB, 0x11, 0x9A, 0xD3, 0x7D,
-        0x4B, 0x65, 0xA1, 0x02, 0x2A, 0x31, 0x48, 0x97,
-        0xB1, 0xB3, 0x61, 0x4B, 0x34, 0x59, 0x74, 0x33,
-        0x2C, 0xB1, 0xB9, 0x58, 0x2C, 0xF0, 0x35, 0x36
-    }};
+static const ec_secret secret =
+{{
+    0x80, 0x10, 0xB1, 0xBB, 0x11, 0x9A, 0xD3, 0x7D,
+    0x4B, 0x65, 0xA1, 0x02, 0x2A, 0x31, 0x48, 0x97,
+    0xB1, 0xB3, 0x61, 0x4B, 0x34, 0x59, 0x74, 0x33,
+    0x2C, 0xB1, 0xB9, 0x58, 0x2C, 0xF0, 0x35, 0x36
+}};
 
 #ifdef ENABLE_TESTNET
-    std::string compressed =
+    static const char wif_compressed[] =
         "cRseHatKciTzFiXnoDjt5pWE3j3N2Hgd8qsVsCD4Ljv2DCwuD1V6";
-    std::string uncompressed =
+    static const char wif_uncompressed[] =
         "92ZKR9aqAuSbirHVW3tQMaRJ1AXScBaSrosQkzpbHhzKrVBsZBL";
 #else
-    std::string compressed =
+    static const char wif_compressed[] =
         "L1WepftUBemj6H4XQovkiW1ARVjxMqaw4oj2kmkYqdG1xTnBcHfC";
-    std::string uncompressed =
+    static const char wif_uncompressed[] =
         "5JngqQmHagNTknnCshzVUysLMWAjT23FWs1TgNU5wyFH5SB3hrP";
 #endif
 
-    BOOST_REQUIRE_EQUAL(secret_to_wif(secret, true), compressed);
-    BOOST_REQUIRE_EQUAL(secret_to_wif(secret, false), uncompressed);
+BOOST_AUTO_TEST_CASE(is_wif_compressed_test)
+{
+    BOOST_REQUIRE(is_wif_compressed(wif_compressed));
+    BOOST_REQUIRE(!is_wif_compressed(wif_uncompressed));
+}
 
-    BOOST_REQUIRE(is_wif_compressed(compressed));
-    BOOST_REQUIRE(!is_wif_compressed(uncompressed));
+BOOST_AUTO_TEST_CASE(wif_to_secret_test)
+{
+    BOOST_REQUIRE(secret == wif_to_secret(wif_compressed));
+    BOOST_REQUIRE(secret == wif_to_secret(wif_uncompressed));
+}
 
-    ec_secret from_wif = wif_to_secret(compressed);
-    BOOST_REQUIRE(std::equal(secret.begin(), secret.end(), from_wif.begin()));
-    from_wif = wif_to_secret(uncompressed);
-    BOOST_REQUIRE(std::equal(secret.begin(), secret.end(), from_wif.begin()));
+BOOST_AUTO_TEST_CASE(secret_to_wif_test)
+{
+    BOOST_REQUIRE_EQUAL(secret_to_wif(secret, true), 
+        std::string(wif_compressed));
+    BOOST_REQUIRE_EQUAL(secret_to_wif(secret, false), 
+        std::string(wif_uncompressed));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
