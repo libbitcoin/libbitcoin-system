@@ -88,11 +88,7 @@ long_hash hmac_sha512_hash(data_slice data, data_slice key)
 
 hash_digest bitcoin_hash(data_slice data)
 {
-    auto hash = sha256_hash(sha256_hash(data));
-
-    // The hash is in the reverse of the expected order.
-    std::reverse(hash.begin(), hash.end());
-    return hash;
+    return sha256_hash(sha256_hash(data));
 }
 
 short_hash bitcoin_short_hash(data_slice data)

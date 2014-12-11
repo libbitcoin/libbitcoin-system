@@ -102,7 +102,6 @@ bool verify_private_key(const ec_secret& private_key)
 
 ec_secret create_nonce(ec_secret secret, hash_digest hash)
 {
-    std::reverse(hash.begin(), hash.end());
     init.init();
 
     hash_digest K
@@ -139,7 +138,6 @@ ec_secret create_nonce(ec_secret secret, hash_digest hash)
 
 endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 {
-    std::reverse(hash.begin(), hash.end());
     init.init();
 
     int out_size = max_endorsement_size;
@@ -158,7 +156,6 @@ endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 compact_signature sign_compact(ec_secret secret, hash_digest hash,
     ec_secret nonce)
 {
-    std::reverse(hash.begin(), hash.end());
     init.init();
 
     compact_signature out;
@@ -175,7 +172,6 @@ compact_signature sign_compact(ec_secret secret, hash_digest hash,
 bool verify_signature(const ec_point& public_key, hash_digest hash,
     const endorsement& signature)
 {
-    std::reverse(hash.begin(), hash.end());
     init.init();
     return 1 == secp256k1_ecdsa_verify(hash.data(), hash.size(),
         signature.data(), signature.size(), public_key.data(),
@@ -186,7 +182,6 @@ bool verify_signature(const ec_point& public_key, hash_digest hash,
 ec_point recover_compact(compact_signature signature,
     hash_digest hash, bool compressed)
 {
-    std::reverse(hash.begin(), hash.end());
     init.init();
 
     size_t public_key_size = ec_uncompressed_size;

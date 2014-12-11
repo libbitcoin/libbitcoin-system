@@ -40,7 +40,7 @@ uint32_t hash_number::compact() const
 }
 void hash_number::set_hash(const hash_digest& hash)
 {
-    std::copy(hash.rbegin(), hash.rend(), hash_.begin());
+    std::copy(hash.begin(), hash.end(), hash_.begin());
 }
 hash_digest hash_number::hash() const
 {
