@@ -233,19 +233,17 @@ AS_CASE([${CC}], [*],
         [AX_CHECK_LINK_FLAG([-fstack-protector-all],
             [CXXFLAGS="$CXXFLAGS -fstack-protector-all"])])])
 
-# Hide inlines from external libs (disabled pending review).
+# Hide internal functions from external libs.
 #------------------------------------------------------------------------------
-AS_CASE([${CC}], [*disabled*],
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-fvisibility-hidden],
+        [CXXFLAGS="$CXXFLAGS -fvisibility-hidden"])])
+
+# Hide inlines from external libs.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-fvisibility-inlines-hidden],
         [CXXFLAGS="$CXXFLAGS -fvisibility-inlines-hidden"])])
-
-# Set visibility to internal or hidden (disabled pending review).
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*disabled*],
-    [AX_CHECK_COMPILE_FLAG([-fvisibility=internal],
-        [CXXFLAGS="$CXXFLAGS -fvisibility=internal"],
-        [AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
-            [CXXFLAGS="$CXXFLAGS -fvisibility=hidden"])])])
 
 
 # Process outputs into templates.
