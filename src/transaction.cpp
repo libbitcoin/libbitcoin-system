@@ -186,7 +186,7 @@ uint64_t total_output_value(const transaction_type& tx)
 
 select_outputs_result select_outputs(
     output_info_list unspent, uint64_t min_value,
-    select_outputs_algorithm algorithm)
+    select_outputs_algorithm DEBUG_ONLY(algorithm))
 {
     // Just one default implementation for now.
     // Consider a switch case with greedy_select_outputs(min_value) .etc

@@ -310,7 +310,7 @@ bool verify_header(const header_type& header_msg)
 }
 
 void channel_proxy::handle_read_header(const boost::system::error_code& ec,
-    size_t bytes_transferred)
+    size_t DEBUG_ONLY(bytes_transferred))
 {
     if (problems_check(ec))
         return;
@@ -333,7 +333,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
 }
 
 void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
-    size_t bytes_transferred, header_type& header_msg)
+    size_t DEBUG_ONLY(bytes_transferred), header_type& header_msg)
 {
     if (problems_check(ec))
         return;
@@ -346,7 +346,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
 }
 
 void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
-    size_t bytes_transferred, const header_type& header_msg)
+    size_t DEBUG_ONLY(bytes_transferred), const header_type& header_msg)
 {
     if (problems_check(ec))
         return;

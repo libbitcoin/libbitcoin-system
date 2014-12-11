@@ -102,7 +102,9 @@ bool decode_hash(hash_digest& out, const std::string& in)
 hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
 {
     hash_digest out;
-    BITCOIN_ASSERT(decode_base16_private(out.data(), out.size(), string));
+    DEBUG_ONLY(const auto success =) decode_base16_private(out.data(),
+        out.size(), string);
+    BITCOIN_ASSERT(success);
     std::reverse(out.begin(), out.end());
     return out;
 }
