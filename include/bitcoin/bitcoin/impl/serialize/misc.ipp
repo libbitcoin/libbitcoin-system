@@ -94,13 +94,14 @@ void satoshi_load(const Iterator first, const Iterator last,
 
 // verack messages
 template <typename Iterator>
-Iterator satoshi_save(const verack_type& packet, Iterator result)
+Iterator satoshi_save(const verack_type& DEBUG_ONLY(packet), Iterator result)
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
     return result;
 }
 template <typename Iterator>
-void satoshi_load(const Iterator, const Iterator, verack_type& packet)
+void satoshi_load(const Iterator, const Iterator, 
+    verack_type& DEBUG_ONLY(packet))
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }
@@ -137,13 +138,15 @@ void satoshi_load(const Iterator first, const Iterator last,
 
 // getaddr messages
 template <typename Iterator>
-Iterator satoshi_save(const get_address_type& packet, Iterator result)
+Iterator satoshi_save(const get_address_type& DEBUG_ONLY(packet),
+    Iterator result)
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
     return result;
 }
 template <typename Iterator>
-void satoshi_load(const Iterator, const Iterator, get_address_type& packet)
+void satoshi_load(const Iterator, const Iterator, 
+    get_address_type& DEBUG_ONLY(packet))
 {
     BITCOIN_ASSERT(satoshi_raw_size(packet) == 0);
 }

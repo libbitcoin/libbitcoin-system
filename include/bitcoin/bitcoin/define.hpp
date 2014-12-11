@@ -80,6 +80,12 @@
     #endif
 #endif
 
+#ifdef NDEBUG
+    #define DEBUG_ONLY(expression)
+#else
+    #define DEBUG_ONLY(expression) expression
+#endif
+
 // Remove this when cURL dependency is fully removed.
 #define NO_CURL
 

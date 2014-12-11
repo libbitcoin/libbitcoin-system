@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(sha1_hash_test)
     for (const hash_result& result: sha1_tests)
     {
         data_chunk data;
-        BITCOIN_ASSERT(decode_base16(data, result.input));
+        BOOST_REQUIRE(decode_base16(data, result.input));
         BOOST_REQUIRE_EQUAL(encode_hex(sha1_hash(data)), result.result);
     }
 }
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(ripemd_hash_test)
     for (const hash_result& result: ripemd_tests)
     {
         data_chunk data;
-        BITCOIN_ASSERT(decode_base16(data, result.input));
+        BOOST_REQUIRE(decode_base16(data, result.input));
         BOOST_REQUIRE_EQUAL(encode_base16(ripemd160_hash(data)),
             result.result);
     }
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(sha256_hash_test)
     for (const hash_result& result: sha256_tests)
     {
         data_chunk data;
-        BITCOIN_ASSERT(decode_base16(data, result.input));
+        BOOST_REQUIRE(decode_base16(data, result.input));
         BOOST_REQUIRE_EQUAL(encode_base16(sha256_hash(data)), result.result);
     }
 

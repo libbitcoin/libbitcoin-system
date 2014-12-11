@@ -54,7 +54,7 @@ bool extract_stealth_info(stealth_info& info,
 ec_secret shared_secret(const ec_secret& secret, const ec_point& pubkey)
 {
     ec_point final = pubkey;
-    bool success = ec_multiply(final, secret);
+    DEBUG_ONLY(const auto success =) ec_multiply(final, secret);
     BITCOIN_ASSERT(success);
     return sha256_hash(final);
 }
@@ -64,7 +64,7 @@ ec_point uncover_stealth(const ec_point& ephem_pubkey,
 {
     ec_point final = spend_pubkey;
     ec_secret shared = shared_secret(scan_secret, ephem_pubkey);
-    bool success = ec_add(final, shared);
+    DEBUG_ONLY(const auto success = ) ec_add(final, shared);
     BITCOIN_ASSERT(success);
     return final;
 }
@@ -74,7 +74,7 @@ ec_secret uncover_stealth_secret(const ec_point& pubkey,
 {
     ec_secret final = spend_secret;
     ec_secret shared = shared_secret(secret, pubkey);
-    bool success = ec_add(final, shared);
+    DEBUG_ONLY(const auto success = ) ec_add(final, shared);
     BITCOIN_ASSERT(success);
     return final;
 }

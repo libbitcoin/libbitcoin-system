@@ -169,10 +169,10 @@
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\block.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\misc.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\base16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\endian.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
