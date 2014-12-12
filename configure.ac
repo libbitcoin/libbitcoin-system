@@ -233,15 +233,15 @@ AS_CASE([${CC}], [*],
         [AX_CHECK_LINK_FLAG([-fstack-protector-all],
             [CXXFLAGS="$CXXFLAGS -fstack-protector-all"])])])
 
-# Hide internal functions from external libs.
+# Hide internal functions from external libs. Enabled in gcc only.
 #------------------------------------------------------------------------------
-AS_CASE([${CC}], [*],
+AS_CASE([${CC}], [*gcc*],
     [AX_CHECK_COMPILE_FLAG([-fvisibility-hidden],
         [CXXFLAGS="$CXXFLAGS -fvisibility-hidden"])])
 
-# Hide inlines from external libs.
+# Hide inlines from external libs. Enabled in gcc only.
 #------------------------------------------------------------------------------
-AS_CASE([${CC}], [*],
+AS_CASE([${CC}], [*gcc*],
     [AX_CHECK_COMPILE_FLAG([-fvisibility-inlines-hidden],
         [CXXFLAGS="$CXXFLAGS -fvisibility-inlines-hidden"])])
 
