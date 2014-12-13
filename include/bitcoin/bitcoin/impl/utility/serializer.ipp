@@ -115,12 +115,7 @@ void serializer<Iterator>::write_hash(const hash_digest& hash)
 template <typename Iterator>
 void serializer<Iterator>::write_short_hash(const short_hash& hash)
 {
-    // There is no reason for this to be reversed!
-    // The only reason it is still reversed is because the old
-    // obelisk protocol expects it that way.
-    // Fortunately, the old obelisk protocol is the only thing
-    // that currently uses this function.
-    write_data_reverse(hash);
+    write_data(hash);
 }
 
 template <typename Iterator>
@@ -273,8 +268,7 @@ hash_digest deserializer<Iterator, SafeCheckLast>::read_hash()
 template <typename Iterator, bool SafeCheckLast>
 short_hash deserializer<Iterator, SafeCheckLast>::read_short_hash()
 {
-    // See the note in serializer::write_short_hash:
-    return read_bytes_reverse<short_hash_size>();
+    return read_bytes<short_hash_size>();
 }
 
 template <typename Iterator, bool SafeCheckLast>
