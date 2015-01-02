@@ -612,5 +612,11 @@ void protocol::subscribe_channel(channel_handler handle_channel)
     channel_subscribe_->subscribe(handle_channel);
 }
 
+size_t protocol::total_connections() const
+{
+    return connections_.size() + manual_connections_.size() +
+        accepted_channels_.size();
+}
+
 } // namespace network
 } // namespace libbitcoin
