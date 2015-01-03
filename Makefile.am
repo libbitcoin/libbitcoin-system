@@ -181,16 +181,7 @@ src_libbitcoin_la_SOURCES = \
     src/script.cpp \
     src/stealth.cpp \
     src/transaction.cpp \
-<<<<<<< HEAD
     src/utility/binary.cpp \
-=======
-    src/utility/base58.cpp \
-    src/utility/binary.cpp \
-    src/utility/checksum.cpp \
-    src/utility/ec_keys.cpp \
-    src/utility/hash.cpp \
-    src/utility/hash_number.cpp \
->>>>>>> rename stealth_prefix to binary_type now
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \

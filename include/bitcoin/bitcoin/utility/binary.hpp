@@ -50,6 +50,8 @@ private:
         const binary_type& prefix_a, const binary_type& prefix_b);
     friend std::istream& operator>>(
         std::istream& stream, binary_type& prefix);
+    friend std::ostream& operator<<(
+        std::ostream& stream, const binary_type& prefix);
 
     size_t size_ = 0;
     data_chunk blocks_;
@@ -62,6 +64,8 @@ BC_API bool operator!=(
 
 BC_API std::istream& operator>>(
     std::istream& stream, binary_type& prefix);
+BC_API std::ostream& operator<<(
+    std::ostream& stream, const binary_type& prefix);
 
 } // namespace libbitcoin
 
