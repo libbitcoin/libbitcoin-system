@@ -156,6 +156,12 @@ public:
     BC_API void subscribe_channel(channel_handler handle_channel);
 
     /**
+     * Return the number of active connections.
+     * Not threadsafe. Intended only for diagnostics information.
+     */
+    BC_API size_t total_connections() const;
+
+    /**
      * Broadcast a message to all nodes in our connection list.
      *
      * @param[in]   packet      Message packet to broadcast
@@ -307,7 +313,7 @@ private:
     template <typename Message>
     void do_broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        size_t total_nodes = connections_.size() + accepted_channels_.size();
+        const size_t total_nodes = total_connections();
         auto send_handler =
             std::bind(handle_send, std::placeholders::_1, total_nodes);
         for (const connection_info& connection: connections_)
