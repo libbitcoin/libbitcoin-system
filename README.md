@@ -64,7 +64,7 @@ The install script should not normally be executed using sudo. Instead it will i
 
 The build script clones, builds and installs two unpackaged repositories, namely:
 
-- [bitcoin/secp256k1](https://github.com/bitcoin/secp256k1)
+- [libbitcoin/secp256k1](https://github.com/libbitcoin/secp256k1)
 - [libbitcoin/libbitcoin](https://github.com/libbitcoin/libbitcoin)
 
 #### Build Options
