@@ -48,6 +48,7 @@ public:
         fetch_count_handler;
 
     BC_API hosts(threadpool& pool, size_t capacity=1000);
+    BC_API ~hosts();
 
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;

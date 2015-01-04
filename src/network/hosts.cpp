@@ -31,6 +31,9 @@ hosts::hosts(threadpool& pool, size_t capacity)
 {
     srand((unsigned int)time(nullptr));
 }
+hosts::~hosts()
+{
+}
 
 void hosts::load(const std::string& filename, load_handler handle_load)
 {
