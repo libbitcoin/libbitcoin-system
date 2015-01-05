@@ -995,12 +995,8 @@ bool create_signature(data_chunk& signature, const ec_secret& private_key,
         script_type::generate_signature_hash(
             new_tx, input_index, prevout_script, hash_type);
 
-    const auto deterministic_nonce = create_nonce(private_key, sighash);
-
     // Create the EC signature.
-    signature = sign(private_key, sighash, deterministic_nonce);
-    if (signature.empty())
-        return false;
+    signature = sign(private_key, sighash);
 
     // Add the sighash type to the end of the signature.
     signature.push_back(hash_type);

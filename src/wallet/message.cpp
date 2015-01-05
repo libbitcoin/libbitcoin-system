@@ -57,7 +57,7 @@ message_signature sign_message(data_slice message,
 {
     auto hash = hash_message(message);
 
-    auto cs = sign_compact(secret, hash, create_nonce(secret, hash));
+    auto cs = sign_compact(secret, hash);
 
     int magic = 27 + cs.recid;
     if (compressed)

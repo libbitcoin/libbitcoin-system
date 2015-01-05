@@ -69,15 +69,32 @@ BC_API bool verify_public_key_fast(const ec_point& public_key);
 BC_API bool verify_private_key(const ec_secret& private_key);
 
 /**
- * Create a deterministic signature nonce according to rfc6979.
+ * Create a deterministic EC signature using a private key.
+ * This function will always produce a valid signature.
  */
-BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash);
+BC_API endorsement sign(ec_secret secret, hash_digest hash);
+
+/**
+ * Create an compact EC signature for use in message signing.
+ * This function will always produce a valid signature.
+ */
+BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash);
+
+/**
+ * Create a deterministic signature nonce according to rfc6979.
+ * @param index It is possible that the generated nonce is unacceptable,
+ * either because it is out of range or because it creates a bad signature.
+ * If this happens, increment index and try again.
+ */
+BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash,
+    unsigned index=0);
 
 /**
  * Create an EC signature using a private key.
+ * DO NOT USE! A bad nonce is an easy way to get Bitcoins stolen.
+ * Consider using the deterministic version above instead.
  * The nonce must be a cryptographically-secure random number,
  * or the signature will leak information about the private key.
- * Consider using the `create_nonce` function here.
  * @return an EC signature, or a zero-length chunk if something goes wrong.
  * Try another nonce if this happens.
  */
@@ -85,9 +102,10 @@ BC_API endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce);
 
 /**
  * Create an compact EC signature for use in message signing.
+ * DO NOT USE! A bad nonce is an easy way to get Bitcoins stolen.
+ * Consider using the deterministic version above instead.
  * The nonce must be a cryptographically-secure random number,
  * or the signature will leak information about the private key.
- * Consider using the `create_nonce` function here.
  * @return a compact signature. This will be all-zero if something goes wrong.
  * Try another nonce if this happens.
  */
