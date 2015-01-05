@@ -312,7 +312,8 @@ make_tests()
     local JOBS=$1
 
     # Build and run unit tests relative to the primary directory.
-    make_jobs $JOBS check
+    # VERBOSE=1 ensures test-suite.log output sent to console.
+    make_jobs $JOBS check VERBOSE=1
 }
 
 pop_directory()
