@@ -100,7 +100,41 @@ bool verify_private_key(const ec_secret& private_key)
     return secp256k1_ec_seckey_verify(private_key.data()) == 1;
 }
 
-ec_secret create_nonce(ec_secret secret, hash_digest hash)
+endorsement sign(ec_secret secret, hash_digest hash)
+{
+    init.init();
+
+    int out_size = max_endorsement_size;
+    endorsement signature(out_size);
+
+    ec_secret nonce;
+    unsigned index = 0;
+    do {
+        nonce = create_nonce(secret, hash, index++);
+    } while (secp256k1_ecdsa_sign(hash.data(), hash.size(), signature.data(),
+        &out_size, secret.data(), nonce.data()) <= 0);
+
+    signature.resize(out_size);
+    return signature;
+}
+
+compact_signature sign_compact(ec_secret secret, hash_digest hash)
+{
+    init.init();
+
+    compact_signature out;
+
+    ec_secret nonce;
+    unsigned index = 0;
+    do {
+        nonce = create_nonce(secret, hash, index++);
+    } while (secp256k1_ecdsa_sign_compact(hash.data(), hash.size(),
+        out.signature.data(), secret.data(), nonce.data(), &out.recid) <= 0);
+
+    return out;
+}
+
+ec_secret create_nonce(ec_secret secret, hash_digest hash, unsigned index)
 {
     init.init();
 
@@ -128,7 +162,7 @@ ec_secret create_nonce(ec_secret secret, hash_digest hash)
     {
         V = hmac_sha256_hash(V, K);
 
-        if (verify_private_key(V))
+        if (0 == index--)
             return V;
 
         K = hmac_sha256_hash(build_data({V, to_byte(0x00)}), K);
