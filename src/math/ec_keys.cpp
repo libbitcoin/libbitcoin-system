@@ -162,8 +162,9 @@ ec_secret create_nonce(ec_secret secret, hash_digest hash, unsigned index)
     {
         V = hmac_sha256_hash(V, K);
 
-        if (0 == index--)
+        if (0 == index)
             return V;
+        --index;
 
         K = hmac_sha256_hash(build_data({V, to_byte(0x00)}), K);
         V = hmac_sha256_hash(V, K);
