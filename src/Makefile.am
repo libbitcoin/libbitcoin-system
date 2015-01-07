@@ -54,5 +54,5 @@ endif
 
 libbitcoin_la_LIBADD = \
     -lboost_thread -lboost_system -lboost_regex -lboost_filesystem -lpthread \
-    -lcurl -lsecp256k1 @LDFLAG_LEVELDB@ -lcrypto -ldl -lz
+    -lcurl @libsecp256k1_LIBS@ @LDFLAG_LEVELDB@ -lcrypto -ldl -lz
 
