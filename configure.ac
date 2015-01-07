@@ -207,6 +207,12 @@ AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wno-missing-braces],
         [CXXFLAGS="$CXXFLAGS -Wno-missing-braces"])])
 
+# Conflict in stdlib under clang. Enabled in clang only.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*clang*],
+    [AX_CHECK_COMPILE_FLAG([-Wno-mismatched-tags],
+        [CXXFLAGS="$CXXFLAGS -Wno-mismatched-tags"])])
+
 # Clean up boost 1.54 headers. Enabled in clang only.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*clang*],
