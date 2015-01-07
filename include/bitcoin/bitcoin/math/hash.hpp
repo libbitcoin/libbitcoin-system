@@ -37,8 +37,9 @@ typedef byte_array<hash_size> hash_digest;
 typedef byte_array<long_hash_size> long_hash;
 
 // List of hashes. Useful primitive.
-typedef std::vector<hash_digest> hash_list;
 typedef std::vector<short_hash> short_hash_list;
+typedef std::vector<hash_digest> hash_list;
+typedef std::vector<long_hash> long_hash_list;
 
 /**
  * Generate a ripemd160 hash. This hash function is used in script for
@@ -110,12 +111,12 @@ BC_API short_hash bitcoin_short_hash(data_slice data);
 
 // Make hash_digest and short_hash hashable for std::*map variants
 template <typename HashType>
-struct std_hash_wrapper
+struct BC_API std_hash_wrapper
 {
-    size_t operator()(const HashType& h) const
+    size_t operator()(const HashType& hash) const
     {
         std::hash<std::string> functor;
-        return functor(std::string(std::begin(h), std::end(h)));
+        return functor(std::string(std::begin(hash), std::end(hash)));
     }
 };
 
@@ -125,18 +126,25 @@ struct std_hash_wrapper
 namespace std
 {
     using libbitcoin::std_hash_wrapper;
-    using libbitcoin::hash_digest;
     using libbitcoin::short_hash;
+    using libbitcoin::hash_digest;
+    using libbitcoin::long_hash;
 
     template <>
-    struct hash<hash_digest>
+    struct BC_API hash<short_hash>
+      : public std_hash_wrapper<short_hash>
+    {
+    };
+
+    template <>
+    struct BC_API hash<hash_digest>
       : public std_hash_wrapper<hash_digest>
     {
     };
 
     template <>
-    struct hash<short_hash>
-      : public std_hash_wrapper<short_hash>
+    struct BC_API hash<long_hash>
+      : public std_hash_wrapper<long_hash>
     {
     };
 } // namespace std
