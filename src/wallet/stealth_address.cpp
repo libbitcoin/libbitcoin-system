@@ -37,7 +37,7 @@ constexpr uint8_t compressed_pubkey_size = 33;
 constexpr uint8_t number_keys_size = sizeof(uint8_t);
 constexpr uint8_t number_sigs_size = sizeof(uint8_t);
 constexpr uint8_t prefix_length_size = sizeof(uint8_t);
-constexpr uint8_t max_spend_key_count = sizeof(uint8_t) * byte_bits;
+constexpr uint8_t max_spend_key_count = max_uint8;
 
 // wiki.unsystem.net/index.php/DarkWallet/Stealth#Address_format
 // [version:1=0x2a][options:1][scan_pubkey:33][N:1][spend_pubkey_1:33]..
@@ -81,10 +81,8 @@ stealth_address::stealth_address(const binary_type& prefix,
         return;
 
     // Coerce signatures to a valid range.
-    if (signatures == 0)
+    if (signatures == 0 || signatures > spend_pubkeys_size)
         signatures_ = static_cast<uint8_t>(spend_pubkeys_size);
-    else if (signatures > spend_pubkeys_size)
-        signatures_ = spend_pubkeys_size;
     else
         signatures_ = signatures;
 

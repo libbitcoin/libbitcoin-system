@@ -24,83 +24,52 @@ matrix:
     exclude:
         - os: osx
           compiler: gcc
-    allow_failures:
-        - os: linux
-          compiler: clang
     fast_finish:
         - true
 
 before_install:
 
     # Set aliases for readability.
-    - if [[ $CC == gcc   ]]; then GCC=true; fi
-    - if [[ $CC == clang ]]; then CLANG=true; fi
-    - if [[ $LINK == static  ]]; then STATIC=true; fi
-    - if [[ $LINK == dynamic ]]; then DYNAMIC=true; fi
-    - if [[ $TRAVIS_OS_NAME == osx   ]]; then OSX=true; fi
-    - if [[ $TRAVIS_OS_NAME == linux ]]; then LINUX=true; fi
+    - if [[ $CC             == gcc     ]]; then GCC=true; fi
+    - if [[ $CC             == clang   ]]; then CLANG=true; fi
+    - if [[ $LINK           == static  ]]; then STATIC=true; fi
+    - if [[ $LINK           == dynamic ]]; then DYNAMIC=true; fi
+    - if [[ $TRAVIS_OS_NAME == osx     ]]; then OSX=true; fi
+    - if [[ $TRAVIS_OS_NAME == linux   ]]; then LINUX=true; fi
 
     # Set package repository.
-    - if [[ $LINUX && $GCC   ]]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
+    - if [[ $LINUX           ]]; then sudo add-apt-repository -y ppa:boost-latest/ppa; fi
+    - if [[ $LINUX           ]]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
     - if [[ $LINUX && $CLANG ]]; then sudo add-apt-repository -y ppa:h-rayflood/llvm; fi
 
     # Update the system.
-    - if [[ $LINUX ]]; then sudo apt-get -qq update; fi
+    - if [[ $LINUX           ]]; then sudo apt-get -qq update; fi
 
 install:
 
     # Install g++ 4.8
-    - if [[ $LINUX && $GCC   ]]; then sudo apt-get install -qq g++-4.8 --allow-unauthenticated; fi
-    - if [[ $LINUX && $GCC   ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
-    - if [[ $LINUX && $GCC   ]]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50; fi
+    - if [[ $LINUX           ]]; then sudo apt-get install -qq g++-4.8 --allow-unauthenticated; fi
+    - if [[ $LINUX           ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
+    - if [[ $LINUX           ]]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50; fi
 
     # Install clang++ 3.4
     - if [[ $LINUX && $CLANG ]]; then sudo apt-get install -qq clang-3.4 --allow-unauthenticated; fi
     - if [[ $LINUX && $CLANG ]]; then sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 50; fi
     - if [[ $LINUX && $CLANG ]]; then sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 50; fi
 
-    # Install libc++ for linux/clang.
-    - if [[ $LINUX && $CLANG ]]; then svn co --quiet http://llvm.org/svn/llvm-project/libcxx/trunk libcxx; fi
-    
-    - if [[ $LINUX && $CLANG ]]; then pushd libcxx/lib/; fi
-    - if [[ $LINUX && $CLANG ]]; then bash buildit; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo cp ./libc++.so.1.0 /usr/lib/; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo mkdir -p /usr/include/c++/v1; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo cp -r ../include/* /usr/include/c++/v1/; fi
-    - if [[ $LINUX && $CLANG ]]; then popd; fi
-    
-    - if [[ $LINUX && $CLANG ]]; then pushd /usr/lib/; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo ln -sf libc++.so.1.0 libc++.so; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo ln -sf libc++.so.1.0 libc++.so.1; fi
-    - if [[ $LINUX && $CLANG ]]; then popd; fi
-    
-    # Install libc++abi for linux/clang.
-    - if [[ $LINUX && $CLANG ]]; then svn co --quiet http://llvm.org/svn/llvm-project/libcxxabi/trunk libcxxabi; fi
-    
-    - if [[ $LINUX && $CLANG ]]; then pushd libcxxabi/lib/; fi
-    - if [[ $LINUX && $CLANG ]]; then bash buildit; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo cp ./libc++abi.so.1.0 /usr/lib/; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo mkdir -p /usr/include/c++/v1; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo cp -r ../include/* /usr/include/c++/v1/; fi
-    - if [[ $LINUX && $CLANG ]]; then popd; fi
-    
-    - if [[ $LINUX && $CLANG ]]; then pushd /usr/lib/; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo ln -sf libc++abi.so.1.0 libc++abi.so; fi
-    - if [[ $LINUX && $CLANG ]]; then sudo ln -sf libc++abi.so.1.0 libc++.so.1; fi
-    - if [[ $LINUX && $CLANG ]]; then popd; fi
-
     # Download and install packages for osx/clang/dynamic.
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew install gmp; fi
 
     # Download and install packages for linux/clang/dynamic.
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo apt-get -qq install boost1.54; fi
     - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo apt-get -qq install libgmp-dev; fi
 
 script:
 
     # Download and build libbitcoin and all dependencies.
     - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --enable-testnet --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix; fi
-    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix CXXFLAGS='-Os -stdlib=libc++' LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix CXXFLAGS='-Os -stdlib=libstdc++' LDLIBS='-lstdc++'; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --disable-ndebug --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix --build-dir=my-build CXXFLAGS='-Os -s'; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then ./install.sh ; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --disable-ndebug --disable-static --build-boost CXXFLAGS='-Os -stdlib=libc++' LDLIBS='-lc++ -lc++abi -lm -lc -lgcc_s -lgcc'; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --disable-ndebug --disable-static CXXFLAGS='-Os -stdlib=libstdc++' LDLIBS='-lstdc++'; fi
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --disable-static --build-gmp --build-boost CXXFLAGS='-Os -s'; fi

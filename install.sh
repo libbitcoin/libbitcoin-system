@@ -109,7 +109,7 @@ for CUSTOM_OPTION in "${CUSTOM_OPTIONS[@]}"; do
     CONFIGURE_OPTIONS=( "${CONFIGURE_OPTIONS[@]/$CUSTOM_OPTION}" )
 done
 
-# Set public boost_link variable (to translate libtool link to Boost build).
+# Set public boost_link variable (to translate configuration to Boost build).
 #------------------------------------------------------------------------------
 if [[ $DISABLE_STATIC == yes ]]; then
     boost_link="link=shared"
@@ -119,18 +119,26 @@ else
     boost_link="link=static,shared"
 fi
 
+# Set public boost_stdlib variable (to translate configuration to Boost build).
+#------------------------------------------------------------------------------
+if [[ $OS == Darwin ]]; then
+    boost_stdlib="libc++"
+else
+    boost_stdlib="libstdc++"
+fi
+
 # Incorporate the prefix.
 #------------------------------------------------------------------------------
 if [[ $PREFIX ]]; then
 
     # Set public with_pkgconfigdir variable (for packages that handle it).
+    # Currently all relevant dependencies support it except secp256k1.
     PKG_CONFIG_DIR="$PREFIX/lib/pkgconfig"
     with_pkgconfigdir="--with-pkgconfigdir=$PKG_CONFIG_DIR"
     
     # Augment PKG_CONFIG_PATH with prefix path. 
-    # If all libs support --with-pkgconfigdir we could avoid this variable.
-    # Currently all relevant dependencies support it except secp256k1.
-    # TODO: patch secp256k1 and disable this.
+    # This allows package config to locate packages installed to the prefix.
+    # TODO: determine why this is necessary when setting with_pkgconfigdir.
     export PKG_CONFIG_PATH="$PKG_CONFIG_DIR:$PKG_CONFIG_PATH"
 
     # Boost m4 discovery searches in the following order:
@@ -156,6 +164,7 @@ fi
 #------------------------------------------------------------------------------
 echo "Published dynamic options:"
 echo "  boost_link: $boost_link"
+echo "  boost_stdlib: $boost_stdlib"
 echo "  prefix: $prefix"
 echo "  gmp_flags: $gmp_flags"
 echo "  with_boost: $with_boost"
@@ -189,8 +198,8 @@ BOOST_OPTIONS_GCC=\
 #------------------------------------------------------------------------------
 BOOST_OPTIONS_CLANG=\
 "toolset=clang "\
-"cxxflags=-stdlib=libc++ "\
-"linkflags=-stdlib=libc++ "\
+"cxxflags=-stdlib=${boost_stdlib} "\
+"linkflags=-stdlib=${boost_stdlib} "\
 "threading=single "\
 "variant=release "\
 "--disable-icu "\

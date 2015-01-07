@@ -120,11 +120,10 @@ namespace std
             const short_hash& addr_hash = payaddr.hash();
             std::copy(addr_hash.begin(), addr_hash.end(),
                 raw_addr.begin() + 1);
-            std::hash<std::string> hash_fn;
-            return hash_fn(raw_addr);
+            std::hash<std::string> functor;
+            return functor(raw_addr);
         }
     };
 }
 
 #endif
-

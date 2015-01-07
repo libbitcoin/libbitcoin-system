@@ -261,8 +261,11 @@ private:
     // Checksum size is 4 bytes
     static constexpr size_t header_checksum_size = 4;
 
-    byte_array<header_chunk_size> inbound_header_;
-    byte_array<header_checksum_size> inbound_checksum_;
+    // boost1.54/linux/clang/libstdc++-4.8 error if std::array
+    // could not match 'boost::array' against 'std::array'
+    boost::array<uint8_t, header_chunk_size> inbound_header_;
+    boost::array<uint8_t, header_checksum_size> inbound_checksum_;
+
     std::vector<uint8_t> inbound_payload_;
 
     // We should be using variadic templates for these
