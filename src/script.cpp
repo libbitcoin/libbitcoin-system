@@ -1483,7 +1483,7 @@ bool is_stealth_info_type(const operation_stack& ops)
     return ops.size() == 2 &&
         ops[0].code == opcode::return_ &&
         ops[1].code == opcode::special &&
-        ops[1].data.size() >= hash_size;
+        ops[1].data.size() >= ec_compressed_size;
 }
 bool is_multisig_type(const operation_stack&)
 {
