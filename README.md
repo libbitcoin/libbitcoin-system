@@ -44,7 +44,7 @@ Next install the [build system](http://en.wikipedia.org/wiki/GNU_build_system):
 ```sh
   $ sudo apt-get install build-essential autoconf automake libtool pkg-config
 ```
-Next install [Boost](http://www.boost.org) (1.50.0 or newer) and [GMP](https://gmplib.org/)  (5.0.0 or newer).
+Next install [Boost](http://www.boost.org) (1.49.0 or newer) and [GMP](https://gmplib.org/)  (5.0.0 or newer).
 ```sh
   $ sudo apt-get install libboost-all-dev libgmp-dev
 ```
