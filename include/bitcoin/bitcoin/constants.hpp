@@ -81,7 +81,12 @@ constexpr uint64_t max_uint64 = MAX_UINT64;
 constexpr uint32_t max_uint32 = MAX_UINT32;
 constexpr uint16_t max_uint16 = MAX_UINT16;
 constexpr uint8_t max_uint8 = MAX_UINT8;
+// Debian complains about missing UINTPTR_MAX definition for some weird reason.
+#ifdef UINTPTR_MAX
 constexpr uint64_t max_size_t = UINTPTR_MAX;
+#else
+constexpr uint64_t max_size_t = std::numeric_limits<size_t>::max();
+#endif
 
 constexpr uint32_t max_index = max_uint32;
 constexpr uint32_t max_height = max_uint32;
