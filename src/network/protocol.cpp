@@ -150,8 +150,10 @@ void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
 #ifdef ENABLE_TESTNET
 const std::vector<std::string> dns_seeds
 {
+    "testnet-seed.alexykot.me",
     "testnet-seed.bitcoin.petertodd.org",
-    "testnet-seed.bluematt.me"
+    "testnet-seed.bluematt.me",
+    "testnet-seed.bitcoin.schildbach.de"
 };
 #else
 const std::vector<std::string> dns_seeds

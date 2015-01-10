@@ -31,6 +31,9 @@ struct BC_API stealth_info
     binary_type bitfield;
 };
 
+/**
+ * Calculate the stealth binary prefix from the RETURN output.
+ */
 BC_API binary_type calculate_stealth_prefix(
     const script_type& stealth_script);
 
