@@ -119,7 +119,8 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
 
 channel_proxy::~channel_proxy()
 {
-    stop();
+    stop_impl();
+    stop_subscriber_->relay(error::service_stopped);
 }
 
 void channel_proxy::start()
@@ -131,12 +132,16 @@ void channel_proxy::start()
 
 void channel_proxy::stop()
 {
-    stop_impl();
-    stop_subscriber_->relay(error::service_stopped);
+    auto this_ptr = shared_from_this();
+    auto do_stop = [this, this_ptr]()
+    {
+        stop_impl();
+        stop_subscriber_->relay(error::service_stopped);
+    };
+    strand_.queue(do_stop);
 }
 void channel_proxy::stop_impl()
 {
-    std::lock_guard<std::mutex> lock(stop_mutex_);
     if (stopped_)
         return;
     // We need this because the timeout timer shares this code with stop()
@@ -224,7 +229,7 @@ void channel_proxy::set_timeout(const time_duration timeout)
 {
     timeout_.cancel();
     timeout_.expires_from_now(timeout);
-    timeout_.async_wait(std::bind(
+    timeout_.async_wait(strand_.wrap(
         &channel_proxy::handle_timeout, shared_from_this(), _1));
 }
 void channel_proxy::set_heartbeat(const time_duration timeout)
