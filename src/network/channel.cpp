@@ -131,13 +131,14 @@ void channel_proxy::start()
 
 void channel_proxy::stop()
 {
-    if (stopped_)
-        return;
     stop_impl();
     stop_subscriber_->relay(error::service_stopped);
 }
 void channel_proxy::stop_impl()
 {
+    std::lock_guard<std::mutex> lock(stop_mutex_);
+    if (stopped_)
+        return;
     // We need this because the timeout timer shares this code with stop()
     // But sends a different error_code
     stopped_ = true;
@@ -145,6 +146,8 @@ void channel_proxy::stop_impl()
     boost::system::error_code ret_ec;
     timeout_.cancel(ret_ec);
     heartbeat_.cancel(ret_ec);
+    // Force the socket closed
+    // Should we do something with these error_codes?
     socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ret_ec);
     socket_->close(ret_ec);
     clear_subscriptions();
@@ -199,14 +202,9 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
     // No response for a while so disconnect
     boost::system::error_code ret_ec;
     tcp::endpoint remote_endpoint = socket_->remote_endpoint(ret_ec);
-    if (!ec)
+    if (!ret_ec)
         log_debug(LOG_NETWORK) << "Closing channel "
             << remote_endpoint.address().to_string();
-    ret_ec = boost::system::error_code();
-    // Force the socket closed
-    // Should we do something with these error_codes?
-    socket_->shutdown(tcp::socket::shutdown_both, ret_ec);
-    socket_->close(ret_ec);
     stop_impl();
     stop_subscriber_->relay(error::channel_timeout);
 }
