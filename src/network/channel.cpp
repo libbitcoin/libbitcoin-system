@@ -91,7 +91,7 @@ void channel_stream_loader::load_lookup(const std::string& symbol,
 }
 
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
-  : strand_(pool.service()), socket_(socket),
+  : strand_(pool), socket_(socket),
     timeout_(pool.service()), heartbeat_(pool.service()), stopped_(false)
 {
 #define CHANNEL_TRANSPORT_MECHANISM(MESSAGE_TYPE) \
@@ -131,13 +131,14 @@ void channel_proxy::start()
 
 void channel_proxy::stop()
 {
-    if (stopped_)
-        return;
     stop_impl();
     stop_subscriber_->relay(error::service_stopped);
 }
 void channel_proxy::stop_impl()
 {
+    std::lock_guard<std::mutex> lock(stop_mutex_);
+    if (stopped_)
+        return;
     // We need this because the timeout timer shares this code with stop()
     // But sends a different error_code
     stopped_ = true;
@@ -145,6 +146,8 @@ void channel_proxy::stop_impl()
     boost::system::error_code ret_ec;
     timeout_.cancel(ret_ec);
     heartbeat_.cancel(ret_ec);
+    // Force the socket closed
+    // Should we do something with these error_codes?
     socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ret_ec);
     socket_->close(ret_ec);
     clear_subscriptions();
@@ -199,14 +202,9 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
     // No response for a while so disconnect
     boost::system::error_code ret_ec;
     tcp::endpoint remote_endpoint = socket_->remote_endpoint(ret_ec);
-    if (!ec)
+    if (!ret_ec)
         log_debug(LOG_NETWORK) << "Closing channel "
             << remote_endpoint.address().to_string();
-    ret_ec = boost::system::error_code();
-    // Force the socket closed
-    // Should we do something with these error_codes?
-    socket_->shutdown(tcp::socket::shutdown_both, ret_ec);
-    socket_->close(ret_ec);
     stop_impl();
     stop_subscriber_->relay(error::channel_timeout);
 }
@@ -255,23 +253,23 @@ bool channel_proxy::problems_check(const boost::system::error_code& ec)
 void channel_proxy::read_header()
 {
     async_read(*socket_, buffer(inbound_header_),
-        strand_.wrap(std::bind(&channel_proxy::handle_read_header,
-            shared_from_this(), _1, _2)));
+        strand_.wrap(&channel_proxy::handle_read_header,
+            shared_from_this(), _1, _2));
 }
 
 void channel_proxy::read_checksum(const header_type& header_msg)
 {
     async_read(*socket_, buffer(inbound_checksum_),
-        strand_.wrap(std::bind(&channel_proxy::handle_read_checksum,
-            shared_from_this(), _1, _2, header_msg)));
+        strand_.wrap(&channel_proxy::handle_read_checksum,
+            shared_from_this(), _1, _2, header_msg));
 }
 
 void channel_proxy::read_payload(const header_type& header_msg)
 {
     inbound_payload_.resize(header_msg.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
-        strand_.wrap(std::bind(&channel_proxy::handle_read_payload,
-            shared_from_this(), _1, _2, header_msg)));
+        strand_.wrap(&channel_proxy::handle_read_payload,
+            shared_from_this(), _1, _2, header_msg));
 }
 
 bool verify_header(const header_type& header_msg)
@@ -455,8 +453,8 @@ void channel_proxy::send_raw(const header_type& packet_header,
     if (stopped_)
         handle_send(error::service_stopped);
     else
-        strand_.post(std::bind(&channel_proxy::do_send_raw,
-            shared_from_this(), packet_header, payload, handle_send));
+        strand_.queue(&channel_proxy::do_send_raw,
+            shared_from_this(), packet_header, payload, handle_send);
 }
 
 void channel_proxy::do_send_raw(const header_type& packet_header,
@@ -480,7 +478,7 @@ void channel_proxy::send_common(const data_chunk& whole_message,
     else
     {
         auto this_ptr = shared_from_this();
-        strand_.post(
+        strand_.queue(
             [this, this_ptr, whole_message, handle_send]
             {
                 do_send_common(whole_message, handle_send);

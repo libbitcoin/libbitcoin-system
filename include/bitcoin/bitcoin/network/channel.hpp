@@ -248,8 +248,10 @@ private:
     void stop_impl();
     void clear_subscriptions();
 
-    boost::asio::io_service::strand strand_;
+    async_strand strand_;
     socket_ptr socket_;
+    // Used to ensure that the socket only gets closed once.
+    std::mutex stop_mutex_;
     // We keep the service alive for lifetime rules
     boost::asio::deadline_timer timeout_, heartbeat_;
     std::atomic<bool> stopped_;
