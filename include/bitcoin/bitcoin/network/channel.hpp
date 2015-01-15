@@ -248,7 +248,7 @@ private:
     void stop_impl();
     void clear_subscriptions();
 
-    boost::asio::io_service::strand strand_;
+    async_strand strand_;
     socket_ptr socket_;
     // We keep the service alive for lifetime rules
     boost::asio::deadline_timer timeout_, heartbeat_;
