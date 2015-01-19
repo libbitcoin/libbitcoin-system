@@ -25,32 +25,40 @@ The libbitcoin toolkit is a set of cross platform C++ libraries for building bit
 
 ### Debian/Ubuntu
 
-Libbitcoin requires a C++11 compiler, currently [GCC 4.8.0](https://gcc.gnu.org/projects/cxx0x.html) minimum.
-
-> For this reason Ubuntu is not supported prior to version 12.04.
+Libbitcoin requires a C++11 compiler, currently [GCC 4.8.0](https://gcc.gnu.org/projects/cxx0x.html) minimum. For this reason Ubuntu is not supported prior to version [12.04](http://askubuntu.com/a/271561).
 
 To see your GCC version:
-
 ```sh
   $ gcc --version
 ```
-If necessary, upgrade your compiler [as follows](http://bit.ly/1vXaaQL):
+```
+g++ (Ubuntu 4.8.2-19ubuntu1) 4.8.2
+Copyright (C) 2013 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```
+If necessary, upgrade your compiler as follows:
 ```sh
-  $ sudo apt-get install g++-4.8
-  $ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
-  $ sudo update-alternatives --config g++
+$ sudo apt-get install g++-4.8
+$ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
+$ sudo update-alternatives --config g++
 ```
 Next install the [build system](http://en.wikipedia.org/wiki/GNU_build_system):
 ```sh
-  $ sudo apt-get install build-essential autoconf automake libtool pkg-config
+$ sudo apt-get install build-essential autoconf automake libtool pkg-config
 ```
-Next install [Boost](http://www.boost.org) (1.49.0 or newer) and [GMP](https://gmplib.org/)  (5.0.0 or newer).
+Next install [Boost](http://www.boost.org) (1.49.0 or newer) and [GMP](https://gmplib.org/)  (5.0.0 or newer):
 ```sh
-  $ sudo apt-get install libboost-all-dev libgmp-dev
+$ sudo apt-get install libboost-all-dev libgmp-dev
 ```
-Finally, execute the [install script](https://raw.githubusercontent.com/evoskuil/libbitcoin/develop/install.sh). This single file will download, build, install and test libbitcoin.
+Next download the [install script](https://github.com/libbitcoin/libbitcoin/blob/version2/install.sh) and enable execution:
 ```sh
-  $ ./install.sh
+$ wget https://raw.githubusercontent.com/libbitcoin/libbitcoin/version2/install.sh
+$ chmod +x install.sh
+```
+Finally, install libbitcoin:
+```sh
+$ sudo ./install.sh
 ```
 Libbitcoin is now installed in `/usr/local/`.
 
@@ -72,21 +80,21 @@ The build script clones, builds and installs two unpackaged repositories, namely
 Any set of `./configure` options can be passed via the build script, for example:
 
 ```sh
-  $ ./install.sh CPPFLAGS=-DDEBUG CFLAGS="-Og -g"
+$ ./install.sh CPPFLAGS=-DDEBUG CFLAGS="-Og -g"
 ```
 
 #### Compiling for Testnet
 
 Currently libbitcoin cannot work with both [testnet](https://en.bitcoin.it/wiki/Testnet) and mainnet. This restriction will be lifted in a future version. In order to work with testnet in the interim libbitcoin must be recompiled with the testnet option:
 ```sh
-  $ ./install.sh --enable-testnet
+$ ./install.sh --enable-testnet
 ```
 #### Packaging Instructions
 
 To build the Debian package execute the following commands:
 ```sh
-  $ sudo apt-get install libboost-all-dev fakeroot
-  $ dpkg-buildpackage -rfakeroot
+$ sudo apt-get install libboost-all-dev fakeroot
+$ dpkg-buildpackage -rfakeroot
 ```
 
 ### Macintosh
@@ -95,19 +103,19 @@ The OSX installation differs from Linux in the installation of the compiler and 
 
 To upgrade GCC first set the following environment variables:
 ```sh
-  CC=/usr/local/bin/gcc-4.8
-  CXX=/usr/local/bin/g++-4.8
+CC=/usr/local/bin/gcc-4.8
+CXX=/usr/local/bin/g++-4.8
 ```
 Next execute the following commands:
 ```sh
-  $ brew install boost gmp
-  $ brew tap homebrew/versions
-  $ brew install gcc48
-  $ sudo ln -sf /usr/local/bin/g++-4.8 /usr/bin/g++
+$ brew install boost gmp
+$ brew tap homebrew/versions
+$ brew install gcc48
+$ sudo ln -sf /usr/local/bin/g++-4.8 /usr/bin/g++
 ```
 Finally, invoke the install script:
 ```sh
-  $ ./install.sh
+$ ./install.sh
 ```
 
 ### Windows
