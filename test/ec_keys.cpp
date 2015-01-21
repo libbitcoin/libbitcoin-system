@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(ec_signature_test)
     // The nonce is now ignored and only deterministic signing is used.
     // Invalid nonce:
     ec_secret nonce = ec_secret{{0}};
-    BOOST_REQUIRE_NE(sign(secret, hash, nonce).size(), 0);
+    BOOST_REQUIRE_NE(sign(secret, hash, nonce).size(), 0u);
 }
 
 BOOST_AUTO_TEST_CASE(ec_verify_test)
