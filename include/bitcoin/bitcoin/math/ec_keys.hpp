@@ -127,13 +127,13 @@ BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash,
 // DEPRECATED (deterministic signatures are safer)
 ///////////////////////////////////////////////////////////////////////////////
 
-BC_API endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce);
+BC_API endorsement sign(ec_secret secret, hash_digest hash, ec_secret);
 
 ///////////////////////////////////////////////////////////////////////////////
 // DEPRECATED (deterministic signatures are safer)
 ///////////////////////////////////////////////////////////////////////////////
 BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash,
-    ec_secret nonce);
+    ec_secret);
 
 } // namespace libbitcoin
 
