@@ -8,7 +8,6 @@
 # Script to build and install libbitcoin.
 #
 # Script options:
-# --build-gmp              Builds GMP library.
 # --build-boost            Builds Boost libraries.
 # --build-dir=<path>       Location of downloaded and intermediate files.
 # --prefix=<absolute-path> Library install location (defaults to /usr/local).
@@ -43,9 +42,6 @@ BOOST_ARCHIVE_CLANG="boost_1_54_0.tar.bz2"
 
 # GMP archives.
 #------------------------------------------------------------------------------
-GMP_URL="https://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.bz2"
-GMP_ARCHIVE="gmp-6.0.0a.tar.bz2"
-
 
 # Initialize the build environment.
 #==============================================================================
@@ -173,11 +169,6 @@ echo "  with_pkgconfigdir: $with_pkgconfigdir"
 
 # Define build options.
 #==============================================================================
-# Define gmp options.
-#------------------------------------------------------------------------------
-GMP_OPTIONS=\
-"CPPFLAGS=-w "
-
 # Define boost options for gcc.
 #------------------------------------------------------------------------------
 BOOST_OPTIONS_GCC=\
@@ -213,20 +204,9 @@ BOOST_OPTIONS_CLANG=\
 "${prefix} "\
 "${boost_link} "
 
-# Define secp256k1 options.
-#------------------------------------------------------------------------------
-SECP256K1_OPTIONS=\
-"--with-bignum=gmp "\
-"--with-field=gmp "\
-"--enable-benchmark=no "\
-"--enable-tests=no "\
-"--enable-endomorphism=no "\
-"${gmp_flags} "
-
 # Define bitcoin options.
 #------------------------------------------------------------------------------
 BITCOIN_OPTIONS=\
-"${gmp_flags} "\
 "${with_boost} "\
 "${with_pkgconfigdir} "
 
@@ -468,9 +448,8 @@ build_from_travis()
 #==============================================================================
 build_all()
 {
-    build_from_tarball_gmp $GMP_URL $GMP_ARCHIVE gmp $PARALLEL "$@" $GMP_OPTIONS
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
-    build_from_github libbitcoin secp256k1 master $PARALLEL "$@" $SECP256K1_OPTIONS
+    build_from_github libbitcoin secp256k1 version2 $PARALLEL "$@" $SECP256K1_OPTIONS
     build_from_travis libbitcoin libbitcoin version2 $PARALLEL "$@" $BITCOIN_OPTIONS
 }
 

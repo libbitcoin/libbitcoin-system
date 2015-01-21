@@ -11,7 +11,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: libbitcoin
-Description: Bitcoin Software Development Toolkit
+Description: Bitcoin Cross-Platform C++ Development Toolkit
 URL: https://github.com/libbitcoin/libbitcoin
 Version: @PACKAGE_VERSION@
 
@@ -22,4 +22,4 @@ Requires: libsecp256k1 >= 0.0.1
 Cflags: -I${includedir} -std=c++11
 
 # Our own lib and any we require that do not publish package configuration.
-Libs: -L${libdir} -lbitcoin -lpthread @boost_LIBS@ @rt_LIBS@ @gmp_LIBS@
+Libs: -L${libdir} -lbitcoin -lpthread @boost_LIBS@ @rt_LIBS@

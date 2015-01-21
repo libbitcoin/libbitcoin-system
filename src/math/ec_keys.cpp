@@ -71,11 +71,16 @@ ec_point secret_to_public_key(const ec_secret& secret,
 
     ec_point out(public_key_size);
     int out_size;
-    if (!secp256k1_ec_pubkey_create(out.data(), &out_size, secret.data(),
-            compressed))
-        return ec_point();
-    BITCOIN_ASSERT(public_key_size == static_cast<size_t>(out_size));
-    return out;
+
+    if (secp256k1_ec_pubkey_create(out.data(), &out_size, secret.data(),
+        compressed) == 1)
+    {
+        BITCOIN_ASSERT_MSG(public_key_size == static_cast<size_t>(out_size),
+            "secp256k1_ec_pubkey_create returned invalid size");
+        return out;
+    }
+
+    return ec_point();
 }
 
 bool verify_public_key(const ec_point& public_key)
@@ -103,16 +108,15 @@ bool verify_private_key(const ec_secret& private_key)
 endorsement sign(ec_secret secret, hash_digest hash)
 {
     init.init();
-
     int out_size = max_endorsement_size;
     endorsement signature(out_size);
 
-    ec_secret nonce;
-    unsigned index = 0;
-    do {
-        nonce = create_nonce(secret, hash, index++);
-    } while (secp256k1_ecdsa_sign(hash.data(), hash.size(), signature.data(),
-        &out_size, secret.data(), nonce.data()) <= 0);
+    if (secp256k1_ecdsa_sign(hash.data(), signature.data(), &out_size,
+        secret.data(), secp256k1_nonce_function_rfc6979, nullptr) != 1)
+    {
+        BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign failed");
+        out_size = 0;
+    };
 
     signature.resize(out_size);
     return signature;
@@ -121,15 +125,15 @@ endorsement sign(ec_secret secret, hash_digest hash)
 compact_signature sign_compact(ec_secret secret, hash_digest hash)
 {
     init.init();
-
     compact_signature out;
 
-    ec_secret nonce;
-    unsigned index = 0;
-    do {
-        nonce = create_nonce(secret, hash, index++);
-    } while (secp256k1_ecdsa_sign_compact(hash.data(), hash.size(),
-        out.signature.data(), secret.data(), nonce.data(), &out.recid) <= 0);
+    if (secp256k1_ecdsa_sign_compact(hash.data(),  out.signature.data(),
+        secret.data(), secp256k1_nonce_function_rfc6979, nullptr, 
+        &out.recid) != 1)
+    {
+        BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign_compact failed");
+        return compact_signature();
+    }
 
     return out;
 }
@@ -174,18 +178,19 @@ ec_secret create_nonce(ec_secret secret, hash_digest hash, unsigned index)
 endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce)
 {
     init.init();
-
     int out_size = max_endorsement_size;
     endorsement signature(out_size);
-    if (0 < secp256k1_ecdsa_sign(hash.data(), hash.size(), signature.data(),
-        &out_size, secret.data(), nonce.data()))
+
+    if (secp256k1_ecdsa_sign(hash.data(), signature.data(), &out_size,
+        secret.data(), secp256k1_nonce_function_default,  // *** TODO: use nonce here. ***
+        nullptr) != 1)
     {
-        signature.resize(out_size);
-        return signature;
+        BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign failed");
+        out_size = 0;
     }
 
-    // Error case:
-    return endorsement();
+    signature.resize(out_size);
+    return signature;
 }
 
 compact_signature sign_compact(ec_secret secret, hash_digest hash,
@@ -194,28 +199,33 @@ compact_signature sign_compact(ec_secret secret, hash_digest hash,
     init.init();
 
     compact_signature out;
-    if (0 < secp256k1_ecdsa_sign_compact(hash.data(), hash.size(),
-        out.signature.data(), secret.data(), nonce.data(), &out.recid))
+
+    if (secp256k1_ecdsa_sign_compact(hash.data(), out.signature.data(),
+        secret.data(), secp256k1_nonce_function_default, // *** TODO: use nonce here. ***
+        nullptr, &out.recid) != 1)
     {
-        return out;
+        BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign_compact failed");
+        return compact_signature{{{0}}, 0};
     }
 
-    // Error case:
-    return compact_signature{{{0}}, 0};
+    return out;
 }
 
 bool verify_signature(const ec_point& public_key, hash_digest hash,
     const endorsement& signature)
 {
     init.init();
-    return 1 == secp256k1_ecdsa_verify(hash.data(), hash.size(),
-        signature.data(), signature.size(), public_key.data(),
-        public_key.size()
-    );
+
+    auto result = secp256k1_ecdsa_verify(hash.data(), signature.data(),
+        signature.size(), public_key.data(), public_key.size());
+
+    BITCOIN_ASSERT_MSG(result >= 0, "secp256k1_ecdsa_verify failed");
+
+    return result == 1;
 }
 
-ec_point recover_compact(compact_signature signature,
-    hash_digest hash, bool compressed)
+ec_point recover_compact(compact_signature signature, hash_digest hash,
+    bool compressed)
 {
     init.init();
 
@@ -225,15 +235,16 @@ ec_point recover_compact(compact_signature signature,
 
     ec_point out(public_key_size);
     int out_size;
-    if (0 < secp256k1_ecdsa_recover_compact(hash.data(), hash.size(),
+
+    if (secp256k1_ecdsa_recover_compact( hash.data(), 
         signature.signature.data(), out.data(), &out_size, compressed,
-        signature.recid))
+        signature.recid) == 1)
     {
-        BITCOIN_ASSERT(public_key_size == static_cast<size_t>(out_size));
+        BITCOIN_ASSERT_MSG(public_key_size == static_cast<size_t>(out_size),
+            "secp256k1_ecdsa_recover_compact returned invalid size");
         return out;
     }
 
-    // Error case:
     return ec_point();
 }
 
