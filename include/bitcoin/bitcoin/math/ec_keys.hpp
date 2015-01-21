@@ -81,38 +81,6 @@ BC_API endorsement sign(ec_secret secret, hash_digest hash);
 BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash);
 
 /**
- * Create a deterministic signature nonce according to rfc6979.
- * @param index It is possible that the generated nonce is unacceptable,
- * either because it is out of range or because it creates a bad signature.
- * If this happens, increment index and try again.
- */
-BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash,
-    unsigned index=0);
-
-/**
- * Create an EC signature using a private key.
- * DO NOT USE! A bad nonce is an easy way to get Bitcoins stolen.
- * Consider using the deterministic version above instead.
- * The nonce must be a cryptographically-secure random number,
- * or the signature will leak information about the private key.
- * @return an EC signature, or a zero-length chunk if something goes wrong.
- * Try another nonce if this happens.
- */
-BC_API endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce);
-
-/**
- * Create an compact EC signature for use in message signing.
- * DO NOT USE! A bad nonce is an easy way to get Bitcoins stolen.
- * Consider using the deterministic version above instead.
- * The nonce must be a cryptographically-secure random number,
- * or the signature will leak information about the private key.
- * @return a compact signature. This will be all-zero if something goes wrong.
- * Try another nonce if this happens.
- */
-BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash,
-    ec_secret nonce);
-
-/**
  * Verifies an EC signature using a public key.
  */
 BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
@@ -148,6 +116,24 @@ BC_API bool ec_multiply(ec_point& a, const ec_secret& b);
  * @return false on failure (such as a zero result).
  */
 BC_API bool ec_multiply(ec_secret& a, const ec_secret& b);
+
+///////////////////////////////////////////////////////////////////////////////
+// DEPRECATED (now redundant with secp256k1 implementation)
+///////////////////////////////////////////////////////////////////////////////
+BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash,
+    unsigned index=0);
+
+///////////////////////////////////////////////////////////////////////////////
+// DEPRECATED (deterministic signatures are safer)
+///////////////////////////////////////////////////////////////////////////////
+
+BC_API endorsement sign(ec_secret secret, hash_digest hash, ec_secret nonce);
+
+///////////////////////////////////////////////////////////////////////////////
+// DEPRECATED (deterministic signatures are safer)
+///////////////////////////////////////////////////////////////////////////////
+BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash,
+    ec_secret nonce);
 
 } // namespace libbitcoin
 
