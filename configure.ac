@@ -144,32 +144,6 @@ AS_CASE([${host_os}], [*linux*],
         [AC_SUBST([rt_LIBS], [])
             AC_MSG_ERROR([rt library is required but was not found.])])])
 
-# Require gmp if on linux and output ${gmp_LIBS}.
-#------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*], 
-    [AC_CHECK_HEADER([gmp.h], [],
-        [AC_MSG_ERROR([gmp header is required but was not found.])],-)])
-AS_CASE([${host_os}], [*linux*], 
-    [AC_CHECK_LIB([gmp],[__gmpz_init],
-        [AC_SUBST([gmp_LIBS], [-lgmp])],
-        [AC_SUBST([gmp_LIBS], [])
-            AC_MSG_ERROR([gmp library is required but was not found.])])])
-
-# Require gmp if on darwin and output ${gmp_LIBS}.
-#------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*darwin*], 
-    [CPPFLAGS="$CPPFLAGS -I/opt/local/include"])
-AS_CASE([${host_os}], [*darwin*], 
-    [LDFLAGS="$LDFLAGS -L/opt/local/lib"])
-AS_CASE([${host_os}], [*darwin*], 
-    [AC_CHECK_HEADER([gmp.h], [],
-        [AC_MSG_ERROR([gmp header is required but was not found.])],-)])
-AS_CASE([${host_os}], [*darwin*], 
-    [AC_CHECK_LIB([gmp],[__gmpz_init],
-        [AC_SUBST([gmp_LIBS], [-lgmp])],
-        [AC_SUBST([gmp_LIBS], [])
-            AC_MSG_ERROR([gmp library is required but was not found.])])])
-
 # Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS} and ${secp256k1_LIBS}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])

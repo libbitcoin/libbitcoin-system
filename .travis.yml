@@ -57,19 +57,15 @@ install:
     - if [[ $LINUX && $CLANG ]]; then sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-3.4 50; fi
     - if [[ $LINUX && $CLANG ]]; then sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-3.4 50; fi
 
-    # Download and install packages for osx/clang/dynamic.
-    - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then brew install gmp; fi
-
     # Download and install packages for linux/clang/dynamic.
     - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo apt-get -qq install boost1.54; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo apt-get -qq install libgmp-dev; fi
 
 script:
 
     # Download and build libbitcoin and all dependencies.
-    - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --enable-testnet --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix; fi
-    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix CXXFLAGS='-Os -stdlib=libstdc++' LDLIBS='-lstdc++'; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --disable-ndebug --disable-shared --build-gmp --build-boost --prefix=$HOME/my-prefix --build-dir=my-build CXXFLAGS='-Os -s'; fi
+    - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --enable-testnet --disable-shared --build-boost --prefix=$HOME/my-prefix; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --disable-shared --build-boost --prefix=$HOME/my-prefix CXXFLAGS='-Os -stdlib=libstdc++' LDLIBS='-lstdc++'; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --disable-ndebug --disable-shared --build-boost --prefix=$HOME/my-prefix --build-dir=my-build CXXFLAGS='-Os -s'; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then ./install.sh ; fi
     - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --disable-ndebug --disable-static CXXFLAGS='-Os -stdlib=libstdc++' LDLIBS='-lstdc++'; fi
-    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --disable-static --build-gmp --build-boost CXXFLAGS='-Os -s'; fi
+    - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --disable-static --build-boost CXXFLAGS='-Os -s'; fi
