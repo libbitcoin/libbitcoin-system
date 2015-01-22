@@ -29,11 +29,14 @@
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
+namespace po = boost::program_options;
+
 namespace libbitcoin {
 namespace config {
 
-// Space-saving namespace and clarifying external type equivalents.
-namespace po = boost::program_options;
+/**
+ * Abbreviating aliases for external types.
+ */
 typedef po::option_description option_metadata;
 typedef po::options_description options_metadata;
 typedef po::positional_options_description arguments_metadata;
