@@ -76,6 +76,10 @@ bitcoin_bitcoin_config_include_HEADERS = \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
 
+bitcoin_bitcoin_impl_config_includedir = ${includedir}/bitcoin/bitcoin/impl/config
+bitcoin_bitcoin_impl_config_include_HEADERS = \
+    include/bitcoin/bitcoin/impl/config/config.ipp
+
 bitcoin_bitcoin_formats_includedir = ${includedir}/bitcoin/bitcoin/formats
 bitcoin_bitcoin_formats_include_HEADERS = \
     include/bitcoin/bitcoin/formats/base10.hpp \
