@@ -580,7 +580,7 @@ void protocol::receive_address_message(const std::error_code& ec,
 {
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
+        log_warning(LOG_PROTOCOL)
             << "Problem receiving addresses: " << ec.message();
         return;
     }
