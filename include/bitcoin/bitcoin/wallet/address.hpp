@@ -126,4 +126,25 @@ namespace std
     };
 }
 
+//// TODO: from BX
+///**
+// * Unwrap a wrapped payload.
+// * @param[out] version   The version byte of the wrapped data.
+// * @param[out] payload   The payload of the wrapped data.
+// * @param[out] checksum  The validated checksum of the wrapped data.
+// * @param[in]  wrapped   The wrapped data to unwrap.
+// * @return               True if input checksum validates.
+// */
+//BC_API bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
+//    const data_chunk& wrapped);
+//
+//// TODO: from BX
+///**
+// * Wrap arbitrary data.
+// * @param[in]  version  The version byte for the wrapped data.
+// * @param[out] payload  The payload to wrap.
+// * @return              The wrapped data.
+// */
+//BC_API data_chunk wrap(uint8_t version, const data_chunk& payload);
+
 #endif

@@ -63,6 +63,15 @@
     <Filter Include="src\wallet">
       <UniqueIdentifier>{b2e7788e-4e44-4bbd-b5ba-5de47b5a1022}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\config">
+      <UniqueIdentifier>{2cbd227b-0248-43d2-a8be-b1890114b27a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\config">
+      <UniqueIdentifier>{5aca2e32-6005-4543-bee5-6de0cd35f51c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\bitcoin\impl\config">
+      <UniqueIdentifier>{56317cd8-44d3-4595-ac65-0267a4cdf890}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -86,6 +95,9 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\config\config.ipp">
+      <Filter>include\bitcoin\impl\config</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -208,6 +220,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\uri.cpp">
       <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\parameter.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\printer.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\config.cpp">
+      <Filter>src\config</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -381,6 +402,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp">
       <Filter>include\bitcoin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\config.hpp">
+      <Filter>include\bitcoin\config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

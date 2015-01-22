@@ -162,5 +162,40 @@ bool operator==(const payment_address& lhs, const payment_address& rhs)
     return lhs.hash() == rhs.hash() && lhs.version() == rhs.version();
 }
 
+//// TODO: from BX
+//bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
+//    const data_chunk& wrapped)
+//{
+//    constexpr size_t version_length = sizeof(version);
+//    constexpr size_t checksum_length = sizeof(checksum);
+//
+//    // guard against insufficient buffer length
+//    if (wrapped.size() < version_length + checksum_length)
+//        return false;
+//
+//    if (!verify_checksum(wrapped))
+//        return false;
+//
+//    // set return values
+//    version = wrapped.front();
+//    payload = data_chunk(wrapped.begin() + version_length,
+//        wrapped.end() - checksum_length);
+//    const auto checksum_start = wrapped.end() - checksum_length;
+//    auto deserial = make_deserializer(checksum_start, wrapped.end());
+//    checksum = deserial.read_4_bytes();
+//
+//    return true;
+//}
+//
+//// TODO: from BX
+//data_chunk wrap(uint8_t version, const data_chunk& payload)
+//{
+//    data_chunk wrapped;
+//    wrapped.push_back(version);
+//    extend_data(wrapped, payload);
+//    append_checksum(wrapped);
+//    return wrapped;
+//}
+
 } // namespace libbitcoin
 
