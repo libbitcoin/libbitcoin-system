@@ -112,6 +112,14 @@ AS_IF([test x$enable_testnet != xno], AC_DEFINE([ENABLE_TESTNET]))
 AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 
+# Set unconditional preprocessor defines.
+#==============================================================================
+# Unconditionally define the preprocessor symbol SYSCONFDIR.
+#------------------------------------------------------------------------------
+# Set the value of SYSCONFDIR for source usage.
+AC_DEFINE([SYSCONFDIR], ["${sysconfdir}"])
+
+
 # Check dependencies.
 #==============================================================================
 # Require Boost of at least version 1.49.0 if in gcc.
@@ -129,6 +137,8 @@ AS_CASE([${CC}], [*clang*],
 AX_BOOST_DATE_TIME
 
 AX_BOOST_FILESYSTEM
+
+AX_BOOST_PROGRAM_OPTIONS
 
 AX_BOOST_REGEX
 
@@ -150,7 +160,7 @@ PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
 # Output ${boost_LIBS}
 #------------------------------------------------------------------------------
-AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_regex -lboost_system"])
+AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_system"])
 
 
 # Set flags.

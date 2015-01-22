@@ -168,6 +168,9 @@
 #endif
 #include <bitcoin/bitcoin/block.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/config/config.hpp>
+#include <bitcoin/bitcoin/config/parameter.hpp>
+#include <bitcoin/bitcoin/config/printer.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>

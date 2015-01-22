@@ -70,6 +70,12 @@ bitcoin_bitcoin_impl_serialize_include_HEADERS = \
     include/bitcoin/bitcoin/impl/serialize/block.ipp \
     include/bitcoin/bitcoin/impl/serialize/misc.ipp
 
+bitcoin_bitcoin_config_includedir = ${includedir}/bitcoin/bitcoin/config
+bitcoin_bitcoin_config_include_HEADERS = \
+    include/bitcoin/bitcoin/config/config.hpp \
+    include/bitcoin/bitcoin/config/parameter.hpp \
+    include/bitcoin/bitcoin/config/printer.hpp
+
 bitcoin_bitcoin_formats_includedir = ${includedir}/bitcoin/bitcoin/formats
 bitcoin_bitcoin_formats_include_HEADERS = \
     include/bitcoin/bitcoin/formats/base10.hpp \
@@ -156,6 +162,9 @@ src_libbitcoin_la_SOURCES = \
     src/compat.cpp \
     src/constants.cpp \
     src/error.cpp \
+    src/config/config.cpp \
+    src/config/parameter.cpp \
+    src/config/printer.cpp \
     src/formats/base10.cpp \
     src/formats/base16.cpp \
     src/formats/base58.cpp \
@@ -220,6 +229,7 @@ test_libbitcoin_test_SOURCES = \
     test/base64.cpp \
     test/big_number.cpp \
     test/checksum.cpp \
+    test/config.cpp \
     test/ec_keys.cpp \
     test/format.cpp \
     test/hash_number.cpp \
@@ -228,6 +238,8 @@ test_libbitcoin_test_SOURCES = \
     test/key_formats.cpp \
     test/main.cpp \
     test/message.cpp \
+    test/parameter.cpp \
+    test/printer.cpp \
     test/script_number.cpp \
     test/script.cpp \
     test/serialize.cpp \
