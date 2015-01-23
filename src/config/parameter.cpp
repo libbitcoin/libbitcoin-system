@@ -21,10 +21,12 @@
 
 #include <iostream>
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/config/config.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
+namespace po = boost::program_options;
 using namespace libbitcoin::config;
 
 const int parameter::not_positional = -1;
@@ -34,7 +36,7 @@ const char parameter::option_prefix_char = '-';
 // 100% component coverage, common scenarios.
 // A required argument may only be preceeded by required arguments.
 // Requiredness may be in error if the metadata is inconsistent.
-void parameter::initialize(const option_metadata& option,
+void parameter::initialize(const po::option_description& option,
     const argument_list& arguments)
 {
     set_position(position(option, arguments));
@@ -48,14 +50,14 @@ void parameter::initialize(const option_metadata& option,
 }
 
 // 100% component coverage, all three scenarios (long, short, both)
-int parameter::position(const option_metadata& option,
+int parameter::position(const po::option_description& option,
     const argument_list& arguments) const
 {
     return find_pair_position(arguments, option.long_name());
 }
 
 // 100% unit coverage, all three scenarios (long, short, both)
-char parameter::short_name(const option_metadata& option) const
+char parameter::short_name(const po::option_description& option) const
 {
     // This call requires boost 1.50, don't use it.
     //auto name = option.canonical_display_name(
@@ -71,7 +73,7 @@ char parameter::short_name(const option_metadata& option) const
 
 // 100% component coverage
 unsigned parameter::arguments_limit(int position, 
-    const option_metadata& option, const argument_list& arguments) const
+    const po::option_description& option, const argument_list& arguments) const
 {
     if (position == parameter::not_positional)
         return option.semantic()->max_tokens();

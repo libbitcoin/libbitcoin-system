@@ -30,11 +30,6 @@
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
-/**
- * Abbreviating alias for external type.
- */
-typedef boost::format format;
-
 namespace libbitcoin {
 namespace config {
 
@@ -68,8 +63,9 @@ public:
      */
     BC_API printer(const std::string& application, 
         const std::string& category, const std::string& command, 
-        const std::string& description, const arguments_metadata& arguments,
-        const options_metadata& options);
+        const std::string& description, 
+        const boost::program_options::positional_options_description& arguments,
+        const boost::program_options::options_description& options);
 
     /**
      * Convert a paragraph of text into a column.
@@ -142,8 +138,8 @@ public:
     BC_PROPERTY_GET_REF(std::string, category);
     BC_PROPERTY_GET_REF(std::string, command);
     BC_PROPERTY_GET_REF(std::string, description);
-    BC_PROPERTY_GET_REF(arguments_metadata, arguments);
-    BC_PROPERTY_GET_REF(options_metadata, options);
+    BC_PROPERTY_GET_REF(boost::program_options::positional_options_description, arguments);
+    BC_PROPERTY_GET_REF(boost::program_options::options_description, options);
 
     /**
      * Virtual property declarations, generated from metadata.
