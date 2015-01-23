@@ -19,7 +19,7 @@ Version: @PACKAGE_VERSION@
 Requires: libsecp256k1 >= 0.0.1
 
 # Our own include directory and any other compiler flags we require.
-Cflags: -I${includedir} -std=c++11
+Cflags: -I${includedir} -std=c++11 @testnet@
 
 # Our own lib and any we require that do not publish package configuration.
 Libs: -L${libdir} -lbitcoin -lpthread @boost_LIBS@ @rt_LIBS@
