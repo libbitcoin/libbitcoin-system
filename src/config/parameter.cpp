@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/config/config.hpp>
 #include <bitcoin/bitcoin/define.hpp>
