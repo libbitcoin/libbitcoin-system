@@ -23,6 +23,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/config/config.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
@@ -54,13 +55,15 @@
 #define BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT " %1%"
 #define BC_PRINTER_USAGE_ARGUMENT_OPTIONAL_FORMAT " [%1%]"
 
+namespace po = boost::program_options;
 using namespace libbitcoin::config;
 
 const int printer::max_arguments = 256;
 
 printer::printer(const std::string& application, const std::string& category,
     const std::string& command, const std::string& description,
-    const arguments_metadata& arguments, const options_metadata& options)
+    const po::positional_options_description& arguments, 
+    const po::options_description& options)
   : application_(application), category_(category), command_(command),
     description_(description), arguments_(arguments), options_(options)
 {
@@ -102,19 +105,19 @@ std::vector<std::string> printer::columnize(const std::string& paragraph,
 }
 
 // 100% component tested.
-static format format_row_name(const parameter& value)
+static boost::format format_row_name(const parameter& value)
 {
     if (value.get_position() != parameter::not_positional)
-        return format(BC_PRINTER_USAGE_ARGUMENT_TABLE_FORMAT) %
+        return boost::format(BC_PRINTER_USAGE_ARGUMENT_TABLE_FORMAT) %
             value.get_long_name();
     else if (value.get_short_name() == parameter::no_short_name)
-        return format(BC_PRINTER_USAGE_OPTION_LONG_TABLE_FORMAT) %
+        return boost::format(BC_PRINTER_USAGE_OPTION_LONG_TABLE_FORMAT) %
         value.get_long_name();
     else if (value.get_long_name().empty())
-        return format(BC_PRINTER_USAGE_OPTION_SHORT_TABLE_FORMAT) %
+        return boost::format(BC_PRINTER_USAGE_OPTION_SHORT_TABLE_FORMAT) %
             value.get_short_name();
     else
-        return format(BC_PRINTER_USAGE_OPTION_TABLE_FORMAT) %
+        return boost::format(BC_PRINTER_USAGE_OPTION_TABLE_FORMAT) %
             value.get_short_name() % value.get_long_name();
 }
 
@@ -132,7 +135,7 @@ std::string printer::format_parameters_table(bool positional)
 {
     std::stringstream output;
     const auto& parameters = get_parameters();
-    format table_format("%-20s %-52s\n");
+    boost::format table_format("%-20s %-52s\n");
 
     for (const auto& parameter: parameters)
     {
@@ -164,7 +167,7 @@ std::string printer::format_parameters_table(bool positional)
 std::string printer::format_paragraph(const std::string& paragraph)
 {
     std::stringstream output;
-    format paragraph_format("%-73s\n");
+    boost::format paragraph_format("%-73s\n");
 
     const auto lines = columnize(paragraph, 73);
 
@@ -178,7 +181,7 @@ std::string printer::format_usage()
 {
     // USAGE: bx COMMAND [-hvt] -n VALUE [-m VALUE] [-w VALUE]... REQUIRED 
     // [OPTIONAL] [MULTIPLE]...
-    auto usage = format(BC_PRINTER_USAGE_FORMAT) % get_application() %
+    auto usage = boost::format(BC_PRINTER_USAGE_FORMAT) % get_application() %
         get_command() % format_usage_parameters();
 
     return format_paragraph(usage.str());
@@ -187,7 +190,8 @@ std::string printer::format_usage()
 std::string printer::format_description()
 {
     // DESCRIPTION: %1%
-    auto description = format(BC_PRINTER_DESCRIPTION_FORMAT) % get_description();
+    auto description = boost::format(BC_PRINTER_DESCRIPTION_FORMAT) % 
+        get_description();
     return format_paragraph(description.str());
 }
 
@@ -256,35 +260,35 @@ std::string printer::format_usage_parameters()
     std::stringstream usage;
 
     if (!toggle_short_options.empty())
-        usage << format(BC_PRINTER_USAGE_OPTION_TOGGLE_SHORT_FORMAT) % 
+        usage << boost::format(BC_PRINTER_USAGE_OPTION_TOGGLE_SHORT_FORMAT) %
             toggle_short_options;
 
     for (const auto& required_option: required_options)
-        usage << format(BC_PRINTER_USAGE_OPTION_REQUIRED_FORMAT) % 
+        usage << boost::format(BC_PRINTER_USAGE_OPTION_REQUIRED_FORMAT) %
             required_option % BC_PRINTER_VALUE_TEXT;
     
     for (const auto& toggle_long_option: toggle_long_options)
-        usage << format(BC_PRINTER_USAGE_OPTION_TOGGLE_LONG_FORMAT) % 
+        usage << boost::format(BC_PRINTER_USAGE_OPTION_TOGGLE_LONG_FORMAT) %
             toggle_long_option;
 
     for (const auto& optional_option: optional_options)
-        usage << format(BC_PRINTER_USAGE_OPTION_OPTIONAL_FORMAT) % 
+        usage << boost::format(BC_PRINTER_USAGE_OPTION_OPTIONAL_FORMAT) %
             optional_option % BC_PRINTER_VALUE_TEXT;
 
     for (const auto& multiple_option: multiple_options)
-        usage << format(BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT) % 
+        usage << boost::format(BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT) %
             multiple_option % BC_PRINTER_VALUE_TEXT;
 
     for (const auto& required_argument: required_arguments)
-        usage << format(BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT) % 
+        usage << boost::format(BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT) %
             required_argument;
 
     for (const auto& optional_argument: optional_arguments)
-        usage << format(BC_PRINTER_USAGE_ARGUMENT_OPTIONAL_FORMAT) %
+        usage << boost::format(BC_PRINTER_USAGE_ARGUMENT_OPTIONAL_FORMAT) %
             optional_argument;
 
     for (const auto& multiple_argument: multiple_arguments)
-        usage << format(BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT) %
+        usage << boost::format(BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT) %
             multiple_argument;
 
     std::string clean_usage(usage.str());

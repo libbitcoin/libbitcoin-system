@@ -26,6 +26,7 @@
 #include <boost/test/unit_test_suite.hpp>
 #include <bitcoin/bitcoin.hpp>
 
+namespace po = boost::program_options;
 using namespace bc::config;
 
 enum opt
@@ -41,7 +42,7 @@ enum opt
     multitoken
 };
 
-static void load_test_options(options_metadata& options)
+static void load_test_options(po::options_description& options)
 {
     using namespace boost::filesystem;
     using namespace boost::program_options;
@@ -70,7 +71,7 @@ static void load_test_arguments(argument_list& arguments)
 }
 
 #define CONFIG_TEST_PARAMETER_SETUP(index) \
-    options_metadata options; \
+    po::options_description options; \
     load_test_options(options); \
     argument_list names; \
     load_test_arguments(names); \
@@ -78,7 +79,7 @@ static void load_test_arguments(argument_list& arguments)
     bc::config::parameter parameter
 
 #define CONFIG_TEST_PARAMETER_OPTIONS_SETUP(index) \
-    options_metadata options; \
+    po::options_description options; \
     load_test_options(options); \
     auto option = *(options.options()[index]); \
     bc::config::parameter parameter

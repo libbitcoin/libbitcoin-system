@@ -29,17 +29,8 @@
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
-namespace po = boost::program_options;
-
 namespace libbitcoin {
 namespace config {
-
-/**
- * Abbreviating aliases for external types.
- */
-typedef po::option_description option_metadata;
-typedef po::options_description options_metadata;
-typedef po::positional_options_description arguments_metadata;
 
 /**
  * Shorthand for property declarations in parameter class.
@@ -110,7 +101,8 @@ public:
      * @param[in]  option     The metadata of the option to test.
      * @param[in]  arguments  The list of supported positional arguments.
      */
-    BC_API virtual void initialize(const option_metadata& option,
+    BC_API virtual void initialize(
+        const boost::program_options::option_description& option,
         const argument_list& arguments);
 
     /**
@@ -120,7 +112,8 @@ public:
      * @param[in]  arguments  The list of supported positional arguments.
      * @return                Relative position or -1 if not positional.
      */
-    BC_API virtual int position(const option_metadata& option,
+    BC_API virtual int position(
+        const boost::program_options::option_description& option,
         const argument_list& arguments) const;
 
     /**
@@ -131,14 +124,16 @@ public:
      * @return                The arguments limit value for the option.
      */
     BC_API unsigned arguments_limit(int position, 
-        const option_metadata& option, const argument_list& arguments) const;
+        const boost::program_options::option_description& option,
+        const argument_list& arguments) const;
 
     /**
      * Get the option's short name character or zero.
      * @param[in]  option  The metadata of the option to test.
      * @return             The short name character or null character.
      */
-    BC_API virtual char short_name(const option_metadata& option) const;
+    BC_API virtual char short_name(
+        const boost::program_options::option_description& option) const;
 
     /**
      * Virtual property declarations.

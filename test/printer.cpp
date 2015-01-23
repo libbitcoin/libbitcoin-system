@@ -25,6 +25,7 @@
 #include <boost/test/unit_test_suite.hpp>
 #include <bitcoin/bitcoin.hpp>
 
+namespace po = boost::program_options;
 using namespace bc::config;
 
 BOOST_AUTO_TEST_SUITE(config)
@@ -36,8 +37,8 @@ BOOST_AUTO_TEST_SUITE(config__printer)
 #define CONFIG_DESCRIPTION "DESCRIPTION"
 
 #define CONFIG_PRINTER_SETUP_ARGUMENTS(initializer) \
-    options_metadata options; \
-    arguments_metadata arguments; \
+    po::options_description options; \
+    po::positional_options_description arguments; \
     initializer; \
     printer help(CONFIG_APPLICATION, CONFIG_CATEGORY, CONFIG_COMMAND, CONFIG_DESCRIPTION, arguments, options)
 
