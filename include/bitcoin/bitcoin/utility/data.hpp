@@ -31,6 +31,11 @@ namespace libbitcoin {
 
 template<size_t Size> using byte_array = std::array<uint8_t, Size>;
 
+inline byte_array<1> to_byte(uint8_t byte)
+{
+    return byte_array<1>{{byte}};
+}
+
 // Arbitrary byte storage.
 typedef array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;

@@ -26,8 +26,6 @@
 
 namespace libbitcoin {
 
-BC_API bool is_base16(const char c);
-
 /**
  * Convert data into a user-readable hex string.
  */

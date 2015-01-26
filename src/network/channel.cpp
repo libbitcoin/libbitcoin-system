@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/network/channel.hpp>
 
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {

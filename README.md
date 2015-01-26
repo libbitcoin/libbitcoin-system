@@ -66,7 +66,7 @@ Libbitcoin is now installed in `/usr/local/`.
 
 If you intend to inspect and/or modify source code you should [git clone](http://git-scm.com/docs/git-clone) libbitcoin and each unpackaged dependency and build them manually. The install script itself is commented so that the manual build steps for each dependency can be inferred by a developer.
 
-You can run the install script from any directory on your system. This will build libbitcoin in a subdirectory named `libbitcoin_build` and install it to `/usr/local/`. When the build completes successfully the `libbitcoin_build` directory is deleted.
+You can run the install script from any directory on your system. This will build libbitcoin in a subdirectory named `build-libbitcoin` and install it to `/usr/local/`.
 
 The install script should not normally be executed using sudo. Instead it will immediately prompt you for a super user password if required. This ensures that only the necessary installation steps are executed as a super user, as opposed to the entire build process.
 

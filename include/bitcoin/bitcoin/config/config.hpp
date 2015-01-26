@@ -98,12 +98,6 @@ BC_API std::vector<std::string> split(const std::string& sentence,
     const std::string& delimiter=BC_SENTENCE_DELIMITER);
 
 /**
- * Get the system-wide configuration directory.
- * @return  The system configuration directory.
- */
-BC_API std::string system_config_directory();
-
-/**
  * Trim a string of whitespace.
  * @param[out] value  The string to trim.
  */

@@ -22,6 +22,7 @@
 #include <functional>
 #include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>

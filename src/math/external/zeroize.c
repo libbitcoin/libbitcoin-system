@@ -15,10 +15,11 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
+#include <bitcoin/bitcoin/math/external/zeroize.h>
+
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <bitcoin/bitcoin/math/external/zeroize.h>
 
 // TODO: deal with determination of HAVE_SECUREZEROMEMORY and HAVE_MEMSET_S
 // These are performance optimizations, not required for security.
@@ -28,16 +29,11 @@ void zeroize(void* const buffer, const size_t length)
     SecureZeroMemory(buffer, length);
 #elif defined(HAVE_MEMSET_S)
     if (memset_s(buffer, (rsize_t)length, 0, (rsize_t)length) != 0) 
-    {
         abort();
-    }
 #else
     size_t i;
     volatile uint8_t* vbuffer = (volatile uint8_t*)buffer;
-
     for (i = 0; i < length; i++)
-    {
         vbuffer[i] = 0;
-    }
 #endif
 }

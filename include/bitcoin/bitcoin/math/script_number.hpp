@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_SCRIPT_NUMBER_HPP
 #define LIBBITCOIN_SCRIPT_NUMBER_HPP
 
+#include <cstddef>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {

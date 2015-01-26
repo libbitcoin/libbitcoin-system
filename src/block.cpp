@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/block.hpp>
 
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>

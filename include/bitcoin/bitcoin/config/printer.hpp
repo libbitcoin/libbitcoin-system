@@ -54,18 +54,16 @@ public:
 
     /**
      * Construct an instance of the printer class.
-     * @param[in]  application  This application (e.g. 'bx').
-     * @param[in]  category     This command category (e.g. 'MATH').
-     * @param[in]  command      This command (e.g. 'btc').
-     * @param[in]  description  This command description (e.g. 'Convert BTC').
-     * @param[in]  arguments    Populated command line arguments metadata.
      * @param[in]  options      Populated command line options metadata.
+     * @param[in]  arguments    Populated command line arguments metadata.
+     * @param[in]  application  This application (e.g. 'bx').
+     * @param[in]  description  This command description (e.g. 'Convert BTC').
+     * @param[in]  command      This command (e.g. 'btc').
      */
-    BC_API printer(const std::string& application, 
-        const std::string& category, const std::string& command, 
-        const std::string& description, 
+    BC_API printer(const boost::program_options::options_description& options,
         const boost::program_options::positional_options_description& arguments,
-        const boost::program_options::options_description& options);
+        const std::string& application, const std::string& description="", 
+        const std::string& command="");
 
     /**
      * Convert a paragraph of text into a column.
@@ -134,12 +132,11 @@ public:
     /**
      * Virtual property declarations, passed on construct.
      */
-    BC_PROPERTY_GET_REF(std::string, application);
-    BC_PROPERTY_GET_REF(std::string, category);
-    BC_PROPERTY_GET_REF(std::string, command);
-    BC_PROPERTY_GET_REF(std::string, description);
-    BC_PROPERTY_GET_REF(boost::program_options::positional_options_description, arguments);
     BC_PROPERTY_GET_REF(boost::program_options::options_description, options);
+    BC_PROPERTY_GET_REF(boost::program_options::positional_options_description, arguments);
+    BC_PROPERTY_GET_REF(std::string, application);
+    BC_PROPERTY_GET_REF(std::string, description);
+    BC_PROPERTY_GET_REF(std::string, command);
 
     /**
      * Virtual property declarations, generated from metadata.

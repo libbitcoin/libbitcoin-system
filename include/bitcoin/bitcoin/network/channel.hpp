@@ -29,6 +29,7 @@
 #include <boost/array.hpp>
 #include <boost/utility.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>

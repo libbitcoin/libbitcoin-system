@@ -113,14 +113,6 @@ AS_IF([test x$enable_testnet != xno], AC_SUBST([testnet], [-DENABLE_TESTNET]))
 AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 
-# Set unconditional preprocessor defines.
-#==============================================================================
-# Unconditionally define the preprocessor symbol SYSCONFDIR.
-#------------------------------------------------------------------------------
-# Set the value of SYSCONFDIR for source usage.
-AC_DEFINE([SYSCONFDIR], ["${sysconfdir}"])
-
-
 # Check dependencies.
 #==============================================================================
 # Require Boost of at least version 1.49.0 if in gcc.

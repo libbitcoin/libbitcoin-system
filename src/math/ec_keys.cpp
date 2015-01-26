@@ -86,8 +86,8 @@ ec_point secret_to_public_key(const ec_secret& secret,
 bool verify_public_key(const ec_point& public_key)
 {
     init.init();
-    return secp256k1_ec_pubkey_verify(public_key.data(), public_key.size())
-        == 1;
+    return secp256k1_ec_pubkey_verify(public_key.data(), 
+        static_cast<uint32_t>(public_key.size())) == 1;
 }
 
 bool verify_public_key_fast(const ec_point& public_key)
@@ -144,7 +144,8 @@ bool verify_signature(const ec_point& public_key, hash_digest hash,
     init.init();
 
     auto result = secp256k1_ecdsa_verify(hash.data(), signature.data(),
-        signature.size(), public_key.data(), public_key.size());
+        static_cast<uint32_t>(signature.size()), public_key.data(), 
+        static_cast<uint32_t>(public_key.size()));
 
     BITCOIN_ASSERT_MSG(result >= 0, "secp256k1_ecdsa_verify failed");
 
@@ -178,7 +179,8 @@ ec_point recover_compact(compact_signature signature, hash_digest hash,
 bool ec_add(ec_point& a, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ec_pubkey_tweak_add(a.data(), a.size(), b.data()) == 1;
+    return secp256k1_ec_pubkey_tweak_add(a.data(), 
+        static_cast<uint32_t>(a.size()), b.data()) == 1;
 }
 
 bool ec_add(ec_secret& a, const ec_secret& b)
@@ -190,7 +192,8 @@ bool ec_add(ec_secret& a, const ec_secret& b)
 bool ec_multiply(ec_point& a, const ec_secret& b)
 {
     init.init();
-    return secp256k1_ec_pubkey_tweak_mul(a.data(), a.size(), b.data()) == 1;
+    return secp256k1_ec_pubkey_tweak_mul(a.data(), 
+        static_cast<uint32_t>(a.size()), b.data()) == 1;
 }
 
 bool ec_multiply(ec_secret& a, const ec_secret& b)
@@ -202,7 +205,7 @@ bool ec_multiply(ec_secret& a, const ec_secret& b)
 ///////////////////////////////////////////////////////////////////////////////
 // DEPRECATED (now redundant with secp256k1 implementation)
 ///////////////////////////////////////////////////////////////////////////////
-ec_secret create_nonce(ec_secret secret, hash_digest hash, unsigned index)
+ec_secret create_nonce(ec_secret secret, hash_digest hash, uint32_t index)
 {
     init.init();
 

@@ -32,15 +32,15 @@ BOOST_AUTO_TEST_SUITE(config)
 BOOST_AUTO_TEST_SUITE(config__printer)
 
 #define CONFIG_APPLICATION "APP"
-#define CONFIG_COMMAND "COMMAND"
-#define CONFIG_CATEGORY "CATEGORY"
 #define CONFIG_DESCRIPTION "DESCRIPTION"
+#define CONFIG_COMMAND "COMMAND"
+//#define CONFIG_CATEGORY "CATEGORY"
 
 #define CONFIG_PRINTER_SETUP_ARGUMENTS(initializer) \
     po::options_description options; \
     po::positional_options_description arguments; \
     initializer; \
-    printer help(CONFIG_APPLICATION, CONFIG_CATEGORY, CONFIG_COMMAND, CONFIG_DESCRIPTION, arguments, options)
+    printer help(options, arguments, CONFIG_APPLICATION, CONFIG_DESCRIPTION, CONFIG_COMMAND)
 
 #define CONFIG_PRINTER_SETUP() \
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options())

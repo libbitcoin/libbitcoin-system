@@ -19,14 +19,6 @@
  */
 #include <bitcoin/bitcoin/config/config.hpp>
 
-#ifdef _MSC_VER
-    #include <shlobj.h>
-    #include <windows.h>
-#else
-    #include <pwd.h>
-    #include <unistd.h>
-#endif
-
 #include <istream>
 #include <iterator>
 #include <string>
@@ -60,20 +52,6 @@ std::vector<std::string> split(const std::string& sentence,
     boost::split(words, sentence, boost::is_any_of(delimiter),
         boost::token_compress_on);
     return words;
-}
-
-std::string system_config_directory()
-{
-#ifdef _MSC_VER
-    char path[MAX_PATH];
-    const auto result = SHGetFolderPathA(NULL, CSIDL_COMMON_APPDATA, NULL,
-        SHGFP_TYPE_CURRENT, path);
-    if (SUCCEEDED(result))
-        return path;
-    return "";
-#else
-    return std::string(SYSCONFDIR);
-#endif
 }
 
 void trim(std::string& value)

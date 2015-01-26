@@ -17,26 +17,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
-#include <stack>
-#include <type_traits>
-#include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/script.hpp>
-#include <bitcoin/bitcoin/transaction.hpp>
+
+#include <cstddef>
+#include <cstdint>
+#include <stack>
+#include <boost/algorithm/string.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 
+// False is an empty stack.
+static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{1};
-static const data_chunk stack_false_value;  // False is an empty
 
 constexpr size_t op_counter_limit = 201;
 
@@ -2160,9 +2162,11 @@ inline data_chunk operation_metadata(const opcode code, size_t data_size)
         case opcode::pushdata1:
             return data_chunk{ static_cast<uint8_t>(data_size) };
         case opcode::pushdata2:
-            return to_data_chunk(to_little_endian<uint16_t>(data_size));
+            return to_data_chunk(
+                to_little_endian(static_cast<uint16_t>(data_size)));
         case opcode::pushdata4:
-            return to_data_chunk(to_little_endian<uint32_t>(data_size));
+            return to_data_chunk(
+                to_little_endian(static_cast<uint32_t>(data_size)));
         default:
             return data_chunk();
     }
@@ -2180,7 +2184,7 @@ data_chunk save_script(const script_type& script)
     {
         uint8_t raw_byte = static_cast<uint8_t>(op.code);
         if (op.code == opcode::special)
-            raw_byte = op.data.size();
+            raw_byte = static_cast<uint8_t>(op.data.size());
         raw_script.push_back(raw_byte);
         extend_data(raw_script, operation_metadata(op.code, op.data.size()));
         extend_data(raw_script, op.data);

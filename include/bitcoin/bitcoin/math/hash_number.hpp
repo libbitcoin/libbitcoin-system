@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_HASH_NUMBER_HPP
 #define LIBBITCOIN_HASH_NUMBER_HPP
 
+#include <cstddef>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/external/uint256.h>
 

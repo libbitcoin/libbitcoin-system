@@ -19,6 +19,9 @@
  */
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 
+#include <string>
+#include <cstdint>
+
 namespace libbitcoin {
 
 size_t variable_uint_size(uint64_t v)

@@ -97,12 +97,6 @@ byte_array<sizeof(T)> to_little_endian(T n)
     return out;
 }
 
-inline
-byte_array<1> to_byte(uint8_t byte)
-{
-    return byte_array<1>{{byte}};
-}
-
 #undef VERIFY_UNSIGNED
 
 } // libbitcoin

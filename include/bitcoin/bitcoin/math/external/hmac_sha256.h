@@ -29,7 +29,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <bitcoin/bitcoin/math/external/sha256.h>
-#include <bitcoin/bitcoin/math/external/hmac_sha256.h>
 
 #define HMACSHA256_DIGEST_LENGTH 32U
 

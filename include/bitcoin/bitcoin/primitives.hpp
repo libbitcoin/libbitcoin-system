@@ -86,7 +86,6 @@ struct BC_API get_address_type
 {
 };
 
-
 struct BC_API get_blocks_type
 {
     // 10 sequential hashes, then exponential samples until reaching genesis

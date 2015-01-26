@@ -209,8 +209,7 @@ src_libbitcoin_la_SOURCES = \
 # The rt_LIBS symbol may be empty, keep on shared line.
 src_libbitcoin_la_LIBADD = \
     ${boost_LIBS} \
-    ${secp256k1_LIBS} \
-    ${gmp_LIBS} ${rt_LIBS}
+    ${secp256k1_LIBS} ${rt_LIBS}
 
 #
 # tests
@@ -257,7 +256,6 @@ test_libbitcoin_test_LDADD = \
     ${boost_LIBS} \
     -lboost_unit_test_framework \
     -lpthread \
-    ${secp256k1_LIBS} \
-    ${gmp_LIBS} ${rt_LIBS}
+    ${secp256k1_LIBS} ${rt_LIBS}
 
 endif
