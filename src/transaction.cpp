@@ -19,9 +19,15 @@
  */
 #include <bitcoin/bitcoin/transaction.hpp>
 
+#include <cstdint>
+#include <cstddef>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/satoshi_serialize.hpp>
+#include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/satoshi_serialize.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -156,7 +162,7 @@ bool is_final(const transaction_type& tx,
         return true;
     uint32_t max_locktime = block_time;
     if (tx.locktime < locktime_threshold)
-        max_locktime = block_height;
+        max_locktime = static_cast<uint32_t>(block_height);
     if (tx.locktime < max_locktime)
         return true;
     for (const transaction_input_type& tx_input: tx.inputs)

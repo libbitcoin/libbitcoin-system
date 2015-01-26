@@ -20,14 +20,17 @@
 #ifndef LIBBITCOIN_BLOCK_IPP
 #define LIBBITCOIN_BLOCK_IPP
 
+#ifndef NDEBUG
+#include <bitcoin/bitcoin/formats/base16.hpp>
+#endif
+
 namespace libbitcoin {
 
 template <typename Deserializer>
 data_chunk read_raw_script(Deserializer& deserial)
 {
     data_chunk raw_script;
-    // Note: changed to uint32_t to make cast explicit, possible loss of data.
-    auto script_length = (uint32_t)deserial.read_variable_uint();
+    auto script_length = static_cast<uint32_t>(deserial.read_variable_uint());
     return deserial.read_data(script_length);
 }
 
@@ -47,11 +50,8 @@ script_type read_script(Deserializer& deserial)
     {
         return raw_data_script(raw_script);
     }
-#ifndef BITCOIN_DISABLE_ASSERTS
-    std::string assert_msg = encode_base16(raw_script);
-    BITCOIN_ASSERT_MSG(
-        raw_script == save_script(result), assert_msg.c_str());
-#endif
+    DEBUG_ONLY(std::string assert_msg = encode_base16(raw_script));
+    BITCOIN_ASSERT_MSG(raw_script == save_script(result), assert_msg.c_str());
     return result;
 }
 
