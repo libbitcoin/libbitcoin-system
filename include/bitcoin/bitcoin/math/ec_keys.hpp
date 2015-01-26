@@ -20,8 +20,10 @@
 #ifndef LIBBITCOIN_EC_KEYS_HPP
 #define LIBBITCOIN_EC_KEYS_HPP
 
+#include <cstddef>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 

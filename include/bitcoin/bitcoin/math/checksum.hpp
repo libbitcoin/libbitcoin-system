@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHECKSUM_HPP
 #define LIBBITCOIN_CHECKSUM_HPP
 
+#include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 

@@ -20,8 +20,9 @@
 #ifndef LIBBITCOIN_STEALTH_HPP
 #define LIBBITCOIN_STEALTH_HPP
 
-#include <bitcoin/bitcoin/utility/binary.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/script.hpp>
+#include <bitcoin/bitcoin/utility/binary.hpp>
 
 namespace libbitcoin {
 

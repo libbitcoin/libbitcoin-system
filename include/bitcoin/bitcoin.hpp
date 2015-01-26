@@ -194,6 +194,7 @@
 #include <bitcoin/bitcoin/stealth.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/array_slice.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>

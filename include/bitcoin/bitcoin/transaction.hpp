@@ -20,7 +20,9 @@
 #ifndef LIBBITCOIN_TRANSACTION_HPP
 #define LIBBITCOIN_TRANSACTION_HPP
 
+#include <cstddef>
 #include <cstdint>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 
 namespace libbitcoin {

@@ -23,9 +23,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#include <bitcoin/bitcoin/math/external/hmac_sha512.h>
+
 #include <stdint.h>
 #include <string.h>
-#include <bitcoin/bitcoin/math/external/hmac_sha512.h>
 #include <bitcoin/bitcoin/math/external/sha512.h>
 #include <bitcoin/bitcoin/math/external/zeroize.h>
 

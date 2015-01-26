@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_MISC_IPP
 #define LIBBITCOIN_MISC_IPP
 
-#include <boost/optional.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 

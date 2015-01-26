@@ -22,6 +22,7 @@
 
 #include <cstddef>
 #include <string>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 

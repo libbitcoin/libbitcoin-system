@@ -29,7 +29,6 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <bitcoin/bitcoin/math/external/sha512.h>
-#include <bitcoin/bitcoin/math/external/hmac_sha512.h>
 
 #define HMACSHA512_DIGEST_LENGTH 64U
 
