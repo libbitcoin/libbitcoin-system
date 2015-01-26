@@ -61,12 +61,12 @@ using boost::format;
 
 const int printer::max_arguments = 256;
 
-printer::printer(const std::string& application, const std::string& category,
-    const std::string& command, const std::string& description,
-    const po::positional_options_description& arguments, 
-    const po::options_description& options)
-  : application_(application), category_(category), command_(command),
-    description_(description), arguments_(arguments), options_(options)
+printer::printer(const po::options_description& options,
+    const po::positional_options_description& arguments,
+    const std::string& application, const std::string& description,
+    const std::string& command)
+    : options_(options), arguments_(arguments), application_(application),
+    description_(description), command_(command)
 {
 }
 
