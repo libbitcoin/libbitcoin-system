@@ -23,6 +23,7 @@
 #ifndef NDEBUG
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #endif
+#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 
