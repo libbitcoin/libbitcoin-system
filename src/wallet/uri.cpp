@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 
 #include <cstdint>
+#include <ctype.h>
 #include <iomanip>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -59,7 +60,7 @@ static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
     // Find the end of the valid-character run:
     size_t count = 0;
     while (end != i && (is_valid(i[0]) ||
-        ('%' == *i && 2 < end - i && is_base16(i[1]) && is_base16(i[2]))))
+        ('%' == *i && 2 < end - i && isxdigit(i[1]) && isxdigit(i[2]))))
     {
         ++count;
         if ('%' == *i)

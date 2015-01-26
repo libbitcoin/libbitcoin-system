@@ -19,6 +19,7 @@
  */
 #include "script.hpp"
 
+#include <ctype.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
@@ -42,7 +43,7 @@ bool is_hex_data(const std::string& token)
     if (!boost::starts_with(token, "0x"))
         return false;
     std::string hex_part(token.begin() + 2, token.end());
-    return boost::all(hex_part, [](char c) { return std::isxdigit(c); });
+    return boost::all(hex_part, [](char c) { return isxdigit(c); });
 }
 
 bool is_quoted_string(const std::string& token)

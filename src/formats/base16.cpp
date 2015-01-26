@@ -20,18 +20,12 @@
 #include <bitcoin/bitcoin/formats/base16.hpp>
 
 #include <algorithm>
+#include <ctype.h>
 #include <iomanip>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 
 namespace libbitcoin {
-
-bool is_base16(const char c)
-{
-    return ('0' <= c && c <= '9') ||
-        ('A' <= c && c <= 'F') ||
-        ('a' <= c && c <= 'f');
-}
 
 std::string encode_base16(data_slice data)
 {
@@ -53,7 +47,7 @@ static unsigned from_hex(const char c)
 
 bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
 {
-    if (!std::all_of(in, in + 2 * out_size, is_base16))
+    if (!std::all_of(in, in + 2 * out_size, isxdigit))
         return false;
 
     for (size_t i = 0; i < out_size; ++i)
