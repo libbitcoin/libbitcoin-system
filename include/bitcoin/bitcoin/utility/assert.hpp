@@ -20,14 +20,15 @@
 #ifndef LIBBITCOIN_ASSERT_HPP
 #define LIBBITCOIN_ASSERT_HPP
 
-#include <boost/assert.hpp>
-
-#ifdef BITCOIN_DISABLE_ASSERTS
-    #define BOOST_DISABLE_ASSERTS
+#ifdef NDEBUG
+    #define BITCOIN_ASSERT(expr)
+    #define BITCOIN_ASSERT_MSG(expr, msg)
+    #define DEBUG_ONLY(expression)
+#else
+    #include <cassert>
+    #define BITCOIN_ASSERT(expr) assert(expr)
+    #define BITCOIN_ASSERT_MSG(expr, msg) assert((expr)&&(msg))
+    #define DEBUG_ONLY(expression) expression
 #endif
 
-#define BITCOIN_ASSERT BOOST_ASSERT
-#define BITCOIN_ASSERT_MSG BOOST_ASSERT_MSG
-
 #endif
-
