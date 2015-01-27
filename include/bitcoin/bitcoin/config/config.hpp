@@ -81,13 +81,6 @@ BC_API std::string join(const std::vector<std::string>& words,
     const std::string& delimiter=BC_SENTENCE_DELIMITER);
 
 /**
- * Get a message from the specified input stream.
- * @param[in]  stream The input stream to read.
- * @return            The message read from the input stream.
- */
-BC_API std::string read_stream(std::istream& stream);
-
-/**
  * Split a list of strings into a string vector string, in order, white space
  * delimited.
  * @param[in]  sentence   The string to split.

@@ -36,15 +36,6 @@ std::string join(const std::vector<std::string>& words,
     return boost::join(words, delimiter);
 }
 
-std::string read_stream(std::istream& stream)
-{
-    BC_SET_BINARY_FILE_MODE(true);
-    std::istreambuf_iterator<char> first(stream), last;
-    std::string result(first, last);
-    BC_SET_BINARY_FILE_MODE(false);
-    return result;
-}
-
 std::vector<std::string> split(const std::string& sentence,
     const std::string& delimiter)
 {
