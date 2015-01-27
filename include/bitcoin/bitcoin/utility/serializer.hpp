@@ -164,7 +164,7 @@ public:
      */
     uint64_t read_variable_uint();
 
-    data_chunk read_data(uint32_t n_bytes);
+    data_chunk read_data(size_t n_bytes);
     hash_digest read_hash();
     short_hash read_short_hash();
 
