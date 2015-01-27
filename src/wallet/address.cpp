@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 
@@ -61,22 +62,13 @@ bool payment_address::set_encoded(const std::string& encoded_address)
     data_chunk decoded_address;
     if (!decode_base58(decoded_address, encoded_address))
         return false;
-    // version + 20 bytes short hash + 4 bytes checksum
-    if (decoded_address.size() != 25)
-        return false;
-    if (!verify_checksum(decoded_address))
-        return false;
-
-    version_ = decoded_address[0];
-    std::copy_n(decoded_address.begin() + 1, hash_.size(), hash_.begin());
-    return true;
+    uint32_t checksum;
+    return unwrap(version_, hash_, checksum, decoded_address);
 }
 
 std::string payment_address::encoded() const
 {
-    auto data = build_data({to_byte(version_), hash_}, checksum_size);
-    append_checksum(data);
-    BITCOIN_ASSERT(data.size() == 25);
+    const auto data = wrap(version_, hash_);
     return encode_base58(data);
 }
 
@@ -162,40 +154,45 @@ bool operator==(const payment_address& lhs, const payment_address& rhs)
     return lhs.hash() == rhs.hash() && lhs.version() == rhs.version();
 }
 
-//// TODO: from BX
-//bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
-//    const data_chunk& wrapped)
-//{
-//    constexpr size_t version_length = sizeof(version);
-//    constexpr size_t checksum_length = sizeof(checksum);
-//
-//    // guard against insufficient buffer length
-//    if (wrapped.size() < version_length + checksum_length)
-//        return false;
-//
-//    if (!verify_checksum(wrapped))
-//        return false;
-//
-//    // set return values
-//    version = wrapped.front();
-//    payload = data_chunk(wrapped.begin() + version_length,
-//        wrapped.end() - checksum_length);
-//    const auto checksum_start = wrapped.end() - checksum_length;
-//    auto deserial = make_deserializer(checksum_start, wrapped.end());
-//    checksum = deserial.read_4_bytes();
-//
-//    return true;
-//}
-//
-//// TODO: from BX
-//data_chunk wrap(uint8_t version, const data_chunk& payload)
-//{
-//    data_chunk wrapped;
-//    wrapped.push_back(version);
-//    extend_data(wrapped, payload);
-//    append_checksum(wrapped);
-//    return wrapped;
-//}
+bool unwrap(uint8_t& version, short_hash& hash, uint32_t& checksum,
+    data_slice wrapped)
+{
+    data_chunk payload;
+    auto result = unwrap(version, payload, checksum, wrapped) && 
+        (payload.size() == hash.size());
+    if (result)
+        std::copy_n(payload.begin(), hash.size(), hash.begin());
+    return result;
+}
+
+bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
+    data_slice wrapped)
+{
+    constexpr size_t version_length = sizeof(version);
+    constexpr size_t checksum_length = sizeof(checksum);
+    // guard against insufficient buffer length
+    if (wrapped.size() < version_length + checksum_length)
+        return false;
+    if (!verify_checksum(wrapped))
+        return false;
+    // set return values
+    version = wrapped.data()[0];
+    payload = data_chunk(wrapped.begin() + version_length,
+        wrapped.end() - checksum_length);
+    const auto checksum_start = wrapped.end() - checksum_length;
+    auto deserial = make_deserializer(checksum_start, wrapped.end());
+    checksum = deserial.read_4_bytes();
+    return true;
+}
+
+data_chunk wrap(uint8_t version, data_slice payload)
+{
+    data_chunk wrapped;
+    wrapped.push_back(version);
+    extend_data(wrapped, payload);
+    append_checksum(wrapped);
+    return wrapped;
+}
 
 } // namespace libbitcoin
 

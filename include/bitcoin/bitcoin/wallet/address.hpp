@@ -102,6 +102,36 @@ BC_API bool extract(payment_address& address, const script_type& script);
 
 BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
 
+/**
+ * Unwrap a wrapped payload.
+ * @param[out] version   The version byte of the wrapped data.
+ * @param[out] hash      The short_hash payload of the wrapped data.
+ * @param[out] checksum  The validated checksum of the wrapped data.
+ * @param[in]  wrapped   The wrapped data to unwrap.
+ * @return               True if input checksum validates.
+ */
+BC_API bool unwrap(uint8_t& version, short_hash& hash, uint32_t& checksum,
+    data_slice wrapped);
+
+/**
+ * Unwrap a wrapped payload.
+ * @param[out] version   The version byte of the wrapped data.
+ * @param[out] payload   The payload of the wrapped data.
+ * @param[out] checksum  The validated checksum of the wrapped data.
+ * @param[in]  wrapped   The wrapped data to unwrap.
+ * @return               True if input checksum validates.
+ */
+BC_API bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
+    data_slice wrapped);
+
+/**
+ * Wrap arbitrary data.
+ * @param[in]  version  The version byte for the wrapped data.
+ * @param[out] payload  The payload to wrap.
+ * @return              The wrapped data.
+ */
+BC_API data_chunk wrap(uint8_t version, data_slice payload);
+
 } // namespace libbitcoin
 
 // Allow payment_address to be in indexed in std::*map classes.
@@ -124,27 +154,7 @@ namespace std
             return functor(raw_addr);
         }
     };
-}
 
-//// TODO: from BX
-///**
-// * Unwrap a wrapped payload.
-// * @param[out] version   The version byte of the wrapped data.
-// * @param[out] payload   The payload of the wrapped data.
-// * @param[out] checksum  The validated checksum of the wrapped data.
-// * @param[in]  wrapped   The wrapped data to unwrap.
-// * @return               True if input checksum validates.
-// */
-//BC_API bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
-//    const data_chunk& wrapped);
-//
-//// TODO: from BX
-///**
-// * Wrap arbitrary data.
-// * @param[in]  version  The version byte for the wrapped data.
-// * @param[out] payload  The payload to wrap.
-// * @return              The wrapped data.
-// */
-//BC_API data_chunk wrap(uint8_t version, const data_chunk& payload);
+} // namespace std
 
 #endif
