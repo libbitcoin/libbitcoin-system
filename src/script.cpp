@@ -2145,9 +2145,9 @@ script_type parse_script(data_slice raw_script)
             op.code = opcode::special;
         if (must_read_data(op.code))
         {
-            size_t read_n_bytes =
+            size_t read_n_bytes = 
                 number_bytes_to_read(op.code, raw_byte, deserial);
-            op.data = deserial.read_data(read_n_bytes);
+            op.data = deserial.read_data(static_cast<uint32_t>(read_n_bytes));
             BITCOIN_ASSERT(read_n_bytes || op.data.empty());
         }
         script_object.push_operation(op);
