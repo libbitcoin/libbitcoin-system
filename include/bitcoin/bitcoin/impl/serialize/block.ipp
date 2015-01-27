@@ -30,9 +30,10 @@ namespace libbitcoin {
 template <typename Deserializer>
 data_chunk read_raw_script(Deserializer& deserial)
 {
-    data_chunk raw_script;
     auto script_length = deserial.read_variable_uint();
-    return deserial.read_data(script_length);
+    BITCOIN_ASSERT(script_length <= max_uint32);
+    auto script_length32 = static_cast<uint32_t>(script_length);
+    return deserial.read_data(script_length32);
 }
 
 template <typename Deserializer>

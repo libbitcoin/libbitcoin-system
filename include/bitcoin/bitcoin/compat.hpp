@@ -23,6 +23,22 @@
 #include <limits>
 #include <bitcoin/bitcoin/define.hpp>
 
+#ifdef _MSC_VER
+    // For BC_SET_BINARY_FILE_MODE
+    #include <fcntl.h>
+    #include <io.h>
+    #include <stdio.h>
+#endif
+
+// Sets the _fmode global variable, which controls the default translation
+// mode for file I/O operations.
+#ifdef _MSC_VER
+    #define BC_SET_BINARY_FILE_MODE(mode) \
+        _setmode(_fileno(stdin), mode ? _O_BINARY : _O_TEXT)
+#else
+    #define BC_SET_BINARY_FILE_MODE(mode)
+#endif
+
 #ifdef __MACH__
     // Mac clock_gettime from gist.github.com/jbenet/1087739
     #include <mach/clock.h>

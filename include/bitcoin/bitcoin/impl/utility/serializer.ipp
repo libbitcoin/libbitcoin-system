@@ -242,7 +242,7 @@ data_chunk deserializer<
 {
     SAFE_CHECK_DISTANCE(n_bytes);
     data_chunk raw_bytes(n_bytes);
-    for (auto i = 0; i < n_bytes; ++i)
+    for (size_t i = 0; i < n_bytes; ++i)
         raw_bytes[i] = read_byte();
     return raw_bytes;
 }
