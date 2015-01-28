@@ -168,7 +168,6 @@
 #endif
 #include <bitcoin/bitcoin/block.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
-#include <bitcoin/bitcoin/config/config.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -198,6 +197,7 @@
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/utility/general.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>

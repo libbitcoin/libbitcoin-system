@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/utility/general.hpp>
 
 namespace libbitcoin {
 
@@ -70,8 +71,13 @@ stealth_address::stealth_address(const binary_type& prefix,
         if (spend_pubkey.size() != compressed_pubkey_size)
             return;
 
+    // Apply 'reuse'.
+    auto spend_points = spend_pubkeys;
+    if (spend_points.empty())
+        spend_points.push_back(scan_pubkey);
+
     // Guard against too many keys.
-    const auto spend_pubkeys_size = spend_pubkeys.size();
+    auto spend_pubkeys_size = spend_points.size();
     if (spend_pubkeys_size > max_spend_key_count)
         return;
 
@@ -89,7 +95,7 @@ stealth_address::stealth_address(const binary_type& prefix,
     prefix_ = prefix;
     testnet_ = testnet;
     scan_pubkey_ = scan_pubkey;
-    spend_pubkeys_ = spend_pubkeys;
+    spend_pubkeys_ = spend_points;
     valid_ = true;
 }
 
@@ -120,14 +126,8 @@ std::string stealth_address::encoded() const
     raw_address.push_back(signatures_);
 
     // The prefix must be guarded against a size greater than 32
-    // so that the bitfield can convert into uint32_t, which also ensures
-    // that number of bits doesn't exceed uint8_t.
+    // so that the bitfield can convert into uint32_t and sized by uint8_t.
     auto prefix_number_bits = static_cast<uint8_t>(prefix_.size());
-
-    // Prefix not yet supported on server!
-    //BITCOIN_ASSERT(prefix_number_bits == 0);
-    //if (prefix_number_bits != 0)
-    //    return std::string();
 
     // Serialize the prefix bytes/blocks.
     raw_address.push_back(prefix_number_bits);

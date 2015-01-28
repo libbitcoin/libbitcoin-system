@@ -72,13 +72,8 @@ bitcoin_bitcoin_impl_serialize_include_HEADERS = \
 
 bitcoin_bitcoin_config_includedir = ${includedir}/bitcoin/bitcoin/config
 bitcoin_bitcoin_config_include_HEADERS = \
-    include/bitcoin/bitcoin/config/config.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
-
-bitcoin_bitcoin_impl_config_includedir = ${includedir}/bitcoin/bitcoin/impl/config
-bitcoin_bitcoin_impl_config_include_HEADERS = \
-    include/bitcoin/bitcoin/impl/config/config.ipp
 
 bitcoin_bitcoin_formats_includedir = ${includedir}/bitcoin/bitcoin/formats
 bitcoin_bitcoin_formats_include_HEADERS = \
@@ -128,6 +123,7 @@ bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
+    include/bitcoin/bitcoin/utility/general.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
@@ -140,6 +136,7 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
+    include/bitcoin/bitcoin/impl/utility/general.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
@@ -166,7 +163,6 @@ src_libbitcoin_la_SOURCES = \
     src/compat.cpp \
     src/constants.cpp \
     src/error.cpp \
-    src/config/config.cpp \
     src/config/parameter.cpp \
     src/config/printer.cpp \
     src/formats/base10.cpp \
@@ -195,6 +191,7 @@ src_libbitcoin_la_SOURCES = \
     src/stealth.cpp \
     src/transaction.cpp \
     src/utility/binary.cpp \
+    src/utility/general.cpp \
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \

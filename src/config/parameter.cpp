@@ -22,8 +22,8 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/config/config.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/general.hpp>
 
 namespace po = boost::program_options;
 using namespace libbitcoin::config;

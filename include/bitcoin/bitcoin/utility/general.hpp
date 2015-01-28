@@ -29,7 +29,6 @@
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
 namespace libbitcoin {
-namespace config {
 
 #define BC_SENTENCE_DELIMITER " "
 
@@ -96,9 +95,8 @@ BC_API std::vector<std::string> split(const std::string& sentence,
  */
 BC_API  void trim(std::string& value);
 
-} // namespace config
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/config/config.ipp>
+#include <bitcoin/bitcoin/impl/utility/general.ipp>
 
 #endif

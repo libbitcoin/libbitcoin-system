@@ -236,14 +236,13 @@ uint64_t deserializer<Iterator, SafeCheckLast>::read_variable_uint()
     return read_8_bytes();
 }
 
-// NOTE: n_bytes changed to uint32_t to prevent array overflow.
 template <typename Iterator, bool SafeCheckLast>
 data_chunk deserializer<
-    Iterator, SafeCheckLast>::read_data(uint32_t n_bytes)
+    Iterator, SafeCheckLast>::read_data(size_t n_bytes)
 {
     SAFE_CHECK_DISTANCE(n_bytes);
     data_chunk raw_bytes(n_bytes);
-    for (uint32_t i = 0; i < n_bytes; ++i)
+    for (size_t i = 0; i < n_bytes; ++i)
         raw_bytes[i] = read_byte();
     return raw_bytes;
 }

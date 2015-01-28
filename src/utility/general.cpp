@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/config.hpp>
+#include <bitcoin/bitcoin/utility/general.hpp>
 
 #include <istream>
 #include <iterator>
@@ -28,7 +28,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
-namespace config {
 
 std::string join(const std::vector<std::string>& words,
     const std::string& delimiter)
@@ -50,6 +49,5 @@ void trim(std::string& value)
     boost::trim(value);
 }
 
-} // namespace config
 } // namespace libbitcoin
 

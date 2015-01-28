@@ -62,7 +62,7 @@ size_t count_leading_zeros(data_slice unencoded)
     return leading_zeros;
 }
 
-void pack_value(data_chunk& indexes, int carry)
+void pack_value(data_chunk& indexes, size_t carry)
 {
     // Apply "b58 = b58 * 256 + ch".
     for (auto it = indexes.rbegin(); it != indexes.rend(); ++it)
@@ -122,7 +122,7 @@ size_t count_leading_zeros(const std::string& encoded)
     return leading_zeros;
 }
 
-void unpack_char(data_chunk& data, int carry)
+void unpack_char(data_chunk& data, size_t carry)
 {
     for (auto it = data.rbegin(); it != data.rend(); it++)
     {

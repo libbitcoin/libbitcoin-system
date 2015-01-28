@@ -24,8 +24,8 @@
 #include <utility>
 #include <vector>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/config/config.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/general.hpp>
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
 

@@ -25,9 +25,9 @@
 #include <vector>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-#include <bitcoin/bitcoin/config/config.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/general.hpp>
 
 // We built this because po::options_description.print() sucks.
 

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_IPP
-#define LIBBITCOIN_CONFIG_IPP
+#ifndef LIBBITCOIN_GENERAL_IPP
+#define LIBBITCOIN_GENERAL_IPP
 
 #include <iterator>
 #include <string>
@@ -27,7 +27,6 @@
 /* NOTE: don't declare 'using namespace foo' in headers. */
 
 namespace libbitcoin {
-namespace config {
 
 template <typename Pair, typename Key>
 int find_pair_position(const std::vector<Pair>& list, const Key& key)
@@ -61,7 +60,6 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
         element);
 }
 
-} // namespace config
 } // namespace libbitcoin
 
 #endif
