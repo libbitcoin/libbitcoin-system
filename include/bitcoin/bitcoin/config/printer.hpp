@@ -54,6 +54,15 @@ public:
 
     /**
      * Construct an instance of the printer class.
+     * @param[in]  settings     Populated config file settings metadata.
+     * @param[in]  application  This application (e.g. 'bitcoin_server').
+     * @param[in]  description  This application description (e.g. 'Server').
+     */
+    BC_API printer(const boost::program_options::options_description& settings,
+        const std::string& application, const std::string& description="");
+
+    /**
+     * Construct an instance of the printer class.
      * @param[in]  options      Populated command line options metadata.
      * @param[in]  arguments    Populated command line arguments metadata.
      * @param[in]  application  This application (e.g. 'bx').
@@ -88,12 +97,12 @@ public:
      * @return                 The formatted help arguments table.
      */
     BC_API virtual std::string format_parameters_table(bool positional);
-
+    
     /**
-     * Format the command line usage.
-     * @return  The formatted usage.
+     * Format the settings table.
+     * @return  The formatted settings table.
      */
-    BC_API virtual std::string format_usage();
+    BC_API virtual std::string format_settings_table();
 
     /**
      * Format a paragraph.
@@ -101,6 +110,12 @@ public:
      * @return                The formatted paragraph.
      */
     BC_API virtual std::string format_paragraph(const std::string& paragraph);
+
+    /**
+     * Format the command line usage.
+     * @return  The formatted usage.
+     */
+    BC_API virtual std::string format_usage();
 
     /**
      * Format the command line parameters.
@@ -125,9 +140,15 @@ public:
 
     /**
      * Serialize command line help (full details).
-     * @param[out] output  Stream that is sink for print output. 
+     * @param[out] output  Stream that is sink for output. 
      */
-    BC_API virtual void print(std::ostream& output);
+    BC_API virtual void commandline(std::ostream& output);
+
+    /**
+     * Serialize as config settings (full details).
+     * @param[out] output  Stream that is sink for output. 
+     */
+    BC_API virtual void settings(std::ostream& output);
 
     /**
      * Virtual property declarations, passed on construct.

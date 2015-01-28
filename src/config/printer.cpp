@@ -38,6 +38,7 @@
 #define BC_PRINTER_OPTION_TABLE_HEADER "Options (named):"
 #define BC_PRINTER_USAGE_FORMAT "Usage: %1% %2% %3%"
 #define BC_PRINTER_VALUE_TEXT "VALUE"
+#define BC_PRINTER_SETTINGS_TABLE_HEADER "Configuration File Settings"
 
 // Not localizable formatters.
 #define BC_PRINTER_USAGE_OPTION_TABLE_FORMAT "-%1% [--%2%]"
@@ -67,6 +68,12 @@ printer::printer(const po::options_description& options,
     const std::string& command)
     : options_(options), arguments_(arguments), application_(application),
     description_(description), command_(command)
+{
+}
+
+printer::printer(const po::options_description& settings,
+    const std::string& application, const std::string& description)
+    : options_(settings), application_(application), description_(description)
 {
 }
 
@@ -174,6 +181,33 @@ std::string printer::format_paragraph(const std::string& paragraph)
 
     for (const auto& line: lines)
         output << paragraph_format % line;
+
+    return output.str();
+}
+
+std::string printer::format_settings_table()
+{
+    std::stringstream output;
+    const auto& parameters = get_parameters();
+    format table_format("%-20s %-52s\n");
+
+    for (const auto& parameter: parameters)
+    {
+        // Get the formatted parameter name.
+        auto name = format_row_name(parameter).str();
+
+        // Build a column for the description.
+        const auto rows = columnize(parameter.get_description(), 52);
+
+        // If there is no description the command is not output!
+        for (const auto& row: rows)
+        {
+            output << table_format % name % row;
+
+            // The name is only set in the first row.
+            name.clear();
+        }
+    }
 
     return output.str();
 }
@@ -391,9 +425,9 @@ void printer::initialize()
     generate_parameters();
 }
 
-/* Printer */
+/* Printers */
 
-void printer::print(std::ostream& output)
+void printer::commandline(std::ostream& output)
 {
     const auto& option_table = format_parameters_table(false);
     const auto& argument_table = format_parameters_table(true);
@@ -411,4 +445,17 @@ void printer::print(std::ostream& output)
         << std::endl << option_table
         << std::endl << argument_table_header
         << std::endl << argument_table;
+}
+
+void printer::settings(std::ostream& output)
+{
+    const auto& setting_table = format_settings_table();
+
+    std::string setting_table_header(BC_PRINTER_SETTINGS_TABLE_HEADER "\n");
+
+    output
+        << std::endl << format_usage()
+        << std::endl << format_description()
+        << std::endl << setting_table_header
+        << std::endl << setting_table;
 }
