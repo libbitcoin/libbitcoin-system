@@ -136,7 +136,7 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
-    include/bitcoin/bitcoin/impl/utility/general.ipp
+    include/bitcoin/bitcoin/impl/utility/general.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
