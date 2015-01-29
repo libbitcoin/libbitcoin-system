@@ -512,7 +512,7 @@ void printer::commandline(std::ostream& output)
 void printer::settings(std::ostream& output)
 {
     const auto& setting_table = format_settings_table();
-    const auto& setting_table_header = BC_PRINTER_SETTINGS_TABLE_HEADER "\n";
+    const auto& setting_table_header = BC_PRINTER_SETTINGS_TABLE_HEADER;
 
     output
         << std::endl << setting_table_header
