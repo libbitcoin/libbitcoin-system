@@ -23,10 +23,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/general.hpp>
 
 // We built this because po::options_description.print() sucks.
@@ -37,26 +39,34 @@
 #define BC_PRINTER_DESCRIPTION_FORMAT "Info: %1%"
 #define BC_PRINTER_OPTION_TABLE_HEADER "Options (named):"
 #define BC_PRINTER_USAGE_FORMAT "Usage: %1% %2% %3%"
+#define BC_PRINTER_SETTINGS_TABLE_HEADER "Configuration Settings:"
 #define BC_PRINTER_VALUE_TEXT "VALUE"
-#define BC_PRINTER_SETTINGS_TABLE_HEADER "Configuration File Settings"
 
 // Not localizable formatters.
-#define BC_PRINTER_USAGE_OPTION_TABLE_FORMAT "-%1% [--%2%]"
-#define BC_PRINTER_USAGE_OPTION_LONG_TABLE_FORMAT "--%1%"
-#define BC_PRINTER_USAGE_OPTION_SHORT_TABLE_FORMAT "-%1%"
-#define BC_PRINTER_USAGE_ARGUMENT_TABLE_FORMAT "%1%"
-
+#define BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT " [--%1% %2%]..."
+#define BC_PRINTER_USAGE_OPTION_OPTIONAL_FORMAT " [--%1% %2%]"
+#define BC_PRINTER_USAGE_OPTION_REQUIRED_FORMAT " --%1% %2%"
 #define BC_PRINTER_USAGE_OPTION_TOGGLE_SHORT_FORMAT " [-%1%]"
 #define BC_PRINTER_USAGE_OPTION_TOGGLE_LONG_FORMAT " [--%1%]"
-#define BC_PRINTER_USAGE_OPTION_MULTIPLE_FORMAT " [--%1% %2%]..."
-#define BC_PRINTER_USAGE_OPTION_REQUIRED_FORMAT " --%1% %2%"
-#define BC_PRINTER_USAGE_OPTION_OPTIONAL_FORMAT " [--%1% %2%]"
 
 #define BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT " [%1%]..."
-#define BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT " %1%"
 #define BC_PRINTER_USAGE_ARGUMENT_OPTIONAL_FORMAT " [%1%]"
+#define BC_PRINTER_USAGE_ARGUMENT_REQUIRED_FORMAT " %1%"
+
+#define BC_PRINTER_TABLE_OPTION_FORMAT "-%1% [--%2%]"
+#define BC_PRINTER_TABLE_OPTION_LONG_FORMAT "--%1%"
+#define BC_PRINTER_TABLE_OPTION_SHORT_FORMAT "-%1%"
+
+#define BC_PRINTER_TABLE_ARGUMENT_FORMAT "%1%"
+
+#define BC_PRINTER_SETTING_SECTION_FORMAT "[%1%]\n"
+#define BC_PRINTER_SETTING_COMMENT_FORMAT "# %1%\n"
+#define BC_PRINTER_SETTING_MULTIPLE_FORMAT "%1% = <%2%>\n%1% = <%2%>\n...\n"
+#define BC_PRINTER_SETTING_OPTIONAL_FORMAT "%1% = <%2%>\n"
+#define BC_PRINTER_SETTING_REQUIRED_FORMAT "%1% = %2%\n"
 
 namespace po = boost::program_options;
+using namespace libbitcoin;
 using namespace libbitcoin::config;
 using boost::format;
 
@@ -113,20 +123,26 @@ std::vector<std::string> printer::columnize(const std::string& paragraph,
 }
 
 // 100% component tested.
-static format format_row_name(const parameter& value)
+static std::string format_row_name(const parameter& value)
 {
+    // We hack in upper case for all positional args because of a bug in
+    // boost that requires environment variable options to be lower case
+    // in order to match any case environment variable, at least on Windows.
+    // This is a problem when composing with a command-line argument that
+    // wants to be upper case but must match in case with the env var option.
+
     if (value.get_position() != parameter::not_positional)
-        return format(BC_PRINTER_USAGE_ARGUMENT_TABLE_FORMAT) %
-            value.get_long_name();
+        return (format(BC_PRINTER_TABLE_ARGUMENT_FORMAT) % 
+            boost::to_upper_copy(value.get_long_name())).str();
     else if (value.get_short_name() == parameter::no_short_name)
-        return format(BC_PRINTER_USAGE_OPTION_LONG_TABLE_FORMAT) %
-        value.get_long_name();
+        return (format(BC_PRINTER_TABLE_OPTION_LONG_FORMAT) %
+            value.get_long_name()).str();
     else if (value.get_long_name().empty())
-        return format(BC_PRINTER_USAGE_OPTION_SHORT_TABLE_FORMAT) %
-            value.get_short_name();
+        return (format(BC_PRINTER_TABLE_OPTION_SHORT_FORMAT) %
+            value.get_short_name()).str();
     else
-        return format(BC_PRINTER_USAGE_OPTION_TABLE_FORMAT) %
-            value.get_short_name() % value.get_long_name();
+        return (format(BC_PRINTER_TABLE_OPTION_FORMAT) %
+            value.get_short_name() % value.get_long_name()).str();
 }
 
 // 100% component tested.
@@ -152,7 +168,7 @@ std::string printer::format_parameters_table(bool positional)
             continue;
 
         // Get the formatted parameter name.
-        auto name = format_row_name(parameter).str();
+        auto name = format_row_name(parameter);
 
         // Build a column for the description.
         const auto rows = columnize(parameter.get_description(), 52);
@@ -185,28 +201,73 @@ std::string printer::format_paragraph(const std::string& paragraph)
     return output.str();
 }
 
+static std::string format_setting(const parameter& value,
+    const std::string& name)
+{
+    // A required argument may only be preceeded by required arguments.
+    // Requiredness may be in error if the metadata is inconsistent.
+    auto required = value.get_required();
+
+    // In terms of formatting we also treat multivalued as not required.
+    auto optional = value.get_args_limit() == 1;
+
+    std::string formatter;
+    if (required)
+        formatter = BC_PRINTER_SETTING_REQUIRED_FORMAT;
+    else if (optional)
+        formatter = BC_PRINTER_SETTING_OPTIONAL_FORMAT;
+    else
+        formatter = BC_PRINTER_SETTING_MULTIPLE_FORMAT;
+
+    return (format(formatter) % name % BC_PRINTER_VALUE_TEXT).str();
+}
+
+// Requires a single period in each setting (i.e. no unnamed sections).
+static void split_setting_name(const parameter& value, std::string& name,
+    std::string& section)
+{
+    auto tokens = split(value.get_long_name(), ".");
+    if (tokens.size() != 2)
+    {
+        section.clear();
+        name.clear();
+        return;
+    }
+
+    section = tokens[0];
+    name = tokens[1];
+}
+
 std::string printer::format_settings_table()
 {
+    std::string name;
+    std::string section;
     std::stringstream output;
-    const auto& parameters = get_parameters();
-    format table_format("%-20s %-52s\n");
+    std::string preceding_section;
 
+    const auto& parameters = get_parameters();
     for (const auto& parameter: parameters)
     {
-        // Get the formatted parameter name.
-        auto name = format_row_name(parameter).str();
-
-        // Build a column for the description.
-        const auto rows = columnize(parameter.get_description(), 52);
-
-        // If there is no description the command is not output!
-        for (const auto& row: rows)
+        split_setting_name(parameter, name, section);
+        if (section.empty())
         {
-            output << table_format % name % row;
-
-            // The name is only set in the first row.
-            name.clear();
+            BITCOIN_ASSERT_MSG(false, "Invalid config setting metadata.");
+            continue;
         }
+
+        if (section != preceding_section)
+        {
+            output << std::endl;
+            if (!section.empty())
+            {
+                output << format(BC_PRINTER_SETTING_SECTION_FORMAT) % section;
+                preceding_section = section;
+            }
+        }
+
+        output << format(BC_PRINTER_SETTING_COMMENT_FORMAT) %
+            parameter.get_description();
+        output << format_setting(parameter, name);
     }
 
     return output.str();
@@ -224,7 +285,7 @@ std::string printer::format_usage()
 
 std::string printer::format_description()
 {
-    // DESCRIPTION: %1%
+    // Info: %1%
     auto description = format(BC_PRINTER_DESCRIPTION_FORMAT) %
         get_description();
     return format_paragraph(description.str());
@@ -278,17 +339,18 @@ std::string printer::format_usage_parameters()
                 required_options.push_back(long_name);
             else if (optional)
                 optional_options.push_back(long_name);
-            else /* multiple */
+            else
                 multiple_options.push_back(long_name);
         }
         else
         {
+            // to_upper_copy is a hack for boost bug, see format_row_name.
             if (required)
-                required_arguments.push_back(long_name);
+                required_arguments.push_back(boost::to_upper_copy(long_name));
             else if (optional)
-                optional_arguments.push_back(long_name);
-            else /* multiple */
-                multiple_arguments.push_back(long_name);
+                optional_arguments.push_back(boost::to_upper_copy(long_name));
+            else
+                multiple_arguments.push_back(boost::to_upper_copy(long_name));
         }
     }
 
@@ -450,12 +512,9 @@ void printer::commandline(std::ostream& output)
 void printer::settings(std::ostream& output)
 {
     const auto& setting_table = format_settings_table();
-
-    std::string setting_table_header(BC_PRINTER_SETTINGS_TABLE_HEADER "\n");
+    const auto& setting_table_header = BC_PRINTER_SETTINGS_TABLE_HEADER "\n";
 
     output
-        << std::endl << format_usage()
-        << std::endl << format_description()
         << std::endl << setting_table_header
         << std::endl << setting_table;
 }
