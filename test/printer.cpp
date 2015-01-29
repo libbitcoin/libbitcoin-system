@@ -234,12 +234,12 @@ BOOST_AUTO_TEST_CASE(printer__format_parameters_table__positional_three_options_
 BOOST_AUTO_TEST_CASE(printer__format_parameters_table__reverse_positional_three_options_three_matching_arguments__three_unsorted_arguments)
 {
     CONFIG_PRINTER_SETUP_ARGUMENTS(options.add_options()
-        ("THIRD", "Third option description.")
+        ("third", "Third option description.")
         ("SECOND", "Second option description.")
         ("FIRST", "First option description.");
         arguments.add("FIRST", 1);
         arguments.add("SECOND", 42);
-        arguments.add("THIRD", -1));
+        arguments.add("third", -1));
     CONFIG_PRINTER_INITIALIZE(3u, 3u);
     BOOST_REQUIRE_EQUAL(help.format_parameters_table(true),
         "THIRD                Third option description.                           \n"
@@ -308,12 +308,12 @@ BOOST_AUTO_TEST_CASE(printer__format_usage_parameters__unsorted_multiple_paramet
         ("longy", value<int>()->required(), "Long name only.")
         ("SIMPLE", value<std::string>(), "Simple string.")
         ("defaulty", value<bool>()->default_value(true), "Defaulted bool.")
-        ("REQUIRED", value<path>()->required(), "Required path.")
+        ("required", value<path>()->required(), "Required path.")
         ("untoggled", value<bool>()->zero_tokens(), "Zero token but not short.")
         ("toggled,t", value<bool>()->zero_tokens(), "Toggled, zero token and short.")
         ("ARRAY", value<std::vector<std::string>>(), "String vector.")
         ("multy", value<int>()->multitoken(), "Multi-token int.");
-        arguments.add("REQUIRED", 1);
+        arguments.add("required", 1);
         arguments.add("SIMPLE", 1);
         arguments.add("ARRAY", -1));
     CONFIG_PRINTER_INITIALIZE(10u, 3u);
