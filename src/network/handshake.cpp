@@ -52,7 +52,7 @@ handshake::handshake(threadpool& pool)
         ip_address_type{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                          0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01}};
     template_version_.address_you.port = protocol_port;
-    template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_LIB_VERSION "/";
+    template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_VERSION "/";
     template_version_.start_height = 0;
     template_version_.nonce = rand();
 }
