@@ -20,11 +20,9 @@
 #ifndef LIBBITCOIN_VERSION_HPP
 #define LIBBITCOIN_VERSION_HPP
 
-// LIBBITCOIN_LIB_VERSION is defined to be the same as LIBBITCOIN_VERSION
-// but as a *string* in the form "x.y[.z]" where x is the major version
-// number, y is the minor version number, and z is the patch level if not 0.
+// TODO: generate the version value from libbitcoin-build.
+// LIBBITCOIN_VERSION is a string in the form "major.minor[.patch]".
 // This is used for the user agent string during the connection handshake.
-
-#define LIBBITCOIN_LIB_VERSION "2.8.0"
+#define LIBBITCOIN_VERSION "2.8.0"
 
 #endif
