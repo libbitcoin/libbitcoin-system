@@ -1,6 +1,6 @@
 #!/bin/bash
 ###############################################################################
-# Copyright (c) 2011-2014 libbitcoin developers (see COPYING).
+#  Copyright (c) 2014-2015 libbitcoin developers (see COPYING).
 #
 #         GENERATED SOURCE CODE, DO NOT EDIT EXCEPT EXPERIMENTALLY
 #

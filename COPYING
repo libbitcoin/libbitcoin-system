@@ -8,9 +8,6 @@ it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-EXCEPTION: This distribution of libbitcoin may be linked against OpenSSL
-according to the terms of the section below entitled "OpenSSL Exception."
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -32,37 +29,6 @@ If you modify this Program, or any covered work, by linking or
 combining it with other code, such other code is not for that reason
 alone subject to any of the requirements of the GNU Affero GPL
 version 3.
-
-                       _OpenSSL Exception_
-
-0. Definitions
-
-"libbitcoin" means libbitcoin software licensed under version 3 or any later
-version of the GNU Affero General Public License (collectively, "AGPL"), or a
-work based on such software and licensed under the AGPL.
-
-"OpenSSL" means OpenSSL toolkit software distributed by the OpenSSL
-Project and licensed under the OpenSSL Licenses, or a work based on such
-software and licensed under the OpenSSL Licenses.
-
-"OpenSSL Licenses" means the OpenSSL License and Original SSLeay License
-under which the OpenSSL Project distributes the OpenSSL toolkit software,
-as those licenses appear in the file LICENSE-OPENSSL.
-
-1. Exception
-
-You have permission to copy, modify, propagate, and distribute a work
-formed by combining OpenSSL with libbitcoin, or a work derivative of such a
-combination, even if such copying, modification, propagation, or
-distribution would otherwise violate the terms of the AGPL. You must
-comply with the AGPL in all respects for all of the code used other than
-OpenSSL.
-
-You may include this OpenSSL Exception and its grant of permissions when
-you distribute libbitcoin.  Inclusion of this notice with such a
-distribution constitutes a grant of such permission.  If you do not wish
-to grant these permissions, remove this section entitled "OpenSSL
-Exception" from your distribution.
 
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
