@@ -40,8 +40,6 @@ BOOST_ARCHIVE_GCC="boost_1_49_0.tar.bz2"
 BOOST_URL_CLANG="http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download"
 BOOST_ARCHIVE_CLANG="boost_1_54_0.tar.bz2"
 
-# GMP archives.
-#------------------------------------------------------------------------------
 
 # Initialize the build environment.
 #==============================================================================
