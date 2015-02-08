@@ -12,9 +12,18 @@ All files in this repository fall under the license specified in [COPYING](COPYI
 
 The libbitcoin toolkit is a set of cross platform C++ libraries for building bitcoin applications. The toolkit consists of several libraries, most of which depend on the foundational [libbitcoin](https://github.com/libbitcoin/libbitcoin) library. Each library's repository can be cloned and built using common [automake](http://www.gnu.org/software/automake) instructions. There are no packages yet in distribution however each library includes an installation script (described below) which is regularly verified in the automated build.
 
-**Table of Contents**
+## Installation
 
-* Installation
+On Linux and Macintosh libbitcoin is built using Autotools as follows.
+```sh
+$ ./autogen.sh
+$ ./configure
+$ make
+$ sudo make install
+$ sudo ldconfig
+```
+Detailed instructions are provided below.
+
   * [Debian/Ubuntu](#debianubuntu)
   * [Macintosh](#macintosh)
   * [Windows](#windows)
