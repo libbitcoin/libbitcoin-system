@@ -69,7 +69,7 @@ void threadpool::join()
         {
             t.join();
         }
-        catch (std::system_error& e)
+        catch (const std::system_error&)
         {
             // other than logging, or altering the signature to
             // return the error to the join caller, not sure what
