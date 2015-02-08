@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <system_error>
 
 namespace libbitcoin {
 
@@ -63,7 +64,18 @@ void threadpool::shutdown()
 void threadpool::join()
 {
     for (std::thread& t: threads_)
-        t.join();
+    {
+        try
+        {
+            t.join();
+        }
+        catch (std::system_error& e)
+        {
+            // other than logging, or altering the signature to
+            // return the error to the join caller, not sure what
+            // to do here.
+        }
+    }
 }
 
 io_service& threadpool::service()
