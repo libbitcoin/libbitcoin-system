@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2014 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/formats/base58.hpp>
+#include <bitcoin/bitcoin/formats/base64.hpp>
 
 #include <cstdint>
 #include <string>

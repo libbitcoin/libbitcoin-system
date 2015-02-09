@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2014 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -27,14 +27,14 @@
 namespace libbitcoin {
 
 /**
- * Encode data as base58.
- * @return the base58 encoded string.
+ * Encode data as base64.
+ * @return the base64 encoded string.
  */
 BC_API std::string encode_base64(data_slice unencoded);
 
 /**
- * Attempt to decode base58 data.
- * @return false if the input contains non-base58 characters.
+ * Attempt to decode base64 data.
+ * @return false if the input contains non-base64 characters.
  */
 BC_API bool decode_base64(data_chunk& out, const std::string& in);
 
