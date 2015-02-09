@@ -21,7 +21,6 @@
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 // This implementation derived from public domain:
@@ -34,7 +33,7 @@ const static char pad = '=';
 const static char table[] = 
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-BC_API std::string encode_base64(data_slice unencoded)
+std::string encode_base64(data_slice unencoded)
 {
     std::string encoded;
     auto size = unencoded.size();
