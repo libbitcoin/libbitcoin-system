@@ -158,6 +158,18 @@ AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_program_op
 
 # Set flags.
 #==============================================================================
+# Require a c++11 compiler.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-std=c++11],
+        [CXXFLAGS="$CXXFLAGS -std=c++11"])])
+
+# Enable POSIX thread definitions.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-pthread],
+        [CXXFLAGS="$CXXFLAGS -pthread"])])
+
 # Warn on all stuff.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
