@@ -125,7 +125,6 @@ bool decode_base85(data_chunk& out, const std::string& in)
     if (length % 5 != 0)
         return false;
 
-    constexpr uint8_t shift = 32;
     const size_t decoded_size = length * 4 / 5;
     data_chunk decoded;
     decoded.reserve(decoded_size);
@@ -134,8 +133,8 @@ bool decode_base85(data_chunk& out, const std::string& in)
 
     for (const uint8_t encoded_character: in)
     {
-        const auto position = encoded_character - shift;
-        if (position < 0 || position > sizeof(decoder))
+        const auto position = encoded_character - 32;
+        if (position < 0 || position > 96)
             return false;
 
         accumulator = accumulator * 85 + decoder[position];
