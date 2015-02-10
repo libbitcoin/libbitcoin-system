@@ -227,6 +227,9 @@
     <ClCompile Include="..\..\..\..\src\utility\general.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\formats\base85.cpp">
+      <Filter>src\formats</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -408,6 +411,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp">
       <Filter>include\bitcoin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base85.hpp">
+      <Filter>include\bitcoin\formats</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
