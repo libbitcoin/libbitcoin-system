@@ -80,7 +80,8 @@ bitcoin_bitcoin_formats_include_HEADERS = \
     include/bitcoin/bitcoin/formats/base10.hpp \
     include/bitcoin/bitcoin/formats/base16.hpp \
     include/bitcoin/bitcoin/formats/base58.hpp \
-    include/bitcoin/bitcoin/formats/base64.hpp
+    include/bitcoin/bitcoin/formats/base64.hpp \
+    include/bitcoin/bitcoin/formats/base85.hpp
 
 bitcoin_bitcoin_impl_formats_includedir = ${includedir}/bitcoin/bitcoin/impl/formats
 bitcoin_bitcoin_impl_formats_include_HEADERS = \
@@ -169,6 +170,7 @@ src_libbitcoin_la_SOURCES = \
     src/formats/base16.cpp \
     src/formats/base58.cpp \
     src/formats/base64.cpp \
+    src/formats/base85.cpp \
     src/math/checksum.cpp \
     src/math/ec_keys.cpp \
     src/math/external/hmac_sha256.c \
@@ -227,6 +229,7 @@ test_libbitcoin_test_SOURCES = \
     test/base16.cpp \
     test/base58.cpp \
     test/base64.cpp \
+    test/base85.cpp \
     test/big_number.cpp \
     test/checksum.cpp \
     test/config.cpp \

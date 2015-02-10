@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2014 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/formats/base58.hpp>
+#include <bitcoin/bitcoin/formats/base64.hpp>
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 // This implementation derived from public domain:
@@ -34,10 +33,10 @@ const static char pad = '=';
 const static char table[] = 
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-BC_API std::string encode_base64(data_slice unencoded)
+std::string encode_base64(data_slice unencoded)
 {
     std::string encoded;
-    auto size = unencoded.size();
+    const auto size = unencoded.size();
     encoded.reserve(((size / 3) + (size % 3 > 0)) * 4);
 
     uint32_t value;
@@ -84,7 +83,7 @@ bool decode_base64(data_chunk& out, const std::string& in)
 {
     const static uint32_t mask = 0x000000FF;
 
-    auto length = in.length();
+    const auto length = in.length();
     if ((length % 4) != 0)
         return false;
 
