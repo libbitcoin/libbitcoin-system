@@ -26,8 +26,15 @@
     #include <time.h>
     #include <sys/time.h>
 
-    void clock_gettime(int, timespec* ts)
+    int clock_gettime(int clock_id, timespec* ts)
     {
+        // The clock_id specified is not supported on this system.
+        if (clock_id != CLOCK_REALTIME)
+        {
+            errno = EINVAL;
+            return -1;
+        }
+
         clock_serv_t cclock;
         mach_timespec_t mts;
         host_get_clock_service(mach_host_self(), CALENDAR_CLOCK, &cclock);
@@ -35,12 +42,14 @@
         mach_port_deallocate(mach_task_self(), cclock);
         ts->tv_sec = mts.tv_sec;
         ts->tv_nsec = mts.tv_nsec;
+        return 0;
     }
 #endif
 
 // THIS SECTION IS UNTESTED
 // Windows clock_gettime from: http://stackoverflow.com/a/5404467/1172329
 #ifdef _MSC_VER
+    #include <errno.h>
     #include <windows.h>
 
     LARGE_INTEGER getFILETIMEoffset()
@@ -62,8 +71,15 @@
         return time;
     }
 
-    void clock_gettime(int, timespec* ts)
+    int clock_gettime(int clock_id, timespec* ts)
     {
+        // The clock_id specified is not supported on this system.
+        if (clock_id != CLOCK_REALTIME)
+        {
+            errno = EINVAL;
+            return -1;
+        }
+
         static bool initialized = false;
         static bool usePerformanceCounter = false;
         static double frequencyToNanoseconds;
@@ -115,5 +131,7 @@
         ts->tv_sec = static_cast<time_t>(nanoseconds / 1000000000);
         ts->tv_nsec = static_cast<int32_t>
             (static_cast<int64_t>(nanoseconds) % 1000000000);
+
+        return 0;
     }
 #endif
