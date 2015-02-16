@@ -21,6 +21,7 @@
 
 #ifdef __MACH__
     // Mac clock_gettime from gist.github.com/jbenet/1087739
+    #include <errno.h>
     #include <mach/clock.h>
     #include <mach/mach.h>
     #include <time.h>
