@@ -23,16 +23,12 @@
 #include <limits>
 #include <bitcoin/bitcoin/define.hpp>
 
-#ifdef _MSC_VER
-    // For BC_SET_BINARY_FILE_MODE
-    #include <fcntl.h>
-    #include <io.h>
-    #include <stdio.h>
-#endif
-
 // Sets the _fmode global variable, which controls the default translation
 // mode for file I/O operations.
 #ifdef _MSC_VER
+    #include <fcntl.h>
+    #include <io.h>
+    #include <stdio.h>
     #define BC_SET_BINARY_FILE_MODE(mode) \
         _setmode(_fileno(stdin), mode ? _O_BINARY : _O_TEXT)
 #else
@@ -46,7 +42,7 @@
     #include <time.h>
     #include <sys/time.h>
     #define CLOCK_REALTIME 0
-    BC_API void clock_gettime(int, timespec* ts);
+    BC_API int clock_gettime(int clock_id, timespec* ts);
 #endif
 
 #ifdef _MSC_VER
@@ -58,7 +54,7 @@
         int32_t tv_nsec;
     } timespec;
     #define CLOCK_REALTIME 0
-    BC_API void clock_gettime(int, timespec* ts);
+    BC_API int clock_gettime(int, timespec* ts);
 #endif
 
 #ifdef _MSC_VER
