@@ -45,9 +45,6 @@ AC_PROG_LIBTOOL
 # Compute the canonical host-system type variable host, including host_os.
 AC_CANONICAL_HOST
 
-# Check for baseline language coverage in the compiler for the C++11 standard.
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
-
 # Enable silent rules option.
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -59,6 +56,10 @@ PKG_PROG_PKG_CONFIG
 AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
+
+# Check for baseline language coverage in the compiler for the C++11 standard.
+#------------------------------------------------------------------------------
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 
 
 # Process options.
