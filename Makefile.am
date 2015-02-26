@@ -231,6 +231,7 @@ test_libbitcoin_test_SOURCES = \
     test/base64.cpp \
     test/base85.cpp \
     test/big_number.cpp \
+    test/binary.cpp \
     test/checksum.cpp \
     test/config.cpp \
     test/ec_keys.cpp \
