@@ -2,6 +2,10 @@ usr/include/bitcoin/*.hpp
 usr/include/bitcoin/bitcoin/*.hpp
 usr/include/bitcoin/bitcoin/config/*.hpp
 usr/include/bitcoin/bitcoin/formats/*.hpp
+usr/include/bitcoin/bitcoin/formats/*.hpp
+usr/include/bitcoin/bitcoin/impl/formats/*.hpp
+usr/include/bitcoin/bitcoin/impl/serialize/*.hpp
+usr/include/bitcoin/bitcoin/impl/utility/*.hpp
 usr/include/bitcoin/bitcoin/math/*.hpp
 usr/include/bitcoin/bitcoin/network/*.hpp
 usr/include/bitcoin/bitcoin/utility/*.hpp
