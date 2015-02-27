@@ -40,8 +40,6 @@ BOOST_ARCHIVE_GCC="boost_1_49_0.tar.bz2"
 BOOST_URL_CLANG="http://sourceforge.net/projects/boost/files/boost/1.54.0/boost_1_54_0.tar.bz2/download"
 BOOST_ARCHIVE_CLANG="boost_1_54_0.tar.bz2"
 
-# GMP archives.
-#------------------------------------------------------------------------------
 
 # Initialize the build environment.
 #==============================================================================
@@ -172,7 +170,7 @@ echo "  with_pkgconfigdir: $with_pkgconfigdir"
 # Define boost options for gcc.
 #------------------------------------------------------------------------------
 BOOST_OPTIONS_GCC=\
-"threading=single "\
+"threading=multi "\
 "variant=release "\
 "--disable-icu "\
 "--with-date_time "\
@@ -192,7 +190,7 @@ BOOST_OPTIONS_CLANG=\
 "toolset=clang "\
 "cxxflags=-stdlib=${boost_stdlib} "\
 "linkflags=-stdlib=${boost_stdlib} "\
-"threading=single "\
+"threading=multi "\
 "variant=release "\
 "--disable-icu "\
 "--with-date_time "\

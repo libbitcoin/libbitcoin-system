@@ -43,8 +43,20 @@ pkgconfig_DATA = libbitcoin.pc
 ACLOCAL_AMFLAGS = -I m4
 
 #
-# headers
+# libraries
 #
+lib_LTLIBRARIES = \
+    src/libbitcoin.la
+    
+src_libbitcoin_la_CPPFLAGS = \
+    -I${srcdir}/include \
+    ${secp256k1_CFLAGS}
+    
+# The rt_LIBS symbol may be empty, keep on shared line.
+src_libbitcoin_la_LIBADD = \
+    ${boost_LIBS} \
+    ${secp256k1_LIBS} ${rt_LIBS}
+
 bitcoin_includedir = ${includedir}/bitcoin
 
 bitcoin_include_HEADERS = \
@@ -80,7 +92,8 @@ bitcoin_bitcoin_formats_include_HEADERS = \
     include/bitcoin/bitcoin/formats/base10.hpp \
     include/bitcoin/bitcoin/formats/base16.hpp \
     include/bitcoin/bitcoin/formats/base58.hpp \
-    include/bitcoin/bitcoin/formats/base64.hpp
+    include/bitcoin/bitcoin/formats/base64.hpp \
+    include/bitcoin/bitcoin/formats/base85.hpp
 
 bitcoin_bitcoin_impl_formats_includedir = ${includedir}/bitcoin/bitcoin/impl/formats
 bitcoin_bitcoin_impl_formats_include_HEADERS = \
@@ -150,15 +163,6 @@ bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
 
-#
-# libraries
-#
-lib_LTLIBRARIES = src/libbitcoin.la
-
-src_libbitcoin_la_CPPFLAGS = \
-    -I${srcdir}/include \
-    ${secp256k1_CFLAGS}
-
 src_libbitcoin_la_SOURCES = \
     src/block.cpp \
     src/compat.cpp \
@@ -170,6 +174,7 @@ src_libbitcoin_la_SOURCES = \
     src/formats/base16.cpp \
     src/formats/base58.cpp \
     src/formats/base64.cpp \
+    src/formats/base85.cpp \
     src/math/checksum.cpp \
     src/math/ec_keys.cpp \
     src/math/external/hmac_sha256.c \
@@ -205,31 +210,38 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
 
-# The rt_LIBS symbol may be empty, keep on shared line.
-src_libbitcoin_la_LIBADD = \
-    ${boost_LIBS} \
-    ${secp256k1_LIBS} ${rt_LIBS}
-
 #
 # tests
 #
 if WITH_TESTS
 
-TESTS = test/libbitcoin_test
+TESTS = \
+    test/libbitcoin_test
 
-check_PROGRAMS = test/libbitcoin_test
+check_PROGRAMS = \
+    test/libbitcoin_test
 
 test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/include \
     -I${srcdir}/test \
     ${secp256k1_CFLAGS}
 
+# The rt_LIBS symbol may be empty, keep on shared line.
+test_libbitcoin_test_LDADD = \
+    src/libbitcoin.la \
+    ${boost_LIBS} \
+    -lboost_unit_test_framework \
+    -lpthread \
+    ${secp256k1_LIBS} ${rt_LIBS}
+
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
     test/base16.cpp \
     test/base58.cpp \
     test/base64.cpp \
+    test/base85.cpp \
     test/big_number.cpp \
+    test/binary.cpp \
     test/checksum.cpp \
     test/config.cpp \
     test/ec_keys.cpp \
@@ -248,13 +260,5 @@ test_libbitcoin_test_SOURCES = \
     test/stealth_address.cpp \
     test/stealth.cpp \
     test/uri.cpp
-
-# The rt_LIBS symbol may be empty, keep on shared line.
-test_libbitcoin_test_LDADD = \
-    src/libbitcoin.la \
-    ${boost_LIBS} \
-    -lboost_unit_test_framework \
-    -lpthread \
-    ${secp256k1_LIBS} ${rt_LIBS}
 
 endif
