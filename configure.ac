@@ -45,9 +45,6 @@ AC_PROG_LIBTOOL
 # Compute the canonical host-system type variable host, including host_os.
 AC_CANONICAL_HOST
 
-# Check for baseline language coverage in the compiler for the C++11 standard.
-AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
-
 # Enable silent rules option.
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
@@ -59,6 +56,10 @@ PKG_PROG_PKG_CONFIG
 AC_ARG_VAR([CC], "C compiler to use, such as gcc or clang")
 AC_ARG_VAR([CXX], "C++ compiler to use, such as g++ or clang++")
 AC_ARG_VAR([PKG_CONFIG_PATH], "Additional directories for package discovery.")
+
+# Check for baseline language coverage in the compiler for the C++11 standard.
+#------------------------------------------------------------------------------
+AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 
 
 # Process options.
@@ -160,6 +161,18 @@ AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_program_op
 
 # Set flags.
 #==============================================================================
+# Require a c++11 compiler.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-std=c++11],
+        [CXXFLAGS="$CXXFLAGS -std=c++11"])])
+
+# Enable POSIX thread definitions.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-pthread],
+        [CXXFLAGS="$CXXFLAGS -pthread"])])
+
 # Warn on all stuff.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
