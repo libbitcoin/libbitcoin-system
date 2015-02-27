@@ -43,8 +43,20 @@ pkgconfig_DATA = libbitcoin.pc
 ACLOCAL_AMFLAGS = -I m4
 
 #
-# headers
+# libraries
 #
+lib_LTLIBRARIES = \
+    src/libbitcoin.la
+    
+src_libbitcoin_la_CPPFLAGS = \
+    -I${srcdir}/include \
+    ${secp256k1_CFLAGS}
+    
+# The rt_LIBS symbol may be empty, keep on shared line.
+src_libbitcoin_la_LIBADD = \
+    ${boost_LIBS} \
+    ${secp256k1_LIBS} ${rt_LIBS}
+
 bitcoin_includedir = ${includedir}/bitcoin
 
 bitcoin_include_HEADERS = \
@@ -150,15 +162,6 @@ bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
 
-#
-# libraries
-#
-lib_LTLIBRARIES = src/libbitcoin.la
-
-src_libbitcoin_la_CPPFLAGS = \
-    -I${srcdir}/include \
-    ${secp256k1_CFLAGS}
-
 src_libbitcoin_la_SOURCES = \
     src/block.cpp \
     src/compat.cpp \
@@ -205,24 +208,29 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
 
-# The rt_LIBS symbol may be empty, keep on shared line.
-src_libbitcoin_la_LIBADD = \
-    ${boost_LIBS} \
-    ${secp256k1_LIBS} ${rt_LIBS}
-
 #
 # tests
 #
 if WITH_TESTS
 
-TESTS = test/libbitcoin_test
+TESTS = \
+    test/libbitcoin_test
 
-check_PROGRAMS = test/libbitcoin_test
+check_PROGRAMS = \
+    test/libbitcoin_test
 
 test_libbitcoin_test_CPPFLAGS = \
     -I${srcdir}/include \
     -I${srcdir}/test \
     ${secp256k1_CFLAGS}
+
+# The rt_LIBS symbol may be empty, keep on shared line.
+test_libbitcoin_test_LDADD = \
+    src/libbitcoin.la \
+    ${boost_LIBS} \
+    -lboost_unit_test_framework \
+    -lpthread \
+    ${secp256k1_LIBS} ${rt_LIBS}
 
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
@@ -250,13 +258,5 @@ test_libbitcoin_test_SOURCES = \
     test/stealth_address.cpp \
     test/stealth.cpp \
     test/uri.cpp
-
-# The rt_LIBS symbol may be empty, keep on shared line.
-test_libbitcoin_test_LDADD = \
-    src/libbitcoin.la \
-    ${boost_LIBS} \
-    -lboost_unit_test_framework \
-    -lpthread \
-    ${secp256k1_LIBS} ${rt_LIBS}
 
 endif
