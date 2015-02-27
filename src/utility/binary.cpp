@@ -191,7 +191,7 @@ binary_type binary_type::get_substring(size_type start, size_type length) const
         start = size_;
     }
 
-    if ((start + length) > size_)
+    if ((length == SIZE_MAX) || ((start + length) > size_))
     {
         length = size_ - start;
     }
