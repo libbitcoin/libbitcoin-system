@@ -128,6 +128,8 @@
  * - @link libbitcoin::decode_base58 decode_base58 @endlink
  * - @link libbitcoin::encode_base64 encode_base64 @endlink
  * - @link libbitcoin::decode_base64 decode_base64 @endlink
+ * - @link libbitcoin::encode_base85 encode_base85 @endlink
+ * - @link libbitcoin::decode_base85 decode_base85 @endlink
  * - @link libbitcoin::decode_hash decode_hash @endlink
  * - @link libbitcoin::extend_data extend_data @endlink
  * - @link libbitcoin::to_little_endian to_little_endian @endlink
@@ -177,6 +179,7 @@
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/formats/base64.hpp>
+#include <bitcoin/bitcoin/formats/base85.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
