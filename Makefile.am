@@ -103,7 +103,8 @@ bitcoin_bitcoin_math_external_include_HEADERS = \
     include/bitcoin/bitcoin/math/external/sha256.h \
     include/bitcoin/bitcoin/math/external/sha512.h \
     include/bitcoin/bitcoin/math/external/uint256.h \
-    include/bitcoin/bitcoin/math/external/zeroize.h
+    include/bitcoin/bitcoin/math/external/zeroize.h \
+    include/bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h
 
 bitcoin_bitcoin_network_includedir = ${includedir}/bitcoin/bitcoin/network
 bitcoin_bitcoin_network_include_HEADERS = \
@@ -178,6 +179,7 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/sha256.c \
     src/math/external/sha512.c \
     src/math/external/zeroize.c \
+    src/math/external/pkcs5_pbkdf2.c \
     src/math/hash.cpp \
     src/math/hash_number.cpp \
     src/math/script_number.cpp \

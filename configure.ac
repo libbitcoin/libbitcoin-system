@@ -131,6 +131,8 @@ AX_BOOST_DATE_TIME
 
 AX_BOOST_FILESYSTEM
 
+AX_BOOST_LOCALE
+
 AX_BOOST_PROGRAM_OPTIONS
 
 AX_BOOST_REGEX
@@ -153,7 +155,7 @@ PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 
 # Output ${boost_LIBS}
 #------------------------------------------------------------------------------
-AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_system"])
+AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_program_options -lboost_locale -lboost_regex -lboost_system"])
 
 
 # Set flags.
