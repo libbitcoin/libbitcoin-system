@@ -145,7 +145,7 @@ data_chunk decode_mnemonic(const string_list& words,
 
     long_hash hash;
     if (pkcs5_pbkdf2_hmac_sha512(mnemonic, salt_chunk, hmac_iterations, hash))
-        return data_chunk(hash.begin(), hash.end());
+        return to_data_chunk(hash);
 
     return data_chunk();
 }
