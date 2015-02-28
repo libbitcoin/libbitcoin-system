@@ -20,36 +20,20 @@
 #ifndef LIBBITCOIN_MNEMONIC_HPP
 #define LIBBITCOIN_MNEMONIC_HPP
 
-#include <map>
 #include <string>
 #include <vector>
-
-#include <boost/algorithm/string/case_conv.hpp>
-
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
 
-const uint16_t max_word_count = 128;
-const uint16_t min_entropy_bits = 128;
-const uint16_t max_digest_buf_len = 512;
+BC_API data_chunk decode_mnemonic(const string_list& words,
+    const std::string& passphrase="");
 
-enum class bip39_language {
-    en, es, ja, zh
-};
-
-typedef std::vector<std::string> string_list;
-typedef std::map<bip39_language, string_list> dictionary;
-
-// seed to mnemonic
-BC_API string_list encode_mnemonic(
-    /* data_slice seed, const std::string &passphrase="", */
-    data_slice seed, bip39_language language = bip39_language::en);
-
-// mnemonic to seed
-BC_API data_chunk decode_mnemonic(
-    const string_list &words, const std::string &passphrase = "");
+BC_API string_list encode_mnemonic(data_slice seed,
+    const std::string& passphrase="",
+    bip39_language language=bip39_language::en);
 
 } // namespace libbitcoin
 
