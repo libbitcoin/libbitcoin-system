@@ -35,11 +35,12 @@ std::string join(const std::vector<std::string>& words,
     return boost::join(words, delimiter);
 }
 
-std::string join(const std::vector<const std::string>& words,
-    const std::string& delimiter)
-{
-    return boost::join(words, delimiter);
-}
+/* FIXME: Not building with g++ */
+/* std::string join(const std::vector<const std::string>& words, */
+/*     const std::string& delimiter) */
+/* { */
+/*     return boost::join(words, delimiter); */
+/* } */
 
 std::vector<std::string> split(const std::string& sentence,
     const std::string& delimiter)

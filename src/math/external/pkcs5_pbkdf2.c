@@ -23,6 +23,13 @@
 #include <bitcoin/bitcoin/math/external/hmac_sha512.h>
 #include <bitcoin/bitcoin/math/external/zeroize.h>
 
+#ifndef min
+#define min(a,b) \
+    ({ __typeof__ (a) _a = (a); \
+    __typeof__ (b) _b = (b); \
+    _a < _b ? _a : _b; })
+#endif
+
 int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
     uint32_t rounds)
@@ -30,6 +37,7 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
     size_t length;
     uint8_t* asalt;
     size_t asalt_size;
+    uint32_t count, round, buffer_index;
     uint8_t buffer[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest1[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest2[HMACSHA512_DIGEST_LENGTH];
@@ -46,7 +54,7 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
         return -1;
 
     memcpy(asalt, salt, salt_length);
-    for (uint32_t count = 1; key_length > 0; count++)
+    for (count = 1; key_length > 0; count++)
     {
         asalt[salt_length + 0] = (count >> 24) & 0xff;
         asalt[salt_length + 1] = (count >> 16) & 0xff;
@@ -55,12 +63,14 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
         HMACSHA512(asalt, asalt_size, passphrase, passphrase_length, digest1);
         memcpy(buffer, digest1, sizeof(buffer));
 
-        for (uint32_t round = 0; round < rounds; round++)
+        for (round = 1; round < rounds; round++)
         {
             HMACSHA512(digest1, sizeof(digest1), passphrase, passphrase_length,
                 digest2);
             memcpy(digest1, digest2, sizeof(digest1));
-            memcpy(buffer, digest1, sizeof(buffer));
+            for (buffer_index = 0; buffer_index < sizeof(buffer);
+                buffer_index++)
+                buffer[buffer_index] ^= digest1[buffer_index];
         }
 
         length = min(key_length, sizeof(buffer));

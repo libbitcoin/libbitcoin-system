@@ -32,7 +32,6 @@ BC_API data_chunk decode_mnemonic(const string_list& words,
     const std::string& passphrase="");
 
 BC_API string_list encode_mnemonic(data_slice seed,
-    const std::string& passphrase="",
     bip39_language language=bip39_language::en);
 
 } // namespace libbitcoin
