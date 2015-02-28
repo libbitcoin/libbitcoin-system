@@ -53,6 +53,36 @@ int find_position(const std::vector<Element>& list, Element& value)
     return static_cast<int>(distance(list.begin(), it));
 }
 
+template <typename Element>
+int find_position(const std::vector<Element>& list, const Element& value)
+{
+    const auto it = std::find(list.begin(), list.end(), value);
+    if (it == list.end())
+        return -1;
+
+    return static_cast<int>(distance(list.begin(), it));
+}
+
+template <typename Element>
+int find_position(const std::vector<const Element>& list, Element& value)
+{
+    const auto it = std::find(list.begin(), list.end(), value);
+    if (it == list.end())
+        return -1;
+
+    return static_cast<int>(distance(list.begin(), it));
+}
+
+template <typename Element>
+int find_position(const std::vector<const Element>& list, const Element& value)
+{
+    const auto it = std::find(list.begin(), list.end(), value);
+    if (it == list.end())
+        return -1;
+
+    return static_cast<int>(distance(list.begin(), it));
+}
+
 template <typename Consequent, typename Alternate>
 Consequent if_else(bool antecedent, const Consequent consequent,
     const Alternate alternative)

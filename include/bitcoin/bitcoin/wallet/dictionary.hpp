@@ -40,7 +40,8 @@ enum class bip39_language
 /**
  * Word list type for dictionary and mnemonics.
  */
-typedef std::vector<const std::string> string_list;
+/* typedef std::vector<const std::string> string_list; */
+typedef std::vector<std::string> string_list;
 
 /**
  * Multilingual bip-39 word dictionary type.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -32,13 +32,14 @@
 
 namespace libbitcoin {
 
-// Bip-39 magic numbers.
-constexpr size_t bip39_magic = 11;
+// Bip-39 constants.
 constexpr size_t bip39_check_size = 4;
 constexpr size_t min_word_count = 12;
 constexpr size_t max_word_count = 128;
 constexpr size_t hmac_iterations = 2048;
 constexpr size_t dictionary_length = 2048;
+// the number of bits consumed for each word index
+constexpr size_t bip39_index_bits = 11;
 
 // It would be nice if we could do this statically.
 static void validate_dictionary()
@@ -97,8 +98,7 @@ static uint8_t bip39_shift(size_t bit)
 // extracts entropy/checksum from the mnemonic and rebuilds the word list
 // for comparison; returns true if it's a match (valid), false otherwise
 static bool validate_mnemonic(const string_list& words,
-    const string_list& dictionary, bip39_language language,
-    const std::string& passphrase)
+    const string_list& dictionary, bip39_language language)
 {
     const auto word_count = words.size();
     if ((word_count < min_word_count) || (word_count > max_word_count))
@@ -113,9 +113,9 @@ static bool validate_mnemonic(const string_list& words,
         if (position == -1)
             return false;
 
-        for (size_t loop = 0; loop < bip39_magic; loop++, bit++)
+        for (size_t loop = 0; loop < bip39_index_bits; loop++, bit++)
         {
-            if (position & (1 << (bip39_magic - loop - 1)))
+            if (position & (1 << (bip39_index_bits - loop - 1)))
             {
                 const auto byte = bit / byte_bits;
                 seed[byte] |= bip39_shift(bit);
@@ -126,7 +126,7 @@ static bool validate_mnemonic(const string_list& words,
     const auto size = bit / byte_bits;
     seed.resize(size);
 
-    const auto mnemonic = encode_mnemonic(seed, passphrase, language);
+    const auto mnemonic = encode_mnemonic(seed, language);
     return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
 
@@ -136,7 +136,7 @@ data_chunk decode_mnemonic(const string_list& words,
     const auto language = get_language(words);
     const auto& dictionary = get_dictionary(language);
 
-    if (!validate_mnemonic(words, dictionary, language, passphrase))
+    if (!validate_mnemonic(words, dictionary, language))
         return data_chunk();
 
     const auto mnemonic = join(words);
@@ -144,14 +144,14 @@ data_chunk decode_mnemonic(const string_list& words,
     const auto salt_chunk = to_data_chunk(salt);
 
     long_hash hash;
-    if (pkcs5_pbkdf2_hmac_sha512(mnemonic, salt_chunk, hmac_iterations, hash))
+    if (pkcs5_pbkdf2_hmac_sha512(
+            mnemonic, salt_chunk, hmac_iterations, hash))
         return data_chunk(hash.begin(), hash.end());
 
     return data_chunk();
 }
 
-string_list encode_mnemonic(data_slice seed, const std::string& passphrase,
-    bip39_language language)
+string_list encode_mnemonic(data_slice seed, bip39_language language)
 {
     if ((seed.size() % bip39_check_size) != 0)
         return string_list();
@@ -164,9 +164,9 @@ string_list encode_mnemonic(data_slice seed, const std::string& passphrase,
     const size_t seed_bits = (seed.size() * byte_bits);
     const size_t check_bits = (chunk.size() / bip39_check_size);
     const size_t total_bits = (seed_bits + check_bits);
-    const size_t word_count = (total_bits / bip39_magic);
+    const size_t word_count = (total_bits / bip39_index_bits);
 
-    BITCOIN_ASSERT((total_bits % bip39_magic) == 0);
+    BITCOIN_ASSERT((total_bits % bip39_index_bits) == 0);
     BITCOIN_ASSERT((word_count % 3) == 0);
 
     size_t bit = 0;
@@ -175,25 +175,22 @@ string_list encode_mnemonic(data_slice seed, const std::string& passphrase,
     for (size_t word = 0; word < word_count; word++)
     {
         size_t position = 0;
-        for (size_t loop = 0; loop < bip39_magic; loop++)
+        for (size_t loop = 0; loop < bip39_index_bits; loop++)
         {
-            bit = (word * bip39_magic + loop);
+            bit = (word * bip39_index_bits + loop);
             position <<= 1;
 
             const auto byte = bit / byte_bits;
 
-            // BUGBUG: incrementing by a boolean value.
-            position += (chunk[byte] & bip39_shift(bit)) > 0;
+            if ((chunk[byte] & bip39_shift(bit)) > 0)
+                position++;
         }
-
-        // This should not be possible, so should assert or drop.
-        //if (position >= dictionary_length)
-        //    return string_list();
+        BITCOIN_ASSERT(position < dictionary_length);
 
         words.push_back(dictionary[position]);
     }
 
-    BITCOIN_ASSERT(words.size() == (bit / bip39_magic));
+    BITCOIN_ASSERT(words.size() == (bit / bip39_index_bits));
     return words;
 }
 
