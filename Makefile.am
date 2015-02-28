@@ -172,6 +172,7 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/address.hpp \
+    include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
@@ -218,7 +219,8 @@ src_libbitcoin_la_SOURCES = \
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
-    src/wallet/address.cpp \
+    src/wallet/address.cpp \ \
+    src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \

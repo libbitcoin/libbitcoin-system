@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,43 +17,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/general.hpp>
+#ifndef LIBBITCOIN_DICTIONARY_HPP
+#define LIBBITCOIN_DICTIONARY_HPP
 
-#include <istream>
-#include <iterator>
+#include <map>
 #include <string>
 #include <vector>
-#include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/compat.h>
-#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 
-std::string join(const std::vector<std::string>& words,
-    const std::string& delimiter)
+/**
+ * Bip-39 dictionary languages.
+ */
+enum class bip39_language
 {
-    return boost::join(words, delimiter);
-}
+    en,
+    es,
+    ja,
+    zh_Hans
+};
 
-std::string join(const std::vector<const std::string>& words,
-    const std::string& delimiter)
-{
-    return boost::join(words, delimiter);
-}
+/**
+ * Word list type for dictionary and mnemonics.
+ */
+typedef std::vector<const std::string> string_list;
 
-std::vector<std::string> split(const std::string& sentence,
-    const std::string& delimiter)
-{
-    std::vector<std::string> words;
-    boost::split(words, sentence, boost::is_any_of(delimiter),
-        boost::token_compress_on);
-    return words;
-}
+/**
+ * Multilingual bip-39 word dictionary type.
+ */
+typedef std::map<bip39_language, const string_list> bip39_dictionary_type;
 
-void trim(std::string& value)
-{
-    boost::trim(value);
-}
+/**
+ * Multilingual bip-39 word dictionary.
+ */
+extern const bip39_dictionary_type bip39_dictionary;
 
 } // namespace libbitcoin
 
+#endif

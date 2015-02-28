@@ -1,6 +1,5 @@
-/*	$OpenBSD: pkcs5_pbkdf2.c,v 1.9 2015/02/05 12:59:57 millert Exp $	*/
-
-/*-
+/* OpenBSD: pkcs5_pbkdf2.c, v 1.9 2015/02/05 12:59:57 millert */
+/**
  * Copyright (c) 2008 Damien Bergamini <damien.bergamini@free.fr>
  *
  * Permission to use, copy, modify, and distribute this software for any
@@ -16,61 +15,65 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 #include <bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h>
-#include <bitcoin/bitcoin/math/external/hmac_sha512.h>
 
-#include <sys/types.h>
-
-#include <string.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
+#include <bitcoin/bitcoin/math/external/hmac_sha512.h>
+#include <bitcoin/bitcoin/math/external/zeroize.h>
 
-/*
- * Password-Based Key Derivation Function 2 (PKCS #5 v2.0).
- * Code based on IEEE Std 802.11-2007, Annex H.4.2.
- */
-int pkcs5_pbkdf2(
-    const char *pass, size_t pass_len, const uint8_t *salt,
-    size_t salt_len, uint8_t *key, size_t key_len, unsigned int rounds)
+int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
+    const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
+    uint32_t rounds)
 {
-    uint8_t *asalt, obuf[HMACSHA512_DIGEST_LENGTH];
-    uint8_t d1[HMACSHA512_DIGEST_LENGTH], d2[HMACSHA512_DIGEST_LENGTH];
-    unsigned int i, j;
-    unsigned int count;
-    size_t r;
+    size_t length;
+    uint8_t* asalt;
+    size_t asalt_size;
+    uint8_t buffer[HMACSHA512_DIGEST_LENGTH];
+    uint8_t digest1[HMACSHA512_DIGEST_LENGTH];
+    uint8_t digest2[HMACSHA512_DIGEST_LENGTH];
 
-    if (rounds < 1 || key_len == 0)
-        return -1;
-    if (salt_len == 0 || salt_len > SIZE_MAX - 4)
-        return -1;
-    if ((asalt = malloc(salt_len + 4)) == NULL)
+    if (rounds == 0 || key_length == 0)
         return -1;
 
-    memcpy(asalt, salt, salt_len);
+    if (salt_length == 0 || salt_length > SIZE_MAX - 4)
+        return -1;
 
-    for (count = 1; key_len > 0; count++) {
-        asalt[salt_len + 0] = (count >> 24) & 0xff;
-        asalt[salt_len + 1] = (count >> 16) & 0xff;
-        asalt[salt_len + 2] = (count >> 8) & 0xff;
-        asalt[salt_len + 3] = count & 0xff;
-        HMACSHA512(asalt, salt_len + 4, pass, pass_len, d1);
-        memcpy(obuf, d1, sizeof(obuf));
+    asalt_size = salt_length + 4;
+    asalt = malloc(asalt_size);
+    if (asalt == NULL)
+        return -1;
 
-        for (i = 1; i < rounds; i++) {
-            HMACSHA512(d1, sizeof(d1), pass, pass_len, d2);
-            memcpy(d1, d2, sizeof(d1));
-            for (j = 0; j < sizeof(obuf); j++)
-                obuf[j] ^= d1[j];
+    memcpy(asalt, salt, salt_length);
+    for (uint32_t count = 1; key_length > 0; count++)
+    {
+        asalt[salt_length + 0] = (count >> 24) & 0xff;
+        asalt[salt_length + 1] = (count >> 16) & 0xff;
+        asalt[salt_length + 2] = (count >> 8) & 0xff;
+        asalt[salt_length + 3] = (count >> 0) & 0xff;
+        HMACSHA512(asalt, asalt_size, passphrase, passphrase_length, digest1);
+        memcpy(buffer, digest1, sizeof(buffer));
+
+        for (uint32_t round = 0; round < rounds; round++)
+        {
+            HMACSHA512(digest1, sizeof(digest1), passphrase, passphrase_length,
+                digest2);
+            memcpy(digest1, digest2, sizeof(digest1));
+            memcpy(buffer, digest1, sizeof(buffer));
         }
 
-        r = MINIMUM(key_len, HMACSHA512_DIGEST_LENGTH);
-        memcpy(key, obuf, r);
-        key += r;
-        key_len -= r;
+        length = min(key_length, sizeof(buffer));
+        memcpy(key, buffer, length);
+        key += length;
+        key_length -= length;
     };
-    explicit_bzero(asalt, salt_len + 4);
+
+    zeroize(digest1, sizeof(digest1));
+    zeroize(digest2, sizeof(digest2));
+    zeroize(buffer, sizeof(buffer));
+    zeroize(asalt, asalt_size);
     free(asalt);
-    explicit_bzero(d1, sizeof(d1));
-    explicit_bzero(d2, sizeof(d2));
-    explicit_bzero(obuf, sizeof(obuf));
 
     return 0;
 }
