@@ -58,7 +58,6 @@ src_libbitcoin_la_LIBADD = \
     ${secp256k1_LIBS} ${rt_LIBS}
 
 bitcoin_includedir = ${includedir}/bitcoin
-
 bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin.hpp
 
