@@ -58,7 +58,6 @@ src_libbitcoin_la_LIBADD = \
     ${secp256k1_LIBS} ${rt_LIBS}
 
 bitcoin_includedir = ${includedir}/bitcoin
-
 bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin.hpp
 
@@ -128,8 +127,8 @@ bitcoin_bitcoin_network_include_HEADERS = \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
-bitcoin_bitcoin_util_includedir = ${includedir}/bitcoin/bitcoin/utility
-bitcoin_bitcoin_util_include_HEADERS = \
+bitcoin_bitcoin_utility_includedir = ${includedir}/bitcoin/bitcoin/utility
+bitcoin_bitcoin_utility_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
