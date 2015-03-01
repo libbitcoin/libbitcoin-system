@@ -20,13 +20,14 @@
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
+namespace bip39 {
 
 // Word lists from: 
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
-const bip39_dictionary_type bip39_dictionary =
+const dictionary_type dictionary =
 {
     {
-        { bip39_language::en },
+        { language::en },
         {
             "abandon",
             "ability",
@@ -2079,7 +2080,7 @@ const bip39_dictionary_type bip39_dictionary =
         }
     },
     {
-        { bip39_language::es },
+        { language::es },
         {
             "Ã¡baco",
             "abdomen",
@@ -4132,7 +4133,7 @@ const bip39_dictionary_type bip39_dictionary =
         }
     },
     {
-        { bip39_language::ja },
+        { language::ja },
         {
             "あいこくしん",
             "あいさつ",
@@ -6185,7 +6186,7 @@ const bip39_dictionary_type bip39_dictionary =
         }
     },
     {
-        { bip39_language::zh_Hans },
+        { language::zh_Hans },
         {
             "的",
             "一",
@@ -8239,4 +8240,5 @@ const bip39_dictionary_type bip39_dictionary =
     }
 };
 
+} // namespace bip39
 } // namespace libbitcoin
