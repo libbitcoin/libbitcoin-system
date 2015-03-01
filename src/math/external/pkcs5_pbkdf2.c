@@ -27,14 +27,12 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
     uint32_t rounds)
 {
-    size_t length;
     uint8_t* asalt;
     size_t asalt_size;
-    uint32_t count, round, buffer_index;
+    size_t count, round, index, length;
     uint8_t buffer[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest1[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest2[HMACSHA512_DIGEST_LENGTH];
-    size_t buffer_size = sizeof(buffer);
 
     if (rounds == 0 || key_length == 0)
         return -1;
@@ -55,18 +53,18 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
         asalt[salt_length + 2] = (count >> 8) & 0xff;
         asalt[salt_length + 3] = (count >> 0) & 0xff;
         HMACSHA512(asalt, asalt_size, passphrase, passphrase_length, digest1);
-        memcpy(buffer, digest1, buffer_size);
+        memcpy(buffer, digest1, sizeof(buffer));
 
         for (round = 1; round < rounds; round++)
         {
             HMACSHA512(digest1, sizeof(digest1), passphrase, passphrase_length,
                 digest2);
             memcpy(digest1, digest2, sizeof(digest1));
-            for (buffer_index = 0; buffer_index < buffer_size; buffer_index++)
-                buffer[buffer_index] ^= digest1[buffer_index];
+            for (index = 0; index < sizeof(buffer); index++)
+                buffer[index] ^= digest1[index];
         }
 
-        length = (key_length < buffer_size ? key_length : buffer_size);
+        length = (key_length < sizeof(buffer) ? key_length : sizeof(buffer));
         memcpy(key, buffer, length);
         key += length;
         key_length -= length;
@@ -74,7 +72,7 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
 
     zeroize(digest1, sizeof(digest1));
     zeroize(digest2, sizeof(digest2));
-    zeroize(buffer, buffer_size);
+    zeroize(buffer, sizeof(buffer));
     zeroize(asalt, asalt_size);
     free(asalt);
 
