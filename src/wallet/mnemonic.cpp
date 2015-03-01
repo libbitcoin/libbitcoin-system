@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <boost/locale.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
