@@ -20,18 +20,18 @@
 #include <bitcoin/bitcoin/math/external/zeroize.h>
 
 #ifdef __BIG_ENDIAN__
-# define SHA1_BIG_ENDIAN
+    #define SHA1_BIG_ENDIAN
 #elif defined __LITTLE_ENDIAN__
-/* override */
+    /* override */
 #elif defined __BYTE_ORDER
-# if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
-# define SHA1_BIG_ENDIAN
-# endif
+    #if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
+        #define SHA1_BIG_ENDIAN
+    #endif
 #else // ! defined __LITTLE_ENDIAN__
-# include <endian.h> // machine/endian.h
-# if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
-#  define SHA1_BIG_ENDIAN
-# endif
+    #include <endian.h> // machine/endian.h
+    #if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
+        #define SHA1_BIG_ENDIAN
+    #endif
 #endif
 
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))

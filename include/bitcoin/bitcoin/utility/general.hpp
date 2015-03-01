@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_HPP
-#define LIBBITCOIN_CONFIG_HPP
+#ifndef LIBBITCOIN_GENERAL_HPP
+#define LIBBITCOIN_GENERAL_HPP
 
 #include <iterator>
 #include <string>
@@ -40,7 +40,47 @@ namespace libbitcoin {
  * @return             The position or -1 if not found.
  */
 template <typename Pair, typename Key>
-int find_pair_position(const std::vector<Pair>& list, const Key& key);
+int find_pair_position(const std::vector<const Pair>& list, Key& key);
+
+/**
+ * Find the position of an element in an ordered list.
+ * @param      <Element>  The type of list member elements.
+ * @param[in]  list       The list to search.
+ * @param[in]  value      The value of the element to find.
+ * @return                The position or -1 if not found.
+ */
+template <typename Element>
+int find_position(const std::vector<Element>& list, Element& value);
+
+/**
+ * Find the position of an element in an ordered list.
+ * @param      <Element>  The type of list member elements.
+ * @param[in]  list       The list to search.
+ * @param[in]  value      The value of the element to find.
+ * @return                The position or -1 if not found.
+ */
+template <typename Element>
+int find_position(const std::vector<const Element>& list, Element& value);
+
+/**
+ * Find the position of an element in an ordered list.
+ * @param      <Element>  The type of list member elements.
+ * @param[in]  list       The list to search.
+ * @param[in]  value      The value of the element to find.
+ * @return                The position or -1 if not found.
+ */
+template <typename Element>
+int find_position(const std::vector<Element>& list, const Element& value);
+
+/**
+ * Find the position of an element in an ordered list.
+ * @param      <Element>  The type of list member elements.
+ * @param[in]  list       The list to search.
+ * @param[in]  value      The value of the element to find.
+ * @return                The position or -1 if not found.
+ */
+template <typename Element>
+int find_position(const std::vector<const Element>& list, const Element& value);
 
 /**
  * Avoid the ternary (just for fun). Must precede tempalte usage for gcc build.
@@ -68,7 +108,7 @@ Consequent if_else(bool antecedent, const Consequent consequent,
  */
 template<typename Type, typename Predicate>
 typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
-    Type const& element, Predicate predicate);
+    const Type& element, Predicate predicate);
 
 /**
  * Join a list of strings into a single string, in order.
@@ -78,6 +118,16 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
  */
 BC_API std::string join(const std::vector<std::string>& words,
     const std::string& delimiter=BC_SENTENCE_DELIMITER);
+
+/**
+ * Join a list of strings into a single string, in order.
+ * @param[in]  words      The list of strings to join.
+ * @param[in]  delimiter  The delimiter, defaults to BC_SENTENCE_DELIMITER.
+ * @return                The resulting string.
+ */
+/* FIXME: Not building with g++ */
+/* BC_API std::string join(const std::vector<const std::string>& words, */
+/*     const std::string& delimiter=BC_SENTENCE_DELIMITER); */
 
 /**
  * Split a list of strings into a string vector string, in order, white space

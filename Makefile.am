@@ -1,7 +1,7 @@
 #
 # documentation
 #
-doc_DATA = README.md INSTALL COPYING doc/README.tutorial
+doc_DATA = README INSTALL COPYING
 
 #doc_sphinxdir = ${docdir}/sphinx/
 #doc_sphinx_DATA = \
@@ -58,7 +58,6 @@ src_libbitcoin_la_LIBADD = \
     ${secp256k1_LIBS} ${rt_LIBS}
 
 bitcoin_includedir = ${includedir}/bitcoin
-
 bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin.hpp
 
@@ -128,8 +127,8 @@ bitcoin_bitcoin_network_include_HEADERS = \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
-bitcoin_bitcoin_util_includedir = ${includedir}/bitcoin/bitcoin/utility
-bitcoin_bitcoin_util_include_HEADERS = \
+bitcoin_bitcoin_utility_includedir = ${includedir}/bitcoin/bitcoin/utility
+bitcoin_bitcoin_utility_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
@@ -156,6 +155,7 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/address.hpp \
+    include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
@@ -202,11 +202,11 @@ src_libbitcoin_la_SOURCES = \
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
-    src/wallet/address.cpp \
+    src/wallet/address.cpp \ \
+    src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
-    src/wallet/mnemonic-wordlists.cpp \
     src/wallet/mnemonic.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp

@@ -83,6 +83,7 @@
     <ClCompile Include="..\..\..\..\src\math\ec_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha256.c" />
     <ClCompile Include="..\..\..\..\src\math\external\hmac_sha512.c" />
+    <ClCompile Include="..\..\..\..\src\math\external\pkcs5_pbkdf2.c" />
     <ClCompile Include="..\..\..\..\src\math\external\ripemd160.c" />
     <ClCompile Include="..\..\..\..\src\math\external\sha1.c" />
     <ClCompile Include="..\..\..\..\src\math\external\sha256.c" />
@@ -112,6 +113,7 @@
     <ClCompile Include="..\..\..\..\src\wallet\mnemonic.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\uri.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin.hpp" />
@@ -132,6 +134,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha256.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha512.h" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\pkcs5_pbkdf2.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\ripemd160.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha1.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha256.h" />
@@ -171,6 +174,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\key_formats.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\message.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri.hpp" />

@@ -230,6 +230,12 @@
     <ClCompile Include="..\..\..\..\src\formats\base85.cpp">
       <Filter>src\formats</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\pkcs5_pbkdf2.c">
+      <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -414,6 +420,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base85.hpp">
       <Filter>include\bitcoin\formats</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\pkcs5_pbkdf2.h">
+      <Filter>include\bitcoin\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
