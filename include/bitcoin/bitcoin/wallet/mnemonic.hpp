@@ -60,7 +60,7 @@ BC_API string_list create_mnemonic(data_slice entropy,
 /**
  * Convert a mnemonic and optional passphrase to a seed for use in seeding
  * wallet creation. The words must have been created using mnemonic encoding.
- * Any assphrase can be used and will change the resulting seed.
+ * Any passphrase can be used and will change the resulting seed.
  */
 BC_API data_chunk decode_mnemonic(const string_list& mnemonic,
     const std::string& passphrase="");
