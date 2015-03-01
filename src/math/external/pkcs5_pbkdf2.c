@@ -55,15 +55,14 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
         asalt[salt_length + 2] = (count >> 8) & 0xff;
         asalt[salt_length + 3] = (count >> 0) & 0xff;
         HMACSHA512(asalt, asalt_size, passphrase, passphrase_length, digest1);
-        memcpy(buffer, digest1, sizeof(buffer));
+        memcpy(buffer, digest1, buffer_size);
 
         for (round = 1; round < rounds; round++)
         {
             HMACSHA512(digest1, sizeof(digest1), passphrase, passphrase_length,
                 digest2);
             memcpy(digest1, digest2, sizeof(digest1));
-            for (buffer_index = 0; buffer_index < sizeof(buffer);
-                buffer_index++)
+            for (buffer_index = 0; buffer_index < buffer_size; buffer_index++)
                 buffer[buffer_index] ^= digest1[buffer_index];
         }
 
@@ -75,7 +74,7 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
 
     zeroize(digest1, sizeof(digest1));
     zeroize(digest2, sizeof(digest2));
-    zeroize(buffer, sizeof(buffer));
+    zeroize(buffer, buffer_size);
     zeroize(asalt, asalt_size);
     free(asalt);
 
