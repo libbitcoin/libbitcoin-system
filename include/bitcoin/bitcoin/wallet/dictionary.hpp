@@ -25,11 +25,12 @@
 #include <vector>
 
 namespace libbitcoin {
+namespace bip39 {
 
 /**
- * Bip-39 dictionary languages.
+ * Dictionary languages.
  */
-enum class bip39_language
+enum class language
 {
     en,
     es,
@@ -40,19 +41,19 @@ enum class bip39_language
 /**
  * Word list type for dictionary and mnemonics.
  */
-/* typedef std::vector<const std::string> string_list; */
 typedef std::vector<std::string> string_list;
 
 /**
- * Multilingual bip-39 word dictionary type.
+ * Multilingual word dictionary type.
  */
-typedef std::map<bip39_language, const string_list> bip39_dictionary_type;
+typedef std::map<language, const string_list> dictionary_type;
 
 /**
- * Multilingual bip-39 word dictionary.
+ * Multilingual word dictionary.
  */
-extern const bip39_dictionary_type bip39_dictionary;
+extern const dictionary_type dictionary;
 
+} // namespace bip39
 } // namespace libbitcoin
 
 #endif
