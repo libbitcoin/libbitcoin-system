@@ -23,13 +23,6 @@
 #include <bitcoin/bitcoin/math/external/hmac_sha512.h>
 #include <bitcoin/bitcoin/math/external/zeroize.h>
 
-#ifndef min
-#define min(a,b) \
-    ({ __typeof__ (a) _a = (a); \
-    __typeof__ (b) _b = (b); \
-    _a < _b ? _a : _b; })
-#endif
-
 int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
     uint32_t rounds)
@@ -41,6 +34,7 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
     uint8_t buffer[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest1[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest2[HMACSHA512_DIGEST_LENGTH];
+    size_t buffer_size = sizeof(buffer);
 
     if (rounds == 0 || key_length == 0)
         return -1;
@@ -73,7 +67,7 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
                 buffer[buffer_index] ^= digest1[buffer_index];
         }
 
-        length = min(key_length, sizeof(buffer));
+        length = (key_length < buffer_size ? key_length : buffer_size);
         memcpy(key, buffer, length);
         key += length;
         key_length -= length;
