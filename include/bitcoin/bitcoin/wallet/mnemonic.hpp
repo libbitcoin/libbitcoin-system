@@ -20,37 +20,52 @@
 #ifndef LIBBITCOIN_MNEMONIC_HPP
 #define LIBBITCOIN_MNEMONIC_HPP
 
-#include <map>
 #include <string>
 #include <vector>
-
-#include <boost/algorithm/string/case_conv.hpp>
-
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
+namespace bip39 {
 
-const uint16_t max_word_count = 128;
-const uint16_t min_entropy_bits = 128;
-const uint16_t max_digest_buf_len = 512;
+/**
+ * A valid mnemonic word count is evenly divisible by this number.
+ */
+constexpr size_t word_multiple = 3;
 
-enum class bip39_language {
-    en, es, ja, zh
-};
+/**
+ * A valid seed byte count is evenly divisible by this number.
+ */
+constexpr size_t seed_multiple = 4;
 
-typedef std::vector<std::string> string_list;
-typedef std::map<bip39_language, string_list> dictionary;
+/**
+ * A valid mnemonic has at least this many words.
+ */
+constexpr size_t min_word_count = 12;
 
-// seed to mnemonic
-BC_API string_list encode_mnemonic(
-    /* data_slice seed, const std::string &passphrase="", */
-    data_slice seed, bip39_language language = bip39_language::en);
+/**
+ * A valid mnemonic has no more than this many words.
+ */
+constexpr size_t max_word_count = 128;
 
-// mnemonic to seed
-BC_API data_chunk decode_mnemonic(
-    const string_list &words, const std::string &passphrase = "");
+/**
+ * Create a new mnenomic (list of words) from provided entropy and a dictionary
+ * selection. The mnemonic can later be converted to a seed for use in wallet
+ * creation. Entropy byte count must be evenly divisible by 3.
+ */
+BC_API string_list create_mnemonic(data_slice entropy, 
+    bip39::language language=bip39::language::en);
 
+/**
+ * Convert a mnemonic and optional passphrase to a seed for use in seeding
+ * wallet creation. The words must have been created using mnemonic encoding.
+ * Any passphrase can be used and will change the resulting seed.
+ */
+BC_API data_chunk decode_mnemonic(const string_list& mnemonic,
+    const std::string& passphrase="");
+
+} // namespace bip39
 } // namespace libbitcoin
 
 #endif

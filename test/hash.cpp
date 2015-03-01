@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -105,6 +105,17 @@ BOOST_AUTO_TEST_CASE(sha512_hash_test)
     BOOST_REQUIRE_EQUAL(encode_base16(long_hash),
         "77c7ce9a5d86bb386d443bb96390faa120633158699c8844c30b13ab0bf92760"
         "b7e4416aea397db91b4ac0e5dd56b8ef7e4b066162ab1fdc088319ce6defc876");
+}
+
+BOOST_AUTO_TEST_CASE(pkcs5_pbkdf2_hmac_sha512_test)
+{
+    for (const pkcs5_pbkdf2_hmac_sha512_result& result: pkcs5_pbkdf2_tests)
+    {
+        long_hash data;
+        BOOST_REQUIRE(pkcs5_pbkdf2_hmac_sha512(result.passphrase,
+            result.salt, result.iterations, data));
+        BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

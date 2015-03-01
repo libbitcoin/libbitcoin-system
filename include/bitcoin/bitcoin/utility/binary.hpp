@@ -70,8 +70,8 @@ private:
     static uint8_t shift_block_right(uint8_t next, uint8_t current, uint8_t prior,
         size_type original_offset, size_type intended_offset);
 
-    size_t size_ = 0;
     data_chunk blocks_;
+    uint8_t final_block_excess_ = 0;
 };
 
 BC_API bool operator==(
