@@ -23,6 +23,7 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::bip39;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
@@ -30,20 +31,22 @@ BOOST_AUTO_TEST_CASE(entropy_to_mnemonic)
 {
     for (const mnemonic_result& result: entropy_to_mnemonic_tests)
     {
-        data_slice data = to_data_slice(result.input);
+        data_chunk data;
+        decode_base16(data, result.input);
         const auto words = create_mnemonic(data, bip39::language::en);
-        BOOST_REQUIRE(word_list.size());
+        BOOST_REQUIRE(words.size() > 0);
         BOOST_REQUIRE_EQUAL(join(words), result.result);
     }
 }
 
 BOOST_AUTO_TEST_CASE(mnemonic_to_seed)
 {
+    typedef std::vector<std::string> string_list;
     const auto passphrase = "TREZOR";
     for (const mnemonic_result& result: mnemonic_to_seed_tests)
     {
         const auto words = split(result.input);
-        const data = decode_mnemonic(words, passphrase);
+        data_chunk data = decode_mnemonic(words, passphrase);
         BOOST_REQUIRE(not data.empty());
         BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
     }

@@ -36,6 +36,7 @@ namespace bip39 {
 constexpr size_t bits_per_word = 11;
 constexpr size_t hmac_iterations = 2048;
 constexpr size_t dictionary_length = 2048;
+constexpr size_t entropy_bit_divisor = 32;
 
 // It would be nice if we could do this statically.
 static void validate_dictionary()
@@ -157,7 +158,7 @@ string_list create_mnemonic(data_slice entropy, bip39::language language)
     extend_data(chunk, hash);
 
     const size_t entropy_bits = (entropy.size() * byte_bits);
-    const size_t check_bits = (chunk.size() / bits_per_word);
+    const size_t check_bits = (entropy_bits / entropy_bit_divisor);
     const size_t total_bits = (entropy_bits + check_bits);
     const size_t word_count = (total_bits / bits_per_word);
 
