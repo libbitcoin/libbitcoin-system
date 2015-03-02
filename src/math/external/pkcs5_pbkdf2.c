@@ -25,16 +25,16 @@
 
 int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
-    uint32_t rounds)
+    size_t iterations)
 {
     uint8_t* asalt;
     size_t asalt_size;
-    size_t count, round, index, length;
+    size_t count, index, iteration, length;
     uint8_t buffer[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest1[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest2[HMACSHA512_DIGEST_LENGTH];
 
-    if (rounds == 0 || key_length == 0)
+    if (iterations == 0 || key_length == 0)
         return -1;
 
     if (salt_length == 0 || salt_length > SIZE_MAX - 4)
@@ -55,7 +55,7 @@ int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
         HMACSHA512(asalt, asalt_size, passphrase, passphrase_length, digest1);
         memcpy(buffer, digest1, sizeof(buffer));
 
-        for (round = 1; round < rounds; round++)
+        for (iteration = 1; iteration < iterations; iteration++)
         {
             HMACSHA512(digest1, sizeof(digest1), passphrase, passphrase_length,
                 digest2);

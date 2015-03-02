@@ -31,7 +31,7 @@ extern "C"
 // returns 0 if successful.
 int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
-    uint32_t rounds);
+    size_t iterations);
 
 #ifdef __cplusplus
 }
