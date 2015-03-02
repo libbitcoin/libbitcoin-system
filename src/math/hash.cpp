@@ -90,7 +90,8 @@ long_hash hmac_sha512_hash(data_slice data, data_slice key)
 bool pkcs5_pbkdf2_hmac_sha512(const std::string& passphrase, 
     data_slice salt, size_t iterations, long_hash& long_hash)
 {
-    return pkcs5_pbkdf2(passphrase.c_str(), passphrase.length(),
+    const auto passphrase_bytes = to_data_chunk(passphrase);
+    return pkcs5_pbkdf2(&passphrase_bytes[0], passphrase_bytes.size(),
         salt.data(), salt.size(), long_hash.data(), sizeof(long_hash),
         iterations) == 0;
 }
