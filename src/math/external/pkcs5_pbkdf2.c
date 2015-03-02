@@ -23,7 +23,7 @@
 #include <bitcoin/bitcoin/math/external/hmac_sha512.h>
 #include <bitcoin/bitcoin/math/external/zeroize.h>
 
-int pkcs5_pbkdf2(const char* passphrase, size_t passphrase_length,
+int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint8_t* key, size_t key_length,
     size_t iterations)
 {
