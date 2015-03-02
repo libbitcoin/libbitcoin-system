@@ -34,9 +34,9 @@ namespace bip39 {
 
 // BIP-39 private constants.
 constexpr size_t bits_per_word = 11;
-constexpr size_t hmac_iterations = 2048;
-constexpr size_t dictionary_length = 2048;
 constexpr size_t entropy_bit_divisor = 32;
+constexpr size_t hmac_iterations = 2048;
+DEBUG_ONLY(constexpr size_t dictionary_length = 2048;)
 
 // It would be nice if we could do this statically.
 static void validate_dictionary()
@@ -59,7 +59,7 @@ static const string_list& get_dictionary(bip39::language language)
 
     const auto it = bip39::dictionary.find(language);
 
-    // We should *always* find the language.
+    // Guards against lack of uniqueness in dictionary languages.
     BITCOIN_ASSERT(it != bip39::dictionary.end());
     return it->second;
 }
