@@ -101,7 +101,7 @@ BC_API long_hash hmac_sha512_hash(data_slice data, data_slice key);
  * pkcs5_pbkdf2_hmac_sha512(passphrase, salt, iterations)
  */
 BC_API bool pkcs5_pbkdf2_hmac_sha512(const std::string& passphrase,
-    data_slice salt, uint32_t iterations, long_hash& long_hash);
+    data_slice salt, size_t iterations, long_hash& long_hash);
 
 /**
  * Generate a typical bitcoin hash. This is the most widely used
