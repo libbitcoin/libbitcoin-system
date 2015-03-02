@@ -175,6 +175,7 @@ BOOST_OPTIONS_GCC=\
 "--disable-icu "\
 "--with-date_time "\
 "--with-filesystem "\
+"--with-locale "\
 "--with-program_options "\
 "--with-regex "\
 "--with-system "\
@@ -195,6 +196,7 @@ BOOST_OPTIONS_CLANG=\
 "--disable-icu "\
 "--with-date_time "\
 "--with-filesystem "\
+"--with-locale "\
 "--with-program_options "\
 "--with-regex "\
 "--with-system "\
