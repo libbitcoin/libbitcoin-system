@@ -30,8 +30,9 @@ struct hash_result
 
 struct pkcs5_pbkdf2_hmac_sha512_result
 {
+    std::string passphrase, salt;
     size_t iterations;
-    std::string passphrase, salt, result;
+    std::string result;
 };
 
 typedef std::vector<hash_result> hash_result_list;
@@ -139,9 +140,7 @@ pkcs5_pbkdf2_hmac_sha512_result_list pkcs5_pbkdf2_hmac_sha512_tests{{
     {"password", "salt", 2, "e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e"},
     {"password", "salt", 4096, "d197b1b33db0143e018b12f3d1d1479e6cdebdcc97c5c0f87f6902e072f457b5143f30602641b3d55cd335988cb36b84376060ecd532e039b742a239434af2d5"},
     {"passwordPASSWORDpassword", "saltSALTsaltSALTsaltSALTsaltSALTsalt", 4096, "8c0511f4c6e597c6ac6315d8f0362e225f3c501495ba23b868c005174dc4ee71115b59f9e60cd9532fa33e0f75aefe30225c583a186cd82bd4daea9724a3d3b8"},
-    {"password", "NaCL", 1, "73decfa58aa2e84f94771a75736bb88bd3c7b38270cfb50cb390ed78b305656af8148e52452b2216b2b8098b761fc6336060a09f76415e9f71ea47f9e9064306"},
-    {"pass\0word", "sa\0lt", 1, "71a0ec842abd5c678bcfd145f09d83522f93361560563c4d0d63b88329871090e76604a49af08fe7c9f57156c8790996b20f06bc535e5ab5440df7e878296fa7"},
-    {"passwordPASSWORDpassword", "salt\0\0\0", 50, "016871a4c4b75f96857fd2b9f8ca28023b30ee2a39f5adcac8c9375f9bda1ccd1b6f0b2fc3adda505412e79d890056c62e524c7d51154b1a8534575bd02dee39"},
+    {"password", "NaCL", 1, "73decfa58aa2e84f94771a75736bb88bd3c7b38270cfb50cb390ed78b305656af8148e52452b2216b2b8098b761fc6336060a09f76415e9f71ea47f9e9064306"}
 }};
 
 

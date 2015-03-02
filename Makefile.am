@@ -271,6 +271,7 @@ test_libbitcoin_test_SOURCES = \
     test/key_formats.cpp \
     test/main.cpp \
     test/message.cpp \
+    test/mnemonic.cpp \
     test/parameter.cpp \
     test/printer.cpp \
     test/script_number.cpp \

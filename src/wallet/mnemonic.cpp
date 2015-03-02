@@ -19,237 +19,177 @@
  */
 #include <bitcoin/bitcoin/wallet/mnemonic.hpp>
 
-#include <boost/random.hpp>
-#include <boost/locale.hpp>
-
 #include <algorithm>
 #include <cstdint>
-#include <iostream>
+#include <boost/locale.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/general.hpp>
-#include <bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h>
+#include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
+namespace bip39 {
 
-namespace bip39_word_lists {
-    extern string_list common_words_ENGLISH;
-    extern string_list common_words_SPANISH;
-    extern string_list common_words_JAPANESE;
-    extern string_list common_words_CHINESE;
-}
+// BIP-39 private constants.
+constexpr size_t bits_per_word = 11;
+constexpr size_t hmac_iterations = 2048;
+constexpr size_t dictionary_length = 2048;
+constexpr size_t entropy_bit_divisor = 32;
 
-static dictionary master_dictionary;
-
-// populate master dictionary with common word lists of requested
-// supported languages
-static void initialize_master_dictionary(bip39_language language)
+// It would be nice if we could do this statically.
+static void validate_dictionary()
 {
-    if (master_dictionary.find(language) == master_dictionary.end()) {
-        switch(language) {
-            case bip39_language::ja:
-                master_dictionary[language] =
-                    bip39_word_lists::common_words_JAPANESE;
-                break;
-            case bip39_language::es:
-                master_dictionary[language]  =
-                    bip39_word_lists::common_words_SPANISH;
-                break;
-            case bip39_language::zh:
-                master_dictionary[language]  =
-                    bip39_word_lists::common_words_CHINESE;
-                break;
-            case bip39_language::en:
-            default:
-                master_dictionary[language]  =
-                    bip39_word_lists::common_words_ENGLISH;
-                break;
-        }
+    BITCOIN_ASSERT_MSG(dictionary.size() == sizeof(bip39::language),
+        "The dictionary does not have the required number of languages.");
+
+#ifndef NDEBUG
+    for (const auto& dictionary: bip39::dictionary)
+    {
+        BITCOIN_ASSERT_MSG(dictionary.second.size() == dictionary_length,
+            "A dictionary does not have the required number of elements.");
     }
-    BITCOIN_ASSERT(not master_dictionary.empty());
+#endif
 }
 
-static bip39_language detect_language_of_words(const string_list& words)
+static const string_list& get_dictionary(bip39::language language)
 {
-    bip39_language languages[] = {
-        bip39_language::en, bip39_language::ja,
-        bip39_language::zh, bip39_language::es
-    };
+    validate_dictionary();
 
-    std::string first_word = words[0];
-    for(auto language : languages) {
-        initialize_master_dictionary(language);
-        string_list& word_list = master_dictionary[language];
-        BITCOIN_ASSERT(word_list.size() == 2048);
-        if (std::find(word_list.begin(), word_list.end(), first_word) !=
-            word_list.end()) {
-            return language;
-        }
-    }
-    BITCOIN_ASSERT(not master_dictionary.empty());
-    return bip39_language::en;
+    const auto it = bip39::dictionary.find(language);
+
+    // We should *always* find the language.
+    BITCOIN_ASSERT(it != bip39::dictionary.end());
+    return it->second;
 }
 
-static string_list& get_common_words(bip39_language language)
+static bip39::language get_language(const string_list& words)
 {
-    if (master_dictionary.find(language) == master_dictionary.end()) {
-        initialize_master_dictionary(language);
-    }
-    BITCOIN_ASSERT(master_dictionary.find(language) !=
-                   master_dictionary.end());
-    return master_dictionary[language];
+    validate_dictionary();
+
+    if (words.empty())
+        return bip39::language::en;
+
+    const auto& first_word = words.front();
+
+    for (const auto& dictionary : bip39::dictionary)
+        if (find_position(dictionary.second, first_word) != -1)
+            return dictionary.first;
+
+    return bip39::language::en;
 }
 
-static std::string normalize_string(std::string str)
+static std::string normalize_nfkd(const std::string& value)
 {
-    boost::locale::generator gen;
-    std::locale::global(gen(""));
-
-    return boost::locale::normalize(
-        str, boost::locale::norm_type::norm_nfkd);
+    using namespace boost::locale;
+    const generator locale;
+    return normalize(value, norm_type::norm_nfkd, locale(""));
 }
 
-
-static void pkcs5_pbkdf2_hmac_sha512(
-    std::string passphrase, std::string salt,
-    int iterations, data_chunk& seed, unsigned int output_len)
+static uint8_t bip39_shift(size_t bit)
 {
-    unsigned int i;
-    unsigned char digest[max_digest_buf_len] = {0};
-
-    BITCOIN_ASSERT(output_len < max_digest_buf_len);
-
-    const char *pptr = (const char *)passphrase.c_str();
-    const unsigned char *sptr = (const unsigned char *)salt.c_str();
-
-    pkcs5_pbkdf2(pptr, passphrase.length(), sptr, salt.length(),
-                 (unsigned char *)digest, output_len, iterations);
-
-    for (i = 0; i < output_len; i++) {
-        seed.push_back(digest[i]);
-    }
+    return (1 << (byte_bits - (bit % byte_bits) - 1));
 }
 
-static inline uint16_t index_of(const std::string& word, string_list& common_words)
-{
-    BITCOIN_ASSERT(common_words != nullptr);
-    return std::find(common_words.begin(), common_words.end(), word)
-        - common_words.begin();
-}
-
-// extracts entropy/cksum from the mnemonic and rebuilds the word list
+// extracts entropy/checksum from the mnemonic and rebuilds the word list
 // for comparison; returns true if it's a match (valid), false otherwise
-static bool validate_mnemonic(
-    const string_list& words, string_list& common_words,
-    bip39_language language)
+static bool validate_mnemonic(const string_list& words,
+    const string_list& dictionary, bip39::language language)
 {
-    data_chunk seed;
-    uint8_t data[max_word_count] = {0};
-    unsigned int i, j, word_index, error_count = 0;
-    unsigned int bit_index = 0, word_count = words.size();
+    const auto word_count = words.size();
+    if ((word_count < min_word_count) || (word_count > max_word_count))
+        return false;
 
-    BITCOIN_ASSERT(common_words.size() == 2048);
-    BITCOIN_ASSERT((word_count >= 12) && (word_count < max_word_count));
+    size_t bit = 0;
+    data_chunk seed(max_word_count, 0);
 
-    for(i = 0; i < word_count; i++) {
-        word_index = index_of(words[i], common_words);
-        if (word_index > 2047) {
-            break;
-        }
-        if (common_words[word_index] != words[i]) {
-            break;
-        }
-        for (j = 0; j < 11; j++) {
-            if (word_index & (1 << (10 - j))) {
-                data[bit_index / 8] |= 1 << (7 - (bit_index % 8));
+    for (const auto& word: words)
+    {
+        const auto position = find_position(dictionary, word);
+        if (position == -1)
+            return false;
+
+        for (size_t loop = 0; loop < bits_per_word; loop++, bit++)
+        {
+            if (position & (1 << (bits_per_word - loop - 1)))
+            {
+                const auto byte = bit / byte_bits;
+                seed[byte] |= bip39_shift(bit);
             }
-            bit_index++;
         }
     }
-    BITCOIN_ASSERT(bit_index == (word_count * 11));
 
-    for(i = 0; i < ((word_count * 11) / 8); i++) {
-        seed.push_back(data[i]);
-    }
+    const auto size = bit / byte_bits;
+    seed.resize(size);
 
-    string_list test_mnemonic = encode_mnemonic(seed, language);
-    if (words.size() == test_mnemonic.size()) {
-        unsigned int i;
-        for(i = 0; i < words.size(); i++) {
-            error_count |= (words[i] != test_mnemonic[i]);
-        }
-    }
-    return (error_count == 0);
+    const auto mnemonic = create_mnemonic(seed, language);
+    return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
 
-string_list encode_mnemonic(data_slice seed, bip39_language language)
+data_chunk decode_mnemonic(const string_list& mnemonic,
+    const std::string& passphrase)
 {
-    string_list result;
-    unsigned int i, j;
-    uint16_t index = 0, bit_index;
+    const auto language = get_language(mnemonic);
+    const auto& dictionary = get_dictionary(language);
 
-    BITCOIN_ASSERT((seed.size() % 4) == 0);
+    if (!validate_mnemonic(mnemonic, dictionary, language))
+        return data_chunk();
 
-    data_chunk bip39data = to_data_chunk(seed);
-    hash_digest hash = sha256_hash(bip39data);
-    for(i = 0; i < hash.size(); i++) {
-        bip39data.push_back(hash[i]);
-    }
+    const auto sentence = join(mnemonic);
+    const auto salt = normalize_nfkd("mnemonic" + passphrase);
+    const auto salt_chunk = to_data_chunk(salt);
 
-    string_list common_words = get_common_words(language);
-    BITCOIN_ASSERT(common_words.size() == 2048);
+    long_hash hash;
+    if (pkcs5_pbkdf2_hmac_sha512(sentence, salt_chunk, hmac_iterations, hash))
+        return to_data_chunk(hash);
 
-    unsigned int num_seed_bits = (seed.size() * 8);
-    unsigned int cksum_bits = (bip39data.size() / 4);
-    BITCOIN_ASSERT(((num_seed_bits + cksum_bits) % 11) == 0);
-
-    unsigned int word_count = ((num_seed_bits + cksum_bits) / 11);
-    BITCOIN_ASSERT((word_count % 3) == 0);
-
-    for(i = 0; i < word_count; i++) {
-        for (j = 0; j < 11; j++) {
-            bit_index = (i * 11 + j);
-            index <<= 1;
-            index += (bip39data[bit_index / 8] &
-                      (1 << (7 - (bit_index % 8)))) > 0;
-        }
-        if (index > 2047) {
-            break;
-        }
-        result.push_back(common_words[index]);
-        index = 0;
-    }
-    BITCOIN_ASSERT(result.size() == (num_bits / 11));
-
-    return result;
+    return data_chunk();
 }
 
-data_chunk decode_mnemonic(
-    const string_list& words, const std::string& passphrase)
+string_list create_mnemonic(data_slice entropy, bip39::language language)
 {
-    data_chunk seed;
-    const int output_len = 64;
-    const int num_iterations = 2048;
+    if ((entropy.size() % seed_multiple) != 0)
+        return string_list();
 
-    std::string salt = normalize_string("mnemonic" + passphrase);
+    const auto& dictionary = get_dictionary(language);
+    const auto hash = sha256_hash(entropy);
+    auto chunk = to_data_chunk(entropy);
+    extend_data(chunk, hash);
 
-    bip39_language language = detect_language_of_words(words);
-    string_list common_words = get_common_words(language);
-    BITCOIN_ASSERT(common_words.size() == 2048);
+    const size_t entropy_bits = (entropy.size() * byte_bits);
+    const size_t check_bits = (entropy_bits / entropy_bit_divisor);
+    const size_t total_bits = (entropy_bits + check_bits);
+    const size_t word_count = (total_bits / bits_per_word);
 
-    if (!validate_mnemonic(words, common_words, language)) {
-        return seed;
+    BITCOIN_ASSERT((total_bits % bits_per_word) == 0);
+    BITCOIN_ASSERT((word_count % word_multiple) == 0);
+
+    size_t bit = 0;
+    string_list words;
+
+    for (size_t word = 0; word < word_count; word++)
+    {
+        size_t position = 0;
+        for (size_t loop = 0; loop < bits_per_word; loop++)
+        {
+            bit = (word * bits_per_word + loop);
+            position <<= 1;
+
+            const auto byte = bit / byte_bits;
+
+            if ((chunk[byte] & bip39_shift(bit)) > 0)
+                position++;
+        }
+
+        BITCOIN_ASSERT(position < dictionary_length);
+        words.push_back(dictionary[position]);
     }
 
-    std::string mnemonic_passphrase = join(words, " ");
-
-    pkcs5_pbkdf2_hmac_sha512(
-        mnemonic_passphrase, salt, num_iterations, seed, output_len);
-
-    return seed;
+    BITCOIN_ASSERT(words.size() == (bit / bits_per_word));
+    return words;
 }
 
+} // namespace bip39
 } // namespace libbitcoin
 
