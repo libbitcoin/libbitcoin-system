@@ -154,6 +154,10 @@ AX_BOOST_SYSTEM
 AC_SUBST([boost_system_CFLAGS], [])
 AC_SUBST([boost_system_LIBS], [${BOOST_SYSTEM_LIB}])
 
+AX_BOOST_THREAD
+AC_SUBST([boost_thread_CFLAGS], [])
+AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
+
 AS_IF([test x$with_tests = xyes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK
      AC_SUBST([boost_unit_test_framework_CFLAGS], [])
