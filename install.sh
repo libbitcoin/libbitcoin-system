@@ -179,6 +179,7 @@ BOOST_OPTIONS_GCC=\
 "--with-regex "\
 "--with-system "\
 "--with-test "\
+"--with-thread "\
 "-d0 "\
 "-q "\
 "${prefix} "\
@@ -199,6 +200,7 @@ BOOST_OPTIONS_CLANG=\
 "--with-regex "\
 "--with-system "\
 "--with-test "\
+"--with-thread "\
 "-d0 "\
 "-q "\
 "${prefix} "\
