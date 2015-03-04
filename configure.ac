@@ -170,6 +170,17 @@ AX_PTHREAD(
      AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])],
         [AC_MSG_ERROR([pthread library is required but was not found.])])
 
+# Require icu and output ${icu_LIBS}.
+#------------------------------------------------------------------------------
+AC_PATH_PROG([ICU_CONFIG], "icu-config", [], $PATH)
+if test [ -x "$ICU_CONFIG" ]
+    then
+        icu_LIBS=`$ICU_CONFIG --ldflags`
+        AC_SUBST([icu_LIBS])
+else
+    AC_MSG_ERROR([[cannot find icu-config]])
+fi
+
 # Require rt if on linux and output ${rt_CFLAGS} and ${rt_LIBS}.
 #------------------------------------------------------------------------------
 AC_SUBST([rt_CFLAGS], [])
