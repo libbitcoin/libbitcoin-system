@@ -186,7 +186,7 @@ string_list create_mnemonic(data_slice entropy, bip39::language language)
         words.push_back(dictionary[position]);
     }
 
-    BITCOIN_ASSERT(words.size() == (bit / bits_per_word));
+    BITCOIN_ASSERT(words.size() == ((bit + 1) / bits_per_word));
     return words;
 }
 
