@@ -172,7 +172,6 @@ echo "  with_pkgconfigdir: $with_pkgconfigdir"
 BOOST_OPTIONS_GCC=\
 "threading=multi "\
 "variant=release "\
-"--disable-icu "\
 "--with-date_time "\
 "--with-filesystem "\
 "--with-locale "\
@@ -180,6 +179,7 @@ BOOST_OPTIONS_GCC=\
 "--with-regex "\
 "--with-system "\
 "--with-test "\
+"--with-thread "\
 "-d0 "\
 "-q "\
 "${prefix} "\
@@ -193,7 +193,6 @@ BOOST_OPTIONS_CLANG=\
 "linkflags=-stdlib=${boost_stdlib} "\
 "threading=multi "\
 "variant=release "\
-"--disable-icu "\
 "--with-date_time "\
 "--with-filesystem "\
 "--with-locale "\
@@ -201,6 +200,7 @@ BOOST_OPTIONS_CLANG=\
 "--with-regex "\
 "--with-system "\
 "--with-test "\
+"--with-thread "\
 "-d0 "\
 "-q "\
 "${prefix} "\

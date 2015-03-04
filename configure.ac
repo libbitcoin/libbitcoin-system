@@ -66,7 +66,7 @@ AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 #==============================================================================
 # Implement --with-pkgconfigdir and output ${pkgconfigdir}.
 #------------------------------------------------------------------------------
-AC_MSG_CHECKING(--with-pkgconfigdir option)
+AC_MSG_CHECKING([--with-pkgconfigdir option])
 AC_ARG_WITH([pkgconfigdir],
     AS_HELP_STRING([--with-pkgconfigdir=PATH],
         [Path to pkgconfig directory. @<:@default=${libdir}/pkgconfig@:>@]),
@@ -77,7 +77,7 @@ AC_SUBST([pkgconfigdir])
 
 # Implement --with-tests and declare WITH_TESTS.
 #------------------------------------------------------------------------------
-AC_MSG_CHECKING(--with-tests option)
+AC_MSG_CHECKING([--with-tests option])
 AC_ARG_WITH([tests],
     AS_HELP_STRING([--with-tests],
         [Compile with unit tests. @<:@default=yes@:>@]),
@@ -88,7 +88,7 @@ AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 
 # Implement --enable-ndebug option and define NDEBUG.
 #------------------------------------------------------------------------------
-AC_MSG_CHECKING(--enable-ndebug option)
+AC_MSG_CHECKING([--enable-ndebug option])
 AC_ARG_ENABLE([ndebug],
     AS_HELP_STRING([--enable-ndebug],
         [Compile without debug assertions. @<:@default=yes@:>@]),
@@ -99,7 +99,7 @@ AS_IF([test x$enable_ndebug != xno], AC_DEFINE([NDEBUG]))
 
 # Implement --enable-testnet option and define ENABLE_TESTNET and output ${testnet}.
 #------------------------------------------------------------------------------
-AC_MSG_CHECKING(--enable-testnet option)
+AC_MSG_CHECKING([--enable-testnet option])
 AC_ARG_ENABLE([testnet],
     AS_HELP_STRING([--enable-testnet],
         [Compile for testnet (deprecated). @<:@default=no@:>@]),
@@ -116,47 +116,72 @@ AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.49.0 if in gcc.
+# Require Boost of at least version 1.49.0 if in gcc and output ${boost_CFLAGS} and ${boost_LIBS}.
 #------------------------------------------------------------------------------
-AS_CASE([${CC}], [*gcc*],
-    [AX_BOOST_BASE([1.49.0], [], [AC_MSG_ERROR(
-        [Boost 1.49.0 or later is required but was not found.])])])
+AS_CASE([${CC}], [*gcc*], [AX_BOOST_BASE([1.49.0], 
+    [AC_SUBST([boost_CFLAGS], [${BOOST_CPPFLAGS}])
+     AC_SUBST([boost_LIBS], [${BOOST_LDFLAGS}])],
+    [AC_MSG_ERROR([Boost 1.49.0 or later is required but was not found.])])])
 
-# Require Boost of at least version 1.54.0 if in clang.
+# Require Boost of at least version 1.54.0 if in clang and output ${boost_CFLAGS} and ${boost_LIBS}.
 #------------------------------------------------------------------------------
-AS_CASE([${CC}], [*clang*],
-    [AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
-        [Boost 1.54.0 or later is required but was not found.])])])
+AS_CASE([${CC}], [*clang*], [AX_BOOST_BASE([1.54.0], 
+    [AC_SUBST([boost_CFLAGS], [${BOOST_CPPFLAGS}])
+     AC_SUBST([boost_LIBS], [${BOOST_LDFLAGS}])],
+    [AC_MSG_ERROR([Boost 1.54.0 or later is required but was not found.])])])
 
 AX_BOOST_DATE_TIME
+AC_SUBST([boost_date_time_CFLAGS], [])
+AC_SUBST([boost_date_time_LIBS], [${BOOST_DATE_TIME_LIB}])
 
 AX_BOOST_FILESYSTEM
+AC_SUBST([boost_filesystem_CFLAGS], [])
+AC_SUBST([boost_filesystem_LIBS], [${BOOST_FILESYSTEM_LIB}])
 
 AX_BOOST_LOCALE
+AC_SUBST([boost_locale_CFLAGS], [])
+AC_SUBST([boost_locale_LIBS], [${BOOST_LOCALE_LIB}])
 
 AX_BOOST_PROGRAM_OPTIONS
+AC_SUBST([boost_program_options_CFLAGS], [])
+AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
 
 AX_BOOST_REGEX
+AC_SUBST([boost_regex_CFLAGS], [])
+AC_SUBST([boost_regex_LIBS], [${BOOST_REGEX_LIB}])
 
 AX_BOOST_SYSTEM
+AC_SUBST([boost_system_CFLAGS], [])
+AC_SUBST([boost_system_LIBS], [${BOOST_SYSTEM_LIB}])
 
-AS_IF([test x$with_tests = xyes], [AX_BOOST_UNIT_TEST_FRAMEWORK])
+AX_BOOST_THREAD
+AC_SUBST([boost_thread_CFLAGS], [])
+AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
 
-# Require rt if on linux and output ${rt_LIBS}.
+AS_IF([test x$with_tests = xyes],
+    [AX_BOOST_UNIT_TEST_FRAMEWORK
+     AC_SUBST([boost_unit_test_framework_CFLAGS], [])
+     AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])])
+
+# Require pthread and output ${pthread_CFLAGS} and ${pthread_LIBS}.
 #------------------------------------------------------------------------------
+AX_PTHREAD(
+    [AC_SUBST([pthread_CFLAGS], [${PTHREAD_CFLAGS}])
+     AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])],
+        [AC_MSG_ERROR([pthread library is required but was not found.])])
+
+# Require rt if on linux and output ${rt_CFLAGS} and ${rt_LIBS}.
+#------------------------------------------------------------------------------
+AC_SUBST([rt_CFLAGS], [])
 AS_CASE([${host_os}], [*linux*], 
     [AC_CHECK_LIB([rt],[clock_gettime],
-        [AC_SUBST([rt_LIBS], [-lrt])],
+        [AC_SUBST([rt_LIBS], [-lrt])], 
         [AC_SUBST([rt_LIBS], [])
-            AC_MSG_ERROR([rt library is required but was not found.])])])
+         AC_MSG_ERROR([rt library is required but was not found.])])])
 
 # Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS} and ${secp256k1_LIBS}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
-
-# Output ${boost_LIBS}
-#------------------------------------------------------------------------------
-AC_SUBST([boost_LIBS], ["-lboost_date_time -lboost_filesystem -lboost_locale -lboost_program_options -lboost_regex -lboost_system"])
 
 
 # Set flags.
