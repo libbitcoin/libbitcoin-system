@@ -355,7 +355,7 @@ build_from_tarball_boost()
 
     # Build and install (note that "$@" is not from script args).
     ./bootstrap.sh
-    ./b2 install -j $JOBS "$@"
+    ./b2 install boost.locale.icu=off -j $JOBS "$@"
 
     pop_directory
 }

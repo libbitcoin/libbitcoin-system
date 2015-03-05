@@ -27,7 +27,7 @@ AC_CONFIG_MACRO_DIR([m4])
 # specifically: AUTHORS, COPYING, INSTALL, NEWS, README and ChangeLog.
 AM_INIT_AUTOMAKE([subdir-objects])
 
-# Enable C and Posix extensions that may be disabled on certain platforms.
+# Enable C and POSIX extensions that may be disabled on certain platforms.
 AC_USE_SYSTEM_EXTENSIONS
 
 # Enable the archiver.
