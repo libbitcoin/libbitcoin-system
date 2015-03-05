@@ -154,10 +154,6 @@ AX_BOOST_SYSTEM
 AC_SUBST([boost_system_CFLAGS], [])
 AC_SUBST([boost_system_LIBS], [${BOOST_SYSTEM_LIB}])
 
-AX_BOOST_THREAD
-AC_SUBST([boost_thread_CFLAGS], [])
-AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
-
 AS_IF([test x$with_tests = xyes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK
      AC_SUBST([boost_unit_test_framework_CFLAGS], [])
@@ -169,17 +165,6 @@ AX_PTHREAD(
     [AC_SUBST([pthread_CFLAGS], [${PTHREAD_CFLAGS}])
      AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])],
         [AC_MSG_ERROR([pthread library is required but was not found.])])
-
-# Require icu and output ${icu_LIBS}.
-#------------------------------------------------------------------------------
-AC_PATH_PROG([ICU_CONFIG], "icu-config", [], $PATH)
-if test [ -x "$ICU_CONFIG" ]
-    then
-        icu_LIBS=`$ICU_CONFIG --ldflags`
-        AC_SUBST([icu_LIBS])
-else
-    AC_MSG_ERROR([[cannot find icu-config]])
-fi
 
 # Require rt if on linux and output ${rt_CFLAGS} and ${rt_LIBS}.
 #------------------------------------------------------------------------------
