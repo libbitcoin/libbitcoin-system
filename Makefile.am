@@ -49,7 +49,7 @@ lib_LTLIBRARIES = src/libbitcoin.la
 
 src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${boost_CFLAGS} ${boost_date_time_CFLAGS} ${boost_filesystem_CFLAGS} ${boost_locale_CFLAGS} ${boost_program_options_CFLAGS} ${boost_regex_CFLAGS} ${boost_system_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS} ${secp256k1_CFLAGS}
 
-src_libbitcoin_la_LIBADD = ${boost_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+src_libbitcoin_la_LIBADD = ${boost_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS} ${LIBICONV}
 
 bitcoin_includedir = ${includedir}/bitcoin
 bitcoin_include_HEADERS = \
@@ -216,7 +216,7 @@ check_PROGRAMS = test/libbitcoin_test
 
 test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include -I${srcdir}/test ${boost_CFLAGS} ${boost_date_time_CFLAGS} ${boost_filesystem_CFLAGS} ${boost_locale_CFLAGS} ${boost_program_options_CFLAGS} ${boost_regex_CFLAGS} ${boost_system_CFLAGS} ${boost_unit_test_framework_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS} ${secp256k1_CFLAGS}
 
-test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_unit_test_framework_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_unit_test_framework_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS} ${LIBICONV}
 
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
