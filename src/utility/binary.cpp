@@ -52,14 +52,17 @@ binary_type::binary_type(size_type size, data_slice blocks)
 
 void binary_type::resize(size_type size)
 {
-    size_type offset = size % bits_per_block;
-
+    final_block_excess_ = 0;
     blocks_.resize(blocks_size(size), 0);
-    final_block_excess_ = (offset > 0) ? (bits_per_block - offset) : 0;
+
+    size_type offset = size % bits_per_block;
 
     if (offset > 0)
     {
-        uint8_t mask = 0xFF << (bits_per_block - offset);
+        BITCOIN_ASSERT((bits_per_block - offset) <= max_uint8);
+        final_block_excess_ = static_cast<uint8_t>(bits_per_block - offset);
+
+        uint8_t mask = 0xFF << final_block_excess_;
         blocks_[blocks_.size() - 1] = blocks_[blocks_.size() - 1] & mask;
     }
 }
