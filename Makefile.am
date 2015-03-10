@@ -45,20 +45,13 @@ ACLOCAL_AMFLAGS = -I m4
 #
 # libraries
 #
-lib_LTLIBRARIES = \
-    src/libbitcoin.la
-    
-src_libbitcoin_la_CPPFLAGS = \
-    -I${srcdir}/include \
-    ${secp256k1_CFLAGS}
-    
-# The rt_LIBS symbol may be empty, keep on shared line.
-src_libbitcoin_la_LIBADD = \
-    ${boost_LIBS} \
-    ${secp256k1_LIBS} ${rt_LIBS}
+lib_LTLIBRARIES = src/libbitcoin.la
+
+src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${boost_CFLAGS} ${boost_date_time_CFLAGS} ${boost_filesystem_CFLAGS} ${boost_locale_CFLAGS} ${boost_program_options_CFLAGS} ${boost_regex_CFLAGS} ${boost_system_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS} ${secp256k1_CFLAGS}
+
+src_libbitcoin_la_LIBADD = ${boost_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS} ${LIBICONV}
 
 bitcoin_includedir = ${includedir}/bitcoin
-
 bitcoin_include_HEADERS = \
     include/bitcoin/bitcoin.hpp
 
@@ -116,7 +109,8 @@ bitcoin_bitcoin_math_external_include_HEADERS = \
     include/bitcoin/bitcoin/math/external/sha256.h \
     include/bitcoin/bitcoin/math/external/sha512.h \
     include/bitcoin/bitcoin/math/external/uint256.h \
-    include/bitcoin/bitcoin/math/external/zeroize.h
+    include/bitcoin/bitcoin/math/external/zeroize.h \
+    include/bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h
 
 bitcoin_bitcoin_network_includedir = ${includedir}/bitcoin/bitcoin/network
 bitcoin_bitcoin_network_include_HEADERS = \
@@ -127,8 +121,8 @@ bitcoin_bitcoin_network_include_HEADERS = \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
-bitcoin_bitcoin_util_includedir = ${includedir}/bitcoin/bitcoin/utility
-bitcoin_bitcoin_util_include_HEADERS = \
+bitcoin_bitcoin_utility_includedir = ${includedir}/bitcoin/bitcoin/utility
+bitcoin_bitcoin_utility_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
@@ -155,6 +149,7 @@ bitcoin_bitcoin_impl_utility_include_HEADERS = \
 bitcoin_bitcoin_wallet_includedir = ${includedir}/bitcoin/bitcoin/wallet
 bitcoin_bitcoin_wallet_include_HEADERS = \
     include/bitcoin/bitcoin/wallet/address.hpp \
+    include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
@@ -183,6 +178,7 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/sha256.c \
     src/math/external/sha512.c \
     src/math/external/zeroize.c \
+    src/math/external/pkcs5_pbkdf2.c \
     src/math/hash.cpp \
     src/math/hash_number.cpp \
     src/math/script_number.cpp \
@@ -200,7 +196,8 @@ src_libbitcoin_la_SOURCES = \
     src/utility/logger.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
-    src/wallet/address.cpp \
+    src/wallet/address.cpp \ \
+    src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
@@ -213,24 +210,13 @@ src_libbitcoin_la_SOURCES = \
 #
 if WITH_TESTS
 
-TESTS = \
-    test/libbitcoin_test
+TESTS = test/libbitcoin_test
 
-check_PROGRAMS = \
-    test/libbitcoin_test
+check_PROGRAMS = test/libbitcoin_test
 
-test_libbitcoin_test_CPPFLAGS = \
-    -I${srcdir}/include \
-    -I${srcdir}/test \
-    ${secp256k1_CFLAGS}
+test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include -I${srcdir}/test ${boost_CFLAGS} ${boost_date_time_CFLAGS} ${boost_filesystem_CFLAGS} ${boost_locale_CFLAGS} ${boost_program_options_CFLAGS} ${boost_regex_CFLAGS} ${boost_system_CFLAGS} ${boost_unit_test_framework_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS} ${secp256k1_CFLAGS}
 
-# The rt_LIBS symbol may be empty, keep on shared line.
-test_libbitcoin_test_LDADD = \
-    src/libbitcoin.la \
-    ${boost_LIBS} \
-    -lboost_unit_test_framework \
-    -lpthread \
-    ${secp256k1_LIBS} ${rt_LIBS}
+test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_unit_test_framework_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS} ${LIBICONV}
 
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
@@ -250,6 +236,7 @@ test_libbitcoin_test_SOURCES = \
     test/key_formats.cpp \
     test/main.cpp \
     test/message.cpp \
+    test/mnemonic.cpp \
     test/parameter.cpp \
     test/printer.cpp \
     test/script_number.cpp \
