@@ -195,6 +195,11 @@
 #include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
+#include <bitcoin/bitcoin/trie/binary_trie.hpp>
+#include <bitcoin/bitcoin/trie/trie_iterator.hpp>
+#include <bitcoin/bitcoin/trie/trie_reverse_iterator.hpp>
+#include <bitcoin/bitcoin/trie/trie_structure_node.hpp>
+#include <bitcoin/bitcoin/trie/trie_value_node.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
