@@ -95,6 +95,15 @@ BC_API long_hash sha512_hash(data_slice data);
 BC_API long_hash hmac_sha512_hash(data_slice data, data_slice key);
 
 /**
+ * Generate a pkcs5 pbkdf2 hmac sha512 hash. This hash function is used in
+ * bip39 mnemonics.
+ *
+ * pkcs5_pbkdf2_hmac_sha512(passphrase, salt, iterations)
+ */
+BC_API bool pkcs5_pbkdf2_hmac_sha512(const std::string& passphrase,
+    data_slice salt, size_t iterations, long_hash& long_hash);
+
+/**
  * Generate a typical bitcoin hash. This is the most widely used
  * hash function in Bitcoin.
  *

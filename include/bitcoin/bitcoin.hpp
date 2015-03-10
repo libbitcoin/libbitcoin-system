@@ -213,6 +213,7 @@
 #include <bitcoin/bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/dictionary.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
 #include <bitcoin/bitcoin/wallet/message.hpp>

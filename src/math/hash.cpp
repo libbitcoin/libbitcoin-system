@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <bitcoin/bitcoin/math/external/hmac_sha256.h>
 #include <bitcoin/bitcoin/math/external/hmac_sha512.h>
+#include <bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h>
 #include <bitcoin/bitcoin/math/external/ripemd160.h>
 #include <bitcoin/bitcoin/math/external/sha1.h>
 #include <bitcoin/bitcoin/math/external/sha256.h>
@@ -84,6 +85,15 @@ long_hash hmac_sha512_hash(data_slice data, data_slice key)
     HMACSHA512(data.data(), data.size(), key.data(),
         key.size(), hash.data());
     return hash;
+}
+
+bool pkcs5_pbkdf2_hmac_sha512(const std::string& passphrase, 
+    data_slice salt, size_t iterations, long_hash& long_hash)
+{
+    const auto passphrase_bytes = to_data_chunk(passphrase);
+    return pkcs5_pbkdf2(&passphrase_bytes[0], passphrase_bytes.size(),
+        salt.data(), salt.size(), long_hash.data(), sizeof(long_hash),
+        iterations) == 0;
 }
 
 hash_digest bitcoin_hash(data_slice data)

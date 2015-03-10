@@ -172,9 +172,9 @@ echo "  with_pkgconfigdir: $with_pkgconfigdir"
 BOOST_OPTIONS_GCC=\
 "threading=multi "\
 "variant=release "\
-"--disable-icu "\
 "--with-date_time "\
 "--with-filesystem "\
+"--with-locale "\
 "--with-program_options "\
 "--with-regex "\
 "--with-system "\
@@ -192,9 +192,9 @@ BOOST_OPTIONS_CLANG=\
 "linkflags=-stdlib=${boost_stdlib} "\
 "threading=multi "\
 "variant=release "\
-"--disable-icu "\
 "--with-date_time "\
 "--with-filesystem "\
+"--with-locale "\
 "--with-program_options "\
 "--with-regex "\
 "--with-system "\
@@ -353,7 +353,7 @@ build_from_tarball_boost()
 
     # Build and install (note that "$@" is not from script args).
     ./bootstrap.sh
-    ./b2 install -j $JOBS "$@"
+    ./b2 install boost.locale.icu=off -j $JOBS "$@"
 
     pop_directory
 }
