@@ -52,10 +52,10 @@ binary_type::binary_type(size_type size, data_slice blocks)
 
 void binary_type::resize(size_type size)
 {
-    size_ = size;
-    blocks_.resize(blocks_size(size_), 0);
+    size_type offset = size % bits_per_block;
 
-    size_type offset = size_ % bits_per_block;
+    blocks_.resize(blocks_size(size), 0);
+    final_block_excess_ = (offset > 0) ? (bits_per_block - offset) : 0;
 
     if (offset > 0)
     {
@@ -66,7 +66,7 @@ void binary_type::resize(size_type size)
 
 bool binary_type::operator[](size_type index) const
 {
-    BITCOIN_ASSERT(index < size_);
+    BITCOIN_ASSERT(index < size());
     const size_type block_index = index / bits_per_block;
     const uint8_t block = blocks_[block_index];
     const size_type offset = index - (block_index * bits_per_block);
@@ -81,19 +81,19 @@ const data_chunk& binary_type::blocks() const
 
 binary_type::size_type binary_type::size() const
 {
-    return size_;
+    return (blocks_.size() * bits_per_block) - final_block_excess_;
 }
 
 void binary_type::append(const binary_type& post)
 {
-    const size_type block_offset = size_ / bits_per_block;
-    const size_type offset = size_ % bits_per_block;
+    const size_type block_offset = size() / bits_per_block;
+    const size_type offset = size() % bits_per_block;
 
     // overkill for byte alignment
     binary_type duplicate(post.size(), post.blocks());
     duplicate.shift_right(offset);
 
-    resize(size_ + post.size());
+    resize(size() + post.size());
 
     data_chunk post_shift_blocks = duplicate.blocks();
 
@@ -117,7 +117,7 @@ void binary_type::prepend(const binary_type& prior)
 
 void binary_type::shift_left(size_type distance)
 {
-    const size_type initial_size = size_;
+    const size_type initial_size = size();
     const size_type initial_block_count = blocks_.size();
 
     size_type destination_size = 0;
@@ -148,7 +148,7 @@ void binary_type::shift_left(size_type distance)
 
 void binary_type::shift_right(size_type distance)
 {
-    const size_type initial_size = size_;
+    const size_type initial_size = size();
     const size_type initial_block_count = blocks_.size();
 
     const size_type offset = distance % bits_per_block;
@@ -159,8 +159,6 @@ void binary_type::shift_right(size_type distance)
     {
         blocks_.insert(blocks_.begin(), 0x00);
     }
-
-    size_ = initial_size + (offset_blocks * bits_per_block);
 
     uint8_t previous = 0x00;
 
@@ -186,17 +184,19 @@ void binary_type::shift_right(size_type distance)
 
 binary_type binary_type::get_substring(size_type start, size_type length) const
 {
-    if (start > size_)
+    size_type current_size = size();
+
+    if (start > current_size)
     {
-        start = size_;
+        start = current_size;
     }
 
-    if ((length == SIZE_MAX) || ((start + length) > size_))
+    if ((length == SIZE_MAX) || ((start + length) > current_size))
     {
-        length = size_ - start;
+        length = current_size - start;
     }
 
-    binary_type result(size_, blocks_);
+    binary_type result(current_size, blocks_);
 
     result.shift_left(start);
 
@@ -225,8 +225,7 @@ std::istream& operator>>(
     std::string bitstring;
     stream >> bitstring;
 
-    prefix.size_ = 0;
-    prefix.blocks_.clear();
+    prefix.resize(0);
 
     uint8_t block = 0;
     binary_type::size_type bit_iter = binary_type::bits_per_block;
@@ -262,7 +261,7 @@ std::istream& operator>>(
     if (bit_iter != binary_type::bits_per_block)
         prefix.blocks_.push_back(block);
 
-    prefix.size_ = bitstring.size();
+    prefix.resize(bitstring.size());
     return stream;
 }
 std::ostream& operator<<(

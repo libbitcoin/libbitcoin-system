@@ -127,6 +127,22 @@ bitcoin_bitcoin_network_include_HEADERS = \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
+bitcoin_bitcoin_trie_includedir = ${includedir}/bitcoin/bitcoin/trie
+bitcoin_bitcoin_trie_include_HEADERS = \
+    include/bitcoin/bitcoin/trie/binary_trie.hpp \
+    include/bitcoin/bitcoin/trie/trie_iterator.hpp \
+    include/bitcoin/bitcoin/trie/trie_reverse_iterator.hpp \
+    include/bitcoin/bitcoin/trie/trie_structure_node.hpp \
+    include/bitcoin/bitcoin/trie/trie_value_node.hpp
+
+bitcoin_bitcoin_impl_trie_includedir = ${includedir}/bitcoin/bitcoin/impl/trie
+bitcoin_bitcoin_impl_trie_include_HEADERS = \
+    include/bitcoin/bitcoin/impl/trie/binary_trie.ipp \
+    include/bitcoin/bitcoin/impl/trie/trie_iterator.ipp \
+    include/bitcoin/bitcoin/impl/trie/trie_reverse_iterator.ipp \
+    include/bitcoin/bitcoin/impl/trie/trie_structure_node.ipp \
+    include/bitcoin/bitcoin/impl/trie/trie_value_node.ipp
+
 bitcoin_bitcoin_util_includedir = ${includedir}/bitcoin/bitcoin/utility
 bitcoin_bitcoin_util_include_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
@@ -240,6 +256,7 @@ test_libbitcoin_test_SOURCES = \
     test/base85.cpp \
     test/big_number.cpp \
     test/binary.cpp \
+    test/binary_trie.cpp \
     test/checksum.cpp \
     test/config.cpp \
     test/ec_keys.cpp \
