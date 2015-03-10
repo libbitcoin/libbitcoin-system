@@ -217,7 +217,6 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
-    src/wallet/mnemonic-wordlists.cpp \
     src/wallet/mnemonic.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
