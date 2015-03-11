@@ -279,41 +279,6 @@ void channel_proxy::read_payload(const header_type& header_msg)
             shared_from_this(), _1, _2, header_msg));
 }
 
-bool verify_header(const header_type& header_msg)
-{
-    if (header_msg.magic != magic_value())
-        return false;
-    if (header_msg.command == "verack"
-        || header_msg.command == "getaddr")
-    {
-        if (header_msg.payload_length != 0)
-            return false;
-    }
-    else if (header_msg.command == "ping"
-        || header_msg.command == "pong")
-    {
-        if (header_msg.payload_length != 8)
-            return false;
-    }
-    else if (header_msg.command == "version"
-        || header_msg.command == "inv"
-        || header_msg.command == "addr"
-        || header_msg.command == "getdata"
-        || header_msg.command == "getblocks"
-        || header_msg.command == "getheaders"
-        || header_msg.command == "tx"
-        || header_msg.command == "block"
-        || header_msg.command == "headers"
-        || header_msg.command == "alert")
-    {
-        // Should check if sizes make sense
-        // i.e for addr should be multiple of 30x + 1 byte
-        // Also then add ASSERTS to handlers above.
-    }
-    // Ignore unknown headers
-    return true;
-}
-
 void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     size_t DEBUG_ONLY(bytes_transferred))
 {
@@ -324,7 +289,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     header_type header_msg;
     satoshi_load(header_stream.begin(), header_stream.end(), header_msg);
 
-    if (!verify_header(header_msg))
+    if (header_msg.magic != magic_value())
     {
         log_debug(LOG_NETWORK) << "Bad header received.";
         stop();
