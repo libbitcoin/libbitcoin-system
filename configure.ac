@@ -196,10 +196,8 @@ AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])
 # Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
-AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])
 AC_MSG_NOTICE([secp256k1_CFLAGS : ${secp256k1_CFLAGS}])
 AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])
-AC_MSG_NOTICE([secp256k1_PKG : ${secp256k1_PKG}])
 
 
 # Set flags.
