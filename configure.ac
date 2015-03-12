@@ -68,7 +68,7 @@ AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--with-pkgconfigdir option])
 AC_ARG_WITH([pkgconfigdir],
-    AS_HELP_STRING([--with-pkgconfigdir=PATH],
+    AS_HELP_STRING([--with-pkgconfigdir=DIR],
         [Path to pkgconfig directory. @<:@default=${libdir}/pkgconfig@:>@]),
     [pkgconfigdir=$withval],
     [pkgconfigdir=${libdir}/pkgconfig])
@@ -86,7 +86,7 @@ AC_ARG_WITH([tests],
 AC_MSG_RESULT([$with_tests])
 AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 
-# Implement --enable-ndebug option and define NDEBUG.
+# Implement --enable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-ndebug option])
 AC_ARG_ENABLE([ndebug],
@@ -95,9 +95,9 @@ AC_ARG_ENABLE([ndebug],
     [enable_ndebug=$enableval],
     [enable_ndebug=yes])
 AC_MSG_RESULT([$enable_ndebug])
-AS_IF([test x$enable_ndebug != xno], AC_DEFINE([NDEBUG]))
+AS_CASE([${enable_ndebug}], [yes], AC_DEFINE([NDEBUG]))
 
-# Implement --enable-testnet option and define ENABLE_TESTNET and output ${testnet}.
+# Implement --enable-testnet and define ENABLE_TESTNET and output ${testnet}.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-testnet option])
 AC_ARG_ENABLE([testnet],
@@ -106,117 +106,123 @@ AC_ARG_ENABLE([testnet],
     [enable_testnet=$enableval],
     [enable_testnet=no])
 AC_MSG_RESULT([$enable_testnet])
-AS_IF([test x$enable_testnet != xno], AC_DEFINE([ENABLE_TESTNET]))
-AS_IF([test x$enable_testnet != xno], AC_SUBST([testnet], [-DENABLE_TESTNET]))
+AS_CASE([${enable_testnet}], [yes], AC_DEFINE([ENABLE_TESTNET]))
+AS_CASE([${enable_testnet}], [yes], AC_SUBST([testnet], [-DENABLE_TESTNET]))
 
-# Inherit --enable-shared option and define BOOST_TEST_DYN_LINK.
+# Inherit --enable-shared and define BOOST_TEST_DYN_LINK.
 #------------------------------------------------------------------------------
-AS_IF([test x$enable_shared != xno], AC_DEFINE([BOOST_TEST_DYN_LINK]))
+AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.49.0 if in gcc and output ${boost_CFLAGS} and ${boost_LIBS}.
+# Require Boost of at least version 1.49.0 if in gcc and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
-AS_CASE([${CC}], [*gcc*], [AX_BOOST_BASE([1.49.0], 
-    [AC_SUBST([boost_CFLAGS], [${BOOST_CPPFLAGS}])
-     AC_SUBST([boost_LIBS], [${BOOST_LDFLAGS}])],
-    [AC_MSG_ERROR([Boost 1.49.0 or later is required but was not found.])])])
+AS_CASE([${CC}], [*gcc*],
+    [AX_BOOST_BASE([1.49.0],
+        [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
+         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])],
+        [AC_MSG_ERROR([Boost 1.49.0 or later is required but was not found.])])])
+AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])
 
-# Require Boost of at least version 1.54.0 if in clang and output ${boost_CFLAGS} and ${boost_LIBS}.
+# Require Boost of at least version 1.54.0 if in clang and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
-AS_CASE([${CC}], [*clang*], [AX_BOOST_BASE([1.54.0], 
-    [AC_SUBST([boost_CFLAGS], [${BOOST_CPPFLAGS}])
-     AC_SUBST([boost_LIBS], [${BOOST_LDFLAGS}])],
-    [AC_MSG_ERROR([Boost 1.54.0 or later is required but was not found.])])])
+AS_CASE([${CC}], [*clang*],
+    [AX_BOOST_BASE([1.54.0],
+        [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
+         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])],
+        [AC_MSG_ERROR([Boost 1.54.0 or later is required but was not found.])])])
+AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])
 
 AX_BOOST_DATE_TIME
-AC_SUBST([boost_date_time_CFLAGS], [])
 AC_SUBST([boost_date_time_LIBS], [${BOOST_DATE_TIME_LIB}])
+AC_MSG_NOTICE([boost_date_time_LIBS : ${boost_date_time_LIBS}])
 
 AX_BOOST_FILESYSTEM
-AC_SUBST([boost_filesystem_CFLAGS], [])
 AC_SUBST([boost_filesystem_LIBS], [${BOOST_FILESYSTEM_LIB}])
+AC_MSG_NOTICE([boost_filesystem_LIBS : ${boost_filesystem_LIBS}])
 
 AX_BOOST_LOCALE
-AC_SUBST([boost_locale_CFLAGS], [])
 AC_SUBST([boost_locale_LIBS], [${BOOST_LOCALE_LIB}])
+AC_MSG_NOTICE([boost_locale_LIBS : ${boost_locale_LIBS}])
 
 AX_BOOST_PROGRAM_OPTIONS
-AC_SUBST([boost_program_options_CFLAGS], [])
 AC_SUBST([boost_program_options_LIBS], [${BOOST_PROGRAM_OPTIONS_LIB}])
+AC_MSG_NOTICE([boost_program_options_LIBS : ${boost_program_options_LIBS}])
 
 AX_BOOST_REGEX
-AC_SUBST([boost_regex_CFLAGS], [])
 AC_SUBST([boost_regex_LIBS], [${BOOST_REGEX_LIB}])
+AC_MSG_NOTICE([boost_regex_LIBS : ${boost_regex_LIBS}])
 
 AX_BOOST_SYSTEM
-AC_SUBST([boost_system_CFLAGS], [])
 AC_SUBST([boost_system_LIBS], [${BOOST_SYSTEM_LIB}])
+AC_MSG_NOTICE([boost_system_LIBS : ${boost_system_LIBS}])
 
-AS_IF([test x$with_tests = xyes],
+AS_CASE([${with_tests}], [yes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK
-     AC_SUBST([boost_unit_test_framework_CFLAGS], [])
-     AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])])
+     AC_SUBST([boost_unit_test_framework_LIBS],
+        [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])])
+AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])
 
-# Require pthread and output ${pthread_CFLAGS} and ${pthread_LIBS}.
+# Require pthread and output ${pthread_CFLAGS/LIBS}.
 #------------------------------------------------------------------------------
 AX_PTHREAD(
     [AC_SUBST([pthread_CFLAGS], [${PTHREAD_CFLAGS}])
      AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])],
-        [AC_MSG_ERROR([pthread library is required but was not found.])])
+    [AC_MSG_ERROR([pthread library is required but was not found.])])
+AC_MSG_NOTICE([pthread_CFLAGS : ${pthread_CFLAGS}])
+AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])
+# Hard wired -lpthread because AX_PTHREAD does not do it.
+AC_SUBST([pthread_LIBS], [-lpthread])
 
-# Require rt if on linux and output ${rt_CFLAGS} and ${rt_LIBS}.
+# Require rt if on linux and output ${rt_LIBS}.
 #------------------------------------------------------------------------------
-AC_SUBST([rt_CFLAGS], [])
 AS_CASE([${host_os}], [*linux*], 
-    [AC_CHECK_LIB([rt],[clock_gettime],
+    [AC_CHECK_LIB([rt], [clock_gettime],
         [AC_SUBST([rt_LIBS], [-lrt])], 
-        [AC_SUBST([rt_LIBS], [])
-         AC_MSG_ERROR([rt library is required but was not found.])])])
+        [AC_MSG_ERROR([rt library is required but was not found.])])])
+AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])
 
-# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS} and ${secp256k1_LIBS}.
+# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
+AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])
+AC_MSG_NOTICE([secp256k1_CFLAGS : ${secp256k1_CFLAGS}])
+AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])
+AC_MSG_NOTICE([secp256k1_PKG : ${secp256k1_PKG}])
 
-
-# Require iconv
-#------------------------------------------------------------------------------
-AM_ICONV
 
 # Set flags.
 #==============================================================================
-# Require a c++11 compiler.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*],
-    [AX_CHECK_COMPILE_FLAG([-std=c++11],
-        [CXXFLAGS="$CXXFLAGS -std=c++11"])])
-
-# Enable POSIX thread definitions.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*],
-    [AX_CHECK_COMPILE_FLAG([-pthread],
-        [CXXFLAGS="$CXXFLAGS -pthread"])])
-
 # Warn on all stuff.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wall],
-        [CXXFLAGS="$CXXFLAGS -Wall"])])
+        [CFLAGS="$CFLAGS -Wall"])])
 
 # Warn on extra stuff.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wextra],
-        [CXXFLAGS="$CXXFLAGS -Wextra"])])
+        [CFLAGS="$CFLAGS -Wextra"])])
 
 # Be really annoying.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-Wpedantic],
-        [CXXFLAGS="$CXXFLAGS -Wpedantic"],
+        [CFLAGS="$CFLAGS -Wpedantic"],
         [AX_CHECK_COMPILE_FLAG([-pedantic],
-            [CXXFLAGS="$CXXFLAGS -pedantic"])])])
+            [CFLAGS="$CFLAGS -pedantic"])])])
+
+# Allow use of C99 'long long' type.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-Wno-long-long],
+        [CFLAGS="$CFLAGS -Wno-long-long"],
+        [AX_CHECK_COMPILE_FLAG([-pedantic],
+            [CFLAGS="$CFLAGS -pedantic"])])])
 
 # Conform to style.
 #------------------------------------------------------------------------------
@@ -229,6 +235,12 @@ AS_CASE([${CC}], [*],
 AS_CASE([${CC}], [*clang*],
     [AX_CHECK_COMPILE_FLAG([-Wno-mismatched-tags],
         [CXXFLAGS="$CXXFLAGS -Wno-mismatched-tags"])])
+
+# Limit delays and warning. Enabled in gcc only.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*gcc*],
+    [AX_CHECK_COMPILE_FLAG([-fno-var-tracking-assignments],
+        [CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments"])])
 
 # Clean up boost 1.54 headers. Enabled in clang only.
 #------------------------------------------------------------------------------
@@ -245,16 +257,14 @@ AS_CASE([${CC}], [*gcc*],
 # Protect stack.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
-    [AX_CHECK_COMPILE_FLAG([-fstack-protector],
-        [AX_CHECK_LINK_FLAG([-fstack-protector],
-            [CXXFLAGS="$CXXFLAGS -fstack-protector"])])])
+    [AX_CHECK_LINK_FLAG([-fstack-protector],
+        [LDFLAGS="$LDFLAGS -fstack-protector"])])
 
 # Protect stack comprehensively.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
-    [AX_CHECK_COMPILE_FLAG([-fstack-protector-all],
-        [AX_CHECK_LINK_FLAG([-fstack-protector-all],
-            [CXXFLAGS="$CXXFLAGS -fstack-protector-all"])])])
+    [AX_CHECK_LINK_FLAG([-fstack-protector-all],
+        [LDFLAGS="$LDFLAGS -fstack-protector-all"])])
 
 # Hide internal functions from external libs. Enabled in gcc only.
 #------------------------------------------------------------------------------
