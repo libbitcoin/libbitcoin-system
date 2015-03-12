@@ -33,9 +33,9 @@ doc_DATA = \
 lib_LTLIBRARIES = src/libbitcoin.la
 src_libbitcoin_la_CFLAGS = ${pthread_CFLAGS} ${secp256k1_CFLAGS}
 src_libbitcoin_la_CXXFLAGS = -std=c++11
-src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS}
+src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${testnet} ${iconv_CPPFLAGS} ${boost_CPPFLAGS}
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
-src_libbitcoin_la_LIBADD = ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+src_libbitcoin_la_LIBADD = ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
     src/block.cpp \
     src/compat.cpp \
@@ -94,9 +94,9 @@ TESTS = test/libbitcoin_test
 check_PROGRAMS = test/libbitcoin_test
 test_libbitcoin_test_CFLAGS = ${boost_CFLAGS} ${secp256k1_CFLAGS}
 test_libbitcoin_test_CXXFLAGS = -std=c++11
-test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS}
+test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${iconv_CPPFLAGS}
 test_libbitcoin_test_LDFLAGS = -L${srcdir}/src ${boost_LDFLAGS}
-test_libbitcoin_test_LDADD = -lbitcoin ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_unit_test_framework_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+test_libbitcoin_test_LDADD = -lbitcoin ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_unit_test_framework_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
     test/base16.cpp \

@@ -121,20 +121,20 @@ AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 AS_CASE([${CC}], [*gcc*],
     [AX_BOOST_BASE([1.50.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
-         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
-         AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
-         AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
+         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])],
         [AC_MSG_ERROR([Boost 1.50.0 or later is required but was not found.])])])
+AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])
 
 # Require Boost of at least version 1.54.0 if in clang and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*clang*],
     [AX_BOOST_BASE([1.54.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
-         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
-         AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
-         AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
+         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])],
         [AC_MSG_ERROR([Boost 1.54.0 or later is required but was not found.])])])
+AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])
 
 AX_BOOST_DATE_TIME
 AC_SUBST([boost_date_time_LIBS], [${BOOST_DATE_TIME_LIB}])
@@ -166,6 +166,14 @@ AS_CASE([${with_tests}], [yes],
         [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])])
 AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])
 
+# Require iconv and output ${iconv_CPPFLAGS/LIBS}.
+#------------------------------------------------------------------------------
+AM_ICONV
+AC_SUBST([iconv_CPPFLAGS], [${INCICONV}])
+AC_SUBST([iconv_LIBS], [${LIBICONV}])
+AC_MSG_NOTICE([iconv_CPPFLAGS : ${iconv_CPPFLAGS}])
+AC_MSG_NOTICE([iconv_LIBS : ${iconv_LIBS}])
+
 # Require pthread and output ${pthread_CFLAGS/LIBS}.
 #------------------------------------------------------------------------------
 AX_PTHREAD(
@@ -179,7 +187,7 @@ AC_SUBST([pthread_LIBS], [-lpthread])
 
 # Require rt if on linux and output ${rt_LIBS}.
 #------------------------------------------------------------------------------
-AS_CASE([${host_os}], [*linux*], 
+AS_CASE([${host_os}], [*linux*],
     [AC_CHECK_LIB([rt], [clock_gettime],
         [AC_SUBST([rt_LIBS], [-lrt])], 
         [AC_MSG_ERROR([rt library is required but was not found.])])])
@@ -236,12 +244,6 @@ AS_CASE([${CC}], [*clang*],
     [AX_CHECK_COMPILE_FLAG([-Wno-mismatched-tags],
         [CXXFLAGS="$CXXFLAGS -Wno-mismatched-tags"])])
 
-# Limit delays and warning. Enabled in gcc only.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*gcc*],
-    [AX_CHECK_COMPILE_FLAG([-fno-var-tracking-assignments],
-        [CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments"])])
-
 # Clean up boost 1.54 headers. Enabled in clang only.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*clang*],
@@ -277,6 +279,12 @@ AS_CASE([${CC}], [*gcc*],
 AS_CASE([${CC}], [*gcc*],
     [AX_CHECK_COMPILE_FLAG([-fvisibility-inlines-hidden],
         [CXXFLAGS="$CXXFLAGS -fvisibility-inlines-hidden"])])
+
+# Limit delays and warnings. Enabled in gcc only.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*gcc*],
+    [AX_CHECK_COMPILE_FLAG([-fno-var-tracking-assignments],
+        [CXXFLAGS="$CXXFLAGS -fno-var-tracking-assignments"])])
 
 
 # Process outputs into templates.
