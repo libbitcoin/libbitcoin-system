@@ -157,7 +157,7 @@ The script builds from the head of the `version2` branches. The `master` branch 
 Any set of `./configure` options can be passed via the build script, for example:
 
 ```sh
-$ ./install.sh CPPFLAGS=-DDEBUG CFLAGS="-Og -g" --prefix=/home/me/myprefix
+$ ./install.sh CFLAGS="-Og -g" --prefix=/home/me/myprefix
 ```
 
 #### Compiling for Testnet
@@ -191,6 +191,7 @@ The required set of NuGet packages can be viewed using the [NuGet package manage
  * [boost\_chrono-vc120](http://www.nuget.org/packages/boost_chrono-vc120)
  * [boost\_date\_time-vc120](http://www.nuget.org/packages/boost_date_time-vc120)
  * [boost\_filesystem-vc120](http://www.nuget.org/packages/boost_filesystem-vc120)
+ * [boost\_locale-vc120](http://www.nuget.org/packages/boost_locale-vc120)
  * [boost\_program\_options-vc120](http://www.nuget.org/packages/boost_program_options-vc120)
  * [boost\_regex-vc120](http://www.nuget.org/packages/boost_regex-vc120)
  * [boost\_system-vc120](http://www.nuget.org/packages/boost_system-vc120)

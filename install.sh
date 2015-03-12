@@ -32,8 +32,8 @@ BUILD_DIR="build-libbitcoin"
 
 # Boost archives for gcc.
 #------------------------------------------------------------------------------
-BOOST_URL_GCC="http://sourceforge.net/projects/boost/files/boost/1.49.0/boost_1_49_0.tar.bz2/download"
-BOOST_ARCHIVE_GCC="boost_1_49_0.tar.bz2"
+BOOST_URL_GCC="http://sourceforge.net/projects/boost/files/boost/1.50.0/boost_1_50_0.tar.bz2/download"
+BOOST_ARCHIVE_GCC="boost_1_50_0.tar.bz2"
 
 # Boost archives for clang.
 #------------------------------------------------------------------------------

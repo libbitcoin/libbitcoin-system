@@ -21,7 +21,7 @@
 #define LIBBITCOIN_COMPAT_H
 
 #ifdef _MSC_VER
-    // There is no <endian.h> for MSVC but it is always little endian.
+    /* There is no <endian.h> for MSVC but it is always little endian. */
     #ifndef __LITTLE_ENDIAN__
         # undef __BIG_ENDIAN__
         # define __LITTLE_ENDIAN__
