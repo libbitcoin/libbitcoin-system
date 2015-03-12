@@ -16,7 +16,7 @@ URL: https://github.com/libbitcoin/libbitcoin
 Version: @PACKAGE_VERSION@
 
 # Our dependencies that publish package configuration.
-Requires: @secp256k1_PKG@
+Requires: libsecp256k1 >= 0.0.1
 
 # Our own include directory and any other compiler flags we require.
 Cflags: -I${includedir} -std=c++11 -pthread @testnet@
