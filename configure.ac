@@ -121,20 +121,20 @@ AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 AS_CASE([${CC}], [*gcc*],
     [AX_BOOST_BASE([1.50.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
-         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])],
+         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
+         AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+         AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
         [AC_MSG_ERROR([Boost 1.50.0 or later is required but was not found.])])])
-AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
-AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])
 
 # Require Boost of at least version 1.54.0 if in clang and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*clang*],
     [AX_BOOST_BASE([1.54.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
-         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])],
+         AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
+         AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
+         AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
         [AC_MSG_ERROR([Boost 1.54.0 or later is required but was not found.])])])
-AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
-AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])
 
 AX_BOOST_DATE_TIME
 AC_SUBST([boost_date_time_LIBS], [${BOOST_DATE_TIME_LIB}])
@@ -162,9 +162,8 @@ AC_MSG_NOTICE([boost_system_LIBS : ${boost_system_LIBS}])
 
 AS_CASE([${with_tests}], [yes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK
-     AC_SUBST([boost_unit_test_framework_LIBS],
-        [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])])
-AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])
+     AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])
+     AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])])
 
 # Require iconv and output ${iconv_CPPFLAGS/LIBS}.
 #------------------------------------------------------------------------------
@@ -178,10 +177,10 @@ AC_MSG_NOTICE([iconv_LIBS : ${iconv_LIBS}])
 #------------------------------------------------------------------------------
 AX_PTHREAD(
     [AC_SUBST([pthread_CFLAGS], [${PTHREAD_CFLAGS}])
-     AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])],
+     AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])
+     AC_MSG_NOTICE([pthread_CFLAGS : ${pthread_CFLAGS}])
+     AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])],
     [AC_MSG_ERROR([pthread library is required but was not found.])])
-AC_MSG_NOTICE([pthread_CFLAGS : ${pthread_CFLAGS}])
-AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])
 # Hard wired -lpthread because AX_PTHREAD does not do it.
 AC_SUBST([pthread_LIBS], [-lpthread])
 
@@ -189,19 +188,26 @@ AC_SUBST([pthread_LIBS], [-lpthread])
 #------------------------------------------------------------------------------
 AS_CASE([${host_os}], [*linux*],
     [AC_CHECK_LIB([rt], [clock_gettime],
-        [AC_SUBST([rt_LIBS], [-lrt])], 
+        [AC_SUBST([rt_LIBS], [-lrt])
+         AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])], 
         [AC_MSG_ERROR([rt library is required but was not found.])])])
-AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])
 
 # Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 AC_MSG_NOTICE([secp256k1_CFLAGS : ${secp256k1_CFLAGS}])
 AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])
+AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])
 
 
 # Set flags.
 #==============================================================================
+# Require c++11 for all c++ products.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*],
+    [AX_CHECK_COMPILE_FLAG([-std=c++11],
+        [CXXFLAGS="$CXXFLAGS -std=c++11"])])
+
 # Warn on all stuff.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*],
