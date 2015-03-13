@@ -31,10 +31,10 @@ doc_DATA = \
 # src/libbitcoin.la => ${libdir}
 #------------------------------------------------------------------------------
 lib_LTLIBRARIES = src/libbitcoin.la
-src_libbitcoin_la_CFLAGS = ${boost_CFLAGS} ${boost_date_time_CFLAGS} ${boost_filesystem_CFLAGS} ${boost_locale_CFLAGS} ${boost_program_options_CFLAGS} ${boost_regex_CFLAGS} ${boost_system_CFLAGS} ${iconv_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS} ${secp256k1_CFLAGS}
-src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${boost_date_time_CPPFLAGS} ${boost_filesystem_CPPFLAGS} ${boost_locale_CPPFLAGS} ${boost_program_options_CPPFLAGS} ${boost_regex_CPPFLAGS} ${boost_system_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${rt_CPPFLAGS}
-src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS} ${boost_date_time_LDFLAGS} ${boost_filesystem_LDFLAGS} ${boost_locale_LDFLAGS} ${boost_program_options_LDFLAGS} ${boost_regex_LDFLAGS} ${boost_system_LDFLAGS} ${iconv_LDFLAGS} ${pthread_LDFLAGS} ${rt_LDFLAGS}
-src_libbitcoin_la_LIBADD = ${boost_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+src_libbitcoin_la_CFLAGS = ${iconv_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS}
+src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${rt_CPPFLAGS} ${secp256k1_CPPFLAGS}
+src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS} ${iconv_LDFLAGS} ${pthread_LDFLAGS} ${rt_LDFLAGS}
+src_libbitcoin_la_LIBADD = ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
     src/block.cpp \
     src/compat.cpp \
@@ -91,10 +91,10 @@ if WITH_TESTS
 TESTS = test/libbitcoin_test
 
 check_PROGRAMS = test/libbitcoin_test
-test_libbitcoin_test_CFLAGS = ${boost_CFLAGS} ${boost_date_time_CFLAGS} ${boost_filesystem_CFLAGS} ${boost_locale_CFLAGS} ${boost_program_options_CFLAGS} ${boost_regex_CFLAGS} ${boost_system_CFLAGS} ${iconv_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS} ${secp256k1_CFLAGS} ${boost_unit_test_framework_CFLAGS}
-test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${boost_date_time_CPPFLAGS} ${boost_filesystem_CPPFLAGS} ${boost_locale_CPPFLAGS} ${boost_program_options_CPPFLAGS} ${boost_regex_CPPFLAGS} ${boost_system_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${rt_CPPFLAGS} ${boost_unit_test_framework_CPPFLAGS}
-test_libbitcoin_test_LDFLAGS = -L${srcdir}/src ${boost_LDFLAGS} ${boost_date_time_LDFLAGS} ${boost_filesystem_LDFLAGS} ${boost_locale_LDFLAGS} ${boost_program_options_LDFLAGS} ${boost_regex_LDFLAGS} ${boost_system_LDFLAGS} ${iconv_LDFLAGS} ${pthread_LDFLAGS} ${rt_LDFLAGS} ${boost_unit_test_framework_LDFLAGS}
-test_libbitcoin_test_LDADD = -lbitcoin ${boost_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS} ${boost_unit_test_framework_LIBS}
+test_libbitcoin_test_CFLAGS = ${iconv_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS}
+test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${rt_CPPFLAGS} ${secp256k1_CPPFLAGS}
+test_libbitcoin_test_LDFLAGS = -L${srcdir}/src ${boost_LDFLAGS} ${iconv_LDFLAGS} ${pthread_LDFLAGS} ${rt_LDFLAGS}
+test_libbitcoin_test_LDADD = -lbitcoin ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS} ${boost_unit_test_framework_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
     test/base16.cpp \
