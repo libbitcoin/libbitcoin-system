@@ -194,7 +194,7 @@ AS_CASE([${host_os}], [*linux*],
         [AC_MSG_ERROR([rt library is required but was not found.])])],
     [AC_SUBST([rt_LIBS], [])])
 
-# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS/LIBS/PKG}.
+# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])
