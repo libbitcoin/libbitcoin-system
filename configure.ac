@@ -163,7 +163,8 @@ AC_MSG_NOTICE([boost_system_LIBS : ${boost_system_LIBS}])
 AS_CASE([${with_tests}], [yes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK
      AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])
-     AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])])
+     AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])],
+    [AC_SUBST([boost_unit_test_framework_LIBS], [])])
 
 # Require iconv and output ${iconv_CPPFLAGS/LIBS}.
 #------------------------------------------------------------------------------
@@ -190,9 +191,10 @@ AS_CASE([${host_os}], [*linux*],
     [AC_CHECK_LIB([rt], [clock_gettime],
         [AC_SUBST([rt_LIBS], [-lrt])
          AC_MSG_NOTICE([rt_LIBS : ${rt_LIBS}])], 
-        [AC_MSG_ERROR([rt library is required but was not found.])])])
+        [AC_MSG_ERROR([rt library is required but was not found.])])],
+    [AC_SUBST([rt_LIBS], [])])
 
-# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CFLAGS/LIBS/PKG}.
+# Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
 AC_SUBST([secp256k1_PKG], ['libsecp256k1 >= 0.0.1'])

@@ -93,8 +93,8 @@ TESTS = test/libbitcoin_test
 check_PROGRAMS = test/libbitcoin_test
 test_libbitcoin_test_CFLAGS = ${iconv_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS}
 test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${rt_CPPFLAGS} ${secp256k1_CPPFLAGS}
-test_libbitcoin_test_LDFLAGS = -L${srcdir}/src ${boost_LDFLAGS} ${iconv_LDFLAGS} ${pthread_LDFLAGS} ${rt_LDFLAGS}
-test_libbitcoin_test_LDADD = -lbitcoin ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS} ${boost_unit_test_framework_LIBS}
+test_libbitcoin_test_LDFLAGS = ${boost_LDFLAGS} ${iconv_LDFLAGS} ${pthread_LDFLAGS} ${rt_LDFLAGS}
+test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS} ${boost_unit_test_framework_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
     test/base16.cpp \
@@ -102,6 +102,7 @@ test_libbitcoin_test_SOURCES = \
     test/base64.cpp \
     test/base85.cpp \
     test/big_number.cpp \
+    test/big_number.hpp \
     test/binary.cpp \
     test/binary_trie.cpp \
     test/checksum.cpp \
@@ -109,17 +110,21 @@ test_libbitcoin_test_SOURCES = \
     test/ec_keys.cpp \
     test/format.cpp \
     test/hash.cpp \
+    test/hash.hpp \
     test/hash_number.cpp \
     test/hd_keys.cpp \
     test/key_formats.cpp \
     test/main.cpp \
     test/message.cpp \
     test/mnemonic.cpp \
+    test/mnemonic.hpp \
     test/parameter.cpp \
     test/printer.cpp \
     test/satoshi_words.cpp \
     test/script.cpp \
+    test/script.hpp \
     test/script_number.cpp \
+    test/script_number.hpp \
     test/serialize.cpp \
     test/stealth.cpp \
     test/stealth_address.cpp \
