@@ -102,6 +102,7 @@ test_libbitcoin_test_SOURCES = \
     test/base64.cpp \
     test/base85.cpp \
     test/big_number.cpp \
+    test/big_number.hpp \
     test/binary.cpp \
     test/binary_trie.cpp \
     test/checksum.cpp \
@@ -109,17 +110,21 @@ test_libbitcoin_test_SOURCES = \
     test/ec_keys.cpp \
     test/format.cpp \
     test/hash.cpp \
+    test/hash.hpp \
     test/hash_number.cpp \
     test/hd_keys.cpp \
     test/key_formats.cpp \
     test/main.cpp \
     test/message.cpp \
     test/mnemonic.cpp \
+    test/mnemonic.hpp \
     test/parameter.cpp \
     test/printer.cpp \
     test/satoshi_words.cpp \
     test/script.cpp \
+    test/script.hpp \
     test/script_number.cpp \
+    test/script_number.hpp \
     test/serialize.cpp \
     test/stealth.cpp \
     test/stealth_address.cpp \
