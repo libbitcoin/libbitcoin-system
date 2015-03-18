@@ -136,6 +136,10 @@ AS_CASE([${CC}], [*clang*],
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
         [AC_MSG_ERROR([Boost 1.54.0 or later is required but was not found.])])])
 
+AX_BOOST_CHRONO
+AC_SUBST([boost_chrono_LIBS], [${BOOST_CHRONO_LIB}])
+AC_MSG_NOTICE([boost_chrono_LIBS : ${boost_chrono_LIBS}])
+
 AX_BOOST_DATE_TIME
 AC_SUBST([boost_date_time_LIBS], [${BOOST_DATE_TIME_LIB}])
 AC_MSG_NOTICE([boost_date_time_LIBS : ${boost_date_time_LIBS}])

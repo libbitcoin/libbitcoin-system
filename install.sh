@@ -172,6 +172,7 @@ echo "  with_pkgconfigdir: $with_pkgconfigdir"
 BOOST_OPTIONS_GCC=\
 "threading=multi "\
 "variant=release "\
+"--with-chrono "\
 "--with-date_time "\
 "--with-filesystem "\
 "--with-locale "\
@@ -192,6 +193,7 @@ BOOST_OPTIONS_CLANG=\
 "linkflags=-stdlib=${boost_stdlib} "\
 "threading=multi "\
 "variant=release "\
+"--with-chrono "\
 "--with-date_time "\
 "--with-filesystem "\
 "--with-locale "\
