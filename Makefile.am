@@ -87,8 +87,7 @@ src_libbitcoin_la_SOURCES = \
 #------------------------------------------------------------------------------
 if WITH_TESTS
 
-# Execute 'test/libbitcoin_test' as a test.
-TESTS = test/libbitcoin_test
+TESTS = libbitcoin_test_runner.sh
 
 check_PROGRAMS = test/libbitcoin_test
 test_libbitcoin_test_CFLAGS = ${iconv_CFLAGS} ${pthread_CFLAGS} ${rt_CFLAGS}
