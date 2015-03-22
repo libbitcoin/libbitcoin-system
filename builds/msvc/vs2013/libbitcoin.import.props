@@ -26,8 +26,9 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies Condition="'$(Linkage-libbitcoin)' != ''">libbitcoin.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Debug')) != -1">$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Debug\$(PlatformToolset)\$(Linkage-libbitcoin)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Release')) != -1">$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Release\$(PlatformToolset)\$(Linkage-libbitcoin)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>   
+      <!-- $(PlatformToolset) is hard wired to CTP_Nov2013 to allow for linkage by PlatformToolset=v120 (and CTP_Nov2013) callers. -->
+      <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Debug')) != -1">$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Debug\CTP_Nov2013\$(Linkage-libbitcoin)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="$(Configuration.IndexOf('Release')) != -1">$(ProjectDir)..\..\..\..\..\libbitcoin\bin\$(PlatformName)\Release\CTP_Nov2013\$(Linkage-libbitcoin)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>   
     </Link>
   </ItemDefinitionGroup>
 
