@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
@@ -32,22 +33,22 @@ namespace bip39 {
 /**
  * A valid mnemonic word count is evenly divisible by this number.
  */
-constexpr size_t word_multiple = 3;
+BC_CONSTEXPR size_t word_multiple = 3;
 
 /**
  * A valid seed byte count is evenly divisible by this number.
  */
-constexpr size_t seed_multiple = 4;
+BC_CONSTEXPR size_t seed_multiple = 4;
 
 /**
  * A valid mnemonic has at least this many words.
  */
-constexpr size_t min_word_count = 12;
+BC_CONSTEXPR size_t min_word_count = 12;
 
 /**
  * A valid mnemonic has no more than this many words.
  */
-constexpr size_t max_word_count = 128;
+BC_CONSTEXPR size_t max_word_count = 128;
 
 /**
  * Create a new mnenomic (list of words) from provided entropy and a dictionary

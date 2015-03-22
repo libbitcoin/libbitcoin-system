@@ -22,6 +22,7 @@
 
 #include <string>
 #include <system_error>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
@@ -98,10 +99,10 @@ class error_category_impl
   : public std::error_category
 {
 public:
-    BC_API virtual const char* name() const noexcept;
-    BC_API virtual std::string message(int ev) const noexcept;
+    BC_API virtual const char* name() const BC_NOEXCEPT;
+    BC_API virtual std::string message(int ev) const BC_NOEXCEPT;
     BC_API virtual std::error_condition
-        default_error_condition(int ev) const noexcept;
+        default_error_condition(int ev) const BC_NOEXCEPT;
 };
 
 const std::error_category& error_category();

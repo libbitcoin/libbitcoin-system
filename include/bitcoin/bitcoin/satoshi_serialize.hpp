@@ -21,13 +21,14 @@
 #define LIBBITCOIN_SATOSHI_SERIALIZE_HPP
 
 #include <cstdint>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
 
 namespace libbitcoin {
 
-constexpr size_t command_size = 12;
+BC_CONSTEXPR size_t command_size = 12;
 
 // message headers
 BC_API size_t satoshi_raw_size(const header_type& head);

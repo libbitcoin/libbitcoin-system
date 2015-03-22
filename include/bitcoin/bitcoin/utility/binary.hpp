@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_BINARY_HPP
 #define LIBBITCOIN_BINARY_HPP
 
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -32,7 +33,7 @@ public:
     typedef uint8_t block;
     typedef std::size_t size_type;
 
-    static constexpr size_type bits_per_block = byte_bits;
+    static BC_CONSTEXPR size_type bits_per_block = byte_bits;
 
     static size_type blocks_size(const size_type bitsize);
 

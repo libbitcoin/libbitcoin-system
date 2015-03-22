@@ -20,6 +20,7 @@
 #define LIBBITCOIN_MESSAGE_HPP
 
 #include <string>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -27,7 +28,7 @@
 
 namespace libbitcoin {
 
-constexpr size_t message_signature_size = 65;
+BC_CONSTEXPR size_t message_signature_size = 65;
 typedef byte_array<message_signature_size> message_signature;
 
 /**

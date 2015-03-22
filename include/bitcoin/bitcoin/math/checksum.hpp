@@ -21,12 +21,13 @@
 #define LIBBITCOIN_CHECKSUM_HPP
 
 #include <cstdint>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-constexpr size_t checksum_size = sizeof(uint32_t);
+BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
 
 /**
  * Appends a four-byte checksum to a data chunk.

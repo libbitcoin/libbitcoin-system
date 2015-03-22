@@ -19,6 +19,8 @@
  */
 #include <bitcoin/bitcoin/error.hpp>
 
+#include <bitcoin/bitcoin/compat.hpp>
+
 namespace libbitcoin {
 
 namespace error
@@ -34,12 +36,12 @@ namespace error
     }
 }
 
-const char* error_category_impl::name() const noexcept
+const char* error_category_impl::name() const BC_NOEXCEPT
 {
     return "bitcoin";
 }
 
-std::string error_category_impl::message(int ev) const noexcept
+std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 {
     switch (ev)
     {
@@ -138,7 +140,7 @@ std::string error_category_impl::message(int ev) const noexcept
 }
 
 std::error_condition
-    error_category_impl::default_error_condition(int ev) const noexcept
+    error_category_impl::default_error_condition(int ev) const BC_NOEXCEPT
 {
     switch (ev)
     {
