@@ -69,6 +69,9 @@
     <Filter Include="src\config">
       <UniqueIdentifier>{5aca2e32-6005-4543-bee5-6de0cd35f51c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\external">
+      <UniqueIdentifier>{cdbd60d2-a825-43a2-88b6-70fe206f0a50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -235,6 +238,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp">
       <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="$(VC_CTP_Nov2013_InstallDir)\crt\src\threadsafestatics.cpp">
+      <Filter>src\external</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
