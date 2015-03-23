@@ -21,6 +21,7 @@
 #define LIBBITCOIN_EC_KEYS_HPP
 
 #include <cstddef>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -28,20 +29,20 @@
 namespace libbitcoin {
 
 // Private keys:
-constexpr size_t ec_secret_size = 32;
+BC_CONSTEXPR size_t ec_secret_size = 32;
 typedef byte_array<ec_secret_size> ec_secret;
 
 // Public keys:
-constexpr size_t ec_compressed_size = 33;
-constexpr size_t ec_uncompressed_size = 65;
+BC_CONSTEXPR size_t ec_compressed_size = 33;
+BC_CONSTEXPR size_t ec_uncompressed_size = 65;
 typedef data_chunk ec_point;
 
 // Full ecdsa signatures for input endorsement:
-constexpr size_t max_endorsement_size = 72;
+BC_CONSTEXPR size_t max_endorsement_size = 72;
 typedef data_chunk endorsement;
 
 // Compact ecdsa signature for message signing:
-constexpr size_t compact_signature_size = 64;
+BC_CONSTEXPR size_t compact_signature_size = 64;
 struct compact_signature
 {
     byte_array<compact_signature_size> signature;

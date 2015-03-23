@@ -23,6 +23,18 @@
 #include <limits>
 #include <bitcoin/bitcoin/define.hpp>
 
+// CTP_Nov2013 implements noexcept but unfortunately VC12 and CTP_Nov2013
+// both identify as _MSC_VER = 1800, otherwise we could include CTP_Nov2013.
+#if defined(_MSC_VER) && (_MSC_VER <= 1800)
+    #define BC_NOEXCEPT _NOEXCEPT
+    #define BC_CONSTEXPR const
+    #define BC_CONSTFUNC inline
+#else
+    #define BC_NOEXCEPT noexcept
+    #define BC_CONSTEXPR constexpr
+    #define BC_CONSTFUNC constexpr
+#endif
+
 // Sets the _fmode global variable, which controls the default translation
 // mode for file I/O operations.
 #ifdef _MSC_VER

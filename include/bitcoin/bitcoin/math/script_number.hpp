@@ -21,12 +21,13 @@
 #define LIBBITCOIN_SCRIPT_NUMBER_HPP
 
 #include <cstddef>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-constexpr size_t max_script_number_size = 4;
+BC_CONSTEXPR size_t max_script_number_size = 4;
 
 /**
  * Numeric opcodes (OP_1ADD, etc) are restricted to operating on

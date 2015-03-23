@@ -29,6 +29,7 @@
 #include <boost/array.hpp>
 #include <boost/utility.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
@@ -258,9 +259,9 @@ private:
     channel_stream_loader loader_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes
-    static constexpr size_t header_chunk_size = 20;
+    static BC_CONSTEXPR size_t header_chunk_size = 20;
     // Checksum size is 4 bytes
-    static constexpr size_t header_checksum_size = 4;
+    static BC_CONSTEXPR size_t header_checksum_size = 4;
 
     // boost1.54/linux/clang/libstdc++-4.8 error if std::array
     // could not match 'boost::array' against 'std::array'

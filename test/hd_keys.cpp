@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(hd_keys_tests)
 
 BOOST_AUTO_TEST_CASE(bip32_test_vector_1)
 {
-    constexpr auto hard = first_hardened_key;
+    BC_CONSTEXPR auto hard = first_hardened_key;
 
     // Generate public keys:
     data_chunk seed
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_1)
 
 BOOST_AUTO_TEST_CASE(bip32_test_vector_2)
 {
-    constexpr auto hard = first_hardened_key;
+    BC_CONSTEXPR auto hard = first_hardened_key;
 
     // Generate private keys:
     data_chunk seed

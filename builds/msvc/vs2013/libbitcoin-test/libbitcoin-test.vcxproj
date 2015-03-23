@@ -3,7 +3,7 @@
   <PropertyGroup Label="Globals">
     <ConfigurationType>Application</ConfigurationType>
     <NuGetPackageImportStamp>2c597dac</NuGetPackageImportStamp>
-    <PlatformToolset>CTP_Nov2013</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <ProjectGuid>{51A424A9-2C12-4211-8D40-E49D1534C541}</ProjectGuid>
     <ProjectName>libbitcoin-test</ProjectName>
   </PropertyGroup>

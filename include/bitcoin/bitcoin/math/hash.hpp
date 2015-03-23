@@ -23,14 +23,15 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-constexpr size_t short_hash_size = 20;
-constexpr size_t hash_size = 32;
-constexpr size_t long_hash_size = 64;
+BC_CONSTEXPR size_t short_hash_size = 20;
+BC_CONSTEXPR size_t hash_size = 32;
+BC_CONSTEXPR size_t long_hash_size = 64;
 
 // Standard hash containers.
 typedef byte_array<short_hash_size> short_hash;
