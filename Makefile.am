@@ -58,13 +58,21 @@ src_libbitcoin_la_SOURCES = \
     src/math/hash_number.cpp \
     src/math/script_number.cpp \
     src/math/external/hmac_sha256.c \
+    src/math/external/hmac_sha256.h \
     src/math/external/hmac_sha512.c \
+    src/math/external/hmac_sha512.h \
     src/math/external/pkcs5_pbkdf2.c \
+    src/math/external/pkcs5_pbkdf2.h \
     src/math/external/ripemd160.c \
+    src/math/external/ripemd160.h \
     src/math/external/sha1.c \
+    src/math/external/sha1.h \
     src/math/external/sha256.c \
+    src/math/external/sha256.h \
     src/math/external/sha512.c \
+    src/math/external/sha512.h \
     src/math/external/zeroize.c \
+    src/math/external/zeroize.h \
     src/network/channel.cpp \
     src/network/handshake.cpp \
     src/network/hosts.cpp \
@@ -197,19 +205,8 @@ include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/ec_keys.hpp \
     include/bitcoin/bitcoin/math/hash.hpp \
     include/bitcoin/bitcoin/math/hash_number.hpp \
-    include/bitcoin/bitcoin/math/script_number.hpp
-
-include_bitcoin_bitcoin_math_externaldir = ${includedir}/bitcoin/bitcoin/math/external
-include_bitcoin_bitcoin_math_external_HEADERS = \
-    include/bitcoin/bitcoin/math/external/hmac_sha256.h \
-    include/bitcoin/bitcoin/math/external/hmac_sha512.h \
-    include/bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h \
-    include/bitcoin/bitcoin/math/external/ripemd160.h \
-    include/bitcoin/bitcoin/math/external/sha1.h \
-    include/bitcoin/bitcoin/math/external/sha256.h \
-    include/bitcoin/bitcoin/math/external/sha512.h \
-    include/bitcoin/bitcoin/math/external/uint256.h \
-    include/bitcoin/bitcoin/math/external/zeroize.h
+    include/bitcoin/bitcoin/math/script_number.hpp \
+    include/bitcoin/bitcoin/math/uint256.hpp
 
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \

@@ -23,11 +23,11 @@
 #include <cstdint>
 #include <boost/locale.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/general.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include "../math/external/pkcs5_pbkdf2.h"
 
 namespace libbitcoin {
 namespace bip39 {

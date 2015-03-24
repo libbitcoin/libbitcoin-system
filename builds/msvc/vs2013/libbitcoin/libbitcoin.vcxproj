@@ -135,18 +135,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base85.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\checksum.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_keys.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha256.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha512.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\pkcs5_pbkdf2.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\ripemd160.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha1.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha256.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha512.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\uint256.h" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\zeroize.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\script_number.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\handshake.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp" />
@@ -181,6 +173,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri.hpp" />
+    <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\hmac_sha512.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\pkcs5_pbkdf2.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\ripemd160.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\sha1.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\sha256.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\sha512.h" />
+    <ClInclude Include="..\..\..\..\src\math\external\zeroize.h" />
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>

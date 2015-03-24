@@ -26,9 +26,6 @@
     <Filter Include="include\bitcoin\math">
       <UniqueIdentifier>{00705853-92d1-443c-8745-44d63a658d31}</UniqueIdentifier>
     </Filter>
-    <Filter Include="include\bitcoin\math\external">
-      <UniqueIdentifier>{3809494a-8698-4eac-a36b-582fb2e54e42}</UniqueIdentifier>
-    </Filter>
     <Filter Include="include\bitcoin\network">
       <UniqueIdentifier>{86cf2b40-4c9c-4858-80f7-7bb8c4d06b36}</UniqueIdentifier>
     </Filter>
@@ -286,30 +283,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\ec_keys.hpp">
       <Filter>include\bitcoin\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha256.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\hmac_sha512.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\ripemd160.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha1.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha256.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\sha512.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\uint256.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\zeroize.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp">
       <Filter>include\bitcoin\math</Filter>
     </ClInclude>
@@ -427,11 +400,35 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base85.hpp">
       <Filter>include\bitcoin\formats</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\external\pkcs5_pbkdf2.h">
-      <Filter>include\bitcoin\math\external</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp">
       <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\sha512.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\zeroize.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\hmac_sha512.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\pkcs5_pbkdf2.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\ripemd160.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\sha1.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\sha256.h">
+      <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp">
+      <Filter>include\bitcoin\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

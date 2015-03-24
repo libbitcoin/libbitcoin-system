@@ -12,12 +12,12 @@
 * A million repetitions of "a"
 *   34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F
 */
-#include <bitcoin/bitcoin/math/external/sha1.h>
+#include "sha1.h"
 
 #include <stdint.h>
 #include <string.h>
 #include <bitcoin/bitcoin/compat.h>
-#include <bitcoin/bitcoin/math/external/zeroize.h>
+#include "zeroize.h"
 
 #ifdef __BIG_ENDIAN__
     #define SHA1_BIG_ENDIAN
@@ -75,7 +75,7 @@ typedef union {
     uint32_t l[16];
 } CHAR64LONG16;
 
-void SHA1(const uint8_t* input, size_t length,
+void SHA1_(const uint8_t* input, size_t length,
     uint8_t digest[SHA1_DIGEST_LENGTH])
 {
     SHA1CTX context;

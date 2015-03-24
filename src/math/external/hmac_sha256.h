@@ -1,4 +1,4 @@
-/* libsodium: crypto_hash_sha512.h, v0.4.5 2014/04/16 */
+/* libsodium: hmac_hmacsha512.c, v0.4.5 2014/04/16 */
 /*
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
@@ -23,42 +23,38 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef LIBBITCOIN_SHA512_H
-#define LIBBITCOIN_SHA512_H
+#ifndef LIBBITCOIN_HMACSHA256_H
+#define LIBBITCOIN_HMACSHA256_H
 
 #include <stdint.h>
 #include <stddef.h>
+#include "sha256.h"
 
-#define SHA512_STATE_LENGTH 8U
-#define SHA512_COUNT_LENGTH 2U
-#define SHA512_BLOCK_LENGTH 128U
-#define SHA512_DIGEST_LENGTH 64U
+#define HMACSHA256_DIGEST_LENGTH 32U
 
 #ifdef __cplusplus
 extern "C" 
 {
 #endif
 
-typedef struct SHA512CTX 
+typedef struct HMACSHA256CTX
 {
-    uint64_t state[SHA512_STATE_LENGTH];
-    uint64_t count[SHA512_COUNT_LENGTH];
-    uint8_t buf[SHA512_BLOCK_LENGTH];
-} SHA512CTX;
+    SHA256CTX ctx;
+    SHA256CTX ictx;
+    SHA256CTX octx;
+} HMACSHA256CTX;
 
-void SHA512(const uint8_t* input, size_t length,
-    uint8_t digest[SHA512_DIGEST_LENGTH]);
+void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
+    size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH]);
 
-void SHA512Final(SHA512CTX* context, uint8_t digest[SHA512_DIGEST_LENGTH]);
+void HMACSHA256Final(HMACSHA256CTX* context,
+    uint8_t digest[HMACSHA256_DIGEST_LENGTH]);
 
-void SHA512Init(SHA512CTX* context);
+void HMACSHA256Init(HMACSHA256CTX* context, const uint8_t* key,
+    size_t key_length);
 
-void SHA512Pad(SHA512CTX* context);
-
-void SHA512Transform(uint64_t state[SHA512_STATE_LENGTH],
-    const uint8_t block[SHA512_BLOCK_LENGTH]);
-
-void SHA512Update(SHA512CTX* context, const uint8_t* input, size_t length);
+void HMACSHA256Update(HMACSHA256CTX* context, const uint8_t* input,
+    size_t length);
 
 #ifdef __cplusplus
 }
