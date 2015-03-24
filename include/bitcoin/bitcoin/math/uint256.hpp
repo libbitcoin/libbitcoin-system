@@ -3,14 +3,13 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef LIBBBITCOIN_UINT256_H
-#define LIBBBITCOIN_UINT256_H
+#ifndef LIBBBITCOIN_UINT256_HPP
+#define LIBBBITCOIN_UINT256_HPP
 
-#include <assert.h>
+#include <cassert>
+#include <cstdint>
+#include <iostream>
 #include <stdexcept>
-#include <stdint.h>
-#include <stdio.h>
-#include <string>
 #include <string.h>
 #include <vector>
 

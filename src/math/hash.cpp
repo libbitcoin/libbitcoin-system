@@ -20,13 +20,13 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 #include <algorithm>
-#include <bitcoin/bitcoin/math/external/hmac_sha256.h>
-#include <bitcoin/bitcoin/math/external/hmac_sha512.h>
-#include <bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h>
-#include <bitcoin/bitcoin/math/external/ripemd160.h>
-#include <bitcoin/bitcoin/math/external/sha1.h>
-#include <bitcoin/bitcoin/math/external/sha256.h>
-#include <bitcoin/bitcoin/math/external/sha512.h>
+#include "../math/external/hmac_sha256.h"
+#include "../math/external/hmac_sha512.h"
+#include "../math/external/pkcs5_pbkdf2.h"
+#include "../math/external/ripemd160.h"
+#include "../math/external/sha1.h"
+#include "../math/external/sha256.h"
+#include "../math/external/sha512.h"
 
 namespace libbitcoin {
 
@@ -40,14 +40,14 @@ short_hash ripemd160_hash(data_slice data)
 short_hash sha1_hash(data_slice data)
 {
     short_hash hash;
-    SHA1(data.data(), data.size(), hash.data());
+    SHA1_(data.data(), data.size(), hash.data());
     return hash;
 }
 
 hash_digest sha256_hash(data_slice data)
 {
     hash_digest hash;
-    SHA256(data.data(), data.size(), hash.data());
+    SHA256_(data.data(), data.size(), hash.data());
     return hash;
 }
 
@@ -75,7 +75,7 @@ hash_digest hmac_sha256_hash(data_slice data, data_slice key)
 long_hash sha512_hash(data_slice data)
 {
     long_hash hash;
-    SHA512(data.data(), data.size(), hash.data());
+    SHA512_(data.data(), data.size(), hash.data());
     return hash;
 }
 

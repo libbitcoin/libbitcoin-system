@@ -23,11 +23,11 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include <bitcoin/bitcoin/math/external/sha256.h>
+#include "sha256.h"
 
 #include <stdint.h>
 #include <string.h>
-#include <bitcoin/bitcoin/math/external/zeroize.h>
+#include "zeroize.h"
 
 static uint32_t be32dec(const void* pp)
 {
@@ -95,7 +95,7 @@ static unsigned char PAD[SHA256_BLOCK_LENGTH] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-void SHA256(const uint8_t* input, size_t length,
+void SHA256_(const uint8_t* input, size_t length,
     uint8_t digest[SHA256_DIGEST_LENGTH])
 {
     SHA256CTX context;

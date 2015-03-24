@@ -19,7 +19,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <bitcoin/bitcoin/math/external/pkcs5_pbkdf2.h>
+#include "pkcs5_pbkdf2.h"
 
 #ifdef __cplusplus
 extern "C" 

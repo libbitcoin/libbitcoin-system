@@ -23,12 +23,12 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include <bitcoin/bitcoin/math/external/hmac_sha256.h>
+#include "hmac_sha256.h"
 
 #include <stdint.h>
 #include <string.h>
-#include <bitcoin/bitcoin/math/external/sha256.h>
-#include <bitcoin/bitcoin/math/external/zeroize.h>
+#include "sha256.h"
+#include "zeroize.h"
 
 void HMACSHA256(const uint8_t* input, size_t length, const uint8_t* key,
     size_t key_length, uint8_t digest[HMACSHA256_DIGEST_LENGTH])

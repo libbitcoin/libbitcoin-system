@@ -32,10 +32,10 @@
   <!-- Dependencies -->
   
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-secp256k1>static</Linkage-secp256k1>
+    <Linkage-secp256k1>dynamic</Linkage-secp256k1>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
-    <Linkage-secp256k1>static</Linkage-secp256k1>
+    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
     <Linkage-secp256k1>static</Linkage-secp256k1>

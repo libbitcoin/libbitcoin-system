@@ -37,11 +37,11 @@
   </ImportGroup>
   
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'dynamic'">
-    <Linkage-secp256k1>static</Linkage-secp256k1>
-    <Linkage-libbitcoin>static</Linkage-libbitcoin>
+    <Linkage-secp256k1>dynamic</Linkage-secp256k1>
+    <Linkage-libbitcoin>dynamic</Linkage-libbitcoin>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'ltcg'">
-    <Linkage-secp256k1>static</Linkage-secp256k1>
+    <Linkage-secp256k1>ltcg</Linkage-secp256k1>
     <Linkage-libbitcoin>ltcg</Linkage-libbitcoin>
   </PropertyGroup>
   <PropertyGroup Condition="'$(DefaultLinkage)' == 'static'">
