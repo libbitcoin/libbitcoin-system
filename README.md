@@ -54,7 +54,7 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system):
 ```sh
 $ sudo apt-get install build-essential autoconf automake libtool pkg-config
 ```
-Next install the [Boost](http://www.boost.org) (minimum 1.49.0 for GCC or 1.54.0 for Clang) development package:
+Next install the [Boost](http://www.boost.org) (minimum 1.50.0 for GCC or 1.54.0 for Clang) development package:
 ```sh
 $ sudo apt-get install libboost-all-dev
 ```
