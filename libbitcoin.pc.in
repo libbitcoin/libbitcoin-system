@@ -16,10 +16,12 @@ URL: https://github.com/libbitcoin/libbitcoin
 Version: @PACKAGE_VERSION@
 
 # Our dependencies that publish package configuration.
-Requires: @secp256k1_PKG@
+Requires: libsecp256k1 >= 0.0.1
+Requires.private: 
 
 # Our own include directory and any other compiler flags we require.
-Cflags: -I${includedir} @pthread_CFLAGS@ @testnet@
+Cflags: -I${includedir} @testnet@ @boost_CPPFLAGS@ @iconv_CPPFLAGS@ @pthread_CPPFLAGS@
 
 # Our own lib directory, lib and any that do not publish package configuration.
-Libs: -L${libdir} -lbitcoin @boost_chrono_LIBS@ @boost_date_time_LIBS@ @boost_filesystem_LIBS@ @boost_locale_LIBS@ @boost_program_options_LIBS@ @boost_regex_LIBS@ @boost_system_LIBS@ @iconv_LIBS@ @pthread_LIBS@ @rt_LIBS@
+Libs: -L${libdir} -lbitcoin @boost_LDFLAGS@ @boost_chrono_LIBS@ @boost_date_time_LIBS@ @boost_filesystem_LIBS@ @boost_locale_LIBS@ @boost_program_options_LIBS@ @boost_regex_LIBS@ @boost_system_LIBS@ @iconv_LIBS@ @pthread_LIBS@ @rt_LIBS@
+Libs.private: 

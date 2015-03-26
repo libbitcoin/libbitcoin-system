@@ -178,12 +178,12 @@ AC_SUBST([iconv_LIBS], [${LIBICONV}])
 AC_MSG_NOTICE([iconv_CPPFLAGS : ${iconv_CPPFLAGS}])
 AC_MSG_NOTICE([iconv_LIBS : ${iconv_LIBS}])
 
-# Require pthread and output ${pthread_CFLAGS/LIBS}.
+# Require pthread and output ${pthread_CPPFLAGS/LIBS}.
 #------------------------------------------------------------------------------
 AX_PTHREAD(
-    [AC_SUBST([pthread_CFLAGS], [${PTHREAD_CFLAGS}])
+    [AC_SUBST([pthread_CPPFLAGS], [${PTHREAD_CPPFLAGS}])
      AC_SUBST([pthread_LIBS], [${PTHREAD_LIBS}])
-     AC_MSG_NOTICE([pthread_CFLAGS : ${pthread_CFLAGS}])
+     AC_MSG_NOTICE([pthread_CPPFLAGS : ${pthread_CPPFLAGS}])
      AC_MSG_NOTICE([pthread_LIBS : ${pthread_LIBS}])],
     [AC_MSG_ERROR([pthread library is required but was not found.])])
 # Hard wired -lpthread because AX_PTHREAD does not do it.

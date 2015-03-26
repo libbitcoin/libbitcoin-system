@@ -28,8 +28,6 @@ Detailed instructions are provided below.
   * [Macintosh](#macintosh)
   * [Windows](#windows)
 
-## Installation
-
 ### Debian/Ubuntu
 
 Libbitcoin requires a C++11 compiler, currently minimum [GCC 4.8.0](https://gcc.gnu.org/projects/cxx0x.html) or Clang based on [LLVM 3.5](http://llvm.org/releases/3.5.0/docs/ReleaseNotes.html).
@@ -54,7 +52,7 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system):
 ```sh
 $ sudo apt-get install build-essential autoconf automake libtool pkg-config
 ```
-Next install the [Boost](http://www.boost.org) (minimum 1.49.0 for GCC or 1.54.0 for Clang) development package:
+Next install the [Boost](http://www.boost.org) (minimum 1.50.0 for GCC or 1.54.0 for Clang) development package:
 ```sh
 $ sudo apt-get install libboost-all-dev
 ```
