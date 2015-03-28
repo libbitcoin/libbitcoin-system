@@ -49,38 +49,8 @@ int find_pair_position(const std::vector<const Pair>& list, Key& key);
  * @param[in]  value      The value of the element to find.
  * @return                The position or -1 if not found.
  */
-template <typename Element>
-int find_position(const std::vector<Element>& list, Element& value);
-
-/**
- * Find the position of an element in an ordered list.
- * @param      <Element>  The type of list member elements.
- * @param[in]  list       The list to search.
- * @param[in]  value      The value of the element to find.
- * @return                The position or -1 if not found.
- */
-template <typename Element>
-int find_position(const std::vector<const Element>& list, Element& value);
-
-/**
- * Find the position of an element in an ordered list.
- * @param      <Element>  The type of list member elements.
- * @param[in]  list       The list to search.
- * @param[in]  value      The value of the element to find.
- * @return                The position or -1 if not found.
- */
-template <typename Element>
-int find_position(const std::vector<Element>& list, const Element& value);
-
-/**
- * Find the position of an element in an ordered list.
- * @param      <Element>  The type of list member elements.
- * @param[in]  list       The list to search.
- * @param[in]  value      The value of the element to find.
- * @return                The position or -1 if not found.
- */
-template <typename Element>
-int find_position(const std::vector<const Element>& list, const Element& value);
+template <typename Element, typename Container>
+int find_position(const Container& list, const Element& value);
 
 /**
  * Avoid the ternary (just for fun). Must precede tempalte usage for gcc build.
