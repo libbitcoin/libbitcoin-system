@@ -20,12 +20,24 @@
 #ifndef LIBBITCOIN_DICTIONARY_HPP
 #define LIBBITCOIN_DICTIONARY_HPP
 
+#include <array>
 #include <map>
-#include <string>
-#include <vector>
+#include <bitcoin/bitcoin/compat.hpp>
 
 namespace libbitcoin {
 namespace bip39 {
+
+/**
+ * A valid mnemonic wordlist has exactly this many words.
+ */
+BC_CONSTEXPR size_t wordlist_size = 2048;
+
+/**
+ * A "wordlist" for creating mnemonics, as defined in bip39.
+ * This is a POD type, which means the compiler can write it directly
+ * to static memory no run-time overhead.
+ */
+typedef std::array<const char *, wordlist_size> wordlist;
 
 /**
  * Dictionary languages.
@@ -39,14 +51,11 @@ enum class language
 };
 
 /**
- * Word list type for dictionary and mnemonics.
- */
-typedef std::vector<std::string> string_list;
-
-/**
  * Multilingual word dictionary type.
+ * It references the wordlists by pointer,
+ * allowing them to live in static memory.
  */
-typedef std::map<language, const string_list> dictionary_type;
+typedef std::map<language, const wordlist *> dictionary_type;
 
 /**
  * Multilingual word dictionary.

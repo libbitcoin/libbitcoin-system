@@ -51,11 +51,16 @@ BC_CONSTEXPR size_t min_word_count = 12;
 BC_CONSTEXPR size_t max_word_count = 128;
 
 /**
+ * Represents a mnemonic.
+ */
+typedef std::vector<std::string> string_list;
+
+/**
  * Create a new mnenomic (list of words) from provided entropy and a dictionary
  * selection. The mnemonic can later be converted to a seed for use in wallet
  * creation. Entropy byte count must be evenly divisible by 3.
  */
-BC_API string_list create_mnemonic(data_slice entropy, 
+BC_API string_list create_mnemonic(data_slice entropy,
     bip39::language language=bip39::language::en);
 
 /**

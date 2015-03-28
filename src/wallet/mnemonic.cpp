@@ -36,24 +36,15 @@ namespace bip39 {
 constexpr size_t bits_per_word = 11;
 constexpr size_t entropy_bit_divisor = 32;
 constexpr size_t hmac_iterations = 2048;
-DEBUG_ONLY(constexpr size_t dictionary_length = 2048;)
 
 // It would be nice if we could do this statically.
 static void validate_dictionary()
 {
     BITCOIN_ASSERT_MSG(dictionary.size() == sizeof(bip39::language),
         "The dictionary does not have the required number of languages.");
-
-#ifndef NDEBUG
-    for (const auto& dictionary: bip39::dictionary)
-    {
-        BITCOIN_ASSERT_MSG(dictionary.second.size() == dictionary_length,
-            "A dictionary does not have the required number of elements.");
-    }
-#endif
 }
 
-static const string_list& get_dictionary(bip39::language language)
+static const wordlist& get_dictionary(bip39::language language)
 {
     validate_dictionary();
 
@@ -61,7 +52,7 @@ static const string_list& get_dictionary(bip39::language language)
 
     // Guards against lack of uniqueness in dictionary languages.
     BITCOIN_ASSERT(it != bip39::dictionary.end());
-    return it->second;
+    return *it->second;
 }
 
 static bip39::language get_language(const string_list& words)
@@ -74,7 +65,7 @@ static bip39::language get_language(const string_list& words)
     const auto& first_word = words.front();
 
     for (const auto& dictionary : bip39::dictionary)
-        if (find_position(dictionary.second, first_word) != -1)
+        if (find_position(*dictionary.second, first_word) != -1)
             return dictionary.first;
 
     return bip39::language::en;
@@ -95,7 +86,7 @@ static uint8_t bip39_shift(size_t bit)
 // extracts entropy/checksum from the mnemonic and rebuilds the word list
 // for comparison; returns true if it's a match (valid), false otherwise
 static bool validate_mnemonic(const string_list& words,
-    const string_list& dictionary, bip39::language language)
+    const wordlist& dictionary, bip39::language language)
 {
     const auto word_count = words.size();
     if ((word_count < min_word_count) || (word_count > max_word_count))
@@ -182,7 +173,7 @@ string_list create_mnemonic(data_slice entropy, bip39::language language)
                 position++;
         }
 
-        BITCOIN_ASSERT(position < dictionary_length);
+        BITCOIN_ASSERT(position < wordlist_size);
         words.push_back(dictionary[position]);
     }
 
