@@ -20,6 +20,12 @@
 #ifndef LIBBITCOIN_DEFINE_HPP
 #define LIBBITCOIN_DEFINE_HPP
 
+// Create bc namespace alias.
+namespace libbitcoin {
+} // namespace libbitcoin
+
+namespace bc = libbitcoin;
+
 // Logger definitions. You can add your own to the logger.
 // Better to use a define because you get type safety.
 #define LOG_NETWORK     "network"
