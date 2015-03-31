@@ -432,9 +432,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="readme.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="..\..\resource.rc">
       <Filter>resource</Filter>
     </ResourceCompile>
