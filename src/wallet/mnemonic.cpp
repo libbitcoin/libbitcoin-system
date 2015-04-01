@@ -36,51 +36,68 @@ namespace bip39 {
 constexpr size_t bits_per_word = 11;
 constexpr size_t entropy_bit_divisor = 32;
 constexpr size_t hmac_iterations = 2048;
+constexpr size_t numer_of_langauges = (size_t)language::unknown;
 
 // It would be nice if we could do this statically.
 static void validate_dictionary()
 {
-    BITCOIN_ASSERT_MSG(dictionary.size() == (int)language::numer_of_langauges,
+    BITCOIN_ASSERT_MSG(dictionary.size() == numer_of_langauges,
         "The dictionary does not have the required number of languages.");
 }
 
+// Get the dictionary of the lanuguage or of en if unknown.
 static const wordlist& get_dictionary(bip39::language language)
 {
     validate_dictionary();
 
-    const auto it = bip39::dictionary.find(language);
+    auto tongue = language;
+    if (tongue == bip39::language::unknown)
+        tongue = bip39::language::en;
 
-    // Guards against lack of uniqueness in dictionary languages.
+    const auto it = bip39::dictionary.find(tongue);
+
+    // Guards against lack of uniqueness in dictionary language enum.
     BITCOIN_ASSERT(it != bip39::dictionary.end());
-    return *it->second;
+    return *(it->second);
 }
 
+// Force explicit langauge specification for ambiguous dictionaries.
+static bip39::language resolve_ambiguity(bip39::language language)
+{
+    if (language == bip39::language::zh_Hans || 
+        language == bip39::language::zh_Hant)
+        return bip39::language::unknown;
+
+    return language;
+}
+
+// Detect the language of the wordlist, or return unknown if it's ambiguous.
 static bip39::language get_language(const string_list& words)
 {
     validate_dictionary();
 
     if (words.empty())
-        return bip39::language::en;
+        return bip39::language::unknown;
 
     const auto& first_word = words.front();
 
-    for (const auto& dictionary : bip39::dictionary)
+    for (const auto& dictionary: bip39::dictionary)
         if (find_position(*dictionary.second, first_word) != -1)
-            return dictionary.first;
+            return resolve_ambiguity(dictionary.first);
 
-    return bip39::language::en;
+    return bip39::language::unknown;
+}
+
+static uint8_t bip39_shift(size_t bit)
+{
+    return (1 << (byte_bits - (bit % byte_bits) - 1));
 }
 
 static std::string normalize_nfkd(const std::string& value)
 {
     using namespace boost::locale;
     const generator locale;
-    return normalize(value, norm_type::norm_nfkd, locale(""));
-}
-
-static uint8_t bip39_shift(size_t bit)
-{
-    return (1 << (byte_bits - (bit % byte_bits) - 1));
+    return normalize(value, norm_type::norm_nfkd, locale("UTF-8"));
 }
 
 // extracts entropy/checksum from the mnemonic and rebuilds the word list
@@ -118,13 +135,20 @@ static bool validate_mnemonic(const string_list& words,
     return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
 
+// The word selection may be ambiguous (zh), which requires specified language.
 data_chunk decode_mnemonic(const string_list& mnemonic,
-    const std::string& passphrase)
+    const std::string& passphrase, bip39::language language)
 {
-    const auto language = get_language(mnemonic);
-    const auto& dictionary = get_dictionary(language);
+    auto tongue = language;
+    if (tongue == bip39::language::unknown)
+        tongue = get_language(mnemonic);
 
-    if (!validate_mnemonic(mnemonic, dictionary, language))
+    if (tongue == bip39::language::unknown)
+        return data_chunk();
+
+    const auto& dictionary = get_dictionary(tongue);
+
+    if (!validate_mnemonic(mnemonic, dictionary, tongue))
         return data_chunk();
 
     const auto sentence = join(mnemonic);

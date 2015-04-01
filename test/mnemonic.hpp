@@ -25,12 +25,12 @@
 
 struct mnemonic_result
 {
-    std::string input, result;
+    std::string input, expectation;
 };
 
 typedef std::vector<mnemonic_result> mnemonic_result_list;
 
-mnemonic_result_list entropy_to_mnemonic_tests{{
+mnemonic_result_list entropy_to_mnemonic_en{{
     {"00000000000000000000000000000000",
      "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"},
     {"7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f7f",
@@ -81,7 +81,7 @@ mnemonic_result_list entropy_to_mnemonic_tests{{
      "beyond stage sleep clip because twist token leaf atom beauty genius food business side grid unable middle armed observe pair crouch tonight away coconut"}
 }};
 
-mnemonic_result_list mnemonic_to_seed_tests{{
+mnemonic_result_list mnemonic_to_seed_en{{
     {"abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
      "c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e53495531f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04"},
     {"legal winner thank year wave sausage worth useful legal winner thank yellow",

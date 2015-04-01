@@ -27,29 +27,60 @@ using namespace bc::bip39;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
-BOOST_AUTO_TEST_CASE(entropy_to_mnemonic)
+BOOST_AUTO_TEST_CASE(entropy_to_en_mnemonic)
 {
-    for (const mnemonic_result& result: entropy_to_mnemonic_tests)
+    for (const mnemonic_result& result: entropy_to_mnemonic_en)
     {
-        data_chunk data;
-        decode_base16(data, result.input);
-        const auto words = create_mnemonic(data, bip39::language::en);
-        BOOST_REQUIRE(words.size() > 0);
-        BOOST_REQUIRE_EQUAL(join(words), result.result);
+        data_chunk entropy;
+        decode_base16(entropy, result.input);
+        const auto mnemonic = create_mnemonic(entropy, bip39::language::en);
+        BOOST_REQUIRE(mnemonic.size() > 0);
+        BOOST_REQUIRE_EQUAL(join(mnemonic), result.expectation);
     }
 }
 
-BOOST_AUTO_TEST_CASE(mnemonic_to_seed)
+BOOST_AUTO_TEST_CASE(en_mnemonic_to_seed)
 {
-    typedef std::vector<std::string> string_list;
-    const auto passphrase = "TREZOR";
-    for (const mnemonic_result& result: mnemonic_to_seed_tests)
+    const auto& passphrase = "TREZOR";
+    for (const mnemonic_result& result: mnemonic_to_seed_en)
     {
         const auto words = split(result.input);
-        data_chunk data = decode_mnemonic(words, passphrase);
-        BOOST_REQUIRE(!data.empty());
-        BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
+        const auto seed = decode_mnemonic(words, passphrase);
+        BOOST_REQUIRE(!seed.empty());
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), result.expectation);
     }
+}
+
+BOOST_AUTO_TEST_CASE(ensure_en_es_disjointness)
+{
+    const auto& english = *dictionary.at(language::en);
+    const auto& spanish = *dictionary.at(language::es);
+    size_t intersection = 0;
+    for (const auto es: spanish)
+    {
+        std::string test(es);
+        const auto it = std::find(english.begin(), english.end(), test);
+        if (it != std::end(english))
+            intersection++;
+    }
+
+    BOOST_REQUIRE_EQUAL(intersection, 0u);
+}
+
+BOOST_AUTO_TEST_CASE(ensure_zh_Hans_Hant_intersection)
+{
+    const auto& simplified = *dictionary.at(language::zh_Hans);
+    const auto& traditional = *dictionary.at(language::zh_Hant);
+    size_t intersection = 0;
+    for (const auto hant: traditional)
+    {
+        std::string test(hant);
+        const auto it = std::find(simplified.begin(), simplified.end(), test);
+        if (it != std::end(simplified))
+            intersection++;
+    }
+
+    BOOST_REQUIRE_EQUAL(intersection, 1275u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

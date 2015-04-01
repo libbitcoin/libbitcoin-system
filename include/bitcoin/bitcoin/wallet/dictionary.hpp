@@ -49,7 +49,7 @@ enum class language
     ja,
     zh_Hans,
     zh_Hant,
-    numer_of_langauges
+    unknown
 };
 
 /**
