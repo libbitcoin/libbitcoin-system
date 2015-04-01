@@ -37,7 +37,7 @@ BC_CONSTEXPR size_t wordlist_size = 2048;
  * This is a POD type, which means the compiler can write it directly
  * to static memory no run-time overhead.
  */
-typedef std::array<const char *, wordlist_size> wordlist;
+typedef std::array<const char*, wordlist_size> wordlist;
 
 /**
  * Dictionary languages.
@@ -47,7 +47,9 @@ enum class language
     en,
     es,
     ja,
-    zh_Hans
+    zh_Hans,
+    zh_Hant,
+    numer_of_langauges
 };
 
 /**
@@ -55,7 +57,7 @@ enum class language
  * It references the wordlists by pointer,
  * allowing them to live in static memory.
  */
-typedef std::map<language, const wordlist *> dictionary_type;
+typedef std::map<language, const wordlist*> dictionary_type;
 
 /**
  * Multilingual word dictionary.
