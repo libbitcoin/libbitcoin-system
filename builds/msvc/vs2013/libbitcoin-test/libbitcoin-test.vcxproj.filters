@@ -110,5 +110,8 @@
     <ClInclude Include="..\..\..\..\test\script_number.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\test\mnemonic.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

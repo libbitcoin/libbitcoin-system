@@ -101,6 +101,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\test\big_number.hpp" />
     <ClInclude Include="..\..\..\..\test\hash.hpp" />
+    <ClInclude Include="..\..\..\..\test\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\test\script.hpp" />
     <ClInclude Include="..\..\..\..\test\script_number.hpp" />
   </ItemGroup>
