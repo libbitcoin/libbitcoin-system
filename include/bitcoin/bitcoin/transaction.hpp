@@ -23,7 +23,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/primitives/blockchain/transaction.hpp>
+#include <bitcoin/bitcoin/primitives/output_info.hpp>
 
 namespace libbitcoin {
 
@@ -45,9 +46,6 @@ BC_API hash_digest hash_transaction(const transaction_type& tx,
 
 BC_API hash_digest generate_merkle_root(const transaction_list& transactions);
 
-BC_API std::string pretty(const transaction_type& transaction);
-// BC_API transaction_type unpretty(const std::string& pretty);
-
 // TODO: rename to is_previous_output_null (API consistency)
 BC_API bool previous_output_is_null(const output_point& previous_output);
 BC_API bool is_coinbase(const transaction_type& tx);
@@ -65,11 +63,6 @@ BC_API uint64_t total_output_value(const transaction_type& tx);
 BC_API select_outputs_result select_outputs(
     output_info_list unspent, uint64_t min_value,
     select_outputs_algorithm algorithm=select_outputs_algorithm::greedy);
-
-BC_API bool operator==(
-    const output_point& output_a, const output_point& output_b);
-BC_API bool operator!=(
-    const output_point& output_a, const output_point& output_b);
 
 } // namespace libbitcoin
 

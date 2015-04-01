@@ -25,8 +25,9 @@
 #include <system_error>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/network.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/verack.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/version.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {

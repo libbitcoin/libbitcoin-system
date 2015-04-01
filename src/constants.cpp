@@ -18,6 +18,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/primitives/blockchain/block.hpp>
+#include <bitcoin/bitcoin/primitives/blockchain/transaction.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/address.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/get_address.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/get_blocks.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/get_data.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/inventory.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/ping.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/verack.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/version.hpp>
 
 namespace libbitcoin {
 
@@ -36,5 +46,18 @@ uint32_t magic_value()
     return 0xd9b4bef9;
 #endif
 }
+
+const std::string block_type::satoshi_command = "block";
+const std::string transaction_type::satoshi_command = "tx";
+const std::string address_type::satoshi_command = "addr";
+const std::string get_address_type::satoshi_command = "getaddr";
+const std::string get_blocks_type::satoshi_command = "getblocks";
+const std::string get_data_type::satoshi_command = "getdata";
+const std::string inventory_type::satoshi_command = "inv";
+const std::string ping_type::satoshi_command = "ping";
+const std::string pong_type::satoshi_command = "pong";
+const std::string verack_type::satoshi_command = "verack";
+const std::string version_type::satoshi_command = "version";
+
 } // namespace libbitcoin
 

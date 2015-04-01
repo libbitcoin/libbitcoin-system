@@ -25,6 +25,21 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/primitives/blockchain/block.hpp>
+#include <bitcoin/bitcoin/primitives/blockchain/transaction.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/address.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/get_address.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/get_blocks.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/get_data.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/header.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/inventory.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/ping.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/verack.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/version.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -93,4 +108,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

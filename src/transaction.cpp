@@ -24,8 +24,6 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
@@ -37,8 +35,7 @@ namespace libbitcoin {
 hash_digest hash_transaction_impl(const transaction_type& tx,
     uint32_t* hash_type_code)
 {
-    data_chunk serialized_tx(satoshi_raw_size(tx));
-    satoshi_save(tx, serialized_tx.begin());
+    data_chunk serialized_tx = tx;
     if (hash_type_code != nullptr)
         extend_data(serialized_tx, to_little_endian(*hash_type_code));
     return bitcoin_hash(serialized_tx);
@@ -264,15 +261,6 @@ select_outputs_result select_outputs(output_info_list unspent,
     }
 
     return select_outputs_result();
-}
-
-bool operator==(const output_point& output_a, const output_point& output_b)
-{
-    return output_a.hash == output_b.hash && output_a.index == output_b.index;
-}
-bool operator!=(const output_point& output_a, const output_point& output_b)
-{
-    return !(output_a == output_b);
 }
 
 } // namespace libbitcoin

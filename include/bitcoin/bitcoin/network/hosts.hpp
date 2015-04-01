@@ -28,7 +28,7 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
