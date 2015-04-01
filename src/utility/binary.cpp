@@ -134,6 +134,7 @@ void binary_type::shift_left(size_type distance)
     // shift
     for (size_type i = 0; i < initial_block_count; i++)
     {
+        uint8_t leading_bits = 0x00;
         uint8_t trailing_bits = 0x00;
 
         if ((offset != 0) && ((block_offset + i + 1) < initial_block_count))
@@ -141,10 +142,10 @@ void binary_type::shift_left(size_type distance)
             trailing_bits = blocks_[block_offset + i + 1] >> (bits_per_block - offset);
         }
 
-        BITCOIN_ASSERT_MSG(blocks_.size() > block_offset + i, 
-            "Block offset overflow in binary_type.");
-
-        uint8_t leading_bits = blocks_[block_offset + i] << offset;
+        if ((block_offset + i) < initial_block_count)
+        {
+            leading_bits = blocks_[block_offset + i] << offset;
+        }
 
         blocks_[i] = leading_bits | trailing_bits;
     }
