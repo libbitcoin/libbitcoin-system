@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(mnemonic_to_seed)
     {
         const auto words = split(result.input);
         data_chunk data = decode_mnemonic(words, passphrase);
-        BOOST_REQUIRE(not data.empty());
+        BOOST_REQUIRE(!data.empty());
         BOOST_REQUIRE_EQUAL(encode_base16(data), result.result);
     }
 }
