@@ -92,8 +92,9 @@ void set_public_key(payment_address& address, const ec_point& public_key)
 
 void set_script(payment_address& address, const script_type& eval_script)
 {
+    data_chunk raw_eval_script = eval_script;
     address.set(payment_address::script_version,
-        bitcoin_short_hash(save_script(eval_script)));
+        bitcoin_short_hash(raw_eval_script));
 }
 
 bool extract(payment_address& address, const script_type& script)
@@ -107,7 +108,7 @@ bool extract(payment_address& address, const script_type& script)
             std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
             address.set(version, hash_data);
         };
-    const operation_stack& ops = script.operations();
+    const operation_stack& ops = script.operations;
     payment_type pay_type = script.type();
     switch (pay_type)
     {
