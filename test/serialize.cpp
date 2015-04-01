@@ -52,17 +52,20 @@ BOOST_AUTO_TEST_CASE(serialize_test)
 BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
 {
     block_type genblk = genesis_block();
-    BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk), 285u);
-    BOOST_REQUIRE_EQUAL(satoshi_raw_size(genblk.header), 80u);
-    data_chunk rawblk(285);
-    BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), rawblk.end()), 285u);
+    BOOST_REQUIRE_EQUAL(genblk.satoshi_size(), 285u);
+    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(), 80u);
     // Save genesis block.
-    auto end_iter = satoshi_save(genblk, rawblk.begin());
-    BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), end_iter), 285u);
-    BOOST_REQUIRE(end_iter == rawblk.end());
+    data_chunk rawblk = genblk;
+    BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), rawblk.end()), 285u);
+    BOOST_REQUIRE_EQUAL(rawblk.size(), 285u);
     // Reload genesis block.
-    block_type blk;
-    satoshi_load(rawblk.begin(), rawblk.end(), blk);
+    block_type blk(rawblk.begin(), rawblk.end());
+    BOOST_REQUIRE(genblk.header.version == blk.header.version);
+    BOOST_REQUIRE(genblk.header.previous_block_hash == blk.header.previous_block_hash);
+    BOOST_REQUIRE(genblk.header.merkle == blk.header.merkle);
+    BOOST_REQUIRE(genblk.header.timestamp == blk.header.timestamp);
+    BOOST_REQUIRE(genblk.header.bits == blk.header.bits);
+    BOOST_REQUIRE(genblk.header.nonce == blk.header.nonce);
     BOOST_REQUIRE(genblk.header == blk.header);
     const hash_digest& merkle = generate_merkle_root(blk.transactions);
     BOOST_REQUIRE(genblk.header.merkle == merkle);
@@ -73,8 +76,7 @@ BOOST_AUTO_TEST_CASE(junk_test)
     auto junk = base16_literal(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
-    transaction_type tx;
-    satoshi_load(junk.begin(), junk.end(), tx);
+    transaction_type tx(junk.begin(), junk.end());
 }
 
 BOOST_AUTO_TEST_CASE(tx_test)
@@ -91,13 +93,12 @@ BOOST_AUTO_TEST_CASE(tx_test)
         "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
         "00"));
     BOOST_REQUIRE_EQUAL(raw_tx_1.size(), 225u);
-    transaction_type tx_1;
-    satoshi_load(raw_tx_1.begin(), raw_tx_1.end(), tx_1);
+    transaction_type tx_1(raw_tx_1.begin(), raw_tx_1.end());
+    BOOST_REQUIRE_EQUAL(tx_1.satoshi_size(), 225u);
     BOOST_REQUIRE(hash_transaction(tx_1) == tx_hash_1);
     // Re-save tx and compare against original.
-    BOOST_REQUIRE_EQUAL(satoshi_raw_size(tx_1), raw_tx_1.size());
-    data_chunk resave_1(satoshi_raw_size(tx_1));
-    satoshi_save(tx_1, resave_1.begin());
+    BOOST_REQUIRE_EQUAL(tx_1.satoshi_size(), raw_tx_1.size());
+    data_chunk resave_1 = tx_1;
     BOOST_REQUIRE(resave_1 == raw_tx_1);
 
     hash_digest tx_hash_2 = hash_literal(
@@ -121,29 +122,28 @@ BOOST_AUTO_TEST_CASE(tx_test)
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
     BOOST_REQUIRE_EQUAL(raw_tx_2.size(), 523u);
-    transaction_type tx_2;
-    satoshi_load(raw_tx_2.begin(), raw_tx_2.end(), tx_2);
+    transaction_type tx_2(raw_tx_2);
     BOOST_REQUIRE(hash_transaction(tx_2) == tx_hash_2);
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(satoshi_raw_size(tx_2) == raw_tx_2.size());
-    data_chunk resave_2(satoshi_raw_size(tx_2));
-    satoshi_save(tx_2, resave_2.begin());
+    BOOST_REQUIRE(tx_2.satoshi_size() == raw_tx_2.size());
+    data_chunk resave_2 = tx_2;
     BOOST_REQUIRE(resave_2 == raw_tx_2);
 }
 
 BOOST_AUTO_TEST_CASE(script_parse_save_test)
 {
     BOOST_REQUIRE_THROW(
-    script_type psc = parse_script(base16_literal(
+    script_type psc(to_data_chunk(base16_literal(
         "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
         "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
-        "b2c8d9febfb84d01")),
+        "b2c8d9febfb84d01"))),
     end_of_stream);
 
     data_chunk normal_output_script = to_data_chunk(base16_literal(
         "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
-    script_type out_scr = parse_script(normal_output_script);
-    BOOST_REQUIRE(save_script(out_scr) == normal_output_script);
+    script_type out_scr(normal_output_script);
+    data_chunk roundtrip = out_scr;
+    BOOST_REQUIRE(roundtrip == normal_output_script);
 
     data_chunk weird_script = to_data_chunk(base16_literal(
         "0c49206c69656b20636174732e483045022100c7387f64e1f4"
@@ -163,8 +163,8 @@ BOOST_AUTO_TEST_CASE(script_parse_save_test)
         "00d124f07a22680e39debd4dc4bdb1aa4b893720dd05af3c50"
         "560fddada820a4d933888318a23c28fb5fc67aca8530524e20"
         "74b1d185dbf5b4db4ddb0642848868685174519c6351670068"));
-    script_type weird = parse_script(weird_script);
-    BOOST_REQUIRE(save_script(weird) == weird_script);
+    script_type weird(weird_script);
+    BOOST_REQUIRE(((data_chunk)weird) == weird_script);
 }
 
 BOOST_AUTO_TEST_CASE(serialize_deserialize)
