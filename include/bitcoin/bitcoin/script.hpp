@@ -27,10 +27,15 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/primitives/blockchain/operation.hpp>
+#include <bitcoin/bitcoin/primitives/blockchain/script.hpp>
+#include <bitcoin/bitcoin/primitives/blockchain/transaction.hpp>
 
 namespace libbitcoin {
 
-struct transaction_type;
+BC_API bool evaluate(script_type& input_script,
+    script_type& output_script, const transaction_type& parent_tx,
+    uint32_t input_index, bool bip16_enabled = true);
 
 enum class opcode : uint8_t
 {
@@ -313,9 +318,11 @@ BC_API size_t script_size(const script_type& script);
 BC_API bool check_signature(data_slice signature,
     const ec_point& public_key, const script_type& script_code,
     const transaction_type& parent_tx, uint32_t input_index);
+
 BC_API bool create_signature(data_chunk& signature,
     const ec_secret& private_key, const script_type& prevout_script,
     const transaction_type& tx, uint32_t input_index, uint32_t hash_type);
+
 BC_API bool create_signature(data_chunk& signature,
     const ec_secret& private_key, const script_type& prevout_script,
     const transaction_type& tx, uint32_t input_index, uint32_t hash_type,

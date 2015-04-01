@@ -22,8 +22,9 @@
 
 #include <stdexcept>
 #include <string>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
 
 namespace libbitcoin {
 

@@ -29,6 +29,14 @@
 namespace libbitcoin {
 
 // Generic constants.
+BC_CONSTEXPR size_t command_size = 12;
+
+BC_CONSTEXPR uint32_t protocol_version = 60000;
+
+BC_CONSTEXPR uint64_t block_reward = 50;
+
+// 210000 ~ 4 years / 10 minutes
+BC_CONSTEXPR uint64_t reward_interval = 210000;
 
 BC_CONSTEXPR int64_t min_int64 = MIN_INT64;
 BC_CONSTEXPR int64_t max_int64 = MAX_INT64;
