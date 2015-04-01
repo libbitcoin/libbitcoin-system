@@ -40,7 +40,7 @@ constexpr size_t hmac_iterations = 2048;
 // It would be nice if we could do this statically.
 static void validate_dictionary()
 {
-    BITCOIN_ASSERT_MSG(dictionary.size() == sizeof(bip39::language),
+    BITCOIN_ASSERT_MSG(dictionary.size() == (int)language::numer_of_langauges,
         "The dictionary does not have the required number of languages.");
 }
 
