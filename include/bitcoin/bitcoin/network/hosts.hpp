@@ -28,9 +28,9 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -46,10 +46,13 @@ public:
     typedef std::function<void (const std::error_code&)> save_handler;
     typedef std::function<void (const std::error_code&)> store_handler;
     typedef std::function<void (const std::error_code&)> remove_handler;
+
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
-    typedef std::function<void (const std::error_code&,
-        const network_address_type&)> fetch_address_handler;
+
+    typedef std::function<
+        void (const std::error_code&, const message::network_address&)>
+            fetch_address_handler;
 
     hosts(threadpool& pool, const boost::filesystem::path& file_path,
         size_t capacity=1000);
@@ -64,9 +67,10 @@ public:
 
     void load(load_handler handle_load);
     void save(save_handler handle_save);
-    void store(const network_address_type& address,
+
+    BC_API void store(const message::network_address& address,
         store_handler handle_store);
-    void remove(const network_address_type& address,
+    BC_API void remove(const message::network_address& address,
         remove_handler handle_remove);
     void fetch_address(fetch_address_handler handle_fetch);
     void fetch_count(fetch_count_handler handle_fetch);
@@ -81,14 +85,14 @@ public:
     void save(const std::string& path, save_handler handle_save);
 
 private:
-    struct ip_address
+    struct socket_address
     {
-        ip_address();
-        ip_address(const std::string& line);
-        ip_address(const network_address_type& host);
-        bool operator==(const ip_address& other) const;
+        socket_address();
+        socket_address(const std::string& line);
+        socket_address(const message::network_address& host);
+        bool operator==(const socket_address& other) const;
 
-        ip_address_type ip;
+        message::ip_address ip;
         uint16_t port;
     };
 
@@ -96,9 +100,9 @@ private:
         load_handler handle_load);
     void do_save(const boost::filesystem::path& path,
         save_handler handle_save);
-    void do_remove(const network_address_type& address,
+    void do_remove(const message::network_address& address,
         remove_handler handle_remove);
-    void do_store(const network_address_type& address,
+    void do_store(const message::network_address& address,
         store_handler handle_store);
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);
@@ -106,7 +110,7 @@ private:
 
     async_strand strand_;
     boost::filesystem::path file_path_;
-    boost::circular_buffer<ip_address> buffer_;
+    boost::circular_buffer<socket_address> buffer_;
 
     // Deprecated, remove when protocol::set_hosts_filename is removed.
     // This allows (deprecated) protocol::set_hosts_filename to set file_path_.
@@ -117,4 +121,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

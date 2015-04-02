@@ -106,18 +106,19 @@ void handshake::handle_message_sent(const std::error_code& ec,
     completion_callback(ec);
 }
 
-void handshake::receive_version(const std::error_code& ec, const version_type&,
-    channel_ptr node, handshake::handshake_handler completion_callback)
+void handshake::receive_version(const std::error_code& ec,
+    const message::announce_version&, channel_ptr node,
+    handshake::handshake_handler completion_callback)
 {
     if (ec)
         completion_callback(ec);
     else
-        node->send(verack_type(),
+        node->send(message::verack(),
             strand_.wrap(&handshake::handle_message_sent,
                 this, _1, completion_callback));
 }
 
-void handshake::receive_verack(const std::error_code& ec, const verack_type&,
+void handshake::receive_verack(const std::error_code& ec, const message::verack&,
     handshake::handshake_handler completion_callback)
 {
     completion_callback(ec);
@@ -216,4 +217,3 @@ void connect(handshake& shake, network& net, const std::string& hostname,
 
 } // namespace network
 } // namespace libbitcoin
-

@@ -97,7 +97,7 @@ void hosts::do_load(const path& path, load_handler handle_load)
     std::string line;
     while (std::getline(file, line))
     {
-        ip_address address(line);
+        socket_address address(line);
         const auto load_address = [this, address]()
         {
             buffer_.push_back(address);
@@ -139,7 +139,7 @@ void hosts::do_save(const path& path, save_handler handle_save)
     handle_save(error::success);
 }
 
-void hosts::remove(const network_address_type& address,
+void hosts::remove(const message::network_address& address,
     remove_handler handle_remove)
 {
     strand_.randomly_queue(
@@ -147,11 +147,12 @@ void hosts::remove(const network_address_type& address,
             this, address, handle_remove));
 }
 
-void hosts::do_remove(const network_address_type& address,
+void hosts::do_remove(const message::network_address& address,
     remove_handler handle_remove)
 {
-    const ip_address host(address);
+    const socket_address host(address);
     const auto it = std::find(buffer_.begin(), buffer_.end(), host);
+
     if (it == buffer_.end())
     {
         handle_remove(error::not_found);
@@ -173,7 +174,7 @@ void hosts::store(const network_address_type& address,
 void hosts::do_store(const network_address_type& address,
     store_handler handle_store)
 {
-    buffer_.push_back(ip_address(address));
+    buffer_.push_back(socket_address(address));
     handle_store(error::success);
 }
 
@@ -188,14 +189,14 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 {
     if (buffer_.empty())
     {
-        handle_fetch(error::not_found, network_address_type());
+        handle_fetch(error::not_found, message::network_address());
         return;
     }
 
     // Randomly select a host from the buffer.
     const auto host = static_cast<size_t>(pseudo_random() % buffer_.size());
 
-    network_address_type address;
+    message::network_address address;
     address.ip = buffer_[host].ip;
     address.port = buffer_[host].port;
     address.timestamp = 0;
@@ -215,14 +216,14 @@ void hosts::do_fetch_count(fetch_count_handler handle_fetch)
     handle_fetch(error::success, buffer_.size());
 }
 
-// private struct ip_address
+// private struct socket_address
 
-hosts::ip_address::ip_address()
+hosts::socket_address::socket_address()
   : port(0)
 {
 }
 
-hosts::ip_address::ip_address(const network_address_type& host)
+hosts::socket_address::socket_address(const message::network_address& host)
   : ip(host.ip), port(host.port)
 {
     // TODO: We are getting unspecified ports over the wire.
@@ -231,8 +232,8 @@ hosts::ip_address::ip_address(const network_address_type& host)
 }
 
 // This is the format utilized by the hosts file.
-hosts::ip_address::ip_address(const std::string& line)
-  : ip_address()
+hosts::socket_address::socket_address(const std::string& line)
+  : socket_address()
 {
     const auto parts = split(boost::trim_copy(line), " ");
     if (parts.size() != 2)
@@ -250,7 +251,8 @@ hosts::ip_address::ip_address(const std::string& line)
     // BITCOIN_ASSERT(port != 0);
 }
 
-bool hosts::ip_address::operator==(const hosts::ip_address& other) const
+bool hosts::socket_address::operator==(
+    const hosts::socket_address& other) const
 {
     return ip == other.ip && port == other.port;
 }
