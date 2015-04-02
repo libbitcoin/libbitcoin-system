@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/network_address.hpp>
 
+#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
