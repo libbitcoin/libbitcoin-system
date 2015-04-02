@@ -17,40 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_GET_DATA_HPP
-#define LIBBITCOIN_MESSAGE_GET_DATA_HPP
+#ifndef LIBBITCOIN_EXCEPTIONS_HPP
+#define LIBBITCOIN_EXCEPTIONS_HPP
 
-#include <string>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/message/inventory_vector.hpp>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <exception>
 
 namespace libbitcoin {
-namespace message {
 
-class BC_API get_data : public inventory
-{
-public:
+class BC_API end_of_stream
+  : std::exception {};
 
-    static const std::string satoshi_command;
-
-    get_data();
-
-    get_data(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    get_data(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    get_data(const Iterator begin, const Iterator end);
-};
-
-} // end message
-} // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/get_data.ipp>
+}
 
 #endif
