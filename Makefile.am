@@ -91,6 +91,19 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
 
+# local: examples/libbitcoin_examples
+#------------------------------------------------------------------------------
+if WITH_EXAMPLES
+
+noinst_PROGRAMS = examples/libbitcoin_examples
+examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${boost_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${secp256k1_CPPFLAGS}
+examples_libbitcoin_examples_LDFLAGS = ${boost_LDFLAGS}
+examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+examples_libbitcoin_examples_SOURCES = \
+    examples/main.cpp
+
+endif WITH_EXAMPLES
+
 # local: test/libbitcoin_test
 #------------------------------------------------------------------------------
 if WITH_TESTS
@@ -251,4 +264,14 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
+
+
+# Custom make targets.
+#==============================================================================
+# make target: examples
+#------------------------------------------------------------------------------
+target_examples = \
+    examples/libbitcoin_examples
+
+examples: ${target_examples}
 

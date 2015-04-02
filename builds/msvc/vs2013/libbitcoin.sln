@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin", "libbitcoin\li
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin-test", "libbitcoin-test\libbitcoin-test.vcxproj", "{51A424A9-2C12-4211-8D40-E49D1534C541}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libbitcoin-examples", "libbitcoin-examples\libbitcoin-examples.vcxproj", "{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		StaticDebug|Win32 = StaticDebug|Win32
@@ -31,6 +33,14 @@ Global
 		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
 		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
 		{51A424A9-2C12-4211-8D40-E49D1534C541}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
+		{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}.StaticDebug|Win32.ActiveCfg = DebugSEXE|Win32
+		{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}.StaticDebug|Win32.Build.0 = DebugSEXE|Win32
+		{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}.StaticDebug|x64.ActiveCfg = DebugSEXE|x64
+		{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}.StaticDebug|x64.Build.0 = DebugSEXE|x64
+		{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}.StaticRelease|Win32.ActiveCfg = ReleaseSEXE|Win32
+		{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}.StaticRelease|Win32.Build.0 = ReleaseSEXE|Win32
+		{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}.StaticRelease|x64.ActiveCfg = ReleaseSEXE|x64
+		{B726DF7D-6D1D-48FB-AC02-34EB45F9145E}.StaticRelease|x64.Build.0 = ReleaseSEXE|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
