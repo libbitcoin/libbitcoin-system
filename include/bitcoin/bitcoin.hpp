@@ -14,16 +14,23 @@
  * Maintainers: Do not include this header internal to this library.
  */
 
-#include <bitcoin/bitcoin/block.hpp>
 #include <bitcoin/bitcoin/compat.h>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
-#include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/version.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/chain/block_header.hpp>
+#include <bitcoin/bitcoin/chain/opcode.hpp>
+#include <bitcoin/bitcoin/chain/operation.hpp>
+#include <bitcoin/bitcoin/chain/payment.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/chain/transaction_input.hpp>
+#include <bitcoin/bitcoin/chain/transaction_output.hpp>
 #include <bitcoin/bitcoin/config/directory.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
@@ -39,6 +46,18 @@
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
@@ -49,30 +68,6 @@
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
-#include <bitcoin/bitcoin/primitives/output_info.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/block.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/block_header.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/opcode.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/operation.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/payment.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/point.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/script.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/sighash.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/transaction.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/transaction_input.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/transaction_output.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/get_address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/get_blocks.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/get_data.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/header.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/inventory.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/inventory_type_id.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/inventory_vector.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/ping.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/verack.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/version.hpp>
 #include <bitcoin/bitcoin/trie/binary_trie.hpp>
 #include <bitcoin/bitcoin/trie/trie_iterator.hpp>
 #include <bitcoin/bitcoin/trie/trie_reverse_iterator.hpp>
@@ -108,6 +103,7 @@
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
 #include <bitcoin/bitcoin/wallet/message.hpp>
 #include <bitcoin/bitcoin/wallet/mnemonic.hpp>
+#include <bitcoin/bitcoin/wallet/select_outputs.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 

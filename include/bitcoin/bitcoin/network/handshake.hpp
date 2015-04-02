@@ -25,9 +25,11 @@
 #include <system_error>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/verack.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/version.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
+#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -41,11 +43,11 @@ public:
     typedef std::function<void (const std::error_code&)> handshake_handler;
 
     typedef std::function<void (
-        const std::error_code&, const ip_address_type&)>
+        const std::error_code&, const message::ip_address&)>
             discover_ip_handler;
 
     typedef std::function<void (
-        const std::error_code&, const network_address_type&)>
+        const std::error_code&, const message::network_address&)>
             fetch_network_address_handler;
 
     typedef std::function<void (const std::error_code&)> setter_handler;
@@ -67,14 +69,18 @@ public:
 private:
     void handle_connect(const std::error_code& ec,
         channel_ptr node, network::connect_handler handle_connect);
-    void handle_message_sent(const std::error_code& ec,
-        handshake_handler completion_callback);
-    void receive_version(const std::error_code& ec, const version_type&,
-        channel_ptr node, handshake::handshake_handler completion_callback);
-    void receive_verack(const std::error_code& ec, const verack_type&,
-        handshake_handler completion_callback);
 
-    ip_address_type localhost_ip();
+    void handle_message_sent(const std::error_code& ec,
+        handshake::handshake_handler completion_callback);
+
+    void receive_version(const std::error_code& ec,
+        const message::announce_version&, channel_ptr node,
+        handshake::handshake_handler completion_callback);
+
+    void receive_verack(const std::error_code& ec, const message::verack&,
+        handshake::handshake_handler completion_callback);
+
+    message::ip_address localhost_ip();
     void do_discover_external_ip(discover_ip_handler handler_discover);
     void do_fetch_network_address(fetch_network_address_handler handle_fetch);
     void do_set_port(uint16_t port, setter_handler handle_set);
@@ -83,7 +89,7 @@ private:
     void do_set_start_height(uint32_t height, setter_handler handle_set);
 
     boost::asio::io_service::strand strand_;
-    version_type template_version_;
+    message::announce_version template_version_;
 };
 
 BC_API void connect(handshake& shake, network& net,

@@ -25,8 +25,8 @@
 #include <system_error>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -185,7 +185,7 @@ public:
 private:
     struct connection_info
     {
-        network_address_type address;
+        message::network_address address;
         channel_ptr node;
     };
     typedef std::vector<connection_info> connection_list;
@@ -236,7 +236,7 @@ private:
         void handle_send_get_address(const std::error_code& ec);
 
         void save_addresses(const std::error_code& ec,
-            const address_type& packet, channel_ptr);
+            const message::address& packet, channel_ptr);
         void handle_store(const std::error_code& ec);
 
         completion_handler handle_complete_;
@@ -273,9 +273,9 @@ private:
     // subscribe call.
     void try_connect_once(slot_index slot);
     void attempt_connect(const std::error_code& ec,
-        const network_address_type& packet, slot_index slot);
+        const message::network_address& packet, slot_index slot);
     void handle_connect(const std::error_code& ec, channel_ptr node,
-        const network_address_type& address, slot_index slot);
+        const message::network_address& address, slot_index slot);
 
     // Periodically call this method to reset the watermark and reallow
     // connections. This prevents too many connection attempts from
@@ -306,7 +306,7 @@ private:
 
     void subscribe_address(channel_ptr node);
     void receive_address_message(const std::error_code& ec,
-        const address_type& addr, channel_ptr node);
+        const message::address& addr, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
     // fetch methods

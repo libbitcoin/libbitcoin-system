@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/version.hpp>
+
 namespace libbitcoin {
 namespace network {
 
@@ -47,7 +48,7 @@ handshake::handshake(threadpool& pool)
     template_version_.address_me.port = protocol_port;
     template_version_.address_you.services = template_version_.services;
     template_version_.address_you.ip =
-        ip_address_type{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        message::ip_address{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                          0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01}};
     template_version_.address_you.port = protocol_port;
     template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_VERSION "/";
@@ -65,7 +66,7 @@ void handshake::ready(channel_ptr node,
 {
     auto completion_callback = async_parallel(handle_handshake, 3);
 
-    version_type session_version = template_version_;
+    message::announce_version session_version = template_version_;
     session_version.timestamp = time(NULL);
     node->send(session_version,
         strand_.wrap(std::bind(&handshake::handle_message_sent,
@@ -86,19 +87,19 @@ void handshake::handle_message_sent(const std::error_code& ec,
 }
 
 void handshake::receive_version(
-    const std::error_code& ec, const version_type&,
+    const std::error_code& ec, const message::announce_version&,
     channel_ptr node, handshake::handshake_handler completion_callback)
 {
     if (ec)
         completion_callback(ec);
     else
-        node->send(verack_type(),
+        node->send(message::verack(),
             strand_.wrap(std::bind(&handshake::handle_message_sent,
                 this, _1, completion_callback)));
 }
 
 void handshake::receive_verack(
-    const std::error_code& ec, const verack_type&,
+    const std::error_code& ec, const message::verack&,
     handshake::handshake_handler completion_callback)
 {
     completion_callback(ec);
@@ -111,10 +112,14 @@ void handshake::discover_external_ip(discover_ip_handler handle_discover)
             this, handle_discover));
 }
 
-ip_address_type handshake::localhost_ip()
+message::ip_address handshake::localhost_ip()
 {
-    return ip_address_type{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01}};
+    return message::ip_address{
+        {
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01
+        }
+    };
 }
 
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
@@ -194,4 +199,3 @@ void connect(handshake& shake, network& net,
 
 } // namespace network
 } // namespace libbitcoin
-

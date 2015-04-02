@@ -24,7 +24,7 @@
 #include <string>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 
 namespace libbitcoin {
 
@@ -81,7 +81,7 @@ public:
     void write_hash(const hash_digest& hash);
     void write_short_hash(const short_hash& hash);
 
-    void write_network_address(network_address_type addr);
+    void write_network_address(const message::network_address& addr);
 
     /**
      * Write a fixed size string padded with zeroes.
@@ -170,7 +170,7 @@ public:
     hash_digest read_hash();
     short_hash read_short_hash();
 
-    network_address_type read_network_address();
+    message::network_address read_network_address();
 
     /**
      * Read a fixed size string padded with zeroes.

@@ -224,7 +224,7 @@ void protocol::seeds::request_addresses(
     }
     else
     {
-        dns_seed_node->send(get_address_type(),
+        dns_seed_node->send(message::get_address(),
             strand_.wrap(&protocol::seeds::handle_send_get_address,
                 shared_from_this(), _1));
         dns_seed_node->subscribe_address(
@@ -244,7 +244,7 @@ void protocol::seeds::handle_send_get_address(const std::error_code& ec)
 }
 
 void protocol::seeds::save_addresses(const std::error_code& ec,
-    const address_type& packet, channel_ptr)
+    const message::address& packet, channel_ptr)
 {
     if (ec)
     {
@@ -256,7 +256,7 @@ void protocol::seeds::save_addresses(const std::error_code& ec,
     else
     {
         log_debug(LOG_PROTOCOL) << "Storing seeded addresses.";
-        for (const network_address_type& net_address: packet.addresses)
+        for (const message::network_address& net_address: packet.addresses)
             hosts_.store(net_address, strand_.wrap(
                 &protocol::seeds::handle_store, shared_from_this(), _1));
 
@@ -370,7 +370,7 @@ void protocol::start_watermark_reset_timer()
 
 template <typename ConnectionList>
 bool already_connected(
-    const network_address_type& address,
+    const message::network_address& address,
     const ConnectionList& connections)
 {
     // Are we already connected to this address?
@@ -394,7 +394,7 @@ static std::string pretty(const ip_address_type& ip)
     return oss.str();
 }
 void protocol::attempt_connect(const std::error_code& ec,
-    const network_address_type& address, slot_index slot)
+    const message::network_address& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
     modify_slot(slot, connect_state::connecting);
@@ -421,7 +421,7 @@ void protocol::attempt_connect(const std::error_code& ec,
 }
 void protocol::handle_connect(
     const std::error_code& ec, channel_ptr node,
-    const network_address_type& address, slot_index slot)
+    const message::network_address& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
     if (ec)
@@ -525,7 +525,7 @@ void handle_send(const std::error_code& ec)
 void protocol::setup_new_channel(channel_ptr node)
 {
     subscribe_address(node);
-    node->send(get_address_type(), handle_send);
+    node->send(message::get_address(), handle_send);
     // Notify subscribers
     channel_subscribe_->relay(std::error_code(), node);
 }
@@ -602,7 +602,7 @@ void protocol::subscribe_address(channel_ptr node)
         &protocol::receive_address_message, this, _1, _2, node));
 }
 void protocol::receive_address_message(const std::error_code& ec,
-    const address_type& packet, channel_ptr node)
+    const message::address& packet, channel_ptr node)
 {
     if (ec)
     {
@@ -611,7 +611,7 @@ void protocol::receive_address_message(const std::error_code& ec,
         return;
     }
     log_debug(LOG_PROTOCOL) << "Storing addresses.";
-    for (const network_address_type& net_address: packet.addresses)
+    for (const message::network_address& net_address: packet.addresses)
         hosts_.store(net_address, strand_.wrap(
             &protocol::handle_store_address, this, _1));
     node->subscribe_address(strand_.wrap(

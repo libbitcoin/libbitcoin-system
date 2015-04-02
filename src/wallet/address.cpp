@@ -90,14 +90,14 @@ void set_public_key(payment_address& address, const ec_point& public_key)
         bitcoin_short_hash(public_key));
 }
 
-void set_script(payment_address& address, const script_type& eval_script)
+void set_script(payment_address& address, const chain::script& eval_script)
 {
     data_chunk raw_eval_script = eval_script;
     address.set(payment_address::script_version,
         bitcoin_short_hash(raw_eval_script));
 }
 
-bool extract(payment_address& address, const script_type& script)
+bool extract(payment_address& address, const chain::script& script)
 {
     // Cast a data_chunk to a short_hash and set the address
     auto set_hash_data =
@@ -108,35 +108,35 @@ bool extract(payment_address& address, const script_type& script)
             std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
             address.set(version, hash_data);
         };
-    const operation_stack& ops = script.operations;
-    payment_type pay_type = script.type();
+    const chain::operation_stack& ops = script.operations;
+    chain::payment_type pay_type = script.type();
     switch (pay_type)
     {
-        case payment_type::pubkey:
+        case chain::payment_type::pubkey:
             BITCOIN_ASSERT(ops.size() == 2);
             set_public_key(address, ops[0].data);
             return true;
 
-        case payment_type::pubkey_hash:
+        case chain::payment_type::pubkey_hash:
             BITCOIN_ASSERT(ops.size() == 5);
             set_hash_data(payment_address::pubkey_version, ops[2].data);
             return true;
 
-        case payment_type::script_hash:
+        case chain::payment_type::script_hash:
             BITCOIN_ASSERT(ops.size() == 3);
             set_hash_data(payment_address::script_version, ops[1].data);
             return true;
 
-        case payment_type::multisig:
+        case chain::payment_type::multisig:
             // Unimplemented...
             return false;
 
-        case payment_type::pubkey_hash_sig:
+        case chain::payment_type::pubkey_hash_sig:
             BITCOIN_ASSERT(ops.size() == 2);
             set_public_key(address, ops[1].data);
             return true;
 
-        case payment_type::script_code_sig:
+        case chain::payment_type::script_code_sig:
             // Should have at least 1 sig and the script code.
             BITCOIN_ASSERT(ops.size() > 1);
             set_script_hash(address,
