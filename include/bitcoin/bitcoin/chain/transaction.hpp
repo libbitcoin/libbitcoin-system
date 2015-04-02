@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/chain/transaction_input.hpp>
 #include <bitcoin/bitcoin/chain/transaction_output.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
