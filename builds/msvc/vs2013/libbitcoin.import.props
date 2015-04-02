@@ -19,7 +19,8 @@
       <!-- can't define _SCL_SECURE_NO_WARNINGS when using boost, can produce redefined symbol error, use 4996 instead -->
       <DisableSpecificWarnings>4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <!-- NOMINMAX enables use of std::min/max without conflict. -->
-      <PreprocessorDefinitions>NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- WIN32_LEAN_AND_MEAN avoids boost conflict: lists.boost.org/boost-users/2008/07/37824.php. -->
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Option-testnet)' == 'true'">ENABLE_TESTNET;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Linkage-libbitcoin)' == 'static' Or '$(Linkage-libbitcoin)' == 'ltcg'">BC_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>      
     </ClCompile>
