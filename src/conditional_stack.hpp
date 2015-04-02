@@ -21,7 +21,7 @@
 #define LIBBITCOIN_CONDITIONAL_STACK_HPP
 
 #include <vector>
-#include <bitcoin/bitcoin/primitives/blockchain/operation.hpp>
+#include <bitcoin/bitcoin/chain/operation.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {

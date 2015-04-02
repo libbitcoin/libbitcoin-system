@@ -22,9 +22,9 @@
 
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/script.hpp>
 
 namespace libbitcoin {
 
@@ -93,13 +93,13 @@ BC_API void set_script_hash(payment_address& address,
 BC_API void set_public_key(payment_address& address,
     const ec_point& public_key);
 BC_API void set_script(payment_address& address,
-    const script_type& eval_script);
+    const chain::script& eval_script);
 
 /**
  * Extract a Bitcoin address from an input or output script.
  * Returns false on failure.
  */
-BC_API bool extract(payment_address& address, const script_type& script);
+BC_API bool extract(payment_address& address, const chain::script& script);
 
 BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
 

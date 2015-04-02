@@ -26,10 +26,11 @@
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/verack.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/version.hpp>
+#include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -64,14 +65,19 @@ public:
         setter_handler handle_set);
 
 private:
+
     void handle_connect(const std::error_code& ec, channel_ptr node,
         network::connect_handler handle_connect);
+
     void handle_message_sent(const std::error_code& ec,
-        handshake_handler completion_callback);
-    void receive_version(const std::error_code& ec, const version_type&,
-        channel_ptr node, handshake::handshake_handler completion_callback);
-    void receive_verack(const std::error_code& ec, const verack_type&,
-        handshake_handler completion_callback);
+        handshake::handshake_handler completion_callback);
+
+    void receive_version(const std::error_code& ec,
+        const message::announce_version&, channel_ptr node,
+        handshake::handshake_handler completion_callback);
+
+    void receive_verack(const std::error_code& ec, const message::verack&,
+        handshake::handshake_handler completion_callback);
 
     void do_discover_external_ip(discover_ip_handler handler_discover);
     void do_fetch_network_address(fetch_network_address_handler handle_fetch);
@@ -81,7 +87,7 @@ private:
         setter_handler handle_set);
 
     async_strand strand_;
-    version_type template_version_;
+    message::announce_version template_version_;
 };
 
 BC_API void connect(handshake& shake, network& net,

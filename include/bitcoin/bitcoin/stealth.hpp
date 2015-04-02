@@ -21,8 +21,8 @@
 #define LIBBITCOIN_STEALTH_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/script.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 
 namespace libbitcoin {
@@ -37,10 +37,10 @@ struct BC_API stealth_info
  * Calculate the stealth binary prefix from the RETURN output.
  */
 BC_API binary_type calculate_stealth_prefix(
-    const script_type& stealth_script);
+    const chain::script& stealth_script);
 
 BC_API bool extract_stealth_info(stealth_info& info,
-    const script_type& output_script);
+    const chain::script& output_script);
 
 BC_API ec_secret shared_secret(const ec_secret& secret,
     const ec_point& pubkey);

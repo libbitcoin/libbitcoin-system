@@ -30,17 +30,17 @@
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/block.hpp>
-#include <bitcoin/bitcoin/primitives/blockchain/transaction.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/get_address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/get_blocks.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/get_data.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/header.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/inventory.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/ping.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/verack.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/version.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -82,7 +82,7 @@ public:
             handle_send(error::service_stopped);
     }
 
-    void send_raw(const header_type& packet_header,
+    BC_API void send_raw(const message::header& packet_header,
         const data_chunk& payload, channel_proxy::send_handler handle_send);
     void subscribe_version(
         channel_proxy::receive_version_handler handle_receive);

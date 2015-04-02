@@ -310,7 +310,7 @@ void protocol::start_watermark_reset_timer()
 }
 
 template <typename ConnectionList>
-bool already_connected(const network_address_type& address,
+bool already_connected(const message::network_address& address,
     const ConnectionList& connections)
 {
     for (const auto& connection: connections)
@@ -322,7 +322,7 @@ bool already_connected(const network_address_type& address,
 }
 
 void protocol::attempt_connect(const std::error_code& ec,
-    const network_address_type& address, slot_index slot)
+    const message::network_address& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
     modify_slot(slot, connect_state::connecting);
@@ -358,7 +358,7 @@ void protocol::attempt_connect(const std::error_code& ec,
 }
 
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
-    const network_address_type& address, slot_index slot)
+    const message::network_address& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
 
@@ -520,7 +520,7 @@ void protocol::setup_new_channel(channel_ptr node)
         strand_.wrap(&protocol::handle_address_message,
             this, _1, _2, node));
 
-    node->send(get_address_type(), handle_send);
+    node->send(message::get_address(), handle_send);
 
     // Notify subscribers
     channel_subscribe_->relay(error::success, node);
@@ -614,7 +614,7 @@ void protocol::inbound_channel_stopped(const std::error_code& ec,
 }
 
 void protocol::handle_address_message(const std::error_code& ec,
-    const address_type& packet, channel_ptr node)
+    const message::address& packet, channel_ptr node)
 {
     if (!node)
         return;
