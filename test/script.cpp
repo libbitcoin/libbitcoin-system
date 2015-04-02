@@ -54,16 +54,16 @@ bool is_quoted_string(const std::string& token)
     return boost::starts_with(token, "'") && boost::ends_with(token, "'");
 }
 
-opcode token_to_opcode(const std::string& token)
+chain::opcode token_to_opcode(const std::string& token)
 {
     std::string lower_token = token;
     boost::algorithm::to_lower(lower_token);
-    return string_to_opcode(lower_token);
+    return chain::string_to_opcode(lower_token);
 }
 
 bool is_opcode(const std::string& token)
 {
-    return token_to_opcode(token) != opcode::bad_operation;
+    return token_to_opcode(token) != chain::opcode::bad_operation;
 }
 
 bool is_opx(int64_t value)
@@ -77,12 +77,12 @@ void push_literal(data_chunk& raw_script, int64_t value)
     switch (value)
     {
         case -1:
-            raw_script.push_back(static_cast<uint8_t>(opcode::negative_1));
+            raw_script.push_back(static_cast<uint8_t>(chain::opcode::negative_1));
             return;
 
 #define PUSH_X(n) \
         case n: \
-            raw_script.push_back(static_cast<uint8_t>(opcode::op_##n)); \
+            raw_script.push_back(static_cast<uint8_t>(chain::opcode::op_##n)); \
             return;
 
         PUSH_X(1);
@@ -106,23 +106,24 @@ void push_literal(data_chunk& raw_script, int64_t value)
 
 void push_data(data_chunk& raw_script, const data_chunk& data)
 {
-    operation op;
+    chain::operation op;
     // pushdata1 = 76
     if (data.empty())
-        op.code = opcode::zero;
+        op.code = chain::opcode::zero;
     else if (data.size() < 76)
-        op.code = opcode::special;
+        op.code = chain::opcode::special;
     else if (data.size() <= 0xff)
-        op.code = opcode::pushdata1;
+        op.code = chain::opcode::pushdata1;
     else if (data.size() <= 0xffff)
-        op.code = opcode::pushdata2;
+        op.code = chain::opcode::pushdata2;
     else
     {
         BOOST_REQUIRE_LE(data.size(), 0xffffffffu);
-        op.code = opcode::pushdata4;
+        op.code = chain::opcode::pushdata4;
     }
     op.data = data;
-    script_type tmp_script(op);
+    chain::script tmp_script;
+    tmp_script.operations.push_back(op);
     data_chunk raw_tmp_script = tmp_script;
     extend_data(raw_script, raw_tmp_script);
 }
@@ -172,7 +173,7 @@ bool parse_token(data_chunk& raw_script, std::string token)
     }
     else if (is_opcode(token))
     {
-        opcode tokenized_opcode = token_to_opcode(token);
+        chain::opcode tokenized_opcode = token_to_opcode(token);
         raw_script.push_back(static_cast<uint8_t>(tokenized_opcode));
     }
     else
@@ -183,7 +184,7 @@ bool parse_token(data_chunk& raw_script, std::string token)
     return true;
 }
 
-bool parse(script_type& result_script, std::string format)
+bool parse(chain::script& result_script, std::string format)
 {
     boost::trim(format);
     if (format.empty())
@@ -195,10 +196,10 @@ bool parse(script_type& result_script, std::string format)
             return false;
     parse_token(raw_script, "ENDING");
 
-    script_type parsed_script(raw_script, true);
+    chain::script parsed_script(raw_script, true);
 
     if ((parsed_script.operations.size() > 0) &&
-        (parsed_script.operations[0].code == opcode::raw_data))
+        (parsed_script.operations[0].code == chain::opcode::raw_data))
         return false;
 
     result_script = parsed_script;
@@ -211,7 +212,7 @@ bool parse(script_type& result_script, std::string format)
 
 bool run_script(const script_test& test)
 {
-    script_type input, output;
+    chain::script input, output;
 
     if (!parse(input, test.input))
         return false;
@@ -219,10 +220,10 @@ bool run_script(const script_test& test)
     if (!parse(output, test.output))
         return false;
 
-    transaction_type tx;
+    chain::transaction tx;
     //log_debug() << test.input << " -> " << input;
     //log_debug() << test.output << " -> " << output;
-    return evaluate(input, output, tx, 0);
+    return chain::script::verify(input, output, tx, 0);
 }
 
 void ignore_output(log_level,
@@ -258,7 +259,7 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
     // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:1
     data_chunk txdat;
     decode_base16(txdat, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
-    transaction_type parent_tx(txdat.begin(), txdat.end());
+    chain::transaction parent_tx(txdat.begin(), txdat.end());
     uint32_t input_index = 1;
 
     data_chunk signature;
@@ -268,8 +269,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
 
     data_chunk rawscr;
     decode_base16(rawscr, "76a91433cef61749d11ba2adf091a5e045678177fe3a6d88ac");
-    script_type script_code(rawscr);
-    BOOST_REQUIRE(check_signature(
+    chain::script script_code(rawscr);
+    BOOST_REQUIRE(chain::script::check_signature(
         signature, pubkey, script_code, parent_tx, input_index));
 }
 
@@ -278,7 +279,7 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
     // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:0
     data_chunk txdat;
     decode_base16(txdat, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
-    transaction_type parent_tx(txdat.begin(), txdat.end());
+    chain::transaction parent_tx(txdat.begin(), txdat.end());
     uint32_t input_index = 0;
 
     data_chunk signature;
@@ -288,8 +289,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
 
     data_chunk rawscr;
     decode_base16(rawscr, "76a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac");
-    script_type script_code(rawscr);
-    BOOST_REQUIRE(check_signature(
+    chain::script script_code(rawscr);
+    BOOST_REQUIRE(chain::script::check_signature(
         signature, pubkey, script_code, parent_tx, input_index));
 }
 

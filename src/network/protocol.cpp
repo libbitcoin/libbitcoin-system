@@ -499,7 +499,7 @@ void protocol::inbound_channel_stopped(const std::error_code& ec,
 }
 
 void protocol::handle_address_message(const std::error_code& ec,
-    const address_type& message, channel_ptr node)
+    const message::address& message, channel_ptr node)
 {
     if (ec == error::channel_stopped)
         return;

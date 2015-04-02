@@ -100,7 +100,8 @@ void serializer<Iterator>::write_data(const T& data)
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_network_address(network_address_type addr)
+void serializer<Iterator>::write_network_address(
+    const message::network_address& addr)
 {
     write_8_bytes(addr.services);
     write_data(addr.ip);
@@ -248,10 +249,10 @@ data_chunk deserializer<
 }
 
 template <typename Iterator, bool SafeCheckLast>
-network_address_type deserializer<
+message::network_address deserializer<
     Iterator, SafeCheckLast>::read_network_address()
 {
-    network_address_type addr;
+    message::network_address addr;
     addr.services = read_8_bytes();
     // Read IP address
     addr.ip = read_bytes<16>();

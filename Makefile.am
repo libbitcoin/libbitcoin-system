@@ -36,14 +36,24 @@ src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFL
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
-    src/block.cpp \
+    src/compat.cpp \
     src/conditional_stack.cpp \
     src/conditional_stack.hpp \
     src/constants.cpp \
     src/error.cpp \
-    src/script.cpp \
+    src/evaluation_context.cpp \
+    src/evaluation_context.hpp \
     src/stealth.cpp \
     src/transaction.cpp \
+    src/chain/block.cpp \
+    src/chain/block_header.cpp \
+    src/chain/opcode.cpp \
+    src/chain/operation.cpp \
+    src/chain/point.cpp \
+    src/chain/script.cpp \
+    src/chain/transaction.cpp \
+    src/chain/transaction_input.cpp \
+    src/chain/transaction_output.cpp \
     src/config/authority.cpp \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
@@ -86,6 +96,18 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/sha512.h \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
+    src/message/address.cpp \
+    src/message/announce_version.cpp \
+    src/message/get_address.cpp \
+    src/message/get_blocks.cpp \
+    src/message/get_data.cpp \
+    src/message/header.cpp \
+    src/message/inventory.cpp \
+    src/message/inventory_type_id.cpp \
+    src/message/inventory_vector.cpp \
+    src/message/network_address.cpp \
+    src/message/nonce.cpp \
+    src/message/verack.cpp \
     src/network/acceptor.cpp \
     src/network/channel.cpp \
     src/network/channel_proxy.cpp \
@@ -140,6 +162,7 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
     src/wallet/mnemonic.cpp \
+    src/wallet/select_outputs.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
 
@@ -185,6 +208,8 @@ test_libbitcoin_test_SOURCES = \
     test/ec_keys.cpp \
     test/endpoint.cpp \
     test/format.cpp \
+    test/genesis_block.cpp \
+    test/genesis_block.hpp \
     test/hash.cpp \
     test/hash.hpp \
     test/hash_number.cpp \
@@ -221,16 +246,26 @@ include_bitcoin_HEADERS = \
 
 include_bitcoin_bitcoindir = ${includedir}/bitcoin/bitcoin
 include_bitcoin_bitcoin_HEADERS = \
-    include/bitcoin/bitcoin/block.hpp \
     include/bitcoin/bitcoin/compat.h \
     include/bitcoin/bitcoin/compat.hpp \
     include/bitcoin/bitcoin/constants.hpp \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
-    include/bitcoin/bitcoin/script.hpp \
     include/bitcoin/bitcoin/stealth.hpp \
-    include/bitcoin/bitcoin/transaction.hpp \
     include/bitcoin/bitcoin/version.hpp
+
+include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
+include_bitcoin_bitcoin_chain_HEADERS = \
+    include/bitcoin/bitcoin/chain/block.hpp \
+    include/bitcoin/bitcoin/chain/block_header.hpp \
+    include/bitcoin/bitcoin/chain/opcode.hpp \
+    include/bitcoin/bitcoin/chain/operation.hpp \
+    include/bitcoin/bitcoin/chain/payment.hpp \
+    include/bitcoin/bitcoin/chain/point.hpp \
+    include/bitcoin/bitcoin/chain/script.hpp \
+    include/bitcoin/bitcoin/chain/transaction.hpp \
+    include/bitcoin/bitcoin/chain/transaction_input.hpp \
+    include/bitcoin/bitcoin/chain/transaction_output.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
@@ -250,32 +285,32 @@ include_bitcoin_bitcoin_formats_HEADERS = \
     include/bitcoin/bitcoin/formats/base64.hpp \
     include/bitcoin/bitcoin/formats/base85.hpp
 
+include_bitcoin_bitcoin_impl_chaindir = ${includedir}/bitcoin/bitcoin/impl/chain
+include_bitcoin_bitcoin_impl_chain_HEADERS = \
+    include/bitcoin/bitcoin/impl/chain/block.ipp \
+    include/bitcoin/bitcoin/impl/chain/block_header.ipp \
+    include/bitcoin/bitcoin/impl/chain/operation.ipp \
+    include/bitcoin/bitcoin/impl/chain/script.ipp \
+    include/bitcoin/bitcoin/impl/chain/transaction.ipp \
+    include/bitcoin/bitcoin/impl/chain/transaction_input.ipp \
+    include/bitcoin/bitcoin/impl/chain/transaction_output.ipp
+
 include_bitcoin_bitcoin_impl_formatsdir = ${includedir}/bitcoin/bitcoin/impl/formats
 include_bitcoin_bitcoin_impl_formats_HEADERS = \
     include/bitcoin/bitcoin/impl/formats/base16.ipp
 
-include_bitcoin_bitcoin_impl_primitives_blockchaindir = ${includedir}/bitcoin/bitcoin/impl/primitives/blockchain
-include_bitcoin_bitcoin_impl_primitives_blockchain_HEADERS = \
-    include/bitcoin/bitcoin/impl/primitives/blockchain/block.ipp \
-    include/bitcoin/bitcoin/impl/primitives/blockchain/block_header.ipp \
-    include/bitcoin/bitcoin/impl/primitives/blockchain/operation.ipp \
-    include/bitcoin/bitcoin/impl/primitives/blockchain/script.ipp \
-    include/bitcoin/bitcoin/impl/primitives/blockchain/transaction.ipp \
-    include/bitcoin/bitcoin/impl/primitives/blockchain/transaction_input.ipp \
-    include/bitcoin/bitcoin/impl/primitives/blockchain/transaction_output.ipp
-
-include_bitcoin_bitcoin_impl_primitives_satoshidir = ${includedir}/bitcoin/bitcoin/impl/primitives/satoshi
-include_bitcoin_bitcoin_impl_primitives_satoshi_HEADERS = \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/address.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/get_address.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/get_blocks.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/get_data.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/header.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/inventory.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/inventory_vector.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/ping.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/verack.ipp \
-    include/bitcoin/bitcoin/impl/primitives/satoshi/version.ipp
+include_bitcoin_bitcoin_impl_messagedir = ${includedir}/bitcoin/bitcoin/impl/message
+include_bitcoin_bitcoin_impl_message_HEADERS = \
+    include/bitcoin/bitcoin/impl/message/address.ipp \
+    include/bitcoin/bitcoin/impl/message/announce_version.ipp \
+    include/bitcoin/bitcoin/impl/message/get_address.ipp \
+    include/bitcoin/bitcoin/impl/message/get_blocks.ipp \
+    include/bitcoin/bitcoin/impl/message/get_data.ipp \
+    include/bitcoin/bitcoin/impl/message/header.ipp \
+    include/bitcoin/bitcoin/impl/message/inventory.ipp \
+    include/bitcoin/bitcoin/impl/message/inventory_vector.ipp \
+    include/bitcoin/bitcoin/impl/message/nonce.ipp \
+    include/bitcoin/bitcoin/impl/message/verack.ipp
 
 include_bitcoin_bitcoin_impl_triedir = ${includedir}/bitcoin/bitcoin/impl/trie
 include_bitcoin_bitcoin_impl_trie_HEADERS = \
@@ -305,6 +340,21 @@ include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/secp256k1_initializer.hpp \
     include/bitcoin/bitcoin/math/uint256.hpp
 
+include_bitcoin_bitcoin_messagedir = ${includedir}/bitcoin/bitcoin/message
+include_bitcoin_bitcoin_message_HEADERS = \
+    include/bitcoin/bitcoin/message/address.hpp \
+    include/bitcoin/bitcoin/message/announce_version.hpp \
+    include/bitcoin/bitcoin/message/get_address.hpp \
+    include/bitcoin/bitcoin/message/get_blocks.hpp \
+    include/bitcoin/bitcoin/message/get_data.hpp \
+    include/bitcoin/bitcoin/message/header.hpp \
+    include/bitcoin/bitcoin/message/inventory.hpp \
+    include/bitcoin/bitcoin/message/inventory_type_id.hpp \
+    include/bitcoin/bitcoin/message/inventory_vector.hpp \
+    include/bitcoin/bitcoin/message/network_address.hpp \
+    include/bitcoin/bitcoin/message/nonce.hpp \
+    include/bitcoin/bitcoin/message/verack.hpp
+
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/acceptor.hpp \
@@ -321,39 +371,6 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/settings.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp \
     include/bitcoin/bitcoin/network/timeout.hpp
-
-include_bitcoin_bitcoin_primitivesdir = ${includedir}/bitcoin/bitcoin/primitives
-include_bitcoin_bitcoin_primitives_HEADERS = \
-    include/bitcoin/bitcoin/primitives/output_info.hpp
-
-include_bitcoin_bitcoin_primitives_blockchaindir = ${includedir}/bitcoin/bitcoin/primitives/blockchain
-include_bitcoin_bitcoin_primitives_blockchain_HEADERS = \
-    include/bitcoin/bitcoin/primitives/blockchain/block.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/block_header.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/opcode.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/operation.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/payment.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/point.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/script.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/sighash.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/transaction.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/transaction_input.hpp \
-    include/bitcoin/bitcoin/primitives/blockchain/transaction_output.hpp
-
-include_bitcoin_bitcoin_primitives_satoshidir = ${includedir}/bitcoin/bitcoin/primitives/satoshi
-include_bitcoin_bitcoin_primitives_satoshi_HEADERS = \
-    include/bitcoin/bitcoin/primitives/satoshi/address.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/get_address.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/get_blocks.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/get_data.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/header.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/inventory.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/inventory_type_id.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/inventory_vector.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/network_address.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/ping.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/verack.hpp \
-    include/bitcoin/bitcoin/primitives/satoshi/version.hpp
 
 include_bitcoin_bitcoin_triedir = ${includedir}/bitcoin/bitcoin/trie
 include_bitcoin_bitcoin_trie_HEADERS = \
@@ -402,6 +419,7 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
+    include/bitcoin/bitcoin/wallet/select_outputs.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
 

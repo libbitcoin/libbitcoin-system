@@ -24,7 +24,7 @@
 
 namespace libbitcoin {
 
-binary_type calculate_stealth_prefix(const script_type& stealth_script)
+binary_type calculate_stealth_prefix(const chain::script& stealth_script)
 {
     const data_chunk stealth_data = stealth_script;
     const hash_digest index = bitcoin_hash(stealth_data);
@@ -33,9 +33,9 @@ binary_type calculate_stealth_prefix(const script_type& stealth_script)
 }
 
 bool extract_stealth_info(stealth_info& info,
-    const script_type& output_script)
+    const chain::script& output_script)
 {
-    if (output_script.type() != payment_type::stealth_info)
+    if (output_script.type() != chain::payment_type::stealth_info)
         return false;
 
     info.bitfield = calculate_stealth_prefix(output_script);

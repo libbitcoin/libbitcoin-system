@@ -33,13 +33,13 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/peer.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/address.hpp>
-#include <bitcoin/bitcoin/primitives/satoshi/network_address.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -145,6 +145,7 @@ public:
     void set_max_outbound(size_t max_outbound);
 
 private:
+
     typedef std::vector<channel_ptr> channel_ptr_list;
     typedef subscriber<const std::error_code&, channel_ptr> channel_subscriber;
 
@@ -158,7 +159,7 @@ private:
     void handle_hosts_save(const std::error_code& ec,
         completion_handler handle_complete);
     void handle_address_message(const std::error_code& ec,
-        const address_type& message, channel_ptr node);
+        const message::address& message, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
     // Start outbound and accepting inbound connections

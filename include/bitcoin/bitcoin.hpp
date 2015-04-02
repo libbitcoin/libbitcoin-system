@@ -14,16 +14,23 @@
  * Maintainers: Do not include this header internal to this library.
  */
 
-#include <bitcoin/bitcoin/block.hpp>
 #include <bitcoin/bitcoin/compat.h>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/stealth.hpp>
-#include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/version.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/chain/block_header.hpp>
+#include <bitcoin/bitcoin/chain/opcode.hpp>
+#include <bitcoin/bitcoin/chain/operation.hpp>
+#include <bitcoin/bitcoin/chain/payment.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/chain/transaction_input.hpp>
+#include <bitcoin/bitcoin/chain/transaction_output.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/btc256.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
@@ -44,6 +51,18 @@
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/inventory_type_id.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
@@ -118,6 +137,7 @@
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
 #include <bitcoin/bitcoin/wallet/message.hpp>
 #include <bitcoin/bitcoin/wallet/mnemonic.hpp>
+#include <bitcoin/bitcoin/wallet/select_outputs.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 
