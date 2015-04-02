@@ -17,13 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_GENERAL_HPP
-#define LIBBITCOIN_GENERAL_HPP
+#ifndef LIBBITCOIN_COLLECTION_HPP
+#define LIBBITCOIN_COLLECTION_HPP
 
 #include <iterator>
-#include <string>
 #include <vector>
-#include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
@@ -80,43 +78,8 @@ template<typename Type, typename Predicate>
 typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
     const Type& element, Predicate predicate);
 
-/**
- * Join a list of strings into a single string, in order.
- * @param[in]  words      The list of strings to join.
- * @param[in]  delimiter  The delimiter, defaults to BC_SENTENCE_DELIMITER.
- * @return                The resulting string.
- */
-BC_API std::string join(const std::vector<std::string>& words,
-    const std::string& delimiter=BC_SENTENCE_DELIMITER);
-
-/**
- * Join a list of strings into a single string, in order.
- * @param[in]  words      The list of strings to join.
- * @param[in]  delimiter  The delimiter, defaults to BC_SENTENCE_DELIMITER.
- * @return                The resulting string.
- */
-/* FIXME: Not building with g++ */
-/* BC_API std::string join(const std::vector<const std::string>& words, */
-/*     const std::string& delimiter=BC_SENTENCE_DELIMITER); */
-
-/**
- * Split a list of strings into a string vector string, in order, white space
- * delimited.
- * @param[in]  sentence   The string to split.
- * @param[in]  delimiter  The delimeter, defaults to BC_SENTENCE_DELIMITER.
- * @return                The list of resulting strings.
- */
-BC_API std::vector<std::string> split(const std::string& sentence,
-    const std::string& delimiter=BC_SENTENCE_DELIMITER);
-
-/**
- * Trim a string of whitespace.
- * @param[out] value  The string to trim.
- */
-BC_API  void trim(std::string& value);
-
 } // namespace libbitcoin
 
-#include <bitcoin/bitcoin/impl/utility/general.ipp>
+#include <bitcoin/bitcoin/impl/utility/collection.ipp>
 
 #endif

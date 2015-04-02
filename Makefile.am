@@ -78,8 +78,8 @@ src_libbitcoin_la_SOURCES = \
     src/network/network.cpp \
     src/network/protocol.cpp \
     src/utility/binary.cpp \
-    src/utility/general.cpp \
     src/utility/logger.cpp \
+    src/utility/string.cpp \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
     src/wallet/address.cpp \
@@ -192,9 +192,9 @@ include_bitcoin_bitcoin_impl_trie_HEADERS = \
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
+    include/bitcoin/bitcoin/impl/utility/collection.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
-    include/bitcoin/bitcoin/impl/utility/general.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
@@ -229,12 +229,13 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
+    include/bitcoin/bitcoin/utility/collection.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
-    include/bitcoin/bitcoin/utility/general.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
+    include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \

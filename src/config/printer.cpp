@@ -29,7 +29,8 @@
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/general.hpp>
+#include <bitcoin/bitcoin/utility/collection.hpp>
+#include <bitcoin/bitcoin/utility/string.hpp>
 
 // We built this because po::options_description.print() sucks.
 

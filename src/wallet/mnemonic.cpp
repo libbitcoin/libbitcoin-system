@@ -25,7 +25,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
-#include <bitcoin/bitcoin/utility/general.hpp>
+#include <bitcoin/bitcoin/utility/collection.hpp>
+#include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 #include "../math/external/pkcs5_pbkdf2.h"
 
