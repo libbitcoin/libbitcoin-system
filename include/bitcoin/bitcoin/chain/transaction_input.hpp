@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
