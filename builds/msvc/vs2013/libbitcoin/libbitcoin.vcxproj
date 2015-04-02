@@ -105,7 +105,7 @@
     <ClCompile Include="..\..\..\..\src\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\general.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
@@ -154,10 +154,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_parallel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\collection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\endian.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\general.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\string.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\subscriber.hpp" />
@@ -188,9 +189,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\block.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\misc.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\endian.ipp" />
-    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\general.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="packages.config" />
   </ItemGroup>

@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/general.hpp>
+#include <bitcoin/bitcoin/utility/string.hpp>
 
 #include <istream>
-#include <iterator>
 #include <string>
 #include <vector>
 #include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/compat.h>
-#include <bitcoin/bitcoin/define.hpp>
+#include <boost/locale.hpp>
 
 namespace libbitcoin {
 
@@ -34,13 +32,6 @@ std::string join(const std::vector<std::string>& words,
 {
     return boost::join(words, delimiter);
 }
-
-/* FIXME: Not building with g++ */
-/* std::string join(const std::vector<const std::string>& words, */
-/*     const std::string& delimiter) */
-/* { */
-/*     return boost::join(words, delimiter); */
-/* } */
 
 std::vector<std::string> split(const std::string& sentence,
     const std::string& delimiter)
@@ -54,6 +45,18 @@ std::vector<std::string> split(const std::string& sentence,
 void trim(std::string& value)
 {
     boost::trim(value);
+}
+
+std::string narrow(const std::wstring& wide)
+{
+    using namespace boost::locale;
+    return conv::utf_to_utf<char>(wide, conv::method_type::stop);
+}
+
+std::wstring widen(const std::string& narrow)
+{
+    using namespace boost::locale;
+    return conv::utf_to_utf<wchar_t>(narrow, conv::method_type::stop);
 }
 
 } // namespace libbitcoin
