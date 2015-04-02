@@ -36,39 +36,37 @@ namespace bip39 {
 constexpr size_t bits_per_word = 11;
 constexpr size_t entropy_bit_divisor = 32;
 constexpr size_t hmac_iterations = 2048;
-constexpr size_t numer_of_langauges = (size_t)language::unknown;
 
 // It would be nice if we could do this statically.
 static void validate_dictionary()
 {
-    BITCOIN_ASSERT_MSG(dictionary.size() == numer_of_langauges,
+    DEBUG_ONLY(constexpr size_t languages = (size_t)language::unknown);
+    BITCOIN_ASSERT_MSG(dictionary.size() == languages,
         "The dictionary does not have the required number of languages.");
 }
 
-// Get the dictionary of the lanuguage or of en if unknown.
+// Get the dictionary of the language or en if unknown.
 static const wordlist& get_dictionary(bip39::language language)
 {
     validate_dictionary();
 
-    auto tongue = language;
-    if (tongue == bip39::language::unknown)
-        tongue = bip39::language::en;
+    const auto tongue = if_else(language == bip39::language::unknown,
+        bip39::language::en, language);
 
     const auto it = bip39::dictionary.find(tongue);
 
-    // Guards against lack of uniqueness in dictionary language enum.
+    // Guard against lack of uniqueness in dictionary languages by enum.
     BITCOIN_ASSERT(it != bip39::dictionary.end());
+
     return *(it->second);
 }
 
-// Force explicit langauge specification for ambiguous dictionaries.
+// Force explicit language specification for ambiguous dictionaries.
 static bip39::language resolve_ambiguity(bip39::language language)
 {
-    if (language == bip39::language::zh_Hans || 
-        language == bip39::language::zh_Hant)
-        return bip39::language::unknown;
-
-    return language;
+    return if_else(language == bip39::language::zh_Hans ||
+        language == bip39::language::zh_Hant, bip39::language::unknown,
+        language);
 }
 
 // Detect the language of the wordlist, or return unknown if it's ambiguous.
@@ -80,7 +78,6 @@ static bip39::language get_language(const string_list& words)
         return bip39::language::unknown;
 
     const auto& first_word = words.front();
-
     for (const auto& dictionary: bip39::dictionary)
         if (find_position(*dictionary.second, first_word) != -1)
             return resolve_ambiguity(dictionary.first);
