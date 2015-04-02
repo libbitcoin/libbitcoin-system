@@ -69,7 +69,8 @@ BC_API string_list create_mnemonic(data_slice entropy,
  * Any passphrase can be used and will change the resulting seed.
  */
 BC_API data_chunk decode_mnemonic(const string_list& mnemonic,
-    const std::string& passphrase="");
+    const std::string& passphrase="",
+    bip39::language language=bip39::language::unknown);
 
 } // namespace bip39
 } // namespace libbitcoin
