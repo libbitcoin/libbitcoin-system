@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -65,7 +65,7 @@ auto weak_bind(MemberFunction member_func,
     return weak_wrapper(weak_ref, handler);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 

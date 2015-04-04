@@ -17,116 +17,52 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-// assert
-#include <cassert>
-// _O_U8TEXT
-#include <fcntl.h>
-// _setmode, _fileno, _isatty
-#include <io.h>
-// std::wcout, std::wcerr, std::endl, getchar
 #include <iostream>
-// SetConsoleCP, GetStdHandle, GetConsoleMode, SetCurrentConsoleFontEx
-#include <windows.h>
-// wstring
+#include <stdlib.h>
 #include <string>
-// wcscpy
-#include <string.h>
-// getwchar
-#include <wchar.h>
-// widen, narrow
 #include <bitcoin/bitcoin.hpp>
 
-// Must save file as utf8 (CP65001) without signature/BOM.
-int wmain(int argc, wchar_t* argv[])
+// Must save all non-ascii files as utf8 (CP65001) without signature/BOM.
+// int wmain(int argc, wchar_t* argv[])
+int main(int argc, char* argv[])
 {
-#ifdef _MSC_VER
-    // Set console code page to UTF-8.
-    auto set_code_page = ::SetConsoleCP(65001);
-    assert(set_code_page != FALSE);
+    // Establish UTF8 stdio and patch wcin for keyboard input.
+    bc::unicode_streams::initialize();
 
-    // Set console font to Lucida Console 16.
-    CONSOLE_FONT_INFOEX font;
-    font.cbSize = sizeof(font);
-    font.nFont = 0;
-    font.dwFontSize.X = 0;
-    font.dwFontSize.Y = 16;
-    font.FontFamily = FF_DONTCARE;
-    font.FontWeight = FW_NORMAL;
-    auto result = wcscpy(font.FaceName, L"Lucida Console");
-    assert(result != NULL);
+    // Pass the UTF args to internal processing.
+    // TODO: confirm boost::program_options handling of UTF8 values.
+    //auto buffer = bc::narrow(argc, argv);
+    //auto args = reinterpret_cast<char**>(&buffer[0]);
 
-    auto console = ::GetStdHandle(STD_OUTPUT_HANDLE);
-    assert(console != INVALID_HANDLE_VALUE && console != NULL);
-    auto set_font = ::SetCurrentConsoleFontEx(console, FALSE, &font);
-    assert(set_font != FALSE);
-
-    console = ::GetStdHandle(STD_ERROR_HANDLE);
-    assert(console != INVALID_HANDLE_VALUE && console != NULL);
-    set_font = ::SetCurrentConsoleFontEx(console, FALSE, &font);
-    assert(set_font != FALSE);
-
-    // Set stdout/stderr/stdin file stream mode to utf8.
-    auto set_mode = _setmode(_fileno(stdout), _O_U8TEXT);
-    assert(set_mode != -1);
-    set_mode = _setmode(_fileno(stderr), _O_U8TEXT);
-    assert(set_mode != -1);
-    set_mode = _setmode(_fileno(stdin), _O_U8TEXT);
-    assert(set_mode != -1);
-#endif
-
-    // Must use widen vs. L when the source is UTF-8 w/out BOM.
-    const auto utf8to16 = bc::widen("acción.кошка.日本国");
-
-    // Use wcin for input (needs fix to not mangle).
+    // wcin translates input to wide.
+    // Raw (non-text) inputs should use binary/cin/char.
     std::wcout << "Enter text to stdin..." << std::endl;
     std::wstring stdin16;
     std::wcin >> stdin16;
     std::wcout << "\nwcin  : " << stdin16 << std::endl;
 
-    // Use wmain to get args as wchar_t (only way to get unicode args).
-    if (argc > 1)
-    {
-        const auto argv16 = argv[1];
-        std::wcout << "wargv : " << argv16 << std::endl;
-    }
+    //if (argc > 1)
+    //{
+    //    const auto argv16 = bc::widen(args[1]);
+    //    std::wcout << "wargv : " << argv16 << std::endl;
+    //}
 
-    // Use narrow or wide with wcout/wcerr.
+    // Use ascii narrow or wide with wcout|wcerr.
+    const auto utf8to16 = bc::widen("acción.кошка.日本国");
     std::wcout << "wcout : " << utf8to16 << std::endl;
     std::wcerr << "wcerr : " << utf8to16 << std::endl;
+    std::wcout << "wcout ascii : " << "ascii" << std::endl;
+    std::wcerr << "wcerr ascii : " << "ascii" << std::endl;
 
-    // Use getwchar when stdin is set to wide streaming.
-    std::wcout << "\nPress enter to continue" << std::endl;
-    getwchar();
-    getwchar();
-
-    // NOTES:
-
-    // With _O_U8TEXT on stdout
-    // Don't use C FILE level narrow characters operations on cout (assert).
-    //std::cout << "cout : " << "cout" << std::endl;
-
-    // With _O_U8TEXT on stderr
-    // Don't use non-ASCII characters in narrow operations on wcerr (mangle).
-    //std::wcerr << "acción.кошка.日本国" << std::endl;
-    // Don't use C FILE level narrow characters operations on cerr (assert).
-    //std::cerr << "cerr : " << "cerr" << std::endl;
-
-    // With _O_U8TEXT on stdin
-    // Don't use cin for input (assert).
-    //std::string ina;
+    // Don't use cout|cerr|cin (aborts on assertion)
+    //std::cout << "cout ascii : " << "racer-x" << std::endl;
+    //std::cerr << "cerr ascii : " << "racer-x" << std::endl;
+    //std::string ina("test");
     //std::cin >> ina;
 
-    // Always use wmain (argv), wcin, wcout, wcerr.
-    // Do not need to translate to wide for wcout.
-    // Cannot use -w stdio, will crash (without hack).
-    // Must translate to wide for wcerr (if not ASCII) without hack.
-    // Use of wcin requires small hack to not mangle.
-    // Don't use wide literals.
-    // Save source files as UTF8 w/out BOM.
+    // Don't use L translation when the source is UTF-8 w/out BOM (mangles).
+    //const auto utf16 = L"acción.кошка.日本国";
+    //std::wcout << "wcout : " << utf16 << std::endl;
 
-    // TODO: 
-    // Test file I/O and streaming.
-    // Normalize arg array to UTF-8.
-
-    return 0;
+    return EXIT_SUCCESS;
 }

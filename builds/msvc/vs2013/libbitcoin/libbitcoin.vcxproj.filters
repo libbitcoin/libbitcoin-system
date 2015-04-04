@@ -101,9 +101,6 @@
     <ClCompile Include="..\..\..\..\src\block.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\compat.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\constants.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -237,6 +234,15 @@
       <Filter>src\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\string.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\unicode.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\unicode_streams.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\time.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
   </ItemGroup>
@@ -431,6 +437,15 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\collection.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\unicode.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\unicode_streams.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\time.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>

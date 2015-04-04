@@ -22,8 +22,8 @@
 
 #include <ctime>
 #include <string>
-#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/time.hpp>
 
 namespace libbitcoin {
 
@@ -43,4 +43,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-
