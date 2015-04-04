@@ -23,7 +23,6 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
-using namespace bc::bip39;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 

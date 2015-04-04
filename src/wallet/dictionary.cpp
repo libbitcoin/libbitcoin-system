@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
-namespace bip39 {
 namespace language {
 
 const wordlist en =
@@ -10305,5 +10304,4 @@ const wordlist_list all
 };
 
 } // namespace language
-} // namespace bip39
 } // namespace libbitcoin
