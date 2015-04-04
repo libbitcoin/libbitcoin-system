@@ -27,7 +27,7 @@
 namespace libbitcoin {
 
 /**
- * Class to patch stdin keyboard input, file input is not a problem.
+ * Class to patch windows stdin keyboard input, file input is not a problem.
  * Limits keyboard input buffer to 1024 bytes, terminated by <ENTER>.
  * Initializes stdout, stderr and stdin for wide stream (utf8 translation).
  */
