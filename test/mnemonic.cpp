@@ -52,6 +52,31 @@ BOOST_AUTO_TEST_CASE(en_mnemonic_to_seed)
     }
 }
 
+BOOST_AUTO_TEST_CASE(tiny_mnemonic)
+{
+    const data_chunk entropy(4, 0xa9);
+    const auto mnemonic = create_mnemonic(entropy);
+    BOOST_REQUIRE_EQUAL(mnemonic.size(), 3u);
+    BOOST_REQUIRE(validate_mnemonic(mnemonic));
+}
+
+BOOST_AUTO_TEST_CASE(giant_mnemonic)
+{
+    const data_chunk entropy(1024, 0xa9);
+    const auto mnemonic = create_mnemonic(entropy);
+    BOOST_REQUIRE_EQUAL(mnemonic.size(), 768u);
+    BOOST_REQUIRE(validate_mnemonic(mnemonic));
+}
+
+BOOST_AUTO_TEST_CASE(invalid_mnemonics)
+{
+    for (const auto& mnemonic: invalid_mnemonic_tests)
+    {
+        const auto words = split(mnemonic);
+        BOOST_REQUIRE(!validate_mnemonic(words));
+    }
+}
+
 BOOST_AUTO_TEST_CASE(ensure_en_es_disjointness)
 {
     const auto& english = *dictionary.at(language::en);

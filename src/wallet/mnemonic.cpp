@@ -104,11 +104,17 @@ static bool validate_mnemonic(const string_list& words,
     const wordlist& dictionary, bip39::language language)
 {
     const auto word_count = words.size();
-    if ((word_count < min_word_count) || (word_count > max_word_count))
+    if ((word_count % word_multiple) != 0)
         return false;
 
+    const auto total_bits = bits_per_word * word_count;
+    const auto check_bits = total_bits / (entropy_bit_divisor + 1);
+    const auto entropy_bits = total_bits - check_bits;
+
+    BITCOIN_ASSERT((entropy_bits % byte_bits) == 0);
+
     size_t bit = 0;
-    data_chunk seed(max_word_count, 0);
+    data_chunk data((total_bits + byte_bits - 1) / byte_bits, 0);
 
     for (const auto& word: words)
     {
@@ -121,15 +127,14 @@ static bool validate_mnemonic(const string_list& words,
             if (position & (1 << (bits_per_word - loop - 1)))
             {
                 const auto byte = bit / byte_bits;
-                seed[byte] |= bip39_shift(bit);
+                data[byte] |= bip39_shift(bit);
             }
         }
     }
 
-    const auto size = bit / byte_bits;
-    seed.resize(size);
+    data.resize(entropy_bits / byte_bits);
 
-    const auto mnemonic = create_mnemonic(seed, language);
+    const auto mnemonic = create_mnemonic(data, language);
     return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
 

@@ -158,4 +158,20 @@ mnemonic_result_list mnemonic_bip39_vectors
     }
 };
 
+typedef std::vector<std::string> string_list;
+
+string_list invalid_mnemonic_tests
+{
+    // Spelling error:
+    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon aboot",
+
+    // Bad lengths:
+    "one",
+    "one two",
+    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon",
+
+    // Bad checksum:
+    "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon one",
+};
+
 #endif
