@@ -51,8 +51,8 @@ int main(int argc, char* argv[])
     const auto utf8to16 = bc::widen("acción.кошка.日本国");
     std::wcout << "wcout : " << utf8to16 << std::endl;
     std::wcerr << "wcerr : " << utf8to16 << std::endl;
-    std::wcout << "wcout ascii : " << "ascii" << std::endl;
-    std::wcerr << "wcerr ascii : " << "ascii" << std::endl;
+    std::wcout << "wcout : " << "ascii" << std::endl;
+    std::wcerr << "wcerr : " << "ascii" << std::endl;
 
     // Don't use cout|cerr|cin (aborts on assertion)
     //std::cout << "cout ascii : " << "racer-x" << std::endl;

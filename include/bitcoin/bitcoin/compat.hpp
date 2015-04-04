@@ -34,7 +34,7 @@
     #define BC_CONSTFUNC constexpr
 #endif
 
-// TODO: predicate names with BC_
+// TODO: prefix names with BC_
 #ifdef _MSC_VER
     #define MIN_INT64 INT64_MIN
     #define MAX_INT64 INT64_MAX
