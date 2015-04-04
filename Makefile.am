@@ -37,7 +37,6 @@ src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
     src/block.cpp \
-    src/compat.cpp \
     src/constants.cpp \
     src/error.cpp \
     src/satoshi_serialize.cpp \
@@ -81,7 +80,10 @@ src_libbitcoin_la_SOURCES = \
     src/utility/logger.cpp \
     src/utility/string.cpp \
     src/utility/threadpool.cpp \
+    src/utility/time.cpp \
     src/utility/timed_section.cpp \
+    src/utility/unicode.cpp \
+    src/utility/unicode_streams.cpp \
     src/wallet/address.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
@@ -90,6 +92,19 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/mnemonic.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
+
+# local: examples/libbitcoin_examples
+#------------------------------------------------------------------------------
+if WITH_EXAMPLES
+
+noinst_PROGRAMS = examples/libbitcoin_examples
+examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${boost_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${secp256k1_CPPFLAGS}
+examples_libbitcoin_examples_LDFLAGS = ${boost_LDFLAGS}
+examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+examples_libbitcoin_examples_SOURCES = \
+    examples/main.cpp
+
+endif WITH_EXAMPLES
 
 # local: test/libbitcoin_test
 #------------------------------------------------------------------------------
@@ -238,7 +253,10 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
+    include/bitcoin/bitcoin/utility/time.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
+    include/bitcoin/bitcoin/utility/unicode.hpp \
+    include/bitcoin/bitcoin/utility/unicode_streams.hpp \
     include/bitcoin/bitcoin/utility/weak_bind.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
@@ -251,4 +269,14 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
+
+
+# Custom make targets.
+#==============================================================================
+# make target: examples
+#------------------------------------------------------------------------------
+target_examples = \
+    examples/libbitcoin_examples
+
+examples: ${target_examples}
 

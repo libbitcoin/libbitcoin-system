@@ -86,6 +86,17 @@ AC_ARG_WITH([tests],
 AC_MSG_RESULT([$with_tests])
 AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 
+# Implement --with-examples and declare WITH_EXAMPLES.
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING([--with-examples option])
+AC_ARG_WITH([examples],
+    AS_HELP_STRING([--with-examples],
+        [Compile with examples. @<:@default=yes@:>@]),
+    [with_examples=$withval],
+    [with_examples=yes])
+AC_MSG_RESULT([$with_examples])
+AM_CONDITIONAL([WITH_EXAMPLES], [test x$with_examples != xno])
+
 # Implement --enable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-ndebug option])

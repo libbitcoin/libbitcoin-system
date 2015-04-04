@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -21,7 +21,6 @@
 #define LIBBITCOIN_COMPAT_HPP
 
 #include <limits>
-#include <bitcoin/bitcoin/define.hpp>
 
 // CTP_Nov2013 implements noexcept but unfortunately VC12 and CTP_Nov2013
 // both identify as _MSC_VER = 1800, otherwise we could include CTP_Nov2013.
@@ -35,40 +34,7 @@
     #define BC_CONSTFUNC constexpr
 #endif
 
-// Sets the _fmode global variable, which controls the default translation
-// mode for file I/O operations.
-#ifdef _MSC_VER
-    #include <fcntl.h>
-    #include <io.h>
-    #include <stdio.h>
-    #define BC_SET_BINARY_FILE_MODE(mode) \
-        _setmode(_fileno(stdin), mode ? _O_BINARY : _O_TEXT)
-#else
-    #define BC_SET_BINARY_FILE_MODE(mode)
-#endif
-
-#ifdef __MACH__
-    // Mac clock_gettime from gist.github.com/jbenet/1087739
-    #include <mach/clock.h>
-    #include <mach/mach.h>
-    #include <time.h>
-    #include <sys/time.h>
-    #define CLOCK_REALTIME 0
-    BC_API int clock_gettime(int clock_id, timespec* ts);
-#endif
-
-#ifdef _MSC_VER
-    #include <stdint.h>
-    #include <time.h>
-    typedef struct BC_API timespec
-    {
-        time_t tv_sec;
-        int32_t tv_nsec;
-    } timespec;
-    #define CLOCK_REALTIME 0
-    BC_API int clock_gettime(int, timespec* ts);
-#endif
-
+// TODO: predicate names with BC_
 #ifdef _MSC_VER
     #define MIN_INT64 INT64_MIN
     #define MAX_INT64 INT64_MAX

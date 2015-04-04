@@ -28,11 +28,11 @@ BOOST_AUTO_TEST_CASE(uri_parse_test)
 {
     // Typical-looking URI:
     uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(
-        "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=0.1", result));
-    BOOST_REQUIRE(result.address && result.address.get().encoded() ==
-        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    BOOST_REQUIRE(result.amount && result.amount.get() == 10000000);
+    BOOST_REQUIRE(uri_parse("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=0.1", result));
+    BOOST_REQUIRE(result.address);
+    BOOST_REQUIRE_EQUAL(result.address.get().encoded(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(result.amount);
+    BOOST_REQUIRE_EQUAL(result.amount.get(), 10000000u);
     BOOST_REQUIRE(!result.label);
     BOOST_REQUIRE(!result.message);
     BOOST_REQUIRE(!result.r);
@@ -61,10 +61,9 @@ BOOST_AUTO_TEST_CASE(uri_parse_address_test)
 {
     // Address only:
     uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(
-        "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
-    BOOST_REQUIRE(result.address && result.address.get().encoded() ==
-        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(uri_parse("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
+    BOOST_REQUIRE(result.address);
+    BOOST_REQUIRE_EQUAL(result.address.get().encoded(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
     BOOST_REQUIRE(!result.amount);
     BOOST_REQUIRE(!result.label);
     BOOST_REQUIRE(!result.message);
@@ -75,10 +74,9 @@ BOOST_AUTO_TEST_CASE(uri_parse_address_format_test)
 {
     // Percent-encoding in address:
     uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(
-        "bitcoin:%3113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
-    BOOST_REQUIRE(result.address && result.address.get().encoded() ==
-        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(uri_parse("bitcoin:%3113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
+    BOOST_REQUIRE(result.address);
+    BOOST_REQUIRE_EQUAL(result.address.get().encoded(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
 
     // Malformed addresses:
     BOOST_REQUIRE(!uri_parse("bitcoin:19l88", result));
@@ -91,7 +89,8 @@ BOOST_AUTO_TEST_CASE(uri_parse_amount_test)
     uri_parse_result result;
     BOOST_REQUIRE(uri_parse("bitcoin:?amount=4.2", result));
     BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(result.amount && result.amount.get() == 420000000);
+    BOOST_REQUIRE(result.amount);
+    BOOST_REQUIRE_EQUAL(result.amount.get(), 420000000u);
     BOOST_REQUIRE(!result.label);
     BOOST_REQUIRE(!result.message);
     BOOST_REQUIRE(!result.r);
@@ -102,7 +101,8 @@ BOOST_AUTO_TEST_CASE(uri_parse_amount_format_test)
     // Minimal amount:
     uri_parse_result result;
     BOOST_REQUIRE(uri_parse("bitcoin:?amount=.", result));
-    BOOST_REQUIRE(result.amount && result.amount.get() == 0);
+    BOOST_REQUIRE(result.amount);
+    BOOST_REQUIRE_EQUAL(result.amount.get(), 0u);
 
     // Malformed amounts:
     BOOST_REQUIRE(!uri_parse("bitcoin:amount=4.2.1", result));
@@ -116,7 +116,8 @@ BOOST_AUTO_TEST_CASE(uri_parse_label_test)
     BOOST_REQUIRE(uri_parse("bitcoin:?label=test", result));
     BOOST_REQUIRE(!result.address);
     BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(result.label && result.label.get() == "test");
+    BOOST_REQUIRE(result.label);
+    BOOST_REQUIRE_EQUAL(result.label.get(), "test");
     BOOST_REQUIRE(!result.message);
     BOOST_REQUIRE(!result.r);
 }
@@ -126,7 +127,8 @@ BOOST_AUTO_TEST_CASE(uri_parse_escape_test)
     // Reserved symbol encoding and lowercase percent encoding:
     uri_parse_result result;
     BOOST_REQUIRE(uri_parse("bitcoin:?label=%26%3d%6b", result));
-    BOOST_REQUIRE(result.label && result.label.get() == "&=k");
+    BOOST_REQUIRE(result.label);
+    BOOST_REQUIRE_EQUAL(result.label.get(), "&=k");
 
     // Malformed percent encoding:
     BOOST_REQUIRE(!uri_parse("bitcoin:label=%3", result));
@@ -135,35 +137,35 @@ BOOST_AUTO_TEST_CASE(uri_parse_escape_test)
 
 BOOST_AUTO_TEST_CASE(uri_parse_escape_utf8_test)
 {
-    // UTF-8 percent encoding:
+    // URL encoding of multibyte utf8 character.
     uri_parse_result result;
     BOOST_REQUIRE(uri_parse("bitcoin:?label=%E3%83%95", result));
-    BOOST_REQUIRE(result.label && result.label.get() == "フ");
+    BOOST_REQUIRE(result.label);
+    BOOST_REQUIRE_EQUAL(result.label.get(), "フ");
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse_strict_test)
+BOOST_AUTO_TEST_CASE(uri_utf8_strict_test)
 {
-    // Lenient parsing:
+    // URL embedding of multibyte utf8 characters with unencoded space in label.
+    bool strict = false;
     uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(
-        "bitcoin:?label=Some テスト", result, false));
-    BOOST_REQUIRE(result.label && result.label.get() == "Some テスト");
-
-    // Strict parsing:
-    BOOST_REQUIRE(!uri_parse(
-        "bitcoin:?label=Some テスト", result, true));
+    BOOST_REQUIRE(uri_parse("bitcoin:?label=Some テスト", result, strict));
+    BOOST_REQUIRE(result.label);
+    BOOST_REQUIRE_EQUAL(result.label.get(), "Some テスト");
+    strict = true;
+    BOOST_REQUIRE(!uri_parse("bitcoin:?label=Some テスト", result, strict));
 }
 
 BOOST_AUTO_TEST_CASE(uri_parse_message_test)
 {
     // Message only:
     uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(
-        "bitcoin:?message=Hi%20Alice", result));
+    BOOST_REQUIRE(uri_parse("bitcoin:?message=Hi%20Alice", result));
     BOOST_REQUIRE(!result.address);
     BOOST_REQUIRE(!result.amount);
     BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(result.message && result.message.get() == "Hi Alice");
+    BOOST_REQUIRE(result.message);
+    BOOST_REQUIRE_EQUAL(result.message.get(), "Hi Alice");
     BOOST_REQUIRE(!result.r);
 }
 
@@ -171,14 +173,13 @@ BOOST_AUTO_TEST_CASE(uri_parse_payment_proto_test)
 {
     // Payment protocol only:
     uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(
-        "bitcoin:?r=http://www.example.com?purchase%3Dshoes", result));
+    BOOST_REQUIRE(uri_parse("bitcoin:?r=http://www.example.com?purchase%3Dshoes", result));
     BOOST_REQUIRE(!result.address);
     BOOST_REQUIRE(!result.amount);
     BOOST_REQUIRE(!result.label);
     BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(result.r &&
-        result.r.get() == "http://www.example.com?purchase=shoes");
+    BOOST_REQUIRE(result.r);
+    BOOST_REQUIRE_EQUAL(result.r.get(), "http://www.example.com?purchase=shoes");
 }
 
 BOOST_AUTO_TEST_CASE(uri_parse_unknown_test)
@@ -198,9 +199,7 @@ BOOST_AUTO_TEST_CASE(uri_parse_unknown_test)
 
 BOOST_AUTO_TEST_CASE(uri_parse_custom_test)
 {
-    /**
-    * Example class to demonstrate handling custom URI parameters.
-    */
+    // Example class to demonstrate handling custom URI parameters.
     struct custom_result
         : public uri_parse_result
     {
@@ -223,7 +222,8 @@ BOOST_AUTO_TEST_CASE(uri_parse_custom_test)
     BOOST_REQUIRE(!custom.label);
     BOOST_REQUIRE(!custom.message);
     BOOST_REQUIRE(!custom.r);
-    BOOST_REQUIRE(custom.myparam && custom.myparam.get() == "here");
+    BOOST_REQUIRE(custom.myparam);
+    BOOST_REQUIRE_EQUAL(custom.myparam.get(), "here");
 }
 
 BOOST_AUTO_TEST_CASE(uri_write_test)
