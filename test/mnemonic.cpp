@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(entropy_to_en_mnemonic)
     {
         data_chunk entropy;
         decode_base16(entropy, result.entropy);
-        const auto mnemonic = create_mnemonic(entropy, bip39::language::en);
+        const auto mnemonic = create_mnemonic(entropy, language::en);
         BOOST_REQUIRE(mnemonic.size() > 0);
         BOOST_REQUIRE_EQUAL(join(mnemonic), result.mnemonic);
         BOOST_REQUIRE(validate_mnemonic(mnemonic));
@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE(invalid_mnemonics)
 
 BOOST_AUTO_TEST_CASE(ensure_en_es_disjointness)
 {
-    const auto& english = *dictionary.at(language::en);
-    const auto& spanish = *dictionary.at(language::es);
+    const auto& english = language::en;
+    const auto& spanish = language::es;
     size_t intersection = 0;
     for (const auto es: spanish)
     {
@@ -95,8 +95,8 @@ BOOST_AUTO_TEST_CASE(ensure_en_es_disjointness)
 
 BOOST_AUTO_TEST_CASE(ensure_zh_Hans_Hant_intersection)
 {
-    const auto& simplified = *dictionary.at(language::zh_Hans);
-    const auto& traditional = *dictionary.at(language::zh_Hant);
+    const auto& simplified = language::zh_Hans;
+    const auto& traditional = language::zh_Hant;
     size_t intersection = 0;
     for (const auto hant: traditional)
     {

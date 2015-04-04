@@ -38,54 +38,6 @@ constexpr size_t bits_per_word = 11;
 constexpr size_t entropy_bit_divisor = 32;
 constexpr size_t hmac_iterations = 2048;
 
-// It would be nice if we could do this statically.
-static void validate_dictionary()
-{
-    DEBUG_ONLY(constexpr size_t languages = (size_t)language::unknown);
-    BITCOIN_ASSERT_MSG(dictionary.size() == languages,
-        "The dictionary does not have the required number of languages.");
-}
-
-// Get the dictionary of the language or en if unknown.
-static const wordlist& get_dictionary(bip39::language language)
-{
-    validate_dictionary();
-
-    const auto tongue = if_else(language == bip39::language::unknown,
-        bip39::language::en, language);
-
-    const auto it = bip39::dictionary.find(tongue);
-
-    // Guard against lack of uniqueness in dictionary languages by enum.
-    BITCOIN_ASSERT(it != bip39::dictionary.end());
-
-    return *(it->second);
-}
-
-// Force explicit language specification for ambiguous dictionaries.
-static bip39::language resolve_ambiguity(bip39::language language)
-{
-    return if_else(language == bip39::language::zh_Hans ||
-        language == bip39::language::zh_Hant, bip39::language::unknown,
-        language);
-}
-
-// Detect the language of the wordlist, or return unknown if it's ambiguous.
-static bip39::language get_language(const string_list& words)
-{
-    validate_dictionary();
-
-    if (words.empty())
-        return bip39::language::unknown;
-
-    const auto& first_word = words.front();
-    for (const auto& dictionary: bip39::dictionary)
-        if (find_position(*dictionary.second, first_word) != -1)
-            return resolve_ambiguity(dictionary.first);
-
-    return bip39::language::unknown;
-}
-
 static uint8_t bip39_shift(size_t bit)
 {
     return (1 << (byte_bits - (bit % byte_bits) - 1));
@@ -98,10 +50,7 @@ static std::string normalize_nfkd(const std::string& value)
     return normalize(value, norm_type::norm_nfkd, locale("UTF-8"));
 }
 
-// extracts entropy/checksum from the mnemonic and rebuilds the word list
-// for comparison; returns true if it's a match (valid), false otherwise
-static bool validate_mnemonic(const string_list& words,
-    const wordlist& dictionary, bip39::language language)
+bool validate_mnemonic(const string_list& words, const wordlist& dictionary)
 {
     const auto word_count = words.size();
     if ((word_count % word_multiple) != 0)
@@ -134,19 +83,14 @@ static bool validate_mnemonic(const string_list& words,
 
     data.resize(entropy_bits / byte_bits);
 
-    const auto mnemonic = create_mnemonic(data, language);
+    const auto mnemonic = create_mnemonic(data, dictionary);
     return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
 
-string_list create_mnemonic(data_slice entropy, bip39::language language)
+string_list create_mnemonic(data_slice entropy, const wordlist &dictionary)
 {
     if ((entropy.size() % seed_multiple) != 0)
         return string_list();
-
-    const auto& dictionary = get_dictionary(language);
-    const auto hash = sha256_hash(entropy);
-    auto chunk = to_data_chunk(entropy);
-    extend_data(chunk, hash);
 
     const size_t entropy_bits = (entropy.size() * byte_bits);
     const size_t check_bits = (entropy_bits / entropy_bit_divisor);
@@ -155,6 +99,8 @@ string_list create_mnemonic(data_slice entropy, bip39::language language)
 
     BITCOIN_ASSERT((total_bits % bits_per_word) == 0);
     BITCOIN_ASSERT((word_count % word_multiple) == 0);
+
+    const auto data = build_data({entropy, sha256_hash(entropy)});
 
     size_t bit = 0;
     string_list words;
@@ -169,7 +115,7 @@ string_list create_mnemonic(data_slice entropy, bip39::language language)
 
             const auto byte = bit / byte_bits;
 
-            if ((chunk[byte] & bip39_shift(bit)) > 0)
+            if ((data[byte] & bip39_shift(bit)) > 0)
                 position++;
         }
 
@@ -181,22 +127,15 @@ string_list create_mnemonic(data_slice entropy, bip39::language language)
     return words;
 }
 
-// The word selection may be ambiguous (zh), which requires specified language.
-bool validate_mnemonic(const string_list& mnemonic, bip39::language language)
+bool validate_mnemonic(const string_list& mnemonic,
+    const wordlist_list& dictionaries)
 {
-    auto tongue = language;
-    if (tongue == bip39::language::unknown)
-        tongue = get_language(mnemonic);
-
-    if (tongue == bip39::language::unknown)
-        return false;
-
-    const auto& dictionary = get_dictionary(tongue);
-
-    if (!validate_mnemonic(mnemonic, dictionary, tongue))
-        return false;
-
-    return true;
+    for (const auto& i: dictionaries)
+    {
+        if (validate_mnemonic(mnemonic, *i))
+            return true;
+    }
+    return false;
 }
 
 long_hash decode_mnemonic(const string_list& mnemonic,

@@ -21,8 +21,9 @@
 
 namespace libbitcoin {
 namespace bip39 {
+namespace language {
 
-static const wordlist wordlist_en =
+const wordlist en =
 {
     {
         "abandon",
@@ -2076,7 +2077,7 @@ static const wordlist wordlist_en =
     }
 };
 
-static const wordlist wordlist_es =
+const wordlist es =
 {
     {
         "ábaco",
@@ -4130,7 +4131,7 @@ static const wordlist wordlist_es =
     }
 };
 
-static const wordlist wordlist_ja =
+const wordlist ja =
 {
     {
         "あいこくしん",
@@ -6184,7 +6185,7 @@ static const wordlist wordlist_ja =
     }
 };
 
-static const wordlist wordlist_zh_Hans =
+const wordlist zh_Hans =
 {
     {
         "的",
@@ -8238,7 +8239,7 @@ static const wordlist wordlist_zh_Hans =
     }
 };
 
-static const wordlist wordlist_zh_Hant =
+const wordlist zh_Hant =
 {
     {
         "的",
@@ -10294,24 +10295,15 @@ static const wordlist wordlist_zh_Hant =
 
 // Word lists from:
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
-const dictionary_type dictionary
+const wordlist_list all
 {
-    {
-        {language::en}, &wordlist_en
-    },
-    {
-        {language::es}, &wordlist_es
-    },
-    {
-        {language::ja}, &wordlist_ja
-    },
-    {
-        {language::zh_Hans}, &wordlist_zh_Hans
-    },
-    {
-        {language::zh_Hant}, &wordlist_zh_Hant
-    }
+    &en,
+    &es,
+    &ja,
+    &zh_Hans,
+    &zh_Hant,
 };
 
+} // namespace language
 } // namespace bip39
 } // namespace libbitcoin
