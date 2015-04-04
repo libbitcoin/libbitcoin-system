@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
-namespace bip39 {
 
 // Word lists from:
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
@@ -10303,5 +10302,4 @@ const wordlist wordlist_zh_Hant =
     }
 };
 
-} // namespace bip39
 } // namespace libbitcoin

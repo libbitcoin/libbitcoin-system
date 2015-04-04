@@ -25,7 +25,6 @@
 #include <bitcoin/bitcoin/compat.hpp>
 
 namespace libbitcoin {
-namespace bip39 {
 
 /**
  * A valid mnemonic wordlist has exactly this many words.
@@ -54,7 +53,6 @@ extern const wordlist wordlist_ja;
 extern const wordlist wordlist_zh_Hans;
 extern const wordlist wordlist_zh_Hant;
 
-} // namespace bip39
 } // namespace libbitcoin
 
 #endif

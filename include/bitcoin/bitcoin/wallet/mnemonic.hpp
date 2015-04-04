@@ -29,17 +29,16 @@
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
-namespace bip39 {
 
 /**
  * A valid mnemonic word count is evenly divisible by this number.
  */
-BC_CONSTEXPR size_t word_multiple = 3;
+BC_CONSTEXPR size_t mnemonic_word_multiple = 3;
 
 /**
  * A valid seed byte count is evenly divisible by this number.
  */
-BC_CONSTEXPR size_t seed_multiple = 4;
+BC_CONSTEXPR size_t mnemonic_seed_multiple = 4;
 
 /**
  * Represents a mnemonic.
@@ -75,7 +74,6 @@ BC_API bool validate_mnemonic(const string_list& mnemonic,
 BC_API long_hash decode_mnemonic(const string_list& mnemonic,
     const std::string& passphrase="");
 
-} // namespace bip39
 } // namespace libbitcoin
 
 #endif

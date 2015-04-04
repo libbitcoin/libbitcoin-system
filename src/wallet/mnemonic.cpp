@@ -31,7 +31,6 @@
 #include "../math/external/pkcs5_pbkdf2.h"
 
 namespace libbitcoin {
-namespace bip39 {
 
 // BIP-39 private constants.
 constexpr size_t bits_per_word = 11;
@@ -53,7 +52,7 @@ static std::string normalize_nfkd(const std::string& value)
 bool validate_mnemonic(const string_list& words, const wordlist& dictionary)
 {
     const auto word_count = words.size();
-    if ((word_count % word_multiple) != 0)
+    if ((word_count % mnemonic_word_multiple) != 0)
         return false;
 
     const auto total_bits = bits_per_word * word_count;
@@ -89,7 +88,7 @@ bool validate_mnemonic(const string_list& words, const wordlist& dictionary)
 
 string_list create_mnemonic(data_slice entropy, const wordlist &dictionary)
 {
-    if ((entropy.size() % seed_multiple) != 0)
+    if ((entropy.size() % mnemonic_seed_multiple) != 0)
         return string_list();
 
     const size_t entropy_bits = (entropy.size() * byte_bits);
@@ -98,7 +97,7 @@ string_list create_mnemonic(data_slice entropy, const wordlist &dictionary)
     const size_t word_count = (total_bits / bits_per_word);
 
     BITCOIN_ASSERT((total_bits % bits_per_word) == 0);
-    BITCOIN_ASSERT((word_count % word_multiple) == 0);
+    BITCOIN_ASSERT((word_count % mnemonic_word_multiple) == 0);
 
     const auto data = build_data({entropy, sha256_hash(entropy)});
 
@@ -148,6 +147,5 @@ long_hash decode_mnemonic(const string_list& mnemonic,
         to_data_chunk(sentence), to_data_chunk(salt), hmac_iterations);
 }
 
-} // namespace bip39
 } // namespace libbitcoin
 
