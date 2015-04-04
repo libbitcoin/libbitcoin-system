@@ -22,7 +22,18 @@
 namespace libbitcoin {
 namespace bip39 {
 
-static const wordlist wordlist_en =
+// Word lists from:
+// github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
+const wordlist_list builtin_wordlists
+{
+    &wordlist_en,
+    &wordlist_es,
+    &wordlist_ja,
+    &wordlist_zh_Hans,
+    &wordlist_zh_Hant,
+};
+
+const wordlist wordlist_en =
 {
     {
         "abandon",
@@ -2076,7 +2087,7 @@ static const wordlist wordlist_en =
     }
 };
 
-static const wordlist wordlist_es =
+const wordlist wordlist_es =
 {
     {
         "ábaco",
@@ -4130,7 +4141,7 @@ static const wordlist wordlist_es =
     }
 };
 
-static const wordlist wordlist_ja =
+const wordlist wordlist_ja =
 {
     {
         "あいこくしん",
@@ -6184,7 +6195,7 @@ static const wordlist wordlist_ja =
     }
 };
 
-static const wordlist wordlist_zh_Hans =
+const wordlist wordlist_zh_Hans =
 {
     {
         "的",
@@ -8238,7 +8249,7 @@ static const wordlist wordlist_zh_Hans =
     }
 };
 
-static const wordlist wordlist_zh_Hant =
+const wordlist wordlist_zh_Hant =
 {
     {
         "的",
@@ -10289,27 +10300,6 @@ static const wordlist wordlist_zh_Hant =
         "怨",
         "矮",
         "歇"
-    }
-};
-
-// Word lists from:
-// github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
-const dictionary_type dictionary
-{
-    {
-        {language::en}, &wordlist_en
-    },
-    {
-        {language::es}, &wordlist_es
-    },
-    {
-        {language::ja}, &wordlist_ja
-    },
-    {
-        {language::zh_Hans}, &wordlist_zh_Hans
-    },
-    {
-        {language::zh_Hant}, &wordlist_zh_Hant
     }
 };
 
