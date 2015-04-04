@@ -133,29 +133,6 @@ static bool validate_mnemonic(const string_list& words,
     return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
 
-// The word selection may be ambiguous (zh), which requires specified language.
-data_chunk decode_mnemonic(const string_list& mnemonic,
-    const std::string& passphrase, bip39::language language)
-{
-    auto tongue = language;
-    if (tongue == bip39::language::unknown)
-        tongue = get_language(mnemonic);
-
-    if (tongue == bip39::language::unknown)
-        return data_chunk();
-
-    const auto& dictionary = get_dictionary(tongue);
-
-    if (!validate_mnemonic(mnemonic, dictionary, tongue))
-        return data_chunk();
-
-    const auto sentence = join(mnemonic);
-    const auto salt = normalize_nfkd("mnemonic" + passphrase);
-
-    return to_data_chunk(pkcs5_pbkdf2_hmac_sha512(
-        to_data_chunk(sentence), to_data_chunk(salt), hmac_iterations));
-}
-
 string_list create_mnemonic(data_slice entropy, bip39::language language)
 {
     if ((entropy.size() % seed_multiple) != 0)
@@ -197,6 +174,34 @@ string_list create_mnemonic(data_slice entropy, bip39::language language)
 
     BITCOIN_ASSERT(words.size() == ((bit + 1) / bits_per_word));
     return words;
+}
+
+// The word selection may be ambiguous (zh), which requires specified language.
+bool validate_mnemonic(const string_list& mnemonic, bip39::language language)
+{
+    auto tongue = language;
+    if (tongue == bip39::language::unknown)
+        tongue = get_language(mnemonic);
+
+    if (tongue == bip39::language::unknown)
+        return false;
+
+    const auto& dictionary = get_dictionary(tongue);
+
+    if (!validate_mnemonic(mnemonic, dictionary, tongue))
+        return false;
+
+    return true;
+}
+
+long_hash decode_mnemonic(const string_list& mnemonic,
+    const std::string& passphrase)
+{
+    const auto sentence = join(mnemonic);
+    const auto salt = normalize_nfkd("mnemonic" + passphrase);
+
+    return pkcs5_pbkdf2_hmac_sha512(
+        to_data_chunk(sentence), to_data_chunk(salt), hmac_iterations);
 }
 
 } // namespace bip39
