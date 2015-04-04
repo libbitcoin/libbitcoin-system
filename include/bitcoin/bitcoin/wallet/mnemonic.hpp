@@ -24,6 +24,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
@@ -64,13 +65,19 @@ BC_API string_list create_mnemonic(data_slice entropy,
     bip39::language language=bip39::language::en);
 
 /**
- * Convert a mnemonic and optional passphrase to a seed for use in seeding
- * wallet creation. The words must have been created using mnemonic encoding.
+ * Checks a mnemonic against a list of languages to determine if the
+ * words are spelled correctly and the checksum matches.
+ * The words must have been created using mnemonic encoding.
+ */
+BC_API bool validate_mnemonic(const string_list& mnemonic,
+    bip39::language language=bip39::language::unknown);
+
+/**
+ * Convert a mnemonic and optional passphrase to a wallet-generation seed.
  * Any passphrase can be used and will change the resulting seed.
  */
-BC_API data_chunk decode_mnemonic(const string_list& mnemonic,
-    const std::string& passphrase="",
-    bip39::language language=bip39::language::unknown);
+BC_API long_hash decode_mnemonic(const string_list& mnemonic,
+    const std::string& passphrase="");
 
 } // namespace bip39
 } // namespace libbitcoin

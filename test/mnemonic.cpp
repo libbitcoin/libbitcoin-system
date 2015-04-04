@@ -36,6 +36,7 @@ BOOST_AUTO_TEST_CASE(entropy_to_en_mnemonic)
         const auto mnemonic = create_mnemonic(entropy, bip39::language::en);
         BOOST_REQUIRE(mnemonic.size() > 0);
         BOOST_REQUIRE_EQUAL(join(mnemonic), result.mnemonic);
+        BOOST_REQUIRE(validate_mnemonic(mnemonic));
     }
 }
 
@@ -45,8 +46,8 @@ BOOST_AUTO_TEST_CASE(en_mnemonic_to_seed)
     for (const mnemonic_result& result: mnemonic_bip39_vectors)
     {
         const auto words = split(result.mnemonic);
+        BOOST_REQUIRE(validate_mnemonic(words));
         const auto seed = decode_mnemonic(words, passphrase);
-        BOOST_REQUIRE(!seed.empty());
         BOOST_REQUIRE_EQUAL(encode_base16(seed), result.seed);
     }
 }
