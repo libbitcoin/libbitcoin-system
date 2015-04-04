@@ -151,13 +151,9 @@ data_chunk decode_mnemonic(const string_list& mnemonic,
 
     const auto sentence = join(mnemonic);
     const auto salt = normalize_nfkd("mnemonic" + passphrase);
-    const auto salt_chunk = to_data_chunk(salt);
 
-    long_hash hash;
-    if (pkcs5_pbkdf2_hmac_sha512(sentence, salt_chunk, hmac_iterations, hash))
-        return to_data_chunk(hash);
-
-    return data_chunk();
+    return to_data_chunk(pkcs5_pbkdf2_hmac_sha512(
+        to_data_chunk(sentence), to_data_chunk(salt), hmac_iterations));
 }
 
 string_list create_mnemonic(data_slice entropy, bip39::language language)

@@ -22,7 +22,7 @@
 #include "pkcs5_pbkdf2.h"
 
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 
