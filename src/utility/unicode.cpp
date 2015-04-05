@@ -26,23 +26,23 @@
 
 namespace libbitcoin {
 
-data_chunk narrow(int argc, wchar_t* argv[])
+data_chunk to_utf8(int argc, wchar_t* argv[])
 {
     // Convert each arg and determine the payload size.
     size_t payload_size = 0;
     std::vector<std::string> collection(argc + 1);
     for (size_t arg = 0; arg < argc; arg++)
     {
-        collection[arg] = bc::narrow(argv[arg]);
+        collection[arg] = to_utf8(argv[arg]);
         payload_size += collection[arg].size() + 1;
     }
 
     // Determine the index size.
-    auto index_size = static_cast<size_t>(argc * sizeof(void*));
+    auto index_size = static_cast<size_t>((argc + 1)* sizeof(void*));
 
     // Allocate the new buffer.
-    auto buffer_size = index_size + payload_size + 1;
-    bc::data_chunk buffer(buffer_size, 0x00);
+    auto buffer_size = index_size + payload_size;
+    data_chunk buffer(buffer_size, 0x00);
     buffer.resize(buffer_size);
 
     // Set pointers into index and payload buffer sections.
@@ -60,16 +60,25 @@ data_chunk narrow(int argc, wchar_t* argv[])
     return buffer;
 }
 
-std::string narrow(const std::wstring& wide)
+std::string to_utf8(const std::wstring& wide)
 {
     using namespace boost::locale;
     return conv::utf_to_utf<char>(wide, conv::method_type::stop);
 }
 
-std::wstring widen(const std::string& narrow)
+std::wstring to_utf16(const std::string& narrow)
 {
     using namespace boost::locale;
     return conv::utf_to_utf<wchar_t>(narrow, conv::method_type::stop);
+}
+
+tstring to_utf(const std::string& narrow)
+{
+#ifdef _MSC_VER
+    return to_utf16(narrow);
+#else
+    return narrow;
+#endif
 }
 
 } // namespace libbitcoin

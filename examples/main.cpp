@@ -28,25 +28,30 @@ BC_USE_LIBBITCOIN_MAIN
 
 int bc::main(int argc, char* argv[])
 {
-    // wcin translates input to wide.
-    // Raw (non-text) inputs should use binary/cin/char.
-    std::wcout << "Enter text to stdin..." << std::endl;
-    std::wstring stdin16;
-    std::wcin >> stdin16;
-    std::wcout << "\nwcin  : " << stdin16 << std::endl;
+    // tcin treats file input as utf8 and translates console input to wide.
+    tcout << "Enter text to stdin..." << std::endl;
+    bc::tstring tstdin;
+    tcin >> tstdin;
+    tcout << "tcin  : " << tstdin << std::endl;
 
     if (argc > 1)
     {
-        const auto argv16 = bc::widen(argv[1]);
-        std::wcout << "wargv : " << argv16 << std::endl;
+        const auto utf = bc::to_utf(argv[1]);
+        tcout << "targv : " << utf << std::endl;
     }
 
-    // Use ascii narrow or wide with wcout|wcerr.
-    const auto utf8to16 = bc::widen("acción.кошка.日本国");
-    std::wcout << "wcout : " << utf8to16 << std::endl;
-    std::wcerr << "wcerr : " << utf8to16 << std::endl;
-    std::wcout << "wcout : " << "ascii" << std::endl;
-    std::wcerr << "wcerr : " << "ascii" << std::endl;
+    // Use wide with tcout|tcerr.
+    const auto utf = bc::to_utf("acción.кошка.日本国");
+    tcout << "tcout : " << utf << std::endl;
+    tcerr << "tcerr : " << utf << std::endl;
+
+    // Use ascii narrow with tcout|tcerr (but not non-ascii narrow).
+    tcout << "tcout : " << "narrow" << std::endl;
+    tcerr << "tcerr : " << "narrow" << std::endl;
+
+    // Use ascii wide with wcout|wcerr (but not non-ascii wide).
+    std::wcout << "tcout : " << L"wide" << std::endl;
+    std::wcerr << "tcerr : " << L"wide" << std::endl;
 
     return EXIT_SUCCESS;
 }

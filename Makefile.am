@@ -149,6 +149,7 @@ test_libbitcoin_test_SOURCES = \
     test/serialize.cpp \
     test/stealth.cpp \
     test/stealth_address.cpp \
+    test/unicode.cpp \
     test/uri.cpp
 
 endif WITH_TESTS

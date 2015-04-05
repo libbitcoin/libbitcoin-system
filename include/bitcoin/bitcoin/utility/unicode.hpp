@@ -68,28 +68,31 @@
 // std::wcout << utf16;
 
 #ifdef _MSC_VER
-#define BC_USE_LIBBITCOIN_MAIN \
-    _BC_DECLARE_LIBBITCOIN_MAIN \
-    int wmain(int argc, wchar_t* argv[]) \
-    { \
-        bc::unicode_streams::initialize(); \
-        auto buffer = libbitcoin::narrow(argc, argv); \
-        auto args = reinterpret_cast<char**>(&buffer[0]); \
-        return libbitcoin::main(argc, args); \
-    }
+    namespace libbitcoin { typedef std::wstring tstring; }
+    #define tcin std::wcin
+    #define tcout std::wcout
+    #define tcerr std::wcerr
+    #define BC_USE_LIBBITCOIN_MAIN \
+        namespace libbitcoin { int main(int argc, char* argv[]); } \
+        int wmain(int argc, wchar_t* argv[]) \
+        { \
+            bc::unicode_streams::initialize(); \
+            auto buffer = libbitcoin::to_utf8(argc, argv); \
+            auto args = reinterpret_cast<char**>(&buffer[0]); \
+            return libbitcoin::main(argc, args); \
+        }
 #else
-#define BC_USE_LIBBITCOIN_MAIN \
-    _BC_DECLARE_LIBBITCOIN_MAIN \
-    int main(int argc, char* argv[]) \
-    { \
-        return libbitcoin::main(argc, argv); \
-    }
+    namespace libbitcoin { typedef std::string tstring; }
+    #define tcin std::cin
+    #define tcout std::cout
+    #define tcerr std::cerr
+    #define BC_USE_LIBBITCOIN_MAIN \
+        namespace libbitcoin { int main(int argc, char* argv[]); } \
+        int main(int argc, char* argv[]) \
+        { \
+            return libbitcoin::main(argc, argv); \
+        }
 #endif
-
-#define _BC_DECLARE_LIBBITCOIN_MAIN \
-namespace libbitcoin { \
-    int main(int argc, char* argv[]); \
-}
 
 namespace libbitcoin {
 
@@ -100,21 +103,29 @@ namespace libbitcoin {
  * @param[in]  argv  The wide command line arguments
  * @return           A buffer holding the narrow version of argv.
  */
-BC_API data_chunk narrow(int argc, wchar_t* argv[]);
+BC_API data_chunk to_utf8(int argc, wchar_t* argv[]);
 
 /**
  * Convert a wchar_t (presumed UTF16) string to wide (UTF8/char).
  * @param[in]  wide  The utf16 string to convert.
  * @return           The resulting utf8 string.
  */
-BC_API std::string narrow(const std::wstring& wide);
+BC_API std::string to_utf8(const std::wstring& wide);
 
 /**
- * Convert a char (presumed UTF8) string to wide (UTF16/wchar_t).
+ * Convert a narrow (presumed UTF8) string to wide (UTF16/wchar_t).
  * @param[in]  narrow  The utf8 string to convert.
  * @return             The resulting utf16 string.
  */
-BC_API std::wstring widen(const std::string& narrow);
+BC_API std::wstring to_utf16(const std::string& narrow);
+
+/**
+ * Conditionally convert a narrow string to wide based on platform.
+ * The result is wide in Windows builds and narrow in others.
+ * @param[in]  narrow  The utf8 string to convert.
+ * @return             The resulting string.
+ */
+BC_API tstring to_utf(const std::string& narrow);
 
 } // namespace libbitcoin
 
