@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 #include <algorithm>
+#include <new>
 #include "../math/external/hmac_sha256.h"
 #include "../math/external/hmac_sha512.h"
 #include "../math/external/pkcs5_pbkdf2.h"
@@ -87,13 +88,14 @@ long_hash hmac_sha512_hash(data_slice data, data_slice key)
     return hash;
 }
 
-bool pkcs5_pbkdf2_hmac_sha512(const std::string& passphrase, 
-    data_slice salt, size_t iterations, long_hash& long_hash)
+long_hash pkcs5_pbkdf2_hmac_sha512(data_slice passphrase,
+    data_slice salt, size_t iterations)
 {
-    const auto passphrase_bytes = to_data_chunk(passphrase);
-    return pkcs5_pbkdf2(&passphrase_bytes[0], passphrase_bytes.size(),
-        salt.data(), salt.size(), long_hash.data(), sizeof(long_hash),
-        iterations) == 0;
+    long_hash hash;
+    if (pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
+        salt.data(), salt.size(), hash.data(), hash.size(), iterations))
+        throw std::bad_alloc();
+    return hash;
 }
 
 hash_digest bitcoin_hash(data_slice data)

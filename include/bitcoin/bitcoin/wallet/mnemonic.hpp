@@ -24,31 +24,21 @@
 #include <vector>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include <bitcoin/bitcoin/wallet/wordlist.hpp>
 
 namespace libbitcoin {
-namespace bip39 {
 
 /**
  * A valid mnemonic word count is evenly divisible by this number.
  */
-BC_CONSTEXPR size_t word_multiple = 3;
+BC_CONSTEXPR size_t mnemonic_word_multiple = 3;
 
 /**
  * A valid seed byte count is evenly divisible by this number.
  */
-BC_CONSTEXPR size_t seed_multiple = 4;
-
-/**
- * A valid mnemonic has at least this many words.
- */
-BC_CONSTEXPR size_t min_word_count = 12;
-
-/**
- * A valid mnemonic has no more than this many words.
- */
-BC_CONSTEXPR size_t max_word_count = 128;
+BC_CONSTEXPR size_t mnemonic_seed_multiple = 4;
 
 /**
  * Represents a mnemonic.
@@ -58,21 +48,32 @@ typedef std::vector<std::string> string_list;
 /**
  * Create a new mnenomic (list of words) from provided entropy and a dictionary
  * selection. The mnemonic can later be converted to a seed for use in wallet
- * creation. Entropy byte count must be evenly divisible by 3.
+ * creation. Entropy byte count must be evenly divisible by 4.
  */
 BC_API string_list create_mnemonic(data_slice entropy,
-    bip39::language language=bip39::language::en);
+    const wordlist &dictionary=wordlist_en);
 
 /**
- * Convert a mnemonic and optional passphrase to a seed for use in seeding
- * wallet creation. The words must have been created using mnemonic encoding.
+ * Checks a mnemonic against a wordlist to determine if the
+ * words are spelled correctly and the checksum matches.
+ * The words must have been created using mnemonic encoding.
+ */
+BC_API bool validate_mnemonic(const string_list& mnemonic,
+    const wordlist &dictionary);
+
+/**
+ * Checks that a mnemonic is valid in at least one of the provided languages.
+ */
+BC_API bool validate_mnemonic(const string_list& mnemonic,
+    const wordlist_list& wordlists=builtin_wordlists);
+
+/**
+ * Convert a mnemonic and optional passphrase to a wallet-generation seed.
  * Any passphrase can be used and will change the resulting seed.
  */
-BC_API data_chunk decode_mnemonic(const string_list& mnemonic,
-    const std::string& passphrase="",
-    bip39::language language=bip39::language::unknown);
+BC_API long_hash decode_mnemonic(const string_list& mnemonic,
+    const std::string& passphrase="");
 
-} // namespace bip39
 } // namespace libbitcoin
 
 #endif

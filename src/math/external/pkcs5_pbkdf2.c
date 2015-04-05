@@ -16,6 +16,7 @@
  */
 #include "pkcs5_pbkdf2.h"
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -34,11 +35,10 @@ int pkcs5_pbkdf2(const uint8_t* passphrase, size_t passphrase_length,
     uint8_t digest1[HMACSHA512_DIGEST_LENGTH];
     uint8_t digest2[HMACSHA512_DIGEST_LENGTH];
 
-    if (iterations == 0 || key_length == 0)
-        return -1;
-
-    if (salt_length == 0 || salt_length > SIZE_MAX - 4)
-        return -1;
+    assert(iterations != 0);
+    assert(key_length != 0);
+    assert(salt_length != 0);
+    assert(salt_length <= SIZE_MAX - 4);
 
     asalt_size = salt_length + 4;
     asalt = malloc(asalt_size);

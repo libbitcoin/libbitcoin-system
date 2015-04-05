@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_DICTIONARY_HPP
-#define LIBBITCOIN_DICTIONARY_HPP
+#ifndef LIBBITCOIN_WORDLIST_HPP
+#define LIBBITCOIN_WORDLIST_HPP
 
 #include <array>
-#include <map>
+#include <vector>
 #include <bitcoin/bitcoin/compat.hpp>
 
 namespace libbitcoin {
-namespace bip39 {
 
 /**
  * A valid mnemonic wordlist has exactly this many words.
@@ -35,36 +34,25 @@ BC_CONSTEXPR size_t wordlist_size = 2048;
 /**
  * A "wordlist" for creating mnemonics, as defined in bip39.
  * This is a POD type, which means the compiler can write it directly
- * to static memory no run-time overhead.
+ * to static memory with no run-time overhead.
  */
 typedef std::array<const char*, wordlist_size> wordlist;
 
 /**
- * Dictionary languages.
+ * A collection of candidate wordlists for mnemonic validation.
  */
-enum class language
-{
-    en,
-    es,
-    ja,
-    zh_Hans,
-    zh_Hant,
-    unknown
-};
+typedef std::vector<const wordlist*> wordlist_list;
 
-/**
- * Multilingual word dictionary type.
- * It references the wordlists by pointer,
- * allowing them to live in static memory.
- */
-typedef std::map<language, const wordlist*> dictionary_type;
+// All built-in languages:
+extern const wordlist_list builtin_wordlists;
 
-/**
- * Multilingual word dictionary.
- */
-extern const dictionary_type dictionary;
+// Individual built-in languages:
+extern const wordlist wordlist_en;
+extern const wordlist wordlist_es;
+extern const wordlist wordlist_ja;
+extern const wordlist wordlist_zh_Hans;
+extern const wordlist wordlist_zh_Hant;
 
-} // namespace bip39
 } // namespace libbitcoin
 
 #endif

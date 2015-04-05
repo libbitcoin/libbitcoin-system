@@ -23,38 +23,63 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
-using namespace bc::bip39;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
 BOOST_AUTO_TEST_CASE(entropy_to_en_mnemonic)
 {
-    for (const mnemonic_result& result: entropy_to_mnemonic_en)
+    for (const mnemonic_result& result: mnemonic_bip39_vectors)
     {
         data_chunk entropy;
-        decode_base16(entropy, result.input);
-        const auto mnemonic = create_mnemonic(entropy, bip39::language::en);
+        decode_base16(entropy, result.entropy);
+        const auto mnemonic = create_mnemonic(entropy, wordlist_en);
         BOOST_REQUIRE(mnemonic.size() > 0);
-        BOOST_REQUIRE_EQUAL(join(mnemonic), result.expectation);
+        BOOST_REQUIRE_EQUAL(join(mnemonic), result.mnemonic);
+        BOOST_REQUIRE(validate_mnemonic(mnemonic));
     }
 }
 
 BOOST_AUTO_TEST_CASE(en_mnemonic_to_seed)
 {
     const auto& passphrase = "TREZOR";
-    for (const mnemonic_result& result: mnemonic_to_seed_en)
+    for (const mnemonic_result& result: mnemonic_bip39_vectors)
     {
-        const auto words = split(result.input);
+        const auto words = split(result.mnemonic);
+        BOOST_REQUIRE(validate_mnemonic(words));
         const auto seed = decode_mnemonic(words, passphrase);
-        BOOST_REQUIRE(!seed.empty());
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), result.expectation);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), result.seed);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(tiny_mnemonic)
+{
+    const data_chunk entropy(4, 0xa9);
+    const auto mnemonic = create_mnemonic(entropy);
+    BOOST_REQUIRE_EQUAL(mnemonic.size(), 3u);
+    BOOST_REQUIRE(validate_mnemonic(mnemonic));
+}
+
+BOOST_AUTO_TEST_CASE(giant_mnemonic)
+{
+    const data_chunk entropy(1024, 0xa9);
+    const auto mnemonic = create_mnemonic(entropy);
+    BOOST_REQUIRE_EQUAL(mnemonic.size(), 768u);
+    BOOST_REQUIRE(validate_mnemonic(mnemonic));
+}
+
+BOOST_AUTO_TEST_CASE(invalid_mnemonics)
+{
+    for (const auto& mnemonic: invalid_mnemonic_tests)
+    {
+        const auto words = split(mnemonic);
+        BOOST_REQUIRE(!validate_mnemonic(words));
     }
 }
 
 BOOST_AUTO_TEST_CASE(ensure_en_es_disjointness)
 {
-    const auto& english = *dictionary.at(language::en);
-    const auto& spanish = *dictionary.at(language::es);
+    const auto& english = wordlist_en;
+    const auto& spanish = wordlist_es;
     size_t intersection = 0;
     for (const auto es: spanish)
     {
@@ -69,8 +94,8 @@ BOOST_AUTO_TEST_CASE(ensure_en_es_disjointness)
 
 BOOST_AUTO_TEST_CASE(ensure_zh_Hans_Hant_intersection)
 {
-    const auto& simplified = *dictionary.at(language::zh_Hans);
-    const auto& traditional = *dictionary.at(language::zh_Hant);
+    const auto& simplified = wordlist_zh_Hans;
+    const auto& traditional = wordlist_zh_Hant;
     size_t intersection = 0;
     for (const auto hant: traditional)
     {
