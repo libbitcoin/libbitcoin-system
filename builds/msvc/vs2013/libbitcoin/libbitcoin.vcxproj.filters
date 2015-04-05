@@ -230,7 +230,7 @@
     <ClCompile Include="..\..\..\..\src\math\external\pkcs5_pbkdf2.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp">
+    <ClCompile Include="..\..\..\..\src\wallet\wordlist.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="$(VC_CTP_Nov2013_InstallDir)\crt\src\threadsafestatics.cpp">
@@ -397,7 +397,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\formats\base85.hpp">
       <Filter>include\bitcoin\formats</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\wordlist.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\sha512.h">

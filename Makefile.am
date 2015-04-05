@@ -83,7 +83,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/threadpool.cpp \
     src/utility/timed_section.cpp \
     src/wallet/address.cpp \
-    src/wallet/dictionary.cpp \
+    src/wallet/wordlist.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
@@ -244,7 +244,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/address.hpp \
-    include/bitcoin/bitcoin/wallet/dictionary.hpp \
+    include/bitcoin/bitcoin/wallet/wordlist.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
