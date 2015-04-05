@@ -35,6 +35,7 @@
 
 namespace libbitcoin {
 
+// Local constants.
 constexpr int32_t utf8_code_page = 65001u;
 constexpr size_t keyboard_buffer_size = 1024u;
 
@@ -90,9 +91,9 @@ void unicode_streams::initialize()
 #endif
 }
 
-unicode_streams::unicode_streams(wide_streambuf const& other)
+unicode_streams::unicode_streams(wide_streambuf const& stream_buffer)
 #ifdef _MSC_VER
-    : wide_streambuf(other), buffer_(keyboard_buffer_size, L'\0')
+    : wide_streambuf(stream_buffer), buffer_(keyboard_buffer_size, L'\0')
 #endif
 {
 }

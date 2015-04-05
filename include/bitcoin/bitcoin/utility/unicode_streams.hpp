@@ -27,7 +27,7 @@
 namespace libbitcoin {
 
 /**
- * Class to patch windows stdin keyboard input, file input is not a problem.
+ * Class to patch Windows stdin keyboard input, file input is not a problem.
  * Limits keyboard input buffer to 1024 bytes, terminated by <ENTER>.
  * Initializes stdout, stderr and stdin for wide stream (utf8 translation).
  */
@@ -47,10 +47,10 @@ protected:
     /**
      * Protected construction, use static initialize method.
      */
-    unicode_streams(wide_streambuf const& other);
+    unicode_streams(wide_streambuf const& stream_buffer);
 
     /**
-     * Implement alternate console read using ReadConsoleW.
+     * Implement alternate console read.
      */
     virtual std::streamsize xsgetn(wchar_t* buffer, std::streamsize size);
 
