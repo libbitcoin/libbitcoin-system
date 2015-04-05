@@ -95,8 +95,8 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf8_main__utf16__test)
 {
     // We cannot use L for literal encoding of non-ascii text on Windows.
     auto utf16 = to_utf16("テスト");
-    auto non_const_utf16 = utf16.c_str();
-    std::vector<const wchar_t*> wide_args = { L"ascii", non_const_utf16, nullptr };
+    auto non_literal_utf16 = utf16.c_str();
+    std::vector<const wchar_t*> wide_args = { L"ascii", non_literal_utf16, nullptr };
 
     auto argv = const_cast<wchar_t**>(&wide_args[0]);
     auto argc = static_cast<int>(wide_args.size()) - 1;
