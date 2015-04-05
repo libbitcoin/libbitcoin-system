@@ -25,7 +25,7 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 #ifdef _MSC_VER
     #include <bitcoin/bitcoin/utility/unicode.hpp>
-    #include <bitcoin/bitcoin/utility/unicode_streams.hpp>
+    #include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
 #endif
 
 // Regarding Unicode design for Windows:
@@ -39,8 +39,8 @@
 // The objective is to use utf8 as the canonical string encoding, pushing
 // wchar_t translation to the edge (stdio, argv, O/S and external API calls).
 // The macro BC_USE_LIBBITCOIN_MAIN does most of the heavy lifting to ensure
-// that stdio and argv is configured for utf8. The functions 'widen' and 
-// 'narrow' are provided for API translation.
+// that stdio and argv is configured for utf8. The function 'to_utf' is
+// provided for API translation.
 
 // Regarding Unicode source files in VC++ builds:
 //
@@ -48,7 +48,8 @@
 // This instruction causes sources to be explicitly interpreted as UTF8.
 // However this technique improperly encodes literals ("フ" for example).
 // Instead use non-BOM UTF encoded files. To do this use "save as..."
-// without a "signature" (BOM) in the Visual Studio save dialog.
+// utf8 without a "signature" (BOM) in the Visual Studio save dialog.
+// This is the typical file format for C++ sources in other environments.
 
 // Regarding Unicode in console applications:
 //
@@ -76,7 +77,7 @@
         namespace libbitcoin { int main(int argc, char* argv[]); } \
         int wmain(int argc, wchar_t* argv[]) \
         { \
-            bc::unicode_streams::initialize(); \
+            bc::unicode_streambuf::initialize_stdio(); \
             auto buffer = libbitcoin::to_utf8(argc, argv); \
             auto args = reinterpret_cast<char**>(&buffer[0]); \
             return libbitcoin::main(argc, args); \
