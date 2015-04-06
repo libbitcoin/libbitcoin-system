@@ -49,7 +49,7 @@ static std::string normalize_nfkd(const std::string& value)
     return normalize(value, norm_type::norm_nfkd, locale("UTF-8"));
 }
 
-bool validate_mnemonic(const string_list& words, const wordlist& dictionary)
+bool validate_mnemonic(const string_list& words, const dictionary& lexicon)
 {
     const auto word_count = words.size();
     if ((word_count % mnemonic_word_multiple) != 0)
@@ -66,7 +66,7 @@ bool validate_mnemonic(const string_list& words, const wordlist& dictionary)
 
     for (const auto& word: words)
     {
-        const auto position = find_position(dictionary, word);
+        const auto position = find_position(lexicon, word);
         if (position == -1)
             return false;
 
@@ -82,11 +82,11 @@ bool validate_mnemonic(const string_list& words, const wordlist& dictionary)
 
     data.resize(entropy_bits / byte_bits);
 
-    const auto mnemonic = create_mnemonic(data, dictionary);
+    const auto mnemonic = create_mnemonic(data, lexicon);
     return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
 
-string_list create_mnemonic(data_slice entropy, const wordlist &dictionary)
+string_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
 {
     if ((entropy.size() % mnemonic_seed_multiple) != 0)
         return string_list();
@@ -118,8 +118,8 @@ string_list create_mnemonic(data_slice entropy, const wordlist &dictionary)
                 position++;
         }
 
-        BITCOIN_ASSERT(position < wordlist_size);
-        words.push_back(dictionary[position]);
+        BITCOIN_ASSERT(position < dictionary_size);
+        words.push_back(lexicon[position]);
     }
 
     BITCOIN_ASSERT(words.size() == ((bit + 1) / bits_per_word));
@@ -127,9 +127,9 @@ string_list create_mnemonic(data_slice entropy, const wordlist &dictionary)
 }
 
 bool validate_mnemonic(const string_list& mnemonic,
-    const wordlist_list& dictionaries)
+    const dictionary_list& lexicons)
 {
-    for (const auto& i: dictionaries)
+    for (const auto& i: lexicons)
     {
         if (validate_mnemonic(mnemonic, *i))
             return true;

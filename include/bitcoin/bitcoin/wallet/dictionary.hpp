@@ -27,33 +27,34 @@
 namespace libbitcoin {
 
 /**
- * A valid mnemonic wordlist has exactly this many words.
+ * A valid mnemonic dictionary has exactly this many words.
  */
-BC_CONSTEXPR size_t wordlist_size = 2048;
+BC_CONSTEXPR size_t dictionary_size = 2048;
 
 /**
- * A "wordlist" for creating mnemonics, as defined in bip39.
+ * A dictionary for creating mnemonics.
+ * The bip39 spec calls this a "wordlist".
  * This is a POD type, which means the compiler can write it directly
  * to static memory with no run-time overhead.
  */
-typedef std::array<const char*, wordlist_size> wordlist;
+typedef std::array<const char*, dictionary_size> dictionary;
 
 /**
- * A collection of candidate wordlists for mnemonic validation.
+ * A collection of candidate dictionaries for mnemonic validation.
  */
-typedef std::vector<const wordlist*> wordlist_list;
+typedef std::vector<const dictionary*> dictionary_list;
 
 namespace language
 {
     // Individual built-in languages:
-    extern const wordlist en;
-    extern const wordlist es;
-    extern const wordlist ja;
-    extern const wordlist zh_Hans;
-    extern const wordlist zh_Hant;
+    extern const dictionary en;
+    extern const dictionary es;
+    extern const dictionary ja;
+    extern const dictionary zh_Hans;
+    extern const dictionary zh_Hant;
 
     // All built-in languages:
-    extern const wordlist_list all;
+    extern const dictionary_list all;
 }
 
 } // namespace libbitcoin

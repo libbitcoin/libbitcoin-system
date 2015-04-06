@@ -22,7 +22,7 @@
 namespace libbitcoin {
 namespace language {
 
-const wordlist en =
+const dictionary en =
 {
     {
         "abandon",
@@ -2076,7 +2076,7 @@ const wordlist en =
     }
 };
 
-const wordlist es =
+const dictionary es =
 {
     {
         "ábaco",
@@ -4130,7 +4130,7 @@ const wordlist es =
     }
 };
 
-const wordlist ja =
+const dictionary ja =
 {
     {
         "あいこくしん",
@@ -6184,7 +6184,7 @@ const wordlist ja =
     }
 };
 
-const wordlist zh_Hans =
+const dictionary zh_Hans =
 {
     {
         "的",
@@ -8238,7 +8238,7 @@ const wordlist zh_Hans =
     }
 };
 
-const wordlist zh_Hant =
+const dictionary zh_Hant =
 {
     {
         "的",
@@ -10294,7 +10294,7 @@ const wordlist zh_Hant =
 
 // Word lists from:
 // github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
-const wordlist_list all
+const dictionary_list all
 {
     &en,
     &es,

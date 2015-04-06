@@ -50,21 +50,21 @@ typedef std::vector<std::string> string_list;
  * creation. Entropy byte count must be evenly divisible by 4.
  */
 BC_API string_list create_mnemonic(data_slice entropy,
-    const wordlist &dictionary=language::en);
+    const dictionary &lexicon=language::en);
 
 /**
- * Checks a mnemonic against a wordlist to determine if the
+ * Checks a mnemonic against a dictionary to determine if the
  * words are spelled correctly and the checksum matches.
  * The words must have been created using mnemonic encoding.
  */
 BC_API bool validate_mnemonic(const string_list& mnemonic,
-    const wordlist &dictionary);
+    const dictionary &lexicon);
 
 /**
  * Checks that a mnemonic is valid in at least one of the provided languages.
  */
 BC_API bool validate_mnemonic(const string_list& mnemonic,
-    const wordlist_list& dictionaries=language::all);
+    const dictionary_list& lexicons=language::all);
 
 /**
  * Convert a mnemonic and optional passphrase to a wallet-generation seed.
