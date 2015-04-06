@@ -20,49 +20,38 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+#include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin.hpp>
 
-// Must save all non-ascii files as utf8 (CP65001) without signature/BOM.
-// int wmain(int argc, wchar_t* argv[])
-int main(int argc, char* argv[])
+BC_USE_LIBBITCOIN_MAIN
+
+int bc::main(int argc, char* argv[])
 {
-    // Establish UTF8 stdio and patch wcin for keyboard input.
-    bc::unicode_streams::initialize();
+    // tcin treats file input as utf8 and translates console input to wide.
+    tcout << "Enter text to stdin..." << std::endl;
+    bc::tstring tstdin;
+    tcin >> tstdin;
+    tcout << "tcin  : " << tstdin << std::endl;
 
-    // Pass the UTF args to internal processing.
-    // TODO: confirm boost::program_options handling of UTF8 values.
-    //auto buffer = bc::narrow(argc, argv);
-    //auto args = reinterpret_cast<char**>(&buffer[0]);
+    if (argc > 1)
+    {
+        const auto utf = bc::to_utf(argv[1]);
+        tcout << "targv : " << utf << std::endl;
+    }
 
-    // wcin translates input to wide.
-    // Raw (non-text) inputs should use binary/cin/char.
-    std::wcout << "Enter text to stdin..." << std::endl;
-    std::wstring stdin16;
-    std::wcin >> stdin16;
-    std::wcout << "\nwcin  : " << stdin16 << std::endl;
+    // Use wide with tcout|tcerr.
+    const auto utf = bc::to_utf("acción.кошка.日本国");
+    tcout << "tcout : " << utf << std::endl;
+    tcerr << "tcerr : " << utf << std::endl;
 
-    //if (argc > 1)
-    //{
-    //    const auto argv16 = bc::widen(args[1]);
-    //    std::wcout << "wargv : " << argv16 << std::endl;
-    //}
+    // Use ascii narrow with tcout|tcerr (but not non-ascii narrow).
+    tcout << "tcout : " << "narrow" << std::endl;
+    tcerr << "tcerr : " << "narrow" << std::endl;
 
-    // Use ascii narrow or wide with wcout|wcerr.
-    const auto utf8to16 = bc::widen("acción.кошка.日本国");
-    std::wcout << "wcout : " << utf8to16 << std::endl;
-    std::wcerr << "wcerr : " << utf8to16 << std::endl;
-    std::wcout << "wcout : " << "ascii" << std::endl;
-    std::wcerr << "wcerr : " << "ascii" << std::endl;
-
-    // Don't use cout|cerr|cin (aborts on assertion)
-    //std::cout << "cout ascii : " << "racer-x" << std::endl;
-    //std::cerr << "cerr ascii : " << "racer-x" << std::endl;
-    //std::string ina("test");
-    //std::cin >> ina;
-
-    // Don't use L translation when the source is UTF-8 w/out BOM (mangles).
-    //const auto utf16 = L"acción.кошка.日本国";
-    //std::wcout << "wcout : " << utf16 << std::endl;
+    // Use ascii wide with wcout|wcerr (but not non-ascii wide).
+    std::wcout << "tcout : " << L"wide" << std::endl;
+    std::wcerr << "tcerr : " << L"wide" << std::endl;
 
     return EXIT_SUCCESS;
 }

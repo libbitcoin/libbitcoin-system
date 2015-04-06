@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_UNICODE_STREAMS_HPP
-#define LIBBITCOIN_UNICODE_STREAMS_HPP
+#ifndef LIBBITCOIN_UNICODE_STREAMBUF_HPP
+#define LIBBITCOIN_UNICODE_STREAMBUF_HPP
 
 #include <streambuf>
 #include <string>
@@ -27,18 +27,18 @@
 namespace libbitcoin {
 
 /**
- * Class to patch stdin keyboard input, file input is not a problem.
+ * Class to patch Windows stdin keyboard input, file input is not a problem.
  * Limits keyboard input buffer to 1024 bytes, terminated by <ENTER>.
  * Initializes stdout, stderr and stdin for wide stream (utf8 translation).
  */
-class BC_API unicode_streams
+class BC_API unicode_streambuf
     : public std::basic_streambuf<wchar_t>
 {
 public:
     /**
-     * Initialize unicode streams.
+     * Initialize stdio to use utf8 translation on Windows.
      */
-    static void initialize();
+    static void initialize_stdio();
 
 protected:
     typedef std::basic_streambuf<wchar_t> wide_streambuf;
@@ -47,10 +47,10 @@ protected:
     /**
      * Protected construction, use static initialize method.
      */
-    unicode_streams(wide_streambuf const& other);
+    unicode_streambuf(wide_streambuf const& stream_buffer);
 
     /**
-     * Implement alternate console read using ReadConsoleW.
+     * Implement alternate console read.
      */
     virtual std::streamsize xsgetn(wchar_t* buffer, std::streamsize size);
 
@@ -62,7 +62,6 @@ protected:
 private:
     std::wstring buffer_;
     static bool initialized_;
-    static void* get_input_handle();
 };
 
 } // namespace libbitcoin

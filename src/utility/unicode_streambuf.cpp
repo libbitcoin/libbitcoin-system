@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/unicode_streams.hpp>
+#include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -35,11 +35,12 @@
 
 namespace libbitcoin {
 
+// Local constants.
 constexpr int32_t utf8_code_page = 65001u;
 constexpr size_t keyboard_buffer_size = 1024u;
 
 // Initialize private static member.
-bool unicode_streams::initialized_ = false;
+bool unicode_streambuf::initialized_ = false;
 
 // Set file mode to UTF8 no BOM (translated).
 static void set_stdio_utf8(FILE* file)
@@ -50,9 +51,22 @@ static void set_stdio_utf8(FILE* file)
 #endif
 }
 
+static void* get_input_handle()
+{
+    void* handle = nullptr;
+
+#ifdef _MSC_VER
+    handle = GetStdHandle(STD_INPUT_HANDLE);
+    if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
+        throw std::ios_base::failure("Failed to get input handle.");
+#endif
+
+    return handle;
+}
+
 // This class/mathod is a no-op on non-windows platforms.
 // This is the factory method to privately instantiate a singleton class.
-void unicode_streams::initialize()
+void unicode_streambuf::initialize_stdio()
 {
     if (initialized_)
         return;
@@ -67,7 +81,7 @@ void unicode_streams::initialize()
     if (GetConsoleMode(get_input_handle(), &console_mode) != FALSE)
     {
         // Hack for faulty wcin translation of non-ASCII keyboard input.
-        static unicode_streams buffer(*std::wcin.rdbuf());
+        static unicode_streambuf buffer(*std::wcin.rdbuf());
         std::wcin.rdbuf(&buffer);
     }
 
@@ -90,27 +104,15 @@ void unicode_streams::initialize()
 #endif
 }
 
-unicode_streams::unicode_streams(wide_streambuf const& other)
+unicode_streambuf::unicode_streambuf(wide_streambuf const& stream_buffer)
 #ifdef _MSC_VER
-    : wide_streambuf(other), buffer_(keyboard_buffer_size, L'\0')
+    : wide_streambuf(stream_buffer), buffer_(keyboard_buffer_size, L'\0')
 #endif
 {
 }
 
-void* unicode_streams::get_input_handle()
-{
-    void* handle = nullptr;
-
-#ifdef _MSC_VER
-    handle = GetStdHandle(STD_INPUT_HANDLE);
-    if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
-        throw std::ios_base::failure("Failed to get input handle.");
-#endif
-
-    return handle;
-}
-
-std::streamsize unicode_streams::xsgetn(wchar_t* buffer, std::streamsize size)
+std::streamsize unicode_streambuf::xsgetn(wchar_t* buffer,
+    std::streamsize size)
 {
     std::streamsize read_size = 0;
 
@@ -128,7 +130,7 @@ std::streamsize unicode_streams::xsgetn(wchar_t* buffer, std::streamsize size)
     return read_size;
 }
 
-unicode_streams::traits::int_type unicode_streams::underflow()
+unicode_streambuf::traits::int_type unicode_streambuf::underflow()
 {
     if (gptr() == nullptr || gptr() >= egptr())
     {

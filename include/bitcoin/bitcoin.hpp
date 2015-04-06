@@ -66,7 +66,7 @@
 #include <bitcoin/bitcoin/utility/time.hpp>
 #include <bitcoin/bitcoin/utility/timed_section.hpp>
 #include <bitcoin/bitcoin/utility/unicode.hpp>
-#include <bitcoin/bitcoin/utility/unicode_streams.hpp>
+#include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
 #include <bitcoin/bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>

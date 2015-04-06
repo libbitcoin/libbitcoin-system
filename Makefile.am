@@ -83,7 +83,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/time.cpp \
     src/utility/timed_section.cpp \
     src/utility/unicode.cpp \
-    src/utility/unicode_streams.cpp \
+    src/utility/unicode_streambuf.cpp \
     src/wallet/address.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
@@ -149,6 +149,7 @@ test_libbitcoin_test_SOURCES = \
     test/serialize.cpp \
     test/stealth.cpp \
     test/stealth_address.cpp \
+    test/unicode.cpp \
     test/uri.cpp
 
 endif WITH_TESTS
@@ -256,7 +257,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/time.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
     include/bitcoin/bitcoin/utility/unicode.hpp \
-    include/bitcoin/bitcoin/utility/unicode_streams.hpp \
+    include/bitcoin/bitcoin/utility/unicode_streambuf.hpp \
     include/bitcoin/bitcoin/utility/weak_bind.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
