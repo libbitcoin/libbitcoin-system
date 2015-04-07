@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 namespace language {
 
 const dictionary en =
@@ -10304,4 +10305,5 @@ const dictionary_list all
 };
 
 } // namespace language
+} // namespace wallet
 } // namespace libbitcoin
