@@ -24,9 +24,10 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 BC_CONSTEXPR size_t chain_code_size = 32;
 typedef byte_array<chain_code_size> chain_code_type;
@@ -98,6 +99,7 @@ protected:
     ec_secret k_;
 };
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

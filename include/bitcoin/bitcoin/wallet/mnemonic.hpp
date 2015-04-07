@@ -31,6 +31,7 @@
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 /**
  * A valid mnemonic word count is evenly divisible by this number.
@@ -85,6 +86,7 @@ BC_API long_hash decode_mnemonic(const word_list& mnemonic,
 
 #endif
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

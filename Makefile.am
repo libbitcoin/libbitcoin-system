@@ -36,7 +36,6 @@ src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFL
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
-    src/compat.cpp \
     src/conditional_stack.cpp \
     src/conditional_stack.hpp \
     src/constants.cpp \
@@ -162,6 +161,7 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
     src/wallet/mnemonic.cpp \
+    src/wallet/payment_address.cpp \
     src/wallet/select_outputs.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
@@ -415,13 +415,13 @@ include_bitcoin_bitcoin_utility_HEADERS = \
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
-    include/bitcoin/bitcoin/wallet/address.hpp \
     include/bitcoin/bitcoin/wallet/bip38.hpp \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
+    include/bitcoin/bitcoin/wallet/payment_address.hpp \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp

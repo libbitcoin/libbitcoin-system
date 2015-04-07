@@ -24,9 +24,10 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 BC_CONSTEXPR size_t message_signature_size = 65;
 typedef byte_array<message_signature_size> message_signature;
@@ -67,6 +68,7 @@ BC_API message_signature sign_message(data_slice message,
 BC_API bool verify_message(data_slice message,
     const payment_address& address, const message_signature& signature);
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

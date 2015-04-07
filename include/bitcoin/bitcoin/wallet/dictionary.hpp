@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/compat.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 /**
  * A valid mnemonic dictionary has exactly this many words.
@@ -57,6 +58,7 @@ namespace language
     extern const dictionary_list all;
 }
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

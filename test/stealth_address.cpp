@@ -71,13 +71,13 @@ BOOST_AUTO_TEST_CASE(stealth_address_test)
     //   | sx ec-to-address
     // 1Gvq8pSTRocNLDyf858o4PL3yhZm5qQDgB
 
-    payment_address payaddr;
-    set_public_key(payaddr, sender_pubkey);
+    wallet::payment_address payaddr;
+    payaddr.set_public_key(sender_pubkey);
 
 #ifdef ENABLE_TESTNET
-    BOOST_REQUIRE_EQUAL(payaddr.encoded(), "mwSnRsXSEq3d7LTGqe7AtJYNqhATwHdhMb");
+    BOOST_REQUIRE_EQUAL(payaddr.to_string(), "mwSnRsXSEq3d7LTGqe7AtJYNqhATwHdhMb");
 #else
-    BOOST_REQUIRE_EQUAL(payaddr.encoded(), "1Gvq8pSTRocNLDyf858o4PL3yhZm5qQDgB");
+    BOOST_REQUIRE_EQUAL(payaddr.to_string(), "1Gvq8pSTRocNLDyf858o4PL3yhZm5qQDgB");
 #endif
 }
 
@@ -86,9 +86,9 @@ BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_mainnet__round_trips)
     const std::string encoded =
         "vJmzLu29obZcUGXXgotapfQLUpz7dfnZpbr4xg1R75qctf8xaXAteRdi3ZUk3T2Z"
         "MSad5KyPbve7uyH6eswYAxLHRVSbWgNUeoGuXp";
-    stealth_address address;
-    address.set_encoded(encoded);
-    BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
+    wallet::stealth_address address;
+    address.from_string(encoded);
+    BOOST_REQUIRE_EQUAL(address.to_string(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_testnet__round_trips)
@@ -96,27 +96,27 @@ BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_testnet__round_trips)
     const std::string encoded =
         "waPXhQwQE9tDugfgLkvpDs3dnkPx1RsfDjFt4zBq7EeWeATRHpyQpYrFZR8T4BQy"
         "91Vpvshm2TDER8b9ZryuZ8VSzz8ywzNzX8NqF4";
-    stealth_address address;
-    address.set_encoded(encoded);
-    BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
+    wallet::stealth_address address;
+    address.from_string(encoded);
+    BOOST_REQUIRE_EQUAL(address.to_string(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_pub_mainnet__round_trips)
 {
     const std::string encoded =
         "hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i";
-    stealth_address address;
-    address.set_encoded(encoded);
-    BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
+    wallet::stealth_address address;
+    address.from_string(encoded);
+    BOOST_REQUIRE_EQUAL(address.to_string(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(stealth_address__encoding__scan_pub_testnet__round_trip)
 {
     const std::string encoded =
         "idPayBqZUpZH7Y5GTaoEyGxDsEmU377JUmhtqG8yoHCkfGfhnAHmGUJbL";
-    stealth_address address;
-    address.set_encoded(encoded);
-    BOOST_REQUIRE_EQUAL(address.encoded(), encoded);
+    wallet::stealth_address address;
+    address.from_string(encoded);
+    BOOST_REQUIRE_EQUAL(address.to_string(), encoded);
 }
 
 BOOST_AUTO_TEST_CASE(prefix_to_string__32_bits__expected_value)

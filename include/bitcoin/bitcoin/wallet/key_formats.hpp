@@ -24,6 +24,7 @@
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 /**
  * Convert a secret parameter to the wallet import format.
@@ -79,6 +80,7 @@ BC_API bool is_wif_compressed(const std::string& wif);
  */
 BC_API ec_secret minikey_to_secret(const std::string& minikey);
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

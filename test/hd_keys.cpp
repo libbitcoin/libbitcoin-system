@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_SUITE(hd_keys_tests)
 
 BOOST_AUTO_TEST_CASE(bip32_test_vector_1)
 {
-    BC_CONSTEXPR auto hard = first_hardened_key;
+    BC_CONSTEXPR auto hard = wallet::first_hardened_key;
 
     // Generate public keys:
     data_chunk seed
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_1)
         0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
     };
 
-    hd_private_key m(seed);
+    wallet::hd_private_key m(seed);
     auto m0h      = m.      generate_private_key(hard);
     auto m0h1     = m0h.    generate_private_key(1);
     auto m0h12h   = m0h1.   generate_private_key(2 + hard);
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_1)
         "Ha8kmHScGpWmj4WggLyQjgPie1rFSruoUihUZREPSL39UNdE3BBDu76");
 
     // Generate public keys:
-    hd_public_key m_pub = m;
+    wallet::hd_public_key m_pub = m;
     auto m0h_bad      = m_pub.      generate_public_key(hard);
     auto m0h_pub      = m.          generate_public_key(hard);
     auto m0h1_pub     = m0h_pub.    generate_public_key(1);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_1)
 
 BOOST_AUTO_TEST_CASE(bip32_test_vector_2)
 {
-    BC_CONSTEXPR auto hard = first_hardened_key;
+    BC_CONSTEXPR auto hard = wallet::first_hardened_key;
 
     // Generate private keys:
     data_chunk seed
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_2)
         0x57, 0x54, 0x51, 0x4e, 0x4b, 0x48, 0x45, 0x42
     };
 
-    hd_private_key m(seed);
+    wallet::hd_private_key m(seed);
     auto m0       = m.      generate_private_key(0);
     auto m0xH     = m0.     generate_private_key(2147483647 + hard);
     auto m0xH1    = m0xH.   generate_private_key(1);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(bip32_test_vector_2)
         "EXw7nadnHM8Dq38EGfSh6dqA9QWTyefMLEcBYJUuekgW4BYPJcr9E7j");
 
     // Generate public keys:
-    hd_public_key m_pub = m;
+    wallet::hd_public_key m_pub = m;
     auto m0_pub       = m_pub.      generate_public_key(0);
     auto m0xH_pub     = m0.         generate_public_key(2147483647 + hard);
     auto m0xH1_pub    = m0xH_pub.   generate_public_key(1);

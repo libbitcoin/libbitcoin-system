@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 static bool is_qchar(const char c)
 {
@@ -135,7 +136,7 @@ bool uri_parse(const std::string& uri, uri_visitor& result,
 bool uri_parse_result::got_address(std::string& address)
 {
     payment_address payaddr;
-    if (payaddr.set_encoded(address))
+    if (payaddr.from_string(address))
     {
         this->address.reset(payaddr);
         this->stealth.reset();
@@ -143,7 +144,7 @@ bool uri_parse_result::got_address(std::string& address)
     }
 
     stealth_address stealthaddr;
-    if (stealthaddr.set_encoded(address))
+    if (stealthaddr.from_string(address))
     {
         this->stealth.reset(stealthaddr);
         this->address.reset();
@@ -199,12 +200,12 @@ uri_writer::uri_writer()
 
 void uri_writer::write_address(const payment_address& address)
 {
-    write_address(address.encoded());
+    write_address(address.to_string());
 }
 
 void uri_writer::write_address(const stealth_address& address)
 {
-    write_address(address.encoded());
+    write_address(address.to_string());
 }
 
 void uri_writer::write_amount(uint64_t satoshis)
@@ -248,4 +249,5 @@ std::string uri_writer::string() const
     return stream_.str();
 }
 
+} // namespace wallet
 } // namespace libbitcoin

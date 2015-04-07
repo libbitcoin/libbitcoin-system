@@ -27,13 +27,15 @@
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 typedef std::vector<ec_point> pubkey_list;
 
 // Supports testnet and mainnet addresses but not prefix > 0
-class stealth_address
+class BC_API stealth_address
 {
 public:
+
     static const uint8_t max_prefix_bits = sizeof(uint32_t) * byte_bits;
 
     enum flags : uint8_t
@@ -50,26 +52,38 @@ public:
     };
 
     // Construction
-    BC_API stealth_address();
-    BC_API stealth_address(const binary_type& prefix,
+    stealth_address();
+
+    stealth_address(const binary_type& prefix,
         const ec_point& scan_pubkey, const pubkey_list& spend_pubkeys,
         uint8_t signatures, bool testnet);
 
+    stealth_address(const std::string& encoded_address);
+
     // Serialization
-    BC_API std::string encoded() const;
-    BC_API bool set_encoded(const std::string& encoded_address);
-    BC_API bool valid() const;
+    std::string to_string() const;
+
+    bool from_string(const std::string& encoded_address);
+
+    bool valid() const;
 
     // Properties
-    BC_API const binary_type& get_prefix() const;
-    BC_API const ec_point& get_scan_pubkey() const;
-    BC_API uint8_t get_signatures() const;
-    BC_API const pubkey_list& get_spend_pubkeys() const;
-    BC_API bool get_testnet() const;
+    const binary_type& get_prefix() const;
+
+    const ec_point& get_scan_pubkey() const;
+
+    uint8_t get_signatures() const;
+
+    const pubkey_list& get_spend_pubkeys() const;
+
+    bool get_testnet() const;
 
 protected:
+
     bool get_reuse_key() const;
+
     uint8_t get_options() const;
+
     uint8_t get_version() const;
 
     bool valid_ = false;
@@ -80,6 +94,7 @@ protected:
     binary_type prefix_;
 };
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

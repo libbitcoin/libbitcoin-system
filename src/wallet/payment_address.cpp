@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 #include <algorithm>
 #include <bitcoin/bitcoin/formats/base58.hpp>
@@ -27,19 +27,23 @@
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 payment_address::payment_address()
 {
 }
+
 payment_address::payment_address(uint8_t version, const short_hash& hash)
   : payment_address()
 {
     set(version, hash);
 }
+
 payment_address::payment_address(const std::string& encoded_address)
   : payment_address()
 {
-    set_encoded(encoded_address);
+    if (!from_string(encoded_address))
+        throw std::invalid_argument("encoded_address");
 }
 
 void payment_address::set(uint8_t version, const short_hash& hash)
@@ -52,49 +56,49 @@ uint8_t payment_address::version() const
 {
     return version_;
 }
+
 const short_hash& payment_address::hash() const
 {
     return hash_;
 }
 
-bool payment_address::set_encoded(const std::string& encoded_address)
+bool payment_address::from_string(const std::string& encoded_address)
 {
     data_chunk decoded_address;
+
     if (!decode_base58(decoded_address, encoded_address))
         return false;
+
     uint32_t checksum;
+
     return unwrap(version_, hash_, checksum, decoded_address);
 }
 
-std::string payment_address::encoded() const
+std::string payment_address::to_string() const
 {
     const auto data = wrap(version_, hash_);
     return encode_base58(data);
 }
 
-void set_public_key_hash(payment_address& address,
-    const short_hash& pubkey_hash)
+void payment_address::set_public_key_hash(const short_hash& pubkey_hash)
 {
-    address.set(payment_address::pubkey_version, pubkey_hash);
+    set(payment_address::pubkey_version, pubkey_hash);
 }
 
-void set_script_hash(payment_address& address,
-    const short_hash& script_hash)
+void payment_address::set_script_hash(const short_hash& script_hash)
 {
-    address.set(payment_address::script_version, script_hash);
+    set(payment_address::script_version, script_hash);
 }
 
-void set_public_key(payment_address& address, const ec_point& public_key)
+void payment_address::set_public_key(const ec_point& public_key)
 {
-    address.set(payment_address::pubkey_version,
-        bitcoin_short_hash(public_key));
+    set(payment_address::pubkey_version, bitcoin_short_hash(public_key));
 }
 
-void set_script(payment_address& address, const chain::script& eval_script)
+void payment_address::set_script(const chain::script& eval_script)
 {
     data_chunk raw_eval_script = eval_script;
-    address.set(payment_address::script_version,
-        bitcoin_short_hash(raw_eval_script));
+    set(payment_address::script_version, bitcoin_short_hash(raw_eval_script));
 }
 
 bool extract(payment_address& address, const chain::script& script)
@@ -110,11 +114,12 @@ bool extract(payment_address& address, const chain::script& script)
         };
     const chain::operation_stack& ops = script.operations;
     chain::payment_type pay_type = script.type();
+
     switch (pay_type)
     {
         case chain::payment_type::pubkey:
             BITCOIN_ASSERT(ops.size() == 2);
-            set_public_key(address, ops[0].data);
+            address.set_public_key(ops[0].data);
             return true;
 
         case chain::payment_type::pubkey_hash:
@@ -133,14 +138,13 @@ bool extract(payment_address& address, const chain::script& script)
 
         case chain::payment_type::pubkey_hash_sig:
             BITCOIN_ASSERT(ops.size() == 2);
-            set_public_key(address, ops[1].data);
+            address.set_public_key(ops[1].data);
             return true;
 
         case chain::payment_type::script_code_sig:
             // Should have at least 1 sig and the script code.
             BITCOIN_ASSERT(ops.size() > 1);
-            set_script_hash(address,
-                bitcoin_short_hash(ops.back().data));
+            address.set_script_hash(bitcoin_short_hash(ops.back().data));
             return true;
 
         default:
@@ -195,5 +199,5 @@ data_chunk wrap(uint8_t version, data_slice payload)
     return wrapped;
 }
 
+} // namespace wallet
 } // namespace libbitcoin
-
