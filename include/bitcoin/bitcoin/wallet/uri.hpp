@@ -25,10 +25,11 @@
 #include <sstream>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 /**
  * The URI parser calls these methods each time it extracts a URI component.
@@ -101,6 +102,7 @@ private:
     bool first_param_;
 };
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

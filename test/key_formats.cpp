@@ -46,21 +46,21 @@ static const ec_secret secret =
 
 BOOST_AUTO_TEST_CASE(is_wif_compressed_test)
 {
-    BOOST_REQUIRE(is_wif_compressed(wif_compressed));
-    BOOST_REQUIRE(!is_wif_compressed(wif_uncompressed));
+    BOOST_REQUIRE(wallet::is_wif_compressed(wif_compressed));
+    BOOST_REQUIRE(!wallet::is_wif_compressed(wif_uncompressed));
 }
 
 BOOST_AUTO_TEST_CASE(wif_to_secret_test)
 {
-    BOOST_REQUIRE(secret == wif_to_secret(wif_compressed));
-    BOOST_REQUIRE(secret == wif_to_secret(wif_uncompressed));
+    BOOST_REQUIRE(secret == wallet::wif_to_secret(wif_compressed));
+    BOOST_REQUIRE(secret == wallet::wif_to_secret(wif_uncompressed));
 }
 
 BOOST_AUTO_TEST_CASE(secret_to_wif_test)
 {
-    BOOST_REQUIRE_EQUAL(secret_to_wif(secret, true), 
+    BOOST_REQUIRE_EQUAL(wallet::secret_to_wif(secret, true),
         std::string(wif_compressed));
-    BOOST_REQUIRE_EQUAL(secret_to_wif(secret, false), 
+    BOOST_REQUIRE_EQUAL(wallet::secret_to_wif(secret, false),
         std::string(wif_uncompressed));
 }
 
