@@ -23,6 +23,7 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::wallet;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
