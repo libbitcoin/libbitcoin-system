@@ -21,50 +21,42 @@
 #define LIBBITCOIN_DICTIONARY_HPP
 
 #include <array>
-#include <map>
+#include <vector>
 #include <bitcoin/bitcoin/compat.hpp>
 
 namespace libbitcoin {
-namespace bip39 {
 
 /**
- * A valid mnemonic wordlist has exactly this many words.
+ * A valid mnemonic dictionary has exactly this many words.
  */
-BC_CONSTEXPR size_t wordlist_size = 2048;
+BC_CONSTEXPR size_t dictionary_size = 2048;
 
 /**
- * A "wordlist" for creating mnemonics, as defined in bip39.
+ * A dictionary for creating mnemonics.
+ * The bip39 spec calls this a "wordlist".
  * This is a POD type, which means the compiler can write it directly
- * to static memory no run-time overhead.
+ * to static memory with no run-time overhead.
  */
-typedef std::array<const char*, wordlist_size> wordlist;
+typedef std::array<const char*, dictionary_size> dictionary;
 
 /**
- * Dictionary languages.
+ * A collection of candidate dictionaries for mnemonic validation.
  */
-enum class language
+typedef std::vector<const dictionary*> dictionary_list;
+
+namespace language
 {
-    en,
-    es,
-    ja,
-    zh_Hans,
-    zh_Hant,
-    unknown
-};
+    // Individual built-in languages:
+    extern const dictionary en;
+    extern const dictionary es;
+    extern const dictionary ja;
+    extern const dictionary zh_Hans;
+    extern const dictionary zh_Hant;
 
-/**
- * Multilingual word dictionary type.
- * It references the wordlists by pointer,
- * allowing them to live in static memory.
- */
-typedef std::map<language, const wordlist*> dictionary_type;
+    // All built-in languages:
+    extern const dictionary_list all;
+}
 
-/**
- * Multilingual word dictionary.
- */
-extern const dictionary_type dictionary;
-
-} // namespace bip39
 } // namespace libbitcoin
 
 #endif

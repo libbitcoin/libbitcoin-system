@@ -112,9 +112,9 @@ BOOST_AUTO_TEST_CASE(pkcs5_pbkdf2_hmac_sha512_test)
     for (const pkcs5_pbkdf2_hmac_sha512_result& result:
              pkcs5_pbkdf2_hmac_sha512_tests)
     {
-        long_hash hash;
-        BOOST_REQUIRE(pkcs5_pbkdf2_hmac_sha512(result.passphrase,
-            to_data_chunk(result.salt), result.iterations, hash));
+        auto hash = pkcs5_pbkdf2_hmac_sha512(
+            to_data_chunk(result.passphrase), to_data_chunk(result.salt),
+            result.iterations);
         BOOST_REQUIRE_EQUAL(encode_base16(hash), result.result);
     }
 }
