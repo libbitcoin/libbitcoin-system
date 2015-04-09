@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_CHAIN_SCRIPT_IPP
 #define LIBBITCOIN_CHAIN_SCRIPT_IPP
 
+#include <bitcoin/bitcoin/constants.hpp>
+
 namespace libbitcoin {
 namespace chain {
 
