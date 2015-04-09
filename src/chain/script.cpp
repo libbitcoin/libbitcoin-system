@@ -110,7 +110,8 @@ script::operator const data_chunk() const
 
     if ((operations.size() > 0) && (operations[0].code == opcode::raw_data))
     {
-        result = operations[0];
+        data_chunk raw_op = operations[0];
+        extend_data(result, raw_op);
     }
     else
     {

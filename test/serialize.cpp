@@ -164,8 +164,11 @@ BOOST_AUTO_TEST_CASE(script_parse_save_test)
         "00d124f07a22680e39debd4dc4bdb1aa4b893720dd05af3c50"
         "560fddada820a4d933888318a23c28fb5fc67aca8530524e20"
         "74b1d185dbf5b4db4ddb0642848868685174519c6351670068"));
+
     chain::script weird(weird_script);
-    BOOST_REQUIRE(((data_chunk)weird) == weird_script);
+    data_chunk roundtrip_result = weird;
+
+    BOOST_REQUIRE(roundtrip_result == weird_script);
 }
 
 BOOST_AUTO_TEST_CASE(serialize_deserialize)
