@@ -63,6 +63,10 @@ private:
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
 };
 
+// A list of indices. Used for creating block_locator objects or
+// storing list of unconfirmed input indexes in tx pool.
+typedef std::vector<size_t> index_list;
+
 } // end chain
 } // end libbitcoin
 

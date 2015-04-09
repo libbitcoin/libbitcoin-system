@@ -91,7 +91,7 @@ chain::block genesis_block()
     BITCOIN_ASSERT(genesis.transactions.size() == 1);
 
     BITCOIN_ASSERT(
-        block::generate_merkle_root(genesis.transactions) == genesis.header.merkle);
+        chain::block::generate_merkle_root(genesis.transactions) == genesis.header.merkle);
 
     return genesis;
 }
