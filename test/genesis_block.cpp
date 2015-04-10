@@ -47,7 +47,7 @@ chain::block genesis_block()
     coinbase_input.previous_output.index = bc::max_uint32;
 
     // The Times 03/Jan/2009 Chancellor on brink of second bailout for banks
-    coinbase_input.script.operations.push_back(
+    coinbase_input.script.push_operations(
         chain::operation{ chain::opcode::raw_data,
         data_chunk{ 0x04, 0xff, 0xff, 0x00, 0x1d, 0x01, 0x04, 0x45,
                    0x54, 0x68, 0x65, 0x20, 0x54, 0x69, 0x6d, 0x65,
@@ -67,7 +67,7 @@ chain::block genesis_block()
     chain::transaction_output coinbase_output;
     coinbase_output.value = coin_price(50);
 
-    coinbase_output.script.operations.push_back(
+    coinbase_output.script.push_operations(
         chain::operation{ chain::opcode::special,
             data_chunk{0x04, 0x67, 0x8a, 0xfd, 0xb0, 0xfe, 0x55, 0x48,
                        0x27, 0x19, 0x67, 0xf1, 0xa6, 0x71, 0x30, 0xb7,
@@ -79,7 +79,7 @@ chain::block genesis_block()
                        0x57, 0x8a, 0x4c, 0x70, 0x2b, 0x6b, 0xf1, 0x1d,
                        0x5f}});
 
-    coinbase_output.script.operations.push_back(
+    coinbase_output.script.push_operations(
         chain::operation{ chain::opcode::checksig, data_chunk() });
 
     coinbase_tx.outputs.push_back(coinbase_output);

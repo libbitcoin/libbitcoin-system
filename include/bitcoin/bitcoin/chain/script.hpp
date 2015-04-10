@@ -46,8 +46,6 @@ class BC_API script
 {
 public:
 
-    operation_stack operations;
-
     script();
 
     script(const data_chunk& value, bool allow_raw_data_fallback = false);
@@ -70,7 +68,15 @@ public:
 
     std::string to_string() const;
 
+    const operation_stack& operations() const;
+
+    bool push_operations(const operation& oper);
+
+    bool push_operations(const operation_stack& other);
+
     payment_type type() const;
+
+    bool is_raw_data() const;
 
     static BC_API bool verify(script& input_script, script& output_script,
         const transaction& parent_tx, uint32_t input_index,
@@ -83,11 +89,11 @@ public:
         const ec_point& public_key, const script& script_code,
         const transaction& parent_tx, uint32_t input_index);
 
-    BC_API bool create_signature(data_chunk& signature,
+    static BC_API bool create_signature(data_chunk& signature,
         const ec_secret& private_key, const script& prevout_script,
         const transaction& tx, uint32_t input_index, uint32_t hash_type);
 
-    BC_API bool create_signature(data_chunk& signature,
+    static BC_API bool create_signature(data_chunk& signature,
         const ec_secret& private_key, const script& prevout_script,
         const transaction& tx, uint32_t input_index, uint32_t hash_type,
         const ec_secret& nonce);
@@ -105,6 +111,8 @@ private:
     template<typename Deserializer>
     size_t read_operation_data_byte_count(opcode code, uint8_t raw_byte,
         Deserializer& deserial);
+
+    operation_stack operations_;
 };
 
 } // end chain
