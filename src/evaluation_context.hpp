@@ -30,7 +30,7 @@ class evaluation_context
 {
 public:
 
-    chain::operation_stack::iterator codehash_begin;
+    chain::operation_stack::const_iterator codehash_begin;
     size_t operation_counter;
     data_stack primary;
     data_stack secondary;

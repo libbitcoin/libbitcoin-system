@@ -233,15 +233,14 @@ bool is_script_code_sig_type(const operation_stack& ops)
 
     script script_code(last_data, true);
 
-    if ((script_code.operations.size() == 1) &&
-        (script_code.operations[0].code == opcode::raw_data))
+    if (script_code.is_raw_data())
         return false;
 
     // Minimum size is 4
     // M [SIG]... N checkmultisig
-    return script_code.operations.size() >= 4 &&
-        count_non_push(script_code.operations) == 1 &&
-        script_code.operations.back().code == opcode::checkmultisig;
+    return script_code.operations().size() >= 4 &&
+        count_non_push(script_code.operations()) == 1 &&
+        script_code.operations().back().code == opcode::checkmultisig;
 }
 
 } // end chain
