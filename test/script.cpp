@@ -123,7 +123,7 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
     }
     op.data = data;
     chain::script tmp_script;
-    tmp_script.operations.push_back(op);
+    tmp_script.push_operations(op);
     data_chunk raw_tmp_script = tmp_script;
     extend_data(raw_script, raw_tmp_script);
 }
@@ -198,13 +198,12 @@ bool parse(chain::script& result_script, std::string format)
 
     chain::script parsed_script(raw_script, true);
 
-    if ((parsed_script.operations.size() > 0) &&
-        (parsed_script.operations[0].code == chain::opcode::raw_data))
+    if (parsed_script.is_raw_data())
         return false;
 
     result_script = parsed_script;
 
-    if (result_script.operations.empty())
+    if (result_script.operations().empty())
         return false;
 
     return true;

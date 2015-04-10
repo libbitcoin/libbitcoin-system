@@ -39,10 +39,12 @@ bool extract_stealth_info(stealth_info& info,
         return false;
 
     info.bitfield = calculate_stealth_prefix(output_script);
-    if (output_script.operations.size() < 2)
+
+    if (output_script.operations().size() < 2)
         return false;
 
-    const data_chunk& data = output_script.operations[1].data;
+    const data_chunk& data = output_script.operations()[1].data;
+
     if (data.size() < hash_size)
         return false;
 
