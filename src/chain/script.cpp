@@ -51,7 +51,7 @@ script::script(const data_chunk& value, bool allow_raw_data_fallback)
 
 script::script(const operation& op)
 {
-    operations.push_back(op);
+    push_operations(op);
 }
 
 script::script(const std::string& human_readable)
@@ -95,12 +95,12 @@ script::script(const std::string& human_readable)
             op.code = string_to_opcode(*token);
         }
 
-        operations.push_back(op);
+        operations_.push_back(op);
     }
 
     if (clear)
     {
-        operations.clear();
+        operations_.clear();
     }
 }
 
@@ -108,14 +108,14 @@ script::operator const data_chunk() const
 {
     data_chunk result;
 
-    if ((operations.size() > 0) && (operations[0].code == opcode::raw_data))
+    if ((operations_.size() > 0) && (operations_[0].code == opcode::raw_data))
     {
-        data_chunk raw_op = operations[0];
+        data_chunk raw_op = operations_[0];
         extend_data(result, raw_op);
     }
     else
     {
-        for (const operation& op: operations)
+        for (const operation& op: operations_)
         {
             data_chunk raw_op = op;
             extend_data(result, raw_op);
@@ -129,13 +129,13 @@ size_t script::satoshi_size() const
 {
     size_t size = 0;
 
-    if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
+    if (operations_.size() > 0 && (operations_[0].code == opcode::raw_data))
     {
-        size = operations[0].satoshi_size();
+        size = operations_[0].satoshi_size();
     }
     else
     {
-        for (const operation& op: operations)
+        for (const operation& op: operations_)
         {
             size += op.satoshi_size();
         }
@@ -148,9 +148,9 @@ std::string script::to_string() const
 {
     std::ostringstream ss;
 
-    for (auto it = operations.begin(); it != operations.end(); ++it)
+    for (auto it = operations_.begin(); it != operations_.end(); ++it)
     {
-        if (it != operations.begin())
+        if (it != operations_.begin())
             ss << " ";
 
         ss << (*it).to_string();
@@ -161,21 +161,44 @@ std::string script::to_string() const
 
 payment_type script::type() const
 {
-    if (is_pubkey_type(operations))
+    if (is_pubkey_type(operations_))
         return payment_type::pubkey;
-    if (is_pubkey_hash_type(operations))
+    if (is_pubkey_hash_type(operations_))
         return payment_type::pubkey_hash;
-    if (is_script_hash_type(operations))
+    if (is_script_hash_type(operations_))
         return payment_type::script_hash;
-    if (is_stealth_info_type(operations))
+    if (is_stealth_info_type(operations_))
         return payment_type::stealth_info;
-    if (is_multisig_type(operations))
+    if (is_multisig_type(operations_))
         return payment_type::multisig;
-    if (is_pubkey_hash_sig_type(operations))
+    if (is_pubkey_hash_sig_type(operations_))
         return payment_type::pubkey_hash_sig;
-    if (is_script_code_sig_type(operations))
+    if (is_script_code_sig_type(operations_))
         return payment_type::script_code_sig;
     return payment_type::non_standard;
+}
+
+bool script::is_raw_data() const
+{
+    return (operations_.size() == 1) &&
+        (operations_[0].code == opcode::raw_data);
+}
+
+const operation_stack& script::operations() const
+{
+    return operations_;
+}
+
+bool script::push_operations(const operation& oper)
+{
+    operations_.push_back(oper);
+    return true;
+}
+
+bool script::push_operations(const operation_stack& other)
+{
+    operations_.insert(operations_.end(), other.begin(), other.end());
+    return true;
 }
 
 void script::deserialize(data_chunk raw_script,
@@ -193,11 +216,11 @@ void script::deserialize(data_chunk raw_script,
         }
 
         // recognize as raw data
-        operations.clear();
+        operations_.clear();
         operation op;
         op.code = opcode::raw_data;
         op.data = to_data_chunk(raw_script);
-        operations.push_back(op);
+        operations_.push_back(op);
     }
 }
 
@@ -208,7 +231,7 @@ void script::parse(data_chunk raw_script)
     while (deserial.iterator() != raw_script.end())
     {
         operation op(deserial);
-        operations.push_back(op);
+        operations_.push_back(op);
     }
 }
 
@@ -1160,14 +1183,14 @@ bool op_checksigverify(evaluation_context& context, script& script,
 
     chain::script script_code;
 
-    for (auto it = context.codehash_begin; it != script.operations.end(); ++it)
+    for (auto it = context.codehash_begin; it != script.operations().end(); ++it)
     {
         const operation op = *it;
 
         if (op.data == signature || op.code == opcode::codeseparator)
             continue;
 
-        script_code.operations.push_back(op);
+        script_code.push_operations(op);
     }
 
     return script::check_signature(
@@ -1247,7 +1270,7 @@ bool op_checkmultisigverify(evaluation_context& context, script& script,
 
     chain::script script_code;
 
-    for (auto it = context.codehash_begin; it != script.operations.end(); ++it)
+    for (auto it = context.codehash_begin; it != script.operations().end(); ++it)
     {
         const operation op = *it;
 
@@ -1257,7 +1280,7 @@ bool op_checkmultisigverify(evaluation_context& context, script& script,
         if (is_signature(op.data))
             continue;
 
-        script_code.operations.push_back(op);
+        script_code.push_operations(op);
     }
 
     // When checking the signatures against our public keys,
@@ -1632,7 +1655,8 @@ bool opcode_is_disabled(opcode code)
 }
 
 bool next_step(const transaction& parent_tx, uint32_t input_index,
-    operation_stack::iterator it, script& script, evaluation_context& context)
+    operation_stack::const_iterator it, script& script,
+    evaluation_context& context)
 {
     const operation& op = *it;
 
@@ -1683,17 +1707,14 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
 bool evaluate(const transaction& parent_tx, uint32_t input_index,
     script& script, evaluation_context& context)
 {
-    script_type script;
-    const auto tokens = split(pretty);
-    for (auto token = tokens.begin(); token != tokens.end(); ++token)
-
     if (script.satoshi_size() > 10000)
         return false;
 
     context.operation_counter = 0;
-    context.codehash_begin = script.operations.begin();
 
-    for (auto it = script.operations.begin(); it != script.operations.end(); ++it)
+    context.codehash_begin = script.operations().begin();
+
+    for (auto it = script.operations().begin(); it != script.operations().end(); ++it)
     {
         if (!next_step(parent_tx, input_index, it, script, context))
             return false;
@@ -1724,7 +1745,7 @@ bool script::verify(script& input_script, script& output_script,
     // Additional validation for spend-to-script-hash transactions
     if (bip16_enabled && (output_script.type() == payment_type::script_hash))
     {
-        if (!is_push_only(input_script.operations))
+        if (!is_push_only(input_script.operations()))
             return false;
 
         // Load last input_script stack item as a script
@@ -1734,8 +1755,7 @@ bool script::verify(script& input_script, script& output_script,
         script eval_script(input_context.primary.back(), true);
 
         // Invalid script - parsed as raw_data
-        if ((eval_script.operations.size() == 1) &&
-            (eval_script.operations[0].code == opcode::raw_data))
+        if (eval_script.is_raw_data())
             return false;
 
         // Pop last item and copy as starting stack to eval script
