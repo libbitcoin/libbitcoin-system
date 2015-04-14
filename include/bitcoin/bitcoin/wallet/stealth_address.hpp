@@ -23,8 +23,8 @@
 #include <vector>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/stealth.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/wallet/stealth.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -61,9 +61,9 @@ public:
     stealth_address(const std::string& encoded_address);
 
     // Serialization
-    std::string to_string() const;
-
     bool from_string(const std::string& encoded_address);
+
+    std::string to_string() const;
 
     bool valid() const;
 
