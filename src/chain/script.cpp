@@ -1172,7 +1172,7 @@ bool op_hash256(evaluation_context& context)
     return true;
 }
 
-bool op_checksigverify(evaluation_context& context, script& script,
+bool op_checksigverify(evaluation_context& context, const script& script,
     const transaction& parent_tx, uint32_t input_index)
 {
     if (context.primary.size() < 2)
@@ -1197,7 +1197,7 @@ bool op_checksigverify(evaluation_context& context, script& script,
         signature, pubkey, script_code, parent_tx, input_index);
 }
 
-bool op_checksig(evaluation_context& context, script& script,
+bool op_checksig(evaluation_context& context, const script& script,
     const transaction& parent_tx, uint32_t input_index)
 {
     if (op_checksigverify(context, script, parent_tx, input_index))
@@ -1220,7 +1220,7 @@ bool read_section(evaluation_context& context, data_stack& section,
     return true;
 }
 
-bool op_checkmultisigverify(evaluation_context& context, script& script,
+bool op_checkmultisigverify(evaluation_context& context, const script& script,
     const transaction& parent_tx, uint32_t input_index)
 {
     int32_t pubkeys_count;
@@ -1310,7 +1310,7 @@ bool op_checkmultisigverify(evaluation_context& context, script& script,
     return true;
 }
 
-bool op_checkmultisig(evaluation_context& context, script& script,
+bool op_checkmultisig(evaluation_context& context, const script& script,
     const transaction& parent_tx, uint32_t input_index)
 {
     if (op_checkmultisigverify(context, script, parent_tx, input_index))
@@ -1322,7 +1322,7 @@ bool op_checkmultisig(evaluation_context& context, script& script,
 }
 
 bool run_operation(const operation& op, const transaction& parent_tx,
-    uint32_t input_index, script& script, evaluation_context& context)
+    uint32_t input_index, const script& script, evaluation_context& context)
 {
     switch (op.code)
     {
@@ -1654,7 +1654,7 @@ bool opcode_is_disabled(opcode code)
 }
 
 bool next_step(const transaction& parent_tx, uint32_t input_index,
-    operation_stack::const_iterator it, script& script,
+    operation_stack::const_iterator it, const script& script,
     evaluation_context& context)
 {
     const operation& op = *it;
@@ -1704,7 +1704,7 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
 }
 
 bool evaluate(const transaction& parent_tx, uint32_t input_index,
-    script& script, evaluation_context& context)
+    const script& script, evaluation_context& context)
 {
     if (script.satoshi_size() > 10000)
         return false;
@@ -1722,7 +1722,7 @@ bool evaluate(const transaction& parent_tx, uint32_t input_index,
     return context.conditional.closed();
 }
 
-bool script::verify(script& input_script, script& output_script,
+bool script::verify(const script& input_script, const script& output_script,
     const transaction& parent_tx, uint32_t input_index, bool bip16_enabled)
 {
     evaluation_context input_context, output_context;
