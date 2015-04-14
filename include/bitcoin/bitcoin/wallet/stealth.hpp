@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_STEALTH_HPP
-#define LIBBITCOIN_STEALTH_HPP
+#ifndef LIBBITCOIN_WALLET_STEALTH_HPP
+#define LIBBITCOIN_WALLET_STEALTH_HPP
 
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 struct BC_API stealth_info
 {
@@ -58,7 +59,7 @@ BC_API ec_secret uncover_stealth_secret(const ec_point& ephem_pubkey,
 //BC_API ec_point initiate_stealth(const ec_secret& ephem_secret,
 //   const ec_point& scan_pubkey const ec_point& spend_pubkey);
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif
-
