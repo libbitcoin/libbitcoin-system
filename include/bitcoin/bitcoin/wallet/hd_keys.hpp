@@ -48,27 +48,37 @@ struct BC_API hd_key_lineage
 /**
  * An extended public key, as defined by BIP 32.
  */
-class hd_public_key
+class BC_API hd_public_key
 {
 public:
-    BC_API hd_public_key();
-    BC_API hd_public_key(const ec_point& public_key,
+
+    hd_public_key();
+
+    hd_public_key(const std::string& encoded);
+
+    hd_public_key(const ec_point& public_key,
         const chain_code_type& chain_code, hd_key_lineage lineage);
 
-    BC_API bool valid() const;
+    bool valid() const;
 
-    BC_API const ec_point& public_key() const;
-    BC_API const chain_code_type& chain_code() const;
-    BC_API const hd_key_lineage& lineage() const;
+    const ec_point& public_key() const;
 
-    BC_API bool set_encoded(const std::string& encoded);
-    BC_API std::string encoded() const;
-    BC_API uint32_t fingerprint() const;
-    BC_API payment_address address() const;
+    const chain_code_type& chain_code() const;
 
-    BC_API hd_public_key generate_public_key(uint32_t i) const;
+    const hd_key_lineage& lineage() const;
+
+    bool from_string(const std::string& encoded);
+
+    std::string to_string() const;
+
+    uint32_t fingerprint() const;
+
+    payment_address address() const;
+
+    hd_public_key generate_public_key(uint32_t i) const;
 
 protected:
+
     bool valid_;
     ec_point K_; // EC point
     chain_code_type c_;
@@ -78,24 +88,31 @@ protected:
 /**
  * An extended private key, as defined by BIP 32.
  */
-class hd_private_key
-  : public hd_public_key
+class BC_API hd_private_key : public hd_public_key
 {
 public:
-    BC_API hd_private_key();
-    BC_API hd_private_key(const ec_secret& private_key,
+
+    hd_private_key();
+
+    hd_private_key(const std::string& encoded);
+
+    hd_private_key(const ec_secret& private_key,
         const chain_code_type& chain_code, hd_key_lineage lineage);
-    BC_API hd_private_key(data_slice seed, bool testnet=false);
 
-    BC_API const ec_secret& private_key() const;
+    hd_private_key(data_slice seed, bool testnet=false);
 
-    BC_API bool set_encoded(const std::string& encoded);
-    BC_API std::string encoded() const;
+    const ec_secret& private_key() const;
 
-    BC_API hd_private_key generate_private_key(uint32_t i) const;
-    BC_API hd_public_key generate_public_key(uint32_t i) const;
+    bool from_string(const std::string& encoded);
+
+    std::string to_string() const;
+
+    hd_private_key generate_private_key(uint32_t i) const;
+
+    hd_public_key generate_public_key(uint32_t i) const;
 
 protected:
+
     ec_secret k_;
 };
 
@@ -103,4 +120,3 @@ protected:
 } // namespace libbitcoin
 
 #endif
-
