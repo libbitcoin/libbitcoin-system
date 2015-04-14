@@ -27,6 +27,12 @@ inventory_vector::inventory_vector()
 {
 }
 
+inventory_vector::inventory_vector(inventory_type_id type,
+    const hash_digest& hash)
+    : type(type), hash(hash)
+{
+}
+
 inventory_vector::inventory_vector(const data_chunk& value)
 : inventory_vector(value.begin(), value.end())
 {
