@@ -39,6 +39,8 @@ public:
 
     inventory_vector();
 
+    inventory_vector(inventory_type_id type, const hash_digest& hash);
+
     inventory_vector(const data_chunk& value);
 
     template <typename Iterator, bool SafeCheckLast>
