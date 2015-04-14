@@ -37,7 +37,7 @@ namespace wallet {
  *
  * @code
  *   payment_address payaddr;
- *   if (!payaddr.set_encoded("155GwFbFET2HCT6r6jHAHUoxc897sSdjaq"))
+ *   if (!payaddr.from_string("155GwFbFET2HCT6r6jHAHUoxc897sSdjaq"))
  *       // Address is invalid
  * @endcode
  *
