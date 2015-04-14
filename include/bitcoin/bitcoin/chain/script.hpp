@@ -66,6 +66,8 @@ public:
 
     size_t satoshi_size() const;
 
+    bool from_string(const std::string& human_readable);
+
     std::string to_string() const;
 
     const operation_stack& operations() const;

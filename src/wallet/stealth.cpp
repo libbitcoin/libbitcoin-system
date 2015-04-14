@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/stealth.hpp>
+#include <bitcoin/bitcoin/wallet/stealth.hpp>
 
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 binary_type calculate_stealth_prefix(const chain::script& stealth_script)
 {
@@ -81,5 +82,5 @@ ec_secret uncover_stealth_secret(const ec_point& pubkey,
     return final;
 }
 
+} // namespace wallet
 } // namespace libbitcoin
-

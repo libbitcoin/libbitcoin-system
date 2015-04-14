@@ -55,13 +55,13 @@ BOOST_AUTO_TEST_CASE(stealth_address_test)
     ec_point ephem_pubkey = secret_to_public_key(ephem_privkey);
     BOOST_REQUIRE_EQUAL(ephem_pubkey.size(), ec_compressed_size);
 
-    ec_point sender_pubkey = uncover_stealth(
+    ec_point sender_pubkey = wallet::uncover_stealth(
         scan_pubkey, ephem_privkey, spend_pubkey);
-    ec_point receiver_pubkey = uncover_stealth(
+    ec_point receiver_pubkey = wallet::uncover_stealth(
         ephem_pubkey, scan_privkey, spend_pubkey);
     BOOST_REQUIRE(sender_pubkey == receiver_pubkey);
 
-    ec_secret stealth_secret = uncover_stealth_secret(
+    ec_secret stealth_secret = wallet::uncover_stealth_secret(
         ephem_pubkey, scan_privkey, spend_privkey);
     BOOST_REQUIRE(secret_to_public_key(stealth_secret) == sender_pubkey);
 
