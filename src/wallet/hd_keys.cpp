@@ -62,6 +62,15 @@ hd_public_key::hd_public_key()
 {
 }
 
+hd_public_key::hd_public_key(const std::string& encoded)
+  : hd_public_key()
+{
+    if (!from_string(encoded))
+    {
+        throw std::invalid_argument("encoded");
+    }
+}
+
 hd_public_key::hd_public_key(const ec_point& public_key,
     const chain_code_type& chain_code, hd_key_lineage lineage)
   : valid_(true), K_(public_key), c_(chain_code), lineage_(lineage)
@@ -88,7 +97,7 @@ const hd_key_lineage& hd_public_key::lineage() const
     return lineage_;
 }
 
-bool hd_public_key::set_encoded(const std::string& encoded)
+bool hd_public_key::from_string(const std::string& encoded)
 {
     data_chunk decoded;
     if (!decode_base58(decoded, encoded))
@@ -113,7 +122,7 @@ bool hd_public_key::set_encoded(const std::string& encoded)
     return true;
 }
 
-std::string hd_public_key::encoded() const
+std::string hd_public_key::to_string() const
 {
     auto prefix = mainnet_public_prefix;
     if (lineage_.testnet)
@@ -173,6 +182,15 @@ hd_private_key::hd_private_key()
 {
 }
 
+hd_private_key::hd_private_key(const std::string& encoded)
+  : hd_private_key()
+{
+    if (!from_string(encoded))
+    {
+        throw std::invalid_argument("encoded");
+    }
+}
+
 hd_private_key::hd_private_key(const ec_secret& private_key,
     const chain_code_type& chain_code, hd_key_lineage lineage)
   : hd_public_key(secret_to_public_key(private_key), chain_code, lineage),
@@ -199,7 +217,7 @@ const ec_secret& hd_private_key::private_key() const
     return k_;
 }
 
-bool hd_private_key::set_encoded(const std::string& encoded)
+bool hd_private_key::from_string(const std::string& encoded)
 {
     data_chunk decoded;
     if (!decode_base58(decoded, encoded))
@@ -226,7 +244,7 @@ bool hd_private_key::set_encoded(const std::string& encoded)
     return true;
 }
 
-std::string hd_private_key::encoded() const
+std::string hd_private_key::to_string() const
 {
     auto prefix = mainnet_private_prefix;
     if (lineage_.testnet)
