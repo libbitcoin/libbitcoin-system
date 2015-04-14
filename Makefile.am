@@ -153,6 +153,7 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/mnemonic.cpp \
     src/wallet/payment_address.cpp \
     src/wallet/select_outputs.cpp \
+    src/wallet/stealth.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
 
@@ -234,7 +235,6 @@ include_bitcoin_bitcoin_HEADERS = \
     include/bitcoin/bitcoin/constants.hpp \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
-    include/bitcoin/bitcoin/stealth.hpp \
     include/bitcoin/bitcoin/version.hpp
 
 include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
@@ -395,6 +395,7 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
     include/bitcoin/bitcoin/wallet/payment_address.hpp \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
+    include/bitcoin/bitcoin/wallet/stealth.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
 

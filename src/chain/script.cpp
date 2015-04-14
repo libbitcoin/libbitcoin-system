@@ -56,8 +56,58 @@ script::script(const operation& op)
 
 script::script(const std::string& human_readable)
 {
-    const auto tokens = split(human_readable);
+    if (!from_string(human_readable))
+    {
+        throw std::invalid_argument("human_readable");
+    }
+}
 
+script::operator const data_chunk() const
+{
+    data_chunk result;
+
+    if ((operations_.size() > 0) && (operations_[0].code == opcode::raw_data))
+    {
+        data_chunk raw_op = operations_[0];
+        extend_data(result, raw_op);
+    }
+    else
+    {
+        for (const operation& op: operations_)
+        {
+            data_chunk raw_op = op;
+            extend_data(result, raw_op);
+        }
+    }
+
+    return result;
+}
+
+size_t script::satoshi_size() const
+{
+    size_t size = 0;
+
+    if (operations_.size() > 0 && (operations_[0].code == opcode::raw_data))
+    {
+        size = operations_[0].satoshi_size();
+    }
+    else
+    {
+        for (const operation& op: operations_)
+        {
+            size += op.satoshi_size();
+        }
+    }
+
+    return size;
+}
+
+bool script::from_string(const std::string& human_readable)
+{
+    // clear current contents
+    operations_.clear();
+
+    const auto tokens = split(human_readable);
     bool clear = false;
 
     for (auto token = tokens.begin(); (token != tokens.end()); ++token)
@@ -100,48 +150,11 @@ script::script(const std::string& human_readable)
 
     if (clear)
     {
+        // empty invalid/failed parse content
         operations_.clear();
     }
-}
 
-script::operator const data_chunk() const
-{
-    data_chunk result;
-
-    if ((operations_.size() > 0) && (operations_[0].code == opcode::raw_data))
-    {
-        data_chunk raw_op = operations_[0];
-        extend_data(result, raw_op);
-    }
-    else
-    {
-        for (const operation& op: operations_)
-        {
-            data_chunk raw_op = op;
-            extend_data(result, raw_op);
-        }
-    }
-
-    return result;
-}
-
-size_t script::satoshi_size() const
-{
-    size_t size = 0;
-
-    if (operations_.size() > 0 && (operations_[0].code == opcode::raw_data))
-    {
-        size = operations_[0].satoshi_size();
-    }
-    else
-    {
-        for (const operation& op: operations_)
-        {
-            size += op.satoshi_size();
-        }
-    }
-
-    return size;
+    return clear;
 }
 
 std::string script::to_string() const
