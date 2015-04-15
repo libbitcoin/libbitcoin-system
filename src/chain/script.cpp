@@ -154,7 +154,7 @@ bool script::from_string(const std::string& human_readable)
         operations_.clear();
     }
 
-    return clear;
+    return !clear;
 }
 
 std::string script::to_string() const
