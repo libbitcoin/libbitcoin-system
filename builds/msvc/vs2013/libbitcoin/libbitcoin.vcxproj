@@ -110,6 +110,9 @@
     <ClCompile Include="..\..\..\..\src\utility\time.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\unicode.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\unicode_istream.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\unicode_ostream.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\console_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\unicode_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp" />
@@ -168,6 +171,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\time.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timed_section.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\unicode.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\unicode_istream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\unicode_ostream.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\console_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\weak_bind.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />

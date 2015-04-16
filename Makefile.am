@@ -77,12 +77,15 @@ src_libbitcoin_la_SOURCES = \
     src/network/network.cpp \
     src/network/protocol.cpp \
     src/utility/binary.cpp \
+    src/utility/console_streambuf.cpp \
     src/utility/logger.cpp \
     src/utility/string.cpp \
     src/utility/threadpool.cpp \
     src/utility/time.cpp \
     src/utility/timed_section.cpp \
     src/utility/unicode.cpp \
+    src/utility/unicode_istream.cpp \
+    src/utility/unicode_ostream.cpp \
     src/utility/unicode_streambuf.cpp \
     src/wallet/address.cpp \
     src/wallet/dictionary.cpp \
@@ -150,6 +153,8 @@ test_libbitcoin_test_SOURCES = \
     test/stealth.cpp \
     test/stealth_address.cpp \
     test/unicode.cpp \
+    test/unicode_istream.cpp \
+    test/unicode_ostream.cpp \
     test/uri.cpp
 
 endif WITH_TESTS
@@ -246,6 +251,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
+    include/bitcoin/bitcoin/utility/console_streambuf.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
@@ -257,6 +263,8 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/time.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
     include/bitcoin/bitcoin/utility/unicode.hpp \
+    include/bitcoin/bitcoin/utility/unicode_istream.hpp \
+    include/bitcoin/bitcoin/utility/unicode_ostream.hpp \
     include/bitcoin/bitcoin/utility/unicode_streambuf.hpp \
     include/bitcoin/bitcoin/utility/weak_bind.hpp
 

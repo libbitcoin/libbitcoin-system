@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,31 +17,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef LIBBITCOIN_UNICODE_OSTREAM_HPP
+#define LIBBITCOIN_UNICODE_OSTREAM_HPP
+
 #include <iostream>
-#include <sstream>
-#include <string>
-#include <bitcoin/bitcoin.hpp>
 
-BC_USE_LIBBITCOIN_MAIN
+namespace libbitcoin {
 
-int bc::main(int argc, char* argv[])
+/**
+ * Class to expose a widening output stream.
+ */
+class unicode_ostream
+    : public std::ostream
 {
-    unicode_istream input(std::cin, std::wcin);
-    unicode_ostream output(std::cout, std::wcout);
-    unicode_ostream error(std::cerr, std::wcerr);
+public:
+    /**
+     * Construct instance of a conditionally-widening output stream.
+     * @param[in]  narrow_stream  A narrow output stream such as std::cout.
+     * @param[in]  wide_stream    A wide output stream such as std::wcout.
+     */
+    unicode_ostream(std::ostream& narrow_stream, std::wostream& wide_stream);
+    
+    /**
+     * Delete the unicode_streambuf that wraps wide_stream.
+     */
+    ~unicode_ostream();
+};
 
-    // Use utf-8 with output|error.
-    output << "output : acción.кошка.日本国" << std::endl;
-    error << "error : acción.кошка.日本国" << std::endl;
+} // namespace libbitcoin
 
-    // input treats file input as utf8 and translates console input to utf8.
-    output << "Enter text to input..." << std::endl;
-    std::string console;
-    input >> console;
-    output << "input[0]  : " << console << std::endl;
-
-    if (argc > 1)
-        output << "argv[1] : " << argv[1] << std::endl;
-
-    return EXIT_SUCCESS;
-}
+#endif

@@ -1,5 +1,5 @@
 ﻿/**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -23,10 +23,8 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#ifdef _MSC_VER
-    #include <bitcoin/bitcoin/utility/unicode.hpp>
-    #include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
-#endif
+#include <bitcoin/bitcoin/utility/unicode.hpp>
+#include <bitcoin/bitcoin/utility/console_streambuf.hpp>
 
 // Regarding Unicode design for Windows:
 //
@@ -68,25 +66,29 @@
 // const auto utf16 = L"acción.кошка.日本国";
 // std::wcout << utf16;
 
+// Regarding use of boost::filesystem::path:
+//
+// If generic_wstring or c_str is used the boost::path default code page should
+// be inbued with UTF8. Otherwise generic_wstring and c_str will be in error.
+// This examples shows path with utf8 confiured properly:
+//      using namespace boost::locale;
+//      using namespace boost::filesystem;
+//      std::locale::global(generator().generate(""));
+//      path::imbue(std::locale());
+//      const auto directory = path() / "acción" / "кошка" / "日本国";
+//      auto utf16 = directory.generic_wstring();
+
 #ifdef _MSC_VER
-    namespace libbitcoin { typedef std::wstring tstring; }
-    #define tcin std::wcin
-    #define tcout std::wcout
-    #define tcerr std::wcerr
     #define BC_USE_LIBBITCOIN_MAIN \
         namespace libbitcoin { int main(int argc, char* argv[]); } \
         int wmain(int argc, wchar_t* argv[]) \
         { \
-            bc::unicode_streambuf::initialize_stdio(); \
+            bc::console_streambuf::initialize(); \
             auto buffer = libbitcoin::to_utf8(argc, argv); \
             auto args = reinterpret_cast<char**>(&buffer[0]); \
             return libbitcoin::main(argc, args); \
         }
 #else
-    namespace libbitcoin { typedef std::string tstring; }
-    #define tcin std::cin
-    #define tcout std::cout
-    #define tcerr std::cerr
     #define BC_USE_LIBBITCOIN_MAIN \
         namespace libbitcoin { int main(int argc, char* argv[]); } \
         int main(int argc, char* argv[]) \
@@ -120,15 +122,6 @@ BC_API std::string to_utf8(const std::wstring& wide);
  */
 BC_API std::wstring to_utf16(const std::string& narrow);
 
-/**
- * Conditionally convert a narrow string to wide based on platform.
- * The result is wide in Windows builds and narrow in others.
- * @param[in]  narrow  The utf8 string to convert.
- * @return             The resulting string.
- */
-BC_API tstring to_utf(const std::string& narrow);
-
 } // namespace libbitcoin
 
 #endif
-
