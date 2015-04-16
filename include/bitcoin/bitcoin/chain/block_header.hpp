@@ -34,14 +34,10 @@ class BC_API block_header
 {
 public:
 
-    uint32_t version;
-    hash_digest previous_block_hash;
-    hash_digest merkle;
-    uint32_t timestamp;
-    uint32_t bits;
-    uint32_t nonce;
-
     block_header();
+
+    block_header(uint32_t version, hash_digest previous_block_hash,
+        hash_digest merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce);
 
     block_header(const data_chunk& value);
 
@@ -50,6 +46,30 @@ public:
 
     template<typename Iterator>
     block_header(const Iterator begin, const Iterator end);
+
+    uint32_t version() const;
+
+    void set_version(uint32_t version);
+
+    const hash_digest& previous_block_hash() const;
+
+    void set_previous_block_hash(const hash_digest& hash);
+
+    const hash_digest& merkle() const;
+
+    void set_merkle(const hash_digest& merkle);
+
+    uint32_t timestamp() const;
+
+    void set_timestamp(uint32_t timestamp);
+
+    uint32_t bits() const;
+
+    void set_bits(uint32_t bits);
+
+    uint32_t nonce() const;
+
+    void set_nonce(uint32_t nonce);
 
     operator const data_chunk() const;
 
@@ -63,6 +83,13 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    uint32_t version_;
+    hash_digest previous_block_hash_;
+    hash_digest merkle_;
+    uint32_t timestamp_;
+    uint32_t bits_;
+    uint32_t nonce_;
 };
 
 BC_API bool operator==(const block_header& block_a,

@@ -39,12 +39,14 @@ public:
 
     static const std::string satoshi_command;
 
-    uint32_t version;
-    uint32_t locktime;
-    transaction_input_list inputs;
-    transaction_output_list outputs;
+    friend hash_digest  script::generate_signature_hash(transaction, uint32_t,
+        const script&, uint32_t);
 
     transaction();
+
+    transaction(const uint32_t version, const uint32_t locktime,
+        const transaction_input_list& inputs,
+        const transaction_output_list& outputs);
 
     transaction(const data_chunk& value);
 
@@ -55,6 +57,26 @@ public:
     transaction(const Iterator begin, const Iterator end);
 
 //    transaction(const std::string& human_readable);
+
+    uint32_t version() const;
+
+    void set_version(uint32_t version);
+
+    uint32_t locktime() const;
+
+    void set_locktime(uint32_t locktime);
+
+    const transaction_input_list& inputs() const;
+
+    void push_inputs(const transaction_input& input);
+
+    void push_inputs(const transaction_input_list& inputs);
+
+    const transaction_output_list& outputs() const;
+
+    void push_outputs(const transaction_output& output);
+
+    void push_outputs(const transaction_output_list& outputs);
 
     operator const data_chunk() const;
 
@@ -81,6 +103,11 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    uint32_t version_;
+    uint32_t locktime_;
+    transaction_input_list inputs_;
+    transaction_output_list outputs_;
 };
 
 typedef std::vector<transaction> transaction_list;

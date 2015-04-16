@@ -25,6 +25,13 @@ namespace libbitcoin {
 namespace chain {
 
 transaction_output::transaction_output()
+    : value_(0), script_()
+{
+}
+
+transaction_output::transaction_output(uint64_t value,
+    const chain::script& script)
+    : value_(value), script_(script)
 {
 }
 
@@ -33,13 +40,33 @@ transaction_output::transaction_output(const data_chunk& value)
 {
 }
 
+const chain::script& transaction_output::script() const
+{
+    return script_;
+}
+
+void transaction_output::set_script(const chain::script& script)
+{
+    script_ = script;
+}
+
+uint64_t transaction_output::value() const
+{
+    return value_;
+}
+
+void transaction_output::set_value(const uint64_t value)
+{
+    value_ = value;
+}
+
 transaction_output::operator const data_chunk() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_8_bytes(value);
-    data_chunk raw_script = script;
+    serial.write_8_bytes(value_);
+    data_chunk raw_script = script_;
     serial.write_variable_uint(raw_script.size());
     serial.write_data(raw_script);
 
@@ -50,7 +77,7 @@ transaction_output::operator const data_chunk() const
 
 size_t transaction_output::satoshi_size() const
 {
-    size_t script_size = script.satoshi_size();
+    size_t script_size = script_.satoshi_size();
 
     return 8 + variable_uint_size(script_size) + script_size;
 }
@@ -59,8 +86,8 @@ std::string transaction_output::to_string() const
 {
     std::ostringstream ss;
 
-    ss << "\tvalue = " << value << "\n"
-        << "\t" << script.to_string() << "\n";
+    ss << "\tvalue = " << value_ << "\n"
+        << "\t" << script_.to_string() << "\n";
 
     return ss.str();
 }

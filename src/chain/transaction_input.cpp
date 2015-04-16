@@ -26,6 +26,13 @@ namespace libbitcoin {
 namespace chain {
 
 transaction_input::transaction_input()
+    : previous_output_(), script_(), sequence_(0)
+{
+}
+
+transaction_input::transaction_input(const output_point& previous_output,
+    const chain::script& script, const uint32_t sequence)
+    : previous_output_(previous_output), script_(script), sequence_(sequence)
 {
 }
 
@@ -34,17 +41,47 @@ transaction_input::transaction_input(const data_chunk& value)
 {
 }
 
+const output_point& transaction_input::previous_output() const
+{
+    return previous_output_;
+}
+
+void transaction_input::set_previous_output(const output_point& previous)
+{
+    previous_output_ = previous;
+}
+
+const chain::script& transaction_input::script() const
+{
+    return script_;
+}
+
+void transaction_input::set_script(const chain::script& script)
+{
+    script_ = script;
+}
+
+uint32_t transaction_input::sequence() const
+{
+    return sequence_;
+}
+
+void transaction_input::set_sequence(const uint32_t sequence)
+{
+    sequence_ = sequence;
+}
+
 transaction_input::operator const data_chunk() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_hash(previous_output.hash());
-    serial.write_4_bytes(previous_output.index());
-    data_chunk raw_script = script;
+    data_chunk raw_prevout = previous_output_;
+    serial.write_data(raw_prevout);
+    data_chunk raw_script = script_;
     serial.write_variable_uint(raw_script.size());
     serial.write_data(raw_script);
-    serial.write_4_bytes(sequence);
+    serial.write_4_bytes(sequence_);
 
     BITCOIN_ASSERT(std::distance(result.begin(), serial.iterator()) == satoshi_size());
 
@@ -53,25 +90,26 @@ transaction_input::operator const data_chunk() const
 
 size_t transaction_input::satoshi_size() const
 {
-    size_t script_size = script.satoshi_size();
+    size_t script_size = script_.satoshi_size();
 
-    return 40 + variable_uint_size(script_size) + script_size;
+    return 4 + previous_output_.satoshi_size()
+        + variable_uint_size(script_size) + script_size;
 }
 
 std::string transaction_input::to_string() const
 {
     std::ostringstream ss;
 
-    ss << previous_output.to_string() << "\n"
-        << "\t" << script.to_string() << "\n"
-        << "\tsequence = " << sequence << "\n";
+    ss << previous_output_.to_string() << "\n"
+        << "\t" << script_.to_string() << "\n"
+        << "\tsequence = " << sequence_ << "\n";
 
     return ss.str();
 }
 
 bool transaction_input::is_final() const
 {
-    return (sequence == max_sequence);
+    return (sequence_ == max_sequence);
 }
 
 } // end chain

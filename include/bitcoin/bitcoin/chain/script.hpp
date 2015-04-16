@@ -48,6 +48,10 @@ public:
 
     script();
 
+    script(const operation& op);
+
+    script(const operation_stack& operations);
+
     script(const data_chunk& value, bool allow_raw_data_fallback = false);
 
     template<typename Iterator, bool SafeCheckLast>
@@ -58,9 +62,17 @@ public:
     script(const Iterator begin, const Iterator end,
         bool allow_raw_data_fallback = false);
 
-    script(const operation& op);
-
     script(const std::string& human_readable);
+
+    const operation_stack& operations() const;
+
+    void push_operations(const operation& oper);
+
+    void push_operations(const operation_stack& other);
+
+    payment_type type() const;
+
+    bool is_raw_data() const;
 
     operator const data_chunk() const;
 
@@ -69,16 +81,6 @@ public:
     bool from_string(const std::string& human_readable);
 
     std::string to_string() const;
-
-    const operation_stack& operations() const;
-
-    bool push_operations(const operation& oper);
-
-    bool push_operations(const operation_stack& other);
-
-    payment_type type() const;
-
-    bool is_raw_data() const;
 
     static BC_API bool verify(const script& input_script,
         const script& output_script, const transaction& parent_tx,

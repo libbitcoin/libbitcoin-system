@@ -47,21 +47,19 @@ const hash_digest& point::hash() const
     return hash_;
 }
 
+void point::set_hash(const hash_digest& hash)
+{
+    hash_ = hash;
+}
+
 uint32_t point::index() const
 {
     return index_;
 }
 
-bool point::set_hash(const hash_digest& hash)
-{
-    hash_ = hash;
-    return true;
-}
-
-bool point::set_index(uint32_t index)
+void point::set_index(uint32_t index)
 {
     index_ = index;
-    return true;
 }
 
 std::string point::to_string() const

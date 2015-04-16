@@ -35,11 +35,10 @@ class BC_API transaction_input
 {
 public:
 
-    output_point previous_output;
-    chain::script script;
-    uint32_t sequence;
-
     transaction_input();
+
+    transaction_input(const output_point& previous_output,
+        const chain::script& script, const uint32_t sequence);
 
     transaction_input(const data_chunk& value);
 
@@ -48,6 +47,18 @@ public:
 
     template<typename Iterator>
     transaction_input(const Iterator begin, const Iterator end);
+
+    const output_point& previous_output() const;
+
+    void set_previous_output(const output_point& previous);
+
+    const chain::script& script() const;
+
+    void set_script(const chain::script& script);
+
+    uint32_t sequence() const;
+
+    void set_sequence(const uint32_t sequence);
 
     operator const data_chunk() const;
 
@@ -63,6 +74,10 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    output_point previous_output_;
+    chain::script script_;
+    uint32_t sequence_;
 };
 
 typedef std::vector<transaction_input> transaction_input_list;

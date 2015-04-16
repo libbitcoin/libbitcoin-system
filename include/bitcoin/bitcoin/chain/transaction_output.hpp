@@ -34,10 +34,9 @@ class BC_API transaction_output
 {
 public:
 
-    uint64_t value;
-    chain::script script;
-
     transaction_output();
+
+    transaction_output(uint64_t value, const chain::script& script);
 
     transaction_output(const data_chunk& value);
 
@@ -46,6 +45,14 @@ public:
 
     template<typename Iterator>
     transaction_output(const Iterator begin, const Iterator end);
+
+    const chain::script& script() const;
+
+    void set_script(const chain::script& script);
+
+    uint64_t value() const;
+
+    void set_value(const uint64_t value);
 
     operator const data_chunk() const;
 
@@ -59,6 +66,9 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    uint64_t value_;
+    chain::script script_;
 };
 
 typedef std::vector<transaction_output> transaction_output_list;

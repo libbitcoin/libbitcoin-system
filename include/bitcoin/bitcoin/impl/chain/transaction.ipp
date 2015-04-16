@@ -26,14 +26,14 @@ namespace chain {
 template <typename Iterator, bool SafeCheckLast>
 void transaction::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
-    version = deserial.read_4_bytes();
+    version_ = deserial.read_4_bytes();
 
     uint64_t tx_in_count = deserial.read_variable_uint();
 
     for (size_t tx_in_i = 0; tx_in_i < tx_in_count; ++tx_in_i)
     {
         transaction_input input(deserial);
-        inputs.push_back(input);
+        inputs_.push_back(input);
     }
 
     uint64_t tx_out_count = deserial.read_variable_uint();
@@ -41,10 +41,10 @@ void transaction::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
     for (size_t tx_out_i = 0; tx_out_i < tx_out_count; ++tx_out_i)
     {
         transaction_output output(deserial);
-        outputs.push_back(output);
+        outputs_.push_back(output);
     }
 
-    locktime = deserial.read_4_bytes();
+    locktime_ = deserial.read_4_bytes();
 }
 
 template <typename Iterator, bool SafeCheckLast>

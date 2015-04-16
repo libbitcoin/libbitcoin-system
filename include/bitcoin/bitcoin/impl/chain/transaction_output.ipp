@@ -26,8 +26,8 @@ namespace chain {
 template <typename Iterator, bool SafeCheckLast>
 void transaction_output::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
-    value = deserial.read_8_bytes();
-    script = chain::script(deserial);
+    value_ = deserial.read_8_bytes();
+    script_ = chain::script(deserial);
 }
 
 template <typename Iterator, bool SafeCheckLast>
