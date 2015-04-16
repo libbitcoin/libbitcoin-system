@@ -17,28 +17,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_TRANSACTION_INPUT_IPP
-#define LIBBITCOIN_CHAIN_TRANSACTION_INPUT_IPP
+#ifndef LIBBITCOIN_CHAIN_POINT_IPP
+#define LIBBITCOIN_CHAIN_POINT_IPP
 
 namespace libbitcoin {
 namespace chain {
 
 template <typename Iterator, bool SafeCheckLast>
-void transaction_input::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
+void point::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
-    previous_output = output_point(deserial);
-    script = chain::script(deserial);
-    sequence = deserial.read_4_bytes();
+    hash_ = deserial.read_hash();
+    index_ = deserial.read_4_bytes();
 }
 
 template <typename Iterator, bool SafeCheckLast>
-transaction_input::transaction_input(deserializer<Iterator, SafeCheckLast>& deserial)
+point::point(deserializer<Iterator, SafeCheckLast>& deserial)
 {
     deserialize(deserial);
 }
 
 template<typename Iterator>
-transaction_input::transaction_input(const Iterator begin, const Iterator end)
+point::point(const Iterator begin, const Iterator end)
 {
     deserializer<Iterator, true> deserial = make_deserializer(begin, end);
     deserialize(deserial);

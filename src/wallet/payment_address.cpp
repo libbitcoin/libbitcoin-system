@@ -119,17 +119,17 @@ bool extract(payment_address& address, const chain::script& script)
     {
         case chain::payment_type::pubkey:
             BITCOIN_ASSERT(ops.size() == 2);
-            address.set_public_key(ops[0].data);
+            address.set_public_key(ops[0].data());
             return true;
 
         case chain::payment_type::pubkey_hash:
             BITCOIN_ASSERT(ops.size() == 5);
-            set_hash_data(payment_address::pubkey_version, ops[2].data);
+            set_hash_data(payment_address::pubkey_version, ops[2].data());
             return true;
 
         case chain::payment_type::script_hash:
             BITCOIN_ASSERT(ops.size() == 3);
-            set_hash_data(payment_address::script_version, ops[1].data);
+            set_hash_data(payment_address::script_version, ops[1].data());
             return true;
 
         case chain::payment_type::multisig:
@@ -138,13 +138,13 @@ bool extract(payment_address& address, const chain::script& script)
 
         case chain::payment_type::pubkey_hash_sig:
             BITCOIN_ASSERT(ops.size() == 2);
-            address.set_public_key(ops[1].data);
+            address.set_public_key(ops[1].data());
             return true;
 
         case chain::payment_type::script_code_sig:
             // Should have at least 1 sig and the script code.
             BITCOIN_ASSERT(ops.size() > 1);
-            address.set_script_hash(bitcoin_short_hash(ops.back().data));
+            address.set_script_hash(bitcoin_short_hash(ops.back().data()));
             return true;
 
         default:

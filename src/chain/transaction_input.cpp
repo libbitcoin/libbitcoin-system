@@ -39,8 +39,8 @@ transaction_input::operator const data_chunk() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_hash(previous_output.hash);
-    serial.write_4_bytes(previous_output.index);
+    serial.write_hash(previous_output.hash());
+    serial.write_4_bytes(previous_output.index());
     data_chunk raw_script = script;
     serial.write_variable_uint(raw_script.size());
     serial.write_data(raw_script);
