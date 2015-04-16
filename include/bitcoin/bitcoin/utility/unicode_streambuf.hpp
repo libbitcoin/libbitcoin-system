@@ -29,6 +29,9 @@ namespace libbitcoin {
 
 /**
  * Class to translate internal utf8 iostreams to external utf16 iostreams.
+ * This uses wide and narrow input and output buffers of 1024 characters/bytes.
+ * However because of utf8-utf16 conversion ratios of up to 4:1 the effective
+ * wide output buffering may be reduced to as much as 256 characters.
  */
 class BC_API unicode_streambuf
     : public std::streambuf
@@ -53,9 +56,9 @@ protected:
 
     /**
      * Implement overflow for support of output streams.
-     * @param[in]  value  Character to be put.
+     * @param[in]  byte  A single byte to be explicitly put.
      */
-    virtual std::streambuf::int_type overflow(std::streambuf::int_type value);
+    virtual std::streambuf::int_type overflow(std::streambuf::int_type byte);
 
     /**
      * Implement sync for support of output streams.
@@ -77,14 +80,20 @@ private:
     // This is maxed out when all wide characters are single byte utf8.
     static const size_t to_wide_characters_ = narrow_size_;
 
-    char narrow_[narrow_size_ + character_size_];
-    wchar_t wide_[to_wide_characters_ + character_size_];
+    char narrow_[narrow_size_];
+    wchar_t wide_[to_wide_characters_];
+
+    // This is the excapsulated wide buffer used for I/O.
     wide_streambuf* wide_buffer_;
 
-    static_assert(narrow_size_ <= MAX_INT32,
-        "Narrow buffer must not exceed max int32.");
+    // Ensure sufficient stack allocation for implementation assumptions.
+    // Note that buffers cannot equal MAX_INT32 because of the overflow char.
     static_assert(narrow_size_ >= character_size_,
         "Narrow buffer must be at least 4 bytes wide.");
+    static_assert(narrow_size_ < MAX_INT32,
+        "Narrow buffer must be less than max int32.");
+    static_assert(to_wide_characters_ < MAX_INT32,
+        "Wide buffer must be less than max int32.");
 };
 
 } // namespace libbitcoin

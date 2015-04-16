@@ -22,23 +22,19 @@
 #include <cstddef>
 #include <iostream>
 #include <streambuf>
-
-#ifdef _MSC_VER
-    #include <windows.h>
-#else
-    #include <string>
-    #include <string.h>
-    #include <boost/locale/encoding_errors.hpp>
-    #include <bitcoin/bitcoin/utility/unicode.hpp>
-#endif
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/unicode.hpp>
 
 namespace libbitcoin {
     
 unicode_streambuf::unicode_streambuf(wide_streambuf* wide_buffer)
     : wide_buffer_(wide_buffer)
 {
+    // Input buffer is not yet populated.
     setg(narrow_, narrow_, narrow_);
-    setp(narrow_, &narrow_[narrow_size_]);
+
+    // Output buffer is underexposed by 1 byte to accomodate the overflow byte.
+    setp(narrow_, &narrow_[narrow_size_ - 1]);
 }
 
 unicode_streambuf::~unicode_streambuf()
@@ -52,121 +48,95 @@ unicode_streambuf::~unicode_streambuf()
 // initialized with a patched std::wcin when std::wcin is used.
 std::streambuf::int_type unicode_streambuf::underflow()
 {
-    auto read = wide_buffer_->sgetn(wide_, from_wide_characters_);
+    // Read from the wide input buffer.
+    const auto read = wide_buffer_->sgetn(wide_, from_wide_characters_);
+
+    // Handle read termination.
     if (read == 0)
         return traits_type::eof();
 
-    size_t size = 0;
+    // These values are statically guarded to be < maxint32.
+    const auto wide_size = static_cast<int>(read);
+    const auto narrow_size = static_cast<int>(narrow_size_);
 
-    // Convert from wide to narrow.
-#ifdef _MSC_VER
-    // This is an optimization for the expected common usage (Windows).
-    size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, wide_,
-        static_cast<int>(read), narrow_, static_cast<int>(narrow_size_), NULL,
-        NULL);
-#else
-    const std::wstring wide(wide_, &wide_[read]);
-    const auto narrow = to_utf8(wide);
-    size = narrow.size();
-    memcpy(narrow_, narrow.data(), size);
-#endif
-
-    if (size == 0)
-        throw std::istream::failure("utf-16 to utf-8 conversion fail");
+    // Convert utf16 to utf8, returning bytes written.
+    const auto bytes = to_utf8(narrow_, narrow_size, wide_, wide_size);
 
     // Reset the buffered portion of the input sequence.
-    setg(narrow_, narrow_, &narrow_[size]);
+    setg(narrow_, narrow_, &narrow_[bytes]);
 
     // Return the first character in the input sequence.
     return traits_type::to_int_type(*gptr());
 }
 
+// Write characters to output buffer.
+// We compensate for character-splitting. This is necessary because
+// MSVC does not support a UTF8 locale and as such streams interpret
+// narrow characters in the default locale. This implementation
+// assumes the stream will treat each byte of a multibyte narrow 
+// chracter as an individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
-    std::streambuf::int_type value)
+    std::streambuf::int_type byte)
 {
-    if (value != traits_type::eof())
+    // Add a single explicitly read byte to the buffer.
+    // The narrow buffer is underexposed by 1 byte to accomodate this.
+    if (byte != traits_type::eof())
     {
-        *pptr() = value;
+        *pptr() = byte;
         pbump(1);
     }
 
-    uint8_t offset = 0;
+    // This will be in the range 0..4, indicating the number of bytes that were
+    // not read in the conversion. A nonzero value results when the buffer 
+    // terminates within a utf8 multiple byte character.
+    uint8_t unread = 0;
 
-    // The value of write is no larger than narrow_size_.
-    std::ptrdiff_t write = pptr() - pbase();
-    if (write != 0)
+    // Get the number of bytes in the buffer to convert.
+    BITCOIN_ASSERT(pptr() >= pbase());
+
+    // These values are statically guarded to be <= maxint32.
+    const auto narrow_size = static_cast<int>(pptr() - pbase());
+    const auto wide_size = static_cast<int>(to_wide_characters_);
+
+    if (narrow_size != 0)
     {
-        size_t size = 0;
+        // Convert utf8 to utf16, returning chars written and bytes unread.
+        const auto chars = to_utf16(wide_, wide_size, narrow_, narrow_size,
+            unread);
 
-        // Compensate for character-splitting. This is necessary because
-        // MSVC does not support a UTF8 locale and as such here interprets
-        // narrow characters in the default locale. This implementation
-        // assumes the stream will treat each byte of a multibyte narrow 
-        // chracter as an individual single byte character.
-        while (offset < character_size_)
-        {
-            // Convert from narrow to wide.
-#ifdef _MSC_VER
-            // This is an optimization for the expected common usage (Windows).
-            size = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, narrow_,
-                static_cast<int>(write - offset), wide_,
-                static_cast<int>(to_wide_characters_));
+        // Write to the wide output buffer.
+        const auto written = wide_buffer_->sputn(wide_, chars);
 
-            if (size == 0 && GetLastError() == ERROR_NO_UNICODE_TRANSLATION)
-                ++offset;
-            else
-                break;
-#else
-            const std::string narrow(narrow_, &narrow_[write - offset]);
-            try
-            {
-                const auto wide = to_utf16(narrow);
-                size = wide.size();
-                wmemcpy(wide_, wide.data(), size);
-                break;
-            }
-            catch (const boost::locale::conv::conversion_error&)
-            {
-                size = 0;
-                ++offset;
-            }
-#endif
-        }
-
-        if (size == 0)
-            throw std::ostream::failure("utf-8 to utf-16 conversion fail");
-
-        // Write wide to output buffer.
-        auto written = wide_buffer_->sputn(wide_, size);
-        if (written != size)
+        // Handle write failure as an EOF.
+        if (written != chars)
             return traits_type::eof();
     }
 
     // Reset the buffered portion of the output sequence.
-    setp(narrow_, &narrow_[narrow_size_]);
+    // The buffer is underexposed by 1 byte to accomodate the overflow byte.
+    setp(narrow_, &narrow_[narrow_size_ - 1]);
 
     // Copy the fractional character to the beginning of the buffer.
-    memcpy(narrow_, &narrow_[write - offset], offset);
+    memcpy(narrow_, &narrow_[narrow_size - unread], unread);
 
-    // Continue writing at the end of the fractional character.
-    pbump(offset);
+    // Start any subsequent writes immediately after the fractional character.
+    pbump(unread);
 
-    // Return whether value is not equivalent to eof.
-    return traits_type::not_eof(value);
+    // Return the overflow byte or EOF sentinel.
+    return byte;
 };
 
+// Flush our output sequence.
 int unicode_streambuf::sync()
 {
     const int success = 0;
     const int failure = -1;
 
-    // Flush our output sequence.
-    auto value = overflow(traits_type::eof());
+    // We expect EOF to be returned, because we passed it.
+    if (overflow(traits_type::eof()) == traits_type::eof())
+        return success;
 
-    if (traits_type::eq_int_type(value, traits_type::eof()))
-        return failure;
-
-    return success;
+    return failure;
 }
 
 } // namespace libbitcoin
