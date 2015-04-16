@@ -34,9 +34,6 @@ class BC_API operation
 {
 public:
 
-    opcode code;
-    data_chunk data;
-
     operation();
 
     operation(const data_chunk& value);
@@ -48,6 +45,10 @@ public:
 
     template<typename Iterator>
     operation(const Iterator begin, const Iterator end);
+
+    opcode code() const;
+
+    const data_chunk& data() const;
 
     operator const data_chunk() const;
 
@@ -65,6 +66,9 @@ private:
         Deserializer& deserial);
 
     static bool must_read_data(opcode code);
+
+    opcode code_;
+    data_chunk data_;
 };
 
 typedef std::vector<operation> operation_stack;

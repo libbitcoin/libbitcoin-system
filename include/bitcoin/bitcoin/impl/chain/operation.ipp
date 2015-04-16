@@ -28,21 +28,21 @@ void operation::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
     uint8_t raw_byte = deserial.read_byte();
 
-    code = static_cast<opcode>(raw_byte);
+    code_ = static_cast<opcode>(raw_byte);
 
-    BITCOIN_ASSERT(raw_byte != 0 || code == opcode::zero);
+    BITCOIN_ASSERT(raw_byte != 0 || code_ == opcode::zero);
 
     if (0 < raw_byte && raw_byte <= 75)
-        code = opcode::special;
+        code_ = opcode::special;
 
-    if (operation::must_read_data(code))
+    if (operation::must_read_data(code_))
     {
         size_t read_n_bytes =
-            read_opcode_data_byte_count(code, raw_byte, deserial);
+            read_opcode_data_byte_count(code_, raw_byte, deserial);
 
-        data = deserial.read_data(read_n_bytes);
+        data_ = deserial.read_data(read_n_bytes);
 
-        BITCOIN_ASSERT(read_n_bytes || data.empty());
+        BITCOIN_ASSERT(read_n_bytes || data_.empty());
     }
 }
 

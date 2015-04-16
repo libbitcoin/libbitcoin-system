@@ -37,14 +37,22 @@ operation::operation(const data_chunk& value)
 }
 
 operation::operation(const opcode code, const data_chunk& data)
+    : code_(code), data_(data)
 {
 //    if (code != opcode::raw_data)
 //    {
 //        throw std::invalid_argument("code");
 //    }
+}
 
-    this->code = code;
-    this->data = data;
+opcode operation::code() const
+{
+    return code_;
+}
+
+const data_chunk& operation::data() const
+{
+    return data_;
 }
 
 operation::operator const data_chunk() const
@@ -52,27 +60,29 @@ operation::operator const data_chunk() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    if (code != opcode::raw_data)
+    if (code_ != opcode::raw_data)
     {
-        uint8_t raw_byte = static_cast<uint8_t>(code);
+        uint8_t raw_byte = static_cast<uint8_t>(code_);
 
-        if (code == opcode::special)
-            raw_byte = static_cast<uint8_t>(data.size());
+        if (code_ == opcode::special)
+            raw_byte = static_cast<uint8_t>(data_.size());
 
         serial.write_byte(raw_byte);
 
-        switch (code)
+        switch (code_)
         {
             case opcode::pushdata1:
-                serial.write_byte(static_cast<uint8_t>(data.size()));
+                serial.write_byte(static_cast<uint8_t>(data_.size()));
                 break;
 
             case opcode::pushdata2:
-                serial.write_little_endian(static_cast<uint16_t>(data.size()));
+                serial.write_little_endian(static_cast<uint16_t>(
+                    data_.size()));
                 break;
 
             case opcode::pushdata4:
-                serial.write_little_endian(static_cast<uint32_t>(data.size()));
+                serial.write_little_endian(static_cast<uint32_t>(
+                    data_.size()));
                 break;
 
             default:
@@ -80,7 +90,7 @@ operation::operator const data_chunk() const
         }
     }
 
-    serial.write_data(data);
+    serial.write_data(data_);
 
 
     return result;
@@ -88,9 +98,9 @@ operation::operator const data_chunk() const
 
 size_t operation::satoshi_size() const
 {
-    size_t size = 1 + data.size();
+    size_t size = 1 + data_.size();
 
-    switch (code)
+    switch (code_)
     {
         case opcode::pushdata1:
             size += 1;
@@ -120,10 +130,10 @@ std::string operation::to_string() const
 {
     std::ostringstream ss;
 
-    if (data.empty())
-        ss << opcode_to_string(code);
+    if (data_.empty())
+        ss << opcode_to_string(code_);
     else
-        ss << "[ " << encode_base16(data) << " ]";
+        ss << "[ " << encode_base16(data_) << " ]";
 
     return ss.str();
 }
@@ -165,7 +175,7 @@ bool is_push(const opcode code)
 size_t count_non_push(const operation_stack& operations)
 {
     return std::count_if(operations.begin(), operations.end(),
-        [](const operation& op) { return !is_push(op.code); });
+        [](const operation& op) { return !is_push(op.code()); });
 }
 
 bool is_push_only(const operation_stack& operations)
@@ -176,36 +186,36 @@ bool is_push_only(const operation_stack& operations)
 bool is_pubkey_type(const operation_stack& ops)
 {
     return ops.size() == 2 &&
-        ops[0].code == opcode::special &&
-        ops[1].code == opcode::checksig;
+        ops[0].code() == opcode::special &&
+        ops[1].code() == opcode::checksig;
 }
 
 bool is_pubkey_hash_type(const operation_stack& ops)
 {
     return ops.size() == 5 &&
-        ops[0].code == opcode::dup &&
-        ops[1].code == opcode::hash160 &&
-        ops[2].code == opcode::special &&
-        ops[2].data.size() == 20 &&
-        ops[3].code == opcode::equalverify &&
-        ops[4].code == opcode::checksig;
+        ops[0].code() == opcode::dup &&
+        ops[1].code() == opcode::hash160 &&
+        ops[2].code() == opcode::special &&
+        ops[2].data().size() == 20 &&
+        ops[3].code() == opcode::equalverify &&
+        ops[4].code() == opcode::checksig;
 }
 
 bool is_script_hash_type(const operation_stack& ops)
 {
     return ops.size() == 3 &&
-        ops[0].code == opcode::hash160 &&
-        ops[1].code == opcode::special &&
-        ops[1].data.size() == 20 &&
-        ops[2].code == opcode::equal;
+        ops[0].code() == opcode::hash160 &&
+        ops[1].code() == opcode::special &&
+        ops[1].data().size() == 20 &&
+        ops[2].code() == opcode::equal;
 }
 
 bool is_stealth_info_type(const operation_stack& ops)
 {
     return ops.size() == 2 &&
-        ops[0].code == opcode::return_ &&
-        ops[1].code == opcode::special &&
-        ops[1].data.size() >= hash_size;
+        ops[0].code() == opcode::return_ &&
+        ops[1].code() == opcode::special &&
+        ops[1].data().size() >= hash_size;
 }
 
 bool is_multisig_type(const operation_stack&)
@@ -217,7 +227,7 @@ bool is_pubkey_hash_sig_type(const operation_stack& ops)
 {
     if (ops.size() != 2 || !is_push_only(ops))
         return false;
-    const ec_point& last_data = ops.back().data;
+    const ec_point& last_data = ops.back().data();
     return verify_public_key_fast(last_data);
 }
 
@@ -226,7 +236,7 @@ bool is_script_code_sig_type(const operation_stack& ops)
     if (ops.size() < 2 || !is_push_only(ops))
         return false;
 
-    const data_chunk& last_data = ops.back().data;
+    const data_chunk& last_data = ops.back().data();
 
     if (last_data.empty())
         return false;
@@ -240,7 +250,7 @@ bool is_script_code_sig_type(const operation_stack& ops)
     // M [SIG]... N checkmultisig
     return script_code.operations().size() >= 4 &&
         count_non_push(script_code.operations()) == 1 &&
-        script_code.operations().back().code == opcode::checkmultisig;
+        script_code.operations().back().code() == opcode::checkmultisig;
 }
 
 } // end chain

@@ -25,6 +25,8 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/deserializer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -33,12 +35,43 @@ class BC_API point
 {
 public:
 
-    hash_digest hash;
-    uint32_t index;
+    point();
+
+    point(hash_digest hash, uint32_t index);
+
+    point(const data_chunk& value);
+
+    template <typename Iterator, bool SafeCheckLast>
+    point(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    template<typename Iterator>
+    point(const Iterator begin, const Iterator end);
+
+    const hash_digest& hash() const;
+
+    uint32_t index() const;
+
+    bool set_hash(const hash_digest& hash);
+
+    bool set_index(uint32_t index);
 
     std::string to_string() const;
 
     bool is_null() const;
+
+    operator const data_chunk() const;
+
+    size_t satoshi_size() const;
+
+    static size_t satoshi_fixed_size();
+
+private:
+
+    template <typename Iterator, bool SafeCheckLast>
+    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    hash_digest hash_;
+    uint32_t index_;
 };
 
 typedef std::vector<point> point_list;
@@ -55,5 +88,7 @@ BC_API bool operator!=(const point& a, const point& b);
 
 } // end chain
 } // end libbitcoin
+
+#include <bitcoin/bitcoin/impl/chain/point.ipp>
 
 #endif

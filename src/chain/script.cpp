@@ -66,7 +66,8 @@ script::operator const data_chunk() const
 {
     data_chunk result;
 
-    if ((operations_.size() > 0) && (operations_[0].code == opcode::raw_data))
+    if ((operations_.size() > 0) &&
+        (operations_[0].code() == opcode::raw_data))
     {
         data_chunk raw_op = operations_[0];
         extend_data(result, raw_op);
@@ -87,7 +88,7 @@ size_t script::satoshi_size() const
 {
     size_t size = 0;
 
-    if (operations_.size() > 0 && (operations_[0].code == opcode::raw_data))
+    if (operations_.size() > 0 && (operations_[0].code() == opcode::raw_data))
     {
         size = operations_[0].satoshi_size();
     }
@@ -112,40 +113,41 @@ bool script::from_string(const std::string& human_readable)
 
     for (auto token = tokens.begin(); (token != tokens.end()); ++token)
     {
-        operation op;
+        opcode code;
+        data_chunk data;
 
         if (*token == "[")
         {
-            data_chunk data;
+            data_chunk raw_data;
 
-            if (!decode_base16(data, *++token))
+            if (!decode_base16(raw_data, *++token))
             {
                 clear = true;
                 break;
             }
 
-            if (data.empty() || *++token != "]")
+            if (raw_data.empty() || *++token != "]")
             {
                 clear = true;
                 break;
             }
 
-            op.code = data_to_opcode(data);
+            code = data_to_opcode(raw_data);
 
-            if (op.code == opcode::bad_operation)
+            if (code == opcode::bad_operation)
             {
                 clear = true;
                 break;
             }
 
-            op.data = data;
+            data = raw_data;
         }
         else
         {
-            op.code = string_to_opcode(*token);
+            code = string_to_opcode(*token);
         }
 
-        operations_.push_back(op);
+        operations_.push_back(operation(code, data));
     }
 
     if (clear)
@@ -194,7 +196,7 @@ payment_type script::type() const
 bool script::is_raw_data() const
 {
     return (operations_.size() == 1) &&
-        (operations_[0].code == opcode::raw_data);
+        (operations_[0].code() == opcode::raw_data);
 }
 
 const operation_stack& script::operations() const
@@ -230,10 +232,9 @@ void script::deserialize(data_chunk raw_script,
 
         // recognize as raw data
         operations_.clear();
-        operation op;
-        op.code = opcode::raw_data;
-        op.data = to_data_chunk(raw_script);
-        operations_.push_back(op);
+
+        operations_.push_back(
+            operation(opcode::raw_data, to_data_chunk(raw_script)));
     }
 }
 
@@ -1200,7 +1201,7 @@ bool op_checksigverify(evaluation_context& context, const script& script,
     {
         const operation op = *it;
 
-        if (op.data == signature || op.code == opcode::codeseparator)
+        if (op.data() == signature || op.code() == opcode::codeseparator)
             continue;
 
         script_code.push_operations(op);
@@ -1287,10 +1288,10 @@ bool op_checkmultisigverify(evaluation_context& context, const script& script,
     {
         const operation op = *it;
 
-        if (op.code == opcode::codeseparator)
+        if (op.code() == opcode::codeseparator)
             continue;
 
-        if (is_signature(op.data))
+        if (is_signature(op.data()))
             continue;
 
         script_code.push_operations(op);
@@ -1337,14 +1338,14 @@ bool op_checkmultisig(evaluation_context& context, const script& script,
 bool run_operation(const operation& op, const transaction& parent_tx,
     uint32_t input_index, const script& script, evaluation_context& context)
 {
-    switch (op.code)
+    switch (op.code())
     {
         case opcode::zero:
         case opcode::special:
         case opcode::pushdata1:
         case opcode::pushdata2:
         case opcode::pushdata4:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
                 "Invalid push operation in run_operation");
             return true;
 
@@ -1370,7 +1371,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::op_14:
         case opcode::op_15:
         case opcode::op_16:
-            return op_x(context, op.code);
+            return op_x(context, op.code());
 
         case opcode::nop:
             return true;
@@ -1386,7 +1387,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         case opcode::verif:
         case opcode::vernotif:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
                 "Disabled opcodes (verif/vernotif) in run_operation");
             return false;
 
@@ -1460,7 +1461,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::substr:
         case opcode::left:
         case opcode::right:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
                 "Disabled splice operations in run_operation");
             return false;
 
@@ -1474,7 +1475,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::and_:
         case opcode::or_:
         case opcode::xor_:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
                 "Disabled bit logic operations in run_operation");
             return false;
 
@@ -1496,7 +1497,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         case opcode::op_2mul:
         case opcode::op_2div:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
                 "Disabled opcodes (2mul/2div) in run_operation");
             return false;
 
@@ -1523,7 +1524,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::mod:
         case opcode::lshift:
         case opcode::rshift:
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
                 "Disabled numeric operations in run_operation");
             return false;
 
@@ -1582,7 +1583,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
             // This is set in the main run(...) loop
             // codehash_begin_ is updated to the current
             // operations_ iterator
-            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
                 "Invalid operation (codeseparator) in run_operation");
             return true;
 
@@ -1614,8 +1615,8 @@ bool run_operation(const operation& op, const transaction& parent_tx,
             return false;
 
         default:
-            // This kills our test cases, but it should be called, as above.
-            // BITCOIN_ASSERT_MSG(false, "Unsupported opcode.");
+            log_fatal(LOG_SCRIPT) << "Unimplemented operation <none "
+                << static_cast<int>(op.code()) << ">";
             return false;
     }
 
@@ -1673,35 +1674,35 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
 {
     const operation& op = *it;
 
-    if (op.data.size() > 520)
+    if (op.data().size() > 520)
         return false;
 
-    if (!increment_op_counter(op.code, context))
+    if (!increment_op_counter(op.code(), context))
         return false;
 
-    if (opcode_is_disabled(op.code))
+    if (opcode_is_disabled(op.code()))
         return false;
 
     bool allow_execution = !context.conditional.has_failed_branches();
 
     // continue onwards to next command.
-    if (!allow_execution && !is_condition_opcode(op.code))
+    if (!allow_execution && !is_condition_opcode(op.code()))
         return true;
 
     // push data to the stack
-    if (op.code == opcode::zero)
+    if (op.code() == opcode::zero)
         context.primary.push_back(data_chunk());
 
     // These operations may also push empty data (opcode zero)
     // Hence we check the opcode over the shorter !op.data.empty()
-    else if (op.code == opcode::special
-        || op.code == opcode::pushdata1
-        || op.code == opcode::pushdata2
-        || op.code == opcode::pushdata4)
+    else if (op.code() == opcode::special
+        || op.code() == opcode::pushdata1
+        || op.code() == opcode::pushdata2
+        || op.code() == opcode::pushdata4)
     {
-        context.primary.push_back(op.data);
+        context.primary.push_back(op.data());
     }
-    else if (op.code == opcode::codeseparator)
+    else if (op.code() == opcode::codeseparator)
         context.codehash_begin = it;
     // opcodes above should assert 9;,sinside run_operation
     else if (!run_operation(op, parent_tx, input_index, script, context))
