@@ -36,17 +36,12 @@ BOOST_AUTO_TEST_CASE(serialize_test)
         0xbb, 0x72, 0x44, 0x5b, 0xf1, 0x34, 0x93, 0xe2, 0xcd, 0x46, 0xc5, 0xc0,
         0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
     }));
-    auto deserial = make_deserializer(rawdat.begin(), rawdat.end());
-    chain::output_point outpoint;
-    outpoint.hash = deserial.read_hash();
-    outpoint.index = deserial.read_4_bytes();
-    BOOST_REQUIRE_EQUAL(encode_hash(outpoint.hash),
+
+    chain::output_point outpoint(rawdat);
+    BOOST_REQUIRE_EQUAL(encode_hash(outpoint.hash()),
         "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
-    BOOST_REQUIRE(outpoint.index == 0);
-    data_chunk buff(36);
-    auto serial = make_serializer(buff.begin());
-    serial.write_hash(outpoint.hash);
-    serial.write_4_bytes(outpoint.index);
+    BOOST_REQUIRE(outpoint.index() == 0);
+    data_chunk buff = outpoint;
     BOOST_REQUIRE(buff == rawdat);
 }
 
@@ -69,6 +64,10 @@ BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
     BOOST_REQUIRE(genblk.header.nonce == blk.header.nonce);
     BOOST_REQUIRE(genblk.header == blk.header);
     const hash_digest& merkle = chain::block::generate_merkle_root(blk.transactions);
+    std::cout << "merkle: " << encode_hash(merkle) << std::endl;
+    std::cout << "expected: " << encode_hash(genblk.header.merkle) << std::endl;
+    std::cout << "duplicate: " << encode_hash(blk.header.merkle) << std::endl;
+    std::cout << "tx.input.previous_output: " << genblk.transactions[0].to_string() << std::endl;
     BOOST_REQUIRE(genblk.header.merkle == merkle);
 }
 

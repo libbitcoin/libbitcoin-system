@@ -22,27 +22,90 @@
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace chain {
+
+point::point()
+//    :hash_(null_hash), index_(std::numeric_limits<uint32_t>::max())
+{
+}
+
+point::point(hash_digest hash, uint32_t index)
+    : hash_(hash), index_(index)
+{
+}
+
+point::point(const data_chunk& value)
+    : point(value.begin(), value.end())
+{
+}
+
+const hash_digest& point::hash() const
+{
+    return hash_;
+}
+
+uint32_t point::index() const
+{
+    return index_;
+}
+
+bool point::set_hash(const hash_digest& hash)
+{
+    hash_ = hash;
+    return true;
+}
+
+bool point::set_index(uint32_t index)
+{
+    index_ = index;
+    return true;
+}
 
 std::string point::to_string() const
 {
     std::ostringstream ss;
 
-    ss << "\thash = " << encode_hash(hash) << "\n" << "\tindex = " << index;
+    ss << "\thash = " << encode_hash(hash_) << "\n" << "\tindex = " << index_;
 
     return ss.str();
 }
 
 bool point::is_null() const
 {
-    return (index == max_index) && (hash == null_hash);
+    return (index_ == max_index) && (hash_ == null_hash);
+}
+
+point::operator const data_chunk() const
+{
+    data_chunk result(satoshi_size());
+    auto serial = make_serializer(result.begin());
+
+    serial.write_hash(hash_);
+    serial.write_4_bytes(index_);
+
+    BITCOIN_ASSERT(
+        std::distance(result.begin(), serial.iterator())
+            == point::satoshi_fixed_size());
+
+    return result;
+}
+
+size_t point::satoshi_size() const
+{
+    return point::satoshi_fixed_size();
+}
+
+size_t point::satoshi_fixed_size()
+{
+    return hash_size + 4;
 }
 
 bool operator==(const point& a, const point& b)
 {
-    return a.hash == b.hash && a.index == b.index;
+    return a.hash() == b.hash() && a.index() == b.index();
 }
 bool operator!=(const point& a, const point& b)
 {
