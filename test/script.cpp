@@ -106,24 +106,25 @@ void push_literal(data_chunk& raw_script, int64_t value)
 
 void push_data(data_chunk& raw_script, const data_chunk& data)
 {
-    chain::operation op;
+    chain::opcode code;
+
     // pushdata1 = 76
     if (data.empty())
-        op.code = chain::opcode::zero;
+        code = chain::opcode::zero;
     else if (data.size() < 76)
-        op.code = chain::opcode::special;
+        code = chain::opcode::special;
     else if (data.size() <= 0xff)
-        op.code = chain::opcode::pushdata1;
+        code = chain::opcode::pushdata1;
     else if (data.size() <= 0xffff)
-        op.code = chain::opcode::pushdata2;
+        code = chain::opcode::pushdata2;
     else
     {
         BOOST_REQUIRE_LE(data.size(), 0xffffffffu);
-        op.code = chain::opcode::pushdata4;
+        code = chain::opcode::pushdata4;
     }
-    op.data = data;
+
     chain::script tmp_script;
-    tmp_script.push_operations(op);
+    tmp_script.push_operations(chain::operation(code, data));
     data_chunk raw_tmp_script = tmp_script;
     extend_data(raw_script, raw_tmp_script);
 }

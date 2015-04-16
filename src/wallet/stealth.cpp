@@ -44,7 +44,7 @@ bool extract_stealth_info(stealth_info& info,
     if (output_script.operations().size() < 2)
         return false;
 
-    const data_chunk& data = output_script.operations()[1].data;
+    const data_chunk& data = output_script.operations()[1].data();
 
     if (data.size() < hash_size)
         return false;

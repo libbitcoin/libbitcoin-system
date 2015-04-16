@@ -45,8 +45,8 @@ transaction::operator const data_chunk() const
 
     for (const transaction_input& input: inputs)
     {
-        serial.write_hash(input.previous_output.hash);
-        serial.write_4_bytes(input.previous_output.index);
+        data_chunk raw_prevout = input.previous_output;
+        serial.write_data(raw_prevout);
         data_chunk raw_script = input.script;
         serial.write_variable_uint(raw_script.size());
         serial.write_data(raw_script);
