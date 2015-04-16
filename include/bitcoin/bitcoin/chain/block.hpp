@@ -37,10 +37,9 @@ public:
 
     static const std::string satoshi_command;
 
-    block_header header;
-    transaction_list transactions;
-
     block();
+
+    block(const block_header& header, const transaction_list& transactions);
 
     block(const data_chunk& value);
 
@@ -49,6 +48,16 @@ public:
 
     template<typename Iterator>
     block(const Iterator begin, const Iterator end);
+
+    const block_header& header() const;
+
+    void set_header(const block_header& header);
+
+    const transaction_list& transactions() const;
+
+    void push_transactions(const transaction& transaction);
+
+    void push_transactions(const transaction_list& transactions);
 
     operator const data_chunk() const;
 
@@ -61,6 +70,9 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    block_header header_;
+    transaction_list transactions_;
 };
 
 // A list of indices. Used for creating block_locator objects or

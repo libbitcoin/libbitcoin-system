@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE(sha256_hash_test)
     }
 
     // This changes based on ENABLE_TESTNET, so the test condition must vary.
-    const auto genesis = genesis_block();
-    const auto genesis_hash = genesis.header.hash();
+    auto genesis = genesis_block();
+    auto genesis_hash = genesis.header().hash();
 
 #ifdef ENABLE_TESTNET
     BOOST_REQUIRE_EQUAL(encode_hash(genesis_hash),

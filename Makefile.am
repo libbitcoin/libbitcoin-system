@@ -290,6 +290,7 @@ include_bitcoin_bitcoin_impl_chain_HEADERS = \
     include/bitcoin/bitcoin/impl/chain/block.ipp \
     include/bitcoin/bitcoin/impl/chain/block_header.ipp \
     include/bitcoin/bitcoin/impl/chain/operation.ipp \
+    include/bitcoin/bitcoin/impl/chain/point.ipp \
     include/bitcoin/bitcoin/impl/chain/script.ipp \
     include/bitcoin/bitcoin/impl/chain/transaction.ipp \
     include/bitcoin/bitcoin/impl/chain/transaction_input.ipp \

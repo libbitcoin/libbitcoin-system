@@ -49,26 +49,22 @@ BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
 {
     chain::block genblk = genesis_block();
     BOOST_REQUIRE_EQUAL(genblk.satoshi_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(), 80u);
+    BOOST_REQUIRE_EQUAL(genblk.header().satoshi_size(), 80u);
     // Save genesis block.
     data_chunk rawblk = genblk;
     BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), rawblk.end()), 285u);
     BOOST_REQUIRE_EQUAL(rawblk.size(), 285u);
     // Reload genesis block.
     chain::block blk(rawblk.begin(), rawblk.end());
-    BOOST_REQUIRE(genblk.header.version == blk.header.version);
-    BOOST_REQUIRE(genblk.header.previous_block_hash == blk.header.previous_block_hash);
-    BOOST_REQUIRE(genblk.header.merkle == blk.header.merkle);
-    BOOST_REQUIRE(genblk.header.timestamp == blk.header.timestamp);
-    BOOST_REQUIRE(genblk.header.bits == blk.header.bits);
-    BOOST_REQUIRE(genblk.header.nonce == blk.header.nonce);
-    BOOST_REQUIRE(genblk.header == blk.header);
-    const hash_digest& merkle = chain::block::generate_merkle_root(blk.transactions);
-    std::cout << "merkle: " << encode_hash(merkle) << std::endl;
-    std::cout << "expected: " << encode_hash(genblk.header.merkle) << std::endl;
-    std::cout << "duplicate: " << encode_hash(blk.header.merkle) << std::endl;
-    std::cout << "tx.input.previous_output: " << genblk.transactions[0].to_string() << std::endl;
-    BOOST_REQUIRE(genblk.header.merkle == merkle);
+    BOOST_REQUIRE(genblk.header().version() == blk.header().version());
+    BOOST_REQUIRE(genblk.header().previous_block_hash() == blk.header().previous_block_hash());
+    BOOST_REQUIRE(genblk.header().merkle() == blk.header().merkle());
+    BOOST_REQUIRE(genblk.header().timestamp() == blk.header().timestamp());
+    BOOST_REQUIRE(genblk.header().bits() == blk.header().bits());
+    BOOST_REQUIRE(genblk.header().nonce() == blk.header().nonce());
+    BOOST_REQUIRE(genblk.header() == blk.header());
+    const hash_digest& merkle = chain::block::generate_merkle_root(blk.transactions());
+    BOOST_REQUIRE(genblk.header().merkle() == merkle);
 }
 
 BOOST_AUTO_TEST_CASE(junk_test)

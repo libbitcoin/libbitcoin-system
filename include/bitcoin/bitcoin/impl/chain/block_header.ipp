@@ -26,12 +26,12 @@ namespace chain {
 template <typename Iterator, bool SafeCheckLast>
 void block_header::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
-    version = deserial.read_4_bytes();
-    previous_block_hash = deserial.read_hash();
-    merkle = deserial.read_hash();
-    timestamp = deserial.read_4_bytes();
-    bits = deserial.read_4_bytes();
-    nonce = deserial.read_4_bytes();
+    version_ = deserial.read_4_bytes();
+    previous_block_hash_ = deserial.read_hash();
+    merkle_ = deserial.read_hash();
+    timestamp_ = deserial.read_4_bytes();
+    bits_ = deserial.read_4_bytes();
+    nonce_ = deserial.read_4_bytes();
 }
 
 template <typename Iterator, bool SafeCheckLast>

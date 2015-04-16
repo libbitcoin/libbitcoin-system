@@ -26,7 +26,7 @@ namespace chain {
 template <typename Iterator, bool SafeCheckLast>
 void block::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
-    header = block_header(deserial.read_data(
+    header_ = block_header(deserial.read_data(
         block_header::satoshi_fixed_size()));
 
     uint64_t tx_count = deserial.read_variable_uint();
@@ -34,7 +34,7 @@ void block::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
     for (size_t tx_i = 0; tx_i < tx_count; ++tx_i)
     {
         transaction tx(deserial);
-        transactions.push_back(std::move(tx));
+        transactions_.push_back(std::move(tx));
     }
 }
 
