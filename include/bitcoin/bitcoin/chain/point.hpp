@@ -49,11 +49,11 @@ public:
 
     const hash_digest& hash() const;
 
+    void set_hash(const hash_digest& hash);
+
     uint32_t index() const;
 
-    bool set_hash(const hash_digest& hash);
-
-    bool set_index(uint32_t index);
+    void set_index(uint32_t index);
 
     std::string to_string() const;
 

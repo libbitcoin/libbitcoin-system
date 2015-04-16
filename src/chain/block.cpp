@@ -29,9 +29,40 @@ block::block()
 {
 }
 
+block::block(const block_header& header, const transaction_list& transactions)
+    : header_(header), transactions_(transactions)
+{
+}
+
 block::block(const data_chunk& value)
     : block(value.begin(), value.end())
 {
+}
+
+const block_header& block::header() const
+{
+    return header_;
+}
+
+void block::set_header(const block_header& header)
+{
+    header_ = header;
+}
+
+const transaction_list& block::transactions() const
+{
+    return transactions_;
+}
+
+void block::push_transactions(const transaction& transaction)
+{
+    transactions_.push_back(transaction);
+}
+
+void block::push_transactions(const transaction_list& transactions)
+{
+    transactions_.insert(transactions_.end(), transactions.begin(),
+        transactions.end());
 }
 
 block::operator const data_chunk() const
@@ -39,12 +70,12 @@ block::operator const data_chunk() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    data_chunk raw_header = header;
+    data_chunk raw_header = header_;
     serial.write_data(raw_header);
 
-    serial.write_variable_uint(transactions.size());
+    serial.write_variable_uint(transactions_.size());
 
-    for (const transaction& tx : transactions)
+    for (const transaction& tx : transactions_)
     {
         data_chunk raw_tx = tx;
         serial.write_data(raw_tx);
@@ -55,10 +86,10 @@ block::operator const data_chunk() const
 
 size_t block::satoshi_size() const
 {
-    size_t block_size = header.satoshi_size()
-        + variable_uint_size(transactions.size());
+    size_t block_size = header_.satoshi_size()
+        + variable_uint_size(transactions_.size());
 
-    for (const transaction& tx : transactions)
+    for (const transaction& tx : transactions_)
         block_size += tx.satoshi_size();
 
     return block_size;

@@ -29,9 +29,67 @@ transaction::transaction()
 {
 }
 
+transaction::transaction(const uint32_t version, const uint32_t locktime,
+    const transaction_input_list& inputs,
+    const transaction_output_list& outputs)
+    : version_(version), locktime_(locktime), inputs_(inputs),
+      outputs_(outputs)
+{
+}
+
 transaction::transaction(const data_chunk& value)
 : transaction(value.begin(), value.end())
 {
+}
+
+uint32_t transaction::version() const
+{
+    return version_;
+}
+
+void transaction::set_version(uint32_t version)
+{
+    version_ = version;
+}
+
+uint32_t transaction::locktime() const
+{
+    return locktime_;
+}
+
+void transaction::set_locktime(uint32_t locktime)
+{
+    locktime_ = locktime;
+}
+
+const transaction_input_list& transaction::inputs() const
+{
+    return inputs_;
+}
+
+void transaction::push_inputs(const transaction_input& input)
+{
+    inputs_.push_back(input);
+}
+
+void transaction::push_inputs(const transaction_input_list& inputs)
+{
+    inputs_.insert(inputs_.end(), inputs.begin(), inputs.end());
+}
+
+const transaction_output_list& transaction::outputs() const
+{
+    return outputs_;
+}
+
+void transaction::push_outputs(const transaction_output& output)
+{
+    outputs_.push_back(output);
+}
+
+void transaction::push_outputs(const transaction_output_list& outputs)
+{
+    outputs_.insert(outputs_.end(), outputs.begin(), outputs.end());
 }
 
 transaction::operator const data_chunk() const
@@ -39,31 +97,25 @@ transaction::operator const data_chunk() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_4_bytes(version);
+    serial.write_4_bytes(version_);
 
-    serial.write_variable_uint(inputs.size());
+    serial.write_variable_uint(inputs_.size());
 
-    for (const transaction_input& input: inputs)
+    for (const transaction_input& input: inputs_)
     {
-        data_chunk raw_prevout = input.previous_output;
-        serial.write_data(raw_prevout);
-        data_chunk raw_script = input.script;
-        serial.write_variable_uint(raw_script.size());
-        serial.write_data(raw_script);
-        serial.write_4_bytes(input.sequence);
+        data_chunk raw_input = input;
+        serial.write_data(raw_input);
     }
 
-    serial.write_variable_uint(outputs.size());
+    serial.write_variable_uint(outputs_.size());
 
-    for (const transaction_output& output: outputs)
+    for (const transaction_output& output: outputs_)
     {
-        serial.write_8_bytes(output.value);
-        data_chunk raw_script = output.script;
-        serial.write_variable_uint(raw_script.size());
-        serial.write_data(raw_script);
+        data_chunk raw_output = output;
+        serial.write_data(raw_output);
     }
 
-    serial.write_4_bytes(locktime);
+    serial.write_4_bytes(locktime_);
 
     BITCOIN_ASSERT(std::distance(result.begin(), serial.iterator()) == satoshi_size());
 
@@ -74,16 +126,16 @@ size_t transaction::satoshi_size() const
 {
     size_t tx_size = 8;
 
-    tx_size += variable_uint_size(inputs.size());
+    tx_size += variable_uint_size(inputs_.size());
 
-    for (const transaction_input& input: inputs)
+    for (const transaction_input& input: inputs_)
     {
         tx_size += input.satoshi_size();
     }
 
-    tx_size += variable_uint_size(outputs.size());
+    tx_size += variable_uint_size(outputs_.size());
 
-    for (const transaction_output& output: outputs)
+    for (const transaction_output& output: outputs_)
     {
         tx_size += output.satoshi_size();
     }
@@ -96,16 +148,16 @@ std::string transaction::to_string() const
     std::ostringstream ss;
 
     ss << "Transaction:\n"
-        << "\tversion = " << version << "\n"
-        << "\tlocktime = " << locktime << "\n"
+        << "\tversion = " << version_ << "\n"
+        << "\tlocktime = " << locktime_ << "\n"
         << "Inputs:\n";
 
-    for (transaction_input input: inputs)
+    for (transaction_input input: inputs_)
         ss << input.to_string();
 
     ss << "Outputs:\n";
 
-    for (transaction_output output: outputs)
+    for (transaction_output output: outputs_)
         ss << output.to_string();
 
     ss << "\n";
@@ -128,23 +180,23 @@ hash_digest transaction::hash(uint32_t hash_type_code) const
 
 bool transaction::is_coinbase() const
 {
-    return (inputs.size() == 1) && inputs[0].previous_output.is_null();
+    return (inputs_.size() == 1) && inputs_[0].previous_output().is_null();
 }
 
 bool transaction::is_final(size_t block_height, uint32_t block_time) const
 {
-    if (locktime == 0)
+    if (locktime_ == 0)
         return true;
 
     uint32_t max_locktime = block_time;
 
-    if (locktime < locktime_threshold)
+    if (locktime_ < locktime_threshold)
         max_locktime = static_cast<uint32_t>(block_height);
 
-    if (locktime < max_locktime)
+    if (locktime_ < max_locktime)
         return true;
 
-    for (const transaction_input& tx_input : inputs)
+    for (const transaction_input& tx_input : inputs_)
     {
         if (!tx_input.is_final())
             return false;
@@ -155,13 +207,13 @@ bool transaction::is_final(size_t block_height, uint32_t block_time) const
 
 bool transaction::is_locktime_conflict() const
 {
-    auto locktime_set = locktime != 0;
+    auto locktime_set = locktime_ != 0;
 
     if (locktime_set)
     {
-        for (const auto& input : inputs)
+        for (const auto& input : inputs_)
         {
-            if (input.sequence < max_sequence)
+            if (input.sequence() < max_sequence)
                 return false;
         }
     }
@@ -173,8 +225,8 @@ uint64_t transaction::total_output_value() const
 {
     uint64_t total = 0;
 
-    for (const transaction_output& output : outputs)
-        total += output.value;
+    for (const transaction_output& output : outputs_)
+        total += output.value();
 
     return total;
 }

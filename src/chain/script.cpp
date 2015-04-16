@@ -41,17 +41,24 @@ static const data_chunk stack_true_value{1};
 constexpr size_t op_counter_limit = 201;
 
 script::script()
+    : operations_()
 {
-}
-
-script::script(const data_chunk& value, bool allow_raw_data_fallback)
-{
-    deserialize(value, allow_raw_data_fallback);
 }
 
 script::script(const operation& op)
 {
     push_operations(op);
+}
+
+script::script(const operation_stack& operations)
+{
+    for (auto op : operations)
+        push_operations(op);
+}
+
+script::script(const data_chunk& value, bool allow_raw_data_fallback)
+{
+    deserialize(value, allow_raw_data_fallback);
 }
 
 script::script(const std::string& human_readable)
@@ -60,6 +67,46 @@ script::script(const std::string& human_readable)
     {
         throw std::invalid_argument("human_readable");
     }
+}
+
+const operation_stack& script::operations() const
+{
+    return operations_;
+}
+
+void script::push_operations(const operation& oper)
+{
+    operations_.push_back(oper);
+}
+
+void script::push_operations(const operation_stack& other)
+{
+    operations_.insert(operations_.end(), other.begin(), other.end());
+}
+
+payment_type script::type() const
+{
+    if (is_pubkey_type(operations_))
+        return payment_type::pubkey;
+    if (is_pubkey_hash_type(operations_))
+        return payment_type::pubkey_hash;
+    if (is_script_hash_type(operations_))
+        return payment_type::script_hash;
+    if (is_stealth_info_type(operations_))
+        return payment_type::stealth_info;
+    if (is_multisig_type(operations_))
+        return payment_type::multisig;
+    if (is_pubkey_hash_sig_type(operations_))
+        return payment_type::pubkey_hash_sig;
+    if (is_script_code_sig_type(operations_))
+        return payment_type::script_code_sig;
+    return payment_type::non_standard;
+}
+
+bool script::is_raw_data() const
+{
+    return (operations_.size() == 1) &&
+        (operations_[0].code() == opcode::raw_data);
 }
 
 script::operator const data_chunk() const
@@ -174,48 +221,6 @@ std::string script::to_string() const
     return ss.str();
 }
 
-payment_type script::type() const
-{
-    if (is_pubkey_type(operations_))
-        return payment_type::pubkey;
-    if (is_pubkey_hash_type(operations_))
-        return payment_type::pubkey_hash;
-    if (is_script_hash_type(operations_))
-        return payment_type::script_hash;
-    if (is_stealth_info_type(operations_))
-        return payment_type::stealth_info;
-    if (is_multisig_type(operations_))
-        return payment_type::multisig;
-    if (is_pubkey_hash_sig_type(operations_))
-        return payment_type::pubkey_hash_sig;
-    if (is_script_code_sig_type(operations_))
-        return payment_type::script_code_sig;
-    return payment_type::non_standard;
-}
-
-bool script::is_raw_data() const
-{
-    return (operations_.size() == 1) &&
-        (operations_[0].code() == opcode::raw_data);
-}
-
-const operation_stack& script::operations() const
-{
-    return operations_;
-}
-
-bool script::push_operations(const operation& oper)
-{
-    operations_.push_back(oper);
-    return true;
-}
-
-bool script::push_operations(const operation_stack& other)
-{
-    operations_.insert(operations_.end(), other.begin(), other.end());
-    return true;
-}
-
 void script::deserialize(data_chunk raw_script,
     bool allow_raw_data_fallback)
 {
@@ -261,7 +266,7 @@ inline void nullify_input_sequences(transaction_input_list& inputs,
     for (size_t i = 0; i < inputs.size(); ++i)
     {
         if (i != except_input)
-            inputs[i].sequence = 0;
+            inputs[i].set_sequence(0);
     }
 }
 
@@ -270,16 +275,16 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
 {
     // This is NOT considered an error result and callers should not test
     // for one_hash. This is a bitcoind bug we perpetuate.
-    if (input_index >= parent_tx.inputs.size())
+    if (input_index >= parent_tx.inputs().size())
         return one_hash();
 
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 
     // Blank all other inputs' signatures
-    for (transaction_input& input : parent_tx.inputs)
-        input.script = script();
+    for (transaction_input& input : parent_tx.inputs_)
+        input.set_script(script());
 
-    parent_tx.inputs[input_index].script = script_code;
+    parent_tx.inputs_[input_index].set_script(script_code);
 
     // The default sighash::all signs all outputs, and the current input.
     // Transaction cannot be updated without resigning the input.
@@ -288,14 +293,14 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // sighash::none signs no outputs so they can be changed.
     if ((hash_type & 0x1f) == signature_hash_algorithm::none)
     {
-        parent_tx.outputs.clear();
-        nullify_input_sequences(parent_tx.inputs, input_index);
+        parent_tx.outputs_.clear();
+        nullify_input_sequences(parent_tx.inputs_, input_index);
     }
     // Sign the single corresponding output to our index.
     // We don't care about additional inputs or outputs to the tx.
     else if ((hash_type & 0x1f) == signature_hash_algorithm::single)
     {
-        transaction_output_list& outputs = parent_tx.outputs;
+        transaction_output_list& outputs = parent_tx.outputs_;
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
@@ -308,18 +313,18 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
         // Loop through outputs except the last one
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
-            it->value = std::numeric_limits<uint64_t>::max();
-            it->script = script();
+            it->set_value(std::numeric_limits<uint64_t>::max());
+            it->set_script(script());
         }
 
-        nullify_input_sequences(parent_tx.inputs, input_index);
+        nullify_input_sequences(parent_tx.inputs_, input_index);
     }
 
     // Modifier to ignore the other inputs except our own.
     if (hash_type & signature_hash_algorithm::anyone_can_pay)
     {
-        parent_tx.inputs[0] = parent_tx.inputs[input_index];
-        parent_tx.inputs.resize(1);
+        parent_tx.inputs_[0] = parent_tx.inputs_[input_index];
+        parent_tx.inputs_.resize(1);
     }
 
     return parent_tx.hash(hash_type);

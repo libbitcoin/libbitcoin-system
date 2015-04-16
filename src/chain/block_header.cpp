@@ -26,9 +26,76 @@ block_header::block_header()
 {
 }
 
+block_header::block_header(uint32_t version, hash_digest previous_block_hash,
+    hash_digest merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce)
+    : version_(version), previous_block_hash_(previous_block_hash),
+      merkle_(merkle), timestamp_(timestamp), bits_(bits), nonce_(nonce)
+{
+}
+
 block_header::block_header(const data_chunk& value)
     : block_header(value.begin(), value.end())
 {
+}
+
+uint32_t block_header::version() const
+{
+    return version_;
+}
+
+void block_header::set_version(uint32_t version)
+{
+    version_ = version;
+}
+
+const hash_digest& block_header::previous_block_hash() const
+{
+    return previous_block_hash_;
+}
+
+void block_header::set_previous_block_hash(const hash_digest& hash)
+{
+    previous_block_hash_ = hash;
+}
+
+const hash_digest& block_header::merkle() const
+{
+    return merkle_;
+}
+
+void block_header::set_merkle(const hash_digest& merkle)
+{
+    merkle_ = merkle;
+}
+
+uint32_t block_header::timestamp() const
+{
+    return timestamp_;
+}
+
+void block_header::set_timestamp(uint32_t timestamp)
+{
+    timestamp_ = timestamp;
+}
+
+uint32_t block_header::bits() const
+{
+    return bits_;
+}
+
+void block_header::set_bits(uint32_t bits)
+{
+    bits_ = bits;
+}
+
+uint32_t block_header::nonce() const
+{
+    return nonce_;
+}
+
+void block_header::set_nonce(uint32_t nonce)
+{
+    nonce_ = nonce;
 }
 
 block_header::operator const data_chunk() const
@@ -36,12 +103,12 @@ block_header::operator const data_chunk() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_4_bytes(version);
-    serial.write_hash(previous_block_hash);
-    serial.write_hash(merkle);
-    serial.write_4_bytes(timestamp);
-    serial.write_4_bytes(bits);
-    serial.write_4_bytes(nonce);
+    serial.write_4_bytes(version_);
+    serial.write_hash(previous_block_hash_);
+    serial.write_hash(merkle_);
+    serial.write_4_bytes(timestamp_);
+    serial.write_4_bytes(bits_);
+    serial.write_4_bytes(nonce_);
 
     BITCOIN_ASSERT(
         std::distance(result.begin(), serial.iterator())
@@ -63,11 +130,12 @@ size_t block_header::satoshi_fixed_size()
 bool operator==(const block_header& block_a,
     const block_header& block_b)
 {
-    return block_a.version == block_b.version
-        && block_a.previous_block_hash == block_b.previous_block_hash
-        && block_a.merkle == block_b.merkle
-        && block_a.timestamp == block_b.timestamp
-        && block_a.bits == block_b.bits && block_a.nonce == block_b.nonce;
+    return block_a.version() == block_b.version()
+        && block_a.previous_block_hash() == block_b.previous_block_hash()
+        && block_a.merkle() == block_b.merkle()
+        && block_a.timestamp() == block_b.timestamp()
+        && block_a.bits() == block_b.bits()
+        && block_a.nonce() == block_b.nonce();
 }
 
 hash_digest block_header::hash() const
