@@ -98,7 +98,11 @@ std::streambuf::int_type unicode_streambuf::overflow(
     {
         size_t size = 0;
 
-        // Prevent character-splitting.
+        // Compensate for character-splitting. This is necessary because
+        // MSVC does not support a UTF8 locale and as such here interprets
+        // narrow characters in the default locale. This implementation
+        // assumes the stream will treat each byte of a multibyte narrow 
+        // chracter as an individual single byte character.
         while (offset < character_size_)
         {
             // Convert from narrow to wide.
