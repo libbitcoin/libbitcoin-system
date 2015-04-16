@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
 
 #include <cstddef>
+#include <cstring>
 #include <iostream>
 #include <streambuf>
 #include <bitcoin/bitcoin/utility/assert.hpp>

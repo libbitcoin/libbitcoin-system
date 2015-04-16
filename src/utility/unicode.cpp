@@ -20,17 +20,16 @@
 #include <bitcoin/bitcoin/utility/unicode.hpp>
 
 #include <cstddef>
+#include <cstring>
+#include <cwchar>
 #include <string>
 #include <boost/locale.hpp>
+#include <boost/locale/encoding_errors.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 #ifdef _MSC_VER
     #include <windows.h>
-#else
-    #include <string>
-    #include <string.h>
-    #include <boost/locale/encoding_errors.hpp>
 #endif
 
 namespace libbitcoin {
