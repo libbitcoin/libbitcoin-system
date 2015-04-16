@@ -55,6 +55,7 @@
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/collection.hpp>
+#include <bitcoin/bitcoin/utility/console_streambuf.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/decorator.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
@@ -66,6 +67,8 @@
 #include <bitcoin/bitcoin/utility/time.hpp>
 #include <bitcoin/bitcoin/utility/timed_section.hpp>
 #include <bitcoin/bitcoin/utility/unicode.hpp>
+#include <bitcoin/bitcoin/utility/unicode_istream.hpp>
+#include <bitcoin/bitcoin/utility/unicode_ostream.hpp>
 #include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
 #include <bitcoin/bitcoin/utility/weak_bind.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>

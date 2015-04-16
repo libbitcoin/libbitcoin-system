@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -25,9 +25,11 @@
 
 using namespace bc;
 
+BOOST_AUTO_TEST_SUITE(unicode)
+
 BOOST_AUTO_TEST_SUITE(unicode_tests)
 
-// Use of L is not recommented as it will only work for ascii.
+// Use of L is not recommended as it will only work for ascii.
 BOOST_AUTO_TEST_CASE(unicode__to_utf8__ascii__test)
 {
     const auto utf8_ascii = "ascii";
@@ -36,7 +38,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf8__ascii__test)
     BOOST_REQUIRE_EQUAL(converted, utf8_ascii);
 }
 
-// Use of L is not recommented as it will only work for ascii.
+// Use of L is not recommended as it will only work for ascii.
 BOOST_AUTO_TEST_CASE(unicode__to_utf16__ascii__test)
 {
     const auto utf8_ascii = "ascii";
@@ -127,5 +129,7 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf8_main__null_termination__test)
     auto argv_terminator = narrow_args[argc];
     BOOST_REQUIRE_EQUAL(argv_terminator, static_cast<char*>(nullptr));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

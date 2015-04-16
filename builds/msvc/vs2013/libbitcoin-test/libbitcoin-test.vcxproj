@@ -97,6 +97,8 @@
     <ClCompile Include="..\..\..\..\test\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\stealth_address.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode_istream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\test\uri.cpp" />
   </ItemGroup>
   <ItemGroup>

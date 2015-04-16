@@ -1,5 +1,5 @@
-﻿/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+﻿/**
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -21,50 +21,72 @@
 #define LIBBITCOIN_UNICODE_STREAMBUF_HPP
 
 #include <streambuf>
-#include <string>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/console_streambuf.hpp>
 
 namespace libbitcoin {
 
 /**
- * Class to patch Windows stdin keyboard input, file input is not a problem.
- * Limits keyboard input buffer to 1024 bytes, terminated by <ENTER>.
- * Initializes stdout, stderr and stdin for wide stream (utf8 translation).
+ * Class to translate internal utf8 iostreams to external utf16 iostreams.
  */
 class BC_API unicode_streambuf
-    : public std::basic_streambuf<wchar_t>
+    : public std::streambuf
 {
 public:
     /**
-     * Initialize stdio to use utf8 translation on Windows.
+     * Construct unicode stream buffer from a weak reference to a wide buffer.
+     * @param[in]  wide_buffer  A wide stream buffer for i/o relay.
      */
-    static void initialize_stdio();
+    unicode_streambuf(wide_streambuf* wide_buffer);
+
+    /**
+     * Synchronize stream buffer.
+     */
+    virtual ~unicode_streambuf();
 
 protected:
-    typedef std::basic_streambuf<wchar_t> wide_streambuf;
-    typedef std::basic_streambuf<wchar_t>::traits_type traits;
+    /**
+     * Implement underflow for support of input streams.
+     */
+    virtual std::streambuf::int_type underflow();
 
     /**
-     * Protected construction, use static initialize method.
+     * Implement overflow for support of output streams.
+     * @param[in]  value  Character to be put.
      */
-    unicode_streambuf(wide_streambuf const& stream_buffer);
+    virtual std::streambuf::int_type overflow(std::streambuf::int_type value);
 
     /**
-     * Implement alternate console read.
+     * Implement sync for support of output streams.
      */
-    virtual std::streamsize xsgetn(wchar_t* buffer, std::streamsize size);
-
-    /**
-     * Implement alternate console read.
-     */
-    virtual traits::int_type underflow();
+    virtual int sync();
 
 private:
-    std::wstring buffer_;
-    static bool initialized_;
+    // UTF8 encoding requires up to 4 bytes per character.
+    static const size_t character_size_ = 4;
+
+    // The input buffer size in number of characters.
+    // This is the min number of 4 byte utf8 characters to fill narrow_size_.
+    static const size_t from_wide_characters_ = 256;
+
+    // The input buffer size in bytes.
+    static const size_t narrow_size_ = from_wide_characters_ * character_size_;
+
+    // The input buffer size in number of characters.
+    // This is maxed out when all wide characters are single byte utf8.
+    static const size_t to_wide_characters_ = narrow_size_;
+
+    char narrow_[narrow_size_ + character_size_];
+    wchar_t wide_[to_wide_characters_ + character_size_];
+    wide_streambuf* wide_buffer_;
+
+    static_assert(narrow_size_ <= MAX_INT32,
+        "Narrow buffer must not exceed max int32.");
+    static_assert(narrow_size_ >= character_size_,
+        "Narrow buffer must be at least 4 bytes wide.");
 };
 
 } // namespace libbitcoin
 
 #endif
-

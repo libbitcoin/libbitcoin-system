@@ -19,7 +19,7 @@
  */
 #include <bitcoin/bitcoin/utility/unicode.hpp>
 
-#include <cstdint>
+#include <cstddef>
 #include <string>
 #include <boost/locale.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -72,14 +72,4 @@ std::wstring to_utf16(const std::string& narrow)
     return conv::utf_to_utf<wchar_t>(narrow, conv::method_type::stop);
 }
 
-tstring to_utf(const std::string& narrow)
-{
-#ifdef _MSC_VER
-    return to_utf16(narrow);
-#else
-    return narrow;
-#endif
-}
-
 } // namespace libbitcoin
-

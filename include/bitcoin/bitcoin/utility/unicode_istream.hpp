@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,31 +17,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef LIBBITCOIN_UNICODE_ISTREAM_HPP
+#define LIBBITCOIN_UNICODE_ISTREAM_HPP
+
 #include <iostream>
-#include <sstream>
-#include <string>
-#include <bitcoin/bitcoin.hpp>
 
-BC_USE_LIBBITCOIN_MAIN
-
-int bc::main(int argc, char* argv[])
+namespace libbitcoin {
+    
+/**
+ * Class to expose a narrowing input stream.
+ */
+class unicode_istream
+    : public std::istream
 {
-    unicode_istream input(std::cin, std::wcin);
-    unicode_ostream output(std::cout, std::wcout);
-    unicode_ostream error(std::cerr, std::wcerr);
+public:
+    /**
+     * Construct instance of a conditionally-narrowing input stream.
+     * @param[in]  narrow_stream  A narrow input stream such as std::cin.
+     * @param[in]  wide_stream    A wide input stream such as std::wcin.
+     *                            std::wcin must be patched for Windows input.
+     */
+    unicode_istream(std::istream& narrow_stream, std::wistream& wide_stream);
+    
+    /**
+     * Delete the unicode_streambuf that wraps wide_stream.
+     */
+    ~unicode_istream();
+};
 
-    // Use utf-8 with output|error.
-    output << "output : acción.кошка.日本国" << std::endl;
-    error << "error : acción.кошка.日本国" << std::endl;
+} // namespace libbitcoin
 
-    // input treats file input as utf8 and translates console input to utf8.
-    output << "Enter text to input..." << std::endl;
-    std::string console;
-    input >> console;
-    output << "input[0]  : " << console << std::endl;
-
-    if (argc > 1)
-        output << "argv[1] : " << argv[1] << std::endl;
-
-    return EXIT_SUCCESS;
-}
+#endif

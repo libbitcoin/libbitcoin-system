@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_COMPAT_HPP
 #define LIBBITCOIN_COMPAT_HPP
 
+#include <cstdint>
 #include <limits>
 
 // CTP_Nov2013 implements noexcept but unfortunately VC12 and CTP_Nov2013

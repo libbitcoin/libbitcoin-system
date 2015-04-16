@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -20,130 +20,149 @@
 #include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
 
 #include <cstddef>
-#include <cstdint>
+#include <iostream>
 #include <streambuf>
-#include <string>
+
 #ifdef _MSC_VER
-    #include <fcntl.h>
-    #include <io.h>
-    #include <iostream>
-    #include <stdexcept>
-    #include <stdio.h>
-    #include <string.h>
     #include <windows.h>
+#else
+    #include <string>
+    #include <string.h>
+    #include <boost/locale/encoding_errors.hpp>
+    #include <bitcoin/bitcoin/utility/unicode.hpp>
 #endif
 
 namespace libbitcoin {
-
-// Local constants.
-constexpr int32_t utf8_code_page = 65001u;
-constexpr size_t keyboard_buffer_size = 1024u;
-
-// Initialize private static member.
-bool unicode_streambuf::initialized_ = false;
-
-// Set file mode to UTF8 no BOM (translated).
-static void set_stdio_utf8(FILE* file)
+    
+unicode_streambuf::unicode_streambuf(wide_streambuf* wide_buffer)
+    : wide_buffer_(wide_buffer)
 {
-#ifdef _MSC_VER
-    if (!_setmode(_fileno(file), _O_U8TEXT))
-        throw std::ios_base::failure("Failed to set stdio to utf8.");
-#endif
+    setg(narrow_, narrow_, narrow_);
+    setp(narrow_, &narrow_[narrow_size_]);
 }
 
-static void* get_input_handle()
+unicode_streambuf::~unicode_streambuf()
 {
-    void* handle = nullptr;
-
-#ifdef _MSC_VER
-    handle = GetStdHandle(STD_INPUT_HANDLE);
-    if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
-        throw std::ios_base::failure("Failed to get input handle.");
-#endif
-
-    return handle;
+    sync();
 }
 
-// This class/mathod is a no-op on non-windows platforms.
-// This is the factory method to privately instantiate a singleton class.
-void unicode_streambuf::initialize_stdio()
+// Read characters from input buffer.
+// This invokes wide_buffer_.xsgetn() which requires a patch for
+// console (keyboard) input on Windows, so ensure this class is
+// initialized with a patched std::wcin when std::wcin is used.
+std::streambuf::int_type unicode_streambuf::underflow()
 {
-    if (initialized_)
-        return;
+    auto read = wide_buffer_->sgetn(wide_, from_wide_characters_);
+    if (read == 0)
+        return traits_type::eof();
 
-    initialized_ = true;
+    size_t size = 0;
 
+    // Convert from wide to narrow.
 #ifdef _MSC_VER
-    if (SetConsoleCP(utf8_code_page) == FALSE)
-        throw std::ios_base::failure("Failed to set console to utf8.");
+    // This is an optimization for the expected common usage (Windows).
+    size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, wide_,
+        static_cast<int>(read), narrow_, static_cast<int>(narrow_size_), NULL,
+        NULL);
+#else
+    const std::wstring wide(wide_, &wide_[read]);
+    const auto narrow = to_utf8(wide);
+    size = narrow.size();
+    memcpy(narrow_, narrow.data(), size);
+#endif
 
-    DWORD console_mode;
-    if (GetConsoleMode(get_input_handle(), &console_mode) != FALSE)
+    if (size == 0)
+        throw std::istream::failure("utf-16 to utf-8 conversion fail");
+
+    // Reset the buffered portion of the input sequence.
+    setg(narrow_, narrow_, &narrow_[size]);
+
+    // Return the first character in the input sequence.
+    return traits_type::to_int_type(*gptr());
+}
+
+std::streambuf::int_type unicode_streambuf::overflow(
+    std::streambuf::int_type value)
+{
+    if (value != traits_type::eof())
     {
-        // Hack for faulty wcin translation of non-ASCII keyboard input.
-        static unicode_streambuf buffer(*std::wcin.rdbuf());
-        std::wcin.rdbuf(&buffer);
+        *pptr() = value;
+        pbump(1);
     }
 
-    // Set all stdio to wide streaming.
-    set_stdio_utf8(stdin);
-    set_stdio_utf8(stdout);
-    set_stdio_utf8(stderr);
+    uint8_t offset = 0;
 
-    //// Set console font to Lucida Console 16 (to see non-ASCII better).
-    //CONSOLE_FONT_INFOEX font;
-    //font.cbSize = sizeof(font);
-    //font.nFont = 0;
-    //font.dwFontSize.X = 0;
-    //font.dwFontSize.Y = 16;
-    //font.FontFamily = FF_DONTCARE;
-    //font.FontWeight = FW_NORMAL;
-    //wcscpy(font.FaceName, L"Lucida Console");
-    //auto console = GetStdHandle(STD_OUTPUT_HANDLE);
-    //SetCurrentConsoleFontEx(console, FALSE, &font);
-#endif
-}
-
-unicode_streambuf::unicode_streambuf(wide_streambuf const& stream_buffer)
-#ifdef _MSC_VER
-    : wide_streambuf(stream_buffer), buffer_(keyboard_buffer_size, L'\0')
-#endif
-{
-}
-
-std::streamsize unicode_streambuf::xsgetn(wchar_t* buffer,
-    std::streamsize size)
-{
-    std::streamsize read_size = 0;
-
-#ifdef _MSC_VER
-    DWORD read_bytes;
-    const auto result = ReadConsoleW(get_input_handle(), buffer,
-        static_cast<DWORD>(size), &read_bytes, nullptr);
-
-    if (result == FALSE)
-        throw std::ios_base::failure("Failed to read from console.");
-
-    read_size = static_cast<std::streamsize>(read_bytes);
-#endif
-
-    return read_size;
-}
-
-unicode_streambuf::traits::int_type unicode_streambuf::underflow()
-{
-    if (gptr() == nullptr || gptr() >= egptr())
+    // The value of write is no larger than narrow_size_.
+    std::ptrdiff_t write = pptr() - pbase();
+    if (write != 0)
     {
-        const auto start = &buffer_[0];
-        const auto length = xsgetn(start, buffer_.size());
-        if (length > 0)
-            setg(start, start, start + length);
+        size_t size = 0;
+
+        // Prevent character-splitting.
+        while (offset < character_size_)
+        {
+            // Convert from narrow to wide.
+#ifdef _MSC_VER
+            // This is an optimization for the expected common usage (Windows).
+            size = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, narrow_,
+                static_cast<int>(write - offset), wide_,
+                static_cast<int>(to_wide_characters_));
+
+            if (size == 0 && GetLastError() == ERROR_NO_UNICODE_TRANSLATION)
+                ++offset;
+            else
+                break;
+#else
+            const std::string narrow(narrow_, &narrow_[write - offset]);
+            try
+            {
+                const auto wide = to_utf16(narrow);
+                size = wide.size();
+                wmemcpy(wide_, wide.data(), size);
+                break;
+            }
+            catch (const boost::locale::conv::conversion_error&)
+            {
+                size = 0;
+                ++offset;
+            }
+#endif
+        }
+
+        if (size == 0)
+            throw std::ostream::failure("utf-8 to utf-16 conversion fail");
+
+        // Write wide to output buffer.
+        auto written = wide_buffer_->sputn(wide_, size);
+        if (written != size)
+            return traits_type::eof();
     }
 
-    if (gptr() == nullptr || gptr() >= egptr())
-        return traits::eof();
+    // Reset the buffered portion of the output sequence.
+    setp(narrow_, &narrow_[narrow_size_]);
 
-    return traits::to_int_type(*gptr());
+    // Copy the fractional character to the beginning of the buffer.
+    memcpy(narrow_, &narrow_[write - offset], offset);
+
+    // Continue writing at the end of the fractional character.
+    pbump(offset);
+
+    // Return whether value is not equivalent to eof.
+    return traits_type::not_eof(value);
+};
+
+int unicode_streambuf::sync()
+{
+    const int success = 0;
+    const int failure = -1;
+
+    // Flush our output sequence.
+    auto value = overflow(traits_type::eof());
+
+    if (traits_type::eq_int_type(value, traits_type::eof()))
+        return failure;
+
+    return success;
 }
 
 } // namespace libbitcoin
