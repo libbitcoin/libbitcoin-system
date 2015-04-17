@@ -79,8 +79,7 @@ std::string to_utf8(const std::wstring& wide)
 
 // The use of int vs. size_t is required by use of WideCharToMultiByte().
 // The MSVC section is an optimization for the expected common usage (Windows).
-size_t to_utf8(char out[], int out_bytes, const wchar_t in[],
-    int in_chars)
+size_t to_utf8(char out[], int out_bytes, const wchar_t in[], int in_chars)
 {
     BITCOIN_ASSERT(in != nullptr);
     BITCOIN_ASSERT(out != nullptr);
@@ -206,8 +205,8 @@ static uint8_t offset_to_terminal_utf8_character(const char text[], size_t size)
 
 // The use of int vs. size_t is required by use of MultiByteToWideChar().
 // The MSVC section is an optimization for the expected common usage (Windows).
-size_t to_utf16(wchar_t out[], int out_chars, const char in[],
-    int in_bytes, uint8_t& truncated)
+size_t to_utf16(wchar_t out[], int out_chars, const char in[], int in_bytes,
+    uint8_t& truncated)
 {
     BITCOIN_ASSERT(in != nullptr);
     BITCOIN_ASSERT(out != nullptr);
