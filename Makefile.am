@@ -43,6 +43,7 @@ src_libbitcoin_la_SOURCES = \
     src/script.cpp \
     src/stealth.cpp \
     src/transaction.cpp \
+    src/config/directory.cpp \
     src/config/parameter.cpp \
     src/config/printer.cpp \
     src/formats/base10.cpp \
@@ -182,6 +183,7 @@ include_bitcoin_bitcoin_HEADERS = \
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
+    include/bitcoin/bitcoin/config/directory.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
 
