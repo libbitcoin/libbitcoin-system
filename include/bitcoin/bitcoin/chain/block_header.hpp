@@ -49,27 +49,27 @@ public:
 
     uint32_t version() const;
 
-    void set_version(uint32_t version);
+    void version(uint32_t version);
 
     const hash_digest& previous_block_hash() const;
 
-    void set_previous_block_hash(const hash_digest& hash);
+    void previous_block_hash(const hash_digest& hash);
 
     const hash_digest& merkle() const;
 
-    void set_merkle(const hash_digest& merkle);
+    void merkle(const hash_digest& merkle);
 
     uint32_t timestamp() const;
 
-    void set_timestamp(uint32_t timestamp);
+    void timestamp(uint32_t timestamp);
 
     uint32_t bits() const;
 
-    void set_bits(uint32_t bits);
+    void bits(uint32_t bits);
 
     uint32_t nonce() const;
 
-    void set_nonce(uint32_t nonce);
+    void nonce(uint32_t nonce);
 
     operator const data_chunk() const;
 

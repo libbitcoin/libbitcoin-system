@@ -48,7 +48,13 @@ public:
 
     opcode code() const;
 
+    void code(const opcode code);
+
+    data_chunk& data();
+
     const data_chunk& data() const;
+
+    void data(const data_chunk& data);
 
     operator const data_chunk() const;
 

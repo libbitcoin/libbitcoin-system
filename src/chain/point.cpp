@@ -47,7 +47,7 @@ const hash_digest& point::hash() const
     return hash_;
 }
 
-void point::set_hash(const hash_digest& hash)
+void point::hash(const hash_digest& hash)
 {
     hash_ = hash;
 }
@@ -57,7 +57,7 @@ uint32_t point::index() const
     return index_;
 }
 
-void point::set_index(uint32_t index)
+void point::index(uint32_t index)
 {
     index_ = index;
 }

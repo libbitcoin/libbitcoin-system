@@ -39,9 +39,6 @@ public:
 
     static const std::string satoshi_command;
 
-    friend hash_digest  script::generate_signature_hash(transaction, uint32_t,
-        const script&, uint32_t);
-
     transaction();
 
     transaction(const uint32_t version, const uint32_t locktime,
@@ -60,23 +57,19 @@ public:
 
     uint32_t version() const;
 
-    void set_version(uint32_t version);
+    void version(uint32_t version);
 
     uint32_t locktime() const;
 
-    void set_locktime(uint32_t locktime);
+    void locktime(uint32_t locktime);
+
+    transaction_input_list& inputs();
 
     const transaction_input_list& inputs() const;
 
-    void push_inputs(const transaction_input& input);
-
-    void push_inputs(const transaction_input_list& inputs);
+    transaction_output_list& outputs();
 
     const transaction_output_list& outputs() const;
-
-    void push_outputs(const transaction_output& output);
-
-    void push_outputs(const transaction_output_list& outputs);
 
     operator const data_chunk() const;
 

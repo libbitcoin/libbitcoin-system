@@ -49,15 +49,15 @@ public:
     template<typename Iterator>
     block(const Iterator begin, const Iterator end);
 
+    block_header& header();
+
     const block_header& header() const;
 
-    void set_header(const block_header& header);
+    void header(const block_header& header);
+
+    transaction_list& transactions();
 
     const transaction_list& transactions() const;
-
-    void push_transactions(const transaction& transaction);
-
-    void push_transactions(const transaction_list& transactions);
 
     operator const data_chunk() const;
 

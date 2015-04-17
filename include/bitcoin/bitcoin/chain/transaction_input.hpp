@@ -48,17 +48,21 @@ public:
     template<typename Iterator>
     transaction_input(const Iterator begin, const Iterator end);
 
+    output_point& previous_output();
+
     const output_point& previous_output() const;
 
-    void set_previous_output(const output_point& previous);
+    void previous_output(const output_point& previous);
+
+    chain::script& script();
 
     const chain::script& script() const;
 
-    void set_script(const chain::script& script);
+    void script(const chain::script& script);
 
     uint32_t sequence() const;
 
-    void set_sequence(const uint32_t sequence);
+    void sequence(const uint32_t sequence);
 
     operator const data_chunk() const;
 
