@@ -41,14 +41,24 @@ transaction_input::transaction_input(const data_chunk& value)
 {
 }
 
+output_point& transaction_input::previous_output()
+{
+    return previous_output_;
+}
+
 const output_point& transaction_input::previous_output() const
 {
     return previous_output_;
 }
 
-void transaction_input::set_previous_output(const output_point& previous)
+void transaction_input::previous_output(const output_point& previous)
 {
     previous_output_ = previous;
+}
+
+chain::script& transaction_input::script()
+{
+    return script_;
 }
 
 const chain::script& transaction_input::script() const
@@ -56,7 +66,7 @@ const chain::script& transaction_input::script() const
     return script_;
 }
 
-void transaction_input::set_script(const chain::script& script)
+void transaction_input::script(const chain::script& script)
 {
     script_ = script;
 }
@@ -66,7 +76,7 @@ uint32_t transaction_input::sequence() const
     return sequence_;
 }
 
-void transaction_input::set_sequence(const uint32_t sequence)
+void transaction_input::sequence(const uint32_t sequence)
 {
     sequence_ = sequence;
 }

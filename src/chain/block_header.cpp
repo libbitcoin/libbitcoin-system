@@ -43,7 +43,7 @@ uint32_t block_header::version() const
     return version_;
 }
 
-void block_header::set_version(uint32_t version)
+void block_header::version(uint32_t version)
 {
     version_ = version;
 }
@@ -53,7 +53,7 @@ const hash_digest& block_header::previous_block_hash() const
     return previous_block_hash_;
 }
 
-void block_header::set_previous_block_hash(const hash_digest& hash)
+void block_header::previous_block_hash(const hash_digest& hash)
 {
     previous_block_hash_ = hash;
 }
@@ -63,7 +63,7 @@ const hash_digest& block_header::merkle() const
     return merkle_;
 }
 
-void block_header::set_merkle(const hash_digest& merkle)
+void block_header::merkle(const hash_digest& merkle)
 {
     merkle_ = merkle;
 }
@@ -73,7 +73,7 @@ uint32_t block_header::timestamp() const
     return timestamp_;
 }
 
-void block_header::set_timestamp(uint32_t timestamp)
+void block_header::timestamp(uint32_t timestamp)
 {
     timestamp_ = timestamp;
 }
@@ -83,7 +83,7 @@ uint32_t block_header::bits() const
     return bits_;
 }
 
-void block_header::set_bits(uint32_t bits)
+void block_header::bits(uint32_t bits)
 {
     bits_ = bits;
 }
@@ -93,7 +93,7 @@ uint32_t block_header::nonce() const
     return nonce_;
 }
 
-void block_header::set_nonce(uint32_t nonce)
+void block_header::nonce(uint32_t nonce)
 {
     nonce_ = nonce;
 }

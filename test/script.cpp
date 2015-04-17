@@ -124,7 +124,7 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
     }
 
     chain::script tmp_script;
-    tmp_script.push_operations(chain::operation(code, data));
+    tmp_script.operations().push_back(chain::operation(code, data));
     data_chunk raw_tmp_script = tmp_script;
     extend_data(raw_script, raw_tmp_script);
 }

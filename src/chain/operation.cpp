@@ -50,9 +50,19 @@ opcode operation::code() const
     return code_;
 }
 
+void operation::code(const opcode code)
+{
+    code_ = code;
+}
+
 const data_chunk& operation::data() const
 {
     return data_;
+}
+
+void operation::data(const data_chunk& data)
+{
+    data_ = data;
 }
 
 operation::operator const data_chunk() const
