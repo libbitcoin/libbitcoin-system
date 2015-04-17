@@ -39,30 +39,29 @@ block::block(const data_chunk& value)
 {
 }
 
+block_header& block::header()
+{
+    return header_;
+}
+
 const block_header& block::header() const
 {
     return header_;
 }
 
-void block::set_header(const block_header& header)
+void block::header(const block_header& header)
 {
     header_ = header;
+}
+
+transaction_list& block::transactions()
+{
+    return transactions_;
 }
 
 const transaction_list& block::transactions() const
 {
     return transactions_;
-}
-
-void block::push_transactions(const transaction& transaction)
-{
-    transactions_.push_back(transaction);
-}
-
-void block::push_transactions(const transaction_list& transactions)
-{
-    transactions_.insert(transactions_.end(), transactions.begin(),
-        transactions.end());
 }
 
 block::operator const data_chunk() const

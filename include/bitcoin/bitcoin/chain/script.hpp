@@ -64,11 +64,9 @@ public:
 
     script(const std::string& human_readable);
 
+    operation_stack& operations();
+
     const operation_stack& operations() const;
-
-    void push_operations(const operation& oper);
-
-    void push_operations(const operation_stack& other);
 
     payment_type type() const;
 

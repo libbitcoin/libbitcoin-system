@@ -40,12 +40,17 @@ transaction_output::transaction_output(const data_chunk& value)
 {
 }
 
+chain::script& transaction_output::script()
+{
+    return script_;
+}
+
 const chain::script& transaction_output::script() const
 {
     return script_;
 }
 
-void transaction_output::set_script(const chain::script& script)
+void transaction_output::script(const chain::script& script)
 {
     script_ = script;
 }
@@ -55,7 +60,7 @@ uint64_t transaction_output::value() const
     return value_;
 }
 
-void transaction_output::set_value(const uint64_t value)
+void transaction_output::value(const uint64_t value)
 {
     value_ = value;
 }

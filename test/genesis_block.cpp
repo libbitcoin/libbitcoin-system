@@ -24,18 +24,18 @@ using namespace bc;
 chain::block genesis_block()
 {
     chain::block_header header;
-    header.set_version(1);
-    header.set_previous_block_hash(null_hash);
-    header.set_merkle(hash_literal(
+    header.version(1);
+    header.previous_block_hash(null_hash);
+    header.merkle(hash_literal(
         "4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"));
-    header.set_bits(0x1d00ffff);
+    header.bits(0x1d00ffff);
 
 #ifdef ENABLE_TESTNET
-    header.set_timestamp(1296688602);
-    header.set_nonce(414098458);
+    header.timestamp(1296688602);
+    header.nonce(414098458);
 #else
-    header.set_timestamp(1231006505);
-    header.set_nonce(2083236893);
+    header.timestamp(1231006505);
+    header.nonce(2083236893);
 #endif
 
     // The Times 03/Jan/2009 Chancellor on brink of second bailout for banks
