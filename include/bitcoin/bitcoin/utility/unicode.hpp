@@ -109,11 +109,37 @@ namespace libbitcoin {
 BC_API data_chunk to_utf8(int argc, wchar_t* argv[]);
 
 /**
- * Convert a wchar_t (presumed UTF16) string to wide (UTF8/char).
+ * Convert a wide (presumed UTF16) array to wide (UTF8/char).
+ * @param[in]  out        The converted narrow array.
+ * @param[in]  out_bytes  The allocated number of bytes in 'out'.
+ * @param[in]  in         The wide character array to convert.
+ * @param[in]  in_chars   The number of 'in' wide characters to convert.
+ * @return                The number of bytes converted.
+ */
+BC_API size_t to_utf8(char out[], int out_bytes, const wchar_t in[],
+    int in_chars);
+
+/**
+ * Convert a wide (presumed UTF16) string to narrow (UTF8/char).
  * @param[in]  wide  The utf16 string to convert.
  * @return           The resulting utf8 string.
  */
 BC_API std::string to_utf8(const std::wstring& wide);
+
+/**
+ * Convert a narrow (presumed UTF8) array to wide (UTF16/wchar_t).
+ * This is designed for buffering, where the narrow array may have been
+ * truncated in the middle of a multiple byte character. The terminating
+ * offset is returned in the 'unread' out parameter.
+ * @param[in]  out        The converted wide array.
+ * @param[in]  out_chars  The allocated number of wide characters in 'out'.
+ * @param[in]  in         The narrow array to convert.
+ * @param[in]  in_bytes   The number of 'in' bytes to convert.
+ * @param[in]  truncated  The number of 'in' bytes [0..3] that were truncated.
+ * @return                The number of characters converted.
+ */
+BC_API size_t to_utf16(wchar_t out[], int out_chars, const char in[],
+    int in_bytes, uint8_t& truncated);
 
 /**
  * Convert a narrow (presumed UTF8) string to wide (UTF16/wchar_t).
