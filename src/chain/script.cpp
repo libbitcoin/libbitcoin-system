@@ -46,22 +46,26 @@ script::script()
 }
 
 script::script(const operation& op)
+    : script()
 {
-    push_operations(op);
+    operations_.push_back(op);
 }
 
 script::script(const operation_stack& operations)
+    : script()
 {
-    for (auto op : operations)
-        push_operations(op);
+    operations_.insert(operations_.end(), operations.begin(),
+        operations.end());
 }
 
 script::script(const data_chunk& value, bool allow_raw_data_fallback)
+    : script()
 {
     deserialize(value, allow_raw_data_fallback);
 }
 
 script::script(const std::string& human_readable)
+    : script()
 {
     if (!from_string(human_readable))
     {
@@ -69,19 +73,14 @@ script::script(const std::string& human_readable)
     }
 }
 
-const operation_stack& script::operations() const
+operation_stack& script::operations()
 {
     return operations_;
 }
 
-void script::push_operations(const operation& oper)
+const operation_stack& script::operations() const
 {
-    operations_.push_back(oper);
-}
-
-void script::push_operations(const operation_stack& other)
-{
-    operations_.insert(operations_.end(), other.begin(), other.end());
+    return operations_;
 }
 
 payment_type script::type() const
@@ -266,7 +265,7 @@ inline void nullify_input_sequences(transaction_input_list& inputs,
     for (size_t i = 0; i < inputs.size(); ++i)
     {
         if (i != except_input)
-            inputs[i].set_sequence(0);
+            inputs[i].sequence(0);
     }
 }
 
@@ -281,10 +280,10 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 
     // Blank all other inputs' signatures
-    for (transaction_input& input : parent_tx.inputs_)
-        input.set_script(script());
+    for (transaction_input& input : parent_tx.inputs())
+        input.script(script());
 
-    parent_tx.inputs_[input_index].set_script(script_code);
+    parent_tx.inputs()[input_index].script(script_code);
 
     // The default sighash::all signs all outputs, and the current input.
     // Transaction cannot be updated without resigning the input.
@@ -293,14 +292,14 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // sighash::none signs no outputs so they can be changed.
     if ((hash_type & 0x1f) == signature_hash_algorithm::none)
     {
-        parent_tx.outputs_.clear();
-        nullify_input_sequences(parent_tx.inputs_, input_index);
+        parent_tx.outputs().clear();
+        nullify_input_sequences(parent_tx.inputs(), input_index);
     }
     // Sign the single corresponding output to our index.
     // We don't care about additional inputs or outputs to the tx.
     else if ((hash_type & 0x1f) == signature_hash_algorithm::single)
     {
-        transaction_output_list& outputs = parent_tx.outputs_;
+        transaction_output_list& outputs = parent_tx.outputs();
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
@@ -313,18 +312,18 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
         // Loop through outputs except the last one
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
-            it->set_value(std::numeric_limits<uint64_t>::max());
-            it->set_script(script());
+            it->value(std::numeric_limits<uint64_t>::max());
+            it->script(script());
         }
 
-        nullify_input_sequences(parent_tx.inputs_, input_index);
+        nullify_input_sequences(parent_tx.inputs(), input_index);
     }
 
     // Modifier to ignore the other inputs except our own.
     if (hash_type & signature_hash_algorithm::anyone_can_pay)
     {
-        parent_tx.inputs_[0] = parent_tx.inputs_[input_index];
-        parent_tx.inputs_.resize(1);
+        parent_tx.inputs()[0] = parent_tx.inputs()[input_index];
+        parent_tx.inputs().resize(1);
     }
 
     return parent_tx.hash(hash_type);
@@ -1209,7 +1208,7 @@ bool op_checksigverify(evaluation_context& context, const script& script,
         if (op.data() == signature || op.code() == opcode::codeseparator)
             continue;
 
-        script_code.push_operations(op);
+        script_code.operations().push_back(op);
     }
 
     return script::check_signature(
@@ -1299,7 +1298,7 @@ bool op_checkmultisigverify(evaluation_context& context, const script& script,
         if (is_signature(op.data()))
             continue;
 
-        script_code.push_operations(op);
+        script_code.operations().push_back(op);
     }
 
     // When checking the signatures against our public keys,

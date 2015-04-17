@@ -46,13 +46,15 @@ public:
     template<typename Iterator>
     transaction_output(const Iterator begin, const Iterator end);
 
+    chain::script& script();
+
     const chain::script& script() const;
 
-    void set_script(const chain::script& script);
+    void script(const chain::script& script);
 
     uint64_t value() const;
 
-    void set_value(const uint64_t value);
+    void value(const uint64_t value);
 
     operator const data_chunk() const;
 

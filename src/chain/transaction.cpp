@@ -47,7 +47,7 @@ uint32_t transaction::version() const
     return version_;
 }
 
-void transaction::set_version(uint32_t version)
+void transaction::version(uint32_t version)
 {
     version_ = version;
 }
@@ -57,9 +57,14 @@ uint32_t transaction::locktime() const
     return locktime_;
 }
 
-void transaction::set_locktime(uint32_t locktime)
+void transaction::locktime(uint32_t locktime)
 {
     locktime_ = locktime;
+}
+
+transaction_input_list& transaction::inputs()
+{
+    return inputs_;
 }
 
 const transaction_input_list& transaction::inputs() const
@@ -67,29 +72,14 @@ const transaction_input_list& transaction::inputs() const
     return inputs_;
 }
 
-void transaction::push_inputs(const transaction_input& input)
+transaction_output_list& transaction::outputs()
 {
-    inputs_.push_back(input);
-}
-
-void transaction::push_inputs(const transaction_input_list& inputs)
-{
-    inputs_.insert(inputs_.end(), inputs.begin(), inputs.end());
+    return outputs_;
 }
 
 const transaction_output_list& transaction::outputs() const
 {
     return outputs_;
-}
-
-void transaction::push_outputs(const transaction_output& output)
-{
-    outputs_.push_back(output);
-}
-
-void transaction::push_outputs(const transaction_output_list& outputs)
-{
-    outputs_.insert(outputs_.end(), outputs.begin(), outputs.end());
 }
 
 transaction::operator const data_chunk() const
