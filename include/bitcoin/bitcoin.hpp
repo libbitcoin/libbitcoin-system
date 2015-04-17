@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/stealth.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/version.hpp>
+#include <bitcoin/bitcoin/config/directory.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
 #include <bitcoin/bitcoin/formats/base10.hpp>

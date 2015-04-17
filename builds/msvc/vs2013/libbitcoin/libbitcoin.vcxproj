@@ -72,6 +72,7 @@
       <ExcludedFromBuild Condition="$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\block.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp" />
