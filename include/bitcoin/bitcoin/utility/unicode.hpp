@@ -100,10 +100,20 @@
 namespace libbitcoin {
 
 /**
- * Caller should reinterpret result as:
+ * Convert wide environment vector to utf8 environment vector.
+ * Caller should assign buffer and set result to environ as:
+ * environ = reinterpret_cast<char**>(&buffer[0])
+ * @param[in]  environment  The wide environment variables vector.
+ * @return                  A buffer holding the narrow version of environment.
+ */
+BC_API data_chunk to_utf8(wchar_t* environment[]);
+
+/**
+ * Convert wide argument vector to utf8 argument vector.
+ * Caller should assign buffer and reinterpret result as:
  * auto args = reinterpret_cast<char**>(&buffer[0])
  * @param[in]  argc  The number of elements in argv.
- * @param[in]  argv  The wide command line arguments
+ * @param[in]  argv  The wide command line arguments.
  * @return           A buffer holding the narrow version of argv.
  */
 BC_API data_chunk to_utf8(int argc, wchar_t* argv[]);

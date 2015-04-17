@@ -81,36 +81,6 @@ BOOST_AUTO_TEST_CASE(unicode__string_round_trip__wide_literal__test)
 #endif
 }
 
-BOOST_AUTO_TEST_CASE(unicode__to_utf8_main__ascii__test)
-{
-    std::vector<const wchar_t*> wide_args = { L"ascii", nullptr };
-
-    auto argv = const_cast<wchar_t**>(&wide_args[0]);
-    auto argc = static_cast<int>(wide_args.size()) - 1;
-
-    auto buffer = to_utf8(argc, argv);
-    auto narrow_args = reinterpret_cast<char**>(&buffer[0]);
-
-    BOOST_REQUIRE_EQUAL(narrow_args[0], "ascii");
-}
-
-BOOST_AUTO_TEST_CASE(unicode__to_utf8_main__utf16__test)
-{
-    // We cannot use L for literal encoding of non-ascii text on Windows.
-    auto utf16 = to_utf16("テスト");
-    auto non_literal_utf16 = utf16.c_str();
-    std::vector<const wchar_t*> wide_args = { L"ascii", non_literal_utf16, nullptr };
-
-    auto argv = const_cast<wchar_t**>(&wide_args[0]);
-    auto argc = static_cast<int>(wide_args.size()) - 1;
-
-    auto buffer = to_utf8(argc, argv);
-    auto narrow_args = reinterpret_cast<char**>(&buffer[0]);
-
-    BOOST_REQUIRE_EQUAL(narrow_args[0], "ascii");
-    BOOST_REQUIRE_EQUAL(narrow_args[1], "テスト");
-}
-
 BOOST_AUTO_TEST_CASE(unicode__to_utf8_array__ascii__test)
 {
     char utf8[20];
@@ -234,6 +204,82 @@ BOOST_AUTO_TEST_CASE(unicode__to_utf16_array__non_ascii_truncation2__test)
     BOOST_REQUIRE_EQUAL(truncated, expected_truncated);
     BOOST_REQUIRE_EQUAL(utf16, expected_utf16.c_str());
     BOOST_REQUIRE_EQUAL(size, expected_utf16.size());
+}
+
+BOOST_AUTO_TEST_CASE(unicode__to_utf8_environment__ascii__test)
+{
+    std::vector<const wchar_t*> wide_environment = { L"ascii", nullptr };
+
+    auto variables = const_cast<wchar_t**>(&wide_environment[0]);
+    auto buffer = to_utf8(variables);
+    auto narrow_environment = reinterpret_cast<char**>(&buffer[0]);
+
+    BOOST_REQUIRE_EQUAL(narrow_environment[0], "ascii");
+}
+
+BOOST_AUTO_TEST_CASE(unicode__to_utf8_environment__utf16__test)
+{
+    // We cannot use L for literal encoding of non-ascii text on Windows.
+    auto utf16 = to_utf16("テスト");
+    auto non_literal_utf16 = utf16.c_str();
+    std::vector<const wchar_t*> wide_environment = { L"ascii", non_literal_utf16, nullptr };
+
+    auto variables = const_cast<wchar_t**>(&wide_environment[0]);
+    auto buffer = to_utf8(variables);
+    auto narrow_environment = reinterpret_cast<char**>(&buffer[0]);
+
+    BOOST_REQUIRE_EQUAL(narrow_environment[0], "ascii");
+    BOOST_REQUIRE_EQUAL(narrow_environment[1], "テスト");
+}
+
+BOOST_AUTO_TEST_CASE(unicode__to_utf8_environment__null_termination__test)
+{
+    std::vector<const wchar_t*> wide_environment = { L"ascii", nullptr };
+
+    auto variables = const_cast<wchar_t**>(&wide_environment[0]);
+    auto expected_count = static_cast<int>(wide_environment.size()) - 1;
+
+    auto environment = to_utf8(variables);
+    auto narrow_environment = reinterpret_cast<char**>(&environment[0]);
+
+    // Each argument is a null terminated string.
+    const auto length = strlen(narrow_environment[0]);
+    auto variable_terminator = narrow_environment[0][length];
+    BOOST_REQUIRE_EQUAL(variable_terminator, '\0');
+
+    // The argument vector is a null terminated array.
+    auto environment_terminator = narrow_environment[expected_count];
+    BOOST_REQUIRE_EQUAL(environment_terminator, static_cast<char*>(nullptr));
+}
+
+BOOST_AUTO_TEST_CASE(unicode__to_utf8_main__ascii__test)
+{
+    std::vector<const wchar_t*> wide_args = { L"ascii", nullptr };
+
+    auto argv = const_cast<wchar_t**>(&wide_args[0]);
+    auto argc = static_cast<int>(wide_args.size()) - 1;
+
+    auto buffer = to_utf8(argc, argv);
+    auto narrow_args = reinterpret_cast<char**>(&buffer[0]);
+
+    BOOST_REQUIRE_EQUAL(narrow_args[0], "ascii");
+}
+
+BOOST_AUTO_TEST_CASE(unicode__to_utf8_main__utf16__test)
+{
+    // We cannot use L for literal encoding of non-ascii text on Windows.
+    auto utf16 = to_utf16("テスト");
+    auto non_literal_utf16 = utf16.c_str();
+    std::vector<const wchar_t*> wide_args = { L"ascii", non_literal_utf16, nullptr };
+
+    auto argv = const_cast<wchar_t**>(&wide_args[0]);
+    auto argc = static_cast<int>(wide_args.size()) - 1;
+
+    auto buffer = to_utf8(argc, argv);
+    auto narrow_args = reinterpret_cast<char**>(&buffer[0]);
+
+    BOOST_REQUIRE_EQUAL(narrow_args[0], "ascii");
+    BOOST_REQUIRE_EQUAL(narrow_args[1], "テスト");
 }
 
 BOOST_AUTO_TEST_CASE(unicode__to_utf8_main__null_termination__test)

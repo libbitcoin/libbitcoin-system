@@ -37,6 +37,13 @@ namespace libbitcoin {
 // Local definition for max number of bytes in a utf8 character.
 constexpr size_t utf8_max_character_size = 4;
 
+data_chunk to_utf8(wchar_t* environment[])
+{
+    int count;
+    for (count = 0; environment[count] != nullptr; count++);
+    return to_utf8(count, environment);
+}
+
 data_chunk to_utf8(int argc, wchar_t* argv[])
 {
     // Convert each arg and determine the payload size.
