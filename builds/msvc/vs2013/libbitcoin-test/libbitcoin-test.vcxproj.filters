@@ -70,9 +70,6 @@
     <ClCompile Include="..\..\..\..\test\printer.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\config.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\base85.cpp">
       <Filter>src</Filter>
     </ClCompile>

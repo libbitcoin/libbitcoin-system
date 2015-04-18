@@ -131,7 +131,6 @@ test_libbitcoin_test_SOURCES = \
     test/binary.cpp \
     test/binary_trie.cpp \
     test/checksum.cpp \
-    test/config.cpp \
     test/ec_keys.cpp \
     test/format.cpp \
     test/hash.cpp \

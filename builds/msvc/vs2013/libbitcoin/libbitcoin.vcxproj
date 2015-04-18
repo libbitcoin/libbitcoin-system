@@ -201,6 +201,11 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base16.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\block.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\serialize\misc.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\binary_trie.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_iterator.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_reverse_iterator.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_structure_node.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_value_node.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />

@@ -69,6 +69,9 @@
     <Filter Include="src\external">
       <UniqueIdentifier>{cdbd60d2-a825-43a2-88b6-70fe206f0a50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\impl\trie">
+      <UniqueIdentifier>{b2a71c20-6828-4d21-a99b-afb8645d76b4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -95,6 +98,21 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_structure_node.ipp">
+      <Filter>include\bitcoin\impl\trie</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_value_node.ipp">
+      <Filter>include\bitcoin\impl\trie</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\binary_trie.ipp">
+      <Filter>include\bitcoin\impl\trie</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_iterator.ipp">
+      <Filter>include\bitcoin\impl\trie</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_reverse_iterator.ipp">
+      <Filter>include\bitcoin\impl\trie</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
