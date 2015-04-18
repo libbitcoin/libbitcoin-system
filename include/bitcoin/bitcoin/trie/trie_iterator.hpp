@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -97,7 +97,7 @@ private:
     binary_type cached_key_;
 };
 
-}
+} // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/trie/trie_iterator.ipp>
 

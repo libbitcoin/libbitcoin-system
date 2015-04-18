@@ -121,9 +121,9 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
         op.code = opcode::pushdata4;
     }
     op.data = data;
-    script_type tmp_script;
-    tmp_script.push_operation(op);
-    extend_data(raw_script, save_script(tmp_script));
+    script_type script;
+    script.push_operation(op);
+    extend_data(raw_script, save_script(script));
 }
 
 bool parse_token(data_chunk& raw_script, std::string token)

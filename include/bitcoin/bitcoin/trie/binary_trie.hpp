@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -68,7 +68,8 @@ public:
     typedef std::pair<iterator, bool> pair_iterator_bool;
     typedef std::pair<iterator, iterator> iterator_range;
 
-    typedef std::pair<structure_node_type*, binary_type::size_type> pair_node_size;
+    typedef std::pair<structure_node_type*, binary_type::size_type>
+        pair_node_size;
 
 public:
 
@@ -191,8 +192,8 @@ protected:
     pair_iterator_bool insert(structure_node_type*& current,
         const binary_type& key, const value_type& value);
 
-    pair_node_size find_closest_subkey_matching_node(structure_node_type* start,
-        const binary_type& key);
+    pair_node_size find_closest_subkey_matching_node(
+        structure_node_type* start, const binary_type& key);
 
 private:
 
@@ -202,7 +203,7 @@ private:
     structure_node_type* root_;
 };
 
-}
+} // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/trie/binary_trie.ipp>
 

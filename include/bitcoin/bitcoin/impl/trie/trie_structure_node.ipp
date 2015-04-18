@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -38,8 +38,9 @@ namespace libbitcoin {
 // trie_node implenentation
 template<typename Value>
 trie_structure_node<Value>::trie_structure_node()
-: parent(0), value_head(nullptr), value_tail(nullptr), value_leftmost(nullptr),
-    value_rightmost(nullptr), previous(nullptr), next(nullptr), label()
+    : parent(0), value_head(nullptr), value_tail(nullptr),
+    value_leftmost(nullptr), value_rightmost(nullptr), previous(nullptr),
+    next(nullptr), label()
 {
     children_[0] = nullptr;
     children_[1] = nullptr;
@@ -101,6 +102,6 @@ trie_structure_node<Value>::get_last_child() const
     return result;
 }
 
-}
+} // namespace libbitcoin
 
 #endif
