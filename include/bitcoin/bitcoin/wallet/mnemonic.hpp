@@ -40,16 +40,16 @@ BC_CONSTEXPR size_t mnemonic_word_multiple = 3;
 BC_CONSTEXPR size_t mnemonic_seed_multiple = 4;
 
 /**
- * Represents a mnemonic.
+ * Represents a mnemonic word list.
  */
-typedef std::vector<std::string> string_list;
+typedef std::vector<std::string> word_list;
 
 /**
  * Create a new mnenomic (list of words) from provided entropy and a dictionary
  * selection. The mnemonic can later be converted to a seed for use in wallet
  * creation. Entropy byte count must be evenly divisible by 4.
  */
-BC_API string_list create_mnemonic(data_slice entropy,
+BC_API word_list create_mnemonic(data_slice entropy,
     const dictionary &lexicon=language::en);
 
 /**
@@ -57,20 +57,20 @@ BC_API string_list create_mnemonic(data_slice entropy,
  * words are spelled correctly and the checksum matches.
  * The words must have been created using mnemonic encoding.
  */
-BC_API bool validate_mnemonic(const string_list& mnemonic,
+BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary &lexicon);
 
 /**
  * Checks that a mnemonic is valid in at least one of the provided languages.
  */
-BC_API bool validate_mnemonic(const string_list& mnemonic,
+BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons=language::all);
 
 /**
  * Convert a mnemonic and optional passphrase to a wallet-generation seed.
  * Any passphrase can be used and will change the resulting seed.
  */
-BC_API long_hash decode_mnemonic(const string_list& mnemonic,
+BC_API long_hash decode_mnemonic(const word_list& mnemonic,
     const std::string& passphrase="");
 
 } // namespace libbitcoin

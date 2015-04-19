@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -38,20 +38,20 @@ namespace libbitcoin {
 // trie_reverse_iterator implementation
 template <typename TrieIterator>
 trie_reverse_iterator<TrieIterator>::trie_reverse_iterator()
-: base_iterator_()
+    : base_iterator_()
 {
 }
 
 template <typename TrieIterator>
 trie_reverse_iterator<TrieIterator>::trie_reverse_iterator(base_iter_type it)
-: base_iterator_(it)
+    : base_iterator_(it)
 {
 }
 
 template <typename TrieIterator>
 trie_reverse_iterator<TrieIterator>::trie_reverse_iterator(
     const iter_type& other)
-: base_iterator_(other.base())
+    : base_iterator_(other.base())
 {
 }
 
@@ -59,7 +59,7 @@ template <typename TrieIterator>
 template<typename Iter>
 trie_reverse_iterator<TrieIterator>::trie_reverse_iterator(
     const trie_reverse_iterator<Iter>& other)
-: base_iterator_(other.base())
+    : base_iterator_(other.base())
 {
 }
 
@@ -67,8 +67,8 @@ template <typename TrieIterator>
 typename trie_reverse_iterator<TrieIterator>::reference
     trie_reverse_iterator<TrieIterator>::operator*() const
 {
-    base_iter_type tmp = base_iterator_;
-    return *--tmp;
+    auto it = base_iterator_;
+    return *--it;
 }
 
 template <typename TrieIterator>
@@ -104,9 +104,9 @@ template <typename TrieIterator>
 typename trie_reverse_iterator<TrieIterator>::iter_type
     trie_reverse_iterator<TrieIterator>::operator++(int)
 {
-    iter_type tmp = *this;
+    auto it = *this;
     --base_iterator_;
-    return tmp;
+    return it;
 }
 
 template <typename TrieIterator>
@@ -121,9 +121,9 @@ template <typename TrieIterator>
 typename trie_reverse_iterator<TrieIterator>::iter_type
     trie_reverse_iterator<TrieIterator>::operator--(int)
 {
-    iter_type tmp = *this;
+    auto it = *this;
     ++base_iterator_;
-    return tmp;
+    return it;
 }
 
 template <typename TrieIterator>
@@ -136,10 +136,10 @@ typename trie_reverse_iterator<TrieIterator>::base_iter_type
 template<typename TrieIterator>
 binary_type trie_reverse_iterator<TrieIterator>::get_key()
 {
-    iter_type tmp = base_iterator_;
-    return (--tmp).get_key();
+    auto it = base_iterator_;
+    return (--it).get_key();
 }
 
-}
+} // namespace libbitcoin
 
 #endif

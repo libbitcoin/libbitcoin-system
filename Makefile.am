@@ -43,6 +43,7 @@ src_libbitcoin_la_SOURCES = \
     src/script.cpp \
     src/stealth.cpp \
     src/transaction.cpp \
+    src/config/directory.cpp \
     src/config/parameter.cpp \
     src/config/printer.cpp \
     src/formats/base10.cpp \
@@ -76,17 +77,19 @@ src_libbitcoin_la_SOURCES = \
     src/network/hosts.cpp \
     src/network/network.cpp \
     src/network/protocol.cpp \
+    src/unicode/console_streambuf.cpp \
+    src/unicode/ifstream.cpp \
+    src/unicode/ofstream.cpp \
+    src/unicode/unicode.cpp \
+    src/unicode/unicode_istream.cpp \
+    src/unicode/unicode_ostream.cpp \
+    src/unicode/unicode_streambuf.cpp \
     src/utility/binary.cpp \
-    src/utility/console_streambuf.cpp \
     src/utility/logger.cpp \
     src/utility/string.cpp \
     src/utility/threadpool.cpp \
     src/utility/time.cpp \
     src/utility/timed_section.cpp \
-    src/utility/unicode.cpp \
-    src/utility/unicode_istream.cpp \
-    src/utility/unicode_ostream.cpp \
-    src/utility/unicode_streambuf.cpp \
     src/wallet/address.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
@@ -130,7 +133,6 @@ test_libbitcoin_test_SOURCES = \
     test/binary.cpp \
     test/binary_trie.cpp \
     test/checksum.cpp \
-    test/config.cpp \
     test/ec_keys.cpp \
     test/format.cpp \
     test/hash.cpp \
@@ -182,6 +184,7 @@ include_bitcoin_bitcoin_HEADERS = \
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
+    include/bitcoin/bitcoin/config/directory.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
 
@@ -244,6 +247,16 @@ include_bitcoin_bitcoin_trie_HEADERS = \
     include/bitcoin/bitcoin/trie/trie_structure_node.hpp \
     include/bitcoin/bitcoin/trie/trie_value_node.hpp
 
+include_bitcoin_bitcoin_unicodedir = ${includedir}/bitcoin/bitcoin/unicode
+include_bitcoin_bitcoin_unicode_HEADERS = \
+    include/bitcoin/bitcoin/unicode/console_streambuf.hpp \
+    include/bitcoin/bitcoin/unicode/ifstream.hpp \
+    include/bitcoin/bitcoin/unicode/ofstream.hpp \
+    include/bitcoin/bitcoin/unicode/unicode.hpp \
+    include/bitcoin/bitcoin/unicode/unicode_istream.hpp \
+    include/bitcoin/bitcoin/unicode/unicode_ostream.hpp \
+    include/bitcoin/bitcoin/unicode/unicode_streambuf.hpp
+
 include_bitcoin_bitcoin_utilitydir = ${includedir}/bitcoin/bitcoin/utility
 include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
@@ -251,7 +264,6 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
-    include/bitcoin/bitcoin/utility/console_streambuf.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
@@ -262,10 +274,6 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/time.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
-    include/bitcoin/bitcoin/utility/unicode.hpp \
-    include/bitcoin/bitcoin/utility/unicode_istream.hpp \
-    include/bitcoin/bitcoin/utility/unicode_ostream.hpp \
-    include/bitcoin/bitcoin/utility/unicode_streambuf.hpp \
     include/bitcoin/bitcoin/utility/weak_bind.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet

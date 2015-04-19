@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,29 +17,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <cstdlib>
-#include <string>
-#include <bitcoin/bitcoin.hpp>
+#ifndef LIBBITCOIN_UNICODE_OSTREAM_HPP
+#define LIBBITCOIN_UNICODE_OSTREAM_HPP
 
-BC_USE_LIBBITCOIN_MAIN
+#include <cstddef>
+#include <iostream>
+#include <bitcoin/bitcoin/define.hpp>
 
-int bc::main(int argc, char* argv[])
+namespace libbitcoin {
+
+/**
+ * Class to expose a widening output stream.
+ */
+class BC_API unicode_ostream
+    : public std::ostream
 {
-    bc::cout << "output : acción.кошка.日本国" << std::endl;
-    bc::cerr << "error : acción.кошка.日本国" << std::endl;
+public:
+    /**
+     * Construct instance of a conditionally-widening output stream.
+     * @param[in]  narrow_stream  A narrow output stream such as std::cout.
+     * @param[in]  wide_stream    A wide output stream such as std::wcout.
+     * @param[in]  size           The wide buffer size.
+     */
+    unicode_ostream(std::ostream& narrow_stream, std::wostream& wide_stream,
+        size_t size);
+    
+    /**
+     * Delete the unicode_streambuf that wraps wide_stream.
+     */
+    ~unicode_ostream();
+};
 
-    bc::cout << "Enter text to input..." << std::endl;
-    std::string console;
-    bc::cin >> console;
-    bc::cout << "input[0]  : " << console << std::endl;
+} // namespace libbitcoin
 
-    if (argc > 1)
-        bc::cout << "argv[1] : " << argv[1] << std::endl;
-
-#ifndef __MACH__
-    if (environ[0] != nullptr)
-        bc::cout << "environ[0] : " << environ[0] << std::endl;
 #endif
-
-    return EXIT_SUCCESS;
-}

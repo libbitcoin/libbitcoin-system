@@ -17,21 +17,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
+#include <bitcoin/bitcoin/unicode/unicode_streambuf.hpp>
 
 #include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <streambuf>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/unicode.hpp>
 
 namespace libbitcoin {
-    
-unicode_streambuf::unicode_streambuf(wide_streambuf* wide_buffer)
-    : wide_buffer_(wide_buffer)
+
+// Local definition for max number of bytes in a utf8 character.
+constexpr size_t utf8_max_character_size = 4;
+
+unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
+    : wide_size_(size), narrow_size_(wide_size_ * utf8_max_character_size),
+    narrow_(new char[narrow_size_]), wide_(new wchar_t[narrow_size_]),
+    wide_buffer_(wide_buffer)
 {
-    // Input buffer is not yet populated.
+    if (wide_size_ > (MAX_UINT64 / utf8_max_character_size))
+        throw std::ios_base::failure(
+            "Wide buffer must be no more than one fourth of max uint64.");
+
+    // Input buffer is not yet populated, reflect zero length buffer here.
     setg(narrow_, narrow_, narrow_);
 
     // Output buffer is underexposed by 1 byte to accomodate the overflow byte.
@@ -41,6 +50,8 @@ unicode_streambuf::unicode_streambuf(wide_streambuf* wide_buffer)
 unicode_streambuf::~unicode_streambuf()
 {
     sync();
+    delete[] wide_;
+    delete[] narrow_;
 }
 
 // Read characters from input buffer.
@@ -50,20 +61,16 @@ unicode_streambuf::~unicode_streambuf()
 std::streambuf::int_type unicode_streambuf::underflow()
 {
     // Read from the wide input buffer.
-    const auto read = wide_buffer_->sgetn(wide_, from_wide_characters_);
+    const auto read = wide_buffer_->sgetn(wide_, wide_size_);
 
     // Handle read termination.
     if (read == 0)
         return traits_type::eof();
 
-    // These values are statically guarded to be < maxint32.
-    const auto wide_size = static_cast<int>(read);
-    const auto narrow_size = static_cast<int>(narrow_size_);
-
     // Convert utf16 to utf8, returning bytes written.
-    const auto bytes = to_utf8(narrow_, narrow_size, wide_, wide_size);
+    const auto bytes = to_utf8(narrow_, narrow_size_, wide_, read);
 
-    // Reset the buffered portion of the input sequence.
+    // Reset gptr and egptr, eback never changes.
     setg(narrow_, narrow_, &narrow_[bytes]);
 
     // Return the first character in the input sequence.
@@ -77,33 +84,29 @@ std::streambuf::int_type unicode_streambuf::underflow()
 // assumes the stream will treat each byte of a multibyte narrow 
 // chracter as an individual single byte character.
 std::streambuf::int_type unicode_streambuf::overflow(
-    std::streambuf::int_type byte)
+    std::streambuf::int_type character)
 {
     // Add a single explicitly read byte to the buffer.
     // The narrow buffer is underexposed by 1 byte to accomodate this.
-    if (byte != traits_type::eof())
+    if (character != traits_type::eof())
     {
-        *pptr() = byte;
-        pbump(1);
+        *pptr() = static_cast<char>(character);
+        pbump(sizeof(char));
     }
 
     // This will be in the range 0..4, indicating the number of bytes that were
-    // not read in the conversion. A nonzero value results when the buffer 
+    // not written in the conversion. A nonzero value results when the buffer 
     // terminates within a utf8 multiple byte character.
-    uint8_t unread = 0;
+    uint8_t unwritten = 0;
 
     // Get the number of bytes in the buffer to convert.
-    BITCOIN_ASSERT(pptr() >= pbase());
+    const auto write = pptr() - pbase();
 
-    // These values are statically guarded to be <= maxint32.
-    const auto narrow_size = static_cast<int>(pptr() - pbase());
-    const auto wide_size = static_cast<int>(to_wide_characters_);
-
-    if (narrow_size != 0)
+    if (write > 0)
     {
         // Convert utf8 to utf16, returning chars written and bytes unread.
-        const auto chars = to_utf16(wide_, wide_size, narrow_, narrow_size,
-            unread);
+        const auto chars = to_utf16(wide_, narrow_size_, narrow_, write,
+            unwritten);
 
         // Write to the wide output buffer.
         const auto written = wide_buffer_->sputn(wide_, chars);
@@ -113,18 +116,18 @@ std::streambuf::int_type unicode_streambuf::overflow(
             return traits_type::eof();
     }
 
-    // Reset the buffered portion of the output sequence.
-    // The buffer is underexposed by 1 byte to accomodate the overflow byte.
+    // Copy the fractional character to the beginning of the buffer.
+    memcpy(narrow_, &narrow_[write - unwritten], unwritten);
+
+    // Reset the pptr to the buffer start, leave pbase and epptr.
+    // We could use just pbump for this if it wasn't limited to 'int' width.
     setp(narrow_, &narrow_[narrow_size_ - 1]);
 
-    // Copy the fractional character to the beginning of the buffer.
-    memcpy(narrow_, &narrow_[narrow_size - unread], unread);
-
-    // Start any subsequent writes immediately after the fractional character.
-    pbump(unread);
+    // Reset pptr just after the fractional character.
+    pbump(unwritten);
 
     // Return the overflow byte or EOF sentinel.
-    return byte;
+    return character;
 };
 
 // Flush our output sequence.

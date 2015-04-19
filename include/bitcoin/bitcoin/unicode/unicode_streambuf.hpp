@@ -20,10 +20,10 @@
 #ifndef LIBBITCOIN_UNICODE_STREAMBUF_HPP
 #define LIBBITCOIN_UNICODE_STREAMBUF_HPP
 
+#include <cstddef>
 #include <streambuf>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/console_streambuf.hpp>
 
 namespace libbitcoin {
 
@@ -40,8 +40,9 @@ public:
     /**
      * Construct unicode stream buffer from a weak reference to a wide buffer.
      * @param[in]  wide_buffer  A wide stream buffer for i/o relay.
+     * @param[in]  size         The wide buffer size.
      */
-    unicode_streambuf(wide_streambuf* wide_buffer);
+    unicode_streambuf(std::wstreambuf* wide_buffer, size_t size);
 
     /**
      * Synchronize stream buffer.
@@ -56,9 +57,10 @@ protected:
 
     /**
      * Implement overflow for support of output streams.
-     * @param[in]  byte  A single byte to be explicitly put.
+     * @param[in]  character  A single byte to be explicitly put.
      */
-    virtual std::streambuf::int_type overflow(std::streambuf::int_type byte);
+    virtual std::streambuf::int_type overflow(
+        std::streambuf::int_type character);
 
     /**
      * Implement sync for support of output streams.
@@ -66,34 +68,18 @@ protected:
     virtual int sync();
 
 private:
-    // UTF8 encoding requires up to 4 bytes per character.
-    static const size_t character_size_ = 4;
+    // The constructed wide buffer size in number of characters.
+    size_t wide_size_;
 
-    // The input buffer size in number of characters.
-    // This is the min number of 4 byte utf8 characters to fill narrow_size_.
-    static const size_t from_wide_characters_ = 256;
+    // The derived narrow buffer size in utf8 (bytes).
+    size_t narrow_size_;
 
-    // The input buffer size in bytes.
-    static const size_t narrow_size_ = from_wide_characters_ * character_size_;
+    // The dynamically-allocated buffers.
+    wchar_t* wide_;
+    char* narrow_;
 
-    // The input buffer size in number of characters.
-    // This is maxed out when all wide characters are single byte utf8.
-    static const size_t to_wide_characters_ = narrow_size_;
-
-    char narrow_[narrow_size_];
-    wchar_t wide_[to_wide_characters_];
-
-    // This is the excapsulated wide buffer used for I/O.
-    wide_streambuf* wide_buffer_;
-
-    // Ensure sufficient stack allocation for implementation assumptions.
-    // Note that buffers cannot equal MAX_INT32 because of the overflow char.
-    static_assert(narrow_size_ >= character_size_,
-        "Narrow buffer must be at least 4 bytes wide.");
-    static_assert(narrow_size_ < MAX_INT32,
-        "Narrow buffer must be less than max int32.");
-    static_assert(to_wide_characters_ < MAX_INT32,
-        "Wide buffer must be less than max int32.");
+    // The excapsulated wide streambuf.
+    std::wstreambuf* wide_buffer_;
 };
 
 } // namespace libbitcoin

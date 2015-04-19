@@ -17,26 +17,70 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/unicode.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 
 #include <cstddef>
 #include <cstring>
 #include <cwchar>
+#include <iostream>
+#include <mutex>
 #include <string>
 #include <boost/locale.hpp>
-#include <boost/locale/encoding_errors.hpp>
+#include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
+#include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
+#include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
-#ifdef _MSC_VER
-    #include <windows.h>
-#endif
-
 namespace libbitcoin {
+
+// The width of utf16 stdio buffers.
+constexpr size_t utf16_buffer_size = 256;
 
 // Local definition for max number of bytes in a utf8 character.
 constexpr size_t utf8_max_character_size = 4;
 
+// Ensure console_streambuf::initialize is called only once.
+std::once_flag mutex;
+
+// Static initializer for bc::cin.
+static std::istream& cin_stream()
+{
+    std::call_once(mutex, console_streambuf::initialize, utf16_buffer_size);
+    static unicode_istream input(std::cin, std::wcin, utf16_buffer_size);
+    return input;
+}
+
+// Static initializer for bc::cout.
+static std::ostream& cout_stream()
+{
+    std::call_once(mutex, console_streambuf::initialize, utf16_buffer_size);
+    static unicode_ostream output(std::cout, std::wcout, utf16_buffer_size);
+    return output;
+}
+
+// Static initializer for bc::cerr.
+static std::ostream& cerr_stream()
+{
+    std::call_once(mutex, console_streambuf::initialize, utf16_buffer_size);
+    static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
+    return error;
+}
+
+// Use bc::cin in place of std::cin, etc.
+std::istream& cin = cin_stream();
+std::ostream& cout = cout_stream();
+std::ostream& cerr = cerr_stream();
+
+// Convert wmain environment to utf8 main environment.
+data_chunk to_utf8(wchar_t* environment[])
+{
+    int count;
+    for (count = 0; environment[count] != nullptr; count++);
+    return to_utf8(count, environment);
+}
+
+// Convert wmain parameters to utf8 main parameters.
 data_chunk to_utf8(int argc, wchar_t* argv[])
 {
     // Convert each arg and determine the payload size.
@@ -71,16 +115,16 @@ data_chunk to_utf8(int argc, wchar_t* argv[])
     return buffer;
 }
 
+// Convert wstring to utf8 string.
 std::string to_utf8(const std::wstring& wide)
 {
     using namespace boost::locale;
     return conv::utf_to_utf<char>(wide, conv::method_type::stop);
 }
 
-// The use of int vs. size_t is required by use of WideCharToMultiByte().
-// The MSVC section is an optimization for the expected common usage (Windows).
-size_t to_utf8(char out[], int out_bytes, const wchar_t in[],
-    int in_chars)
+// Convert wchar_t buffer to utf8 char buffer.
+size_t to_utf8(char out[], size_t out_bytes, const wchar_t in[],
+    size_t in_chars)
 {
     BITCOIN_ASSERT(in != nullptr);
     BITCOIN_ASSERT(out != nullptr);
@@ -91,15 +135,6 @@ size_t to_utf8(char out[], int out_bytes, const wchar_t in[],
 
     size_t bytes = 0;
 
-#ifdef _MSC_VER
-    // Get the required buffer bytes by setting allocated bytes to zero.
-    bytes = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, in,
-        in_chars, NULL, 0, NULL, NULL);
-
-    if (bytes <= out_bytes)
-        bytes = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, in, 
-            in_chars, out, out_bytes, NULL, NULL);
-#else
     try
     {
         const auto narrow = to_utf8({ in, &in[in_chars] });
@@ -112,7 +147,6 @@ size_t to_utf8(char out[], int out_bytes, const wchar_t in[],
     {
         bytes = 0;
     }
-#endif
 
     if (bytes == 0)
         throw std::istream::failure("utf-16 to utf-8 conversion failure");
@@ -204,10 +238,9 @@ static uint8_t offset_to_terminal_utf8_character(const char text[], size_t size)
     return 0;
 }
 
-// The use of int vs. size_t is required by use of MultiByteToWideChar().
-// The MSVC section is an optimization for the expected common usage (Windows).
-size_t to_utf16(wchar_t out[], int out_chars, const char in[],
-    int in_bytes, uint8_t& truncated)
+// Convert utf8 char buffer to wchar_t buffer, with truncation handling.
+size_t to_utf16(wchar_t out[], size_t out_chars, const char in[],
+    size_t in_bytes, uint8_t& truncated)
 {
     BITCOIN_ASSERT(in != nullptr);
     BITCOIN_ASSERT(out != nullptr);
@@ -221,15 +254,6 @@ size_t to_utf16(wchar_t out[], int out_chars, const char in[],
 
     size_t chars = 0;
 
-#ifdef _MSC_VER
-    // Get the required buffer chars by setting allocated chars to zero.
-    chars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, in,
-        in_bytes - truncated, 0, NULL);
-
-    if (chars <= out_chars)
-        chars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, in,
-            in_bytes - truncated, out, out_chars);
-#else
     try
     {
         const auto wide = to_utf16({ in, &in[in_bytes - truncated] });
@@ -242,7 +266,6 @@ size_t to_utf16(wchar_t out[], int out_chars, const char in[],
     {
         chars = 0;
     }
-#endif
 
     if (chars == 0)
         throw std::ostream::failure("utf-8 to utf-16 conversion failure");
@@ -253,6 +276,7 @@ size_t to_utf16(wchar_t out[], int out_chars, const char in[],
     return chars;
 }
 
+// Convert utf8 string to wstring.
 std::wstring to_utf16(const std::string& narrow)
 {
     using namespace boost::locale;

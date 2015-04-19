@@ -17,32 +17,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_UNICODE_ISTREAM_HPP
-#define LIBBITCOIN_UNICODE_ISTREAM_HPP
+#ifndef LIBBITCOIN_OFSTREAM_HPP
+#define LIBBITCOIN_OFSTREAM_HPP
 
-#include <iostream>
+#include <fstream>
+#include <string>
+#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
-    
+
 /**
- * Class to expose a narrowing input stream.
+ * Use bc::ofstream in place of std::ofstream.
+ * This provides utf8 to utf16 path translation for Windows.
  */
-class unicode_istream
-    : public std::istream
+class BC_API ofstream :
+    public std::ofstream
 {
 public:
     /**
-     * Construct instance of a conditionally-narrowing input stream.
-     * @param[in]  narrow_stream  A narrow input stream such as std::cin.
-     * @param[in]  wide_stream    A wide input stream such as std::wcin.
-     *                            std::wcin must be patched for Windows input.
+     * Construct bc::ofstream.
+     * @param[in]  path  The utf8 path to the file.
+     * @param[in]  mode  The file opening mode.
      */
-    unicode_istream(std::istream& narrow_stream, std::wistream& wide_stream);
-    
-    /**
-     * Delete the unicode_streambuf that wraps wide_stream.
-     */
-    ~unicode_istream();
+    ofstream(const std::string& path,
+        std::ifstream::openmode mode=std::ifstream::out);
 };
 
 } // namespace libbitcoin

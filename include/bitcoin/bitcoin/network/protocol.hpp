@@ -22,6 +22,7 @@
 
 #include <memory>
 #include <system_error>
+#include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
@@ -60,9 +61,9 @@ public:
     BC_API void set_max_outbound(size_t max_outbound);
 
     /**
-     * Set the filename to load the hosts file from.
+     * Set the path to load the hosts file from, defaults to "hosts.p2p".
      */
-    BC_API void set_hosts_filename(const std::string& hosts_filename);
+    BC_API void set_hosts_filename(const std::string& hosts_path);
 
     /**
      * If called, then this service will not listen for incoming
@@ -326,10 +327,10 @@ private:
 
     async_strand strand_;
 
-    std::string hosts_filename_ = "hosts.p2p";
     hosts& hosts_;
     handshake& handshake_;
     network& network_;
+    boost::filesystem::path hosts_path_;
 
     // There's a fixed number of slots that are always trying to reconnect.
     size_t max_outbound_ = 8;

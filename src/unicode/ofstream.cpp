@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,28 +17,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/unicode_ostream.hpp>
+#include <bitcoin/bitcoin/unicode/ofstream.hpp>
 
-#include <iostream>
-#include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
+#include <fstream>
+#include <string>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 
 namespace libbitcoin {
 
-unicode_ostream::unicode_ostream(std::ostream& narrow_stream,
-    std::wostream& wide_stream)
+// Construct bc::ofstream.
+ofstream::ofstream(const std::string& path, std::ofstream::openmode mode)
 #ifdef _MSC_VER
-    : std::ostream(new unicode_streambuf(wide_stream.rdbuf()))
+    : std::ofstream(bc::to_utf16(path), mode)
 #else
-    : std::ostream(narrow_stream.rdbuf())
+    : std::ofstream(path, mode)
 #endif
 {
-}
-
-unicode_ostream::~unicode_ostream()
-{
-#ifdef _MSC_VER
-    delete rdbuf();
-#endif
 }
 
 } // namespace libbitcoin

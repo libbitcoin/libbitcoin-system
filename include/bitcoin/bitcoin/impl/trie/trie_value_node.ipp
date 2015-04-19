@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -48,6 +48,6 @@ trie_value_node<Value>::trie_value_node(const value_type& value)
 {
 }
 
-}
+} // namespace libbitcoin
 
 #endif

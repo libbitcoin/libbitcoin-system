@@ -19,6 +19,7 @@
  */
 #include <iostream>
 #include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 
 namespace libbitcoin {
 
@@ -58,12 +59,12 @@ void ignore_output(log_level,
 void output_cout(log_level level,
     const std::string& domain, const std::string& body)
 {
-    output_ostream(std::cout, level, domain, body);
+    output_ostream(bc::cout, level, domain, body);
 }
 void output_cerr(log_level level,
     const std::string& domain, const std::string& body)
 {
-    output_ostream(std::cerr, level, domain, body);
+    output_ostream(bc::cerr, level, domain, body);
 }
 
 logger_wrapper::destination_map logger_wrapper::dests_{

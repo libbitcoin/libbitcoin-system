@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -43,8 +43,10 @@ class trie_reverse_iterator
 {
 public:
     // iterator_traits required typedefs
-    typedef typename std::iterator_traits<TrieIterator>::difference_type differcent_type;
-    typedef typename std::iterator_traits<TrieIterator>::iterator_category iterator_category;
+    typedef typename std::iterator_traits<TrieIterator>::difference_type
+        differcent_type;
+    typedef typename std::iterator_traits<TrieIterator>::iterator_category
+        iterator_category;
     typedef typename std::iterator_traits<TrieIterator>::pointer pointer;
     typedef typename std::iterator_traits<TrieIterator>::reference reference;
     typedef typename std::iterator_traits<TrieIterator>::value_type value_type;
@@ -91,7 +93,7 @@ private:
     base_iter_type base_iterator_;
 };
 
-}
+} // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/trie/trie_reverse_iterator.ipp>
 

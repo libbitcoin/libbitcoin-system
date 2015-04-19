@@ -1,5 +1,5 @@
-﻿/**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,33 +17,22 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_UNICODE_OSTREAM_HPP
-#define LIBBITCOIN_UNICODE_OSTREAM_HPP
+#include <bitcoin/bitcoin/unicode/ifstream.hpp>
 
-#include <iostream>
+#include <fstream>
+#include <string>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 
 namespace libbitcoin {
 
-/**
- * Class to expose a widening output stream.
- */
-class unicode_ostream
-    : public std::ostream
+// Construct bc::ifstream.
+ifstream::ifstream(const std::string& path, std::ifstream::openmode mode)
+#ifdef _MSC_VER
+    : std::ifstream(bc::to_utf16(path), mode)
+#else
+    : std::ifstream(path, mode)
+#endif
 {
-public:
-    /**
-     * Construct instance of a conditionally-widening output stream.
-     * @param[in]  narrow_stream  A narrow output stream such as std::cout.
-     * @param[in]  wide_stream    A wide output stream such as std::wcout.
-     */
-    unicode_ostream(std::ostream& narrow_stream, std::wostream& wide_stream);
-    
-    /**
-     * Delete the unicode_streambuf that wraps wide_stream.
-     */
-    ~unicode_ostream();
-};
+}
 
 } // namespace libbitcoin
-
-#endif

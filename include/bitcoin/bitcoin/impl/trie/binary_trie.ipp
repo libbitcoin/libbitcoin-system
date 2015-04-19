@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -38,8 +38,8 @@ namespace libbitcoin {
 // binary_trie implementation
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::binary_trie(
-    structure_node_allocator structure_allocator,
+binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::binary_trie(structure_node_allocator structure_allocator,
     value_node_allocator value_allocator)
     : structure_allocator_(structure_allocator),
         value_allocator_(value_allocator), root_(create_structure_node())
@@ -50,14 +50,16 @@ binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::binary
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::~binary_trie()
+binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::~binary_trie()
 {
     destroy();
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::destroy()
+void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::destroy()
 {
     erase_subtree(root_);
     root_ = nullptr;
@@ -65,68 +67,61 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::d
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::create_structure_node()
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::create_structure_node()
 {
     auto node = structure_allocator_.allocate(1);
-
     if (node == nullptr)
-    {
         throw std::bad_alloc();
-    }
 
-    new (node) structure_node_type();
-
+    new (node)structure_node_type();
     return node;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::create_structure_node(
-    const binary_type& key)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::create_structure_node(
+        const binary_type& key)
 {
     auto node = create_structure_node();
-
     node->label = key;
-
     return node;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::create_structure_node(
-    const binary_type& key, const value_node_type* value_node)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::create_structure_node(
+        const binary_type& key, const value_node_type* value_node)
 {
     auto node = create_structure_node(key);
-
     append_value(node, value_node);
-
     return node;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::create_structure_node(
-    const binary_type& key, const value_type& value)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::create_structure_node(
+        const binary_type& key, const value_type& value)
 {
     auto node = create_structure_node(key);
     auto value_node = create_value_node(value);
-
     append_value(node, value_node);
-
     return node;
 }
 
 template<typename Value, typename StructureNodeAllocator,
-    typename ValueNodeAllocator, typename Comparer>
-bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::destroy_structure_node(
-    structure_node_type* node)
+    typename ValueNodeAllocator, typename Comparer> 
+bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::destroy_structure_node(structure_node_type* node)
 {
-    bool result = false;
-
+    auto result = false;
     if (node != nullptr)
     {
         erase_values(node);
@@ -140,18 +135,17 @@ bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::d
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::erase_values(
-    structure_node_type* node)
+void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::erase_values(structure_node_type* node)
 {
     if (node != nullptr)
     {
-        value_node_type* value = node->value_head;
-
+        auto* value = node->value_head;
         while (value != nullptr)
         {
-            value_node_type* tmp = value->next;
+            auto* next = value->next;
             destroy_value_node(value);
-            value = tmp;
+            value = next;
         }
 
         node->value_head = nullptr;
@@ -161,14 +155,14 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::e
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::erase_subtree(
-    structure_node_type* node)
+void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::erase_subtree(structure_node_type* node)
 {
     if (node != nullptr)
     {
         // identify previous/next pointers which need reset to separate
         // the subtree from the rest of the tree
-        structure_node_type* first_in_subtree = node;
+        auto* first_in_subtree = node;
         structure_node_type* previous_outside_subtree = nullptr;
 
         if (node->value_leftmost != nullptr)
@@ -177,7 +171,7 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::e
             previous_outside_subtree = first_in_subtree->previous;
         }
 
-        structure_node_type* last_in_subtree = node;
+        auto* last_in_subtree = node;
         structure_node_type* next_outside_subtree = nullptr;
 
         if (node->value_rightmost != nullptr)
@@ -188,7 +182,7 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::e
 
         // sever the subtree from the remaining tree by resetting
         // previous, next, parent and child pointers
-        structure_node_type* parent_from_tree = node->parent;
+        auto* parent_from_tree = node->parent;
 
         if (parent_from_tree != nullptr)
         {
@@ -200,41 +194,33 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::e
         last_in_subtree->next = node;
 
         if (previous_outside_subtree != nullptr)
-        {
             previous_outside_subtree->next = next_outside_subtree;
-        }
 
         if (next_outside_subtree != nullptr)
-        {
             next_outside_subtree->previous = previous_outside_subtree;
-        }
 
         // should be done, can't do it now without propegating nullptrs
         // update_left_and_right_branch(parent_from_tree);
 
         // descend first children to leaf
-        structure_node_type* current = get_leftmost_leaf(node);
+        auto* current = get_leftmost_leaf(node);
 
         // erase node, remembering parent and which child was matching
         // if not first child, current is parent
         // otherwise descend first children of last child until leaf
         while (current != nullptr)
         {
-            structure_node_type* next = current->parent;
-
+            auto* next = current->parent;
             if (next != nullptr)
             {
                 if (next->get_last_child() != current)
-                {
                     next = get_leftmost_leaf(next->get_last_child());
-                }
 
                 current->parent->set_child(current->label[0], nullptr);
             }
 
             // destroy the leaf, regardless of contained values
             destroy_structure_node(current);
-
             current = next;
         }
     }
@@ -242,20 +228,19 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::e
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::compress_branch(
-    structure_node_type* node)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::compress_branch(structure_node_type* node)
 {
     if (node != nullptr)
     {
-        bool update = true;
+        auto update = true;
 
         // while not the trie root (designated by null parent), having no value
         // and having no children, delete leaf and replace reference with its parent
         while ((node->parent != nullptr) && !node->has_value())
         {
             auto parent = node->parent;
-
             if (node->has_children())
             {
                 // Can we collapse this node out of the trie before termination?
@@ -280,9 +265,7 @@ binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::compre
         }
 
         if (update)
-        {
             update_left_and_right_branch(node);
-        }
     }
 
     return node;
@@ -290,29 +273,24 @@ binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::compre
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::value_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::create_value_node(
-    const value_type& value)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::value_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::create_value_node(const value_type& value)
 {
-    value_node_type* node = value_allocator_.allocate(1);
-
+    auto* node = value_allocator_.allocate(1);
     if (node == nullptr)
-    {
         throw std::bad_alloc();
-    }
 
-    new (node) value_node_type(value);
-
+    new (node)value_node_type(value);
     return node;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::destroy_value_node(
-    value_node_type* node)
+bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::destroy_value_node(value_node_type* node)
 {
-    bool result = false;
-
+    auto result = false;
     if (node != nullptr)
     {
         value_allocator_.destroy(node);
@@ -325,35 +303,30 @@ bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::d
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::value_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::append_value(
-    structure_node_type* node, value_node_type* value_node)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::value_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::append_value(structure_node_type* node,
+        value_node_type* value_node)
 {
-    bool update = false;
+    auto update = false;
 
     value_node->anchor = node;
     // value_node->next = node->value_head;
 
-    value_node_type* previous = node->value_tail;
-
-    while ((previous != nullptr)
-        && !value_comparer_(previous->value, value_node->value))
-    {
+    auto* previous = node->value_tail;
+    while ((previous != nullptr) && 
+        !value_comparer_(previous->value, value_node->value))
         previous = previous->previous;
-    }
 
     if (previous != nullptr)
     {
-        value_node_type* next = previous->next;
-
+        auto* next = previous->next;
         previous->next = value_node;
         value_node->previous = previous;
         value_node->next = next;
 
         if (next != nullptr)
-        {
             next->previous = value_node;
-        }
     }
 
     if (previous == node->value_tail)
@@ -371,84 +344,78 @@ binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::append
 
     // fixup left/right pointers
     if (update)
-    {
         update_left_and_right_branch(node);
-    }
 
     return value_node;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::value_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::append_value(
-    structure_node_type* node, const value_type& value)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::value_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::append_value(structure_node_type* node,
+        const value_type& value)
 {
-    value_node_type* value_node = create_value_node(value);
+    auto* value_node = create_value_node(value);
     return append_value(node, value_node);
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::get_leftmost_leaf(
-    structure_node_type* origin) const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::get_leftmost_leaf(
+        structure_node_type* origin) const
 {
-    structure_node_type* current = origin;
-
+    auto* current = origin;
     while (current->has_children())
-    {
         current = current->get_first_child();
-    }
 
     return current;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::get_rightmost_leaf(
-    structure_node_type* origin) const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::get_rightmost_leaf(
+        structure_node_type* origin) const
 {
-    structure_node_type* current = origin;
-
+    auto* current = origin;
     while (current->has_children())
-    {
         current = current->get_last_child();
-    }
 
     return current;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::get_leftmost_node(
-    structure_node_type* origin) const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::get_leftmost_node(
+        structure_node_type* origin) const
 {
-    structure_node_type* current = origin;
-
+    auto* current = origin;
     while (current->has_children() && !(current->has_value()))
-    {
         current = current->get_first_child();
-    }
 
     return current;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::get_rightmost_node(
-    structure_node_type* origin) const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::get_rightmost_node(
+        structure_node_type* origin) const
 {
     return get_rightmost_leaf(origin);
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::update_left_and_right(
-    structure_node_type* node)
+void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::update_left_and_right(structure_node_type* node)
 {
     if (!node->has_children())
     {
@@ -458,13 +425,9 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::u
     else
     {
         if (node->has_value())
-        {
             node->value_leftmost = node->value_head;
-        }
         else
-        {
             node->value_leftmost = node->get_first_child()->value_leftmost;
-        }
 
         node->value_rightmost = node->get_last_child()->value_rightmost;
     }
@@ -472,14 +435,13 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::u
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::update_left_and_right_branch(
-    structure_node_type* node)
+void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::update_left_and_right_branch(structure_node_type* node)
 {
     if (node != nullptr)
     {
         // fixup left/right pointers
         auto temp = node;
-
         while (temp != nullptr)
         {
             update_left_and_right(temp);
@@ -490,16 +452,16 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::u
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::next_node_with_value(
-    structure_node_type* node)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::next_node_with_value(
+        structure_node_type* node)
 {
     // if at root (designated by null parent), terminate
     if (node->parent == nullptr)
         return node;
 
     auto next = node;
-
     if (next->has_children())
     {
         // if this node has a child, then at least one value will be located
@@ -521,7 +483,6 @@ binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::next_n
             if (parent->get_last_child() != next)
             {
                 next = get_leftmost_node(parent->get_last_child());
-
                 break;
             }
 
@@ -534,11 +495,10 @@ binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::next_n
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::link_node(
-    structure_node_type* node)
+void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::link_node(structure_node_type* node)
 {
     unlink_node(node);
-
     auto next = next_node_with_value(node);
     auto previous = next->previous;
     node->next = next;
@@ -549,8 +509,8 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::l
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::unlink_node(
-    structure_node_type* node)
+void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::unlink_node(structure_node_type* node)
 {
     // only unlink linked nodes (note that the root node is linked)
     if ((node->next != nullptr) && (node->previous != nullptr))
@@ -566,167 +526,173 @@ void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::u
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::begin()
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::begin()
 {
     auto value = root_->value_leftmost;
-    return (value != nullptr) ? (iterator) value : (iterator) root_;
+    return (value != nullptr) ? (iterator)value : (iterator)root_;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::end()
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::end()
 {
-    return (iterator) root_;
+    return (iterator)root_;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::const_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::begin() const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::const_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::begin() const
 {
     auto value = root_->value_leftmost;
-    return (value != nullptr) ? (const_iterator) value : (const_iterator) root_;
+    return (value != nullptr) ? (const_iterator)value : (const_iterator)root_;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::const_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::end() const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::const_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::end() const
+{
+    return (const_iterator)root_;
+}
+
+template<typename Value, typename StructureNodeAllocator,
+    typename ValueNodeAllocator, typename Comparer>
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::const_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::cbegin() const
+{
+    auto value = root_->value_leftmost;
+    return (value != nullptr) ? (const_iterator)value : (const_iterator)root_;
+}
+
+template<typename Value, typename StructureNodeAllocator,
+    typename ValueNodeAllocator, typename Comparer>
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::const_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::cend() const
 {
     return (const_iterator) root_;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::const_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::cbegin() const
-{
-    auto value = root_->value_leftmost;
-    return (value != nullptr) ? (const_iterator) value : (const_iterator) root_;
-}
-
-template<typename Value, typename StructureNodeAllocator,
-    typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::const_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::cend() const
-{
-    return (const_iterator) root_;
-}
-
-template<typename Value, typename StructureNodeAllocator,
-    typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::reverse_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::rbegin()
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::reverse_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::rbegin()
 {
     return static_cast<reverse_iterator>(end());
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::reverse_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::rend()
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::reverse_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::rend()
 {
     return static_cast<reverse_iterator>(begin());
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::const_reverse_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::rbegin() const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::const_reverse_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::rbegin() const
 {
     return static_cast<const_reverse_iterator>(end());
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::const_reverse_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::rend() const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::const_reverse_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::rend() const
 {
     return static_cast<const_reverse_iterator>(begin());
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::const_reverse_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::crbegin() const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::const_reverse_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::crbegin() const
 {
     return rbegin();
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::const_reverse_iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::crend() const
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::const_reverse_iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::crend() const
 {
     return rend();
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::attach_child(
-    structure_node_type* parent, structure_node_type* child)
+void binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::attach_child(structure_node_type* parent,
+        structure_node_type* child)
 {
     // note: method trusts that the parent's child is safely overwriteable
     child->parent = parent;
     parent->set_child(child->label[0], child);
-
     if (child->has_value())
     {
         link_node(child);
-
         update_left_and_right_branch(child);
     }
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::insert_at(
-    structure_node_type* current, const binary_type& key)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::insert_at(structure_node_type* current,
+        const binary_type& key)
 {
     auto host = create_structure_node(key);
-
     attach_child(current, host);
-
     return host;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::structure_node_type*
-binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::insert_at(
-    structure_node_type* current, const binary_type& key,
-    const value_type& value)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::structure_node_type* binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::insert_at(structure_node_type* current,
+        const binary_type& key, const value_type& value)
 {
     auto host = create_structure_node(key, value);
-
     attach_child(current, host);
-
     return host;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::pair_iterator_bool binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::insert(
-    structure_node_type*& current, const binary_type& key,
-    const value_type& value)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::pair_iterator_bool binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::insert(structure_node_type*& current,
+        const binary_type& key,const value_type& value)
 {
     binary_type::size_type key_offset = 0;
-
     for (; key_offset < key.size();)
     {
         auto initial_match = current->get_child(key[key_offset]);
-
         if (initial_match == nullptr)
         {
-            binary_type subkey = key.get_substring(key_offset,
+            auto subkey = key.get_substring(key_offset, 
                 key.size() - key_offset);
 
             return std::make_pair(
-                (iterator) (insert_at(current, subkey, value)->value_head),
+                (iterator)(insert_at(current, subkey, value)->value_head),
                 true);
         }
 
@@ -745,8 +711,8 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
                 break;
             }
 
-            if (initial_match->label[label_offset]
-                != key[key_offset + label_offset])
+            if (initial_match->label[label_offset] != 
+                key[key_offset + label_offset])
             {
                 matches_label = false;
                 break;
@@ -758,11 +724,11 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
         {
             // if there is a disagreement, introduce intermediary node
             // and insert the new branch
-            binary_type intermediary_key = initial_match->label.get_substring(0,
+            auto intermediary_key = initial_match->label.get_substring(0,
                 label_offset);
 
-            binary_type trailing_initial_key =
-                initial_match->label.get_substring(label_offset);
+            auto trailing_initial_key = initial_match->label.get_substring(
+                label_offset);
 
             // unlink/remove the initial_match from the tree
             unlink_node(initial_match);
@@ -778,22 +744,21 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
             if (key.size() > (key_offset + label_offset))
             {
                 // if the key has remaining length, insert a sibling
-                binary_type remaining_key = key.get_substring(
+                auto remaining_key = key.get_substring(
                     key_offset + label_offset);
 
-                return std::make_pair(
-                    (iterator) (insert_at(intermediary, remaining_key, value)->value_head),
-                    true);
+                return std::make_pair((iterator)(insert_at(intermediary,
+                    remaining_key, value)->value_head), true);
             }
             else
             {
                 // otherwise intermediary label must be key, so add value to 
                 // the intermediary which was uniquely added and link_node
-                value_node_type* inserted = append_value(intermediary, value);
+                auto* inserted = append_value(intermediary, value);
                 link_node(intermediary);
 
                 current = intermediary;
-                return std::make_pair((iterator) inserted, true);
+                return std::make_pair((iterator)inserted, true);
             }
         }
         else
@@ -804,14 +769,15 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
         }
     }
 
-    return std::make_pair((iterator) current, false);
+    return std::make_pair((iterator)current, false);
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::pair_iterator_bool binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::insert_equal(
-    const binary_type& key, const value_type& value)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::pair_iterator_bool binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::insert_equal(const binary_type& key,
+        const value_type& value)
 {
     auto current = root_;
     auto result = insert(current, key, value);
@@ -821,14 +787,10 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
     // though we aren't guaranteed to be unique
     if (!result.second && (current != root_))
     {
-        bool linked = current->has_value();
-
+        auto linked = current->has_value();
         auto inserted = append_value(current, value);
-
         if (!linked)
-        {
             link_node(current);
-        }
 
         return std::make_pair((iterator) inserted, true);
     }
@@ -838,9 +800,10 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::pair_iterator_bool binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::insert_unique(
-    const binary_type& key, const value_type& value)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::pair_iterator_bool binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::insert_unique(const binary_type& key,
+        const value_type& value)
 {
     auto current = root_;
     auto result = insert(current, key, value);
@@ -851,10 +814,8 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
     if (!result.second && !current->has_value() && (current != root_))
     {
         auto inserted = append_value(current, value);
-
         link_node(current);
-
-        return std::make_pair((iterator) inserted, true);
+        return std::make_pair((iterator)inserted, true);
     }
 
     return result;
@@ -862,23 +823,22 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::pair_node_size binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::find_closest_subkey_matching_node(
-    structure_node_type* start, const binary_type& key)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::pair_node_size binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::find_closest_subkey_matching_node(
+        structure_node_type* start, const binary_type& key)
 {
+    auto match = true;
     auto current = start;
     binary_type::size_type key_offset = 0;
-    bool match = true;
-
     for (; match && (current != nullptr) && (key_offset < key.size());)
     {
         auto initial_match = current->get_child(key[key_offset]);
-
         if (initial_match != nullptr)
         {
             for (binary_type::size_type label_offset = 0;
-                (label_offset < initial_match->label.size())
-                    && (key_offset + label_offset < key.size()); label_offset++)
+                (label_offset < initial_match->label.size()) && 
+                    (key_offset + label_offset < key.size()); label_offset++)
             {
                 if (key[key_offset + label_offset]
                     != initial_match->label[label_offset])
@@ -904,20 +864,17 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::iterator_range binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::find_equal(
-    const binary_type& key)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::iterator_range binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::find_equal(const binary_type& key)
 {
     auto find_pair = find_closest_subkey_matching_node(root_, key);
-
-    if ((find_pair.first == nullptr) || (find_pair.second != key.size())
-        || (find_pair.second == 0))
-    {
+    if ((find_pair.first == nullptr) || (find_pair.second != key.size()) ||
+        (find_pair.second == 0))
         return std::make_pair(end(), end());
-    }
 
-    iterator begin = (iterator) (find_pair.first->value_head);
-    iterator end = (iterator) (find_pair.first->value_tail);
+    auto begin = (iterator)(find_pair.first->value_head);
+    auto end = (iterator)(find_pair.first->value_tail);
     ++end;
 
     return std::make_pair(begin, end);
@@ -925,19 +882,16 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::iterator_range binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::find_prefix(
-    const binary_type& key)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::iterator_range binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::find_prefix(const binary_type& key)
 {
     auto find_pair = find_closest_subkey_matching_node(root_, key);
-
     if ((find_pair.first == nullptr) || (find_pair.second == 0))
-    {
         return std::make_pair(end(), end());
-    }
 
-    iterator begin = (find_pair.first->value_leftmost);
-    iterator end = (find_pair.first->value_rightmost);
+    auto begin = (iterator)(find_pair.first->value_leftmost);
+    auto end = (iterator)(find_pair.first->value_rightmost);
     ++end;
 
     return std::make_pair(begin, end);
@@ -945,18 +899,16 @@ typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::remove_equal(
-    const binary_type& key)
+bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::remove_equal(const binary_type& key)
 {
     auto find_pair = find_closest_subkey_matching_node(root_, key);
-
-    bool nonremovable = ((find_pair.first == nullptr)
-        || (find_pair.second != key.size()) || (find_pair.second == 0));
+    auto nonremovable = ((find_pair.first == nullptr) ||
+        (find_pair.second != key.size()) || (find_pair.second == 0));
 
     if (!nonremovable)
     {
         auto node = find_pair.first;
-
         erase_values(node);
         compress_branch(node);
     }
@@ -966,101 +918,80 @@ bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::r
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::remove_prefix(
-    const binary_type& key)
+bool binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::remove_prefix(const binary_type& key)
 {
     auto find_pair = find_closest_subkey_matching_node(root_, key);
+    auto removable = ((find_pair.first != nullptr) &&
+        (find_pair.second >= key.size()) && (find_pair.second != 0));
 
-    bool nonremovable = ((find_pair.first == nullptr)
-        || (find_pair.second < key.size()) || (find_pair.second == 0));
-
-    if (!nonremovable)
+    if (removable)
     {
         auto node = find_pair.first;
         auto parent = node->parent;
-
         erase_subtree(node);
         compress_branch(parent);
     }
 
-    return !nonremovable;
+    return removable;
 }
 
 template<typename Value, typename StructureNodeAllocator,
     typename ValueNodeAllocator, typename Comparer>
-typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::iterator binary_trie<
-    Value, StructureNodeAllocator, ValueNodeAllocator, Comparer>::remove_value(
-    iterator it)
+typename binary_trie<Value, StructureNodeAllocator, ValueNodeAllocator,
+    Comparer>::iterator binary_trie<Value, StructureNodeAllocator,
+    ValueNodeAllocator, Comparer>::remove_value(iterator it)
 {
     auto value_node = it.value_node_;
-
     if (value_node == nullptr)
-    {
         return it;
-    }
 
     auto anchor = value_node->anchor;
-
-    if (anchor->value_head != anchor->value_tail)
-    {
-        // if the value can be removed without removing emptying the node
-        auto next = value_node->next;
-        auto previous = value_node->previous;
-
-        if (next != nullptr)
-        {
-            next->previous = previous;
-        }
-
-        if (previous != nullptr)
-        {
-            previous->next = next;
-        }
-
-        value_node->next = nullptr;
-        value_node->previous = nullptr;
-
-        bool update = false;
-
-        if (anchor->value_head == value_node)
-        {
-            anchor->value_head = next;
-            update = true;
-        }
-
-        if (anchor->value_tail == value_node)
-        {
-            anchor->value_tail = previous;
-            update = true;
-        }
-
-        destroy_value_node(value_node);
-
-        if (update)
-        {
-            update_left_and_right_branch(anchor);
-        }
-
-        if (next != nullptr)
-        {
-            return (iterator) (next);
-        }
-        else
-        {
-            return (iterator) (anchor->next);
-        }
-    }
-    else
+    if (anchor->value_head == anchor->value_tail)
     {
         auto next = anchor->next;
+
         // otherwise, remove all values and attempt to remove the node
         erase_values(anchor);
         compress_branch(anchor);
 
-        return (iterator) (next);
+        return (iterator)(next);
     }
+
+    // if the value can be removed without removing emptying the node
+    auto next = value_node->next;
+    auto previous = value_node->previous;
+
+    if (next != nullptr)
+        next->previous = previous;
+
+    if (previous != nullptr)
+        previous->next = next;
+
+    auto update = false;
+    value_node->next = nullptr;
+    value_node->previous = nullptr;
+
+    if (anchor->value_head == value_node)
+    {
+        anchor->value_head = next;
+        update = true;
+    }
+
+    if (anchor->value_tail == value_node)
+    {
+        anchor->value_tail = previous;
+        update = true;
+    }
+
+    destroy_value_node(value_node);
+
+    if (update)
+        update_left_and_right_branch(anchor);
+
+    return (next == nullptr) ? (iterator)(anchor->next) : (iterator)next;
 }
 
-}
+} // namespace libbitcoin
 
 #endif

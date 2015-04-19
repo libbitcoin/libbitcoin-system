@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,29 +17,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <cstdlib>
+#ifndef LIBBITCOIN_IFSTREAM_HPP
+#define LIBBITCOIN_IFSTREAM_HPP
+
+#include <fstream>
 #include <string>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 
-BC_USE_LIBBITCOIN_MAIN
+namespace libbitcoin {
 
-int bc::main(int argc, char* argv[])
+/**
+ * Use bc::ifstream in place of std::ifstream.
+ * This provides utf8 to utf16 path translation for Windows.
+ */
+class BC_API ifstream :
+    public std::ifstream
 {
-    bc::cout << "output : acción.кошка.日本国" << std::endl;
-    bc::cerr << "error : acción.кошка.日本国" << std::endl;
+public:
+    /**
+     * Construct bc::ifstream.
+     * @param[in]  path  The utf8 path to the file.
+     * @param[in]  mode  The file opening mode.
+     */
+    ifstream(const std::string& path, 
+        std::ifstream::openmode mode=std::ifstream::in);
+};
 
-    bc::cout << "Enter text to input..." << std::endl;
-    std::string console;
-    bc::cin >> console;
-    bc::cout << "input[0]  : " << console << std::endl;
+} // namespace libbitcoin
 
-    if (argc > 1)
-        bc::cout << "argv[1] : " << argv[1] << std::endl;
-
-#ifndef __MACH__
-    if (environ[0] != nullptr)
-        bc::cout << "environ[0] : " << environ[0] << std::endl;
 #endif
-
-    return EXIT_SUCCESS;
-}

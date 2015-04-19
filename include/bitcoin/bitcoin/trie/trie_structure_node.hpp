@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -83,7 +83,7 @@ private:
 
 };
 
-}
+} // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/trie/trie_structure_node.ipp>
 

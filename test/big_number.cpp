@@ -132,9 +132,9 @@ uint32_t big_number::compact() const
         compact = BN_get_word(&bignum_) << 8 * (3 - size);
     else
     {
-        big_number tmp_number;
-        BN_rshift(&tmp_number.bignum_, &bignum_, 8 * (size - 3));
-        compact = BN_get_word(&tmp_number.bignum_);
+        big_number temp_number;
+        BN_rshift(&temp_number.bignum_, &bignum_, 8 * (size - 3));
+        compact = BN_get_word(&temp_number.bignum_);
     }
     // The 0x00800000 bit denotes the sign.
     // Thus, if it is already set, divide the mantissa by 256

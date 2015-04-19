@@ -17,92 +17,64 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/console_streambuf.hpp>
+#include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
 
+#include <cstddef>
 #include <iostream>
 #include <streambuf>
 
 #ifdef _MSC_VER
-    #include <fcntl.h>
-    #include <io.h>
-    #include <windows.h>
-#endif
+#include <windows.h>
 
-namespace libbitcoin {
-    
-// The keyboard buffer size in number of characters.
-constexpr size_t keyboard_buffer_size = 256;
-
-// Initialize private static member.
-bool console_streambuf::initialized_ = false;
-
-// Set file mode to UTF8 no BOM (translated).
-static void set_stdio_utf8(FILE* file)
-{
-#ifdef _MSC_VER
-    if (!_setmode(_fileno(file), _O_U8TEXT))
-        throw std::ios_base::failure("Failed to set stdio to utf8.");
-#endif
-}
-
+// Get Windows input handle.
 static void* get_input_handle()
 {
-    void* handle = nullptr;
-
-#ifdef _MSC_VER
-    handle = GetStdHandle(STD_INPUT_HANDLE);
+    auto handle = GetStdHandle(STD_INPUT_HANDLE);
     if (handle == INVALID_HANDLE_VALUE || handle == nullptr)
         throw std::ios_base::failure("Failed to get input handle.");
-#endif
 
     return handle;
 }
+#endif
+
+namespace libbitcoin {
 
 // This class/mathod is a no-op on non-windows platforms.
+// When working in Windows console set font to "Lucida Console".
 // This is the factory method to privately instantiate a singleton class.
-void console_streambuf::initialize()
+void console_streambuf::initialize(size_t size)
 {
-    if (initialized_)
-        return;
-
-    initialized_ = true;
-
 #ifdef _MSC_VER
+    // Set the console to operate in UTF-8 for this process.
     if (SetConsoleCP(CP_UTF8) == FALSE)
         throw std::ios_base::failure("Failed to set console to utf8.");
 
     DWORD console_mode;
     if (GetConsoleMode(get_input_handle(), &console_mode) != FALSE)
     {
-        // Hack for faulty wcin translation of non-ASCII keyboard input.
-        static console_streambuf buffer(*std::wcin.rdbuf());
+        // Hack for faulty std::wcin translation of non-ASCII keyboard input.
+        static console_streambuf buffer(*std::wcin.rdbuf(), size);
         std::wcin.rdbuf(&buffer);
     }
-
-    // Set all stdio to wide streaming.
-    set_stdio_utf8(stdin);
-    set_stdio_utf8(stdout);
-    set_stdio_utf8(stderr);
-
-    //// Set console font to Lucida Console 16 (to see non-ASCII better).
-    //CONSOLE_FONT_INFOEX font;
-    //font.cbSize = sizeof(font);
-    //font.nFont = 0;
-    //font.dwFontSize.X = 0;
-    //font.dwFontSize.Y = 16;
-    //font.FontFamily = FF_DONTCARE;
-    //font.FontWeight = FW_NORMAL;
-    //wcscpy(font.FaceName, L"Lucida Console");
-    //auto console = GetStdHandle(STD_OUTPUT_HANDLE);
-    //SetCurrentConsoleFontEx(console, FALSE, &font);
 #endif
 }
 
-console_streambuf::console_streambuf(wide_streambuf const& stream_buffer)
+console_streambuf::console_streambuf(
+    std::wstreambuf const& stream_buffer, size_t size)
 #ifdef _MSC_VER
-    : wide_streambuf(stream_buffer), buffer_(keyboard_buffer_size, L'\0')
+    : buffer_size_(size), buffer_(new wchar_t[buffer_size_]),
+    std::wstreambuf(stream_buffer)
+#else
+    : buffer_size_(0), buffer_(nullptr)
 #endif
 {
+}
+
+console_streambuf::~console_streambuf()
+{
+#ifdef _MSC_VER
+    delete[] buffer_;
+#endif
 }
 
 std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
@@ -124,20 +96,21 @@ std::streamsize console_streambuf::xsgetn(wchar_t* buffer,
     return read_size;
 }
 
-wide_traits::int_type console_streambuf::underflow()
+std::wstreambuf::int_type console_streambuf::underflow()
 {
+#ifdef _MSC_VER
     if (gptr() == nullptr || gptr() >= egptr())
     {
-        const auto start = &buffer_[0];
-        const auto length = xsgetn(start, buffer_.size());
+        const auto length = xsgetn(buffer_, buffer_size_);
         if (length > 0)
-            setg(start, start, &start[length]);
+            setg(buffer_, buffer_, &buffer_[length]);
     }
 
     if (gptr() == nullptr || gptr() >= egptr())
-        return wide_traits::eof();
+        return traits_type::eof();
+#endif
 
-    return wide_traits::to_int_type(*gptr());
+    return traits_type::to_int_type(*gptr());
 }
 
 } // namespace libbitcoin

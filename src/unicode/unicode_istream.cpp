@@ -17,29 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <cstdlib>
-#include <string>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
 
-BC_USE_LIBBITCOIN_MAIN
+#include <cstddef>
+#include <iostream>
+#include <bitcoin/bitcoin/unicode/unicode_streambuf.hpp>
 
-int bc::main(int argc, char* argv[])
-{
-    bc::cout << "output : acción.кошка.日本国" << std::endl;
-    bc::cerr << "error : acción.кошка.日本国" << std::endl;
+namespace libbitcoin {
 
-    bc::cout << "Enter text to input..." << std::endl;
-    std::string console;
-    bc::cin >> console;
-    bc::cout << "input[0]  : " << console << std::endl;
-
-    if (argc > 1)
-        bc::cout << "argv[1] : " << argv[1] << std::endl;
-
-#ifndef __MACH__
-    if (environ[0] != nullptr)
-        bc::cout << "environ[0] : " << environ[0] << std::endl;
+unicode_istream::unicode_istream(std::istream& narrow_stream,
+    std::wistream& wide_stream, size_t size)
+#ifdef _MSC_VER
+    : std::istream(new unicode_streambuf(wide_stream.rdbuf(), size))
+#else
+    : std::istream(narrow_stream.rdbuf())
 #endif
-
-    return EXIT_SUCCESS;
+{
 }
+
+unicode_istream::~unicode_istream()
+{
+#ifdef _MSC_VER
+    delete rdbuf();
+#endif
+}
+
+} // namespace libbitcoin

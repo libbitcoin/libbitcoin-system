@@ -49,7 +49,7 @@ static std::string normalize_nfkd(const std::string& value)
     return normalize(value, norm_type::norm_nfkd, locale("UTF-8"));
 }
 
-bool validate_mnemonic(const string_list& words, const dictionary& lexicon)
+bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
 {
     const auto word_count = words.size();
     if ((word_count % mnemonic_word_multiple) != 0)
@@ -86,10 +86,10 @@ bool validate_mnemonic(const string_list& words, const dictionary& lexicon)
     return std::equal(mnemonic.begin(), mnemonic.end(), words.begin());
 }
 
-string_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
+word_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
 {
     if ((entropy.size() % mnemonic_seed_multiple) != 0)
-        return string_list();
+        return word_list();
 
     const size_t entropy_bits = (entropy.size() * byte_bits);
     const size_t check_bits = (entropy_bits / entropy_bit_divisor);
@@ -102,7 +102,7 @@ string_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
     const auto data = build_data({entropy, sha256_hash(entropy)});
 
     size_t bit = 0;
-    string_list words;
+    word_list words;
 
     for (size_t word = 0; word < word_count; word++)
     {
@@ -126,18 +126,17 @@ string_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
     return words;
 }
 
-bool validate_mnemonic(const string_list& mnemonic,
+bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons)
 {
     for (const auto& i: lexicons)
-    {
         if (validate_mnemonic(mnemonic, *i))
             return true;
-    }
+
     return false;
 }
 
-long_hash decode_mnemonic(const string_list& mnemonic,
+long_hash decode_mnemonic(const word_list& mnemonic,
     const std::string& passphrase)
 {
     const auto sentence = join(mnemonic);

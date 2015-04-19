@@ -78,7 +78,6 @@
     <ClCompile Include="..\..\..\..\test\binary.cpp" />
     <ClCompile Include="..\..\..\..\test\binary_trie.cpp" />
     <ClCompile Include="..\..\..\..\test\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\config.cpp" />
     <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\format.cpp" />
     <ClCompile Include="..\..\..\..\test\hash.cpp" />

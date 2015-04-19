@@ -29,6 +29,7 @@ namespace network {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
+using boost::filesystem::path;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
@@ -45,8 +46,8 @@ static std::string pretty(const ip_address_type& ip)
 
 protocol::protocol(threadpool& pool, hosts& hsts,
     handshake& shake, network& net)
-  : strand_(pool), hosts_(hsts), handshake_(shake), network_(net),
-    watermark_timer_(pool.service())
+  : strand_(pool),  hosts_(hsts), handshake_(shake),network_(net),
+    hosts_path_("hosts.p2p"), watermark_timer_(pool.service())
 {
     channel_subscribe_ = std::make_shared<channel_subscriber_type>(pool);
 }
@@ -55,9 +56,9 @@ void protocol::set_max_outbound(size_t max_outbound)
 {
     max_outbound_ = max_outbound;
 }
-void protocol::set_hosts_filename(const std::string& hosts_filename)
+void protocol::set_hosts_filename(const std::string& hosts_path)
 {
-    hosts_filename_ = hosts_filename;
+    hosts_path_ = hosts_path;
 }
 void protocol::disable_listener()
 {
@@ -94,7 +95,7 @@ void protocol::handle_bootstrap(
 
 void protocol::stop(completion_handler handle_complete)
 {
-    hosts_.save(hosts_filename_, strand_.wrap(
+    hosts_.save(hosts_path_.string(), strand_.wrap(
         &protocol::handle_save, this, _1, handle_complete));
 }
 void protocol::handle_save(const std::error_code& ec,
@@ -103,7 +104,7 @@ void protocol::handle_save(const std::error_code& ec,
     if (ec)
     {
         log_error(LOG_PROTOCOL) << "Failed to save hosts '"
-            << hosts_filename_ << "': " << ec.message();
+            << hosts_path_ << "': " << ec.message();
         handle_complete(ec);
         return;
     }
@@ -113,7 +114,7 @@ void protocol::handle_save(const std::error_code& ec,
 
 void protocol::bootstrap(completion_handler handle_complete)
 {
-    hosts_.load(hosts_filename_, strand_.wrap(
+    hosts_.load(hosts_path_.string(), strand_.wrap(
         &protocol::load_hosts, this, _1, handle_complete));
 }
 void protocol::load_hosts(const std::error_code& ec,

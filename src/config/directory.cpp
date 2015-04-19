@@ -17,29 +17,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <cstdlib>
+#include <bitcoin/bitcoin/config/directory.hpp>
+
 #include <string>
-#include <bitcoin/bitcoin.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 
-BC_USE_LIBBITCOIN_MAIN
-
-int bc::main(int argc, char* argv[])
-{
-    bc::cout << "output : acción.кошка.日本国" << std::endl;
-    bc::cerr << "error : acción.кошка.日本国" << std::endl;
-
-    bc::cout << "Enter text to input..." << std::endl;
-    std::string console;
-    bc::cin >> console;
-    bc::cout << "input[0]  : " << console << std::endl;
-
-    if (argc > 1)
-        bc::cout << "argv[1] : " << argv[1] << std::endl;
-
-#ifndef __MACH__
-    if (environ[0] != nullptr)
-        bc::cout << "environ[0] : " << environ[0] << std::endl;
+#ifdef _MSC_VER
+    #include <shlobj.h>
+    #include <windows.h>
 #endif
 
-    return EXIT_SUCCESS;
+namespace libbitcoin {
+namespace config {
+
+// Returns empty string if unable to retrieve (including when not in Windows).
+std::string windows_config_directory()
+{
+#ifdef _MSC_VER
+    wchar_t directory[MAX_PATH];
+    const auto result = SHGetFolderPathW(NULL, CSIDL_COMMON_APPDATA, NULL,
+        SHGFP_TYPE_CURRENT, directory);
+
+    if (SUCCEEDED(result))
+        return to_utf8(directory);
+#endif
+    return "";
 }
+
+} // namespace config
+} // namespace libbitcoin

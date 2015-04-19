@@ -20,11 +20,11 @@
 #ifndef LIBBITCOIN_UNICODE_HPP
 #define LIBBITCOIN_UNICODE_HPP
 
+#include <cstddef>
+#include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/unicode.hpp>
-#include <bitcoin/bitcoin/utility/console_streambuf.hpp>
 
 // Regarding Unicode design for Windows:
 //
@@ -37,8 +37,8 @@
 // The objective is to use utf8 as the canonical string encoding, pushing
 // wchar_t translation to the edge (stdio, argv, O/S and external API calls).
 // The macro BC_USE_LIBBITCOIN_MAIN does most of the heavy lifting to ensure
-// that stdio and argv is configured for utf8. The function 'to_utf' is
-// provided for API translation.
+// that stdio and argv is configured for utf8. The 'to_utf' functions are
+// provided for API translations.
 
 // Regarding Unicode source files in VC++ builds:
 //
@@ -52,11 +52,12 @@
 // Regarding Unicode in console applications:
 //
 // BC_USE_LIBBITCOIN_MAIN should be declared prior to bc::main() in a console
-// application. This enables Unicode stdio and argument processing in Windows.
-// This macro implements main() and forwards to bc::main(), which should be 
-// implemented as if it was main() with the expectation that argv is utf8.
+// application. This enables Unicode argument and environment processing in 
+// Windows. This macro implements main() and forwards to bc::main(), which 
+// should be implemented as if it was main() with the expectation that argv 
+// is utf8.
 //
-// Do not use cout|cerr|cin (aborts on assertion):
+// Do not use std::cout|std::cerr|std::cin (aborts on assertion):
 // std::cout << "text";
 // std::cerr << "text";
 // std::string text;
@@ -66,31 +67,49 @@
 // const auto utf16 = L"acción.кошка.日本国";
 // std::wcout << utf16;
 
-// Regarding use of boost::filesystem::path:
+// Regarding use of boost:
 //
-// If generic_wstring or c_str is used the boost::path default code page should
-// be inbued with UTF8. Otherwise generic_wstring and c_str will be in error.
-// This examples shows path with utf8 confiured properly:
-//      using namespace boost::locale;
-//      using namespace boost::filesystem;
-//      std::locale::global(generator().generate(""));
-//      path::imbue(std::locale());
-//      const auto directory = path() / "acción" / "кошка" / "日本国";
-//      auto utf16 = directory.generic_wstring();
+// When working with boost and utf8 narrow characters on Windows the thread
+// must be configured for utf8. When working with boost::filesystem::path the
+// static path object must be imbued with the utf8 locale or paths will be 
+// incorrectly translated.
 
 #ifdef _MSC_VER
+    #include <locale>
+    #include <boost/filesystem.hpp>
+    #include <boost/locale.hpp>
+    #include <fcntl.h>
+    #include <io.h>
+    #include <windows.h>
     #define BC_USE_LIBBITCOIN_MAIN \
-        namespace libbitcoin { int main(int argc, char* argv[]); } \
+        namespace libbitcoin { \
+        int main(int argc, char* argv[]); \
+        } \
+        \
         int wmain(int argc, wchar_t* argv[]) \
         { \
-            bc::console_streambuf::initialize(); \
-            auto buffer = libbitcoin::to_utf8(argc, argv); \
-            auto args = reinterpret_cast<char**>(&buffer[0]); \
+            _setmode(_fileno(stdin), _O_U8TEXT); \
+            _setmode(_fileno(stdout), _O_U8TEXT); \
+            _setmode(_fileno(stderr), _O_U8TEXT); \
+            \
+            using namespace libbitcoin; \
+            std::locale::global(boost::locale::generator()("UTF8")); \
+            boost::filesystem::path::imbue(std::locale()); \
+            \
+            auto variables = to_utf8(_wenviron); \
+            environ = reinterpret_cast<char**>(variables.data()); \
+            \
+            auto arguments = to_utf8(argc, argv); \
+            auto args = reinterpret_cast<char**>(arguments.data()); \
+            \
             return libbitcoin::main(argc, args); \
         }
 #else
     #define BC_USE_LIBBITCOIN_MAIN \
-        namespace libbitcoin { int main(int argc, char* argv[]); } \
+        namespace libbitcoin { \
+        int main(int argc, char* argv[]); \
+        } \
+        \
         int main(int argc, char* argv[]) \
         { \
             return libbitcoin::main(argc, argv); \
@@ -100,10 +119,35 @@
 namespace libbitcoin {
 
 /**
- * Caller should reinterpret result as:
+ * Use bc::cin in place of std::cin.
+ */
+extern std::istream& cin;
+
+/**
+ * Use bc::cout in place of std::cout.
+ */
+extern std::ostream& cout;
+
+/**
+ * Use bc::cerr in place of std::cerr.
+ */
+extern std::ostream& cerr;
+
+/**
+ * Convert wide environment vector to utf8 environment vector.
+ * Caller should assign buffer and set result to environ as:
+ * environ = reinterpret_cast<char**>(&buffer[0])
+ * @param[in]  environment  The wide environment variables vector.
+ * @return                  A buffer holding the narrow version of environment.
+ */
+BC_API data_chunk to_utf8(wchar_t* environment[]);
+
+/**
+ * Convert wide argument vector to utf8 argument vector.
+ * Caller should assign buffer and reinterpret result as:
  * auto args = reinterpret_cast<char**>(&buffer[0])
  * @param[in]  argc  The number of elements in argv.
- * @param[in]  argv  The wide command line arguments
+ * @param[in]  argv  The wide command line arguments.
  * @return           A buffer holding the narrow version of argv.
  */
 BC_API data_chunk to_utf8(int argc, wchar_t* argv[]);
@@ -116,8 +160,8 @@ BC_API data_chunk to_utf8(int argc, wchar_t* argv[]);
  * @param[in]  in_chars   The number of 'in' wide characters to convert.
  * @return                The number of bytes converted.
  */
-BC_API size_t to_utf8(char out[], int out_bytes, const wchar_t in[],
-    int in_chars);
+BC_API size_t to_utf8(char out[], size_t out_bytes, const wchar_t in[],
+    size_t in_chars);
 
 /**
  * Convert a wide (presumed UTF16) string to narrow (UTF8/char).
@@ -138,8 +182,8 @@ BC_API std::string to_utf8(const std::wstring& wide);
  * @param[in]  truncated  The number of 'in' bytes [0..3] that were truncated.
  * @return                The number of characters converted.
  */
-BC_API size_t to_utf16(wchar_t out[], int out_chars, const char in[],
-    int in_bytes, uint8_t& truncated);
+BC_API size_t to_utf16(wchar_t out[], size_t out_chars, const char in[],
+    size_t in_bytes, uint8_t& truncated);
 
 /**
  * Convert a narrow (presumed UTF8) string to wide (UTF16/wchar_t).

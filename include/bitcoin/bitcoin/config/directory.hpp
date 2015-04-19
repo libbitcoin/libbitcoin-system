@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,27 +17,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <utility>
-#include <vector>
-#include <boost/test/test_tools.hpp>
-#include <boost/test/unit_test_suite.hpp>
-#include <bitcoin/bitcoin.hpp>
+#ifndef LIBBITCOIN_DIRECTORY_HPP
+#define LIBBITCOIN_DIRECTORY_HPP
 
-using namespace bc::config;
+#include <string>
+#include <bitcoin/bitcoin/define.hpp>
 
-BOOST_AUTO_TEST_SUITE(config)
+/* NOTE: don't declare 'using namespace foo' in headers. */
 
-// TODO: add tests for these config utils.
-//find_pair_position(const std::vector<Pair>& list, const Key& key)
-//if_else(bool antecedent, const Consequent consequent, const Alternate alternative)
-//insert_sorted(std::vector<Type>& list, Type const& element, Predicate predicate)
-//join(const std::vector<std::string>& words, const std::string& delimiter)
-//split(const std::string& sentence, const std::string& delimiter)
-//trim(std::string& value)
+namespace libbitcoin {
+namespace config {
 
-//BOOST_AUTO_TEST_CASE(config__utilities__test)
-//{
-//    BOOST_REQUIRE(true);
-//}
+/**
+ * Get the windows configuration directory.
+ * @return Path or empty string if unable to retrieve.
+ */
+BC_API std::string windows_config_directory();
 
-BOOST_AUTO_TEST_SUITE_END() // config
+} // namespace config
+} // namespace libbitcoin
+
+#endif

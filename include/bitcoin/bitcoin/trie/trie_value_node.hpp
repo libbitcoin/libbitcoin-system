@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2011-2015
  *
  * Modified from https://github.com/BoostGSoC13/boost.trie
@@ -61,7 +61,7 @@ public:
     explicit trie_value_node(const value_type& x);
 };
 
-}
+} // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/trie/trie_value_node.ipp>
 
