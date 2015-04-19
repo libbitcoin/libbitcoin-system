@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,32 +17,32 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/directory.hpp>
+#ifndef LIBBITCOIN_IFSTREAM_HPP
+#define LIBBITCOIN_IFSTREAM_HPP
 
+#include <fstream>
 #include <string>
-#include <bitcoin/bitcoin/unicode/unicode.hpp>
-
-#ifdef _MSC_VER
-    #include <shlobj.h>
-    #include <windows.h>
-#endif
+#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
-namespace config {
 
-// Returns empty string if unable to retrieve (including when not in Windows).
-std::string windows_config_directory()
+/**
+ * Use bc::ifstream in place of std::ifstream.
+ * This provides utf8 to utf16 path translation for Windows.
+ */
+class BC_API ifstream :
+    public std::ifstream
 {
-#ifdef _MSC_VER
-    wchar_t directory[MAX_PATH];
-    const auto result = SHGetFolderPathW(NULL, CSIDL_COMMON_APPDATA, NULL,
-        SHGFP_TYPE_CURRENT, directory);
+public:
+    /**
+     * Construct bc::ifstream.
+     * @param[in]  path  The utf8 path to the file.
+     * @param[in]  mode  The file opening mode.
+     */
+    ifstream(const std::string& path, 
+        std::ifstream::openmode mode=std::ifstream::in);
+};
 
-    if (SUCCEEDED(result))
-        return to_utf8(directory);
-#endif
-    return "";
-}
-
-} // namespace config
 } // namespace libbitcoin
+
+#endif

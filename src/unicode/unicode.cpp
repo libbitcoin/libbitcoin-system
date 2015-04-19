@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/unicode.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 
 #include <cstddef>
 #include <cstring>
@@ -26,11 +26,11 @@
 #include <mutex>
 #include <string>
 #include <boost/locale.hpp>
+#include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
+#include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
+#include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/console_streambuf.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/unicode_istream.hpp>
-#include <bitcoin/bitcoin/utility/unicode_ostream.hpp>
 
 namespace libbitcoin {
 
@@ -71,30 +71,6 @@ static std::ostream& cerr_stream()
 std::istream& cin = cin_stream();
 std::ostream& cout = cout_stream();
 std::ostream& cerr = cerr_stream();
-
-// Use bc::ifstream as factory for std::ifstream.
-std::ifstream ifstream(const std::string& path, std::ios_base::openmode mode)
-{
-#ifdef _MSC_VER
-    // MSVC provides wide character path support via a non-standard override to
-    // ifstream. The resulting stream is a standard ifstream (not a wifstream).
-    return std::ifstream(to_utf16(path), mode);
-#else
-    return std::ifstream(path, mode);
-#endif
-}
-
-// Use bc::ofstream as factory for std::ofstream.
-std::ofstream ofstream(const std::string& path, std::ios_base::openmode mode)
-{
-#ifdef _MSC_VER
-    // MSVC provides wide character path support via a non-standard override to
-    // ofstream. The resulting stream is a standard ofstream (not a wofstream).
-    return std::ofstream(to_utf16(path), mode);
-#else
-    return std::ofstream(path, mode);
-#endif
-}
 
 // Convert wmain environment to utf8 main environment.
 data_chunk to_utf8(wchar_t* environment[])

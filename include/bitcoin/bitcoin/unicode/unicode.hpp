@@ -21,7 +21,6 @@
 #define LIBBITCOIN_UNICODE_HPP
 
 #include <cstddef>
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
@@ -133,24 +132,6 @@ extern std::ostream& cout;
  * Use bc::cerr in place of std::cerr.
  */
 extern std::ostream& cerr;
-
-/**
- * Use bc::ifstream as factory for std::ifstream.
- * @param[in]  path  The utf8 path to the file.
- * @param[in]  mode  The file opening mode.
- * @return           The input file stream for the specified file.
- */
-std::ifstream ifstream(const std::string& path,
-    std::ios_base::openmode mode=std::ios_base::in);
-
-/**
- * Use bc::ifstream as factory for std::ofstream.
- * @param[in]  path  The utf8 path to the file.
- * @param[in]  mode  The file opening mode.
- * @return           The output file stream for the specified file.
- */
-std::ofstream ofstream(const std::string& path,
-    std::ios_base::openmode mode=std::ios_base::out);
 
 /**
  * Convert wide environment vector to utf8 environment vector.

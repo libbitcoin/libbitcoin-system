@@ -22,6 +22,7 @@
 
 #include <cstddef>
 #include <streambuf>
+#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 
@@ -29,7 +30,7 @@ namespace libbitcoin {
  * Class to patch Windows stdin keyboard input, file input is not a problem.
  * This class and members are no-ops when called in non-MSVC++ builds.
  */
-class console_streambuf
+class BC_API console_streambuf
     : public std::wstreambuf
 {
 public:

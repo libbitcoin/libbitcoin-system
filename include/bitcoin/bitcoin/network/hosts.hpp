@@ -21,7 +21,6 @@
 #define LIBBITCOIN_HOSTS_HPP
 
 #include <string>
-#include <fstream>
 #include <functional>
 #include <system_error>
 #include <boost/circular_buffer.hpp>

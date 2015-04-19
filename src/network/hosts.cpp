@@ -28,7 +28,9 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/utility/unicode.hpp>
+#include <bitcoin/bitcoin/unicode/ifstream.hpp>
+#include <bitcoin/bitcoin/unicode/ofstream.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -50,7 +52,7 @@ void hosts::load(const std::string& path, load_handler handle_load)
 }
 void hosts::do_load(const path& path, load_handler handle_load)
 {
-    auto file = bc::ifstream(path.string());
+    bc::ifstream file(path.string());
     if (!file.good())
     {
         // TODO: handle error.
@@ -90,7 +92,7 @@ void hosts::save(const std::string& path, save_handler handle_save)
 }
 void hosts::do_save(const path& path, save_handler handle_save)
 {
-    auto file = bc::ofstream(path.string());
+    bc::ofstream file(path.string());
     if (!file.good())
     {
         // TODO: handle error.
