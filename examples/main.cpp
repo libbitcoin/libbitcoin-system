@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <cstdlib>
 #include <string>
 #include <bitcoin/bitcoin.hpp>
 
@@ -35,8 +36,10 @@ int bc::main(int argc, char* argv[])
     if (argc > 1)
         bc::cout << "argv[1] : " << argv[1] << std::endl;
 
+#ifndef __MACH__
     if (environ[0] != nullptr)
         bc::cout << "environ[0] : " << environ[0] << std::endl;
+#endif
 
     return EXIT_SUCCESS;
 }
