@@ -105,6 +105,7 @@
     <ClCompile Include="..\..\..\..\src\stealth.cpp" />
     <ClCompile Include="..\..\..\..\src\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\console_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
@@ -113,7 +114,6 @@
     <ClCompile Include="..\..\..\..\src\utility\unicode.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\unicode_ostream.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\console_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\unicode_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp" />
@@ -157,6 +157,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\transaction.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\trie\binary_trie.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\trie\trie_iterator.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\trie\trie_reverse_iterator.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\trie\trie_structure_node.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\trie\trie_value_node.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_parallel.hpp" />

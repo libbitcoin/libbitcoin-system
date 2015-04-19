@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__conditional__test)
     std::wstringstream wide_stream;
     std::stringstream narrow_stream;
 
-    unicode_ostream output(narrow_stream, wide_stream);
+    unicode_ostream output(narrow_stream, wide_stream, 256);
     output << "ascii";
     output.flush();
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__non_ascii__test)
     std::wstringstream wide_stream;
     std::stringstream narrow_stream;
 
-    unicode_ostream output(narrow_stream, wide_stream);
+    unicode_ostream output(narrow_stream, wide_stream, 256);
     output << utf8;
     output.flush();
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__overflow__test)
     std::wstringstream wide_stream;
     std::stringstream narrow_stream;
 
-    unicode_ostream output(narrow_stream, wide_stream);
+    unicode_ostream output(narrow_stream, wide_stream, 256);
     output << utf8_1800_bytes;
     output.flush();
 

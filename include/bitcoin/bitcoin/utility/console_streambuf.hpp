@@ -20,54 +20,56 @@
 #ifndef LIBBITCOIN_CONSOLE_STREAMBUF_HPP
 #define LIBBITCOIN_CONSOLE_STREAMBUF_HPP
 
+#include <cstddef>
 #include <streambuf>
-#include <string>
-#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 
 /**
- * An alias for the wide character basic stream buffer type.
- */
-typedef std::basic_streambuf<wchar_t> wide_streambuf;
-
-/**
- * An alias for the wide character basic stream buffer traits type.
- */
-typedef std::basic_streambuf<wchar_t>::traits_type wide_traits;
-
-/**
  * Class to patch Windows stdin keyboard input, file input is not a problem.
- * Initializes stdout, stderr and stdin for wide stream (utf8 translation).
+ * This class and members are no-ops when called in non-MSVC++ builds.
  */
-class BC_API console_streambuf
-    : public wide_streambuf
+class console_streambuf
+    : public std::wstreambuf
 {
 public:
     /**
      * Initialize stdio to use utf8 translation on Windows.
+     * @param[in]  size  The stream buffer size.
      */
-    static void initialize();
+    static void initialize(size_t size);
 
 protected:
     /**
      * Protected construction, use static initialize method.
+     * @param[in]  stream_buffer  The stream buffer to patch.
+     * @param[in]  size           The stream buffer size.
      */
-    console_streambuf(wide_streambuf const& stream_buffer);
+    console_streambuf(std::wstreambuf const& stream_buffer, size_t size);
+
+    /**
+     * Delete stream buffer.
+     */
+    virtual ~console_streambuf();
 
     /**
      * Implement alternate console read.
+     * @param[in]  buffer  Pointer to the buffer to fill with console reads.
+     * @param[in]  size    The size of the buffer that may be populated.
      */
     virtual std::streamsize xsgetn(wchar_t* buffer, std::streamsize size);
 
     /**
      * Implement alternate console read.
      */
-    virtual wide_traits::int_type underflow();
+    virtual std::wstreambuf::int_type underflow();
 
 private:
-    std::wstring buffer_;
-    static bool initialized_;
+    // The constructed buffer size.
+    size_t buffer_size_;
+
+    // The dynamically-allocated buffers.
+    wchar_t* buffer_;
 };
 
 } // namespace libbitcoin

@@ -19,15 +19,16 @@
  */
 #include <bitcoin/bitcoin/utility/unicode_istream.hpp>
 
+#include <cstddef>
 #include <iostream>
 #include <bitcoin/bitcoin/utility/unicode_streambuf.hpp>
 
 namespace libbitcoin {
 
 unicode_istream::unicode_istream(std::istream& narrow_stream,
-    std::wistream& wide_stream)
+    std::wistream& wide_stream, size_t size)
 #ifdef _MSC_VER
-    : std::istream(new unicode_streambuf(wide_stream.rdbuf()))
+    : std::istream(new unicode_streambuf(wide_stream.rdbuf(), size))
 #else
     : std::istream(narrow_stream.rdbuf())
 #endif

@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <string>
 #include <bitcoin/bitcoin.hpp>
 
@@ -25,22 +24,19 @@ BC_USE_LIBBITCOIN_MAIN
 
 int bc::main(int argc, char* argv[])
 {
-    unicode_istream input(std::cin, std::wcin);
-    unicode_ostream output(std::cout, std::wcout);
-    unicode_ostream error(std::cerr, std::wcerr);
+    bc::cout << "output : acción.кошка.日本国" << std::endl;
+    bc::cerr << "error : acción.кошка.日本国" << std::endl;
 
-    // Use utf-8 with output|error.
-    output << "output : acción.кошка.日本国" << std::endl;
-    error << "error : acción.кошка.日本国" << std::endl;
-
-    // input treats file input as utf8 and translates console input to utf8.
-    output << "Enter text to input..." << std::endl;
+    bc::cout << "Enter text to input..." << std::endl;
     std::string console;
-    input >> console;
-    output << "input[0]  : " << console << std::endl;
+    bc::cin >> console;
+    bc::cout << "input[0]  : " << console << std::endl;
 
     if (argc > 1)
-        output << "argv[1] : " << argv[1] << std::endl;
+        bc::cout << "argv[1] : " << argv[1] << std::endl;
+
+    if (environ[0] != nullptr)
+        bc::cout << "environ[0] : " << environ[0] << std::endl;
 
     return EXIT_SUCCESS;
 }

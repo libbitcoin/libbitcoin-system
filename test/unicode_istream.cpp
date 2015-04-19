@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(unicode_istream__conditional__test)
     std::wstringstream wide_stream(L"windows ...");
     std::stringstream narrow_stream("linux ...");
 
-    unicode_istream input(narrow_stream, wide_stream);
+    unicode_istream input(narrow_stream, wide_stream, 256);
     std::string result;
     input >> result;
 
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(unicode_istream__non_ascii__test)
     std::wstringstream wide_stream(utf16);
     std::stringstream narrow_stream(utf8);
 
-    unicode_istream input(narrow_stream, wide_stream);
+    unicode_istream input(narrow_stream, wide_stream, 256);
     std::string result;
     input >> result;
 
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(unicode_istream__tokenization__test)
     std::wstringstream wide_stream(utf16);
     std::stringstream narrow_stream(utf8);
 
-    unicode_istream input(narrow_stream, wide_stream);
+    unicode_istream input(narrow_stream, wide_stream, 256);
     std::string result;
 
     input >> result;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(unicode_istream__overflow__test)
     std::wstringstream wide_stream(utf16_600_chars);
     std::stringstream narrow_stream(utf8_1800_bytes);
 
-    unicode_istream input(narrow_stream, wide_stream);
+    unicode_istream input(narrow_stream, wide_stream, 256);
     std::string result;
     input >> result;
 

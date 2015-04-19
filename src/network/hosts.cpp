@@ -17,34 +17,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
+#include <string>
+#include <system_error>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/utility/unicode.hpp>
 
 namespace libbitcoin {
 namespace network {
 
+using boost::filesystem::path;
+
 hosts::hosts(threadpool& pool, size_t capacity)
   : strand_(pool), buffer_(capacity)
 {
-    srand((unsigned int)time(nullptr));
+    srand(static_cast<uint32_t>(time(nullptr)));
 }
 hosts::~hosts()
 {
 }
 
-void hosts::load(const std::string& filename, load_handler handle_load)
+void hosts::load(const std::string& path, load_handler handle_load)
 {
-    strand_.randomly_queue(
-        &hosts::do_load, this, filename, handle_load);
+    strand_.randomly_queue(&hosts::do_load, this, path, handle_load);
 }
-void hosts::do_load(const std::string& filename, load_handler handle_load)
+void hosts::do_load(const path& path, load_handler handle_load)
 {
-    std::ifstream file_handle(filename);
+    auto file = bc::ifstream(path.string());
+    if (!file.good())
+    {
+        // TODO: handle error.
+    }
+
     std::string line;
-    while (std::getline(file_handle, line))
+    while (std::getline(file, line))
     {
         std::vector<std::string> parts;
         boost::split(parts, line, boost::is_any_of(" "));
@@ -57,6 +70,7 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
         if (raw_ip.size() != field.ip.size())
             continue;
         std::copy(raw_ip.begin(), raw_ip.end(), field.ip.begin());
+
         // Trim CR if using CRLF Windows style line endings.
         boost::trim_if(parts[1], boost::is_any_of("\r"));
         field.port = boost::lexical_cast<uint16_t>(parts[1]);
@@ -69,18 +83,21 @@ void hosts::do_load(const std::string& filename, load_handler handle_load)
     handle_load(std::error_code());
 }
 
-void hosts::save(const std::string& filename, save_handler handle_save)
+void hosts::save(const std::string& path, save_handler handle_save)
 {
     strand_.randomly_queue(
-        std::bind(&hosts::do_save,
-            this, filename, handle_save));
+        std::bind(&hosts::do_save, this, path, handle_save));
 }
-void hosts::do_save(const std::string& filename, save_handler handle_save)
+void hosts::do_save(const path& path, save_handler handle_save)
 {
-    std::ofstream file_handle(filename);
+    auto file = bc::ofstream(path.string());
+    if (!file.good())
+    {
+        // TODO: handle error.
+    }
+
     for (const hosts_field& field: buffer_)
-        file_handle << encode_base16(field.ip) << ' '
-            << field.port << std::endl;
+        file << encode_base16(field.ip) << ' ' << field.port << std::endl;
     handle_save(std::error_code());
 }
 

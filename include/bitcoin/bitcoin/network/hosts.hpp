@@ -25,6 +25,7 @@
 #include <functional>
 #include <system_error>
 #include <boost/circular_buffer.hpp>
+#include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -53,8 +54,8 @@ public:
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
 
-    BC_API void load(const std::string& filename, load_handler handle_load);
-    BC_API void save(const std::string& filename, save_handler handle_save);
+    BC_API void load(const std::string& path, load_handler handle_load);
+    BC_API void save(const std::string& path, save_handler handle_save);
 
     BC_API void store(const network_address_type& address,
         store_handler handle_store);
@@ -71,8 +72,10 @@ private:
         uint16_t port;
     };
 
-    void do_load(const std::string& filename, load_handler handle_load);
-    void do_save(const std::string& filename, save_handler handle_save);
+    void do_load(const boost::filesystem::path& path,
+        load_handler handle_load);
+    void do_save(const boost::filesystem::path& path,
+        save_handler handle_save);
 
     void do_remove(const network_address_type& address,
         remove_handler handle_remove);
