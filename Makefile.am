@@ -42,9 +42,6 @@ src_libbitcoin_la_SOURCES = \
     src/error.cpp \
     src/evaluation_context.cpp \
     src/evaluation_context.hpp \
-    src/stealth.cpp \
-    src/transaction.cpp \
-    src/config/directory.cpp \
     src/chain/block.cpp \
     src/chain/block_header.cpp \
     src/chain/opcode.cpp \
@@ -54,6 +51,7 @@ src_libbitcoin_la_SOURCES = \
     src/chain/transaction.cpp \
     src/chain/transaction_input.cpp \
     src/chain/transaction_output.cpp \
+    src/config/directory.cpp \
     src/config/parameter.cpp \
     src/config/printer.cpp \
     src/formats/base10.cpp \
@@ -108,27 +106,6 @@ src_libbitcoin_la_SOURCES = \
     src/network/network.cpp \
     src/network/protocol.cpp \
     src/network/seeder.cpp \
-    src/primitives/blockchain/block.cpp \
-    src/primitives/blockchain/block_header.cpp \
-    src/primitives/blockchain/opcode.cpp \
-    src/primitives/blockchain/operation.cpp \
-    src/primitives/blockchain/point.cpp \
-    src/primitives/blockchain/script.cpp \
-    src/primitives/blockchain/transaction.cpp \
-    src/primitives/blockchain/transaction_input.cpp \
-    src/primitives/blockchain/transaction_output.cpp \
-    src/primitives/satoshi/address.cpp \
-    src/primitives/satoshi/get_address.cpp \
-    src/primitives/satoshi/get_blocks.cpp \
-    src/primitives/satoshi/get_data.cpp \
-    src/primitives/satoshi/header.cpp \
-    src/primitives/satoshi/inventory.cpp \
-    src/primitives/satoshi/inventory_type_id.cpp \
-    src/primitives/satoshi/inventory_vector.cpp \
-    src/primitives/satoshi/network_address.cpp \
-    src/primitives/satoshi/ping.cpp \
-    src/primitives/satoshi/verack.cpp \
-    src/primitives/satoshi/version.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
     src/unicode/ofstream.cpp \
@@ -146,9 +123,6 @@ src_libbitcoin_la_SOURCES = \
     src/utility/threadpool.cpp \
     src/utility/time.cpp \
     src/utility/timed_section.cpp \
-    src/utility/unicode.cpp \
-    src/utility/unicode_streambuf.cpp \
-    src/wallet/address.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
