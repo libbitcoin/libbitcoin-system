@@ -42,6 +42,11 @@ point::point(const data_chunk& value)
 {
 }
 
+hash_digest& point::hash()
+{
+    return hash_;
+}
+
 const hash_digest& point::hash() const
 {
     return hash_;

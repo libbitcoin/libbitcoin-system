@@ -47,6 +47,8 @@ public:
     template<typename Iterator>
     point(const Iterator begin, const Iterator end);
 
+    hash_digest& hash();
+
     const hash_digest& hash() const;
 
     void hash(const hash_digest& hash);
