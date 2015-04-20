@@ -51,9 +51,13 @@ public:
 
     void version(uint32_t version);
 
+    hash_digest& previous_block_hash();
+
     const hash_digest& previous_block_hash() const;
 
     void previous_block_hash(const hash_digest& hash);
+
+    hash_digest& merkle();
 
     const hash_digest& merkle() const;
 

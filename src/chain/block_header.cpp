@@ -48,6 +48,11 @@ void block_header::version(uint32_t version)
     version_ = version;
 }
 
+hash_digest& block_header::previous_block_hash()
+{
+    return previous_block_hash_;
+}
+
 const hash_digest& block_header::previous_block_hash() const
 {
     return previous_block_hash_;
@@ -56,6 +61,11 @@ const hash_digest& block_header::previous_block_hash() const
 void block_header::previous_block_hash(const hash_digest& hash)
 {
     previous_block_hash_ = hash;
+}
+
+hash_digest& block_header::merkle()
+{
+    return merkle_;
 }
 
 const hash_digest& block_header::merkle() const
@@ -130,12 +140,17 @@ size_t block_header::satoshi_fixed_size()
 bool operator==(const block_header& block_a,
     const block_header& block_b)
 {
-    return block_a.version() == block_b.version()
-        && block_a.previous_block_hash() == block_b.previous_block_hash()
-        && block_a.merkle() == block_b.merkle()
-        && block_a.timestamp() == block_b.timestamp()
-        && block_a.bits() == block_b.bits()
-        && block_a.nonce() == block_b.nonce();
+    const hash_digest hash_a = block_a.previous_block_hash();
+    const hash_digest hash_b = block_b.previous_block_hash();
+    const hash_digest merkle_a = block_a.merkle();
+    const hash_digest merkle_b = block_b.merkle();
+
+    return (block_a.version() == block_b.version())
+        && (hash_a == hash_b)
+        && (merkle_a == merkle_b)
+        && (block_a.timestamp() == block_b.timestamp())
+        && (block_a.bits() == block_b.bits())
+        && (block_a.nonce() == block_b.nonce());
 }
 
 hash_digest block_header::hash() const
