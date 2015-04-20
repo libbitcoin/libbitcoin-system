@@ -37,44 +37,46 @@ bool char_is(const char c)
     return c == C;
 }
 
-bool decode_base10(uint64_t& out, std::string amount,
+bool decode_base10(uint64_t& out, const std::string& amount,
     uint8_t decimal_places, bool strict)
 {
+    std::string value(amount);
+
     // Get rid of the decimal point:
-    auto point = std::find(amount.begin(), amount.end(), '.');
-    if (point != amount.end())
-        point = amount.erase(point);
+    auto point = std::find(value.begin(), value.end(), '.');
+    if (point != value.end())
+        point = value.erase(point);
 
     // Only digits should remain:
-    if (!std::all_of(amount.begin(), amount.end(), is_digit))
+    if (!std::all_of(value.begin(), value.end(), is_digit))
         return false;
 
     // Add digits to the end if there are too few:
-    auto actual_places = amount.end() - point;
+    auto actual_places = value.end() - point;
     if (actual_places < decimal_places)
-        amount.append(decimal_places - actual_places, '0');
+        value.append(decimal_places - actual_places, '0');
 
     // Remove digits from the end if there are too many:
     bool round = false;
     if (actual_places > decimal_places)
     {
         auto end = point + decimal_places;
-        round = !std::all_of(end, amount.end(), char_is<'0'>);
-        amount.erase(end, amount.end());
+        round = !std::all_of(end, value.end(), char_is<'0'>);
+        value.erase(end, value.end());
     }
     if (strict && round)
         return false;
 
     // Convert to an integer:
-    std::istringstream stream(amount);
-    uint64_t value = 0;
-    if (amount.size() && !(stream >> value))
+    std::istringstream stream(value);
+    uint64_t number = 0;
+    if (value.size() && !(stream >> number))
         return false;
 
     // Round and return:
-    if (round && value == max_uint64)
+    if (round && number == max_uint64)
         return false;
-    out = value + round;
+    out = number + round;
     return true;
 }
 

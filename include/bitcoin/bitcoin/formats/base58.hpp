@@ -42,7 +42,7 @@ BC_API std::string encode_base58(data_slice unencoded);
 BC_API bool decode_base58(data_chunk& out, const std::string& in);
 
 // Old prototype:
-BC_API data_chunk decode_base58(std::string encoded);
+BC_API data_chunk decode_base58(const std::string& encoded);
 
 } // namespace libbitcoin
 
