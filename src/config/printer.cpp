@@ -389,9 +389,7 @@ std::string printer::format_usage_parameters()
         usage << format(BC_PRINTER_USAGE_ARGUMENT_MULTIPLE_FORMAT) %
             multiple_argument;
 
-    std::string clean_usage(usage.str());
-    trim(clean_usage);
-    return clean_usage;
+    return boost::trim_copy(usage.str());
 }
 
 /* Initialization */

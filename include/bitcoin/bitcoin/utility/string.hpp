@@ -45,12 +45,6 @@ BC_API std::string join(const std::vector<std::string>& words,
 BC_API std::vector<std::string> split(const std::string& sentence,
     const std::string& delimiter=" ");
 
-/**
- * Trim a string of whitespace.
- * @param[out] value  The string to trim.
- */
-BC_API void trim(std::string& value);
-
 } // namespace libbitcoin
 
 #endif

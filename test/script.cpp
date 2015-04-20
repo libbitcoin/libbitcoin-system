@@ -128,7 +128,7 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
 
 bool parse_token(data_chunk& raw_script, std::string token)
 {
-    boost::algorithm::trim(token);
+    boost::trim(token);
     // skip this
     if (token.empty())
         return true;
@@ -184,11 +184,10 @@ bool parse_token(data_chunk& raw_script, std::string token)
 
 bool parse(script_type& result_script, std::string format)
 {
-    boost::algorithm::trim(format);
+    boost::trim(format);
     if (format.empty())
         return true;
-    std::vector<std::string> tokens;
-    boost::split(tokens, format, boost::is_any_of(" "));
+    auto tokens = bc::split(format, " ");
     data_chunk raw_script;
     for (const auto& token: tokens)
         if (!parse_token(raw_script, token))

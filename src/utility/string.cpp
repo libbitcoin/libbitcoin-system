@@ -40,9 +40,4 @@ std::vector<std::string> split(const std::string& sentence,
     return words;
 }
 
-void trim(std::string& value)
-{
-    boost::trim(value);
-}
-
 } // namespace libbitcoin
