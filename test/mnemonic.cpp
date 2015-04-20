@@ -26,27 +26,50 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
-BOOST_AUTO_TEST_CASE(entropy_to_en_mnemonic)
+BOOST_AUTO_TEST_CASE(entropy_to_trezor_mnemonic)
 {
-    for (const mnemonic_result& result: mnemonic_bip39_vectors)
+    for (const mnemonic_result& result: mnemonic_trezor_vectors)
     {
         data_chunk entropy;
         decode_base16(entropy, result.entropy);
-        const auto mnemonic = create_mnemonic(entropy, language::en);
+        const auto mnemonic = create_mnemonic(entropy, result.language);
         BOOST_REQUIRE(mnemonic.size() > 0);
         BOOST_REQUIRE_EQUAL(join(mnemonic), result.mnemonic);
         BOOST_REQUIRE(validate_mnemonic(mnemonic));
     }
 }
 
-BOOST_AUTO_TEST_CASE(en_mnemonic_to_seed)
+BOOST_AUTO_TEST_CASE(entropy_to_bx_new_mnemonic)
 {
-    const auto& passphrase = "TREZOR";
-    for (const mnemonic_result& result: mnemonic_bip39_vectors)
+    for (const mnemonic_result& result: mnemonic_bx_new_vectors)
+    {
+        data_chunk entropy;
+        decode_base16(entropy, result.entropy);
+        const auto mnemonic = create_mnemonic(entropy, result.language);
+        BOOST_REQUIRE(mnemonic.size() > 0);
+        BOOST_REQUIRE_EQUAL(join(mnemonic), result.mnemonic);
+        BOOST_REQUIRE(validate_mnemonic(mnemonic));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(trezor_mnemonic_to_seed)
+{
+    for (const auto& result: mnemonic_trezor_vectors)
     {
         const auto words = split(result.mnemonic);
         BOOST_REQUIRE(validate_mnemonic(words));
-        const auto seed = decode_mnemonic(words, passphrase);
+        const auto seed = decode_mnemonic(words, result.passphrase);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), result.seed);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(bx_mnemonic_to_seed)
+{
+    for (const auto& result: mnemonic_bx_to_seed_vectors)
+    {
+        const auto words = split(result.mnemonic);
+        BOOST_REQUIRE(validate_mnemonic(words));
+        const auto seed = decode_mnemonic(words, result.passphrase);
         BOOST_REQUIRE_EQUAL(encode_base16(seed), result.seed);
     }
 }
