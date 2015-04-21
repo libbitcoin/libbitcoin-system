@@ -39,11 +39,9 @@ public:
 
     static const std::string satoshi_command;
 
-    // 10 sequential hashes, then exponential samples until reaching genesis
-    block_locator start_hashes;
-    hash_digest hash_stop;
-
     get_blocks();
+
+    get_blocks(const block_locator& start_hashes, const hash_digest& hash_stop);
 
     get_blocks(const data_chunk& value);
 
@@ -53,6 +51,19 @@ public:
     template<typename Iterator>
     get_blocks(const Iterator begin, const Iterator end);
 
+    // 10 sequential hashes, then exponential samples until reaching genesis
+    block_locator& start_hashes();
+
+    const block_locator& start_hashes() const;
+
+    void start_hashes(const block_locator& value);
+
+    hash_digest& hash_stop();
+
+    const hash_digest& hash_stop() const;
+
+    void hash_stop(const hash_digest& value);
+
     operator const data_chunk() const;
 
     size_t satoshi_size() const;
@@ -61,6 +72,10 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    // 10 sequential hashes, then exponential samples until reaching genesis
+    block_locator start_hashes_;
+    hash_digest hash_stop_;
 };
 
 } // end message

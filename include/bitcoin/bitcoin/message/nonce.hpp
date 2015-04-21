@@ -37,9 +37,9 @@ class BC_API nonce_base
 {
 public:
 
-    uint64_t nonce;
-
     nonce_base();
+
+    nonce_base(const uint64_t nonce);
 
     nonce_base(const data_chunk& value);
 
@@ -48,6 +48,10 @@ public:
 
     template<typename Iterator>
     nonce_base(const Iterator begin, const Iterator end);
+
+    uint64_t nonce() const;
+
+    void nonce(uint64_t value);
 
     operator const data_chunk() const;
 
@@ -59,6 +63,8 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    uint64_t nonce_;
 };
 
 class BC_API ping : public nonce_base

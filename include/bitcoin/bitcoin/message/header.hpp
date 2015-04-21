@@ -34,13 +34,10 @@ class BC_API header
 {
 public:
 
-    uint32_t magic;
-    std::string command;
-    uint32_t payload_length;
-    // Ignored by version and verack commands
-    uint32_t checksum;
-
     header();
+
+    header(uint32_t magic, std::string command, uint32_t payload_length,
+        uint32_t checksum);
 
     header(const data_chunk& value);
 
@@ -50,6 +47,24 @@ public:
     template<typename Iterator>
     header(const Iterator begin, const Iterator end);
 
+    uint32_t magic() const;
+
+    void magic(const uint32_t value);
+
+    std::string& command();
+
+    const std::string& command() const;
+
+    void command(const std::string& value);
+
+    uint32_t payload_length() const;
+
+    void payload_length(const uint32_t value);
+
+    uint32_t checksum() const;
+
+    void checksum(const uint32_t value);
+
     operator const data_chunk() const;
 
     size_t satoshi_size() const;
@@ -58,6 +73,12 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    uint32_t magic_;
+    std::string command_;
+    uint32_t payload_length_;
+    // Ignored by version and verack commands
+    uint32_t checksum_;
 };
 
 } // end message

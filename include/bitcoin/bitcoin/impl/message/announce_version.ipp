@@ -26,33 +26,34 @@ namespace message {
 template <typename Iterator, bool SafeCheckLast>
 void announce_version::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
-    version = deserial.read_4_bytes();
-    services = deserial.read_8_bytes();
-    timestamp = deserial.read_8_bytes();
-    address_me = deserial.read_network_address();
+    version_ = deserial.read_4_bytes();
+    services_ = deserial.read_8_bytes();
+    timestamp_ = deserial.read_8_bytes();
+
+    address_me_ = network_address(deserial);
 
     // Ignored field
-    address_me.timestamp = 0;
+    address_me_.timestamp(0);
 
-    if (version < 106)
+    if (version_ < 106)
     {
         return;
     }
 
-    address_you = deserial.read_network_address();
+    address_you_ = network_address(deserial);
 
     // Ignored field
-    address_you.timestamp = 0;
+    address_you_.timestamp(0);
 
-    nonce = deserial.read_8_bytes();
-    user_agent = deserial.read_string();
+    nonce_ = deserial.read_8_bytes();
+    user_agent_ = deserial.read_string();
 
-    if (version < 209)
+    if (version_ < 209)
     {
         return;
     }
 
-    start_height = deserial.read_4_bytes();
+    start_height_ = deserial.read_4_bytes();
 }
 
 template <typename Iterator, bool SafeCheckLast>
@@ -68,13 +69,13 @@ announce_version::announce_version(const Iterator begin, const Iterator end)
     auto deserial = make_deserializer(begin, end);
     deserialize(deserial);
 
-    if (version < 106)
+    if (version_ < 106)
     {
         BITCOIN_ASSERT(std::distance(begin, end) >= 46);
         return;
     }
 
-    if (version < 209)
+    if (version_ < 209)
     {
         BITCOIN_ASSERT(std::distance(begin, end) >= 46 + 26 + 8 + 1);
         return;

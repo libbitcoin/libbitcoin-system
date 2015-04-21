@@ -17,57 +17,37 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_NONCE_IPP
-#define LIBBITCOIN_MESSAGE_NONCE_IPP
+#ifndef LIBBITCOIN_MESSAGE_NETWORK_ADDRESS_IPP
+#define LIBBITCOIN_MESSAGE_NETWORK_ADDRESS_IPP
 
 namespace libbitcoin {
 namespace message {
 
 template <typename Iterator, bool SafeCheckLast>
-void nonce_base::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
+void network_address::deserialize(
+    deserializer<Iterator, SafeCheckLast>& deserial)
 {
-    nonce_ = deserial.read_8_bytes();
-
+    services_ = deserial.read_8_bytes();
+    // Read IP address
+    ip_ = deserial.template read_bytes<16>();
+    port_ = deserial.template read_big_endian<uint16_t>();
 }
 
 template <typename Iterator, bool SafeCheckLast>
-nonce_base::nonce_base(deserializer<Iterator, SafeCheckLast>& deserial)
+network_address::network_address(
+    deserializer<Iterator, SafeCheckLast>& deserial)
 {
     deserialize(deserial);
 }
 
 template<typename Iterator>
-nonce_base::nonce_base(const Iterator begin, const Iterator end)
+network_address::network_address(const Iterator begin, const Iterator end)
 {
     auto deserial = make_deserializer(begin, end);
     deserialize(deserial);
 
     BITCOIN_ASSERT(deserial.iterator() == begin + satoshi_size());
     BITCOIN_ASSERT(deserial.iterator() == end);
-}
-
-template <typename Iterator, bool SafeCheckLast>
-ping::ping(deserializer<Iterator, SafeCheckLast>& deserial)
-: nonce_base(deserial)
-{
-}
-
-template<typename Iterator>
-ping::ping(const Iterator begin, const Iterator end)
-: nonce_base(begin, end)
-{
-}
-
-template <typename Iterator, bool SafeCheckLast>
-pong::pong(deserializer<Iterator, SafeCheckLast>& deserial)
-: nonce_base(deserial)
-{
-}
-
-template<typename Iterator>
-pong::pong(const Iterator begin, const Iterator end)
-: nonce_base(begin, end)
-{
 }
 
 } // end message

@@ -24,35 +24,87 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/deserializer.hpp>
+#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
 
 typedef byte_array<16> ip_address;
 
+//struct BC_API network_address
+//{
+//public:
+//
+//    uint32_t timestamp;
+//    uint64_t services;
+//    ip_address ip;
+//    uint16_t port;
+//
+//    operator const data_chunk() const;
+//
+//    size_t satoshi_size() const;
+//
+//    static size_t satoshi_fixed_size();
+//};
+
 class BC_API network_address
 {
 public:
 
-    uint32_t timestamp;
-    uint64_t services;
-    ip_address ip;
-    uint16_t port;
-
     network_address();
 
+    network_address(const uint32_t timestamp, const uint64_t services,
+        const ip_address& ip, const uint16_t port);
+
     network_address(const data_chunk& value);
+
+    template <typename Iterator, bool SafeCheckLast>
+    network_address(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    template<typename Iterator>
+    network_address(const Iterator begin, const Iterator end);
+
+    uint32_t timestamp() const;
+
+    void timestamp(uint32_t value);
+
+    uint64_t services() const;
+
+    void services(uint64_t value);
+
+    ip_address& ip();
+
+    const ip_address& ip() const;
+
+    void ip(const ip_address& value);
+
+    uint16_t port() const;
+
+    void port(uint16_t value);
 
     operator const data_chunk() const;
 
     size_t satoshi_size() const;
 
     static size_t satoshi_fixed_size();
+
+private:
+
+    template <typename Iterator, bool SafeCheckLast>
+    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    uint32_t timestamp_;
+    uint64_t services_;
+    ip_address ip_;
+    uint16_t port_;
 };
 
 typedef std::vector<network_address> network_address_list;
 
 } // end message
 } // end libbitcoin
+
+#include <bitcoin/bitcoin/impl/message/network_address.ipp>
 
 #endif
