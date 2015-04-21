@@ -31,7 +31,7 @@ void inventory::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
     for (size_t i = 0; i < count; ++i)
     {
         inventory_vector inv(deserial);
-        inventories.push_back(inv);
+        inventories_.push_back(inv);
     }
 }
 

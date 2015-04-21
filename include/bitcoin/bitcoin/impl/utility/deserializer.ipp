@@ -108,18 +108,6 @@ data_chunk deserializer<
 }
 
 template <typename Iterator, bool SafeCheckLast>
-message::network_address deserializer<
-    Iterator, SafeCheckLast>::read_network_address()
-{
-    message::network_address addr;
-    addr.services = read_8_bytes();
-    // Read IP address
-    addr.ip = read_bytes<16>();
-    addr.port = read_big_endian<uint16_t>();
-    return addr;
-}
-
-template <typename Iterator, bool SafeCheckLast>
 hash_digest deserializer<Iterator, SafeCheckLast>::read_hash()
 {
     return read_bytes<hash_size>();

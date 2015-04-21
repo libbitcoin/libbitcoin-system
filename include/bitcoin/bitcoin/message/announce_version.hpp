@@ -36,16 +36,12 @@ public:
 
     static const std::string satoshi_command;
 
-    uint32_t version;
-    uint64_t services;
-    uint64_t timestamp;
-    network_address address_me;
-    network_address address_you;
-    uint64_t nonce;
-    std::string user_agent;
-    uint32_t start_height;
-
     announce_version();
+
+    announce_version(const uint32_t version, const uint64_t services,
+        const uint64_t timestamp, const network_address& address_me,
+        const network_address& address_you, const uint64_t nonce,
+        const std::string& user_agent, const uint32_t start_height);
 
     announce_version(const data_chunk& value);
 
@@ -55,6 +51,44 @@ public:
     template<typename Iterator>
     announce_version(const Iterator begin, const Iterator end);
 
+    uint32_t version() const;
+
+    void version(uint32_t value);
+
+    uint64_t services() const;
+
+    void services(uint64_t value);
+
+    uint64_t timestamp() const;
+
+    void timestamp(uint64_t value);
+
+    network_address& address_me();
+
+    const network_address& address_me() const;
+
+    void address_me(const network_address& value);
+
+    network_address& address_you();
+
+    const network_address& address_you() const;
+
+    void address_you(const network_address& value);
+
+    uint64_t nonce() const;
+
+    void nonce(uint64_t value);
+
+    std::string& user_agent();
+
+    const std::string& user_agent() const;
+
+    void user_agent(const std::string& value);
+
+    uint32_t start_height() const;
+
+    void start_height(uint32_t value);
+
     operator const data_chunk() const;
 
     size_t satoshi_size() const;
@@ -63,6 +97,15 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    uint32_t version_;
+    uint64_t services_;
+    uint64_t timestamp_;
+    network_address address_me_;
+    network_address address_you_;
+    uint64_t nonce_;
+    std::string user_agent_;
+    uint32_t start_height_;
 };
 
 } // end message

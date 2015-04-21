@@ -29,7 +29,7 @@ inventory_vector::inventory_vector()
 
 inventory_vector::inventory_vector(inventory_type_id type,
     const hash_digest& hash)
-    : type(type), hash(hash)
+    : type_(type), hash_(hash)
 {
 }
 
@@ -38,13 +38,38 @@ inventory_vector::inventory_vector(const data_chunk& value)
 {
 }
 
+inventory_type_id inventory_vector::type() const
+{
+    return type_;
+}
+
+void inventory_vector::type(const inventory_type_id value)
+{
+    type_ = value;
+}
+
+hash_digest& inventory_vector::hash()
+{
+    return hash_;
+}
+
+const hash_digest& inventory_vector::hash() const
+{
+    return hash_;
+}
+
+void inventory_vector::hash(const hash_digest& value)
+{
+    hash_ = value;
+}
+
 inventory_vector::operator const data_chunk() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
-    uint32_t raw_type = inventory_type_to_number(type);
+    uint32_t raw_type = inventory_type_to_number(type_);
     serial.write_4_bytes(raw_type);
-    serial.write_hash(hash);
+    serial.write_hash(hash_);
     return result;
 }
 

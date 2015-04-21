@@ -24,7 +24,6 @@
 #include <string>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
 
 namespace libbitcoin {
 
@@ -80,8 +79,6 @@ public:
     void write_data(const T& data);
     void write_hash(const hash_digest& hash);
     void write_short_hash(const short_hash& hash);
-
-    void write_network_address(const message::network_address& addr);
 
     /**
      * Write a fixed size string padded with zeroes.

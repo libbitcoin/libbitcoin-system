@@ -314,9 +314,13 @@ bool already_connected(const message::network_address& address,
     const ConnectionList& connections)
 {
     for (const auto& connection: connections)
+    {
         if (connection.address.ip == address.ip &&
             connection.address.port == address.port)
+        {
             return true;
+        }
+    }
 
     return false;
 }
