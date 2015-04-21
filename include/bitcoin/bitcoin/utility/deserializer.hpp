@@ -23,7 +23,6 @@
 #include <string>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
 
 namespace libbitcoin {
 
@@ -79,8 +78,6 @@ public:
     data_chunk read_data(size_t n_bytes);
     hash_digest read_hash();
     short_hash read_short_hash();
-
-    message::network_address read_network_address();
 
     /**
      * Read a fixed size string padded with zeroes.

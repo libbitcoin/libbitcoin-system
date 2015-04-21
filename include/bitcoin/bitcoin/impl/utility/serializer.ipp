@@ -100,15 +100,6 @@ void serializer<Iterator>::write_data(const T& data)
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_network_address(
-    const message::network_address& addr)
-{
-    write_8_bytes(addr.services);
-    write_data(addr.ip);
-    write_big_endian<uint16_t>(addr.port);
-}
-
-template <typename Iterator>
 void serializer<Iterator>::write_hash(const hash_digest& hash)
 {
     write_data(hash);

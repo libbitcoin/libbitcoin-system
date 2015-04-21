@@ -31,10 +31,10 @@ void address::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
     for (size_t i = 0; i < count; ++i)
     {
         uint32_t timestamp = deserial.read_4_bytes();
-        network_address addr = deserial.read_network_address();
-        addr.timestamp = timestamp;
+        network_address addr(deserial);
+        addr.timestamp(timestamp);
 
-        addresses.push_back(addr);
+        addresses_.push_back(addr);
     }
 }
 

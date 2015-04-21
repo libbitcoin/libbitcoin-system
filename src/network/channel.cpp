@@ -279,8 +279,8 @@ void channel_proxy::read_checksum(const message::header& header_msg)
 
 void channel_proxy::read_payload(const message::header& header_msg)
 {
-    inbound_payload_.resize(header_msg.payload_length);
-    async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length),
+    inbound_payload_.resize(header_msg.payload_length());
+    async_read(*socket_, buffer(inbound_payload_, header_msg.payload_length()),
         strand_.wrap(&channel_proxy::handle_read_payload,
             shared_from_this(), _1, _2, header_msg));
 }
@@ -294,15 +294,15 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     data_slice header_stream(inbound_header_);
     message::header header_msg(header_stream.begin(), header_stream.end());
 
-    if (header_msg.magic != magic_value())
+    if (header_msg.magic() != magic_value())
     {
         log_debug(LOG_NETWORK) << "Bad header received.";
         stop();
         return;
     }
 
-    log_debug(LOG_NETWORK) << "r: " << header_msg.command
-            << " (" << header_msg.payload_length << " bytes)";
+    log_debug(LOG_NETWORK) << "r: " << header_msg.command()
+            << " (" << header_msg.payload_length() << " bytes)";
     read_checksum(header_msg);
     reset_timers();
 }
@@ -313,9 +313,9 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_checksum_size);
-    header_msg.checksum =
+    header_msg.checksum(
         from_little_endian<uint32_t>(
-            inbound_checksum_.begin(), inbound_checksum_.end());
+            inbound_checksum_.begin(), inbound_checksum_.end()));
     read_payload(header_msg);
     reset_timers();
 }
@@ -325,11 +325,11 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
 {
     if (problems_check(ec))
         return;
-    BITCOIN_ASSERT(bytes_transferred == header_msg.payload_length);
+    BITCOIN_ASSERT(bytes_transferred == header_msg.payload_length());
     data_chunk payload_stream = data_chunk(
         inbound_payload_.begin(), inbound_payload_.end());
-    BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length);
-    if (header_msg.checksum != bitcoin_checksum(payload_stream))
+    BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length());
+    if (header_msg.checksum() != bitcoin_checksum(payload_stream))
     {
         log_warning(LOG_NETWORK) << "Bad checksum!";
         raw_subscriber_->relay(error::bad_stream,
@@ -345,7 +345,8 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     read_header();
     reset_timers();
 
-    loader_.load_lookup(header_msg.command, payload_stream);
+    const std::string& command = header_msg.command();
+    loader_.load_lookup(command, payload_stream);
 }
 
 void channel_proxy::call_handle_send(const boost::system::error_code& ec,

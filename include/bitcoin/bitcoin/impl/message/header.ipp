@@ -28,10 +28,10 @@ namespace message {
 template <typename Iterator, bool SafeCheckLast>
 void header::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
-    magic = deserial.read_4_bytes();
-    command = deserial.read_fixed_string(command_size);
-    payload_length = deserial.read_4_bytes();
-    checksum = 0;
+    magic_ = deserial.read_4_bytes();
+    command_ = deserial.read_fixed_string(command_size);
+    payload_length_ = deserial.read_4_bytes();
+    checksum_ = 0;
 }
 
 template <typename Iterator, bool SafeCheckLast>
