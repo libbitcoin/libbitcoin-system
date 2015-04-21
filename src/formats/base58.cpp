@@ -167,13 +167,11 @@ bool decode_base58(data_chunk& out, const std::string& in)
     return true;
 }
 
-data_chunk decode_base58(std::string encoded)
+data_chunk decode_base58(const std::string& encoded)
 {
-    // Trim spaces and newlines around the string.
-    boost::algorithm::trim(encoded);
-
     data_chunk out;
-    if (!decode_base58(out, encoded))
+    // Trim spaces and newlines around the string.
+    if (!decode_base58(out, boost::trim_copy(encoded)))
         return data_chunk();
     return out;
 }

@@ -39,7 +39,7 @@ BC_CONSTEXPR uint8_t ubtc_decimal_places = 2;
  * or false to round them upwards.
  * @return false for failure.
  */
-BC_API bool decode_base10(uint64_t& out, std::string amount,
+BC_API bool decode_base10(uint64_t& out, const std::string& amount,
     uint8_t decimal_places=0, bool strict=true);
 
 /**
