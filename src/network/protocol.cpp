@@ -256,7 +256,7 @@ void protocol::seeds::save_addresses(const std::error_code& ec,
     else
     {
         log_debug(LOG_PROTOCOL) << "Storing seeded addresses.";
-        for (const message::network_address& net_address: packet.addresses)
+        for (const message::network_address& net_address: packet.addresses())
             hosts_.store(net_address, strand_.wrap(
                 &protocol::seeds::handle_store, shared_from_this(), _1));
 
@@ -376,8 +376,8 @@ bool already_connected(
     // Are we already connected to this address?
     for (const auto& connection: connections)
     {
-        if (connection.address.ip == address.ip &&
-            connection.address.port == address.port)
+        if (connection.address.ip() == address.ip() &&
+            connection.address.port() == address.port())
         {
             return true;
         }
@@ -407,16 +407,16 @@ void protocol::attempt_connect(const std::error_code& ec,
     if (already_connected(address, connections_))
     {
         log_debug(LOG_PROTOCOL)
-            << "Already connected to " << encode_base16(address.ip);
+            << "Already connected to " << encode_base16(address.ip());
         // Retry another connection
         // Still in same strand.
         modify_slot(slot, connect_state::stopped);
         try_connect_once(slot);
         return;
     }
-    const std::string hostname = pretty(address.ip);
-    log_debug(LOG_PROTOCOL) << "Trying " << hostname << ":" << address.port;
-    connect(handshake_, network_, hostname, address.port,
+    const std::string hostname = pretty(address.ip());
+    log_debug(LOG_PROTOCOL) << "Trying " << hostname << ":" << address.port();
+    connect(handshake_, network_, hostname, address.port(),
         strand_.wrap(&protocol::handle_connect, this, _1, _2, address, slot));
 }
 void protocol::handle_connect(
@@ -427,7 +427,7 @@ void protocol::handle_connect(
     if (ec)
     {
         log_warning(LOG_PROTOCOL) << "Unable to connect to "
-            << pretty(address.ip) << ":" << address.port
+            << pretty(address.ip()) << ":" << address.port()
             << " - " << ec.message();
         // Retry another connection
         // Still in same strand.
@@ -439,7 +439,7 @@ void protocol::handle_connect(
     BITCOIN_ASSERT(connections_.size() <= max_outbound_);
     connections_.push_back({address, node});
     log_info(LOG_PROTOCOL) << "Connected to "
-        << pretty(address.ip) << ":" << address.port
+        << pretty(address.ip()) << ":" << address.port()
         << " (" << connections_.size() << " connections)";
     // Remove channel from list of connections
     node->subscribe_stop(strand_.wrap(
@@ -611,9 +611,11 @@ void protocol::receive_address_message(const std::error_code& ec,
         return;
     }
     log_debug(LOG_PROTOCOL) << "Storing addresses.";
-    for (const message::network_address& net_address: packet.addresses)
+
+    for (const message::network_address& net_address: packet.addresses())
         hosts_.store(net_address, strand_.wrap(
             &protocol::handle_store_address, this, _1));
+
     node->subscribe_address(strand_.wrap(
         &protocol::receive_address_message, this, _1, _2, node));
 }

@@ -35,10 +35,10 @@ void get_blocks::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
     for (uint64_t i = 0; i < count; ++i)
     {
         hash_digest start_hash = deserial.read_hash();
-        start_hashes.push_back(start_hash);
+        start_hashes_.push_back(start_hash);
     }
 
-    hash_stop = deserial.read_hash();
+    hash_stop_ = deserial.read_hash();
 }
 
 template <typename Iterator, bool SafeCheckLast>

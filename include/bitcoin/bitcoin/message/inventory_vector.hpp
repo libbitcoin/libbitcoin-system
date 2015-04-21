@@ -34,12 +34,9 @@ class BC_API inventory_vector
 {
 public:
 
-    inventory_type_id type;
-    hash_digest hash;
-
     inventory_vector();
 
-    inventory_vector(inventory_type_id type, const hash_digest& hash);
+    inventory_vector(const inventory_type_id type, const hash_digest& hash);
 
     inventory_vector(const data_chunk& value);
 
@@ -48,6 +45,16 @@ public:
 
     template<typename Iterator>
     inventory_vector(const Iterator begin, const Iterator end);
+
+    inventory_type_id type() const;
+
+    void type(const inventory_type_id value);
+
+    hash_digest& hash();
+
+    const hash_digest& hash() const;
+
+    void hash(const hash_digest& value);
 
     operator const data_chunk() const;
 
@@ -59,6 +66,9 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    inventory_type_id type_;
+    hash_digest hash_;
 };
 
 typedef std::vector<inventory_vector> inventory_list;

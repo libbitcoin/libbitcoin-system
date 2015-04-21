@@ -35,9 +35,9 @@ public:
 
     static const std::string satoshi_command;
 
-    network_address_list addresses;
-
     address();
+
+    address(const network_address_list& addresses);
 
     address(const data_chunk& value);
 
@@ -47,6 +47,10 @@ public:
     template<typename Iterator>
     address(const Iterator begin, const Iterator end);
 
+    network_address_list& addresses();
+
+    const network_address_list& addresses() const;
+
     operator const data_chunk() const;
 
     size_t satoshi_size() const;
@@ -55,6 +59,8 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    network_address_list addresses_;
 };
 
 } // end message

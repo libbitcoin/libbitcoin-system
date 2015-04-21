@@ -25,6 +25,12 @@ namespace libbitcoin {
 namespace message {
 
 nonce_base::nonce_base()
+    : nonce_()
+{
+}
+
+nonce_base::nonce_base(const uint64_t nonce)
+    : nonce_(nonce)
 {
 }
 
@@ -33,11 +39,21 @@ nonce_base::nonce_base(const data_chunk& value)
 {
 }
 
+uint64_t nonce_base::nonce() const
+{
+    return nonce_;
+}
+
+void nonce_base::nonce(uint64_t value)
+{
+    nonce_ = value;
+}
+
 nonce_base::operator const data_chunk() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
-    serial.write_8_bytes(nonce);
+    serial.write_8_bytes(nonce_);
     return result;
 }
 

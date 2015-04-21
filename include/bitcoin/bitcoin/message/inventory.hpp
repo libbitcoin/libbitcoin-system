@@ -36,9 +36,9 @@ public:
 
     static const std::string satoshi_command;
 
-    inventory_list inventories;
-
     inventory();
+
+    inventory(const inventory_list& inventories);
 
     inventory(const data_chunk& value);
 
@@ -48,6 +48,10 @@ public:
     template<typename Iterator>
     inventory(const Iterator begin, const Iterator end);
 
+    inventory_list& inventories();
+
+    const inventory_list& inventories() const;
+
     operator const data_chunk() const;
 
     size_t satoshi_size() const;
@@ -56,6 +60,8 @@ private:
 
     template <typename Iterator, bool SafeCheckLast>
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
+
+    inventory_list inventories_;
 };
 
 } // end message

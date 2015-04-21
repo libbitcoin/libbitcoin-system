@@ -263,6 +263,7 @@ include_bitcoin_bitcoin_impl_message_HEADERS = \
     include/bitcoin/bitcoin/impl/message/header.ipp \
     include/bitcoin/bitcoin/impl/message/inventory.ipp \
     include/bitcoin/bitcoin/impl/message/inventory_vector.ipp \
+    include/bitcoin/bitcoin/impl/message/network_address.ipp \
     include/bitcoin/bitcoin/impl/message/nonce.ipp \
     include/bitcoin/bitcoin/impl/message/verack.ipp
 

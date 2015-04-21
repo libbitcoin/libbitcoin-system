@@ -27,8 +27,8 @@ template <typename Iterator, bool SafeCheckLast>
 void inventory_vector::deserialize(deserializer<Iterator, SafeCheckLast>& deserial)
 {
     uint32_t raw_type = deserial.read_4_bytes();
-    type = inventory_type_from_number(raw_type);
-    hash = deserial.read_hash();
+    type_ = inventory_type_from_number(raw_type);
+    hash_ = deserial.read_hash();
 }
 
 template <typename Iterator, bool SafeCheckLast>
