@@ -45,8 +45,14 @@ static uint8_t bip39_shift(size_t bit)
 static std::string normalize_nfkd(const std::string& value)
 {
     using namespace boost::locale;
-    const generator locale;
-    return normalize(value, norm_type::norm_nfkd, locale("UTF-8"));
+    generator locale;
+
+    // boost:
+    // "This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or
+    // UTF-32. It does not take in account the locale encoding, because 
+    // Unicode decomposition and composition are meaningless outside of a
+    // Unicode character set."
+    return normalize(value, norm_type::norm_nfkd, locale(""));
 }
 
 bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
@@ -141,6 +147,11 @@ long_hash decode_mnemonic(const word_list& mnemonic,
 {
     const auto sentence = join(mnemonic);
     const auto salt = normalize_nfkd("mnemonic" + passphrase);
+
+    // boost:
+    // "throws std::bad_cast if loc does not have converter facet installed."
+    // This appears to not throw but instead return empty string on failure.
+    BITCOIN_ASSERT_MSG(!salt.empty(), "NFKD normalization failed.");
 
     return pkcs5_pbkdf2_hmac_sha512(
         to_data_chunk(sentence), to_data_chunk(salt), hmac_iterations);
