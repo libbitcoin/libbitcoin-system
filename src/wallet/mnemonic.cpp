@@ -42,17 +42,14 @@ static uint8_t bip39_shift(size_t bit)
     return (1 << (byte_bits - (bit % byte_bits) - 1));
 }
 
-static std::string normalize_nfkd(const std::string& value)
+// "This function receives only UTF-8 strings. It does not take in account 
+// the locale encoding, because Unicode decomposition and composition are 
+// meaningless outside of a Unicode character set (from boost docs).
+std::string normalize_nfkd(const std::string& value)
 {
     using namespace boost::locale;
-    generator locale;
-
-    // boost:
-    // "This function receives only Unicode strings, i.e.: UTF-8, UTF-16 or
-    // UTF-32. It does not take in account the locale encoding, because 
-    // Unicode decomposition and composition are meaningless outside of a
-    // Unicode character set."
-    return normalize(value, norm_type::norm_nfkd, locale(""));
+    generator unused;
+    return normalize(value, norm_type::norm_nfkd, unused(""));
 }
 
 bool validate_mnemonic(const word_list& words, const dictionary& lexicon)

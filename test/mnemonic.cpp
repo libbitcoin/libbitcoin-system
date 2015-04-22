@@ -26,6 +26,14 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
+BOOST_AUTO_TEST_CASE(normalize_nfkd)
+{
+    const auto ascii_space_sandwich = "start end";
+    const auto ideographic_space_sandwich = "start　end";
+    const auto normalized = bc::normalize_nfkd(ideographic_space_sandwich);
+    BOOST_REQUIRE_EQUAL(normalized.c_str(), ascii_space_sandwich);
+}
+
 BOOST_AUTO_TEST_CASE(entropy_to_trezor_mnemonic)
 {
     for (const mnemonic_result& result: mnemonic_trezor_vectors)
