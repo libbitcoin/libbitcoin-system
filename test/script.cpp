@@ -187,7 +187,7 @@ bool parse(script_type& result_script, std::string format)
     boost::trim(format);
     if (format.empty())
         return true;
-    auto tokens = bc::split(format, " ");
+    const auto tokens = split(format);
     data_chunk raw_script;
     for (const auto& token: tokens)
         if (!parse_token(raw_script, token))

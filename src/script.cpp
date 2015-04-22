@@ -33,6 +33,7 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
 
@@ -2049,9 +2050,7 @@ opcode data_to_opcode(const data_chunk& data)
 script_type unpretty(const std::string& pretty)
 {
     script_type script;
-    std::vector<std::string> tokens;
-    boost::split(tokens, pretty, boost::is_any_of(" "),
-        boost::token_compress_on);
+    const auto tokens = split(pretty);
     for (auto token = tokens.begin(); token != tokens.end(); ++token)
     {
         operation op;

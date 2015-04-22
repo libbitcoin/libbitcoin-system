@@ -31,12 +31,14 @@ std::string join(const std::vector<std::string>& words,
     return boost::join(words, delimiter);
 }
 
+// Note that use of token_compress_on may cause unexpected results when
+// working with CSV-style lists that accept empty elements.
 std::vector<std::string> split(const std::string& sentence,
     const std::string& delimiter)
 {
     std::vector<std::string> words;
-    boost::split(words, sentence, boost::is_any_of(delimiter),
-        boost::token_compress_on);
+    boost::split(words, boost::trim_copy(sentence),
+        boost::is_any_of(delimiter), boost::token_compress_on);
     return words;
 }
 

@@ -227,7 +227,7 @@ static std::string format_setting(const parameter& value,
 static void split_setting_name(const parameter& value, std::string& name,
     std::string& section)
 {
-    auto tokens = split(value.get_long_name(), ".");
+    const auto tokens = split(value.get_long_name(), ".");
     if (tokens.size() != 2)
     {
         section.clear();

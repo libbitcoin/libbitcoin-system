@@ -31,6 +31,7 @@
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
+#include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -61,8 +62,7 @@ void hosts::do_load(const path& path, load_handler handle_load)
     std::string line;
     while (std::getline(file, line))
     {
-        std::vector<std::string> parts;
-        boost::split(parts, line, boost::is_any_of(" "));
+        auto parts = split(line);
         if (parts.size() != 2)
             continue;
         data_chunk raw_ip;
