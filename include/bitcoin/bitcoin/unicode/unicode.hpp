@@ -93,7 +93,8 @@
             _setmode(_fileno(stderr), _O_U8TEXT); \
             \
             using namespace libbitcoin; \
-            std::locale::global(boost::locale::generator()("UTF8")); \
+            boost::locale::generator locale; \
+            std::locale::global(locale("UTF8")); \
             boost::filesystem::path::imbue(std::locale()); \
             \
             auto variables = to_utf8(_wenviron); \
