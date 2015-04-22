@@ -40,10 +40,11 @@ BC_API std::string join(const std::vector<std::string>& words,
  * delimited.
  * @param[in]  sentence   The string to split.
  * @param[in]  delimiter  The delimeter, defaults to " ".
+ * @param[in]  trim       Trim the sentence for whitespace, defaults to true.
  * @return                The list of resulting strings.
  */
 BC_API std::vector<std::string> split(const std::string& sentence,
-    const std::string& delimiter=" ");
+    const std::string& delimiter=" ", bool trim=true);
 
 } // namespace libbitcoin
 
