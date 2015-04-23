@@ -32,8 +32,8 @@ BUILD_DIR="build-libbitcoin"
 
 # Boost archives for gcc.
 #------------------------------------------------------------------------------
-BOOST_URL_GCC="http://sourceforge.net/projects/boost/files/boost/1.50.0/boost_1_50_0.tar.bz2/download"
-BOOST_ARCHIVE_GCC="boost_1_50_0.tar.bz2"
+BOOST_URL_GCC="http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.bz2/download"
+BOOST_ARCHIVE_GCC="boost_1_55_0.tar.bz2"
 
 # Boost archives for clang.
 #------------------------------------------------------------------------------
@@ -346,7 +346,7 @@ build_from_tarball_boost()
 
     # Build and install (note that "$@" is not from script args).
     ./bootstrap.sh
-    ./b2 install boost.locale.icu=off -j $JOBS "$@"
+    ./b2 install -j $JOBS "$@"
 
     pop_directory
 }

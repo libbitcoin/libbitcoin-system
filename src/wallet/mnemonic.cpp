@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <boost/locale.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/collection.hpp>
@@ -37,19 +38,9 @@ constexpr size_t bits_per_word = 11;
 constexpr size_t entropy_bit_divisor = 32;
 constexpr size_t hmac_iterations = 2048;
 
-static uint8_t bip39_shift(size_t bit)
+inline uint8_t bip39_shift(size_t bit)
 {
     return (1 << (byte_bits - (bit % byte_bits) - 1));
-}
-
-// "This function receives only UTF-8 strings. It does not take in account 
-// the locale encoding, because Unicode decomposition and composition are 
-// meaningless outside of a Unicode character set (from boost docs).
-std::string normalize_nfkd(const std::string& value)
-{
-    using namespace boost::locale;
-    generator unused;
-    return normalize(value, norm_type::norm_nfkd, unused(""));
 }
 
 bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
@@ -132,8 +123,8 @@ word_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
 bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons)
 {
-    for (const auto& i: lexicons)
-        if (validate_mnemonic(mnemonic, *i))
+    for (const auto& lexicon: lexicons)
+        if (validate_mnemonic(mnemonic, *lexicon))
             return true;
 
     return false;
@@ -143,15 +134,9 @@ long_hash decode_mnemonic(const word_list& mnemonic,
     const std::string& passphrase)
 {
     const auto sentence = join(mnemonic);
-    const auto salt = normalize_nfkd("mnemonic" + passphrase);
-
-    // boost:
-    // "throws std::bad_cast if loc does not have converter facet installed."
-    // This appears to not throw but instead return empty string on failure.
-    BITCOIN_ASSERT_MSG(!salt.empty(), "NFKD normalization failed.");
-
-    return pkcs5_pbkdf2_hmac_sha512(
-        to_data_chunk(sentence), to_data_chunk(salt), hmac_iterations);
+    const auto salt = to_normal_form("mnemonic" + passphrase);
+    return pkcs5_pbkdf2_hmac_sha512(to_data_chunk(sentence),
+        to_data_chunk(salt), hmac_iterations);
 }
 
 } // namespace libbitcoin

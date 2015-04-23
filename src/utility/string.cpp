@@ -41,7 +41,10 @@ std::vector<std::string> split(const std::string& sentence,
     const auto delimit = boost::is_any_of(delimiter);
 
     if (trim)
-        boost::split(words, boost::trim_copy(sentence), delimit, compress);
+    {
+        const auto trimmed = boost::trim_copy(sentence);
+        boost::split(words, trimmed, delimit, compress);
+    }
     else
         boost::split(words, sentence, delimit, compress);
 

@@ -74,6 +74,9 @@
 // static path object must be imbued with the utf8 locale or paths will be 
 // incorrectly translated.
 
+#define BC_LOCALE_BACKEND "icu"
+#define BC_LOCALE_UTF8 "en_US.UTF8"
+
 #ifdef _MSC_VER
     #include <locale>
     #include <boost/filesystem.hpp>
@@ -94,7 +97,7 @@
             \
             using namespace libbitcoin; \
             boost::locale::generator locale; \
-            std::locale::global(locale("UTF8")); \
+            std::locale::global(locale(BC_LOCALE_UTF8)); \
             boost::filesystem::path::imbue(std::locale()); \
             \
             auto variables = to_utf8(_wenviron); \
@@ -133,6 +136,14 @@ extern std::ostream& cout;
  * Use bc::cerr in place of std::cerr.
  */
 extern std::ostream& cerr;
+
+/**
+ * Normalize a string value using nfkd normalization.
+ * This function requires the ICU dependency.
+ * @param[in]  value  The value to normalize.
+ * @return            The normalized value.
+ */
+BC_API std::string to_normal_form(const std::string& value);
 
 /**
  * Convert wide environment vector to utf8 environment vector.

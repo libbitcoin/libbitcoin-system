@@ -34,6 +34,8 @@
 
 namespace libbitcoin {
 
+using namespace boost::locale;
+
 // The width of utf16 stdio buffers.
 constexpr size_t utf16_buffer_size = 256;
 
@@ -41,12 +43,15 @@ constexpr size_t utf16_buffer_size = 256;
 constexpr size_t utf8_max_character_size = 4;
 
 // Ensure console_streambuf::initialize is called only once.
-std::once_flag mutex;
+static std::once_flag io_mutex;
+
+// Ensure initialize_icu_installation is called only once.
+static std::once_flag icu_mutex;
 
 // Static initializer for bc::cin.
 static std::istream& cin_stream()
 {
-    std::call_once(mutex, console_streambuf::initialize, utf16_buffer_size);
+    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_istream input(std::cin, std::wcin, utf16_buffer_size);
     return input;
 }
@@ -54,7 +59,7 @@ static std::istream& cin_stream()
 // Static initializer for bc::cout.
 static std::ostream& cout_stream()
 {
-    std::call_once(mutex, console_streambuf::initialize, utf16_buffer_size);
+    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream output(std::cout, std::wcout, utf16_buffer_size);
     return output;
 }
@@ -62,7 +67,7 @@ static std::ostream& cout_stream()
 // Static initializer for bc::cerr.
 static std::ostream& cerr_stream()
 {
-    std::call_once(mutex, console_streambuf::initialize, utf16_buffer_size);
+    std::call_once(io_mutex, console_streambuf::initialize, utf16_buffer_size);
     static unicode_ostream error(std::cerr, std::wcerr, utf16_buffer_size);
     return error;
 }
@@ -71,6 +76,37 @@ static std::ostream& cerr_stream()
 std::istream& cin = cin_stream();
 std::ostream& cout = cout_stream();
 std::ostream& cerr = cerr_stream();
+
+// The backend selection appears to be ignored on Windows, which shows "std"
+// and "winapi". Yet the normalization test succeeds. Just another annoying
+// case of silent failure.
+static std::string normalize_nfkd(const std::string& value)
+{
+    auto backend = localization_backend_manager::global();
+    backend.select(BC_LOCALE_BACKEND);
+    const generator locale(backend);
+    return normalize(value, norm_type::norm_nfkd, locale(BC_LOCALE_UTF8));
+}
+
+// One time verifier of the localization backend manager. This is 
+// necessary because boost::normalize will fail silently to perform 
+// normalization if the ICU dependency is missing.
+static void validate_localization()
+{
+    const auto ascii_space = "> <";
+    const auto ideographic_space = ">　<";
+    const auto normalized = normalize_nfkd(ideographic_space);
+    if (normalized != ascii_space)
+        throw std::runtime_error(
+            "Unicode normalization test failed, a dependency may be missing.");
+}
+
+// Normalize strings using unicode nfkd normalization.
+std::string to_normal_form(const std::string& value)
+{
+    std::call_once(icu_mutex, validate_localization);
+    return normalize_nfkd(value);
+}
 
 // Convert wmain environment to utf8 main environment.
 data_chunk to_utf8(wchar_t* environment[])

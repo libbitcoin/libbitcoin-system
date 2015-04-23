@@ -53,11 +53,6 @@ BC_API word_list create_mnemonic(data_slice entropy,
     const dictionary &lexicon=language::en);
 
 /**
- * Normalize a string using BIP-39 specified normalization (nfkd).
- */
-BC_API std::string normalize_nfkd(const std::string& value);
-
-/**
  * Checks a mnemonic against a dictionary to determine if the
  * words are spelled correctly and the checksum matches.
  * The words must have been created using mnemonic encoding.
