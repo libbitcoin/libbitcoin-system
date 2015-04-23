@@ -32,9 +32,9 @@ doc_DATA = \
 # src/libbitcoin.la => ${libdir}
 #------------------------------------------------------------------------------
 lib_LTLIBRARIES = src/libbitcoin.la
-src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${secp256k1_CPPFLAGS}
+src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${secp256k1_CPPFLAGS}
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
-src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
     src/block.cpp \
     src/constants.cpp \
@@ -104,9 +104,9 @@ src_libbitcoin_la_SOURCES = \
 if WITH_EXAMPLES
 
 noinst_PROGRAMS = examples/libbitcoin_examples
-examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${boost_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${secp256k1_CPPFLAGS}
+examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${secp256k1_CPPFLAGS}
 examples_libbitcoin_examples_LDFLAGS = ${boost_LDFLAGS}
-examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
 examples_libbitcoin_examples_SOURCES = \
     examples/main.cpp
 
@@ -119,9 +119,9 @@ if WITH_TESTS
 TESTS = libbitcoin_test_runner.sh
 
 check_PROGRAMS = test/libbitcoin_test
-test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${iconv_CPPFLAGS} ${pthread_CPPFLAGS} ${secp256k1_CPPFLAGS}
+test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${testnet} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${secp256k1_CPPFLAGS}
 test_libbitcoin_test_LDFLAGS = ${boost_LDFLAGS}
-test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${iconv_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
+test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${pthread_LIBS} ${rt_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/base10.cpp \
     test/base16.cpp \

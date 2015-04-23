@@ -181,14 +181,6 @@ AS_CASE([${with_tests}], [yes],
      AC_MSG_NOTICE([boost_unit_test_framework_LIBS : ${boost_unit_test_framework_LIBS}])],
     [AC_SUBST([boost_unit_test_framework_LIBS], [])])
 
-# Require iconv and output ${iconv_CPPFLAGS/LIBS}.
-#------------------------------------------------------------------------------
-AM_ICONV
-AC_SUBST([iconv_CPPFLAGS], [${INCICONV}])
-AC_SUBST([iconv_LIBS], [${LIBICONV}])
-AC_MSG_NOTICE([iconv_CPPFLAGS : ${iconv_CPPFLAGS}])
-AC_MSG_NOTICE([iconv_LIBS : ${iconv_LIBS}])
-
 # Require pthread and output ${pthread_CPPFLAGS/LIBS}.
 #------------------------------------------------------------------------------
 AX_PTHREAD(
