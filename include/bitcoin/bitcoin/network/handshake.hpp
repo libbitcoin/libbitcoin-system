@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_HANDSHAKE_HPP
-#define LIBBITCOIN_HANDSHAKE_HPP
+#ifndef LIBBITCOIN_NETWORK_HANDSHAKE_HPP
+#define LIBBITCOIN_NETWORK_HANDSHAKE_HPP
 
 #include <cstddef>
 #include <cstdint>
