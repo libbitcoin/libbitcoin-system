@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PAYMENT_ADDRESS_HPP
-#define LIBBITCOIN_PAYMENT_ADDRESS_HPP
+#ifndef LIBBITCOIN_WALLET_PAYMENT_ADDRESS_HPP
+#define LIBBITCOIN_WALLET_PAYMENT_ADDRESS_HPP
 
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
