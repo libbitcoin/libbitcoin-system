@@ -33,6 +33,8 @@
 #ifndef LIBBITCOIN_BINARY_TRIE_IPP
 #define LIBBITCOIN_BINARY_TRIE_IPP
 
+#include <new>
+
 namespace libbitcoin {
 
 // binary_trie implementation

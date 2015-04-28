@@ -74,6 +74,9 @@
 // static path object must be imbued with the utf8 locale or paths will be 
 // incorrectly translated.
 
+#ifdef _WIN32
+#define BOOST_HAS_ICU
+#endif
 #define BC_LOCALE_BACKEND "icu"
 #define BC_LOCALE_UTF8 "en_US.UTF8"
 
@@ -137,6 +140,8 @@ extern std::ostream& cout;
  */
 extern std::ostream& cerr;
 
+#ifdef BOOST_HAS_ICU
+
 /**
  * Normalize a string value using nfkd normalization.
  * This function requires the ICU dependency.
@@ -144,6 +149,8 @@ extern std::ostream& cerr;
  * @return            The normalized value.
  */
 BC_API std::string to_normal_form(const std::string& value);
+
+#endif
 
 /**
  * Convert wide environment vector to utf8 environment vector.

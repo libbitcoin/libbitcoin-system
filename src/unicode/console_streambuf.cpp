@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <iostream>
+#include <new>
 #include <streambuf>
 
 #ifdef _MSC_VER

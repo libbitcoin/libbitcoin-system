@@ -97,6 +97,17 @@ AC_ARG_WITH([examples],
 AC_MSG_RESULT([$with_examples])
 AM_CONDITIONAL([WITH_EXAMPLES], [test x$with_examples != xno])
 
+# Implement --with-icu and define BOOST_HAS_ICU.
+#------------------------------------------------------------------------------
+AC_MSG_CHECKING([--with-icu option])
+AC_ARG_WITH([icu],
+    AS_HELP_STRING([--with-icu],
+        [Compile with International Components for Unicode. @<:@default=no@:>@]),
+    [with_icu=$withval],
+    [with_icu=no])
+AC_MSG_RESULT([$with_icu])
+AS_CASE([${with_icu}], [yes], AC_DEFINE([BOOST_HAS_ICU]))
+
 # Implement --enable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--enable-ndebug option])
@@ -127,15 +138,15 @@ AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_TEST_DYN_LINK]))
 
 # Check dependencies.
 #==============================================================================
-# Require Boost of at least version 1.55.0 if in gcc and output ${boost_CPPFLAGS/LDFLAGS}.
+# Require Boost of at least version 1.50.0 if in gcc and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
 AS_CASE([${CC}], [*gcc*],
-    [AX_BOOST_BASE([1.55.0],
+    [AX_BOOST_BASE([1.50.0],
         [AC_SUBST([boost_CPPFLAGS], [${BOOST_CPPFLAGS}])
          AC_SUBST([boost_LDFLAGS], [${BOOST_LDFLAGS}])
          AC_MSG_NOTICE([boost_CPPFLAGS : ${boost_CPPFLAGS}])
          AC_MSG_NOTICE([boost_LDFLAGS : ${boost_LDFLAGS}])],
-        [AC_MSG_ERROR([Boost 1.55.0 or later is required but was not found.])])])
+        [AC_MSG_ERROR([Boost 1.50.0 or later is required but was not found.])])])
 
 # Require Boost of at least version 1.54.0 if in clang and output ${boost_CPPFLAGS/LDFLAGS}.
 #------------------------------------------------------------------------------
@@ -175,6 +186,10 @@ AX_BOOST_SYSTEM
 AC_SUBST([boost_system_LIBS], [${BOOST_SYSTEM_LIB}])
 AC_MSG_NOTICE([boost_system_LIBS : ${boost_system_LIBS}])
 
+AX_BOOST_THREAD
+AC_SUBST([boost_thread_LIBS], [${BOOST_THREAD_LIB}])
+AC_MSG_NOTICE([boost_thread_LIBS : ${boost_thread_LIBS}])
+
 AS_CASE([${with_tests}], [yes],
     [AX_BOOST_UNIT_TEST_FRAMEWORK
      AC_SUBST([boost_unit_test_framework_LIBS], [${BOOST_UNIT_TEST_FRAMEWORK_LIB}])
@@ -201,6 +216,25 @@ AS_CASE([${host_os}], [*linux*],
         [AC_MSG_ERROR([rt library is required but was not found.])])],
     [AC_SUBST([rt_LIBS], [])])
 
+# Require icu-i18n of at least version 51.2 and output ${icu_i18n_CPPFLAGS/LIBS/PKG}.
+#------------------------------------------------------------------------------
+AS_CASE([${with_icu}], [yes],
+    [PKG_CHECK_MODULES([icu_i18n], [icu-i18n >= 51.2])
+     AC_SUBST([icu_i18n_PKG], ['icu-i18n >= 51.2'])
+     AC_SUBST([icu_i18n_CPPFLAGS], [${icu_i18n_CFLAGS}])
+     AC_MSG_NOTICE([icu_i18n_CPPFLAGS : ${icu_i18n_CPPFLAGS}])
+     AC_MSG_NOTICE([icu_i18n_LIBS : ${icu_i18n_LIBS}])],
+    [AC_SUBST([icu_i18n_PKG], [])])
+
+# Require dl if on linux and output ${dl_LIBS}.
+#------------------------------------------------------------------------------
+AS_CASE([${host_os}], [*linux*],
+    [AC_CHECK_LIB([dl], [dlopen],
+        [AC_SUBST([dl_LIBS], [-ldl])
+         AC_MSG_NOTICE([dl_LIBS : ${dl_LIBS}])], 
+        [AC_MSG_ERROR([dl library is required but was not found.])])],
+    [AC_SUBST([dl_LIBS], [])])
+
 # Require secp256k1 of at least version 0.0.1 and output ${secp256k1_CPPFLAGS/LIBS/PKG}.
 #------------------------------------------------------------------------------
 PKG_CHECK_MODULES([secp256k1], [libsecp256k1 >= 0.0.1])
@@ -217,6 +251,12 @@ AC_MSG_NOTICE([secp256k1_LIBS : ${secp256k1_LIBS}])
 AS_CASE([${CC}], [*],
     [AX_CHECK_COMPILE_FLAG([-std=c++11],
         [CXXFLAGS="$CXXFLAGS -std=c++11"])])
+
+# Clean up boost 1.54 headers. Enabled in clang only.
+#------------------------------------------------------------------------------
+AS_CASE([${CC}], [*clang*],
+    [AX_CHECK_COMPILE_FLAG([-Wno-deprecated-register],
+        [CXXFLAGS="$CXXFLAGS -Wno-deprecated-register"])])
 
 # Warn on all stuff.
 #------------------------------------------------------------------------------
@@ -257,18 +297,6 @@ AS_CASE([${CC}], [*],
 AS_CASE([${CC}], [*clang*],
     [AX_CHECK_COMPILE_FLAG([-Wno-mismatched-tags],
         [CXXFLAGS="$CXXFLAGS -Wno-mismatched-tags"])])
-
-# Clean up boost 1.54 headers. Enabled in clang only.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*clang*],
-    [AX_CHECK_COMPILE_FLAG([-Wno-deprecated-register],
-        [CXXFLAGS="$CXXFLAGS -Wno-deprecated-register"])])
-
-# Clean up boost 1.49 headers. Enabled in gcc only.
-#------------------------------------------------------------------------------
-AS_CASE([${CC}], [*gcc*],
-    [AX_CHECK_COMPILE_FLAG([-Wno-unused-local-typedefs],
-        [CXXFLAGS="$CXXFLAGS -Wno-unused-local-typedefs"])])
 
 # Protect stack.
 #------------------------------------------------------------------------------

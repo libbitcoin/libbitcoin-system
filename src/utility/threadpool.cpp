@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+
+#include <new>
 #include <system_error>
 
 namespace libbitcoin {

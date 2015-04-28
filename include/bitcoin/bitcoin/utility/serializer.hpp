@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_SERIALIZER_HPP
 #define LIBBITCOIN_SERIALIZER_HPP
 
+#include <stdexcept>
 #include <string>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>

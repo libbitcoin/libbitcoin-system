@@ -37,6 +37,7 @@ namespace libbitcoin {
 constexpr size_t bits_per_word = 11;
 constexpr size_t entropy_bit_divisor = 32;
 constexpr size_t hmac_iterations = 2048;
+static const char* passphrase_prefix = "mnemonic";
 
 inline uint8_t bip39_shift(size_t bit)
 {
@@ -130,14 +131,27 @@ bool validate_mnemonic(const word_list& mnemonic,
     return false;
 }
 
+long_hash decode_mnemonic(const word_list& mnemonic)
+{
+    const auto sentence = join(mnemonic);
+    const std::string salt(passphrase_prefix);
+    return pkcs5_pbkdf2_hmac_sha512(to_data_chunk(sentence),
+        to_data_chunk(salt), hmac_iterations);
+}
+
+#ifdef BOOST_HAS_ICU
+
 long_hash decode_mnemonic(const word_list& mnemonic,
     const std::string& passphrase)
 {
     const auto sentence = join(mnemonic);
-    const auto salt = to_normal_form("mnemonic" + passphrase);
+    const std::string prefix(passphrase_prefix);
+    const auto salt = to_normal_form(prefix + passphrase);
     return pkcs5_pbkdf2_hmac_sha512(to_data_chunk(sentence),
         to_data_chunk(salt), hmac_iterations);
 }
+
+#endif
 
 } // namespace libbitcoin
 

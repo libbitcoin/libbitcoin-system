@@ -35,7 +35,7 @@ struct mnemonic_result
 
 typedef std::vector<mnemonic_result> mnemonic_result_list;
 
-mnemonic_result_list mnemonic_trezor_vectors
+const mnemonic_result_list mnemonic_trezor_vectors
 {
     {
         {
@@ -209,7 +209,7 @@ mnemonic_result_list mnemonic_trezor_vectors
     }
 };
 
-mnemonic_result_list mnemonic_bx_to_seed_vectors
+const mnemonic_result_list mnemonic_bx_to_seed_vectors
 {
     {
         {
@@ -229,8 +229,7 @@ mnemonic_result_list mnemonic_bx_to_seed_vectors
     }
 };
 
-// The CJK characters are not delimited with the ideographic space.
-mnemonic_result_list mnemonic_bx_new_vectors
+const mnemonic_result_list mnemonic_bx_new_vectors
 {
     {
         {
@@ -278,9 +277,22 @@ mnemonic_result_list mnemonic_bx_new_vectors
     }
 };
 
+const mnemonic_result_list mnemonic_no_passphrase
+{
+    {
+        {
+            "baadf00dbaadf00d",
+            "rival,hurdle,address,inspire,tenant,alone",
+            "",
+            "33498afc5ef71e87afd7cad1e50a9d9adb9e30d3ca4b1da5dc370d266aa7796cbc1854eebce5ab3fd3b02b6625e2a82868dbb693e988e47d74106f04c76a6263",
+            bc::language::en
+        }
+    }
+};
+
 typedef std::vector<std::string> string_list;
 
-string_list invalid_mnemonic_tests
+const string_list invalid_mnemonic_tests
 {
     // Spelling error:
     "abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,abandon,aboot",

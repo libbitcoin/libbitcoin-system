@@ -24,6 +24,7 @@
 #include <cwchar>
 #include <iostream>
 #include <mutex>
+#include <stdexcept>
 #include <string>
 #include <boost/locale.hpp>
 #include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
@@ -77,9 +78,9 @@ std::istream& cin = cin_stream();
 std::ostream& cout = cout_stream();
 std::ostream& cerr = cerr_stream();
 
-// The backend selection appears to be ignored on Windows, which shows "std"
-// and "winapi". Yet the normalization test succeeds. Just another annoying
-// case of silent failure.
+#ifdef BOOST_HAS_ICU
+
+// The backend selection is ignored if invalid (in this case on Windows).
 static std::string normalize_nfkd(const std::string& value)
 {
     auto backend = localization_backend_manager::global();
@@ -107,6 +108,8 @@ std::string to_normal_form(const std::string& value)
     std::call_once(icu_mutex, validate_localization);
     return normalize_nfkd(value);
 }
+
+#endif
 
 // Convert wmain environment to utf8 main environment.
 data_chunk to_utf8(wchar_t* environment[])
