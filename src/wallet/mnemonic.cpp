@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <boost/locale.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/collection.hpp>
@@ -36,17 +37,11 @@ namespace libbitcoin {
 constexpr size_t bits_per_word = 11;
 constexpr size_t entropy_bit_divisor = 32;
 constexpr size_t hmac_iterations = 2048;
+static const char* passphrase_prefix = "mnemonic";
 
-static uint8_t bip39_shift(size_t bit)
+inline uint8_t bip39_shift(size_t bit)
 {
     return (1 << (byte_bits - (bit % byte_bits) - 1));
-}
-
-static std::string normalize_nfkd(const std::string& value)
-{
-    using namespace boost::locale;
-    const generator locale;
-    return normalize(value, norm_type::norm_nfkd, locale("UTF-8"));
 }
 
 bool validate_mnemonic(const word_list& words, const dictionary& lexicon)
@@ -129,22 +124,34 @@ word_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
 bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons)
 {
-    for (const auto& i: lexicons)
-        if (validate_mnemonic(mnemonic, *i))
+    for (const auto& lexicon: lexicons)
+        if (validate_mnemonic(mnemonic, *lexicon))
             return true;
 
     return false;
 }
 
+long_hash decode_mnemonic(const word_list& mnemonic)
+{
+    const auto sentence = join(mnemonic);
+    const std::string salt(passphrase_prefix);
+    return pkcs5_pbkdf2_hmac_sha512(to_data_chunk(sentence),
+        to_data_chunk(salt), hmac_iterations);
+}
+
+#ifdef BOOST_HAS_ICU
+
 long_hash decode_mnemonic(const word_list& mnemonic,
     const std::string& passphrase)
 {
     const auto sentence = join(mnemonic);
-    const auto salt = normalize_nfkd("mnemonic" + passphrase);
-
-    return pkcs5_pbkdf2_hmac_sha512(
-        to_data_chunk(sentence), to_data_chunk(salt), hmac_iterations);
+    const std::string prefix(passphrase_prefix);
+    const auto salt = to_normal_form(prefix + passphrase);
+    return pkcs5_pbkdf2_hmac_sha512(to_data_chunk(sentence),
+        to_data_chunk(salt), hmac_iterations);
 }
+
+#endif
 
 } // namespace libbitcoin
 

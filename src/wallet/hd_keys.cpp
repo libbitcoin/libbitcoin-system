@@ -152,7 +152,7 @@ hd_public_key hd_public_key::generate_public_key(uint32_t i) const
         return hd_public_key();
 
     auto data = build_data({K_, to_big_endian(i)});
-    auto I = split(hmac_sha512_hash(data, c_));
+    const auto I = split(hmac_sha512_hash(data, c_));
 
     // The returned child key Ki is point(parse256(IL)) + Kpar.
     ec_point Ki = K_;
@@ -255,7 +255,7 @@ hd_private_key hd_private_key::generate_private_key(uint32_t i) const
         data = build_data({to_byte(0x00), k_, to_big_endian(i)});
     else
         data = build_data({K_, to_big_endian(i)});
-    auto I = split(hmac_sha512_hash(data, c_));
+    const auto I = split(hmac_sha512_hash(data, c_));
 
     // The child key ki is (parse256(IL) + kpar) mod n:
     ec_secret ki = k_;

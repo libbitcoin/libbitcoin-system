@@ -64,7 +64,7 @@ char parameter::short_name(const po::option_description& option) const
     //    search_options::dashed_short_prefer_short);
 
     // This is a substitute that allows us to use boost 1.49 for libbitcoin.
-    auto name = split(option.format_name()).front();
+    const auto name = split(option.format_name()).front();
     auto is_short_name = name[0] == option_prefix_char && 
         name[1] != option_prefix_char;
 

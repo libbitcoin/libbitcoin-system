@@ -26,55 +26,79 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(mnemonic_tests)
 
-BOOST_AUTO_TEST_CASE(entropy_to_trezor_mnemonic)
+BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__no_passphrase)
 {
-    for (const mnemonic_result& result: mnemonic_trezor_vectors)
+    for (const auto& vector: mnemonic_no_passphrase)
+    {
+        const auto words = split(vector.mnemonic, ",");
+        BOOST_REQUIRE(validate_mnemonic(words, vector.language));
+        const auto seed = decode_mnemonic(words);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
+    }
+}
+
+#ifdef BOOST_HAS_ICU
+
+BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__trezor)
+{
+    for (const auto& vector: mnemonic_trezor_vectors)
+    {
+        const auto words = split(vector.mnemonic, ",");
+        BOOST_REQUIRE(validate_mnemonic(words));
+        const auto seed = decode_mnemonic(words, vector.passphrase);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
+    }
+}
+
+BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__bx)
+{
+    for (const auto& vector: mnemonic_bx_to_seed_vectors)
+    {
+        const auto words = split(vector.mnemonic, ",");
+        BOOST_REQUIRE(validate_mnemonic(words));
+        const auto seed = decode_mnemonic(words, vector.passphrase);
+        BOOST_REQUIRE_EQUAL(encode_base16(seed), vector.seed);
+    }
+}
+
+#endif
+
+BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__trezor)
+{
+    for (const mnemonic_result& vector: mnemonic_trezor_vectors)
     {
         data_chunk entropy;
-        decode_base16(entropy, result.entropy);
-        const auto mnemonic = create_mnemonic(entropy, result.language);
+        decode_base16(entropy, vector.entropy);
+        const auto mnemonic = create_mnemonic(entropy, vector.language);
         BOOST_REQUIRE(mnemonic.size() > 0);
-        BOOST_REQUIRE_EQUAL(join(mnemonic), result.mnemonic);
+        BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
         BOOST_REQUIRE(validate_mnemonic(mnemonic));
     }
 }
 
-BOOST_AUTO_TEST_CASE(entropy_to_bx_new_mnemonic)
+BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__bx)
 {
-    for (const mnemonic_result& result: mnemonic_bx_new_vectors)
+    for (const mnemonic_result& vector: mnemonic_bx_new_vectors)
     {
         data_chunk entropy;
-        decode_base16(entropy, result.entropy);
-        const auto mnemonic = create_mnemonic(entropy, result.language);
+        decode_base16(entropy, vector.entropy);
+        const auto mnemonic = create_mnemonic(entropy, vector.language);
         BOOST_REQUIRE(mnemonic.size() > 0);
-        BOOST_REQUIRE_EQUAL(join(mnemonic), result.mnemonic);
+        BOOST_REQUIRE_EQUAL(join(mnemonic, ","), vector.mnemonic);
         BOOST_REQUIRE(validate_mnemonic(mnemonic));
     }
 }
 
-BOOST_AUTO_TEST_CASE(trezor_mnemonic_to_seed)
+BOOST_AUTO_TEST_CASE(mnemonic__validate_mnemonic__invalid)
 {
-    for (const auto& result: mnemonic_trezor_vectors)
+    for (const auto& mnemonic: invalid_mnemonic_tests)
     {
-        const auto words = split(result.mnemonic);
-        BOOST_REQUIRE(validate_mnemonic(words));
-        const auto seed = decode_mnemonic(words, result.passphrase);
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), result.seed);
+        const auto words = split(mnemonic, ",");
+        BOOST_REQUIRE(!validate_mnemonic(words));
     }
 }
 
-BOOST_AUTO_TEST_CASE(bx_mnemonic_to_seed)
-{
-    for (const auto& result: mnemonic_bx_to_seed_vectors)
-    {
-        const auto words = split(result.mnemonic);
-        BOOST_REQUIRE(validate_mnemonic(words));
-        const auto seed = decode_mnemonic(words, result.passphrase);
-        BOOST_REQUIRE_EQUAL(encode_base16(seed), result.seed);
-    }
-}
-
-BOOST_AUTO_TEST_CASE(tiny_mnemonic)
+BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__tiny)
 {
     const data_chunk entropy(4, 0xa9);
     const auto mnemonic = create_mnemonic(entropy);
@@ -82,7 +106,7 @@ BOOST_AUTO_TEST_CASE(tiny_mnemonic)
     BOOST_REQUIRE(validate_mnemonic(mnemonic));
 }
 
-BOOST_AUTO_TEST_CASE(giant_mnemonic)
+BOOST_AUTO_TEST_CASE(mnemonic__create_mnemonic__giant)
 {
     const data_chunk entropy(1024, 0xa9);
     const auto mnemonic = create_mnemonic(entropy);
@@ -90,16 +114,7 @@ BOOST_AUTO_TEST_CASE(giant_mnemonic)
     BOOST_REQUIRE(validate_mnemonic(mnemonic));
 }
 
-BOOST_AUTO_TEST_CASE(invalid_mnemonics)
-{
-    for (const auto& mnemonic: invalid_mnemonic_tests)
-    {
-        const auto words = split(mnemonic);
-        BOOST_REQUIRE(!validate_mnemonic(words));
-    }
-}
-
-BOOST_AUTO_TEST_CASE(ensure_en_es_disjointness)
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__en_es__no_intersection)
 {
     const auto& english = language::en;
     const auto& spanish = language::es;
@@ -115,7 +130,7 @@ BOOST_AUTO_TEST_CASE(ensure_en_es_disjointness)
     BOOST_REQUIRE_EQUAL(intersection, 0u);
 }
 
-BOOST_AUTO_TEST_CASE(ensure_zh_Hans_Hant_intersection)
+BOOST_AUTO_TEST_CASE(mnemonic__dictionary__zh_Hans_Hant__intersection)
 {
     const auto& simplified = language::zh_Hans;
     const auto& traditional = language::zh_Hant;

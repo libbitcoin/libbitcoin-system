@@ -102,7 +102,7 @@ static void enqueue_fragment(std::string& fragment,
 std::vector<std::string> printer::columnize(const std::string& paragraph,
     size_t width)
 {
-    const auto words = split(paragraph);
+    const auto words = split(paragraph, " ", false);
 
     std::string fragment;
     std::vector<std::string> column;
@@ -227,7 +227,7 @@ static std::string format_setting(const parameter& value,
 static void split_setting_name(const parameter& value, std::string& name,
     std::string& section)
 {
-    auto tokens = split(value.get_long_name(), ".");
+    const auto tokens = split(value.get_long_name(), ".");
     if (tokens.size() != 2)
     {
         section.clear();

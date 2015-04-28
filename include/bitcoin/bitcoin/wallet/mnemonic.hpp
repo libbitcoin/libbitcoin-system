@@ -20,10 +20,13 @@
 #ifndef LIBBITCOIN_MNEMONIC_HPP
 #define LIBBITCOIN_MNEMONIC_HPP
 
+#include <cstddef>
 #include <string>
+#include <vector>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
@@ -67,11 +70,20 @@ BC_API bool validate_mnemonic(const word_list& mnemonic,
     const dictionary_list& lexicons=language::all);
 
 /**
- * Convert a mnemonic and optional passphrase to a wallet-generation seed.
+ * Convert a mnemonic with no passphrase to a wallet-generation seed.
+ */
+BC_API long_hash decode_mnemonic(const word_list& mnemonic);
+
+#ifdef BOOST_HAS_ICU
+
+/**
+ * Convert a mnemonic and passphrase to a wallet-generation seed.
  * Any passphrase can be used and will change the resulting seed.
  */
 BC_API long_hash decode_mnemonic(const word_list& mnemonic,
-    const std::string& passphrase="");
+    const std::string& passphrase);
+
+#endif
 
 } // namespace libbitcoin
 

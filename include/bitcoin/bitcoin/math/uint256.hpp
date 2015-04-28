@@ -13,10 +13,14 @@
 #include <string.h>
 #include <vector>
 
-class uint_error : public std::runtime_error
+class uint_error 
+    : public std::runtime_error
 {
 public:
-    explicit uint_error(const std::string& str) : std::runtime_error(str) {}
+    explicit uint_error(const std::string& str) 
+        : std::runtime_error(str)
+    {
+    }
 };
 
 /* Template base class for unsigned big integers. */
@@ -26,6 +30,7 @@ class base_uint
 private:
     enum { WIDTH=BITS/32 };
     uint32_t pn[WIDTH];
+
 public:
 
     base_uint()
@@ -424,7 +429,8 @@ public:
 };
 
 /* 256-bit unsigned big integer. */
-class uint256 : public base_uint<256>
+class uint256 
+    : public base_uint<256>
 {
 public:
     uint256() {}
