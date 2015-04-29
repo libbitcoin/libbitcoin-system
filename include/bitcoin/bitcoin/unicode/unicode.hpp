@@ -75,8 +75,12 @@
 // incorrectly translated.
 
 #ifdef _WIN32
-#define BOOST_HAS_ICU
+    #define BOOST_HAS_ICU
 #endif
+#ifdef BOOST_HAS_ICU
+    #define BC_HAS_ICU
+#endif
+
 #define BC_LOCALE_BACKEND "icu"
 #define BC_LOCALE_UTF8 "en_US.UTF8"
 
