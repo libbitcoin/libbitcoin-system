@@ -285,7 +285,7 @@ const mnemonic_result_list mnemonic_no_passphrase
             "rival,hurdle,address,inspire,tenant,alone",
             "",
             "33498afc5ef71e87afd7cad1e50a9d9adb9e30d3ca4b1da5dc370d266aa7796cbc1854eebce5ab3fd3b02b6625e2a82868dbb693e988e47d74106f04c76a6263",
-            bc::language::en
+            bc::wallet::language::en
         }
     }
 };
