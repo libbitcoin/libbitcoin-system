@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
-#include "conditional_stack.hpp"
+#include "../conditional_stack.hpp"
 #include "../evaluation_context.hpp"
 
 namespace libbitcoin {

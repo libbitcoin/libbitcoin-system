@@ -375,3 +375,13 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
 
+
+# Custom make targets.
+#==============================================================================
+# make target: examples
+#------------------------------------------------------------------------------
+target_examples = \
+    examples/libbitcoin_examples
+
+examples: ${target_examples}
+
