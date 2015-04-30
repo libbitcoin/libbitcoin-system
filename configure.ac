@@ -107,7 +107,7 @@ AC_ARG_WITH([icu],
     [with_icu=no])
 AC_MSG_RESULT([$with_icu])
 AS_CASE([${with_icu}], [yes], AC_DEFINE([BOOST_HAS_ICU]))
-AS_CASE([${with_icu}], [yes], AC_SUBST([icu], [-DBOOST_HAS_ICU]))
+AS_CASE([${with_icu}], [yes], AC_SUBST([icu], [-DWITH_ICU]))
 
 # Implement --enable-ndebug and define NDEBUG.
 #------------------------------------------------------------------------------
