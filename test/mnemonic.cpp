@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__no_passphrase)
     }
 }
 
-#ifdef BOOST_HAS_ICU
+#ifdef WITH_ICU
 
 BOOST_AUTO_TEST_CASE(mnemonic__decode_mnemonic__trezor)
 {

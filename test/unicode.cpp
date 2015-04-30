@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(unicode)
 
 BOOST_AUTO_TEST_SUITE(unicode_tests)
 
-#ifdef BOOST_HAS_ICU
+#ifdef WITH_ICU
 
 BOOST_AUTO_TEST_CASE(unicode__to_normal_form__validate__test)
 {

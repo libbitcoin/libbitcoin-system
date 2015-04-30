@@ -139,7 +139,7 @@ long_hash decode_mnemonic(const word_list& mnemonic)
         to_data_chunk(salt), hmac_iterations);
 }
 
-#ifdef BOOST_HAS_ICU
+#ifdef WITH_ICU
 
 long_hash decode_mnemonic(const word_list& mnemonic,
     const std::string& passphrase)

@@ -78,7 +78,7 @@ std::istream& cin = cin_stream();
 std::ostream& cout = cout_stream();
 std::ostream& cerr = cerr_stream();
 
-#ifdef BOOST_HAS_ICU
+#ifdef WITH_ICU
 
 // The backend selection is ignored if invalid (in this case on Windows).
 static std::string normalize_nfkd(const std::string& value)

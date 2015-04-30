@@ -74,7 +74,7 @@ BC_API bool validate_mnemonic(const word_list& mnemonic,
  */
 BC_API long_hash decode_mnemonic(const word_list& mnemonic);
 
-#ifdef BOOST_HAS_ICU
+#ifdef WITH_ICU
 
 /**
  * Convert a mnemonic and passphrase to a wallet-generation seed.
