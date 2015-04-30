@@ -41,7 +41,7 @@ protected:
     int flags_;
     
     /**
-     * Call to obtain the secp256k1 context, initialized on first call.
+     * Construct a signing context initializer of the specified context.
      * @param[in]  flags  { SECP256K1_CONTEXT_SIGN, SECP256K1_CONTEXT_VERIFY }
      */
     secp256k1_initializer(int flags);
