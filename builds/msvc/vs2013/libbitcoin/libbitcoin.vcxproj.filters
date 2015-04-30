@@ -290,6 +290,9 @@
     <ClCompile Include="..\..\..\..\src\unicode\ofstream.cpp">
       <Filter>src\unicode</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\uint256.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">

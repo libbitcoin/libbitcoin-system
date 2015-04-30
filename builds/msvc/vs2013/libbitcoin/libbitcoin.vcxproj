@@ -95,6 +95,7 @@
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\hash_number.cpp" />
     <ClCompile Include="..\..\..\..\src\math\script_number.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel.cpp" />
     <ClCompile Include="..\..\..\..\src\network\handshake.cpp" />
     <ClCompile Include="..\..\..\..\src\network\hosts.cpp" />

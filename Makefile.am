@@ -56,6 +56,7 @@ src_libbitcoin_la_SOURCES = \
     src/math/hash.cpp \
     src/math/hash_number.cpp \
     src/math/script_number.cpp \
+    src/math/uint256.cpp \
     src/math/external/hmac_sha256.c \
     src/math/external/hmac_sha256.h \
     src/math/external/hmac_sha512.c \
