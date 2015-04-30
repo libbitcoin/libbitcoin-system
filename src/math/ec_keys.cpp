@@ -31,21 +31,25 @@ namespace libbitcoin {
 // This class holds no static state but will only initialize its state once for
 // the given mutex. This can be assigned to a static or otherwise. It lazily
 // inits the context once and destroys the context on destruct as necessary.
-class curve
+class secp256k1_signing
 {
 private:
-    static void set_context(secp256k1_context_t** context, int flags)
+    static void set_context(secp256k1_context_t** context, bool signing)
     {
-        *context = secp256k1_context_create(flags);
+        int flag = signing ? SECP256K1_CONTEXT_SIGN : SECP256K1_CONTEXT_VERIFY;
+        *context = secp256k1_context_create(flag);
     }
+
+protected:
+    bool signing_;
 
 public:
-    curve(int flags)
-        : flags_(flags), context_(nullptr)
+    secp256k1_signing()
+        : signing_(true), context_(nullptr)
     {
     }
 
-    ~curve()
+    ~secp256k1_signing()
     {
         if (context_ != nullptr)
             secp256k1_context_destroy(context_);
@@ -53,21 +57,29 @@ public:
 
     secp256k1_context_t* context()
     {
-        std::call_once(mutex_, set_context, &context_, flags_);
+        std::call_once(mutex_, set_context, &context_, signing_);
         return context_;
     }
 
 private:
-    int flags_;
     std::once_flag mutex_;
     secp256k1_context_t* context_;
 };
 
+class secp256k1_verification
+    : public secp256k1_signing
+{
+public:
+    secp256k1_verification()
+    {
+        signing_ = false;
+    }
+};
 
 // We do not share contexts because they may or may not both be required at 
 // some point and they can't be independently destroyed.
-static curve signing(SECP256K1_CONTEXT_SIGN);
-static curve verification(SECP256K1_CONTEXT_VERIFY);
+static secp256k1_signing signing;
+static secp256k1_verification verification;
 
 ec_point secret_to_public_key(const ec_secret& secret,
     bool compressed)
