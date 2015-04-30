@@ -95,6 +95,7 @@
     <ClCompile Include="..\..\..\..\src\math\hash.cpp" />
     <ClCompile Include="..\..\..\..\src\math\hash_number.cpp" />
     <ClCompile Include="..\..\..\..\src\math\script_number.cpp" />
+    <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel.cpp" />
     <ClCompile Include="..\..\..\..\src\network\handshake.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\hash_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\script_number.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\secp256k1_initializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\handshake.hpp" />

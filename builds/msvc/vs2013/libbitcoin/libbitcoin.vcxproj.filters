@@ -293,6 +293,9 @@
     <ClCompile Include="..\..\..\..\src\math\uint256.cpp">
       <Filter>src\math</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp">
+      <Filter>src\math</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -528,6 +531,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\ofstream.hpp">
       <Filter>include\bitcoin\unicode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\secp256k1_initializer.hpp">
+      <Filter>include\bitcoin\math</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
