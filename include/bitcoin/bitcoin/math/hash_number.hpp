@@ -67,7 +67,7 @@ private:
     friend bool operator==(
         const hash_number& number, uint64_t value);
 
-    uint256 hash_;
+    uint256_t hash_;
 };
 
 BC_API bool operator>(

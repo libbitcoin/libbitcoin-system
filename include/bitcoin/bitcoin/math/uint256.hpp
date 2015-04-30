@@ -13,19 +13,31 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include <bitcoin/bitcoin/define.hpp>
 
-class uint_error : public std::runtime_error {
+namespace libbitcoin {
+
+class BC_API uint_error 
+    : public std::runtime_error
+{
 public:
-    explicit uint_error(const std::string& str) : std::runtime_error(str) {}
+    explicit uint_error(const std::string& str) : std::runtime_error(str)
+    {
+    }
 };
 
 /** Template base class for unsigned big integers. */
 template<unsigned int BITS>
-class base_uint
+class BC_API base_uint
 {
 protected:
-    enum { WIDTH=BITS/32 };
+    enum 
+    { 
+        WIDTH = BITS / 32
+    };
+
     uint32_t pn[WIDTH];
+
 public:
 
     base_uint()
@@ -44,6 +56,7 @@ public:
     {
         for (int i = 0; i < WIDTH; i++)
             pn[i] = b.pn[i];
+
         return *this;
     }
 
@@ -62,6 +75,7 @@ public:
         for (int i = 0; i < WIDTH; i++)
             if (pn[i] != 0)
                 return false;
+
         return true;
     }
 
@@ -70,6 +84,7 @@ public:
         base_uint ret;
         for (int i = 0; i < WIDTH; i++)
             ret.pn[i] = ~pn[i];
+
         return ret;
     }
 
@@ -78,6 +93,7 @@ public:
         base_uint ret;
         for (int i = 0; i < WIDTH; i++)
             ret.pn[i] = ~pn[i];
+
         ret++;
         return ret;
     }
@@ -88,6 +104,7 @@ public:
         pn[1] = (unsigned int)(b >> 32);
         for (int i = 2; i < WIDTH; i++)
             pn[i] = 0;
+
         return *this;
     }
 
@@ -95,6 +112,7 @@ public:
     {
         for (int i = 0; i < WIDTH; i++)
             pn[i] ^= b.pn[i];
+
         return *this;
     }
 
@@ -102,6 +120,7 @@ public:
     {
         for (int i = 0; i < WIDTH; i++)
             pn[i] &= b.pn[i];
+
         return *this;
     }
 
@@ -109,6 +128,7 @@ public:
     {
         for (int i = 0; i < WIDTH; i++)
             pn[i] |= b.pn[i];
+
         return *this;
     }
 
@@ -138,6 +158,7 @@ public:
             pn[i] = n & 0xffffffff;
             carry = n >> 32;
         }
+
         return *this;
     }
 
@@ -171,8 +192,9 @@ public:
     {
         // prefix operator
         int i = 0;
-        while (++pn[i] == 0 && i < WIDTH-1)
+        while (++pn[i] == 0 && i < WIDTH - 1)
             i++;
+
         return *this;
     }
 
@@ -188,8 +210,9 @@ public:
     {
         // prefix operator
         int i = 0;
-        while (--pn[i] == (uint32_t)-1 && i < WIDTH-1)
+        while (--pn[i] == (uint32_t)-1 && i < WIDTH - 1)
             i++;
+
         return *this;
     }
 
@@ -198,6 +221,7 @@ public:
         // postfix operator
         const base_uint ret = *this;
         --(*this);
+
         return ret;
     }
 
@@ -214,6 +238,7 @@ public:
     friend inline const base_uint operator>>(const base_uint& a, int shift) { return base_uint(a) >>= shift; }
     friend inline const base_uint operator<<(const base_uint& a, int shift) { return base_uint(a) <<= shift; }
     friend inline const base_uint operator*(const base_uint& a, uint32_t b) { return base_uint(a) *= b; }
+
     friend inline bool operator==(const base_uint& a, const base_uint& b) { return memcmp(a.pn, b.pn, sizeof(a.pn)) == 0; }
     friend inline bool operator!=(const base_uint& a, const base_uint& b) { return memcmp(a.pn, b.pn, sizeof(a.pn)) != 0; }
     friend inline bool operator>(const base_uint& a, const base_uint& b) { return a.CompareTo(b) > 0; }
@@ -262,13 +287,24 @@ public:
 };
 
 /** 256-bit unsigned big integer. */
-class uint256 : public base_uint<256> {
+class BC_API uint256_t : public base_uint<256>
+{
 public:
-    uint256() {}
-    uint256(const base_uint<256>& b) : base_uint<256>(b) {}
-    uint256(uint64_t b) : base_uint<256>(b) {}
-    explicit uint256(const std::vector<unsigned char>& vch) : base_uint<256>(vch) {}
-    
+    uint256_t()
+    {
+    }
+    uint256_t(const base_uint<256>& b) : base_uint<256>(b)
+    {
+    }
+    uint256_t(uint64_t b) : base_uint<256>(b)
+    {
+    }
+
+    explicit uint256_t(const std::vector<unsigned char>& vch) 
+        : base_uint<256>(vch)
+    {
+    }
+
     /**
      * The "compact" format is a representation of a whole
      * number N using an unsigned 32bit number similar to a
@@ -278,19 +314,22 @@ public:
      * The lower 23 bits are the mantissa.
      * Bit number 24 (0x800000) represents the sign of N.
      * N = (-1^sign) * mantissa * 256^(exponent-3)
-     * 
+     *
      * Satoshi's original implementation used BN_bn2mpi() and BN_mpi2bn().
      * MPI uses the most significant bit of the first byte as sign.
      * Thus 0x1234560000 is compact (0x05123456)
      * and  0xc0de000000 is compact (0x0600c0de)
-     * 
+     *
      * Bitcoin only uses this "compact" format for encoding difficulty
      * targets, which are unsigned 256bit quantities.  Thus, all the
      * complexities of the sign bit and using base 256 are probably an
      * implementation accident.
      */
-    uint256& SetCompact(uint32_t nCompact, bool *pfNegative = NULL, bool *pfOverflow = NULL);
     uint32_t GetCompact(bool fNegative = false) const;
+    uint256_t& SetCompact(uint32_t nCompact, bool *pfNegative = NULL,
+        bool *pfOverflow = NULL);
 };
 
-#endif // BITCOIN_UINT256_H
+} // namespace libbitcoin
+
+#endif
