@@ -44,20 +44,22 @@ class script_number
 {
 public:
     BC_API explicit script_number(const int64_t value);
+
     // Undefined state. set_data() must be called after.
     BC_API script_number();
-
     BC_API bool set_data(const data_chunk& data);
-    BC_API data_chunk data() const;
 
+    BC_API data_chunk data() const;
     BC_API int32_t int32() const;
 
     // Arithmetic with a number.
     BC_API script_number operator+(const int64_t value) const;
     BC_API script_number operator-(const int64_t value) const;
+
     // Arithmetic with another script_number.
     BC_API script_number operator+(const script_number& other) const;
     BC_API script_number operator-(const script_number& other) const;
+
     // -script_number
     BC_API script_number operator-() const;
 
@@ -68,6 +70,7 @@ public:
     BC_API bool operator< (const int64_t value) const;
     BC_API bool operator>=(const int64_t value) const;
     BC_API bool operator> (const int64_t value) const;
+
     // Comparison operators with another script_number.
     BC_API bool operator==(const script_number& other) const;
     BC_API bool operator!=(const script_number& other) const;

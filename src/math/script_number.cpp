@@ -26,7 +26,7 @@ namespace libbitcoin {
 
 data_chunk script_number_serialize(const int64_t value)
 {
-    if(value == 0)
+    if (value == 0)
         return data_chunk();
 
     data_chunk result;
@@ -39,7 +39,6 @@ data_chunk script_number_serialize(const int64_t value)
         abs_value >>= 8;
     }
 
-
     // - If the most significant byte is >= 0x80 and the value is positive,
     // push a new zero-byte to make the significant byte < 0x80 again.
 
@@ -51,7 +50,7 @@ data_chunk script_number_serialize(const int64_t value)
     // add 0x80 to it, since it will be subtracted and interpreted as
     // a negative when converting to an integral.
 
-    if (result.back() & 0x80)
+    if ((result.back() & 0x80) != 0)
         result.push_back(is_negative ? 0x80 : 0);
     else if (is_negative)
         result.back() |= 0x80;
@@ -67,9 +66,7 @@ int64_t script_number_deserialize(const data_chunk& data)
 
     int64_t result = 0;
     for (size_t i = 0; i != data.size(); ++i)
-    {
         result |= static_cast<int64_t>(data[i]) << 8 * i;
-    }
 
     // If the input vector's most significant byte is 0x80, remove it from
     // the result's msb and return a negative.
@@ -92,6 +89,7 @@ bool script_number::set_data(const data_chunk& data)
 {
     if (data.size() > max_script_number_size)
         return false;
+
     value_ = script_number_deserialize(data);
     return true;
 }
@@ -106,6 +104,7 @@ int32_t script_number::int32() const
         return max_int32;
     else if (value_ < min_int32)
         return min_int32;
+
     return static_cast<int32_t>(value_);
 }
 
