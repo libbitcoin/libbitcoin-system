@@ -238,14 +238,14 @@ circumvent_boost_icu_detection()
     # Boost ICU discovery fails when using prefix, can't fix with -sICU_LINK,
     # so we rewrite the two 'has_icu_test.cpp' files to always return success.
     
-    if [[ $BUILD_ICU ]]; then
+    if [[ $WITH_ICU ]]; then
         local SUCCESS="int main() { return 0; }"
         local REGEX_TEST="libs/regex/build/has_icu_test.cpp"
         local LOCALE_TEST="libs/locale/build/has_icu_test.cpp"
         
         echo $SUCCESS > $REGEX_TEST
         echo $SUCCESS > $LOCALE_TEST
-        
+
         echo "hack: ICU detection modified, will always indicate found."
     fi
 }
