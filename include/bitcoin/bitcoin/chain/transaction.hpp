@@ -48,16 +48,6 @@ public:
 
     transaction(std::istream& stream);
 
-    transaction(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    transaction(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    transaction(const Iterator begin, const Iterator end);
-
-//    transaction(const std::string& human_readable);
-
     uint32_t version() const;
 
     void version(uint32_t version);
@@ -97,9 +87,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     uint32_t version_;
     uint32_t locktime_;
     transaction_input_list inputs_;
@@ -110,7 +97,5 @@ typedef std::vector<transaction> transaction_list;
 
 } // end chain
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/chain/transaction.ipp>
 
 #endif

@@ -35,7 +35,9 @@ BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
     BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), rawblk.end()), 285u);
     BOOST_REQUIRE_EQUAL(rawblk.size(), 285u);
     // Reload genesis block.
-    chain::block blk(rawblk.begin(), rawblk.end());
+    data_chunk_buffer rawblkbuf(rawblk.data(), rawblk.size());
+    std::istream rawblkis(&rawblkbuf);
+    chain::block blk(rawblkis);
     BOOST_REQUIRE(genblk.header().version() == blk.header().version());
     BOOST_REQUIRE(genblk.header().previous_block_hash() == blk.header().previous_block_hash());
     BOOST_REQUIRE(genblk.header().merkle() == blk.header().merkle());
@@ -52,7 +54,10 @@ BOOST_AUTO_TEST_CASE(junk_test)
     auto junk = base16_literal(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
-    chain::transaction tx(junk.begin(), junk.end());
+
+    data_chunk_buffer junkbuf(junk.data(), junk.size());
+    std::istream junkis(&junkbuf);
+    chain::transaction tx(junkis);
 }
 
 BOOST_AUTO_TEST_CASE(tx_test)
@@ -68,8 +73,11 @@ BOOST_AUTO_TEST_CASE(tx_test)
         "001976a914d9d78e26df4e4601cf9b26d09c7b280ee764469f88ac80c4600f00"
         "0000001976a9141ee32412020a324b93b1a1acfdfff6ab9ca8fac288ac000000"
         "00"));
+
+    data_chunk_buffer raw_tx_1_buf(raw_tx_1.data(), raw_tx_1.size());
+    std::istream raw_tx_1_is(&raw_tx_1_buf);
     BOOST_REQUIRE_EQUAL(raw_tx_1.size(), 225u);
-    chain::transaction tx_1(raw_tx_1.begin(), raw_tx_1.end());
+    chain::transaction tx_1(raw_tx_1_is);
     BOOST_REQUIRE_EQUAL(tx_1.satoshi_size(), 225u);
     BOOST_REQUIRE(tx_1.hash() == tx_hash_1);
     // Re-save tx and compare against original.
@@ -98,7 +106,9 @@ BOOST_AUTO_TEST_CASE(tx_test)
         "10c3d488ac20300500000000001976a914905f933de850988603aafeeb2fd7fc"
         "e61e66fe5d88ac00000000"));
     BOOST_REQUIRE_EQUAL(raw_tx_2.size(), 523u);
-    chain::transaction tx_2(raw_tx_2);
+    data_chunk_buffer raw_tx_2_buf(raw_tx_2.data(), raw_tx_2.size());
+    std::istream raw_tx_2_is(&raw_tx_2_buf);
+    chain::transaction tx_2(raw_tx_2_is);
     BOOST_REQUIRE(tx_2.hash() == tx_hash_2);
     // Re-save tx and compare against original.
     BOOST_REQUIRE(tx_2.satoshi_size() == raw_tx_2.size());

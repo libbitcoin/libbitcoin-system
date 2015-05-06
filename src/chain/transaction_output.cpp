@@ -43,10 +43,10 @@ transaction_output::transaction_output(std::istream& stream)
         throw std::ios_base::failure("transaction_output");
 }
 
-transaction_output::transaction_output(const data_chunk& value)
-: transaction_output(value.begin(), value.end())
-{
-}
+//transaction_output::transaction_output(const data_chunk& value)
+//: transaction_output(value.begin(), value.end())
+//{
+//}
 
 chain::script& transaction_output::script()
 {

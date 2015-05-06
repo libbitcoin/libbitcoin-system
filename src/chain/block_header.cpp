@@ -47,10 +47,10 @@ block_header::block_header(std::istream& stream)
         throw std::ios_base::failure("block_header");
 }
 
-block_header::block_header(const data_chunk& value)
-    : block_header(value.begin(), value.end())
-{
-}
+//block_header::block_header(const data_chunk& value)
+//    : block_header(value.begin(), value.end())
+//{
+//}
 
 uint32_t block_header::version() const
 {

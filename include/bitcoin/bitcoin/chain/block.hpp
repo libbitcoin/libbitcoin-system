@@ -44,14 +44,6 @@ public:
 
     block(std::istream& stream);
 
-    block(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    block(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    block(const Iterator begin, const Iterator end);
-
     block_header& header();
 
     const block_header& header() const;
@@ -71,9 +63,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     block_header header_;
     transaction_list transactions_;
 };
@@ -84,7 +73,5 @@ typedef std::vector<size_t> index_list;
 
 } // end chain
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/chain/block.ipp>
 
 #endif

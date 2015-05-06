@@ -57,14 +57,6 @@ public:
 
     script(const data_chunk& value, bool allow_raw_data_fallback = false);
 
-    template<typename Iterator, bool SafeCheckLast>
-    script(deserializer<Iterator, SafeCheckLast>& deserial,
-        bool allow_raw_data_fallback = false);
-
-    template<typename Iterator>
-    script(const Iterator begin, const Iterator end,
-        bool allow_raw_data_fallback = false);
-
     script(const std::string& human_readable);
 
     operation_stack& operations();
@@ -105,24 +97,14 @@ public:
 
 private:
 
-    template<typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial,
-        bool allow_raw_data_fallback);
-
     void deserialize(data_chunk& raw_script, bool allow_raw_data_fallback);
 
     bool parse(data_chunk& raw_script);
-
-    template<typename Deserializer>
-    size_t read_operation_data_byte_count(opcode code, uint8_t raw_byte,
-        Deserializer& deserial);
 
     operation_stack operations_;
 };
 
 } // end chain
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/chain/script.ipp>
 
 #endif

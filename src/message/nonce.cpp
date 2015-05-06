@@ -41,10 +41,10 @@ nonce_base::nonce_base(std::istream& stream)
         throw std::ios_base::failure("nonce_base");
 }
 
-nonce_base::nonce_base(const data_chunk& value)
-: nonce_base(value.begin(), value.end())
-{
-}
+//nonce_base::nonce_base(const data_chunk& value)
+//: nonce_base(value.begin(), value.end())
+//{
+//}
 
 uint64_t nonce_base::nonce() const
 {
@@ -79,10 +79,15 @@ ping::ping()
 {
 }
 
-ping::ping(const data_chunk& value)
-: nonce_base(value)
+ping::ping(std::istream& stream)
+: nonce_base(stream)
 {
 }
+
+//ping::ping(const data_chunk& value)
+//: nonce_base(value)
+//{
+//}
 
 size_t ping::satoshi_fixed_size()
 {
@@ -94,10 +99,15 @@ pong::pong()
 {
 }
 
-pong::pong(const data_chunk& value)
-: nonce_base(value)
+pong::pong(std::istream& stream)
+: nonce_base(stream)
 {
 }
+
+//pong::pong(const data_chunk& value)
+//: nonce_base(value)
+//{
+//}
 
 size_t pong::satoshi_fixed_size()
 {

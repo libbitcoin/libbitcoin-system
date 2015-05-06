@@ -44,10 +44,10 @@ inventory_vector::inventory_vector(std::istream& stream)
         throw std::ios_base::failure("inventory_vector");
 }
 
-inventory_vector::inventory_vector(const data_chunk& value)
-: inventory_vector(value.begin(), value.end())
-{
-}
+//inventory_vector::inventory_vector(const data_chunk& value)
+//: inventory_vector(value.begin(), value.end())
+//{
+//}
 
 inventory_type_id inventory_vector::type() const
 {

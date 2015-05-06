@@ -41,14 +41,6 @@ public:
 
     inventory_vector(std::istream& stream);
 
-    inventory_vector(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    inventory_vector(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    inventory_vector(const Iterator begin, const Iterator end);
-
     inventory_type_id type() const;
 
     void type(const inventory_type_id value);
@@ -67,9 +59,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     inventory_type_id type_;
     hash_digest hash_;
 };
@@ -78,7 +67,5 @@ typedef std::vector<inventory_vector> inventory_list;
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/inventory_vector.ipp>
 
 #endif

@@ -44,10 +44,10 @@ transaction_input::transaction_input(std::istream& stream)
         throw std::ios_base::failure("transaction_input");
 }
 
-transaction_input::transaction_input(const data_chunk& value)
-: transaction_input(value.begin(), value.end())
-{
-}
+//transaction_input::transaction_input(const data_chunk& value)
+//: transaction_input(value.begin(), value.end())
+//{
+//}
 
 output_point& transaction_input::previous_output()
 {
