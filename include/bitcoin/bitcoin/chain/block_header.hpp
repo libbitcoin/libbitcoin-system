@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_BLOCK_HEADER_HPP
 
 #include <cstdint>
+#include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -34,10 +35,16 @@ class BC_API block_header
 {
 public:
 
+//    static block_header& from_data(bool& result, std::istream& stream);
+
     block_header();
+
+//    block_header(const block_header& other) = delete;
 
     block_header(uint32_t version, hash_digest previous_block_hash,
         hash_digest merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce);
+
+    block_header(std::istream& stream);
 
     block_header(const data_chunk& value);
 
@@ -76,6 +83,8 @@ public:
     void nonce(uint32_t nonce);
 
     operator const data_chunk() const;
+
+//    data_chunk to_data() const;
 
     size_t satoshi_size() const;
 

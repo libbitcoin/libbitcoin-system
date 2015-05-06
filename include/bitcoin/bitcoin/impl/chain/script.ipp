@@ -55,28 +55,6 @@ script::script(const Iterator begin, const Iterator end,
     BITCOIN_ASSERT(std::distance(begin, deserial.iterator()) == satoshi_size());
 }
 
-template <typename Deserializer>
-size_t script::read_operation_data_byte_count(opcode code,
-    uint8_t raw_byte, Deserializer& deserial)
-{
-    switch (code)
-    {
-        case opcode::special:
-            return raw_byte;
-        case opcode::pushdata1:
-            return deserial.read_byte();
-        case opcode::pushdata2:
-            return deserial.read_2_bytes();
-        case opcode::pushdata4:
-            return deserial.read_4_bytes();
-        default:
-            break;
-    }
-    BITCOIN_ASSERT_MSG(false, "Invalid opcode passed to function.");
-
-    return 0;
-}
-
 } // end chain
 } // end libbitcoin
 

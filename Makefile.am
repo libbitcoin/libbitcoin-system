@@ -115,6 +115,7 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_streambuf.cpp \
     src/utility/async_strand.cpp \
     src/utility/binary.cpp \
+    src/utility/istream.cpp \
     src/utility/logger.cpp \
     src/utility/random.cpp \
     src/utility/serializer.cpp \
@@ -195,7 +196,9 @@ test_libbitcoin_test_SOURCES = \
     test/unicode.cpp \
     test/unicode_istream.cpp \
     test/unicode_ostream.cpp \
-    test/uri.cpp
+    test/uri.cpp \
+    test/chain/point.cpp \
+    test/utility/endian.cpp
 
 endif WITH_TESTS
 
@@ -285,6 +288,7 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/deserializer.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
+    include/bitcoin/bitcoin/impl/utility/istream.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
@@ -358,6 +362,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/deserializer.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
+    include/bitcoin/bitcoin/utility/istream.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \

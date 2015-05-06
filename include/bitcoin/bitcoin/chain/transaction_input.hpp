@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_TRANSACTION_INPUT_HPP
 
 #include <cstdint>
+#include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -38,6 +39,8 @@ public:
 
     transaction_input(const output_point& previous_output,
         const chain::script& script, const uint32_t sequence);
+
+    transaction_input(std::istream& stream);
 
     transaction_input(const data_chunk& value);
 

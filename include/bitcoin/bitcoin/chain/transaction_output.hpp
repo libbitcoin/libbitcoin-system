@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_TRANSACTION_OUTPUT_HPP
 
 #include <cstdint>
+#include <istream>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -37,6 +38,8 @@ public:
     transaction_output();
 
     transaction_output(uint64_t value, const chain::script& script);
+
+    transaction_output(std::istream& stream);
 
     transaction_output(const data_chunk& value);
 

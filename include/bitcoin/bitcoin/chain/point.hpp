@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_POINT_HPP
 
 #include <cstdint>
+#include <istream>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
@@ -38,6 +39,8 @@ public:
     point();
 
     point(hash_digest hash, uint32_t index);
+
+    point(std::istream& stream);
 
     point(const data_chunk& value);
 
