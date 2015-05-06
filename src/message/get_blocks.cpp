@@ -90,7 +90,7 @@ void get_blocks::hash_stop(const hash_digest& value)
     hash_stop_ = value;
 }
 
-get_blocks::operator const data_chunk() const
+data_chunk get_blocks::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());

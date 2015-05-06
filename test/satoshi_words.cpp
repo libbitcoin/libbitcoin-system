@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(satoshi_words_mainnet_or_testnet)
     const bc::chain::transaction_input& coinbase_input = coinbase_tx.inputs()[0];
 
     // Convert the input script to its raw format.
-    const bc::data_chunk raw_message = coinbase_input.script();
+    const bc::data_chunk raw_message = coinbase_input.script().to_data();
 
     // Convert to a string after removing the 8 byte checksum.
     BOOST_REQUIRE_GT(raw_message.size(), 8u);

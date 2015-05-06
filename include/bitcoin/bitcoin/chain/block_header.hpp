@@ -74,7 +74,7 @@ public:
 
     void nonce(uint32_t nonce);
 
-    operator const data_chunk() const;
+    data_chunk to_data() const;
 
 //    data_chunk to_data() const;
 

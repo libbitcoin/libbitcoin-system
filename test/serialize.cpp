@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
     BOOST_REQUIRE_EQUAL(genblk.satoshi_size(), 285u);
     BOOST_REQUIRE_EQUAL(genblk.header().satoshi_size(), 80u);
     // Save genesis block.
-    data_chunk rawblk = genblk;
+    data_chunk rawblk = genblk.to_data();
     BOOST_REQUIRE_EQUAL(std::distance(rawblk.begin(), rawblk.end()), 285u);
     BOOST_REQUIRE_EQUAL(rawblk.size(), 285u);
     // Reload genesis block.
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(tx_test)
     BOOST_REQUIRE(tx_1.hash() == tx_hash_1);
     // Re-save tx and compare against original.
     BOOST_REQUIRE_EQUAL(tx_1.satoshi_size(), raw_tx_1.size());
-    data_chunk resave_1 = tx_1;
+    data_chunk resave_1 = tx_1.to_data();
     BOOST_REQUIRE(resave_1 == raw_tx_1);
 
     hash_digest tx_hash_2 = hash_literal(
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(tx_test)
     BOOST_REQUIRE(tx_2.hash() == tx_hash_2);
     // Re-save tx and compare against original.
     BOOST_REQUIRE(tx_2.satoshi_size() == raw_tx_2.size());
-    data_chunk resave_2 = tx_2;
+    data_chunk resave_2 = tx_2.to_data();
     BOOST_REQUIRE(resave_2 == raw_tx_2);
 }
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(script_parse_save_test)
     data_chunk normal_output_script = to_data_chunk(base16_literal(
         "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
     chain::script out_scr(normal_output_script);
-    data_chunk roundtrip = out_scr;
+    data_chunk roundtrip = out_scr.to_data();
     BOOST_REQUIRE(roundtrip == normal_output_script);
 
     data_chunk weird_script = to_data_chunk(base16_literal(
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(script_parse_save_test)
         "74b1d185dbf5b4db4ddb0642848868685174519c6351670068"));
 
     chain::script weird(weird_script);
-    data_chunk roundtrip_result = weird;
+    data_chunk roundtrip_result = weird.to_data();
 
     BOOST_REQUIRE(roundtrip_result == weird_script);
 }

@@ -105,7 +105,7 @@ void operation::data(const data_chunk& data)
     data_ = data;
 }
 
-operation::operator const data_chunk() const
+data_chunk operation::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());

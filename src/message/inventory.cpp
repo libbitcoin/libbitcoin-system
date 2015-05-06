@@ -48,11 +48,6 @@ inventory::inventory(std::istream& stream)
         throw std::ios_base::failure("inventory");
 }
 
-//inventory::inventory(const data_chunk& value)
-//: inventory(value.begin(), value.end())
-//{
-//}
-
 inventory_list& inventory::inventories()
 {
     return inventories_;
@@ -63,17 +58,14 @@ const inventory_list& inventory::inventories() const
     return inventories_;
 }
 
-inventory::operator const data_chunk() const
+data_chunk inventory::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
     serial.write_variable_uint(inventories_.size());
 
     for (const inventory_vector inv: inventories_)
-    {
-        data_chunk raw_inv = inv;
-        serial.write_data(raw_inv);
-    }
+        serial.write_data(inv.to_data());
 
     return result;
 }

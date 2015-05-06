@@ -64,7 +64,7 @@ const network_address_list& address::addresses() const
     return addresses_;
 }
 
-address::operator const data_chunk() const
+data_chunk address::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
@@ -74,8 +74,7 @@ address::operator const data_chunk() const
     for (const network_address& net_address: addresses_)
     {
         serial.write_4_bytes(net_address.timestamp());
-        data_chunk raw_address = net_address;
-        serial.write_data(raw_address);
+        serial.write_data(net_address.to_data());
     }
 
     return result;

@@ -176,17 +176,15 @@ void announce_version::start_height(uint32_t value)
     start_height_ = value;
 }
 
-announce_version::operator const data_chunk() const
+data_chunk announce_version::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
     serial.write_4_bytes(version_);
     serial.write_8_bytes(services_);
     serial.write_8_bytes(timestamp_);
-    data_chunk raw_address_me = address_me_;
-    serial.write_data(raw_address_me);
-    data_chunk raw_address_you = address_you_;
-    serial.write_data(raw_address_you);
+    serial.write_data(address_me_.to_data());
+    serial.write_data(address_you_.to_data());
     serial.write_8_bytes(nonce_);
     serial.write_string(user_agent_);
     serial.write_4_bytes(start_height_);

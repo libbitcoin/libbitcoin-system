@@ -27,8 +27,7 @@ namespace wallet {
 
 binary_type calculate_stealth_prefix(const chain::script& stealth_script)
 {
-    const data_chunk stealth_data = stealth_script;
-    const hash_digest index = bitcoin_hash(stealth_data);
+    const hash_digest index = bitcoin_hash(stealth_script.to_data());
     const size_t bitsize = binary_type::bits_per_block * sizeof(uint32_t);
     return binary_type(bitsize, index);
 }

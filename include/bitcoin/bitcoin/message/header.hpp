@@ -60,7 +60,7 @@ public:
 
     void checksum(const uint32_t value);
 
-    operator const data_chunk() const;
+    data_chunk to_data() const;
 
     size_t satoshi_size() const;
 

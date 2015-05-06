@@ -109,7 +109,7 @@ const transaction_output_list& transaction::outputs() const
     return outputs_;
 }
 
-transaction::operator const data_chunk() const
+data_chunk transaction::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
@@ -119,18 +119,12 @@ transaction::operator const data_chunk() const
     serial.write_variable_uint(inputs_.size());
 
     for (const transaction_input& input: inputs_)
-    {
-        data_chunk raw_input = input;
-        serial.write_data(raw_input);
-    }
+        serial.write_data(input.to_data());
 
     serial.write_variable_uint(outputs_.size());
 
     for (const transaction_output& output: outputs_)
-    {
-        data_chunk raw_output = output;
-        serial.write_data(raw_output);
-    }
+        serial.write_data(output.to_data());
 
     serial.write_4_bytes(locktime_);
 
@@ -184,13 +178,12 @@ std::string transaction::to_string() const
 
 hash_digest transaction::hash() const
 {
-    data_chunk serialized = *this;
-    return bitcoin_hash(serialized);
+    return bitcoin_hash(to_data());
 }
 
 hash_digest transaction::hash(uint32_t hash_type_code) const
 {
-    data_chunk serialized = *this;
+    data_chunk serialized = to_data();
     extend_data(serialized, to_little_endian(hash_type_code));
     return bitcoin_hash(serialized);
 }

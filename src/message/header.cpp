@@ -44,11 +44,6 @@ header::header(std::istream& stream)
         throw std::ios_base::failure("header");
 }
 
-//header::header(const data_chunk& value)
-//: header(value.begin(), value.end())
-//{
-//}
-
 uint32_t header::magic() const
 {
     return magic_;
@@ -94,7 +89,7 @@ void header::checksum(const uint32_t value)
     checksum_ = value;
 }
 
-header::operator const data_chunk() const
+data_chunk header::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
