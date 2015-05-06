@@ -21,6 +21,7 @@
 
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -34,6 +35,13 @@ transaction_input::transaction_input(const output_point& previous_output,
     const chain::script& script, const uint32_t sequence)
     : previous_output_(previous_output), script_(script), sequence_(sequence)
 {
+}
+
+transaction_input::transaction_input(std::istream& stream)
+    : previous_output_(stream), script_(stream), sequence_(read_4_bytes(stream))
+{
+    if (stream.fail())
+        throw std::ios_base::failure("transaction_input");
 }
 
 transaction_input::transaction_input(const data_chunk& value)

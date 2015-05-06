@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_TRANSACTION_HPP
 
 #include <cstdint>
+#include <istream>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
@@ -44,6 +45,8 @@ public:
     transaction(const uint32_t version, const uint32_t locktime,
         const transaction_input_list& inputs,
         const transaction_output_list& outputs);
+
+    transaction(std::istream& stream);
 
     transaction(const data_chunk& value);
 

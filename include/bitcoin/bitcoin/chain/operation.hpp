@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_OPERATION_HPP
 #define LIBBITCOIN_CHAIN_OPERATION_HPP
 
+#include <istream>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/opcode.hpp>
@@ -35,6 +36,8 @@ class BC_API operation
 public:
 
     operation();
+
+    operation(std::istream& stream);
 
     operation(const data_chunk& value);
 
@@ -70,6 +73,9 @@ private:
     template <typename Deserializer>
     static size_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
         Deserializer& deserial);
+
+    static size_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
+        std::istream& stream);
 
     static bool must_read_data(opcode code);
 

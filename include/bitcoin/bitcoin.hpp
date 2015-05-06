@@ -121,6 +121,7 @@
 #include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/exceptions.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
