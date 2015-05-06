@@ -37,17 +37,9 @@ public:
 
     operation();
 
-    operation(std::istream& stream);
-
-    operation(const data_chunk& value);
-
     operation(const opcode code, const data_chunk& data);
 
-    template <typename Iterator, bool SafeCheckLast>
-    operation(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    operation(const Iterator begin, const Iterator end);
+    operation(std::istream& stream);
 
     opcode code() const;
 
@@ -66,13 +58,6 @@ public:
     std::string to_string() const;
 
 private:
-
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template <typename Deserializer>
-    static size_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
-        Deserializer& deserial);
 
     static size_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
         std::istream& stream);
@@ -107,7 +92,5 @@ bool is_script_code_sig_type(const operation_stack& ops);
 
 } // end chain
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/chain/operation.ipp>
 
 #endif

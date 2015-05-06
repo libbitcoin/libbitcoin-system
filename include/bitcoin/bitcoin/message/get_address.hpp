@@ -40,29 +40,14 @@ public:
 
     get_address(std::istream& stream);
 
-    get_address(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    get_address(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    get_address(const Iterator begin, const Iterator end);
-
     operator const data_chunk() const;
 
     size_t satoshi_size() const;
 
     static size_t satoshi_fixed_size();
-
-private:
-
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
 };
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/get_address.ipp>
 
 #endif

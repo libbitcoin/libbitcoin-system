@@ -44,14 +44,6 @@ public:
 
     network_address(std::istream& stream);
 
-    network_address(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    network_address(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    network_address(const Iterator begin, const Iterator end);
-
     uint32_t timestamp() const;
 
     void timestamp(uint32_t value);
@@ -78,9 +70,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     uint32_t timestamp_;
     uint64_t services_;
     ip_address ip_;
@@ -91,7 +80,5 @@ typedef std::vector<network_address> network_address_list;
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/network_address.ipp>
 
 #endif

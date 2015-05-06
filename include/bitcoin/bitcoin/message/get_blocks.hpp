@@ -46,14 +46,6 @@ public:
 
     get_blocks(std::istream& stream);
 
-    get_blocks(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    get_blocks(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    get_blocks(const Iterator begin, const Iterator end);
-
     // 10 sequential hashes, then exponential samples until reaching genesis
     block_locator& start_hashes();
 
@@ -73,9 +65,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     // 10 sequential hashes, then exponential samples until reaching genesis
     block_locator start_hashes_;
     hash_digest hash_stop_;
@@ -83,7 +72,5 @@ private:
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/get_blocks.ipp>
 
 #endif

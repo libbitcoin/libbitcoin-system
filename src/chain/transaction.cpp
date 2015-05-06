@@ -64,10 +64,10 @@ transaction::transaction(std::istream& stream)
         throw std::ios_base::failure("transaction");
 }
 
-transaction::transaction(const data_chunk& value)
-: transaction(value.begin(), value.end())
-{
-}
+//transaction::transaction(const data_chunk& value)
+//: transaction(value.begin(), value.end())
+//{
+//}
 
 uint32_t transaction::version() const
 {

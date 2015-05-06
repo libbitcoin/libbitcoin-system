@@ -41,19 +41,9 @@ public:
     get_data();
 
     get_data(std::istream& stream);
-
-    get_data(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    get_data(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    get_data(const Iterator begin, const Iterator end);
 };
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/get_data.ipp>
 
 #endif

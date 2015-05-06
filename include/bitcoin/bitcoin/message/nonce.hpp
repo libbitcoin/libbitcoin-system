@@ -44,14 +44,6 @@ public:
 
     nonce_base(std::istream& stream);
 
-    nonce_base(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    nonce_base(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    nonce_base(const Iterator begin, const Iterator end);
-
     uint64_t nonce() const;
 
     void nonce(uint64_t value);
@@ -64,9 +56,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     uint64_t nonce_;
 };
 
@@ -78,13 +67,7 @@ public:
 
     ping();
 
-    ping(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    ping(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    ping(const Iterator begin, const Iterator end);
+    ping(std::istream& stream);
 
     static size_t satoshi_fixed_size();
 };
@@ -97,20 +80,12 @@ public:
 
     pong();
 
-    pong(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    pong(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    pong(const Iterator begin, const Iterator end);
+    pong(std::istream& stream);
 
     static size_t satoshi_fixed_size();
 };
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/nonce.ipp>
 
 #endif

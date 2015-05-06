@@ -32,10 +32,10 @@ get_address::get_address(std::istream& stream)
         throw std::ios_base::failure("get_address");
 }
 
-get_address::get_address(const data_chunk& value)
-: get_address(value.begin(), value.end())
-{
-}
+//get_address::get_address(const data_chunk& value)
+//: get_address(value.begin(), value.end())
+//{
+//}
 
 get_address::operator const data_chunk() const
 {

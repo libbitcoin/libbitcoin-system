@@ -42,14 +42,6 @@ public:
 
     header(std::istream& stream);
 
-    header(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    header(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    header(const Iterator begin, const Iterator end);
-
     uint32_t magic() const;
 
     void magic(const uint32_t value);
@@ -74,9 +66,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     uint32_t magic_;
     std::string command_;
     uint32_t payload_length_;
@@ -86,7 +75,5 @@ private:
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/header.ipp>
 
 #endif

@@ -76,10 +76,10 @@ announce_version::announce_version(std::istream& stream)
         throw std::ios_base::failure("announce_version");
 }
 
-announce_version::announce_version(const data_chunk& value)
-: announce_version(value.begin(), value.end())
-{
-}
+//announce_version::announce_version(const data_chunk& value)
+//: announce_version(value.begin(), value.end())
+//{
+//}
 
 uint32_t announce_version::version() const
 {

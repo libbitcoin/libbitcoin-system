@@ -42,14 +42,6 @@ public:
 
     point(std::istream& stream);
 
-    point(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    point(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    point(const Iterator begin, const Iterator end);
-
     hash_digest& hash();
 
     const hash_digest& hash() const;
@@ -72,9 +64,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     hash_digest hash_;
     uint32_t index_;
 };
@@ -93,7 +82,5 @@ BC_API bool operator!=(const point& a, const point& b);
 
 } // end chain
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/chain/point.ipp>
 
 #endif

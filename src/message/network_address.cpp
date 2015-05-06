@@ -45,10 +45,10 @@ network_address::network_address(std::istream& stream)
         throw std::ios_base::failure("network_address");
 }
 
-network_address::network_address(const data_chunk& value)
-    : network_address(value.begin(), value.end())
-{
-}
+//network_address::network_address(const data_chunk& value)
+//    : network_address(value.begin(), value.end())
+//{
+//}
 
 uint32_t network_address::timestamp() const
 {

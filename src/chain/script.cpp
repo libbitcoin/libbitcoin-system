@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/script.hpp>
-
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
@@ -272,7 +272,7 @@ bool script::parse(data_chunk& raw_script)
 
     if (raw_script.begin() != raw_script.end())
     {
-        data_chunk_wrapped_buffer buffer(raw_script);
+        data_buffer<uint8_t, char> buffer(raw_script.data(), raw_script.size());
         std::istream stream(&buffer);
 
         while (!stream.eof() && !stream.fail() &&
