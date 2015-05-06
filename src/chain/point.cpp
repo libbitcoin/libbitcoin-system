@@ -91,7 +91,7 @@ bool point::is_null() const
     return (index_ == max_index) && (hash_ == null_hash);
 }
 
-point::operator const data_chunk() const
+data_chunk point::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());

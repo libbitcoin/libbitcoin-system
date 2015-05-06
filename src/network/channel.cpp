@@ -433,7 +433,7 @@ void channel_proxy::send_raw(const message::header& packet_header,
 void channel_proxy::do_send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
-    data_chunk raw_header = packet_header;
+    data_chunk raw_header = packet_header.to_data();
     // Construct completed packet with header + payload
     data_chunk whole_message = raw_header;
     extend_data(whole_message, payload);

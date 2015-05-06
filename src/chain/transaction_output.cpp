@@ -73,13 +73,13 @@ void transaction_output::value(const uint64_t value)
     value_ = value;
 }
 
-transaction_output::operator const data_chunk() const
+data_chunk transaction_output::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
     serial.write_8_bytes(value_);
-    data_chunk raw_script = script_;
+    data_chunk raw_script = script_.to_data();
     serial.write_variable_uint(raw_script.size());
     serial.write_data(raw_script);
 

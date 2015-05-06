@@ -58,7 +58,7 @@ public:
 
     void sequence(const uint32_t sequence);
 
-    operator const data_chunk() const;
+    data_chunk to_data() const;
 
     size_t satoshi_size() const;
 

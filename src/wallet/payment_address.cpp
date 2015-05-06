@@ -97,8 +97,7 @@ void payment_address::set_public_key(const ec_point& public_key)
 
 void payment_address::set_script(const chain::script& eval_script)
 {
-    data_chunk raw_eval_script = eval_script;
-    set(payment_address::script_version, bitcoin_short_hash(raw_eval_script));
+    set(payment_address::script_version, bitcoin_short_hash(eval_script.to_data()));
 }
 
 bool extract(payment_address& address, const chain::script& script)
