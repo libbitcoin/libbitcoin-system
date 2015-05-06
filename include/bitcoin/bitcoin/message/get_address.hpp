@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_MESSAGE_GET_ADDRESS_HPP
 #define LIBBITCOIN_MESSAGE_GET_ADDRESS_HPP
 
+#include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -36,6 +37,8 @@ public:
     static const std::string satoshi_command;
 
     get_address();
+
+    get_address(std::istream& stream);
 
     get_address(const data_chunk& value);
 

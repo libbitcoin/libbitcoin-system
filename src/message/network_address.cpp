@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/message/network_address.hpp>
 
 #include <bitcoin/bitcoin/utility/deserializer.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -36,13 +37,17 @@ network_address::network_address(const uint32_t timestamp,
 {
 }
 
-network_address::network_address(const data_chunk& value)
+network_address::network_address(std::istream& stream)
+    : services_(read_8_bytes(stream)), ip_(read_bytes<16>(stream)),
+    port_(read_big_endian<uint16_t>(stream))
 {
-    auto deserializer = make_deserializer(value.begin(), value.end());
-    services_ = deserializer.read_8_bytes();
-    // Read IP address
-    ip_ = deserializer.read_bytes<16>();
-    port_ = deserializer.read_big_endian<uint16_t>();
+    if (stream.fail())
+        throw std::ios_base::failure("network_address");
+}
+
+network_address::network_address(const data_chunk& value)
+    : network_address(value.begin(), value.end())
+{
 }
 
 uint32_t network_address::timestamp() const

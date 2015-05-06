@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
-
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -33,6 +33,26 @@ get_blocks::get_blocks(const block_locator& start_hashes,
     const hash_digest& hash_stop)
     : start_hashes_(start_hashes), hash_stop_(hash_stop)
 {
+}
+
+get_blocks::get_blocks(std::istream& stream)
+{
+    // Discard protocol version because it is stupid
+    read_4_bytes(stream);
+
+    // Note: changed to uint64_t to preclude possible loss of data.
+    uint64_t count = read_variable_uint(stream);
+
+    for (uint64_t i = 0; (i < count) && !stream.fail(); ++i)
+    {
+        hash_digest start_hash = read_hash(stream);
+        start_hashes_.push_back(start_hash);
+    }
+
+    hash_stop_ = read_hash(stream);
+
+    if (stream.fail())
+        throw std::ios_base::failure("get_blocks");
 }
 
 get_blocks::get_blocks(const data_chunk& value)

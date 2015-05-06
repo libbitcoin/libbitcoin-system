@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_ANNOUNCE_VERSION_HPP
 
 #include <cstdint>
+#include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
@@ -42,6 +43,8 @@ public:
         const uint64_t timestamp, const network_address& address_me,
         const network_address& address_you, const uint64_t nonce,
         const std::string& user_agent, const uint32_t start_height);
+
+    announce_version(std::istream& stream);
 
     announce_version(const data_chunk& value);
 
