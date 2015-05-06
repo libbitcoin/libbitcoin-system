@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_BLOCK_HPP
 #define LIBBITCOIN_CHAIN_BLOCK_HPP
 
+#include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/block_header.hpp>
@@ -40,6 +41,8 @@ public:
     block();
 
     block(const block_header& header, const transaction_list& transactions);
+
+    block(std::istream& stream);
 
     block(const data_chunk& value);
 

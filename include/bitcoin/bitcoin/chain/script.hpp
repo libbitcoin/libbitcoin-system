@@ -21,6 +21,7 @@
 #define LIBBITCOIN_CHAIN_SCRIPT_HPP
 
 //#include <string>
+#include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/operation.hpp>
 #include <bitcoin/bitcoin/chain/payment.hpp>
@@ -51,6 +52,8 @@ public:
     script(const operation& op);
 
     script(const operation_stack& operations);
+
+    script(std::istream& stream, bool allow_raw_data_fallback = false);
 
     script(const data_chunk& value, bool allow_raw_data_fallback = false);
 
@@ -106,9 +109,9 @@ private:
     void deserialize(deserializer<Iterator, SafeCheckLast>& deserial,
         bool allow_raw_data_fallback);
 
-    void deserialize(data_chunk raw_script, bool allow_raw_data_fallback);
+    void deserialize(data_chunk& raw_script, bool allow_raw_data_fallback);
 
-    void parse(data_chunk raw_script);
+    bool parse(data_chunk& raw_script);
 
     template<typename Deserializer>
     size_t read_operation_data_byte_count(opcode code, uint8_t raw_byte,

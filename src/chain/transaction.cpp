@@ -21,6 +21,7 @@
 
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -35,6 +36,32 @@ transaction::transaction(const uint32_t version, const uint32_t locktime,
     : version_(version), locktime_(locktime), inputs_(inputs),
       outputs_(outputs)
 {
+}
+
+transaction::transaction(std::istream& stream)
+{
+    version_ = read_4_bytes(stream);
+
+    uint64_t tx_in_count = read_variable_uint(stream);
+
+    for (size_t i = 0; (i < tx_in_count) && !stream.fail(); ++i)
+    {
+        transaction_input input(stream);
+        inputs_.push_back(input);
+    }
+
+    uint64_t tx_out_count = read_variable_uint(stream);
+
+    for (size_t i = 0; (i < tx_out_count) && !stream.fail(); ++i)
+    {
+        transaction_output output(stream);
+        outputs_.push_back(output);
+    }
+
+    locktime_ = read_4_bytes(stream);
+
+    if (stream.fail())
+        throw std::ios_base::failure("transaction");
 }
 
 transaction::transaction(const data_chunk& value)

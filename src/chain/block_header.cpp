@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/block_header.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -31,6 +32,19 @@ block_header::block_header(uint32_t version, hash_digest previous_block_hash,
     : version_(version), previous_block_hash_(previous_block_hash),
       merkle_(merkle), timestamp_(timestamp), bits_(bits), nonce_(nonce)
 {
+}
+
+block_header::block_header(std::istream& stream)
+{
+    version_ = read_4_bytes(stream);
+    previous_block_hash_ = read_hash(stream);
+    merkle_ = read_hash(stream);
+    timestamp_ = read_4_bytes(stream);
+    bits_ = read_4_bytes(stream);
+    nonce_ = read_4_bytes(stream);
+
+    if (stream.fail())
+        throw std::ios_base::failure("block_header");
 }
 
 block_header::block_header(const data_chunk& value)
