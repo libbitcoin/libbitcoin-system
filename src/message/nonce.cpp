@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/nonce.hpp>
-
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -32,6 +32,13 @@ nonce_base::nonce_base()
 nonce_base::nonce_base(const uint64_t nonce)
     : nonce_(nonce)
 {
+}
+
+nonce_base::nonce_base(std::istream& stream)
+    : nonce_(read_8_bytes(stream))
+{
+    if (stream.fail())
+        throw std::ios_base::failure("nonce_base");
 }
 
 nonce_base::nonce_base(const data_chunk& value)

@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_MESSAGE_INVENTORY_VECTOR_HPP
 #define LIBBITCOIN_MESSAGE_INVENTORY_VECTOR_HPP
 
+#include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
@@ -37,6 +38,8 @@ public:
     inventory_vector();
 
     inventory_vector(const inventory_type_id type, const hash_digest& hash);
+
+    inventory_vector(std::istream& stream);
 
     inventory_vector(const data_chunk& value);
 

@@ -26,6 +26,12 @@ get_address::get_address()
 {
 }
 
+get_address::get_address(std::istream& stream)
+{
+    if (stream.fail() || !(stream.peek() == std::istream::traits_type::eof()))
+        throw std::ios_base::failure("get_address");
+}
+
 get_address::get_address(const data_chunk& value)
 : get_address(value.begin(), value.end())
 {

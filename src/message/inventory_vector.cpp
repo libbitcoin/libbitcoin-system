@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -31,6 +32,16 @@ inventory_vector::inventory_vector(inventory_type_id type,
     const hash_digest& hash)
     : type_(type), hash_(hash)
 {
+}
+
+inventory_vector::inventory_vector(std::istream& stream)
+{
+    uint32_t raw_type = read_4_bytes(stream);
+    type_ = inventory_type_from_number(raw_type);
+    hash_ = read_hash(stream);
+
+    if (stream.fail())
+        throw std::ios_base::failure("inventory_vector");
 }
 
 inventory_vector::inventory_vector(const data_chunk& value)

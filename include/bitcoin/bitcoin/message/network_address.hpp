@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_NETWORK_ADDRESS_HPP
 
 #include <cstdint>
+#include <istream>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -32,22 +33,6 @@ namespace message {
 
 typedef byte_array<16> ip_address;
 
-//struct BC_API network_address
-//{
-//public:
-//
-//    uint32_t timestamp;
-//    uint64_t services;
-//    ip_address ip;
-//    uint16_t port;
-//
-//    operator const data_chunk() const;
-//
-//    size_t satoshi_size() const;
-//
-//    static size_t satoshi_fixed_size();
-//};
-
 class BC_API network_address
 {
 public:
@@ -56,6 +41,8 @@ public:
 
     network_address(const uint32_t timestamp, const uint64_t services,
         const ip_address& ip, const uint16_t port);
+
+    network_address(std::istream& stream);
 
     network_address(const data_chunk& value);
 

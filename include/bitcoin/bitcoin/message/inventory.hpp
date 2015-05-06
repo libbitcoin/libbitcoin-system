@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_MESSAGE_INVENTORY_HPP
 #define LIBBITCOIN_MESSAGE_INVENTORY_HPP
 
+#include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
@@ -39,6 +40,8 @@ public:
     inventory();
 
     inventory(const inventory_list& inventories);
+
+    inventory(std::istream& stream);
 
     inventory(const data_chunk& value);
 

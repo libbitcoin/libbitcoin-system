@@ -27,6 +27,12 @@ get_data::get_data()
 {
 }
 
+get_data::get_data(std::istream& stream)
+{
+    if (stream.fail() || !(stream.peek() == std::istream::traits_type::eof()))
+        throw std::ios_base::failure("get_data");
+}
+
 get_data::get_data(const data_chunk& value)
 : inventory(value)
 {
