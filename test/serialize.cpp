@@ -25,26 +25,6 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(serialize_tests)
 
-BOOST_AUTO_TEST_CASE(serialize_test)
-{
-    data_chunk rawdat = to_data_chunk(base16_literal(
-        "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
-    ));
-    BOOST_REQUIRE(rawdat == (data_chunk
-    {
-        0x46, 0x68, 0x24, 0x88, 0xf0, 0xa7, 0x21, 0x12, 0x4a, 0x39, 0x05, 0xa1,
-        0xbb, 0x72, 0x44, 0x5b, 0xf1, 0x34, 0x93, 0xe2, 0xcd, 0x46, 0xc5, 0xc0,
-        0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
-    }));
-
-    chain::output_point outpoint(rawdat);
-    BOOST_REQUIRE_EQUAL(encode_hash(outpoint.hash()),
-        "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
-    BOOST_REQUIRE(outpoint.index() == 0);
-    data_chunk buff = outpoint;
-    BOOST_REQUIRE(buff == rawdat);
-}
-
 BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
 {
     chain::block genblk = genesis_block();
@@ -133,7 +113,7 @@ BOOST_AUTO_TEST_CASE(script_parse_save_test)
             "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
             "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
             "b2c8d9febfb84d01"))),
-        end_of_stream);
+        std::ios_base::failure);
 
     data_chunk normal_output_script = to_data_chunk(base16_literal(
         "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));

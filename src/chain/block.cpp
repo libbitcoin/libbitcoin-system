@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/chain/block.hpp>
 
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -32,6 +33,21 @@ block::block()
 block::block(const block_header& header, const transaction_list& transactions)
     : header_(header), transactions_(transactions)
 {
+}
+
+block::block(std::istream& stream)
+    : header_(stream)
+{
+    uint64_t tx_count = read_variable_uint(stream);
+
+    for (size_t i = 0; (i < tx_count) && !stream.fail(); ++i)
+    {
+        transaction tx(stream);
+        transactions_.push_back(std::move(tx));
+    }
+
+    if (stream.fail())
+        throw std::ios_base::failure("block");
 }
 
 block::block(const data_chunk& value)

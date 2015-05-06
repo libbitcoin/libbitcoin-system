@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
@@ -58,10 +59,27 @@ script::script(const operation_stack& operations)
         operations.end());
 }
 
+script::script(std::istream& stream, bool allow_raw_data_fallback)
+{
+    auto script_length = read_variable_uint(stream);
+
+    if (!(script_length <= max_uint32))
+        throw std::ios_base::failure("script");
+
+    auto script_length32 = static_cast<uint32_t>(script_length);
+    data_chunk raw_script = read_data(stream, script_length32);
+
+    if (stream.fail())
+        throw std::ios_base::failure("script");
+
+    deserialize(raw_script, allow_raw_data_fallback);
+}
+
 script::script(const data_chunk& value, bool allow_raw_data_fallback)
     : script()
 {
-    deserialize(value, allow_raw_data_fallback);
+    data_chunk copy = value;
+    deserialize(copy, allow_raw_data_fallback);
 }
 
 script::script(const std::string& human_readable)
@@ -220,18 +238,24 @@ std::string script::to_string() const
     return ss.str();
 }
 
-void script::deserialize(data_chunk raw_script,
+void script::deserialize(data_chunk& raw_script,
     bool allow_raw_data_fallback)
 {
+    bool successful_parse = false;
+
     try
     {
-        parse(raw_script);
+        successful_parse = parse(raw_script);
     }
-    catch (end_of_stream eos)
+    catch (std::ios_base::failure ex)
+    {
+    }
+
+    if (!successful_parse)
     {
         if (!allow_raw_data_fallback)
         {
-            throw eos;
+            throw std::ios_base::failure("deserialize");
         }
 
         // recognize as raw data
@@ -242,15 +266,26 @@ void script::deserialize(data_chunk raw_script,
     }
 }
 
-void script::parse(data_chunk raw_script)
+bool script::parse(data_chunk& raw_script)
 {
-    auto deserial = make_deserializer(raw_script.begin(), raw_script.end());
+    bool success = true;
 
-    while (deserial.iterator() != raw_script.end())
+    if (raw_script.begin() != raw_script.end())
     {
-        operation op(deserial);
-        operations_.push_back(op);
+        data_chunk_wrapped_buffer buffer(raw_script);
+        std::istream stream(&buffer);
+
+        while (!stream.eof() && !stream.fail() &&
+            (stream.peek() != std::istream::traits_type::eof()))
+        {
+            operation op(stream);
+            operations_.push_back(op);
+        }
+
+        success = !stream.fail();
     }
+
+    return success;
 }
 
 inline hash_digest one_hash()

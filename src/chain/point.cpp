@@ -22,6 +22,7 @@
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -35,6 +36,15 @@ point::point()
 point::point(hash_digest hash, uint32_t index)
     : hash_(hash), index_(index)
 {
+}
+
+point::point(std::istream& stream)
+{
+    hash_ = read_hash(stream);
+    index_ = read_4_bytes(stream);
+
+    if (stream.fail())
+        throw std::ios_base::failure("point");
 }
 
 point::point(const data_chunk& value)

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/transaction_output.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 
 #include <sstream>
 
@@ -33,6 +34,13 @@ transaction_output::transaction_output(uint64_t value,
     const chain::script& script)
     : value_(value), script_(script)
 {
+}
+
+transaction_output::transaction_output(std::istream& stream)
+    : value_(read_8_bytes(stream)), script_(stream)
+{
+    if (stream.fail())
+        throw std::ios_base::failure("transaction_output");
 }
 
 transaction_output::transaction_output(const data_chunk& value)
