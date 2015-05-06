@@ -122,7 +122,7 @@ void block_header::nonce(uint32_t nonce)
     nonce_ = nonce;
 }
 
-block_header::operator const data_chunk() const
+data_chunk block_header::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
@@ -169,8 +169,7 @@ bool operator==(const block_header& block_a,
 
 hash_digest block_header::hash() const
 {
-    data_chunk raw_block_header = *this;
-    return bitcoin_hash(raw_block_header);
+    return bitcoin_hash(to_data());
 }
 
 } // end chain

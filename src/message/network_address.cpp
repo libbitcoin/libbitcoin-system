@@ -45,11 +45,6 @@ network_address::network_address(std::istream& stream)
         throw std::ios_base::failure("network_address");
 }
 
-//network_address::network_address(const data_chunk& value)
-//    : network_address(value.begin(), value.end())
-//{
-//}
-
 uint32_t network_address::timestamp() const
 {
     return timestamp_;
@@ -95,7 +90,7 @@ void network_address::port(uint16_t value)
     port_ = value;
 }
 
-network_address::operator const data_chunk() const
+data_chunk network_address::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());

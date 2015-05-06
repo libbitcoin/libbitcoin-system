@@ -56,7 +56,7 @@ void nonce_base::nonce(uint64_t value)
     nonce_ = value;
 }
 
-nonce_base::operator const data_chunk() const
+data_chunk nonce_base::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());

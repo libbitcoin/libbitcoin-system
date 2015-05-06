@@ -32,10 +32,5 @@ get_data::get_data(std::istream& stream)
 {
 }
 
-//get_data::get_data(const data_chunk& value)
-//: inventory(value)
-//{
-//}
-
 } // end message
 } // end libbitcoin

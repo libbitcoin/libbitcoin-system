@@ -74,7 +74,7 @@ void inventory_vector::hash(const hash_digest& value)
     hash_ = value;
 }
 
-inventory_vector::operator const data_chunk() const
+data_chunk inventory_vector::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());

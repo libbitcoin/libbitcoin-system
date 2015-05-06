@@ -126,22 +126,20 @@ bool script::is_raw_data() const
         (operations_[0].code() == opcode::raw_data);
 }
 
-script::operator const data_chunk() const
+data_chunk script::to_data() const
 {
     data_chunk result;
 
     if ((operations_.size() > 0) &&
         (operations_[0].code() == opcode::raw_data))
     {
-        data_chunk raw_op = operations_[0];
-        extend_data(result, raw_op);
+        extend_data(result, operations_[0].to_data());
     }
     else
     {
         for (const operation& op: operations_)
         {
-            data_chunk raw_op = op;
-            extend_data(result, raw_op);
+            extend_data(result, op.to_data());
         }
     }
 
