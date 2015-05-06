@@ -20,10 +20,12 @@
 #ifndef LIBBITCOIN_MESSAGE_ADDRESS_HPP
 #define LIBBITCOIN_MESSAGE_ADDRESS_HPP
 
+#include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/utility/deserializer.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -38,6 +40,8 @@ public:
     address();
 
     address(const network_address_list& addresses);
+
+    address(std::istream& stream);
 
     address(const data_chunk& value);
 

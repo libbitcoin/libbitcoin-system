@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_MESSAGE_GET_BLOCKS_HPP
 #define LIBBITCOIN_MESSAGE_GET_BLOCKS_HPP
 
+#include <istream>
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
@@ -42,6 +43,8 @@ public:
     get_blocks();
 
     get_blocks(const block_locator& start_hashes, const hash_digest& hash_stop);
+
+    get_blocks(std::istream& stream);
 
     get_blocks(const data_chunk& value);
 

@@ -18,7 +18,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/verack.hpp>
-
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -26,6 +25,12 @@ namespace message {
 
 verack::verack()
 {
+}
+
+verack::verack(std::istream& stream)
+{
+    if (stream.fail() || !(stream.peek() == std::istream::traits_type::eof()))
+        throw std::ios_base::failure("verack");
 }
 
 verack::verack(const data_chunk& value)

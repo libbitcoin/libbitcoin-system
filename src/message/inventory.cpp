@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/inventory.hpp>
-
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -32,6 +32,20 @@ inventory::inventory()
 inventory::inventory(const inventory_list& inventories)
     : inventories_(inventories)
 {
+}
+
+inventory::inventory(std::istream& stream)
+{
+    uint64_t count = read_variable_uint(stream);
+
+    for (size_t i = 0; (i < count) && !stream.fail(); ++i)
+    {
+        inventory_vector inv(stream);
+        inventories_.push_back(inv);
+    }
+
+    if (stream.fail())
+        throw std::ios_base::failure("inventory");
 }
 
 inventory::inventory(const data_chunk& value)
