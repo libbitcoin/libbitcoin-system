@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/announce_version.hpp>
-
+#include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -39,6 +39,41 @@ announce_version::announce_version(const uint32_t version,
       address_me_(address_me), address_you_(address_you), nonce_(nonce),
       user_agent_(user_agent), start_height_(start_height)
 {
+}
+
+announce_version::announce_version(std::istream& stream)
+{
+    version_ = read_4_bytes(stream);
+    services_ = read_8_bytes(stream);
+    timestamp_ = read_8_bytes(stream);
+
+    address_me_ = network_address(stream);
+
+    // Ignored field
+    address_me_.timestamp(0);
+
+    if (version_ < 106)
+    {
+        return;
+    }
+
+    address_you_ = network_address(stream);
+
+    // Ignored field
+    address_you_.timestamp(0);
+
+    nonce_ = read_8_bytes(stream);
+    user_agent_ = read_string(stream);
+
+    if (version_ < 209)
+    {
+        return;
+    }
+
+    start_height_ = read_4_bytes(stream);
+
+    if (stream.fail())
+        throw std::ios_base::failure("announce_version");
 }
 
 announce_version::announce_version(const data_chunk& value)

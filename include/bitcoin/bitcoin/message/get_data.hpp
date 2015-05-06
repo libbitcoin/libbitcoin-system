@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_MESSAGE_GET_DATA_HPP
 #define LIBBITCOIN_MESSAGE_GET_DATA_HPP
 
+#include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
@@ -38,6 +39,8 @@ public:
     static const std::string satoshi_command;
 
     get_data();
+
+    get_data(std::istream& stream);
 
     get_data(const data_chunk& value);
 

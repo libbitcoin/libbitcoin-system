@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_MESSAGE_VERACK_HPP
 #define LIBBITCOIN_MESSAGE_VERACK_HPP
 
+#include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -36,6 +37,8 @@ public:
     static const std::string satoshi_command;
 
     verack();
+
+    verack(std::istream& stream);
 
     verack(const data_chunk& value);
 

@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_NONCE_HPP
 
 #include <cstdint>
+#include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -40,6 +41,8 @@ public:
     nonce_base();
 
     nonce_base(const uint64_t nonce);
+
+    nonce_base(std::istream& stream);
 
     nonce_base(const data_chunk& value);
 

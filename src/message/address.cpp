@@ -32,6 +32,23 @@ address::address(const network_address_list& addresses)
 {
 }
 
+address::address(std::istream& stream)
+{
+    uint64_t count = read_variable_uint(stream);
+
+    for (size_t i = 0; (i < count) && !stream.fail(); ++i)
+    {
+        uint32_t timestamp = read_4_bytes(stream);
+        network_address addr(stream);
+        addr.timestamp(timestamp);
+
+        addresses_.push_back(addr);
+    }
+
+    if (stream.fail())
+        throw std::ios_base::failure("address");
+}
+
 address::address(const data_chunk& value)
 : address(value.begin(), value.end())
 {
