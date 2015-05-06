@@ -33,10 +33,10 @@ verack::verack(std::istream& stream)
         throw std::ios_base::failure("verack");
 }
 
-verack::verack(const data_chunk& value)
-: verack(value.begin(), value.end())
-{
-}
+//verack::verack(const data_chunk& value)
+//: verack(value.begin(), value.end())
+//{
+//}
 
 verack::operator const data_chunk() const
 {

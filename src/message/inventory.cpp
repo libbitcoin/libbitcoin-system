@@ -48,10 +48,10 @@ inventory::inventory(std::istream& stream)
         throw std::ios_base::failure("inventory");
 }
 
-inventory::inventory(const data_chunk& value)
-: inventory(value.begin(), value.end())
-{
-}
+//inventory::inventory(const data_chunk& value)
+//: inventory(value.begin(), value.end())
+//{
+//}
 
 inventory_list& inventory::inventories()
 {

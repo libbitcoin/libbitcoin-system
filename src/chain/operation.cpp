@@ -80,10 +80,10 @@ operation::operation(std::istream& stream)
         throw std::ios_base::failure("stream.fail() (5)");
 }
 
-operation::operation(const data_chunk& value)
-: operation(value.begin(), value.end())
-{
-}
+//operation::operation(const data_chunk& value)
+//: operation(value.begin(), value.end())
+//{
+//}
 
 opcode operation::code() const
 {

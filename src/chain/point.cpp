@@ -47,10 +47,10 @@ point::point(std::istream& stream)
         throw std::ios_base::failure("point");
 }
 
-point::point(const data_chunk& value)
-    : point(value.begin(), value.end())
-{
-}
+//point::point(const data_chunk& value)
+//    : point(value.begin(), value.end())
+//{
+//}
 
 hash_digest& point::hash()
 {
