@@ -46,14 +46,6 @@ public:
 
     announce_version(std::istream& stream);
 
-    announce_version(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    announce_version(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    announce_version(const Iterator begin, const Iterator end);
-
     uint32_t version() const;
 
     void version(uint32_t value);
@@ -98,9 +90,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     uint32_t version_;
     uint64_t services_;
     uint64_t timestamp_;
@@ -113,7 +102,5 @@ private:
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/announce_version.ipp>
 
 #endif

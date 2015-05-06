@@ -40,29 +40,14 @@ public:
 
     verack(std::istream& stream);
 
-    verack(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    verack(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    verack(const Iterator begin, const Iterator end);
-
     operator const data_chunk() const;
 
     size_t satoshi_size() const;
 
     static size_t satoshi_fixed_size();
-
-private:
-
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
 };
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/verack.ipp>
 
 #endif

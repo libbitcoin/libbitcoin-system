@@ -51,14 +51,14 @@ public:
     channel_loader_module(load_handler handle_load)
       : handle_load_(handle_load) {}
 
-    void attempt_load(const data_chunk& stream) const
+    void attempt_load(std::istream& stream)
     {
         try
         {
             Message result(stream);
             handle_load_(std::error_code(), result);
         }
-        catch (end_of_stream)
+        catch (std::ios_base::failure)
         {
             handle_load_(error::bad_stream, Message());
         }
@@ -84,7 +84,7 @@ void channel_stream_loader::add(channel_loader_module_base* module)
 }
 
 void channel_stream_loader::load_lookup(const std::string& symbol,
-    const data_chunk& stream) const
+    std::istream& stream) const
 {
     for (channel_loader_module_base* module: modules_)
         if (module->lookup_symbol() == symbol)
@@ -284,8 +284,9 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
-    data_slice header_stream(inbound_header_);
-    message::header header_msg(header_stream.begin(), header_stream.end());
+    data_buffer<uint8_t, char> buffer(inbound_header_.data(), inbound_header_.size());
+    std::istream header_stream(&buffer);
+    message::header header_msg(header_stream);
 
     if (header_msg.magic() != magic_value())
     {
@@ -319,10 +320,10 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     if (problems_check(ec))
         return;
     BITCOIN_ASSERT(bytes_transferred == header_msg.payload_length());
-    data_chunk payload_stream = data_chunk(
+    data_chunk payload_data = data_chunk(
         inbound_payload_.begin(), inbound_payload_.end());
-    BITCOIN_ASSERT(payload_stream.size() == header_msg.payload_length());
-    if (header_msg.checksum() != bitcoin_checksum(payload_stream))
+    BITCOIN_ASSERT(payload_data.size() == header_msg.payload_length());
+    if (header_msg.checksum() != bitcoin_checksum(payload_data))
     {
         log_warning(LOG_NETWORK) << "Bad checksum!";
         raw_subscriber_->relay(error::bad_stream,
@@ -339,6 +340,8 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     reset_timers();
 
     const std::string& command = header_msg.command();
+    data_buffer<uint8_t, char> payload_buffer(payload_data.data(), payload_data.size());
+    std::istream payload_stream(&payload_buffer);
     loader_.load_lookup(command, payload_stream);
 }
 

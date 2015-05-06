@@ -49,10 +49,10 @@ address::address(std::istream& stream)
         throw std::ios_base::failure("address");
 }
 
-address::address(const data_chunk& value)
-: address(value.begin(), value.end())
-{
-}
+//address::address(const data_chunk& value)
+//: address(value.begin(), value.end())
+//{
+//}
 
 network_address_list& address::addresses()
 {

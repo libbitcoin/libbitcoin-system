@@ -55,10 +55,10 @@ get_blocks::get_blocks(std::istream& stream)
         throw std::ios_base::failure("get_blocks");
 }
 
-get_blocks::get_blocks(const data_chunk& value)
-: get_blocks(value.begin(), value.end())
-{
-}
+//get_blocks::get_blocks(const data_chunk& value)
+//: get_blocks(value.begin(), value.end())
+//{
+//}
 
 block_locator& get_blocks::start_hashes()
 {

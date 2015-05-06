@@ -50,10 +50,10 @@ block::block(std::istream& stream)
         throw std::ios_base::failure("block");
 }
 
-block::block(const data_chunk& value)
-    : block(value.begin(), value.end())
-{
-}
+//block::block(const data_chunk& value)
+//    : block(value.begin(), value.end())
+//{
+//}
 
 block_header& block::header()
 {

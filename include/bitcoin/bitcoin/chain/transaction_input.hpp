@@ -42,14 +42,6 @@ public:
 
     transaction_input(std::istream& stream);
 
-    transaction_input(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    transaction_input(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    transaction_input(const Iterator begin, const Iterator end);
-
     output_point& previous_output();
 
     const output_point& previous_output() const;
@@ -78,9 +70,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     output_point previous_output_;
     chain::script script_;
     uint32_t sequence_;
@@ -90,7 +79,5 @@ typedef std::vector<transaction_input> transaction_input_list;
 
 } // end chain
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/chain/transaction_input.ipp>
 
 #endif

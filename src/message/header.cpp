@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 namespace libbitcoin {
 namespace message {
@@ -43,10 +44,10 @@ header::header(std::istream& stream)
         throw std::ios_base::failure("header");
 }
 
-header::header(const data_chunk& value)
-: header(value.begin(), value.end())
-{
-}
+//header::header(const data_chunk& value)
+//: header(value.begin(), value.end())
+//{
+//}
 
 uint32_t header::magic() const
 {

@@ -43,14 +43,6 @@ public:
 
     address(std::istream& stream);
 
-    address(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    address(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    address(const Iterator begin, const Iterator end);
-
     network_address_list& addresses();
 
     const network_address_list& addresses() const;
@@ -61,15 +53,10 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     network_address_list addresses_;
 };
 
 } // end message
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/message/address.ipp>
 
 #endif

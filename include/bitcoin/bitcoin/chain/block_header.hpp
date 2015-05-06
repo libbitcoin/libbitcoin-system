@@ -46,14 +46,6 @@ public:
 
     block_header(std::istream& stream);
 
-    block_header(const data_chunk& value);
-
-    template <typename Iterator, bool SafeCheckLast>
-    block_header(deserializer<Iterator, SafeCheckLast>& deserial);
-
-    template<typename Iterator>
-    block_header(const Iterator begin, const Iterator end);
-
     uint32_t version() const;
 
     void version(uint32_t version);
@@ -94,9 +86,6 @@ public:
 
 private:
 
-    template <typename Iterator, bool SafeCheckLast>
-    void deserialize(deserializer<Iterator, SafeCheckLast>& deserial);
-
     uint32_t version_;
     hash_digest previous_block_hash_;
     hash_digest merkle_;
@@ -110,7 +99,5 @@ BC_API bool operator==(const block_header& block_a,
 
 } // end chain
 } // end libbitcoin
-
-#include <bitcoin/bitcoin/impl/chain/block_header.ipp>
 
 #endif

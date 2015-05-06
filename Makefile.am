@@ -244,34 +244,9 @@ include_bitcoin_bitcoin_formats_HEADERS = \
     include/bitcoin/bitcoin/formats/base64.hpp \
     include/bitcoin/bitcoin/formats/base85.hpp
 
-include_bitcoin_bitcoin_impl_chaindir = ${includedir}/bitcoin/bitcoin/impl/chain
-include_bitcoin_bitcoin_impl_chain_HEADERS = \
-    include/bitcoin/bitcoin/impl/chain/block.ipp \
-    include/bitcoin/bitcoin/impl/chain/block_header.ipp \
-    include/bitcoin/bitcoin/impl/chain/operation.ipp \
-    include/bitcoin/bitcoin/impl/chain/point.ipp \
-    include/bitcoin/bitcoin/impl/chain/script.ipp \
-    include/bitcoin/bitcoin/impl/chain/transaction.ipp \
-    include/bitcoin/bitcoin/impl/chain/transaction_input.ipp \
-    include/bitcoin/bitcoin/impl/chain/transaction_output.ipp
-
 include_bitcoin_bitcoin_impl_formatsdir = ${includedir}/bitcoin/bitcoin/impl/formats
 include_bitcoin_bitcoin_impl_formats_HEADERS = \
     include/bitcoin/bitcoin/impl/formats/base16.ipp
-
-include_bitcoin_bitcoin_impl_messagedir = ${includedir}/bitcoin/bitcoin/impl/message
-include_bitcoin_bitcoin_impl_message_HEADERS = \
-    include/bitcoin/bitcoin/impl/message/address.ipp \
-    include/bitcoin/bitcoin/impl/message/announce_version.ipp \
-    include/bitcoin/bitcoin/impl/message/get_address.ipp \
-    include/bitcoin/bitcoin/impl/message/get_blocks.ipp \
-    include/bitcoin/bitcoin/impl/message/get_data.ipp \
-    include/bitcoin/bitcoin/impl/message/header.ipp \
-    include/bitcoin/bitcoin/impl/message/inventory.ipp \
-    include/bitcoin/bitcoin/impl/message/inventory_vector.ipp \
-    include/bitcoin/bitcoin/impl/message/network_address.ipp \
-    include/bitcoin/bitcoin/impl/message/nonce.ipp \
-    include/bitcoin/bitcoin/impl/message/verack.ipp
 
 include_bitcoin_bitcoin_impl_triedir = ${includedir}/bitcoin/bitcoin/impl/trie
 include_bitcoin_bitcoin_impl_trie_HEADERS = \
