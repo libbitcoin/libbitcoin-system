@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(constructor_istream_to_data_roundtrip)
 
     BOOST_REQUIRE(point.index() == 0);
 
-    data_chunk output = point;
+    data_chunk output = point.to_data();
     BOOST_REQUIRE(output == rawdata);
 }
 

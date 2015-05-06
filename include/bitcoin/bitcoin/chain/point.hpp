@@ -56,7 +56,7 @@ public:
 
     bool is_null() const;
 
-    operator const data_chunk() const;
+    data_chunk to_data() const;
 
     size_t satoshi_size() const;
 

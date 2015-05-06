@@ -89,14 +89,13 @@ void transaction_input::sequence(const uint32_t sequence)
     sequence_ = sequence;
 }
 
-transaction_input::operator const data_chunk() const
+data_chunk transaction_input::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    data_chunk raw_prevout = previous_output_;
-    serial.write_data(raw_prevout);
-    data_chunk raw_script = script_;
+    serial.write_data(previous_output_.to_data());
+    data_chunk raw_script = script_.to_data();
     serial.write_variable_uint(raw_script.size());
     serial.write_data(raw_script);
     serial.write_4_bytes(sequence_);

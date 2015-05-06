@@ -51,7 +51,7 @@ public:
 
     void data(const data_chunk& data);
 
-    operator const data_chunk() const;
+    data_chunk to_data() const;
 
     size_t satoshi_size() const;
 

@@ -47,7 +47,7 @@ public:
 
     const network_address_list& addresses() const;
 
-    operator const data_chunk() const;
+    data_chunk to_data() const;
 
     size_t satoshi_size() const;
 

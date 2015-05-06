@@ -80,21 +80,17 @@ const transaction_list& block::transactions() const
     return transactions_;
 }
 
-block::operator const data_chunk() const
+data_chunk block::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    data_chunk raw_header = header_;
-    serial.write_data(raw_header);
+    serial.write_data(header_.to_data());
 
     serial.write_variable_uint(transactions_.size());
 
     for (const transaction& tx : transactions_)
-    {
-        data_chunk raw_tx = tx;
-        serial.write_data(raw_tx);
-    }
+        serial.write_data(tx.to_data());
 
     return result;
 }
