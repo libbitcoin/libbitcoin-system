@@ -122,17 +122,19 @@ data_chunk to_utf8(wchar_t* environment[])
 // Convert wmain parameters to utf8 main parameters.
 data_chunk to_utf8(int argc, wchar_t* argv[])
 {
+    auto arg_count = static_cast<size_t>(argc);
+
     // Convert each arg and determine the payload size.
     size_t payload_size = 0;
-    std::vector<std::string> collection(argc + 1);
-    for (size_t arg = 0; arg < argc; arg++)
+    std::vector<std::string> collection(arg_count + 1);
+    for (size_t arg = 0; arg < arg_count; arg++)
     {
         collection[arg] = to_utf8(argv[arg]);
         payload_size += collection[arg].size() + 1;
     }
 
     // Determine the index size.
-    auto index_size = static_cast<size_t>((argc + 1)* sizeof(void*));
+    auto index_size = static_cast<size_t>((arg_count + 1)* sizeof(void*));
 
     // Allocate the new buffer.
     auto buffer_size = index_size + payload_size;
@@ -144,7 +146,7 @@ data_chunk to_utf8(int argc, wchar_t* argv[])
     auto arguments = reinterpret_cast<char*>(&buffer[index_size]);
 
     // Clone the converted collection into the new narrow argv.
-    for (size_t arg = 0; arg < argc; arg++)
+    for (size_t arg = 0; arg < arg_count; arg++)
     {
         index[arg] = arguments;
         std::copy(collection[arg].begin(), collection[arg].end(), index[arg]);
