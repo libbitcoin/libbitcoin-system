@@ -2062,14 +2062,16 @@ script_type unpretty(const std::string& pretty)
             if (data.empty() || *++token != "]")
                 return script_type();
             op.code = data_to_opcode(data);
-            if (op.code == opcode::bad_operation)
-                return script_type();
             op.data = data;
         }
         else
         {
             op.code = string_to_opcode(*token);
         }
+
+        if (op.code == opcode::bad_operation)
+            return script_type();
+
         script.push_operation(op);
     }
     return script;
