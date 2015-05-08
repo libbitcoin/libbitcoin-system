@@ -25,6 +25,15 @@ BC_USE_LIBBITCOIN_MAIN
 
 int bc::main(int argc, char* argv[])
 {
+#ifdef _MSC_VER
+    if (_setmode(_fileno(stdin), _O_U8TEXT) == -1)
+        throw std::exception("Could not set STDIN to utf8 mode.");
+    if (_setmode(_fileno(stdout), _O_U8TEXT) == -1)
+        throw std::exception("Could not set STDOUT to utf8 mode.");
+    if (_setmode(_fileno(stderr), _O_U8TEXT) == -1)
+        throw std::exception("Could not set STDERR to utf8 mode.");
+#endif
+
     bc::cout << "output : acción.кошка.日本国" << std::endl;
     bc::cerr << "error : acción.кошка.日本国" << std::endl;
 

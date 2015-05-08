@@ -91,10 +91,6 @@
         \
         int wmain(int argc, wchar_t* argv[]) \
         { \
-            _setmode(_fileno(stdin), _O_U8TEXT); \
-            _setmode(_fileno(stdout), _O_U8TEXT); \
-            _setmode(_fileno(stderr), _O_U8TEXT); \
-            \
             using namespace libbitcoin; \
             boost::locale::generator locale; \
             std::locale::global(locale(BC_LOCALE_UTF8)); \
