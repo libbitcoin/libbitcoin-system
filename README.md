@@ -52,7 +52,7 @@ Next install the [build system](http://wikipedia.org/wiki/GNU_build_system):
 ```sh
 $ sudo apt-get install build-essential autoconf automake libtool pkg-config
 ```
-Next install the [Boost](http://www.boost.org) (minimum 1.50.0 for GCC or 1.54.0 for Clang) development package:
+Next install the [Boost](http://www.boost.org) (minimum 1.55.0 for GCC or 1.54.0 for Clang) development package:
 ```sh
 $ sudo apt-get install libboost-all-dev
 ```
@@ -153,7 +153,6 @@ The script builds from the head of their `version3` and `version2` branches resp
 #### Build Options
 
 Any set of `./configure` options can be passed via the build script, for example:
-
 ```sh
 $ ./install.sh CFLAGS="-Og -g" --prefix=/home/me/myprefix
 ```
@@ -163,6 +162,20 @@ $ ./install.sh CFLAGS="-Og -g" --prefix=/home/me/myprefix
 Currently libbitcoin cannot work with both [testnet](https://en.bitcoin.it/wiki/Testnet) and mainnet. This restriction will be lifted in a future version. In order to work with testnet in the interim libbitcoin must be recompiled with the testnet option:
 ```sh
 $ ./install.sh --enable-testnet
+```
+
+#### Compiling with ICU (International Components for Unicode)
+
+Since the addition of [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) support, libbitcoin conditionally incorporates [ICU](http://site.icu-project.org). To use the BIP-39 passphrase normalization feature libbitcoin must be compiled with ICU support. Currently [libbitcoin-explorer] is the only other library that accesses this feautre, so if you do not intend to use passphrase normalization ICU can be avoided:
+```sh
+$ ./install.sh --with-icu
+```
+
+#### Building ICU and/or Boost
+
+The installer can download and install ICU and/or Boost. These are large dependencies that are not typically preinstalled at a sufficient level. It is recommended to use a prefix directory when building these components.
+```sh
+$ ./install.sh --with-icu --build-icu --build-boost --prefix=/home/me/myprefix
 ```
 
 ### Windows
