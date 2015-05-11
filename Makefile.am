@@ -55,6 +55,7 @@ src_libbitcoin_la_SOURCES = \
     src/formats/base58.cpp \
     src/formats/base64.cpp \
     src/formats/base85.cpp \
+    src/math/aes256.cpp \
     src/math/checksum.cpp \
     src/math/ec_keys.cpp \
     src/math/hash.cpp \
@@ -62,10 +63,16 @@ src_libbitcoin_la_SOURCES = \
     src/math/script_number.cpp \
     src/math/secp256k1_initializer.cpp \
     src/math/uint256.cpp \
+    src/math/external/aes256.c \
+    src/math/external/aes256.h \
+    src/math/external/crypto_scrypt.c \
+    src/math/external/crypto_scrypt.h \
     src/math/external/hmac_sha256.c \
     src/math/external/hmac_sha256.h \
     src/math/external/hmac_sha512.c \
     src/math/external/hmac_sha512.h \
+    src/math/external/pbkdf2_sha256.c \
+    src/math/external/pbkdf2_sha256.h \
     src/math/external/pkcs5_pbkdf2.c \
     src/math/external/pkcs5_pbkdf2.h \
     src/math/external/ripemd160.c \
@@ -104,6 +111,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
     src/wallet/address.cpp \
+    src/wallet/bip38.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
@@ -247,6 +255,7 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \
+    include/bitcoin/bitcoin/math/aes256.hpp \
     include/bitcoin/bitcoin/math/checksum.hpp \
     include/bitcoin/bitcoin/math/ec_keys.hpp \
     include/bitcoin/bitcoin/math/hash.hpp \
@@ -313,6 +322,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/address.hpp \
+    include/bitcoin/bitcoin/wallet/bip38.hpp \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
