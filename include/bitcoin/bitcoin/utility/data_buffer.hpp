@@ -17,45 +17,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_ADDRESS_HPP
-#define LIBBITCOIN_MESSAGE_ADDRESS_HPP
+#ifndef LIBBITCOIN_DATA_BUFFER_HPP
+#define LIBBITCOIN_DATA_BUFFER_HPP
 
 #include <istream>
-#include <string>
+#include <boost/static_assert.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
-namespace message {
 
-class BC_API address
+template<typename SourceType, typename CharType>
+class BC_API data_buffer : public std::basic_streambuf<CharType, std::char_traits<CharType>>
 {
 public:
 
-    static const std::string satoshi_command;
+    data_buffer(SourceType* data, size_t size)
+    {
+        BOOST_STATIC_ASSERT((sizeof(SourceType) == sizeof(CharType)));
 
-    network_address_list& addresses();
+       CharType* start =
+            reinterpret_cast<CharType*>(data);
+        CharType* finish = start + size;
+        CharType* current = start;
 
-    const network_address_list& addresses() const;
-
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    data_chunk to_data() const;
-
-    void reset();
-
-    size_t satoshi_size() const;
-
-private:
-
-    network_address_list addresses_;
+        std::basic_streambuf<CharType, std::char_traits<CharType>>::setg(start, current, finish);
+    }
 };
 
-} // end message
-} // end libbitcoin
+typedef data_buffer<uint8_t, char> data_chunk_buffer;
+
+} // namespace libbitcoin
 
 #endif
+

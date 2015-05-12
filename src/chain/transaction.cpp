@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/transaction.hpp>
-
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
@@ -37,37 +37,6 @@ transaction::transaction(const uint32_t version, const uint32_t locktime,
       outputs_(outputs)
 {
 }
-
-transaction::transaction(std::istream& stream)
-{
-    version_ = read_4_bytes(stream);
-
-    uint64_t tx_in_count = read_variable_uint(stream);
-
-    for (size_t i = 0; (i < tx_in_count) && !stream.fail(); ++i)
-    {
-        transaction_input input(stream);
-        inputs_.push_back(input);
-    }
-
-    uint64_t tx_out_count = read_variable_uint(stream);
-
-    for (size_t i = 0; (i < tx_out_count) && !stream.fail(); ++i)
-    {
-        transaction_output output(stream);
-        outputs_.push_back(output);
-    }
-
-    locktime_ = read_4_bytes(stream);
-
-    if (stream.fail())
-        throw std::ios_base::failure("transaction");
-}
-
-//transaction::transaction(const data_chunk& value)
-//: transaction(value.begin(), value.end())
-//{
-//}
 
 uint32_t transaction::version() const
 {
@@ -107,6 +76,67 @@ transaction_output_list& transaction::outputs()
 const transaction_output_list& transaction::outputs() const
 {
     return outputs_;
+}
+
+void transaction::reset()
+{
+    version_ = 0;
+    locktime_ = 0;
+    inputs_.clear();
+    outputs_.clear();
+}
+
+bool transaction::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool transaction::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    version_ = read_4_bytes(stream);
+    result = !stream.fail();
+
+    if (result)
+    {
+        uint64_t tx_in_count = read_variable_uint(stream);
+        result = !stream.fail();
+
+        for (size_t i = 0; (i < tx_in_count) && result; ++i)
+        {
+            transaction_input input;
+            result = input.from_data(stream);
+            inputs_.push_back(input);
+        }
+    }
+
+    if (result)
+    {
+        uint64_t tx_out_count = read_variable_uint(stream);
+        result = !stream.fail();
+
+        for (size_t i = 0; (i < tx_out_count) && result; ++i)
+        {
+            transaction_output output;
+            result = output.from_data(stream);
+            outputs_.push_back(output);
+        }
+    }
+
+    if (result)
+    {
+        locktime_ = read_4_bytes(stream);
+        result = !stream.fail();
+    }
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk transaction::to_data() const

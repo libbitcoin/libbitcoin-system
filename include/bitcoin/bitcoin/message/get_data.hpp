@@ -26,8 +26,6 @@
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -37,10 +35,6 @@ class BC_API get_data : public inventory
 public:
 
     static const std::string satoshi_command;
-
-    get_data();
-
-    get_data(std::istream& stream);
 };
 
 } // end message

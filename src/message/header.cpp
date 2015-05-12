@@ -19,30 +19,10 @@
  */
 #include <bitcoin/bitcoin/message/header.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 namespace libbitcoin {
 namespace message {
-
-header::header()
-    : magic_(), command_(), payload_length_(), checksum_()
-{
-}
-
-header::header(uint32_t magic, std::string command, uint32_t payload_length,
-    uint32_t checksum)
-    : magic_(magic), command_(command), payload_length_(payload_length),
-      checksum_(checksum)
-{
-}
-
-header::header(std::istream& stream)
-    : magic_(read_4_bytes(stream)),
-      command_(read_fixed_string(stream, command_size)),
-      payload_length_(read_4_bytes(stream)), checksum_(0)
-{
-    if (stream.fail())
-        throw std::ios_base::failure("header");
-}
 
 uint32_t header::magic() const
 {
@@ -87,6 +67,38 @@ uint32_t header::checksum() const
 void header::checksum(const uint32_t value)
 {
     checksum_ = value;
+}
+
+void header::reset()
+{
+    magic_ = 0;
+    command_.clear();
+    payload_length_ = 0;
+    checksum_ = 0;
+}
+
+bool header::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool header::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    magic_ = read_4_bytes(stream);
+    command_ = read_fixed_string(stream, command_size);
+    payload_length_ = read_4_bytes(stream);
+    checksum_ = 0;
+    result = !stream.fail();
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk header::to_data() const

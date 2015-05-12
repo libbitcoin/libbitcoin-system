@@ -26,7 +26,6 @@
 #include <bitcoin/bitcoin/chain/block_header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -36,13 +35,11 @@ class BC_API block
 {
 public:
 
-    static const std::string satoshi_command;
-
     block();
 
     block(const block_header& header, const transaction_list& transactions);
 
-    block(std::istream& stream);
+    static const std::string satoshi_command;
 
     block_header& header();
 
@@ -54,7 +51,13 @@ public:
 
     const transaction_list& transactions() const;
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 

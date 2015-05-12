@@ -25,7 +25,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -35,16 +34,10 @@ class BC_API block_header
 {
 public:
 
-//    static block_header& from_data(bool& result, std::istream& stream);
-
     block_header();
-
-//    block_header(const block_header& other) = delete;
 
     block_header(uint32_t version, hash_digest previous_block_hash,
         hash_digest merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce);
-
-    block_header(std::istream& stream);
 
     uint32_t version() const;
 
@@ -74,15 +67,19 @@ public:
 
     void nonce(uint32_t nonce);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
 
-//    data_chunk to_data() const;
+    hash_digest hash() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 
     static size_t satoshi_fixed_size();
-
-    hash_digest hash() const;
 
 private:
 

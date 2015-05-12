@@ -22,7 +22,6 @@
 
 #include <istream>
 #include <string>
-#include <boost/static_assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
@@ -75,25 +74,6 @@ byte_array<N> read_bytes(std::istream& stream);
 
 template<unsigned N>
 byte_array<N> read_bytes_reverse(std::istream& stream);
-
-template<typename SourceType, typename CharType>
-class BC_API data_buffer : public std::basic_streambuf<CharType, std::char_traits<CharType>>
-{
-    BOOST_STATIC_ASSERT((sizeof(SourceType) == sizeof(CharType)));
-public:
-
-    data_buffer(SourceType* data, size_t size)
-    {
-        CharType* start =
-            reinterpret_cast<CharType*>(data);
-        CharType* finish = start + size;
-        CharType* current = start;
-
-        std::basic_streambuf<CharType, std::char_traits<CharType>>::setg(start, current, finish);
-    }
-};
-
-typedef data_buffer<uint8_t, char> data_chunk_buffer;
 
 } // namespace libbitcoin
 

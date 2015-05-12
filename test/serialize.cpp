@@ -37,7 +37,8 @@ BOOST_AUTO_TEST_CASE(genesis_block_serialize_test)
     // Reload genesis block.
     data_chunk_buffer rawblkbuf(rawblk.data(), rawblk.size());
     std::istream rawblkis(&rawblkbuf);
-    chain::block blk(rawblkis);
+    chain::block blk;
+    BOOST_REQUIRE(blk.from_data(rawblkis));
     BOOST_REQUIRE(genblk.header().version() == blk.header().version());
     BOOST_REQUIRE(genblk.header().previous_block_hash() == blk.header().previous_block_hash());
     BOOST_REQUIRE(genblk.header().merkle() == blk.header().merkle());
@@ -57,7 +58,8 @@ BOOST_AUTO_TEST_CASE(junk_test)
 
     data_chunk_buffer junkbuf(junk.data(), junk.size());
     std::istream junkis(&junkbuf);
-    chain::transaction tx(junkis);
+    chain::transaction tx;
+    BOOST_REQUIRE(tx.from_data(junkis));
 }
 
 BOOST_AUTO_TEST_CASE(tx_test)
@@ -77,7 +79,8 @@ BOOST_AUTO_TEST_CASE(tx_test)
     data_chunk_buffer raw_tx_1_buf(raw_tx_1.data(), raw_tx_1.size());
     std::istream raw_tx_1_is(&raw_tx_1_buf);
     BOOST_REQUIRE_EQUAL(raw_tx_1.size(), 225u);
-    chain::transaction tx_1(raw_tx_1_is);
+    chain::transaction tx_1;
+    BOOST_REQUIRE(tx_1.from_data(raw_tx_1_is));
     BOOST_REQUIRE_EQUAL(tx_1.satoshi_size(), 225u);
     BOOST_REQUIRE(tx_1.hash() == tx_hash_1);
     // Re-save tx and compare against original.
@@ -108,7 +111,8 @@ BOOST_AUTO_TEST_CASE(tx_test)
     BOOST_REQUIRE_EQUAL(raw_tx_2.size(), 523u);
     data_chunk_buffer raw_tx_2_buf(raw_tx_2.data(), raw_tx_2.size());
     std::istream raw_tx_2_is(&raw_tx_2_buf);
-    chain::transaction tx_2(raw_tx_2_is);
+    chain::transaction tx_2;
+    BOOST_REQUIRE(tx_2.from_data(raw_tx_2_is));
     BOOST_REQUIRE(tx_2.hash() == tx_hash_2);
     // Re-save tx and compare against original.
     BOOST_REQUIRE(tx_2.satoshi_size() == raw_tx_2.size());
@@ -118,16 +122,17 @@ BOOST_AUTO_TEST_CASE(tx_test)
 
 BOOST_AUTO_TEST_CASE(script_parse_save_test)
 {
-    BOOST_REQUIRE_THROW(
-        chain::script psc(to_data_chunk(base16_literal(
-            "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
-            "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
-            "b2c8d9febfb84d01"))),
-        std::ios_base::failure);
+    chain::script psc;
+    data_chunk first_failing_script = to_data_chunk(base16_literal(
+        "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
+        "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
+        "b2c8d9febfb84d01"));
+    BOOST_REQUIRE_EQUAL(false, psc.from_data(first_failing_script));
 
     data_chunk normal_output_script = to_data_chunk(base16_literal(
         "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
-    chain::script out_scr(normal_output_script);
+    chain::script out_scr;
+    BOOST_REQUIRE(out_scr.from_data(normal_output_script, true));
     data_chunk roundtrip = out_scr.to_data();
     BOOST_REQUIRE(roundtrip == normal_output_script);
 
@@ -150,7 +155,8 @@ BOOST_AUTO_TEST_CASE(script_parse_save_test)
         "560fddada820a4d933888318a23c28fb5fc67aca8530524e20"
         "74b1d185dbf5b4db4ddb0642848868685174519c6351670068"));
 
-    chain::script weird(weird_script);
+    chain::script weird;
+    BOOST_REQUIRE(weird.from_data(weird_script, true));
     data_chunk roundtrip_result = weird.to_data();
 
     BOOST_REQUIRE(roundtrip_result == weird_script);

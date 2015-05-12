@@ -25,7 +25,6 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -34,13 +33,6 @@ namespace message {
 class BC_API header
 {
 public:
-
-    header();
-
-    header(uint32_t magic, std::string command, uint32_t payload_length,
-        uint32_t checksum);
-
-    header(std::istream& stream);
 
     uint32_t magic() const;
 
@@ -60,7 +52,13 @@ public:
 
     void checksum(const uint32_t value);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 

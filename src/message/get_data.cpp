@@ -22,15 +22,5 @@
 namespace libbitcoin {
 namespace message {
 
-get_data::get_data()
-: inventory()
-{
-}
-
-get_data::get_data(std::istream& stream)
-    : inventory(stream)
-{
-}
-
 } // end message
 } // end libbitcoin

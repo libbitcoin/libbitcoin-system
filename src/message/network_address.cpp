@@ -18,8 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/network_address.hpp>
-
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -35,14 +34,6 @@ network_address::network_address(const uint32_t timestamp,
     const uint64_t services, const ip_address& ip, const uint16_t port)
     : timestamp_(timestamp), services_(services), ip_(ip), port_(port)
 {
-}
-
-network_address::network_address(std::istream& stream)
-    : services_(read_8_bytes(stream)), ip_(read_bytes<16>(stream)),
-    port_(read_big_endian<uint16_t>(stream))
-{
-    if (stream.fail())
-        throw std::ios_base::failure("network_address");
 }
 
 uint32_t network_address::timestamp() const
@@ -88,6 +79,42 @@ uint16_t network_address::port() const
 void network_address::port(uint16_t value)
 {
     port_ = value;
+}
+
+void network_address::reset()
+{
+    timestamp_ = 0;
+    services_ = 0;
+    ip_.fill(0);
+    port_ = 0;
+}
+
+bool network_address::from_data(const data_chunk& data, bool with_timestamp)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream, with_timestamp);
+}
+
+bool network_address::from_data(std::istream& stream, bool with_timestamp)
+{
+    bool result = true;
+
+    reset();
+
+    if (with_timestamp)
+        timestamp_ = read_4_bytes(stream);
+
+    services_ = read_8_bytes(stream);
+    ip_ = read_bytes<16>(stream);
+    port_ = read_big_endian<uint16_t>(stream);
+
+    if (stream.fail())
+    {
+        reset();
+        result = false;
+    }
+
+    return result;
 }
 
 data_chunk network_address::to_data() const
