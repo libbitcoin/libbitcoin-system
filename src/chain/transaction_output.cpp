@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/transaction_output.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-
 #include <sstream>
+#include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -35,18 +35,6 @@ transaction_output::transaction_output(uint64_t value,
     : value_(value), script_(script)
 {
 }
-
-transaction_output::transaction_output(std::istream& stream)
-    : value_(read_8_bytes(stream)), script_(stream)
-{
-    if (stream.fail())
-        throw std::ios_base::failure("transaction_output");
-}
-
-//transaction_output::transaction_output(const data_chunk& value)
-//: transaction_output(value.begin(), value.end())
-//{
-//}
 
 chain::script& transaction_output::script()
 {
@@ -71,6 +59,36 @@ uint64_t transaction_output::value() const
 void transaction_output::value(const uint64_t value)
 {
     value_ = value;
+}
+
+void transaction_output::reset()
+{
+    value_ = 0;
+    script_.reset();
+}
+
+bool transaction_output::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool transaction_output::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    value_ = read_8_bytes(stream);
+    result = !stream.fail();
+
+    if (result)
+        result = script_.from_data(stream, true);
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk transaction_output::to_data() const

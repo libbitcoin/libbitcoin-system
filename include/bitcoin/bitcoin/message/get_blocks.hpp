@@ -26,7 +26,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -39,12 +38,6 @@ class BC_API get_blocks
 public:
 
     static const std::string satoshi_command;
-
-    get_blocks();
-
-    get_blocks(const block_locator& start_hashes, const hash_digest& hash_stop);
-
-    get_blocks(std::istream& stream);
 
     // 10 sequential hashes, then exponential samples until reaching genesis
     block_locator& start_hashes();
@@ -59,11 +52,17 @@ public:
 
     void hash_stop(const hash_digest& value);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
 
     size_t satoshi_size() const;
 
 private:
+
+    void reset();
 
     // 10 sequential hashes, then exponential samples until reaching genesis
     block_locator start_hashes_;

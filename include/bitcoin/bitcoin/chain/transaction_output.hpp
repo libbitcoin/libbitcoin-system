@@ -25,7 +25,6 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -39,8 +38,6 @@ public:
 
     transaction_output(uint64_t value, const chain::script& script);
 
-    transaction_output(std::istream& stream);
-
     chain::script& script();
 
     const chain::script& script() const;
@@ -51,13 +48,19 @@ public:
 
     void value(const uint64_t value);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    std::string to_string() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 
     static size_t satoshi_fixed_size();
-
-    std::string to_string() const;
 
 private:
 

@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/block_header.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
@@ -33,24 +34,6 @@ block_header::block_header(uint32_t version, hash_digest previous_block_hash,
       merkle_(merkle), timestamp_(timestamp), bits_(bits), nonce_(nonce)
 {
 }
-
-block_header::block_header(std::istream& stream)
-{
-    version_ = read_4_bytes(stream);
-    previous_block_hash_ = read_hash(stream);
-    merkle_ = read_hash(stream);
-    timestamp_ = read_4_bytes(stream);
-    bits_ = read_4_bytes(stream);
-    nonce_ = read_4_bytes(stream);
-
-    if (stream.fail())
-        throw std::ios_base::failure("block_header");
-}
-
-//block_header::block_header(const data_chunk& value)
-//    : block_header(value.begin(), value.end())
-//{
-//}
 
 uint32_t block_header::version() const
 {
@@ -120,6 +103,43 @@ uint32_t block_header::nonce() const
 void block_header::nonce(uint32_t nonce)
 {
     nonce_ = nonce;
+}
+
+void block_header::reset()
+{
+    version_ = 0;
+    previous_block_hash_.fill(0);
+    merkle_.fill(0);
+    timestamp_ = 0;
+    bits_ = 0;
+    nonce_ = 0;
+}
+
+bool block_header::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool block_header::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    version_ = read_4_bytes(stream);
+    previous_block_hash_ = read_hash(stream);
+    merkle_ = read_hash(stream);
+    timestamp_ = read_4_bytes(stream);
+    bits_ = read_4_bytes(stream);
+    nonce_ = read_4_bytes(stream);
+
+    result = !stream.fail();
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk block_header::to_data() const

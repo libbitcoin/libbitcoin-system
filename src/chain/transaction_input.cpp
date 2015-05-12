@@ -18,9 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/transaction_input.hpp>
-
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
@@ -36,18 +36,6 @@ transaction_input::transaction_input(const output_point& previous_output,
     : previous_output_(previous_output), script_(script), sequence_(sequence)
 {
 }
-
-transaction_input::transaction_input(std::istream& stream)
-    : previous_output_(stream), script_(stream), sequence_(read_4_bytes(stream))
-{
-    if (stream.fail())
-        throw std::ios_base::failure("transaction_input");
-}
-
-//transaction_input::transaction_input(const data_chunk& value)
-//: transaction_input(value.begin(), value.end())
-//{
-//}
 
 output_point& transaction_input::previous_output()
 {
@@ -87,6 +75,45 @@ uint32_t transaction_input::sequence() const
 void transaction_input::sequence(const uint32_t sequence)
 {
     sequence_ = sequence;
+}
+
+void transaction_input::reset()
+{
+    previous_output_.reset();
+    script_.reset();
+    sequence_ = 0;
+}
+
+bool transaction_input::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool transaction_input::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    result = previous_output_.from_data(stream);
+
+    if (result)
+    {
+//        if (previous_output_.is_null())
+        result = script_.from_data(stream, true);
+    }
+
+    if (result)
+    {
+        sequence_ = read_4_bytes(stream);
+        result = !stream.fail();
+    }
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk transaction_input::to_data() const

@@ -25,6 +25,7 @@
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -59,37 +60,14 @@ script::script(const operation_stack& operations)
         operations.end());
 }
 
-script::script(std::istream& stream, bool allow_raw_data_fallback)
-{
-    auto script_length = read_variable_uint(stream);
-
-    if (!(script_length <= max_uint32))
-        throw std::ios_base::failure("script");
-
-    auto script_length32 = static_cast<uint32_t>(script_length);
-    data_chunk raw_script = read_data(stream, script_length32);
-
-    if (stream.fail())
-        throw std::ios_base::failure("script");
-
-    deserialize(raw_script, allow_raw_data_fallback);
-}
-
-script::script(const data_chunk& value, bool allow_raw_data_fallback)
-    : script()
-{
-    data_chunk copy = value;
-    deserialize(copy, allow_raw_data_fallback);
-}
-
-script::script(const std::string& human_readable)
-    : script()
-{
-    if (!from_string(human_readable))
-    {
-        throw std::invalid_argument("human_readable");
-    }
-}
+//script::script(const std::string& human_readable)
+//    : script()
+//{
+//    if (!from_string(human_readable))
+//    {
+//        throw std::invalid_argument("human_readable");
+//    }
+//}
 
 operation_stack& script::operations()
 {
@@ -124,6 +102,63 @@ bool script::is_raw_data() const
 {
     return (operations_.size() == 1) &&
         (operations_[0].code() == opcode::raw_data);
+}
+
+void script::reset()
+{
+    operations_.clear();
+}
+
+bool script::from_data(const data_chunk& data, bool missing_length_prefix,
+    bool allow_raw_data_fallback)
+{
+    bool result = true;
+
+    if (missing_length_prefix)
+    {
+        reset();
+
+        result = deserialize(data, allow_raw_data_fallback);
+
+        if (!result)
+            reset();
+    }
+    else
+    {
+        data_chunk_stream_host host(data);
+        result = from_data(host.stream, allow_raw_data_fallback);
+    }
+
+    return result;
+}
+
+bool script::from_data(std::istream& stream, bool allow_raw_data_fallback)
+{
+    bool result = true;
+
+    reset();
+
+    auto script_length = read_variable_uint(stream);
+    result = !stream.fail();
+
+    BITCOIN_ASSERT(script_length <= max_uint32);
+
+    data_chunk raw_script;
+
+    if (result)
+    {
+        auto script_length32 = static_cast<uint32_t>(script_length);
+        raw_script = read_data(stream, script_length32);
+        result = !stream.fail();
+    }
+
+    if (result)
+        result = deserialize(raw_script, allow_raw_data_fallback);
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk script::to_data() const
@@ -236,25 +271,14 @@ std::string script::to_string() const
     return ss.str();
 }
 
-void script::deserialize(data_chunk& raw_script,
+bool script::deserialize(const data_chunk& raw_script,
     bool allow_raw_data_fallback)
 {
-    bool successful_parse = false;
+    bool successful_parse = parse(raw_script);
 
-    try
+    if (!successful_parse && allow_raw_data_fallback)
     {
-        successful_parse = parse(raw_script);
-    }
-    catch (std::ios_base::failure ex)
-    {
-    }
-
-    if (!successful_parse)
-    {
-        if (!allow_raw_data_fallback)
-        {
-            throw std::ios_base::failure("deserialize");
-        }
+        successful_parse = true;
 
         // recognize as raw data
         operations_.clear();
@@ -262,25 +286,27 @@ void script::deserialize(data_chunk& raw_script,
         operations_.push_back(
             operation(opcode::raw_data, to_data_chunk(raw_script)));
     }
+
+    return successful_parse;
 }
 
-bool script::parse(data_chunk& raw_script)
+bool script::parse(const data_chunk& raw_script)
 {
     bool success = true;
 
     if (raw_script.begin() != raw_script.end())
     {
-        data_buffer<uint8_t, char> buffer(raw_script.data(), raw_script.size());
-        std::istream stream(&buffer);
+        data_chunk_stream_host host(raw_script);
 
-        while (!stream.eof() && !stream.fail() &&
-            (stream.peek() != std::istream::traits_type::eof()))
+        while (success && !host.stream.eof() && !host.stream.fail() &&
+            (host.stream.peek() != std::istream::traits_type::eof()))
         {
-            operation op(stream);
+            operation op;
+            success = op.from_data(host.stream);
             operations_.push_back(op);
         }
 
-        success = !stream.fail();
+        success &= !host.stream.fail();
     }
 
     return success;
@@ -1802,7 +1828,8 @@ bool script::verify(const script& input_script, const script& output_script,
         evaluation_context eval_context;
         eval_context.primary = input_context.primary;
 
-        script eval_script(input_context.primary.back(), true);
+        script eval_script;
+        eval_script.from_data(input_context.primary.back(), true);
 
         // Invalid script - parsed as raw_data
         if (eval_script.is_raw_data())

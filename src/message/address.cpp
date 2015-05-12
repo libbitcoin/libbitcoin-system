@@ -18,41 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 
 namespace libbitcoin {
 namespace message {
-
-address::address()
-    : addresses_()
-{
-}
-
-address::address(const network_address_list& addresses)
-    : addresses_(addresses.begin(), addresses.end())
-{
-}
-
-address::address(std::istream& stream)
-{
-    uint64_t count = read_variable_uint(stream);
-
-    for (size_t i = 0; (i < count) && !stream.fail(); ++i)
-    {
-        uint32_t timestamp = read_4_bytes(stream);
-        network_address addr(stream);
-        addr.timestamp(timestamp);
-
-        addresses_.push_back(addr);
-    }
-
-    if (stream.fail())
-        throw std::ios_base::failure("address");
-}
-
-//address::address(const data_chunk& value)
-//: address(value.begin(), value.end())
-//{
-//}
 
 network_address_list& address::addresses()
 {
@@ -62,6 +31,39 @@ network_address_list& address::addresses()
 const network_address_list& address::addresses() const
 {
     return addresses_;
+}
+
+void address::reset()
+{
+    addresses_.clear();
+}
+
+bool address::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool address::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    uint64_t count = read_variable_uint(stream);
+    result = !stream.fail();
+
+    for (size_t i = 0; (i < count) && result; ++i)
+    {
+        network_address addr;
+        result = addr.from_data(stream, true);
+        addresses_.push_back(addr);
+    }
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk address::to_data() const

@@ -17,45 +17,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_ADDRESS_HPP
-#define LIBBITCOIN_MESSAGE_ADDRESS_HPP
+#ifndef LIBBITCOIN_DATA_STREAM_HOST_HPP
+#define LIBBITCOIN_DATA_STREAM_HOST_HPP
 
 #include <istream>
-#include <string>
+#include <boost/static_assert.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/data_buffer.hpp>
 
 namespace libbitcoin {
-namespace message {
 
-class BC_API address
+template<typename SourceType, typename CharType>
+class BC_API data_stream_host
 {
-public:
-
-    static const std::string satoshi_command;
-
-    network_address_list& addresses();
-
-    const network_address_list& addresses() const;
-
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    data_chunk to_data() const;
-
-    void reset();
-
-    size_t satoshi_size() const;
-
 private:
 
-    network_address_list addresses_;
+    data_buffer<SourceType, CharType> buffer_;
+
+public:
+
+    data_stream_host(const std::vector<SourceType>& data)
+        : buffer_(const_cast<SourceType*>(data.data()), data.size()),
+          stream(&buffer_)
+    {
+        BOOST_STATIC_ASSERT((sizeof(SourceType) == sizeof(CharType)));
+    }
+
+    std::basic_istream<CharType, std::char_traits<CharType>> stream;
 };
 
-} // end message
-} // end libbitcoin
+typedef data_stream_host<uint8_t, char> data_chunk_stream_host;
+
+} // namespace libbitcoin
 
 #endif
+

@@ -25,7 +25,6 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -36,15 +35,6 @@ class BC_API announce_version
 public:
 
     static const std::string satoshi_command;
-
-    announce_version();
-
-    announce_version(const uint32_t version, const uint64_t services,
-        const uint64_t timestamp, const network_address& address_me,
-        const network_address& address_you, const uint64_t nonce,
-        const std::string& user_agent, const uint32_t start_height);
-
-    announce_version(std::istream& stream);
 
     uint32_t version() const;
 
@@ -84,7 +74,13 @@ public:
 
     void start_height(uint32_t value);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 

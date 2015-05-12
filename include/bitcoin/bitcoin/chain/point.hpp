@@ -27,7 +27,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -39,8 +38,6 @@ public:
     point();
 
     point(hash_digest hash, uint32_t index);
-
-    point(std::istream& stream);
 
     hash_digest& hash();
 
@@ -56,7 +53,13 @@ public:
 
     bool is_null() const;
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 

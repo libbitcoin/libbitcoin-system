@@ -18,19 +18,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/verack.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-verack::verack()
+void verack::reset()
 {
 }
 
-verack::verack(std::istream& stream)
+bool verack::from_data(const data_chunk& data)
 {
-    if (stream.fail() || !(stream.peek() == std::istream::traits_type::eof()))
-        throw std::ios_base::failure("verack");
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool verack::from_data(std::istream& stream)
+{
+    reset();
+    return !stream.fail();
 }
 
 data_chunk verack::to_data() const

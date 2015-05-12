@@ -18,18 +18,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-get_address::get_address()
+void get_address::reset()
 {
 }
 
-get_address::get_address(std::istream& stream)
+bool get_address::from_data(const data_chunk& data)
 {
-    if (stream.fail() || !(stream.peek() == std::istream::traits_type::eof()))
-        throw std::ios_base::failure("get_address");
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool get_address::from_data(std::istream& stream)
+{
+    reset();
+    return !stream.fail();
 }
 
 data_chunk get_address::to_data() const

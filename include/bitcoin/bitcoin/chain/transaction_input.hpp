@@ -26,7 +26,6 @@
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -39,8 +38,6 @@ public:
 
     transaction_input(const output_point& previous_output,
         const chain::script& script, const uint32_t sequence);
-
-    transaction_input(std::istream& stream);
 
     output_point& previous_output();
 
@@ -58,15 +55,21 @@ public:
 
     void sequence(const uint32_t sequence);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    std::string to_string() const;
+
+    void reset();
+
+    bool is_final() const;
 
     size_t satoshi_size() const;
 
     static size_t satoshi_fixed_size();
-
-    std::string to_string() const;
-
-    bool is_final() const;
 
 private:
 

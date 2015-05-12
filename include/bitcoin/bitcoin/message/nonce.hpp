@@ -25,7 +25,6 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -38,17 +37,17 @@ class BC_API nonce_base
 {
 public:
 
-    nonce_base();
-
-    nonce_base(const uint64_t nonce);
-
-    nonce_base(std::istream& stream);
-
     uint64_t nonce() const;
 
     void nonce(uint64_t value);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 
@@ -65,10 +64,6 @@ public:
 
     static const std::string satoshi_command;
 
-    ping();
-
-    ping(std::istream& stream);
-
     static size_t satoshi_fixed_size();
 };
 
@@ -77,10 +72,6 @@ class BC_API pong : public nonce_base
 public:
 
     static const std::string satoshi_command;
-
-    pong();
-
-    pong(std::istream& stream);
 
     static size_t satoshi_fixed_size();
 };
