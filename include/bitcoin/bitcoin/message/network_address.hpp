@@ -25,7 +25,6 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -41,8 +40,6 @@ public:
 
     network_address(const uint32_t timestamp, const uint64_t services,
         const ip_address& ip, const uint16_t port);
-
-    network_address(std::istream& stream);
 
     uint32_t timestamp() const;
 
@@ -62,7 +59,13 @@ public:
 
     void port(uint16_t value);
 
+    bool from_data(const data_chunk& data, bool with_timestamp = false);
+
+    bool from_data(std::istream& stream, bool with_timestamp = false);
+
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 

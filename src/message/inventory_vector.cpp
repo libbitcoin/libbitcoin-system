@@ -18,36 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
-
-inventory_vector::inventory_vector()
-{
-}
-
-inventory_vector::inventory_vector(inventory_type_id type,
-    const hash_digest& hash)
-    : type_(type), hash_(hash)
-{
-}
-
-inventory_vector::inventory_vector(std::istream& stream)
-{
-    uint32_t raw_type = read_4_bytes(stream);
-    type_ = inventory_type_from_number(raw_type);
-    hash_ = read_hash(stream);
-
-    if (stream.fail())
-        throw std::ios_base::failure("inventory_vector");
-}
-
-//inventory_vector::inventory_vector(const data_chunk& value)
-//: inventory_vector(value.begin(), value.end())
-//{
-//}
 
 inventory_type_id inventory_vector::type() const
 {
@@ -72,6 +48,35 @@ const hash_digest& inventory_vector::hash() const
 void inventory_vector::hash(const hash_digest& value)
 {
     hash_ = value;
+}
+
+void inventory_vector::reset()
+{
+    type_ = inventory_type_id::error;
+    hash_.fill(0);
+}
+
+bool inventory_vector::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool inventory_vector::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    uint32_t raw_type = read_4_bytes(stream);
+    type_ = inventory_type_from_number(raw_type);
+    hash_ = read_hash(stream);
+    result = !stream.fail();
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk inventory_vector::to_data() const

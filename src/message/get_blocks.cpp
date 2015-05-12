@@ -19,46 +19,11 @@
  */
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
 namespace message {
-
-get_blocks::get_blocks()
-    : start_hashes_(), hash_stop_()
-{
-}
-
-get_blocks::get_blocks(const block_locator& start_hashes,
-    const hash_digest& hash_stop)
-    : start_hashes_(start_hashes), hash_stop_(hash_stop)
-{
-}
-
-get_blocks::get_blocks(std::istream& stream)
-{
-    // Discard protocol version because it is stupid
-    read_4_bytes(stream);
-
-    // Note: changed to uint64_t to preclude possible loss of data.
-    uint64_t count = read_variable_uint(stream);
-
-    for (uint64_t i = 0; (i < count) && !stream.fail(); ++i)
-    {
-        hash_digest start_hash = read_hash(stream);
-        start_hashes_.push_back(start_hash);
-    }
-
-    hash_stop_ = read_hash(stream);
-
-    if (stream.fail())
-        throw std::ios_base::failure("get_blocks");
-}
-
-//get_blocks::get_blocks(const data_chunk& value)
-//: get_blocks(value.begin(), value.end())
-//{
-//}
 
 block_locator& get_blocks::start_hashes()
 {
@@ -88,6 +53,49 @@ const hash_digest& get_blocks::hash_stop() const
 void get_blocks::hash_stop(const hash_digest& value)
 {
     hash_stop_ = value;
+}
+
+void get_blocks::reset()
+{
+    start_hashes_.clear();
+    hash_stop_.fill(0);
+}
+
+bool get_blocks::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool get_blocks::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    // Discard protocol version because it is stupid
+    read_4_bytes(stream);
+
+    // Note: changed to uint64_t to preclude possible loss of data.
+    uint64_t count = read_variable_uint(stream);
+    result = !stream.fail();
+
+    for (uint64_t i = 0; (i < count) && result; ++i)
+    {
+        start_hashes_.push_back(read_hash(stream));
+        result = !stream.fail();
+    }
+
+    if (result)
+    {
+        hash_stop_ = read_hash(stream);
+        result = !stream.fail();
+    }
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk get_blocks::to_data() const

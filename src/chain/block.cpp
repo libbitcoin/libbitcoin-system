@@ -18,8 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/block.hpp>
-
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -34,26 +34,6 @@ block::block(const block_header& header, const transaction_list& transactions)
     : header_(header), transactions_(transactions)
 {
 }
-
-block::block(std::istream& stream)
-    : header_(stream)
-{
-    uint64_t tx_count = read_variable_uint(stream);
-
-    for (size_t i = 0; (i < tx_count) && !stream.fail(); ++i)
-    {
-        transaction tx(stream);
-        transactions_.push_back(std::move(tx));
-    }
-
-    if (stream.fail())
-        throw std::ios_base::failure("block");
-}
-
-//block::block(const data_chunk& value)
-//    : block(value.begin(), value.end())
-//{
-//}
 
 block_header& block::header()
 {
@@ -78,6 +58,43 @@ transaction_list& block::transactions()
 const transaction_list& block::transactions() const
 {
     return transactions_;
+}
+
+void block::reset()
+{
+    header_.reset();
+    transactions_.clear();
+}
+
+bool block::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool block::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    result = header_.from_data(stream);
+
+    uint64_t tx_count = read_variable_uint(stream);
+    result &= !stream.fail();
+
+    for (size_t i = 0; (i < tx_count) && result; ++i)
+    {
+        transaction tx;
+        result = tx.from_data(stream);
+        result &= !stream.fail();
+        transactions_.push_back(std::move(tx));
+    }
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk block::to_data() const

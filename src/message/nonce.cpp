@@ -18,33 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
-
-nonce_base::nonce_base()
-    : nonce_()
-{
-}
-
-nonce_base::nonce_base(const uint64_t nonce)
-    : nonce_(nonce)
-{
-}
-
-nonce_base::nonce_base(std::istream& stream)
-    : nonce_(read_8_bytes(stream))
-{
-    if (stream.fail())
-        throw std::ios_base::failure("nonce_base");
-}
-
-//nonce_base::nonce_base(const data_chunk& value)
-//: nonce_base(value.begin(), value.end())
-//{
-//}
 
 uint64_t nonce_base::nonce() const
 {
@@ -54,6 +33,32 @@ uint64_t nonce_base::nonce() const
 void nonce_base::nonce(uint64_t value)
 {
     nonce_ = value;
+}
+
+void nonce_base::reset()
+{
+    nonce_ = 0;
+}
+
+bool nonce_base::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool nonce_base::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    nonce_ = read_8_bytes(stream);
+    result = !stream.fail();
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk nonce_base::to_data() const
@@ -74,40 +79,10 @@ size_t nonce_base::satoshi_fixed_size()
     return 8;
 }
 
-ping::ping()
-: nonce_base()
-{
-}
-
-ping::ping(std::istream& stream)
-: nonce_base(stream)
-{
-}
-
-//ping::ping(const data_chunk& value)
-//: nonce_base(value)
-//{
-//}
-
 size_t ping::satoshi_fixed_size()
 {
     return nonce_base::satoshi_fixed_size();
 }
-
-pong::pong()
-: nonce_base()
-{
-}
-
-pong::pong(std::istream& stream)
-: nonce_base(stream)
-{
-}
-
-//pong::pong(const data_chunk& value)
-//: nonce_base(value)
-//{
-//}
 
 size_t pong::satoshi_fixed_size()
 {

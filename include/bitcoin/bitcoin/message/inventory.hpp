@@ -25,7 +25,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -37,17 +36,17 @@ public:
 
     static const std::string satoshi_command;
 
-    inventory();
-
-    inventory(const inventory_list& inventories);
-
-    inventory(std::istream& stream);
-
     inventory_list& inventories();
 
     const inventory_list& inventories() const;
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 

@@ -18,11 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/operation.hpp>
-
 #include <sstream>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
@@ -35,55 +35,7 @@ operation::operation()
 operation::operation(const opcode code, const data_chunk& data)
     : code_(code), data_(data)
 {
-//    if (code != opcode::raw_data)
-//    {
-//        throw std::invalid_argument("code");
-//    }
 }
-
-operation::operation(std::istream& stream)
-{
-    if (stream.fail())
-        throw std::ios_base::failure("stream.fail() (1)");
-
-    uint8_t raw_byte = read_byte(stream);
-
-    if (stream.fail())
-        throw std::ios_base::failure("stream.fail() (2)");
-
-    code_ = static_cast<opcode>(raw_byte);
-
-    if (!(raw_byte != 0 || code_ == opcode::zero))
-        throw std::ios_base::failure("!(raw_byte != 0 || code_ == opcode::zero)");
-
-    if (0 < raw_byte && raw_byte <= 75)
-        code_ = opcode::special;
-
-    if (operation::must_read_data(code_))
-    {
-        size_t read_n_bytes =
-            read_opcode_data_byte_count(code_, raw_byte, stream);
-
-        if (stream.fail())
-            throw std::ios_base::failure("stream.fail() (3)");
-
-        data_ = read_data(stream, read_n_bytes);
-
-        if (stream.fail())
-            throw std::ios_base::failure("stream.fail() (4)");
-
-        if (!(read_n_bytes || data_.empty()))
-            throw std::ios_base::failure("!(read_n_bytes || data_.empty())");
-    }
-
-    if (stream.fail())
-        throw std::ios_base::failure("stream.fail() (5)");
-}
-
-//operation::operation(const data_chunk& value)
-//: operation(value.begin(), value.end())
-//{
-//}
 
 opcode operation::code() const
 {
@@ -103,6 +55,49 @@ const data_chunk& operation::data() const
 void operation::data(const data_chunk& data)
 {
     data_ = data;
+}
+
+void operation::reset()
+{
+    code_ = opcode::zero;
+    data_.clear();
+}
+
+bool operation::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool operation::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    uint8_t raw_byte = read_byte(stream);
+    result = !stream.fail();
+
+    code_ = static_cast<opcode>(raw_byte);
+    result &= (raw_byte != 0 || code_ == opcode::zero);
+
+    if (0 < raw_byte && raw_byte <= 75)
+        code_ = opcode::special;
+
+    if (result && operation::must_read_data(code_))
+    {
+        size_t read_n_bytes =
+            read_opcode_data_byte_count(code_, raw_byte, stream);
+
+        data_ = read_data(stream, read_n_bytes);
+
+        result = !stream.fail() && (read_n_bytes || data_.empty());
+    }
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk operation::to_data() const
@@ -313,7 +308,10 @@ bool is_script_code_sig_type(const operation_stack& ops)
     if (last_data.empty())
         return false;
 
-    script script_code(last_data, true);
+    // note: ignores parse failure, though by allowing fallback, failure
+    // cannot meaningfully occur.
+    script script_code;
+    script_code.from_data(last_data, true);
 
     if (script_code.is_raw_data())
         return false;
