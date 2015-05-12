@@ -40,7 +40,8 @@ BOOST_AUTO_TEST_CASE(constructor_istream_to_data_roundtrip)
     std::stringstream stream;
     std::copy(rawdata.begin(), rawdata.end(), std::ostream_iterator<uint8_t>(stream));
 
-    chain::point point(stream);
+    chain::point point;
+    BOOST_REQUIRE(point.from_data(stream));
 
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash()),
         "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");

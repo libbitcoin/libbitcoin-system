@@ -28,7 +28,6 @@
 #include <bitcoin/bitcoin/chain/transaction_input.hpp>
 #include <bitcoin/bitcoin/chain/transaction_output.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -38,15 +37,13 @@ class BC_API transaction
 {
 public:
 
-    static const std::string satoshi_command;
-
     transaction();
 
     transaction(const uint32_t version, const uint32_t locktime,
         const transaction_input_list& inputs,
         const transaction_output_list& outputs);
 
-    transaction(std::istream& stream);
+    static const std::string satoshi_command;
 
     uint32_t version() const;
 
@@ -64,13 +61,15 @@ public:
 
     const transaction_output_list& outputs() const;
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
 
-    size_t satoshi_size() const;
-
-    static size_t satoshi_fixed_size();
-
     std::string to_string() const;
+
+    void reset();
 
     hash_digest hash() const;
 
@@ -84,6 +83,10 @@ public:
     bool is_locktime_conflict() const;
 
     uint64_t total_output_value() const;
+
+    size_t satoshi_size() const;
+
+    static size_t satoshi_fixed_size();
 
 private:
 

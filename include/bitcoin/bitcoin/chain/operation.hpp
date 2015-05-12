@@ -25,7 +25,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/opcode.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -39,8 +38,6 @@ public:
 
     operation(const opcode code, const data_chunk& data);
 
-    operation(std::istream& stream);
-
     opcode code() const;
 
     void code(const opcode code);
@@ -51,11 +48,17 @@ public:
 
     void data(const data_chunk& data);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
 
-    size_t satoshi_size() const;
+    void reset();
 
     std::string to_string() const;
+
+    size_t satoshi_size() const;
 
 private:
 

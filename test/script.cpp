@@ -197,7 +197,8 @@ bool parse(chain::script& result_script, std::string format)
             return false;
     parse_token(raw_script, "ENDING");
 
-    chain::script parsed_script(raw_script, true);
+    chain::script parsed_script;
+    parsed_script.from_data(raw_script, true, true);
 
     if (parsed_script.is_raw_data())
         return false;
@@ -258,10 +259,11 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
 {
     // input 315ac7d4c26d69668129cc352851d9389b4a6868f1509c6c8b66bead11e2619f:1
     data_chunk txdat;
-    decode_base16(txdat, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
-    data_chunk_buffer buffer(txdat.data(), txdat.size());
-    std::istream txis(&buffer);
-    chain::transaction parent_tx(txis);
+    BOOST_REQUIRE(decode_base16(txdat, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000"));
+    data_chunk_buffer txbuf(txdat.data(), txdat.size());
+    std::istream txis(&txbuf);
+    chain::transaction parent_tx;
+    BOOST_REQUIRE(parent_tx.from_data(txis));
     uint32_t input_index = 1;
 
     data_chunk signature;
@@ -271,7 +273,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
 
     data_chunk rawscr;
     decode_base16(rawscr, "76a91433cef61749d11ba2adf091a5e045678177fe3a6d88ac");
-    chain::script script_code(rawscr);
+    chain::script script_code;
+    BOOST_REQUIRE(script_code.from_data(rawscr, true, true));
     BOOST_REQUIRE(chain::script::check_signature(
         signature, pubkey, script_code, parent_tx, input_index));
 }
@@ -283,7 +286,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
     decode_base16(txdat, "0100000002dc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169000000006a47304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c27032102100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2feffffffffdc38e9359bd7da3b58386204e186d9408685f427f5e513666db735aa8a6b2169010000006b4830450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03210275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cbffffffff0140899500000000001976a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac00000000");
     data_chunk_buffer txbuf(txdat.data(), txdat.size());
     std::istream txis(&txbuf);
-    chain::transaction parent_tx(txis);
+    chain::transaction parent_tx;
+    BOOST_REQUIRE(parent_tx.from_data(txis));
     uint32_t input_index = 0;
 
     data_chunk signature;
@@ -293,7 +297,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
 
     data_chunk rawscr;
     decode_base16(rawscr, "76a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac");
-    chain::script script_code(rawscr);
+    chain::script script_code;
+    BOOST_REQUIRE_EQUAL(true, script_code.from_data(rawscr, true));
     BOOST_REQUIRE(chain::script::check_signature(
         signature, pubkey, script_code, parent_tx, input_index));
 }

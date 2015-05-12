@@ -18,10 +18,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/point.hpp>
-
 #include <sstream>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -37,20 +37,6 @@ point::point(hash_digest hash, uint32_t index)
     : hash_(hash), index_(index)
 {
 }
-
-point::point(std::istream& stream)
-{
-    hash_ = read_hash(stream);
-    index_ = read_4_bytes(stream);
-
-    if (stream.fail())
-        throw std::ios_base::failure("point");
-}
-
-//point::point(const data_chunk& value)
-//    : point(value.begin(), value.end())
-//{
-//}
 
 hash_digest& point::hash()
 {
@@ -89,6 +75,34 @@ std::string point::to_string() const
 bool point::is_null() const
 {
     return (index_ == max_index) && (hash_ == null_hash);
+}
+
+void point::reset()
+{
+    hash_.fill(0);
+    index_ = 0;
+}
+
+bool point::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool point::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    hash_ = read_hash(stream);
+    index_ = read_4_bytes(stream);
+    result = !stream.fail();
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk point::to_data() const

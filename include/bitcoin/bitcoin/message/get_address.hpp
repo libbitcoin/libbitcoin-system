@@ -24,7 +24,6 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -36,11 +35,13 @@ public:
 
     static const std::string satoshi_command;
 
-    get_address();
+    bool from_data(const data_chunk& data);
 
-    get_address(std::istream& stream);
+    bool from_data(std::istream& stream);
 
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 

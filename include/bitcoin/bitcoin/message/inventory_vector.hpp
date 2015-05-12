@@ -25,7 +25,6 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -34,12 +33,6 @@ namespace message {
 class BC_API inventory_vector
 {
 public:
-
-    inventory_vector();
-
-    inventory_vector(const inventory_type_id type, const hash_digest& hash);
-
-    inventory_vector(std::istream& stream);
 
     inventory_type_id type() const;
 
@@ -51,7 +44,13 @@ public:
 
     void hash(const hash_digest& value);
 
+    bool from_data(const data_chunk& data);
+
+    bool from_data(std::istream& stream);
+
     data_chunk to_data() const;
+
+    void reset();
 
     size_t satoshi_size() const;
 

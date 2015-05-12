@@ -18,35 +18,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
-
-inventory::inventory()
-    : inventories_()
-{
-}
-
-inventory::inventory(const inventory_list& inventories)
-    : inventories_(inventories)
-{
-}
-
-inventory::inventory(std::istream& stream)
-{
-    uint64_t count = read_variable_uint(stream);
-
-    for (size_t i = 0; (i < count) && !stream.fail(); ++i)
-    {
-        inventory_vector inv(stream);
-        inventories_.push_back(inv);
-    }
-
-    if (stream.fail())
-        throw std::ios_base::failure("inventory");
-}
 
 inventory_list& inventory::inventories()
 {
@@ -56,6 +33,39 @@ inventory_list& inventory::inventories()
 const inventory_list& inventory::inventories() const
 {
     return inventories_;
+}
+
+void inventory::reset()
+{
+    inventories_.clear();
+}
+
+bool inventory::from_data(const data_chunk& data)
+{
+    data_chunk_stream_host host(data);
+    return from_data(host.stream);
+}
+
+bool inventory::from_data(std::istream& stream)
+{
+    bool result = true;
+
+    reset();
+
+    uint64_t count = read_variable_uint(stream);
+    result = !stream.fail();
+
+    for (size_t i = 0; (i < count) && result; ++i)
+    {
+        inventory_vector inv;
+        result = inv.from_data(stream);
+        inventories_.push_back(inv);
+    }
+
+    if (!result)
+        reset();
+
+    return result;
 }
 
 data_chunk inventory::to_data() const

@@ -27,7 +27,6 @@
 #include <bitcoin/bitcoin/chain/payment.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -53,12 +52,6 @@ public:
 
     script(const operation_stack& operations);
 
-    script(std::istream& stream, bool allow_raw_data_fallback = false);
-
-    script(const data_chunk& value, bool allow_raw_data_fallback = false);
-
-    script(const std::string& human_readable);
-
     operation_stack& operations();
 
     const operation_stack& operations() const;
@@ -67,13 +60,20 @@ public:
 
     bool is_raw_data() const;
 
-    data_chunk to_data() const;
+    bool from_data(const data_chunk& data, bool missing_length_prefix = false,
+        bool allow_raw_data_fallback = false);
 
-    size_t satoshi_size() const;
+    bool from_data(std::istream& stream, bool allow_raw_data_fallback = false);
+
+    data_chunk to_data() const;
 
     bool from_string(const std::string& human_readable);
 
     std::string to_string() const;
+
+    void reset();
+
+    size_t satoshi_size() const;
 
     static BC_API bool verify(const script& input_script,
         const script& output_script, const transaction& parent_tx,
@@ -97,9 +97,9 @@ public:
 
 private:
 
-    void deserialize(data_chunk& raw_script, bool allow_raw_data_fallback);
+    bool deserialize(const data_chunk& raw_script, bool allow_raw_data_fallback);
 
-    bool parse(data_chunk& raw_script);
+    bool parse(const data_chunk& raw_script);
 
     operation_stack operations_;
 };
