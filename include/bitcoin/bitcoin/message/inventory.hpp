@@ -36,10 +36,8 @@ public:
 
     static const std::string satoshi_command;
 
-    // public members
     inventory_list inventories;
 
-    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);

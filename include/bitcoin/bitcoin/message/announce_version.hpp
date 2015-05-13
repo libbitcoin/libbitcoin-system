@@ -36,7 +36,6 @@ public:
 
     static const std::string satoshi_command;
 
-    // public members
     uint32_t version;
     uint64_t services;
     uint64_t timestamp;
@@ -46,7 +45,6 @@ public:
     std::string user_agent;
     uint32_t start_height;
 
-    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);

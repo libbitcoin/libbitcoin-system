@@ -36,10 +36,8 @@ public:
 
     static const std::string satoshi_command;
 
-    // public members
     network_address_list addresses;
 
-    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);

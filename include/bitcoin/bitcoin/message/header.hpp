@@ -34,14 +34,12 @@ class BC_API header
 {
 public:
 
-    // public members
     uint32_t magic;
     std::string command;
     uint32_t payload_length;
     // Ignored by version and verack commands
     uint32_t checksum;
 
-    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);

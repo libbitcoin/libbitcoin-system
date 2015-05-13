@@ -34,11 +34,9 @@ class BC_API inventory_vector
 {
 public:
 
-    // public members
     inventory_type_id type;
     hash_digest hash;
 
-    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);

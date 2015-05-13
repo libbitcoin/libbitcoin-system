@@ -36,13 +36,11 @@ class BC_API network_address
 {
 public:
 
-    // public members
     uint32_t timestamp;
     uint64_t services;
     ip_address ip;
     uint16_t port;
 
-    // serialization methods
     bool from_data(const data_chunk& data, bool with_timestamp /*= false*/);
 
     bool from_data(std::istream& stream, bool with_timestamp /*= false*/);
