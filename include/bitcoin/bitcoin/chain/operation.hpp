@@ -34,19 +34,8 @@ class BC_API operation
 {
 public:
 
-    operation();
-
-    operation(const opcode code, const data_chunk& data);
-
-    opcode code() const;
-
-    void code(const opcode code);
-
-    data_chunk& data();
-
-    const data_chunk& data() const;
-
-    void data(const data_chunk& data);
+    opcode code;
+    data_chunk data;
 
     bool from_data(const data_chunk& data);
 
@@ -54,9 +43,9 @@ public:
 
     data_chunk to_data() const;
 
-    void reset();
-
     std::string to_string() const;
+
+    void reset();
 
     uint64_t satoshi_size() const;
 
@@ -66,9 +55,6 @@ private:
         std::istream& stream);
 
     static bool must_read_data(opcode code);
-
-    opcode code_;
-    data_chunk data_;
 };
 
 typedef std::vector<operation> operation_stack;

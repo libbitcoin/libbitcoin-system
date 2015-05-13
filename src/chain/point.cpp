@@ -28,59 +28,15 @@
 namespace libbitcoin {
 namespace chain {
 
-point::point()
-//    :hash_(null_hash), index_(std::numeric_limits<uint32_t>::max())
-{
-}
-
-point::point(hash_digest hash, uint32_t index)
-    : hash_(hash), index_(index)
-{
-}
-
-hash_digest& point::hash()
-{
-    return hash_;
-}
-
-const hash_digest& point::hash() const
-{
-    return hash_;
-}
-
-void point::hash(const hash_digest& hash)
-{
-    hash_ = hash;
-}
-
-uint32_t point::index() const
-{
-    return index_;
-}
-
-void point::index(uint32_t index)
-{
-    index_ = index;
-}
-
-std::string point::to_string() const
-{
-    std::ostringstream ss;
-
-    ss << "\thash = " << encode_hash(hash_) << "\n" << "\tindex = " << index_;
-
-    return ss.str();
-}
-
 bool point::is_null() const
 {
-    return (index_ == max_index) && (hash_ == null_hash);
+    return (index == max_index) && (hash == null_hash);
 }
 
 void point::reset()
 {
-    hash_.fill(0);
-    index_ = 0;
+    hash.fill(0);
+    index = 0;
 }
 
 bool point::from_data(const data_chunk& data)
@@ -95,8 +51,8 @@ bool point::from_data(std::istream& stream)
 
     reset();
 
-    hash_ = read_hash(stream);
-    index_ = read_4_bytes(stream);
+    hash = read_hash(stream);
+    index = read_4_bytes(stream);
     result = !stream.fail();
 
     if (!result)
@@ -110,8 +66,8 @@ data_chunk point::to_data() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_hash(hash_);
-    serial.write_4_bytes(index_);
+    serial.write_hash(hash);
+    serial.write_4_bytes(index);
 
     BITCOIN_ASSERT(
         std::distance(result.begin(), serial.iterator())
@@ -130,9 +86,18 @@ uint64_t point::satoshi_fixed_size()
     return hash_size + 4;
 }
 
+std::string point::to_string() const
+{
+    std::ostringstream ss;
+
+    ss << "\thash = " << encode_hash(hash) << "\n" << "\tindex = " << index;
+
+    return ss.str();
+}
+
 bool operator==(const point& a, const point& b)
 {
-    return a.hash() == b.hash() && a.index() == b.index();
+    return a.hash == b.hash && a.index == b.index;
 }
 bool operator!=(const point& a, const point& b)
 {

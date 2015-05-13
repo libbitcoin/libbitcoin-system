@@ -34,26 +34,9 @@ class BC_API transaction_input
 {
 public:
 
-    transaction_input();
-
-    transaction_input(const output_point& previous_output,
-        const chain::script& script, const uint32_t sequence);
-
-    output_point& previous_output();
-
-    const output_point& previous_output() const;
-
-    void previous_output(const output_point& previous);
-
-    chain::script& script();
-
-    const chain::script& script() const;
-
-    void script(const chain::script& script);
-
-    uint32_t sequence() const;
-
-    void sequence(const uint32_t sequence);
+    output_point previous_output;
+    chain::script script;
+    uint32_t sequence;
 
     bool from_data(const data_chunk& data);
 
@@ -70,12 +53,6 @@ public:
     uint64_t satoshi_size() const;
 
     static uint64_t satoshi_fixed_size();
-
-private:
-
-    output_point previous_output_;
-    chain::script script_;
-    uint32_t sequence_;
 };
 
 typedef std::vector<transaction_input> transaction_input_list;

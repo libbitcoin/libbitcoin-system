@@ -26,64 +26,12 @@
 namespace libbitcoin {
 namespace chain {
 
-transaction::transaction()
-{
-}
-
-transaction::transaction(const uint32_t version, const uint32_t locktime,
-    const transaction_input_list& inputs,
-    const transaction_output_list& outputs)
-    : version_(version), locktime_(locktime), inputs_(inputs),
-      outputs_(outputs)
-{
-}
-
-uint32_t transaction::version() const
-{
-    return version_;
-}
-
-void transaction::version(uint32_t version)
-{
-    version_ = version;
-}
-
-uint32_t transaction::locktime() const
-{
-    return locktime_;
-}
-
-void transaction::locktime(uint32_t locktime)
-{
-    locktime_ = locktime;
-}
-
-transaction_input_list& transaction::inputs()
-{
-    return inputs_;
-}
-
-const transaction_input_list& transaction::inputs() const
-{
-    return inputs_;
-}
-
-transaction_output_list& transaction::outputs()
-{
-    return outputs_;
-}
-
-const transaction_output_list& transaction::outputs() const
-{
-    return outputs_;
-}
-
 void transaction::reset()
 {
-    version_ = 0;
-    locktime_ = 0;
-    inputs_.clear();
-    outputs_.clear();
+    version = 0;
+    locktime = 0;
+    inputs.clear();
+    outputs.clear();
 }
 
 bool transaction::from_data(const data_chunk& data)
@@ -98,7 +46,7 @@ bool transaction::from_data(std::istream& stream)
 
     reset();
 
-    version_ = read_4_bytes(stream);
+    version = read_4_bytes(stream);
     result = !stream.fail();
 
     if (result)
@@ -110,7 +58,7 @@ bool transaction::from_data(std::istream& stream)
         {
             transaction_input input;
             result = input.from_data(stream);
-            inputs_.push_back(input);
+            inputs.push_back(input);
         }
     }
 
@@ -123,13 +71,13 @@ bool transaction::from_data(std::istream& stream)
         {
             transaction_output output;
             result = output.from_data(stream);
-            outputs_.push_back(output);
+            outputs.push_back(output);
         }
     }
 
     if (result)
     {
-        locktime_ = read_4_bytes(stream);
+        locktime = read_4_bytes(stream);
         result = !stream.fail();
     }
 
@@ -144,21 +92,22 @@ data_chunk transaction::to_data() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_4_bytes(version_);
+    serial.write_4_bytes(version);
 
-    serial.write_variable_uint(inputs_.size());
+    serial.write_variable_uint(inputs.size());
 
-    for (const transaction_input& input: inputs_)
+    for (const transaction_input& input: inputs)
         serial.write_data(input.to_data());
 
-    serial.write_variable_uint(outputs_.size());
+    serial.write_variable_uint(outputs.size());
 
-    for (const transaction_output& output: outputs_)
+    for (const transaction_output& output: outputs)
         serial.write_data(output.to_data());
 
-    serial.write_4_bytes(locktime_);
+    serial.write_4_bytes(locktime);
 
-    BITCOIN_ASSERT(std::distance(result.begin(), serial.iterator()) == satoshi_size());
+    BITCOIN_ASSERT(
+        std::distance(result.begin(), serial.iterator()) == satoshi_size());
 
     return result;
 }
@@ -167,19 +116,15 @@ uint64_t transaction::satoshi_size() const
 {
     uint64_t tx_size = 8;
 
-    tx_size += variable_uint_size(inputs_.size());
+    tx_size += variable_uint_size(inputs.size());
 
-    for (const transaction_input& input: inputs_)
-    {
+    for (const transaction_input& input: inputs)
         tx_size += input.satoshi_size();
-    }
 
-    tx_size += variable_uint_size(outputs_.size());
+    tx_size += variable_uint_size(outputs.size());
 
-    for (const transaction_output& output: outputs_)
-    {
+    for (const transaction_output& output: outputs)
         tx_size += output.satoshi_size();
-    }
 
     return tx_size;
 }
@@ -189,16 +134,16 @@ std::string transaction::to_string() const
     std::ostringstream ss;
 
     ss << "Transaction:\n"
-        << "\tversion = " << version_ << "\n"
-        << "\tlocktime = " << locktime_ << "\n"
+        << "\tversion = " << version << "\n"
+        << "\tlocktime = " << locktime << "\n"
         << "Inputs:\n";
 
-    for (transaction_input input: inputs_)
+    for (transaction_input input: inputs)
         ss << input.to_string();
 
     ss << "Outputs:\n";
 
-    for (transaction_output output: outputs_)
+    for (transaction_output output: outputs)
         ss << output.to_string();
 
     ss << "\n";
@@ -220,23 +165,23 @@ hash_digest transaction::hash(uint32_t hash_type_code) const
 
 bool transaction::is_coinbase() const
 {
-    return (inputs_.size() == 1) && inputs_[0].previous_output().is_null();
+    return (inputs.size() == 1) && inputs[0].previous_output.is_null();
 }
 
 bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
 {
-    if (locktime_ == 0)
+    if (locktime == 0)
         return true;
 
     uint32_t max_locktime = block_time;
 
-    if (locktime_ < locktime_threshold)
+    if (locktime < locktime_threshold)
         max_locktime = static_cast<uint32_t>(block_height);
 
-    if (locktime_ < max_locktime)
+    if (locktime < max_locktime)
         return true;
 
-    for (const transaction_input& tx_input : inputs_)
+    for (const transaction_input& tx_input : inputs)
     {
         if (!tx_input.is_final())
             return false;
@@ -247,13 +192,13 @@ bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
 
 bool transaction::is_locktime_conflict() const
 {
-    auto locktime_set = locktime_ != 0;
+    auto locktime_set = locktime != 0;
 
     if (locktime_set)
     {
-        for (const auto& input : inputs_)
+        for (const auto& input : inputs)
         {
-            if (input.sequence() < max_sequence)
+            if (input.sequence < max_sequence)
                 return false;
         }
     }
@@ -265,8 +210,8 @@ uint64_t transaction::total_output_value() const
 {
     uint64_t total = 0;
 
-    for (const transaction_output& output : outputs_)
-        total += output.value();
+    for (const transaction_output& output : outputs)
+        total += output.value;
 
     return total;
 }

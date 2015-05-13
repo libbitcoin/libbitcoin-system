@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_genesis_block_serialization)
 {
     chain::block genblk = genesis_block();
     BOOST_REQUIRE_EQUAL(genblk.satoshi_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genblk.header().satoshi_size(), 80u);
+    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(), 80u);
 
     // Save genesis block.
     data_chunk rawblk = genblk.to_data();
@@ -39,17 +39,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_genesis_block_serialization)
     // Reload genesis block.
     chain::block blk;
     BOOST_REQUIRE(blk.from_data(rawblk));
-    BOOST_REQUIRE(genblk.header().version() == blk.header().version());
-    BOOST_REQUIRE(genblk.header().previous_block_hash() == blk.header().previous_block_hash());
-    BOOST_REQUIRE(genblk.header().merkle() == blk.header().merkle());
-    BOOST_REQUIRE(genblk.header().timestamp() == blk.header().timestamp());
-    BOOST_REQUIRE(genblk.header().bits() == blk.header().bits());
-    BOOST_REQUIRE(genblk.header().nonce() == blk.header().nonce());
-    BOOST_REQUIRE(genblk.header() == blk.header());
+    BOOST_REQUIRE(genblk.header.version == blk.header.version);
+    BOOST_REQUIRE(genblk.header.previous_block_hash == blk.header.previous_block_hash);
+    BOOST_REQUIRE(genblk.header.merkle == blk.header.merkle);
+    BOOST_REQUIRE(genblk.header.timestamp == blk.header.timestamp);
+    BOOST_REQUIRE(genblk.header.bits == blk.header.bits);
+    BOOST_REQUIRE(genblk.header.nonce == blk.header.nonce);
+    BOOST_REQUIRE(genblk.header == blk.header);
 
     // Verify merkle root from transactions.
-    const hash_digest& merkle = chain::block::generate_merkle_root(blk.transactions());
-    BOOST_REQUIRE(genblk.header().merkle() == merkle);
+    const hash_digest& merkle = chain::block::generate_merkle_root(blk.transactions);
+    BOOST_REQUIRE(genblk.header.merkle == merkle);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
