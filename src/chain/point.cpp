@@ -120,12 +120,12 @@ data_chunk point::to_data() const
     return result;
 }
 
-size_t point::satoshi_size() const
+uint64_t point::satoshi_size() const
 {
     return point::satoshi_fixed_size();
 }
 
-size_t point::satoshi_fixed_size()
+uint64_t point::satoshi_fixed_size()
 {
     return hash_size + 4;
 }

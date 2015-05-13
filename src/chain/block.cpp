@@ -83,7 +83,7 @@ bool block::from_data(std::istream& stream)
     uint64_t tx_count = read_variable_uint(stream);
     result &= !stream.fail();
 
-    for (size_t i = 0; (i < tx_count) && result; ++i)
+    for (uint64_t i = 0; (i < tx_count) && result; ++i)
     {
         transaction tx;
         result = tx.from_data(stream);
@@ -112,9 +112,9 @@ data_chunk block::to_data() const
     return result;
 }
 
-size_t block::satoshi_size() const
+uint64_t block::satoshi_size() const
 {
-    size_t block_size = header_.satoshi_size()
+    uint64_t block_size = header_.satoshi_size()
         + variable_uint_size(transactions_.size());
 
     for (const transaction& tx : transactions_)

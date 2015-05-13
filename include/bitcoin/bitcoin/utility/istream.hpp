@@ -50,7 +50,7 @@ T read_little_endian(std::istream& stream);
 
 uint64_t read_variable_uint(std::istream& stream);
 
-data_chunk read_data(std::istream& stream, size_t n_bytes);
+data_chunk read_data(std::istream& stream, uint64_t n_bytes);
 
 hash_digest read_hash(std::istream& stream);
 
@@ -59,7 +59,7 @@ short_hash read_short_hash(std::istream& stream);
 /**
  * Read a fixed size string padded with zeroes.
  */
-std::string read_fixed_string(std::istream& stream, size_t len);
+std::string read_fixed_string(std::istream& stream, uint64_t len);
 
 /**
  * Read a variable length string.

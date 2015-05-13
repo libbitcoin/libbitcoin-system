@@ -192,7 +192,7 @@ data_chunk announce_version::to_data() const
     return result;
 }
 
-size_t announce_version::satoshi_size() const
+uint64_t announce_version::satoshi_size() const
 {
     return 84 +
         variable_uint_size(user_agent_.size()) + user_agent_.size();

@@ -60,15 +60,6 @@ script::script(const operation_stack& operations)
         operations.end());
 }
 
-//script::script(const std::string& human_readable)
-//    : script()
-//{
-//    if (!from_string(human_readable))
-//    {
-//        throw std::invalid_argument("human_readable");
-//    }
-//}
-
 operation_stack& script::operations()
 {
     return operations_;
@@ -109,12 +100,12 @@ void script::reset()
     operations_.clear();
 }
 
-bool script::from_data(const data_chunk& data, bool missing_length_prefix,
+bool script::from_data(const data_chunk& data, bool with_length_prefix,
     bool allow_raw_data_fallback)
 {
     bool result = true;
 
-    if (missing_length_prefix)
+    if (!with_length_prefix)
     {
         reset();
 
@@ -161,29 +152,35 @@ bool script::from_data(std::istream& stream, bool allow_raw_data_fallback)
     return result;
 }
 
-data_chunk script::to_data() const
+data_chunk script::to_data(bool with_length_prefix) const
 {
-    data_chunk result;
+    data_chunk result(satoshi_size(with_length_prefix));
+    auto serial = make_serializer(result.begin());
+
+    if (with_length_prefix)
+    {
+        serial.write_variable_uint(satoshi_content_size());
+    }
 
     if ((operations_.size() > 0) &&
         (operations_[0].code() == opcode::raw_data))
     {
-        extend_data(result, operations_[0].to_data());
+        serial.write_data(operations_[0].to_data());
     }
     else
     {
         for (const operation& op: operations_)
         {
-            extend_data(result, op.to_data());
+            serial.write_data(op.to_data());
         }
     }
 
     return result;
 }
 
-size_t script::satoshi_size() const
+uint64_t script::satoshi_content_size() const
 {
-    size_t size = 0;
+    uint64_t size = 0;
 
     if (operations_.size() > 0 && (operations_[0].code() == opcode::raw_data))
     {
@@ -196,6 +193,16 @@ size_t script::satoshi_size() const
             size += op.satoshi_size();
         }
     }
+
+    return size;
+}
+
+uint64_t script::satoshi_size(bool with_length_prefix) const
+{
+    uint64_t size = satoshi_content_size();
+
+    if (with_length_prefix)
+        size += variable_uint_size(size);
 
     return size;
 }
@@ -1783,7 +1790,7 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
 bool evaluate(const transaction& parent_tx, uint32_t input_index,
     const script& script, evaluation_context& context)
 {
-    if (script.satoshi_size() > 10000)
+    if (script.satoshi_content_size() > 10000)
         return false;
 
     context.operation_counter = 0;
@@ -1829,7 +1836,7 @@ bool script::verify(const script& input_script, const script& output_script,
         eval_context.primary = input_context.primary;
 
         script eval_script;
-        eval_script.from_data(input_context.primary.back(), true);
+        eval_script.from_data(input_context.primary.back(), false, true);
 
         // Invalid script - parsed as raw_data
         if (eval_script.is_raw_data())

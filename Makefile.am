@@ -182,11 +182,8 @@ test_libbitcoin_test_SOURCES = \
     test/parameter.cpp \
     test/printer.cpp \
     test/satoshi_words.cpp \
-    test/script.cpp \
-    test/script.hpp \
     test/script_number.cpp \
     test/script_number.hpp \
-    test/serialize.cpp \
     test/stealth.cpp \
     test/stealth_address.cpp \
     test/thread.cpp \
@@ -194,8 +191,13 @@ test_libbitcoin_test_SOURCES = \
     test/unicode_istream.cpp \
     test/unicode_ostream.cpp \
     test/uri.cpp \
+    test/chain/block.cpp \
     test/chain/point.cpp \
-    test/utility/endian.cpp
+    test/chain/script.cpp \
+    test/chain/script.hpp \
+    test/chain/transaction.cpp \
+    test/utility/endian.cpp \
+    test/utility/serializer.cpp
 
 endif WITH_TESTS
 

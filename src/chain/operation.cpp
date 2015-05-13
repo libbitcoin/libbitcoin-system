@@ -86,7 +86,7 @@ bool operation::from_data(std::istream& stream)
 
     if (result && operation::must_read_data(code_))
     {
-        size_t read_n_bytes =
+        uint64_t read_n_bytes =
             read_opcode_data_byte_count(code_, raw_byte, stream);
 
         data_ = read_data(stream, read_n_bytes);
@@ -141,9 +141,9 @@ data_chunk operation::to_data() const
     return result;
 }
 
-size_t operation::satoshi_size() const
+uint64_t operation::satoshi_size() const
 {
-    size_t size = 1 + data_.size();
+    uint64_t size = 1 + data_.size();
 
     switch (code_)
     {
@@ -183,7 +183,7 @@ std::string operation::to_string() const
     return ss.str();
 }
 
-size_t operation::read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
+uint64_t operation::read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
     std::istream& stream)
 {
     switch (code)
@@ -239,7 +239,7 @@ bool is_push(const opcode code)
         || code == opcode::op_16;
 }
 
-size_t count_non_push(const operation_stack& operations)
+uint64_t count_non_push(const operation_stack& operations)
 {
     return std::count_if(operations.begin(), operations.end(),
         [](const operation& op) { return !is_push(op.code()); });
@@ -311,7 +311,7 @@ bool is_script_code_sig_type(const operation_stack& ops)
     // note: ignores parse failure, though by allowing fallback, failure
     // cannot meaningfully occur.
     script script_code;
-    script_code.from_data(last_data, true);
+    script_code.from_data(last_data, false, true);
 
     if (script_code.is_raw_data())
         return false;

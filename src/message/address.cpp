@@ -53,7 +53,7 @@ bool address::from_data(std::istream& stream)
     uint64_t count = read_variable_uint(stream);
     result = !stream.fail();
 
-    for (size_t i = 0; (i < count) && result; ++i)
+    for (uint64_t i = 0; (i < count) && result; ++i)
     {
         network_address addr;
         result = addr.from_data(stream, true);
@@ -82,7 +82,7 @@ data_chunk address::to_data() const
     return result;
 }
 
-size_t address::satoshi_size() const
+uint64_t address::satoshi_size() const
 {
     return variable_uint_size(addresses_.size())
         + addresses_.size() * network_address::satoshi_fixed_size();
