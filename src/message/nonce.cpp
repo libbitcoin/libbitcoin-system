@@ -25,19 +25,9 @@
 namespace libbitcoin {
 namespace message {
 
-uint64_t nonce_base::nonce() const
-{
-    return nonce_;
-}
-
-void nonce_base::nonce(uint64_t value)
-{
-    nonce_ = value;
-}
-
 void nonce_base::reset()
 {
-    nonce_ = 0;
+    nonce = 0;
 }
 
 bool nonce_base::from_data(const data_chunk& data)
@@ -52,7 +42,7 @@ bool nonce_base::from_data(std::istream& stream)
 
     reset();
 
-    nonce_ = read_8_bytes(stream);
+    nonce = read_8_bytes(stream);
     result = !stream.fail();
 
     if (!result)
@@ -65,7 +55,7 @@ data_chunk nonce_base::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
-    serial.write_8_bytes(nonce_);
+    serial.write_8_bytes(nonce);
     return result;
 }
 
