@@ -149,17 +149,11 @@ bool announce_version::from_data(std::istream& stream)
     result = !stream.fail();
 
     if (result)
-        result = address_me_.from_data(stream);
-
-    // Ignored field
-    address_me_.timestamp(0);
+        result = address_me_.from_data(stream, false);
 
     if (result && (version_ >= 106))
     {
-        result = address_you_.from_data(stream);
-
-        // Ignored field
-        address_you_.timestamp(0);
+        result = address_you_.from_data(stream, false);
 
         nonce_ = read_8_bytes(stream);
         user_agent_ = read_string(stream);
@@ -184,8 +178,8 @@ data_chunk announce_version::to_data() const
     serial.write_4_bytes(version_);
     serial.write_8_bytes(services_);
     serial.write_8_bytes(timestamp_);
-    serial.write_data(address_me_.to_data());
-    serial.write_data(address_you_.to_data());
+    serial.write_data(address_me_.to_data(false));
+    serial.write_data(address_you_.to_data(false));
     serial.write_8_bytes(nonce_);
     serial.write_string(user_agent_);
     serial.write_4_bytes(start_height_);
@@ -194,7 +188,7 @@ data_chunk announce_version::to_data() const
 
 uint64_t announce_version::satoshi_size() const
 {
-    return 84 +
+    return 32 + (2 * network_address::satoshi_fixed_size(false)) +
         variable_uint_size(user_agent_.size()) + user_agent_.size();
 }
 
