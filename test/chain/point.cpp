@@ -24,7 +24,7 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(point_tests)
 
-BOOST_AUTO_TEST_CASE(constructor_istream_to_data_roundtrip)
+BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
 {
     data_chunk rawdata = to_data_chunk(base16_literal(
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
@@ -37,11 +37,8 @@ BOOST_AUTO_TEST_CASE(constructor_istream_to_data_roundtrip)
         0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
     }));
 
-    std::stringstream stream;
-    std::copy(rawdata.begin(), rawdata.end(), std::ostream_iterator<uint8_t>(stream));
-
     chain::point point;
-    BOOST_REQUIRE(point.from_data(stream));
+    BOOST_REQUIRE(point.from_data(rawdata));
 
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash()),
         "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");

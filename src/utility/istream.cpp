@@ -65,11 +65,11 @@ uint64_t read_variable_uint(std::istream& stream)
     return read_8_bytes(stream);
 }
 
-data_chunk read_data(std::istream& stream, size_t n_bytes)
+data_chunk read_data(std::istream& stream, uint64_t n_bytes)
 {
     data_chunk raw_bytes(n_bytes);
 
-    for (size_t i = 0; i < n_bytes; ++i)
+    for (uint64_t i = 0; i < n_bytes; ++i)
         raw_bytes[i] = read_byte(stream);
 
     return raw_bytes;
@@ -85,7 +85,7 @@ short_hash read_short_hash(std::istream& stream)
     return read_bytes<short_hash_size>(stream);
 }
 
-std::string read_fixed_string(std::istream& stream, size_t len)
+std::string read_fixed_string(std::istream& stream, uint64_t len)
 {
     data_chunk string_bytes = read_data(stream, len);
     std::string result(string_bytes.begin(), string_bytes.end());
@@ -96,8 +96,7 @@ std::string read_fixed_string(std::istream& stream, size_t len)
 std::string read_string(std::istream& stream)
 {
     uint64_t string_size = read_variable_uint(stream);
-    // Warning: conversion from uint64_t to size_t, possible loss of data.
-    return read_fixed_string(stream, (size_t)string_size);
+    return read_fixed_string(stream, string_size);
 }
 
 } // namespace libbitcoin

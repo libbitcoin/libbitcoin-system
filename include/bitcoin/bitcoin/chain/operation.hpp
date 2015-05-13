@@ -58,11 +58,11 @@ public:
 
     std::string to_string() const;
 
-    size_t satoshi_size() const;
+    uint64_t satoshi_size() const;
 
 private:
 
-    static size_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
+    static uint64_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
         std::istream& stream);
 
     static bool must_read_data(opcode code);
@@ -75,7 +75,7 @@ typedef std::vector<operation> operation_stack;
 
 bool is_push(const opcode code);
 
-size_t count_non_push(const operation_stack& operations);
+uint64_t count_non_push(const operation_stack& operations);
 
 bool is_push_only(const operation_stack& operations);
 

@@ -46,13 +46,13 @@ data_chunk verack::to_data() const
     return result;
 }
 
-size_t verack::satoshi_size() const
+uint64_t verack::satoshi_size() const
 {
     return verack::satoshi_fixed_size();
 }
 
 
-size_t verack::satoshi_fixed_size()
+uint64_t verack::satoshi_fixed_size()
 {
     return 0;
 }

@@ -106,7 +106,7 @@ bool transaction::from_data(std::istream& stream)
         uint64_t tx_in_count = read_variable_uint(stream);
         result = !stream.fail();
 
-        for (size_t i = 0; (i < tx_in_count) && result; ++i)
+        for (uint64_t i = 0; (i < tx_in_count) && result; ++i)
         {
             transaction_input input;
             result = input.from_data(stream);
@@ -119,7 +119,7 @@ bool transaction::from_data(std::istream& stream)
         uint64_t tx_out_count = read_variable_uint(stream);
         result = !stream.fail();
 
-        for (size_t i = 0; (i < tx_out_count) && result; ++i)
+        for (uint64_t i = 0; (i < tx_out_count) && result; ++i)
         {
             transaction_output output;
             result = output.from_data(stream);
@@ -163,9 +163,9 @@ data_chunk transaction::to_data() const
     return result;
 }
 
-size_t transaction::satoshi_size() const
+uint64_t transaction::satoshi_size() const
 {
-    size_t tx_size = 8;
+    uint64_t tx_size = 8;
 
     tx_size += variable_uint_size(inputs_.size());
 
@@ -223,7 +223,7 @@ bool transaction::is_coinbase() const
     return (inputs_.size() == 1) && inputs_[0].previous_output().is_null();
 }
 
-bool transaction::is_final(size_t block_height, uint32_t block_time) const
+bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
 {
     if (locktime_ == 0)
         return true;

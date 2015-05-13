@@ -78,15 +78,15 @@ public:
 
     bool is_coinbase() const;
 
-    bool is_final(size_t block_height, uint32_t block_time) const;
+    bool is_final(uint64_t block_height, uint32_t block_time) const;
 
     bool is_locktime_conflict() const;
 
     uint64_t total_output_value() const;
 
-    size_t satoshi_size() const;
+    uint64_t satoshi_size() const;
 
-    static size_t satoshi_fixed_size();
+    static uint64_t satoshi_fixed_size();
 
 private:
 

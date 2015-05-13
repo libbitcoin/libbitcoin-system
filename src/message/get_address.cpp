@@ -45,12 +45,12 @@ data_chunk get_address::to_data() const
     return result;
 }
 
-size_t get_address::satoshi_size() const
+uint64_t get_address::satoshi_size() const
 {
     return get_address::satoshi_fixed_size();
 }
 
-size_t get_address::satoshi_fixed_size()
+uint64_t get_address::satoshi_fixed_size()
 {
     return 0;
 }

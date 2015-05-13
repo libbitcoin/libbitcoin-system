@@ -161,12 +161,12 @@ data_chunk block_header::to_data() const
     return result;
 }
 
-size_t block_header::satoshi_size() const
+uint64_t block_header::satoshi_size() const
 {
     return block_header::satoshi_fixed_size();
 }
 
-size_t block_header::satoshi_fixed_size()
+uint64_t block_header::satoshi_fixed_size()
 {
     return 80;
 }

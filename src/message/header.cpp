@@ -113,7 +113,7 @@ data_chunk header::to_data() const
     return result;
 }
 
-size_t header::satoshi_size() const
+uint64_t header::satoshi_size() const
 {
     return 20 + (checksum_ == 0 ? 0 : 4);
 }
