@@ -37,10 +37,8 @@ class BC_API nonce_base
 {
 public:
 
-    // public members
     uint64_t nonce;
 
-    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);

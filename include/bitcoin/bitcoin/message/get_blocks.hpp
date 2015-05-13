@@ -39,12 +39,10 @@ public:
 
     static const std::string satoshi_command;
 
-    // public members
     // 10 sequential hashes, then exponential samples until reaching genesis
     block_locator start_hashes;
     hash_digest hash_stop;
 
-    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);
