@@ -37,10 +37,10 @@ class BC_API nonce_base
 {
 public:
 
-    uint64_t nonce() const;
+    // public members
+    uint64_t nonce;
 
-    void nonce(uint64_t value);
-
+    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);
@@ -52,10 +52,6 @@ public:
     uint64_t satoshi_size() const;
 
     static uint64_t satoshi_fixed_size();
-
-private:
-
-    uint64_t nonce_;
 };
 
 class BC_API ping : public nonce_base

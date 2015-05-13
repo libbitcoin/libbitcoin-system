@@ -23,19 +23,9 @@
 namespace libbitcoin {
 namespace message {
 
-network_address_list& address::addresses()
-{
-    return addresses_;
-}
-
-const network_address_list& address::addresses() const
-{
-    return addresses_;
-}
-
 void address::reset()
 {
-    addresses_.clear();
+    addresses.clear();
 }
 
 bool address::from_data(const data_chunk& data)
@@ -57,7 +47,7 @@ bool address::from_data(std::istream& stream)
     {
         network_address addr;
         result = addr.from_data(stream, true);
-        addresses_.push_back(addr);
+        addresses.push_back(addr);
     }
 
     if (!result)
@@ -71,9 +61,9 @@ data_chunk address::to_data() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_variable_uint(addresses_.size());
+    serial.write_variable_uint(addresses.size());
 
-    for (const network_address& net_address: addresses_)
+    for (const network_address& net_address: addresses)
     {
         serial.write_data(net_address.to_data(true));
     }
@@ -83,8 +73,8 @@ data_chunk address::to_data() const
 
 uint64_t address::satoshi_size() const
 {
-    return variable_uint_size(addresses_.size())
-        + (addresses_.size() * network_address::satoshi_fixed_size(true));
+    return variable_uint_size(addresses.size())
+        + (addresses.size() * network_address::satoshi_fixed_size(true));
 }
 
 } // end message

@@ -35,6 +35,7 @@ public:
 
     static const std::string satoshi_command;
 
+    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);

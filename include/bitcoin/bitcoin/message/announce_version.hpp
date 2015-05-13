@@ -36,44 +36,17 @@ public:
 
     static const std::string satoshi_command;
 
-    uint32_t version() const;
+    // public members
+    uint32_t version;
+    uint64_t services;
+    uint64_t timestamp;
+    network_address address_me;
+    network_address address_you;
+    uint64_t nonce;
+    std::string user_agent;
+    uint32_t start_height;
 
-    void version(uint32_t value);
-
-    uint64_t services() const;
-
-    void services(uint64_t value);
-
-    uint64_t timestamp() const;
-
-    void timestamp(uint64_t value);
-
-    network_address& address_me();
-
-    const network_address& address_me() const;
-
-    void address_me(const network_address& value);
-
-    network_address& address_you();
-
-    const network_address& address_you() const;
-
-    void address_you(const network_address& value);
-
-    uint64_t nonce() const;
-
-    void nonce(uint64_t value);
-
-    std::string& user_agent();
-
-    const std::string& user_agent() const;
-
-    void user_agent(const std::string& value);
-
-    uint32_t start_height() const;
-
-    void start_height(uint32_t value);
-
+    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);
@@ -83,17 +56,6 @@ public:
     void reset();
 
     uint64_t satoshi_size() const;
-
-private:
-
-    uint32_t version_;
-    uint64_t services_;
-    uint64_t timestamp_;
-    network_address address_me_;
-    network_address address_you_;
-    uint64_t nonce_;
-    std::string user_agent_;
-    uint32_t start_height_;
 };
 
 } // end message

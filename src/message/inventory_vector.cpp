@@ -25,35 +25,10 @@
 namespace libbitcoin {
 namespace message {
 
-inventory_type_id inventory_vector::type() const
-{
-    return type_;
-}
-
-void inventory_vector::type(const inventory_type_id value)
-{
-    type_ = value;
-}
-
-hash_digest& inventory_vector::hash()
-{
-    return hash_;
-}
-
-const hash_digest& inventory_vector::hash() const
-{
-    return hash_;
-}
-
-void inventory_vector::hash(const hash_digest& value)
-{
-    hash_ = value;
-}
-
 void inventory_vector::reset()
 {
-    type_ = inventory_type_id::error;
-    hash_.fill(0);
+    type = inventory_type_id::error;
+    hash.fill(0);
 }
 
 bool inventory_vector::from_data(const data_chunk& data)
@@ -69,8 +44,8 @@ bool inventory_vector::from_data(std::istream& stream)
     reset();
 
     uint32_t raw_type = read_4_bytes(stream);
-    type_ = inventory_type_from_number(raw_type);
-    hash_ = read_hash(stream);
+    type = inventory_type_from_number(raw_type);
+    hash = read_hash(stream);
     result = !stream.fail();
 
     if (!result)
@@ -83,9 +58,9 @@ data_chunk inventory_vector::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
-    uint32_t raw_type = inventory_type_to_number(type_);
+    uint32_t raw_type = inventory_type_to_number(type);
     serial.write_4_bytes(raw_type);
-    serial.write_hash(hash_);
+    serial.write_hash(hash);
     return result;
 }
 

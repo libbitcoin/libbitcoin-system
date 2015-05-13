@@ -34,16 +34,11 @@ class BC_API inventory_vector
 {
 public:
 
-    inventory_type_id type() const;
+    // public members
+    inventory_type_id type;
+    hash_digest hash;
 
-    void type(const inventory_type_id value);
-
-    hash_digest& hash();
-
-    const hash_digest& hash() const;
-
-    void hash(const hash_digest& value);
-
+    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);
@@ -55,11 +50,6 @@ public:
     uint64_t satoshi_size() const;
 
     static uint64_t satoshi_fixed_size();
-
-private:
-
-    inventory_type_id type_;
-    hash_digest hash_;
 };
 
 typedef std::vector<inventory_vector> inventory_list;

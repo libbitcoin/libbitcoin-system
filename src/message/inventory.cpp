@@ -25,19 +25,9 @@
 namespace libbitcoin {
 namespace message {
 
-inventory_list& inventory::inventories()
-{
-    return inventories_;
-}
-
-const inventory_list& inventory::inventories() const
-{
-    return inventories_;
-}
-
 void inventory::reset()
 {
-    inventories_.clear();
+    inventories.clear();
 }
 
 bool inventory::from_data(const data_chunk& data)
@@ -59,7 +49,7 @@ bool inventory::from_data(std::istream& stream)
     {
         inventory_vector inv;
         result = inv.from_data(stream);
-        inventories_.push_back(inv);
+        inventories.push_back(inv);
     }
 
     if (!result)
@@ -72,9 +62,9 @@ data_chunk inventory::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
-    serial.write_variable_uint(inventories_.size());
+    serial.write_variable_uint(inventories.size());
 
-    for (const inventory_vector inv: inventories_)
+    for (const inventory_vector inv: inventories)
         serial.write_data(inv.to_data());
 
     return result;
@@ -82,8 +72,8 @@ data_chunk inventory::to_data() const
 
 uint64_t inventory::satoshi_size() const
 {
-    return variable_uint_size(inventories_.size())
-        + inventories_.size() * inventory_vector::satoshi_fixed_size();
+    return variable_uint_size(inventories.size())
+        + inventories.size() * inventory_vector::satoshi_fixed_size();
 }
 
 } // end message

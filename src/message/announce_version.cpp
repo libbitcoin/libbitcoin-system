@@ -25,110 +25,15 @@
 namespace libbitcoin {
 namespace message {
 
-uint32_t announce_version::version() const
-{
-    return version_;
-}
-
-void announce_version::version(uint32_t value)
-{
-    version_ = value;
-}
-
-uint64_t announce_version::services() const
-{
-    return services_;
-}
-
-void announce_version::services(uint64_t value)
-{
-    services_ = value;
-}
-
-uint64_t announce_version::timestamp() const
-{
-    return timestamp_;
-}
-
-void announce_version::timestamp(uint64_t value)
-{
-    timestamp_ = value;
-}
-
-network_address& announce_version::address_me()
-{
-    return address_me_;
-}
-
-const network_address& announce_version::address_me() const
-{
-    return address_me_;
-}
-
-void announce_version::address_me(const network_address& value)
-{
-    address_me_ = value;
-}
-
-network_address& announce_version::address_you()
-{
-    return address_you_;
-}
-
-const network_address& announce_version::address_you() const
-{
-    return address_you_;
-}
-
-void announce_version::address_you(const network_address& value)
-{
-    address_you_ = value;
-}
-
-uint64_t announce_version::nonce() const
-{
-    return nonce_;
-}
-
-void announce_version::nonce(uint64_t value)
-{
-    nonce_ = value;
-}
-
-std::string& announce_version::user_agent()
-{
-    return user_agent_;
-}
-
-const std::string& announce_version::user_agent() const
-{
-    return user_agent_;
-}
-
-void announce_version::user_agent(const std::string& value)
-{
-    user_agent_ = value;
-}
-
-uint32_t announce_version::start_height() const
-{
-    return start_height_;
-}
-
-void announce_version::start_height(uint32_t value)
-{
-    start_height_ = value;
-}
-
 void announce_version::reset()
 {
-    version_ = 0;
-    services_ = 0;
-    timestamp_ = 0;
-    address_me_.reset();
-    address_you_.reset();
-    nonce_ = 0;
-    user_agent_.clear();
+    version = 0;
+    services = 0;
+    timestamp = 0;
+    address_me.reset();
+    address_you.reset();
+    nonce = 0;
+    user_agent.clear();
 }
 
 bool announce_version::from_data(const data_chunk& data)
@@ -143,24 +48,24 @@ bool announce_version::from_data(std::istream& stream)
 
     reset();
 
-    version_ = read_4_bytes(stream);
-    services_ = read_8_bytes(stream);
-    timestamp_ = read_8_bytes(stream);
+    version = read_4_bytes(stream);
+    services = read_8_bytes(stream);
+    timestamp = read_8_bytes(stream);
     result = !stream.fail();
 
     if (result)
-        result = address_me_.from_data(stream, false);
+        result = address_me.from_data(stream, false);
 
-    if (result && (version_ >= 106))
+    if (result && (version >= 106))
     {
-        result = address_you_.from_data(stream, false);
+        result = address_you.from_data(stream, false);
 
-        nonce_ = read_8_bytes(stream);
-        user_agent_ = read_string(stream);
+        nonce = read_8_bytes(stream);
+        user_agent = read_string(stream);
         result = !stream.fail();
 
-        if (version_ >= 209)
-            start_height_ = read_4_bytes(stream);
+        if (version >= 209)
+            start_height = read_4_bytes(stream);
 
         result &= !stream.fail();
     }
@@ -175,21 +80,21 @@ data_chunk announce_version::to_data() const
 {
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
-    serial.write_4_bytes(version_);
-    serial.write_8_bytes(services_);
-    serial.write_8_bytes(timestamp_);
-    serial.write_data(address_me_.to_data(false));
-    serial.write_data(address_you_.to_data(false));
-    serial.write_8_bytes(nonce_);
-    serial.write_string(user_agent_);
-    serial.write_4_bytes(start_height_);
+    serial.write_4_bytes(version);
+    serial.write_8_bytes(services);
+    serial.write_8_bytes(timestamp);
+    serial.write_data(address_me.to_data(false));
+    serial.write_data(address_you.to_data(false));
+    serial.write_8_bytes(nonce);
+    serial.write_string(user_agent);
+    serial.write_4_bytes(start_height);
     return result;
 }
 
 uint64_t announce_version::satoshi_size() const
 {
     return 32 + (2 * network_address::satoshi_fixed_size(false)) +
-        variable_uint_size(user_agent_.size()) + user_agent_.size();
+        variable_uint_size(user_agent.size()) + user_agent.size();
 }
 
 } // end message
