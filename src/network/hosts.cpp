@@ -140,7 +140,7 @@ void hosts::store(const message::network_address& address,
     strand_.randomly_queue(
         [this, address, handle_store]()
         {
-            buffer_.push_back(hosts_field{address.ip(), address.port()});
+            buffer_.push_back(hosts_field{address.ip, address.port});
             handle_store(std::error_code());
         });
 }
@@ -160,7 +160,7 @@ void hosts::do_remove(const message::network_address& address,
     remove_handler handle_remove)
 {
     auto it = std::find(buffer_.begin(), buffer_.end(),
-        hosts_field{address.ip(), address.port()});
+        hosts_field{address.ip, address.port});
     if (it == buffer_.end())
     {
         handle_remove(error::not_found);
@@ -186,7 +186,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
     }
 
     size_t index = rand() % buffer_.size();
-    message::network_address address(0, 0, buffer_[index].ip, buffer_[index].port);
+    message::network_address address{ 0, 0, buffer_[index].ip, buffer_[index].port };
     handle_fetch(std::error_code(), address);
 }
 

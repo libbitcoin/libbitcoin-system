@@ -25,40 +25,10 @@
 namespace libbitcoin {
 namespace message {
 
-block_locator& get_blocks::start_hashes()
-{
-    return start_hashes_;
-}
-
-const block_locator& get_blocks::start_hashes() const
-{
-    return start_hashes_;
-}
-
-void get_blocks::start_hashes(const block_locator& value)
-{
-    start_hashes_ = value;
-}
-
-hash_digest& get_blocks::hash_stop()
-{
-    return hash_stop_;
-}
-
-const hash_digest& get_blocks::hash_stop() const
-{
-    return hash_stop_;
-}
-
-void get_blocks::hash_stop(const hash_digest& value)
-{
-    hash_stop_ = value;
-}
-
 void get_blocks::reset()
 {
-    start_hashes_.clear();
-    hash_stop_.fill(0);
+    start_hashes.clear();
+    hash_stop.fill(0);
 }
 
 bool get_blocks::from_data(const data_chunk& data)
@@ -82,13 +52,13 @@ bool get_blocks::from_data(std::istream& stream)
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
-        start_hashes_.push_back(read_hash(stream));
+        start_hashes.push_back(read_hash(stream));
         result = !stream.fail();
     }
 
     if (result)
     {
-        hash_stop_ = read_hash(stream);
+        hash_stop = read_hash(stream);
         result = !stream.fail();
     }
 
@@ -105,14 +75,14 @@ data_chunk get_blocks::to_data() const
 
     serial.write_4_bytes(protocol_version);
 
-    serial.write_variable_uint(start_hashes_.size());
+    serial.write_variable_uint(start_hashes.size());
 
-    for (hash_digest start_hash: start_hashes_)
+    for (hash_digest start_hash: start_hashes)
     {
         serial.write_hash(start_hash);
     }
 
-    serial.write_hash(hash_stop_);
+    serial.write_hash(hash_stop);
 
     return result;
 }
@@ -120,8 +90,8 @@ data_chunk get_blocks::to_data() const
 uint64_t get_blocks::satoshi_size() const
 {
     return 36 +
-        variable_uint_size(start_hashes_.size()) +
-        hash_size * start_hashes_.size();
+        variable_uint_size(start_hashes.size()) +
+        hash_size * start_hashes.size();
 }
 
 } // end message

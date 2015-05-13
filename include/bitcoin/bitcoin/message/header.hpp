@@ -34,24 +34,14 @@ class BC_API header
 {
 public:
 
-    uint32_t magic() const;
+    // public members
+    uint32_t magic;
+    std::string command;
+    uint32_t payload_length;
+    // Ignored by version and verack commands
+    uint32_t checksum;
 
-    void magic(const uint32_t value);
-
-    std::string& command();
-
-    const std::string& command() const;
-
-    void command(const std::string& value);
-
-    uint32_t payload_length() const;
-
-    void payload_length(const uint32_t value);
-
-    uint32_t checksum() const;
-
-    void checksum(const uint32_t value);
-
+    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);
@@ -61,14 +51,6 @@ public:
     void reset();
 
     uint64_t satoshi_size() const;
-
-private:
-
-    uint32_t magic_;
-    std::string command_;
-    uint32_t payload_length_;
-    // Ignored by version and verack commands
-    uint32_t checksum_;
 };
 
 } // end message

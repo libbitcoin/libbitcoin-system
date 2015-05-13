@@ -39,22 +39,24 @@ handshake::handshake(threadpool& pool)
   : strand_(pool.service())
 {
     // Setup template version packet with defaults
-    template_version_.version(protocol_version);
-    template_version_.services(1);
+    template_version_.version = protocol_version;
+    template_version_.services = 1;
     // non-constant field
     //template_version_.timestamp = time(NULL);
-    template_version_.address_me().services(template_version_.services());
-    template_version_.address_me().ip(localhost_ip());
-    template_version_.address_me().port(protocol_port);
-    template_version_.address_you().services(template_version_.services());
-    template_version_.address_you().ip(
-        message::ip_address{{
+    template_version_.address_me.services = template_version_.services;
+    template_version_.address_me.ip = localhost_ip();
+    template_version_.address_me.port = protocol_port;
+    template_version_.address_you.services = template_version_.services;
+    template_version_.address_you.ip = message::ip_address{
+        {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01}});
-    template_version_.address_you().port(protocol_port);
-    template_version_.user_agent("/libbitcoin:" LIBBITCOIN_VERSION "/");
-    template_version_.start_height(0);
-    template_version_.nonce(rand());
+            0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01
+        }
+    };
+    template_version_.address_you.port = protocol_port;
+    template_version_.user_agent = "/libbitcoin:" LIBBITCOIN_VERSION "/";
+    template_version_.start_height = 0;
+    template_version_.nonce = rand();
 }
 
 void handshake::start(start_handler handle_start)
@@ -68,7 +70,7 @@ void handshake::ready(channel_ptr node,
     auto completion_callback = async_parallel(handle_handshake, 3);
 
     message::announce_version session_version = template_version_;
-    session_version.timestamp(time(NULL));
+    session_version.timestamp = time(NULL);
     node->send(session_version,
         strand_.wrap(std::bind(&handshake::handle_message_sent,
             this, _1, completion_callback)));
@@ -139,7 +141,7 @@ void handshake::fetch_network_address(
 void handshake::do_fetch_network_address(
     fetch_network_address_handler handle_fetch)
 {
-    handle_fetch(std::error_code(), template_version_.address_me());
+    handle_fetch(std::error_code(), template_version_.address_me);
 }
 
 void handshake::set_port(uint16_t port, setter_handler handle_set)
@@ -150,7 +152,7 @@ void handshake::set_port(uint16_t port, setter_handler handle_set)
 }
 void handshake::do_set_port(uint16_t port, setter_handler handle_set)
 {
-    template_version_.address_me().port(port);
+    template_version_.address_me.port = port;
     handle_set(std::error_code());
 }
 
@@ -164,7 +166,7 @@ void handshake::set_user_agent(const std::string& user_agent,
 void handshake::do_set_user_agent(const std::string& user_agent,
     setter_handler handle_set)
 {
-    template_version_.user_agent(user_agent);
+    template_version_.user_agent = user_agent;
     handle_set(std::error_code());
 }
 
@@ -176,7 +178,7 @@ void handshake::set_start_height(uint32_t height, setter_handler handle_set)
 }
 void handshake::do_set_start_height(uint32_t height, setter_handler handle_set)
 {
-    template_version_.start_height(height);
+    template_version_.start_height = height;
     handle_set(std::error_code());
 }
 

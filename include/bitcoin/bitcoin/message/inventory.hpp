@@ -36,10 +36,10 @@ public:
 
     static const std::string satoshi_command;
 
-    inventory_list& inventories();
+    // public members
+    inventory_list inventories;
 
-    const inventory_list& inventories() const;
-
+    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);
@@ -49,10 +49,6 @@ public:
     void reset();
 
     uint64_t satoshi_size() const;
-
-private:
-
-    inventory_list inventories_;
 };
 
 } // end message
