@@ -35,21 +35,10 @@ class BC_API block
 {
 public:
 
-    block();
-
-    block(const block_header& header, const transaction_list& transactions);
-
     static const std::string satoshi_command;
 
-    block_header& header();
-
-    const block_header& header() const;
-
-    void header(const block_header& header);
-
-    transaction_list& transactions();
-
-    const transaction_list& transactions() const;
+    block_header header;
+    transaction_list transactions;
 
     bool from_data(const data_chunk& data);
 
@@ -63,11 +52,6 @@ public:
 
     static hash_digest generate_merkle_root(
         const transaction_list& transactions);
-
-private:
-
-    block_header header_;
-    transaction_list transactions_;
 };
 
 // A list of indices. Used for creating block_locator objects or

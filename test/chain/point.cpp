@@ -40,10 +40,10 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
     chain::point point;
     BOOST_REQUIRE(point.from_data(rawdata));
 
-    BOOST_REQUIRE_EQUAL(encode_hash(point.hash()),
+    BOOST_REQUIRE_EQUAL(encode_hash(point.hash),
         "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
 
-    BOOST_REQUIRE(point.index() == 0);
+    BOOST_REQUIRE(point.index == 0);
 
     data_chunk output = point.to_data();
     BOOST_REQUIRE(output == rawdata);

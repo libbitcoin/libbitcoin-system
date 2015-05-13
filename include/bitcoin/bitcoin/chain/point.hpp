@@ -35,21 +35,8 @@ class BC_API point
 {
 public:
 
-    point();
-
-    point(hash_digest hash, uint32_t index);
-
-    hash_digest& hash();
-
-    const hash_digest& hash() const;
-
-    void hash(const hash_digest& hash);
-
-    uint32_t index() const;
-
-    void index(uint32_t index);
-
-    std::string to_string() const;
+    hash_digest hash;
+    uint32_t index;
 
     bool is_null() const;
 
@@ -59,16 +46,13 @@ public:
 
     data_chunk to_data() const;
 
+    std::string to_string() const;
+
     void reset();
 
     uint64_t satoshi_size() const;
 
     static uint64_t satoshi_fixed_size();
-
-private:
-
-    hash_digest hash_;
-    uint32_t index_;
 };
 
 typedef std::vector<point> point_list;

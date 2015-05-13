@@ -42,62 +42,34 @@ static const data_chunk stack_true_value{1};
 
 constexpr size_t op_counter_limit = 201;
 
-script::script()
-    : operations_()
-{
-}
-
-script::script(const operation& op)
-    : script()
-{
-    operations_.push_back(op);
-}
-
-script::script(const operation_stack& operations)
-    : script()
-{
-    operations_.insert(operations_.end(), operations.begin(),
-        operations.end());
-}
-
-operation_stack& script::operations()
-{
-    return operations_;
-}
-
-const operation_stack& script::operations() const
-{
-    return operations_;
-}
-
 payment_type script::type() const
 {
-    if (is_pubkey_type(operations_))
+    if (is_pubkey_type(operations))
         return payment_type::pubkey;
-    if (is_pubkey_hash_type(operations_))
+    if (is_pubkey_hash_type(operations))
         return payment_type::pubkey_hash;
-    if (is_script_hash_type(operations_))
+    if (is_script_hash_type(operations))
         return payment_type::script_hash;
-    if (is_stealth_info_type(operations_))
+    if (is_stealth_info_type(operations))
         return payment_type::stealth_info;
-    if (is_multisig_type(operations_))
+    if (is_multisig_type(operations))
         return payment_type::multisig;
-    if (is_pubkey_hash_sig_type(operations_))
+    if (is_pubkey_hash_sig_type(operations))
         return payment_type::pubkey_hash_sig;
-    if (is_script_code_sig_type(operations_))
+    if (is_script_code_sig_type(operations))
         return payment_type::script_code_sig;
     return payment_type::non_standard;
 }
 
 bool script::is_raw_data() const
 {
-    return (operations_.size() == 1) &&
-        (operations_[0].code() == opcode::raw_data);
+    return (operations.size() == 1) &&
+        (operations[0].code == opcode::raw_data);
 }
 
 void script::reset()
 {
-    operations_.clear();
+    operations.clear();
 }
 
 bool script::from_data(const data_chunk& data, bool with_length_prefix,
@@ -162,14 +134,14 @@ data_chunk script::to_data(bool with_length_prefix) const
         serial.write_variable_uint(satoshi_content_size());
     }
 
-    if ((operations_.size() > 0) &&
-        (operations_[0].code() == opcode::raw_data))
+    if ((operations.size() > 0) &&
+        (operations[0].code == opcode::raw_data))
     {
-        serial.write_data(operations_[0].to_data());
+        serial.write_data(operations[0].to_data());
     }
     else
     {
-        for (const operation& op: operations_)
+        for (const operation& op: operations)
         {
             serial.write_data(op.to_data());
         }
@@ -182,13 +154,13 @@ uint64_t script::satoshi_content_size() const
 {
     uint64_t size = 0;
 
-    if (operations_.size() > 0 && (operations_[0].code() == opcode::raw_data))
+    if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
     {
-        size = operations_[0].satoshi_size();
+        size = operations[0].satoshi_size();
     }
     else
     {
-        for (const operation& op: operations_)
+        for (const operation& op: operations)
         {
             size += op.satoshi_size();
         }
@@ -210,7 +182,7 @@ uint64_t script::satoshi_size(bool with_length_prefix) const
 bool script::from_string(const std::string& human_readable)
 {
     // clear current contents
-    operations_.clear();
+    operations.clear();
 
     const auto tokens = split(human_readable);
     bool clear = false;
@@ -251,14 +223,12 @@ bool script::from_string(const std::string& human_readable)
             code = string_to_opcode(*token);
         }
 
-        operations_.push_back(operation(code, data));
+        operations.push_back(operation{ code, data });
     }
 
+    // empty invalid/failed parse content
     if (clear)
-    {
-        // empty invalid/failed parse content
-        operations_.clear();
-    }
+        operations.clear();
 
     return !clear;
 }
@@ -267,9 +237,9 @@ std::string script::to_string() const
 {
     std::ostringstream ss;
 
-    for (auto it = operations_.begin(); it != operations_.end(); ++it)
+    for (auto it = operations.begin(); it != operations.end(); ++it)
     {
-        if (it != operations_.begin())
+        if (it != operations.begin())
             ss << " ";
 
         ss << (*it).to_string();
@@ -288,10 +258,10 @@ bool script::deserialize(const data_chunk& raw_script,
         successful_parse = true;
 
         // recognize as raw data
-        operations_.clear();
+        operations.clear();
 
-        operations_.push_back(
-            operation(opcode::raw_data, to_data_chunk(raw_script)));
+        operations.push_back(
+            operation{ opcode::raw_data, to_data_chunk(raw_script) });
     }
 
     return successful_parse;
@@ -310,7 +280,7 @@ bool script::parse(const data_chunk& raw_script)
         {
             operation op;
             success = op.from_data(host.stream);
-            operations_.push_back(op);
+            operations.push_back(op);
         }
 
         success &= !host.stream.fail();
@@ -321,8 +291,12 @@ bool script::parse(const data_chunk& raw_script)
 
 inline hash_digest one_hash()
 {
-    return hash_digest{{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+    return hash_digest{
+        {
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        }
+    };
 }
 
 inline void nullify_input_sequences(transaction_input_list& inputs,
@@ -331,7 +305,7 @@ inline void nullify_input_sequences(transaction_input_list& inputs,
     for (size_t i = 0; i < inputs.size(); ++i)
     {
         if (i != except_input)
-            inputs[i].sequence(0);
+            inputs[i].sequence = 0;
     }
 }
 
@@ -340,16 +314,16 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
 {
     // This is NOT considered an error result and callers should not test
     // for one_hash. This is a bitcoind bug we perpetuate.
-    if (input_index >= parent_tx.inputs().size())
+    if (input_index >= parent_tx.inputs.size())
         return one_hash();
 
     // FindAndDelete(OP_CODESEPARATOR) done in op_checksigverify(...)
 
     // Blank all other inputs' signatures
-    for (transaction_input& input : parent_tx.inputs())
-        input.script(script());
+    for (transaction_input& input : parent_tx.inputs)
+        input.script.reset();
 
-    parent_tx.inputs()[input_index].script(script_code);
+    parent_tx.inputs[input_index].script = script_code;
 
     // The default sighash::all signs all outputs, and the current input.
     // Transaction cannot be updated without resigning the input.
@@ -358,14 +332,14 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // sighash::none signs no outputs so they can be changed.
     if ((hash_type & 0x1f) == signature_hash_algorithm::none)
     {
-        parent_tx.outputs().clear();
-        nullify_input_sequences(parent_tx.inputs(), input_index);
+        parent_tx.outputs.clear();
+        nullify_input_sequences(parent_tx.inputs, input_index);
     }
     // Sign the single corresponding output to our index.
     // We don't care about additional inputs or outputs to the tx.
     else if ((hash_type & 0x1f) == signature_hash_algorithm::single)
     {
-        transaction_output_list& outputs = parent_tx.outputs();
+        transaction_output_list& outputs = parent_tx.outputs;
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
@@ -378,18 +352,18 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
         // Loop through outputs except the last one
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
-            it->value(std::numeric_limits<uint64_t>::max());
-            it->script(script());
+            it->value = std::numeric_limits<uint64_t>::max();
+            it->script.reset();
         }
 
-        nullify_input_sequences(parent_tx.inputs(), input_index);
+        nullify_input_sequences(parent_tx.inputs, input_index);
     }
 
     // Modifier to ignore the other inputs except our own.
     if (hash_type & signature_hash_algorithm::anyone_can_pay)
     {
-        parent_tx.inputs()[0] = parent_tx.inputs()[input_index];
-        parent_tx.inputs().resize(1);
+        parent_tx.inputs[0] = parent_tx.inputs[input_index];
+        parent_tx.inputs.resize(1);
     }
 
     return parent_tx.hash(hash_type);
@@ -1267,14 +1241,14 @@ bool op_checksigverify(evaluation_context& context, const script& script,
 
     chain::script script_code;
 
-    for (auto it = context.codehash_begin; it != script.operations().end(); ++it)
+    for (auto it = context.codehash_begin; it != script.operations.end(); ++it)
     {
         const operation op = *it;
 
-        if (op.data() == signature || op.code() == opcode::codeseparator)
+        if (op.data == signature || op.code == opcode::codeseparator)
             continue;
 
-        script_code.operations().push_back(op);
+        script_code.operations.push_back(op);
     }
 
     return script::check_signature(
@@ -1354,17 +1328,17 @@ bool op_checkmultisigverify(evaluation_context& context, const script& script,
 
     chain::script script_code;
 
-    for (auto it = context.codehash_begin; it != script.operations().end(); ++it)
+    for (auto it = context.codehash_begin; it != script.operations.end(); ++it)
     {
         const operation op = *it;
 
-        if (op.code() == opcode::codeseparator)
+        if (op.code == opcode::codeseparator)
             continue;
 
-        if (is_signature(op.data()))
+        if (is_signature(op.data))
             continue;
 
-        script_code.operations().push_back(op);
+        script_code.operations.push_back(op);
     }
 
     // When checking the signatures against our public keys,
@@ -1408,14 +1382,14 @@ bool op_checkmultisig(evaluation_context& context, const script& script,
 bool run_operation(const operation& op, const transaction& parent_tx,
     uint32_t input_index, const script& script, evaluation_context& context)
 {
-    switch (op.code())
+    switch (op.code)
     {
         case opcode::zero:
         case opcode::special:
         case opcode::pushdata1:
         case opcode::pushdata2:
         case opcode::pushdata4:
-            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
                 "Invalid push operation in run_operation");
             return true;
 
@@ -1441,7 +1415,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::op_14:
         case opcode::op_15:
         case opcode::op_16:
-            return op_x(context, op.code());
+            return op_x(context, op.code);
 
         case opcode::nop:
             return true;
@@ -1457,7 +1431,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         case opcode::verif:
         case opcode::vernotif:
-            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
                 "Disabled opcodes (verif/vernotif) in run_operation");
             return false;
 
@@ -1531,7 +1505,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::substr:
         case opcode::left:
         case opcode::right:
-            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
                 "Disabled splice operations in run_operation");
             return false;
 
@@ -1545,7 +1519,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::and_:
         case opcode::or_:
         case opcode::xor_:
-            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
                 "Disabled bit logic operations in run_operation");
             return false;
 
@@ -1567,7 +1541,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         case opcode::op_2mul:
         case opcode::op_2div:
-            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
                 "Disabled opcodes (2mul/2div) in run_operation");
             return false;
 
@@ -1594,7 +1568,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::mod:
         case opcode::lshift:
         case opcode::rshift:
-            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
                 "Disabled numeric operations in run_operation");
             return false;
 
@@ -1653,7 +1627,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
             // This is set in the main run(...) loop
             // codehash_begin_ is updated to the current
             // operations_ iterator
-            BITCOIN_ASSERT_MSG(op.code() == opcode::bad_operation,
+            BITCOIN_ASSERT_MSG(op.code == opcode::bad_operation,
                 "Invalid operation (codeseparator) in run_operation");
             return true;
 
@@ -1686,7 +1660,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
 
         default:
             log_fatal(LOG_SCRIPT) << "Unimplemented operation <none "
-                << static_cast<int>(op.code()) << ">";
+                << static_cast<int>(op.code) << ">";
             return false;
     }
     return false;
@@ -1743,35 +1717,35 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
 {
     const operation& op = *it;
 
-    if (op.data().size() > 520)
+    if (op.data.size() > 520)
         return false;
 
-    if (!increment_op_counter(op.code(), context))
+    if (!increment_op_counter(op.code, context))
         return false;
 
-    if (opcode_is_disabled(op.code()))
+    if (opcode_is_disabled(op.code))
         return false;
 
     bool allow_execution = !context.conditional.has_failed_branches();
 
     // continue onwards to next command.
-    if (!allow_execution && !is_condition_opcode(op.code()))
+    if (!allow_execution && !is_condition_opcode(op.code))
         return true;
 
     // push data to the stack
-    if (op.code() == opcode::zero)
+    if (op.code == opcode::zero)
         context.primary.push_back(data_chunk());
 
     // These operations may also push empty data (opcode zero)
     // Hence we check the opcode over the shorter !op.data.empty()
-    else if (op.code() == opcode::special
-        || op.code() == opcode::pushdata1
-        || op.code() == opcode::pushdata2
-        || op.code() == opcode::pushdata4)
+    else if (op.code == opcode::special
+        || op.code == opcode::pushdata1
+        || op.code == opcode::pushdata2
+        || op.code == opcode::pushdata4)
     {
-        context.primary.push_back(op.data());
+        context.primary.push_back(op.data);
     }
-    else if (op.code() == opcode::codeseparator)
+    else if (op.code == opcode::codeseparator)
         context.codehash_begin = it;
     // opcodes above should assert 9;,sinside run_operation
     else if (!run_operation(op, parent_tx, input_index, script, context))
@@ -1795,9 +1769,9 @@ bool evaluate(const transaction& parent_tx, uint32_t input_index,
 
     context.operation_counter = 0;
 
-    context.codehash_begin = script.operations().begin();
+    context.codehash_begin = script.operations.begin();
 
-    for (auto it = script.operations().begin(); it != script.operations().end(); ++it)
+    for (auto it = script.operations.begin(); it != script.operations.end(); ++it)
     {
         if (!next_step(parent_tx, input_index, it, script, context))
             return false;
@@ -1828,7 +1802,7 @@ bool script::verify(const script& input_script, const script& output_script,
     // Additional validation for spend-to-script-hash transactions
     if (bip16_enabled && (output_script.type() == payment_type::script_hash))
     {
-        if (!is_push_only(input_script.operations()))
+        if (!is_push_only(input_script.operations))
             return false;
 
         // Load last input_script stack item as a script

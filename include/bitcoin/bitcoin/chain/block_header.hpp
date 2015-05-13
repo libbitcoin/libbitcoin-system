@@ -34,38 +34,12 @@ class BC_API block_header
 {
 public:
 
-    block_header();
-
-    block_header(uint32_t version, hash_digest previous_block_hash,
-        hash_digest merkle, uint32_t timestamp, uint32_t bits, uint32_t nonce);
-
-    uint32_t version() const;
-
-    void version(uint32_t version);
-
-    hash_digest& previous_block_hash();
-
-    const hash_digest& previous_block_hash() const;
-
-    void previous_block_hash(const hash_digest& hash);
-
-    hash_digest& merkle();
-
-    const hash_digest& merkle() const;
-
-    void merkle(const hash_digest& merkle);
-
-    uint32_t timestamp() const;
-
-    void timestamp(uint32_t timestamp);
-
-    uint32_t bits() const;
-
-    void bits(uint32_t bits);
-
-    uint32_t nonce() const;
-
-    void nonce(uint32_t nonce);
+    uint32_t version;
+    hash_digest previous_block_hash;
+    hash_digest merkle;
+    uint32_t timestamp;
+    uint32_t bits;
+    uint32_t nonce;
 
     bool from_data(const data_chunk& data);
 
@@ -80,15 +54,6 @@ public:
     uint64_t satoshi_size() const;
 
     static uint64_t satoshi_fixed_size();
-
-private:
-
-    uint32_t version_;
-    hash_digest previous_block_hash_;
-    hash_digest merkle_;
-    uint32_t timestamp_;
-    uint32_t bits_;
-    uint32_t nonce_;
 };
 
 BC_API bool operator==(const block_header& block_a,

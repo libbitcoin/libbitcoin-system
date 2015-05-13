@@ -46,15 +46,7 @@ class BC_API script
 {
 public:
 
-    script();
-
-    script(const operation& op);
-
-    script(const operation_stack& operations);
-
-    operation_stack& operations();
-
-    const operation_stack& operations() const;
+    operation_stack operations;
 
     payment_type type() const;
 
@@ -102,8 +94,6 @@ private:
     bool deserialize(const data_chunk& raw_script, bool allow_raw_data_fallback);
 
     bool parse(const data_chunk& raw_script);
-
-    operation_stack operations_;
 };
 
 } // end chain
