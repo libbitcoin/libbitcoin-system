@@ -37,29 +37,12 @@ class BC_API transaction
 {
 public:
 
-    transaction();
-
-    transaction(const uint32_t version, const uint32_t locktime,
-        const transaction_input_list& inputs,
-        const transaction_output_list& outputs);
-
     static const std::string satoshi_command;
 
-    uint32_t version() const;
-
-    void version(uint32_t version);
-
-    uint32_t locktime() const;
-
-    void locktime(uint32_t locktime);
-
-    transaction_input_list& inputs();
-
-    const transaction_input_list& inputs() const;
-
-    transaction_output_list& outputs();
-
-    const transaction_output_list& outputs() const;
+    uint32_t version;
+    uint32_t locktime;
+    transaction_input_list inputs;
+    transaction_output_list outputs;
 
     bool from_data(const data_chunk& data);
 
@@ -87,13 +70,6 @@ public:
     uint64_t satoshi_size() const;
 
     static uint64_t satoshi_fixed_size();
-
-private:
-
-    uint32_t version_;
-    uint32_t locktime_;
-    transaction_input_list inputs_;
-    transaction_output_list outputs_;
 };
 
 typedef std::vector<transaction> transaction_list;

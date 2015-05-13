@@ -34,19 +34,8 @@ class BC_API transaction_output
 {
 public:
 
-    transaction_output();
-
-    transaction_output(uint64_t value, const chain::script& script);
-
-    chain::script& script();
-
-    const chain::script& script() const;
-
-    void script(const chain::script& script);
-
-    uint64_t value() const;
-
-    void value(const uint64_t value);
+    uint64_t value;
+    chain::script script;
 
     bool from_data(const data_chunk& data);
 
@@ -61,11 +50,6 @@ public:
     uint64_t satoshi_size() const;
 
     static uint64_t satoshi_fixed_size();
-
-private:
-
-    uint64_t value_;
-    chain::script script_;
 };
 
 typedef std::vector<transaction_output> transaction_output_list;

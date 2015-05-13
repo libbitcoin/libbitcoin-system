@@ -26,62 +26,11 @@
 namespace libbitcoin {
 namespace chain {
 
-transaction_input::transaction_input()
-    : previous_output_(), script_(), sequence_(0)
-{
-}
-
-transaction_input::transaction_input(const output_point& previous_output,
-    const chain::script& script, const uint32_t sequence)
-    : previous_output_(previous_output), script_(script), sequence_(sequence)
-{
-}
-
-output_point& transaction_input::previous_output()
-{
-    return previous_output_;
-}
-
-const output_point& transaction_input::previous_output() const
-{
-    return previous_output_;
-}
-
-void transaction_input::previous_output(const output_point& previous)
-{
-    previous_output_ = previous;
-}
-
-chain::script& transaction_input::script()
-{
-    return script_;
-}
-
-const chain::script& transaction_input::script() const
-{
-    return script_;
-}
-
-void transaction_input::script(const chain::script& script)
-{
-    script_ = script;
-}
-
-uint32_t transaction_input::sequence() const
-{
-    return sequence_;
-}
-
-void transaction_input::sequence(const uint32_t sequence)
-{
-    sequence_ = sequence;
-}
-
 void transaction_input::reset()
 {
-    previous_output_.reset();
-    script_.reset();
-    sequence_ = 0;
+    previous_output.reset();
+    script.reset();
+    sequence = 0;
 }
 
 bool transaction_input::from_data(const data_chunk& data)
@@ -96,17 +45,17 @@ bool transaction_input::from_data(std::istream& stream)
 
     reset();
 
-    result = previous_output_.from_data(stream);
+    result = previous_output.from_data(stream);
 
     if (result)
     {
-//        if (previous_output_.is_null())
-        result = script_.from_data(stream, true);
+        // note: removed branch on previous_output.is_null() adding parse attempt cost.
+        result = script.from_data(stream, true);
     }
 
     if (result)
     {
-        sequence_ = read_4_bytes(stream);
+        sequence = read_4_bytes(stream);
         result = !stream.fail();
     }
 
@@ -121,10 +70,10 @@ data_chunk transaction_input::to_data() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_data(previous_output_.to_data());
-    data_chunk raw_script = script_.to_data(true);
+    serial.write_data(previous_output.to_data());
+    data_chunk raw_script = script.to_data(true);
     serial.write_data(raw_script);
-    serial.write_4_bytes(sequence_);
+    serial.write_4_bytes(sequence);
 
     BITCOIN_ASSERT(std::distance(result.begin(), serial.iterator()) == satoshi_size());
 
@@ -133,25 +82,24 @@ data_chunk transaction_input::to_data() const
 
 uint64_t transaction_input::satoshi_size() const
 {
-    uint64_t script_size = script_.satoshi_size(true);
-
-    return 4 + previous_output_.satoshi_size() + script_size;
+    uint64_t script_size = script.satoshi_size(true);
+    return 4 + previous_output.satoshi_size() + script_size;
 }
 
 std::string transaction_input::to_string() const
 {
     std::ostringstream ss;
 
-    ss << previous_output_.to_string() << "\n"
-        << "\t" << script_.to_string() << "\n"
-        << "\tsequence = " << sequence_ << "\n";
+    ss << previous_output.to_string() << "\n"
+        << "\t" << script.to_string() << "\n"
+        << "\tsequence = " << sequence << "\n";
 
     return ss.str();
 }
 
 bool transaction_input::is_final() const
 {
-    return (sequence_ == max_sequence);
+    return (sequence == max_sequence);
 }
 
 } // end chain

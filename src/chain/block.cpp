@@ -26,44 +26,10 @@
 namespace libbitcoin {
 namespace chain {
 
-block::block()
-{
-}
-
-block::block(const block_header& header, const transaction_list& transactions)
-    : header_(header), transactions_(transactions)
-{
-}
-
-block_header& block::header()
-{
-    return header_;
-}
-
-const block_header& block::header() const
-{
-    return header_;
-}
-
-void block::header(const block_header& header)
-{
-    header_ = header;
-}
-
-transaction_list& block::transactions()
-{
-    return transactions_;
-}
-
-const transaction_list& block::transactions() const
-{
-    return transactions_;
-}
-
 void block::reset()
 {
-    header_.reset();
-    transactions_.clear();
+    header.reset();
+    transactions.clear();
 }
 
 bool block::from_data(const data_chunk& data)
@@ -78,7 +44,7 @@ bool block::from_data(std::istream& stream)
 
     reset();
 
-    result = header_.from_data(stream);
+    result = header.from_data(stream);
 
     uint64_t tx_count = read_variable_uint(stream);
     result &= !stream.fail();
@@ -88,7 +54,7 @@ bool block::from_data(std::istream& stream)
         transaction tx;
         result = tx.from_data(stream);
         result &= !stream.fail();
-        transactions_.push_back(std::move(tx));
+        transactions.push_back(std::move(tx));
     }
 
     if (!result)
@@ -102,11 +68,11 @@ data_chunk block::to_data() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    serial.write_data(header_.to_data());
+    serial.write_data(header.to_data());
 
-    serial.write_variable_uint(transactions_.size());
+    serial.write_variable_uint(transactions.size());
 
-    for (const transaction& tx : transactions_)
+    for (const transaction& tx : transactions)
         serial.write_data(tx.to_data());
 
     return result;
@@ -114,10 +80,10 @@ data_chunk block::to_data() const
 
 uint64_t block::satoshi_size() const
 {
-    uint64_t block_size = header_.satoshi_size()
-        + variable_uint_size(transactions_.size());
+    uint64_t block_size = header.satoshi_size()
+        + variable_uint_size(transactions.size());
 
-    for (const transaction& tx : transactions_)
+    for (const transaction& tx : transactions)
         block_size += tx.satoshi_size();
 
     return block_size;

@@ -28,39 +28,10 @@
 namespace libbitcoin {
 namespace chain {
 
-operation::operation()
-{
-}
-
-operation::operation(const opcode code, const data_chunk& data)
-    : code_(code), data_(data)
-{
-}
-
-opcode operation::code() const
-{
-    return code_;
-}
-
-void operation::code(const opcode code)
-{
-    code_ = code;
-}
-
-const data_chunk& operation::data() const
-{
-    return data_;
-}
-
-void operation::data(const data_chunk& data)
-{
-    data_ = data;
-}
-
 void operation::reset()
 {
-    code_ = opcode::zero;
-    data_.clear();
+    code = opcode::zero;
+    data.clear();
 }
 
 bool operation::from_data(const data_chunk& data)
@@ -78,20 +49,20 @@ bool operation::from_data(std::istream& stream)
     uint8_t raw_byte = read_byte(stream);
     result = !stream.fail();
 
-    code_ = static_cast<opcode>(raw_byte);
-    result &= (raw_byte != 0 || code_ == opcode::zero);
+    code = static_cast<opcode>(raw_byte);
+    result &= (raw_byte != 0 || code == opcode::zero);
 
     if (0 < raw_byte && raw_byte <= 75)
-        code_ = opcode::special;
+        code = opcode::special;
 
-    if (result && operation::must_read_data(code_))
+    if (result && operation::must_read_data(code))
     {
         uint64_t read_n_bytes =
-            read_opcode_data_byte_count(code_, raw_byte, stream);
+            read_opcode_data_byte_count(code, raw_byte, stream);
 
-        data_ = read_data(stream, read_n_bytes);
+        data = read_data(stream, read_n_bytes);
 
-        result = !stream.fail() && (read_n_bytes || data_.empty());
+        result = !stream.fail() && (read_n_bytes || data.empty());
     }
 
     if (!result)
@@ -105,29 +76,29 @@ data_chunk operation::to_data() const
     data_chunk result(satoshi_size());
     auto serial = make_serializer(result.begin());
 
-    if (code_ != opcode::raw_data)
+    if (code != opcode::raw_data)
     {
-        uint8_t raw_byte = static_cast<uint8_t>(code_);
+        uint8_t raw_byte = static_cast<uint8_t>(code);
 
-        if (code_ == opcode::special)
-            raw_byte = static_cast<uint8_t>(data_.size());
+        if (code == opcode::special)
+            raw_byte = static_cast<uint8_t>(data.size());
 
         serial.write_byte(raw_byte);
 
-        switch (code_)
+        switch (code)
         {
             case opcode::pushdata1:
-                serial.write_byte(static_cast<uint8_t>(data_.size()));
+                serial.write_byte(static_cast<uint8_t>(data.size()));
                 break;
 
             case opcode::pushdata2:
                 serial.write_little_endian(static_cast<uint16_t>(
-                    data_.size()));
+                    data.size()));
                 break;
 
             case opcode::pushdata4:
                 serial.write_little_endian(static_cast<uint32_t>(
-                    data_.size()));
+                    data.size()));
                 break;
 
             default:
@@ -135,17 +106,16 @@ data_chunk operation::to_data() const
         }
     }
 
-    serial.write_data(data_);
-
+    serial.write_data(data);
 
     return result;
 }
 
 uint64_t operation::satoshi_size() const
 {
-    uint64_t size = 1 + data_.size();
+    uint64_t size = 1 + data.size();
 
-    switch (code_)
+    switch (code)
     {
         case opcode::pushdata1:
             size += 1;
@@ -175,10 +145,10 @@ std::string operation::to_string() const
 {
     std::ostringstream ss;
 
-    if (data_.empty())
-        ss << opcode_to_string(code_);
+    if (data.empty())
+        ss << opcode_to_string(code);
     else
-        ss << "[ " << encode_base16(data_) << " ]";
+        ss << "[ " << encode_base16(data) << " ]";
 
     return ss.str();
 }
@@ -242,7 +212,7 @@ bool is_push(const opcode code)
 uint64_t count_non_push(const operation_stack& operations)
 {
     return std::count_if(operations.begin(), operations.end(),
-        [](const operation& op) { return !is_push(op.code()); });
+        [](const operation& op) { return !is_push(op.code); });
 }
 
 bool is_push_only(const operation_stack& operations)
@@ -253,36 +223,36 @@ bool is_push_only(const operation_stack& operations)
 bool is_pubkey_type(const operation_stack& ops)
 {
     return ops.size() == 2 &&
-        ops[0].code() == opcode::special &&
-        ops[1].code() == opcode::checksig;
+        ops[0].code == opcode::special &&
+        ops[1].code == opcode::checksig;
 }
 
 bool is_pubkey_hash_type(const operation_stack& ops)
 {
     return ops.size() == 5 &&
-        ops[0].code() == opcode::dup &&
-        ops[1].code() == opcode::hash160 &&
-        ops[2].code() == opcode::special &&
-        ops[2].data().size() == 20 &&
-        ops[3].code() == opcode::equalverify &&
-        ops[4].code() == opcode::checksig;
+        ops[0].code == opcode::dup &&
+        ops[1].code == opcode::hash160 &&
+        ops[2].code == opcode::special &&
+        ops[2].data.size() == 20 &&
+        ops[3].code == opcode::equalverify &&
+        ops[4].code == opcode::checksig;
 }
 
 bool is_script_hash_type(const operation_stack& ops)
 {
     return ops.size() == 3 &&
-        ops[0].code() == opcode::hash160 &&
-        ops[1].code() == opcode::special &&
-        ops[1].data().size() == 20 &&
-        ops[2].code() == opcode::equal;
+        ops[0].code == opcode::hash160 &&
+        ops[1].code == opcode::special &&
+        ops[1].data.size() == 20 &&
+        ops[2].code == opcode::equal;
 }
 
 bool is_stealth_info_type(const operation_stack& ops)
 {
     return ops.size() == 2 &&
-        ops[0].code() == opcode::return_ &&
-        ops[1].code() == opcode::special &&
-        ops[1].data().size() >= hash_size;
+        ops[0].code == opcode::return_ &&
+        ops[1].code == opcode::special &&
+        ops[1].data.size() >= hash_size;
 }
 
 bool is_multisig_type(const operation_stack&)
@@ -294,7 +264,7 @@ bool is_pubkey_hash_sig_type(const operation_stack& ops)
 {
     if (ops.size() != 2 || !is_push_only(ops))
         return false;
-    const ec_point& last_data = ops.back().data();
+    const ec_point& last_data = ops.back().data;
     return verify_public_key_fast(last_data);
 }
 
@@ -303,7 +273,7 @@ bool is_script_code_sig_type(const operation_stack& ops)
     if (ops.size() < 2 || !is_push_only(ops))
         return false;
 
-    const data_chunk& last_data = ops.back().data();
+    const data_chunk& last_data = ops.back().data;
 
     if (last_data.empty())
         return false;
@@ -318,9 +288,9 @@ bool is_script_code_sig_type(const operation_stack& ops)
 
     // Minimum size is 4
     // M [SIG]... N checkmultisig
-    return script_code.operations().size() >= 4 &&
-        count_non_push(script_code.operations()) == 1 &&
-        script_code.operations().back().code() == opcode::checkmultisig;
+    return script_code.operations.size() >= 4 &&
+        count_non_push(script_code.operations) == 1 &&
+        script_code.operations.back().code == opcode::checkmultisig;
 }
 
 } // end chain
