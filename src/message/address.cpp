@@ -75,8 +75,7 @@ data_chunk address::to_data() const
 
     for (const network_address& net_address: addresses_)
     {
-        serial.write_4_bytes(net_address.timestamp());
-        serial.write_data(net_address.to_data());
+        serial.write_data(net_address.to_data(true));
     }
 
     return result;
@@ -85,7 +84,7 @@ data_chunk address::to_data() const
 uint64_t address::satoshi_size() const
 {
     return variable_uint_size(addresses_.size())
-        + addresses_.size() * network_address::satoshi_fixed_size();
+        + (addresses_.size() * network_address::satoshi_fixed_size(true));
 }
 
 } // end message

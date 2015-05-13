@@ -117,24 +117,33 @@ bool network_address::from_data(std::istream& stream, bool with_timestamp)
     return result;
 }
 
-data_chunk network_address::to_data() const
+data_chunk network_address::to_data(bool with_timestamp) const
 {
-    data_chunk result(satoshi_size());
+    data_chunk result(satoshi_size(with_timestamp));
     auto serial = make_serializer(result.begin());
+
+    if (with_timestamp)
+        serial.write_4_bytes(timestamp_);
+
     serial.write_8_bytes(services_);
     serial.write_data(ip_);
     serial.write_big_endian<uint16_t>(port_);
     return result;
 }
 
-uint64_t network_address::satoshi_size() const
+uint64_t network_address::satoshi_size(bool with_timestamp) const
 {
-    return network_address::satoshi_fixed_size();
+    return network_address::satoshi_fixed_size(with_timestamp);
 }
 
-uint64_t network_address::satoshi_fixed_size()
+uint64_t network_address::satoshi_fixed_size(bool with_timestamp)
 {
-    return 26;
+    uint64_t result = 26;
+
+    if (with_timestamp)
+        result += 4;
+
+    return result;
 }
 
 } // end message
