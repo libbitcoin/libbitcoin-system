@@ -89,12 +89,12 @@ data_chunk inventory_vector::to_data() const
     return result;
 }
 
-size_t inventory_vector::satoshi_size() const
+uint64_t inventory_vector::satoshi_size() const
 {
     return inventory_vector::satoshi_fixed_size();
 }
 
-size_t inventory_vector::satoshi_fixed_size()
+uint64_t inventory_vector::satoshi_fixed_size()
 {
     return 36;
 }

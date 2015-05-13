@@ -48,7 +48,7 @@ public:
 
     void reset();
 
-    size_t satoshi_size() const;
+    uint64_t satoshi_size() const;
 
 private:
 

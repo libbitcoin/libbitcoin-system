@@ -67,9 +67,9 @@ public:
 
     bool is_final() const;
 
-    size_t satoshi_size() const;
+    uint64_t satoshi_size() const;
 
-    static size_t satoshi_fixed_size();
+    static uint64_t satoshi_fixed_size();
 
 private:
 

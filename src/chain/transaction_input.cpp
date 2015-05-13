@@ -122,8 +122,7 @@ data_chunk transaction_input::to_data() const
     auto serial = make_serializer(result.begin());
 
     serial.write_data(previous_output_.to_data());
-    data_chunk raw_script = script_.to_data();
-    serial.write_variable_uint(raw_script.size());
+    data_chunk raw_script = script_.to_data(true);
     serial.write_data(raw_script);
     serial.write_4_bytes(sequence_);
 
@@ -132,12 +131,11 @@ data_chunk transaction_input::to_data() const
     return result;
 }
 
-size_t transaction_input::satoshi_size() const
+uint64_t transaction_input::satoshi_size() const
 {
-    size_t script_size = script_.satoshi_size();
+    uint64_t script_size = script_.satoshi_size(true);
 
-    return 4 + previous_output_.satoshi_size()
-        + variable_uint_size(script_size) + script_size;
+    return 4 + previous_output_.satoshi_size() + script_size;
 }
 
 std::string transaction_input::to_string() const

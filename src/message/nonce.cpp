@@ -69,22 +69,22 @@ data_chunk nonce_base::to_data() const
     return result;
 }
 
-size_t nonce_base::satoshi_size() const
+uint64_t nonce_base::satoshi_size() const
 {
     return nonce_base::satoshi_fixed_size();
 }
 
-size_t nonce_base::satoshi_fixed_size()
+uint64_t nonce_base::satoshi_fixed_size()
 {
     return 8;
 }
 
-size_t ping::satoshi_fixed_size()
+uint64_t ping::satoshi_fixed_size()
 {
     return nonce_base::satoshi_fixed_size();
 }
 
-size_t pong::satoshi_fixed_size()
+uint64_t pong::satoshi_fixed_size()
 {
     return nonce_base::satoshi_fixed_size();
 }

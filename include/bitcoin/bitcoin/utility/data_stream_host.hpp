@@ -43,6 +43,14 @@ public:
         BOOST_STATIC_ASSERT((sizeof(SourceType) == sizeof(CharType)));
     }
 
+    template<std::size_t N>
+    data_stream_host(const std::array<SourceType, N>& data)
+        : buffer_(const_cast<SourceType*>(data.data()), data.size()),
+          stream(&buffer_)
+    {
+        BOOST_STATIC_ASSERT((sizeof(SourceType) == sizeof(CharType)));
+    }
+
     std::basic_istream<CharType, std::char_traits<CharType>> stream;
 };
 

@@ -97,8 +97,7 @@ data_chunk transaction_output::to_data() const
     auto serial = make_serializer(result.begin());
 
     serial.write_8_bytes(value_);
-    data_chunk raw_script = script_.to_data();
-    serial.write_variable_uint(raw_script.size());
+    data_chunk raw_script = script_.to_data(true);
     serial.write_data(raw_script);
 
     BITCOIN_ASSERT(std::distance(result.begin(), serial.iterator()) == satoshi_size());
@@ -106,11 +105,9 @@ data_chunk transaction_output::to_data() const
     return result;
 }
 
-size_t transaction_output::satoshi_size() const
+uint64_t transaction_output::satoshi_size() const
 {
-    size_t script_size = script_.satoshi_size();
-
-    return 8 + variable_uint_size(script_size) + script_size;
+    return 8 + script_.satoshi_size(true);
 }
 
 std::string transaction_output::to_string() const

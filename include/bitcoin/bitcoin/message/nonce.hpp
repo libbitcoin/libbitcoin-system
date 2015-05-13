@@ -49,9 +49,9 @@ public:
 
     void reset();
 
-    size_t satoshi_size() const;
+    uint64_t satoshi_size() const;
 
-    static size_t satoshi_fixed_size();
+    static uint64_t satoshi_fixed_size();
 
 private:
 
@@ -64,7 +64,7 @@ public:
 
     static const std::string satoshi_command;
 
-    static size_t satoshi_fixed_size();
+    static uint64_t satoshi_fixed_size();
 };
 
 class BC_API pong : public nonce_base
@@ -73,7 +73,7 @@ public:
 
     static const std::string satoshi_command;
 
-    static size_t satoshi_fixed_size();
+    static uint64_t satoshi_fixed_size();
 };
 
 } // end message
