@@ -55,7 +55,7 @@ bool inventory::from_data(std::istream& stream)
     uint64_t count = read_variable_uint(stream);
     result = !stream.fail();
 
-    for (size_t i = 0; (i < count) && result; ++i)
+    for (uint64_t i = 0; (i < count) && result; ++i)
     {
         inventory_vector inv;
         result = inv.from_data(stream);
@@ -80,7 +80,7 @@ data_chunk inventory::to_data() const
     return result;
 }
 
-size_t inventory::satoshi_size() const
+uint64_t inventory::satoshi_size() const
 {
     return variable_uint_size(inventories_.size())
         + inventories_.size() * inventory_vector::satoshi_fixed_size();

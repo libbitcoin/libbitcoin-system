@@ -60,12 +60,12 @@ public:
 
     bool is_raw_data() const;
 
-    bool from_data(const data_chunk& data, bool missing_length_prefix = false,
-        bool allow_raw_data_fallback = false);
+    bool from_data(const data_chunk& data, bool with_length_prefix /*= true*/,
+        bool allow_raw_data_fallback /*= false*/);
 
-    bool from_data(std::istream& stream, bool allow_raw_data_fallback = false);
+    bool from_data(std::istream& stream, bool allow_raw_data_fallback /*= false*/);
 
-    data_chunk to_data() const;
+    data_chunk to_data(bool with_length_prefix /*= true*/) const;
 
     bool from_string(const std::string& human_readable);
 
@@ -73,7 +73,9 @@ public:
 
     void reset();
 
-    size_t satoshi_size() const;
+    uint64_t satoshi_content_size() const;
+
+    uint64_t satoshi_size(bool with_length_prefix /*= true*/) const;
 
     static BC_API bool verify(const script& input_script,
         const script& output_script, const transaction& parent_tx,

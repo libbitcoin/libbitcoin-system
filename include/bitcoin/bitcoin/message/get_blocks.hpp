@@ -58,7 +58,7 @@ public:
 
     data_chunk to_data() const;
 
-    size_t satoshi_size() const;
+    uint64_t satoshi_size() const;
 
 private:
 

@@ -117,7 +117,7 @@ data_chunk get_blocks::to_data() const
     return result;
 }
 
-size_t get_blocks::satoshi_size() const
+uint64_t get_blocks::satoshi_size() const
 {
     return 36 +
         variable_uint_size(start_hashes_.size()) +
