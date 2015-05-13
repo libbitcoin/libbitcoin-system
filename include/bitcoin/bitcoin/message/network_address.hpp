@@ -59,17 +59,17 @@ public:
 
     void port(uint16_t value);
 
-    bool from_data(const data_chunk& data, bool with_timestamp = false);
+    bool from_data(const data_chunk& data, bool with_timestamp /*= false*/);
 
-    bool from_data(std::istream& stream, bool with_timestamp = false);
+    bool from_data(std::istream& stream, bool with_timestamp /*= false*/);
 
-    data_chunk to_data() const;
+    data_chunk to_data(bool with_timestamp /*= false*/) const;
 
     void reset();
 
-    uint64_t satoshi_size() const;
+    uint64_t satoshi_size(bool with_timestamp /*= false*/) const;
 
-    static uint64_t satoshi_fixed_size();
+    static uint64_t satoshi_fixed_size(bool with_timestamp /*= false*/);
 
 private:
 
