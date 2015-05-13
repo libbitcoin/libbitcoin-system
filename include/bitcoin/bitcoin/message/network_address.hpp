@@ -36,29 +36,13 @@ class BC_API network_address
 {
 public:
 
-    network_address();
+    // public members
+    uint32_t timestamp;
+    uint64_t services;
+    ip_address ip;
+    uint16_t port;
 
-    network_address(const uint32_t timestamp, const uint64_t services,
-        const ip_address& ip, const uint16_t port);
-
-    uint32_t timestamp() const;
-
-    void timestamp(uint32_t value);
-
-    uint64_t services() const;
-
-    void services(uint64_t value);
-
-    ip_address& ip();
-
-    const ip_address& ip() const;
-
-    void ip(const ip_address& value);
-
-    uint16_t port() const;
-
-    void port(uint16_t value);
-
+    // serialization methods
     bool from_data(const data_chunk& data, bool with_timestamp /*= false*/);
 
     bool from_data(std::istream& stream, bool with_timestamp /*= false*/);
@@ -70,13 +54,6 @@ public:
     uint64_t satoshi_size(bool with_timestamp /*= false*/) const;
 
     static uint64_t satoshi_fixed_size(bool with_timestamp /*= false*/);
-
-private:
-
-    uint32_t timestamp_;
-    uint64_t services_;
-    ip_address ip_;
-    uint16_t port_;
 };
 
 typedef std::vector<network_address> network_address_list;

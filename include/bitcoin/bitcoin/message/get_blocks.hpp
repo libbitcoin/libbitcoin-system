@@ -39,34 +39,21 @@ public:
 
     static const std::string satoshi_command;
 
+    // public members
     // 10 sequential hashes, then exponential samples until reaching genesis
-    block_locator& start_hashes();
+    block_locator start_hashes;
+    hash_digest hash_stop;
 
-    const block_locator& start_hashes() const;
-
-    void start_hashes(const block_locator& value);
-
-    hash_digest& hash_stop();
-
-    const hash_digest& hash_stop() const;
-
-    void hash_stop(const hash_digest& value);
-
+    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);
 
     data_chunk to_data() const;
 
-    uint64_t satoshi_size() const;
-
-private:
-
     void reset();
 
-    // 10 sequential hashes, then exponential samples until reaching genesis
-    block_locator start_hashes_;
-    hash_digest hash_stop_;
+    uint64_t satoshi_size() const;
 };
 
 } // end message

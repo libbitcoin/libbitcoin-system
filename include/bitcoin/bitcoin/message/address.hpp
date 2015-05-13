@@ -36,10 +36,10 @@ public:
 
     static const std::string satoshi_command;
 
-    network_address_list& addresses();
+    // public members
+    network_address_list addresses;
 
-    const network_address_list& addresses() const;
-
+    // serialization methods
     bool from_data(const data_chunk& data);
 
     bool from_data(std::istream& stream);
@@ -49,10 +49,6 @@ public:
     void reset();
 
     uint64_t satoshi_size() const;
-
-private:
-
-    network_address_list addresses_;
 };
 
 } // end message
