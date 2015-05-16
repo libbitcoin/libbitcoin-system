@@ -68,10 +68,10 @@ script:
 
     # Download and build libbitcoin and all dependencies.
     - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --enable-testnet --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
-    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os -stdlib=libstdc++' CXXFLAGS='-Os -stdlib=libstdc++'; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' LDLIBS='-lstdc++' CXXFLAGS='-Os -stdlib=libstdc++'; fi
     - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-O0 -g -static --coverage' CXXFLAGS='-O0 -g -static --coverage'; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then ./install.sh ; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --with-icu --build-icu --disable-ndebug --disable-static CFLAGS='-Os -stdlib=libstdc++' CXXFLAGS='-Os -stdlib=libstdc++'; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --with-icu --build-icu --disable-ndebug --disable-static CFLAGS='-Os' LDLIBS='-lstdc++' CXXFLAGS='-Os -stdlib=libstdc++'; fi
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --build-boost; fi
 
 after_success:
