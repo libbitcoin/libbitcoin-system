@@ -220,8 +220,7 @@ BOOST_OPTIONS_CLANG=\
 # Define secp256k1 options.
 #------------------------------------------------------------------------------
 SECP256K1_OPTIONS=\
-"--disable-tests "\
-"--disable-bignum "
+"--disable-tests "
 
 # Define bitcoin options.
 #------------------------------------------------------------------------------
