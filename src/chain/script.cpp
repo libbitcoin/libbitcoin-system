@@ -209,18 +209,17 @@ bool script::from_string(const std::string& human_readable)
             }
 
             code = data_to_opcode(raw_data);
-
-            if (code == opcode::bad_operation)
-            {
-                clear = true;
-                break;
-            }
-
             data = raw_data;
         }
         else
         {
             code = string_to_opcode(*token);
+        }
+
+        if (code == opcode::bad_operation)
+        {
+            clear = true;
+            break;
         }
 
         operations.push_back(operation{ code, data });
