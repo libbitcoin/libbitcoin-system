@@ -89,6 +89,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/binary.cpp \
     src/utility/logger.cpp \
     src/utility/string.cpp \
+    src/utility/thread.cpp \
     src/utility/threadpool.cpp \
     src/utility/time.cpp \
     src/utility/timed_section.cpp \
@@ -156,6 +157,7 @@ test_libbitcoin_test_SOURCES = \
     test/serialize.cpp \
     test/stealth.cpp \
     test/stealth_address.cpp \
+    test/thread.cpp \
     test/unicode.cpp \
     test/unicode_istream.cpp \
     test/unicode_ostream.cpp \
@@ -274,6 +276,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
+    include/bitcoin/bitcoin/utility/thread.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/time.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
