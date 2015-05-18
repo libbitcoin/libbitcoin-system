@@ -47,38 +47,36 @@ bool transaction::from_data(std::istream& stream)
     reset();
 
     version = read_4_bytes(stream);
-    result = !stream.fail();
+    result = stream;
 
     if (result)
     {
         uint64_t tx_in_count = read_variable_uint(stream);
-        result = !stream.fail();
+        result = stream;
 
         for (uint64_t i = 0; (i < tx_in_count) && result; ++i)
         {
-            transaction_input input;
-            result = input.from_data(stream);
-            inputs.push_back(input);
+            inputs.emplace_back();
+            result = inputs.back().from_data(stream);
         }
     }
 
     if (result)
     {
         uint64_t tx_out_count = read_variable_uint(stream);
-        result = !stream.fail();
+        result = stream;
 
         for (uint64_t i = 0; (i < tx_out_count) && result; ++i)
         {
-            transaction_output output;
-            result = output.from_data(stream);
-            outputs.push_back(output);
+            outputs.emplace_back();
+            result = outputs.back().from_data(stream);
         }
     }
 
     if (result)
     {
         locktime = read_4_bytes(stream);
-        result = !stream.fail();
+        result = stream;
     }
 
     if (!result)

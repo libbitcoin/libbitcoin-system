@@ -52,6 +52,8 @@ uint64_t read_variable_uint(std::istream& stream);
 
 data_chunk read_data(std::istream& stream, uint64_t n_bytes);
 
+data_chunk read_all_data(std::istream& stream);
+
 hash_digest read_hash(std::istream& stream);
 
 short_hash read_short_hash(std::istream& stream);

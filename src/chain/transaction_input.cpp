@@ -50,13 +50,13 @@ bool transaction_input::from_data(std::istream& stream)
     if (result)
     {
         // note: removed branch on previous_output.is_null() adding parse attempt cost.
-        result = script.from_data(stream, true);
+        result = script.from_data(stream, true, true);
     }
 
     if (result)
     {
         sequence = read_4_bytes(stream);
-        result = !stream.fail();
+        result = stream;
     }
 
     if (!result)

@@ -78,7 +78,7 @@ T from_big_endian_stream_unsafe(std::istream& stream)
 
     T out = 0;
 
-    for (size_t i = sizeof(T); (i > 0) && !stream.fail(); i--)
+    for (size_t i = sizeof(T); (i > 0) && stream; i--)
     {
         uint8_t value = 0;
         stream.read(reinterpret_cast<char*>(&value), sizeof value);
