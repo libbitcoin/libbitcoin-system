@@ -19,8 +19,9 @@
  */
 #include <bitcoin/bitcoin/chain/transaction_output.hpp>
 #include <sstream>
+#include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/utility/data_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -33,8 +34,9 @@ void transaction_output::reset()
 
 bool transaction_output::from_data(const data_chunk& data)
 {
-    data_chunk_stream_host host(data);
-    return from_data(host.stream);
+    byte_source<data_chunk> source(data);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    return from_data(istream);
 }
 
 bool transaction_output::from_data(std::istream& stream)

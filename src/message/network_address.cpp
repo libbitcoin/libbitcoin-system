@@ -18,7 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/utility/data_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
@@ -35,8 +36,9 @@ void network_address::reset()
 
 bool network_address::from_data(const data_chunk& data, bool with_timestamp)
 {
-    data_chunk_stream_host host(data);
-    return from_data(host.stream, with_timestamp);
+    byte_source<data_chunk> source(data);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    return from_data(istream, with_timestamp);
 }
 
 bool network_address::from_data(std::istream& stream, bool with_timestamp)

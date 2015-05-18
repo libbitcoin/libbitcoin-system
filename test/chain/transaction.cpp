@@ -19,6 +19,7 @@
  */
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
+#include <boost/iostreams/stream.hpp>
 
 using namespace bc;
 
@@ -29,10 +30,12 @@ BOOST_AUTO_TEST_CASE(from_data_junk)
     auto junk = base16_literal(
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0"
         "000000000000005739943a9c29a1955dfae2b3f37de547005bfb9535192e5fb0");
-    data_chunk_stream_host host(junk);
+//    data_chunk_stream_host host(junk);
+    byte_source<std::array<uint8_t, 64>> source(junk);
+    boost::iostreams::stream<byte_source<std::array<uint8_t, 64>>> stream(source);
 
     chain::transaction tx;
-    BOOST_REQUIRE(tx.from_data(host.stream));
+    BOOST_REQUIRE(tx.from_data(stream));
 }
 
 BOOST_AUTO_TEST_CASE(case_1)
