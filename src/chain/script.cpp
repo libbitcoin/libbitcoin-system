@@ -41,7 +41,7 @@ namespace chain {
 static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{1};
 
-constexpr size_t op_counter_limit = 201;
+constexpr uint64_t op_counter_limit = 201;
 
 payment_type script::type() const
 {
@@ -1819,10 +1819,9 @@ bool script::verify(const script& input_script, const script& output_script,
         eval_context.primary = input_context.primary;
 
         script eval_script;
-        eval_script.from_data(input_context.primary.back(), false, true);
 
-        // Invalid script - parsed as raw_data
-        if (eval_script.is_raw_data())
+        // Invalid script - parse-able only as raw_data
+        if (!eval_script.from_data(input_context.primary.back(), false, false))
             return false;
 
         // Pop last item and copy as starting stack to eval script
