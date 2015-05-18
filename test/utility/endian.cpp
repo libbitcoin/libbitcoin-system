@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(from_big_endian_stream_unsafe_valid)
 
     uint64_t value = from_big_endian_stream_unsafe<uint64_t>(stream);
 
-    BOOST_REQUIRE(stream.good());
+    BOOST_REQUIRE(stream);
     BOOST_REQUIRE(expected == value);
 }
 
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE(from_little_endian_stream_unsafe_valid)
 
     uint64_t value = from_little_endian_stream_unsafe<uint64_t>(stream);
 
-    BOOST_REQUIRE(stream.good());
+    BOOST_REQUIRE(stream);
     BOOST_REQUIRE(expected == value);
 }
 

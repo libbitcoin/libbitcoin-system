@@ -36,7 +36,7 @@ bool get_address::from_data(const data_chunk& data)
 bool get_address::from_data(std::istream& stream)
 {
     reset();
-    return !stream.fail();
+    return stream;
 }
 
 data_chunk get_address::to_data() const

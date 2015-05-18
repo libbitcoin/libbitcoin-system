@@ -39,8 +39,6 @@ bool get_blocks::from_data(const data_chunk& data)
 
 bool get_blocks::from_data(std::istream& stream)
 {
-    bool result = true;
-
     reset();
 
     // Discard protocol version because it is stupid
@@ -48,24 +46,17 @@ bool get_blocks::from_data(std::istream& stream)
 
     // Note: changed to uint64_t to preclude possible loss of data.
     uint64_t count = read_variable_uint(stream);
-    result = !stream.fail();
 
-    for (uint64_t i = 0; (i < count) && result; ++i)
-    {
+    for (uint64_t i = 0; (i < count) && stream; ++i)
         start_hashes.push_back(read_hash(stream));
-        result = !stream.fail();
-    }
 
-    if (result)
-    {
+    if (stream)
         hash_stop = read_hash(stream);
-        result = !stream.fail();
-    }
 
-    if (!result)
+    if (!stream)
         reset();
 
-    return result;
+    return stream;
 }
 
 data_chunk get_blocks::to_data() const

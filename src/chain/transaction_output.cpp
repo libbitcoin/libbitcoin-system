@@ -44,10 +44,10 @@ bool transaction_output::from_data(std::istream& stream)
     reset();
 
     value = read_8_bytes(stream);
-    result = !stream.fail();
+    result = stream;
 
     if (result)
-        result = script.from_data(stream, true);
+        result = script.from_data(stream, true, true);
 
     if (!result)
         reset();

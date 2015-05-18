@@ -41,13 +41,12 @@ bool address::from_data(std::istream& stream)
     reset();
 
     uint64_t count = read_variable_uint(stream);
-    result = !stream.fail();
+    result = stream;
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
-        network_address addr;
-        result = addr.from_data(stream, true);
-        addresses.push_back(addr);
+        addresses.emplace_back();
+        result = addresses.back().from_data(stream, true);
     }
 
     if (!result)

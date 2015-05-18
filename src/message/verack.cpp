@@ -37,7 +37,7 @@ bool verack::from_data(const data_chunk& data)
 bool verack::from_data(std::istream& stream)
 {
     reset();
-    return !stream.fail();
+    return stream;
 }
 
 data_chunk verack::to_data() const

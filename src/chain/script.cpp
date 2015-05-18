@@ -77,7 +77,12 @@ bool script::from_data(const data_chunk& data, bool with_length_prefix,
 {
     bool result = true;
 
-    if (!with_length_prefix)
+    if (with_length_prefix)
+    {
+        data_chunk_stream_host host(data);
+        result = from_data(host.stream, true, allow_raw_data_fallback);
+    }
+    else
     {
         reset();
 
@@ -86,33 +91,37 @@ bool script::from_data(const data_chunk& data, bool with_length_prefix,
         if (!result)
             reset();
     }
-    else
-    {
-        data_chunk_stream_host host(data);
-        result = from_data(host.stream, allow_raw_data_fallback);
-    }
 
     return result;
 }
 
-bool script::from_data(std::istream& stream, bool allow_raw_data_fallback)
+bool script::from_data(std::istream& stream, bool with_length_prefix,
+    bool allow_raw_data_fallback)
 {
     bool result = true;
 
-    reset();
-
-    auto script_length = read_variable_uint(stream);
-    result = !stream.fail();
-
-    BITCOIN_ASSERT(script_length <= max_uint32);
-
     data_chunk raw_script;
 
-    if (result)
+    reset();
+
+    if (with_length_prefix)
     {
-        auto script_length32 = static_cast<uint32_t>(script_length);
-        raw_script = read_data(stream, script_length32);
-        result = !stream.fail();
+        auto script_length = read_variable_uint(stream);
+        result = stream;
+
+        BITCOIN_ASSERT(script_length <= max_uint32);
+
+        if (result)
+        {
+            auto script_length32 = static_cast<uint32_t>(script_length);
+            raw_script = read_data(stream, script_length32);
+            result = stream;
+        }
+    }
+    else
+    {
+        raw_script = read_all_data(stream);
+        result = stream;
     }
 
     if (result)
@@ -274,15 +283,12 @@ bool script::parse(const data_chunk& raw_script)
     {
         data_chunk_stream_host host(raw_script);
 
-        while (success && !host.stream.eof() && !host.stream.fail() &&
+        while (success && host.stream &&
             (host.stream.peek() != std::istream::traits_type::eof()))
         {
-            operation op;
-            success = op.from_data(host.stream);
-            operations.push_back(op);
+            operations.emplace_back();
+            success = operations.back().from_data(host.stream);
         }
-
-        success &= !host.stream.fail();
     }
 
     return success;

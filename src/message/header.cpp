@@ -40,20 +40,17 @@ bool header::from_data(const data_chunk& data)
 
 bool header::from_data(std::istream& stream)
 {
-    bool result = true;
-
     reset();
 
     magic = read_4_bytes(stream);
     command = read_fixed_string(stream, command_size);
     payload_length = read_4_bytes(stream);
     checksum = 0;
-    result = !stream.fail();
 
-    if (!result)
+    if (stream)
         reset();
 
-    return result;
+    return stream;
 }
 
 data_chunk header::to_data() const

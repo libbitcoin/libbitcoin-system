@@ -53,7 +53,7 @@ bool block_header::from_data(std::istream& stream)
     bits = read_4_bytes(stream);
     nonce = read_4_bytes(stream);
 
-    result = !stream.fail();
+    result = stream;
 
     if (!result)
         reset();
