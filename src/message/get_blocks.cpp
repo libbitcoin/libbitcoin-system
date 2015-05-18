@@ -18,8 +18,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
+#include <bitcoin/bitcoin/utility/data_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
@@ -33,8 +34,9 @@ void get_blocks::reset()
 
 bool get_blocks::from_data(const data_chunk& data)
 {
-    data_chunk_stream_host host(data);
-    return from_data(host.stream);
+    byte_source<data_chunk> source(data);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    return from_data(istream);
 }
 
 bool get_blocks::from_data(std::istream& stream)

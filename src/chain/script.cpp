@@ -20,12 +20,13 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
-#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
+#include <bitcoin/bitcoin/utility/data_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -79,8 +80,9 @@ bool script::from_data(const data_chunk& data, bool with_length_prefix,
 
     if (with_length_prefix)
     {
-        data_chunk_stream_host host(data);
-        result = from_data(host.stream, true, allow_raw_data_fallback);
+        byte_source<data_chunk> source(data);
+        boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+        result = from_data(istream, true, allow_raw_data_fallback);
     }
     else
     {
@@ -281,13 +283,14 @@ bool script::parse(const data_chunk& raw_script)
 
     if (raw_script.begin() != raw_script.end())
     {
-        data_chunk_stream_host host(raw_script);
+        byte_source<data_chunk> source(raw_script);
+        boost::iostreams::stream<byte_source<data_chunk>> istream(source);
 
-        while (success && host.stream &&
-            (host.stream.peek() != std::istream::traits_type::eof()))
+        while (success && istream &&
+            (istream.peek() != std::istream::traits_type::eof()))
         {
             operations.emplace_back();
-            success = operations.back().from_data(host.stream);
+            success = operations.back().from_data(istream);
         }
     }
 
