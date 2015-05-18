@@ -88,8 +88,7 @@
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/collection.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/data_buffer.hpp>
-#include <bitcoin/bitcoin/utility/data_stream_host.hpp>
+#include <bitcoin/bitcoin/utility/data_source.hpp>
 #include <bitcoin/bitcoin/utility/decorator.hpp>
 #include <bitcoin/bitcoin/utility/deserializer.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
