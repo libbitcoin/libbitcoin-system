@@ -31,25 +31,13 @@ namespace libbitcoin {
 template <typename T>
 T read_big_endian(std::istream& stream)
 {
-    T result = from_big_endian_stream_unsafe<T>(stream);
-
-//    // if the stream didn't throw on fail, we will
-//    if (stream.fail())
-//        throw std::ios_base::failure("read_big_endian");
-
-    return result;
+    return from_big_endian_stream_unsafe<T>(stream);
 }
 
 template <typename T>
 T read_little_endian(std::istream& stream)
 {
-    T result = from_little_endian_stream_unsafe<T>(stream);
-
-//    // if the stream didn't throw on fail, we will
-//    if (stream.fail())
-//        throw std::ios_base::failure("read_little_endian");
-
-    return result;
+    return from_little_endian_stream_unsafe<T>(stream);
 }
 
 template<unsigned N>

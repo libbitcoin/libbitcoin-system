@@ -43,7 +43,7 @@ bool inventory::from_data(std::istream& stream)
     reset();
 
     uint64_t count = read_variable_uint(stream);
-    result = !stream.fail();
+    result = stream;
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {

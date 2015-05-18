@@ -41,8 +41,6 @@ bool network_address::from_data(const data_chunk& data, bool with_timestamp)
 
 bool network_address::from_data(std::istream& stream, bool with_timestamp)
 {
-    bool result = true;
-
     reset();
 
     if (with_timestamp)
@@ -52,13 +50,10 @@ bool network_address::from_data(std::istream& stream, bool with_timestamp)
     ip= read_bytes<16>(stream);
     port = read_big_endian<uint16_t>(stream);
 
-    if (stream.fail())
-    {
+    if (!stream)
         reset();
-        result = false;
-    }
 
-    return result;
+    return stream;
 }
 
 data_chunk network_address::to_data(bool with_timestamp) const

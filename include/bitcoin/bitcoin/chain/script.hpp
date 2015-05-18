@@ -55,7 +55,8 @@ public:
     bool from_data(const data_chunk& data, bool with_length_prefix /*= true*/,
         bool allow_raw_data_fallback /*= false*/);
 
-    bool from_data(std::istream& stream, bool allow_raw_data_fallback /*= false*/);
+    bool from_data(std::istream& stream, bool with_length_prefix /*= true*/,
+        bool allow_raw_data_fallback /*= false*/);
 
     data_chunk to_data(bool with_length_prefix /*= true*/) const;
 

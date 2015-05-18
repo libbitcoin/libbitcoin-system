@@ -28,10 +28,6 @@ uint8_t read_byte(std::istream& stream)
 
     stream.read(reinterpret_cast<char*>(&result), sizeof result);
 
-//    // if the stream didn't throw on fail, we will
-//    if (stream.fail())
-//        throw std::ios_base::failure("read_byte");
-
     return result;
 }
 
@@ -71,6 +67,16 @@ data_chunk read_data(std::istream& stream, uint64_t n_bytes)
 
     for (uint64_t i = 0; i < n_bytes; ++i)
         raw_bytes[i] = read_byte(stream);
+
+    return raw_bytes;
+}
+
+data_chunk read_all_data(std::istream& stream)
+{
+    data_chunk raw_bytes;
+
+    while (stream && (stream.peek() != std::istream::traits_type::eof()))
+        raw_bytes.push_back(read_byte(stream));
 
     return raw_bytes;
 }
