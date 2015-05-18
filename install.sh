@@ -197,6 +197,7 @@ BOOST_OPTIONS_GCC=\
 "--with-chrono "\
 "--with-date_time "\
 "--with-filesystem "\
+"--with-iostreams "\
 "--with-locale "\
 "--with-program_options "\
 "--with-regex "\
@@ -210,6 +211,7 @@ BOOST_OPTIONS_CLANG=\
 "--with-chrono "\
 "--with-date_time "\
 "--with-filesystem "\
+"--with-iostreams "\
 "--with-locale "\
 "--with-program_options "\
 "--with-regex "\
