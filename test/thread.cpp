@@ -28,24 +28,47 @@ BOOST_AUTO_TEST_SUITE(thread)
 
 BOOST_AUTO_TEST_SUITE(thread_tests)
 
-BOOST_AUTO_TEST_CASE(thread__set_thread_priority__high__no_throw)
+static int get_thread_priority_test()
 {
-    BOOST_REQUIRE_NO_THROW(set_thread_priority(thread_priority::high));
+#if defined(_WIN32)
+    return GetThreadPriority(GetCurrentThread());
+#elif defined(PRIO_THREAD)
+    return getpriority(PRIO_THREAD, 0);
+#else
+    return getpriority(PRIO_PROCESS, 0);
+#endif
 }
 
-BOOST_AUTO_TEST_CASE(thread__set_thread_priority__normal__no_throw)
+void set_thread_priority_test(int priority)
 {
-    BOOST_REQUIRE_NO_THROW(set_thread_priority(thread_priority::normal));
+#if defined(_WIN32)
+    SetThreadPriority(GetCurrentThread(), priority);
+#elif defined(PRIO_THREAD)
+    setpriority(PRIO_THREAD, 0, priority);
+#else
+    setpriority(PRIO_PROCESS, 0, priority);
+#endif
 }
 
-BOOST_AUTO_TEST_CASE(thread__set_thread_priority__low__no_throw)
+// WARNING: This creates a side effect that may impact other tests.
+// We must run these sequentially to prevent concurrency-driven test failures.
+BOOST_AUTO_TEST_CASE(thread__set_thread_priorites__all__set_as_expected)
 {
-    BOOST_REQUIRE_NO_THROW(set_thread_priority(thread_priority::low));
-}
+    // Save so we can restore at the end of this test case.
+    const int save = get_thread_priority_test();
 
-BOOST_AUTO_TEST_CASE(thread__set_thread_priority__background__no_throw)
-{
-    BOOST_REQUIRE_NO_THROW(set_thread_priority(thread_priority::background));
+    set_thread_priority(thread_priority::high);
+    BOOST_REQUIRE_EQUAL(THREAD_PRIORITY_ABOVE_NORMAL, get_thread_priority_test());
+    set_thread_priority(thread_priority::normal);
+    BOOST_REQUIRE_EQUAL(THREAD_PRIORITY_NORMAL, get_thread_priority_test());
+    set_thread_priority(thread_priority::low);
+    BOOST_REQUIRE_EQUAL(THREAD_PRIORITY_BELOW_NORMAL, get_thread_priority_test());
+    set_thread_priority(thread_priority::lowest);
+    BOOST_REQUIRE_EQUAL(THREAD_PRIORITY_LOWEST, get_thread_priority_test());
+
+    // Restore and verify test execution thread priority to minimize side effect.
+    set_thread_priority_test(save);
+    BOOST_REQUIRE_EQUAL(save, get_thread_priority_test());
 }
 
 BOOST_AUTO_TEST_CASE(thread__set_thread_priority__invalid__throws_invalid_argument)

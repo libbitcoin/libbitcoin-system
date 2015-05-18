@@ -29,7 +29,7 @@ enum class thread_priority
     high,
     normal,
     low,
-    background
+    lowest
 };
 
 BC_API void set_thread_priority(thread_priority priority);
