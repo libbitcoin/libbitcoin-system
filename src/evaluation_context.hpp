@@ -31,7 +31,7 @@ class evaluation_context
 public:
 
     chain::operation_stack::const_iterator codehash_begin;
-    size_t operation_counter;
+    uint64_t operation_counter;
     data_stack primary;
     data_stack secondary;
     conditional_stack conditional;
