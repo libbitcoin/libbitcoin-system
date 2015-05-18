@@ -47,7 +47,7 @@ bool operation::from_data(std::istream& stream)
     reset();
 
     uint8_t raw_byte = read_byte(stream);
-    result = !stream.fail();
+    result = stream;
 
     code = static_cast<opcode>(raw_byte);
     result &= (raw_byte != 0 || code == opcode::zero);
@@ -62,7 +62,7 @@ bool operation::from_data(std::istream& stream)
 
         data = read_data(stream, read_n_bytes);
 
-        result = !stream.fail() && (read_n_bytes || data.empty());
+        result = stream && (read_n_bytes || data.empty());
     }
 
     if (!result)

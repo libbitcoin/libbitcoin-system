@@ -46,7 +46,7 @@ bool inventory_vector::from_data(std::istream& stream)
     uint32_t raw_type = read_4_bytes(stream);
     type = inventory_type_from_number(raw_type);
     hash = read_hash(stream);
-    result = !stream.fail();
+    result = stream;
 
     if (!result)
         reset();

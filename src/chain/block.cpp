@@ -46,15 +46,18 @@ bool block::from_data(std::istream& stream)
 
     result = header.from_data(stream);
 
-    uint64_t tx_count = read_variable_uint(stream);
-    result &= !stream.fail();
+    uint64_t tx_count = 0;
+
+    if (result)
+    {
+        tx_count = read_variable_uint(stream);
+        result = stream;
+    }
 
     for (uint64_t i = 0; (i < tx_count) && result; ++i)
     {
-        transaction tx;
-        result = tx.from_data(stream);
-        result &= !stream.fail();
-        transactions.push_back(std::move(tx));
+        transactions.emplace_back();
+        result = transactions.back().from_data(stream);
     }
 
     if (!result)

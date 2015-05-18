@@ -51,7 +51,7 @@ bool announce_version::from_data(std::istream& stream)
     version = read_4_bytes(stream);
     services = read_8_bytes(stream);
     timestamp = read_8_bytes(stream);
-    result = !stream.fail();
+    result = stream;
 
     if (result)
         result = address_me.from_data(stream, false);
@@ -59,10 +59,8 @@ bool announce_version::from_data(std::istream& stream)
     if (result && (version >= 106))
     {
         result = address_you.from_data(stream, false);
-
         nonce = read_8_bytes(stream);
         user_agent = read_string(stream);
-        result = !stream.fail();
 
         if (version >= 209)
             start_height = read_4_bytes(stream);

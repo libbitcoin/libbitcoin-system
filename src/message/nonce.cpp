@@ -38,17 +38,14 @@ bool nonce_base::from_data(const data_chunk& data)
 
 bool nonce_base::from_data(std::istream& stream)
 {
-    bool result = true;
-
     reset();
 
     nonce = read_8_bytes(stream);
-    result = !stream.fail();
 
-    if (!result)
+    if (!stream)
         reset();
 
-    return result;
+    return stream;
 }
 
 data_chunk nonce_base::to_data() const

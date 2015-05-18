@@ -53,7 +53,7 @@ bool point::from_data(std::istream& stream)
 
     hash = read_hash(stream);
     index = read_4_bytes(stream);
-    result = !stream.fail();
+    result = stream;
 
     if (!result)
         reset();
