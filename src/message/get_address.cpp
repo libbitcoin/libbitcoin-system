@@ -24,6 +24,11 @@
 namespace libbitcoin {
 namespace message {
 
+bool get_address::is_valid() const
+{
+    return true;
+}
+
 void get_address::reset()
 {
 }

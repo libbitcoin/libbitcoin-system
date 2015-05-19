@@ -19,11 +19,22 @@
  */
 #include <bitcoin/bitcoin/chain/block_header.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/data_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
 namespace chain {
+
+bool block_header::is_valid() const
+{
+    return (version != 0) ||
+        (previous_block_hash != null_hash) ||
+        (merkle != null_hash) ||
+        (timestamp != 0) ||
+        (bits != 0) ||
+        (nonce != 0);
+}
 
 void block_header::reset()
 {

@@ -26,6 +26,11 @@
 namespace libbitcoin {
 namespace message {
 
+bool get_blocks::is_valid() const
+{
+    return !start_hashes.empty() || (hash_stop != null_hash);
+}
+
 void get_blocks::reset()
 {
     start_hashes.clear();

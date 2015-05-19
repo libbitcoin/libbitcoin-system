@@ -29,6 +29,11 @@
 namespace libbitcoin {
 namespace chain {
 
+bool operation::is_valid() const
+{
+    return (code == opcode::zero) && data.empty();
+}
+
 void operation::reset()
 {
     code = opcode::zero;

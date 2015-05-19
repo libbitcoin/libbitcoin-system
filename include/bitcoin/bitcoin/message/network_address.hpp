@@ -47,9 +47,15 @@ public:
 
     data_chunk to_data(bool with_timestamp /*= false*/) const;
 
+    bool is_valid() const;
+
     void reset();
 
     uint64_t satoshi_size(bool with_timestamp /*= false*/) const;
+
+    static network_address from_data(const data_chunk& data);
+
+    static network_address from_data(std::istream& stream);
 
     static uint64_t satoshi_fixed_size(bool with_timestamp /*= false*/);
 };

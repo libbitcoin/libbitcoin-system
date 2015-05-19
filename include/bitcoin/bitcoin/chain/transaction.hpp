@@ -52,6 +52,8 @@ public:
 
     std::string to_string() const;
 
+    bool is_valid() const;
+
     void reset();
 
     hash_digest hash() const;
@@ -68,6 +70,10 @@ public:
     uint64_t total_output_value() const;
 
     uint64_t satoshi_size() const;
+
+//    static transaction factory_from_data(const data_chunk& data);
+//
+//    static transaction factory_from_data(std::istream& stream);
 
     static uint64_t satoshi_fixed_size();
 };
