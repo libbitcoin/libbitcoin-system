@@ -21,10 +21,13 @@
 
 #include <stdexcept>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
     #include <windows.h>
 #else
+    #include <unistd.h>
+    #include <pthread.h>
     #include <sys/resource.h>
+    #include <sys/types.h>
     #ifndef PRIO_MAX
         #define PRIO_MAX 20
     #endif
@@ -47,7 +50,7 @@ static int get_thread_priority(thread_priority priority)
             return THREAD_PRIORITY_NORMAL;
         case thread_priority::low:
             return THREAD_PRIORITY_BELOW_NORMAL;
-        case thread_priority::background:
+        case thread_priority::lowest:
             return THREAD_PRIORITY_LOWEST;
         default:
             throw std::invalid_argument("priority");
@@ -59,12 +62,12 @@ void set_thread_priority(thread_priority priority)
 {
     const auto prioritization = get_thread_priority(priority);
 
-#if defined(_WIN32)
-    ::SetThreadPriority(GetCurrentThread(), prioritization);
+#if defined(_MSC_VER)
+    SetThreadPriority(GetCurrentThread(), prioritization);
 #elif defined(PRIO_THREAD)
-    setpriority(PRIO_THREAD, 0, prioritization);
+    setpriority(PRIO_THREAD, pthread_self(), prioritization);
 #else
-    setpriority(PRIO_PROCESS, 0, prioritization);
+    setpriority(PRIO_PROCESS, getpid(), prioritization);
 #endif
 }
 

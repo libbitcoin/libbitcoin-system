@@ -21,37 +21,40 @@
 
 #include <new>
 #include <system_error>
+#include <thread>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
 
 using boost::asio::io_service;
 
-threadpool::threadpool()
+threadpool::threadpool(size_t number_threads, thread_priority priority)
   : work_(nullptr)
 {
+    spawn(number_threads, priority);
 }
-
-threadpool::threadpool(size_t number_threads)
-  : work_(nullptr)
-{
-    spawn(number_threads);
-}
-
 threadpool::~threadpool()
 {
-    delete work_;
+    shutdown();
 }
 
-void threadpool::spawn(size_t number_threads)
+void threadpool::spawn(size_t number_threads, thread_priority priority)
 {
     for (size_t i = 0; i < number_threads; ++i)
-        spawn_once();
+        spawn_once(priority);
 }
-void threadpool::spawn_once()
+void threadpool::spawn_once(thread_priority priority)
 {
-    if (!work_)
+    if (work_ == nullptr)
         work_ = new io_service::work(ios_);
-    threads_.push_back(std::thread([this] { ios_.run(); }));
+
+    auto action = [this, priority]
+    {
+        set_thread_priority(priority);
+        ios_.run();
+    };
+
+    threads_.push_back(std::thread(action));
 }
 
 void threadpool::stop()
@@ -60,16 +63,18 @@ void threadpool::stop()
 }
 void threadpool::shutdown()
 {
-    delete work_;
+    if (work_ != nullptr)
+        delete work_;
+
     work_ = nullptr;
 }
 void threadpool::join()
 {
-    for (std::thread& t: threads_)
+    for (std::thread& thread: threads_)
     {
         try
         {
-            t.join();
+            thread.join();
         }
         catch (const std::system_error&)
         {

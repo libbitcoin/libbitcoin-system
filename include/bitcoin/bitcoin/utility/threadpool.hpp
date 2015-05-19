@@ -24,6 +24,7 @@
 #include <thread>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
 
@@ -44,17 +45,15 @@ namespace libbitcoin {
 class threadpool
 {
 public:
+
     /**
-     * Default constructor. Threadpool has no threads.
-     * Call spawn() to start threads.
-     */
-    BC_API threadpool();
-    /**
-     * Convenience constructor. spawn()s number_threads threads.
+     * Threadpool constructor. spawn()s number_threads threads.
      *
      * @param[in]   number_threads  Number of threads to spawn.
      */
-    BC_API threadpool(size_t number_threads);
+    BC_API threadpool(size_t number_threads=0, 
+        thread_priority priority=thread_priority::normal);
+
     BC_API ~threadpool();
 
     threadpool(const threadpool&) = delete;
@@ -63,17 +62,20 @@ public:
     /**
      * Add n threads to this threadpool.
      */
-    BC_API void spawn(size_t number_threads=1);
+    BC_API void spawn(size_t number_threads=1, 
+        thread_priority priority=thread_priority::normal);
 
     /**
      * Stop the threadpool. All remaining operations on the queue are dropped.
      */
     BC_API void stop();
+
     /**
      * Finish executing all remaining operations in the queue.
      * Adding more operations keeps the threadpool running.
      */
     BC_API void shutdown();
+
     /**
      * Join all the threads in this threadpool with the current thread,
      * This method will hang until all the threads in this threadpool have
@@ -113,13 +115,14 @@ public:
      * Underlying boost::io_service object.
      */
     BC_API boost::asio::io_service& service();
+
     /**
      * Underlying boost::io_service object.
      */
     BC_API const boost::asio::io_service& service() const;
 
 private:
-    void spawn_once();
+    void spawn_once(thread_priority priority = thread_priority::normal);
 
     boost::asio::io_service ios_;
     boost::asio::io_service::work* work_;
