@@ -64,11 +64,17 @@ public:
 
     std::string to_string() const;
 
+    bool is_valid() const;
+
     void reset();
 
     uint64_t satoshi_content_size() const;
 
     uint64_t satoshi_size(bool with_length_prefix /*= true*/) const;
+
+    static script from_data(const data_chunk& data);
+
+    static script from_data(std::istream& stream);
 
     static BC_API bool verify(const script& input_script,
         const script& output_script, const transaction& parent_tx,

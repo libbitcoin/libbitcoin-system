@@ -25,6 +25,11 @@
 namespace libbitcoin {
 namespace message {
 
+bool verack::is_valid() const
+{
+    return true;
+}
+
 void verack::reset()
 {
 }

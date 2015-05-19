@@ -212,6 +212,7 @@ test_libbitcoin_test_SOURCES = \
     test/unicode_ostream.cpp \
     test/uri.cpp \
     test/chain/block.cpp \
+    test/chain/block_header.cpp \
     test/chain/point.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \

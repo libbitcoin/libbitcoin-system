@@ -26,6 +26,11 @@
 namespace libbitcoin {
 namespace message {
 
+bool nonce_base::is_valid() const
+{
+    return (nonce != 0);
+}
+
 void nonce_base::reset()
 {
     nonce = 0;

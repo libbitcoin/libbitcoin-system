@@ -19,12 +19,18 @@
  */
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/data_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
+
+bool inventory_vector::is_valid() const
+{
+    return (type != inventory_type_id::error) || (hash != null_hash);
+}
 
 void inventory_vector::reset()
 {

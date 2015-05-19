@@ -27,6 +27,13 @@
 namespace libbitcoin {
 namespace chain {
 
+bool transaction_input::is_valid() const
+{
+    return (sequence != 0) ||
+        previous_output.is_valid() ||
+        script.is_valid();
+}
+
 void transaction_input::reset()
 {
     previous_output.reset();
