@@ -68,6 +68,11 @@ bool script::is_raw_data() const
         (operations[0].code == opcode::raw_data);
 }
 
+bool script::is_valid() const
+{
+    return !operations.empty();
+}
+
 void script::reset()
 {
     operations.clear();

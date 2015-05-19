@@ -46,11 +46,17 @@ public:
 
     std::string to_string() const;
 
+    bool is_valid() const;
+
     void reset();
 
     bool is_final() const;
 
     uint64_t satoshi_size() const;
+
+//    static transaction_input factory_from_data(const data_chunk& data);
+//
+//    static transaction_input factory_from_data(std::istream& stream);
 
     static uint64_t satoshi_fixed_size();
 };

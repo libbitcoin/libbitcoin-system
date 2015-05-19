@@ -26,6 +26,14 @@
 namespace libbitcoin {
 namespace message {
 
+bool header::is_valid() const
+{
+    return (magic != 0) ||
+        (payload_length != 0) ||
+        (checksum != 0) ||
+        !command.empty();
+}
+
 void header::reset()
 {
     magic = 0;

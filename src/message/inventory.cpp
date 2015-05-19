@@ -26,6 +26,11 @@
 namespace libbitcoin {
 namespace message {
 
+bool inventory::is_valid() const
+{
+    return !inventories.empty();
+}
+
 void inventory::reset()
 {
     inventories.clear();

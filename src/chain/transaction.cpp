@@ -27,6 +27,14 @@
 namespace libbitcoin {
 namespace chain {
 
+bool transaction::is_valid() const
+{
+    return (version != 0) ||
+        (locktime != 0) ||
+        !inputs.empty() ||
+        !outputs.empty();
+}
+
 void transaction::reset()
 {
     version = 0;

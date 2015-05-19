@@ -34,6 +34,11 @@ bool point::is_null() const
     return (index == max_index) && (hash == null_hash);
 }
 
+bool point::is_valid() const
+{
+    return (index != 0) || (hash != null_hash);
+}
+
 void point::reset()
 {
     hash.fill(0);
