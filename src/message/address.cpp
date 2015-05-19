@@ -24,6 +24,11 @@
 namespace libbitcoin {
 namespace message {
 
+bool address::is_valid() const
+{
+    return !addresses.empty();
+}
+
 void address::reset()
 {
     addresses.clear();

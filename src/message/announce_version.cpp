@@ -26,6 +26,17 @@
 namespace libbitcoin {
 namespace message {
 
+bool announce_version::is_valid() const
+{
+    return (version != 0) ||
+        (services != 0) ||
+        (timestamp != 0) ||
+        address_me.is_valid() ||
+        address_you.is_valid() ||
+        (nonce != 0) ||
+        !user_agent.empty();
+}
+
 void announce_version::reset()
 {
     version = 0;

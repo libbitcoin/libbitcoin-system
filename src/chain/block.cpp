@@ -27,6 +27,11 @@
 namespace libbitcoin {
 namespace chain {
 
+bool block::is_valid() const
+{
+    return !transactions.empty() || header.is_valid();
+}
+
 void block::reset()
 {
     header.reset();

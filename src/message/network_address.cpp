@@ -26,6 +26,18 @@
 namespace libbitcoin {
 namespace message {
 
+ip_address null_address = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+};
+
+bool network_address::is_valid() const
+{
+    return (timestamp != 0) ||
+        (services != 0) ||
+        (port != 0) ||
+        (ip != null_address);
+}
+
 void network_address::reset()
 {
     timestamp = 0;
