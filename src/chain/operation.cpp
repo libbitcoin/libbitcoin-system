@@ -23,7 +23,7 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
-#include <bitcoin/bitcoin/utility/data_source.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
