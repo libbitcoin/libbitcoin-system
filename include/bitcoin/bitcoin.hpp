@@ -93,6 +93,7 @@
 #include <bitcoin/bitcoin/utility/exceptions.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
