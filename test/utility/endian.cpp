@@ -32,40 +32,6 @@ bool is_failure( std::ios_base::failure const& ex )
 
 BOOST_AUTO_TEST_SUITE(endian_tests)
 
-//BOOST_AUTO_TEST_CASE(failbit_stickyness_test)
-//{
-//    const uint8_t content = 0xFF;
-//    const uint32_t expected = static_cast<uint32_t>(content) << ((sizeof(uint32_t) - sizeof(uint8_t)) * 8);
-//
-//    std::stringstream stream;
-//
-//    stream.put(content);
-//
-//    BOOST_REQUIRE(!stream.eof());
-//
-//    uint32_t value = 0;
-//
-//    value = from_big_endian_stream_unsafe<uint32_t>(stream);
-//
-//    BOOST_REQUIRE(expected == value);
-//    BOOST_REQUIRE(stream.fail());
-//    BOOST_REQUIRE(stream.eof());
-//    BOOST_REQUIRE(!stream.bad());
-//
-//    stream.put(content);
-//    BOOST_REQUIRE(!stream.bad());
-//
-//    uint8_t result = 0xFA;
-//    stream.readsome(reinterpret_cast<char*>(&result), sizeof result);
-//
-//    BOOST_REQUIRE(!stream.bad());
-//    BOOST_REQUIRE(stream.fail());
-//    BOOST_REQUIRE(stream.eof());
-//
-//    std::cout << "result: " << result << std::endl;
-//    BOOST_REQUIRE(result == 0xFA);
-//}
-
 BOOST_AUTO_TEST_CASE(from_big_endian_stream_unsafe_eof_stream_partial_read)
 {
     const uint8_t content = 0xFF;

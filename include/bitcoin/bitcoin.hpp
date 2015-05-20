@@ -124,6 +124,7 @@
 #include <bitcoin/bitcoin/utility/exceptions.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
