@@ -26,6 +26,20 @@
 namespace libbitcoin {
 namespace message {
 
+announce_version announce_version::factory_from_data(const data_chunk& data)
+{
+    announce_version instance;
+    instance.from_data(data);
+    return instance;
+}
+
+announce_version announce_version::factory_from_data(std::istream& stream)
+{
+    announce_version instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool announce_version::is_valid() const
 {
     return (version != 0) ||

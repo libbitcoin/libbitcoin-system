@@ -72,9 +72,13 @@ public:
 
     uint64_t satoshi_size(bool with_length_prefix /*= true*/) const;
 
-    static script from_data(const data_chunk& data);
+    static script factory_from_data(const data_chunk& data,
+        bool with_length_prefix /*= true*/,
+        bool allow_raw_data_fallback /*= false*/);
 
-    static script from_data(std::istream& stream);
+    static script factory_from_data(std::istream& stream,
+        bool with_length_prefix /*= true*/,
+        bool allow_raw_data_fallback /*= false*/);
 
     static BC_API bool verify(const script& input_script,
         const script& output_script, const transaction& parent_tx,

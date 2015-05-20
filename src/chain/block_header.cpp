@@ -26,6 +26,20 @@
 namespace libbitcoin {
 namespace chain {
 
+block_header block_header::factory_from_data(const data_chunk& data)
+{
+    block_header instance;
+    instance.from_data(data);
+    return instance;
+}
+
+block_header block_header::factory_from_data(std::istream& stream)
+{
+    block_header instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool block_header::is_valid() const
 {
     return (version != 0) ||

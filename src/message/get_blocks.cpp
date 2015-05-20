@@ -26,6 +26,20 @@
 namespace libbitcoin {
 namespace message {
 
+get_blocks get_blocks::factory_from_data(const data_chunk& data)
+{
+    get_blocks instance;
+    instance.from_data(data);
+    return instance;
+}
+
+get_blocks get_blocks::factory_from_data(std::istream& stream)
+{
+    get_blocks instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool get_blocks::is_valid() const
 {
     return !start_hashes.empty() || (hash_stop != null_hash);

@@ -54,9 +54,9 @@ public:
 
     uint64_t satoshi_size() const;
 
-//    static point factory_from_data(const data_chunk& data);
-//
-//    static point factory_from_data(std::istream& stream);
+    static point factory_from_data(const data_chunk& data);
+
+    static point factory_from_data(std::istream& stream);
 
     static uint64_t satoshi_fixed_size();
 };

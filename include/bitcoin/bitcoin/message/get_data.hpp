@@ -36,9 +36,9 @@ public:
 
     static const std::string satoshi_command;
 
-//    static get_data factory_from_data(const data_chunk& data);
-//
-//    static get_data factory_from_data(std::istream& stream);
+    static get_data factory_from_data(const data_chunk& data);
+
+    static get_data factory_from_data(std::istream& stream);
 };
 
 } // end message
