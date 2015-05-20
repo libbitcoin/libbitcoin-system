@@ -17,6 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#define BOOST_TEST_MODULE libbitcoin tests
+#define BOOST_TEST_MODULE libbitcoin_test
 #include <boost/test/unit_test.hpp>
 
