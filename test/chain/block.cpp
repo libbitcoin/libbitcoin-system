@@ -25,6 +25,16 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(block_tests)
 
+BOOST_AUTO_TEST_CASE(from_data_fails)
+{
+    data_chunk data(10);
+
+    chain::block instance;
+
+    BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
+    BOOST_REQUIRE_EQUAL(false, instance.is_valid());
+}
+
 BOOST_AUTO_TEST_CASE(roundtrip_genesis_block_serialization)
 {
     chain::block genblk = genesis_block();
