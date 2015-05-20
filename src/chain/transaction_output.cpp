@@ -20,7 +20,7 @@
 #include <bitcoin/bitcoin/chain/transaction_output.hpp>
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/utility/data_source.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 
 namespace libbitcoin {
