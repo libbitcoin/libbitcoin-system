@@ -26,6 +26,20 @@
 namespace libbitcoin {
 namespace message {
 
+inventory inventory::factory_from_data(const data_chunk& data)
+{
+    inventory instance;
+    instance.from_data(data);
+    return instance;
+}
+
+inventory inventory::factory_from_data(std::istream& stream)
+{
+    inventory instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool inventory::is_valid() const
 {
     return !inventories.empty();

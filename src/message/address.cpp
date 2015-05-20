@@ -24,6 +24,20 @@
 namespace libbitcoin {
 namespace message {
 
+address address::factory_from_data(const data_chunk& data)
+{
+    address instance;
+    instance.from_data(data);
+    return instance;
+}
+
+address address::factory_from_data(std::istream& stream)
+{
+    address instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool address::is_valid() const
 {
     return !addresses.empty();

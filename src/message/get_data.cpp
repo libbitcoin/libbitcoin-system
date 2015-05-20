@@ -22,5 +22,19 @@
 namespace libbitcoin {
 namespace message {
 
+get_data get_data::factory_from_data(const data_chunk& data)
+{
+    get_data instance;
+    instance.from_data(data);
+    return instance;
+}
+
+get_data get_data::factory_from_data(std::istream& stream)
+{
+    get_data instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 } // end message
 } // end libbitcoin
