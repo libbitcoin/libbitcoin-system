@@ -81,9 +81,15 @@ void write_short_hash(std::ostream& stream, const short_hash& value)
 
 void write_fixed_string(std::ostream& stream, const std::string& value, size_t string_size)
 {
-    BITCOIN_ASSERT(value.size() <= string_size);
+    size_t max_size = std::max(string_size, value.size());
     data_chunk raw_string(string_size, 0);
-    std::copy(value.begin(), value.end(), raw_string.begin());
+
+    std::copy_n(value.begin(), max_size, raw_string.begin());
+
+    // conditionally truncate
+    if (max_size > string_size)
+        raw_string.resize(string_size);
+
     write_data(stream, raw_string);
 }
 

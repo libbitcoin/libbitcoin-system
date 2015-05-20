@@ -19,7 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/utility/data_source.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 
 namespace libbitcoin {
 namespace message {

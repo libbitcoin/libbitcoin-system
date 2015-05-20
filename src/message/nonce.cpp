@@ -19,7 +19,7 @@
  */
 #include <bitcoin/bitcoin/message/nonce.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/utility/data_source.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 

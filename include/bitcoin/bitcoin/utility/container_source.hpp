@@ -21,9 +21,9 @@
 #define LIBBITCOIN_DATA_SOURCE_HPP
 
 #include <algorithm>
-#include <iosfwd>
-//#include <istream>
+//#include <iosfwd>
 #include <boost/iostreams/categories.hpp>
+#include <boost/static_assert.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
@@ -31,24 +31,23 @@ namespace libbitcoin {
 // modified from boost.iostreams example
 // http://www.boost.org/doc/libs/1_55_0/libs/iostreams/doc/tutorial/container_source.html
 template<typename Container, typename SourceType, typename CharType>
-class BC_API data_source
+class BC_API container_source
 {
 public:
 
     typedef CharType char_type;
-    struct category : boost::iostreams::source_tag
-    {
-    };
+    typedef boost::iostreams::source_tag category;
 
-    data_source(const Container& container)
+    container_source(const Container& container)
         : container_(container), pos_(0)
     {
+        BOOST_STATIC_ASSERT((sizeof(SourceType) == sizeof(CharType)));
     }
 
     std::streamsize read(char_type* s, std::streamsize n)
     {
         auto amt = static_cast<std::streamsize>(container_.size() - pos_);
-        auto result = (std::min)(n, amt);
+        auto result = std::min(n, amt);
 
         if (result != 0)
         {
@@ -74,7 +73,7 @@ private:
 };
 
 template<typename Container>
-using byte_source = data_source<Container, uint8_t, char>;
+using byte_source = container_source<Container, uint8_t, char>;
 
 } // namespace libbitcoin
 
