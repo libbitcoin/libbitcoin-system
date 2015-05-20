@@ -29,6 +29,20 @@
 namespace libbitcoin {
 namespace chain {
 
+operation operation::factory_from_data(const data_chunk& data)
+{
+    operation instance;
+    instance.from_data(data);
+    return instance;
+}
+
+operation operation::factory_from_data(std::istream& stream)
+{
+    operation instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool operation::is_valid() const
 {
     return (code == opcode::zero) && data.empty();

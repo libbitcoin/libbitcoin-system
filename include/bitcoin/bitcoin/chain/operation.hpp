@@ -51,9 +51,9 @@ public:
 
     uint64_t satoshi_size() const;
 
-//    static operation factory_from_data(const data_chunk& data);
-//
-//    static operation factory_from_data(std::istream& stream);
+    static operation factory_from_data(const data_chunk& data);
+
+    static operation factory_from_data(std::istream& stream);
 
 private:
 

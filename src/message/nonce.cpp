@@ -73,9 +73,37 @@ uint64_t nonce_base::satoshi_fixed_size()
     return 8;
 }
 
+ping ping::factory_from_data(const data_chunk& data)
+{
+    ping instance;
+    instance.from_data(data);
+    return instance;
+}
+
+ping ping::factory_from_data(std::istream& stream)
+{
+    ping instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 uint64_t ping::satoshi_fixed_size()
 {
     return nonce_base::satoshi_fixed_size();
+}
+
+pong pong::factory_from_data(const data_chunk& data)
+{
+    pong instance;
+    instance.from_data(data);
+    return instance;
+}
+
+pong pong::factory_from_data(std::istream& stream)
+{
+    pong instance;
+    instance.from_data(stream);
+    return instance;
 }
 
 uint64_t pong::satoshi_fixed_size()

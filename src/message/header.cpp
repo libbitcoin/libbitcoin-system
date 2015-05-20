@@ -26,6 +26,20 @@
 namespace libbitcoin {
 namespace message {
 
+header header::factory_from_data(const data_chunk& data)
+{
+    header instance;
+    instance.from_data(data);
+    return instance;
+}
+
+header header::factory_from_data(std::istream& stream)
+{
+    header instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool header::is_valid() const
 {
     return (magic != 0) ||

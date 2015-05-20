@@ -52,9 +52,9 @@ public:
 
     uint64_t satoshi_size() const;
 
-//    static block factory_from_data(const data_chunk& data);
-//
-//    static block factory_from_data(std::istream& stream);
+    static block factory_from_data(const data_chunk& data);
+
+    static block factory_from_data(std::istream& stream);
 
     static hash_digest generate_merkle_root(
         const transaction_list& transactions);

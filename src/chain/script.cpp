@@ -43,6 +43,22 @@ static const data_chunk stack_true_value{1};
 
 constexpr uint64_t op_counter_limit = 201;
 
+script script::factory_from_data(const data_chunk& data, bool with_length_prefix,
+    bool allow_raw_data_fallback)
+{
+    script instance;
+    instance.from_data(data, with_length_prefix, allow_raw_data_fallback);
+    return instance;
+}
+
+script script::factory_from_data(std::istream& stream, bool with_length_prefix,
+    bool allow_raw_data_fallback)
+{
+    script instance;
+    instance.from_data(stream, with_length_prefix, allow_raw_data_fallback);
+    return instance;
+}
+
 payment_type script::type() const
 {
     if (is_pubkey_type(operations))
