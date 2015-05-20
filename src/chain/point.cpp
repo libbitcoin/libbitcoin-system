@@ -34,6 +34,20 @@ bool point::is_null() const
     return (index == max_index) && (hash == null_hash);
 }
 
+point point::factory_from_data(const data_chunk& data)
+{
+    point instance;
+    instance.from_data(data);
+    return instance;
+}
+
+point point::factory_from_data(std::istream& stream)
+{
+    point instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool point::is_valid() const
 {
     return (index != 0) || (hash != null_hash);

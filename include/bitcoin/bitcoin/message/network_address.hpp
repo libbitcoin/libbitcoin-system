@@ -53,9 +53,11 @@ public:
 
     uint64_t satoshi_size(bool with_timestamp /*= false*/) const;
 
-    static network_address from_data(const data_chunk& data);
+    static network_address factory_from_data(const data_chunk& data,
+        bool with_timestamp /*= false*/);
 
-    static network_address from_data(std::istream& stream);
+    static network_address factory_from_data(std::istream& stream,
+        bool with_timestamp /*= false*/);
 
     static uint64_t satoshi_fixed_size(bool with_timestamp /*= false*/);
 };

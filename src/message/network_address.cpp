@@ -30,6 +30,22 @@ ip_address null_address = {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+network_address network_address::factory_from_data(const data_chunk& data,
+    bool with_timestamp /*= false*/)
+{
+    network_address instance;
+    instance.from_data(data, with_timestamp);
+    return instance;
+}
+
+network_address network_address::factory_from_data(std::istream& stream,
+    bool with_timestamp /*= false*/)
+{
+    network_address instance;
+    instance.from_data(stream, with_timestamp);
+    return instance;
+}
+
 bool network_address::is_valid() const
 {
     return (timestamp != 0) ||

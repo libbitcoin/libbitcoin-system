@@ -60,9 +60,9 @@ public:
 
     static const std::string satoshi_command;
 
-//    static ping factory_from_data(const data_chunk& data);
-//
-//    static ping factory_from_data(std::istream& stream);
+    static ping factory_from_data(const data_chunk& data);
+
+    static ping factory_from_data(std::istream& stream);
 
     static uint64_t satoshi_fixed_size();
 };
@@ -73,9 +73,9 @@ public:
 
     static const std::string satoshi_command;
 
-//    static pong factory_from_data(const data_chunk& data);
-//
-//    static pong factory_from_data(std::istream& stream);
+    static pong factory_from_data(const data_chunk& data);
+
+    static pong factory_from_data(std::istream& stream);
 
     static uint64_t satoshi_fixed_size();
 };

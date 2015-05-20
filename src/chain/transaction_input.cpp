@@ -27,6 +27,20 @@
 namespace libbitcoin {
 namespace chain {
 
+transaction_input transaction_input::factory_from_data(const data_chunk& data)
+{
+    transaction_input instance;
+    instance.from_data(data);
+    return instance;
+}
+
+transaction_input transaction_input::factory_from_data(std::istream& stream)
+{
+    transaction_input instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool transaction_input::is_valid() const
 {
     return (sequence != 0) ||

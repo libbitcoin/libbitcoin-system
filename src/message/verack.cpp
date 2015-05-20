@@ -25,6 +25,20 @@
 namespace libbitcoin {
 namespace message {
 
+verack verack::factory_from_data(const data_chunk& data)
+{
+    verack instance;
+    instance.from_data(data);
+    return instance;
+}
+
+verack verack::factory_from_data(std::istream& stream)
+{
+    verack instance;
+    instance.from_data(stream);
+    return instance;
+}
+
 bool verack::is_valid() const
 {
     return true;
