@@ -25,7 +25,6 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -46,6 +45,8 @@ public:
     bool from_data(std::istream& stream, bool with_timestamp /*= false*/);
 
     data_chunk to_data(bool with_timestamp /*= false*/) const;
+
+    void to_data(std::ostream& stream, bool with_timestamp /*= false*/) const;
 
     bool is_valid() const;
 

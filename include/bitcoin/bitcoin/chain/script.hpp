@@ -27,7 +27,6 @@
 #include <bitcoin/bitcoin/chain/payment.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -59,6 +58,8 @@ public:
         bool allow_raw_data_fallback /*= false*/);
 
     data_chunk to_data(bool with_length_prefix /*= true*/) const;
+
+    void to_data(std::ostream& stream, bool with_length_prefix /*= true*/) const;
 
     bool from_string(const std::string& human_readable);
 

@@ -41,6 +41,12 @@ void write_little_endian(std::ostream& stream, T value)
     stream.write(reinterpret_cast<const char*>(&value), sizeof(T));
 }
 
+template <typename T>
+void write_data(std::ostream& stream, T& value)
+{
+    stream.write(reinterpret_cast<const char*>(value.data()), value.size());
+}
+
 template<unsigned N>
 void write_bytes(std::ostream& stream, const byte_array<N>& value)
 {

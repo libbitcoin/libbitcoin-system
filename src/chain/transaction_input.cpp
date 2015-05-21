@@ -21,8 +21,10 @@
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -57,8 +59,7 @@ void transaction_input::reset()
 
 bool transaction_input::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -90,17 +91,18 @@ bool transaction_input::from_data(std::istream& stream)
 
 data_chunk transaction_input::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
 
-    serial.write_data(previous_output.to_data());
-    data_chunk raw_script = script.to_data(true);
-    serial.write_data(raw_script);
-    serial.write_4_bytes(sequence);
-
-    BITCOIN_ASSERT(std::distance(result.begin(), serial.iterator()) == satoshi_size());
-
-    return result;
+void transaction_input::to_data(std::ostream& stream) const
+{
+    previous_output.to_data(stream);
+    script.to_data(stream, true);
+    write_4_bytes(stream, sequence);
 }
 
 uint64_t transaction_input::satoshi_size() const

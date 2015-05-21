@@ -20,9 +20,10 @@
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -54,8 +55,7 @@ void block::reset()
 
 bool block::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -89,17 +89,20 @@ bool block::from_data(std::istream& stream)
 
 data_chunk block::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
 
-    serial.write_data(header.to_data());
-
-    serial.write_variable_uint(transactions.size());
+void block::to_data(std::ostream& stream) const
+{
+    header.to_data(stream);
+    write_variable_uint(stream, transactions.size());
 
     for (const transaction& tx : transactions)
-        serial.write_data(tx.to_data());
-
-    return result;
+        tx.to_data(stream);
 }
 
 uint64_t block::satoshi_size() const
@@ -136,11 +139,11 @@ hash_digest build_merkle_tree(hash_list& merkle)
         for (auto it = merkle.begin(); it != merkle.end(); it += 2)
         {
             // Join both current hashes together (concatenate).
-            data_chunk concat_data(hash_size * 2);
-            auto concat = make_serializer(concat_data.begin());
-            concat.write_hash(*it);
-            concat.write_hash(*(it + 1));
-            BITCOIN_ASSERT(concat.iterator() == concat_data.end());
+            data_chunk concat_data;
+            boost::iostreams::stream<byte_sink<data_chunk>> concat_stream(concat_data);
+            write_hash(concat_stream, *it);
+            write_hash(concat_stream, *(it + 1));
+            BITCOIN_ASSERT(concat_data.size() == (2 * hash_size));
 
             // Hash both of the hashes.
             hash_digest new_root = bitcoin_hash(concat_data);

@@ -19,9 +19,10 @@
  */
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -64,8 +65,7 @@ void network_address::reset()
 
 bool network_address::from_data(const data_chunk& data, bool with_timestamp)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream, with_timestamp);
 }
 
@@ -88,16 +88,21 @@ bool network_address::from_data(std::istream& stream, bool with_timestamp)
 
 data_chunk network_address::to_data(bool with_timestamp) const
 {
-    data_chunk result(satoshi_size(with_timestamp));
-    auto serial = make_serializer(result.begin());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream, with_timestamp);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
 
+void network_address::to_data(std::ostream& stream, bool with_timestamp) const
+{
     if (with_timestamp)
-        serial.write_4_bytes(timestamp);
+        write_4_bytes(stream, timestamp);
 
-    serial.write_8_bytes(services);
-    serial.write_data(ip);
-    serial.write_big_endian<uint16_t>(port);
-    return result;
+    write_8_bytes(stream, services);
+    write_data(stream, ip);
+    write_big_endian<uint16_t>(stream, port);
 }
 
 uint64_t network_address::satoshi_size(bool with_timestamp) const
