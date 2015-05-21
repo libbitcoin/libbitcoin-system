@@ -130,10 +130,10 @@ src_libbitcoin_la_SOURCES = \
     src/utility/ostream.cpp \
     src/utility/random.cpp \
     src/utility/sequencer.cpp \
-    src/utility/serializer.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
+    src/utility/variable_uint_size.cpp \
     src/wallet/bip38.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
@@ -361,6 +361,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
+    include/bitcoin/bitcoin/utility/container_sink.hpp \
     include/bitcoin/bitcoin/utility/container_source.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
@@ -378,7 +379,8 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/synchronizer.hpp \
     include/bitcoin/bitcoin/utility/thread.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
-    include/bitcoin/bitcoin/utility/timer.hpp
+    include/bitcoin/bitcoin/utility/timer.hpp \
+    include/bitcoin/bitcoin/utility/variable_uint_size.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \

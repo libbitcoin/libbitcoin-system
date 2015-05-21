@@ -116,6 +116,7 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/binary.hpp>
 #include <bitcoin/bitcoin/utility/collection.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/decorator.hpp>
@@ -134,7 +135,7 @@
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/timer.hpp>
-#include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
 #include <bitcoin/bitcoin/wallet/bip38.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>

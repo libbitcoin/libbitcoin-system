@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONTAINER_SOURCE_HPP
-#define LIBBITCOIN_CONTAINER_SOURCE_HPP
+#ifndef LIBBITCOIN_CONTAINER_SINK_HPP
+#define LIBBITCOIN_CONTAINER_SINK_HPP
 
 #include <algorithm>
 //#include <iosfwd>
@@ -30,50 +30,34 @@ namespace libbitcoin {
 
 // modified from boost.iostreams example
 // http://www.boost.org/doc/libs/1_55_0/libs/iostreams/doc/tutorial/container_source.html
-template<typename Container, typename SourceType, typename CharType>
-class BC_API container_source
+template<typename Container, typename SinkType, typename CharType>
+class BC_API container_sink
 {
 public:
 
     typedef CharType char_type;
-    typedef boost::iostreams::source_tag category;
+    typedef boost::iostreams::sink_tag category;
 
-    container_source(const Container& container)
-        : container_(container), pos_(0)
+    container_sink(Container& container)
+        : container_(container)
     {
-        BOOST_STATIC_ASSERT((sizeof(SourceType) == sizeof(CharType)));
+        BOOST_STATIC_ASSERT((sizeof(SinkType) == sizeof(CharType)));
     }
 
-    std::streamsize read(char_type* s, std::streamsize n)
+    std::streamsize write(const char_type* s, std::streamsize n)
     {
-        auto amt = static_cast<std::streamsize>(container_.size() - pos_);
-        auto result = std::min(n, amt);
-
-        if (result != 0)
-        {
-            std::copy(
-                container_.begin() + pos_,
-                container_.begin() + pos_ + result,
-                s);
-
-            pos_ += result;
-        }
-        else
-        {
-            result = -1; // EOF
-        }
-
-        return result;
+        const SinkType* safe_s = reinterpret_cast<const SinkType*>(s);
+        container_.insert(container_.end(), safe_s, safe_s + n);
+        return n;
     }
 
 private:
 
-    const Container& container_;
-    typename Container::size_type pos_;
+    Container& container_;
 };
 
 template<typename Container>
-using byte_source = container_source<Container, uint8_t, char>;
+using byte_sink = container_sink<Container, uint8_t, char>;
 
 } // namespace libbitcoin
 

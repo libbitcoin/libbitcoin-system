@@ -44,6 +44,8 @@ public:
 
     data_chunk to_data() const;
 
+    void to_data(std::ostream& stream) const;
+
     std::string to_string() const;
 
     bool is_valid() const;

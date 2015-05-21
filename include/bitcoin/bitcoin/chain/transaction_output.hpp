@@ -25,7 +25,6 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -42,6 +41,8 @@ public:
     bool from_data(std::istream& stream);
 
     data_chunk to_data() const;
+
+    void to_data(std::ostream& stream) const;
 
     std::string to_string() const;
 

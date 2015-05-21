@@ -62,4 +62,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

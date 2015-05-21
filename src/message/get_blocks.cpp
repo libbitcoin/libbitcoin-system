@@ -20,8 +20,10 @@
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -53,8 +55,7 @@ void get_blocks::reset()
 
 bool get_blocks::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -82,21 +83,22 @@ bool get_blocks::from_data(std::istream& stream)
 
 data_chunk get_blocks::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
 
-    serial.write_4_bytes(protocol_version);
+void get_blocks::to_data(std::ostream& stream) const
+{
+    write_4_bytes(stream, protocol_version);
+    write_variable_uint(stream, start_hashes.size());
 
-    serial.write_variable_uint(start_hashes.size());
+    for (hash_digest start_hash : start_hashes)
+        write_hash(stream, start_hash);
 
-    for (hash_digest start_hash: start_hashes)
-    {
-        serial.write_hash(start_hash);
-    }
-
-    serial.write_hash(hash_stop);
-
-    return result;
+    write_hash(stream, hash_stop);
 }
 
 uint64_t get_blocks::satoshi_size() const

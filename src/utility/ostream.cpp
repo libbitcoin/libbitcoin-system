@@ -64,10 +64,10 @@ void write_variable_uint(std::ostream& stream, uint64_t value)
     }
 }
 
-void write_data(std::ostream& stream, const data_chunk& value)
-{
-    stream.write(reinterpret_cast<const char*>(value.data()), value.size());
-}
+//void write_data(std::ostream& stream, const data_chunk& value)
+//{
+//    stream.write(reinterpret_cast<const char*>(value.data()), value.size());
+//}
 
 void write_hash(std::ostream& stream, const hash_digest& value)
 {

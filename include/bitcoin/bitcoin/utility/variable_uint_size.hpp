@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,46 +17,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_INVENTORY_HPP
-#define LIBBITCOIN_MESSAGE_INVENTORY_HPP
+#ifndef LIBBITCOIN_VARIABLE_UINT_SIZE_HPP
+#define LIBBITCOIN_VARIABLE_UINT_SIZE_HPP
 
-#include <istream>
-#include <string>
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/message/inventory_vector.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-namespace message {
 
-class BC_API inventory
-{
-public:
+BC_API size_t variable_uint_size(uint64_t v);
 
-    static const std::string satoshi_command;
-
-    inventory_list inventories;
-
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    data_chunk to_data() const;
-
-    void to_data(std::ostream& stream) const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size() const;
-
-    static inventory factory_from_data(const data_chunk& data);
-
-    static inventory factory_from_data(std::istream& stream);
-};
-
-} // end message
-} // end libbitcoin
+} // namespace libbitcoin
 
 #endif
+
