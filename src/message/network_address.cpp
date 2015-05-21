@@ -91,7 +91,7 @@ data_chunk network_address::to_data(bool with_timestamp) const
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream, with_timestamp);
-    BOOST_ASSERT(data.size() == satoshi_size());
+    BOOST_ASSERT(data.size() == satoshi_size(with_timestamp));
     return data;
 }
 
