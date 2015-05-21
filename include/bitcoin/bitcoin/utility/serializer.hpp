@@ -24,10 +24,10 @@
 #include <string>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
+
 
 namespace libbitcoin {
-
-BC_API size_t variable_uint_size(uint64_t v);
 
 /**
  * Serializer that uses iterators and is oblivious to the underlying

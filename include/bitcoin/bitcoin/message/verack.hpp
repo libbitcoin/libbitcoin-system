@@ -24,7 +24,6 @@
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -40,6 +39,8 @@ public:
     bool from_data(std::istream& stream);
 
     data_chunk to_data() const;
+
+    void to_data(std::ostream& stream) const;
 
     bool is_valid() const;
 

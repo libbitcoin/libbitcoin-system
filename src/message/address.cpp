@@ -19,7 +19,10 @@
  */
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -50,8 +53,7 @@ void address::reset()
 
 bool address::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -78,17 +80,19 @@ bool address::from_data(std::istream& stream)
 
 data_chunk address::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
 
-    serial.write_variable_uint(addresses.size());
+void address::to_data(std::ostream& stream) const
+{
+    write_variable_uint(stream, addresses.size());
 
-    for (const network_address& net_address: addresses)
-    {
-        serial.write_data(net_address.to_data(true));
-    }
-
-    return result;
+    for (const network_address& net_address : addresses)
+        net_address.to_data(stream, true);
 }
 
 uint64_t address::satoshi_size() const
