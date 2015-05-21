@@ -19,8 +19,10 @@
  */
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -50,8 +52,7 @@ void verack::reset()
 
 bool verack::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -63,8 +64,15 @@ bool verack::from_data(std::istream& stream)
 
 data_chunk verack::to_data() const
 {
-    data_chunk result(0);
-    return result;
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
+
+void verack::to_data(std::ostream& stream) const
+{
 }
 
 uint64_t verack::satoshi_size() const

@@ -19,9 +19,10 @@
  */
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -52,8 +53,7 @@ void inventory::reset()
 
 bool inventory::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -81,14 +81,19 @@ bool inventory::from_data(std::istream& stream)
 
 data_chunk inventory::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
-    serial.write_variable_uint(inventories.size());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
 
-    for (const inventory_vector inv: inventories)
-        serial.write_data(inv.to_data());
+void inventory::to_data(std::ostream& stream) const
+{
+    write_variable_uint(stream, inventories.size());
 
-    return result;
+    for (const inventory_vector inv : inventories)
+        inv.to_data(stream);
 }
 
 uint64_t inventory::satoshi_size() const

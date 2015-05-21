@@ -26,11 +26,13 @@
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
 #include "../conditional_stack.hpp"
 #include "../evaluation_context.hpp"
 
@@ -101,8 +103,7 @@ bool script::from_data(const data_chunk& data, bool with_length_prefix,
 
     if (with_length_prefix)
     {
-        byte_source<data_chunk> source(data);
-        boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+        boost::iostreams::stream<byte_source<data_chunk>> istream(data);
         result = from_data(istream, true, allow_raw_data_fallback);
     }
     else
@@ -158,28 +159,28 @@ bool script::from_data(std::istream& stream, bool with_length_prefix,
 
 data_chunk script::to_data(bool with_length_prefix) const
 {
-    data_chunk result(satoshi_size(with_length_prefix));
-    auto serial = make_serializer(result.begin());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream, with_length_prefix);
+    BOOST_ASSERT(data.size() == satoshi_size(with_length_prefix));
+    return data;
+}
 
+void script::to_data(std::ostream& stream, bool with_length_prefix) const
+{
     if (with_length_prefix)
-    {
-        serial.write_variable_uint(satoshi_content_size());
-    }
+        write_variable_uint(stream, satoshi_content_size());
 
     if ((operations.size() > 0) &&
         (operations[0].code == opcode::raw_data))
     {
-        serial.write_data(operations[0].to_data());
+        operations[0].to_data(stream);
     }
     else
     {
         for (const operation& op: operations)
-        {
-            serial.write_data(op.to_data());
-        }
+            op.to_data(stream);
     }
-
-    return result;
 }
 
 uint64_t script::satoshi_content_size() const
@@ -304,8 +305,7 @@ bool script::parse(const data_chunk& raw_script)
 
     if (raw_script.begin() != raw_script.end())
     {
-        byte_source<data_chunk> source(raw_script);
-        boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+        boost::iostreams::stream<byte_source<data_chunk>> istream(raw_script);
 
         while (success && istream &&
             (istream.peek() != std::istream::traits_type::eof()))

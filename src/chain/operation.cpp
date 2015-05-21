@@ -23,8 +23,10 @@
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -56,8 +58,7 @@ void operation::reset()
 
 bool operation::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -94,9 +95,15 @@ bool operation::from_data(std::istream& stream)
 
 data_chunk operation::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
 
+void operation::to_data(std::ostream& stream) const
+{
     if (code != opcode::raw_data)
     {
         uint8_t raw_byte = static_cast<uint8_t>(code);
@@ -104,22 +111,20 @@ data_chunk operation::to_data() const
         if (code == opcode::special)
             raw_byte = static_cast<uint8_t>(data.size());
 
-        serial.write_byte(raw_byte);
+        write_byte(stream, raw_byte);
 
         switch (code)
         {
             case opcode::pushdata1:
-                serial.write_byte(static_cast<uint8_t>(data.size()));
+                write_byte(stream, static_cast<uint8_t>(data.size()));
                 break;
 
             case opcode::pushdata2:
-                serial.write_little_endian(static_cast<uint16_t>(
-                    data.size()));
+                write_little_endian(stream, static_cast<uint16_t>(data.size()));
                 break;
 
             case opcode::pushdata4:
-                serial.write_little_endian(static_cast<uint32_t>(
-                    data.size()));
+                write_little_endian(stream, static_cast<uint32_t>(data.size()));
                 break;
 
             default:
@@ -127,9 +132,7 @@ data_chunk operation::to_data() const
         }
     }
 
-    serial.write_data(data);
-
-    return result;
+    write_data(stream, data);
 }
 
 uint64_t operation::satoshi_size() const

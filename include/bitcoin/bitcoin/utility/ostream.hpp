@@ -24,6 +24,7 @@
 #include <string>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
 
 namespace libbitcoin {
 
@@ -50,7 +51,8 @@ void write_little_endian(std::ostream& stream, T value);
 
 void write_variable_uint(std::ostream& stream, uint64_t value);
 
-void write_data(std::ostream& stream, const data_chunk& value);
+template <typename T>
+void write_data(std::ostream& stream, T& value);
 
 void write_hash(std::ostream& stream, const hash_digest& value);
 

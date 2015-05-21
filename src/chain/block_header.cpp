@@ -20,8 +20,10 @@
 #include <bitcoin/bitcoin/chain/block_header.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -62,8 +64,7 @@ void block_header::reset()
 
 bool block_header::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -90,21 +91,21 @@ bool block_header::from_data(std::istream& stream)
 
 data_chunk block_header::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
 
-    serial.write_4_bytes(version);
-    serial.write_hash(previous_block_hash);
-    serial.write_hash(merkle);
-    serial.write_4_bytes(timestamp);
-    serial.write_4_bytes(bits);
-    serial.write_4_bytes(nonce);
-
-    BITCOIN_ASSERT(
-        std::distance(result.begin(), serial.iterator())
-            == block_header::satoshi_fixed_size());
-
-    return result;
+void block_header::to_data(std::ostream& stream) const
+{
+    write_4_bytes(stream, version);
+    write_hash(stream, previous_block_hash);
+    write_hash(stream, merkle);
+    write_4_bytes(stream, timestamp);
+    write_4_bytes(stream, bits);
+    write_4_bytes(stream, nonce);
 }
 
 uint64_t block_header::satoshi_size() const

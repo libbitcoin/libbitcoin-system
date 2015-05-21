@@ -20,8 +20,10 @@
 #include <bitcoin/bitcoin/message/header.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -58,8 +60,7 @@ void header::reset()
 
 bool header::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -80,16 +81,21 @@ bool header::from_data(std::istream& stream)
 
 data_chunk header::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
-    serial.write_4_bytes(magic);
-    serial.write_fixed_string(command, command_size);
-    serial.write_4_bytes(payload_length);
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
+
+void header::to_data(std::ostream& stream) const
+{
+    write_4_bytes(stream, magic);
+    write_fixed_string(stream, command, command_size);
+    write_4_bytes(stream, payload_length);
 
     if (checksum != 0)
-        serial.write_4_bytes(checksum);
-
-    return result;
+        write_4_bytes(stream, checksum);
 }
 
 uint64_t header::satoshi_size() const

@@ -19,9 +19,10 @@
  */
 #include <bitcoin/bitcoin/message/announce_version.hpp>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/ostream.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -64,8 +65,7 @@ void announce_version::reset()
 
 bool announce_version::from_data(const data_chunk& data)
 {
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     return from_data(istream);
 }
 
@@ -103,17 +103,23 @@ bool announce_version::from_data(std::istream& stream)
 
 data_chunk announce_version::to_data() const
 {
-    data_chunk result(satoshi_size());
-    auto serial = make_serializer(result.begin());
-    serial.write_4_bytes(version);
-    serial.write_8_bytes(services);
-    serial.write_8_bytes(timestamp);
-    serial.write_data(address_me.to_data(false));
-    serial.write_data(address_you.to_data(false));
-    serial.write_8_bytes(nonce);
-    serial.write_string(user_agent);
-    serial.write_4_bytes(start_height);
-    return result;
+    data_chunk data;
+    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    to_data(ostream);
+    BOOST_ASSERT(data.size() == satoshi_size());
+    return data;
+}
+
+void announce_version::to_data(std::ostream& stream) const
+{
+    write_4_bytes(stream, version);
+    write_8_bytes(stream, services);
+    write_8_bytes(stream, timestamp);
+    address_me.to_data(stream, false);
+    address_you.to_data(stream, false);
+    write_8_bytes(stream, nonce);
+    write_string(stream, user_agent);
+    write_4_bytes(stream, start_height);
 }
 
 uint64_t announce_version::satoshi_size() const
