@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -222,8 +223,8 @@ uint32_t uint256_t::GetCompact(bool fNegative) const
         nSize++;
     }
 
-    assert((nCompact & ~0x007fffff) == 0);
-    assert(nSize < 256);
+    BITCOIN_ASSERT((nCompact & ~0x007fffff) == 0);
+    BITCOIN_ASSERT(nSize < 256);
     nCompact |= nSize << 24;
     nCompact |= (fNegative && (nCompact & 0x007fffff) ? 0x00800000 : 0);
     return nCompact;
