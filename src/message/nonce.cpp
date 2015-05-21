@@ -60,7 +60,8 @@ data_chunk nonce_base::to_data() const
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream);
-    BOOST_ASSERT(data.size() == satoshi_size());
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == satoshi_size());
     return data;
 }
 
