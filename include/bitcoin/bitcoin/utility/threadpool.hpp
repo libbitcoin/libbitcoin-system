@@ -48,8 +48,8 @@ public:
 
     /**
      * Threadpool constructor. spawn()s number_threads threads.
-     *
      * @param[in]   number_threads  Number of threads to spawn.
+     * @param[in]   priority        Priority of threads to spawn.
      */
     BC_API threadpool(size_t number_threads=0, 
         thread_priority priority=thread_priority::normal);
@@ -61,6 +61,8 @@ public:
 
     /**
      * Add n threads to this threadpool.
+     * @param[in]   number_threads  Number of threads to add.
+     * @param[in]   priority        Priority of threads to add.
      */
     BC_API void spawn(size_t number_threads=1, 
         thread_priority priority=thread_priority::normal);
