@@ -162,7 +162,8 @@ data_chunk script::to_data(bool with_length_prefix) const
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream, with_length_prefix);
-    BOOST_ASSERT(data.size() == satoshi_size(with_length_prefix));
+    ostream.flush();
+    BITCOIN_ASSERT(data.size() == satoshi_size(with_length_prefix));
     return data;
 }
 
