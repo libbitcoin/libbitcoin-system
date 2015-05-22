@@ -56,7 +56,8 @@ hosts::~hosts()
 
 void hosts::load(load_handler handle_load)
 {
-    load(hosts_path_.string(), handle_load);
+    strand_.randomly_queue(
+        &hosts::do_load, this, hosts_path_.string(), handle_load);
 }
 
 /// Deprecated, set path on construct.
@@ -68,11 +69,11 @@ void hosts::load(const std::string& path, load_handler handle_load)
 void hosts::do_load(const path& path, load_handler handle_load)
 {
     bc::ifstream file(path.string());
-    if (!file.good())
+    if (file.bad())
     {
-        const auto error = std::error_code(
-            std::make_error_code(std::errc::io_error));
+        const auto error = std::make_error_code(std::errc::io_error);
         handle_load(error);
+        return;
     }
 
     std::string line;
@@ -100,10 +101,10 @@ void hosts::do_load(const path& path, load_handler handle_load)
     handle_load(std::error_code());
 }
 
-
 void hosts::save(save_handler handle_save)
 {
-    save(hosts_path_.string(), handle_save);
+    strand_.randomly_queue(
+        std::bind(&hosts::do_save, this, hosts_path_.string(), handle_save));
 }
 
 /// Deprecated, set path on construct.
@@ -116,11 +117,11 @@ void hosts::save(const std::string& path, save_handler handle_save)
 void hosts::do_save(const path& path, save_handler handle_save)
 {
     bc::ofstream file(path.string());
-    if (!file.good())
+    if (file.bad())
     {
-        const auto error = std::error_code(
-            std::make_error_code(std::errc::io_error));
+        const auto error = std::make_error_code(std::errc::io_error);
         handle_save(error);
+        return;
     }
 
     for (const hosts_field& field: buffer_)
