@@ -70,19 +70,20 @@ void threadpool::shutdown()
 }
 void threadpool::join()
 {
-    for (std::thread& thread: threads_)
-    {
-        try
-        {
-            thread.join();
-        }
-        catch (const std::system_error&)
-        {
-            // other than logging, or altering the signature to
-            // return the error to the join caller, not sure what
-            // to do here.
-        }
-    }
+    for (auto& thread: threads_)
+    //{
+        //try
+        //{
+            if (thread.joinable())
+                thread.join();
+        //}
+        //catch (const std::system_error&)
+        //{
+        //    // other than logging, or altering the signature to
+        //    // return the error to the join caller, not sure what
+        //    // to do here.
+        //}
+    //}
 }
 
 io_service& threadpool::service()
