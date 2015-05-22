@@ -36,7 +36,7 @@ using boost::filesystem::path;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-// TODO: expose these with accessors (the are safe to change at any time).
+// TODO: expose these with accessors (they are safe to change at any time).
 constexpr size_t watermark_limit = 10;
 const time_duration watermark_reset_interval = seconds(1);
 
