@@ -78,9 +78,10 @@ void protocol::start(completion_handler handle_complete)
     // Bootstrap from seeds if neccessary.
     bootstrap(strand_.wrap(
         &protocol::handle_bootstrap, this, _1, handle_complete));
+
     // Start handshake service, but if it fails to start
     // then it's not a critical error.
-    auto handshake_service_started = [](const std::error_code& ec)
+    const auto handshake_service_started = [](const std::error_code& ec)
     {
         if (ec)
             log_error(LOG_PROTOCOL)
