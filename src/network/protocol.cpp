@@ -104,7 +104,7 @@ void protocol::handle_bootstrap(
 
 void protocol::stop(completion_handler handle_complete)
 {
-    hosts_.save(hosts_path_.string(), strand_.wrap(
+    hosts_.save(strand_.wrap(
         &protocol::handle_save, this, _1, handle_complete));
 }
 void protocol::handle_save(const std::error_code& ec,
@@ -123,7 +123,7 @@ void protocol::handle_save(const std::error_code& ec,
 
 void protocol::bootstrap(completion_handler handle_complete)
 {
-    hosts_.load(hosts_path_.string(), strand_.wrap(
+    hosts_.load(strand_.wrap(
         &protocol::load_hosts, this, _1, handle_complete));
 }
 void protocol::load_hosts(const std::error_code& ec,
