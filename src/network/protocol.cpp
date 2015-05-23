@@ -52,16 +52,16 @@ protocol::protocol(threadpool& pool, hosts& peers,
 /// Deprecated, unsafe to change after startup, set on construct.
 void protocol::set_max_outbound(size_t max_outbound)
 {
-    BITCOIN_ASSERT_MSG(false, 
-        "protocol::set_max_outbound deprecated, set on construct");
+    //BITCOIN_ASSERT_MSG(false, 
+    //    "protocol::set_max_outbound deprecated, set on construct");
     max_outbound_ = max_outbound;
 }
 
 /// Deprecated, unsafe to change after statrup, set on host construct.
 void protocol::set_hosts_filename(const std::string& hosts_path)
 {
-    BITCOIN_ASSERT_MSG(false,
-        "protocol::set_hosts_filename deprecated, set on construct");
+    //BITCOIN_ASSERT_MSG(false,
+    //    "protocol::set_hosts_filename deprecated, set on construct");
     hosts_path_ = hosts_path;
 }
 

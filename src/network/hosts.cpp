@@ -48,7 +48,7 @@ hosts::hosts(threadpool& pool, const std::string& path, size_t capacity)
 hosts::hosts(threadpool& pool, size_t capacity)
   : hosts(pool, "hosts.p2p", capacity)
 {
-    BITCOIN_ASSERT_MSG(false, "hosts::hosts deprecated");
+    //BITCOIN_ASSERT_MSG(false, "hosts::hosts deprecated");
 }
 hosts::~hosts()
 {
@@ -63,7 +63,8 @@ void hosts::load(load_handler handle_load)
 /// Deprecated, set path on construct.
 void hosts::load(const std::string& path, load_handler handle_load)
 {
-    BITCOIN_ASSERT_MSG(false, "hosts::load deprecated, set path on construct");
+    //BITCOIN_ASSERT_MSG(false,
+    //    "hosts::load deprecated, set path on construct");
     strand_.randomly_queue(&hosts::do_load, this, path, handle_load);
 }
 void hosts::do_load(const path& path, load_handler handle_load)
@@ -110,7 +111,8 @@ void hosts::save(save_handler handle_save)
 /// Deprecated, set path on construct.
 void hosts::save(const std::string& path, save_handler handle_save)
 {
-    BITCOIN_ASSERT_MSG(false, "hosts::save deprecated, set path on construct");
+    //BITCOIN_ASSERT_MSG(false,
+    //    "hosts::save deprecated, set path on construct");
     strand_.randomly_queue(
         std::bind(&hosts::do_save, this, path, handle_save));
 }
