@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_PROTOCOL_HPP
 #define LIBBITCOIN_PROTOCOL_HPP
 
+#include <cstddef>
 #include <memory>
 #include <system_error>
 #include <boost/filesystem.hpp>
@@ -49,26 +50,20 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    BC_API protocol(threadpool& pool, hosts& hsts,
-        handshake& shake, network& net);
+    BC_API protocol(threadpool& pool, hosts& peers,
+        handshake& shake, network& net, size_t max_outbound=8, 
+        bool listen=true);
 
     protocol(const protocol&) = delete;
     void operator=(const protocol&) = delete;
 
-    /**
-     * Set max_outbound connections soft limit.
-     */
+    /// Deprecated, set on construct.
     BC_API void set_max_outbound(size_t max_outbound);
 
-    /**
-     * Set the path to load the hosts file from, defaults to "hosts.p2p".
-     */
+    /// Deprecated, construct hosts with path.
     BC_API void set_hosts_filename(const std::string& hosts_path);
 
-    /**
-     * If called, then this service will not listen for incoming
-     * connections. Must be called before start().
-     */
+    /// Deprecated, set on construct.
     BC_API void disable_listener();
 
     /**
@@ -333,7 +328,7 @@ private:
     boost::filesystem::path hosts_path_;
 
     // There's a fixed number of slots that are always trying to reconnect.
-    size_t max_outbound_ = 8;
+    size_t max_outbound_;
     connection_list connections_;
     // Simply a debugging tool to enforce correct state transition behaviour
     // for maintaining connections.
@@ -341,7 +336,7 @@ private:
     // Used to prevent too many connection attempts from exhausting resources.
     // The watermark is refreshed every interval.
     boost::asio::deadline_timer watermark_timer_;
-    size_t watermark_count_ = 0;
+    size_t watermark_count_;
 
     // Manual connections created by user themselves.
     channel_ptr_list manual_connections_;

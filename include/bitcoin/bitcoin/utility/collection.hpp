@@ -51,7 +51,7 @@ template <typename Element, typename Container>
 int find_position(const Container& list, const Element& value);
 
 /**
- * Avoid the ternary (just for fun). Must precede tempalte usage for gcc build.
+ * Avoid the ternary (just for fun). Must precede template usage for gcc build.
  * You should use with expressions as consequent or alternative as they will be
  * executed regardless of the predicate.
  * @param      <Consequent>  The type of the consequent.

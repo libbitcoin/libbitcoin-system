@@ -35,7 +35,7 @@ using boost::posix_time::minutes;
 using boost::posix_time::seconds;
 using boost::posix_time::time_duration;
 
-// Connection timeout time
+// Connection timeouts (these can be safely adjusted by accessors at runtime).
 const time_duration initial_timeout = seconds(0) + minutes(1);
 const time_duration disconnect_timeout = seconds(0) + minutes(90);
 const time_duration heartbeat_time = seconds(0) + minutes(30);

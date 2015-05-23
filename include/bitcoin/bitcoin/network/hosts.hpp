@@ -47,14 +47,15 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
 
-    BC_API hosts(threadpool& pool, size_t capacity=1000);
+    BC_API hosts(threadpool& pool, const std::string& path, 
+        size_t capacity=1000);
     BC_API ~hosts();
 
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
 
-    BC_API void load(const std::string& path, load_handler handle_load);
-    BC_API void save(const std::string& path, save_handler handle_save);
+    BC_API void load(load_handler handle_load);
+    BC_API void save(save_handler handle_save);
 
     BC_API void store(const network_address_type& address,
         store_handler handle_store);
@@ -62,6 +63,11 @@ public:
         remove_handler handle_remove);
     BC_API void fetch_address(fetch_address_handler handle_fetch);
     BC_API void fetch_count(fetch_count_handler handle_fetch);
+
+    /// Deprecated, set hosts path on construct.
+    BC_API hosts(threadpool& pool, size_t capacity=1000);
+    BC_API void load(const std::string& path, load_handler handle_load);
+    BC_API void save(const std::string& path, save_handler handle_save);
 
 private:
     struct hosts_field
@@ -82,6 +88,7 @@ private:
     void do_fetch_count(fetch_count_handler handle_fetch);
 
     async_strand strand_;
+    boost::filesystem::path hosts_path_;
     boost::circular_buffer<hosts_field> buffer_;
 };
 
