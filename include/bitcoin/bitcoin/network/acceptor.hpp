@@ -17,50 +17,44 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_HPP
-#define LIBBITCOIN_NETWORK_HPP
+#ifndef LIBBITCOIN_ACCEPTOR_HPP
+#define LIBBITCOIN_ACCEPTOR_HPP
 
+#include <functional>
 #include <memory>
-#include <thread>
+#include <system_error>
 #include <boost/asio.hpp>
-#include <boost/utility.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-class BC_API network
+class acceptor;
+
+// TODO: move acceptor_ptr into acceptor as public type (interface break).
+typedef std::shared_ptr<acceptor> acceptor_ptr;
+
+class BC_API acceptor
+  : public std::enable_shared_from_this<acceptor>
 {
 public:
+    typedef std::shared_ptr<boost::asio::ip::tcp::acceptor> tcp_acceptor_ptr;
 
     typedef std::function<
-        void(const std::error_code&, channel_ptr)> connect_handler;
-    typedef std::function<
-        void (const std::error_code&, acceptor_ptr)> listen_handler;
+        void (const std::error_code&, channel_ptr)> accept_handler;
 
-    network(threadpool& pool);
-
-    network(const network&) = delete;
-    void operator=(const network&) = delete;
-
-    void listen(uint16_t port, listen_handler handle_listen);
-    void connect(const std::string& hostname, uint16_t port,
-        connect_handler handle_connect);
+     acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept);
+     void accept(accept_handler handle_accept);
 
 private:
-    typedef std::shared_ptr<boost::asio::ip::tcp::resolver> resolver_ptr;
-    typedef std::shared_ptr<boost::asio::ip::tcp::resolver::query> query_ptr;
-
-    void resolve_handler(const boost::system::error_code& ec,
-        boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-        connect_handler handle_connect, resolver_ptr, query_ptr);
+    void call_handle_accept(const boost::system::error_code& ec,
+        socket_ptr socket, accept_handler handle_accept);
 
     threadpool& pool_;
+    tcp_acceptor_ptr tcp_accept_;
 };
 
 } // namespace network

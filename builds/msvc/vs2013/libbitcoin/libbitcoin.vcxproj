@@ -97,10 +97,14 @@
     <ClCompile Include="..\..\..\..\src\math\script_number.cpp" />
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\math\uint256.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\acceptor.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\channel_proxy.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\channel_stream_loader.cpp" />
     <ClCompile Include="..\..\..\..\src\network\handshake.cpp" />
     <ClCompile Include="..\..\..\..\src\network\hosts.cpp" />
     <ClCompile Include="..\..\..\..\src\network\network.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\connect_with_timeout.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp" />
     <ClCompile Include="..\..\..\..\src\satoshi_serialize.cpp" />
     <ClCompile Include="..\..\..\..\src\script.cpp" />
@@ -152,7 +156,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\script_number.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\secp256k1_initializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_loader_module.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_proxy.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_stream_loader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\handshake.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network.hpp" />
@@ -209,6 +217,7 @@
     <ClInclude Include="..\..\..\..\src\math\external\sha256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\sha512.h" />
     <ClInclude Include="..\..\..\..\src\math\external\zeroize.h" />
+    <ClInclude Include="..\..\..\..\src\network\connect_with_timeout.hpp" />
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
