@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,45 +17,30 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SHARED_CONST_BUFFER_HPP
-#define LIBBITCOIN_SHARED_CONST_BUFFER_HPP
+#ifndef LIBBITCOIN_CHANNEL_STREAM_LOADER_HPP
+#define LIBBITCOIN_CHANNEL_STREAM_LOADER_HPP
 
-#include <memory>
-#include <boost/asio.hpp>
+#include <string>
+#include <vector>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-// A reference-counted non-modifiable buffer class.
-class BC_API shared_const_buffer
+class BC_API channel_stream_loader
 {
 public:
-     // Construct from a stream object.
-     explicit shared_const_buffer(const data_chunk& user_data)
-     : data_(std::make_shared<data_chunk>(
-            std::begin(user_data), std::end(user_data))),
-        buffer_(boost::asio::buffer(*data_))
-    {
-    }
-
-    // Implement the ConstBufferSequence requirements.
-    typedef boost::asio::const_buffer value_type;
-    typedef const value_type* const_iterator;
-
-    const_iterator begin() const
-    {
-        return &buffer_;
-    }
-
-    const_iterator end() const
-    {
-        return &buffer_ + 1;
-    }
+    ~channel_stream_loader();
+    void add(bc::network::channel_loader_module_base* module);
+    void load_lookup(const std::string& symbol,
+        const bc::data_chunk& stream) const;
 
 private:
-    std::shared_ptr<data_chunk> data_;
-    value_type buffer_;
+    typedef std::vector<channel_loader_module_base*> module_list;
+
+    module_list modules_;
 };
 
 } // namespace network

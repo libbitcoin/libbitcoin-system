@@ -41,7 +41,11 @@
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
+#include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/channel_loader_module.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,49 +17,38 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SHARED_CONST_BUFFER_HPP
-#define LIBBITCOIN_SHARED_CONST_BUFFER_HPP
-
 #include <memory>
 #include <boost/asio.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <boost/date_time.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/network.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-// A reference-counted non-modifiable buffer class.
-class BC_API shared_const_buffer
+using boost::asio::ip::tcp;
+using boost::posix_time::time_duration;
+
+class connect_with_timeout
+  : public std::enable_shared_from_this<connect_with_timeout>
 {
 public:
-     // Construct from a stream object.
-     explicit shared_const_buffer(const data_chunk& user_data)
-     : data_(std::make_shared<data_chunk>(
-            std::begin(user_data), std::end(user_data))),
-        buffer_(boost::asio::buffer(*data_))
-    {
-    }
+    connect_with_timeout(threadpool& pool);
 
-    // Implement the ConstBufferSequence requirements.
-    typedef boost::asio::const_buffer value_type;
-    typedef const value_type* const_iterator;
-
-    const_iterator begin() const
-    {
-        return &buffer_;
-    }
-
-    const_iterator end() const
-    {
-        return &buffer_ + 1;
-    }
+    void start(tcp::resolver::iterator endpoint_iterator,
+        time_duration timeout, network::connect_handler handle_connect);
 
 private:
-    std::shared_ptr<data_chunk> data_;
-    value_type buffer_;
+    void call_connect_handler(const boost::system::error_code& ec,
+        tcp::resolver::iterator, network::connect_handler handle_connect);
+
+    void close(const boost::system::error_code& ec);
+
+    socket_ptr socket_;
+    channel::channel_proxy_ptr proxy_;
+    boost::asio::deadline_timer timer_;
 };
 
 } // namespace network
 } // namespace libbitcoin
-
-#endif
-

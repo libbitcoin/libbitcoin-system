@@ -27,6 +27,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/handshake.hpp>
+#include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -37,7 +39,7 @@ namespace network {
 class hosts;
 class handshake;
 
-class protocol
+class BC_API protocol
 {
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
@@ -50,7 +52,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    BC_API protocol(threadpool& pool, hosts& peers,
+    protocol(threadpool& pool, hosts& peers,
         handshake& shake, network& net, size_t max_outbound=8, 
         bool listen=true);
 
@@ -58,13 +60,13 @@ public:
     void operator=(const protocol&) = delete;
 
     /// Deprecated, set on construct.
-    BC_API void set_max_outbound(size_t max_outbound);
+    void set_max_outbound(size_t max_outbound);
 
     /// Deprecated, construct hosts with path.
-    BC_API void set_hosts_filename(const std::string& hosts_path);
+    void set_hosts_filename(const std::string& hosts_path);
 
     /// Deprecated, set on construct.
-    BC_API void disable_listener();
+    void disable_listener();
 
     /**
      * Perform full initialization sequence.
@@ -77,7 +79,7 @@ public:
      *  );
      * @endcode
      */
-    BC_API void start(completion_handler handle_complete);
+    void start(completion_handler handle_complete);
 
     /**
      * Gracefully close down.
@@ -89,7 +91,7 @@ public:
      *  );
      * @endcode
      */
-    BC_API void stop(completion_handler handle_complete);
+    void stop(completion_handler handle_complete);
 
     /**
      * Begin initialization sequence of performing node discovery and
@@ -102,12 +104,12 @@ public:
      *  );
      * @endcode
      */
-    BC_API void bootstrap(completion_handler handle_complete);
+    void bootstrap(completion_handler handle_complete);
 
     /**
      * Starts the internal run loop for this service.
      */
-    BC_API void run();
+    void run();
 
     /**
      * Fetch number of connections maintained by this service.
@@ -120,7 +122,7 @@ public:
      *  );
      * @endcode
      */
-    BC_API void fetch_connection_count(
+    void fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
 
     /**
@@ -130,7 +132,7 @@ public:
      * @param[in]   hostname            // Hostname
      * @param[in]   port                // Port
      */
-    BC_API void maintain_connection(
+    void maintain_connection(
         const std::string& hostname, uint16_t port);
 
     /**
@@ -149,13 +151,13 @@ public:
      *  );
      * @endcode
      */
-    BC_API void subscribe_channel(channel_handler handle_channel);
+    void subscribe_channel(channel_handler handle_channel);
 
     /**
      * Return the number of active connections.
      * Not threadsafe. Intended only for diagnostics information.
      */
-    BC_API size_t total_connections() const;
+    size_t total_connections() const;
 
     /**
      * Broadcast a message to all nodes in our connection list.
@@ -195,6 +197,7 @@ private:
     };
     typedef std::vector<connect_state> connect_state_list;
     typedef size_t slot_index;
+
     // Accepted connections
     typedef std::vector<channel_ptr> channel_ptr_list;
 
@@ -222,6 +225,7 @@ private:
     public:
         seeds(protocol* parent);
         void start(completion_handler handle_complete);
+
     private:
         void error_case(const std::error_code& ec);
 
@@ -244,6 +248,7 @@ private:
         handshake& handshake_;
         network& network_;
     };
+
     std::shared_ptr<seeds> load_seeds_;
     friend class seeds;
 
@@ -252,6 +257,7 @@ private:
 
     // run loop
     void start_connecting();
+
     // Connect outwards
     void start_stopped_connects();
     // This function is called in these places:
@@ -330,9 +336,11 @@ private:
     // There's a fixed number of slots that are always trying to reconnect.
     size_t max_outbound_;
     connection_list connections_;
+
     // Simply a debugging tool to enforce correct state transition behaviour
     // for maintaining connections.
     connect_state_list connect_states_;
+
     // Used to prevent too many connection attempts from exhausting resources.
     // The watermark is refreshed every interval.
     boost::asio::deadline_timer watermark_timer_;

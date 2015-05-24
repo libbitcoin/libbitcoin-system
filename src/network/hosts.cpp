@@ -99,6 +99,7 @@ void hosts::do_load(const path& path, load_handler handle_load)
                 buffer_.push_back(field);
             });
     }
+
     handle_load(std::error_code());
 }
 
@@ -163,6 +164,7 @@ void hosts::do_remove(const network_address_type& address,
         handle_remove(error::not_found);
         return;
     }
+
     buffer_.erase(it);
     handle_remove(std::error_code());
 }
@@ -180,6 +182,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
         handle_fetch(error::not_found, network_address_type());
         return;
     }
+
     size_t index = rand() % buffer_.size();
     network_address_type address;
     address.timestamp = 0;

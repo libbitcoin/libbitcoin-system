@@ -20,17 +20,19 @@
 #ifndef LIBBITCOIN_HANDSHAKE_HPP
 #define LIBBITCOIN_HANDSHAKE_HPP
 
-#include <atomic>
+#include <cstdint>
+#include <string>
+#include <system_error>
+#include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
-#include <bitcoin/bitcoin/utility/async_parallel.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-class handshake
+class BC_API handshake
 {
 public:
     typedef std::function<void (const std::error_code&)> start_handler;
@@ -47,35 +49,29 @@ public:
 
     typedef std::function<void (const std::error_code&)> setter_handler;
 
-    BC_API handshake(threadpool& pool);
+    handshake(threadpool& pool);
 
     handshake(const handshake&) = delete;
     void operator=(const handshake&) = delete;
 
-    BC_API void start(start_handler handle_start);
-
-    BC_API void ready(channel_ptr node, handshake_handler handle_handshake);
-
-    BC_API void discover_external_ip(discover_ip_handler handle_discover);
-    BC_API void fetch_network_address(
-        fetch_network_address_handler handle_fetch);
-    BC_API void set_port(uint16_t port, setter_handler handle_set);
-    BC_API void set_user_agent(const std::string& user_agent,
+    void start(start_handler handle_start);
+    void ready(channel_ptr node, handshake_handler handle_handshake);
+    void discover_external_ip(discover_ip_handler handle_discover);
+    void fetch_network_address(fetch_network_address_handler handle_fetch);
+    void set_port(uint16_t port, setter_handler handle_set);
+    void set_user_agent(const std::string& user_agent,
         setter_handler handle_set);
-    BC_API void set_start_height(uint32_t height, setter_handler handle_set);
+    void set_start_height(uint32_t height, setter_handler handle_set);
 
 private:
     void handle_connect(const std::error_code& ec,
         channel_ptr node, network::connect_handler handle_connect);
-
     void handle_message_sent(const std::error_code& ec,
-        handshake::handshake_handler completion_callback);
-
+        handshake_handler completion_callback);
     void receive_version(const std::error_code& ec, const version_type&,
         channel_ptr node, handshake::handshake_handler completion_callback);
-
     void receive_verack(const std::error_code& ec, const verack_type&,
-        handshake::handshake_handler completion_callback);
+        handshake_handler completion_callback);
 
     ip_address_type localhost_ip();
     void do_discover_external_ip(discover_ip_handler handler_discover);
