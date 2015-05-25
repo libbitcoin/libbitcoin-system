@@ -44,7 +44,7 @@ void channel_stream_loader::add(channel_loader_module_base* module)
 }
 
 void channel_stream_loader::load_lookup(const std::string& symbol,
-    const data_chunk& stream) const
+    std::istream& stream) const
 {
     for (auto module: modules_)
         if (module->lookup_symbol() == symbol)

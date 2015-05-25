@@ -26,7 +26,7 @@
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>

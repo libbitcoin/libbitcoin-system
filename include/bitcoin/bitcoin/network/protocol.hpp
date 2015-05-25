@@ -33,7 +33,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
@@ -51,8 +51,8 @@ public:
     typedef std::function<void (const std::error_code&)> completion_handler;
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_connection_count_handler;
-    typedef std::function<void (const std::error_code&, channel_ptr)>
-        channel_handler;
+    typedef std::function<void (const std::error_code&,
+        channel::pointer)> channel_handler;
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
@@ -153,7 +153,7 @@ private:
     struct connection_info
     {
         message::network_address address;
-        channel_ptr node;
+        channel::pointer node;
     };
 
     enum class connect_state
@@ -165,10 +165,10 @@ private:
     };
 
     typedef size_t slot_index;
-    typedef std::vector<channel_ptr> channel_ptr_list;
+    typedef std::vector<channel::pointer> channel_ptr_list;
     typedef std::vector<connect_state> connect_state_list;
     typedef std::vector<connection_info> connection_list;
-    typedef subscriber<const std::error_code&, channel_ptr>
+    typedef subscriber<const std::error_code&, channel::pointer>
         channel_subscriber_type;
 
     // start sequence
@@ -205,7 +205,7 @@ private:
     void try_connect_once(slot_index slot);
     void attempt_connect(const std::error_code& ec,
         const message::network_address& packet, slot_index slot);
-    void handle_connect(const std::error_code& ec, channel_ptr node,
+    void handle_connect(const std::error_code& ec, channel::pointer node,
         const message::network_address& address, slot_index slot);
 
     // Periodically call this method to reset the watermark and reallow
@@ -215,27 +215,27 @@ private:
     void start_watermark_reset_timer();
 
     // Manual connections
-    void handle_manual_connect(const std::error_code& ec, channel_ptr node,
+    void handle_manual_connect(const std::error_code& ec, channel::pointer node,
         const std::string& hostname, uint16_t port);
 
     // Accept inwards connections
-    void handle_listen(const std::error_code& ec, acceptor_ptr accept);
-    void handle_accept(const std::error_code& ec, channel_ptr node,
-        acceptor_ptr accept);
+    void handle_listen(const std::error_code& ec, acceptor::pointer accept);
+    void handle_accept(const std::error_code& ec, channel::pointer node,
+        acceptor::pointer accept);
 
     // Channel setup
-    void setup_new_channel(channel_ptr node);
+    void setup_new_channel(channel::pointer node);
 
     // Remove channels from lists when disconnected.
-    void outbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node, slot_index slot);
+    void outbound_channel_stopped( const std::error_code& ec,
+        channel::pointer node, slot_index slot);
     void manual_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname, uint16_t port);
+        channel::pointer node, const std::string& hostname, uint16_t port);
     void inbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node);
+        channel::pointer node);
 
     void handle_address_message(const std::error_code& ec,
-        const message::address& addr, channel_ptr node);
+        const message::address& addr, channel::pointer node);
     void handle_store_address(const std::error_code& ec);
 
     // fetch methods

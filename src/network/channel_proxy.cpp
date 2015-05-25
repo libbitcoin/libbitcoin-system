@@ -27,16 +27,18 @@
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <boost/format.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
 #include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -75,22 +77,22 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
     raw_subscriber_(std::make_shared<raw_subscriber_type>(pool)),
     stop_subscriber_(std::make_shared<stop_subscriber_type>(pool))
 {
-#define CHANNEL_TRANSPORT_MECHANISM(MESSAGE_TYPE) \
-    MESSAGE_TYPE##_subscriber_ = \
-        std::make_shared<MESSAGE_TYPE##_subscriber_type>(pool); \
-    loader_.add(new channel_loader_module<MESSAGE_TYPE##_type>( \
-        std::bind(&MESSAGE_TYPE##_subscriber_type::relay, \
-            MESSAGE_TYPE##_subscriber_, _1, _2)));
+#define CHANNEL_TRANSPORT_MECHANISM(SUBSCRIBER_PREFIX, MESSAGE_TYPE) \
+    SUBSCRIBER_PREFIX##_subscriber_ = \
+        std::make_shared<SUBSCRIBER_PREFIX##_subscriber_type>(pool); \
+    loader_.add(new channel_loader_module<MESSAGE_TYPE>( \
+        std::bind(&SUBSCRIBER_PREFIX##_subscriber_type::relay, \
+            SUBSCRIBER_PREFIX##_subscriber_, _1, _2)));
 
-    CHANNEL_TRANSPORT_MECHANISM(version);
-    CHANNEL_TRANSPORT_MECHANISM(verack);
-    CHANNEL_TRANSPORT_MECHANISM(address);
-    CHANNEL_TRANSPORT_MECHANISM(get_address);
-    CHANNEL_TRANSPORT_MECHANISM(inventory);
-    CHANNEL_TRANSPORT_MECHANISM(get_data);
-    CHANNEL_TRANSPORT_MECHANISM(get_blocks);
-    CHANNEL_TRANSPORT_MECHANISM(transaction);
-    CHANNEL_TRANSPORT_MECHANISM(block);
+    CHANNEL_TRANSPORT_MECHANISM(version, message::announce_version);
+    CHANNEL_TRANSPORT_MECHANISM(verack, message::verack);
+    CHANNEL_TRANSPORT_MECHANISM(address, message::address);
+    CHANNEL_TRANSPORT_MECHANISM(get_address, message::get_address);
+    CHANNEL_TRANSPORT_MECHANISM(inventory, message::inventory);
+    CHANNEL_TRANSPORT_MECHANISM(get_data, message::get_data);
+    CHANNEL_TRANSPORT_MECHANISM(get_blocks, message::get_blocks);
+    CHANNEL_TRANSPORT_MECHANISM(transaction, chain::transaction);
+    CHANNEL_TRANSPORT_MECHANISM(block, chain::block);
 
 #undef CHANNEL_TRANSPORT_MECHANISM
 }
@@ -166,23 +168,23 @@ authority channel_proxy::address() const
 
 void channel_proxy::clear_subscriptions()
 {
-#define CHANNEL_CLEAR_SUBSCRIPTION(MESSAGE_TYPE) \
-    MESSAGE_TYPE##_subscriber_->relay(error::service_stopped, \
-        MESSAGE_TYPE##_type());
+#define CHANNEL_CLEAR_SUBSCRIPTION(SUBSCRIBER_PREFIX, MESSAGE_TYPE) \
+    SUBSCRIBER_PREFIX##_subscriber_->relay(error::service_stopped, \
+        MESSAGE_TYPE());
 
-    CHANNEL_CLEAR_SUBSCRIPTION(version);
-    CHANNEL_CLEAR_SUBSCRIPTION(verack);
-    CHANNEL_CLEAR_SUBSCRIPTION(address);
-    CHANNEL_CLEAR_SUBSCRIPTION(get_address);
-    CHANNEL_CLEAR_SUBSCRIPTION(inventory);
-    CHANNEL_CLEAR_SUBSCRIPTION(get_data);
-    CHANNEL_CLEAR_SUBSCRIPTION(get_blocks);
-    CHANNEL_CLEAR_SUBSCRIPTION(transaction);
-    CHANNEL_CLEAR_SUBSCRIPTION(block);
+    CHANNEL_CLEAR_SUBSCRIPTION(version, message::announce_version);
+    CHANNEL_CLEAR_SUBSCRIPTION(verack, message::verack);
+    CHANNEL_CLEAR_SUBSCRIPTION(address, message::address);
+    CHANNEL_CLEAR_SUBSCRIPTION(get_address, message::get_address);
+    CHANNEL_CLEAR_SUBSCRIPTION(inventory, message::inventory);
+    CHANNEL_CLEAR_SUBSCRIPTION(get_data, message::get_data);
+    CHANNEL_CLEAR_SUBSCRIPTION(get_blocks, message::get_blocks);
+    CHANNEL_CLEAR_SUBSCRIPTION(transaction, chain::transaction);
+    CHANNEL_CLEAR_SUBSCRIPTION(block, chain::block);
 
 #undef CHANNEL_CLEAR_SUBSCRIPTION
 
-    raw_subscriber_->relay(error::service_stopped, header_type(),
+    raw_subscriber_->relay(error::service_stopped, message::header(),
         data_chunk());
 }
 
@@ -336,7 +338,7 @@ void channel_proxy::read_header()
 }
 
 // This is a subscription.
-void channel_proxy::read_checksum(const header_type& header)
+void channel_proxy::read_checksum(const message::header& header)
 {
     async_read(*socket_, buffer(inbound_checksum_),
         strand_.wrap(&channel_proxy::handle_read_checksum,
@@ -344,7 +346,7 @@ void channel_proxy::read_checksum(const header_type& header)
 }
 
 // This is a subscription.
-void channel_proxy::read_payload(const header_type& header)
+void channel_proxy::read_payload(const message::header& header)
 {
     inbound_payload_.resize(header.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header.payload_length),
@@ -361,18 +363,11 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
     BITCOIN_ASSERT(bytes_transferred == inbound_header_.size());
 
-    auto valid_parse = true;
-    header_type header;
-    const data_slice buffer(inbound_header_);
+    container_source<boost::array<uint8_t, header_chunk_size>, uint8_t, char> source(inbound_header_);
+    boost::iostreams::stream<container_source<boost::array<uint8_t, header_chunk_size>, uint8_t, char>> header_stream(source);
+    message::header header;
 
-    try
-    {
-        satoshi_load(buffer.begin(), buffer.end(), header);
-    }
-    catch (bc::end_of_stream)
-    {
-        valid_parse = false;
-    }
+    auto valid_parse = header.from_data(header_stream);
 
     if (!valid_parse || header.magic != magic_value())
     {
@@ -392,7 +387,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
 }
 
 void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
-    size_t DEBUG_ONLY(bytes_transferred), header_type& header)
+    size_t DEBUG_ONLY(bytes_transferred), message::header& header)
 {
     if (failed(ec))
         return;
@@ -408,7 +403,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
 }
 
 void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
-    size_t DEBUG_ONLY(bytes_transferred), const header_type& header)
+    size_t DEBUG_ONLY(bytes_transferred), const message::header& header)
 {
     if (failed(ec))
         return;
@@ -422,7 +417,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
         log_warning(LOG_NETWORK) 
             << "Invalid checksum from [" << address().to_string() << "]";
 
-        raw_subscriber_->relay(error::bad_stream, header_type(), data_chunk());
+        raw_subscriber_->relay(error::bad_stream, message::header(), data_chunk());
         stop(error::bad_stream);
         return;
     }
@@ -434,7 +429,9 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     read_header();
     reset_timers();
 
-    loader_.load_lookup(header.command, payload);
+    byte_source<data_chunk> source(payload);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    loader_.load_lookup(header.command, istream);
 }
 
 void channel_proxy::call_handle_send(const boost::system::error_code& ec,
@@ -452,70 +449,70 @@ void channel_proxy::call_handle_send(const boost::system::error_code& ec,
 void channel_proxy::subscribe_version(
     receive_version_handler handle_receive)
 {
-    generic_subscribe<version_type>(
+    generic_subscribe<message::announce_version>(
         handle_receive, version_subscriber_);
 }
 
 void channel_proxy::subscribe_verack(
     receive_verack_handler handle_receive)
 {
-    generic_subscribe<verack_type>(
+    generic_subscribe<message::verack>(
         handle_receive, verack_subscriber_);
 }
 
 void channel_proxy::subscribe_address(
     receive_address_handler handle_receive)
 {
-    generic_subscribe<address_type>(
+    generic_subscribe<message::address>(
         handle_receive, address_subscriber_);
 }
 
 void channel_proxy::subscribe_inventory(
     receive_inventory_handler handle_receive)
 {
-    generic_subscribe<inventory_type>(
+    generic_subscribe<message::inventory>(
         handle_receive, inventory_subscriber_);
 }
 
 void channel_proxy::subscribe_get_data(
     receive_get_data_handler handle_receive)
 {
-    generic_subscribe<get_data_type>(
+    generic_subscribe<message::get_data>(
         handle_receive, get_data_subscriber_);
 }
 
 void channel_proxy::subscribe_get_blocks(
     receive_get_blocks_handler handle_receive)
 {
-    generic_subscribe<get_blocks_type>(
+    generic_subscribe<message::get_blocks>(
         handle_receive, get_blocks_subscriber_);
 }
 
 void channel_proxy::subscribe_transaction(
     receive_transaction_handler handle_receive)
 {
-    generic_subscribe<transaction_type>(
+    generic_subscribe<chain::transaction>(
         handle_receive, transaction_subscriber_);
 }
 
 void channel_proxy::subscribe_block(
     receive_block_handler handle_receive)
 {
-    generic_subscribe<block_type>(
+    generic_subscribe<chain::block>(
         handle_receive, block_subscriber_);
 }
 
 void channel_proxy::subscribe_get_address(
     receive_get_address_handler handle_receive)
 {
-    generic_subscribe<get_address_type>(
+    generic_subscribe<message::get_address>(
         handle_receive, get_address_subscriber_);
 }
 
 void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::service_stopped, header_type(), data_chunk());
+        handle_receive(error::service_stopped, message::header(), data_chunk());
     else
         raw_subscriber_->subscribe(handle_receive);
 }
@@ -528,7 +525,7 @@ void channel_proxy::subscribe_stop(stop_handler handle_stop)
         stop_subscriber_->subscribe(handle_stop);
 }
 
-void channel_proxy::send_raw(const header_type& packet_header,
+void channel_proxy::send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     if (stopped())
@@ -539,12 +536,11 @@ void channel_proxy::send_raw(const header_type& packet_header,
                 shared_from_this(), packet_header, payload, handle_send));
 }
 
-void channel_proxy::do_send_raw(const header_type& packet_header,
+void channel_proxy::do_send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     // TODO: eliminate unnecessary copying.
-    data_chunk raw_header(satoshi_raw_size(packet_header));
-    satoshi_save(packet_header, raw_header.begin());
+    data_chunk raw_header = packet_header.to_data();
 
     // Construct completed packet with header + payload.
     data_chunk message = raw_header;

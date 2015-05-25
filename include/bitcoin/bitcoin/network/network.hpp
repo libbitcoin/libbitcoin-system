@@ -27,7 +27,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -38,9 +37,9 @@ class BC_API network
 {
 public:
     typedef std::function<
-        void (const std::error_code&, channel_ptr)> connect_handler;
+        void (const std::error_code&, channel::pointer)> connect_handler;
     typedef std::function<
-        void (const std::error_code&, acceptor_ptr)> listen_handler;
+        void (const std::error_code&, acceptor::pointer)> listen_handler;
     typedef std::function<void (const std::error_code&)> unlisten_handler;
 
     network(threadpool& pool);

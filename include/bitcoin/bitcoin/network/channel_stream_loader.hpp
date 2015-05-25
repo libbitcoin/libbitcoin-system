@@ -41,7 +41,7 @@ public:
 
     void add(bc::network::channel_loader_module_base* module);
     void load_lookup(const std::string& symbol,
-        const bc::data_chunk& stream) const;
+        std::istream& stream) const;
 
 private:
     typedef std::vector<channel_loader_module_base*> module_list;
