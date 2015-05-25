@@ -140,7 +140,7 @@ std::string pretty(const transaction_type& tx)
 
 bool previous_output_is_null(const output_point& previous_output)
 {
-    return previous_output.index == max_index &&
+    return previous_output.index == max_input_sequence &&
         previous_output.hash == null_hash;
 }
 
