@@ -38,25 +38,43 @@ namespace network {
 
 using boost::filesystem::path;
 
-hosts::hosts(threadpool& pool, size_t capacity)
-  : strand_(pool), buffer_(capacity)
+hosts::hosts(threadpool& pool, const std::string& path, size_t capacity)
+  : strand_(pool), hosts_path_(path), buffer_(capacity)
 {
     srand(static_cast<uint32_t>(time(nullptr)));
+}
+
+/// Deprecated, set path on construct.
+hosts::hosts(threadpool& pool, size_t capacity)
+  : hosts(pool, "hosts.p2p", capacity)
+{
+    //BITCOIN_ASSERT_MSG(false, "hosts::hosts deprecated");
 }
 hosts::~hosts()
 {
 }
 
+void hosts::load(load_handler handle_load)
+{
+    strand_.randomly_queue(
+        &hosts::do_load, this, hosts_path_.string(), handle_load);
+}
+
+/// Deprecated, set path on construct.
 void hosts::load(const std::string& path, load_handler handle_load)
 {
+    //BITCOIN_ASSERT_MSG(false,
+    //    "hosts::load deprecated, set path on construct");
     strand_.randomly_queue(&hosts::do_load, this, path, handle_load);
 }
 void hosts::do_load(const path& path, load_handler handle_load)
 {
     bc::ifstream file(path.string());
-    if (!file.good())
+    if (file.bad())
     {
-        // TODO: handle error.
+        const auto error = std::make_error_code(std::errc::io_error);
+        handle_load(error);
+        return;
     }
 
     std::string line;
@@ -81,20 +99,32 @@ void hosts::do_load(const path& path, load_handler handle_load)
                 buffer_.push_back(field);
             });
     }
+
     handle_load(std::error_code());
 }
 
+void hosts::save(save_handler handle_save)
+{
+    strand_.randomly_queue(
+        std::bind(&hosts::do_save, this, hosts_path_.string(), handle_save));
+}
+
+/// Deprecated, set path on construct.
 void hosts::save(const std::string& path, save_handler handle_save)
 {
+    //BITCOIN_ASSERT_MSG(false,
+    //    "hosts::save deprecated, set path on construct");
     strand_.randomly_queue(
         std::bind(&hosts::do_save, this, path, handle_save));
 }
 void hosts::do_save(const path& path, save_handler handle_save)
 {
     bc::ofstream file(path.string());
-    if (!file.good())
+    if (file.bad())
     {
-        // TODO: handle error.
+        const auto error = std::make_error_code(std::errc::io_error);
+        handle_save(error);
+        return;
     }
 
     for (const hosts_field& field: buffer_)
@@ -134,6 +164,7 @@ void hosts::do_remove(const network_address_type& address,
         handle_remove(error::not_found);
         return;
     }
+
     buffer_.erase(it);
     handle_remove(std::error_code());
 }
@@ -151,6 +182,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
         handle_fetch(error::not_found, network_address_type());
         return;
     }
+
     size_t index = rand() % buffer_.size();
     network_address_type address;
     address.timestamp = 0;

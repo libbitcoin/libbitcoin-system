@@ -17,6 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <cstddef>
+#include <iostream>
+#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
@@ -33,35 +36,40 @@ using boost::filesystem::path;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
+// TODO: expose these with accessors (they are safe to change at any time).
 constexpr size_t watermark_limit = 10;
 const time_duration watermark_reset_interval = seconds(1);
 
-static std::string pretty(const ip_address_type& ip)
-{
-    std::ostringstream oss;
-    oss << (int)ip[12] << '.' << (int)ip[13] << '.'
-        << (int)ip[14] << '.' << (int)ip[15];
-    return oss.str();
-}
-
-protocol::protocol(threadpool& pool, hosts& hsts,
-    handshake& shake, network& net)
-  : strand_(pool),  hosts_(hsts), handshake_(shake),network_(net),
-    hosts_path_("hosts.p2p"), watermark_timer_(pool.service())
+protocol::protocol(threadpool& pool, hosts& peers,
+    handshake& shake, network& net, size_t max_outbound, bool listen)
+  : strand_(pool),  hosts_(peers), handshake_(shake),network_(net),
+    watermark_timer_(pool.service()), max_outbound_(max_outbound),
+    listen_is_enabled_(listen), watermark_count_(0)
 {
     channel_subscribe_ = std::make_shared<channel_subscriber_type>(pool);
 }
 
+/// Deprecated, unsafe to change after startup, set on construct.
 void protocol::set_max_outbound(size_t max_outbound)
 {
+    //BITCOIN_ASSERT_MSG(false, 
+    //    "protocol::set_max_outbound deprecated, set on construct");
     max_outbound_ = max_outbound;
 }
+
+/// Deprecated, unsafe to change after statrup, set on host construct.
 void protocol::set_hosts_filename(const std::string& hosts_path)
 {
+    //BITCOIN_ASSERT_MSG(false,
+    //    "protocol::set_hosts_filename deprecated, set on construct");
     hosts_path_ = hosts_path;
 }
+
+/// Deprecated, does not take effect after statrup, set on construct.
 void protocol::disable_listener()
 {
+    BITCOIN_ASSERT_MSG(false,
+        "protocol::disable_listener deprecated, set on construct");
     listen_is_enabled_ = false;
 }
 
@@ -70,9 +78,10 @@ void protocol::start(completion_handler handle_complete)
     // Bootstrap from seeds if neccessary.
     bootstrap(strand_.wrap(
         &protocol::handle_bootstrap, this, _1, handle_complete));
+
     // Start handshake service, but if it fails to start
     // then it's not a critical error.
-    auto handshake_service_started = [](const std::error_code& ec)
+    const auto handshake_service_started = [](const std::error_code& ec)
     {
         if (ec)
             log_error(LOG_PROTOCOL)
@@ -95,7 +104,7 @@ void protocol::handle_bootstrap(
 
 void protocol::stop(completion_handler handle_complete)
 {
-    hosts_.save(hosts_path_.string(), strand_.wrap(
+    hosts_.save(strand_.wrap(
         &protocol::handle_save, this, _1, handle_complete));
 }
 void protocol::handle_save(const std::error_code& ec,
@@ -114,7 +123,7 @@ void protocol::handle_save(const std::error_code& ec,
 
 void protocol::bootstrap(completion_handler handle_complete)
 {
-    hosts_.load(hosts_path_.string(), strand_.wrap(
+    hosts_.load(strand_.wrap(
         &protocol::load_hosts, this, _1, handle_complete));
 }
 void protocol::load_hosts(const std::error_code& ec,
@@ -304,15 +313,19 @@ void protocol::start_connecting()
     BITCOIN_ASSERT(connections_.empty());
     BITCOIN_ASSERT(connect_states_.empty());
     connect_states_.resize(max_outbound_);
-    for (slot_index slot = 0; slot < max_outbound_; ++slot)
+
+    // TODO: use connect_states_ iterator here.
+    for (auto slot = 0; slot < connect_states_.size(); ++slot)
         modify_slot(slot, connect_state::stopped);
+
     // Start the main outbound connect loop.
     start_stopped_connects();
     start_watermark_reset_timer();
 }
 void protocol::start_stopped_connects()
 {
-    for (slot_index slot = 0; slot < max_outbound_; ++slot)
+    // TODO: use connect_states_ iterator here.
+    for (auto slot = 0; slot < connect_states_.size(); ++slot)
         if (connect_states_[slot] == connect_state::stopped)
             try_connect_once(slot);
 }
@@ -321,13 +334,15 @@ void protocol::try_connect_once(slot_index slot)
     ++watermark_count_;
     if (watermark_count_ > watermark_limit)
         return;
-    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
+
+    BITCOIN_ASSERT(slot <= connect_states_.size());
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::stopped);
+
     // Begin connection flow: finding_peer -> connecting -> established.
     // Failures end with connect_state::stopped and loop back here again.
     modify_slot(slot, connect_state::finding_peer);
-    hosts_.fetch_address(strand_.wrap(
-        &protocol::attempt_connect, this, _1, _2, slot));
+    hosts_.fetch_address(
+        strand_.wrap(&protocol::attempt_connect, this, _1, _2, slot));
 }
 
 void protocol::start_watermark_reset_timer()
@@ -370,6 +385,14 @@ bool already_connected(
     return false;
 }
 
+// TODO: move to ip utility.
+static std::string pretty(const ip_address_type& ip)
+{
+    std::ostringstream oss;
+    oss << (int)ip[12] << '.' << (int)ip[13] << '.'
+        << (int)ip[14] << '.' << (int)ip[15];
+    return oss.str();
+}
 void protocol::attempt_connect(const std::error_code& ec,
     const network_address_type& address, slot_index slot)
 {

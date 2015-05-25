@@ -74,7 +74,12 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/sha512.h \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
+    src/network/acceptor.cpp \
     src/network/channel.cpp \
+    src/network/channel_proxy.cpp \
+    src/network/channel_stream_loader.cpp \
+    src/network/connect_with_timeout.cpp \
+    src/network/connect_with_timeout.hpp \
     src/network/handshake.cpp \
     src/network/hosts.cpp \
     src/network/network.cpp \
@@ -237,7 +242,11 @@ include_bitcoin_bitcoin_math_HEADERS = \
 
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
+    include/bitcoin/bitcoin/network/acceptor.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
+    include/bitcoin/bitcoin/network/channel_loader_module.hpp \
+    include/bitcoin/bitcoin/network/channel_proxy.hpp \
+    include/bitcoin/bitcoin/network/channel_stream_loader.hpp \
     include/bitcoin/bitcoin/network/handshake.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
     include/bitcoin/bitcoin/network/network.hpp \

@@ -26,10 +26,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/version.hpp>
-#ifndef NO_CURL
-#include <curl/curl.h>
-#endif
 namespace libbitcoin {
 namespace network {
 
@@ -113,47 +111,6 @@ void handshake::discover_external_ip(discover_ip_handler handle_discover)
             this, handle_discover));
 }
 
-#ifndef NO_CURL
-bool handshake::lookup_external(const std::string& website,
-    ip_address_type& ip)
-{
-    // Initialise CURL with our various options.
-    CURL* curl = curl_easy_init();
-    // This goes first in case of any problems below. We get an error message.
-    char error_buffer[CURL_ERROR_SIZE];
-    error_buffer[0] = '\0';
-    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
-    // fail when server sends >= 404
-    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
-    curl_easy_setopt(curl, CURLOPT_HEADER, 0);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 0);
-    curl_easy_setopt(curl, CURLOPT_POSTREDIR, CURL_REDIR_POST_302);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writer);
-    curl_easy_setopt(curl, CURLOPT_USE_SSL, CURLUSESSL_TRY);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
-    // server response goes in response_buffer
-    std::string response_buffer;
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
-    curl_easy_setopt(curl, CURLOPT_URL, website.c_str());
-    // Everything fine. Do fetch
-    CURLcode web_success = curl_easy_perform(curl);
-    curl_easy_cleanup(curl);
-    if (web_success != CURLE_OK)
-        return false;
-    // TODO use std::regex instead ... when it work >_>
-    boost::cmatch results;
-    boost::regex rx("(\\d+)[.](\\d+)[.](\\d+)[.](\\d+)");
-    if (!boost::regex_search(response_buffer.c_str(), results, rx))
-    {
-        return false;
-    }
-    ip = localhost_ip();
-    for (size_t i = 0; i < 4; ++i)
-        ip[i + 12] = boost::lexical_cast<unsigned int>(results[i + 1]);
-    return true;
-}
-#endif
-
 ip_address_type handshake::localhost_ip()
 {
     return ip_address_type{{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -163,36 +120,6 @@ ip_address_type handshake::localhost_ip()
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
 {
     template_version_.address_me.ip = localhost_ip();
-
-#ifndef NO_CURL
-    std::vector<ip_address_type> corroborate_ips;
-
-    // Lookup our IP address from a bunch of hosts
-    ip_address_type lookup_ip;
-    if (lookup_external("checkip.dyndns.org", lookup_ip))
-        corroborate_ips.push_back(lookup_ip);
-    if (lookup_external("whatismyip.org", lookup_ip))
-        corroborate_ips.push_back(lookup_ip);
-
-
-    if (corroborate_ips.empty())
-    {
-        handle_discover(error::bad_stream, ip_address_type());
-        return;
-    }
-    // Make sure that the IPs are the same
-    template_version_.address_me.ip = corroborate_ips[0];
-    for (const ip_address_type& match_ip: corroborate_ips)
-    {
-        if (match_ip != template_version_.address_me.ip)
-        {
-            template_version_.address_me.ip = localhost_ip();
-            handle_discover(error::bad_stream, ip_address_type());
-            return;
-        }
-    }
-#endif
-
     handle_discover(std::error_code(), template_version_.address_me.ip);
 }
 

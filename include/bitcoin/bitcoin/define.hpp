@@ -90,8 +90,5 @@ namespace bc = libbitcoin;
 #define LCOV_EXCL_START(text)
 #define LCOV_EXCL_STOP()
 
-// Remove this when cURL dependency is fully removed.
-#define NO_CURL
-
 #endif
 
