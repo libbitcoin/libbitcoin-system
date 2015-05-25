@@ -25,8 +25,8 @@
 namespace libbitcoin {
 namespace network {
 
-channel::channel(channel_proxy_ptr proxy)
-  : weak_proxy_(proxy)
+channel::channel(channel_proxy::pointer proxy)
+: weak_proxy_(proxy)
 {
 }
 

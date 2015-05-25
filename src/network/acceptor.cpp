@@ -25,7 +25,7 @@
 #include <system_error>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 
 namespace libbitcoin {
 namespace network {

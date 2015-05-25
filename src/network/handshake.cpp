@@ -26,7 +26,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
@@ -71,7 +71,7 @@ void handshake::start(start_handler handle_start)
     discover_external_ip(std::bind(handle_start, _1));
 }
 
-void handshake::ready(channel_ptr node,
+void handshake::ready(channel::pointer node,
     handshake::handshake_handler handle_handshake)
 {
     constexpr size_t sync = 3;
@@ -107,7 +107,7 @@ void handshake::handle_message_sent(const std::error_code& ec,
 }
 
 void handshake::receive_version(const std::error_code& ec,
-    const message::announce_version&, channel_ptr node,
+    const message::announce_version&, channel::pointer node,
     handshake::handshake_handler completion_callback)
 {
     if (ec)
@@ -198,7 +198,7 @@ void handshake::do_set_start_height(uint64_t height, setter_handler handle_set)
     handle_set(error::success);
 }
 
-void finish_connect(const std::error_code& ec, channel_ptr node,
+void finish_connect(const std::error_code& ec, channel::pointer node,
     handshake& shake, network::connect_handler handle_connect)
 {
     if (ec)
