@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef LIBBITCOIN_NETWORK_CHANNEL_HPP
 #define LIBBITCOIN_NETWORK_CHANNEL_HPP
 
@@ -28,7 +29,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
-#include <bitcoin/bitcoin/network/network.hpp>
+//#include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
@@ -49,15 +50,18 @@
 
 namespace libbitcoin {
 namespace network {
-    
+
 class channel;
 typedef std::shared_ptr<channel> channel_ptr;
 
 class BC_API channel
 {
 public:
+
     channel(channel_proxy_ptr proxy);
+
     channel(threadpool& pool, socket_ptr socket, const timeout& timeouts);
+
     ~channel();
 
     /// This class is not copyable.
@@ -111,6 +115,7 @@ public:
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
 private:
+
     channel_proxy_ptr proxy_;
     uint64_t nonce_;
 };

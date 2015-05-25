@@ -62,8 +62,8 @@ private:
 
     void handle_synced(const std::error_code& ec,
         handshake_handler handle_handshake);
-    void handle_timer(const boost::system::error_code& ec, channel_ptr node,
-        handshake_handler completion_callback);
+    void handle_timer(const boost::system::error_code& ec,
+        channel_ptr node, handshake_handler completion_callback);
     void handle_version_sent(const std::error_code& ec, channel_ptr node,
         handshake_handler completion_callback);
     void handle_verack_sent(const std::error_code& ec,
@@ -87,4 +87,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

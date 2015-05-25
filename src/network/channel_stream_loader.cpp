@@ -38,7 +38,7 @@ channel_stream_loader::~channel_stream_loader()
 }
 
 void channel_stream_loader::load(const std::string& symbol,
-    const data_chunk& stream) const
+    std::istream& stream) const
 {
     auto it = modules_.find(symbol);
     if (it != modules_.end())

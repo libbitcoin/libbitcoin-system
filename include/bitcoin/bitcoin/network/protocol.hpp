@@ -34,7 +34,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/peer.hpp>
@@ -146,7 +146,8 @@ public:
 private:
 
     typedef std::vector<channel_ptr> channel_ptr_list;
-    typedef subscriber<const std::error_code&, channel_ptr> channel_subscriber;
+    typedef subscriber<const std::error_code&, channel_ptr>
+        channel_subscriber;
 
     // Startup sequence
     void handle_hosts_load(const std::error_code& ec,

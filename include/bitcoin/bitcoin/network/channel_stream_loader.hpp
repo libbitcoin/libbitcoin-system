@@ -47,7 +47,7 @@ public:
         modules_[module->lookup_symbol()] = module;
     }
 
-    void load(const std::string& symbol, const bc::data_chunk& stream) const;
+    void load(const std::string& symbol, std::istream& stream) const;
 
 private:
     typedef std::map<std::string, channel_loader_module_base*> module_list;

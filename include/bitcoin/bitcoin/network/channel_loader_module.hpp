@@ -25,7 +25,6 @@
 #include <system_error>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
@@ -35,7 +34,7 @@ class BC_API channel_loader_module_base
 {
 public:
     virtual ~channel_loader_module_base() {}
-    virtual void attempt_load(const data_chunk& stream) const = 0;
+    virtual void attempt_load(std::istream& stream) const = 0;
     virtual const std::string lookup_symbol() const = 0;
 };
 
@@ -56,15 +55,15 @@ public:
     channel_loader_module(const channel_loader_module&) = delete;
     void operator=(const channel_loader_module&) = delete;
 
-    void attempt_load(const data_chunk& stream) const
+    void attempt_load(std::istream& stream) const
     {
         Message result;
-        try
+
+        if (result.from_data(stream))
         {
-            satoshi_load(stream.begin(), stream.end(), result);
             handle_load_(error::success, result);
         }
-        catch (bc::end_of_stream)
+        else
         {
             handle_load_(bc::error::bad_stream, Message());
         }
@@ -72,10 +71,11 @@ public:
 
     const std::string lookup_symbol() const
     {
-        return satoshi_command(Message());
+        return Message::satoshi_command;
     }
 
 private:
+
     load_handler handle_load_;
 };
 

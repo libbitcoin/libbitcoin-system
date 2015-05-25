@@ -34,7 +34,6 @@
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -44,6 +43,7 @@ namespace network {
 class BC_API peer
 {
 public:
+
     peer(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.

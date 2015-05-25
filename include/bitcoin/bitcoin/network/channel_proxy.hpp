@@ -31,14 +31,22 @@
 #include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
@@ -75,45 +83,62 @@ namespace network {
 // filterclear  [BIP37: no support intended]
 // merkleblock  [BIP37: no support intended]
 
+typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
+
 class channel_proxy;
 typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
-typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
 
 class BC_API channel_proxy
   : public std::enable_shared_from_this<channel_proxy>
 {
 public:
     typedef std::function<void (const std::error_code&)> send_handler;
+
     typedef std::function<void (const std::error_code&,
-        const version_type&)> receive_version_handler;
+        const message::announce_version&)> receive_version_handler;
+
     typedef std::function<void (const std::error_code&,
-        const verack_type&)> receive_verack_handler;
+        const message::verack&)> receive_verack_handler;
+
     typedef std::function<void (const std::error_code&,
-        const address_type&)> receive_address_handler;
+        const message::address&)> receive_address_handler;
+
     typedef std::function<void (const std::error_code&,
-        const get_address_type&)> receive_get_address_handler;
+        const message::get_address&)> receive_get_address_handler;
+
     typedef std::function<void (const std::error_code&,
-        const inventory_type&)> receive_inventory_handler;
+        const message::inventory&)> receive_inventory_handler;
+
     typedef std::function<void (const std::error_code&,
-        const get_data_type&)> receive_get_data_handler;
+        const message::get_data&)> receive_get_data_handler;
+
     typedef std::function<void (const std::error_code&,
-        const get_blocks_type&)> receive_get_blocks_handler;
+        const message::get_blocks&)> receive_get_blocks_handler;
+
     typedef std::function<void (const std::error_code&,
-        const transaction_type&)> receive_transaction_handler;
-    typedef std::function<void(const std::error_code&,
-        const block_type&)> receive_block_handler;
+        const chain::transaction&)> receive_transaction_handler;
+
     typedef std::function<void (const std::error_code&,
-        const ping_type&)> receive_ping_handler;
+        const chain::block&)> receive_block_handler;
+
     typedef std::function<void (const std::error_code&,
-        const pong_type&)> receive_pong_handler;
+        const message::ping&)> receive_ping_handler;
+
     typedef std::function<void (const std::error_code&,
-        const header_type&, const data_chunk&)> receive_raw_handler;
+        const message::pong&)> receive_pong_handler;
+
+    typedef std::function<void (const std::error_code&,
+        const message::header&, const data_chunk&)> receive_raw_handler;
+
     typedef std::function<void (const std::error_code&)> stop_handler;
-    typedef std::function<void (const std::error_code&)> revival_handler;
+
+    typedef std::function<void (const std::error_code&)> revivial_handler;
+
     typedef std::function<void (const std::error_code&)> expiration_handler;
 
     channel_proxy(threadpool& pool, socket_ptr socket,
         const timeout& timeouts);
+
     ~channel_proxy();
 
     /// This class is not copyable.
@@ -143,7 +168,8 @@ public:
             std::bind(&channel_proxy::do_send,
                 shared_from_this(), message, handle_send, command));
     }
-    void send_raw(const header_type& packet_header,
+
+    void send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
     void subscribe_version(receive_version_handler handle_receive);
@@ -165,29 +191,30 @@ public:
     void subscribe_stop(stop_handler handle_stop);
 
 private:
-    typedef subscriber<const std::error_code&, const version_type&>
+
+    typedef subscriber<const std::error_code&, const message::announce_version&>
         version_subscriber;
-    typedef subscriber<const std::error_code&, const verack_type&>
+    typedef subscriber<const std::error_code&, const message::verack&>
         verack_subscriber;
-    typedef subscriber<const std::error_code&, const address_type&>
+    typedef subscriber<const std::error_code&, const message::address&>
         address_subscriber;
-    typedef subscriber<const std::error_code&, const get_address_type&>
+    typedef subscriber<const std::error_code&, const message::get_address&>
         get_address_subscriber;
-    typedef subscriber<const std::error_code&, const inventory_type&>
+    typedef subscriber<const std::error_code&, const message::inventory&>
         inventory_subscriber;
-    typedef subscriber<const std::error_code&, const get_data_type&>
+    typedef subscriber<const std::error_code&, const message::get_data&>
         get_data_subscriber;
-    typedef subscriber<const std::error_code&, const get_blocks_type&>
+    typedef subscriber<const std::error_code&, const message::get_blocks&>
         get_blocks_subscriber;
-    typedef subscriber<const std::error_code&, const transaction_type&>
+    typedef subscriber<const std::error_code&, const chain::transaction&>
         transaction_subscriber;
-    typedef subscriber<const std::error_code&, const block_type&>
+    typedef subscriber<const std::error_code&, const chain::block&>
         block_subscriber;
-    typedef subscriber<const std::error_code&, const ping_type&>
+    typedef subscriber<const std::error_code&, const message::ping&>
         ping_subscriber;
-    typedef subscriber<const std::error_code&, const pong_type&>
+    typedef subscriber<const std::error_code&, const message::pong&>
         pong_subscriber;
-    typedef subscriber<const std::error_code&, const header_type&,
+    typedef subscriber<const std::error_code&, const message::header&,
         const data_chunk&> raw_subscriber;
     typedef subscriber<const std::error_code&> stop_subscriber;
 
@@ -218,26 +245,27 @@ private:
     void handle_revival(const boost::system::error_code& ec);
     
     void read_header();
-    void read_checksum(const header_type& header);
-    void read_payload(const header_type& header);
+    void read_checksum(const message::header& header);
+    void read_payload(const message::header& header);
 
     void handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred);
     void handle_read_checksum(const boost::system::error_code& ec,
-        size_t bytes_transferred, header_type& header);
+        size_t bytes_transferred, message::header& header);
     void handle_read_payload(const boost::system::error_code& ec,
-        size_t bytes_transferred, const header_type& header);
+        size_t bytes_transferred, const message::header& header);
 
     void handle_send_ping(const std::error_code& ec);
     void handle_send_pong(const std::error_code& ec);
-    void handle_receive_ping(const std::error_code& ec, const ping_type& ping);
-    void handle_receive_pong(const std::error_code& ec, const pong_type& pong,
+    void handle_receive_ping(const std::error_code& ec, const message::ping& ping);
+    void handle_receive_pong(const std::error_code& ec, const message::pong& pong,
         uint64_t nonce);
 
     void do_send(const data_chunk& message, send_handler handle_send,
         const std::string& command);
     void do_send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
+
     void call_handle_send(const boost::system::error_code& ec,
         send_handler handle_send);
 
