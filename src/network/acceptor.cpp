@@ -39,7 +39,7 @@ acceptor::acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept)
 
 void acceptor::accept(accept_handler handle_accept)
 {
-    socket_ptr socket = std::make_shared<tcp::socket>(pool_.service());
+    const auto socket = std::make_shared<tcp::socket>(pool_.service());
     tcp_accept_->async_accept(*socket,
         std::bind(&acceptor::call_handle_accept, shared_from_this(),
             _1, socket, handle_accept));
@@ -54,9 +54,9 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
         return;
     }
 
-    auto proxy = std::make_shared<channel_proxy>(pool_, socket);
+    const auto proxy = std::make_shared<channel_proxy>(pool_, socket);
     proxy->start();
-    channel_ptr channel_object = std::make_shared<channel>(proxy);
+    const auto channel_object = std::make_shared<channel>(proxy);
     handle_accept(std::error_code(), channel_object);
 }
 
