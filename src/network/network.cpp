@@ -24,7 +24,7 @@
 #include <iostream>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include "connect_with_timeout.hpp"
 

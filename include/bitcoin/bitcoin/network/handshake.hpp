@@ -58,7 +58,7 @@ public:
     void operator=(const handshake&) = delete;
 
     void start(start_handler handle_start);
-    void ready(channel_ptr node, handshake_handler handle_handshake);
+    void ready(channel::pointer node, handshake_handler handle_handshake);
     void discover_external_ip(discover_ip_handler handle_discover);
     void fetch_network_address(fetch_network_address_handler handle_fetch);
     void set_port(uint16_t port, setter_handler handle_set);
@@ -68,13 +68,13 @@ public:
 
 private:
     void handle_connect(const std::error_code& ec,
-        channel_ptr node, network::connect_handler handle_connect);
+        channel::pointer node, network::connect_handler handle_connect);
 
     void handle_message_sent(const std::error_code& ec,
         handshake::handshake_handler completion_callback);
 
     void receive_version(const std::error_code& ec,
-        const message::announce_version&, channel_ptr node,
+        const message::announce_version&, channel::pointer node,
         handshake::handshake_handler completion_callback);
 
     void receive_verack(const std::error_code& ec, const message::verack&,

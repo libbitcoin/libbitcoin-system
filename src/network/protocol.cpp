@@ -214,7 +214,7 @@ void protocol::seeds::connect_dns_seed(const std::string& hostname)
         &protocol::seeds::request_addresses, shared_from_this(), _1, _2));
 }
 void protocol::seeds::request_addresses(
-    const std::error_code& ec, channel_ptr dns_seed_node)
+    const std::error_code& ec, channel::pointer dns_seed_node)
 {
     if (ec)
     {
@@ -244,7 +244,7 @@ void protocol::seeds::handle_send_get_address(const std::error_code& ec)
 }
 
 void protocol::seeds::save_addresses(const std::error_code& ec,
-    const message::address& packet, channel_ptr)
+    const message::address& packet, channel::pointer)
 {
     if (ec)
     {
@@ -386,7 +386,7 @@ bool already_connected(
 }
 
 // TODO: move to ip utility.
-static std::string pretty(const ip_address_type& ip)
+static std::string pretty(const message::ip_address& ip)
 {
     std::ostringstream oss;
     oss << (int)ip[12] << '.' << (int)ip[13] << '.'
@@ -420,7 +420,7 @@ void protocol::attempt_connect(const std::error_code& ec,
         strand_.wrap(&protocol::handle_connect, this, _1, _2, address, slot));
 }
 void protocol::handle_connect(
-    const std::error_code& ec, channel_ptr node,
+    const std::error_code& ec, channel::pointer node,
     const message::network_address& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
@@ -453,7 +453,7 @@ void protocol::maintain_connection(const std::string& hostname, uint16_t port)
         &protocol::handle_manual_connect, this, _1, _2, hostname, port));
 }
 void protocol::handle_manual_connect(
-    const std::error_code& ec, channel_ptr node,
+    const std::error_code& ec, channel::pointer node,
     const std::string& hostname, uint16_t port)
 {
     if (ec)
@@ -473,7 +473,8 @@ void protocol::handle_manual_connect(
     setup_new_channel(node);
 }
 
-void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
+void protocol::handle_listen(const std::error_code& ec,
+    acceptor::pointer accept)
 {
     if (ec)
     {
@@ -486,8 +487,8 @@ void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
             &protocol::handle_accept, this, _1, _2, accept));
     }
 }
-void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
-    acceptor_ptr accept)
+void protocol::handle_accept(const std::error_code& ec, channel::pointer node,
+    acceptor::pointer accept)
 {
     accept->accept(strand_.wrap(
         &protocol::handle_accept, this, _1, _2, accept));
@@ -522,7 +523,7 @@ void handle_send(const std::error_code& ec)
         log_error(LOG_PROTOCOL)
             << "Sending error: " << ec.message();
 }
-void protocol::setup_new_channel(channel_ptr node)
+void protocol::setup_new_channel(channel::pointer node)
 {
     subscribe_address(node);
     node->send(message::get_address(), handle_send);
@@ -531,7 +532,7 @@ void protocol::setup_new_channel(channel_ptr node)
 }
 
 template <typename ConnectionsList>
-void remove_connection(ConnectionsList& connections, channel_ptr which_node)
+void remove_connection(ConnectionsList& connections, channel::pointer which_node)
 {
     auto it = connections.begin();
     for (; it != connections.end(); ++it)
@@ -541,7 +542,7 @@ void remove_connection(ConnectionsList& connections, channel_ptr which_node)
     connections.erase(it);
 }
 void protocol::outbound_channel_stopped(
-    const std::error_code& ec, channel_ptr which_node, slot_index slot)
+    const std::error_code& ec, channel::pointer which_node, slot_index slot)
 {
     // We must always attempt a reconnection if this was an
     // outbound connection.
@@ -560,7 +561,7 @@ void protocol::outbound_channel_stopped(
 }
 
 template <typename ChannelsList>
-void remove_channel(ChannelsList& channels, channel_ptr which_node)
+void remove_channel(ChannelsList& channels, channel::pointer which_node)
 {
     auto it = std::find(channels.begin(), channels.end(), which_node);
     BITCOIN_ASSERT(it != channels.end());
@@ -568,7 +569,7 @@ void remove_channel(ChannelsList& channels, channel_ptr which_node)
 }
 
 void protocol::manual_channel_stopped(
-    const std::error_code& ec, channel_ptr which_node,
+    const std::error_code& ec, channel::pointer which_node,
     const std::string& hostname, uint16_t port)
 {
     // We must always attempt a reconnection if this was an
@@ -583,7 +584,7 @@ void protocol::manual_channel_stopped(
     maintain_connection(hostname, port);
 }
 void protocol::inbound_channel_stopped(
-    const std::error_code& ec, channel_ptr which_node)
+    const std::error_code& ec, channel::pointer which_node)
 {
     // We must always attempt a reconnection if this was an
     // outbound connection.
@@ -596,13 +597,13 @@ void protocol::inbound_channel_stopped(
     remove_channel(accepted_channels_, which_node);
 }
 
-void protocol::subscribe_address(channel_ptr node)
+void protocol::subscribe_address(channel::pointer node)
 {
     node->subscribe_address(strand_.wrap(
         &protocol::receive_address_message, this, _1, _2, node));
 }
 void protocol::receive_address_message(const std::error_code& ec,
-    const message::address& packet, channel_ptr node)
+    const message::address& packet, channel::pointer node)
 {
     if (ec)
     {

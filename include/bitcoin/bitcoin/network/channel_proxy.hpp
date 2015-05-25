@@ -29,10 +29,19 @@
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -67,17 +76,17 @@ typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
 template <typename Message>
 data_chunk create_raw_message(const Message& packet)
 {
-    data_chunk payload(satoshi_raw_size(packet));
-    satoshi_save(packet, payload.begin());
+    data_chunk payload = packet.to_data();
 
     // Make the header packet and serialise it
-    header_type head;
-    head.magic = magic_value();
-    head.command = satoshi_command(packet);
-    head.payload_length = static_cast<uint32_t>(payload.size());
-    head.checksum = bitcoin_checksum(payload);
-    data_chunk raw_header(satoshi_raw_size(head));
-    satoshi_save(head, raw_header.begin());
+    message::header head {
+        magic_value(),
+        Message::satoshi_command,
+        static_cast<uint32_t>(payload.size()),
+        bitcoin_checksum(payload)
+    };
+
+    data_chunk raw_header = head.to_data();
 
     // Construct completed packet with header + payload
     data_chunk whole_message = raw_header;
@@ -87,6 +96,7 @@ data_chunk create_raw_message(const Message& packet)
     // Networking output in an exporter
     log_debug(LOG_NETWORK) << "s: " << head.command
         << " (" << payload.size() << " bytes)";
+
     return whole_message;
 }
 
@@ -94,37 +104,39 @@ class BC_API channel_proxy
   : public std::enable_shared_from_this<channel_proxy>
 {
 public:
+    typedef std::shared_ptr<channel_proxy> pointer;
+
     typedef std::function<void (const std::error_code&)> send_handler;
 
     typedef std::function<void (const std::error_code&,
-        const version_type&)> receive_version_handler;
+        const message::announce_version&)> receive_version_handler;
 
     typedef std::function<void (const std::error_code&,
-        const verack_type&)> receive_verack_handler;
+        const message::verack&)> receive_verack_handler;
 
     typedef std::function<void (const std::error_code&,
-        const address_type&)> receive_address_handler;
+        const message::address&)> receive_address_handler;
 
     typedef std::function<void (const std::error_code&,
-        const get_address_type&)> receive_get_address_handler;
+        const message::get_address&)> receive_get_address_handler;
 
     typedef std::function<void (const std::error_code&,
-        const inventory_type&)> receive_inventory_handler;
+        const message::inventory&)> receive_inventory_handler;
 
     typedef std::function<void (const std::error_code&,
-        const get_data_type&)> receive_get_data_handler;
+        const message::get_data&)> receive_get_data_handler;
 
     typedef std::function<void (const std::error_code&,
-        const get_blocks_type&)> receive_get_blocks_handler;
+        const message::get_blocks&)> receive_get_blocks_handler;
 
     typedef std::function<void (const std::error_code&,
-        const transaction_type&)> receive_transaction_handler;
+        const chain::transaction&)> receive_transaction_handler;
 
     typedef std::function<void (const std::error_code&,
-        const block_type&)> receive_block_handler;
+        const chain::block&)> receive_block_handler;
 
     typedef std::function<void (const std::error_code&,
-        const header_type&, const data_chunk&)> receive_raw_handler;
+        const message::header&, const data_chunk&)> receive_raw_handler;
 
     typedef std::function<void (const std::error_code&)> stop_handler;
 
@@ -144,7 +156,7 @@ public:
         send_common(create_raw_message(packet), handle_send);
     }
 
-    void send_raw(const header_type& packet_header,
+    BC_API void send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
     void send_common(const data_chunk& whole_message,
@@ -167,30 +179,30 @@ public:
     void subscribe_stop(stop_handler handle_stop);
 
 private:
-    typedef subscriber<const std::error_code&, const version_type&>
+    typedef subscriber<const std::error_code&, const message::announce_version&>
         version_subscriber_type;
-    typedef subscriber<const std::error_code&, const verack_type&>
+    typedef subscriber<const std::error_code&, const message::verack&>
         verack_subscriber_type;
-    typedef subscriber<const std::error_code&, const address_type&>
+    typedef subscriber<const std::error_code&, const message::address&>
         address_subscriber_type;
-    typedef subscriber<const std::error_code&, const get_address_type&>
+    typedef subscriber<const std::error_code&, const message::get_address&>
         get_address_subscriber_type;
-    typedef subscriber<const std::error_code&, const inventory_type&>
+    typedef subscriber<const std::error_code&, const message::inventory&>
         inventory_subscriber_type;
-    typedef subscriber<const std::error_code&, const get_data_type&>
+    typedef subscriber<const std::error_code&, const message::get_data&>
         get_data_subscriber_type;
-    typedef subscriber<const std::error_code&, const get_blocks_type&>
+    typedef subscriber<const std::error_code&, const message::get_blocks&>
         get_blocks_subscriber_type;
-    typedef subscriber<const std::error_code&, const transaction_type&>
+    typedef subscriber<const std::error_code&, const chain::transaction&>
         transaction_subscriber_type;
-    typedef subscriber<const std::error_code&, const block_type&>
+    typedef subscriber<const std::error_code&, const chain::block&>
         block_subscriber_type;
 
     typedef subscriber<const std::error_code&,
-        const header_type&, const data_chunk&> raw_subscriber_type;
+        const message::header&, const data_chunk&> raw_subscriber_type;
     typedef subscriber<const std::error_code&> stop_subscriber_type;
 
-    void do_send_raw(const header_type& packet_header,
+    void do_send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
     void do_send_common(const data_chunk& whole_message,
         send_handler handle_send);
@@ -207,15 +219,15 @@ private:
     }
 
     void read_header();
-    void read_checksum(const header_type& header_msg);
-    void read_payload(const header_type& header_msg);
+    void read_checksum(const message::header& header_msg);
+    void read_payload(const message::header& header_msg);
 
     void handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred);
     void handle_read_checksum(const boost::system::error_code& ec,
-        size_t bytes_transferred, header_type& header_msg);
+        size_t bytes_transferred, message::header& header_msg);
     void handle_read_payload(const boost::system::error_code& ec,
-        size_t bytes_transferred, const header_type& header_msg);
+        size_t bytes_transferred, const message::header& header_msg);
 
     // Calls the send handler after a successful send, translating
     // the boost error_code to std::error_code
