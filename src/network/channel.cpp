@@ -26,8 +26,8 @@ namespace libbitcoin {
 namespace network {
 
 channel::channel(channel_proxy_ptr proxy)
+  : weak_proxy_(proxy)
 {
-    weak_proxy_ = proxy;
 }
 channel::~channel()
 {
@@ -54,112 +54,111 @@ void channel::send_raw(const header_type& packet_header,
     const data_chunk& payload, channel_proxy::send_handler handle_send)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_send(error::service_stopped);
-    else
+    if (proxy)
         proxy->send_raw(packet_header, payload, handle_send);
+    else
+        handle_send(error::service_stopped);
 }
 
 void channel::subscribe_version(
     channel_proxy::receive_version_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, version_type());
-    else
+    if (proxy)
         proxy->subscribe_version(handle_receive);
+    else
+        handle_receive(error::service_stopped, version_type());
 }
 void channel::subscribe_verack(
     channel_proxy::receive_verack_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, verack_type());
-    else
+    if (proxy)
         proxy->subscribe_verack(handle_receive);
+    else
+        handle_receive(error::service_stopped, verack_type());
 }
 void channel::subscribe_address(
     channel_proxy::receive_address_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, address_type());
-    else
+    if (proxy)
         proxy->subscribe_address(handle_receive);
+    else
+        handle_receive(error::service_stopped, address_type());
 }
 void channel::subscribe_get_address(
     channel_proxy::receive_get_address_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, get_address_type());
-    else
+    if (proxy)
         proxy->subscribe_get_address(handle_receive);
+    else
+        handle_receive(error::service_stopped, get_address_type());
 }
 void channel::subscribe_inventory(
     channel_proxy::receive_inventory_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, inventory_type());
-    else
+    if (proxy)
         proxy->subscribe_inventory(handle_receive);
+    else
+        handle_receive(error::service_stopped, inventory_type());
 }
 void channel::subscribe_get_data(
     channel_proxy::receive_get_data_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, get_data_type());
-    else
+    if (proxy)
         proxy->subscribe_get_data(handle_receive);
+    else
+        handle_receive(error::service_stopped, get_data_type());
 }
 void channel::subscribe_get_blocks(
     channel_proxy::receive_get_blocks_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, get_blocks_type());
-    else
+    if (proxy)
         proxy->subscribe_get_blocks(handle_receive);
+    else
+        handle_receive(error::service_stopped, get_blocks_type());
 }
 void channel::subscribe_transaction(
     channel_proxy::receive_transaction_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, transaction_type());
-    else
+    if (proxy)
         proxy->subscribe_transaction(handle_receive);
+    else
+        handle_receive(error::service_stopped, transaction_type());
 }
 void channel::subscribe_block(
     channel_proxy::receive_block_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped, block_type());
-    else
+    if (proxy)
         proxy->subscribe_block(handle_receive);
+    else
+        handle_receive(error::service_stopped, block_type());
 }
 void channel::subscribe_raw(
     channel_proxy::receive_raw_handler handle_receive)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_receive(error::service_stopped,
-            header_type(), data_chunk());
-    else
+    if (proxy)
         proxy->subscribe_raw(handle_receive);
+    else
+        handle_receive(error::service_stopped, header_type(), data_chunk());
 }
 
 void channel::subscribe_stop(
     channel_proxy::stop_handler handle_stop)
 {
     const auto proxy = weak_proxy_.lock();
-    if (!proxy)
-        handle_stop(error::service_stopped);
-    else
+    if (proxy)
         proxy->subscribe_stop(handle_stop);
+    else
+        handle_stop(error::service_stopped);
 }
 
 } // namespace network
