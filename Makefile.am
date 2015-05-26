@@ -91,6 +91,7 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_istream.cpp \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
+    src/utility/async_strand.cpp \
     src/utility/binary.cpp \
     src/utility/logger.cpp \
     src/utility/string.cpp \
@@ -276,6 +277,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
+    include/bitcoin/bitcoin/utility/async_strand.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
@@ -288,8 +290,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/thread.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/time.hpp \
-    include/bitcoin/bitcoin/utility/timed_section.hpp \
-    include/bitcoin/bitcoin/utility/weak_bind.hpp
+    include/bitcoin/bitcoin/utility/timed_section.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \

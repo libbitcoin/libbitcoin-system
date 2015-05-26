@@ -52,10 +52,10 @@ public:
     void send(const Message& packet, channel_proxy::send_handler handle_send)
     {
         const auto proxy = weak_proxy_.lock();
-        if (!proxy)
-            handle_send(error::service_stopped);
-        else
+        if (proxy)
             proxy->send(packet, handle_send);
+        else
+            handle_send(error::service_stopped);
     }
 
     void send_raw(const header_type& packet_header,

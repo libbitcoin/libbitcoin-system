@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -21,19 +21,22 @@
 
 #include <bitcoin/bitcoin/compat.hpp>
 
-namespace libbitcoin {
+using namespace bc;
 
-namespace error
+class error_category_impl
+  : public std::error_category
 {
-    std::error_code make_error_code(error_code_t e)
-    {
-        return std::error_code(static_cast<int>(e), error_category());
-    }
+public:
+    virtual const char* name() const BC_NOEXCEPT;
+    virtual std::string message(int ev) const BC_NOEXCEPT;
+    virtual std::error_condition default_error_condition(int ev) 
+        const BC_NOEXCEPT;
+};
 
-    std::error_condition make_error_condition(error_condition_t e)
-    {
-        return std::error_condition(static_cast<int>(e), error_category());
-    }
+static const error_category_impl& get_error_category_instance()
+{
+    static error_category_impl instance;
+    return instance;
 }
 
 const char* error_category_impl::name() const BC_NOEXCEPT
@@ -71,11 +74,13 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "Bad stream";
         case error::channel_timeout:
             return "Channel timed out";
+
         // transaction pool
         case error::blockchain_reorganized:
             return "Transactions invalidated from blockchain reorganization";
         case error::pool_filled:
             return "Forced removal of old transaction from full pool";
+
         // validate tx
         case error::coinbase_transaction:
             return "Memory pool coinbase transaction";
@@ -85,6 +90,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "Double spend of input";
         case error::input_not_found:
             return "Spent input not found";
+
         // check_transaction()
         case error::empty_transaction:
             return "Transaction inputs or outputs are empty";
@@ -94,9 +100,11 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "Coinbase script is too small or large";
         case error::previous_output_null:
             return "Non-coinbase transaction has null previous in an input";
+
         // validate block
         case error::previous_block_invalid:
             return "Previous block failed to validate";
+
         // check_block()
         case error::size_limits:
             return "Size limits failed";
@@ -112,6 +120,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "Too many script *SIG operations";
         case error::merkle_mismatch:
             return "Merkle root mismatch";
+
         // accept_block()
         case error::incorrect_proof_of_work:
             return "Proof of work does not match bits field";
@@ -125,6 +134,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "Reject version=1 block";
         case error::coinbase_height_mismatch:
             return "Block height mismatch in coinbase";
+
         // connect_block()
         case error::duplicate_or_spent:
             return "Duplicate transaction when with unspent outputs";
@@ -134,13 +144,14 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "Fees are out of range";
         case error::coinbase_too_large:
             return "Reported coinbase value is too large";
+
         default:
             return "Unknown error";
     }
 }
 
-std::error_condition
-    error_category_impl::default_error_condition(int ev) const BC_NOEXCEPT
+std::error_condition error_category_impl::default_error_condition(int ev)
+    const BC_NOEXCEPT
 {
     switch (ev)
     {
@@ -149,13 +160,16 @@ std::error_condition
         case error::is_not_standard:
         case error::double_spend:
         case error::input_not_found:
+
         // check_transaction()
         case error::empty_transaction:
         case error::output_value_overflow:
         case error::invalid_coinbase_script_size:
         case error::previous_output_null:
+
         // validate block
         case error::previous_block_invalid:
+
         // check_block()
         case error::size_limits:
         case error::proof_of_work:
@@ -164,6 +178,7 @@ std::error_condition
         case error::extra_coinbases:
         case error::too_many_sigs:
         case error::merkle_mismatch:
+
         // accept_block()
         case error::incorrect_proof_of_work:
         case error::timestamp_too_early:
@@ -171,25 +186,36 @@ std::error_condition
         case error::checkpoints_failed:
         case error::old_version_block:
         case error::coinbase_height_mismatch:
+
         // connect_block()
         case error::duplicate_or_spent:
         case error::validate_inputs_failed:
         case error::fees_out_of_range:
         case error::coinbase_too_large:
             return error::validate_failed;
+
+        // transaction pool
         case error::blockchain_reorganized:
         case error::pool_filled:
             return error::forced_removal;
+
         default:
             return std::error_condition(ev, *this);
     }
 }
 
-const std::error_category& error_category()
-{
-    static error_category_impl instance;
-    return instance;
-}
+namespace libbitcoin {
+namespace error {
 
+    std::error_code make_error_code(error_code_t e)
+    {
+        return std::error_code(e, get_error_category_instance());
+    }
+
+    std::error_condition make_error_condition(error_condition_t e)
+    {
+        return std::error_condition(e, get_error_category_instance());
+    }
+
+} // namespace error
 } // namespace libbitcoin
-
