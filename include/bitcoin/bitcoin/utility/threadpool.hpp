@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -42,7 +42,7 @@ namespace libbitcoin {
  *  pool.service.post(task_foo);
  * @endcode
  */
-class threadpool
+class BC_API threadpool
 {
 public:
 
@@ -51,10 +51,10 @@ public:
      * @param[in]   number_threads  Number of threads to spawn.
      * @param[in]   priority        Priority of threads to spawn.
      */
-    BC_API threadpool(size_t number_threads=0, 
+     threadpool(size_t number_threads=0, 
         thread_priority priority=thread_priority::normal);
 
-    BC_API ~threadpool();
+    ~threadpool();
 
     threadpool(const threadpool&) = delete;
     void operator=(const threadpool&) = delete;
@@ -64,19 +64,19 @@ public:
      * @param[in]   number_threads  Number of threads to add.
      * @param[in]   priority        Priority of threads to add.
      */
-    BC_API void spawn(size_t number_threads=1, 
+    void spawn(size_t number_threads=1, 
         thread_priority priority=thread_priority::normal);
 
     /**
      * Stop the threadpool. All remaining operations on the queue are dropped.
      */
-    BC_API void stop();
+    void stop();
 
     /**
      * Finish executing all remaining operations in the queue.
      * Adding more operations keeps the threadpool running.
      */
-    BC_API void shutdown();
+    void shutdown();
 
     /**
      * Join all the threads in this threadpool with the current thread,
@@ -99,7 +99,7 @@ public:
      *  pool.join();
      * @endcode
      */
-    BC_API void join();
+    void join();
 
     template <typename... Args>
     void push(Args&&... args)
@@ -116,103 +116,19 @@ public:
     /**
      * Underlying boost::io_service object.
      */
-    BC_API boost::asio::io_service& service();
+    boost::asio::io_service& service();
 
     /**
      * Underlying boost::io_service object.
      */
-    BC_API const boost::asio::io_service& service() const;
+    const boost::asio::io_service& service() const;
 
 private:
-    void spawn_once(thread_priority priority = thread_priority::normal);
+    void spawn_once(thread_priority priority=thread_priority::normal);
 
     boost::asio::io_service ios_;
     boost::asio::io_service::work* work_;
     std::vector<std::thread> threads_;
-};
-
-
-template <typename Handler>
-struct wrapped_handler_impl
-{
-    Handler handler;
-    boost::asio::io_service::strand& strand;
-
-    template <typename... Args>
-    void operator()(Args&&... args)
-    {
-        strand.dispatch(std::bind(
-            handler, std::forward<Args>(args)...));
-    }
-};
-
-/**
- * Convenience class for objects wishing to synchronize operations around
- * shared data.
- *
- * queue() guarantees that any handlers passed to it will never
- * execute at the same time, and they will be called in sequential order.
- *
- * randomly_queue() guarantees that any handlers passed to it will never
- * execute at the same time.
- */
-class async_strand
-{
-public:
-    BC_API async_strand(threadpool& pool);
-
-    /*
-     * wrap() returns a new handler that guarantees that the handler it
-     * encapsulates will never execute at the same time as another handler
-     * passing through this class.
-     */
-    template <typename Function, typename... Args>
-    auto wrap(Function&& func, Args&&... args)
-      -> wrapped_handler_impl<
-            decltype(std::bind(
-                std::forward<Function>(func), std::forward<Args>(args)...))>
-    {
-        auto handler = std::bind(
-            std::forward<Function>(func), std::forward<Args>(args)...);
-        return {handler, strand_};
-    }
-
-    /*
-     * queue() guarantees that any handlers passed to it will
-     * never execute at the same time in sequential order.
-     *
-     * Guarantees sequential calling order.
-     *
-     * @code
-     *   strand.queue(handler);
-     * @endcode
-     */
-    template <typename... Args>
-    void queue(Args&&... args)
-    {
-        strand_.post(std::bind(std::forward<Args>(args)...));
-    }
-
-    /*
-     * randomly_queue() guarantees that any handlers passed to it will
-     * never execute at the same time.
-     *
-     * Does not guarantee sequential calling order.
-     *
-     * @code
-     *   strand.randomly_queue(handler);
-     * @endcode
-     */
-    template <typename... Args>
-    void randomly_queue(Args&&... args)
-    {
-        ios_.post(strand_.wrap(
-            std::bind(std::forward<Args>(args)...)));
-    }
-
-private:
-    boost::asio::io_service& ios_;
-    boost::asio::io_service::strand strand_;
 };
 
 } // namespace libbitcoin
