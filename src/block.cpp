@@ -52,11 +52,13 @@ hash_number block_work(uint32_t bits)
     hash_number target;
     if (!target.set_compact(bits))
         return 0;
+
     if (target == 0)
         return 0;
+
     // We need to compute 2**256 / (bnTarget+1), but we can't represent 2**256
-    // as it's too large for a uint256. However, as 2**256 is at least as large
-    // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,
+    // as it's too large for a uint256. However as 2**256 is at least as large
+    // as bnTarget+1 it's equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1
     // or ~bnTarget / (nTarget+1) + 1.
     return (~target / (target + 1)) + 1;
 }
@@ -68,18 +70,21 @@ hash_digest hash_block_header(const block_header_type& header)
     return bitcoin_hash(raw_block_header);
 }
 
-index_list block_locator_indexes(int top_height)
+index_list block_locator_indexes(size_t top_height)
 {
-    // Start at max_height
     index_list indexes;
+
+    // Start at max_height
     // Push last 10 indexes first
     int step = 1, start = 0;
     for (int i = top_height; i > 0; i -= step, ++start)
     {
         if (start >= 10)
             step *= 2;
+
         indexes.push_back(i);
     }
+
     indexes.push_back(0);
     return indexes;
 }
