@@ -32,7 +32,7 @@ namespace chain {
 
 bool point::is_null() const
 {
-    return (index == max_index) && (hash == null_hash);
+    return (index == max_input_sequence) && (hash == null_hash);
 }
 
 point point::factory_from_data(const data_chunk& data)
