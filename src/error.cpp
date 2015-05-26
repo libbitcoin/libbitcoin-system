@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -21,19 +21,22 @@
 
 #include <bitcoin/bitcoin/compat.hpp>
 
-namespace libbitcoin {
+using namespace bc;
 
-namespace error
+class error_category_impl
+  : public std::error_category
 {
-    std::error_code make_error_code(error_code_t e)
-    {
-        return std::error_code(static_cast<int>(e), error_category());
-    }
+public:
+    virtual const char* name() const BC_NOEXCEPT;
+    virtual std::string message(int ev) const BC_NOEXCEPT;
+    virtual std::error_condition default_error_condition(int ev) 
+        const BC_NOEXCEPT;
+};
 
-    std::error_condition make_error_condition(error_condition_t e)
-    {
-        return std::error_condition(static_cast<int>(e), error_category());
-    }
+static const error_category_impl& get_error_category_instance()
+{
+    static error_category_impl instance;
+    return instance;
 }
 
 const char* error_category_impl::name() const BC_NOEXCEPT
@@ -139,8 +142,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
     }
 }
 
-std::error_condition
-    error_category_impl::default_error_condition(int ev) const BC_NOEXCEPT
+std::error_condition error_category_impl::default_error_condition(int ev)
+    const BC_NOEXCEPT
 {
     switch (ev)
     {
@@ -185,11 +188,18 @@ std::error_condition
     }
 }
 
-const std::error_category& error_category()
-{
-    static error_category_impl instance;
-    return instance;
-}
+namespace libbitcoin {
+namespace error {
 
+    std::error_code make_error_code(error_code_t e)
+    {
+        return std::error_code(e, get_error_category_instance());
+    }
+
+    std::error_condition make_error_condition(error_condition_t e)
+    {
+        return std::error_condition(e, get_error_category_instance());
+    }
+
+} // namespace error
 } // namespace libbitcoin
-

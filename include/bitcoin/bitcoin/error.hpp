@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -22,13 +22,11 @@
 
 #include <string>
 #include <system_error>
-#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
+namespace error {
 
-namespace error
-{
     // Specific errors
     enum error_code_t
     {
@@ -93,34 +91,21 @@ namespace error
 
     BC_API std::error_code make_error_code(error_code_t e);
     BC_API std::error_condition make_error_condition(error_condition_t e);
-}
 
-class error_category_impl
-  : public std::error_category
-{
-public:
-    BC_API virtual const char* name() const BC_NOEXCEPT;
-    BC_API virtual std::string message(int ev) const BC_NOEXCEPT;
-    BC_API virtual std::error_condition
-        default_error_condition(int ev) const BC_NOEXCEPT;
-};
-
-const std::error_category& error_category();
-
+} // namespace error
 } // namespace libbitcoin
 
-namespace std
-{
+namespace std {
+
     template <>
-    struct BC_API is_error_code_enum<
-        libbitcoin::error::error_code_t>
+    struct BC_API is_error_code_enum<libbitcoin::error::error_code_t>
       : public true_type {};
 
     template <>
-    struct BC_API is_error_condition_enum<
-        libbitcoin::error::error_condition_t>
+    struct BC_API is_error_condition_enum<libbitcoin::error::error_condition_t>
       : public true_type {};
-}
+
+} // namespace std
 
 #endif
 
