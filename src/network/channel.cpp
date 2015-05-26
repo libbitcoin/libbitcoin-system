@@ -126,7 +126,7 @@ void channel::subscribe_get_blocks(
 void channel::subscribe_transaction(
     channel_proxy::receive_transaction_handler handle_receive)
 {
-    channel_proxy_ptr proxy = weak_proxy_.lock();
+    const auto proxy = weak_proxy_.lock();
     if (!proxy)
         handle_receive(error::service_stopped, transaction_type());
     else
