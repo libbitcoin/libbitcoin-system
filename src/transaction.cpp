@@ -59,20 +59,23 @@ hash_digest build_merkle_tree(hash_list& merkle)
     // Stop if hash list is empty.
     if (merkle.empty())
         return null_hash;
-    else if (merkle.size() == 1)
+
+    if (merkle.size() == 1)
         return merkle[0];
 
-    // While there is more than 1 hash in the list, keep looping...
+    // While there is more than 1 hash in the list, keep looping.
     while (merkle.size() > 1)
     {
         // If number of hashes is odd, duplicate last hash in the list.
         if (merkle.size() % 2 != 0)
             merkle.push_back(merkle.back());
+
         // List size is now even.
         BITCOIN_ASSERT(merkle.size() % 2 == 0);
 
         // New hash list.
         hash_list new_merkle;
+
         // Loop through hashes 2 at a time.
         for (auto it = merkle.begin(); it != merkle.end(); it += 2)
         {
@@ -82,14 +85,18 @@ hash_digest build_merkle_tree(hash_list& merkle)
             concat.write_hash(*it);
             concat.write_hash(*(it + 1));
             BITCOIN_ASSERT(concat.iterator() == concat_data.end());
+
             // Hash both of the hashes.
-            hash_digest new_root = bitcoin_hash(concat_data);
+            const auto new_root = bitcoin_hash(concat_data);
+
             // Add this to the new list.
             new_merkle.push_back(new_root);
         }
+
         // This is the new list.
         merkle = new_merkle;
     }
+
     // Finally we end up with a single item.
     return merkle[0];
 }
@@ -98,8 +105,9 @@ hash_digest generate_merkle_root(const transaction_list& transactions)
 {
     // Generate list of transaction hashes.
     hash_list tx_hashes;
-    for (transaction_type tx: transactions)
+    for (const auto& tx: transactions)
         tx_hashes.push_back(hash_transaction(tx));
+
     // Build merkle tree.
     return build_merkle_tree(tx_hashes);
 }
@@ -129,11 +137,13 @@ std::string pretty(const transaction_type& tx)
         << "\tversion = " << tx.version << "\n"
         << "\tlocktime = " << tx.locktime << "\n"
         << "Inputs:\n";
-    for (transaction_input_type input: tx.inputs)
+    for (const auto& input: tx.inputs)
         ss << pretty(input);
+
     ss << "Outputs:\n";
-    for (transaction_output_type output: tx.outputs)
+    for (const auto& output: tx.outputs)
         ss << pretty(output);
+
     ss << "\n";
     return ss.str();
 }
@@ -160,14 +170,18 @@ bool is_final(const transaction_type& tx,
 {
     if (tx.locktime == 0)
         return true;
-    uint32_t max_locktime = block_time;
+
+    auto max_locktime = block_time;
     if (tx.locktime < locktime_threshold)
         max_locktime = static_cast<uint32_t>(block_height);
+
     if (tx.locktime < max_locktime)
         return true;
-    for (const transaction_input_type& tx_input: tx.inputs)
+
+    for (const auto& tx_input: tx.inputs)
         if (!is_final(tx_input))
             return false;
+
     return true;
 }
 
@@ -185,35 +199,45 @@ bool is_locktime_conflict(const transaction_type& tx)
 uint64_t total_output_value(const transaction_type& tx)
 {
     uint64_t total = 0;
-    for (const transaction_output_type& output: tx.outputs)
+    for (const auto& output: tx.outputs)
         total += output.value;
+
     return total;
 }
 
-select_outputs_result select_outputs(
-    output_info_list unspent, uint64_t min_value,
-    select_outputs_algorithm DEBUG_ONLY(algorithm))
+select_outputs_result select_outputs(output_info_list unspent,
+    uint64_t min_value, select_outputs_algorithm DEBUG_ONLY(algorithm))
 {
     // Just one default implementation for now.
     // Consider a switch case with greedy_select_outputs(min_value) .etc
     // if this is ever extended with more algorithms.
     BITCOIN_ASSERT(algorithm == select_outputs_algorithm::greedy);
+
     // Fail if empty.
     if (unspent.empty())
         return select_outputs_result();
+
+    const auto lesser = [min_value](const output_info_type& info)
+    {
+        return info.value < min_value;
+    };
+
+    const auto less_than = [](const output_info_type& a, const output_info_type& b)
+    {
+        return a.value < b.value;
+    };
+
+    const auto more_than = [](const output_info_type& a, const output_info_type& b)
+    {
+        return a.value > b.value;
+    };
+
     auto lesser_begin = unspent.begin();
-    auto lesser_end = std::partition(unspent.begin(), unspent.end(),
-        [min_value](const output_info_type& out_info)
-        {
-            return out_info.value < min_value;
-        });
+    auto lesser_end = std::partition(unspent.begin(), unspent.end(), lesser);
     auto greater_begin = lesser_end;
     auto greater_end = unspent.end();
-    auto min_greater = std::min_element(greater_begin, greater_end,
-        [](const output_info_type& info_a, const output_info_type& info_b)
-        {
-            return info_a.value < info_b.value;
-        });
+    auto min_greater = std::min_element(greater_begin, greater_end, less_than);
+
     select_outputs_result result;
     if (min_greater != greater_end)
     {
@@ -221,14 +245,12 @@ select_outputs_result select_outputs(
         result.points.push_back(min_greater->point);
         return result;
     }
+
     // Not found in greaters. Try several lessers instead.
     // Rearrange them from biggest to smallest. We want to use the least
     // amount of inputs as possible.
-    std::sort(lesser_begin, lesser_end,
-        [](const output_info_type& info_a, const output_info_type& info_b)
-        {
-            return info_a.value > info_b.value;
-        });
+    std::sort(lesser_begin, lesser_end, more_than);
+
     uint64_t accum = 0;
     for (auto it = lesser_begin; it != lesser_end; ++it)
     {
@@ -240,6 +262,7 @@ select_outputs_result select_outputs(
             return result;
         }
     }
+
     return select_outputs_result();
 }
 
