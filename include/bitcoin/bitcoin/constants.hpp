@@ -63,7 +63,7 @@ BC_CONSTEXPR uint32_t protocol_version = 60000;
 BC_CONSTEXPR uint32_t coinbase_maturity = 100;
 BC_CONSTEXPR uint32_t initial_block_reward = 50;
 BC_CONSTEXPR uint32_t max_work_bits = 0x1d00ffff;
-BC_CONSTEXPR uint32_t max_input_sequence = MAX_UINT32;
+BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
 
 // Deprecated (use more descriptive).
 BC_CONSTEXPR uint32_t max_bits = max_work_bits;
