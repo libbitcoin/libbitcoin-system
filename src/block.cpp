@@ -42,7 +42,7 @@ bool operator==(
 
 uint64_t block_value(size_t height)
 {
-    uint64_t subsidy = coin_price(block_reward);
+    uint64_t subsidy = coin_price(initial_block_reward);
     subsidy >>= (height / reward_interval);
     return subsidy;
 }
