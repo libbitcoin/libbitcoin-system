@@ -92,7 +92,7 @@ void channel::subscribe_version(
     if (proxy)
         proxy->subscribe_version(handle_receive);
     else
-        handle_receive(error::service_stopped, version_type());
+        handle_receive(error::service_stopped, message::announce_version());
 }
 
 void channel::subscribe_verack(
