@@ -42,11 +42,15 @@ class BC_API acceptor
 {
 public:
     typedef std::shared_ptr<boost::asio::ip::tcp::acceptor> tcp_acceptor_ptr;
-
-    typedef std::function<
-        void (const std::error_code&, channel_ptr)> accept_handler;
+    typedef std::function<void (const std::error_code&, channel_ptr)>
+        accept_handler;
 
      acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept);
+
+     /// This class is not copyable.
+     acceptor(const acceptor&) = delete;
+     void operator=(const acceptor&) = delete;
+
      void accept(accept_handler handle_accept);
 
 private:

@@ -37,14 +37,14 @@ namespace network {
 class BC_API network
 {
 public:
-
     typedef std::function<
-        void(const std::error_code&, channel_ptr)> connect_handler;
+        void (const std::error_code&, channel_ptr)> connect_handler;
     typedef std::function<
         void (const std::error_code&, acceptor_ptr)> listen_handler;
 
     network(threadpool& pool);
 
+    /// This class is not copyable.
     network(const network&) = delete;
     void operator=(const network&) = delete;
 

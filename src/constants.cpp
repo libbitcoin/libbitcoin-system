@@ -36,5 +36,6 @@ uint32_t magic_value()
     return 0xd9b4bef9;
 #endif
 }
+
 } // namespace libbitcoin
 

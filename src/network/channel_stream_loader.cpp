@@ -27,6 +27,10 @@
 namespace libbitcoin {
 namespace network {
 
+channel_stream_loader::channel_stream_loader()
+{
+}
+
 channel_stream_loader::~channel_stream_loader()
 {
     for (auto module: modules_)

@@ -35,7 +35,7 @@ class BC_API channel_loader_module_base
 {
 public:
     virtual ~channel_loader_module_base() {}
-    virtual void attempt_load(const bc::data_chunk& stream) const = 0;
+    virtual void attempt_load(const data_chunk& stream) const = 0;
     virtual const std::string lookup_symbol() const = 0;
 };
 
@@ -45,15 +45,19 @@ class channel_loader_module
   : public channel_loader_module_base
 {
 public:
-    typedef std::function<
-        void(const std::error_code&, const Message&)> load_handler;
+    typedef std::function<void (const std::error_code&, const Message&)>
+        load_handler;
 
     channel_loader_module(load_handler handle_load)
       : handle_load_(handle_load)
     {
     }
 
-    void attempt_load(const bc::data_chunk& stream) const
+    /// This class is not copyable.
+    channel_loader_module(const channel_loader_module&) = delete;
+    void operator=(const channel_loader_module&) = delete;
+
+    void attempt_load(const data_chunk& stream) const
     {
         Message result;
         try

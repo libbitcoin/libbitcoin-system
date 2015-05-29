@@ -314,6 +314,9 @@
     <ClCompile Include="..\..\..\..\src\utility\async_strand.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\seeder.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -570,6 +573,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_strand.hpp">
       <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\seeder.hpp">
+      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

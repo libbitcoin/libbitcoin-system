@@ -49,13 +49,13 @@ void connect_with_timeout::start(tcp::resolver::iterator endpoint_iterator,
 {
     timer_.expires_from_now(timeout);
     timer_.async_wait(std::bind(
-        &connect_with_timeout::close, shared_from_this(), _1));
+        &connect_with_timeout::close,
+            shared_from_this(), _1));
 
     boost::asio::async_connect(*socket_, endpoint_iterator,
         std::bind(&connect_with_timeout::call_connect_handler,
             shared_from_this(), _1, _2, handle_connect));
 }
-
 
 void connect_with_timeout::call_connect_handler(
     const boost::system::error_code& ec, tcp::resolver::iterator, 
@@ -69,7 +69,7 @@ void connect_with_timeout::call_connect_handler(
 
     timer_.cancel();
     proxy_->start();
-    channel_ptr channel_object = std::make_shared<channel>(proxy_);
+    const auto channel_object = std::make_shared<channel>(proxy_);
     handle_connect(std::error_code(), channel_object);
 }
 
@@ -77,6 +77,7 @@ void connect_with_timeout::close(const boost::system::error_code& ec)
 {
     // ec should be boost::asio::error::operation_aborted or nothing.
     BITCOIN_ASSERT(!ec || ec == boost::asio::error::operation_aborted);
+
     if (!ec)
         proxy_->stop();
 }

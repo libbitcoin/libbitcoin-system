@@ -50,6 +50,7 @@
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
+#include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/trie/binary_trie.hpp>
 #include <bitcoin/bitcoin/trie/trie_iterator.hpp>

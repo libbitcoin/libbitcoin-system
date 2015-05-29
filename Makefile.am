@@ -84,6 +84,7 @@ src_libbitcoin_la_SOURCES = \
     src/network/hosts.cpp \
     src/network/network.cpp \
     src/network/protocol.cpp \
+    src/network/seeder.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
     src/unicode/ofstream.cpp \
@@ -252,6 +253,7 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/hosts.hpp \
     include/bitcoin/bitcoin/network/network.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \
+    include/bitcoin/bitcoin/network/seeder.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
 include_bitcoin_bitcoin_triedir = ${includedir}/bitcoin/bitcoin/trie

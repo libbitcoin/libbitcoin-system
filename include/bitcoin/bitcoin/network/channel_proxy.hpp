@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2018 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <functional>
 #include <system_error>
+#include <string>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
@@ -63,6 +64,7 @@ namespace network {
 // Defined here because of the central position in the dependency graph.
 typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
 
+// TODO: eliminate excess copying here.
 // TODO: move to serializer|misc|message.hpp/ipp.
 template <typename Message>
 data_chunk create_raw_message(const Message& packet)
@@ -70,24 +72,19 @@ data_chunk create_raw_message(const Message& packet)
     data_chunk payload(satoshi_raw_size(packet));
     satoshi_save(packet, payload.begin());
 
-    // Make the header packet and serialise it
-    header_type head;
-    head.magic = magic_value();
-    head.command = satoshi_command(packet);
-    head.payload_length = static_cast<uint32_t>(payload.size());
-    head.checksum = bitcoin_checksum(payload);
-    data_chunk raw_header(satoshi_raw_size(head));
-    satoshi_save(head, raw_header.begin());
+    // Make the header packet and serialise it.
+    header_type header;
+    header.magic = magic_value();
+    header.command = satoshi_command(packet);
+    header.payload_length = static_cast<uint32_t>(payload.size());
+    header.checksum = bitcoin_checksum(payload);
+    data_chunk raw_header(satoshi_raw_size(header));
+    satoshi_save(header, raw_header.begin());
 
-    // Construct completed packet with header + payload
-    data_chunk whole_message = raw_header;
-    extend_data(whole_message, payload);
-
-    // Probably not the right place for this
-    // Networking output in an exporter
-    log_debug(LOG_NETWORK) << "s: " << head.command
-        << " (" << payload.size() << " bytes)";
-    return whole_message;
+    // Construct completed packet with header + payload.
+    data_chunk message = raw_header;
+    extend_data(message, payload);
+    return message;
 }
 
 class BC_API channel_proxy
@@ -95,60 +92,53 @@ class BC_API channel_proxy
 {
 public:
     typedef std::function<void (const std::error_code&)> send_handler;
-
     typedef std::function<void (const std::error_code&,
         const version_type&)> receive_version_handler;
-
     typedef std::function<void (const std::error_code&,
         const verack_type&)> receive_verack_handler;
-
     typedef std::function<void (const std::error_code&,
         const address_type&)> receive_address_handler;
-
     typedef std::function<void (const std::error_code&,
         const get_address_type&)> receive_get_address_handler;
-
     typedef std::function<void (const std::error_code&,
         const inventory_type&)> receive_inventory_handler;
-
     typedef std::function<void (const std::error_code&,
         const get_data_type&)> receive_get_data_handler;
-
     typedef std::function<void (const std::error_code&,
         const get_blocks_type&)> receive_get_blocks_handler;
-
     typedef std::function<void (const std::error_code&,
         const transaction_type&)> receive_transaction_handler;
-
     typedef std::function<void (const std::error_code&,
         const block_type&)> receive_block_handler;
-
     typedef std::function<void (const std::error_code&,
         const header_type&, const data_chunk&)> receive_raw_handler;
-
     typedef std::function<void (const std::error_code&)> stop_handler;
 
     channel_proxy(threadpool& pool, socket_ptr socket);
     ~channel_proxy();
 
+    /// This class is not copyable.
     channel_proxy(const channel_proxy&) = delete;
     void operator=(const channel_proxy&) = delete;
 
     void start();
     void stop();
     bool stopped() const;
+    std::string address() const;
 
     template <typename Message>
     void send(const Message& packet, send_handler handle_send)
     {
-        send_common(create_raw_message(packet), handle_send);
+        send_common(create_raw_message(packet), handle_send,
+            satoshi_command(packet));
     }
 
     void send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
+    // TODO: reorder args to put command first and required (interface break).
     void send_common(const data_chunk& whole_message,
-        send_handler handle_send);
+        send_handler handle_send, const std::string& command="unknown");
 
     void subscribe_version(receive_version_handler handle_receive);
     void subscribe_verack(receive_verack_handler handle_receive);
@@ -193,13 +183,13 @@ private:
     void do_send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
     void do_send_common(const data_chunk& whole_message,
-        send_handler handle_send);
+        send_handler handle_send, const std::string& command="");
 
     template <typename Message, typename Callback, typename SubscriberPtr>
     void generic_subscribe(Callback handle_message,
         SubscriberPtr message_subscribe)
     {
-        // Subscribing must be immediate. We cannot switch thread contexts
+        // Subscribing must be immediate, we cannot switch thread contexts.
         if (stopped_)
             handle_message(error::service_stopped, Message());
         else
@@ -207,15 +197,15 @@ private:
     }
 
     void read_header();
-    void read_checksum(const header_type& header_msg);
-    void read_payload(const header_type& header_msg);
+    void read_checksum(const header_type& header);
+    void read_payload(const header_type& header);
 
     void handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred);
     void handle_read_checksum(const boost::system::error_code& ec,
-        size_t bytes_transferred, header_type& header_msg);
+        size_t bytes_transferred, header_type& header);
     void handle_read_payload(const boost::system::error_code& ec,
-        size_t bytes_transferred, const header_type& header_msg);
+        size_t bytes_transferred, const header_type& header);
 
     // Calls the send handler after a successful send, translating
     // the boost error_code to std::error_code
@@ -237,7 +227,8 @@ private:
     socket_ptr socket_;
 
     // We keep the service alive for lifetime rules
-    boost::asio::deadline_timer timeout_, heartbeat_;
+    boost::asio::deadline_timer timeout_;
+    boost::asio::deadline_timer heartbeat_;
     std::atomic<bool> stopped_;
 
     channel_stream_loader loader_;

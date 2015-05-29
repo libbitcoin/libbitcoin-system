@@ -63,15 +63,16 @@ void network::connect(const std::string& hostname, uint16_t port,
     connect_handler handle_connect)
 {
     const auto resolver = std::make_shared<tcp::resolver>(pool_.service());
-    const auto  query = std::make_shared<tcp::resolver::query>(
+    const auto query = std::make_shared<tcp::resolver::query>(
         hostname, std::to_string(port));
+
     resolver->async_resolve(*query,
         std::bind(&network::resolve_handler,
             this, _1, _2, handle_connect, resolver, query));
 }
 
 // I personally don't like how exceptions mess with the program flow.
-bool listen_error(const boost::system::error_code& ec,
+static bool listen_error(const boost::system::error_code& ec,
     network::listen_handler handle_listen)
 {
     if (ec == boost::system::errc::address_in_use)
@@ -88,13 +89,15 @@ bool listen_error(const boost::system::error_code& ec,
 
     return false;
 }
+
 void network::listen(uint16_t port, listen_handler handle_listen)
 {
     tcp::endpoint endpoint(tcp::v4(), port);
     const auto tcp_accept =std::make_shared<tcp::acceptor>(pool_.service());
 
-    // Need to check error codes for functions
+    // Need to check error codes for functions.
     boost::system::error_code ec;
+
     tcp_accept->open(endpoint.protocol(), ec);
     if (listen_error(ec, handle_listen))
         return;
@@ -111,7 +114,7 @@ void network::listen(uint16_t port, listen_handler handle_listen)
     if (listen_error(ec, handle_listen))
         return;
 
-    const auto  accept = std::make_shared<acceptor>(pool_, tcp_accept);
+    const auto accept = std::make_shared<acceptor>(pool_, tcp_accept);
     handle_listen(std::error_code(), accept);
 }
 

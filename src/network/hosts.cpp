@@ -17,6 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <bitcoin/bitcoin/network/hosts.hpp>
+
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
@@ -24,10 +26,11 @@
 #include <system_error>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
@@ -37,38 +40,132 @@
 
 namespace libbitcoin {
 namespace network {
-
+    
+using boost::format;
 using boost::filesystem::path;
 
-hosts::hosts(threadpool& pool, const std::string& path, size_t capacity)
-  : strand_(pool), hosts_path_(path), buffer_(capacity)
+hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
+  : strand_(pool), file_path_(file_path), buffer_(capacity)
 {
     srand(static_cast<uint32_t>(time(nullptr)));
 }
 
-/// Deprecated, set path on construct.
 hosts::hosts(threadpool& pool, size_t capacity)
   : hosts(pool, "hosts.p2p", capacity)
 {
-    //BITCOIN_ASSERT_MSG(false, "hosts::hosts deprecated");
+    // BITCOIN_ASSERT_MSG(false, "hosts::hosts deprecated");
 }
+
 hosts::~hosts()
 {
 }
 
-void hosts::load(load_handler handle_load)
+// public struct hosts::address
+// This is the format utilized by the seed list.
+
+hosts::address::address()
+  : port(0)
 {
-    strand_.randomly_queue(
-        &hosts::do_load, this, hosts_path_.string(), handle_load);
 }
 
-/// Deprecated, set path on construct.
+hosts::address::address(channel_ptr node)
+    : address(node ? node->address() : std::string())
+{
+}
+
+hosts::address::address(const std::string& line)
+  : address()
+{
+    const auto parts = split(boost::trim_copy(line), ":");
+    host = parts[0];
+
+    // TODO: verify lexical_cast ndebug exception safety.
+    if (parts.size() == 2)
+        port = boost::lexical_cast<uint16_t>(parts[1]);
+
+    // The port was invalid or unspecified.
+    BITCOIN_ASSERT(port != 0);
+}
+
+hosts::address::address(const network_address_type& net)
+{
+    const auto& ip = net.ip;
+    const auto formatted = format("%d.%d.%d.%d") %
+        (int)ip[12] % (int)ip[13] % (int)ip[14] % (int)ip[15];
+    host = formatted.str();
+    port = net.port;
+}
+
+hosts::address::address(const std::string& host, uint16_t port)
+    : host(host), port(port)
+{
+    // Can't explicitly set an invalid port.
+    BITCOIN_ASSERT(port != 0);
+}
+
+bool hosts::address::operator==(const hosts::address& other) const
+{
+    // Note that addresses are not inherently normalized.
+    return host == other.host && port == other.port;
+}
+
+std::string hosts::address::to_string() const
+{
+    return (format("%s:%d") % host % port).str();
+}
+
+// private: struct hosts::ip_address
+// This is the format utilized by the hosts file.
+
+hosts::ip_address::ip_address()
+  : port(0)
+{
+}
+
+hosts::ip_address::ip_address(const network_address_type& host)
+  : ip(host.ip), port(host.port)
+{
+    // TODO: We are getting unspecified ports over the wire.
+    // We may want to explicitly write in the default port at that time.
+    // BITCOIN_ASSERT(port != 0);
+}
+
+hosts::ip_address::ip_address(const std::string& line)
+  : ip_address()
+{
+    address name(line);
+    if (name.port == 0)
+        return;
+
+    data_chunk data;
+    if (!decode_base16(data, name.host) || (data.size() != ip.size()))
+        return;
+
+    std::copy(data.begin(), data.end(), ip.begin());
+    port = name.port;
+}
+
+bool hosts::ip_address::operator==(const hosts::ip_address& other) const
+{
+    return ip == other.ip && port == other.port;
+}
+
+// class hosts
+
+void hosts::load(load_handler handle_load)
+{
+    strand_.randomly_queue(&hosts::do_load,
+        this, file_path_.string(), handle_load);
+}
+
 void hosts::load(const std::string& path, load_handler handle_load)
 {
     //BITCOIN_ASSERT_MSG(false,
     //    "hosts::load deprecated, set path on construct");
-    strand_.randomly_queue(&hosts::do_load, this, path, handle_load);
+    strand_.randomly_queue(&hosts::do_load,
+        this, path, handle_load);
 }
+
 void hosts::do_load(const path& path, load_handler handle_load)
 {
     bc::ifstream file(path.string());
@@ -82,24 +179,13 @@ void hosts::do_load(const path& path, load_handler handle_load)
     std::string line;
     while (std::getline(file, line))
     {
-        auto parts = split(line);
-        if (parts.size() != 2)
-            continue;
-        data_chunk raw_ip;
-        if (!decode_base16(raw_ip, parts[0]))
-            continue;
-        hosts_field field;
-        if (raw_ip.size() != field.ip.size())
-            continue;
-        std::copy(raw_ip.begin(), raw_ip.end(), field.ip.begin());
+        ip_address address(line);
+        const auto enqueue = [this, address]()
+        {
+            buffer_.push_back(address);
+        };
 
-        boost::trim(parts[1]);
-        field.port = boost::lexical_cast<uint16_t>(parts[1]);
-        strand_.randomly_queue(
-            [this, field]()
-            {
-                buffer_.push_back(field);
-            });
+        strand_.randomly_queue(enqueue);
     }
 
     handle_load(std::error_code());
@@ -108,17 +194,19 @@ void hosts::do_load(const path& path, load_handler handle_load)
 void hosts::save(save_handler handle_save)
 {
     strand_.randomly_queue(
-        std::bind(&hosts::do_save, this, hosts_path_.string(), handle_save));
+        std::bind(&hosts::do_save,
+            this, file_path_.string(), handle_save));
 }
 
-/// Deprecated, set path on construct.
 void hosts::save(const std::string& path, save_handler handle_save)
 {
     //BITCOIN_ASSERT_MSG(false,
     //    "hosts::save deprecated, set path on construct");
     strand_.randomly_queue(
-        std::bind(&hosts::do_save, this, path, handle_save));
+        std::bind(&hosts::do_save,
+            this, path, handle_save));
 }
+
 void hosts::do_save(const path& path, save_handler handle_save)
 {
     bc::ofstream file(path.string());
@@ -129,20 +217,22 @@ void hosts::do_save(const path& path, save_handler handle_save)
         return;
     }
 
-    for (const hosts_field& field: buffer_)
-        file << encode_base16(field.ip) << ' ' << field.port << std::endl;
+    for (const auto& entry: buffer_)
+        file << encode_base16(entry.ip) << " " << entry.port << std::endl;
+
     handle_save(std::error_code());
 }
 
 void hosts::store(const network_address_type& address,
     store_handler handle_store)
 {
-    strand_.randomly_queue(
-        [this, address, handle_store]()
-        {
-            buffer_.push_back(hosts_field{address.ip, address.port});
-            handle_store(std::error_code());
-        });
+    const auto enqueue = [this, address, handle_store]()
+    {
+        buffer_.push_back(ip_address(address));
+        handle_store(std::error_code());
+    };
+
+    strand_.randomly_queue(enqueue);
 }
 
 void hosts::remove(const network_address_type& address,
@@ -152,15 +242,12 @@ void hosts::remove(const network_address_type& address,
         std::bind(&hosts::do_remove,
             this, address, handle_remove));
 }
-bool hosts::hosts_field::operator==(const hosts_field& other)
-{
-    return ip == other.ip && port == other.port;
-}
+
 void hosts::do_remove(const network_address_type& address,
     remove_handler handle_remove)
 {
-    auto it = std::find(buffer_.begin(), buffer_.end(),
-        hosts_field{address.ip, address.port});
+    const ip_address host(address);
+    const auto it = std::find(buffer_.begin(), buffer_.end(), host);
     if (it == buffer_.end())
     {
         handle_remove(error::not_found);
@@ -177,6 +264,7 @@ void hosts::fetch_address(fetch_address_handler handle_fetch)
         std::bind(&hosts::do_fetch_address,
             this, handle_fetch));
 }
+
 void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 {
     if (buffer_.empty())
@@ -185,7 +273,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
         return;
     }
 
-    size_t index = rand() % buffer_.size();
+    const auto index = rand() % buffer_.size();
     network_address_type address;
     address.timestamp = 0;
     address.services = 0;
@@ -200,6 +288,7 @@ void hosts::fetch_count(fetch_count_handler handle_fetch)
         std::bind(&hosts::do_fetch_count,
             this, handle_fetch));
 }
+
 void hosts::do_fetch_count(fetch_count_handler handle_fetch)
 {
     handle_fetch(std::error_code(), buffer_.size());

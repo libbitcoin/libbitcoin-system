@@ -33,6 +33,12 @@ typedef std::vector<hash_digest> block_locator_type;
 
 typedef byte_array<16> ip_address_type;
 
+BC_CONSTEXPR ip_address_type localhost_ip_address =
+{
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01
+};
+
 struct BC_API network_address_type
 {
     uint32_t timestamp;
