@@ -53,104 +53,17 @@ hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
 hosts::hosts(threadpool& pool, size_t capacity)
   : hosts(pool, "hosts.p2p", capacity)
 {
-    // BITCOIN_ASSERT_MSG(false, "hosts::hosts deprecated");
 }
 
-hosts::~hosts()
+size_t hosts::size() const
 {
+    return buffer_.size();
 }
 
-// public struct hosts::address
-// This is the format utilized by the seed list.
-
-hosts::address::address()
-  : port(0)
+bool hosts::empty() const
 {
+    return buffer_.empty();
 }
-
-hosts::address::address(channel_ptr node)
-    : address(node ? node->address() : std::string())
-{
-}
-
-hosts::address::address(const std::string& line)
-  : address()
-{
-    const auto parts = split(boost::trim_copy(line), ":");
-    host = parts[0];
-
-    // TODO: verify lexical_cast ndebug exception safety.
-    if (parts.size() == 2)
-        port = boost::lexical_cast<uint16_t>(parts[1]);
-
-    // The port was invalid or unspecified.
-    BITCOIN_ASSERT(port != 0);
-}
-
-hosts::address::address(const network_address_type& net)
-{
-    const auto& ip = net.ip;
-    const auto formatted = format("%d.%d.%d.%d") %
-        (int)ip[12] % (int)ip[13] % (int)ip[14] % (int)ip[15];
-    host = formatted.str();
-    port = net.port;
-}
-
-hosts::address::address(const std::string& host, uint16_t port)
-    : host(host), port(port)
-{
-    // Can't explicitly set an invalid port.
-    BITCOIN_ASSERT(port != 0);
-}
-
-bool hosts::address::operator==(const hosts::address& other) const
-{
-    // Note that addresses are not inherently normalized.
-    return host == other.host && port == other.port;
-}
-
-std::string hosts::address::to_string() const
-{
-    return (format("%s:%d") % host % port).str();
-}
-
-// private: struct hosts::ip_address
-// This is the format utilized by the hosts file.
-
-hosts::ip_address::ip_address()
-  : port(0)
-{
-}
-
-hosts::ip_address::ip_address(const network_address_type& host)
-  : ip(host.ip), port(host.port)
-{
-    // TODO: We are getting unspecified ports over the wire.
-    // We may want to explicitly write in the default port at that time.
-    // BITCOIN_ASSERT(port != 0);
-}
-
-hosts::ip_address::ip_address(const std::string& line)
-  : ip_address()
-{
-    address name(line);
-    if (name.port == 0)
-        return;
-
-    data_chunk data;
-    if (!decode_base16(data, name.host) || (data.size() != ip.size()))
-        return;
-
-    std::copy(data.begin(), data.end(), ip.begin());
-    port = name.port;
-}
-
-bool hosts::ip_address::operator==(const hosts::ip_address& other) const
-{
-    return ip == other.ip && port == other.port;
-}
-
-// class hosts
 
 void hosts::load(load_handler handle_load)
 {
@@ -160,8 +73,6 @@ void hosts::load(load_handler handle_load)
 
 void hosts::load(const std::string& path, load_handler handle_load)
 {
-    //BITCOIN_ASSERT_MSG(false,
-    //    "hosts::load deprecated, set path on construct");
     strand_.randomly_queue(&hosts::do_load,
         this, path, handle_load);
 }
@@ -185,7 +96,8 @@ void hosts::do_load(const path& path, load_handler handle_load)
             buffer_.push_back(address);
         };
 
-        strand_.randomly_queue(enqueue);
+        if (address.port != 0)
+            strand_.randomly_queue(enqueue);
     }
 
     handle_load(std::error_code());
@@ -200,8 +112,6 @@ void hosts::save(save_handler handle_save)
 
 void hosts::save(const std::string& path, save_handler handle_save)
 {
-    //BITCOIN_ASSERT_MSG(false,
-    //    "hosts::save deprecated, set path on construct");
     strand_.randomly_queue(
         std::bind(&hosts::do_save,
             this, path, handle_save));
@@ -294,6 +204,45 @@ void hosts::do_fetch_count(fetch_count_handler handle_fetch)
     handle_fetch(std::error_code(), buffer_.size());
 }
 
+// private struct ip_address
+
+hosts::ip_address::ip_address()
+  : port(0)
+{
+}
+
+hosts::ip_address::ip_address(const network_address_type& host)
+  : ip(host.ip), port(host.port)
+{
+    // TODO: We are getting unspecified ports over the wire.
+    // We may want to explicitly write in the default port at that time.
+    // BITCOIN_ASSERT(port != 0);
+}
+
+// This is the format utilized by the hosts file.
+hosts::ip_address::ip_address(const std::string& line)
+  : ip_address()
+{
+    const auto parts = split(boost::trim_copy(line), " ");
+    if (parts.size() != 2)
+        return;
+
+    data_chunk data;
+    if (!decode_base16(data, parts[0]) || (data.size() != ip.size()))
+        return;
+
+    // TODO: verify lexical_cast ndebug exception safety.
+    std::copy(data.begin(), data.end(), ip.begin());
+    port = boost::lexical_cast<uint16_t>(parts[1]);
+
+    // The port was invalid or unspecified.
+    // BITCOIN_ASSERT(port != 0);
+}
+
+bool hosts::ip_address::operator==(const hosts::ip_address& other) const
+{
+    return ip == other.ip && port == other.port;
+}
+
 } // namespace network
 } // namespace libbitcoin
-

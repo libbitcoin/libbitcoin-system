@@ -27,6 +27,7 @@
 #include <boost/date_time.hpp>
 #include <boost/format.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -133,26 +134,16 @@ void channel_proxy::stop_impl()
     clear_subscriptions();
 }
 
-static std::string to_string(const tcp::socket::endpoint_type& endpoint)
-{
-    const auto ip = bc::split(endpoint.address().to_string(), ".");
-    BITCOIN_ASSERT(ip.size() == 4);
-    const auto host = format("%03s.%03s.%03s.%03s:%d")
-        % ip[0] % ip[1] % ip[2] % ip[3] % endpoint.port();
-
-    return host.str();
-}
-
-std::string channel_proxy::address() const
+authority channel_proxy::address() const
 {
     boost::system::error_code error;
     const auto endpoint = socket_->remote_endpoint(error);
 
-    // This assumes that the endpoint has since become disconnected.
+    // The endpoint may have become disconnected.
     if (error)
-        return "000.000.000.000:0";
+        return authority();
 
-    return to_string(endpoint);
+    return authority(endpoint);
 }
 
 void channel_proxy::clear_subscriptions()
@@ -202,7 +193,7 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
         return;
 
     log_debug(LOG_NETWORK) 
-        << "Closing channel [" << address() << "] due to timeout.";
+        << "Closing channel [" << address().to_string() << "] due to timeout.";
 
     stop_impl();
     stop_subscriber_->relay(error::channel_timeout);
@@ -293,13 +284,14 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     if (header.magic != magic_value())
     {
         log_warning(LOG_NETWORK) 
-            << "Invalid header received [" << address() << "]";
+            << "Invalid header received [" << address().to_string() << "]";
         stop();
         return;
     }
 
     log_debug(LOG_NETWORK) 
-        << "Receive " << header.command << " [" << address() << "] ("
+        << "Receive " << header.command << " [" 
+        << address().to_string() << "] ("
         << header.payload_length << " bytes)";
 
     read_checksum(header);
@@ -335,7 +327,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     if (header.checksum != bitcoin_checksum(payload))
     {
         log_warning(LOG_NETWORK) 
-            << "Invalid checksum received [" << address() << "]";
+            << "Invalid checksum received [" << address().to_string() << "]";
 
         raw_subscriber_->relay(error::bad_stream, header_type(), data_chunk());
         stop();
@@ -481,7 +473,8 @@ void channel_proxy::send_common(const data_chunk& whole_message,
 void channel_proxy::do_send_common(const data_chunk& whole_message,
     send_handler handle_send, const std::string& command)
 {
-    log_debug(LOG_NETWORK) << "Send " << command << " [" << address()
+    log_debug(LOG_NETWORK)
+        << "Send " << command << " [" << address().to_string()
         << "] (" << whole_message.size() << " bytes)";
 
     const shared_const_buffer buffer(whole_message);

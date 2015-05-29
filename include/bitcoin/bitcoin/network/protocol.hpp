@@ -55,10 +55,10 @@ public:
         broadcast_handler;
 
     static const size_t default_max_outbound;
-    static const hosts::name_list default_seeds;
+    static const hosts::authority_list default_seeds;
 
     protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
-        const hosts::name_list& seeds = default_seeds,
+        const hosts::authority_list& seeds = default_seeds,
         uint16_t port=bc::protocol_port, bool listen=true, 
         size_t max_outbound=default_max_outbound);
     
@@ -234,11 +234,11 @@ private:
 
     // Remove channels from lists when disconnected.
     void outbound_channel_stopped(const std::error_code& ec,
-        channel_ptr which_node, slot_index slot);
+        channel_ptr node, slot_index slot);
     void manual_channel_stopped(const std::error_code& ec,
-        channel_ptr which_node, const std::string& hostname, uint16_t port);
+        channel_ptr node, const std::string& hostname, uint16_t port);
     void inbound_channel_stopped(const std::error_code& ec,
-        channel_ptr which_node);
+        channel_ptr node);
 
     void subscribe_address(channel_ptr node);
     void receive_address_message(const std::error_code& ec,
@@ -291,7 +291,7 @@ private:
     channel_subscriber_type::ptr channel_subscribe_;
 
     boost::filesystem::path hosts_path_;
-    const hosts::name_list& seeds_;
+    const hosts::authority_list& seeds_;
     std::shared_ptr<seeder> seeder_;
     friend class seeder;
 };

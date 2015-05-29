@@ -26,6 +26,7 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
@@ -44,7 +45,7 @@ using boost::posix_time::seconds;
 
 // Based on http://bitcoinstats.com/network/dns-servers
 #ifdef ENABLE_TESTNET
-const hosts::name_list protocol::default_seeds =
+const hosts::authority_list protocol::default_seeds =
 {
     { "testnet-seed.alexykot.me", 18333 },
     { "testnet-seed.bitcoin.petertodd.org", 18333 },
@@ -52,7 +53,7 @@ const hosts::name_list protocol::default_seeds =
     { "testnet-seed.bitcoin.schildbach.de", 18333 }
 };
 #else
-const hosts::name_list protocol::default_seeds =
+const hosts::authority_list protocol::default_seeds =
 {
     { "seed.bitnodes.io", 8333 },
     { "seed.bitcoinstats.com", 8333 },
@@ -77,8 +78,8 @@ const size_t watermark_connection_limit = 10;
 const time_duration watermark_reset_interval = seconds(1);
 
 protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
-    network& net, const hosts::name_list& seeds, uint16_t port, bool listen,
-    size_t max_outbound)
+    network& net, const hosts::authority_list& seeds, uint16_t port,
+    bool listen, size_t max_outbound)
   : strand_(pool),
     hosts_(peers),
     handshake_(shake),
@@ -325,19 +326,19 @@ void protocol::attempt_connect(const std::error_code& ec,
     {
         log_debug(LOG_PROTOCOL)
             << "Already connected to selected peer [" 
-            << hosts::address(address).to_string() << "]";
+            << authority(address).to_string() << "]";
 
         // Retry another connection, still in same strand.
         modify_slot(slot, connect_state::stopped);
         try_connect_once(slot);
         return;
     }
-    
+
     log_debug(LOG_PROTOCOL) << 
-        "Connecting to peer [" << hosts::address(address).to_string()
+        "Connecting to peer [" << authority(address).to_string()
         << "] on slot [" << slot << "]";
 
-    const auto peer = hosts::address(address);
+    const authority peer(address);
     connect(handshake_, network_, peer.host, peer.port,
         strand_.wrap(&protocol::handle_connect,
             this, _1, _2, address, slot));
@@ -347,11 +348,12 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     const network_address_type& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
+
     if (ec)
     {
         log_warning(LOG_PROTOCOL) << "Failure connecting to peer ["
-            << hosts::address(address).to_string()
-            << "] on slot [" << slot << "] " << ec.message();
+            << authority(address).to_string() << "] on slot [" << slot << "] "
+            << ec.message();
 
         // Retry another connection, still in same strand.
         modify_slot(slot, connect_state::stopped);
@@ -364,8 +366,8 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     connections_.push_back({address, node});
 
     log_info(LOG_PROTOCOL) << "Connected to peer ["
-        << hosts::address(address).to_string() << "] on slot ["
-        << slot << "] (" << connections_.size() << " total)";
+        << authority(address).to_string() << "] on slot [" << slot << "] ("
+        << connections_.size() << " total)";
 
     // Remove channel from list of connections
     node->subscribe_stop(
@@ -379,8 +381,8 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
 void protocol::maintain_connection(const std::string& hostname, uint16_t port)
 {
     log_warning(LOG_PROTOCOL) <<
-        "Retrying connection to ["
-        << hostname << ":" << port << "] ";
+        "Retrying connection to [" 
+        << authority(hostname, port).to_string() << "] ";
 
     connect(handshake_, network_, hostname, port,
         strand_.wrap(&protocol::handle_manual_connect,
@@ -394,7 +396,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     {
         log_warning(LOG_PROTOCOL) << 
             "Failure connecting manually to peer [" 
-            << hostname << ":" << port << "] " << ec.message();
+            << authority(hostname, port).to_string() << "] " << ec.message();
 
         // Reconnect again.
         maintain_connection(hostname, port);
@@ -405,8 +407,8 @@ void protocol::handle_manual_connect(const std::error_code& ec,
 
     // Connected!
     log_info(LOG_PROTOCOL) << 
-        "Connection to peer established manually [" 
-        << hostname << ":" << port << "]";
+        "Connection to peer established manually ["
+        << authority(hostname, port).to_string() << "]";
 
     // Remove channel from list of connections
     node->subscribe_stop(
@@ -439,22 +441,32 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
-            << "Failure in connection from [" 
-            << node->address() << "] " << ec.message();
+        if (node)
+            log_error(LOG_PROTOCOL)
+                << "Failure in connection from [" 
+                << node->address().to_string() << "] " << ec.message();
+        else
+            log_error(LOG_PROTOCOL)
+            << "Failure in connection: " << ec.message();
         return;
     }
 
     accepted_channels_.push_back(node);
-    log_info(LOG_PROTOCOL) << "Accepted connection from [" 
-        << node->address() << "] (" << accepted_channels_.size() << " total)";
+    log_info(LOG_PROTOCOL)
+        << "Accepted connection from [" << node->address().to_string() << "] ("
+        << accepted_channels_.size() << " total)";
 
-    const auto handshake_complete = [this, node](const std::error_code& ec)
+    const auto handshake_complete = [this, node](
+        const std::error_code& ec)
     {
         if (ec)
         {
-            log_error(LOG_PROTOCOL) << "Failure in handshake from [" 
-                << node->address() << "] " << ec.message();
+            if (node)
+                log_error(LOG_PROTOCOL) << "Failure in handshake from [" 
+                    << node->address().to_string() << "] " << ec.message();
+            else
+                log_error(LOG_PROTOCOL) << "Failure in handshake: "
+                    << ec.message();
             return;
         }
 
@@ -474,8 +486,13 @@ void protocol::setup_new_channel(channel_ptr node)
     const auto handle_send = [node](const std::error_code& ec)
     {
         if (ec)
-            log_error(LOG_PROTOCOL) << "Send error [" 
-                << node->address() << "] " << ec.message();
+        {
+            if (node)
+                log_error(LOG_PROTOCOL) << "Send error ["
+                    << node->address().to_string() << "] " << ec.message();
+            else
+                log_error(LOG_PROTOCOL) << "Send error: " << ec.message();
+        }
     };
 
     subscribe_address(node);
@@ -486,11 +503,11 @@ void protocol::setup_new_channel(channel_ptr node)
 }
 
 template <typename ConnectionsList>
-void remove_connection(ConnectionsList& connections, channel_ptr which_node)
+void remove_connection(ConnectionsList& connections, channel_ptr node)
 {
     auto it = connections.begin();
     for (; it != connections.end(); ++it)
-        if (it->node == which_node)
+        if (it->node == node)
             break;
 
     BITCOIN_ASSERT(it != connections.end());
@@ -498,17 +515,23 @@ void remove_connection(ConnectionsList& connections, channel_ptr which_node)
 }
 
 void protocol::outbound_channel_stopped(const std::error_code& ec,
-    channel_ptr which_node, slot_index slot)
+    channel_ptr node, slot_index slot)
 {
     // We must always attempt a reconnection if this was an
     // outbound connection.
     if (ec)
-        log_error(LOG_PROTOCOL)
-            << "Channel stopped (outbound) [" 
-            << which_node->address() << "] " << ec.message();
+    {
+        if (node)
+            log_error(LOG_PROTOCOL)
+                << "Channel stopped (outbound) ["
+                << node->address().to_string() << "] " << ec.message();
+        else
+            log_error(LOG_PROTOCOL)
+            << "Channel stopped (outbound): " << ec.message();
+    }
 
     // Erase this channel from our list and then attempt a reconnection.
-    remove_connection(connections_, which_node);
+    remove_connection(connections_, node);
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
     modify_slot(slot, connect_state::stopped);
 
@@ -517,43 +540,53 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
 }
 
 template <typename ChannelsList>
-void remove_channel(ChannelsList& channels, channel_ptr which_node)
+void remove_channel(ChannelsList& channels, channel_ptr node)
 {
-    const auto it = std::find(channels.begin(), channels.end(), which_node);
+    const auto it = std::find(channels.begin(), channels.end(), node);
     BITCOIN_ASSERT(it != channels.end());
     channels.erase(it);
 }
 
 void protocol::manual_channel_stopped(const std::error_code& ec,
-    channel_ptr which_node, const std::string& hostname, uint16_t port)
+    channel_ptr node, const std::string& hostname, uint16_t port)
 {
     // We must always attempt a reconnection if this was outbound.
     if (ec)
-        log_error(LOG_PROTOCOL)
-            << "Channel stopped (manual) [" << hostname << ":" << port << "] "
-            << ec.message();
+    {
+        if (node)
+            log_error(LOG_PROTOCOL)
+                << "Channel stopped (manual) [" 
+                << authority(hostname, port).to_string() << "] " << ec.message();
+        else
+            log_error(LOG_PROTOCOL)
+            << "Channel stopped (manual): " << ec.message();
+    }
 
     // Remove from list and try to reconnect.
     // Timeout logic would go here if we ever need it.
-    remove_channel(manual_connections_, which_node);
+    remove_channel(manual_connections_, node);
 
     // Reconnect again.
     maintain_connection(hostname, port);
 }
 
 void protocol::inbound_channel_stopped(const std::error_code& ec,
-    channel_ptr which_node)
+    channel_ptr node)
 {
     // We must always attempt a reconnection if this was outbound.
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
-            << "Channel stopped (inbound) [" << which_node->address() << "] "
-            << ec.message();
+        if (node)
+            log_error(LOG_PROTOCOL)
+                << "Channel stopped (inbound) ["
+                << node->address().to_string() << "] " << ec.message();
+        else
+            log_error(LOG_PROTOCOL)
+                << "Channel stopped (inbound): " << ec.message();
     }
 
     // Remove from accepted connections.
-    remove_channel(accepted_channels_, which_node);
+    remove_channel(accepted_channels_, node);
 }
 
 void protocol::subscribe_address(channel_ptr node)
@@ -568,14 +601,18 @@ void protocol::receive_address_message(const std::error_code& ec,
 {
     if (ec)
     {
-        log_warning(LOG_PROTOCOL)
-            << "Failure getting addresses from [" << node->address() << "] "
-            << ec.message();
+        if (node)
+            log_warning(LOG_PROTOCOL)
+                << "Failure getting addresses from ["
+                << node->address().to_string() << "] " << ec.message();
+        else
+            log_warning(LOG_PROTOCOL)
+                << "Failure getting addresses: " << ec.message();
         return;
     }
 
     log_debug(LOG_PROTOCOL) 
-        << "Storing addresses from [" << node->address() << "]";
+        << "Storing addresses from [" << node->address().to_string() << "]";
 
     for (const auto& net_address: packet.addresses)
         hosts_.store(net_address,
@@ -624,6 +661,7 @@ bool protocol::get_listening()
 
 void protocol::set_listening(bool value)
 {
+    // TODO: need to send message to stop listener.
     listen_enabled_ = value;
 }
 

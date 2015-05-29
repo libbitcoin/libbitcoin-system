@@ -21,12 +21,10 @@
 #define LIBBITCOIN_SEEDS_HPP
 
 #include <cstddef>
-#include <cstdint>
-#include <string>
 #include <memory>
 #include <system_error>
-#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -41,7 +39,7 @@ class BC_API seeder
   : public std::enable_shared_from_this<seeder>
 {
 public:
-    seeder(protocol* proto, const hosts::name_list& seeds,
+    seeder(protocol* proto, const hosts::authority_list& seeds,
         protocol::completion_handler handle_complete);
 
     /// This class is not copyable.
@@ -51,7 +49,7 @@ public:
     void start();
 
 private:
-    void contact(const hosts::address& address);
+    void contact(const authority& seed_address);
     void handle_request(const std::error_code& ec);
     void handle_store(const std::error_code& ec);
     void request(const std::error_code& ec, channel_ptr seed_node);
@@ -63,8 +61,9 @@ private:
     hosts& hosts_;
     handshake& handshake_;
     network& network_;
+    bool succeeded_;
     size_t visited_;
-    const hosts::name_list& seeds_;
+    const hosts::authority_list& seeds_;
     const protocol::completion_handler handle_complete_;
 };
 

@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/network/channel.hpp>
 
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 
@@ -52,13 +53,13 @@ bool channel::stopped() const
     return true;
 }
 
-std::string channel::address() const
+authority channel::address() const
 {
     const auto proxy = weak_proxy_.lock();
     if (proxy)
         return proxy->address();
 
-    return "";
+    return address();
 }
 
 void channel::send_raw(const header_type& packet_header,

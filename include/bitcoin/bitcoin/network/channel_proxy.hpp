@@ -32,6 +32,7 @@
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
@@ -124,7 +125,7 @@ public:
     void start();
     void stop();
     bool stopped() const;
-    std::string address() const;
+    authority address() const;
 
     template <typename Message>
     void send(const Message& packet, send_handler handle_send)

@@ -98,6 +98,7 @@
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\src\network\acceptor.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel_proxy.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel_stream_loader.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\secp256k1_initializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\authority.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_loader_module.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_proxy.hpp" />

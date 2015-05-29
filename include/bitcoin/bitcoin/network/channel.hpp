@@ -25,6 +25,7 @@
 #include <string>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -52,7 +53,7 @@ public:
 
     void stop() const;
     bool stopped() const;
-    std::string address() const;
+    authority address() const;
 
     template <typename Message>
     void send(const Message& packet, channel_proxy::send_handler handle_send)

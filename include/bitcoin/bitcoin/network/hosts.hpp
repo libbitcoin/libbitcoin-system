@@ -28,6 +28,7 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
@@ -39,21 +40,7 @@ namespace network {
 class BC_API hosts
 {
 public:
-    struct address
-    {
-        address();
-        address(channel_ptr node);
-        address(const std::string& line);
-        address(const network_address_type& net);
-        address(const std::string& host, uint16_t port);
-        bool operator==(const address& other) const;
-        std::string to_string() const;
-
-        std::string host;
-        uint16_t port = 0;
-    };
-
-    typedef std::vector<address> name_list;
+    typedef std::vector<authority> authority_list;
     typedef std::function<void (const std::error_code&)> load_handler;
     typedef std::function<void (const std::error_code&)> save_handler;
     typedef std::function<void (const std::error_code&)> store_handler;
@@ -65,11 +52,13 @@ public:
 
     hosts(threadpool& pool, const boost::filesystem::path& file_path,
         size_t capacity=1000);
-    ~hosts();
 
     /// This class is not copyable.
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
+
+    size_t size() const;
+    bool empty() const;
 
     void load(load_handler handle_load);
     void save(save_handler handle_save);
@@ -98,7 +87,7 @@ private:
         bool operator==(const ip_address& other) const;
 
         ip_address_type ip;
-        uint16_t port = 0;
+        uint16_t port;
     };
 
     void do_load(const boost::filesystem::path& path,

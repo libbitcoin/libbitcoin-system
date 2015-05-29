@@ -75,6 +75,7 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
     src/network/acceptor.cpp \
+    src/network/authority.cpp \
     src/network/channel.cpp \
     src/network/channel_proxy.cpp \
     src/network/channel_stream_loader.cpp \
@@ -245,6 +246,7 @@ include_bitcoin_bitcoin_math_HEADERS = \
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/acceptor.hpp \
+    include/bitcoin/bitcoin/network/authority.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
     include/bitcoin/bitcoin/network/channel_loader_module.hpp \
     include/bitcoin/bitcoin/network/channel_proxy.hpp \
