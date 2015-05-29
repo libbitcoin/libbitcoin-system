@@ -356,8 +356,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/time.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
-    include/bitcoin/bitcoin/utility/variable_uint_size.hpp \
-    include/bitcoin/bitcoin/utility/weak_bind.hpp
+    include/bitcoin/bitcoin/utility/variable_uint_size.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
