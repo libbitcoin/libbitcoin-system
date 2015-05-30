@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/error.hpp>
 
+#include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 
 using namespace bc;
@@ -46,107 +47,122 @@ const char* error_category_impl::name() const BC_NOEXCEPT
 
 std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 {
+    // This text mapping may change without notice.
     switch (ev)
     {
+        case error::success:
+            return "success";
+
+        // network errors
         case error::service_stopped:
-            return "Service stopped";
+            return "connection terminated";
         case error::operation_failed:
-            return "Operation failed";
+            return "operation failed";
+
+        // blockchain errors
         case error::not_found:
-            return "Object does not exist";
+            return "object does not exist";
         case error::duplicate:
-            return "Matching previous object found";
+            return "matching previous object found";
         case error::unspent_output:
-            return "Unspent output";
+            return "unspent output";
         case error::unsupported_payment_type:
-            return "Unsupport payment type";
+            return "unsupport payment type";
+
+        // network errors (more)
         case error::resolve_failed:
-            return "Resolving hostname failed";
+            return "resolving hostname failed";
         case error::network_unreachable:
-            return "Unable to reach remote network";
+            return "unable to reach remote network";
         case error::address_in_use:
-            return "Address already in use";
+            return "address already in use";
         case error::listen_failed:
-            return "Listen incoming connections failed";
+            return "listen incoming connections failed";
         case error::accept_failed:
-            return "Accept connection failed";
+            return "accept connection failed";
         case error::bad_stream:
-            return "Bad stream";
+            return "bad stream";
         case error::channel_timeout:
-            return "Channel timed out";
+            return "channel timed out";
 
         // transaction pool
         case error::blockchain_reorganized:
-            return "Transactions invalidated from blockchain reorganization";
+            return "transactions invalidated from blockchain reorganization";
         case error::pool_filled:
-            return "Forced removal of old transaction from full pool";
+            return "forced removal of old transaction from full pool";
 
         // validate tx
         case error::coinbase_transaction:
-            return "Memory pool coinbase transaction";
+            return "memory pool coinbase transaction";
         case error::is_not_standard:
-            return "Transaction is not standard";
+            return "transaction is not standard";
         case error::double_spend:
-            return "Double spend of input";
+            return "double spend of input";
         case error::input_not_found:
-            return "Spent input not found";
+            return "spent input not found";
 
         // check_transaction()
         case error::empty_transaction:
-            return "Transaction inputs or outputs are empty";
+            return "transaction inputs or outputs are empty";
         case error::output_value_overflow:
-            return "Overflow in output value outside range";
+            return "overflow in output value outside range";
         case error::invalid_coinbase_script_size:
-            return "Coinbase script is too small or large";
+            return "coinbase script is too small or large";
         case error::previous_output_null:
-            return "Non-coinbase transaction has null previous in an input";
+            return "non-coinbase transaction has null previous in an input";
 
         // validate block
         case error::previous_block_invalid:
-            return "Previous block failed to validate";
+            return "previous block failed to validate";
 
         // check_block()
         case error::size_limits:
-            return "Size limits failed";
+            return "size limits failed";
         case error::proof_of_work:
-            return "Proof of work failed";
+            return "proof of work failed";
         case error::futuristic_timestamp:
-            return "Timestamp too far in the future";
+            return "timestamp too far in the future";
         case error::first_not_coinbase:
-            return "First transaction is not a coinbase";
+            return "first transaction is not a coinbase";
         case error::extra_coinbases:
-            return "More than one coinbase";
+            return "more than one coinbase";
         case error::too_many_sigs:
-            return "Too many script *SIG operations";
+            return "too many script signatures";
         case error::merkle_mismatch:
-            return "Merkle root mismatch";
+            return "merkle root mismatch";
 
         // accept_block()
         case error::incorrect_proof_of_work:
-            return "Proof of work does not match bits field";
+            return "proof of work does not match bits field";
         case error::timestamp_too_early:
-            return "Block timestamp is too early";
+            return "block timestamp is too early";
         case error::non_final_transaction:
-            return "Contains a non-final transaction";
+            return "contains a non-final transaction";
         case error::checkpoints_failed:
-            return "Block hash rejected by checkpoint lockins";
+            return "block hash rejected by checkpoint lockins";
         case error::old_version_block:
-            return "Reject version=1 block";
+            return "reject version=1 block";
         case error::coinbase_height_mismatch:
-            return "Block height mismatch in coinbase";
+            return "block height mismatch in coinbase";
 
         // connect_block()
         case error::duplicate_or_spent:
-            return "Duplicate transaction when with unspent outputs";
+            return "duplicate transaction when with unspent outputs";
         case error::validate_inputs_failed:
-            return "Validation of inputs failed";
+            return "validation of inputs failed";
         case error::fees_out_of_range:
-            return "Fees are out of range";
+            return "fees are out of range";
         case error::coinbase_too_large:
-            return "Reported coinbase value is too large";
+            return "reported coinbase value is too large";
 
+        // file system errors
+        case error::file_system:
+            return "file system error";
+
+        // unknown errors
+        case error::unknown:
         default:
-            return "Unknown error";
+            return "unknown error";
     }
 }
 
@@ -215,6 +231,116 @@ namespace error {
     std::error_condition make_error_condition(error_condition_t e)
     {
         return std::error_condition(e, get_error_category_instance());
+    }
+
+    error_code_t boost_to_error_code(const boost::system::error_code& ec)
+    {
+        namespace boost_error = boost::system::errc;
+        switch (ec.value())
+        {
+            case boost_error::success:
+                return error::success;
+
+            // network errors
+            case boost_error::connection_aborted:
+            case boost_error::connection_refused:
+            case boost_error::connection_reset:
+            case boost_error::not_connected:
+            case boost_error::operation_canceled:
+                return error::service_stopped;
+
+            case boost_error::operation_not_permitted:
+            case boost_error::operation_not_supported:
+            case boost_error::owner_dead:
+            case boost_error::permission_denied:
+                return error::operation_failed;
+
+            case boost_error::address_family_not_supported:
+            case boost_error::address_not_available:
+            case boost_error::bad_address:
+            case boost_error::destination_address_required:
+                return error::resolve_failed;
+
+            case boost_error::broken_pipe:
+            case boost_error::host_unreachable:
+            case boost_error::network_down:
+            case boost_error::network_reset:
+            case boost_error::network_unreachable:
+            case boost_error::no_link:
+            case boost_error::no_protocol_option:
+            case boost_error::no_such_file_or_directory:
+            case boost_error::not_a_socket:
+            case boost_error::protocol_not_supported:
+            case boost_error::wrong_protocol_type:
+                return error::network_unreachable;
+
+            case boost_error::address_in_use:
+            case boost_error::already_connected:
+            case boost_error::connection_already_in_progress:
+            case boost_error::operation_in_progress:
+                return error::address_in_use;
+
+            case boost_error::bad_message:
+            case boost_error::illegal_byte_sequence:
+            case boost_error::io_error:
+            case boost_error::message_size:
+            case boost_error::no_message_available:
+            case boost_error::no_message:
+            case boost_error::no_stream_resources:
+            case boost_error::not_a_stream:
+            case boost_error::protocol_error:
+                return error::bad_stream;
+
+            case boost_error::stream_timeout:
+            case boost_error::timed_out:
+                return error::channel_timeout;
+
+            // file system errors
+            case boost_error::cross_device_link:
+            case boost_error::bad_file_descriptor:
+            case boost_error::device_or_resource_busy:
+            case boost_error::directory_not_empty:
+            case boost_error::executable_format_error:
+            case boost_error::file_exists:
+            case boost_error::file_too_large:
+            case boost_error::filename_too_long:
+            case boost_error::invalid_seek:
+            case boost_error::is_a_directory:
+            case boost_error::no_space_on_device:
+            case boost_error::no_such_device:
+            case boost_error::no_such_device_or_address:
+            case boost_error::read_only_file_system:
+            case boost_error::resource_unavailable_try_again:
+            case boost_error::text_file_busy:
+            case boost_error::too_many_files_open:
+            case boost_error::too_many_files_open_in_system:
+            case boost_error::too_many_links:
+            case boost_error::too_many_symbolic_link_levels:
+                return error::file_system;
+
+            // unknown errors
+            case boost_error::argument_list_too_long:
+            case boost_error::argument_out_of_domain:
+            case boost_error::function_not_supported:
+            case boost_error::identifier_removed:
+            case boost_error::inappropriate_io_control_operation:
+            case boost_error::interrupted:
+            case boost_error::invalid_argument:
+            case boost_error::no_buffer_space:
+            case boost_error::no_child_process:
+            case boost_error::no_lock_available:
+            case boost_error::no_such_process:
+            case boost_error::not_a_directory:
+            case boost_error::not_enough_memory:
+            case boost_error::not_supported:
+            case boost_error::operation_would_block:
+            case boost_error::resource_deadlock_would_occur:
+            case boost_error::result_out_of_range:
+            case boost_error::state_not_recoverable:
+            case boost_error::value_too_large:
+            default:
+                return error::unknown;
+        }
     }
 
 } // namespace error

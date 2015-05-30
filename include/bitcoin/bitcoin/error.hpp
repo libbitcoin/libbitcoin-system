@@ -22,22 +22,28 @@
 
 #include <string>
 #include <system_error>
+#include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 namespace error {
 
-    // Specific errors
+    // The numeric values of these codes may change without notice.
     enum error_code_t
     {
-        service_stopped = 1,
+        success = 0,
+
+        // network errors
+        service_stopped,
         operation_failed,
+
         // blockchain errors
         not_found,
         duplicate,
         unspent_output,
         unsupported_payment_type,
-        // network errors
+
+        // network errors (more)
         resolve_failed,
         network_unreachable,
         address_in_use,
@@ -45,21 +51,26 @@ namespace error {
         accept_failed,
         bad_stream,
         channel_timeout,
+
         // transaction pool
         blockchain_reorganized,
         pool_filled,
+
         // validate tx
         coinbase_transaction,
         is_not_standard,
         double_spend,
         input_not_found,
+
         // check_transaction()
         empty_transaction,
         output_value_overflow,
         invalid_coinbase_script_size,
         previous_output_null,
+
         // validate block
         previous_block_invalid,
+
         // check_block()
         size_limits,
         proof_of_work,
@@ -68,6 +79,7 @@ namespace error {
         extra_coinbases,
         too_many_sigs,
         merkle_mismatch,
+
         // accept_block()
         incorrect_proof_of_work,
         timestamp_too_early,
@@ -75,11 +87,18 @@ namespace error {
         checkpoints_failed,
         old_version_block,
         coinbase_height_mismatch,
+
         // connect_block()
         duplicate_or_spent,
         validate_inputs_failed,
         fees_out_of_range,
-        coinbase_too_large
+        coinbase_too_large,
+
+        // file system errors
+        file_system,
+
+        // unknown errors
+        unknown
     };
 
     enum error_condition_t
@@ -91,6 +110,7 @@ namespace error {
 
     BC_API std::error_code make_error_code(error_code_t e);
     BC_API std::error_condition make_error_condition(error_condition_t e);
+    BC_API error_code_t boost_to_error_code(const boost::system::error_code& ec);
 
 } // namespace error
 } // namespace libbitcoin
