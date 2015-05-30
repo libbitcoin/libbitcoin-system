@@ -39,7 +39,7 @@ using std::placeholders::_2;
 seeder::seeder(protocol* proto, const hosts::authority_list& seeds,
     protocol::completion_handler handle_complete)
   : strand_(proto->strand_), 
-    hosts_(proto->hosts_),
+    host_pool_(proto->host_pool_),
     handshake_(proto->handshake_),
     network_(proto->network_),
     succeeded_(false),
@@ -130,7 +130,7 @@ void seeder::store(const std::error_code& ec, const address_type& packet,
         << seed_node->address().to_string() << "] ";
 
     for (const auto& address: packet.addresses)
-        hosts_.store(address,
+        host_pool_.store(address,
             strand_.wrap(&seeder::handle_store,
                 shared_from_this(), _1));
 

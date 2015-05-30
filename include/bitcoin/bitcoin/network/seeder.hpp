@@ -58,7 +58,7 @@ private:
     void visited(const std::error_code& ec);
 
     async_strand& strand_;
-    hosts& hosts_;
+    hosts& host_pool_;
     handshake& handshake_;
     network& network_;
     bool succeeded_;

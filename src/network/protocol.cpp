@@ -81,7 +81,7 @@ protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
     network& net, const hosts::authority_list& seeds, uint16_t port,
     bool listen, size_t max_outbound)
   : strand_(pool),
-    hosts_(peers),
+    host_pool_(peers),
     handshake_(shake),
     network_(net),
     max_outbound_(max_outbound),
@@ -128,7 +128,7 @@ void protocol::handle_bootstrap(const std::error_code& ec,
 
 void protocol::stop(completion_handler handle_complete)
 {
-    hosts_.save(
+    host_pool_.save(
         strand_.wrap(&protocol::handle_save,
             this, _1, handle_complete));
 }
@@ -150,7 +150,7 @@ void protocol::handle_save(const std::error_code& ec,
 
 void protocol::bootstrap(completion_handler handle_complete)
 {
-    hosts_.load(
+    host_pool_.load(
         strand_.wrap(&protocol::load_hosts,
             this, _1, handle_complete));
 }
@@ -166,7 +166,7 @@ void protocol::load_hosts(const std::error_code& ec,
         return;
     }
 
-    hosts_.fetch_count(
+    host_pool_.fetch_count(
         strand_.wrap(&protocol::if_no_seeds,
             this, _1, _2, handle_complete));
 }
@@ -264,7 +264,7 @@ void protocol::try_connect_once(slot_index slot)
     // Begin connection flow: finding_peer -> connecting -> established.
     // Failures end with connect_state::stopped and loop back here again.
     modify_slot(slot, connect_state::finding_peer);
-    hosts_.fetch_address(
+    host_pool_.fetch_address(
         strand_.wrap(&protocol::attempt_connect, 
             this, _1, _2, slot));
 }
@@ -615,7 +615,7 @@ void protocol::receive_address_message(const std::error_code& ec,
         << "Storing addresses from [" << node->address().to_string() << "]";
 
     for (const auto& net_address: packet.addresses)
-        hosts_.store(net_address,
+        host_pool_.store(net_address,
             strand_.wrap(&protocol::handle_store_address,
                 this, _1));
 
@@ -676,7 +676,7 @@ void protocol::set_hosts_filename(const std::string& hosts_path)
 {
     //BITCOIN_ASSERT_MSG(false,
     //    "protocol::set_hosts_filename deprecated, set hosts on construct.");
-    hosts_.file_path_ = hosts_path;
+    host_pool_.file_path_ = hosts_path;
 }
 
 // This is problematic because there is no enabler.

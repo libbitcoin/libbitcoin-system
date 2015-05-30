@@ -264,7 +264,7 @@ private:
     }
     
     async_strand strand_;
-    hosts& hosts_;
+    hosts& host_pool_;
     handshake& handshake_;
     network& network_;
 
