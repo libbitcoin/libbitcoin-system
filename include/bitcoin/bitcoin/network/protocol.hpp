@@ -252,14 +252,17 @@ private:
     template <typename Message>
     void do_broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        const size_t total_nodes = total_connections();
-        auto send_handler =
+        const auto total_nodes = total_connections();
+        const auto send_handler =
             std::bind(handle_send, std::placeholders::_1, total_nodes);
-        for (const connection_info& connection: connections_)
+
+        for (const auto& connection: connections_)
             connection.node->send(packet, send_handler);
-        for (channel_ptr node: manual_connections_)
+
+        for (const auto node: manual_connections_)
             node->send(packet, send_handler);
-        for (channel_ptr node: accepted_channels_)
+
+        for (const auto node: accepted_channels_)
             node->send(packet, send_handler);
     }
     
