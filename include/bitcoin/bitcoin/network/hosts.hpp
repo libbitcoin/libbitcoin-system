@@ -53,6 +53,7 @@ public:
 
     hosts(threadpool& pool, const boost::filesystem::path& file_path,
         size_t capacity=1000);
+    ~hosts();
 
     /// This class is not copyable.
     hosts(const hosts&) = delete;

@@ -55,6 +55,11 @@ hosts::hosts(threadpool& pool, size_t capacity)
 {
 }
 
+hosts::~hosts()
+{
+    // This was reportedly required for use with circular_buffer.
+}
+
 bool hosts::empty() const
 {
     return buffer_.empty();
