@@ -73,27 +73,27 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::resolve_failed:
             return "resolving hostname failed";
         case error::network_unreachable:
-            return "unable to reach remote network";
+            return "unable to reach remote host";
         case error::address_in_use:
             return "address already in use";
         case error::listen_failed:
-            return "listen incoming connections failed";
+            return "incoming connection failed";
         case error::accept_failed:
-            return "accept connection failed";
+            return "connection acceptance failed";
         case error::bad_stream:
-            return "bad stream";
+            return "bad data stream";
         case error::channel_timeout:
-            return "channel timed out";
+            return "connection timed out";
 
         // transaction pool
         case error::blockchain_reorganized:
-            return "transactions invalidated from blockchain reorganization";
+            return "transactions invalidated by blockchain reorganization";
         case error::pool_filled:
-            return "forced removal of old transaction from full pool";
+            return "forced removal of old transaction from pool overflow";
 
         // validate tx
         case error::coinbase_transaction:
-            return "memory pool coinbase transaction";
+            return "coinbase transaction disallowed in memory pool";
         case error::is_not_standard:
             return "transaction is not standard";
         case error::double_spend:
@@ -105,11 +105,11 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::empty_transaction:
             return "transaction inputs or outputs are empty";
         case error::output_value_overflow:
-            return "overflow in output value outside range";
+            return "output value outside valid range";
         case error::invalid_coinbase_script_size:
             return "coinbase script is too small or large";
         case error::previous_output_null:
-            return "non-coinbase transaction has null previous in an input";
+            return "non-coinbase transaction has input with null previous output";
 
         // validate block
         case error::previous_block_invalid:
@@ -137,23 +137,23 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::timestamp_too_early:
             return "block timestamp is too early";
         case error::non_final_transaction:
-            return "contains a non-final transaction";
+            return "block contains a non-final transaction";
         case error::checkpoints_failed:
             return "block hash rejected by checkpoint lockins";
         case error::old_version_block:
-            return "reject version=1 block";
+            return "block version one rejected at current height";
         case error::coinbase_height_mismatch:
             return "block height mismatch in coinbase";
 
         // connect_block()
         case error::duplicate_or_spent:
-            return "duplicate transaction when with unspent outputs";
+            return "duplicate transaction with unspent outputs";
         case error::validate_inputs_failed:
             return "validation of inputs failed";
         case error::fees_out_of_range:
             return "fees are out of range";
         case error::coinbase_too_large:
-            return "reported coinbase value is too large";
+            return "coinbase value is too large";
 
         // file system errors
         case error::file_system:
