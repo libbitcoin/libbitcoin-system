@@ -56,7 +56,7 @@ public:
     void discover_external_ip(discover_ip_handler handle_discover);
     void fetch_network_address(fetch_network_address_handler handle_fetch);
     void set_port(uint16_t port, setter_handler handle_set);
-    void set_start_height(uint32_t height, setter_handler handle_set);
+    void set_start_height(uint64_t height, setter_handler handle_set);
     void set_user_agent(const std::string& user_agent,
         setter_handler handle_set);
 
@@ -73,7 +73,7 @@ private:
     void do_discover_external_ip(discover_ip_handler handler_discover);
     void do_fetch_network_address(fetch_network_address_handler handle_fetch);
     void do_set_port(uint16_t port, setter_handler handle_set);
-    void do_set_start_height(uint32_t height, setter_handler handle_set);
+    void do_set_start_height(uint64_t height, setter_handler handle_set);
     void do_set_user_agent(const std::string& user_agent,
         setter_handler handle_set);
 

@@ -175,16 +175,20 @@ void handshake::do_set_user_agent(const std::string& user_agent,
     handle_set(std::error_code());
 }
 
-void handshake::set_start_height(uint32_t height, setter_handler handle_set)
+void handshake::set_start_height(uint64_t height, setter_handler handle_set)
 {
     strand_.post(
         std::bind(&handshake::do_set_start_height,
             this, height, handle_set));
 }
 
-void handshake::do_set_start_height(uint32_t height, setter_handler handle_set)
+void handshake::do_set_start_height(uint64_t height, setter_handler handle_set)
 {
-    template_version_.start_height = height;
+    // We type this method as uint64_t because that is what is returned by
+    // fetch_last_height, whcih feeds directly into this method. But start_height
+    // is uint32_t in the satoshi network protocol.
+    BITCOIN_ASSERT(height <= bc::max_uint32);
+    template_version_.start_height = static_cast<uint32_t>(height);
     handle_set(std::error_code());
 }
 
