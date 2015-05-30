@@ -58,7 +58,7 @@ authority channel::address() const
     if (proxy)
         return proxy->address();
 
-    return address();
+    return authority();
 }
 
 void channel::send_raw(const header_type& packet_header,
