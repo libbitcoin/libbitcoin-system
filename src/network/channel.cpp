@@ -36,7 +36,6 @@ channel::~channel()
     stop();
 }
 
-// Slowly shutdown
 void channel::stop() const
 {
     const auto proxy = weak_proxy_.lock();

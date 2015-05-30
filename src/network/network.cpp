@@ -22,8 +22,10 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <system_error>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include "connect_with_timeout.hpp"
@@ -115,7 +117,7 @@ void network::listen(uint16_t port, listen_handler handle_listen)
         return;
 
     const auto accept = std::make_shared<acceptor>(pool_, tcp_accept);
-    handle_listen(std::error_code(), accept);
+    handle_listen(error::success, accept);
 }
 
 } // namespace network

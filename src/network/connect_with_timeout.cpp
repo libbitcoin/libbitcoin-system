@@ -21,8 +21,10 @@
 
 #include <functional>
 #include <memory>
+#include <system_error>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
@@ -70,7 +72,7 @@ void connect_with_timeout::call_connect_handler(
     timer_.cancel();
     proxy_->start();
     const auto channel_object = std::make_shared<channel>(proxy_);
-    handle_connect(std::error_code(), channel_object);
+    handle_connect(error::success, channel_object);
 }
 
 void connect_with_timeout::close(const boost::system::error_code& ec)

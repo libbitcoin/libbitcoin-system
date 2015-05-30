@@ -23,9 +23,11 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <system_error>
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
@@ -122,7 +124,7 @@ void protocol::handle_bootstrap(const std::error_code& ec,
         return;
     }
 
-    handle_complete(std::error_code());
+    handle_complete(error::success);
     run();
 }
 
@@ -145,7 +147,7 @@ void protocol::handle_save(const std::error_code& ec,
     }
 
     channel_subscribe_->relay(error::service_stopped, nullptr);
-    handle_complete(std::error_code());
+    handle_complete(error::success);
 }
 
 void protocol::bootstrap(completion_handler handle_complete)
@@ -189,7 +191,7 @@ void protocol::if_no_seeds(const std::error_code& ec, size_t hosts_count,
         return;
     }
 
-    handle_complete(std::error_code()); 
+    handle_complete(error::success); 
 }
 
 std::string protocol::state_to_string(connect_state state) const
@@ -499,7 +501,7 @@ void protocol::setup_new_channel(channel_ptr node)
     node->send(get_address_type(), handle_send);
 
     // Notify subscribers
-    channel_subscribe_->relay(std::error_code(), node);
+    channel_subscribe_->relay(error::success, node);
 }
 
 template <typename ConnectionsList>
@@ -640,7 +642,7 @@ void protocol::fetch_connection_count(
 void protocol::do_fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
-    handle_fetch(std::error_code(), connections_.size());
+    handle_fetch(error::success, connections_.size());
 }
 
 void protocol::subscribe_channel(channel_handler handle_channel)

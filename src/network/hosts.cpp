@@ -87,8 +87,7 @@ void hosts::do_load(const path& path, load_handler handle_load)
     bc::ifstream file(path.string());
     if (file.bad())
     {
-        const auto error = std::make_error_code(std::errc::io_error);
-        handle_load(error);
+        handle_load(error::file_system);
         return;
     }
 
@@ -96,16 +95,16 @@ void hosts::do_load(const path& path, load_handler handle_load)
     while (std::getline(file, line))
     {
         ip_address address(line);
-        const auto enqueue = [this, address]()
+        const auto load_address = [this, address]()
         {
             buffer_.push_back(address);
         };
 
         if (address.port != 0)
-            strand_.randomly_queue(enqueue);
+            strand_.randomly_queue(load_address);
     }
 
-    handle_load(std::error_code());
+    handle_load(error::success);
 }
 
 void hosts::save(save_handler handle_save)
@@ -127,15 +126,14 @@ void hosts::do_save(const path& path, save_handler handle_save)
     bc::ofstream file(path.string());
     if (file.bad())
     {
-        const auto error = std::make_error_code(std::errc::io_error);
-        handle_save(error);
+        handle_save(error::file_system);
         return;
     }
 
     for (const auto& entry: buffer_)
         file << encode_base16(entry.ip) << " " << entry.port << std::endl;
 
-    handle_save(std::error_code());
+    handle_save(error::success);
 }
 
 void hosts::remove(const network_address_type& address,
@@ -160,7 +158,7 @@ void hosts::do_remove(const network_address_type& address,
     buffer_.erase(it);
     //log_info("hosts") << "Remove host ("
     //    << buffer_.size() << ") [" << authority(address).to_string() << "]";
-    handle_remove(std::error_code());
+    handle_remove(error::success);
 }
 
 void hosts::store(const network_address_type& address,
@@ -177,7 +175,7 @@ void hosts::do_store(const network_address_type& address,
     buffer_.push_back(ip_address(address));
     //log_info("hosts") << "Add host ("
     //    << buffer_.size() << ") [" << authority(address).to_string() << "]";
-    handle_store(std::error_code());
+    handle_store(error::success);
 }
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)
@@ -201,7 +199,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
     address.port = buffer_[host].port;
     address.timestamp = 0;
     address.services = 0;
-    handle_fetch(std::error_code(), address);
+    handle_fetch(error::success, address);
 }
 
 void hosts::fetch_count(fetch_count_handler handle_fetch)
@@ -213,7 +211,7 @@ void hosts::fetch_count(fetch_count_handler handle_fetch)
 
 void hosts::do_fetch_count(fetch_count_handler handle_fetch)
 {
-    handle_fetch(std::error_code(), buffer_.size());
+    handle_fetch(error::success, buffer_.size());
 }
 
 size_t hosts::select_random_host()

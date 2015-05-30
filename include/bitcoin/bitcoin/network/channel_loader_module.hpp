@@ -63,7 +63,7 @@ public:
         try
         {
             satoshi_load(stream.begin(), stream.end(), result);
-            handle_load_(std::error_code(), result);
+            handle_load_(error::success, result);
         }
         catch (bc::end_of_stream)
         {

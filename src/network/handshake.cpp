@@ -21,9 +21,10 @@
 
 #include <cstdint>
 #include <functional>
-#include <boost/lexical_cast.hpp>
+#include <system_error>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -41,9 +42,6 @@ using std::placeholders::_2;
 handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
   : strand_(pool.service())
 {
-    // template_version_.nonce = rand();
-    // template_version_.timestamp = time(nullptr);
-
     // Set fixed values inversion template.
     template_version_.version = bc::protocol_version;
     template_version_.user_agent = BC_USER_AGENT;
@@ -126,7 +124,7 @@ void handshake::discover_external_ip(discover_ip_handler handle_discover)
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
 {
     template_version_.address_me.ip = localhost_ip_address;
-    handle_discover(std::error_code(), template_version_.address_me.ip);
+    handle_discover(error::success, template_version_.address_me.ip);
 }
 
 void handshake::fetch_network_address(
@@ -140,7 +138,7 @@ void handshake::fetch_network_address(
 void handshake::do_fetch_network_address(
     fetch_network_address_handler handle_fetch)
 {
-    handle_fetch(std::error_code(), template_version_.address_me);
+    handle_fetch(error::success, template_version_.address_me);
 }
 
 void handshake::set_port(uint16_t port, setter_handler handle_set)
@@ -153,7 +151,7 @@ void handshake::set_port(uint16_t port, setter_handler handle_set)
 void handshake::do_set_port(uint16_t port, setter_handler handle_set)
 {
     template_version_.address_me.port = port;
-    handle_set(std::error_code());
+    handle_set(error::success);
 }
 
 // TODO: deprecate (any reason to set this dynamically)?
@@ -170,7 +168,7 @@ void handshake::do_set_user_agent(const std::string& user_agent,
     setter_handler handle_set)
 {
     template_version_.user_agent = user_agent;
-    handle_set(std::error_code());
+    handle_set(error::success);
 }
 
 void handshake::set_start_height(uint64_t height, setter_handler handle_set)
@@ -187,7 +185,7 @@ void handshake::do_set_start_height(uint64_t height, setter_handler handle_set)
     // is uint32_t in the satoshi network protocol.
     BITCOIN_ASSERT(height <= bc::max_uint32);
     template_version_.start_height = static_cast<uint32_t>(height);
-    handle_set(std::error_code());
+    handle_set(error::success);
 }
 
 void finish_connect(const std::error_code& ec, channel_ptr node,
