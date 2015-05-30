@@ -195,12 +195,12 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
         return;
     }
 
-    const auto index = rand() % buffer_.size();
+    const auto host = select_random_host();
     network_address_type address;
+    address.ip = buffer_[host].ip;
+    address.port = buffer_[host].port;
     address.timestamp = 0;
     address.services = 0;
-    address.ip = buffer_[index].ip;
-    address.port = buffer_[index].port;
     handle_fetch(std::error_code(), address);
 }
 
@@ -214,6 +214,11 @@ void hosts::fetch_count(fetch_count_handler handle_fetch)
 void hosts::do_fetch_count(fetch_count_handler handle_fetch)
 {
     handle_fetch(std::error_code(), buffer_.size());
+}
+
+size_t hosts::select_random_host()
+{
+    return rand() % buffer_.size();
 }
 
 // private struct ip_address

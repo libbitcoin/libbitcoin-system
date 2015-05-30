@@ -102,6 +102,7 @@ private:
         store_handler handle_store);
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);
+    size_t select_random_host();
 
     async_strand strand_;
     boost::filesystem::path file_path_;
