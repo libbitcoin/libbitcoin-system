@@ -133,18 +133,6 @@ void hosts::do_save(const path& path, save_handler handle_save)
     handle_save(std::error_code());
 }
 
-void hosts::store(const network_address_type& address,
-    store_handler handle_store)
-{
-    const auto enqueue = [this, address, handle_store]()
-    {
-        buffer_.push_back(ip_address(address));
-        handle_store(std::error_code());
-    };
-
-    strand_.randomly_queue(enqueue);
-}
-
 void hosts::remove(const network_address_type& address,
     remove_handler handle_remove)
 {
@@ -166,6 +154,21 @@ void hosts::do_remove(const network_address_type& address,
 
     buffer_.erase(it);
     handle_remove(std::error_code());
+}
+
+void hosts::store(const network_address_type& address,
+    store_handler handle_store)
+{
+    strand_.randomly_queue(
+        std::bind(&hosts::do_store,
+            this, address, handle_store));
+}
+
+void hosts::do_store(const network_address_type& address,
+    store_handler handle_store)
+{
+    buffer_.push_back(ip_address(address));
+    handle_store(std::error_code());
 }
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)

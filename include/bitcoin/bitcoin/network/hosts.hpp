@@ -96,6 +96,8 @@ private:
         save_handler handle_save);
     void do_remove(const network_address_type& address,
         remove_handler handle_remove);
+    void do_store(const network_address_type& address,
+        store_handler handle_store);
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);
 
