@@ -21,7 +21,6 @@
 
 #include <cstdint>
 #include <functional>
-#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -42,8 +41,7 @@ using std::placeholders::_2;
 handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
   : strand_(pool.service())
 {
-    // TODO: shouldn't the nonce change on every handshake (like timestamp)?
-    template_version_.nonce = rand();
+    // template_version_.nonce = rand();
     // template_version_.timestamp = time(nullptr);
 
     // Set fixed values inversion template.
@@ -76,9 +74,9 @@ void handshake::ready(channel_ptr node,
 
     // Copy the version template and set its timestamp.
     auto session_version = template_version_;
+    template_version_.nonce = rand();
     session_version.timestamp = time(nullptr);
 
-    // TODO: where does session_version get customized?
     // Since we removed cURL discover_external_ip always returns localhost.
     // The port value was formerly hardwired to bc::protocol_port.
 
