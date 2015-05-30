@@ -37,6 +37,7 @@
 namespace libbitcoin {
 namespace network {
 
+// TODO: rename to host_pool for symmetry with mempool and txpool (break).
 class BC_API hosts
 {
 public:
@@ -57,8 +58,8 @@ public:
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
 
-    size_t size() const;
     bool empty() const;
+    size_t size() const;
 
     void load(load_handler handle_load);
     void save(save_handler handle_save);

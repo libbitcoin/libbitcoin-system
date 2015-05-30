@@ -55,14 +55,14 @@ hosts::hosts(threadpool& pool, size_t capacity)
 {
 }
 
-size_t hosts::size() const
-{
-    return buffer_.size();
-}
-
 bool hosts::empty() const
 {
     return buffer_.empty();
+}
+
+size_t hosts::size() const
+{
+    return buffer_.size();
 }
 
 void hosts::load(load_handler handle_load)
@@ -153,6 +153,8 @@ void hosts::do_remove(const network_address_type& address,
     }
 
     buffer_.erase(it);
+    //log_info("hosts") << "Remove host ("
+    //    << buffer_.size() << ") [" << authority(address).to_string() << "]";
     handle_remove(std::error_code());
 }
 
@@ -168,6 +170,8 @@ void hosts::do_store(const network_address_type& address,
     store_handler handle_store)
 {
     buffer_.push_back(ip_address(address));
+    //log_info("hosts") << "Add host ("
+    //    << buffer_.size() << ") [" << authority(address).to_string() << "]";
     handle_store(std::error_code());
 }
 
