@@ -69,7 +69,7 @@ bool transaction_output::from_data(std::istream& stream)
     result = stream;
 
     if (result)
-        result = script.from_data(stream, true, true);
+        result = script.from_data(stream, true, script::parse_mode::strict);
 
     if (!result)
         reset();

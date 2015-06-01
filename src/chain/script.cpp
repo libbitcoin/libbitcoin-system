@@ -46,18 +46,18 @@ static const data_chunk stack_true_value{1};
 constexpr uint64_t op_counter_limit = 201;
 
 script script::factory_from_data(const data_chunk& data, bool with_length_prefix,
-    bool allow_raw_data_fallback)
+    script::parse_mode mode)
 {
     script instance;
-    instance.from_data(data, with_length_prefix, allow_raw_data_fallback);
+    instance.from_data(data, with_length_prefix, mode);
     return instance;
 }
 
 script script::factory_from_data(std::istream& stream, bool with_length_prefix,
-    bool allow_raw_data_fallback)
+    script::parse_mode mode)
 {
     script instance;
-    instance.from_data(stream, with_length_prefix, allow_raw_data_fallback);
+    instance.from_data(stream, with_length_prefix, mode);
     return instance;
 }
 
@@ -97,20 +97,20 @@ void script::reset()
 }
 
 bool script::from_data(const data_chunk& data, bool with_length_prefix,
-    bool allow_raw_data_fallback)
+    script::parse_mode mode)
 {
     bool result = true;
 
     if (with_length_prefix)
     {
         boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-        result = from_data(istream, true, allow_raw_data_fallback);
+        result = from_data(istream, true, mode);
     }
     else
     {
         reset();
 
-        result = deserialize(data, allow_raw_data_fallback);
+        result = deserialize(data, mode);
 
         if (!result)
             reset();
@@ -120,7 +120,7 @@ bool script::from_data(const data_chunk& data, bool with_length_prefix,
 }
 
 bool script::from_data(std::istream& stream, bool with_length_prefix,
-    bool allow_raw_data_fallback)
+    script::parse_mode mode)
 {
     bool result = true;
 
@@ -149,7 +149,7 @@ bool script::from_data(std::istream& stream, bool with_length_prefix,
     }
 
     if (result)
-        result = deserialize(raw_script, allow_raw_data_fallback);
+        result = deserialize(raw_script, mode);
 
     if (!result)
         reset();
@@ -282,11 +282,14 @@ std::string script::to_string() const
 }
 
 bool script::deserialize(const data_chunk& raw_script,
-    bool allow_raw_data_fallback)
+    script::parse_mode mode)
 {
-    bool successful_parse = parse(raw_script);
+    bool successful_parse = false;
 
-    if (!successful_parse && allow_raw_data_fallback)
+    if (mode != script::parse_mode::raw_data)
+        successful_parse = parse(raw_script);
+
+    if (!successful_parse && (mode != script::parse_mode::strict))
     {
         successful_parse = true;
 
@@ -1842,7 +1845,8 @@ bool script::verify(const script& input_script, const script& output_script,
         script eval_script;
 
         // Invalid script - parse-able only as raw_data
-        if (!eval_script.from_data(input_context.primary.back(), false, false))
+        if (!eval_script.from_data(input_context.primary.back(), false,
+            script::parse_mode::raw_data_fallback))
             return false;
 
         // Pop last item and copy as starting stack to eval script
