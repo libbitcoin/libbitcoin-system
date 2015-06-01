@@ -45,6 +45,13 @@ class BC_API script
 {
 public:
 
+    enum class parse_mode
+    {
+        strict,
+        raw_data,
+        raw_data_fallback
+    };
+
     operation_stack operations;
 
     payment_type type() const;
@@ -52,10 +59,10 @@ public:
     bool is_raw_data() const;
 
     bool from_data(const data_chunk& data, bool with_length_prefix /*= true*/,
-        bool allow_raw_data_fallback /*= false*/);
+        script::parse_mode mode /*= script::parse_mode::strict*/);
 
     bool from_data(std::istream& stream, bool with_length_prefix /*= true*/,
-        bool allow_raw_data_fallback /*= false*/);
+        script::parse_mode mode /*= script::parse_mode::strict*/);
 
     data_chunk to_data(bool with_length_prefix /*= true*/) const;
 
@@ -75,11 +82,11 @@ public:
 
     static script factory_from_data(const data_chunk& data,
         bool with_length_prefix /*= true*/,
-        bool allow_raw_data_fallback /*= false*/);
+        script::parse_mode mode /*= script::parse_mode::strict*/);
 
     static script factory_from_data(std::istream& stream,
         bool with_length_prefix /*= true*/,
-        bool allow_raw_data_fallback /*= false*/);
+        script::parse_mode mode /*= script::parse_mode::strict*/);
 
     static BC_API bool verify(const script& input_script,
         const script& output_script, const transaction& parent_tx,
@@ -103,7 +110,7 @@ public:
 
 private:
 
-    bool deserialize(const data_chunk& raw_script, bool allow_raw_data_fallback);
+    bool deserialize(const data_chunk& raw_script, script::parse_mode mode);
 
     bool parse(const data_chunk& raw_script);
 };

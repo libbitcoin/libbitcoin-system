@@ -303,12 +303,9 @@ bool is_script_code_sig_type(const operation_stack& ops)
     if (last_data.empty())
         return false;
 
-    // note: ignores parse failure, though by allowing fallback, failure
-    // cannot meaningfully occur.
     script script_code;
-    script_code.from_data(last_data, false, true);
 
-    if (script_code.is_raw_data())
+    if (!script_code.from_data(last_data, false, script::parse_mode::strict))
         return false;
 
     // Minimum size is 4

@@ -73,8 +73,12 @@ bool transaction_input::from_data(std::istream& stream)
 
     if (result)
     {
-        // note: removed branch on previous_output.is_null() adding parse attempt cost.
-        result = script.from_data(stream, true, true);
+        script::parse_mode mode = script::parse_mode::strict;
+
+        if (previous_output.is_null())
+            mode = script::parse_mode::raw_data;
+
+        result = script.from_data(stream, true, mode);
     }
 
     if (result)
