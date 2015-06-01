@@ -195,13 +195,8 @@ bool parse(chain::script& result_script, std::string format)
             return false;
     parse_token(raw_script, "ENDING");
 
-    chain::script parsed_script;
-    parsed_script.from_data(raw_script, false, true);
-
-    if (parsed_script.is_raw_data())
+    if (!result_script.from_data(raw_script, false, chain::script::parse_mode::strict))
         return false;
-
-    result_script = parsed_script;
 
     if (result_script.operations.empty())
         return false;
@@ -240,7 +235,8 @@ BOOST_AUTO_TEST_CASE(from_data_fails_parse)
         "b2c8d9febfb84d01"));
 
     chain::script psc;
-    BOOST_REQUIRE_EQUAL(false, psc.from_data(raw_script, true, false));
+    BOOST_REQUIRE_EQUAL(false, psc.from_data(raw_script, true,
+        chain::script::parse_mode::strict));
 }
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
@@ -249,7 +245,8 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
         "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
 
     chain::script out_scr;
-    BOOST_REQUIRE(out_scr.from_data(normal_output_script, false, false));
+    BOOST_REQUIRE(out_scr.from_data(normal_output_script, false,
+        chain::script::parse_mode::raw_data_fallback));
 
     data_chunk roundtrip = out_scr.to_data(false);
     BOOST_REQUIRE(roundtrip == normal_output_script);
@@ -277,7 +274,8 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_weird)
         "74b1d185dbf5b4db4ddb0642848868685174519c6351670068"));
 
     chain::script weird;
-    BOOST_REQUIRE(weird.from_data(weird_raw_script, false, false));
+    BOOST_REQUIRE(weird.from_data(weird_raw_script, false,
+        chain::script::parse_mode::raw_data_fallback));
 
     data_chunk roundtrip_result = weird.to_data(false);
     BOOST_REQUIRE(roundtrip_result == weird_raw_script);
@@ -324,7 +322,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
     decode_base16(raw_script, "76a91433cef61749d11ba2adf091a5e045678177fe3a6d88ac");
 
     chain::script script_code;
-    BOOST_REQUIRE(script_code.from_data(raw_script, false, false));
+    BOOST_REQUIRE(script_code.from_data(raw_script, false,
+        chain::script::parse_mode::raw_data_fallback));
 
     BOOST_REQUIRE(chain::script::check_signature(
         signature, pubkey, script_code, parent_tx, input_index));
@@ -350,7 +349,8 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
     decode_base16(raw_script, "76a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac");
 
     chain::script script_code;
-    BOOST_REQUIRE_EQUAL(true, script_code.from_data(raw_script, false, false));
+    BOOST_REQUIRE_EQUAL(true, script_code.from_data(raw_script, false,
+        chain::script::parse_mode::raw_data_fallback));
 
     BOOST_REQUIRE(chain::script::check_signature(
         signature, pubkey, script_code, parent_tx, input_index));
