@@ -25,8 +25,8 @@
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -42,6 +42,13 @@ operation operation::factory_from_data(std::istream& stream)
 {
     operation instance;
     instance.from_data(stream);
+    return instance;
+}
+
+operation operation::factory_from_data(reader& source)
+{
+    operation instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -64,12 +71,18 @@ bool operation::from_data(const data_chunk& data)
 
 bool operation::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool operation::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    uint8_t raw_byte = read_byte(stream);
-    result = stream;
+    uint8_t raw_byte = source.read_byte();
+    result = source;
 
     code = static_cast<opcode>(raw_byte);
     result &= (raw_byte != 0 || code == opcode::zero);
@@ -80,11 +93,11 @@ bool operation::from_data(std::istream& stream)
     if (result && operation::must_read_data(code))
     {
         uint64_t read_n_bytes =
-            read_opcode_data_byte_count(code, raw_byte, stream);
+            read_opcode_data_byte_count(code, raw_byte, source);
 
-        data = read_data(stream, read_n_bytes);
+        data = source.read_data(read_n_bytes);
 
-        result = stream && (read_n_bytes || data.empty());
+        result = source && (read_n_bytes || data.empty());
     }
 
     if (!result)
@@ -105,6 +118,12 @@ data_chunk operation::to_data() const
 
 void operation::to_data(std::ostream& stream) const
 {
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void operation::to_data(writer& sink) const
+{
     if (code != opcode::raw_data)
     {
         uint8_t raw_byte = static_cast<uint8_t>(code);
@@ -112,20 +131,22 @@ void operation::to_data(std::ostream& stream) const
         if (code == opcode::special)
             raw_byte = static_cast<uint8_t>(data.size());
 
-        write_byte(stream, raw_byte);
+        sink.write_byte(raw_byte);
 
         switch (code)
         {
             case opcode::pushdata1:
-                write_byte(stream, static_cast<uint8_t>(data.size()));
+                sink.write_byte(static_cast<uint8_t>(data.size()));
                 break;
 
             case opcode::pushdata2:
-                write_little_endian(stream, static_cast<uint16_t>(data.size()));
+                sink.write_2_bytes_little_endian(
+                    static_cast<uint16_t>(data.size()));
                 break;
 
             case opcode::pushdata4:
-                write_little_endian(stream, static_cast<uint32_t>(data.size()));
+                sink.write_4_bytes_little_endian(
+                    static_cast<uint32_t>(data.size()));
                 break;
 
             default:
@@ -133,7 +154,7 @@ void operation::to_data(std::ostream& stream) const
         }
     }
 
-    write_data(stream, data);
+    sink.write_data(data);
 }
 
 uint64_t operation::satoshi_size() const
@@ -179,18 +200,18 @@ std::string operation::to_string() const
 }
 
 uint64_t operation::read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
-    std::istream& stream)
+    reader& source)
 {
     switch (code)
     {
         case opcode::special:
             return raw_byte;
         case opcode::pushdata1:
-            return read_byte(stream);
+            return source.read_byte();
         case opcode::pushdata2:
-            return read_2_bytes(stream);
+            return source.read_2_bytes_little_endian();
         case opcode::pushdata4:
-            return read_4_bytes(stream);
+            return source.read_4_bytes_little_endian();
         default:
             break;
     }

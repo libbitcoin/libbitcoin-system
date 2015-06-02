@@ -23,8 +23,8 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -40,6 +40,13 @@ transaction transaction::factory_from_data(std::istream& stream)
 {
     transaction instance;
     instance.from_data(stream);
+    return instance;
+}
+
+transaction transaction::factory_from_data(reader& source)
+{
+    transaction instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -67,41 +74,47 @@ bool transaction::from_data(const data_chunk& data)
 
 bool transaction::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool transaction::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    version = read_4_bytes(stream);
-    result = stream;
+    version = source.read_4_bytes_little_endian();
+    result = source;
 
     if (result)
     {
-        uint64_t tx_in_count = read_variable_uint(stream);
-        result = stream;
+        uint64_t tx_in_count = source.read_variable_uint_little_endian();
+        result = source;
 
         for (uint64_t i = 0; (i < tx_in_count) && result; ++i)
         {
             inputs.emplace_back();
-            result = inputs.back().from_data(stream);
+            result = inputs.back().from_data(source);
         }
     }
 
     if (result)
     {
-        uint64_t tx_out_count = read_variable_uint(stream);
-        result = stream;
+        uint64_t tx_out_count = source.read_variable_uint_little_endian();
+        result = source;
 
         for (uint64_t i = 0; (i < tx_out_count) && result; ++i)
         {
             outputs.emplace_back();
-            result = outputs.back().from_data(stream);
+            result = outputs.back().from_data(source);
         }
     }
 
     if (result)
     {
-        locktime = read_4_bytes(stream);
-        result = stream;
+        locktime = source.read_4_bytes_little_endian();
+        result = source;
     }
 
     if (!result)
@@ -123,19 +136,25 @@ data_chunk transaction::to_data() const
 
 void transaction::to_data(std::ostream& stream) const
 {
-    write_4_bytes(stream, version);
+    ostream_writer sink(stream);
+    to_data(sink);
+}
 
-    write_variable_uint(stream, inputs.size());
+void transaction::to_data(writer& sink) const
+{
+    sink.write_4_bytes_little_endian(version);
+
+    sink.write_variable_uint_little_endian(inputs.size());
 
     for (const transaction_input& input: inputs)
-        input.to_data(stream);
+        input.to_data(sink);
 
-    write_variable_uint(stream, outputs.size());
+    sink.write_variable_uint_little_endian(outputs.size());
 
     for (const transaction_output& output: outputs)
-        output.to_data(stream);
+        output.to_data(sink);
 
-    write_4_bytes(stream, locktime);
+    sink.write_4_bytes_little_endian(locktime);
 }
 
 uint64_t transaction::satoshi_size() const

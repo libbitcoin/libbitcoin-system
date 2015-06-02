@@ -22,8 +22,8 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -39,6 +39,13 @@ get_blocks get_blocks::factory_from_data(std::istream& stream)
 {
     get_blocks instance;
     instance.from_data(stream);
+    return instance;
+}
+
+get_blocks get_blocks::factory_from_data(reader& source)
+{
+    get_blocks instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -61,24 +68,30 @@ bool get_blocks::from_data(const data_chunk& data)
 
 bool get_blocks::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool get_blocks::from_data(reader& source)
+{
     reset();
 
     // Discard protocol version because it is stupid
-    read_4_bytes(stream);
+    source.read_4_bytes_little_endian();
 
     // Note: changed to uint64_t to preclude possible loss of data.
-    uint64_t count = read_variable_uint(stream);
+    uint64_t count = source.read_variable_uint_little_endian();
 
-    for (uint64_t i = 0; (i < count) && stream; ++i)
-        start_hashes.push_back(read_hash(stream));
+    for (uint64_t i = 0; (i < count) && source; ++i)
+        start_hashes.push_back(source.read_hash());
 
-    if (stream)
-        hash_stop = read_hash(stream);
+    if (source)
+        hash_stop = source.read_hash();
 
-    if (!stream)
+    if (!source)
         reset();
 
-    return stream;
+    return source;
 }
 
 data_chunk get_blocks::to_data() const
@@ -93,13 +106,19 @@ data_chunk get_blocks::to_data() const
 
 void get_blocks::to_data(std::ostream& stream) const
 {
-    write_4_bytes(stream, protocol_version);
-    write_variable_uint(stream, start_hashes.size());
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void get_blocks::to_data(writer& sink) const
+{
+    sink.write_4_bytes_little_endian(protocol_version);
+    sink.write_variable_uint_little_endian(start_hashes.size());
 
     for (hash_digest start_hash : start_hashes)
-        write_hash(stream, start_hash);
+        sink.write_hash(start_hash);
 
-    write_hash(stream, hash_stop);
+    sink.write_hash(hash_stop);
 }
 
 uint64_t get_blocks::satoshi_size() const

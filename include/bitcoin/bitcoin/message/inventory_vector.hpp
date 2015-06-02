@@ -25,6 +25,8 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/message/inventory_type_id.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -40,9 +42,13 @@ public:
 
     bool from_data(std::istream& stream);
 
+    bool from_data(reader& source);
+
     data_chunk to_data() const;
 
     void to_data(std::ostream& stream) const;
+
+    void to_data(writer& sink) const;
 
     bool is_valid() const;
 
@@ -53,6 +59,8 @@ public:
     static inventory_vector factory_from_data(const data_chunk& data);
 
     static inventory_vector factory_from_data(std::istream& stream);
+
+    static inventory_vector factory_from_data(reader& source);
 
     static uint64_t satoshi_fixed_size();
 };
