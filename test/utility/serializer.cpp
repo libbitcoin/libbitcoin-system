@@ -29,20 +29,20 @@ BOOST_AUTO_TEST_CASE(roundtrip_serialize_deserialize)
     data_chunk data(1 + 2 + 4 + 8 + 4 + 4 + 3 + 7);
     auto s = make_serializer(data.begin());
     s.write_byte(0x80);
-    s.write_2_bytes(0x8040);
-    s.write_4_bytes(0x80402010);
-    s.write_8_bytes(0x8040201011223344);
+    s.write_2_bytes_little_endian(0x8040);
+    s.write_4_bytes_little_endian(0x80402010);
+    s.write_8_bytes_little_endian(0x8040201011223344);
     s.write_big_endian<uint32_t>(0x80402010);
-    s.write_variable_uint(1234);
+    s.write_variable_uint_little_endian(1234);
     s.write_data(to_data_chunk(to_little_endian<uint32_t>(0xbadf00d)));
     s.write_string("hello");
     auto ds = make_deserializer(data.begin(), s.iterator());
     BOOST_REQUIRE_EQUAL(ds.read_byte(), 0x80u);
-    BOOST_REQUIRE_EQUAL(ds.read_2_bytes(), 0x8040u);
-    BOOST_REQUIRE_EQUAL(ds.read_4_bytes(), 0x80402010u);
-    BOOST_REQUIRE_EQUAL(ds.read_8_bytes(), 0x8040201011223344u);
+    BOOST_REQUIRE_EQUAL(ds.read_2_bytes_little_endian(), 0x8040u);
+    BOOST_REQUIRE_EQUAL(ds.read_4_bytes_little_endian(), 0x80402010u);
+    BOOST_REQUIRE_EQUAL(ds.read_8_bytes_little_endian(), 0x8040201011223344u);
     BOOST_REQUIRE_EQUAL(ds.read_big_endian<uint32_t>(),  0x80402010u);
-    BOOST_REQUIRE_EQUAL(ds.read_variable_uint(), 1234u);
+    BOOST_REQUIRE_EQUAL(ds.read_variable_uint_little_endian(), 1234u);
     BOOST_REQUIRE_EQUAL(from_little_endian_unsafe<uint32_t>(
         ds.read_data(4).begin()), 0xbadf00du);
     BOOST_REQUIRE_EQUAL(ds.read_string(), "hello");

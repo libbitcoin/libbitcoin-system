@@ -20,9 +20,7 @@
 #ifndef LIBBITCOIN_DESERIALIZER_HPP
 #define LIBBITCOIN_DESERIALIZER_HPP
 
-#include <string>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
 
 namespace libbitcoin {
 
@@ -46,16 +44,51 @@ namespace libbitcoin {
  * @endcode
  */
 template <typename Iterator, bool SafeCheckLast>
-class deserializer
+class deserializer : public reader
 {
 public:
+
     deserializer(const Iterator begin, const Iterator end);
 
-    /* These read data in little endian format: */
+    operator bool() const;
+
+    bool operator!() const;
+
+    bool is_exhausted() const;
+
     uint8_t read_byte();
-    uint16_t read_2_bytes();
-    uint32_t read_4_bytes();
-    uint64_t read_8_bytes();
+
+    data_chunk read_data(size_t n_bytes);
+
+    void read_data(uint8_t* data, uint64_t n_bytes);
+
+    data_chunk read_data_to_eof();
+
+    hash_digest read_hash();
+
+    short_hash read_short_hash();
+
+    /* These read data in little endian format: */
+    uint16_t read_2_bytes_little_endian();
+    uint32_t read_4_bytes_little_endian();
+    uint64_t read_8_bytes_little_endian();
+
+    /**
+     * Variable uints are usually used for sizes.
+     * They're encoded using fewer bytes depending on the value itself.
+     */
+    uint64_t read_variable_uint_little_endian();
+
+    /* These read data in big endian format: */
+    uint16_t read_2_bytes_big_endian();
+    uint32_t read_4_bytes_big_endian();
+    uint64_t read_8_bytes_big_endian();
+
+    /**
+     * Variable uints are usually used for sizes.
+     * They're encoded using fewer bytes depending on the value itself.
+     */
+    uint64_t read_variable_uint_big_endian();
 
     /**
      * Reads an unsigned integer that has been encoded in big endian format.
@@ -68,16 +101,6 @@ public:
      */
     template <typename T>
     T read_little_endian();
-
-    /**
-     * Variable uints are usually used for sizes.
-     * They're encoded using fewer bytes depending on the value itself.
-     */
-    uint64_t read_variable_uint();
-
-    data_chunk read_data(size_t n_bytes);
-    hash_digest read_hash();
-    short_hash read_short_hash();
 
     /**
      * Read a fixed size string padded with zeroes.

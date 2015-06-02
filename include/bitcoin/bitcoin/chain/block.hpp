@@ -26,6 +26,8 @@
 #include <bitcoin/bitcoin/chain/block_header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -43,9 +45,13 @@ public:
 
     bool from_data(std::istream& stream);
 
+    bool from_data(reader& source);
+
     data_chunk to_data() const;
 
     void to_data(std::ostream& stream) const;
+
+    void to_data(writer& sink) const;
 
     bool is_valid() const;
 
@@ -56,6 +62,8 @@ public:
     static block factory_from_data(const data_chunk& data);
 
     static block factory_from_data(std::istream& stream);
+
+    static block factory_from_data(reader& source);
 
     static hash_digest generate_merkle_root(
         const transaction_list& transactions);

@@ -21,8 +21,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -45,14 +45,20 @@ bool nonce_base::from_data(const data_chunk& data)
 
 bool nonce_base::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool nonce_base::from_data(reader& source)
+{
     reset();
 
-    nonce = read_8_bytes(stream);
+    nonce = source.read_8_bytes_little_endian();
 
-    if (!stream)
+    if (!source)
         reset();
 
-    return stream;
+    return source;
 }
 
 data_chunk nonce_base::to_data() const
@@ -67,7 +73,13 @@ data_chunk nonce_base::to_data() const
 
 void nonce_base::to_data(std::ostream& stream) const
 {
-    write_8_bytes(stream, nonce);
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void nonce_base::to_data(writer& sink) const
+{
+    sink.write_8_bytes_little_endian(nonce);
 }
 
 uint64_t nonce_base::satoshi_size() const
@@ -94,6 +106,13 @@ ping ping::factory_from_data(std::istream& stream)
     return instance;
 }
 
+ping ping::factory_from_data(reader& source)
+{
+    ping instance;
+    instance.from_data(source);
+    return instance;
+}
+
 uint64_t ping::satoshi_fixed_size()
 {
     return nonce_base::satoshi_fixed_size();
@@ -110,6 +129,13 @@ pong pong::factory_from_data(std::istream& stream)
 {
     pong instance;
     instance.from_data(stream);
+    return instance;
+}
+
+pong pong::factory_from_data(reader& source)
+{
+    pong instance;
+    instance.from_data(source);
     return instance;
 }
 

@@ -22,8 +22,8 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -39,6 +39,13 @@ block block::factory_from_data(std::istream& stream)
 {
     block instance;
     instance.from_data(stream);
+    return instance;
+}
+
+block block::factory_from_data(reader& source)
+{
+    block instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -61,24 +68,30 @@ bool block::from_data(const data_chunk& data)
 
 bool block::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool block::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    result = header.from_data(stream);
+    result = header.from_data(source);
 
     uint64_t tx_count = 0;
 
     if (result)
     {
-        tx_count = read_variable_uint(stream);
-        result = stream;
+        tx_count = source.read_variable_uint_little_endian();
+        result = source;
     }
 
     for (uint64_t i = 0; (i < tx_count) && result; ++i)
     {
         transactions.emplace_back();
-        result = transactions.back().from_data(stream);
+        result = transactions.back().from_data(source);
     }
 
     if (!result)
@@ -99,11 +112,17 @@ data_chunk block::to_data() const
 
 void block::to_data(std::ostream& stream) const
 {
-    header.to_data(stream);
-    write_variable_uint(stream, transactions.size());
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void block::to_data(writer& sink) const
+{
+    header.to_data(sink);
+    sink.write_variable_uint_little_endian(transactions.size());
 
     for (const transaction& tx : transactions)
-        tx.to_data(stream);
+        tx.to_data(sink);
 }
 
 uint64_t block::satoshi_size() const
@@ -142,8 +161,11 @@ hash_digest build_merkle_tree(hash_list& merkle)
             // Join both current hashes together (concatenate).
             data_chunk concat_data;
             boost::iostreams::stream<byte_sink<data_chunk>> concat_stream(concat_data);
-            write_hash(concat_stream, *it);
-            write_hash(concat_stream, *(it + 1));
+            ostream_writer concat_sink(concat_stream);
+            concat_sink.write_hash(*it);
+            concat_sink.write_hash(*(it + 1));
+            concat_stream.flush();
+
             BITCOIN_ASSERT(concat_data.size() == (2 * hash_size));
 
             // Hash both of the hashes.

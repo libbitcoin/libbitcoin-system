@@ -187,7 +187,7 @@ bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
         wrapped.end() - checksum_length);
     const auto checksum_start = wrapped.end() - checksum_length;
     auto deserial = make_deserializer(checksum_start, wrapped.end());
-    checksum = deserial.read_4_bytes();
+    checksum = deserial.read_4_bytes_little_endian();
     return true;
 }
 

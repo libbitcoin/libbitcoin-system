@@ -27,6 +27,8 @@
 #include <bitcoin/bitcoin/chain/payment.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -64,9 +66,14 @@ public:
     bool from_data(std::istream& stream, bool with_length_prefix /*= true*/,
         script::parse_mode mode /*= script::parse_mode::strict*/);
 
+    bool from_data(reader& source, bool with_length_prefix /*= true*/,
+        script::parse_mode mode /*= script::parse_mode::strict*/);
+
     data_chunk to_data(bool with_length_prefix /*= true*/) const;
 
     void to_data(std::ostream& stream, bool with_length_prefix /*= true*/) const;
+
+    void to_data(writer& sink, bool with_length_prefix /*= true*/) const;
 
     bool from_string(const std::string& human_readable);
 
@@ -85,6 +92,10 @@ public:
         script::parse_mode mode /*= script::parse_mode::strict*/);
 
     static script factory_from_data(std::istream& stream,
+        bool with_length_prefix /*= true*/,
+        script::parse_mode mode /*= script::parse_mode::strict*/);
+
+    static script factory_from_data(reader& source,
         bool with_length_prefix /*= true*/,
         script::parse_mode mode /*= script::parse_mode::strict*/);
 

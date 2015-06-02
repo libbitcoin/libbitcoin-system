@@ -22,8 +22,8 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -39,6 +39,13 @@ header header::factory_from_data(std::istream& stream)
 {
     header instance;
     instance.from_data(stream);
+    return instance;
+}
+
+header header::factory_from_data(reader& source)
+{
+    header instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -66,17 +73,23 @@ bool header::from_data(const data_chunk& data)
 
 bool header::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool header::from_data(reader& source)
+{
     reset();
 
-    magic = read_4_bytes(stream);
-    command = read_fixed_string(stream, command_size);
-    payload_length = read_4_bytes(stream);
+    magic = source.read_4_bytes_little_endian();
+    command = source.read_fixed_string(command_size);
+    payload_length = source.read_4_bytes_little_endian();
     checksum = 0;
 
-    if (stream)
+    if (source)
         reset();
 
-    return stream;
+    return source;
 }
 
 data_chunk header::to_data() const
@@ -91,12 +104,18 @@ data_chunk header::to_data() const
 
 void header::to_data(std::ostream& stream) const
 {
-    write_4_bytes(stream, magic);
-    write_fixed_string(stream, command, command_size);
-    write_4_bytes(stream, payload_length);
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void header::to_data(writer& sink) const
+{
+    sink.write_4_bytes_little_endian(magic);
+    sink.write_fixed_string(command, command_size);
+    sink.write_4_bytes_little_endian(payload_length);
 
     if (checksum != 0)
-        write_4_bytes(stream, checksum);
+        sink.write_4_bytes_little_endian(checksum);
 }
 
 uint64_t header::satoshi_size() const

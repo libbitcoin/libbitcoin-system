@@ -30,129 +30,232 @@ BOOST_AUTO_TEST_CASE(roundtrip_byte)
 {
     const uint8_t expected = 0xAA;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_byte(stream, expected);
-    uint8_t result = read_byte(stream);
+    sink.write_byte(expected);
+    uint8_t result = source.read_byte();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_2_bytes)
+BOOST_AUTO_TEST_CASE(roundtrip_2_bytes_little_endian)
 {
     const uint16_t expected = 43707;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_2_bytes(stream, expected);
-    uint16_t result = read_2_bytes(stream);
+    sink.write_2_bytes_little_endian(expected);
+    uint16_t result = source.read_2_bytes_little_endian();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_4_bytes)
+BOOST_AUTO_TEST_CASE(roundtrip_4_bytes_little_endian)
 {
     const uint32_t expected = 2898120443;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_4_bytes(stream, expected);
-    uint32_t result = read_4_bytes(stream);
+    sink.write_4_bytes_little_endian(expected);
+    uint32_t result = source.read_4_bytes_little_endian();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_8_bytes)
+BOOST_AUTO_TEST_CASE(roundtrip_8_bytes_little_endian)
 {
     const uint64_t expected = 0xd4b14be5d8f02abe;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_8_bytes(stream, expected);
-    uint64_t result = read_8_bytes(stream);
+    sink.write_8_bytes_little_endian(expected);
+    uint64_t result = source.read_8_bytes_little_endian();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_big_endian)
+BOOST_AUTO_TEST_CASE(roundtrip_2_bytes_big_endian)
+{
+    const uint16_t expected = 43707;
+    std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
+
+    sink.write_2_bytes_big_endian(expected);
+    uint16_t result = source.read_2_bytes_big_endian();
+
+    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE(stream);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_4_bytes_big_endian)
+{
+    const uint32_t expected = 2898120443;
+    std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
+
+    sink.write_4_bytes_big_endian(expected);
+    uint32_t result = source.read_4_bytes_big_endian();
+
+    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE(stream);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_8_bytes_big_endian)
 {
     const uint64_t expected = 0xd4b14be5d8f02abe;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_big_endian<uint64_t>(stream, expected);
-    uint64_t result = read_big_endian<uint64_t>(stream);
-
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(stream);
-}
-
-BOOST_AUTO_TEST_CASE(roundtrip_little_endian)
-{
-    const uint64_t expected = 0xd4b14be5d8f02abe;
-    std::stringstream stream;
-
-    write_little_endian<uint64_t>(stream, expected);
-    uint64_t result = read_little_endian<uint64_t>(stream);
+    sink.write_8_bytes_big_endian(expected);
+    uint64_t result = source.read_8_bytes_big_endian();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_one_byte)
+
+BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_little_endian_1_byte)
 {
     const uint64_t expected = 0xAA;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_variable_uint(stream, expected);
+    sink.write_variable_uint_little_endian(expected);
 
     BOOST_REQUIRE(stream.str().length() == 1);
 
-    uint64_t result = read_variable_uint(stream);
+    uint64_t result = source.read_variable_uint_little_endian();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_two_bytes)
+BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_little_endian_2_bytes)
 {
     const uint64_t expected = 43707;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_variable_uint(stream, expected);
+    sink.write_variable_uint_little_endian(expected);
 
     BOOST_REQUIRE(stream.str().length() == sizeof(uint16_t) + 1);
 
-    uint64_t result = read_variable_uint(stream);
+    uint64_t result = source.read_variable_uint_little_endian();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_four_bytes)
+BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_little_endian_4_bytes)
 {
     const uint64_t expected = 2898120443;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_variable_uint(stream, expected);
+    sink.write_variable_uint_little_endian(expected);
 
     BOOST_REQUIRE(stream.str().length() == sizeof(uint32_t) + 1);
 
-    uint64_t result = read_variable_uint(stream);
+    uint64_t result = source.read_variable_uint_little_endian();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_eight_bytes)
+BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_little_endian_8_bytes)
 {
     const uint64_t expected = 0xd4b14be5d8f02abe;
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_variable_uint(stream, expected);
+    sink.write_variable_uint_little_endian(expected);
 
     BOOST_REQUIRE(stream.str().length() == sizeof(uint64_t) + 1);
 
-    uint64_t result = read_variable_uint(stream);
+    uint64_t result = source.read_variable_uint_little_endian();
+
+    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE(stream);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_1_byte)
+{
+    const uint64_t expected = 0xAA;
+    std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
+
+    sink.write_variable_uint_big_endian(expected);
+
+    BOOST_REQUIRE(stream.str().length() == 1);
+
+    uint64_t result = source.read_variable_uint_big_endian();
+
+    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE(stream);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_2_bytes)
+{
+    const uint64_t expected = 43707;
+    std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
+
+    sink.write_variable_uint_big_endian(expected);
+
+    BOOST_REQUIRE(stream.str().length() == sizeof(uint16_t) + 1);
+
+    uint64_t result = source.read_variable_uint_big_endian();
+
+    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE(stream);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_4_bytes)
+{
+    const uint64_t expected = 2898120443;
+    std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
+
+    sink.write_variable_uint_big_endian(expected);
+
+    BOOST_REQUIRE(stream.str().length() == sizeof(uint32_t) + 1);
+
+    uint64_t result = source.read_variable_uint_big_endian();
+
+    BOOST_REQUIRE(expected == result);
+    BOOST_REQUIRE(stream);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_8_bytes)
+{
+    const uint64_t expected = 0xd4b14be5d8f02abe;
+    std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
+
+    sink.write_variable_uint_big_endian(expected);
+
+    BOOST_REQUIRE(stream.str().length() == sizeof(uint64_t) + 1);
+
+    uint64_t result = source.read_variable_uint_big_endian();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
@@ -169,12 +272,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_data_chunk)
     };
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_data(stream, expected);
+    sink.write_data(expected);
 
     BOOST_REQUIRE(stream.str().length() == expected.size());
 
-    data_chunk result = read_data(stream, expected.size());
+    data_chunk result = source.read_data(expected.size());
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
@@ -189,12 +294,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_hash)
     };
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_hash(stream, expected);
+    sink.write_hash(expected);
 
     BOOST_REQUIRE(stream.str().length() == expected.size());
 
-    hash_digest result = read_hash(stream);
+    hash_digest result = source.read_hash();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
@@ -208,12 +315,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_short_hash)
     };
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_short_hash(stream, expected);
+    sink.write_short_hash(expected);
 
     BOOST_REQUIRE(stream.str().length() == expected.size());
 
-    short_hash result = read_short_hash(stream);
+    short_hash result = source.read_short_hash();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
@@ -224,12 +333,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_fixed_string)
     const std::string expected = "my string data";
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_fixed_string(stream, expected, 10);
+    sink.write_fixed_string(expected, 10);
 
     BOOST_REQUIRE(stream.str().length() == 10);
 
-    std::string result = read_fixed_string(stream, 10);
+    std::string result = source.read_fixed_string(10);
 
     BOOST_REQUIRE(expected.substr(0, 10) == result);
     BOOST_REQUIRE(stream);
@@ -240,13 +351,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_string)
     const std::string expected = "my string data";
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_string(stream, expected);
+    sink.write_string(expected);
 
     BOOST_REQUIRE_EQUAL(stream.str().length(),
         (expected.length() + variable_uint_size(expected.length())));
 
-    std::string result = read_string(stream);
+    std::string result = source.read_string();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
@@ -261,12 +374,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_bytes)
     };
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_bytes<32>(stream, expected);
+    sink.write_bytes<32>(expected);
 
     BOOST_REQUIRE(stream.str().length() == expected.size());
 
-    byte_array<32> result = read_bytes<32>(stream);
+    byte_array<32> result = source.read_bytes<32>();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
@@ -281,12 +396,14 @@ BOOST_AUTO_TEST_CASE(roundtrip_bytes_reverse)
     };
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_bytes_reverse<32>(stream, expected);
+    sink.write_bytes_reverse<32>(expected);
 
     BOOST_REQUIRE(stream.str().length() == expected.size());
 
-    byte_array<32> result = read_bytes_reverse<32>(stream);
+    byte_array<32> result = source.read_bytes_reverse<32>();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
@@ -301,18 +418,20 @@ BOOST_AUTO_TEST_CASE(write_bytes_read_bytes_reverse)
     };
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_bytes<32>(stream, expected);
+    sink.write_bytes<32>(expected);
 
     BOOST_REQUIRE(stream.str().length() == expected.size());
 
-    byte_array<32> result = read_bytes_reverse<32>(stream);
+    byte_array<32> result = source.read_bytes_reverse<32>();
 
     BOOST_REQUIRE(std::equal(expected.rbegin(), expected.rend(), result.begin()));
     BOOST_REQUIRE(stream);
 }
 
-BOOST_AUTO_TEST_CASE(read_all_data_until_eof)
+BOOST_AUTO_TEST_CASE(read_data_to_eof)
 {
     const data_chunk expected = {
         0x4d, 0xc9, 0x32, 0x18, 0x4d, 0x86, 0xa0, 0xb2, 0xe4, 0xba, 0x65, 0xa8,
@@ -321,16 +440,17 @@ BOOST_AUTO_TEST_CASE(read_all_data_until_eof)
     };
 
     std::stringstream stream;
+    ostream_writer sink(stream);
+    istream_reader source(stream);
 
-    write_data(stream, expected);
+    sink.write_data(expected);
 
     BOOST_REQUIRE(stream.str().length() == expected.size());
 
-    data_chunk result = read_all_data(stream);
+    data_chunk result = source.read_data_to_eof();
 
     BOOST_REQUIRE(expected == result);
     BOOST_REQUIRE(stream);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
