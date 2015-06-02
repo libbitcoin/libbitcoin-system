@@ -26,6 +26,8 @@
 #include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -42,9 +44,13 @@ public:
 
     bool from_data(std::istream& stream);
 
+    bool from_data(reader& source);
+
     data_chunk to_data() const;
 
     void to_data(std::ostream& stream) const;
+
+    void to_data(writer& sink) const;
 
     std::string to_string() const;
 
@@ -59,6 +65,8 @@ public:
     static transaction_input factory_from_data(const data_chunk& data);
 
     static transaction_input factory_from_data(std::istream& stream);
+
+    static transaction_input factory_from_data(reader& source);
 
     static uint64_t satoshi_fixed_size();
 };

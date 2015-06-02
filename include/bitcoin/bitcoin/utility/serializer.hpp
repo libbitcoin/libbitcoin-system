@@ -21,10 +21,7 @@
 #define LIBBITCOIN_SERIALIZER_HPP
 
 #include <stdexcept>
-#include <string>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
+#include <bitcoin/bitcoin/utility/writer.hpp>
 
 
 namespace libbitcoin {
@@ -46,16 +43,47 @@ namespace libbitcoin {
  * @endcode
  */
 template <typename Iterator>
-class serializer
+class serializer : public writer
 {
 public:
+
     serializer(const Iterator begin);
 
-    /* These write data in little endian format: */
+    operator bool() const;
+
+    bool operator!() const;
+
     void write_byte(uint8_t value);
-    void write_2_bytes(uint16_t value);
-    void write_4_bytes(uint32_t value);
-    void write_8_bytes(uint64_t value);
+
+    void write_data(const data_chunk& data);
+
+    void write_data(const uint8_t* data, uint64_t n_bytes);
+
+    void write_hash(const hash_digest& hash);
+
+    void write_short_hash(const short_hash& hash);
+
+    /* These write data in little endian format: */
+    void write_2_bytes_little_endian(uint16_t value);
+    void write_4_bytes_little_endian(uint32_t value);
+    void write_8_bytes_little_endian(uint64_t value);
+
+    /**
+     * Variable uints are usually used for sizes.
+     * They're encoded using fewer bytes depending on the value itself.
+     */
+    void write_variable_uint_little_endian(uint64_t value);
+
+    /* These write data in big endian format: */
+    void write_2_bytes_big_endian(uint16_t value);
+    void write_4_bytes_big_endian(uint32_t value);
+    void write_8_bytes_big_endian(uint64_t value);
+
+    /**
+     * Variable uints are usually used for sizes.
+     * They're encoded using fewer bytes depending on the value itself.
+     */
+    void write_variable_uint_big_endian(uint64_t value);
 
     /**
      * Encodes an unsigned integer in big-endian format.
@@ -69,16 +97,8 @@ public:
     template <typename T>
     void write_little_endian(T n);
 
-    /**
-     * Variable uints are usually used for sizes.
-     * They're encoded using fewer bytes depending on the value itself.
-     */
-    void write_variable_uint(uint64_t value);
-
     template <typename T>
     void write_data(const T& data);
-    void write_hash(const hash_digest& hash);
-    void write_short_hash(const short_hash& hash);
 
     /**
      * Write a fixed size string padded with zeroes.
@@ -116,4 +136,3 @@ serializer<Iterator> make_serializer(Iterator begin);
 #include <bitcoin/bitcoin/impl/utility/serializer.ipp>
 
 #endif
-

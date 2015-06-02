@@ -25,6 +25,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/opcode.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -40,9 +42,13 @@ public:
 
     bool from_data(std::istream& stream);
 
+    bool from_data(reader& source);
+
     data_chunk to_data() const;
 
     void to_data(std::ostream& stream) const;
+
+    void to_data(writer& sink) const;
 
     std::string to_string() const;
 
@@ -56,10 +62,12 @@ public:
 
     static operation factory_from_data(std::istream& stream);
 
+    static operation factory_from_data(reader& source);
+
 private:
 
     static uint64_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
-        std::istream& stream);
+        reader& source);
 
     static bool must_read_data(opcode code);
 };

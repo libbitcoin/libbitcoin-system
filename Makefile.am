@@ -113,9 +113,9 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_streambuf.cpp \
     src/utility/async_strand.cpp \
     src/utility/binary.cpp \
-    src/utility/istream.cpp \
+    src/utility/istream_reader.cpp \
     src/utility/logger.cpp \
-    src/utility/ostream.cpp \
+    src/utility/ostream_writer.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
@@ -265,8 +265,8 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/deserializer.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
-    include/bitcoin/bitcoin/impl/utility/istream.ipp \
-    include/bitcoin/bitcoin/impl/utility/ostream.ipp \
+    include/bitcoin/bitcoin/impl/utility/istream_reader.ipp \
+    include/bitcoin/bitcoin/impl/utility/ostream_writer.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
@@ -340,9 +340,10 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/deserializer.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
-    include/bitcoin/bitcoin/utility/istream.hpp \
+    include/bitcoin/bitcoin/utility/istream_reader.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
-    include/bitcoin/bitcoin/utility/ostream.hpp \
+    include/bitcoin/bitcoin/utility/ostream_writer.hpp \
+    include/bitcoin/bitcoin/utility/reader.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
@@ -350,7 +351,8 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/time.hpp \
     include/bitcoin/bitcoin/utility/timed_section.hpp \
-    include/bitcoin/bitcoin/utility/variable_uint_size.hpp
+    include/bitcoin/bitcoin/utility/variable_uint_size.hpp \
+    include/bitcoin/bitcoin/utility/writer.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \

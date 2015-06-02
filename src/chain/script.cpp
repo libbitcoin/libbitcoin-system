@@ -28,8 +28,8 @@
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
@@ -58,6 +58,14 @@ script script::factory_from_data(std::istream& stream, bool with_length_prefix,
 {
     script instance;
     instance.from_data(stream, with_length_prefix, mode);
+    return instance;
+}
+
+script script::factory_from_data(reader& source, bool with_length_prefix,
+    script::parse_mode mode)
+{
+    script instance;
+    instance.from_data(source, with_length_prefix, mode);
     return instance;
 }
 
@@ -122,6 +130,13 @@ bool script::from_data(const data_chunk& data, bool with_length_prefix,
 bool script::from_data(std::istream& stream, bool with_length_prefix,
     script::parse_mode mode)
 {
+    istream_reader source(stream);
+    return from_data(source, with_length_prefix, mode);
+}
+
+bool script::from_data(reader& source, bool with_length_prefix,
+    script::parse_mode mode)
+{
     bool result = true;
 
     data_chunk raw_script;
@@ -130,22 +145,22 @@ bool script::from_data(std::istream& stream, bool with_length_prefix,
 
     if (with_length_prefix)
     {
-        auto script_length = read_variable_uint(stream);
-        result = stream;
+        auto script_length = source.read_variable_uint_little_endian();
+        result = source;
 
         BITCOIN_ASSERT(script_length <= max_uint32);
 
         if (result)
         {
             auto script_length32 = static_cast<uint32_t>(script_length);
-            raw_script = read_data(stream, script_length32);
-            result = stream;
+            raw_script = source.read_data(script_length32);
+            result = source;
         }
     }
     else
     {
-        raw_script = read_all_data(stream);
-        result = stream;
+        raw_script = source.read_data_to_eof();
+        result = source;
     }
 
     if (result)
@@ -169,18 +184,24 @@ data_chunk script::to_data(bool with_length_prefix) const
 
 void script::to_data(std::ostream& stream, bool with_length_prefix) const
 {
+    ostream_writer sink(stream);
+    to_data(sink, with_length_prefix);
+}
+
+void script::to_data(writer& sink, bool with_length_prefix) const
+{
     if (with_length_prefix)
-        write_variable_uint(stream, satoshi_content_size());
+        sink.write_variable_uint_little_endian(satoshi_content_size());
 
     if ((operations.size() > 0) &&
         (operations[0].code == opcode::raw_data))
     {
-        operations[0].to_data(stream);
+        operations[0].to_data(sink);
     }
     else
     {
         for (const operation& op: operations)
-            op.to_data(stream);
+            op.to_data(sink);
     }
 }
 

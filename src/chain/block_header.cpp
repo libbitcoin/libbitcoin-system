@@ -22,8 +22,8 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -39,6 +39,13 @@ block_header block_header::factory_from_data(std::istream& stream)
 {
     block_header instance;
     instance.from_data(stream);
+    return instance;
+}
+
+block_header block_header::factory_from_data(reader& source)
+{
+    block_header instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -70,18 +77,24 @@ bool block_header::from_data(const data_chunk& data)
 
 bool block_header::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool block_header::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    version = read_4_bytes(stream);
-    previous_block_hash = read_hash(stream);
-    merkle = read_hash(stream);
-    timestamp = read_4_bytes(stream);
-    bits = read_4_bytes(stream);
-    nonce = read_4_bytes(stream);
+    version = source.read_4_bytes_little_endian();
+    previous_block_hash = source.read_hash();
+    merkle = source.read_hash();
+    timestamp = source.read_4_bytes_little_endian();
+    bits = source.read_4_bytes_little_endian();
+    nonce = source.read_4_bytes_little_endian();
 
-    result = stream;
+    result = source;
 
     if (!result)
         reset();
@@ -101,12 +114,18 @@ data_chunk block_header::to_data() const
 
 void block_header::to_data(std::ostream& stream) const
 {
-    write_4_bytes(stream, version);
-    write_hash(stream, previous_block_hash);
-    write_hash(stream, merkle);
-    write_4_bytes(stream, timestamp);
-    write_4_bytes(stream, bits);
-    write_4_bytes(stream, nonce);
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void block_header::to_data(writer& sink) const
+{
+    sink.write_4_bytes_little_endian(version);
+    sink.write_hash(previous_block_hash);
+    sink.write_hash(merkle);
+    sink.write_4_bytes_little_endian(timestamp);
+    sink.write_4_bytes_little_endian(bits);
+    sink.write_4_bytes_little_endian(nonce);
 }
 
 uint64_t block_header::satoshi_size() const

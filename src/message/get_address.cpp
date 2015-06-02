@@ -21,8 +21,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -38,6 +38,13 @@ get_address get_address::factory_from_data(std::istream& stream)
 {
     get_address instance;
     instance.from_data(stream);
+    return instance;
+}
+
+get_address get_address::factory_from_data(reader& source)
+{
+    get_address instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -58,8 +65,14 @@ bool get_address::from_data(const data_chunk& data)
 
 bool get_address::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool get_address::from_data(reader& source)
+{
     reset();
-    return stream;
+    return source;
 }
 
 data_chunk get_address::to_data() const
@@ -73,6 +86,12 @@ data_chunk get_address::to_data() const
 }
 
 void get_address::to_data(std::ostream& stream) const
+{
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void get_address::to_data(writer& sink) const
 {
 }
 

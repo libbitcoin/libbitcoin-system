@@ -25,6 +25,8 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -41,9 +43,13 @@ public:
 
     bool from_data(std::istream& stream);
 
+    bool from_data(reader& source);
+
     data_chunk to_data() const;
 
     void to_data(std::ostream& stream) const;
+
+    void to_data(writer& sink) const;
 
     bool is_valid() const;
 
@@ -54,6 +60,8 @@ public:
     static inventory factory_from_data(const data_chunk& data);
 
     static inventory factory_from_data(std::istream& stream);
+
+    static inventory factory_from_data(reader& source);
 };
 
 } // end message

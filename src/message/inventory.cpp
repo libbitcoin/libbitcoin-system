@@ -21,8 +21,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -38,6 +38,13 @@ inventory inventory::factory_from_data(std::istream& stream)
 {
     inventory instance;
     instance.from_data(stream);
+    return instance;
+}
+
+inventory inventory::factory_from_data(reader& source)
+{
+    inventory instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -59,18 +66,23 @@ bool inventory::from_data(const data_chunk& data)
 
 bool inventory::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool inventory::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    uint64_t count = read_variable_uint(stream);
-    result = stream;
+    uint64_t count = source.read_variable_uint_little_endian();
+    result = source;
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
-        inventory_vector inv;
-        result = inv.from_data(stream);
-        inventories.push_back(inv);
+        inventories.emplace_back();
+        result = inventories.back().from_data(source);
     }
 
     if (!result)
@@ -91,10 +103,16 @@ data_chunk inventory::to_data() const
 
 void inventory::to_data(std::ostream& stream) const
 {
-    write_variable_uint(stream, inventories.size());
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void inventory::to_data(writer& sink) const
+{
+    sink.write_variable_uint_little_endian(inventories.size());
 
     for (const inventory_vector inv : inventories)
-        inv.to_data(stream);
+        inv.to_data(sink);
 }
 
 uint64_t inventory::satoshi_size() const

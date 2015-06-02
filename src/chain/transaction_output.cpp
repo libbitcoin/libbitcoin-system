@@ -22,8 +22,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -39,6 +39,13 @@ transaction_output transaction_output::factory_from_data(std::istream& stream)
 {
     transaction_output instance;
     instance.from_data(stream);
+    return instance;
+}
+
+transaction_output transaction_output::factory_from_data(reader& source)
+{
+    transaction_output instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -61,15 +68,21 @@ bool transaction_output::from_data(const data_chunk& data)
 
 bool transaction_output::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool transaction_output::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    value = read_8_bytes(stream);
-    result = stream;
+    value = source.read_8_bytes_little_endian();
+    result = source;
 
     if (result)
-        result = script.from_data(stream, true, script::parse_mode::strict);
+        result = script.from_data(source, true, script::parse_mode::strict);
 
     if (!result)
         reset();
@@ -89,8 +102,14 @@ data_chunk transaction_output::to_data() const
 
 void transaction_output::to_data(std::ostream& stream) const
 {
-    write_8_bytes(stream, value);
-    script.to_data(stream, true);
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void transaction_output::to_data(writer& sink) const
+{
+    sink.write_8_bytes_little_endian(value);
+    script.to_data(sink, true);
 }
 
 uint64_t transaction_output::satoshi_size() const

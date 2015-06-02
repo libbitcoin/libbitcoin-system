@@ -23,8 +23,8 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
@@ -40,6 +40,13 @@ transaction_input transaction_input::factory_from_data(std::istream& stream)
 {
     transaction_input instance;
     instance.from_data(stream);
+    return instance;
+}
+
+transaction_input transaction_input::factory_from_data(reader& source)
+{
+    transaction_input instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -65,11 +72,17 @@ bool transaction_input::from_data(const data_chunk& data)
 
 bool transaction_input::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool transaction_input::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    result = previous_output.from_data(stream);
+    result = previous_output.from_data(source);
 
     if (result)
     {
@@ -78,13 +91,13 @@ bool transaction_input::from_data(std::istream& stream)
         if (previous_output.is_null())
             mode = script::parse_mode::raw_data;
 
-        result = script.from_data(stream, true, mode);
+        result = script.from_data(source, true, mode);
     }
 
     if (result)
     {
-        sequence = read_4_bytes(stream);
-        result = stream;
+        sequence = source.read_4_bytes_little_endian();
+        result = source;
     }
 
     if (!result)
@@ -105,9 +118,15 @@ data_chunk transaction_input::to_data() const
 
 void transaction_input::to_data(std::ostream& stream) const
 {
-    previous_output.to_data(stream);
-    script.to_data(stream, true);
-    write_4_bytes(stream, sequence);
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void transaction_input::to_data(writer& sink) const
+{
+    previous_output.to_data(sink);
+    script.to_data(sink, true);
+    sink.write_4_bytes_little_endian(sequence);
 }
 
 uint64_t transaction_input::satoshi_size() const
