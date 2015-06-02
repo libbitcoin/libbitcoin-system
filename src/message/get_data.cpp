@@ -36,5 +36,12 @@ get_data get_data::factory_from_data(std::istream& stream)
     return instance;
 }
 
+get_data get_data::factory_from_data(reader& source)
+{
+    get_data instance;
+    instance.from_data(source);
+    return instance;
+}
+
 } // end message
 } // end libbitcoin

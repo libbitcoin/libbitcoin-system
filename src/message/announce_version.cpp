@@ -21,8 +21,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -38,6 +38,13 @@ announce_version announce_version::factory_from_data(std::istream& stream)
 {
     announce_version instance;
     instance.from_data(stream);
+    return instance;
+}
+
+announce_version announce_version::factory_from_data(reader& source)
+{
+    announce_version instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -71,28 +78,34 @@ bool announce_version::from_data(const data_chunk& data)
 
 bool announce_version::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool announce_version::from_data(reader& source)
+{
     bool result = 0;
 
     reset();
 
-    version = read_4_bytes(stream);
-    services = read_8_bytes(stream);
-    timestamp = read_8_bytes(stream);
-    result = stream;
+    version = source.read_4_bytes_little_endian();
+    services = source.read_8_bytes_little_endian();
+    timestamp = source.read_8_bytes_little_endian();
+    result = source;
 
     if (result)
-        result = address_me.from_data(stream, false);
+        result = address_me.from_data(source, false);
 
     if (result && (version >= 106))
     {
-        result = address_you.from_data(stream, false);
-        nonce = read_8_bytes(stream);
-        user_agent = read_string(stream);
+        result = address_you.from_data(source, false);
+        nonce = source.read_8_bytes_little_endian();
+        user_agent = source.read_string();
 
         if (version >= 209)
-            start_height = read_4_bytes(stream);
+            start_height = source.read_4_bytes_little_endian();
 
-        result &= !stream.fail();
+        result &= source;
     }
 
     if (!result)
@@ -113,14 +126,20 @@ data_chunk announce_version::to_data() const
 
 void announce_version::to_data(std::ostream& stream) const
 {
-    write_4_bytes(stream, version);
-    write_8_bytes(stream, services);
-    write_8_bytes(stream, timestamp);
-    address_me.to_data(stream, false);
-    address_you.to_data(stream, false);
-    write_8_bytes(stream, nonce);
-    write_string(stream, user_agent);
-    write_4_bytes(stream, start_height);
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void announce_version::to_data(writer& sink) const
+{
+    sink.write_4_bytes_little_endian(version);
+    sink.write_8_bytes_little_endian(services);
+    sink.write_8_bytes_little_endian(timestamp);
+    address_me.to_data(sink, false);
+    address_you.to_data(sink, false);
+    sink.write_8_bytes_little_endian(nonce);
+    sink.write_string(user_agent);
+    sink.write_4_bytes_little_endian(start_height);
 }
 
 uint64_t announce_version::satoshi_size() const

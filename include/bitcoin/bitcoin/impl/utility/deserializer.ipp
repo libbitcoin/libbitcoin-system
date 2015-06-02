@@ -42,25 +42,64 @@ deserializer<Iterator, SafeCheckLast>::deserializer(
 }
 
 template <typename Iterator, bool SafeCheckLast>
+deserializer<Iterator, SafeCheckLast>::operator bool() const
+{
+    return true;
+}
+
+template <typename Iterator, bool SafeCheckLast>
+bool deserializer<Iterator, SafeCheckLast>::operator!() const
+{
+    return false;
+}
+
+template <typename Iterator, bool SafeCheckLast>
+bool deserializer<Iterator, SafeCheckLast>::is_exhausted() const
+{
+    return (iter_ == end_);
+}
+
+template <typename Iterator, bool SafeCheckLast>
 uint8_t deserializer<Iterator, SafeCheckLast>::read_byte()
 {
     SAFE_CHECK_DISTANCE(1);
     return *(iter_++);
 }
+
 template <typename Iterator, bool SafeCheckLast>
-uint16_t deserializer<Iterator, SafeCheckLast>::read_2_bytes()
+uint16_t deserializer<Iterator, SafeCheckLast>::read_2_bytes_little_endian()
 {
     return read_little_endian<uint16_t>();
 }
+
 template <typename Iterator, bool SafeCheckLast>
-uint32_t deserializer<Iterator, SafeCheckLast>::read_4_bytes()
+uint32_t deserializer<Iterator, SafeCheckLast>::read_4_bytes_little_endian()
 {
     return read_little_endian<uint32_t>();
 }
+
 template <typename Iterator, bool SafeCheckLast>
-uint64_t deserializer<Iterator, SafeCheckLast>::read_8_bytes()
+uint64_t deserializer<Iterator, SafeCheckLast>::read_8_bytes_little_endian()
 {
     return read_little_endian<uint64_t>();
+}
+
+template <typename Iterator, bool SafeCheckLast>
+uint16_t deserializer<Iterator, SafeCheckLast>::read_2_bytes_big_endian()
+{
+    return read_big_endian<uint16_t>();
+}
+
+template <typename Iterator, bool SafeCheckLast>
+uint32_t deserializer<Iterator, SafeCheckLast>::read_4_bytes_big_endian()
+{
+    return read_big_endian<uint32_t>();
+}
+
+template <typename Iterator, bool SafeCheckLast>
+uint64_t deserializer<Iterator, SafeCheckLast>::read_8_bytes_big_endian()
+{
+    return read_big_endian<uint64_t>();
 }
 
 template <typename Iterator, bool SafeCheckLast>
@@ -83,17 +122,31 @@ T deserializer<Iterator, SafeCheckLast>::read_little_endian()
 }
 
 template <typename Iterator, bool SafeCheckLast>
-uint64_t deserializer<Iterator, SafeCheckLast>::read_variable_uint()
+uint64_t deserializer<Iterator, SafeCheckLast>::read_variable_uint_little_endian()
 {
     uint8_t length = read_byte();
     if (length < 0xfd)
         return length;
     else if (length == 0xfd)
-        return read_2_bytes();
+        return read_2_bytes_little_endian();
     else if (length == 0xfe)
-        return read_4_bytes();
+        return read_4_bytes_little_endian();
     // length should be 0xff
-    return read_8_bytes();
+    return read_8_bytes_little_endian();
+}
+
+template <typename Iterator, bool SafeCheckLast>
+uint64_t deserializer<Iterator, SafeCheckLast>::read_variable_uint_big_endian()
+{
+    uint8_t length = read_byte();
+    if (length < 0xfd)
+        return length;
+    else if (length == 0xfd)
+        return read_2_bytes_big_endian();
+    else if (length == 0xfe)
+        return read_4_bytes_big_endian();
+    // length should be 0xff
+    return read_8_bytes_big_endian();
 }
 
 template <typename Iterator, bool SafeCheckLast>
@@ -104,6 +157,26 @@ data_chunk deserializer<
     data_chunk raw_bytes(n_bytes);
     for (size_t i = 0; i < n_bytes; ++i)
         raw_bytes[i] = read_byte();
+    return raw_bytes;
+}
+
+template <typename Iterator, bool SafeCheckLast>
+void deserializer<
+    Iterator, SafeCheckLast>::read_data(uint8_t* data, size_t n_bytes)
+{
+    SAFE_CHECK_DISTANCE(n_bytes);
+    for (size_t i = 0; i < n_bytes; ++i)
+        data[i] = read_byte();
+}
+
+template <typename Iterator, bool SafeCheckLast>
+data_chunk deserializer<Iterator, SafeCheckLast>::read_data_to_eof()
+{
+    data_chunk raw_bytes;
+
+    while (iter_ != end_)
+        raw_bytes.push_back(read_byte());
+
     return raw_bytes;
 }
 
@@ -132,7 +205,7 @@ std::string deserializer<
 template <typename Iterator, bool SafeCheckLast>
 std::string deserializer<Iterator, SafeCheckLast>::read_string()
 {
-    uint64_t string_size = read_variable_uint();
+    uint64_t string_size = read_variable_uint_little_endian();
     // Warning: conversion from uint64_t to size_t, possible loss of data.
     return read_fixed_string((size_t)string_size);
 }

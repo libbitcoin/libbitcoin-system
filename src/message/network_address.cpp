@@ -21,8 +21,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -44,6 +44,14 @@ network_address network_address::factory_from_data(std::istream& stream,
 {
     network_address instance;
     instance.from_data(stream, with_timestamp);
+    return instance;
+}
+
+network_address network_address::factory_from_data(reader& source,
+    bool with_timestamp /*= false*/)
+{
+    network_address instance;
+    instance.from_data(source, with_timestamp);
     return instance;
 }
 
@@ -71,19 +79,25 @@ bool network_address::from_data(const data_chunk& data, bool with_timestamp)
 
 bool network_address::from_data(std::istream& stream, bool with_timestamp)
 {
+    istream_reader source(stream);
+    return from_data(source, with_timestamp);
+}
+
+bool network_address::from_data(reader& source, bool with_timestamp)
+{
     reset();
 
     if (with_timestamp)
-        timestamp = read_4_bytes(stream);
+        timestamp = source.read_4_bytes_little_endian();
 
-    services = read_8_bytes(stream);
-    ip= read_bytes<16>(stream);
-    port = read_big_endian<uint16_t>(stream);
+    services = source.read_8_bytes_little_endian();
+    source.read_data(ip.data(), ip.size());
+    port = source.read_2_bytes_big_endian();
 
-    if (!stream)
+    if (!source)
         reset();
 
-    return stream;
+    return source;
 }
 
 data_chunk network_address::to_data(bool with_timestamp) const
@@ -98,12 +112,18 @@ data_chunk network_address::to_data(bool with_timestamp) const
 
 void network_address::to_data(std::ostream& stream, bool with_timestamp) const
 {
-    if (with_timestamp)
-        write_4_bytes(stream, timestamp);
+    ostream_writer sink(stream);
+    to_data(sink, with_timestamp);
+}
 
-    write_8_bytes(stream, services);
-    write_data(stream, ip);
-    write_big_endian<uint16_t>(stream, port);
+void network_address::to_data(writer& sink, bool with_timestamp) const
+{
+    if (with_timestamp)
+        sink.write_4_bytes_little_endian(timestamp);
+
+    sink.write_8_bytes_little_endian(services);
+    sink.write_data(ip.data(), ip.size());
+    sink.write_2_bytes_big_endian(port);
 }
 
 uint64_t network_address::satoshi_size(bool with_timestamp) const

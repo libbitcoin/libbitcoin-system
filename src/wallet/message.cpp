@@ -35,7 +35,7 @@ hash_digest hash_message(data_slice message)
 
     auto ser = make_serializer(data.begin());
     ser.write_string(prefix);
-    ser.write_variable_uint(message.size());
+    ser.write_variable_uint_little_endian(message.size());
     ser.write_data(message);
 
     return bitcoin_hash(data);

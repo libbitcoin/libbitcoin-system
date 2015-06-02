@@ -24,16 +24,11 @@
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
-
-bool point::is_null() const
-{
-    return (index == max_input_sequence) && (hash == null_hash);
-}
 
 point point::factory_from_data(const data_chunk& data)
 {
@@ -46,6 +41,13 @@ point point::factory_from_data(std::istream& stream)
 {
     point instance;
     instance.from_data(stream);
+    return instance;
+}
+
+point point::factory_from_data(reader& source)
+{
+    point instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -68,13 +70,19 @@ bool point::from_data(const data_chunk& data)
 
 bool point::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool point::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    hash = read_hash(stream);
-    index = read_4_bytes(stream);
-    result = stream;
+    hash = source.read_hash();
+    index = source.read_4_bytes_little_endian();
+    result = source;
 
     if (!result)
         reset();
@@ -94,8 +102,14 @@ data_chunk point::to_data() const
 
 void point::to_data(std::ostream& stream) const
 {
-    write_hash(stream, hash);
-    write_4_bytes(stream, index);
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void point::to_data(writer& sink) const
+{
+    sink.write_hash(hash);
+    sink.write_4_bytes_little_endian(index);
 }
 
 uint64_t point::satoshi_size() const
@@ -115,6 +129,11 @@ std::string point::to_string() const
     ss << "\thash = " << encode_hash(hash) << "\n" << "\tindex = " << index;
 
     return ss.str();
+}
+
+bool point::is_null() const
+{
+    return (index == max_input_sequence) && (hash == null_hash);
 }
 
 bool operator==(const point& a, const point& b)

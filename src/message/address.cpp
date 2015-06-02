@@ -21,8 +21,8 @@
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
-#include <bitcoin/bitcoin/utility/istream.hpp>
-#include <bitcoin/bitcoin/utility/ostream.hpp>
+#include <bitcoin/bitcoin/utility/istream_reader.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 
 namespace libbitcoin {
 namespace message {
@@ -38,6 +38,13 @@ address address::factory_from_data(std::istream& stream)
 {
     address instance;
     instance.from_data(stream);
+    return instance;
+}
+
+address address::factory_from_data(reader& source)
+{
+    address instance;
+    instance.from_data(source);
     return instance;
 }
 
@@ -59,17 +66,23 @@ bool address::from_data(const data_chunk& data)
 
 bool address::from_data(std::istream& stream)
 {
+    istream_reader source(stream);
+    return from_data(source);
+}
+
+bool address::from_data(reader& source)
+{
     bool result = true;
 
     reset();
 
-    uint64_t count = read_variable_uint(stream);
-    result = stream;
+    uint64_t count = source.read_variable_uint_little_endian();
+    result = source;
 
     for (uint64_t i = 0; (i < count) && result; ++i)
     {
         addresses.emplace_back();
-        result = addresses.back().from_data(stream, true);
+        result = addresses.back().from_data(source, true);
     }
 
     if (!result)
@@ -90,10 +103,16 @@ data_chunk address::to_data() const
 
 void address::to_data(std::ostream& stream) const
 {
-    write_variable_uint(stream, addresses.size());
+    ostream_writer sink(stream);
+    to_data(sink);
+}
+
+void address::to_data(writer& sink) const
+{
+    sink.write_variable_uint_little_endian(addresses.size());
 
     for (const network_address& net_address : addresses)
-        net_address.to_data(stream, true);
+        net_address.to_data(sink, true);
 }
 
 uint64_t address::satoshi_size() const

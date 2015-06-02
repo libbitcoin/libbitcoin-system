@@ -34,25 +34,70 @@ serializer<Iterator>::serializer(const Iterator begin)
 }
 
 template <typename Iterator>
+serializer<Iterator>::operator bool() const
+{
+    return true;
+}
+
+template <typename Iterator>
+bool serializer<Iterator>::operator!() const
+{
+    return false;
+}
+
+template <typename Iterator>
 void serializer<Iterator>::write_byte(uint8_t value)
 {
     *iter_ = value;
     ++iter_;
 }
+
 template <typename Iterator>
-void serializer<Iterator>::write_2_bytes(uint16_t value)
+void serializer<Iterator>::write_data(const data_chunk& data)
+{
+    write_data<const data_chunk>(data);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_data(const uint8_t* data, uint64_t n_bytes)
+{
+    iter_ = std::copy(data, (data + n_bytes), iter_);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_2_bytes_little_endian(uint16_t value)
 {
     write_little_endian(value);
 }
+
 template <typename Iterator>
-void serializer<Iterator>::write_4_bytes(uint32_t value)
+void serializer<Iterator>::write_4_bytes_little_endian(uint32_t value)
 {
     write_little_endian(value);
 }
+
 template <typename Iterator>
-void serializer<Iterator>::write_8_bytes(uint64_t value)
+void serializer<Iterator>::write_8_bytes_little_endian(uint64_t value)
 {
     write_little_endian(value);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_2_bytes_big_endian(uint16_t value)
+{
+    write_big_endian(value);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_4_bytes_big_endian(uint32_t value)
+{
+    write_big_endian(value);
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_8_bytes_big_endian(uint64_t value)
+{
+    write_big_endian(value);
 }
 
 template <typename Iterator>
@@ -61,6 +106,7 @@ void serializer<Iterator>::write_big_endian(T n)
 {
     return write_data(to_big_endian(n));
 }
+
 template <typename Iterator>
 template <typename T>
 void serializer<Iterator>::write_little_endian(T n)
@@ -69,7 +115,7 @@ void serializer<Iterator>::write_little_endian(T n)
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_variable_uint(uint64_t value)
+void serializer<Iterator>::write_variable_uint_little_endian(uint64_t value)
 {
     if (value < 0xfd)
     {
@@ -78,17 +124,41 @@ void serializer<Iterator>::write_variable_uint(uint64_t value)
     else if (value <= 0xffff)
     {
         write_byte(0xfd);
-        write_2_bytes((uint16_t)value);
+        write_2_bytes_little_endian((uint16_t)value);
     }
     else if (value <= 0xffffffff)
     {
         write_byte(0xfe);
-        write_4_bytes((uint32_t)value);
+        write_4_bytes_little_endian((uint32_t)value);
     }
     else
     {
         write_byte(0xff);
-        write_8_bytes(value);
+        write_8_bytes_little_endian(value);
+    }
+}
+
+template <typename Iterator>
+void serializer<Iterator>::write_variable_uint_big_endian(uint64_t value)
+{
+    if (value < 0xfd)
+    {
+        write_byte((uint8_t)value);
+    }
+    else if (value <= 0xffff)
+    {
+        write_byte(0xfd);
+        write_2_bytes_big_endian((uint16_t)value);
+    }
+    else if (value <= 0xffffffff)
+    {
+        write_byte(0xfe);
+        write_4_bytes_big_endian((uint32_t)value);
+    }
+    else
+    {
+        write_byte(0xff);
+        write_8_bytes_big_endian(value);
     }
 }
 
@@ -124,7 +194,7 @@ void serializer<Iterator>::write_fixed_string(
 template <typename Iterator>
 void serializer<Iterator>::write_string(const std::string& str)
 {
-    write_variable_uint(str.size());
+    write_variable_uint_little_endian(str.size());
     write_data(str);
 }
 
