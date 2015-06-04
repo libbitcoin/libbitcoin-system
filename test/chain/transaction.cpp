@@ -26,6 +26,119 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(transaction_tests)
 
+BOOST_AUTO_TEST_CASE(is_coinbase_returns_false)
+{
+    chain::transaction instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(is_coinbase_returns_true)
+{
+    chain::transaction instance;
+    instance.inputs.emplace_back();
+    instance.inputs.back().previous_output.index = max_input_sequence;
+    instance.inputs.back().previous_output.hash = null_hash;
+    BOOST_REQUIRE_EQUAL(true, instance.is_coinbase());
+}
+
+BOOST_AUTO_TEST_CASE(is_final_locktime_zero_returns_true)
+{
+    uint64_t height = 100;
+    uint32_t time = 100;
+    chain::transaction instance;
+    instance.locktime = 0;
+    BOOST_REQUIRE_EQUAL(true, instance.is_final(height, time));
+}
+
+BOOST_AUTO_TEST_CASE(is_final_locktime_less_block_time_greater_threshold_returns_true)
+{
+    uint64_t height = locktime_threshold + 100;
+    uint32_t time = 100;
+    chain::transaction instance;
+    instance.locktime = locktime_threshold + 50;
+    BOOST_REQUIRE_EQUAL(true, instance.is_final(height, time));
+}
+
+BOOST_AUTO_TEST_CASE(is_final_locktime_less_block_height_less_threshold_returns_true)
+{
+    uint64_t height = 100;
+    uint32_t time = 100;
+    chain::transaction instance;
+    instance.locktime = 50;
+    BOOST_REQUIRE_EQUAL(true, instance.is_final(height, time));
+}
+
+BOOST_AUTO_TEST_CASE(is_final_locktime_input_not_final_returns_false)
+{
+    uint64_t height = 100;
+    uint32_t time = 100;
+    chain::transaction instance;
+    instance.locktime = 101;
+    instance.inputs.emplace_back();
+    instance.inputs.back().sequence = 1;
+    BOOST_REQUIRE_EQUAL(false, instance.is_final(height, time));
+}
+
+BOOST_AUTO_TEST_CASE(is_final_locktime_inputs_final_returns_true)
+{
+    uint64_t height = 100;
+    uint32_t time = 100;
+    chain::transaction instance;
+    instance.locktime = 101;
+    instance.inputs.emplace_back();
+    instance.inputs.back().sequence = max_sequence;
+    BOOST_REQUIRE_EQUAL(true, instance.is_final(height, time));
+}
+
+BOOST_AUTO_TEST_CASE(is_locktime_conflict_locktime_zero_returns_false)
+{
+    chain::transaction instance;
+    instance.locktime = 0;
+    BOOST_REQUIRE_EQUAL(false, instance.is_locktime_conflict());
+}
+
+BOOST_AUTO_TEST_CASE(is_locktime_conflict_input_sequence_not_maximum_returns_false)
+{
+    chain::transaction instance;
+    instance.locktime = 2143;
+    instance.inputs.emplace_back();
+    instance.inputs.back().sequence = 1;
+    BOOST_REQUIRE_EQUAL(false, instance.is_locktime_conflict());
+}
+
+BOOST_AUTO_TEST_CASE(is_locktime_conflict_no_inputs_returns_true)
+{
+    chain::transaction instance;
+    instance.locktime = 2143;
+    BOOST_REQUIRE_EQUAL(true, instance.is_locktime_conflict());
+}
+
+BOOST_AUTO_TEST_CASE(is_locktime_conflict_input_max_sequence_returns_true)
+{
+    chain::transaction instance;
+    instance.locktime = 2143;
+    instance.inputs.emplace_back();
+    instance.inputs.back().sequence = max_sequence;
+    BOOST_REQUIRE_EQUAL(true, instance.is_locktime_conflict());
+}
+
+BOOST_AUTO_TEST_CASE(total_output_value_returns_zero)
+{
+    chain::transaction instance;
+    BOOST_REQUIRE_EQUAL(0u, instance.total_output_value());
+}
+
+BOOST_AUTO_TEST_CASE(total_output_value_returns_positive)
+{
+    uint64_t expected = 1234;
+    chain::transaction instance;
+    instance.outputs.emplace_back();
+    instance.outputs.back().value = 1200;
+    instance.outputs.emplace_back();
+    instance.outputs.back().value = 34;
+    BOOST_REQUIRE_EQUAL(expected, instance.total_output_value());
+}
+
 BOOST_AUTO_TEST_CASE(from_data_fails)
 {
     data_chunk data(2);
