@@ -29,7 +29,7 @@ istream_reader::istream_reader(std::istream& stream)
 
 istream_reader::operator bool() const
 {
-    return stream_;
+    return (bool)stream_;
 }
 
 bool istream_reader::operator!() const
