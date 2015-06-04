@@ -28,7 +28,7 @@ ostream_writer::ostream_writer(std::ostream& stream)
 
 ostream_writer::operator bool() const
 {
-    return stream_;
+    return (bool)stream_;
 }
 
 bool ostream_writer::operator!() const
