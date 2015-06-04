@@ -51,7 +51,7 @@ transaction_output transaction_output::factory_from_data(reader& source)
 
 bool transaction_output::is_valid() const
 {
-    return !(value != 0) || script.is_valid();
+    return (value != 0) || script.is_valid();
 }
 
 void transaction_output::reset()
