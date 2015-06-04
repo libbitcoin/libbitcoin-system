@@ -218,6 +218,8 @@ test_libbitcoin_test_SOURCES = \
     test/chain/script.cpp \
     test/chain/script.hpp \
     test/chain/transaction.cpp \
+    test/chain/transaction_input.cpp \
+    test/chain/transaction_output.cpp \
     test/utility/endian.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp
