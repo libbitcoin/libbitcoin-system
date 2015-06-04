@@ -17,6 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include <boost/iostreams/stream.hpp>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
 
@@ -34,7 +35,31 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
+BOOST_AUTO_TEST_CASE(to_data_from_data_roundtrip)
+{
+    uint32_t index = 53213;
+    hash_digest hash = {
+        0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+        0x01, 0x01, 0xab, 0x11, 0x11, 0xcd, 0x11, 0x11,
+        0x01, 0x10, 0x11, 0xab, 0x11, 0x11, 0xcd, 0x11,
+        0x01, 0x11, 0x11, 0x11, 0xab, 0x11, 0x11, 0xcd
+    };
+
+    chain::point initial{ hash, index };
+
+    BOOST_REQUIRE(initial.is_valid());
+    BOOST_REQUIRE(hash == initial.hash);
+    BOOST_REQUIRE(index == initial.index);
+
+    chain::point point;
+
+    BOOST_REQUIRE(point != initial);
+    BOOST_REQUIRE(point.from_data(initial.to_data()));
+    BOOST_REQUIRE(point.is_valid());
+    BOOST_REQUIRE(point == initial);
+}
+
+BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_data_chunk)
 {
     data_chunk rawdata = to_data_chunk(base16_literal(
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
@@ -47,8 +72,64 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
         0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
     }));
 
-    chain::point point;
-    BOOST_REQUIRE(point.from_data(rawdata));
+    auto point = chain::point::factory_from_data(rawdata);
+
+    BOOST_REQUIRE(point.is_valid());
+
+    BOOST_REQUIRE_EQUAL(encode_hash(point.hash),
+        "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
+
+    BOOST_REQUIRE(point.index == 0);
+
+    data_chunk output = point.to_data();
+    BOOST_REQUIRE(output == rawdata);
+}
+
+BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_stream)
+{
+    data_chunk rawdata = to_data_chunk(base16_literal(
+        "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
+    ));
+
+    BOOST_REQUIRE(rawdata == (data_chunk
+    {
+        0x46, 0x68, 0x24, 0x88, 0xf0, 0xa7, 0x21, 0x12, 0x4a, 0x39, 0x05, 0xa1,
+        0xbb, 0x72, 0x44, 0x5b, 0xf1, 0x34, 0x93, 0xe2, 0xcd, 0x46, 0xc5, 0xc0,
+        0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
+    }));
+
+    boost::iostreams::stream<byte_source<data_chunk>> istream(rawdata);
+    auto point = chain::point::factory_from_data(istream);
+
+    BOOST_REQUIRE(point.is_valid());
+
+    BOOST_REQUIRE_EQUAL(encode_hash(point.hash),
+        "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
+
+    BOOST_REQUIRE(point.index == 0);
+
+    data_chunk output = point.to_data();
+    BOOST_REQUIRE(output == rawdata);
+}
+
+BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_reader)
+{
+    data_chunk rawdata = to_data_chunk(base16_literal(
+        "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
+    ));
+
+    BOOST_REQUIRE(rawdata == (data_chunk
+    {
+        0x46, 0x68, 0x24, 0x88, 0xf0, 0xa7, 0x21, 0x12, 0x4a, 0x39, 0x05, 0xa1,
+        0xbb, 0x72, 0x44, 0x5b, 0xf1, 0x34, 0x93, 0xe2, 0xcd, 0x46, 0xc5, 0xc0,
+        0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
+    }));
+
+    boost::iostreams::stream<byte_source<data_chunk>> istream(rawdata);
+    istream_reader source(istream);
+    auto point = chain::point::factory_from_data(source);
+
+    BOOST_REQUIRE(point.is_valid());
 
     BOOST_REQUIRE_EQUAL(encode_hash(point.hash),
         "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
