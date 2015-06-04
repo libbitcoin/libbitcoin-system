@@ -183,11 +183,17 @@ void serializer<Iterator>::write_short_hash(const short_hash& hash)
 
 template <typename Iterator>
 void serializer<Iterator>::write_fixed_string(
-    const std::string& command, size_t string_size)
+    const std::string& value, size_t string_size)
 {
-    BITCOIN_ASSERT(command.size() <= string_size);
+    size_t max_size = std::max(string_size, value.size());
     data_chunk raw_string(string_size, 0);
-    std::copy(command.begin(), command.end(), raw_string.begin());
+
+    std::copy_n(value.begin(), max_size, raw_string.begin());
+
+    // conditionally truncate
+    if (max_size > string_size)
+        raw_string.resize(string_size);
+
     write_data(raw_string);
 }
 

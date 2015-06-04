@@ -103,7 +103,7 @@ public:
     /**
      * Write a fixed size string padded with zeroes.
      */
-    void write_fixed_string(const std::string& command, size_t string_size);
+    void write_fixed_string(const std::string& value, size_t string_size);
 
     /**
      * Write a variable length string.
