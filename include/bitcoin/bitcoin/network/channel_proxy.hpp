@@ -228,6 +228,8 @@ private:
     // We keep the service alive for lifetime rules
     boost::asio::deadline_timer timeout_;
     boost::asio::deadline_timer heartbeat_;
+
+    // TODO: use lock-free std::atomic_flag?
     std::atomic<bool> stopped_;
 
     channel_stream_loader loader_;
@@ -241,7 +243,7 @@ private:
     boost::array<uint8_t, header_chunk_size> inbound_header_;
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;
 
-    std::vector<uint8_t> inbound_payload_;
+    data_chunk inbound_payload_;
 
     // We should be using variadic templates for these
     version_subscriber_type::ptr version_subscriber_;
