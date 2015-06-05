@@ -92,6 +92,11 @@ uint64_t nonce_base::satoshi_fixed_size()
     return 8;
 }
 
+bool operator==(const nonce_base& a, const nonce_base& b)
+{
+    return (a.nonce == b.nonce);
+}
+
 ping ping::factory_from_data(const data_chunk& data)
 {
     ping instance;
