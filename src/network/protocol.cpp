@@ -373,9 +373,8 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
 
     // Remove channel from list of connections
     node->subscribe_stop(
-        strand_.wrap(
-            &protocol::outbound_channel_stopped,
-                this, _1, node, slot));
+        strand_.wrap(&protocol::outbound_channel_stopped,
+            this, _1, node, slot));
 
     setup_new_channel(node);
 }
