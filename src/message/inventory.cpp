@@ -121,5 +121,15 @@ uint64_t inventory::satoshi_size() const
         + inventories.size() * inventory_vector::satoshi_fixed_size();
 }
 
+bool operator==(const inventory& a, const inventory& b)
+{
+    bool result = (a.inventories.size() == b.inventories.size());
+
+    for (size_t i = 0; (i < a.inventories.size()) && result; i++)
+        result = (a.inventories[i] == b.inventories[i]);
+
+    return result;
+}
+
 } // end message
 } // end libbitcoin

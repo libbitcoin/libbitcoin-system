@@ -65,6 +65,8 @@ public:
     static uint64_t satoshi_fixed_size();
 };
 
+bool operator==(const inventory_vector& a, const inventory_vector& b);
+
 typedef std::vector<inventory_vector> inventory_list;
 
 } // end message

@@ -69,6 +69,8 @@ public:
     static get_blocks factory_from_data(reader& source);
 };
 
+bool operator==(const get_blocks& a, const get_blocks& b);
+
 } // end message
 } // end libbitcoin
 

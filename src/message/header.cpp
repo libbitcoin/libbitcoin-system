@@ -51,10 +51,8 @@ header header::factory_from_data(reader& source)
 
 bool header::is_valid() const
 {
-    return (magic != 0) ||
-        (payload_length != 0) ||
-        (checksum != 0) ||
-        !command.empty();
+    return (magic != 0) || (payload_length != 0) || (checksum != 0)
+        || !command.empty();
 }
 
 void header::reset()
@@ -86,7 +84,7 @@ bool header::from_data(reader& source)
     payload_length = source.read_4_bytes_little_endian();
     checksum = 0;
 
-    if (source)
+    if (!source)
         reset();
 
     return source;
@@ -121,6 +119,14 @@ void header::to_data(writer& sink) const
 uint64_t header::satoshi_size() const
 {
     return 20 + (checksum == 0 ? 0 : 4);
+}
+
+bool operator==(const header& a, const header& b)
+{
+    return (a.magic == b.magic)
+        && (a.command == b.command)
+        && (a.payload_length == b.payload_length)
+        && (a.checksum == b.checksum);
 }
 
 } // end message
