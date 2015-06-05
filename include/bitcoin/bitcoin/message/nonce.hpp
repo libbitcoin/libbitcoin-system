@@ -61,6 +61,8 @@ public:
     static uint64_t satoshi_fixed_size();
 };
 
+bool operator==(const nonce_base& a, const nonce_base& b);
+
 class BC_API ping : public nonce_base
 {
 public:

@@ -200,6 +200,18 @@ test_libbitcoin_test_SOURCES = \
     test/chain/transaction.cpp \
     test/chain/transaction_input.cpp \
     test/chain/transaction_output.cpp \
+    test/message/address.cpp \
+    test/message/announce_version.cpp \
+    test/message/get_address.cpp \
+    test/message/get_blocks.cpp \
+    test/message/get_data.cpp \
+    test/message/header.cpp \
+    test/message/inventory.cpp \
+    test/message/inventory_type_id.cpp \
+    test/message/inventory_vector.cpp \
+    test/message/network_address.cpp \
+    test/message/nonce.cpp \
+    test/message/verack.cpp \
     test/utility/endian.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \
