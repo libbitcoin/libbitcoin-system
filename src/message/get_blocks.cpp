@@ -128,5 +128,15 @@ uint64_t get_blocks::satoshi_size() const
         hash_size * start_hashes.size();
 }
 
+bool operator==(const get_blocks& a, const get_blocks& b)
+{
+    bool result = (a.start_hashes.size() == b.start_hashes.size());
+
+    for (size_t i = 0; (i < a.start_hashes.size()) && result; i++)
+        result = (a.start_hashes[i] == b.start_hashes[i]);
+
+    return result && (a.hash_stop == b.hash_stop);
+}
+
 } // end message
 } // end libbitcoin

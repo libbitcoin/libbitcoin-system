@@ -64,6 +64,8 @@ public:
     static inventory factory_from_data(reader& source);
 };
 
+bool operator==(const inventory& a, const inventory& b);
+
 } // end message
 } // end libbitcoin
 

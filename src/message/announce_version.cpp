@@ -50,13 +50,13 @@ announce_version announce_version::factory_from_data(reader& source)
 
 bool announce_version::is_valid() const
 {
-    return (version != 0) ||
-        (services != 0) ||
-        (timestamp != 0) ||
-        address_me.is_valid() ||
-        address_you.is_valid() ||
-        (nonce != 0) ||
-        !user_agent.empty();
+    return (version != 0)
+        || (services != 0)
+        || (timestamp != 0)
+        || address_me.is_valid()
+        || address_you.is_valid()
+        || (nonce != 0)
+        || !user_agent.empty();
 }
 
 void announce_version::reset()

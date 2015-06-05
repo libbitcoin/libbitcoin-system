@@ -122,5 +122,10 @@ uint64_t inventory_vector::satoshi_fixed_size()
     return 36;
 }
 
+bool operator==(const inventory_vector& a, const inventory_vector& b)
+{
+    return (a.hash == b.hash) && (a.type == b.type);
+}
+
 } // end message
 } // end libbitcoin
