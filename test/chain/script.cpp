@@ -19,6 +19,7 @@
  */
 #include <ctype.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
@@ -354,6 +355,64 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
 
     BOOST_REQUIRE(chain::script::check_signature(
         signature, pubkey, script_code, parent_tx, input_index));
+}
+
+BOOST_AUTO_TEST_CASE(is_raw_data_operations_size_not_equal_one_returns_false)
+{
+    chain::script instance;
+    BOOST_REQUIRE_EQUAL(false, instance.is_raw_data());
+}
+
+BOOST_AUTO_TEST_CASE(is_raw_data_code_not_equal_raw_data_returns_false)
+{
+    chain::script instance;
+    instance.operations.emplace_back();
+    instance.operations.back().code = chain::opcode::vernotif;
+    BOOST_REQUIRE_EQUAL(false, instance.is_raw_data());
+}
+
+BOOST_AUTO_TEST_CASE(is_raw_data_returns_true)
+{
+    chain::script instance;
+    instance.operations.emplace_back();
+    instance.operations.back().code = chain::opcode::raw_data;
+    BOOST_REQUIRE_EQUAL(true, instance.is_raw_data());
+}
+
+BOOST_AUTO_TEST_CASE(factory_from_data_chunk_test)
+{
+    auto raw = to_data_chunk(base16_literal(
+        "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+
+    auto instance = chain::script::factory_from_data(
+        raw, false, chain::script::parse_mode::strict);
+
+    BOOST_REQUIRE(instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(factory_from_data_stream_test)
+{
+    auto raw = to_data_chunk(base16_literal(
+        "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    boost::iostreams::stream<byte_source<data_chunk>> istream(raw);
+
+    auto instance = chain::script::factory_from_data(
+        istream, false, chain::script::parse_mode::strict);
+
+    BOOST_REQUIRE(instance.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(factory_from_data_reader_test)
+{
+    auto raw = to_data_chunk(base16_literal(
+        "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    boost::iostreams::stream<byte_source<data_chunk>> istream(raw);
+    istream_reader source(istream);
+
+    auto instance = chain::script::factory_from_data(
+        source, false, chain::script::parse_mode::strict);
+
+    BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
