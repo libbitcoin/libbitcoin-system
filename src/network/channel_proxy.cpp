@@ -35,6 +35,7 @@
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -59,7 +60,6 @@ using boost::posix_time::time_duration;
 static const auto initial_timeout = seconds(0) + minutes(1);
 static const auto disconnect_timeout = seconds(0) + minutes(90);
 static const auto heartbeat_time = seconds(0) + minutes(30);
-
 
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
   : strand_(pool),
@@ -245,7 +245,7 @@ void channel_proxy::set_timeout(const time_duration& timeout)
     timeout_.cancel();
     timeout_.expires_from_now(timeout);
     timeout_.async_wait(
-        strand_.wrap(&channel_proxy::handle_timeout,
+        std::bind(&channel_proxy::handle_timeout,
             shared_from_this(), _1));
 }
 

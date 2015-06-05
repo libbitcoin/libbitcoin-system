@@ -40,7 +40,7 @@ using std::placeholders::_2;
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
 
 handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
-  : strand_(pool.service())
+  : strand_(pool)
 {
     // Set fixed values inversion template.
     template_version_.version = bc::protocol_version;
@@ -79,16 +79,16 @@ void handshake::ready(channel_ptr node,
     // The port value was formerly hardwired to bc::protocol_port.
 
     node->send(session_version,
-        strand_.wrap(std::bind(&handshake::handle_message_sent,
-            this, _1, completion_callback)));
+        strand_.wrap(&handshake::handle_message_sent,
+            this, _1, completion_callback));
 
     node->subscribe_version(
-        strand_.wrap(std::bind(&handshake::receive_version,
-            this, _1, _2, node, completion_callback)));
+        strand_.wrap(&handshake::receive_version,
+            this, _1, _2, node, completion_callback));
 
     node->subscribe_verack(
-        strand_.wrap(std::bind(&handshake::receive_verack,
-            this, _1, _2, completion_callback)));
+        strand_.wrap(&handshake::receive_verack,
+            this, _1, _2, completion_callback));
 }
 
 void handshake::handle_message_sent(const std::error_code& ec,
@@ -104,8 +104,8 @@ void handshake::receive_version(const std::error_code& ec, const version_type&,
         completion_callback(ec);
     else
         node->send(verack_type(),
-            strand_.wrap(std::bind(&handshake::handle_message_sent,
-                this, _1, completion_callback)));
+            strand_.wrap(&handshake::handle_message_sent,
+                this, _1, completion_callback));
 }
 
 void handshake::receive_verack(const std::error_code& ec, const verack_type&,
@@ -116,9 +116,9 @@ void handshake::receive_verack(const std::error_code& ec, const verack_type&,
 
 void handshake::discover_external_ip(discover_ip_handler handle_discover)
 {
-    strand_.post(
-        std::bind(&handshake::do_discover_external_ip,
-            this, handle_discover));
+    strand_.queue(
+        &handshake::do_discover_external_ip,
+            this, handle_discover);
 }
 
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
@@ -130,9 +130,9 @@ void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
 void handshake::fetch_network_address(
     fetch_network_address_handler handle_fetch)
 {
-    strand_.post(
-        std::bind(&handshake::do_fetch_network_address,
-            this, handle_fetch));
+    strand_.queue(
+        &handshake::do_fetch_network_address,
+            this, handle_fetch);
 }
 
 void handshake::do_fetch_network_address(
@@ -143,9 +143,9 @@ void handshake::do_fetch_network_address(
 
 void handshake::set_port(uint16_t port, setter_handler handle_set)
 {
-    strand_.post(
-        std::bind(&handshake::do_set_port,
-            this, port, handle_set));
+    strand_.queue(
+        &handshake::do_set_port,
+            this, port, handle_set);
 }
 
 void handshake::do_set_port(uint16_t port, setter_handler handle_set)
@@ -158,9 +158,9 @@ void handshake::do_set_port(uint16_t port, setter_handler handle_set)
 void handshake::set_user_agent(const std::string& user_agent,
     setter_handler handle_set)
 {
-    strand_.post(
-        std::bind(&handshake::do_set_user_agent,
-            this, user_agent, handle_set));
+    strand_.queue(
+        &handshake::do_set_user_agent,
+            this, user_agent, handle_set);
 }
 
 // TODO: deprecate (any reason to set this dynamically)?
@@ -173,9 +173,9 @@ void handshake::do_set_user_agent(const std::string& user_agent,
 
 void handshake::set_start_height(uint64_t height, setter_handler handle_set)
 {
-    strand_.post(
-        std::bind(&handshake::do_set_start_height,
-            this, height, handle_set));
+    strand_.queue(
+        &handshake::do_set_start_height,
+            this, height, handle_set);
 }
 
 void handshake::do_set_start_height(uint64_t height, setter_handler handle_set)

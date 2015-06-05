@@ -28,6 +28,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -77,7 +78,7 @@ private:
     void do_set_user_agent(const std::string& user_agent,
         setter_handler handle_set);
 
-    boost::asio::io_service::strand strand_;
+    async_strand strand_;
     version_type template_version_;
 };
 

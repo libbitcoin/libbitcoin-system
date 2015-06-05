@@ -20,9 +20,11 @@
 #ifndef  LIBBITCOIN_SUBSCRIBER_HPP
 #define  LIBBITCOIN_SUBSCRIBER_HPP
 
+#include <functional>
 #include <memory>
 #include <stack>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -36,22 +38,26 @@ public:
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
     subscriber(threadpool& pool)
-      : strand_(pool.service())
+      : strand_(pool)
     {
     }
 
     void subscribe(handler_type handle)
     {
-        strand_.dispatch(
-            std::bind(&subscriber<Args...>::do_subscribe,
-                this->shared_from_this(), handle));
+        auto dispatch_subscribe =
+            strand_.wrap(&subscriber<Args...>::do_subscribe,
+                shared_from_this(), handle);
+
+        dispatch_subscribe();
     }
 
     void relay(Args... params)
     {
-        strand_.dispatch(
-            std::bind(&subscriber<Args...>::do_relay,
-                this->shared_from_this(), std::forward<Args>(params)...));
+        auto dispatch_relay =
+            strand_.wrap(&subscriber<Args...>::do_relay,
+                shared_from_this(), std::forward<Args>(params)...);
+
+        dispatch_relay();
     }
 
 private:
@@ -64,17 +70,18 @@ private:
 
     void do_relay(Args... params)
     {
-        registry_stack notify_copy = registry_;
+        auto notify_copy = registry_;
         registry_ = registry_stack();
         while (!notify_copy.empty())
         {
             notify_copy.top()(params...);
             notify_copy.pop();
         }
+
         BITCOIN_ASSERT(notify_copy.empty());
     }
 
-    boost::asio::io_service::strand strand_;
+    async_strand strand_;
     registry_stack registry_;
 };
 
