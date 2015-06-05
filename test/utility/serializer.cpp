@@ -54,6 +54,8 @@ BOOST_AUTO_TEST_CASE(is_exhausted_initialized_empty_stream_returns_true)
     data_chunk data(0);
     auto source = make_deserializer(data.begin(), data.end());
     BOOST_REQUIRE_EQUAL(true, source.is_exhausted());
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
+    BOOST_REQUIRE_EQUAL(false, !source);
 }
 
 BOOST_AUTO_TEST_CASE(is_exhausted_initialized_nonempty_stream_returns_false)
@@ -61,6 +63,8 @@ BOOST_AUTO_TEST_CASE(is_exhausted_initialized_nonempty_stream_returns_false)
     data_chunk data(1);
     auto source = make_deserializer(data.begin(), data.end());
     BOOST_REQUIRE_EQUAL(false, source.is_exhausted());
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
+    BOOST_REQUIRE_EQUAL(false, !source);
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_byte)
@@ -75,8 +79,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_byte)
 
     BOOST_REQUIRE(expected == result);
 
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -92,10 +96,11 @@ BOOST_AUTO_TEST_CASE(roundtrip_2_bytes_little_endian)
     uint16_t result = source.read_2_bytes_little_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
+
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_4_bytes_little_endian)
@@ -109,9 +114,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_4_bytes_little_endian)
     uint32_t result = source.read_4_bytes_little_endian();
 
     BOOST_REQUIRE(expected == result);
-
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -127,9 +131,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_8_bytes_little_endian)
     uint64_t result = source.read_8_bytes_little_endian();
 
     BOOST_REQUIRE(expected == result);
-
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -145,9 +148,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_2_bytes_big_endian)
     uint16_t result = source.read_2_bytes_big_endian();
 
     BOOST_REQUIRE(expected == result);
-
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -163,9 +165,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_4_bytes_big_endian)
     uint32_t result = source.read_4_bytes_big_endian();
 
     BOOST_REQUIRE(expected == result);
-
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -181,9 +182,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_8_bytes_big_endian)
     uint64_t result = source.read_8_bytes_big_endian();
 
     BOOST_REQUIRE(expected == result);
-
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -201,8 +201,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_little_endian_1_byte)
     uint64_t result = source.read_variable_uint_little_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -219,8 +219,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_little_endian_2_bytes)
     uint64_t result = source.read_variable_uint_little_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -237,8 +237,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_little_endian_4_bytes)
     uint64_t result = source.read_variable_uint_little_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -255,8 +255,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_little_endian_8_bytes)
     uint64_t result = source.read_variable_uint_little_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -273,8 +273,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_1_byte)
     uint64_t result = source.read_variable_uint_big_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -291,8 +291,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_2_bytes)
     uint64_t result = source.read_variable_uint_big_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -309,8 +309,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_4_bytes)
     uint64_t result = source.read_variable_uint_big_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -327,8 +327,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_variable_uint_big_endian_8_bytes)
     uint64_t result = source.read_variable_uint_big_endian();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -352,8 +352,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_data_chunk)
     data_chunk result = source.read_data(expected.size());
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -378,8 +378,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_data_pointer_array)
     source.read_data(reinterpret_cast<uint8_t*>(result.data()), result.size());
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -401,8 +401,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_hash)
     hash_digest result = source.read_hash();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -423,8 +423,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_short_hash)
     short_hash result = source.read_short_hash();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -442,8 +442,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_fixed_string)
     std::string result = source.read_fixed_string(10);
 
     BOOST_REQUIRE(expected.substr(0, 10) == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -461,8 +461,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_string)
     std::string result = source.read_string();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }
@@ -484,8 +484,8 @@ BOOST_AUTO_TEST_CASE(read_data_to_eof)
     data_chunk result = source.read_data_to_eof();
 
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE(sink);
-    BOOST_REQUIRE(source);
+    BOOST_REQUIRE_EQUAL(true, (bool)sink);
+    BOOST_REQUIRE_EQUAL(true, (bool)source);
     BOOST_REQUIRE_EQUAL(false, !sink);
     BOOST_REQUIRE_EQUAL(false, !source);
 }

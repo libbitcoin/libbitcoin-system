@@ -36,26 +36,7 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
     BOOST_REQUIRE_EQUAL(false, header.is_valid());
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_from_data_chunk)
-{
-    chain::block_header expected {
-        10,
-        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
-        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
-        531234,
-        6523454,
-        68644
-    };
-
-    data_chunk data = expected.to_data();
-
-    chain::block_header result;
-
-    BOOST_REQUIRE(result.from_data(data));
-    BOOST_REQUIRE(expected == result);
-}
-
-BOOST_AUTO_TEST_CASE(roundtrip_factory_from_data_chunk)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
     chain::block_header expected {
         10,
@@ -74,7 +55,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_factory_from_data_chunk)
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_from_data_istream)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     chain::block_header expected {
         10,
@@ -86,16 +67,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_from_data_istream)
     };
 
     data_chunk data = expected.to_data();
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
 
-    chain::block_header result;
+    auto result = chain::block_header::factory_from_data(istream);
 
-    BOOST_REQUIRE(result.from_data(istream));
+    BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(roundtrip_factory_from_data_istream)
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     chain::block_header expected {
         10,
@@ -107,10 +87,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_factory_from_data_istream)
     };
 
     data_chunk data = expected.to_data();
-    byte_source<data_chunk> source(data);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    istream_reader source(istream);
 
-    auto result = chain::block_header::factory_from_data(istream);
+    auto result = chain::block_header::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
