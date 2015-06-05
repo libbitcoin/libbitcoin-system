@@ -85,6 +85,7 @@ private:
     registry_stack registry_;
 };
 
+// TODO: push into subscriber<Agrs...> (interface break).
 template <typename... Args>
 using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
 
