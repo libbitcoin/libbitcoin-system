@@ -67,6 +67,7 @@ public:
         }
         catch (bc::end_of_stream)
         {
+            // This doesn't invalidate the channel (unlike the invalid header).
             handle_load_(bc::error::bad_stream, Message());
         }
     }

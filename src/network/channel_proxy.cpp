@@ -266,6 +266,7 @@ void channel_proxy::reset_timers()
     set_heartbeat(heartbeat_time);
 }
 
+// This is a subscription.
 void channel_proxy::read_header()
 {
     async_read(*socket_, buffer(inbound_header_),
@@ -273,6 +274,7 @@ void channel_proxy::read_header()
             shared_from_this(), _1, _2));
 }
 
+// This is a subscription.
 void channel_proxy::read_checksum(const header_type& header)
 {
     async_read(*socket_, buffer(inbound_checksum_),
@@ -280,6 +282,7 @@ void channel_proxy::read_checksum(const header_type& header)
             shared_from_this(), _1, _2, header));
 }
 
+// This is a subscription.
 void channel_proxy::read_payload(const header_type& header)
 {
     inbound_payload_.resize(header.payload_length);
@@ -299,6 +302,8 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
 
     header_type header;
     const data_slice buffer(inbound_header_);
+
+    // TODO: try/catch.
     satoshi_load(buffer.begin(), buffer.end(), header);
 
     if (header.magic != magic_value())
