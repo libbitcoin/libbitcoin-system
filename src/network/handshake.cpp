@@ -72,7 +72,7 @@ void handshake::ready(channel_ptr node,
 
     // Copy the version template and set its timestamp.
     auto session_version = template_version_;
-    template_version_.nonce = rand();
+    session_version.nonce = rand();
     session_version.timestamp = time(nullptr);
 
     // Since we removed cURL discover_external_ip always returns localhost.
