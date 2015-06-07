@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_HOSTS_HPP
-#define LIBBITCOIN_HOSTS_HPP
+#ifndef LIBBITCOIN_NETWORK_HOSTS_HPP
+#define LIBBITCOIN_NETWORK_HOSTS_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -28,7 +28,7 @@
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -44,7 +44,7 @@ public:
     typedef std::function<void (const std::error_code&)> remove_handler;
 
     typedef std::function<
-        void (const std::error_code&, const network_address_type&)>
+        void (const std::error_code&, const message::network_address&)>
             fetch_address_handler;
 
     typedef std::function<void (const std::error_code&, size_t)>
@@ -59,9 +59,9 @@ public:
     void load(load_handler handle_load);
     void save(save_handler handle_save);
 
-    void store(const network_address_type& address,
+    BC_API void store(const message::network_address& address,
         store_handler handle_store);
-    void remove(const network_address_type& address,
+    BC_API void remove(const message::network_address& address,
         remove_handler handle_remove);
     void fetch_address(fetch_address_handler handle_fetch);
     void fetch_count(fetch_count_handler handle_fetch);
@@ -75,7 +75,7 @@ private:
     struct hosts_field
     {
         bool operator==(const hosts_field& other);
-        ip_address_type ip;
+        message::ip_address ip;
         uint16_t port;
     };
 
@@ -84,7 +84,7 @@ private:
     void do_save(const boost::filesystem::path& path,
         save_handler handle_save);
 
-    void do_remove(const network_address_type& address,
+    void do_remove(const message::network_address& address,
         remove_handler handle_remove);
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);
@@ -98,4 +98,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

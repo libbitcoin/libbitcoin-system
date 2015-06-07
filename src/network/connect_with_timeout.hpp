@@ -20,7 +20,7 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 
@@ -46,7 +46,7 @@ private:
     void close(const boost::system::error_code& ec);
 
     socket_ptr socket_;
-    channel::channel_proxy_ptr proxy_;
+    channel_proxy::pointer proxy_;
     boost::asio::deadline_timer timer_;
 };
 

@@ -17,18 +17,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_URI_HPP
-#define LIBBITCOIN_URI_HPP
+#ifndef LIBBITCOIN_WALLET_URI_HPP
+#define LIBBITCOIN_WALLET_URI_HPP
 
 #include <cstdint>
 #include <string>
 #include <sstream>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 /**
  * The URI parser calls these methods each time it extracts a URI component.
@@ -101,6 +102,7 @@ private:
     bool first_param_;
 };
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

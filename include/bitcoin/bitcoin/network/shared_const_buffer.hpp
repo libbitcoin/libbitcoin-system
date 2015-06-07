@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SHARED_CONST_BUFFER_HPP
-#define LIBBITCOIN_SHARED_CONST_BUFFER_HPP
+#ifndef LIBBITCOIN_NETWORK_SHARED_CONST_BUFFER_HPP
+#define LIBBITCOIN_NETWORK_SHARED_CONST_BUFFER_HPP
 
 #include <memory>
 #include <boost/asio.hpp>
@@ -62,4 +62,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

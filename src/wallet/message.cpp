@@ -23,6 +23,7 @@
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 hash_digest hash_message(data_slice message)
 {
@@ -34,7 +35,7 @@ hash_digest hash_message(data_slice message)
 
     auto ser = make_serializer(data.begin());
     ser.write_string(prefix);
-    ser.write_variable_uint(message.size());
+    ser.write_variable_uint_little_endian(message.size());
     ser.write_data(message);
 
     return bitcoin_hash(data);
@@ -94,5 +95,6 @@ bool verify_message(data_slice message,
     return address.hash() == bitcoin_short_hash(pubkey);
 }
 
+} // namespace wallet
 } // namespace libbitcoin
 

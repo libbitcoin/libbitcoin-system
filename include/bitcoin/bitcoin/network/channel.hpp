@@ -17,32 +17,44 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHANNEL_HPP
-#define LIBBITCOIN_CHANNEL_HPP
+
+#ifndef LIBBITCOIN_NETWORK_CHANNEL_HPP
+#define LIBBITCOIN_NETWORK_CHANNEL_HPP
 
 #include <cstdint>
 #include <memory>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
+//#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace network {
-    
-class channel;
 
-// TODO: move channel_ptr into channel as public type (interface break).
-typedef std::shared_ptr<channel> channel_ptr;
+class channel;
 
 class BC_API channel
 {
 public:
-    // TODO: move into channel_proxy (interface break).
-    typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
 
-    channel(channel_proxy_ptr proxy);
+    typedef std::shared_ptr<channel> pointer;
+
+    channel(channel_proxy::pointer proxy);
     ~channel();
 
     void stop();
@@ -58,7 +70,7 @@ public:
             handle_send(error::service_stopped);
     }
 
-    void send_raw(const header_type& packet_header,
+    BC_API void send_raw(const message::header& packet_header,
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
     void subscribe_version(
@@ -86,6 +98,7 @@ public:
         channel_proxy::stop_handler handle_stop);
 
 private:
+
     std::weak_ptr<channel_proxy> weak_proxy_;
 };
 
@@ -93,4 +106,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

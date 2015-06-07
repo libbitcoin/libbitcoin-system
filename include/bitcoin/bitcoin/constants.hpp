@@ -30,6 +30,8 @@ namespace libbitcoin {
 
 // Generic constants.
 
+BC_CONSTEXPR size_t command_size = 12;
+
 BC_CONSTEXPR int64_t min_int64 = MIN_INT64;
 BC_CONSTEXPR int64_t max_int64 = MAX_INT64;
 BC_CONSTEXPR int32_t min_int32 = MIN_INT32;

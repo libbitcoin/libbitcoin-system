@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_HPP
-#define LIBBITCOIN_NETWORK_HPP
+#ifndef LIBBITCOIN_NETWORK_NETWORK_HPP
+#define LIBBITCOIN_NETWORK_NETWORK_HPP
 
 #include <memory>
 #include <thread>
@@ -27,7 +27,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -39,9 +38,10 @@ class BC_API network
 public:
 
     typedef std::function<
-        void(const std::error_code&, channel_ptr)> connect_handler;
+        void(const std::error_code&, channel::pointer)> connect_handler;
+
     typedef std::function<
-        void (const std::error_code&, acceptor_ptr)> listen_handler;
+        void (const std::error_code&, acceptor::pointer)> listen_handler;
 
     network(threadpool& pool);
 
@@ -67,4 +67,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

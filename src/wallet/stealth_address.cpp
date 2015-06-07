@@ -21,7 +21,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/stealth.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
@@ -30,6 +29,7 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 constexpr uint8_t options_size = sizeof(uint8_t);
 constexpr uint8_t version_size = sizeof(uint8_t);
@@ -98,7 +98,14 @@ stealth_address::stealth_address(const binary_type& prefix,
     valid_ = true;
 }
 
-std::string stealth_address::encoded() const
+stealth_address::stealth_address(const std::string& encoded_address)
+    : stealth_address()
+{
+    if (!from_string(encoded_address))
+        throw std::invalid_argument("encoded_address");
+}
+
+std::string stealth_address::to_string() const
 {
     if (!valid_)
         return std::string();
@@ -136,15 +143,17 @@ std::string stealth_address::encoded() const
     return encode_base58(raw_address);
 }
 
-bool stealth_address::set_encoded(const std::string& encoded_address)
+bool stealth_address::from_string(const std::string& encoded_address)
 {
     valid_ = false;
     data_chunk raw_address;
+
     if (!decode_base58(raw_address, encoded_address))
         return false;
 
     // Size is guarded until we get to N.
     auto required_size = min_address_size;
+
     if (raw_address.size() < required_size)
         return valid_;
 
@@ -156,15 +165,19 @@ bool stealth_address::set_encoded(const std::string& encoded_address)
 
     // [version:1 = 0x2a]
     auto version = *iter;
+
     if (version != network::mainnet && version != network::testnet)
         return valid_;
+
     testnet_ = (version == network::testnet);
     ++iter;
 
     // [options:1]
     auto options = *iter;
+
     if (options != flags::none && options != flags::reuse_key)
         return valid_;
+
     ++iter;
 
     // [scan_pubkey:33]
@@ -178,6 +191,7 @@ bool stealth_address::set_encoded(const std::string& encoded_address)
 
     // Adjust and retest required size. for pubkey list.
     required_size += number_spend_pubkeys * compressed_pubkey_size;
+
     if (raw_address.size() < required_size)
         return valid_;
 
@@ -199,14 +213,17 @@ bool stealth_address::set_encoded(const std::string& encoded_address)
 
     // [prefix_number_bits:1]
     auto prefix_number_bits = *iter;
+
     if (prefix_number_bits > max_prefix_bits)
         return valid_;
+
     ++iter;
 
     // [prefix:prefix_number_bits / 8, round up]
     // Adjust and retest required size for prefix bytes.
     auto prefix_bytes = (prefix_number_bits + (byte_bits - 1)) / byte_bits;
     required_size += prefix_bytes;
+
     if (raw_address.size() != required_size)
         return valid_;
 
@@ -276,5 +293,5 @@ uint8_t stealth_address::get_version() const
         return network::mainnet;
 }
 
+} // namespace wallet
 } // namespace libbitcoin
-

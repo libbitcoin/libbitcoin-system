@@ -197,6 +197,7 @@ BOOST_OPTIONS_GCC=\
 "--with-chrono "\
 "--with-date_time "\
 "--with-filesystem "\
+"--with-iostreams "\
 "--with-locale "\
 "--with-program_options "\
 "--with-regex "\
@@ -210,6 +211,7 @@ BOOST_OPTIONS_CLANG=\
 "--with-chrono "\
 "--with-date_time "\
 "--with-filesystem "\
+"--with-iostreams "\
 "--with-locale "\
 "--with-program_options "\
 "--with-regex "\
@@ -369,7 +371,16 @@ make_tests()
 
     # Build and run unit tests relative to the primary directory.
     # VERBOSE=1 ensures test-suite.log output sent to console (gcc).
-    make_jobs $JOBS check VERBOSE=1
+    if ! make_jobs $JOBS check VERBOSE=1; then
+        if [ -e "test-suite.log" ]; then
+            echo "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+            echo "cat test-suite.log"
+            echo "------------------------------"
+            cat "test-suite.log"
+            echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+        fi
+        exit 1
+    fi
 }
 
 pop_directory()
@@ -531,7 +542,7 @@ build_all()
     build_from_tarball_icu $ICU_URL $ICU_ARCHIVE icu $PARALLEL $ICU_OPTIONS
     build_from_tarball_boost $BOOST_URL $BOOST_ARCHIVE boost $PARALLEL $BOOST_OPTIONS
     build_from_github libbitcoin secp256k1 version3 $PARALLEL "$@" $SECP256K1_OPTIONS
-    build_from_travis libbitcoin libbitcoin version2 $PARALLEL "$@" $BITCOIN_OPTIONS
+    build_from_travis libbitcoin libbitcoin master $PARALLEL "$@" $BITCOIN_OPTIONS
 }
 
 

@@ -17,16 +17,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PROTOCOL_HPP
-#define LIBBITCOIN_PROTOCOL_HPP
+#ifndef LIBBITCOIN_NETWORK_PROTOCOL_HPP
+#define LIBBITCOIN_NETWORK_PROTOCOL_HPP
 
 #include <cstddef>
 #include <memory>
 #include <system_error>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
@@ -47,7 +48,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_connection_count_handler;
     typedef std::function<void (const std::error_code&,
-        channel_ptr)> channel_handler;
+        channel::pointer)> channel_handler;
 
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
@@ -147,7 +148,7 @@ public:
      * @code
      *  void handle_channel(
      *      const std::error_code& ec,  // Status of operation
-     *      channel_ptr node            // Communication channel to new node
+     *      channel::pointer node            // Communication channel to new node
      *  );
      * @endcode
      */
@@ -184,8 +185,8 @@ public:
 private:
     struct connection_info
     {
-        network_address_type address;
-        channel_ptr node;
+        message::network_address address;
+        channel::pointer node;
     };
     typedef std::vector<connection_info> connection_list;
     enum class connect_state
@@ -199,9 +200,9 @@ private:
     typedef size_t slot_index;
 
     // Accepted connections
-    typedef std::vector<channel_ptr> channel_ptr_list;
+    typedef std::vector<channel::pointer> channel_ptr_list;
 
-    typedef subscriber<const std::error_code&, channel_ptr>
+    typedef subscriber<const std::error_code&, channel::pointer>
         channel_subscriber_type;
 
     // start sequence
@@ -231,11 +232,11 @@ private:
 
         void connect_dns_seed(const std::string& hostname);
         void request_addresses(const std::error_code& ec,
-            channel_ptr dns_seed_node);
+            channel::pointer dns_seed_node);
         void handle_send_get_address(const std::error_code& ec);
 
         void save_addresses(const std::error_code& ec,
-            const address_type& packet, channel_ptr);
+            const message::address& packet, channel::pointer);
         void handle_store(const std::error_code& ec);
 
         completion_handler handle_complete_;
@@ -272,9 +273,9 @@ private:
     // subscribe call.
     void try_connect_once(slot_index slot);
     void attempt_connect(const std::error_code& ec,
-        const network_address_type& packet, slot_index slot);
-    void handle_connect(const std::error_code& ec, channel_ptr node,
-        const network_address_type& address, slot_index slot);
+        const message::network_address& packet, slot_index slot);
+    void handle_connect(const std::error_code& ec, channel::pointer node,
+        const message::network_address& address, slot_index slot);
 
     // Periodically call this method to reset the watermark and reallow
     // connections. This prevents too many connection attempts from
@@ -283,29 +284,29 @@ private:
     void start_watermark_reset_timer();
 
     // Manual connections
-    void handle_manual_connect(const std::error_code& ec, channel_ptr node,
+    void handle_manual_connect(const std::error_code& ec, channel::pointer node,
         const std::string& hostname, uint16_t port);
 
     // Accept inwards connections
-    void handle_listen(const std::error_code& ec, acceptor_ptr accept);
-    void handle_accept(const std::error_code& ec, channel_ptr node,
-        acceptor_ptr accept);
+    void handle_listen(const std::error_code& ec, acceptor::pointer accept);
+    void handle_accept(const std::error_code& ec, channel::pointer node,
+        acceptor::pointer accept);
 
     // Channel setup
-    void setup_new_channel(channel_ptr node);
+    void setup_new_channel(channel::pointer node);
 
     // Remove channels from lists when disconnected.
-    void outbound_channel_stopped(
-        const std::error_code& ec, channel_ptr which_node, slot_index slot);
-    void manual_channel_stopped(
-        const std::error_code& ec, channel_ptr which_node,
-        const std::string& hostname, uint16_t port);
-    void inbound_channel_stopped(
-        const std::error_code& ec, channel_ptr which_node);
+    void outbound_channel_stopped( const std::error_code& ec,
+        channel::pointer which_node, slot_index slot);
+    void manual_channel_stopped(const std::error_code& ec,
+        channel::pointer which_node, const std::string& hostname,
+        uint16_t port);
+    void inbound_channel_stopped(const std::error_code& ec,
+        channel::pointer which_node);
 
-    void subscribe_address(channel_ptr node);
+    void subscribe_address(channel::pointer node);
     void receive_address_message(const std::error_code& ec,
-        const address_type& addr, channel_ptr node);
+        const message::address& addr, channel::pointer node);
     void handle_store_address(const std::error_code& ec);
 
     // fetch methods
@@ -320,9 +321,9 @@ private:
             std::bind(handle_send, std::placeholders::_1, total_nodes);
         for (const connection_info& connection: connections_)
             connection.node->send(packet, send_handler);
-        for (channel_ptr node: manual_connections_)
+        for (channel::pointer node: manual_connections_)
             node->send(packet, send_handler);
-        for (channel_ptr node: accepted_channels_)
+        for (channel::pointer node: accepted_channels_)
             node->send(packet, send_handler);
     }
 

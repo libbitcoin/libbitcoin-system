@@ -27,12 +27,12 @@ BOOST_AUTO_TEST_SUITE(uri_tests)
 BOOST_AUTO_TEST_CASE(uri_parse_test)
 {
     // Typical-looking URI:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=0.1", result));
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().encoded(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    BOOST_REQUIRE(result.amount);
-    BOOST_REQUIRE_EQUAL(result.amount.get(), 10000000u);
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse(
+        "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=0.1", result));
+    BOOST_REQUIRE(result.address && result.address.get().to_string() ==
+        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(result.amount && result.amount.get() == 10000000);
     BOOST_REQUIRE(!result.label);
     BOOST_REQUIRE(!result.message);
     BOOST_REQUIRE(!result.r);
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(uri_parse_test)
 
 BOOST_AUTO_TEST_CASE(uri_parse_format_test)
 {
-    uri_parse_result result;
+    wallet::uri_parse_result result;
 
     // Various scheme spellings and blank structure elements:
     BOOST_REQUIRE( uri_parse("bitcoin:", result));
@@ -60,10 +60,11 @@ BOOST_AUTO_TEST_CASE(uri_parse_format_test)
 BOOST_AUTO_TEST_CASE(uri_parse_address_test)
 {
     // Address only:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().encoded(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(uri_parse(
+        "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
+    BOOST_REQUIRE(result.address && result.address.get().to_string() ==
+        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
     BOOST_REQUIRE(!result.amount);
     BOOST_REQUIRE(!result.label);
     BOOST_REQUIRE(!result.message);
@@ -73,10 +74,11 @@ BOOST_AUTO_TEST_CASE(uri_parse_address_test)
 BOOST_AUTO_TEST_CASE(uri_parse_address_format_test)
 {
     // Percent-encoding in address:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:%3113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().encoded(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(uri_parse(
+        "bitcoin:%3113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
+    BOOST_REQUIRE(result.address && result.address.get().to_string() ==
+        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
 
     // Malformed addresses:
     BOOST_REQUIRE(!uri_parse("bitcoin:19l88", result));
@@ -86,7 +88,7 @@ BOOST_AUTO_TEST_CASE(uri_parse_address_format_test)
 BOOST_AUTO_TEST_CASE(uri_parse_amount_test)
 {
     // Amount only:
-    uri_parse_result result;
+    wallet::uri_parse_result result;
     BOOST_REQUIRE(uri_parse("bitcoin:?amount=4.2", result));
     BOOST_REQUIRE(!result.address);
     BOOST_REQUIRE(result.amount);
@@ -99,21 +101,20 @@ BOOST_AUTO_TEST_CASE(uri_parse_amount_test)
 BOOST_AUTO_TEST_CASE(uri_parse_amount_format_test)
 {
     // Minimal amount:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?amount=.", result));
-    BOOST_REQUIRE(result.amount);
-    BOOST_REQUIRE_EQUAL(result.amount.get(), 0u);
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?amount=.", result));
+    BOOST_REQUIRE(result.amount && result.amount.get() == 0);
 
     // Malformed amounts:
-    BOOST_REQUIRE(!uri_parse("bitcoin:amount=4.2.1", result));
-    BOOST_REQUIRE(!uri_parse("bitcoin:amount=bob", result));
+    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:amount=4.2.1", result));
+    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:amount=bob", result));
 }
 
 BOOST_AUTO_TEST_CASE(uri_parse_label_test)
 {
     // Label only:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?label=test", result));
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?label=test", result));
     BOOST_REQUIRE(!result.address);
     BOOST_REQUIRE(!result.amount);
     BOOST_REQUIRE(result.label);
@@ -125,42 +126,42 @@ BOOST_AUTO_TEST_CASE(uri_parse_label_test)
 BOOST_AUTO_TEST_CASE(uri_parse_escape_test)
 {
     // Reserved symbol encoding and lowercase percent encoding:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?label=%26%3d%6b", result));
-    BOOST_REQUIRE(result.label);
-    BOOST_REQUIRE_EQUAL(result.label.get(), "&=k");
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?label=%26%3d%6b", result));
+    BOOST_REQUIRE(result.label && result.label.get() == "&=k");
 
     // Malformed percent encoding:
-    BOOST_REQUIRE(!uri_parse("bitcoin:label=%3", result));
-    BOOST_REQUIRE(!uri_parse("bitcoin:label=%3G", result));
+    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:label=%3", result));
+    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:label=%3G", result));
 }
 
 BOOST_AUTO_TEST_CASE(uri_parse_escape_utf8_test)
 {
     // URL encoding of multibyte utf8 character.
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?label=%E3%83%95", result));
-    BOOST_REQUIRE(result.label);
-    BOOST_REQUIRE_EQUAL(result.label.get(), "フ");
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?label=%E3%83%95", result));
+    BOOST_REQUIRE(result.label && result.label.get() == "フ");
 }
 
 BOOST_AUTO_TEST_CASE(uri_utf8_strict_test)
 {
     // URL embedding of multibyte utf8 characters with unencoded space in label.
-    bool strict = false;
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?label=Some テスト", result, strict));
-    BOOST_REQUIRE(result.label);
-    BOOST_REQUIRE_EQUAL(result.label.get(), "Some テスト");
-    strict = true;
-    BOOST_REQUIRE(!uri_parse("bitcoin:?label=Some テスト", result, strict));
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse(
+        "bitcoin:?label=Some テスト", result, false));
+    BOOST_REQUIRE(result.label && result.label.get() == "Some テスト");
+
+    // Strict parsing:
+    BOOST_REQUIRE(!wallet::uri_parse(
+        "bitcoin:?label=Some テスト", result, true));
 }
 
 BOOST_AUTO_TEST_CASE(uri_parse_message_test)
 {
     // Message only:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?message=Hi%20Alice", result));
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse(
+        "bitcoin:?message=Hi%20Alice", result));
     BOOST_REQUIRE(!result.address);
     BOOST_REQUIRE(!result.amount);
     BOOST_REQUIRE(!result.label);
@@ -172,8 +173,9 @@ BOOST_AUTO_TEST_CASE(uri_parse_message_test)
 BOOST_AUTO_TEST_CASE(uri_parse_payment_proto_test)
 {
     // Payment protocol only:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?r=http://www.example.com?purchase%3Dshoes", result));
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse(
+        "bitcoin:?r=http://www.example.com?purchase%3Dshoes", result));
     BOOST_REQUIRE(!result.address);
     BOOST_REQUIRE(!result.amount);
     BOOST_REQUIRE(!result.label);
@@ -185,8 +187,8 @@ BOOST_AUTO_TEST_CASE(uri_parse_payment_proto_test)
 BOOST_AUTO_TEST_CASE(uri_parse_unknown_test)
 {
     // Unknown optional parameter:
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?ignore=true", result));
+    wallet::uri_parse_result result;
+    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?ignore=true", result));
     BOOST_REQUIRE(!result.address);
     BOOST_REQUIRE(!result.amount);
     BOOST_REQUIRE(!result.label);
@@ -194,14 +196,14 @@ BOOST_AUTO_TEST_CASE(uri_parse_unknown_test)
     BOOST_REQUIRE(!result.r);
 
     // Unknown required parameter:
-    BOOST_REQUIRE(!uri_parse("bitcoin:?req-ignore=false", result));
+    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:?req-ignore=false", result));
 }
 
 BOOST_AUTO_TEST_CASE(uri_parse_custom_test)
 {
     // Example class to demonstrate handling custom URI parameters.
     struct custom_result
-        : public uri_parse_result
+        : public wallet::uri_parse_result
     {
         optional_string myparam;
 
@@ -228,7 +230,7 @@ BOOST_AUTO_TEST_CASE(uri_parse_custom_test)
 
 BOOST_AUTO_TEST_CASE(uri_write_test)
 {
-    uri_writer writer;
+    wallet::uri_writer writer;
     writer.write_address(std::string("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
     writer.write_amount(120000);
     writer.write_amount(10000000000);

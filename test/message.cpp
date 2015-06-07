@@ -33,7 +33,7 @@ static const ec_secret secret
 }};
 
 // Generated using Electrum and above key (compressed):
-static const message_signature electrum_signature
+static const wallet::message_signature electrum_signature
 {{
     0x1f,
     0x14, 0x29, 0xdd, 0xc5, 0xe0, 0x38, 0x88, 0x41,
@@ -63,63 +63,63 @@ BOOST_AUTO_TEST_SUITE(message_tests)
 BOOST_AUTO_TEST_CASE(message_sign_uncompressed_round_trip)
 {
     const auto message = to_data_chunk(std::string("Bitcoin"));
-    payment_address address(payment_address::pubkey_version,
+    wallet::payment_address address(wallet::payment_address::pubkey_version,
         bitcoin_short_hash(secret_to_public_key(secret, false)));
 
-    const auto signature = sign_message(message, secret, false);
-    BOOST_REQUIRE(verify_message(message, address, signature));
+    const auto signature = wallet::sign_message(message, secret, false);
+    BOOST_REQUIRE(wallet::verify_message(message, address, signature));
 }
 
 BOOST_AUTO_TEST_CASE(message_sign_compressed_round_trip)
 {
     const auto message = to_data_chunk(std::string("Nakomoto"));
-    payment_address address(payment_address::pubkey_version,
+    wallet::payment_address address(wallet::payment_address::pubkey_version,
         bitcoin_short_hash(secret_to_public_key(secret, true)));
 
-    const auto signature = sign_message(message, secret, true);
-    BOOST_REQUIRE(verify_message(message, address, signature));
+    const auto signature = wallet::sign_message(message, secret, true);
+    BOOST_REQUIRE(wallet::verify_message(message, address, signature));
 }
 
 BOOST_AUTO_TEST_CASE(message_sign_wif_uncompressed_round_trip)
 {
-    const auto secret = wif_to_secret(wif_uncompressed);
+    const auto secret = wallet::wif_to_secret(wif_uncompressed);
     const auto message = to_data_chunk(std::string("Nakomoto"));
 
-    payment_address address(payment_address::pubkey_version,
+    wallet::payment_address address(wallet::payment_address::pubkey_version,
         bitcoin_short_hash(secret_to_public_key(secret, false)));
 
-    const auto signature = sign_message(message, wif_uncompressed);
-    BOOST_REQUIRE(verify_message(message, address, signature));
+    const auto signature = wallet::sign_message(message, wif_uncompressed);
+    BOOST_REQUIRE(wallet::verify_message(message, address, signature));
 }
 
 BOOST_AUTO_TEST_CASE(message_sign_wif_compressed_round_trip)
 {
-    const auto secret = wif_to_secret(wif_compressed);
+    const auto secret = wallet::wif_to_secret(wif_compressed);
     const auto message = to_data_chunk(std::string("Nakomoto"));
 
-    payment_address address(payment_address::pubkey_version,
+    wallet::payment_address address(wallet::payment_address::pubkey_version,
         bitcoin_short_hash(secret_to_public_key(secret, true)));
 
-    const auto signature = sign_message(message, wif_compressed);
-    BOOST_REQUIRE(verify_message(message, address, signature));
+    const auto signature = wallet::sign_message(message, wif_compressed);
+    BOOST_REQUIRE(wallet::verify_message(message, address, signature));
 }
 
 BOOST_AUTO_TEST_CASE(message_electrum_compressed_okay)
 {
     // Address of the compressed public key of the message signer.
-    payment_address address("1PeChFbhxDD9NLbU21DfD55aQBC4ZTR3tE");
+    wallet::payment_address address("1PeChFbhxDD9NLbU21DfD55aQBC4ZTR3tE");
     const auto message = to_data_chunk(std::string("Nakomoto"));
 
-    BOOST_REQUIRE(verify_message(message, address, electrum_signature));
+    BOOST_REQUIRE(wallet::verify_message(message, address, electrum_signature));
 }
 
 BOOST_AUTO_TEST_CASE(message_electrum_uncompressed_failure)
 {
     // Address of the uncompressed public key of the message signer.
-    payment_address address("1Em1SX7qQq1pTmByqLRafhL1ypx2V786tP");
+    wallet::payment_address address("1Em1SX7qQq1pTmByqLRafhL1ypx2V786tP");
     auto message = to_data_chunk(std::string("Nakomoto"));
 
-    BOOST_REQUIRE(!verify_message(message, address, electrum_signature));
+    BOOST_REQUIRE(!wallet::verify_message(message, address, electrum_signature));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -16,14 +16,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_KEY_FORMATS_HPP
-#define LIBBITCOIN_KEY_FORMATS_HPP
+#ifndef LIBBITCOIN_WALLET_KEY_FORMATS_HPP
+#define LIBBITCOIN_WALLET_KEY_FORMATS_HPP
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 /**
  * Convert a secret parameter to the wallet import format.
@@ -79,6 +80,7 @@ BC_API bool is_wif_compressed(const std::string& wif);
  */
 BC_API ec_secret minikey_to_secret(const std::string& minikey);
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif
