@@ -18,7 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <new>
-#include <sstream>
+#include <boost/iostreams/stream.hpp>
 #include <boost/test/test_tools.hpp>
 #include <boost/test/unit_test_suite.hpp>
 #include <bitcoin/bitcoin.hpp>
@@ -52,22 +52,16 @@ BOOST_AUTO_TEST_CASE(from_big_endian_stream_unsafe_eof_stream_partial_read)
     BOOST_REQUIRE(stream.eof());
 }
 
-BOOST_AUTO_TEST_CASE(from_big_endian_stream_unsafe_eof_stream_throw_on_fail)
+BOOST_AUTO_TEST_CASE(from_big_endian_stream_unsafe_insufficient_data_stream_indicates_failure)
 {
-    std::stringstream stream;
-
-    stream.put(0xFF);
-
-    stream.exceptions(std::stringstream::failbit);
+    data_chunk data = { 0xFF };
+    boost::iostreams::stream<byte_source<data_chunk>> stream(data);
 
     BOOST_REQUIRE(!stream.eof());
 
-    uint64_t value = 0;
+    uint64_t value = from_little_endian_stream_unsafe<uint64_t>(stream);
 
-    BOOST_REQUIRE_EXCEPTION(value = from_big_endian_stream_unsafe<uint64_t>(stream),
-        std::ios_base::failure,
-        is_failure);
-
+    BOOST_REQUIRE(!stream);
     BOOST_REQUIRE(stream.eof());
 }
 
@@ -106,22 +100,16 @@ BOOST_AUTO_TEST_CASE(from_little_endian_stream_unsafe_eof_stream_partial_read)
     BOOST_REQUIRE(stream.eof());
 }
 
-BOOST_AUTO_TEST_CASE(from_little_endian_stream_unsafe_eof_stream_throw_on_fail)
+BOOST_AUTO_TEST_CASE(from_little_endian_stream_unsafe_insufficient_data_stream_indicates_failure)
 {
-    std::stringstream stream;
-
-    stream.put(0xFF);
-
-    stream.exceptions(std::stringstream::failbit);
+    data_chunk data = { 0xFF };
+    boost::iostreams::stream<byte_source<data_chunk>> stream(data);
 
     BOOST_REQUIRE(!stream.eof());
 
-    uint64_t value = 0;
+    uint64_t value = from_little_endian_stream_unsafe<uint64_t>(stream);
 
-    BOOST_REQUIRE_EXCEPTION(value = from_little_endian_stream_unsafe<uint64_t>(stream),
-        std::ios_base::failure,
-        is_failure);
-
+    BOOST_REQUIRE(!stream);
     BOOST_REQUIRE(stream.eof());
 }
 
