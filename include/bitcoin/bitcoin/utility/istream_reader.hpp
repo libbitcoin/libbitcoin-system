@@ -39,9 +39,9 @@ public:
 
     uint8_t read_byte();
 
-    data_chunk read_data(uint64_t n_bytes);
+    data_chunk read_data(size_t n_bytes);
 
-    void read_data(uint8_t* data, uint64_t n_bytes);
+    void read_data(uint8_t* data, size_t n_bytes);
 
     data_chunk read_data_to_eof();
 
@@ -70,7 +70,7 @@ public:
     /**
      * Read a fixed size string padded with zeroes.
      */
-    std::string read_fixed_string(uint64_t len);
+    std::string read_fixed_string(size_t len);
 
     /**
      * Read a variable length string.

@@ -38,9 +38,9 @@ public:
 
     virtual uint8_t read_byte() = 0;
 
-    virtual data_chunk read_data(uint64_t n_bytes) = 0;
+    virtual data_chunk read_data(size_t n_bytes) = 0;
 
-    virtual void read_data(uint8_t* data, uint64_t n_bytes) = 0;
+    virtual void read_data(uint8_t* data, size_t n_bytes) = 0;
 
     virtual data_chunk read_data_to_eof() = 0;
 
@@ -69,7 +69,7 @@ public:
     /**
      * Read a fixed size string padded with zeroes.
      */
-    virtual std::string read_fixed_string(uint64_t len) = 0;
+    virtual std::string read_fixed_string(size_t len) = 0;
 
     /**
      * Read a variable length string.

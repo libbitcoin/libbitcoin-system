@@ -151,21 +151,21 @@ uint64_t deserializer<Iterator, SafeCheckLast>::read_variable_uint_big_endian()
 
 template <typename Iterator, bool SafeCheckLast>
 data_chunk deserializer<
-    Iterator, SafeCheckLast>::read_data(uint64_t n_bytes)
+    Iterator, SafeCheckLast>::read_data(size_t n_bytes)
 {
     SAFE_CHECK_DISTANCE(n_bytes);
     data_chunk raw_bytes(n_bytes);
-    for (uint64_t i = 0; i < n_bytes; ++i)
+    for (size_t i = 0; i < n_bytes; ++i)
         raw_bytes[i] = read_byte();
     return raw_bytes;
 }
 
 template <typename Iterator, bool SafeCheckLast>
 void deserializer<
-    Iterator, SafeCheckLast>::read_data(uint8_t* data, uint64_t n_bytes)
+    Iterator, SafeCheckLast>::read_data(uint8_t* data, size_t n_bytes)
 {
     SAFE_CHECK_DISTANCE(n_bytes);
-    for (uint64_t i = 0; i < n_bytes; ++i)
+    for (size_t i = 0; i < n_bytes; ++i)
         data[i] = read_byte();
 }
 
@@ -194,7 +194,7 @@ short_hash deserializer<Iterator, SafeCheckLast>::read_short_hash()
 
 template <typename Iterator, bool SafeCheckLast>
 std::string deserializer<
-    Iterator, SafeCheckLast>::read_fixed_string(uint64_t len)
+    Iterator, SafeCheckLast>::read_fixed_string(size_t len)
 {
     data_chunk string_bytes = read_data(len);
     std::string result(string_bytes.begin(), string_bytes.end());
