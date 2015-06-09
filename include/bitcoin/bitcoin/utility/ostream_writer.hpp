@@ -39,7 +39,7 @@ public:
 
     void write_data(const data_chunk& data);
 
-    void write_data(const uint8_t* data, uint64_t n_bytes);
+    void write_data(const uint8_t* data, size_t n_bytes);
 
     void write_hash(const hash_digest& value);
 

@@ -111,20 +111,16 @@ uint64_t istream_reader::read_variable_uint_big_endian()
     return read_8_bytes_big_endian();
 }
 
-data_chunk istream_reader::read_data(uint64_t n_bytes)
+data_chunk istream_reader::read_data(size_t n_bytes)
 {
     data_chunk raw_bytes(n_bytes);
-
-    for (uint64_t i = 0; i < n_bytes; ++i)
-        raw_bytes[i] = read_byte();
-
+    stream_.read(reinterpret_cast<char*>(raw_bytes.data()), n_bytes);
     return raw_bytes;
 }
 
-void istream_reader::read_data(uint8_t* data, uint64_t n_bytes)
+void istream_reader::read_data(uint8_t* data, size_t n_bytes)
 {
-    for (uint64_t i = 0; i < n_bytes; ++i)
-        data[i] = read_byte();
+    stream_.read(reinterpret_cast<char*>(data), n_bytes);
 }
 
 data_chunk istream_reader::read_data_to_eof()
@@ -147,7 +143,7 @@ short_hash istream_reader::read_short_hash()
     return read_bytes<short_hash_size>();
 }
 
-std::string istream_reader::read_fixed_string(uint64_t len)
+std::string istream_reader::read_fixed_string(size_t len)
 {
     data_chunk string_bytes = read_data(len);
     std::string result(string_bytes.begin(), string_bytes.end());

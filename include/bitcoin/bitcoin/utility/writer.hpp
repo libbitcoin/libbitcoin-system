@@ -39,7 +39,7 @@ public:
 
     virtual void write_data(const data_chunk& data) = 0;
 
-    virtual void write_data(const uint8_t* data, uint64_t n_bytes) = 0;
+    virtual void write_data(const uint8_t* data, size_t n_bytes) = 0;
 
     virtual void write_hash(const hash_digest& value) = 0;
 

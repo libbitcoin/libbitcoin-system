@@ -25,6 +25,7 @@
 #include <boost/iostreams/categories.hpp>
 #include <boost/static_assert.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -49,14 +50,19 @@ public:
         auto amt = static_cast<std::streamsize>(container_.size() - pos_);
         auto result = std::min(n, amt);
 
-        if (result != 0)
+        if (result > 0)
         {
+            BITCOIN_ASSERT(std::numeric_limits<typename Container::size_type>::max()
+                >= std::numeric_limits<std::streamsize>::max());
+
+            auto upperbound = pos_ + static_cast<typename Container::size_type>(result);
+
             std::copy(
                 container_.begin() + pos_,
-                container_.begin() + pos_ + result,
+                container_.begin() + upperbound,
                 s);
 
-            pos_ += result;
+            pos_ = upperbound;
         }
         else
         {
