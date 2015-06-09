@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <system_error>
@@ -47,7 +48,6 @@ using boost::filesystem::path;
 hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
   : strand_(pool), file_path_(file_path), buffer_(capacity)
 {
-    srand(static_cast<uint32_t>(time(nullptr)));
 }
 
 hosts::hosts(threadpool& pool, size_t capacity)
@@ -156,8 +156,6 @@ void hosts::do_remove(const network_address_type& address,
     }
 
     buffer_.erase(it);
-    //log_info("hosts") << "Remove host ("
-    //    << buffer_.size() << ") [" << authority(address).to_string() << "]";
     handle_remove(error::success);
 }
 
@@ -173,8 +171,6 @@ void hosts::do_store(const network_address_type& address,
     store_handler handle_store)
 {
     buffer_.push_back(ip_address(address));
-    //log_info("hosts") << "Add host ("
-    //    << buffer_.size() << ") [" << authority(address).to_string() << "]";
     handle_store(error::success);
 }
 
@@ -216,7 +212,9 @@ void hosts::do_fetch_count(fetch_count_handler handle_fetch)
 
 size_t hosts::select_random_host()
 {
-    return rand() % buffer_.size();
+    // Get a random value.
+    std::srand(static_cast<uint32_t>(std::time(nullptr)));
+    return std::rand() % buffer_.size();
 }
 
 // private struct ip_address

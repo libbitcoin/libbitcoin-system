@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/network/handshake.hpp>
 
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <system_error>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -70,10 +71,16 @@ void handshake::ready(channel_ptr node,
     // synchrnize three code paths (or error) before calling handle_handshake.
     const auto completion_callback = async_parallel(handle_handshake, sync);
 
+    // Get a random value.
+    // TODO: is there any reason that the nonce would need to be decoupled from
+    // the timestamp, which is also in this message?
+    std::srand(static_cast<uint32_t>(std::time(nullptr)));
+    const auto random = std::rand();
+
     // Copy the version template and set its timestamp.
     auto session_version = template_version_;
-    session_version.nonce = rand();
-    session_version.timestamp = time(nullptr);
+    session_version.nonce = random;
+    session_version.timestamp = std::time(nullptr);
 
     // Since we removed cURL discover_external_ip always returns localhost.
     // The port value was formerly hardwired to bc::protocol_port.
@@ -181,7 +188,7 @@ void handshake::set_start_height(uint64_t height, setter_handler handle_set)
 void handshake::do_set_start_height(uint64_t height, setter_handler handle_set)
 {
     // We type this method as uint64_t because that is what is returned by
-    // fetch_last_height, whcih feeds directly into this method. But start_height
+    // fetch_last_height, which feeds directly into this method. But start_height
     // is uint32_t in the satoshi network protocol.
     BITCOIN_ASSERT(height <= bc::max_uint32);
     template_version_.start_height = static_cast<uint32_t>(height);
