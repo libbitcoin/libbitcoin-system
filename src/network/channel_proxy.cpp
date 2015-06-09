@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <memory>
 #include <system_error>
 #include <boost/asio.hpp>
@@ -225,18 +226,22 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
     {
         if (ec)
         {
-            log_info(LOG_NETWORK)
+            log_debug(LOG_NETWORK)
                 << "Ping failure [" << address().to_string() << "] "
                 << ec.message();
             return;
         }
 
-        log_info(LOG_NETWORK)
+        log_debug(LOG_NETWORK)
             << "Ping sent [" << address().to_string() << "] ";
     };
 
+    // Get a random value.
+    std::srand(static_cast<uint32_t>(std::time(nullptr)));
+    const auto random = std::rand();
+
     // TODO: match our sent ping.nonce with the returned pong.nonce.
-    ping_type random_ping{ rand() };
+    ping_type random_ping{ random };
     send(random_ping, handle_ping);
 }
 
@@ -300,13 +305,20 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
     BITCOIN_ASSERT(bytes_transferred == inbound_header_.size());
 
+    auto valid_parse = true;
     header_type header;
     const data_slice buffer(inbound_header_);
 
-    // TODO: try/catch.
-    satoshi_load(buffer.begin(), buffer.end(), header);
+    try
+    {
+        satoshi_load(buffer.begin(), buffer.end(), header);
+    }
+    catch (bc::end_of_stream)
+    {
+        valid_parse = false;
+    }
 
-    if (header.magic != magic_value())
+    if (!valid_parse || header.magic != magic_value())
     {
         log_warning(LOG_NETWORK) 
             << "Invalid header received [" << address().to_string() << "]";
@@ -314,7 +326,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
         return;
     }
 
-    log_debug(LOG_NETWORK) 
+    log_debug(LOG_NETWORK)
         << "Receive " << header.command << " [" 
         << address().to_string() << "] ("
         << header.payload_length << " bytes)";
