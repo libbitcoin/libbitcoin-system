@@ -69,21 +69,23 @@ void seeder::contact(const authority& seed_address)
 
 void seeder::request(const std::error_code& ec, channel_ptr seed_node)
 {
+    if (!seed_node)
+    {
+        visited(ec);
+        return;
+    }
+
     if (ec)
     {
-        if (seed_node)
-            log_error(LOG_PROTOCOL)
-                << "Failure contacting seed [" 
-                << seed_node->address().to_string() << "] " << ec.message();
-        else
-            log_error(LOG_PROTOCOL)
-                << "Failure contacting seed: " << ec.message();
+        log_debug(LOG_PROTOCOL)
+            << "Failure contacting seed [" 
+            << seed_node->address().to_string() << "] " << ec.message();
 
         visited(ec);
         return;
     }
 
-    log_debug(LOG_PROTOCOL) 
+    log_debug(LOG_PROTOCOL)
         << "Getting addresses from seed ["
         << seed_node->address().to_string() << "]";
 
@@ -101,8 +103,8 @@ void seeder::handle_request(const std::error_code& ec)
 {
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
-            << "Failure sending 'get_address' message: " << ec.message();
+        log_debug(LOG_PROTOCOL)
+            << "Failure sending get address message: " << ec.message();
 
         visited(ec);
     }
@@ -114,20 +116,21 @@ void seeder::store(const std::error_code& ec, const address_type& packet,
     if (ec)
     {
         if (seed_node)
-            log_error(LOG_PROTOCOL)
+            log_debug(LOG_PROTOCOL)
                 << "Failure getting addresses from seed [" 
                 << seed_node->address().to_string() << "] " << ec.message();
         else
-            log_error(LOG_PROTOCOL)
+            log_debug(LOG_PROTOCOL)
                 << "Failure getting addresses from seed: " << ec.message();
 
         visited(ec);
         return;
     }
 
-    log_info(LOG_PROTOCOL)
-        << "Storing " << packet.addresses.size() << " addresses from seed ["
-        << seed_node->address().to_string() << "] ";
+    if (seed_node)
+        log_info(LOG_PROTOCOL)
+            << "Storing " << packet.addresses.size() << " addresses from seed ["
+            << seed_node->address().to_string() << "] ";
 
     for (const auto& address: packet.addresses)
         host_pool_.store(address,
