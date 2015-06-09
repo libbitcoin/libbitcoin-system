@@ -122,7 +122,7 @@ void ostream_writer::write_data(const data_chunk& data)
     write_data<const data_chunk>(data);
 }
 
-void ostream_writer::write_data(const uint8_t* data, uint64_t n_bytes)
+void ostream_writer::write_data(const uint8_t* data, size_t n_bytes)
 {
     stream_.write(reinterpret_cast<const char*>(data), n_bytes);
 }

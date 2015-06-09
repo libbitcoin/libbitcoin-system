@@ -59,7 +59,7 @@ void serializer<Iterator>::write_data(const data_chunk& data)
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_data(const uint8_t* data, uint64_t n_bytes)
+void serializer<Iterator>::write_data(const uint8_t* data, size_t n_bytes)
 {
     iter_ = std::copy(data, (data + n_bytes), iter_);
 }
