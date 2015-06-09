@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_PROTOCOL_HPP
 #define LIBBITCOIN_PROTOCOL_HPP
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -59,7 +60,7 @@ public:
 
     protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
         const hosts::authority_list& seeds = default_seeds,
-        uint16_t port=bc::protocol_port, bool listen=true, 
+        uint16_t port=bc::protocol_port,
         size_t max_outbound=default_max_outbound);
     
     /// This class is not copyable.
@@ -78,18 +79,6 @@ public:
      * @param[in]  handle_complete  Completion handler for start operation.
      */
     void stop(completion_handler handle_complete);
-
-    /**
-     * Begin initialization sequence of performing node discovery and
-     * starting other network services.
-     * @param[in]  handle_complete  Completion handler for start operation.
-     */
-    void bootstrap(completion_handler handle_complete);
-
-    /**
-     * Starts the internal run loop for this service.
-     */
-    void run();
 
     /**
      * Fetch number of connections maintained by this service.
@@ -143,6 +132,12 @@ public:
         const auto lambda = &protocol::do_broadcast<Message>;
         strand_.queue(lambda, this, packet, handle_send);
     }
+    
+    /// Deprecated, should be private since it's called from start.
+    void bootstrap(completion_handler handle_complete);
+
+    /// Deprecated, should be private since it's called from start.
+    void run();
 
     /// Deprecated, set on construct.
     void set_max_outbound(size_t max_outbound);
@@ -176,17 +171,15 @@ private:
         channel_subscriber_type;
 
     // start sequence
-    void handle_bootstrap(const std::error_code& ec,
+    void handle_start(const std::error_code& ec,
+        completion_handler handle_complete);
+    void fetch_count(const std::error_code& ec,
+        completion_handler handle_complete);
+    void start_seeder(const std::error_code& ec, size_t hosts_count,
         completion_handler handle_complete);
 
     // stop sequence
-    void handle_save(const std::error_code& ec,
-        completion_handler handle_complete);
-
-    // bootstrap sequence
-    void load_hosts(const std::error_code& ec,
-        completion_handler handle_complete);
-    void if_no_seeds(const std::error_code& ec, size_t hosts_count,
+    void handle_stop(const std::error_code& ec,
         completion_handler handle_complete);
 
     std::string state_to_string(connect_state state) const;
@@ -240,8 +233,7 @@ private:
     void inbound_channel_stopped(const std::error_code& ec,
         channel_ptr node);
 
-    void subscribe_address(channel_ptr node);
-    void receive_address_message(const std::error_code& ec,
+    void handle_address_message(const std::error_code& ec,
         const address_type& addr, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
@@ -284,12 +276,11 @@ private:
     boost::asio::deadline_timer watermark_timer_;
     size_t watermark_count_;
 
-    // Manual connections created by user themselves.
+    // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
 
     // Inbound connections from the p2p network.
     uint16_t listen_port_;
-    bool listen_enabled_;
     channel_ptr_list accepted_channels_;
     channel_subscriber_type::ptr channel_subscribe_;
 
