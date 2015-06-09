@@ -29,6 +29,7 @@ namespace bc = libbitcoin;
 // Logger definitions. You can add your own to the logger.
 // Better to use a define because you get type safety.
 #define LOG_NETWORK     "network"
+#define LOG_DATABASE    "database"
 #define LOG_BLOCKCHAIN  "blockchain"
 #define LOG_VALIDATE    "validate"
 #define LOG_PROTOCOL    "protocol"
