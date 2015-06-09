@@ -96,6 +96,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/async_strand.cpp \
     src/utility/binary.cpp \
     src/utility/logger.cpp \
+    src/utility/random.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
@@ -288,6 +289,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/decorator.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
+    include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \

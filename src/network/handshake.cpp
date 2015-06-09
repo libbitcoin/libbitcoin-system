@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
+#include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
 namespace libbitcoin {
@@ -78,15 +79,9 @@ void handshake::ready(channel_ptr node,
     // synchrnize three code paths (or error) before calling handle_handshake.
     const auto completion_callback = async_parallel(handle_handshake, sync);
 
-    // Get a random value.
-    // TODO: is there any reason that the nonce would need to be decoupled from
-    // the timestamp, which is also in this message?
-    std::srand(static_cast<uint32_t>(std::time(nullptr)));
-    const auto random = std::rand();
-
     // Copy the version template and set its timestamp.
     auto session_version = template_version_;
-    session_version.nonce = random;
+    session_version.nonce = pseudo_random();
     session_version.timestamp = std::time(nullptr);
 
     // Since we removed cURL discover_external_ip always returns localhost.

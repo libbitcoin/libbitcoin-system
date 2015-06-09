@@ -40,6 +40,7 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
@@ -236,12 +237,8 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
             << "Ping sent [" << address().to_string() << "] ";
     };
 
-    // Get a random value.
-    std::srand(static_cast<uint32_t>(std::time(nullptr)));
-    const auto random = std::rand();
-
     // TODO: match our sent ping.nonce with the returned pong.nonce.
-    ping_type random_ping{ random };
+    ping_type random_ping{ pseudo_random() };
     send(random_ping, handle_ping);
 }
 

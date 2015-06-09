@@ -36,6 +36,7 @@
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -191,7 +192,9 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
         return;
     }
 
-    const auto host = select_random_host();
+    // Randomly select a host from the buffer.
+    const auto host = static_cast<size_t>(pseudo_random() % buffer_.size());
+
     network_address_type address;
     address.ip = buffer_[host].ip;
     address.port = buffer_[host].port;
@@ -210,13 +213,6 @@ void hosts::fetch_count(fetch_count_handler handle_fetch)
 void hosts::do_fetch_count(fetch_count_handler handle_fetch)
 {
     handle_fetch(error::success, buffer_.size());
-}
-
-size_t hosts::select_random_host()
-{
-    // Get a random value.
-    std::srand(static_cast<uint32_t>(std::time(nullptr)));
-    return std::rand() % buffer_.size();
 }
 
 // private struct ip_address

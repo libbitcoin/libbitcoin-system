@@ -121,6 +121,7 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\async_strand.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
@@ -197,6 +198,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\decorator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\endian.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\string.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\logger.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\serializer.hpp" />
