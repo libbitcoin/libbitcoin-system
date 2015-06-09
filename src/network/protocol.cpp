@@ -225,8 +225,9 @@ void protocol::modify_slot(slot_index slot, connect_state state)
 
 void protocol::run()
 {
-    strand_.queue(&protocol::start_connecting,
-        this);
+    strand_.queue(
+        std::bind(&protocol::start_connecting,
+            this));
 
     if (listen_port_ == 0)
         return;
@@ -651,8 +652,9 @@ void protocol::handle_store_address(const std::error_code& ec)
 void protocol::fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
-    strand_.queue(&protocol::do_fetch_connection_count,
-        this, handle_fetch);
+    strand_.queue(
+        std::bind(&protocol::do_fetch_connection_count,
+            this, handle_fetch));
 }
 
 void protocol::do_fetch_connection_count(

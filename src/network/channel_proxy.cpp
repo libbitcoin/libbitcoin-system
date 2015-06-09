@@ -478,8 +478,9 @@ void channel_proxy::send_raw(const header_type& packet_header,
     if (stopped())
         handle_send(error::service_stopped);
     else
-        strand_.queue(&channel_proxy::do_send_raw,
-            shared_from_this(), packet_header, payload, handle_send);
+        strand_.queue(
+            std::bind(&channel_proxy::do_send_raw,
+                shared_from_this(), packet_header, payload, handle_send));
 }
 
 void channel_proxy::do_send_raw(const header_type& packet_header,

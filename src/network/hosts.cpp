@@ -72,14 +72,16 @@ size_t hosts::size() const
 
 void hosts::load(load_handler handle_load)
 {
-    strand_.randomly_queue(&hosts::do_load,
-        this, file_path_.string(), handle_load);
+    strand_.randomly_queue(
+        std::bind(&hosts::do_load,
+            this, file_path_.string(), handle_load));
 }
 
 void hosts::load(const std::string& path, load_handler handle_load)
 {
-    strand_.randomly_queue(&hosts::do_load,
-        this, path, handle_load);
+    strand_.randomly_queue(
+        std::bind(&hosts::do_load,
+            this, path, handle_load));
 }
 
 void hosts::do_load(const path& path, load_handler handle_load)

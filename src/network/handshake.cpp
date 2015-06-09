@@ -38,6 +38,13 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+// unpublished for now
+enum services : uint64_t
+{
+    node_network = 1
+};
+
+// unpublished for now
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
 
 handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
@@ -46,7 +53,7 @@ handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
     // Set fixed values inversion template.
     template_version_.version = bc::protocol_version;
     template_version_.user_agent = BC_USER_AGENT;
-    template_version_.services = 1;
+    template_version_.services = services::node_network;
 
     // Set default values inversion template.
     template_version_.start_height = start_height;
@@ -124,8 +131,8 @@ void handshake::receive_verack(const std::error_code& ec, const verack_type&,
 void handshake::discover_external_ip(discover_ip_handler handle_discover)
 {
     strand_.queue(
-        &handshake::do_discover_external_ip,
-            this, handle_discover);
+        std::bind(&handshake::do_discover_external_ip,
+            this, handle_discover));
 }
 
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
@@ -138,8 +145,8 @@ void handshake::fetch_network_address(
     fetch_network_address_handler handle_fetch)
 {
     strand_.queue(
-        &handshake::do_fetch_network_address,
-            this, handle_fetch);
+        std::bind(&handshake::do_fetch_network_address,
+            this, handle_fetch));
 }
 
 void handshake::do_fetch_network_address(
@@ -151,8 +158,8 @@ void handshake::do_fetch_network_address(
 void handshake::set_port(uint16_t port, setter_handler handle_set)
 {
     strand_.queue(
-        &handshake::do_set_port,
-            this, port, handle_set);
+        std::bind(&handshake::do_set_port,
+            this, port, handle_set));
 }
 
 void handshake::do_set_port(uint16_t port, setter_handler handle_set)
@@ -166,8 +173,8 @@ void handshake::set_user_agent(const std::string& user_agent,
     setter_handler handle_set)
 {
     strand_.queue(
-        &handshake::do_set_user_agent,
-            this, user_agent, handle_set);
+        std::bind(&handshake::do_set_user_agent,
+            this, user_agent, handle_set));
 }
 
 // TODO: deprecate (any reason to set this dynamically)?
@@ -181,8 +188,8 @@ void handshake::do_set_user_agent(const std::string& user_agent,
 void handshake::set_start_height(uint64_t height, setter_handler handle_set)
 {
     strand_.queue(
-        &handshake::do_set_start_height,
-            this, height, handle_set);
+        std::bind(&handshake::do_set_start_height,
+            this, height, handle_set));
 }
 
 void handshake::do_set_start_height(uint64_t height, setter_handler handle_set)
