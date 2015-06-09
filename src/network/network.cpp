@@ -73,51 +73,37 @@ void network::connect(const std::string& hostname, uint16_t port,
             this, _1, _2, handle_connect, resolver, query));
 }
 
-// I personally don't like how exceptions mess with the program flow.
-static bool listen_error(const boost::system::error_code& ec,
-    network::listen_handler handle_listen)
-{
-    if (ec == boost::system::errc::address_in_use)
-    {
-        handle_listen(error::address_in_use, nullptr);
-        return true;
-    }
-
-    if (ec)
-    {
-        handle_listen(error::listen_failed, nullptr);
-        return true;
-    }
-
-    return false;
-}
-
 void network::listen(uint16_t port, listen_handler handle_listen)
 {
+    using namespace boost::asio;
+    boost::system::error_code boost_ec;
     tcp::endpoint endpoint(tcp::v4(), port);
-    const auto tcp_accept =std::make_shared<tcp::acceptor>(pool_.service());
+    const auto tcp_accept = std::make_shared<tcp::acceptor>(pool_.service());
 
-    // Need to check error codes for functions.
-    boost::system::error_code ec;
+    tcp_accept->open(endpoint.protocol(), boost_ec);
 
-    tcp_accept->open(endpoint.protocol(), ec);
-    if (listen_error(ec, handle_listen))
-        return;
+    if (!boost_ec)
+        tcp_accept->set_option(tcp::acceptor::reuse_address(true), boost_ec);
 
-    tcp_accept->set_option(tcp::acceptor::reuse_address(true), ec);
-    if (listen_error(ec, handle_listen))
-        return;
+    if (!boost_ec)
+        tcp_accept->bind(endpoint, boost_ec);
 
-    tcp_accept->bind(endpoint, ec);
-    if (listen_error(ec, handle_listen))
-        return;
+    if (!boost_ec)
+        tcp_accept->listen(socket_base::max_connections, boost_ec);
 
-    tcp_accept->listen(boost::asio::socket_base::max_connections, ec);
-    if (listen_error(ec, handle_listen))
-        return;
+    const auto ec = bc::error::boost_to_error_code(boost_ec);
+    const auto accept = ec ? nullptr :
+        std::make_shared<acceptor>(pool_, tcp_accept);
 
-    const auto accept = std::make_shared<acceptor>(pool_, tcp_accept);
-    handle_listen(error::success, accept);
+    handle_listen(ec, accept);
+}
+
+void network::unlisten(unlisten_handler handle_unlisten)
+{
+    const auto tcp_accept = std::make_shared<tcp::acceptor>(pool_.service());
+    tcp_accept->cancel();
+    tcp_accept->close();
+    handle_unlisten(error::success);
 }
 
 } // namespace network
