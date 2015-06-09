@@ -77,7 +77,8 @@ void output_cerr(log_level level,
     output_ostream(bc::cerr, level, domain, body);
 }
 
-logger_wrapper::destination_map logger_wrapper::dests_{
+logger_wrapper::destination_map logger_wrapper::dests_
+{
 #ifdef DEBUG
     std::make_pair(log_level::debug, output_cout),
 #else

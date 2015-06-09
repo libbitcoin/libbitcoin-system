@@ -42,8 +42,8 @@ void acceptor::accept(accept_handler handle_accept)
 {
     const auto socket = std::make_shared<tcp::socket>(pool_.service());
     tcp_accept_->async_accept(*socket,
-        std::bind(&acceptor::call_handle_accept, shared_from_this(),
-            _1, socket, handle_accept));
+        std::bind(&acceptor::call_handle_accept,
+            shared_from_this(), _1, socket, handle_accept));
 }
 
 void acceptor::call_handle_accept(const boost::system::error_code& ec,
