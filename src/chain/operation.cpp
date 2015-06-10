@@ -92,7 +92,7 @@ bool operation::from_data(reader& source)
 
     if (result && operation::must_read_data(code))
     {
-        uint64_t read_n_bytes =
+        auto read_n_bytes =
             read_opcode_data_byte_count(code, raw_byte, source);
 
         data = source.read_data(read_n_bytes);
@@ -199,7 +199,7 @@ std::string operation::to_string() const
     return ss.str();
 }
 
-uint64_t operation::read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
+uint32_t operation::read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
     reader& source)
 {
     switch (code)

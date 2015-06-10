@@ -66,7 +66,7 @@ public:
 
 private:
 
-    static uint64_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
+	static uint32_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
         reader& source);
 
     static bool must_read_data(opcode code);
