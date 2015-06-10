@@ -52,8 +52,8 @@ public:
 
         if (result > 0)
         {
-            BITCOIN_ASSERT(std::numeric_limits<typename Container::size_type>::max()
-                >= std::numeric_limits<std::streamsize>::max());
+            BITCOIN_ASSERT(result < std::numeric_limits<typename Container::size_type>::max());
+			BITCOIN_ASSERT(pos_ + static_cast<typename Container::size_type>(result) < std::numeric_limits<typename Container::size_type>::max());
 
             auto upperbound = pos_ + static_cast<typename Container::size_type>(result);
 
