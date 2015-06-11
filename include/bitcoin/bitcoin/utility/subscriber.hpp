@@ -46,7 +46,7 @@ public:
     {
         auto dispatch_subscribe =
             strand_.wrap(&subscriber<Args...>::do_subscribe,
-                shared_from_this(), handle);
+                this->shared_from_this(), handle);
 
         dispatch_subscribe();
     }
@@ -55,7 +55,7 @@ public:
     {
         auto dispatch_relay =
             strand_.wrap(&subscriber<Args...>::do_relay,
-                shared_from_this(), std::forward<Args>(params)...);
+                this->shared_from_this(), std::forward<Args>(params)...);
 
         dispatch_relay();
     }
