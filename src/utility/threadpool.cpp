@@ -33,6 +33,7 @@ threadpool::threadpool(size_t number_threads, thread_priority priority)
 {
     spawn(number_threads, priority);
 }
+
 threadpool::~threadpool()
 {
     shutdown();
@@ -43,12 +44,13 @@ void threadpool::spawn(size_t number_threads, thread_priority priority)
     for (size_t i = 0; i < number_threads; ++i)
         spawn_once(priority);
 }
+
 void threadpool::spawn_once(thread_priority priority)
 {
     if (work_ == nullptr)
         work_ = new io_service::work(ios_);
 
-    auto action = [this, priority]
+    const auto action = [this, priority]
     {
         set_thread_priority(priority);
         ios_.run();
@@ -61,6 +63,7 @@ void threadpool::stop()
 {
     ios_.stop();
 }
+
 void threadpool::shutdown()
 {
     if (work_ != nullptr)
@@ -68,6 +71,7 @@ void threadpool::shutdown()
 
     work_ = nullptr;
 }
+
 void threadpool::join()
 {
     for (auto& thread: threads_)
@@ -79,6 +83,7 @@ io_service& threadpool::service()
 {
     return ios_;
 }
+
 const io_service& threadpool::service() const
 {
     return ios_;

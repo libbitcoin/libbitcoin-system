@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -37,8 +37,7 @@ struct wrapped_handler_impl
     template <typename... Args>
     void operator()(Args&&... args)
     {
-        strand.dispatch(std::bind(
-            handler, std::forward<Args>(args)...));
+        strand.dispatch(std::bind(handler, std::forward<Args>(args)...));
     }
 };
 
@@ -57,23 +56,23 @@ class BC_API async_strand
 public:
     async_strand(threadpool& pool);
 
-    /*
+    /**
      * wrap() returns a new handler that guarantees that the handler it
      * encapsulates will never execute at the same time as another handler
      * passing through this class.
      */
-    template <typename Function, typename... Args>
-    auto wrap(Function&& func, Args&&... args)
-      -> wrapped_handler_impl<
-            decltype(std::bind(
-                std::forward<Function>(func), std::forward<Args>(args)...))>
+    template <typename Handler, typename... Args>
+    auto wrap(Handler&& handler, Args&&... args) ->
+        wrapped_handler_impl<decltype(
+            std::bind(
+                std::forward<Handler>(handler), std::forward<Args>(args)...))>
     {
-        auto handler = std::bind(
-            std::forward<Function>(func), std::forward<Args>(args)...);
-        return {handler, strand_};
+        auto bound = std::bind(
+            std::forward<Handler>(handler), std::forward<Args>(args)...);
+        return { bound, strand_ };
     }
 
-    /*
+    /**
      * queue() guarantees that any handlers passed to it will
      * never execute at the same time in sequential order.
      *
@@ -89,7 +88,7 @@ public:
         strand_.post(std::bind(std::forward<Args>(args)...));
     }
 
-    /*
+    /**
      * randomly_queue() guarantees that any handlers passed to it will
      * never execute at the same time.
      *
@@ -102,8 +101,7 @@ public:
     template <typename... Args>
     void randomly_queue(Args&&... args)
     {
-        ios_.post(strand_.wrap(
-            std::bind(std::forward<Args>(args)...)));
+        ios_.post(strand_.wrap(std::bind(std::forward<Args>(args)...)));
     }
 
 private:

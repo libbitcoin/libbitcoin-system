@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2018 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -20,10 +20,16 @@
 #ifndef LIBBITCOIN_PROTOCOL_HPP
 #define LIBBITCOIN_PROTOCOL_HPP
 
+#include <atomic>
 #include <cstddef>
+#include <cstdint>
 #include <memory>
+#include <string>
 #include <system_error>
+#include <vector>
+#include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
@@ -36,91 +42,47 @@
 namespace libbitcoin {
 namespace network {
 
-class hosts;
-class handshake;
+class seeder;
 
 class BC_API protocol
 {
 public:
     typedef std::function<void (const std::error_code&)> completion_handler;
-
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_connection_count_handler;
-    typedef std::function<void (const std::error_code&,
-        channel_ptr)> channel_handler;
-
+    typedef std::function<void (const std::error_code&, channel_ptr)>
+        channel_handler;
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    protocol(threadpool& pool, hosts& peers,
-        handshake& shake, network& net, size_t max_outbound=8, 
-        bool listen=true);
+    static const size_t default_max_outbound;
+    static const hosts::authority_list default_seeds;
 
+    protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
+        const hosts::authority_list& seeds = default_seeds,
+        uint16_t port=bc::protocol_port,
+        size_t max_outbound=default_max_outbound);
+    
+    /// This class is not copyable.
     protocol(const protocol&) = delete;
     void operator=(const protocol&) = delete;
-
-    /// Deprecated, set on construct.
-    void set_max_outbound(size_t max_outbound);
-
-    /// Deprecated, construct hosts with path.
-    void set_hosts_filename(const std::string& hosts_path);
-
-    /// Deprecated, set on construct.
-    void disable_listener();
 
     /**
      * Perform full initialization sequence.
      * Internally calls bootstrap() and then run().
-     *
-     * @param[in]   handle_complete     Completion handler for start operation.
-     * @code
-     *  void handle_complete(
-     *      const std::error_code& ec   // Status of operation
-     *  );
-     * @endcode
+     * @param[in]  handle_complete  Completion handler for start operation.
      */
     void start(completion_handler handle_complete);
 
     /**
      * Gracefully close down.
-     *
-     * @param[in]   handle_complete     Completion handler for start operation.
-     * @code
-     *  void handle_complete(
-     *      const std::error_code& ec   // Status of operation
-     *  );
-     * @endcode
+     * @param[in]  handle_complete  Completion handler for start operation.
      */
     void stop(completion_handler handle_complete);
 
     /**
-     * Begin initialization sequence of performing node discovery and
-     * starting other network services.
-     *
-     * @param[in]   handle_complete     Completion handler for start operation.
-     * @code
-     *  void handle_complete(
-     *      const std::error_code& ec   // Status of operation
-     *  );
-     * @endcode
-     */
-    void bootstrap(completion_handler handle_complete);
-
-    /**
-     * Starts the internal run loop for this service.
-     */
-    void run();
-
-    /**
      * Fetch number of connections maintained by this service.
-     *
-     * @param[in]   handle_fetch    Completion handler for fetch operation.
-     * @code
-     *  void handle_fetch(
-     *      const std::error_code& ec,  // Status of operation
-     *      size_t connection_count     // Number of connections
-     *  );
-     * @endcode
+     * @param[in]  handle_fetch  Completion handler for fetch operation.
      */
     void fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
@@ -128,28 +90,16 @@ public:
     /**
      * Create a manual connection to a specific node. If disconnected
      * this service will keep attempting to reconnect until successful.
-     *
-     * @param[in]   hostname            // Hostname
-     * @param[in]   port                // Port
      */
-    void maintain_connection(
-        const std::string& hostname, uint16_t port);
+    void maintain_connection(const std::string& hostname, uint16_t port);
 
     /**
      * Subscribe to new connections established to other nodes.
      * This method must be called again to stay subscribed as
      * handlers are deregistered after being called.
-     *
      * When this protocol service is stopped, any subscribed handlers
      * will be called with the error_code set to error::service_stopped.
-     *
-     * @param[in]   handle_channel      Handler for new connection.
-     * @code
-     *  void handle_channel(
-     *      const std::error_code& ec,  // Status of operation
-     *      channel_ptr node            // Communication channel to new node
-     *  );
-     * @endcode
+     * @param[in]  handle_channel  Handler for new connection.
      */
     void subscribe_channel(channel_handler handle_channel);
 
@@ -160,26 +110,43 @@ public:
     size_t total_connections() const;
 
     /**
+     * Determine if the listener is enabled.
+     */
+    bool get_listening();
+
+    /**
+     * Enable or disable the listener.
+     */
+    void set_listening(bool value=true);
+
+    /**
      * Broadcast a message to all nodes in our connection list.
-     *
      * @param[in]   packet      Message packet to broadcast
      * @param[in]   handle_send Called after every send operation.
-     * @code
-     *  void handle_send(
-     *      const std::error_code& ec,  // Status of operation
-     *      size_t total_nodes          // Total number of connected nodes
-     *                                  // when the operation began.
-     *  );
-     * @endcode
      */
     template <typename Message>
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
         // The intermediate variable 'lambda' is a workaround for a
         // limitation of the VC++ CTP_Nov2013 generic lambda support.
-        auto lambda = &protocol::do_broadcast<Message>;
+        const auto lambda = &protocol::do_broadcast<Message>;
         strand_.queue(lambda, this, packet, handle_send);
     }
+    
+    /// Deprecated, should be private since it's called from start.
+    void bootstrap(completion_handler handle_complete);
+
+    /// Deprecated, should be private since it's called from start.
+    void run();
+
+    /// Deprecated, set on construct.
+    void set_max_outbound(size_t max_outbound);
+
+    /// Deprecated, construct hosts with path.
+    void set_hosts_filename(const std::string& hosts_path);
+
+    /// Deprecated, set on construct or use accessors.
+    void disable_listener();
 
 private:
     struct connection_info
@@ -187,7 +154,7 @@ private:
         network_address_type address;
         channel_ptr node;
     };
-    typedef std::vector<connection_info> connection_list;
+
     enum class connect_state
     {
         finding_peer,
@@ -195,64 +162,27 @@ private:
         established,
         stopped
     };
-    typedef std::vector<connect_state> connect_state_list;
+
     typedef size_t slot_index;
-
-    // Accepted connections
     typedef std::vector<channel_ptr> channel_ptr_list;
-
+    typedef std::vector<connect_state> connect_state_list;
+    typedef std::vector<connection_info> connection_list;
     typedef subscriber<const std::error_code&, channel_ptr>
         channel_subscriber_type;
 
     // start sequence
-    void handle_bootstrap(
-        const std::error_code& ec, completion_handler handle_complete);
+    void handle_start(const std::error_code& ec,
+        completion_handler handle_complete);
+    void fetch_count(const std::error_code& ec,
+        completion_handler handle_complete);
+    void start_seeder(const std::error_code& ec, size_t hosts_count,
+        completion_handler handle_complete);
 
     // stop sequence
-    void handle_save(const std::error_code& ec,
+    void handle_stop(const std::error_code& ec,
         completion_handler handle_complete);
 
-    // bootstrap sequence
-    void load_hosts(const std::error_code& ec,
-        completion_handler handle_complete);
-    void if_0_seed(const std::error_code& ec, size_t hosts_count,
-        completion_handler handle_complete);
-
-    // seed addresses from dns seeds
-    class seeds
-      : public std::enable_shared_from_this<seeds>
-    {
-    public:
-        seeds(protocol* parent);
-        void start(completion_handler handle_complete);
-
-    private:
-        void error_case(const std::error_code& ec);
-
-        void connect_dns_seed(const std::string& hostname);
-        void request_addresses(const std::error_code& ec,
-            channel_ptr dns_seed_node);
-        void handle_send_get_address(const std::error_code& ec);
-
-        void save_addresses(const std::error_code& ec,
-            const address_type& packet, channel_ptr);
-        void handle_store(const std::error_code& ec);
-
-        completion_handler handle_complete_;
-        size_t ended_paths_;
-        bool finished_;
-
-        // From parent
-        async_strand& strand_;
-        hosts& hosts_;
-        handshake& handshake_;
-        network& network_;
-    };
-
-    std::shared_ptr<seeds> load_seeds_;
-    friend class seeds;
-
-    std::string state_to_string(connect_state state);
+    std::string state_to_string(connect_state state) const;
     void modify_slot(slot_index slot, connect_state state);
 
     // run loop
@@ -260,6 +190,7 @@ private:
 
     // Connect outwards
     void start_stopped_connects();
+
     // This function is called in these places:
     //
     // 1. try_outbound_connects() calls it n times.
@@ -295,16 +226,14 @@ private:
     void setup_new_channel(channel_ptr node);
 
     // Remove channels from lists when disconnected.
-    void outbound_channel_stopped(
-        const std::error_code& ec, channel_ptr which_node, slot_index slot);
-    void manual_channel_stopped(
-        const std::error_code& ec, channel_ptr which_node,
-        const std::string& hostname, uint16_t port);
-    void inbound_channel_stopped(
-        const std::error_code& ec, channel_ptr which_node);
+    void outbound_channel_stopped(const std::error_code& ec,
+        channel_ptr node, slot_index slot);
+    void manual_channel_stopped(const std::error_code& ec,
+        channel_ptr node, const std::string& hostname, uint16_t port);
+    void inbound_channel_stopped(const std::error_code& ec,
+        channel_ptr node);
 
-    void subscribe_address(channel_ptr node);
-    void receive_address_message(const std::error_code& ec,
+    void handle_address_message(const std::error_code& ec,
         const address_type& addr, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
@@ -315,23 +244,24 @@ private:
     template <typename Message>
     void do_broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        const size_t total_nodes = total_connections();
-        auto send_handler =
+        const auto total_nodes = total_connections();
+        const auto send_handler =
             std::bind(handle_send, std::placeholders::_1, total_nodes);
-        for (const connection_info& connection: connections_)
+
+        for (const auto& connection: connections_)
             connection.node->send(packet, send_handler);
-        for (channel_ptr node: manual_connections_)
+
+        for (const auto node: manual_connections_)
             node->send(packet, send_handler);
-        for (channel_ptr node: accepted_channels_)
+
+        for (const auto node: accepted_channels_)
             node->send(packet, send_handler);
     }
-
+    
     async_strand strand_;
-
-    hosts& hosts_;
+    hosts& host_pool_;
     handshake& handshake_;
     network& network_;
-    boost::filesystem::path hosts_path_;
 
     // There's a fixed number of slots that are always trying to reconnect.
     size_t max_outbound_;
@@ -346,14 +276,18 @@ private:
     boost::asio::deadline_timer watermark_timer_;
     size_t watermark_count_;
 
-    // Manual connections created by user themselves.
+    // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
 
     // Inbound connections from the p2p network.
-    bool listen_is_enabled_ = true;
+    uint16_t listen_port_;
     channel_ptr_list accepted_channels_;
-
     channel_subscriber_type::ptr channel_subscribe_;
+
+    boost::filesystem::path hosts_path_;
+    const hosts::authority_list& seeds_;
+    std::shared_ptr<seeder> seeder_;
+    friend class seeder;
 };
 
 } // namespace network

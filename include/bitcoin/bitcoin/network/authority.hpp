@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,39 +17,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
+#ifndef LIBBITCOIN_AUTHORITY_HPP
+#define LIBBITCOIN_AUTHORITY_HPP
 
+#include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/network/channel_loader_module.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <boost/asio.hpp>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-channel_stream_loader::channel_stream_loader()
+struct BC_API authority
 {
-}
+    authority();
+    authority(const std::string& line);
+    authority(const network_address_type& net);
+    authority(const std::string& host, uint16_t port);
+    authority(const boost::asio::ip::tcp::socket::endpoint_type& endpoint);
+    bool operator==(const authority& other) const;
+    std::string to_string() const;
 
-channel_stream_loader::~channel_stream_loader()
-{
-    for (auto module: modules_)
-        delete module;
-}
-
-void channel_stream_loader::add(channel_loader_module_base* module)
-{
-    BITCOIN_ASSERT(module != nullptr);
-    modules_.push_back(module);
-}
-
-void channel_stream_loader::load_lookup(const std::string& symbol,
-    const data_chunk& stream) const
-{
-    for (auto module: modules_)
-        if (module->lookup_symbol() == symbol)
-            module->attempt_load(stream);
-}
+    std::string host;
+    uint16_t port;
+};
 
 } // namespace network
 } // namespace libbitcoin
+
+#endif
+

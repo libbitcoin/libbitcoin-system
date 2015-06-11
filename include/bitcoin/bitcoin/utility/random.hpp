@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,39 +17,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
+#ifndef LIBBITCOIN_RANDOM_HPP
+#define LIBBITCOIN_RANDOM_HPP
 
-#include <string>
-#include <bitcoin/bitcoin/network/channel_loader_module.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <cstdint>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
-namespace network {
 
-channel_stream_loader::channel_stream_loader()
-{
-}
+/**
+ * Generate a pseudo random number within the domain.
+ * @return  The 64 bit number (use % to subset domain).
+ */
+BC_API uint64_t pseudo_random();
 
-channel_stream_loader::~channel_stream_loader()
-{
-    for (auto module: modules_)
-        delete module;
-}
+/**
+ * Fill a buffer with randomness using the default random engine.
+ * @param[in]  chunk  The buffer to fill with randomness.
+ */
+BC_API void pseudo_random_fill(data_chunk& chunk);
 
-void channel_stream_loader::add(channel_loader_module_base* module)
-{
-    BITCOIN_ASSERT(module != nullptr);
-    modules_.push_back(module);
-}
-
-void channel_stream_loader::load_lookup(const std::string& symbol,
-    const data_chunk& stream) const
-{
-    for (auto module: modules_)
-        if (module->lookup_symbol() == symbol)
-            module->attempt_load(stream);
-}
-
-} // namespace network
 } // namespace libbitcoin
+
+#endif

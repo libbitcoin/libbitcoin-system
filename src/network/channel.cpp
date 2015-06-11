@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2018 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/network/channel.hpp>
 
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 
@@ -29,18 +30,19 @@ channel::channel(channel_proxy_ptr proxy)
   : weak_proxy_(proxy)
 {
 }
+
 channel::~channel()
 {
     stop();
 }
 
-// Slowly shutdown
-void channel::stop()
+void channel::stop() const
 {
     const auto proxy = weak_proxy_.lock();
     if (proxy)
         proxy->stop();
 }
+
 bool channel::stopped() const
 {
     const auto proxy = weak_proxy_.lock();
@@ -48,6 +50,29 @@ bool channel::stopped() const
         return proxy->stopped();
 
     return true;
+}
+
+authority channel::address() const
+{
+    const auto proxy = weak_proxy_.lock();
+    if (proxy)
+        return proxy->address();
+
+    return authority();
+}
+
+void channel::reset_revival()
+{
+    const auto proxy = weak_proxy_.lock();
+    if (proxy)
+        return proxy->reset_revival();
+}
+
+void channel::set_revival_handler(channel_proxy::revivial_handler handler)
+{
+    const auto proxy = weak_proxy_.lock();
+    if (proxy)
+        return proxy->set_revival_handler(handler);
 }
 
 void channel::send_raw(const header_type& packet_header,
@@ -69,6 +94,7 @@ void channel::subscribe_version(
     else
         handle_receive(error::service_stopped, version_type());
 }
+
 void channel::subscribe_verack(
     channel_proxy::receive_verack_handler handle_receive)
 {
@@ -78,6 +104,7 @@ void channel::subscribe_verack(
     else
         handle_receive(error::service_stopped, verack_type());
 }
+
 void channel::subscribe_address(
     channel_proxy::receive_address_handler handle_receive)
 {
@@ -87,6 +114,7 @@ void channel::subscribe_address(
     else
         handle_receive(error::service_stopped, address_type());
 }
+
 void channel::subscribe_get_address(
     channel_proxy::receive_get_address_handler handle_receive)
 {
@@ -96,6 +124,7 @@ void channel::subscribe_get_address(
     else
         handle_receive(error::service_stopped, get_address_type());
 }
+
 void channel::subscribe_inventory(
     channel_proxy::receive_inventory_handler handle_receive)
 {
@@ -105,6 +134,7 @@ void channel::subscribe_inventory(
     else
         handle_receive(error::service_stopped, inventory_type());
 }
+
 void channel::subscribe_get_data(
     channel_proxy::receive_get_data_handler handle_receive)
 {
@@ -114,6 +144,7 @@ void channel::subscribe_get_data(
     else
         handle_receive(error::service_stopped, get_data_type());
 }
+
 void channel::subscribe_get_blocks(
     channel_proxy::receive_get_blocks_handler handle_receive)
 {
@@ -123,6 +154,7 @@ void channel::subscribe_get_blocks(
     else
         handle_receive(error::service_stopped, get_blocks_type());
 }
+
 void channel::subscribe_transaction(
     channel_proxy::receive_transaction_handler handle_receive)
 {
@@ -132,6 +164,7 @@ void channel::subscribe_transaction(
     else
         handle_receive(error::service_stopped, transaction_type());
 }
+
 void channel::subscribe_block(
     channel_proxy::receive_block_handler handle_receive)
 {
@@ -141,6 +174,7 @@ void channel::subscribe_block(
     else
         handle_receive(error::service_stopped, block_type());
 }
+
 void channel::subscribe_raw(
     channel_proxy::receive_raw_handler handle_receive)
 {

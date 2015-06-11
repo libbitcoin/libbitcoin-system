@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <sstream>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 
@@ -40,34 +41,44 @@ std::string level_repr(log_level level)
         case log_level::fatal:
             return "FATAL";
     }
+
     return "";
 }
 
-void output_ostream(std::ostream& ostr, log_level level,
+static void output_ostream(std::ostream& out, log_level level,
     const std::string& domain, const std::string& body)
 {
-    ostr << level_repr(level);
+    std::ostringstream buffer;
+    buffer << level_repr(level);
     if (!domain.empty())
-        ostr << " [" << domain << "]";
-    ostr << ": " << body << std::endl;
+        buffer << " [" << domain << "]";
+
+    buffer << ": " << body << std::endl;
+
+    // Buffering prevents line interleaving across threads.
+    out << buffer.str();
+    out.flush();
 }
 
 void ignore_output(log_level,
     const std::string&, const std::string&)
 {
 }
+
 void output_cout(log_level level,
     const std::string& domain, const std::string& body)
 {
     output_ostream(bc::cout, level, domain, body);
 }
+
 void output_cerr(log_level level,
     const std::string& domain, const std::string& body)
 {
     output_ostream(bc::cerr, level, domain, body);
 }
 
-logger_wrapper::destination_map logger_wrapper::dests_{
+logger_wrapper::destination_map logger_wrapper::dests_
+{
 #ifdef DEBUG
     std::make_pair(log_level::debug, output_cout),
 #else
@@ -79,10 +90,11 @@ logger_wrapper::destination_map logger_wrapper::dests_{
     std::make_pair(log_level::fatal, output_cerr)
 };
 
-logger_wrapper::logger_wrapper(log_level lev, const std::string& domain)
-  : level_(lev), domain_(domain)
+logger_wrapper::logger_wrapper(log_level level, const std::string& domain)
+    : level_(level), domain_(domain)
 {
 }
+
 // g++ bug in initializer list.
 // It should be: stream_(std::move(other.stream_))
 // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=54316
@@ -91,17 +103,19 @@ logger_wrapper::logger_wrapper(logger_wrapper&& other)
     stream_(other.stream_.str())
 {
 }
+
 logger_wrapper::~logger_wrapper()
 {
     if (!dests_.count(level_))
         return;
+
     auto& outfunc = dests_[level_];
     outfunc(level_, domain_, stream_.str());
 }
 
-void logger_wrapper::set_output_function(logger_output_func outfunc)
+void logger_wrapper::set_output_function(logger_output_func func)
 {
-    dests_[level_] = outfunc;
+    dests_[level_] = func;
 }
 
 logger_wrapper log_debug(const std::string& domain)

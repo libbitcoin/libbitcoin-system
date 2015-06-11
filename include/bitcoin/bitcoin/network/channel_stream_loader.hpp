@@ -32,7 +32,13 @@ namespace network {
 class BC_API channel_stream_loader
 {
 public:
+    channel_stream_loader();
     ~channel_stream_loader();
+
+    /// This class is not copyable.
+    channel_stream_loader(const channel_stream_loader&) = delete;
+    void operator=(const channel_stream_loader&) = delete;
+
     void add(bc::network::channel_loader_module_base* module);
     void load_lookup(const std::string& symbol,
         const bc::data_chunk& stream) const;

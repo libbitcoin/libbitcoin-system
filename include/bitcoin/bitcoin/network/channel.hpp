@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2018 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -22,8 +22,10 @@
 
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -45,8 +47,15 @@ public:
     channel(channel_proxy_ptr proxy);
     ~channel();
 
-    void stop();
+    /// This class is not copyable.
+    channel(const channel&) = delete;
+    void operator=(const channel&) = delete;
+
+    void stop() const;
     bool stopped() const;
+    authority address() const;
+    void reset_revival();
+    void set_revival_handler(channel_proxy::revivial_handler handler);
 
     template <typename Message>
     void send(const Message& packet, channel_proxy::send_handler handle_send)
@@ -60,7 +69,6 @@ public:
 
     void send_raw(const header_type& packet_header,
         const data_chunk& payload, channel_proxy::send_handler handle_send);
-
     void subscribe_version(
         channel_proxy::receive_version_handler handle_receive);
     void subscribe_verack(
@@ -81,7 +89,6 @@ public:
         channel_proxy::receive_block_handler handle_receive);
     void subscribe_raw(
         channel_proxy::receive_raw_handler handle_receive);
-
     void subscribe_stop(
         channel_proxy::stop_handler handle_stop);
 

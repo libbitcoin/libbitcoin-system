@@ -39,15 +39,6 @@ BC_CONSTEXPR uint32_t max_uint32 = MAX_UINT32;
 BC_CONSTEXPR uint16_t max_uint16 = MAX_UINT16;
 BC_CONSTEXPR uint8_t max_uint8 = MAX_UINT8;
 BC_CONSTEXPR uint8_t byte_bits = 8;
-BC_CONSTEXPR hash_digest null_hash = 
-{
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-BC_CONSTEXPR short_hash null_short_hash = 
-{
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
 
 // Debian complains about missing UINTPTR_MAX definition for some weird reason.
 #ifdef UINTPTR_MAX
