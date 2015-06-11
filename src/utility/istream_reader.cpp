@@ -114,13 +114,17 @@ uint64_t istream_reader::read_variable_uint_big_endian()
 data_chunk istream_reader::read_data(size_t n_bytes)
 {
     data_chunk raw_bytes(n_bytes);
-    stream_.read(reinterpret_cast<char*>(raw_bytes.data()), n_bytes);
+
+    if (n_bytes > 0)
+        stream_.read(reinterpret_cast<char*>(raw_bytes.data()), n_bytes);
+
     return raw_bytes;
 }
 
 void istream_reader::read_data(uint8_t* data, size_t n_bytes)
 {
-    stream_.read(reinterpret_cast<char*>(data), n_bytes);
+    if (n_bytes > 0)
+        stream_.read(reinterpret_cast<char*>(data), n_bytes);
 }
 
 data_chunk istream_reader::read_data_to_eof()
