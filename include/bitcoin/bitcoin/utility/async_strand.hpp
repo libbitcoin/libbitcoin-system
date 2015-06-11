@@ -64,11 +64,11 @@ public:
     template <typename Handler, typename... Args>
     auto wrap(Handler&& handler, Args&&... args) ->
         wrapped_handler_impl<decltype(
-            std::bind(std::forward<Handler>(handler),
-                std::forward<Args>(args)...))>
+            std::bind(
+                std::forward<Handler>(handler), std::forward<Args>(args)...))>
     {
-        const auto forward = std::forward<Handler>(handler);
-        const auto bound = std::bind(forward, std::forward<Args>(args)...);
+        auto bound = std::bind(
+            std::forward<Handler>(handler), std::forward<Args>(args)...);
         return { bound, strand_ };
     }
 
