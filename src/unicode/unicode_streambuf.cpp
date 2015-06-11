@@ -61,9 +61,12 @@ unicode_streambuf::~unicode_streambuf()
 // initialized with a patched std::wcin when std::wcin is used.
 std::streambuf::int_type unicode_streambuf::underflow()
 {
+    // streamsize is signed.
+    BITCOIN_ASSERT(wide_size_ > 0 && wide_size_ <= bc::max_int64);
+    const auto size = static_cast<std::streamsize>(wide_size_);
+
     // Read from the wide input buffer.
-    const auto read = 
-        static_cast<size_t>(wide_buffer_->sgetn(wide_, wide_size_));
+    const auto read = static_cast<size_t>(wide_buffer_->sgetn(wide_, size));
 
     // Handle read termination.
     if (read == 0)
