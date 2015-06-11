@@ -61,6 +61,20 @@ authority channel::address() const
     return authority();
 }
 
+void channel::reset_revival()
+{
+    const auto proxy = weak_proxy_.lock();
+    if (proxy)
+        return proxy->reset_revival();
+}
+
+void channel::set_revival_handler(channel_proxy::revivial_handler handler)
+{
+    const auto proxy = weak_proxy_.lock();
+    if (proxy)
+        return proxy->set_revival_handler(handler);
+}
+
 void channel::send_raw(const header_type& packet_header,
     const data_chunk& payload, channel_proxy::send_handler handle_send)
 {

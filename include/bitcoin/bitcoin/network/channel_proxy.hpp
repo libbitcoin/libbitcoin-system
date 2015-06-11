@@ -117,6 +117,7 @@ public:
     typedef std::function<void (const std::error_code&,
         const header_type&, const data_chunk&)> receive_raw_handler;
     typedef std::function<void (const std::error_code&)> stop_handler;
+    typedef std::function<void (const std::error_code&)> revivial_handler;
 
     channel_proxy(threadpool& pool, socket_ptr socket);
     ~channel_proxy();
@@ -129,6 +130,8 @@ public:
     void stop(const std::error_code& ec=error::service_stopped);
     bool stopped() const;
     authority address() const;
+    void reset_revival();
+    void set_revival_handler(revivial_handler handler);
 
     template <typename Message>
     void send(const Message& packet, send_handler handle_send)
@@ -221,6 +224,9 @@ private:
     void handle_timeout(const boost::system::error_code& ec);
     void set_heartbeat(const boost::posix_time::time_duration& timeout);
     void handle_heartbeat(const boost::system::error_code& ec);
+    void set_revival(const boost::posix_time::time_duration& timeout);
+    void handle_revival(const boost::system::error_code& ec);
+    void do_revivial(const boost::system::error_code& ec);
 
     async_strand strand_;
     socket_ptr socket_;
@@ -228,6 +234,8 @@ private:
     // We keep the service alive for lifetime rules
     boost::asio::deadline_timer timeout_;
     boost::asio::deadline_timer heartbeat_;
+    boost::asio::deadline_timer revival_;
+    revivial_handler revival_handler_;
 
     // TODO: use lock-free std::atomic_flag?
     std::atomic<bool> stopped_;

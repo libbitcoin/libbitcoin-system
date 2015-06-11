@@ -62,12 +62,15 @@ using boost::posix_time::time_duration;
 static const auto initial_timeout = seconds(0) + minutes(1);
 static const auto disconnect_timeout = seconds(0) + minutes(90);
 static const auto heartbeat_time = seconds(0) + minutes(30);
+static const auto revival_time = seconds(0) + minutes(1);
 
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
   : strand_(pool),
     socket_(socket),
-    timeout_(pool.service()), 
+    timeout_(pool.service()),
     heartbeat_(pool.service()),
+    revival_(pool.service()),
+    revival_handler_(nullptr),
     stopped_(false),
     raw_subscriber_(std::make_shared<raw_subscriber_type>(pool)),
     stop_subscriber_(std::make_shared<stop_subscriber_type>(pool))
@@ -102,6 +105,7 @@ void channel_proxy::start()
     read_header();
     set_timeout(initial_timeout);
     set_heartbeat(heartbeat_time);
+    set_revival(revival_time);
 }
 
 void channel_proxy::stop(const std::error_code& ec)
@@ -135,24 +139,26 @@ void channel_proxy::stop_impl()
     stopped_ = true;
 
     // Ignore the error_code. We don't really care at this point.
-    boost::system::error_code error;
-    timeout_.cancel(error);
-    heartbeat_.cancel(error);
+    boost::system::error_code ec;
+    timeout_.cancel(ec);
+    heartbeat_.cancel(ec);
+    revival_.cancel(ec);
+    revival_handler_ = nullptr;
 
     // Force the socket closed
     // Should we do something with these error_codes?
-    socket_->shutdown(tcp::socket::shutdown_both, error);
-    socket_->close(error);
+    socket_->shutdown(tcp::socket::shutdown_both, ec);
+    socket_->close(ec);
     clear_subscriptions();
 }
 
 authority channel_proxy::address() const
 {
-    boost::system::error_code error;
-    const auto endpoint = socket_->remote_endpoint(error);
+    boost::system::error_code ec;
+    const auto endpoint = socket_->remote_endpoint(ec);
 
     // The endpoint may have become disconnected.
-    if (error)
+    if (ec)
         return authority();
 
     return authority(endpoint);
@@ -211,8 +217,10 @@ bool channel_proxy::failed(const boost::system::error_code& ec)
 
 void channel_proxy::set_heartbeat(const time_duration& timeout)
 {
-    heartbeat_.cancel();
-    heartbeat_.expires_from_now(timeout);
+    // Ignore the error_code. We don't really care at this point.
+    boost::system::error_code ec;
+    heartbeat_.cancel(ec);
+    heartbeat_.expires_from_now(timeout, ec);
     heartbeat_.async_wait(
         std::bind(&channel_proxy::handle_heartbeat,
             shared_from_this(), _1));
@@ -220,7 +228,8 @@ void channel_proxy::set_heartbeat(const time_duration& timeout)
 
 void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 {
-    if (failed(ec))
+    // Failure condition not handled, just abort.
+    if (aborted(ec))
         return;
 
     const auto handle_ping = [this](const std::error_code& ec)
@@ -244,8 +253,10 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 
 void channel_proxy::set_timeout(const time_duration& timeout)
 {
-    timeout_.cancel();
-    timeout_.expires_from_now(timeout);
+    // Ignore the error_code. We don't really care at this point.
+    boost::system::error_code ec;
+    timeout_.cancel(ec);
+    timeout_.expires_from_now(timeout, ec);
     timeout_.async_wait(
         std::bind(&channel_proxy::handle_timeout,
             shared_from_this(), _1));
@@ -253,7 +264,8 @@ void channel_proxy::set_timeout(const time_duration& timeout)
 
 void channel_proxy::handle_timeout(const boost::system::error_code& ec)
 {
-    if (failed(ec))
+    // Failure condition not handled, just abort.
+    if (aborted(ec))
         return;
 
     log_info(LOG_NETWORK)
@@ -266,6 +278,53 @@ void channel_proxy::reset_timers()
 {
     set_timeout(disconnect_timeout);
     set_heartbeat(heartbeat_time);
+}
+
+void channel_proxy::set_revival(const time_duration& timeout)
+{
+    // Ignore the error_code. We don't really care at this point.
+    boost::system::error_code ec;
+    revival_.cancel(ec);
+    revival_.expires_from_now(timeout, ec);
+    revival_.async_wait(
+        std::bind(&channel_proxy::handle_revival,
+            shared_from_this(), _1));
+}
+
+void channel_proxy::set_revival_handler(revivial_handler handler)
+{
+    revival_handler_ = handler;
+}
+
+void channel_proxy::handle_revival(const boost::system::error_code& ec)
+{
+    if (aborted(ec))
+        return;
+
+    strand_.queue(
+        std::bind(&channel_proxy::do_revivial,
+            shared_from_this(), ec));
+}
+
+void channel_proxy::do_revivial(const boost::system::error_code& ec)
+{
+    // Nothing to do, no handler registered.
+    if (revival_handler_ == nullptr)
+        return;
+
+    log_info(LOG_NETWORK)
+        << "Channel revival [" << address().to_string() << "]";
+
+    // Convert to standard code for public interface.
+    const auto code = bc::error::boost_to_error_code(ec);
+
+    // Invoke the revival handler.
+    revival_handler_(code);
+}
+
+void channel_proxy::reset_revival()
+{
+    set_revival(revival_time);
 }
 
 // This is a subscription.

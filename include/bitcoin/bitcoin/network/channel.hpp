@@ -54,6 +54,8 @@ public:
     void stop() const;
     bool stopped() const;
     authority address() const;
+    void reset_revival();
+    void set_revival_handler(channel_proxy::revivial_handler handler);
 
     template <typename Message>
     void send(const Message& packet, channel_proxy::send_handler handle_send)
