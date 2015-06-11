@@ -334,8 +334,16 @@ namespace error {
             case boost_error::no_such_process:
             case boost_error::not_a_directory:
             case boost_error::not_enough_memory:
-            case boost_error::not_supported:
-            case boost_error::operation_would_block:
+
+            // This is the same value as operation_not_supported
+            // in gcc, so excluded to prevent case break.
+            //case boost_error::operation_would_block:
+            // case boost_error::not_supported:
+
+            // This is the same value as resource_unavailable_try_again
+            // except in MSVC, so excluded to prevent case break.
+            //case boost_error::operation_would_block:
+
             case boost_error::resource_deadlock_would_occur:
             case boost_error::result_out_of_range:
             case boost_error::state_not_recoverable:
