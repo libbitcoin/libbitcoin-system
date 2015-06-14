@@ -28,7 +28,6 @@
 #include <bitcoin/bitcoin/error.hpp>
 //#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/version.hpp>
@@ -59,10 +58,10 @@ handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
     // Set default values inversion template.
     template_version_.start_height = start_height;
     template_version_.address_me.services = template_version_.services;
-    template_version_.address_me.ip = bc::localhost_ip_address;
+    template_version_.address_me.ip = message::localhost_ip_address;
     template_version_.address_me.port = port;
     template_version_.address_you.services = template_version_.services;
-    template_version_.address_you.ip = bc::localhost_ip_address;
+    template_version_.address_you.ip = message::localhost_ip_address;
     template_version_.address_you.port = port;
 }
 
@@ -133,7 +132,7 @@ void handshake::discover_external_ip(discover_ip_handler handle_discover)
 
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
 {
-    template_version_.address_me.ip = localhost_ip_address;
+    template_version_.address_me.ip = message::localhost_ip_address;
     handle_discover(error::success, template_version_.address_me.ip);
 }
 

@@ -46,8 +46,6 @@
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -162,7 +160,7 @@ public:
     void send(const Message& packet, send_handler handle_send)
     {
         send_common(create_raw_message(packet), handle_send,
-            satoshi_command(packet));
+            Message::satoshi_command);
     }
 
     BC_API void send_raw(const message::header& packet_header,

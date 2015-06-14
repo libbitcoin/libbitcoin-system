@@ -54,7 +54,7 @@ authority::authority(const std::string& line)
 }
 
 // This is the format returned from peers on the bitcoin network.
-authority::authority(const network_address_type& net)
+authority::authority(const message::network_address& net)
 {
     const auto& ip = net.ip;
     const auto formatted = format("%d.%d.%d.%d") %
