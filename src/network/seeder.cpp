@@ -67,7 +67,7 @@ void seeder::contact(const authority& seed_address)
             shared_from_this(), _1, _2));
 }
 
-void seeder::request(const std::error_code& ec, channel_ptr seed_node)
+void seeder::request(const std::error_code& ec, channel::pointer seed_node)
 {
     if (!seed_node)
     {
@@ -89,7 +89,7 @@ void seeder::request(const std::error_code& ec, channel_ptr seed_node)
         << "Getting addresses from seed ["
         << seed_node->address().to_string() << "]";
 
-    seed_node->send(get_address_type(),
+    seed_node->send(message::get_address(),
         strand_.wrap(&seeder::handle_request,
             shared_from_this(), _1));
 
@@ -110,8 +110,8 @@ void seeder::handle_request(const std::error_code& ec)
     }
 }
 
-void seeder::store(const std::error_code& ec, const address_type& packet,
-    channel_ptr seed_node)
+void seeder::store(const std::error_code& ec, const message::address& packet,
+    channel::pointer seed_node)
 {
     if (ec)
     {

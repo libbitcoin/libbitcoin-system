@@ -163,7 +163,7 @@ void hosts::do_remove(const message::network_address& address,
     handle_remove(error::success);
 }
 
-void hosts::store(const network_address_type& address,
+void hosts::store(const message::network_address& address,
     store_handler handle_store)
 {
     strand_.randomly_queue(
@@ -171,7 +171,7 @@ void hosts::store(const network_address_type& address,
             this, address, handle_store));
 }
 
-void hosts::do_store(const network_address_type& address,
+void hosts::do_store(const message::network_address& address,
     store_handler handle_store)
 {
     buffer_.push_back(socket_address(address));

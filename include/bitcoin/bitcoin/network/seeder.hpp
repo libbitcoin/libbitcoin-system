@@ -52,9 +52,9 @@ private:
     void contact(const authority& seed_address);
     void handle_request(const std::error_code& ec);
     void handle_store(const std::error_code& ec);
-    void request(const std::error_code& ec, channel_ptr seed_node);
-    void store(const std::error_code& ec, const address_type& packet,
-        channel_ptr seed_node);
+    void request(const std::error_code& ec, channel::pointer seed_node);
+    void store(const std::error_code& ec, const message::address& packet,
+        channel::pointer seed_node);
     void visited(const std::error_code& ec);
 
     async_strand& strand_;

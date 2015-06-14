@@ -249,7 +249,8 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
     };
 
     // TODO: match our sent ping.nonce with the returned pong.nonce.
-    ping_type random_ping{ pseudo_random() };
+    message::ping random_ping;
+    random_ping.nonce = pseudo_random();
     send(random_ping, handle_ping);
 }
 

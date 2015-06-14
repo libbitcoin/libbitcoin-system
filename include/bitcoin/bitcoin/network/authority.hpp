@@ -24,7 +24,7 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -33,7 +33,7 @@ struct BC_API authority
 {
     authority();
     authority(const std::string& line);
-    authority(const network_address_type& net);
+    authority(const message::network_address& net);
     authority(const std::string& host, uint16_t port);
     authority(const boost::asio::ip::tcp::socket::endpoint_type& endpoint);
     bool operator==(const authority& other) const;
@@ -47,4 +47,3 @@ struct BC_API authority
 } // namespace libbitcoin
 
 #endif
-

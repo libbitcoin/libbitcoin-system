@@ -44,9 +44,9 @@ public:
     typedef std::function<void (const std::error_code&)> start_handler;
     typedef std::function<void (const std::error_code&)> handshake_handler;
     typedef std::function<void (const std::error_code&,
-        const ip_address_type&)> discover_ip_handler;
+        const message::ip_address&)> discover_ip_handler;
     typedef std::function<void (const std::error_code&,
-        const network_address_type&)> fetch_network_address_handler;
+        const message::network_address&)> fetch_network_address_handler;
 
     handshake(threadpool& pool, uint16_t port=protocol_port,
         uint32_t start_height=0);

@@ -51,7 +51,7 @@ bool channel::stopped() const
     return true;
 }
 
-channel::address() const
+authority channel::address() const
 {
     const auto proxy = weak_proxy_.lock();
     if (proxy)
