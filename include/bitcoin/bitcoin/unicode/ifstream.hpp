@@ -23,6 +23,7 @@
 #include <fstream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 
 namespace libbitcoin {
 

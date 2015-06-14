@@ -192,7 +192,7 @@ void seeder::handle_send(const std::error_code& ec,
 }
 
 void seeder::handle_receive(const std::error_code& ec,
-    const address_type& message, const config::endpoint& seed,
+    const message::address& message, const config::endpoint& seed,
     channel_ptr node, seeded_handler completion_callback)
 {
     if (ec)

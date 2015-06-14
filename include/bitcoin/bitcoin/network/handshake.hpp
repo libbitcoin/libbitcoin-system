@@ -45,7 +45,7 @@ public:
     typedef std::function<void(const std::error_code&)> handshake_handler;
     typedef std::function<void (const std::error_code&)> setter_handler;
 
-    static const network_address_type unspecified;
+    static const message::network_address unspecified;
 
     handshake(threadpool& pool, const config::authority& self=unspecified,
         const timeout& timeouts=timeout::defaults);
