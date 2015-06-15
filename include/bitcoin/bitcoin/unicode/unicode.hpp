@@ -204,6 +204,40 @@ BC_API size_t to_utf16(wchar_t out[], size_t out_chars, const char in[],
  */
 BC_API std::wstring to_utf16(const std::string& narrow);
 
+/**
+ * Initialize windows to use UTF8 for stdio. This cannot be uninitialized and
+ * once set bc stdio must be used in place of std stdio.
+ */
+BC_API void set_utf8_stdio();
+
+/**
+ * Initialize windows to use UTF8 for stdin. This cannot be uninitialized and
+ * once set bc::cin must be used in place of std::cin.
+ */
+BC_API void set_utf8_stdin();
+
+/**
+ * Initialize windows to use UTF8 for stdout. This cannot be uninitialized and
+ * once set bc::cout must be used in place of std::cout.
+ */
+BC_API void set_utf8_stdout();
+
+/**
+ * Initialize windows to use UTF8 for stderr. This cannot be uninitialized and
+ * once set bc::cerr must be used in place of std::cerr.
+ */
+BC_API void set_utf8_stderr();
+
+/**
+ * Initialize windows to use binary for stdin. This cannot be uninitialized.
+ */
+BC_API void set_binary_stdin();
+
+/**
+ * Initialize windows to use binary for stdout. This cannot be uninitialized.
+ */
+BC_API void set_binary_stdout();
+
 } // namespace libbitcoin
 
 #endif

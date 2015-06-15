@@ -27,11 +27,17 @@
 #include <stdexcept>
 #include <string>
 #include <boost/locale.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
 #include <bitcoin/bitcoin/unicode/unicode_istream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode_ostream.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+
+#ifdef _MSC_VER
+    #include <fcntl.h>
+    #include <io.h>
+#endif
 
 namespace libbitcoin {
 
@@ -323,5 +329,63 @@ std::wstring to_utf16(const std::string& narrow)
     using namespace boost::locale;
     return conv::utf_to_utf<wchar_t>(narrow, conv::method_type::stop);
 }
+
+LCOV_EXCL_START("Untestable but visually-verifiable section.")
+
+static void set_utf8_stdio(FILE* file)
+{
+#ifdef _MSC_VER
+    if (_setmode(_fileno(file), _O_U8TEXT) == -1)
+        throw std::exception("Could not set STDIO to utf8 mode.");
+#endif
+}
+
+static void set_binary_stdio(FILE* file)
+{
+#ifdef _MSC_VER
+    if (_setmode(_fileno(file), _O_BINARY) == -1)
+        throw std::exception("Could not set STDIO to binary mode.");
+#endif
+}
+
+// Set stdio to use UTF8 translation on Windows.
+void set_utf8_stdio()
+{
+    set_utf8_stdin();
+    set_utf8_stdout();
+    set_utf8_stderr();
+}
+
+// Set stdio to use UTF8 translation on Windows.
+void set_utf8_stdin()
+{
+    set_utf8_stdio(stdin);
+}
+
+// Set stdio to use UTF8 translation on Windows.
+void set_utf8_stdout()
+{
+    set_utf8_stdio(stdout);
+}
+
+// Set stdio to use UTF8 translation on Windows.
+void set_utf8_stderr()
+{
+    set_utf8_stdio(stderr);
+}
+
+// Set stdio to use UTF8 translation on Windows.
+void set_binary_stdin()
+{
+    set_binary_stdio(stdin);
+}
+
+// Set stdio to use UTF8 translation on Windows.
+void set_binary_stdout()
+{
+    set_binary_stdio(stdout);
+}
+
+LCOV_EXCL_STOP()
 
 } // namespace libbitcoin
