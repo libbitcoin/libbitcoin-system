@@ -36,7 +36,7 @@ public:
 
     static const std::string satoshi_command;
 
-    network_address_list addresses;
+    network_address::list addresses;
 
     bool from_data(const data_chunk& data);
 

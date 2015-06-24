@@ -40,7 +40,7 @@ typedef std::vector<output_info> output_info_list;
 
 struct BC_API select_outputs_result
 {
-    chain::output_point_list points;
+    chain::output_point::list points;
     uint64_t change;
 };
 

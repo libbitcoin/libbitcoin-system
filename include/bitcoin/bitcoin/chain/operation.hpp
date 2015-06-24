@@ -35,6 +35,9 @@ class BC_API operation
 {
 public:
 
+    typedef std::vector<operation> list;
+    typedef std::vector<operation> stack;
+
     opcode code;
     data_chunk data;
 
@@ -72,27 +75,25 @@ private:
     static bool must_read_data(opcode code);
 };
 
-typedef std::vector<operation> operation_stack;
-
 bool is_push(const opcode code);
 
-uint64_t count_non_push(const operation_stack& operations);
+uint64_t count_non_push(const operation::stack& operations);
 
-bool is_push_only(const operation_stack& operations);
+bool is_push_only(const operation::stack& operations);
 
-bool is_pubkey_type(const operation_stack& ops);
+bool is_pubkey_type(const operation::stack& ops);
 
-bool is_pubkey_hash_type(const operation_stack& ops);
+bool is_pubkey_hash_type(const operation::stack& ops);
 
-bool is_script_hash_type(const operation_stack& ops);
+bool is_script_hash_type(const operation::stack& ops);
 
-bool is_stealth_info_type(const operation_stack& ops);
+bool is_stealth_info_type(const operation::stack& ops);
 
-bool is_multisig_type(const operation_stack&);
+bool is_multisig_type(const operation::stack&);
 
-bool is_pubkey_hash_sig_type(const operation_stack& ops);
+bool is_pubkey_hash_sig_type(const operation::stack& ops);
 
-bool is_script_code_sig_type(const operation_stack& ops);
+bool is_script_code_sig_type(const operation::stack& ops);
 
 } // end chain
 } // end libbitcoin

@@ -22,6 +22,7 @@
 
 //#include <string>
 #include <istream>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/operation.hpp>
 #include <bitcoin/bitcoin/chain/payment.hpp>
@@ -47,6 +48,8 @@ class BC_API script
 {
 public:
 
+    typedef std::vector<script> list;
+
     enum class parse_mode
     {
         strict,
@@ -54,7 +57,7 @@ public:
         raw_data_fallback
     };
 
-    operation_stack operations;
+    operation::stack operations;
 
     payment_type type() const;
 

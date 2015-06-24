@@ -35,6 +35,8 @@ class BC_API inventory_vector
 {
 public:
 
+    typedef std::vector<inventory_vector> list;
+
     inventory_type_id type;
     hash_digest hash;
 
@@ -66,8 +68,6 @@ public:
 };
 
 bool operator==(const inventory_vector& a, const inventory_vector& b);
-
-typedef std::vector<inventory_vector> inventory_list;
 
 } // end message
 } // end libbitcoin

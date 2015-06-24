@@ -112,7 +112,7 @@ bool extract(payment_address& address, const chain::script& script)
             std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
             address.set(version, hash_data);
         };
-    const chain::operation_stack& ops = script.operations;
+    const chain::operation::stack& ops = script.operations;
     chain::payment_type pay_type = script.type();
 
     switch (pay_type)

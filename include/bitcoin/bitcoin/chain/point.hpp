@@ -37,6 +37,8 @@ class BC_API point
 {
 public:
 
+    typedef std::vector<point> list;
+
     hash_digest hash;
     uint32_t index;
 
@@ -71,13 +73,9 @@ public:
     static uint64_t satoshi_fixed_size();
 };
 
-typedef std::vector<point> point_list;
-
 typedef point input_point;
-typedef point_list input_point_list;
 
 typedef point output_point;
-typedef point_list output_point_list;
 
 BC_API bool operator==(const point& a, const point& b);
 

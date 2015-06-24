@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -34,6 +35,8 @@ namespace chain {
 class BC_API block_header
 {
 public:
+
+    typedef std::vector<block_header> list;
 
     uint32_t version;
     hash_digest previous_block_hash;
