@@ -353,7 +353,7 @@ inline hash_digest one_hash()
     };
 }
 
-inline void nullify_input_sequences(transaction_input_list& inputs,
+inline void nullify_input_sequences(transaction_input::list& inputs,
     uint32_t except_input)
 {
     for (size_t i = 0; i < inputs.size(); ++i)
@@ -393,7 +393,7 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // We don't care about additional inputs or outputs to the tx.
     else if ((hash_type & 0x1f) == signature_hash_algorithm::single)
     {
-        transaction_output_list& outputs = parent_tx.outputs;
+        transaction_output::list& outputs = parent_tx.outputs;
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
@@ -1767,7 +1767,7 @@ bool opcode_is_disabled(opcode code)
 }
 
 bool next_step(const transaction& parent_tx, uint32_t input_index,
-    operation_stack::const_iterator it, const script& script,
+    operation::stack::const_iterator it, const script& script,
     evaluation_context& context)
 {
     const operation& op = *it;
