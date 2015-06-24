@@ -271,6 +271,7 @@ include_bitcoin_bitcoin_impl_formats_HEADERS = \
 include_bitcoin_bitcoin_impl_triedir = ${includedir}/bitcoin/bitcoin/impl/trie
 include_bitcoin_bitcoin_impl_trie_HEADERS = \
     include/bitcoin/bitcoin/impl/trie/binary_trie.ipp \
+    include/bitcoin/bitcoin/impl/trie/threadsafe_binary_trie.ipp \
     include/bitcoin/bitcoin/impl/trie/trie_iterator.ipp \
     include/bitcoin/bitcoin/impl/trie/trie_reverse_iterator.ipp \
     include/bitcoin/bitcoin/impl/trie/trie_structure_node.ipp \
@@ -330,6 +331,7 @@ include_bitcoin_bitcoin_network_HEADERS = \
 include_bitcoin_bitcoin_triedir = ${includedir}/bitcoin/bitcoin/trie
 include_bitcoin_bitcoin_trie_HEADERS = \
     include/bitcoin/bitcoin/trie/binary_trie.hpp \
+    include/bitcoin/bitcoin/trie/threadsafe_binary_trie.hpp \
     include/bitcoin/bitcoin/trie/trie_iterator.hpp \
     include/bitcoin/bitcoin/trie/trie_reverse_iterator.hpp \
     include/bitcoin/bitcoin/trie/trie_structure_node.hpp \

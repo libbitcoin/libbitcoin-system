@@ -44,7 +44,7 @@ class trie_reverse_iterator
 public:
     // iterator_traits required typedefs
     typedef typename std::iterator_traits<TrieIterator>::difference_type
-        differcent_type;
+        difference_type;
     typedef typename std::iterator_traits<TrieIterator>::iterator_category
         iterator_category;
     typedef typename std::iterator_traits<TrieIterator>::pointer pointer;
@@ -87,6 +87,10 @@ public:
     base_iter_type base() const;
 
     binary_type get_key();
+
+    bool is_first_key_value() const;
+
+    bool is_last_key_value() const;
 
 private:
 

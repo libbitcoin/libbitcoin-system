@@ -70,6 +70,7 @@
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/trie/binary_trie.hpp>
+#include <bitcoin/bitcoin/trie/threadsafe_binary_trie.hpp>
 #include <bitcoin/bitcoin/trie/trie_iterator.hpp>
 #include <bitcoin/bitcoin/trie/trie_reverse_iterator.hpp>
 #include <bitcoin/bitcoin/trie/trie_structure_node.hpp>

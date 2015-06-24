@@ -140,6 +140,18 @@ binary_type trie_reverse_iterator<TrieIterator>::get_key()
     return (--it).get_key();
 }
 
+template<typename TrieIterator>
+bool trie_reverse_iterator<TrieIterator>::is_first_key_value() const
+{
+    return base_iterator_.is_last_key_value();
+}
+
+template<typename TrieIterator>
+bool trie_reverse_iterator<TrieIterator>::is_last_key_value() const
+{
+    return base_iterator_.is_first_key_value();
+}
+
 } // namespace libbitcoin
 
 #endif
