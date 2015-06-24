@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_genesis_block_serialization_factory_reader)
 
 BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_zero_transactions_matches_null_hash)
 {
-    BOOST_REQUIRE(null_hash == chain::block::generate_merkle_root(chain::transaction_list{}));
+    BOOST_REQUIRE(null_hash == chain::block::generate_merkle_root(chain::transaction::list{}));
 }
 
 BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_multiple_transactions_matches_historic_data)

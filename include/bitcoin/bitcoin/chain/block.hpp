@@ -36,10 +36,12 @@ class BC_API block
 {
 public:
 
+    typedef std::vector<block> list;
+
     static const std::string satoshi_command;
 
     block_header header;
-    transaction_list transactions;
+    transaction::list transactions;
 
     bool from_data(const data_chunk& data);
 
@@ -66,7 +68,7 @@ public:
     static block factory_from_data(reader& source);
 
     static hash_digest generate_merkle_root(
-        const transaction_list& transactions);
+        const transaction::list& transactions);
 };
 
 // A list of indices. Used for creating block_locator objects or

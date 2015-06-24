@@ -38,12 +38,14 @@ class BC_API transaction
 {
 public:
 
+    typedef std::vector<transaction> list;
+
     static const std::string satoshi_command;
 
     uint32_t version;
     uint32_t locktime;
-    transaction_input_list inputs;
-    transaction_output_list outputs;
+    transaction_input::list inputs;
+    transaction_output::list outputs;
 
     bool from_data(const data_chunk& data);
 
@@ -86,8 +88,6 @@ public:
 
     static uint64_t satoshi_fixed_size();
 };
-
-typedef std::vector<transaction> transaction_list;
 
 } // end chain
 } // end libbitcoin

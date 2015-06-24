@@ -36,6 +36,8 @@ class BC_API transaction_input
 {
 public:
 
+    typedef std::vector<transaction_input> list;
+
     output_point previous_output;
     chain::script script;
     uint32_t sequence;
@@ -70,8 +72,6 @@ public:
 
     static uint64_t satoshi_fixed_size();
 };
-
-typedef std::vector<transaction_input> transaction_input_list;
 
 } // end chain
 } // end libbitcoin

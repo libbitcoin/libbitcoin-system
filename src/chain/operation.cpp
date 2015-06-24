@@ -255,25 +255,25 @@ bool is_push(const opcode code)
         || code == opcode::op_16;
 }
 
-uint64_t count_non_push(const operation_stack& operations)
+uint64_t count_non_push(const operation::stack& operations)
 {
     return std::count_if(operations.begin(), operations.end(),
         [](const operation& op) { return !is_push(op.code); });
 }
 
-bool is_push_only(const operation_stack& operations)
+bool is_push_only(const operation::stack& operations)
 {
     return count_non_push(operations) == 0;
 }
 
-bool is_pubkey_type(const operation_stack& ops)
+bool is_pubkey_type(const operation::stack& ops)
 {
     return ops.size() == 2 &&
         ops[0].code == opcode::special &&
         ops[1].code == opcode::checksig;
 }
 
-bool is_pubkey_hash_type(const operation_stack& ops)
+bool is_pubkey_hash_type(const operation::stack& ops)
 {
     return ops.size() == 5 &&
         ops[0].code == opcode::dup &&
@@ -284,7 +284,7 @@ bool is_pubkey_hash_type(const operation_stack& ops)
         ops[4].code == opcode::checksig;
 }
 
-bool is_script_hash_type(const operation_stack& ops)
+bool is_script_hash_type(const operation::stack& ops)
 {
     return ops.size() == 3 &&
         ops[0].code == opcode::hash160 &&
@@ -293,7 +293,7 @@ bool is_script_hash_type(const operation_stack& ops)
         ops[2].code == opcode::equal;
 }
 
-bool is_stealth_info_type(const operation_stack& ops)
+bool is_stealth_info_type(const operation::stack& ops)
 {
     return ops.size() == 2 &&
         ops[0].code == opcode::return_ &&
@@ -301,12 +301,12 @@ bool is_stealth_info_type(const operation_stack& ops)
         ops[1].data.size() >= hash_size;
 }
 
-bool is_multisig_type(const operation_stack&)
+bool is_multisig_type(const operation::stack&)
 {
     return false;
 }
 
-bool is_pubkey_hash_sig_type(const operation_stack& ops)
+bool is_pubkey_hash_sig_type(const operation::stack& ops)
 {
     if (ops.size() != 2 || !is_push_only(ops))
         return false;
@@ -314,7 +314,7 @@ bool is_pubkey_hash_sig_type(const operation_stack& ops)
     return verify_public_key_fast(last_data);
 }
 
-bool is_script_code_sig_type(const operation_stack& ops)
+bool is_script_code_sig_type(const operation::stack& ops)
 {
     if (ops.size() < 2 || !is_push_only(ops))
         return false;

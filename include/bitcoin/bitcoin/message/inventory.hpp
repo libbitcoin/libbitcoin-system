@@ -37,7 +37,7 @@ public:
 
     static const std::string satoshi_command;
 
-    inventory_list inventories;
+    inventory_vector::list inventories;
 
     bool from_data(const data_chunk& data);
 

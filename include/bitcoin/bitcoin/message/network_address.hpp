@@ -43,6 +43,8 @@ class BC_API network_address
 {
 public:
 
+    typedef std::vector<network_address> list;
+
     uint32_t timestamp;
     uint64_t services;
     ip_address ip;
@@ -77,8 +79,6 @@ public:
 
     static uint64_t satoshi_fixed_size(bool with_timestamp /*= false*/);
 };
-
-typedef std::vector<network_address> network_address_list;
 
 } // end message
 } // end libbitcoin

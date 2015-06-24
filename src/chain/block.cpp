@@ -184,7 +184,7 @@ hash_digest build_merkle_tree(hash_list& merkle)
 }
 
 hash_digest block::generate_merkle_root(
-    const transaction_list& transactions)
+    const transaction::list& transactions)
 {
     // Generate list of transaction hashes.
     hash_list tx_hashes;
