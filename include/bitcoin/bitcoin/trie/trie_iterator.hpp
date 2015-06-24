@@ -64,27 +64,44 @@ public:
     typedef trie_value_node<Value> value_node_type;
 
 public:
+
     // constructors
     explicit trie_iterator();
+
     trie_iterator(structure_node_type* node);
+
     trie_iterator(value_node_type* value);
+
     trie_iterator(structure_node_type* node, value_node_type* value);
+
     trie_iterator(const iterator& it);
 
     // accessors
     binary_type get_key();
 
+    bool is_first_key_value() const;
+
+    bool is_last_key_value() const;
+
     // iterator methods
     reference operator*() const;
+
     pointer operator->() const;
+
     bool operator==(const trie_iterator& other) const;
+
     bool operator!=(const trie_iterator& other) const;
+
     iter_type& operator++();
+
     iter_type operator++(int);
+
     iter_type& operator--();
+
     iter_type operator--(int);
 
 protected:
+
     // increment/decrement implementation
     void trie_node_increment();
     void trie_node_decrement();
@@ -92,6 +109,7 @@ protected:
     void decrement();
 
 private:
+
     structure_node_type* trie_node_;
     value_node_type* value_node_;
     binary_type cached_key_;
