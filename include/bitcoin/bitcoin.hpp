@@ -101,6 +101,7 @@
 #include <bitcoin/bitcoin/primitives/satoshi/verack.hpp>
 #include <bitcoin/bitcoin/primitives/satoshi/version.hpp>
 #include <bitcoin/bitcoin/trie/binary_trie.hpp>
+#include <bitcoin/bitcoin/trie/threadsafe_binary_trie.hpp>
 #include <bitcoin/bitcoin/trie/trie_iterator.hpp>
 #include <bitcoin/bitcoin/trie/trie_reverse_iterator.hpp>
 #include <bitcoin/bitcoin/trie/trie_structure_node.hpp>

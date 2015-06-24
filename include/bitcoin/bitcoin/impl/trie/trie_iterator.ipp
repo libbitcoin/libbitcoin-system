@@ -195,6 +195,18 @@ binary_type trie_iterator<Value, Reference, Pointer>::get_key()
     return cached_key_;
 }
 
+template<typename Value, typename Reference, typename Pointer>
+bool trie_iterator<Value, Reference, Pointer>::is_first_key_value() const
+{
+    return (trie_node_->value_head == value_node_);
+}
+
+template<typename Value, typename Reference, typename Pointer>
+bool trie_iterator<Value, Reference, Pointer>::is_last_key_value() const
+{
+    return (trie_node_->value_tail == value_node_);
+}
+
 } // namespace libbitcoin
 
 #endif
