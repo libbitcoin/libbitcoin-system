@@ -28,24 +28,27 @@
 namespace libbitcoin {
 namespace chain {
 
-block_header block_header::factory_from_data(const data_chunk& data)
+block_header block_header::factory_from_data(const data_chunk& data,
+    bool with_transaction_count)
 {
     block_header instance;
-    instance.from_data(data);
+    instance.from_data(data, with_transaction_count);
     return instance;
 }
 
-block_header block_header::factory_from_data(std::istream& stream)
+block_header block_header::factory_from_data(std::istream& stream,
+    bool with_transaction_count)
 {
     block_header instance;
-    instance.from_data(stream);
+    instance.from_data(stream, with_transaction_count);
     return instance;
 }
 
-block_header block_header::factory_from_data(reader& source)
+block_header block_header::factory_from_data(reader& source,
+    bool with_transaction_count)
 {
     block_header instance;
-    instance.from_data(source);
+    instance.from_data(source, with_transaction_count);
     return instance;
 }
 
@@ -69,19 +72,20 @@ void block_header::reset()
     nonce = 0;
 }
 
-bool block_header::from_data(const data_chunk& data)
+bool block_header::from_data(const data_chunk& data,
+    bool with_transaction_count)
 {
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    return from_data(istream);
+    return from_data(istream, with_transaction_count);
 }
 
-bool block_header::from_data(std::istream& stream)
+bool block_header::from_data(std::istream& stream, bool with_transaction_count)
 {
     istream_reader source(stream);
-    return from_data(source);
+    return from_data(source, with_transaction_count);
 }
 
-bool block_header::from_data(reader& source)
+bool block_header::from_data(reader& source, bool with_transaction_count)
 {
     bool result = true;
 
@@ -93,6 +97,10 @@ bool block_header::from_data(reader& source)
     timestamp = source.read_4_bytes_little_endian();
     bits = source.read_4_bytes_little_endian();
     nonce = source.read_4_bytes_little_endian();
+    transaction_count = 0;
+
+    if (with_transaction_count)
+        transaction_count = source.read_variable_uint_little_endian();
 
     result = source;
 
@@ -102,23 +110,24 @@ bool block_header::from_data(reader& source)
     return result;
 }
 
-data_chunk block_header::to_data() const
+data_chunk block_header::to_data(bool with_transaction_count) const
 {
     data_chunk data;
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
-    to_data(ostream);
+    to_data(ostream, with_transaction_count);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == satoshi_size(with_transaction_count));
     return data;
 }
 
-void block_header::to_data(std::ostream& stream) const
+void block_header::to_data(std::ostream& stream,
+    bool with_transaction_count) const
 {
     ostream_writer sink(stream);
-    to_data(sink);
+    to_data(sink, with_transaction_count);
 }
 
-void block_header::to_data(writer& sink) const
+void block_header::to_data(writer& sink, bool with_transaction_count) const
 {
     sink.write_4_bytes_little_endian(version);
     sink.write_hash(previous_block_hash);
@@ -126,16 +135,24 @@ void block_header::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(timestamp);
     sink.write_4_bytes_little_endian(bits);
     sink.write_4_bytes_little_endian(nonce);
+
+    if (with_transaction_count)
+        sink.write_variable_uint_little_endian(transaction_count);
 }
 
-uint64_t block_header::satoshi_size() const
+uint64_t block_header::satoshi_size(bool with_transaction_count) const
 {
-    return block_header::satoshi_fixed_size();
+    uint64_t size = 80;
+
+    if (with_transaction_count)
+        size += variable_uint_size(transaction_count);
+
+    return size;
 }
 
-uint64_t block_header::satoshi_fixed_size()
+hash_digest block_header::hash() const
 {
-    return 80;
+    return bitcoin_hash(to_data(false));
 }
 
 bool operator==(const block_header& block_a,
@@ -146,12 +163,14 @@ bool operator==(const block_header& block_a,
         && (block_a.merkle == block_b.merkle)
         && (block_a.timestamp == block_b.timestamp)
         && (block_a.bits == block_b.bits)
-        && (block_a.nonce == block_b.nonce);
+        && (block_a.nonce == block_b.nonce)
+        && (block_a.transaction_count == block_b.transaction_count);
 }
 
-hash_digest block_header::hash() const
+bool operator!=(const block_header& block_a,
+    const block_header& block_b)
 {
-    return bitcoin_hash(to_data());
+    return !(block_a == block_b);
 }
 
 } // end chain

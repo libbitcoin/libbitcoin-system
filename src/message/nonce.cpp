@@ -97,6 +97,11 @@ bool operator==(const nonce_base& a, const nonce_base& b)
     return (a.nonce == b.nonce);
 }
 
+bool operator!=(const nonce_base& a, const nonce_base& b)
+{
+    return !(a == b);
+}
+
 ping ping::factory_from_data(const data_chunk& data)
 {
     ping instance;

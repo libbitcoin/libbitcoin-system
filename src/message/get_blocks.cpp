@@ -138,5 +138,10 @@ bool operator==(const get_blocks& a, const get_blocks& b)
     return result && (a.hash_stop == b.hash_stop);
 }
 
+bool operator!=(const get_blocks& a, const get_blocks& b)
+{
+    return !(a == b);
+}
+
 } // end message
 } // end libbitcoin

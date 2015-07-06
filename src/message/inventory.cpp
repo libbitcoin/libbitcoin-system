@@ -131,5 +131,10 @@ bool operator==(const inventory& a, const inventory& b)
     return result;
 }
 
+bool operator!=(const inventory& a, const inventory& b)
+{
+    return !(a == b);
+}
+
 } // end message
 } // end libbitcoin

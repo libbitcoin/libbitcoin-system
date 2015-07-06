@@ -63,6 +63,8 @@ public:
 
 bool operator==(const nonce_base& a, const nonce_base& b);
 
+bool operator!=(const nonce_base& a, const nonce_base& b);
+
 class BC_API ping : public nonce_base
 {
 public:

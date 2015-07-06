@@ -78,17 +78,15 @@ bool block::from_data(reader& source)
 
     reset();
 
-    result = header.from_data(source);
-
-    uint64_t tx_count = 0;
+    result = header.from_data(source, false);
 
     if (result)
     {
-        tx_count = source.read_variable_uint_little_endian();
+        header.transaction_count = source.read_variable_uint_little_endian();
         result = source;
     }
 
-    for (uint64_t i = 0; (i < tx_count) && result; ++i)
+    for (uint64_t i = 0; (i < header.transaction_count) && result; ++i)
     {
         transactions.emplace_back();
         result = transactions.back().from_data(source);
@@ -118,7 +116,7 @@ void block::to_data(std::ostream& stream) const
 
 void block::to_data(writer& sink) const
 {
-    header.to_data(sink);
+    header.to_data(sink, false);
     sink.write_variable_uint_little_endian(transactions.size());
 
     for (const transaction& tx : transactions)
@@ -127,7 +125,7 @@ void block::to_data(writer& sink) const
 
 uint64_t block::satoshi_size() const
 {
-    uint64_t block_size = header.satoshi_size()
+    uint64_t block_size = header.satoshi_size(false)
         + variable_uint_size(transactions.size());
 
     for (const transaction& tx : transactions)
