@@ -127,5 +127,10 @@ bool operator==(const inventory_vector& a, const inventory_vector& b)
     return (a.hash == b.hash) && (a.type == b.type);
 }
 
+bool operator!=(const inventory_vector& a, const inventory_vector& b)
+{
+    return !(a == b);
+}
+
 } // end message
 } // end libbitcoin

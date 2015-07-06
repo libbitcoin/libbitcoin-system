@@ -129,5 +129,10 @@ bool operator==(const header& a, const header& b)
         && (a.checksum == b.checksum);
 }
 
+bool operator!=(const header& a, const header& b)
+{
+    return !(a == b);
+}
+
 } // end message
 } // end libbitcoin

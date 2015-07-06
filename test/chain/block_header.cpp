@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
 
     chain::block_header header;
 
-    BOOST_REQUIRE_EQUAL(false, header.from_data(data));
+    BOOST_REQUIRE_EQUAL(false, header.from_data(data, false));
     BOOST_REQUIRE_EQUAL(false, header.is_valid());
 }
 
@@ -47,9 +47,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         68644
     };
 
-    data_chunk data = expected.to_data();
+    data_chunk data = expected.to_data(false);
 
-    auto result = chain::block_header::factory_from_data(data);
+    auto result = chain::block_header::factory_from_data(data, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -66,10 +66,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         68644
     };
 
-    data_chunk data = expected.to_data();
+    data_chunk data = expected.to_data(false);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
 
-    auto result = chain::block_header::factory_from_data(istream);
+    auto result = chain::block_header::factory_from_data(istream, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -86,11 +86,55 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         68644
     };
 
-    data_chunk data = expected.to_data();
+    data_chunk data = expected.to_data(false);
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
 
-    auto result = chain::block_header::factory_from_data(source);
+    auto result = chain::block_header::factory_from_data(source, false);
+
+    BOOST_REQUIRE(result.is_valid());
+    BOOST_REQUIRE(expected == result);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_transaction_count_does_not_match)
+{
+    chain::block_header expected {
+        10,
+        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        531234,
+        6523454,
+        68644,
+        1234
+    };
+
+    data_chunk data = expected.to_data(false);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    istream_reader source(istream);
+
+    auto result = chain::block_header::factory_from_data(source, false);
+
+    BOOST_REQUIRE(result.is_valid());
+    BOOST_REQUIRE(expected != result);
+}
+
+BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_transaction_count_matches)
+{
+    chain::block_header expected {
+        10,
+        hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
+        hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
+        531234,
+        6523454,
+        68644,
+        123544
+    };
+
+    data_chunk data = expected.to_data(true);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    istream_reader source(istream);
+
+    auto result = chain::block_header::factory_from_data(source, true);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
