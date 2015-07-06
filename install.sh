@@ -74,7 +74,7 @@ if [[ $TRAVIS == true ]]; then
 elif [[ $OS == Linux ]]; then
     PARALLEL=`nproc`
 elif [[ $OS == Darwin ]]; then
-    PARALLEL=2 #TODO
+    PARALLEL=`sysctl -n hw.ncpu`
 else
     echo "Unsupported system: $OS"
     exit 1
