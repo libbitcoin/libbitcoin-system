@@ -71,6 +71,8 @@ public:
 
 bool operator==(const get_blocks& a, const get_blocks& b);
 
+bool operator!=(const get_blocks& a, const get_blocks& b);
+
 } // end message
 } // end libbitcoin
 

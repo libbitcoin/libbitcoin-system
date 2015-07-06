@@ -68,6 +68,8 @@ public:
 
 bool operator==(const header& a, const header& b);
 
+bool operator!=(const header& a, const header& b);
+
 } // end message
 } // end libbitcoin
 

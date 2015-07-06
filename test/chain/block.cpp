@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_genesis_block_serialization_factory_data_chunk)
 {
     chain::block genblk = genesis_block();
     BOOST_REQUIRE_EQUAL(genblk.satoshi_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(), 80u);
+    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(false), 80u);
 
     // Save genesis block.
     data_chunk rawblk = genblk.to_data();
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_genesis_block_serialization_factory_stream)
 {
     chain::block genblk = genesis_block();
     BOOST_REQUIRE_EQUAL(genblk.satoshi_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(), 80u);
+    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(false), 80u);
 
     // Save genesis block.
     data_chunk rawblk = genblk.to_data();
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_genesis_block_serialization_factory_reader)
 {
     chain::block genblk = genesis_block();
     BOOST_REQUIRE_EQUAL(genblk.satoshi_size(), 285u);
-    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(), 80u);
+    BOOST_REQUIRE_EQUAL(genblk.header.satoshi_size(false), 80u);
 
     // Save genesis block.
     data_chunk rawblk = genblk.to_data();

@@ -44,18 +44,19 @@ public:
     uint32_t timestamp;
     uint32_t bits;
     uint32_t nonce;
+    uint64_t transaction_count;
 
-    bool from_data(const data_chunk& data);
+    bool from_data(const data_chunk& data, bool with_transaction_count);
 
-    bool from_data(std::istream& stream);
+    bool from_data(std::istream& stream, bool with_transaction_count);
 
-    bool from_data(reader& source);
+    bool from_data(reader& source, bool with_transaction_count);
 
-    data_chunk to_data() const;
+    data_chunk to_data(bool with_transaction_count) const;
 
-    void to_data(std::ostream& stream) const;
+    void to_data(std::ostream& stream, bool with_transaction_count) const;
 
-    void to_data(writer& sink) const;
+    void to_data(writer& sink, bool with_transaction_count) const;
 
     hash_digest hash() const;
 
@@ -63,18 +64,22 @@ public:
 
     void reset();
 
-    uint64_t satoshi_size() const;
+    uint64_t satoshi_size(bool with_transaction_count) const;
 
-    static block_header factory_from_data(const data_chunk& data);
+    static block_header factory_from_data(const data_chunk& data,
+        bool with_transaction_count);
 
-    static block_header factory_from_data(std::istream& stream);
+    static block_header factory_from_data(std::istream& stream,
+        bool with_transaction_count);
 
-    static block_header factory_from_data(reader& source);
-
-    static uint64_t satoshi_fixed_size();
+    static block_header factory_from_data(reader& source,
+        bool with_transaction_count);
 };
 
 BC_API bool operator==(const block_header& block_a,
+    const block_header& block_b);
+
+BC_API bool operator!=(const block_header& block_a,
     const block_header& block_b);
 
 } // end chain

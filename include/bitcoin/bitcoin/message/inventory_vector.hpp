@@ -69,6 +69,8 @@ public:
 
 bool operator==(const inventory_vector& a, const inventory_vector& b);
 
+bool operator!=(const inventory_vector& a, const inventory_vector& b);
+
 } // end message
 } // end libbitcoin
 
