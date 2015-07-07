@@ -20,53 +20,74 @@
 #ifndef LIBBITCOIN_HOSTS_HPP
 #define LIBBITCOIN_HOSTS_HPP
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <functional>
 #include <system_error>
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-class hosts
+// TODO: rename to host_pool for symmetry with mempool and txpool (break).
+class BC_API hosts
 {
 public:
+    typedef std::vector<authority> authority_list;
     typedef std::function<void (const std::error_code&)> load_handler;
     typedef std::function<void (const std::error_code&)> save_handler;
     typedef std::function<void (const std::error_code&)> store_handler;
     typedef std::function<void (const std::error_code&)> remove_handler;
-
-    typedef std::function<
-        void (const std::error_code&, const network_address_type&)>
-            fetch_address_handler;
-
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
+    typedef std::function<void (const std::error_code&,
+        const network_address_type&)> fetch_address_handler;
 
-    BC_API hosts(threadpool& pool, size_t capacity=1000);
-    BC_API ~hosts();
+    hosts(threadpool& pool, const boost::filesystem::path& file_path,
+        size_t capacity=1000);
+    ~hosts();
 
+    /// This class is not copyable.
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
 
-    BC_API void load(const std::string& path, load_handler handle_load);
-    BC_API void save(const std::string& path, save_handler handle_save);
+    bool empty() const;
+    size_t size() const;
 
-    BC_API void store(const network_address_type& address,
+    void load(load_handler handle_load);
+    void save(save_handler handle_save);
+    void store(const network_address_type& address,
         store_handler handle_store);
-    BC_API void remove(const network_address_type& address,
+    void remove(const network_address_type& address,
         remove_handler handle_remove);
-    BC_API void fetch_address(fetch_address_handler handle_fetch);
-    BC_API void fetch_count(fetch_count_handler handle_fetch);
+    void fetch_address(fetch_address_handler handle_fetch);
+    void fetch_count(fetch_count_handler handle_fetch);
+
+    /// Deprecated, require hosts path on construct.
+    hosts(threadpool& pool, size_t capacity=1000);
+
+    /// Deprecated, set hosts path on construct.
+    void load(const std::string& path, load_handler handle_load);
+
+    /// Deprecated, set hosts path on construct.
+    void save(const std::string& path, save_handler handle_save);
 
 private:
-    struct hosts_field
+    struct ip_address
     {
-        bool operator==(const hosts_field& other);
+        ip_address();
+        ip_address(const std::string& line);
+        ip_address(const network_address_type& host);
+        bool operator==(const ip_address& other) const;
+
         ip_address_type ip;
         uint16_t port;
     };
@@ -75,14 +96,21 @@ private:
         load_handler handle_load);
     void do_save(const boost::filesystem::path& path,
         save_handler handle_save);
-
     void do_remove(const network_address_type& address,
         remove_handler handle_remove);
+    void do_store(const network_address_type& address,
+        store_handler handle_store);
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);
+    size_t select_random_host();
 
     async_strand strand_;
-    boost::circular_buffer<hosts_field> buffer_;
+    boost::filesystem::path file_path_;
+    boost::circular_buffer<ip_address> buffer_;
+
+    // Deprecated, remove when protocol::set_hosts_filename is removed.
+    // This allows (deprecated) protocol::set_hosts_filename to set file_path_.
+    friend class protocol;
 };
 
 } // namespace network

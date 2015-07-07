@@ -74,11 +74,18 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/sha512.h \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
+    src/network/acceptor.cpp \
+    src/network/authority.cpp \
     src/network/channel.cpp \
+    src/network/channel_proxy.cpp \
+    src/network/channel_stream_loader.cpp \
+    src/network/connect_with_timeout.cpp \
+    src/network/connect_with_timeout.hpp \
     src/network/handshake.cpp \
     src/network/hosts.cpp \
     src/network/network.cpp \
     src/network/protocol.cpp \
+    src/network/seeder.cpp \
     src/unicode/console_streambuf.cpp \
     src/unicode/ifstream.cpp \
     src/unicode/ofstream.cpp \
@@ -86,9 +93,12 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_istream.cpp \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
+    src/utility/async_strand.cpp \
     src/utility/binary.cpp \
     src/utility/logger.cpp \
+    src/utility/random.cpp \
     src/utility/string.cpp \
+    src/utility/thread.cpp \
     src/utility/threadpool.cpp \
     src/utility/time.cpp \
     src/utility/timed_section.cpp \
@@ -156,6 +166,7 @@ test_libbitcoin_test_SOURCES = \
     test/serialize.cpp \
     test/stealth.cpp \
     test/stealth_address.cpp \
+    test/thread.cpp \
     test/unicode.cpp \
     test/unicode_istream.cpp \
     test/unicode_ostream.cpp \
@@ -235,11 +246,17 @@ include_bitcoin_bitcoin_math_HEADERS = \
 
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
+    include/bitcoin/bitcoin/network/acceptor.hpp \
+    include/bitcoin/bitcoin/network/authority.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
+    include/bitcoin/bitcoin/network/channel_loader_module.hpp \
+    include/bitcoin/bitcoin/network/channel_proxy.hpp \
+    include/bitcoin/bitcoin/network/channel_stream_loader.hpp \
     include/bitcoin/bitcoin/network/handshake.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
     include/bitcoin/bitcoin/network/network.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \
+    include/bitcoin/bitcoin/network/seeder.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp
 
 include_bitcoin_bitcoin_triedir = ${includedir}/bitcoin/bitcoin/trie
@@ -265,19 +282,21 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/async_parallel.hpp \
+    include/bitcoin/bitcoin/utility/async_strand.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
+    include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \
+    include/bitcoin/bitcoin/utility/thread.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
     include/bitcoin/bitcoin/utility/time.hpp \
-    include/bitcoin/bitcoin/utility/timed_section.hpp \
-    include/bitcoin/bitcoin/utility/weak_bind.hpp
+    include/bitcoin/bitcoin/utility/timed_section.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \

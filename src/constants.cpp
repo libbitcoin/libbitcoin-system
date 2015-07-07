@@ -24,7 +24,7 @@ namespace libbitcoin {
 hash_number max_target()
 {
     hash_number max_target;
-    max_target.set_compact(max_bits);
+    max_target.set_compact(max_work_bits);
     return max_target;
 }
 
@@ -36,5 +36,6 @@ uint32_t magic_value()
     return 0xd9b4bef9;
 #endif
 }
+
 } // namespace libbitcoin
 

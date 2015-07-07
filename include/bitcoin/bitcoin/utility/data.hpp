@@ -21,6 +21,7 @@
 #define LIBBITCOIN_DATA_HPP
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <initializer_list>
 #include <vector>

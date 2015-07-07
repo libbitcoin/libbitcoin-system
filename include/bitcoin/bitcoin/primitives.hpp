@@ -33,6 +33,12 @@ typedef std::vector<hash_digest> block_locator_type;
 
 typedef byte_array<16> ip_address_type;
 
+BC_CONSTEXPR ip_address_type localhost_ip_address =
+{
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01
+};
+
 struct BC_API network_address_type
 {
     uint32_t timestamp;
@@ -173,12 +179,13 @@ struct BC_API inventory_type
     inventory_list inventories;
 };
 
-// TODO: Satoshi peers will might 0-length nonces as of 0.10.
+// TODO: Satoshi peers might send 0-length nonces as of 0.10.
 // Allow the ping & pong payloads to be any size.
 struct BC_API ping_type
 {
     uint64_t nonce;
 };
+
 struct BC_API pong_type
 {
     uint64_t nonce;

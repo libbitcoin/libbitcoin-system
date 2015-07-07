@@ -26,9 +26,9 @@ namespace libbitcoin {
 
 binary_type calculate_stealth_prefix(const script_type& stealth_script)
 {
-    const data_chunk stealth_data = save_script(stealth_script);
-    const hash_digest index = bitcoin_hash(stealth_data);
-    const size_t bitsize = binary_type::bits_per_block * sizeof(uint32_t);
+    const auto stealth_data = save_script(stealth_script);
+    const auto index = bitcoin_hash(stealth_data);
+    const auto bitsize = binary_type::bits_per_block * sizeof(uint32_t);
     return binary_type(bitsize, index);
 }
 
@@ -53,7 +53,7 @@ bool extract_stealth_info(stealth_info& info,
 
 ec_secret shared_secret(const ec_secret& secret, const ec_point& pubkey)
 {
-    ec_point final = pubkey;
+    auto final = pubkey;
     DEBUG_ONLY(const auto success =) ec_multiply(final, secret);
     BITCOIN_ASSERT(success);
     return sha256_hash(final);
@@ -62,8 +62,8 @@ ec_secret shared_secret(const ec_secret& secret, const ec_point& pubkey)
 ec_point uncover_stealth(const ec_point& ephem_pubkey, 
     const ec_secret& scan_secret, const ec_point& spend_pubkey)
 {
-    ec_point final = spend_pubkey;
-    ec_secret shared = shared_secret(scan_secret, ephem_pubkey);
+    auto final = spend_pubkey;
+    const auto shared = shared_secret(scan_secret, ephem_pubkey);
     DEBUG_ONLY(const auto success = ) ec_add(final, shared);
     BITCOIN_ASSERT(success);
     return final;
@@ -72,19 +72,12 @@ ec_point uncover_stealth(const ec_point& ephem_pubkey,
 ec_secret uncover_stealth_secret(const ec_point& pubkey,
     const ec_secret& secret, const ec_secret& spend_secret)
 {
-    ec_secret final = spend_secret;
-    ec_secret shared = shared_secret(secret, pubkey);
+    auto final = spend_secret;
+    const auto shared = shared_secret(secret, pubkey);
     DEBUG_ONLY(const auto success = ) ec_add(final, shared);
     BITCOIN_ASSERT(success);
     return final;
 }
-
-// See header comments.
-//ec_point initiate_stealth( onst ec_secret& ephem_secret,
-//  const ec_point& scan_pubkey, const ec_point& spend_pubkey)
-//{
-//    return uncover_stealth(scan_pubkey, ephem_secret, spend_pubkey);
-//}
 
 } // namespace libbitcoin
 

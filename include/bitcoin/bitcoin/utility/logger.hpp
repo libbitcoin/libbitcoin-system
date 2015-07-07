@@ -45,7 +45,7 @@ public:
     typedef std::function<void (
         log_level, const std::string&, const std::string&)> logger_output_func;
 
-    logger_wrapper(log_level lev, const std::string& token);
+    logger_wrapper(log_level level, const std::string& token);
     logger_wrapper(logger_wrapper&& other);
     BC_API ~logger_wrapper();
 
@@ -56,7 +56,7 @@ public:
         return *this;
     }
 
-    BC_API void set_output_function(logger_output_func outfunc);
+    BC_API void set_output_function(logger_output_func func);
 
 private:
     typedef std::map<log_level, logger_output_func> destination_map;

@@ -81,8 +81,6 @@
     #include <locale>
     #include <boost/filesystem.hpp>
     #include <boost/locale.hpp>
-    #include <fcntl.h>
-    #include <io.h>
     #include <windows.h>
     #define BC_USE_LIBBITCOIN_MAIN \
         namespace libbitcoin { \

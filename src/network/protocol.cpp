@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2018 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,12 +17,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/constants.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/network/handshake.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
+
+#include <cstddef>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <system_error>
+#include <boost/date_time.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/format.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
+#include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/handshake.hpp>
+#include <bitcoin/bitcoin/network/seeder.hpp>
+#include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -30,343 +41,283 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::filesystem::path;
+using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-constexpr size_t watermark_limit = 10;
+// Based on http://bitcoinstats.com/network/dns-servers
+#ifdef ENABLE_TESTNET
+const hosts::authority_list protocol::default_seeds =
+{
+    { "testnet-seed.alexykot.me", 18333 },
+    { "testnet-seed.bitcoin.petertodd.org", 18333 },
+    { "testnet-seed.bluematt.me", 18333 },
+    { "testnet-seed.bitcoin.schildbach.de", 18333 }
+};
+#else
+const hosts::authority_list protocol::default_seeds =
+{
+    { "seed.bitnodes.io", 8333 },
+    { "seed.bitcoinstats.com", 8333 },
+    { "seed.bitcoin.sipa.be", 8333 },
+    { "dnsseed.bluematt.me", 8333 },
+    { "seed.bitcoin.jonasschnelli.ch", 8333 },
+    { "dnsseed.bitcoin.dashjr.org", 8333 }
+
+    // Previously also included:
+    // bitseed.xf2.org:8333
+    // archivum.info:8333
+    // progressbar.sk:8333
+    // faucet.bitcoin.st:8333
+    // bitcoin.securepayment.cc:8333
+};
+#endif
+
+const size_t protocol::default_max_outbound = 8;
+
+// TODO: parameterize for config access.
+const size_t watermark_connection_limit = 10;
 const time_duration watermark_reset_interval = seconds(1);
 
-static std::string pretty(const ip_address_type& ip)
+protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
+    network& net, const hosts::authority_list& seeds, uint16_t port,
+    size_t max_outbound)
+  : strand_(pool),
+    host_pool_(peers),
+    handshake_(shake),
+    network_(net),
+    max_outbound_(max_outbound),
+    watermark_timer_(pool.service()),
+    watermark_count_(0),
+    listen_port_(port),
+    channel_subscribe_(std::make_shared<channel_subscriber_type>(pool)),
+    seeds_(seeds)
 {
-    std::ostringstream oss;
-    oss << (int)ip[12] << '.' << (int)ip[13] << '.'
-        << (int)ip[14] << '.' << (int)ip[15];
-    return oss.str();
-}
-
-protocol::protocol(threadpool& pool, hosts& hsts,
-    handshake& shake, network& net)
-  : strand_(pool),  hosts_(hsts), handshake_(shake),network_(net),
-    hosts_path_("hosts.p2p"), watermark_timer_(pool.service())
-{
-    channel_subscribe_ = std::make_shared<channel_subscriber_type>(pool);
-}
-
-void protocol::set_max_outbound(size_t max_outbound)
-{
-    max_outbound_ = max_outbound;
-}
-void protocol::set_hosts_filename(const std::string& hosts_path)
-{
-    hosts_path_ = hosts_path;
-}
-void protocol::disable_listener()
-{
-    listen_is_enabled_ = false;
 }
 
 void protocol::start(completion_handler handle_complete)
 {
-    // Bootstrap from seeds if neccessary.
-    bootstrap(strand_.wrap(
-        &protocol::handle_bootstrap, this, _1, handle_complete));
-    // Start handshake service, but if it fails to start
-    // then it's not a critical error.
-    auto handshake_service_started = [](const std::error_code& ec)
+    // handshake.start doesn't accept an error code so we prevent its
+    // execution in case of start failure, using this lambda wrapper.
+    const auto start_handshake = [this, handle_complete]
+        (const std::error_code& ec)
     {
         if (ec)
-            log_error(LOG_PROTOCOL)
-                << "Failed to start handshake service: " << ec.message();
+        {
+            handle_complete(ec);
+            return;
+        }
+
+        strand_.wrap(&handshake::start,
+            &handshake_, handle_complete)();
     };
-    handshake_.start(handshake_service_started);
+
+    const auto run_protocol =
+        strand_.wrap(&protocol::handle_start,
+            this, _1, start_handshake);
+    
+    host_pool_.load(
+        strand_.wrap(&protocol::fetch_count,
+            this, _1, run_protocol));
 }
-void protocol::handle_bootstrap(
-    const std::error_code& ec, completion_handler handle_complete)
+
+void protocol::handle_start(const std::error_code& ec,
+    completion_handler handle_complete)
 {
     if (ec)
     {
-        log_error(LOG_PROTOCOL) << "Failed to bootstrap: " << ec.message();
+        log_error(LOG_PROTOCOL)
+            << "Failure fetching height: " << ec.message();
         handle_complete(ec);
         return;
     }
-    handle_complete(std::error_code());
+
+    // TODO: handle run startup failure.
+    handle_complete(ec);
     run();
 }
 
 void protocol::stop(completion_handler handle_complete)
 {
-    hosts_.save(hosts_path_.string(), strand_.wrap(
-        &protocol::handle_save, this, _1, handle_complete));
+    host_pool_.save(
+        strand_.wrap(&protocol::handle_stop,
+            this, _1, handle_complete));
 }
-void protocol::handle_save(const std::error_code& ec,
+
+void protocol::handle_stop(const std::error_code& ec,
     completion_handler handle_complete)
 {
     if (ec)
     {
-        log_error(LOG_PROTOCOL) << "Failed to save hosts '"
-            << hosts_path_ << "': " << ec.message();
+        log_error(LOG_PROTOCOL)
+            << "Failure saving hosts file: " << ec.message();
         handle_complete(ec);
         return;
     }
+
     channel_subscribe_->relay(error::service_stopped, nullptr);
-    handle_complete(std::error_code());
+    handle_complete(error::success);
 }
 
-void protocol::bootstrap(completion_handler handle_complete)
-{
-    hosts_.load(hosts_path_.string(), strand_.wrap(
-        &protocol::load_hosts, this, _1, handle_complete));
-}
-void protocol::load_hosts(const std::error_code& ec,
+void protocol::fetch_count(const std::error_code& ec,
     completion_handler handle_complete)
 {
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "Could not load hosts file: " << ec.message();
+            << "Failure loading hosts file: " << ec.message();
         handle_complete(ec);
         return;
     }
-    hosts_.fetch_count(strand_.wrap(
-        &protocol::if_0_seed, this, _1, _2, handle_complete));
+
+    host_pool_.fetch_count(
+        strand_.wrap(&protocol::start_seeder,
+            this, _1, _2, handle_complete));
 }
 
-void protocol::if_0_seed(const std::error_code& ec, size_t hosts_count,
+void protocol::start_seeder(const std::error_code& ec, size_t hosts_count,
     completion_handler handle_complete)
 {
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "Unable to check hosts empty: " << ec.message();
+            << "Failure checking existing hosts file: " << ec.message();
         handle_complete(ec);
         return;
     }
+
     if (hosts_count == 0)
     {
-        load_seeds_ = std::make_shared<seeds>(this);
-        load_seeds_->start(handle_complete);
-    }
-    else
-        handle_complete(std::error_code());
-}
-
-#ifdef ENABLE_TESTNET
-const std::vector<std::string> dns_seeds
-{
-    "testnet-seed.alexykot.me",
-    "testnet-seed.bitcoin.petertodd.org",
-    "testnet-seed.bluematt.me",
-    "testnet-seed.bitcoin.schildbach.de"
-};
-#else
-const std::vector<std::string> dns_seeds
-{
-    "bitseed.xf2.org",
-    "dnsseed.bluematt.me",
-    "seed.bitcoin.sipa.be",
-    "dnsseed.bitcoin.dashjr.org",
-    "archivum.info",
-    "progressbar.sk",
-    "faucet.bitcoin.st",
-    "bitcoin.securepayment.cc",
-    "seed.bitnodes.io"
-};
-#endif
-
-protocol::seeds::seeds(protocol* parent)
-  : strand_(parent->strand_), hosts_(parent->hosts_),
-    handshake_(parent->handshake_), network_(parent->network_)
-{
-}
-void protocol::seeds::start(completion_handler handle_complete)
-{
-    handle_complete_ = handle_complete;
-    ended_paths_ = 0;
-    finished_ = false;
-    for (const std::string& hostname: dns_seeds)
-        connect_dns_seed(hostname);
-}
-
-void protocol::seeds::error_case(const std::error_code& ec)
-{
-    if (finished_)
+        seeder_ = std::make_shared<seeder>(this, seeds_, handle_complete);
+        seeder_->start();
         return;
-    ++ended_paths_;
-    if (ended_paths_ == dns_seeds.size())
-    {
-        finished_ = true;
-        handle_complete_(ec);
-    }
-}
-
-void protocol::seeds::connect_dns_seed(const std::string& hostname)
-{
-    connect(handshake_, network_, hostname, protocol_port, strand_.wrap(
-        &protocol::seeds::request_addresses, shared_from_this(), _1, _2));
-}
-void protocol::seeds::request_addresses(
-    const std::error_code& ec, channel_ptr dns_seed_node)
-{
-    if (ec)
-    {
-        log_error(LOG_PROTOCOL)
-            << "Failed to connect to seed node: " << ec.message();
-        error_case(ec);
-    }
-    else
-    {
-        dns_seed_node->send(get_address_type(),
-            strand_.wrap(&protocol::seeds::handle_send_get_address,
-                shared_from_this(), _1));
-        dns_seed_node->subscribe_address(
-            strand_.wrap(&protocol::seeds::save_addresses,
-                shared_from_this(), _1, _2, dns_seed_node));
     }
 
-}
-void protocol::seeds::handle_send_get_address(const std::error_code& ec)
-{
-    if (ec)
-    {
-        log_error(LOG_PROTOCOL)
-            << "Sending get_address message failed: " << ec.message();
-        error_case(ec);
-    }
+    handle_complete(error::success); 
 }
 
-void protocol::seeds::save_addresses(const std::error_code& ec,
-    const address_type& packet, channel_ptr)
-{
-    if (ec)
-    {
-        log_error(LOG_PROTOCOL)
-            << "Problem receiving addresses from seed nodes: "
-            << ec.message();
-        error_case(ec);
-    }
-    else
-    {
-        log_debug(LOG_PROTOCOL) << "Storing seeded addresses.";
-        for (const network_address_type& net_address: packet.addresses)
-            hosts_.store(net_address, strand_.wrap(
-                &protocol::seeds::handle_store, shared_from_this(), _1));
-
-        if (!finished_)
-        {
-            ++ended_paths_;
-            finished_ = true;
-            handle_complete_(std::error_code());
-        }
-    }
-}
-void protocol::seeds::handle_store(const std::error_code& ec)
-{
-    if (ec)
-        log_error(LOG_PROTOCOL)
-            << "Failed to store addresses from seed nodes: "
-            << ec.message();
-}
-
-std::string protocol::state_to_string(connect_state state)
+std::string protocol::state_to_string(connect_state state) const
 {
     switch (state)
     {
-    case connect_state::finding_peer:
-        return "Finding peer";
-    case connect_state::connecting:
-        return "Connecting to peer";
-    case connect_state::established:
-        return "Established connection";
-    case connect_state::stopped:
-        return "Stopped";
+        case connect_state::finding_peer:
+            return "finding peer";
+        case connect_state::connecting:
+            return "connecting to peer";
+        case connect_state::established:
+            return "established connection";
+        case connect_state::stopped:
+            return "stopped";
     }
+
     // Unhandled state!
     BITCOIN_ASSERT(false);
-    return std::string();
+    return "";
 }
+
 void protocol::modify_slot(slot_index slot, connect_state state)
 {
     connect_states_[slot] = state;
-    log_debug(LOG_PROTOCOL) << "Outbound connection " << slot
-        << ": " << state_to_string(state) << ".";
+    log_debug(LOG_PROTOCOL)
+        << "Outbound connection on slot ["
+        << slot << "] " << state_to_string(state) << ".";
 }
 
 void protocol::run()
 {
-    strand_.queue(&protocol::start_connecting, this);
-    if (listen_is_enabled_)
-        network_.listen(protocol_port,
-            strand_.wrap(&protocol::handle_listen, this, _1, _2));
+    strand_.queue(
+        std::bind(&protocol::start_connecting,
+            this));
+
+    if (listen_port_ == 0)
+        return;
+
+    // Unhandled startup failure condition.
+    network_.listen(listen_port_,
+        strand_.wrap(&protocol::handle_listen,
+            this, _1, _2));
 }
+
 void protocol::start_connecting()
 {
     // Initialize the connection slots.
     BITCOIN_ASSERT(connections_.empty());
     BITCOIN_ASSERT(connect_states_.empty());
     connect_states_.resize(max_outbound_);
-    for (slot_index slot = 0; slot < max_outbound_; ++slot)
+
+    for (size_t slot = 0; slot < connect_states_.size(); ++slot)
         modify_slot(slot, connect_state::stopped);
+
     // Start the main outbound connect loop.
     start_stopped_connects();
     start_watermark_reset_timer();
 }
+
 void protocol::start_stopped_connects()
 {
-    for (slot_index slot = 0; slot < max_outbound_; ++slot)
+    for (size_t slot = 0; slot < connect_states_.size(); ++slot)
         if (connect_states_[slot] == connect_state::stopped)
             try_connect_once(slot);
 }
+
 void protocol::try_connect_once(slot_index slot)
 {
     ++watermark_count_;
-    if (watermark_count_ > watermark_limit)
+    if (watermark_count_ > watermark_connection_limit)
         return;
-    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
+
+    BITCOIN_ASSERT(slot <= connect_states_.size());
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::stopped);
+
     // Begin connection flow: finding_peer -> connecting -> established.
     // Failures end with connect_state::stopped and loop back here again.
     modify_slot(slot, connect_state::finding_peer);
-    hosts_.fetch_address(strand_.wrap(
-        &protocol::attempt_connect, this, _1, _2, slot));
+    host_pool_.fetch_address(
+        strand_.wrap(&protocol::attempt_connect, 
+            this, _1, _2, slot));
 }
 
 void protocol::start_watermark_reset_timer()
 {
     // This timer just loops continuously at fixed intervals
     // resetting the watermark_count_ variable and starting stopped slots.
-    auto reset_watermark = [this](const boost::system::error_code& ec)
+    const auto reset_watermark = [this](const boost::system::error_code& ec)
     {
         if (ec)
         {
+            if (ec != boost::asio::error::operation_aborted)
+                log_error(LOG_PROTOCOL)
+                    << "Failure resetting watermark timer: " << ec.message();
+
             BITCOIN_ASSERT(ec == boost::asio::error::operation_aborted);
             return;
         }
-        if (watermark_count_ > watermark_limit)
-            log_debug(LOG_PROTOCOL) << "Resuming connection attempts.";
-        // Perform the reset, and hence reallow connections again.
+
+        if (watermark_count_ > watermark_connection_limit)
+            log_debug(LOG_PROTOCOL)
+                << "Resuming connection attempts.";
+
+        // Perform the reset, reallowing connection attempts.
         watermark_count_ = 0;
         start_stopped_connects();
+
         // Looping timer...
         start_watermark_reset_timer();
     };
+
     watermark_timer_.expires_from_now(watermark_reset_interval);
     watermark_timer_.async_wait(strand_.wrap(reset_watermark, _1));
 }
 
 template <typename ConnectionList>
-bool already_connected(
-    const network_address_type& address,
+bool already_connected(const network_address_type& address,
     const ConnectionList& connections)
 {
-    // Are we already connected to this address?
     for (const auto& connection: connections)
-    {
         if (connection.address.ip == address.ip &&
             connection.address.port == address.port)
-        {
             return true;
-        }
-    }
+
     return false;
 }
 
@@ -375,241 +326,341 @@ void protocol::attempt_connect(const std::error_code& ec,
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
     modify_slot(slot, connect_state::connecting);
+
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "Problem fetching random address: " << ec.message();
+            << "Failure randomly selecting a peer address for slot ["
+            << slot << "] " << ec.message();
         return;
     }
+
     if (already_connected(address, connections_))
     {
         log_debug(LOG_PROTOCOL)
-            << "Already connected to " << encode_base16(address.ip);
-        // Retry another connection
-        // Still in same strand.
+            << "Already connected to selected peer [" 
+            << authority(address).to_string() << "]";
+
+        // Retry another connection, still in same strand.
         modify_slot(slot, connect_state::stopped);
         try_connect_once(slot);
         return;
     }
-    const std::string hostname = pretty(address.ip);
-    log_debug(LOG_PROTOCOL) << "Trying " << hostname << ":" << address.port;
-    connect(handshake_, network_, hostname, address.port,
-        strand_.wrap(&protocol::handle_connect, this, _1, _2, address, slot));
+
+    log_debug(LOG_PROTOCOL)
+        << "Connecting to peer [" << authority(address).to_string()
+        << "] on slot [" << slot << "]";
+
+    const authority peer(address);
+    connect(handshake_, network_, peer.host, peer.port,
+        strand_.wrap(&protocol::handle_connect,
+            this, _1, _2, address, slot));
 }
-void protocol::handle_connect(
-    const std::error_code& ec, channel_ptr node,
+
+void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     const network_address_type& address, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
-    if (ec)
+
+    if (ec || !node)
     {
-        log_warning(LOG_PROTOCOL) << "Unable to connect to "
-            << pretty(address.ip) << ":" << address.port
-            << " - " << ec.message();
-        // Retry another connection
-        // Still in same strand.
+        log_debug(LOG_PROTOCOL)
+            << "Failure connecting to peer ["
+            << authority(address).to_string() << "] on slot [" << slot << "] "
+            << ec.message();
+
+        // Retry another connection, still in same strand.
         modify_slot(slot, connect_state::stopped);
         try_connect_once(slot);
         return;
     }
+
     modify_slot(slot, connect_state::established);
     BITCOIN_ASSERT(connections_.size() <= max_outbound_);
     connections_.push_back({address, node});
-    log_info(LOG_PROTOCOL) << "Connected to "
-        << pretty(address.ip) << ":" << address.port
-        << " (" << connections_.size() << " connections)";
+
+    log_info(LOG_PROTOCOL)
+        << "Connected to peer ["
+        << authority(address).to_string() << "] on slot [" << slot << "] ("
+        << connections_.size() << " total)";
+
     // Remove channel from list of connections
-    node->subscribe_stop(strand_.wrap(
-        &protocol::outbound_channel_stopped, this, _1, node, slot));
+    node->subscribe_stop(
+        strand_.wrap(&protocol::outbound_channel_stopped,
+            this, _1, node, slot));
+
     setup_new_channel(node);
 }
 
 void protocol::maintain_connection(const std::string& hostname, uint16_t port)
 {
-    connect(handshake_, network_, hostname, port, strand_.wrap(
-        &protocol::handle_manual_connect, this, _1, _2, hostname, port));
+    connect(handshake_, network_, hostname, port,
+        strand_.wrap(&protocol::handle_manual_connect,
+            this, _1, _2, hostname, port));
 }
-void protocol::handle_manual_connect(
-    const std::error_code& ec, channel_ptr node,
-    const std::string& hostname, uint16_t port)
+
+void protocol::handle_manual_connect(const std::error_code& ec,
+    channel_ptr node, const std::string& hostname, uint16_t port)
 {
-    if (ec)
+    if (ec || !node)
     {
-        log_warning(LOG_PROTOCOL) << "Manual connection to "
-            << hostname << ":" << port << " failed with " << ec.message();
+        log_debug(LOG_PROTOCOL)
+            << "Failure connecting manually to peer [" 
+            << authority(hostname, port).to_string() << "] " << ec.message();
+
+        // Retry connect.
         maintain_connection(hostname, port);
         return;
     }
+
     manual_connections_.push_back(node);
+
     // Connected!
-    log_info(LOG_PROTOCOL) << "Manual connection established: "
-        << hostname << ":" << port;
-    // Remove channel from list of connections
-    node->subscribe_stop(strand_.wrap(
-        &protocol::manual_channel_stopped, this, _1, node, hostname, port));
+    log_info(LOG_PROTOCOL)
+        << "Connection to peer established manually ["
+        << authority(hostname, port).to_string() << "]";
+
+    // Subscript to channel stop notifications.
+    node->subscribe_stop(
+        strand_.wrap(&protocol::manual_channel_stopped,
+            this, _1, node, hostname, port));
+
     setup_new_channel(node);
 }
 
 void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
 {
+    if (!accept)
+        return;
+
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "Error while listening: " << ec.message();
+            << "Error while starting listener: " << ec.message();
+        return;
     }
-    else
-    {
-        accept->accept(strand_.wrap(
-            &protocol::handle_accept, this, _1, _2, accept));
-    }
+
+    // Listen for connections.
+    accept->accept(
+        strand_.wrap(&protocol::handle_accept,
+            this, _1, _2, accept));
 }
+
 void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
     acceptor_ptr accept)
 {
-    accept->accept(strand_.wrap(
-        &protocol::handle_accept, this, _1, _2, accept));
+    if (!accept)
+        return;
+
+    // Relisten for connections.
+    accept->accept(
+        strand_.wrap(&protocol::handle_accept,
+            this, _1, _2, accept));
+
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
-            << "Problem accepting connection: " << ec.message();
+        if (node)
+            log_debug(LOG_PROTOCOL)
+                << "Failure accepting connection from [" 
+                << node->address().to_string() << "] " << ec.message();
+        else
+            log_debug(LOG_PROTOCOL)
+                << "Failure accepting connection: " << ec.message();
         return;
     }
+
     accepted_channels_.push_back(node);
-    log_info(LOG_PROTOCOL) << "Accepted connection: "
-        << accepted_channels_.size();
-    auto handshake_complete = [this, node](const std::error_code& ec)
+
+    log_info(LOG_PROTOCOL)
+        << "Accepted connection from [" << node->address().to_string() << "] ("
+        << accepted_channels_.size() << " total)";
+
+    const auto handshake_complete = [this, node](const std::error_code& ec)
     {
+        if (!node)
+            return;
+
         if (ec)
         {
-            log_error(LOG_PROTOCOL) << "Problem with handshake: "
-                << ec.message();
+            log_debug(LOG_PROTOCOL) << "Failure in handshake from ["
+                << node->address().to_string() << "] " << ec.message();
             return;
         }
+
         // Remove channel from list of connections
-        node->subscribe_stop(strand_.wrap(
-            &protocol::inbound_channel_stopped, this, _1, node));
+        node->subscribe_stop(
+            strand_.wrap(&protocol::inbound_channel_stopped,
+                this, _1, node));
+
         setup_new_channel(node);
     };
+
     handshake_.ready(node, handshake_complete);
 }
 
-void handle_send(const std::error_code& ec)
-{
-    if (ec)
-        log_error(LOG_PROTOCOL)
-            << "Sending error: " << ec.message();
-}
 void protocol::setup_new_channel(channel_ptr node)
 {
-    subscribe_address(node);
+    if (!node)
+        return;
+
+    const auto handle_send = [node](const std::error_code& ec)
+    {
+        if (!node)
+            return;
+
+        if (ec)
+        {
+            log_debug(LOG_PROTOCOL) << "Send error ["
+                << node->address().to_string() << "] " << ec.message();
+        }
+    };
+    
+    // Subscribe to address messages.
+    node->subscribe_address(
+        strand_.wrap(&protocol::handle_address_message,
+            this, _1, _2, node));
+
     node->send(get_address_type(), handle_send);
+
     // Notify subscribers
-    channel_subscribe_->relay(std::error_code(), node);
+    channel_subscribe_->relay(error::success, node);
 }
 
 template <typename ConnectionsList>
-void remove_connection(ConnectionsList& connections, channel_ptr which_node)
+void remove_connection(ConnectionsList& connections, channel_ptr node)
 {
     auto it = connections.begin();
     for (; it != connections.end(); ++it)
-        if (it->node == which_node)
+        if (it->node == node)
             break;
+
     BITCOIN_ASSERT(it != connections.end());
     connections.erase(it);
 }
-void protocol::outbound_channel_stopped(
-    const std::error_code& ec, channel_ptr which_node, slot_index slot)
+
+void protocol::outbound_channel_stopped(const std::error_code& ec,
+    channel_ptr node, slot_index slot)
 {
-    // We must always attempt a reconnection if this was an
-    // outbound connection.
-    if (ec) 
-        log_error(LOG_PROTOCOL)
-            << "Channel stopped (outbound): " << ec.message();
-    // Erase this channel from our connections list.
-    // And then attempt a reconnection.
-    remove_connection(connections_, which_node);
+    // We must always attempt a reconnection.
+    if (ec)
+    {
+        if (node)
+            log_debug(LOG_PROTOCOL)
+                << "Channel stopped (outbound) ["
+                << node->address().to_string() << "] " << ec.message();
+        else
+            log_debug(LOG_PROTOCOL)
+                << "Channel stopped (outbound): " << ec.message();
+    }
+
+    // Erase this channel from our list and then attempt a reconnection.
+    remove_connection(connections_, node);
+
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
     modify_slot(slot, connect_state::stopped);
-    // Attempt a reconnection.
-    // Recreate 1 new connection always.
-    // Still in same strand.
+
+    // Attempt reconnection.
     try_connect_once(slot);
 }
 
 template <typename ChannelsList>
-void remove_channel(ChannelsList& channels, channel_ptr which_node)
+void remove_channel(ChannelsList& channels, channel_ptr node)
 {
-    auto it = std::find(channels.begin(), channels.end(), which_node);
+    const auto it = std::find(channels.begin(), channels.end(), node);
     BITCOIN_ASSERT(it != channels.end());
     channels.erase(it);
 }
 
-void protocol::manual_channel_stopped(
-    const std::error_code& ec, channel_ptr which_node,
-    const std::string& hostname, uint16_t port)
+void protocol::manual_channel_stopped(const std::error_code& ec,
+    channel_ptr node, const std::string& hostname, uint16_t port)
 {
-    // We must always attempt a reconnection if this was an
-    // outbound connection.
-    if (ec) 
-        log_error(LOG_PROTOCOL)
-            << "Channel stopped (manual): " << ec.message();
-    // Remove from list and try to reconnect.
-    // Timeout logic would go here if we ever need it.
-    remove_channel(manual_connections_, which_node);
-    // Reconnect again.
-    maintain_connection(hostname, port);
-}
-void protocol::inbound_channel_stopped(
-    const std::error_code& ec, channel_ptr which_node)
-{
-    // We must always attempt a reconnection if this was an
-    // outbound connection.
-    if (ec) 
-    {
-        log_error(LOG_PROTOCOL)
-            << "Channel stopped (inbound): " << ec.message();
-    }
-    // Remove from accepted connections.
-    remove_channel(accepted_channels_, which_node);
-}
-
-void protocol::subscribe_address(channel_ptr node)
-{
-    node->subscribe_address(strand_.wrap(
-        &protocol::receive_address_message, this, _1, _2, node));
-}
-void protocol::receive_address_message(const std::error_code& ec,
-    const address_type& packet, channel_ptr node)
-{
+    // We must always attempt a reconnection.
     if (ec)
     {
-        log_warning(LOG_PROTOCOL)
-            << "Problem receiving addresses: " << ec.message();
+        if (node)
+            log_debug(LOG_PROTOCOL)
+                << "Channel stopped (manual) [" 
+                << authority(hostname, port).to_string() << "] " << ec.message();
+        else
+            log_debug(LOG_PROTOCOL)
+                << "Channel stopped (manual): " << ec.message();
+    }
+
+    // Remove from accepted connections.
+    // Timeout logic would go here if we ever need it.
+    remove_channel(manual_connections_, node);
+
+    // Attempt reconnection.
+    maintain_connection(hostname, port);
+}
+
+void protocol::inbound_channel_stopped(const std::error_code& ec,
+    channel_ptr node)
+{
+    // We do not attempt to reconnect inbound connections.
+    if (ec)
+    {
+        if (node)
+            log_debug(LOG_PROTOCOL)
+                << "Channel stopped (inbound) ["
+                << node->address().to_string() << "] " << ec.message();
+        else
+            log_debug(LOG_PROTOCOL)
+                << "Channel stopped (inbound): " << ec.message();
+    }
+
+    // Remove from accepted connections (no reconnect).
+    remove_channel(accepted_channels_, node);
+}
+
+void protocol::handle_address_message(const std::error_code& ec,
+    const address_type& packet, channel_ptr node)
+{
+    if (!node)
+        return;
+
+    if (ec)
+    {
+        // TODO: reset the connection.
+        log_debug(LOG_PROTOCOL)
+            << "Failure getting addresses from ["
+            << node->address().to_string() << "] " << ec.message();
         return;
     }
-    log_debug(LOG_PROTOCOL) << "Storing addresses.";
-    for (const network_address_type& net_address: packet.addresses)
-        hosts_.store(net_address, strand_.wrap(
-            &protocol::handle_store_address, this, _1));
-    node->subscribe_address(strand_.wrap(
-        &protocol::receive_address_message, this, _1, _2, node));
+
+    log_debug(LOG_PROTOCOL)
+        << "Storing addresses from [" << node->address().to_string() << "]";
+
+    for (const auto& net_address: packet.addresses)
+        host_pool_.store(net_address,
+            strand_.wrap(&protocol::handle_store_address,
+                this, _1));
+
+    // Subscribe to address messages.
+    node->subscribe_address(
+        strand_.wrap(&protocol::handle_address_message,
+            this, _1, _2, node));
 }
+
 void protocol::handle_store_address(const std::error_code& ec)
 {
     if (ec)
-        log_error(LOG_PROTOCOL) << "Failed to store address: " << ec.message();
+        log_error(LOG_PROTOCOL) << "Failed to store address: "
+            << ec.message();
 }
 
 void protocol::fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
     strand_.queue(
-        &protocol::do_fetch_connection_count, this, handle_fetch);
+        std::bind(&protocol::do_fetch_connection_count,
+            this, handle_fetch));
 }
+
 void protocol::do_fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
-    handle_fetch(std::error_code(), connections_.size());
+    handle_fetch(error::success, connections_.size());
 }
 
 void protocol::subscribe_channel(channel_handler handle_channel)
@@ -621,6 +672,27 @@ size_t protocol::total_connections() const
 {
     return connections_.size() + manual_connections_.size() +
         accepted_channels_.size();
+}
+
+void protocol::set_max_outbound(size_t max_outbound)
+{
+    max_outbound_ = max_outbound;
+}
+
+void protocol::set_hosts_filename(const std::string& hosts_path)
+{
+    host_pool_.file_path_ = hosts_path;
+}
+
+// Deprecated, this is problematic because there is no enabler.
+void protocol::disable_listener()
+{
+    listen_port_ = 0;
+}
+
+// Deprecated, should be private.
+void protocol::bootstrap(completion_handler handle_complete)
+{
 }
 
 } // namespace network

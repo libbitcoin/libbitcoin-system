@@ -14,6 +14,7 @@
 #include <string.h>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -281,7 +282,7 @@ public:
 
     uint64_t GetLow64() const
     {
-        assert(WIDTH >= 2);
+        BITCOIN_ASSERT(WIDTH >= 2);
         return pn[0] | (uint64_t)pn[1] << 32;
     }
 };

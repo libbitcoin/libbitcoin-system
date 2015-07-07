@@ -28,52 +28,7 @@
 
 namespace libbitcoin {
 
-BC_CONSTEXPR uint32_t protocol_version = 60000;
-
-BC_CONSTEXPR uint64_t block_reward = 50;
-
-// 210000 ~ 4 years / 10 minutes
-BC_CONSTEXPR uint64_t reward_interval = 210000;
-
-BC_CONSTEXPR size_t coinbase_maturity = 100;
-
-#ifdef ENABLE_TESTNET
-BC_CONSTEXPR uint32_t protocol_port = 18333;
-#else
-BC_CONSTEXPR uint32_t protocol_port = 8333;
-#endif
-
-// Threshold for nLockTime: below this value it is
-// interpreted as block number, otherwise as UNIX timestamp.
-// Tue Nov 5 00:53:20 1985 UTC
-BC_CONSTEXPR uint32_t locktime_threshold = 500000000;
-
-BC_CONSTFUNC uint64_t max_money_recursive(uint64_t current)
-{
-    return (current > 0) ?
-        current + max_money_recursive(current >> 1) : 0;
-}
-
-BC_CONSTFUNC uint64_t coin_price(uint64_t value = 1)
-{
-    return value * 100000000;
-}
-
-BC_CONSTFUNC uint64_t max_money()
-{
-    return reward_interval * max_money_recursive(coin_price(block_reward));
-}
-
-BC_CONSTEXPR hash_digest null_hash = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-BC_CONSTEXPR short_hash null_short_hash = {
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-BC_CONSTEXPR uint8_t byte_bits = 8;
-BC_CONSTEXPR uint32_t max_bits = 0x1d00ffff;
-BC_API hash_number max_target();
-BC_API uint32_t magic_value();
+// Generic constants.
 
 BC_CONSTEXPR int64_t min_int64 = MIN_INT64;
 BC_CONSTEXPR int64_t max_int64 = MAX_INT64;
@@ -83,36 +38,66 @@ BC_CONSTEXPR uint64_t max_uint64 = MAX_UINT64;
 BC_CONSTEXPR uint32_t max_uint32 = MAX_UINT32;
 BC_CONSTEXPR uint16_t max_uint16 = MAX_UINT16;
 BC_CONSTEXPR uint8_t max_uint8 = MAX_UINT8;
+BC_CONSTEXPR uint8_t byte_bits = 8;
+
 // Debian complains about missing UINTPTR_MAX definition for some weird reason.
 #ifdef UINTPTR_MAX
-BC_CONSTEXPR uint64_t max_size_t = UINTPTR_MAX;
+    BC_CONSTEXPR uint64_t max_size_t = UINTPTR_MAX;
 #else
-BC_CONSTEXPR uint64_t max_size_t = std::numeric_limits<size_t>::max();
+    BC_CONSTEXPR uint64_t max_size_t = std::numeric_limits<size_t>::max();
 #endif
 
-BC_CONSTEXPR uint32_t max_index = max_uint32;
-BC_CONSTEXPR uint32_t max_height = max_uint32;
-BC_CONSTEXPR uint32_t max_sequence = max_uint32;
+// Bitcoin constants.
 
-// Every two weeks we readjust target
-BC_CONSTEXPR uint64_t target_timespan = 14 * 24 * 60 * 60;
-// Aim for blocks every 10 mins
-BC_CONSTEXPR uint64_t target_spacing = 10 * 60;
-// Two weeks worth of blocks = readjust interval = 2016
-BC_CONSTEXPR uint64_t readjustment_interval = target_timespan / target_spacing;
+BC_CONSTEXPR uint32_t reward_interval = 210000;
+BC_CONSTEXPR uint32_t protocol_version = 60000;
+BC_CONSTEXPR uint32_t coinbase_maturity = 100;
+BC_CONSTEXPR uint32_t initial_block_reward = 50;
+BC_CONSTEXPR uint32_t max_work_bits = 0x1d00ffff;
+BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
+
+// Deprecated (use more descriptive).
+BC_CONSTEXPR uint32_t max_bits = max_work_bits;
+BC_CONSTEXPR uint32_t max_sequence = max_input_sequence;
+BC_CONSTEXPR uint32_t block_reward = initial_block_reward;
+
+// Threshold for nLockTime: below this value it is interpreted as block number,
+// otherwise as UNIX timestamp. [Tue Nov 5 00:53:20 1985 UTC]
+BC_CONSTEXPR uint32_t locktime_threshold = 500000000;
+
+BC_CONSTFUNC uint64_t max_money_recursive(uint64_t current)
+{
+    return (current > 0) ? current + max_money_recursive(current >> 1) : 0;
+}
+
+BC_CONSTFUNC uint64_t coin_price(uint64_t value=1)
+{
+    return value * 100000000;
+}
+
+BC_CONSTFUNC uint64_t max_money()
+{
+    return reward_interval *
+        max_money_recursive(coin_price(initial_block_reward));
+}
 
 #ifdef ENABLE_TESTNET
-// Block 514 is the first block after Feb 15 2014.
-// Testnet started bip16 before mainnet.
-BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
-BC_CONSTEXPR uint32_t bip16_switchover_height = 514;
+    // Block 514 is the first block after [Feb 15 2014].
+    // Testnet started bip16 before mainnet.
+    BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
+    BC_CONSTEXPR uint32_t bip16_switchover_height = 514;
+    BC_CONSTEXPR uint16_t protocol_port = 18333;
 #else
-// April 1 2012
-BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
-BC_CONSTEXPR uint32_t bip16_switchover_height = 173805;
+    // [April 1 2012]
+    BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
+    BC_CONSTEXPR uint32_t bip16_switchover_height = 173805;
+    BC_CONSTEXPR uint16_t protocol_port = 8333;
 #endif
+
+// Constants, sort of.
+BC_API hash_number max_target();
+BC_API uint32_t magic_value();
 
 } // namespace libbitcoin
 
 #endif
-

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -21,77 +21,72 @@
 
 #include <new>
 #include <system_error>
+#include <thread>
+#include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
 
 using boost::asio::io_service;
 
-threadpool::threadpool()
+threadpool::threadpool(size_t number_threads, thread_priority priority)
   : work_(nullptr)
 {
-}
-
-threadpool::threadpool(size_t number_threads)
-  : work_(nullptr)
-{
-    spawn(number_threads);
+    spawn(number_threads, priority);
 }
 
 threadpool::~threadpool()
 {
-    delete work_;
+    shutdown();
 }
 
-void threadpool::spawn(size_t number_threads)
+void threadpool::spawn(size_t number_threads, thread_priority priority)
 {
     for (size_t i = 0; i < number_threads; ++i)
-        spawn_once();
+        spawn_once(priority);
 }
-void threadpool::spawn_once()
+
+void threadpool::spawn_once(thread_priority priority)
 {
-    if (!work_)
+    if (work_ == nullptr)
         work_ = new io_service::work(ios_);
-    threads_.push_back(std::thread([this] { ios_.run(); }));
+
+    const auto action = [this, priority]
+    {
+        set_thread_priority(priority);
+        ios_.run();
+    };
+
+    threads_.push_back(std::thread(action));
 }
 
 void threadpool::stop()
 {
     ios_.stop();
 }
+
 void threadpool::shutdown()
 {
-    delete work_;
+    if (work_ != nullptr)
+        delete work_;
+
     work_ = nullptr;
 }
+
 void threadpool::join()
 {
-    for (std::thread& t: threads_)
-    {
-        try
-        {
-            t.join();
-        }
-        catch (const std::system_error&)
-        {
-            // other than logging, or altering the signature to
-            // return the error to the join caller, not sure what
-            // to do here.
-        }
-    }
+    for (auto& thread: threads_)
+        if (thread.joinable())
+            thread.join();
 }
 
 io_service& threadpool::service()
 {
     return ios_;
 }
+
 const io_service& threadpool::service() const
 {
     return ios_;
-}
-
-async_strand::async_strand(threadpool& pool)
-  : ios_(pool.service()), strand_(ios_)
-{
 }
 
 } // namespace libbitcoin

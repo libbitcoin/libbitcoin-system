@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/libbitcoin/libbitcoin.svg?branch=master)](https://travis-ci.org/libbitcoin/libbitcoin)
 
+[![Coverage Status](https://coveralls.io/repos/libbitcoin/libbitcoin/badge.svg)](https://coveralls.io/r/libbitcoin/libbitcoin)
+
 # Libbitcoin
 
 *The Bitcoin Development Library*
@@ -47,6 +49,7 @@ If necessary, upgrade your compiler as follows:
 $ sudo apt-get install g++-4.8
 $ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
 $ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
+$ sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 50
 ```
 Next install the [build system](http://wikipedia.org/wiki/GNU_build_system):
 ```sh

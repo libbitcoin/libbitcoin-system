@@ -145,48 +145,61 @@ bool is_push_only(const operation_stack& operations)
     return count_non_push(operations) == 0;
 }
 
-bool script_type::run(
-    script_type input_script, const transaction_type& parent_tx,
-    uint32_t input_index, bool bip16_enabled)
+bool script_type::run(const script_type& input_script,
+    const transaction_type& parent_tx, uint32_t input_index,
+    bool bip16_enabled)
 {
+    // Copy the script.
+    auto copy_script = input_script;
+
     stack_.clear();
-    input_script.stack_.clear();
-    if (!input_script.run(parent_tx, input_index))
+    copy_script.stack_.clear();
+    if (!copy_script.run(parent_tx, input_index))
         return false;
-    stack_ = input_script.stack_;
+
+    stack_ = copy_script.stack_;
     if (!run(parent_tx, input_index))
         return false;
+
     if (stack_.empty())
         return false;
+
     if (!cast_to_bool(stack_.back()))
         return false;
+
     // Additional validation for spend-to-script-hash transactions
     if (bip16_enabled && type() == payment_type::script_hash)
     {
-        if (!is_push_only(input_script.operations()))
+        if (!is_push_only(copy_script.operations()))
             return false;
-        // Load last input_script stack item as a script
-        data_stack eval_stack = input_script.stack_;
+
+        // Load last input_script stack item as a script.
         script_type eval_script;
+        auto eval_stack = copy_script.stack_;
         try
         {
-            eval_script = parse_script(input_script.stack_.back());
+            eval_script = parse_script(copy_script.stack_.back());
         }
         catch (end_of_stream)
         {
             // Invalid script.
             return false;
         }
+
         // Pop last item and copy as starting stack to eval script
         eval_stack.pop_back();
         eval_script.stack_ = eval_stack;
+
         // Run script
         if (!eval_script.run(parent_tx, input_index))
             return false;
+
         if (eval_script.stack_.empty())
             return false;
+
         return cast_to_bool(eval_script.stack_.back());
     }
+
     return true;
 }
 
@@ -1171,7 +1184,7 @@ bool script_type::op_checkmultisigverify(
 }
 
 bool script_type::run_operation(const operation& op,
-        const transaction_type& parent_tx, uint32_t input_index)
+    const transaction_type& parent_tx, uint32_t input_index)
 {
     switch (op.code)
     {
@@ -1450,10 +1463,11 @@ bool script_type::run_operation(const operation& op,
             return false;
 
         default:
-            log_fatal(LOG_SCRIPT) << "Unimplemented operation <none "
-                << static_cast<int>(op.code) << ">";
+            // This kills our test cases, but it should be called, as above.
+            // BITCOIN_ASSERT_MSG(false, "Unsupported opcode.");
             return false;
     }
+
     return false;
 }
 

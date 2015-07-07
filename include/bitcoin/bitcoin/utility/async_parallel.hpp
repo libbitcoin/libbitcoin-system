@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -21,6 +21,7 @@
 #define LIBBITCOIN_ASYNC_PARALLEL_HPP
 
 #include <atomic>
+#include <cstddef>
 #include <memory>
 #include <system_error>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -60,31 +61,36 @@ struct async_parallel_dispatch
     atomic_counter_ptr counter;
 
     template <typename... Args>
-    void operator()(const std::error_code& ec, Args&&... args)
+    void operator()(const std::error_code& code, Args&&... args)
     {
         BITCOIN_ASSERT(*counter <= clearance_count);
         if (*counter == clearance_count)
             return;
-        if (ec)
+
+        if (code)
         {
             // Stop because of failure.
             *counter = clearance_count;
-            handler(ec, std::forward<Args>(args)...);
+            handler(code, std::forward<Args>(args)...);
         }
         else if (++(*counter) == clearance_count)
+        {
             // Finished executing multiple async paths.
-            handler(ec, std::forward<Args>(args)...);
+            handler(code, std::forward<Args>(args)...);
+        }
     }
 };
 
 template <typename Handler>
-async_parallel_dispatch<
-    typename std::decay<Handler>::type
->
+async_parallel_dispatch<typename std::decay<Handler>::type>
 async_parallel(Handler&& handler, size_t clearance_count)
 {
-    return {handler, clearance_count,
-        std::make_shared<atomic_counter>(0)};
+    return
+    {
+        handler,
+        clearance_count,
+        std::make_shared<atomic_counter>(0)
+    };
 }
 
 } // libbitcoin

@@ -27,8 +27,9 @@
 
 namespace libbitcoin {
 
-// A list of indices. Used for creating block_locator objects or
-// Storing list of unconfirmed input indexes in tx pool.
+// A list of indices. Used for creating block_locator objects or storing list 
+// of unconfirmed input indexes in tx pool.
+// TODO: move to libbitcoin-blockchain::transaction_pool (interface break).
 typedef std::vector<size_t> index_list;
 
 enum class block_status
@@ -49,11 +50,8 @@ BC_API bool operator==(
 
 BC_API uint64_t block_value(size_t height);
 BC_API hash_number block_work(uint32_t bits);
-
 BC_API hash_digest hash_block_header(const block_header_type& header);
-
-BC_API index_list block_locator_indexes(int top_height);
-
+BC_API index_list block_locator_indexes(size_t top_height);
 BC_API block_type genesis_block();
 
 } // namespace libbitcoin

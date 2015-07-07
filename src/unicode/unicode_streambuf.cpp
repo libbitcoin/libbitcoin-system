@@ -23,6 +23,7 @@
 #include <cstring>
 #include <iostream>
 #include <streambuf>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
@@ -36,7 +37,7 @@ unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
     narrow_(new char[narrow_size_]), wide_(new wchar_t[narrow_size_]),
     wide_buffer_(wide_buffer)
 {
-    if (wide_size_ > (MAX_UINT64 / utf8_max_character_size))
+    if (wide_size_ > (bc::max_uint64 / utf8_max_character_size))
         throw std::ios_base::failure(
             "Wide buffer must be no more than one fourth of max uint64.");
 
@@ -60,8 +61,12 @@ unicode_streambuf::~unicode_streambuf()
 // initialized with a patched std::wcin when std::wcin is used.
 std::streambuf::int_type unicode_streambuf::underflow()
 {
+    // streamsize is signed.
+    BITCOIN_ASSERT(wide_size_ > 0 && wide_size_ <= bc::max_int64);
+    const auto size = static_cast<std::streamsize>(wide_size_);
+
     // Read from the wide input buffer.
-    const auto read = wide_buffer_->sgetn(wide_, wide_size_);
+    const auto read = static_cast<size_t>(wide_buffer_->sgetn(wide_, size));
 
     // Handle read termination.
     if (read == 0)

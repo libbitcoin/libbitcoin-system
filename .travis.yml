@@ -51,6 +51,7 @@ install:
     - if [[ $LINUX           ]]; then sudo apt-get install -qq g++-4.8 --allow-unauthenticated; fi
     - if [[ $LINUX           ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50; fi
     - if [[ $LINUX           ]]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50; fi
+    - if [[ $LINUX           ]]; then sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 50; fi
 
     # Install clang++ 3.4
     - if [[ $LINUX && $CLANG ]]; then sudo apt-get install -qq clang-3.4 --allow-unauthenticated; fi
@@ -66,9 +67,25 @@ install:
 script:
 
     # Download and build libbitcoin and all dependencies.
-    - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --enable-testnet --disable-shared --prefix=$HOME/my-prefix; fi
-    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --disable-shared --prefix=$HOME/my-prefix CXXFLAGS='-Os -stdlib=libstdc++' LDLIBS='-lstdc++'; fi
-    - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --disable-ndebug --disable-shared --prefix=$HOME/my-prefix --build-dir=my-build CXXFLAGS='-Os -s -static'; fi
+    - if [[ $OSX   && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --enable-testnet --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix; fi
+    - if [[ $LINUX && $CLANG && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --disable-shared --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-Os' LDLIBS='-lstdc++' CXXFLAGS='-Os -stdlib=libstdc++'; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then ./install.sh --with-icu --build-icu --build-boost --disable-shared --build-dir=my-build --prefix=$TRAVIS_BUILD_DIR/my-prefix CFLAGS='-O0 -g -static --coverage' CXXFLAGS='-O0 -g -static --coverage'; fi
     - if [[ $OSX   && $CLANG && $DYNAMIC ]]; then ./install.sh ; fi
-    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --with-icu --build-icu --disable-ndebug --disable-static CXXFLAGS='-Os -stdlib=libstdc++' LDLIBS='-lstdc++'; fi
+    - if [[ $LINUX && $CLANG && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --with-icu --build-icu --disable-ndebug --disable-static CFLAGS='-Os' LDLIBS='-lstdc++' CXXFLAGS='-Os -stdlib=libstdc++'; fi
     - if [[ $LINUX && $GCC   && $DYNAMIC ]]; then sudo CXX=$CXX CC=$CC ./install.sh --build-boost; fi
+
+after_success:
+
+    # Install coveralls and current lcov.
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then wget http://ftp.de.debian.org/debian/pool/main/l/lcov/lcov_1.11.orig.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then tar xf lcov_1.11.orig.tar.gz; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then sudo make -C lcov-1.11 install; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then gem install coveralls-lcov; fi
+
+    # Capture coverage info, filter out system and test code, and debug before upload.
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --directory . --capture --output-file coverage.info; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --remove coverage.info "/usr/*" "$TRAVIS_BUILD_DIR/my-prefix/*" "my-build/*" "examples/*" "test/*" --output-file coverage.info; fi
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then lcov --list coverage.info; fi
+    
+    # Upload coverage info to coveralls service (--repo-token <private coveralls repo token>).
+    - if [[ $LINUX && $GCC   && $STATIC  ]]; then coveralls-lcov coverage.info; fi

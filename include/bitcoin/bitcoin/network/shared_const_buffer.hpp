@@ -20,33 +20,35 @@
 #ifndef LIBBITCOIN_SHARED_CONST_BUFFER_HPP
 #define LIBBITCOIN_SHARED_CONST_BUFFER_HPP
 
+#include <memory>
 #include <boost/asio.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace network {
 
+// TODO: split into cpp file.
 // A reference-counted non-modifiable buffer class.
-class shared_const_buffer
+class BC_API shared_const_buffer
 {
 public:
-    // Construct from a stream object
-    BC_API explicit shared_const_buffer(const data_chunk& user_data)
-     : data_(std::make_shared<data_chunk>(
-            std::begin(user_data), std::end(user_data))),
-        buffer_(boost::asio::buffer(*data_))
-    {
-    }
-
     // Implement the ConstBufferSequence requirements.
     typedef boost::asio::const_buffer value_type;
     typedef const value_type* const_iterator;
 
-    BC_API const_iterator begin() const
+     // Construct from a stream object.
+    explicit shared_const_buffer(const data_chunk& data)
+      : data_(std::make_shared<data_chunk>(data.begin(), data.end())),
+        buffer_(boost::asio::buffer(*data_))
+    {
+    }
+
+    const_iterator begin() const
     {
         return &buffer_;
     }
-    BC_API const_iterator end() const
+
+    const_iterator end() const
     {
         return &buffer_ + 1;
     }

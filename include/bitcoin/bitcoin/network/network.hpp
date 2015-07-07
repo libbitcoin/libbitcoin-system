@@ -25,6 +25,8 @@
 #include <boost/asio.hpp>
 #include <boost/utility.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/acceptor.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -32,47 +34,24 @@
 namespace libbitcoin {
 namespace network {
 
-class channel;
-typedef std::shared_ptr<channel> channel_ptr;
-typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
-
-class acceptor
-  : public std::enable_shared_from_this<acceptor>
-{
-public:
-    typedef std::shared_ptr<boost::asio::ip::tcp::acceptor> tcp_acceptor_ptr;
-
-    typedef std::function<
-        void (const std::error_code&, channel_ptr)> accept_handler;
-
-    BC_API acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept);
-    BC_API void accept(accept_handler handle_accept);
-
-private:
-    void call_handle_accept(const boost::system::error_code& ec,
-        socket_ptr socket, accept_handler handle_accept);
-
-    threadpool& pool_;
-    tcp_acceptor_ptr tcp_accept_;
-};
-
-typedef std::shared_ptr<acceptor> acceptor_ptr;
-
-class network
+class BC_API network
 {
 public:
     typedef std::function<
         void (const std::error_code&, channel_ptr)> connect_handler;
     typedef std::function<
         void (const std::error_code&, acceptor_ptr)> listen_handler;
+    typedef std::function<void (const std::error_code&)> unlisten_handler;
 
-    BC_API network(threadpool& pool);
+    network(threadpool& pool);
 
+    /// This class is not copyable.
     network(const network&) = delete;
     void operator=(const network&) = delete;
 
-    BC_API void listen(uint16_t port, listen_handler handle_listen);
-    BC_API void connect(const std::string& hostname, uint16_t port,
+    void listen(uint16_t port, listen_handler handle_listen);
+    void unlisten(unlisten_handler handle_unlisten);
+    void connect(const std::string& hostname, uint16_t port,
         connect_handler handle_connect);
 
 private:
