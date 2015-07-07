@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PROTOCOL_HPP
-#define LIBBITCOIN_PROTOCOL_HPP
+// TODO: rationalize include guard names (conflict with libbitcoin-protocol).
+#ifndef BC_PROTOCOL_HPP
+#define BC_PROTOCOL_HPP
 
 #include <atomic>
 #include <cstddef>
