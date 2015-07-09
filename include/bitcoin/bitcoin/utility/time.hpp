@@ -43,11 +43,11 @@ BC_API int clock_gettime(int clock_id, timespec* ts);
 
 #define CLOCK_REALTIME 0
 
-typedef struct BC_API timespec
+struct BC_API timespec
 {
     time_t tv_sec;
     int32_t tv_nsec;
-} timespec;
+};
 
 BC_API int clock_gettime(int, timespec* ts);
 
