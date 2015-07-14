@@ -40,7 +40,7 @@ public:
     void operator=(const channel_stream_loader&) = delete;
 
     void add(bc::network::channel_loader_module_base* module);
-    void load_lookup(const std::string& symbol,
+    std::error_code load_lookup(const std::string& symbol,
         std::istream& stream) const;
 
 private:

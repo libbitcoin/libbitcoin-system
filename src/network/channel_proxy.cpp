@@ -432,7 +432,16 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
 
     byte_source<data_chunk> source(payload);
     boost::iostreams::stream<byte_source<data_chunk>> istream(source);
-    loader_.load_lookup(header.command, istream);
+
+    if (loader_.load_lookup(header.command, istream))
+    {
+        if (istream.peek() != std::istream::traits_type::eof())
+        {
+            log_warning(LOG_NETWORK)
+                << "Valid message [" << header.command
+                << "] handled, unused bytes remain in payload.";
+        }
+    }
 }
 
 void channel_proxy::call_handle_send(const boost::system::error_code& ec,

@@ -34,7 +34,7 @@ class BC_API channel_loader_module_base
 {
 public:
     virtual ~channel_loader_module_base() {}
-    virtual void attempt_load(std::istream& stream) const = 0;
+    virtual std::error_code attempt_load(std::istream& stream) const = 0;
     virtual const std::string lookup_symbol() const = 0;
 };
 
@@ -56,19 +56,20 @@ public:
     channel_loader_module(const channel_loader_module&) = delete;
     void operator=(const channel_loader_module&) = delete;
 
-    void attempt_load(std::istream& stream) const
+    std::error_code attempt_load(std::istream& stream) const
     {
+        std::error_code status = error::success;
         Message result;
 
-        if (result.from_data(stream))
+        if (!result.from_data(stream))
         {
-            handle_load_(error::success, result);
+            status = bc::error::bad_stream;
+            result = Message();
         }
-        else
-        {
-            // This doesn't invalidate the channel (unlike the invalid header).
-            handle_load_(bc::error::bad_stream, Message());
-        }
+
+        handle_load_(status, result);
+
+        return status;
     }
 
     const std::string lookup_symbol() const

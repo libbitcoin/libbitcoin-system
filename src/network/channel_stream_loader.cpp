@@ -43,12 +43,16 @@ void channel_stream_loader::add(channel_loader_module_base* module)
     modules_.push_back(module);
 }
 
-void channel_stream_loader::load_lookup(const std::string& symbol,
+std::error_code channel_stream_loader::load_lookup(const std::string& symbol,
     std::istream& stream) const
 {
+    std::error_code status = bc::error::bad_stream;
+
     for (auto module: modules_)
         if (module->lookup_symbol() == symbol)
-            module->attempt_load(stream);
+            status = module->attempt_load(stream);
+
+    return status;
 }
 
 } // namespace network
