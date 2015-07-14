@@ -570,7 +570,16 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     // Parse and publish the payload to message subscribers.
     byte_source<data_chunk> source(payload_copy);
     boost::iostreams::stream<byte_source<data_chunk>> istream(source);
-    loader_.load(header.command, istream);
+
+    if (loader_.load(header.command, istream))
+    {
+        if (istream.peek() != std::istream::traits_type::eof())
+        {
+            log_warning(LOG_NETWORK)
+                << "Valid message [" << header.command
+                << "] handled, unused bytes remain in payload.";
+        }
+    }
 
     // Now we stop the channel if there was an error and we aren't yet stopped.
     if (ec)

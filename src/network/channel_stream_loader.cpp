@@ -37,12 +37,16 @@ channel_stream_loader::~channel_stream_loader()
         delete module.second;
 }
 
-void channel_stream_loader::load(const std::string& symbol,
+std::error_code channel_stream_loader::load(const std::string& symbol,
     std::istream& stream) const
 {
+    std::error_code status = bc::error::bad_stream;
+
     auto it = modules_.find(symbol);
     if (it != modules_.end())
-        it->second->attempt_load(stream);
+        status = it->second->attempt_load(stream);
+
+    return status;
 }
 
 } // namespace network
