@@ -36,6 +36,7 @@ timed_section::~timed_section()
     log_debug(context_) << section_ << " " << std::fixed << elapsed();
 }
 
+// calculate elapsed milliseconds.
 double timed_section::elapsed() const
 {
     timespec end;
