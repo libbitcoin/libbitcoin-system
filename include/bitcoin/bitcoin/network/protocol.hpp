@@ -150,12 +150,6 @@ public:
     void disable_listener();
 
 private:
-    struct connection_info
-    {
-        network_address_type address;
-        channel_ptr node;
-    };
-
     enum class connect_state
     {
         finding_peer,
@@ -167,7 +161,6 @@ private:
     typedef size_t slot_index;
     typedef std::vector<channel_ptr> channel_ptr_list;
     typedef std::vector<connect_state> connect_state_list;
-    typedef std::vector<connection_info> connection_list;
     typedef subscriber<const std::error_code&, channel_ptr>
         channel_subscriber_type;
 
@@ -204,15 +197,15 @@ private:
     // subscribe call.
     void try_connect_once(slot_index slot);
     void attempt_connect(const std::error_code& ec,
-        const network_address_type& packet, slot_index slot);
+        const authority& packet, slot_index slot);
     void handle_connect(const std::error_code& ec, channel_ptr node,
-        const network_address_type& address, slot_index slot);
+        const authority& address, slot_index slot);
 
-    // Periodically call this method to reset the watermark and reallow
+    // Periodically call this method to reset the sweep and reallow
     // connections. This prevents too many connection attempts from
     // exhausting resources by putting a limit on connection attempts
     // within a certain time interval.
-    void start_watermark_reset_timer();
+    void start_sweep_reset_timer();
 
     // Manual connections
     void handle_manual_connect(const std::error_code& ec, channel_ptr node,
@@ -225,6 +218,8 @@ private:
 
     // Channel setup
     void setup_new_channel(channel_ptr node);
+    bool is_connected(const authority& address);
+    void remove_connection(channel_ptr_list& connections, channel_ptr node);
 
     // Remove channels from lists when disconnected.
     void outbound_channel_stopped(const std::error_code& ec,
@@ -247,15 +242,16 @@ private:
     {
         const auto total_nodes = total_connections();
         const auto send_handler =
-            std::bind(handle_send, std::placeholders::_1, total_nodes);
+            std::bind(handle_send,
+                std::placeholders::_1, total_nodes);
 
-        for (const auto& connection: connections_)
-            connection.node->send(packet, send_handler);
+        for (const auto& node: outbound_connections_)
+            node->send(packet, send_handler);
 
         for (const auto node: manual_connections_)
             node->send(packet, send_handler);
 
-        for (const auto node: accepted_channels_)
+        for (const auto node: inbound_connections_)
             node->send(packet, send_handler);
     }
     
@@ -264,27 +260,27 @@ private:
     handshake& handshake_;
     network& network_;
 
+    // Manual connections created via configuration or user input.
+    channel_ptr_list manual_connections_;
+
+    // Inbound connections from the p2p network.
+    uint16_t inbound_port_;
+    channel_ptr_list inbound_connections_;
+
     // There's a fixed number of slots that are always trying to reconnect.
     size_t max_outbound_;
-    connection_list connections_;
+    channel_ptr_list outbound_connections_;
 
     // Simply a debugging tool to enforce correct state transition behaviour
     // for maintaining connections.
     connect_state_list connect_states_;
 
     // Used to prevent too many connection attempts from exhausting resources.
-    // The watermark is refreshed every interval.
-    boost::asio::deadline_timer watermark_timer_;
-    size_t watermark_count_;
+    // The sweep is refreshed every interval.
+    boost::asio::deadline_timer sweep_timer_;
+    size_t sweep_count_;
 
-    // Manual connections created via configuration or user input.
-    channel_ptr_list manual_connections_;
-
-    // Inbound connections from the p2p network.
-    uint16_t listen_port_;
-    channel_ptr_list accepted_channels_;
     channel_subscriber_type::ptr channel_subscribe_;
-
     boost::filesystem::path hosts_path_;
     const hosts::authority_list& seeds_;
     std::shared_ptr<seeder> seeder_;

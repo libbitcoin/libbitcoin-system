@@ -76,8 +76,8 @@ const hosts::authority_list protocol::default_seeds =
 const size_t protocol::default_max_outbound = 8;
 
 // TODO: parameterize for config access.
-const size_t watermark_connection_limit = 10;
-const time_duration watermark_reset_interval = seconds(1);
+const size_t sweep_connection_limit = 10;
+const time_duration sweep_reset_interval = seconds(1);
 
 protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
     network& net, const hosts::authority_list& seeds, uint16_t port,
@@ -87,9 +87,9 @@ protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
     handshake_(shake),
     network_(net),
     max_outbound_(max_outbound),
-    watermark_timer_(pool.service()),
-    watermark_count_(0),
-    listen_port_(port),
+    sweep_timer_(pool.service()),
+    sweep_count_(0),
+    inbound_port_(port),
     channel_subscribe_(std::make_shared<channel_subscriber_type>(pool)),
     seeds_(seeds)
 {
@@ -229,11 +229,11 @@ void protocol::run()
         std::bind(&protocol::start_connecting,
             this));
 
-    if (listen_port_ == 0)
+    if (inbound_port_ == 0)
         return;
 
     // Unhandled startup failure condition.
-    network_.listen(listen_port_,
+    network_.listen(inbound_port_,
         strand_.wrap(&protocol::handle_listen,
             this, _1, _2));
 }
@@ -241,7 +241,7 @@ void protocol::run()
 void protocol::start_connecting()
 {
     // Initialize the connection slots.
-    BITCOIN_ASSERT(connections_.empty());
+    BITCOIN_ASSERT(outbound_connections_.empty());
     BITCOIN_ASSERT(connect_states_.empty());
     connect_states_.resize(max_outbound_);
 
@@ -250,7 +250,7 @@ void protocol::start_connecting()
 
     // Start the main outbound connect loop.
     start_stopped_connects();
-    start_watermark_reset_timer();
+    start_sweep_reset_timer();
 }
 
 void protocol::start_stopped_connects()
@@ -262,8 +262,8 @@ void protocol::start_stopped_connects()
 
 void protocol::try_connect_once(slot_index slot)
 {
-    ++watermark_count_;
-    if (watermark_count_ > watermark_connection_limit)
+    ++sweep_count_;
+    if (sweep_count_ > sweep_connection_limit)
         return;
 
     BITCOIN_ASSERT(slot <= connect_states_.size());
@@ -277,52 +277,58 @@ void protocol::try_connect_once(slot_index slot)
             this, _1, _2, slot));
 }
 
-void protocol::start_watermark_reset_timer()
+void protocol::start_sweep_reset_timer()
 {
     // This timer just loops continuously at fixed intervals
-    // resetting the watermark_count_ variable and starting stopped slots.
-    const auto reset_watermark = [this](const boost::system::error_code& ec)
+    // resetting the sweep_count_ variable and starting stopped slots.
+    const auto reset_sweep = [this](const boost::system::error_code& ec)
     {
         if (ec)
         {
             if (ec != boost::asio::error::operation_aborted)
                 log_error(LOG_PROTOCOL)
-                    << "Failure resetting watermark timer: " << ec.message();
+                    << "Failure resetting sweep timer: " << ec.message();
 
             BITCOIN_ASSERT(ec == boost::asio::error::operation_aborted);
             return;
         }
 
-        if (watermark_count_ > watermark_connection_limit)
+        if (sweep_count_ > sweep_connection_limit)
             log_debug(LOG_PROTOCOL)
                 << "Resuming connection attempts.";
 
         // Perform the reset, reallowing connection attempts.
-        watermark_count_ = 0;
+        sweep_count_ = 0;
         start_stopped_connects();
 
         // Looping timer...
-        start_watermark_reset_timer();
+        start_sweep_reset_timer();
     };
 
-    watermark_timer_.expires_from_now(watermark_reset_interval);
-    watermark_timer_.async_wait(strand_.wrap(reset_watermark, _1));
+    sweep_timer_.expires_from_now(sweep_reset_interval);
+    sweep_timer_.async_wait(strand_.wrap(reset_sweep, _1));
 }
 
-template <typename ConnectionList>
-bool already_connected(const network_address_type& address,
-    const ConnectionList& connections)
+// Determine if we are connected to the address for any reason.
+bool protocol::is_connected(const authority& address)
 {
-    for (const auto& connection: connections)
-        if (connection.address.ip == address.ip &&
-            connection.address.port == address.port)
+    for (const auto& connection: outbound_connections_)
+        if (connection->address() == address)
+            return true;
+
+    for (const auto& connection: inbound_connections_)
+        if (connection->address() == address)
+            return true;
+
+    for (const auto& connection: manual_connections_)
+        if (connection->address() == address)
             return true;
 
     return false;
 }
 
 void protocol::attempt_connect(const std::error_code& ec,
-    const network_address_type& address, slot_index slot)
+    const authority& peer, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
     modify_slot(slot, connect_state::connecting);
@@ -335,11 +341,12 @@ void protocol::attempt_connect(const std::error_code& ec,
         return;
     }
 
-    if (already_connected(address, connections_))
+    // It is possible for this guard to be violated by a race.
+    if (is_connected(peer))
     {
         log_debug(LOG_PROTOCOL)
             << "Already connected to selected peer [" 
-            << authority(address).to_string() << "]";
+            << peer.to_string() << "]";
 
         // Retry another connection, still in same strand.
         modify_slot(slot, connect_state::stopped);
@@ -348,17 +355,16 @@ void protocol::attempt_connect(const std::error_code& ec,
     }
 
     log_debug(LOG_PROTOCOL)
-        << "Connecting to peer [" << authority(address).to_string()
+        << "Connecting to peer [" << peer.to_string()
         << "] on slot [" << slot << "]";
 
-    const authority peer(address);
     connect(handshake_, network_, peer.host, peer.port,
         strand_.wrap(&protocol::handle_connect,
-            this, _1, _2, address, slot));
+            this, _1, _2, peer, slot));
 }
 
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
-    const network_address_type& address, slot_index slot)
+    const authority& peer, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
 
@@ -366,7 +372,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     {
         log_debug(LOG_PROTOCOL)
             << "Failure connecting to peer ["
-            << authority(address).to_string() << "] on slot [" << slot << "] "
+            << peer.to_string() << "] on slot [" << slot << "] "
             << ec.message();
 
         // Retry another connection, still in same strand.
@@ -376,13 +382,14 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     }
 
     modify_slot(slot, connect_state::established);
-    BITCOIN_ASSERT(connections_.size() <= max_outbound_);
-    connections_.push_back({address, node});
+    BITCOIN_ASSERT(outbound_connections_.size() <= max_outbound_);
+    outbound_connections_.push_back(node);
 
+    // Connected!
     log_info(LOG_PROTOCOL)
         << "Connected to peer ["
-        << authority(address).to_string() << "] on slot [" << slot << "] ("
-        << connections_.size() << " total)";
+        << peer.to_string() << "] on slot [" << slot << "] ("
+        << outbound_connections_.size() << " total)";
 
     // Remove channel from list of connections
     node->subscribe_stop(
@@ -469,11 +476,12 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         return;
     }
 
-    accepted_channels_.push_back(node);
+    inbound_connections_.push_back(node);
 
+    // Accepted!
     log_info(LOG_PROTOCOL)
         << "Accepted connection from [" << node->address().to_string() << "] ("
-        << accepted_channels_.size() << " total)";
+        << inbound_connections_.size() << " total)";
 
     const auto handshake_complete = [this, node](const std::error_code& ec)
     {
@@ -487,7 +495,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
             return;
         }
 
-        // Remove channel from list of connections
+        // Remove channel from list of connections.
         node->subscribe_stop(
             strand_.wrap(&protocol::inbound_channel_stopped,
                 this, _1, node));
@@ -526,14 +534,10 @@ void protocol::setup_new_channel(channel_ptr node)
     channel_subscribe_->relay(error::success, node);
 }
 
-template <typename ConnectionsList>
-void remove_connection(ConnectionsList& connections, channel_ptr node)
+void protocol::remove_connection(channel_ptr_list& connections,
+    channel_ptr node)
 {
-    auto it = connections.begin();
-    for (; it != connections.end(); ++it)
-        if (it->node == node)
-            break;
-
+    auto it = std::find(connections.begin(), connections.end(), node);
     BITCOIN_ASSERT(it != connections.end());
     connections.erase(it);
 }
@@ -554,21 +558,13 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
     }
 
     // Erase this channel from our list and then attempt a reconnection.
-    remove_connection(connections_, node);
+    remove_connection(outbound_connections_, node);
 
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
     modify_slot(slot, connect_state::stopped);
 
     // Attempt reconnection.
     try_connect_once(slot);
-}
-
-template <typename ChannelsList>
-void remove_channel(ChannelsList& channels, channel_ptr node)
-{
-    const auto it = std::find(channels.begin(), channels.end(), node);
-    BITCOIN_ASSERT(it != channels.end());
-    channels.erase(it);
 }
 
 void protocol::manual_channel_stopped(const std::error_code& ec,
@@ -588,7 +584,7 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
 
     // Remove from accepted connections.
     // Timeout logic would go here if we ever need it.
-    remove_channel(manual_connections_, node);
+    remove_connection(manual_connections_, node);
 
     // Attempt reconnection.
     maintain_connection(hostname, port);
@@ -610,7 +606,7 @@ void protocol::inbound_channel_stopped(const std::error_code& ec,
     }
 
     // Remove from accepted connections (no reconnect).
-    remove_channel(accepted_channels_, node);
+    remove_connection(inbound_connections_, node);
 }
 
 void protocol::handle_address_message(const std::error_code& ec,
@@ -660,7 +656,7 @@ void protocol::fetch_connection_count(
 void protocol::do_fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
-    handle_fetch(error::success, connections_.size());
+    handle_fetch(error::success, outbound_connections_.size());
 }
 
 void protocol::subscribe_channel(channel_handler handle_channel)
@@ -670,8 +666,8 @@ void protocol::subscribe_channel(channel_handler handle_channel)
 
 size_t protocol::total_connections() const
 {
-    return connections_.size() + manual_connections_.size() +
-        accepted_channels_.size();
+    return outbound_connections_.size() + manual_connections_.size() +
+        inbound_connections_.size();
 }
 
 void protocol::set_max_outbound(size_t max_outbound)
@@ -687,7 +683,7 @@ void protocol::set_hosts_filename(const std::string& hosts_path)
 // Deprecated, this is problematic because there is no enabler.
 void protocol::disable_listener()
 {
-    listen_port_ = 0;
+    inbound_port_ = 0;
 }
 
 // Deprecated, should be private.
