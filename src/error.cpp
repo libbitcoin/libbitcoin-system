@@ -235,7 +235,12 @@ namespace error {
 
     error_code_t boost_to_error_code(const boost::system::error_code& ec)
     {
-        const static int windows_connection_reset_by_peer = 10054;
+        enum windows_error
+        {
+            connection_aborted_by_host_system = 10053,
+            connection_reset_by_peer = 10054
+        };
+
         namespace boost_error = boost::system::errc;
         switch (ec.value())
         {
@@ -243,7 +248,8 @@ namespace error {
                 return error::success;
 
             // network errors
-            case windows_connection_reset_by_peer:
+            case windows_error::connection_aborted_by_host_system:
+            case windows_error::connection_reset_by_peer:
             case boost_error::connection_aborted:
             case boost_error::connection_refused:
             case boost_error::connection_reset:
