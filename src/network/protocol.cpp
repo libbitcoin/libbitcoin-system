@@ -73,6 +73,7 @@ const hosts::authority_list protocol::default_seeds =
 };
 #endif
 
+const size_t protocol::default_max_inbound = 8;
 const size_t protocol::default_max_outbound = 8;
 
 // TODO: parameterize for config access.
@@ -81,15 +82,16 @@ const time_duration sweep_reset_interval = seconds(1);
 
 protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
     network& net, const hosts::authority_list& seeds, uint16_t port,
-    size_t max_outbound)
+    size_t max_outbound, size_t max_inbound)
   : strand_(pool),
     host_pool_(peers),
     handshake_(shake),
     network_(net),
+    inbound_port_(port),
+    max_inbound_(max_inbound),
     max_outbound_(max_outbound),
     sweep_timer_(pool.service()),
     sweep_count_(0),
-    inbound_port_(port),
     channel_subscribe_(std::make_shared<channel_subscriber_type>(pool)),
     seeds_(seeds)
 {
@@ -229,7 +231,8 @@ void protocol::run()
         std::bind(&protocol::start_connecting,
             this));
 
-    if (inbound_port_ == 0)
+    // Not accepting connections.
+    if (inbound_port_ == 0 || max_inbound_ == 0)
         return;
 
     // Unhandled startup failure condition.
@@ -309,6 +312,19 @@ void protocol::start_sweep_reset_timer()
     sweep_timer_.async_wait(strand_.wrap(reset_sweep, _1));
 }
 
+// Determine if the address is banned.
+bool protocol::is_banned(const authority& address)
+{
+    for (const auto& banned: banned_connections_)
+    {
+        if ((banned.port == 0 || banned.port == address.port) &&
+            banned.host == address.host)
+            return true;
+    }
+
+    return false;
+}
+
 // Determine if we are connected to the address for any reason.
 bool protocol::is_connected(const authority& address)
 {
@@ -354,11 +370,23 @@ void protocol::attempt_connect(const std::error_code& ec,
         return;
     }
 
+    if (is_banned(peer))
+    {
+        log_debug(LOG_PROTOCOL)
+            << "Selected banned peer [" << peer.to_string() << "]";
+
+        // Retry another connection, still in same strand.
+        modify_slot(slot, connect_state::stopped);
+        try_connect_once(slot);
+        return;
+    }
+
     log_debug(LOG_PROTOCOL)
         << "Connecting to peer [" << peer.to_string()
         << "] on slot [" << slot << "]";
 
-    connect(handshake_, network_, peer.host, peer.port,
+    // OUTBOUND CONNECT WITH TIMEOUT
+    bc::network::connect(handshake_, network_, peer.host, peer.port,
         strand_.wrap(&protocol::handle_connect,
             this, _1, _2, peer, slot));
 }
@@ -391,7 +419,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         << peer.to_string() << "] on slot [" << slot << "] ("
         << outbound_connections_.size() << " total)";
 
-    // Remove channel from list of connections
+    // Remove channel from list of connections.
     node->subscribe_stop(
         strand_.wrap(&protocol::outbound_channel_stopped,
             this, _1, node, slot));
@@ -399,9 +427,15 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     setup_new_channel(node);
 }
 
+void protocol::ban_connection(const std::string& hostname, uint16_t port)
+{
+    banned_connections_.push_back({ hostname, port });
+}
+
 void protocol::maintain_connection(const std::string& hostname, uint16_t port)
 {
-    connect(handshake_, network_, hostname, port,
+    // MANUAL CONNECT WITH TIMEOUT
+    bc::network::connect(handshake_, network_, hostname, port,
         strand_.wrap(&protocol::handle_manual_connect,
             this, _1, _2, hostname, port));
 }
@@ -447,7 +481,7 @@ void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
         return;
     }
 
-    // Listen for connections.
+    // ACCEPT INCOMING CONNECTIONS (NO TIMEOUT)
     accept->accept(
         strand_.wrap(&protocol::handle_accept,
             this, _1, _2, accept));
@@ -473,6 +507,28 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         else
             log_debug(LOG_PROTOCOL)
                 << "Failure accepting connection: " << ec.message();
+
+        return;
+    }
+
+    // TODO: we would prefer to limit using slots and stop the listener.
+    if (inbound_connections_.size() >= max_inbound_)
+    {
+        log_info(LOG_PROTOCOL)
+            << "Inbound connection limit blocked ["
+            << node->address().to_string() << "]";
+
+        node->stop();
+        return;
+    }
+
+    if (is_banned(node->address()))
+    {
+        log_info(LOG_PROTOCOL)
+            << "Blocked banned connection from ["
+            << node->address().to_string() << "]";
+
+        node->stop();
         return;
     }
 
@@ -495,13 +551,15 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
             return;
         }
 
-        // Remove channel from list of connections.
-        node->subscribe_stop(
-            strand_.wrap(&protocol::inbound_channel_stopped,
-                this, _1, node));
-
         setup_new_channel(node);
     };
+
+    // The handshake may not complete until the caller disconnects.
+    // So this registration cannot happen in the completion handler.
+    // Otherwise the termination filaure would prevent the subscription.
+    node->subscribe_stop(
+        strand_.wrap(&protocol::inbound_channel_stopped,
+            this, _1, node));
 
     handshake_.ready(node, handshake_complete);
 }
@@ -550,11 +608,11 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
     {
         if (node)
             log_debug(LOG_PROTOCOL)
-                << "Channel stopped (outbound) ["
+                << "Outbound channel stopped (outbound) ["
                 << node->address().to_string() << "] " << ec.message();
         else
             log_debug(LOG_PROTOCOL)
-                << "Channel stopped (outbound): " << ec.message();
+                << "Outbound channel stopped (outbound): " << ec.message();
     }
 
     // Erase this channel from our list and then attempt a reconnection.
@@ -575,11 +633,11 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
     {
         if (node)
             log_debug(LOG_PROTOCOL)
-                << "Channel stopped (manual) [" 
+                << "Manual channel stopped (manual) [" 
                 << authority(hostname, port).to_string() << "] " << ec.message();
         else
             log_debug(LOG_PROTOCOL)
-                << "Channel stopped (manual): " << ec.message();
+                << "Manual channel stopped (manual): " << ec.message();
     }
 
     // Remove from accepted connections.
@@ -598,11 +656,11 @@ void protocol::inbound_channel_stopped(const std::error_code& ec,
     {
         if (node)
             log_debug(LOG_PROTOCOL)
-                << "Channel stopped (inbound) ["
+                << "Inbound channel stopped (inbound) ["
                 << node->address().to_string() << "] " << ec.message();
         else
             log_debug(LOG_PROTOCOL)
-                << "Channel stopped (inbound): " << ec.message();
+                << "Inbound channel stopped (inbound): " << ec.message();
     }
 
     // Remove from accepted connections (no reconnect).
@@ -645,6 +703,7 @@ void protocol::handle_store_address(const std::error_code& ec)
             << ec.message();
 }
 
+// Deprecated, unreasonable to queue this, use total_connections.
 void protocol::fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
@@ -653,6 +712,7 @@ void protocol::fetch_connection_count(
             this, handle_fetch));
 }
 
+// Deprecated, unreasonable to queue this, use total_connections.
 void protocol::do_fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {

@@ -32,10 +32,11 @@
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -56,13 +57,15 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
+    static const size_t default_max_inbound;
     static const size_t default_max_outbound;
     static const hosts::authority_list default_seeds;
 
     protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
         const hosts::authority_list& seeds = default_seeds,
-        uint16_t port=bc::protocol_port,
-        size_t max_outbound=default_max_outbound);
+        uint16_t port = bc::protocol_port,
+        size_t max_outbound=default_max_outbound,
+        size_t max_inbound=default_max_inbound);
     
     /// This class is not copyable.
     protocol(const protocol&) = delete;
@@ -82,15 +85,17 @@ public:
     void stop(completion_handler handle_complete);
 
     /**
-     * Fetch number of connections maintained by this service.
-     * @param[in]  handle_fetch  Completion handler for fetch operation.
+     * Add a banned connection.
+     * @param[in]  hostname  The host IP address to ban.
+     * @param[in]  port      The port of the host to ban, or zero for all.
      */
-    void fetch_connection_count(
-        fetch_connection_count_handler handle_fetch);
+    void ban_connection(const std::string& hostname, uint16_t port);
 
     /**
-     * Create a manual connection to a specific node. If disconnected
+     * Create a persistent connection to the specific node. If disconnected
      * this service will keep attempting to reconnect until successful.
+     * @param[in]  hostname  The host IP address to ban.
+     * @param[in]  port      The port of the host to ban, or zero for all.
      */
     void maintain_connection(const std::string& hostname, uint16_t port);
 
@@ -106,7 +111,7 @@ public:
 
     /**
      * Return the number of active connections.
-     * Not threadsafe. Intended only for diagnostics information.
+     * The summation is not thread safe. Intended for diagnostics only.
      */
     size_t total_connections() const;
 
@@ -129,25 +134,28 @@ public:
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
         // The intermediate variable 'lambda' is a workaround for a
-        // limitation of the VC++ CTP_Nov2013 generic lambda support.
+        // limitation of the MSVC++ CTP_Nov2013 generic lambda support.
         const auto lambda = &protocol::do_broadcast<Message>;
         strand_.queue(lambda, this, packet, handle_send);
     }
-    
+
     /// Deprecated, should be private since it's called from start.
     void bootstrap(completion_handler handle_complete);
+
+    /// Deprecated, set on construct or use accessors.
+    void disable_listener();
+
+    /// Deprecated, unreasonable to queue this, use total_connections.
+    void fetch_connection_count(fetch_connection_count_handler handle_fetch);
 
     /// Deprecated, should be private since it's called from start.
     void run();
 
-    /// Deprecated, set on construct.
-    void set_max_outbound(size_t max_outbound);
-
     /// Deprecated, construct hosts with path.
     void set_hosts_filename(const std::string& hosts_path);
 
-    /// Deprecated, set on construct or use accessors.
-    void disable_listener();
+    /// Deprecated, set on construct.
+    void set_max_outbound(size_t max_outbound);
 
 private:
     enum class connect_state
@@ -218,6 +226,7 @@ private:
 
     // Channel setup
     void setup_new_channel(channel_ptr node);
+    bool is_banned(const authority& address);
     bool is_connected(const authority& address);
     void remove_connection(channel_ptr_list& connections, channel_ptr node);
 
@@ -233,7 +242,7 @@ private:
         const address_type& addr, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
-    // fetch methods
+    /// Deprecated, unreasonable to queue this, use total_connections.
     void do_fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
 
@@ -262,9 +271,11 @@ private:
 
     // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
+    hosts::authority_list banned_connections_;
 
     // Inbound connections from the p2p network.
     uint16_t inbound_port_;
+    size_t max_inbound_;
     channel_ptr_list inbound_connections_;
 
     // There's a fixed number of slots that are always trying to reconnect.
