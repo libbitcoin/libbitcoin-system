@@ -328,16 +328,16 @@ bool protocol::is_banned(const authority& address)
 // Determine if we are connected to the address for any reason.
 bool protocol::is_connected(const authority& address)
 {
-    for (const auto& connection: outbound_connections_)
-        if (connection->address() == address)
+    for (const auto node: outbound_connections_)
+        if (node->address() == address)
             return true;
 
-    for (const auto& connection: inbound_connections_)
-        if (connection->address() == address)
+    for (const auto node: inbound_connections_)
+        if (node->address() == address)
             return true;
 
-    for (const auto& connection: manual_connections_)
-        if (connection->address() == address)
+    for (const auto node: manual_connections_)
+        if (node->address() == address)
             return true;
 
     return false;

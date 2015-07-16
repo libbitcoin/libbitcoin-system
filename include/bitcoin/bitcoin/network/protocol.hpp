@@ -254,7 +254,7 @@ private:
             std::bind(handle_send,
                 std::placeholders::_1, total_nodes);
 
-        for (const auto& node: outbound_connections_)
+        for (const auto node: outbound_connections_)
             node->send(packet, send_handler);
 
         for (const auto node: manual_connections_)
