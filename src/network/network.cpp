@@ -96,13 +96,5 @@ void network::listen(uint16_t port, listen_handler handle_listen)
     handle_listen(ec, accept);
 }
 
-void network::unlisten(unlisten_handler handle_unlisten)
-{
-    const auto tcp_accept = std::make_shared<tcp::acceptor>(pool_.service());
-    tcp_accept->cancel();
-    tcp_accept->close();
-    handle_unlisten(error::success);
-}
-
 } // namespace network
 } // namespace libbitcoin
