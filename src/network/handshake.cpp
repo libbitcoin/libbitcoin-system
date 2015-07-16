@@ -71,6 +71,9 @@ void handshake::start(start_handler handle_start)
     discover_external_ip(std::bind(handle_start, _1));
 }
 
+// This will not fire the handshake completion until all three
+// subscriptions fire, which will never happen if the peer doesn't complete
+// the handshare or disconnect. So caller cannot depend on the handler.
 void handshake::ready(channel_ptr node,
     handshake::handshake_handler handle_handshake)
 {
