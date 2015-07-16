@@ -81,7 +81,7 @@ void connect_with_timeout::close(const boost::system::error_code& ec)
     BITCOIN_ASSERT(!ec || ec == boost::asio::error::operation_aborted);
 
     if (!ec)
-        proxy_->stop();
+        proxy_->stop(error::channel_timeout);
 }
 
 } // namespace network
