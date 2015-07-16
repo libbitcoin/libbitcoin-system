@@ -63,8 +63,8 @@ void network::connect(const std::string& hostname, uint16_t port,
     connect_handler handle_connect)
 {
     const auto resolver = std::make_shared<tcp::resolver>(pool_.service());
-    const auto query = std::make_shared<tcp::resolver::query>(
-        hostname, std::to_string(port));
+    const auto query = std::make_shared<tcp::resolver::query>(hostname,
+        std::to_string(port));
 
     resolver->async_resolve(*query,
         std::bind(&network::resolve_handler,
