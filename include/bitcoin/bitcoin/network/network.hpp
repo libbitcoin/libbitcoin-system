@@ -20,9 +20,11 @@
 #ifndef LIBBITCOIN_NETWORK_HPP
 #define LIBBITCOIN_NETWORK_HPP
 
+#include <cstdint>
 #include <memory>
 #include <thread>
 #include <boost/asio.hpp>
+#include <boost/date_time.hpp>
 #include <boost/utility.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
@@ -43,7 +45,7 @@ public:
         void (const std::error_code&, acceptor_ptr)> listen_handler;
     typedef std::function<void (const std::error_code&)> unlisten_handler;
 
-    network(threadpool& pool);
+    network(threadpool& pool, uint32_t timeout=5);
 
     /// This class is not copyable.
     network(const network&) = delete;
@@ -63,6 +65,7 @@ private:
         connect_handler handle_connect, resolver_ptr, query_ptr);
 
     threadpool& pool_;
+    boost::posix_time::time_duration timeout_;
 };
 
 } // namespace network

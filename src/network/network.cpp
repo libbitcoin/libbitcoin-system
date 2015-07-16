@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/network/network.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <system_error>
@@ -39,11 +40,8 @@ using boost::asio::ip::tcp;
 using boost::posix_time::seconds;
 using boost::posix_time::time_duration;
 
-// TODO: parameterize for config access.
-static const auto connect_timeout = seconds(5);
-
-network::network(threadpool& pool)
-  : pool_(pool)
+network::network(threadpool& pool, uint32_t timeout_seconds)
+  : pool_(pool), timeout_(seconds(timeout_seconds))
 {
 }
 
@@ -58,7 +56,7 @@ void network::resolve_handler(const boost::system::error_code& ec,
     }
 
     const auto connect = std::make_shared<connect_with_timeout>(pool_);
-    connect->start(endpoint_iterator, connect_timeout, handle_connect);
+    connect->start(endpoint_iterator, timeout_, handle_connect);
 }
 
 void network::connect(const std::string& hostname, uint16_t port,
