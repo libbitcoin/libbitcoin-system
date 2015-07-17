@@ -218,9 +218,6 @@
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -261,9 +258,6 @@
       <Filter>src\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\string.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\time.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\directory.cpp">
@@ -442,9 +436,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timed_section.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\address.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
@@ -512,9 +503,6 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\collection.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\time.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp">
@@ -587,6 +575,9 @@
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>

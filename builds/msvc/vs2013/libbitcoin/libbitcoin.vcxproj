@@ -126,8 +126,6 @@
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\time.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\key_formats.cpp" />
@@ -205,8 +203,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\subscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\thread.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\time.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timed_section.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_keys.hpp" />
