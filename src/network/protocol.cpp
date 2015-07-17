@@ -63,18 +63,8 @@ const hosts::authority_list protocol::default_seeds =
     { "dnsseed.bluematt.me", 8333 },
     { "seed.bitcoin.jonasschnelli.ch", 8333 },
     { "dnsseed.bitcoin.dashjr.org", 8333 }
-
-    // Previously also included:
-    // bitseed.xf2.org:8333
-    // archivum.info:8333
-    // progressbar.sk:8333
-    // faucet.bitcoin.st:8333
-    // bitcoin.securepayment.cc:8333
 };
 #endif
-
-const size_t protocol::default_max_inbound = 8;
-const size_t protocol::default_max_outbound = 8;
 
 // TODO: parameterize for config access.
 const size_t sweep_connection_limit = 10;

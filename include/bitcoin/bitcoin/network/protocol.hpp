@@ -57,15 +57,12 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    static const size_t default_max_inbound;
-    static const size_t default_max_outbound;
     static const hosts::authority_list default_seeds;
 
     protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
         const hosts::authority_list& seeds = default_seeds,
-        uint16_t port = bc::protocol_port,
-        size_t max_outbound=default_max_outbound,
-        size_t max_inbound=default_max_inbound);
+        uint16_t port = bc::protocol_port, size_t max_outbound=8,
+        size_t max_inbound=8);
     
     /// This class is not copyable.
     protocol(const protocol&) = delete;
