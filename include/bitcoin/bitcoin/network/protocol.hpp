@@ -60,8 +60,8 @@ public:
     static const hosts::authority_list default_seeds;
 
     protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
-        const hosts::authority_list& seeds = default_seeds,
-        uint16_t port = bc::protocol_port, size_t max_outbound=8,
+        const hosts::authority_list& seeds=default_seeds,
+        uint16_t port=bc::protocol_port, size_t max_outbound=8,
         size_t max_inbound=8);
     
     /// This class is not copyable.
@@ -80,6 +80,12 @@ public:
      * @param[in]  handle_complete  Completion handler for start operation.
      */
     void stop(completion_handler handle_complete);
+
+    /**
+     * Determine if the connection is manual.
+     * @param[in]  node  The node of interest.
+     */
+    bool is_manual(channel_ptr node);
 
     /**
      * Add a banned connection.
@@ -222,10 +228,10 @@ private:
         acceptor_ptr accept);
 
     // Channel setup
-    void setup_new_channel(channel_ptr node);
     bool is_banned(const authority& address);
     bool is_connected(const authority& address);
     void remove_connection(channel_ptr_list& connections, channel_ptr node);
+    void setup_new_channel(channel_ptr node);
 
     // Remove channels from lists when disconnected.
     void outbound_channel_stopped(const std::error_code& ec,
@@ -279,8 +285,7 @@ private:
     size_t max_outbound_;
     channel_ptr_list outbound_connections_;
 
-    // Simply a debugging tool to enforce correct state transition behaviour
-    // for maintaining connections.
+    // Used to enforce correct state transition behaviour for maintaining connections.
     connect_state_list connect_states_;
 
     // Used to prevent too many connection attempts from exhausting resources.

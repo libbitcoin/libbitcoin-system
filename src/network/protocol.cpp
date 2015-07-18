@@ -66,9 +66,9 @@ const hosts::authority_list protocol::default_seeds =
 };
 #endif
 
-// TODO: parameterize for config access.
-const size_t sweep_connection_limit = 10;
-const time_duration sweep_reset_interval = seconds(1);
+// These are not configurable.
+static const size_t sweep_connection_limit = 10;
+static const auto sweep_reset_interval = seconds(1);
 
 protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
     network& net, const hosts::authority_list& seeds, uint16_t port,
@@ -313,6 +313,13 @@ bool protocol::is_banned(const authority& address)
     }
 
     return false;
+}
+
+// Determine if the connection is manual.
+bool protocol::is_manual(channel_ptr node)
+{
+    auto it = std::find(manual_connections_.begin(), manual_connections_.end(), node);
+    return it != manual_connections_.end();
 }
 
 // Determine if we are connected to the address for any reason.
