@@ -46,6 +46,29 @@ namespace network {
 using boost::format;
 using boost::filesystem::path;
 
+// Based on http://bitcoinstats.com/network/dns-servers
+// We'd prefer this as static member of the seeder class, but the dependency
+// cycle between the seeder and protocol class makes that difficult.
+#ifdef ENABLE_TESTNET
+const hosts::list hosts::defaults
+{
+    { "testnet-seed.alexykot.me", 18333 },
+    { "testnet-seed.bitcoin.petertodd.org", 18333 },
+    { "testnet-seed.bluematt.me", 18333 },
+    { "testnet-seed.bitcoin.schildbach.de", 18333 }
+};
+#else
+const hosts::list hosts::defaults
+{
+    { "seed.bitnodes.io", 8333 },
+    { "seed.bitcoinstats.com", 8333 },
+    { "seed.bitcoin.sipa.be", 8333 },
+    { "dnsseed.bluematt.me", 8333 },
+    { "seed.bitcoin.jonasschnelli.ch", 8333 },
+    { "dnsseed.bitcoin.dashjr.org", 8333 }
+};
+#endif
+
 hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
   : strand_(pool), file_path_(file_path), buffer_(capacity)
 {

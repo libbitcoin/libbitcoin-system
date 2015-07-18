@@ -57,10 +57,8 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    static const hosts::authority_list default_seeds;
-
     protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
-        const hosts::authority_list& seeds=default_seeds,
+        const hosts::list& seed=hosts::defaults,
         uint16_t port=bc::protocol_port, size_t max_outbound=8,
         size_t max_inbound=8);
     
@@ -180,7 +178,7 @@ private:
         completion_handler handle_complete);
     void fetch_count(const std::error_code& ec,
         completion_handler handle_complete);
-    void start_seeder(const std::error_code& ec, size_t hosts_count,
+    void start_seeds(const std::error_code& ec, size_t hosts_count,
         completion_handler handle_complete);
 
     // stop sequence
@@ -274,7 +272,7 @@ private:
 
     // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
-    hosts::authority_list banned_connections_;
+    hosts::list banned_connections_;
 
     // Inbound connections from the p2p network.
     uint16_t inbound_port_;
@@ -295,7 +293,7 @@ private:
 
     channel_subscriber_type::ptr channel_subscribe_;
     boost::filesystem::path hosts_path_;
-    const hosts::authority_list& seeds_;
+    const hosts::list& seeds_;
     std::shared_ptr<seeder> seeder_;
     friend class seeder;
 };

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2018 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -36,6 +36,7 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
@@ -121,9 +122,7 @@ public:
     typedef std::function<void (const std::error_code&)> expiration_handler;
 
     channel_proxy(threadpool& pool, socket_ptr socket,
-        uint32_t expiration_time_minutes=90, uint32_t timeout_time_minutes=30,
-        uint32_t heartbeat_time_minutes=15, uint32_t revival_time_minutes=1);
-
+        const timeout& timeouts);
     ~channel_proxy();
 
     /// This class is not copyable.
@@ -238,13 +237,8 @@ private:
 
     async_strand strand_;
     socket_ptr socket_;
+    timeout timeouts_;
 
-    boost::posix_time::minutes expiration_time_;
-    boost::posix_time::minutes timeout_time_;
-    boost::posix_time::minutes heartbeat_time_;
-    boost::posix_time::minutes revival_time_;
-
-    // We keep the service alive for lifetime rules
     boost::asio::deadline_timer expiration_;
     boost::asio::deadline_timer timeout_;
     boost::asio::deadline_timer heartbeat_;

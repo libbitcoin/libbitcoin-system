@@ -39,13 +39,29 @@ using std::placeholders::_2;
 using boost::asio::ip::tcp;
 using boost::posix_time::time_duration;
 
-connect_with_timeout::connect_with_timeout(threadpool& pool)
+connect_with_timeout::connect_with_timeout(threadpool& pool,
+    const timeout& timeouts)
   : timer_(pool.service()),
+    connection_timeout_(timeouts.connection),
     socket_(std::make_shared<tcp::socket>(pool.service())),
-    proxy_(std::make_shared<channel_proxy>(pool, socket_))
+    proxy_(std::make_shared<channel_proxy>(pool, socket_, timeouts))
 {
 }
 
+void connect_with_timeout::start(tcp::resolver::iterator endpoint_iterator,
+    network::connect_handler handle_connect)
+{
+    timer_.expires_from_now(connection_timeout_);
+    timer_.async_wait(std::bind(
+        &connect_with_timeout::close,
+            shared_from_this(), _1));
+
+    boost::asio::async_connect(*socket_, endpoint_iterator,
+        std::bind(&connect_with_timeout::call_connect_handler,
+            shared_from_this(), _1, _2, handle_connect));
+}
+
+// Deprecated, obtain connect timeout on construct.
 void connect_with_timeout::start(tcp::resolver::iterator endpoint_iterator,
     time_duration timeout, network::connect_handler handle_connect)
 {

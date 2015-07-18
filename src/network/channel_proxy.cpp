@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2018 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -33,6 +33,7 @@
 #include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -53,21 +54,13 @@ using boost::asio::buffer;
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using boost::format;
-using boost::posix_time::minutes;
 using boost::posix_time::time_duration;
 
-// This is not configurable.
-static const auto initial_timeout_time = minutes(1);
-
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
-    uint32_t expiration_time_minutes, uint32_t timeout_time_minutes,
-    uint32_t heartbeat_time_minutes, uint32_t revival_time_minutes)
+    const timeout& timeouts=timeout::defaults)
   : strand_(pool),
     socket_(socket),
-    expiration_time_(expiration_time_minutes),
-    timeout_time_(timeout_time_minutes),
-    heartbeat_time_(heartbeat_time_minutes),
-    revival_time_(revival_time_minutes),
+    timeouts_(timeouts),
     expiration_(pool.service()),
     timeout_(pool.service()),
     heartbeat_(pool.service()),
@@ -105,10 +98,10 @@ channel_proxy::~channel_proxy()
 void channel_proxy::start()
 {
     read_header();
-    set_expiration(expiration_time_);
-    set_heartbeat(heartbeat_time_);
-    set_revival(revival_time_);
-    set_timeout(initial_timeout_time);
+    set_expiration(timeouts_.expiration);
+    set_heartbeat(timeouts_.heartbeat);
+    set_revival(timeouts_.revival);
+    set_timeout(timeouts_.startup);
 }
 
 void channel_proxy::stop(const std::error_code& ec)
@@ -210,13 +203,13 @@ static inline bool aborted(const boost::system::error_code& ec)
 
 void channel_proxy::reset_timers()
 {
-    set_timeout(timeout_time_);
-    set_heartbeat(heartbeat_time_);
+    set_timeout(timeouts_.inactivity);
+    set_heartbeat(timeouts_.heartbeat);
 }
 
 void channel_proxy::reset_revival()
 {
-    set_revival(revival_time_);
+    set_revival(timeouts_.revival);
 }
 
 void channel_proxy::set_revival_handler(revivial_handler handler)

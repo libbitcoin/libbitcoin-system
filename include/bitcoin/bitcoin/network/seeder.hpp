@@ -39,7 +39,7 @@ class BC_API seeder
   : public std::enable_shared_from_this<seeder>
 {
 public:
-    seeder(protocol* proto, const hosts::authority_list& seeds,
+    seeder(protocol* proto, const hosts::list& seeds,
         protocol::completion_handler handle_complete);
 
     /// This class is not copyable.
@@ -63,7 +63,7 @@ private:
     network& network_;
     bool succeeded_;
     size_t visited_;
-    const hosts::authority_list& seeds_;
+    const hosts::list& hosts_;
     const protocol::completion_handler handle_complete_;
 };
 

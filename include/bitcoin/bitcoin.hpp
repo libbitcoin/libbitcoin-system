@@ -53,6 +53,7 @@
 #include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/trie/binary_trie.hpp>
 #include <bitcoin/bitcoin/trie/trie_iterator.hpp>
 #include <bitcoin/bitcoin/trie/trie_reverse_iterator.hpp>

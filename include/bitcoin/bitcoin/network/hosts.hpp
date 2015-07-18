@@ -41,7 +41,9 @@ namespace network {
 class BC_API hosts
 {
 public:
-    typedef std::vector<authority> authority_list;
+    typedef std::vector<authority> list;
+    static const list defaults;
+
     typedef std::function<void (const std::error_code&)> load_handler;
     typedef std::function<void (const std::error_code&)> save_handler;
     typedef std::function<void (const std::error_code&)> store_handler;

@@ -45,34 +45,13 @@ using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-// Based on http://bitcoinstats.com/network/dns-servers
-#ifdef ENABLE_TESTNET
-const hosts::authority_list protocol::default_seeds =
-{
-    { "testnet-seed.alexykot.me", 18333 },
-    { "testnet-seed.bitcoin.petertodd.org", 18333 },
-    { "testnet-seed.bluematt.me", 18333 },
-    { "testnet-seed.bitcoin.schildbach.de", 18333 }
-};
-#else
-const hosts::authority_list protocol::default_seeds =
-{
-    { "seed.bitnodes.io", 8333 },
-    { "seed.bitcoinstats.com", 8333 },
-    { "seed.bitcoin.sipa.be", 8333 },
-    { "dnsseed.bluematt.me", 8333 },
-    { "seed.bitcoin.jonasschnelli.ch", 8333 },
-    { "dnsseed.bitcoin.dashjr.org", 8333 }
-};
-#endif
-
 // These are not configurable.
 static const size_t sweep_connection_limit = 10;
 static const auto sweep_reset_interval = seconds(1);
 
 protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
-    network& net, const hosts::authority_list& seeds, uint16_t port,
-    size_t max_outbound, size_t max_inbound)
+    network& net, const hosts::list& seeds, uint16_t port, size_t max_outbound,
+    size_t max_inbound)
   : strand_(pool),
     host_pool_(peers),
     handshake_(shake),
@@ -163,11 +142,11 @@ void protocol::fetch_count(const std::error_code& ec,
     }
 
     host_pool_.fetch_count(
-        strand_.wrap(&protocol::start_seeder,
+        strand_.wrap(&protocol::start_seeds,
             this, _1, _2, handle_complete));
 }
 
-void protocol::start_seeder(const std::error_code& ec, size_t hosts_count,
+void protocol::start_seeds(const std::error_code& ec, size_t hosts_count,
     completion_handler handle_complete)
 {
     if (ec)

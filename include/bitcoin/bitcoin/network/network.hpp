@@ -29,6 +29,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -44,7 +45,7 @@ public:
     typedef std::function<
         void (const std::error_code&, acceptor_ptr)> listen_handler;
 
-    network(threadpool& pool, uint32_t timeout=5);
+    network(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
     network(const network&) = delete;
@@ -63,7 +64,7 @@ private:
         connect_handler handle_connect, resolver_ptr, query_ptr);
 
     threadpool& pool_;
-    boost::posix_time::time_duration timeout_;
+    const timeout& timeouts_;
 };
 
 } // namespace network

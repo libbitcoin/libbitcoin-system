@@ -25,9 +25,9 @@
 #include <iostream>
 #include <system_error>
 #include <boost/asio.hpp>
-#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include "connect_with_timeout.hpp"
 
@@ -37,11 +37,9 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::asio::ip::tcp;
-using boost::posix_time::seconds;
-using boost::posix_time::time_duration;
 
-network::network(threadpool& pool, uint32_t timeout_seconds)
-  : pool_(pool), timeout_(seconds(timeout_seconds))
+network::network(threadpool& pool, const timeout& timeouts)
+  : pool_(pool), timeouts_(timeouts)
 {
 }
 
@@ -55,8 +53,8 @@ void network::resolve_handler(const boost::system::error_code& ec,
         return;
     }
 
-    const auto connect = std::make_shared<connect_with_timeout>(pool_);
-    connect->start(endpoint_iterator, timeout_, handle_connect);
+    const auto connect = std::make_shared<connect_with_timeout>(pool_, timeouts_);
+    connect->start(endpoint_iterator, handle_connect);
 }
 
 void network::connect(const std::string& hostname, uint16_t port,
@@ -91,7 +89,7 @@ void network::listen(uint16_t port, listen_handler handle_listen)
 
     const auto ec = bc::error::boost_to_error_code(boost_ec);
     const auto accept = ec ? nullptr :
-        std::make_shared<acceptor>(pool_, tcp_accept);
+        std::make_shared<acceptor>(pool_, tcp_accept, timeouts_);
 
     handle_listen(ec, accept);
 }

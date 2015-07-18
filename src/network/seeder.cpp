@@ -36,7 +36,7 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-seeder::seeder(protocol* proto, const hosts::authority_list& seeds,
+seeder::seeder(protocol* proto, const hosts::list& seed,
     protocol::completion_handler handle_complete)
   : strand_(proto->strand_), 
     host_pool_(proto->host_pool_),
@@ -44,7 +44,7 @@ seeder::seeder(protocol* proto, const hosts::authority_list& seeds,
     network_(proto->network_),
     succeeded_(false),
     visited_(0),
-    seeds_(seeds),
+    hosts_(seed),
     handle_complete_(handle_complete)
 {
     BITCOIN_ASSERT(proto != nullptr);
@@ -53,7 +53,7 @@ seeder::seeder(protocol* proto, const hosts::authority_list& seeds,
 void seeder::start()
 {
     BITCOIN_ASSERT(!succeeded_ && visited_ == 0);
-    for (const auto& address: seeds_)
+    for (const auto& address: hosts_)
         contact(address);
 }
 
@@ -153,11 +153,11 @@ void seeder::handle_store(const std::error_code& ec)
 
 void seeder::visited(const std::error_code& ec)
 {
-    BITCOIN_ASSERT(visited_ < seeds_.size());
+    BITCOIN_ASSERT(visited_ < hosts_.size());
 
     // We block session start until all seeds are populated. This provides
     // greater assurance of a random pool of address at session startup.
-    if (++visited_ == seeds_.size())
+    if (++visited_ == hosts_.size())
         handle_complete_(succeeded_ ? std::error_code () : ec);
 }
 
