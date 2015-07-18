@@ -54,19 +54,21 @@ using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::minutes;
-using boost::posix_time::seconds;
 using boost::posix_time::time_duration;
 
-// TODO: parameterize for config access.
-// Connection timeout (these could be safely adjusted by accessors at runtime).
-static const auto initial_timeout = seconds(0) + minutes(1);
-static const auto disconnect_timeout = seconds(0) + minutes(90);
-static const auto heartbeat_time = seconds(0) + minutes(30);
-static const auto revival_time = seconds(0) + minutes(1);
+// This is not configurable.
+static const auto initial_timeout_time = minutes(1);
 
-channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket)
+channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
+    uint32_t expiration_time_minutes, uint32_t timeout_time_minutes,
+    uint32_t heartbeat_time_minutes, uint32_t revival_time_minutes)
   : strand_(pool),
     socket_(socket),
+    expiration_time_(expiration_time_minutes),
+    timeout_time_(timeout_time_minutes),
+    heartbeat_time_(heartbeat_time_minutes),
+    revival_time_(revival_time_minutes),
+    expiration_(pool.service()),
     timeout_(pool.service()),
     heartbeat_(pool.service()),
     revival_(pool.service()),
@@ -103,13 +105,17 @@ channel_proxy::~channel_proxy()
 void channel_proxy::start()
 {
     read_header();
-    set_timeout(initial_timeout);
-    set_heartbeat(heartbeat_time);
-    set_revival(revival_time);
+    set_expiration(expiration_time_);
+    set_heartbeat(heartbeat_time_);
+    set_revival(revival_time_);
+    set_timeout(initial_timeout_time);
 }
 
 void channel_proxy::stop(const std::error_code& ec)
 {
+    if (stopped())
+        return;
+
     const auto self = shared_from_this();
     const auto stop_service = [self, ec]()
     {
@@ -120,11 +126,17 @@ void channel_proxy::stop(const std::error_code& ec)
 
 void channel_proxy::stop(const boost::system::error_code& ec)
 {
+    if (stopped())
+        return;
+
     stop(error::boost_to_error_code(ec));
 }
 
 void channel_proxy::do_stop(const std::error_code& ec)
 {
+    if (stopped())
+        return;
+
     stop_impl();
     stop_subscriber_->relay(ec);
 }
@@ -196,23 +208,42 @@ static inline bool aborted(const boost::system::error_code& ec)
     return ec == boost::asio::error::operation_aborted;
 }
 
-bool channel_proxy::failed(const boost::system::error_code& ec)
+void channel_proxy::reset_timers()
 {
-    // Suppress error if we are already stopped or the call has been aborted.
-    if (stopped() || aborted(ec))
-        return true;
+    set_timeout(timeout_time_);
+    set_heartbeat(heartbeat_time_);
+}
 
-    if (ec)
-    {
-        log_info(LOG_NETWORK)
-            << "Channel failure [" << address().to_string() << "] "
-            << std::error_code(error::boost_to_error_code(ec)).message()
-            << " (boost code " << ec.value() << ")";
-        stop(ec);
-        return true;
-    }
+void channel_proxy::reset_revival()
+{
+    set_revival(revival_time_);
+}
 
-    return false;
+void channel_proxy::set_revival_handler(revivial_handler handler)
+{
+    revival_handler_ = handler;
+}
+
+void channel_proxy::set_expiration(const time_duration& timeout)
+{
+    // Ignore the error_code. We don't really care at this point.
+    boost::system::error_code ec;
+    expiration_.cancel(ec);
+    expiration_.expires_from_now(timeout, ec);
+    expiration_.async_wait(
+        std::bind(&channel_proxy::handle_expiration,
+            shared_from_this(), _1));
+}
+
+void channel_proxy::set_timeout(const time_duration& timeout)
+{
+    // Ignore the error_code. We don't really care at this point.
+    boost::system::error_code ec;
+    timeout_.cancel(ec);
+    timeout_.expires_from_now(timeout, ec);
+    timeout_.async_wait(
+        std::bind(&channel_proxy::handle_timeout,
+            shared_from_this(), _1));
 }
 
 void channel_proxy::set_heartbeat(const time_duration& timeout)
@@ -226,40 +257,27 @@ void channel_proxy::set_heartbeat(const time_duration& timeout)
             shared_from_this(), _1));
 }
 
-void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
+void channel_proxy::set_revival(const time_duration& timeout)
+{
+    // Ignore the error_code. We don't really care at this point.
+    boost::system::error_code ec;
+    revival_.cancel(ec);
+    revival_.expires_from_now(timeout, ec);
+    revival_.async_wait(
+        std::bind(&channel_proxy::handle_revival,
+            shared_from_this(), _1));
+}
+
+void channel_proxy::handle_expiration(const boost::system::error_code& ec)
 {
     // Failure condition not handled, just abort.
     if (aborted(ec))
         return;
 
-    const auto handle_ping = [this](const std::error_code& ec)
-    {
-        if (ec)
-        {
-            log_debug(LOG_NETWORK)
-                << "Ping failure [" << address().to_string() << "] "
-                << ec.message();
-            return;
-        }
+    log_info(LOG_NETWORK)
+        << "Channel expired [" << address().to_string() << "]";
 
-        log_debug(LOG_NETWORK)
-            << "Ping sent [" << address().to_string() << "] ";
-    };
-
-    // TODO: match our sent ping.nonce with the returned pong.nonce.
-    ping_type random_ping{ pseudo_random() };
-    send(random_ping, handle_ping);
-}
-
-void channel_proxy::set_timeout(const time_duration& timeout)
-{
-    // Ignore the error_code. We don't really care at this point.
-    boost::system::error_code ec;
-    timeout_.cancel(ec);
-    timeout_.expires_from_now(timeout, ec);
-    timeout_.async_wait(
-        std::bind(&channel_proxy::handle_timeout,
-            shared_from_this(), _1));
+    stop(error::service_stopped);
 }
 
 void channel_proxy::handle_timeout(const boost::system::error_code& ec)
@@ -274,57 +292,43 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
     stop(error::channel_timeout);
 }
 
-void channel_proxy::reset_timers()
+void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 {
-    set_timeout(disconnect_timeout);
-    set_heartbeat(heartbeat_time);
-}
+    // Failure condition not handled, just abort.
+    if (aborted(ec))
+        return;
 
-void channel_proxy::set_revival(const time_duration& timeout)
-{
-    // Ignore the error_code. We don't really care at this point.
-    boost::system::error_code ec;
-    revival_.cancel(ec);
-    revival_.expires_from_now(timeout, ec);
-    revival_.async_wait(
-        std::bind(&channel_proxy::handle_revival,
-            shared_from_this(), _1));
-}
+    const auto ping = [this](const std::error_code& ec)
+    {
+        if (ec)
+        {
+            log_debug(LOG_NETWORK)
+                << "Ping failure [" << address().to_string() << "] "
+                << ec.message();
+            return;
+        }
 
-void channel_proxy::set_revival_handler(revivial_handler handler)
-{
-    revival_handler_ = handler;
+        log_debug(LOG_NETWORK)
+            << "Ping sent [" << address().to_string() << "] ";
+    };
+
+    const ping_type random_ping = { pseudo_random() };
+
+    // TODO: match our sent ping.nonce with the returned pong.nonce.
+    send(random_ping, ping);
 }
 
 void channel_proxy::handle_revival(const boost::system::error_code& ec)
 {
+    // Failure condition not handled, just abort.
     if (aborted(ec))
         return;
 
-    strand_.queue(
-        std::bind(&channel_proxy::do_revivial,
-            shared_from_this(), ec));
-}
-
-void channel_proxy::do_revivial(const boost::system::error_code& ec)
-{
     // Nothing to do, no handler registered.
     if (revival_handler_ == nullptr)
         return;
 
-    log_info(LOG_NETWORK)
-        << "Channel revival [" << address().to_string() << "]";
-
-    // Convert to standard code for public interface.
-    const auto code = bc::error::boost_to_error_code(ec);
-
-    // Invoke the revival handler.
-    revival_handler_(code);
-}
-
-void channel_proxy::reset_revival()
-{
-    set_revival(revival_time);
+    revival_handler_(bc::error::boost_to_error_code(ec));
 }
 
 // This is a subscription.
@@ -355,8 +359,19 @@ void channel_proxy::read_payload(const header_type& header)
 void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     size_t DEBUG_ONLY(bytes_transferred))
 {
-    if (failed(ec))
+    if (stopped() || aborted(ec))
         return;
+
+    if (ec)
+    {
+        log_info(LOG_NETWORK)
+            << "Channel failure [" << address().to_string() << "] "
+            << std::error_code(error::boost_to_error_code(ec)).message()
+            << " (boost code " << ec.value() << ")";
+
+        stop(ec);
+        return;
+    }
 
     BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
     BITCOIN_ASSERT(bytes_transferred == inbound_header_.size());
@@ -392,13 +407,28 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
 }
 
 void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
-    size_t DEBUG_ONLY(bytes_transferred), header_type& header)
+    size_t bytes_transferred, header_type& header)
 {
-    if (failed(ec))
+    if (stopped())
         return;
 
-    BITCOIN_ASSERT(bytes_transferred == header_checksum_size);
-    BITCOIN_ASSERT(bytes_transferred == inbound_checksum_.size());
+    // Client may have disconnected, so allow bad channel.
+    if (ec)
+    {
+        // But make sure we got the required data.
+        if (bytes_transferred != header_checksum_size ||
+            bytes_transferred != inbound_checksum_.size())
+        {
+            // No log error if we aborted, causing the invalid data.
+            if (aborted(ec))
+                return;
+
+            log_warning(LOG_NETWORK)
+                << "Invalid checksum from [" << address().to_string() << "]";
+            stop(ec);
+            return;
+        }
+    }
 
     header.checksum = from_little_endian<uint32_t>(
         inbound_checksum_.begin(), inbound_checksum_.end());
@@ -408,21 +438,35 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
 }
 
 void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
-    size_t DEBUG_ONLY(bytes_transferred), const header_type& header)
+    size_t bytes_transferred, const header_type& header)
 {
-    if (failed(ec))
+    if (stopped())
         return;
 
-    BITCOIN_ASSERT(bytes_transferred == header.payload_length);
-    BITCOIN_ASSERT(bytes_transferred == inbound_payload_.size());
+    // Client may have disconnected, so allow bad channel.
+    if (ec)
+    {
+        // But make sure we got the required data.
+        if (bytes_transferred != header.payload_length ||
+            bytes_transferred != inbound_payload_.size())
+        {
+            // No log error if we aborted, causing the invalid data.
+            if (aborted(ec))
+                return;
+
+            log_warning(LOG_NETWORK)
+                << "Invalid payload from [" << address().to_string() << "]";
+            stop(ec);
+            return;
+        }
+    }
 
     const data_chunk payload(inbound_payload_);
     if (header.checksum != bitcoin_checksum(payload))
     {
         log_warning(LOG_NETWORK) 
-            << "Invalid checksum from [" << address().to_string() << "]";
-
-        raw_subscriber_->relay(error::bad_stream, header_type(), data_chunk());
+            << "Invalid bitcoin checksum from [" << address().to_string()
+            << "]";
         stop(error::bad_stream);
         return;
     }
@@ -431,10 +475,15 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
 
     // This must happen before calling subscribe notification handlers
     // In case user tries to stop() this channel.
-    read_header();
-    reset_timers();
+    if (!ec)
+        read_header();
 
+    reset_timers();
     loader_.load_lookup(header.command, payload);
+
+    // Now we stop the channel if there was an error and we aren't yet stopped.
+    if (ec)
+        stop(ec);
 }
 
 void channel_proxy::call_handle_send(const boost::system::error_code& ec,

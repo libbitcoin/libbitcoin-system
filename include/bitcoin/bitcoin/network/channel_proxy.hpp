@@ -118,8 +118,12 @@ public:
         const header_type&, const data_chunk&)> receive_raw_handler;
     typedef std::function<void (const std::error_code&)> stop_handler;
     typedef std::function<void (const std::error_code&)> revivial_handler;
+    typedef std::function<void (const std::error_code&)> expiration_handler;
 
-    channel_proxy(threadpool& pool, socket_ptr socket);
+    channel_proxy(threadpool& pool, socket_ptr socket,
+        uint32_t expiration_time_minutes=90, uint32_t timeout_time_minutes=30,
+        uint32_t heartbeat_time_minutes=15, uint32_t revival_time_minutes=1);
+
     ~channel_proxy();
 
     /// This class is not copyable.
@@ -159,8 +163,8 @@ public:
     void subscribe_transaction(
         receive_transaction_handler handle_receive);
     void subscribe_block(receive_block_handler handle_receive);
-    void subscribe_raw(receive_raw_handler handle_receive);
 
+    void subscribe_raw(receive_raw_handler handle_receive);
     void subscribe_stop(stop_handler handle_stop);
 
 private:
@@ -188,10 +192,6 @@ private:
 
     void stop(const boost::system::error_code& ec);
     void do_stop(const std::error_code& ec=error::service_stopped);
-    void do_send_raw(const header_type& packet_header,
-        const data_chunk& payload, send_handler handle_send);
-    void do_send_common(const data_chunk& message,
-        send_handler handle_send, const std::string& command="");
 
     template <typename Message, typename Callback, typename SubscriberPtr>
     void generic_subscribe(Callback handle_message,
@@ -204,37 +204,52 @@ private:
             message_subscribe->subscribe(handle_message);
     }
 
+    void reset_timers();
+    void stop_impl();
+    void clear_subscriptions();
+
+    void set_expiration(const boost::posix_time::time_duration& timeout);
+    void set_timeout(const boost::posix_time::time_duration& timeout);
+    void set_heartbeat(const boost::posix_time::time_duration& timeout);
+    void set_revival(const boost::posix_time::time_duration& timeout);
+
+    void handle_expiration(const boost::system::error_code& ec);
+    void handle_timeout(const boost::system::error_code& ec);
+    void handle_heartbeat(const boost::system::error_code& ec);
+    void handle_revival(const boost::system::error_code& ec);
+    
     void read_header();
     void read_checksum(const header_type& header);
     void read_payload(const header_type& header);
+
     void handle_read_header(const boost::system::error_code& ec,
         size_t bytes_transferred);
     void handle_read_checksum(const boost::system::error_code& ec,
         size_t bytes_transferred, header_type& header);
     void handle_read_payload(const boost::system::error_code& ec,
         size_t bytes_transferred, const header_type& header);
+
     void call_handle_send(const boost::system::error_code& ec,
         send_handler handle_send);
-
-    void reset_timers();
-    void stop_impl();
-    void clear_subscriptions();
-    bool failed(const boost::system::error_code& ec);
-    void set_timeout(const boost::posix_time::time_duration& timeout);
-    void handle_timeout(const boost::system::error_code& ec);
-    void set_heartbeat(const boost::posix_time::time_duration& timeout);
-    void handle_heartbeat(const boost::system::error_code& ec);
-    void set_revival(const boost::posix_time::time_duration& timeout);
-    void handle_revival(const boost::system::error_code& ec);
-    void do_revivial(const boost::system::error_code& ec);
+    void do_send_raw(const header_type& packet_header,
+        const data_chunk& payload, send_handler handle_send);
+    void do_send_common(const data_chunk& message,
+        send_handler handle_send, const std::string& command="");
 
     async_strand strand_;
     socket_ptr socket_;
 
+    boost::posix_time::minutes expiration_time_;
+    boost::posix_time::minutes timeout_time_;
+    boost::posix_time::minutes heartbeat_time_;
+    boost::posix_time::minutes revival_time_;
+
     // We keep the service alive for lifetime rules
+    boost::asio::deadline_timer expiration_;
     boost::asio::deadline_timer timeout_;
     boost::asio::deadline_timer heartbeat_;
     boost::asio::deadline_timer revival_;
+
     revivial_handler revival_handler_;
 
     // TODO: use lock-free std::atomic_flag?
