@@ -24,9 +24,9 @@
 #include <functional>
 #include <system_error>
 #include <boost/algorithm/string.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
 
@@ -57,7 +57,7 @@ void seeder::start()
         contact(address);
 }
 
-void seeder::contact(const authority& seed_address)
+void seeder::contact(const config::authority& seed_address)
 {
     log_info(LOG_PROTOCOL)
         << "Contacting seed [" << seed_address.to_string() << "]";

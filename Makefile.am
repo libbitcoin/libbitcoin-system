@@ -43,7 +43,11 @@ src_libbitcoin_la_SOURCES = \
     src/script.cpp \
     src/stealth.cpp \
     src/transaction.cpp \
+    src/config/authority.cpp \
+    src/config/btc256.cpp \
+    src/config/checkpoint.cpp \
     src/config/directory.cpp \
+    src/config/endpoint.cpp \
     src/config/parameter.cpp \
     src/config/printer.cpp \
     src/formats/base10.cpp \
@@ -75,7 +79,6 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
     src/network/acceptor.cpp \
-    src/network/authority.cpp \
     src/network/channel.cpp \
     src/network/channel_proxy.cpp \
     src/network/channel_stream_loader.cpp \
@@ -196,7 +199,11 @@ include_bitcoin_bitcoin_HEADERS = \
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
+    include/bitcoin/bitcoin/config/authority.hpp \
+    include/bitcoin/bitcoin/config/btc256.hpp \
+    include/bitcoin/bitcoin/config/checkpoint.hpp \
     include/bitcoin/bitcoin/config/directory.hpp \
+    include/bitcoin/bitcoin/config/endpoint.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
 
@@ -246,7 +253,6 @@ include_bitcoin_bitcoin_math_HEADERS = \
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/acceptor.hpp \
-    include/bitcoin/bitcoin/network/authority.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
     include/bitcoin/bitcoin/network/channel_loader_module.hpp \
     include/bitcoin/bitcoin/network/channel_proxy.hpp \

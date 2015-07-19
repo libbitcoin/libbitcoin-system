@@ -28,9 +28,9 @@
 #include <boost/date_time.hpp>
 #include <boost/format.hpp>
 #include <boost/system/error_code.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
@@ -157,16 +157,16 @@ void channel_proxy::stop_impl()
     clear_subscriptions();
 }
 
-authority channel_proxy::address() const
+config::authority channel_proxy::address() const
 {
     boost::system::error_code ec;
     const auto endpoint = socket_->remote_endpoint(ec);
 
     // The endpoint may have become disconnected.
     if (ec)
-        return authority();
+        return config::authority();
 
-    return authority(endpoint);
+    return config::authority(endpoint);
 }
 
 void channel_proxy::clear_subscriptions()

@@ -23,8 +23,8 @@
 #include <cstddef>
 #include <memory>
 #include <system_error>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -49,7 +49,7 @@ public:
     void start();
 
 private:
-    void contact(const authority& seed_address);
+    void contact(const config::authority& seed_address);
     void handle_request(const std::error_code& ec);
     void handle_store(const std::error_code& ec);
     void request(const std::error_code& ec, channel_ptr seed_node);

@@ -31,8 +31,8 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -206,9 +206,9 @@ private:
     // subscribe call.
     void try_connect_once(slot_index slot);
     void attempt_connect(const std::error_code& ec,
-        const authority& packet, slot_index slot);
+        const config::authority& packet, slot_index slot);
     void handle_connect(const std::error_code& ec, channel_ptr node,
-        const authority& address, slot_index slot);
+        const config::authority& address, slot_index slot);
 
     // Periodically call this method to reset the sweep and reallow
     // connections. This prevents too many connection attempts from
@@ -226,8 +226,8 @@ private:
         acceptor_ptr accept);
 
     // Channel setup
-    bool is_banned(const authority& address);
-    bool is_connected(const authority& address);
+    bool is_banned(const config::authority& address);
+    bool is_connected(const config::authority& address);
     void remove_connection(channel_ptr_list& connections, channel_ptr node);
     void setup_new_channel(channel_ptr node);
 

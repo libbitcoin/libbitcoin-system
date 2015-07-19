@@ -27,7 +27,7 @@
 #include <bitcoin/bitcoin/primitives.hpp>
 
 namespace libbitcoin {
-namespace network {
+namespace config {
 
 struct BC_API authority
 {
@@ -43,7 +43,7 @@ struct BC_API authority
     uint16_t port;
 };
 
-} // namespace network
+} // namespace config
 } // namespace libbitcoin
 
 #endif

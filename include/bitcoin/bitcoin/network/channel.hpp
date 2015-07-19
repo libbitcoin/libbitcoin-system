@@ -24,8 +24,8 @@
 #include <memory>
 #include <string>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -53,7 +53,7 @@ public:
 
     void stop() const;
     bool stopped() const;
-    authority address() const;
+    config::authority address() const;
     void reset_revival();
     void set_revival_handler(channel_proxy::revivial_handler handler);
 

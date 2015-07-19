@@ -27,8 +27,8 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
@@ -282,7 +282,7 @@ void protocol::start_sweep_reset_timer()
 }
 
 // Determine if the address is banned.
-bool protocol::is_banned(const authority& address)
+bool protocol::is_banned(const config::authority& address)
 {
     for (const auto& banned: banned_connections_)
     {
@@ -302,7 +302,7 @@ bool protocol::is_manual(channel_ptr node)
 }
 
 // Determine if we are connected to the address for any reason.
-bool protocol::is_connected(const authority& address)
+bool protocol::is_connected(const config::authority& address)
 {
     for (const auto node: outbound_connections_)
         if (node->address() == address)
@@ -320,7 +320,7 @@ bool protocol::is_connected(const authority& address)
 }
 
 void protocol::attempt_connect(const std::error_code& ec,
-    const authority& peer, slot_index slot)
+    const config::authority& peer, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
     modify_slot(slot, connect_state::connecting);
@@ -368,7 +368,7 @@ void protocol::attempt_connect(const std::error_code& ec,
 }
 
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
-    const authority& peer, slot_index slot)
+    const config::authority& peer, slot_index slot)
 {
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
 
@@ -423,7 +423,8 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     {
         log_debug(LOG_PROTOCOL)
             << "Failure connecting manually to peer [" 
-            << authority(hostname, port).to_string() << "] " << ec.message();
+            << config::authority(hostname, port).to_string() << "] "
+            << ec.message();
 
         // Retry connect.
         maintain_connection(hostname, port);
@@ -435,7 +436,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     // Connected!
     log_info(LOG_PROTOCOL)
         << "Connection to peer established manually ["
-        << authority(hostname, port).to_string() << "]";
+        << config::authority(hostname, port).to_string() << "]";
 
     // Subscript to channel stop notifications.
     node->subscribe_stop(
@@ -610,7 +611,8 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
         if (node)
             log_debug(LOG_PROTOCOL)
                 << "Manual channel stopped (manual) [" 
-                << authority(hostname, port).to_string() << "] " << ec.message();
+                << config::authority(hostname, port).to_string() << "] "
+                << ec.message();
         else
             log_debug(LOG_PROTOCOL)
                 << "Manual channel stopped (manual): " << ec.message();

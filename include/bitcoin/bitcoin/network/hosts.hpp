@@ -27,8 +27,8 @@
 #include <system_error>
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
@@ -41,7 +41,7 @@ namespace network {
 class BC_API hosts
 {
 public:
-    typedef std::vector<authority> list;
+    typedef std::vector<config::authority> list;
     static const list defaults;
 
     typedef std::function<void (const std::error_code&)> load_handler;

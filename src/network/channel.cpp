@@ -19,7 +19,7 @@
  */
 #include <bitcoin/bitcoin/network/channel.hpp>
 
-#include <bitcoin/bitcoin/network/authority.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 
@@ -52,13 +52,13 @@ bool channel::stopped() const
     return true;
 }
 
-authority channel::address() const
+config::authority channel::address() const
 {
     const auto proxy = weak_proxy_.lock();
     if (proxy)
         return proxy->address();
 
-    return authority();
+    return config::authority();
 }
 
 void channel::reset_revival()

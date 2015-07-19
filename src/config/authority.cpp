@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/authority.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 
 #include <cstdint>
 #include <string>
@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
-namespace network {
+namespace config {
     
 using boost::format;
 using boost::asio::ip::tcp;
@@ -93,6 +93,6 @@ std::string authority::to_string() const
     return (format("%s:%d") % host % port).str();
 }
 
-} // namespace network
+} // namespace config
 } // namespace libbitcoin
 

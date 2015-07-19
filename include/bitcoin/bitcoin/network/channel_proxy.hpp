@@ -31,10 +31,10 @@
 #include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -132,7 +132,7 @@ public:
     void start();
     void stop(const std::error_code& ec=error::service_stopped);
     bool stopped() const;
-    authority address() const;
+    config::authority address() const;
     void reset_revival();
     void set_revival_handler(revivial_handler handler);
 
