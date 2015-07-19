@@ -52,8 +52,8 @@ void connect_with_timeout::start(tcp::resolver::iterator endpoint_iterator,
     network::connect_handler handle_connect)
 {
     timer_.expires_from_now(connection_timeout_);
-    timer_.async_wait(std::bind(
-        &connect_with_timeout::close,
+    timer_.async_wait(
+        std::bind(&connect_with_timeout::close,
             shared_from_this(), _1));
 
     boost::asio::async_connect(*socket_, endpoint_iterator,
@@ -66,8 +66,8 @@ void connect_with_timeout::start(tcp::resolver::iterator endpoint_iterator,
     time_duration timeout, network::connect_handler handle_connect)
 {
     timer_.expires_from_now(timeout);
-    timer_.async_wait(std::bind(
-        &connect_with_timeout::close,
+    timer_.async_wait(
+        std::bind(&connect_with_timeout::close,
             shared_from_this(), _1));
 
     boost::asio::async_connect(*socket_, endpoint_iterator,
