@@ -46,7 +46,7 @@ struct BC_API settings
     boost::filesystem::path hosts_file;
     boost::filesystem::path debug_file;
     boost::filesystem::path error_file;
-    std::vector<config::endpoint_type> seeds;
+    std::vector<config::endpoint> seeds;
 };
 
 } // namespace network

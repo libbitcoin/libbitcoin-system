@@ -29,12 +29,12 @@
 namespace libbitcoin {
 namespace config {
 
-class BC_API endpoint_type
+class BC_API endpoint
 {
 public:
-    endpoint_type();
-    endpoint_type(const std::string& value);
-    endpoint_type(const endpoint_type& other);
+    endpoint();
+    endpoint(const std::string& value);
+    endpoint(const endpoint& other);
 
     const std::string& get_scheme() const;
     const std::string& get_host() const;
@@ -42,9 +42,9 @@ public:
     operator const std::string() const;
 
     friend std::istream& operator>>(std::istream& input,
-        endpoint_type& argument);
+        endpoint& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const endpoint_type& argument);
+        const endpoint& argument);
 
 private:
     std::string scheme_;

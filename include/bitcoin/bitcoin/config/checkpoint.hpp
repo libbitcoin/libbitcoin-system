@@ -29,20 +29,20 @@
 namespace libbitcoin {
 namespace config {
 
-class BC_API checkpoint_type
+class BC_API checkpoint
 {
 public:
-    checkpoint_type();
-    checkpoint_type(const std::string& value);
-    checkpoint_type(const checkpoint_type& other);
+    checkpoint();
+    checkpoint(const std::string& value);
+    checkpoint(const checkpoint& other);
 
     const bc::hash_digest& get_hash() const;
     const size_t get_height() const;
 
     friend std::istream& operator>>(std::istream& input,
-        checkpoint_type& argument);
+        checkpoint& argument);
     friend std::ostream& operator<<(std::ostream& output,
-        const checkpoint_type& argument);
+        const checkpoint& argument);
 
 private:
     bc::hash_digest hash_;

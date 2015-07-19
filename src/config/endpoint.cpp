@@ -34,46 +34,46 @@ namespace config {
 using namespace boost;
 using namespace boost::program_options;
 
-endpoint_type::endpoint_type()
+endpoint::endpoint()
   : port_(0)
 {
 }
 
-endpoint_type::endpoint_type(const std::string& value)
-  : endpoint_type()
+endpoint::endpoint(const std::string& value)
+  : endpoint()
 {
     std::stringstream(value) >> *this;
 }
 
-endpoint_type::endpoint_type(const endpoint_type& other)
+endpoint::endpoint(const endpoint& other)
   : scheme_(other.get_scheme()), host_(other.get_host()),
     port_(other.get_port())
 {
 }
 
-const std::string& endpoint_type::get_scheme() const
+const std::string& endpoint::get_scheme() const
 {
     return scheme_;
 }
 
-const std::string& endpoint_type::get_host() const
+const std::string& endpoint::get_host() const
 {
     return host_;
 }
 
-uint16_t endpoint_type::get_port() const
+uint16_t endpoint::get_port() const
 {
     return port_;
 }
 
-endpoint_type::operator const std::string() const
+endpoint::operator const std::string() const
 {
     std::stringstream value;
     value << *this;
     return value.str();
 }
 
-std::istream& operator>>(std::istream& input, endpoint_type& argument)
+std::istream& operator>>(std::istream& input, endpoint& argument)
 {
     std::string value;
     input >> value;
@@ -115,7 +115,7 @@ std::istream& operator>>(std::istream& input, endpoint_type& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const endpoint_type& argument)
+std::ostream& operator<<(std::ostream& output, const endpoint& argument)
 {
     if (!argument.scheme_.empty())
         output << argument.scheme_ << "://";

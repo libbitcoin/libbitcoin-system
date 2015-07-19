@@ -34,33 +34,33 @@ namespace config {
 using namespace boost;
 using namespace boost::program_options;
 
-checkpoint_type::checkpoint_type()
+checkpoint::checkpoint()
   : height_(0), hash_(bc::null_hash)
 {
 }
 
-checkpoint_type::checkpoint_type(const std::string& value)
-  : checkpoint_type()
+checkpoint::checkpoint(const std::string& value)
+  : checkpoint()
 {
     std::stringstream(value) >> *this;
 }
 
-checkpoint_type::checkpoint_type(const checkpoint_type& other)
+checkpoint::checkpoint(const checkpoint& other)
   : hash_(other.get_hash()), height_(other.get_height())
 {
 }
 
-const hash_digest& checkpoint_type::get_hash() const
+const hash_digest& checkpoint::get_hash() const
 {
     return hash_;
 }
 
-const size_t checkpoint_type::get_height() const
+const size_t checkpoint::get_height() const
 {
     return height_;
 }
 
-std::istream& operator>>(std::istream& input, checkpoint_type& argument)
+std::istream& operator>>(std::istream& input, checkpoint& argument)
 {
     std::string value;
     input >> value;
@@ -106,7 +106,7 @@ std::istream& operator>>(std::istream& input, checkpoint_type& argument)
     return input;
 }
 
-std::ostream& operator<<(std::ostream& output, const checkpoint_type& argument)
+std::ostream& operator<<(std::ostream& output, const checkpoint& argument)
 {
     output << bc::encode_hash(argument.hash_) << ":" << argument.height_;
 
