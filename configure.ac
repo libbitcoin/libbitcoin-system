@@ -31,13 +31,17 @@ AM_INIT_AUTOMAKE([subdir-objects])
 AC_USE_SYSTEM_EXTENSIONS
 
 # Enable the archiver.
-AM_PROG_AR
+# (Please note that "AM_PROG_AR" as well as "m4_pattern_allow([AM_PROG_AR], [AM_PROG_AR])" are
+# not friends with Autotools 2.69.)
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 # Initialize libtool.
 LT_INIT
 
 # Determine C++ compiler to use.
 AC_PROG_CXX
+
+AM_PROG_CC_C_O
 
 # Enable shared libraries if available, and static if they don't conflict.
 AC_PROG_LIBTOOL
