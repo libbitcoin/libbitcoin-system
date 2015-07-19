@@ -604,6 +604,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\..\resource.rc">
