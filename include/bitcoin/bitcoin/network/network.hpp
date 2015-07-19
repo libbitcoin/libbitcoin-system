@@ -37,6 +37,7 @@
 namespace libbitcoin {
 namespace network {
 
+// TODO: rename to p2p (avoid network namespace and library no class).
 class BC_API network
 {
 public:
