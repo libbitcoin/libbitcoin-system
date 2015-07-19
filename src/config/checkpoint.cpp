@@ -66,7 +66,7 @@ std::istream& operator>>(std::istream& input, checkpoint_type& argument)
     input >> value;
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    // When matched will always generate 6 tokens, we want 2 and 4.
+    // When matched will always generate 6 tokens, we want 1 and 3.
     // We allow 1-10 digits, which is sufficient for 2^32 blocks.
     const boost::regex regular("([0-9a-f]{64})(:([0-9]{1,10}))?");
 
@@ -83,12 +83,12 @@ std::istream& operator>>(std::istream& input, checkpoint_type& argument)
         // Extract the two tokens of interest.
         boost::smatch match = *it;
 
-        if (!decode_hash(argument.hash_, match[2]))
+        if (!decode_hash(argument.hash_, match[1]))
         {
             BOOST_THROW_EXCEPTION(invalid_option_value(value));
         }
 
-        const std::string number(match[4]);
+        const std::string number(match[3]);
 
         // Convert the block height to a number, catching exceptions.
         if (!number.empty())
