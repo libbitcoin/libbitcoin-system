@@ -20,9 +20,13 @@
 #include <cstdlib>
 #include <string>
 #include <bitcoin/bitcoin.hpp>
+#if !defined(__MACH__) && !defined(_MSC_VER)
+#include <unistd.h>
+#endif
 
 BC_USE_LIBBITCOIN_MAIN
 
+// Testing out our http://utf8everywhere.org implementation.
 int bc::main(int argc, char* argv[])
 {
     set_utf8_stdio();
