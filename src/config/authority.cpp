@@ -48,9 +48,6 @@ authority::authority(const std::string& line)
     // TODO: verify lexical_cast ndebug exception safety.
     if (parts.size() == 2)
         port = boost::lexical_cast<uint16_t>(parts[1]);
-
-    // The port was invalid or unspecified.
-    BITCOIN_ASSERT(port != 0);
 }
 
 // This is the format returned from peers on the bitcoin network.
@@ -67,8 +64,6 @@ authority::authority(const network_address_type& net)
 authority::authority(const std::string& host, uint16_t port)
   : host(host), port(port)
 {
-    // Can't explicitly set an invalid port.
-    BITCOIN_ASSERT(port != 0);
 }
 
 // This is the format obtained from a boost asio channel.
