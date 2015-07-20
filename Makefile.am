@@ -289,15 +289,6 @@ include_bitcoin_bitcoin_impl_formatsdir = ${includedir}/bitcoin/bitcoin/impl/for
 include_bitcoin_bitcoin_impl_formats_HEADERS = \
     include/bitcoin/bitcoin/impl/formats/base16.ipp
 
-include_bitcoin_bitcoin_impl_triedir = ${includedir}/bitcoin/bitcoin/impl/trie
-include_bitcoin_bitcoin_impl_trie_HEADERS = \
-    include/bitcoin/bitcoin/impl/trie/binary_trie.ipp \
-    include/bitcoin/bitcoin/impl/trie/threadsafe_binary_trie.ipp \
-    include/bitcoin/bitcoin/impl/trie/trie_iterator.ipp \
-    include/bitcoin/bitcoin/impl/trie/trie_reverse_iterator.ipp \
-    include/bitcoin/bitcoin/impl/trie/trie_structure_node.ipp \
-    include/bitcoin/bitcoin/impl/trie/trie_value_node.ipp
-
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
@@ -352,15 +343,6 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/settings.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp \
     include/bitcoin/bitcoin/network/timeout.hpp
-
-include_bitcoin_bitcoin_triedir = ${includedir}/bitcoin/bitcoin/trie
-include_bitcoin_bitcoin_trie_HEADERS = \
-    include/bitcoin/bitcoin/trie/binary_trie.hpp \
-    include/bitcoin/bitcoin/trie/threadsafe_binary_trie.hpp \
-    include/bitcoin/bitcoin/trie/trie_iterator.hpp \
-    include/bitcoin/bitcoin/trie/trie_reverse_iterator.hpp \
-    include/bitcoin/bitcoin/trie/trie_structure_node.hpp \
-    include/bitcoin/bitcoin/trie/trie_value_node.hpp
 
 include_bitcoin_bitcoin_unicodedir = ${includedir}/bitcoin/bitcoin/unicode
 include_bitcoin_bitcoin_unicode_HEADERS = \
