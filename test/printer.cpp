@@ -28,8 +28,7 @@
 namespace po = boost::program_options;
 using namespace bc::config;
 
-BOOST_AUTO_TEST_SUITE(config)
-BOOST_AUTO_TEST_SUITE(config__printer)
+BOOST_AUTO_TEST_SUITE(printer_tests)
 
 #define CONFIG_APPLICATION "APP"
 #define CONFIG_DESCRIPTION "DESCRIPTION"
@@ -481,5 +480,4 @@ BOOST_AUTO_TEST_CASE(printer__initialize__unsorted_multitple_options__expected_s
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END() // config__printer
-BOOST_AUTO_TEST_SUITE_END() // config
+BOOST_AUTO_TEST_SUITE_END()

@@ -22,9 +22,9 @@
 
 using namespace libbitcoin;
 
-BOOST_AUTO_TEST_SUITE(hashnum_tests)
+BOOST_AUTO_TEST_SUITE(hash_number_tests)
 
-BOOST_AUTO_TEST_CASE(simple)
+BOOST_AUTO_TEST_CASE(hash_number__simple__test)
 {
     hash_number target;
     uint32_t bits = 486604799;
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(simple)
     BOOST_REQUIRE(!(our_value > target));
 }
 
-BOOST_AUTO_TEST_CASE(work)
+BOOST_AUTO_TEST_CASE(hash_number__work__test)
 {
     hash_number orphan_work = 0;
     BOOST_REQUIRE_EQUAL(encode_base16(orphan_work.hash()), encode_base16(null_hash));

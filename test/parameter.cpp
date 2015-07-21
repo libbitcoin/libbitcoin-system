@@ -84,8 +84,7 @@ static void load_test_arguments(argument_list& arguments)
     auto option = *(options.options()[index]); \
     bc::config::parameter parameter
 
-BOOST_AUTO_TEST_SUITE(config)
-BOOST_AUTO_TEST_SUITE(config__parameter)
+BOOST_AUTO_TEST_SUITE(parameter_tests)
 
 // ------------------------------------------------------------------------- //
 BOOST_AUTO_TEST_SUITE(parameter__position)
@@ -311,5 +310,4 @@ BOOST_AUTO_TEST_CASE(parameter__short_name__long_only__returns_null_char)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE_END() // config__parameter
-BOOST_AUTO_TEST_SUITE_END() // config
+BOOST_AUTO_TEST_SUITE_END()
