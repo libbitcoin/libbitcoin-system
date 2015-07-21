@@ -28,28 +28,20 @@ namespace libbitcoin {
 namespace config {
 
 /**
- * Serialization helper to convert between base16 string and hash_digest.
+ * Serialization helper for a bitcoin 256 bit hash.
  */
 class BC_API btc256
 {
 public:
+    /**
+     * A list of bitcoin 256 bit hashes.
+     */
+    typedef std::vector<btc256> list;
 
     /**
      * Default constructor.
      */
     btc256();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  hexcode  The value to initialize with.
-     */
-    btc256(const std::string& hexcode);
-
-    /**
-     * Initialization constructor.
-     * @param[in]  value  The value to initialize with.
-     */
-    btc256(const hash_digest& value);
 
     /**
      * Copy constructor.
@@ -58,13 +50,37 @@ public:
     btc256(const btc256& other);
 
     /**
-     * Overload cast to internal type.
+     * Initialization constructor.
+     * @param[in]  hexcode  The hash value in string hexidecimal form.
+     */
+    btc256(const std::string& hexcode);
+
+    /**
+     * Initialization constructor.
+     * @param[in]  value  The hash value to initialize with.
+     */
+    btc256(const hash_digest& value);
+    
+    /**
+     * Get the hash as a string.
+     * @return The hash in the string hexidecimal form.
+     */
+    std::string to_string() const;
+
+    /**
+     * Override the equality operator.
+     * @param[in]  other  The other object with which to compare.
+     */
+    bool operator==(const btc256& other) const;
+
+    /**
+     * Cast to internal type.
      * @return  This object's value cast to internal type.
      */
     operator const hash_digest&() const;
 
     /**
-     * Overload stream in. Throws if input is invalid.
+     * Define stream in. Throws if input is invalid.
      * @param[in]   input     The input stream to read the value from.
      * @param[out]  argument  The object to receive the read value.
      * @return                The input stream reference.
@@ -73,7 +89,7 @@ public:
         btc256& argument);
 
     /**
-     * Overload stream out.
+     * Define stream out.
      * @param[in]   output    The output stream to write the value to.
      * @param[out]  argument  The object from which to obtain the value.
      * @return                The output stream reference.
@@ -82,10 +98,6 @@ public:
         const btc256& argument);
 
 private:
-
-    /**
-     * The state of this object.
-     */
     hash_digest value_;
 };
 

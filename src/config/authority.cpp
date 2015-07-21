@@ -21,73 +21,130 @@
 
 #include <cstdint>
 #include <string>
+#include <sstream>
+#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/asio.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/program_options.hpp>
+#include <boost/regex.hpp>
+#include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
 namespace config {
-    
-using boost::format;
-using boost::asio::ip::tcp;
+
+using namespace boost;
+using namespace boost::asio;
+using namespace boost::program_options;
 
 authority::authority()
-  : port(0)
+  : authority(undefined_ip_address, 0)
 {
 }
 
-// This is the format utilized by the seed list.
-authority::authority(const std::string& line)
+authority::authority(const authority& other)
+  : authority(other.ip_, other.port_)
+{
+}
+
+// This supports both IPv4 and IPv6 formats.
+authority::authority(const std::string& value)
   : authority()
 {
-    const auto parts = split(boost::trim_copy(line), ":");
-    host = parts[0];
-
-    // TODO: verify lexical_cast ndebug exception safety.
-    if (parts.size() == 2)
-        port = boost::lexical_cast<uint16_t>(parts[1]);
+    std::stringstream(value) >> *this;
 }
 
 // This is the format returned from peers on the bitcoin network.
 authority::authority(const network_address_type& net)
-{
-    const auto& ip = net.ip;
-    const auto formatted = format("%d.%d.%d.%d") %
-        (int)ip[12] % (int)ip[13] % (int)ip[14] % (int)ip[15];
-    host = formatted.str();
-    port = net.port;
-}
-
-// This is the manual construction expected format.
-authority::authority(const std::string& host, uint16_t port)
-  : host(host), port(port)
+  : authority(net.ip, net.port)
 {
 }
 
-// This is the format obtained from a boost asio channel.
-authority::authority(const tcp::socket::endpoint_type& endpoint)
+authority::authority(const ip_address_type& ip, uint16_t port)
+  : ip_(ip::address_v6(ip)), port_(port)
 {
-    host = endpoint.address().to_string();
-    port = endpoint.port();
+}
+
+authority::authority(const ip::tcp::endpoint& endpoint)
+  : authority(endpoint.address(), endpoint.port())
+{
+}
+
+authority::authority(const ip::address& ip, uint16_t port)
+  : ip_(ip), port_(port)
+{
+}
+
+const ip_address_type& authority::ip() const
+{
+    return ip_.to_v6().to_bytes();
+}
+
+uint16_t authority::port() const
+{
+    return port_;
+}
+
+std::string authority::to_hostname() const
+{
+    return ip_.to_string();
+}
+
+network_address_type authority::to_network_address() const
+{
+    static constexpr uint32_t services = 0;
+    static constexpr uint64_t timestamp = 0;
+    const network_address_type network_address
+    {
+        timestamp,
+        services,
+        ip_.to_v6().to_bytes(),
+        port_,
+    };
+
+    return network_address;
+}
+
+std::string authority::to_string() const
+{
+    std::stringstream value;
+    value << *this;
+    return value.str();
 }
 
 bool authority::operator==(const authority& other) const
 {
-    // Note that addresses are not inherently normalized.
-    return host == other.host && port == other.port;
+    return ip() == other.ip() && port() == other.port();
 }
 
-// This produces a pretty format even if the address is invalid.
-std::string authority::to_string() const
+std::istream& operator>>(std::istream& input, authority& argument)
 {
-    if (host.empty())
-        return (format("0.0.0.0:%d") % port).str();
+    std::string value;
+    input >> value;
 
-    return (format("%s:%d") % host % port).str();
+    // This supports both IPv4 and IPv6 formats.
+    const auto parts = split(trim_copy(value), ":");
+    argument.ip_.from_string(parts[0]);
+
+    if (parts.size() == 2)
+        argument.port_ = lexical_cast<uint16_t>(parts[1]);
+
+    return input;
+}
+
+std::ostream& operator<<(std::ostream& output, const authority& argument)
+{
+    output << argument.to_hostname();
+
+    if (argument.port() != 0)
+        output << ":" << argument.port();
+
+    return output;
 }
 
 } // namespace config
 } // namespace libbitcoin
-

@@ -23,8 +23,10 @@
 #include <cstdint>
 #include <functional>
 #include <system_error>
+#include <vector>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -36,7 +38,7 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-seeder::seeder(protocol* proto, const hosts::list& seed,
+seeder::seeder(protocol* proto, const config::endpoint::list& seeds,
     protocol::completion_handler handle_complete)
   : strand_(proto->strand_), 
     host_pool_(proto->host_pool_),
@@ -44,7 +46,7 @@ seeder::seeder(protocol* proto, const hosts::list& seed,
     network_(proto->network_),
     succeeded_(false),
     visited_(0),
-    hosts_(seed),
+    seeds_(seeds),
     handle_complete_(handle_complete)
 {
     BITCOIN_ASSERT(proto != nullptr);
@@ -53,23 +55,23 @@ seeder::seeder(protocol* proto, const hosts::list& seed,
 void seeder::start()
 {
     BITCOIN_ASSERT(!succeeded_ && visited_ == 0);
-    for (const auto& address: hosts_)
+    for (const auto& address: seeds_)
         contact(address);
 }
 
-void seeder::contact(const config::authority& seed_address)
+void seeder::contact(const config::endpoint& seed)
 {
     log_info(LOG_PROTOCOL)
-        << "Contacting seed [" << seed_address.to_string() << "]";
+        << "Contacting seed [" << seed.to_string() << "]";
 
-    connect(handshake_, network_, seed_address.host, seed_address.port,
+    connect(handshake_, network_, seed.host(), seed.port(),
         strand_.wrap(&seeder::request,
             shared_from_this(), _1, _2));
 }
 
-void seeder::request(const std::error_code& ec, channel_ptr seed_node)
+void seeder::request(const std::error_code& ec, channel_ptr node)
 {
-    if (!seed_node)
+    if (!node)
     {
         visited(ec);
         return;
@@ -79,7 +81,7 @@ void seeder::request(const std::error_code& ec, channel_ptr seed_node)
     {
         log_debug(LOG_PROTOCOL)
             << "Failure contacting seed [" 
-            << seed_node->address().to_string() << "] " << ec.message();
+            << node->address().to_string() << "] " << ec.message();
 
         visited(ec);
         return;
@@ -87,15 +89,15 @@ void seeder::request(const std::error_code& ec, channel_ptr seed_node)
 
     log_debug(LOG_PROTOCOL)
         << "Getting addresses from seed ["
-        << seed_node->address().to_string() << "]";
+        << node->address().to_string() << "]";
 
-    seed_node->send(get_address_type(),
+    node->send(get_address_type(),
         strand_.wrap(&seeder::handle_request,
             shared_from_this(), _1));
 
-    seed_node->subscribe_address(
+    node->subscribe_address(
         strand_.wrap(&seeder::store,
-            shared_from_this(), _1, _2, seed_node));
+            shared_from_this(), _1, _2, node));
 
 }
 
@@ -110,15 +112,15 @@ void seeder::handle_request(const std::error_code& ec)
     }
 }
 
-void seeder::store(const std::error_code& ec, const address_type& packet,
-    channel_ptr seed_node)
+void seeder::store(const std::error_code& ec, const address_type& message,
+    channel_ptr node)
 {
     if (ec)
     {
-        if (seed_node)
+        if (node)
             log_debug(LOG_PROTOCOL)
                 << "Failure getting addresses from seed [" 
-                << seed_node->address().to_string() << "] " << ec.message();
+                << node->address().to_string() << "] " << ec.message();
         else
             log_debug(LOG_PROTOCOL)
                 << "Failure getting addresses from seed: " << ec.message();
@@ -127,17 +129,17 @@ void seeder::store(const std::error_code& ec, const address_type& packet,
         return;
     }
 
-    if (seed_node)
+    if (node)
         log_info(LOG_PROTOCOL)
-            << "Storing " << packet.addresses.size() << " addresses from seed ["
-            << seed_node->address().to_string() << "] ";
+            << "Storing " << message.addresses.size() << " addresses from seed ["
+            << node->address().to_string() << "] ";
 
-    for (const auto& address: packet.addresses)
+    for (const auto& address: message.addresses)
         host_pool_.store(address,
             strand_.wrap(&seeder::handle_store,
                 shared_from_this(), _1));
 
-    if (!packet.addresses.empty())
+    if (!message.addresses.empty())
         succeeded_ = true;
 
     visited(ec);
@@ -153,11 +155,11 @@ void seeder::handle_store(const std::error_code& ec)
 
 void seeder::visited(const std::error_code& ec)
 {
-    BITCOIN_ASSERT(visited_ < hosts_.size());
+    BITCOIN_ASSERT(visited_ < seeds_.size());
 
     // We block session start until all seeds are populated. This provides
     // greater assurance of a random pool of address at session startup.
-    if (++visited_ == hosts_.size())
+    if (++visited_ == seeds_.size())
         handle_complete_(succeeded_ ? std::error_code () : ec);
 }
 

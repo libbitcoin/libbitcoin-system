@@ -25,10 +25,12 @@
 #include <iostream>
 #include <string>
 #include <system_error>
+#include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
@@ -50,7 +52,7 @@ using boost::filesystem::path;
 // We'd prefer this as static member of the seeder class, but the dependency
 // cycle between the seeder and protocol class makes that difficult.
 #ifdef ENABLE_TESTNET
-const hosts::list hosts::defaults
+const config::endpoint::list hosts::defaults
 {
     { "testnet-seed.alexykot.me", 18333 },
     { "testnet-seed.bitcoin.petertodd.org", 18333 },
@@ -58,7 +60,7 @@ const hosts::list hosts::defaults
     { "testnet-seed.bitcoin.schildbach.de", 18333 }
 };
 #else
-const hosts::list hosts::defaults
+const config::endpoint::list hosts::defaults
 {
     { "seed.bitnodes.io", 8333 },
     { "seed.bitcoinstats.com", 8333 },
@@ -120,14 +122,16 @@ void hosts::do_load(const path& path, load_handler handle_load)
     std::string line;
     while (std::getline(file, line))
     {
-        ip_address address(line);
-        const auto load_address = [this, address]()
+        config::authority address(line);
+        if (address.port() != 0)
         {
-            buffer_.push_back(address);
-        };
+            const auto load_address = [this, address]()
+            {
+                buffer_.push_back(address);
+            };
 
-        if (address.port != 0)
             strand_.randomly_queue(load_address);
+        }
     }
 
     handle_load(error::success);
@@ -157,7 +161,7 @@ void hosts::do_save(const path& path, save_handler handle_save)
     }
 
     for (const auto& entry: buffer_)
-        file << encode_base16(entry.ip) << " " << entry.port << std::endl;
+        file << entry << std::endl;
 
     handle_save(error::success);
 }
@@ -173,7 +177,7 @@ void hosts::remove(const network_address_type& address,
 void hosts::do_remove(const network_address_type& address,
     remove_handler handle_remove)
 {
-    const ip_address host(address);
+    const config::authority host(address);
     const auto it = std::find(buffer_.begin(), buffer_.end(), host);
     if (it == buffer_.end())
     {
@@ -196,7 +200,7 @@ void hosts::store(const network_address_type& address,
 void hosts::do_store(const network_address_type& address,
     store_handler handle_store)
 {
-    buffer_.push_back(ip_address(address));
+    buffer_.push_back(config::authority(address));
     handle_store(error::success);
 }
 
@@ -216,14 +220,8 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
     }
 
     // Randomly select a host from the buffer.
-    const auto host = static_cast<size_t>(pseudo_random() % buffer_.size());
-
-    network_address_type address;
-    address.ip = buffer_[host].ip;
-    address.port = buffer_[host].port;
-    address.timestamp = 0;
-    address.services = 0;
-    handle_fetch(error::success, address);
+    const auto index = static_cast<size_t>(pseudo_random() % buffer_.size());
+    handle_fetch(error::success, buffer_[index].to_network_address());
 }
 
 void hosts::fetch_count(fetch_count_handler handle_fetch)
@@ -236,46 +234,6 @@ void hosts::fetch_count(fetch_count_handler handle_fetch)
 void hosts::do_fetch_count(fetch_count_handler handle_fetch)
 {
     handle_fetch(error::success, buffer_.size());
-}
-
-// private struct ip_address
-
-hosts::ip_address::ip_address()
-  : port(0)
-{
-}
-
-hosts::ip_address::ip_address(const network_address_type& host)
-  : ip(host.ip), port(host.port)
-{
-    // TODO: We are getting unspecified ports over the wire.
-    // We may want to explicitly write in the default port at that time.
-    // BITCOIN_ASSERT(port != 0);
-}
-
-// This is the format utilized by the hosts file.
-hosts::ip_address::ip_address(const std::string& line)
-  : ip_address()
-{
-    const auto parts = split(boost::trim_copy(line), " ");
-    if (parts.size() != 2)
-        return;
-
-    data_chunk data;
-    if (!decode_base16(data, parts[0]) || (data.size() != ip.size()))
-        return;
-
-    // TODO: verify lexical_cast ndebug exception safety.
-    std::copy(data.begin(), data.end(), ip.begin());
-    port = boost::lexical_cast<uint16_t>(parts[1]);
-
-    // The port was invalid or unspecified.
-    // BITCOIN_ASSERT(port != 0);
-}
-
-bool hosts::ip_address::operator==(const hosts::ip_address& other) const
-{
-    return ip == other.ip && port == other.port;
 }
 
 } // namespace network

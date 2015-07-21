@@ -30,23 +30,31 @@ namespace libbitcoin {
 namespace config {
 
 btc256::btc256()
-    : value_(bc::null_hash)
+  : value_(bc::null_hash)
 {
 }
 
 btc256::btc256(const std::string& hexcode)
+  : btc256()
 {
     std::stringstream(hexcode) >> *this;
 }
 
 btc256::btc256(const hash_digest& value)
-    : value_(value)
+  : value_(value)
 {
 }
 
 btc256::btc256(const btc256& other)
-    : btc256(other.value_)
+  : btc256(other.value_)
 {
+}
+
+std::string btc256::to_string() const
+{
+    std::stringstream value;
+    value << *this;
+    return value.str();
 }
 
 btc256::operator const hash_digest&() const

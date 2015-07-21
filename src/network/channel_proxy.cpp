@@ -268,7 +268,7 @@ void channel_proxy::handle_expiration(const boost::system::error_code& ec)
         return;
 
     log_info(LOG_NETWORK)
-        << "Channel expired [" << address().to_string() << "]";
+        << "Channel expired [" << address() << "]";
 
     stop(error::service_stopped);
 }
@@ -280,7 +280,7 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
         return;
 
     log_info(LOG_NETWORK)
-        << "Channel timeout [" << address().to_string() << "]";
+        << "Channel timeout [" << address() << "]";
 
     stop(error::channel_timeout);
 }
@@ -296,13 +296,13 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
         if (ec)
         {
             log_debug(LOG_NETWORK)
-                << "Ping failure [" << address().to_string() << "] "
+                << "Ping failure [" << address() << "] "
                 << ec.message();
             return;
         }
 
         log_debug(LOG_NETWORK)
-            << "Ping sent [" << address().to_string() << "] ";
+            << "Ping sent [" << address() << "] ";
     };
 
     const ping_type random_ping = { pseudo_random() };
@@ -358,7 +358,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     if (ec)
     {
         log_info(LOG_NETWORK)
-            << "Channel failure [" << address().to_string() << "] "
+            << "Channel failure [" << address() << "] "
             << std::error_code(error::boost_to_error_code(ec)).message()
             << " (boost code " << ec.value() << ")";
 
@@ -385,14 +385,14 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     if (!valid_parse || header.magic != magic_value())
     {
         log_warning(LOG_NETWORK) 
-            << "Invalid header received [" << address().to_string() << "]";
+            << "Invalid header received [" << address() << "]";
         stop(error::bad_stream);
         return;
     }
 
     log_debug(LOG_NETWORK)
         << "Receive " << header.command << " [" 
-        << address().to_string() << "] ("
+        << address() << "] ("
         << header.payload_length << " bytes)";
 
     read_checksum(header);
@@ -417,7 +417,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
                 return;
 
             log_warning(LOG_NETWORK)
-                << "Invalid checksum from [" << address().to_string() << "]";
+                << "Invalid checksum from [" << address() << "]";
             stop(ec);
             return;
         }
@@ -448,7 +448,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
                 return;
 
             log_warning(LOG_NETWORK)
-                << "Invalid payload from [" << address().to_string() << "]";
+                << "Invalid payload from [" << address() << "]";
             stop(ec);
             return;
         }
@@ -458,8 +458,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     if (header.checksum != bitcoin_checksum(payload))
     {
         log_warning(LOG_NETWORK) 
-            << "Invalid bitcoin checksum from [" << address().to_string()
-            << "]";
+            << "Invalid bitcoin checksum from [" << address() << "]";
         stop(error::bad_stream);
         return;
     }
@@ -616,8 +615,8 @@ void channel_proxy::do_send_common(const data_chunk& message,
     send_handler handle_send, const std::string& command)
 {
     log_debug(LOG_NETWORK)
-        << "Send " << command << " [" << address().to_string()
-        << "] (" << message.size() << " bytes)";
+        << "Send " << command << " [" << address() << "] ("
+        << message.size() << " bytes)";
 
     const shared_const_buffer buffer(message);
     async_write(*socket_, buffer,

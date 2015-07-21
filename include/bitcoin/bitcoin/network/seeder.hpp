@@ -23,7 +23,8 @@
 #include <cstddef>
 #include <memory>
 #include <system_error>
-#include <bitcoin/bitcoin/config/authority.hpp>
+#include <vector>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
@@ -39,7 +40,7 @@ class BC_API seeder
   : public std::enable_shared_from_this<seeder>
 {
 public:
-    seeder(protocol* proto, const hosts::list& seeds,
+    seeder(protocol* proto, const config::endpoint::list& seeds,
         protocol::completion_handler handle_complete);
 
     /// This class is not copyable.
@@ -49,12 +50,12 @@ public:
     void start();
 
 private:
-    void contact(const config::authority& seed_address);
+    void contact(const config::endpoint& seed);
     void handle_request(const std::error_code& ec);
     void handle_store(const std::error_code& ec);
-    void request(const std::error_code& ec, channel_ptr seed_node);
-    void store(const std::error_code& ec, const address_type& packet,
-        channel_ptr seed_node);
+    void request(const std::error_code& ec, channel_ptr node);
+    void store(const std::error_code& ec, const address_type& message,
+        channel_ptr node);
     void visited(const std::error_code& ec);
 
     async_strand& strand_;
@@ -63,7 +64,7 @@ private:
     network& network_;
     bool succeeded_;
     size_t visited_;
-    const hosts::list& hosts_;
+    const config::endpoint::list& seeds_;
     const protocol::completion_handler handle_complete_;
 };
 

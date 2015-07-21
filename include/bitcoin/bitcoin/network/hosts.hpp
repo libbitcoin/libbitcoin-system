@@ -25,9 +25,11 @@
 #include <string>
 #include <functional>
 #include <system_error>
+#include <vector>
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -41,8 +43,7 @@ namespace network {
 class BC_API hosts
 {
 public:
-    typedef std::vector<config::authority> list;
-    static const list defaults;
+    static const config::endpoint::list defaults;
 
     typedef std::function<void (const std::error_code&)> load_handler;
     typedef std::function<void (const std::error_code&)> save_handler;
@@ -83,17 +84,6 @@ public:
     void save(const std::string& path, save_handler handle_save);
 
 private:
-    struct ip_address
-    {
-        ip_address();
-        ip_address(const std::string& line);
-        ip_address(const network_address_type& host);
-        bool operator==(const ip_address& other) const;
-
-        ip_address_type ip;
-        uint16_t port;
-    };
-
     void do_load(const boost::filesystem::path& path,
         load_handler handle_load);
     void do_save(const boost::filesystem::path& path,
@@ -108,7 +98,7 @@ private:
 
     async_strand strand_;
     boost::filesystem::path file_path_;
-    boost::circular_buffer<ip_address> buffer_;
+    boost::circular_buffer<config::authority> buffer_;
 
     // Deprecated, remove when protocol::set_hosts_filename is removed.
     // This allows (deprecated) protocol::set_hosts_filename to set file_path_.

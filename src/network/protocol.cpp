@@ -24,10 +24,12 @@
 #include <functional>
 #include <memory>
 #include <system_error>
+#include <vector>
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
@@ -50,7 +52,8 @@ static const size_t sweep_connection_limit = 10;
 static const auto sweep_reset_interval = seconds(1);
 
 protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
-    network& net, const hosts::list& seeds, uint16_t port, size_t max_outbound,
+    network& net, const config::endpoint::list& seeds, uint16_t port,
+    size_t max_outbound,
     size_t max_inbound)
   : strand_(pool),
     host_pool_(peers),
@@ -282,14 +285,12 @@ void protocol::start_sweep_reset_timer()
 }
 
 // Determine if the address is banned.
-bool protocol::is_banned(const config::authority& address)
+bool protocol::is_banned(const config::authority& peer)
 {
     for (const auto& banned: banned_connections_)
-    {
-        if ((banned.port == 0 || banned.port == address.port) &&
-            banned.host == address.host)
+        if ((banned.port() == 0 || banned.port() == peer.port()) &&
+            banned.ip() == peer.ip())
             return true;
-    }
 
     return false;
 }
@@ -302,18 +303,18 @@ bool protocol::is_manual(channel_ptr node)
 }
 
 // Determine if we are connected to the address for any reason.
-bool protocol::is_connected(const config::authority& address)
+bool protocol::is_connected(const config::authority& peer)
 {
     for (const auto node: outbound_connections_)
-        if (node->address() == address)
+        if (node->address() == peer)
             return true;
 
     for (const auto node: inbound_connections_)
-        if (node->address() == address)
+        if (node->address() == peer)
             return true;
 
     for (const auto node: manual_connections_)
-        if (node->address() == address)
+        if (node->address() == peer)
             return true;
 
     return false;
@@ -362,7 +363,7 @@ void protocol::attempt_connect(const std::error_code& ec,
         << "] on slot [" << slot << "]";
 
     // OUTBOUND CONNECT WITH TIMEOUT
-    bc::network::connect(handshake_, network_, peer.host, peer.port,
+    bc::network::connect(handshake_, network_, peer.to_hostname(), peer.port(),
         strand_.wrap(&protocol::handle_connect,
             this, _1, _2, peer, slot));
 }
@@ -403,11 +404,17 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     setup_new_channel(node);
 }
 
-void protocol::ban_connection(const std::string& hostname, uint16_t port)
+void protocol::ban_connection(const config::authority& peer)
 {
-    banned_connections_.push_back({ hostname, port });
+    banned_connections_.push_back(peer);
 }
 
+void protocol::maintain_connection(const config::endpoint& address)
+{
+    maintain_connection(address.host(), address.port());
+}
+
+// Deprecated
 void protocol::maintain_connection(const std::string& hostname, uint16_t port)
 {
     // MANUAL CONNECT WITH TIMEOUT
@@ -423,7 +430,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     {
         log_debug(LOG_PROTOCOL)
             << "Failure connecting manually to peer [" 
-            << config::authority(hostname, port).to_string() << "] "
+            << config::endpoint(hostname, port) << "] "
             << ec.message();
 
         // Retry connect.
@@ -436,7 +443,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     // Connected!
     log_info(LOG_PROTOCOL)
         << "Connection to peer established manually ["
-        << config::authority(hostname, port).to_string() << "]";
+        << config::endpoint(hostname, port) << "]";
 
     // Subscript to channel stop notifications.
     node->subscribe_stop(
@@ -611,7 +618,7 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
         if (node)
             log_debug(LOG_PROTOCOL)
                 << "Manual channel stopped (manual) [" 
-                << config::authority(hostname, port).to_string() << "] "
+                << config::endpoint(hostname, port) << "] "
                 << ec.message();
         else
             log_debug(LOG_PROTOCOL)
@@ -646,7 +653,7 @@ void protocol::inbound_channel_stopped(const std::error_code& ec,
 }
 
 void protocol::handle_address_message(const std::error_code& ec,
-    const address_type& packet, channel_ptr node)
+    const address_type& message, channel_ptr node)
 {
     if (!node)
         return;
@@ -663,7 +670,7 @@ void protocol::handle_address_message(const std::error_code& ec,
     log_debug(LOG_PROTOCOL)
         << "Storing addresses from [" << node->address().to_string() << "]";
 
-    for (const auto& net_address: packet.addresses)
+    for (const auto& net_address: message.addresses)
         host_pool_.store(net_address,
             strand_.wrap(&protocol::handle_store_address,
                 this, _1));

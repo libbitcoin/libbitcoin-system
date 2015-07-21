@@ -32,6 +32,7 @@
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
@@ -58,7 +59,7 @@ public:
         broadcast_handler;
 
     protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
-        const hosts::list& seed=hosts::defaults,
+        const config::endpoint::list& seeds=hosts::defaults,
         uint16_t port=bc::protocol_port, size_t max_outbound=8,
         size_t max_inbound=8);
     
@@ -87,18 +88,16 @@ public:
 
     /**
      * Add a banned connection.
-     * @param[in]  hostname  The host IP address to ban.
-     * @param[in]  port      The port of the host to ban, or zero for all.
+     * @param[in]  peer  The peer to ban.
      */
-    void ban_connection(const std::string& hostname, uint16_t port);
+    void ban_connection(const config::authority& peer);
 
     /**
      * Create a persistent connection to the specific node. If disconnected
      * this service will keep attempting to reconnect until successful.
-     * @param[in]  hostname  The host IP address to ban.
-     * @param[in]  port      The port of the host to ban, or zero for all.
+     * @param[in]  address  The host address to maintain.
      */
-    void maintain_connection(const std::string& hostname, uint16_t port);
+    void maintain_connection(const config::endpoint& address);
 
     /**
      * Subscribe to new connections established to other nodes.
@@ -148,6 +147,9 @@ public:
 
     /// Deprecated, unreasonable to queue this, use total_connections.
     void fetch_connection_count(fetch_connection_count_handler handle_fetch);
+
+    /// Deprecated.
+    void maintain_connection(const std::string& hostname, uint16_t port);
 
     /// Deprecated, should be private since it's called from start.
     void run();
@@ -206,9 +208,9 @@ private:
     // subscribe call.
     void try_connect_once(slot_index slot);
     void attempt_connect(const std::error_code& ec,
-        const config::authority& packet, slot_index slot);
+        const config::authority& peer, slot_index slot);
     void handle_connect(const std::error_code& ec, channel_ptr node,
-        const config::authority& address, slot_index slot);
+        const config::authority& peer, slot_index slot);
 
     // Periodically call this method to reset the sweep and reallow
     // connections. This prevents too many connection attempts from
@@ -226,8 +228,8 @@ private:
         acceptor_ptr accept);
 
     // Channel setup
-    bool is_banned(const config::authority& address);
-    bool is_connected(const config::authority& address);
+    bool is_banned(const config::authority& peer);
+    bool is_connected(const config::authority& peer);
     void remove_connection(channel_ptr_list& connections, channel_ptr node);
     void setup_new_channel(channel_ptr node);
 
@@ -240,7 +242,7 @@ private:
         channel_ptr node);
 
     void handle_address_message(const std::error_code& ec,
-        const address_type& addr, channel_ptr node);
+        const address_type& message, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
     /// Deprecated, unreasonable to queue this, use total_connections.
@@ -272,7 +274,7 @@ private:
 
     // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
-    hosts::list banned_connections_;
+    config::authority::list banned_connections_;
 
     // Inbound connections from the p2p network.
     uint16_t inbound_port_;
@@ -293,7 +295,7 @@ private:
 
     channel_subscriber_type::ptr channel_subscribe_;
     boost::filesystem::path hosts_path_;
-    const hosts::list& seeds_;
+    const config::endpoint::list& seeds_;
     std::shared_ptr<seeder> seeder_;
     friend class seeder;
 };

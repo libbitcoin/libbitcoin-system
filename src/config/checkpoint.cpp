@@ -23,6 +23,7 @@
 #include <iostream>
 #include <regex>
 #include <string>
+#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -46,18 +47,40 @@ checkpoint::checkpoint(const std::string& value)
 }
 
 checkpoint::checkpoint(const checkpoint& other)
-  : hash_(other.get_hash()), height_(other.get_height())
+  : hash_(other.hash()), height_(other.height())
 {
 }
 
-const hash_digest& checkpoint::get_hash() const
+// This is intended for static initialization (i.e. of the internal defaults).
+checkpoint::checkpoint(const std::string& hash, size_t height)
+  : height_(height)
+{
+    if (!decode_hash(hash_, hash))
+    {
+        BOOST_THROW_EXCEPTION(invalid_option_value(hash));
+    }
+}
+
+checkpoint::checkpoint(const hash_digest& hash, size_t height)
+    : hash_(hash), height_(height)
+{
+}
+
+const hash_digest& checkpoint::hash() const
 {
     return hash_;
 }
 
-const size_t checkpoint::get_height() const
+const size_t checkpoint::height() const
 {
     return height_;
+}
+
+std::string checkpoint::to_string() const
+{
+    std::stringstream value;
+    value << *this;
+    return value.str();
 }
 
 std::istream& operator>>(std::istream& input, checkpoint& argument)
@@ -68,31 +91,23 @@ std::istream& operator>>(std::istream& input, checkpoint& argument)
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
     // When matched will always generate 6 tokens, we want 1 and 3.
     // We allow 1-10 digits, which is sufficient for 2^32 blocks.
-    const boost::regex regular("([0-9a-f]{64})(:([0-9]{1,10}))?");
+    static const regex regular("([0-9a-f]{64})(:([0-9]{1,10}))?");
 
     try 
     {
-        boost::sregex_iterator it(value.begin(), value.end(), regular), end;
-
-        // No match?
+        sregex_iterator it(value.begin(), value.end(), regular), end;
         if (it == end)
         {
             BOOST_THROW_EXCEPTION(invalid_option_value(value));
         }
 
-        // Extract the two tokens of interest.
         boost::smatch match = *it;
-
         if (!decode_hash(argument.hash_, match[1]))
         {
             BOOST_THROW_EXCEPTION(invalid_option_value(value));
         }
 
-        const std::string number(match[3]);
-
-        // Convert the block height to a number, catching exceptions.
-        if (!number.empty())
-            argument.height_ = boost::lexical_cast<size_t>(number);
+        argument.height_ = lexical_cast<size_t>(match[3]);
     }
     catch (const boost::exception&)
     {
@@ -108,8 +123,7 @@ std::istream& operator>>(std::istream& input, checkpoint& argument)
 
 std::ostream& operator<<(std::ostream& output, const checkpoint& argument)
 {
-    output << bc::encode_hash(argument.hash_) << ":" << argument.height_;
-
+    output << encode_hash(argument.hash()) << ":" << argument.height();
     return output;
 }
 

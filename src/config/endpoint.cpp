@@ -23,19 +23,27 @@
 #include <iostream>
 #include <regex>
 #include <string>
-#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
+#include <boost/regex.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 
 namespace libbitcoin {
 namespace config {
-    
+
 using namespace boost;
+using namespace boost::asio;
 using namespace boost::program_options;
 
 endpoint::endpoint()
   : port_(0)
+{
+}
+
+endpoint::endpoint(const endpoint& other)
+  : scheme_(other.scheme()), host_(other.host()), port_(other.port())
 {
 }
 
@@ -45,32 +53,52 @@ endpoint::endpoint(const std::string& value)
     std::stringstream(value) >> *this;
 }
 
-endpoint::endpoint(const endpoint& other)
-  : scheme_(other.get_scheme()), host_(other.get_host()),
-    port_(other.get_port())
+endpoint::endpoint(const authority& authority)
+  : endpoint(authority.to_string())
 {
 }
 
-const std::string& endpoint::get_scheme() const
+endpoint::endpoint(const std::string& host, uint16_t port)
+  : host_(host), port_(port)
+{
+}
+
+endpoint::endpoint(const ip::tcp::endpoint& endpoint)
+  : endpoint(endpoint.address(), port_)
+{
+}
+
+endpoint::endpoint(const ip::address& ip, uint16_t port)
+  : host_(ip.to_string()), port_(port)
+{
+}
+
+const std::string& endpoint::scheme() const
 {
     return scheme_;
 }
 
-const std::string& endpoint::get_host() const
+const std::string& endpoint::host() const
 {
     return host_;
 }
 
-uint16_t endpoint::get_port() const
+uint16_t endpoint::port() const
 {
     return port_;
 }
 
-endpoint::operator const std::string() const
+std::string endpoint::to_string() const
 {
     std::stringstream value;
     value << *this;
     return value.str();
+}
+
+bool endpoint::operator==(const endpoint& other) const
+{
+    return host_ == other.host_ && port_ == other.port_ &&
+        scheme_ == other.scheme_;
 }
 
 std::istream& operator>>(std::istream& input, endpoint& argument)
@@ -80,28 +108,21 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
     // When matched will always generate 6 tokens, we want 2, 3 and 5.
-    const boost::regex regular(
+    static const regex regular(
         "((tcp|udp):\\/\\/)?([0-9a-z\\.\\*-]+)(:([0-9]{1,5}))?");
 
     try 
     {
-        boost::sregex_iterator it(value.begin(), value.end(), regular), end;
-
-        // No match?
+        sregex_iterator it(value.begin(), value.end(), regular), end;
         if (it == end)
         {
             BOOST_THROW_EXCEPTION(invalid_option_value(value));
         }
 
-        boost::smatch match = *it;
-
-        // Extract the three tokens of interest.
+        smatch match = *it;
         argument.scheme_ = match[2];
         argument.host_ = match[3];
-        const std::string number(match[5]);
-
-        if (!number.empty())
-            argument.port_ = boost::lexical_cast<uint16_t>(number);
+        argument.port_ = lexical_cast<uint16_t>(match[5]);
     }
     catch (const boost::exception&)
     {
@@ -117,13 +138,13 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
 
 std::ostream& operator<<(std::ostream& output, const endpoint& argument)
 {
-    if (!argument.scheme_.empty())
-        output << argument.scheme_ << "://";
+    if (!argument.scheme().empty())
+        output << argument.scheme() << "://";
 
-    output << argument.host_;
+    output << argument.host();
 
-    if (argument.port_ != 0)
-        output << ":" << argument.port_;
+    if (argument.port() != 0)
+        output << ":" << argument.port();
 
     return output;
 }
