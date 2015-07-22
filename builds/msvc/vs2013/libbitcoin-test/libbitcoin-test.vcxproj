@@ -69,6 +69,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\base10.cpp" />
     <ClCompile Include="..\..\..\..\test\base16.cpp" />
     <ClCompile Include="..\..\..\..\test\base58.cpp" />

@@ -22,7 +22,6 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/asio.hpp>
 #include <boost/format.hpp>
@@ -40,9 +39,76 @@ namespace config {
 using namespace boost;
 using namespace boost::asio;
 using namespace boost::program_options;
+using boost::format;
+
+// hostname: [2001:db8::2] or 1.2.240.1
+static std::string to_hostname(const std::string& host)
+{
+    if (host.find(":") == std::string::npos ||
+        host.find("[") != std::string::npos)
+        return host;
+
+    const auto hostname = format("[%1%]") % host;
+    return hostname.str();
+}
+
+// host: [2001:db8::2] or 2001:db8::2 or 1.2.240.1
+static std::string to_authority(const std::string& host, uint16_t port)
+{
+    std::stringstream authority;
+    authority << to_hostname(host);
+    if (port > 0)
+        authority << ":" << port;
+
+    return authority.str();
+}
+
+static std::string to_ipv6(const std::string& ipv4_address)
+{
+    return std::string("::ffff:") + ipv4_address;
+}
+
+static ip::address_v6 to_ipv6(const ip::address_v4& ipv4_address)
+{
+    // Create an IPv6 mapped IPv4 address via serialization.
+    const auto ipv6 = to_ipv6(ipv4_address.to_string());
+    return ip::address_v6::from_string(ipv6);
+}
+
+static ip::address_v6 to_ipv6(const ip::address& ip_address)
+{
+    if (ip_address.is_v6())
+        return ip_address.to_v6();
+
+    BITCOIN_ASSERT_MSG(ip_address.is_v4(),
+        "The address must be either IPv4 or IPv6.");
+
+    return to_ipv6(ip_address.to_v4());
+}
+
+static std::string to_ipv4_hostname(const ip::address& ip_address)
+{
+    // std::regex requires gcc 4.9, so we are using boost::regex for now.
+    static const regex regular("::ffff:([0-9\\.]+)");
+
+    const auto address = ip_address.to_string();
+    sregex_iterator it(address.begin(), address.end(), regular), end;
+    if (it == end)
+        return "";
+
+    smatch match = *it;
+    return match[1];
+}
+
+static std::string to_ipv6_hostname(const ip::address& ip_address)
+{
+    // IPv6 URLs use a bracketed IPv6 address, see rfc2732.
+    const auto hostname = format("[%1%]") % to_ipv6(ip_address);
+    return hostname.str();
+}
 
 authority::authority()
-  : authority(undefined_ip_address, 0)
+  : port_(0)
 {
 }
 
@@ -51,11 +117,10 @@ authority::authority(const authority& other)
 {
 }
 
-// This supports both IPv4 and IPv6 formats.
-authority::authority(const std::string& value)
-  : authority()
+// authority: [2001:db8::2]:port or 1.2.240.1:port
+authority::authority(const std::string& authority)
 {
-    std::stringstream(value) >> *this;
+    std::stringstream(authority) >> *this;
 }
 
 // This is the format returned from peers on the bitcoin network.
@@ -69,19 +134,25 @@ authority::authority(const ip_address_type& ip, uint16_t port)
 {
 }
 
+// host: [2001:db8::2] or 2001:db8::2 or 1.2.240.1
+authority::authority(const std::string& host, uint16_t port)
+  : authority(to_authority(host, port))
+{
+}
+
+authority::authority(const ip::address& ip, uint16_t port)
+  : ip_(to_ipv6(ip)), port_(port)
+{
+}
+
 authority::authority(const ip::tcp::endpoint& endpoint)
   : authority(endpoint.address(), endpoint.port())
 {
 }
 
-authority::authority(const ip::address& ip, uint16_t port)
-  : ip_(ip), port_(port)
+ip_address_type authority::ip() const
 {
-}
-
-const ip_address_type& authority::ip() const
-{
-    return ip_.to_v6().to_bytes();
+    return ip_.to_bytes();
 }
 
 uint16_t authority::port() const
@@ -91,7 +162,8 @@ uint16_t authority::port() const
 
 std::string authority::to_hostname() const
 {
-    return ip_.to_string();
+    auto ipv4_hostname = to_ipv4_hostname(ip_);
+    return ipv4_hostname.empty() ? to_ipv6_hostname(ip_) : ipv4_hostname;
 }
 
 network_address_type authority::to_network_address() const
@@ -100,10 +172,7 @@ network_address_type authority::to_network_address() const
     static constexpr uint64_t timestamp = 0;
     const network_address_type network_address
     {
-        timestamp,
-        services,
-        ip_.to_v6().to_bytes(),
-        port_,
+        timestamp, services, ip(), port(),
     };
 
     return network_address;
@@ -126,23 +195,41 @@ std::istream& operator>>(std::istream& input, authority& argument)
     std::string value;
     input >> value;
 
-    // This supports both IPv4 and IPv6 formats.
-    const auto parts = split(trim_copy(value), ":");
-    argument.ip_.from_string(parts[0]);
+    // std::regex requires gcc 4.9, so we are using boost::regex for now.
+    static const regex regular(
+        "(([0-9\\.]+)|\\[([0-9a-f:\\.]+)])(:([0-9]{1,10}))?");
 
-    if (parts.size() == 2)
-        argument.port_ = lexical_cast<uint16_t>(parts[1]);
+    sregex_iterator it(value.begin(), value.end(), regular), end;
+    if (it == end)
+    {
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
+    boost::smatch match = *it;
+    std::string ip_address(match[3]);
+    if (ip_address.empty())
+        ip_address = to_ipv6(match[2]);
+
+    try
+    {
+        argument.ip_ = ip::address_v6::from_string(ip_address);
+        argument.port_ = lexical_cast<uint16_t>(match[5]);
+    }
+    catch (const boost::exception&)
+    {
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+    catch (const std::exception&)
+    {
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
 
     return input;
 }
 
 std::ostream& operator<<(std::ostream& output, const authority& argument)
 {
-    output << argument.to_hostname();
-
-    if (argument.port() != 0)
-        output << ":" << argument.port();
-
+    output << to_authority(argument.to_hostname(), argument.port());
     return output;
 }
 

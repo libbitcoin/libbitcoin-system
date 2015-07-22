@@ -56,16 +56,16 @@ public:
     
     /**
      * Initialization constructor.
+     * Deserialize a IPv4 or IPv6 address-based hostname[:port].
      * The port is optional and will be set to zero if not provided.
-     * @param[in]  value  The initial value in one of two forms:
-     *                    a.b.c.d[:port]
-     *                    0000::0000::0000::0000::0000::ffff::0a00::0001[:port]
+     * @param[in]  authority  The initial value in one of two forms:
+     *                        [2001:db8::2]:port or 1.2.240.1:port
      */
-    authority(const std::string& value);
+    authority(const std::string& authority);
     
     /**
      * Initialization constructor.
-     * @param[in]  net  The value to initialize with.
+     * @param[in]  net  The network address (ip and port) to initialize with.
      */
     authority(const network_address_type& net);
     
@@ -78,9 +78,11 @@ public:
     
     /**
      * Initialization constructor.
-     * @param[in]  endpoint  The boost endpoint addresss to initialize with.
+     * @param[in]  host  The host to initialize with in one of three forms:
+     *                   [2001:db8::2] or 2001:db8::2 or 1.2.240.1
+     * @param[in]  port  The port to initialize with.
      */
-    authority(const boost::asio::ip::tcp::endpoint& endpoint);
+    authority(const std::string& host, uint16_t port);
     
     /**
      * Initialization constructor.
@@ -88,12 +90,18 @@ public:
      * @param[in]  port  The port to initialize with.
      */
     authority(const boost::asio::ip::address& ip, uint16_t port);
+    
+    /**
+     * Initialization constructor.
+     * @param[in]  endpoint  The boost endpoint addresss to initialize with.
+     */
+    authority(const boost::asio::ip::tcp::endpoint& endpoint);
 
     /**
      * Getter.
      * @return The ip address of the authority.
      */
-    const ip_address_type& ip() const;
+    ip_address_type ip() const;
 
     /**
      * Getter.
@@ -102,20 +110,19 @@ public:
     uint16_t port() const;
     
     /**
-     * Get the ip address of the authority as a string.
+     * Get the hostname of the authority as a string.
      * The form of the return is determined by the type of address.
-     * @return The ip address of the authority in one of two forms:
-     *         a.b.c.d
-     *         0000::0000::0000::0000::0000::ffff::0a00::0001
+     * @return The hostname in one of two forms:
+     *         [2001:db8::2]:port or 1.2.240.1:port
      */
     std::string to_hostname() const;
     
     /**
      * Get the authority as a string.
      * The form of the return is determined by the type of address.
+     * The port is optional and not included if zero-valued.
      * @return The authority in one of two forms:
-     *         a.b.c.d[:port]
-     *         0000::0000::0000::0000::0000::ffff::0a00::0001[:port]
+     *         [2001:db8::2]:port or 1.2.240.1:port
      */
     std::string to_string() const;
 
@@ -150,7 +157,7 @@ public:
         const authority& argument);
 
 private:
-    boost::asio::ip::address ip_;
+    boost::asio::ip::address_v6 ip_;
     uint16_t port_;
 };
 
