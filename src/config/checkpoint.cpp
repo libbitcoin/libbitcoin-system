@@ -98,7 +98,7 @@ std::istream& operator>>(std::istream& input, checkpoint& argument)
         BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }
 
-    boost::smatch match = *it;
+    const auto& match = *it;
     if (!decode_hash(argument.hash_, match[1]))
     {
         BOOST_THROW_EXCEPTION(invalid_option_value(value));

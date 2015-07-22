@@ -96,7 +96,7 @@ static std::string to_ipv4_hostname(const ip::address& ip_address)
     if (it == end)
         return "";
 
-    smatch match = *it;
+    const auto& match = *it;
     return match[1];
 }
 
@@ -205,7 +205,7 @@ std::istream& operator>>(std::istream& input, authority& argument)
         BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }
 
-    boost::smatch match = *it;
+    const auto& match = *it;
     std::string ip_address(match[3]);
     if (ip_address.empty())
         ip_address = to_ipv6(match[2]);

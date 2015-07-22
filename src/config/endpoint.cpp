@@ -116,7 +116,7 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
         BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }
 
-    smatch match = *it;
+    const auto& match = *it;
     argument.scheme_ = match[2];
     argument.host_ = match[3];
 
