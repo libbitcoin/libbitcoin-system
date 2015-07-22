@@ -107,28 +107,24 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
     input >> value;
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    // When matched will always generate 6 tokens, we want 2, 3 and 5.
     static const regex regular(
         "((tcp|udp):\\/\\/)?([0-9a-z\\.\\*-]+)(:([0-9]{1,5}))?");
 
-    try 
-    {
-        sregex_iterator it(value.begin(), value.end(), regular), end;
-        if (it == end)
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(value));
-        }
-
-        smatch match = *it;
-        argument.scheme_ = match[2];
-        argument.host_ = match[3];
-        argument.port_ = lexical_cast<uint16_t>(match[5]);
-    }
-    catch (const boost::exception&)
+    sregex_iterator it(value.begin(), value.end(), regular), end;
+    if (it == end)
     {
         BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }
-    catch (const std::exception&)
+
+    smatch match = *it;
+    argument.scheme_ = match[2];
+    argument.host_ = match[3];
+
+    try
+    {
+        argument.port_ = lexical_cast<uint16_t>(match[5]);
+    }
+    catch (const boost::exception&)
     {
         BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }

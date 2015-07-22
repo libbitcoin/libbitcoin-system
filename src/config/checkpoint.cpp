@@ -89,24 +89,23 @@ std::istream& operator>>(std::istream& input, checkpoint& argument)
     input >> value;
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    // When matched will always generate 6 tokens, we want 1 and 3.
     // We allow 1-10 digits, which is sufficient for 2^32 blocks.
     static const regex regular("([0-9a-f]{64})(:([0-9]{1,10}))?");
 
-    try 
+    sregex_iterator it(value.begin(), value.end(), regular), end;
+    if (it == end)
     {
-        sregex_iterator it(value.begin(), value.end(), regular), end;
-        if (it == end)
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(value));
-        }
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
 
-        boost::smatch match = *it;
-        if (!decode_hash(argument.hash_, match[1]))
-        {
-            BOOST_THROW_EXCEPTION(invalid_option_value(value));
-        }
+    boost::smatch match = *it;
+    if (!decode_hash(argument.hash_, match[1]))
+    {
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
 
+    try
+    {
         argument.height_ = lexical_cast<size_t>(match[3]);
     }
     catch (const boost::exception&)
