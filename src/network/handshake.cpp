@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <functional>
 #include <system_error>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -48,6 +49,14 @@ enum services : uint64_t
 // unpublished for now
 #define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
 
+// This is a non-routable ipv6 mapping of an ipv4 local only address.
+// This should be replaced with our own ip address detection.
+BC_CONSTEXPR ip_address_type mapped_local_ip_address =
+{
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01
+};
+
 handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
   : strand_(pool)
 {
@@ -59,10 +68,10 @@ handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
     // Set default values inversion template.
     template_version_.start_height = start_height;
     template_version_.address_me.services = template_version_.services;
-    template_version_.address_me.ip = bc::localhost_ip_address;
+    template_version_.address_me.ip = mapped_local_ip_address;
     template_version_.address_me.port = port;
     template_version_.address_you.services = template_version_.services;
-    template_version_.address_you.ip = bc::localhost_ip_address;
+    template_version_.address_you.ip = mapped_local_ip_address;
     template_version_.address_you.port = port;
 }
 
@@ -135,7 +144,7 @@ void handshake::discover_external_ip(discover_ip_handler handle_discover)
 
 void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
 {
-    template_version_.address_me.ip = localhost_ip_address;
+    template_version_.address_me.ip = mapped_local_ip_address;
     handle_discover(error::success, template_version_.address_me.ip);
 }
 
