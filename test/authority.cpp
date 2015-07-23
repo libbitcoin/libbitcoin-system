@@ -19,12 +19,14 @@
  */
 #include <sstream>
 #include <boost/asio.hpp>
+#include <boost/program_options.hpp>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
 using namespace bc::config;
 using namespace boost::asio;
+using namespace boost::program_options;
 
 BOOST_AUTO_TEST_SUITE(authority_tests)
 
@@ -336,14 +338,192 @@ BOOST_AUTO_TEST_CASE(authority__to_network_address__ipv6_address__ipv6_compresse
 
 BOOST_AUTO_TEST_SUITE_END()
 
-// TODO:
+// ------------------------------------------------------------------------- //
+
 BOOST_AUTO_TEST_SUITE(authority__to_string)
+
+BOOST_AUTO_TEST_CASE(authority__to_string__default__unspecified)
+{
+    const authority host;
+    BOOST_REQUIRE_EQUAL(host.to_string(), "[" BC_AUTHORITY_IPV6_UNSPECIFIED_ADDRESS "]");
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__unspecified__unspecified)
+{
+    const auto line = "[" BC_AUTHORITY_IPV6_UNSPECIFIED_ADDRESS "]";
+    const authority host(line);
+    BOOST_REQUIRE_EQUAL(host.to_string(), line);
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__ipv4__expected)
+{
+    const auto line = BC_AUTHORITY_IPV4_ADDRESS;
+    const authority host(line);
+    BOOST_REQUIRE_EQUAL(host.to_string(), line);
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__ipv4_port__expected)
+{
+    const auto line = BC_AUTHORITY_IPV4_ADDRESS ":42";
+    const authority host(line);
+    BOOST_REQUIRE_EQUAL(host.to_string(), line);
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__ipv6__expected)
+{
+    const auto line = "[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]";
+    const authority host(line);
+    BOOST_REQUIRE_EQUAL(host.to_string(), line);
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__ipv6_port__expected)
+{
+    const auto line = "[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]:42";
+    const authority host(line);
+    BOOST_REQUIRE_EQUAL(host.to_string(), line);
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__ipv6_compatible__expected)
+{
+    // A compatible ip address serializes as alternative notation IPv6.
+    const authority host("[" BC_AUTHORITY_IPV6_COMPATIBLE_ADDRESS "]");
+    BOOST_REQUIRE_EQUAL(host.to_string(), "[" BC_AUTHORITY_IPV6_ALTERNATIVE_COMPATIBLE_ADDRESS "]");
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__ipv6_alternative_compatible_port__expected)
+{
+    // A compatible ip address serializes as alternative notation IPv6.
+    const authority host("[" BC_AUTHORITY_IPV6_COMPATIBLE_ADDRESS "]:42");
+    BOOST_REQUIRE_EQUAL(host.to_string(), "[" BC_AUTHORITY_IPV6_ALTERNATIVE_COMPATIBLE_ADDRESS "]:42");
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__ipv6_alternative_compatible__expected)
+{
+    const auto line = "[" BC_AUTHORITY_IPV6_ALTERNATIVE_COMPATIBLE_ADDRESS "]";
+    const authority host(line);
+    BOOST_REQUIRE_EQUAL(host.to_string(), line);
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__ipv6_compatible_port__expected)
+{
+    const auto line = "[" BC_AUTHORITY_IPV6_ALTERNATIVE_COMPATIBLE_ADDRESS "]:42";
+    const authority host(line);
+    BOOST_REQUIRE_EQUAL(host.to_string(), line);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
+
+// ------------------------------------------------------------------------- //
+
 BOOST_AUTO_TEST_SUITE(authority__equality)
+
+BOOST_AUTO_TEST_CASE(authority__equality__default_default__true)
+{
+    const authority host1;
+    const authority host2;
+    BOOST_REQUIRE(host1 == host2);
+}
+
+BOOST_AUTO_TEST_CASE(authority__equality__default_unspecified_port__false)
+{
+    const authority host1;
+    const authority host2(BC_AUTHORITY_IPV6_UNSPECIFIED_ADDRESS, 42);
+    BOOST_REQUIRE(!(host1 == host2));
+}
+
+BOOST_AUTO_TEST_CASE(authority__equality__ipv4_ipv4__true)
+{
+    const authority host1(BC_AUTHORITY_IPV4_ADDRESS);
+    const authority host2(BC_AUTHORITY_IPV4_ADDRESS);
+    BOOST_REQUIRE(host1 == host2);
+}
+
+BOOST_AUTO_TEST_CASE(authority__equality__ipv4_ipv4_port__true)
+{
+    const authority host1(BC_AUTHORITY_IPV4_ADDRESS);
+    const authority host2(BC_AUTHORITY_IPV4_ADDRESS, 42);
+    BOOST_REQUIRE(!(host1 == host2));
+}
+
+BOOST_AUTO_TEST_CASE(authority__equality__ipv4_ipv6__false)
+{
+    const authority host1(BC_AUTHORITY_IPV4_ADDRESS);
+    const authority host2(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    BOOST_REQUIRE(!(host1 == host2));
+}
+
+BOOST_AUTO_TEST_CASE(authority__equality__ipv6_ipv6__true)
+{
+    const authority host1(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    const authority host2(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    BOOST_REQUIRE(host1 == host2);
+}
+
+BOOST_AUTO_TEST_CASE(authority__equality__ipv6_ipv6_port__false)
+{
+    const authority host1(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    const authority host2(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS, 42);
+    BOOST_REQUIRE(!(host1 == host2));
+}
+
+BOOST_AUTO_TEST_CASE(authority__equality__compatible_alternative__false)
+{
+    // A compatible ip address serializes as alternative notation IPv6 but
+    // they are not the same internally.
+    const authority host1(BC_AUTHORITY_IPV6_COMPATIBLE_ADDRESS);
+    const authority host2(BC_AUTHORITY_IPV6_ALTERNATIVE_COMPATIBLE_ADDRESS);
+    BOOST_REQUIRE(!(host1 == host2));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE(authority__input)
-BOOST_AUTO_TEST_SUITE_END()
-BOOST_AUTO_TEST_SUITE(authority__output)
+
+// ------------------------------------------------------------------------- //
+
+BOOST_AUTO_TEST_SUITE(authority__inequality)
+
+BOOST_AUTO_TEST_CASE(authority__inequality__default_default__false)
+{
+    const authority host1;
+    const authority host2;
+    BOOST_REQUIRE(!(host1 != host2));
+}
+
+BOOST_AUTO_TEST_CASE(authority__inequality__default_unspecified_port__true)
+{
+    const authority host1;
+    const authority host2(BC_AUTHORITY_IPV6_UNSPECIFIED_ADDRESS, 42);
+    BOOST_REQUIRE(host1 != host2);
+}
+
+BOOST_AUTO_TEST_CASE(authority__inequality__ipv6_ipv6__false)
+{
+    const authority host1(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    const authority host2(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    BOOST_REQUIRE(!(host1 != host2));
+}
+
+// ------------------------------------------------------------------------- //
+
+BOOST_AUTO_TEST_CASE(authority__construct__bogus_ip__throws_invalid_option)
+{
+    BOOST_REQUIRE_THROW(authority host("bogus"), invalid_option_value);
+}
+
+BOOST_AUTO_TEST_CASE(authority__construct__invalid_ipv4__throws_invalid_option)
+{
+    BOOST_REQUIRE_THROW(authority host("999.999.999.999"), invalid_option_value);
+}
+
+BOOST_AUTO_TEST_CASE(authority__construct__invalid_ipv6__throws_invalid_option)
+{
+    BOOST_REQUIRE_THROW(authority host("[:::]"), invalid_option_value);
+}
+
+BOOST_AUTO_TEST_CASE(authority__construct__invalid_port__throws_invalid_option)
+{
+    BOOST_REQUIRE_THROW(authority host("[::]:12345678901"), invalid_option_value);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

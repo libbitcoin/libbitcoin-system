@@ -41,11 +41,11 @@ using namespace boost::asio;
 using namespace boost::program_options;
 using boost::format;
 
-// hostname: [2001:db8::2] or 1.2.240.1
-static std::string to_hostname(const std::string& host)
+// host:    [2001:db8::2] or  2001:db8::2  or 1.2.240.1
+// returns: [2001:db8::2] or [2001:db8::2] or 1.2.240.1
+static std::string to_host_name(const std::string& host)
 {
-    if (host.find(":") == std::string::npos ||
-        host.find("[") != std::string::npos)
+    if (host.find(":") == std::string::npos || host.find("[") == 0)
         return host;
 
     const auto hostname = format("[%1%]") % host;
@@ -56,7 +56,7 @@ static std::string to_hostname(const std::string& host)
 static std::string to_authority(const std::string& host, uint16_t port)
 {
     std::stringstream authority;
-    authority << to_hostname(host);
+    authority << to_host_name(host);
     if (port > 0)
         authority << ":" << port;
 
@@ -187,7 +187,12 @@ std::string authority::to_string() const
 
 bool authority::operator==(const authority& other) const
 {
-    return ip() == other.ip() && port() == other.port();
+    return port() == other.port() && ip() == other.ip();
+}
+
+bool authority::operator!=(const authority& other) const
+{
+    return !(*this == other);
 }
 
 std::istream& operator>>(std::istream& input, authority& argument)
@@ -206,6 +211,7 @@ std::istream& operator>>(std::istream& input, authority& argument)
     }
 
     const auto& match = *it;
+    std::string port(match[5]);
     std::string ip_address(match[3]);
     if (ip_address.empty())
         ip_address = to_ipv6(match[2]);
@@ -213,13 +219,9 @@ std::istream& operator>>(std::istream& input, authority& argument)
     try
     {
         argument.ip_ = ip::address_v6::from_string(ip_address);
-        argument.port_ = lexical_cast<uint16_t>(match[5]);
+        argument.port_ = port.empty() ? 0 : lexical_cast<uint16_t>(port);
     }
     catch (const boost::exception&)
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
-    catch (const std::exception&)
     {
         BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }

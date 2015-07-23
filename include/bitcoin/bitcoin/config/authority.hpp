@@ -139,6 +139,12 @@ public:
     bool operator==(const authority& other) const;
 
     /**
+     * Override the inequality operator.
+     * @param[in]  other  The other object with which to compare.
+     */
+    bool operator!=(const authority& other) const;
+
+    /**
      * Define stream in. Throws if input is invalid.
      * @param[in]   input     The input stream to read the value from.
      * @param[out]  argument  The object to receive the read value.
