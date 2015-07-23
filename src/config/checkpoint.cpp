@@ -112,10 +112,6 @@ std::istream& operator>>(std::istream& input, checkpoint& argument)
     {
         BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }
-    catch (const std::exception&)
-    {
-        BOOST_THROW_EXCEPTION(invalid_option_value(value));
-    }
 
     return input;
 }

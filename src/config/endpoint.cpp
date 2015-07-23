@@ -48,7 +48,6 @@ endpoint::endpoint(const endpoint& other)
 }
 
 endpoint::endpoint(const std::string& value)
-  : endpoint()
 {
     std::stringstream(value) >> *this;
 }
@@ -119,10 +118,11 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
     const auto& match = *it;
     argument.scheme_ = match[2];
     argument.host_ = match[3];
+    std::string port(match[5]);
 
     try
     {
-        argument.port_ = lexical_cast<uint16_t>(match[5]);
+        argument.port_ = port.empty() ? 0 : lexical_cast<uint16_t>(port);
     }
     catch (const boost::exception&)
     {
