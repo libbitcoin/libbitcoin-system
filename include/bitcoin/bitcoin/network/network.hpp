@@ -65,9 +65,7 @@ private:
         connect_handler handle_connect, resolver_ptr, query_ptr);
 
     threadpool& pool_;
-
-    // HACK: Should be reference but timeouts are not currently part of config.
-    const timeout timeouts_;
+    const timeout& timeouts_;
 };
 
 } // namespace network
