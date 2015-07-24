@@ -237,7 +237,7 @@ private:
 
     async_strand strand_;
     socket_ptr socket_;
-    timeout timeouts_;
+    const timeout timeouts_;
 
     boost::asio::deadline_timer expiration_;
     boost::asio::deadline_timer timeout_;
