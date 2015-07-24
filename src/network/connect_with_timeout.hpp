@@ -38,17 +38,13 @@ public:
         const timeout& timeouts=timeout::defaults);
 
     void start(tcp::resolver::iterator endpoint_iterator,
-        network::connect_handler handle_connect);
-
-    /// Deprecated, obtain connect timeout on construct.
-    void start(tcp::resolver::iterator endpoint_iterator,
-        time_duration timeout, network::connect_handler handle_connect);
+        network::connect_handler connect_handler);
 
 private:
-    void call_connect_handler(const boost::system::error_code& ec,
-        tcp::resolver::iterator, network::connect_handler handle_connect);
+    void handle_connect(const boost::system::error_code& ec,
+        tcp::resolver::iterator, network::connect_handler connect_handler);
 
-    void close(const boost::system::error_code& ec);
+    void handle_timer(const boost::system::error_code& ec);
 
     socket_ptr socket_;
     channel::channel_proxy_ptr proxy_;
