@@ -64,55 +64,66 @@ void seeder::contact(const config::endpoint& seed)
     log_info(LOG_PROTOCOL)
         << "Contacting seed [" << seed.to_string() << "]";
 
-    connect(handshake_, network_, seed.host(), seed.port(),
-        strand_.wrap(&seeder::request,
-            shared_from_this(), _1, _2));
+    const auto self = shared_from_this();
+    const auto connect_handler = [self, &seed](const std::error_code& ec,
+        channel_ptr node)
+    {
+        self->connect(ec, seed, node);
+    };
+
+    bc::network::connect(handshake_, network_, seed.host(), seed.port(),
+        connect_handler);
 }
 
-void seeder::request(const std::error_code& ec, channel_ptr node)
+void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
+    channel_ptr node)
 {
+
     if (!node)
     {
-        visited(ec);
+        log_info(LOG_PROTOCOL)
+            << "Failure contacting seed [" << seed << "]";
+
+        visit(ec);
         return;
     }
 
     if (ec)
     {
-        log_debug(LOG_PROTOCOL)
-            << "Failure contacting seed [" 
-            << node->address().to_string() << "] " << ec.message();
+        log_info(LOG_PROTOCOL)
+            << "Failure contacting seed [" << seed << "]: "
+            << ec.message();
 
-        visited(ec);
+        visit(ec);
         return;
     }
 
-    log_debug(LOG_PROTOCOL)
-        << "Getting addresses from seed ["
-        << node->address().to_string() << "]";
+    log_info(LOG_PROTOCOL)
+        << "Getting addresses from [" << seed << "] as ["
+        << node->address() << "]";
 
     node->send(get_address_type(),
-        strand_.wrap(&seeder::handle_request,
+        strand_.wrap(&seeder::handle_send,
             shared_from_this(), _1));
 
     node->subscribe_address(
-        strand_.wrap(&seeder::store,
+        strand_.wrap(&seeder::handle_store_all,
             shared_from_this(), _1, _2, node));
 
 }
 
-void seeder::handle_request(const std::error_code& ec)
+void seeder::handle_send(const std::error_code& ec)
 {
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
             << "Failure sending get address message: " << ec.message();
 
-        visited(ec);
+        visit(ec);
     }
 }
 
-void seeder::store(const std::error_code& ec, const address_type& message,
+void seeder::handle_store_all(const std::error_code& ec, const address_type& message,
     channel_ptr node)
 {
     if (ec)
@@ -120,45 +131,45 @@ void seeder::store(const std::error_code& ec, const address_type& message,
         if (node)
             log_debug(LOG_PROTOCOL)
                 << "Failure getting addresses from seed [" 
-                << node->address().to_string() << "] " << ec.message();
+                << node->address() << "] " << ec.message();
         else
             log_debug(LOG_PROTOCOL)
                 << "Failure getting addresses from seed: " << ec.message();
 
-        visited(ec);
+        visit(ec);
         return;
     }
 
     if (node)
         log_info(LOG_PROTOCOL)
-            << "Storing " << message.addresses.size() << " addresses from seed ["
-            << node->address().to_string() << "] ";
+            << "Storing " << message.addresses.size()
+            << " addresses from seed [" << node->address() << "]";
 
     for (const auto& address: message.addresses)
         host_pool_.store(address,
-            strand_.wrap(&seeder::handle_store,
+        strand_.wrap(&seeder::handle_store_one,
                 shared_from_this(), _1));
 
     if (!message.addresses.empty())
         succeeded_ = true;
 
-    visited(ec);
+    visit(ec);
 }
 
 // This is called for each individual accress in the packet.
-void seeder::handle_store(const std::error_code& ec)
+void seeder::handle_store_one(const std::error_code& ec)
 {
     if (ec)
         log_error(LOG_PROTOCOL)
             << "Failure storing address from seed: " << ec.message();
 }
 
-void seeder::visited(const std::error_code& ec)
+void seeder::visit(const std::error_code& ec)
 {
     BITCOIN_ASSERT(visited_ < seeds_.size());
 
     // We block session start until all seeds are populated. This provides
-    // greater assurance of a random pool of address at session startup.
+    // greater assurance of a distributed pool of address at session startup.
     if (++visited_ == seeds_.size())
         handle_complete_(succeeded_ ? std::error_code () : ec);
 }

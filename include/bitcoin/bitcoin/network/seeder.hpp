@@ -51,12 +51,15 @@ public:
 
 private:
     void contact(const config::endpoint& seed);
-    void handle_request(const std::error_code& ec);
-    void handle_store(const std::error_code& ec);
-    void request(const std::error_code& ec, channel_ptr node);
-    void store(const std::error_code& ec, const address_type& message,
+    void connect(const std::error_code& ec, const config::endpoint& seed,
         channel_ptr node);
-    void visited(const std::error_code& ec);
+    void visit(const std::error_code& ec);
+
+    void handle_send(const std::error_code& ec);
+    void handle_store_all(const std::error_code& ec,
+        const address_type& message, channel_ptr node);
+    void handle_store_one(const std::error_code& ec);
+
 
     async_strand& strand_;
     hosts& host_pool_;
