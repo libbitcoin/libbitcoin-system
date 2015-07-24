@@ -487,7 +487,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         if (node)
             log_debug(LOG_PROTOCOL)
                 << "Failure accepting connection from [" 
-                << node->address().to_string() << "] " << ec.message();
+                << node->address() << "] " << ec.message();
         else
             log_debug(LOG_PROTOCOL)
                 << "Failure accepting connection: " << ec.message();
@@ -499,8 +499,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
     if (inbound_connections_.size() >= max_inbound_)
     {
         log_info(LOG_PROTOCOL)
-            << "Inbound connection limit blocked ["
-            << node->address().to_string() << "]";
+            << "Inbound connection limit blocked [" << node->address() << "]";
 
         node->stop();
         return;
@@ -509,8 +508,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
     if (is_banned(node->address()))
     {
         log_info(LOG_PROTOCOL)
-            << "Blocked banned connection from ["
-            << node->address().to_string() << "]";
+            << "Blocked banned connection from [" << node->address() << "]";
 
         node->stop();
         return;
@@ -520,7 +518,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
     // Accepted!
     log_info(LOG_PROTOCOL)
-        << "Accepted connection from [" << node->address().to_string() << "] ("
+        << "Accepted connection from [" << node->address() << "] ("
         << inbound_connections_.size() << " total)";
 
     const auto handshake_complete = [this, node](const std::error_code& ec)
@@ -531,7 +529,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         if (ec)
         {
             log_debug(LOG_PROTOCOL) << "Failure in handshake from ["
-                << node->address().to_string() << "] " << ec.message();
+                << node->address() << "] " << ec.message();
             return;
         }
 
@@ -560,8 +558,8 @@ void protocol::setup_new_channel(channel_ptr node)
 
         if (ec)
         {
-            log_debug(LOG_PROTOCOL) << "Send error ["
-                << node->address().to_string() << "] " << ec.message();
+            log_debug(LOG_PROTOCOL)
+                << "Send error [" << node->address() << "] " << ec.message();
         }
     };
     
@@ -593,7 +591,7 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
         if (node)
             log_debug(LOG_PROTOCOL)
                 << "Outbound channel stopped (outbound) ["
-                << node->address().to_string() << "] " << ec.message();
+                << node->address() << "] " << ec.message();
         else
             log_debug(LOG_PROTOCOL)
                 << "Outbound channel stopped (outbound): " << ec.message();
@@ -642,7 +640,7 @@ void protocol::inbound_channel_stopped(const std::error_code& ec,
         if (node)
             log_debug(LOG_PROTOCOL)
                 << "Inbound channel stopped (inbound) ["
-                << node->address().to_string() << "] " << ec.message();
+                << node->address() << "] " << ec.message();
         else
             log_debug(LOG_PROTOCOL)
                 << "Inbound channel stopped (inbound): " << ec.message();
@@ -663,12 +661,12 @@ void protocol::handle_address_message(const std::error_code& ec,
         // TODO: reset the connection.
         log_debug(LOG_PROTOCOL)
             << "Failure getting addresses from ["
-            << node->address().to_string() << "] " << ec.message();
+            << node->address() << "] " << ec.message();
         return;
     }
 
     log_debug(LOG_PROTOCOL)
-        << "Storing addresses from [" << node->address().to_string() << "]";
+        << "Storing addresses from [" << node->address() << "]";
 
     for (const auto& net_address: message.addresses)
         host_pool_.store(net_address,
