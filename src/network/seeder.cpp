@@ -144,7 +144,7 @@ void seeder::handle_store_all(const std::error_code& ec, const address_type& mes
 
     for (const auto& address: message.addresses)
         host_pool_.store(address,
-        strand_.wrap(&seeder::handle_store_one,
+            strand_.wrap(&seeder::handle_store_one,
                 shared_from_this(), _1));
 
     if (!message.addresses.empty())
