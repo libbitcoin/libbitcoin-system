@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/error.hpp>
 
+#include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 
@@ -235,21 +236,16 @@ namespace error {
 
     error_code_t boost_to_error_code(const boost::system::error_code& ec)
     {
-        enum windows_error
-        {
-            connection_aborted_by_host_system = 10053,
-            connection_reset_by_peer = 10054
-        };
-
         namespace boost_error = boost::system::errc;
+        namespace boost_error_asio = boost::asio::error;
         switch (ec.value())
         {
             case boost_error::success:
                 return error::success;
 
             // network errors
-            case windows_error::connection_aborted_by_host_system:
-            case windows_error::connection_reset_by_peer:
+            case boost_error_asio::connection_aborted:
+            case boost_error_asio::connection_reset:
             case boost_error::connection_aborted:
             case boost_error::connection_refused:
             case boost_error::connection_reset:
@@ -257,12 +253,14 @@ namespace error {
             case boost_error::operation_canceled:
                 return error::service_stopped;
 
+            case boost_error_asio::operation_aborted:
             case boost_error::operation_not_permitted:
             case boost_error::operation_not_supported:
             case boost_error::owner_dead:
             case boost_error::permission_denied:
                 return error::operation_failed;
 
+            case boost_error_asio::address_family_not_supported:
             case boost_error::address_family_not_supported:
             case boost_error::address_not_available:
             case boost_error::bad_address:
@@ -299,6 +297,7 @@ namespace error {
             case boost_error::protocol_error:
                 return error::bad_stream;
 
+            case boost_error_asio::timed_out:
             case boost_error::stream_timeout:
             case boost_error::timed_out:
                 return error::channel_timeout;
