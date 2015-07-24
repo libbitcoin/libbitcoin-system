@@ -70,55 +70,36 @@ protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
 }
 
 void protocol::start(completion_handler handle_complete)
-{
-    // handshake.start doesn't accept an error code so we prevent its
-    // execution in case of start failure, using this lambda wrapper.
-    const auto start_handshake = [this, handle_complete]
-        (const std::error_code& ec)
-    {
-        if (ec)
-        {
-            handle_complete(ec);
-            return;
-        }
-
-        strand_.wrap(&handshake::start,
-            &handshake_, handle_complete)();
-    };
-
-    const auto run_protocol =
-        strand_.wrap(&protocol::handle_start,
-            this, _1, start_handshake);
-    
+{   
     host_pool_.load(
-        strand_.wrap(&protocol::fetch_count,
-            this, _1, run_protocol));
-}
-
-void protocol::handle_start(const std::error_code& ec,
-    completion_handler handle_complete)
-{
-    if (ec)
-    {
-        log_error(LOG_PROTOCOL)
-            << "Failure fetching height: " << ec.message();
-        handle_complete(ec);
-        return;
-    }
-
-    // TODO: handle run startup failure.
-    handle_complete(ec);
-    run();
+        strand_.wrap(&protocol::handle_hosts_load,
+            this, _1, handle_complete));
 }
 
 void protocol::stop(completion_handler handle_complete)
 {
     host_pool_.save(
-        strand_.wrap(&protocol::handle_stop,
+        strand_.wrap(&protocol::handle_hosts_save,
             this, _1, handle_complete));
 }
 
-void protocol::handle_stop(const std::error_code& ec,
+void protocol::handle_hosts_load(const std::error_code& ec,
+    completion_handler handle_complete)
+{
+    if (ec)
+    {
+        log_error(LOG_PROTOCOL)
+            << "Failure loading hosts: " << ec.message();
+        handle_complete(ec);
+        return;
+    }
+
+    host_pool_.fetch_count(
+        strand_.wrap(&protocol::handle_hosts_count,
+            this, _1, _2, handle_complete));
+}
+
+void protocol::handle_hosts_save(const std::error_code& ec,
     completion_handler handle_complete)
 {
     if (ec)
@@ -133,41 +114,90 @@ void protocol::handle_stop(const std::error_code& ec,
     handle_complete(error::success);
 }
 
-void protocol::fetch_count(const std::error_code& ec,
-    completion_handler handle_complete)
+void protocol::handle_hosts_count(const std::error_code& ec,
+    size_t hosts_count, completion_handler handle_complete)
 {
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "Failure loading hosts file: " << ec.message();
+            << "Failure getting hosts count: " << ec.message();
         handle_complete(ec);
         return;
     }
 
-    host_pool_.fetch_count(
-        strand_.wrap(&protocol::start_seeds,
-            this, _1, _2, handle_complete));
+    if (hosts_count == 0 && seeds_.size() == 0)
+    {
+        log_error(LOG_PROTOCOL)
+            << "There are no cached hosts and no seeds configured.";
+        handle_complete(error::service_stopped);
+        return;
+    }
+    
+    handshake_.start(
+        strand_.wrap(&protocol::handle_handshake_start,
+            this, _1, hosts_count, handle_complete));
 }
 
-void protocol::start_seeds(const std::error_code& ec, size_t hosts_count,
-    completion_handler handle_complete)
+void protocol::handle_handshake_start(const std::error_code& ec,
+    size_t hosts_count, completion_handler handle_complete)
 {
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "Failure checking existing hosts file: " << ec.message();
+            << "Failure obtaining own IP address: " << ec.message();
         handle_complete(ec);
         return;
     }
 
     if (hosts_count == 0)
+        seed(handle_complete);
+    else
+        handle_seed(error::success, handle_complete);
+}
+
+void protocol::seed(completion_handler handle_complete)
+{
+    const auto seed_complete =
+        strand_.wrap(&protocol::handle_seed,
+            this, _1, handle_complete);
+
+    // The seeder is complicated by protocol co-dependence.
+    // For this reason we must create it as a shared pointer.
+    seeder_ = std::make_shared<seeder>(this, seeds_, seed_complete);
+    seeder_->start();
+}
+
+void protocol::handle_seed(const std::error_code& ec,
+    completion_handler handle_complete)
+{
+    if (ec)
     {
-        seeder_ = std::make_shared<seeder>(this, seeds_, handle_complete);
-        seeder_->start();
+        log_error(LOG_PROTOCOL)
+            << "Failure seeding hosts: " << ec.message();
+        handle_complete(ec);
         return;
     }
 
-    handle_complete(error::success); 
+    run();
+    handle_complete(ec);
+}
+
+void protocol::run()
+{
+    // Loop over outbound connections and start sweep timers.
+    strand_.queue(
+        std::bind(&protocol::start_connecting,
+            this));
+
+    // Are we accepting inbound connections?
+    if (inbound_port_ == 0 || max_inbound_ == 0)
+        return;
+
+    // TODO: Unhandled startup failure condition.
+    // Start listening for inbound connections.
+    network_.listen(inbound_port_,
+        strand_.wrap(&protocol::handle_listen,
+            this, _1, _2));
 }
 
 std::string protocol::state_to_string(connect_state state) const
@@ -195,22 +225,6 @@ void protocol::modify_slot(slot_index slot, connect_state state)
     log_debug(LOG_PROTOCOL)
         << "Outbound connection on slot ["
         << slot << "] " << state_to_string(state) << ".";
-}
-
-void protocol::run()
-{
-    strand_.queue(
-        std::bind(&protocol::start_connecting,
-            this));
-
-    // Not accepting connections.
-    if (inbound_port_ == 0 || max_inbound_ == 0)
-        return;
-
-    // Unhandled startup failure condition.
-    network_.listen(inbound_port_,
-        strand_.wrap(&protocol::handle_listen,
-            this, _1, _2));
 }
 
 void protocol::start_connecting()

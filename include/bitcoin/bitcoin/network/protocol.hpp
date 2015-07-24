@@ -175,20 +175,20 @@ private:
     typedef subscriber<const std::error_code&, channel_ptr>
         channel_subscriber_type;
 
-    // start sequence
-    void handle_start(const std::error_code& ec,
+    void handle_hosts_load(const std::error_code& ec,
         completion_handler handle_complete);
-    void fetch_count(const std::error_code& ec,
+    void handle_hosts_count(const std::error_code& ec, size_t hosts_count,
         completion_handler handle_complete);
-    void start_seeds(const std::error_code& ec, size_t hosts_count,
+    void handle_handshake_start(const std::error_code& ec, size_t hosts_count,
         completion_handler handle_complete);
-
-    // stop sequence
-    void handle_stop(const std::error_code& ec,
+    void handle_seed(const std::error_code& ec,
+        completion_handler handle_complete);
+    void handle_hosts_save(const std::error_code& ec,
         completion_handler handle_complete);
 
     std::string state_to_string(connect_state state) const;
     void modify_slot(slot_index slot, connect_state state);
+    void seed(completion_handler handle_complete);
 
     // run loop
     void start_connecting();
