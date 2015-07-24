@@ -25,6 +25,7 @@
 #include <system_error>
 #include <vector>
 #include <boost/algorithm/string.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -40,7 +41,7 @@ using std::placeholders::_2;
 
 seeder::seeder(protocol* proto, const config::endpoint::list& seeds,
     protocol::completion_handler handle_complete)
-  : strand_(proto->strand_), 
+  : strand_(proto->strand_),
     host_pool_(proto->host_pool_),
     handshake_(proto->handshake_),
     network_(proto->network_),
@@ -78,12 +79,10 @@ void seeder::contact(const config::endpoint& seed)
 void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
     channel_ptr node)
 {
-
     if (!node)
     {
         log_info(LOG_PROTOCOL)
             << "Failure contacting seed [" << seed << "]";
-
         visit(ec);
         return;
     }
@@ -93,7 +92,6 @@ void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
         log_info(LOG_PROTOCOL)
             << "Failure contacting seed [" << seed << "]: "
             << ec.message();
-
         visit(ec);
         return;
     }
@@ -109,7 +107,6 @@ void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
     node->subscribe_address(
         strand_.wrap(&seeder::handle_store_all,
             shared_from_this(), _1, _2, node));
-
 }
 
 void seeder::handle_send(const std::error_code& ec)
@@ -171,7 +168,7 @@ void seeder::visit(const std::error_code& ec)
     // We block session start until all seeds are populated. This provides
     // greater assurance of a distributed pool of address at session startup.
     if (++visited_ == seeds_.size())
-        handle_complete_(succeeded_ ? std::error_code () : ec);
+        handle_complete_(succeeded_ ? error::success : ec);
 }
 
 } // namespace network
