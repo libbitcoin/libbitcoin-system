@@ -237,30 +237,33 @@ namespace error {
     error_code_t boost_to_error_code(const boost::system::error_code& ec)
     {
         namespace boost_error = boost::system::errc;
-        namespace boost_error_asio = boost::asio::error;
+
+        //// ASIO code are unique on Windows but not on Linux.
+        ////namespace boost_error_asio = boost::asio::error;
+
         switch (ec.value())
         {
             case boost_error::success:
                 return error::success;
 
             // network errors
-            case boost_error_asio::connection_aborted:
-            case boost_error_asio::connection_reset:
+            ////case boost_error_asio::connection_aborted:
             case boost_error::connection_aborted:
             case boost_error::connection_refused:
+            ////case boost_error_asio::connection_reset:
             case boost_error::connection_reset:
             case boost_error::not_connected:
-            case boost_error::operation_canceled:
                 return error::service_stopped;
 
-            case boost_error_asio::operation_aborted:
+            ////case boost_error_asio::operation_aborted:
+            case boost_error::operation_canceled:
             case boost_error::operation_not_permitted:
             case boost_error::operation_not_supported:
             case boost_error::owner_dead:
             case boost_error::permission_denied:
                 return error::operation_failed;
 
-            case boost_error_asio::address_family_not_supported:
+            ////case boost_error_asio::address_family_not_supported:
             case boost_error::address_family_not_supported:
             case boost_error::address_not_available:
             case boost_error::bad_address:
@@ -297,8 +300,8 @@ namespace error {
             case boost_error::protocol_error:
                 return error::bad_stream;
 
-            case boost_error_asio::timed_out:
             case boost_error::stream_timeout:
+            ////case boost_error_asio::timed_out:
             case boost_error::timed_out:
                 return error::channel_timeout;
 
