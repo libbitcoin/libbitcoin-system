@@ -448,31 +448,30 @@ BOOST_AUTO_TEST_CASE(authority__equality__ipv4_ipv4_port__true)
 BOOST_AUTO_TEST_CASE(authority__equality__ipv4_ipv6__false)
 {
     const authority host1(BC_AUTHORITY_IPV4_ADDRESS);
-    const authority host2(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    const authority host2("[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]");
     BOOST_REQUIRE(!(host1 == host2));
 }
 
 BOOST_AUTO_TEST_CASE(authority__equality__ipv6_ipv6__true)
 {
-    const authority host1(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
-    const authority host2(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    const authority host1("[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]");
+    const authority host2("[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]");
     BOOST_REQUIRE(host1 == host2);
 }
 
 BOOST_AUTO_TEST_CASE(authority__equality__ipv6_ipv6_port__false)
 {
-    const authority host1(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    const authority host1("[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]");
     const authority host2(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS, 42);
     BOOST_REQUIRE(!(host1 == host2));
 }
 
-BOOST_AUTO_TEST_CASE(authority__equality__compatible_alternative__false)
+BOOST_AUTO_TEST_CASE(authority__equality__compatible_alternative__true)
 {
-    // A compatible ip address serializes as alternative notation IPv6 but
-    // they are not the same internally.
-    const authority host1(BC_AUTHORITY_IPV6_COMPATIBLE_ADDRESS);
-    const authority host2(BC_AUTHORITY_IPV6_ALTERNATIVE_COMPATIBLE_ADDRESS);
-    BOOST_REQUIRE(!(host1 == host2));
+    // A compatible ip address is equivalent to its alternative addressing.
+    const authority host1("[" BC_AUTHORITY_IPV6_COMPATIBLE_ADDRESS "]");
+    const authority host2("[" BC_AUTHORITY_IPV6_ALTERNATIVE_COMPATIBLE_ADDRESS "]");
+    BOOST_REQUIRE(host1 == host2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -497,12 +496,16 @@ BOOST_AUTO_TEST_CASE(authority__inequality__default_unspecified_port__true)
 
 BOOST_AUTO_TEST_CASE(authority__inequality__ipv6_ipv6__false)
 {
-    const authority host1(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
-    const authority host2(BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS);
+    const authority host1("[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]");
+    const authority host2("[" BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "]");
     BOOST_REQUIRE(!(host1 != host2));
 }
 
+BOOST_AUTO_TEST_SUITE_END()
+
 // ------------------------------------------------------------------------- //
+
+BOOST_AUTO_TEST_SUITE(authority__construct)
 
 BOOST_AUTO_TEST_CASE(authority__construct__bogus_ip__throws_invalid_option)
 {
