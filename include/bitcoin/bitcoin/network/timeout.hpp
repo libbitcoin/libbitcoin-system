@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_TIMEOUT_HPP
 #define LIBBITCOIN_TIMEOUT_HPP
 
+#include <cstdint>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
@@ -30,6 +31,15 @@ class BC_API timeout
 {
 public:
     static const timeout defaults;
+
+    timeout();
+    timeout(
+        uint32_t channel_expiration_minutes,
+        uint32_t channel_timeout_minutes,
+        uint32_t channel_heartbeat_minutes,
+        uint32_t channel_startup_minutes,
+        uint32_t channel_revivial_minutes,
+        uint32_t connect_timeout_seconds);
 
     boost::posix_time::time_duration expiration;
     boost::posix_time::time_duration inactivity;
