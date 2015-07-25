@@ -90,7 +90,7 @@ std::istream& operator>>(std::istream& input, checkpoint& argument)
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
     // We allow 1-10 digits, which is sufficient for 2^32 blocks.
-    static const regex regular("([0-9a-f]{64})(:([0-9]{1,10}))?");
+    static const regex regular("^([0-9a-f]{64})(:([0-9]{1,10}))?$");
 
     sregex_iterator it(value.begin(), value.end(), regular), end;
     if (it == end)

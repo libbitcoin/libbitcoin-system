@@ -106,8 +106,8 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
     input >> value;
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    static const regex regular(
-        "((tcp|udp):\\/\\/)?([0-9a-z\\.\\*-]+)(:([0-9]{1,5}))?");
+    static const regex regular("^((tcp|udp):\\/\\/)?"
+        "(\\[([0-9a-f:\\.]+)]|([^:]+))(:([0-9]{1,5}))?$");
 
     sregex_iterator it(value.begin(), value.end(), regular), end;
     if (it == end)
@@ -118,7 +118,7 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
     const auto& match = *it;
     argument.scheme_ = match[2];
     argument.host_ = match[3];
-    std::string port(match[5]);
+    std::string port(match[7]);
 
     try
     {

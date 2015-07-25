@@ -202,7 +202,7 @@ std::istream& operator>>(std::istream& input, authority& argument)
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
     static const regex regular(
-        "(([0-9\\.]+)|\\[([0-9a-f:\\.]+)])(:([0-9]{1,10}))?");
+        "^(([0-9\\.]+)|\\[([0-9a-f:\\.]+)])(:([0-9]{1,5}))?$");
 
     sregex_iterator it(value.begin(), value.end(), regular), end;
     if (it == end)
