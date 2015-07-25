@@ -67,7 +67,7 @@ seeder::seeder(threadpool& pool, hosts& hosts, handshake& shake, network& net,
     network_(net),
     seeds_(seeds),
     visited_(0),
-    succeeded_(false),
+    success_(false),
     handle_complete_(nullptr)
 {
 }
@@ -75,11 +75,17 @@ seeder::seeder(threadpool& pool, hosts& hosts, handshake& shake, network& net,
 // TODO: set error if no seeds are configured or no hosts can be loaded.
 void seeder::start(completion_handler handle_complete)
 {
-    BITCOIN_ASSERT(!succeeded_ && visited_ == 0 && 
+    BITCOIN_ASSERT(!success_ && visited_ == 0 &&
         handle_complete_ == nullptr);
 
     // Don't call completion handler until ass seeds have been visited.
     handle_complete_ = handle_complete;
+
+    if (seeds_.empty())
+    {
+        log_info(LOG_PROTOCOL) << "No seeds configured.";
+        handle_complete_(error::success);
+    }
 
     for (const auto& address: seeds_)
         contact(address);
@@ -107,7 +113,7 @@ void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
     {
         log_info(LOG_PROTOCOL)
             << "Failure contacting seed [" << seed << "]";
-        visit(ec);
+        visit();
         return;
     }
 
@@ -116,7 +122,7 @@ void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
         log_info(LOG_PROTOCOL)
             << "Failure contacting seed [" << seed << "]: "
             << ec.message();
-        visit(ec);
+        visit();
         return;
     }
 
@@ -139,8 +145,7 @@ void seeder::handle_send(const std::error_code& ec)
     {
         log_debug(LOG_PROTOCOL)
             << "Failure sending get address message: " << ec.message();
-
-        visit(ec);
+        visit();
     }
 }
 
@@ -157,7 +162,7 @@ void seeder::handle_store_all(const std::error_code& ec,
             log_debug(LOG_PROTOCOL)
                 << "Failure getting addresses from seed: " << ec.message();
 
-        visit(ec);
+        visit();
         return;
     }
 
@@ -172,9 +177,9 @@ void seeder::handle_store_all(const std::error_code& ec,
                 this, _1));
 
     if (!message.addresses.empty())
-        succeeded_ = true;
+        success_ = true;
 
-    visit(ec);
+    visit();
 }
 
 // This is called for each individual accress in the packet.
@@ -185,14 +190,14 @@ void seeder::handle_store_one(const std::error_code& ec)
             << "Failure storing address from seed: " << ec.message();
 }
 
-void seeder::visit(const std::error_code& ec)
+void seeder::visit()
 {
     BITCOIN_ASSERT(visited_ < seeds_.size());
 
     // We block session start until all seeds are populated. This provides
     // greater assurance of a distributed pool of address at session startup.
     if (++visited_ == seeds_.size())
-        handle_complete_(succeeded_ ? error::success : ec);
+        handle_complete_(success_ ? error::success : error::operation_failed);
 }
 
 } // namespace network

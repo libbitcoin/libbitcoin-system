@@ -55,7 +55,7 @@ private:
     void contact(const config::endpoint& seed);
     void connect(const std::error_code& ec, const config::endpoint& seed,
         channel_ptr node);
-    void visit(const std::error_code& ec);
+    void visit();
 
     void handle_send(const std::error_code& ec);
     void handle_store_all(const std::error_code& ec,
@@ -69,7 +69,7 @@ private:
     const config::endpoint::list& seeds_;
 
     size_t visited_;
-    bool succeeded_;
+    bool success_;
     completion_handler handle_complete_;
 };
 
