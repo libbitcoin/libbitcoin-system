@@ -116,6 +116,14 @@ void protocol::handle_handshake_start(const std::error_code& ec,
         return;
     }
 
+    // No need to load or seed hosts if we aren't connecting outbound.
+    if (max_outbound_ == 0)
+    {
+        run();
+        handle_complete(ec);
+        return;
+    }
+
     host_pool_.load(
         strand_.wrap(&protocol::handle_hosts_load,
             this, _1, handle_complete));
@@ -166,7 +174,7 @@ void protocol::handle_seeder_start(const std::error_code& ec,
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "No hosts cached and failed to seed hosts: " << ec.message();
+            << "Failed to seed hosts: " << ec.message();
         handle_complete(ec);
         return;
     }
@@ -230,8 +238,11 @@ void protocol::start_connecting()
         modify_slot(slot, connect_state::stopped);
 
     // Start the main outbound connect loop.
-    start_stopped_connects();
-    start_sweep_reset_timer();
+    if (max_outbound_ > 0)
+    {
+        start_stopped_connects();
+        start_sweep_reset_timer();
+    }
 }
 
 void protocol::start_stopped_connects()
@@ -434,10 +445,11 @@ void protocol::handle_manual_connect(const std::error_code& ec,
 {
     if (ec || !node)
     {
-        log_debug(LOG_PROTOCOL)
-            << "Failure connecting manually to peer [" 
-            << config::endpoint(hostname, port) << "] "
-            << ec.message();
+        // Warn because we are supposed to maintain this connection.
+        log_warning(LOG_PROTOCOL)
+            << "Failure connecting to peer ["
+            << config::endpoint(hostname, port)
+            << "] manually" << ec.message();
 
         // Retry connect.
         maintain_connection(hostname, port);
@@ -448,8 +460,9 @@ void protocol::handle_manual_connect(const std::error_code& ec,
 
     // Connected!
     log_info(LOG_PROTOCOL)
-        << "Connection to peer established manually ["
-        << config::endpoint(hostname, port) << "]";
+        << "Connected to peer ["
+        << config::endpoint(hostname, port)
+        << "] manually";
 
     // Subscript to channel stop notifications.
     node->subscribe_stop(
