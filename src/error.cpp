@@ -140,7 +140,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::non_final_transaction:
             return "block contains a non-final transaction";
         case error::checkpoints_failed:
-            return "block hash rejected by checkpoint lockins";
+            return "block hash rejected by checkpoint";
         case error::old_version_block:
             return "block version one rejected at current height";
         case error::coinbase_height_mismatch:
