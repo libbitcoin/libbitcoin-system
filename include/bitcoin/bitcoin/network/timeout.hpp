@@ -38,7 +38,7 @@ public:
         uint32_t channel_timeout_minutes,
         uint32_t channel_heartbeat_minutes,
         uint32_t channel_startup_minutes,
-        uint32_t channel_revivial_minutes,
+        uint32_t channel_revival_minutes,
         uint32_t connect_timeout_seconds);
 
     boost::posix_time::time_duration expiration;

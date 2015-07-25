@@ -212,7 +212,7 @@ void channel_proxy::reset_revival()
     set_revival(timeouts_.revival);
 }
 
-void channel_proxy::set_revival_handler(revivial_handler handler)
+void channel_proxy::set_revival_handler(revival_handler handler)
 {
     revival_handler_ = handler;
 }

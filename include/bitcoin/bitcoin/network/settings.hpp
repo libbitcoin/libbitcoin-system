@@ -40,7 +40,7 @@ struct BC_API settings
     uint32_t channel_timeout_minutes;
     uint32_t channel_heartbeat_minutes;
     uint32_t channel_startup_minutes;
-    uint32_t channel_revivial_minutes;
+    uint32_t channel_revival_minutes;
     uint32_t host_pool_capacity;
     boost::filesystem::path hosts_file;
     boost::filesystem::path debug_file;

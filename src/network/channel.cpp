@@ -68,7 +68,7 @@ void channel::reset_revival()
         return proxy->reset_revival();
 }
 
-void channel::set_revival_handler(channel_proxy::revivial_handler handler)
+void channel::set_revival_handler(channel_proxy::revival_handler handler)
 {
     const auto proxy = weak_proxy_.lock();
     if (proxy)
