@@ -37,6 +37,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
@@ -44,8 +45,6 @@
 
 namespace libbitcoin {
 namespace network {
-
-class seeder;
 
 class BC_API protocol
 {
@@ -58,8 +57,8 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
-        const config::endpoint::list& seeds=hosts::defaults,
+    protocol(threadpool& pool, hosts& hosts, handshake& shake, network& net,
+        const config::endpoint::list& seeds=seeder::defaults,
         uint16_t port=bc::protocol_port, size_t max_outbound=8,
         size_t max_inbound=8);
     
@@ -179,16 +178,15 @@ private:
         completion_handler handle_complete);
     void handle_hosts_count(const std::error_code& ec, size_t hosts_count,
         completion_handler handle_complete);
-    void handle_handshake_start(const std::error_code& ec, size_t hosts_count,
+    void handle_handshake_start(const std::error_code& ec,
         completion_handler handle_complete);
-    void handle_seed(const std::error_code& ec,
+    void handle_seeder_start(const std::error_code& ec,
         completion_handler handle_complete);
     void handle_hosts_save(const std::error_code& ec,
         completion_handler handle_complete);
 
     std::string state_to_string(connect_state state) const;
     void modify_slot(slot_index slot, connect_state state);
-    void seed(completion_handler handle_complete);
 
     // run loop
     void start_connecting();
@@ -271,6 +269,7 @@ private:
     hosts& host_pool_;
     handshake& handshake_;
     network& network_;
+    seeder seeder_;
 
     // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
@@ -295,9 +294,6 @@ private:
 
     channel_subscriber_type::ptr channel_subscribe_;
     boost::filesystem::path hosts_path_;
-    const config::endpoint::list& seeds_;
-    std::shared_ptr<seeder> seeder_;
-    friend class seeder;
 };
 
 } // namespace network

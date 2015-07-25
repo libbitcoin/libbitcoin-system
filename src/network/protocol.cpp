@@ -47,39 +47,77 @@ using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
+
+// TODO:
+// Timing out instantly, check config propagation.
+// Update to not fail on individual seed node failures but
+// on lack of loading any seeds (or empty hosts when done).
+// Ensure that independent strand for seeder isn't causing any problems.
+
+
 // These are not configurable.
 static const size_t sweep_connection_limit = 10;
 static const auto sweep_reset_interval = seconds(1);
 
-protocol::protocol(threadpool& pool, hosts& peers, handshake& shake,
+protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
     network& net, const config::endpoint::list& seeds, uint16_t port,
-    size_t max_outbound,
-    size_t max_inbound)
+    size_t max_outbound, size_t max_inbound)
   : strand_(pool),
-    host_pool_(peers),
+    host_pool_(hosts),
     handshake_(shake),
     network_(net),
+    seeder_(pool, hosts, shake, net, seeds),
     inbound_port_(port),
     max_inbound_(max_inbound),
     max_outbound_(max_outbound),
     sweep_timer_(pool.service()),
     sweep_count_(0),
-    channel_subscribe_(std::make_shared<channel_subscriber_type>(pool)),
-    seeds_(seeds)
+    channel_subscribe_(std::make_shared<channel_subscriber_type>(pool))
 {
-}
-
-void protocol::start(completion_handler handle_complete)
-{   
-    host_pool_.load(
-        strand_.wrap(&protocol::handle_hosts_load,
-            this, _1, handle_complete));
 }
 
 void protocol::stop(completion_handler handle_complete)
 {
     host_pool_.save(
         strand_.wrap(&protocol::handle_hosts_save,
+            this, _1, handle_complete));
+}
+
+void protocol::handle_hosts_save(const std::error_code& ec,
+    completion_handler handle_complete)
+{
+    if (ec)
+    {
+        log_error(LOG_PROTOCOL)
+            << "Failure saving hosts file: " << ec.message();
+        handle_complete(ec);
+        return;
+    }
+
+    channel_subscribe_->relay(error::service_stopped, nullptr);
+    handle_complete(error::success);
+}
+
+void protocol::start(completion_handler handle_complete)
+{
+    handshake_.start(
+        strand_.wrap(&protocol::handle_handshake_start,
+            this, _1,  handle_complete));
+}
+
+void protocol::handle_handshake_start(const std::error_code& ec,
+    completion_handler handle_complete)
+{
+    if (ec)
+    {
+        log_error(LOG_PROTOCOL)
+            << "Failure obtaining own IP address: " << ec.message();
+        handle_complete(ec);
+        return;
+    }
+
+    host_pool_.load(
+        strand_.wrap(&protocol::handle_hosts_load,
             this, _1, handle_complete));
 }
 
@@ -99,21 +137,6 @@ void protocol::handle_hosts_load(const std::error_code& ec,
             this, _1, _2, handle_complete));
 }
 
-void protocol::handle_hosts_save(const std::error_code& ec,
-    completion_handler handle_complete)
-{
-    if (ec)
-    {
-        log_error(LOG_PROTOCOL)
-            << "Failure saving hosts file: " << ec.message();
-        handle_complete(ec);
-        return;
-    }
-
-    channel_subscribe_->relay(error::service_stopped, nullptr);
-    handle_complete(error::success);
-}
-
 void protocol::handle_hosts_count(const std::error_code& ec,
     size_t hosts_count, completion_handler handle_complete)
 {
@@ -125,55 +148,25 @@ void protocol::handle_hosts_count(const std::error_code& ec,
         return;
     }
 
-    if (hosts_count == 0 && seeds_.size() == 0)
+    if (hosts_count > 0)
     {
-        log_error(LOG_PROTOCOL)
-            << "There are no cached hosts and no seeds configured.";
-        handle_complete(error::service_stopped);
-        return;
-    }
-    
-    handshake_.start(
-        strand_.wrap(&protocol::handle_handshake_start,
-            this, _1, hosts_count, handle_complete));
-}
-
-void protocol::handle_handshake_start(const std::error_code& ec,
-    size_t hosts_count, completion_handler handle_complete)
-{
-    if (ec)
-    {
-        log_error(LOG_PROTOCOL)
-            << "Failure obtaining own IP address: " << ec.message();
-        handle_complete(ec);
+        // Bypass seeding if we have a non-empty hosts cache.
+        handle_seeder_start(error::success, handle_complete);
         return;
     }
 
-    if (hosts_count == 0)
-        seed(handle_complete);
-    else
-        handle_seed(error::success, handle_complete);
+    seeder_.start(
+        strand_.wrap(&protocol::handle_seeder_start,
+            this, _1, handle_complete));
 }
 
-void protocol::seed(completion_handler handle_complete)
-{
-    const auto seed_complete =
-        strand_.wrap(&protocol::handle_seed,
-            this, _1, handle_complete);
-
-    // The seeder is complicated by protocol co-dependence.
-    // For this reason we must create it as a shared pointer.
-    seeder_ = std::make_shared<seeder>(this, seeds_, seed_complete);
-    seeder_->start();
-}
-
-void protocol::handle_seed(const std::error_code& ec,
+void protocol::handle_seeder_start(const std::error_code& ec,
     completion_handler handle_complete)
 {
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "Failure seeding hosts: " << ec.message();
+            << "No hosts cached and failed to seed hosts: " << ec.message();
         handle_complete(ec);
         return;
     }
@@ -182,6 +175,8 @@ void protocol::handle_seed(const std::error_code& ec,
     handle_complete(ec);
 }
 
+// Eliminate this method and continue from handle_seed so that remaining 
+// startup error conditions can be handled.
 void protocol::run()
 {
     // Loop over outbound connections and start sweep timers.
@@ -193,7 +188,6 @@ void protocol::run()
     if (inbound_port_ == 0 || max_inbound_ == 0)
         return;
 
-    // TODO: Unhandled startup failure condition.
     // Start listening for inbound connections.
     network_.listen(inbound_port_,
         strand_.wrap(&protocol::handle_listen,
@@ -212,11 +206,9 @@ std::string protocol::state_to_string(connect_state state) const
             return "established connection";
         case connect_state::stopped:
             return "stopped";
+        default:
+            return "unknown";
     }
-
-    // Unhandled state!
-    BITCOIN_ASSERT(false);
-    return "";
 }
 
 void protocol::modify_slot(slot_index slot, connect_state state)
@@ -343,7 +335,7 @@ void protocol::attempt_connect(const std::error_code& ec,
     if (ec)
     {
         log_error(LOG_PROTOCOL)
-            << "Failure randomly selecting a peer address for slot ["
+            << "Failure selecting a peer address for slot ["
             << slot << "] " << ec.message();
         return;
     }
@@ -428,7 +420,7 @@ void protocol::maintain_connection(const config::endpoint& address)
     maintain_connection(address.host(), address.port());
 }
 
-// Deprecated
+// Deprecated.
 void protocol::maintain_connection(const std::string& hostname, uint16_t port)
 {
     // MANUAL CONNECT WITH TIMEOUT

@@ -31,7 +31,6 @@
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/protocol.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -39,23 +38,49 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-seeder::seeder(protocol* proto, const config::endpoint::list& seeds,
-    protocol::completion_handler handle_complete)
-  : strand_(proto->strand_),
-    host_pool_(proto->host_pool_),
-    handshake_(proto->handshake_),
-    network_(proto->network_),
-    succeeded_(false),
-    visited_(0),
-    seeds_(seeds),
-    handle_complete_(handle_complete)
+// Based on bitcoinstats.com/network/dns-servers
+#ifdef ENABLE_TESTNET
+const config::endpoint::list seeder::defaults
 {
-    BITCOIN_ASSERT(proto != nullptr);
+    { "testnet-seed.alexykot.me", 18333 },
+    { "testnet-seed.bitcoin.petertodd.org", 18333 },
+    { "testnet-seed.bluematt.me", 18333 },
+    { "testnet-seed.bitcoin.schildbach.de", 18333 }
+};
+#else
+const config::endpoint::list seeder::defaults
+{
+    { "seed.bitnodes.io", 8333 },
+    { "seed.bitcoinstats.com", 8333 },
+    { "seed.bitcoin.sipa.be", 8333 },
+    { "dnsseed.bluematt.me", 8333 },
+    { "seed.bitcoin.jonasschnelli.ch", 8333 },
+    { "dnsseed.bitcoin.dashjr.org", 8333 }
+};
+#endif
+
+seeder::seeder(threadpool& pool, hosts& hosts, handshake& shake, network& net,
+    const config::endpoint::list& seeds)
+  : strand_(pool),
+    host_pool_(hosts),
+    handshake_(shake),
+    network_(net),
+    seeds_(seeds),
+    visited_(0),
+    succeeded_(false),
+    handle_complete_(nullptr)
+{
 }
 
-void seeder::start()
+// TODO: set error if no seeds are configured or no hosts can be loaded.
+void seeder::start(completion_handler handle_complete)
 {
-    BITCOIN_ASSERT(!succeeded_ && visited_ == 0);
+    BITCOIN_ASSERT(!succeeded_ && visited_ == 0 && 
+        handle_complete_ == nullptr);
+
+    // Don't call completion handler until ass seeds have been visited.
+    handle_complete_ = handle_complete;
+
     for (const auto& address: seeds_)
         contact(address);
 }
@@ -65,11 +90,10 @@ void seeder::contact(const config::endpoint& seed)
     log_info(LOG_PROTOCOL)
         << "Contacting seed [" << seed.to_string() << "]";
 
-    const auto self = shared_from_this();
-    const auto connect_handler = [self, &seed](const std::error_code& ec,
+    const auto connect_handler = [this, &seed](const std::error_code& ec,
         channel_ptr node)
     {
-        self->connect(ec, seed, node);
+        connect(ec, seed, node);
     };
 
     bc::network::connect(handshake_, network_, seed.host(), seed.port(),
@@ -102,11 +126,11 @@ void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
 
     node->send(get_address_type(),
         strand_.wrap(&seeder::handle_send,
-            shared_from_this(), _1));
+            this, _1));
 
     node->subscribe_address(
         strand_.wrap(&seeder::handle_store_all,
-            shared_from_this(), _1, _2, node));
+            this, _1, _2, node));
 }
 
 void seeder::handle_send(const std::error_code& ec)
@@ -120,8 +144,8 @@ void seeder::handle_send(const std::error_code& ec)
     }
 }
 
-void seeder::handle_store_all(const std::error_code& ec, const address_type& message,
-    channel_ptr node)
+void seeder::handle_store_all(const std::error_code& ec, 
+    const address_type& message, channel_ptr node)
 {
     if (ec)
     {
@@ -145,7 +169,7 @@ void seeder::handle_store_all(const std::error_code& ec, const address_type& mes
     for (const auto& address: message.addresses)
         host_pool_.store(address,
             strand_.wrap(&seeder::handle_store_one,
-                shared_from_this(), _1));
+                this, _1));
 
     if (!message.addresses.empty())
         succeeded_ = true;

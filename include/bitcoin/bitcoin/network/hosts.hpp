@@ -43,8 +43,6 @@ namespace network {
 class BC_API hosts
 {
 public:
-    static const config::endpoint::list defaults;
-
     typedef std::function<void (const std::error_code&)> load_handler;
     typedef std::function<void (const std::error_code&)> save_handler;
     typedef std::function<void (const std::error_code&)> store_handler;

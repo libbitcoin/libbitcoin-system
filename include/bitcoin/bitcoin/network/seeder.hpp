@@ -21,7 +21,6 @@
 #define LIBBITCOIN_SEEDS_HPP
 
 #include <cstddef>
-#include <memory>
 #include <system_error>
 #include <vector>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
@@ -30,24 +29,27 @@
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
-#include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 class BC_API seeder
-  : public std::enable_shared_from_this<seeder>
 {
 public:
-    seeder(protocol* proto, const config::endpoint::list& seeds,
-        protocol::completion_handler handle_complete);
+    typedef std::function<void(const std::error_code&)> completion_handler;
+
+    static const config::endpoint::list defaults;
+
+    seeder(threadpool& pool, hosts& hosts, handshake& shake, network& net,
+        const config::endpoint::list& seeds);
 
     /// This class is not copyable.
     seeder(const seeder&) = delete;
     void operator=(const seeder&) = delete;
 
-    void start();
+    void start(completion_handler handle_complete);
 
 private:
     void contact(const config::endpoint& seed);
@@ -60,15 +62,15 @@ private:
         const address_type& message, channel_ptr node);
     void handle_store_one(const std::error_code& ec);
 
-
-    async_strand& strand_;
+    async_strand strand_;
     hosts& host_pool_;
     handshake& handshake_;
     network& network_;
-    bool succeeded_;
-    size_t visited_;
     const config::endpoint::list& seeds_;
-    const protocol::completion_handler handle_complete_;
+
+    size_t visited_;
+    bool succeeded_;
+    completion_handler handle_complete_;
 };
 
 } // namespace network
