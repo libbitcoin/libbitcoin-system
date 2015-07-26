@@ -12,9 +12,9 @@
  * For interpretation of the versioning scheme see: http://semver.org
  */
 
-#define LIBBITCOIN_VERSION "2.9.0"
+#define LIBBITCOIN_VERSION "2.10.0"
 #define LIBBITCOIN_MAJOR_VERSION 2
-#define LIBBITCOIN_MINOR_VERSION 9
+#define LIBBITCOIN_MINOR_VERSION 10
 #define LIBBITCOIN_PATCH_VERSION 0
 
 #endif
