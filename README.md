@@ -12,7 +12,7 @@ All files in this repository fall under the license specified in [COPYING](COPYI
 
 **About Libbitcoin**
 
-The libbitcoin toolkit is a set of cross platform C++ libraries for building bitcoin applications. The toolkit consists of several libraries, most of which depend on the foundational [libbitcoin](https://github.com/libbitcoin/libbitcoin) library. Each library's repository can be cloned and built using common [automake](http://www.gnu.org/software/automake) instructions. There are no packages yet in distribution however each library includes an installation script (described below) which is regularly verified in the automated build.
+The libbitcoin toolkit is a set of cross platform C++ libraries for building bitcoin applications. The toolkit consists of several libraries, most of which depend on the foundational [libbitcoin](https://github.com/libbitcoin/libbitcoin) library. Each library's repository can be cloned and built using common [automake](http://www.gnu.org/software/automake) 1.14+ instructions. There are no packages yet in distribution however each library includes an installation script (described below) which is regularly verified in the automated build.
 
 ## Installation
 
@@ -51,7 +51,7 @@ $ sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
 $ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50
 $ sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-4.8 50
 ```
-Next install the [build system](http://wikipedia.org/wiki/GNU_build_system):
+Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14):
 ```sh
 $ sudo apt-get install build-essential autoconf automake libtool pkg-config
 ```
@@ -98,7 +98,7 @@ $ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/maste
 ```
 You may encounter a prompt to install the Xcode command line developer tools, in which case accept the prompt.
 
-Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) and [wget](http://www.gnu.org/software/wget):
+Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and [wget](http://www.gnu.org/software/wget):
 ```sh
 $ brew install autoconf automake libtool pkgconfig wget
 ```
@@ -121,7 +121,7 @@ Libbitcoin is now installed in `/usr/local/`.
 
 First install [MacPorts](https://www.macports.org/install.php).
 
-Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) and [wget](http://www.gnu.org/software/wget):
+Next install the [build system](http://wikipedia.org/wiki/GNU_build_system) (Automake minimum 1.14) and [wget](http://www.gnu.org/software/wget):
 ```sh
 $ sudo port install autoconf automake libtool pkgconfig wget
 ```

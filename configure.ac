@@ -7,11 +7,13 @@
 
 # Standard declarations.
 #==============================================================================
-# Declare the required version of autoconf.
+# Requires Automake 1.14 or newer.
+
+# Declare the required version of Autoconf.
 AC_PREREQ([2.65])
 
 # Process command-line arguments and perform initialization and verification.
-AC_INIT([libbitcoin], [2.9.0], [genjix@riseup.net])
+AC_INIT([libbitcoin], [2.10.0], [genjix@riseup.net])
 
 # Do compilation tests.
 AC_LANG(C++)
