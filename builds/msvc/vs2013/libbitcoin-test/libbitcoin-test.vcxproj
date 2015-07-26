@@ -69,6 +69,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\authority.cpp" />
     <ClCompile Include="..\..\..\..\test\base10.cpp" />
     <ClCompile Include="..\..\..\..\test\base16.cpp" />
     <ClCompile Include="..\..\..\..\test\base58.cpp" />
@@ -77,8 +78,10 @@
     <ClCompile Include="..\..\..\..\test\big_number.cpp" />
     <ClCompile Include="..\..\..\..\test\binary.cpp" />
     <ClCompile Include="..\..\..\..\test\binary_trie.cpp" />
+    <ClCompile Include="..\..\..\..\test\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\checksum.cpp" />
     <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\test\format.cpp" />
     <ClCompile Include="..\..\..\..\test\hash.cpp" />
     <ClCompile Include="..\..\..\..\test\hash_number.cpp" />

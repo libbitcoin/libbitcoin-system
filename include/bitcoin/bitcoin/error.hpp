@@ -110,7 +110,8 @@ namespace error {
 
     BC_API std::error_code make_error_code(error_code_t e);
     BC_API std::error_condition make_error_condition(error_condition_t e);
-    BC_API error_code_t boost_to_error_code(const boost::system::error_code& ec);
+    BC_API error_code_t boost_to_error_code(
+        const boost::system::error_code& ec);
 
 } // namespace error
 } // namespace libbitcoin

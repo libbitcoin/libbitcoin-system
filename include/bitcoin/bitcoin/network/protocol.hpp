@@ -31,19 +31,20 @@
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/seeder.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
-
-class seeder;
 
 class BC_API protocol
 {
@@ -56,13 +57,10 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    static const size_t default_max_outbound;
-    static const hosts::authority_list default_seeds;
-
-    protocol(threadpool& pool, hosts& peers, handshake& shake, network& net,
-        const hosts::authority_list& seeds = default_seeds,
-        uint16_t port=bc::protocol_port,
-        size_t max_outbound=default_max_outbound);
+    protocol(threadpool& pool, hosts& hosts, handshake& shake, network& net,
+        const config::endpoint::list& seeds=seeder::defaults,
+        uint16_t port=bc::protocol_port, size_t max_outbound=8,
+        size_t max_inbound=8);
     
     /// This class is not copyable.
     protocol(const protocol&) = delete;
@@ -82,17 +80,23 @@ public:
     void stop(completion_handler handle_complete);
 
     /**
-     * Fetch number of connections maintained by this service.
-     * @param[in]  handle_fetch  Completion handler for fetch operation.
+     * Determine if the connection is manual.
+     * @param[in]  node  The node of interest.
      */
-    void fetch_connection_count(
-        fetch_connection_count_handler handle_fetch);
+    bool is_manual(channel_ptr node);
 
     /**
-     * Create a manual connection to a specific node. If disconnected
-     * this service will keep attempting to reconnect until successful.
+     * Add a banned connection.
+     * @param[in]  peer  The peer to ban.
      */
-    void maintain_connection(const std::string& hostname, uint16_t port);
+    void ban_connection(const config::authority& peer);
+
+    /**
+     * Create a persistent connection to the specific node. If disconnected
+     * this service will keep attempting to reconnect until successful.
+     * @param[in]  address  The host address to maintain.
+     */
+    void maintain_connection(const config::endpoint& address);
 
     /**
      * Subscribe to new connections established to other nodes.
@@ -106,7 +110,7 @@ public:
 
     /**
      * Return the number of active connections.
-     * Not threadsafe. Intended only for diagnostics information.
+     * The summation is not thread safe. Intended for diagnostics only.
      */
     size_t total_connections() const;
 
@@ -129,33 +133,33 @@ public:
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
         // The intermediate variable 'lambda' is a workaround for a
-        // limitation of the VC++ CTP_Nov2013 generic lambda support.
+        // limitation of the MSVC++ CTP_Nov2013 generic lambda support.
         const auto lambda = &protocol::do_broadcast<Message>;
         strand_.queue(lambda, this, packet, handle_send);
     }
-    
+
     /// Deprecated, should be private since it's called from start.
     void bootstrap(completion_handler handle_complete);
-
-    /// Deprecated, should be private since it's called from start.
-    void run();
-
-    /// Deprecated, set on construct.
-    void set_max_outbound(size_t max_outbound);
-
-    /// Deprecated, construct hosts with path.
-    void set_hosts_filename(const std::string& hosts_path);
 
     /// Deprecated, set on construct or use accessors.
     void disable_listener();
 
-private:
-    struct connection_info
-    {
-        network_address_type address;
-        channel_ptr node;
-    };
+    /// Deprecated, unreasonable to queue this, use total_connections.
+    void fetch_connection_count(fetch_connection_count_handler handle_fetch);
 
+    /// Deprecated.
+    void maintain_connection(const std::string& hostname, uint16_t port);
+
+    /// Deprecated, should be private since it's called from start.
+    void run();
+
+    /// Deprecated, construct hosts with path.
+    void set_hosts_filename(const std::string& hosts_path);
+
+    /// Deprecated, set on construct.
+    void set_max_outbound(size_t max_outbound);
+
+private:
     enum class connect_state
     {
         finding_peer,
@@ -167,20 +171,18 @@ private:
     typedef size_t slot_index;
     typedef std::vector<channel_ptr> channel_ptr_list;
     typedef std::vector<connect_state> connect_state_list;
-    typedef std::vector<connection_info> connection_list;
     typedef subscriber<const std::error_code&, channel_ptr>
         channel_subscriber_type;
 
-    // start sequence
-    void handle_start(const std::error_code& ec,
+    void handle_hosts_load(const std::error_code& ec,
         completion_handler handle_complete);
-    void fetch_count(const std::error_code& ec,
+    void handle_hosts_count(const std::error_code& ec, size_t hosts_count,
         completion_handler handle_complete);
-    void start_seeder(const std::error_code& ec, size_t hosts_count,
+    void handle_handshake_start(const std::error_code& ec,
         completion_handler handle_complete);
-
-    // stop sequence
-    void handle_stop(const std::error_code& ec,
+    void handle_seeder_start(const std::error_code& ec,
+        completion_handler handle_complete);
+    void handle_hosts_save(const std::error_code& ec,
         completion_handler handle_complete);
 
     std::string state_to_string(connect_state state) const;
@@ -204,15 +206,15 @@ private:
     // subscribe call.
     void try_connect_once(slot_index slot);
     void attempt_connect(const std::error_code& ec,
-        const network_address_type& packet, slot_index slot);
+        const config::authority& peer, slot_index slot);
     void handle_connect(const std::error_code& ec, channel_ptr node,
-        const network_address_type& address, slot_index slot);
+        const config::authority& peer, slot_index slot);
 
-    // Periodically call this method to reset the watermark and reallow
+    // Periodically call this method to reset the sweep and reallow
     // connections. This prevents too many connection attempts from
     // exhausting resources by putting a limit on connection attempts
     // within a certain time interval.
-    void start_watermark_reset_timer();
+    void start_sweep_reset_timer();
 
     // Manual connections
     void handle_manual_connect(const std::error_code& ec, channel_ptr node,
@@ -224,6 +226,9 @@ private:
         acceptor_ptr accept);
 
     // Channel setup
+    bool is_banned(const config::authority& peer);
+    bool is_connected(const config::authority& peer);
+    void remove_connection(channel_ptr_list& connections, channel_ptr node);
     void setup_new_channel(channel_ptr node);
 
     // Remove channels from lists when disconnected.
@@ -235,10 +240,10 @@ private:
         channel_ptr node);
 
     void handle_address_message(const std::error_code& ec,
-        const address_type& addr, channel_ptr node);
+        const address_type& message, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
-    // fetch methods
+    /// Deprecated, unreasonable to queue this, use total_connections.
     void do_fetch_connection_count(
         fetch_connection_count_handler handle_fetch);
 
@@ -247,15 +252,16 @@ private:
     {
         const auto total_nodes = total_connections();
         const auto send_handler =
-            std::bind(handle_send, std::placeholders::_1, total_nodes);
+            std::bind(handle_send,
+                std::placeholders::_1, total_nodes);
 
-        for (const auto& connection: connections_)
-            connection.node->send(packet, send_handler);
+        for (const auto node: outbound_connections_)
+            node->send(packet, send_handler);
 
         for (const auto node: manual_connections_)
             node->send(packet, send_handler);
 
-        for (const auto node: accepted_channels_)
+        for (const auto node: inbound_connections_)
             node->send(packet, send_handler);
     }
     
@@ -263,32 +269,31 @@ private:
     hosts& host_pool_;
     handshake& handshake_;
     network& network_;
-
-    // There's a fixed number of slots that are always trying to reconnect.
-    size_t max_outbound_;
-    connection_list connections_;
-
-    // Simply a debugging tool to enforce correct state transition behaviour
-    // for maintaining connections.
-    connect_state_list connect_states_;
-
-    // Used to prevent too many connection attempts from exhausting resources.
-    // The watermark is refreshed every interval.
-    boost::asio::deadline_timer watermark_timer_;
-    size_t watermark_count_;
+    seeder seeder_;
 
     // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
+    config::authority::list banned_connections_;
 
     // Inbound connections from the p2p network.
-    uint16_t listen_port_;
-    channel_ptr_list accepted_channels_;
-    channel_subscriber_type::ptr channel_subscribe_;
+    uint16_t inbound_port_;
+    size_t max_inbound_;
+    channel_ptr_list inbound_connections_;
 
+    // There's a fixed number of slots that are always trying to reconnect.
+    size_t max_outbound_;
+    channel_ptr_list outbound_connections_;
+
+    // Used to enforce correct state transition behaviour for maintaining connections.
+    connect_state_list connect_states_;
+
+    // Used to prevent too many connection attempts from exhausting resources.
+    // The sweep is refreshed every interval.
+    boost::asio::deadline_timer sweep_timer_;
+    size_t sweep_count_;
+
+    channel_subscriber_type::ptr channel_subscribe_;
     boost::filesystem::path hosts_path_;
-    const hosts::authority_list& seeds_;
-    std::shared_ptr<seeder> seeder_;
-    friend class seeder;
 };
 
 } // namespace network

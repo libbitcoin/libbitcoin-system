@@ -20,13 +20,16 @@
 #ifndef LIBBITCOIN_NETWORK_HPP
 #define LIBBITCOIN_NETWORK_HPP
 
+#include <cstdint>
 #include <memory>
 #include <thread>
 #include <boost/asio.hpp>
+#include <boost/date_time.hpp>
 #include <boost/utility.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -34,6 +37,7 @@
 namespace libbitcoin {
 namespace network {
 
+// TODO: rename to p2p (avoid network namespace and library no class).
 class BC_API network
 {
 public:
@@ -41,16 +45,14 @@ public:
         void (const std::error_code&, channel_ptr)> connect_handler;
     typedef std::function<
         void (const std::error_code&, acceptor_ptr)> listen_handler;
-    typedef std::function<void (const std::error_code&)> unlisten_handler;
 
-    network(threadpool& pool);
+    network(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
     network(const network&) = delete;
     void operator=(const network&) = delete;
 
     void listen(uint16_t port, listen_handler handle_listen);
-    void unlisten(unlisten_handler handle_unlisten);
     void connect(const std::string& hostname, uint16_t port,
         connect_handler handle_connect);
 
@@ -63,6 +65,7 @@ private:
         connect_handler handle_connect, resolver_ptr, query_ptr);
 
     threadpool& pool_;
+    const timeout& timeouts_;
 };
 
 } // namespace network

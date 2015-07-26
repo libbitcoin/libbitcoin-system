@@ -26,6 +26,7 @@
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -33,8 +34,9 @@ namespace network {
 using std::placeholders::_1;
 using boost::asio::ip::tcp;
 
-acceptor::acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept)
-  : pool_(pool), tcp_accept_(tcp_accept)
+acceptor::acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept,
+    const timeout& timeouts)
+  : pool_(pool), tcp_accept_(tcp_accept), timeouts_(timeouts)
 {
 }
 
@@ -55,7 +57,8 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
         return;
     }
 
-    const auto proxy = std::make_shared<channel_proxy>(pool_, socket);
+    const auto proxy = std::make_shared<channel_proxy>(pool_, socket,
+        timeouts_);
     proxy->start();
     const auto channel_object = std::make_shared<channel>(proxy);
     handle_accept(error::success, channel_object);

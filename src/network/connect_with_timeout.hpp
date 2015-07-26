@@ -34,20 +34,22 @@ class connect_with_timeout
   : public std::enable_shared_from_this<connect_with_timeout>
 {
 public:
-    connect_with_timeout(threadpool& pool);
+    connect_with_timeout(threadpool& pool,
+        const timeout& timeouts=timeout::defaults);
 
     void start(tcp::resolver::iterator endpoint_iterator,
-        time_duration timeout, network::connect_handler handle_connect);
+        network::connect_handler connect_handler);
 
 private:
-    void call_connect_handler(const boost::system::error_code& ec,
-        tcp::resolver::iterator, network::connect_handler handle_connect);
+    void handle_connect(const boost::system::error_code& ec,
+        tcp::resolver::iterator, network::connect_handler connect_handler);
 
-    void close(const boost::system::error_code& ec);
+    void handle_timer(const boost::system::error_code& ec);
 
     socket_ptr socket_;
     channel::channel_proxy_ptr proxy_;
     boost::asio::deadline_timer timer_;
+    boost::posix_time::time_duration connection_timeout_;
 };
 
 } // namespace network

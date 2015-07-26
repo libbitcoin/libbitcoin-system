@@ -39,49 +39,51 @@ using std::placeholders::_2;
 using boost::asio::ip::tcp;
 using boost::posix_time::time_duration;
 
-connect_with_timeout::connect_with_timeout(threadpool& pool)
+connect_with_timeout::connect_with_timeout(threadpool& pool,
+    const timeout& timeouts)
   : timer_(pool.service()),
+    connection_timeout_(timeouts.connection),
     socket_(std::make_shared<tcp::socket>(pool.service())),
-    proxy_(std::make_shared<channel_proxy>(pool, socket_))
+    proxy_(std::make_shared<channel_proxy>(pool, socket_, timeouts))
 {
 }
 
 void connect_with_timeout::start(tcp::resolver::iterator endpoint_iterator,
-    time_duration timeout, network::connect_handler handle_connect)
+    network::connect_handler connect_handler)
 {
-    timer_.expires_from_now(timeout);
-    timer_.async_wait(std::bind(
-        &connect_with_timeout::close,
+    timer_.expires_from_now(connection_timeout_);
+    timer_.async_wait(
+        std::bind(&connect_with_timeout::handle_timer,
             shared_from_this(), _1));
 
     boost::asio::async_connect(*socket_, endpoint_iterator,
-        std::bind(&connect_with_timeout::call_connect_handler,
-            shared_from_this(), _1, _2, handle_connect));
+        std::bind(&connect_with_timeout::handle_connect,
+            shared_from_this(), _1, _2, connect_handler));
 }
 
-void connect_with_timeout::call_connect_handler(
+void connect_with_timeout::handle_connect(
     const boost::system::error_code& ec, tcp::resolver::iterator, 
-    network::connect_handler handle_connect)
+    network::connect_handler connect_handler)
 {
+    timer_.cancel();
+
     if (ec)
     {
-        handle_connect(error::network_unreachable, nullptr);
+        connect_handler(error::boost_to_error_code(ec), nullptr);
         return;
     }
 
-    timer_.cancel();
     proxy_->start();
     const auto channel_object = std::make_shared<channel>(proxy_);
-    handle_connect(error::success, channel_object);
+    connect_handler(error::success, channel_object);
 }
 
-void connect_with_timeout::close(const boost::system::error_code& ec)
+void connect_with_timeout::handle_timer(const boost::system::error_code& ec)
 {
-    // ec should be boost::asio::error::operation_aborted or nothing.
-    BITCOIN_ASSERT(!ec || ec == boost::asio::error::operation_aborted);
-
+    // If there is no error the timer fired because of expiration.
+    // Otherwise we canceled the timer explicitly due to another error.
     if (!ec)
-        proxy_->stop();
+        proxy_->stop(error::channel_timeout);
 }
 
 } // namespace network

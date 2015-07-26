@@ -26,7 +26,11 @@
 #include <bitcoin/bitcoin/stealth.hpp>
 #include <bitcoin/bitcoin/transaction.hpp>
 #include <bitcoin/bitcoin/version.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/config/btc256.hpp>
+#include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/config/directory.hpp>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
 #include <bitcoin/bitcoin/formats/base10.hpp>
@@ -42,7 +46,6 @@
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
@@ -52,7 +55,9 @@
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
+#include <bitcoin/bitcoin/network/settings.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/trie/binary_trie.hpp>
 #include <bitcoin/bitcoin/trie/trie_iterator.hpp>
 #include <bitcoin/bitcoin/trie/trie_reverse_iterator.hpp>
@@ -81,8 +86,7 @@
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
-#include <bitcoin/bitcoin/utility/time.hpp>
-#include <bitcoin/bitcoin/utility/timed_section.hpp>
+#include <bitcoin/bitcoin/utility/timer.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>

@@ -40,8 +40,6 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(thread)
-
 BOOST_AUTO_TEST_SUITE(thread_tests)
 
 static int get_thread_priority_test()
@@ -114,7 +112,5 @@ BOOST_AUTO_TEST_CASE(thread__set_thread_priority__invalid__throws_invalid_argume
 {
     BOOST_REQUIRE_THROW(set_thread_priority(static_cast<thread_priority>(42)), std::invalid_argument);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

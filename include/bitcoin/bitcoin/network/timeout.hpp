@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,29 +17,40 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TIMED_SECTION_HPP
-#define LIBBITCOIN_TIMED_SECTION_HPP
+#ifndef LIBBITCOIN_TIMEOUT_HPP
+#define LIBBITCOIN_TIMEOUT_HPP
 
-#include <ctime>
-#include <string>
+#include <cstdint>
+#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/time.hpp>
 
 namespace libbitcoin {
+namespace network {
 
-class timed_section
+class BC_API timeout
 {
 public:
-    BC_API timed_section(
-        const std::string& context, const std::string& section);
-    BC_API ~timed_section();
-    BC_API double elapsed() const;
+    static const timeout defaults;
 
-private:
-    const std::string context_, section_;
-    timespec start_;
+    timeout();
+    timeout(
+        uint32_t channel_expiration_minutes,
+        uint32_t channel_timeout_minutes,
+        uint32_t channel_heartbeat_minutes,
+        uint32_t channel_startup_minutes,
+        uint32_t channel_revival_minutes,
+        uint32_t connect_timeout_seconds);
+
+    boost::posix_time::time_duration expiration;
+    boost::posix_time::time_duration inactivity;
+    boost::posix_time::time_duration heartbeat;
+    boost::posix_time::time_duration startup;
+    boost::posix_time::time_duration revival;
+    boost::posix_time::time_duration connection;
 };
 
+} // namespace network
 } // namespace libbitcoin
 
 #endif
+

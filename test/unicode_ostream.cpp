@@ -25,8 +25,6 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(unicode)
-
 BOOST_AUTO_TEST_SUITE(unicode_ostream_tests)
 
 // Use of L is not recommended as it will only work for ascii.
@@ -116,7 +114,5 @@ BOOST_AUTO_TEST_CASE(unicode_ostream__overflow__test)
     BOOST_REQUIRE_EQUAL(narrow_stream.str(), utf8_1800_bytes);
 #endif
 }
-
-BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

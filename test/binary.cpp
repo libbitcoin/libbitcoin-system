@@ -42,7 +42,7 @@ static void require_equal(binary_type& expected, binary_type& instance)
     BOOST_REQUIRE(instance == expected);
 }
 
-BOOST_AUTO_TEST_SUITE(binary_type_tests)
+BOOST_AUTO_TEST_SUITE(binary_tests)
 
 //
 // shift_left tests

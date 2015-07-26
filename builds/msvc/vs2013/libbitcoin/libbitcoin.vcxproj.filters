@@ -218,9 +218,6 @@
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -261,9 +258,6 @@
       <Filter>src\external</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\string.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\time.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\directory.cpp">
@@ -314,14 +308,26 @@
     <ClCompile Include="..\..\..\..\src\utility\async_strand.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\random.cpp">
+      <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\timeout.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\seeder.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\authority.cpp">
-      <Filter>src\network</Filter>
+    <ClCompile Include="..\..\..\..\src\config\authority.cpp">
+      <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\random.cpp">
-      <Filter>src\utility</Filter>
+    <ClCompile Include="..\..\..\..\src\config\btc256.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\endpoint.cpp">
+      <Filter>src\config</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -442,9 +448,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timed_section.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\address.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
@@ -514,9 +517,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\collection.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\time.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
@@ -580,14 +580,32 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_strand.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\timeout.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\seeder.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\authority.hpp">
-      <Filter>include\bitcoin\network</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\authority.hpp">
+      <Filter>include\bitcoin\config</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp">
-      <Filter>include\bitcoin\utility</Filter>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\btc256.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\checkpoint.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp">
+      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -32,7 +32,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(scriptnum_tests)
+BOOST_AUTO_TEST_SUITE(script_number_tests)
 
 // Helpers
 // ----------------------------------------------------------------------------

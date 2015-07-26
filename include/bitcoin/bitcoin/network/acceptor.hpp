@@ -26,6 +26,7 @@
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -45,13 +46,14 @@ public:
     typedef std::function<void (const std::error_code&, channel_ptr)>
         accept_handler;
 
-     acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept);
+    acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept,
+        const timeout& timeouts=timeout::defaults);
 
-     /// This class is not copyable.
-     acceptor(const acceptor&) = delete;
-     void operator=(const acceptor&) = delete;
+    /// This class is not copyable.
+    acceptor(const acceptor&) = delete;
+    void operator=(const acceptor&) = delete;
 
-     void accept(accept_handler handle_accept);
+    void accept(accept_handler handle_accept);
 
 private:
     void call_handle_accept(const boost::system::error_code& ec,
@@ -59,6 +61,7 @@ private:
 
     threadpool& pool_;
     tcp_acceptor_ptr tcp_accept_;
+    const timeout& timeouts_;
 };
 
 } // namespace network

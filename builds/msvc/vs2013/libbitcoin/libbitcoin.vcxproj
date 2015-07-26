@@ -72,7 +72,11 @@
       <ExcludedFromBuild Condition="$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\block.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\btc256.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
@@ -98,7 +102,6 @@
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\src\network\acceptor.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel_proxy.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel_stream_loader.cpp" />
@@ -108,6 +111,7 @@
     <ClCompile Include="..\..\..\..\src\network\connect_with_timeout.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp" />
     <ClCompile Include="..\..\..\..\src\network\seeder.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\timeout.cpp" />
     <ClCompile Include="..\..\..\..\src\satoshi_serialize.cpp" />
     <ClCompile Include="..\..\..\..\src\script.cpp" />
     <ClCompile Include="..\..\..\..\src\stealth.cpp" />
@@ -126,8 +130,6 @@
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\time.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\timed_section.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\address.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\key_formats.cpp" />
@@ -142,7 +144,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\block.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\authority.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\btc256.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\checkpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\constants.hpp" />
@@ -161,7 +167,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\secp256k1_initializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\authority.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_loader_module.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_proxy.hpp" />
@@ -171,7 +176,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\seeder.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\shared_const_buffer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\timeout.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\primitives.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\satoshi_serialize.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\script.hpp" />
@@ -205,8 +212,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\subscriber.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\thread.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\time.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timed_section.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\timer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_keys.hpp" />

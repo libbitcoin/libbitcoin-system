@@ -21,50 +21,56 @@
 #define LIBBITCOIN_SEEDS_HPP
 
 #include <cstddef>
-#include <memory>
 #include <system_error>
+#include <vector>
+#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/authority.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
-#include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 class BC_API seeder
-  : public std::enable_shared_from_this<seeder>
 {
 public:
-    seeder(protocol* proto, const hosts::authority_list& seeds,
-        protocol::completion_handler handle_complete);
+    typedef std::function<void(const std::error_code&)> completion_handler;
+
+    static const config::endpoint::list defaults;
+
+    seeder(threadpool& pool, hosts& hosts, handshake& shake, network& net,
+        const config::endpoint::list& seeds);
 
     /// This class is not copyable.
     seeder(const seeder&) = delete;
     void operator=(const seeder&) = delete;
 
-    void start();
+    void start(completion_handler handle_complete);
 
 private:
-    void contact(const authority& seed_address);
-    void handle_request(const std::error_code& ec);
-    void handle_store(const std::error_code& ec);
-    void request(const std::error_code& ec, channel_ptr seed_node);
-    void store(const std::error_code& ec, const address_type& packet,
-        channel_ptr seed_node);
-    void visited(const std::error_code& ec);
+    void contact(const config::endpoint& seed);
+    void connect(const std::error_code& ec, const config::endpoint& seed,
+        channel_ptr node);
+    void visit();
 
-    async_strand& strand_;
+    void handle_send(const std::error_code& ec);
+    void handle_store_all(const std::error_code& ec,
+        const address_type& message, channel_ptr node);
+    void handle_store_one(const std::error_code& ec);
+
+    async_strand strand_;
     hosts& host_pool_;
     handshake& handshake_;
     network& network_;
-    bool succeeded_;
+    const config::endpoint::list& seeds_;
+
     size_t visited_;
-    const hosts::authority_list& seeds_;
-    const protocol::completion_handler handle_complete_;
+    bool success_;
+    completion_handler handle_complete_;
 };
 
 } // namespace network
