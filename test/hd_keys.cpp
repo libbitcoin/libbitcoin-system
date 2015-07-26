@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2011-2013 libwallet developers (see AUTHORS)
+/**
+ * Copyright (c) 2011-2015 libwallet developers (see AUTHORS)
  *
  * This file is part of libwallet.
  *

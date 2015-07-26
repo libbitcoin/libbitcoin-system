@@ -1,5 +1,5 @@
 /* OpenBSD: sha1.c, v 1.23 2014/01/08 */
-/*
+/**
 * SHA-1 in C
 * By Steve Reid <steve@edmweb.com>
 * 100% Public Domain
