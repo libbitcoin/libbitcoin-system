@@ -38,7 +38,7 @@ using namespace boost::asio;
 using namespace boost::program_options;
 
 endpoint::endpoint()
-  : port_(0)
+  : endpoint("localhost")
 {
 }
 
