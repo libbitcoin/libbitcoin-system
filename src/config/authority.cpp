@@ -129,8 +129,26 @@ authority::authority(const network_address_type& net)
 {
 }
 
+static ip::address_v6 to_boost_address(const ip_address_type& in)
+{
+    ip::address_v6::bytes_type bytes;
+    BITCOIN_ASSERT(bytes.size() == in.size());
+    std::copy(in.begin(), in.end(), bytes.begin());
+    const ip::address_v6 out(bytes);
+    return out;
+}
+
+static ip_address_type to_bc_address(const ip::address_v6& in)
+{
+    ip_address_type out;
+    const auto bytes = in.to_bytes();
+    BITCOIN_ASSERT(bytes.size() == out.size());
+    std::copy(bytes.begin(), bytes.end(), out.begin());
+    return out;
+}
+
 authority::authority(const ip_address_type& ip, uint16_t port)
-  : ip_(ip::address_v6(ip)), port_(port)
+  : ip_(to_boost_address(ip)), port_(port)
 {
 }
 
@@ -152,7 +170,7 @@ authority::authority(const ip::tcp::endpoint& endpoint)
 
 ip_address_type authority::ip() const
 {
-    return ip_.to_bytes();
+    return to_bc_address(ip_);
 }
 
 uint16_t authority::port() const
