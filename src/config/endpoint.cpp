@@ -62,8 +62,8 @@ endpoint::endpoint(const std::string& host, uint16_t port)
 {
 }
 
-endpoint::endpoint(const ip::tcp::endpoint& endpoint)
-  : endpoint(endpoint.address(), port_)
+endpoint::endpoint(const ip::tcp::endpoint& host)
+  : endpoint(host.address(), host.port())
 {
 }
 

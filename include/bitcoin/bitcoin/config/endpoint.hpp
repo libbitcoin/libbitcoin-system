@@ -80,7 +80,7 @@ public:
      * Initialization constructor.
      * @param[in]  endpoint  The endpoint addresss to initialize with.
      */
-    endpoint(const boost::asio::ip::tcp::endpoint& endpoint);
+    endpoint(const boost::asio::ip::tcp::endpoint& host);
     
     /**
      * Initialization constructor.
