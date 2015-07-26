@@ -1,5 +1,5 @@
 /* libsodium: crypto_hash_sha512.h, v0.4.5 2014/04/16 */
-/*
+/**
  * Copyright 2005,2007,2009 Colin Percival. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

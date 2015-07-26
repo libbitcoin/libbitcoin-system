@@ -1,5 +1,5 @@
 /* OpenBSD: rmd160.h, v1.5 2009/07/05 */
-/*
+/**
  * Copyright (c) 2001 Markus Friedl. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

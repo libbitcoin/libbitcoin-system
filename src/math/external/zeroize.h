@@ -1,5 +1,5 @@
 /* libsodium: utils.c, v0.4.5 2014/04/16 */
-/*
+/**
  * Copyright (c) 2013-2014
  * Frank Denis <j at pureftpd dot org>
  *

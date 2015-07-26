@@ -34,32 +34,57 @@ BOOST_AUTO_TEST_SUITE(endpoint__construct)
 
 BOOST_AUTO_TEST_CASE(endpoint__construct__empty__throws_invalid_option)
 {
-    // TODO: elimiante default constructor to prevent invalid instance.
     BOOST_REQUIRE_THROW(endpoint url(""), invalid_option_value);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-
-// ------------------------------------------------------------------------- //
-
-BOOST_AUTO_TEST_SUITE(endpoint__host)
-
-BOOST_AUTO_TEST_CASE(endpoint__host__default__empty)
+BOOST_AUTO_TEST_CASE(endpoint__construct__no_host__throws_invalid_option_value)
 {
-    endpoint url;
-    BOOST_REQUIRE_EQUAL(url.host(), "");
+    BOOST_REQUIRE_THROW(endpoint host("tcp://"), invalid_option_value);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-
-// ------------------------------------------------------------------------- //
-
-BOOST_AUTO_TEST_SUITE(endpoint__port)
-
-BOOST_AUTO_TEST_CASE(endpoint__port__default__zero)
+BOOST_AUTO_TEST_CASE(endpoint__construct__port_only__throws_invalid_option_value)
 {
-    endpoint url;
-    BOOST_REQUIRE_EQUAL(url.port(), 0u);
+    BOOST_REQUIRE_THROW(endpoint host(":42"), invalid_option_value);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__default__localhost)
+{
+    endpoint host;
+    BOOST_REQUIRE_EQUAL(host.scheme(), "");
+    BOOST_REQUIRE_EQUAL(host.host(), "localhost");
+    BOOST_REQUIRE_EQUAL(host.port(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__host__expected_values)
+{
+    endpoint host("foo");
+    BOOST_REQUIRE_EQUAL(host.scheme(), "");
+    BOOST_REQUIRE_EQUAL(host.host(), "foo");
+    BOOST_REQUIRE_EQUAL(host.port(), 0u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__host_port__expected_values)
+{
+    endpoint endpoint("foo.bar:42");
+    BOOST_REQUIRE_EQUAL(endpoint.scheme(), "");
+    BOOST_REQUIRE_EQUAL(endpoint.host(), "foo.bar");
+    BOOST_REQUIRE_EQUAL(endpoint.port(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__scheme_host_port__expected_values)
+{
+    endpoint host("tcp://foo.bar:42");
+    BOOST_REQUIRE_EQUAL(host.scheme(), "tcp");
+    BOOST_REQUIRE_EQUAL(host.host(), "foo.bar");
+    BOOST_REQUIRE_EQUAL(host.port(), 42u);
+}
+
+BOOST_AUTO_TEST_CASE(endpoint__construct__scheme_host__expected_values)
+{
+    endpoint host("tcp://foo.bar");
+    BOOST_REQUIRE_EQUAL(host.scheme(), "tcp");
+    BOOST_REQUIRE_EQUAL(host.host(), "foo.bar");
+    BOOST_REQUIRE_EQUAL(host.port(), 0u);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
