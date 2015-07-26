@@ -65,8 +65,7 @@ void connect_with_timeout::handle_connect(
     const boost::system::error_code& ec, tcp::resolver::iterator, 
     network::connect_handler connect_handler)
 {
-    using namespace boost::system::errc;
-    timer_.cancel(make_error_code(operation_canceled));
+    timer_.cancel();
 
     if (ec)
     {
