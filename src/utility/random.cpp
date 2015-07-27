@@ -21,14 +21,18 @@
 
 #include <cstdint>
 #include <random>
+#include <boost/date_time.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
+using namespace boost::posix_time;
+
 // DO NOT USE srand() and rand() on MSVC as srand must be called per thread.
 // As a result it is difficult to use safely.
 
-// Not testable due to lack of random engine injection.
+// Not fully testable due to lack of random engine injection.
 // This may be truly random depending on the underlying device.
 uint64_t pseudo_random()
 {
@@ -37,7 +41,7 @@ uint64_t pseudo_random()
     return distribution(device);
 }
 
-// Not testable due to lack of random engine injection.
+// Not fully testable due to lack of random engine injection.
 // This may be truly random depending on the underlying device.
 void pseudo_random_fill(data_chunk& chunk)
 {
@@ -50,5 +54,23 @@ void pseudo_random_fill(data_chunk& chunk)
         byte = distribution(device) % std::numeric_limits<uint8_t>::max();
     }
 }
+
+// Not fully testable due to lack of random engine injection.
+// Randomly select a time duration in the range [expiration/ratio, expiration].
+time_duration pseudo_randomize(const time_duration& expiration, uint8_t ratio)
+{
+    if (ratio == 0)
+        return expiration;
+
+    const auto max_expire = expiration.total_seconds();
+    if (max_expire == 0)
+        return expiration;
+
+    const auto offset = max_expire / ratio;
+    const auto random_offset = static_cast<int>(bc::pseudo_random() % offset);
+    const auto expire = max_expire - random_offset;
+    return seconds(expire);
+}
+
 
 } // namespace libbitcoin
