@@ -98,7 +98,8 @@ channel_proxy::~channel_proxy()
 void channel_proxy::start()
 {
     read_header();
-    set_expiration(timeouts_.expiration);
+    const auto expiration = pseudo_randomize(timeouts_.expiration);
+    set_expiration(expiration);
     set_heartbeat(timeouts_.heartbeat);
     set_revival(timeouts_.revival);
     set_timeout(timeouts_.startup);
