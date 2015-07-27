@@ -93,6 +93,7 @@
     <ClCompile Include="..\..\..\..\test\mnemonic.cpp" />
     <ClCompile Include="..\..\..\..\test\parameter.cpp" />
     <ClCompile Include="..\..\..\..\test\printer.cpp" />
+    <ClCompile Include="..\..\..\..\test\random.cpp" />
     <ClCompile Include="..\..\..\..\test\satoshi_words.cpp" />
     <ClCompile Include="..\..\..\..\test\script.cpp" />
     <ClCompile Include="..\..\..\..\test\script_number.cpp" />

@@ -164,6 +164,7 @@ test_libbitcoin_test_SOURCES = \
     test/mnemonic.hpp \
     test/parameter.cpp \
     test/printer.cpp \
+    test/random.cpp \
     test/satoshi_words.cpp \
     test/script.cpp \
     test/script.hpp \
