@@ -39,6 +39,8 @@ class BC_API checkpoint
 public:
     /**
      * A list of checkpoints.
+     * This must provide operator<< for ostream in order to be used as a 
+     * boost::program_options default_value.
      */
     typedef std::vector<checkpoint> list;
     

@@ -21,6 +21,7 @@
 #define LIBBITCOIN_COLLECTION_HPP
 
 #include <iterator>
+#include <iostream>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 
@@ -79,6 +80,20 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
     const Type& element, Predicate predicate);
 
 } // namespace libbitcoin
+
+namespace std {
+
+/**
+ * Make vectors of serializable elements serializable to std::ostream.
+ * @param      <Type>  The type of list member elements.
+ * @param[in]  output  The output stream to serialize to.
+ * @param[in]  list    The list to serialize.
+ * @return             The output stream.
+ */
+template <class Type>
+std::ostream& operator<<(std::ostream& output, const std::vector<Type>& list);
+
+} // namespace std
 
 #include <bitcoin/bitcoin/impl/utility/collection.ipp>
 

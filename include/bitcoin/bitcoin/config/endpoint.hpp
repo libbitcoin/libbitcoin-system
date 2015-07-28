@@ -41,6 +41,8 @@ class BC_API endpoint
 public:
     /**
      * A list of endpoints.
+     * This must provide operator<< for ostream in order to be used as a 
+     * boost::program_options default_value.
      */
     typedef std::vector<endpoint> list;
     

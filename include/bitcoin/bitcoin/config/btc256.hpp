@@ -35,6 +35,8 @@ class BC_API btc256
 public:
     /**
      * A list of bitcoin 256 bit hashes.
+     * This must provide operator<< for ostream in order to be used as a 
+     * boost::program_options default_value.
      */
     typedef std::vector<btc256> list;
 

@@ -20,7 +20,9 @@
 #ifndef LIBBITCOIN_COLLECTION_IPP
 #define LIBBITCOIN_COLLECTION_IPP
 
+#include <cstddef>
 #include <iterator>
+#include <iostream>
 #include <vector>
 
 /* NOTE: don't declare 'using namespace foo' in headers. */
@@ -72,5 +74,24 @@ typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
 }
 
 } // namespace libbitcoin
+
+namespace std {
+
+template <class Type>
+std::ostream& operator<<(std::ostream& output, const std::vector<Type>& list)
+{
+    size_t current = 0;
+    const auto end = list.size();
+    for (const auto& element: list)
+    {
+        output << element;
+        if (++current < end)
+            output << std::endl;
+    }
+
+    return output;
+}
+
+} // namespace std
 
 #endif
