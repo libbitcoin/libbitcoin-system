@@ -89,7 +89,7 @@ static ip::address_v6 to_ipv6(const ip::address& ip_address)
 static std::string to_ipv4_hostname(const ip::address& ip_address)
 {
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    static const regex regular("::ffff:([0-9\\.]+)");
+    static const regex regular("^::ffff:([0-9\\.]+)$");
 
     const auto address = ip_address.to_string();
     sregex_iterator it(address.begin(), address.end(), regular), end;
