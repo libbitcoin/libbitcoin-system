@@ -40,6 +40,8 @@ class BC_API authority
 public:
     /**
      * A list of authorities.
+     * This must provide operator<< for ostream in order to be used as a 
+     * boost::program_options default_value.
      */
     typedef std::vector<authority> list;
 
