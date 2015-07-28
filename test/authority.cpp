@@ -36,6 +36,8 @@ BOOST_AUTO_TEST_SUITE(authority_tests)
 #define BC_AUTHORITY_IPV6_COMPRESSED_ADDRESS "2001:db8::2"
 #define BC_AUTHORITY_IPV6_COMPATIBLE_ADDRESS "::0102:f001"
 #define BC_AUTHORITY_IPV6_ALTERNATIVE_COMPATIBLE_ADDRESS "::1.2.240.1"
+#define BC_AUTHORITY_IPV4_BOGUS_ADDRESS "0.0.0.57:256"
+#define BC_AUTHORITY_IPV6_BOGUS_IPV4_ADDRESS "[::ffff:0:39]:256"
 
 // tools.ietf.org/html/rfc4291#section-2.5.2
 BC_CONSTEXPR ip_address_type unspecified_ip_address =
@@ -353,6 +355,12 @@ BOOST_AUTO_TEST_CASE(authority__to_string__unspecified__unspecified)
     const auto line = "[" BC_AUTHORITY_IPV6_UNSPECIFIED_ADDRESS "]";
     const authority host(line);
     BOOST_REQUIRE_EQUAL(host.to_string(), line);
+}
+
+BOOST_AUTO_TEST_CASE(authority__to_string__bogus_ipv4__ipv6_compatible)
+{
+    authority host(BC_AUTHORITY_IPV4_BOGUS_ADDRESS);
+    BOOST_REQUIRE_EQUAL(host.to_string(), BC_AUTHORITY_IPV6_BOGUS_IPV4_ADDRESS);
 }
 
 BOOST_AUTO_TEST_CASE(authority__to_string__ipv4__expected)
