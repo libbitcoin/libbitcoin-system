@@ -357,11 +357,17 @@ BOOST_AUTO_TEST_CASE(authority__to_string__unspecified__unspecified)
     BOOST_REQUIRE_EQUAL(host.to_string(), line);
 }
 
-BOOST_AUTO_TEST_CASE(authority__to_string__bogus_ipv4__ipv6_compatible)
-{
-    authority host(BC_AUTHORITY_IPV4_BOGUS_ADDRESS);
-    BOOST_REQUIRE_EQUAL(host.to_string(), BC_AUTHORITY_IPV6_BOGUS_IPV4_ADDRESS);
-}
+// These results vary by Boost version, so these tests are disabled.
+////BOOST_AUTO_TEST_CASE(authority__to_string__bogus_ipv4__ipv4)
+////{
+////    authority host(BC_AUTHORITY_IPV4_BOGUS_ADDRESS);
+////    BOOST_REQUIRE_EQUAL(host.to_string(), BC_AUTHORITY_IPV4_BOGUS_ADDRESS);
+////}
+////BOOST_AUTO_TEST_CASE(authority__to_string__bogus_ipv4__ipv6_compatible)
+////{
+////    authority host(BC_AUTHORITY_IPV4_BOGUS_ADDRESS);
+////    BOOST_REQUIRE_EQUAL(host.to_string(), BC_AUTHORITY_IPV6_BOGUS_IPV4_ADDRESS);
+////}
 
 BOOST_AUTO_TEST_CASE(authority__to_string__ipv4__expected)
 {
