@@ -47,14 +47,6 @@ using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-
-// TODO:
-// Timing out instantly, check config propagation.
-// Update to not fail on individual seed node failures but
-// on lack of loading any seeds (or empty hosts when done).
-// Ensure that independent strand for seeder isn't causing any problems.
-
-
 // These are not configurable.
 static const size_t sweep_connection_limit = 10;
 static const auto sweep_reset_interval = seconds(1);
