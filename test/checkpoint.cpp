@@ -38,44 +38,102 @@ BOOST_AUTO_TEST_SUITE(checkpoint_tests)
 
 // ------------------------------------------------------------------------- //
 
-BOOST_AUTO_TEST_SUITE(checkpoint__hash)
+BOOST_AUTO_TEST_SUITE(checkpoint__construct)
 
-BOOST_AUTO_TEST_CASE(checkpoint__hash__default__null_hash)
+BOOST_AUTO_TEST_CASE(checkpoint__construct__default__null_hash)
 {
     const checkpoint check;
     BOOST_REQUIRE(check.hash() == null_hash);
-}
-
-BOOST_AUTO_TEST_CASE(checkpoint__hash__genesis__expected)
-{
-    const checkpoint genesis(CHECKPOINT_A);
-    BOOST_REQUIRE_EQUAL(genesis.height(), 0u);
-}
-
-
-BOOST_AUTO_TEST_SUITE_END()
-
-// ------------------------------------------------------------------------- //
-
-BOOST_AUTO_TEST_SUITE(checkpoint__height)
-
-BOOST_AUTO_TEST_CASE(checkpoint__height__default__zero)
-{
-    const checkpoint check;
     BOOST_REQUIRE_EQUAL(check.height(), 0u);
 }
 
-BOOST_AUTO_TEST_CASE(checkpoint__height__genesis__zero)
+BOOST_AUTO_TEST_CASE(checkpoint__construct__copy__expected)
 {
-    const checkpoint genesis(CHECKPOINT_A);
-    BOOST_REQUIRE_EQUAL(genesis.height(), 0u);
+    const checkpoint check1(CHECKPOINT_C);
+    const checkpoint check2(check1);
+    BOOST_REQUIRE_EQUAL(check2.height(), check1.height());
+    BOOST_REQUIRE_EQUAL(encode_hash(check2.hash()), encode_hash(check1.hash()));
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__construct__string__expected)
+{
+    const checkpoint genesis(CHECKPOINT_B);
+    BOOST_REQUIRE_EQUAL(genesis.height(), 11111u);
+    BOOST_REQUIRE_EQUAL(genesis.to_string(), CHECKPOINT_B);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__construct__digest__expected)
+{
+    const size_t expected_height = 42;
+    const auto expected_hash = CHECKPOINT_HASH_A;
+    hash_digest digest;
+    bc::decode_hash(digest, expected_hash);
+    const checkpoint genesis(digest, expected_height);
+    BOOST_REQUIRE_EQUAL(genesis.height(), expected_height);
+    BOOST_REQUIRE_EQUAL(encode_hash(genesis.hash()), expected_hash);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__construct__max_height__expected)
+{
+#if defined(UINTPTR_MAX) && defined(UINT64_MAX) && defined (UINT32_MAX)
+#if UINTPTR_MAX == UINT64_MAX
+    // 2^64-1
+    const auto check = checkpoint(CHECKPOINT_HASH_A ":18446744073709551615");
+    BOOST_REQUIRE_EQUAL(check.height(), 18446744073709551615u);
+#elif UINTPTR_MAX == UINT32_MAX
+    // 2^32-1
+    const auto check = checkpoint(CHECKPOINT_HASH_A ":4294967295");
+    BOOST_REQUIRE_EQUAL(check.height(), 4294967295u);
+#endif
+#endif
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__construct__invalid_height_value__throws_invalid_option_value)
+{
+    // 2^64
+    BOOST_REQUIRE_THROW(checkpoint(CHECKPOINT_HASH_A ":18446744073709551616"), invalid_option_value);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__construct__invalid_height_characters__throws_invalid_option_value)
+{
+    // 21 characters
+    BOOST_REQUIRE_THROW(checkpoint(CHECKPOINT_HASH_A ":1000000000100000000001"), invalid_option_value);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__construct__bogus_height_characters__throws_invalid_option_value)
+{
+    BOOST_REQUIRE_THROW(checkpoint(CHECKPOINT_HASH_A ":xxx"), invalid_option_value);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__construct__bogus_line_hash__throws_invalid_option_value)
+{
+    BOOST_REQUIRE_THROW(checkpoint("bogus:42"), invalid_option_value);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__construct__bogus_hash__throws_invalid_option_value)
+{
+    BOOST_REQUIRE_THROW(checkpoint("bogus", 42), invalid_option_value);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 // ------------------------------------------------------------------------- //
 
-BOOST_AUTO_TEST_SUITE(checkpoint_list)
+BOOST_AUTO_TEST_SUITE(checkpoint__istream)
+
+BOOST_AUTO_TEST_CASE(checkpoint__istream__empty__expected)
+{
+    checkpoint deserialized;
+    std::stringstream serialized(CHECKPOINT_A);
+    serialized >> deserialized;
+    BOOST_REQUIRE_EQUAL(deserialized.to_string(), CHECKPOINT_A);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+// ------------------------------------------------------------------------- //
+
+BOOST_AUTO_TEST_SUITE(checkpoint__ostream)
 
 static const checkpoint::list test_checkpoints_list(
 {
@@ -84,21 +142,21 @@ static const checkpoint::list test_checkpoints_list(
     { CHECKPOINT_C }
 });
 
-BOOST_AUTO_TEST_CASE(checkpoint_list__ostream__three_elements__expected)
-{
-    std::stringstream serialized;
-    serialized << test_checkpoints_list;
-    BOOST_REQUIRE_EQUAL(serialized.str(), CHECKPOINT_ABC);
-}
-
-BOOST_AUTO_TEST_CASE(checkpoint_list__ostream__empty__expected)
+BOOST_AUTO_TEST_CASE(checkpoint__ostream__empty__expected)
 {
     std::stringstream serialized;
     serialized << checkpoint::list();
     BOOST_REQUIRE_EQUAL(serialized.str(), "");
 }
 
-BOOST_AUTO_TEST_CASE(checkpoint_list__ostream__boost_lexical_cast__expected)
+BOOST_AUTO_TEST_CASE(checkpoint__ostream__populated__expected)
+{
+    std::stringstream serialized;
+    serialized << test_checkpoints_list;
+    BOOST_REQUIRE_EQUAL(serialized.str(), CHECKPOINT_ABC);
+}
+
+BOOST_AUTO_TEST_CASE(checkpoint__ostream__boost_lexical_cast__expected)
 {
     using namespace boost;
     const auto serialized = lexical_cast<std::string>(test_checkpoints_list);
