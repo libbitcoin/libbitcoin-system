@@ -73,7 +73,7 @@ void satoshi_load(const Iterator first, const Iterator last,
     packet.services = deserial.read_8_bytes();
     packet.timestamp = deserial.read_8_bytes();
     packet.address_me = deserial.read_network_address();
-    // Ignored field
+    // The timestamp is not used in the version message.
     packet.address_me.timestamp = 0;
     if (packet.version < 106)
     {
@@ -81,7 +81,7 @@ void satoshi_load(const Iterator first, const Iterator last,
         return;
     }
     packet.address_you = deserial.read_network_address();
-    // Ignored field
+    // The timestamp is not used in the version message.
     packet.address_you.timestamp = 0;
     packet.nonce = deserial.read_8_bytes();
     packet.user_agent = deserial.read_string();
