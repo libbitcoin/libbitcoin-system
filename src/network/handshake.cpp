@@ -99,10 +99,6 @@ void handshake::ready(channel_ptr node,
     // Since we removed cURL discover_external_ip always returns localhost.
     // The port value was formerly hardwired to bc::protocol_port.
 
-    node->send(session_version,
-        strand_.wrap(&handshake::handle_message_sent,
-            this, _1, completion_callback));
-
     node->subscribe_version(
         strand_.wrap(&handshake::receive_version,
             this, _1, _2, node, completion_callback));
@@ -110,6 +106,10 @@ void handshake::ready(channel_ptr node,
     node->subscribe_verack(
         strand_.wrap(&handshake::receive_verack,
             this, _1, _2, completion_callback));
+
+    node->send(session_version,
+        strand_.wrap(&handshake::handle_message_sent,
+            this, _1, completion_callback));
 }
 
 void handshake::handle_message_sent(const std::error_code& ec,
