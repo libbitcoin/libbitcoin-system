@@ -456,7 +456,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
         << config::endpoint(hostname, port)
         << "] manually";
 
-    // Subscript to channel stop notifications.
+    // Subscribe to channel stop notifications.
     node->subscribe_stop(
         strand_.wrap(&protocol::manual_channel_stopped,
             this, _1, node, hostname, port));
@@ -510,7 +510,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
     if (inbound_connections_.size() >= max_inbound_)
     {
         log_info(LOG_PROTOCOL)
-            << "Inbound connection limit blocked [" << node->address() << "]";
+            << "Blocked due to inbound connection limit [" << node->address() << "]";
 
         node->stop();
         return;
