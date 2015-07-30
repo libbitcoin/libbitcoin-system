@@ -120,7 +120,7 @@ void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
     if (ec)
     {
         log_info(LOG_PROTOCOL)
-            << "Failure contacting seed [" << seed << "]: "
+            << "Failure contacting seed [" << seed << "] "
             << ec.message();
         visit();
         return;

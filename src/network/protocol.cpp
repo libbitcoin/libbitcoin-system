@@ -441,7 +441,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
         log_warning(LOG_PROTOCOL)
             << "Failure connecting to peer ["
             << config::endpoint(hostname, port)
-            << "] manually" << ec.message();
+            << "] manually: " << ec.message();
 
         // Retry connect.
         maintain_connection(hostname, port);
