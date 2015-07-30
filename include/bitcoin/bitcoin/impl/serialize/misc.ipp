@@ -114,7 +114,7 @@ Iterator satoshi_save(const address_type& packet, Iterator result)
 {
     auto serial = make_serializer(result);
     serial.write_variable_uint(packet.addresses.size());
-    for (const network_address_type& net_address: packet.addresses)
+    for (const auto& net_address: packet.addresses)
     {
         serial.write_4_bytes(net_address.timestamp);
         serial.write_network_address(net_address);
@@ -168,7 +168,7 @@ Iterator save_inventory_impl(const Message& packet, Iterator result)
 {
     auto serial = make_serializer(result);
     serial.write_variable_uint(packet.inventories.size());
-    for (const inventory_vector_type inv: packet.inventories)
+    for (const auto& inv: packet.inventories)
     {
         uint32_t raw_type = inventory_type_to_number(inv.type);
         serial.write_4_bytes(raw_type);
@@ -226,7 +226,7 @@ Iterator satoshi_save(const get_blocks_type& packet, Iterator result)
     auto serial = make_serializer(result);
     serial.write_4_bytes(protocol_version);
     serial.write_variable_uint(packet.start_hashes.size());
-    for (hash_digest start_hash: packet.start_hashes)
+    for (const auto& start_hash: packet.start_hashes)
         serial.write_hash(start_hash);
     serial.write_hash(packet.hash_stop);
     return serial.iterator();
