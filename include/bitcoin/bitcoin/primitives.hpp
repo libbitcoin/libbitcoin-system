@@ -35,6 +35,7 @@ typedef byte_array<16> ip_address_type;
 
 struct BC_API network_address_type
 {
+    // Starting version 31402, addresses are prefixed with a timestamp.
     uint32_t timestamp;
     uint64_t services;
     ip_address_type ip;
@@ -62,6 +63,7 @@ struct BC_API header_type
     uint32_t magic;
     std::string command;
     uint32_t payload_length;
+
     // Ignored by version and verack commands
     uint32_t checksum;
 };
@@ -72,10 +74,17 @@ struct BC_API version_type
     uint64_t services;
     uint64_t timestamp;
     network_address_type address_me;
+
+    // version ≥ 106
     network_address_type address_you;
     uint64_t nonce;
     std::string user_agent;
+
+    // version >= 209 
     uint32_t start_height;
+
+    // version >= 7001
+    // bool relay;
 };
 
 struct BC_API verack_type
