@@ -392,8 +392,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     }
 
     log_debug(LOG_NETWORK)
-        << "Receive " << header.command << " [" 
-        << address() << "] ("
+        << "Receive " << header.command << " [" << address() << "] ("
         << header.payload_length << " bytes)";
 
     read_checksum(header);
@@ -418,7 +417,9 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
                 return;
 
             log_warning(LOG_NETWORK)
-                << "Invalid checksum from [" << address() << "]";
+                << "Invalid checksum from [" << address() << "] "
+                << std::error_code(error::boost_to_error_code(ec)).message()
+                << " (boost code " << ec.value() << ")";
             stop(ec);
             return;
         }
@@ -449,7 +450,9 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
                 return;
 
             log_warning(LOG_NETWORK)
-                << "Invalid payload from [" << address() << "]";
+                << "Invalid payload from [" << address() << "] "
+                << std::error_code(error::boost_to_error_code(ec)).message()
+                << " (boost code " << ec.value() << ")";
             stop(ec);
             return;
         }
