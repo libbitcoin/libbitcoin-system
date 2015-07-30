@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/error.hpp>
 
+#include <system_error>
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
