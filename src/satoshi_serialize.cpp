@@ -47,9 +47,23 @@ const std::string satoshi_command(const version_type&)
 }
 size_t satoshi_raw_size(const version_type& packet)
 {
-    return 84 +
-        variable_uint_size(packet.user_agent.size()) +
-        packet.user_agent.size();
+    // version, services, timestamp, address1
+    size_t size = 4 + 8 + 8 + 26;
+
+    // address2, nonce, user_agent
+    if (packet.version >= 106)
+        size += (26 + 8 + packet.user_agent.size() +
+            variable_uint_size(packet.user_agent.size()));
+
+    // start_height
+    if (packet.version >= 209)
+        size += 4;
+
+    // relay
+    if (packet.version >= 70001)
+        size += 1; 
+
+    return size;
 }
 
 const std::string satoshi_command(const verack_type&)

@@ -83,8 +83,8 @@ struct BC_API version_type
     // version >= 209 
     uint32_t start_height;
 
-    // version >= 7001
-    // bool relay;
+    // version >= 70001
+    bool relay;
 };
 
 struct BC_API verack_type
