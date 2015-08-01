@@ -47,10 +47,16 @@ BC_CONSTEXPR uint8_t byte_bits = 8;
     BC_CONSTEXPR uint64_t max_size_t = std::numeric_limits<size_t>::max();
 #endif
 
-// Bitcoin constants.
+// Network protocol
+    
+// 70001 for version.relay, we do not yet fully support this level.
+BC_CONSTEXPR uint32_t protocol_version = 70001;
 
+//TODO:  We haven't yet established a minimum required peer version.
+BC_CONSTEXPR uint32_t peer_minimum_version = 0;
+
+// Consensus constants.
 BC_CONSTEXPR uint32_t reward_interval = 210000;
-BC_CONSTEXPR uint32_t protocol_version = 60000;
 BC_CONSTEXPR uint32_t coinbase_maturity = 100;
 BC_CONSTEXPR uint32_t initial_block_reward = 50;
 BC_CONSTEXPR uint32_t max_work_bits = 0x1d00ffff;
