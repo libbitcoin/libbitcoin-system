@@ -114,8 +114,7 @@ public:
     /**
      * Get the hostname of the authority as a string.
      * The form of the return is determined by the type of address.
-     * @return The hostname in one of two forms:
-     *         [2001:db8::2]:port or 1.2.240.1:port
+     * @return The hostname in one of two forms: 2001:db8::2 or 1.2.240.1
      */
     std::string to_hostname() const;
     
