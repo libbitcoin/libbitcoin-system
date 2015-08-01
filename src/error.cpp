@@ -268,6 +268,9 @@ namespace error {
 #endif
             case boost_error::operation_canceled:
             case boost_error::operation_not_permitted:
+#ifdef _MSC_VER
+            case boost_error_asio::operation_not_supported:
+#endif
             case boost_error::operation_not_supported:
             case boost_error::owner_dead:
             case boost_error::permission_denied:
@@ -334,7 +337,8 @@ namespace error {
             case boost_error::no_such_device:
             case boost_error::no_such_device_or_address:
             case boost_error::read_only_file_system:
-            case boost_error::resource_unavailable_try_again:
+            // same as operation_would_block on non-windows
+            //case boost_error::resource_unavailable_try_again:
             case boost_error::text_file_busy:
             case boost_error::too_many_files_open:
             case boost_error::too_many_files_open_in_system:
@@ -356,11 +360,6 @@ namespace error {
             case boost_error::no_such_process:
             case boost_error::not_a_directory:
             case boost_error::not_enough_memory:
-
-#ifdef _MSC_VER
-            case boost_error_asio::operation_not_supported:
-#endif
-            case boost_error::not_supported:
             case boost_error::operation_would_block:
             case boost_error::resource_deadlock_would_occur:
             case boost_error::result_out_of_range:
