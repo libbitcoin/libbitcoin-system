@@ -115,12 +115,7 @@ void channel_proxy::start()
     set_expiration(expiration);
     set_heartbeat(timeouts_.heartbeat);
     set_revival(timeouts_.revival);
-
-    // TODO: This doesn't achieve the desired behavior because the startup is a
-    // multi-step communication. We need to reset timers after all general 
-    // communications, so this gets reset after the frst handshake stage.
-    // We need to incorporate a timer into the handshake class as noted there.
-    set_timeout(timeouts_.startup);
+    set_timeout(timeouts_.inactivity);
 
     // Subscribe to ping messages.
     subscribe_ping(
@@ -325,7 +320,7 @@ void channel_proxy::set_revival(const time_duration& timeout)
 
 void channel_proxy::handle_expiration(const boost::system::error_code& ec)
 {
-    // Did the timer fired because of cancelation?
+    // Did the timer fire because of cancelation?
     if (aborted(ec))
         return;
 
@@ -337,7 +332,7 @@ void channel_proxy::handle_expiration(const boost::system::error_code& ec)
 
 void channel_proxy::handle_timeout(const boost::system::error_code& ec)
 {
-    // Did the timer fired because of cancelation?
+    // Did the timer fire because of cancelation?
     if (aborted(ec))
         return;
 
@@ -349,7 +344,7 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
 
 void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 {
-    // Did the timer fired because of cancelation?
+    // Did the timer fire because of cancelation?
     if (aborted(ec))
         return;
 
