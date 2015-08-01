@@ -113,7 +113,6 @@ void handshake::ready(channel_ptr node, handshake_handler handle_handshake,
     // for each connection to minimize persistent collisions.
     session_version.nonce = pseudo_random();
 
-    // TODO: add loopback detection to the channel.
     // Add nonce to channel state for loopback detection.
     node->set_nonce(session_version.nonce);
 
@@ -133,9 +132,6 @@ void handshake::ready(channel_ptr node, handshake_handler handle_handshake,
 void handshake::handle_version_sent(const std::error_code& ec,
     channel_ptr node, handshake_handler handle_handshake)
 {
-    // TODO: set channel timeout to handshake duration.
-    // node->set_timeout();
-
     handle_handshake(ec);
 }
 
@@ -149,18 +145,15 @@ void handshake::receive_version(const std::error_code& ec,
         return;
     }
 
-    // TODO: trace out version.version|services|user_agent.
-
+    // TODO: add loopback detection to the channel.
     // TODO: set the protocol version on node (for feature degradation).
-    // node->set_version(version.version);
-
     // TODO: save relay to node and have protocol not relay if false.
-    // This is a feature request independent of the version.
-    // node->set_relay(version.relay);
+    // TODO: trace out version.version|services|user_agent.
+    // node->set_version(version);
 
     if (version.version < bc::peer_minimum_version)
     {
-        node->stop(/* below minimum version */);
+        handle_handshake(error::accept_failed);
         return;
     }
 
@@ -180,8 +173,9 @@ void handshake::receive_verack(const std::error_code& ec, const verack_type&,
 {
     if (!ec)
     {
-        // TODO: reset channel timeout to the non-handshake value.
-        // node->reset_timeout();
+        // TODO: enable channel timeout on node construct.
+        // TODO: disable channel timeout.
+        // node->reset_handshake();
 
         // TODO: we don't really care what it says about IP addresses
         // but we may want to add inbound connnection addresses to hosts.
