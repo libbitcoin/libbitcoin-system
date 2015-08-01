@@ -95,8 +95,10 @@ public:
      * Create a persistent connection to the specific node. If disconnected
      * this service will keep attempting to reconnect until successful.
      * @param[in]  address  The host address to maintain.
+     * @param[in]  relay    Relay transactions (without a bloom filter).
      */
-    void maintain_connection(const config::endpoint& address);
+    void maintain_connection(const config::endpoint& address,
+        bool relay=true);
 
     /**
      * Subscribe to new connections established to other nodes.
@@ -148,7 +150,8 @@ public:
     void fetch_connection_count(fetch_connection_count_handler handle_fetch);
 
     /// Deprecated.
-    void maintain_connection(const std::string& hostname, uint16_t port);
+    void maintain_connection(const std::string& hostname, uint16_t port,
+        bool relay=true);
 
     /// Deprecated, should be private since it's called from start.
     void run();
@@ -218,7 +221,7 @@ private:
 
     // Manual connections
     void handle_manual_connect(const std::error_code& ec, channel_ptr node,
-        const std::string& hostname, uint16_t port);
+        const std::string& hostname, uint16_t port, bool relay);
 
     // Accept inwards connections
     void handle_listen(const std::error_code& ec, acceptor_ptr accept);
@@ -233,11 +236,11 @@ private:
 
     // Remove channels from lists when disconnected.
     void outbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node, slot_index slot);
+        channel_ptr node, const std::string& hostname, slot_index slot);
     void manual_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname, uint16_t port);
+        channel_ptr node, const std::string& hostname, bool relay);
     void inbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node);
+        channel_ptr node, const std::string& hostname);
 
     void handle_address_message(const std::error_code& ec,
         const address_type& message, channel_ptr node);

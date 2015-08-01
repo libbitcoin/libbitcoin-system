@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <boost/filesystem.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
@@ -45,6 +46,7 @@ struct BC_API settings
     boost::filesystem::path hosts_file;
     boost::filesystem::path debug_file;
     boost::filesystem::path error_file;
+    config::authority self;
     config::endpoint::list seeds;
 };
 

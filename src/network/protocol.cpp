@@ -92,27 +92,11 @@ void protocol::handle_hosts_save(const std::error_code& ec,
 
 void protocol::start(completion_handler handle_complete)
 {
-    handshake_.start(
-        strand_.wrap(&protocol::handle_handshake_start,
-            this, _1,  handle_complete));
-}
-
-void protocol::handle_handshake_start(const std::error_code& ec,
-    completion_handler handle_complete)
-{
-    if (ec)
-    {
-        log_error(LOG_PROTOCOL)
-            << "Failure obtaining own IP address: " << ec.message();
-        handle_complete(ec);
-        return;
-    }
-
     // No need to load or seed hosts if we aren't connecting outbound.
     if (max_outbound_ == 0)
     {
         run();
-        handle_complete(ec);
+        handle_complete(error::success);
         return;
     }
 
@@ -372,9 +356,10 @@ void protocol::attempt_connect(const std::error_code& ec,
         << "] on slot [" << slot << "]";
 
     // OUTBOUND CONNECT WITH TIMEOUT
+    const bool relay = true;
     bc::network::connect(handshake_, network_, peer.to_hostname(), peer.port(),
         strand_.wrap(&protocol::handle_connect,
-            this, _1, _2, peer, slot));
+            this, _1, _2, peer, slot), relay);
 }
 
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
@@ -385,9 +370,8 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     if (ec || !node)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure connecting to peer ["
-            << peer.to_string() << "] on slot [" << slot << "] "
-            << ec.message();
+            << "Failure connecting to peer [" << peer.to_string()
+            << "] on slot [" << slot << "] " << ec.message();
 
         // Retry another connection, still in same strand.
         modify_slot(slot, connect_state::stopped);
@@ -401,14 +385,13 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
 
     // Connected!
     log_info(LOG_PROTOCOL)
-        << "Connected to peer ["
-        << peer.to_string() << "] on slot [" << slot << "] ("
-        << outbound_connections_.size() << " total)";
+        << "Connected to peer [" << peer.to_string() << "] on slot ["
+        << slot << "] (" << outbound_connections_.size() << " total)";
 
     // Remove channel from list of connections.
     node->subscribe_stop(
         strand_.wrap(&protocol::outbound_channel_stopped,
-            this, _1, node, slot));
+            this, _1, node, peer.to_string(), slot));
 
     setup_new_channel(node);
 }
@@ -418,33 +401,35 @@ void protocol::ban_connection(const config::authority& peer)
     banned_connections_.push_back(peer);
 }
 
-void protocol::maintain_connection(const config::endpoint& address)
+void protocol::maintain_connection(const config::endpoint& address, bool relay)
 {
-    maintain_connection(address.host(), address.port());
+    maintain_connection(address.host(), address.port(), relay);
 }
 
 // Deprecated.
-void protocol::maintain_connection(const std::string& hostname, uint16_t port)
+void protocol::maintain_connection(const std::string& hostname, uint16_t port,
+    bool relay)
 {
     // MANUAL CONNECT WITH TIMEOUT
     bc::network::connect(handshake_, network_, hostname, port,
         strand_.wrap(&protocol::handle_manual_connect,
-            this, _1, _2, hostname, port));
+            this, _1, _2, hostname, port, relay));
 }
 
 void protocol::handle_manual_connect(const std::error_code& ec,
-    channel_ptr node, const std::string& hostname, uint16_t port)
+    channel_ptr node, const std::string& hostname, uint16_t port, bool relay)
 {
+    const config::endpoint peer(hostname, port);
+
     if (ec || !node)
     {
         // Warn because we are supposed to maintain this connection.
         log_warning(LOG_PROTOCOL)
-            << "Failure connecting to peer ["
-            << config::endpoint(hostname, port)
-            << "] manually: " << ec.message();
+            << "Failure connecting to peer [" << peer << "] manually: "
+            << ec.message();
 
         // Retry connect.
-        maintain_connection(hostname, port);
+        maintain_connection(hostname, port, relay);
         return;
     }
 
@@ -452,14 +437,12 @@ void protocol::handle_manual_connect(const std::error_code& ec,
 
     // Connected!
     log_info(LOG_PROTOCOL)
-        << "Connected to peer ["
-        << config::endpoint(hostname, port)
-        << "] manually";
+        << "Connected to peer [" << peer << "] manually";
 
     // Subscribe to channel stop notifications.
     node->subscribe_stop(
         strand_.wrap(&protocol::manual_channel_stopped,
-            this, _1, node, hostname, port));
+            this, _1, node, peer.to_string(), relay));
 
     setup_new_channel(node);
 }
@@ -506,20 +489,22 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         return;
     }
 
+    const auto address = node->address();
+
     // TODO: we would prefer to limit using slots and stop the listener.
     if (inbound_connections_.size() >= max_inbound_)
     {
         log_info(LOG_PROTOCOL)
-            << "Blocked due to inbound connection limit [" << node->address() << "]";
+            << "Blocked due to inbound connection limit [" << address << "]";
 
         node->stop();
         return;
     }
 
-    if (is_banned(node->address()))
+    if (is_banned(address))
     {
         log_info(LOG_PROTOCOL)
-            << "Blocked banned connection from [" << node->address() << "]";
+            << "Blocked banned connection from [" << address << "]";
 
         node->stop();
         return;
@@ -529,7 +514,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
     // Accepted!
     log_info(LOG_PROTOCOL)
-        << "Accepted connection from [" << node->address() << "] ("
+        << "Accepted connection from [" << address << "] ("
         << inbound_connections_.size() << " total)";
 
     const auto handshake_complete = [this, node](const std::error_code& ec)
@@ -549,10 +534,10 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
     // The handshake may not complete until the caller disconnects.
     // So this registration cannot happen in the completion handler.
-    // Otherwise the termination filaure would prevent the subscription.
+    // Otherwise the termination failure would prevent the subscription.
     node->subscribe_stop(
         strand_.wrap(&protocol::inbound_channel_stopped,
-            this, _1, node));
+            this, _1, node, address.to_string()));
 
     handshake_.ready(node, handshake_complete);
 }
@@ -573,13 +558,18 @@ void protocol::setup_new_channel(channel_ptr node)
                 << "Send error [" << node->address() << "] " << ec.message();
         }
     };
-    
-    // Subscribe to address messages.
-    node->subscribe_address(
-        strand_.wrap(&protocol::handle_address_message,
-            this, _1, _2, node));
 
-    node->send(get_address_type(), handle_send);
+    // Don't ask for or subscribe to addresses if host pool is zero-sized.
+    if (host_pool_.size() > 0)
+    {
+        // Subscribe to address messages.
+        node->subscribe_address(
+            strand_.wrap(&protocol::handle_address_message,
+                this, _1, _2, node));
+
+        // Ask for addresses.
+        node->send(get_address_type(), handle_send);
+    }
 
     // Notify subscribers
     channel_subscribe_->relay(error::success, node);
@@ -594,70 +584,48 @@ void protocol::remove_connection(channel_ptr_list& connections,
 }
 
 void protocol::outbound_channel_stopped(const std::error_code& ec,
-    channel_ptr node, slot_index slot)
+    channel_ptr node, const std::string& address, slot_index slot)
 {
-    // We must always attempt a reconnection.
     if (ec)
     {
-        if (node)
-            log_debug(LOG_PROTOCOL)
-                << "Outbound channel stopped (outbound) ["
-                << node->address() << "] " << ec.message();
-        else
-            log_debug(LOG_PROTOCOL)
-                << "Outbound channel stopped (outbound): " << ec.message();
+        log_debug(LOG_PROTOCOL)
+            << "Channel stopped (outbound) [" << address << "] "
+            << ec.message();
     }
 
-    // Erase this channel from our list and then attempt a reconnection.
+    // We must always attempt a new connection.
     remove_connection(outbound_connections_, node);
-
     BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
     modify_slot(slot, connect_state::stopped);
-
-    // Attempt reconnection.
     try_connect_once(slot);
 }
 
 void protocol::manual_channel_stopped(const std::error_code& ec,
-    channel_ptr node, const std::string& hostname, uint16_t port)
+    channel_ptr node, const std::string& address, bool relay)
 {
-    // We must always attempt a reconnection.
     if (ec)
     {
-        if (node)
-            log_debug(LOG_PROTOCOL)
-                << "Manual channel stopped (manual) [" 
-                << config::endpoint(hostname, port) << "] "
-                << ec.message();
-        else
-            log_debug(LOG_PROTOCOL)
-                << "Manual channel stopped (manual): " << ec.message();
+        log_debug(LOG_PROTOCOL)
+            << "Channel stopped (manual) [" << address << "] "
+            << ec.message();
     }
 
-    // Remove from accepted connections.
-    // Timeout logic would go here if we ever need it.
+    // We must always attempt a reconnection.
     remove_connection(manual_connections_, node);
-
-    // Attempt reconnection.
-    maintain_connection(hostname, port);
+    maintain_connection(config::endpoint(address), relay);
 }
 
 void protocol::inbound_channel_stopped(const std::error_code& ec,
-    channel_ptr node)
+    channel_ptr node, const std::string& address)
 {
-    // We do not attempt to reconnect inbound connections.
     if (ec)
     {
-        if (node)
-            log_debug(LOG_PROTOCOL)
-                << "Inbound channel stopped (inbound) ["
-                << node->address() << "] " << ec.message();
-        else
-            log_debug(LOG_PROTOCOL)
-                << "Inbound channel stopped (inbound): " << ec.message();
+        log_debug(LOG_PROTOCOL)
+            << "Channel stopped (inbound) [" << address << "] "
+            << ec.message();
     }
 
-    // Remove from accepted connections (no reconnect).
+    // We never attempt to reconnect inbound connections.
     remove_connection(inbound_connections_, node);
 }
 

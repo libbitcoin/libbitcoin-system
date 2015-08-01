@@ -102,8 +102,9 @@ void seeder::contact(const config::endpoint& seed)
         connect(ec, seed, node);
     };
 
+    const bool relay = false;
     bc::network::connect(handshake_, network_, seed.host(), seed.port(),
-        connect_handler);
+        connect_handler, relay);
 }
 
 void seeder::connect(const std::error_code& ec, const config::endpoint& seed,
