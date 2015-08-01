@@ -38,13 +38,14 @@ public:
         const timeout& timeouts=timeout::defaults);
 
     void start(tcp::resolver::iterator endpoint_iterator,
-        network::connect_handler connect_handler);
+        network::connect_handler handle_connect);
 
 private:
-    void handle_connect(const boost::system::error_code& ec,
-        tcp::resolver::iterator, network::connect_handler connect_handler);
+    void call_handle_connect(const boost::system::error_code& ec,
+        tcp::resolver::iterator, network::connect_handler handle_connect);
 
-    void handle_timer(const boost::system::error_code& ec);
+    void handle_timer(const boost::system::error_code& ec,
+        network::connect_handler handle_connect);
 
     socket_ptr socket_;
     channel::channel_proxy_ptr proxy_;

@@ -34,16 +34,16 @@ namespace network {
 using std::placeholders::_1;
 using boost::asio::ip::tcp;
 
-acceptor::acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept,
+acceptor::acceptor(threadpool& pool, tcp_acceptor_ptr accept,
     const timeout& timeouts)
-  : pool_(pool), tcp_accept_(tcp_accept), timeouts_(timeouts)
+  : pool_(pool), times_(timeouts), tcp_acceptor_(accept)
 {
 }
 
 void acceptor::accept(accept_handler handle_accept)
 {
     const auto socket = std::make_shared<tcp::socket>(pool_.service());
-    tcp_accept_->async_accept(*socket,
+    tcp_acceptor_->async_accept(*socket,
         std::bind(&acceptor::call_handle_accept,
             shared_from_this(), _1, socket, handle_accept));
 }
@@ -57,11 +57,17 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
         return;
     }
 
-    const auto proxy = std::make_shared<channel_proxy>(pool_, socket,
-        timeouts_);
-    proxy->start();
+    const auto proxy = std::make_shared<channel_proxy>(pool_, socket, times_);
     const auto channel_object = std::make_shared<channel>(proxy);
     handle_accept(error::success, channel_object);
+
+    // EKV 7/31/2015: moved this after handle_accept because of a race failure.
+    // start->read_header() would process messages before handle_accept() would
+    // have called the handshake registrations. So handshake could miss the
+    // version message and never complete the handshake. The handshake would
+    // hang until a disconnect was forced by the client or the server expired
+    // the connection. See also connect_with_timeout::call_handle_connect.
+    proxy->start();
 }
 
 } // namespace network

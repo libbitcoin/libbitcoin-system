@@ -46,7 +46,7 @@ public:
     typedef std::function<void (const std::error_code&, channel_ptr)>
         accept_handler;
 
-    acceptor(threadpool& pool, tcp_acceptor_ptr tcp_accept,
+    acceptor(threadpool& pool, tcp_acceptor_ptr accept,
         const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
@@ -60,8 +60,8 @@ private:
         socket_ptr socket, accept_handler handle_accept);
 
     threadpool& pool_;
-    tcp_acceptor_ptr tcp_accept_;
-    const timeout& timeouts_;
+    const timeout& times_;
+    tcp_acceptor_ptr tcp_acceptor_;
 };
 
 } // namespace network
