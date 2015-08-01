@@ -90,7 +90,7 @@ void connect_with_timeout::call_handle_connect(
 void connect_with_timeout::handle_timer(const boost::system::error_code& ec,
     network::connect_handler handle_connect)
 {
-    // Did the timer fired because of cancelation?
+    // Did the timer fire because of cancelation?
     if (aborted(ec))
         return;
 
