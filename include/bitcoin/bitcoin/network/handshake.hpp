@@ -37,46 +37,35 @@ namespace network {
 class BC_API handshake
 {
 public:
+    typedef std::function<void(const std::error_code&)> handshake_handler;
     typedef std::function<void (const std::error_code&)> setter_handler;
-    typedef std::function<void (const std::error_code&)> start_handler;
-    typedef std::function<void (const std::error_code&)> handshake_handler;
-    typedef std::function<void (const std::error_code&,
-        const ip_address_type&)> discover_ip_handler;
-    typedef std::function<void (const std::error_code&,
-        const network_address_type&)> fetch_network_address_handler;
 
-    handshake(threadpool& pool, uint16_t port=protocol_port,
-        uint32_t start_height=0);
+    static const network_address_type unspecified;
+
+    handshake(threadpool& pool, const config::authority& self=unspecified);
 
     /// This class is not copyable.
     handshake(const handshake&) = delete;
     void operator=(const handshake&) = delete;
 
-    void start(start_handler handle_start);
-    void ready(channel_ptr node, handshake_handler handle_handshake);
-    void discover_external_ip(discover_ip_handler handle_discover);
-    void fetch_network_address(fetch_network_address_handler handle_fetch);
-    void set_port(uint16_t port, setter_handler handle_set);
+    void ready(channel_ptr node, handshake_handler handle_handshake,
+        bool relay=true);
     void set_start_height(uint64_t height, setter_handler handle_set);
-    void set_user_agent(const std::string& user_agent,
-        setter_handler handle_set);
 
 private:
     void handle_connect(const std::error_code& ec, channel_ptr node,
         network::connect_handler handle_connect);
-    void handle_message_sent(const std::error_code& ec,
-        handshake_handler completion_callback);
-    void receive_version(const std::error_code& ec, const version_type&,
-        channel_ptr node, handshake::handshake_handler completion_callback);
+    void handle_version_sent(const std::error_code& ec,
+        channel_ptr node, handshake_handler handle_handshake);
+    void handle_verack_sent(const std::error_code& ec,
+        handshake_handler handle_handshake);
+    void receive_version(const std::error_code& ec, 
+        const version_type& version, channel_ptr node,
+        handshake_handler handle_handshake);
     void receive_verack(const std::error_code& ec, const verack_type&,
-        handshake_handler completion_callback);
+        channel_ptr node, handshake_handler handle_handshake);
 
-    void do_discover_external_ip(discover_ip_handler handler_discover);
-    void do_fetch_network_address(fetch_network_address_handler handle_fetch);
-    void do_set_port(uint16_t port, setter_handler handle_set);
     void do_set_start_height(uint64_t height, setter_handler handle_set);
-    void do_set_user_agent(const std::string& user_agent,
-        setter_handler handle_set);
 
     async_strand strand_;
     version_type template_version_;
@@ -84,7 +73,7 @@ private:
 
 BC_API void connect(handshake& shake, network& net,
     const std::string& hostname, uint16_t port,
-    network::connect_handler handle_connect);
+    network::connect_handler handle_connect, bool relay=true);
 
 } // namespace network
 } // namespace libbitcoin

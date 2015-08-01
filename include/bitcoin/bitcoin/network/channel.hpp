@@ -55,6 +55,7 @@ public:
     bool stopped() const;
     config::authority address() const;
     void reset_revival();
+    void set_nonce(uint64_t nonce);
     void set_revival_handler(channel_proxy::revival_handler handler);
 
     template <typename Message>
@@ -87,6 +88,10 @@ public:
         channel_proxy::receive_transaction_handler handle_receive);
     void subscribe_block(
         channel_proxy::receive_block_handler handle_receive);
+    void subscribe_ping(
+        channel_proxy::receive_ping_handler handle_receive);
+    void subscribe_pong(
+        channel_proxy::receive_pong_handler handle_receive);
     void subscribe_raw(
         channel_proxy::receive_raw_handler handle_receive);
     void subscribe_stop(

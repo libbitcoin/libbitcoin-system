@@ -75,6 +75,13 @@ void channel::set_revival_handler(channel_proxy::revival_handler handler)
         return proxy->set_revival_handler(handler);
 }
 
+void channel::set_nonce(uint64_t nonce)
+{
+    const auto proxy = weak_proxy_.lock();
+    if (proxy)
+        return proxy->set_nonce(nonce);
+}
+
 void channel::send_raw(const header_type& packet_header,
     const data_chunk& payload, channel_proxy::send_handler handle_send)
 {
@@ -173,6 +180,26 @@ void channel::subscribe_block(
         proxy->subscribe_block(handle_receive);
     else
         handle_receive(error::service_stopped, block_type());
+}
+
+void channel::subscribe_ping(
+    channel_proxy::receive_ping_handler handle_receive)
+{
+    const auto proxy = weak_proxy_.lock();
+    if (proxy)
+        proxy->subscribe_ping(handle_receive);
+    else
+        handle_receive(error::service_stopped, ping_type());
+}
+
+void channel::subscribe_pong(
+    channel_proxy::receive_pong_handler handle_receive)
+{
+    const auto proxy = weak_proxy_.lock();
+    if (proxy)
+        proxy->subscribe_pong(handle_receive);
+    else
+        handle_receive(error::service_stopped, pong_type());
 }
 
 void channel::subscribe_raw(

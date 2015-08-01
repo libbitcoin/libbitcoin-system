@@ -40,68 +40,82 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-// unpublished for now
-enum services : uint64_t
+#define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
+
+enum services: uint64_t
 {
     node_network = 1
 };
 
-// unpublished for now
-#define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
-
-// This is a non-routable ipv6 mapping of an ipv4 local only address.
-// This should be replaced with our own ip address detection.
-BC_CONSTEXPR ip_address_type mapped_local_ip_address =
+static constexpr uint32_t no_timestamp = 0;
+static constexpr uint16_t unspecified_ip_port = 0;
+static constexpr ip_address_type unspecified_ip_address
 {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0xff, 0xff, 0x0a, 0x00, 0x00, 0x01
+    {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00
+    }
 };
 
-handshake::handshake(threadpool& pool, uint16_t port, uint32_t start_height)
+const network_address_type handshake::unspecified
+{
+    no_timestamp,
+    services::node_network,
+    unspecified_ip_address,
+    unspecified_ip_port
+};
+
+handshake::handshake(threadpool& pool, const config::authority& self)
   : strand_(pool)
 {
-    // Set fixed values inversion template.
-    template_version_.version = bc::protocol_version;
-    template_version_.user_agent = BC_USER_AGENT;
+    // relay and address_you are set in ready().
+    template_version_.address_you = unspecified;
+    template_version_.relay = true;
+
+    // start_height is managed dynamically by node.
+    template_version_.start_height = 0;
+
+    // Constant values.
+    template_version_.address_me = self.to_network_address();
+    template_version_.address_me.services = services::node_network;
     template_version_.services = services::node_network;
-
-    // Set default values inversion template.
-    template_version_.start_height = start_height;
-    template_version_.address_me.services = template_version_.services;
-    template_version_.address_me.ip = mapped_local_ip_address;
-    template_version_.address_me.port = port;
-    template_version_.address_you.services = template_version_.services;
-    template_version_.address_you.ip = mapped_local_ip_address;
-    template_version_.address_you.port = port;
-}
-
-void handshake::start(start_handler handle_start)
-{
-    discover_external_ip(std::bind(handle_start, _1));
+    template_version_.user_agent = BC_USER_AGENT;
+    template_version_.version = bc::protocol_version;
 }
 
 // This will not fire the handshake completion until all three
 // subscriptions fire, which will never happen if the peer doesn't complete
 // the handshare or disconnect. So caller cannot depend on the handler.
-void handshake::ready(channel_ptr node,
-    handshake::handshake_handler handle_handshake)
+void handshake::ready(channel_ptr node, handshake_handler handle_handshake,
+    bool relay)
 {
-    constexpr size_t sync = 3;
+    if (!node)
+    {
+        handle_handshake(error::service_stopped);
+        return;
+    }
 
-    // synchrnize three code paths (or error) before calling handle_handshake.
-    const auto completion_callback = async_parallel(handle_handshake, sync);
+    // Synchrnize three code paths (or error) before calling handle_handshake.
+    constexpr size_t require = 3;
+    const auto completion_callback = async_parallel(handle_handshake, require);
 
-    // Copy the version template and set its timestamp.
+    // Create a copy of the version template.
     auto session_version = template_version_;
+
+    // Set the peer's address into the outgoing version.
+    // The timestamp should not used here and there's no need to set services.
+    session_version.address_you = node->address().to_network_address();
+
+    // Set required transaction relay policy for the connection.
+    session_version.relay = relay;
+
+    // The nonce is used to detect connections to self. It is chosen at random
+    // for each connection to minimize persistent collisions.
     session_version.nonce = pseudo_random();
-    session_version.timestamp = std::time(nullptr);
 
-    // Since we removed cURL discover_external_ip always returns localhost.
-    // The port value was formerly hardwired to bc::protocol_port.
-
-    node->send(session_version,
-        strand_.wrap(&handshake::handle_message_sent,
-            this, _1, completion_callback));
+    // TODO: add loopback detection to the channel.
+    // Add nonce to channel state for loopback detection.
+    node->set_nonce(session_version.nonce);
 
     node->subscribe_version(
         strand_.wrap(&handshake::receive_version,
@@ -109,87 +123,74 @@ void handshake::ready(channel_ptr node,
 
     node->subscribe_verack(
         strand_.wrap(&handshake::receive_verack,
-            this, _1, _2, completion_callback));
+            this, _1, _2, node, completion_callback));
+
+    node->send(session_version,
+        strand_.wrap(&handshake::handle_version_sent,
+            this, _1, node, completion_callback));
 }
 
-void handshake::handle_message_sent(const std::error_code& ec,
-    handshake::handshake_handler completion_callback)
+void handshake::handle_version_sent(const std::error_code& ec,
+    channel_ptr node, handshake_handler handle_handshake)
 {
-    completion_callback(ec);
+    // TODO: set channel timeout to handshake duration.
+    // node->set_timeout();
+
+    handle_handshake(ec);
 }
 
-void handshake::receive_version(const std::error_code& ec, const version_type&,
-    channel_ptr node, handshake::handshake_handler completion_callback)
+void handshake::receive_version(const std::error_code& ec, 
+    const version_type& version, channel_ptr node,
+    handshake_handler handle_handshake)
 {
     if (ec)
-        completion_callback(ec);
-    else
-        node->send(verack_type(),
-            strand_.wrap(&handshake::handle_message_sent,
-                this, _1, completion_callback));
+    {
+        handle_handshake(ec);
+        return;
+    }
+
+    // TODO: trace out version.version|services|user_agent.
+
+    // TODO: set the protocol version on node (for feature degradation).
+    // node->set_version(version.version);
+
+    // TODO: save relay to node and have protocol not relay if false.
+    // This is a feature request independent of the version.
+    // node->set_relay(version.relay);
+
+    if (version.version < bc::peer_minimum_version)
+    {
+        node->stop(/* below minimum version */);
+        return;
+    }
+
+    node->send(verack_type(),
+        strand_.wrap(&handshake::handle_verack_sent,
+            this, _1, handle_handshake));
+}
+
+void handshake::handle_verack_sent(const std::error_code& ec,
+    handshake_handler handle_handshake)
+{
+    handle_handshake(ec);
 }
 
 void handshake::receive_verack(const std::error_code& ec, const verack_type&,
-    handshake::handshake_handler completion_callback)
+    channel_ptr node, handshake_handler handle_handshake)
 {
-    completion_callback(ec);
-}
+    if (!ec)
+    {
+        // TODO: reset channel timeout to the non-handshake value.
+        // node->reset_timeout();
 
-void handshake::discover_external_ip(discover_ip_handler handle_discover)
-{
-    strand_.queue(
-        std::bind(&handshake::do_discover_external_ip,
-            this, handle_discover));
-}
+        // TODO: we don't really care what it says about IP addresses
+        // but we may want to add inbound connnection addresses to hosts.
+        // Find out whether we would add self and/or inbound peers.
+    }
 
-void handshake::do_discover_external_ip(discover_ip_handler handle_discover)
-{
-    template_version_.address_me.ip = mapped_local_ip_address;
-    handle_discover(error::success, template_version_.address_me.ip);
-}
-
-void handshake::fetch_network_address(
-    fetch_network_address_handler handle_fetch)
-{
-    strand_.queue(
-        std::bind(&handshake::do_fetch_network_address,
-            this, handle_fetch));
-}
-
-void handshake::do_fetch_network_address(
-    fetch_network_address_handler handle_fetch)
-{
-    handle_fetch(error::success, template_version_.address_me);
-}
-
-void handshake::set_port(uint16_t port, setter_handler handle_set)
-{
-    strand_.queue(
-        std::bind(&handshake::do_set_port,
-            this, port, handle_set));
-}
-
-void handshake::do_set_port(uint16_t port, setter_handler handle_set)
-{
-    template_version_.address_me.port = port;
-    handle_set(error::success);
-}
-
-// TODO: deprecate (any reason to set this dynamically)?
-void handshake::set_user_agent(const std::string& user_agent,
-    setter_handler handle_set)
-{
-    strand_.queue(
-        std::bind(&handshake::do_set_user_agent,
-            this, user_agent, handle_set));
-}
-
-// TODO: deprecate (any reason to set this dynamically)?
-void handshake::do_set_user_agent(const std::string& user_agent,
-    setter_handler handle_set)
-{
-    template_version_.user_agent = user_agent;
-    handle_set(error::success);
+    // We may not get this response before timeout, in which case we can
+    // only assume that our version wasn't accepted.
+    handle_handshake(ec);
 }
 
 void handshake::set_start_height(uint64_t height, setter_handler handle_set)
@@ -209,21 +210,21 @@ void handshake::do_set_start_height(uint64_t height, setter_handler handle_set)
     handle_set(error::success);
 }
 
-void finish_connect(const std::error_code& ec, channel_ptr node,
-    handshake& shake, network::connect_handler handle_connect)
+static void do_connect(const std::error_code& ec, channel_ptr node,
+    handshake& shake, network::connect_handler handle_connect, bool relay=true)
 {
     if (ec)
         handle_connect(ec, node);
     else
-        shake.ready(node, std::bind(handle_connect, _1, node));
+        shake.ready(node, std::bind(handle_connect, _1, node), relay);
 }
 
 void connect(handshake& shake, network& net, const std::string& hostname,
-    uint16_t port, network::connect_handler handle_connect)
+    uint16_t port, network::connect_handler handle_connect, bool relay)
 {
     net.connect(hostname, port,
-        std::bind(finish_connect,
-            _1, _2, std::ref(shake), handle_connect));
+        std::bind(do_connect,
+            _1, _2, std::ref(shake), handle_connect, relay));
 }
 
 } // namespace network

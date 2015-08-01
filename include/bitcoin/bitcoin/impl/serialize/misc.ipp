@@ -62,18 +62,21 @@ Iterator satoshi_save(const version_type& packet, Iterator result)
     serial.write_8_bytes(packet.nonce);
     serial.write_string(packet.user_agent);
     serial.write_4_bytes(packet.start_height);
+    const uint8_t relay = packet.relay ? 1 : 0;
+    serial.write_byte(relay);
     return serial.iterator();
 }
 template <typename Iterator>
 void satoshi_load(const Iterator first, const Iterator last,
     version_type& packet)
 {
+    // Address timestamps are not used in the version message.
+    // read_network_address skips timestamp but it is read load address_type.
     auto deserial = make_deserializer(first, last);
     packet.version = deserial.read_4_bytes();
     packet.services = deserial.read_8_bytes();
     packet.timestamp = deserial.read_8_bytes();
     packet.address_me = deserial.read_network_address();
-    // Ignored field
     packet.address_me.timestamp = 0;
     if (packet.version < 106)
     {
@@ -81,7 +84,6 @@ void satoshi_load(const Iterator first, const Iterator last,
         return;
     }
     packet.address_you = deserial.read_network_address();
-    // Ignored field
     packet.address_you.timestamp = 0;
     packet.nonce = deserial.read_8_bytes();
     packet.user_agent = deserial.read_string();
@@ -90,8 +92,16 @@ void satoshi_load(const Iterator first, const Iterator last,
         BITCOIN_ASSERT(std::distance(first, last) >= 46 + 26 + 8 + 1);
         return;
     }
+    // The satoshi client treats 209 as the "initial protocol version"
+    // and disconnects peers below 31800 (for getheaders support).
     packet.start_height = deserial.read_4_bytes();
-    BITCOIN_ASSERT(std::distance(first, last) >= 81 + 4);
+    if (packet.version < 70001)
+    {
+        BITCOIN_ASSERT(std::distance(first, last) >= 81 + 4);
+        return;
+    }
+    packet.relay = deserial.read_byte() != 0;
+    BITCOIN_ASSERT(std::distance(first, last) >= 85 + 1);
 }
 
 // verack messages
@@ -114,7 +124,7 @@ Iterator satoshi_save(const address_type& packet, Iterator result)
 {
     auto serial = make_serializer(result);
     serial.write_variable_uint(packet.addresses.size());
-    for (const network_address_type& net_address: packet.addresses)
+    for (const auto& net_address: packet.addresses)
     {
         serial.write_4_bytes(net_address.timestamp);
         serial.write_network_address(net_address);
@@ -168,7 +178,7 @@ Iterator save_inventory_impl(const Message& packet, Iterator result)
 {
     auto serial = make_serializer(result);
     serial.write_variable_uint(packet.inventories.size());
-    for (const inventory_vector_type inv: packet.inventories)
+    for (const auto& inv: packet.inventories)
     {
         uint32_t raw_type = inventory_type_to_number(inv.type);
         serial.write_4_bytes(raw_type);
@@ -226,7 +236,7 @@ Iterator satoshi_save(const get_blocks_type& packet, Iterator result)
     auto serial = make_serializer(result);
     serial.write_4_bytes(protocol_version);
     serial.write_variable_uint(packet.start_hashes.size());
-    for (hash_digest start_hash: packet.start_hashes)
+    for (const auto& start_hash: packet.start_hashes)
         serial.write_hash(start_hash);
     serial.write_hash(packet.hash_stop);
     return serial.iterator();
