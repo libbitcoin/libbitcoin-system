@@ -49,22 +49,31 @@ namespace libbitcoin {
 namespace network {
 
 // List of bitcoin messages
+// ------------------------
 // version
 // verack
-// addr
 // getaddr
+// addr
 // inv
 // getdata
 // getblocks
-// tx
 // block
-// getheaders   [unused]
-// headers      [unused]
-// checkorder   [deprecated]
-// submitorder  [deprecated]
-// reply        [deprecated]
-// ping         [internal]
-// alert        [not supported]
+// tx
+// ping
+// pong
+// checkorder   [deprecated in protocol]
+// submitorder  [deprecated in protocol]
+// reply        [deprecated in protocol]
+// reject       [not yet supported]
+// notfound     [not yet supported]
+// getheaders   [not yet supported]
+// headers      [not yet supported]
+// alert        [no support intended]
+// mempool      [BIP35: not yet supported]
+// filterload   [BIP37: no support intended]
+// filteradd    [BIP37: no support intended]
+// filterclear  [BIP37: no support intended]
+// merkleblock  [BIP37: no support intended]
 
 // Defined here because of the central position in the dependency graph.
 typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
@@ -113,8 +122,12 @@ public:
         const get_blocks_type&)> receive_get_blocks_handler;
     typedef std::function<void (const std::error_code&,
         const transaction_type&)> receive_transaction_handler;
-    typedef std::function<void (const std::error_code&,
+    typedef std::function<void(const std::error_code&,
         const block_type&)> receive_block_handler;
+    typedef std::function<void (const std::error_code&,
+        const ping_type&)> receive_ping_handler;
+    typedef std::function<void (const std::error_code&,
+        const pong_type&)> receive_pong_handler;
     typedef std::function<void (const std::error_code&,
         const header_type&, const data_chunk&)> receive_raw_handler;
     typedef std::function<void (const std::error_code&)> stop_handler;
@@ -135,6 +148,7 @@ public:
     config::authority address() const;
     void reset_revival();
     void set_revival_handler(revival_handler handler);
+    void set_nonce(uint64_t nonce);
 
     template <typename Message>
     void send(const Message& packet, send_handler handle_send)
@@ -162,6 +176,8 @@ public:
     void subscribe_transaction(
         receive_transaction_handler handle_receive);
     void subscribe_block(receive_block_handler handle_receive);
+    void subscribe_ping(receive_ping_handler handle_receive);
+    void subscribe_pong(receive_pong_handler handle_receive);
 
     void subscribe_raw(receive_raw_handler handle_receive);
     void subscribe_stop(stop_handler handle_stop);
@@ -185,6 +201,10 @@ private:
         transaction_subscriber_type;
     typedef subscriber<const std::error_code&, const block_type&>
         block_subscriber_type;
+    typedef subscriber<const std::error_code&, const ping_type&>
+        ping_subscriber_type;
+    typedef subscriber<const std::error_code&, const pong_type&>
+        pong_subscriber_type;
     typedef subscriber<const std::error_code&, const header_type&,
         const data_chunk&> raw_subscriber_type;
     typedef subscriber<const std::error_code&> stop_subscriber_type;
@@ -228,6 +248,11 @@ private:
     void handle_read_payload(const boost::system::error_code& ec,
         size_t bytes_transferred, const header_type& header);
 
+    void handle_ping_message(const std::error_code& ec,
+        const ping_type& ping);
+    void handle_pong_message(const std::error_code& ec,
+        const pong_type& pong, uint64_t nonce);
+
     void call_handle_send(const boost::system::error_code& ec,
         send_handler handle_send);
     void do_send_raw(const header_type& packet_header,
@@ -248,6 +273,7 @@ private:
 
     // TODO: use lock-free std::atomic_flag?
     std::atomic<bool> stopped_;
+    uint64_t nonce_;
 
     channel_stream_loader loader_;
 
@@ -272,6 +298,8 @@ private:
     get_blocks_subscriber_type::ptr get_blocks_subscriber_;
     transaction_subscriber_type::ptr transaction_subscriber_;
     block_subscriber_type::ptr block_subscriber_;
+    ping_subscriber_type::ptr ping_subscriber_;
+    pong_subscriber_type::ptr pong_subscriber_;
 
     raw_subscriber_type::ptr raw_subscriber_;
     stop_subscriber_type::ptr stop_subscriber_;

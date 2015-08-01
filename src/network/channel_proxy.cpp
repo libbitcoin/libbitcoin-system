@@ -56,6 +56,16 @@ using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::time_duration;
 
+static inline bool aborted(const std::error_code& ec)
+{
+    return ec == error::service_stopped;
+}
+
+static inline bool aborted(const boost::system::error_code& ec)
+{
+    return ec == boost::asio::error::operation_aborted;
+}
+
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     const timeout& timeouts=timeout::defaults)
   : strand_(pool),
@@ -66,6 +76,7 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     heartbeat_(pool.service()),
     revival_(pool.service()),
     revival_handler_(nullptr),
+    nonce_(0),
     stopped_(false),
     raw_subscriber_(std::make_shared<raw_subscriber_type>(pool)),
     stop_subscriber_(std::make_shared<stop_subscriber_type>(pool))
@@ -86,6 +97,8 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     CHANNEL_TRANSPORT_MECHANISM(get_blocks);
     CHANNEL_TRANSPORT_MECHANISM(transaction);
     CHANNEL_TRANSPORT_MECHANISM(block);
+    CHANNEL_TRANSPORT_MECHANISM(ping);
+    CHANNEL_TRANSPORT_MECHANISM(pong);
 
 #undef CHANNEL_TRANSPORT_MECHANISM
 }
@@ -102,7 +115,53 @@ void channel_proxy::start()
     set_expiration(expiration);
     set_heartbeat(timeouts_.heartbeat);
     set_revival(timeouts_.revival);
+
+    // TODO: This doesn't achieve the desired behavior because the startup is a
+    // multi-step communication. We need to reset timers after all general 
+    // communications, so this gets reset after the frst handshake stage.
+    // We need to incorporate a timer into the handshake class as noted there.
     set_timeout(timeouts_.startup);
+
+    // Subscribe to ping messages.
+    subscribe_ping(
+        strand_.wrap(&channel_proxy::handle_ping_message,
+            shared_from_this(), _1, _2));
+}
+
+void channel_proxy::handle_ping_message(const std::error_code& ec,
+    const ping_type& ping)
+{
+    if (stopped() || aborted(ec))
+        return;
+
+    // Resubscribe to ping messages.
+    subscribe_ping(
+        strand_.wrap(&channel_proxy::handle_ping_message,
+            shared_from_this(), _1, _2));
+
+    if (ec)
+    {
+        log_debug(LOG_NETWORK)
+            << "Failure getting pong from [" << address() << "]";
+        return;
+    }
+
+    const auto pong = [this](const std::error_code& ec)
+    {
+        if (ec)
+        {
+            log_debug(LOG_NETWORK)
+                << "Pong send failure [" << address() << "] "
+                << ec.message();
+            return;
+        }
+
+        log_debug(LOG_NETWORK)
+            << "Pong sent [" << address() << "] ";
+    };
+
+    const pong_type reply_pong = { ping.nonce };
+    send(reply_pong, pong);
 }
 
 void channel_proxy::stop(const std::error_code& ec)
@@ -185,6 +244,8 @@ void channel_proxy::clear_subscriptions()
     CHANNEL_CLEAR_SUBSCRIPTION(get_blocks);
     CHANNEL_CLEAR_SUBSCRIPTION(transaction);
     CHANNEL_CLEAR_SUBSCRIPTION(block);
+    CHANNEL_CLEAR_SUBSCRIPTION(ping);
+    CHANNEL_CLEAR_SUBSCRIPTION(pong);
 
 #undef CHANNEL_CLEAR_SUBSCRIPTION
 
@@ -197,9 +258,9 @@ bool channel_proxy::stopped() const
     return stopped_;
 }
 
-static inline bool aborted(const boost::system::error_code& ec)
+void channel_proxy::set_nonce(uint64_t nonce)
 {
-    return ec == boost::asio::error::operation_aborted;
+    nonce_ = nonce;
 }
 
 void channel_proxy::reset_timers()
@@ -264,7 +325,7 @@ void channel_proxy::set_revival(const time_duration& timeout)
 
 void channel_proxy::handle_expiration(const boost::system::error_code& ec)
 {
-    // Failure condition not handled, just abort.
+    // Did the timer fired because of cancelation?
     if (aborted(ec))
         return;
 
@@ -276,7 +337,7 @@ void channel_proxy::handle_expiration(const boost::system::error_code& ec)
 
 void channel_proxy::handle_timeout(const boost::system::error_code& ec)
 {
-    // Failure condition not handled, just abort.
+    // Did the timer fired because of cancelation?
     if (aborted(ec))
         return;
 
@@ -288,7 +349,7 @@ void channel_proxy::handle_timeout(const boost::system::error_code& ec)
 
 void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 {
-    // Failure condition not handled, just abort.
+    // Did the timer fired because of cancelation?
     if (aborted(ec))
         return;
 
@@ -297,7 +358,7 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
         if (ec)
         {
             log_debug(LOG_NETWORK)
-                << "Ping failure [" << address() << "] "
+                << "Ping send failure [" << address() << "] "
                 << ec.message();
             return;
         }
@@ -306,10 +367,36 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
             << "Ping sent [" << address() << "] ";
     };
 
-    const ping_type random_ping = { pseudo_random() };
+    const auto nonce = pseudo_random();
 
-    // TODO: match our sent ping.nonce with the returned pong.nonce.
+    // Subscribe to pong messages.
+    subscribe_pong(
+        strand_.wrap(&channel_proxy::handle_pong_message,
+            shared_from_this(), _1, _2, nonce));
+
+    const ping_type random_ping = { nonce };
     send(random_ping, ping);
+}
+
+void channel_proxy::handle_pong_message(const std::error_code& ec,
+    const pong_type& ping, uint64_t nonce)
+{
+    if (stopped() || aborted(ec))
+        return;
+
+    if (ec)
+    {
+        log_debug(LOG_NETWORK)
+            << "Failure getting pong from [" << address() << "]";
+        return;
+    }
+
+    if (ping.nonce != nonce)
+    {
+        log_warning(LOG_NETWORK)
+            << "Invalid pong nonce from [" << address() << "]";
+        stop(error::channel_timeout);
+    }
 }
 
 void channel_proxy::handle_revival(const boost::system::error_code& ec)
@@ -360,8 +447,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     {
         log_info(LOG_NETWORK)
             << "Channel failure [" << address() << "] "
-            << std::error_code(error::boost_to_error_code(ec)).message()
-            << " (boost code " << ec.value() << ")";
+            << std::error_code(error::boost_to_error_code(ec)).message();
 
         stop(ec);
         return;
@@ -405,10 +491,11 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
     if (stopped())
         return;
 
-    // Client may have disconnected, so allow bad channel.
+    // Client may have disconnected after sending, so allow bad channel.
     if (ec)
     {
-        // But make sure we got the required data.
+        // But make sure we got the required data, as this may fail depending 
+        // when the client disconnected.
         if (bytes_transferred != header_checksum_size ||
             bytes_transferred != inbound_checksum_.size())
         {
@@ -418,8 +505,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
 
             log_warning(LOG_NETWORK)
                 << "Invalid checksum from [" << address() << "] "
-                << std::error_code(error::boost_to_error_code(ec)).message()
-                << " (boost code " << ec.value() << ")";
+                << std::error_code(error::boost_to_error_code(ec)).message();
             stop(ec);
             return;
         }
@@ -441,7 +527,8 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     // Client may have disconnected, so allow bad channel.
     if (ec)
     {
-        // But make sure we got the required data.
+        // But make sure we got the required data, as this may fail depending 
+        // when the client disconnected.
         if (bytes_transferred != header.payload_length ||
             bytes_transferred != inbound_payload_.size())
         {
@@ -451,8 +538,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
 
             log_warning(LOG_NETWORK)
                 << "Invalid payload from [" << address() << "] "
-                << std::error_code(error::boost_to_error_code(ec)).message()
-                << " (boost code " << ec.value() << ")";
+                << std::error_code(error::boost_to_error_code(ec)).message();
             stop(ec);
             return;
         }
@@ -515,6 +601,13 @@ void channel_proxy::subscribe_address(
         handle_receive, address_subscriber_);
 }
 
+void channel_proxy::subscribe_get_address(
+    receive_get_address_handler handle_receive)
+{
+    generic_subscribe<get_address_type>(
+        handle_receive, get_address_subscriber_);
+}
+
 void channel_proxy::subscribe_inventory(
     receive_inventory_handler handle_receive)
 {
@@ -550,11 +643,18 @@ void channel_proxy::subscribe_block(
         handle_receive, block_subscriber_);
 }
 
-void channel_proxy::subscribe_get_address(
-    receive_get_address_handler handle_receive)
+void channel_proxy::subscribe_ping(
+    receive_ping_handler handle_receive)
 {
-    generic_subscribe<get_address_type>(
-        handle_receive, get_address_subscriber_);
+    generic_subscribe<ping_type>(
+        handle_receive, ping_subscriber_);
+}
+
+void channel_proxy::subscribe_pong(
+    receive_pong_handler handle_receive)
+{
+    generic_subscribe<pong_type>(
+        handle_receive, pong_subscriber_);
 }
 
 void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
