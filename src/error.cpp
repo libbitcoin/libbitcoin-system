@@ -239,8 +239,11 @@ namespace error {
     {
         namespace boost_error = boost::system::errc;
 
-        //// ASIO code are unique on Windows but not on Linux.
-        ////namespace boost_error_asio = boost::asio::error;
+#ifdef _MSC_VER
+        // TODO: is there a means to map ASIO errors to boost errors?
+        // ASIO codes are unique on Windows but not on Linux.
+        namespace boost_error_asio = boost::asio::error;
+#endif
 
         switch (ec.value())
         {
@@ -248,15 +251,21 @@ namespace error {
                 return error::success;
 
             // network errors
-            ////case boost_error_asio::connection_aborted:
+#ifdef _MSC_VER
+            case boost_error_asio::connection_aborted:
+#endif
             case boost_error::connection_aborted:
             case boost_error::connection_refused:
-            ////case boost_error_asio::connection_reset:
+#ifdef _MSC_VER
+            case boost_error_asio::connection_reset:
+#endif
             case boost_error::connection_reset:
             case boost_error::not_connected:
                 return error::service_stopped;
 
-            ////case boost_error_asio::operation_aborted:
+#ifdef _MSC_VER
+            case boost_error_asio::operation_aborted:
+#endif
             case boost_error::operation_canceled:
             case boost_error::operation_not_permitted:
             case boost_error::operation_not_supported:
@@ -264,7 +273,9 @@ namespace error {
             case boost_error::permission_denied:
                 return error::operation_failed;
 
-            ////case boost_error_asio::address_family_not_supported:
+#ifdef _MSC_VER
+            case boost_error_asio::address_family_not_supported:
+#endif
             case boost_error::address_family_not_supported:
             case boost_error::address_not_available:
             case boost_error::bad_address:
@@ -302,7 +313,9 @@ namespace error {
                 return error::bad_stream;
 
             case boost_error::stream_timeout:
-            ////case boost_error_asio::timed_out:
+#ifdef _MSC_VER
+            case boost_error_asio::timed_out:
+#endif
             case boost_error::timed_out:
                 return error::channel_timeout;
 
@@ -344,15 +357,11 @@ namespace error {
             case boost_error::not_a_directory:
             case boost_error::not_enough_memory:
 
-            // This is the same value as operation_not_supported
-            // in gcc, so excluded to prevent case break.
-            //case boost_error::operation_would_block:
-            // case boost_error::not_supported:
-
-            // This is the same value as resource_unavailable_try_again
-            // except in MSVC, so excluded to prevent case break.
-            //case boost_error::operation_would_block:
-
+#ifdef _MSC_VER
+            case boost_error_asio::operation_not_supported:
+#endif
+            case boost_error::not_supported:
+            case boost_error::operation_would_block:
             case boost_error::resource_deadlock_would_occur:
             case boost_error::result_out_of_range:
             case boost_error::state_not_recoverable:
