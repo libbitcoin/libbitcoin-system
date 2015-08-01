@@ -31,11 +31,9 @@ namespace libbitcoin {
 
 template <typename... Args>
 class subscriber
-  : public std::enable_shared_from_this<subscriber<Args...>>
 {
 public:
     typedef std::function<void (Args...)> handler_type;
-    typedef std::shared_ptr<subscriber<Args...>> ptr;
 
     subscriber(threadpool& pool)
       : strand_(pool)
@@ -46,7 +44,7 @@ public:
     {
         auto dispatch_subscribe =
             strand_.wrap(&subscriber<Args...>::do_subscribe,
-                this->shared_from_this(), handle);
+                this, handle);
 
         dispatch_subscribe();
     }
@@ -55,7 +53,7 @@ public:
     {
         auto dispatch_relay =
             strand_.wrap(&subscriber<Args...>::do_relay,
-                this->shared_from_this(), std::forward<Args>(params)...);
+                this, std::forward<Args>(params)...);
 
         dispatch_relay();
     }
@@ -84,10 +82,6 @@ private:
     async_strand strand_;
     registry_stack registry_;
 };
-
-// TODO: push into subscriber<Agrs...> (interface break).
-template <typename... Args>
-using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
 
 } // namespace libbitcoin
 

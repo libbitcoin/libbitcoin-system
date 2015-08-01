@@ -49,7 +49,8 @@ namespace network {
 class BC_API protocol
 {
 public:
-    typedef std::function<void (const std::error_code&)> completion_handler;
+    typedef std::function<void (const std::error_code&)>
+        completion_handler;
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_connection_count_handler;
     typedef std::function<void (const std::error_code&, channel_ptr)>
@@ -174,8 +175,7 @@ private:
     typedef size_t slot_index;
     typedef std::vector<channel_ptr> channel_ptr_list;
     typedef std::vector<connect_state> connect_state_list;
-    typedef subscriber<const std::error_code&, channel_ptr>
-        channel_subscriber_type;
+    typedef subscriber<const std::error_code&, channel_ptr> channel_subscriber;
 
     void handle_hosts_load(const std::error_code& ec,
         completion_handler handle_complete);
@@ -273,6 +273,7 @@ private:
     handshake& handshake_;
     network& network_;
     seeder seeder_;
+    channel_subscriber channel_subscriber_;
 
     // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
@@ -288,14 +289,11 @@ private:
     channel_ptr_list outbound_connections_;
 
     // Used to enforce correct state transition behaviour for maintaining connections.
+    // Timer prevents too many connection attempts from exhausting resources.
     connect_state_list connect_states_;
-
-    // Used to prevent too many connection attempts from exhausting resources.
-    // The sweep is refreshed every interval.
     boost::asio::deadline_timer sweep_timer_;
     size_t sweep_count_;
 
-    channel_subscriber_type::ptr channel_subscribe_;
     boost::filesystem::path hosts_path_;
 };
 

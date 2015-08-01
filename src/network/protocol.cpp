@@ -59,12 +59,12 @@ protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
     handshake_(shake),
     network_(net),
     seeder_(pool, hosts, shake, net, seeds),
+    channel_subscriber_(pool),
     inbound_port_(port),
     max_inbound_(max_inbound),
     max_outbound_(max_outbound),
     sweep_timer_(pool.service()),
-    sweep_count_(0),
-    channel_subscribe_(std::make_shared<channel_subscriber_type>(pool))
+    sweep_count_(0)
 {
 }
 
@@ -86,7 +86,7 @@ void protocol::handle_hosts_save(const std::error_code& ec,
         return;
     }
 
-    channel_subscribe_->relay(error::service_stopped, nullptr);
+    channel_subscriber_.relay(error::service_stopped, nullptr);
     handle_complete(error::success);
 }
 
@@ -235,7 +235,7 @@ void protocol::try_connect_once(slot_index slot)
         return;
 
     BITCOIN_ASSERT(slot <= connect_states_.size());
-    BITCOIN_ASSERT(connect_states_[slot] == connect_state::stopped);
+    //BITCOIN_ASSERT(connect_states_[slot] == connect_state::stopped);
 
     // Begin connection flow: finding_peer -> connecting -> established.
     // Failures end with connect_state::stopped and loop back here again.
@@ -316,7 +316,7 @@ bool protocol::is_connected(const config::authority& peer)
 void protocol::attempt_connect(const std::error_code& ec,
     const config::authority& peer, slot_index slot)
 {
-    BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
+    //BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
     modify_slot(slot, connect_state::connecting);
 
     if (ec)
@@ -365,7 +365,7 @@ void protocol::attempt_connect(const std::error_code& ec,
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     const config::authority& peer, slot_index slot)
 {
-    BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
+    //BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
 
     if (ec || !node)
     {
@@ -547,6 +547,9 @@ void protocol::setup_new_channel(channel_ptr node)
     if (!node)
         return;
 
+    // TODO: look for node->get_nonce() in each connection excluding this one
+    // and terminate this one if found with an self connection error log entry.
+
     const auto handle_send = [node](const std::error_code& ec)
     {
         if (!node)
@@ -572,7 +575,7 @@ void protocol::setup_new_channel(channel_ptr node)
     }
 
     // Notify subscribers
-    channel_subscribe_->relay(error::success, node);
+    channel_subscriber_.relay(error::success, node);
 }
 
 void protocol::remove_connection(channel_ptr_list& connections,
@@ -595,7 +598,7 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
 
     // We must always attempt a new connection.
     remove_connection(outbound_connections_, node);
-    BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
+    //BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
     modify_slot(slot, connect_state::stopped);
     try_connect_once(slot);
 }
@@ -683,7 +686,7 @@ void protocol::do_fetch_connection_count(
 
 void protocol::subscribe_channel(channel_handler handle_channel)
 {
-    channel_subscribe_->subscribe(handle_channel);
+    channel_subscriber_.subscribe(handle_channel);
 }
 
 size_t protocol::total_connections() const
