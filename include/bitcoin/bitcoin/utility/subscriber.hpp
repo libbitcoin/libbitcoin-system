@@ -22,7 +22,7 @@
 
 #include <functional>
 #include <memory>
-#include <stack>
+#include <vector>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -33,18 +33,18 @@ template <typename... Args>
 class subscriber
 {
 public:
-    typedef std::function<void (Args...)> handler_type;
+    typedef std::function<void (Args...)> subscription_handler;
 
     subscriber(threadpool& pool)
       : strand_(pool)
     {
     }
 
-    void subscribe(handler_type handle)
+    void subscribe(subscription_handler handler)
     {
         auto dispatch_subscribe =
             strand_.wrap(&subscriber<Args...>::do_subscribe,
-                this, handle);
+                this, handler);
 
         dispatch_subscribe();
     }
@@ -59,31 +59,28 @@ public:
     }
 
 private:
-    typedef std::stack<handler_type> registry_stack;
+    typedef std::vector<subscription_handler> subscription_list;
 
-    void do_subscribe(handler_type handle)
+    void do_subscribe(subscription_handler notifier)
     {
-        registry_.push(handle);
+        subscriptions_.push_back(notifier);
     }
 
     void do_relay(Args... params)
     {
-        auto notify_copy = registry_;
-        registry_ = registry_stack();
-        while (!notify_copy.empty())
-        {
-            notify_copy.top()(params...);
-            notify_copy.pop();
-        }
+        if (subscriptions_.empty())
+            return;
 
-        BITCOIN_ASSERT(notify_copy.empty());
+        const auto subscriptions = subscriptions_;
+        subscriptions_.clear();
+        for (const auto notifier: subscriptions)
+            notifier(params...);
     }
 
     async_strand strand_;
-    registry_stack registry_;
+    subscription_list subscriptions_;
 };
 
 } // namespace libbitcoin
 
 #endif
-
