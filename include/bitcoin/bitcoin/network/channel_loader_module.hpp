@@ -39,7 +39,6 @@ public:
     virtual const std::string lookup_symbol() const = 0;
 };
 
-// TODO: split to impl.
 template <typename Message>
 class channel_loader_module
   : public channel_loader_module_base
@@ -67,7 +66,6 @@ public:
         }
         catch (bc::end_of_stream)
         {
-            // This doesn't invalidate the channel (unlike the invalid header).
             handle_load_(bc::error::bad_stream, Message());
         }
     }
