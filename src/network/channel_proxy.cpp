@@ -103,7 +103,6 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     heartbeat_(pool.service()),
     revival_(pool.service()),
     revival_handler_(nullptr),
-    nonce_(0),
     stopped_(false),
     version_subscriber_(pool),
     verack_subscriber_(pool),
@@ -148,11 +147,16 @@ void channel_proxy::start()
 
     // Subscribe to ping messages.
     subscribe_ping(
-        strand_.wrap(&channel_proxy::handle_ping_message,
+        strand_.wrap(&channel_proxy::handle_receive_ping,
             shared_from_this(), _1, _2));
+
+    // Send ping message by simulating first heartbeat.
+    strand_.queue(
+        std::bind(&channel_proxy::handle_heartbeat,
+            shared_from_this(), boost::system::error_code()));
 }
 
-void channel_proxy::handle_ping_message(const std::error_code& ec,
+void channel_proxy::handle_receive_ping(const std::error_code& ec,
     const ping_type& ping)
 {
     if (stopped() || aborted(ec))
@@ -160,7 +164,7 @@ void channel_proxy::handle_ping_message(const std::error_code& ec,
 
     // Resubscribe to ping messages.
     subscribe_ping(
-        strand_.wrap(&channel_proxy::handle_ping_message,
+        strand_.wrap(&channel_proxy::handle_receive_ping,
             shared_from_this(), _1, _2));
 
     if (ec)
@@ -170,7 +174,7 @@ void channel_proxy::handle_ping_message(const std::error_code& ec,
         return;
     }
 
-    const auto pong = [this](const std::error_code& ec)
+    const auto handle_send_pong = [this](const std::error_code& ec)
     {
         if (ec)
         {
@@ -185,7 +189,7 @@ void channel_proxy::handle_ping_message(const std::error_code& ec,
     };
 
     const pong_type reply_pong = { ping.nonce };
-    send(reply_pong, pong);
+    send(reply_pong, handle_send_pong);
 }
 
 void channel_proxy::stop(const std::error_code& ec)
@@ -272,11 +276,6 @@ void channel_proxy::clear_subscriptions()
 bool channel_proxy::stopped() const
 {
     return stopped_;
-}
-
-void channel_proxy::set_nonce(uint64_t nonce)
-{
-    nonce_ = nonce;
 }
 
 void channel_proxy::reset_timers()
@@ -369,7 +368,7 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
     if (aborted(ec))
         return;
 
-    const auto ping = [this](const std::error_code& ec)
+    const auto handle_send_ping = [this](const std::error_code& ec)
     {
         if (ec)
         {
@@ -387,14 +386,14 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
 
     // Subscribe to pong messages.
     subscribe_pong(
-        strand_.wrap(&channel_proxy::handle_pong_message,
+        strand_.wrap(&channel_proxy::handle_receive_pong,
             shared_from_this(), _1, _2, nonce));
 
     const ping_type random_ping = { nonce };
-    send(random_ping, ping);
+    send(random_ping, handle_send_ping);
 }
 
-void channel_proxy::handle_pong_message(const std::error_code& ec,
+void channel_proxy::handle_receive_pong(const std::error_code& ec,
     const pong_type& ping, uint64_t nonce)
 {
     if (stopped() || aborted(ec))

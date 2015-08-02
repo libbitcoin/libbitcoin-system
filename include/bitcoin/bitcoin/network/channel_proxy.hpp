@@ -244,9 +244,9 @@ private:
     void handle_read_payload(const boost::system::error_code& ec,
         size_t bytes_transferred, const header_type& header);
 
-    void handle_ping_message(const std::error_code& ec,
+    void handle_receive_ping(const std::error_code& ec,
         const ping_type& ping);
-    void handle_pong_message(const std::error_code& ec,
+    void handle_receive_pong(const std::error_code& ec,
         const pong_type& pong, uint64_t nonce);
 
     void call_handle_send(const boost::system::error_code& ec,
