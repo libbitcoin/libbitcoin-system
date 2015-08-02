@@ -81,12 +81,6 @@ public:
     void stop(completion_handler handle_complete);
 
     /**
-     * Determine if the connection is manual.
-     * @param[in]  node  The node of interest.
-     */
-    bool is_manual(channel_ptr node) const;
-
-    /**
      * Add a banned connection.
      * @param[in]  peer  The peer to ban.
      */
@@ -157,30 +151,37 @@ private:
     typedef std::vector<channel_ptr> channel_ptr_list;
     typedef subscriber<const std::error_code&, channel_ptr> channel_subscriber;
 
+    // Startup sequence
     void handle_hosts_load(const std::error_code& ec,
         completion_handler handle_complete);
-    void handle_hosts_count(const std::error_code& ec, size_t hosts_count,
-        completion_handler handle_complete);
-    void handle_handshake_start(const std::error_code& ec,
-        completion_handler handle_complete);
+    void handle_hosts_count(const std::error_code& ec,
+        size_t hosts_count, completion_handler handle_complete);
     void handle_seeder_start(const std::error_code& ec,
         completion_handler handle_complete);
     void handle_hosts_save(const std::error_code& ec,
         completion_handler handle_complete);
+    void handle_address_message(const std::error_code& ec,
+        const address_type& message, channel_ptr node);
+    void handle_store_address(const std::error_code& ec);
 
+    // Start outbound and accepting inbound connections
     void start_connecting(completion_handler handle_complete);
 
-    void attempt_connect(const std::error_code& ec,
+    // Outbound connections
+    void new_connection();
+    void start_connect(const std::error_code& ec,
         const config::authority& peer);
     void handle_connect(const std::error_code& ec, channel_ptr node,
         const config::authority& peer);
 
     // Manual connections
+    // void maintain_connection(...) <- public
     void handle_manual_connect(const std::error_code& ec, channel_ptr node,
         const std::string& hostname, uint16_t port, bool relay);
 
-    // Accept inwards connections
-    void handle_listen(const std::error_code& ec, acceptor_ptr accept);
+    // Inbound connections
+    void accept_connections();
+    void start_accept(const std::error_code& ec, acceptor_ptr accept);
     void handle_accept(const std::error_code& ec, channel_ptr node,
         acceptor_ptr accept);
 
@@ -198,10 +199,6 @@ private:
         channel_ptr node, const std::string& hostname, bool relay);
     void inbound_channel_stopped(const std::error_code& ec,
         channel_ptr node, const std::string& hostname);
-
-    void handle_address_message(const std::error_code& ec,
-        const address_type& message, channel_ptr node);
-    void handle_store_address(const std::error_code& ec);
 
     /// Deprecated, unreasonable to queue this, use total_connections.
     void do_fetch_connection_count(
@@ -244,11 +241,6 @@ private:
     // There's a fixed number of connections that are always trying to reconnect.
     size_t max_outbound_;
     channel_ptr_list outbound_connections_;
-
-    //// Used to enforce correct state transition behaviour for maintaining connections.
-    //// Timer prevents too many connection attempts from exhausting resources.
-    //boost::asio::deadline_timer sweep_timer_;
-    //size_t sweep_count_;
 
     boost::filesystem::path hosts_path_;
 };

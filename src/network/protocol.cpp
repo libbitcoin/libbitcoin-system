@@ -24,6 +24,7 @@
 #include <functional>
 #include <memory>
 #include <system_error>
+#include <thread>
 #include <vector>
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
@@ -47,10 +48,6 @@ using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-//// These are not configurable.
-//static const size_t sweep_connection_limit = 10;
-//static const auto sweep_reset_interval = seconds(1);
-
 protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
     network& net, const config::endpoint::list& seeds, uint16_t port,
     size_t max_outbound, size_t max_inbound)
@@ -63,8 +60,6 @@ protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
     inbound_port_(port),
     max_inbound_(max_inbound),
     max_outbound_(max_outbound)
-    //sweep_timer_(pool.service()),
-    //sweep_count_(0)
 {
 }
 
@@ -159,42 +154,52 @@ void protocol::handle_seeder_start(const std::error_code& ec,
 
 void protocol::start_connecting(completion_handler handle_complete)
 {
-    // Are we accepting inbound connections?
+    // Start inbound connection listener.
     if (inbound_port_ > 0 && max_inbound_ > 0)
-        network_.listen(inbound_port_,
-            strand_.wrap(&protocol::handle_listen,
-                this, _1, _2));
+        accept_connections();
 
-    // Are we making outbound connections?
-    ////while (outbound_connections_.size() < max_outbound_)
-    if (max_outbound_ > 0)
-        host_pool_.fetch_address(
-            strand_.wrap(&protocol::attempt_connect, 
-                this, _1, _2));
+    handle_complete(error::success);
+
+    // Start outbound connection attempts at a rate of 10 per second.
+    for (auto channel = 0; channel < max_outbound_; ++channel)
+    {
+        new_connection();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 }
 
-void protocol::attempt_connect(const std::error_code& ec,
+void protocol::accept_connections()
+{
+    network_.listen(inbound_port_,
+        strand_.wrap(&protocol::start_accept,
+            this, _1, _2));
+}
+
+void protocol::new_connection()
+{
+    host_pool_.fetch_address(
+        strand_.wrap(&protocol::start_connect,
+            this, _1, _2));
+}
+
+void protocol::start_connect(const std::error_code& ec,
     const config::authority& peer)
 {
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
-            << "Failure selecting a peer address:" << ec.message();
+        handle_connect(ec, nullptr, peer);
         return;
     }
 
-    // It is possible for this guard to be violated by a race.
     if (is_connected(peer))
     {
-        log_debug(LOG_PROTOCOL)
-            << "Already connected to peer [" << peer.to_string() << "]";
+        handle_connect(error::address_in_use, nullptr, peer);
         return;
     }
 
     if (is_banned(peer))
     {
-        log_debug(LOG_PROTOCOL)
-            << "Selected banned peer [" << peer.to_string() << "]";
+        handle_connect(error::address_blocked, nullptr, peer);
         return;
     }
 
@@ -202,7 +207,7 @@ void protocol::attempt_connect(const std::error_code& ec,
         << "Connecting to peer [" << peer.to_string() << "]";
 
     // OUTBOUND CONNECT WITH TIMEOUT
-    const bool relay = true;
+    const auto relay = true;
     bc::network::connect(handshake_, network_, peer.to_hostname(), peer.port(),
         strand_.wrap(&protocol::handle_connect,
             this, _1, _2, peer), relay);
@@ -216,6 +221,9 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         log_debug(LOG_PROTOCOL)
             << "Failure connecting to peer [" << peer.to_string() << "] "
             << ec.message();
+
+        // Restart connection attempt.
+        new_connection();
         return;
     }
 
@@ -226,7 +234,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         << "Connected to peer [" << peer.to_string() << "] (" 
         << outbound_connections_.size() << " total)";
 
-    // Subscribe to remove channel from list of connections.
+    // Subscribe to remove channel from list of connections when it stops.
     node->subscribe_stop(
         strand_.wrap(&protocol::outbound_channel_stopped,
             this, _1, node, peer.to_string()));
@@ -285,15 +293,12 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     setup_new_channel(node);
 }
 
-void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
+void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept)
 {
-    if (!accept)
-        return;
-
-    if (ec)
+    if (ec || !accept)
     {
         log_error(LOG_PROTOCOL)
-            << "Error while starting listener: " << ec.message();
+            << "Error starting listener: " << ec.message();
         return;
     }
 
@@ -306,15 +311,10 @@ void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
 void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
     acceptor_ptr accept)
 {
-    if (!accept)
-        return;
-
     // Relisten for connections.
-    accept->accept(
-        strand_.wrap(&protocol::handle_accept,
-            this, _1, _2, accept));
+    start_accept(ec, accept);
 
-    if (ec)
+    if (ec || !node)
     {
         if (node)
             log_debug(LOG_PROTOCOL)
@@ -327,30 +327,23 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         return;
     }
 
-    const auto address = node->address();
-
-    // TODO: make more robust.
     if (inbound_connections_.size() >= max_inbound_)
     {
-        log_info(LOG_PROTOCOL)
-            << "Blocked connection due to inbound limit [" << address << "]";
-        node->stop();
+        node->stop(error::connection_limit);
         return;
     }
 
+    const auto address = node->address();
+
     if (is_banned(address))
     {
-        log_info(LOG_PROTOCOL)
-            << "Blocked blacklisted connection from [" << address << "]";
-        node->stop();
+        node->stop(error::address_blocked);
         return;
     }
 
     if (is_loopback(node))
     {
-        log_info(LOG_PROTOCOL)
-            << "Blocked loopback connection from [" << address << "]";
-        node->stop();
+        node->stop(error::connection_to_self);
         return;
     }
 
@@ -437,7 +430,9 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
             << ec.message();
     }
 
+    // We always create a replacement oubound connection.
     remove_connection(outbound_connections_, node);
+    new_connection();
 }
 
 void protocol::manual_channel_stopped(const std::error_code& ec,
@@ -530,6 +525,23 @@ bool protocol::is_banned(const config::authority& peer) const
     return true;
 }
 
+// Determine if we are connected to the address for any reason.
+bool protocol::is_connected(const config::authority& peer) const
+{
+    // TODO: add connection_type to node so we only need one connection pool.
+    const auto& inn = inbound_connections_;
+    const auto& out = outbound_connections_;
+    const auto& man = manual_connections_;
+    const auto predicate = [&peer](const channel_ptr& node)
+    {
+        return (node->address() == peer);
+    };
+    return
+        (std::find_if(inn.begin(), inn.end(), predicate) != inn.end()) ||
+        (std::find_if(out.begin(), out.end(), predicate) != out.end()) ||
+        (std::find_if(man.begin(), man.end(), predicate) != man.end());
+}
+
 // Determine if connection matches the nonce of one of our own outbounds.
 bool protocol::is_loopback(channel_ptr peer) const
 {
@@ -542,30 +554,6 @@ bool protocol::is_loopback(channel_ptr peer) const
     auto it = std::find_if(outbound.begin(), outbound.end(), predicate);
     return it != outbound.end();
     return true;
-}
-
-// Determine if the connection is manual.
-bool protocol::is_manual(channel_ptr node) const
-{
-    const auto& manual = manual_connections_;
-    auto it = std::find(manual.begin(), manual.end(), node);
-    return it != manual.end();
-}
-
-// Determine if we are connected to the address for any reason.
-bool protocol::is_connected(const config::authority& peer) const
-{
-    const auto& inn = inbound_connections_;
-    const auto& out = outbound_connections_;
-    const auto& man = manual_connections_;
-    const auto predicate = [&peer](const channel_ptr& node)
-    {
-        return (node->address() == peer);
-    };
-    return
-        (std::find_if(inn.begin(), inn.end(), predicate) != inn.end()) ||
-        (std::find_if(out.begin(), out.end(), predicate) != out.end()) ||
-        (std::find_if(man.begin(), man.end(), predicate) != man.end());
 }
 
 void protocol::set_max_outbound(size_t max_outbound)
