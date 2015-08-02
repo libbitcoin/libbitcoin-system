@@ -81,9 +81,6 @@ void connect_with_timeout::call_handle_connect(
 
     const auto channel_object = std::make_shared<channel>(proxy_);
     handle_connect(error, channel_object);
-
-    // EKV 7/31/2015: moved this after handle_connect because of a race failure.
-    // See also acceptor::call_handle_accept.
     proxy_->start();
 }
 

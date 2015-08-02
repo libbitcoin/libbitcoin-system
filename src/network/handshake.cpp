@@ -95,7 +95,7 @@ void handshake::ready(channel_ptr node, handshake_handler handle_handshake,
         return;
     }
 
-    // Synchrnize three code paths (or error) before calling handle_handshake.
+    // Synchronize all code paths (or errors) before calling handle_handshake.
     constexpr size_t require = 3;
     const auto completion_callback = async_parallel(handle_handshake, require);
 

@@ -60,13 +60,6 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
     const auto proxy = std::make_shared<channel_proxy>(pool_, socket, times_);
     const auto channel_object = std::make_shared<channel>(proxy);
     handle_accept(error::success, channel_object);
-
-    // EKV 7/31/2015: moved this after handle_accept because of a race failure.
-    // start->read_header() would process messages before handle_accept() would
-    // have called the handshake registrations. So handshake could miss the
-    // version message and never complete the handshake. The handshake would
-    // hang until a disconnect was forced by the client or the server expired
-    // the connection. See also connect_with_timeout::call_handle_connect.
     proxy->start();
 }
 
