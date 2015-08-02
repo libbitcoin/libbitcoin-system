@@ -38,11 +38,11 @@ channel::~channel()
     stop();
 }
 
-void channel::stop() const
+void channel::stop(const std::error_code& ec)
 {
     const auto proxy = weak_proxy_.lock();
     if (proxy)
-        proxy->stop();
+        proxy->stop(ec);
 }
 
 bool channel::stopped() const

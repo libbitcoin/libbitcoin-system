@@ -50,8 +50,8 @@ public:
     /// This class is not copyable.
     channel(const channel&) = delete;
     void operator=(const channel&) = delete;
-
-    void stop() const;
+    
+    void stop(const std::error_code& ec=error::service_stopped);
     bool stopped() const;
 
     config::authority address() const;
