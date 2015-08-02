@@ -20,8 +20,8 @@
 #ifndef LIBBITCOIN_CHANNEL_STREAM_LOADER_HPP
 #define LIBBITCOIN_CHANNEL_STREAM_LOADER_HPP
 
+#include <map>
 #include <string>
-#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -39,12 +39,18 @@ public:
     channel_stream_loader(const channel_stream_loader&) = delete;
     void operator=(const channel_stream_loader&) = delete;
 
-    void add(bc::network::channel_loader_module_base* module);
-    void load_lookup(const std::string& symbol,
-        const bc::data_chunk& stream) const;
+    template <typename Message>
+    void add(typename channel_loader_module<Message>::load_handler handler)
+    {
+        // channel_loader_module isn't copyable, so we use pointers here.
+        auto module = new channel_loader_module<Message>(handler);
+        modules_[module->lookup_symbol()] = module;
+    }
+
+    void load(const std::string& symbol, const bc::data_chunk& stream) const;
 
 private:
-    typedef std::vector<channel_loader_module_base*> module_list;
+    typedef std::map<std::string, channel_loader_module_base*> module_list;
 
     module_list modules_;
 };

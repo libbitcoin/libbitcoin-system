@@ -213,10 +213,11 @@ private:
     void do_stop(const std::error_code& ec=error::service_stopped);
 
     template<typename Message, class Subscriber>
-    void subscribe(Subscriber& subscriber);
-
+    void relay(Subscriber& subscriber);
     template <typename Message, class Subscriber, typename Callback>
     void subscribe(Subscriber& subscriber, Callback handler) const;
+    template <typename Message, class Subscriber>
+    void unsubscribe(Subscriber& subscriber) const;
 
     void reset_timers();
     void stop_impl();
@@ -280,10 +281,8 @@ private:
     // could not match 'boost::array' against 'std::array'
     boost::array<uint8_t, header_chunk_size> inbound_header_;
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;
-
     data_chunk inbound_payload_;
 
-    // We should be using variadic templates for these
     version_subscriber version_subscriber_;
     verack_subscriber verack_subscriber_;
     address_subscriber address_subscriber_;
@@ -295,7 +294,6 @@ private:
     block_subscriber block_subscriber_;
     ping_subscriber ping_subscriber_;
     pong_subscriber pong_subscriber_;
-
     raw_subscriber raw_subscriber_;
     stop_subscriber stop_subscriber_;
 };

@@ -67,21 +67,30 @@ static inline bool aborted(const boost::system::error_code& ec)
 }
 
 template<typename Message, class Subscriber>
-void channel_proxy::subscribe(Subscriber& subscriber)
+void channel_proxy::relay(Subscriber& subscriber)
 {
-    loader_.add(new channel_loader_module<Message>(
+    const auto handler =
         std::bind(&Subscriber::relay,
-            subscriber, _1, _2)));
+            std::ref(subscriber), _1, _2);
+
+    loader_.add<Message>(handler);
 }
 
+// Subscriber doesn't have an unsubscribe, we just send stop.
+// Subscribing must be immediate, we cannot switch thread contexts.
 template <typename Message, class Subscriber, typename Callback>
 void channel_proxy::subscribe(Subscriber& subscriber, Callback handler) const
 {
-    // Subscribing must be immediate, we cannot switch thread contexts.
     if (stopped())
-        handler(error::service_stopped, Message());
+        unsubscribe<Message>(subscriber);
     else
         subscriber.subscribe(handler);
+}
+
+template <typename Message, class Subscriber>
+void channel_proxy::unsubscribe(Subscriber& subscriber) const
+{
+    subscriber.relay(error::service_stopped, Message());
 }
 
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
@@ -110,17 +119,17 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     raw_subscriber_(pool),
     stop_subscriber_(pool)
 {
-    subscribe<version_type>(version_subscriber_);
-    subscribe<verack_type>(verack_subscriber_);
-    subscribe<address_type>(address_subscriber_);
-    subscribe<get_address_type>(get_address_subscriber_);
-    subscribe<inventory_type>(inventory_subscriber_);
-    subscribe<get_data_type>(get_data_subscriber_);
-    subscribe<get_blocks_type>(get_blocks_subscriber_);
-    subscribe<transaction_type>(transaction_subscriber_);
-    subscribe<block_type>(block_subscriber_);
-    subscribe<ping_type>(ping_subscriber_);
-    subscribe<pong_type>(pong_subscriber_);
+    relay<version_type>(version_subscriber_);
+    relay<verack_type>(verack_subscriber_);
+    relay<address_type>(address_subscriber_);
+    relay<get_address_type>(get_address_subscriber_);
+    relay<inventory_type>(inventory_subscriber_);
+    relay<get_data_type>(get_data_subscriber_);
+    relay<get_blocks_type>(get_blocks_subscriber_);
+    relay<transaction_type>(transaction_subscriber_);
+    relay<block_type>(block_subscriber_);
+    relay<ping_type>(ping_subscriber_);
+    relay<pong_type>(pong_subscriber_);
 }
 
 channel_proxy::~channel_proxy()
@@ -172,7 +181,7 @@ void channel_proxy::handle_ping_message(const std::error_code& ec,
         }
 
         log_debug(LOG_NETWORK)
-            << "Pong sent [" << address() << "] ";
+            << "Pong sent [" << address() << "]";
     };
 
     const pong_type reply_pong = { ping.nonce };
@@ -246,17 +255,17 @@ config::authority channel_proxy::address() const
 
 void channel_proxy::clear_subscriptions()
 {
-    version_subscriber_.relay(error::service_stopped, version_type());
-    verack_subscriber_.relay(error::service_stopped, verack_type());
-    address_subscriber_.relay(error::service_stopped, address_type());
-    get_address_subscriber_.relay(error::service_stopped, get_address_type());
-    inventory_subscriber_.relay(error::service_stopped, inventory_type());
-    get_data_subscriber_.relay(error::service_stopped, get_data_type());
-    get_blocks_subscriber_.relay(error::service_stopped, get_blocks_type());
-    transaction_subscriber_.relay(error::service_stopped, transaction_type());
-    block_subscriber_.relay(error::service_stopped, block_type());
-    ping_subscriber_.relay(error::service_stopped, ping_type());
-    pong_subscriber_.relay(error::service_stopped, pong_type());
+    unsubscribe<version_type>(version_subscriber_);
+    unsubscribe<verack_type>(verack_subscriber_);
+    unsubscribe<address_type>(address_subscriber_);
+    unsubscribe<get_address_type>(get_address_subscriber_);
+    unsubscribe<inventory_type>(inventory_subscriber_);
+    unsubscribe<get_data_type>(get_data_subscriber_);
+    unsubscribe<get_blocks_type>(get_blocks_subscriber_);
+    unsubscribe<transaction_type>(transaction_subscriber_);
+    unsubscribe<block_type>(block_subscriber_);
+    unsubscribe<ping_type>(ping_subscriber_);
+    unsubscribe<pong_type>(pong_subscriber_);
     raw_subscriber_.relay(error::service_stopped, header_type(), data_chunk());
 }
 
@@ -568,7 +577,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
         read_header();
 
     reset_timers();
-    loader_.load_lookup(header.command, payload);
+    loader_.load(header.command, payload);
 
     // Now we stop the channel if there was an error and we aren't yet stopped.
     if (ec)
