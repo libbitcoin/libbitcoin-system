@@ -40,9 +40,9 @@ channel_stream_loader::~channel_stream_loader()
 void channel_stream_loader::load(const std::string& symbol,
     const data_chunk& stream) const
 {
-    auto loader = modules_.find(symbol);
-    if (loader != modules_.end())
-        loader->second->attempt_load(stream);
+    auto it = modules_.find(symbol);
+    if (it != modules_.end())
+        it->second->attempt_load(stream);
 }
 
 } // namespace network
