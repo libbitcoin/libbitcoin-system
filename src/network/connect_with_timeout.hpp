@@ -44,8 +44,7 @@ private:
     void call_handle_connect(const boost::system::error_code& ec,
         tcp::resolver::iterator, network::connect_handler handle_connect);
 
-    void handle_timer(const boost::system::error_code& ec,
-        network::connect_handler handle_connect);
+    void handle_timer(const boost::system::error_code& ec);
 
     socket_ptr socket_;
     channel::channel_proxy_ptr proxy_;
