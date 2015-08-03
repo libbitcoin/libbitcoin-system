@@ -91,15 +91,10 @@ void connect_with_timeout::handle_timer(const boost::system::error_code& ec,
     if (aborted(ec))
         return;
 
-    auto error = error::boost_to_error_code(ec);
-    if (!error)
-    {
-        // If there is no error the timer fired because of expiration.
-        error = error::channel_timeout;
-        proxy_->stop(error);
-    }
-
-    handle_connect(error, nullptr);
+    // If there is no error the timer fired because of expiration.
+    using namespace error;
+    const auto code = ec ? boost_to_error_code(ec) : channel_timeout;
+    handle_connect(code, nullptr);
 }
 
 } // namespace network
