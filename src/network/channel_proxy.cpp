@@ -379,7 +379,7 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
         }
 
         log_debug(LOG_NETWORK)
-            << "Ping sent [" << address() << "] ";
+            << "Ping sent [" << address() << "]";
     };
 
     const auto nonce = pseudo_random();
