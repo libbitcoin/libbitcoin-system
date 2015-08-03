@@ -59,9 +59,9 @@ public:
         broadcast_handler;
 
     protocol(threadpool& pool, hosts& hosts, handshake& shake, network& net,
-        const config::endpoint::list& seeds=seeder::defaults,
-        uint16_t port=bc::protocol_port, size_t max_outbound=8,
-        size_t max_inbound=8);
+        uint16_t port=bc::protocol_port, bool relay=true,
+        size_t max_outbound=8, size_t max_inbound=8, 
+        const config::endpoint::list& seeds=seeder::defaults);
     
     /// This class is not copyable.
     protocol(const protocol&) = delete;
@@ -91,9 +91,10 @@ public:
      * this service will keep attempting to reconnect until successful.
      * @param[in]  address  The host address to maintain.
      * @param[in]  relay    Relay transactions (without a bloom filter).
+     * @param[in]  retries  Retry connection this many times (zero forever).
      */
-    void maintain_connection(const config::endpoint& address,
-        bool relay=true);
+    void maintain_connection(const std::string& hostname, uint16_t port,
+        bool relay=true, size_t retries=0);
 
     /**
      * Subscribe to new connections established to other nodes.
@@ -134,10 +135,6 @@ public:
     /// Deprecated, unreasonable to queue this, use total_connections.
     void fetch_connection_count(fetch_connection_count_handler handle_fetch);
 
-    /// Deprecated.
-    void maintain_connection(const std::string& hostname, uint16_t port,
-        bool relay=true);
-
     /// Deprecated, should be private since it's called from start.
     void run() {}
 
@@ -165,25 +162,37 @@ private:
     void handle_store_address(const std::error_code& ec);
 
     // Start outbound and accepting inbound connections
-    void start_connecting(completion_handler handle_complete);
-
-    // Outbound connections
-    void new_connection();
-    void start_connect(const std::error_code& ec,
-        const config::authority& peer);
-    void handle_connect(const std::error_code& ec, channel_ptr node,
-        const config::authority& peer);
-
-    // Manual connections
-    // void maintain_connection(...) <- public
-    void handle_manual_connect(const std::error_code& ec, channel_ptr node,
-        const std::string& hostname, uint16_t port, bool relay);
+    void start_connecting(completion_handler handle_complete, bool relay);
 
     // Inbound connections
-    void accept_connections();
-    void start_accept(const std::error_code& ec, acceptor_ptr accept);
+    void accept_connections(bool relay);
+    void start_accept(const std::error_code& ec, acceptor_ptr accept,
+        bool relay);
     void handle_accept(const std::error_code& ec, channel_ptr node,
-        acceptor_ptr accept);
+        acceptor_ptr accept, bool relay);
+
+    // Outbound connections
+    void new_connection(bool relay);
+    void start_connect(const std::error_code& ec,
+        const config::authority& peer, bool relay);
+    void handle_connect(const std::error_code& ec, channel_ptr node,
+        const config::authority& peer, bool relay);
+
+    // Manual connections
+    void handle_manual_connect(const std::error_code& ec, channel_ptr node,
+        const std::string& hostname, uint16_t port, bool relay,
+        size_t retries);
+    void retry_manual_connection(const config::endpoint& address,
+        bool relay, size_t retries);
+
+    // Remove channels from lists when disconnected.
+    void inbound_channel_stopped(const std::error_code& ec,
+        channel_ptr node, const std::string& hostname);
+    void outbound_channel_stopped(const std::error_code& ec,
+        channel_ptr node, const std::string& hostname, bool relay);
+    void manual_channel_stopped(const std::error_code& ec,
+        channel_ptr node, const std::string& hostname, bool relay,
+        size_t retries);
 
     // Channel setup
     bool is_banned(const config::authority& peer) const;
@@ -191,14 +200,6 @@ private:
     bool is_loopback(channel_ptr node) const;
     void remove_connection(channel_ptr_list& connections, channel_ptr node);
     void setup_new_channel(channel_ptr node);
-
-    // Remove channels from lists when disconnected.
-    void outbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname);
-    void manual_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname, bool relay);
-    void inbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname);
 
     /// Deprecated, unreasonable to queue this, use total_connections.
     void do_fetch_connection_count(
@@ -242,6 +243,7 @@ private:
     size_t max_outbound_;
     channel_ptr_list outbound_connections_;
 
+    bool relay_inbound_and_outbound_;
     boost::filesystem::path hosts_path_;
 };
 

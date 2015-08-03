@@ -49,8 +49,8 @@ using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
 protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
-    network& net, const config::endpoint::list& seeds, uint16_t port,
-    size_t max_outbound, size_t max_inbound)
+    network& net, uint16_t port, bool relay, size_t max_outbound,
+    size_t max_inbound, const config::endpoint::list& seeds)
   : strand_(pool),
     host_pool_(hosts),
     handshake_(shake),
@@ -59,7 +59,8 @@ protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
     channel_subscriber_(pool),
     inbound_port_(port),
     max_inbound_(max_inbound),
-    max_outbound_(max_outbound)
+    max_outbound_(max_outbound),
+    relay_inbound_and_outbound_(relay)
 {
 }
 
@@ -90,7 +91,7 @@ void protocol::start(completion_handler handle_complete)
     if (max_outbound_ == 0)
     {
         // Skip load/seed hosts if we aren't connecting outbound.
-        start_connecting(handle_complete);
+        start_connecting(handle_complete, relay_inbound_and_outbound_);
         return;
     }
 
@@ -129,7 +130,7 @@ void protocol::handle_hosts_count(const std::error_code& ec,
     if (hosts_count > 0)
     {
         // Bypass seeding if we have a non-empty hosts cache.
-        start_connecting(handle_complete);
+        start_connecting(handle_complete, relay_inbound_and_outbound_);
         return;
     }
 
@@ -149,56 +150,56 @@ void protocol::handle_seeder_start(const std::error_code& ec,
         return;
     }
 
-    start_connecting(handle_complete);
+    start_connecting(handle_complete, relay_inbound_and_outbound_);
 }
 
-void protocol::start_connecting(completion_handler handle_complete)
+void protocol::start_connecting(completion_handler handle_complete, bool relay)
 {
     // Start inbound connection listener.
     if (inbound_port_ > 0 && max_inbound_ > 0)
-        accept_connections();
+        accept_connections(relay);
 
     handle_complete(error::success);
 
     // Start outbound connection attempts.
     for (auto channel = 0; channel < max_outbound_; ++channel)
-        new_connection();
+        new_connection(relay);
 }
 
-void protocol::accept_connections()
+void protocol::accept_connections(bool relay)
 {
     network_.listen(inbound_port_,
         strand_.wrap(&protocol::start_accept,
-            this, _1, _2));
+            this, _1, _2, relay));
 }
 
-void protocol::new_connection()
+void protocol::new_connection(bool relay)
 {
     // Throttle outbound connections to a rate of 10 per second.
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     host_pool_.fetch_address(
         strand_.wrap(&protocol::start_connect,
-            this, _1, _2));
+            this, _1, _2, relay));
 }
 
 void protocol::start_connect(const std::error_code& ec,
-    const config::authority& peer)
+    const config::authority& peer, bool relay)
 {
     if (ec)
     {
-        handle_connect(ec, nullptr, peer);
+        handle_connect(ec, nullptr, peer, relay);
         return;
     }
 
     if (is_connected(peer))
     {
-        handle_connect(error::address_in_use, nullptr, peer);
+        handle_connect(error::address_in_use, nullptr, peer, relay);
         return;
     }
 
     if (is_banned(peer))
     {
-        handle_connect(error::address_blocked, nullptr, peer);
+        handle_connect(error::address_blocked, nullptr, peer, relay);
         return;
     }
 
@@ -206,14 +207,13 @@ void protocol::start_connect(const std::error_code& ec,
         << "Connecting to peer [" << peer.to_string() << "]";
 
     // OUTBOUND CONNECT WITH TIMEOUT
-    const auto relay = true;
     bc::network::connect(handshake_, network_, peer.to_hostname(), peer.port(),
         strand_.wrap(&protocol::handle_connect,
-            this, _1, _2, peer), relay);
+            this, _1, _2, peer, relay));
 }
 
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
-    const config::authority& peer)
+    const config::authority& peer, bool relay)
 {
     if (ec || !node)
     {
@@ -221,7 +221,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
             << "Failure connecting [" << peer << "] " << ec.message();
 
         // Restart connection attempt.
-        new_connection();
+        new_connection(relay);
         return;
     }
 
@@ -235,7 +235,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     // Subscribe to remove channel from list of connections when it stops.
     node->subscribe_stop(
         strand_.wrap(&protocol::outbound_channel_stopped,
-            this, _1, node, peer.to_string()));
+            this, _1, node, peer.to_string(), relay));
 
     setup_new_channel(node);
 }
@@ -245,23 +245,35 @@ void protocol::ban_connection(const config::authority& peer)
     banned_connections_.push_back(peer);
 }
 
-void protocol::maintain_connection(const config::endpoint& address, bool relay)
+void protocol::retry_manual_connection(const config::endpoint& address,
+    bool relay, size_t retries)
 {
-    maintain_connection(address.host(), address.port(), relay);
+    const auto done = (retries == 1);
+    if (done)
+    {
+        log_warning(LOG_PROTOCOL)
+            << "Failure connecting [" << address << "] retries exceeded";
+        return;
+    }
+
+    const auto forever = (retries == 0);
+    const auto retry = forever ? 0 : retries - 1;
+    maintain_connection(address.host(), address.port(), relay, retries);
 }
 
 // Deprecated.
 void protocol::maintain_connection(const std::string& hostname, uint16_t port,
-    bool relay)
+    bool relay, size_t retries)
 {
     // MANUAL CONNECT WITH TIMEOUT
     bc::network::connect(handshake_, network_, hostname, port,
         strand_.wrap(&protocol::handle_manual_connect,
-            this, _1, _2, hostname, port, relay));
+            this, _1, _2, hostname, port, relay, retries));
 }
 
 void protocol::handle_manual_connect(const std::error_code& ec,
-    channel_ptr node, const std::string& hostname, uint16_t port, bool relay)
+    channel_ptr node, const std::string& hostname, uint16_t port, bool relay,
+    size_t retries)
 {
     const config::endpoint peer(hostname, port);
 
@@ -273,7 +285,8 @@ void protocol::handle_manual_connect(const std::error_code& ec,
             << ec.message();
 
         // Retry connection.
-        maintain_connection(hostname, port, relay);
+        const config::endpoint address(hostname, port);
+        retry_manual_connection(address, relay, retries);
         return;
     }
 
@@ -286,12 +299,13 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     // Subscribe to channel stop notifications.
     node->subscribe_stop(
         strand_.wrap(&protocol::manual_channel_stopped,
-            this, _1, node, peer.to_string(), relay));
+            this, _1, node, peer.to_string(), relay, retries));
 
     setup_new_channel(node);
 }
 
-void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept)
+void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept,
+    bool relay)
 {
     if (ec || !accept)
     {
@@ -303,14 +317,14 @@ void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept)
     // ACCEPT INCOMING CONNECTIONS (NO TIMEOUT)
     accept->accept(
         strand_.wrap(&protocol::handle_accept,
-            this, _1, _2, accept));
+            this, _1, _2, accept, relay));
 }
 
 void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
-    acceptor_ptr accept)
+    acceptor_ptr accept, bool relay)
 {
     // Relisten for connections.
-    start_accept(ec, accept);
+    start_accept(ec, accept, relay);
 
     if (ec || !node)
     {
@@ -374,7 +388,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         strand_.wrap(&protocol::inbound_channel_stopped,
             this, _1, node, address.to_string()));
 
-    handshake_.ready(node, handshake_complete);
+    handshake_.ready(node, handshake_complete, relay);
 }
 
 void protocol::setup_new_channel(channel_ptr node)
@@ -419,7 +433,7 @@ void protocol::remove_connection(channel_ptr_list& connections,
 }
 
 void protocol::outbound_channel_stopped(const std::error_code& ec,
-    channel_ptr node, const std::string& address)
+    channel_ptr node, const std::string& address, bool relay)
 {
     if (ec)
     {
@@ -430,11 +444,11 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
 
     // We always create a replacement oubound connection.
     remove_connection(outbound_connections_, node);
-    new_connection();
+    new_connection(relay);
 }
 
 void protocol::manual_channel_stopped(const std::error_code& ec,
-    channel_ptr node, const std::string& address, bool relay)
+    channel_ptr node, const std::string& address, bool relay, size_t retries)
 {
     if (ec)
     {
@@ -445,7 +459,7 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
 
     // We always attempt to reconnect manual connections.
     remove_connection(manual_connections_, node);
-    maintain_connection(config::endpoint(address), relay);
+    retry_manual_connection(address, relay, retries);
 }
 
 void protocol::inbound_channel_stopped(const std::error_code& ec,
