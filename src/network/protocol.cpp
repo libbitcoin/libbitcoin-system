@@ -219,7 +219,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     if (ec || !node)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure connecting to peer [" << peer.to_string() << "] "
+            << "Failure connecting [" << peer.to_string() << "] "
             << ec.message();
 
         // Restart connection attempt.
@@ -271,7 +271,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     {
         // Warn because we are supposed to maintain this connection.
         log_warning(LOG_PROTOCOL)
-            << "Failure connecting to peer [" << peer << "] manually: "
+            << "Failure connecting [" << peer << "] manually: "
             << ec.message();
 
         // Retry connection.
