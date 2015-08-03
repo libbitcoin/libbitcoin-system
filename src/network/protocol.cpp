@@ -160,12 +160,9 @@ void protocol::start_connecting(completion_handler handle_complete)
 
     handle_complete(error::success);
 
-    // Start outbound connection attempts at a rate of 10 per second.
+    // Start outbound connection attempts.
     for (auto channel = 0; channel < max_outbound_; ++channel)
-    {
         new_connection();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
 }
 
 void protocol::accept_connections()
@@ -177,6 +174,8 @@ void protocol::accept_connections()
 
 void protocol::new_connection()
 {
+    // Throttle outbound connections to a rate of 10 per second.
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     host_pool_.fetch_address(
         strand_.wrap(&protocol::start_connect,
             this, _1, _2));
@@ -219,8 +218,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     if (ec || !node)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure connecting [" << peer.to_string() << "] "
-            << ec.message();
+            << "Failure connecting [" << peer << "] " << ec.message();
 
         // Restart connection attempt.
         new_connection();
