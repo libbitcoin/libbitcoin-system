@@ -184,44 +184,40 @@ public:
 
 private:
     typedef subscriber<const std::error_code&, const version_type&>
-        version_subscriber_type;
+        version_subscriber;
     typedef subscriber<const std::error_code&, const verack_type&>
-        verack_subscriber_type;
+        verack_subscriber;
     typedef subscriber<const std::error_code&, const address_type&>
-        address_subscriber_type;
+        address_subscriber;
     typedef subscriber<const std::error_code&, const get_address_type&>
-        get_address_subscriber_type;
+        get_address_subscriber;
     typedef subscriber<const std::error_code&, const inventory_type&>
-        inventory_subscriber_type;
+        inventory_subscriber;
     typedef subscriber<const std::error_code&, const get_data_type&>
-        get_data_subscriber_type;
+        get_data_subscriber;
     typedef subscriber<const std::error_code&, const get_blocks_type&>
-        get_blocks_subscriber_type;
+        get_blocks_subscriber;
     typedef subscriber<const std::error_code&, const transaction_type&>
-        transaction_subscriber_type;
+        transaction_subscriber;
     typedef subscriber<const std::error_code&, const block_type&>
-        block_subscriber_type;
+        block_subscriber;
     typedef subscriber<const std::error_code&, const ping_type&>
-        ping_subscriber_type;
+        ping_subscriber;
     typedef subscriber<const std::error_code&, const pong_type&>
-        pong_subscriber_type;
+        pong_subscriber;
     typedef subscriber<const std::error_code&, const header_type&,
-        const data_chunk&> raw_subscriber_type;
-    typedef subscriber<const std::error_code&> stop_subscriber_type;
+        const data_chunk&> raw_subscriber;
+    typedef subscriber<const std::error_code&> stop_subscriber;
 
     void stop(const boost::system::error_code& ec);
     void do_stop(const std::error_code& ec=error::service_stopped);
 
-    template <typename Message, typename Callback, typename SubscriberPtr>
-    void generic_subscribe(Callback handle_message,
-        SubscriberPtr message_subscribe)
-    {
-        // Subscribing must be immediate, we cannot switch thread contexts.
-        if (stopped())
-            handle_message(error::service_stopped, Message());
-        else
-            message_subscribe->subscribe(handle_message);
-    }
+    template<typename Message, class Subscriber>
+    void relay(Subscriber& subscriber);
+    template <typename Message, class Subscriber, typename Callback>
+    void subscribe(Subscriber& subscriber, Callback handler) const;
+    template <typename Message, class Subscriber>
+    void unsubscribe(Subscriber& subscriber) const;
 
     void reset_timers();
     void stop_impl();
@@ -248,9 +244,9 @@ private:
     void handle_read_payload(const boost::system::error_code& ec,
         size_t bytes_transferred, const header_type& header);
 
-    void handle_ping_message(const std::error_code& ec,
+    void handle_receive_ping(const std::error_code& ec,
         const ping_type& ping);
-    void handle_pong_message(const std::error_code& ec,
+    void handle_receive_pong(const std::error_code& ec,
         const pong_type& pong, uint64_t nonce);
 
     void call_handle_send(const boost::system::error_code& ec,
@@ -285,24 +281,21 @@ private:
     // could not match 'boost::array' against 'std::array'
     boost::array<uint8_t, header_chunk_size> inbound_header_;
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;
-
     data_chunk inbound_payload_;
 
-    // We should be using variadic templates for these
-    version_subscriber_type::ptr version_subscriber_;
-    verack_subscriber_type::ptr verack_subscriber_;
-    address_subscriber_type::ptr address_subscriber_;
-    get_address_subscriber_type::ptr get_address_subscriber_;
-    inventory_subscriber_type::ptr inventory_subscriber_;
-    get_data_subscriber_type::ptr get_data_subscriber_;
-    get_blocks_subscriber_type::ptr get_blocks_subscriber_;
-    transaction_subscriber_type::ptr transaction_subscriber_;
-    block_subscriber_type::ptr block_subscriber_;
-    ping_subscriber_type::ptr ping_subscriber_;
-    pong_subscriber_type::ptr pong_subscriber_;
-
-    raw_subscriber_type::ptr raw_subscriber_;
-    stop_subscriber_type::ptr stop_subscriber_;
+    version_subscriber version_subscriber_;
+    verack_subscriber verack_subscriber_;
+    address_subscriber address_subscriber_;
+    get_address_subscriber get_address_subscriber_;
+    inventory_subscriber inventory_subscriber_;
+    get_data_subscriber get_data_subscriber_;
+    get_blocks_subscriber get_blocks_subscriber_;
+    transaction_subscriber transaction_subscriber_;
+    block_subscriber block_subscriber_;
+    ping_subscriber ping_subscriber_;
+    pong_subscriber pong_subscriber_;
+    raw_subscriber raw_subscriber_;
+    stop_subscriber stop_subscriber_;
 };
 
 } // namespace network

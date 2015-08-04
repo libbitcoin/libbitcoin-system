@@ -24,6 +24,7 @@
 #include <functional>
 #include <memory>
 #include <system_error>
+#include <thread>
 #include <vector>
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
@@ -47,24 +48,19 @@ using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-// These are not configurable.
-static const size_t sweep_connection_limit = 10;
-static const auto sweep_reset_interval = seconds(1);
-
 protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
-    network& net, const config::endpoint::list& seeds, uint16_t port,
-    size_t max_outbound, size_t max_inbound)
+    network& net, uint16_t port, bool relay, size_t max_outbound,
+    size_t max_inbound, const config::endpoint::list& seeds)
   : strand_(pool),
     host_pool_(hosts),
     handshake_(shake),
     network_(net),
     seeder_(pool, hosts, shake, net, seeds),
+    channel_subscriber_(pool),
     inbound_port_(port),
     max_inbound_(max_inbound),
     max_outbound_(max_outbound),
-    sweep_timer_(pool.service()),
-    sweep_count_(0),
-    channel_subscribe_(std::make_shared<channel_subscriber_type>(pool))
+    relay_inbound_and_outbound_(relay)
 {
 }
 
@@ -86,17 +82,16 @@ void protocol::handle_hosts_save(const std::error_code& ec,
         return;
     }
 
-    channel_subscribe_->relay(error::service_stopped, nullptr);
+    channel_subscriber_.relay(error::service_stopped, nullptr);
     handle_complete(error::success);
 }
 
 void protocol::start(completion_handler handle_complete)
 {
-    // No need to load or seed hosts if we aren't connecting outbound.
     if (max_outbound_ == 0)
     {
-        run();
-        handle_complete(error::success);
+        // Skip load/seed hosts if we aren't connecting outbound.
+        start_connecting(handle_complete, relay_inbound_and_outbound_);
         return;
     }
 
@@ -135,7 +130,7 @@ void protocol::handle_hosts_count(const std::error_code& ec,
     if (hosts_count > 0)
     {
         // Bypass seeding if we have a non-empty hosts cache.
-        handle_seeder_start(error::success, handle_complete);
+        start_connecting(handle_complete, relay_inbound_and_outbound_);
         return;
     }
 
@@ -155,243 +150,92 @@ void protocol::handle_seeder_start(const std::error_code& ec,
         return;
     }
 
-    run();
-    handle_complete(ec);
+    start_connecting(handle_complete, relay_inbound_and_outbound_);
 }
 
-// Eliminate this method and continue from handle_seed so that remaining 
-// startup error conditions can be handled.
-void protocol::run()
+void protocol::start_connecting(completion_handler handle_complete, bool relay)
 {
-    // Loop over outbound connections and start sweep timers.
-    strand_.queue(
-        std::bind(&protocol::start_connecting,
-            this));
+    // Start inbound connection listener.
+    if (inbound_port_ > 0 && max_inbound_ > 0)
+        accept_connections(relay);
 
-    // Are we accepting inbound connections?
-    if (inbound_port_ == 0 || max_inbound_ == 0)
-        return;
+    handle_complete(error::success);
 
-    // Start listening for inbound connections.
+    // Start outbound connection attempts.
+    for (auto channel = 0; channel < max_outbound_; ++channel)
+        new_connection(relay);
+}
+
+void protocol::accept_connections(bool relay)
+{
     network_.listen(inbound_port_,
-        strand_.wrap(&protocol::handle_listen,
-            this, _1, _2));
+        strand_.wrap(&protocol::start_accept,
+            this, _1, _2, relay));
 }
 
-std::string protocol::state_to_string(connect_state state) const
+void protocol::new_connection(bool relay)
 {
-    switch (state)
-    {
-        case connect_state::finding_peer:
-            return "finding peer";
-        case connect_state::connecting:
-            return "connecting to peer";
-        case connect_state::established:
-            return "established connection";
-        case connect_state::stopped:
-            return "stopped";
-        default:
-            return "unknown";
-    }
-}
-
-void protocol::modify_slot(slot_index slot, connect_state state)
-{
-    connect_states_[slot] = state;
-    log_debug(LOG_PROTOCOL)
-        << "Outbound connection on slot ["
-        << slot << "] " << state_to_string(state) << ".";
-}
-
-void protocol::start_connecting()
-{
-    // Initialize the connection slots.
-    BITCOIN_ASSERT(outbound_connections_.empty());
-    BITCOIN_ASSERT(connect_states_.empty());
-    connect_states_.resize(max_outbound_);
-
-    for (size_t slot = 0; slot < connect_states_.size(); ++slot)
-        modify_slot(slot, connect_state::stopped);
-
-    // Start the main outbound connect loop.
-    if (max_outbound_ > 0)
-    {
-        start_stopped_connects();
-        start_sweep_reset_timer();
-    }
-}
-
-void protocol::start_stopped_connects()
-{
-    for (size_t slot = 0; slot < connect_states_.size(); ++slot)
-        if (connect_states_[slot] == connect_state::stopped)
-            try_connect_once(slot);
-}
-
-void protocol::try_connect_once(slot_index slot)
-{
-    ++sweep_count_;
-    if (sweep_count_ > sweep_connection_limit)
-        return;
-
-    BITCOIN_ASSERT(slot <= connect_states_.size());
-    BITCOIN_ASSERT(connect_states_[slot] == connect_state::stopped);
-
-    // Begin connection flow: finding_peer -> connecting -> established.
-    // Failures end with connect_state::stopped and loop back here again.
-    modify_slot(slot, connect_state::finding_peer);
+    // Throttle outbound connections to a rate of 10 per second.
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     host_pool_.fetch_address(
-        strand_.wrap(&protocol::attempt_connect, 
-            this, _1, _2, slot));
+        strand_.wrap(&protocol::start_connect,
+            this, _1, _2, relay));
 }
 
-void protocol::start_sweep_reset_timer()
+void protocol::start_connect(const std::error_code& ec,
+    const config::authority& peer, bool relay)
 {
-    // This timer just loops continuously at fixed intervals
-    // resetting the sweep_count_ variable and starting stopped slots.
-    const auto reset_sweep = [this](const boost::system::error_code& ec)
-    {
-        if (ec)
-        {
-            if (ec != boost::asio::error::operation_aborted)
-                log_error(LOG_PROTOCOL)
-                    << "Failure resetting sweep timer: " << ec.message();
-
-            BITCOIN_ASSERT(ec == boost::asio::error::operation_aborted);
-            return;
-        }
-
-        if (sweep_count_ > sweep_connection_limit)
-            log_debug(LOG_PROTOCOL)
-                << "Resuming connection attempts.";
-
-        // Perform the reset, reallowing connection attempts.
-        sweep_count_ = 0;
-        start_stopped_connects();
-
-        // Looping timer...
-        start_sweep_reset_timer();
-    };
-
-    sweep_timer_.expires_from_now(sweep_reset_interval);
-    sweep_timer_.async_wait(strand_.wrap(reset_sweep, _1));
-}
-
-// Determine if the address is banned.
-bool protocol::is_banned(const config::authority& peer)
-{
-    for (const auto& banned: banned_connections_)
-        if ((banned.port() == 0 || banned.port() == peer.port()) &&
-            banned.ip() == peer.ip())
-            return true;
-
-    return false;
-}
-
-// Determine if the connection is manual.
-bool protocol::is_manual(channel_ptr node)
-{
-    auto it = std::find(manual_connections_.begin(), manual_connections_.end(), node);
-    return it != manual_connections_.end();
-}
-
-// Determine if we are connected to the address for any reason.
-bool protocol::is_connected(const config::authority& peer)
-{
-    for (const auto node: outbound_connections_)
-        if (node->address() == peer)
-            return true;
-
-    for (const auto node: inbound_connections_)
-        if (node->address() == peer)
-            return true;
-
-    for (const auto node: manual_connections_)
-        if (node->address() == peer)
-            return true;
-
-    return false;
-}
-
-void protocol::attempt_connect(const std::error_code& ec,
-    const config::authority& peer, slot_index slot)
-{
-    BITCOIN_ASSERT(connect_states_[slot] == connect_state::finding_peer);
-    modify_slot(slot, connect_state::connecting);
-
     if (ec)
     {
-        log_error(LOG_PROTOCOL)
-            << "Failure selecting a peer address for slot ["
-            << slot << "] " << ec.message();
+        handle_connect(ec, nullptr, peer, relay);
         return;
     }
 
-    // It is possible for this guard to be violated by a race.
     if (is_connected(peer))
     {
-        log_debug(LOG_PROTOCOL)
-            << "Already connected to selected peer [" 
-            << peer.to_string() << "]";
-
-        // Retry another connection, still in same strand.
-        modify_slot(slot, connect_state::stopped);
-        try_connect_once(slot);
+        handle_connect(error::address_in_use, nullptr, peer, relay);
         return;
     }
 
     if (is_banned(peer))
     {
-        log_debug(LOG_PROTOCOL)
-            << "Selected banned peer [" << peer.to_string() << "]";
-
-        // Retry another connection, still in same strand.
-        modify_slot(slot, connect_state::stopped);
-        try_connect_once(slot);
+        handle_connect(error::address_blocked, nullptr, peer, relay);
         return;
     }
 
     log_debug(LOG_PROTOCOL)
-        << "Connecting to peer [" << peer.to_string()
-        << "] on slot [" << slot << "]";
+        << "Connecting to peer [" << peer.to_string() << "]";
 
     // OUTBOUND CONNECT WITH TIMEOUT
-    const bool relay = true;
     bc::network::connect(handshake_, network_, peer.to_hostname(), peer.port(),
         strand_.wrap(&protocol::handle_connect,
-            this, _1, _2, peer, slot), relay);
+            this, _1, _2, peer, relay));
 }
 
 void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
-    const config::authority& peer, slot_index slot)
+    const config::authority& peer, bool relay)
 {
-    BITCOIN_ASSERT(connect_states_[slot] == connect_state::connecting);
-
     if (ec || !node)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure connecting to peer [" << peer.to_string()
-            << "] on slot [" << slot << "] " << ec.message();
+            << "Failure connecting [" << peer << "] " << ec.message();
 
-        // Retry another connection, still in same strand.
-        modify_slot(slot, connect_state::stopped);
-        try_connect_once(slot);
+        // Restart connection attempt.
+        new_connection(relay);
         return;
     }
 
-    modify_slot(slot, connect_state::established);
-    BITCOIN_ASSERT(outbound_connections_.size() <= max_outbound_);
     outbound_connections_.push_back(node);
 
     // Connected!
     log_info(LOG_PROTOCOL)
-        << "Connected to peer [" << peer.to_string() << "] on slot ["
-        << slot << "] (" << outbound_connections_.size() << " total)";
+        << "Connected to peer [" << peer.to_string() << "] (" 
+        << outbound_connections_.size() << " total)";
 
-    // Remove channel from list of connections.
+    // Subscribe to remove channel from list of connections when it stops.
     node->subscribe_stop(
         strand_.wrap(&protocol::outbound_channel_stopped,
-            this, _1, node, peer.to_string(), slot));
+            this, _1, node, peer.to_string(), relay));
 
     setup_new_channel(node);
 }
@@ -401,23 +245,35 @@ void protocol::ban_connection(const config::authority& peer)
     banned_connections_.push_back(peer);
 }
 
-void protocol::maintain_connection(const config::endpoint& address, bool relay)
+void protocol::retry_manual_connection(const config::endpoint& address,
+    bool relay, size_t retries)
 {
-    maintain_connection(address.host(), address.port(), relay);
+    const auto done = (retries == 1);
+    if (done)
+    {
+        log_warning(LOG_PROTOCOL)
+            << "Failure connecting [" << address << "] retries exceeded";
+        return;
+    }
+
+    const auto forever = (retries == 0);
+    const auto retry = forever ? 0 : retries - 1;
+    maintain_connection(address.host(), address.port(), relay, retries);
 }
 
 // Deprecated.
 void protocol::maintain_connection(const std::string& hostname, uint16_t port,
-    bool relay)
+    bool relay, size_t retries)
 {
     // MANUAL CONNECT WITH TIMEOUT
     bc::network::connect(handshake_, network_, hostname, port,
         strand_.wrap(&protocol::handle_manual_connect,
-            this, _1, _2, hostname, port, relay));
+            this, _1, _2, hostname, port, relay, retries));
 }
 
 void protocol::handle_manual_connect(const std::error_code& ec,
-    channel_ptr node, const std::string& hostname, uint16_t port, bool relay)
+    channel_ptr node, const std::string& hostname, uint16_t port, bool relay,
+    size_t retries)
 {
     const config::endpoint peer(hostname, port);
 
@@ -425,11 +281,12 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     {
         // Warn because we are supposed to maintain this connection.
         log_warning(LOG_PROTOCOL)
-            << "Failure connecting to peer [" << peer << "] manually: "
+            << "Failure connecting [" << peer << "] manually: "
             << ec.message();
 
-        // Retry connect.
-        maintain_connection(hostname, port, relay);
+        // Retry connection.
+        const config::endpoint address(hostname, port);
+        retry_manual_connection(address, relay, retries);
         return;
     }
 
@@ -442,41 +299,34 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     // Subscribe to channel stop notifications.
     node->subscribe_stop(
         strand_.wrap(&protocol::manual_channel_stopped,
-            this, _1, node, peer.to_string(), relay));
+            this, _1, node, peer.to_string(), relay, retries));
 
     setup_new_channel(node);
 }
 
-void protocol::handle_listen(const std::error_code& ec, acceptor_ptr accept)
+void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept,
+    bool relay)
 {
-    if (!accept)
-        return;
-
-    if (ec)
+    if (ec || !accept)
     {
         log_error(LOG_PROTOCOL)
-            << "Error while starting listener: " << ec.message();
+            << "Error starting listener: " << ec.message();
         return;
     }
 
     // ACCEPT INCOMING CONNECTIONS (NO TIMEOUT)
     accept->accept(
         strand_.wrap(&protocol::handle_accept,
-            this, _1, _2, accept));
+            this, _1, _2, accept, relay));
 }
 
 void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
-    acceptor_ptr accept)
+    acceptor_ptr accept, bool relay)
 {
-    if (!accept)
-        return;
-
     // Relisten for connections.
-    accept->accept(
-        strand_.wrap(&protocol::handle_accept,
-            this, _1, _2, accept));
+    start_accept(ec, accept, relay);
 
-    if (ec)
+    if (ec || !node)
     {
         if (node)
             log_debug(LOG_PROTOCOL)
@@ -489,24 +339,23 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         return;
     }
 
-    const auto address = node->address();
-
-    // TODO: we would prefer to limit using slots and stop the listener.
     if (inbound_connections_.size() >= max_inbound_)
     {
-        log_info(LOG_PROTOCOL)
-            << "Blocked due to inbound connection limit [" << address << "]";
-
-        node->stop();
+        node->stop(error::connection_limit);
         return;
     }
 
+    const auto address = node->address();
+
     if (is_banned(address))
     {
-        log_info(LOG_PROTOCOL)
-            << "Blocked banned connection from [" << address << "]";
+        node->stop(error::address_blocked);
+        return;
+    }
 
-        node->stop();
+    if (is_loopback(node))
+    {
+        node->stop(error::connection_to_self);
         return;
     }
 
@@ -539,7 +388,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         strand_.wrap(&protocol::inbound_channel_stopped,
             this, _1, node, address.to_string()));
 
-    handshake_.ready(node, handshake_complete);
+    handshake_.ready(node, handshake_complete, relay);
 }
 
 void protocol::setup_new_channel(channel_ptr node)
@@ -572,19 +421,19 @@ void protocol::setup_new_channel(channel_ptr node)
     }
 
     // Notify subscribers
-    channel_subscribe_->relay(error::success, node);
+    channel_subscriber_.relay(error::success, node);
 }
 
 void protocol::remove_connection(channel_ptr_list& connections,
     channel_ptr node)
 {
     auto it = std::find(connections.begin(), connections.end(), node);
-    BITCOIN_ASSERT(it != connections.end());
-    connections.erase(it);
+    if (it != connections.end())
+        connections.erase(it);
 }
 
 void protocol::outbound_channel_stopped(const std::error_code& ec,
-    channel_ptr node, const std::string& address, slot_index slot)
+    channel_ptr node, const std::string& address, bool relay)
 {
     if (ec)
     {
@@ -593,15 +442,13 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
             << ec.message();
     }
 
-    // We must always attempt a new connection.
+    // We always create a replacement oubound connection.
     remove_connection(outbound_connections_, node);
-    BITCOIN_ASSERT(connect_states_[slot] == connect_state::established);
-    modify_slot(slot, connect_state::stopped);
-    try_connect_once(slot);
+    new_connection(relay);
 }
 
 void protocol::manual_channel_stopped(const std::error_code& ec,
-    channel_ptr node, const std::string& address, bool relay)
+    channel_ptr node, const std::string& address, bool relay, size_t retries)
 {
     if (ec)
     {
@@ -610,9 +457,9 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
             << ec.message();
     }
 
-    // We must always attempt a reconnection.
+    // We always attempt to reconnect manual connections.
     remove_connection(manual_connections_, node);
-    maintain_connection(config::endpoint(address), relay);
+    retry_manual_connection(address, relay, retries);
 }
 
 void protocol::inbound_channel_stopped(const std::error_code& ec,
@@ -665,6 +512,72 @@ void protocol::handle_store_address(const std::error_code& ec)
             << ec.message();
 }
 
+void protocol::subscribe_channel(channel_handler handle_channel)
+{
+    channel_subscriber_.subscribe(handle_channel);
+}
+
+size_t protocol::total_connections() const
+{
+    return outbound_connections_.size() + manual_connections_.size() +
+        inbound_connections_.size();
+}
+
+// Determine if the address is banned.
+bool protocol::is_banned(const config::authority& peer) const
+{
+    const auto& banned = banned_connections_;
+    const auto predicate = [&peer](const config::authority& node)
+    {
+        return (node.port() == 0 || node.port() == peer.port()) &&
+            (node.ip() == peer.ip());
+    };
+    auto it = std::find_if(banned.begin(), banned.end(), predicate);
+    return it != banned.end();
+    return true;
+}
+
+// Determine if we are connected to the address for any reason.
+bool protocol::is_connected(const config::authority& peer) const
+{
+    // TODO: add connection_type to node so we only need one connection pool.
+    const auto& inn = inbound_connections_;
+    const auto& out = outbound_connections_;
+    const auto& man = manual_connections_;
+    const auto predicate = [&peer](const channel_ptr& node)
+    {
+        return (node->address() == peer);
+    };
+    return
+        (std::find_if(inn.begin(), inn.end(), predicate) != inn.end()) ||
+        (std::find_if(out.begin(), out.end(), predicate) != out.end()) ||
+        (std::find_if(man.begin(), man.end(), predicate) != man.end());
+}
+
+// Determine if connection matches the nonce of one of our own outbounds.
+bool protocol::is_loopback(channel_ptr peer) const
+{
+    const auto& outbound = outbound_connections_;
+    const auto peer_nonce = peer->nonce();
+    const auto predicate = [peer, peer_nonce](const channel_ptr& node)
+    {
+        return (node != peer) && (node->nonce() == peer_nonce);
+    };
+    auto it = std::find_if(outbound.begin(), outbound.end(), predicate);
+    return it != outbound.end();
+    return true;
+}
+
+void protocol::set_max_outbound(size_t max_outbound)
+{
+    max_outbound_ = max_outbound;
+}
+
+void protocol::set_hosts_filename(const std::string& hosts_path)
+{
+    host_pool_.file_path_ = hosts_path;
+}
+
 // Deprecated, unreasonable to queue this, use total_connections.
 void protocol::fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
@@ -679,27 +592,6 @@ void protocol::do_fetch_connection_count(
     fetch_connection_count_handler handle_fetch)
 {
     handle_fetch(error::success, outbound_connections_.size());
-}
-
-void protocol::subscribe_channel(channel_handler handle_channel)
-{
-    channel_subscribe_->subscribe(handle_channel);
-}
-
-size_t protocol::total_connections() const
-{
-    return outbound_connections_.size() + manual_connections_.size() +
-        inbound_connections_.size();
-}
-
-void protocol::set_max_outbound(size_t max_outbound)
-{
-    max_outbound_ = max_outbound;
-}
-
-void protocol::set_hosts_filename(const std::string& hosts_path)
-{
-    host_pool_.file_path_ = hosts_path;
 }
 
 // Deprecated, this is problematic because there is no enabler.

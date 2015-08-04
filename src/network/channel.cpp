@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/network/channel.hpp>
 
+#include <cstdint>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -27,7 +28,8 @@ namespace libbitcoin {
 namespace network {
 
 channel::channel(channel_proxy_ptr proxy)
-  : weak_proxy_(proxy)
+  : weak_proxy_(proxy),
+    nonce_(0)
 {
 }
 
@@ -36,11 +38,11 @@ channel::~channel()
     stop();
 }
 
-void channel::stop() const
+void channel::stop(const std::error_code& ec)
 {
     const auto proxy = weak_proxy_.lock();
     if (proxy)
-        proxy->stop();
+        proxy->stop(ec);
 }
 
 bool channel::stopped() const
@@ -61,6 +63,16 @@ config::authority channel::address() const
     return config::authority();
 }
 
+uint64_t channel::nonce() const
+{
+    return nonce_;
+}
+
+void channel::set_nonce(uint64_t nonce)
+{
+    nonce_ = nonce;
+}
+
 void channel::reset_revival()
 {
     const auto proxy = weak_proxy_.lock();
@@ -73,13 +85,6 @@ void channel::set_revival_handler(channel_proxy::revival_handler handler)
     const auto proxy = weak_proxy_.lock();
     if (proxy)
         return proxy->set_revival_handler(handler);
-}
-
-void channel::set_nonce(uint64_t nonce)
-{
-    const auto proxy = weak_proxy_.lock();
-    if (proxy)
-        return proxy->set_nonce(nonce);
 }
 
 void channel::send_raw(const header_type& packet_header,

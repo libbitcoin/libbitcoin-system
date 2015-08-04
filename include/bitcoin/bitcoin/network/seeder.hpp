@@ -38,7 +38,7 @@ namespace network {
 class BC_API seeder
 {
 public:
-    typedef std::function<void(const std::error_code&)> completion_handler;
+    typedef std::function<void(const std::error_code&)> seeded_handler;
 
     static const config::endpoint::list defaults;
 
@@ -49,18 +49,20 @@ public:
     seeder(const seeder&) = delete;
     void operator=(const seeder&) = delete;
 
-    void start(completion_handler handle_complete);
+    void start(seeded_handler handle_seeded);
 
 private:
-    void contact(const config::endpoint& seed);
-    void connect(const std::error_code& ec, const config::endpoint& seed,
-        channel_ptr node);
-    void visit();
-
-    void handle_send(const std::error_code& ec);
-    void handle_store_all(const std::error_code& ec,
-        const address_type& message, channel_ptr node);
-    void handle_store_one(const std::error_code& ec);
+    void connect(const config::endpoint& seed, seeded_handler handle_seeded);
+    void handle_connected(const std::error_code& ec, channel_ptr node,
+        const config::endpoint& seed, seeded_handler handle_seeded);
+    void handle_synced(const std::error_code& ec, size_t host_start_count,
+        seeded_handler handle_complete);
+    void handle_receive(const std::error_code& ec, const address_type& message,
+        const config::endpoint& seed, channel_ptr node, 
+        seeded_handler handle_seeded);
+    void handle_send(const std::error_code& ec, const config::endpoint& seed,
+        seeded_handler handle_seeded);
+    void handle_store(const std::error_code& ec);
 
     async_strand strand_;
     hosts& host_pool_;
@@ -68,9 +70,7 @@ private:
     network& network_;
     const config::endpoint::list& seeds_;
 
-    size_t visited_;
-    bool success_;
-    completion_handler handle_complete_;
+    config::endpoint::list remaining_;
 };
 
 } // namespace network

@@ -37,14 +37,14 @@ public:
         uint32_t channel_expiration_minutes,
         uint32_t channel_timeout_minutes,
         uint32_t channel_heartbeat_minutes,
-        uint32_t channel_startup_minutes,
+        uint32_t channel_handshake_minutes,
         uint32_t channel_revival_minutes,
         uint32_t connect_timeout_seconds);
 
     boost::posix_time::time_duration expiration;
     boost::posix_time::time_duration inactivity;
     boost::posix_time::time_duration heartbeat;
-    boost::posix_time::time_duration startup;
+    boost::posix_time::time_duration handshake;
     boost::posix_time::time_duration revival;
     boost::posix_time::time_duration connection;
 };

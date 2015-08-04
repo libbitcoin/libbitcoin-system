@@ -22,7 +22,7 @@
 
 #include <functional>
 #include <memory>
-#include <stack>
+#include <vector>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -31,22 +31,20 @@ namespace libbitcoin {
 
 template <typename... Args>
 class subscriber
-  : public std::enable_shared_from_this<subscriber<Args...>>
 {
 public:
-    typedef std::function<void (Args...)> handler_type;
-    typedef std::shared_ptr<subscriber<Args...>> ptr;
+    typedef std::function<void (Args...)> subscription_handler;
 
     subscriber(threadpool& pool)
       : strand_(pool)
     {
     }
 
-    void subscribe(handler_type handle)
+    void subscribe(subscription_handler handler)
     {
         auto dispatch_subscribe =
             strand_.wrap(&subscriber<Args...>::do_subscribe,
-                this->shared_from_this(), handle);
+                this, handler);
 
         dispatch_subscribe();
     }
@@ -55,41 +53,34 @@ public:
     {
         auto dispatch_relay =
             strand_.wrap(&subscriber<Args...>::do_relay,
-                this->shared_from_this(), std::forward<Args>(params)...);
+                this, std::forward<Args>(params)...);
 
         dispatch_relay();
     }
 
 private:
-    typedef std::stack<handler_type> registry_stack;
+    typedef std::vector<subscription_handler> subscription_list;
 
-    void do_subscribe(handler_type handle)
+    void do_subscribe(subscription_handler notifier)
     {
-        registry_.push(handle);
+        subscriptions_.push_back(notifier);
     }
 
     void do_relay(Args... params)
     {
-        auto notify_copy = registry_;
-        registry_ = registry_stack();
-        while (!notify_copy.empty())
-        {
-            notify_copy.top()(params...);
-            notify_copy.pop();
-        }
+        if (subscriptions_.empty())
+            return;
 
-        BITCOIN_ASSERT(notify_copy.empty());
+        const auto subscriptions = subscriptions_;
+        subscriptions_.clear();
+        for (const auto notifier: subscriptions)
+            notifier(params...);
     }
 
     async_strand strand_;
-    registry_stack registry_;
+    subscription_list subscriptions_;
 };
-
-// TODO: push into subscriber<Agrs...> (interface break).
-template <typename... Args>
-using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
 
 } // namespace libbitcoin
 
 #endif
-

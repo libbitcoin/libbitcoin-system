@@ -49,7 +49,8 @@ namespace network {
 class BC_API protocol
 {
 public:
-    typedef std::function<void (const std::error_code&)> completion_handler;
+    typedef std::function<void (const std::error_code&)>
+        completion_handler;
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_connection_count_handler;
     typedef std::function<void (const std::error_code&, channel_ptr)>
@@ -58,9 +59,9 @@ public:
         broadcast_handler;
 
     protocol(threadpool& pool, hosts& hosts, handshake& shake, network& net,
-        const config::endpoint::list& seeds=seeder::defaults,
-        uint16_t port=bc::protocol_port, size_t max_outbound=8,
-        size_t max_inbound=8);
+        uint16_t port=bc::protocol_port, bool relay=true,
+        size_t max_outbound=8, size_t max_inbound=8, 
+        const config::endpoint::list& seeds=seeder::defaults);
     
     /// This class is not copyable.
     protocol(const protocol&) = delete;
@@ -80,12 +81,6 @@ public:
     void stop(completion_handler handle_complete);
 
     /**
-     * Determine if the connection is manual.
-     * @param[in]  node  The node of interest.
-     */
-    bool is_manual(channel_ptr node);
-
-    /**
      * Add a banned connection.
      * @param[in]  peer  The peer to ban.
      */
@@ -96,9 +91,10 @@ public:
      * this service will keep attempting to reconnect until successful.
      * @param[in]  address  The host address to maintain.
      * @param[in]  relay    Relay transactions (without a bloom filter).
+     * @param[in]  retries  Retry connection this many times (zero forever).
      */
-    void maintain_connection(const config::endpoint& address,
-        bool relay=true);
+    void maintain_connection(const std::string& hostname, uint16_t port,
+        bool relay=true, size_t retries=0);
 
     /**
      * Subscribe to new connections established to other nodes.
@@ -115,16 +111,6 @@ public:
      * The summation is not thread safe. Intended for diagnostics only.
      */
     size_t total_connections() const;
-
-    /**
-     * Determine if the listener is enabled.
-     */
-    bool get_listening();
-
-    /**
-     * Enable or disable the listener.
-     */
-    void set_listening(bool value=true);
 
     /**
      * Broadcast a message to all nodes in our connection list.
@@ -149,12 +135,8 @@ public:
     /// Deprecated, unreasonable to queue this, use total_connections.
     void fetch_connection_count(fetch_connection_count_handler handle_fetch);
 
-    /// Deprecated.
-    void maintain_connection(const std::string& hostname, uint16_t port,
-        bool relay=true);
-
     /// Deprecated, should be private since it's called from start.
-    void run();
+    void run() {}
 
     /// Deprecated, construct hosts with path.
     void set_hosts_filename(const std::string& hosts_path);
@@ -163,88 +145,61 @@ public:
     void set_max_outbound(size_t max_outbound);
 
 private:
-    enum class connect_state
-    {
-        finding_peer,
-        connecting,
-        established,
-        stopped
-    };
-
-    typedef size_t slot_index;
     typedef std::vector<channel_ptr> channel_ptr_list;
-    typedef std::vector<connect_state> connect_state_list;
-    typedef subscriber<const std::error_code&, channel_ptr>
-        channel_subscriber_type;
+    typedef subscriber<const std::error_code&, channel_ptr> channel_subscriber;
 
+    // Startup sequence
     void handle_hosts_load(const std::error_code& ec,
         completion_handler handle_complete);
-    void handle_hosts_count(const std::error_code& ec, size_t hosts_count,
-        completion_handler handle_complete);
-    void handle_handshake_start(const std::error_code& ec,
-        completion_handler handle_complete);
+    void handle_hosts_count(const std::error_code& ec,
+        size_t hosts_count, completion_handler handle_complete);
     void handle_seeder_start(const std::error_code& ec,
         completion_handler handle_complete);
     void handle_hosts_save(const std::error_code& ec,
         completion_handler handle_complete);
-
-    std::string state_to_string(connect_state state) const;
-    void modify_slot(slot_index slot, connect_state state);
-
-    // run loop
-    void start_connecting();
-
-    // Connect outwards
-    void start_stopped_connects();
-
-    // This function is called in these places:
-    //
-    // 1. try_outbound_connects() calls it n times.
-    // Called by run() at the start.
-    // 2. If we fetch a random node address that we are already
-    // connected to in attempt_connect().
-    // 3. If we fail to connect to said address in handle_connect().
-    // 4. If the channel is stopped manually or there is an error
-    // (such as a disconnect). See setup_new_channel() for the
-    // subscribe call.
-    void try_connect_once(slot_index slot);
-    void attempt_connect(const std::error_code& ec,
-        const config::authority& peer, slot_index slot);
-    void handle_connect(const std::error_code& ec, channel_ptr node,
-        const config::authority& peer, slot_index slot);
-
-    // Periodically call this method to reset the sweep and reallow
-    // connections. This prevents too many connection attempts from
-    // exhausting resources by putting a limit on connection attempts
-    // within a certain time interval.
-    void start_sweep_reset_timer();
-
-    // Manual connections
-    void handle_manual_connect(const std::error_code& ec, channel_ptr node,
-        const std::string& hostname, uint16_t port, bool relay);
-
-    // Accept inwards connections
-    void handle_listen(const std::error_code& ec, acceptor_ptr accept);
-    void handle_accept(const std::error_code& ec, channel_ptr node,
-        acceptor_ptr accept);
-
-    // Channel setup
-    bool is_banned(const config::authority& peer);
-    bool is_connected(const config::authority& peer);
-    void remove_connection(channel_ptr_list& connections, channel_ptr node);
-    void setup_new_channel(channel_ptr node);
-
-    // Remove channels from lists when disconnected.
-    void outbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname, slot_index slot);
-    void manual_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname, bool relay);
-    void inbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname);
-
     void handle_address_message(const std::error_code& ec,
         const address_type& message, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
+
+    // Start outbound and accepting inbound connections
+    void start_connecting(completion_handler handle_complete, bool relay);
+
+    // Inbound connections
+    void accept_connections(bool relay);
+    void start_accept(const std::error_code& ec, acceptor_ptr accept,
+        bool relay);
+    void handle_accept(const std::error_code& ec, channel_ptr node,
+        acceptor_ptr accept, bool relay);
+
+    // Outbound connections
+    void new_connection(bool relay);
+    void start_connect(const std::error_code& ec,
+        const config::authority& peer, bool relay);
+    void handle_connect(const std::error_code& ec, channel_ptr node,
+        const config::authority& peer, bool relay);
+
+    // Manual connections
+    void handle_manual_connect(const std::error_code& ec, channel_ptr node,
+        const std::string& hostname, uint16_t port, bool relay,
+        size_t retries);
+    void retry_manual_connection(const config::endpoint& address,
+        bool relay, size_t retries);
+
+    // Remove channels from lists when disconnected.
+    void inbound_channel_stopped(const std::error_code& ec,
+        channel_ptr node, const std::string& hostname);
+    void outbound_channel_stopped(const std::error_code& ec,
+        channel_ptr node, const std::string& hostname, bool relay);
+    void manual_channel_stopped(const std::error_code& ec,
+        channel_ptr node, const std::string& hostname, bool relay,
+        size_t retries);
+
+    // Channel setup
+    bool is_banned(const config::authority& peer) const;
+    bool is_connected(const config::authority& peer) const;
+    bool is_loopback(channel_ptr node) const;
+    void remove_connection(channel_ptr_list& connections, channel_ptr node);
+    void setup_new_channel(channel_ptr node);
 
     /// Deprecated, unreasonable to queue this, use total_connections.
     void do_fetch_connection_count(
@@ -273,6 +228,7 @@ private:
     handshake& handshake_;
     network& network_;
     seeder seeder_;
+    channel_subscriber channel_subscriber_;
 
     // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;
@@ -283,19 +239,11 @@ private:
     size_t max_inbound_;
     channel_ptr_list inbound_connections_;
 
-    // There's a fixed number of slots that are always trying to reconnect.
+    // There's a fixed number of connections that are always trying to reconnect.
     size_t max_outbound_;
     channel_ptr_list outbound_connections_;
 
-    // Used to enforce correct state transition behaviour for maintaining connections.
-    connect_state_list connect_states_;
-
-    // Used to prevent too many connection attempts from exhausting resources.
-    // The sweep is refreshed every interval.
-    boost::asio::deadline_timer sweep_timer_;
-    size_t sweep_count_;
-
-    channel_subscriber_type::ptr channel_subscribe_;
+    bool relay_inbound_and_outbound_;
     boost::filesystem::path hosts_path_;
 };
 

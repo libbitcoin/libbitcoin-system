@@ -59,7 +59,7 @@ void connect_with_timeout::start(tcp::resolver::iterator endpoint_iterator,
     timer_.expires_from_now(connection_timeout_);
     timer_.async_wait(
         std::bind(&connect_with_timeout::handle_timer,
-            shared_from_this(), _1, handle_connect));
+            shared_from_this(), _1));
 
     boost::asio::async_connect(*socket_, endpoint_iterator,
         std::bind(&connect_with_timeout::call_handle_connect,
@@ -72,37 +72,30 @@ void connect_with_timeout::call_handle_connect(
 {
     timer_.cancel();
 
-    const auto error = error::boost_to_error_code(ec);
-    if (error)
+    const auto code = error::boost_to_error_code(ec);
+    if (code)
     {
-        handle_connect(error, nullptr);
+        handle_connect(code, nullptr);
         return;
     }
 
     const auto channel_object = std::make_shared<channel>(proxy_);
-    handle_connect(error, channel_object);
-
-    // EKV 7/31/2015: moved this after handle_connect because of a race failure.
-    // See also acceptor::call_handle_accept.
+    handle_connect(code, channel_object);
     proxy_->start();
 }
 
-void connect_with_timeout::handle_timer(const boost::system::error_code& ec,
-    network::connect_handler handle_connect)
+void connect_with_timeout::handle_timer(const boost::system::error_code& ec)
 {
-    // Did the timer fired because of cancelation?
+    // Did the timer fire because of cancelation?
     if (aborted(ec))
         return;
 
-    auto error = error::boost_to_error_code(ec);
-    if (!error)
-    {
-        // If there is no error the timer fired because of expiration.
-        error = error::channel_timeout;
-        proxy_->stop(error);
-    }
+    // If there is no error the timer fired because of expiration.
+    auto code = ec ? error::boost_to_error_code(ec) : 
+        error::channel_timeout;
 
-    handle_connect(error, nullptr);
+    // TODO: bring this error back to the log.
+    proxy_->stop(code);
 }
 
 } // namespace network

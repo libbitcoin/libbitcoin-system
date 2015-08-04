@@ -34,21 +34,15 @@ channel_stream_loader::channel_stream_loader()
 channel_stream_loader::~channel_stream_loader()
 {
     for (auto module: modules_)
-        delete module;
+        delete module.second;
 }
 
-void channel_stream_loader::add(channel_loader_module_base* module)
-{
-    BITCOIN_ASSERT(module != nullptr);
-    modules_.push_back(module);
-}
-
-void channel_stream_loader::load_lookup(const std::string& symbol,
+void channel_stream_loader::load(const std::string& symbol,
     const data_chunk& stream) const
 {
-    for (auto module: modules_)
-        if (module->lookup_symbol() == symbol)
-            module->attempt_load(stream);
+    auto it = modules_.find(symbol);
+    if (it != modules_.end())
+        it->second->attempt_load(stream);
 }
 
 } // namespace network

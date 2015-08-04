@@ -53,7 +53,7 @@ BC_CONSTEXPR uint8_t byte_bits = 8;
 BC_CONSTEXPR uint32_t protocol_version = 70001;
 
 //TODO:  We haven't yet established a minimum required peer version.
-BC_CONSTEXPR uint32_t peer_minimum_version = 0;
+BC_CONSTEXPR uint32_t peer_minimum_version = 1;
 
 // Consensus constants.
 BC_CONSTEXPR uint32_t reward_interval = 210000;
