@@ -28,26 +28,21 @@ namespace network {
 using boost::posix_time::seconds;
 using boost::posix_time::minutes;
 
-const timeout timeout::defaults(90, 30, 15, 1, 1, 5);
-
-timeout::timeout()
-  : timeout(0, 0, 0, 0, 0, 0)
-{
-}
+const timeout timeout::defaults;
 
 timeout::timeout(
-    uint32_t channel_expiration_minutes,
-    uint32_t channel_timeout_minutes,
-    uint32_t channel_heartbeat_minutes,
+    uint32_t connect_timeout_seconds,
     uint32_t channel_handshake_minutes,
     uint32_t channel_revival_minutes,
-    uint32_t connect_timeout_seconds)
-  : expiration(0, channel_expiration_minutes, 0),
-    inactivity(0, channel_timeout_minutes, 0),
-    heartbeat(0, channel_heartbeat_minutes, 0),
+    uint32_t channel_heartbeat_minutes,
+    uint32_t channel_inactivity_minutes,
+    uint32_t channel_expiration_minutes)
+  : connect(0, 0, connect_timeout_seconds),
     handshake(0, channel_handshake_minutes, 0),
     revival(0, channel_revival_minutes, 0),
-    connection(0, 0, connect_timeout_seconds)
+    heartbeat(0, channel_heartbeat_minutes, 0),
+    inactivity(0, channel_inactivity_minutes, 0),
+    expiration(0, channel_expiration_minutes, 0)
 {
 }
 

@@ -47,7 +47,7 @@ static inline bool aborted(const boost::system::error_code& ec)
 connect_with_timeout::connect_with_timeout(threadpool& pool,
     const timeout& timeouts)
   : timer_(pool.service()),
-    connection_timeout_(timeouts.connection),
+    connect_timeout_(timeouts.connect),
     socket_(std::make_shared<tcp::socket>(pool.service())),
     proxy_(std::make_shared<channel_proxy>(pool, socket_, timeouts))
 {
@@ -56,7 +56,7 @@ connect_with_timeout::connect_with_timeout(threadpool& pool,
 void connect_with_timeout::start(tcp::resolver::iterator endpoint_iterator,
     network::connect_handler handle_connect)
 {
-    timer_.expires_from_now(connection_timeout_);
+    timer_.expires_from_now(connect_timeout_);
     timer_.async_wait(
         std::bind(&connect_with_timeout::handle_timer,
             shared_from_this(), _1));

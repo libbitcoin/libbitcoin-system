@@ -49,7 +49,7 @@ private:
     socket_ptr socket_;
     channel::channel_proxy_ptr proxy_;
     boost::asio::deadline_timer timer_;
-    boost::posix_time::time_duration connection_timeout_;
+    boost::posix_time::time_duration connect_timeout_;
 };
 
 } // namespace network

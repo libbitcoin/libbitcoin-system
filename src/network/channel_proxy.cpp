@@ -99,7 +99,7 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     socket_(socket),
     timeouts_(timeouts),
     expiration_(pool.service()),
-    timeout_(pool.service()),
+    inactivity_(pool.service()),
     heartbeat_(pool.service()),
     revival_(pool.service()),
     revival_handler_(nullptr),
@@ -143,7 +143,7 @@ void channel_proxy::start()
     set_expiration(expiration);
     set_heartbeat(timeouts_.heartbeat);
     set_revival(timeouts_.revival);
-    set_timeout(timeouts_.inactivity);
+    set_inactivity(timeouts_.inactivity);
 
     // Subscribe to ping messages.
     subscribe_ping(
@@ -233,7 +233,7 @@ void channel_proxy::stop_impl()
 
     // Ignore the error_code. We don't really care at this point.
     boost::system::error_code ec;
-    timeout_.cancel(ec);
+    inactivity_.cancel(ec);
     heartbeat_.cancel(ec);
     revival_.cancel(ec);
     revival_handler_ = nullptr;
@@ -280,7 +280,7 @@ bool channel_proxy::stopped() const
 
 void channel_proxy::reset_timers()
 {
-    set_timeout(timeouts_.inactivity);
+    set_inactivity(timeouts_.inactivity);
     set_heartbeat(timeouts_.heartbeat);
 }
 
@@ -305,14 +305,14 @@ void channel_proxy::set_expiration(const time_duration& timeout)
             shared_from_this(), _1));
 }
 
-void channel_proxy::set_timeout(const time_duration& timeout)
+void channel_proxy::set_inactivity(const time_duration& timeout)
 {
     // Ignore the error_code. We don't really care at this point.
     boost::system::error_code ec;
-    timeout_.cancel(ec);
-    timeout_.expires_from_now(timeout, ec);
-    timeout_.async_wait(
-        std::bind(&channel_proxy::handle_timeout,
+    inactivity_.cancel(ec);
+    inactivity_.expires_from_now(timeout, ec);
+    inactivity_.async_wait(
+        std::bind(&channel_proxy::handle_inactivity,
             shared_from_this(), _1));
 }
 
@@ -345,19 +345,19 @@ void channel_proxy::handle_expiration(const boost::system::error_code& ec)
         return;
 
     log_info(LOG_NETWORK)
-        << "Channel expired [" << address() << "]";
+        << "Channel lifetime expired [" << address() << "]";
 
     stop(error::service_stopped);
 }
 
-void channel_proxy::handle_timeout(const boost::system::error_code& ec)
+void channel_proxy::handle_inactivity(const boost::system::error_code& ec)
 {
     // Did the timer fire because of cancelation?
     if (aborted(ec))
         return;
 
     log_info(LOG_NETWORK)
-        << "Channel timeout [" << address() << "]";
+        << "Channel inactivity timeout [" << address() << "]";
 
     stop(error::channel_timeout);
 }

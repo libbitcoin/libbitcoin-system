@@ -224,12 +224,12 @@ private:
     void clear_subscriptions();
 
     void set_expiration(const boost::posix_time::time_duration& timeout);
-    void set_timeout(const boost::posix_time::time_duration& timeout);
+    void set_inactivity(const boost::posix_time::time_duration& timeout);
     void set_heartbeat(const boost::posix_time::time_duration& timeout);
     void set_revival(const boost::posix_time::time_duration& timeout);
 
     void handle_expiration(const boost::system::error_code& ec);
-    void handle_timeout(const boost::system::error_code& ec);
+    void handle_inactivity(const boost::system::error_code& ec);
     void handle_heartbeat(const boost::system::error_code& ec);
     void handle_revival(const boost::system::error_code& ec);
     
@@ -261,7 +261,7 @@ private:
     const timeout& timeouts_;
 
     boost::asio::deadline_timer expiration_;
-    boost::asio::deadline_timer timeout_;
+    boost::asio::deadline_timer inactivity_;
     boost::asio::deadline_timer heartbeat_;
     boost::asio::deadline_timer revival_;
 
