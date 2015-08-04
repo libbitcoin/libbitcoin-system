@@ -46,14 +46,11 @@ namespace error {
         // network errors (more)
         resolve_failed,
         network_unreachable,
-        address_blocked,
         address_in_use,
         listen_failed,
         accept_failed,
         bad_stream,
         channel_timeout,
-        connection_limit,
-        connection_to_self,
 
         // transaction pool
         blockchain_reorganized,
@@ -101,7 +98,12 @@ namespace error {
         file_system,
 
         // unknown errors
-        unknown
+        unknown,
+
+        // network errors (more)
+        address_blocked,
+        connection_limit,
+        connection_to_self
     };
 
     enum error_condition_t
