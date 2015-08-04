@@ -76,8 +76,6 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "resolving hostname failed";
         case error::network_unreachable:
             return "unable to reach remote host";
-        case error::address_blocked:
-            return "address is blocked by policy";
         case error::address_in_use:
             return "address already in use";
         case error::listen_failed:
@@ -88,10 +86,6 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "bad data stream";
         case error::channel_timeout:
             return "connection timed out";
-        case error::connection_limit:
-            return "connection limit reached";
-        case error::connection_to_self:
-            return "connected to self";
 
         // transaction pool
         case error::blockchain_reorganized:
@@ -166,6 +160,14 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         // file system errors
         case error::file_system:
             return "file system error";
+
+        // network errors (more)
+        case error::address_blocked:
+            return "address is blocked by policy";
+        case error::connection_limit:
+            return "connection limit reached";
+        case error::connection_to_self:
+            return "connected to self";
 
         // unknown errors
         case error::unknown:

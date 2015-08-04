@@ -32,21 +32,20 @@ class BC_API timeout
 public:
     static const timeout defaults;
 
-    timeout();
     timeout(
-        uint32_t channel_expiration_minutes,
-        uint32_t channel_timeout_minutes,
-        uint32_t channel_heartbeat_minutes,
-        uint32_t channel_handshake_minutes,
-        uint32_t channel_revival_minutes,
-        uint32_t connect_timeout_seconds);
+        uint32_t connect_timeout_seconds=5,
+        uint32_t channel_handshake_minutes=1,
+        uint32_t channel_revival_minutes=2,
+        uint32_t channel_heartbeat_minutes=15,
+        uint32_t channel_inactivity_minutes = 30,
+        uint32_t channel_expiration_minutes=90);
 
-    boost::posix_time::time_duration expiration;
-    boost::posix_time::time_duration inactivity;
-    boost::posix_time::time_duration heartbeat;
+    boost::posix_time::time_duration connect;
     boost::posix_time::time_duration handshake;
     boost::posix_time::time_duration revival;
-    boost::posix_time::time_duration connection;
+    boost::posix_time::time_duration heartbeat;
+    boost::posix_time::time_duration inactivity;
+    boost::posix_time::time_duration expiration;
 };
 
 } // namespace network

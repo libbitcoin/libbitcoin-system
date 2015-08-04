@@ -173,12 +173,12 @@ void handshake::receive_verack(const std::error_code& ec, const verack_type&,
 {
     if (!ec)
     {
-        // TODO: enable channel timeout on node construct.
-        // TODO: disable channel timeout.
+        // TODO: enable handshake timeout on node construct.
+        // TODO: disable handshake timeout.
         // node->reset_handshake();
 
-        // TODO: we don't really care what it says about IP addresses
-        // but we may want to add inbound connnection addresses to hosts.
+        // TODO: we don't care what it says about IP addresses but we may want
+        // to add inbound connnection addresses to hosts.
         // Find out whether we would add self and/or inbound peers.
     }
 
