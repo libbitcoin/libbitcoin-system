@@ -233,6 +233,7 @@ void channel_proxy::stop_impl()
 
     // Ignore the error_code. We don't really care at this point.
     boost::system::error_code ec;
+    expiration_.cancel(ec);
     inactivity_.cancel(ec);
     heartbeat_.cancel(ec);
     revival_.cancel(ec);
