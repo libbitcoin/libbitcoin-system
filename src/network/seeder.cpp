@@ -177,6 +177,7 @@ void seeder::handle_receive(const std::error_code& ec,
         << "Storing addresses from seed [" << seed << "] ("
         << message.addresses.size() << ")";
 
+    // TODO: have host pool process address list internally.
     for (const auto& address: message.addresses)
         host_pool_.store(address,
             strand_.wrap(&seeder::handle_store,

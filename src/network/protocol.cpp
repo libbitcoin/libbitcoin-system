@@ -492,8 +492,10 @@ void protocol::handle_address_message(const std::error_code& ec,
     }
 
     log_debug(LOG_PROTOCOL)
-        << "Storing addresses from [" << node->address() << "]";
+        << "Storing addresses from [" << node->address() << "] ("
+        << message.addresses.size() << ")";
 
+    // TODO: have host pool process address list internally.
     for (const auto& net_address: message.addresses)
         host_pool_.store(net_address,
             strand_.wrap(&protocol::handle_store_address,
