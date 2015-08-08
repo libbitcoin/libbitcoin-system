@@ -99,7 +99,7 @@ byte_array<sizeof(T)> to_little_endian(T n)
 
 #undef VERIFY_UNSIGNED
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
 
