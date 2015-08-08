@@ -20,37 +20,55 @@
 #ifndef LIBBITCOIN_DATA_IPP
 #define LIBBITCOIN_DATA_IPP
 
+#include <cstddef>
+#include <initializer_list>
+
 namespace libbitcoin {
 
-template<typename T>
-data_chunk to_data_chunk(T iterable)
+inline byte_array<1> to_byte(uint8_t byte)
 {
-    return data_chunk(std::begin(iterable), std::end(iterable));
+    return byte_array<1>{{byte}};
 }
 
-inline
-data_chunk build_data(std::initializer_list<data_slice> slices,
+inline data_chunk build_data(std::initializer_list<data_slice> slices,
     size_t extra_space)
 {
     size_t size = 0;
-    for (auto slice: slices)
+    for (const auto slice: slices)
         size += slice.size();
 
     data_chunk out;
     out.reserve(size + extra_space);
-    for (auto slice: slices)
+    for (const auto slice: slices)
         out.insert(out.end(), slice.begin(), slice.end());
 
     return out;
 }
 
-template <typename D, typename T>
-void extend_data(D& data, const T& other)
+template<typename Type>
+data_chunk to_data_chunk(Type iterable)
+{
+    return data_chunk(std::begin(iterable), std::end(iterable));
+}
+
+template <typename Data, typename Type>
+void extend_data(Data& data, const Type& other)
 {
     data.insert(std::end(data), std::begin(other), std::end(other));
 }
 
-} // libbitcoin
+template<typename Value>
+Value range_constrain(Value value, Value minimum, Value maximum)
+{
+    if (value < minimum)
+        return minimum;
+
+    if (value > maximum)
+        return maximum;
+
+    return value;
+}
+
+} // namespace libbitcoin
 
 #endif
-
