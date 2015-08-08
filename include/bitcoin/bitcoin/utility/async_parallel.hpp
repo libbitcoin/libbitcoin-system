@@ -43,8 +43,8 @@ namespace libbitcoin {
  *   auto complete = [](std::error_code ec, std::string s) { ... };
  *   auto cb = async_parallel(complete, 3);
  *   cb(std::error_code, "hello");
- *   // Calling cb(error::service_stopped, "") here will
- *   // call complete(error::service_stopped, "")
+ *   // Calling cb(error::operation_failed, "") here will
+ *   // call complete(error::operation_failed, "")
  *   cb(std::error_code, "world");
  *   // Calls complete(std::error_code, "final")
  *   cb(std::error_code, "final");
