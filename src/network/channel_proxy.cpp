@@ -423,6 +423,9 @@ void channel_proxy::handle_receive_pong(const std::error_code& ec,
     {
         log_warning(LOG_NETWORK)
             << "Invalid pong nonce from [" << address() << "]";
+
+        // This could result from message overlap due to a short period.
+        // But we assume the response is not as expected and terminate.
         stop(error::bad_stream);
     }
 }
