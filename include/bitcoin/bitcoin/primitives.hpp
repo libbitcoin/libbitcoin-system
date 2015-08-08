@@ -182,8 +182,6 @@ struct BC_API inventory_type
     inventory_list inventories;
 };
 
-// TODO: Satoshi peers might send 0-length nonces as of 0.10.
-// Allow the ping & pong payloads to be any size.
 struct BC_API ping_type
 {
     uint64_t nonce;
