@@ -27,41 +27,32 @@
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
-
-//// REFCOUNT
-//#include <atomic>
-//#include <cstddef>
-    
+   
 namespace libbitcoin {
-
-//template <typename... Args>
-//std::atomic<size_t> subscriber<Args...>::refcount = 0;
 
 template <typename... Args>
 subscriber<Args...>::subscriber(threadpool& pool)
   : strand_(pool)
 {
-    //log_info("LEAKCHECK") << "subscriber(" << ++refcount << ")";
 }
 
 template <typename... Args>
 subscriber<Args...>::~subscriber()
 {
-    //log_info("LEAKCHECK") << "~subscriber(" << --refcount << ")";
 }
 
 template <typename... Args>
 void subscriber<Args...>::subscribe(subscription_handler handler)
 {
     strand_.wrap(&subscriber<Args...>::do_subscribe,
-        shared_from_this(), handler)();
+        this->shared_from_this(), handler)();
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
     strand_.wrap(&subscriber<Args...>::do_relay,
-        shared_from_this(), std::forward<Args>(args)...)();
+        this->shared_from_this(), std::forward<Args>(args)...)();
 }
 
 template <typename... Args>
