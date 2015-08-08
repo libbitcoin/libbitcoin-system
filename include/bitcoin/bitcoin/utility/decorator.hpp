@@ -49,10 +49,7 @@ struct decorator_dispatch
 };
 
 template <typename Wrapper, typename Handler>
-decorator_dispatch<
-    Wrapper,
-    typename std::decay<Handler>::type
->
+decorator_dispatch<Wrapper, typename std::decay<Handler>::type>
 decorator(Wrapper&& wrapper, Handler&& handler)
 {
     return {wrapper, handler};
