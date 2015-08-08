@@ -123,6 +123,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\trie\trie_reverse_iterator.ipp">
       <Filter>include\bitcoin\impl\trie</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp">
+      <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\block.cpp">

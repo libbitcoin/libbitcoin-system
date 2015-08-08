@@ -198,6 +198,7 @@ private:
     bool is_banned(const config::authority& peer) const;
     bool is_connected(const config::authority& peer) const;
     bool is_loopback(channel_ptr node) const;
+    void notify_stop();
     void remove_connection(channel_ptr_list& connections, channel_ptr node);
     void setup_new_channel(channel_ptr node);
 
@@ -228,7 +229,7 @@ private:
     handshake& handshake_;
     network& network_;
     seeder seeder_;
-    channel_subscriber channel_subscriber_;
+    channel_subscriber::ptr channel_subscriber_;
 
     // Manual connections created via configuration or user input.
     channel_ptr_list manual_connections_;

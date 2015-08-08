@@ -23,7 +23,6 @@
 #include <functional>
 #include <memory>
 #include <vector>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -31,56 +30,33 @@ namespace libbitcoin {
 
 template <typename... Args>
 class subscriber
+  : public std::enable_shared_from_this<subscriber<Args...>>
 {
 public:
     typedef std::function<void (Args...)> subscription_handler;
+    typedef std::shared_ptr<subscriber<Args...>> ptr;
 
-    subscriber(threadpool& pool)
-      : strand_(pool)
-    {
-    }
+    subscriber(threadpool& pool);
+    ~subscriber();
 
-    void subscribe(subscription_handler handler)
-    {
-        auto dispatch_subscribe =
-            strand_.wrap(&subscriber<Args...>::do_subscribe,
-                this, handler);
-
-        dispatch_subscribe();
-    }
-
-    void relay(Args... params)
-    {
-        auto dispatch_relay =
-            strand_.wrap(&subscriber<Args...>::do_relay,
-                this, std::forward<Args>(params)...);
-
-        dispatch_relay();
-    }
+    void subscribe(subscription_handler handler);
+    void relay(Args... args);
 
 private:
     typedef std::vector<subscription_handler> subscription_list;
 
-    void do_subscribe(subscription_handler notifier)
-    {
-        subscriptions_.push_back(notifier);
-    }
-
-    void do_relay(Args... params)
-    {
-        if (subscriptions_.empty())
-            return;
-
-        const auto subscriptions = subscriptions_;
-        subscriptions_.clear();
-        for (const auto notifier: subscriptions)
-            notifier(params...);
-    }
+    void do_subscribe(subscription_handler notifier);
+    void do_relay(Args... args);
 
     async_strand strand_;
     subscription_list subscriptions_;
 };
 
+template <typename... Args>
+using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
+
 } // namespace libbitcoin
+
+#include <bitcoin/bitcoin/impl/utility/subscriber.ipp>
 
 #endif
