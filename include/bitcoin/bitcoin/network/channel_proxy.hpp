@@ -134,6 +134,8 @@ public:
     typedef std::function<void (const std::error_code&)> revival_handler;
     typedef std::function<void (const std::error_code&)> expiration_handler;
 
+    static const std::error_code stop_code;
+
     channel_proxy(threadpool& pool, socket_ptr socket,
         const timeout& timeouts);
     ~channel_proxy();
@@ -143,7 +145,7 @@ public:
     void operator=(const channel_proxy&) = delete;
 
     void start();
-    void stop(const std::error_code& ec=error::service_stopped);
+    void stop(const std::error_code& ec);
     bool stopped() const;
     config::authority address() const;
     void reset_revival();
@@ -153,16 +155,20 @@ public:
     template <typename Message>
     void send(const Message& packet, send_handler handle_send)
     {
-        send_common(create_raw_message(packet), handle_send,
-            satoshi_command(packet));
-    }
+        if (stopped())
+        {
+            handle_send(stop_code);
+            return;
+        }
 
+        const auto message = create_raw_message(packet);
+        const auto command = satoshi_command(packet);
+        strand_.queue(
+            std::bind(&channel_proxy::do_send,
+                shared_from_this(), message, handle_send, command));
+    }
     void send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
-
-    // TODO: reorder args to put command first and required (interface break).
-    void send_common(const data_chunk& message, send_handler handle_send,
-        const std::string& command="unknown");
 
     void subscribe_version(receive_version_handler handle_receive);
     void subscribe_verack(receive_verack_handler handle_receive);
@@ -209,19 +215,21 @@ private:
         const data_chunk&> raw_subscriber;
     typedef subscriber<const std::error_code&> stop_subscriber;
 
-    void stop(const boost::system::error_code& ec);
-    void do_stop(const std::error_code& ec=error::service_stopped);
-
     template<typename Message, class Subscriber>
-    void relay(Subscriber& subscriber);
+    void establish_relay(Subscriber subscriber);
     template <typename Message, class Subscriber, typename Callback>
-    void subscribe(Subscriber& subscriber, Callback handler) const;
+    void subscribe(Subscriber subscriber, Callback handler) const;
     template <typename Message, class Subscriber>
-    void unsubscribe(Subscriber& subscriber) const;
+    void notify_stop(Subscriber subscriber) const;
 
-    void reset_timers();
-    void stop_impl();
+    void stop(const boost::system::error_code& ec);
+    void do_stop();
     void clear_subscriptions();
+    void clear_timers();
+
+    void start_timers();
+    void reset_inactivity();
+    void reset_heartbeat();
 
     void set_expiration(const boost::posix_time::time_duration& timeout);
     void set_inactivity(const boost::posix_time::time_duration& timeout);
@@ -244,17 +252,18 @@ private:
     void handle_read_payload(const boost::system::error_code& ec,
         size_t bytes_transferred, const header_type& header);
 
-    void handle_receive_ping(const std::error_code& ec,
-        const ping_type& ping);
-    void handle_receive_pong(const std::error_code& ec,
-        const pong_type& pong, uint64_t nonce);
+    void handle_send_ping(const std::error_code& ec);
+    void handle_send_pong(const std::error_code& ec);
+    void handle_receive_ping(const std::error_code& ec, const ping_type& ping);
+    void handle_receive_pong(const std::error_code& ec, const pong_type& pong,
+        uint64_t nonce);
 
-    void call_handle_send(const boost::system::error_code& ec,
-        send_handler handle_send);
+    void do_send(const data_chunk& message, send_handler handle_send,
+        const std::string& command);
     void do_send_raw(const header_type& packet_header,
         const data_chunk& payload, send_handler handle_send);
-    void do_send_common(const data_chunk& message,
-        send_handler handle_send, const std::string& command="");
+    void call_handle_send(const boost::system::error_code& ec,
+        send_handler handle_send);
 
     async_strand strand_;
     socket_ptr socket_;
@@ -271,7 +280,7 @@ private:
     std::atomic<bool> stopped_;
     uint64_t nonce_;
 
-    channel_stream_loader loader_;
+    channel_stream_loader stream_loader_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes
     static BC_CONSTEXPR size_t header_chunk_size = 20;
@@ -283,19 +292,19 @@ private:
     boost::array<uint8_t, header_checksum_size> inbound_checksum_;
     data_chunk inbound_payload_;
 
-    version_subscriber version_subscriber_;
-    verack_subscriber verack_subscriber_;
-    address_subscriber address_subscriber_;
-    get_address_subscriber get_address_subscriber_;
-    inventory_subscriber inventory_subscriber_;
-    get_data_subscriber get_data_subscriber_;
-    get_blocks_subscriber get_blocks_subscriber_;
-    transaction_subscriber transaction_subscriber_;
-    block_subscriber block_subscriber_;
-    ping_subscriber ping_subscriber_;
-    pong_subscriber pong_subscriber_;
-    raw_subscriber raw_subscriber_;
-    stop_subscriber stop_subscriber_;
+    version_subscriber::ptr version_subscriber_;
+    verack_subscriber::ptr verack_subscriber_;
+    address_subscriber::ptr address_subscriber_;
+    get_address_subscriber::ptr get_address_subscriber_;
+    inventory_subscriber::ptr inventory_subscriber_;
+    get_data_subscriber::ptr get_data_subscriber_;
+    get_blocks_subscriber::ptr get_blocks_subscriber_;
+    transaction_subscriber::ptr transaction_subscriber_;
+    block_subscriber::ptr block_subscriber_;
+    ping_subscriber::ptr ping_subscriber_;
+    pong_subscriber::ptr pong_subscriber_;
+    raw_subscriber::ptr raw_subscriber_;
+    stop_subscriber::ptr stop_subscriber_;
 };
 
 } // namespace network

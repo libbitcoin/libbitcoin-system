@@ -54,7 +54,7 @@ hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
 }
 
 hosts::hosts(threadpool& pool, size_t capacity)
-  : hosts(pool, "hosts.p2p", capacity)
+  : hosts(pool, "hosts.cache", capacity)
 {
 }
 
@@ -169,6 +169,9 @@ void hosts::do_remove(const network_address_type& address,
 void hosts::store(const network_address_type& address,
     store_handler handle_store)
 {
+    if (address.port == 0)
+        return;
+
     strand_.randomly_queue(
         std::bind(&hosts::do_store,
             this, address, handle_store));

@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <boost/date_time.hpp>
+#include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
@@ -31,6 +32,7 @@ class BC_API timeout
 {
 public:
     static const timeout defaults;
+    static bool canceled(const boost::system::error_code& ec);
 
     timeout(
         uint32_t connect_timeout_seconds=5,

@@ -57,7 +57,7 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 
         // network errors
         case error::service_stopped:
-            return "connection terminated";
+            return "service is stopped";
         case error::operation_failed:
             return "operation failed";
 
@@ -255,30 +255,25 @@ namespace error {
 
         switch (ec.value())
         {
+            // There should be no boost mapping to the shutdown sentinel.
+            //    return error::service_stopped;
+
             case boost_error::success:
                 return error::success;
 
             // network errors
 #ifdef _MSC_VER
             case boost_error_asio::connection_aborted:
+            case boost_error_asio::connection_reset:
+            case boost_error_asio::operation_aborted:
+            case boost_error_asio::operation_not_supported:
 #endif
             case boost_error::connection_aborted:
             case boost_error::connection_refused:
-#ifdef _MSC_VER
-            case boost_error_asio::connection_reset:
-#endif
             case boost_error::connection_reset:
             case boost_error::not_connected:
-                return error::service_stopped;
-
-#ifdef _MSC_VER
-            case boost_error_asio::operation_aborted:
-#endif
             case boost_error::operation_canceled:
             case boost_error::operation_not_permitted:
-#ifdef _MSC_VER
-            case boost_error_asio::operation_not_supported:
-#endif
             case boost_error::operation_not_supported:
             case boost_error::owner_dead:
             case boost_error::permission_denied:
@@ -323,10 +318,10 @@ namespace error {
             case boost_error::protocol_error:
                 return error::bad_stream;
 
-            case boost_error::stream_timeout:
 #ifdef _MSC_VER
             case boost_error_asio::timed_out:
 #endif
+            case boost_error::stream_timeout:
             case boost_error::timed_out:
                 return error::channel_timeout;
 

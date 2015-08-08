@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/version.hpp>
@@ -89,11 +90,7 @@ handshake::handshake(threadpool& pool, const config::authority& self)
 void handshake::ready(channel_ptr node, handshake_handler handle_handshake,
     bool relay)
 {
-    if (!node)
-    {
-        handle_handshake(error::service_stopped);
-        return;
-    }
+    BITCOIN_ASSERT(node);
 
     // Synchronize all code paths (or errors) before calling handle_handshake.
     constexpr size_t require = 3;
@@ -102,18 +99,19 @@ void handshake::ready(channel_ptr node, handshake_handler handle_handshake,
     // Create a copy of the version template.
     auto session_version = template_version_;
 
+    // Set required transaction relay policy for the connection.
+    session_version.relay = relay;
+
+    // TODO: bury the address_you-setting into the proxy.
     // Set the peer's address into the outgoing version.
     // The timestamp should not used here and there's no need to set services.
     session_version.address_you = node->address().to_network_address();
 
-    // Set required transaction relay policy for the connection.
-    session_version.relay = relay;
-
+    // TODO: bury the nonce-setting into the proxy.
     // The nonce is used to detect connections to self. It is chosen at random
     // for each connection to minimize persistent collisions.
-    session_version.nonce = pseudo_random();
-
     // Add nonce to channel state for loopback detection.
+    session_version.nonce = pseudo_random();
     node->set_nonce(session_version.nonce);
 
     node->subscribe_version(

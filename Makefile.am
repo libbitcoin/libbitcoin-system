@@ -243,7 +243,8 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/collection.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
-    include/bitcoin/bitcoin/impl/utility/serializer.ipp
+    include/bitcoin/bitcoin/impl/utility/serializer.ipp \
+    include/bitcoin/bitcoin/impl/utility/subscriber.ipp
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \

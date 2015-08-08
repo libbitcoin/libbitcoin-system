@@ -265,6 +265,7 @@ void satoshi_load(const Iterator first, const Iterator last,
 template <typename Iterator>
 Iterator satoshi_save(const ping_type& packet, Iterator result)
 {
+    // We always send value, which implies our protocol version > 60000.
     auto serial = make_serializer(result);
     serial.write_8_bytes(packet.nonce);
     return serial.iterator();
@@ -273,6 +274,8 @@ template <typename Iterator>
 void satoshi_load(const Iterator first, const Iterator last,
     ping_type& packet)
 {
+    // We require a value, implying a peer protocol version > 60000 (BIP31).
+    // We are currently setting protocol_version above 60000 wo we are OK here.
     auto deserial = make_deserializer(first, last);
     packet.nonce = deserial.read_8_bytes();
     BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));

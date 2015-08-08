@@ -108,8 +108,8 @@ index_list block_locator_indexes(size_t top_height)
     BITCOIN_ASSERT(top_height <= bc::max_int32);
     const auto height32 = static_cast<int32_t>(top_height);
 
-    // Start at max_height, push last 10 indexes first.
     // TODO: modify loop so conversion to signed int is not required.
+    // Start at max_height, push last 10 indexes first.
     int32_t start = 0, step = 1;
     for (auto index = height32; index > 0; index -= step, ++start)
     {

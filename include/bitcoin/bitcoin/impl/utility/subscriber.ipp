@@ -17,46 +17,62 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef  LIBBITCOIN_SUBSCRIBER_HPP
-#define  LIBBITCOIN_SUBSCRIBER_HPP
+#ifndef LIBBITCOIN_SUBSCRIBER_IPP
+#define LIBBITCOIN_SUBSCRIBER_IPP
+
+#include <bitcoin/bitcoin/utility/subscriber.hpp>
 
 #include <functional>
 #include <memory>
-#include <vector>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
-
+   
 namespace libbitcoin {
 
 template <typename... Args>
-class subscriber
-  : public std::enable_shared_from_this<subscriber<Args...>>
+subscriber<Args...>::subscriber(threadpool& pool)
+  : strand_(pool)
 {
-public:
-    typedef std::function<void (Args...)> subscription_handler;
-    typedef std::shared_ptr<subscriber<Args...>> ptr;
-
-    subscriber(threadpool& pool);
-    ~subscriber();
-
-    void subscribe(subscription_handler handler);
-    void relay(Args... args);
-
-private:
-    typedef std::vector<subscription_handler> subscription_list;
-
-    void do_subscribe(subscription_handler notifier);
-    void do_relay(Args... args);
-
-    async_strand strand_;
-    subscription_list subscriptions_;
-};
+}
 
 template <typename... Args>
-using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
+subscriber<Args...>::~subscriber()
+{
+}
+
+template <typename... Args>
+void subscriber<Args...>::subscribe(subscription_handler handler)
+{
+    strand_.wrap(&subscriber<Args...>::do_subscribe,
+        this->shared_from_this(), handler)();
+}
+
+template <typename... Args>
+void subscriber<Args...>::relay(Args... args)
+{
+    strand_.wrap(&subscriber<Args...>::do_relay,
+        this->shared_from_this(), std::forward<Args>(args)...)();
+}
+
+template <typename... Args>
+void subscriber<Args...>::do_subscribe(subscription_handler notifier)
+{
+    subscriptions_.push_back(notifier);
+}
+
+template <typename... Args>
+void subscriber<Args...>::do_relay(Args... args)
+{
+    if (subscriptions_.empty())
+        return;
+
+    const auto subscriptions = subscriptions_;
+    subscriptions_.clear();
+    for (const auto notifier: subscriptions)
+        notifier(args...);
+}
 
 } // namespace libbitcoin
-
-#include <bitcoin/bitcoin/impl/utility/subscriber.ipp>
 
 #endif

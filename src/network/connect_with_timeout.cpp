@@ -29,6 +29,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -72,15 +73,14 @@ void connect_with_timeout::call_handle_connect(
 {
     timer_.cancel();
 
-    const auto code = error::boost_to_error_code(ec);
-    if (code)
+    if (ec)
     {
-        handle_connect(code, nullptr);
+        handle_connect(error::boost_to_error_code(ec), nullptr);
         return;
     }
 
     const auto channel_object = std::make_shared<channel>(proxy_);
-    handle_connect(code, channel_object);
+    handle_connect(error::success, channel_object);
     proxy_->start();
 }
 
@@ -91,10 +91,16 @@ void connect_with_timeout::handle_timer(const boost::system::error_code& ec)
         return;
 
     // If there is no error the timer fired because of expiration.
-    auto code = ec ? error::boost_to_error_code(ec) : 
-        error::channel_timeout;
+    auto code = error::boost_to_error_code(ec);
+    if (!code)
+    {
+        code = error::channel_timeout;
 
-    // TODO: bring this error back to the log.
+        // TODO: get address from query.
+        //log_debug(LOG_NETWORK)
+        //    << "Timeout connecting to [" << address << "] ";
+    }
+
     proxy_->stop(code);
 }
 

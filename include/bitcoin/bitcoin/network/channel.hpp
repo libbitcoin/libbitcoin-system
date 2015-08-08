@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_CHANNEL_HPP
 #define LIBBITCOIN_CHANNEL_HPP
 
+#include <atomic>
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -44,6 +46,8 @@ public:
     // TODO: move into channel_proxy (interface break).
     typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
 
+    static std::atomic<size_t> instance_count;
+
     channel(channel_proxy_ptr proxy);
     ~channel();
 
@@ -51,28 +55,15 @@ public:
     channel(const channel&) = delete;
     void operator=(const channel&) = delete;
     
-    void stop(const std::error_code& ec=error::service_stopped);
-    bool stopped() const;
+    void stop(const std::error_code& ec=channel_proxy::stop_code);
 
-    config::authority address() const;
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);
+    config::authority address() const;
 
     void reset_revival();
     void set_revival_handler(channel_proxy::revival_handler handler);
 
-    template <typename Message>
-    void send(const Message& packet, channel_proxy::send_handler handle_send)
-    {
-        const auto proxy = weak_proxy_.lock();
-        if (proxy)
-            proxy->send(packet, handle_send);
-        else
-            handle_send(error::service_stopped);
-    }
-
-    void send_raw(const header_type& packet_header,
-        const data_chunk& payload, channel_proxy::send_handler handle_send);
     void subscribe_version(
         channel_proxy::receive_version_handler handle_receive);
     void subscribe_verack(
@@ -100,8 +91,17 @@ public:
     void subscribe_stop(
         channel_proxy::stop_handler handle_stop);
 
+    template <typename Message>
+    void send(const Message& packet, channel_proxy::send_handler handle_send)
+    {
+        proxy_->send(packet, handle_send);
+    }
+
+    void send_raw(const header_type& packet_header,
+        const data_chunk& payload, channel_proxy::send_handler handle_send);
+
 private:
-    std::weak_ptr<channel_proxy> weak_proxy_;
+    channel_proxy_ptr proxy_;
     uint64_t nonce_;
 };
 

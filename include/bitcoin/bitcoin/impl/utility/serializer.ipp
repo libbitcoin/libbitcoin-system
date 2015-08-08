@@ -364,7 +364,6 @@ deserializer<Iterator, false> make_deserializer_unsafe(
     return deserializer<Iterator, false>(begin, begin);
 }
 
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif
-

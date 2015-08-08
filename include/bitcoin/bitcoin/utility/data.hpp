@@ -30,34 +30,45 @@
 
 namespace libbitcoin {
 
-template<size_t Size> using byte_array = std::array<uint8_t, Size>;
+// Define a byte array of a specified length.
+template<size_t Size>
+using byte_array = std::array<uint8_t, Size>;
 
-inline byte_array<1> to_byte(uint8_t byte)
-{
-    return byte_array<1>{{byte}};
-}
-
-// Arbitrary byte storage.
+// Define arbitrary byte storage types.
 typedef array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;
 typedef std::vector<data_chunk> data_stack;
 
-template<typename T>
-data_chunk to_data_chunk(T iterable);
+/**
+ * Create a single byte data chunk with an initial value.
+ */
+inline byte_array<1> to_byte(uint8_t byte);
 
 /**
- * Concatenates several data slices into a single data_chunk.
- * @param extra_space include this much extra space when calling
+ * Concatenate several data slices into a single data_chunk.
+ * @param  extra_space  Include this much extra space when calling
  * `reserve` on the data_chunk (as an optimization).
  */
-data_chunk build_data(std::initializer_list<data_slice> slices,
+inline data_chunk build_data(std::initializer_list<data_slice> slices,
     size_t extra_space=0);
+
+/**
+ * Create a data chunk from an interatable object.
+ */
+template<typename Type>
+data_chunk to_data_chunk(Type iterable);
 
 /**
  * Extend `data` by appending `other`.
  */
-template <typename D, typename T>
-void extend_data(D& data, const T& other);
+template <typename Data, typename Type>
+void extend_data(Data& data, const Type& other);
+
+/**
+ * Constrain a numeric value within a given range.
+ */
+template<typename Value>
+Value range_constrain(Value value, Value minimum, Value maximum);
 
 } // namespace libbitcoin
 

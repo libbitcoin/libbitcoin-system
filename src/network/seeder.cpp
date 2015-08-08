@@ -28,10 +28,11 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
-#include <bitcoin/bitcoin/network/hosts.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -177,6 +178,7 @@ void seeder::handle_receive(const std::error_code& ec,
         << "Storing addresses from seed [" << seed << "] ("
         << message.addresses.size() << ")";
 
+    // TODO: have host pool process address list internally.
     for (const auto& address: message.addresses)
         host_pool_.store(address,
             strand_.wrap(&seeder::handle_store,
@@ -186,7 +188,7 @@ void seeder::handle_receive(const std::error_code& ec,
     handle_seeded(error::success);
 
     // We are using this reference to keep node in scope until receive.
-    node->stop();
+    node->stop(channel_proxy::stop_code);
 }
 
 // This is called for each individual address in the packet.

@@ -20,7 +20,9 @@
 #include <bitcoin/bitcoin/network/timeout.hpp>
 
 #include <cstdint>
+#include <boost/asio.hpp>
 #include <boost/date_time.hpp>
+#include <boost/system/error_code.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -44,6 +46,11 @@ timeout::timeout(
     inactivity(0, channel_inactivity_minutes, 0),
     expiration(0, channel_expiration_minutes, 0)
 {
+}
+
+bool timeout::canceled(const boost::system::error_code& ec)
+{
+    return ec == boost::asio::error::operation_aborted;
 }
 
 } // namespace network
