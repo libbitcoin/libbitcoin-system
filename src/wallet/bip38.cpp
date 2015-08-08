@@ -44,8 +44,7 @@ static inline uint8_t generate_flag_byte(bool compressed)
     return (compressed ? bip38_compressed : bip38_uncompressed);
 }
 
-static inline uint8_t get_flag_byte(
-    const encrypted_private_key key)
+static inline uint8_t get_flag_byte(const encrypted_private_key& key)
 {
     return key[bip38_flag_index];
 }
@@ -56,14 +55,14 @@ static inline bool is_compressed(const encrypted_private_key key)
 }
 
 static inline bool is_bip38_ec_multiplied(
-    const encrypted_private_key key)
+    const encrypted_private_key& key)
 {
     return (key[bip38_comp_mult_index] ==
             bip38_uc_m_prefix_data[bip38_comp_mult_index]);
 }
 
 static inline bool is_bip38_ec_non_multiplied(
-    const encrypted_private_key key)
+    const encrypted_private_key& key)
 {
     return (key[bip38_comp_mult_index] ==
             bip38_uc_nm_prefix_data[bip38_comp_mult_index]);
@@ -76,15 +75,15 @@ static std::string normalize_nfc(const std::string& value)
     return normalize(value, norm_type::norm_nfc, locale(""));
 }
 
-static bool bip38_scrypt_hash(const data_chunk passphrase,
-    data_slice salt, long_hash& long_hash)
+static bool bip38_scrypt_hash(const data_chunk& passphrase,
+    const data_slice& salt, long_hash& long_hash)
 {
     return crypto_scrypt(passphrase.data(), passphrase.size(),
         salt.data(), bip38_salt_length, bip38_scrypt_N, bip38_scrypt_r,
         bip38_scrypt_p, long_hash.data(), sizeof(long_hash)) == 0;
 }
 
-static data_chunk xor_data(const data_chunk in1, const data_chunk in2,
+static data_chunk xor_data(const data_chunk& in1, const data_chunk& in2,
     size_t offset, size_t length)
 {
     data_chunk out;
@@ -97,7 +96,7 @@ static data_chunk xor_data(const data_chunk in1, const data_chunk in2,
 }
 
 static data_chunk bip38_aes256_encrypt_data(
-    const data_chunk private_key, const long_hash derived_data)
+    const data_chunk& private_key, const long_hash& derived_data)
 {
     BITCOIN_ASSERT(private_key.size() == sizeof(ec_secret));
 
@@ -124,7 +123,7 @@ static data_chunk bip38_aes256_encrypt_data(
 }
 
 static data_chunk bip38_aes256_decrypt_data(
-    const data_chunk data, const long_hash derived_data)
+    const data_chunk& data, const long_hash& derived_data)
 {
     BITCOIN_ASSERT(data.size() == bip38_encrypted_block_length);
 
@@ -152,17 +151,14 @@ static data_chunk bip38_aes256_decrypt_data(
 }
 
 data_chunk bip38_lock_secret(
-    const ec_secret private_key, const std::string& passphrase)
+    const ec_secret& private_key, const std::string& passphrase,
+    bool use_compression)
 {
     long_hash derived_data;
     payment_address address;
 
-    /* FIXME: Should 'compressed' be an incoming argument?  I've */
-    /* verified that we generate the proper encrypted key if used or if not, */
-    /* but was not sure of the best way to interface with it */
-    const auto compressed = false;
-
-    const auto public_key = secret_to_public_key(private_key, compressed);
+    const auto public_key = secret_to_public_key(
+        private_key, use_compression);
     set_public_key(address, public_key);
     const auto salt = bitcoin_hash(to_data_chunk(address.encoded()));
 
@@ -175,7 +171,7 @@ data_chunk bip38_lock_secret(
 
     data_chunk bip38_encrypted_key(&bip38_uc_nm_prefix_data[0],
         &bip38_uc_nm_prefix_data[2]);
-    bip38_encrypted_key.push_back(generate_flag_byte(compressed));
+    bip38_encrypted_key.push_back(generate_flag_byte(use_compression));
     bip38_encrypted_key.insert(bip38_encrypted_key.end(),
         salt.begin(), salt.begin() + bip38_salt_length);
     extend_data(bip38_encrypted_key, encrypted_data);
@@ -185,7 +181,8 @@ data_chunk bip38_lock_secret(
 }
 
 ec_secret bip38_unlock_secret(
-    const encrypted_private_key bip38_key, const std::string& passphrase)
+    const encrypted_private_key& bip38_key,
+    const std::string& passphrase)
 {
     long_hash derived_data;
     payment_address address;

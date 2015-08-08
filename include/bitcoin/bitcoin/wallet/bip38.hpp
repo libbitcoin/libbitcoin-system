@@ -107,7 +107,8 @@ BC_CONSTEXPR uint8_t bip38_uncompressed = 0xC0;
  * bip38_lock_secret(private_key, passphrase)
  */
 BC_API data_chunk bip38_lock_secret(
-    const ec_secret private_key, const std::string& passphrase);
+    const ec_secret& private_key, const std::string& passphrase,
+    bool use_compression);
 
 /**
  * Performs bip38 decryption on the encrypted key given
@@ -116,7 +117,7 @@ BC_API data_chunk bip38_lock_secret(
  * bip38_unlock_secret(encrypted_key, passphrase)
  */
 BC_API ec_secret bip38_unlock_secret(
-    const encrypted_private_key bip38_key, const std::string& passphrase);
+    const encrypted_private_key& bip38_key, const std::string& passphrase);
 
 } // namespace bip38
 } // namespace libbitcoin
