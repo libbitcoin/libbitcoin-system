@@ -55,8 +55,8 @@ src_libbitcoin_la_SOURCES = \
     src/formats/base58.cpp \
     src/formats/base64.cpp \
     src/formats/base85.cpp \
-    src/math/aes256.cpp \
     src/math/checksum.cpp \
+    src/math/crypto.cpp \
     src/math/ec_keys.cpp \
     src/math/hash.cpp \
     src/math/hash_number.cpp \
@@ -255,8 +255,8 @@ include_bitcoin_bitcoin_impl_utility_HEADERS = \
 
 include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \
-    include/bitcoin/bitcoin/math/aes256.hpp \
     include/bitcoin/bitcoin/math/checksum.hpp \
+    include/bitcoin/bitcoin/math/crypto.hpp \
     include/bitcoin/bitcoin/math/ec_keys.hpp \
     include/bitcoin/bitcoin/math/hash.hpp \
     include/bitcoin/bitcoin/math/hash_number.hpp \

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+ * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,38 +17,43 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/aes256.hpp>
+#ifndef LIBBITCOIN_AES256_HPP
+#define LIBBITCOIN_AES256_HPP
 
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <cstdint>
+#include <bitcoin/bitcoin/compat.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include "../math/external/aes256.h"
-
 
 namespace libbitcoin {
 
-void aes256_encrypt(data_chunk key, data_chunk& block)
-{
-    BITCOIN_ASSERT(key.size() == aes256_key_size);
-    BITCOIN_ASSERT(block.size() == aes256_block_size);
+/**
+ * The size in bytes of the key for aes routines.
+ */
+BC_CONSTEXPR uint8_t aes256_key_size = 32;
 
-    aes256_context ctx;
-    aes256_init(&ctx, key.data());
-    aes256_encrypt_ecb(&ctx, block.data());
-    aes256_done(&ctx);
-}
+/**
+ * The size in bytes of the block for aes routines.
+ */
+BC_CONSTEXPR uint8_t aes256_block_size = 16;
 
-void aes256_decrypt(data_chunk key, data_chunk& block)
-{
-    BITCOIN_ASSERT(key.size() == aes256_key_size);
-    BITCOIN_ASSERT(block.size() == aes256_block_size);
+/**
+ * Perform aes256 encryption on the 32 byte data block,
+ * given the specified 16 byte key.
+ *
+ * aes256_encrypt(key, block)
+ */
+BC_API void aes256_encrypt(const data_chunk& key, data_chunk& block);
 
-    aes256_context ctx;
-    aes256_init(&ctx, key.data());
-    aes256_decrypt_ecb(&ctx, block.data());
-    aes256_done(&ctx);
-}
+/**
+ * Perform aes256 decryption on the 16 byte data block,
+ * given the specified 32 byte key.
+ *
+ * aes256_decrypt(key, block)
+ */
+BC_API void aes256_decrypt(const data_chunk& key, data_chunk& block);
 
 } // namespace libbitcoin
+
+#endif
 
