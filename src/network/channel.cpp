@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace network {
 
-std::atomic<size_t> channel::instance_count = 0;
+std::atomic<size_t> channel::instance_count(0);
 
 channel::channel(channel_proxy_ptr proxy)
   : proxy_(proxy), nonce_(0)
