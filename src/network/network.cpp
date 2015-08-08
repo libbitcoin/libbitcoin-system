@@ -44,11 +44,14 @@ network::network(threadpool& pool, const timeout& timeouts)
 }
 
 void network::resolve_handler(const boost::system::error_code& ec,
-    tcp::resolver::iterator endpoint_iterator,
-    connect_handler handle_connect, resolver_ptr, query_ptr)
+    tcp::resolver::iterator endpoint_iterator, connect_handler handle_connect,
+    resolver_ptr, query_ptr /* query */)
 {
     if (ec)
     {
+        // TODO: log query info.
+        // TODO: pass query to connect_with_timeout for logging.
+
         handle_connect(error::resolve_failed, nullptr);
         return;
     }
