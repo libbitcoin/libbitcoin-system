@@ -275,7 +275,7 @@ void satoshi_load(const Iterator first, const Iterator last,
     ping_type& packet)
 {
     // We require a value, implying a peer protocol version > 60000 (BIP31).
-    // We are currently setting protocol_version above 60000 wo we are OK here.
+    // We are currently setting protocol_version to 60001.
     auto deserial = make_deserializer(first, last);
     packet.nonce = deserial.read_8_bytes();
     BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));

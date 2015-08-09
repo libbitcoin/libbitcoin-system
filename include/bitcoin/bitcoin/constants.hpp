@@ -52,8 +52,8 @@ BC_CONSTEXPR uint8_t byte_bits = 8;
 // 70001 for version.relay, we do not yet fully support this level.
 BC_CONSTEXPR uint32_t protocol_version = 70001;
 
-// TODO:  We haven't yet established a minimum required peer version.
-BC_CONSTEXPR uint32_t peer_minimum_version = 1;
+// Currently set > 60000 to simplify BIP-31 (ping).
+BC_CONSTEXPR uint32_t peer_minimum_version = 60001;
 
 // Consensus constants.
 BC_CONSTEXPR uint32_t reward_interval = 210000;
