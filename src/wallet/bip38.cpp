@@ -229,7 +229,7 @@ ec_secret bip38_unlock_ec_multiplied_secret(
     const bool compressed = is_compressed(bip38_key);
     const bool uses_lot_seq = has_lot_seq(bip38_key);
 
-    data_chunk address_hash(
+    const data_chunk address_hash(
         &bip38_key[bip38_salt_index_start],
         &bip38_key[bip38_salt_index_end]);
 
@@ -271,10 +271,12 @@ ec_secret bip38_unlock_ec_multiplied_secret(
 
     ec_point pass_point = secret_to_public_key(pass_factor, true);
 
+    data_chunk owner_data = address_hash;
+    extend_data(owner_data, owner_entropy);
+
     long_hash seedb_pass;
-    extend_data(address_hash, owner_entropy);
     if (!bip38_decrypt_scrypt_hash(
-        to_data_chunk(pass_point), address_hash, seedb_pass))
+        to_data_chunk(pass_point), owner_data, seedb_pass))
         return ec_secret();
 
     data_chunk derived_half1(&seedb_pass[0], &seedb_pass[32]);
@@ -300,14 +302,30 @@ ec_secret bip38_unlock_ec_multiplied_secret(
     ec_secret factorb = ec_secret(bitcoin_hash(seedb));
 
     ec_multiply(pass_factor, factorb);
-    return pass_factor;
+
+    /* verify that the address hash matches */
+    const auto& unlocked_key = pass_factor;
+    const auto public_key = secret_to_public_key(
+        unlocked_key, compressed);
+
+    payment_address address;
+    set_public_key(address, public_key);
+    const auto new_address_hash = bitcoin_hash(
+        to_data_chunk(address.encoded()));
+
+    if (!std::equal(
+        new_address_hash.begin(),
+        new_address_hash.begin() + address_hash.size(),
+        address_hash.begin()))
+        return ec_secret();
+
+    return unlocked_key;
 }
 
 ec_secret bip38_unlock_secret(
     const encrypted_private_key& bip38_key,
     const std::string& passphrase)
 {
-    payment_address address;
     ec_secret bip38_decrypted_key;
 
     if (is_bip38_ec_multiplied(bip38_key))
@@ -341,6 +359,8 @@ ec_secret bip38_unlock_secret(
         /* verify that the address hash matches the salt */
         const auto public_key = secret_to_public_key(
             bip38_decrypted_key, is_compressed(bip38_key));
+
+        payment_address address;
         set_public_key(address, public_key);
         const auto address_hash = bitcoin_hash(
             to_data_chunk(address.encoded()));
