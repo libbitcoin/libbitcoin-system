@@ -33,19 +33,22 @@ namespace bip38 {
 typedef data_chunk encrypted_private_key;
 
 /**
- * Scrypt parameter N used in bip38.
+ * Scrypt parameters N used in bip38.
  */
-BC_CONSTEXPR size_t bip38_scrypt_N = 16384;
+BC_CONSTEXPR size_t bip38_scrypt_N         = 16384;
+BC_CONSTEXPR size_t bip38_decrypt_scrypt_N =  1024;
 
 /**
- * Scrypt parameter r used in bip38.
+ * Scrypt parameters r used in bip38.
  */
-BC_CONSTEXPR size_t bip38_scrypt_r = 8;
+BC_CONSTEXPR size_t bip38_scrypt_r         = 8;
+BC_CONSTEXPR size_t bip38_decrypt_scrypt_r = 1;
 
 /**
- * Scrypt parameter p used in bip38.
+ * Scrypt parameters p used in bip38.
  */
-BC_CONSTEXPR size_t bip38_scrypt_p = 8;
+BC_CONSTEXPR size_t bip38_scrypt_p         = 8;
+BC_CONSTEXPR size_t bip38_decrypt_scrypt_p = 1;
 
 /**
  * The total length in bytes of the address hash used
@@ -82,22 +85,52 @@ BC_CONSTEXPR uint8_t bip38_uc_nm_prefix_data[2] = { 0x01, 0x42 };
 BC_CONSTEXPR uint8_t bip38_uc_m_prefix_data[2] = { 0x01, 0x43 };
 
 /**
+ * The fixed number of bip38 magic bytes.
+ */
+BC_CONSTEXPR size_t bip38_magic_length = 8;
+
+typedef uint8_t bip38_magic[bip38_magic_length];
+
+/**
+ * The fixed bip38 magic bytes used when lot is specified.
+ */
+BC_CONSTEXPR bip38_magic bip38_magic_w_lot =
+{
+    0x2C, 0xE9, 0xB3, 0xE1, 0xFF, 0x39, 0xE2, 0x51
+};
+
+/**
+ * The fixed bip38 magic bytes used when lot is not specified.
+ */
+BC_CONSTEXPR bip38_magic bip38_magic_wo_lot =
+{
+    0x2C, 0xE9, 0xB3, 0xE1, 0xFF, 0x39, 0xE2, 0x53
+};
+
+/**
  * Fixed byte indices used for bip38 decryption.
  */
-BC_CONSTEXPR size_t bip38_comp_mult_index  =  1;
-BC_CONSTEXPR size_t bip38_flag_index       =  2;
-BC_CONSTEXPR size_t bip38_salt_index_start =  3;
-BC_CONSTEXPR size_t bip38_salt_index_end   =  7;
-BC_CONSTEXPR size_t bip38_key_index_end    = 39;
+BC_CONSTEXPR size_t bip38_comp_mult_index     =  1;
+BC_CONSTEXPR size_t bip38_flag_index          =  2;
+BC_CONSTEXPR size_t bip38_salt_index_start    =  3;
+BC_CONSTEXPR size_t bip38_salt_index_end      =  7;
+BC_CONSTEXPR size_t bip38_key_index_start     =  7;
+BC_CONSTEXPR size_t bip38_owner_entropy_start =  7;
+BC_CONSTEXPR size_t bip38_owner_entropy_end   = 15;
+BC_CONSTEXPR size_t bip38_enc_part1_start     = 15;
+BC_CONSTEXPR size_t bip38_decrypt_xor_offset  = 16;
+BC_CONSTEXPR size_t bip38_decrypt_xor_length  = 16;
+BC_CONSTEXPR size_t bip38_enc_part1_end       = 23;
+BC_CONSTEXPR size_t bip38_enc_part2_start     = 23;
+BC_CONSTEXPR size_t bip38_enc_part2_end       = 39;
+BC_CONSTEXPR size_t bip38_key_index_end       = 39;
+
 
 /**
- * The bip38 flag for a compressed key.
+ * The bip38 flag bytes used in this implementation.
  */
-BC_CONSTEXPR uint8_t bip38_compressed = 0xE0;
-
-/**
- * The bip38 flag for an uncompressed key.
- */
+BC_CONSTEXPR uint8_t bip38_lot_sequence = 0x04;
+BC_CONSTEXPR uint8_t bip38_compressed   = 0xE0;
 BC_CONSTEXPR uint8_t bip38_uncompressed = 0xC0;
 
 /**
