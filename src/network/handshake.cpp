@@ -151,6 +151,9 @@ void handshake::receive_version(const std::error_code& ec,
 
     if (version.version < bc::peer_minimum_version)
     {
+        log_debug(LOG_NETWORK)
+            << "Peer version (" << version.version << ") below minimum ("
+            << bc::peer_minimum_version << ") [" << node->address() << "]";
         handle_handshake(error::accept_failed);
         return;
     }

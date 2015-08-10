@@ -161,13 +161,15 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         case error::file_system:
             return "file system error";
 
-        // network errors (more)
+        // network errors
         case error::address_blocked:
             return "address is blocked by policy";
         case error::connection_limit:
             return "connection limit reached";
         case error::connection_to_self:
             return "connected to self";
+        case error::channel_stopped:
+            return "channel is stopped";
 
         // unknown errors
         case error::unknown:
@@ -179,55 +181,57 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 std::error_condition error_category_impl::default_error_condition(int ev)
     const BC_NOEXCEPT
 {
-    switch (ev)
-    {
-        // validate tx
-        case error::coinbase_transaction:
-        case error::is_not_standard:
-        case error::double_spend:
-        case error::input_not_found:
+    return std::error_condition(ev, *this);
 
-        // check_transaction()
-        case error::empty_transaction:
-        case error::output_value_overflow:
-        case error::invalid_coinbase_script_size:
-        case error::previous_output_null:
+    //switch (ev)
+    //{
+    //    // validate tx
+    //    case error::coinbase_transaction:
+    //    case error::is_not_standard:
+    //    case error::double_spend:
+    //    case error::input_not_found:
 
-        // validate block
-        case error::previous_block_invalid:
+    //    // check_transaction()
+    //    case error::empty_transaction:
+    //    case error::output_value_overflow:
+    //    case error::invalid_coinbase_script_size:
+    //    case error::previous_output_null:
 
-        // check_block()
-        case error::size_limits:
-        case error::proof_of_work:
-        case error::futuristic_timestamp:
-        case error::first_not_coinbase:
-        case error::extra_coinbases:
-        case error::too_many_sigs:
-        case error::merkle_mismatch:
+    //    // validate block
+    //    case error::previous_block_invalid:
 
-        // accept_block()
-        case error::incorrect_proof_of_work:
-        case error::timestamp_too_early:
-        case error::non_final_transaction:
-        case error::checkpoints_failed:
-        case error::old_version_block:
-        case error::coinbase_height_mismatch:
+    //    // check_block()
+    //    case error::size_limits:
+    //    case error::proof_of_work:
+    //    case error::futuristic_timestamp:
+    //    case error::first_not_coinbase:
+    //    case error::extra_coinbases:
+    //    case error::too_many_sigs:
+    //    case error::merkle_mismatch:
 
-        // connect_block()
-        case error::duplicate_or_spent:
-        case error::validate_inputs_failed:
-        case error::fees_out_of_range:
-        case error::coinbase_too_large:
-            return error::validate_failed;
+    //    // accept_block()
+    //    case error::incorrect_proof_of_work:
+    //    case error::timestamp_too_early:
+    //    case error::non_final_transaction:
+    //    case error::checkpoints_failed:
+    //    case error::old_version_block:
+    //    case error::coinbase_height_mismatch:
 
-        // transaction pool
-        case error::blockchain_reorganized:
-        case error::pool_filled:
-            return error::forced_removal;
+    //    // connect_block()
+    //    case error::duplicate_or_spent:
+    //    case error::validate_inputs_failed:
+    //    case error::fees_out_of_range:
+    //    case error::coinbase_too_large:
+    //        return error::validate_failed;
 
-        default:
-            return std::error_condition(ev, *this);
-    }
+    //    // transaction pool
+    //    case error::blockchain_reorganized:
+    //    case error::pool_filled:
+    //        return error::forced_removal;
+
+    //    default:
+    //        return std::error_condition(ev, *this);
+    //}
 }
 
 namespace libbitcoin {

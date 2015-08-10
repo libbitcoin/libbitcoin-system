@@ -28,6 +28,7 @@
 namespace libbitcoin {
 namespace network {
 
+// TODO use critical swections to increment/decrement with value access.
 std::atomic<size_t> channel::instance_count(0);
 
 channel::channel(channel_proxy_ptr proxy)
@@ -38,7 +39,7 @@ channel::channel(channel_proxy_ptr proxy)
 
 channel::~channel()
 {
-    stop(channel_proxy::stop_code);
+    stop(error::channel_stopped);
     log_debug(LOG_NETWORK)
         << "Closed channel #" << --instance_count;
 }

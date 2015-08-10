@@ -40,11 +40,6 @@ using std::placeholders::_2;
 using boost::asio::ip::tcp;
 using boost::posix_time::time_duration;
 
-static inline bool aborted(const boost::system::error_code& ec)
-{
-    return ec == boost::asio::error::operation_aborted;
-}
-
 connect_with_timeout::connect_with_timeout(threadpool& pool,
     const timeout& timeouts)
   : timer_(pool.service()),
@@ -86,8 +81,7 @@ void connect_with_timeout::call_handle_connect(
 
 void connect_with_timeout::handle_timer(const boost::system::error_code& ec)
 {
-    // Did the timer fire because of cancelation?
-    if (aborted(ec))
+    if (timeout::canceled(ec))
         return;
 
     // If there is no error the timer fired because of expiration.

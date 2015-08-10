@@ -55,7 +55,7 @@ public:
     channel(const channel&) = delete;
     void operator=(const channel&) = delete;
     
-    void stop(const std::error_code& ec=channel_proxy::stop_code);
+    void stop(const std::error_code& ec);
 
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);

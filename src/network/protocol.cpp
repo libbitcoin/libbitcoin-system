@@ -90,17 +90,17 @@ void protocol::handle_hosts_save(const std::error_code& ec,
 void protocol::notify_stop()
 {
     // Stop protocol subscribers.
-    channel_subscriber_->relay(channel_proxy::stop_code, nullptr);
+    channel_subscriber_->relay(error::service_stopped, nullptr);
 
     // Notify all channels to stop.
     for (const auto node: outbound_connections_)
-        node->stop();
+        node->stop(error::service_stopped);
 
     for (const auto node: manual_connections_)
-        node->stop();
+        node->stop(error::service_stopped);
 
     for (const auto node: inbound_connections_)
-        node->stop();
+        node->stop(error::service_stopped);
 }
 
 void protocol::start(completion_handler handle_complete)
@@ -462,8 +462,8 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
 
     remove_connection(outbound_connections_, node);
 
-    // We always create a replacement oubound connection.
-    if (ec != channel_proxy::stop_code)
+    // If not shutdown we always create a replacement oubound connection.
+    if (ec != error::service_stopped)
         new_connection(relay);
 }
 
@@ -481,8 +481,8 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
 
     remove_connection(manual_connections_, node);
 
-    // We always attempt to reconnect manual connections.
-    if (ec != channel_proxy::stop_code)
+    // If not shutdown we always attempt to reconnect manual connections.
+    if (ec != error::service_stopped)
         retry_manual_connection(address, relay, retries);
 }
 

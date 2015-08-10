@@ -134,8 +134,6 @@ public:
     typedef std::function<void (const std::error_code&)> revival_handler;
     typedef std::function<void (const std::error_code&)> expiration_handler;
 
-    static const std::error_code stop_code;
-
     channel_proxy(threadpool& pool, socket_ptr socket,
         const timeout& timeouts);
     ~channel_proxy();
@@ -157,7 +155,7 @@ public:
     {
         if (stopped())
         {
-            handle_send(stop_code);
+            handle_send(error::channel_stopped);
             return;
         }
 
