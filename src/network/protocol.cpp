@@ -243,8 +243,6 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         return;
     }
 
-    BITCOIN_ASSERT(node);
-
     outbound_connections_.push_back(node);
 
     // Connected!
@@ -309,8 +307,6 @@ void protocol::handle_manual_connect(const std::error_code& ec,
         return;
     }
 
-    BITCOIN_ASSERT(node);
-
     manual_connections_.push_back(node);
 
     // Connected!
@@ -357,8 +353,6 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         return;
     }
 
-    BITCOIN_ASSERT(node);
-
     if (inbound_connections_.size() >= max_inbound_)
     {
         node->stop(error::connection_limit);
@@ -388,8 +382,6 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
     const auto handshake_complete = [this, node](const std::error_code& ec)
     {
-        BITCOIN_ASSERT(node);
-
         if (ec)
         {
             log_debug(LOG_PROTOCOL) << "Failure in handshake from ["
@@ -412,12 +404,8 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
 void protocol::setup_new_channel(channel_ptr node)
 {
-    BITCOIN_ASSERT(node);
-
     const auto handle_send = [node](const std::error_code& ec)
     {
-        BITCOIN_ASSERT(node);
-
         if (ec)
         {
             log_debug(LOG_PROTOCOL)
@@ -470,8 +458,6 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
 void protocol::manual_channel_stopped(const std::error_code& ec,
     channel_ptr node, const std::string& address, bool relay, size_t retries)
 {
-    BITCOIN_ASSERT(node);
-
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
@@ -488,9 +474,7 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
 
 void protocol::inbound_channel_stopped(const std::error_code& ec,
     channel_ptr node, const std::string& address)
-{
-    BITCOIN_ASSERT(node);
-    
+{    
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
@@ -505,7 +489,8 @@ void protocol::inbound_channel_stopped(const std::error_code& ec,
 void protocol::handle_address_message(const std::error_code& ec,
     const address_type& message, channel_ptr node)
 {
-    BITCOIN_ASSERT(node);
+    if (ec == error::channel_stopped)
+        return;
 
     if (ec)
     {
@@ -584,8 +569,6 @@ bool protocol::is_connected(const config::authority& peer) const
 // Determine if connection matches the nonce of one of our own outbounds.
 bool protocol::is_loopback(channel_ptr node) const
 {
-    BITCOIN_ASSERT(node);
-
     const auto& outbound = outbound_connections_;
     const auto nonce = node->nonce();
     const auto predicate = [node, nonce](const channel_ptr& entry)
