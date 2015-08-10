@@ -186,8 +186,6 @@ public:
     void subscribe_raw(receive_raw_handler handle_receive);
     void subscribe_stop(stop_handler handle_stop);
 
-    static bool stopping(const std::error_code& ec);
-
 private:
     typedef subscriber<const std::error_code&, const version_type&>
         version_subscriber;

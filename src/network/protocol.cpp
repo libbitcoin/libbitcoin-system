@@ -462,8 +462,8 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
 
     remove_connection(outbound_connections_, node);
 
-    // If not stopping we always create a replacement oubound connection.
-    if (!channel_proxy::stopping(ec))
+    // If not shutdown we always create a replacement oubound connection.
+    if (ec != error::service_stopped)
         new_connection(relay);
 }
 
@@ -481,8 +481,8 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
 
     remove_connection(manual_connections_, node);
 
-    // If not stopping we always attempt to reconnect manual connections.
-    if (!channel_proxy::stopping(ec))
+    // If not shutdown we always attempt to reconnect manual connections.
+    if (ec != error::service_stopped)
         retry_manual_connection(address, relay, retries);
 }
 

@@ -56,11 +56,6 @@ using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::time_duration;
 
-bool channel_proxy::stopping(const std::error_code& ec)
-{
-    return ec == error::channel_stopped;
-}
-
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     const timeout& timeouts=timeout::defaults)
   : strand_(pool),
