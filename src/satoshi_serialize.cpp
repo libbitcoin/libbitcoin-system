@@ -98,16 +98,16 @@ uint32_t inventory_type_to_number(inventory_type_id inv_type)
 {
     switch (inv_type)
     {
+        case inventory_type_id::transaction:
+            return 1;
+        case inventory_type_id::block:
+            return 2;
+        case inventory_type_id::filtered_block:
+            return 3;
         case inventory_type_id::error:
         case inventory_type_id::none:
         default:
             return 0;
-
-        case inventory_type_id::transaction:
-            return 1;
-
-        case inventory_type_id::block:
-            return 2;
     }
 }
 
@@ -121,6 +121,8 @@ inventory_type_id inventory_type_from_number(uint32_t raw_type)
             return inventory_type_id::transaction;
         case 2:
             return inventory_type_id::block;
+        case 3:
+            return inventory_type_id::filtered_block;
         default:
             return inventory_type_id::none;
     }
