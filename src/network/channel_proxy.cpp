@@ -56,7 +56,12 @@ using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::time_duration;
 
+// TODO: move to error.h/cpp
 const std::error_code channel_proxy::stop_code = error::service_stopped;
+bool channel_proxy::stopping(const std::error_code& ec)
+{
+    return ec == stop_code;
+}
 
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     const timeout& timeouts=timeout::defaults)
