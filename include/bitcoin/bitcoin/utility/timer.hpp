@@ -29,8 +29,7 @@ namespace libbitcoin {
 	/**
 	 * Class to measure the execution time of a callable.
 	 */
-	template <
-		typename Time = std::chrono::milliseconds,
+	template <typename Time = std::chrono::milliseconds,
         class Clock = std::chrono::system_clock> 
 	struct timer
 	{
