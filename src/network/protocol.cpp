@@ -94,13 +94,13 @@ void protocol::notify_stop()
 
     // Notify all channels to stop.
     for (const auto node: outbound_connections_)
-        node->stop(error::channel_stopped);
+        node->stop(error::service_stopped);
 
     for (const auto node: manual_connections_)
-        node->stop(error::channel_stopped);
+        node->stop(error::service_stopped);
 
     for (const auto node: inbound_connections_)
-        node->stop(error::channel_stopped);
+        node->stop(error::service_stopped);
 }
 
 void protocol::start(completion_handler handle_complete)
