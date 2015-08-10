@@ -56,11 +56,9 @@ using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::time_duration;
 
-// TODO: move to error.h/cpp
-const std::error_code channel_proxy::stop_code = error::service_stopped;
 bool channel_proxy::stopping(const std::error_code& ec)
 {
-    return ec == stop_code;
+    return ec == error::channel_stopped;
 }
 
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
@@ -123,7 +121,7 @@ template <typename Message, class Subscriber, typename Callback>
 void channel_proxy::subscribe(Subscriber subscriber, Callback handler) const
 {
     if (stopped())
-        subscriber->relay(stop_code, Message());
+        subscriber->relay(error::channel_stopped, Message());
     else
         subscriber->subscribe(handler);
 }
@@ -133,7 +131,7 @@ void channel_proxy::subscribe(Subscriber subscriber, Callback handler) const
 template <typename Message, class Subscriber>
 void channel_proxy::notify_stop(Subscriber subscriber) const
 {
-    subscriber->relay(stop_code, Message());
+    subscriber->relay(error::channel_stopped, Message());
 }
 
 void channel_proxy::start()
@@ -253,8 +251,9 @@ void channel_proxy::clear_subscriptions()
     notify_stop<block_type>(block_subscriber_);
     notify_stop<ping_type>(ping_subscriber_);
     notify_stop<pong_type>(pong_subscriber_);
-    raw_subscriber_->relay(stop_code, header_type(), data_chunk());
-    stop_subscriber_->relay(stop_code);
+    raw_subscriber_->relay(error::channel_stopped, header_type(),
+        data_chunk());
+    stop_subscriber_->relay(error::channel_stopped);
 }
 
 void channel_proxy::clear_timers()
@@ -654,7 +653,7 @@ void channel_proxy::subscribe_pong(
 void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 {
     if (stopped())
-        handle_receive(stop_code, header_type(), data_chunk());
+        handle_receive(error::channel_stopped, header_type(), data_chunk());
     else
         raw_subscriber_->subscribe(handle_receive);
 }
@@ -662,7 +661,7 @@ void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 void channel_proxy::subscribe_stop(stop_handler handle_stop)
 {
     if (stopped())
-        handle_stop(stop_code);
+        handle_stop(error::channel_stopped);
     else
         stop_subscriber_->subscribe(handle_stop);
 }
@@ -691,7 +690,7 @@ void channel_proxy::send_raw(const header_type& packet_header,
 {
     if (stopped())
     {
-        handle_send(stop_code);
+        handle_send(error::channel_stopped);
         return;
     }
 

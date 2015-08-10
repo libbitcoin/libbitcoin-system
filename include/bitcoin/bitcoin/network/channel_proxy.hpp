@@ -155,7 +155,7 @@ public:
     {
         if (stopped())
         {
-            handle_send(stop_code);
+            handle_send(error::channel_stopped);
             return;
         }
 
@@ -187,7 +187,6 @@ public:
     void subscribe_stop(stop_handler handle_stop);
 
     static bool stopping(const std::error_code& ec);
-    static const std::error_code stop_code;
 
 private:
     typedef subscriber<const std::error_code&, const version_type&>

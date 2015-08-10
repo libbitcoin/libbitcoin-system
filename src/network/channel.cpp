@@ -39,7 +39,7 @@ channel::channel(channel_proxy_ptr proxy)
 
 channel::~channel()
 {
-    stop();
+    stop(error::channel_stopped);
     log_debug(LOG_NETWORK)
         << "Closed channel #" << --instance_count;
 }

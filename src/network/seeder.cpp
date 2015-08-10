@@ -187,8 +187,8 @@ void seeder::handle_receive(const std::error_code& ec,
     // We may have not added any seeds, but caller can check hosts count.
     handle_seeded(error::success);
 
-    // We are using this reference to keep node in scope until receive.
-    node->stop();
+    // We are using this call to keep node in scope until receive.
+    node->stop(error::channel_stopped);
 }
 
 // This is called for each individual address in the packet.

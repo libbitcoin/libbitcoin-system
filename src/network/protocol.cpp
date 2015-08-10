@@ -90,17 +90,17 @@ void protocol::handle_hosts_save(const std::error_code& ec,
 void protocol::notify_stop()
 {
     // Stop protocol subscribers.
-    channel_subscriber_->relay(channel_proxy::stop_code, nullptr);
+    channel_subscriber_->relay(error::service_stopped, nullptr);
 
     // Notify all channels to stop.
     for (const auto node: outbound_connections_)
-        node->stop();
+        node->stop(error::channel_stopped);
 
     for (const auto node: manual_connections_)
-        node->stop();
+        node->stop(error::channel_stopped);
 
     for (const auto node: inbound_connections_)
-        node->stop();
+        node->stop(error::channel_stopped);
 }
 
 void protocol::start(completion_handler handle_complete)
