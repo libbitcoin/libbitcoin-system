@@ -103,14 +103,15 @@ namespace error {
         // network errors (more)
         address_blocked,
         connection_limit,
-        connection_to_self
+        connection_to_self,
+        channel_stopped
     };
 
     enum error_condition_t
     {
-        // validate
-        validate_failed = 1,
-        forced_removal
+        //// validate
+        //validate_failed = 1,
+        //forced_removal
     };
 
     BC_API std::error_code make_error_code(error_code_t e);
@@ -134,4 +135,3 @@ namespace std {
 } // namespace std
 
 #endif
-
