@@ -188,7 +188,7 @@ void seeder::handle_receive(const std::error_code& ec,
     handle_seeded(error::success);
 
     // We are using this reference to keep node in scope until receive.
-    node->stop(channel_proxy::stop_code);
+    node->stop();
 }
 
 // This is called for each individual address in the packet.
