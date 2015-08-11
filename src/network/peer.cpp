@@ -17,19 +17,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/network/peer.hpp>
 
 #include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <string>
 #include <system_error>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
-#include "connect_with_timeout.hpp"
 
 namespace libbitcoin {
 namespace network {
@@ -38,41 +40,29 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::asio::ip::tcp;
 
-network::network(threadpool& pool, const timeout& timeouts)
+peer::peer(threadpool& pool, const timeout& timeouts)
   : pool_(pool), timeouts_(timeouts)
 {
 }
 
-void network::resolve_handler(const boost::system::error_code& ec,
-    tcp::resolver::iterator endpoint_iterator, connect_handler handle_connect,
-    resolver_ptr, query_ptr /* query */)
+void peer::resolve_handler(const boost::system::error_code& ec,
+    tcp::resolver::iterator endpoint_iterator, 
+    connector::connect_handler handle_connect, resolver_ptr,
+    query_ptr /* query */)
 {
     if (ec)
     {
         // TODO: log query info.
-        // TODO: pass query to connect_with_timeout for logging.
-
+        // TODO: pass query to connector for logging.
         handle_connect(error::resolve_failed, nullptr);
         return;
     }
 
-    const auto connect = std::make_shared<connect_with_timeout>(pool_, timeouts_);
+    const auto connect = std::make_shared<connector>(pool_, timeouts_);
     connect->start(endpoint_iterator, handle_connect);
 }
 
-void network::connect(const std::string& hostname, uint16_t port,
-    connect_handler handle_connect)
-{
-    const auto resolver = std::make_shared<tcp::resolver>(pool_.service());
-    const auto query = std::make_shared<tcp::resolver::query>(hostname,
-        std::to_string(port));
-
-    resolver->async_resolve(*query,
-        std::bind(&network::resolve_handler,
-            this, _1, _2, handle_connect, resolver, query));
-}
-
-void network::listen(uint16_t port, listen_handler handle_listen)
+void peer::listen(uint16_t port, acceptor::listen_handler handle_listen)
 {
     using namespace boost::asio;
     boost::system::error_code boost_ec;
@@ -95,6 +85,18 @@ void network::listen(uint16_t port, listen_handler handle_listen)
         std::make_shared<acceptor>(pool_, tcp_accept, timeouts_);
 
     handle_listen(ec, accept);
+}
+
+void peer::connect(const std::string& hostname, uint16_t port,
+    connector::connect_handler handle_connect)
+{
+    const auto resolver = std::make_shared<tcp::resolver>(pool_.service());
+    const auto query = std::make_shared<tcp::resolver::query>(hostname,
+        std::to_string(port));
+
+    resolver->async_resolve(*query,
+        std::bind(&peer::resolve_handler,
+            this, _1, _2, handle_connect, resolver, query));
 }
 
 } // namespace network

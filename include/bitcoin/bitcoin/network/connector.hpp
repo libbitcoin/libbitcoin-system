@@ -17,12 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef LIBBITCOIN_CONNECTOR_HPP
+#define LIBBITCOIN_CONNECTOR_HPP
+
 #include <memory>
+#include <system_error>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/channel_proxy.hpp>
-#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -30,27 +34,35 @@ namespace network {
 using boost::asio::ip::tcp;
 using boost::posix_time::time_duration;
 
-class connect_with_timeout
-  : public std::enable_shared_from_this<connect_with_timeout>
+class connector
+  : public std::enable_shared_from_this<connector>
 {
 public:
-    connect_with_timeout(threadpool& pool,
-        const timeout& timeouts=timeout::defaults);
+    typedef std::function<void(const std::error_code&, channel_ptr)>
+        connect_handler;
+
+    connector(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
     void start(tcp::resolver::iterator endpoint_iterator,
-        network::connect_handler handle_connect);
+        connect_handler handle_connect);
 
 private:
     void call_handle_connect(const boost::system::error_code& ec,
-        tcp::resolver::iterator, network::connect_handler handle_connect);
+        tcp::resolver::iterator, socket_ptr socket,
+        connect_handler handle_connect);
 
-    void handle_timer(const boost::system::error_code& ec);
+    void handle_timer(const boost::system::error_code& ec, socket_ptr socket,
+        connect_handler handle_connect);
 
-    socket_ptr socket_;
-    channel::channel_proxy_ptr proxy_;
+    bool handled();
+
+    threadpool& pool_;
+    const timeout& timeouts_;
     boost::asio::deadline_timer timer_;
-    boost::posix_time::time_duration connect_timeout_;
+    bool handled_;
 };
 
 } // namespace network
 } // namespace libbitcoin
+
+#endif

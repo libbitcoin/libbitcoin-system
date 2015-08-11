@@ -194,9 +194,6 @@
     <ClCompile Include="..\..\..\..\src\network\hosts.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\network.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
@@ -305,9 +302,6 @@
     <ClCompile Include="..\..\..\..\src\network\acceptor.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\connect_with_timeout.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\async_strand.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -331,6 +325,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp">
       <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\connector.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\peer.cpp">
+      <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -392,9 +392,6 @@
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp">
@@ -577,9 +574,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\network\connect_with_timeout.hpp">
-      <Filter>src\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_strand.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
@@ -608,6 +602,12 @@
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\peer.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>
