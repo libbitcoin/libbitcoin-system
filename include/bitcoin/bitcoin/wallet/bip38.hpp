@@ -35,20 +35,20 @@ typedef data_chunk encrypted_private_key;
 /**
  * Scrypt parameters N used in bip38.
  */
-BC_CONSTEXPR size_t bip38_scrypt_N         = 16384;
-BC_CONSTEXPR size_t bip38_decrypt_scrypt_N =  1024;
+BC_CONSTEXPR size_t bip38_scrypt_N   = 16384;
+BC_CONSTEXPR size_t bip38_scrypt_N_2 =  1024;
 
 /**
  * Scrypt parameters r used in bip38.
  */
-BC_CONSTEXPR size_t bip38_scrypt_r         = 8;
-BC_CONSTEXPR size_t bip38_decrypt_scrypt_r = 1;
+BC_CONSTEXPR size_t bip38_scrypt_r   = 8;
+BC_CONSTEXPR size_t bip38_scrypt_r_2 = 1;
 
 /**
  * Scrypt parameters p used in bip38.
  */
-BC_CONSTEXPR size_t bip38_scrypt_p         = 8;
-BC_CONSTEXPR size_t bip38_decrypt_scrypt_p = 1;
+BC_CONSTEXPR size_t bip38_scrypt_p   = 8;
+BC_CONSTEXPR size_t bip38_scrypt_p_2 = 1;
 
 /**
  * The total length in bytes of the address hash used
@@ -73,16 +73,25 @@ BC_CONSTEXPR size_t bip38_encrypted_block_half_length = 16;
 BC_CONSTEXPR size_t bip38_encrypted_key_length = 58;
 
 /**
- * The fixed bip38 uncompressed non-multiplied
+ * The fixed bip38 non-multiplied
  * prefix data constants.
  */
-BC_CONSTEXPR uint8_t bip38_uc_nm_prefix_data[2] = { 0x01, 0x42 };
+BC_CONSTEXPR uint8_t bip38_nm_prefix_data[2] = { 0x01, 0x42 };
 
 /**
- * The fixed bip38 uncompressed ec-multiplied
- * prefix data constants.
+ * The fixed bip38 ec-multiplied prefix data constants.
  */
-BC_CONSTEXPR uint8_t bip38_uc_m_prefix_data[2] = { 0x01, 0x43 };
+BC_CONSTEXPR uint8_t bip38_m_prefix_data[2] = { 0x01, 0x43 };
+
+/**
+ * The fixed number of bip38 base58 checked intermediate bytes required.
+ */
+BC_CONSTEXPR size_t bip38_intermediate_length = 8;
+
+/**
+ * The fixed number of bip38 random seed bytes required.
+ */
+BC_CONSTEXPR size_t bip38_seed_length = 8;
 
 /**
  * The fixed number of bip38 magic bytes.
@@ -117,6 +126,8 @@ BC_CONSTEXPR size_t bip38_salt_index_end      =  7;
 BC_CONSTEXPR size_t bip38_key_index_start     =  7;
 BC_CONSTEXPR size_t bip38_owner_entropy_start =  7;
 BC_CONSTEXPR size_t bip38_owner_entropy_end   = 15;
+BC_CONSTEXPR size_t bip38_pass_point_start    = 16;
+BC_CONSTEXPR size_t bip38_pass_point_end      = 49;
 BC_CONSTEXPR size_t bip38_enc_part1_start     = 15;
 BC_CONSTEXPR size_t bip38_decrypt_xor_offset  = 16;
 BC_CONSTEXPR size_t bip38_decrypt_xor_length  = 16;
@@ -127,11 +138,13 @@ BC_CONSTEXPR size_t bip38_key_index_end       = 39;
 
 
 /**
- * The bip38 flag bytes used in this implementation.
+ * The bip38 flag byte masks used in this implementation.
  */
-BC_CONSTEXPR uint8_t bip38_lot_sequence = 0x04;
-BC_CONSTEXPR uint8_t bip38_compressed   = 0xE0;
-BC_CONSTEXPR uint8_t bip38_uncompressed = 0xC0;
+BC_CONSTEXPR uint8_t bip38_lot_sequence      = 0x04;
+BC_CONSTEXPR uint8_t bip38_compressed        = 0x20;
+BC_CONSTEXPR uint8_t bip38_ec_multiplied     = 0x00;
+BC_CONSTEXPR uint8_t bip38_ec_non_multiplied = 0xC0;
+
 
 /**
  * Performs bip38 encryption on the private key given
@@ -142,6 +155,16 @@ BC_CONSTEXPR uint8_t bip38_uncompressed = 0xC0;
 BC_API data_chunk bip38_lock_secret(
     const ec_secret& private_key, const std::string& passphrase,
     bool use_compression);
+
+/**
+ * Performs bip38 encryption based on the given
+ * intermediate and random data seed provided.
+ *
+ * bip38_lock_secret(private_key, passphrase)
+ */
+BC_API data_chunk bip38_lock_intermediate(
+    const data_chunk& intermediate, const data_chunk& seedb,
+    uint32_t num_out_addrs, bool use_compression);
 
 /**
  * Performs bip38 decryption on the encrypted key given
