@@ -49,6 +49,7 @@ const char* error_category_impl::name() const BC_NOEXCEPT
 
 std::string error_category_impl::message(int ev) const BC_NOEXCEPT
 {
+    // TODO: use a static map (hash table)
     // This text mapping may change without notice.
     switch (ev)
     {
@@ -178,60 +179,11 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
     }
 }
 
+// We are not currently using this.
 std::error_condition error_category_impl::default_error_condition(int ev)
     const BC_NOEXCEPT
 {
     return std::error_condition(ev, *this);
-
-    //switch (ev)
-    //{
-    //    // validate tx
-    //    case error::coinbase_transaction:
-    //    case error::is_not_standard:
-    //    case error::double_spend:
-    //    case error::input_not_found:
-
-    //    // check_transaction()
-    //    case error::empty_transaction:
-    //    case error::output_value_overflow:
-    //    case error::invalid_coinbase_script_size:
-    //    case error::previous_output_null:
-
-    //    // validate block
-    //    case error::previous_block_invalid:
-
-    //    // check_block()
-    //    case error::size_limits:
-    //    case error::proof_of_work:
-    //    case error::futuristic_timestamp:
-    //    case error::first_not_coinbase:
-    //    case error::extra_coinbases:
-    //    case error::too_many_sigs:
-    //    case error::merkle_mismatch:
-
-    //    // accept_block()
-    //    case error::incorrect_proof_of_work:
-    //    case error::timestamp_too_early:
-    //    case error::non_final_transaction:
-    //    case error::checkpoints_failed:
-    //    case error::old_version_block:
-    //    case error::coinbase_height_mismatch:
-
-    //    // connect_block()
-    //    case error::duplicate_or_spent:
-    //    case error::validate_inputs_failed:
-    //    case error::fees_out_of_range:
-    //    case error::coinbase_too_large:
-    //        return error::validate_failed;
-
-    //    // transaction pool
-    //    case error::blockchain_reorganized:
-    //    case error::pool_filled:
-    //        return error::forced_removal;
-
-    //    default:
-    //        return std::error_condition(ev, *this);
-    //}
 }
 
 namespace libbitcoin {
@@ -256,7 +208,7 @@ namespace error {
         // ASIO codes are unique on Windows but not on Linux.
         namespace boost_error_asio = boost::asio::error;
 #endif
-
+        // TODO: use a static map (hash table)
         switch (ec.value())
         {
             // There should be no boost mapping to the shutdown sentinel.
