@@ -459,7 +459,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
 
     if (ec)
     {
-        log_info(LOG_NETWORK)
+        log_debug(LOG_NETWORK)
             << "Channel failure [" << address() << "] "
             << std::error_code(error::boost_to_error_code(ec)).message();
         stop(ec);
