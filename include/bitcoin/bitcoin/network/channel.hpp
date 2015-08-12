@@ -58,7 +58,7 @@ public:
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);
     config::authority address() const;
-    size_t channel::instance() const;
+    size_t instance() const;
 
     void reset_revival();
     void set_revival_handler(channel_proxy::revival_handler handler);
