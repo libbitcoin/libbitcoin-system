@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <system_error>
 #include <string>
 #include <boost/array.hpp>
@@ -75,31 +76,9 @@ namespace network {
 // filterclear  [BIP37: no support intended]
 // merkleblock  [BIP37: no support intended]
 
-// Defined here because of the central position in the dependency graph.
+class channel_proxy;
+typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
 typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
-
-// TODO: eliminate excess copying here.
-// TODO: move to serializer|misc|message.hpp/ipp.
-template <typename Message>
-data_chunk create_raw_message(const Message& packet)
-{
-    data_chunk payload(satoshi_raw_size(packet));
-    satoshi_save(packet, payload.begin());
-
-    // Make the header packet and serialise it.
-    header_type header;
-    header.magic = magic_value();
-    header.command = satoshi_command(packet);
-    header.payload_length = static_cast<uint32_t>(payload.size());
-    header.checksum = bitcoin_checksum(payload);
-    data_chunk raw_header(satoshi_raw_size(header));
-    satoshi_save(header, raw_header.begin());
-
-    // Construct completed packet with header + payload.
-    data_chunk message = raw_header;
-    extend_data(message, payload);
-    return message;
-}
 
 class BC_API channel_proxy
   : public std::enable_shared_from_this<channel_proxy>

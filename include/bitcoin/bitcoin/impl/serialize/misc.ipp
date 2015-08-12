@@ -21,7 +21,9 @@
 #define LIBBITCOIN_MISC_IPP
 
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
@@ -298,6 +300,29 @@ void satoshi_load(const Iterator first, const Iterator last,
     packet.nonce = deserial.read_8_bytes();
     BITCOIN_ASSERT(deserial.iterator() == first + satoshi_raw_size(packet));
     BITCOIN_ASSERT(deserial.iterator() == last);
+}
+
+template <typename Message>
+data_chunk create_raw_message(const Message& packet)
+{
+    const auto payload_size = static_cast<uint32_t>(satoshi_raw_size(packet));
+
+    // Serialize the payload (required for header size).
+    data_chunk payload(payload_size);
+    satoshi_save(packet, payload.begin());
+
+    // Construct the header.
+    header_type header;
+    header.magic = magic_value();
+    header.command = satoshi_command(packet);
+    header.payload_length = payload_size;
+    header.checksum = bitcoin_checksum(payload);
+
+    // Serialize header and copy the payload into a single message buffer.
+    data_chunk message(satoshi_raw_size(header));
+    satoshi_save(header, message.begin());
+    extend_data(message, payload);
+    return message;
 }
 
 } // libbitcoin
