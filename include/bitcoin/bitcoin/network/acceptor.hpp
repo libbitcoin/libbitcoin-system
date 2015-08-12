@@ -45,6 +45,8 @@ public:
     typedef std::shared_ptr<boost::asio::ip::tcp::acceptor> tcp_acceptor_ptr;
     typedef std::function<void (const std::error_code&, channel_ptr)>
         accept_handler;
+    typedef std::function<void(const std::error_code&, acceptor_ptr)>
+        listen_handler;
 
     acceptor(threadpool& pool, tcp_acceptor_ptr accept,
         const timeout& timeouts=timeout::defaults);
@@ -60,7 +62,7 @@ private:
         socket_ptr socket, accept_handler handle_accept);
 
     threadpool& pool_;
-    const timeout& times_;
+    const timeout& timeouts_;
     tcp_acceptor_ptr tcp_acceptor_;
 };
 

@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/network/peer.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -42,7 +42,7 @@ public:
 
     static const config::endpoint::list defaults;
 
-    seeder(threadpool& pool, hosts& hosts, handshake& shake, network& net,
+    seeder(threadpool& pool, hosts& hosts, handshake& shake, peer& network,
         const config::endpoint::list& seeds);
 
     /// This class is not copyable.
@@ -55,6 +55,10 @@ private:
     void connect(const config::endpoint& seed, seeded_handler handle_seeded);
     void handle_connected(const std::error_code& ec, channel_ptr node,
         const config::endpoint& seed, seeded_handler handle_seeded);
+    void handle_handshake(const std::error_code& ec, channel_ptr node,
+        const config::endpoint& seed, seeded_handler handle_seeded);
+    void handle_stop(const std::error_code& ec, const config::endpoint& seed,
+        seeded_handler handle_seeded);
     void handle_synced(const std::error_code& ec, size_t host_start_count,
         seeded_handler handle_complete);
     void handle_receive(const std::error_code& ec, const address_type& message,
@@ -67,7 +71,7 @@ private:
     async_strand strand_;
     hosts& host_pool_;
     handshake& handshake_;
-    network& network_;
+    peer& network_;
     const config::endpoint::list& seeds_;
 
     config::endpoint::list remaining_;

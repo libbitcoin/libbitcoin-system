@@ -21,12 +21,12 @@
 #define LIBBITCOIN_HANDSHAKE_HPP
 
 #include <cstdint>
-#include <string>
 #include <system_error>
 #include <boost/asio.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -53,8 +53,6 @@ public:
     void set_start_height(uint64_t height, setter_handler handle_set);
 
 private:
-    void handle_connect(const std::error_code& ec, channel_ptr node,
-        network::connect_handler handle_connect);
     void handle_version_sent(const std::error_code& ec,
         channel_ptr node, handshake_handler handle_handshake);
     void handle_verack_sent(const std::error_code& ec,
@@ -70,10 +68,6 @@ private:
     async_strand strand_;
     version_type template_version_;
 };
-
-BC_API void connect(handshake& shake, network& net,
-    const std::string& hostname, uint16_t port,
-    network::connect_handler handle_connect, bool relay=true);
 
 } // namespace network
 } // namespace libbitcoin

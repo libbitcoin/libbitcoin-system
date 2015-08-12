@@ -27,6 +27,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -36,13 +38,14 @@ using boost::asio::ip::tcp;
 
 acceptor::acceptor(threadpool& pool, tcp_acceptor_ptr accept,
     const timeout& timeouts)
-  : pool_(pool), times_(timeouts), tcp_acceptor_(accept)
+  : pool_(pool), timeouts_(timeouts), tcp_acceptor_(accept)
 {
 }
 
 void acceptor::accept(accept_handler handle_accept)
 {
     const auto socket = std::make_shared<tcp::socket>(pool_.service());
+
     tcp_acceptor_->async_accept(*socket,
         std::bind(&acceptor::call_handle_accept,
             shared_from_this(), _1, socket, handle_accept));
@@ -53,14 +56,12 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
 {
     if (ec)
     {
-        handle_accept(error::accept_failed, nullptr);
+        handle_accept(error::boost_to_error_code(ec), nullptr);
         return;
     }
 
-    const auto proxy = std::make_shared<channel_proxy>(pool_, socket, times_);
-    const auto channel_object = std::make_shared<channel>(proxy);
-    handle_accept(error::success, channel_object);
-    proxy->start();
+    const auto node = std::make_shared<channel>(pool_, socket, timeouts_);
+    handle_accept(error::success, node);
 }
 
 } // namespace network

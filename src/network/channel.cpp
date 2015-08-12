@@ -21,6 +21,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <memory>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -37,11 +38,21 @@ channel::channel(channel_proxy_ptr proxy)
     ++instance_count;
 }
 
+channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
+  : channel(std::make_shared<channel_proxy>(pool, socket, timeouts))
+{
+}
+
 channel::~channel()
 {
     stop(error::channel_stopped);
     log_debug(LOG_NETWORK)
         << "Closed channel #" << --instance_count;
+}
+
+void channel::start()
+{
+    proxy_->start();
 }
 
 void channel::stop(const std::error_code& ec)

@@ -165,10 +165,6 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
         // network errors
         case error::address_blocked:
             return "address is blocked by policy";
-        case error::connection_limit:
-            return "connection limit reached";
-        case error::connection_to_self:
-            return "connected to self";
         case error::channel_stopped:
             return "channel is stopped";
 

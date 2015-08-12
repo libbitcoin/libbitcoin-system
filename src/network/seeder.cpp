@@ -61,12 +61,12 @@ const config::endpoint::list seeder::defaults
 };
 #endif
 
-seeder::seeder(threadpool& pool, hosts& hosts, handshake& shake, network& net,
+seeder::seeder(threadpool& pool, hosts& hosts, handshake& shake, peer& network,
     const config::endpoint::list& seeds)
   : strand_(pool),
     host_pool_(hosts),
     handshake_(shake),
-    network_(net),
+    network_(network),
     seeds_(seeds)
 {
 }
@@ -115,19 +115,15 @@ void seeder::connect(const config::endpoint& seed, seeded_handler handle_seeded)
     log_info(LOG_PROTOCOL)
         << "Contacting seed [" << seed << "]";
 
-    const auto connected =
+    network_.connect(seed.host(), seed.port(),
         std::bind(&seeder::handle_connected,
-            this, _1, _2, std::ref(seed), handle_seeded);
-
-    const bool relay = false;
-    bc::network::connect(handshake_, network_, seed.host(), seed.port(),
-        connected, relay);
+            this, _1, _2, seed, handle_seeded));
 }
 
 void seeder::handle_connected(const std::error_code& ec, channel_ptr node,
     const config::endpoint& seed, seeded_handler handle_seeded)
 {
-    if (ec || !node)
+    if (ec)
     {
         log_info(LOG_PROTOCOL)
             << "Failure contacting seed [" << seed << "] "
@@ -137,17 +133,54 @@ void seeder::handle_connected(const std::error_code& ec, channel_ptr node,
     }
 
     log_info(LOG_PROTOCOL)
-        << "Getting addresses from [" << seed << "] as ["
-        << node->address() << "]";
+        << "Get seed [" << seed << "] as [" << node->address() << "]";
+
+    node->subscribe_stop(
+        strand_.wrap(&seeder::handle_stop,
+            this, _1, seed, handle_seeded));
+
+    // Subscribe to events and start talking on the socket.
+    static const bool relay = false;
+    handshake_.ready(node, 
+        strand_.wrap(&seeder::handle_handshake,
+            this, _1, node, seed, handle_seeded), relay);
+
+    node->start();
+}
+
+void seeder::handle_stop(const std::error_code& ec,
+    const config::endpoint& seed, seeded_handler handle_seeded)
+{
+    if (ec)
+    {
+        if (ec != error::channel_stopped)
+            log_debug(LOG_PROTOCOL)
+                << "Seed channel stopped [" << seed << "] " << ec.message();
+
+        handle_seeded(error::success);
+    }
+}
+
+void seeder::handle_handshake(const std::error_code& ec, channel_ptr node,
+    const config::endpoint& seed, seeded_handler handle_seeded)
+{
+    if (ec)
+    {
+        log_debug(LOG_PROTOCOL) << "Failure in handshake with seed ["
+            << node->address() << "] " << ec.message();
+        return;
+    }
+
+    // We could start ping-pong here but probabaly not important.
 
     node->subscribe_address(
         strand_.wrap(&seeder::handle_receive,
-            this, _1, _2, std::ref(seed), node, handle_seeded));
+            this, _1, _2, seed, node, handle_seeded));
 
     node->send(get_address_type(),
         strand_.wrap(&seeder::handle_send,
-            this, _1, std::ref(seed), handle_seeded));
-}
+            this, _1, seed, handle_seeded));
+};
 
 void seeder::handle_send(const std::error_code& ec,
     const config::endpoint& seed, seeded_handler handle_seeded)
@@ -161,6 +194,10 @@ void seeder::handle_send(const std::error_code& ec,
     }
 }
 
+// It is possible that we could fire this callback more than once for the same
+// node, which would result in a premature termination of the seeder. To
+// prevent this we could maintain a table of endpoints under a mutex and avoid
+// calling handle_seeded if it had already been called for the same node. 
 void seeder::handle_receive(const std::error_code& ec,
     const address_type& message, const config::endpoint& seed,
     channel_ptr node, seeded_handler handle_seeded)

@@ -28,7 +28,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
@@ -205,23 +204,5 @@ void handshake::do_set_start_height(uint64_t height, setter_handler handle_set)
     handle_set(error::success);
 }
 
-static void do_connect(const std::error_code& ec, channel_ptr node,
-    handshake& shake, network::connect_handler handle_connect, bool relay=true)
-{
-    if (ec)
-        handle_connect(ec, node);
-    else
-        shake.ready(node, std::bind(handle_connect, _1, node), relay);
-}
-
-void connect(handshake& shake, network& net, const std::string& hostname,
-    uint16_t port, network::connect_handler handle_connect, bool relay)
-{
-    net.connect(hostname, port,
-        std::bind(do_connect,
-            _1, _2, std::ref(shake), handle_connect, relay));
-}
-
 } // namespace network
 } // namespace libbitcoin
-
