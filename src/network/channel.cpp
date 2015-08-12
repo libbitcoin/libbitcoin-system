@@ -43,7 +43,7 @@ channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
 
 channel::~channel()
 {
-    stop(error::channel_stopped);
+    // Destruction of the member proxy will set channel_stop.
 
     // Instance tracking.
     log_debug(LOG_NETWORK)
