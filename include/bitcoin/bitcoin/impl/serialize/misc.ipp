@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MISC_IPP
 
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
