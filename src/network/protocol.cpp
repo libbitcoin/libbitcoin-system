@@ -245,13 +245,13 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         return;
     }
 
+    // Save the connection as we are now assured of getting stop event.
+    outbound_connections_.push_back(node);
+
     // Connected!
     log_info(LOG_PROTOCOL)
         << "Connected to peer [" << peer.to_string() << "] (" 
         << outbound_connections_.size() << " total)";
-
-    // Save the connection as we are now assured of getting stop event.
-    outbound_connections_.push_back(node);
 
     // Subscribe to remove channel from list of connections when it stops.
     node->subscribe_stop(
@@ -353,12 +353,13 @@ void protocol::handle_manual_connect(const std::error_code& ec,
         return;
     }
 
-    // Connected!
-    log_info(LOG_PROTOCOL)
-        << "Connected to peer [" << peer << "] manually";
-
     // Save the connection as we are now assured of getting a stop event.
     manual_connections_.push_back(node);
+
+    // Connected!
+    log_info(LOG_PROTOCOL)
+        << "Connected to peer [" << peer << "] manually ("
+        << manual_connections_.size() << " total)";
 
     node->subscribe_stop(
         strand_.wrap(&protocol::manual_channel_stopped,
@@ -428,13 +429,13 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         return;
     }
 
+    // Save the connection as we are now assured of getting stop event.
+    inbound_connections_.push_back(node);
+
     // Accepted!
     log_info(LOG_PROTOCOL)
         << "Accepted connection from [" << address << "] ("
         << inbound_connections_.size() << " total)";
-
-    // Save the connection as we are now assured of getting stop event.
-    inbound_connections_.push_back(node);
 
     node->subscribe_stop(
         strand_.wrap(&protocol::inbound_channel_stopped,
