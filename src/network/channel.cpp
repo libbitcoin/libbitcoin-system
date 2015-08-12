@@ -36,6 +36,9 @@ std::atomic<size_t> channel::instance_count_(0);
 channel::channel(channel_proxy_ptr proxy)
   : proxy_(proxy), nonce_(0), instance_(instance_count_++)
 {
+    // Instance tracking.
+    log_debug(LOG_NETWORK)
+        << "Opened channel #" << instance();
 }
 
 channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
