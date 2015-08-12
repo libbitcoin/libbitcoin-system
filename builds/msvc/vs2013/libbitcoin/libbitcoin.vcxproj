@@ -105,10 +105,10 @@
     <ClCompile Include="..\..\..\..\src\network\channel.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel_proxy.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel_stream_loader.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\connector.cpp" />
     <ClCompile Include="..\..\..\..\src\network\handshake.cpp" />
     <ClCompile Include="..\..\..\..\src\network\hosts.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\network.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\connect_with_timeout.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\peer.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp" />
     <ClCompile Include="..\..\..\..\src\network\seeder.cpp" />
     <ClCompile Include="..\..\..\..\src\network\timeout.cpp" />
@@ -171,9 +171,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_loader_module.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_proxy.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_stream_loader.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\handshake.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\peer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\seeder.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp" />
@@ -230,7 +231,6 @@
     <ClInclude Include="..\..\..\..\src\math\external\sha256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\sha512.h" />
     <ClInclude Include="..\..\..\..\src\math\external\zeroize.h" />
-    <ClInclude Include="..\..\..\..\src\network\connect_with_timeout.hpp" />
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>

@@ -37,6 +37,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/peer.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/async_parallel.hpp>
@@ -58,7 +59,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         broadcast_handler;
 
-    protocol(threadpool& pool, hosts& hosts, handshake& shake, network& net,
+    protocol(threadpool& pool, hosts& hosts, handshake& shake, peer& network,
         uint16_t port=bc::protocol_port, bool relay=true,
         size_t max_outbound=8, size_t max_inbound=8, 
         const config::endpoint::list& seeds=seeder::defaults);
@@ -163,6 +164,7 @@ private:
 
     // Start outbound and accepting inbound connections
     void start_connecting(completion_handler handle_complete, bool relay);
+    void handle_handshake(const std::error_code& ec, channel_ptr node);
 
     // Inbound connections
     void accept_connections(bool relay);
@@ -227,7 +229,7 @@ private:
     async_strand strand_;
     hosts& host_pool_;
     handshake& handshake_;
-    network& network_;
+    peer& network_;
     seeder seeder_;
     channel_subscriber::ptr channel_subscriber_;
 

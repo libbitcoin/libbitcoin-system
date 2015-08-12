@@ -82,11 +82,10 @@ src_libbitcoin_la_SOURCES = \
     src/network/channel.cpp \
     src/network/channel_proxy.cpp \
     src/network/channel_stream_loader.cpp \
-    src/network/connect_with_timeout.cpp \
-    src/network/connect_with_timeout.hpp \
+    src/network/connector.cpp \
     src/network/handshake.cpp \
     src/network/hosts.cpp \
-    src/network/network.cpp \
+    src/network/peer.cpp \
     src/network/protocol.cpp \
     src/network/seeder.cpp \
     src/network/timeout.cpp \
@@ -263,9 +262,10 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/channel_loader_module.hpp \
     include/bitcoin/bitcoin/network/channel_proxy.hpp \
     include/bitcoin/bitcoin/network/channel_stream_loader.hpp \
+    include/bitcoin/bitcoin/network/connector.hpp \
     include/bitcoin/bitcoin/network/handshake.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
-    include/bitcoin/bitcoin/network/network.hpp \
+    include/bitcoin/bitcoin/network/peer.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/seeder.hpp \
     include/bitcoin/bitcoin/network/settings.hpp \

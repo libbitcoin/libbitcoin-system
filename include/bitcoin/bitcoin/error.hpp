@@ -102,8 +102,6 @@ namespace error {
 
         // network errors (more)
         address_blocked,
-        connection_limit,
-        connection_to_self,
         channel_stopped
     };
 

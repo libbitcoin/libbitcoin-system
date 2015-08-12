@@ -51,7 +51,6 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::asio::buffer;
-using boost::asio::io_service;
 using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::time_duration;
@@ -134,10 +133,14 @@ void channel_proxy::start()
     read_header();
     start_timers();
 
+    // TODO: move to new ping_pong class.
+
     // Subscribe to ping messages.
     subscribe_ping(
         strand_.wrap(&channel_proxy::handle_receive_ping,
             shared_from_this(), _1, _2));
+
+    // TODO: defer this until handshake completion.
 
     // Send ping message by simulating first heartbeat.
     strand_.queue(
@@ -248,6 +251,8 @@ void channel_proxy::clear_subscriptions()
     notify_stop<pong_type>(pong_subscriber_);
     raw_subscriber_->relay(error::channel_stopped, header_type(),
         data_chunk());
+
+    // The channel stop handler should normally see error::channel_stopped.
     stop_subscriber_->relay(error::channel_stopped);
 }
 
@@ -459,7 +464,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
 
     if (ec)
     {
-        log_info(LOG_NETWORK)
+        log_debug(LOG_NETWORK)
             << "Channel failure [" << address() << "] "
             << std::error_code(error::boost_to_error_code(ec)).message();
         stop(ec);

@@ -17,11 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_HPP
-#define LIBBITCOIN_NETWORK_HPP
+#ifndef LIBBITCOIN_PEER_HPP
+#define LIBBITCOIN_PEER_HPP
 
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <system_error>
 #include <thread>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
@@ -30,6 +32,8 @@
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/connector.hpp>
+#include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -37,24 +41,18 @@
 namespace libbitcoin {
 namespace network {
 
-// TODO: rename to p2p (avoid network namespace and library no class).
-class BC_API network
+class BC_API peer
 {
 public:
-    typedef std::function<
-        void (const std::error_code&, channel_ptr)> connect_handler;
-    typedef std::function<
-        void (const std::error_code&, acceptor_ptr)> listen_handler;
-
-    network(threadpool& pool, const timeout& timeouts=timeout::defaults);
+    peer(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
-    network(const network&) = delete;
-    void operator=(const network&) = delete;
+    peer(const peer&) = delete;
+    void operator=(const peer&) = delete;
 
-    void listen(uint16_t port, listen_handler handle_listen);
+    void listen(uint16_t port, acceptor::listen_handler handle_listen);
     void connect(const std::string& hostname, uint16_t port,
-        connect_handler handle_connect);
+        connector::connect_handler handle_connect);
 
 private:
     typedef std::shared_ptr<boost::asio::ip::tcp::resolver> resolver_ptr;
@@ -62,7 +60,7 @@ private:
 
     void resolve_handler(const boost::system::error_code& ec,
         boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-        connect_handler handle_connect, resolver_ptr, query_ptr);
+        connector::connect_handler handle_connect, resolver_ptr, query_ptr);
 
     threadpool& pool_;
     const timeout& timeouts_;
@@ -72,4 +70,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

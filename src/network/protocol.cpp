@@ -32,8 +32,10 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
+#include <bitcoin/bitcoin/network/peer.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -49,13 +51,13 @@ using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
 protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
-    network& net, uint16_t port, bool relay, size_t max_outbound,
+    peer& network, uint16_t port, bool relay, size_t max_outbound,
     size_t max_inbound, const config::endpoint::list& seeds)
   : strand_(pool),
     host_pool_(hosts),
     handshake_(shake),
-    network_(net),
-    seeder_(pool, hosts, shake, net, seeds),
+    network_(network),
+    seeder_(pool, hosts, shake, network, seeds),
     channel_subscriber_(std::make_shared<channel_subscriber>(pool)),
     inbound_port_(port),
     max_inbound_(max_inbound),
@@ -92,7 +94,8 @@ void protocol::notify_stop()
     // Stop protocol subscribers.
     channel_subscriber_->relay(error::service_stopped, nullptr);
 
-    // Notify all channels to stop.
+    // Notify all channels to stop. Thes codes are swallowed by the proxy.
+    // Channel stop subscribers should generally see error::channel_stopped.
     for (const auto node: outbound_connections_)
         node->stop(error::service_stopped);
 
@@ -225,7 +228,7 @@ void protocol::start_connect(const std::error_code& ec,
         << "Connecting to peer [" << peer.to_string() << "]";
 
     // OUTBOUND CONNECT WITH TIMEOUT
-    bc::network::connect(handshake_, network_, peer.to_hostname(), peer.port(),
+    network_.connect(peer.to_hostname(), peer.port(),
         strand_.wrap(&protocol::handle_connect,
             this, _1, _2, peer, relay));
 }
@@ -243,19 +246,63 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         return;
     }
 
-    outbound_connections_.push_back(node);
-
     // Connected!
     log_info(LOG_PROTOCOL)
         << "Connected to peer [" << peer.to_string() << "] (" 
         << outbound_connections_.size() << " total)";
+
+    // Save the connection as we are now assured of getting stop event.
+    outbound_connections_.push_back(node);
 
     // Subscribe to remove channel from list of connections when it stops.
     node->subscribe_stop(
         strand_.wrap(&protocol::outbound_channel_stopped,
             this, _1, node, peer.to_string(), relay));
 
-    setup_new_channel(node);
+    // Subscribe to events and start talking on the socket.
+    handshake_.ready(node, 
+        strand_.wrap(&protocol::handle_handshake,
+            this, _1, node), relay);
+
+    // Start reading from the socket (causing events).
+    node->start();
+}
+
+void protocol::handle_handshake(const std::error_code& ec, channel_ptr node)
+{
+    if (ec)
+    {
+        log_debug(LOG_PROTOCOL) << "Failure in handshake from ["
+            << node->address() << "] " << ec.message();
+        return;
+    }
+
+    // TODO: move ping/pong into here.
+
+    // Don't ask for or subscribe to addresses if host pool is zero-sized.
+    if (host_pool_.size() > 0)
+    {
+        const auto handle_send = [node](const std::error_code& ec)
+        {
+            if (ec)
+            {
+                log_debug(LOG_PROTOCOL)
+                    << "Failure sending get address ["
+                    << node->address() << "] " << ec.message();
+            }
+        };
+
+        // Subscribe to address messages.
+        node->subscribe_address(
+            strand_.wrap(&protocol::handle_address_message,
+                this, _1, _2, node));
+
+        // Ask for addresses.
+        node->send(get_address_type(), handle_send);
+    }
+
+    // Notify protocol subscribers of new channel.
+    channel_subscriber_->relay(error::success, node);
 }
 
 void protocol::ban_connection(const config::authority& peer)
@@ -283,7 +330,7 @@ void protocol::maintain_connection(const std::string& hostname, uint16_t port,
     bool relay, size_t retries)
 {
     // MANUAL CONNECT WITH TIMEOUT
-    bc::network::connect(handshake_, network_, hostname, port,
+    network_.connect(hostname, port,
         strand_.wrap(&protocol::handle_manual_connect,
             this, _1, _2, hostname, port, relay, retries));
 }
@@ -307,18 +354,24 @@ void protocol::handle_manual_connect(const std::error_code& ec,
         return;
     }
 
-    manual_connections_.push_back(node);
-
     // Connected!
     log_info(LOG_PROTOCOL)
         << "Connected to peer [" << peer << "] manually";
 
-    // Subscribe to channel stop notifications.
+    // Save the connection as we are now assured of getting a stop event.
+    manual_connections_.push_back(node);
+
     node->subscribe_stop(
         strand_.wrap(&protocol::manual_channel_stopped,
             this, _1, node, peer.to_string(), relay, retries));
 
-    setup_new_channel(node);
+    // Subscribe to events and start talking on the socket.
+    handshake_.ready(node, 
+        strand_.wrap(&protocol::handle_handshake,
+            this, _1, node), relay);
+
+    // Start reading from the socket (causing events).
+    node->start();
 }
 
 void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept,
@@ -355,7 +408,8 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
     if (inbound_connections_.size() >= max_inbound_)
     {
-        node->stop(error::connection_limit);
+        log_debug(LOG_PROTOCOL)
+            << "Rejected inbound connection due to connection limit";
         return;
     }
 
@@ -363,71 +417,37 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
     if (is_banned(address))
     {
-        node->stop(error::address_blocked);
+        log_debug(LOG_PROTOCOL)
+            << "Rejected inbound connection due to blocked address";
         return;
     }
 
     if (is_loopback(node))
     {
-        node->stop(error::connection_to_self);
+        log_debug(LOG_PROTOCOL)
+            << "Rejected inbound connection from self";
         return;
     }
-
-    inbound_connections_.push_back(node);
 
     // Accepted!
     log_info(LOG_PROTOCOL)
         << "Accepted connection from [" << address << "] ("
         << inbound_connections_.size() << " total)";
 
-    const auto handshake_complete = [this, node](const std::error_code& ec)
-    {
-        if (ec)
-        {
-            log_debug(LOG_PROTOCOL) << "Failure in handshake from ["
-                << node->address() << "] " << ec.message();
-            return;
-        }
+    // Save the connection as we are now assured of getting stop event.
+    inbound_connections_.push_back(node);
 
-        setup_new_channel(node);
-    };
-
-    // The handshake may not complete until the caller disconnects.
-    // So this registration cannot happen in the completion handler.
-    // Otherwise the termination failure would prevent the subscription.
     node->subscribe_stop(
         strand_.wrap(&protocol::inbound_channel_stopped,
             this, _1, node, address.to_string()));
 
-    handshake_.ready(node, handshake_complete, relay);
-}
+    // Subscribe to events and start talking on the socket.
+    handshake_.ready(node, 
+        strand_.wrap(&protocol::handle_handshake,
+            this, _1, node), relay);
 
-void protocol::setup_new_channel(channel_ptr node)
-{
-    const auto handle_send = [node](const std::error_code& ec)
-    {
-        if (ec)
-        {
-            log_debug(LOG_PROTOCOL)
-                << "Handshake error [" << node->address() << "] "
-                << ec.message();
-        }
-    };
-
-    // Don't ask for or subscribe to addresses if host pool is zero-sized.
-    if (host_pool_.size() > 0)
-    {
-        // Subscribe to address messages.
-        node->subscribe_address(
-            strand_.wrap(&protocol::handle_address_message,
-                this, _1, _2, node));
-
-        // Ask for addresses.
-        node->send(get_address_type(), handle_send);
-    }
-
-    // Notify protocol subscribers of new channel.
-    channel_subscriber_->relay(error::success, node);
+    // Start reading from the socket (causing events).
+    node->start();
 }
 
 void protocol::remove_connection(channel_ptr_list& connections,
@@ -441,46 +461,40 @@ void protocol::remove_connection(channel_ptr_list& connections,
 void protocol::outbound_channel_stopped(const std::error_code& ec,
     channel_ptr node, const std::string& address, bool relay)
 {
-    if (ec)
-    {
+    if (ec != error::channel_stopped)
         log_debug(LOG_PROTOCOL)
             << "Channel stopped (outbound) [" << address << "] "
             << ec.message();
-    }
 
     remove_connection(outbound_connections_, node);
 
     // If not shutdown we always create a replacement oubound connection.
-    if (ec != error::service_stopped)
+    if (ec != error::channel_stopped)
         new_connection(relay);
 }
 
 void protocol::manual_channel_stopped(const std::error_code& ec,
     channel_ptr node, const std::string& address, bool relay, size_t retries)
 {
-    if (ec)
-    {
+    if (ec != error::channel_stopped)
         log_debug(LOG_PROTOCOL)
             << "Channel stopped (manual) [" << address << "] "
             << ec.message();
-    }
 
     remove_connection(manual_connections_, node);
 
     // If not shutdown we always attempt to reconnect manual connections.
-    if (ec != error::service_stopped)
+    if (ec != error::channel_stopped)
         retry_manual_connection(address, relay, retries);
 }
 
 void protocol::inbound_channel_stopped(const std::error_code& ec,
     channel_ptr node, const std::string& address)
 {    
-    if (ec)
-    {
+    if (ec != error::channel_stopped)
         log_debug(LOG_PROTOCOL)
             << "Channel stopped (inbound) [" << address << "] "
             << ec.message();
-    }
 
     // We never attempt to reconnect inbound connections.
     remove_connection(inbound_connections_, node);

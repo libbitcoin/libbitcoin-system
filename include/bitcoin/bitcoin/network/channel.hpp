@@ -31,6 +31,7 @@
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -49,12 +50,14 @@ public:
     static std::atomic<size_t> instance_count;
 
     channel(channel_proxy_ptr proxy);
+    channel(threadpool& pool, socket_ptr socket, const timeout& timeouts);
     ~channel();
 
     /// This class is not copyable.
     channel(const channel&) = delete;
     void operator=(const channel&) = delete;
-    
+
+    void start();
     void stop(const std::error_code& ec);
 
     uint64_t nonce() const;
