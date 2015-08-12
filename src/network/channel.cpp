@@ -32,9 +32,8 @@ namespace network {
 std::atomic<size_t> channel::instance_count(0);
 
 channel::channel(channel_proxy_ptr proxy)
-  : proxy_(proxy), nonce_(0)
+  : proxy_(proxy), nonce_(0), instance_(instance_count++)
 {
-    ++instance_count;
 }
 
 channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
@@ -46,11 +45,15 @@ channel::~channel()
 {
     stop(error::channel_stopped);
 
+    // Instance tracking.
+    log_debug(LOG_NETWORK)
+        << "Closed channel #" << instance();
+
     // Leak tracking.
     const auto count = --instance_count;
-    log_debug(LOG_NETWORK)<< "Closed channel #" << count;
     if (count == 0)
-        log_info(LOG_NETWORK) << "All channels closed.";
+        log_info(LOG_NETWORK)
+            << "All channels closed.";
 }
 
 void channel::start()
@@ -66,6 +69,11 @@ void channel::stop(const std::error_code& ec)
 config::authority channel::address() const
 {
     return proxy_->address();
+}
+
+size_t channel::instance() const
+{
+    return instance_;
 }
 
 // TODO: make private, pass on notfy.
