@@ -200,8 +200,8 @@ private:
     void notify_stop(Subscriber subscriber) const;
 
     void stop(const boost::system::error_code& ec);
-    void do_stop();
-    void clear_subscriptions();
+    void do_stop(const std::error_code& ec);
+    void clear_subscriptions(const std::error_code& ec);
     void clear_timers();
 
     void start_timers();

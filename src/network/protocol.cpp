@@ -94,8 +94,7 @@ void protocol::notify_stop()
     // Stop protocol subscribers.
     channel_subscriber_->relay(error::service_stopped, nullptr);
 
-    // Notify all channels to stop. Thes codes are swallowed by the proxy.
-    // Channel stop subscribers should generally see error::channel_stopped.
+    // Notify all channels to stop.
     for (const auto node: outbound_connections_)
         node->stop(error::service_stopped);
 
@@ -461,40 +460,37 @@ void protocol::remove_connection(channel_ptr_list& connections,
 void protocol::outbound_channel_stopped(const std::error_code& ec,
     channel_ptr node, const std::string& address, bool relay)
 {
-    if (ec != error::channel_stopped)
-        log_debug(LOG_PROTOCOL)
-            << "Channel stopped (outbound) [" << address << "] "
-            << ec.message();
+    log_debug(LOG_PROTOCOL)
+        << "Channel stopped (outbound) [" << address << "] "
+        << ec.message();
 
     remove_connection(outbound_connections_, node);
 
     // If not shutdown we always create a replacement oubound connection.
-    if (ec != error::channel_stopped)
+    if (ec != error::service_stopped)
         new_connection(relay);
 }
 
 void protocol::manual_channel_stopped(const std::error_code& ec,
     channel_ptr node, const std::string& address, bool relay, size_t retries)
 {
-    if (ec != error::channel_stopped)
-        log_debug(LOG_PROTOCOL)
-            << "Channel stopped (manual) [" << address << "] "
-            << ec.message();
+    log_debug(LOG_PROTOCOL)
+        << "Channel stopped (manual) [" << address << "] "
+        << ec.message();
 
     remove_connection(manual_connections_, node);
 
     // If not shutdown we always attempt to reconnect manual connections.
-    if (ec != error::channel_stopped)
+    if (ec != error::service_stopped)
         retry_manual_connection(address, relay, retries);
 }
 
 void protocol::inbound_channel_stopped(const std::error_code& ec,
     channel_ptr node, const std::string& address)
-{    
-    if (ec != error::channel_stopped)
-        log_debug(LOG_PROTOCOL)
-            << "Channel stopped (inbound) [" << address << "] "
-            << ec.message();
+{
+    log_debug(LOG_PROTOCOL)
+        << "Channel stopped (inbound) [" << address << "] "
+        << ec.message();
 
     // We never attempt to reconnect inbound connections.
     remove_connection(inbound_connections_, node);
