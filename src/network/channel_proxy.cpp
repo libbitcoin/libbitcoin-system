@@ -95,7 +95,7 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
 
 channel_proxy::~channel_proxy()
 {
-    do_stop();
+    do_stop(error::channel_stopped);
 }
 
 template<typename Message, class Subscriber>
@@ -212,14 +212,12 @@ void channel_proxy::stop(const std::error_code& ec)
     if (stopped())
         return;
 
-    // Stop reason codes enter here and get squashed.
-
     strand_.queue(
         std::bind(&channel_proxy::do_stop,
-            shared_from_this()));
+            shared_from_this(), ec));
 }
 
-void channel_proxy::do_stop()
+void channel_proxy::do_stop(const std::error_code& ec)
 {
     if (stopped())
         return;
@@ -228,15 +226,15 @@ void channel_proxy::do_stop()
     clear_timers();
 
     // Shutter the socket, ignore the error code.
-    boost::system::error_code ec;
-    socket_->shutdown(tcp::socket::shutdown_both, ec);
-    socket_->close(ec);
+    boost::system::error_code code;
+    socket_->shutdown(tcp::socket::shutdown_both, code);
+    socket_->close(code);
 
-    // Clear all message subscriptions and notify service stopped.
-    clear_subscriptions();
+    // Clear all message subscriptions and notify with stop reason code.
+    clear_subscriptions(ec);
 }
 
-void channel_proxy::clear_subscriptions()
+void channel_proxy::clear_subscriptions(const std::error_code& ec)
 {
     notify_stop<version_type>(version_subscriber_);
     notify_stop<verack_type>(verack_subscriber_);
@@ -249,11 +247,8 @@ void channel_proxy::clear_subscriptions()
     notify_stop<block_type>(block_subscriber_);
     notify_stop<ping_type>(ping_subscriber_);
     notify_stop<pong_type>(pong_subscriber_);
-    raw_subscriber_->relay(error::channel_stopped, header_type(),
-        data_chunk());
-
-    // The channel stop handler should normally see error::channel_stopped.
-    stop_subscriber_->relay(error::channel_stopped);
+    raw_subscriber_->relay(ec, header_type(), data_chunk());
+    stop_subscriber_->relay(ec);
 }
 
 void channel_proxy::clear_timers()

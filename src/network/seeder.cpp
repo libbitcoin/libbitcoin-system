@@ -195,9 +195,9 @@ void seeder::handle_send(const std::error_code& ec,
 }
 
 // It is possible that we could fire this callback more than once for the same
-// node, which would result in a premature termination of the seeder. To
-// prevent this we could maintain a table of endpoints under a mutex and avoid
-// calling handle_seeded if it had already been called for the same node. 
+// node, which would result in a premature apparent termination of the seeder.
+// To prevent this we could maintain a table of endpoints under a mutex and
+// avoid calling handle_seeded if it had already been called for the same node.
 void seeder::handle_receive(const std::error_code& ec,
     const address_type& message, const config::endpoint& seed,
     channel_ptr node, seeded_handler handle_seeded)

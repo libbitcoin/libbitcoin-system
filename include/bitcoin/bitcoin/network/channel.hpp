@@ -37,18 +37,11 @@ namespace libbitcoin {
 namespace network {
     
 class channel;
-
-// TODO: move channel_ptr into channel as public type (interface break).
 typedef std::shared_ptr<channel> channel_ptr;
 
 class BC_API channel
 {
 public:
-    // TODO: move into channel_proxy (interface break).
-    typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
-
-    static std::atomic<size_t> instance_count;
-
     channel(channel_proxy_ptr proxy);
     channel(threadpool& pool, socket_ptr socket, const timeout& timeouts);
     ~channel();
@@ -63,6 +56,7 @@ public:
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);
     config::authority address() const;
+    size_t instance() const;
 
     void reset_revival();
     void set_revival_handler(channel_proxy::revival_handler handler);
@@ -104,8 +98,11 @@ public:
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
 private:
+    static std::atomic<size_t> instance_count_;
+
     channel_proxy_ptr proxy_;
     uint64_t nonce_;
+    const size_t instance_;
 };
 
 } // namespace network
