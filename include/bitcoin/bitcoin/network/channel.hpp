@@ -20,7 +20,6 @@
 #ifndef LIBBITCOIN_CHANNEL_HPP
 #define LIBBITCOIN_CHANNEL_HPP
 
-#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -42,8 +41,6 @@ typedef std::shared_ptr<channel> channel_ptr;
 class BC_API channel
 {
 public:
-    static std::atomic<size_t> instance_count;
-
     channel(channel_proxy_ptr proxy);
     channel(threadpool& pool, socket_ptr socket, const timeout& timeouts);
     ~channel();
@@ -100,6 +97,9 @@ public:
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
 private:
+    static size_t instance_count;
+    static size_t update_instance_count(bool increment);
+
     channel_proxy_ptr proxy_;
     uint64_t nonce_;
     size_t instance_;

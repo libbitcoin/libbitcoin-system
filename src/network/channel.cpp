@@ -19,20 +19,32 @@
  */
 #include <bitcoin/bitcoin/network/channel.hpp>
 
-#include <atomic>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 
 namespace libbitcoin {
 namespace network {
+    
+std::mutex instance_count_mutex;
+size_t channel::instance_count(0);
 
-std::atomic<size_t> channel::instance_count(0);
+size_t channel::update_instance_count(bool increment)
+{
+    // Ensure exclusive access to instance_count.
+    std::lock_guard<std::mutex> lock(instance_count_mutex);
+
+    if (increment)
+        return instance_count++;
+    else
+        return --instance_count;
+}
 
 channel::channel(channel_proxy_ptr proxy)
-  : proxy_(proxy), nonce_(0), instance_(instance_count++)
+  : proxy_(proxy), nonce_(0), instance_(update_instance_count(true))
 {
 }
 
@@ -50,8 +62,7 @@ channel::~channel()
         << "Closed channel #" << instance();
 
     // Leak tracking.
-    const auto count = --instance_count;
-    if (count == 0)
+    if (update_instance_count(false) == 0)
         log_info(LOG_NETWORK)
             << "All channels closed.";
 }
