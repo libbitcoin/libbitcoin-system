@@ -65,7 +65,7 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     heartbeat_(pool.service()),
     revival_(pool.service()),
     revival_handler_(nullptr),
-    stopped_(false),
+    stopped_(0),
     version_subscriber_(std::make_shared<version_subscriber>(pool)),
     verack_subscriber_(std::make_shared<verack_subscriber>(pool)),
     address_subscriber_(std::make_shared<address_subscriber>(pool)),
@@ -199,7 +199,7 @@ config::authority channel_proxy::address() const
 
 bool channel_proxy::stopped() const
 {
-    return stopped_;
+    return stopped_ > 0;
 }
 
 void channel_proxy::stop(const boost::system::error_code& ec)
@@ -219,10 +219,10 @@ void channel_proxy::stop(const std::error_code& ec)
 
 void channel_proxy::do_stop(const std::error_code& ec)
 {
-    if (stopped())
+    // Test and set value atomically.
+    if (stopped_++ > 0)
         return;
 
-    stopped_ = true;
     clear_timers();
 
     // Shutter the socket, ignore the error code.

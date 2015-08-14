@@ -253,8 +253,7 @@ private:
 
     revival_handler revival_handler_;
 
-    // TODO: use lock-free std::atomic_flag?
-    std::atomic<bool> stopped_;
+    std::atomic<size_t> stopped_;
     uint64_t nonce_;
 
     channel_stream_loader stream_loader_;
