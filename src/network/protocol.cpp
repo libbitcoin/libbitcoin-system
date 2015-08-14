@@ -273,6 +273,7 @@ void protocol::handle_handshake(const std::error_code& ec, channel_ptr node)
     {
         log_debug(LOG_PROTOCOL) << "Failure in handshake from ["
             << node->address() << "] " << ec.message();
+        node->stop(ec);
         return;
     }
 
