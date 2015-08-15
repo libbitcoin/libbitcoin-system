@@ -418,9 +418,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_parallel.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
@@ -609,6 +606,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\peer.hpp">
       <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp">
+      <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
