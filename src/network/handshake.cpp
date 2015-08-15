@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <mutex>
 #include <functional>
 #include <system_error>
 #include <bitcoin/bitcoin/config/authority.hpp>
@@ -28,9 +29,9 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
@@ -65,8 +66,9 @@ const network_address_type handshake::unspecified
     unspecified_ip_port
 };
 
-handshake::handshake(threadpool& pool, const config::authority& self)
-  : strand_(pool)
+handshake::handshake(threadpool& pool, const config::authority& self,
+    const timeout& timeouts)
+  : strand_(pool), timeouts_(timeouts), timer_(pool.service())
 {
     // relay and address_you are set in ready().
     template_version_.address_you = unspecified;
@@ -84,16 +86,17 @@ handshake::handshake(threadpool& pool, const config::authority& self)
 }
 
 // This will not fire the handshake completion until all three
-// subscriptions fire, which will never happen if the peer doesn't complete
-// the handshare or disconnect. So caller cannot depend on the handler.
-void handshake::ready(channel_ptr node, handshake_handler handle_handshake,
+// subscriptions or the timer fires. synchronize guards against the
+// possiblity of conflicting timer completion callbacks.
+void handshake::start(channel_ptr node, handshake_handler handle_handshake,
     bool relay)
 {
     BITCOIN_ASSERT(node);
 
-    // Synchronize all code paths (or errors) before calling handle_handshake.
-    constexpr size_t require = 3;
-    const auto completion_callback = async_parallel(handle_handshake, require);
+    // Require three callbacks (or any error) before calling handle_handshake.
+    const auto complete = synchronizer(
+        std::bind(&handshake::handle_synced,
+            this, _1, handle_handshake), 3, "handshake");
 
     // Create a copy of the version template.
     auto session_version = template_version_;
@@ -113,32 +116,65 @@ void handshake::ready(channel_ptr node, handshake_handler handle_handshake,
     session_version.nonce = pseudo_random();
     node->set_nonce(session_version.nonce);
 
+    // 1 of 3
     node->subscribe_version(
         strand_.wrap(&handshake::receive_version,
-            this, _1, _2, node, completion_callback));
+            this, _1, _2, node, complete));
 
+    // 2 of 3
     node->subscribe_verack(
         strand_.wrap(&handshake::receive_verack,
-            this, _1, _2, node, completion_callback));
+            this, _1, _2, node, complete));
 
+    // 3 of 3
     node->send(session_version,
         strand_.wrap(&handshake::handle_version_sent,
+            this, _1, node, complete));
+
+    // timeout error
+    start_timer(node, complete);
+}
+
+void handshake::handle_synced(const std::error_code& ec,
+    handshake_handler handle_handshake)
+{
+    // Speed up the demise of the timer.
+    boost::system::error_code code;
+    timer_.cancel(code);
+
+    handle_handshake(ec);
+}
+
+void handshake::start_timer(channel_ptr node,
+    handshake_handler completion_callback)
+{
+    timer_.expires_from_now(timeouts_.handshake);
+    timer_.async_wait(
+        std::bind(&handshake::handle_timer,
             this, _1, node, completion_callback));
 }
 
-void handshake::handle_version_sent(const std::error_code& ec,
-    channel_ptr node, handshake_handler handle_handshake)
+void handshake::handle_timer(const boost::system::error_code& ec,
+    channel_ptr node, handshake_handler completion_callback)
 {
-    handle_handshake(ec);
+    // A success code implies that the timer fired.
+    if (!ec)
+        completion_callback(error::channel_timeout);
+}
+
+void handshake::handle_version_sent(const std::error_code& ec,
+    channel_ptr node, handshake_handler completion_callback)
+{
+    completion_callback(ec);
 }
 
 void handshake::receive_version(const std::error_code& ec, 
     const version_type& version, channel_ptr node,
-    handshake_handler handle_handshake)
+    handshake_handler completion_callback)
 {
     if (ec)
     {
-        handle_handshake(ec);
+        completion_callback(ec);
         return;
     }
 
@@ -153,23 +189,23 @@ void handshake::receive_version(const std::error_code& ec,
         log_debug(LOG_NETWORK)
             << "Peer version (" << version.version << ") below minimum ("
             << bc::peer_minimum_version << ") [" << node->address() << "]";
-        handle_handshake(error::accept_failed);
+        completion_callback(error::accept_failed);
         return;
     }
 
     node->send(verack_type(),
         strand_.wrap(&handshake::handle_verack_sent,
-            this, _1, handle_handshake));
+            this, _1, completion_callback));
 }
 
 void handshake::handle_verack_sent(const std::error_code& ec,
-    handshake_handler handle_handshake)
+    handshake_handler completion_callback)
 {
-    handle_handshake(ec);
+    completion_callback(ec);
 }
 
 void handshake::receive_verack(const std::error_code& ec, const verack_type&,
-    channel_ptr node, handshake_handler handle_handshake)
+    channel_ptr node, handshake_handler completion_callback)
 {
     if (!ec)
     {
@@ -184,7 +220,7 @@ void handshake::receive_verack(const std::error_code& ec, const verack_type&,
 
     // We may not get this response before timeout, in which case we can
     // only assume that our version wasn't accepted.
-    handle_handshake(ec);
+    completion_callback(ec);
 }
 
 void handshake::set_start_height(uint64_t height, setter_handler handle_set)
