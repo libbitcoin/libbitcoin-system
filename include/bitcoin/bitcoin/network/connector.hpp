@@ -26,6 +26,7 @@
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -47,19 +48,17 @@ public:
         connect_handler handle_connect);
 
 private:
+    typedef synchronizer<connect_handler> synchronizer;
+
     void call_handle_connect(const boost::system::error_code& ec,
         tcp::resolver::iterator, socket_ptr socket,
         connect_handler handle_connect);
-
-    void handle_timer(const boost::system::error_code& ec, socket_ptr socket,
+    void handle_timer(const boost::system::error_code& ec,
         connect_handler handle_connect);
-
-    bool handled();
 
     threadpool& pool_;
     const timeout& timeouts_;
     boost::asio::deadline_timer timer_;
-    bool handled_;
 };
 
 } // namespace network
