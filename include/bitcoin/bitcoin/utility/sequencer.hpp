@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ASYNC_STRAND_HPP
-#define LIBBITCOIN_ASYNC_STRAND_HPP
+#ifndef LIBBITCOIN_SEQUENCER_HPP
+#define LIBBITCOIN_SEQUENCER_HPP
 
 #include <functional>
 #include <thread>
@@ -29,7 +29,7 @@
 namespace libbitcoin {
 
 template <typename Handler>
-struct wrapped_handler_impl
+struct dispatcher
 {
     Handler handler;
     boost::asio::io_service::strand& strand;
@@ -42,45 +42,31 @@ struct wrapped_handler_impl
 };
 
 /**
- * Convenience class for objects wishing to synchronize operations around
- * shared data.
- *
- * queue() guarantees that any handlers passed to it will never
- * execute at the same time, and they will be called in sequential order.
- *
- * randomly_queue() guarantees that any handlers passed to it will never
- * execute at the same time.
+ * Convenience class for objects wishing to synchronize operations.
  */
-class BC_API async_strand
+class BC_API sequencer
 {
 public:
-    async_strand(threadpool& pool);
+    sequencer(threadpool& pool);
 
     /**
-     * wrap() returns a new handler that guarantees that the handler it
-     * encapsulates will never execute at the same time as another handler
-     * passing through this class.
+     * Returns a new handler that guarantees that the handler it encapsulates
+     * will not execute concurrently with other handlers on the strand. Does
+     * not guarantee sequential calling order.
      */
     template <typename Handler, typename... Args>
     auto wrap(Handler&& handler, Args&&... args) ->
-        wrapped_handler_impl<decltype(
-            std::bind(
-                std::forward<Handler>(handler), std::forward<Args>(args)...))>
+        dispatcher<decltype(std::bind(std::forward<Handler>(handler),
+            std::forward<Args>(args)...))>
     {
-        auto bound = std::bind(
-            std::forward<Handler>(handler), std::forward<Args>(args)...);
+        auto bound = std::bind(std::forward<Handler>(handler),
+            std::forward<Args>(args)...);
         return { bound, strand_ };
     }
 
     /**
-     * queue() guarantees that any handlers passed to it will
-     * never execute at the same time in sequential order.
-     *
-     * Guarantees sequential calling order.
-     *
-     * @code
-     *   strand.queue(handler);
-     * @endcode
+     * Guarantees that any handlers passed to it will not execute concurrently
+     * with other handlers on the strand. Guarantees sequential calling order.
      */
     template <typename... Args>
     void queue(Args&&... args)
@@ -89,19 +75,24 @@ public:
     }
 
     /**
-     * randomly_queue() guarantees that any handlers passed to it will
-     * never execute at the same time.
-     *
-     * Does not guarantee sequential calling order.
-     *
-     * @code
-     *   strand.randomly_queue(handler);
-     * @endcode
+     * Guarantees that any handlers passed to it will not execute concurrently
+     * with other handlers on the strand. Does not guarantee sequential calling
+     * order.
      */
     template <typename... Args>
     void randomly_queue(Args&&... args)
     {
         ios_.post(strand_.wrap(std::bind(std::forward<Args>(args)...)));
+    }
+
+    /**
+     * Offers no synchronization guarantees (i.e. may execute concurrently with
+     * other posts).
+     */
+    template <typename... Args>
+    void async(Args&&... args)
+    {
+        ios_.post(std::bind(std::forward<Args>(args)...));
     }
 
 private:
@@ -112,4 +103,3 @@ private:
 } // namespace libbitcoin
 
 #endif
-

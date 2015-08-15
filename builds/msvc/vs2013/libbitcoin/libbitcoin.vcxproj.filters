@@ -302,9 +302,6 @@
     <ClCompile Include="..\..\..\..\src\network\acceptor.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\async_strand.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\random.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
@@ -331,6 +328,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\peer.cpp">
       <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp">
+      <Filter>src\utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -571,9 +571,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_strand.hpp">
-      <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\random.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
@@ -608,6 +605,9 @@
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp">
+      <Filter>include\bitcoin\utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequencer.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
   </ItemGroup>

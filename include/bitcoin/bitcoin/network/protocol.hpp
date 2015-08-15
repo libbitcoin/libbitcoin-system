@@ -224,7 +224,7 @@ private:
             node->send(packet, send_handler);
     }
     
-    async_strand strand_;
+    sequencer strand_;
     hosts& host_pool_;
     handshake& handshake_;
     peer& network_;

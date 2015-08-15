@@ -29,7 +29,7 @@
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/peer.hpp>
-#include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -72,7 +72,7 @@ private:
         seeded_handler completion_callback);
     void handle_store(const std::error_code& ec);
 
-    async_strand strand_;
+    sequencer strand_;
     hosts& host_pool_;
     handshake& handshake_;
     peer& network_;

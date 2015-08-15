@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/sequencer.hpp>
 
 #include <new>
 #include <system_error>
@@ -26,7 +26,7 @@
 
 namespace libbitcoin {
 
-async_strand::async_strand(threadpool& pool)
+sequencer::sequencer(threadpool& pool)
   : ios_(pool.service()), strand_(ios_)
 {
 }

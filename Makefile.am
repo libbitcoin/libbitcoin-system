@@ -96,10 +96,10 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_istream.cpp \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
-    src/utility/async_strand.cpp \
     src/utility/binary.cpp \
     src/utility/logger.cpp \
     src/utility/random.cpp \
+    src/utility/sequencer.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
@@ -294,7 +294,6 @@ include_bitcoin_bitcoin_utilitydir = ${includedir}/bitcoin/bitcoin/utility
 include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/array_slice.hpp \
     include/bitcoin/bitcoin/utility/assert.hpp \
-    include/bitcoin/bitcoin/utility/async_strand.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
@@ -302,6 +301,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
+    include/bitcoin/bitcoin/utility/sequencer.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \

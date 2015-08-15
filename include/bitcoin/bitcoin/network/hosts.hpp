@@ -33,7 +33,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -94,7 +94,7 @@ private:
     void do_fetch_count(fetch_count_handler handle_fetch);
     size_t select_random_host();
 
-    async_strand strand_;
+    sequencer strand_;
     boost::filesystem::path file_path_;
     boost::circular_buffer<config::authority> buffer_;
 
