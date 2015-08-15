@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/peer.hpp>
 #include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -52,20 +53,23 @@ public:
     void start(seeded_handler handle_seeded);
 
 private:
-    void connect(const config::endpoint& seed, seeded_handler handle_seeded);
+    typedef synchronizer<seeded_handler> synchronizer;
+
+    void connect(const config::endpoint& seed,
+        seeded_handler completion_callback);
     void handle_connected(const std::error_code& ec, channel_ptr node,
-        const config::endpoint& seed, seeded_handler handle_seeded);
+        const config::endpoint& seed, seeded_handler completion_callback);
     void handle_handshake(const std::error_code& ec, channel_ptr node,
-        const config::endpoint& seed, seeded_handler handle_seeded);
+        const config::endpoint& seed, seeded_handler completion_callback);
     void handle_stop(const std::error_code& ec, const config::endpoint& seed,
-        seeded_handler handle_seeded);
+        seeded_handler completion_callback);
     void handle_synced(const std::error_code& ec, size_t host_start_count,
-        seeded_handler handle_complete);
+        seeded_handler completion_callback);
     void handle_receive(const std::error_code& ec, const address_type& message,
         const config::endpoint& seed, channel_ptr node, 
-        seeded_handler handle_seeded);
+        seeded_handler completion_callback);
     void handle_send(const std::error_code& ec, const config::endpoint& seed,
-        seeded_handler handle_seeded);
+        seeded_handler completion_callback);
     void handle_store(const std::error_code& ec);
 
     async_strand strand_;
