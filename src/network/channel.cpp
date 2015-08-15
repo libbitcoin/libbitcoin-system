@@ -46,10 +46,11 @@ channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
 
 channel::~channel()
 {
-    // Destruction of the member proxy will set channel_stop.
+    // A proxy reference may be held externally, so ensure the proxy is closed.
+    proxy_->stop(error::channel_stopped);
 
     // Leak tracking.
-    log_info(LOG_NETWORK)
+    log_debug(LOG_NETWORK)
         << "Closed a channel and (" << --instances_ << ") remain open";
 }
 
