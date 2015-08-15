@@ -37,11 +37,11 @@
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
+#include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
@@ -65,7 +65,7 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     heartbeat_(pool.service()),
     revival_(pool.service()),
     revival_handler_(nullptr),
-    stopped_(0),
+    stopped_(false),
     version_subscriber_(std::make_shared<version_subscriber>(pool)),
     verack_subscriber_(std::make_shared<verack_subscriber>(pool)),
     address_subscriber_(std::make_shared<address_subscriber>(pool)),
@@ -199,7 +199,7 @@ config::authority channel_proxy::address() const
 
 bool channel_proxy::stopped() const
 {
-    return stopped_ > 0;
+    return stopped_;
 }
 
 void channel_proxy::stop(const boost::system::error_code& ec)
@@ -220,9 +220,11 @@ void channel_proxy::stop(const std::error_code& ec)
 void channel_proxy::do_stop(const std::error_code& ec)
 {
     // Test and set value atomically.
-    if (stopped_++ > 0)
+    if (stopped())
         return;
 
+    // An atomic would not be effective here.
+    stopped_ = true;
     clear_timers();
 
     // Shutter the socket, ignore the error code.
