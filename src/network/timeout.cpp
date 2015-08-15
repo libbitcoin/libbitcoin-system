@@ -34,13 +34,13 @@ const timeout timeout::defaults;
 
 timeout::timeout(
     uint32_t connect_timeout_seconds,
-    uint32_t channel_handshake_minutes,
+    uint32_t channel_handshake_seconds,
     uint32_t channel_revival_minutes,
     uint32_t channel_heartbeat_minutes,
     uint32_t channel_inactivity_minutes,
     uint32_t channel_expiration_minutes)
   : connect(0, 0, connect_timeout_seconds),
-    handshake(0, channel_handshake_minutes, 0),
+    handshake(0, 0, channel_handshake_seconds),
     revival(0, channel_revival_minutes, 0),
     heartbeat(0, channel_heartbeat_minutes, 0),
     inactivity(0, channel_inactivity_minutes, 0),
