@@ -48,8 +48,6 @@ public:
         connect_handler handle_connect);
 
 private:
-    typedef synchronizer<connect_handler> synchronizer;
-
     void call_handle_connect(const boost::system::error_code& ec,
         tcp::resolver::iterator, socket_ptr socket,
         connect_handler handle_connect);

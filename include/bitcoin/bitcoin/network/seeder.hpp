@@ -53,8 +53,6 @@ public:
     void start(seeded_handler handle_seeded);
 
 private:
-    typedef synchronizer<seeded_handler> synchronizer;
-
     void connect(const config::endpoint& seed,
         seeded_handler completion_callback);
     void handle_connected(const std::error_code& ec, channel_ptr node,

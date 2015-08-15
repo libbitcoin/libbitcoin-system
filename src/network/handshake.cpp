@@ -94,7 +94,7 @@ void handshake::start(channel_ptr node, handshake_handler handle_handshake,
     BITCOIN_ASSERT(node);
 
     // Require three callbacks (or any error) before calling handle_handshake.
-    const auto complete = synchronizer(
+    const auto complete = synchronizer<handshake_handler>(
         std::bind(&handshake::handle_synced,
             this, _1, handle_handshake), 3, "handshake");
 

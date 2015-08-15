@@ -87,7 +87,7 @@ void seeder::start(seeded_handler handle_seeded)
 
     // Require all node callbacks before calling seeder::handle_synced.
     // We can expect to get exactly one completion handler call per node.
-    const auto complete = synchronizer(
+    const auto complete = synchronizer<seeded_handler>(
         std::bind(&seeder::handle_synced,
             this, _1, host_count, handle_seeded), seed_count, "seeder");
 
@@ -95,7 +95,8 @@ void seeder::start(seeded_handler handle_seeded)
     // Require one callback per node before calling node_complete.
     // A second call is otherwise possible due to concurrent disconnection.
     for (const auto& seed: seeds_)
-        connect(seed, synchronizer(complete, 1, seed.to_string()));
+        connect(seed, synchronizer<seeded_handler>(complete, 1, 
+            seed.to_string()));
 }
 
 void seeder::handle_synced(const std::error_code& ec, size_t host_start_count,

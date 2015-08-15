@@ -57,8 +57,6 @@ public:
     void set_start_height(uint64_t height, setter_handler handle_set);
 
 private:
-    typedef synchronizer<handshake_handler> synchronizer;
-
     void handle_synced(const std::error_code& ec,
         handshake_handler handle_handshake);
     void handle_timer(const boost::system::error_code& ec, channel_ptr node,

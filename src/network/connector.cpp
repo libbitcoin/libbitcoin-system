@@ -53,7 +53,8 @@ void connector::start(tcp::resolver::iterator endpoint_iterator,
     const auto socket = std::make_shared<tcp::socket>(pool_.service());
 
     // Handle one callback before calling handle_connect.
-    const auto complete = synchronizer(handle_connect, 1, "connector");
+    const auto complete = synchronizer<connect_handler>(handle_connect, 1,
+        "connector");
 
     timer_.expires_from_now(timeouts_.connect);
     timer_.async_wait(
