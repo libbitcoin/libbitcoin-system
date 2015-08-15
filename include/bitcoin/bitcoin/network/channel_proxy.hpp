@@ -20,7 +20,6 @@
 #ifndef LIBBITCOIN_CHANNEL_PROXY_HPP
 #define LIBBITCOIN_CHANNEL_PROXY_HPP
 
-#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -40,11 +39,11 @@
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
-#include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/threadpool.hpp>
+#include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -242,7 +241,7 @@ private:
     void call_handle_send(const boost::system::error_code& ec,
         send_handler handle_send);
 
-    async_strand strand_;
+    sequencer strand_;
     socket_ptr socket_;
     const timeout& timeouts_;
 
@@ -252,11 +251,8 @@ private:
     boost::asio::deadline_timer revival_;
 
     revival_handler revival_handler_;
-
-    // TODO: use lock-free std::atomic_flag?
-    std::atomic<bool> stopped_;
+    bool stopped_;
     uint64_t nonce_;
-
     channel_stream_loader stream_loader_;
 
     // Header minus checksum is 4 + 12 + 4 = 20 bytes

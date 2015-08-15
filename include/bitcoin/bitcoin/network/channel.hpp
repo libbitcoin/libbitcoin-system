@@ -20,7 +20,6 @@
 #ifndef LIBBITCOIN_CHANNEL_HPP
 #define LIBBITCOIN_CHANNEL_HPP
 
-#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -56,7 +55,6 @@ public:
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);
     config::authority address() const;
-    size_t instance() const;
 
     void reset_revival();
     void set_revival_handler(channel_proxy::revival_handler handler);
@@ -98,15 +96,11 @@ public:
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
 private:
-    static std::atomic<size_t> instance_count_;
-
     channel_proxy_ptr proxy_;
     uint64_t nonce_;
-    const size_t instance_;
 };
 
 } // namespace network
 } // namespace libbitcoin
 
 #endif
-

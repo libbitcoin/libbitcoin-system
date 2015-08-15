@@ -23,7 +23,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
-#include <bitcoin/bitcoin/utility/async_strand.hpp>
+#include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -48,7 +48,7 @@ private:
     void do_subscribe(subscription_handler notifier);
     void do_relay(Args... args);
 
-    async_strand strand_;
+    sequencer strand_;
     subscription_list subscriptions_;
 };
 

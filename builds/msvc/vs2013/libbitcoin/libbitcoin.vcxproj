@@ -123,7 +123,7 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\async_strand.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
@@ -199,8 +199,8 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\unicode_streambuf.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\array_slice.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_parallel.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\async_strand.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequencer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\collection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\data.hpp" />

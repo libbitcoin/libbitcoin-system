@@ -43,7 +43,7 @@ using boost::asio::ip::tcp;
 std::mutex callback_handled_mutex;
 
 connector::connector(threadpool& pool, const timeout& timeouts)
-  : pool_(pool), timeouts_(timeouts), timer_(pool.service()), handled_(false)
+  : pool_(pool), timeouts_(timeouts), timer_(pool.service())
 {
 }
 
@@ -52,32 +52,26 @@ void connector::start(tcp::resolver::iterator endpoint_iterator,
 {
     const auto socket = std::make_shared<tcp::socket>(pool_.service());
 
+    // Handle one callback before calling handle_connect.
+    const auto complete = synchronizer<connect_handler>(handle_connect, 1,
+        "connector");
+
     timer_.expires_from_now(timeouts_.connect);
     timer_.async_wait(
         std::bind(&connector::handle_timer,
-            shared_from_this(), _1, socket, handle_connect));
+            shared_from_this(), _1, complete));
 
     boost::asio::async_connect(*socket, endpoint_iterator,
         std::bind(&connector::call_handle_connect,
-            shared_from_this(), _1, _2, socket, handle_connect));
-}
-
-bool connector::handled()
-{
-    // Ensure the callback is not invoked for both connection and timeout.
-    std::lock_guard<std::mutex> lock(callback_handled_mutex);
-    if (handled_)
-        return true;
-
-    handled_ = true;
-    return false;
+            shared_from_this(), _1, _2, socket, complete));
 }
 
 void connector::call_handle_connect(const boost::system::error_code& ec,
     tcp::resolver::iterator, socket_ptr socket, connect_handler handle_connect)
 {
-    if (handled())
-        return;
+    // Speed up the demise of the timer.
+    boost::system::error_code code;
+    timer_.cancel(code);
 
     if (ec)
     {
@@ -85,18 +79,18 @@ void connector::call_handle_connect(const boost::system::error_code& ec,
         return;
     }
 
+    // It is possible for the node to get created here after a timeout, but it
+    // will subsequently self-destruct following rejection by the synchronizer.
     const auto node = std::make_shared<channel>(pool_, socket, timeouts_);
     handle_connect(error::success, node);
 }
 
 void connector::handle_timer(const boost::system::error_code& ec,
-    socket_ptr socket, connect_handler handle_connect)
+    connect_handler handle_connect)
 {
-    if (handled())
-        return;
-
     // A success code implies that the timer fired.
-    handle_connect(error::channel_timeout, nullptr);
+    if (!ec)
+        handle_connect(error::channel_timeout, nullptr);
 }
 
 } // namespace network

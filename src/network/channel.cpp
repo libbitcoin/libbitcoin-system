@@ -23,7 +23,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
-#include <mutex>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
@@ -31,14 +30,13 @@
 namespace libbitcoin {
 namespace network {
     
-std::atomic<size_t> channel::instance_count_(0);
+// Leak tracking.
+static std::atomic<size_t> instances_(0);
 
 channel::channel(channel_proxy_ptr proxy)
-  : proxy_(proxy), nonce_(0), instance_(instance_count_++)
+  : proxy_(proxy), nonce_(0)
 {
-    // Instance tracking.
-    log_debug(LOG_NETWORK)
-        << "Opened channel #" << instance();
+    ++instances_;
 }
 
 channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
@@ -48,16 +46,12 @@ channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
 
 channel::~channel()
 {
-    // Destruction of the member proxy will set channel_stop.
-
-    // Instance tracking.
-    log_debug(LOG_NETWORK)
-        << "Closed channel #" << instance();
+    // A proxy reference may be held externally, so ensure the proxy is closed.
+    proxy_->stop(error::channel_stopped);
 
     // Leak tracking.
-    if (--instance_count_ == 0)
-        log_info(LOG_NETWORK)
-            << "All channels closed.";
+    log_debug(LOG_NETWORK)
+        << "Closed a channel and (" << --instances_ << ") remain open";
 }
 
 void channel::start()
@@ -73,11 +67,6 @@ void channel::stop(const std::error_code& ec)
 config::authority channel::address() const
 {
     return proxy_->address();
-}
-
-size_t channel::instance() const
-{
-    return instance_;
 }
 
 // TODO: make private, pass on notfy.

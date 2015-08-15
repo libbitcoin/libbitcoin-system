@@ -259,7 +259,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
             this, _1, node, peer.to_string(), relay));
 
     // Subscribe to events and start talking on the socket.
-    handshake_.ready(node, 
+    handshake_.start(node, 
         strand_.wrap(&protocol::handle_handshake,
             this, _1, node), relay);
 
@@ -273,6 +273,7 @@ void protocol::handle_handshake(const std::error_code& ec, channel_ptr node)
     {
         log_debug(LOG_PROTOCOL) << "Failure in handshake from ["
             << node->address() << "] " << ec.message();
+        node->stop(ec);
         return;
     }
 
@@ -366,7 +367,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
             this, _1, node, peer.to_string(), relay, retries));
 
     // Subscribe to events and start talking on the socket.
-    handshake_.ready(node, 
+    handshake_.start(node, 
         strand_.wrap(&protocol::handle_handshake,
             this, _1, node), relay);
 
@@ -442,7 +443,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
             this, _1, node, address.to_string()));
 
     // Subscribe to events and start talking on the socket.
-    handshake_.ready(node, 
+    handshake_.start(node, 
         strand_.wrap(&protocol::handle_handshake,
             this, _1, node), relay);
 

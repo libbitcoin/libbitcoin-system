@@ -21,7 +21,6 @@
 #ifndef BC_PROTOCOL_HPP
 #define BC_PROTOCOL_HPP
 
-#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -40,7 +39,6 @@
 #include <bitcoin/bitcoin/network/peer.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/utility/async_parallel.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -226,7 +224,7 @@ private:
             node->send(packet, send_handler);
     }
     
-    async_strand strand_;
+    sequencer strand_;
     hosts& host_pool_;
     handshake& handshake_;
     peer& network_;

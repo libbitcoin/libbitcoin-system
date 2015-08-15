@@ -37,11 +37,11 @@
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
+#include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
@@ -219,9 +219,11 @@ void channel_proxy::stop(const std::error_code& ec)
 
 void channel_proxy::do_stop(const std::error_code& ec)
 {
+    // Test and set value atomically.
     if (stopped())
         return;
 
+    // An atomic would not be effective here.
     stopped_ = true;
     clear_timers();
 

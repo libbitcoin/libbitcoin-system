@@ -24,8 +24,8 @@
 
 #include <functional>
 #include <memory>
-#include <bitcoin/bitcoin/utility/async_strand.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
    
 namespace libbitcoin {
