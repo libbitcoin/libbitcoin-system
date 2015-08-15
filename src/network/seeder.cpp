@@ -101,13 +101,7 @@ void seeder::start(seeded_handler handle_seeded)
 void seeder::handle_synced(const std::error_code& ec, size_t host_start_count,
     seeded_handler handle_seeded)
 {
-    // This implies a full stop, so we only send catostropic seeding errors.
-    if (ec)
-    {
-        handle_seeded(ec);
-        return;
-    }
-
+    // Error implies a full stop, so instead we send an error only if no seeds.
     const auto success = host_pool_.size() > host_start_count;
     const auto result = success ? error::success : error::operation_failed;
     handle_seeded(result);
@@ -155,14 +149,11 @@ void seeder::handle_connected(const std::error_code& ec, channel_ptr node,
 void seeder::handle_stop(const std::error_code& ec,
     const config::endpoint& seed, seeded_handler completion_callback)
 {
-    if (ec)
-    {
-        if (ec != error::channel_stopped)
-            log_debug(LOG_PROTOCOL)
-                << "Seed channel stopped [" << seed << "] " << ec.message();
+    if (ec && ec != error::channel_stopped)
+        log_debug(LOG_PROTOCOL)
+            << "Seed channel stopped [" << seed << "] " << ec.message();
 
-        completion_callback(error::success);
-    }
+    completion_callback(error::success);
 }
 
 void seeder::handle_handshake(const std::error_code& ec, channel_ptr node,
@@ -172,6 +163,7 @@ void seeder::handle_handshake(const std::error_code& ec, channel_ptr node,
     {
         log_debug(LOG_PROTOCOL) << "Failure in handshake with seed ["
             << node->address() << "] " << ec.message();
+        completion_callback(error::success);
         return;
     }
 
@@ -221,7 +213,6 @@ void seeder::handle_receive(const std::error_code& ec,
             strand_.wrap(&seeder::handle_store,
                 this, _1));
 
-    // We may have not added any seeds, but caller can check hosts count.
     completion_callback(error::success);
 
     // We are using this call to keep node in scope until receive.
