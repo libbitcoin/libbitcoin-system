@@ -48,7 +48,7 @@ private:
     void do_subscribe(subscription_handler notifier);
     void do_relay(Args... args);
 
-    sequencer strand_;
+    sequencer sequence_;
     subscription_list subscriptions_;
 };
 

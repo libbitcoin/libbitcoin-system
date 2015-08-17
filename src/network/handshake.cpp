@@ -30,6 +30,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/version.hpp>
@@ -49,7 +50,7 @@ enum services: uint64_t
 
 static constexpr uint32_t no_timestamp = 0;
 static constexpr uint16_t unspecified_ip_port = 0;
-static constexpr message::ip_address unspecified_ip_address
+static constexpr ip_address_type unspecified_ip_address
 {
     {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -57,7 +58,7 @@ static constexpr message::ip_address unspecified_ip_address
     }
 };
 
-const message::network_address handshake::unspecified
+const network_address_type handshake::unspecified
 {
     no_timestamp,
     services::node_network,
@@ -67,7 +68,7 @@ const message::network_address handshake::unspecified
 
 handshake::handshake(threadpool& pool, const config::authority& self,
     const timeout& timeouts)
-  : strand_(pool), timeouts_(timeouts), timer_(pool.service())
+  : sequence_(pool), timeouts_(timeouts), timer_(pool.service())
 {
     // relay and address_you are set in ready().
     template_version_.address_you = unspecified;
@@ -117,17 +118,17 @@ void handshake::start(channel_ptr node, handshake_handler handle_handshake,
 
     // 1 of 3
     node->subscribe_version(
-        strand_.wrap(&handshake::receive_version,
+        sequence_.sync(&handshake::receive_version,
             this, _1, _2, node, complete));
 
     // 2 of 3
     node->subscribe_verack(
-        strand_.wrap(&handshake::receive_verack,
+        sequence_.sync(&handshake::receive_verack,
             this, _1, _2, node, complete));
 
     // 3 of 3
     node->send(session_version,
-        strand_.wrap(&handshake::handle_version_sent,
+        sequence_.sync(&handshake::handle_version_sent,
             this, _1, node, complete));
 
     // timeout error
@@ -168,7 +169,7 @@ void handshake::handle_version_sent(const std::error_code& ec,
 }
 
 void handshake::receive_version(const std::error_code& ec, 
-    const message::announce_version& version, channel_ptr node,
+    const version_type& version, channel_ptr node,
     handshake_handler completion_callback)
 {
     if (ec)
@@ -176,12 +177,6 @@ void handshake::receive_version(const std::error_code& ec,
         completion_callback(ec);
         return;
     }
-
-    // TODO: add loopback detection to the channel.
-    // TODO: set the protocol version on node (for feature degradation).
-    // TODO: save relay to node and have protocol not relay if false.
-    // TODO: trace out version.version|services|user_agent.
-    // node->set_version(version);
 
     if (version.version < bc::peer_minimum_version)
     {
@@ -192,8 +187,17 @@ void handshake::receive_version(const std::error_code& ec,
         return;
     }
 
-    node->send(message::verack(),
-        strand_.wrap(&handshake::handle_verack_sent,
+    // TODO: add loopback detection to the channel.
+    // TODO: set the protocol version on node (for feature degradation).
+    // TODO: save relay to node and have protocol not relay if false.
+    // TODO: trace out version.version|services|user_agent.
+    // node->set_version(version);
+    log_debug(LOG_NETWORK)
+        << "Peer version [" << node->address() << "] ("
+        << version.version << ") " << version.user_agent;
+
+    node->send(verack_type(),
+        sequence_.sync(&handshake::handle_verack_sent,
             this, _1, completion_callback));
 }
 
@@ -203,9 +207,8 @@ void handshake::handle_verack_sent(const std::error_code& ec,
     completion_callback(ec);
 }
 
-void handshake::receive_verack(const std::error_code& ec,
-    const message::verack&, channel_ptr node,
-    handshake_handler completion_callback)
+void handshake::receive_verack(const std::error_code& ec, const verack_type&,
+    channel_ptr node, handshake_handler completion_callback)
 {
     if (!ec)
     {
@@ -225,7 +228,7 @@ void handshake::receive_verack(const std::error_code& ec,
 
 void handshake::set_start_height(uint64_t height, setter_handler handle_set)
 {
-    strand_.queue(
+    sequence_.queue(
         std::bind(&handshake::do_set_start_height,
             this, height, handle_set));
 }

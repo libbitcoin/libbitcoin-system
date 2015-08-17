@@ -32,7 +32,7 @@ namespace libbitcoin {
 
 template <typename... Args>
 subscriber<Args...>::subscriber(threadpool& pool)
-  : strand_(pool)
+  : sequence_(pool)
 {
 }
 
@@ -44,14 +44,14 @@ subscriber<Args...>::~subscriber()
 template <typename... Args>
 void subscriber<Args...>::subscribe(subscription_handler handler)
 {
-    strand_.wrap(&subscriber<Args...>::do_subscribe,
+    sequence_.sync(&subscriber<Args...>::do_subscribe,
         this->shared_from_this(), handler)();
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
-    strand_.wrap(&subscriber<Args...>::do_relay,
+    sequence_.sync(&subscriber<Args...>::do_relay,
         this->shared_from_this(), std::forward<Args>(args)...)();
 }
 

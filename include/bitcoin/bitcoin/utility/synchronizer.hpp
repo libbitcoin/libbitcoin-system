@@ -55,7 +55,7 @@ public:
             if (*counter_ == clearance_count_)
             {
                 //log_debug(LOG_PROTOCOL)
-                //    << "Handled [" << name_ << "] > "
+                //    << "Synchronizing [" << name_ << "] > "
                 //    << clearance_count_ << " (ignored)";
                 return;
             }
@@ -65,7 +65,7 @@ public:
             if (code)
             {
                 log_debug(LOG_PROTOCOL)
-                    << "Handled [" << name_ << "] " << *counter_
+                    << "Synchronizing [" << name_ << "] " << *counter_
                     << "/" << clearance_count_ << " " << code.message();
 
                 // Stop because of failure.
@@ -81,7 +81,7 @@ public:
             if (!code)
             {
                 log_debug(LOG_PROTOCOL)
-                    << "Handled [" << name_ << "] " << *counter_ << "/"
+                    << "Synchronizing [" << name_ << "] " << *counter_ << "/"
                     << clearance_count_;
             }
         }

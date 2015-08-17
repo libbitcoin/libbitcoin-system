@@ -55,7 +55,7 @@ public:
      * not guarantee sequential calling order.
      */
     template <typename Handler, typename... Args>
-    auto wrap(Handler&& handler, Args&&... args) ->
+    auto sync(Handler&& handler, Args&&... args) ->
         dispatcher<decltype(std::bind(std::forward<Handler>(handler),
             std::forward<Args>(args)...))>
     {
