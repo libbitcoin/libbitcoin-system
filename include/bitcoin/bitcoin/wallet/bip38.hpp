@@ -86,12 +86,17 @@ BC_CONSTEXPR uint8_t bip38_m_prefix_data[2] = { 0x01, 0x43 };
 /**
  * The fixed number of bip38 base58 checked intermediate bytes required.
  */
-BC_CONSTEXPR size_t bip38_intermediate_length = 8;
+BC_CONSTEXPR size_t bip38_intermediate_length = 72;
+
+/**
+ * The fixed length of bip38 base58 checked confirmation code.
+ */
+BC_CONSTEXPR size_t bip38_confirmation_code_length = 75;
 
 /**
  * The fixed number of bip38 random seed bytes required.
  */
-BC_CONSTEXPR size_t bip38_seed_length = 8;
+BC_CONSTEXPR size_t bip38_seed_length = 24;
 
 /**
  * The fixed number of bip38 magic bytes.
@@ -117,24 +122,42 @@ BC_CONSTEXPR bip38_magic bip38_magic_wo_lot =
 };
 
 /**
- * Fixed byte indices used for bip38 decryption.
+ * The fixed bip38 magic bytes used for confirmation codes.
  */
-BC_CONSTEXPR size_t bip38_comp_mult_index     =  1;
-BC_CONSTEXPR size_t bip38_flag_index          =  2;
-BC_CONSTEXPR size_t bip38_salt_index_start    =  3;
-BC_CONSTEXPR size_t bip38_salt_index_end      =  7;
-BC_CONSTEXPR size_t bip38_key_index_start     =  7;
-BC_CONSTEXPR size_t bip38_owner_entropy_start =  7;
-BC_CONSTEXPR size_t bip38_owner_entropy_end   = 15;
-BC_CONSTEXPR size_t bip38_pass_point_start    = 16;
-BC_CONSTEXPR size_t bip38_pass_point_end      = 49;
-BC_CONSTEXPR size_t bip38_enc_part1_start     = 15;
-BC_CONSTEXPR size_t bip38_decrypt_xor_offset  = 16;
-BC_CONSTEXPR size_t bip38_decrypt_xor_length  = 16;
-BC_CONSTEXPR size_t bip38_enc_part1_end       = 23;
-BC_CONSTEXPR size_t bip38_enc_part2_start     = 23;
-BC_CONSTEXPR size_t bip38_enc_part2_end       = 39;
-BC_CONSTEXPR size_t bip38_key_index_end       = 39;
+BC_CONSTEXPR uint8_t bip38_confirmation_prefix[5] =
+{
+    0x64, 0x3B, 0xF6, 0xA8, 0x9A
+};
+
+
+/**
+ * Fixed byte indices used for bip38.
+ */
+BC_CONSTEXPR size_t bip38_comp_mult_index          =  1;
+BC_CONSTEXPR size_t bip38_flag_index               =  2;
+BC_CONSTEXPR size_t bip38_salt_index_start         =  3;
+BC_CONSTEXPR size_t bip38_cfrm_flag_index          =  5;
+BC_CONSTEXPR size_t bip38_salt_index_end           =  7;
+BC_CONSTEXPR size_t bip38_key_index_start          =  7;
+BC_CONSTEXPR size_t bip38_owner_entropy_start      =  7;
+BC_CONSTEXPR size_t bip38_owner_entropy_end        = 15;
+BC_CONSTEXPR size_t bip38_cfrm_address_hash_start  =  6;
+BC_CONSTEXPR size_t bip38_cfrm_address_hash_end    = 10;
+BC_CONSTEXPR size_t bip38_cfrm_owner_entropy_start = 10;
+BC_CONSTEXPR size_t bip38_cfrm_owner_entropy_end   = 18;
+BC_CONSTEXPR size_t bip38_cfrm_encrypted_start     = 18;
+BC_CONSTEXPR size_t bip38_cfrm_encrypted_end       = 51;
+BC_CONSTEXPR size_t bip38_intm_owner_entropy_start =  8;
+BC_CONSTEXPR size_t bip38_intm_owner_entropy_end   = 16;
+BC_CONSTEXPR size_t bip38_pass_point_start         = 16;
+BC_CONSTEXPR size_t bip38_pass_point_end           = 49;
+BC_CONSTEXPR size_t bip38_enc_part1_start          = 15;
+BC_CONSTEXPR size_t bip38_decrypt_xor_offset       = 16;
+BC_CONSTEXPR size_t bip38_decrypt_xor_length       = 16;
+BC_CONSTEXPR size_t bip38_enc_part1_end            = 23;
+BC_CONSTEXPR size_t bip38_enc_part2_start          = 23;
+BC_CONSTEXPR size_t bip38_enc_part2_end            = 39;
+BC_CONSTEXPR size_t bip38_key_index_end            = 39;
 
 
 /**
@@ -147,24 +170,38 @@ BC_CONSTEXPR uint8_t bip38_ec_non_multiplied = 0xC0;
 
 
 /**
+ * Performs bip38 encryption based on the given
+ * intermediate and random 24 byte seed provided.
+ *
+ * A confirmation code is an output parameter.
+ *
+ * bip38_lock_intermediate(intermediate, seedb,
+ *   confirmation_code, use_compression)
+ */
+BC_API data_chunk bip38_lock_intermediate(
+    const data_chunk& intermediate, const data_chunk& seedb,
+    data_chunk& confirmation_code, bool use_compression);
+
+/**
+ * Performs bip38 validation on the specified confirmation
+ * code using the passphrase.  If the address depends on the
+ * passphrase, the address is returned in out_address.
+ *
+ * bip38_lock_verify(confirmation_code, passphrase, out_address)
+ */
+BC_API bool bip38_lock_verify(
+    const data_chunk& confirmation_code,
+    const std::string& passphrase, std::string& out_address);
+
+/**
  * Performs bip38 encryption on the private key given
  * the specified passphrase.
  *
- * bip38_lock_secret(private_key, passphrase)
+ * bip38_lock_secret(private_key, passphrase, use_compression)
  */
 BC_API data_chunk bip38_lock_secret(
     const ec_secret& private_key, const std::string& passphrase,
     bool use_compression);
-
-/**
- * Performs bip38 encryption based on the given
- * intermediate and random data seed provided.
- *
- * bip38_lock_secret(private_key, passphrase)
- */
-BC_API data_chunk bip38_lock_intermediate(
-    const data_chunk& intermediate, const data_chunk& seedb,
-    uint32_t num_out_addrs, bool use_compression);
 
 /**
  * Performs bip38 decryption on the encrypted key given

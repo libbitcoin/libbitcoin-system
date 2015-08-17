@@ -56,6 +56,11 @@ BC_API ec_point secret_to_public_key(const ec_secret& secret,
     bool compressed=true);
 
 /**
+ * Decompresses a public point from compressed form.
+ */
+BC_API ec_point decompress_public_key(const ec_point& public_key);
+
+/**
  * Verifies that a data chunk represents a valid EC point.
  */
 BC_API bool verify_public_key(const ec_point& public_key);

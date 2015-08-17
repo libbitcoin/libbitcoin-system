@@ -154,6 +154,8 @@ test_libbitcoin_test_SOURCES = \
     test/big_number.hpp \
     test/binary.cpp \
     test/binary_trie.cpp \
+    test/bip38.cpp \
+    test/bip38.hpp \
     test/btc256.cpp \
     test/checkpoint.cpp \
     test/checksum.cpp \

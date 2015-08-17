@@ -51,6 +51,27 @@ ec_point secret_to_public_key(const ec_secret& secret,
     return ec_point();
 }
 
+ec_point decompress_public_key(const ec_point& public_key)
+{
+    const auto signing_context = signing.context();
+
+    int out_size = ec_compressed_size;
+    ec_point out(ec_uncompressed_size);
+    std::copy_n(public_key.begin(), ec_compressed_size, out.begin());
+
+    // NOTE: a later version of secp256k1 could use
+    // secp256k1_ec_pubkey_serialize instead
+    if (secp256k1_ec_pubkey_decompress(signing_context, out.data(),
+        &out_size) == 1)
+    {
+        BITCOIN_ASSERT_MSG(ec_uncompressed_size == static_cast<size_t>(out_size),
+            "secp256k1_ec_pubkey_decompress returned invalid size");
+        return out;
+    }
+
+    return ec_point();
+}
+
 bool verify_public_key(const ec_point& public_key)
 {
     const auto verification_context = verification.context();
