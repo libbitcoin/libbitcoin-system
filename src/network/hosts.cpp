@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/network/hosts.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -49,12 +50,7 @@ using boost::format;
 using boost::filesystem::path;
 
 hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
-  : strand_(pool), file_path_(file_path), buffer_(capacity)
-{
-}
-
-hosts::hosts(threadpool& pool, size_t capacity)
-  : hosts(pool, "hosts.cache", capacity)
+  : buffer_(capacity), sequence_(pool), file_path_(file_path)
 {
 }
 
@@ -63,28 +59,36 @@ hosts::~hosts()
     // This was reportedly required for use with circular_buffer.
 }
 
-bool hosts::empty() const
+hosts::iterator hosts::find(const network_address_type& address)
 {
-    return buffer_.empty();
+    const auto found = [address](const network_address_type& entry)
+    {
+        return entry.port == address.port && entry.ip == address.ip;
+    };
+
+    return std::find_if(buffer_.begin(), buffer_.end(), found);
 }
 
-size_t hosts::size() const
+bool hosts::exists(const network_address_type& address)
+{
+    return find(address) != buffer_.end();
+}
+
+size_t hosts::capacity()
+{
+    return buffer_.capacity();
+}
+
+size_t hosts::size()
 {
     return buffer_.size();
 }
 
 void hosts::load(load_handler handle_load)
 {
-    strand_.randomly_queue(
+    sequence_.randomly_queue(
         std::bind(&hosts::do_load,
             this, file_path_.string(), handle_load));
-}
-
-void hosts::load(const std::string& path, load_handler handle_load)
-{
-    strand_.randomly_queue(
-        std::bind(&hosts::do_load,
-            this, path, handle_load));
 }
 
 void hosts::do_load(const path& path, load_handler handle_load)
@@ -99,15 +103,15 @@ void hosts::do_load(const path& path, load_handler handle_load)
     std::string line;
     while (std::getline(file, line))
     {
-        config::authority address(line);
-        if (address.port() != 0)
+        config::authority host(line);
+        if (host.port() != 0)
         {
-            const auto load_address = [this, address]()
+            const auto load_address = [this, host]()
             {
-                buffer_.push_back(address);
+                buffer_.push_back(host.to_network_address());
             };
 
-            strand_.randomly_queue(load_address);
+            sequence_.randomly_queue(load_address);
         }
     }
 
@@ -116,16 +120,9 @@ void hosts::do_load(const path& path, load_handler handle_load)
 
 void hosts::save(save_handler handle_save)
 {
-    strand_.randomly_queue(
+    sequence_.randomly_queue(
         std::bind(&hosts::do_save,
             this, file_path_.string(), handle_save));
-}
-
-void hosts::save(const std::string& path, save_handler handle_save)
-{
-    strand_.randomly_queue(
-        std::bind(&hosts::do_save,
-            this, path, handle_save));
 }
 
 void hosts::do_save(const path& path, save_handler handle_save)
@@ -138,25 +135,23 @@ void hosts::do_save(const path& path, save_handler handle_save)
     }
 
     for (const auto& entry: buffer_)
-        file << entry << std::endl;
+        file << config::authority(entry) << std::endl;
 
     handle_save(error::success);
 }
 
-void hosts::remove(const message::network_address& address,
+void hosts::remove(const network_address_type& address,
     remove_handler handle_remove)
 {
-    strand_.randomly_queue(
+    sequence_.randomly_queue(
         std::bind(&hosts::do_remove,
             this, address, handle_remove));
 }
 
-void hosts::do_remove(const message::network_address& address,
+void hosts::do_remove(const network_address_type& address,
     remove_handler handle_remove)
 {
-    const config::authority host(address);
-    const auto it = std::find(buffer_.begin(), buffer_.end(), host);
-
+    const auto it = find(address);
     if (it == buffer_.end())
     {
         handle_remove(error::not_found);
@@ -167,27 +162,44 @@ void hosts::do_remove(const message::network_address& address,
     handle_remove(error::success);
 }
 
-void hosts::store(const message::network_address& address,
+void hosts::store(const network_address_type& address,
     store_handler handle_store)
 {
     if (address.port == 0)
         return;
 
-    strand_.randomly_queue(
+    sequence_.randomly_queue(
         std::bind(&hosts::do_store,
             this, address, handle_store));
 }
 
-void hosts::do_store(const message::network_address& address,
+void hosts::do_store(const network_address_type& address,
     store_handler handle_store)
 {
-    buffer_.push_back(config::authority(address));
-    handle_store(error::success);
+    if (!exists(address))
+    {
+        buffer_.push_back(address);
+        handle_store(error::success);
+        return;
+    }
+
+    handle_store(error::duplicate);
+}
+
+void hosts::store(const network_address_list& addresses,
+    store_handler handle_store)
+{
+    // If these are queued concurrently with others then it will lead to 
+    // random distribution in the pool, which is why we queue here.
+    for (const auto& address: addresses)
+        sequence_.randomly_queue(
+            std::bind(&hosts::do_store,
+                this, address, handle_store));
 }
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)
 {
-    strand_.randomly_queue(
+    sequence_.randomly_queue(
         std::bind(&hosts::do_fetch_address,
             this, handle_fetch));
 }
@@ -196,18 +208,18 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 {
     if (buffer_.empty())
     {
-        handle_fetch(error::not_found, message::network_address());
+        handle_fetch(error::not_found, network_address_type());
         return;
     }
 
     // Randomly select a host from the buffer.
     const auto index = static_cast<size_t>(pseudo_random() % buffer_.size());
-    handle_fetch(error::success, buffer_[index].to_network_address());
+    handle_fetch(error::success, buffer_[index]);
 }
 
 void hosts::fetch_count(fetch_count_handler handle_fetch)
 {
-    strand_.randomly_queue(
+    sequence_.randomly_queue(
         std::bind(&hosts::do_fetch_count,
             this, handle_fetch));
 }
