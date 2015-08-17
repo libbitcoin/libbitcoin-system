@@ -113,8 +113,10 @@ src_libbitcoin_la_SOURCES = \
     src/network/connector.cpp \
     src/network/handshake.cpp \
     src/network/hosts.cpp \
-    src/network/peer.cpp \
+    src/network/peer_to_peer.cpp \
     src/network/protocol.cpp \
+    src/network/protocol_address.cpp \
+    src/network/protocol_ping.cpp \
     src/network/seeder.cpp \
     src/network/timeout.cpp \
     src/unicode/console_streambuf.cpp \
@@ -338,8 +340,10 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/connector.hpp \
     include/bitcoin/bitcoin/network/handshake.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
-    include/bitcoin/bitcoin/network/peer.hpp \
+    include/bitcoin/bitcoin/network/peer_to_peer.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \
+    include/bitcoin/bitcoin/network/protocol_address.hpp \
+    include/bitcoin/bitcoin/network/protocol_ping.hpp \
     include/bitcoin/bitcoin/network/seeder.hpp \
     include/bitcoin/bitcoin/network/settings.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp \

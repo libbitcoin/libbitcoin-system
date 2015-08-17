@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_PEER_HPP
-#define LIBBITCOIN_NETWORK_PEER_HPP
+#ifndef LIBBITCOIN_PEER_TO_PEER_HPP
+#define LIBBITCOIN_PEER_TO_PEER_HPP
 
 #include <cstdint>
 #include <memory>
@@ -40,15 +40,14 @@
 namespace libbitcoin {
 namespace network {
 
-class BC_API peer
+class BC_API peer_to_peer
 {
 public:
-
-    peer(threadpool& pool, const timeout& timeouts=timeout::defaults);
+    peer_to_peer(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
-    peer(const peer&) = delete;
-    void operator=(const peer&) = delete;
+    peer_to_peer(const peer_to_peer&) = delete;
+    void operator=(const peer_to_peer&) = delete;
 
     void listen(uint16_t port, acceptor::listen_handler handle_listen);
     void connect(const std::string& hostname, uint16_t port,

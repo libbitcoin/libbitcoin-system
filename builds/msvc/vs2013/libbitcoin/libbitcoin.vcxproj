@@ -131,7 +131,9 @@
     <ClCompile Include="..\..\..\..\src\network\connector.cpp" />
     <ClCompile Include="..\..\..\..\src\network\handshake.cpp" />
     <ClCompile Include="..\..\..\..\src\network\hosts.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\peer.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\peer_to_peer.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\protocol_address.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\protocol_ping.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp" />
     <ClCompile Include="..\..\..\..\src\network\seeder.cpp" />
     <ClCompile Include="..\..\..\..\src\network\timeout.cpp" />
@@ -221,7 +223,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\handshake.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\peer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\peer_to_peer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_address.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_ping.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\seeder.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp" />
