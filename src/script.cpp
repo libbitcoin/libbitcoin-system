@@ -1500,11 +1500,25 @@ bool is_stealth_info_type(const operation_stack& ops)
     return ops.size() == 2 &&
         ops[0].code == opcode::return_ &&
         ops[1].code == opcode::special &&
-        ops[1].data.size() >= hash_size;
+        ops[1].data.size() <= 40;
 }
-bool is_multisig_type(const operation_stack&)
+bool is_multisig_type(const operation_stack& ops)
 {
-    return false;
+    // M of N multisig
+    // Subtract 80 because OP_1 = 81
+    const size_t op_count = ops.size();
+    const uint8_t m = static_cast<uint8_t>(ops[0].code) - 80;
+    const uint8_t n = static_cast<uint8_t>(ops[op_count-2].code) - 80;
+    if (ops.back().code != opcode::checkmultisig ||
+        m < 1 || n < 1 || n < m || op_count != n + 3u)
+        return false;
+    for (auto it = ops.begin()+1; it != ops.end()-2; ++it) {
+        const operation& op = *it;
+        if (op.data.size() != ec_compressed_size &&
+            op.data.size() != ec_uncompressed_size)
+            return false;
+    }
+    return true;
 }
 bool is_pubkey_hash_sig_type(const operation_stack& ops)
 {
