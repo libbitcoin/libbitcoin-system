@@ -39,6 +39,7 @@
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
@@ -150,7 +151,7 @@ void channel_proxy::start()
 }
 
 void channel_proxy::handle_receive_ping(const std::error_code& ec,
-    const ping_type& ping)
+    const message::ping& ping)
 {
     if (stopped())
         return;
@@ -167,7 +168,8 @@ void channel_proxy::handle_receive_ping(const std::error_code& ec,
         return;
     }
 
-    const pong_type reply_pong = { ping.nonce };
+    message::pong reply_pong;
+    reply_pong.nonce = ping.nonce;
     send(reply_pong,
         std::bind(&channel_proxy::handle_send_pong,
             shared_from_this(), _1));
@@ -239,18 +241,18 @@ void channel_proxy::do_stop(const std::error_code& ec)
 
 void channel_proxy::clear_subscriptions(const std::error_code& ec)
 {
-    notify_stop<version_type>(version_subscriber_);
-    notify_stop<verack_type>(verack_subscriber_);
-    notify_stop<address_type>(address_subscriber_);
-    notify_stop<get_address_type>(get_address_subscriber_);
-    notify_stop<inventory_type>(inventory_subscriber_);
-    notify_stop<get_data_type>(get_data_subscriber_);
-    notify_stop<get_blocks_type>(get_blocks_subscriber_);
-    notify_stop<transaction_type>(transaction_subscriber_);
-    notify_stop<block_type>(block_subscriber_);
-    notify_stop<ping_type>(ping_subscriber_);
-    notify_stop<pong_type>(pong_subscriber_);
-    raw_subscriber_->relay(ec, header_type(), data_chunk());
+    notify_stop<message::announce_version>(version_subscriber_);
+    notify_stop<message::verack>(verack_subscriber_);
+    notify_stop<message::address>(address_subscriber_);
+    notify_stop<message::get_address>(get_address_subscriber_);
+    notify_stop<message::inventory>(inventory_subscriber_);
+    notify_stop<message::get_data>(get_data_subscriber_);
+    notify_stop<message::get_blocks>(get_blocks_subscriber_);
+    notify_stop<chain::transaction>(transaction_subscriber_);
+    notify_stop<chain::block>(block_subscriber_);
+    notify_stop<message::ping>(ping_subscriber_);
+    notify_stop<message::pong>(pong_subscriber_);
+    raw_subscriber_->relay(ec, message::header(), data_chunk());
     stop_subscriber_->relay(ec);
 }
 
@@ -371,7 +373,8 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
         strand_.wrap(&channel_proxy::handle_receive_pong,
             shared_from_this(), _1, _2, nonce));
 
-    const ping_type random_ping = { nonce };
+    message::ping random_ping;
+    random_ping.nonce = nonce;
     send(random_ping, 
         std::bind(&channel_proxy::handle_send_ping,
             shared_from_this(), _1));
@@ -409,7 +412,7 @@ void channel_proxy::handle_send_ping(const std::error_code& ec)
 }
 
 void channel_proxy::handle_receive_pong(const std::error_code& ec,
-    const pong_type& ping, uint64_t nonce)
+    const message::pong& ping, uint64_t nonce)
 {
     if (stopped())
         return;
@@ -571,7 +574,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     byte_source<data_chunk> source(payload_copy);
     boost::iostreams::stream<byte_source<data_chunk>> istream(source);
 
-    if (loader_.load(header.command, istream))
+    if (stream_loader_.load(header.command, istream))
     {
         if (istream.peek() != std::istream::traits_type::eof())
         {
@@ -687,7 +690,7 @@ void channel_proxy::call_handle_send(const boost::system::error_code& ec,
     handle_send(error::boost_to_error_code(ec));
 }
 
-void channel_proxy::send_raw(const header_type& packet_header,
+void channel_proxy::send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     if (stopped())

@@ -31,8 +31,8 @@
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/address.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include "../math/external/crypto_scrypt.h"
 
 
@@ -203,9 +203,9 @@ data_chunk bip38_lock_intermediate(
     ec_point generated_point = (use_compression ? tmp_pass_point :
         decompress_public_key(tmp_pass_point));
 
-    payment_address address;
-    set_public_key(address, generated_point);
-    const auto salt = bitcoin_hash(to_data_chunk(address.encoded()));
+    wallet::payment_address address;
+    address.set_public_key(generated_point);
+    const auto salt = bitcoin_hash(to_data_chunk(address.to_string()));
 
     data_chunk address_hash_oe(&salt[0], &salt[bip38_salt_length]);
     extend_data(address_hash_oe, owner_entropy);
@@ -346,15 +346,15 @@ bool bip38_lock_verify(
     ec_point generated_point = (compressed ? pointb :
         decompress_public_key(pointb));
 
-    payment_address address;
-    set_public_key(address, generated_point);
+    wallet::payment_address address;
+    address.set_public_key(generated_point);
     const auto new_address_hash = bitcoin_hash(
-        to_data_chunk(address.encoded()));
+        to_data_chunk(address.to_string()));
 
     if (std::equal(address_hash.begin(), address_hash.end(),
         new_address_hash.begin()))
     {
-        out_address = address.encoded();
+        out_address = address.to_string();
         return true;
     }
     return false;
@@ -366,10 +366,10 @@ data_chunk bip38_lock_secret(
 {
     const ec_point public_key = secret_to_public_key(
         private_key, use_compression);
-    payment_address address;
-    set_public_key(address, public_key);
+    wallet::payment_address address;
+    address.set_public_key(public_key);
 
-    const hash_digest salt_complete = bitcoin_hash(to_data_chunk(address.encoded()));
+    const hash_digest salt_complete = bitcoin_hash(to_data_chunk(address.to_string()));
 
     const data_chunk salt(
         &salt_complete[0], &salt_complete[bip38_salt_length]);
@@ -505,10 +505,10 @@ static ec_secret bip38_unlock_ec_multiplied_secret(
     const auto public_key = secret_to_public_key(
         unlocked_key, compressed);
 
-    payment_address address;
-    set_public_key(address, public_key);
+    wallet::payment_address address;
+    address.set_public_key(public_key);
     const auto new_address_hash = bitcoin_hash(
-        to_data_chunk(address.encoded()));
+        to_data_chunk(address.to_string()));
 
     if (!std::equal(
         new_address_hash.begin(),
@@ -577,10 +577,10 @@ ec_secret bip38_unlock_secret(
         const auto public_key = secret_to_public_key(
             bip38_decrypted_key, is_compressed(bip38_key));
 
-        payment_address address;
-        set_public_key(address, public_key);
+        wallet::payment_address address;
+        address.set_public_key(public_key);
         const auto address_hash = bitcoin_hash(
-            to_data_chunk(address.encoded()));
+            to_data_chunk(address.to_string()));
 
         if (!std::equal(salt.begin(), salt.end(), address_hash.begin()))
             return ec_secret();

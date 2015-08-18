@@ -44,6 +44,7 @@
 #include <bitcoin/bitcoin/message/get_data.hpp>
 #include <bitcoin/bitcoin/message/header.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
@@ -132,7 +133,7 @@ public:
 
     typedef std::function<void (const std::error_code&)> stop_handler;
 
-    typedef std::function<void (const std::error_code&)> revivial_handler;
+    typedef std::function<void (const std::error_code&)> revival_handler;
 
     typedef std::function<void (const std::error_code&)> expiration_handler;
 
@@ -162,11 +163,11 @@ public:
             return;
         }
 
-        const auto message = create_raw_message(packet);
-        const auto command = satoshi_command(packet);
+        const auto message = message::create_raw_message(packet);
+
         strand_.queue(
             std::bind(&channel_proxy::do_send,
-                shared_from_this(), message, handle_send, command));
+                shared_from_this(), message, handle_send, Message::satoshi_command));
     }
 
     void send_raw(const message::header& packet_header,
@@ -263,7 +264,7 @@ private:
 
     void do_send(const data_chunk& message, send_handler handle_send,
         const std::string& command);
-    void do_send_raw(const header_type& packet_header,
+    void do_send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
     void call_handle_send(const boost::system::error_code& ec,

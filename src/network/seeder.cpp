@@ -174,7 +174,7 @@ void seeder::handle_handshake(const std::error_code& ec, channel_ptr node,
         strand_.wrap(&seeder::handle_receive,
             this, _1, _2, seed, node, completion_callback));
 
-    node->send(get_address_type(),
+    node->send(message::get_address(),
         strand_.wrap(&seeder::handle_send,
             this, _1, seed, completion_callback));
 };

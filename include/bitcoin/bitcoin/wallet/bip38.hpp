@@ -22,8 +22,8 @@
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/script.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
+#include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 

@@ -23,7 +23,9 @@
 #include <cstdint>
 #include <istream>
 #include <string>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -69,6 +71,25 @@ public:
 bool operator==(const header& a, const header& b);
 
 bool operator!=(const header& a, const header& b);
+
+template <typename Message>
+data_chunk create_raw_message(const Message& packet)
+{
+    // Serialize the payload (required for header size).
+    data_chunk payload = packet.to_data();
+
+    // Construct the header.
+    header payload_header;
+    payload_header.magic = magic_value();
+    payload_header.command = Message::satoshi_command;
+    payload_header.payload_length = payload.size();
+    payload_header.checksum = bitcoin_checksum(payload);
+
+    // Serialize header and copy the payload into a single message buffer.
+    data_chunk message = payload_header.to_data();
+    extend_data(message, payload);
+    return message;
+}
 
 } // end message
 } // end libbitcoin

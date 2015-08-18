@@ -41,10 +41,17 @@ public:
     uint64_t services;
     uint64_t timestamp;
     network_address address_me;
+
+    // version >= 106
     network_address address_you;
     uint64_t nonce;
     std::string user_agent;
+
+    // version >= 209
     uint32_t start_height;
+
+    // version >= 70001
+    bool relay;
 
     bool from_data(const data_chunk& data);
 

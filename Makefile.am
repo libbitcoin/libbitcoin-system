@@ -42,7 +42,6 @@ src_libbitcoin_la_SOURCES = \
     src/error.cpp \
     src/evaluation_context.cpp \
     src/evaluation_context.hpp \
-    src/transaction.cpp \
     src/chain/block.cpp \
     src/chain/block_header.cpp \
     src/chain/opcode.cpp \
@@ -179,7 +178,6 @@ test_libbitcoin_test_SOURCES = \
     test/big_number.cpp \
     test/big_number.hpp \
     test/binary.cpp \
-    test/binary_trie.cpp \
     test/bip38.cpp \
     test/bip38.hpp \
     test/btc256.cpp \

@@ -56,7 +56,8 @@ bool announce_version::is_valid() const
         || address_me.is_valid()
         || address_you.is_valid()
         || (nonce != 0)
-        || !user_agent.empty();
+        || !user_agent.empty()
+        || (relay != 0);
 }
 
 void announce_version::reset()
@@ -68,6 +69,7 @@ void announce_version::reset()
     address_you.reset();
     nonce = 0;
     user_agent.clear();
+    relay = 0;
 }
 
 bool announce_version::from_data(const data_chunk& data)
@@ -105,6 +107,11 @@ bool announce_version::from_data(reader& source)
         if (version >= 209)
             start_height = source.read_4_bytes_little_endian();
 
+        // The satoshi client treats 209 as the "initial protocol version"
+        // and disconnects peers below 31800 (for getheaders support).
+        if (version >= 70001)
+            relay = (source.read_byte() != 0);
+
         result &= source;
     }
 
@@ -136,16 +143,38 @@ void announce_version::to_data(writer& sink) const
     sink.write_8_bytes_little_endian(services);
     sink.write_8_bytes_little_endian(timestamp);
     address_me.to_data(sink, false);
-    address_you.to_data(sink, false);
-    sink.write_8_bytes_little_endian(nonce);
-    sink.write_string(user_agent);
-    sink.write_4_bytes_little_endian(start_height);
+
+    if (version >= 106)
+    {
+        address_you.to_data(sink, false);
+        sink.write_8_bytes_little_endian(nonce);
+        sink.write_string(user_agent);
+    }
+
+    if (version >= 209)
+        sink.write_4_bytes_little_endian(start_height);
+
+    if (version >= 70001)
+        sink.write_byte(relay ? 1 : 0);
 }
 
 uint64_t announce_version::satoshi_size() const
 {
-    return 32 + (2 * network_address::satoshi_fixed_size(false)) +
-        variable_uint_size(user_agent.size()) + user_agent.size();
+    uint64_t size = 4 + 8 + 8 + address_me.satoshi_size(false);
+
+    if (version >= 106)
+    {
+        size += address_you.satoshi_size(false) + 8 +
+            variable_uint_size(user_agent.size()) + user_agent.size();
+    }
+
+    if (version >= 209)
+        size += 4;
+
+    if (version >= 70001)
+        size += 1;
+
+    return size;
 }
 
 } // end message

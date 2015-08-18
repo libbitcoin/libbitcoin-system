@@ -298,7 +298,7 @@ void protocol::handle_handshake(const std::error_code& ec, channel_ptr node)
                 this, _1, _2, node));
 
         // Ask for addresses.
-        node->send(get_address_type(), handle_send);
+        node->send(message::get_address(), handle_send);
     }
 
     // Notify protocol subscribers of new channel.

@@ -19,17 +19,13 @@
  */
 #include <bitcoin/bitcoin/config/authority.hpp>
 
-#include <cstdint>
-#include <string>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
-#include <boost/asio.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
@@ -124,12 +120,12 @@ authority::authority(const std::string& authority)
 }
 
 // This is the format returned from peers on the bitcoin network.
-authority::authority(const network_address_type& net)
+authority::authority(const message::network_address& net)
   : authority(net.ip, net.port)
 {
 }
 
-static ip::address_v6 to_boost_address(const ip_address_type& in)
+static ip::address_v6 to_boost_address(const message::ip_address& in)
 {
     ip::address_v6::bytes_type bytes;
     BITCOIN_ASSERT(bytes.size() == in.size());
@@ -138,16 +134,16 @@ static ip::address_v6 to_boost_address(const ip_address_type& in)
     return out;
 }
 
-static ip_address_type to_bc_address(const ip::address_v6& in)
+static message::ip_address to_bc_address(const ip::address_v6& in)
 {
-    ip_address_type out;
+    message::ip_address out;
     const auto bytes = in.to_bytes();
     BITCOIN_ASSERT(bytes.size() == out.size());
     std::copy(bytes.begin(), bytes.end(), out.begin());
     return out;
 }
 
-authority::authority(const ip_address_type& ip, uint16_t port)
+authority::authority(const message::ip_address& ip, uint16_t port)
   : ip_(to_boost_address(ip)), port_(port)
 {
 }
@@ -168,7 +164,7 @@ authority::authority(const ip::tcp::endpoint& endpoint)
 {
 }
 
-ip_address_type authority::ip() const
+message::ip_address authority::ip() const
 {
     return to_bc_address(ip_);
 }
@@ -184,11 +180,11 @@ std::string authority::to_hostname() const
     return ipv4_hostname.empty() ? to_ipv6_hostname(ip_) : ipv4_hostname;
 }
 
-network_address_type authority::to_network_address() const
+message::network_address authority::to_network_address() const
 {
     static constexpr uint32_t services = 0;
     static constexpr uint64_t timestamp = 0;
-    const network_address_type network_address
+    const message::network_address network_address
     {
         timestamp, services, ip(), port(),
     };
