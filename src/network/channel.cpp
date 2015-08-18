@@ -32,12 +32,14 @@ namespace network {
 // Leak tracking.
 static std::atomic<size_t> instances_(0);
 
+// TODO: derive channel from proxy, adding timers, tracking, nonce,.
 channel::channel(channel_proxy_ptr proxy)
   : proxy_(proxy), nonce_(0)
 {
     ++instances_;
 }
 
+// TODO: move proxy timeouts to channel (revival deprecated).
 channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
   : channel(std::make_shared<channel_proxy>(pool, socket, timeouts))
 {

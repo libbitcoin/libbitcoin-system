@@ -62,11 +62,11 @@ void connector::start(tcp::resolver::iterator endpoint_iterator,
             shared_from_this(), _1, complete));
 
     boost::asio::async_connect(*socket, endpoint_iterator,
-        std::bind(&connector::call_handle_connect,
+        std::bind(&connector::create_channel,
             shared_from_this(), _1, _2, socket, complete));
 }
 
-void connector::call_handle_connect(const boost::system::error_code& ec,
+void connector::create_channel(const boost::system::error_code& ec,
     tcp::resolver::iterator, socket_ptr socket, connect_handler handle_connect)
 {
     // Speed up the demise of the timer.

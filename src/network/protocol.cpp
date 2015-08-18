@@ -441,12 +441,6 @@ void protocol::remove_connection(channel_ptr_list& connections,
         connections.erase(it);
 }
 
-size_t protocol::connection_count() const
-{
-    return outbound_connections_.size() + manual_connections_.size() +
-        inbound_connections_.size();
-}
-
 void protocol::subscribe_channel(channel_handler handle_channel)
 {
     channel_subscriber_->subscribe(handle_channel);
@@ -454,6 +448,13 @@ void protocol::subscribe_channel(channel_handler handle_channel)
 
 // TODO: consolidate three lists using node type enumeration.
 // inbound, outbound, manual, seed (?).
+// THese are not currently thread safe accessors, should be stranded.
+
+size_t protocol::connection_count() const
+{
+    return outbound_connections_.size() + manual_connections_.size() +
+        inbound_connections_.size();
+}
 
 bool protocol::is_blacklisted(const config::authority& peer) const
 {

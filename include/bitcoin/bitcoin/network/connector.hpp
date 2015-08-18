@@ -48,7 +48,7 @@ public:
         connect_handler handle_connect);
 
 private:
-    void call_handle_connect(const boost::system::error_code& ec,
+    void create_channel(const boost::system::error_code& ec,
         tcp::resolver::iterator, socket_ptr socket,
         connect_handler handle_connect);
     void handle_timer(const boost::system::error_code& ec,

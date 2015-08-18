@@ -58,7 +58,7 @@ public:
     void accept(accept_handler handle_accept);
 
 private:
-    void call_handle_accept(const boost::system::error_code& ec,
+    void create_channel(const boost::system::error_code& ec,
         socket_ptr socket, accept_handler handle_accept);
 
     threadpool& pool_;

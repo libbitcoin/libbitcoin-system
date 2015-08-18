@@ -56,6 +56,7 @@ using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::time_duration;
 
+// The proxy will have no config with timers moved to channel.
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     const timeout& timeouts=timeout::defaults)
   : sequence_(pool),
