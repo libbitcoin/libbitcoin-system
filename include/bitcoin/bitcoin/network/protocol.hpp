@@ -36,7 +36,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/peer_to_peer.hpp>
+#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
@@ -58,7 +58,7 @@ public:
         broadcast_handler;
 
     protocol(threadpool& pool, hosts& hosts, handshake& shake, 
-        peer_to_peer& network, uint16_t port=bc::protocol_port,
+        initiator& network, uint16_t port=bc::protocol_port,
         bool relay=true, size_t max_outbound=8, size_t max_inbound=8,
         const config::endpoint::list& seeds=seeder::defaults,
         const network_address_type& self=handshake::unspecified,
@@ -155,7 +155,7 @@ private:
     threadpool& pool_;
     hosts& hosts_;
     handshake& handshake_;
-    peer_to_peer& network_;
+    initiator& network_;
     channel_subscriber_ptr channel_subscriber_;
 
     // TODO: These are all configuration, move to config container.

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/peer_to_peer.hpp>
+#include <bitcoin/bitcoin/network/initiator.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -40,12 +40,12 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::asio::ip::tcp;
 
-peer_to_peer::peer_to_peer(threadpool& pool, const timeout& timeouts)
+initiator::initiator(threadpool& pool, const timeout& timeouts)
   : pool_(pool), timeouts_(timeouts)
 {
 }
 
-void peer_to_peer::resolve_handler(const boost::system::error_code& ec,
+void initiator::resolve_handler(const boost::system::error_code& ec,
     tcp::resolver::iterator endpoint_iterator, 
     connector::connect_handler handle_connect, resolver_ptr,
     query_ptr /* query */)
@@ -58,11 +58,11 @@ void peer_to_peer::resolve_handler(const boost::system::error_code& ec,
         return;
     }
 
-    const auto connect = std::make_shared<connector>(pool_, timeouts_);
-    connect->start(endpoint_iterator, handle_connect);
+    const auto outbound = std::make_shared<connector>(pool_, timeouts_);
+    outbound->connect(endpoint_iterator, handle_connect);
 }
 
-void peer_to_peer::listen(uint16_t port, acceptor::listen_handler handle_listen)
+void initiator::listen(uint16_t port, acceptor::listen_handler handle_listen)
 {
     using namespace boost::asio;
     boost::system::error_code boost_ec;
@@ -81,13 +81,13 @@ void peer_to_peer::listen(uint16_t port, acceptor::listen_handler handle_listen)
         tcp_accept->listen(socket_base::max_connections, boost_ec);
 
     const auto ec = bc::error::boost_to_error_code(boost_ec);
-    const auto accept = ec ? nullptr :
+    const auto inbound = ec ? nullptr :
         std::make_shared<acceptor>(pool_, tcp_accept, timeouts_);
 
-    handle_listen(ec, accept);
+    handle_listen(ec, inbound);
 }
 
-void peer_to_peer::connect(const std::string& hostname, uint16_t port,
+void initiator::connect(const std::string& hostname, uint16_t port,
     connector::connect_handler handle_connect)
 {
     const auto resolver = std::make_shared<tcp::resolver>(pool_.service());
@@ -95,7 +95,7 @@ void peer_to_peer::connect(const std::string& hostname, uint16_t port,
         std::to_string(port));
 
     resolver->async_resolve(*query,
-        std::bind(&peer_to_peer::resolve_handler,
+        std::bind(&initiator::resolve_handler,
             this, _1, _2, handle_connect, resolver, query));
 }
 

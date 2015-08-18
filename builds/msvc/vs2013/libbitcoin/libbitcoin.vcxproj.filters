@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="include">
@@ -338,7 +338,7 @@
     <ClCompile Include="..\..\..\..\src\network\protocol_address.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\peer_to_peer.cpp">
+    <ClCompile Include="..\..\..\..\src\network\initiator.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
@@ -625,7 +625,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_address.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\peer_to_peer.hpp">
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\initiator.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>

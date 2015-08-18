@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="Globals">
     <NuGetPackageImportStamp>efc3bd94</NuGetPackageImportStamp>
@@ -131,7 +131,7 @@
     <ClCompile Include="..\..\..\..\src\network\connector.cpp" />
     <ClCompile Include="..\..\..\..\src\network\handshake.cpp" />
     <ClCompile Include="..\..\..\..\src\network\hosts.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\peer_to_peer.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\initiator.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol_address.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol_ping.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol.cpp" />
@@ -223,7 +223,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\handshake.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\peer_to_peer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\initiator.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_ping.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp" />

@@ -35,7 +35,7 @@
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
-#include <bitcoin/bitcoin/network/peer_to_peer.hpp>
+#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
@@ -58,7 +58,7 @@ using boost::posix_time::seconds;
 // TODO: pass config reference into each class.
 // TODO: implement protocol_version (handshake) protocol_ping, protocol_address.
 protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
-    peer_to_peer& network, uint16_t port, bool relay, size_t max_outbound,
+    initiator& network, uint16_t port, bool relay, size_t max_outbound,
     size_t max_inbound, const config::endpoint::list& seeds,
     const network_address_type& self, const timeout& timeouts)
   : sequence_(pool),

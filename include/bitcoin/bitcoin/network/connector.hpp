@@ -44,7 +44,7 @@ public:
 
     connector(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
-    void start(tcp::resolver::iterator endpoint_iterator,
+    void connect(tcp::resolver::iterator endpoint_iterator,
         connect_handler handle_connect);
 
 private:

@@ -40,14 +40,14 @@
 namespace libbitcoin {
 namespace network {
 
-class BC_API peer_to_peer
+class BC_API initiator
 {
 public:
-    peer_to_peer(threadpool& pool, const timeout& timeouts=timeout::defaults);
+    initiator(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
-    peer_to_peer(const peer_to_peer&) = delete;
-    void operator=(const peer_to_peer&) = delete;
+    initiator(const initiator&) = delete;
+    void operator=(const initiator&) = delete;
 
     void listen(uint16_t port, acceptor::listen_handler handle_listen);
     void connect(const std::string& hostname, uint16_t port,

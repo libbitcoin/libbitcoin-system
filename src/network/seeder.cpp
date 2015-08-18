@@ -31,7 +31,7 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/peer_to_peer.hpp>
+#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -67,7 +67,7 @@ const config::endpoint::list seeder::defaults
 
 // This is not currently stoppable.
 seeder::seeder(threadpool& pool, hosts& hosts, handshake& shake,
-    peer_to_peer& network, const config::endpoint::list& seeds,
+    initiator& network, const config::endpoint::list& seeds,
     const network_address_type& self)
   : sequence_(pool),
     hosts_(hosts),

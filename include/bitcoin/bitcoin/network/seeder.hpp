@@ -29,7 +29,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/peer_to_peer.hpp>
+#include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/utility/sequencer.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -46,7 +46,7 @@ public:
     static const config::endpoint::list defaults;
 
     seeder(threadpool& pool, hosts& hosts, handshake& shake,
-        peer_to_peer& network, const config::endpoint::list& seeds,
+        initiator& network, const config::endpoint::list& seeds,
         const network_address_type& self);
     seeder::~seeder();
 
@@ -71,7 +71,7 @@ private:
     threadpool& pool_;
     hosts& hosts_;
     handshake& handshake_;
-    peer_to_peer& network_;
+    initiator& network_;
     const config::endpoint::list& seeds_;
     const network_address_type self_;
     config::endpoint::list remaining_;
