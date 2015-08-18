@@ -39,6 +39,7 @@
 #include <bitcoin/bitcoin/formats/base64.hpp>
 #include <bitcoin/bitcoin/formats/base85.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
