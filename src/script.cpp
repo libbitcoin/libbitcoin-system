@@ -1505,8 +1505,10 @@ bool is_stealth_info_type(const operation_stack& ops)
 bool is_multisig_type(const operation_stack& ops)
 {
     // M of N multisig
-    // Subtract 80 because OP_1 = 81
     const size_t op_count = ops.size();
+    if (op_count < 4)
+        return false;
+    // Subtract 80 because OP_1 = 81
     const uint8_t m = static_cast<uint8_t>(ops[0].code) - 80;
     const uint8_t n = static_cast<uint8_t>(ops[op_count-2].code) - 80;
     if (ops.back().code != opcode::checkmultisig ||
@@ -2174,7 +2176,7 @@ script_type parse_script(data_slice raw_script)
             op.code = opcode::special;
         if (must_read_data(op.code))
         {
-            size_t read_n_bytes = 
+            size_t read_n_bytes =
                 number_bytes_to_read(op.code, raw_byte, deserial);
             op.data = deserial.read_data(read_n_bytes);
             BITCOIN_ASSERT(read_n_bytes || op.data.empty());
