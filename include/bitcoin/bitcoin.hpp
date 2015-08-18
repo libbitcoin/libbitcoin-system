@@ -89,6 +89,7 @@
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 #include <bitcoin/bitcoin/utility/timer.hpp>
 #include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/bip38.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
