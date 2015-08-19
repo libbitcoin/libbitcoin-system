@@ -174,7 +174,9 @@ enum class payment_type
     script_hash,        // Payment to multisig address
     stealth_info,       // Stealth information (meta-output)
     multisig,           // Multisig
+    pubkey_sig,         // Pubkey
     pubkey_hash_sig,    // Pubkey hash input script.
+    multi_pubkey_sig,   // BIP11 input script code.
     script_code_sig,    // BIP16 input script code.
     non_standard
 };
@@ -184,7 +186,7 @@ class script_type
 public:
     BC_API void join(const script_type& other);
     BC_API void push_operation(const operation& oper);
-    BC_API bool run(const script_type& input_script, 
+    BC_API bool run(const script_type& input_script,
         const transaction_type& parent_tx, uint32_t input_index,
         bool bip16_enabled=true);
 

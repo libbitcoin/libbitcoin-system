@@ -1522,6 +1522,12 @@ bool is_multisig_type(const operation_stack& ops)
     }
     return true;
 }
+bool is_pubkey_sig_type(const operation_stack& ops)
+{
+    if (ops.size() != 1 || !is_push_only(ops))
+        return false;
+    return true;
+}
 bool is_pubkey_hash_sig_type(const operation_stack& ops)
 {
     if (ops.size() != 2 || !is_push_only(ops))
@@ -1547,11 +1553,24 @@ bool is_script_code_sig_type(const operation_stack& ops)
         return false;
     }
     const operation_stack& code_ops = script_code.operations();
-    // Minimum size is 4
+    const payment_type redeem_type = script_code.type();
     // M [SIG]... N checkmultisig
+    // or one of the other standard transaction types
     return code_ops.size() >= 4 &&
         count_non_push(code_ops) == 1 &&
-        code_ops.back().code == opcode::checkmultisig;
+        code_ops.back().code == opcode::checkmultisig ||
+        redeem_type == payment_type::pubkey;
+        redeem_type == payment_type::pubkey_hash;
+        redeem_type == payment_type::script_hash;
+        redeem_type == payment_type::stealth_info;
+}
+bool is_multi_pubkey_sig_type(const operation_stack& ops)
+{
+    if (ops.size() < 2 || !is_push_only(ops))
+        return false;
+    if (ops.front().code != opcode::zero)
+        return false;
+    return true;
 }
 
 payment_type script_type::type() const
@@ -1566,10 +1585,14 @@ payment_type script_type::type() const
         return payment_type::stealth_info;
     if (is_multisig_type(operations_))
         return payment_type::multisig;
+    if (is_pubkey_sig_type(operations_))
+        return payment_type::pubkey_sig;
     if (is_pubkey_hash_sig_type(operations_))
         return payment_type::pubkey_hash_sig;
     if (is_script_code_sig_type(operations_))
         return payment_type::script_code_sig;
+    if (is_multi_pubkey_sig_type(operations_))
+        return payment_type::multi_pubkey_sig;
     return payment_type::non_standard;
 }
 
@@ -2055,7 +2078,7 @@ std::string pretty(const script_type& script)
         if (op.data.empty())
             ss << opcode_to_string(op.code);
         else
-            ss << "[ " << encode_base16(op.data) << " ]";
+            ss << "[" << encode_base16(op.data) << "]";
     }
     return ss.str();
 }
