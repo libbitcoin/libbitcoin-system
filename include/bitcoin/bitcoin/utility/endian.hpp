@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_ENDIAN_HPP
 #define LIBBITCOIN_ENDIAN_HPP
 
+#include <istream>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -36,6 +37,12 @@ T from_big_endian_unsafe(Iterator in);
 
 template <typename T, typename Iterator>
 T from_little_endian_unsafe(Iterator in);
+
+template <typename T>
+T from_big_endian_stream_unsafe(std::istream& stream);
+
+template <typename T>
+T from_little_endian_stream_unsafe(std::istream& stream);
 
 template <typename T>
 byte_array<sizeof(T)> to_big_endian(T n);

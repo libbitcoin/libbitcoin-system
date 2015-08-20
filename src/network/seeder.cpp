@@ -174,7 +174,7 @@ void seeder::handle_handshake(const std::error_code& ec, channel_ptr node,
         strand_.wrap(&seeder::handle_receive,
             this, _1, _2, seed, node, completion_callback));
 
-    node->send(get_address_type(),
+    node->send(message::get_address(),
         strand_.wrap(&seeder::handle_send,
             this, _1, seed, completion_callback));
 };
@@ -192,7 +192,7 @@ void seeder::handle_send(const std::error_code& ec,
 }
 
 void seeder::handle_receive(const std::error_code& ec,
-    const address_type& message, const config::endpoint& seed,
+    const message::address& message, const config::endpoint& seed,
     channel_ptr node, seeded_handler completion_callback)
 {
     if (ec)

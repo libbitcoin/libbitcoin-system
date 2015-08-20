@@ -34,15 +34,23 @@ doc_DATA = \
 lib_LTLIBRARIES = src/libbitcoin.la
 src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
-src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
+src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
-    src/block.cpp \
+    src/conditional_stack.cpp \
+    src/conditional_stack.hpp \
     src/constants.cpp \
     src/error.cpp \
-    src/satoshi_serialize.cpp \
-    src/script.cpp \
-    src/stealth.cpp \
-    src/transaction.cpp \
+    src/evaluation_context.cpp \
+    src/evaluation_context.hpp \
+    src/chain/block.cpp \
+    src/chain/block_header.cpp \
+    src/chain/opcode.cpp \
+    src/chain/operation.cpp \
+    src/chain/point.cpp \
+    src/chain/script.cpp \
+    src/chain/transaction.cpp \
+    src/chain/transaction_input.cpp \
+    src/chain/transaction_output.cpp \
     src/config/authority.cpp \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
@@ -85,6 +93,18 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/sha512.h \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
+    src/message/address.cpp \
+    src/message/announce_version.cpp \
+    src/message/get_address.cpp \
+    src/message/get_blocks.cpp \
+    src/message/get_data.cpp \
+    src/message/header.cpp \
+    src/message/inventory.cpp \
+    src/message/inventory_type_id.cpp \
+    src/message/inventory_vector.cpp \
+    src/message/network_address.cpp \
+    src/message/nonce.cpp \
+    src/message/verack.cpp \
     src/network/acceptor.cpp \
     src/network/channel.cpp \
     src/network/channel_proxy.cpp \
@@ -104,19 +124,24 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
     src/utility/binary.cpp \
+    src/utility/istream_reader.cpp \
     src/utility/logger.cpp \
+    src/utility/ostream_writer.cpp \
     src/utility/random.cpp \
     src/utility/sequencer.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
-    src/wallet/address.cpp \
+    src/utility/variable_uint_size.cpp \
     src/wallet/bip38.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/hd_keys.cpp \
     src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
     src/wallet/mnemonic.cpp \
+    src/wallet/payment_address.cpp \
+    src/wallet/select_outputs.cpp \
+    src/wallet/stealth.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp
 
@@ -127,7 +152,7 @@ if WITH_EXAMPLES
 noinst_PROGRAMS = examples/libbitcoin_examples
 examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 examples_libbitcoin_examples_LDFLAGS = ${boost_LDFLAGS}
-examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
+examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 examples_libbitcoin_examples_SOURCES = \
     examples/main.cpp
 
@@ -142,7 +167,7 @@ TESTS = libbitcoin_test_runner.sh
 check_PROGRAMS = test/libbitcoin_test
 test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 test_libbitcoin_test_LDFLAGS = ${boost_LDFLAGS}
-test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
+test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_test_SOURCES = \
     test/authority.cpp \
     test/base10.cpp \
@@ -153,7 +178,6 @@ test_libbitcoin_test_SOURCES = \
     test/big_number.cpp \
     test/big_number.hpp \
     test/binary.cpp \
-    test/binary_trie.cpp \
     test/bip38.cpp \
     test/bip38.hpp \
     test/btc256.cpp \
@@ -162,6 +186,8 @@ test_libbitcoin_test_SOURCES = \
     test/ec_keys.cpp \
     test/endpoint.cpp \
     test/format.cpp \
+    test/genesis_block.cpp \
+    test/genesis_block.hpp \
     test/hash.cpp \
     test/hash.hpp \
     test/hash_number.cpp \
@@ -175,18 +201,39 @@ test_libbitcoin_test_SOURCES = \
     test/printer.cpp \
     test/random.cpp \
     test/satoshi_words.cpp \
-    test/script.cpp \
-    test/script.hpp \
     test/script_number.cpp \
     test/script_number.hpp \
-    test/serialize.cpp \
     test/stealth.cpp \
     test/stealth_address.cpp \
     test/thread.cpp \
     test/unicode.cpp \
     test/unicode_istream.cpp \
     test/unicode_ostream.cpp \
-    test/uri.cpp
+    test/uri.cpp \
+    test/chain/block.cpp \
+    test/chain/block_header.cpp \
+    test/chain/point.cpp \
+    test/chain/script.cpp \
+    test/chain/script.hpp \
+    test/chain/transaction.cpp \
+    test/chain/transaction_input.cpp \
+    test/chain/transaction_output.cpp \
+    test/message/address.cpp \
+    test/message/announce_version.cpp \
+    test/message/get_address.cpp \
+    test/message/get_blocks.cpp \
+    test/message/get_data.cpp \
+    test/message/header.cpp \
+    test/message/inventory.cpp \
+    test/message/inventory_type_id.cpp \
+    test/message/inventory_vector.cpp \
+    test/message/network_address.cpp \
+    test/message/nonce.cpp \
+    test/message/verack.cpp \
+    test/utility/endian.cpp \
+    test/utility/serializer.cpp \
+    test/utility/stream.cpp \
+    test/utility/variable_uint_size.cpp
 
 endif WITH_TESTS
 
@@ -198,18 +245,25 @@ include_bitcoin_HEADERS = \
 
 include_bitcoin_bitcoindir = ${includedir}/bitcoin/bitcoin
 include_bitcoin_bitcoin_HEADERS = \
-    include/bitcoin/bitcoin/block.hpp \
     include/bitcoin/bitcoin/compat.h \
     include/bitcoin/bitcoin/compat.hpp \
     include/bitcoin/bitcoin/constants.hpp \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
-    include/bitcoin/bitcoin/primitives.hpp \
-    include/bitcoin/bitcoin/satoshi_serialize.hpp \
-    include/bitcoin/bitcoin/script.hpp \
-    include/bitcoin/bitcoin/stealth.hpp \
-    include/bitcoin/bitcoin/transaction.hpp \
     include/bitcoin/bitcoin/version.hpp
+
+include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
+include_bitcoin_bitcoin_chain_HEADERS = \
+    include/bitcoin/bitcoin/chain/block.hpp \
+    include/bitcoin/bitcoin/chain/block_header.hpp \
+    include/bitcoin/bitcoin/chain/opcode.hpp \
+    include/bitcoin/bitcoin/chain/operation.hpp \
+    include/bitcoin/bitcoin/chain/payment.hpp \
+    include/bitcoin/bitcoin/chain/point.hpp \
+    include/bitcoin/bitcoin/chain/script.hpp \
+    include/bitcoin/bitcoin/chain/transaction.hpp \
+    include/bitcoin/bitcoin/chain/transaction_input.hpp \
+    include/bitcoin/bitcoin/chain/transaction_output.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
@@ -233,25 +287,15 @@ include_bitcoin_bitcoin_impl_formatsdir = ${includedir}/bitcoin/bitcoin/impl/for
 include_bitcoin_bitcoin_impl_formats_HEADERS = \
     include/bitcoin/bitcoin/impl/formats/base16.ipp
 
-include_bitcoin_bitcoin_impl_serializedir = ${includedir}/bitcoin/bitcoin/impl/serialize
-include_bitcoin_bitcoin_impl_serialize_HEADERS = \
-    include/bitcoin/bitcoin/impl/serialize/block.ipp \
-    include/bitcoin/bitcoin/impl/serialize/misc.ipp
-
-include_bitcoin_bitcoin_impl_triedir = ${includedir}/bitcoin/bitcoin/impl/trie
-include_bitcoin_bitcoin_impl_trie_HEADERS = \
-    include/bitcoin/bitcoin/impl/trie/binary_trie.ipp \
-    include/bitcoin/bitcoin/impl/trie/trie_iterator.ipp \
-    include/bitcoin/bitcoin/impl/trie/trie_reverse_iterator.ipp \
-    include/bitcoin/bitcoin/impl/trie/trie_structure_node.ipp \
-    include/bitcoin/bitcoin/impl/trie/trie_value_node.ipp
-
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
     include/bitcoin/bitcoin/impl/utility/collection.ipp \
     include/bitcoin/bitcoin/impl/utility/data.ipp \
+    include/bitcoin/bitcoin/impl/utility/deserializer.ipp \
     include/bitcoin/bitcoin/impl/utility/endian.ipp \
+    include/bitcoin/bitcoin/impl/utility/istream_reader.ipp \
+    include/bitcoin/bitcoin/impl/utility/ostream_writer.ipp \
     include/bitcoin/bitcoin/impl/utility/serializer.ipp \
     include/bitcoin/bitcoin/impl/utility/subscriber.ipp
 
@@ -265,6 +309,21 @@ include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/script_number.hpp \
     include/bitcoin/bitcoin/math/secp256k1_initializer.hpp \
     include/bitcoin/bitcoin/math/uint256.hpp
+
+include_bitcoin_bitcoin_messagedir = ${includedir}/bitcoin/bitcoin/message
+include_bitcoin_bitcoin_message_HEADERS = \
+    include/bitcoin/bitcoin/message/address.hpp \
+    include/bitcoin/bitcoin/message/announce_version.hpp \
+    include/bitcoin/bitcoin/message/get_address.hpp \
+    include/bitcoin/bitcoin/message/get_blocks.hpp \
+    include/bitcoin/bitcoin/message/get_data.hpp \
+    include/bitcoin/bitcoin/message/header.hpp \
+    include/bitcoin/bitcoin/message/inventory.hpp \
+    include/bitcoin/bitcoin/message/inventory_type_id.hpp \
+    include/bitcoin/bitcoin/message/inventory_vector.hpp \
+    include/bitcoin/bitcoin/message/network_address.hpp \
+    include/bitcoin/bitcoin/message/nonce.hpp \
+    include/bitcoin/bitcoin/message/verack.hpp
 
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
@@ -283,14 +342,6 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp \
     include/bitcoin/bitcoin/network/timeout.hpp
 
-include_bitcoin_bitcoin_triedir = ${includedir}/bitcoin/bitcoin/trie
-include_bitcoin_bitcoin_trie_HEADERS = \
-    include/bitcoin/bitcoin/trie/binary_trie.hpp \
-    include/bitcoin/bitcoin/trie/trie_iterator.hpp \
-    include/bitcoin/bitcoin/trie/trie_reverse_iterator.hpp \
-    include/bitcoin/bitcoin/trie/trie_structure_node.hpp \
-    include/bitcoin/bitcoin/trie/trie_value_node.hpp
-
 include_bitcoin_bitcoin_unicodedir = ${includedir}/bitcoin/bitcoin/unicode
 include_bitcoin_bitcoin_unicode_HEADERS = \
     include/bitcoin/bitcoin/unicode/console_streambuf.hpp \
@@ -307,11 +358,18 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/assert.hpp \
     include/bitcoin/bitcoin/utility/binary.hpp \
     include/bitcoin/bitcoin/utility/collection.hpp \
+    include/bitcoin/bitcoin/utility/container_sink.hpp \
+    include/bitcoin/bitcoin/utility/container_source.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
+    include/bitcoin/bitcoin/utility/deserializer.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
+    include/bitcoin/bitcoin/utility/exceptions.hpp \
+    include/bitcoin/bitcoin/utility/istream_reader.hpp \
     include/bitcoin/bitcoin/utility/logger.hpp \
+    include/bitcoin/bitcoin/utility/ostream_writer.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
+    include/bitcoin/bitcoin/utility/reader.hpp \
     include/bitcoin/bitcoin/utility/sequencer.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
@@ -319,17 +377,21 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/synchronizer.hpp \
     include/bitcoin/bitcoin/utility/thread.hpp \
     include/bitcoin/bitcoin/utility/threadpool.hpp \
-    include/bitcoin/bitcoin/utility/timer.hpp
+    include/bitcoin/bitcoin/utility/timer.hpp \
+    include/bitcoin/bitcoin/utility/variable_uint_size.hpp \
+    include/bitcoin/bitcoin/utility/writer.hpp
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
-    include/bitcoin/bitcoin/wallet/address.hpp \
     include/bitcoin/bitcoin/wallet/bip38.hpp \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
     include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
+    include/bitcoin/bitcoin/wallet/payment_address.hpp \
+    include/bitcoin/bitcoin/wallet/select_outputs.hpp \
+    include/bitcoin/bitcoin/wallet/stealth.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp
 

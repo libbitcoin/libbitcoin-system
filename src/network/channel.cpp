@@ -25,7 +25,6 @@
 #include <memory>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -168,7 +167,7 @@ void channel::subscribe_stop(
     proxy_->subscribe_stop(handle_stop);
 }
 
-void channel::send_raw(const header_type& packet_header,
+void channel::send_raw(const message::header& packet_header,
     const data_chunk& payload, channel_proxy::send_handler handle_send)
 {
     proxy_->send_raw(packet_header, payload, handle_send);

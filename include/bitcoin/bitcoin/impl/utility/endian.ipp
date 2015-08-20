@@ -72,6 +72,33 @@ T from_little_endian_unsafe(Iterator in)
 }
 
 template <typename T>
+T from_big_endian_stream_unsafe(std::istream& stream)
+{
+    VERIFY_UNSIGNED(T);
+
+    T out = 0;
+
+    for (size_t i = sizeof(T); (i > 0) && stream; i--)
+    {
+        uint8_t value = 0;
+        stream.read(reinterpret_cast<char*>(&value), sizeof value);
+        out |= static_cast<T>(value) << (8 * (i - 1));
+    }
+
+    return out;
+}
+
+template <typename T>
+T from_little_endian_stream_unsafe(std::istream& stream)
+{
+    VERIFY_UNSIGNED(T);
+
+    T out = 0;
+    stream.read(reinterpret_cast<char*>(&out), sizeof(T));
+    return out;
+}
+
+template <typename T>
 byte_array<sizeof(T)> to_big_endian(T n)
 {
     VERIFY_UNSIGNED(T);

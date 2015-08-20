@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PEER_HPP
-#define LIBBITCOIN_PEER_HPP
+#ifndef LIBBITCOIN_NETWORK_PEER_HPP
+#define LIBBITCOIN_NETWORK_PEER_HPP
 
 #include <cstdint>
 #include <memory>
@@ -34,7 +34,6 @@
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -44,6 +43,7 @@ namespace network {
 class BC_API peer
 {
 public:
+
     peer(threadpool& pool, const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.

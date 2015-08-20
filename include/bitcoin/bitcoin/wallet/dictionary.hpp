@@ -17,14 +17,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_DICTIONARY_HPP
-#define LIBBITCOIN_DICTIONARY_HPP
+#ifndef LIBBITCOIN_WALLET_DICTIONARY_HPP
+#define LIBBITCOIN_WALLET_DICTIONARY_HPP
 
 #include <array>
 #include <vector>
 #include <bitcoin/bitcoin/compat.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 /**
  * A valid mnemonic dictionary has exactly this many words.
@@ -57,6 +58,7 @@ namespace language
     extern const dictionary_list all;
 }
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

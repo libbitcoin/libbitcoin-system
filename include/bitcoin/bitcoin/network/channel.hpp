@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHANNEL_HPP
-#define LIBBITCOIN_CHANNEL_HPP
+
+#ifndef LIBBITCOIN_NETWORK_CHANNEL_HPP
+#define LIBBITCOIN_NETWORK_CHANNEL_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -28,21 +29,39 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
+//#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
+#include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
-    
+
 class channel;
 typedef std::shared_ptr<channel> channel_ptr;
 
 class BC_API channel
 {
 public:
+
     channel(channel_proxy_ptr proxy);
+
     channel(threadpool& pool, socket_ptr socket, const timeout& timeouts);
+
     ~channel();
 
     /// This class is not copyable.
@@ -92,10 +111,11 @@ public:
         proxy_->send(packet, handle_send);
     }
 
-    void send_raw(const header_type& packet_header,
+    void send_raw(const message::header& packet_header,
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
 private:
+
     channel_proxy_ptr proxy_;
     uint64_t nonce_;
 };

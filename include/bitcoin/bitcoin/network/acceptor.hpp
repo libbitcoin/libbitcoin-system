@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ACCEPTOR_HPP
-#define LIBBITCOIN_ACCEPTOR_HPP
+#ifndef LIBBITCOIN_NETWORK_ACCEPTOR_HPP
+#define LIBBITCOIN_NETWORK_ACCEPTOR_HPP
 
 #include <functional>
 #include <memory>
@@ -27,24 +27,24 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 class acceptor;
-
-// TODO: move acceptor_ptr into acceptor as public type (interface break).
 typedef std::shared_ptr<acceptor> acceptor_ptr;
 
 class BC_API acceptor
   : public std::enable_shared_from_this<acceptor>
 {
 public:
+
     typedef std::shared_ptr<boost::asio::ip::tcp::acceptor> tcp_acceptor_ptr;
+
     typedef std::function<void (const std::error_code&, channel_ptr)>
         accept_handler;
+
     typedef std::function<void(const std::error_code&, acceptor_ptr)>
         listen_handler;
 

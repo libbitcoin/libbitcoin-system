@@ -26,9 +26,10 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/wallet/address.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 std::string secret_to_wif(const ec_secret& secret, bool compressed)
 {
@@ -95,5 +96,5 @@ ec_secret minikey_to_secret(const std::string& minikey)
     return sha256_hash(to_data_chunk(minikey));
 }
 
+} // namespace wallet
 } // namespace libbitcoin
-

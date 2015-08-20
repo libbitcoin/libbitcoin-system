@@ -26,7 +26,7 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 
 namespace libbitcoin {
 namespace config {
@@ -69,14 +69,14 @@ public:
      * Initialization constructor.
      * @param[in]  net  The network address (ip and port) to initialize with.
      */
-    authority(const network_address_type& net);
+    authority(const message::network_address& net);
     
     /**
      * Initialization constructor.
      * @param[in]  ip    The ip addresss to initialize with.
      * @param[in]  port  The port to initialize with.
      */
-    authority(const ip_address_type& ip, uint16_t port);
+    authority(const message::ip_address& ip, uint16_t port);
     
     /**
      * Initialization constructor.
@@ -103,7 +103,7 @@ public:
      * Getter.
      * @return The ip address of the authority.
      */
-    ip_address_type ip() const;
+    message::ip_address ip() const;
 
     /**
      * Getter.
@@ -131,7 +131,7 @@ public:
      * Convert to bitcoin network address type.
      * @return  The authority converted to a network address.
      */
-    network_address_type to_network_address() const;
+    message::network_address to_network_address() const;
 
     /**
      * Override the equality operator.
