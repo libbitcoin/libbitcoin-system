@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SEQUENCER_HPP
-#define LIBBITCOIN_SEQUENCER_HPP
+#ifndef LIBBITCOIN_DISPATCHER_HPP
+#define LIBBITCOIN_DISPATCHER_HPP
 
 #include <functional>
 #include <thread>
@@ -29,7 +29,7 @@
 namespace libbitcoin {
 
 template <typename Handler>
-struct dispatcher
+struct dispatch_impl
 {
     Handler handler;
     boost::asio::io_service::strand& strand;
@@ -44,10 +44,10 @@ struct dispatcher
 /**
  * Convenience class for objects wishing to synchronize operations.
  */
-class BC_API sequencer
+class BC_API dispatcher
 {
 public:
-    sequencer(threadpool& pool);
+    dispatcher(threadpool& pool);
 
     /**
      * Returns a new handler that guarantees that the handler it encapsulates
@@ -56,7 +56,7 @@ public:
      */
     template <typename Handler, typename... Args>
     auto sync(Handler&& handler, Args&&... args) ->
-        dispatcher<decltype(std::bind(std::forward<Handler>(handler),
+        dispatch_impl<decltype(std::bind(std::forward<Handler>(handler),
             std::forward<Args>(args)...))>
     {
         auto bound = std::bind(std::forward<Handler>(handler),

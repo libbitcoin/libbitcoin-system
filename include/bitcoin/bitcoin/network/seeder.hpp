@@ -30,7 +30,7 @@
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -67,7 +67,7 @@ private:
         const config::endpoint& seed, completion_handler handle_complete);
     void handle_store(const std::error_code& ec);
 
-    sequencer sequence_;
+    dispatcher dispatch_;
     threadpool& pool_;
     hosts& hosts_;
     handshake& handshake_;

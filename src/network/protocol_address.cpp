@@ -25,7 +25,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -38,7 +38,7 @@ using std::placeholders::_2;
 protocol_address::protocol_address(channel_ptr node, threadpool& pool,
     hosts& hosts, const network_address_type& self)
   : node_(node),
-    sequence_(pool),
+    dispatch_(pool),
     hosts_(hosts),
     self_({ { self } })
 {
@@ -71,7 +71,7 @@ void protocol_address::start()
 
     // Subscribe to address messages.
     node_->subscribe_address(
-        sequence_.sync(&protocol_address::handle_receive_address,
+        dispatch_.sync(&protocol_address::handle_receive_address,
             shared_from_this(), _1, _2));
 
     // Ask for addresses.
@@ -81,7 +81,7 @@ void protocol_address::start()
 
     // Store the peer's address.
     hosts_.store(get_address(),
-        sequence_.sync(&protocol_address::handle_store_address,
+        dispatch_.sync(&protocol_address::handle_store_address,
             this, _1));
 }
 
@@ -99,7 +99,7 @@ void protocol_address::handle_receive_address(const std::error_code& ec,
 
     // Resubscribe to address messages.
     node_->subscribe_address(
-        sequence_.sync(&protocol_address::handle_receive_address,
+        dispatch_.sync(&protocol_address::handle_receive_address,
             shared_from_this(), _1, _2));
 
     log_debug(LOG_PROTOCOL)

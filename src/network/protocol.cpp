@@ -54,14 +54,14 @@ using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
 // TODO: make protocol an aggregator over the derived classes of network_base.
-// TODO: parameterize sequencer, connections and hosts as same object for each.
+// TODO: parameterize dispatcher, connections and hosts as same object for each.
 // TODO: pass config reference into each class.
 // TODO: implement protocol_version (handshake) protocol_ping, protocol_address.
 protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
     initiator& network, uint16_t port, bool relay, size_t max_outbound,
     size_t max_inbound, const config::endpoint::list& seeds,
     const network_address_type& self, const timeout& timeouts)
-  : sequence_(pool),
+  : dispatch_(pool),
     pool_(pool),
     hosts_(hosts),
     handshake_(shake),
@@ -147,7 +147,7 @@ void protocol::start_connecting(const std::error_code& ec,
 void protocol::new_connection()
 {
     hosts_.fetch_address(
-        sequence_.sync(&protocol::start_connect,
+        dispatch_.sync(&protocol::start_connect,
             this, _1, _2));
 }
 
@@ -177,7 +177,7 @@ void protocol::start_connect(const std::error_code& ec,
 
     // OUTBOUND CONNECT (sequential)
     network_.connect(peer.to_hostname(), peer.port(),
-        sequence_.sync(&protocol::handle_connect,
+        dispatch_.sync(&protocol::handle_connect,
             this, _1, _2, peer));
 }
 
@@ -203,7 +203,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
         << outbound_connections_.size() << " total)";
 
     const auto stop_handler =
-        sequence_.sync(&protocol::outbound_channel_stopped,
+        dispatch_.sync(&protocol::outbound_channel_stopped,
             this, _1, node, peer.to_string());
 
     start_talking(node, stop_handler, relay_);
@@ -232,7 +232,7 @@ void protocol::maintain_connection(const std::string& hostname, uint16_t port,
 {
     // MANUAL CONNECT
     network_.connect(hostname, port,
-        sequence_.sync(&protocol::handle_manual_connect,
+        dispatch_.sync(&protocol::handle_manual_connect,
             this, _1, _2, hostname, port, relay, retry));
 }
 
@@ -264,7 +264,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
         << manual_connections_.size() << " total)";
 
     const auto stop_handler =
-        sequence_.sync(&protocol::manual_channel_stopped,
+        dispatch_.sync(&protocol::manual_channel_stopped,
             this, _1, node, peer.to_string(), relay, retries);
 
     start_talking(node, stop_handler, relay);
@@ -275,7 +275,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
 void protocol::start_accepting()
 {
     network_.listen(inbound_port_,
-        sequence_.sync(&protocol::start_accept,
+        dispatch_.sync(&protocol::start_accept,
             this, _1, _2));
 }
 
@@ -292,7 +292,7 @@ void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept)
 
     // ACCEPT INCOMING CONNECTIONS
     accept->accept(
-        sequence_.sync(&protocol::handle_accept,
+        dispatch_.sync(&protocol::handle_accept,
             this, _1, _2, accept));
 }
 
@@ -340,7 +340,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
         << inbound_connections_.size() << " total)";
 
     const auto stop_handler = 
-        sequence_.sync(&protocol::inbound_channel_stopped,
+        dispatch_.sync(&protocol::inbound_channel_stopped,
             this, _1, node, address.to_string());
 
     start_talking(node, stop_handler, relay_);
@@ -358,7 +358,7 @@ void protocol::start_talking(channel_ptr node,
 
     // Subscribe to events and start talking on the socket.
     handshake_.start(node,
-        sequence_.sync(&protocol::handle_handshake,
+        dispatch_.sync(&protocol::handle_handshake,
             this, _1, node), relay);
 
     // Start reading from the socket (causing subscription events).

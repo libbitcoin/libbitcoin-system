@@ -145,7 +145,7 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\sequencer.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
@@ -248,7 +248,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\assert.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\deadline.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\synchronizer.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\sequencer.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\dispatcher.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\binary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\collection.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\container_sink.hpp" />

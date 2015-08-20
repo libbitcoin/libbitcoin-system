@@ -39,7 +39,7 @@
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -49,8 +49,9 @@ namespace network {
 using boost::format;
 using boost::filesystem::path;
 
+// TODO: look into whether randomly_queue is achiving its objective.
 hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
-  : buffer_(capacity), sequence_(pool), file_path_(file_path)
+  : buffer_(capacity), dispatch_(pool), file_path_(file_path)
 {
 }
 
@@ -86,7 +87,7 @@ size_t hosts::size()
 
 void hosts::load(load_handler handle_load)
 {
-    sequence_.randomly_queue(
+    dispatch_.randomly_queue(
         std::bind(&hosts::do_load,
             this, file_path_.string(), handle_load));
 }
@@ -111,7 +112,7 @@ void hosts::do_load(const path& path, load_handler handle_load)
                 buffer_.push_back(host.to_network_address());
             };
 
-            sequence_.randomly_queue(load_address);
+            dispatch_.randomly_queue(load_address);
         }
     }
 
@@ -120,7 +121,7 @@ void hosts::do_load(const path& path, load_handler handle_load)
 
 void hosts::save(save_handler handle_save)
 {
-    sequence_.randomly_queue(
+    dispatch_.randomly_queue(
         std::bind(&hosts::do_save,
             this, file_path_.string(), handle_save));
 }
@@ -143,7 +144,7 @@ void hosts::do_save(const path& path, save_handler handle_save)
 void hosts::remove(const network_address_type& address,
     remove_handler handle_remove)
 {
-    sequence_.randomly_queue(
+    dispatch_.randomly_queue(
         std::bind(&hosts::do_remove,
             this, address, handle_remove));
 }
@@ -168,7 +169,7 @@ void hosts::store(const network_address_type& address,
     if (address.port == 0)
         return;
 
-    sequence_.randomly_queue(
+    dispatch_.randomly_queue(
         std::bind(&hosts::do_store,
             this, address, handle_store));
 }
@@ -192,14 +193,14 @@ void hosts::store(const network_address_list& addresses,
     // If these are queued concurrently with others then it will lead to 
     // random distribution in the pool, which is why we queue here.
     for (const auto& address: addresses)
-        sequence_.randomly_queue(
+        dispatch_.randomly_queue(
             std::bind(&hosts::do_store,
                 this, address, handle_store));
 }
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)
 {
-    sequence_.randomly_queue(
+    dispatch_.randomly_queue(
         std::bind(&hosts::do_fetch_address,
             this, handle_fetch));
 }
@@ -219,7 +220,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 
 void hosts::fetch_count(fetch_count_handler handle_fetch)
 {
-    sequence_.randomly_queue(
+    dispatch_.randomly_queue(
         std::bind(&hosts::do_fetch_count,
             this, handle_fetch));
 }

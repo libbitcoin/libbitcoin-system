@@ -29,7 +29,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -69,7 +69,7 @@ private:
     channel_ptr node_;
     const timeout& timeouts_;
     boost::asio::deadline_timer timer_;
-    sequencer sequence_;
+    dispatcher dispatch_;
     bool stopped_;
 };
 

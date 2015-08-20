@@ -68,7 +68,7 @@ const network_address_type handshake::unspecified
 
 handshake::handshake(threadpool& pool, const config::authority& self,
     const timeout& timeouts)
-  : sequence_(pool), timeouts_(timeouts), timer_(pool.service())
+  : dispatch_(pool), timeouts_(timeouts), timer_(pool.service())
 {
     // relay and address_you are set in ready().
     template_version_.address_you = unspecified;
@@ -118,17 +118,17 @@ void handshake::start(channel_ptr node, handshake_handler handle_handshake,
 
     // 1 of 3
     node->subscribe_version(
-        sequence_.sync(&handshake::receive_version,
+        dispatch_.sync(&handshake::receive_version,
             this, _1, _2, node, complete));
 
     // 2 of 3
     node->subscribe_verack(
-        sequence_.sync(&handshake::receive_verack,
+        dispatch_.sync(&handshake::receive_verack,
             this, _1, _2, node, complete));
 
     // 3 of 3
     node->send(session_version,
-        sequence_.sync(&handshake::handle_version_sent,
+        dispatch_.sync(&handshake::handle_version_sent,
             this, _1, node, complete));
 
     // timeout error
@@ -197,7 +197,7 @@ void handshake::receive_version(const std::error_code& ec,
         << version.version << ") " << version.user_agent;
 
     node->send(verack_type(),
-        sequence_.sync(&handshake::handle_verack_sent,
+        dispatch_.sync(&handshake::handle_verack_sent,
             this, _1, completion_callback));
 }
 
@@ -210,25 +210,14 @@ void handshake::handle_verack_sent(const std::error_code& ec,
 void handshake::receive_verack(const std::error_code& ec, const verack_type&,
     channel_ptr node, handshake_handler completion_callback)
 {
-    if (!ec)
-    {
-        // TODO: enable handshake timeout on node construct.
-        // TODO: disable handshake timeout.
-        // node->reset_handshake();
-
-        // TODO: we don't care what it says about IP addresses but we may want
-        // to add inbound connnection addresses to hosts.
-        // Find out whether we would add self and/or inbound peers.
-    }
-
-    // We may not get this response before timeout, in which case we can
-    // only assume that our version wasn't accepted.
+    // We may not get the verack before timeout, in which case we can only
+    //assume that our version wasn't accepted.
     completion_callback(ec);
 }
 
 void handshake::set_start_height(uint64_t height, setter_handler handle_set)
 {
-    sequence_.queue(
+    dispatch_.queue(
         std::bind(&handshake::do_set_start_height,
             this, height, handle_set));
 }

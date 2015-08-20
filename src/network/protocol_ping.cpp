@@ -26,7 +26,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -42,7 +42,7 @@ protocol_ping::protocol_ping(channel_ptr node, threadpool& pool,
   : node_(node),
     timer_(pool.service()),
     timeouts_(timeouts),
-    sequence_(pool),
+    dispatch_(pool),
     stopped_(false)
 {
 }
@@ -52,16 +52,16 @@ void protocol_ping::start()
 {
     // Subscribe to stop messages.
     node_->subscribe_stop(
-        sequence_.sync(&protocol_ping::stop,
+        dispatch_.sync(&protocol_ping::stop,
             shared_from_this(), _1));
 
     // Subscribe to ping messages.
     node_->subscribe_ping(
-        sequence_.sync(&protocol_ping::handle_receive_ping,
+        dispatch_.sync(&protocol_ping::handle_receive_ping,
             shared_from_this(), _1, _2));
 
     // Send initial ping message by simulating first heartbeat.
-    sequence_.queue(
+    dispatch_.queue(
         std::bind(&protocol_ping::handle_timer,
             shared_from_this(), boost::system::error_code()));
 }
@@ -113,7 +113,7 @@ void protocol_ping::handle_timer(const boost::system::error_code& ec)
 
     // Subscribe to pong messages.
     node_->subscribe_pong(
-        sequence_.sync(&protocol_ping::handle_receive_pong,
+        dispatch_.sync(&protocol_ping::handle_receive_pong,
             shared_from_this(), _1, _2, nonce));
 
     const ping_type random_ping = { nonce };
@@ -166,7 +166,7 @@ void protocol_ping::handle_receive_ping(const std::error_code& ec,
 
     // Resubscribe to ping messages.
     node_->subscribe_ping(
-        sequence_.sync(&protocol_ping::handle_receive_ping,
+        dispatch_.sync(&protocol_ping::handle_receive_ping,
             shared_from_this(), _1, _2));
 
     if (ec)

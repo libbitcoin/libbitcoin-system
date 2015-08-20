@@ -41,7 +41,7 @@
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -139,7 +139,7 @@ public:
 
         const auto message = create_raw_message(packet);
         const auto command = satoshi_command(packet);
-        sequence_.queue(
+        dispatch_.queue(
             std::bind(&channel_proxy::do_send,
                 shared_from_this(), message, handle_send, command));
     }
@@ -229,7 +229,7 @@ private:
     void call_handle_send(const boost::system::error_code& ec,
         send_handler handle_send);
 
-    sequencer sequence_;
+    dispatcher dispatch_;
     socket_ptr socket_;
     const timeout& timeouts_;
 

@@ -85,7 +85,7 @@ public:
         // The intermediate variable 'lambda' is a workaround for a
         // limitation of the MSVC++ CTP_Nov2013 generic lambda support.
         const auto lambda = &protocol::do_broadcast<Message>;
-        sequence_.queue(lambda, this, packet, handle_send);
+        dispatch_.queue(lambda, this, packet, handle_send);
     }
 
 private:
@@ -151,7 +151,7 @@ private:
                 [=](const std::error_code& ec){ handle_send(ec, node); });
     }
 
-    sequencer sequence_;
+    dispatcher dispatch_;
     threadpool& pool_;
     hosts& hosts_;
     handshake& handshake_;

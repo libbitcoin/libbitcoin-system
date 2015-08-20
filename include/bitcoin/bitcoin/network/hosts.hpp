@@ -33,7 +33,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -94,7 +94,7 @@ private:
     size_t select_random_host();
 
     list buffer_;
-    sequencer sequence_;
+    dispatcher dispatch_;
     boost::filesystem::path file_path_;
 };
 

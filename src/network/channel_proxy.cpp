@@ -42,7 +42,7 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
@@ -59,7 +59,7 @@ using boost::posix_time::time_duration;
 // The proxy will have no config with timers moved to channel.
 channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     const timeout& timeouts=timeout::defaults)
-  : sequence_(pool),
+  : dispatch_(pool),
     socket_(socket),
     timeouts_(timeouts),
     expiration_(pool.service()),
@@ -159,7 +159,7 @@ void channel_proxy::stop(const std::error_code& ec)
     if (stopped())
         return;
 
-    sequence_.queue(
+    dispatch_.queue(
         std::bind(&channel_proxy::do_stop,
             shared_from_this(), ec));
 }
@@ -333,7 +333,7 @@ void channel_proxy::read_header()
         return;
 
     async_read(*socket_, buffer(inbound_header_),
-        sequence_.sync(&channel_proxy::handle_read_header,
+        dispatch_.sync(&channel_proxy::handle_read_header,
             shared_from_this(), _1, _2));
 }
 
@@ -343,7 +343,7 @@ void channel_proxy::read_checksum(const header_type& header)
         return;
 
     async_read(*socket_, buffer(inbound_checksum_),
-        sequence_.sync(&channel_proxy::handle_read_checksum,
+        dispatch_.sync(&channel_proxy::handle_read_checksum,
             shared_from_this(), _1, _2, header));
 }
 
@@ -354,7 +354,7 @@ void channel_proxy::read_payload(const header_type& header)
 
     inbound_payload_.resize(header.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header.payload_length),
-        sequence_.sync(&channel_proxy::handle_read_payload,
+        dispatch_.sync(&channel_proxy::handle_read_payload,
             shared_from_this(), _1, _2, header));
 }
 
@@ -635,7 +635,7 @@ void channel_proxy::send_raw(const header_type& packet_header,
         return;
     }
 
-    sequence_.queue(
+    dispatch_.queue(
         std::bind(&channel_proxy::do_send_raw,
             shared_from_this(), packet_header, payload, handle_send));
 }

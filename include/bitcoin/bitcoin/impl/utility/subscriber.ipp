@@ -25,14 +25,14 @@
 #include <functional>
 #include <memory>
 #include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
    
 namespace libbitcoin {
 
 template <typename... Args>
 subscriber<Args...>::subscriber(threadpool& pool)
-  : sequence_(pool)
+  : dispatch_(pool)
 {
 }
 
@@ -44,14 +44,14 @@ subscriber<Args...>::~subscriber()
 template <typename... Args>
 void subscriber<Args...>::subscribe(subscription_handler handler)
 {
-    sequence_.sync(&subscriber<Args...>::do_subscribe,
+    dispatch_.sync(&subscriber<Args...>::do_subscribe,
         this->shared_from_this(), handler)();
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
-    sequence_.sync(&subscriber<Args...>::do_relay,
+    dispatch_.sync(&subscriber<Args...>::do_relay,
         this->shared_from_this(), std::forward<Args>(args)...)();
 }
 

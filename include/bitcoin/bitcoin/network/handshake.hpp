@@ -30,7 +30,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -74,7 +74,7 @@ private:
     void start_timer(channel_ptr node, handshake_handler completion_callback);
     void do_set_start_height(uint64_t height, setter_handler handle_set);
 
-    sequencer sequence_;
+    dispatcher dispatch_;
     version_type template_version_;
     const timeout& timeouts_;
     boost::asio::deadline_timer timer_;

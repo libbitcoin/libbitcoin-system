@@ -69,7 +69,7 @@ const config::endpoint::list seeder::defaults
 seeder::seeder(threadpool& pool, hosts& hosts, handshake& shake,
     initiator& network, const config::endpoint::list& seeds,
     const network_address_type& self)
-  : sequence_(pool),
+  : dispatch_(pool),
     hosts_(hosts),
     pool_(pool),
     handshake_(shake),
@@ -149,7 +149,7 @@ void seeder::handle_connected(const std::error_code& ec, channel_ptr node,
     // Subscribe to events and start talking on the socket.
     static const bool relay = false;
     handshake_.start(node, 
-        sequence_.sync(&seeder::handle_handshake,
+        dispatch_.sync(&seeder::handle_handshake,
             shared_from_this(), _1, node, seed, handle_complete), relay);
 
     // Start reading from the socket (causing subscription events).
