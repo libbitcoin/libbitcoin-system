@@ -104,6 +104,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/inventory_vector.cpp \
     src/message/network_address.cpp \
     src/message/nonce.cpp \
+    src/message/not_found.cpp \
     src/message/verack.cpp \
     src/network/acceptor.cpp \
     src/network/channel.cpp \
@@ -229,6 +230,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/inventory_vector.cpp \
     test/message/network_address.cpp \
     test/message/nonce.cpp \
+    test/message/not_found.cpp \
     test/message/verack.cpp \
     test/utility/endian.cpp \
     test/utility/serializer.cpp \
@@ -323,6 +325,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/inventory_vector.hpp \
     include/bitcoin/bitcoin/message/network_address.hpp \
     include/bitcoin/bitcoin/message/nonce.hpp \
+    include/bitcoin/bitcoin/message/not_found.hpp \
     include/bitcoin/bitcoin/message/verack.hpp
 
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network

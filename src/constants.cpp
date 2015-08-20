@@ -27,6 +27,7 @@
 #include <bitcoin/bitcoin/message/get_data.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
 #include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/not_found.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 
 namespace libbitcoin {
@@ -55,6 +56,7 @@ const std::string message::get_address::satoshi_command = "getaddr";
 const std::string message::get_blocks::satoshi_command = "getblocks";
 const std::string message::get_data::satoshi_command = "getdata";
 const std::string message::inventory::satoshi_command = "inv";
+const std::string message::not_found::satoshi_command = "notfound";
 const std::string message::ping::satoshi_command = "ping";
 const std::string message::pong::satoshi_command = "pong";
 const std::string message::verack::satoshi_command = "verack";

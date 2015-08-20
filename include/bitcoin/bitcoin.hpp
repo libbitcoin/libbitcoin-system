@@ -61,6 +61,7 @@
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/not_found.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>

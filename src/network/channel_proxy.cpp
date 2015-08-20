@@ -168,8 +168,7 @@ void channel_proxy::handle_receive_ping(const std::error_code& ec,
         return;
     }
 
-    message::pong reply_pong;
-    reply_pong.nonce = ping.nonce;
+    message::pong reply_pong = { ping.nonce };
     send(reply_pong,
         std::bind(&channel_proxy::handle_send_pong,
             shared_from_this(), _1));
@@ -373,8 +372,7 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
         strand_.wrap(&channel_proxy::handle_receive_pong,
             shared_from_this(), _1, _2, nonce));
 
-    message::ping random_ping;
-    random_ping.nonce = nonce;
+    message::ping random_ping = { nonce };
     send(random_ping, 
         std::bind(&channel_proxy::handle_send_ping,
             shared_from_this(), _1));

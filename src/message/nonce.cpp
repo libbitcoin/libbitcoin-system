@@ -128,6 +128,15 @@ uint64_t ping::satoshi_fixed_size()
     return nonce_base::satoshi_fixed_size();
 }
 
+ping::ping()
+{
+}
+
+ping::ping(const uint64_t nonce)
+{
+    this->nonce = nonce;
+}
+
 pong pong::factory_from_data(const data_chunk& data)
 {
     pong instance;
@@ -152,6 +161,15 @@ pong pong::factory_from_data(reader& source)
 uint64_t pong::satoshi_fixed_size()
 {
     return nonce_base::satoshi_fixed_size();
+}
+
+pong::pong()
+{
+}
+
+pong::pong(const uint64_t nonce)
+{
+    this->nonce = nonce;
 }
 
 } // end message

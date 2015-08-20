@@ -43,5 +43,14 @@ get_data get_data::factory_from_data(reader& source)
     return instance;
 }
 
+get_data::get_data()
+{
+}
+
+get_data::get_data(const inventory_vector::list& elements)
+{
+    inventories = elements;
+}
+
 } // end message
 } // end libbitcoin

@@ -41,6 +41,10 @@ public:
     static get_data factory_from_data(std::istream& stream);
 
     static get_data factory_from_data(reader& source);
+
+    get_data();
+
+    get_data(const inventory_vector::list& elements);
 };
 
 } // end message
