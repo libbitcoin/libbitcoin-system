@@ -63,9 +63,9 @@ private:
         seeded_handler completion_callback);
     void handle_synced(const std::error_code& ec, size_t host_start_count,
         seeded_handler completion_callback);
-    void handle_receive(const std::error_code& ec, const address_type& message,
-        const config::endpoint& seed, channel_ptr node, 
-        seeded_handler completion_callback);
+    void handle_receive(const std::error_code& ec,
+        const message::address& message, const config::endpoint& seed,
+        channel_ptr node, seeded_handler completion_callback);
     void handle_send(const std::error_code& ec, const config::endpoint& seed,
         seeded_handler completion_callback);
     void handle_store(const std::error_code& ec);

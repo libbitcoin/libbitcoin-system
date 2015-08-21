@@ -27,17 +27,19 @@
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <boost/format.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
@@ -80,17 +82,17 @@ channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
     raw_subscriber_(std::make_shared<raw_subscriber>(pool)),
     stop_subscriber_(std::make_shared<stop_subscriber>(pool))
 {
-    establish_relay<version_type>(version_subscriber_);
-    establish_relay<verack_type>(verack_subscriber_);
-    establish_relay<address_type>(address_subscriber_);
-    establish_relay<get_address_type>(get_address_subscriber_);
-    establish_relay<inventory_type>(inventory_subscriber_);
-    establish_relay<get_data_type>(get_data_subscriber_);
-    establish_relay<get_blocks_type>(get_blocks_subscriber_);
-    establish_relay<transaction_type>(transaction_subscriber_);
-    establish_relay<block_type>(block_subscriber_);
-    establish_relay<ping_type>(ping_subscriber_);
-    establish_relay<pong_type>(pong_subscriber_);
+    establish_relay<message::announce_version>(version_subscriber_);
+    establish_relay<message::verack>(verack_subscriber_);
+    establish_relay<message::address>(address_subscriber_);
+    establish_relay<message::get_address>(get_address_subscriber_);
+    establish_relay<message::inventory>(inventory_subscriber_);
+    establish_relay<message::get_data>(get_data_subscriber_);
+    establish_relay<message::get_blocks>(get_blocks_subscriber_);
+    establish_relay<chain::transaction>(transaction_subscriber_);
+    establish_relay<chain::block>(block_subscriber_);
+    establish_relay<message::ping>(ping_subscriber_);
+    establish_relay<message::pong>(pong_subscriber_);
 }
 
 channel_proxy::~channel_proxy()
@@ -149,7 +151,7 @@ void channel_proxy::start()
 }
 
 void channel_proxy::handle_receive_ping(const std::error_code& ec,
-    const ping_type& ping)
+    const message::ping& ping)
 {
     if (stopped())
         return;
@@ -166,7 +168,7 @@ void channel_proxy::handle_receive_ping(const std::error_code& ec,
         return;
     }
 
-    const pong_type reply_pong = { ping.nonce };
+    message::pong reply_pong = { ping.nonce };
     send(reply_pong,
         std::bind(&channel_proxy::handle_send_pong,
             shared_from_this(), _1));
@@ -238,18 +240,18 @@ void channel_proxy::do_stop(const std::error_code& ec)
 
 void channel_proxy::clear_subscriptions(const std::error_code& ec)
 {
-    notify_stop<version_type>(version_subscriber_);
-    notify_stop<verack_type>(verack_subscriber_);
-    notify_stop<address_type>(address_subscriber_);
-    notify_stop<get_address_type>(get_address_subscriber_);
-    notify_stop<inventory_type>(inventory_subscriber_);
-    notify_stop<get_data_type>(get_data_subscriber_);
-    notify_stop<get_blocks_type>(get_blocks_subscriber_);
-    notify_stop<transaction_type>(transaction_subscriber_);
-    notify_stop<block_type>(block_subscriber_);
-    notify_stop<ping_type>(ping_subscriber_);
-    notify_stop<pong_type>(pong_subscriber_);
-    raw_subscriber_->relay(ec, header_type(), data_chunk());
+    notify_stop<message::announce_version>(version_subscriber_);
+    notify_stop<message::verack>(verack_subscriber_);
+    notify_stop<message::address>(address_subscriber_);
+    notify_stop<message::get_address>(get_address_subscriber_);
+    notify_stop<message::inventory>(inventory_subscriber_);
+    notify_stop<message::get_data>(get_data_subscriber_);
+    notify_stop<message::get_blocks>(get_blocks_subscriber_);
+    notify_stop<chain::transaction>(transaction_subscriber_);
+    notify_stop<chain::block>(block_subscriber_);
+    notify_stop<message::ping>(ping_subscriber_);
+    notify_stop<message::pong>(pong_subscriber_);
+    raw_subscriber_->relay(ec, message::header(), data_chunk());
     stop_subscriber_->relay(ec);
 }
 
@@ -370,7 +372,7 @@ void channel_proxy::handle_heartbeat(const boost::system::error_code& ec)
         strand_.wrap(&channel_proxy::handle_receive_pong,
             shared_from_this(), _1, _2, nonce));
 
-    const ping_type random_ping = { nonce };
+    message::ping random_ping = { nonce };
     send(random_ping, 
         std::bind(&channel_proxy::handle_send_ping,
             shared_from_this(), _1));
@@ -408,7 +410,7 @@ void channel_proxy::handle_send_ping(const std::error_code& ec)
 }
 
 void channel_proxy::handle_receive_pong(const std::error_code& ec,
-    const pong_type& ping, uint64_t nonce)
+    const message::pong& ping, uint64_t nonce)
 {
     if (stopped())
         return;
@@ -438,14 +440,14 @@ void channel_proxy::read_header()
             shared_from_this(), _1, _2));
 }
 
-void channel_proxy::read_checksum(const header_type& header)
+void channel_proxy::read_checksum(const message::header& header)
 {
     async_read(*socket_, buffer(inbound_checksum_),
         strand_.wrap(&channel_proxy::handle_read_checksum,
             shared_from_this(), _1, _2, header));
 }
 
-void channel_proxy::read_payload(const header_type& header)
+void channel_proxy::read_payload(const message::header& header)
 {
     inbound_payload_.resize(header.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header.payload_length),
@@ -471,18 +473,11 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     BITCOIN_ASSERT(bytes_transferred == header_chunk_size);
     BITCOIN_ASSERT(bytes_transferred == inbound_header_.size());
 
-    auto valid_parse = true;
-    header_type header;
-    const data_slice buffer(inbound_header_);
+    container_source<boost::array<uint8_t, header_chunk_size>, uint8_t, char> source(inbound_header_);
+    boost::iostreams::stream<container_source<boost::array<uint8_t, header_chunk_size>, uint8_t, char>> header_stream(source);
+    message::header header;
 
-    try
-    {
-        satoshi_load(buffer.begin(), buffer.end(), header);
-    }
-    catch (bc::end_of_stream)
-    {
-        valid_parse = false;
-    }
+    auto valid_parse = header.from_data(header_stream);
 
     if (!valid_parse || header.magic != magic_value())
     {
@@ -501,7 +496,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
 }
 
 void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
-    size_t bytes_transferred, header_type& header)
+    size_t bytes_transferred, message::header& header)
 {
     if (stopped())
         return;
@@ -531,7 +526,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
 }
 
 void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
-    size_t bytes_transferred, const header_type& header)
+    size_t bytes_transferred, const message::header& header)
 {
     if (stopped())
         return;
@@ -574,7 +569,18 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     reset_inactivity();
 
     // Parse and publish the payload to message subscribers.
-    stream_loader_.load(header.command, payload_copy);
+    byte_source<data_chunk> source(payload_copy);
+    boost::iostreams::stream<byte_source<data_chunk>> istream(source);
+
+    if (stream_loader_.load(header.command, istream))
+    {
+        if (istream.peek() != std::istream::traits_type::eof())
+        {
+            log_warning(LOG_NETWORK)
+                << "Valid message [" << header.command
+                << "] handled, unused bytes remain in payload.";
+        }
+    }
 
     // Now we stop the channel if there was an error and we aren't yet stopped.
     if (ec)
@@ -584,73 +590,73 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
 void channel_proxy::subscribe_version(
     receive_version_handler handle_receive)
 {
-    subscribe<version_type>(version_subscriber_, handle_receive);
+    subscribe<message::announce_version>(version_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_verack(
     receive_verack_handler handle_receive)
 {
-    subscribe<verack_type>(verack_subscriber_, handle_receive);
+    subscribe<message::verack>(verack_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_address(
     receive_address_handler handle_receive)
 {
-    subscribe<address_type>(address_subscriber_, handle_receive);
+    subscribe<message::address>(address_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_get_address(
     receive_get_address_handler handle_receive)
 {
-    subscribe<get_address_type>(get_address_subscriber_, handle_receive);
+    subscribe<message::get_address>(get_address_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_inventory(
     receive_inventory_handler handle_receive)
 {
-    subscribe<inventory_type>(inventory_subscriber_, handle_receive);
+    subscribe<message::inventory>(inventory_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_get_data(
     receive_get_data_handler handle_receive)
 {
-    subscribe<get_data_type>(get_data_subscriber_, handle_receive);
+    subscribe<message::get_data>(get_data_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_get_blocks(
     receive_get_blocks_handler handle_receive)
 {
-    subscribe<get_blocks_type>(get_blocks_subscriber_, handle_receive);
+    subscribe<message::get_blocks>(get_blocks_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_transaction(
     receive_transaction_handler handle_receive)
 {
-    subscribe<transaction_type>(transaction_subscriber_, handle_receive);
+    subscribe<chain::transaction>(transaction_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_block(
     receive_block_handler handle_receive)
 {
-    subscribe<block_type>(block_subscriber_, handle_receive);
+    subscribe<chain::block>(block_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_ping(
     receive_ping_handler handle_receive)
 {
-    subscribe<ping_type>(ping_subscriber_, handle_receive);
+    subscribe<message::ping>(ping_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_pong(
     receive_pong_handler handle_receive)
 {
-    subscribe<pong_type>(pong_subscriber_, handle_receive);
+    subscribe<message::pong>(pong_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, header_type(), data_chunk());
+        handle_receive(error::channel_stopped, message::header(), data_chunk());
     else
         raw_subscriber_->subscribe(handle_receive);
 }
@@ -682,7 +688,7 @@ void channel_proxy::call_handle_send(const boost::system::error_code& ec,
     handle_send(error::boost_to_error_code(ec));
 }
 
-void channel_proxy::send_raw(const header_type& packet_header,
+void channel_proxy::send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     if (stopped())
@@ -696,11 +702,10 @@ void channel_proxy::send_raw(const header_type& packet_header,
             shared_from_this(), packet_header, payload, handle_send));
 }
 
-void channel_proxy::do_send_raw(const header_type& packet_header,
+void channel_proxy::do_send_raw(const message::header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
-    data_chunk message(satoshi_raw_size(packet_header));
-    satoshi_save(packet_header, message.begin());
+    data_chunk message = packet_header.to_data();
     extend_data(message, payload);
     do_send(message, handle_send, packet_header.command);
 }

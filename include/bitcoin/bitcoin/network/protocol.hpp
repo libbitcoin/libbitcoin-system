@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-// TODO: rationalize include guard names (conflict with libbitcoin-protocol).
-#ifndef BC_PROTOCOL_HPP
-#define BC_PROTOCOL_HPP
+#ifndef LIBBITCOIN_NETWORK_PROTOCOL_HPP
+#define LIBBITCOIN_NETWORK_PROTOCOL_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -33,12 +32,13 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
+//#include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/peer.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -144,8 +144,10 @@ public:
     void set_max_outbound(size_t max_outbound);
 
 private:
+
     typedef std::vector<channel_ptr> channel_ptr_list;
-    typedef subscriber<const std::error_code&, channel_ptr> channel_subscriber;
+    typedef subscriber<const std::error_code&, channel_ptr>
+        channel_subscriber;
 
     // Startup sequence
     void handle_hosts_load(const std::error_code& ec,
@@ -157,7 +159,7 @@ private:
     void handle_hosts_save(const std::error_code& ec,
         completion_handler handle_complete);
     void handle_address_message(const std::error_code& ec,
-        const address_type& message, channel_ptr node);
+        const message::address& message, channel_ptr node);
     void handle_store_address(const std::error_code& ec);
 
     // Start outbound and accepting inbound connections

@@ -30,7 +30,6 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/version.hpp>
@@ -50,7 +49,7 @@ enum services: uint64_t
 
 static constexpr uint32_t no_timestamp = 0;
 static constexpr uint16_t unspecified_ip_port = 0;
-static constexpr ip_address_type unspecified_ip_address
+static constexpr message::ip_address unspecified_ip_address
 {
     {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -58,7 +57,7 @@ static constexpr ip_address_type unspecified_ip_address
     }
 };
 
-const network_address_type handshake::unspecified
+const message::network_address handshake::unspecified
 {
     no_timestamp,
     services::node_network,
@@ -169,7 +168,7 @@ void handshake::handle_version_sent(const std::error_code& ec,
 }
 
 void handshake::receive_version(const std::error_code& ec, 
-    const version_type& version, channel_ptr node,
+    const message::announce_version& version, channel_ptr node,
     handshake_handler completion_callback)
 {
     if (ec)
@@ -193,7 +192,7 @@ void handshake::receive_version(const std::error_code& ec,
         return;
     }
 
-    node->send(verack_type(),
+    node->send(message::verack(),
         strand_.wrap(&handshake::handle_verack_sent,
             this, _1, completion_callback));
 }
@@ -204,8 +203,9 @@ void handshake::handle_verack_sent(const std::error_code& ec,
     completion_callback(ec);
 }
 
-void handshake::receive_verack(const std::error_code& ec, const verack_type&,
-    channel_ptr node, handshake_handler completion_callback)
+void handshake::receive_verack(const std::error_code& ec,
+    const message::verack&, channel_ptr node,
+    handshake_handler completion_callback)
 {
     if (!ec)
     {

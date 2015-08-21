@@ -143,7 +143,7 @@ void hosts::do_save(const path& path, save_handler handle_save)
     handle_save(error::success);
 }
 
-void hosts::remove(const network_address_type& address,
+void hosts::remove(const message::network_address& address,
     remove_handler handle_remove)
 {
     strand_.randomly_queue(
@@ -151,11 +151,12 @@ void hosts::remove(const network_address_type& address,
             this, address, handle_remove));
 }
 
-void hosts::do_remove(const network_address_type& address,
+void hosts::do_remove(const message::network_address& address,
     remove_handler handle_remove)
 {
     const config::authority host(address);
     const auto it = std::find(buffer_.begin(), buffer_.end(), host);
+
     if (it == buffer_.end())
     {
         handle_remove(error::not_found);
@@ -166,7 +167,7 @@ void hosts::do_remove(const network_address_type& address,
     handle_remove(error::success);
 }
 
-void hosts::store(const network_address_type& address,
+void hosts::store(const message::network_address& address,
     store_handler handle_store)
 {
     if (address.port == 0)
@@ -177,7 +178,7 @@ void hosts::store(const network_address_type& address,
             this, address, handle_store));
 }
 
-void hosts::do_store(const network_address_type& address,
+void hosts::do_store(const message::network_address& address,
     store_handler handle_store)
 {
     buffer_.push_back(config::authority(address));
@@ -195,7 +196,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 {
     if (buffer_.empty())
     {
-        handle_fetch(error::not_found, network_address_type());
+        handle_fetch(error::not_found, message::network_address());
         return;
     }
 

@@ -32,6 +32,7 @@
 #include "../math/external/pkcs5_pbkdf2.h"
 
 namespace libbitcoin {
+namespace wallet {
 
 // BIP-39 private constants.
 constexpr size_t bits_per_word = 11;
@@ -153,5 +154,5 @@ long_hash decode_mnemonic(const word_list& mnemonic,
 
 #endif
 
+} // namespace wallet
 } // namespace libbitcoin
-

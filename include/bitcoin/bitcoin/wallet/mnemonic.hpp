@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MNEMONIC_HPP
-#define LIBBITCOIN_MNEMONIC_HPP
+#ifndef LIBBITCOIN_WALLET_MNEMONIC_HPP
+#define LIBBITCOIN_WALLET_MNEMONIC_HPP
 
 #include <cstddef>
 #include <string>
@@ -31,6 +31,7 @@
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 
 namespace libbitcoin {
+namespace wallet {
 
 /**
  * A valid mnemonic word count is evenly divisible by this number.
@@ -85,6 +86,7 @@ BC_API long_hash decode_mnemonic(const word_list& mnemonic,
 
 #endif
 
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif
