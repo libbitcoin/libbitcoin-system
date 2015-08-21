@@ -78,6 +78,10 @@ public:
     static ping factory_from_data(reader& source);
 
     static uint64_t satoshi_fixed_size();
+
+    ping();
+
+    ping(const uint64_t nonce);
 };
 
 class BC_API pong : public nonce_base
@@ -93,6 +97,10 @@ public:
     static pong factory_from_data(reader& source);
 
     static uint64_t satoshi_fixed_size();
+
+    pong();
+
+    pong(const uint64_t nonce);
 };
 
 } // end message

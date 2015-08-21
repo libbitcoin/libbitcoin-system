@@ -17,27 +17,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_INVENTORY_TYPE_ID_HPP
-#define LIBBITCOIN_MESSAGE_INVENTORY_TYPE_ID_HPP
+#ifndef LIBBITCOIN_MESSAGE_NOT_FOUND_HPP
+#define LIBBITCOIN_MESSAGE_NOT_FOUND_HPP
 
-#include <cstdint>
+#include <istream>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/inventory_vector.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-enum class inventory_type_id
+class BC_API not_found : public inventory
 {
-    error,
-    transaction,
-    block,
-    filtered_block,
-    none
+public:
+
+    static const std::string satoshi_command;
+
+    static not_found factory_from_data(const data_chunk& data);
+
+    static not_found factory_from_data(std::istream& stream);
+
+    static not_found factory_from_data(reader& source);
+
+    not_found();
+
+    not_found(const inventory_vector::list& elements);
 };
-
-BC_API uint32_t inventory_type_to_number(inventory_type_id inv_type);
-
-BC_API inventory_type_id inventory_type_from_number(uint32_t raw_type);
 
 } // end message
 } // end libbitcoin
