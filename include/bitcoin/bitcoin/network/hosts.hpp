@@ -32,7 +32,7 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -50,7 +50,7 @@ public:
     typedef std::function<void (const std::error_code&, size_t)>
         fetch_count_handler;
     typedef std::function<void (const std::error_code&,
-        const network_address_type&)> fetch_address_handler;
+        const message::network_address&)> fetch_address_handler;
 
     hosts(threadpool& pool,
         const boost::filesystem::path& file_path="hosts.cache",
@@ -65,29 +65,29 @@ public:
     size_t size();
     void load(load_handler handle_load);
     void save(save_handler handle_save);
-    void store(const network_address_type& address,
+    void store(const message::network_address& address,
         store_handler handle_store);
-    void store(const network_address_list& addresses,
+    void store(const message::network_address::list& addresses,
         store_handler handle_store);
-    void remove(const network_address_type& address,
+    void remove(const message::network_address& address,
         remove_handler handle_remove);
     void fetch_address(fetch_address_handler handle_fetch);
     void fetch_count(fetch_count_handler handle_fetch);
 
 private:
-    typedef boost::circular_buffer<network_address_type> list;
+    typedef boost::circular_buffer<message::network_address> list;
     typedef list::iterator iterator;
 
-    bool exists(const network_address_type& address);
-    iterator find(const network_address_type& address);
+    bool exists(const message::network_address& address);
+    iterator find(const message::network_address& address);
 
     void do_load(const boost::filesystem::path& path,
         load_handler handle_load);
     void do_save(const boost::filesystem::path& path,
         save_handler handle_save);
-    void do_remove(const network_address_type& address,
+    void do_remove(const message::network_address& address,
         remove_handler handle_remove);
-    void do_store(const network_address_type& address,
+    void do_store(const message::network_address& address,
         store_handler handle_store);
     void do_fetch_address(fetch_address_handler handle_fetch_address);
     void do_fetch_count(fetch_count_handler handle_fetch);

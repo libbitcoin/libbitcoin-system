@@ -34,14 +34,14 @@
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
-#include <bitcoin/bitcoin/message/announce_version.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
 #include <bitcoin/bitcoin/message/get_data.hpp>
 #include <bitcoin/bitcoin/message/header.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>

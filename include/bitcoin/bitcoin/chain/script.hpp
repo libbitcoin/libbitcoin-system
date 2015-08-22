@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -47,7 +47,6 @@ enum signature_hash_algorithm : uint32_t
 class BC_API script
 {
 public:
-
     typedef std::vector<script> list;
 
     enum class parse_mode
@@ -56,39 +55,6 @@ public:
         raw_data,
         raw_data_fallback
     };
-
-    operation::stack operations;
-
-    payment_type type() const;
-
-    bool is_raw_data() const;
-
-    bool from_data(const data_chunk& data, bool with_length_prefix /*= true*/,
-        script::parse_mode mode /*= script::parse_mode::strict*/);
-
-    bool from_data(std::istream& stream, bool with_length_prefix /*= true*/,
-        script::parse_mode mode /*= script::parse_mode::strict*/);
-
-    bool from_data(reader& source, bool with_length_prefix /*= true*/,
-        script::parse_mode mode /*= script::parse_mode::strict*/);
-
-    data_chunk to_data(bool with_length_prefix /*= true*/) const;
-
-    void to_data(std::ostream& stream, bool with_length_prefix /*= true*/) const;
-
-    void to_data(writer& sink, bool with_length_prefix /*= true*/) const;
-
-    bool from_string(const std::string& human_readable);
-
-    std::string to_string() const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_content_size() const;
-
-    uint64_t satoshi_size(bool with_length_prefix /*= true*/) const;
 
     static script factory_from_data(const data_chunk& data,
         bool with_length_prefix /*= true*/,
@@ -122,14 +88,33 @@ public:
         const transaction& tx, uint32_t input_index, uint32_t hash_type,
         const ec_secret& nonce);
 
+    payment_type type() const;
+    bool is_raw_data() const;
+    bool from_data(const data_chunk& data, bool with_length_prefix /*= true*/,
+        script::parse_mode mode /*= script::parse_mode::strict*/);
+    bool from_data(std::istream& stream, bool with_length_prefix /*= true*/,
+        script::parse_mode mode /*= script::parse_mode::strict*/);
+    bool from_data(reader& source, bool with_length_prefix /*= true*/,
+        script::parse_mode mode /*= script::parse_mode::strict*/);
+    data_chunk to_data(bool with_length_prefix /*= true*/) const;
+    void to_data(std::ostream& stream, 
+        bool with_length_prefix /*= true*/) const;
+    void to_data(writer& sink, bool with_length_prefix /*= true*/) const;
+    bool from_string(const std::string& human_readable);
+    std::string to_string() const;
+    bool is_valid() const;
+    void reset();
+    uint64_t satoshi_content_size() const;
+    uint64_t satoshi_size(bool with_length_prefix /*= true*/) const;
+
+    operation::stack operations;
+
 private:
-
     bool deserialize(const data_chunk& raw_script, script::parse_mode mode);
-
     bool parse(const data_chunk& raw_script);
 };
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin
 
 #endif

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -62,7 +63,7 @@ void get_blocks::reset()
 
 bool get_blocks::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -97,7 +98,7 @@ bool get_blocks::from_data(reader& source)
 data_chunk get_blocks::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size());
@@ -123,25 +124,23 @@ void get_blocks::to_data(writer& sink) const
 
 uint64_t get_blocks::satoshi_size() const
 {
-    return 36 +
-        variable_uint_size(start_hashes.size()) +
+    return 36 + variable_uint_size(start_hashes.size()) +
         hash_size * start_hashes.size();
 }
 
-bool operator==(const get_blocks& a, const get_blocks& b)
+bool operator==(const get_blocks& left, const get_blocks& right)
 {
-    bool result = (a.start_hashes.size() == b.start_hashes.size());
+    auto result = (left.start_hashes.size() == right.start_hashes.size());
+    for (size_t i = 0; (i < left.start_hashes.size()) && result; i++)
+        result = (left.start_hashes[i] == right.start_hashes[i]);
 
-    for (size_t i = 0; (i < a.start_hashes.size()) && result; i++)
-        result = (a.start_hashes[i] == b.start_hashes[i]);
-
-    return result && (a.hash_stop == b.hash_stop);
+    return result && (left.hash_stop == right.hash_stop);
 }
 
-bool operator!=(const get_blocks& a, const get_blocks& b)
+bool operator!=(const get_blocks& left, const get_blocks& right)
 {
-    return !(a == b);
+    return !(left == right);
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

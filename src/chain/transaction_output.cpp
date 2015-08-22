@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/transaction_output.hpp>
+
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -62,7 +63,7 @@ void transaction_output::reset()
 
 bool transaction_output::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -74,7 +75,7 @@ bool transaction_output::from_data(std::istream& stream)
 
 bool transaction_output::from_data(reader& source)
 {
-    bool result = true;
+    auto result = true;
 
     reset();
 
@@ -93,7 +94,7 @@ bool transaction_output::from_data(reader& source)
 data_chunk transaction_output::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size());
@@ -127,5 +128,5 @@ std::string transaction_output::to_string() const
     return ss.str();
 }
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin

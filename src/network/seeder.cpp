@@ -29,12 +29,12 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
@@ -69,7 +69,7 @@ const config::endpoint::list seeder::defaults
 // This is not currently stoppable.
 seeder::seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
     initiator& network, const config::endpoint::list& seeds,
-    const network_address_type& self)
+    const message::network_address& self)
   : dispatch_(pool),
     hosts_(hosts),
     timeouts_(timeouts),

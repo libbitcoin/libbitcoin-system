@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
 
 namespace libbitcoin {
@@ -123,14 +123,14 @@ enum services: uint64_t
 
 BC_CONSTEXPR uint32_t no_timestamp = 0;
 BC_CONSTEXPR uint16_t unspecified_ip_port = 0;
-BC_CONSTEXPR ip_address_type unspecified_ip_address
+BC_CONSTEXPR message::ip_address unspecified_ip_address
 {
     {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00
     }
 };
-BC_CONSTEXPR network_address_type unspecified_network_address
+BC_CONSTEXPR message::network_address unspecified_network_address
 {
     no_timestamp,
     services::node_network,

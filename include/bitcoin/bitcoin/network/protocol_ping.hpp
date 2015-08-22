@@ -25,9 +25,9 @@
 #include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -70,8 +70,10 @@ private:
 
     void handle_send_ping(const std::error_code& ec) const;
     void handle_send_pong(const std::error_code& ec) const;
-    void handle_receive_ping(const std::error_code& ec, const ping_type& ping);
-    void handle_receive_pong(const std::error_code& ec, const pong_type& ping, uint64_t nonce);
+    void handle_receive_ping(const std::error_code& ec,
+        const message::ping& ping);
+    void handle_receive_pong(const std::error_code& ec,
+        const message::pong& ping, uint64_t nonce);
 
     channel_ptr peer_;
     deadline::ptr deadline_;

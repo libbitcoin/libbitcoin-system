@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -29,14 +29,13 @@ namespace libbitcoin {
 class evaluation_context
 {
 public:
+    data_chunk pop_primary();
 
     chain::operation::stack::const_iterator codehash_begin;
     uint64_t operation_counter;
     data_stack primary;
     data_stack secondary;
     conditional_stack conditional;
-
-    data_chunk pop_primary();
 };
 
 }

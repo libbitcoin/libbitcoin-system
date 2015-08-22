@@ -24,8 +24,10 @@
 #include <system_error>
 #include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
@@ -40,7 +42,7 @@ using std::placeholders::_2;
 using boost::posix_time::time_duration;
 
 protocol_address::protocol_address(channel_ptr peer, threadpool& pool,
-    hosts& hosts, const network_address_type& self)
+    hosts& hosts, const message::network_address& self)
   : peer_(peer),
     pool_(pool),
     dispatch_(pool),
@@ -49,7 +51,7 @@ protocol_address::protocol_address(channel_ptr peer, threadpool& pool,
 {
 }
 
-network_address_type protocol_address::address() const
+message::network_address protocol_address::address() const
 {
     return peer_->address().to_network_address();
 }
@@ -84,7 +86,7 @@ void protocol_address::start()
             shared_from_this(), _1, _2, nullptr));
 
     // Ask for addresses.
-    peer_->send(get_address_type(),
+    peer_->send(message::get_address(),
         std::bind(&protocol_address::handle_send_get_address,
             shared_from_this(), _1, nullptr));
 }
@@ -124,7 +126,7 @@ void protocol_address::start(handler handle_seeded,
 
     // 3 of 3
     // Ask for addresses.
-    peer_->send(get_address_type(),
+    peer_->send(message::get_address(),
         std::bind(&protocol_address::handle_send_get_address,
             shared_from_this(), _1, complete));
 
@@ -165,7 +167,7 @@ void protocol_address::handle_timer(const std::error_code& ec,
 }
 
 void protocol_address::handle_receive_address(const std::error_code& ec,
-    const address_type& message, handler complete)
+    const message::address& message, handler complete)
 {
     if (ec)
     {

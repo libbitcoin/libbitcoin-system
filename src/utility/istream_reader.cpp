@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -45,9 +45,7 @@ bool istream_reader::is_exhausted() const
 uint8_t istream_reader::read_byte()
 {
     uint8_t result;
-
     stream_.read(reinterpret_cast<char*>(&result), sizeof result);
-
     return result;
 }
 
@@ -68,8 +66,7 @@ uint64_t istream_reader::read_8_bytes_little_endian()
 
 uint64_t istream_reader::read_variable_uint_little_endian()
 {
-    uint8_t length = read_byte();
-
+    const auto length = read_byte();
     if (length < 0xfd)
         return length;
     else if (length == 0xfd)
@@ -111,26 +108,24 @@ uint64_t istream_reader::read_variable_uint_big_endian()
     return read_8_bytes_big_endian();
 }
 
-data_chunk istream_reader::read_data(size_t n_bytes)
+data_chunk istream_reader::read_data(size_t size)
 {
-    data_chunk raw_bytes(n_bytes);
-
-    if (n_bytes > 0)
-        stream_.read(reinterpret_cast<char*>(raw_bytes.data()), n_bytes);
+    data_chunk raw_bytes(size);
+    if (size > 0)
+        stream_.read(reinterpret_cast<char*>(raw_bytes.data()), size);
 
     return raw_bytes;
 }
 
-void istream_reader::read_data(uint8_t* data, size_t n_bytes)
+void istream_reader::read_data(uint8_t* data, size_t size)
 {
-    if (n_bytes > 0)
-        stream_.read(reinterpret_cast<char*>(data), n_bytes);
+    if (size > 0)
+        stream_.read(reinterpret_cast<char*>(data), size);
 }
 
 data_chunk istream_reader::read_data_to_eof()
 {
     data_chunk raw_bytes;
-
     while (stream_ && (stream_.peek() != std::istream::traits_type::eof()))
         raw_bytes.push_back(read_byte());
 
@@ -147,18 +142,19 @@ short_hash istream_reader::read_short_hash()
     return read_bytes<short_hash_size>();
 }
 
-std::string istream_reader::read_fixed_string(size_t len)
+std::string istream_reader::read_fixed_string(size_t length)
 {
-    data_chunk string_bytes = read_data(len);
+    auto string_bytes = read_data(length);
     std::string result(string_bytes.begin(), string_bytes.end());
+
     // Removes trailing 0s... Needed for string comparisons
     return result.c_str();
 }
 
 std::string istream_reader::read_string()
 {
-    uint64_t string_size = read_variable_uint_little_endian();
-    return read_fixed_string(string_size);
+    const auto size = read_variable_uint_little_endian();
+    return read_fixed_string(size);
 }
 
 } // namespace libbitcoin

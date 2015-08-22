@@ -30,10 +30,11 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
 namespace libbitcoin {
@@ -53,7 +54,7 @@ protocol_version::protocol_version(channel_ptr peer, threadpool& pool,
 {
     // nonce, relay and address_you are set in start.
     // start_height is managed dynamically by channel.
-    template_.version = bc::protocol_version;
+    template_.value = bc::protocol_version;
     template_.services = services::node_network;
     template_.timestamp = 0;
     template_.address_me = self.to_network_address();
@@ -158,7 +159,7 @@ void protocol_version::handle_version_sent(const std::error_code& ec,
 }
 
 void protocol_version::handle_receive_version(const std::error_code& ec,
-    const version_type& version, handler complete)
+    const message::version& version, handler complete)
 {
     if (stopped())
         return;
@@ -169,10 +170,10 @@ void protocol_version::handle_receive_version(const std::error_code& ec,
         return;
     }
 
-    if (version.version < bc::peer_minimum_version)
+    if (version.value < bc::peer_minimum_version)
     {
         log_debug(LOG_NETWORK)
-            << "Peer version (" << version.version << ") below minimum ("
+            << "Peer version (" << version.value << ") below minimum ("
             << bc::peer_minimum_version << ") [" << peer_->address() << "]";
         complete(error::accept_failed);
         return;
@@ -185,9 +186,9 @@ void protocol_version::handle_receive_version(const std::error_code& ec,
     // peer->set_version(version);
     log_debug(LOG_NETWORK)
         << "Peer version [" << peer_->address() << "] ("
-        << version.version << ") " << version.user_agent;
+        << version.value << ") " << version.user_agent;
 
-    peer_->send(verack_type(),
+    peer_->send(message::verack(),
         dispatch_.sync(&protocol_version::handle_verack_sent,
             shared_from_this(), _1, complete));
 }
@@ -202,7 +203,7 @@ void protocol_version::handle_verack_sent(const std::error_code& ec,
 }
 
 void protocol_version::handle_receive_verack(const std::error_code& ec,
-    const verack_type&, handler complete) const
+    const message::verack&, handler complete) const
 {
     if (stopped())
         return;

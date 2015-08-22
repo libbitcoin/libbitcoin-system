@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -29,21 +29,14 @@ namespace libbitcoin {
 class conditional_stack
 {
 public:
-
     bool closed() const;
-
     bool has_failed_branches() const;
-
     void clear();
-
     void open(bool value);
-
     void else_();
-
     void close();
 
 private:
-
     std::vector<bool> stack_;
 };
 

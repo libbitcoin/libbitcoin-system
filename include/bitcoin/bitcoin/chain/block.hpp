@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -35,47 +35,35 @@ namespace chain {
 class BC_API block
 {
 public:
-
     typedef std::vector<block> list;
+
+    static block factory_from_data(const data_chunk& data);
+    static block factory_from_data(std::istream& stream);
+    static block factory_from_data(reader& source);
+    static hash_digest generate_merkle_root(
+        const transaction::list& transactions);
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t satoshi_size() const;
 
     static const std::string satoshi_command;
 
     block_header header;
     transaction::list transactions;
-
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    bool from_data(reader& source);
-
-    data_chunk to_data() const;
-
-    void to_data(std::ostream& stream) const;
-
-    void to_data(writer& sink) const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size() const;
-
-    static block factory_from_data(const data_chunk& data);
-
-    static block factory_from_data(std::istream& stream);
-
-    static block factory_from_data(reader& source);
-
-    static hash_digest generate_merkle_root(
-        const transaction::list& transactions);
 };
 
 // A list of indices. Used for creating block_locator objects or
 // storing list of unconfirmed input indexes in tx pool.
 typedef std::vector<size_t> index_list;
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin
 
 #endif

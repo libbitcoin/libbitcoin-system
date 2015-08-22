@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -44,29 +44,27 @@ void ostream_writer::write_little_endian(T value)
 template <typename T>
 void ostream_writer::write_data(T& value)
 {
-    auto size = value.size();
-
+    const auto size = value.size();
     if (size > 0)
         stream_.write(reinterpret_cast<const char*>(value.data()), size);
 }
 
-template<unsigned N>
-void ostream_writer::write_bytes(const byte_array<N>& value)
+template <unsigned Size>
+void ostream_writer::write_bytes(const byte_array<Size>& value)
 {
-//    for (unsigned i = 0; i < N; i++)
-//        write_byte(value[i]);
+    //for (unsigned i = 0; i < Size; i++)
+    //    write_byte(value[i]);
 
-    auto size = value.size();
-
+    const auto size = value.size();
     if (size > 0)
         stream_.write(reinterpret_cast<const char*>(value.data()), size);
 }
 
-template<unsigned N>
-void ostream_writer::write_bytes_reverse(const byte_array<N>& value)
+template <unsigned Size>
+void ostream_writer::write_bytes_reverse(const byte_array<Size>& value)
 {
-    for (unsigned i = 0; i < N; i++)
-        write_byte(value[N - (i + 1)]);
+    for (unsigned i = 0; i < Size; i++)
+        write_byte(value[Size - (i + 1)]);
 }
 
 } // libbitcoin

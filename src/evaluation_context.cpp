@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include "evaluation_context.hpp"
 
 #include <algorithm>
-#include "evaluation_context.hpp"
 
 namespace libbitcoin {
 
@@ -30,4 +30,4 @@ data_chunk evaluation_context::pop_primary()
     return value;
 }
 
-}
+} // namespace libbitcoin

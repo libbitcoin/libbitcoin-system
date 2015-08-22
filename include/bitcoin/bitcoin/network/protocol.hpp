@@ -32,12 +32,12 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -60,7 +60,7 @@ public:
         uint16_t port=bc::protocol_port, bool relay=true,
         size_t max_outbound=8, size_t max_inbound=8,
         const config::endpoint::list& seeds=seeder::defaults,
-        const network_address_type& self=bc::unspecified_network_address,
+        const message::network_address& self=bc::unspecified_network_address,
         const timeout& timeouts=timeout::defaults);
     
     /// This class is not copyable.
@@ -156,7 +156,7 @@ private:
 
     // Configuration.
     const config::endpoint::list& seeds_;
-    const network_address_type& self_;
+    const message::network_address& self_;
     const timeout& timeouts_;
     uint16_t inbound_port_;
     size_t max_inbound_;

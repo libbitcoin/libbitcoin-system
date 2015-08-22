@@ -29,7 +29,7 @@ namespace libbitcoin {
 
 template <typename Iterator>
 serializer<Iterator>::serializer(const Iterator begin)
-  : iter_(begin)
+  : iterator_(begin)
 {
 }
 
@@ -48,8 +48,8 @@ bool serializer<Iterator>::operator!() const
 template <typename Iterator>
 void serializer<Iterator>::write_byte(uint8_t value)
 {
-    *iter_ = value;
-    ++iter_;
+    *iterator_ = value;
+    ++iterator_;
 }
 
 template <typename Iterator>
@@ -59,9 +59,9 @@ void serializer<Iterator>::write_data(const data_chunk& data)
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_data(const uint8_t* data, size_t n_bytes)
+void serializer<Iterator>::write_data(const uint8_t* data, size_t size)
 {
-    iter_ = std::copy(data, (data + n_bytes), iter_);
+    iterator_ = std::copy(data, (data + size), iterator_);
 }
 
 template <typename Iterator>
@@ -166,7 +166,7 @@ template <typename Iterator>
 template <typename T>
 void serializer<Iterator>::write_data(const T& data)
 {
-    iter_ = std::copy(data.begin(), data.end(), iter_);
+    iterator_ = std::copy(data.begin(), data.end(), iterator_);
 }
 
 template <typename Iterator>
@@ -182,26 +182,26 @@ void serializer<Iterator>::write_short_hash(const short_hash& hash)
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_fixed_string(
-    const std::string& value, size_t string_size)
+void serializer<Iterator>::write_fixed_string(const std::string& value,
+    size_t size)
 {
-    size_t max_size = std::max(string_size, value.size());
-    data_chunk raw_string(string_size, 0);
+    const auto max_size = std::max(size, value.size());
+    data_chunk raw_string(size, 0);
 
     std::copy_n(value.begin(), max_size, raw_string.begin());
 
     // conditionally truncate
-    if (max_size > string_size)
-        raw_string.resize(string_size);
+    if (max_size > size)
+        raw_string.resize(size);
 
     write_data(raw_string);
 }
 
 template <typename Iterator>
-void serializer<Iterator>::write_string(const std::string& str)
+void serializer<Iterator>::write_string(const std::string& value)
 {
-    write_variable_uint_little_endian(str.size());
-    write_data(str);
+    write_variable_uint_little_endian(value.size());
+    write_data(value);
 }
 
 /**
@@ -210,7 +210,7 @@ void serializer<Iterator>::write_string(const std::string& str)
 template <typename Iterator>
 Iterator serializer<Iterator>::iterator()
 {
-    return iter_;
+    return iterator_;
 }
 
 /**
@@ -218,16 +218,16 @@ Iterator serializer<Iterator>::iterator()
  * routine and then continue with this serializer.
  */
 template <typename Iterator>
-void serializer<Iterator>::set_iterator(Iterator iter)
+void serializer<Iterator>::set_iterator(Iterator iterator)
 {
-    iter_ = iter;
+    iterator_ = iterator;
 }
 
 template <typename Iterator>
 template <typename T>
 void serializer<Iterator>::write_data_reverse(const T& data)
 {
-    iter_ = std::reverse_copy(data.begin(), data.end(), iter_);
+    iterator_ = std::reverse_copy(data.begin(), data.end(), iterator_);
 }
 
 template <typename Iterator>

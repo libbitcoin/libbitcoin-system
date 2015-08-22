@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+#include "conditional_stack.hpp"
 
 #include <algorithm>
-#include "conditional_stack.hpp"
 
 namespace libbitcoin {
 
@@ -27,6 +27,7 @@ bool conditional_stack::closed() const
 {
     return stack_.empty();
 }
+
 bool conditional_stack::has_failed_branches() const
 {
     return std::count(stack_.begin(), stack_.end(), false) > 0;
@@ -36,17 +37,20 @@ void conditional_stack::clear()
 {
     stack_.clear();
 }
+
 void conditional_stack::open(bool value)
 {
     stack_.push_back(value);
 }
+
 void conditional_stack::else_()
 {
     stack_.back() = !stack_.back();
 }
+
 void conditional_stack::close()
 {
     stack_.pop_back();
 }
 
-}
+} // namespace libbitcoin

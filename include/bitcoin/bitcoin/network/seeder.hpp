@@ -26,6 +26,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
@@ -49,7 +50,7 @@ public:
 
     seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
         initiator& network, const config::endpoint::list& seeds,
-        const network_address_type& self);
+        const message::network_address& self);
     seeder::~seeder();
 
     /// This class is not copyable.
@@ -75,7 +76,7 @@ private:
     const timeout& timeouts_;
     initiator& network_;
     const config::endpoint::list& seeds_;
-    const network_address_type self_;
+    const message::network_address self_;
     config::endpoint::list remaining_;
 };
 

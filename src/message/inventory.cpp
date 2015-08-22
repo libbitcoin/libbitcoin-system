@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/inventory.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -60,7 +61,7 @@ void inventory::reset()
 
 bool inventory::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -72,10 +73,8 @@ bool inventory::from_data(std::istream& stream)
 
 bool inventory::from_data(reader& source)
 {
-    bool result = true;
-
+    auto result = true;
     reset();
-
     uint64_t count = source.read_variable_uint_little_endian();
     result = source;
 
@@ -94,7 +93,7 @@ bool inventory::from_data(reader& source)
 data_chunk inventory::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size());
@@ -110,31 +109,29 @@ void inventory::to_data(std::ostream& stream) const
 void inventory::to_data(writer& sink) const
 {
     sink.write_variable_uint_little_endian(inventories.size());
-
     for (const inventory_vector inv : inventories)
         inv.to_data(sink);
 }
 
 uint64_t inventory::satoshi_size() const
 {
-    return variable_uint_size(inventories.size())
-        + inventories.size() * inventory_vector::satoshi_fixed_size();
+    return variable_uint_size(inventories.size()) + inventories.size() *
+        inventory_vector::satoshi_fixed_size();
 }
 
-bool operator==(const inventory& a, const inventory& b)
+bool operator==(const inventory& left, const inventory& right)
 {
-    bool result = (a.inventories.size() == b.inventories.size());
-
-    for (size_t i = 0; (i < a.inventories.size()) && result; i++)
-        result = (a.inventories[i] == b.inventories[i]);
+    auto result = (left.inventories.size() == right.inventories.size());
+    for (size_t i = 0; (i < left.inventories.size()) && result; i++)
+        result = (left.inventories[i] == right.inventories[i]);
 
     return result;
 }
 
-bool operator!=(const inventory& a, const inventory& b)
+bool operator!=(const inventory& left, const inventory& right)
 {
-    return !(a == b);
+    return !(left == right);
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

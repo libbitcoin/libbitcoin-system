@@ -25,9 +25,9 @@
 #include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -54,7 +54,7 @@ public:
      * @param[in]  self   The address that represents us to peers.
      */
     protocol_address(channel_ptr peer, threadpool& pool, hosts& hosts,
-        const network_address_type& self);
+        const message::network_address& self);
 
     /// This class is not copyable.
     protocol_address(const protocol_address&) = delete;
@@ -80,10 +80,11 @@ private:
     void handle_stop(const std::error_code& ec, handler complete);
     void handle_timer(const std::error_code& ec, handler complete) const;
 
-    network_address_type address() const;
+    message::network_address address() const;
     bool publish_self_address() const;
 
-    void handle_receive_address(const std::error_code& ec, const address_type& address, handler complete);
+    void handle_receive_address(const std::error_code& ec,
+        const message::address& address, handler complete);
     void handle_send_address(const std::error_code& ec, handler complete) const;
     void handle_send_get_address(const std::error_code& ec, handler complete) const;
     void handle_store_addresses(const std::error_code& ec, handler complete) const;
@@ -95,7 +96,7 @@ private:
     bool stopped_;
 
     hosts& hosts_;
-    const address_type self_;
+    const message::address self_;
 };
 
 } // namespace network

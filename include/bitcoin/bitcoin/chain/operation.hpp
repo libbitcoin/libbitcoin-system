@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -34,68 +34,45 @@ namespace chain {
 class BC_API operation
 {
 public:
-
     typedef std::vector<operation> list;
     typedef std::vector<operation> stack;
+
+    static operation factory_from_data(const data_chunk& data);
+    static operation factory_from_data(std::istream& stream);
+    static operation factory_from_data(reader& source);
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    std::string to_string() const;
+    bool is_valid() const;
+    void reset();
+    uint64_t satoshi_size() const;
 
     opcode code;
     data_chunk data;
 
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    bool from_data(reader& source);
-
-    data_chunk to_data() const;
-
-    void to_data(std::ostream& stream) const;
-
-    void to_data(writer& sink) const;
-
-    std::string to_string() const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size() const;
-
-    static operation factory_from_data(const data_chunk& data);
-
-    static operation factory_from_data(std::istream& stream);
-
-    static operation factory_from_data(reader& source);
-
 private:
-
+    static bool must_read_data(opcode code);
 	static uint32_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
         reader& source);
-
-    static bool must_read_data(opcode code);
 };
 
-bool is_push(const opcode code);
+BC_API uint64_t count_non_push(const operation::stack& ops);
+BC_API bool is_push(const opcode code);
+BC_API bool is_push_only(const operation::stack& ops);
+BC_API bool is_pubkey_type(const operation::stack& ops);
+BC_API bool is_pubkey_hash_type(const operation::stack& ops);
+BC_API bool is_script_hash_type(const operation::stack& ops);
+BC_API bool is_stealth_info_type(const operation::stack& ops);
+BC_API bool is_multisig_type(const operation::stack& /* ops */);
+BC_API bool is_pubkey_hash_sig_type(const operation::stack& ops);
+BC_API bool is_script_code_sig_type(const operation::stack& ops);
 
-uint64_t count_non_push(const operation::stack& operations);
-
-bool is_push_only(const operation::stack& operations);
-
-bool is_pubkey_type(const operation::stack& ops);
-
-bool is_pubkey_hash_type(const operation::stack& ops);
-
-bool is_script_hash_type(const operation::stack& ops);
-
-bool is_stealth_info_type(const operation::stack& ops);
-
-bool is_multisig_type(const operation::stack&);
-
-bool is_pubkey_hash_sig_type(const operation::stack& ops);
-
-bool is_script_code_sig_type(const operation::stack& ops);
-
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin
 
 #endif

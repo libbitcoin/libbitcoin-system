@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -21,11 +21,14 @@
 #define LIBBITCOIN_EXCEPTIONS_HPP
 
 #include <exception>
+#include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 
 class BC_API end_of_stream
-  : std::exception {};
+  : std::exception
+{
+};
 
 }
 

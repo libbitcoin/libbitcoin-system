@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -52,9 +53,7 @@ transaction transaction::factory_from_data(reader& source)
 
 bool transaction::is_valid() const
 {
-    return (version != 0) ||
-        (locktime != 0) ||
-        !inputs.empty() ||
+    return (version != 0) || (locktime != 0) || !inputs.empty() ||
         !outputs.empty();
 }
 
@@ -68,7 +67,7 @@ void transaction::reset()
 
 bool transaction::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -80,10 +79,8 @@ bool transaction::from_data(std::istream& stream)
 
 bool transaction::from_data(reader& source)
 {
-    bool result = true;
-
+    auto result = true;
     reset();
-
     version = source.read_4_bytes_little_endian();
     result = source;
 
@@ -101,7 +98,7 @@ bool transaction::from_data(reader& source)
 
     if (result)
     {
-        uint64_t tx_out_count = source.read_variable_uint_little_endian();
+        auto tx_out_count = source.read_variable_uint_little_endian();
         result = source;
 
         for (uint64_t i = 0; (i < tx_out_count) && result; ++i)
@@ -126,7 +123,7 @@ bool transaction::from_data(reader& source)
 data_chunk transaction::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size());
@@ -143,15 +140,12 @@ void transaction::to_data(std::ostream& stream) const
 void transaction::to_data(writer& sink) const
 {
     sink.write_4_bytes_little_endian(version);
-
     sink.write_variable_uint_little_endian(inputs.size());
-
-    for (const transaction_input& input: inputs)
+    for (const auto& input: inputs)
         input.to_data(sink);
 
     sink.write_variable_uint_little_endian(outputs.size());
-
-    for (const transaction_output& output: outputs)
+    for (const auto& output: outputs)
         output.to_data(sink);
 
     sink.write_4_bytes_little_endian(locktime);
@@ -160,15 +154,12 @@ void transaction::to_data(writer& sink) const
 uint64_t transaction::satoshi_size() const
 {
     uint64_t tx_size = 8;
-
     tx_size += variable_uint_size(inputs.size());
-
-    for (const transaction_input& input: inputs)
+    for (const auto& input: inputs)
         tx_size += input.satoshi_size();
 
     tx_size += variable_uint_size(outputs.size());
-
-    for (const transaction_output& output: outputs)
+    for (const auto& output: outputs)
         tx_size += output.satoshi_size();
 
     return tx_size;
@@ -176,24 +167,21 @@ uint64_t transaction::satoshi_size() const
 
 std::string transaction::to_string() const
 {
-    std::ostringstream ss;
-
-    ss << "Transaction:\n"
+    std::ostringstream value;
+    value << "Transaction:\n"
         << "\tversion = " << version << "\n"
         << "\tlocktime = " << locktime << "\n"
         << "Inputs:\n";
 
-    for (transaction_input input: inputs)
-        ss << input.to_string();
+    for (const auto input: inputs)
+        value << input.to_string();
 
-    ss << "Outputs:\n";
+    value << "Outputs:\n";
+    for (const auto output: outputs)
+        value << output.to_string();
 
-    for (transaction_output output: outputs)
-        ss << output.to_string();
-
-    ss << "\n";
-
-    return ss.str();
+    value << "\n";
+    return value.str();
 }
 
 hash_digest transaction::hash() const
@@ -218,19 +206,16 @@ bool transaction::is_final(uint64_t block_height, uint32_t block_time) const
     if (locktime == 0)
         return true;
 
-    uint32_t max_locktime = block_time;
-
+    auto max_locktime = block_time;
     if (locktime < locktime_threshold)
         max_locktime = static_cast<uint32_t>(block_height);
 
     if (locktime < max_locktime)
         return true;
 
-    for (const transaction_input& tx_input : inputs)
-    {
+    for (const auto& tx_input: inputs)
         if (!tx_input.is_final())
             return false;
-    }
 
     return true;
 }
@@ -240,13 +225,9 @@ bool transaction::is_locktime_conflict() const
     auto locktime_set = locktime != 0;
 
     if (locktime_set)
-    {
-        for (const auto& input : inputs)
-        {
+        for (const auto& input: inputs)
             if (input.sequence < max_sequence)
                 return false;
-        }
-    }
 
     return locktime_set;
 }
@@ -254,12 +235,11 @@ bool transaction::is_locktime_conflict() const
 uint64_t transaction::total_output_value() const
 {
     uint64_t total = 0;
-
-    for (const transaction_output& output : outputs)
+    for (const auto& output: outputs)
         total += output.value;
 
     return total;
 }
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin

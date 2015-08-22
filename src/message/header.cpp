@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/header.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -65,7 +66,7 @@ void header::reset()
 
 bool header::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -78,12 +79,10 @@ bool header::from_data(std::istream& stream)
 bool header::from_data(reader& source)
 {
     reset();
-
     magic = source.read_4_bytes_little_endian();
     command = source.read_fixed_string(command_size);
     payload_length = source.read_4_bytes_little_endian();
     checksum = 0;
-
     if (!source)
         reset();
 
@@ -93,7 +92,7 @@ bool header::from_data(reader& source)
 data_chunk header::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size());
@@ -111,7 +110,6 @@ void header::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(magic);
     sink.write_fixed_string(command, command_size);
     sink.write_4_bytes_little_endian(payload_length);
-
     if (checksum != 0)
         sink.write_4_bytes_little_endian(checksum);
 }
@@ -121,18 +119,18 @@ uint64_t header::satoshi_size() const
     return 20 + (checksum == 0 ? 0 : 4);
 }
 
-bool operator==(const header& a, const header& b)
+bool operator==(const header& left, const header& right)
 {
-    return (a.magic == b.magic)
-        && (a.command == b.command)
-        && (a.payload_length == b.payload_length)
-        && (a.checksum == b.checksum);
+    return (left.magic == right.magic)
+        && (left.command == right.command)
+        && (left.payload_length == right.payload_length)
+        && (left.checksum == right.checksum);
 }
 
-bool operator!=(const header& a, const header& b)
+bool operator!=(const header& left, const header& right)
 {
-    return !(a == b);
+    return !(left == right);
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

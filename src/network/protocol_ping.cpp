@@ -23,6 +23,7 @@
 #include <system_error>
 #include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
+#include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
@@ -92,8 +93,7 @@ void protocol_ping::handle_timer(const std::error_code& ec)
         dispatch_.sync(&protocol_ping::handle_receive_pong,
             shared_from_this(), _1, _2, nonce));
 
-    const ping_type random_ping = { nonce };
-    peer_->send(random_ping,
+    peer_->send(message::ping(nonce),
         std::bind(&protocol_ping::handle_send_ping,
             shared_from_this(), _1));
 
@@ -137,7 +137,7 @@ void protocol_ping::handle_send_pong(const std::error_code& ec) const
 }
 
 void protocol_ping::handle_receive_ping(const std::error_code& ec,
-    const ping_type& ping)
+    const message::ping& ping)
 {
     if (stopped())
         return;
@@ -154,14 +154,13 @@ void protocol_ping::handle_receive_ping(const std::error_code& ec,
         return;
     }
 
-    const pong_type reply_pong = { ping.nonce };
-    peer_->send(reply_pong,
+    peer_->send(message::pong(ping.nonce),
         std::bind(&protocol_ping::handle_send_pong,
             shared_from_this(), _1));
 }
 
 void protocol_ping::handle_receive_pong(const std::error_code& ec,
-    const pong_type& ping, uint64_t nonce)
+    const message::pong& ping, uint64_t nonce)
 {
     if (stopped())
         return;

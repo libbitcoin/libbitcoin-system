@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -30,68 +30,91 @@
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
+// List of bitcoin messages
+// ------------------------
+// version
+// verack
+// getaddr
+// addr
+// inv
+// getdata
+// getblocks
+// block
+// tx
+// ping
+// pong
+// notfound
+// reject       [not yet supported]
+// getheaders   [not yet supported]
+// headers      [not yet supported]
+// mempool      [BIP35: not yet supported]
+// filterload   [BIP37: no support intended]
+// filteradd    [BIP37: no support intended]
+// filterclear  [BIP37: no support intended]
+// merkleblock  [BIP37: no support intended]
+// checkorder   [deprecated in protocol]
+// submitorder  [deprecated in protocol]
+// reply        [deprecated in protocol]
+// alert        [no support intended]
+
 namespace libbitcoin {
 namespace message {
 
 class BC_API header
 {
 public:
+    // Header minus checksum is 4 + 12 + 4 = 20 bytes
+    static BC_CONSTEXPR size_t header_size = 20;
+    static BC_CONSTEXPR size_t checksum_size = 4;
+
+    // boost1.54/linux/clang/libstdc++-4.8 error if std::array
+    // could not match 'boost::array' against 'std::array'
+    typedef std::array<uint8_t, header_size> header_bytes;
+    typedef std::array<uint8_t, checksum_size> checksum_bytes;
+
+    static header factory_from_data(const data_chunk& data);
+    static header factory_from_data(std::istream& stream);
+    static header factory_from_data(reader& source);
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t satoshi_size() const;
 
     uint32_t magic;
     std::string command;
     uint32_t payload_length;
-    // Ignored by version and verack commands
     uint32_t checksum;
-
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    bool from_data(reader& source);
-
-    data_chunk to_data() const;
-
-    void to_data(std::ostream& stream) const;
-
-    void to_data(writer& sink) const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size() const;
-
-    static header factory_from_data(const data_chunk& data);
-
-    static header factory_from_data(std::istream& stream);
-
-    static header factory_from_data(reader& source);
 };
 
-bool operator==(const header& a, const header& b);
-
-bool operator!=(const header& a, const header& b);
+BC_API bool operator==(const header& left, const header& right);
+BC_API bool operator!=(const header& left, const header& right);
 
 template <typename Message>
 data_chunk create_raw_message(const Message& packet)
 {
     // Serialize the payload (required for header size).
-    data_chunk payload = packet.to_data();
+    auto payload = packet.to_data();
 
     // Construct the header.
     header payload_header;
-    payload_header.magic = magic_value();
+    payload_header.magic = bc::magic_value;
     payload_header.command = Message::satoshi_command;
-    payload_header.payload_length = payload.size();
+    payload_header.payload_length = static_cast<uint32_t>(payload.size());
     payload_header.checksum = bitcoin_checksum(payload);
 
     // Serialize header and copy the payload into a single message buffer.
-    data_chunk message = payload_header.to_data();
+    auto message = payload_header.to_data();
     extend_data(message, payload);
     return message;
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif

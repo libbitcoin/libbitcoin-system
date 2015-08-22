@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -21,16 +21,16 @@
 
 namespace libbitcoin {
 
-size_t variable_uint_size(uint64_t v)
+size_t variable_uint_size(uint64_t value)
 {
-    if (v < 0xfd)
+    if (value < 0xfd)
         return 1;
-    else if (v <= 0xffff)
+    else if (value <= 0xffff)
         return 3;
-    else if (v <= 0xffffffff)
+    else if (value <= 0xffffffff)
         return 5;
     else
         return 9;
 }
 
-}
+} // namespace libbitcoin

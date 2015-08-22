@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -29,47 +29,33 @@ namespace libbitcoin {
 class BC_API reader
 {
 public:
-
     virtual operator bool() const = 0;
-
     virtual bool operator!() const = 0;
 
     virtual bool is_exhausted() const = 0;
-
     virtual uint8_t read_byte() = 0;
-
-    virtual data_chunk read_data(size_t n_bytes) = 0;
-
-    virtual void read_data(uint8_t* data, size_t n_bytes) = 0;
-
+    virtual data_chunk read_data(size_t size) = 0;
+    virtual void read_data(uint8_t* data, size_t size) = 0;
     virtual data_chunk read_data_to_eof() = 0;
-
     virtual hash_digest read_hash() = 0;
-
     virtual short_hash read_short_hash() = 0;
 
-    /* These read data in little endian format: */
+    // These read data in little endian format:
     virtual uint16_t read_2_bytes_little_endian() = 0;
-
     virtual uint32_t read_4_bytes_little_endian() = 0;
-
     virtual uint64_t read_8_bytes_little_endian() = 0;
-
     virtual uint64_t read_variable_uint_little_endian() = 0;
 
-    /* These read data in big endian format: */
+    // These read data in big endian format:
     virtual uint16_t read_2_bytes_big_endian() = 0;
-
     virtual uint32_t read_4_bytes_big_endian() = 0;
-
     virtual uint64_t read_8_bytes_big_endian() = 0;
-
     virtual uint64_t read_variable_uint_big_endian() = 0;
 
     /**
      * Read a fixed size string padded with zeroes.
      */
-    virtual std::string read_fixed_string(size_t len) = 0;
+    virtual std::string read_fixed_string(size_t length) = 0;
 
     /**
      * Read a variable length string.

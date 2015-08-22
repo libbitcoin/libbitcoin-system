@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -20,57 +20,45 @@
 #ifndef LIBBITCOIN_ISTREAM_READER_HPP
 #define LIBBITCOIN_ISTREAM_READER_HPP
 
+#include <cstdint>
 #include <istream>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
 namespace libbitcoin {
 
-class BC_API istream_reader : public reader
+class BC_API istream_reader
+  : public reader
 {
 public:
-
     istream_reader(std::istream& stream);
 
     operator bool() const;
-
     bool operator!() const;
 
     bool is_exhausted() const;
-
     uint8_t read_byte();
-
-    data_chunk read_data(size_t n_bytes);
-
-    void read_data(uint8_t* data, size_t n_bytes);
-
+    data_chunk read_data(size_t size);
+    void read_data(uint8_t* data, size_t size);
     data_chunk read_data_to_eof();
-
     hash_digest read_hash();
-
     short_hash read_short_hash();
 
-    /* These read data in little endian format: */
+    // These read data in little endian format: 
     uint16_t read_2_bytes_little_endian();
-
     uint32_t read_4_bytes_little_endian();
-
     uint64_t read_8_bytes_little_endian();
-
     uint64_t read_variable_uint_little_endian();
 
-    /* These read data in big endian format: */
+    // These read data in big endian format:
     uint16_t read_2_bytes_big_endian();
-
     uint32_t read_4_bytes_big_endian();
-
     uint64_t read_8_bytes_big_endian();
-
     uint64_t read_variable_uint_big_endian();
 
     /**
      * Read a fixed size string padded with zeroes.
      */
-    std::string read_fixed_string(size_t len);
+    std::string read_fixed_string(size_t length);
 
     /**
      * Read a variable length string.
@@ -92,14 +80,13 @@ public:
     /**
      * Read a fixed-length data block.
      */
-    template<unsigned N>
-    byte_array<N> read_bytes();
+    template <unsigned Size>
+    byte_array<Size> read_bytes();
 
-    template<unsigned N>
-    byte_array<N> read_bytes_reverse();
+    template <unsigned Size>
+    byte_array<Size> read_bytes_reverse();
 
 private:
-
     std::istream& stream_;
 };
 

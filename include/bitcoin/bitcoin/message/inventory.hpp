@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -34,41 +34,28 @@ namespace message {
 class BC_API inventory
 {
 public:
-
-    static const std::string satoshi_command;
-
-    inventory_vector::list inventories;
+    static inventory factory_from_data(const data_chunk& data);
+    static inventory factory_from_data(std::istream& stream);
+    static inventory factory_from_data(reader& source);
 
     bool from_data(const data_chunk& data);
-
     bool from_data(std::istream& stream);
-
     bool from_data(reader& source);
-
     data_chunk to_data() const;
-
     void to_data(std::ostream& stream) const;
-
     void to_data(writer& sink) const;
-
     bool is_valid() const;
-
     void reset();
-
     uint64_t satoshi_size() const;
 
-    static inventory factory_from_data(const data_chunk& data);
-
-    static inventory factory_from_data(std::istream& stream);
-
-    static inventory factory_from_data(reader& source);
+    static const std::string satoshi_command;
+    inventory_vector::list inventories;
 };
 
-bool operator==(const inventory& a, const inventory& b);
+BC_API bool operator==(const inventory& left, const inventory& right);
+BC_API bool operator!=(const inventory& left, const inventory& right);
 
-bool operator!=(const inventory& a, const inventory& b);
-
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif

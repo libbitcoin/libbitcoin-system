@@ -29,24 +29,29 @@ binary_type::size_type binary_type::blocks_size(const size_type bitsize)
 {
     if (bitsize == 0)
         return 0;
+
     return (bitsize - 1) / bits_per_block + 1;
 }
 
 binary_type::binary_type()
 {
 }
+
 binary_type::binary_type(const std::string& bitstring)
 {
     std::stringstream(bitstring) >> *this;
 }
+
 binary_type::binary_type(size_type size, data_slice blocks)
 {
     // Copy blocks
     blocks_.resize(blocks.size());
     std::copy(blocks.begin(), blocks.end(), blocks_.begin());
+
     // Pad with 00 for safety.
     while (blocks_.size() * bits_per_block < size)
         blocks_.push_back(0x00);
+
     resize(size);
 }
 
@@ -54,8 +59,7 @@ void binary_type::resize(size_type size)
 {
     final_block_excess_ = 0;
     blocks_.resize(blocks_size(size), 0);
-
-    size_type offset = size % bits_per_block;
+    const size_type offset = size % bits_per_block;
 
     if (offset > 0)
     {
@@ -97,9 +101,7 @@ void binary_type::append(const binary_type& post)
     duplicate.shift_right(offset);
 
     resize(size() + post.size());
-
     data_chunk post_shift_blocks = duplicate.blocks();
-
     for (size_type i = 0; i < post_shift_blocks.size(); i++)
     {
         blocks_[block_offset + i] = blocks_[block_offset + i] | post_shift_blocks[i];
@@ -109,9 +111,7 @@ void binary_type::append(const binary_type& post)
 void binary_type::prepend(const binary_type& prior)
 {
     shift_right(prior.size());
-
     data_chunk prior_blocks = prior.blocks();
-
     for (size_type i = 0; i < prior_blocks.size(); i++)
     {
         blocks_[i] = blocks_[i] | prior_blocks[i];
@@ -122,9 +122,7 @@ void binary_type::shift_left(size_type distance)
 {
     const size_type initial_size = size();
     const size_type initial_block_count = blocks_.size();
-
     size_type destination_size = 0;
-
     if (distance < initial_size)
         destination_size = initial_size - distance;
 
@@ -157,27 +155,21 @@ void binary_type::shift_right(size_type distance)
 {
     const size_type initial_size = size();
     const size_type initial_block_count = blocks_.size();
-
     const size_type offset = distance % bits_per_block;
     const size_type offset_blocks = distance / bits_per_block;
     const size_type destination_size = initial_size + distance;
-
     for (size_type i = 0; i < offset_blocks; i++)
     {
         blocks_.insert(blocks_.begin(), 0x00);
     }
 
     uint8_t previous = 0x00;
-
     for (size_type i = 0; i < initial_block_count; i++)
     {
         uint8_t current = blocks_[offset_blocks + i];
-
         uint8_t leading_bits = previous << (bits_per_block - offset);
         uint8_t trailing_bits = current >> offset;
-
         blocks_[offset_blocks + i] = leading_bits | trailing_bits;
-
         previous = current;
     }
 
@@ -192,7 +184,6 @@ void binary_type::shift_right(size_type distance)
 binary_type binary_type::get_substring(size_type start, size_type length) const
 {
     size_type current_size = size();
-
     if (start > current_size)
     {
         start = current_size;
@@ -204,81 +195,78 @@ binary_type binary_type::get_substring(size_type start, size_type length) const
     }
 
     binary_type result(current_size, blocks_);
-
     result.shift_left(start);
-
     result.resize(length);
-
     return result;
 }
 
-bool operator==(
-    const binary_type& prefix_a, const binary_type& prefix_b)
+bool operator==(const binary_type& left, const binary_type& right)
 {
-    for (binary_type::size_type i = 0; i < prefix_a.size() && i < prefix_b.size(); ++i)
-        if (prefix_a[i] != prefix_b[i])
+    using size_type = binary_type::size_type;
+    for (size_type i = 0; i < left.size() && i < right.size(); ++i)
+        if (left[i] != right[i])
             return false;
+
     return true;
 }
-bool operator!=(
-    const binary_type& prefix_a, const binary_type& prefix_b)
+
+bool operator!=(const binary_type& left, const binary_type& right)
 {
-    return !(prefix_a == prefix_b);
+    return !(left == right);
 }
 
-std::istream& operator>>(
-    std::istream& stream, binary_type& prefix)
+std::istream& operator>>(std::istream& stream, binary_type& prefix)
 {
     std::string bitstring;
     stream >> bitstring;
 
     prefix.resize(0);
-
     uint8_t block = 0;
-    binary_type::size_type bit_iter = binary_type::bits_per_block;
+    auto bit_iterator = binary_type::bits_per_block;
 
-    for (const char repr : bitstring)
+    for (const char representation: bitstring)
     {
-        if (repr != '0' && repr != '1')
+        if (representation != '0' && representation != '1')
         {
             prefix.blocks_.clear();
             return stream;
         }
 
         // Set bit to 1
-        if (repr == '1')
+        if (representation == '1')
         {
-            const uint8_t bitmask = 1 << (bit_iter - 1);
+            const uint8_t bitmask = 1 << (bit_iterator - 1);
             block |= bitmask;
         }
 
         // Next bit
-        --bit_iter;
+        --bit_iterator;
 
-        if (bit_iter == 0)
+        if (bit_iterator == 0)
         {
             // Move to the next block.
             prefix.blocks_.push_back(block);
             block = 0;
-            bit_iter = binary_type::bits_per_block;
+            bit_iterator = binary_type::bits_per_block;
         }
     }
 
     // Block wasn't finished but push it back.
-    if (bit_iter != binary_type::bits_per_block)
+    if (bit_iterator != binary_type::bits_per_block)
         prefix.blocks_.push_back(block);
 
     prefix.resize(bitstring.size());
     return stream;
 }
-std::ostream& operator<<(
-    std::ostream& stream, const binary_type& prefix)
+
+std::ostream& operator<<(std::ostream& stream, const binary_type& prefix)
 {
     for (binary_type::size_type i = 0; i < prefix.size(); ++i)
         if (prefix[i])
             stream << '1';
         else
             stream << '0';
+
     return stream;
 }
 

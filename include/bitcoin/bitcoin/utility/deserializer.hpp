@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_DESERIALIZER_HPP
 #define LIBBITCOIN_DESERIALIZER_HPP
 
+#include <cstdint>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 
 namespace libbitcoin {
@@ -44,31 +45,24 @@ namespace libbitcoin {
  * @endcode
  */
 template <typename Iterator, bool SafeCheckLast>
-class deserializer : public reader
+class deserializer
+  : public reader
 {
 public:
-
     deserializer(const Iterator begin, const Iterator end);
 
     operator bool() const;
-
     bool operator!() const;
 
     bool is_exhausted() const;
-
     uint8_t read_byte();
-
-    data_chunk read_data(size_t n_bytes);
-
-    void read_data(uint8_t* data, size_t n_bytes);
-
+    data_chunk read_data(size_t size);
+    void read_data(uint8_t* data, size_t size);
     data_chunk read_data_to_eof();
-
     hash_digest read_hash();
-
     short_hash read_short_hash();
 
-    /* These read data in little endian format: */
+    // These read data in little endian format:
     uint16_t read_2_bytes_little_endian();
     uint32_t read_4_bytes_little_endian();
     uint64_t read_8_bytes_little_endian();
@@ -79,7 +73,7 @@ public:
      */
     uint64_t read_variable_uint_little_endian();
 
-    /* These read data in big endian format: */
+    // These read data in big endian format:
     uint16_t read_2_bytes_big_endian();
     uint32_t read_4_bytes_big_endian();
     uint64_t read_8_bytes_big_endian();
@@ -105,7 +99,7 @@ public:
     /**
      * Read a fixed size string padded with zeroes.
      */
-    std::string read_fixed_string(size_t len);
+    std::string read_fixed_string(size_t length);
 
     /**
      * Read a variable length string.
@@ -130,7 +124,7 @@ public:
      * Useful if you advance the iterator using other serialization
      * methods or objects.
      */
-    void set_iterator(const Iterator iter);
+    void set_iterator(const Iterator iterator);
 
     /**
      * Returns underlying iterator end.
@@ -141,12 +135,11 @@ public:
     }
 
 private:
-    // The compiler will optimise out all calls to this function
-    // if SafeCheckLast is false.
-    static void check_distance(
-        Iterator it, const Iterator end, size_t distance);
+    // The compiler will optimise out calls to this function if !SafeCheckLast.
+    static void check_distance(Iterator it, const Iterator end,
+        size_t distance);
 
-    Iterator iter_;
+    Iterator iterator_;
     const Iterator end_;
 };
 
@@ -155,15 +148,14 @@ private:
  * if the iterator exceeds 'end'.
  */
 template <typename Iterator>
-deserializer<Iterator, true> make_deserializer(
-    const Iterator begin, const Iterator end);
+deserializer<Iterator, true> make_deserializer(const Iterator begin,
+    const Iterator end);
 
 /**
  * Faster deserializer with no bounds checking.
  */
 template <typename Iterator>
-deserializer<Iterator, false> make_deserializer_unsafe(
-    const Iterator begin);
+deserializer<Iterator, false> make_deserializer_unsafe(const Iterator begin);
 
 } // namespace libbitcoin
 

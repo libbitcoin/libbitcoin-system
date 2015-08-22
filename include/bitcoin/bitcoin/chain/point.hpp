@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -36,52 +36,36 @@ namespace chain {
 class BC_API point
 {
 public:
-
     typedef std::vector<point> list;
+
+    static point factory_from_data(const data_chunk& data);
+    static point factory_from_data(std::istream& stream);
+    static point factory_from_data(reader& source);
+    static uint64_t satoshi_fixed_size();
+
+    bool is_null() const;
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    std::string to_string() const;
+    bool is_valid() const;
+    void reset();
+    uint64_t satoshi_size() const;
 
     hash_digest hash;
     uint32_t index;
-
-    bool is_null() const;
-
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    bool from_data(reader& source);
-
-    data_chunk to_data() const;
-
-    void to_data(std::ostream& stream) const;
-
-    void to_data(writer& sink) const;
-
-    std::string to_string() const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size() const;
-
-    static point factory_from_data(const data_chunk& data);
-
-    static point factory_from_data(std::istream& stream);
-
-    static point factory_from_data(reader& source);
-
-    static uint64_t satoshi_fixed_size();
 };
 
 typedef point input_point;
-
 typedef point output_point;
 
-BC_API bool operator==(const point& a, const point& b);
+BC_API bool operator==(const point& left, const point& right);
+BC_API bool operator!=(const point& left, const point& right);
 
-BC_API bool operator!=(const point& a, const point& b);
-
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin
 
 #endif

@@ -33,7 +33,10 @@ namespace network {
 class BC_API channel_loader_module_base
 {
 public:
-    virtual ~channel_loader_module_base() {}
+    virtual ~channel_loader_module_base()
+    {
+    }
+
     virtual std::error_code attempt_load(std::istream& stream) const = 0;
     virtual const std::string lookup_symbol() const = 0;
 };
@@ -67,7 +70,6 @@ public:
         }
 
         handle_load_(status, result);
-
         return status;
     }
 

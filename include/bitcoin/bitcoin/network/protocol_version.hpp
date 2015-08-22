@@ -27,7 +27,8 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
+#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -84,15 +85,17 @@ private:
 
     void handle_version_sent(const std::error_code& ec, handler complete) const;
     void handle_verack_sent(const std::error_code& ec, handler complete) const;
-    void handle_receive_version(const std::error_code& ec, const version_type& version, handler complete);
-    void handle_receive_verack(const std::error_code& ec, const verack_type&, handler complete) const;
+    void handle_receive_version(const std::error_code& ec, 
+        const message::version& version, handler complete);
+    void handle_receive_verack(const std::error_code& ec, 
+        const message::verack&, handler complete) const;
 
     void do_set_height(uint64_t height, set_height_handler handle_set);
 
     channel_ptr peer_;
     dispatcher dispatch_;
     deadline::ptr deadline_;
-    version_type template_;
+    message::version template_;
     bool stopped_;
     bool relay_;
 };

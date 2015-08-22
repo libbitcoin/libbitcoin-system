@@ -34,6 +34,7 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>
 #include <bitcoin/bitcoin/unicode/ofstream.hpp>
@@ -61,9 +62,9 @@ hosts::~hosts()
     // This was reportedly required for use with circular_buffer.
 }
 
-hosts::iterator hosts::find(const network_address_type& address)
+hosts::iterator hosts::find(const message::network_address& address)
 {
-    const auto found = [address](const network_address_type& entry)
+    const auto found = [address](const message::network_address& entry)
     {
         return entry.port == address.port && entry.ip == address.ip;
     };
@@ -71,7 +72,7 @@ hosts::iterator hosts::find(const network_address_type& address)
     return std::find_if(buffer_.begin(), buffer_.end(), found);
 }
 
-bool hosts::exists(const network_address_type& address)
+bool hosts::exists(const message::network_address& address)
 {
     return find(address) != buffer_.end();
 }
@@ -142,7 +143,7 @@ void hosts::do_save(const path& path, save_handler handle_save)
     handle_save(error::success);
 }
 
-void hosts::remove(const network_address_type& address,
+void hosts::remove(const message::network_address& address,
     remove_handler handle_remove)
 {
     dispatch_.randomly_queue(
@@ -150,7 +151,7 @@ void hosts::remove(const network_address_type& address,
             this, address, handle_remove));
 }
 
-void hosts::do_remove(const network_address_type& address,
+void hosts::do_remove(const message::network_address& address,
     remove_handler handle_remove)
 {
     const auto it = find(address);
@@ -164,7 +165,7 @@ void hosts::do_remove(const network_address_type& address,
     handle_remove(error::success);
 }
 
-void hosts::store(const network_address_type& address,
+void hosts::store(const message::network_address& address,
     store_handler handle_store)
 {
     if (address.port == 0)
@@ -175,7 +176,7 @@ void hosts::store(const network_address_type& address,
             this, address, handle_store));
 }
 
-void hosts::do_store(const network_address_type& address,
+void hosts::do_store(const message::network_address& address,
     store_handler handle_store)
 {
     if (!exists(address))
@@ -188,7 +189,8 @@ void hosts::do_store(const network_address_type& address,
     handle_store(error::success);
 }
 
-void hosts::store(const network_address_list& addresses, store_handler handle_store)
+void hosts::store(const message::network_address::list& addresses, 
+    store_handler handle_store)
 {
     const auto complete = synchronize(handle_store, addresses.size(), "hosts");
 
@@ -210,7 +212,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 {
     if (buffer_.empty())
     {
-        handle_fetch(error::not_found, network_address_type());
+        handle_fetch(error::not_found, message::network_address());
         return;
     }
 

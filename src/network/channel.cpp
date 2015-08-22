@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <memory>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 
 namespace libbitcoin {

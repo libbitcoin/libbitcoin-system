@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -59,7 +59,7 @@ void verack::reset()
 
 bool verack::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -78,7 +78,7 @@ bool verack::from_data(reader& source)
 data_chunk verack::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size());
@@ -100,5 +100,5 @@ uint64_t verack::satoshi_fixed_size()
     return 0;
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

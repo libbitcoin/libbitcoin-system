@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -21,43 +21,42 @@
 #define LIBBITCOIN_CONTAINER_SINK_HPP
 
 #include <algorithm>
-//#include <iosfwd>
+#include <cstdint>
 #include <boost/iostreams/categories.hpp>
-#include <boost/static_assert.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
 
 // modified from boost.iostreams example
-// http://www.boost.org/doc/libs/1_55_0/libs/iostreams/doc/tutorial/container_source.html
+// boost.org/doc/libs/1_55_0/libs/iostreams/doc/tutorial/container_source.html
 template<typename Container, typename SinkType, typename CharType>
 class BC_API container_sink
 {
 public:
-
     typedef CharType char_type;
     typedef boost::iostreams::sink_tag category;
 
     container_sink(Container& container)
-        : container_(container)
+      : container_(container)
     {
-        BOOST_STATIC_ASSERT((sizeof(SinkType) == sizeof(CharType)));
+        static_assert(sizeof(SinkType) == sizeof(CharType), "invalid size");
     }
 
-    std::streamsize write(const char_type* s, std::streamsize n)
+    std::streamsize write(const char_type* buffer, std::streamsize size)
     {
-        const SinkType* safe_s = reinterpret_cast<const SinkType*>(s);
-        container_.insert(container_.end(), safe_s, safe_s + n);
-        return n;
+        const auto safe_sink = reinterpret_cast<const SinkType*>(buffer);
+        container_.insert(container_.end(), safe_sink, safe_sink + size);
+        return size;
     }
 
 private:
-
     Container& container_;
 };
 
 template<typename Container>
 using byte_sink = container_sink<Container, uint8_t, char>;
+
+using data_sink = boost::iostreams::stream<byte_sink<data_chunk>>;
 
 } // namespace libbitcoin
 

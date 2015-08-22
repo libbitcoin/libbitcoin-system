@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/point.hpp>
+
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -64,7 +65,7 @@ void point::reset()
 
 bool point::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -76,14 +77,11 @@ bool point::from_data(std::istream& stream)
 
 bool point::from_data(reader& source)
 {
-    bool result = true;
-
+    auto result = true;
     reset();
-
     hash = source.read_hash();
     index = source.read_4_bytes_little_endian();
     result = source;
-
     if (!result)
         reset();
 
@@ -93,7 +91,7 @@ bool point::from_data(reader& source)
 data_chunk point::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size());
@@ -124,11 +122,9 @@ uint64_t point::satoshi_fixed_size()
 
 std::string point::to_string() const
 {
-    std::ostringstream ss;
-
-    ss << "\thash = " << encode_hash(hash) << "\n" << "\tindex = " << index;
-
-    return ss.str();
+    std::ostringstream value;
+    value << "\thash = " << encode_hash(hash) << "\n" << "\tindex = " << index;
+    return value.str();
 }
 
 bool point::is_null() const
@@ -136,14 +132,15 @@ bool point::is_null() const
     return (index == max_input_sequence) && (hash == null_hash);
 }
 
-bool operator==(const point& a, const point& b)
+bool operator==(const point& left, const point& right)
 {
-    return a.hash == b.hash && a.index == b.index;
-}
-bool operator!=(const point& a, const point& b)
-{
-    return !(a == b);
+    return left.hash == right.hash && left.index == right.index;
 }
 
-} // end chain
-} // end libbitcoin
+bool operator!=(const point& left, const point& right)
+{
+    return !(left == right);
+}
+
+} // namspace chain
+} // namspace libbitcoin

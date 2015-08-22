@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -40,24 +40,24 @@ T istream_reader::read_little_endian()
     return from_little_endian_stream_unsafe<T>(stream_);
 }
 
-template<unsigned N>
-byte_array<N> istream_reader::read_bytes()
+template <unsigned Size>
+byte_array<Size> istream_reader::read_bytes()
 {
-    byte_array<N> out;
+    byte_array<Size> out;
 
-    for (unsigned i = 0; i < N; i++)
+    for (unsigned i = 0; i < Size; i++)
         out[i] = read_byte();
 
     return out;
 }
 
-template<unsigned N>
-byte_array<N> istream_reader::read_bytes_reverse()
+template <unsigned Size>
+byte_array<Size> istream_reader::read_bytes_reverse()
 {
-    byte_array<N> out;
+    byte_array<Size> out;
 
-    for (unsigned i = 0; i < N; i++)
-        out[N - (i + 1)] = read_byte();
+    for (unsigned i = 0; i < Size; i++)
+        out[Size - (i + 1)] = read_byte();
 
     return out;
 }

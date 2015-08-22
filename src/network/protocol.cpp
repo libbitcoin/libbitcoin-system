@@ -32,6 +32,7 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
@@ -39,7 +40,6 @@
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -59,7 +59,7 @@ using boost::posix_time::seconds;
 // TODO: implement protocol_version, protocol_ping, protocol_address.
 protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
     uint16_t port, bool relay, size_t max_outbound, size_t max_inbound,
-    const config::endpoint::list& seeds, const network_address_type& self,
+    const config::endpoint::list& seeds, const message::network_address& self,
     const timeout& timeouts)
   : dispatch_(pool),
     pool_(pool),

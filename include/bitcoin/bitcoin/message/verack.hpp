@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -30,40 +30,29 @@
 namespace libbitcoin {
 namespace message {
 
+// The checksum ignored by the verack command.
 class BC_API verack
 {
 public:
-
-    static const std::string satoshi_command;
+    static verack factory_from_data(const data_chunk& data);
+    static verack factory_from_data(std::istream& stream);
+    static verack factory_from_data(reader& source);
+    static uint64_t satoshi_fixed_size();
 
     bool from_data(const data_chunk& data);
-
     bool from_data(std::istream& stream);
-
     bool from_data(reader& source);
-
     data_chunk to_data() const;
-
     void to_data(std::ostream& stream) const;
-
     void to_data(writer& sink) const;
-
     bool is_valid() const;
-
     void reset();
-
     uint64_t satoshi_size() const;
 
-    static verack factory_from_data(const data_chunk& data);
-
-    static verack factory_from_data(std::istream& stream);
-
-    static verack factory_from_data(reader& source);
-
-    static uint64_t satoshi_fixed_size();
+    static const std::string satoshi_command;
 };
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif

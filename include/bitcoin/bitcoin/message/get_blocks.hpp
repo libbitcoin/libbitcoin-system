@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -37,43 +37,31 @@ typedef std::vector<hash_digest> block_locator;
 class BC_API get_blocks
 {
 public:
+    static get_blocks factory_from_data(const data_chunk& data);
+    static get_blocks factory_from_data(std::istream& stream);
+    static get_blocks factory_from_data(reader& source);
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t satoshi_size() const;
 
     static const std::string satoshi_command;
 
-    // 10 sequential hashes, then exponential samples until reaching genesis
+    // 10 sequential hashes, then exponential samples until reaching genesis.
     block_locator start_hashes;
     hash_digest hash_stop;
-
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    bool from_data(reader& source);
-
-    data_chunk to_data() const;
-
-    void to_data(std::ostream& stream) const;
-
-    void to_data(writer& sink) const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size() const;
-
-    static get_blocks factory_from_data(const data_chunk& data);
-
-    static get_blocks factory_from_data(std::istream& stream);
-
-    static get_blocks factory_from_data(reader& source);
 };
 
-bool operator==(const get_blocks& a, const get_blocks& b);
+BC_API bool operator==(const get_blocks& left, const get_blocks& right);
+BC_API bool operator!=(const get_blocks& left, const get_blocks& right);
 
-bool operator!=(const get_blocks& a, const get_blocks& b);
-
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/block_header.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -75,7 +76,7 @@ void block_header::reset()
 bool block_header::from_data(const data_chunk& data,
     bool with_transaction_count)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream, with_transaction_count);
 }
 
@@ -87,10 +88,8 @@ bool block_header::from_data(std::istream& stream, bool with_transaction_count)
 
 bool block_header::from_data(reader& source, bool with_transaction_count)
 {
-    bool result = true;
-
+    auto result = true;
     reset();
-
     version = source.read_4_bytes_little_endian();
     previous_block_hash = source.read_hash();
     merkle = source.read_hash();
@@ -98,12 +97,10 @@ bool block_header::from_data(reader& source, bool with_transaction_count)
     bits = source.read_4_bytes_little_endian();
     nonce = source.read_4_bytes_little_endian();
     transaction_count = 0;
-
     if (with_transaction_count)
         transaction_count = source.read_variable_uint_little_endian();
 
     result = source;
-
     if (!result)
         reset();
 
@@ -113,7 +110,7 @@ bool block_header::from_data(reader& source, bool with_transaction_count)
 data_chunk block_header::to_data(bool with_transaction_count) const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream, with_transaction_count);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size(with_transaction_count));
@@ -143,7 +140,6 @@ void block_header::to_data(writer& sink, bool with_transaction_count) const
 uint64_t block_header::satoshi_size(bool with_transaction_count) const
 {
     uint64_t size = 80;
-
     if (with_transaction_count)
         size += variable_uint_size(transaction_count);
 
@@ -155,23 +151,21 @@ hash_digest block_header::hash() const
     return bitcoin_hash(to_data(false));
 }
 
-bool operator==(const block_header& block_a,
-    const block_header& block_b)
+bool operator==(const block_header& left, const block_header& right)
 {
-    return (block_a.version == block_b.version)
-        && (block_a.previous_block_hash == block_b.previous_block_hash)
-        && (block_a.merkle == block_b.merkle)
-        && (block_a.timestamp == block_b.timestamp)
-        && (block_a.bits == block_b.bits)
-        && (block_a.nonce == block_b.nonce)
-        && (block_a.transaction_count == block_b.transaction_count);
+    return (left.version == right.version)
+        && (left.previous_block_hash == right.previous_block_hash)
+        && (left.merkle == right.merkle)
+        && (left.timestamp == right.timestamp)
+        && (left.bits == right.bits)
+        && (left.nonce == right.nonce)
+        && (left.transaction_count == right.transaction_count);
 }
 
-bool operator!=(const block_header& block_a,
-    const block_header& block_b)
+bool operator!=(const block_header& left, const block_header& right)
 {
-    return !(block_a == block_b);
+    return !(left == right);
 }
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin

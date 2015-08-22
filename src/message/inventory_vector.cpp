@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/inventory_vector.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -62,7 +63,7 @@ void inventory_vector::reset()
 
 bool inventory_vector::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -74,15 +75,12 @@ bool inventory_vector::from_data(std::istream& stream)
 
 bool inventory_vector::from_data(reader& source)
 {
-    bool result = true;
-
+    auto result = true;
     reset();
-
     uint32_t raw_type = source.read_4_bytes_little_endian();
     type = inventory_type_from_number(raw_type);
     hash = source.read_hash();
     result = source;
-
     if (!result)
         reset();
 
@@ -92,7 +90,7 @@ bool inventory_vector::from_data(reader& source)
 data_chunk inventory_vector::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
     BITCOIN_ASSERT(data.size() == satoshi_size());
@@ -122,15 +120,15 @@ uint64_t inventory_vector::satoshi_fixed_size()
     return 36;
 }
 
-bool operator==(const inventory_vector& a, const inventory_vector& b)
+bool operator==(const inventory_vector& left, const inventory_vector& right)
 {
-    return (a.hash == b.hash) && (a.type == b.type);
+    return (left.hash == right.hash) && (left.type == right.type);
 }
 
-bool operator!=(const inventory_vector& a, const inventory_vector& b)
+bool operator!=(const inventory_vector& left, const inventory_vector& right)
 {
-    return !(a == b);
+    return !(left == right);
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

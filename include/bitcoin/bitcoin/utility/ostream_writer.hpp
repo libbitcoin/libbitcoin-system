@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -25,48 +25,37 @@
 
 namespace libbitcoin {
 
-class BC_API ostream_writer : public writer
+class BC_API ostream_writer
+  : public writer
 {
 public:
-
     ostream_writer(std::ostream& stream);
 
     operator bool() const;
-
     bool operator!() const;
 
     void write_byte(uint8_t value);
-
     void write_data(const data_chunk& data);
-
-    void write_data(const uint8_t* data, size_t n_bytes);
-
+    void write_data(const uint8_t* data, size_t size);
     void write_hash(const hash_digest& value);
-
     void write_short_hash(const short_hash& value);
 
-    /* These write data in little endian format: */
+    // These write data in little endian format:
     void write_2_bytes_little_endian(uint16_t value);
-
     void write_4_bytes_little_endian(uint32_t value);
-
     void write_8_bytes_little_endian(uint64_t value);
-
     void write_variable_uint_little_endian(uint64_t value);
 
-    /* These write data in big endian format: */
+    // These write data in big endian format:
     void write_2_bytes_big_endian(uint16_t value);
-
     void write_4_bytes_big_endian(uint32_t value);
-
     void write_8_bytes_big_endian(uint64_t value);
-
     void write_variable_uint_big_endian(uint64_t value);
 
     /**
      * Write a fixed size string padded with zeroes.
      */
-    void write_fixed_string(const std::string& value, size_t string_size);
+    void write_fixed_string(const std::string& value, size_t size);
 
     /**
      * Write a variable length string.
@@ -91,11 +80,11 @@ public:
     /**
      * Write a fixed-length data block.
      */
-    template<unsigned N>
-    void write_bytes(const byte_array<N>& value);
+    template <unsigned Size>
+    void write_bytes(const byte_array<Size>& value);
 
-    template<unsigned N>
-    void write_bytes_reverse(const byte_array<N>& value);
+    template <unsigned Size>
+    void write_bytes_reverse(const byte_array<Size>& value);
 
 private:
 
