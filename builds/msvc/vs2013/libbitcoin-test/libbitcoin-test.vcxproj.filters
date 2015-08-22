@@ -86,9 +86,6 @@
     <ClCompile Include="..\..\..\..\test\message\network_address.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\nonce.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\not_found.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
@@ -96,9 +93,6 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\address.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\announce_version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\get_address.cpp">
@@ -223,6 +217,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\format.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\ping_pong.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\version.cpp">
+      <Filter>src\message</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

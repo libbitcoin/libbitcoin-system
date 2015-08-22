@@ -116,7 +116,7 @@
     <ClCompile Include="..\..\..\..\src\math\secp256k1_initializer.cpp" />
     <ClCompile Include="..\..\..\..\src\math\uint256.cpp" />
     <ClCompile Include="..\..\..\..\src\message\address.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\announce_version.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\version.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_blocks.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp" />
@@ -125,7 +125,7 @@
     <ClCompile Include="..\..\..\..\src\message\inventory_type_id.cpp" />
     <ClCompile Include="..\..\..\..\src\message\inventory_vector.cpp" />
     <ClCompile Include="..\..\..\..\src\message\network_address.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\nonce.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\ping_pong.cpp" />
     <ClCompile Include="..\..\..\..\src\message\not_found.cpp" />
     <ClCompile Include="..\..\..\..\src\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\src\network\acceptor.cpp" />
@@ -155,6 +155,7 @@
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\ostream_writer.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\string.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp" />
@@ -208,7 +209,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\secp256k1_initializer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\math\uint256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\address.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\announce_version.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_blocks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_data.hpp" />
@@ -217,7 +218,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_type_id.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_vector.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\network_address.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\nonce.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\ping_pong.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\not_found.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\verack.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp" />

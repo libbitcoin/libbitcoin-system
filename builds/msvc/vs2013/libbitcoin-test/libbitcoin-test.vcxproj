@@ -140,7 +140,7 @@
     <ClCompile Include="..\..\..\..\test\main.cpp" />
     <ClCompile Include="..\..\..\..\test\message.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\announce_version.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\version.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_address.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_blocks.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_data.cpp" />
@@ -149,7 +149,7 @@
     <ClCompile Include="..\..\..\..\test\message\inventory_type_id.cpp" />
     <ClCompile Include="..\..\..\..\test\message\inventory_vector.cpp" />
     <ClCompile Include="..\..\..\..\test\message\network_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\nonce.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\ping_pong.cpp" />
     <ClCompile Include="..\..\..\..\test\message\not_found.cpp" />
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\test\mnemonic.cpp" />
