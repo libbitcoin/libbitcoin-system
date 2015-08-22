@@ -33,8 +33,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <bitcoin/bitcoin/compat.h>
 #include "pbkdf2_sha256.h"
-
 
 static void blkcpy(uint8_t*, uint8_t*, size_t);
 static void blkxor(uint8_t*, uint8_t*, size_t);
@@ -43,14 +43,14 @@ static void blockmix_salsa8(uint8_t*, uint8_t*, size_t);
 static uint64_t integerify(uint8_t*, size_t);
 static void smix(uint8_t* , size_t, uint64_t, uint8_t*, uint8_t*);
 
-static uint32_t le32dec(const void* pp)
+static BC_C_INLINE uint32_t le32dec(const void* pp)
 {
     const uint8_t* p = (uint8_t const* )pp;
     return ((uint32_t)(p[0]) + ((uint32_t)(p[1]) << 8) +
             ((uint32_t)(p[2]) << 16) + ((uint32_t)(p[3]) << 24));
 }
 
-static void le32enc(void* pp, uint32_t x)
+static BC_C_INLINE void le32enc(void* pp, uint32_t x)
 {
     uint8_t* p = (uint8_t* )pp;
     p[0] = x & 0xff;
@@ -59,7 +59,7 @@ static void le32enc(void* pp, uint32_t x)
     p[3] = (x >> 24) & 0xff;
 }
 
-static uint64_t le64dec(const void* pp)
+static BC_C_INLINE uint64_t le64dec(const void* pp)
 {
     const uint8_t* p = (uint8_t const* )pp;
 

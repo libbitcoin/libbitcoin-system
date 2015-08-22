@@ -28,4 +28,10 @@
     #endif
 #endif
 
+#ifdef _MSC_VER
+    #define BC_C_INLINE __inline
+#else
+    #define BC_C_INLINE inline
+#endif
+
 #endif
