@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -36,10 +36,9 @@ enum class inventory_type_id
 };
 
 BC_API uint32_t inventory_type_to_number(inventory_type_id inv_type);
-
 BC_API inventory_type_id inventory_type_from_number(uint32_t raw_type);
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif

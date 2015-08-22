@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -54,5 +54,5 @@ inventory_type_id inventory_type_from_number(uint32_t raw_type)
     }
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

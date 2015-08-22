@@ -39,7 +39,6 @@ BC_API uint64_t pseudo_random();
  */
 BC_API void pseudo_random_fill(data_chunk& chunk);
 
-
 /**
  * Convert a time duration to a value in the range [max/ratio, max].
  * @param[in]  maximum  The maximum value to return.

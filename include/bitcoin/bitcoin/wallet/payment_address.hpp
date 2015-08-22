@@ -140,8 +140,8 @@ BC_API bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
  */
 BC_API data_chunk wrap(uint8_t version, data_slice payload);
 
-} // end wallet
-} // end libbitcoin
+} // namspace wallet
+} // namspace libbitcoin
 
 // Allow payment_address to be in indexed in std::*map classes.
 namespace std
@@ -168,6 +168,6 @@ namespace std
         }
     };
 
-} // end std
+} // namspace std
 
 #endif

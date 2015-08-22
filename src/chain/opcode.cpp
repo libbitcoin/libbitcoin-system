@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -498,8 +498,8 @@ opcode string_to_opcode(const std::string& code_repr)
 
 opcode data_to_opcode(const data_chunk& data)
 {
+    static constexpr size_t limit = 76;
     opcode code;
-    constexpr size_t limit = 76;
     if (data.size() < limit)
         code = opcode::special;
     else if (data.size() < max_uint8)
@@ -513,5 +513,5 @@ opcode data_to_opcode(const data_chunk& data)
     return code;
 }
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin

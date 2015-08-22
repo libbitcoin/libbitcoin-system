@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -58,8 +58,8 @@ BC_API select_outputs_result select_outputs(output_info_list unspent,
     uint64_t min_value,
     select_outputs_algorithm algorithm = select_outputs_algorithm::greedy);
 
-} // end wallet
-} // end libbitcoin
+} // namspace wallet
+} // namspace libbitcoin
 
 #endif
 
