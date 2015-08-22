@@ -367,7 +367,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
         return;
     }
 
-    BITCOIN_ASSERT(bytes_transferred == message::header::size);
+    BITCOIN_ASSERT(bytes_transferred == message::header::header_size);
     BITCOIN_ASSERT(bytes_transferred == inbound_header_.size());
 
     typedef byte_source<message::header::header_bytes> header_source;
