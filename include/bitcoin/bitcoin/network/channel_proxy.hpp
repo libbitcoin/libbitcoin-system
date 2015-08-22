@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHANNEL_PROXY_HPP
-#define LIBBITCOIN_CHANNEL_PROXY_HPP
+#ifndef LIBBITCOIN_NETWORK_CHANNEL_PROXY_HPP
+#define LIBBITCOIN_NETWORK_CHANNEL_PROXY_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -30,15 +30,23 @@
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
+#include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/message/announce_version.hpp>
+#include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/get_address.hpp>
+#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <bitcoin/bitcoin/message/get_data.hpp>
+#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/inventory.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
+#include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/primitives.hpp>
-#include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>

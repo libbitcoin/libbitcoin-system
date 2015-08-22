@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PEER_TO_PEER_HPP
-#define LIBBITCOIN_PEER_TO_PEER_HPP
+#ifndef LIBBITCOIN_NETWORK_INITIATOR_HPP
+#define LIBBITCOIN_NETWORK_INITIATOR_HPP
 
 #include <cstdint>
 #include <memory>
