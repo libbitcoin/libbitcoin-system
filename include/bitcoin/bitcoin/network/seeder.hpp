@@ -40,7 +40,7 @@ namespace libbitcoin {
 namespace network {
 
 class BC_API seeder
-    : public std::enable_shared_from_this<seeder>
+  : public std::enable_shared_from_this<seeder>
 {
 public:
     typedef std::function<void(const std::error_code&)> handler;
@@ -51,7 +51,7 @@ public:
     seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
         initiator& network, const config::endpoint::list& seeds,
         const message::network_address& self);
-    seeder::~seeder();
+    ~seeder();
 
     /// This class is not copyable.
     seeder(const seeder&) = delete;
