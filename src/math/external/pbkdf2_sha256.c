@@ -26,16 +26,15 @@
 
 #include "pbkdf2_sha256.h"
 
-#include <sys/types.h>
-
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include "hmac_sha256.h"
 #include "zeroize.h"
 
-static inline void be32enc(void* pp, uint32_t x)
+static void be32enc(void* pp, uint32_t x)
 {
     uint8_t* p = (uint8_t*)pp;
 
