@@ -27,6 +27,8 @@
 namespace libbitcoin {
 namespace message {
 
+const std::string message::verack::satoshi_command = "verack";
+
 verack verack::factory_from_data(const data_chunk& data)
 {
     verack instance;

@@ -29,6 +29,8 @@
 namespace libbitcoin {
 namespace message {
 
+const std::string message::get_blocks::satoshi_command = "getblocks";
+
 get_blocks get_blocks::factory_from_data(const data_chunk& data)
 {
     get_blocks instance;

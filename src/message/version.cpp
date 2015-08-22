@@ -28,6 +28,8 @@
 namespace libbitcoin {
 namespace message {
 
+const std::string message::version::satoshi_command = "version";
+
 version version::factory_from_data(const data_chunk& data)
 {
     version instance;

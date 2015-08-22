@@ -28,6 +28,8 @@
 namespace libbitcoin {
 namespace message {
 
+const std::string message::get_address::satoshi_command = "getaddr";
+
 get_address get_address::factory_from_data(const data_chunk& data)
 {
     get_address instance;

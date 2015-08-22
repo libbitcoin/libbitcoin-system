@@ -28,6 +28,8 @@
 namespace libbitcoin {
 namespace message {
 
+const std::string message::inventory::satoshi_command = "inv";
+
 inventory inventory::factory_from_data(const data_chunk& data)
 {
     inventory instance;

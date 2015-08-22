@@ -29,6 +29,8 @@
 namespace libbitcoin {
 namespace chain {
 
+const std::string chain::block::satoshi_command = "block";
+
 block block::factory_from_data(const data_chunk& data)
 {
     block instance;

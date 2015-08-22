@@ -103,6 +103,8 @@ bool operator!=(const ping_pong& left, const ping_pong& right)
     return !(left == right);
 }
 
+const std::string message::ping::satoshi_command = "ping";
+
 ping ping::factory_from_data(const data_chunk& data)
 {
     ping instance;
@@ -137,6 +139,8 @@ ping::ping(const uint64_t nonce)
 {
     this->nonce = nonce;
 }
+
+const std::string message::pong::satoshi_command = "pong";
 
 pong pong::factory_from_data(const data_chunk& data)
 {
