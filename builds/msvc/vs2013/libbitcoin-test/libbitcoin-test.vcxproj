@@ -69,67 +69,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\test\authority.cpp" />
-    <ClCompile Include="..\..\..\..\test\base10.cpp" />
-    <ClCompile Include="..\..\..\..\test\base16.cpp" />
-    <ClCompile Include="..\..\..\..\test\base58.cpp" />
-    <ClCompile Include="..\..\..\..\test\base64.cpp" />
-    <ClCompile Include="..\..\..\..\test\base85.cpp" />
-    <ClCompile Include="..\..\..\..\test\big_number.cpp" />
-    <ClCompile Include="..\..\..\..\test\binary.cpp" />
-    <ClCompile Include="..\..\..\..\test\binary_trie.cpp" />
-    <ClCompile Include="..\..\..\..\test\btc256.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\block.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\block_header.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\transaction_input.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\transaction_output.cpp" />
-    <ClCompile Include="..\..\..\..\test\checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
-    <ClCompile Include="..\..\..\..\test\endpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\format.cpp" />
-    <ClCompile Include="..\..\..\..\test\genesis_block.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash_number.cpp" />
-    <ClCompile Include="..\..\..\..\test\hd_keys.cpp" />
-    <ClCompile Include="..\..\..\..\test\key_formats.cpp" />
-    <ClCompile Include="..\..\..\..\test\main.cpp" />
-    <ClCompile Include="..\..\..\..\test\message.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\announce_version.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_blocks.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\get_data.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\header.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\inventory.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\inventory_type_id.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\inventory_vector.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\network_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\nonce.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
-    <ClCompile Include="..\..\..\..\test\mnemonic.cpp" />
-    <ClCompile Include="..\..\..\..\test\parameter.cpp" />
-    <ClCompile Include="..\..\..\..\test\printer.cpp" />
-    <ClCompile Include="..\..\..\..\test\random.cpp" />
-    <ClCompile Include="..\..\..\..\test\satoshi_words.cpp" />
-    <ClCompile Include="..\..\..\..\test\script_number.cpp" />
-    <ClCompile Include="..\..\..\..\test\stealth.cpp" />
-    <ClCompile Include="..\..\..\..\test\stealth_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\thread.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode_istream.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode_ostream.cpp" />
-    <ClCompile Include="..\..\..\..\test\uri.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
-    <ClCompile Include="..\..\..\..\test\utility\variable_uint_size.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\..\..\test\big_number.hpp" />
+    <ClInclude Include="..\..\..\..\test\bip38.hpp" />
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\test\genesis_block.hpp" />
     <ClInclude Include="..\..\..\..\test\hash.hpp" />
@@ -167,5 +108,66 @@
     <ProjectReference Include="..\libbitcoin\libbitcoin.vcxproj">
       <Project>{39F60708-FF48-4C22-952D-43470866F684}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\authority.cpp" />
+    <ClCompile Include="..\..\..\..\test\base10.cpp" />
+    <ClCompile Include="..\..\..\..\test\base16.cpp" />
+    <ClCompile Include="..\..\..\..\test\base58.cpp" />
+    <ClCompile Include="..\..\..\..\test\base64.cpp" />
+    <ClCompile Include="..\..\..\..\test\base85.cpp" />
+    <ClCompile Include="..\..\..\..\test\big_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\binary.cpp" />
+    <ClCompile Include="..\..\..\..\test\bip38.cpp" />
+    <ClCompile Include="..\..\..\..\test\btc256.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\block.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\block_header.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\transaction_input.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\transaction_output.cpp" />
+    <ClCompile Include="..\..\..\..\test\checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\endpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\format.cpp" />
+    <ClCompile Include="..\..\..\..\test\genesis_block.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash.cpp" />
+    <ClCompile Include="..\..\..\..\test\hash_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\hd_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\key_formats.cpp" />
+    <ClCompile Include="..\..\..\..\test\main.cpp" />
+    <ClCompile Include="..\..\..\..\test\message.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\address.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\announce_version.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\get_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\get_blocks.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\get_data.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\header.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\inventory.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\inventory_type_id.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\inventory_vector.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\network_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\nonce.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\not_found.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
+    <ClCompile Include="..\..\..\..\test\mnemonic.cpp" />
+    <ClCompile Include="..\..\..\..\test\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\test\printer.cpp" />
+    <ClCompile Include="..\..\..\..\test\random.cpp" />
+    <ClCompile Include="..\..\..\..\test\satoshi_words.cpp" />
+    <ClCompile Include="..\..\..\..\test\script_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\stealth.cpp" />
+    <ClCompile Include="..\..\..\..\test\stealth_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\thread.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode_istream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode_ostream.cpp" />
+    <ClCompile Include="..\..\..\..\test\uri.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\variable_uint_size.cpp" />
   </ItemGroup>
 </Project>

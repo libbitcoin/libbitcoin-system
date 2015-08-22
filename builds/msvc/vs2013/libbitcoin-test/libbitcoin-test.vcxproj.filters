@@ -1,28 +1,125 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\test\base10.cpp">
-      <Filter>src</Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{9a1b1e98-7cf9-47aa-9449-1f27fe15f5a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{5e0e641a-cd44-4412-822b-aa5da59dff51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\chain">
+      <UniqueIdentifier>{34d9e6f4-b840-44a9-a39c-6cfbbf126c27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\message">
+      <UniqueIdentifier>{0ba03093-8321-433f-8c41-1869141054c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\utiltiy">
+      <UniqueIdentifier>{63815092-ade6-4e7d-8078-cf178f62dadc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\chain">
+      <UniqueIdentifier>{783b0dcd-fc68-4329-9ab9-f50f07eb4a6e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\..\test\big_number.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\hash.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\script_number.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\mnemonic.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\genesis_block.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\bip38.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\test\chain\script.hpp">
+      <Filter>include\chain</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\test\chain\script.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\base16.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\base58.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\transaction_input.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\base64.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\transaction_output.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\big_number.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\block.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\checksum.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\block_header.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\ec_keys.cpp">
-      <Filter>src</Filter>
+    <ClCompile Include="..\..\..\..\test\chain\point.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\format.cpp">
+    <ClCompile Include="..\..\..\..\test\message\get_data.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\header.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\inventory.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\inventory_type_id.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\inventory_vector.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\network_address.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\nonce.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\not_found.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\verack.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\address.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\announce_version.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_address.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_blocks.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\serializer.cpp">
+      <Filter>src\utiltiy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\stream.cpp">
+      <Filter>src\utiltiy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\variable_uint_size.cpp">
+      <Filter>src\utiltiy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\endian.cpp">
+      <Filter>src\utiltiy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\genesis_block.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\hash.cpp">
@@ -43,25 +140,7 @@
     <ClCompile Include="..\..\..\..\test\message.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\satoshi_words.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\script.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\script_number.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\serialize.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stealth.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\stealth_address.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\uri.cpp">
+    <ClCompile Include="..\..\..\..\test\mnemonic.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\parameter.cpp">
@@ -70,16 +149,22 @@
     <ClCompile Include="..\..\..\..\test\printer.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\base85.cpp">
+    <ClCompile Include="..\..\..\..\test\random.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\mnemonic.cpp">
+    <ClCompile Include="..\..\..\..\test\satoshi_words.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\binary_trie.cpp">
+    <ClCompile Include="..\..\..\..\test\script_number.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\binary.cpp">
+    <ClCompile Include="..\..\..\..\test\stealth.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\stealth_address.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\thread.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\unicode.cpp">
@@ -91,51 +176,53 @@
     <ClCompile Include="..\..\..\..\test\unicode_ostream.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\thread.cpp">
+    <ClCompile Include="..\..\..\..\test\uri.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\authority.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\checkpoint.cpp">
+    <ClCompile Include="..\..\..\..\test\base10.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\endpoint.cpp">
+    <ClCompile Include="..\..\..\..\test\base16.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\base58.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\base64.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\base85.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\big_number.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\binary.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\bip38.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\btc256.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\random.cpp">
+    <ClCompile Include="..\..\..\..\test\checkpoint.cpp">
       <Filter>src</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="src">
-      <UniqueIdentifier>{9a1b1e98-7cf9-47aa-9449-1f27fe15f5a6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include">
-      <UniqueIdentifier>{5e0e641a-cd44-4412-822b-aa5da59dff51}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\..\..\test\big_number.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\hash.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\script.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\script_number.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\test\mnemonic.hpp">
-      <Filter>include</Filter>
-    </ClInclude>
+    <ClCompile Include="..\..\..\..\test\checksum.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\ec_keys.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\endpoint.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\format.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
