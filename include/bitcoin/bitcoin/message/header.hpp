@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <istream>
 #include <string>
+#include <boost/array.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
@@ -69,8 +70,8 @@ public:
 
     // boost1.54/linux/clang/libstdc++-4.8 error if std::array
     // could not match 'boost::array' against 'std::array'
-    typedef std::array<uint8_t, header_size> header_bytes;
-    typedef std::array<uint8_t, checksum_size> checksum_bytes;
+    typedef boost::array<uint8_t, header_size> header_bytes;
+    typedef boost::array<uint8_t, checksum_size> checksum_bytes;
 
     static header factory_from_data(const data_chunk& data);
     static header factory_from_data(std::istream& stream);
