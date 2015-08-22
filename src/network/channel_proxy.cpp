@@ -373,8 +373,11 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     typedef byte_source<message::header::header_bytes> header_source;
     typedef boost::iostreams::stream<header_source> header_stream;
 
+    // Parse and publish the header to message subscribers.
     message::header header;
-    const auto parsed = header.from_data(header_stream(inbound_header_));
+    header_stream istream(inbound_header_);
+    const auto parsed = header.from_data(istream);
+
     if (!parsed || header.magic != bc::magic_value)
     {
         log_warning(LOG_NETWORK) 
@@ -452,7 +455,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
         return;
     }
 
-    // Parse and publish the raw payload to subscribers.
+    // Publish the raw payload to subscribers.
     raw_subscriber_->relay(error::success, header, inbound_payload_);
 
     // Copy the buffer before registering for new messages.
@@ -470,16 +473,19 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     // Parse and publish the payload to message subscribers.
     payload_source source(payload_copy);
     payload_stream istream(source);
+    const auto code = stream_loader_.load(header.command, istream);
 
-    if (stream_loader_.load(header.command, istream))
-        if (istream.peek() != std::istream::traits_type::eof())
-            log_warning(LOG_NETWORK)
-                << "Valid message [" << header.command
-                << "] handled, unused bytes remain in payload.";
+    // Warn about unconsumed bytes in the stream.
+    if (!code && istream.peek() != std::istream::traits_type::eof())
+        log_warning(LOG_NETWORK)
+            << "Valid message [" << header.command
+            << "] handled, unused bytes remain in payload.";
 
-    // Now we stop the channel if there was an error and we aren't yet stopped.
+    // Stop the channel if there was an error before or during parse.
     if (ec)
         stop(ec);
+    else if (code)
+        stop(code);
 }
 
 void channel_proxy::subscribe_version(
