@@ -525,7 +525,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_bytes)
     std::stringstream stream;
     ostream_writer sink(stream);
     istream_reader source(stream);
-    sink.write_bytes(expected);
+    sink.write_bytes<32>(expected);
 
     BOOST_REQUIRE_EQUAL(stream.str().length(), expected.size());
 
@@ -553,7 +553,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_bytes_reverse)
     std::stringstream stream;
     ostream_writer sink(stream);
     istream_reader source(stream);
-    sink.write_bytes_reverse(expected);
+    sink.write_bytes_reverse<32>(expected);
 
     BOOST_REQUIRE_EQUAL(stream.str().length(), expected.size());
 
@@ -580,7 +580,7 @@ BOOST_AUTO_TEST_CASE(write_bytes_read_bytes_reverse)
 
     std::stringstream stream;
     ostream_writer sink(stream);
-    sink.write_bytes(expected);
+    sink.write_bytes<32>(expected);
     istream_reader source(stream);
 
     BOOST_REQUIRE_EQUAL(stream.str().length(), expected.size());
