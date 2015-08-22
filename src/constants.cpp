@@ -29,4 +29,3 @@ hash_number max_target()
 }
 
 } // namespace libbitcoin
-

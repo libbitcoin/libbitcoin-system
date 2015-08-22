@@ -49,6 +49,7 @@ public:
     uint64_t satoshi_size() const;
 
     static const std::string satoshi_command;
+
     inventory_vector::list inventories;
 };
 
