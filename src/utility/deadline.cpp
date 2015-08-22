@@ -31,19 +31,19 @@
 namespace libbitcoin {
 
 using std::placeholders::_1;
+using boost::posix_time::time_duration;
 
+// Use these to make sude codes stay in sync.
 static const auto std_timeout = error::channel_timeout;
 static const auto std_cancel = error::operation_failed;
 static const auto boost_cancel = boost::asio::error::operation_aborted;
 
-// This can be used safely in a heap allocated class.
+// This can be dereferenced with an outstanding callback because the timer
+// closure captures an instance of this class and the callback.
 // This is guaranteed to call handler exactly once (unless prepetually reset).
-deadline::deadline(threadpool& pool, boost::posix_time::time_duration duration,
-    handler handle_expiration)
-  : duration_(duration), timer_(pool.service()), handler_(handle_expiration)
+deadline::deadline(threadpool& pool, const time_duration duration)
+  : duration_(duration), timer_(pool.service())
 {
-    DEBUG_ONLY(const auto cancel = error::boost_to_error_code(boost_cancel));
-    BITCOIN_ASSERT_MSG(cancel == std_cancel, "Unexpected error code mapping.");
 }
 
 // static, allows caller to test for timer cancellation in handler.
@@ -52,18 +52,29 @@ bool deadline::canceled(const std::error_code& ec)
     return ec == std_cancel;
 }
 
-// Start can be used to reset the timer as well.
-void deadline::start()
+// static, allows caller to test for timer expiration in handler.
+bool deadline::expired(const std::error_code& ec)
 {
-    stop();
-    timer_.expires_from_now(duration_);
-    timer_.async_wait(
-        std::bind(&deadline::handle_timer,
-            shared_from_this(), _1));
+    return ec == std_timeout;
 }
 
+void deadline::start(handler handle_expiration)
+{
+    start(handle_expiration, duration_);
+}
+
+void deadline::start(handler handle_expiration, const time_duration duration)
+{
+    cancel();
+    timer_.expires_from_now(duration);
+    timer_.async_wait(
+        std::bind(&deadline::handle_timer,
+            shared_from_this(), _1, handle_expiration));
+}
+
+// Ddestruct will not happen until the timer is canceled or expires.
 // Cancellation calls handle_timer with boost::asio::error::operation_aborted.
-void deadline::stop()
+void deadline::cancel()
 {
     boost::system::error_code code;
     timer_.cancel(code);
@@ -74,13 +85,16 @@ void deadline::stop()
     BITCOIN_ASSERT(code);
 }
 
-void deadline::handle_timer(const boost::system::error_code& ec)
+// A boost success code implies that the timer fired.
+void deadline::handle_timer(const boost::system::error_code& ec,
+    handler handle_expiration) const
 {
-    // A boost success code implies that the timer fired.
     if (!ec)
-        handler_(std_timeout);
+        handle_expiration(std_timeout);
+    else if (boost_cancel)
+        handle_expiration(std_cancel);
     else
-        handler_(error::boost_to_error_code(ec));
+        handle_expiration(error::boost_to_error_code(ec));
 }
 
 } // namespace libbitcoin

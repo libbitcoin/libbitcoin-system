@@ -22,53 +22,59 @@
 
 #include <memory>
 #include <system_error>
-#include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
-
-class protocol_ping;
-typedef std::shared_ptr<protocol_ping> protocol_ping_ptr;
-
+        
+/**
+ * Ping protocol.
+ * Attach this to a node immediately following handshake completion.
+ */
 class BC_API protocol_ping
   : public std::enable_shared_from_this<protocol_ping>
 {
 public:
-    protocol_ping(channel_ptr node, threadpool& pool, const timeout& timeouts);
+    typedef std::shared_ptr<protocol_ping> ptr;
+
+    /**
+     * Construct a ping protocol instance.
+     * @param[in]  peer    The channel on which to start the protocol.
+     * @param[in]  pool    The thread pool used by the protocol.
+     * @param[in]  period  The time period of outgoing ping messages.
+     */
+    protocol_ping(channel_ptr peer, threadpool& pool, 
+        const boost::posix_time::time_duration& period);
 
     /// This class is not copyable.
     protocol_ping(const protocol_ping&) = delete;
     void operator=(const protocol_ping&) = delete;
-
+    
+    /**
+     * Start the protocol on the configured channel.
+     */
     void start();
 
 private:
     bool stopped() const;
-    void stop(const std::error_code& ec);
-
-    void clear_timer();
-    void reset_timer();
-    void set_timer(const boost::posix_time::time_duration& timeout);
-    void handle_timer(const boost::system::error_code& ec);
+    void handle_stop(const std::error_code& ec);
+    void handle_timer(const std::error_code& ec);
 
     void handle_send_ping(const std::error_code& ec) const;
     void handle_send_pong(const std::error_code& ec) const;
-    void handle_receive_ping(const std::error_code& ec,
-        const ping_type& ping);
-    void handle_receive_pong(const std::error_code& ec,
-        const pong_type& ping, uint64_t nonce);
+    void handle_receive_ping(const std::error_code& ec, const ping_type& ping);
+    void handle_receive_pong(const std::error_code& ec, const pong_type& ping, uint64_t nonce);
 
-    channel_ptr node_;
-    const timeout& timeouts_;
-    boost::asio::deadline_timer timer_;
+    channel_ptr peer_;
+    deadline::ptr deadline_;
     dispatcher dispatch_;
     bool stopped_;
 };

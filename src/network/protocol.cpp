@@ -34,10 +34,10 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
-#include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
+#include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -56,15 +56,14 @@ using boost::posix_time::seconds;
 // TODO: make protocol an aggregator over the derived classes of network_base.
 // TODO: parameterize dispatcher, connections and hosts as same object for each.
 // TODO: pass config reference into each class.
-// TODO: implement protocol_version (handshake) protocol_ping, protocol_address.
-protocol::protocol(threadpool& pool, hosts& hosts, handshake& shake,
-    initiator& network, uint16_t port, bool relay, size_t max_outbound,
-    size_t max_inbound, const config::endpoint::list& seeds,
-    const network_address_type& self, const timeout& timeouts)
+// TODO: implement protocol_version, protocol_ping, protocol_address.
+protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
+    uint16_t port, bool relay, size_t max_outbound, size_t max_inbound,
+    const config::endpoint::list& seeds, const network_address_type& self,
+    const timeout& timeouts)
   : dispatch_(pool),
     pool_(pool),
     hosts_(hosts),
-    handshake_(shake),
     network_(network),
     channel_subscriber_(std::make_shared<channel_subscriber>(pool)),
     seeds_(seeds),
@@ -115,16 +114,15 @@ void protocol::stop(completion_handler handle_complete)
 
 void protocol::start_seeding(completion_handler handle_complete)
 {
-    const auto complete_seeding =
+    const auto complete =
         std::bind(&protocol::start_connecting,
             this, _1, handle_complete);
 
-    // TODO: handle_complete must be passed in and invoked upon completion.
-    std::make_shared<seeder>(pool_, hosts_, handshake_, network_, seeds_,
-        self_)->start(complete_seeding);
+    std::make_shared<seeder>(pool_, hosts_, timeouts_, network_, seeds_,
+        self_)->start(complete);
 }
 
-// TODO: implement on protocol_outbound.
+// TODO: implement on context_outbound.
 
 void protocol::start_connecting(const std::error_code& ec,
     completion_handler handle_complete)
@@ -209,7 +207,7 @@ void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
     start_talking(node, stop_handler, relay_);
 }
 
-// TODO: implement on protocol_manual.
+// TODO: implement on context_manual.
 
 void protocol::retry_manual_connection(const config::endpoint& address,
     bool relay, size_t retry)
@@ -270,7 +268,7 @@ void protocol::handle_manual_connect(const std::error_code& ec,
     start_talking(node, stop_handler, relay);
 }
 
-// TODO: implement on protocol_inbound.
+// TODO: implement on context_inbound.
 
 void protocol::start_accepting()
 {
@@ -356,10 +354,11 @@ void protocol::start_talking(channel_ptr node,
     // Notify protocol subscribers of new channel.
     channel_subscriber_->relay(error::success, node);
 
-    // Subscribe to events and start talking on the socket.
-    handshake_.start(node,
-        dispatch_.sync(&protocol::handle_handshake,
-            this, _1, node), relay);
+    // Attach version protocol to the new connection (until complete).
+    std::make_shared<protocol_version>(node, pool_, timeouts_.handshake,
+        self_, relay)->start(
+            dispatch_.sync(&protocol::handle_handshake,
+                this, _1, node));
 
     // Start reading from the socket (causing subscription events).
     node->start();
@@ -378,10 +377,10 @@ void protocol::handle_handshake(const std::error_code& ec, channel_ptr node)
         return;
     }
 
-    // Attach ping protocol to the new connection.
-    std::make_shared<protocol_ping>(node, pool_, timeouts_)->start();
+    // Attach ping protocol to the new connection (until node stop event).
+    std::make_shared<protocol_ping>(node, pool_, timeouts_.heartbeat)->start();
 
-    // Attach address protocol to the new connection.
+    // Attach address protocol to the new connection (until node stop event).
     std::make_shared<protocol_address>(node, pool_, hosts_, self_)->start();
 }
 

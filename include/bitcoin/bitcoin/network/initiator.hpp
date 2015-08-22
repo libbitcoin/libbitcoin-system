@@ -33,7 +33,8 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
-#include <bitcoin/bitcoin/network/handshake.hpp>
+#include <bitcoin/bitcoin/network/protocol_version.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -51,7 +52,7 @@ public:
 
     void listen(uint16_t port, acceptor::listen_handler handle_listen);
     void connect(const std::string& hostname, uint16_t port,
-        connector::connect_handler handle_connect);
+        connector::handler handle_connect);
 
 private:
     typedef std::shared_ptr<boost::asio::ip::tcp::resolver> resolver_ptr;
@@ -59,7 +60,7 @@ private:
 
     void resolve_handler(const boost::system::error_code& ec,
         boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-        connector::connect_handler handle_connect, resolver_ptr, query_ptr);
+        connector::handler handle_connect, resolver_ptr, query_ptr);
 
     threadpool& pool_;
     const timeout& timeouts_;

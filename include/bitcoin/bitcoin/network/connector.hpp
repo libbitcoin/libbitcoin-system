@@ -26,37 +26,52 @@
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-using boost::asio::ip::tcp;
-using boost::posix_time::time_duration;
-
+/**
+ * Class wrapper for boost::asio::async_connect.
+ * This simplifies invocation and eliminates boost-speific error handling.
+ */
 class connector
   : public std::enable_shared_from_this<connector>
 {
 public:
-    typedef std::function<void(const std::error_code&, channel_ptr)>
-        connect_handler;
+    typedef std::shared_ptr<connector> ptr;
+    typedef std::function<void(const std::error_code&, channel_ptr)> handler;
 
-    connector(threadpool& pool, const timeout& timeouts=timeout::defaults);
+    /**
+     * Construct a socket connector.
+     * @param[in]  pool     The thread pool used by the connector.
+     * @param[in]  timeout  The collection of network timeout settings.
+     */
+    connector(threadpool& pool, const timeout& timeout);
 
-    void connect(tcp::resolver::iterator endpoint_iterator,
-        connect_handler handle_connect);
+    /// This class is not copyable.
+    connector(const connector&) = delete;
+    void operator=(const connector&) = delete;
+
+    /**
+     * Connect to the specified endpoint.
+     * @param[in]  endpoint_iterator The endpoint iterator to connect with.
+     * @param[in]  handle_connect    Will be invoked upon expire or connection.
+     */
+    void connect(boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
+        handler handle_connect);
 
 private:
     void create_channel(const boost::system::error_code& ec,
-        tcp::resolver::iterator, socket_ptr socket,
-        connect_handler handle_connect);
-    void handle_timer(const boost::system::error_code& ec,
-        connect_handler handle_connect);
+        boost::asio::ip::tcp::resolver::iterator, socket_ptr socket,
+        handler complete);
+    void handle_timer(const std::error_code& ec, handler complete);
 
     threadpool& pool_;
     const timeout& timeouts_;
-    boost::asio::deadline_timer timer_;
+    deadline::ptr deadline_;
 };
 
 } // namespace network

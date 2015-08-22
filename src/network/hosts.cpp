@@ -41,6 +41,7 @@
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -178,24 +179,24 @@ void hosts::do_store(const network_address_type& address,
     store_handler handle_store)
 {
     if (!exists(address))
-    {
         buffer_.push_back(address);
-        handle_store(error::success);
-        return;
-    }
+    else
+        log_debug(LOG_PROTOCOL)
+        << "Duplicate host address from peer";
 
-    handle_store(error::duplicate);
+    // We don't treat duplicates in one message as an error, just log it.
+    handle_store(error::success);
 }
 
-void hosts::store(const network_address_list& addresses,
-    store_handler handle_store)
+void hosts::store(const network_address_list& addresses, store_handler handle_store)
 {
-    // If these are queued concurrently with others then it will lead to 
-    // random distribution in the pool, which is why we queue here.
+    const auto complete = synchronize(handle_store, addresses.size(), "hosts");
+
+    // We queue here to interleave address distribution in the circular buffer.
     for (const auto& address: addresses)
         dispatch_.randomly_queue(
             std::bind(&hosts::do_store,
-                this, address, handle_store));
+                this, address, complete));
 }
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)

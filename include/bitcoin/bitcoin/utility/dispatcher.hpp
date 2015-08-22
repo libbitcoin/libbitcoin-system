@@ -29,7 +29,7 @@
 namespace libbitcoin {
 
 template <typename Handler>
-struct dispatch_impl
+struct dispatcher_dispatcher
 {
     Handler handler;
     boost::asio::io_service::strand& strand;
@@ -56,7 +56,8 @@ public:
      */
     template <typename Handler, typename... Args>
     auto sync(Handler&& handler, Args&&... args) ->
-        dispatch_impl<decltype(std::bind(std::forward<Handler>(handler),
+        dispatcher_dispatcher<decltype(
+            std::bind(std::forward<Handler>(handler),
             std::forward<Args>(args)...))>
     {
         auto bound = std::bind(std::forward<Handler>(handler),

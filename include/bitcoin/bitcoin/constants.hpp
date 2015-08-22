@@ -24,9 +24,12 @@
 #include <cstdint>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
 
 namespace libbitcoin {
+
+#define BC_USER_AGENT "/libbitcoin:" LIBBITCOIN_VERSION "/"
 
 // Generic constants.
 
@@ -95,16 +98,48 @@ BC_CONSTFUNC uint64_t max_money()
     BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
     BC_CONSTEXPR uint32_t bip16_switchover_height = 514;
     BC_CONSTEXPR uint16_t protocol_port = 18333;
+    BC_CONSTEXPR uint32_t magic_value = 0x0709110b;
 #else
     // [April 1 2012]
     BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
     BC_CONSTEXPR uint32_t bip16_switchover_height = 173805;
     BC_CONSTEXPR uint16_t protocol_port = 8333;
+    BC_CONSTEXPR uint32_t magic_value = 0xd9b4bef9;
 #endif
 
-// Constants, sort of.
+enum services: uint64_t
+{
+    // The node is capable of serving the block chain.
+    node_network = (1 << 0),
+
+    // See BIP 64
+    // The node is capable of responding to the getutxo protocol request.
+    node_utxo = (1 << 1),
+
+    // Requires version >= 70011 (proposed)
+    // The node is capable and willing to handle bloom-filtered connections.
+    bloom_filters = (1 << 2)
+};
+
+BC_CONSTEXPR uint32_t no_timestamp = 0;
+BC_CONSTEXPR uint16_t unspecified_ip_port = 0;
+BC_CONSTEXPR ip_address_type unspecified_ip_address
+{
+    {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00
+    }
+};
+BC_CONSTEXPR network_address_type unspecified_network_address
+{
+    no_timestamp,
+    services::node_network,
+    unspecified_ip_address,
+    unspecified_ip_port
+};
+
+// TODO: make static.
 BC_API hash_number max_target();
-BC_API uint32_t magic_value();
 
 } // namespace libbitcoin
 

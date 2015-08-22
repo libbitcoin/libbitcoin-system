@@ -28,6 +28,7 @@
 
 namespace libbitcoin {
 
+// TODO: use Args&&, list, ptr.
 template <typename... Args>
 class subscriber
   : public std::enable_shared_from_this<subscriber<Args...>>

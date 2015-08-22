@@ -22,59 +22,78 @@
 
 #include <memory>
 #include <system_error>
+#include <boost/date_time.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
+#include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-class protocol_address;
-typedef std::shared_ptr<protocol_address> protocol_address_ptr;
-
+/**
+ * Address protocol.
+ * Attach this to a node immediately following handshake completion.
+ */
 class BC_API protocol_address
   : public std::enable_shared_from_this<protocol_address>
 {
 public:
-    typedef std::function<void(const std::error_code&)> completion_handler;
+    typedef std::shared_ptr<protocol_address> ptr;
+    typedef std::function<void(const std::error_code&)> handler;
 
-    protocol_address(channel_ptr node, threadpool& pool, hosts& hosts_,
+    /**
+     * Construct an address protocol instance.
+     * @param[in]  peer   The channel on which to start the protocol.
+     * @param[in]  pool   The thread pool used by the protocol.
+     * @param[in]  hosts  The address pool that this class populates.
+     * @param[in]  self   The address that represents us to peers.
+     */
+    protocol_address(channel_ptr peer, threadpool& pool, hosts& hosts,
         const network_address_type& self);
 
     /// This class is not copyable.
     protocol_address(const protocol_address&) = delete;
     void operator=(const protocol_address&) = delete;
-
+    
+    /**
+     * Start the protocol on the configured channel.
+     */
     void start();
-    //void start(completion_handler handle_complete, const timeout& timeouts);
+
+    /**
+     * Start the protocol on the configured channel.
+     * This override will invoke the completion handler after handling the
+     * first address message from the peer or timeout.
+     * @param[in]  handle_seeded  Will be invoked upon expire or completion.
+     * @param[in]  timeout        The time limit on get address completion.
+     */
+    void start(handler handle_seeded,
+        const boost::posix_time::time_duration& timeout);
 
 private:
-    //bool stopped() const;
-    //void stop(const std::error_code& ec);
+    bool stopped() const;
+    void handle_stop(const std::error_code& ec, handler complete);
+    void handle_timer(const std::error_code& ec, handler complete) const;
 
-    //void clear_timer();
-    //void reset_timer();
-    //void set_timer(const boost::posix_time::time_duration& timeout);
-    //void handle_timer(const boost::system::error_code& ec);
+    network_address_type address() const;
+    bool publish_self_address() const;
 
-    bool is_self_defined() const;
-    network_address_type get_address() const;
+    void handle_receive_address(const std::error_code& ec, const address_type& address, handler complete);
+    void handle_send_address(const std::error_code& ec, handler complete) const;
+    void handle_send_get_address(const std::error_code& ec, handler complete) const;
+    void handle_store_addresses(const std::error_code& ec, handler complete) const;
 
-    void handle_receive_address(const std::error_code& ec,
-        const address_type& address);
-    void handle_send_address(const std::error_code& ec) const;
-    void handle_send_get_address(const std::error_code& ec) const;
-    void handle_store_address(const std::error_code& ec) const;
-
-    channel_ptr node_;
-    //const timeout& timeouts_;
-    //boost::asio::deadline_timer timer_;
+    channel_ptr peer_;
+    threadpool& pool_;
     dispatcher dispatch_;
-    //bool stopped_;
+    deadline::ptr deadline_;
+    bool stopped_;
+
     hosts& hosts_;
     const address_type self_;
 };

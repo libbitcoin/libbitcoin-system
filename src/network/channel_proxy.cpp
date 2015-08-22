@@ -39,6 +39,7 @@
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
@@ -57,14 +58,14 @@ using boost::format;
 using boost::posix_time::time_duration;
 
 // The proxy will have no config with timers moved to channel.
-channel_proxy::channel_proxy(threadpool& pool, socket_ptr socket,
-    const timeout& timeouts=timeout::defaults)
-  : dispatch_(pool),
-    socket_(socket),
+channel_proxy::channel_proxy(socket_ptr socket, threadpool& pool,
+    const timeout& timeouts)
+  : socket_(socket),
+    dispatch_(pool),
     timeouts_(timeouts),
-    expiration_(pool.service()),
-    inactivity_(pool.service()),
-    revival_(pool.service()),
+    expiration_(std::make_shared<deadline>(pool, timeouts.expiration)),
+    inactivity_(std::make_shared<deadline>(pool, timeouts.inactivity)),
+    revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
     stopped_(false),
     version_subscriber_(std::make_shared<version_subscriber>(pool)),
@@ -200,11 +201,9 @@ void channel_proxy::clear_subscriptions(const std::error_code& ec)
 
 void channel_proxy::clear_timers()
 {
-    // Ignore the error_code.
-    boost::system::error_code ec;
-    expiration_.cancel(ec);
-    inactivity_.cancel(ec);
-    revival_.cancel(ec);
+    expiration_->cancel();
+    inactivity_->cancel();
+    revival_->cancel();
     revival_handler_ = nullptr;
 }
 
@@ -213,27 +212,21 @@ void channel_proxy::start_timers()
     if (stopped())
         return;
 
-    set_expiration(pseudo_randomize(timeouts_.expiration));
-    set_revival(timeouts_.revival);
-    set_inactivity(timeouts_.inactivity);
+    start_expiration();
+    start_revival();
+    start_inactivity();
 }
 
-void channel_proxy::reset_inactivity()
-{
-    if (stopped())
-        return;
-
-    set_inactivity(timeouts_.inactivity);
-}
-
+// public
 void channel_proxy::reset_revival()
 {
     if (stopped())
         return;
 
-    set_revival(timeouts_.revival);
+    start_revival();
 }
 
+// public
 void channel_proxy::set_revival_handler(revival_handler handler)
 {
     if (stopped())
@@ -242,54 +235,44 @@ void channel_proxy::set_revival_handler(revival_handler handler)
     revival_handler_ = handler;
 }
 
-void channel_proxy::set_expiration(const time_duration& timeout)
+void channel_proxy::start_expiration()
 {
     if (stopped())
         return;
 
-    // Ignore the error_code.
-    boost::system::error_code ec;
-    expiration_.cancel(ec);
-    expiration_.expires_from_now(timeout, ec);
-    expiration_.async_wait(
+    const auto timeout = pseudo_randomize(timeouts_.expiration);
+
+    expiration_->start(
         std::bind(&channel_proxy::handle_expiration,
-            shared_from_this(), _1));
+            shared_from_this(), _1), timeout);
 }
 
-void channel_proxy::set_inactivity(const time_duration& timeout)
+void channel_proxy::start_inactivity()
 {
     if (stopped())
         return;
 
-    // Ignore the error_code.
-    boost::system::error_code ec;
-    inactivity_.cancel(ec);
-    inactivity_.expires_from_now(timeout, ec);
-    inactivity_.async_wait(
+    inactivity_->start(
         std::bind(&channel_proxy::handle_inactivity,
             shared_from_this(), _1));
 }
 
-void channel_proxy::set_revival(const time_duration& timeout)
+void channel_proxy::start_revival()
 {
     if (stopped())
         return;
 
-    // Ignore the error_code.
-    boost::system::error_code ec;
-    revival_.cancel(ec);
-    revival_.expires_from_now(timeout, ec);
-    revival_.async_wait(
+    revival_->start(
         std::bind(&channel_proxy::handle_revival,
             shared_from_this(), _1));
 }
 
-void channel_proxy::handle_expiration(const boost::system::error_code& ec)
+void channel_proxy::handle_expiration(const std::error_code& ec)
 {
     if (stopped())
         return;
 
-    if (timeout::canceled(ec))
+    if (deadline::canceled(ec))
         return;
 
     log_info(LOG_NETWORK)
@@ -298,12 +281,12 @@ void channel_proxy::handle_expiration(const boost::system::error_code& ec)
     stop(error::channel_timeout);
 }
 
-void channel_proxy::handle_inactivity(const boost::system::error_code& ec)
+void channel_proxy::handle_inactivity(const std::error_code& ec)
 {
     if (stopped())
         return;
 
-    if (timeout::canceled(ec))
+    if (deadline::canceled(ec))
         return;
 
     log_info(LOG_NETWORK)
@@ -312,19 +295,19 @@ void channel_proxy::handle_inactivity(const boost::system::error_code& ec)
     stop(error::channel_timeout);
 }
 
-void channel_proxy::handle_revival(const boost::system::error_code& ec)
+void channel_proxy::handle_revival(const std::error_code& ec)
 {
     if (stopped())
         return;
 
-    if (timeout::canceled(ec))
+    if (deadline::canceled(ec))
         return;
 
     // Nothing to do, no handler registered.
     if (revival_handler_ == nullptr)
         return;
 
-    revival_handler_(bc::error::boost_to_error_code(ec));
+    revival_handler_(ec);
 }
 
 void channel_proxy::read_header()
@@ -389,7 +372,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
         valid_parse = false;
     }
 
-    if (!valid_parse || header.magic != magic_value())
+    if (!valid_parse || header.magic != bc::magic_value)
     {
         log_warning(LOG_NETWORK) 
             << "Invalid header received [" << address() << "]";
@@ -402,7 +385,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
         << header.payload_length << " bytes)";
 
     read_checksum(header);
-    reset_inactivity();
+    start_inactivity();
 }
 
 void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
@@ -432,7 +415,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
         inbound_checksum_.begin(), inbound_checksum_.end());
 
     read_payload(header);
-    reset_inactivity();
+    start_inactivity();
 }
 
 void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
@@ -476,7 +459,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
     if (!ec)
         read_header();
 
-    reset_inactivity();
+    start_inactivity();
 
     // Parse and publish the payload to message subscribers.
     stream_loader_.load(header.command, payload_copy);

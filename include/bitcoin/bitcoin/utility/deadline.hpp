@@ -29,26 +29,70 @@
 
 namespace libbitcoin {
 
+/**
+ * Class wrapper for boost::asio::deadline_timer.
+ * This simplifies invocation, eliminates boost-speific error handling and makes
+ * timer firing and cancellation conditions safer.
+ */
 class BC_API deadline
   : public std::enable_shared_from_this<deadline>
 {
 public:
+    typedef std::shared_ptr<deadline> ptr;
     typedef std::function<void(const std::error_code&)> handler;
+    
+    /**
+     * Construct a deadline timer.
+     * @param[in]  pool      The thread pool used by the timer.
+     * @param[in]  duration  The default time period from start to expiration.
+     */
+    deadline(threadpool& pool,
+        const boost::posix_time::time_duration duration);
 
-    deadline(threadpool& pool, boost::posix_time::time_duration duration,
-        handler handle_expiration);
+    /// This class is not copyable.
+    deadline(const deadline&) = delete;
+    void operator=(const deadline&) = delete;
 
+    /**
+     * Test handler error code for indication that the timer was stopped.
+     * @param[in]  ec  The error code passed in the handler invocation.
+     */
     static bool canceled(const std::error_code& ec);
 
-    void start();
-    void stop();
+    /**
+     * Test handler error code for indication that the timer fired.
+     * @param[in]  ec  The error code passed in the handler invocation.
+     */
+    static bool expired(const std::error_code& ec);
+
+    /**
+     * Start the timer.
+     * Use expired(ec) in handler to test for expiration.
+     * @param[in]  handle_expiration  Will be invoked upon expire or cancel.
+     */
+    void start(handler handle_expiration);
+
+    /**
+     * Start the timer.
+     * Use expired(ec) in handler to test for expiration.
+     * @param[in]  handle_expiration  Will be invoked upon expire or cancel.
+     * @param[in]  duration           The time period from start to expiration.
+     */
+    void start(handler handle_expiration,
+        const boost::posix_time::time_duration duration);
+
+    /**
+     * Cancel the timer.
+     * Use canceled(ec) in handler to test for cancellation.
+     */
+    void cancel();
 
 private:
+    void handle_timer(const boost::system::error_code& ec,
+        handler handle_expiration) const;
+
     boost::posix_time::time_duration duration_;
     boost::asio::deadline_timer timer_;
-    handler handler_;
-
-    void handle_timer(const boost::system::error_code& ec);
 };
 
 } // namespace libbitcoin

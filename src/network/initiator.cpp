@@ -47,7 +47,7 @@ initiator::initiator(threadpool& pool, const timeout& timeouts)
 
 void initiator::resolve_handler(const boost::system::error_code& ec,
     tcp::resolver::iterator endpoint_iterator, 
-    connector::connect_handler handle_connect, resolver_ptr,
+    connector::handler handle_connect, resolver_ptr,
     query_ptr /* query */)
 {
     if (ec)
@@ -62,6 +62,9 @@ void initiator::resolve_handler(const boost::system::error_code& ec,
     outbound->connect(endpoint_iterator, handle_connect);
 }
 
+// TODO: add stop().
+
+// TODO: make cancellable (via acceptor).
 void initiator::listen(uint16_t port, acceptor::listen_handler handle_listen)
 {
     using namespace boost::asio;
@@ -87,8 +90,9 @@ void initiator::listen(uint16_t port, acceptor::listen_handler handle_listen)
     handle_listen(ec, inbound);
 }
 
+// TODO: make cancellable (via connector).
 void initiator::connect(const std::string& hostname, uint16_t port,
-    connector::connect_handler handle_connect)
+    connector::handler handle_connect)
 {
     const auto resolver = std::make_shared<tcp::resolver>(pool_.service());
     const auto query = std::make_shared<tcp::resolver::query>(hostname,

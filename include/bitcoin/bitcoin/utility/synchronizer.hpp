@@ -32,7 +32,7 @@ template <typename Handler>
 class synchronizer
 {
 public:
-    synchronizer(Handler handler, size_t clearance_count,
+    synchronizer(Handler&& handler, size_t clearance_count,
         const std::string& name)
       : handler_(handler),
         clearance_count_(clearance_count),
@@ -100,6 +100,13 @@ private:
     std::shared_ptr<size_t> counter_;
     std::shared_ptr<std::mutex> counter_mutex_;
 };
+
+template <typename Handler>
+synchronizer<Handler> synchronize(Handler&& handler, size_t clearance_count,
+    const std::string& log_context)
+{
+    return synchronizer<Handler>(handler, clearance_count, log_context);
+}
 
 } // libbitcoin
 

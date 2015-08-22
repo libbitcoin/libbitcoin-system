@@ -27,9 +27,10 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
+#include <bitcoin/bitcoin/network/protocol_version.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -41,11 +42,12 @@ class BC_API seeder
     : public std::enable_shared_from_this<seeder>
 {
 public:
-    typedef std::function<void(const std::error_code&)> completion_handler;
+    typedef std::function<void(const std::error_code&)> handler;
+    typedef std::function<void(const std::error_code&, channel_ptr)> ptr;
 
     static const config::endpoint::list defaults;
 
-    seeder(threadpool& pool, hosts& hosts, handshake& shake,
+    seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
         initiator& network, const config::endpoint::list& seeds,
         const network_address_type& self);
     seeder::~seeder();
@@ -54,23 +56,23 @@ public:
     seeder(const seeder&) = delete;
     void operator=(const seeder&) = delete;
 
-    void start(completion_handler handle_seeded);
+    void start(handler handle_seeded);
 
 private:
-    void start_connect(const config::endpoint& seed,
-        completion_handler handle_complete);
+
     void handle_seeded(const std::error_code& ec, size_t host_start_size,
-        completion_handler handle_complete);
-    void handle_connected(const std::error_code& ec, channel_ptr node,
-        const config::endpoint& seed, completion_handler handle_complete);
-    void handle_handshake(const std::error_code& ec, channel_ptr node,
-        const config::endpoint& seed, completion_handler handle_complete);
+        handler handle_complete);
+    void start_connect(const config::endpoint& seed, handler complete);
+    void handle_connected(const std::error_code& ec, channel_ptr peer,
+        const config::endpoint& seed, handler complete);
+    void handle_handshake(const std::error_code& ec, channel_ptr peer,
+        const config::endpoint& seed, handler complete);
     void handle_store(const std::error_code& ec);
 
     dispatcher dispatch_;
     threadpool& pool_;
     hosts& hosts_;
-    handshake& handshake_;
+    const timeout& timeouts_;
     initiator& network_;
     const config::endpoint::list& seeds_;
     const network_address_type self_;

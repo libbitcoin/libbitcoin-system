@@ -36,12 +36,10 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::posix_time::time_duration;
 
-// ping-pong operates on an independent strand per channel.
-protocol_ping::protocol_ping(channel_ptr node, threadpool& pool,
-    const timeout& timeouts)
-  : node_(node),
-    timer_(pool.service()),
-    timeouts_(timeouts),
+protocol_ping::protocol_ping(channel_ptr peer, threadpool& pool,
+    const time_duration& period)
+  : peer_(peer),
+    deadline_(std::make_shared<deadline>(pool, period)),
     dispatch_(pool),
     stopped_(false)
 {
@@ -51,19 +49,30 @@ protocol_ping::protocol_ping(channel_ptr node, threadpool& pool,
 void protocol_ping::start()
 {
     // Subscribe to stop messages.
-    node_->subscribe_stop(
-        dispatch_.sync(&protocol_ping::stop,
+    peer_->subscribe_stop(
+        dispatch_.sync(&protocol_ping::handle_stop,
             shared_from_this(), _1));
 
     // Subscribe to ping messages.
-    node_->subscribe_ping(
+    peer_->subscribe_ping(
         dispatch_.sync(&protocol_ping::handle_receive_ping,
             shared_from_this(), _1, _2));
 
     // Send initial ping message by simulating first heartbeat.
     dispatch_.queue(
         std::bind(&protocol_ping::handle_timer,
-            shared_from_this(), boost::system::error_code()));
+            shared_from_this(), error::success));
+}
+
+void protocol_ping::handle_stop(const std::error_code& ec)
+{
+    if (stopped())
+        return;
+
+    stopped_ = true;
+
+    if (deadline_)
+        deadline_->cancel();
 }
 
 bool protocol_ping::stopped() const
@@ -71,57 +80,26 @@ bool protocol_ping::stopped() const
     return stopped_;
 }
 
-// This should only be invoked by the stop subscription.
-void protocol_ping::stop(const std::error_code& ec)
+void protocol_ping::handle_timer(const std::error_code& ec)
 {
-    if (stopped())
-        return;
-
-    stopped_ = true;
-    clear_timer();
-}
-
-void protocol_ping::clear_timer()
-{
-    // Ignore the error_code.
-    boost::system::error_code ec;
-    timer_.cancel(ec);
-}
-
-void protocol_ping::reset_timer()
-{
-    set_timer(timeouts_.heartbeat);
-}
-
-void protocol_ping::set_timer(const time_duration& timeout)
-{
-    // Ignore the error_code.
-    boost::system::error_code ec;
-    timer_.cancel(ec);
-    timer_.expires_from_now(timeout, ec);
-    timer_.async_wait(
-        std::bind(&protocol_ping::handle_timer,
-            shared_from_this(), _1));
-}
-
-void protocol_ping::handle_timer(const boost::system::error_code& ec)
-{
-    if (timeout::canceled(ec))
+    if (deadline::canceled(ec))
         return;
 
     const auto nonce = pseudo_random();
 
     // Subscribe to pong messages.
-    node_->subscribe_pong(
+    peer_->subscribe_pong(
         dispatch_.sync(&protocol_ping::handle_receive_pong,
             shared_from_this(), _1, _2, nonce));
 
     const ping_type random_ping = { nonce };
-    node_->send(random_ping,
+    peer_->send(random_ping,
         std::bind(&protocol_ping::handle_send_ping,
             shared_from_this(), _1));
 
-    reset_timer();
+    deadline_->start(
+        std::bind(&protocol_ping::handle_timer,
+            shared_from_this(), _1));
 }
 
 void protocol_ping::handle_send_ping(const std::error_code& ec) const
@@ -132,13 +110,13 @@ void protocol_ping::handle_send_ping(const std::error_code& ec) const
     if (ec)
     {
         log_debug(LOG_NETWORK)
-            << "Ping send failure [" << node_->address() << "] "
+            << "Ping send failure [" << peer_->address() << "] "
             << ec.message();
         return;
     }
 
     log_debug(LOG_NETWORK)
-        << "Ping sent [" << node_->address() << "]";
+        << "Ping sent [" << peer_->address() << "]";
 }
 
 void protocol_ping::handle_send_pong(const std::error_code& ec) const
@@ -149,13 +127,13 @@ void protocol_ping::handle_send_pong(const std::error_code& ec) const
     if (ec)
     {
         log_debug(LOG_NETWORK)
-            << "Pong send failure [" << node_->address() << "] "
+            << "Pong send failure [" << peer_->address() << "] "
             << ec.message();
         return;
     }
 
     log_debug(LOG_NETWORK)
-        << "Pong sent [" << node_->address() << "]";
+        << "Pong sent [" << peer_->address() << "]";
 }
 
 void protocol_ping::handle_receive_ping(const std::error_code& ec,
@@ -165,19 +143,19 @@ void protocol_ping::handle_receive_ping(const std::error_code& ec,
         return;
 
     // Resubscribe to ping messages.
-    node_->subscribe_ping(
+    peer_->subscribe_ping(
         dispatch_.sync(&protocol_ping::handle_receive_ping,
             shared_from_this(), _1, _2));
 
     if (ec)
     {
         log_debug(LOG_NETWORK)
-            << "Failure getting ping from [" << node_->address() << "]";
+            << "Failure getting ping from [" << peer_->address() << "]";
         return;
     }
 
     const pong_type reply_pong = { ping.nonce };
-    node_->send(reply_pong,
+    peer_->send(reply_pong,
         std::bind(&protocol_ping::handle_send_pong,
             shared_from_this(), _1));
 }
@@ -191,18 +169,18 @@ void protocol_ping::handle_receive_pong(const std::error_code& ec,
     if (ec)
     {
         log_debug(LOG_NETWORK)
-            << "Failure getting pong from [" << node_->address() << "]";
+            << "Failure getting pong from [" << peer_->address() << "]";
         return;
     }
 
     if (ping.nonce != nonce)
     {
         log_warning(LOG_NETWORK)
-            << "Invalid pong nonce from [" << node_->address() << "]";
+            << "Invalid pong nonce from [" << peer_->address() << "]";
 
         // This could result from message overlap due to a short period.
         // But we assume the response is not as expected and terminate.
-        node_->stop(error::bad_stream);
+        peer_->stop(error::bad_stream);
     }
 }
 

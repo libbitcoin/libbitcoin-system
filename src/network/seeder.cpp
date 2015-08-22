@@ -33,6 +33,7 @@
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
+#include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
@@ -66,13 +67,13 @@ const config::endpoint::list seeder::defaults
 #endif
 
 // This is not currently stoppable.
-seeder::seeder(threadpool& pool, hosts& hosts, handshake& shake,
+seeder::seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
     initiator& network, const config::endpoint::list& seeds,
     const network_address_type& self)
   : dispatch_(pool),
     hosts_(hosts),
+    timeouts_(timeouts),
     pool_(pool),
-    handshake_(shake),
     network_(network),
     seeds_(seeds),
     self_(self)
@@ -85,7 +86,7 @@ seeder::~seeder()
         << "Closed seeder";
 }
 
-void seeder::start(completion_handler handle_complete)
+void seeder::start(handler handle_complete)
 {
     if (seeds_.empty() || hosts_.capacity() == 0)
     {
@@ -95,22 +96,20 @@ void seeder::start(completion_handler handle_complete)
         return;
     }
 
-    const auto multiple = 
+    auto multiple =
         std::bind(&seeder::handle_seeded,
             shared_from_this(), _1, hosts_.size(), handle_complete);
 
-    using syncronize = synchronizer<completion_handler>;
+    // Require all seed callbacks before calling seeder::handle_complete.
+    auto single = synchronize(multiple, seeds_.size(), "seeder");
 
-    // Require all node callbacks before calling seeder::handle_synced.
-    const auto single = syncronize(multiple, seeds_.size(), "seeder");
-
-    // Require one callback per node before calling node_complete.
+    // Require one callback per channel before calling single.
     for (const auto& seed: seeds_)
-        start_connect(seed, syncronize(single, 1, seed.to_string()));
+        start_connect(seed, synchronize(single, 1, seed.to_string()));
 }
 
 void seeder::handle_seeded(const std::error_code& ec, size_t host_start_size,
-    completion_handler handle_complete)
+    handler handle_complete)
 {
     // We succeed only by adding seeds.
     if (hosts_.size() > host_start_size)
@@ -119,8 +118,7 @@ void seeder::handle_seeded(const std::error_code& ec, size_t host_start_size,
         handle_complete(error::operation_failed);
 }
 
-void seeder::start_connect(const config::endpoint& seed,
-    completion_handler handle_complete)
+void seeder::start_connect(const config::endpoint& seed, handler complete)
 {
     log_info(LOG_PROTOCOL)
         << "Contacting seed [" << seed << "]";
@@ -128,47 +126,49 @@ void seeder::start_connect(const config::endpoint& seed,
     // OUTBOUND CONNECT (concurrent)
     network_.connect(seed.host(), seed.port(),
         std::bind(&seeder::handle_connected,
-            shared_from_this(), _1, _2, seed, handle_complete));
+            shared_from_this(), _1, _2, seed, complete));
 }
 
-void seeder::handle_connected(const std::error_code& ec, channel_ptr node,
-    const config::endpoint& seed, completion_handler handle_complete)
+void seeder::handle_connected(const std::error_code& ec, channel_ptr peer,
+    const config::endpoint& seed, handler complete)
 {
     if (ec)
     {
         log_info(LOG_PROTOCOL)
             << "Failure contacting seed [" << seed << "] "
             << ec.message();
-        handle_complete(error::success);
+        complete(error::success);
         return;
     }
 
     log_info(LOG_PROTOCOL)
-        << "Connected seed [" << seed << "] as " << node->address();
+        << "Connected seed [" << seed << "] as " << peer->address();
 
-    // Subscribe to events and start talking on the socket.
     static const bool relay = false;
-    handshake_.start(node, 
-        dispatch_.sync(&seeder::handle_handshake,
-            shared_from_this(), _1, node, seed, handle_complete), relay);
+
+    // Attach version protocol to the new connection (until complete).
+    std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
+        self_, relay)->start(
+            dispatch_.sync(&seeder::handle_handshake,
+                shared_from_this(), _1, peer, seed, complete));
 
     // Start reading from the socket (causing subscription events).
-    node->start();
+    peer->start();
 }
 
-void seeder::handle_handshake(const std::error_code& ec, channel_ptr node,
-    const config::endpoint& seed, completion_handler handle_complete)
+void seeder::handle_handshake(const std::error_code& ec, channel_ptr peer,
+    const config::endpoint& seed, handler complete)
 {
     if (ec)
     {
         log_debug(LOG_PROTOCOL) << "Failure in seed handshake ["
-            << node->address() << "] " << ec.message();
-        handle_complete(error::success);
+            << peer->address() << "] " << ec.message();
+        complete(error::success);
         return;
     }
 
     // Attach address protocol to the new connection.
-    std::make_shared<protocol_address>(node, pool_, hosts_, self_)->start();
+    std::make_shared<protocol_address>(peer, pool_, hosts_, self_)->start();
 };
 
 // This is called for each individual address in the packet.

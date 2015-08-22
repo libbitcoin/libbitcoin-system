@@ -41,6 +41,7 @@
 #include <bitcoin/bitcoin/satoshi_serialize.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
+#include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -112,8 +113,8 @@ public:
     typedef std::function<void (const std::error_code&)> revival_handler;
     typedef std::function<void (const std::error_code&)> expiration_handler;
 
-    channel_proxy(threadpool& pool, socket_ptr socket,
-        const timeout& timeouts);
+    channel_proxy(socket_ptr socket, threadpool& pool,
+        const timeout& timeouts=timeout::defaults);
     ~channel_proxy();
 
     /// This class is not copyable.
@@ -201,15 +202,13 @@ private:
     void clear_timers();
 
     void start_timers();
-    void reset_inactivity();
+    void start_expiration();
+    void start_inactivity();
+    void start_revival();
 
-    void set_expiration(const boost::posix_time::time_duration& timeout);
-    void set_inactivity(const boost::posix_time::time_duration& timeout);
-    void set_revival(const boost::posix_time::time_duration& timeout);
-
-    void handle_expiration(const boost::system::error_code& ec);
-    void handle_inactivity(const boost::system::error_code& ec);
-    void handle_revival(const boost::system::error_code& ec);
+    void handle_expiration(const std::error_code& ec);
+    void handle_inactivity(const std::error_code& ec);
+    void handle_revival(const std::error_code& ec);
     
     void read_header();
     void read_checksum(const header_type& header);
@@ -229,13 +228,13 @@ private:
     void call_handle_send(const boost::system::error_code& ec,
         send_handler handle_send);
 
-    dispatcher dispatch_;
     socket_ptr socket_;
+    dispatcher dispatch_;
     const timeout& timeouts_;
 
-    boost::asio::deadline_timer expiration_;
-    boost::asio::deadline_timer inactivity_;
-    boost::asio::deadline_timer revival_;
+    deadline::ptr expiration_;
+    deadline::ptr inactivity_;
+    deadline::ptr revival_;
 
     revival_handler revival_handler_;
     bool stopped_;

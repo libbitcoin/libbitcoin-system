@@ -34,9 +34,9 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/handshake.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
+#include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/primitives.hpp>
 #include <bitcoin/bitcoin/utility/subscriber.hpp>
@@ -57,11 +57,11 @@ public:
     typedef std::function<void (const std::error_code&, channel_ptr)>
         broadcast_handler;
 
-    protocol(threadpool& pool, hosts& hosts, handshake& shake, 
-        initiator& network, uint16_t port=bc::protocol_port,
-        bool relay=true, size_t max_outbound=8, size_t max_inbound=8,
+    protocol(threadpool& pool, hosts& hosts, initiator& network,
+        uint16_t port=bc::protocol_port, bool relay=true,
+        size_t max_outbound=8, size_t max_inbound=8,
         const config::endpoint::list& seeds=seeder::defaults,
-        const network_address_type& self=handshake::unspecified,
+        const network_address_type& self=bc::unspecified_network_address,
         const timeout& timeouts=timeout::defaults);
     
     /// This class is not copyable.
@@ -75,17 +75,14 @@ public:
     void maintain_connection(const std::string& hostname, uint16_t port,
         bool relay=true, size_t retries=0);
 
-    // Connection_count is not thread safe, but reading the three vector sizes
-    // is considered safe and as reliable as a read against dynamic changes.
     size_t connection_count() const;
 
     template <typename Message>
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        // The intermediate variable 'lambda' is a workaround for a
-        // limitation of the MSVC++ CTP_Nov2013 generic lambda support.
-        const auto lambda = &protocol::do_broadcast<Message>;
-        dispatch_.queue(lambda, this, packet, handle_send);
+        dispatch_.queue(
+            &protocol::do_broadcast<Message>,
+                this, packet, handle_send);
     }
 
 private:
@@ -154,11 +151,11 @@ private:
     dispatcher dispatch_;
     threadpool& pool_;
     hosts& hosts_;
-    handshake& handshake_;
     initiator& network_;
+    protocol_version::ptr handshake_;
     channel_subscriber_ptr channel_subscriber_;
 
-    // TODO: These are all configuration, move to config container.
+    // Configuration.
     const config::endpoint::list& seeds_;
     const network_address_type& self_;
     const timeout& timeouts_;
