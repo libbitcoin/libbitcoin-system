@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -27,26 +27,22 @@ BOOST_AUTO_TEST_SUITE(inventory_type_id_tests)
 
 BOOST_AUTO_TEST_CASE(inventory_type_to_number_error_returns_0)
 {
-    BOOST_REQUIRE_EQUAL(0u,
-        message::inventory_type_to_number(message::inventory_type_id::error));
+    BOOST_REQUIRE_EQUAL(0u, message::inventory_type_to_number(message::inventory_type_id::error));
 }
 
 BOOST_AUTO_TEST_CASE(inventory_type_to_number_none_returns_0)
 {
-    BOOST_REQUIRE_EQUAL(0u,
-        message::inventory_type_to_number(message::inventory_type_id::none));
+    BOOST_REQUIRE_EQUAL(0u, message::inventory_type_to_number(message::inventory_type_id::none));
 }
 
 BOOST_AUTO_TEST_CASE(inventory_type_to_number_transaction_returns_1)
 {
-    BOOST_REQUIRE_EQUAL(1u,
-        message::inventory_type_to_number(message::inventory_type_id::transaction));
+    BOOST_REQUIRE_EQUAL(1u, message::inventory_type_to_number(message::inventory_type_id::transaction));
 }
 
 BOOST_AUTO_TEST_CASE(inventory_type_to_number_block_returns_2)
 {
-    BOOST_REQUIRE_EQUAL(2u,
-        message::inventory_type_to_number(message::inventory_type_id::block));
+    BOOST_REQUIRE_EQUAL(2u, message::inventory_type_to_number(message::inventory_type_id::block));
 }
 
 BOOST_AUTO_TEST_CASE(inventory_type_from_number_0_returns_error)

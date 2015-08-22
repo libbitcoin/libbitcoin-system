@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(from_big_endian_stream_unsafe_eof_stream_partial_read)
 BOOST_AUTO_TEST_CASE(from_big_endian_stream_unsafe_insufficient_data_stream_indicates_failure)
 {
     data_chunk data = { 0xFF };
-    boost::iostreams::stream<byte_source<data_chunk>> stream(data);
+    data_source stream(data);
 
     BOOST_REQUIRE(!stream.eof());
 
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(from_little_endian_stream_unsafe_eof_stream_partial_read)
 BOOST_AUTO_TEST_CASE(from_little_endian_stream_unsafe_insufficient_data_stream_indicates_failure)
 {
     data_chunk data = { 0xFF };
-    boost::iostreams::stream<byte_source<data_chunk>> stream(data);
+    data_source stream(data);
 
     BOOST_REQUIRE(!stream.eof());
 

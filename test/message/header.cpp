@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -27,7 +27,8 @@ BOOST_AUTO_TEST_SUITE(header_tests)
 
 BOOST_AUTO_TEST_CASE(to_data_checksum_variations)
 {
-    message::header instance{
+    message::header instance
+    {
         32414u,
         "foo",
         56731u,
@@ -46,7 +47,7 @@ BOOST_AUTO_TEST_CASE(to_data_checksum_variations)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw = { 0xab, 0xcd };
+    data_chunk raw{ 0xab, 0xcd };
     message::header instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -54,7 +55,8 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::header expected{
+    message::header expected
+    {
         32414u,
         "foo",
         56731u,
@@ -73,7 +75,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::header expected{
+    message::header expected
+    {
         29145u,
         "bar",
         79531u,
@@ -81,7 +84,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
     };
 
     data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
 
     auto result = message::header::factory_from_data(istream);
 
@@ -93,7 +96,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::header expected{
+    message::header expected
+    {
         1u,
         "bazbazbazbaz",
         2u,
@@ -101,7 +105,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     };
 
     data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
 
     auto result = message::header::factory_from_data(source);

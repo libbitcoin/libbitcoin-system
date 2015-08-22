@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(factory_data_chunk_success)
 
 BOOST_AUTO_TEST_CASE(factory_stream_success)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> stream(valid_raw_output);
+    data_source stream(valid_raw_output);
     auto instance = chain::transaction_output::factory_from_data(stream);
     BOOST_REQUIRE(instance.is_valid());
     BOOST_REQUIRE_EQUAL(instance.satoshi_size(), valid_raw_output.size());
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(factory_stream_success)
 
 BOOST_AUTO_TEST_CASE(factory_reader_success)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> stream(valid_raw_output);
+    data_source stream(valid_raw_output);
     istream_reader source(stream);
     auto instance = chain::transaction_output::factory_from_data(source);
     BOOST_REQUIRE(instance.is_valid());

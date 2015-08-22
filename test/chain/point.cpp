@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -28,7 +28,6 @@ BOOST_AUTO_TEST_SUITE(point_tests)
 BOOST_AUTO_TEST_CASE(from_data_fails)
 {
     data_chunk data(10);
-
     chain::point instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
@@ -38,11 +37,14 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
 BOOST_AUTO_TEST_CASE(to_data_from_data_roundtrip)
 {
     uint32_t index = 53213;
-    hash_digest hash = {
-        0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
-        0x01, 0x01, 0xab, 0x11, 0x11, 0xcd, 0x11, 0x11,
-        0x01, 0x10, 0x11, 0xab, 0x11, 0x11, 0xcd, 0x11,
-        0x01, 0x11, 0x11, 0x11, 0xab, 0x11, 0x11, 0xcd
+    hash_digest hash
+    {
+        {
+            0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+            0x01, 0x01, 0xab, 0x11, 0x11, 0xcd, 0x11, 0x11,
+            0x01, 0x10, 0x11, 0xab, 0x11, 0x11, 0xcd, 0x11,
+            0x01, 0x11, 0x11, 0x11, 0xab, 0x11, 0x11, 0xcd
+        }
     };
 
     chain::point initial{ hash, index };
@@ -75,10 +77,7 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_data_chunk)
     auto point = chain::point::factory_from_data(rawdata);
 
     BOOST_REQUIRE(point.is_valid());
-
-    BOOST_REQUIRE_EQUAL(encode_hash(point.hash),
-        "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
-
+    BOOST_REQUIRE_EQUAL(encode_hash(point.hash), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
     BOOST_REQUIRE(point.index == 0);
 
     data_chunk output = point.to_data();
@@ -98,14 +97,11 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_stream)
         0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
     }));
 
-    boost::iostreams::stream<byte_source<data_chunk>> istream(rawdata);
+    data_source istream(rawdata);
     auto point = chain::point::factory_from_data(istream);
 
     BOOST_REQUIRE(point.is_valid());
-
-    BOOST_REQUIRE_EQUAL(encode_hash(point.hash),
-        "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
-
+    BOOST_REQUIRE_EQUAL(encode_hash(point.hash), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
     BOOST_REQUIRE(point.index == 0);
 
     data_chunk output = point.to_data();
@@ -125,15 +121,12 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_reader)
         0xc8, 0xdb, 0x1c, 0x15, 0xaf, 0xa0, 0xd5, 0x8e, 0x00, 0x00, 0x00, 0x00
     }));
 
-    boost::iostreams::stream<byte_source<data_chunk>> istream(rawdata);
+    data_source istream(rawdata);
     istream_reader source(istream);
     auto point = chain::point::factory_from_data(source);
 
     BOOST_REQUIRE(point.is_valid());
-
-    BOOST_REQUIRE_EQUAL(encode_hash(point.hash),
-        "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
-
+    BOOST_REQUIRE_EQUAL(encode_hash(point.hash), "8ed5a0af151cdbc8c0c546cde29334f15b4472bba105394a1221a7f088246846");
     BOOST_REQUIRE(point.index == 0);
 
     data_chunk output = point.to_data();

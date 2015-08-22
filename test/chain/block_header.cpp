@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -38,7 +38,8 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    chain::block_header expected {
+    chain::block_header expected
+    {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -57,7 +58,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    chain::block_header expected {
+    chain::block_header expected
+    {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -67,7 +69,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
     };
 
     data_chunk data = expected.to_data(false);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
 
     auto result = chain::block_header::factory_from_data(istream, false);
 
@@ -77,7 +79,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    chain::block_header expected {
+    chain::block_header expected
+    {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -87,7 +90,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     };
 
     data_chunk data = expected.to_data(false);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
 
     auto result = chain::block_header::factory_from_data(source, false);
@@ -98,7 +101,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_transaction_count_does_not_match)
 {
-    chain::block_header expected {
+    chain::block_header expected
+    {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -109,7 +113,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_transact
     };
 
     data_chunk data = expected.to_data(false);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
 
     auto result = chain::block_header::factory_from_data(source, false);
@@ -120,7 +124,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_transact
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_transaction_count_matches)
 {
-    chain::block_header expected {
+    chain::block_header expected
+    {
         10,
         hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
         hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -131,7 +136,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_transaction
     };
 
     data_chunk data = expected.to_data(true);
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
 
     auto result = chain::block_header::factory_from_data(source, true);

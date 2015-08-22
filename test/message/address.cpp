@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -54,14 +54,17 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::address expected{
+    message::address expected
+    {
         {
-            message::network_address{
+            {
                 734678u,
                 5357534u,
                 {
-                    0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                    0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
+                    {
+                        0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
+                        0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
+                    }
                 },
                 123u
             }
@@ -80,14 +83,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::address expected{
+    message::address expected
+    {
         {
-            message::network_address{
+            {
                 734678u,
                 5357534u,
                 {
-                    0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                    0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
+                    {
+                        0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
+                        0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
+                    }
                 },
                 123u
             }
@@ -95,7 +101,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
     };
 
     data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
 
     auto result = message::address::factory_from_data(istream);
 
@@ -107,14 +113,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::address expected{
+    message::address expected
+    {
         {
-            message::network_address{
+            {
                 734678u,
                 5357534u,
                 {
-                    0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
-                    0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
+                    {
+                        0x47, 0x81, 0x6a, 0x40, 0xbb, 0x92, 0xbd, 0xb4,
+                        0xe0, 0xb8, 0x25, 0x68, 0x61, 0xf9, 0x6a, 0x55
+                    }
                 },
                 123u
             }
@@ -122,7 +131,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     };
 
     data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
 
     auto result = message::address::factory_from_data(source);

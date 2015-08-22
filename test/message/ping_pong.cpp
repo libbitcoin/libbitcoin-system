@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -23,12 +23,12 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(nonce_tests)
+BOOST_AUTO_TEST_SUITE(ping_pong_tests)
 
-BOOST_AUTO_TEST_CASE(nonce_from_data_insufficient_bytes_failure)
+BOOST_AUTO_TEST_CASE(ping_pong_from_data_insufficient_bytes_failure)
 {
     data_chunk raw(1);
-    message::nonce_base instance;
+    message::ping_pong instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
 }
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_stream)
     expected.nonce = 5087222u;
 
     data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
 
     auto result = message::ping::factory_from_data(istream);
 
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_reader)
     expected.nonce = 6456147u;
 
     data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
 
     auto result = message::ping::factory_from_data(source);
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_stream)
     expected.nonce = 3100693u;
 
     data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
 
     auto result = message::pong::factory_from_data(istream);
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_reader)
     expected.nonce = 4642675u;
 
     data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     istream_reader source(istream);
 
     auto result = message::pong::factory_from_data(source);
