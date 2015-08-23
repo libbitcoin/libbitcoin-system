@@ -256,6 +256,7 @@ data_chunk bip38_lock_intermediate(
     return bip38_encrypted_key;
 }
 
+#ifdef WITH_ICU
 bool bip38_lock_verify(
     const data_chunk& confirmation_code,
     const std::string& passphrase, std::string& out_address)
@@ -587,6 +588,7 @@ ec_secret bip38_unlock_secret(
     }
     return bip38_decrypted_key;
 }
+#endif
 
 } // namespace bip38
 } // namespace libbitcoin
