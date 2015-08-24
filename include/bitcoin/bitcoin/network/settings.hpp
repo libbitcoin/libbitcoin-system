@@ -42,6 +42,7 @@ struct BC_API settings
     uint32_t channel_heartbeat_minutes;
     uint32_t channel_inactivity_minutes;
     uint32_t channel_expiration_minutes;
+    uint32_t channel_germination_seconds;
     uint32_t host_pool_capacity;
     bool relay_transactions;
     boost::filesystem::path hosts_file;
