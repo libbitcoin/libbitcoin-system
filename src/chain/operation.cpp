@@ -194,7 +194,7 @@ std::string operation::to_string() const
     if (data.empty())
         ss << opcode_to_string(code);
     else
-        ss << "[" << encode_base16(data) << "]";
+        ss << "[ " << encode_base16(data) << " ]";
 
     return ss.str();
 }
@@ -293,12 +293,12 @@ bool is_script_hash_type(const operation::stack& ops)
         ops[2].code == opcode::equal;
 }
 
-bool is_stealth_info_type(const operation::stack& ops)
+bool is_null_data_type(const operation::stack& ops)
 {
     return ops.size() == 2 &&
         ops[0].code == opcode::return_ &&
         ops[1].code == opcode::special &&
-        ops[1].data.size() >= hash_size;
+        ops[1].data.size() <= 80;
 }
 
 bool is_multisig_type(const operation::stack& ops)
@@ -361,7 +361,7 @@ bool is_script_code_sig_type(const operation::stack& ops)
         redeem_type == payment_type::pubkey;
         redeem_type == payment_type::pubkey_hash;
         redeem_type == payment_type::script_hash;
-        redeem_type == payment_type::stealth_info;
+        redeem_type == payment_type::null_data;
 }
 
 bool is_multi_pubkey_sig_type(const operation::stack& ops)

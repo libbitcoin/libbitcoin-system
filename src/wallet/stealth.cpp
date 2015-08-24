@@ -35,7 +35,8 @@ binary_type calculate_stealth_prefix(const chain::script& stealth_script)
 bool extract_stealth_info(stealth_info& info,
     const chain::script& output_script)
 {
-    if (output_script.type() != chain::payment_type::stealth_info)
+    if (output_script.type() != chain::payment_type::null_data ||
+        output_script.operations[1].data.size() < hash_size)
         return false;
 
     info.bitfield = calculate_stealth_prefix(output_script);
@@ -61,7 +62,7 @@ ec_secret shared_secret(const ec_secret& secret, const ec_point& pubkey)
     return sha256_hash(final);
 }
 
-ec_point uncover_stealth(const ec_point& ephem_pubkey, 
+ec_point uncover_stealth(const ec_point& ephem_pubkey,
     const ec_secret& scan_secret, const ec_point& spend_pubkey)
 {
     auto final = spend_pubkey;
