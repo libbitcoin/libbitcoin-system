@@ -46,7 +46,7 @@ public:
     std::streamsize read(char_type* buffer, std::streamsize size)
     {
         const auto amount = container_.size() - position_;
-        auto result = std::min(size, static_cast<std::streamsize>(amount));
+        size_t result = std::min(size, static_cast<std::streamsize>(amount));
 
         // TODO: use ios eof symbol (template-based).
         if (result <= 0)
