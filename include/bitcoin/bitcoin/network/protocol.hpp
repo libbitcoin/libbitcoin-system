@@ -24,7 +24,6 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <system_error>
 #include <vector>
 #include <boost/date_time.hpp>
 #include <boost/filesystem.hpp>
@@ -32,6 +31,7 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -47,14 +47,11 @@ namespace network {
 class BC_API protocol
 {
 public:
-    typedef std::function<void(const std::error_code&)>
-        completion_handler;
-    typedef std::function<void (const std::error_code&, size_t)>
+    typedef std::function<void(const code&)> completion_handler;
+    typedef std::function<void(const code&, channel::ptr)> channel_handler;
+    typedef std::function<void(const code&, channel::ptr)> broadcast_handler;
+    typedef std::function<void(const code&, size_t)>
         fetch_connection_count_handler;
-    typedef std::function<void (const std::error_code&, channel_ptr)>
-        channel_handler;
-    typedef std::function<void (const std::error_code&, channel_ptr)>
-        broadcast_handler;
 
     protocol(threadpool& pool, hosts& hosts, initiator& network,
         uint16_t port=bc::protocol_port, bool relay=true,
@@ -85,66 +82,63 @@ public:
     }
 
 private:
-    typedef std::vector<channel_ptr> channel_ptr_list;
-    typedef subscriber<const std::error_code&, channel_ptr> channel_subscriber;
+    typedef std::vector<channel::ptr> channel_ptr_list;
+    typedef subscriber<const code&, channel::ptr> channel_subscriber;
     typedef channel_subscriber::ptr channel_subscriber_ptr;
 
     // Common to all connection types.
-    void handle_handshake(const std::error_code& ec, channel_ptr node);
-    void start_talking(channel_ptr node,
+    void handle_handshake(const code& ec, channel::ptr node);
+    void start_talking(channel::ptr node,
         channel_proxy::stop_handler handle_stop, bool relay);
-    void remove_connection(channel_ptr_list& connections, channel_ptr node);
+    void remove_connection(channel_ptr_list& connections, channel::ptr node);
 
     // Inbound connections.
     void start_accepting();
-    void start_accept(const std::error_code& ec, acceptor_ptr accept);
-    void handle_accept(const std::error_code& ec, channel_ptr node,
-        acceptor_ptr accept);
+    void start_accept(const code& ec, acceptor::ptr accept);
+    void handle_accept(const code& ec, channel::ptr node,
+        acceptor::ptr accept);
 
     // Outbound connections.
     void new_connection();
     void start_seeding(completion_handler handle_complete);
-    void start_connecting(const std::error_code& ec,
-        completion_handler handle_complete);
-    void start_connect(const std::error_code& ec,
-        const config::authority& peer);
-    void handle_connect(const std::error_code& ec, channel_ptr node,
+    void start_connecting(const code& ec, completion_handler handle_complete);
+    void start_connect(const code& ec, const config::authority& peer);
+    void handle_connect(const code& ec, channel::ptr node,
         const config::authority& peer);
 
     // Manual connections.
-    void handle_manual_connect(const std::error_code& ec, channel_ptr node,
+    void handle_manual_connect(const code& ec, channel::ptr node,
         const std::string& hostname, uint16_t port, bool relay, size_t retry);
     void retry_manual_connection(const config::endpoint& address,
         bool relay, size_t retry);
 
     // Remove channels from lists when disconnected.
-    void inbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname);
-    void outbound_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname);
-    void manual_channel_stopped(const std::error_code& ec,
-        channel_ptr node, const std::string& hostname, bool relay,
-        size_t retries);
+    void inbound_channel_stopped(const code& ec, channel::ptr node,
+        const std::string& hostname);
+    void outbound_channel_stopped(const code& ec, channel::ptr node,
+        const std::string& hostname);
+    void manual_channel_stopped(const code& ec, channel::ptr node,
+        const std::string& hostname, bool relay, size_t retries);
 
     // Channel metadata.
     bool is_blacklisted(const config::authority& peer) const;
     bool is_connected(const config::authority& peer) const;
-    bool is_loopback(channel_ptr node) const;
+    bool is_loopback(channel::ptr node) const;
 
     template <typename Message>
     void do_broadcast(const Message& packet, broadcast_handler handle_send)
     {
         for (const auto node: outbound_connections_)
             node->send(packet,
-                [=](const std::error_code& ec){ handle_send(ec, node); });
+                [=](const code& ec){ handle_send(ec, node); });
 
         for (const auto node: manual_connections_)
             node->send(packet,
-                [=](const std::error_code& ec){ handle_send(ec, node); });
+                [=](const code& ec){ handle_send(ec, node); });
 
         for (const auto node: inbound_connections_)
             node->send(packet,
-                [=](const std::error_code& ec){ handle_send(ec, node); });
+                [=](const code& ec){ handle_send(ec, node); });
     }
 
     dispatcher dispatch_;

@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_PROTOCOL_ADDRESS_HPP
-#define LIBBITCOIN_NETWORK_PROTOCOL_ADDRESS_HPP
+#ifndef LIBBITCOIN_NETWORK_PROTOCOL_SEED_HPP
+#define LIBBITCOIN_NETWORK_PROTOCOL_SEED_HPP
 
-#include <memory>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -34,26 +34,27 @@ namespace libbitcoin {
 namespace network {
 
 /**
- * Address protocol.
- * Attach this to a node immediately following handshake completion.
+ * Seeding protocol.
+ * Attach this to a node immediately following seed handshake completion.
  */
-class BC_API protocol_address
+class BC_API protocol_seed
   : public protocol_base
 {
 public:
     /**
-     * Start an address protocol instance.
-     * @param[in]  peer   The channel on which to start the protocol.
-     * @param[in]  pool   The thread pool used by the protocol.
-     * @param[in]  hosts  The address pool that this class populates.
-     * @param[in]  self   The address that represents us to peers.
+     * Start a seed protocol instance.
+     * @param[in]  peer      The channel on which to start the protocol.
+     * @param[in]  pool      The thread pool used by the protocol.
+     * @param[in]  timeout   The timer period.
+     * @param[in]  complete  Callback invoked upon stop or complete.
+     * @param[in]  hosts     The address pool that this class populates.
+     * @param[in]  self      The address that represents our node to this peer.
      */
-    protocol_address(channel::ptr peer, threadpool& pool, hosts& hosts,
+    protocol_seed(channel::ptr peer, threadpool& pool,
+        const asio::duration& timeout, handler complete, hosts& hosts,
         const message::network_address& self);
 
 private:
-    std::shared_ptr<protocol_address> shared();
-
     void handle_receive_address(const code& ec,
         const message::address& address);
     void handle_receive_get_address(const code& ec,
@@ -63,7 +64,7 @@ private:
     void handle_store_addresses(const code& ec) const;
 
     hosts& hosts_;
-    const message::address self_;
+    message::address self_;
 };
 
 } // namespace network

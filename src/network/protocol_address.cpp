@@ -19,214 +19,120 @@
  */
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 
-#include <memory>
 #include <functional>
-#include <system_error>
-#include <boost/date_time.hpp>
-#include <boost/system/error_code.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
-#include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
     
+using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-using boost::posix_time::time_duration;
 
-protocol_address::protocol_address(channel_ptr peer, threadpool& pool,
-    hosts& hosts, const message::network_address& self)
-  : peer_(peer),
-    pool_(pool),
-    dispatch_(pool),
-    hosts_(hosts),
-    self_({ { self } })
-{
-}
-
-message::network_address protocol_address::address() const
-{
-    return peer_->address().to_network_address();
-}
-
-bool protocol_address::publish_self_address() const
+protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
+    hosts& hosts, const network_address& self)
+  : hosts_(hosts), self_({ { self } }), protocol_base(peer, pool)
 {
     BITCOIN_ASSERT(!self_.addresses.empty());
-    return self_.addresses.front().port != 0;
-}
+    if (self_.addresses.front().port != 0)
+        ////send(self_, &protocol_address::handle_send_address);
 
-// This should be started immediately following handshake and ping start.
-void protocol_address::start()
-{
-    // Send our address, if the port is configured.
-    if (publish_self_address())
-        peer_->send(self_,
-            std::bind(&protocol_address::handle_send_address,
-                shared_from_this(), _1, nullptr));
-
-    // Ignore and don't request address messages if we can't store them.
     if (hosts_.capacity() == 0)
         return;
 
-    // Subscribe to stop messages.
-    peer_->subscribe_stop(
-        dispatch_.sync(&protocol_address::handle_stop,
-            shared_from_this(), _1, nullptr));
-
-    // Subscribe to address messages.
-    peer_->subscribe_address(
-        dispatch_.sync(&protocol_address::handle_receive_address,
-            shared_from_this(), _1, _2, nullptr));
-
-    // Ask for addresses.
-    peer_->send(message::get_address(),
-        std::bind(&protocol_address::handle_send_get_address,
-            shared_from_this(), _1, nullptr));
+    ////accept<address>(&protocol_address::handle_receive_address, _1, _2);
+    ////accept<get_address>(&protocol_address::handle_receive_get_address, _1, _2);
+    ////send(get_address(), &protocol_address::handle_send_get_address);
 }
 
-void protocol_address::start(handler handle_seeded,
-    const time_duration& timeout)
+std::shared_ptr<protocol_address> protocol_address::shared()
 {
-    // Require [three] callbacks (or any error) before calling handle_handshake.
-    auto complete = synchronize(handle_seeded, 3, "address");
-
-    // Subscribe to stop messages.
-    peer_->subscribe_stop(
-        dispatch_.sync(&protocol_address::handle_stop,
-            shared_from_this(), _1, complete));
-
-    // 1 of 3
-    // Send our address, if the port is configured.
-    if (!publish_self_address())
-        complete(error::success);
-    else
-        peer_->send(self_,
-            std::bind(&protocol_address::handle_send_address,
-                shared_from_this(), _1, complete));
-
-    // Exit if we can't store addresses.
-    if (hosts_.capacity() == 0)
-    {
-        complete(error::not_found);
-        return;
-    }
-
-    // 2 of 3
-    // Subscribe to address messages.
-    peer_->subscribe_address(
-        dispatch_.sync(&protocol_address::handle_receive_address,
-            shared_from_this(), _1, _2, complete));
-
-    // 3 of 3
-    // Ask for addresses.
-    peer_->send(message::get_address(),
-        std::bind(&protocol_address::handle_send_get_address,
-            shared_from_this(), _1, complete));
-
-    // Subscribe to timeout event.
-    deadline_ = std::make_shared<deadline>(pool_, timeout);
-    deadline_->start(
-        std::bind(&protocol_address::handle_timer,
-            shared_from_this(), _1, complete));
+    return shared_from_base<protocol_address>();
 }
 
-bool protocol_address::stopped() const
-{
-    return stopped_;
-}
-
-void protocol_address::handle_stop(const std::error_code& ec, handler complete)
-{
-    if (stopped())
-        return;
-
-    stopped_ = true;
-
-    if (deadline_)
-        deadline_->cancel();
-
-    if (complete != nullptr)
-        complete(ec);
-}
-
-void protocol_address::handle_timer(const std::error_code& ec,
-    handler complete) const
-{
-    if (stopped())
-        return;
-
-    if (!deadline::canceled(ec))
-        complete(error::channel_timeout);
-}
-
-void protocol_address::handle_receive_address(const std::error_code& ec,
-    const message::address& message, handler complete)
+void protocol_address::handle_receive_address(const code& ec,
+    const address& message)
 {
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure getting addresses from ["
-            << peer_->address() << "] " << ec.message();
-        peer_->stop(error::bad_stream);
+            << "Failure receiving address message from [" << peer() << "] "
+            << ec.message();
+        stop(error::bad_stream);
         return;
     }
 
     // Resubscribe to address messages.
-    peer_->subscribe_address(
-        dispatch_.sync(&protocol_address::handle_receive_address,
-            shared_from_this(), _1, _2, complete));
+    ////accept<address>(&protocol_address::handle_receive_address, _1, _2);
 
     log_debug(LOG_PROTOCOL)
-        << "Storing addresses from [" << peer_->address() << "] ("
+        << "Storing addresses from [" << peer() << "] ("
         << message.addresses.size() << ")";
 
-    // TODO: manage host timestamps.
-    hosts_.store(message.addresses,
+    // TODO: manage timestamps (active peers are connected < 3 hours ago).
+    hosts_.store(message.addresses, 
         std::bind(&protocol_address::handle_store_addresses,
-            shared_from_this(), _1, complete));
+            shared_from_base<protocol_address>(), _1));
 }
 
-void protocol_address::handle_send_address(const std::error_code& ec,
-    handler complete) const
+void protocol_address::handle_receive_get_address(const code& ec,
+    const get_address& message)
+{
+    if (ec)
+    {
+        log_debug(LOG_PROTOCOL)
+            << "Failure receiving get_address message from [" << peer() << "] "
+            << ec.message();
+        stop(error::bad_stream);
+        return;
+    }
+
+    // TODO: pull active hosts from host cache.
+    // TODO: need to distort for privacy, don't send currently-connected peers.
+    address active;
+    if (active.addresses.empty())
+        return;
+
+    // TODO: allowing repeated queries can allow a peer to map our history.
+    // Resubscribe to get_address messages.
+    ////accept<get_address>(&protocol_address::handle_receive_get_address, _1, _2);
+
+    log_debug(LOG_PROTOCOL)
+        << "Sending addresses to [" << peer() << "] ("
+        << active.addresses.size() << ")";
+
+    ////send(active, &protocol_address::handle_send_address);
+}
+
+void protocol_address::handle_send_address(const code& ec) const
 {
     if (ec)
         log_debug(LOG_PROTOCOL)
-            << "Failure sending address message ["
-            << peer_->address() << "] " << ec.message();
-
-    if (complete != nullptr)
-        complete(ec);
+            << "Failure sending address [" << peer() << "] "
+            << ec.message();
 }
 
-void protocol_address::handle_send_get_address(const std::error_code& ec,
-    handler complete) const
+void protocol_address::handle_send_get_address(const code& ec) const
 {
     if (ec)
         log_debug(LOG_PROTOCOL)
-            << "Failure sending get address message ["
-            << peer_->address() << "] " << ec.message();
-
-    if (complete != nullptr)
-        complete(ec);
+            << "Failure sending get_address [" << peer() << "] "
+            << ec.message();
 }
 
-void protocol_address::handle_store_addresses(const std::error_code& ec,
-    handler complete) const
+void protocol_address::handle_store_addresses(const code& ec) const
 {
     if (ec)
         log_error(LOG_PROTOCOL)
-            << "Failure storing addresses from ["
-            << peer_->address() << "] " << ec.message();
-
-    if (complete != nullptr)
-        complete(ec);
+            << "Failure storing addresses from [" << peer() << "] "
+            << ec.message();
 }
 
 } // namespace network

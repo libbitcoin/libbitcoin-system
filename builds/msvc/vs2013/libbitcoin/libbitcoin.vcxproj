@@ -133,6 +133,8 @@
     <ClCompile Include="..\..\..\..\src\network\channel_proxy.cpp" />
     <ClCompile Include="..\..\..\..\src\network\channel_stream_loader.cpp" />
     <ClCompile Include="..\..\..\..\src\network\connector.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\protocol_base.cpp" />
+    <ClCompile Include="..\..\..\..\src\network\protocol_seed.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol_version.cpp" />
     <ClCompile Include="..\..\..\..\src\network\hosts.cpp" />
     <ClCompile Include="..\..\..\..\src\network\initiator.cpp" />
@@ -222,11 +224,14 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\not_found.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\verack.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\asio.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_loader_module.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_proxy.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_stream_loader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_seed.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\hosts.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\initiator.hpp" />

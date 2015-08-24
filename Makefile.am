@@ -115,7 +115,9 @@ src_libbitcoin_la_SOURCES = \
     src/network/initiator.cpp \
     src/network/protocol.cpp \
     src/network/protocol_address.cpp \
+    src/network/protocol_base.cpp \
     src/network/protocol_ping.cpp \
+    src/network/protocol_seed.cpp \
     src/network/protocol_version.cpp \
     src/network/seeder.cpp \
     src/network/timeout.cpp \
@@ -334,6 +336,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/acceptor.hpp \
+    include/bitcoin/bitcoin/network/asio.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
     include/bitcoin/bitcoin/network/channel_loader_module.hpp \
     include/bitcoin/bitcoin/network/channel_proxy.hpp \
@@ -343,7 +346,9 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/initiator.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
+    include/bitcoin/bitcoin/network/protocol_base.hpp \
     include/bitcoin/bitcoin/network/protocol_ping.hpp \
+    include/bitcoin/bitcoin/network/protocol_seed.hpp \
     include/bitcoin/bitcoin/network/protocol_version.hpp \
     include/bitcoin/bitcoin/network/seeder.hpp \
     include/bitcoin/bitcoin/network/settings.hpp \

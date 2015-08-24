@@ -64,6 +64,7 @@
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
@@ -73,7 +74,9 @@
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
+#include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
+#include <bitcoin/bitcoin/network/protocol_seed.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/network/settings.hpp>
