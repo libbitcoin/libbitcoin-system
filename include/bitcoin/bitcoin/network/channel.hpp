@@ -108,13 +108,6 @@ public:
         proxy_->send(packet, handle_send);
     }
 
-    // Generic subscription (redundant with enumerated subscribers).
-    template <typename Message, typename Handler, typename... Args>
-    void subscribe(Handler&& handler, Args&&... args)
-    {
-        subscribe<Message>(handler, args);
-    }
-
     void send_raw(const message::header& packet_header,
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
