@@ -20,10 +20,10 @@
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 
 #include <functional>
-#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -31,73 +31,85 @@
 namespace libbitcoin {
 namespace network {
     
+using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-using boost::posix_time::time_duration;
 
-protocol_ping::protocol_ping(channel::ptr peer, threadpool& pool,
-    const time_duration& period)
-  : peer_(peer),
-    deadline_(std::make_shared<deadline>(pool, period)),
-    dispatch_(pool),
-    stopped_(false)
+#define BIND1(method, a1) \
+    BC_BIND1(method, protocol_ping, a1)
+
+#define SEND1(instance, method, a1) \
+    BC_SEND1(instance, method, protocol_ping, a1)
+
+#define RECEIVE2(Message, method, a1, a2) \
+    BC_RECEIVE2(Message, method, protocol_ping, a1, a2)
+
+#define RECEIVE3(Message, method, a1, a2, a3) \
+    BC_RECEIVE3(Message, method, protocol_ping, a1, a2, a3)
+
+protocol_ping::protocol_ping(channel::ptr channel, threadpool& pool,
+    const asio::duration& period)
+  : protocol_base(channel, pool, period, BIND1(send_ping, _1))
 {
-}
-
-// This should be started immediately following handshake.
-void protocol_ping::start()
-{
-    // Subscribe to stop messages.
-    peer_->subscribe_stop(
-        dispatch_.sync(&protocol_ping::handle_stop,
-            shared_from_this(), _1));
-
-    // Subscribe to ping messages.
-    peer_->subscribe_ping(
-        dispatch_.sync(&protocol_ping::handle_receive_ping,
-            shared_from_this(), _1, _2));
+    RECEIVE2(ping, handle_receive_ping, _1, _2);
 
     // Send initial ping message by simulating first heartbeat.
-    dispatch_.queue(
-        std::bind(&protocol_ping::handle_timer,
-            shared_from_this(), error::success));
+    callback(error::success);
 }
 
-void protocol_ping::handle_stop(const code& ec)
+// This is fired by the callback (i.e. base timer and stop handler).
+void protocol_ping::send_ping(const code& ec)
 {
-    if (stopped())
-        return;
-
-    stopped_ = true;
-
-    if (deadline_)
-        deadline_->cancel();
-}
-
-bool protocol_ping::stopped() const
-{
-    return stopped_;
-}
-
-void protocol_ping::handle_timer(const code& ec)
-{
-    if (deadline::canceled(ec))
+    if (stopped() || deadline::canceled(ec))
         return;
 
     const auto nonce = pseudo_random();
 
-    // Subscribe to pong messages.
-    peer_->subscribe_pong(
-        dispatch_.sync(&protocol_ping::handle_receive_pong,
-            shared_from_this(), _1, _2, nonce));
+    RECEIVE3(pong, handle_receive_pong, _1, _2, nonce);
+    SEND1(message::ping(nonce), handle_send_ping, _1);
+}
 
-    peer_->send(message::ping(nonce),
-        std::bind(&protocol_ping::handle_send_ping,
-            shared_from_this(), _1));
+void protocol_ping::handle_receive_ping(const code& ec,
+    const message::ping& message)
+{
+    if (stopped())
+        return;
 
-    deadline_->start(
-        std::bind(&protocol_ping::handle_timer,
-            shared_from_this(), _1));
+    if (ec)
+    {
+        log_debug(LOG_NETWORK)
+            << "Failure getting ping from [" << authority() << "]";
+        stop(error::bad_stream);
+        return;
+    }
+
+    // Resubscribe to ping messages.
+    RECEIVE2(ping, handle_receive_ping, _1, _2);
+    SEND1(message::pong(message.nonce), handle_send_pong, _1);
+}
+
+void protocol_ping::handle_receive_pong(const code& ec,
+    const message::pong& message, uint64_t nonce)
+{
+    if (stopped())
+        return;
+
+    if (ec)
+    {
+        log_debug(LOG_NETWORK)
+            << "Failure getting pong from [" << authority() << "]";
+        return;
+    }
+
+    if (message.nonce != nonce)
+    {
+        log_warning(LOG_NETWORK)
+            << "Invalid pong nonce from [" << authority() << "]";
+
+        // This could result from message overlap due to a short period,
+        // but we assume the response is not as expected and terminate.
+        stop(error::bad_stream);
+    }
 }
 
 void protocol_ping::handle_send_ping(const code& ec) const
@@ -106,15 +118,9 @@ void protocol_ping::handle_send_ping(const code& ec) const
         return;
 
     if (ec)
-    {
         log_debug(LOG_NETWORK)
-            << "Ping send failure [" << peer_->address() << "] "
+            << "Failure sending ping to [" << authority() << "] "
             << ec.message();
-        return;
-    }
-
-    log_debug(LOG_NETWORK)
-        << "Ping sent [" << peer_->address() << "]";
 }
 
 void protocol_ping::handle_send_pong(const code& ec) const
@@ -123,62 +129,9 @@ void protocol_ping::handle_send_pong(const code& ec) const
         return;
 
     if (ec)
-    {
         log_debug(LOG_NETWORK)
-            << "Pong send failure [" << peer_->address() << "] "
+            << "Failure sending pong to [" << authority() << "] "
             << ec.message();
-        return;
-    }
-
-    log_debug(LOG_NETWORK)
-        << "Pong sent [" << peer_->address() << "]";
-}
-
-void protocol_ping::handle_receive_ping(const code& ec,
-    const message::ping& ping)
-{
-    if (stopped())
-        return;
-
-    // Resubscribe to ping messages.
-    peer_->subscribe_ping(
-        dispatch_.sync(&protocol_ping::handle_receive_ping,
-            shared_from_this(), _1, _2));
-
-    if (ec)
-    {
-        log_debug(LOG_NETWORK)
-            << "Failure getting ping from [" << peer_->address() << "]";
-        return;
-    }
-
-    peer_->send(message::pong(ping.nonce),
-        std::bind(&protocol_ping::handle_send_pong,
-            shared_from_this(), _1));
-}
-
-void protocol_ping::handle_receive_pong(const code& ec,
-    const message::pong& ping, uint64_t nonce)
-{
-    if (stopped())
-        return;
-
-    if (ec)
-    {
-        log_debug(LOG_NETWORK)
-            << "Failure getting pong from [" << peer_->address() << "]";
-        return;
-    }
-
-    if (ping.nonce != nonce)
-    {
-        log_warning(LOG_NETWORK)
-            << "Invalid pong nonce from [" << peer_->address() << "]";
-
-        // This could result from message overlap due to a short period.
-        // But we assume the response is not as expected and terminate.
-        peer_->stop(error::bad_stream);
-    }
 }
 
 } // namespace network

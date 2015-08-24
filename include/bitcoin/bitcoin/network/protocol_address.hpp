@@ -21,6 +21,7 @@
 #define LIBBITCOIN_NETWORK_PROTOCOL_ADDRESS_HPP
 
 #include <memory>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
@@ -46,10 +47,10 @@ public:
      * @param[in]  peer   The channel on which to start the protocol.
      * @param[in]  pool   The thread pool used by the protocol.
      * @param[in]  hosts  The address pool that this class populates.
-     * @param[in]  self   The address that represents us to peers.
+     * @param[in]  self   The authority that represents us to this peer.
      */
     protocol_address(channel::ptr peer, threadpool& pool, hosts& hosts,
-        const message::network_address& self);
+        const config::authority& self);
 
 private:
     void handle_receive_address(const code& ec,
@@ -61,7 +62,7 @@ private:
     void handle_store_addresses(const code& ec) const;
 
     hosts& hosts_;
-    const message::address self_;
+    const config::authority self_;
 };
 
 } // namespace network

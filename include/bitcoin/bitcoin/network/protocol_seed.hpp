@@ -22,6 +22,7 @@
 
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
@@ -48,11 +49,11 @@ public:
      * @param[in]  timeout   The timer period.
      * @param[in]  complete  Callback invoked upon stop or complete.
      * @param[in]  hosts     The address pool that this class populates.
-     * @param[in]  self      The address that represents our node to this peer.
+     * @param[in]  self      The authority that represents us to this peer.
      */
     protocol_seed(channel::ptr peer, threadpool& pool,
         const asio::duration& timeout, handler complete, hosts& hosts,
-        const message::network_address& self);
+        const config::authority& self);
 
 private:
     void handle_receive_address(const code& ec,
@@ -64,7 +65,7 @@ private:
     void handle_store_addresses(const code& ec) const;
 
     hosts& hosts_;
-    message::address self_;
+    const config::authority self_;
 };
 
 } // namespace network

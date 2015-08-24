@@ -113,32 +113,40 @@ private:
 // For use in derived protocols for simplifying bind() calls.
 #define BC_BIND0(method, Type) \
     std::bind(&Type::method, shared_from_base<Type>())
-#define BC_BIND1(method, Type, A1) \
-    std::bind(&Type::method, shared_from_base<Type>(), A1)
-#define BC_BIND2(method, Type, A1, A2) \
-    std::bind(&Type::method, shared_from_base<Type>(), A1, A2)
-#define BC_BIND3(method, Type, A1, A2, A3) \
-    std::bind(&Type::method, shared_from_base<Type>(), A1, A2, A3)
+#define BC_BIND1(method, Type, a1) \
+    std::bind(&Type::method, shared_from_base<Type>(), a1)
+#define BC_BIND2(method, Type, a1, a2) \
+    std::bind(&Type::method, shared_from_base<Type>(), a1, a2)
+#define BC_BIND3(method, Type, a1, a2, a3) \
+    std::bind(&Type::method, shared_from_base<Type>(), a1, a2, a3)
 
 // For use in derived protocols for simplifying send() calls.
 #define BC_SEND0(instance, method, Type) \
-    channel_->send(instance, dispatch_.sync(&Type::method, shared_from_base<Type>()))
-#define BC_SEND1(instance, method, Type, A1) \
-    channel_->send(instance, dispatch_.sync(&Type::method, shared_from_base<Type>(), A1))
-#define BC_SEND2(instance, method, Type, A1, A2) \
-    channel_->send(instance, dispatch_.sync(&Type::method, shared_from_base<Type>(), A1, A2))
-#define BC_SEND3(instance, method, Type, A1, A2, A3) \
-    channel_->send(instance, dispatch_.sync(&Type::method, shared_from_base<Type>(), A1, A2, A3))
+    channel_->send(instance, dispatch_.sync(&Type::method, \
+    shared_from_base<Type>()))
+#define BC_SEND1(instance, method, Type, a1) \
+    channel_->send(instance, dispatch_.sync(&Type::method, \
+    shared_from_base<Type>(), a1))
+#define BC_SEND2(instance, method, Type, a1, a2) \
+    channel_->send(instance, dispatch_.sync(&Type::method, \
+    shared_from_base<Type>(), a1, a2))
+#define BC_SEND3(instance, method, Type, a1, a2, a3) \
+    channel_->send(instance, dispatch_.sync(&Type::method, \
+shared_from_base<Type>(), a1, a2, a3))
 
 // For use in derived protocols for simplifying subscribe() calls.
 #define BC_RECEIVE0(Message, method, Type) \
-    channel_->subscribe_##Message(dispatch_.sync(&Type::method, shared_from_base<Type>()))
-#define BC_RECEIVE1(Message, method, Type, A1) \
-    channel_->subscribe_##Message(dispatch_.sync(&Type::method, shared_from_base<Type>(), A1))
-#define BC_RECEIVE2(Message, method, Type, A1, A2) \
-    channel_->subscribe_##Message(dispatch_.sync(&Type::method, shared_from_base<Type>(), A1, A2))
-#define BC_RECEIVE3(Message, method, Type, A1, A2, A3) \
-    channel_->subscribe_##Message(dispatch_.sync(&Type::method, shared_from_base<Type>(), A1, A2, A3))
+    channel_->subscribe_##Message(dispatch_.sync(&Type::method, \
+    shared_from_base<Type>()))
+#define BC_RECEIVE1(Message, method, Type, a1) \
+    channel_->subscribe_##Message(dispatch_.sync(&Type::method, \
+    shared_from_base<Type>(), a1))
+#define BC_RECEIVE2(Message, method, Type, a1, a2) \
+    channel_->subscribe_##Message(dispatch_.sync(&Type::method, \
+    shared_from_base<Type>(), a1, a2))
+#define BC_RECEIVE3(Message, method, Type, a1, a2, a3) \
+    channel_->subscribe_##Message(dispatch_.sync(&Type::method, \
+    shared_from_base<Type>(), a1, a2, a3))
 
 } // namespace network
 } // namespace libbitcoin

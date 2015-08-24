@@ -19,12 +19,14 @@
  */
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
 
-#include <memory>
 #include <functional>
+#include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
@@ -38,30 +40,30 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-#define BIND1(method, A1) \
-    BC_BIND1(method, protocol_seed, A1)
+#define BIND1(method, a1) \
+    BC_BIND1(method, protocol_seed, a1)
 
-#define SEND1(instance, method, A1) \
-    BC_SEND1(instance, method, protocol_seed, A1)
+#define SEND1(instance, method, a1) \
+    BC_SEND1(instance, method, protocol_seed, a1)
 
-#define RECEIVE2(Message, method, A1, A2) \
-    BC_RECEIVE2(Message, method, protocol_seed, A1, A2)
+#define RECEIVE2(Message, method, a1, a2) \
+    BC_RECEIVE2(Message, method, protocol_seed, a1, a2)
 
 // Require three callbacks (or any error) before calling complete.
 protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
     const asio::duration& timeout, handler complete, hosts& hosts,
-    const message::network_address& self)
-  : hosts_(hosts), self_({ { self } }),
+    const config::authority& self)
+  : hosts_(hosts), self_(self),
     protocol_base(peer, pool, timeout, synchronize(complete, 3, "seed"))
 {
-    BITCOIN_ASSERT(!self_.addresses.empty());
-    if (self_.addresses.front().port != 0)
+    if (self_.port() != 0)
     {
         callback(error::success);
     }
     else
     {
-        SEND1(self_, handle_send_address, _1);
+        address self({ { self_.to_network_address() } });
+        SEND1(self, handle_send_address, _1);
     }
 
     if (hosts_.capacity() == 0)
@@ -86,7 +88,7 @@ void protocol_seed::handle_receive_address(const code& ec,
         log_debug(LOG_PROTOCOL)
             << "Failure receiving addresses from seed [" << authority() << "] "
             << ec.message();
-        stop(error::bad_stream);
+        callback(error::bad_stream);
         return;
     }
 

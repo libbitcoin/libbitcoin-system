@@ -20,12 +20,14 @@
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 
 #include <functional>
+#include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -36,23 +38,23 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-#define BIND1(method, A1) \
-    BC_BIND1(method, protocol_address, A1)
+#define BIND1(method, a1) \
+    BC_BIND1(method, protocol_address, a1)
 
-#define SEND1(instance, method, A1) \
-    BC_SEND1(instance, method, protocol_address, A1)
+#define SEND1(instance, method, a1) \
+    BC_SEND1(instance, method, protocol_address, a1)
 
-#define RECEIVE2(Message, method, A1, A2) \
-    BC_RECEIVE2(Message, method, protocol_address, A1, A2)
+#define RECEIVE2(Message, method, a1, a2) \
+    BC_RECEIVE2(Message, method, protocol_address, a1, a2)
 
 protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
-    hosts& hosts, const network_address& self)
-  : hosts_(hosts), self_({ { self } }), protocol_base(peer, pool)
+    hosts& hosts, const config::authority& self)
+  : hosts_(hosts), self_(self), protocol_base(peer, pool)
 {
-    BITCOIN_ASSERT(!self_.addresses.empty());
-    if (self_.addresses.front().port != 0)
+    if (self_.port() != 0)
     {
-        SEND1(self_, handle_send_address, _1);
+        address self({ { self_.to_network_address() } });
+        SEND1(self, handle_send_address, _1);
     }
 
     if (hosts_.capacity() == 0)
@@ -103,15 +105,15 @@ void protocol_address::handle_receive_get_address(const code& ec,
         return;
     }
 
-    // TODO: pull active hosts from host cache.
-    // TODO: need to distort for privacy, don't send currently-connected peers.
-    address active;
-    if (active.addresses.empty())
-        return;
-
     // TODO: allowing repeated queries can allow a peer to map our history.
     // Resubscribe to get_address messages.
     RECEIVE2(get_address, handle_receive_get_address, _1, _2);
+
+    // TODO: pull active hosts from host cache (currently just resending self).
+    // TODO: need to distort for privacy, don't send currently-connected peers.
+    address active({ { self_.to_network_address() } });
+    if (active.addresses.empty())
+        return;
 
     log_debug(LOG_PROTOCOL)
         << "Sending addresses to [" << authority() << "] ("

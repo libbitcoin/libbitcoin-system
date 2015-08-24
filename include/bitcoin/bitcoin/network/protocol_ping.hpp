@@ -20,63 +20,43 @@
 #ifndef LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 #define LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 
-#include <memory>
-#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/ping_pong.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
         
 /**
- * Ping protocol.
+ * Ping-pong protocol, Bubba's favorite.
  * Attach this to a node immediately following handshake completion.
  */
 class BC_API protocol_ping
-  : public std::enable_shared_from_this<protocol_ping>
+  : public protocol_base
 {
 public:
     typedef std::shared_ptr<protocol_ping> ptr;
 
     /**
      * Construct a ping protocol instance.
-     * @param[in]  peer    The channel on which to start the protocol.
-     * @param[in]  pool    The thread pool used by the protocol.
-     * @param[in]  period  The time period of outgoing ping messages.
+     * @param[in]  channel  The channel on which to start the protocol.
+     * @param[in]  pool     The thread pool used by the protocol.
+     * @param[in]  period   The time period of outgoing ping messages.
      */
-    protocol_ping(channel::ptr peer, threadpool& pool, 
-        const boost::posix_time::time_duration& period);
-
-    /// This class is not copyable.
-    protocol_ping(const protocol_ping&) = delete;
-    void operator=(const protocol_ping&) = delete;
-    
-    /**
-     * Start the protocol on the configured channel.
-     */
-    void start();
+    protocol_ping(channel::ptr channel, threadpool& pool,
+        const asio::duration& period);
 
 private:
-    bool stopped() const;
-    void handle_stop(const code& ec);
-    void handle_timer(const code& ec);
-
+    void send_ping(const code& ec);
+    void handle_receive_ping(const code& ec, const message::ping& message);
+    void handle_receive_pong(const code& ec, const message::pong& message,
+        uint64_t nonce);
     void handle_send_ping(const code& ec) const;
     void handle_send_pong(const code& ec) const;
-    void handle_receive_ping(const code& ec, const message::ping& ping);
-    void handle_receive_pong(const code& ec, const message::pong& ping,
-        uint64_t nonce);
-
-    channel::ptr peer_;
-    deadline::ptr deadline_;
-    dispatcher dispatch_;
-    bool stopped_;
 };
 
 } // namespace network

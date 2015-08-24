@@ -21,15 +21,14 @@
 #define LIBBITCOIN_NETWORK_PROTOCOL_HANDSHAKE_HPP
 
 #include <cstdint>
-#include <memory>
-#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
-#include <bitcoin/bitcoin/utility/deadline.hpp>
-#include <bitcoin/bitcoin/utility/dispatcher.hpp>
+#include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -40,63 +39,42 @@ namespace network {
  * Attach this to a node immediately following socket creation.
  */
 class BC_API protocol_version
-  : public std::enable_shared_from_this<protocol_version>
+  : public protocol_base
 {
 public:
-    typedef std::shared_ptr<protocol_version> ptr;
-    typedef std::function<void(const code&)> handler;
-    typedef std::function<void(const code&)> set_height_handler;
-
     /**
-     * Construct a version protocol instance.
-     * @param[in]  peer     The channel on which to start the protocol.
-     * @param[in]  pool     The thread pool used by the protocol.
-     * @param[in]  timeout  The time limit on handshake completion.
-     * @param[in]  self     The address that represents us to peers.
-     * @param[in]  relay    Set relay in version message to peer.
+     * Start a version protocol instance.
+     * @param[in]  channel   The channel on which to start the protocol.
+     * @param[in]  pool      The thread pool used by the protocol.
+     * @param[in]  timeout   The timer period.
+     * @param[in]  complete  Callback invoked upon stop or complete.
+     * @param[in]  self      The authority that represents us to this peer.
+     * @param[in]  relay     Set relay in version message to peer.
      */
-    protocol_version(channel::ptr peer, threadpool& pool,
-        const boost::posix_time::time_duration& timeout,
-        const config::authority& self=unspecified_network_address,
-        bool relay=true);
-
-    /// This class is not copyable.
-    protocol_version(const protocol_version&) = delete;
-    void operator=(const protocol_version&) = delete;
-    
-    /**
-     * Start the protocol on the configured channel.
-     * @param[in]  handle_handshake  Will be invoked upon expire or completion.
-     */
-    void start(handler handle_handshake);
+    protocol_version(channel::ptr channel, threadpool& pool,
+        const asio::duration& timeout, handler complete, hosts& hosts,
+        const config::authority& self, bool relay);
 
     /**
      * Start the current blockchain height into the version template.
-     * @param[in]  height      The height to set.
-     * @param[in]  handle_set  Will be invoked upon set completion.
+     * @param[in]  height  The height to set.
+     * @param[in]  handle  Callback invoked upon set height completed.
      */
-    void set_height(uint64_t height, set_height_handler handle_set);
+    void set_height(uint64_t height, handler handle);
 
 private:
-    bool stopped() const;
-    void handle_stop(const code& ec, handler complete);
-    void handle_timer(const code& ec, handler complete) const;
+    static const message::version version_template;
 
-    void handle_version_sent(const code& ec, handler complete) const;
-    void handle_verack_sent(const code& ec, handler complete) const;
-    void handle_receive_version(const code& ec, 
-        const message::version& version, handler complete);
-    void handle_receive_verack(const code& ec, 
-        const message::verack&, handler complete) const;
+    void handle_receive_version(const code& ec,
+        const message::version& version);
+    void handle_receive_verack(const code& ec, const message::verack&) const;
+    void handle_version_sent(const code& ec) const;
+    void handle_verack_sent(const code& ec) const;
 
-    void do_set_height(uint64_t height, set_height_handler handle_set);
+    // start_height is managed dynamically by channel.
+    void do_set_height(uint64_t height, handler handle);
 
-    channel::ptr peer_;
-    dispatcher dispatch_;
-    deadline::ptr deadline_;
-    message::version template_;
-    bool stopped_;
-    bool relay_;
+    message::version version_;
 };
 
 } // namespace network
