@@ -52,8 +52,6 @@ public:
         const message::network_address& self);
 
 private:
-    std::shared_ptr<protocol_address> shared();
-
     void handle_receive_address(const code& ec,
         const message::address& address);
     void handle_receive_get_address(const code& ec,
