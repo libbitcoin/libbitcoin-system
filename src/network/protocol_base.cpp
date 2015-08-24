@@ -35,16 +35,16 @@ namespace network {
     
 using std::placeholders::_1;
 
-protocol_base::protocol_base(channel::ptr peer, threadpool& pool,
+protocol_base::protocol_base(channel::ptr channel, threadpool& pool,
     handler complete)
-  : peer_(peer), dispatch_(pool), callback_(complete), stopped_(false)
+  : channel_(channel), dispatch_(pool), callback_(complete), stopped_(false)
 {
     subscribe_stop();
 }
 
-protocol_base::protocol_base(channel::ptr peer, threadpool& pool,
+protocol_base::protocol_base(channel::ptr channel, threadpool& pool,
     const asio::duration& timeout, handler complete)
-  : protocol_base(peer, pool, complete)
+  : protocol_base(channel, pool, complete)
 {
     subscribe_timer(pool, timeout);
 }
@@ -55,15 +55,15 @@ void protocol_base::callback(const code& ec) const
         callback_(ec);
 }
 
-config::authority protocol_base::peer() const
+config::authority protocol_base::authority() const
 {
-    return peer_->address();
+    return channel_->address();
 }
 
 void protocol_base::stop(const code& ec)
 {
     if (!stopped())
-        peer_->stop(ec);
+        channel_->stop(ec);
 }
 
 bool protocol_base::stopped() const
@@ -73,7 +73,7 @@ bool protocol_base::stopped() const
 
 void protocol_base::subscribe_stop()
 {
-    peer_->subscribe_stop(
+    channel_->subscribe_stop(
         dispatch_.sync(&protocol_base::handle_stop,
             shared_from_base<protocol_base>(), _1));
 }

@@ -44,11 +44,11 @@ protected:
 
     /**
      * Construct an address protocol instance.
-     * @param[in]  peer      The channel on which to start the protocol.
+     * @param[in]  channel   The channel on which to start the protocol.
      * @param[in]  pool      The thread pool used by the dispacher.
      * @param[in]  complete  Callback invoked upon stop if not null.
      */
-    protocol_base(channel::ptr peer, threadpool& pool,
+    protocol_base(channel::ptr channel, threadpool& pool,
         handler complete=nullptr);
 
     /**
@@ -66,60 +66,6 @@ protected:
     void operator=(const protocol_base&) = delete;
     
     /**
-     * Dispatch to the handler in order.
-     */
-    template <typename Handler, typename... Args>
-    void queue(Handler&& handler, Args&&... args) const
-    {
-        if (stopped())
-            return;
-
-        const auto self = shared_from_this();
-        const auto stoppable = [self, handler](Args&&... args)
-        {
-            if (!self->stopped())
-                handler(args...);
-        };
-
-        dispatch_.queue(stoppable, args...);
-    }
-    
-    /**
-     * Subscribe to a message from the peer.
-     */
-    template <typename Message, typename Handler, typename... Args>
-    void accept(Handler&& handler, Args&&... args)
-    {
-        if (stopped())
-            return;
-
-        const auto self = shared_from_this();
-        const auto stoppable = [self, handler](Args&&... args)
-        {
-            if (!self->stopped())
-                handler(args...);
-        };
-        
-        peer_->subscribe<Message>(dispatch_.sync(stoppable, args...));
-    }
-    
-    /**
-     * Dispatch a message to the peer.
-     * This just hides bpeer_ from implementations.
-     */
-    template <typename Message, typename Handler, typename... Args>
-    void send(Message message, Handler&& handler, Args&&... args)
-    {
-        if (!stopped())
-            peer_->send(message, std::bind(handler, args...));
-    }
-    
-    /**
-     * Invoke the completion callback.
-     */
-    void callback(const code& ec) const;
-    
-    /**
      * Get a shared pointer to the derived instance from this.
      * Required because enable_shared_from_this doesn't support inheritance.
      */
@@ -130,9 +76,14 @@ protected:
     }
 
     /**
-     * Gets the authority of the peer on this channel.
+     * Gets the authority of this channel.
      */
-    config::authority peer() const;
+    config::authority authority() const;
+    
+    /**
+     * Invoke the completion callback.
+     */
+    void callback(const code& ec) const;
     
     /**
      * Stop the channel.
@@ -144,18 +95,50 @@ protected:
      */
     bool stopped() const;
 
+    // TODO: make these private, eliminate macros, check stopped.
+    channel::ptr channel_;
+    dispatcher dispatch_;
+
 private:
     void subscribe_stop();
     void subscribe_timer(threadpool& pool, const asio::duration& timeout);
     void handle_stop(const code& ec);
     void handle_timer(const code& ec) const;
 
-    channel::ptr peer_;
-    dispatcher dispatch_;
     const handler callback_;
     bool stopped_;
     deadline::ptr deadline_;
 };
+
+// For use in derived protocols for simplifying bind() calls.
+#define BC_BIND0(method, Type) \
+    std::bind(&Type::method, shared_from_base<Type>())
+#define BC_BIND1(method, Type, A1) \
+    std::bind(&Type::method, shared_from_base<Type>(), A1)
+#define BC_BIND2(method, Type, A1, A2) \
+    std::bind(&Type::method, shared_from_base<Type>(), A1, A2)
+#define BC_BIND3(method, Type, A1, A2, A3) \
+    std::bind(&Type::method, shared_from_base<Type>(), A1, A2, A3)
+
+// For use in derived protocols for simplifying send() calls.
+#define BC_SEND0(instance, method, Type) \
+    channel_->send(instance, dispatch_.sync(&Type::method, shared_from_base<Type>()))
+#define BC_SEND1(instance, method, Type, A1) \
+    channel_->send(instance, dispatch_.sync(&Type::method, shared_from_base<Type>(), A1))
+#define BC_SEND2(instance, method, Type, A1, A2) \
+    channel_->send(instance, dispatch_.sync(&Type::method, shared_from_base<Type>(), A1, A2))
+#define BC_SEND3(instance, method, Type, A1, A2, A3) \
+    channel_->send(instance, dispatch_.sync(&Type::method, shared_from_base<Type>(), A1, A2, A3))
+
+// For use in derived protocols for simplifying subscribe() calls.
+#define BC_RECEIVE0(Message, method, Type) \
+    channel_->subscribe_##Message(dispatch_.sync(&Type::method, shared_from_base<Type>()))
+#define BC_RECEIVE1(Message, method, Type, A1) \
+    channel_->subscribe_##Message(dispatch_.sync(&Type::method, shared_from_base<Type>(), A1))
+#define BC_RECEIVE2(Message, method, Type, A1, A2) \
+    channel_->subscribe_##Message(dispatch_.sync(&Type::method, shared_from_base<Type>(), A1, A2))
+#define BC_RECEIVE3(Message, method, Type, A1, A2, A3) \
+    channel_->subscribe_##Message(dispatch_.sync(&Type::method, shared_from_base<Type>(), A1, A2, A3))
 
 } // namespace network
 } // namespace libbitcoin
