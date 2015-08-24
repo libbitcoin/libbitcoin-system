@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 
 #include <new>
-#include <system_error>
 #include <thread>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 

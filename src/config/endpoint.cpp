@@ -29,12 +29,12 @@
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 
 namespace libbitcoin {
 namespace config {
 
 using namespace boost;
-using namespace boost::asio;
 using namespace boost::program_options;
 
 endpoint::endpoint()
@@ -62,12 +62,12 @@ endpoint::endpoint(const std::string& host, uint16_t port)
 {
 }
 
-endpoint::endpoint(const ip::tcp::endpoint& host)
+endpoint::endpoint(const asio::endpoint& host)
   : endpoint(host.address(), host.port())
 {
 }
 
-endpoint::endpoint(const ip::address& ip, uint16_t port)
+endpoint::endpoint(const asio::address& ip, uint16_t port)
   : host_(ip.to_string()), port_(port)
 {
 }

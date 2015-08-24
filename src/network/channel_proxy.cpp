@@ -24,12 +24,9 @@
 #include <cstdlib>
 #include <functional>
 #include <memory>
-#include <system_error>
-#include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
@@ -44,6 +41,7 @@
 #include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
@@ -63,13 +61,11 @@ namespace network {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using boost::asio::buffer;
-using boost::asio::ip::tcp;
 using boost::format;
 using boost::posix_time::time_duration;
 
 // The proxy will have no config with timers moved to channel.
-channel_proxy::channel_proxy(socket_ptr socket, threadpool& pool,
+channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
     const timeout& timeouts)
   : socket_(socket),
     dispatch_(pool),
@@ -114,7 +110,7 @@ channel_proxy::~channel_proxy()
 template<typename Message, class Subscriber>
 void channel_proxy::establish_relay(Subscriber subscriber)
 {
-    const auto message_handler = [subscriber](const std::error_code& ec,
+    const auto message_handler = [subscriber](const code& ec,
         const Message& message)
     {
         subscriber->relay(ec, message);
@@ -149,7 +145,7 @@ void channel_proxy::start()
 
 config::authority channel_proxy::address() const
 {
-    boost::system::error_code ec;
+    boost_code ec;
     const auto endpoint = socket_->remote_endpoint(ec);
 
     // The endpoint may have become disconnected.
@@ -161,13 +157,15 @@ bool channel_proxy::stopped() const
     return stopped_;
 }
 
-void channel_proxy::stop(const boost::system::error_code& ec)
+void channel_proxy::stop(const boost_code& ec)
 {
     stop(error::boost_to_error_code(ec));
 }
 
-void channel_proxy::stop(const std::error_code& ec)
+void channel_proxy::stop(const code& ec)
 {
+    BITCOIN_ASSERT_MSG(ec, "The stop code must be an error code.");
+
     if (stopped())
         return;
 
@@ -176,7 +174,7 @@ void channel_proxy::stop(const std::error_code& ec)
             shared_from_this(), ec));
 }
 
-void channel_proxy::do_stop(const std::error_code& ec)
+void channel_proxy::do_stop(const code& ec)
 {
     if (stopped())
         return;
@@ -185,15 +183,15 @@ void channel_proxy::do_stop(const std::error_code& ec)
     clear_timers();
 
     // Shutter the socket, ignore the error code.
-    boost::system::error_code code;
-    socket_->shutdown(tcp::socket::shutdown_both, code);
+    boost_code code;
+    socket_->shutdown(asio::socket::shutdown_both, code);
     socket_->close(code);
 
     // Clear all message subscriptions and notify with stop reason code.
     clear_subscriptions(ec);
 }
 
-void channel_proxy::clear_subscriptions(const std::error_code& ec)
+void channel_proxy::clear_subscriptions(const code& ec)
 {
     notify_stop<message::version>(version_subscriber_);
     notify_stop<message::verack>(verack_subscriber_);
@@ -278,7 +276,7 @@ void channel_proxy::start_revival()
             shared_from_this(), _1));
 }
 
-void channel_proxy::handle_expiration(const std::error_code& ec)
+void channel_proxy::handle_expiration(const code& ec)
 {
     if (stopped())
         return;
@@ -292,7 +290,7 @@ void channel_proxy::handle_expiration(const std::error_code& ec)
     stop(error::channel_timeout);
 }
 
-void channel_proxy::handle_inactivity(const std::error_code& ec)
+void channel_proxy::handle_inactivity(const code& ec)
 {
     if (stopped())
         return;
@@ -306,7 +304,7 @@ void channel_proxy::handle_inactivity(const std::error_code& ec)
     stop(error::channel_timeout);
 }
 
-void channel_proxy::handle_revival(const std::error_code& ec)
+void channel_proxy::handle_revival(const code& ec)
 {
     if (stopped())
         return;
@@ -326,6 +324,7 @@ void channel_proxy::read_header()
     if (stopped())
         return;
 
+    using namespace boost::asio;
     async_read(*socket_, buffer(inbound_header_),
         dispatch_.sync(&channel_proxy::handle_read_header,
             shared_from_this(), _1, _2));
@@ -336,6 +335,7 @@ void channel_proxy::read_checksum(const message::header& header)
     if (stopped())
         return;
 
+    using namespace boost::asio;
     async_read(*socket_, buffer(inbound_checksum_),
         dispatch_.sync(&channel_proxy::handle_read_checksum,
             shared_from_this(), _1, _2, header));
@@ -346,13 +346,14 @@ void channel_proxy::read_payload(const message::header& header)
     if (stopped())
         return;
 
+    using namespace boost::asio;
     inbound_payload_.resize(header.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header.payload_length),
         dispatch_.sync(&channel_proxy::handle_read_payload,
             shared_from_this(), _1, _2, header));
 }
 
-void channel_proxy::handle_read_header(const boost::system::error_code& ec,
+void channel_proxy::handle_read_header(const boost_code& ec,
     size_t DEBUG_ONLY(bytes_transferred))
 {
     if (stopped())
@@ -362,7 +363,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     {
         log_debug(LOG_NETWORK)
             << "Channel failure [" << address() << "] "
-            << std::error_code(error::boost_to_error_code(ec)).message();
+            << code(error::boost_to_error_code(ec)).message();
         stop(ec);
         return;
     }
@@ -394,7 +395,7 @@ void channel_proxy::handle_read_header(const boost::system::error_code& ec,
     start_inactivity();
 }
 
-void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
+void channel_proxy::handle_read_checksum(const boost_code& ec,
     size_t bytes_transferred, message::header& header)
 {
     if (stopped())
@@ -411,7 +412,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
             // TODO: No error if we aborted, causing the invalid data?
             log_warning(LOG_NETWORK)
                 << "Invalid checksum from [" << address() << "] "
-                << std::error_code(error::boost_to_error_code(ec)).message();
+                << code(error::boost_to_error_code(ec)).message();
             stop(ec);
             return;
         }
@@ -424,7 +425,7 @@ void channel_proxy::handle_read_checksum(const boost::system::error_code& ec,
     start_inactivity();
 }
 
-void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
+void channel_proxy::handle_read_payload(const boost_code& ec,
     size_t bytes_transferred, const message::header& header)
 {
     if (stopped())
@@ -441,7 +442,7 @@ void channel_proxy::handle_read_payload(const boost::system::error_code& ec,
             // TODO: No error if we aborted, causing the invalid data?
             log_warning(LOG_NETWORK)
                 << "Invalid payload from [" << address() << "] "
-                << std::error_code(error::boost_to_error_code(ec)).message();
+                << code(error::boost_to_error_code(ec)).message();
             stop(ec);
             return;
         }
@@ -622,7 +623,7 @@ void channel_proxy::do_send(const data_chunk& message,
             shared_from_this(), _1, handle_send));
 }
 
-void channel_proxy::call_handle_send(const boost::system::error_code& ec,
+void channel_proxy::call_handle_send(const boost_code& ec,
     send_handler handle_send)
 {
     handle_send(error::boost_to_error_code(ec));

@@ -23,13 +23,13 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <system_error>
 #include <thread>
-#include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <boost/utility.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/acceptor.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
@@ -54,12 +54,8 @@ public:
         connector::handler handle_connect);
 
 private:
-    typedef std::shared_ptr<boost::asio::ip::tcp::resolver> resolver_ptr;
-    typedef std::shared_ptr<boost::asio::ip::tcp::resolver::query> query_ptr;
-
-    void resolve_handler(const boost::system::error_code& ec,
-        boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-        connector::handler handle_connect, resolver_ptr, query_ptr);
+    void resolve_handler(const boost_code& ec, asio::iterator endpoint_iterator,
+        connector::handler handle_connect, asio::resolver_ptr, asio::query_ptr);
 
     threadpool& pool_;
     const timeout& timeouts_;

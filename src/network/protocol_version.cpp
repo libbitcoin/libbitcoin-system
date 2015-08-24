@@ -23,7 +23,6 @@
 #include <cstdlib>
 #include <memory>
 #include <functional>
-#include <system_error>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -44,7 +43,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::posix_time::time_duration;
 
-protocol_version::protocol_version(channel_ptr peer, threadpool& pool,
+protocol_version::protocol_version(channel::ptr peer, threadpool& pool,
     const time_duration& timeout, const config::authority& self, bool relay)
   : peer_(peer),
     dispatch_(pool),
@@ -122,7 +121,7 @@ void protocol_version::start(handler handle_handshake)
             shared_from_this(), _1, complete));
 }
 
-void protocol_version::handle_stop(const std::error_code& ec,
+void protocol_version::handle_stop(const code& ec,
     handler complete)
 {
     if (stopped())
@@ -139,7 +138,7 @@ bool protocol_version::stopped() const
     return stopped_;
 }
 
-void protocol_version::handle_timer(const std::error_code& ec,
+void protocol_version::handle_timer(const code& ec,
     handler complete) const
 {
     if (stopped())
@@ -149,7 +148,7 @@ void protocol_version::handle_timer(const std::error_code& ec,
         complete(error::channel_timeout);
 }
 
-void protocol_version::handle_version_sent(const std::error_code& ec,
+void protocol_version::handle_version_sent(const code& ec,
     handler complete) const
 {
     if (stopped())
@@ -158,7 +157,7 @@ void protocol_version::handle_version_sent(const std::error_code& ec,
     complete(ec);
 }
 
-void protocol_version::handle_receive_version(const std::error_code& ec,
+void protocol_version::handle_receive_version(const code& ec,
     const message::version& version, handler complete)
 {
     if (stopped())
@@ -193,7 +192,7 @@ void protocol_version::handle_receive_version(const std::error_code& ec,
             shared_from_this(), _1, complete));
 }
 
-void protocol_version::handle_verack_sent(const std::error_code& ec,
+void protocol_version::handle_verack_sent(const code& ec,
     handler complete) const
 {
     if (stopped())
@@ -202,7 +201,7 @@ void protocol_version::handle_verack_sent(const std::error_code& ec,
     complete(ec);
 }
 
-void protocol_version::handle_receive_verack(const std::error_code& ec,
+void protocol_version::handle_receive_verack(const code& ec,
     const message::verack&, handler complete) const
 {
     if (stopped())

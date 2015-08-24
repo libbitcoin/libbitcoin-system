@@ -21,10 +21,9 @@
 #define LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 
 #include <memory>
-#include <system_error>
 #include <boost/date_time.hpp>
-#include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
@@ -51,7 +50,7 @@ public:
      * @param[in]  pool    The thread pool used by the protocol.
      * @param[in]  period  The time period of outgoing ping messages.
      */
-    protocol_ping(channel_ptr peer, threadpool& pool, 
+    protocol_ping(channel::ptr peer, threadpool& pool, 
         const boost::posix_time::time_duration& period);
 
     /// This class is not copyable.
@@ -65,17 +64,16 @@ public:
 
 private:
     bool stopped() const;
-    void handle_stop(const std::error_code& ec);
-    void handle_timer(const std::error_code& ec);
+    void handle_stop(const code& ec);
+    void handle_timer(const code& ec);
 
-    void handle_send_ping(const std::error_code& ec) const;
-    void handle_send_pong(const std::error_code& ec) const;
-    void handle_receive_ping(const std::error_code& ec,
-        const message::ping& ping);
-    void handle_receive_pong(const std::error_code& ec,
-        const message::pong& ping, uint64_t nonce);
+    void handle_send_ping(const code& ec) const;
+    void handle_send_pong(const code& ec) const;
+    void handle_receive_ping(const code& ec, const message::ping& ping);
+    void handle_receive_pong(const code& ec, const message::pong& ping,
+        uint64_t nonce);
 
-    channel_ptr peer_;
+    channel::ptr peer_;
     deadline::ptr deadline_;
     dispatcher dispatch_;
     bool stopped_;

@@ -27,12 +27,10 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/network/channel_proxy.hpp>
-//#include <bitcoin/bitcoin/network/network.hpp>
-#include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
-#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/get_address.hpp>
 #include <bitcoin/bitcoin/message/get_blocks.hpp>
@@ -42,6 +40,10 @@
 #include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+//#include <bitcoin/bitcoin/network/network.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
@@ -50,17 +52,13 @@
 namespace libbitcoin {
 namespace network {
 
-class channel;
-typedef std::shared_ptr<channel> channel_ptr;
-
 class BC_API channel
 {
 public:
+    typedef std::shared_ptr<channel> ptr;
 
-    channel(channel_proxy_ptr proxy);
-
-    channel(threadpool& pool, socket_ptr socket, const timeout& timeouts);
-
+    channel(channel_proxy::ptr proxy);
+    channel(threadpool& pool, asio::socket_ptr socket, const timeout& timeouts);
     ~channel();
 
     /// This class is not copyable.
@@ -68,7 +66,7 @@ public:
     void operator=(const channel&) = delete;
 
     void start();
-    void stop(const std::error_code& ec);
+    void stop(const code& ec);
 
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);
@@ -110,12 +108,19 @@ public:
         proxy_->send(packet, handle_send);
     }
 
+    // Generic subscription (redundant with enumerated subscribers).
+    template <typename Message, typename Handler, typename... Args>
+    void subscribe(Handler&& handler, Args&&... args)
+    {
+        subscribe<Message>(handler, args);
+    }
+
     void send_raw(const message::header& packet_header,
         const data_chunk& payload, channel_proxy::send_handler handle_send);
 
 private:
 
-    channel_proxy_ptr proxy_;
+    channel_proxy::ptr proxy_;
     uint64_t nonce_;
 };
 

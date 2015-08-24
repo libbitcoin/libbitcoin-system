@@ -22,7 +22,6 @@
 
 #include <functional>
 #include <string>
-#include <system_error>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -37,7 +36,7 @@ public:
     {
     }
 
-    virtual std::error_code attempt_load(std::istream& stream) const = 0;
+    virtual code attempt_load(std::istream& stream) const = 0;
     virtual const std::string lookup_symbol() const = 0;
 };
 
@@ -46,7 +45,7 @@ class channel_loader_module
   : public channel_loader_module_base
 {
 public:
-    typedef std::function<void (const std::error_code&, const Message&)>
+    typedef std::function<void (const code&, const Message&)>
         load_handler;
 
     channel_loader_module(load_handler handle_load)
@@ -58,9 +57,9 @@ public:
     channel_loader_module(const channel_loader_module&) = delete;
     void operator=(const channel_loader_module&) = delete;
 
-    std::error_code attempt_load(std::istream& stream) const
+    code attempt_load(std::istream& stream) const
     {
-        std::error_code status = bc::error::success;
+        code status = bc::error::success;
         Message result;
 
         if (!result.from_data(stream))

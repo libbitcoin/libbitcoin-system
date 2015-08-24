@@ -22,7 +22,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <system_error>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -45,8 +44,8 @@ class BC_API protocol_version
 {
 public:
     typedef std::shared_ptr<protocol_version> ptr;
-    typedef std::function<void(const std::error_code&)> handler;
-    typedef std::function<void(const std::error_code&)> set_height_handler;
+    typedef std::function<void(const code&)> handler;
+    typedef std::function<void(const code&)> set_height_handler;
 
     /**
      * Construct a version protocol instance.
@@ -56,7 +55,7 @@ public:
      * @param[in]  self     The address that represents us to peers.
      * @param[in]  relay    Set relay in version message to peer.
      */
-    protocol_version(channel_ptr peer, threadpool& pool,
+    protocol_version(channel::ptr peer, threadpool& pool,
         const boost::posix_time::time_duration& timeout,
         const config::authority& self=unspecified_network_address,
         bool relay=true);
@@ -80,19 +79,19 @@ public:
 
 private:
     bool stopped() const;
-    void handle_stop(const std::error_code& ec, handler complete);
-    void handle_timer(const std::error_code& ec, handler complete) const;
+    void handle_stop(const code& ec, handler complete);
+    void handle_timer(const code& ec, handler complete) const;
 
-    void handle_version_sent(const std::error_code& ec, handler complete) const;
-    void handle_verack_sent(const std::error_code& ec, handler complete) const;
-    void handle_receive_version(const std::error_code& ec, 
+    void handle_version_sent(const code& ec, handler complete) const;
+    void handle_verack_sent(const code& ec, handler complete) const;
+    void handle_receive_version(const code& ec, 
         const message::version& version, handler complete);
-    void handle_receive_verack(const std::error_code& ec, 
+    void handle_receive_verack(const code& ec, 
         const message::verack&, handler complete) const;
 
     void do_set_height(uint64_t height, set_height_handler handle_set);
 
-    channel_ptr peer_;
+    channel::ptr peer_;
     dispatcher dispatch_;
     deadline::ptr deadline_;
     message::version template_;

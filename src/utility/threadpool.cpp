@@ -20,13 +20,10 @@
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 #include <new>
-#include <system_error>
 #include <thread>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
-
-using boost::asio::io_service;
 
 threadpool::threadpool(size_t number_threads, thread_priority priority)
   : work_(nullptr)
@@ -48,7 +45,7 @@ void threadpool::spawn(size_t number_threads, thread_priority priority)
 void threadpool::spawn_once(thread_priority priority)
 {
     if (work_ == nullptr)
-        work_ = new io_service::work(ios_);
+        work_ = new boost::asio::io_service::work(ios_);
 
     const auto action = [this, priority]
     {
@@ -79,12 +76,12 @@ void threadpool::join()
             thread.join();
 }
 
-io_service& threadpool::service()
+boost::asio::io_service& threadpool::service()
 {
     return ios_;
 }
 
-const io_service& threadpool::service() const
+const boost::asio::io_service& threadpool::service() const
 {
     return ios_;
 }

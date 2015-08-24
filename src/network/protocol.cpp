@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <system_error>
 #include <thread>
 #include <vector>
 #include <boost/date_time.hpp>
@@ -124,7 +123,7 @@ void protocol::start_seeding(completion_handler handle_complete)
 
 // TODO: implement on context_outbound.
 
-void protocol::start_connecting(const std::error_code& ec,
+void protocol::start_connecting(const code& ec,
     completion_handler handle_complete)
 {
     if (ec)
@@ -149,7 +148,7 @@ void protocol::new_connection()
             this, _1, _2));
 }
 
-void protocol::start_connect(const std::error_code& ec,
+void protocol::start_connect(const code& ec,
     const config::authority& peer)
 {
     if (ec)
@@ -179,7 +178,7 @@ void protocol::start_connect(const std::error_code& ec,
             this, _1, _2, peer));
 }
 
-void protocol::handle_connect(const std::error_code& ec, channel_ptr node,
+void protocol::handle_connect(const code& ec, channel::ptr node,
     const config::authority& peer)
 {
     if (ec)
@@ -234,8 +233,8 @@ void protocol::maintain_connection(const std::string& hostname, uint16_t port,
             this, _1, _2, hostname, port, relay, retry));
 }
 
-void protocol::handle_manual_connect(const std::error_code& ec,
-    channel_ptr node, const std::string& hostname, uint16_t port, bool relay,
+void protocol::handle_manual_connect(const code& ec,
+    channel::ptr node, const std::string& hostname, uint16_t port, bool relay,
     size_t retries)
 {
     const config::endpoint peer(hostname, port);
@@ -277,7 +276,7 @@ void protocol::start_accepting()
             this, _1, _2));
 }
 
-void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept)
+void protocol::start_accept(const code& ec, acceptor::ptr accept)
 {
     BITCOIN_ASSERT(accept);
 
@@ -294,8 +293,8 @@ void protocol::start_accept(const std::error_code& ec, acceptor_ptr accept)
             this, _1, _2, accept));
 }
 
-void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
-    acceptor_ptr accept)
+void protocol::handle_accept(const code& ec, channel::ptr node,
+    acceptor::ptr accept)
 {
     // Relisten for connections.
     start_accept(ec, accept);
@@ -346,7 +345,7 @@ void protocol::handle_accept(const std::error_code& ec, channel_ptr node,
 
 // TODO: virtual base method.
 
-void protocol::start_talking(channel_ptr node,
+void protocol::start_talking(channel::ptr node,
     channel_proxy::stop_handler handle_stop, bool relay)
 {
     node->subscribe_stop(handle_stop);
@@ -354,11 +353,13 @@ void protocol::start_talking(channel_ptr node,
     // Notify protocol subscribers of new channel.
     channel_subscriber_->relay(error::success, node);
 
-    // Attach version protocol to the new connection (until complete).
-    std::make_shared<protocol_version>(node, pool_, timeouts_.handshake,
-        self_, relay)->start(
-            dispatch_.sync(&protocol::handle_handshake,
-                this, _1, node));
+    const auto callback = 
+        dispatch_.sync(&protocol::handle_handshake,
+            this, _1, node);
+
+    ////// Attach version protocol to the new connection (until complete).
+    ////std::make_shared<protocol_version>(node, pool_, timeouts_.handshake,
+    ////    callback, self_, relay);
 
     // Start reading from the socket (causing subscription events).
     node->start();
@@ -367,7 +368,7 @@ void protocol::start_talking(channel_ptr node,
 // TODO: virtual base method, override in protocol_seed to use no protocol_ping
 // and invoke protocol_address using callback and timer invoacation.
 
-void protocol::handle_handshake(const std::error_code& ec, channel_ptr node)
+void protocol::handle_handshake(const code& ec, channel::ptr node)
 {
     if (ec)
     {
@@ -378,16 +379,16 @@ void protocol::handle_handshake(const std::error_code& ec, channel_ptr node)
     }
 
     // Attach ping protocol to the new connection (until node stop event).
-    std::make_shared<protocol_ping>(node, pool_, timeouts_.heartbeat)->start();
+    std::make_shared<protocol_ping>(node, pool_, timeouts_.heartbeat);
 
     // Attach address protocol to the new connection (until node stop event).
-    std::make_shared<protocol_address>(node, pool_, hosts_, self_)->start();
+    std::make_shared<protocol_address>(node, pool_, hosts_, self_);
 }
 
 // TODO: abstract base method, implement in derived.
 
-void protocol::outbound_channel_stopped(const std::error_code& ec,
-    channel_ptr node, const std::string& address)
+void protocol::outbound_channel_stopped(const code& ec,
+    channel::ptr node, const std::string& address)
 {
     log_debug(LOG_PROTOCOL)
         << "Channel stopped (outbound) [" << address << "] "
@@ -400,8 +401,8 @@ void protocol::outbound_channel_stopped(const std::error_code& ec,
         new_connection();
 }
 
-void protocol::manual_channel_stopped(const std::error_code& ec,
-    channel_ptr node, const std::string& address, bool relay, size_t retries)
+void protocol::manual_channel_stopped(const code& ec,
+    channel::ptr node, const std::string& address, bool relay, size_t retries)
 {
     log_debug(LOG_PROTOCOL)
         << "Channel stopped (manual) [" << address << "] "
@@ -414,8 +415,8 @@ void protocol::manual_channel_stopped(const std::error_code& ec,
         retry_manual_connection(address, relay, retries);
 }
 
-void protocol::inbound_channel_stopped(const std::error_code& ec,
-    channel_ptr node, const std::string& address)
+void protocol::inbound_channel_stopped(const code& ec,
+    channel::ptr node, const std::string& address)
 {
     log_debug(LOG_PROTOCOL)
         << "Channel stopped (inbound) [" << address << "] "
@@ -433,7 +434,7 @@ void protocol::blacklist(const config::authority& peer)
 }
 
 void protocol::remove_connection(channel_ptr_list& connections,
-    channel_ptr node)
+    channel::ptr node)
 {
     auto it = std::find(connections.begin(), connections.end(), node);
     if (it != connections.end())
@@ -473,7 +474,7 @@ bool protocol::is_connected(const config::authority& peer) const
     const auto& inn = inbound_connections_;
     const auto& out = outbound_connections_;
     const auto& man = manual_connections_;
-    const auto found = [&peer](const channel_ptr& node)
+    const auto found = [&peer](const channel::ptr& node)
     {
         return (node->address() == peer);
     };
@@ -483,11 +484,11 @@ bool protocol::is_connected(const config::authority& peer) const
         (std::find_if(man.begin(), man.end(), found) != man.end());
 }
 
-bool protocol::is_loopback(channel_ptr node) const
+bool protocol::is_loopback(channel::ptr node) const
 {
     const auto& outbound = outbound_connections_;
     const auto nonce = node->nonce();
-    const auto found = [node, nonce](const channel_ptr& entry)
+    const auto found = [node, nonce](const channel::ptr& entry)
     {
         return (entry != node) && (entry->nonce() == nonce);
     };

@@ -21,11 +21,11 @@
 #define LIBBITCOIN_NETWORK_CONNECTOR_HPP
 
 #include <memory>
-#include <system_error>
-#include <boost/asio.hpp>
 #include <boost/date_time.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -42,7 +42,7 @@ class connector
 {
 public:
     typedef std::shared_ptr<connector> ptr;
-    typedef std::function<void(const std::error_code&, channel_ptr)> handler;
+    typedef std::function<void(const code&, channel::ptr)> handler;
 
     /**
      * Construct a socket connector.
@@ -60,14 +60,12 @@ public:
      * @param[in]  endpoint_iterator The endpoint iterator to connect with.
      * @param[in]  handle_connect    Will be invoked upon expire or connection.
      */
-    void connect(boost::asio::ip::tcp::resolver::iterator endpoint_iterator,
-        handler handle_connect);
+    void connect(asio::iterator endpoint_iterator, handler handle_connect);
 
 private:
-    void create_channel(const boost::system::error_code& ec,
-        boost::asio::ip::tcp::resolver::iterator, socket_ptr socket,
-        handler complete);
-    void handle_timer(const std::error_code& ec, handler complete);
+    void create_channel(const boost_code& ec, asio::iterator,
+        asio::socket_ptr socket, handler complete);
+    void handle_timer(const code& ec, handler complete);
 
     threadpool& pool_;
     const timeout& timeouts_;

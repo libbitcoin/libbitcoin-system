@@ -26,6 +26,7 @@
 #include <boost/program_options.hpp>
 #include <boost/regex.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
@@ -33,9 +34,7 @@ namespace libbitcoin {
 namespace config {
 
 using namespace boost;
-using namespace boost::asio;
 using namespace boost::program_options;
-using boost::format;
 
 // host:    [2001:db8::2] or  2001:db8::2  or 1.2.240.1
 // returns: [2001:db8::2] or [2001:db8::2] or 1.2.240.1
@@ -64,14 +63,14 @@ static std::string to_ipv6(const std::string& ipv4_address)
     return std::string("::ffff:") + ipv4_address;
 }
 
-static ip::address_v6 to_ipv6(const ip::address_v4& ipv4_address)
+static asio::ipv6 to_ipv6(const asio::ipv4& ipv4_address)
 {
     // Create an IPv6 mapped IPv4 address via serialization.
     const auto ipv6 = to_ipv6(ipv4_address.to_string());
-    return ip::address_v6::from_string(ipv6);
+    return asio::ipv6::from_string(ipv6);
 }
 
-static ip::address_v6 to_ipv6(const ip::address& ip_address)
+static asio::ipv6 to_ipv6(const asio::address& ip_address)
 {
     if (ip_address.is_v6())
         return ip_address.to_v6();
@@ -82,7 +81,7 @@ static ip::address_v6 to_ipv6(const ip::address& ip_address)
     return to_ipv6(ip_address.to_v4());
 }
 
-static std::string to_ipv4_hostname(const ip::address& ip_address)
+static std::string to_ipv4_hostname(const asio::address& ip_address)
 {
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
     static const regex regular("^::ffff:([0-9\\.]+)$");
@@ -96,7 +95,7 @@ static std::string to_ipv4_hostname(const ip::address& ip_address)
     return match[1];
 }
 
-static std::string to_ipv6_hostname(const ip::address& ip_address)
+static std::string to_ipv6_hostname(const asio::address& ip_address)
 {
     // IPv6 URLs use a bracketed IPv6 address, see rfc2732.
     const auto hostname = format("[%1%]") % to_ipv6(ip_address);
@@ -120,21 +119,21 @@ authority::authority(const std::string& authority)
 }
 
 // This is the format returned from peers on the bitcoin network.
-authority::authority(const message::network_address& net)
-  : authority(net.ip, net.port)
+authority::authority(const message::network_address& address)
+  : authority(address.ip, address.port)
 {
 }
 
-static ip::address_v6 to_boost_address(const message::ip_address& in)
+static asio::ipv6 to_boost_address(const message::ip_address& in)
 {
-    ip::address_v6::bytes_type bytes;
+    asio::ipv6::bytes_type bytes;
     BITCOIN_ASSERT(bytes.size() == in.size());
     std::copy(in.begin(), in.end(), bytes.begin());
-    const ip::address_v6 out(bytes);
+    const asio::ipv6 out(bytes);
     return out;
 }
 
-static message::ip_address to_bc_address(const ip::address_v6& in)
+static message::ip_address to_bc_address(const asio::ipv6& in)
 {
     message::ip_address out;
     const auto bytes = in.to_bytes();
@@ -154,12 +153,12 @@ authority::authority(const std::string& host, uint16_t port)
 {
 }
 
-authority::authority(const ip::address& ip, uint16_t port)
+authority::authority(const asio::address& ip, uint16_t port)
   : ip_(to_ipv6(ip)), port_(port)
 {
 }
 
-authority::authority(const ip::tcp::endpoint& endpoint)
+authority::authority(const asio::endpoint& endpoint)
   : authority(endpoint.address(), endpoint.port())
 {
 }
@@ -232,7 +231,7 @@ std::istream& operator>>(std::istream& input, authority& argument)
 
     try
     {
-        argument.ip_ = ip::address_v6::from_string(ip_address);
+        argument.ip_ = asio::ipv6::from_string(ip_address);
         argument.port_ = port.empty() ? 0 : lexical_cast<uint16_t>(port);
     }
     catch (const boost::exception&)

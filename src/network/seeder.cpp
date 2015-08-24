@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <system_error>
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -33,7 +32,7 @@
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
-#include <bitcoin/bitcoin/network/protocol_address.hpp>
+#include <bitcoin/bitcoin/network/protocol_seed.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
@@ -108,7 +107,7 @@ void seeder::start(handler handle_complete)
         start_connect(seed, synchronize(single, 1, seed.to_string()));
 }
 
-void seeder::handle_seeded(const std::error_code& ec, size_t host_start_size,
+void seeder::handle_seeded(const code& ec, size_t host_start_size,
     handler handle_complete)
 {
     // We succeed only by adding seeds.
@@ -129,7 +128,7 @@ void seeder::start_connect(const config::endpoint& seed, handler complete)
             shared_from_this(), _1, _2, seed, complete));
 }
 
-void seeder::handle_connected(const std::error_code& ec, channel_ptr peer,
+void seeder::handle_connected(const code& ec, channel::ptr peer,
     const config::endpoint& seed, handler complete)
 {
     if (ec)
@@ -145,18 +144,19 @@ void seeder::handle_connected(const std::error_code& ec, channel_ptr peer,
         << "Connected seed [" << seed << "] as " << peer->address();
 
     static const bool relay = false;
+    const auto callback = 
+        dispatch_.sync(&seeder::handle_handshake,
+            shared_from_this(), _1, peer, seed, complete);
 
-    // Attach version protocol to the new connection (until complete).
-    std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
-        self_, relay)->start(
-            dispatch_.sync(&seeder::handle_handshake,
-                shared_from_this(), _1, peer, seed, complete));
+    ////// Attach version protocol to the new connection (until complete).
+    ////std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
+    ////    callback, self_, relay);
 
     // Start reading from the socket (causing subscription events).
     peer->start();
 }
 
-void seeder::handle_handshake(const std::error_code& ec, channel_ptr peer,
+void seeder::handle_handshake(const code& ec, channel::ptr peer,
     const config::endpoint& seed, handler complete)
 {
     if (ec)
@@ -167,17 +167,10 @@ void seeder::handle_handshake(const std::error_code& ec, channel_ptr peer,
         return;
     }
 
-    // Attach address protocol to the new connection.
-    std::make_shared<protocol_address>(peer, pool_, hosts_, self_)->start();
+    // Attach address seed protocol to the new connection.
+    std::make_shared<protocol_seed>(peer, pool_, timeouts_.germination,
+        complete, hosts_, self_);
 };
-
-// This is called for each individual address in the packet.
-void seeder::handle_store(const std::error_code& ec)
-{
-    if (ec)
-        log_error(LOG_PROTOCOL)
-            << "Failure storing address from seed: " << ec.message();
-}
 
 } // namespace network
 } // namespace libbitcoin

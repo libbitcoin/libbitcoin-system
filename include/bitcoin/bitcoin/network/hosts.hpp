@@ -24,13 +24,13 @@
 #include <cstdint>
 #include <string>
 #include <functional>
-#include <system_error>
 #include <vector>
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
@@ -43,14 +43,13 @@ namespace network {
 class BC_API hosts
 {
 public:
-    typedef std::function<void (const std::error_code&)> load_handler;
-    typedef std::function<void (const std::error_code&)> save_handler;
-    typedef std::function<void (const std::error_code&)> store_handler;
-    typedef std::function<void (const std::error_code&)> remove_handler;
-    typedef std::function<void (const std::error_code&, size_t)>
-        fetch_count_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::network_address&)> fetch_address_handler;
+    typedef std::function<void(const code&)> load_handler;
+    typedef std::function<void(const code&)> save_handler;
+    typedef std::function<void(const code&)> store_handler;
+    typedef std::function<void(const code&)> remove_handler;
+    typedef std::function<void(const code&, size_t)> fetch_count_handler;
+    typedef std::function<void(const code&, const message::network_address&)>
+        fetch_address_handler;
 
     hosts(threadpool& pool,
         const boost::filesystem::path& file_path="hosts.cache",

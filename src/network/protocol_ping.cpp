@@ -20,9 +20,7 @@
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 
 #include <functional>
-#include <system_error>
 #include <boost/date_time.hpp>
-#include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
@@ -37,7 +35,7 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::posix_time::time_duration;
 
-protocol_ping::protocol_ping(channel_ptr peer, threadpool& pool,
+protocol_ping::protocol_ping(channel::ptr peer, threadpool& pool,
     const time_duration& period)
   : peer_(peer),
     deadline_(std::make_shared<deadline>(pool, period)),
@@ -65,7 +63,7 @@ void protocol_ping::start()
             shared_from_this(), error::success));
 }
 
-void protocol_ping::handle_stop(const std::error_code& ec)
+void protocol_ping::handle_stop(const code& ec)
 {
     if (stopped())
         return;
@@ -81,7 +79,7 @@ bool protocol_ping::stopped() const
     return stopped_;
 }
 
-void protocol_ping::handle_timer(const std::error_code& ec)
+void protocol_ping::handle_timer(const code& ec)
 {
     if (deadline::canceled(ec))
         return;
@@ -102,7 +100,7 @@ void protocol_ping::handle_timer(const std::error_code& ec)
             shared_from_this(), _1));
 }
 
-void protocol_ping::handle_send_ping(const std::error_code& ec) const
+void protocol_ping::handle_send_ping(const code& ec) const
 {
     if (stopped())
         return;
@@ -119,7 +117,7 @@ void protocol_ping::handle_send_ping(const std::error_code& ec) const
         << "Ping sent [" << peer_->address() << "]";
 }
 
-void protocol_ping::handle_send_pong(const std::error_code& ec) const
+void protocol_ping::handle_send_pong(const code& ec) const
 {
     if (stopped())
         return;
@@ -136,7 +134,7 @@ void protocol_ping::handle_send_pong(const std::error_code& ec) const
         << "Pong sent [" << peer_->address() << "]";
 }
 
-void protocol_ping::handle_receive_ping(const std::error_code& ec,
+void protocol_ping::handle_receive_ping(const code& ec,
     const message::ping& ping)
 {
     if (stopped())
@@ -159,7 +157,7 @@ void protocol_ping::handle_receive_ping(const std::error_code& ec,
             shared_from_this(), _1));
 }
 
-void protocol_ping::handle_receive_pong(const std::error_code& ec,
+void protocol_ping::handle_receive_pong(const code& ec,
     const message::pong& ping, uint64_t nonce)
 {
     if (stopped())

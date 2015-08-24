@@ -23,7 +23,6 @@
 #include <cstddef>
 #include <memory>
 #include <mutex>
-#include <system_error>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -43,7 +42,7 @@ public:
     }
 
     template <typename... Args>
-    void operator()(const std::error_code& code, Args&&... args)
+    void operator()(const code& code, Args&&... args)
     {
         auto handle = false;
 
@@ -105,6 +104,7 @@ template <typename Handler>
 synchronizer<Handler> synchronize(Handler&& handler, size_t clearance_count,
     const std::string& log_context)
 {
+    BITCOIN_ASSERT(handler);
     return synchronizer<Handler>(handler, clearance_count, log_context);
 }
 

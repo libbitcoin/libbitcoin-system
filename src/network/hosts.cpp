@@ -25,7 +25,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include <system_error>
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>

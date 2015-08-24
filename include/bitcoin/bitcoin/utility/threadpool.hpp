@@ -22,8 +22,8 @@
 
 #include <functional>
 #include <thread>
-#include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
@@ -116,18 +116,18 @@ public:
     /**
      * Underlying boost::io_service object.
      */
-    boost::asio::io_service& service();
+    asio::service& service();
 
     /**
      * Underlying boost::io_service object.
      */
-    const boost::asio::io_service& service() const;
+    const asio::service& service() const;
 
 private:
     void spawn_once(thread_priority priority=thread_priority::normal);
 
-    boost::asio::io_service ios_;
-    boost::asio::io_service::work* work_;
+    asio::service ios_;
+    asio::service::work* work_;
     std::vector<std::thread> threads_;
 };
 

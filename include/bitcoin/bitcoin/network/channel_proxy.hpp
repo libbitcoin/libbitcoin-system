@@ -24,13 +24,10 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
-#include <system_error>
 #include <string>
 #include <boost/array.hpp>
-#include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
@@ -44,6 +41,7 @@
 #include <bitcoin/bitcoin/message/get_data.hpp>
 #include <bitcoin/bitcoin/message/header.hpp>
 #include <bitcoin/bitcoin/message/inventory.hpp>
+//#include <bitcoin/bitcoin/message/not_found.hpp>
 #include <bitcoin/bitcoin/message/ping_pong.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
@@ -59,44 +57,44 @@
 namespace libbitcoin {
 namespace network {
 
-class channel_proxy;
-typedef std::shared_ptr<channel_proxy> channel_proxy_ptr;
-typedef std::shared_ptr<boost::asio::ip::tcp::socket> socket_ptr;
-
 class BC_API channel_proxy
   : public std::enable_shared_from_this<channel_proxy>
 {
 public:
-    typedef std::function<void (const std::error_code&)> send_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::version&)> receive_version_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::verack&)> receive_verack_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::address&)> receive_address_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::get_address&)> receive_get_address_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::inventory&)> receive_inventory_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::get_data&)> receive_get_data_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::get_blocks&)> receive_get_blocks_handler;
-    typedef std::function<void (const std::error_code&,
-        const chain::transaction&)> receive_transaction_handler;
-    typedef std::function<void(const std::error_code&,
-        const chain::block&)> receive_block_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::ping&)> receive_ping_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::pong&)> receive_pong_handler;
-    typedef std::function<void (const std::error_code&,
-        const message::header&, const data_chunk&)> receive_raw_handler;
-    typedef std::function<void (const std::error_code&)> stop_handler;
-    typedef std::function<void (const std::error_code&)> revival_handler;
-    typedef std::function<void (const std::error_code&)> expiration_handler;
+    typedef std::shared_ptr<channel_proxy> ptr;
 
-    channel_proxy(socket_ptr socket, threadpool& pool,
+    typedef std::function<void(const code&, const message::version&)>
+        receive_version_handler;
+    typedef std::function<void(const code&, const message::verack&)>
+        receive_verack_handler;
+    typedef std::function<void(const code&, const message::address&)>
+        receive_address_handler;
+    typedef std::function<void(const code&, const message::get_address&)>
+        receive_get_address_handler;
+    typedef std::function<void(const code&, const message::inventory&)>
+        receive_inventory_handler;
+    typedef std::function<void(const code&,  const message::get_data&)>
+        receive_get_data_handler;
+    typedef std::function<void(const code&, const message::get_blocks&)>
+        receive_get_blocks_handler;
+    typedef std::function<void(const code&, const chain::transaction&)>
+        receive_transaction_handler;
+    typedef std::function<void(const code&, const chain::block&)>
+        receive_block_handler;
+    typedef std::function<void(const code&, const message::ping&)>
+        receive_ping_handler;
+    typedef std::function<void(const code&, const message::pong&)>
+        receive_pong_handler;
+
+    typedef std::function<void(const code&)> send_handler;
+    typedef std::function<void(const code&, const message::header&,
+        const data_chunk&)> receive_raw_handler;
+
+    typedef std::function<void(const code&)> stop_handler;
+    typedef std::function<void(const code&)> revival_handler;
+    typedef std::function<void(const code&)> expiration_handler;
+
+    channel_proxy(asio::socket_ptr socket, threadpool& pool,
         const timeout& timeouts=timeout::defaults);
     ~channel_proxy();
 
@@ -105,7 +103,7 @@ public:
     void operator=(const channel_proxy&) = delete;
 
     void start();
-    void stop(const std::error_code& ec);
+    void stop(const code& ec);
     bool stopped() const;
     config::authority address() const;
     void reset_revival();
@@ -121,12 +119,13 @@ public:
             return;
         }
 
-        const auto command = Message::satoshi_command;
+        const auto& command = Message::satoshi_command;
         const auto message = message::create_raw_message(packet);
         dispatch_.queue(
             std::bind(&channel_proxy::do_send,
                 shared_from_this(), message, handle_send, command));
     }
+
     void send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
@@ -141,36 +140,35 @@ public:
     void subscribe_block(receive_block_handler handle_receive);
     void subscribe_ping(receive_ping_handler handle_receive);
     void subscribe_pong(receive_pong_handler handle_receive);
-
     void subscribe_raw(receive_raw_handler handle_receive);
     void subscribe_stop(stop_handler handle_stop);
 
 private:
-    typedef subscriber<const std::error_code&, const message::version&>
+    typedef subscriber<const code&, const message::version&>
         version_subscriber;
-    typedef subscriber<const std::error_code&, const message::verack&>
+    typedef subscriber<const code&, const message::verack&>
         verack_subscriber;
-    typedef subscriber<const std::error_code&, const message::address&>
+    typedef subscriber<const code&, const message::address&>
         address_subscriber;
-    typedef subscriber<const std::error_code&, const message::get_address&>
+    typedef subscriber<const code&, const message::get_address&>
         get_address_subscriber;
-    typedef subscriber<const std::error_code&, const message::inventory&>
+    typedef subscriber<const code&, const message::inventory&>
         inventory_subscriber;
-    typedef subscriber<const std::error_code&, const message::get_data&>
+    typedef subscriber<const code&, const message::get_data&>
         get_data_subscriber;
-    typedef subscriber<const std::error_code&, const message::get_blocks&>
+    typedef subscriber<const code&, const message::get_blocks&>
         get_blocks_subscriber;
-    typedef subscriber<const std::error_code&, const chain::transaction&>
+    typedef subscriber<const code&, const chain::transaction&>
         transaction_subscriber;
-    typedef subscriber<const std::error_code&, const chain::block&>
+    typedef subscriber<const code&, const chain::block&>
         block_subscriber;
-    typedef subscriber<const std::error_code&, const message::ping&>
+    typedef subscriber<const code&, const message::ping&>
         ping_subscriber;
-    typedef subscriber<const std::error_code&, const message::pong&>
+    typedef subscriber<const code&, const message::pong&>
         pong_subscriber;
-    typedef subscriber<const std::error_code&, const message::header&,
+    typedef subscriber<const code&, const message::header&,
         const data_chunk&> raw_subscriber;
-    typedef subscriber<const std::error_code&> stop_subscriber;
+    typedef subscriber<const code&> stop_subscriber;
 
     template<typename Message, class Subscriber>
     void establish_relay(Subscriber subscriber);
@@ -179,9 +177,9 @@ private:
     template <typename Message, class Subscriber>
     void notify_stop(Subscriber subscriber) const;
 
-    void stop(const boost::system::error_code& ec);
-    void do_stop(const std::error_code& ec);
-    void clear_subscriptions(const std::error_code& ec);
+    void stop(const boost_code& ec);
+    void do_stop(const code& ec);
+    void clear_subscriptions(const code& ec);
     void clear_timers();
 
     void start_timers();
@@ -189,29 +187,27 @@ private:
     void start_inactivity();
     void start_revival();
 
-    void handle_expiration(const std::error_code& ec);
-    void handle_inactivity(const std::error_code& ec);
-    void handle_revival(const std::error_code& ec);
+    void handle_expiration(const code& ec);
+    void handle_inactivity(const code& ec);
+    void handle_revival(const code& ec);
     
     void read_header();
     void read_checksum(const message::header& header);
     void read_payload(const message::header& header);
 
-    void handle_read_header(const boost::system::error_code& ec,
-        size_t bytes_transferred);
-    void handle_read_checksum(const boost::system::error_code& ec,
-        size_t bytes_transferred, message::header& header);
-    void handle_read_payload(const boost::system::error_code& ec,
-        size_t bytes_transferred, const message::header& header);
+    void handle_read_header(const boost_code& ec, size_t bytes_transferred);
+    void handle_read_checksum(const boost_code& ec, size_t bytes_transferred,
+        message::header& header);
+    void handle_read_payload(const boost_code& ec, size_t bytes_transferred,
+        const message::header& header);
 
     void do_send(const data_chunk& message, send_handler handle_send,
         const std::string& command);
     void do_send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
-    void call_handle_send(const boost::system::error_code& ec,
-        send_handler handle_send);
+    void call_handle_send(const boost_code& ec, send_handler handle_send);
 
-    socket_ptr socket_;
+    asio::socket_ptr socket_;
     dispatcher dispatch_;
     const timeout& timeouts_;
 

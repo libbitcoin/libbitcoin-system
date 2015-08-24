@@ -25,6 +25,7 @@
 #include <memory>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 
 namespace libbitcoin {
@@ -34,14 +35,14 @@ namespace network {
 static std::atomic<size_t> instances_(0);
 
 // TODO: derive channel from proxy, adding timers, tracking, nonce,.
-channel::channel(channel_proxy_ptr proxy)
+channel::channel(channel_proxy::ptr proxy)
   : proxy_(proxy), nonce_(0)
 {
     ++instances_;
 }
 
 // TODO: move proxy timeouts to channel (revival deprecated).
-channel::channel(threadpool& pool, socket_ptr socket, const timeout& timeouts)
+channel::channel(threadpool& pool, asio::socket_ptr socket, const timeout& timeouts)
   : channel(std::make_shared<channel_proxy>(socket, pool, timeouts))
 {
 }
@@ -61,7 +62,7 @@ void channel::start()
     proxy_->start();
 }
 
-void channel::stop(const std::error_code& ec)
+void channel::stop(const code& ec)
 {
     proxy_->stop(ec);
 }

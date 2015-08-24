@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -47,8 +48,7 @@ public:
         modules_[module->lookup_symbol()] = module;
     }
 
-    std::error_code load(const std::string& symbol,
-        std::istream& stream) const;
+    code load(const std::string& symbol, std::istream& stream) const;
 
 
 private:

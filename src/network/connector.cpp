@@ -22,10 +22,9 @@
 #include <functional>
 #include <memory>
 #include <mutex>
-#include <system_error>
-#include <boost/asio.hpp>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
@@ -39,7 +38,6 @@ namespace network {
 
 using std::placeholders::_1;
 using std::placeholders::_2;
-using boost::asio::ip::tcp;
 
 std::mutex callback_handled_mutex;
 
@@ -52,7 +50,7 @@ connector::connector(threadpool& pool, const timeout& timeouts)
 
 // Calling this with an outstanding call will cause the outstnding call to
 // destruct and invoke stop, canceling the timer and firing the callback.
-void connector::connect(tcp::resolver::iterator endpoint_iterator,
+void connector::connect(asio::iterator endpoint_iterator,
     handler handle_connect)
 {
     // Handle one callback before calling handle_connect.
@@ -64,16 +62,17 @@ void connector::connect(tcp::resolver::iterator endpoint_iterator,
             shared_from_this(), _1, complete));
 
     // Create a socket for the connection.
-    const auto socket = std::make_shared<tcp::socket>(pool_.service());
+    const auto socket = std::make_shared<asio::socket>(pool_.service());
 
     // Start the socket connection with completion handler.
-    boost::asio::async_connect(*socket, endpoint_iterator,
+    using namespace boost::asio;
+    async_connect(*socket, endpoint_iterator,
         std::bind(&connector::create_channel,
             shared_from_this(), _1, _2, socket, complete));
 }
 
-void connector::create_channel(const boost::system::error_code& ec,
-    tcp::resolver::iterator, socket_ptr socket, handler complete)
+void connector::create_channel(const boost_code& ec, asio::iterator,
+    asio::socket_ptr socket, handler complete)
 {
     deadline_->cancel();
 
@@ -85,11 +84,11 @@ void connector::create_channel(const boost::system::error_code& ec,
 
     // It is possible for the node to get created here after a timeout, but it
     // will subsequently self-destruct following rejection by the synchronizer.
-    const auto node = std::make_shared<channel>(pool_, socket, timeouts_);
-    complete(error::success, node);
+    const auto peer = std::make_shared<channel>(pool_, socket, timeouts_);
+    complete(error::success, peer);
 }
 
-void connector::handle_timer(const std::error_code& ec, handler complete)
+void connector::handle_timer(const code& ec, handler complete)
 {
     // The handler most not expect a node when there is an error.
     if (!deadline::canceled(ec))

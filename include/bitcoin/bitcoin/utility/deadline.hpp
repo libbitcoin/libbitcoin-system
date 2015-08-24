@@ -21,10 +21,9 @@
 #define LIBBITCOIN_DEADLINE_HPP
 
 #include <memory>
-#include <system_error>
-#include <boost/asio.hpp>
-#include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -39,15 +38,14 @@ class BC_API deadline
 {
 public:
     typedef std::shared_ptr<deadline> ptr;
-    typedef std::function<void(const std::error_code&)> handler;
+    typedef std::function<void(const code&)> handler;
     
     /**
      * Construct a deadline timer.
      * @param[in]  pool      The thread pool used by the timer.
      * @param[in]  duration  The default time period from start to expiration.
      */
-    deadline(threadpool& pool,
-        const boost::posix_time::time_duration duration);
+    deadline(threadpool& pool, const asio::duration duration);
 
     /// This class is not copyable.
     deadline(const deadline&) = delete;
@@ -57,29 +55,28 @@ public:
      * Test handler error code for indication that the timer was stopped.
      * @param[in]  ec  The error code passed in the handler invocation.
      */
-    static bool canceled(const std::error_code& ec);
+    static bool canceled(const code& ec);
 
     /**
      * Test handler error code for indication that the timer fired.
      * @param[in]  ec  The error code passed in the handler invocation.
      */
-    static bool expired(const std::error_code& ec);
+    static bool expired(const code& ec);
 
     /**
      * Start the timer.
      * Use expired(ec) in handler to test for expiration.
-     * @param[in]  handle_expiration  Will be invoked upon expire or cancel.
+     * @param[in]  handle  Callback invoked upon expire or cancel.
      */
-    void start(handler handle_expiration);
+    void start(handler handle);
 
     /**
      * Start the timer.
      * Use expired(ec) in handler to test for expiration.
-     * @param[in]  handle_expiration  Will be invoked upon expire or cancel.
-     * @param[in]  duration           The time period from start to expiration.
+     * @param[in]  handle    Callback invoked upon expire or cancel.
+     * @param[in]  duration  The time period from start to expiration.
      */
-    void start(handler handle_expiration,
-        const boost::posix_time::time_duration duration);
+    void start(handler handle, const asio::duration duration);
 
     /**
      * Cancel the timer.
@@ -88,11 +85,10 @@ public:
     void cancel();
 
 private:
-    void handle_timer(const boost::system::error_code& ec,
-        handler handle_expiration) const;
+    void handle_timer(const boost_code& ec, handler handle) const;
 
-    boost::posix_time::time_duration duration_;
-    boost::asio::deadline_timer timer_;
+    asio::timer timer_;
+    asio::duration duration_;
 };
 
 } // namespace libbitcoin

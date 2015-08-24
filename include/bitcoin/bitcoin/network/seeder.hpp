@@ -22,7 +22,6 @@
 
 #include <cstddef>
 #include <memory>
-#include <system_error>
 #include <vector>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -43,8 +42,8 @@ class BC_API seeder
   : public std::enable_shared_from_this<seeder>
 {
 public:
-    typedef std::function<void(const std::error_code&)> handler;
-    typedef std::function<void(const std::error_code&, channel_ptr)> ptr;
+    typedef std::function<void(const code&)> handler;
+    typedef std::function<void(const code&, channel::ptr)> ptr;
 
     static const config::endpoint::list defaults;
 
@@ -61,14 +60,13 @@ public:
 
 private:
 
-    void handle_seeded(const std::error_code& ec, size_t host_start_size,
+    void handle_seeded(const code& ec, size_t host_start_size,
         handler handle_complete);
     void start_connect(const config::endpoint& seed, handler complete);
-    void handle_connected(const std::error_code& ec, channel_ptr peer,
+    void handle_connected(const code& ec, channel::ptr peer,
         const config::endpoint& seed, handler complete);
-    void handle_handshake(const std::error_code& ec, channel_ptr peer,
+    void handle_handshake(const code& ec, channel::ptr peer,
         const config::endpoint& seed, handler complete);
-    void handle_store(const std::error_code& ec);
 
     dispatcher dispatch_;
     threadpool& pool_;
@@ -77,7 +75,6 @@ private:
     initiator& network_;
     const config::endpoint::list& seeds_;
     const message::network_address self_;
-    config::endpoint::list remaining_;
 };
 
 } // namespace network

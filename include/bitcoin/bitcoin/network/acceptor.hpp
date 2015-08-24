@@ -22,9 +22,9 @@
 
 #include <functional>
 #include <memory>
-#include <system_error>
-#include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -32,23 +32,15 @@
 namespace libbitcoin {
 namespace network {
 
-class acceptor;
-typedef std::shared_ptr<acceptor> acceptor_ptr;
-
 class BC_API acceptor
   : public std::enable_shared_from_this<acceptor>
 {
 public:
+    typedef std::shared_ptr<acceptor> ptr;
+    typedef std::function<void (const code&, channel::ptr)> accept_handler;
+    typedef std::function<void(const code&, acceptor::ptr)> listen_handler;
 
-    typedef std::shared_ptr<boost::asio::ip::tcp::acceptor> tcp_acceptor_ptr;
-
-    typedef std::function<void (const std::error_code&, channel_ptr)>
-        accept_handler;
-
-    typedef std::function<void(const std::error_code&, acceptor_ptr)>
-        listen_handler;
-
-    acceptor(threadpool& pool, tcp_acceptor_ptr accept,
+    acceptor(threadpool& pool, asio::acceptor_ptr accept,
         const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
@@ -58,12 +50,12 @@ public:
     void accept(accept_handler handle_accept);
 
 private:
-    void create_channel(const boost::system::error_code& ec,
-        socket_ptr socket, accept_handler handle_accept);
+    void create_channel(const boost_code& ec,
+        asio::socket_ptr socket, accept_handler handle_accept);
 
     threadpool& pool_;
     const timeout& timeouts_;
-    tcp_acceptor_ptr tcp_acceptor_;
+    asio::acceptor_ptr asio_acceptor_;
 };
 
 } // namespace network
