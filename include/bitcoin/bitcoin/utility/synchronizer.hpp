@@ -104,7 +104,6 @@ template <typename Handler>
 synchronizer<Handler> synchronize(Handler&& handler, size_t clearance_count,
     const std::string& log_context)
 {
-    BITCOIN_ASSERT(handler);
     return synchronizer<Handler>(handler, clearance_count, log_context);
 }
 
