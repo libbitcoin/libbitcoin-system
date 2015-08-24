@@ -36,59 +36,68 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+#define BIND1(method, A1) \
+    BC_BIND1(method, protocol_address, A1)
+
+#define SEND1(instance, method, A1) \
+    BC_SEND1(instance, method, protocol_address, A1)
+
+#define RECEIVE2(Message, method, A1, A2) \
+    BC_RECEIVE2(Message, method, protocol_address, A1, A2)
+
 protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
     hosts& hosts, const network_address& self)
   : hosts_(hosts), self_({ { self } }), protocol_base(peer, pool)
 {
     BITCOIN_ASSERT(!self_.addresses.empty());
     if (self_.addresses.front().port != 0)
-        ////send(self_, &protocol_address::handle_send_address);
+    {
+        SEND1(self_, handle_send_address, _1);
+    }
 
     if (hosts_.capacity() == 0)
         return;
 
-    ////accept<address>(&protocol_address::handle_receive_address, _1, _2);
-    ////accept<get_address>(&protocol_address::handle_receive_get_address, _1, _2);
-    ////send(get_address(), &protocol_address::handle_send_get_address);
-}
-
-std::shared_ptr<protocol_address> protocol_address::shared()
-{
-    return shared_from_base<protocol_address>();
+    RECEIVE2(get_address, handle_receive_get_address, _1, _2);
+    SEND1(get_address(), handle_send_get_address, _1);
 }
 
 void protocol_address::handle_receive_address(const code& ec,
     const address& message)
 {
+    if (stopped())
+        return;
+
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure receiving address message from [" << peer() << "] "
+            << "Failure receiving address message from [" << authority() << "] "
             << ec.message();
         stop(error::bad_stream);
         return;
     }
 
     // Resubscribe to address messages.
-    ////accept<address>(&protocol_address::handle_receive_address, _1, _2);
+    RECEIVE2(address, handle_receive_address, _1, _2);
 
     log_debug(LOG_PROTOCOL)
-        << "Storing addresses from [" << peer() << "] ("
+        << "Storing addresses from [" << authority() << "] ("
         << message.addresses.size() << ")";
 
     // TODO: manage timestamps (active peers are connected < 3 hours ago).
-    hosts_.store(message.addresses, 
-        std::bind(&protocol_address::handle_store_addresses,
-            shared_from_base<protocol_address>(), _1));
+    hosts_.store(message.addresses, BIND1(handle_store_addresses, _1));
 }
 
 void protocol_address::handle_receive_get_address(const code& ec,
     const get_address& message)
 {
+    if (stopped())
+        return;
+
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure receiving get_address message from [" << peer() << "] "
+            << "Failure receiving get_address message from [" << authority() << "] "
             << ec.message();
         stop(error::bad_stream);
         return;
@@ -102,36 +111,45 @@ void protocol_address::handle_receive_get_address(const code& ec,
 
     // TODO: allowing repeated queries can allow a peer to map our history.
     // Resubscribe to get_address messages.
-    ////accept<get_address>(&protocol_address::handle_receive_get_address, _1, _2);
+    RECEIVE2(get_address, handle_receive_get_address, _1, _2);
 
     log_debug(LOG_PROTOCOL)
-        << "Sending addresses to [" << peer() << "] ("
+        << "Sending addresses to [" << authority() << "] ("
         << active.addresses.size() << ")";
 
-    ////send(active, &protocol_address::handle_send_address);
+    SEND1(active, handle_send_address, _1);
 }
 
 void protocol_address::handle_send_address(const code& ec) const
 {
+    if (stopped())
+        return;
+
     if (ec)
         log_debug(LOG_PROTOCOL)
-            << "Failure sending address [" << peer() << "] "
+            << "Failure sending address [" << authority() << "] "
             << ec.message();
 }
 
 void protocol_address::handle_send_get_address(const code& ec) const
 {
+    if (stopped())
+        return;
+
     if (ec)
         log_debug(LOG_PROTOCOL)
-            << "Failure sending get_address [" << peer() << "] "
+            << "Failure sending get_address [" << authority() << "] "
             << ec.message();
 }
 
 void protocol_address::handle_store_addresses(const code& ec) const
 {
+    if (stopped())
+        return;
+
     if (ec)
         log_error(LOG_PROTOCOL)
-            << "Failure storing addresses from [" << peer() << "] "
+            << "Failure storing addresses from [" << authority() << "] "
             << ec.message();
 }
 

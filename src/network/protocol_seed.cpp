@@ -38,6 +38,15 @@ using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
+#define BIND1(method, A1) \
+    BC_BIND1(method, protocol_seed, A1)
+
+#define SEND1(instance, method, A1) \
+    BC_SEND1(instance, method, protocol_seed, A1)
+
+#define RECEIVE2(Message, method, A1, A2) \
+    BC_RECEIVE2(Message, method, protocol_seed, A1, A2)
+
 // Require three callbacks (or any error) before calling complete.
 protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
     const asio::duration& timeout, handler complete, hosts& hosts,
@@ -47,10 +56,13 @@ protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
 {
     BITCOIN_ASSERT(!self_.addresses.empty());
     if (self_.addresses.front().port != 0)
+    {
         callback(error::success);
+    }
     else
-        send(self_, &protocol_seed::handle_send_address,
-            shared_from_base<protocol_seed>(), _1);
+    {
+        SEND1(self_, handle_send_address, _1);
+    }
 
     if (hosts_.capacity() == 0)
     {
@@ -59,37 +71,41 @@ protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
         return;
     }
 
-    ////accept<address>(&protocol_seed::handle_receive_address, _1, _2);
-    ////send(get_address(), &protocol_seed::handle_send_get_address, _1);
+    RECEIVE2(address, handle_receive_address, _1, _2);
+    SEND1(get_address(), handle_send_get_address, _1);
 }
 
 void protocol_seed::handle_receive_address(const code& ec,
     const address& message)
 {
+    if (stopped())
+        return;
+
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure receiving addresses from seed [" << peer() << "] "
+            << "Failure receiving addresses from seed [" << authority() << "] "
             << ec.message();
         stop(error::bad_stream);
         return;
     }
 
     log_debug(LOG_PROTOCOL)
-        << "Storing addresses from seed [" << peer() << "] ("
+        << "Storing addresses from seed [" << authority() << "] ("
         << message.addresses.size() << ")";
 
     // TODO: manage timestamps (active peers are connected < 3 hours ago).
-    hosts_.store(message.addresses,
-        std::bind(&protocol_seed::handle_store_addresses,
-            shared_from_base<protocol_seed>(), _1));
+    hosts_.store(message.addresses, BIND1(handle_store_addresses, _1));
 }
 
 void protocol_seed::handle_send_address(const code& ec) const
 {
+    if (stopped())
+        return;
+
     if (ec)
         log_debug(LOG_PROTOCOL)
-            << "Failure sending address to seed [" << peer() << "] "
+            << "Failure sending address to seed [" << authority() << "] "
             << ec.message();
 
     // 1 of 3
@@ -98,9 +114,12 @@ void protocol_seed::handle_send_address(const code& ec) const
 
 void protocol_seed::handle_send_get_address(const code& ec) const
 {
+    if (stopped())
+        return;
+
     if (ec)
         log_debug(LOG_PROTOCOL)
-            << "Failure sending get_address to seed [" << peer() << "] "
+            << "Failure sending get_address to seed [" << authority() << "] "
             << ec.message();
 
     // 2 of 3
@@ -109,9 +128,12 @@ void protocol_seed::handle_send_get_address(const code& ec) const
 
 void protocol_seed::handle_store_addresses(const code& ec) const
 {
+    if (stopped())
+        return;
+
     if (ec)
         log_error(LOG_PROTOCOL)
-            << "Failure storing addresses from seed [" << peer() << "] "
+            << "Failure storing addresses from seed [" << authority() << "] "
             << ec.message();
 
     // 3 of 3
