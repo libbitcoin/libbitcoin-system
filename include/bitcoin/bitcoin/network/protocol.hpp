@@ -57,7 +57,7 @@ public:
         uint16_t port=bc::protocol_port, bool relay=true,
         size_t max_outbound=8, size_t max_inbound=8,
         const config::endpoint::list& seeds=seeder::defaults,
-        const message::network_address& self=bc::unspecified_network_address,
+        const config::authority& self=bc::unspecified_network_address,
         const timeout& timeouts=timeout::defaults);
     
     /// This class is not copyable.
@@ -145,12 +145,12 @@ private:
     threadpool& pool_;
     hosts& hosts_;
     initiator& network_;
-    protocol_version::ptr handshake_;
+    std::shared_ptr<protocol_version> handshake_;
     channel_subscriber_ptr channel_subscriber_;
 
     // Configuration.
     const config::endpoint::list& seeds_;
-    const message::network_address& self_;
+    const config::authority self_;
     const timeout& timeouts_;
     uint16_t inbound_port_;
     size_t max_inbound_;

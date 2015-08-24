@@ -58,7 +58,7 @@ using boost::posix_time::seconds;
 // TODO: implement protocol_version, protocol_ping, protocol_address.
 protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
     uint16_t port, bool relay, size_t max_outbound, size_t max_inbound,
-    const config::endpoint::list& seeds, const message::network_address& self,
+    const config::endpoint::list& seeds, const config::authority& self,
     const timeout& timeouts)
   : dispatch_(pool),
     pool_(pool),
@@ -97,7 +97,6 @@ void protocol::stop(completion_handler handle_complete)
     // Stop protocol subscribers.
     channel_subscriber_->relay(error::service_stopped, nullptr);
 
-    // TODO: use single list (simple).
     // Notify all channels to stop.
     for (const auto node: outbound_connections_)
         node->stop(error::service_stopped);
@@ -118,7 +117,7 @@ void protocol::start_seeding(completion_handler handle_complete)
             this, _1, handle_complete);
 
     std::make_shared<seeder>(pool_, hosts_, timeouts_, network_, seeds_,
-        self_)->start(complete);
+        self_.to_network_address())->start(complete);
 }
 
 // TODO: implement on context_outbound.
