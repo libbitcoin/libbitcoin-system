@@ -30,7 +30,7 @@ namespace network {
 using boost::posix_time::seconds;
 using boost::posix_time::minutes;
 
-const timeout timeout::defaults = timeout::timeout();
+const timeout timeout::defaults;
 
 timeout::timeout(
     uint32_t connect_timeout_seconds,
