@@ -24,9 +24,12 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+
+INITIALIZE_TRACK(bc::network::protocol_ping);
 
 namespace libbitcoin {
 namespace network {
@@ -38,7 +41,8 @@ using std::placeholders::_2;
 
 protocol_ping::protocol_ping(channel::ptr channel, threadpool& pool,
     const asio::duration& period)
-  : protocol_base(channel, pool, period)
+  : protocol_base(channel, pool, period),
+    track("protocol_ping", LOG_NETWORK)
 {
 }
 

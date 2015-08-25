@@ -27,18 +27,17 @@
 #include <bitcoin/bitcoin/message/header.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+
+INITIALIZE_TRACK(bc::network::channel);
 
 namespace libbitcoin {
 namespace network {
-    
-// Leak tracking.
-static std::atomic<size_t> instances_(0);
 
-// TODO: derive channel from proxy, adding timers, tracking, nonce,.
+// TODO: derive channel from proxy, adding timers, tracking, nonce.
 channel::channel(channel_proxy::ptr proxy)
-  : proxy_(proxy), nonce_(0)
+  : proxy_(proxy), nonce_(0), track("channel", LOG_NETWORK)
 {
-    ++instances_;
 }
 
 // TODO: move proxy timeouts to channel (revival deprecated).
@@ -51,10 +50,6 @@ channel::~channel()
 {
     // A proxy reference may be held externally, so ensure the proxy is closed.
     proxy_->stop(error::channel_stopped);
-
-    // Leak tracking.
-    log_debug(LOG_NETWORK)
-        << "Closed a channel and (" << --instances_ << ") remain open";
 }
 
 void channel::start()

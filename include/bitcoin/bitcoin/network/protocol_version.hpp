@@ -29,6 +29,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -39,7 +40,7 @@ namespace network {
  * Attach this to a node immediately following socket creation.
  */
 class BC_API protocol_version
-  : public protocol_base
+  : public protocol_base, track<protocol_version>
 {
 public:
     /**

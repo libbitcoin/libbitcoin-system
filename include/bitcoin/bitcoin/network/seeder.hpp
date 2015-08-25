@@ -31,6 +31,7 @@
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -39,7 +40,7 @@ namespace libbitcoin {
 namespace network {
 
 class BC_API seeder
-  : public std::enable_shared_from_this<seeder>
+  : public std::enable_shared_from_this<seeder>, track<seeder>
 {
 public:
     typedef std::function<void(const code&)> handler;

@@ -26,6 +26,7 @@
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -38,7 +39,7 @@ namespace network {
  * This simplifies invocation and eliminates boost-speific error handling.
  */
 class connector
-  : public std::enable_shared_from_this<connector>
+  : public std::enable_shared_from_this<connector>, track<connector>
 {
 public:
     typedef std::shared_ptr<connector> ptr;

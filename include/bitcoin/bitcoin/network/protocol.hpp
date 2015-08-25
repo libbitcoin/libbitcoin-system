@@ -47,6 +47,7 @@ namespace network {
 class BC_API protocol
 {
 public:
+    typedef subscriber<const code&, channel::ptr> channel_subscriber;
     typedef std::function<void(const code&)> completion_handler;
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
     typedef std::function<void(const code&, channel::ptr)> broadcast_handler;
@@ -83,7 +84,6 @@ public:
 
 private:
     typedef std::vector<channel::ptr> channel_ptr_list;
-    typedef subscriber<const code&, channel::ptr> channel_subscriber;
     typedef channel_subscriber::ptr channel_subscriber_ptr;
 
     // Common to all connection types.

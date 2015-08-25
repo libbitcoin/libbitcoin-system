@@ -56,6 +56,21 @@
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
+INITIALIZE_TRACK(bc::network::channel_proxy);
+INITIALIZE_TRACK(bc::network::channel_proxy::version_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::verack_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::address_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::get_address_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::inventory_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::get_data_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::get_blocks_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::transaction_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::block_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::ping_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::pong_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::raw_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy::stop_subscriber);
+
 namespace libbitcoin {
 namespace network {
 
@@ -63,6 +78,10 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::format;
 using boost::posix_time::time_duration;
+
+#define MAKE_SUBSCRIBER(Message, pool) \
+    std::make_shared<Message##_subscriber>( \
+        pool, #Message "_subscriber", LOG_NETWORK)
 
 // The proxy will have no config with timers moved to channel.
 channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
@@ -75,19 +94,20 @@ channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
     stopped_(false),
-    version_subscriber_(std::make_shared<version_subscriber>(pool)),
-    verack_subscriber_(std::make_shared<verack_subscriber>(pool)),
-    address_subscriber_(std::make_shared<address_subscriber>(pool)),
-    get_address_subscriber_(std::make_shared<get_address_subscriber>(pool)),
-    inventory_subscriber_(std::make_shared<inventory_subscriber>(pool)),
-    get_data_subscriber_(std::make_shared<get_data_subscriber>(pool)),
-    get_blocks_subscriber_(std::make_shared<get_blocks_subscriber>(pool)),
-    transaction_subscriber_(std::make_shared<transaction_subscriber>(pool)),
-    block_subscriber_(std::make_shared<block_subscriber>(pool)),
-    ping_subscriber_(std::make_shared<ping_subscriber>(pool)),
-    pong_subscriber_(std::make_shared<pong_subscriber>(pool)),
-    raw_subscriber_(std::make_shared<raw_subscriber>(pool)),
-    stop_subscriber_(std::make_shared<stop_subscriber>(pool))
+    version_subscriber_(MAKE_SUBSCRIBER(version, pool)),
+    verack_subscriber_(MAKE_SUBSCRIBER(verack, pool)),
+    address_subscriber_(MAKE_SUBSCRIBER(address, pool)),
+    get_address_subscriber_(MAKE_SUBSCRIBER(get_address, pool)),
+    inventory_subscriber_(MAKE_SUBSCRIBER(inventory, pool)),
+    get_data_subscriber_(MAKE_SUBSCRIBER(get_data, pool)),
+    get_blocks_subscriber_(MAKE_SUBSCRIBER(get_blocks, pool)),
+    transaction_subscriber_(MAKE_SUBSCRIBER(transaction, pool)),
+    block_subscriber_(MAKE_SUBSCRIBER(block, pool)),
+    ping_subscriber_(MAKE_SUBSCRIBER(ping, pool)),
+    pong_subscriber_(MAKE_SUBSCRIBER(pong, pool)),
+    raw_subscriber_(MAKE_SUBSCRIBER(raw, pool)),
+    stop_subscriber_(MAKE_SUBSCRIBER(stop, pool)),
+    track("channel_proxy", LOG_NETWORK)
 {
     establish_relay<message::version>(version_subscriber_);
     establish_relay<message::verack>(verack_subscriber_);
@@ -104,7 +124,7 @@ channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
 
 channel_proxy::~channel_proxy()
 {
-    do_stop(error::channel_stopped);
+    BITCOIN_ASSERT_MSG(stopped_, "The channel is not stopped.");
 }
 
 template<typename Message, class Subscriber>
@@ -143,6 +163,7 @@ void channel_proxy::start()
     start_timers();
 }
 
+// TODO: cache the endpoint value at accept|connect time.
 config::authority channel_proxy::address() const
 {
     boost_code ec;

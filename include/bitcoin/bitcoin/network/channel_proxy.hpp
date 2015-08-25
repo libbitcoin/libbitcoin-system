@@ -47,6 +47,7 @@
 #include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -59,7 +60,7 @@ namespace libbitcoin {
 namespace network {
 
 class BC_API channel_proxy
-  : public std::enable_shared_from_this<channel_proxy>
+  : public std::enable_shared_from_this<channel_proxy>, track<channel_proxy>
 {
 public:
     typedef std::shared_ptr<channel_proxy> ptr;
@@ -144,7 +145,6 @@ public:
     void subscribe_raw(receive_raw_handler handle_receive);
     void subscribe_stop(stop_handler handle_stop);
 
-private:
     typedef subscriber<const code&, const message::version&>
         version_subscriber;
     typedef subscriber<const code&, const message::verack&>
@@ -171,6 +171,7 @@ private:
         const data_chunk&> raw_subscriber;
     typedef subscriber<const code&> stop_subscriber;
 
+private:
     template<typename Message, class Subscriber>
     void establish_relay(Subscriber subscriber);
     template <typename Message, class Subscriber, typename Callback>

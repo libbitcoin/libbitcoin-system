@@ -21,7 +21,6 @@
 
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
@@ -29,9 +28,12 @@
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+
+INITIALIZE_TRACK(bc::network::connector);
 
 namespace libbitcoin {
 namespace network {
@@ -39,12 +41,11 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-std::mutex callback_handled_mutex;
-
 // There is no way to cancel channel creation, must wait for timer.
 connector::connector(threadpool& pool, const timeout& timeouts)
   : pool_(pool), timeouts_(timeouts),
-    deadline_(std::make_shared<deadline>(pool, timeouts.connect))
+    deadline_(std::make_shared<deadline>(pool, timeouts.connect)),
+    track("connector", LOG_NETWORK)
 {
 }
 

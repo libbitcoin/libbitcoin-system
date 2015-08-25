@@ -53,6 +53,7 @@ namespace libbitcoin {
 namespace network {
 
 class BC_API channel
+  : public track<channel>
 {
 public:
     typedef std::shared_ptr<channel> ptr;

@@ -39,8 +39,11 @@
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/network/seeder.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+
+INITIALIZE_TRACK(bc::network::protocol::channel_subscriber);
 
 namespace libbitcoin {
 namespace network {
@@ -60,7 +63,7 @@ protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
     pool_(pool),
     hosts_(hosts),
     network_(network),
-    channel_subscriber_(std::make_shared<channel_subscriber>(pool)),
+    channel_subscriber_(std::make_shared<channel_subscriber>(pool, "channel_subscriber", LOG_NETWORK)),
     seeds_(seeds),
     self_(self),
     timeouts_(timeouts),

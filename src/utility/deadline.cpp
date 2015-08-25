@@ -24,6 +24,8 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
+INITIALIZE_TRACK(bc::deadline);
+
 namespace libbitcoin {
 
 using std::placeholders::_1;
@@ -37,7 +39,8 @@ static const auto boost_cancel = asio::error::operation_aborted;
 // closure captures an instance of this class and the callback.
 // This is guaranteed to call handler exactly once (unless prepetually reset).
 deadline::deadline(threadpool& pool, const asio::duration duration)
-  : duration_(duration), timer_(pool.service())
+  : duration_(duration), timer_(pool.service()),
+    track("deadline", LOG_NETWORK)
 {
 }
 

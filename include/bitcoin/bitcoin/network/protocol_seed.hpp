@@ -27,8 +27,9 @@
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/protocol_base.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
+#include <bitcoin/bitcoin/network/protocol_base.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -39,7 +40,7 @@ namespace network {
  * Attach this to a node immediately following seed handshake completion.
  */
 class BC_API protocol_seed
-  : public protocol_base
+  : public protocol_base, track<protocol_seed>
 {
 public:
     /**

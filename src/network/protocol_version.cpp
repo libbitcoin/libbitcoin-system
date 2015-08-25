@@ -36,6 +36,8 @@
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 
+INITIALIZE_TRACK(bc::network::protocol_version);
+
 namespace libbitcoin {
 namespace network {
 
@@ -61,7 +63,8 @@ protocol_version::protocol_version(channel::ptr channel, threadpool& pool,
     const asio::duration& timeout, handler complete, hosts& hosts,
     const config::authority& self, bool relay)
   : version_(version_template),
-    protocol_base(channel, pool, timeout, synchronize(complete, 3, "version"))
+    protocol_base(channel, pool, timeout, synchronize(complete, 3, "version")),
+    track("protocol_version", LOG_NETWORK)
 {
     // Set required transaction relay policy for the connection.
     version_.relay = relay;

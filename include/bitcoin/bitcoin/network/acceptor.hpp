@@ -27,13 +27,14 @@
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 namespace network {
 
 class BC_API acceptor
-  : public std::enable_shared_from_this<acceptor>
+  : public std::enable_shared_from_this<acceptor>, track<channel_proxy>
 {
 public:
     typedef std::shared_ptr<acceptor> ptr;

@@ -23,6 +23,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
@@ -30,13 +31,15 @@ namespace libbitcoin {
 
 template <typename... Args>
 class subscriber
-  : public std::enable_shared_from_this<subscriber<Args...>>
+  : public std::enable_shared_from_this<subscriber<Args...>>,
+    track<subscriber<Args...>>
 {
 public:
     typedef std::function<void (Args...)> handler;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
-    subscriber(threadpool& pool);
+    subscriber(threadpool& pool, const std::string& class_name,
+        const std::string& log_name);
     ~subscriber();
 
     void subscribe(handler handler);

@@ -33,6 +33,8 @@
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
+INITIALIZE_TRACK(bc::network::protocol_seed);
+
 namespace libbitcoin {
 namespace network {
     
@@ -46,7 +48,8 @@ protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
     const asio::duration& timeout, handler complete, hosts& hosts,
     const config::authority& self)
   : hosts_(hosts), self_(self),
-    protocol_base(peer, pool, timeout, synchronize(complete, 3, "seed"))
+    protocol_base(peer, pool, timeout, synchronize(complete, 3, "seed")),
+    track("protocol_seed", LOG_NETWORK)
 {
 }
 
@@ -54,7 +57,7 @@ void protocol_seed::start()
 {
     protocol_base::start();
 
-    if (self_.port() != 0)
+    if (self_.port() == 0)
     {
         callback(error::success);
     }
