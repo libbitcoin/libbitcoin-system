@@ -75,7 +75,7 @@ void protocol_base::subscribe_stop()
 {
     channel_->subscribe_stop(
         dispatch_.sync(&protocol_base::handle_stop,
-            shared_from_base<protocol_base>(), _1));
+            shared_from_this(), _1));
 }
 
 void protocol_base::subscribe_timer(threadpool& pool,
@@ -84,7 +84,7 @@ void protocol_base::subscribe_timer(threadpool& pool,
     deadline_ = std::make_shared<deadline>(pool, timeout);
     deadline_->start(
         std::bind(&protocol_base::handle_timer,
-            shared_from_base<protocol_base>(), _1));
+            shared_from_this(), _1));
 }
 
 void protocol_base::handle_stop(const code& ec)

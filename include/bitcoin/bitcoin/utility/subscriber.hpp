@@ -28,33 +28,29 @@
 
 namespace libbitcoin {
 
-// TODO: use Args&&, list, ptr.
 template <typename... Args>
 class subscriber
   : public std::enable_shared_from_this<subscriber<Args...>>
 {
 public:
-    typedef std::function<void (Args...)> subscription_handler;
+    typedef std::function<void (Args...)> handler;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
     subscriber(threadpool& pool);
     ~subscriber();
 
-    void subscribe(subscription_handler handler);
+    void subscribe(handler handler);
     void relay(Args... args);
 
 private:
-    typedef std::vector<subscription_handler> subscription_list;
+    typedef std::vector<handler> list;
 
-    void do_subscribe(subscription_handler notifier);
+    void do_subscribe(handler notifier);
     void do_relay(Args... args);
 
     dispatcher dispatch_;
-    subscription_list subscriptions_;
+    list subscriptions_;
 };
-
-template <typename... Args>
-using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
 
 } // namespace libbitcoin
 

@@ -148,9 +148,9 @@ void seeder::handle_connected(const code& ec, channel::ptr peer,
         dispatch_.sync(&seeder::handle_handshake,
             shared_from_this(), _1, peer, seed, complete);
 
-    ////// Attach version protocol to the new connection (until complete).
-    ////std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
-    ////    callback, self_, relay);
+    // Attach version protocol to the new connection (until complete).
+    std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
+        callback, hosts_, self_, relay);
 
     // Start reading from the socket (causing subscription events).
     peer->start();

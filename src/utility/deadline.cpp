@@ -71,13 +71,13 @@ void deadline::start(handler handle, const asio::duration duration)
 // Cancellation calls handle_timer with asio::error::operation_aborted.
 void deadline::cancel()
 {
-    boost_code code;
-    timer_.cancel(code);
+    boost_code ec;
+    timer_.cancel(ec);
 
     // If cancellation fails the call to handle_timer would be delayed until
     // the timer actually fires. So there is no need to handle this error, it
     // just results in a slower completion (and is very unlikely to occur).
-    BITCOIN_ASSERT(code);
+    BITCOIN_ASSERT(!ec);
 }
 
 // A boost success code implies that the timer fired.

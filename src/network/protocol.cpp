@@ -52,10 +52,6 @@ using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
-// TODO: make protocol an aggregator over the derived classes of network_base.
-// TODO: parameterize dispatcher, connections and hosts as same object for each.
-// TODO: pass config reference into each class.
-// TODO: implement protocol_version, protocol_ping, protocol_address.
 protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
     uint16_t port, bool relay, size_t max_outbound, size_t max_inbound,
     const config::endpoint::list& seeds, const config::authority& self,
@@ -75,8 +71,8 @@ protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
 {
 }
 
-// TODO: add seed connections to protocol_seed (i.e. connect once).
-// TODO: add manual connections via config in protocol_manual.
+// TODO: add seed connections to session_seed (i.e. connect once).
+// TODO: add manual connections via config in session_manual.
 
 void protocol::start(completion_handler handle_complete)
 {
@@ -120,7 +116,7 @@ void protocol::start_seeding(completion_handler handle_complete)
         self_.to_network_address())->start(complete);
 }
 
-// TODO: implement on context_outbound.
+// TODO: implement on session_outbound.
 
 void protocol::start_connecting(const code& ec,
     completion_handler handle_complete)
@@ -205,7 +201,7 @@ void protocol::handle_connect(const code& ec, channel::ptr node,
     start_talking(node, stop_handler, relay_);
 }
 
-// TODO: implement on context_manual.
+// TODO: implement on session_manual.
 
 void protocol::retry_manual_connection(const config::endpoint& address,
     bool relay, size_t retry)
@@ -266,7 +262,7 @@ void protocol::handle_manual_connect(const code& ec,
     start_talking(node, stop_handler, relay);
 }
 
-// TODO: implement on context_inbound.
+// TODO: implement on session_inbound.
 
 void protocol::start_accepting()
 {
@@ -356,16 +352,13 @@ void protocol::start_talking(channel::ptr node,
         dispatch_.sync(&protocol::handle_handshake,
             this, _1, node);
 
-    ////// Attach version protocol to the new connection (until complete).
-    ////std::make_shared<protocol_version>(node, pool_, timeouts_.handshake,
-    ////    callback, self_, relay);
+    // Attach version protocol to the new connection (until complete).
+    std::make_shared<protocol_version>(node, pool_, timeouts_.handshake,
+        callback, hosts_, self_, relay);
 
     // Start reading from the socket (causing subscription events).
     node->start();
 }
-
-// TODO: virtual base method, override in protocol_seed to use no protocol_ping
-// and invoke protocol_address using callback and timer invoacation.
 
 void protocol::handle_handshake(const code& ec, channel::ptr node)
 {
@@ -445,10 +438,6 @@ void protocol::subscribe_channel(channel_handler handle_channel)
     channel_subscriber_->subscribe(handle_channel);
 }
 
-// TODO: consolidate three lists using node type enumeration.
-// inbound, outbound, manual, seed (?).
-// THese are not currently thread safe accessors, should be stranded.
-
 size_t protocol::connection_count() const
 {
     return outbound_connections_.size() + manual_connections_.size() +
@@ -469,7 +458,6 @@ bool protocol::is_blacklisted(const config::authority& peer) const
 
 bool protocol::is_connected(const config::authority& peer) const
 {
-    // TODO: add connection_type to node so we only need one connection pool.
     const auto& inn = inbound_connections_;
     const auto& out = outbound_connections_;
     const auto& man = manual_connections_;

@@ -24,7 +24,6 @@
 
 #include <functional>
 #include <memory>
-#include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
    
@@ -42,7 +41,7 @@ subscriber<Args...>::~subscriber()
 }
 
 template <typename... Args>
-void subscriber<Args...>::subscribe(subscription_handler handler)
+void subscriber<Args...>::subscribe(handler handler)
 {
     dispatch_.sync(&subscriber<Args...>::do_subscribe,
         this->shared_from_this(), handler)();
@@ -56,7 +55,7 @@ void subscriber<Args...>::relay(Args... args)
 }
 
 template <typename... Args>
-void subscriber<Args...>::do_subscribe(subscription_handler notifier)
+void subscriber<Args...>::do_subscribe(handler notifier)
 {
     subscriptions_.push_back(notifier);
 }

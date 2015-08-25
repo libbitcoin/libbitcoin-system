@@ -31,7 +31,7 @@ template <typename Handler>
 class synchronizer
 {
 public:
-    synchronizer(Handler&& handler, size_t clearance_count,
+    synchronizer(Handler handler, size_t clearance_count,
         const std::string& name)
       : handler_(handler),
         clearance_count_(clearance_count),
@@ -42,7 +42,7 @@ public:
     }
 
     template <typename... Args>
-    void operator()(const code& code, Args&&... args)
+    void operator()(const code& ec, Args... args)
     {
         auto handle = false;
 
@@ -61,11 +61,11 @@ public:
 
             ++(*counter_);
 
-            if (code)
+            if (ec)
             {
                 log_debug(LOG_PROTOCOL)
                     << "Synchronizing [" << name_ << "] " << *counter_
-                    << "/" << clearance_count_ << " " << code.message();
+                    << "/" << clearance_count_ << " " << ec.message();
 
                 // Stop because of failure.
                 *counter_ = clearance_count_;
@@ -77,7 +77,7 @@ public:
                 handle = true;
             }
 
-            if (!code)
+            if (!ec)
             {
                 log_debug(LOG_PROTOCOL)
                     << "Synchronizing [" << name_ << "] " << *counter_ << "/"
@@ -87,7 +87,7 @@ public:
 
         // Keep this long-running call out of critical section.
         if (handle)
-            handler_(code, std::forward<Args>(args)...);
+            handler_(ec, std::forward<Args>(args)...);
     }
 
 private:
@@ -101,7 +101,7 @@ private:
 };
 
 template <typename Handler>
-synchronizer<Handler> synchronize(Handler&& handler, size_t clearance_count,
+synchronizer<Handler> synchronize(Handler handler, size_t clearance_count,
     const std::string& log_context)
 {
     return synchronizer<Handler>(handler, clearance_count, log_context);
