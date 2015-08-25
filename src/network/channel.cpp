@@ -36,7 +36,7 @@ namespace network {
 
 // TODO: derive channel from proxy, adding timers, tracking, nonce.
 channel::channel(channel_proxy::ptr proxy)
-  : proxy_(proxy), nonce_(0), track("channel", LOG_NETWORK)
+  : proxy_(proxy), nonce_(0), track<channel>("channel", LOG_NETWORK)
 {
 }
 

@@ -79,7 +79,7 @@ seeder::seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
     network_(network),
     seeds_(seeds),
     self_(self),
-    track("seeder", LOG_NETWORK)
+    track<seeder>("seeder", LOG_NETWORK)
 {
 }
 

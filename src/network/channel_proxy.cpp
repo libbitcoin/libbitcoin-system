@@ -107,7 +107,7 @@ channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
     pong_subscriber_(MAKE_SUBSCRIBER(pong, pool)),
     raw_subscriber_(MAKE_SUBSCRIBER(raw, pool)),
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool)),
-    track("channel_proxy", LOG_NETWORK)
+    track<channel_proxy>("channel_proxy", LOG_NETWORK)
 {
     establish_relay<message::version>(version_subscriber_);
     establish_relay<message::verack>(verack_subscriber_);

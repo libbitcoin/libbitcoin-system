@@ -42,7 +42,7 @@ using std::placeholders::_2;
 protocol_ping::protocol_ping(channel::ptr channel, threadpool& pool,
     const asio::duration& period)
   : protocol_base(channel, pool, period),
-    track("protocol_ping", LOG_NETWORK)
+    track<protocol_ping>("protocol_ping", LOG_NETWORK)
 {
 }
 

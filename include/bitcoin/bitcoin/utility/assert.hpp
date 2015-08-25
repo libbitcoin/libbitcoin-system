@@ -38,9 +38,12 @@
     class track
     {
     protected:
-        track(const std::string&, const std::string&)
+        track(const std::string& log_name, const std::string&)
+          : log_(log_name)
         {
         }
+
+        const std::string log_;
     };
 #else
     #include <atomic>
