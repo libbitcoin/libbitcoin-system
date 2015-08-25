@@ -34,9 +34,12 @@
 #include <bitcoin/bitcoin/network/initiator.hpp>
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/synchronizer.hpp>
+
+INITIALIZE_TRACK(bc::network::seeder);
 
 namespace libbitcoin {
 namespace network {
@@ -75,7 +78,8 @@ seeder::seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
     pool_(pool),
     network_(network),
     seeds_(seeds),
-    self_(self)
+    self_(self),
+    track("seeder", LOG_NETWORK)
 {
 }
 
@@ -100,7 +104,7 @@ void seeder::start(handler handle_complete)
             shared_from_this(), _1, hosts_.size(), handle_complete);
 
     // Require all seed callbacks before calling seeder::handle_complete.
-    auto single = synchronize(multiple, seeds_.size(), "seeder");
+    auto single = synchronize(multiple, seeds_.size(), "seeder", true);
 
     // Require one callback per channel before calling single.
     for (const auto& seed: seeds_)
@@ -136,7 +140,7 @@ void seeder::handle_connected(const code& ec, channel::ptr peer,
         log_info(LOG_PROTOCOL)
             << "Failure contacting seed [" << seed << "] "
             << ec.message();
-        complete(error::success);
+        complete(ec);
         return;
     }
 
@@ -163,7 +167,7 @@ void seeder::handle_handshake(const code& ec, channel::ptr peer,
     {
         log_debug(LOG_PROTOCOL) << "Failure in seed handshake ["
             << peer->address() << "] " << ec.message();
-        complete(error::success);
+        complete(ec);
         return;
     }
 
