@@ -88,13 +88,14 @@ static inline bool is_bip38_ec_multiplied(
     return !is_bip38_ec_non_multiplied(key);
 }
 
-
+#ifdef WITH_ICU
 static std::string normalize_nfc(const std::string& value)
 {
     using namespace boost::locale;
     const generator locale;
     return normalize(value, norm_type::norm_nfc, locale(""));
 }
+#endif
 
 template<class T>
 static bool bip38_scrypt_hash(const data_chunk passphrase,

@@ -39,6 +39,8 @@ struct bip38_result
 
 typedef std::vector<bip38_result> bip38_result_list;
 
+#ifndef ENABLE_TESTNET
+
 // Test vector list taken from:
 // https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#Test_vectors
 //
@@ -50,6 +52,8 @@ typedef std::vector<bip38_result> bip38_result_list;
 const bip38_result_list bip38_test_vector
 {
     {
+#ifndef ENABLE_TESTNET
+#ifdef WITH_ICU
         {
             "6PRVWUbkzzsbcVac2qwfssoUJAN1Xhrg6bNk8J7Nzm5H7kxEbn2Nh2ZoGg",
             "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5",
@@ -94,6 +98,7 @@ const bip38_result_list bip38_test_vector
             true,
             false
         },
+#endif // WITH_ICU
         {
             "6PfQu77ygVyJLZjfvMLyhLMQbYnu5uguoJJ4kMCLqWwPEdfpwANVS76gTX",
             "a43a940577f4e97f5c4d39eb14ff083a98187c64ea7c99ef7ce460833959a519",
@@ -160,8 +165,11 @@ const bip38_result_list bip38_test_vector
             false,
             true
         }
+#endif // ENABLE_TESTNET
     }
 };
+
+#endif // ENABLE_TESTNET
 
 #endif
 
