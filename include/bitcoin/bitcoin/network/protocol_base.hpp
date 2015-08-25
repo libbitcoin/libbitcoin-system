@@ -95,6 +95,14 @@ protected:
     void callback(const code& ec) const;
     
     /**
+     * Set the completion callback.
+     * This is used to defer the callback configuration until after construct
+     * so as to enable self-referential callbacks (that use shared_from_this).
+     * @param[in]  callback  The complation callback.
+     */
+    void set_callback(handler complete);
+    
+    /**
      * Stop the channel.
      * @param[in]  ec  The error code indicating the reason for stopping.
      */
@@ -115,7 +123,7 @@ private:
     void handle_stop(const code& ec);
     void handle_timer(const code& ec) const;
 
-    const handler callback_;
+    handler callback_;
     bool stopped_;
     deadline::ptr deadline_;
 

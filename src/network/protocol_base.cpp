@@ -61,12 +61,19 @@ void protocol_base::callback(const code& ec) const
         callback_(ec);
 }
 
+void protocol_base::set_callback(handler complete)
+{
+    BITCOIN_ASSERT_MSG(callback_ != nullptr, "The callback cannot be reset.");
+    if (callback_ == nullptr)
+        callback_ = complete;
+}
+
 // Startup is deferred until after construct in order to use shared_from_this.
 // We could simplify this by using boost::enable_shared_from_this which can be
 // called from construct, but that requires use of boost::share_ptr as well.
 void protocol_base::start()
 {
-    BITCOIN_ASSERT_MSG(start_ != nullptr, "The protocol is not restartable.");
+    BITCOIN_ASSERT_MSG(start_ != nullptr, "The protocol cannot be restarted.");
     if (start_ == nullptr)
         return;
 
