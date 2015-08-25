@@ -51,6 +51,7 @@
     #include <string>
     #include <bitcoin/bitcoin/utility/logger.hpp>
     #define INITIALIZE_TRACK(class_name) \
+        template <> \
         track<class_name>::counter track<class_name>::instances(0)
 
     template <class Shared>
