@@ -34,7 +34,7 @@ namespace libbitcoin {
 namespace network {
 
 class BC_API acceptor
-  : public std::enable_shared_from_this<acceptor>, track<channel_proxy>
+  : public std::enable_shared_from_this<acceptor>, track<acceptor>
 {
 public:
     typedef std::shared_ptr<acceptor> ptr;
