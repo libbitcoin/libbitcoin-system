@@ -87,13 +87,17 @@ bool is_pubkey_hash_type(const operation::stack& ops);
 
 bool is_script_hash_type(const operation::stack& ops);
 
-bool is_stealth_info_type(const operation::stack& ops);
+bool is_null_data_type(const operation::stack& ops);
 
-bool is_multisig_type(const operation::stack&);
+bool is_multisig_type(const operation::stack& ops);
+
+bool is_pubkey_sig_type(const operation::stack& ops);
 
 bool is_pubkey_hash_sig_type(const operation::stack& ops);
 
 bool is_script_code_sig_type(const operation::stack& ops);
+
+bool is_multi_pubkey_sig_type(const operation::stack& ops);
 
 } // end chain
 } // end libbitcoin

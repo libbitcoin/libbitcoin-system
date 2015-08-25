@@ -293,17 +293,40 @@ bool is_script_hash_type(const operation::stack& ops)
         ops[2].code == opcode::equal;
 }
 
-bool is_stealth_info_type(const operation::stack& ops)
+bool is_null_data_type(const operation::stack& ops)
 {
     return ops.size() == 2 &&
         ops[0].code == opcode::return_ &&
         ops[1].code == opcode::special &&
-        ops[1].data.size() >= hash_size;
+        ops[1].data.size() <= 80;
 }
 
-bool is_multisig_type(const operation::stack&)
+bool is_multisig_type(const operation::stack& ops)
 {
-    return false;
+    // M of N multisig
+    const size_t op_count = ops.size();
+    if (op_count < 4)
+        return false;
+    // Subtract 80 because OP_1 = 81
+    const uint8_t m = static_cast<uint8_t>(ops[0].code) - 80;
+    const uint8_t n = static_cast<uint8_t>(ops[op_count-2].code) - 80;
+    if (ops.back().code != opcode::checkmultisig ||
+        m < 1 || n < 1 || n < m || op_count != n + 3u)
+        return false;
+    for (auto it = ops.begin()+1; it != ops.end()-2; ++it) {
+        const operation& op = *it;
+        if (op.data.size() != ec_compressed_size &&
+            op.data.size() != ec_uncompressed_size)
+            return false;
+    }
+    return true;
+}
+
+bool is_pubkey_sig_type(const operation::stack& ops)
+{
+    if (ops.size() != 1 || !is_push_only(ops))
+        return false;
+    return true;
 }
 
 bool is_pubkey_hash_sig_type(const operation::stack& ops)
@@ -329,11 +352,25 @@ bool is_script_code_sig_type(const operation::stack& ops)
     if (!script_code.from_data(last_data, false, script::parse_mode::strict))
         return false;
 
-    // Minimum size is 4
+    const payment_type redeem_type = script_code.type();
     // M [SIG]... N checkmultisig
+    // or one of the other standard transaction types
     return script_code.operations.size() >= 4 &&
         count_non_push(script_code.operations) == 1 &&
-        script_code.operations.back().code == opcode::checkmultisig;
+        script_code.operations.back().code == opcode::checkmultisig ||
+        redeem_type == payment_type::pubkey;
+        redeem_type == payment_type::pubkey_hash;
+        redeem_type == payment_type::script_hash;
+        redeem_type == payment_type::null_data;
+}
+
+bool is_multi_pubkey_sig_type(const operation::stack& ops)
+{
+    if (ops.size() < 2 || !is_push_only(ops))
+        return false;
+    if (ops.front().code != opcode::zero)
+        return false;
+    return true;
 }
 
 } // end chain

@@ -77,14 +77,18 @@ payment_type script::type() const
         return payment_type::pubkey_hash;
     if (is_script_hash_type(operations))
         return payment_type::script_hash;
-    if (is_stealth_info_type(operations))
-        return payment_type::stealth_info;
+    if (is_null_data_type(operations))
+        return payment_type::null_data;
     if (is_multisig_type(operations))
         return payment_type::multisig;
+    if (is_pubkey_sig_type(operations))
+        return payment_type::pubkey_sig;
     if (is_pubkey_hash_sig_type(operations))
         return payment_type::pubkey_hash_sig;
     if (is_script_code_sig_type(operations))
         return payment_type::script_code_sig;
+    if (is_multi_pubkey_sig_type(operations))
+        return payment_type::multi_pubkey_sig;
     return payment_type::non_standard;
 }
 

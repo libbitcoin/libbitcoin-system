@@ -30,9 +30,11 @@ enum class payment_type
     pubkey,             // Pubkey and checksig in output.
     pubkey_hash,        // Payment to hash of pubkey
     script_hash,        // Payment to multisig address
-    stealth_info,       // Stealth information (meta-output)
+    null_data,          // Null data output
     multisig,           // Multisig
+    pubkey_sig,         // Pubkey input script.
     pubkey_hash_sig,    // Pubkey hash input script.
+    multi_pubkey_sig,   // BIP11 input script code.
     script_code_sig,    // BIP16 input script code.
     non_standard
 };
