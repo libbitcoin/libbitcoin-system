@@ -88,6 +88,7 @@ private:
 
     // Common to all connection types.
     void handle_handshake(const code& ec, channel::ptr node);
+    void handle_hosts_loaded(completion_handler handle_complete);
     void start_talking(channel::ptr node,
         channel_proxy::stop_handler handle_stop, bool relay);
     void remove_connection(channel_ptr_list& connections, channel::ptr node);

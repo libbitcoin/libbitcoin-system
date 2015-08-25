@@ -95,7 +95,7 @@ void seeder::start(handler handle_complete)
     {
         log_info(LOG_PROTOCOL)
             << "No seeds and/or host capacity configured.";
-        handle_complete(error::success);
+        handle_complete(error::operation_failed);
         return;
     }
 

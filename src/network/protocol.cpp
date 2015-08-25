@@ -83,11 +83,20 @@ void protocol::start(completion_handler handle_complete)
     if (inbound_port_ > 0 && max_inbound_ > 0)
         start_accepting();
 
-    // TODO: move seeding to node start.
-    if (hosts_.capacity() > 0 && max_outbound_ > 0)
+    hosts_.load(
+        std::bind(&protocol::handle_hosts_loaded,
+            this, handle_complete));
+}
+
+// TODO: move seeding to node start.
+void protocol::handle_hosts_loaded(completion_handler handle_complete)
+{
+    const auto need_seeding = (max_outbound_ > 0 && hosts_.size() == 0 &&
+        hosts_.capacity() > 0 && !seeds_.empty());
+
+    if (need_seeding)
         start_seeding(handle_complete);
     else
-        // if (!hosts_.empty() && max_outbound_ > 0)
         start_connecting(error::success, handle_complete);
 }
 
