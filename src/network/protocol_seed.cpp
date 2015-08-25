@@ -39,15 +39,7 @@ namespace network {
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-
-#define BIND1(method, a1) \
-    BC_BIND1(method, protocol_seed, a1)
-
-#define SEND1(instance, method, a1) \
-    BC_SEND1(instance, method, protocol_seed, a1)
-
-#define RECEIVE2(Message, method, a1, a2) \
-    BC_RECEIVE2(Message, method, protocol_seed, a1, a2)
+#define CLASS protocol_seed
 
 // Require three callbacks (or any error) before calling complete.
 protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
@@ -56,6 +48,12 @@ protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
   : hosts_(hosts), self_(self),
     protocol_base(peer, pool, timeout, synchronize(complete, 3, "seed"))
 {
+}
+
+void protocol_seed::start()
+{
+    protocol_base::start();
+
     if (self_.port() != 0)
     {
         callback(error::success);
@@ -73,7 +71,7 @@ protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
         return;
     }
 
-    RECEIVE2(address, handle_receive_address, _1, _2);
+    SUBSCRIBE2(address, handle_receive_address, _1, _2);
     SEND1(get_address(), handle_send_get_address, _1);
 }
 
@@ -141,6 +139,8 @@ void protocol_seed::handle_store_addresses(const code& ec) const
     // 3 of 3
     callback(ec);
 }
+
+#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

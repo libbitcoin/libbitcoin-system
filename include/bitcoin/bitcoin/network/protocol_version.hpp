@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_PROTOCOL_HANDSHAKE_HPP
-#define LIBBITCOIN_NETWORK_PROTOCOL_HANDSHAKE_HPP
+#ifndef LIBBITCOIN_NETWORK_PROTOCOL_VERSION_HPP
+#define LIBBITCOIN_NETWORK_PROTOCOL_VERSION_HPP
 
 #include <cstdint>
 #include <bitcoin/bitcoin/config/authority.hpp>
@@ -56,6 +56,11 @@ public:
         const config::authority& self, bool relay);
 
     /**
+     * Starts the protocol, release any reference after calling.
+     */
+    void start() override;
+
+    /**
      * Start the current blockchain height into the version template.
      * @param[in]  height  The height to set.
      * @param[in]  handle  Callback invoked upon set height completed.
@@ -71,7 +76,7 @@ private:
     void handle_version_sent(const code& ec) const;
     void handle_verack_sent(const code& ec) const;
 
-    // start_height is managed dynamically by channel.
+    /// start_height is managed dynamically by channel.
     void do_set_height(uint64_t height, handler handle);
 
     message::version version_;

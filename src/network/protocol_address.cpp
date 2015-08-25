@@ -37,20 +37,18 @@ namespace network {
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-
-#define BIND1(method, a1) \
-    BC_BIND1(method, protocol_address, a1)
-
-#define SEND1(instance, method, a1) \
-    BC_SEND1(instance, method, protocol_address, a1)
-
-#define RECEIVE2(Message, method, a1, a2) \
-    BC_RECEIVE2(Message, method, protocol_address, a1, a2)
+#define CLASS protocol_address
 
 protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
     hosts& hosts, const config::authority& self)
   : hosts_(hosts), self_(self), protocol_base(peer, pool)
 {
+}
+
+void protocol_address::start()
+{
+    protocol_base::start();
+
     if (self_.port() != 0)
     {
         address self({ { self_.to_network_address() } });
@@ -60,7 +58,7 @@ protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
     if (hosts_.capacity() == 0)
         return;
 
-    RECEIVE2(get_address, handle_receive_get_address, _1, _2);
+    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
     SEND1(get_address(), handle_send_get_address, _1);
 }
 
@@ -80,7 +78,7 @@ void protocol_address::handle_receive_address(const code& ec,
     }
 
     // Resubscribe to address messages.
-    RECEIVE2(address, handle_receive_address, _1, _2);
+    SUBSCRIBE2(address, handle_receive_address, _1, _2);
 
     log_debug(LOG_PROTOCOL)
         << "Storing addresses from [" << authority() << "] ("
@@ -107,7 +105,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
 
     // TODO: allowing repeated queries can allow a peer to map our history.
     // Resubscribe to get_address messages.
-    RECEIVE2(get_address, handle_receive_get_address, _1, _2);
+    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
 
     // TODO: pull active hosts from host cache (currently just resending self).
     // TODO: need to distort for privacy, don't send currently-connected peers.
@@ -154,6 +152,8 @@ void protocol_address::handle_store_addresses(const code& ec) const
             << "Failure storing addresses from [" << authority() << "] "
             << ec.message();
 }
+
+#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

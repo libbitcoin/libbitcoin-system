@@ -55,6 +55,11 @@ public:
         const asio::duration& timeout, handler complete, hosts& hosts,
         const config::authority& self);
 
+    /**
+     * Starts the protocol, release any reference after calling.
+     */
+    void start() override;
+
 private:
     void handle_receive_address(const code& ec,
         const message::address& address);

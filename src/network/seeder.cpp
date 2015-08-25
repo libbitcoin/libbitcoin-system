@@ -150,7 +150,7 @@ void seeder::handle_connected(const code& ec, channel::ptr peer,
 
     // Attach version protocol to the new connection (until complete).
     std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
-        callback, hosts_, self_, relay);
+        callback, hosts_, self_, relay)->start();
 
     // Start reading from the socket (causing subscription events).
     peer->start();
@@ -169,7 +169,7 @@ void seeder::handle_handshake(const code& ec, channel::ptr peer,
 
     // Attach address seed protocol to the new connection.
     std::make_shared<protocol_seed>(peer, pool_, timeouts_.germination,
-        complete, hosts_, self_);
+        complete, hosts_, self_)->start();
 };
 
 } // namespace network

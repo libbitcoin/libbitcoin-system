@@ -34,19 +34,25 @@ namespace libbitcoin {
 namespace network {
     
 using std::placeholders::_1;
+#define CLASS protocol_base
 
 protocol_base::protocol_base(channel::ptr channel, threadpool& pool,
     handler complete)
   : channel_(channel), dispatch_(pool), callback_(complete), stopped_(false)
 {
-    subscribe_stop();
+    start_ = [this]() { subscribe_stop(); };
 }
 
 protocol_base::protocol_base(channel::ptr channel, threadpool& pool,
     const asio::duration& timeout, handler complete)
   : protocol_base(channel, pool, complete)
 {
-    subscribe_timer(pool, timeout);
+    start_ = [this, &pool, &timeout]() { subscribe_timer(pool, timeout); };
+}
+
+config::authority protocol_base::authority() const
+{
+    return channel_->address();
 }
 
 void protocol_base::callback(const code& ec) const
@@ -55,9 +61,17 @@ void protocol_base::callback(const code& ec) const
         callback_(ec);
 }
 
-config::authority protocol_base::authority() const
+// Startup is deferred until after construct in order to use shared_from_this.
+// We could simplify this by using boost::enable_shared_from_this which can be
+// called from construct, but that requires use of boost::share_ptr as well.
+void protocol_base::start()
 {
-    return channel_->address();
+    BITCOIN_ASSERT_MSG(start_ != nullptr, "The protocol is not restartable.");
+    if (start_ == nullptr)
+        return;
+
+    start_();
+    start_ = nullptr;
 }
 
 void protocol_base::stop(const code& ec)
@@ -73,18 +87,14 @@ bool protocol_base::stopped() const
 
 void protocol_base::subscribe_stop()
 {
-    channel_->subscribe_stop(
-        dispatch_.sync(&protocol_base::handle_stop,
-            shared_from_this(), _1));
+    SUBSCRIBE1(stop, handle_stop, _1);
 }
 
 void protocol_base::subscribe_timer(threadpool& pool,
     const asio::duration& timeout)
 {
     deadline_ = std::make_shared<deadline>(pool, timeout);
-    deadline_->start(
-        std::bind(&protocol_base::handle_timer,
-            shared_from_this(), _1));
+    deadline_->start(BIND1(handle_timer, _1));
 }
 
 void protocol_base::handle_stop(const code& ec)
@@ -93,7 +103,6 @@ void protocol_base::handle_stop(const code& ec)
         return;
 
     stopped_ = true;
-
     if (deadline_)
         deadline_->cancel();
 
@@ -107,6 +116,8 @@ void protocol_base::handle_timer(const code& ec) const
 
     callback(error::channel_timeout);
 }
+
+#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

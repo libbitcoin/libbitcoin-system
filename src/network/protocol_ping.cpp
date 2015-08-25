@@ -34,24 +34,19 @@ namespace network {
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-
-#define BIND1(method, a1) \
-    BC_BIND1(method, protocol_ping, a1)
-
-#define SEND1(instance, method, a1) \
-    BC_SEND1(instance, method, protocol_ping, a1)
-
-#define RECEIVE2(Message, method, a1, a2) \
-    BC_RECEIVE2(Message, method, protocol_ping, a1, a2)
-
-#define RECEIVE3(Message, method, a1, a2, a3) \
-    BC_RECEIVE3(Message, method, protocol_ping, a1, a2, a3)
+#define CLASS protocol_ping
 
 protocol_ping::protocol_ping(channel::ptr channel, threadpool& pool,
     const asio::duration& period)
   : protocol_base(channel, pool, period, BIND1(send_ping, _1))
 {
-    RECEIVE2(ping, handle_receive_ping, _1, _2);
+}
+
+void protocol_ping::start()
+{
+    protocol_base::start();
+
+    SUBSCRIBE2(ping, handle_receive_ping, _1, _2);
 
     // Send initial ping message by simulating first heartbeat.
     callback(error::success);
@@ -65,7 +60,7 @@ void protocol_ping::send_ping(const code& ec)
 
     const auto nonce = pseudo_random();
 
-    RECEIVE3(pong, handle_receive_pong, _1, _2, nonce);
+    SUBSCRIBE3(pong, handle_receive_pong, _1, _2, nonce);
     SEND1(message::ping(nonce), handle_send_ping, _1);
 }
 
@@ -84,7 +79,7 @@ void protocol_ping::handle_receive_ping(const code& ec,
     }
 
     // Resubscribe to ping messages.
-    RECEIVE2(ping, handle_receive_ping, _1, _2);
+    SUBSCRIBE2(ping, handle_receive_ping, _1, _2);
     SEND1(message::pong(message.nonce), handle_send_pong, _1);
 }
 
@@ -133,6 +128,8 @@ void protocol_ping::handle_send_pong(const code& ec) const
             << "Failure sending pong to [" << authority() << "] "
             << ec.message();
 }
+
+#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

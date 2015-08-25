@@ -50,6 +50,11 @@ public:
     protocol_ping(channel::ptr channel, threadpool& pool,
         const asio::duration& period);
 
+    /**
+     * Starts the protocol, release any reference after calling.
+     */
+    void start() override;
+
 private:
     void send_ping(const code& ec);
     void handle_receive_ping(const code& ec, const message::ping& message);

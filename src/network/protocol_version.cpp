@@ -42,15 +42,7 @@ namespace network {
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-
-#define BIND2(method, a1, a2) \
-    BC_BIND2(method, protocol_version, a1, a2)
-
-#define SEND1(instance, method, a1) \
-    BC_SEND1(instance, method, protocol_version, a1)
-
-#define RECEIVE2(Message, method, a1, a2) \
-    BC_RECEIVE2(Message, method, protocol_version, a1, a2)
+#define CLASS protocol_version
 
 const message::version protocol_version::version_template
 {
@@ -71,8 +63,6 @@ protocol_version::protocol_version(channel::ptr channel, threadpool& pool,
   : version_(version_template),
     protocol_base(channel, pool, timeout, synchronize(complete, 3, "version"))
 {
-    RECEIVE2(version, handle_receive_version, _1, _2);
-
     // Set required transaction relay policy for the connection.
     version_.relay = relay;
 
@@ -87,8 +77,14 @@ protocol_version::protocol_version(channel::ptr channel, threadpool& pool,
 
     // TODO: Add nonce to channel state for loopback detection in the context.
     channel_->set_nonce(version_.nonce);
+}
 
-    RECEIVE2(verack, handle_receive_verack, _1, _2);
+void protocol_version::start()
+{
+    protocol_base::start();
+
+    SUBSCRIBE2(version, handle_receive_version, _1, _2);
+    SUBSCRIBE2(verack, handle_receive_verack, _1, _2);
     SEND1(version_, handle_version_sent, _1);
 }
 
@@ -176,6 +172,8 @@ void protocol_version::do_set_height(uint64_t height, handler handle)
     version_.start_height = static_cast<uint32_t>(height);
     handle(error::success);
 }
+
+#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

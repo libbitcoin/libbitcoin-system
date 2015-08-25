@@ -354,7 +354,7 @@ void protocol::start_talking(channel::ptr node,
 
     // Attach version protocol to the new connection (until complete).
     std::make_shared<protocol_version>(node, pool_, timeouts_.handshake,
-        callback, hosts_, self_, relay);
+        callback, hosts_, self_, relay)->start();
 
     // Start reading from the socket (causing subscription events).
     node->start();
@@ -371,10 +371,10 @@ void protocol::handle_handshake(const code& ec, channel::ptr node)
     }
 
     // Attach ping protocol to the new connection (until node stop event).
-    std::make_shared<protocol_ping>(node, pool_, timeouts_.heartbeat);
+    std::make_shared<protocol_ping>(node, pool_, timeouts_.heartbeat)->start();
 
     // Attach address protocol to the new connection (until node stop event).
-    std::make_shared<protocol_address>(node, pool_, hosts_, self_);
+    std::make_shared<protocol_address>(node, pool_, hosts_, self_)->start();
 }
 
 // TODO: abstract base method, implement in derived.

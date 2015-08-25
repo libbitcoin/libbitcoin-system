@@ -39,6 +39,13 @@ namespace network {
 class BC_API protocol_base
   : public std::enable_shared_from_this<protocol_base>
 {
+public:
+    /**
+     * Starts the protocol, release any reference after calling.
+     * A protocol instance is not restartable.
+     */
+    virtual void start();
+
 protected:
     typedef std::function<void(const code&)> handler;
 
@@ -67,6 +74,7 @@ protected:
     
     /**
      * Get a shared pointer to the derived instance from this.
+     * Used by implementations to obtain a shared pointer of the derived type.
      * Required because enable_shared_from_this doesn't support inheritance.
      */
     template <typename Derived>
@@ -82,16 +90,18 @@ protected:
     
     /**
      * Invoke the completion callback.
+     * @param[in]  ec  The error code of the preceding operation.
      */
     void callback(const code& ec) const;
     
     /**
      * Stop the channel.
+     * @param[in]  ec  The error code indicating the reason for stopping.
      */
     void stop(const code& ec);
     
     /**
-     * Determine if the channel is stopped.
+     * Determines if the channel is stopped.
      */
     bool stopped() const;
 
@@ -108,45 +118,48 @@ private:
     const handler callback_;
     bool stopped_;
     deadline::ptr deadline_;
+
+    // Deferred startup function.
+    std::function<void()> start_;
 };
 
 // For use in derived protocols for simplifying bind() calls.
-#define BC_BIND0(method, Type) \
-    std::bind(&Type::method, shared_from_base<Type>())
-#define BC_BIND1(method, Type, a1) \
-    std::bind(&Type::method, shared_from_base<Type>(), a1)
-#define BC_BIND2(method, Type, a1, a2) \
-    std::bind(&Type::method, shared_from_base<Type>(), a1, a2)
-#define BC_BIND3(method, Type, a1, a2, a3) \
-    std::bind(&Type::method, shared_from_base<Type>(), a1, a2, a3)
+#define BIND0(method) \
+    std::bind(&CLASS::method, shared_from_base<CLASS>())
+#define BIND1(method, a1) \
+    std::bind(&CLASS::method, shared_from_base<CLASS>(), a1)
+#define BIND2(method, a1, a2) \
+    std::bind(&CLASS::method, shared_from_base<CLASS>(), a1, a2)
+#define BIND3(method, a1, a2, a3) \
+    std::bind(&CLASS::method, shared_from_base<CLASS>(), a1, a2, a3)
 
 // For use in derived protocols for simplifying send() calls.
-#define BC_SEND0(instance, method, Type) \
-    channel_->send(instance, dispatch_.sync(&Type::method, \
-    shared_from_base<Type>()))
-#define BC_SEND1(instance, method, Type, a1) \
-    channel_->send(instance, dispatch_.sync(&Type::method, \
-    shared_from_base<Type>(), a1))
-#define BC_SEND2(instance, method, Type, a1, a2) \
-    channel_->send(instance, dispatch_.sync(&Type::method, \
-    shared_from_base<Type>(), a1, a2))
-#define BC_SEND3(instance, method, Type, a1, a2, a3) \
-    channel_->send(instance, dispatch_.sync(&Type::method, \
-shared_from_base<Type>(), a1, a2, a3))
+#define SEND0(instance, method) \
+    channel_->send(instance, dispatch_.sync(&CLASS::method, \
+    shared_from_base<CLASS>()))
+#define SEND1(instance, method, a1) \
+    channel_->send(instance, dispatch_.sync(&CLASS::method, \
+    shared_from_base<CLASS>(), a1))
+#define SEND2(instance, method, a1, a2) \
+    channel_->send(instance, dispatch_.sync(&CLASS::method, \
+    shared_from_base<CLASS>(), a1, a2))
+#define SEND3(instance, method, a1, a2, a3) \
+    channel_->send(instance, dispatch_.sync(&CLASS::method, \
+    shared_from_base<CLASS>(), a1, a2, a3))
 
 // For use in derived protocols for simplifying subscribe() calls.
-#define BC_RECEIVE0(Message, method, Type) \
-    channel_->subscribe_##Message(dispatch_.sync(&Type::method, \
-    shared_from_base<Type>()))
-#define BC_RECEIVE1(Message, method, Type, a1) \
-    channel_->subscribe_##Message(dispatch_.sync(&Type::method, \
-    shared_from_base<Type>(), a1))
-#define BC_RECEIVE2(Message, method, Type, a1, a2) \
-    channel_->subscribe_##Message(dispatch_.sync(&Type::method, \
-    shared_from_base<Type>(), a1, a2))
-#define BC_RECEIVE3(Message, method, Type, a1, a2, a3) \
-    channel_->subscribe_##Message(dispatch_.sync(&Type::method, \
-    shared_from_base<Type>(), a1, a2, a3))
+#define SUBSCRIBE0(Message, method) \
+    channel_->subscribe_##Message(dispatch_.sync(&CLASS::method, \
+    shared_from_base<CLASS>()))
+#define SUBSCRIBE1(Message, method, a1) \
+    channel_->subscribe_##Message(dispatch_.sync(&CLASS::method, \
+    shared_from_base<CLASS>(), a1))
+#define SUBSCRIBE2(Message, method, a1, a2) \
+    channel_->subscribe_##Message(dispatch_.sync(&CLASS::method, \
+    shared_from_base<CLASS>(), a1, a2))
+#define SUBSCRIBE3(Message, method, a1, a2, a3) \
+    channel_->subscribe_##Message(dispatch_.sync(&CLASS::method, \
+    shared_from_base<CLASS>(), a1, a2, a3))
 
 } // namespace network
 } // namespace libbitcoin
