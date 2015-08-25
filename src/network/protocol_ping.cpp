@@ -38,13 +38,17 @@ using std::placeholders::_2;
 
 protocol_ping::protocol_ping(channel::ptr channel, threadpool& pool,
     const asio::duration& period)
-  : protocol_base(channel, pool, period, BIND1(send_ping, _1))
+  : protocol_base(channel, pool, period)
 {
 }
 
 void protocol_ping::start()
 {
     protocol_base::start();
+
+    // Unfortunately this cannt be set on construct because of the inability of
+    // shared_from_this to execute within a constructor.
+    set_callback(BIND1(send_ping, _1));
 
     SUBSCRIBE2(ping, handle_receive_ping, _1, _2);
 
