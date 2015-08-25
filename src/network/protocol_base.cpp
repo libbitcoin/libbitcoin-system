@@ -63,7 +63,7 @@ void protocol_base::callback(const code& ec) const
 
 void protocol_base::set_callback(handler complete)
 {
-    BITCOIN_ASSERT_MSG(callback_ != nullptr, "The callback cannot be reset.");
+    BITCOIN_ASSERT_MSG(callback_ == nullptr, "The callback cannot be reset.");
     if (callback_ == nullptr)
         callback_ = complete;
 }
