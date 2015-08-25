@@ -182,6 +182,8 @@ BC_API data_chunk bip38_lock_intermediate(
     const data_chunk& intermediate, const data_chunk& seedb,
     data_chunk& confirmation_code, bool use_compression);
 
+#ifdef WITH_ICU
+
 /**
  * Performs bip38 validation on the specified confirmation
  * code using the passphrase.  If the address depends on the
@@ -211,6 +213,8 @@ BC_API data_chunk bip38_lock_secret(
  */
 BC_API ec_secret bip38_unlock_secret(
     const encrypted_private_key& bip38_key, const std::string& passphrase);
+
+#endif // WITH_ICU
 
 } // namespace bip38
 } // namespace libbitcoin

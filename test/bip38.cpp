@@ -35,6 +35,7 @@ BOOST_AUTO_TEST_CASE(bip38__lock_test)
     {
         if (!vector.ec_multiplied)
         {
+#ifdef WITH_ICU
             data_chunk unlocked;
             decode_base16(unlocked, vector.unlocked);
 
@@ -46,6 +47,7 @@ BOOST_AUTO_TEST_CASE(bip38__lock_test)
                 vector.passphrase, vector.compressed);
 
             BOOST_REQUIRE_EQUAL(encode_base58(locked), vector.locked);
+#endif // WITH_ICU
         }
         else if (vector.random_seed_data.size() > 0)
         {
@@ -63,16 +65,19 @@ BOOST_AUTO_TEST_CASE(bip38__lock_test)
             BOOST_REQUIRE_EQUAL(encode_base58(confirmation_code),
                 vector.confirmation_code);
 
+#ifdef WITH_ICU
             // lastly, verify the confirmation code
             std::string address;
             const bool ret = bip38_lock_verify(confirmation_code,
                 vector.passphrase, address);
             BOOST_REQUIRE_EQUAL(ret, true);
             BOOST_REQUIRE_EQUAL(address, vector.address);
+#endif // WITH_ICU
         }
     }
 }
 
+#ifdef WITH_ICU
 BOOST_AUTO_TEST_CASE(bip38__unlock_test)
 {
     for (const auto& vector: bip38_test_vector)
@@ -86,6 +91,7 @@ BOOST_AUTO_TEST_CASE(bip38__unlock_test)
         BOOST_REQUIRE_EQUAL(encode_base16(unlocked), vector.unlocked);
     }
 }
+#endif // WITH_ICU
 
 BOOST_AUTO_TEST_SUITE_END()
 
