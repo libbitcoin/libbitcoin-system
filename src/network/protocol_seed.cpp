@@ -86,10 +86,13 @@ void protocol_seed::handle_receive_address(const code& ec,
 
     if (ec)
     {
+        // We are getting here with channel stopped because this session
+        // doesn't register a stop handler. We may be getting stopped due to
+        // failure to handle ping on this session.
         log_debug(LOG_PROTOCOL)
             << "Failure receiving addresses from seed [" << authority() << "] "
             << ec.message();
-        callback(error::bad_stream);
+        callback(ec);
         return;
     }
 
