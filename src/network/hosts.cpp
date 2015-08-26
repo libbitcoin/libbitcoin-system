@@ -102,19 +102,13 @@ void hosts::do_load(const path& path, load_handler handle_load)
         return;
     }
 
+    // Formerly each address was randomly-queued for insert here.
     std::string line;
     while (std::getline(file, line))
     {
         config::authority host(line);
         if (host.port() != 0)
-        {
-            const auto load_address = [this, host]()
-            {
-                buffer_.push_back(host.to_network_address());
-            };
-
-            dispatch_.randomly_queue(load_address);
-        }
+            buffer_.push_back(host.to_network_address());
     }
 
     handle_load(error::success);
