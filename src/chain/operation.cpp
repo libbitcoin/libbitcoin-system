@@ -92,7 +92,7 @@ bool operation::from_data(reader& source)
     {
         const auto count = read_opcode_data_byte_count(code, raw_byte, source);
         data = source.read_data(count);
-        result = source && (count || data.empty());
+        result = source && (data.size() == count);
     }
 
     if (!result)

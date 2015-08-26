@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <istream>
+#include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -38,22 +39,24 @@ public:
     typedef std::vector<block_header> list;
 
     static block_header factory_from_data(const data_chunk& data,
-        bool with_transaction_count);
+        bool with_transaction_count = true);
     static block_header factory_from_data(std::istream& stream,
-        bool with_transaction_count);
+        bool with_transaction_count = true);
     static block_header factory_from_data(reader& source,
-        bool with_transaction_count);
+        bool with_transaction_count = true);
 
-    bool from_data(const data_chunk& data, bool with_transaction_count);
-    bool from_data(std::istream& stream, bool with_transaction_count);
-    bool from_data(reader& source, bool with_transaction_count);
-    data_chunk to_data(bool with_transaction_count) const;
-    void to_data(std::ostream& stream, bool with_transaction_count) const;
-    void to_data(writer& sink, bool with_transaction_count) const;
+    bool from_data(const data_chunk& data, bool with_transaction_count = true);
+    bool from_data(std::istream& stream, bool with_transaction_count = true);
+    bool from_data(reader& source, bool with_transaction_count = true);
+    data_chunk to_data(bool with_transaction_count = true) const;
+    void to_data(std::ostream& stream, bool with_transaction_count = true) const;
+    void to_data(writer& sink, bool with_transaction_count = true) const;
     hash_digest hash() const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size(bool with_transaction_count) const;
+    uint64_t satoshi_size(bool with_transaction_count = true) const;
+
+    static const std::string satoshi_command;
 
     uint32_t version;
     hash_digest previous_block_hash;

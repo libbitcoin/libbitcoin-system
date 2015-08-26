@@ -94,16 +94,23 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
     src/message/address.cpp \
+    src/message/filter_add.cpp \
+    src/message/filter_clear.cpp \
+    src/message/filter_load.cpp \
     src/message/get_address.cpp \
     src/message/get_blocks.cpp \
     src/message/get_data.cpp \
+    src/message/get_headers.cpp \
     src/message/header.cpp \
     src/message/inventory.cpp \
     src/message/inventory_type_id.cpp \
     src/message/inventory_vector.cpp \
+    src/message/memory_pool.cpp \
+    src/message/merkle_block.cpp \
     src/message/network_address.cpp \
     src/message/not_found.cpp \
     src/message/ping_pong.cpp \
+    src/message/reject.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
     src/network/acceptor.cpp \
@@ -225,16 +232,22 @@ test_libbitcoin_test_SOURCES = \
     test/chain/transaction_input.cpp \
     test/chain/transaction_output.cpp \
     test/message/address.cpp \
+    test/message/filter_add.cpp \
+    test/message/filter_clear.cpp \
     test/message/get_address.cpp \
     test/message/get_blocks.cpp \
     test/message/get_data.cpp \
+    test/message/get_headers.cpp \
     test/message/header.cpp \
     test/message/inventory.cpp \
     test/message/inventory_type_id.cpp \
     test/message/inventory_vector.cpp \
+    test/message/memory_pool.cpp \
+    test/message/merkle_block.cpp \
     test/message/network_address.cpp \
     test/message/not_found.cpp \
     test/message/ping_pong.cpp \
+    test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
     test/utility/endian.cpp \
@@ -320,16 +333,23 @@ include_bitcoin_bitcoin_math_HEADERS = \
 include_bitcoin_bitcoin_messagedir = ${includedir}/bitcoin/bitcoin/message
 include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/address.hpp \
+    include/bitcoin/bitcoin/message/filter_add.hpp \
+    include/bitcoin/bitcoin/message/filter_clear.hpp \
+    include/bitcoin/bitcoin/message/filter_load.hpp \
     include/bitcoin/bitcoin/message/get_address.hpp \
     include/bitcoin/bitcoin/message/get_blocks.hpp \
     include/bitcoin/bitcoin/message/get_data.hpp \
+    include/bitcoin/bitcoin/message/get_headers.hpp \
     include/bitcoin/bitcoin/message/header.hpp \
     include/bitcoin/bitcoin/message/inventory.hpp \
     include/bitcoin/bitcoin/message/inventory_type_id.hpp \
     include/bitcoin/bitcoin/message/inventory_vector.hpp \
+    include/bitcoin/bitcoin/message/memory_pool.hpp \
+    include/bitcoin/bitcoin/message/merkle_block.hpp \
     include/bitcoin/bitcoin/message/network_address.hpp \
     include/bitcoin/bitcoin/message/not_found.hpp \
     include/bitcoin/bitcoin/message/ping_pong.hpp \
+    include/bitcoin/bitcoin/message/reject.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp
 

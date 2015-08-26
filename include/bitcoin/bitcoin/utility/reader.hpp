@@ -35,7 +35,7 @@ public:
     virtual bool is_exhausted() const = 0;
     virtual uint8_t read_byte() = 0;
     virtual data_chunk read_data(size_t size) = 0;
-    virtual void read_data(uint8_t* data, size_t size) = 0;
+    virtual size_t read_data(uint8_t* data, size_t size) = 0;
     virtual data_chunk read_data_to_eof() = 0;
     virtual hash_digest read_hash() = 0;
     virtual short_hash read_short_hash() = 0;

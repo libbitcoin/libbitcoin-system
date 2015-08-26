@@ -147,7 +147,7 @@ bool script::from_data(reader& source, bool with_length_prefix,
         {
             auto script_length32 = static_cast<uint32_t>(script_length);
             raw_script = source.read_data(script_length32);
-            result = source;
+            result = source && (raw_script.size() == script_length32);
         }
     }
     else

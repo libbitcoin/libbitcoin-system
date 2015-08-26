@@ -85,17 +85,22 @@ bool network_address::from_data(std::istream& stream, bool with_timestamp)
 
 bool network_address::from_data(reader& source, bool with_timestamp)
 {
+    bool result = false;
+
     reset();
+
     if (with_timestamp)
         timestamp = source.read_4_bytes_little_endian();
 
     services = source.read_8_bytes_little_endian();
-    source.read_data(ip.data(), ip.size());
+    size_t ip_size = source.read_data(ip.data(), ip.size());
     port = source.read_2_bytes_big_endian();
-    if (!source)
+    result = source && (ip.size() == ip_size);
+
+    if (!result)
         reset();
 
-    return source;
+    return result;
 }
 
 data_chunk network_address::to_data(bool with_timestamp) const
