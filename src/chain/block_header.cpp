@@ -29,6 +29,8 @@
 namespace libbitcoin {
 namespace chain {
 
+const std::string chain::block_header::satoshi_command = "headers";
+
 block_header block_header::factory_from_data(const data_chunk& data,
     bool with_transaction_count)
 {

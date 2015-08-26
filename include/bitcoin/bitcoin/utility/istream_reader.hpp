@@ -38,7 +38,7 @@ public:
     bool is_exhausted() const;
     uint8_t read_byte();
     data_chunk read_data(size_t size);
-    void read_data(uint8_t* data, size_t size);
+    size_t read_data(uint8_t* data, size_t size);
     data_chunk read_data_to_eof();
     hash_digest read_hash();
     short_hash read_short_hash();

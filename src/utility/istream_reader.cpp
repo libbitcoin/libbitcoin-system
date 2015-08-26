@@ -111,16 +111,32 @@ uint64_t istream_reader::read_variable_uint_big_endian()
 data_chunk istream_reader::read_data(size_t size)
 {
     data_chunk raw_bytes(size);
+
     if (size > 0)
+    {
         stream_.read(reinterpret_cast<char*>(raw_bytes.data()), size);
+
+        auto read_size = stream_.gcount();
+
+        if (size != read_size)
+//            throw std::ios_base::failure("read_data failed to read requested number of bytes");
+            raw_bytes.resize(read_size);
+    }
 
     return raw_bytes;
 }
 
-void istream_reader::read_data(uint8_t* data, size_t size)
+size_t istream_reader::read_data(uint8_t* data, size_t size)
 {
+    size_t read_size = 0;
+
     if (size > 0)
+    {
         stream_.read(reinterpret_cast<char*>(data), size);
+        read_size = stream_.gcount();
+    }
+
+    return read_size;
 }
 
 data_chunk istream_reader::read_data_to_eof()

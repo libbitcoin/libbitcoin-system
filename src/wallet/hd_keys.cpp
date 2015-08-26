@@ -120,7 +120,7 @@ bool hd_public_key::from_string(const std::string& encoded)
     lineage_.child_number = ds.read_big_endian<uint32_t>();
     c_ = ds.read_bytes<chain_code_size>();
     K_ = ds.read_data(33);
-    return true;
+    return (K_.size() == 33);
 }
 
 std::string hd_public_key::to_string() const

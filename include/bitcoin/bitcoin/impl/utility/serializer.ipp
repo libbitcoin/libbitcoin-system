@@ -185,14 +185,10 @@ template <typename Iterator>
 void serializer<Iterator>::write_fixed_string(const std::string& value,
     size_t size)
 {
-    const auto max_size = std::max(size, value.size());
+    const auto min_size = std::min(size, value.size());
     data_chunk raw_string(size, 0);
 
-    std::copy_n(value.begin(), max_size, raw_string.begin());
-
-    // conditionally truncate
-    if (max_size > size)
-        raw_string.resize(size);
+    std::copy_n(value.begin(), min_size, raw_string.begin());
 
     write_data(raw_string);
 }

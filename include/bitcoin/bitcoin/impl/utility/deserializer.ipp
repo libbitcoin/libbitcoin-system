@@ -164,12 +164,13 @@ data_chunk deserializer<Iterator, SafeCheckLast>::read_data(size_t size)
 }
 
 template <typename Iterator, bool SafeCheckLast>
-void deserializer<Iterator, SafeCheckLast>::read_data(uint8_t* data,
+size_t deserializer<Iterator, SafeCheckLast>::read_data(uint8_t* data,
     size_t size)
 {
     SAFE_CHECK_DISTANCE(size);
     for (size_t i = 0; i < size; ++i)
         data[i] = read_byte();
+    return size;
 }
 
 template <typename Iterator, bool SafeCheckLast>
