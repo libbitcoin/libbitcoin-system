@@ -45,7 +45,7 @@ using std::placeholders::_2;
 connector::connector(threadpool& pool, const timeout& timeouts)
   : pool_(pool), timeouts_(timeouts),
     deadline_(std::make_shared<deadline>(pool, timeouts.connect)),
-    track<connector>("connector", LOG_NETWORK)
+    CONSTRUCT_TRACK(connector, LOG_NETWORK)
 {
 }
 

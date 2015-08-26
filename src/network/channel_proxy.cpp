@@ -56,32 +56,30 @@
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 
-INITIALIZE_TRACK(bc::network::channel_proxy);
-INITIALIZE_TRACK(bc::network::channel_proxy::version_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::verack_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::address_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::get_address_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::inventory_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::get_data_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::get_blocks_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::transaction_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::block_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::ping_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::pong_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::raw_subscriber);
-INITIALIZE_TRACK(bc::network::channel_proxy::stop_subscriber);
+INITIALIZE_TRACK(bc::network::channel_proxy)
+INITIALIZE_TRACK(bc::network::channel_proxy::version_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::verack_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::address_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::get_address_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::inventory_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::get_data_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::get_blocks_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::transaction_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::block_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::ping_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::pong_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::raw_subscriber)
+INITIALIZE_TRACK(bc::network::channel_proxy::stop_subscriber)
 
 namespace libbitcoin {
 namespace network {
 
+using namespace chain;
+using namespace message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 using boost::format;
 using boost::posix_time::time_duration;
-
-#define MAKE_SUBSCRIBER(Message, pool) \
-    std::make_shared<Message##_subscriber>( \
-        pool, #Message "_subscriber", LOG_NETWORK)
 
 // The proxy will have no config with timers moved to channel.
 channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
@@ -94,32 +92,32 @@ channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
     stopped_(false),
-    version_subscriber_(MAKE_SUBSCRIBER(version, pool)),
-    verack_subscriber_(MAKE_SUBSCRIBER(verack, pool)),
-    address_subscriber_(MAKE_SUBSCRIBER(address, pool)),
-    get_address_subscriber_(MAKE_SUBSCRIBER(get_address, pool)),
-    inventory_subscriber_(MAKE_SUBSCRIBER(inventory, pool)),
-    get_data_subscriber_(MAKE_SUBSCRIBER(get_data, pool)),
-    get_blocks_subscriber_(MAKE_SUBSCRIBER(get_blocks, pool)),
-    transaction_subscriber_(MAKE_SUBSCRIBER(transaction, pool)),
-    block_subscriber_(MAKE_SUBSCRIBER(block, pool)),
-    ping_subscriber_(MAKE_SUBSCRIBER(ping, pool)),
-    pong_subscriber_(MAKE_SUBSCRIBER(pong, pool)),
-    raw_subscriber_(MAKE_SUBSCRIBER(raw, pool)),
-    stop_subscriber_(MAKE_SUBSCRIBER(stop, pool)),
-    track<channel_proxy>("channel_proxy", LOG_NETWORK)
+    version_subscriber_(MAKE_SUBSCRIBER(version, pool, LOG_NETWORK)),
+    verack_subscriber_(MAKE_SUBSCRIBER(verack, pool, LOG_NETWORK)),
+    address_subscriber_(MAKE_SUBSCRIBER(address, pool, LOG_NETWORK)),
+    get_address_subscriber_(MAKE_SUBSCRIBER(get_address, pool, LOG_NETWORK)),
+    inventory_subscriber_(MAKE_SUBSCRIBER(inventory, pool, LOG_NETWORK)),
+    get_data_subscriber_(MAKE_SUBSCRIBER(get_data, pool, LOG_NETWORK)),
+    get_blocks_subscriber_(MAKE_SUBSCRIBER(get_blocks, pool, LOG_NETWORK)),
+    transaction_subscriber_(MAKE_SUBSCRIBER(transaction, pool, LOG_NETWORK)),
+    block_subscriber_(MAKE_SUBSCRIBER(block, pool, LOG_NETWORK)),
+    ping_subscriber_(MAKE_SUBSCRIBER(ping, pool, LOG_NETWORK)),
+    pong_subscriber_(MAKE_SUBSCRIBER(pong, pool, LOG_NETWORK)),
+    raw_subscriber_(MAKE_SUBSCRIBER(raw, pool, LOG_NETWORK)),
+    stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
+    CONSTRUCT_TRACK(channel_proxy, LOG_NETWORK)
 {
-    establish_relay<message::version>(version_subscriber_);
-    establish_relay<message::verack>(verack_subscriber_);
+    establish_relay<version>(version_subscriber_);
+    establish_relay<verack>(verack_subscriber_);
     establish_relay<message::address>(address_subscriber_);
-    establish_relay<message::get_address>(get_address_subscriber_);
-    establish_relay<message::inventory>(inventory_subscriber_);
-    establish_relay<message::get_data>(get_data_subscriber_);
-    establish_relay<message::get_blocks>(get_blocks_subscriber_);
-    establish_relay<chain::transaction>(transaction_subscriber_);
-    establish_relay<chain::block>(block_subscriber_);
-    establish_relay<message::ping>(ping_subscriber_);
-    establish_relay<message::pong>(pong_subscriber_);
+    establish_relay<get_address>(get_address_subscriber_);
+    establish_relay<inventory>(inventory_subscriber_);
+    establish_relay<get_data>(get_data_subscriber_);
+    establish_relay<get_blocks>(get_blocks_subscriber_);
+    establish_relay<transaction>(transaction_subscriber_);
+    establish_relay<block>(block_subscriber_);
+    establish_relay<ping>(ping_subscriber_);
+    establish_relay<pong>(pong_subscriber_);
 }
 
 channel_proxy::~channel_proxy()
@@ -214,18 +212,18 @@ void channel_proxy::do_stop(const code& ec)
 
 void channel_proxy::clear_subscriptions(const code& ec)
 {
-    notify_stop<message::version>(version_subscriber_);
-    notify_stop<message::verack>(verack_subscriber_);
+    notify_stop<version>(version_subscriber_);
+    notify_stop<verack>(verack_subscriber_);
     notify_stop<message::address>(address_subscriber_);
-    notify_stop<message::get_address>(get_address_subscriber_);
-    notify_stop<message::inventory>(inventory_subscriber_);
-    notify_stop<message::get_data>(get_data_subscriber_);
-    notify_stop<message::get_blocks>(get_blocks_subscriber_);
-    notify_stop<chain::transaction>(transaction_subscriber_);
-    notify_stop<chain::block>(block_subscriber_);
-    notify_stop<message::ping>(ping_subscriber_);
-    notify_stop<message::pong>(pong_subscriber_);
-    raw_subscriber_->relay(ec, message::header(), data_chunk());
+    notify_stop<get_address>(get_address_subscriber_);
+    notify_stop<inventory>(inventory_subscriber_);
+    notify_stop<get_data>(get_data_subscriber_);
+    notify_stop<get_blocks>(get_blocks_subscriber_);
+    notify_stop<transaction>(transaction_subscriber_);
+    notify_stop<block>(block_subscriber_);
+    notify_stop<ping>(ping_subscriber_);
+    notify_stop<pong>(pong_subscriber_);
+    raw_subscriber_->relay(ec, header(), data_chunk());
     stop_subscriber_->relay(ec);
 }
 
@@ -351,7 +349,7 @@ void channel_proxy::read_header()
             shared_from_this(), _1, _2));
 }
 
-void channel_proxy::read_checksum(const message::header& header)
+void channel_proxy::read_checksum(const header& header)
 {
     if (stopped())
         return;
@@ -362,7 +360,7 @@ void channel_proxy::read_checksum(const message::header& header)
             shared_from_this(), _1, _2, header));
 }
 
-void channel_proxy::read_payload(const message::header& header)
+void channel_proxy::read_payload(const header& header)
 {
     if (stopped())
         return;
@@ -389,10 +387,10 @@ void channel_proxy::handle_read_header(const boost_code& ec,
         return;
     }
 
-    BITCOIN_ASSERT(bytes_transferred == message::header::header_size);
+    BITCOIN_ASSERT(bytes_transferred == header::header_size);
     BITCOIN_ASSERT(bytes_transferred == inbound_header_.size());
 
-    typedef byte_source<message::header::header_bytes> header_source;
+    typedef byte_source<header::header_bytes> header_source;
     typedef boost::iostreams::stream<header_source> header_stream;
 
     // Parse and publish the header to message subscribers.
@@ -495,37 +493,49 @@ void channel_proxy::handle_read_payload(const boost_code& ec,
     // Parse and publish the payload to message subscribers.
     payload_source source(payload_copy);
     payload_stream istream(source);
-    const auto code = stream_loader_.load(header.command, istream);
+    const auto error = stream_loader_.load(header.command, istream);
 
     // Warn about unconsumed bytes in the stream.
-    if (!code && istream.peek() != std::istream::traits_type::eof())
+    if (!error && istream.peek() != std::istream::traits_type::eof())
         log_warning(LOG_NETWORK)
             << "Valid message [" << header.command
             << "] handled, unused bytes remain in payload.";
 
     // Stop the channel if there was an error before or during parse.
     if (ec)
+    {
+        log_warning(LOG_NETWORK)
+            << "Invalid payload from [" << address() << "] (deferred)"
+            << code(error::boost_to_error_code(ec)).message();
         stop(ec);
-    else if (code)
-        stop(code);
+        return;
+    }
+
+    if (error)
+    {
+        log_warning(LOG_NETWORK)
+            << "Invalid stream load from [" << address() << "] "
+            << error.message();
+        stop(error);
+    }
 }
 
 void channel_proxy::subscribe_version(
     receive_version_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::version());
+        handle_receive(error::channel_stopped, version());
     else
-        subscribe<message::version>(version_subscriber_, handle_receive);
+        subscribe<version>(version_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_verack(
     receive_verack_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::verack());
+        handle_receive(error::channel_stopped, verack());
     else
-        subscribe<message::verack>(verack_subscriber_, handle_receive);
+        subscribe<verack>(verack_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_address(
@@ -541,36 +551,36 @@ void channel_proxy::subscribe_get_address(
     receive_get_address_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::get_address());
+        handle_receive(error::channel_stopped, get_address());
     else
-        subscribe<message::get_address>(get_address_subscriber_, handle_receive);
+        subscribe<get_address>(get_address_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_inventory(
     receive_inventory_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::inventory());
+        handle_receive(error::channel_stopped, inventory());
     else
-        subscribe<message::inventory>(inventory_subscriber_, handle_receive);
+        subscribe<inventory>(inventory_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_get_data(
     receive_get_data_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::get_data());
+        handle_receive(error::channel_stopped, get_data());
     else
-        subscribe<message::get_data>(get_data_subscriber_, handle_receive);
+        subscribe<get_data>(get_data_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_get_blocks(
     receive_get_blocks_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::get_blocks());
+        handle_receive(error::channel_stopped, get_blocks());
     else
-        subscribe<message::get_blocks>(get_blocks_subscriber_, handle_receive);
+        subscribe<get_blocks>(get_blocks_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_transaction(
@@ -595,24 +605,24 @@ void channel_proxy::subscribe_ping(
     receive_ping_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::ping());
+        handle_receive(error::channel_stopped, ping());
     else
-        subscribe<message::ping>(ping_subscriber_, handle_receive);
+        subscribe<ping>(ping_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_pong(
     receive_pong_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::pong());
+        handle_receive(error::channel_stopped, pong());
     else
-        subscribe<message::pong>(pong_subscriber_, handle_receive);
+        subscribe<pong>(pong_subscriber_, handle_receive);
 }
 
 void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, message::header(), data_chunk());
+        handle_receive(error::channel_stopped, header(), data_chunk());
     else
         raw_subscriber_->subscribe(handle_receive);
 }
@@ -650,7 +660,7 @@ void channel_proxy::call_handle_send(const boost_code& ec,
     handle_send(error::boost_to_error_code(ec));
 }
 
-void channel_proxy::send_raw(const message::header& packet_header,
+void channel_proxy::send_raw(const header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     if (stopped())
@@ -664,7 +674,7 @@ void channel_proxy::send_raw(const message::header& packet_header,
             shared_from_this(), packet_header, payload, handle_send));
 }
 
-void channel_proxy::do_send_raw(const message::header& packet_header,
+void channel_proxy::do_send_raw(const header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     if (stopped())

@@ -40,7 +40,7 @@ using std::placeholders::_1;
 acceptor::acceptor(threadpool& pool, asio::acceptor_ptr accept,
     const timeout& timeouts)
   : pool_(pool), timeouts_(timeouts), asio_acceptor_(accept),
-    track<acceptor>("acceptor", LOG_NETWORK)
+    CONSTRUCT_TRACK(acceptor, LOG_NETWORK)
 {
 }
 

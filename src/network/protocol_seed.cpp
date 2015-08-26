@@ -49,7 +49,7 @@ protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
     const config::authority& self)
   : hosts_(hosts), self_(self),
     protocol_base(peer, pool, timeout, synchronize(complete, 3, "seed")),
-    track<protocol_seed>("protocol_seed", LOG_NETWORK)
+    CONSTRUCT_TRACK(protocol_seed, LOG_NETWORK)
 {
 }
 

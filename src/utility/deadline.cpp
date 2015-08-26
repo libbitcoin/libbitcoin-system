@@ -40,7 +40,7 @@ static const auto boost_cancel = asio::error::operation_aborted;
 // This is guaranteed to call handler exactly once (unless prepetually reset).
 deadline::deadline(threadpool& pool, const asio::duration duration)
   : duration_(duration), timer_(pool.service()),
-    track<deadline>("deadline", LOG_NETWORK)
+    CONSTRUCT_TRACK(deadline, LOG_NETWORK)
 {
 }
 

@@ -45,7 +45,7 @@ using std::placeholders::_2;
 protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
     hosts& hosts, const config::authority& self)
   : hosts_(hosts), self_(self), protocol_base(peer, pool),
-    track<protocol_address>("protocol_address", LOG_NETWORK)
+    CONSTRUCT_TRACK(protocol_address, LOG_NETWORK)
 {
 }
 
