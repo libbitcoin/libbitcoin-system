@@ -32,6 +32,7 @@
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
+#include <bitcoin/bitcoin/network/protocol_ping.hpp>
 #include <bitcoin/bitcoin/network/protocol_seed.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -170,6 +171,9 @@ void seeder::handle_handshake(const code& ec, channel::ptr peer,
         complete(ec);
         return;
     }
+
+    // Attach ping protocol to the new connection (until peer stop event).
+    std::make_shared<protocol_ping>(peer, pool_, timeouts_.heartbeat)->start();
 
     // Attach address seed protocol to the new connection.
     std::make_shared<protocol_seed>(peer, pool_, timeouts_.germination,
