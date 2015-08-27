@@ -151,12 +151,11 @@ void protocol::start_connecting(const code& ec,
 void protocol::new_connection()
 {
     hosts_.fetch_address(
-        dispatch_.sync(&protocol::start_connect,
+        dispatch_.concurrent_delegate(&protocol::start_connect,
             this, _1, _2));
 }
 
-void protocol::start_connect(const code& ec,
-    const config::authority& peer)
+void protocol::start_connect(const code& ec, const config::authority& peer)
 {
     if (ec)
     {
@@ -181,7 +180,7 @@ void protocol::start_connect(const code& ec,
 
     // OUTBOUND CONNECT (sequential)
     network_.connect(peer.to_hostname(), peer.port(),
-        dispatch_.sync(&protocol::handle_connect,
+        dispatch_.ordered_delegate(&protocol::handle_connect,
             this, _1, _2, peer));
 }
 
@@ -207,7 +206,7 @@ void protocol::handle_connect(const code& ec, channel::ptr node,
         << outbound_connections_.size() << " total)";
 
     const auto stop_handler =
-        dispatch_.sync(&protocol::outbound_channel_stopped,
+        dispatch_.ordered_delegate(&protocol::outbound_channel_stopped,
             this, _1, node, peer.to_string());
 
     start_talking(node, stop_handler, relay_);
@@ -236,7 +235,7 @@ void protocol::maintain_connection(const std::string& hostname, uint16_t port,
 {
     // MANUAL CONNECT
     network_.connect(hostname, port,
-        dispatch_.sync(&protocol::handle_manual_connect,
+        dispatch_.ordered_delegate(&protocol::handle_manual_connect,
             this, _1, _2, hostname, port, relay, retry));
 }
 
@@ -268,7 +267,7 @@ void protocol::handle_manual_connect(const code& ec,
         << manual_connections_.size() << " total)";
 
     const auto stop_handler =
-        dispatch_.sync(&protocol::manual_channel_stopped,
+        dispatch_.ordered_delegate(&protocol::manual_channel_stopped,
             this, _1, node, peer.to_string(), relay, retries);
 
     start_talking(node, stop_handler, relay);
@@ -279,7 +278,7 @@ void protocol::handle_manual_connect(const code& ec,
 void protocol::start_accepting()
 {
     network_.listen(inbound_port_,
-        dispatch_.sync(&protocol::start_accept,
+        dispatch_.ordered_delegate(&protocol::start_accept,
             this, _1, _2));
 }
 
@@ -296,7 +295,7 @@ void protocol::start_accept(const code& ec, acceptor::ptr accept)
 
     // ACCEPT INCOMING CONNECTIONS
     accept->accept(
-        dispatch_.sync(&protocol::handle_accept,
+        dispatch_.ordered_delegate(&protocol::handle_accept,
             this, _1, _2, accept));
 }
 
@@ -344,7 +343,7 @@ void protocol::handle_accept(const code& ec, channel::ptr node,
         << inbound_connections_.size() << " total)";
 
     const auto stop_handler = 
-        dispatch_.sync(&protocol::inbound_channel_stopped,
+        dispatch_.ordered_delegate(&protocol::inbound_channel_stopped,
             this, _1, node, address.to_string());
 
     start_talking(node, stop_handler, relay_);
@@ -361,7 +360,7 @@ void protocol::start_talking(channel::ptr node,
     channel_subscriber_->relay(error::success, node);
 
     const auto callback = 
-        dispatch_.sync(&protocol::handle_handshake,
+        dispatch_.ordered_delegate(&protocol::handle_handshake,
             this, _1, node);
 
     // Attach version protocol to the new connection (until complete).

@@ -143,31 +143,31 @@ private:
 
 // For use in derived protocols for simplifying send() calls.
 #define SEND0(instance, method) \
-    channel_->send(instance, dispatch_.sync(&CLASS::method, \
-    shared_from_base<CLASS>()))
+    channel_->send(instance, dispatch_.ordered_delegate( \
+        &CLASS::method, shared_from_base<CLASS>()))
 #define SEND1(instance, method, a1) \
-    channel_->send(instance, dispatch_.sync(&CLASS::method, \
-    shared_from_base<CLASS>(), a1))
+    channel_->send(instance, dispatch_.ordered_delegate( \
+        &CLASS::method, shared_from_base<CLASS>(), a1))
 #define SEND2(instance, method, a1, a2) \
-    channel_->send(instance, dispatch_.sync(&CLASS::method, \
-    shared_from_base<CLASS>(), a1, a2))
+    channel_->send(instance, dispatch_.ordered_delegate( \
+        &CLASS::method, shared_from_base<CLASS>(), a1, a2))
 #define SEND3(instance, method, a1, a2, a3) \
-    channel_->send(instance, dispatch_.sync(&CLASS::method, \
-    shared_from_base<CLASS>(), a1, a2, a3))
+    channel_->send(instance, dispatch_.ordered_delegate( \
+        &CLASS::method, shared_from_base<CLASS>(), a1, a2, a3))
 
 // For use in derived protocols for simplifying subscribe() calls.
 #define SUBSCRIBE0(Message, method) \
-    channel_->subscribe_##Message(dispatch_.sync(&CLASS::method, \
-    shared_from_base<CLASS>()))
+    channel_->subscribe_##Message(dispatch_.ordered_delegate( \
+        &CLASS::method, shared_from_base<CLASS>()))
 #define SUBSCRIBE1(Message, method, a1) \
-    channel_->subscribe_##Message(dispatch_.sync(&CLASS::method, \
-    shared_from_base<CLASS>(), a1))
+    channel_->subscribe_##Message(dispatch_.ordered_delegate( \
+        &CLASS::method, shared_from_base<CLASS>(), a1))
 #define SUBSCRIBE2(Message, method, a1, a2) \
-    channel_->subscribe_##Message(dispatch_.sync(&CLASS::method, \
-    shared_from_base<CLASS>(), a1, a2))
+    channel_->subscribe_##Message(dispatch_.ordered_delegate( \
+        &CLASS::method, shared_from_base<CLASS>(), a1, a2))
 #define SUBSCRIBE3(Message, method, a1, a2, a3) \
-    channel_->subscribe_##Message(dispatch_.sync(&CLASS::method, \
-    shared_from_base<CLASS>(), a1, a2, a3))
+    channel_->subscribe_##Message(dispatch_.ordered_delegate( \
+        &CLASS::method, shared_from_base<CLASS>(), a1, a2, a3))
 
 } // namespace network
 } // namespace libbitcoin

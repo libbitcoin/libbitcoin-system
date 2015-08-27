@@ -45,14 +45,14 @@ subscriber<Args...>::~subscriber()
 template <typename... Args>
 void subscriber<Args...>::subscribe(handler handler)
 {
-    dispatch_.sync(&subscriber<Args...>::do_subscribe,
+    dispatch_.ordered_delegate(&subscriber<Args...>::do_subscribe,
         this->shared_from_this(), handler)();
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
-    dispatch_.sync(&subscriber<Args...>::do_relay,
+    dispatch_.ordered_delegate(&subscriber<Args...>::do_relay,
         this->shared_from_this(), std::forward<Args>(args)...)();
 }
 

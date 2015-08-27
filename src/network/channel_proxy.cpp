@@ -188,7 +188,7 @@ void channel_proxy::stop(const code& ec)
     if (stopped())
         return;
 
-    dispatch_.queue(
+    dispatch_.ordered(
         std::bind(&channel_proxy::do_stop,
             shared_from_this(), ec));
 }
@@ -345,7 +345,7 @@ void channel_proxy::read_header()
 
     using namespace boost::asio;
     async_read(*socket_, buffer(inbound_header_),
-        dispatch_.sync(&channel_proxy::handle_read_header,
+        dispatch_.ordered_delegate(&channel_proxy::handle_read_header,
             shared_from_this(), _1, _2));
 }
 
@@ -356,7 +356,7 @@ void channel_proxy::read_checksum(const header& header)
 
     using namespace boost::asio;
     async_read(*socket_, buffer(inbound_checksum_),
-        dispatch_.sync(&channel_proxy::handle_read_checksum,
+        dispatch_.ordered_delegate(&channel_proxy::handle_read_checksum,
             shared_from_this(), _1, _2, header));
 }
 
@@ -368,7 +368,7 @@ void channel_proxy::read_payload(const header& header)
     using namespace boost::asio;
     inbound_payload_.resize(header.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header.payload_length),
-        dispatch_.sync(&channel_proxy::handle_read_payload,
+        dispatch_.ordered_delegate(&channel_proxy::handle_read_payload,
             shared_from_this(), _1, _2, header));
 }
 
@@ -669,7 +669,7 @@ void channel_proxy::send_raw(const header& packet_header,
         return;
     }
 
-    dispatch_.queue(
+    dispatch_.ordered(
         std::bind(&channel_proxy::do_send_raw,
             shared_from_this(), packet_header, payload, handle_send));
 }

@@ -160,7 +160,7 @@ void protocol_version::set_height(uint64_t height, handler handle)
     if (stopped())
         return;
 
-    dispatch_.queue(BIND2(do_set_height, height, handle));
+    dispatch_.ordered(BIND2(do_set_height, height, handle));
 }
 
 void protocol_version::do_set_height(uint64_t height, handler handle)

@@ -77,9 +77,9 @@ public:
     template <typename Message>
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        // Intermediate variable is workaround for MSVC generic lambda issue.
-        const auto lambda = &protocol::do_broadcast<Message>;
-        dispatch_.queue(lambda, this, packet, handle_send);
+        dispatch_.ordered(
+            std::bind(&protocol::do_broadcast<Message>,
+                this, packet, handle_send));
     }
 
 private:

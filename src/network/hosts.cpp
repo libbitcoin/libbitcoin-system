@@ -50,7 +50,6 @@ namespace network {
 using boost::format;
 using boost::filesystem::path;
 
-// TODO: look into whether randomly_queue is achiving its objective.
 hosts::hosts(threadpool& pool, const path& file_path, size_t capacity)
   : buffer_(capacity), dispatch_(pool), file_path_(file_path)
 {
@@ -88,7 +87,7 @@ size_t hosts::size()
 
 void hosts::load(load_handler handle_load)
 {
-    dispatch_.randomly_queue(
+    dispatch_.unordered(
         std::bind(&hosts::do_load,
             this, file_path_.string(), handle_load));
 }
@@ -116,7 +115,7 @@ void hosts::do_load(const path& path, load_handler handle_load)
 
 void hosts::save(save_handler handle_save)
 {
-    dispatch_.randomly_queue(
+    dispatch_.ordered(
         std::bind(&hosts::do_save,
             this, file_path_.string(), handle_save));
 }
@@ -139,7 +138,7 @@ void hosts::do_save(const path& path, save_handler handle_save)
 void hosts::remove(const message::network_address& address,
     remove_handler handle_remove)
 {
-    dispatch_.randomly_queue(
+    dispatch_.unordered(
         std::bind(&hosts::do_remove,
             this, address, handle_remove));
 }
@@ -161,42 +160,38 @@ void hosts::do_remove(const message::network_address& address,
 void hosts::store(const message::network_address& address,
     store_handler handle_store)
 {
-    if (address.port == 0)
-        return;
-
-    dispatch_.randomly_queue(
+    dispatch_.unordered(
         std::bind(&hosts::do_store,
             this, address, handle_store));
+}
+
+void hosts::store(const message::network_address::list& addresses,
+    store_handler handle_store)
+{
+    // We disperse here to allow other addresses messages to interleave hosts.
+    dispatch_.disperse(addresses, "hosts", handle_store,
+        &hosts::do_store, this);
 }
 
 void hosts::do_store(const message::network_address& address,
     store_handler handle_store)
 {
-    if (!exists(address))
-        buffer_.push_back(address);
-    else
+    if (address.is_valid())
         log_debug(LOG_PROTOCOL)
-        << "Duplicate host address from peer";
+        << "Invalid host port from peer";
+    else if (exists(address))
+        log_debug(LOG_PROTOCOL)
+            << "Redundant host address from peer";
+    else
+        buffer_.push_back(address);
 
-    // We don't treat duplicates in one message as an error, just log it.
+    // We don't treat invalid address as an error, just log it.
     handle_store(error::success);
-}
-
-void hosts::store(const message::network_address::list& addresses, 
-    store_handler handle_store)
-{
-    const auto complete = synchronize(handle_store, addresses.size(), "hosts");
-
-    // We queue here to interleave address distribution in the circular buffer.
-    for (const auto& address: addresses)
-        dispatch_.randomly_queue(
-            std::bind(&hosts::do_store,
-                this, address, complete));
 }
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)
 {
-    dispatch_.randomly_queue(
+    dispatch_.unordered(
         std::bind(&hosts::do_fetch_address,
             this, handle_fetch));
 }
@@ -216,7 +211,7 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 
 void hosts::fetch_count(fetch_count_handler handle_fetch)
 {
-    dispatch_.randomly_queue(
+    dispatch_.unordered(
         std::bind(&hosts::do_fetch_count,
             this, handle_fetch));
 }

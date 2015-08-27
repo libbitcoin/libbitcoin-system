@@ -108,6 +108,7 @@ void seeder::start(handler handle_complete)
     auto single = synchronize(multiple, seeds_.size(), "seeder", true);
 
     // Require one callback per channel before calling single.
+    // We don't use parallel here because connect is itself asynchronous.
     for (const auto& seed: seeds_)
         start_connect(seed, synchronize(single, 1, seed.to_string()));
 }
@@ -150,7 +151,7 @@ void seeder::handle_connected(const code& ec, channel::ptr peer,
 
     static const bool relay = false;
     const auto callback = 
-        dispatch_.sync(&seeder::handle_handshake,
+        dispatch_.ordered_delegate(&seeder::handle_handshake,
             shared_from_this(), _1, peer, seed, complete);
 
     // Attach version protocol to the new connection (until complete).

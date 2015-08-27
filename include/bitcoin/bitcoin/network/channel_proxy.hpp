@@ -123,7 +123,7 @@ public:
 
         const auto& command = Message::satoshi_command;
         const auto message = message::create_raw_message(packet);
-        dispatch_.queue(
+        dispatch_.ordered(
             std::bind(&channel_proxy::do_send,
                 shared_from_this(), message, handle_send, command));
     }
