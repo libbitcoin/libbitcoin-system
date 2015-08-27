@@ -23,22 +23,23 @@
 
 using namespace bc;
 
-bool equal(const message::network_address& address_a,
-    const message::network_address& address_b, bool with_timestamp)
+bool equal(const message::network_address& left,
+    const message::network_address& right, bool with_timestamp)
 {
-    bool matches_timestamp = with_timestamp ? (address_a.timestamp == address_b.timestamp) : true;
+    bool matches_timestamp = with_timestamp ? 
+        (left.timestamp == right.timestamp) : true;
 
     return matches_timestamp
-        && (address_a.services == address_b.services)
-        && (address_a.ip == address_b.ip)
-        && (address_a.port == address_b.port);
+        && (left.services == right.services)
+        && (left.ip == right.ip)
+        && (left.port == right.port);
 }
 
 BOOST_AUTO_TEST_SUITE(network_address_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw(1);
+    const data_chunk raw{ 1 };
     message::network_address instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw, false));
@@ -46,7 +47,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_without_timestamp)
 {
-    message::network_address expected
+    const message::network_address expected
     {
         734678u,
         5357534u,
@@ -59,9 +60,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_without_timestamp
         123u
     };
 
-    data_chunk data = expected.to_data(false);
-
-    auto result = message::network_address::factory_from_data(data, false);
+    const auto data = expected.to_data(false);
+    const auto result = message::network_address::factory_from_data(data, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_without_timestamp
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestamp)
 {
-    message::network_address expected
+    const message::network_address expected
     {
         734678u,
         5357534u,
@@ -84,10 +84,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestam
         123u
     };
 
-    data_chunk data = expected.to_data(false);
+    const auto data = expected.to_data(false);
     data_source istream(data);
-
-    auto result = message::network_address::factory_from_data(istream, false);
+    const auto result = message::network_address::factory_from_data(istream, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
@@ -97,7 +96,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestam
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestamp)
 {
-    message::network_address expected
+    const message::network_address expected
     {
         734678u,
         5357534u,
@@ -110,11 +109,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestam
         123u
     };
 
-    data_chunk data = expected.to_data(false);
+    const auto data = expected.to_data(false);
     data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::network_address::factory_from_data(source, false);
+    const auto result = message::network_address::factory_from_data(source, false);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
@@ -124,7 +122,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestam
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
 {
-    message::network_address expected
+    const message::network_address expected
     {
         734678u,
         5357534u,
@@ -137,9 +135,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
         123u
     };
 
-    data_chunk data = expected.to_data(true);
-
-    auto result = message::network_address::factory_from_data(data, true);
+    const auto data = expected.to_data(true);
+    const auto result = message::network_address::factory_from_data(data, true);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));
@@ -149,7 +146,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
 {
-    message::network_address expected
+    const message::network_address expected
     {
         734678u,
         5357534u,
@@ -162,10 +159,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
         123u
     };
 
-    data_chunk data = expected.to_data(true);
+    const auto data = expected.to_data(true);
     data_source istream(data);
-
-    auto result = message::network_address::factory_from_data(istream, true);
+    const auto result = message::network_address::factory_from_data(istream, true);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));
@@ -175,7 +171,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_timestamp)
 {
-    message::network_address expected
+    const message::network_address expected
     {
         734678u,
         5357534u,
@@ -188,11 +184,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_timestamp)
         123u
     };
 
-    data_chunk data = expected.to_data(true);
+    const auto data = expected.to_data(true);
     data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::network_address::factory_from_data(source, true);
+    const auto result = message::network_address::factory_from_data(source, true);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));

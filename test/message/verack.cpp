@@ -27,10 +27,9 @@ BOOST_AUTO_TEST_SUITE(verack_tests)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::verack expected;
-    data_chunk data = expected.to_data();
-
-    auto result = message::verack::factory_from_data(data);
+    const message::verack expected;
+    const auto data = expected.to_data();
+    const auto result = message::verack::factory_from_data(data);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
@@ -39,11 +38,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::verack expected;
-    data_chunk data = expected.to_data();
+    const message::verack expected;
+    const auto data = expected.to_data();
     data_source istream(data);
-
-    auto result = message::verack::factory_from_data(istream);
+    const auto result = message::verack::factory_from_data(istream);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
@@ -52,12 +50,11 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::verack expected;
-    data_chunk data = expected.to_data();
+    const message::verack expected;
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::verack::factory_from_data(source);
+    const auto result = message::verack::factory_from_data(source);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());

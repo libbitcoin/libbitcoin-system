@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(alert_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw = { 0xab, 0x11 };
+    const data_chunk raw{ 0xab, 0x11 };
     message::alert instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -36,7 +36,8 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(wiki_sample_test)
 {
-    data_chunk raw_payload = {
+    const data_chunk raw_payload
+    {
         0x01, 0x00, 0x00, 0x00, 0x37, 0x66, 0x40, 0x4f, 0x00,
         0x00, 0x00, 0x00, 0xb3, 0x05, 0x43, 0x4f, 0x00, 0x00, 0x00,
         0x00, 0xf2, 0x03, 0x00, 0x00, 0xf1, 0x03, 0x00, 0x00, 0x00,
@@ -51,7 +52,8 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
         0x72, 0x75, 0x61, 0x72, 0x79, 0x00
     };
 
-    data_chunk raw_signature = {
+    const data_chunk raw_signature
+    {
         0x30, 0x45, 0x02, 0x21, 0x00, 0x83, 0x89, 0xdf, 0x45, 0xf0,
         0x70, 0x3f, 0x39, 0xec, 0x8c, 0x1c, 0xc4, 0x2c, 0x13, 0x81,
         0x0f, 0xfc, 0xae, 0x14, 0x99, 0x5b, 0xb6, 0x48, 0x34, 0x02,
@@ -62,7 +64,8 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
         0xf1
     };
 
-    data_chunk raw = {
+    const data_chunk raw
+    {
         0x73, 0x01, 0x00, 0x00, 0x00, 0x37, 0x66, 0x40, 0x4f, 0x00,
         0x00, 0x00, 0x00, 0xb3, 0x05, 0x43, 0x4f, 0x00, 0x00, 0x00,
         0x00, 0xf2, 0x03, 0x00, 0x00, 0xf1, 0x03, 0x00, 0x00, 0x00,
@@ -84,15 +87,14 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
         0x46, 0x72, 0x33, 0x26, 0xe4, 0xe8, 0xa4, 0xf1
     };
 
-    message::alert expected { raw_payload, raw_signature };
-
-    auto result = message::alert::factory_from_data(raw);
+    const message::alert expected{ raw_payload, raw_signature };
+    const auto result = message::alert::factory_from_data(raw);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(raw.size(), result.satoshi_size());
     BOOST_REQUIRE(result == expected);
 
-    auto data = expected.to_data();
+    const auto data = expected.to_data();
 
     BOOST_REQUIRE_EQUAL(raw.size(), data.size());
     BOOST_REQUIRE_EQUAL(data.size(), expected.satoshi_size());
@@ -100,14 +102,14 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::alert expected {
-        data_chunk { 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 },
-        data_chunk { 0x04, 0xff, 0xab, 0xcd, 0xee }
+    const message::alert expected
+    {
+        { 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 },
+        { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::alert::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::alert::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -117,15 +119,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::alert expected {
-        data_chunk { 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 },
-        data_chunk { 0x04, 0xff, 0xab, 0xcd, 0xee }
+    const message::alert expected
+    {
+        { 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 },
+        { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-
-    auto result = message::alert::factory_from_data(istream);
+    const auto result = message::alert::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -135,16 +137,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::alert expected {
-        data_chunk { 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 },
-        data_chunk { 0x04, 0xff, 0xab, 0xcd, 0xee }
+    const message::alert expected
+    {
+        { 0x07, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 },
+        { 0x04, 0xff, 0xab, 0xcd, 0xee }
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-
-    auto result = message::alert::factory_from_data(source);
+    const auto result = message::alert::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

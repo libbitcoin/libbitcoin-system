@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(filter_load_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw = { 0xab, 0x11 };
+    const data_chunk raw{ 0xab, 0x11 };
     message::filter_load instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -35,16 +35,16 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::filter_load expected {
-        data_chunk { 0x05, 0xaa, 0xbb, 0xcc, 0xdd, 0xee },
+    const message::filter_load expected
+    {
+        { 0x05, 0xaa, 0xbb, 0xcc, 0xdd, 0xee },
         25,
         10,
         0xab
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::filter_load::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::filter_load::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -54,17 +54,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::filter_load expected {
-        data_chunk { 0x05, 0xaa, 0xbb, 0xcc, 0xdd, 0xee },
+    const message::filter_load expected
+    {
+        { 0x05, 0xaa, 0xbb, 0xcc, 0xdd, 0xee },
         25,
         10,
         0xab
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-
-    auto result = message::filter_load::factory_from_data(istream);
+    const auto result = message::filter_load::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -74,18 +74,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::filter_load expected {
-        data_chunk { 0x05, 0xaa, 0xbb, 0xcc, 0xdd, 0xee },
+    const message::filter_load expected
+    {
+        { 0x05, 0xaa, 0xbb, 0xcc, 0xdd, 0xee },
         25,
         10,
         0xab
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-
-    auto result = message::filter_load::factory_from_data(source);
+    const auto result = message::filter_load::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

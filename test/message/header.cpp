@@ -35,13 +35,14 @@ BOOST_AUTO_TEST_CASE(to_data_checksum_variations)
         0u
     };
 
-    data_chunk zero_checksum = instance.to_data();
+    auto zero_checksum = instance.to_data();
+
     BOOST_REQUIRE_EQUAL(zero_checksum.size(), instance.satoshi_size());
 
     instance.checksum = 123u;
-    data_chunk nonzero_checksum = instance.to_data();
-    BOOST_REQUIRE_EQUAL(nonzero_checksum.size(), instance.satoshi_size());
+    const auto nonzero_checksum = instance.to_data();
 
+    BOOST_REQUIRE_EQUAL(nonzero_checksum.size(), instance.satoshi_size());
     BOOST_REQUIRE(zero_checksum.size() != nonzero_checksum.size());
 }
 
@@ -55,7 +56,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::header expected
+    const message::header expected
     {
         32414u,
         "foo",
@@ -63,9 +64,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         0u
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::header::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::header::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::header expected
+    const message::header expected
     {
         29145u,
         "bar",
@@ -83,10 +83,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         0u
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
-
-    auto result = message::header::factory_from_data(istream);
+    const auto result = message::header::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -96,7 +95,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::header expected
+    const  message::header expected
     {
         1u,
         "bazbazbazbaz",
@@ -104,11 +103,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         0u
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::header::factory_from_data(source);
+    const auto result = message::header::factory_from_data(source);
 
     BOOST_REQUIRE_EQUAL(data.size(), expected.satoshi_size());
     BOOST_REQUIRE(result.is_valid());

@@ -23,32 +23,31 @@
 
 using namespace bc;
 
-bool equal_address_without_timestamp(const message::network_address& address_a,
-    const message::network_address& address_b)
+bool equal_without_timestamp(const message::network_address& left,
+    const message::network_address& right)
 {
-    return (address_a.services == address_b.services)
-        && (address_a.ip == address_b.ip)
-        && (address_a.port == address_b.port);
+    return (left.services == right.services)
+        && (left.ip == right.ip)
+        && (left.port == right.port);
 }
 
-bool equal(const message::version& a,
-    const message::version& b)
+bool equal(const message::version& left, const message::version& right)
 {
-    return (a.value == b.value)
-        && (a.services == b.services)
-        && (a.timestamp == b.timestamp)
-        && equal_address_without_timestamp(a.address_me, b.address_me)
-        && equal_address_without_timestamp(a.address_you, b.address_you)
-        && (a.nonce == b.nonce)
-        && (a.user_agent == b.user_agent)
-        && (a.start_height == b.start_height);
+    return (left.value == right.value)
+        && (left.services == right.services)
+        && (left.timestamp == right.timestamp)
+        && equal_without_timestamp(left.address_me, right.address_me)
+        && equal_without_timestamp(left.address_you, right.address_you)
+        && (left.nonce == right.nonce)
+        && (left.user_agent == right.user_agent)
+        && (left.start_height == right.start_height);
 }
 
 BOOST_AUTO_TEST_SUITE(version_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw{ 0xab };
+    const data_chunk raw{ 0xab };
     message::version instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -56,7 +55,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::version expected
+    const message::version expected
     {
         210u,
         1515u,
@@ -88,9 +87,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         100u
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::version::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::version::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
@@ -100,7 +98,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::version expected
+    const message::version expected
     {
         210u,
         1515u,
@@ -132,9 +130,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         100u
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
-
     const auto result = message::version::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
@@ -145,7 +142,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::version expected
+    const message::version expected
     {
         210u,
         1515u,
@@ -177,10 +174,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         100u
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-
     const auto result = message::version::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());

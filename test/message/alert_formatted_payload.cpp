@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(alert_formatted_payload_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw = { 0xab, 0x11 };
+    data_chunk raw{ 0xab, 0x11 };
     message::alert_formatted_payload instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -36,7 +36,8 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(wiki_sample_test)
 {
-    data_chunk raw = {
+    const data_chunk raw
+    {
         0x01, 0x00, 0x00, 0x00, 0x37, 0x66, 0x40, 0x4f, 0x00, 0x00,
         0x00, 0x00, 0xb3, 0x05, 0x43, 0x4f, 0x00, 0x00, 0x00, 0x00,
         0xf2, 0x03, 0x00, 0x00, 0xf1, 0x03, 0x00, 0x00, 0x00, 0x10,
@@ -51,7 +52,8 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
         0x75, 0x61, 0x72, 0x79, 0x00
     };
 
-    message::alert_formatted_payload expected {
+    const message::alert_formatted_payload expected
+    {
         1,
         1329620535,
         1329792435,
@@ -67,13 +69,13 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
         ""
     };
 
-    auto result = message::alert_formatted_payload::factory_from_data(raw);
+    const auto result = message::alert_formatted_payload::factory_from_data(raw);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(raw.size(), result.satoshi_size());
     BOOST_REQUIRE(result == expected);
 
-    auto data = expected.to_data();
+    const auto data = expected.to_data();
 
     BOOST_REQUIRE_EQUAL(raw.size(), data.size());
     BOOST_REQUIRE_EQUAL(data.size(), expected.satoshi_size());
@@ -81,18 +83,19 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::alert_formatted_payload expected {
+    message::alert_formatted_payload expected
+    {
         5,
         105169,
         723544,
         1779,
         1678,
-        std::vector<uint32_t>{
+        {
             10, 25256, 37, 98485, 250
         },
         75612,
         81354,
-        std::vector<std::string>{
+        {
             "alpha", "beta", "gamma", "delta"
         },
         781,
@@ -101,9 +104,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         "RESERVED?"
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::alert_formatted_payload::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::alert_formatted_payload::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -113,18 +115,19 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::alert_formatted_payload expected {
+    message::alert_formatted_payload expected
+    {
         5,
         105169,
         723544,
         1779,
         1678,
-        std::vector<uint32_t>{
+        {
             10, 25256, 37, 98485, 250
         },
         75612,
         81354,
-        std::vector<std::string>{
+        {
             "alpha", "beta", "gamma", "delta"
         },
         781,
@@ -133,10 +136,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         "RESERVED?"
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-
-    auto result = message::alert_formatted_payload::factory_from_data(istream);
+    const auto result = message::alert_formatted_payload::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -146,18 +148,19 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::alert_formatted_payload expected {
+    const message::alert_formatted_payload expected
+    {
         5,
         105169,
         723544,
         1779,
         1678,
-        std::vector<uint32_t>{
+        {
             10, 25256, 37, 98485, 250
         },
         75612,
         81354,
-        std::vector<std::string>{
+        {
             "alpha", "beta", "gamma", "delta"
         },
         781,
@@ -166,11 +169,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         "RESERVED?"
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-
-    auto result = message::alert_formatted_payload::factory_from_data(source);
+    const auto result = message::alert_formatted_payload::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

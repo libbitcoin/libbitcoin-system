@@ -27,11 +27,9 @@ BOOST_AUTO_TEST_SUITE(memory_pool_tests)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::memory_pool expected;
-
-    data_chunk data = expected.to_data();
-
-    auto result = message::memory_pool::factory_from_data(data);
+    const message::memory_pool expected;
+    const auto data = expected.to_data();
+    const auto result = message::memory_pool::factory_from_data(data);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
@@ -40,12 +38,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::memory_pool expected;
-
-    data_chunk data = expected.to_data();
+    const message::memory_pool expected;
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-
-    auto result = message::memory_pool::factory_from_data(istream);
+    const auto result = message::memory_pool::factory_from_data(istream);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
@@ -54,13 +50,11 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::memory_pool expected;
-
-    data_chunk data = expected.to_data();
+    const message::memory_pool expected;
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-
-    auto result = message::memory_pool::factory_from_data(source);
+    const auto result = message::memory_pool::factory_from_data(source);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());

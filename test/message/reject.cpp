@@ -23,29 +23,31 @@
 
 using namespace bc;
 
-bool equal(const message::reject& a,
-    const message::reject& b)
+bool equal(const message::reject& left, const message::reject& right)
 {
-    return (a.code == b.code)
-        && (a.message == b.message)
-        && (a.reason == b.reason)
-        && (a.data == b.data);
+    return (left.code == right.code)
+        && (left.message == right.message)
+        && (left.reason == right.reason)
+        && (left.data == right.data);
 }
 
 const std::string reason_text = "My Reason...";
 
-const hash_digest data = {
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-    0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+const hash_digest data
+{
+    {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
+    }
 };
 
 BOOST_AUTO_TEST_SUITE(reject_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw{ 0xab };
+    const data_chunk raw{ 0xab };
     message::reject instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -53,16 +55,16 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::reject expected{
+    const message::reject expected
+    {
         chain::block::satoshi_command,
         message::reject::error_code::dust,
         reason_text,
         data
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::reject::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::reject::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
@@ -72,17 +74,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::reject expected{
+    const message::reject expected
+    {
         chain::block::satoshi_command,
         message::reject::error_code::insufficient_fee,
         reason_text,
         data
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-
-    auto result = message::reject::factory_from_data(istream);
+    const auto result = message::reject::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
@@ -92,18 +94,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::reject expected{
+    const message::reject expected
+    {
         chain::transaction::satoshi_command,
         message::reject::error_code::duplicate,
         reason_text,
         data
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-
-    auto result = message::reject::factory_from_data(source);
+    const auto result = message::reject::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));

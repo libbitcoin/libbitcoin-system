@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(get_blocks_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw{ 0xab, 0xcd };
+    const data_chunk raw{ 0xab, 0xcd };
     message::get_blocks instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::get_blocks expected
+    const message::get_blocks expected
     {
         {
             {
@@ -65,9 +65,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         }
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::get_blocks::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::get_blocks::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -77,7 +76,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::get_blocks expected
+    const message::get_blocks expected
     {
         {
             {
@@ -85,7 +84,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
                     0x78, 0x51, 0x04, 0xa9, 0xcb, 0x52, 0xb3, 0x77,
                     0x53, 0x9c, 0x8a, 0x27, 0x02, 0xab, 0x70, 0xc7,
                     0xc2, 0x04, 0xee, 0xb5, 0xd2, 0x78, 0x2e, 0x04,
-                    0x76, 0xef, 0xb9, 0x9d, 0xc7, 0x5c, 0xda, 0x82,
+                    0x76, 0xef, 0xb9, 0x9d, 0xc7, 0x5c, 0xda, 0x82
                 }
             },
             {
@@ -107,10 +106,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         }
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
-
-    auto result = message::get_blocks::factory_from_data(istream);
+    const auto result = message::get_blocks::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -120,7 +118,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::get_blocks expected
+    const message::get_blocks expected
     {
         {
             {
@@ -128,7 +126,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
                     0x78, 0x51, 0x04, 0xa9, 0xcb, 0x52, 0xb3, 0x77,
                     0x53, 0x9c, 0x8a, 0x27, 0x02, 0xab, 0x70, 0xc7,
                     0xc2, 0x04, 0xee, 0xb5, 0xd2, 0x78, 0x2e, 0x04,
-                    0x76, 0xef, 0xb9, 0x9d, 0xc7, 0x5c, 0xda, 0x82,
+                    0x76, 0xef, 0xb9, 0x9d, 0xc7, 0x5c, 0xda, 0x82
                 }
             },
             {
@@ -150,11 +148,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         }
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::get_blocks::factory_from_data(source);
+    const auto result = message::get_blocks::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

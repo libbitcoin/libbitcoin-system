@@ -28,8 +28,7 @@ BOOST_AUTO_TEST_SUITE(merkle_block_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_fails)
 {
-    data_chunk data(10);
-
+    const data_chunk data{ 10 };
     message::merkle_block instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
@@ -38,8 +37,9 @@ BOOST_AUTO_TEST_CASE(from_data_fails)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::merkle_block expected {
-        chain::block_header {
+    const message::merkle_block expected
+    {
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -48,17 +48,16 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
             68644,
             1
         },
-        hash_list {
+        {
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         },
-        data_chunk {
+        {
             0x00
         }
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::merkle_block::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::merkle_block::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -66,8 +65,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::merkle_block expected {
-        chain::block_header {
+    const  message::merkle_block expected
+    {
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -76,18 +76,17 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
             68644,
             1
         },
-        hash_list {
+        {
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         },
-        data_chunk {
+        {
             0x00
         }
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-
-    auto result = message::merkle_block::factory_from_data(istream);
+    const auto result = message::merkle_block::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -95,8 +94,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::merkle_block expected {
-        chain::block_header {
+    const message::merkle_block expected
+    {
+        {
             10,
             hash_literal("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f"),
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b"),
@@ -105,19 +105,18 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
             68644,
             1
         },
-        hash_list {
+        {
             hash_literal("4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b")
         },
-        data_chunk {
+        {
             0x00
         }
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-
-    auto result = message::merkle_block::factory_from_data(source);
+    const auto result = message::merkle_block::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

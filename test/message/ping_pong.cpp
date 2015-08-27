@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(ping_pong_tests)
 
 BOOST_AUTO_TEST_CASE(ping_pong_from_data_insufficient_bytes_failure)
 {
-    data_chunk raw(1);
+    const data_chunk raw{ 1 };
     message::ping_pong instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -40,12 +40,13 @@ BOOST_AUTO_TEST_CASE(ping_satoshi_fixed_size_returns_sizeof_uint64_t)
 
 BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_chunk)
 {
-    message::ping expected;
-    expected.nonce = 16545612u;
+    const message::ping expected
+    {
+        16545612u
+    };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::ping::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::ping::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -55,13 +56,14 @@ BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_stream)
 {
-    message::ping expected;
-    expected.nonce = 5087222u;
+    const message::ping expected
+    {
+        5087222u
+    };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
-
-    auto result = message::ping::factory_from_data(istream);
+    const auto result = message::ping::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -71,14 +73,15 @@ BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_reader)
 {
-    message::ping expected;
-    expected.nonce = 6456147u;
+    const message::ping expected
+    {
+        6456147u
+    };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::ping::factory_from_data(source);
+    const auto result = message::ping::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -93,12 +96,13 @@ BOOST_AUTO_TEST_CASE(pong_satoshi_fixed_size_returns_sizeof_uint64_t)
 
 BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_chunk)
 {
-    message::pong expected;
-    expected.nonce = 4306550u;
+    const message::pong expected
+    {
+        4306550u
+    };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::pong::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::pong::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -108,13 +112,14 @@ BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_stream)
 {
-    message::pong expected;
-    expected.nonce = 3100693u;
+    const message::pong expected
+    {
+        3100693u
+    };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
-
-    auto result = message::pong::factory_from_data(istream);
+    const auto result = message::pong::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -124,14 +129,15 @@ BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(pong_roundtrip_to_data_factory_from_data_reader)
 {
-    message::pong expected;
-    expected.nonce = 4642675u;
+    const message::pong expected
+    {
+        4642675u
+    };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::pong::factory_from_data(source);
+    const auto result = message::pong::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(inventory_vector_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw(1);
+    const data_chunk raw{ 1 };
     message::inventory_vector instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::inventory_vector expected
+    const message::inventory_vector expected
     {
         message::inventory_type_id::error,
         {
@@ -48,9 +48,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
         }
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::inventory_vector::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::inventory_vector::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -60,7 +59,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::inventory_vector expected
+    const message::inventory_vector expected
     {
         message::inventory_type_id::transaction,
         {
@@ -73,10 +72,9 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
         }
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
-
-    auto result = message::inventory_vector::factory_from_data(istream);
+    const auto result = message::inventory_vector::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -86,7 +84,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::inventory_vector expected
+    const message::inventory_vector expected
     {
         message::inventory_type_id::block,
         {
@@ -99,11 +97,10 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
         }
     };
 
-    data_chunk data = expected.to_data();
+    const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::inventory_vector::factory_from_data(source);
+    const auto result = message::inventory_vector::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
