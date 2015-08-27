@@ -94,6 +94,8 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
     src/message/address.cpp \
+    src/message/alert.cpp \
+    src/message/alert_formatted_payload.cpp \
     src/message/filter_add.cpp \
     src/message/filter_clear.cpp \
     src/message/filter_load.cpp \
@@ -232,8 +234,11 @@ test_libbitcoin_test_SOURCES = \
     test/chain/transaction_input.cpp \
     test/chain/transaction_output.cpp \
     test/message/address.cpp \
+    test/message/alert.cpp \
+    test/message/alert_formatted_payload.cpp \
     test/message/filter_add.cpp \
     test/message/filter_clear.cpp \
+    test/message/filter_load.cpp \
     test/message/get_address.cpp \
     test/message/get_blocks.cpp \
     test/message/get_data.cpp \
@@ -333,6 +338,8 @@ include_bitcoin_bitcoin_math_HEADERS = \
 include_bitcoin_bitcoin_messagedir = ${includedir}/bitcoin/bitcoin/message
 include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/address.hpp \
+    include/bitcoin/bitcoin/message/alert.hpp \
+    include/bitcoin/bitcoin/message/alert_formatted_payload.hpp \
     include/bitcoin/bitcoin/message/filter_add.hpp \
     include/bitcoin/bitcoin/message/filter_clear.hpp \
     include/bitcoin/bitcoin/message/filter_load.hpp \

@@ -51,6 +51,8 @@
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
+#include <bitcoin/bitcoin/message/alert.hpp>
+#include <bitcoin/bitcoin/message/alert_formatted_payload.hpp>
 #include <bitcoin/bitcoin/message/filter_add.hpp>
 #include <bitcoin/bitcoin/message/filter_clear.hpp>
 #include <bitcoin/bitcoin/message/filter_load.hpp>

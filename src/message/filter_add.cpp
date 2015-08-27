@@ -52,11 +52,12 @@ filter_add filter_add::factory_from_data(reader& source)
 
 bool filter_add::is_valid() const
 {
-    return true;
+    return !data.empty();
 }
 
 void filter_add::reset()
 {
+    data.clear();
 }
 
 bool filter_add::from_data(const data_chunk& data)

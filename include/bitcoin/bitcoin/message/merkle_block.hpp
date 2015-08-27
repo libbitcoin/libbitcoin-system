@@ -34,38 +34,27 @@ namespace message {
 class BC_API merkle_block
 {
 public:
-
     typedef std::vector<merkle_block> list;
+
+    static merkle_block factory_from_data(const data_chunk& data);
+    static merkle_block factory_from_data(std::istream& stream);
+    static merkle_block factory_from_data(reader& source);
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t satoshi_size() const;
 
     static const std::string satoshi_command;
 
     chain::block_header header;
     hash_list hashes;
     data_chunk flags;
-
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    bool from_data(reader& source);
-
-    data_chunk to_data() const;
-
-    void to_data(std::ostream& stream) const;
-
-    void to_data(writer& sink) const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size() const;
-
-    static merkle_block factory_from_data(const data_chunk& data);
-
-    static merkle_block factory_from_data(std::istream& stream);
-
-    static merkle_block factory_from_data(reader& source);
 };
 
 BC_API bool operator==(const merkle_block& block_a,
