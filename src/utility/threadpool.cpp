@@ -45,9 +45,10 @@ void threadpool::spawn(size_t number_threads, thread_priority priority)
 
 void threadpool::spawn_once(thread_priority priority)
 {
+    // In C++14 work should use a unique_ptr.
     // Work prevents the service from running out of work and terminating.
     if (!work_)
-        work_ = std::make_unique<asio::service::work>(service_);
+        work_ = std::make_shared<asio::service::work>(service_);
 
     const auto action = [this, priority]
     {

@@ -129,7 +129,7 @@ private:
 
     asio::service service_;
     std::vector<std::thread> threads_;
-    std::unique_ptr<asio::service::work> work_;
+    std::shared_ptr<asio::service::work> work_;
 };
 
 } // namespace libbitcoin
