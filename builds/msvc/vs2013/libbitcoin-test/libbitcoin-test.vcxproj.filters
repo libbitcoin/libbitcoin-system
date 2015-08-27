@@ -224,5 +224,32 @@
     <ClCompile Include="..\..\..\..\test\message\version.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\alert.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\alert_formatted_payload.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\filter_clear.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\filter_load.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\filter_add.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\get_headers.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\memory_pool.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\merkle_block.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\reject.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
