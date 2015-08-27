@@ -34,8 +34,8 @@
 #include <bitcoin/bitcoin/utility/logger.hpp>
 #include <bitcoin/bitcoin/utility/string.hpp>
 #include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
-#include "../conditional_stack.hpp"
-#include "../evaluation_context.hpp"
+#include "../utility/conditional_stack.hpp"
+#include "../utility/evaluation_context.hpp"
 
 namespace libbitcoin {
 namespace chain {
@@ -45,8 +45,8 @@ static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{ 1 };
 static constexpr uint64_t op_counter_limit = 201;
 
-script script::factory_from_data(const data_chunk& data, bool with_length_prefix,
-    script::parse_mode mode)
+script script::factory_from_data(const data_chunk& data,
+    bool with_length_prefix, script::parse_mode mode)
 {
     script instance;
     instance.from_data(data, with_length_prefix, mode);
@@ -73,16 +73,22 @@ payment_type script::type() const
 {
     if (is_pubkey_type(operations))
         return payment_type::pubkey;
+
     if (is_pubkey_hash_type(operations))
         return payment_type::pubkey_hash;
+
     if (is_script_hash_type(operations))
         return payment_type::script_hash;
+
     if (is_stealth_info_type(operations))
         return payment_type::stealth_info;
+
     if (is_multisig_type(operations))
         return payment_type::multisig;
+
     if (is_pubkey_hash_sig_type(operations))
         return payment_type::pubkey_hash_sig;
+
     if (is_script_code_sig_type(operations))
         return payment_type::script_code_sig;
 
@@ -138,6 +144,7 @@ bool script::from_data(reader& source, bool with_length_prefix,
     auto result = true;
     data_chunk raw_script;
     reset();
+
     if (with_length_prefix)
     {
         auto script_length = source.read_variable_uint_little_endian();
@@ -196,6 +203,7 @@ void script::to_data(writer& sink, bool with_length_prefix) const
 uint64_t script::satoshi_content_size() const
 {
     uint64_t size = 0;
+
     if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
         size = operations[0].satoshi_size();
     else
@@ -220,10 +228,12 @@ bool script::from_string(const std::string& human_readable)
     operations.clear();
     const auto tokens = split(human_readable);
     auto clear = false;
+
     for (auto token = tokens.begin(); (token != tokens.end()); ++token)
     {
         opcode code;
         data_chunk data;
+
         if (*token == "[")
         {
             data_chunk raw_data;
@@ -266,6 +276,7 @@ bool script::from_string(const std::string& human_readable)
 std::string script::to_string() const
 {
     std::ostringstream value;
+
     for (auto it = operations.begin(); it != operations.end(); ++it)
     {
         if (it != operations.begin())
@@ -305,6 +316,7 @@ bool script::deserialize(const data_chunk& raw_script,
 bool script::parse(const data_chunk& raw_script)
 {
     auto success = true;
+
     if (raw_script.begin() != raw_script.end())
     {
         data_source istream(raw_script);
@@ -334,9 +346,9 @@ inline hash_digest one_hash()
 inline void nullify_input_sequences(transaction_input::list& inputs,
     uint32_t except_input)
 {
-    for (auto i = 0; i < inputs.size(); ++i)
-        if (i != except_input)
-            inputs[i].sequence = 0;
+    for (size_t index = 0; index < inputs.size(); ++index)
+        if (index != except_input)
+            inputs[index].sequence = 0;
 }
 
 hash_digest script::generate_signature_hash(transaction parent_tx,
@@ -650,10 +662,8 @@ bool op_toaltstack(evaluation_context& context)
     if (context.primary.size() < 1)
         return false;
 
-    data_chunk move_data = context.pop_primary();
-
+    const auto move_data = context.pop_primary();
     context.secondary.push_back(move_data);
-
     return true;
 }
 
@@ -682,8 +692,8 @@ bool op_2dup(evaluation_context& context)
     if (context.primary.size() < 2)
         return false;
 
-    auto dup_first = *(context.primary.end() - 2),
-        dup_second = *(context.primary.end() - 1);
+    const auto dup_first = *(context.primary.end() - 2);
+    const auto dup_second = *(context.primary.end() - 1);
 
     context.primary.push_back(dup_first);
     context.primary.push_back(dup_second);
@@ -695,9 +705,9 @@ bool op_3dup(evaluation_context& context)
     if (context.primary.size() < 3)
         return false;
 
-    const auto dup_first = *(context.primary.end() - 3),
-        dup_second = *(context.primary.end() - 2),
-        dup_third = *(context.primary.end() - 1);
+    const auto dup_first = *(context.primary.end() - 3);
+    const auto dup_second = *(context.primary.end() - 2);
+    const auto dup_third = *(context.primary.end() - 1);
 
     context.primary.push_back(dup_first);
     context.primary.push_back(dup_second);
@@ -728,12 +738,16 @@ bool op_2rot(evaluation_context& context)
     if (context.primary.size() < 6)
         return false;
 
-    data_chunk first = *(context.primary.end() - 6),
-        second = *(context.primary.end() - 5);
+    const auto first_position = context.primary.end() - 6;
+    const auto second_position = context.primary.end() - 5;
+    const auto third_position = context.primary.end() - 4;
 
-    context.primary.erase(context.primary.end() - 6, context.primary.end() - 4);
-    context.primary.push_back(first);
-    context.primary.push_back(second);
+    const auto dup_first = *(first_position);
+    const auto dup_second = *(second_position);
+
+    context.primary.erase(first_position, third_position);
+    context.primary.push_back(dup_first);
+    context.primary.push_back(dup_second);
     return true;
 }
 
@@ -850,7 +864,7 @@ bool op_size(evaluation_context& context)
     if (context.primary.size() < 1)
         return false;
 
-    script_number top_item_size(context.primary.back().size());
+    const script_number top_item_size(context.primary.back().size());
     context.primary.push_back(top_item_size.data());
     return true;
 }
@@ -943,7 +957,6 @@ bool op_not(evaluation_context& context)
         return false;
 
     script_number number;
-
     if (!number.set_data(context.pop_primary()))
         return false;
 
@@ -1147,7 +1160,7 @@ bool op_ripemd160(evaluation_context& context)
     if (context.primary.size() < 1)
         return false;
 
-    short_hash hash = ripemd160_hash(context.pop_primary());
+    const auto hash = ripemd160_hash(context.pop_primary());
     context.primary.push_back(to_data_chunk(hash));
     return true;
 }
@@ -1157,7 +1170,7 @@ bool op_sha1(evaluation_context& context)
     if (context.primary.size() < 1)
         return false;
 
-    short_hash hash = sha1_hash(context.pop_primary());
+    const auto hash = sha1_hash(context.pop_primary());
     context.primary.push_back(to_data_chunk(hash));
     return true;
 }
@@ -1167,7 +1180,7 @@ bool op_sha256(evaluation_context& context)
     if (context.primary.size() < 1)
         return false;
 
-    hash_digest hash = sha256_hash(context.pop_primary());
+    const auto hash = sha256_hash(context.pop_primary());
     context.primary.push_back(to_data_chunk(hash));
     return true;
 }
@@ -1177,7 +1190,7 @@ bool op_hash160(evaluation_context& context)
     if (context.primary.size() < 1)
         return false;
 
-    short_hash hash = bitcoin_short_hash(context.pop_primary());
+    const auto hash = bitcoin_short_hash(context.pop_primary());
     context.primary.push_back(to_data_chunk(hash));
     return true;
 }
@@ -1187,7 +1200,7 @@ bool op_hash256(evaluation_context& context)
     if (context.primary.size() < 1)
         return false;
 
-    hash_digest hash = bitcoin_hash(context.pop_primary());
+    const auto hash = bitcoin_hash(context.pop_primary());
     context.primary.push_back(to_data_chunk(hash));
     return true;
 }
@@ -1273,7 +1286,6 @@ bool op_checkmultisigverify(evaluation_context& context, const script& script,
         return false;
 
     context.primary.pop_back();
-
     const auto is_signature = [&signatures](const data_chunk& data)
     {
         return std::find(signatures.begin(), signatures.end(), data) != 
@@ -1298,7 +1310,7 @@ bool op_checkmultisigverify(evaluation_context& context, const script& script,
     // we always advance forwards until we either run out of pubkeys (fail)
     // or finish with our signatures (pass)
     auto pubkey_current = pubkeys.begin();
-    for (const data_chunk& signature: signatures)
+    for (const auto& signature: signatures)
     {
         for (auto pubkey_iterator = pubkey_current;;)
         {
@@ -1668,7 +1680,7 @@ bool next_step(const transaction& parent_tx, uint32_t input_index,
     operation::stack::const_iterator it, const script& script,
     evaluation_context& context)
 {
-    const operation& op = *it;
+    const auto& op = *it;
 
     if (op.data.size() > 520)
         return false;
@@ -1732,7 +1744,8 @@ bool evaluate(const transaction& parent_tx, uint32_t input_index,
 bool script::verify(const script& input_script, const script& output_script,
     const transaction& parent_tx, uint32_t input_index, bool bip16_enabled)
 {
-    evaluation_context input_context, output_context;
+    evaluation_context input_context;
+    evaluation_context output_context;
     if (!evaluate(parent_tx, input_index, input_script, input_context))
         return false;
 
