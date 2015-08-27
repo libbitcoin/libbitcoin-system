@@ -26,7 +26,7 @@
 namespace libbitcoin {
 
 dispatcher::dispatcher(threadpool& pool)
-  : ios_(pool.service()), strand_(ios_)
+  : service_(pool.service()), strand_(service_)
 {
 }
 

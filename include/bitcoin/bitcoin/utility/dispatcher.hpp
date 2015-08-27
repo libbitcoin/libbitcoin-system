@@ -21,28 +21,33 @@
 #define LIBBITCOIN_DISPATCHER_HPP
 
 #include <functional>
-#include <thread>
-#include <boost/asio.hpp>
+#include <string>
+#include <utility>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/utility/delegates.hpp>
+#include <bitcoin/bitcoin/utility/synchronizer.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 
-template <typename Handler>
-struct dispatcher_dispatcher
-{
-    Handler handler;
-    boost::asio::io_service::strand& strand;
+using std::placeholders::_1;
 
-    template <typename... Args>
-    void operator()(Args&&... args)
-    {
-        strand.dispatch(std::bind(handler, std::forward<Args>(args)...));
-    }
-};
+#define FORWARD_ARGS(args) \
+    std::forward<Args>(args)...
+#define FORWARD_HANDLER(handler) \
+    std::forward<Handler>(handler)
+#define BIND_ARGS(args) \
+    std::bind(FORWARD_ARGS(args))
+#define BIND_HANDLER(handler, args) \
+    std::bind(FORWARD_HANDLER(handler), FORWARD_ARGS(args))
+#define BIND_ELEMENT(args, call, element) \
+    std::bind(FORWARD_ARGS(args), call, element)
 
 /**
  * Convenience class for objects wishing to synchronize operations.
+ * If the ios service is stopped jobs will not be dispatched.
  */
 class BC_API dispatcher
 {
@@ -50,56 +55,129 @@ public:
     dispatcher(threadpool& pool);
 
     /**
-     * Returns a new handler that guarantees that the handler it encapsulates
-     * will not execute concurrently with other handlers on the strand. Does
-     * not guarantee sequential calling order.
+     * Posts a job to the service. Concurrent and not ordered.
+     */
+    template <typename... Args>
+    void concurrent(Args&&... args)
+    {
+        service_.post(BIND_ARGS(args));
+    }
+
+    /**
+     * Post a job to the strand. Ordered and not concurrent.
+     */
+    template <typename... Args>
+    void ordered(Args&&... args)
+    {
+        strand_.post(BIND_ARGS(args));
+    }
+
+    /**
+     * Posts a strand-wrapped job to the service. Not ordered or concurrent.
+     * The wrap provides non-concurrency, order is prevented by service post.
+     */
+    template <typename... Args>
+    void unordered(Args&&... args)
+    {
+        service_.post(strand_.wrap(BIND_ARGS(args)));
+    }
+
+    /**
+     * Executes the job against each member of a collection concurrently.
+     */
+    template <typename Element, typename Handler, typename... Args>
+    void parallel(const std::vector<Element>& collection,
+        const std::string& name, Handler&& handler, Args&&... args)
+    {
+        const auto call = synchronize(FORWARD_HANDLER(handler),
+            collection.size(), name);
+
+        for (const auto& element: collection)
+            concurrent(BIND_ELEMENT(args, std::ref(element), call));
+    }
+
+    /**
+     * Disperses the job against each member of a collection without order.
+     */
+    template <typename Element, typename Handler, typename... Args>
+    void disperse(const std::vector<Element>& collection,
+        const std::string& name, Handler&& handler, Args&&... args)
+    {
+        const auto call = synchronize(FORWARD_HANDLER(handler),
+            collection.size(), name);
+
+        for (const auto& element: collection)
+            unordered(BIND_ELEMENT(args, std::ref(element), call));
+    }
+
+    /**
+     * Disperses the job against each member of a collection with order.
+     */
+    template <typename Element, typename Handler, typename... Args>
+    void serialize(const std::vector<Element>& collection,
+        const std::string& name, Handler&& handler, Args&&... args)
+    {
+        const auto call = synchronize(FORWARD_HANDLER(handler),
+            collection.size(), name);
+
+        for (const auto& element: collection)
+            ordered(BIND_ELEMENT(args, std::ref(element), call));
+    }
+
+    /**
+     * Returns a delegate that will post the job via the service.
      */
     template <typename Handler, typename... Args>
-    auto sync(Handler&& handler, Args&&... args) ->
-        dispatcher_dispatcher<decltype(
-            std::bind(std::forward<Handler>(handler),
-            std::forward<Args>(args)...))>
+    auto concurrent_delegate(Handler&& handler, Args&&... args) ->
+        delegate::concurrent<decltype(BIND_HANDLER(handler, args))>
     {
-        auto bound = std::bind(std::forward<Handler>(handler),
-            std::forward<Args>(args)...);
-        return { bound, strand_ };
+        return
+        {
+            BIND_HANDLER(handler, args),
+            service_
+        };
     }
 
     /**
-     * Guarantees that any handlers passed to it will not execute concurrently
-     * with other handlers on the strand. Guarantees sequential calling order.
+     * Returns a delegate that will post the job via the strand.
      */
-    template <typename... Args>
-    void queue(Args&&... args)
+    template <typename Handler, typename... Args>
+    auto ordered_delegate(Handler&& handler, Args&&... args) ->
+        delegate::ordered<decltype(BIND_HANDLER(handler, args))>
     {
-        strand_.post(std::bind(std::forward<Args>(args)...));
+        return
+        {
+            BIND_HANDLER(handler, args),
+            strand_
+        };
     }
 
     /**
-     * Guarantees that any handlers passed to it will not execute concurrently
-     * with other handlers on the strand. Does not guarantee sequential calling
-     * order.
+     * Returns a delegate that will post a wrapped job via the service.
      */
-    template <typename... Args>
-    void randomly_queue(Args&&... args)
+    template <typename Handler, typename... Args>
+    auto unordered_delegate(Handler&& handler, Args&&... args) ->
+        delegate::unordered<decltype(BIND_HANDLER(handler, args))>
     {
-        ios_.post(strand_.wrap(std::bind(std::forward<Args>(args)...)));
-    }
-
-    /**
-     * Offers no synchronization guarantees (i.e. may execute concurrently with
-     * other posts).
-     */
-    template <typename... Args>
-    void async(Args&&... args)
-    {
-        ios_.post(std::bind(std::forward<Args>(args)...));
+        return
+        {
+            BIND_HANDLER(handler, args),
+            service_,
+            strand_
+        };
     }
 
 private:
-    boost::asio::io_service& ios_;
-    boost::asio::io_service::strand strand_;
+    asio::service& service_;
+    asio::service::strand strand_;
 };
+
+#undef FORWARD_ARGS
+#undef FORWARD_HANDLER
+#undef BIND_ARGS
+#undef BIND_HANDLER
+#undef BIND_ELEMENT
+
 
 } // namespace libbitcoin
 
