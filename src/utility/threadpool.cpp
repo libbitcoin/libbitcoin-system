@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
+#include <memory>
 #include <new>
 #include <thread>
 #include <bitcoin/bitcoin/network/asio.hpp>
