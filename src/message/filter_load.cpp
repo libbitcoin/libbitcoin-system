@@ -52,11 +52,18 @@ filter_load filter_load::factory_from_data(reader& source)
 
 bool filter_load::is_valid() const
 {
-    return true;
+    return !filter.empty() ||
+        (hash_functions != 0) ||
+        (tweak != 0) ||
+        (flags != 0x00);
 }
 
 void filter_load::reset()
 {
+    filter.clear();
+    hash_functions = 0;
+    tweak = 0;
+    flags = 0x00;
 }
 
 bool filter_load::from_data(const data_chunk& data)
@@ -123,6 +130,26 @@ void filter_load::to_data(writer& sink) const
 uint64_t filter_load::satoshi_size() const
 {
     return 1 + 4 + 4 + variable_uint_size(filter.size()) + filter.size();
+}
+
+bool operator==(const filter_load& msg_a,
+    const filter_load& msg_b)
+{
+    bool result = (msg_a.filter.size() == msg_b.filter.size()) &&
+        (msg_a.hash_functions == msg_b.hash_functions) &&
+        (msg_a.tweak == msg_b.tweak) &&
+        (msg_a.flags == msg_b.flags);
+
+    for (data_chunk::size_type i = 0; i < msg_a.filter.size() && result; i++)
+        result = (msg_a.filter[i] == msg_b.filter[i]);
+
+    return result;
+}
+
+bool operator!=(const filter_load& msg_a,
+    const filter_load& msg_b)
+{
+    return !(msg_a == msg_b);
 }
 
 } // end message

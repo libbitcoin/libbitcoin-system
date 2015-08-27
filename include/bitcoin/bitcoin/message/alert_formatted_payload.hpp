@@ -17,38 +17,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_REJECT_HPP
-#define LIBBITCOIN_MESSAGE_REJECT_HPP
+#ifndef LIBBITCOIN_MESSAGE_ALERT_FORMATTED_PAYLOAD_HPP
+#define LIBBITCOIN_MESSAGE_ALERT_FORMATTED_PAYLOAD_HPP
 
-#include <cstdint>
 #include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-class BC_API reject
+class BC_API alert_formatted_payload
 {
 public:
-    enum class error_code : uint8_t
-    {
-        undefined = 0x00,
-        malformed = 0x01,
-        invalid = 0x10,
-        obsolete = 0x11,
-        duplicate = 0x12,
-        nonstandard = 0x40,
-        dust = 0x41,
-        insufficient_fee = 0x42,
-        checkpoint = 0x43
-    };
-
-    static reject factory_from_data(const data_chunk& data);
-    static reject factory_from_data(std::istream& stream);
-    static reject factory_from_data(reader& source);
+    static alert_formatted_payload factory_from_data(const data_chunk& data);
+    static alert_formatted_payload factory_from_data(std::istream& stream);
+    static alert_formatted_payload factory_from_data(reader& source);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -60,16 +47,26 @@ public:
     void reset();
     uint64_t satoshi_size() const;
 
-    static const std::string satoshi_command;
-    std::string message;
-    error_code code;
-    std::string reason;
-    hash_digest data;
-
-private:
-    static error_code error_code_from_byte(const uint8_t byte);
-    static uint8_t error_code_to_byte(const error_code code);
+    uint32_t version;
+    uint64_t relay_until;
+    uint64_t expiration;
+    uint32_t id;
+    uint32_t cancel;
+    std::vector<uint32_t> set_cancel;
+    uint32_t min_version;
+    uint32_t max_version;
+    std::vector<std::string> set_sub_version;
+    uint32_t priority;
+    std::string comment;
+    std::string status_bar;
+    std::string reserved;
 };
+
+BC_API bool operator==(const alert_formatted_payload& msg_a,
+    const alert_formatted_payload& msg_b);
+
+BC_API bool operator!=(const alert_formatted_payload& msg_a,
+    const alert_formatted_payload& msg_b);
 
 } // end message
 } // end libbitcoin

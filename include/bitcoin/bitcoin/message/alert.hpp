@@ -17,26 +17,45 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_GET_HEADERS_HPP
-#define LIBBITCOIN_MESSAGE_GET_HEADERS_HPP
+#ifndef LIBBITCOIN_MESSAGE_ALERT_HPP
+#define LIBBITCOIN_MESSAGE_ALERT_HPP
 
-#include <bitcoin/bitcoin/message/get_blocks.hpp>
+#include <istream>
+#include <string>
+#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/reader.hpp>
+#include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace message {
 
-class BC_API get_headers : public get_blocks
+class BC_API alert
 {
 public:
-    static get_headers factory_from_data(const data_chunk& data);
-    static get_headers factory_from_data(std::istream& stream);
-    static get_headers factory_from_data(reader& source);
+    static alert factory_from_data(const data_chunk& data);
+    static alert factory_from_data(std::istream& stream);
+    static alert factory_from_data(reader& source);
 
-    get_headers();
-    get_headers(const block_locator start_hashes, const hash_digest hash_stop);
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t satoshi_size() const;
 
     static const std::string satoshi_command;
+
+    data_chunk payload;
+    data_chunk signature;
 };
+
+BC_API bool operator==(const alert& msg_a, const alert& msg_b);
+
+BC_API bool operator!=(const alert& msg_a, const alert& msg_b);
 
 } // end message
 } // end libbitcoin
