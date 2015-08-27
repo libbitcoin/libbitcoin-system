@@ -36,12 +36,8 @@ src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFL
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
-    src/conditional_stack.cpp \
-    src/conditional_stack.hpp \
     src/constants.cpp \
     src/error.cpp \
-    src/evaluation_context.cpp \
-    src/evaluation_context.hpp \
     src/chain/block.cpp \
     src/chain/block_header.cpp \
     src/chain/opcode.cpp \
@@ -138,8 +134,12 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
     src/utility/binary.cpp \
+    src/utility/conditional_stack.cpp \
+    src/utility/conditional_stack.hpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
+    src/utility/evaluation_context.cpp \
+    src/utility/evaluation_context.hpp \
     src/utility/istream_reader.cpp \
     src/utility/logger.cpp \
     src/utility/ostream_writer.cpp \

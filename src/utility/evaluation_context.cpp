@@ -17,29 +17,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONDITIONAL_STACK_HPP
-#define LIBBITCOIN_CONDITIONAL_STACK_HPP
+#include "evaluation_context.hpp"
 
-#include <vector>
-#include <bitcoin/bitcoin/chain/operation.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-class conditional_stack
+data_chunk evaluation_context::pop_primary()
 {
-public:
-    bool closed() const;
-    bool has_failed_branches() const;
-    void clear();
-    void open(bool value);
-    void else_();
-    void close();
-
-private:
-    std::vector<bool> stack_;
-};
-
+    const auto value = primary.back();
+    primary.pop_back();
+    return value;
 }
 
-#endif
+} // namespace libbitcoin

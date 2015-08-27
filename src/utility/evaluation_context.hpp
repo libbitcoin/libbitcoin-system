@@ -20,6 +20,8 @@
 #ifndef LIBBITCOIN_EVALUATION_CONTEXT_HPP
 #define LIBBITCOIN_EVALUATION_CONTEXT_HPP
 
+#include <algorithm>
+#include <cstdint>
 #include <bitcoin/bitcoin/chain/operation.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include "conditional_stack.hpp"

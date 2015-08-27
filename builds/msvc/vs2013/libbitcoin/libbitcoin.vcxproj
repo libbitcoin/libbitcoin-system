@@ -80,7 +80,6 @@
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction_input.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction_output.cpp" />
-    <ClCompile Include="..\..\..\..\src\conditional_stack.cpp" />
     <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\config\btc256.cpp" />
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
@@ -90,7 +89,6 @@
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
     <ClCompile Include="..\..\..\..\src\constants.cpp" />
     <ClCompile Include="..\..\..\..\src\error.cpp" />
-    <ClCompile Include="..\..\..\..\src\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base10.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base16.cpp" />
     <ClCompile Include="..\..\..\..\src\formats\base58.cpp" />
@@ -159,9 +157,11 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\conditional_stack.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\evaluation_context.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\istream_reader.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\logger.cpp" />
@@ -307,8 +307,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri.hpp" />
-    <ClInclude Include="..\..\..\..\src\conditional_stack.hpp" />
-    <ClInclude Include="..\..\..\..\src\evaluation_context.hpp" />
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h" />
     <ClInclude Include="..\..\..\..\src\math\external\hmac_sha256.h" />
@@ -320,6 +318,8 @@
     <ClInclude Include="..\..\..\..\src\math\external\sha256.h" />
     <ClInclude Include="..\..\..\..\src\math\external\sha512.h" />
     <ClInclude Include="..\..\..\..\src\math\external\zeroize.h" />
+    <ClInclude Include="..\..\..\..\src\utility\conditional_stack.hpp" />
+    <ClInclude Include="..\..\..\..\src\utility\evaluation_context.hpp" />
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
