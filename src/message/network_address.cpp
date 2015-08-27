@@ -59,8 +59,10 @@ network_address network_address::factory_from_data(reader& source,
 
 bool network_address::is_valid() const
 {
-    return (timestamp != 0) || (services != 0) || (port != 0) ||
-        (ip != null_address);
+    return (timestamp != 0)
+        || (services != 0)
+        || (port != 0)
+        || (ip != null_address);
 }
 
 void network_address::reset()

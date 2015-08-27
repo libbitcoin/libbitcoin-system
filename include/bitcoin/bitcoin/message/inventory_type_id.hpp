@@ -36,6 +36,7 @@ enum class inventory_type_id
 };
 
 BC_API uint32_t inventory_type_to_number(inventory_type_id inv_type);
+
 BC_API inventory_type_id inventory_type_from_number(uint32_t raw_type);
 
 } // namspace message

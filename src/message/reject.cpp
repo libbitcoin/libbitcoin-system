@@ -149,94 +149,52 @@ uint64_t reject::satoshi_size() const
 
 reject::error_code reject::error_code_from_byte(const uint8_t byte)
 {
-    error_code result = error_code::undefined;
-
     switch (byte)
     {
         case 0x01:
-            result = error_code::malformed;
-            break;
-
+            return error_code::malformed;
         case 0x10:
-            result = error_code::invalid;
-            break;
-
+            return error_code::invalid;
         case 0x11:
-            result = error_code::obsolete;
-            break;
-
+            return error_code::obsolete;
         case 0x12:
-            result = error_code::duplicate;
-            break;
-
+            return error_code::duplicate;
         case 0x40:
-            result = error_code::nonstandard;
-            break;
-
+            return error_code::nonstandard;
         case 0x41:
-            result = error_code::dust;
-            break;
-
+            return error_code::dust;
         case 0x42:
-            result = error_code::insufficient_fee;
-            break;
-
+            return error_code::insufficient_fee;
         case 0x43:
-            result = error_code::checkpoint;
-            break;
-
+            return error_code::checkpoint;
         default:
-            result = error_code::undefined;
-            break;
+            return error_code::undefined;
     }
-
-    return result;
 }
 
 uint8_t reject::error_code_to_byte(const error_code code)
 {
-    uint8_t result = 0x00;
-
     switch (code)
     {
         case error_code::malformed:
-            result = 0x01;
-            break;
-
+            return 0x01;
         case error_code::invalid:
-            result = 0x10;
-            break;
-
+            return 0x10;
         case error_code::obsolete:
-            result = 0x11;
-            break;
-
+            return 0x11;
         case error_code::duplicate:
-            result = 0x12;
-            break;
-
+            return 0x12;
         case error_code::nonstandard:
-            result = 0x40;
-            break;
-
+            return 0x40;
         case error_code::dust:
-            result = 0x41;
-            break;
-
+            return 0x41;
         case error_code::insufficient_fee:
-            result = 0x42;
-            break;
-
+            return 0x42;
         case error_code::checkpoint:
-            result = 0x43;
-            break;
-
+            return 0x43;
         default:
-            result = 0x00;
-            break;
+            return 0x00;
     }
-
-    return result;
 }
 
 } // end message

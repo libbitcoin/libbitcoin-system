@@ -57,11 +57,9 @@ public:
     data_chunk flags;
 };
 
-BC_API bool operator==(const merkle_block& block_a,
-    const merkle_block& block_b);
+BC_API bool operator==(const merkle_block& left, const merkle_block& right);
 
-BC_API bool operator!=(const merkle_block& block_a,
-    const merkle_block& block_b);
+BC_API bool operator!=(const merkle_block& left, const merkle_block& right);
 
 } // end message
 } // end libbitcoin

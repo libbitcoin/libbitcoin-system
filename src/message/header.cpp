@@ -52,7 +52,9 @@ header header::factory_from_data(reader& source)
 
 bool header::is_valid() const
 {
-    return (magic != 0) || (payload_length != 0) || (checksum != 0)
+    return (magic != 0)
+        || (payload_length != 0)
+        || (checksum != 0)
         || !command.empty();
 }
 

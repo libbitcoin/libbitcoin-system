@@ -52,10 +52,10 @@ filter_load filter_load::factory_from_data(reader& source)
 
 bool filter_load::is_valid() const
 {
-    return !filter.empty() ||
-        (hash_functions != 0) ||
-        (tweak != 0) ||
-        (flags != 0x00);
+    return !filter.empty()
+        || (hash_functions != 0)
+        || (tweak != 0)
+        || (flags != 0x00);
 }
 
 void filter_load::reset()
@@ -132,24 +132,24 @@ uint64_t filter_load::satoshi_size() const
     return 1 + 4 + 4 + variable_uint_size(filter.size()) + filter.size();
 }
 
-bool operator==(const filter_load& msg_a,
-    const filter_load& msg_b)
+bool operator==(const filter_load& left,
+    const filter_load& right)
 {
-    bool result = (msg_a.filter.size() == msg_b.filter.size()) &&
-        (msg_a.hash_functions == msg_b.hash_functions) &&
-        (msg_a.tweak == msg_b.tweak) &&
-        (msg_a.flags == msg_b.flags);
+    bool result = (left.filter.size() == right.filter.size()) &&
+        (left.hash_functions == right.hash_functions) &&
+        (left.tweak == right.tweak) &&
+        (left.flags == right.flags);
 
-    for (data_chunk::size_type i = 0; i < msg_a.filter.size() && result; i++)
-        result = (msg_a.filter[i] == msg_b.filter[i]);
+    for (data_chunk::size_type i = 0; i < left.filter.size() && result; i++)
+        result = (left.filter[i] == right.filter[i]);
 
     return result;
 }
 
-bool operator!=(const filter_load& msg_a,
-    const filter_load& msg_b)
+bool operator!=(const filter_load& left,
+    const filter_load& right)
 {
-    return !(msg_a == msg_b);
+    return !(left == right);
 }
 
 } // end message

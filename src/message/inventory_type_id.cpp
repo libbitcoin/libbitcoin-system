@@ -30,10 +30,8 @@ uint32_t inventory_type_to_number(inventory_type_id inv_type)
         case inventory_type_id::none:
         default:
             return 0;
-
         case inventory_type_id::transaction:
             return 1;
-
         case inventory_type_id::block:
             return 2;
     }

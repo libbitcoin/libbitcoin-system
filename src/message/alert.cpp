@@ -137,23 +137,23 @@ uint64_t alert::satoshi_size() const
         variable_uint_size(signature.size()) + signature.size();
 }
 
-bool operator==(const alert& msg_a, const alert& msg_b)
+bool operator==(const alert& left, const alert& right)
 {
-    bool result = (msg_a.payload.size() == msg_b.payload.size()) &&
-        (msg_a.signature.size() == msg_b.signature.size());
+    bool result = (left.payload.size() == right.payload.size()) &&
+        (left.signature.size() == right.signature.size());
 
-    for (data_chunk::size_type i = 0; i < msg_a.payload.size() && result; i++)
-        result = (msg_a.payload[i] == msg_b.payload[i]);
+    for (data_chunk::size_type i = 0; i < left.payload.size() && result; i++)
+        result = (left.payload[i] == right.payload[i]);
 
-    for (data_chunk::size_type i = 0; i < msg_a.signature.size() && result; i++)
-        result = (msg_a.signature[i] == msg_b.signature[i]);
+    for (data_chunk::size_type i = 0; i < left.signature.size() && result; i++)
+        result = (left.signature[i] == right.signature[i]);
 
     return result;
 }
 
-bool operator!=(const alert& msg_a, const alert& msg_b)
+bool operator!=(const alert& left, const alert& right)
 {
-    return !(msg_a == msg_b);
+    return !(left == right);
 }
 
 } // end message

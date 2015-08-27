@@ -53,19 +53,19 @@ alert_formatted_payload alert_formatted_payload::factory_from_data(
 
 bool alert_formatted_payload::is_valid() const
 {
-    return (version != 0) ||
-        (relay_until != 0) ||
-        (expiration != 0) ||
-        (id != 0) ||
-        (cancel != 0) ||
-        !set_cancel.empty() ||
-        (min_version != 0) ||
-        (max_version != 0) ||
-        !set_sub_version.empty() ||
-        (priority != 0) ||
-        !comment.empty() ||
-        !status_bar.empty() ||
-        !reserved.empty();
+    return (version != 0)
+        || (relay_until != 0)
+        || (expiration != 0)
+        || (id != 0)
+        || (cancel != 0)
+        || !set_cancel.empty()
+        || (min_version != 0)
+        || (max_version != 0)
+        || !set_sub_version.empty()
+        || (priority != 0)
+        || !comment.empty()
+        || !status_bar.empty()
+        || !reserved.empty();
 }
 
 void alert_formatted_payload::reset()
@@ -184,36 +184,36 @@ uint64_t alert_formatted_payload::satoshi_size() const
     return size;
 }
 
-bool operator==(const alert_formatted_payload& msg_a,
-    const alert_formatted_payload& msg_b)
+bool operator==(const alert_formatted_payload& left,
+    const alert_formatted_payload& right)
 {
-    bool result = (msg_a.version == msg_b.version) &&
-        (msg_a.relay_until == msg_b.relay_until) &&
-        (msg_a.expiration == msg_b.expiration) &&
-        (msg_a.id == msg_b.id) &&
-        (msg_a.cancel == msg_b.cancel) &&
-        (msg_a.set_cancel.size() == msg_b.set_cancel.size()) &&
-        (msg_a.min_version == msg_b.min_version) &&
-        (msg_a.max_version == msg_b.max_version) &&
-        (msg_a.set_sub_version.size() == msg_b.set_sub_version.size()) &&
-        (msg_a.priority == msg_b.priority) &&
-        (msg_a.comment == msg_b.comment) &&
-        (msg_a.status_bar == msg_b.status_bar) &&
-        (msg_a.reserved == msg_b.reserved);
+    bool result = (left.version == right.version) &&
+        (left.relay_until == right.relay_until) &&
+        (left.expiration == right.expiration) &&
+        (left.id == right.id) &&
+        (left.cancel == right.cancel) &&
+        (left.set_cancel.size() == right.set_cancel.size()) &&
+        (left.min_version == right.min_version) &&
+        (left.max_version == right.max_version) &&
+        (left.set_sub_version.size() == right.set_sub_version.size()) &&
+        (left.priority == right.priority) &&
+        (left.comment == right.comment) &&
+        (left.status_bar == right.status_bar) &&
+        (left.reserved == right.reserved);
 
-    for (std::vector<uint32_t>::size_type i = 0; i < msg_a.set_cancel.size() && result; i++)
-        result = (msg_a.set_cancel[i] == msg_b.set_cancel[i]);
+    for (std::vector<uint32_t>::size_type i = 0; i < left.set_cancel.size() && result; i++)
+        result = (left.set_cancel[i] == right.set_cancel[i]);
 
-    for (std::vector<std::string>::size_type i = 0; i < msg_a.set_sub_version.size() && result; i++)
-        result = (msg_a.set_sub_version[i] == msg_b.set_sub_version[i]);
+    for (std::vector<std::string>::size_type i = 0; i < left.set_sub_version.size() && result; i++)
+        result = (left.set_sub_version[i] == right.set_sub_version[i]);
 
     return result;
 }
 
-bool operator!=(const alert_formatted_payload& msg_a,
-    const alert_formatted_payload& msg_b)
+bool operator!=(const alert_formatted_payload& left,
+    const alert_formatted_payload& right)
 {
-    return !(msg_a == msg_b);
+    return !(left == right);
 }
 
 } // end message

@@ -52,11 +52,9 @@ public:
     data_chunk data;
 };
 
-BC_API bool operator==(const filter_add& msg_a,
-    const filter_add& msg_b);
+BC_API bool operator==(const filter_add& left,  const filter_add& right);
 
-BC_API bool operator!=(const filter_add& msg_a,
-    const filter_add& msg_b);
+BC_API bool operator!=(const filter_add& left, const filter_add& right);
 
 } // end message
 } // end libbitcoin

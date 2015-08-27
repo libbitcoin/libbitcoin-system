@@ -55,11 +55,9 @@ public:
     uint8_t flags;
 };
 
-BC_API bool operator==(const filter_load& msg_a,
-    const filter_load& msg_b);
+BC_API bool operator==(const filter_load& left, const filter_load& right);
 
-BC_API bool operator!=(const filter_load& msg_a,
-    const filter_load& msg_b);
+BC_API bool operator!=(const filter_load& left, const filter_load& right);
 
 } // end message
 } // end libbitcoin

@@ -54,6 +54,7 @@ public:
 };
 
 BC_API bool operator==(const inventory& left, const inventory& right);
+
 BC_API bool operator!=(const inventory& left, const inventory& right);
 
 } // namspace message

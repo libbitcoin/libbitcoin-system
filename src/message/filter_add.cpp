@@ -120,21 +120,21 @@ uint64_t filter_add::satoshi_size() const
     return variable_uint_size(data.size()) + data.size();
 }
 
-bool operator==(const filter_add& msg_a,
-    const filter_add& msg_b)
+bool operator==(const filter_add& left,
+    const filter_add& right)
 {
-    bool result = (msg_a.data.size() == msg_b.data.size());
+    bool result = (left.data.size() == right.data.size());
 
-    for (data_chunk::size_type i = 0; i < msg_a.data.size() && result; i++)
-        result = (msg_a.data[i] == msg_b.data[i]);
+    for (data_chunk::size_type i = 0; i < left.data.size() && result; i++)
+        result = (left.data[i] == right.data[i]);
 
     return result;
 }
 
-bool operator!=(const filter_add& msg_a,
-    const filter_add& msg_b)
+bool operator!=(const filter_add& left,
+    const filter_add& right)
 {
-    return !(msg_a == msg_b);
+    return !(left == right);
 }
 
 } // end message

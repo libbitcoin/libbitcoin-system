@@ -57,6 +57,7 @@ public:
 
 BC_API bool operator==(const inventory_vector& left,
     const inventory_vector& right);
+
 BC_API bool operator!=(const inventory_vector& left,
     const inventory_vector& right);
 

@@ -53,9 +53,9 @@ public:
     data_chunk signature;
 };
 
-BC_API bool operator==(const alert& msg_a, const alert& msg_b);
+BC_API bool operator==(const alert& left, const alert& right);
 
-BC_API bool operator!=(const alert& msg_a, const alert& msg_b);
+BC_API bool operator!=(const alert& left, const alert& right);
 
 } // end message
 } // end libbitcoin

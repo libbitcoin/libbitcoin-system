@@ -50,6 +50,7 @@ public:
 };
 
 BC_API bool operator==(const ping_pong& left, const ping_pong& right);
+
 BC_API bool operator!=(const ping_pong& left, const ping_pong& right);
 
 class BC_API ping

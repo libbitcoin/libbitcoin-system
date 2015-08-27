@@ -62,11 +62,11 @@ public:
     std::string reserved;
 };
 
-BC_API bool operator==(const alert_formatted_payload& msg_a,
-    const alert_formatted_payload& msg_b);
+BC_API bool operator==(const alert_formatted_payload& left,
+    const alert_formatted_payload& right);
 
-BC_API bool operator!=(const alert_formatted_payload& msg_a,
-    const alert_formatted_payload& msg_b);
+BC_API bool operator!=(const alert_formatted_payload& left,
+    const alert_formatted_payload& right);
 
 } // end message
 } // end libbitcoin
