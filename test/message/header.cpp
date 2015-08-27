@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(to_data_checksum_variations)
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
     data_chunk raw{ 0xab, 0xcd };
-    message::header instance;
+    message::header instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
 }

@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE(merkle_block_tests)
 BOOST_AUTO_TEST_CASE(from_data_fails)
 {
     const data_chunk data{ 10 };
-    message::merkle_block instance;
+    message::merkle_block instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());

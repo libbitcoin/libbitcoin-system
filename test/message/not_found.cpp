@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(not_found_tests)
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
     const data_chunk raw{ 0xab, 0xcd };
-    message::not_found instance;
+    message::not_found instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
 }

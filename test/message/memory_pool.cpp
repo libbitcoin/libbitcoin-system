@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(memory_pool_tests)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    const message::memory_pool expected;
+    const message::memory_pool expected{};
     const auto data = expected.to_data();
     const auto result = message::memory_pool::factory_from_data(data);
 
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    const message::memory_pool expected;
+    const message::memory_pool expected{};
     const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     const auto result = message::memory_pool::factory_from_data(istream);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    const message::memory_pool expected;
+    const message::memory_pool expected{};
     const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);

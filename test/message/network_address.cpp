@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_SUITE(network_address_tests)
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
     const data_chunk raw{ 1 };
-    message::network_address instance;
+    message::network_address instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw, false));
 }

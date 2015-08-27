@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(ping_pong_tests)
 BOOST_AUTO_TEST_CASE(ping_pong_from_data_insufficient_bytes_failure)
 {
     const data_chunk raw{ 1 };
-    message::ping_pong instance;
+    message::ping_pong instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
 }

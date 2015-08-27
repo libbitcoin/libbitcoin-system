@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_SUITE(reject_tests)
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
     const data_chunk raw{ 0xab };
-    message::reject instance;
+    message::reject instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
 }

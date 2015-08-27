@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(verack_tests)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    const message::verack expected;
+    const message::verack expected{};
     const auto data = expected.to_data();
     const auto result = message::verack::factory_from_data(data);
 
@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    const message::verack expected;
+    const message::verack expected{};
     const auto data = expected.to_data();
     data_source istream(data);
     const auto result = message::verack::factory_from_data(istream);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    const message::verack expected;
+    const message::verack expected{};
     const auto data = expected.to_data();
     data_source istream(data);
     istream_reader source(istream);

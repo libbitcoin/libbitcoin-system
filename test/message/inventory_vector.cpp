@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(inventory_vector_tests)
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
     const data_chunk raw{ 1 };
-    message::inventory_vector instance;
+    message::inventory_vector instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
 }
