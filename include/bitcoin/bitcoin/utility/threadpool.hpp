@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_THREADPOOL_HPP
 #define LIBBITCOIN_THREADPOOL_HPP
 
+#include <memory>
 #include <functional>
 #include <thread>
 #include <bitcoin/bitcoin/define.hpp>
@@ -104,13 +105,13 @@ public:
     template <typename... Args>
     void push(Args&&... args)
     {
-        ios_.post(std::bind(std::forward<Args>(args)...));
+        service_.post(std::bind(std::forward<Args>(args)...));
     }
 
     template <typename... Args>
     void dispatch(Args&&... args)
     {
-        ios_.dispatch(std::bind(std::forward<Args>(args)...));
+        service_.dispatch(std::bind(std::forward<Args>(args)...));
     }
 
     /**
@@ -126,9 +127,9 @@ public:
 private:
     void spawn_once(thread_priority priority=thread_priority::normal);
 
-    asio::service ios_;
-    asio::service::work* work_;
+    asio::service service_;
     std::vector<std::thread> threads_;
+    std::unique_ptr<asio::service::work> work_;
 };
 
 } // namespace libbitcoin

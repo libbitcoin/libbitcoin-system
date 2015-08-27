@@ -21,12 +21,12 @@
 
 #include <new>
 #include <thread>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
 
 threadpool::threadpool(size_t number_threads, thread_priority priority)
-  : work_(nullptr)
 {
     spawn(number_threads, priority);
 }
@@ -44,13 +44,14 @@ void threadpool::spawn(size_t number_threads, thread_priority priority)
 
 void threadpool::spawn_once(thread_priority priority)
 {
-    if (work_ == nullptr)
-        work_ = new boost::asio::io_service::work(ios_);
+    // Work prevents the service from running out of work and terminating.
+    if (!work_)
+        work_ = std::make_unique<asio::service::work>(service_);
 
     const auto action = [this, priority]
     {
         set_thread_priority(priority);
-        ios_.run();
+        service_.run();
     };
 
     threads_.push_back(std::thread(action));
@@ -58,32 +59,35 @@ void threadpool::spawn_once(thread_priority priority)
 
 void threadpool::stop()
 {
-    ios_.stop();
+    // TODO: don't call this on shutdown, instead signal the application.
+    // Signals the service to stop. Calls will return immediately without
+    // invoking any handlers.
+    service_.stop();
 }
 
 void threadpool::shutdown()
 {
-    if (work_ != nullptr)
-        delete work_;
-
+    // This does not terminate outstanding calls, it just allows service to
+    // terminate once all outstanding calls are complete.
     work_ = nullptr;
 }
 
 void threadpool::join()
 {
+    // TODO: join the threadpool on destruct?
     for (auto& thread: threads_)
         if (thread.joinable())
             thread.join();
 }
 
-boost::asio::io_service& threadpool::service()
+asio::service& threadpool::service()
 {
-    return ios_;
+    return service_;
 }
 
-const boost::asio::io_service& threadpool::service() const
+const asio::service& threadpool::service() const
 {
-    return ios_;
+    return service_;
 }
 
 } // namespace libbitcoin
