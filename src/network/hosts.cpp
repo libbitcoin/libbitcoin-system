@@ -87,9 +87,8 @@ size_t hosts::size()
 
 void hosts::load(load_handler handle_load)
 {
-    dispatch_.unordered(
-        std::bind(&hosts::do_load,
-            this, file_path_.string(), handle_load));
+    dispatch_.unordered(&hosts::do_load,
+        this, file_path_.string(), handle_load);
 }
 
 void hosts::do_load(const path& path, load_handler handle_load)
@@ -115,9 +114,8 @@ void hosts::do_load(const path& path, load_handler handle_load)
 
 void hosts::save(save_handler handle_save)
 {
-    dispatch_.ordered(
-        std::bind(&hosts::do_save,
-            this, file_path_.string(), handle_save));
+    dispatch_.ordered(&hosts::do_save,
+        this, file_path_.string(), handle_save);
 }
 
 void hosts::do_save(const path& path, save_handler handle_save)
@@ -138,9 +136,8 @@ void hosts::do_save(const path& path, save_handler handle_save)
 void hosts::remove(const message::network_address& address,
     remove_handler handle_remove)
 {
-    dispatch_.unordered(
-        std::bind(&hosts::do_remove,
-            this, address, handle_remove));
+    dispatch_.unordered(&hosts::do_remove,
+        this, address, handle_remove);
 }
 
 void hosts::do_remove(const message::network_address& address,
@@ -160,9 +157,8 @@ void hosts::do_remove(const message::network_address& address,
 void hosts::store(const message::network_address& address,
     store_handler handle_store)
 {
-    dispatch_.unordered(
-        std::bind(&hosts::do_store,
-            this, address, handle_store));
+    dispatch_.unordered(&hosts::do_store,
+        this, address, handle_store);
 }
 
 void hosts::store(const message::network_address::list& addresses,
@@ -191,9 +187,8 @@ void hosts::do_store(const message::network_address& address,
 
 void hosts::fetch_address(fetch_address_handler handle_fetch)
 {
-    dispatch_.unordered(
-        std::bind(&hosts::do_fetch_address,
-            this, handle_fetch));
+    dispatch_.unordered(&hosts::do_fetch_address,
+        this, handle_fetch);
 }
 
 void hosts::do_fetch_address(fetch_address_handler handle_fetch)
@@ -211,9 +206,8 @@ void hosts::do_fetch_address(fetch_address_handler handle_fetch)
 
 void hosts::fetch_count(fetch_count_handler handle_fetch)
 {
-    dispatch_.unordered(
-        std::bind(&hosts::do_fetch_count,
-            this, handle_fetch));
+    dispatch_.unordered(&hosts::do_fetch_count,
+        this, handle_fetch);
 }
 
 void hosts::do_fetch_count(fetch_count_handler handle_fetch)
