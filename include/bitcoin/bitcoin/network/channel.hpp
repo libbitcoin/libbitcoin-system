@@ -30,16 +30,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
+#include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/message/address.hpp>
-#include <bitcoin/bitcoin/message/get_address.hpp>
-#include <bitcoin/bitcoin/message/get_blocks.hpp>
-#include <bitcoin/bitcoin/message/get_data.hpp>
-#include <bitcoin/bitcoin/message/header.hpp>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-#include <bitcoin/bitcoin/message/ping_pong.hpp>
-#include <bitcoin/bitcoin/message/verack.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
 #include <bitcoin/bitcoin/network/channel_proxy.hpp>
 //#include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
@@ -68,49 +60,24 @@ public:
 
     void start();
     void stop(const code& ec);
-
     uint64_t nonce() const;
     void set_nonce(uint64_t nonce);
     config::authority address() const;
-
     void reset_revival();
     void set_revival_handler(channel_proxy::revival_handler handler);
 
-    void subscribe_version(
-        channel_proxy::receive_version_handler handle_receive);
-    void subscribe_verack(
-        channel_proxy::receive_verack_handler handle_receive);
-    void subscribe_address(
-        channel_proxy::receive_address_handler handle_receive);
-    void subscribe_get_address(
-        channel_proxy::receive_get_address_handler handle_receive);
-    void subscribe_inventory(
-        channel_proxy::receive_inventory_handler handle_receive);
-    void subscribe_get_data(
-        channel_proxy::receive_get_data_handler handle_receive);
-    void subscribe_get_blocks(
-        channel_proxy::receive_get_blocks_handler handle_receive);
-    void subscribe_transaction(
-        channel_proxy::receive_transaction_handler handle_receive);
-    void subscribe_block(
-        channel_proxy::receive_block_handler handle_receive);
-    void subscribe_ping(
-        channel_proxy::receive_ping_handler handle_receive);
-    void subscribe_pong(
-        channel_proxy::receive_pong_handler handle_receive);
-    void subscribe_raw(
-        channel_proxy::receive_raw_handler handle_receive);
-    void subscribe_stop(
-        channel_proxy::stop_handler handle_stop);
+    DECLARE_CHANNEL_MESSAGE_SUBSCRIBERS();
+    void subscribe_raw(channel_proxy::receive_raw_handler handle);
+    void subscribe_stop(channel_proxy::stop_handler handle);
 
     template <typename Message>
-    void send(const Message& packet, channel_proxy::send_handler handle_send)
+    void send(const Message& packet, channel_proxy::send_handler handler)
     {
-        proxy_->send(packet, handle_send);
+        proxy_->send(packet, handler);
     }
 
     void send_raw(const message::header& packet_header,
-        const data_chunk& payload, channel_proxy::send_handler handle_send);
+        const data_chunk& payload, channel_proxy::send_handler handler);
 
 private:
 

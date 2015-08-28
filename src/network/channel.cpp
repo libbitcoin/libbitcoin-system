@@ -36,19 +36,23 @@ namespace network {
 
 // TODO: derive channel from proxy, adding timers, tracking, nonce.
 channel::channel(channel_proxy::ptr proxy)
-  : proxy_(proxy), nonce_(0), CONSTRUCT_TRACK(channel, LOG_NETWORK)
+  : proxy_(proxy), nonce_(0),
+    CONSTRUCT_TRACK(channel, LOG_NETWORK)
 {
 }
 
+// This implements the set of channel_proxy messsage handler methods.
+DEFINE_CHANNEL_MESSAGE_SUBSCRIBERS()
+
 // TODO: move proxy timeouts to channel (revival deprecated).
-channel::channel(threadpool& pool, asio::socket_ptr socket, const timeout& timeouts)
+channel::channel(threadpool& pool, asio::socket_ptr socket,
+    const timeout& timeouts)
   : channel(std::make_shared<channel_proxy>(socket, pool, timeouts))
 {
 }
 
 channel::~channel()
 {
-    // A proxy reference may be held externally, so ensure the proxy is closed.
     proxy_->stop(error::channel_stopped);
 }
 
@@ -88,88 +92,22 @@ void channel::set_revival_handler(channel_proxy::revival_handler handler)
     return proxy_->set_revival_handler(handler);
 }
 
-void channel::subscribe_version(
-    channel_proxy::receive_version_handler handle_receive)
+void channel::subscribe_stop(
+    channel_proxy::stop_handler handler)
 {
-    proxy_->subscribe_version(handle_receive);
-}
-
-void channel::subscribe_verack(
-    channel_proxy::receive_verack_handler handle_receive)
-{
-    proxy_->subscribe_verack(handle_receive);
-}
-
-void channel::subscribe_address(
-    channel_proxy::receive_address_handler handle_receive)
-{
-    proxy_->subscribe_address(handle_receive);
-}
-
-void channel::subscribe_get_address(
-    channel_proxy::receive_get_address_handler handle_receive)
-{
-    proxy_->subscribe_get_address(handle_receive);
-}
-
-void channel::subscribe_inventory(
-    channel_proxy::receive_inventory_handler handle_receive)
-{
-    proxy_->subscribe_inventory(handle_receive);
-}
-
-void channel::subscribe_get_data(
-    channel_proxy::receive_get_data_handler handle_receive)
-{
-    proxy_->subscribe_get_data(handle_receive);
-}
-
-void channel::subscribe_get_blocks(
-    channel_proxy::receive_get_blocks_handler handle_receive)
-{
-    proxy_->subscribe_get_blocks(handle_receive);
-}
-
-void channel::subscribe_transaction(
-    channel_proxy::receive_transaction_handler handle_receive)
-{
-    proxy_->subscribe_transaction(handle_receive);
-}
-
-void channel::subscribe_block(
-    channel_proxy::receive_block_handler handle_receive)
-{
-    proxy_->subscribe_block(handle_receive);
-}
-
-void channel::subscribe_ping(
-    channel_proxy::receive_ping_handler handle_receive)
-{
-    proxy_->subscribe_ping(handle_receive);
-}
-
-void channel::subscribe_pong(
-    channel_proxy::receive_pong_handler handle_receive)
-{
-    proxy_->subscribe_pong(handle_receive);
+    proxy_->subscribe_stop(handler);
 }
 
 void channel::subscribe_raw(
-    channel_proxy::receive_raw_handler handle_receive)
+    channel_proxy::receive_raw_handler handler)
 {
-    proxy_->subscribe_raw(handle_receive);
-}
-
-void channel::subscribe_stop(
-    channel_proxy::stop_handler handle_stop)
-{
-    proxy_->subscribe_stop(handle_stop);
+    proxy_->subscribe_raw(handler);
 }
 
 void channel::send_raw(const message::header& packet_header,
-    const data_chunk& payload, channel_proxy::send_handler handle_send)
+    const data_chunk& payload, channel_proxy::send_handler handler)
 {
-    proxy_->send_raw(packet_header, payload, handle_send);
+    proxy_->send_raw(packet_header, payload, handler);
 }
 
 } // namespace network

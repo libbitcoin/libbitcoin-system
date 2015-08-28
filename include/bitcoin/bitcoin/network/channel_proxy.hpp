@@ -35,16 +35,7 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/message/address.hpp>
-#include <bitcoin/bitcoin/message/get_address.hpp>
-#include <bitcoin/bitcoin/message/get_blocks.hpp>
-#include <bitcoin/bitcoin/message/get_data.hpp>
-#include <bitcoin/bitcoin/message/header.hpp>
-#include <bitcoin/bitcoin/message/inventory.hpp>
-//#include <bitcoin/bitcoin/message/not_found.hpp>
-#include <bitcoin/bitcoin/message/ping_pong.hpp>
-#include <bitcoin/bitcoin/message/verack.hpp>
-#include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -63,36 +54,13 @@ class BC_API channel_proxy
   : public std::enable_shared_from_this<channel_proxy>, track<channel_proxy>
 {
 public:
-    typedef std::shared_ptr<channel_proxy> ptr;
-
-    typedef std::function<void(const code&, const message::version&)>
-        receive_version_handler;
-    typedef std::function<void(const code&, const message::verack&)>
-        receive_verack_handler;
-    typedef std::function<void(const code&, const message::address&)>
-        receive_address_handler;
-    typedef std::function<void(const code&, const message::get_address&)>
-        receive_get_address_handler;
-    typedef std::function<void(const code&, const message::inventory&)>
-        receive_inventory_handler;
-    typedef std::function<void(const code&,  const message::get_data&)>
-        receive_get_data_handler;
-    typedef std::function<void(const code&, const message::get_blocks&)>
-        receive_get_blocks_handler;
-    typedef std::function<void(const code&, const chain::transaction&)>
-        receive_transaction_handler;
-    typedef std::function<void(const code&, const chain::block&)>
-        receive_block_handler;
-    typedef std::function<void(const code&, const message::ping&)>
-        receive_ping_handler;
-    typedef std::function<void(const code&, const message::pong&)>
-        receive_pong_handler;
-
-    typedef std::function<void(const code&)> send_handler;
+    DECLARE_PROXY_MESSAGE_HANDLER_TYPES();
+    typedef std::function<void(const code&)> stop_handler;
     typedef std::function<void(const code&, const message::header&,
         const data_chunk&)> receive_raw_handler;
 
-    typedef std::function<void(const code&)> stop_handler;
+    typedef std::shared_ptr<channel_proxy> ptr;
+    typedef std::function<void(const code&)> send_handler;
     typedef std::function<void(const code&)> revival_handler;
     typedef std::function<void(const code&)> expiration_handler;
 
@@ -131,45 +99,14 @@ public:
     void send_raw(const message::header& packet_header,
         const data_chunk& payload, send_handler handle_send);
 
-    void subscribe_version(receive_version_handler handle_receive);
-    void subscribe_verack(receive_verack_handler handle_receive);
-    void subscribe_address(receive_address_handler handle_receive);
-    void subscribe_get_address(receive_get_address_handler handle_receive);
-    void subscribe_inventory(receive_inventory_handler handle_receive);
-    void subscribe_get_data(receive_get_data_handler handle_receive);
-    void subscribe_get_blocks(receive_get_blocks_handler handle_receive);
-    void subscribe_transaction(receive_transaction_handler handle_receive);
-    void subscribe_block(receive_block_handler handle_receive);
-    void subscribe_ping(receive_ping_handler handle_receive);
-    void subscribe_pong(receive_pong_handler handle_receive);
-    void subscribe_raw(receive_raw_handler handle_receive);
+    DECLARE_PROXY_MESSAGE_SUBSCRIBERS();
     void subscribe_stop(stop_handler handle_stop);
+    void subscribe_raw(receive_raw_handler handle_receive);
 
-    typedef subscriber<const code&, const message::version&>
-        version_subscriber;
-    typedef subscriber<const code&, const message::verack&>
-        verack_subscriber;
-    typedef subscriber<const code&, const message::address&>
-        address_subscriber;
-    typedef subscriber<const code&, const message::get_address&>
-        get_address_subscriber;
-    typedef subscriber<const code&, const message::inventory&>
-        inventory_subscriber;
-    typedef subscriber<const code&, const message::get_data&>
-        get_data_subscriber;
-    typedef subscriber<const code&, const message::get_blocks&>
-        get_blocks_subscriber;
-    typedef subscriber<const code&, const chain::transaction&>
-        transaction_subscriber;
-    typedef subscriber<const code&, const chain::block&>
-        block_subscriber;
-    typedef subscriber<const code&, const message::ping&>
-        ping_subscriber;
-    typedef subscriber<const code&, const message::pong&>
-        pong_subscriber;
-    typedef subscriber<const code&, const message::header&,
-        const data_chunk&> raw_subscriber;
+    DECLARE_PROXY_MESSAGE_SUBSCRIBER_TYPES();
     typedef subscriber<const code&> stop_subscriber;
+    typedef subscriber<const code&, const message::header&, const data_chunk&>
+        raw_subscriber;
 
 private:
     template<typename Message, class Subscriber>
@@ -203,11 +140,11 @@ private:
     void handle_read_payload(const boost_code& ec, size_t bytes_transferred,
         const message::header& header);
 
-    void do_send(const data_chunk& message, send_handler handle_send,
+    void do_send(const data_chunk& message, send_handler handler,
         const std::string& command);
     void do_send_raw(const message::header& packet_header,
-        const data_chunk& payload, send_handler handle_send);
-    void call_handle_send(const boost_code& ec, send_handler handle_send);
+        const data_chunk& payload, send_handler handler);
+    void call_handle_send(const boost_code& ec, send_handler handler);
 
     asio::socket_ptr socket_;
     dispatcher dispatch_;
@@ -226,19 +163,9 @@ private:
     message::header::checksum_bytes inbound_checksum_;
     data_chunk inbound_payload_;
 
-    version_subscriber::ptr version_subscriber_;
-    verack_subscriber::ptr verack_subscriber_;
-    address_subscriber::ptr address_subscriber_;
-    get_address_subscriber::ptr get_address_subscriber_;
-    inventory_subscriber::ptr inventory_subscriber_;
-    get_data_subscriber::ptr get_data_subscriber_;
-    get_blocks_subscriber::ptr get_blocks_subscriber_;
-    transaction_subscriber::ptr transaction_subscriber_;
-    block_subscriber::ptr block_subscriber_;
-    ping_subscriber::ptr ping_subscriber_;
-    pong_subscriber::ptr pong_subscriber_;
-    raw_subscriber::ptr raw_subscriber_;
+    DECLARE_PROXY_MESSAGE_SUBSCRIBER_POINTERS();
     stop_subscriber::ptr stop_subscriber_;
+    raw_subscriber::ptr raw_subscriber_;
 };
 
 } // namespace network
