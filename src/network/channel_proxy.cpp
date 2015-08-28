@@ -73,7 +73,7 @@ channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
     stopped_(false),
-    INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(pool, LOG_NETWORK),
+    INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(),
     CONSTRUCT_TRACK(channel_proxy, LOG_NETWORK)
 {
     ESTABLISH_PROXY_MESSAGE_RELAYS();
