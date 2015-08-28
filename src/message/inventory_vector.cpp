@@ -93,7 +93,7 @@ data_chunk inventory_vector::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -110,7 +110,7 @@ void inventory_vector::to_data(writer& sink) const
     sink.write_hash(hash);
 }
 
-uint64_t inventory_vector::satoshi_size() const
+uint64_t inventory_vector::serialized_size() const
 {
     return inventory_vector::satoshi_fixed_size();
 }

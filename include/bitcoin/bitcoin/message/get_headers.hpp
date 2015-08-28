@@ -35,7 +35,7 @@ public:
     get_headers();
     get_headers(const block_locator start_hashes, const hash_digest hash_stop);
 
-    static const std::string satoshi_command;
+    static const std::string command;
 };
 
 } // end message

@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::verack::satoshi_command = "verack";
+const std::string message::verack::command = "verack";
 
 verack verack::factory_from_data(const data_chunk& data)
 {
@@ -83,7 +83,7 @@ data_chunk verack::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -91,7 +91,7 @@ void verack::to_data(std::ostream& stream) const
 {
 }
 
-uint64_t verack::satoshi_size() const
+uint64_t verack::serialized_size() const
 {
     return verack::satoshi_fixed_size();
 }

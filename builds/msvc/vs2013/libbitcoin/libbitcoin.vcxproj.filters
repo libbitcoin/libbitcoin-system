@@ -311,9 +311,6 @@
     <ClCompile Include="..\..\..\..\src\chain\block.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\block_header.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\opcode.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -327,12 +324,6 @@
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\transaction_input.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\chain\transaction_output.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c">
@@ -354,9 +345,6 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\message\header.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\inventory.cpp">
@@ -457,6 +445,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\stream_loader.cpp">
       <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\input.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\output.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\chain\header.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\message\heading.cpp">
+      <Filter>src\message</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -715,9 +715,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_data.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header.hpp">
-      <Filter>include\bitcoin\message</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>
@@ -739,16 +736,10 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block_header.hpp">
-      <Filter>include\bitcoin\chain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\opcode.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\operation.hpp">
-      <Filter>include\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp">
@@ -758,12 +749,6 @@
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp">
-      <Filter>include\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction_input.hpp">
-      <Filter>include\bitcoin\chain</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction_output.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\container_sink.hpp">
@@ -882,6 +867,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\stream_loader.hpp">
       <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp">
+      <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output.hpp">
+      <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment_type.hpp">
+      <Filter>include\bitcoin\chain</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\heading.hpp">
+      <Filter>include\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp">
+      <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

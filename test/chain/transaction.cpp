@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include <boost/iostreams/stream.hpp>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
@@ -179,11 +178,11 @@ BOOST_AUTO_TEST_CASE(case_1_factory_data_chunk)
 
     chain::transaction tx = chain::transaction::factory_from_data(raw_tx);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.satoshi_size(), 225u);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE_EQUAL(tx.satoshi_size(), raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(), raw_tx.size());
     data_chunk resave = tx.to_data();
     BOOST_REQUIRE(resave == raw_tx);
 }
@@ -217,7 +216,7 @@ BOOST_AUTO_TEST_CASE(case_2_factory_data_chunk)
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.satoshi_size() == raw_tx.size());
+    BOOST_REQUIRE(tx.serialized_size() == raw_tx.size());
     data_chunk resave = tx.to_data();
     BOOST_REQUIRE(resave == raw_tx);
 }
@@ -240,11 +239,11 @@ BOOST_AUTO_TEST_CASE(case_1_factory_stream)
     data_source stream(raw_tx);
     chain::transaction tx = chain::transaction::factory_from_data(stream);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.satoshi_size(), 225u);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE_EQUAL(tx.satoshi_size(), raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(), raw_tx.size());
     data_chunk resave = tx.to_data();
     BOOST_REQUIRE(resave == raw_tx);
 }
@@ -279,7 +278,7 @@ BOOST_AUTO_TEST_CASE(case_2_factory_stream)
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.satoshi_size() == raw_tx.size());
+    BOOST_REQUIRE(tx.serialized_size() == raw_tx.size());
     data_chunk resave = tx.to_data();
     BOOST_REQUIRE(resave == raw_tx);
 }
@@ -303,11 +302,11 @@ BOOST_AUTO_TEST_CASE(case_1_factory_reader)
     istream_reader source(stream);
     chain::transaction tx = chain::transaction::factory_from_data(source);
     BOOST_REQUIRE(tx.is_valid());
-    BOOST_REQUIRE_EQUAL(tx.satoshi_size(), 225u);
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(), 225u);
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE_EQUAL(tx.satoshi_size(), raw_tx.size());
+    BOOST_REQUIRE_EQUAL(tx.serialized_size(), raw_tx.size());
     data_chunk resave = tx.to_data();
     BOOST_REQUIRE(resave == raw_tx);
 }
@@ -343,7 +342,7 @@ BOOST_AUTO_TEST_CASE(case_2_factory_reader)
     BOOST_REQUIRE(tx.hash() == tx_hash);
 
     // Re-save tx and compare against original.
-    BOOST_REQUIRE(tx.satoshi_size() == raw_tx.size());
+    BOOST_REQUIRE(tx.serialized_size() == raw_tx.size());
     data_chunk resave = tx.to_data();
     BOOST_REQUIRE(resave == raw_tx);
 }

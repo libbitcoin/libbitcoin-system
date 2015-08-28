@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::version::satoshi_command = "version";
+const std::string message::version::command = "version";
 
 version version::factory_from_data(const data_chunk& data)
 {
@@ -126,7 +126,7 @@ data_chunk version::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -156,12 +156,12 @@ void version::to_data(writer& sink) const
         sink.write_byte(relay ? 1 : 0);
 }
 
-uint64_t version::satoshi_size() const
+uint64_t version::serialized_size() const
 {
-    auto size = 4 + 8 + 8 + address_me.satoshi_size(false);
+    auto size = 4 + 8 + 8 + address_me.serialized_size(false);
     if (value >= 106)
     {
-        size += address_you.satoshi_size(false) + 8 +
+        size += address_you.serialized_size(false) + 8 +
             variable_uint_size(user_agent.size()) + user_agent.size();
     }
 

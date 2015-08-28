@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(satoshi_words_mainnet_or_testnet)
 
     // Coinbase tx has a single input.
     BOOST_REQUIRE_EQUAL(coinbase_tx.inputs.size(), 1u);
-    const bc::chain::transaction_input& coinbase_input = coinbase_tx.inputs[0];
+    const bc::chain::input& coinbase_input = coinbase_tx.inputs[0];
 
     // Convert the input script to its raw format.
     const bc::data_chunk raw_message = coinbase_input.script.to_data(false);

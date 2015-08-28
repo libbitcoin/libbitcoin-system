@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include <boost/iostreams/stream.hpp>
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
@@ -31,13 +30,13 @@ data_chunk valid_raw_input = to_data_chunk(base16_literal(
     "da450151d36012103893d5a06201d5cf61400e96fa4a7514fc12ab45166ace618d68b"
     "8066c9c585f9ffffffff"));
 
-BOOST_AUTO_TEST_SUITE(transaction_input_tests)
+BOOST_AUTO_TEST_SUITE(input_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_fails)
 {
     data_chunk data(2);
 
-    chain::transaction_input instance;
+    chain::input instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(data));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
@@ -52,15 +51,15 @@ BOOST_AUTO_TEST_CASE(from_data_valid_junk)
     byte_source<std::array<uint8_t, 64>> source(junk);
     boost::iostreams::stream<byte_source<std::array<uint8_t, 64>>> stream(source);
 
-    chain::transaction_input instance;
+    chain::input instance;
     BOOST_REQUIRE(instance.from_data(stream));
 }
 
 BOOST_AUTO_TEST_CASE(factory_data_chunk_success)
 {
-    auto instance = chain::transaction_input::factory_from_data(valid_raw_input);
+    auto instance = chain::input::factory_from_data(valid_raw_input);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.satoshi_size(), valid_raw_input.size());
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_input.size());
 
     // Re-save and compare against original.
     data_chunk resave = instance.to_data();
@@ -71,9 +70,9 @@ BOOST_AUTO_TEST_CASE(factory_data_chunk_success)
 BOOST_AUTO_TEST_CASE(factory_stream_success)
 {
     data_source stream(valid_raw_input);
-    auto instance = chain::transaction_input::factory_from_data(stream);
+    auto instance = chain::input::factory_from_data(stream);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.satoshi_size(), valid_raw_input.size());
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_input.size());
 
     // Re-save and compare against original.
     data_chunk resave = instance.to_data();
@@ -85,9 +84,9 @@ BOOST_AUTO_TEST_CASE(factory_reader_success)
 {
     data_source stream(valid_raw_input);
     istream_reader source(stream);
-    auto instance = chain::transaction_input::factory_from_data(source);
+    auto instance = chain::input::factory_from_data(source);
     BOOST_REQUIRE(instance.is_valid());
-    BOOST_REQUIRE_EQUAL(instance.satoshi_size(), valid_raw_input.size());
+    BOOST_REQUIRE_EQUAL(instance.serialized_size(), valid_raw_input.size());
 
     // Re-save and compare against original.
     data_chunk resave = instance.to_data();

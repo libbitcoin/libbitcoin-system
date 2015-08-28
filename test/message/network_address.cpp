@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_without_timestamp
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size(false));
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(false), result.satoshi_size(false));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(false));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(false), result.serialized_size(false));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestamp)
@@ -90,8 +90,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_without_timestam
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size(false));
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(false), result.satoshi_size(false));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(false));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(false), result.serialized_size(false));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestamp)
@@ -116,8 +116,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_without_timestam
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, false));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size(false));
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(false), result.satoshi_size(false));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(false));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(false), result.serialized_size(false));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
@@ -140,8 +140,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk_with_timestamp)
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size(true));
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(true), result.satoshi_size(true));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(true));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(true), result.serialized_size(true));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
@@ -165,8 +165,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream_with_timestamp)
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size(true));
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(true), result.satoshi_size(true));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(true));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(true), result.serialized_size(true));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_timestamp)
@@ -191,8 +191,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader_with_timestamp)
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result, true));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size(true));
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(true), result.satoshi_size(true));
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size(true));
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(true), result.serialized_size(true));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

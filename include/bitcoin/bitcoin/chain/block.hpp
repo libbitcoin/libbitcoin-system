@@ -23,7 +23,7 @@
 #include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/block_header.hpp>
+#include <bitcoin/bitcoin/chain/header.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -51,11 +51,11 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size() const;
+    uint64_t serialized_size() const;
 
-    static const std::string satoshi_command;
+    static const std::string command;
 
-    block_header header;
+    chain::header header;
     transaction::list transactions;
 };
 

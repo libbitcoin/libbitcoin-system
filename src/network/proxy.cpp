@@ -55,7 +55,6 @@ INITIALIZE_TRACK(bc::network::proxy)
 namespace libbitcoin {
 namespace network {
 
-using namespace chain;
 using namespace message;
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -120,7 +119,7 @@ void proxy::notify_stop(Subscriber subscriber) const
 
 void proxy::start()
 {
-    read_header();
+    read_heading();
     start_timers();
 }
 
@@ -175,7 +174,7 @@ void proxy::do_stop(const code& ec)
 void proxy::clear_subscriptions(const code& ec)
 {
     CLEAR_PROXY_MESSAGE_SUBSCRIPTIONS();
-    raw_subscriber_->relay(ec, header(), data_chunk());
+    raw_subscriber_->relay(ec, heading(), data_chunk());
     stop_subscriber_->relay(ec);
 }
 
@@ -290,18 +289,18 @@ void proxy::handle_revival(const code& ec)
     revival_handler_(ec);
 }
 
-void proxy::read_header()
+void proxy::read_heading()
 {
     if (stopped())
         return;
 
     using namespace boost::asio;
-    async_read(*socket_, buffer(inbound_header_),
-        dispatch_.ordered_delegate(&proxy::handle_read_header,
+    async_read(*socket_, buffer(inbound_heading_),
+        dispatch_.ordered_delegate(&proxy::handle_read_heading,
             shared_from_this(), _1, _2));
 }
 
-void proxy::read_checksum(const header& header)
+void proxy::read_checksum(const heading& heading)
 {
     if (stopped())
         return;
@@ -309,22 +308,22 @@ void proxy::read_checksum(const header& header)
     using namespace boost::asio;
     async_read(*socket_, buffer(inbound_checksum_),
         dispatch_.ordered_delegate(&proxy::handle_read_checksum,
-            shared_from_this(), _1, _2, header));
+            shared_from_this(), _1, _2, heading));
 }
 
-void proxy::read_payload(const header& header)
+void proxy::read_payload(const heading& heading)
 {
     if (stopped())
         return;
 
     using namespace boost::asio;
-    inbound_payload_.resize(header.payload_length);
-    async_read(*socket_, buffer(inbound_payload_, header.payload_length),
+    inbound_payload_.resize(heading.payload_size);
+    async_read(*socket_, buffer(inbound_payload_, heading.payload_size),
         dispatch_.ordered_delegate(&proxy::handle_read_payload,
-            shared_from_this(), _1, _2, header));
+            shared_from_this(), _1, _2, heading));
 }
 
-void proxy::handle_read_header(const boost_code& ec,
+void proxy::handle_read_heading(const boost_code& ec,
     size_t DEBUG_ONLY(bytes_transferred))
 {
     if (stopped())
@@ -339,35 +338,35 @@ void proxy::handle_read_header(const boost_code& ec,
         return;
     }
 
-    BITCOIN_ASSERT(bytes_transferred == header::header_size);
-    BITCOIN_ASSERT(bytes_transferred == inbound_header_.size());
+    BITCOIN_ASSERT(bytes_transferred == heading::heading_size);
+    BITCOIN_ASSERT(bytes_transferred == inbound_heading_.size());
 
-    typedef byte_source<header::header_bytes> header_source;
-    typedef boost::iostreams::stream<header_source> header_stream;
+    typedef byte_source<heading::heading_bytes> heading_source;
+    typedef boost::iostreams::stream<heading_source> heading_stream;
 
-    // Parse and publish the header to message subscribers.
-    message::header header;
-    header_stream istream(inbound_header_);
-    const auto parsed = header.from_data(istream);
+    // Parse and publish the heading to message subscribers.
+    heading head;
+    heading_stream istream(inbound_heading_);
+    const auto parsed = head.from_data(istream);
 
-    if (!parsed || header.magic != bc::magic_value)
+    if (!parsed || head.magic != bc::magic_value)
     {
         log_warning(LOG_NETWORK) 
-            << "Invalid header received [" << address() << "]";
+            << "Invalid heading received [" << address() << "]";
         stop(error::bad_stream);
         return;
     }
 
     log_debug(LOG_NETWORK)
-        << "Receive " << header.command << " [" << address() << "] ("
-        << header.payload_length << " bytes)";
+        << "Receive " << head.command << " [" << address() << "] ("
+        << head.payload_size << " bytes)";
 
-    read_checksum(header);
+    read_checksum(head);
     start_inactivity();
 }
 
 void proxy::handle_read_checksum(const boost_code& ec,
-    size_t bytes_transferred, message::header& header)
+    size_t bytes_transferred, heading& heading)
 {
     if (stopped())
         return;
@@ -377,7 +376,7 @@ void proxy::handle_read_checksum(const boost_code& ec,
     {
         // But make sure we got the required data, as this may fail depending 
         // when the client disconnected.
-        if (bytes_transferred != message::header::checksum_size ||
+        if (bytes_transferred != heading::checksum_size ||
             bytes_transferred != inbound_checksum_.size())
         {
             // TODO: No error if we aborted, causing the invalid data?
@@ -389,15 +388,15 @@ void proxy::handle_read_checksum(const boost_code& ec,
         }
     }
 
-    header.checksum = from_little_endian<uint32_t>(inbound_checksum_.begin(),
+    heading.checksum = from_little_endian<uint32_t>(inbound_checksum_.begin(),
         inbound_checksum_.end());
 
-    read_payload(header);
+    read_payload(heading);
     start_inactivity();
 }
 
 void proxy::handle_read_payload(const boost_code& ec,
-    size_t bytes_transferred, const message::header& header)
+    size_t bytes_transferred, const heading& heading)
 {
     if (stopped())
         return;
@@ -407,7 +406,7 @@ void proxy::handle_read_payload(const boost_code& ec,
     {
         // But make sure we got the required data, as this may fail depending 
         // when the client disconnected.
-        if (bytes_transferred != header.payload_length ||
+        if (bytes_transferred != heading.payload_size ||
             bytes_transferred != inbound_payload_.size())
         {
             // TODO: No error if we aborted, causing the invalid data?
@@ -419,7 +418,7 @@ void proxy::handle_read_payload(const boost_code& ec,
         }
     }
 
-    if (header.checksum != bitcoin_checksum(inbound_payload_))
+    if (heading.checksum != bitcoin_checksum(inbound_payload_))
     {
         log_warning(LOG_NETWORK) 
             << "Invalid bitcoin checksum from [" << address() << "]";
@@ -428,14 +427,14 @@ void proxy::handle_read_payload(const boost_code& ec,
     }
 
     // Publish the raw payload to subscribers.
-    raw_subscriber_->relay(error::success, header, inbound_payload_);
+    raw_subscriber_->relay(error::success, heading, inbound_payload_);
 
     // Copy the buffer before registering for new messages.
     const data_chunk payload_copy(inbound_payload_);
 
     // This must be called before calling subscribe notification handlers.
     if (!ec)
-        read_header();
+        read_heading();
 
     start_inactivity();
 
@@ -445,19 +444,19 @@ void proxy::handle_read_payload(const boost_code& ec,
     // Parse and publish the payload to message subscribers.
     payload_source source(payload_copy);
     payload_stream istream(source);
-    const auto error = stream_loader_.load(header.command, istream);
+    const auto error = stream_loader_.load(heading.command, istream);
 
     // Warn about unconsumed bytes in the stream.
     if (!error && istream.peek() != std::istream::traits_type::eof())
         log_warning(LOG_NETWORK)
-            << "Valid message [" << header.command
+            << "Valid message [" << heading.command
             << "] handled, unused bytes remain in payload.";
 
     // Stop the channel if there was an error before or during parse.
     if (ec)
     {
         log_warning(LOG_NETWORK)
-            << "Invalid payload of " << header.command
+            << "Invalid payload of " << heading.command
             << " from [" << address() << "] (deferred)"
             << code(error::boost_to_error_code(ec)).message();
         stop(ec);
@@ -467,7 +466,7 @@ void proxy::handle_read_payload(const boost_code& ec,
     if (error)
     {
         log_warning(LOG_NETWORK)
-            << "Invalid stream load of " << header.command 
+            << "Invalid stream load of " << heading.command
             << " from [" << address() << "] " << error.message();
         stop(error);
     }
@@ -484,7 +483,7 @@ void proxy::subscribe_stop(stop_handler handler)
 void proxy::subscribe_raw(receive_raw_handler handler)
 {
     if (stopped())
-        handler(error::channel_stopped, header(), data_chunk());
+        handler(error::channel_stopped, heading(), data_chunk());
     else
         raw_subscriber_->subscribe(handler);
 }
@@ -513,7 +512,7 @@ void proxy::call_handle_send(const boost_code& ec, handler handler)
     handler(error::boost_to_error_code(ec));
 }
 
-void proxy::send_raw(const header& packet_header, const data_chunk& payload,
+void proxy::send_raw(const heading& heading, const data_chunk& payload,
     handler handler)
 {
     if (stopped())
@@ -523,10 +522,10 @@ void proxy::send_raw(const header& packet_header, const data_chunk& payload,
     }
 
     dispatch_.ordered(&proxy::do_send_raw,
-        shared_from_this(), packet_header, payload, handler);
+        shared_from_this(), heading, payload, handler);
 }
 
-void proxy::do_send_raw(const header& packet_header, const data_chunk& payload,
+void proxy::do_send_raw(const heading& heading, const data_chunk& payload,
     handler handler)
 {
     if (stopped())
@@ -535,9 +534,9 @@ void proxy::do_send_raw(const header& packet_header, const data_chunk& payload,
         return;
     }
 
-    auto message = packet_header.to_data();
+    auto message = heading.to_data();
     extend_data(message, payload);
-    do_send(message, handler, packet_header.command);
+    do_send(message, handler, heading.command);
 }
 
 } // namespace network

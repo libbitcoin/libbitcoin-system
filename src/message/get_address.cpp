@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::get_address::satoshi_command = "getaddr";
+const std::string message::get_address::command = "getaddr";
 
 get_address get_address::factory_from_data(const data_chunk& data)
 {
@@ -84,7 +84,7 @@ data_chunk get_address::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -98,7 +98,7 @@ void get_address::to_data(writer& sink) const
 {
 }
 
-uint64_t get_address::satoshi_size() const
+uint64_t get_address::serialized_size() const
 {
     return get_address::satoshi_fixed_size();
 }

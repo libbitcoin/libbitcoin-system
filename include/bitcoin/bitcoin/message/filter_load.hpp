@@ -45,9 +45,9 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size() const;
+    uint64_t serialized_size() const;
 
-    static const std::string satoshi_command;
+    static const std::string command;
 
     data_chunk filter;
     uint32_t hash_functions;
@@ -56,7 +56,6 @@ public:
 };
 
 BC_API bool operator==(const filter_load& left, const filter_load& right);
-
 BC_API bool operator!=(const filter_load& left, const filter_load& right);
 
 } // end message

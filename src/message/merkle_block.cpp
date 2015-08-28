@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::merkle_block::satoshi_command = "merkleblock";
+const std::string message::merkle_block::command = "merkleblock";
 
 merkle_block merkle_block::factory_from_data(const data_chunk& data)
 {
@@ -116,7 +116,7 @@ data_chunk merkle_block::to_data() const
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -139,9 +139,9 @@ void merkle_block::to_data(writer& sink) const
     sink.write_data(flags);
 }
 
-uint64_t merkle_block::satoshi_size() const
+uint64_t merkle_block::serialized_size() const
 {
-    return header.satoshi_size(true) +
+    return header.serialized_size(true) +
         variable_uint_size(hashes.size()) + (hash_size * hashes.size()) +
         variable_uint_size(flags.size()) + flags.size();
 }

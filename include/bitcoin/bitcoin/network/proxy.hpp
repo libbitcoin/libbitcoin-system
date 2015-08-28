@@ -54,7 +54,7 @@ class BC_API proxy
 public:
     DECLARE_PROXY_MESSAGE_HANDLER_TYPES();
     typedef std::function<void(const code&)> stop_handler;
-    typedef std::function<void(const code&, const message::header&,
+    typedef std::function<void(const code&, const message::heading&,
         const data_chunk&)> receive_raw_handler;
 
     typedef std::shared_ptr<proxy> ptr;
@@ -85,13 +85,13 @@ public:
             return;
         }
 
-        const auto& command = Message::satoshi_command;
-        const auto message = message::create_raw_message(packet);
+        const auto& command = Message::command;
+        const auto message = message::serialize(packet);
         dispatch_.ordered(&proxy::do_send,
             shared_from_this(), message, handler, command);
     }
 
-    void send_raw(const message::header& packet_header,
+    void send_raw(const message::heading& heading,
         const data_chunk& payload, handler handler);
 
     DECLARE_PROXY_MESSAGE_SUBSCRIBERS();
@@ -100,7 +100,7 @@ public:
 
     DECLARE_PROXY_MESSAGE_SUBSCRIBER_TYPES();
     typedef subscriber<const code&> stop_subscriber;
-    typedef subscriber<const code&, const message::header&, const data_chunk&>
+    typedef subscriber<const code&, const message::heading&, const data_chunk&>
         raw_subscriber;
 
 private:
@@ -125,19 +125,19 @@ private:
     void handle_inactivity(const code& ec);
     void handle_revival(const code& ec);
     
-    void read_header();
-    void read_checksum(const message::header& header);
-    void read_payload(const message::header& header);
+    void read_heading();
+    void read_checksum(const message::heading& heading);
+    void read_payload(const message::heading& heading);
 
-    void handle_read_header(const boost_code& ec, size_t bytes_transferred);
+    void handle_read_heading(const boost_code& ec, size_t bytes_transferred);
     void handle_read_checksum(const boost_code& ec, size_t bytes_transferred,
-        message::header& header);
+        message::heading& heading);
     void handle_read_payload(const boost_code& ec, size_t bytes_transferred,
-        const message::header& header);
+        const message::heading& heading);
 
     void do_send(const data_chunk& message, handler handler,
         const std::string& command);
-    void do_send_raw(const message::header& packet_header,
+    void do_send_raw(const message::heading& heading,
         const data_chunk& payload, handler handler);
     void call_handle_send(const boost_code& ec, handler handler);
 
@@ -154,8 +154,8 @@ private:
     uint64_t nonce_;
     stream_loader stream_loader_;
 
-    message::header::header_bytes inbound_header_;
-    message::header::checksum_bytes inbound_checksum_;
+    message::heading::heading_bytes inbound_heading_;
+    message::heading::checksum_bytes inbound_checksum_;
     data_chunk inbound_payload_;
 
     DECLARE_PROXY_MESSAGE_SUBSCRIBER_POINTERS();

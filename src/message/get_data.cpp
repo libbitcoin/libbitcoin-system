@@ -22,7 +22,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::get_data::satoshi_command = "getdata";
+const std::string message::get_data::command = "getdata";
 
 get_data get_data::factory_from_data(const data_chunk& data)
 {

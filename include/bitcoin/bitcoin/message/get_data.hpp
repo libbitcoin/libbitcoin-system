@@ -41,7 +41,7 @@ public:
     get_data();
     get_data(const inventory_vector::list& elements);
 
-    static const std::string satoshi_command;
+    static const std::string command;
 };
 
 } // namspace message

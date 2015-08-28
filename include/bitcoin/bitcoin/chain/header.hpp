@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_BLOCK_HEADER_HPP
-#define LIBBITCOIN_CHAIN_BLOCK_HEADER_HPP
+#ifndef LIBBITCOIN_CHAIN_HEADER_HPP
+#define LIBBITCOIN_CHAIN_HEADER_HPP
 
 #include <cstdint>
 #include <istream>
@@ -33,16 +33,16 @@
 namespace libbitcoin {
 namespace chain {
 
-class BC_API block_header
+class BC_API header
 {
 public:
-    typedef std::vector<block_header> list;
+    typedef std::vector<header> list;
 
-    static block_header factory_from_data(const data_chunk& data,
+    static header factory_from_data(const data_chunk& data,
         bool with_transaction_count = true);
-    static block_header factory_from_data(std::istream& stream,
+    static header factory_from_data(std::istream& stream,
         bool with_transaction_count = true);
-    static block_header factory_from_data(reader& source,
+    static header factory_from_data(reader& source,
         bool with_transaction_count = true);
 
     bool from_data(const data_chunk& data, bool with_transaction_count = true);
@@ -54,9 +54,9 @@ public:
     hash_digest hash() const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size(bool with_transaction_count = true) const;
+    uint64_t serialized_size(bool with_transaction_count = true) const;
 
-    static const std::string satoshi_command;
+    static const std::string command;
 
     uint32_t version;
     hash_digest previous_block_hash;
@@ -67,8 +67,8 @@ public:
     uint64_t transaction_count;
 };
 
-BC_API bool operator==(const block_header& left, const block_header& right);
-BC_API bool operator!=(const block_header& left, const block_header& right);
+BC_API bool operator==(const header& left, const header& right);
+BC_API bool operator!=(const header& left, const header& right);
 
 } // namspace chain
 } // namspace libbitcoin

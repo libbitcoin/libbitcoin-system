@@ -74,7 +74,7 @@ data_chunk nonce_::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -89,7 +89,7 @@ void nonce_::to_data(writer& sink) const
     sink.write_8_bytes_little_endian(nonce);
 }
 
-uint64_t nonce_::satoshi_size() const
+uint64_t nonce_::serialized_size() const
 {
     return nonce_::satoshi_fixed_size();
 }

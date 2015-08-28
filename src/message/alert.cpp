@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::alert::satoshi_command = "alert";
+const std::string message::alert::command = "alert";
 
 alert alert::factory_from_data(const data_chunk& data)
 {
@@ -113,7 +113,7 @@ data_chunk alert::to_data() const
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -131,7 +131,7 @@ void alert::to_data(writer& sink) const
     sink.write_data(signature);
 }
 
-uint64_t alert::satoshi_size() const
+uint64_t alert::serialized_size() const
 {
     return variable_uint_size(payload.size()) + payload.size() +
         variable_uint_size(signature.size()) + signature.size();

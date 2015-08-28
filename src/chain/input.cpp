@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/chain/transaction_output.hpp>
+#include <bitcoin/bitcoin/chain/input.hpp>
 
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -29,61 +30,76 @@
 namespace libbitcoin {
 namespace chain {
 
-transaction_output transaction_output::factory_from_data(const data_chunk& data)
+input input::factory_from_data(const data_chunk& data)
 {
-    transaction_output instance;
+    input instance;
     instance.from_data(data);
     return instance;
 }
 
-transaction_output transaction_output::factory_from_data(std::istream& stream)
+input input::factory_from_data(std::istream& stream)
 {
-    transaction_output instance;
+    input instance;
     instance.from_data(stream);
     return instance;
 }
 
-transaction_output transaction_output::factory_from_data(reader& source)
+input input::factory_from_data(reader& source)
 {
-    transaction_output instance;
+    input instance;
     instance.from_data(source);
     return instance;
 }
 
-bool transaction_output::is_valid() const
+bool input::is_valid() const
 {
-    return (value != 0) || script.is_valid();
+    return (sequence != 0) ||
+        previous_output.is_valid() ||
+        script.is_valid();
 }
 
-void transaction_output::reset()
+void input::reset()
 {
-    value = 0;
+    previous_output.reset();
     script.reset();
+    sequence = 0;
 }
 
-bool transaction_output::from_data(const data_chunk& data)
+bool input::from_data(const data_chunk& data)
 {
     data_source istream(data);
     return from_data(istream);
 }
 
-bool transaction_output::from_data(std::istream& stream)
+bool input::from_data(std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(source);
 }
 
-bool transaction_output::from_data(reader& source)
+bool input::from_data(reader& source)
 {
     auto result = true;
 
     reset();
 
-    value = source.read_8_bytes_little_endian();
-    result = source;
+    result = previous_output.from_data(source);
 
     if (result)
-        result = script.from_data(source, true, script::parse_mode::strict);
+    {
+        auto mode = script::parse_mode::strict;
+
+        if (previous_output.is_null())
+            mode = script::parse_mode::raw_data;
+
+        result = script.from_data(source, true, mode);
+    }
+
+    if (result)
+    {
+        sequence = source.read_4_bytes_little_endian();
+        result = source;
+    }
 
     if (!result)
         reset();
@@ -91,41 +107,49 @@ bool transaction_output::from_data(reader& source)
     return result;
 }
 
-data_chunk transaction_output::to_data() const
+data_chunk input::to_data() const
 {
     data_chunk data;
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
-void transaction_output::to_data(std::ostream& stream) const
+void input::to_data(std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(sink);
 }
 
-void transaction_output::to_data(writer& sink) const
+void input::to_data(writer& sink) const
 {
-    sink.write_8_bytes_little_endian(value);
+    previous_output.to_data(sink);
     script.to_data(sink, true);
+    sink.write_4_bytes_little_endian(sequence);
 }
 
-uint64_t transaction_output::satoshi_size() const
+uint64_t input::serialized_size() const
 {
-    return 8 + script.satoshi_size(true);
+    const auto script_size = script.serialized_size(true);
+    return 4 + previous_output.serialized_size() + script_size;
 }
 
-std::string transaction_output::to_string() const
+std::string input::to_string() const
 {
     std::ostringstream ss;
 
-    ss << "\tvalue = " << value << "\n"
-        << "\t" << script.to_string() << "\n";
+    ss << previous_output.to_string() << "\n"
+        << "\t" << script.to_string() << "\n"
+        << "\tsequence = " << sequence << "\n";
 
     return ss.str();
+}
+
+bool input::is_final() const
+{
+    return (sequence == max_sequence);
 }
 
 } // namspace chain

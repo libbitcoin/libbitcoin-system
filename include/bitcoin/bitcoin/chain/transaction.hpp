@@ -25,8 +25,8 @@
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/transaction_input.hpp>
-#include <bitcoin/bitcoin/chain/transaction_output.hpp>
+#include <bitcoin/bitcoin/chain/input.hpp>
+#include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -61,14 +61,14 @@ public:
     bool is_final(uint64_t block_height, uint32_t block_time) const;
     bool is_locktime_conflict() const;
     uint64_t total_output_value() const;
-    uint64_t satoshi_size() const;
+    uint64_t serialized_size() const;
 
-    static const std::string satoshi_command;
+    static const std::string command;
 
     uint32_t version;
     uint32_t locktime;
-    transaction_input::list inputs;
-    transaction_output::list outputs;
+    input::list inputs;
+    output::list outputs;
 };
 
 } // namspace chain

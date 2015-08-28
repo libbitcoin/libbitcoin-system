@@ -49,7 +49,7 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size() const;
+    uint64_t serialized_size() const;
 
     inventory_type_id type;
     hash_digest hash;
@@ -57,7 +57,6 @@ public:
 
 BC_API bool operator==(const inventory_vector& left,
     const inventory_vector& right);
-
 BC_API bool operator!=(const inventory_vector& left,
     const inventory_vector& right);
 

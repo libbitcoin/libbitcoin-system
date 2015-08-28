@@ -29,7 +29,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::reject::satoshi_command = "reject";
+const std::string message::reject::command = "reject";
 
 reject reject::factory_from_data(const data_chunk& data)
 {
@@ -90,8 +90,8 @@ bool reject::from_data(reader& source)
     code = error_code_from_byte(source.read_byte());
     reason = source.read_string();
 
-    if ((message == chain::block::satoshi_command) ||
-        (message == chain::transaction::satoshi_command))
+    if ((message == chain::block::command) ||
+        (message == chain::transaction::command))
     {
         data = source.read_hash();
     }
@@ -110,7 +110,7 @@ data_chunk reject::to_data() const
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -126,20 +126,20 @@ void reject::to_data(writer& sink) const
     sink.write_byte(error_code_to_byte(code));
     sink.write_string(reason);
 
-    if ((message == chain::block::satoshi_command) ||
-        (message == chain::transaction::satoshi_command))
+    if ((message == chain::block::command) ||
+        (message == chain::transaction::command))
     {
         sink.write_hash(data);
     }
 }
 
-uint64_t reject::satoshi_size() const
+uint64_t reject::serialized_size() const
 {
     uint64_t size = 1 + variable_uint_size(message.size()) + message.size() +
         variable_uint_size(reason.size()) + reason.size();
 
-    if ((message == chain::block::satoshi_command) ||
-        (message == chain::transaction::satoshi_command))
+    if ((message == chain::block::command) ||
+        (message == chain::transaction::command))
     {
         size += hash_size;
     }

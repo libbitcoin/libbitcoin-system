@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
     const message::reject expected
     {
-        chain::block::satoshi_command,
+        chain::block::command,
         message::reject::error_code::dust,
         reason_text,
         data
@@ -68,15 +68,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
     const message::reject expected
     {
-        chain::block::satoshi_command,
+        chain::block::command,
         message::reject::error_code::insufficient_fee,
         reason_text,
         data
@@ -88,15 +88,15 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
     const message::reject expected
     {
-        chain::transaction::satoshi_command,
+        chain::transaction::command,
         message::reject::error_code::duplicate,
         reason_text,
         data
@@ -109,8 +109,8 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(equal(expected, result));
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

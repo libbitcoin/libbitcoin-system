@@ -148,7 +148,7 @@ data_chunk alert_payload::to_data() const
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -183,7 +183,7 @@ void alert_payload::to_data(writer& sink) const
     sink.write_string(reserved);
 }
 
-uint64_t alert_payload::satoshi_size() const
+uint64_t alert_payload::serialized_size() const
 {
     uint64_t size = 40 + variable_uint_size(comment.size()) + comment.size() +
         variable_uint_size(status_bar.size()) + status_bar.size() +

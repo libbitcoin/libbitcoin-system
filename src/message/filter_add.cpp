@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::filter_add::satoshi_command = "filteradd";
+const std::string message::filter_add::command = "filteradd";
 
 filter_add filter_add::factory_from_data(const data_chunk& data)
 {
@@ -99,7 +99,7 @@ data_chunk filter_add::to_data() const
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -115,7 +115,7 @@ void filter_add::to_data(writer& sink) const
     sink.write_data(data);
 }
 
-uint64_t filter_add::satoshi_size() const
+uint64_t filter_add::serialized_size() const
 {
     return variable_uint_size(data.size()) + data.size();
 }

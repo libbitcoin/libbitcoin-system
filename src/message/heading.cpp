@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/heading.hpp>
 
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -29,61 +29,61 @@
 namespace libbitcoin {
 namespace message {
 
-header header::factory_from_data(const data_chunk& data)
+heading heading::factory_from_data(const data_chunk& data)
 {
-    header instance;
+    heading instance;
     instance.from_data(data);
     return instance;
 }
 
-header header::factory_from_data(std::istream& stream)
+heading heading::factory_from_data(std::istream& stream)
 {
-    header instance;
+    heading instance;
     instance.from_data(stream);
     return instance;
 }
 
-header header::factory_from_data(reader& source)
+heading heading::factory_from_data(reader& source)
 {
-    header instance;
+    heading instance;
     instance.from_data(source);
     return instance;
 }
 
-bool header::is_valid() const
+bool heading::is_valid() const
 {
     return (magic != 0)
-        || (payload_length != 0)
+        || (payload_size != 0)
         || (checksum != 0)
         || !command.empty();
 }
 
-void header::reset()
+void heading::reset()
 {
     magic = 0;
     command.clear();
-    payload_length = 0;
+    payload_size = 0;
     checksum = 0;
 }
 
-bool header::from_data(const data_chunk& data)
+bool heading::from_data(const data_chunk& data)
 {
     data_source istream(data);
     return from_data(istream);
 }
 
-bool header::from_data(std::istream& stream)
+bool heading::from_data(std::istream& stream)
 {
     istream_reader source(stream);
     return from_data(source);
 }
 
-bool header::from_data(reader& source)
+bool heading::from_data(reader& source)
 {
     reset();
     magic = source.read_4_bytes_little_endian();
     command = source.read_fixed_string(command_size);
-    payload_length = source.read_4_bytes_little_endian();
+    payload_size = source.read_4_bytes_little_endian();
     checksum = 0;
     if (!source)
         reset();
@@ -91,45 +91,45 @@ bool header::from_data(reader& source)
     return source;
 }
 
-data_chunk header::to_data() const
+data_chunk heading::to_data() const
 {
     data_chunk data;
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
-void header::to_data(std::ostream& stream) const
+void heading::to_data(std::ostream& stream) const
 {
     ostream_writer sink(stream);
     to_data(sink);
 }
 
-void header::to_data(writer& sink) const
+void heading::to_data(writer& sink) const
 {
     sink.write_4_bytes_little_endian(magic);
     sink.write_fixed_string(command, command_size);
-    sink.write_4_bytes_little_endian(payload_length);
+    sink.write_4_bytes_little_endian(payload_size);
     if (checksum != 0)
         sink.write_4_bytes_little_endian(checksum);
 }
 
-uint64_t header::satoshi_size() const
+uint64_t heading::serialized_size() const
 {
     return 20 + (checksum == 0 ? 0 : 4);
 }
 
-bool operator==(const header& left, const header& right)
+bool operator==(const heading& left, const heading& right)
 {
     return (left.magic == right.magic)
         && (left.command == right.command)
-        && (left.payload_length == right.payload_length)
+        && (left.payload_size == right.payload_size)
         && (left.checksum == right.checksum);
 }
 
-bool operator!=(const header& left, const header& right)
+bool operator!=(const heading& left, const heading& right)
 {
     return !(left == right);
 }

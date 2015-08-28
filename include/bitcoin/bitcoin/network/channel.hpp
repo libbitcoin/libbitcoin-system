@@ -75,8 +75,8 @@ public:
         proxy_->send(packet, handler);
     }
 
-    void send_raw(const message::header& packet_header,
-        const data_chunk& payload, proxy::handler handler);
+    void send_raw(const message::heading& heading, const data_chunk& payload,
+        proxy::handler handler);
 
 private:
     proxy::ptr proxy_;

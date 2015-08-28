@@ -25,7 +25,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/operation.hpp>
-#include <bitcoin/bitcoin/chain/payment.hpp>
+#include <bitcoin/bitcoin/chain/payment_type.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -105,7 +105,7 @@ public:
     bool is_valid() const;
     void reset();
     uint64_t satoshi_content_size() const;
-    uint64_t satoshi_size(bool with_length_prefix /*= true*/) const;
+    uint64_t serialized_size(bool with_length_prefix /*= true*/) const;
 
     operation::stack operations;
 

@@ -60,7 +60,7 @@ public:
     void to_data(writer& sink, bool with_timestamp /*= true*/) const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size(bool with_timestamp /*= false*/) const;
+    uint64_t serialized_size(bool with_timestamp /*= false*/) const;
 
     uint32_t timestamp;
     uint64_t services;

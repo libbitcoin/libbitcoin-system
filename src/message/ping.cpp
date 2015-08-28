@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::ping::satoshi_command = "ping";
+const std::string message::ping::command = "ping";
 
 ping ping::factory_from_data(const data_chunk& data)
 {

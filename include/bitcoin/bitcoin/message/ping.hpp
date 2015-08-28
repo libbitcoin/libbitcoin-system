@@ -47,7 +47,7 @@ public:
     ping();
     ping(const uint64_t nonce);
 
-    static const std::string satoshi_command;
+    static const std::string command;
 };
 
 } // namspace message

@@ -72,14 +72,14 @@
       <ExcludedFromBuild Condition="$(PlatformToolset) != 'CTP_Nov2013'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\block.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\block_header.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\header.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\opcode.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\operation.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\point.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\script.cpp" />
     <ClCompile Include="..\..\..\..\src\chain\transaction.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\transaction_input.cpp" />
-    <ClCompile Include="..\..\..\..\src\chain\transaction_output.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\input.cpp" />
+    <ClCompile Include="..\..\..\..\src\chain\output.cpp" />
     <ClCompile Include="..\..\..\..\src\config\authority.cpp" />
     <ClCompile Include="..\..\..\..\src\config\btc256.cpp" />
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
@@ -129,7 +129,7 @@
     <ClCompile Include="..\..\..\..\src\message\get_address.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_blocks.cpp" />
     <ClCompile Include="..\..\..\..\src\message\get_data.cpp" />
-    <ClCompile Include="..\..\..\..\src\message\header.cpp" />
+    <ClCompile Include="..\..\..\..\src\message\heading.cpp" />
     <ClCompile Include="..\..\..\..\src\message\inventory.cpp" />
     <ClCompile Include="..\..\..\..\src\message\inventory_type_id.cpp" />
     <ClCompile Include="..\..\..\..\src\message\inventory_vector.cpp" />
@@ -187,15 +187,15 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\block_header.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\opcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\operation.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment_type.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction_input.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction_output.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.h" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\compat.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\authority.hpp" />
@@ -239,7 +239,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_address.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_blocks.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\get_data.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\header.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\heading.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_type_id.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\inventory_vector.hpp" />

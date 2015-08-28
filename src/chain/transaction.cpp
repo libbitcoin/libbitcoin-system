@@ -30,7 +30,7 @@
 namespace libbitcoin {
 namespace chain {
 
-const std::string chain::transaction::satoshi_command = "tx";
+const std::string chain::transaction::command = "tx";
 
 transaction transaction::factory_from_data(const data_chunk& data)
 {
@@ -128,7 +128,7 @@ data_chunk transaction::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
 
     return data;
 }
@@ -153,16 +153,16 @@ void transaction::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(locktime);
 }
 
-uint64_t transaction::satoshi_size() const
+uint64_t transaction::serialized_size() const
 {
     uint64_t tx_size = 8;
     tx_size += variable_uint_size(inputs.size());
     for (const auto& input: inputs)
-        tx_size += input.satoshi_size();
+        tx_size += input.serialized_size();
 
     tx_size += variable_uint_size(outputs.size());
     for (const auto& output: outputs)
-        tx_size += output.satoshi_size();
+        tx_size += output.serialized_size();
 
     return tx_size;
 }

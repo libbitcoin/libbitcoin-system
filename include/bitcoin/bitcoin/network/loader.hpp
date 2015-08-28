@@ -36,7 +36,7 @@ public:
     typedef std::shared_ptr<loader_base> ptr;
 
     virtual code try_load(std::istream& stream) const = 0;
-    virtual const std::string satoshi_command() const = 0;
+    virtual const std::string command() const = 0;
 };
 
 template <typename Message>
@@ -70,9 +70,9 @@ public:
         return status;
     }
 
-    const std::string satoshi_command() const
+    const std::string command() const
     {
-        return Message::satoshi_command;
+        return Message::command;
     }
 
 private:

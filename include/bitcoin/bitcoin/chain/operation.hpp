@@ -50,7 +50,7 @@ public:
     std::string to_string() const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size() const;
+    uint64_t serialized_size() const;
 
     opcode code;
     data_chunk data;

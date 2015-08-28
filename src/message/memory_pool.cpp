@@ -27,7 +27,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::memory_pool::satoshi_command = "mempool";
+const std::string message::memory_pool::command = "mempool";
 
 memory_pool memory_pool::factory_from_data(const data_chunk& data)
 {
@@ -83,7 +83,7 @@ data_chunk memory_pool::to_data() const
     boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -97,7 +97,7 @@ void memory_pool::to_data(writer& sink) const
 {
 }
 
-uint64_t memory_pool::satoshi_size() const
+uint64_t memory_pool::serialized_size() const
 {
     return memory_pool::satoshi_fixed_size();
 }

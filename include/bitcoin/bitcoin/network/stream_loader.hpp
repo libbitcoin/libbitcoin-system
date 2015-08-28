@@ -46,7 +46,7 @@ public:
     {
         // loader isn't copyable, so we use pointers here.
         auto module = std::make_shared<loader<Message>>(handler);
-        modules_[module->satoshi_command()] = module;
+        modules_[module->command()] = module;
     }
 
     code load(const std::string& command, std::istream& stream) const;

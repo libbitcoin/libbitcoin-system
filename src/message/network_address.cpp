@@ -111,7 +111,7 @@ data_chunk network_address::to_data(bool with_timestamp) const
     data_sink ostream(data);
     to_data(ostream, with_timestamp);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size(with_timestamp));
+    BITCOIN_ASSERT(data.size() == serialized_size(with_timestamp));
     return data;
 }
 
@@ -131,7 +131,7 @@ void network_address::to_data(writer& sink, bool with_timestamp) const
     sink.write_2_bytes_big_endian(port);
 }
 
-uint64_t network_address::satoshi_size(bool with_timestamp) const
+uint64_t network_address::serialized_size(bool with_timestamp) const
 {
     return network_address::satoshi_fixed_size(with_timestamp);
 }

@@ -22,7 +22,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::not_found::satoshi_command = "notfound";
+const std::string message::not_found::command = "notfound";
 
 not_found not_found::factory_from_data(const data_chunk& data)
 {

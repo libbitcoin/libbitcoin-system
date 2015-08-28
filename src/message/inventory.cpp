@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::inventory::satoshi_command = "inv";
+const std::string message::inventory::command = "inv";
 
 inventory inventory::factory_from_data(const data_chunk& data)
 {
@@ -98,7 +98,7 @@ data_chunk inventory::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -115,7 +115,7 @@ void inventory::to_data(writer& sink) const
         inv.to_data(sink);
 }
 
-uint64_t inventory::satoshi_size() const
+uint64_t inventory::serialized_size() const
 {
     return variable_uint_size(inventories.size()) + inventories.size() *
         inventory_vector::satoshi_fixed_size();

@@ -53,25 +53,13 @@
     <ClCompile Include="..\..\..\..\test\chain\transaction.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\transaction_input.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\transaction_output.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\block.cpp">
-      <Filter>src\chain</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\chain\block_header.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\chain\point.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\get_data.cpp">
-      <Filter>src\message</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\message\header.cpp">
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\inventory.cpp">
@@ -253,6 +241,18 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\message\alert_payload.cpp">
       <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\header.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\message\heading.cpp">
+      <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\input.cpp">
+      <Filter>src\chain</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\chain\output.cpp">
+      <Filter>src\chain</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

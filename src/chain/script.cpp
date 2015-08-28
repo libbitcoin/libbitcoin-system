@@ -178,7 +178,7 @@ data_chunk script::to_data(bool with_length_prefix) const
     data_sink ostream(data);
     to_data(ostream, with_length_prefix);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size(with_length_prefix));
+    BITCOIN_ASSERT(data.size() == serialized_size(with_length_prefix));
     return data;
 }
 
@@ -205,15 +205,15 @@ uint64_t script::satoshi_content_size() const
     uint64_t size = 0;
 
     if (operations.size() > 0 && (operations[0].code == opcode::raw_data))
-        size = operations[0].satoshi_size();
+        size = operations[0].serialized_size();
     else
         for (const operation& op: operations)
-            size += op.satoshi_size();
+            size += op.serialized_size();
 
     return size;
 }
 
-uint64_t script::satoshi_size(bool with_length_prefix) const
+uint64_t script::serialized_size(bool with_length_prefix) const
 {
     uint64_t size = satoshi_content_size();
     if (with_length_prefix)
@@ -343,7 +343,7 @@ inline hash_digest one_hash()
     };
 }
 
-inline void nullify_input_sequences(transaction_input::list& inputs,
+inline void nullify_input_sequences(input::list& inputs,
     uint32_t except_input)
 {
     for (size_t index = 0; index < inputs.size(); ++index)
@@ -382,7 +382,7 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // We don't care about additional inputs or outputs to the tx.
     else if ((hash_type & 0x1f) == signature_hash_algorithm::single)
     {
-        transaction_output::list& outputs = parent_tx.outputs;
+        output::list& outputs = parent_tx.outputs;
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test

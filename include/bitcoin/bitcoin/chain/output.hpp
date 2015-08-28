@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,25 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_FILTER_ADD_HPP
-#define LIBBITCOIN_MESSAGE_FILTER_ADD_HPP
+#ifndef LIBBITCOIN_CHAIN_OUTPUT_HPP
+#define LIBBITCOIN_CHAIN_OUTPUT_HPP
 
+#include <cstdint>
 #include <istream>
-#include <string>
+#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
-namespace message {
+namespace chain {
 
-class BC_API filter_add
+class BC_API output
 {
 public:
-    static filter_add factory_from_data(const data_chunk& data);
-    static filter_add factory_from_data(std::istream& stream);
-    static filter_add factory_from_data(reader& source);
+    typedef std::vector<output> list;
+
+    static output factory_from_data(const data_chunk& data);
+    static output factory_from_data(std::istream& stream);
+    static output factory_from_data(reader& source);
+    static uint64_t satoshi_fixed_size();
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -43,19 +47,16 @@ public:
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
+    std::string to_string() const;
     bool is_valid() const;
     void reset();
     uint64_t serialized_size() const;
 
-    static const std::string command;
-
-    data_chunk data;
+    uint64_t value;
+    chain::script script;
 };
 
-BC_API bool operator==(const filter_add& left,  const filter_add& right);
-BC_API bool operator!=(const filter_add& left, const filter_add& right);
-
-} // end message
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin
 
 #endif

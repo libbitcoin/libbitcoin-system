@@ -107,7 +107,7 @@ data_chunk operation::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -151,7 +151,7 @@ void operation::to_data(writer& sink) const
     sink.write_data(data);
 }
 
-uint64_t operation::satoshi_size() const
+uint64_t operation::serialized_size() const
 {
     uint64_t size = 1 + data.size();
 

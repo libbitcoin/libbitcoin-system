@@ -24,7 +24,7 @@
 #include <cstdint>
 #include <memory>
 #include <bitcoin/bitcoin/config/authority.hpp>
-#include <bitcoin/bitcoin/message/header.hpp>
+#include <bitcoin/bitcoin/message/heading.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -102,10 +102,10 @@ void channel::subscribe_raw(proxy::receive_raw_handler handler)
     proxy_->subscribe_raw(handler);
 }
 
-void channel::send_raw(const message::header& packet_header,
+void channel::send_raw(const message::heading& heading,
     const data_chunk& payload, proxy::handler handler)
 {
-    proxy_->send_raw(packet_header, payload, handler);
+    proxy_->send_raw(heading, payload, handler);
 }
 
 } // namespace network

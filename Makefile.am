@@ -39,14 +39,14 @@ src_libbitcoin_la_SOURCES = \
     src/constants.cpp \
     src/error.cpp \
     src/chain/block.cpp \
-    src/chain/block_header.cpp \
+    src/chain/header.cpp \
+    src/chain/input.cpp \
     src/chain/opcode.cpp \
     src/chain/operation.cpp \
+    src/chain/output.cpp \
     src/chain/point.cpp \
     src/chain/script.cpp \
     src/chain/transaction.cpp \
-    src/chain/transaction_input.cpp \
-    src/chain/transaction_output.cpp \
     src/config/authority.cpp \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
@@ -99,7 +99,7 @@ src_libbitcoin_la_SOURCES = \
     src/message/get_blocks.cpp \
     src/message/get_data.cpp \
     src/message/get_headers.cpp \
-    src/message/header.cpp \
+    src/message/heading.cpp \
     src/message/inventory.cpp \
     src/message/inventory_type_id.cpp \
     src/message/inventory_vector.cpp \
@@ -228,13 +228,13 @@ test_libbitcoin_test_SOURCES = \
     test/unicode_ostream.cpp \
     test/uri.cpp \
     test/chain/block.cpp \
-    test/chain/block_header.cpp \
+    test/chain/header.cpp \
+    test/chain/input.cpp \
+    test/chain/output.cpp \
     test/chain/point.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
     test/chain/transaction.cpp \
-    test/chain/transaction_input.cpp \
-    test/chain/transaction_output.cpp \
     test/message/address.cpp \
     test/message/alert.cpp \
     test/message/alert_payload.cpp \
@@ -245,7 +245,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/get_blocks.cpp \
     test/message/get_data.cpp \
     test/message/get_headers.cpp \
-    test/message/header.cpp \
+    test/message/heading.cpp \
     test/message/inventory.cpp \
     test/message/inventory_type_id.cpp \
     test/message/inventory_vector.cpp \
@@ -284,15 +284,15 @@ include_bitcoin_bitcoin_HEADERS = \
 include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
 include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/block.hpp \
-    include/bitcoin/bitcoin/chain/block_header.hpp \
+    include/bitcoin/bitcoin/chain/header.hpp \
+    include/bitcoin/bitcoin/chain/input.hpp \
     include/bitcoin/bitcoin/chain/opcode.hpp \
     include/bitcoin/bitcoin/chain/operation.hpp \
-    include/bitcoin/bitcoin/chain/payment.hpp \
+    include/bitcoin/bitcoin/chain/output.hpp \
+    include/bitcoin/bitcoin/chain/payment_type.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
     include/bitcoin/bitcoin/chain/script.hpp \
-    include/bitcoin/bitcoin/chain/transaction.hpp \
-    include/bitcoin/bitcoin/chain/transaction_input.hpp \
-    include/bitcoin/bitcoin/chain/transaction_output.hpp
+    include/bitcoin/bitcoin/chain/transaction.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
@@ -351,7 +351,7 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/get_blocks.hpp \
     include/bitcoin/bitcoin/message/get_data.hpp \
     include/bitcoin/bitcoin/message/get_headers.hpp \
-    include/bitcoin/bitcoin/message/header.hpp \
+    include/bitcoin/bitcoin/message/heading.hpp \
     include/bitcoin/bitcoin/message/inventory.hpp \
     include/bitcoin/bitcoin/message/inventory_type_id.hpp \
     include/bitcoin/bitcoin/message/inventory_vector.hpp \

@@ -29,7 +29,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::get_blocks::satoshi_command = "getblocks";
+const std::string message::get_blocks::command = "getblocks";
 
 get_blocks get_blocks::factory_from_data(const data_chunk& data)
 {
@@ -103,7 +103,7 @@ data_chunk get_blocks::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -124,7 +124,7 @@ void get_blocks::to_data(writer& sink) const
     sink.write_hash(hash_stop);
 }
 
-uint64_t get_blocks::satoshi_size() const
+uint64_t get_blocks::serialized_size() const
 {
     return 36 + variable_uint_size(start_hashes.size()) +
         hash_size * start_hashes.size();

@@ -17,28 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CHAIN_TRANSACTION_OUTPUT_HPP
-#define LIBBITCOIN_CHAIN_TRANSACTION_OUTPUT_HPP
+#ifndef LIBBITCOIN_CHAIN_INPUT_HPP
+#define LIBBITCOIN_CHAIN_INPUT_HPP
 
 #include <cstdint>
 #include <istream>
-#include <vector>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/chain/point.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
 
-class BC_API transaction_output
+class BC_API input
 {
 public:
-    typedef std::vector<transaction_output> list;
+    typedef std::vector<input> list;
 
-    static transaction_output factory_from_data(const data_chunk& data);
-    static transaction_output factory_from_data(std::istream& stream);
-    static transaction_output factory_from_data(reader& source);
+    static input factory_from_data(const data_chunk& data);
+    static input factory_from_data(std::istream& stream);
+    static input factory_from_data(reader& source);
     static uint64_t satoshi_fixed_size();
 
     bool from_data(const data_chunk& data);
@@ -50,10 +51,12 @@ public:
     std::string to_string() const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size() const;
+    bool is_final() const;
+    uint64_t serialized_size() const;
 
-    uint64_t value;
+    output_point previous_output;
     chain::script script;
+    uint32_t sequence;
 };
 
 } // namspace chain

@@ -53,7 +53,7 @@ public:
     std::string to_string() const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size() const;
+    uint64_t serialized_size() const;
 
     hash_digest hash;
     uint32_t index;

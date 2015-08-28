@@ -28,7 +28,7 @@
 namespace libbitcoin {
 namespace message {
 
-const std::string message::pong::satoshi_command = "pong";
+const std::string message::pong::command = "pong";
 
 pong pong::factory_from_data(const data_chunk& data)
 {

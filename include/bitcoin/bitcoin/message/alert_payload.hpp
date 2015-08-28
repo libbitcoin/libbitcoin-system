@@ -46,7 +46,7 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t satoshi_size() const;
+    uint64_t serialized_size() const;
 
     static const ec_point satoshi_public_key;
 
@@ -66,7 +66,6 @@ public:
 };
 
 BC_API bool operator==(const alert_payload& left, const alert_payload& right);
-
 BC_API bool operator!=(const alert_payload& left, const alert_payload& right);
 
 } // end message
