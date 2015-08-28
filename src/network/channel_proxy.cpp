@@ -480,6 +480,14 @@ void channel_proxy::subscribe_stop(stop_handler handler)
         stop_subscriber_->subscribe(handler);
 }
 
+void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
+{
+    if (stopped())
+        handle_receive(error::channel_stopped, header(), data_chunk());
+    else
+        raw_subscriber_->subscribe(handle_receive);
+}
+
 void channel_proxy::do_send(const data_chunk& message,
     send_handler handler, const std::string& command)
 {
