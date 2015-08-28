@@ -77,8 +77,9 @@ public:
     template <typename Message>
     void broadcast(const Message& packet, broadcast_handler handle_send)
     {
-        dispatch_.ordered(&protocol::do_broadcast<Message>,
-            this, packet, handle_send);
+        dispatch_.ordered(
+            std::bind(&protocol::do_broadcast<Message>,
+                this, packet, handle_send));
     }
 
 private:
