@@ -176,9 +176,9 @@ void hosts::store(const message::network_address::list& addresses,
 void hosts::do_store(const message::network_address& address,
     store_handler handle_store)
 {
-    if (address.is_valid())
+    if (!address.is_valid())
         log_debug(LOG_PROTOCOL)
-        << "Invalid host port from peer";
+            << "Invalid host address from peer";
     else if (exists(address))
         log_debug(LOG_PROTOCOL)
             << "Redundant host address from peer";
