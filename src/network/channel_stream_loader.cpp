@@ -21,9 +21,8 @@
 
 #include <istream>
 #include <string>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel_loader_module.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -41,7 +40,7 @@ channel_stream_loader::~channel_stream_loader()
 code channel_stream_loader::load(const std::string& symbol,
     std::istream& stream) const
 {
-    code status = bc::error::bad_stream;
+    code status(bc::error::bad_stream);
 
     auto it = modules_.find(symbol);
     if (it != modules_.end())
