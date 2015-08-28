@@ -48,6 +48,8 @@
 
 // These must be declared in the global namespace.
 INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACKS()
+INITIALIZE_TRACK(bc::network::proxy::stop_subscriber)
+INITIALIZE_TRACK(bc::network::proxy::raw_subscriber)
 INITIALIZE_TRACK(bc::network::proxy)
 
 namespace libbitcoin {
@@ -72,6 +74,8 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     revival_handler_(nullptr),
     stopped_(false),
     INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(),
+    stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
+    raw_subscriber_(MAKE_SUBSCRIBER(raw, pool, LOG_NETWORK)),
     CONSTRUCT_TRACK(proxy, LOG_NETWORK)
 {
     ESTABLISH_PROXY_MESSAGE_RELAYS();
