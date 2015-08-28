@@ -26,7 +26,7 @@
 namespace libbitcoin {
 namespace delegate {
 
-#define BIND_HANDLER(handler, args) \
+#define BIND_HANDLER_ARGS(handler, args) \
     std::bind(handler, std::forward<Args>(args)...)
 
 /**
@@ -39,7 +39,7 @@ struct concurrent
     void operator()(Args&&... args)
     {
         // Service post ensures the job does not execute in the current thread.
-        service.post(BIND_HANDLER(handler, args));
+        service.post(BIND_HANDLER_ARGS(handler, args));
     }
 
     Handler handler;
@@ -57,7 +57,7 @@ struct ordered
     {
         // We use a strand to prevent concurrency and post vs. dispatch to
         // ensure that the job is not executed in the current thread.
-        strand.post(BIND_HANDLER(handler, args));
+        strand.post(BIND_HANDLER_ARGS(handler, args));
     }
 
     Handler handler;
@@ -75,7 +75,7 @@ struct unordered
     {
         // We use a strand wrapper ro prevent concurrency and a service post
         // to deny ordering while ensuring execution on another thread.
-        service.post(strand.wrap(BIND_HANDLER(handler, args)));
+        service.post(strand.wrap(BIND_HANDLER_ARGS(handler, args)));
     }
 
     Handler handler;
@@ -83,7 +83,7 @@ struct unordered
     asio::service::strand& strand;
 };
 
-#undef BIND_HANDLER
+#undef BIND_HANDLER_ARGS
 
 } // namespace delegate
 } // namespace libbitcoin
