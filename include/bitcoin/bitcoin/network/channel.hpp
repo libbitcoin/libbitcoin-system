@@ -28,8 +28,6 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/chain/block.hpp>
-#include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
@@ -65,25 +63,22 @@ public:
     void set_nonce(uint64_t nonce);
     config::authority address() const;
     void reset_revival();
-    void set_revival_handler(proxy::revival_handler handler);
+    void set_revival_handler(proxy::handler handler);
 
     DECLARE_CHANNEL_MESSAGE_SUBSCRIBERS();
-    //void subscribe_transaction(proxy::receive_transaction_handler handler);
-    //void subscribe_block(proxy::receive_block_handler handler);
     void subscribe_raw(proxy::receive_raw_handler handle);
     void subscribe_stop(proxy::stop_handler handle);
 
     template <typename Message>
-    void send(const Message& packet, proxy::send_handler handler)
+    void send(const Message& packet, proxy::handler handler)
     {
         proxy_->send(packet, handler);
     }
 
     void send_raw(const message::header& packet_header,
-        const data_chunk& payload, proxy::send_handler handler);
+        const data_chunk& payload, proxy::handler handler);
 
 private:
-
     proxy::ptr proxy_;
     uint64_t nonce_;
 };

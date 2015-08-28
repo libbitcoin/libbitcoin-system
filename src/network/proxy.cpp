@@ -27,8 +27,6 @@
 #include <boost/date_time.hpp>
 #include <boost/format.hpp>
 #include <boost/iostreams/stream.hpp>
-#include <bitcoin/bitcoin/chain/block.hpp>
-#include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
@@ -90,13 +88,12 @@ proxy::~proxy()
 template<typename Message, class Subscriber>
 void proxy::establish_relay(Subscriber subscriber)
 {
-    const auto message_handler = [subscriber](const code& ec,
-        const Message& message)
+    const auto handler = [subscriber](const code& ec, const Message& message)
     {
         subscriber->relay(ec, message);
     };
 
-    stream_loader_.add<Message>(message_handler);
+    stream_loader_.add<Message>(handler);
 }
 
 // Subscribing must be immediate, we cannot switch thread contexts.
@@ -206,7 +203,7 @@ void proxy::reset_revival()
 }
 
 // public
-void proxy::set_revival_handler(revival_handler handler)
+void proxy::set_revival_handler(handler handler)
 {
     if (stopped())
         return;
@@ -480,16 +477,16 @@ void proxy::subscribe_stop(stop_handler handler)
         stop_subscriber_->subscribe(handler);
 }
 
-void proxy::subscribe_raw(receive_raw_handler handle_receive)
+void proxy::subscribe_raw(receive_raw_handler handler)
 {
     if (stopped())
-        handle_receive(error::channel_stopped, header(), data_chunk());
+        handler(error::channel_stopped, header(), data_chunk());
     else
-        raw_subscriber_->subscribe(handle_receive);
+        raw_subscriber_->subscribe(handler);
 }
 
-void proxy::do_send(const data_chunk& message,
-    send_handler handler, const std::string& command)
+void proxy::do_send(const data_chunk& message, handler handler,
+    const std::string& command)
 {
     if (stopped())
     {
@@ -507,27 +504,26 @@ void proxy::do_send(const data_chunk& message,
             shared_from_this(), _1, handler));
 }
 
-void proxy::call_handle_send(const boost_code& ec,
-    send_handler handler)
+void proxy::call_handle_send(const boost_code& ec, handler handler)
 {
     handler(error::boost_to_error_code(ec));
 }
 
-void proxy::send_raw(const header& packet_header,
-    const data_chunk& payload, send_handler handle_send)
+void proxy::send_raw(const header& packet_header, const data_chunk& payload,
+    handler handler)
 {
     if (stopped())
     {
-        handle_send(error::channel_stopped);
+        handler(error::channel_stopped);
         return;
     }
 
     dispatch_.ordered(&proxy::do_send_raw,
-        shared_from_this(), packet_header, payload, handle_send);
+        shared_from_this(), packet_header, payload, handler);
 }
 
-void proxy::do_send_raw(const header& packet_header,
-    const data_chunk& payload, send_handler handler)
+void proxy::do_send_raw(const header& packet_header, const data_chunk& payload,
+    handler handler)
 {
     if (stopped())
     {

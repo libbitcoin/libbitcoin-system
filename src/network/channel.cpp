@@ -87,20 +87,10 @@ void channel::reset_revival()
     return proxy_->reset_revival();
 }
 
-void channel::set_revival_handler(proxy::revival_handler handler)
+void channel::set_revival_handler(proxy::handler handler)
 {
     return proxy_->set_revival_handler(handler);
 }
-
-//void channel::subscribe_transaction(proxy::receive_transaction_handler handler)
-//{
-//    proxy_->subscribe_transaction(handler);
-//}
-//
-//void channel::subscribe_block(proxy::receive_block_handler handler)
-//{
-//    proxy_->subscribe_block(handler);
-//}
 
 void channel::subscribe_stop(proxy::stop_handler handler)
 {
@@ -113,7 +103,7 @@ void channel::subscribe_raw(proxy::receive_raw_handler handler)
 }
 
 void channel::send_raw(const message::header& packet_header,
-    const data_chunk& payload, proxy::send_handler handler)
+    const data_chunk& payload, proxy::handler handler)
 {
     proxy_->send_raw(packet_header, payload, handler);
 }
