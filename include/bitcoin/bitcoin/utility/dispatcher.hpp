@@ -93,7 +93,7 @@ public:
             collection.size(), name);
 
         for (const auto& element: collection)
-            concurrent(BIND_ELEMENT(args, std::ref(element), call));
+            concurrent(BIND_ELEMENT(args, element, call));
     }
 
     /**
@@ -107,7 +107,7 @@ public:
             collection.size(), name);
 
         for (const auto& element: collection)
-            unordered(BIND_ELEMENT(args, std::ref(element), call));
+            unordered(BIND_ELEMENT(args, element, call));
     }
 
     /**
@@ -121,7 +121,7 @@ public:
             collection.size(), name);
 
         for (const auto& element: collection)
-            ordered(BIND_ELEMENT(args, std::ref(element), call));
+            ordered(BIND_ELEMENT(args, element, call));
     }
 
     /**
