@@ -19,6 +19,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/version.hpp>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/block_header.hpp>
@@ -52,7 +53,7 @@
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/alert.hpp>
-#include <bitcoin/bitcoin/message/alert_formatted_payload.hpp>
+#include <bitcoin/bitcoin/message/alert_payload.hpp>
 #include <bitcoin/bitcoin/message/filter_add.hpp>
 #include <bitcoin/bitcoin/message/filter_clear.hpp>
 #include <bitcoin/bitcoin/message/filter_load.hpp>
@@ -67,8 +68,10 @@
 #include <bitcoin/bitcoin/message/memory_pool.hpp>
 #include <bitcoin/bitcoin/message/merkle_block.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/message/nonce.hpp>
 #include <bitcoin/bitcoin/message/not_found.hpp>
-#include <bitcoin/bitcoin/message/ping_pong.hpp>
+#include <bitcoin/bitcoin/message/ping.hpp>
+#include <bitcoin/bitcoin/message/pong.hpp>
 #include <bitcoin/bitcoin/message/reject.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>

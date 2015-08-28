@@ -91,7 +91,7 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/zeroize.h \
     src/message/address.cpp \
     src/message/alert.cpp \
-    src/message/alert_formatted_payload.cpp \
+    src/message/alert_payload.cpp \
     src/message/filter_add.cpp \
     src/message/filter_clear.cpp \
     src/message/filter_load.cpp \
@@ -106,8 +106,10 @@ src_libbitcoin_la_SOURCES = \
     src/message/memory_pool.cpp \
     src/message/merkle_block.cpp \
     src/message/network_address.cpp \
+    src/message/nonce.cpp \
     src/message/not_found.cpp \
-    src/message/ping_pong.cpp \
+    src/message/ping.cpp \
+    src/message/pong.cpp \
     src/message/reject.cpp \
     src/message/verack.cpp \
     src/message/version.cpp \
@@ -235,7 +237,7 @@ test_libbitcoin_test_SOURCES = \
     test/chain/transaction_output.cpp \
     test/message/address.cpp \
     test/message/alert.cpp \
-    test/message/alert_formatted_payload.cpp \
+    test/message/alert_payload.cpp \
     test/message/filter_add.cpp \
     test/message/filter_clear.cpp \
     test/message/filter_load.cpp \
@@ -251,7 +253,8 @@ test_libbitcoin_test_SOURCES = \
     test/message/merkle_block.cpp \
     test/message/network_address.cpp \
     test/message/not_found.cpp \
-    test/message/ping_pong.cpp \
+    test/message/ping.cpp \
+    test/message/pong.cpp \
     test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
@@ -275,6 +278,7 @@ include_bitcoin_bitcoin_HEADERS = \
     include/bitcoin/bitcoin/constants.hpp \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
+    include/bitcoin/bitcoin/messages.hpp \
     include/bitcoin/bitcoin/version.hpp
 
 include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
@@ -339,7 +343,7 @@ include_bitcoin_bitcoin_messagedir = ${includedir}/bitcoin/bitcoin/message
 include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/address.hpp \
     include/bitcoin/bitcoin/message/alert.hpp \
-    include/bitcoin/bitcoin/message/alert_formatted_payload.hpp \
+    include/bitcoin/bitcoin/message/alert_payload.hpp \
     include/bitcoin/bitcoin/message/filter_add.hpp \
     include/bitcoin/bitcoin/message/filter_clear.hpp \
     include/bitcoin/bitcoin/message/filter_load.hpp \
@@ -354,8 +358,10 @@ include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/memory_pool.hpp \
     include/bitcoin/bitcoin/message/merkle_block.hpp \
     include/bitcoin/bitcoin/message/network_address.hpp \
+    include/bitcoin/bitcoin/message/nonce.hpp \
     include/bitcoin/bitcoin/message/not_found.hpp \
-    include/bitcoin/bitcoin/message/ping_pong.hpp \
+    include/bitcoin/bitcoin/message/ping.hpp \
+    include/bitcoin/bitcoin/message/pong.hpp \
     include/bitcoin/bitcoin/message/reject.hpp \
     include/bitcoin/bitcoin/message/verack.hpp \
     include/bitcoin/bitcoin/message/version.hpp

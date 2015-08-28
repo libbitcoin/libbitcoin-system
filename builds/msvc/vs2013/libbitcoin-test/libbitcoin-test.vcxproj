@@ -141,13 +141,14 @@
     <ClCompile Include="..\..\..\..\test\message.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
     <ClCompile Include="..\..\..\..\test\message\alert.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\alert_formatted_payload.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\alert_payload.cpp" />
     <ClCompile Include="..\..\..\..\test\message\filter_add.cpp" />
     <ClCompile Include="..\..\..\..\test\message\filter_clear.cpp" />
     <ClCompile Include="..\..\..\..\test\message\filter_load.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_headers.cpp" />
     <ClCompile Include="..\..\..\..\test\message\memory_pool.cpp" />
     <ClCompile Include="..\..\..\..\test\message\merkle_block.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\pong.cpp" />
     <ClCompile Include="..\..\..\..\test\message\reject.cpp" />
     <ClCompile Include="..\..\..\..\test\message\version.cpp" />
     <ClCompile Include="..\..\..\..\test\message\get_address.cpp" />
@@ -158,7 +159,7 @@
     <ClCompile Include="..\..\..\..\test\message\inventory_type_id.cpp" />
     <ClCompile Include="..\..\..\..\test\message\inventory_vector.cpp" />
     <ClCompile Include="..\..\..\..\test\message\network_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\message\ping_pong.cpp" />
+    <ClCompile Include="..\..\..\..\test\message\ping.cpp" />
     <ClCompile Include="..\..\..\..\test\message\not_found.cpp" />
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
     <ClCompile Include="..\..\..\..\test\mnemonic.cpp" />

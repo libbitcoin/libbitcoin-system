@@ -23,71 +23,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(ping_pong_tests)
-
-BOOST_AUTO_TEST_CASE(ping_pong_from_data_insufficient_bytes_failure)
-{
-    const data_chunk raw{ 1 };
-    message::ping_pong instance{};
-
-    BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
-}
-
-BOOST_AUTO_TEST_CASE(ping_satoshi_fixed_size_returns_sizeof_uint64_t)
-{
-    BOOST_REQUIRE_EQUAL(sizeof(uint64_t), message::ping::satoshi_fixed_size());
-}
-
-BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_chunk)
-{
-    const message::ping expected
-    {
-        16545612u
-    };
-
-    const auto data = expected.to_data();
-    const auto result = message::ping::factory_from_data(data);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
-}
-
-BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_stream)
-{
-    const message::ping expected
-    {
-        5087222u
-    };
-
-    const auto data = expected.to_data();
-    data_source istream(data);
-    const auto result = message::ping::factory_from_data(istream);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
-}
-
-BOOST_AUTO_TEST_CASE(ping_roundtrip_to_data_factory_from_data_reader)
-{
-    const message::ping expected
-    {
-        6456147u
-    };
-
-    const auto data = expected.to_data();
-    data_source istream(data);
-    istream_reader source(istream);
-    const auto result = message::ping::factory_from_data(source);
-
-    BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
-}
+BOOST_AUTO_TEST_SUITE(pong_tests)
 
 BOOST_AUTO_TEST_CASE(pong_satoshi_fixed_size_returns_sizeof_uint64_t)
 {

@@ -22,7 +22,8 @@
 
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/message/ping_pong.hpp>
+#include <bitcoin/bitcoin/message/ping.hpp>
+#include <bitcoin/bitcoin/message/pong.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>

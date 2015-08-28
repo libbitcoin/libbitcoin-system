@@ -23,12 +23,12 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(alert_formatted_payload_tests)
+BOOST_AUTO_TEST_SUITE(alert_payload_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
     data_chunk raw{ 0xab, 0x11 };
-    message::alert_formatted_payload instance;
+    message::alert_payload instance;
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
     BOOST_REQUIRE_EQUAL(false, instance.is_valid());
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
         0x75, 0x61, 0x72, 0x79, 0x00
     };
 
-    const message::alert_formatted_payload expected
+    const message::alert_payload expected
     {
         1,
         1329620535,
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
         ""
     };
 
-    const auto result = message::alert_formatted_payload::factory_from_data(raw);
+    const auto result = message::alert_payload::factory_from_data(raw);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE_EQUAL(raw.size(), result.satoshi_size());
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(wiki_sample_test)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::alert_formatted_payload expected
+    message::alert_payload expected
     {
         5,
         105169,
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
     };
 
     const auto data = expected.to_data();
-    const auto result = message::alert_formatted_payload::factory_from_data(data);
+    const auto result = message::alert_payload::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::alert_formatted_payload expected
+    message::alert_payload expected
     {
         5,
         105169,
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
     const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-    const auto result = message::alert_formatted_payload::factory_from_data(istream);
+    const auto result = message::alert_payload::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    const message::alert_formatted_payload expected
+    const message::alert_payload expected
     {
         5,
         105169,
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     const auto data = expected.to_data();
     boost::iostreams::stream<byte_source<data_chunk>> istream(data);
     istream_reader source(istream);
-    const auto result = message::alert_formatted_payload::factory_from_data(source);
+    const auto result = message::alert_payload::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);

@@ -20,7 +20,8 @@
 #include <bitcoin/bitcoin/network/protocol_ping.hpp>
 
 #include <functional>
-#include <bitcoin/bitcoin/message/ping_pong.hpp>
+#include <bitcoin/bitcoin/message/ping.hpp>
+#include <bitcoin/bitcoin/message/pong.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>

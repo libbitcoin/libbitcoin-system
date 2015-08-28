@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_MESSAGE_ALERT_FORMATTED_PAYLOAD_HPP
-#define LIBBITCOIN_MESSAGE_ALERT_FORMATTED_PAYLOAD_HPP
+#ifndef LIBBITCOIN_MESSAGE_NONCE_HPP
+#define LIBBITCOIN_MESSAGE_NONCE_HPP
 
+#include <cstdint>
 #include <istream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
@@ -30,12 +31,13 @@
 namespace libbitcoin {
 namespace message {
 
-class BC_API alert_formatted_payload
+/**
+ * Abstract base class for ping and pong.
+ */
+class BC_API nonce_
 {
 public:
-    static alert_formatted_payload factory_from_data(const data_chunk& data);
-    static alert_formatted_payload factory_from_data(std::istream& stream);
-    static alert_formatted_payload factory_from_data(reader& source);
+    static uint64_t satoshi_fixed_size();
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -47,28 +49,17 @@ public:
     void reset();
     uint64_t satoshi_size() const;
 
-    uint32_t version;
-    uint64_t relay_until;
-    uint64_t expiration;
-    uint32_t id;
-    uint32_t cancel;
-    std::vector<uint32_t> set_cancel;
-    uint32_t min_version;
-    uint32_t max_version;
-    std::vector<std::string> set_sub_version;
-    uint32_t priority;
-    std::string comment;
-    std::string status_bar;
-    std::string reserved;
+    uint64_t nonce;
+
+protected:
+    nonce_(const uint64_t nonce);
 };
 
-BC_API bool operator==(const alert_formatted_payload& left,
-    const alert_formatted_payload& right);
+BC_API bool operator==(const nonce_& left, const nonce_& right);
 
-BC_API bool operator!=(const alert_formatted_payload& left,
-    const alert_formatted_payload& right);
+BC_API bool operator!=(const nonce_& left, const nonce_& right);
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif
