@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/proxy.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -34,7 +34,7 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
-#include <bitcoin/bitcoin/network/channel_loader_module.hpp>
+#include <bitcoin/bitcoin/network/loader.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -50,7 +50,7 @@
 
 // These must be declared in the global namespace.
 INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACKS()
-INITIALIZE_TRACK(bc::network::channel_proxy)
+INITIALIZE_TRACK(bc::network::proxy)
 
 namespace libbitcoin {
 namespace network {
@@ -63,7 +63,7 @@ using boost::format;
 using boost::posix_time::time_duration;
 
 // The proxy will have no config with timers moved to channel.
-channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
+proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     const timeout& timeouts)
   : socket_(socket),
     dispatch_(pool),
@@ -74,21 +74,21 @@ channel_proxy::channel_proxy(asio::socket_ptr socket, threadpool& pool,
     revival_handler_(nullptr),
     stopped_(false),
     INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(),
-    CONSTRUCT_TRACK(channel_proxy, LOG_NETWORK)
+    CONSTRUCT_TRACK(proxy, LOG_NETWORK)
 {
     ESTABLISH_PROXY_MESSAGE_RELAYS();
 }
 
-// This implements the set of channel_proxy messsage handler methods.
+// This implements the set of proxy messsage handler methods.
 DEFINE_PROXY_MESSAGE_SUBSCRIBERS()
 
-channel_proxy::~channel_proxy()
+proxy::~proxy()
 {
     BITCOIN_ASSERT_MSG(stopped_, "The channel is not stopped.");
 }
 
 template<typename Message, class Subscriber>
-void channel_proxy::establish_relay(Subscriber subscriber)
+void proxy::establish_relay(Subscriber subscriber)
 {
     const auto message_handler = [subscriber](const code& ec,
         const Message& message)
@@ -101,7 +101,7 @@ void channel_proxy::establish_relay(Subscriber subscriber)
 
 // Subscribing must be immediate, we cannot switch thread contexts.
 template <typename Message, class Subscriber, typename Callback>
-void channel_proxy::subscribe(Subscriber subscriber, Callback handler) const
+void proxy::subscribe(Subscriber subscriber, Callback handler) const
 {
     if (stopped())
         subscriber->relay(error::channel_stopped, Message());
@@ -112,19 +112,19 @@ void channel_proxy::subscribe(Subscriber subscriber, Callback handler) const
 // Subscriber doesn't have an unsubscribe, we just send service_stopped.
 // The subscriber then has the option to not resubscribe in the handler.
 template <typename Message, class Subscriber>
-void channel_proxy::notify_stop(Subscriber subscriber) const
+void proxy::notify_stop(Subscriber subscriber) const
 {
     subscriber->relay(error::channel_stopped, Message());
 }
 
-void channel_proxy::start()
+void proxy::start()
 {
     read_header();
     start_timers();
 }
 
 // TODO: cache the endpoint value at accept|connect time.
-config::authority channel_proxy::address() const
+config::authority proxy::address() const
 {
     boost_code ec;
     const auto endpoint = socket_->remote_endpoint(ec);
@@ -133,28 +133,28 @@ config::authority channel_proxy::address() const
     return ec ? config::authority() : config::authority(endpoint);
 }
 
-bool channel_proxy::stopped() const
+bool proxy::stopped() const
 {
     return stopped_;
 }
 
-void channel_proxy::stop(const boost_code& ec)
+void proxy::stop(const boost_code& ec)
 {
     stop(error::boost_to_error_code(ec));
 }
 
-void channel_proxy::stop(const code& ec)
+void proxy::stop(const code& ec)
 {
     BITCOIN_ASSERT_MSG(ec, "The stop code must be an error code.");
 
     if (stopped())
         return;
 
-    dispatch_.ordered(&channel_proxy::do_stop,
+    dispatch_.ordered(&proxy::do_stop,
         shared_from_this(), ec);
 }
 
-void channel_proxy::do_stop(const code& ec)
+void proxy::do_stop(const code& ec)
 {
     if (stopped())
         return;
@@ -171,14 +171,14 @@ void channel_proxy::do_stop(const code& ec)
     clear_subscriptions(ec);
 }
 
-void channel_proxy::clear_subscriptions(const code& ec)
+void proxy::clear_subscriptions(const code& ec)
 {
     CLEAR_PROXY_MESSAGE_SUBSCRIPTIONS();
     raw_subscriber_->relay(ec, header(), data_chunk());
     stop_subscriber_->relay(ec);
 }
 
-void channel_proxy::clear_timers()
+void proxy::clear_timers()
 {
     expiration_->cancel();
     inactivity_->cancel();
@@ -186,7 +186,7 @@ void channel_proxy::clear_timers()
     revival_handler_ = nullptr;
 }
 
-void channel_proxy::start_timers()
+void proxy::start_timers()
 {
     if (stopped())
         return;
@@ -197,7 +197,7 @@ void channel_proxy::start_timers()
 }
 
 // public
-void channel_proxy::reset_revival()
+void proxy::reset_revival()
 {
     if (stopped())
         return;
@@ -206,7 +206,7 @@ void channel_proxy::reset_revival()
 }
 
 // public
-void channel_proxy::set_revival_handler(revival_handler handler)
+void proxy::set_revival_handler(revival_handler handler)
 {
     if (stopped())
         return;
@@ -214,7 +214,7 @@ void channel_proxy::set_revival_handler(revival_handler handler)
     revival_handler_ = handler;
 }
 
-void channel_proxy::start_expiration()
+void proxy::start_expiration()
 {
     if (stopped())
         return;
@@ -222,31 +222,31 @@ void channel_proxy::start_expiration()
     const auto timeout = pseudo_randomize(timeouts_.expiration);
 
     expiration_->start(
-        std::bind(&channel_proxy::handle_expiration,
+        std::bind(&proxy::handle_expiration,
             shared_from_this(), _1), timeout);
 }
 
-void channel_proxy::start_inactivity()
+void proxy::start_inactivity()
 {
     if (stopped())
         return;
 
     inactivity_->start(
-        std::bind(&channel_proxy::handle_inactivity,
+        std::bind(&proxy::handle_inactivity,
             shared_from_this(), _1));
 }
 
-void channel_proxy::start_revival()
+void proxy::start_revival()
 {
     if (stopped())
         return;
 
     revival_->start(
-        std::bind(&channel_proxy::handle_revival,
+        std::bind(&proxy::handle_revival,
             shared_from_this(), _1));
 }
 
-void channel_proxy::handle_expiration(const code& ec)
+void proxy::handle_expiration(const code& ec)
 {
     if (stopped())
         return;
@@ -260,7 +260,7 @@ void channel_proxy::handle_expiration(const code& ec)
     stop(error::channel_timeout);
 }
 
-void channel_proxy::handle_inactivity(const code& ec)
+void proxy::handle_inactivity(const code& ec)
 {
     if (stopped())
         return;
@@ -274,7 +274,7 @@ void channel_proxy::handle_inactivity(const code& ec)
     stop(error::channel_timeout);
 }
 
-void channel_proxy::handle_revival(const code& ec)
+void proxy::handle_revival(const code& ec)
 {
     if (stopped())
         return;
@@ -289,29 +289,29 @@ void channel_proxy::handle_revival(const code& ec)
     revival_handler_(ec);
 }
 
-void channel_proxy::read_header()
+void proxy::read_header()
 {
     if (stopped())
         return;
 
     using namespace boost::asio;
     async_read(*socket_, buffer(inbound_header_),
-        dispatch_.ordered_delegate(&channel_proxy::handle_read_header,
+        dispatch_.ordered_delegate(&proxy::handle_read_header,
             shared_from_this(), _1, _2));
 }
 
-void channel_proxy::read_checksum(const header& header)
+void proxy::read_checksum(const header& header)
 {
     if (stopped())
         return;
 
     using namespace boost::asio;
     async_read(*socket_, buffer(inbound_checksum_),
-        dispatch_.ordered_delegate(&channel_proxy::handle_read_checksum,
+        dispatch_.ordered_delegate(&proxy::handle_read_checksum,
             shared_from_this(), _1, _2, header));
 }
 
-void channel_proxy::read_payload(const header& header)
+void proxy::read_payload(const header& header)
 {
     if (stopped())
         return;
@@ -319,11 +319,11 @@ void channel_proxy::read_payload(const header& header)
     using namespace boost::asio;
     inbound_payload_.resize(header.payload_length);
     async_read(*socket_, buffer(inbound_payload_, header.payload_length),
-        dispatch_.ordered_delegate(&channel_proxy::handle_read_payload,
+        dispatch_.ordered_delegate(&proxy::handle_read_payload,
             shared_from_this(), _1, _2, header));
 }
 
-void channel_proxy::handle_read_header(const boost_code& ec,
+void proxy::handle_read_header(const boost_code& ec,
     size_t DEBUG_ONLY(bytes_transferred))
 {
     if (stopped())
@@ -365,7 +365,7 @@ void channel_proxy::handle_read_header(const boost_code& ec,
     start_inactivity();
 }
 
-void channel_proxy::handle_read_checksum(const boost_code& ec,
+void proxy::handle_read_checksum(const boost_code& ec,
     size_t bytes_transferred, message::header& header)
 {
     if (stopped())
@@ -395,7 +395,7 @@ void channel_proxy::handle_read_checksum(const boost_code& ec,
     start_inactivity();
 }
 
-void channel_proxy::handle_read_payload(const boost_code& ec,
+void proxy::handle_read_payload(const boost_code& ec,
     size_t bytes_transferred, const message::header& header)
 {
     if (stopped())
@@ -472,7 +472,7 @@ void channel_proxy::handle_read_payload(const boost_code& ec,
     }
 }
 
-void channel_proxy::subscribe_stop(stop_handler handler)
+void proxy::subscribe_stop(stop_handler handler)
 {
     if (stopped())
         handler(error::channel_stopped);
@@ -480,7 +480,7 @@ void channel_proxy::subscribe_stop(stop_handler handler)
         stop_subscriber_->subscribe(handler);
 }
 
-void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
+void proxy::subscribe_raw(receive_raw_handler handle_receive)
 {
     if (stopped())
         handle_receive(error::channel_stopped, header(), data_chunk());
@@ -488,7 +488,7 @@ void channel_proxy::subscribe_raw(receive_raw_handler handle_receive)
         raw_subscriber_->subscribe(handle_receive);
 }
 
-void channel_proxy::do_send(const data_chunk& message,
+void proxy::do_send(const data_chunk& message,
     send_handler handler, const std::string& command)
 {
     if (stopped())
@@ -503,17 +503,17 @@ void channel_proxy::do_send(const data_chunk& message,
 
     const shared_const_buffer buffer(message);
     async_write(*socket_, buffer,
-        std::bind(&channel_proxy::call_handle_send,
+        std::bind(&proxy::call_handle_send,
             shared_from_this(), _1, handler));
 }
 
-void channel_proxy::call_handle_send(const boost_code& ec,
+void proxy::call_handle_send(const boost_code& ec,
     send_handler handler)
 {
     handler(error::boost_to_error_code(ec));
 }
 
-void channel_proxy::send_raw(const header& packet_header,
+void proxy::send_raw(const header& packet_header,
     const data_chunk& payload, send_handler handle_send)
 {
     if (stopped())
@@ -522,11 +522,11 @@ void channel_proxy::send_raw(const header& packet_header,
         return;
     }
 
-    dispatch_.ordered(&channel_proxy::do_send_raw,
+    dispatch_.ordered(&proxy::do_send_raw,
         shared_from_this(), packet_header, payload, handle_send);
 }
 
-void channel_proxy::do_send_raw(const header& packet_header,
+void proxy::do_send_raw(const header& packet_header,
     const data_chunk& payload, send_handler handler)
 {
     if (stopped())

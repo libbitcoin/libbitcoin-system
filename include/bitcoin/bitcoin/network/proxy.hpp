@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_CHANNEL_PROXY_HPP
-#define LIBBITCOIN_NETWORK_CHANNEL_PROXY_HPP
+#ifndef LIBBITCOIN_NETWORK_PROXY_HPP
+#define LIBBITCOIN_NETWORK_PROXY_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -36,7 +36,7 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
-#include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
+#include <bitcoin/bitcoin/network/stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
@@ -50,8 +50,8 @@
 namespace libbitcoin {
 namespace network {
 
-class BC_API channel_proxy
-  : public std::enable_shared_from_this<channel_proxy>, track<channel_proxy>
+class BC_API proxy
+  : public std::enable_shared_from_this<proxy>, track<proxy>
 {
 public:
     DECLARE_PROXY_MESSAGE_HANDLER_TYPES();
@@ -59,18 +59,18 @@ public:
     typedef std::function<void(const code&, const message::header&,
         const data_chunk&)> receive_raw_handler;
 
-    typedef std::shared_ptr<channel_proxy> ptr;
+    typedef std::shared_ptr<proxy> ptr;
     typedef std::function<void(const code&)> send_handler;
     typedef std::function<void(const code&)> revival_handler;
     typedef std::function<void(const code&)> expiration_handler;
 
-    channel_proxy(asio::socket_ptr socket, threadpool& pool,
+    proxy(asio::socket_ptr socket, threadpool& pool,
         const timeout& timeouts=timeout::defaults);
-    ~channel_proxy();
+    ~proxy();
 
     /// This class is not copyable.
-    channel_proxy(const channel_proxy&) = delete;
-    void operator=(const channel_proxy&) = delete;
+    proxy(const proxy&) = delete;
+    void operator=(const proxy&) = delete;
 
     void start();
     void stop(const code& ec);
@@ -92,7 +92,7 @@ public:
         const auto& command = Message::satoshi_command;
         const auto message = message::create_raw_message(packet);
         dispatch_.ordered(
-            std::bind(&channel_proxy::do_send,
+            std::bind(&proxy::do_send,
                 shared_from_this(), message, handle_send, command));
     }
 
@@ -157,7 +157,7 @@ private:
     revival_handler revival_handler_;
     bool stopped_;
     uint64_t nonce_;
-    channel_stream_loader stream_loader_;
+    stream_loader stream_loader_;
 
     message::header::header_bytes inbound_header_;
     message::header::checksum_bytes inbound_checksum_;

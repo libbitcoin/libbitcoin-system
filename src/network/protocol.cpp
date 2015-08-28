@@ -352,7 +352,7 @@ void protocol::handle_accept(const code& ec, channel::ptr node,
 // TODO: virtual base method.
 
 void protocol::start_talking(channel::ptr node,
-    channel_proxy::stop_handler handle_stop, bool relay)
+    proxy::stop_handler handle_stop, bool relay)
 {
     node->subscribe_stop(handle_stop);
 

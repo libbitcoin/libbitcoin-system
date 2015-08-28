@@ -31,7 +31,7 @@
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/protocol_version.hpp>
 #include <bitcoin/bitcoin/error.hpp>

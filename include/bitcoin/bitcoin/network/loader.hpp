@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_CHANNEL_LOADER_MODULE_HPP
-#define LIBBITCOIN_NETWORK_CHANNEL_LOADER_MODULE_HPP
+#ifndef LIBBITCOIN_NETWORK_LOADER_HPP
+#define LIBBITCOIN_NETWORK_LOADER_HPP
 
 #include <functional>
+#include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -29,37 +30,34 @@
 namespace libbitcoin {
 namespace network {
 
-class BC_API channel_loader_module_base
+class BC_API loader_base
 {
 public:
-    virtual ~channel_loader_module_base()
-    {
-    }
+    typedef std::shared_ptr<loader_base> ptr;
 
-    virtual code attempt_load(std::istream& stream) const = 0;
-    virtual const std::string lookup_symbol() const = 0;
+    virtual code try_load(std::istream& stream) const = 0;
+    virtual const std::string satoshi_command() const = 0;
 };
 
 template <typename Message>
-class channel_loader_module
-  : public channel_loader_module_base
+class loader
+  : public loader_base
 {
 public:
-    typedef std::function<void (const code&, const Message&)>
-        load_handler;
+    typedef std::function<void (const code&, const Message&)> handler;
 
-    channel_loader_module(load_handler handle_load)
-      : handle_load_(handle_load)
+    loader(handler handler)
+      : handle_load_(handler)
     {
     }
 
     /// This class is not copyable.
-    channel_loader_module(const channel_loader_module&) = delete;
-    void operator=(const channel_loader_module&) = delete;
+    loader(const loader&) = delete;
+    void operator=(const loader&) = delete;
 
-    code attempt_load(std::istream& stream) const
+    code try_load(std::istream& stream) const
     {
-        code status = bc::error::success;
+        code status(bc::error::success);
         Message result;
 
         if (!result.from_data(stream))
@@ -72,14 +70,13 @@ public:
         return status;
     }
 
-    const std::string lookup_symbol() const
+    const std::string satoshi_command() const
     {
         return Message::satoshi_command;
     }
 
 private:
-
-    load_handler handle_load_;
+    handler handle_load_;
 };
 
 } // namespace network

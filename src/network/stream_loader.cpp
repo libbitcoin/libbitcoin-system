@@ -17,34 +17,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/network/channel_stream_loader.hpp>
+#include <bitcoin/bitcoin/network/stream_loader.hpp>
 
 #include <istream>
 #include <string>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/channel_loader_module.hpp>
+#include <bitcoin/bitcoin/network/loader.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-channel_stream_loader::channel_stream_loader()
+stream_loader::stream_loader()
 {
 }
 
-channel_stream_loader::~channel_stream_loader()
-{
-    for (auto module: modules_)
-        delete module.second;
-}
-
-code channel_stream_loader::load(const std::string& symbol,
+code stream_loader::load(const std::string& command,
     std::istream& stream) const
 {
     code status(bc::error::bad_stream);
 
-    auto it = modules_.find(symbol);
+    auto it = modules_.find(command);
     if (it != modules_.end())
-        status = it->second->attempt_load(stream);
+        status = it->second->try_load(stream);
 
     return status;
 }

@@ -26,7 +26,7 @@
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/message/header.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
-#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 INITIALIZE_TRACK(bc::network::channel);
@@ -35,19 +35,19 @@ namespace libbitcoin {
 namespace network {
 
 // TODO: derive channel from proxy, adding timers, tracking, nonce.
-channel::channel(channel_proxy::ptr proxy)
+channel::channel(proxy::ptr proxy)
   : proxy_(proxy), nonce_(0),
     CONSTRUCT_TRACK(channel, LOG_NETWORK)
 {
 }
 
-// This implements the set of channel_proxy messsage handler methods.
+// This implements the set of proxy messsage handler methods.
 DEFINE_CHANNEL_MESSAGE_SUBSCRIBERS()
 
 // TODO: move proxy timeouts to channel (revival deprecated).
 channel::channel(threadpool& pool, asio::socket_ptr socket,
     const timeout& timeouts)
-  : channel(std::make_shared<channel_proxy>(socket, pool, timeouts))
+  : channel(std::make_shared<proxy>(socket, pool, timeouts))
 {
 }
 
@@ -87,25 +87,33 @@ void channel::reset_revival()
     return proxy_->reset_revival();
 }
 
-void channel::set_revival_handler(channel_proxy::revival_handler handler)
+void channel::set_revival_handler(proxy::revival_handler handler)
 {
     return proxy_->set_revival_handler(handler);
 }
 
-void channel::subscribe_stop(
-    channel_proxy::stop_handler handler)
+//void channel::subscribe_transaction(proxy::receive_transaction_handler handler)
+//{
+//    proxy_->subscribe_transaction(handler);
+//}
+//
+//void channel::subscribe_block(proxy::receive_block_handler handler)
+//{
+//    proxy_->subscribe_block(handler);
+//}
+
+void channel::subscribe_stop(proxy::stop_handler handler)
 {
     proxy_->subscribe_stop(handler);
 }
 
-void channel::subscribe_raw(
-    channel_proxy::receive_raw_handler handler)
+void channel::subscribe_raw(proxy::receive_raw_handler handler)
 {
     proxy_->subscribe_raw(handler);
 }
 
 void channel::send_raw(const message::header& packet_header,
-    const data_chunk& payload, channel_proxy::send_handler handler)
+    const data_chunk& payload, proxy::send_handler handler)
 {
     proxy_->send_raw(packet_header, payload, handler);
 }

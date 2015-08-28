@@ -263,12 +263,6 @@
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\channel_stream_loader.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\channel_proxy.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\acceptor.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
@@ -457,6 +451,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\message\nonce.cpp">
       <Filter>src\message</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\proxy.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\stream_loader.cpp">
+      <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -648,15 +648,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\thread.hpp">
       <Filter>include\bitcoin\utility</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_stream_loader.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_loader_module.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel_proxy.hpp">
-      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\acceptor.hpp">
       <Filter>include\bitcoin\network</Filter>
@@ -882,6 +873,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\nonce.hpp">
       <Filter>include\bitcoin\message</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\proxy.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\loader.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\stream_loader.hpp">
+      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

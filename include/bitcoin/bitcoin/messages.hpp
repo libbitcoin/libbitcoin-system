@@ -70,7 +70,7 @@
     macro(verack)terminator \
     macro(version)
 
-// For channel_proxy.hpp:
+// For proxy.hpp:
 
 #define DECLARE_PROXY_MESSAGE_HANDLER_TYPE(Message) \
     typedef std::function<void(const code&, const message::Message&)> \
@@ -97,7 +97,7 @@
 #define DECLARE_PROXY_MESSAGE_SUBSCRIBER_POINTERS() \
     DEFINE_MESSAGE_MACROS(DECLARE_PROXY_MESSAGE_SUBSCRIBER_POINTER, SEMICOLON)
 
-// For channel_proxy.cpp:
+// For proxy.cpp:
 
 #define INITIALIZE_PROXY_MESSAGE_SUBSCRIBER(Message) \
     Message##_subscriber_(MAKE_SUBSCRIBER(Message, pool, LOG_NETWORK))
@@ -106,7 +106,7 @@
     DEFINE_MESSAGE_MACROS(INITIALIZE_PROXY_MESSAGE_SUBSCRIBER, COMMA)
 
 #define INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACK(Message) \
-    INITIALIZE_TRACK(bc::network::channel_proxy::Message##_subscriber)
+    INITIALIZE_TRACK(bc::network::proxy::Message##_subscriber)
 
 #define INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACKS() \
     DEFINE_MESSAGE_MACROS(INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACK, NONE)
@@ -124,7 +124,7 @@
     DEFINE_MESSAGE_MACROS(CLEAR_PROXY_MESSAGE_SUBSCRIPTION, SEMICOLON)
 
 #define DEFINE_PROXY_MESSAGE_SUBSCRIBER(Message) \
-void channel_proxy::subscribe_##Message(receive_##Message##_handler handle) \
+void proxy::subscribe_##Message(receive_##Message##_handler handle) \
 { \
     if (stopped()) \
         handle(error::channel_stopped, message::Message()); \
@@ -138,7 +138,7 @@ void channel_proxy::subscribe_##Message(receive_##Message##_handler handle) \
 // For channel.hpp:
 
 #define DECLARE_CHANNEL_MESSAGE_SUBSCRIBER(Message) \
-    void subscribe_##Message(channel_proxy::receive_##Message##_handler handle)
+    void subscribe_##Message(proxy::receive_##Message##_handler handle)
 
 #define DECLARE_CHANNEL_MESSAGE_SUBSCRIBERS() \
     DEFINE_MESSAGE_MACROS(DECLARE_CHANNEL_MESSAGE_SUBSCRIBER, SEMICOLON)
@@ -147,7 +147,7 @@ void channel_proxy::subscribe_##Message(receive_##Message##_handler handle) \
 
 #define DEFINE_CHANNEL_MESSAGE_SUBSCRIBER(Message) \
 void channel::subscribe_##Message( \
-    channel_proxy::receive_##Message##_handler handler) \
+    proxy::receive_##Message##_handler handler) \
 { \
     proxy_->subscribe_##Message(handler); \
 }

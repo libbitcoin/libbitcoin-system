@@ -32,7 +32,7 @@
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/proxy.hpp>
 //#include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
@@ -44,13 +44,14 @@
 namespace libbitcoin {
 namespace network {
 
+
 class BC_API channel
   : public track<channel>
 {
 public:
     typedef std::shared_ptr<channel> ptr;
 
-    channel(channel_proxy::ptr proxy);
+    channel(proxy::ptr proxy);
     channel(threadpool& pool, asio::socket_ptr socket, const timeout& timeouts);
     ~channel();
 
@@ -64,24 +65,26 @@ public:
     void set_nonce(uint64_t nonce);
     config::authority address() const;
     void reset_revival();
-    void set_revival_handler(channel_proxy::revival_handler handler);
+    void set_revival_handler(proxy::revival_handler handler);
 
     DECLARE_CHANNEL_MESSAGE_SUBSCRIBERS();
-    void subscribe_raw(channel_proxy::receive_raw_handler handle);
-    void subscribe_stop(channel_proxy::stop_handler handle);
+    //void subscribe_transaction(proxy::receive_transaction_handler handler);
+    //void subscribe_block(proxy::receive_block_handler handler);
+    void subscribe_raw(proxy::receive_raw_handler handle);
+    void subscribe_stop(proxy::stop_handler handle);
 
     template <typename Message>
-    void send(const Message& packet, channel_proxy::send_handler handler)
+    void send(const Message& packet, proxy::send_handler handler)
     {
         proxy_->send(packet, handler);
     }
 
     void send_raw(const message::header& packet_header,
-        const data_chunk& payload, channel_proxy::send_handler handler);
+        const data_chunk& payload, proxy::send_handler handler);
 
 private:
 
-    channel_proxy::ptr proxy_;
+    proxy::ptr proxy_;
     uint64_t nonce_;
 };
 

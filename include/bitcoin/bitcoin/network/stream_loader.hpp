@@ -17,42 +17,42 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_CHANNEL_STREAM_LOADER_HPP
-#define LIBBITCOIN_NETWORK_CHANNEL_STREAM_LOADER_HPP
+#ifndef LIBBITCOIN_NETWORK_STREAM_LOADER_HPP
+#define LIBBITCOIN_NETWORK_STREAM_LOADER_HPP
 
+#include <istream>
 #include <map>
+#include <memory>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
-#include <bitcoin/bitcoin/network/channel_loader_module.hpp>
+#include <bitcoin/bitcoin/network/loader.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace network {
 
-class BC_API channel_stream_loader
+class BC_API stream_loader
 {
 public:
-    channel_stream_loader();
-    ~channel_stream_loader();
+    stream_loader();
 
     /// This class is not copyable.
-    channel_stream_loader(const channel_stream_loader&) = delete;
-    void operator=(const channel_stream_loader&) = delete;
+    stream_loader(const stream_loader&) = delete;
+    void operator=(const stream_loader&) = delete;
 
     template <typename Message>
-    void add(typename channel_loader_module<Message>::load_handler handler)
+    void add(typename loader<Message>::handler handler)
     {
-        // channel_loader_module isn't copyable, so we use pointers here.
-        auto module = new channel_loader_module<Message>(handler);
-        modules_[module->lookup_symbol()] = module;
+        // loader isn't copyable, so we use pointers here.
+        auto module = std::make_shared<loader<Message>>(handler);
+        modules_[module->satoshi_command()] = module;
     }
 
-    code load(const std::string& symbol, std::istream& stream) const;
-
+    code load(const std::string& command, std::istream& stream) const;
 
 private:
-    typedef std::map<std::string, channel_loader_module_base*> module_list;
+    typedef std::map<std::string, loader_base::ptr> module_list;
 
     module_list modules_;
 };
