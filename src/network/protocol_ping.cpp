@@ -34,15 +34,17 @@ INITIALIZE_TRACK(bc::network::protocol_ping);
 
 namespace libbitcoin {
 namespace network {
-    
+
+#define NAME "ping"
+#define CLASS protocol_ping
+
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-#define CLASS protocol_ping
 
 protocol_ping::protocol_ping(channel::ptr channel, threadpool& pool,
     const asio::duration& period)
-  : protocol_base(channel, pool, period),
+  : protocol_base(channel, pool, period, NAME),
     CONSTRUCT_TRACK(protocol_ping, LOG_NETWORK)
 {
 }
@@ -67,6 +69,15 @@ void protocol_ping::send_ping(const code& ec)
     if (stopped() || deadline::canceled(ec))
         return;
 
+    if (ec && ec != error::channel_timeout)
+    {
+        log_debug(LOG_NETWORK)
+            << "Failure in ping timer for [" << authority() << "] "
+            << ec.message();
+        stop(ec);
+        return;
+    }
+
     const auto nonce = pseudo_random();
 
     SUBSCRIBE3(pong, handle_receive_pong, _1, _2, nonce);
@@ -82,8 +93,9 @@ void protocol_ping::handle_receive_ping(const code& ec,
     if (ec)
     {
         log_debug(LOG_NETWORK)
-            << "Failure getting ping from [" << authority() << "]";
-        stop(error::bad_stream);
+            << "Failure getting ping from [" << authority() << "] "
+            << ec.message();
+        stop(ec);
         return;
     }
 
@@ -101,7 +113,9 @@ void protocol_ping::handle_receive_pong(const code& ec,
     if (ec)
     {
         log_debug(LOG_NETWORK)
-            << "Failure getting pong from [" << authority() << "]";
+            << "Failure getting pong from [" << authority() << "] "
+            << ec.message();
+        stop(ec);
         return;
     }
 
@@ -116,29 +130,33 @@ void protocol_ping::handle_receive_pong(const code& ec,
     }
 }
 
-void protocol_ping::handle_send_ping(const code& ec) const
+void protocol_ping::handle_send_ping(const code& ec)
 {
     if (stopped())
         return;
 
     if (ec)
+    {
         log_debug(LOG_NETWORK)
             << "Failure sending ping to [" << authority() << "] "
             << ec.message();
+        stop(ec);
+    }
 }
 
-void protocol_ping::handle_send_pong(const code& ec) const
+void protocol_ping::handle_send_pong(const code& ec)
 {
     if (stopped())
         return;
 
     if (ec)
+    {
         log_debug(LOG_NETWORK)
             << "Failure sending pong to [" << authority() << "] "
             << ec.message();
+        stop(ec);
+    }
 }
-
-#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

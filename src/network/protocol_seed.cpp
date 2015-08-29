@@ -37,18 +37,26 @@ INITIALIZE_TRACK(bc::network::protocol_seed);
 
 namespace libbitcoin {
 namespace network {
-    
+
+#define NAME "seed"
+#define CLASS protocol_seed
+
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-#define CLASS protocol_seed
+
+protocol_base::handler protocol_seed::synchronizer(handler complete)
+{
+    return synchronize(complete, 3, NAME);
+}
 
 // Require three callbacks (or any error) before calling complete.
 protocol_seed::protocol_seed(channel::ptr peer, threadpool& pool,
     const asio::duration& timeout, handler complete, hosts& hosts,
     const config::authority& self)
-  : hosts_(hosts), self_(self),
-    protocol_base(peer, pool, timeout, synchronize(complete, 3, "seed")),
+  : hosts_(hosts),
+    self_(self),
+    protocol_base(peer, pool, timeout, NAME, synchronizer(complete)),
     CONSTRUCT_TRACK(protocol_seed, LOG_NETWORK)
 {
 }
@@ -69,8 +77,8 @@ void protocol_seed::start()
 
     if (hosts_.capacity() == 0)
     {
-        // Error return ends synchronized completion callback.
-        callback(error::not_found);
+        // Stops channel and ends callback synchronization.
+        stop(error::not_found);
         return;
     }
 
@@ -92,7 +100,7 @@ void protocol_seed::handle_receive_address(const code& ec,
         log_debug(LOG_PROTOCOL)
             << "Failure receiving addresses from seed [" << authority() << "] "
             << ec.message();
-        callback(ec);
+        stop(ec);
         return;
     }
 
@@ -104,52 +112,60 @@ void protocol_seed::handle_receive_address(const code& ec,
     hosts_.store(message.addresses, BIND1(handle_store_addresses, _1));
 }
 
-void protocol_seed::handle_send_address(const code& ec) const
+void protocol_seed::handle_send_address(const code& ec)
 {
     if (stopped())
         return;
 
     if (ec)
+    {
         log_debug(LOG_PROTOCOL)
             << "Failure sending address to seed [" << authority() << "] "
             << ec.message();
+        stop(ec);
+        return;
+    }
 
     // 1 of 3
-    callback(ec);
+    callback(error::success);
 }
 
-void protocol_seed::handle_send_get_address(const code& ec) const
+void protocol_seed::handle_send_get_address(const code& ec)
 {
     if (stopped())
         return;
 
     if (ec)
+    {
         log_debug(LOG_PROTOCOL)
             << "Failure sending get_address to seed [" << authority() << "] "
             << ec.message();
+        stop(ec);
+        return;
+    }
 
     // 2 of 3
-    callback(ec);
+    callback(error::success);
 }
 
-void protocol_seed::handle_store_addresses(const code& ec) const
+void protocol_seed::handle_store_addresses(const code& ec)
 {
     if (stopped())
         return;
 
     if (ec)
+    {
         log_error(LOG_PROTOCOL)
             << "Failure storing addresses from seed [" << authority() << "] "
             << ec.message();
+        stop(ec);
+        return;
+    }
 
     // 3 of 3
-    ////callback(ec);
-
-    //// HACK: remove upon implementing the planned session generalization.
-    channel_->stop(ec ? ec : error::channel_stopped);
+    callback(error::success);
+    stop(error::channel_stopped);
 }
-
-#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

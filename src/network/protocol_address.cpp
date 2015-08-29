@@ -36,15 +36,19 @@ INITIALIZE_TRACK(bc::network::protocol_address);
 
 namespace libbitcoin {
 namespace network {
-    
+
+#define NAME "adddress"
+#define CLASS protocol_address
+
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
-#define CLASS protocol_address
 
 protocol_address::protocol_address(channel::ptr peer, threadpool& pool,
     hosts& hosts, const config::authority& self)
-  : hosts_(hosts), self_(self), protocol_base(peer, pool),
+  : hosts_(hosts),
+    self_(self),
+    protocol_base(peer, pool, NAME),
     CONSTRUCT_TRACK(protocol_address, LOG_NETWORK)
 {
 }
@@ -77,7 +81,7 @@ void protocol_address::handle_receive_address(const code& ec,
         log_debug(LOG_PROTOCOL)
             << "Failure receiving address message from [" << authority() << "] "
             << ec.message();
-        stop(error::bad_stream);
+        stop(ec);
         return;
     }
 
@@ -103,7 +107,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
         log_debug(LOG_PROTOCOL)
             << "Failure receiving get_address message from [" << authority() << "] "
             << ec.message();
-        stop(error::bad_stream);
+        stop(ec);
         return;
     }
 
@@ -124,40 +128,47 @@ void protocol_address::handle_receive_get_address(const code& ec,
     SEND1(active, handle_send_address, _1);
 }
 
-void protocol_address::handle_send_address(const code& ec) const
+void protocol_address::handle_send_address(const code& ec)
 {
     if (stopped())
         return;
 
     if (ec)
+    {
         log_debug(LOG_PROTOCOL)
             << "Failure sending address [" << authority() << "] "
             << ec.message();
+        stop(ec);
+    }
 }
 
-void protocol_address::handle_send_get_address(const code& ec) const
+void protocol_address::handle_send_get_address(const code& ec)
 {
     if (stopped())
         return;
 
     if (ec)
+    {
         log_debug(LOG_PROTOCOL)
             << "Failure sending get_address [" << authority() << "] "
             << ec.message();
+        stop(ec);
+    }
 }
 
-void protocol_address::handle_store_addresses(const code& ec) const
+void protocol_address::handle_store_addresses(const code& ec)
 {
     if (stopped())
         return;
 
     if (ec)
+    {
         log_error(LOG_PROTOCOL)
             << "Failure storing addresses from [" << authority() << "] "
             << ec.message();
+        stop(ec);
+    }
 }
-
-#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

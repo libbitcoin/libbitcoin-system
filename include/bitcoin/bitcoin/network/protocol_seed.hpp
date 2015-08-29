@@ -62,13 +62,15 @@ public:
     void start() override;
 
 private:
+    static handler synchronizer(handler complete);
+
     void handle_receive_address(const code& ec,
         const message::address& address);
     void handle_receive_get_address(const code& ec,
         const message::get_address& message);
-    void handle_send_address(const code& ec) const;
-    void handle_send_get_address(const code& ec) const;
-    void handle_store_addresses(const code& ec) const;
+    void handle_send_address(const code& ec);
+    void handle_send_get_address(const code& ec);
+    void handle_store_addresses(const code& ec);
 
     hosts& hosts_;
     const config::authority self_;
