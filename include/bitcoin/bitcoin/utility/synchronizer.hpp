@@ -46,6 +46,8 @@ public:
     template <typename... Args>
     void operator()(const code& ec, Args... args)
     {
+        auto cleared = false;
+
         // This requires a critical section, not just an atomic counter.
         if (true)
         {
@@ -78,10 +80,12 @@ public:
                 //    << "Synchronizing [" << name_ << "] " << *counter_ << "/"
                 //    << clearance_count_;
             }
+
+            cleared = (*counter_ == clearance_count_);
         }
 
-        // Keep this long-running call out of critical section.
-        if (*counter_ == clearance_count_)
+        // Use execute flag to keep this log task out of the critical section.
+        if (cleared)
         {
             const auto result = suppress_errors_ ? error::success : ec;
             handler_(result, std::forward<Args>(args)...);
