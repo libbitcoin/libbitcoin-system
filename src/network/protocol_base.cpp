@@ -19,8 +19,9 @@
  */
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
 
-#include <memory>
 #include <functional>
+#include <memory>
+#include <string>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
@@ -32,22 +33,33 @@
 
 namespace libbitcoin {
 namespace network {
-    
-using std::placeholders::_1;
+
 #define CLASS protocol_base
 
+using std::placeholders::_1;
+
 protocol_base::protocol_base(channel::ptr channel, threadpool& pool,
-    handler complete)
-  : channel_(channel), dispatch_(pool), callback_(complete), stopped_(false)
+    const std::string& name, handler complete)
+  : channel_(channel),
+    dispatch_(pool),
+    name_(name),
+    callback_(complete),
+    stopped_(false)
 {
-    start_ = [this]() { subscribe_stop(); };
+    start_ = [this]()
+    {
+        subscribe_stop();
+    };
 }
 
 protocol_base::protocol_base(channel::ptr channel, threadpool& pool,
-    const asio::duration& timeout, handler complete)
-  : protocol_base(channel, pool, complete)
+    const asio::duration& timeout, const std::string& name, handler complete)
+  : protocol_base(channel, pool, name, complete)
 {
-    start_ = [this, &pool, &timeout]() { subscribe_timer(pool, timeout); };
+    start_ = [this, &pool, &timeout]()
+    {
+        subscribe_timer(pool, timeout);
+    };
 }
 
 config::authority protocol_base::authority() const
@@ -55,12 +67,15 @@ config::authority protocol_base::authority() const
     return channel_->address();
 }
 
+// If an error code is passed to the callback the channel is also stopped.
 void protocol_base::callback(const code& ec) const
 {
     if (callback_ != nullptr)
         callback_(ec);
 }
 
+// This must only be called from start() and before any subscriptions.
+// Ideally avoid this, but it works around no self-closure in construct.
 void protocol_base::set_callback(handler complete)
 {
     BITCOIN_ASSERT_MSG(callback_ == nullptr, "The callback cannot be reset.");
@@ -109,6 +124,10 @@ void protocol_base::handle_stop(const code& ec)
     if (stopped())
         return;
 
+    log_debug(LOG_PROTOCOL)
+        << "Stopped " << name_ << " protocol on [" << authority() << "] "
+        << ec.message();
+
     stopped_ = true;
     if (deadline_)
         deadline_->cancel();
@@ -116,15 +135,17 @@ void protocol_base::handle_stop(const code& ec)
     callback(ec);
 }
 
-void protocol_base::handle_timer(const code& ec) const
+void protocol_base::handle_timer(const code& ec)
 {
     if (stopped() || deadline::canceled(ec))
         return;
 
+    log_debug(LOG_PROTOCOL)
+        << "Fired " << name_ << " protocol timer on [" << authority() << "] "
+        << ec.message();
+
     callback(error::channel_timeout);
 }
-
-#undef CLASS
 
 } // namespace network
 } // namespace libbitcoin

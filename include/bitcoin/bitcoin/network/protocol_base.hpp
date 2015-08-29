@@ -22,6 +22,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -53,20 +54,23 @@ protected:
      * Construct an address protocol instance.
      * @param[in]  channel   The channel on which to start the protocol.
      * @param[in]  pool      The thread pool used by the dispacher.
+     * @param[in]  name      The instance name for logging purposes.
      * @param[in]  complete  Callback invoked upon stop if not null.
      */
     protocol_base(channel::ptr channel, threadpool& pool,
-        handler complete=nullptr);
+        const std::string& name, handler complete=nullptr);
 
     /**
      * Construct an address protocol instance.
      * @param[in]  peer      The channel on which to start the protocol.
      * @param[in]  pool      The thread pool used by the dispacher.
      * @param[in]  timeout   The timer period.
+     * @param[in]  name      The instance name for logging purposes.
      * @param[in]  complete  Callback invoked upon stop if not null.
      */
     protocol_base(channel::ptr peer, threadpool& pool,
-        const asio::duration& timeout, handler complete=nullptr);
+        const asio::duration& timeout, const std::string& name,
+        handler complete=nullptr);
 
     /// Instances of this class are not copyable.
     protocol_base(const protocol_base&) = delete;
@@ -121,8 +125,9 @@ private:
     void subscribe_stop();
     void subscribe_timer(threadpool& pool, const asio::duration& timeout);
     void handle_stop(const code& ec);
-    void handle_timer(const code& ec) const;
+    void handle_timer(const code& ec);
 
+    const std::string name_;
     handler callback_;
     bool stopped_;
     deadline::ptr deadline_;
