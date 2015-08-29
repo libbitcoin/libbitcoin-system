@@ -62,8 +62,7 @@ public:
 
 private:
     void start_connect(const config::endpoint& seed, handler complete);
-    void handle_stopped(const code& ec, size_t host_start_size,
-        handler complete);
+    void handle_stopped(size_t host_start_size, handler complete);
     void handle_connected(const code& ec, channel::ptr peer,
         const config::endpoint& seed, handler complete);
     void handle_handshake(const code& ec, channel::ptr peer,

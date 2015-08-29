@@ -105,7 +105,7 @@ void seeder::start(handler complete)
 
     auto multiple =
         std::bind(&seeder::handle_stopped,
-            shared_from_this(), _1, hosts_.size(), complete);
+            shared_from_this(), hosts_.size(), complete);
 
     // Require all seed callbacks before calling seeder::handle_complete.
     auto single = synchronize(multiple, seeds_.size(), "seeder", true);
@@ -116,8 +116,8 @@ void seeder::start(handler complete)
         start_connect(seed, synchronize(single, 1, seed.to_string()));
 }
 
-void seeder::handle_stopped(const code& ec, size_t host_start_size,
-    handler complete)
+// This accepts no error code becuase individual seed errors are suppressed.
+void seeder::handle_stopped(size_t host_start_size, handler complete)
 {
     // TODO: there is a race in that hosts_.size() is not ordered.
     // We succeed only if there is a seed count increase.
@@ -158,9 +158,12 @@ void seeder::handle_connected(const code& ec, channel::ptr peer,
         dispatch_.ordered_delegate(&seeder::handle_handshake,
             shared_from_this(), _1, peer, seed, complete);
 
+    // TODO: set height.
+    const auto blockchain_height = 0;
+
     // Attach version protocol to the new connection (until complete).
     std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
-        callback, hosts_, self_, relay)->start();
+        callback, hosts_, self_, blockchain_height, relay)->start();
 
     // Protocols never start a channel.
     peer->start();

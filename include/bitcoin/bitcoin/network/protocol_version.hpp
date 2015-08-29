@@ -49,36 +49,29 @@ public:
      * @param[in]  pool      The thread pool used by the protocol.
      * @param[in]  timeout   The timer period.
      * @param[in]  complete  Callback invoked upon stop or complete.
+     * @param[in]  height    The current height of the local blockchain.
      * @param[in]  self      The authority that represents us to this peer.
      * @param[in]  relay     Set relay in version message to peer.
      */
     protocol_version(channel::ptr channel, threadpool& pool,
         const asio::duration& timeout, handler complete, hosts& hosts,
-        const config::authority& self, bool relay);
+        const config::authority& self, uint32_t height, bool relay);
 
     /**
      * Starts the protocol, release any reference after calling.
      */
     void start() override;
 
-    /**
-     * Start the current blockchain height into the version template.
-     * @param[in]  height  The height to set.
-     * @param[in]  handle  Callback invoked upon set height completed.
-     */
-    void set_height(uint64_t height, handler handle);
-
 private:
-    static const message::version version_template;
+    static handler synchronizer(handler complete);
 
     void handle_receive_version(const code& ec,
         const message::version& version);
-    void handle_receive_verack(const code& ec, const message::verack&) const;
-    void handle_version_sent(const code& ec) const;
-    void handle_verack_sent(const code& ec) const;
+    void handle_receive_verack(const code& ec, const message::verack&);
+    void handle_version_sent(const code& ec);
+    void handle_verack_sent(const code& ec);
 
-    /// start_height is managed dynamically by channel.
-    void do_set_height(uint64_t height, handler handle);
+    static const message::version template_;
 
     message::version version_;
 };

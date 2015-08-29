@@ -138,7 +138,7 @@ void protocol::start_connecting(const code& ec,
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
-            << "Error seeding hosts " << ec.message();
+            << "Error seeding hosts: " << ec.message();
         handle_complete(ec);
         return;
     }
@@ -365,9 +365,12 @@ void protocol::start_talking(channel::ptr node,
         dispatch_.ordered_delegate(&protocol::handle_handshake,
             this, _1, node);
 
+    // TODO: set height.
+    const uint32_t blockchain_height = 0;
+
     // Attach version protocol to the new connection (until complete).
     std::make_shared<protocol_version>(node, pool_, timeouts_.handshake,
-        callback, hosts_, self_, relay)->start();
+        callback, hosts_, self_, blockchain_height, relay)->start();
 
     // Start reading from the socket (causing subscription events).
     node->start();
