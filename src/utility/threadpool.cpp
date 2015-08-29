@@ -59,24 +59,18 @@ void threadpool::spawn_once(thread_priority priority)
     threads_.push_back(std::thread(action));
 }
 
-void threadpool::stop()
+void threadpool::abort()
 {
-    // TODO: don't call this on shutdown, instead signal the application.
-    // Signals the service to stop. Calls will return immediately without
-    // invoking any handlers.
     service_.stop();
 }
 
 void threadpool::shutdown()
 {
-    // This does not terminate outstanding calls, it just allows service to
-    // terminate once all outstanding calls are complete.
     work_ = nullptr;
 }
 
 void threadpool::join()
 {
-    // TODO: join the threadpool on destruct?
     for (auto& thread: threads_)
         if (thread.joinable())
             thread.join();
