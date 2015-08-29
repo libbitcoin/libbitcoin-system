@@ -90,19 +90,22 @@ seeder::~seeder()
         << "Closed seeder";
 }
 
-void seeder::start(handler handle_complete)
+// TODO: notify all channels to stop.
+// This will result in the completion handler being invoked.
+// This is properly implemented through the planned session generalization.
+void seeder::start(handler complete)
 {
     if (seeds_.empty() || hosts_.capacity() == 0)
     {
         log_info(LOG_PROTOCOL)
             << "No seeds and/or host capacity configured.";
-        handle_complete(error::operation_failed);
+        complete(error::operation_failed);
         return;
     }
 
     auto multiple =
-        std::bind(&seeder::handle_seeded,
-            shared_from_this(), _1, hosts_.size(), handle_complete);
+        std::bind(&seeder::handle_stopped,
+            shared_from_this(), _1, hosts_.size(), complete);
 
     // Require all seed callbacks before calling seeder::handle_complete.
     auto single = synchronize(multiple, seeds_.size(), "seeder", true);
@@ -113,14 +116,15 @@ void seeder::start(handler handle_complete)
         start_connect(seed, synchronize(single, 1, seed.to_string()));
 }
 
-void seeder::handle_seeded(const code& ec, size_t host_start_size,
-    handler handle_complete)
+void seeder::handle_stopped(const code& ec, size_t host_start_size,
+    handler complete)
 {
-    // We succeed only by adding seeds.
+    // TODO: there is a race in that hosts_.size() is not ordered.
+    // We succeed only if there is a seed count increase.
     if (hosts_.size() > host_start_size)
-        handle_complete(error::success);
+        complete(error::success);
     else
-        handle_complete(error::operation_failed);
+        complete(error::operation_failed);
 }
 
 void seeder::start_connect(const config::endpoint& seed, handler complete)
@@ -158,7 +162,7 @@ void seeder::handle_connected(const code& ec, channel::ptr peer,
     std::make_shared<protocol_version>(peer, pool_, timeouts_.handshake,
         callback, hosts_, self_, relay)->start();
 
-    // Start reading from the socket (causing subscription events).
+    // Protocols never start a channel.
     peer->start();
 }
 

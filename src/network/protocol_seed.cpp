@@ -143,7 +143,10 @@ void protocol_seed::handle_store_addresses(const code& ec) const
             << ec.message();
 
     // 3 of 3
-    callback(ec);
+    ////callback(ec);
+
+    //// HACK: remove upon implementing the planned session generalization.
+    channel_->stop(ec ? ec : error::channel_stopped);
 }
 
 #undef CLASS

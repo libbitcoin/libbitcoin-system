@@ -25,6 +25,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
@@ -60,10 +61,9 @@ public:
     void start(handler handle_seeded);
 
 private:
-
-    void handle_seeded(const code& ec, size_t host_start_size,
-        handler handle_complete);
     void start_connect(const config::endpoint& seed, handler complete);
+    void handle_stopped(const code& ec, size_t host_start_size,
+        handler complete);
     void handle_connected(const code& ec, channel::ptr peer,
         const config::endpoint& seed, handler complete);
     void handle_handshake(const code& ec, channel::ptr peer,

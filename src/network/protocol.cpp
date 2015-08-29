@@ -124,6 +124,8 @@ void protocol::start_seeding(completion_handler handle_complete)
         std::bind(&protocol::start_connecting,
             this, _1, handle_complete);
 
+    // This will always call complete no later than implied by timeouts.
+    // These is presently no way to get a stop notification to the seeder.
     std::make_shared<seeder>(pool_, hosts_, timeouts_, network_, seeds_,
         self_.to_network_address())->start(complete);
 }
