@@ -37,6 +37,7 @@
 #include <bitcoin/bitcoin/network/stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -86,12 +87,8 @@ public:
             return;
         }
 
-        // Conversion to bytes and a text command name here allows us to drop
-        // type-specific information, preventing the need to type-specific
-        // send handlers.
         const auto& command = Message::command;
         const auto bytes = message::serialize(packet);
-
         dispatch_.ordered(&proxy::do_send,
             shared_from_this(), bytes, handler, command);
     }
@@ -112,6 +109,12 @@ public:
     void subscribe_stop(stop_handler handler);
 
 private:
+    typedef byte_source<message::heading::buffer> heading_source;
+    typedef boost::iostreams::stream<heading_source> heading_stream;
+
+    typedef byte_source<data_chunk> payload_source;
+    typedef boost::iostreams::stream<payload_source> payload_stream;
+
     ////template <typename Message, class Subscriber>
     ////void proxy::establish_relay(Subscriber subscriber)
     ////{
@@ -146,13 +149,10 @@ private:
     void handle_revival(const code& ec);
     
     void read_heading();
-    void read_checksum(const message::heading& heading);
-    void read_payload(const message::heading& heading);
+    void read_payload(const message::heading& head);
 
-    void handle_read_heading(const boost_code& ec, size_t bytes_transferred);
-    void handle_read_checksum(const boost_code& ec, size_t bytes_transferred,
-        message::heading& heading);
-    void handle_read_payload(const boost_code& ec, size_t bytes_transferred,
+    void handle_read_heading(const boost_code& ec, size_t);
+    void handle_read_payload(const boost_code& ec, size_t,
         const message::heading& heading);
 
     void do_send(const data_chunk& message, handler handler,
@@ -160,22 +160,20 @@ private:
     void call_handle_send(const boost_code& ec, handler handler);
 
     asio::socket_ptr socket_;
-    dispatcher dispatch_;
-    const timeout& timeouts_;
+    message::heading::buffer heading_buffer_;
+    data_chunk payload_buffer_;
+    stream_loader stream_loader_;
 
+    dispatcher dispatch_;
+
+    const timeout& timeouts_;
     deadline::ptr expiration_;
     deadline::ptr inactivity_;
     deadline::ptr revival_;
-
     handler revival_handler_;
+
     bool stopped_;
     uint64_t nonce_;
-    stream_loader stream_loader_;
-
-    // TODO: consider passing via closure.
-    message::heading::heading_bytes inbound_heading_;
-    message::heading::checksum_bytes inbound_checksum_;
-    data_chunk inbound_payload_;
 
     ////message_subscriber::ptr message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;

@@ -84,7 +84,7 @@ bool heading::from_data(reader& source)
     magic = source.read_4_bytes_little_endian();
     command = source.read_fixed_string(command_size);
     payload_size = source.read_4_bytes_little_endian();
-    checksum = 0;
+    checksum = source.read_4_bytes_little_endian();
     if (!source)
         reset();
 
@@ -97,7 +97,7 @@ data_chunk heading::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size());
+    BITCOIN_ASSERT(data.size() == heading::serialized_size);
     return data;
 }
 
@@ -112,13 +112,7 @@ void heading::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(magic);
     sink.write_fixed_string(command, command_size);
     sink.write_4_bytes_little_endian(payload_size);
-    if (checksum != 0)
-        sink.write_4_bytes_little_endian(checksum);
-}
-
-uint64_t heading::serialized_size() const
-{
-    return 20 + (checksum == 0 ? 0 : 4);
+    sink.write_4_bytes_little_endian(checksum);
 }
 
 bool operator==(const heading& left, const heading& right)

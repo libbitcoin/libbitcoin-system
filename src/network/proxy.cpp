@@ -71,6 +71,7 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
     stopped_(false),
+    nonce_(0),
     ////INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(),
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
     CONSTRUCT_TRACK(proxy, LOG_NETWORK)
@@ -259,40 +260,26 @@ void proxy::read_heading()
     if (stopped())
         return;
 
-    // TODO: consider passing inbound_heading_ via closure.
     using namespace boost::asio;
-    async_read(*socket_, buffer(inbound_heading_),
+    async_read(*socket_, buffer(heading_buffer_),
         dispatch_.ordered_delegate(&proxy::handle_read_heading,
             shared_from_this(), _1, _2));
 }
 
-void proxy::read_checksum(const heading& heading)
+void proxy::read_payload(const heading& head)
 {
     if (stopped())
         return;
 
-    // TODO: consider passing inbound_checksum_ via closure.
-    using namespace boost::asio;
-    async_read(*socket_, buffer(inbound_checksum_),
-        dispatch_.ordered_delegate(&proxy::handle_read_checksum,
-            shared_from_this(), _1, _2, heading));
-}
+    payload_buffer_.resize(head.payload_size);
 
-void proxy::read_payload(const heading& heading)
-{
-    if (stopped())
-        return;
-
-    // TODO: consider passing inbound_payload_ via closure.
     using namespace boost::asio;
-    inbound_payload_.resize(heading.payload_size);
-    async_read(*socket_, buffer(inbound_payload_, heading.payload_size),
+    async_read(*socket_, buffer(payload_buffer_, head.payload_size),
         dispatch_.ordered_delegate(&proxy::handle_read_payload,
-            shared_from_this(), _1, _2, heading));
+            shared_from_this(), _1, _2, head));
 }
 
-void proxy::handle_read_heading(const boost_code& ec,
-    size_t DEBUG_ONLY(bytes_transferred))
+void proxy::handle_read_heading(const boost_code& ec, size_t)
 {
     if (stopped())
         return;
@@ -306,17 +293,9 @@ void proxy::handle_read_heading(const boost_code& ec,
         return;
     }
 
-    BITCOIN_ASSERT(bytes_transferred == heading::heading_size);
-    BITCOIN_ASSERT(bytes_transferred == inbound_heading_.size());
-
-    typedef byte_source<heading::heading_bytes> heading_source;
-    typedef boost::iostreams::stream<heading_source> heading_stream;
-
-    // Parse and publish the heading to message subscribers.
     heading head;
-    heading_stream istream(inbound_heading_);
+    heading_stream istream(heading_buffer_);
     const auto parsed = head.from_data(istream);
-
     if (!parsed || head.magic != bc::magic_value)
     {
         log_warning(LOG_NETWORK) 
@@ -329,64 +308,19 @@ void proxy::handle_read_heading(const boost_code& ec,
         << "Receive " << head.command << " [" << address() << "] ("
         << head.payload_size << " bytes)";
 
-    read_checksum(head);
+    read_payload(head);
     start_inactivity();
 }
 
-void proxy::handle_read_checksum(const boost_code& ec,
-    size_t bytes_transferred, heading& heading)
+void proxy::handle_read_payload(const boost_code& ec, size_t,
+    const heading& heading)
 {
     if (stopped())
         return;
 
-    // Client may have disconnected after sending, so allow bad channel.
-    if (ec)
-    {
-        // But make sure we got the required data, as this may fail depending 
-        // when the client disconnected.
-        if (bytes_transferred != heading::checksum_size ||
-            bytes_transferred != inbound_checksum_.size())
-        {
-            // TODO: No error if we aborted, causing the invalid data?
-            log_warning(LOG_NETWORK)
-                << "Invalid checksum from [" << address() << "] "
-                << code(error::boost_to_error_code(ec)).message();
-            stop(ec);
-            return;
-        }
-    }
+    // Ignore read error here, client may have disconnected.
 
-    heading.checksum = from_little_endian<uint32_t>(inbound_checksum_.begin(),
-        inbound_checksum_.end());
-
-    read_payload(heading);
-    start_inactivity();
-}
-
-void proxy::handle_read_payload(const boost_code& ec,
-    size_t bytes_transferred, const heading& heading)
-{
-    if (stopped())
-        return;
-
-    // Client may have disconnected, so allow bad channel.
-    if (ec)
-    {
-        // But make sure we got the required data, as this may fail depending 
-        // when the client disconnected.
-        if (bytes_transferred != heading.payload_size ||
-            bytes_transferred != inbound_payload_.size())
-        {
-            // TODO: No error if we aborted, causing the invalid data?
-            log_warning(LOG_NETWORK)
-                << "Invalid payload from [" << address() << "] "
-                << code(error::boost_to_error_code(ec)).message();
-            stop(ec);
-            return;
-        }
-    }
-
-    if (heading.checksum != bitcoin_checksum(inbound_payload_))
+    if (heading.checksum != bitcoin_checksum(payload_buffer_))
     {
         log_warning(LOG_NETWORK) 
             << "Invalid bitcoin checksum from [" << address() << "]";
@@ -394,17 +328,14 @@ void proxy::handle_read_payload(const boost_code& ec,
         return;
     }
 
-    // Copy the buffer before registering for new messages.
-    const data_chunk payload_copy(inbound_payload_);
+    // We must copy the payload before restarting the reader.
+    const auto payload_copy = payload_buffer_;
 
-    // This must be called before calling subscribe notification handlers.
+    // This must be called before firing subscription events.
     if (!ec)
         read_heading();
 
     start_inactivity();
-
-    typedef byte_source<data_chunk> payload_source;
-    typedef boost::iostreams::stream<payload_source> payload_stream;
 
     // Parse and publish the payload to message subscribers.
     payload_source source(payload_copy);
@@ -417,7 +348,7 @@ void proxy::handle_read_payload(const boost_code& ec,
             << "Valid message [" << heading.command
             << "] handled, unused bytes remain in payload.";
 
-    // Stop the channel if there was an error before or during parse.
+    // Stop the channel if there was a read error.
     if (ec)
     {
         log_warning(LOG_NETWORK)
@@ -428,6 +359,7 @@ void proxy::handle_read_payload(const boost_code& ec,
         return;
     }
 
+    // Stop the channel if there was an error from parse.
     if (error)
     {
         log_warning(LOG_NETWORK)

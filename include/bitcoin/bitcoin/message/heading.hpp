@@ -37,14 +37,12 @@ namespace message {
 class BC_API heading
 {
 public:
-    // Header minus checksum is 4 + 12 + 4 = 20 bytes
-    static BC_CONSTEXPR size_t heading_size = 20;
-    static BC_CONSTEXPR size_t checksum_size = 4;
+    // Header minus checksum is 4 + 12 + 4 + 4 = 24 bytes
+    static BC_CONSTEXPR size_t serialized_size = 24;
 
     // boost1.54/linux/clang/libstdc++-4.8 error if std::array
     // could not match 'boost::array' against 'std::array'
-    typedef boost::array<uint8_t, heading_size> heading_bytes;
-    typedef boost::array<uint8_t, checksum_size> checksum_bytes;
+    typedef boost::array<uint8_t, serialized_size> buffer;
 
     static heading factory_from_data(const data_chunk& data);
     static heading factory_from_data(std::istream& stream);
@@ -58,7 +56,6 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
-    uint64_t serialized_size() const;
 
     uint32_t magic;
     std::string command;
