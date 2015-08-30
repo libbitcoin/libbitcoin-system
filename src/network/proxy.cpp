@@ -76,6 +76,12 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
     CONSTRUCT_TRACK(proxy, LOG_NETWORK)
 {
+    // Cache the endpoint address for logging after stop.
+    boost_code ec;
+    const auto endpoint = socket_->remote_endpoint(ec);
+    if (!ec)
+        authority_ = config::authority(endpoint);
+
     ///ESTABLISH_PROXY_MESSAGE_RELAYS();
 }
 
@@ -90,14 +96,9 @@ void proxy::start()
     start_timers();
 }
 
-// TODO: cache the endpoint value at accept|connect time.
 config::authority proxy::address() const
 {
-    boost_code ec;
-    const auto endpoint = socket_->remote_endpoint(ec);
-
-    // The endpoint may have become disconnected.
-    return ec ? config::authority() : config::authority(endpoint);
+    return authority_;
 }
 
 bool proxy::stopped() const

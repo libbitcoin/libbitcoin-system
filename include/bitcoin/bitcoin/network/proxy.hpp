@@ -160,6 +160,7 @@ private:
     void call_handle_send(const boost_code& ec, handler handler);
 
     asio::socket_ptr socket_;
+    config::authority authority_;
     message::heading::buffer heading_buffer_;
     data_chunk payload_buffer_;
     stream_loader stream_loader_;
