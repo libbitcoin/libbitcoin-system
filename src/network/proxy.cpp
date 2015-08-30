@@ -47,7 +47,7 @@
 #include <bitcoin/bitcoin/utility/string.hpp>
 
 // These must be declared in the global namespace.
-INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACKS()
+////INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACKS()
 INITIALIZE_TRACK(bc::network::proxy::stop_subscriber)
 INITIALIZE_TRACK(bc::network::proxy::raw_subscriber)
 INITIALIZE_TRACK(bc::network::proxy)
@@ -72,49 +72,17 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
     stopped_(false),
-    INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(),
+    ////INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(),
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
     raw_subscriber_(MAKE_SUBSCRIBER(raw, pool, LOG_NETWORK)),
     CONSTRUCT_TRACK(proxy, LOG_NETWORK)
 {
-    ESTABLISH_PROXY_MESSAGE_RELAYS();
+    ///ESTABLISH_PROXY_MESSAGE_RELAYS();
 }
-
-// This implements the set of proxy messsage handler methods.
-DEFINE_PROXY_MESSAGE_SUBSCRIBERS()
 
 proxy::~proxy()
 {
     BITCOIN_ASSERT_MSG(stopped_, "The channel is not stopped.");
-}
-
-template<typename Message, class Subscriber>
-void proxy::establish_relay(Subscriber subscriber)
-{
-    const auto handler = [subscriber](const code& ec, const Message& message)
-    {
-        subscriber->relay(ec, message);
-    };
-
-    stream_loader_.add<Message>(handler);
-}
-
-// Subscribing must be immediate, we cannot switch thread contexts.
-template <typename Message, class Subscriber, typename Callback>
-void proxy::subscribe(Subscriber subscriber, Callback handler) const
-{
-    if (stopped())
-        subscriber->relay(error::channel_stopped, Message());
-    else
-        subscriber->subscribe(handler);
-}
-
-// Subscriber doesn't have an unsubscribe, we just send service_stopped.
-// The subscriber then has the option to not resubscribe in the handler.
-template <typename Message, class Subscriber>
-void proxy::notify_stop(Subscriber subscriber) const
-{
-    subscriber->relay(error::channel_stopped, Message());
 }
 
 void proxy::start()
@@ -173,7 +141,7 @@ void proxy::do_stop(const code& ec)
 
 void proxy::clear_subscriptions(const code& ec)
 {
-    CLEAR_PROXY_MESSAGE_SUBSCRIPTIONS();
+    ////CLEAR_PROXY_MESSAGE_SUBSCRIPTIONS();
     raw_subscriber_->relay(ec, heading(), data_chunk());
     stop_subscriber_->relay(ec);
 }
@@ -294,6 +262,7 @@ void proxy::read_heading()
     if (stopped())
         return;
 
+    // TODO: consider passing inbound_heading_ via closure.
     using namespace boost::asio;
     async_read(*socket_, buffer(inbound_heading_),
         dispatch_.ordered_delegate(&proxy::handle_read_heading,
@@ -305,6 +274,7 @@ void proxy::read_checksum(const heading& heading)
     if (stopped())
         return;
 
+    // TODO: consider passing inbound_checksum_ via closure.
     using namespace boost::asio;
     async_read(*socket_, buffer(inbound_checksum_),
         dispatch_.ordered_delegate(&proxy::handle_read_checksum,
@@ -316,6 +286,7 @@ void proxy::read_payload(const heading& heading)
     if (stopped())
         return;
 
+    // TODO: consider passing inbound_payload_ via closure.
     using namespace boost::asio;
     inbound_payload_.resize(heading.payload_size);
     async_read(*socket_, buffer(inbound_payload_, heading.payload_size),
@@ -480,7 +451,7 @@ void proxy::subscribe_stop(stop_handler handler)
         stop_subscriber_->subscribe(handler);
 }
 
-void proxy::subscribe_raw(receive_raw_handler handler)
+void proxy::subscribe_raw(raw_handler handler)
 {
     if (stopped())
         handler(error::channel_stopped, heading(), data_chunk());

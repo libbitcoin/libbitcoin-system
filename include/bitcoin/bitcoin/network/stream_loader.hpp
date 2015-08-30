@@ -49,6 +49,9 @@ public:
         modules_[module->command()] = module;
     }
 
+    // TODO: implement remove() so that a channel can dynamically start/stop
+    // processing messages via protocol attach/detach.
+
     code load(const std::string& command, std::istream& stream) const;
 
 private:

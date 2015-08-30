@@ -29,7 +29,7 @@ namespace libbitcoin {
 
 // modified from boost.iostreams example
 // boost.org/doc/libs/1_55_0/libs/iostreams/doc/tutorial/container_source.html
-template<typename Container, typename SinkType, typename CharType>
+template <typename Container, typename SinkType, typename CharType>
 class BC_API container_sink
 {
 public:
@@ -53,7 +53,7 @@ private:
     Container& container_;
 };
 
-template<typename Container>
+template <typename Container>
 using byte_sink = container_sink<Container, uint8_t, char>;
 
 using data_sink = boost::iostreams::stream<byte_sink<data_chunk>>;

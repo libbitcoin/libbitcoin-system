@@ -23,8 +23,9 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <bitcoin/bitcoin/define.hpp>
+#include <utility>
 #include <bitcoin/bitcoin/config/authority.hpp>
+#include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
@@ -81,10 +82,35 @@ protected:
      * Used by implementations to obtain a shared pointer of the derived type.
      * Required because enable_shared_from_this doesn't support inheritance.
      */
-    template <typename Derived>
-    std::shared_ptr<Derived> shared_from_base()
+    template <class Self>
+    std::shared_ptr<Self> shared_from_base()
     {
-        return std::static_pointer_cast<Derived>(shared_from_this());
+        return std::static_pointer_cast<Self>(shared_from_this());
+    }
+
+    template <class Self, typename Handler, typename... Args>
+    auto bind(Handler&& handler, Args&&... args) ->
+        decltype(std::bind(std::forward<Handler>(handler),
+            std::shared_ptr<Self>(), std::forward<Args>(args)...))
+    {
+        return std::bind(std::forward<Handler>(handler),
+            shared_from_base<Self>(), std::forward<Args>(args)...);
+    }
+
+    template <class Self, class Message, typename Handler, typename... Args>
+    void send(Message&& packet, Handler&& handler, Args&&... args)
+    {
+        channel_->send(std::forward<Message>(packet),
+            dispatch_.ordered_delegate(std::forward<Handler>(handler),
+                shared_from_base<Self>(), std::forward<Args>(args)...));
+    }
+
+    template <class Self, class Message, typename Handler, typename... Args>
+    void subscribe(Handler&& handler, Args&&... args)
+    {
+        channel_->subscribe<Message>(
+            dispatch_.ordered_delegate(std::forward<Handler>(handler),
+                shared_from_base<Self>(), std::forward<Args>(args)...));
     }
 
     /**
@@ -117,16 +143,14 @@ protected:
      */
     bool stopped() const;
 
-    // TODO: make these private, eliminate macros, check stopped.
-    channel::ptr channel_;
-    dispatcher dispatch_;
-
 private:
     void subscribe_stop();
     void subscribe_timer(threadpool& pool, const asio::duration& timeout);
     void handle_stop(const code& ec);
     void handle_timer(const code& ec);
 
+    channel::ptr channel_;
+    dispatcher dispatch_;
     const std::string name_;
     handler callback_;
     bool stopped_;
@@ -135,44 +159,6 @@ private:
     // Deferred startup function.
     std::function<void()> start_;
 };
-
-// For use in derived protocols for simplifying bind() calls.
-#define BIND0(method) \
-    std::bind(&CLASS::method, shared_from_base<CLASS>())
-#define BIND1(method, a1) \
-    std::bind(&CLASS::method, shared_from_base<CLASS>(), a1)
-#define BIND2(method, a1, a2) \
-    std::bind(&CLASS::method, shared_from_base<CLASS>(), a1, a2)
-#define BIND3(method, a1, a2, a3) \
-    std::bind(&CLASS::method, shared_from_base<CLASS>(), a1, a2, a3)
-
-// For use in derived protocols for simplifying send() calls.
-#define SEND0(instance, method) \
-    channel_->send(instance, dispatch_.ordered_delegate( \
-        &CLASS::method, shared_from_base<CLASS>()))
-#define SEND1(instance, method, a1) \
-    channel_->send(instance, dispatch_.ordered_delegate( \
-        &CLASS::method, shared_from_base<CLASS>(), a1))
-#define SEND2(instance, method, a1, a2) \
-    channel_->send(instance, dispatch_.ordered_delegate( \
-        &CLASS::method, shared_from_base<CLASS>(), a1, a2))
-#define SEND3(instance, method, a1, a2, a3) \
-    channel_->send(instance, dispatch_.ordered_delegate( \
-        &CLASS::method, shared_from_base<CLASS>(), a1, a2, a3))
-
-// For use in derived protocols for simplifying subscribe() calls.
-#define SUBSCRIBE0(Message, method) \
-    channel_->subscribe_##Message(dispatch_.ordered_delegate( \
-        &CLASS::method, shared_from_base<CLASS>()))
-#define SUBSCRIBE1(Message, method, a1) \
-    channel_->subscribe_##Message(dispatch_.ordered_delegate( \
-        &CLASS::method, shared_from_base<CLASS>(), a1))
-#define SUBSCRIBE2(Message, method, a1, a2) \
-    channel_->subscribe_##Message(dispatch_.ordered_delegate( \
-        &CLASS::method, shared_from_base<CLASS>(), a1, a2))
-#define SUBSCRIBE3(Message, method, a1, a2, a3) \
-    channel_->subscribe_##Message(dispatch_.ordered_delegate( \
-        &CLASS::method, shared_from_base<CLASS>(), a1, a2, a3))
 
 } // namespace network
 } // namespace libbitcoin

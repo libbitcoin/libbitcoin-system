@@ -60,14 +60,14 @@ void protocol_address::start()
     if (self_.port() != 0)
     {
         address self({ { self_.to_network_address() } });
-        SEND1(self, handle_send_address, _1);
+        send<protocol_address>(self, &protocol_address::handle_send_address, _1);
     }
 
     if (hosts_.capacity() == 0)
         return;
 
-    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
-    SEND1(get_address(), handle_send_get_address, _1);
+    ////subscribe<get_address>(&protocol_address::handle_receive_get_address, _1, _2);
+    send<protocol_address>(get_address(), &protocol_address::handle_send_get_address, _1);
 }
 
 void protocol_address::handle_receive_address(const code& ec,
@@ -86,14 +86,15 @@ void protocol_address::handle_receive_address(const code& ec,
     }
 
     // Resubscribe to address messages.
-    SUBSCRIBE2(address, handle_receive_address, _1, _2);
+    ////subscribe<address>(&protocol_address::handle_receive_address, _1, _2);
 
     log_debug(LOG_PROTOCOL)
         << "Storing addresses from [" << authority() << "] ("
         << message.addresses.size() << ")";
 
     // TODO: manage timestamps (active peers are connected < 3 hours ago).
-    hosts_.store(message.addresses, BIND1(handle_store_addresses, _1));
+    hosts_.store(message.addresses,
+        bind<protocol_address>(&protocol_address::handle_store_addresses, _1));
 }
 
 void protocol_address::handle_receive_get_address(const code& ec,
@@ -113,7 +114,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
 
     // TODO: allowing repeated queries can allow a peer to map our history.
     // Resubscribe to get_address messages.
-    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
+    ////subscribe<get_address>(&protocol_address::handle_receive_get_address, _1, _2);
 
     // TODO: pull active hosts from host cache (currently just resending self).
     // TODO: need to distort for privacy, don't send currently-connected peers.
@@ -125,7 +126,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
         << "Sending addresses to [" << authority() << "] ("
         << active.addresses.size() << ")";
 
-    SEND1(active, handle_send_address, _1);
+    send<protocol_address>(active, &protocol_address::handle_send_address, _1);
 }
 
 void protocol_address::handle_send_address(const code& ec)

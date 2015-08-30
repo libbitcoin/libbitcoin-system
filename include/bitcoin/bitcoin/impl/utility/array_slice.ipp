@@ -22,44 +22,44 @@
 
 namespace libbitcoin {
 
-template<typename T>
-template<typename Container>
+template <typename T>
+template <typename Container>
 array_slice<T>::array_slice(const Container& container)
   : begin_(container.data()), end_(container.data() + container.size())
 {
 }
 
-template<typename T>
+template <typename T>
 array_slice<T>::array_slice(const T* begin, const T* end)
   : begin_(begin), end_(end)
 {
 }
 
-template<typename T>
+template <typename T>
 const T* array_slice<T>::begin() const
 {
     return begin_;
 }
 
-template<typename T>
+template <typename T>
 const T* array_slice<T>::end() const
 {
     return end_;
 }
 
-template<typename T>
+template <typename T>
 const T* array_slice<T>::data() const
 {
     return begin_;
 }
 
-template<typename T>
+template <typename T>
 std::size_t array_slice<T>::size() const
 {
     return end_ - begin_;
 }
 
-template<typename T>
+template <typename T>
 bool array_slice<T>::empty() const
 {
     return end_ == begin_;

@@ -109,10 +109,10 @@ public:
     /**
      * Read a fixed-length data block.
      */
-    template<unsigned N>
+    template <unsigned N>
     byte_array<N> read_bytes();
 
-    template<unsigned N>
+    template <unsigned N>
     byte_array<N> read_bytes_reverse();
 
     /**

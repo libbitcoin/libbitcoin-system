@@ -52,10 +52,16 @@ class BC_API proxy
   : public std::enable_shared_from_this<proxy>, track<proxy>
 {
 public:
-    DECLARE_PROXY_MESSAGE_HANDLER_TYPES();
+    template <class Message>
+    using message_handler = std::function<void(const code&, const Message&)>;
+    typedef std::function<void(const code&)> send_handler;
     typedef std::function<void(const code&)> stop_handler;
     typedef std::function<void(const code&, const message::heading&,
-        const data_chunk&)> receive_raw_handler;
+        const data_chunk&)> raw_handler;
+
+    typedef subscriber<const code&> stop_subscriber;
+    typedef subscriber<const code&, const message::heading&,
+        const data_chunk&> raw_subscriber;
 
     typedef std::shared_ptr<proxy> ptr;
     typedef std::function<void(const code&)> handler;
@@ -76,8 +82,8 @@ public:
     void set_revival_handler(handler handler);
     void set_nonce(uint64_t nonce);
 
-    template <typename Message>
-    void send(const Message& packet, handler handler)
+    template <class Message>
+    void send(const Message& packet, send_handler handler)
     {
         if (stopped())
         {
@@ -85,31 +91,53 @@ public:
             return;
         }
 
+        // Conversion to bytes and a text command name here allows us to drop
+        // type-specific information, preventing the need to type-specific
+        // send handlers.
         const auto& command = Message::command;
-        const auto message = message::serialize(packet);
+        const auto bytes = message::serialize(packet);
+
         dispatch_.ordered(&proxy::do_send,
-            shared_from_this(), message, handler, command);
+            shared_from_this(), bytes, handler, command);
     }
 
+    template <class Message>
+    void subscribe(message_handler<Message> handler)
+    {
+        if (stopped())
+        {
+            handler(error::channel_stopped, Message());
+            return;
+        }
+
+        // Subscribing must be immediate, we cannot switch thread contexts.
+        // message_subscriber<Message>(handler);
+    }
+
+    void subscribe_raw(raw_handler handler);
+    void subscribe_stop(stop_handler handler);
     void send_raw(const message::heading& heading,
         const data_chunk& payload, handler handler);
 
-    DECLARE_PROXY_MESSAGE_SUBSCRIBERS();
-    void subscribe_stop(stop_handler handler);
-    void subscribe_raw(receive_raw_handler handler);
-
-    DECLARE_PROXY_MESSAGE_SUBSCRIBER_TYPES();
-    typedef subscriber<const code&> stop_subscriber;
-    typedef subscriber<const code&, const message::heading&, const data_chunk&>
-        raw_subscriber;
-
 private:
-    template<typename Message, class Subscriber>
-    void establish_relay(Subscriber subscriber);
-    template <typename Message, class Subscriber, typename Callback>
-    void subscribe(Subscriber subscriber, Callback handler) const;
-    template <typename Message, class Subscriber>
-    void notify_stop(Subscriber subscriber) const;
+    ////template <typename Message, class Subscriber>
+    ////void proxy::establish_relay(Subscriber subscriber)
+    ////{
+    ////    const auto handler = [subscriber](const code& ec, const Message& message)
+    ////    {
+    ////        subscriber->relay(ec, message);
+    ////    };
+    ////
+    ////    stream_loader_.add<Message>(handler);
+    ////}
+
+    ////// Subscriber doesn't have an unsubscribe, we just send service_stopped.
+    ////// The subscriber then has the option to not resubscribe in the handler.
+    ////template <typename Message, class Subscriber>
+    ////void proxy::notify_stop(Subscriber subscriber) const
+    ////{
+    ////    subscriber->relay(error::channel_stopped, Message());
+    ////}
 
     void stop(const boost_code& ec);
     void do_stop(const code& ec);
@@ -154,11 +182,12 @@ private:
     uint64_t nonce_;
     stream_loader stream_loader_;
 
+    // TODO: consider passing via closure.
     message::heading::heading_bytes inbound_heading_;
     message::heading::checksum_bytes inbound_checksum_;
     data_chunk inbound_payload_;
 
-    DECLARE_PROXY_MESSAGE_SUBSCRIBER_POINTERS();
+    ////message_subscriber::ptr message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
     raw_subscriber::ptr raw_subscriber_;
 };

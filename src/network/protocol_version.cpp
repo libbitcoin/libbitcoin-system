@@ -92,16 +92,16 @@ protocol_version::protocol_version(channel::ptr channel, threadpool& pool,
     version_.nonce = pseudo_random();
 
     // TODO: Add nonce to channel state for loopback detection in the context.
-    channel_->set_nonce(version_.nonce);
+    ////channel_->set_nonce(version_.nonce);
 }
 
 void protocol_version::start()
 {
     protocol_base::start();
 
-    SUBSCRIBE2(version, handle_receive_version, _1, _2);
-    SUBSCRIBE2(verack, handle_receive_verack, _1, _2);
-    SEND1(version_, handle_version_sent, _1);
+    ////subscribe<protocol_version, version>(&protocol_version::handle_receive_version, _1, _2);
+    subscribe<protocol_version, verack>(&protocol_version::handle_receive_verack, _1, _2);
+    send<protocol_version>(version_, &protocol_version::handle_version_sent, _1);
 }
 
 void protocol_version::handle_receive_version(const code& ec,
@@ -137,7 +137,7 @@ void protocol_version::handle_receive_version(const code& ec,
         << "Peer version [" << authority() << "] ("
         << message.value << ") " << message.user_agent;
 
-    SEND1(verack(), handle_verack_sent, _1);
+    send<protocol_version>(verack(), &protocol_version::handle_verack_sent, _1);
 }
 
 void protocol_version::handle_verack_sent(const code& ec)

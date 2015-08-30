@@ -32,7 +32,7 @@
 #endif
 
 #define CONSTRUCT_TRACK(class_name, log_name) \
-        track<class_name>(#class_name, log_name)
+    track<class_name>(#class_name, log_name)
 
 ////#ifdef NDEBUG
 ////    #define INITIALIZE_TRACK(class_name)

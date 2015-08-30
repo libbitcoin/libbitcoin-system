@@ -216,7 +216,7 @@ std::string deserializer<Iterator, SafeCheckLast>::read_string()
 }
 
 template <typename Iterator, bool SafeCheckLast>
-template<unsigned N>
+template <unsigned N>
 byte_array<N> deserializer<Iterator, SafeCheckLast>::read_bytes()
 {
     SAFE_CHECK_DISTANCE(N);
@@ -227,7 +227,7 @@ byte_array<N> deserializer<Iterator, SafeCheckLast>::read_bytes()
 }
 
 template <typename Iterator, bool SafeCheckLast>
-template<unsigned N>
+template <unsigned N>
 byte_array<N> deserializer<Iterator, SafeCheckLast>::read_bytes_reverse()
 {
     SAFE_CHECK_DISTANCE(N);

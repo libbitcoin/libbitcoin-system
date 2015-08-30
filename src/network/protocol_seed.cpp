@@ -72,7 +72,7 @@ void protocol_seed::start()
     else
     {
         address self({ { self_.to_network_address() } });
-        SEND1(self, handle_send_address, _1);
+        send<protocol_seed>(self, &protocol_seed::handle_send_address, _1);
     }
 
     if (hosts_.capacity() == 0)
@@ -82,8 +82,8 @@ void protocol_seed::start()
         return;
     }
 
-    SUBSCRIBE2(address, handle_receive_address, _1, _2);
-    SEND1(get_address(), handle_send_get_address, _1);
+    ////subscribe<address>(&protocol_seed::handle_receive_address, _1, _2);
+    send<protocol_seed>(get_address(), &protocol_seed::handle_send_get_address, _1);
 }
 
 void protocol_seed::handle_receive_address(const code& ec,
@@ -109,7 +109,8 @@ void protocol_seed::handle_receive_address(const code& ec,
         << message.addresses.size() << ")";
 
     // TODO: manage timestamps (active peers are connected < 3 hours ago).
-    hosts_.store(message.addresses, BIND1(handle_store_addresses, _1));
+    hosts_.store(message.addresses, 
+        bind<protocol_seed>(&protocol_seed::handle_store_addresses, _1));
 }
 
 void protocol_seed::handle_send_address(const code& ec)

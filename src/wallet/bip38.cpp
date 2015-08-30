@@ -96,7 +96,7 @@ static std::string normalize_nfc(const std::string& value)
     return normalize(value, norm_type::norm_nfc, locale(""));
 }
 
-template<class T>
+template <class T>
 static bool bip38_scrypt_hash(const data_chunk passphrase,
     data_slice salt, T& output)
 {
@@ -105,7 +105,7 @@ static bool bip38_scrypt_hash(const data_chunk passphrase,
         bip38_scrypt_p, output.data(), sizeof(T)) == 0;
 }
 
-template<class T>
+template <class T>
 static bool bip38_scrypt_hash_2(const ec_point& pass_point,
     data_slice salt, T& output)
 {

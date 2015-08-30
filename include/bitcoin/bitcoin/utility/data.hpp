@@ -31,7 +31,7 @@
 namespace libbitcoin {
 
 // Define a byte array of a specified length.
-template<size_t Size>
+template <size_t Size>
 using byte_array = std::array<uint8_t, Size>;
 
 // Define arbitrary byte storage types.
@@ -55,7 +55,7 @@ inline data_chunk build_data(std::initializer_list<data_slice> slices,
 /**
  * Create a data chunk from an interatable object.
  */
-template<typename Type>
+template <typename Type>
 data_chunk to_data_chunk(Type iterable);
 
 /**
@@ -67,7 +67,7 @@ void extend_data(Data& data, const Type& other);
 /**
  * Constrain a numeric value within a given range.
  */
-template<typename Value>
+template <typename Value>
 Value range_constrain(Value value, Value minimum, Value maximum);
 
 } // namespace libbitcoin

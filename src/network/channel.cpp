@@ -36,13 +36,14 @@ namespace network {
 
 // TODO: derive channel from proxy, adding timers, tracking, nonce.
 channel::channel(proxy::ptr proxy)
-  : proxy_(proxy), nonce_(0),
+  : proxy_(proxy),
+    nonce_(0),
     CONSTRUCT_TRACK(channel, LOG_NETWORK)
 {
 }
 
 // This implements the set of proxy messsage handler methods.
-DEFINE_CHANNEL_MESSAGE_SUBSCRIBERS()
+////DEFINE_CHANNEL_MESSAGE_SUBSCRIBERS()
 
 // TODO: move proxy timeouts to channel (revival deprecated).
 channel::channel(threadpool& pool, asio::socket_ptr socket,
@@ -97,7 +98,7 @@ void channel::subscribe_stop(proxy::stop_handler handler)
     proxy_->subscribe_stop(handler);
 }
 
-void channel::subscribe_raw(proxy::receive_raw_handler handler)
+void channel::subscribe_raw(proxy::raw_handler handler)
 {
     proxy_->subscribe_raw(handler);
 }

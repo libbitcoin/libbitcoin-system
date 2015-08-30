@@ -109,14 +109,16 @@ bool protocol_base::stopped() const
 
 void protocol_base::subscribe_stop()
 {
-    SUBSCRIBE1(stop, handle_stop, _1);
+    channel_->subscribe_stop(
+        bind<protocol_base>(&protocol_base::handle_stop, _1));
 }
 
 void protocol_base::subscribe_timer(threadpool& pool,
     const asio::duration& timeout)
 {
     deadline_ = std::make_shared<deadline>(pool, timeout);
-    deadline_->start(BIND1(handle_timer, _1));
+    deadline_->start(
+        bind<protocol_base>(&protocol_base::handle_timer, _1));
 }
 
 void protocol_base::handle_stop(const code& ec)

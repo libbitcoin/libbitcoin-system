@@ -45,7 +45,7 @@ inline data_chunk build_data(std::initializer_list<data_slice> slices,
     return out;
 }
 
-template<typename Type>
+template <typename Type>
 data_chunk to_data_chunk(Type iterable)
 {
     return data_chunk(std::begin(iterable), std::end(iterable));
@@ -57,7 +57,7 @@ void extend_data(Data& data, const Type& other)
     data.insert(std::end(data), std::begin(other), std::end(other));
 }
 
-template<typename Value>
+template <typename Value>
 Value range_constrain(Value value, Value minimum, Value maximum)
 {
     if (value < minimum)

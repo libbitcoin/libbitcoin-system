@@ -44,7 +44,7 @@ bool decode_base16(byte_array<Size>& out, const std::string &in)
     return true;
 }
 
-template<size_t Size>
+template <size_t Size>
 byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
 {
     byte_array<(Size - 1) / 2> out;

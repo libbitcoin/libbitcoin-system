@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 #define LIBBITCOIN_NETWORK_PROTOCOL_PING_HPP
 
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/message/ping.hpp>

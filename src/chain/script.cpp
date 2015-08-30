@@ -565,7 +565,7 @@ bool arithmetic_start_new(DataStack& stack, script_number& number_a,
 }
 
 // Convert opcode to its actual numeric value.
-template<typename OpCode>
+template <typename OpCode>
 auto base_value(OpCode code) -> typename std::underlying_type<OpCode>::type
 {
     return static_cast<typename std::underlying_type<OpCode>::type>(code);

@@ -65,16 +65,20 @@ public:
     void reset_revival();
     void set_revival_handler(proxy::handler handler);
 
-    DECLARE_CHANNEL_MESSAGE_SUBSCRIBERS();
-    void subscribe_raw(proxy::receive_raw_handler handle);
-    void subscribe_stop(proxy::stop_handler handle);
-
-    template <typename Message>
-    void send(const Message& packet, proxy::handler handler)
+    template <class Message>
+    void send(Message&& packet, proxy::send_handler handler)
     {
-        proxy_->send(packet, handler);
+        proxy_->send(std::forward<Message>(packet), handler);
     }
 
+    template <class Message>
+    void subscribe(proxy::message_handler<Message> handler)
+    {
+        proxy_->subscribe<Message>(handler);
+    }
+
+    void subscribe_raw(proxy::raw_handler handle);
+    void subscribe_stop(proxy::stop_handler handle);
     void send_raw(const message::heading& heading, const data_chunk& payload,
         proxy::handler handler);
 
