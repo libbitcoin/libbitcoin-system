@@ -77,10 +77,7 @@ public:
         proxy_->subscribe<Message>(handler);
     }
 
-    void subscribe_raw(proxy::raw_handler handle);
     void subscribe_stop(proxy::stop_handler handle);
-    void send_raw(const message::heading& heading, const data_chunk& payload,
-        proxy::handler handler);
 
 private:
     proxy::ptr proxy_;

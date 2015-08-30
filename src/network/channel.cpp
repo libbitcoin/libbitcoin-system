@@ -98,16 +98,5 @@ void channel::subscribe_stop(proxy::stop_handler handler)
     proxy_->subscribe_stop(handler);
 }
 
-void channel::subscribe_raw(proxy::raw_handler handler)
-{
-    proxy_->subscribe_raw(handler);
-}
-
-void channel::send_raw(const message::heading& heading,
-    const data_chunk& payload, proxy::handler handler)
-{
-    proxy_->send_raw(heading, payload, handler);
-}
-
 } // namespace network
 } // namespace libbitcoin

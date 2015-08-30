@@ -49,7 +49,6 @@
 // These must be declared in the global namespace.
 ////INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACKS()
 INITIALIZE_TRACK(bc::network::proxy::stop_subscriber)
-INITIALIZE_TRACK(bc::network::proxy::raw_subscriber)
 INITIALIZE_TRACK(bc::network::proxy)
 
 namespace libbitcoin {
@@ -74,7 +73,6 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     stopped_(false),
     ////INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(),
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
-    raw_subscriber_(MAKE_SUBSCRIBER(raw, pool, LOG_NETWORK)),
     CONSTRUCT_TRACK(proxy, LOG_NETWORK)
 {
     ///ESTABLISH_PROXY_MESSAGE_RELAYS();
@@ -142,7 +140,6 @@ void proxy::do_stop(const code& ec)
 void proxy::clear_subscriptions(const code& ec)
 {
     ////CLEAR_PROXY_MESSAGE_SUBSCRIPTIONS();
-    raw_subscriber_->relay(ec, heading(), data_chunk());
     stop_subscriber_->relay(ec);
 }
 
@@ -397,9 +394,6 @@ void proxy::handle_read_payload(const boost_code& ec,
         return;
     }
 
-    // Publish the raw payload to subscribers.
-    raw_subscriber_->relay(error::success, heading, inbound_payload_);
-
     // Copy the buffer before registering for new messages.
     const data_chunk payload_copy(inbound_payload_);
 
@@ -451,14 +445,6 @@ void proxy::subscribe_stop(stop_handler handler)
         stop_subscriber_->subscribe(handler);
 }
 
-void proxy::subscribe_raw(raw_handler handler)
-{
-    if (stopped())
-        handler(error::channel_stopped, heading(), data_chunk());
-    else
-        raw_subscriber_->subscribe(handler);
-}
-
 void proxy::do_send(const data_chunk& message, handler handler,
     const std::string& command)
 {
@@ -481,33 +467,6 @@ void proxy::do_send(const data_chunk& message, handler handler,
 void proxy::call_handle_send(const boost_code& ec, handler handler)
 {
     handler(error::boost_to_error_code(ec));
-}
-
-void proxy::send_raw(const heading& heading, const data_chunk& payload,
-    handler handler)
-{
-    if (stopped())
-    {
-        handler(error::channel_stopped);
-        return;
-    }
-
-    dispatch_.ordered(&proxy::do_send_raw,
-        shared_from_this(), heading, payload, handler);
-}
-
-void proxy::do_send_raw(const heading& heading, const data_chunk& payload,
-    handler handler)
-{
-    if (stopped())
-    {
-        handler(error::channel_stopped);
-        return;
-    }
-
-    auto message = heading.to_data();
-    extend_data(message, payload);
-    do_send(message, handler, heading.command);
 }
 
 } // namespace network

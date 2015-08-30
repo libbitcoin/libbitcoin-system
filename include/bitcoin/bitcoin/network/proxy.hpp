@@ -56,12 +56,7 @@ public:
     using message_handler = std::function<void(const code&, const Message&)>;
     typedef std::function<void(const code&)> send_handler;
     typedef std::function<void(const code&)> stop_handler;
-    typedef std::function<void(const code&, const message::heading&,
-        const data_chunk&)> raw_handler;
-
     typedef subscriber<const code&> stop_subscriber;
-    typedef subscriber<const code&, const message::heading&,
-        const data_chunk&> raw_subscriber;
 
     typedef std::shared_ptr<proxy> ptr;
     typedef std::function<void(const code&)> handler;
@@ -114,10 +109,7 @@ public:
         // message_subscriber<Message>(handler);
     }
 
-    void subscribe_raw(raw_handler handler);
     void subscribe_stop(stop_handler handler);
-    void send_raw(const message::heading& heading,
-        const data_chunk& payload, handler handler);
 
 private:
     ////template <typename Message, class Subscriber>
@@ -165,8 +157,6 @@ private:
 
     void do_send(const data_chunk& message, handler handler,
         const std::string& command);
-    void do_send_raw(const message::heading& heading,
-        const data_chunk& payload, handler handler);
     void call_handle_send(const boost_code& ec, handler handler);
 
     asio::socket_ptr socket_;
@@ -189,7 +179,6 @@ private:
 
     ////message_subscriber::ptr message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
-    raw_subscriber::ptr raw_subscriber_;
 };
 
 } // namespace network
