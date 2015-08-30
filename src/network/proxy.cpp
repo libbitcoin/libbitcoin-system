@@ -304,6 +304,16 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
         return;
     }
 
+    // TODO: configure payload size guard for DoS protection.
+    if (head.payload_size > (2 * 1024 * 1024))
+    {
+        log_warning(LOG_NETWORK)
+            << "Oversized payload indicated [" << address() << "] ("
+            << head.payload_size << " bytes)";
+        stop(error::bad_stream);
+        return;
+    }
+
     log_debug(LOG_NETWORK)
         << "Receive " << head.command << " [" << address() << "] ("
         << head.payload_size << " bytes)";
