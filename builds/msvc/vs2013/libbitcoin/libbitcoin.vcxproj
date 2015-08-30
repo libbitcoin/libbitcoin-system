@@ -159,7 +159,6 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
-    <ClCompile Include="..\..\..\..\src\utility\assert.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\conditional_stack.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
