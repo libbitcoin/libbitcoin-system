@@ -36,7 +36,7 @@ namespace message {
  * Pong message class.
  */
 class BC_API pong
-    : public nonce_
+  : public nonce_
 {
 public:
     static pong factory_from_data(const data_chunk& data);

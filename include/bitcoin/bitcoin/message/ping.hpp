@@ -36,7 +36,7 @@ namespace message {
  * Ping message class.
  */
 class BC_API ping
-    : public nonce_
+  : public nonce_
 {
 public:
     static ping factory_from_data(const data_chunk& data);
