@@ -377,7 +377,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     // We must copy the payload before restarting the reader.
     const auto payload_copy = payload_buffer_;
 
-    // This must be called before firing subscription events.
+    // We must restart the reader before firing subscription events.
     if (!ec)
         read_heading();
 
