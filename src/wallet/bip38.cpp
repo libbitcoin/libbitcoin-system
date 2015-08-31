@@ -88,13 +88,14 @@ static inline bool is_bip38_ec_multiplied(
     return !is_bip38_ec_non_multiplied(key);
 }
 
-
+#ifdef WITH_ICU
 static std::string normalize_nfc(const std::string& value)
 {
     using namespace boost::locale;
     const generator locale;
     return normalize(value, norm_type::norm_nfc, locale(""));
 }
+#endif
 
 template<class T>
 static bool bip38_scrypt_hash(const data_chunk passphrase,
@@ -256,6 +257,7 @@ data_chunk bip38_lock_intermediate(
     return bip38_encrypted_key;
 }
 
+#ifdef WITH_ICU
 bool bip38_lock_verify(
     const data_chunk& confirmation_code,
     const std::string& passphrase, std::string& out_address)
@@ -587,6 +589,7 @@ ec_secret bip38_unlock_secret(
     }
     return bip38_decrypted_key;
 }
+#endif
 
 } // namespace bip38
 } // namespace libbitcoin
