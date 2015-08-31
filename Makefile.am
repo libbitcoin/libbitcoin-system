@@ -120,6 +120,7 @@ src_libbitcoin_la_SOURCES = \
     src/network/initiator.cpp \
     src/network/protocol.cpp \
     src/network/protocol_address.cpp \
+    src/network/protocol_base_base.cpp \
     src/network/protocol_ping.cpp \
     src/network/protocol_seed.cpp \
     src/network/protocol_version.cpp \
@@ -315,10 +316,6 @@ include_bitcoin_bitcoin_impl_formatsdir = ${includedir}/bitcoin/bitcoin/impl/for
 include_bitcoin_bitcoin_impl_formats_HEADERS = \
     include/bitcoin/bitcoin/impl/formats/base16.ipp
 
-include_bitcoin_bitcoin_impl_networkdir = ${includedir}/bitcoin/bitcoin/impl/network
-include_bitcoin_bitcoin_impl_network_HEADERS = \
-    include/bitcoin/bitcoin/impl/network/protocol_base.ipp
-
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \
     include/bitcoin/bitcoin/impl/utility/array_slice.ipp \
@@ -381,6 +378,7 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
     include/bitcoin/bitcoin/network/protocol_base.hpp \
+    include/bitcoin/bitcoin/network/protocol_base_base.hpp \
     include/bitcoin/bitcoin/network/protocol_ping.hpp \
     include/bitcoin/bitcoin/network/protocol_seed.hpp \
     include/bitcoin/bitcoin/network/protocol_version.hpp \

@@ -24,10 +24,9 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <bitcoin/bitcoin/config/authority.hpp>
-#include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
+#include <bitcoin/bitcoin/network/protocol_base_base.hpp>
 #include <bitcoin/bitcoin/utility/deadline.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
@@ -36,34 +35,29 @@ namespace libbitcoin {
 namespace network {
 
 /**
- * Templated virtual base class for protocol implementations.
+ * Templated intermediate base class for protocol implementations.
+ * This simplifies calling bind, send and subscribe.
  */
 template <class Protocol>
 class protocol_base
-  : public std::enable_shared_from_this<protocol_base<Protocol>>
+  : public protocol_base_base
 {
-public:
-    /**
-     * Starts the protocol, release any reference after calling.
-     * A protocol instance is not restartable.
-     */
-    virtual void start();
-
 protected:
-    typedef std::function<void(const code&)> handler;
-
     /**
-     * Construct an address protocol instance.
+     * Construct a base protocol instance.
      * @param[in]  channel   The channel on which to start the protocol.
      * @param[in]  pool      The thread pool used by the dispacher.
      * @param[in]  name      The instance name for logging purposes.
      * @param[in]  complete  Callback invoked upon stop if not null.
      */
     protocol_base(channel::ptr channel, threadpool& pool,
-        const std::string& name, handler complete=nullptr);
+        const std::string& name, handler complete=nullptr)
+      : protocol_base_base(channel, pool, name, complete)
+    {
+    }
 
     /**
-     * Construct an address protocol instance.
+     * Construct a base protocol instance.
      * @param[in]  peer      The channel on which to start the protocol.
      * @param[in]  pool      The thread pool used by the dispacher.
      * @param[in]  timeout   The timer period.
@@ -72,21 +66,9 @@ protected:
      */
     protocol_base(channel::ptr peer, threadpool& pool,
         const asio::duration& timeout, const std::string& name,
-        handler complete=nullptr);
-
-    /// Instances of this class are not copyable.
-    protocol_base(const protocol_base&) = delete;
-    void operator=(const protocol_base&) = delete;
-    
-    /**
-     * Get a shared pointer to the derived instance from this.
-     * Used by implementations to obtain a shared pointer of the derived type.
-     * Required because enable_shared_from_this doesn't support inheritance.
-     */
-    template <class Derived>
-    std::shared_ptr<Derived> shared_from_base()
+        handler complete=nullptr)
+      : protocol_base(peer, pool, name, complete)
     {
-        return std::static_pointer_cast<Derived>(shared_from_this());
     }
 
     template <typename Handler, typename... Args>
@@ -113,63 +95,9 @@ protected:
             dispatch_.ordered_delegate(std::forward<Handler>(handler),
                 shared_from_base<Protocol>(), std::forward<Args>(args)...));
     }
-
-    /**
-     * Gets the authority of this channel.
-     */
-    config::authority authority() const;
-    
-    /**
-     * Invoke the completion callback.
-     * @param[in]  ec  The error code of the preceding operation.
-     */
-    void callback(const code& ec) const;
-    
-    /**
-     * Set the completion callback.
-     * This is used to defer the callback configuration until after construct
-     * so as to enable self-referential callbacks (that use shared_from_this).
-     * @param[in]  callback  The complation callback.
-     */
-    void set_callback(handler complete);
-
-    /**
-     * Set the channel identity for own-channel detection.
-     * @param[in]  nonce  The nonce value.
-     */
-    void set_identifier(uint64_t nonce);
-    
-    /**
-     * Stop the channel.
-     * @param[in]  ec  The error code indicating the reason for stopping.
-     */
-    void stop(const code& ec);
-    
-    /**
-     * Determines if the channel is stopped.
-     */
-    bool stopped() const;
-
-private:
-    void subscribe_stop();
-    void subscribe_timer(threadpool& pool, const asio::duration& timeout);
-    void handle_stop(const code& ec);
-    void handle_timer(const code& ec);
-
-    channel::ptr channel_;
-    dispatcher dispatch_;
-    const std::string name_;
-    handler callback_;
-    bool stopped_;
-    deadline::ptr deadline_;
-
-    // Deferred startup function.
-    std::function<void()> start_;
 };
 
 } // namespace network
 } // namespace libbitcoin
-
-#include <bitcoin/bitcoin/impl/network/protocol_base.ipp>
 
 #endif

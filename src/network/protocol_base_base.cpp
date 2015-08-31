@@ -17,8 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PROTOCOL_BASE_IPP
-#define LIBBITCOIN_PROTOCOL_BASE_IPP
+#include <bitcoin/bitcoin/network/protocol_base_base.hpp>
 
 #include <functional>
 #include <memory>
@@ -35,8 +34,9 @@
 namespace libbitcoin {
 namespace network {
 
-template <class Protocol>
-protocol_base<Protocol>::protocol_base(channel::ptr channel, threadpool& pool,
+using std::placeholders::_1;
+
+protocol_base_base::protocol_base_base(channel::ptr channel, threadpool& pool,
     const std::string& name, handler complete)
   : channel_(channel),
     dispatch_(pool),
@@ -50,10 +50,9 @@ protocol_base<Protocol>::protocol_base(channel::ptr channel, threadpool& pool,
     };
 }
 
-template <class Protocol>
-protocol_base<Protocol>::protocol_base(channel::ptr channel, threadpool& pool,
+protocol_base_base::protocol_base_base(channel::ptr channel, threadpool& pool,
     const asio::duration& timeout, const std::string& name, handler complete)
-  : protocol_base(channel, pool, name, complete)
+  : protocol_base_base(channel, pool, name, complete)
 {
     start_ = [this, &pool, &timeout]()
     {
@@ -61,15 +60,13 @@ protocol_base<Protocol>::protocol_base(channel::ptr channel, threadpool& pool,
     };
 }
 
-template <class Protocol>
-config::authority protocol_base<Protocol>::authority() const
+config::authority protocol_base_base::authority() const
 {
     return channel_->address();
 }
 
 // If an error code is passed to the callback the channel is also stopped.
-template <class Protocol>
-void protocol_base<Protocol>::callback(const code& ec) const
+void protocol_base_base::callback(const code& ec) const
 {
     if (callback_ != nullptr)
         callback_(ec);
@@ -77,16 +74,14 @@ void protocol_base<Protocol>::callback(const code& ec) const
 
 // This must only be called from start() and before any subscriptions.
 // Ideally avoid this, but it works around no self-closure in construct.
-template <class Protocol>
-void protocol_base<Protocol>::set_callback(handler complete)
+void protocol_base_base::set_callback(handler complete)
 {
     BITCOIN_ASSERT_MSG(callback_ == nullptr, "The callback cannot be reset.");
     if (callback_ == nullptr)
         callback_ = complete;
 }
 
-template <class Protocol>
-void protocol_base<Protocol>::set_identifier(uint64_t value)
+void protocol_base_base::set_identifier(uint64_t value)
 {
     channel_->set_identifier(value);
 }
@@ -94,8 +89,7 @@ void protocol_base<Protocol>::set_identifier(uint64_t value)
 // Startup is deferred until after construct in order to use shared_from_this.
 // We could simplify this by using boost::enable_shared_from_this which can be
 // called from construct, but that requires use of boost::share_ptr as well.
-template <class Protocol>
-void protocol_base<Protocol>::start()
+void protocol_base_base::start()
 {
     BITCOIN_ASSERT_MSG(start_ != nullptr, "The protocol cannot be restarted.");
     if (start_ == nullptr)
@@ -105,37 +99,34 @@ void protocol_base<Protocol>::start()
     start_ = nullptr;
 }
 
-template <class Protocol>
-void protocol_base<Protocol>::stop(const code& ec)
+void protocol_base_base::stop(const code& ec)
 {
     if (!stopped())
         channel_->stop(ec);
 }
 
-template <class Protocol>
-bool protocol_base<Protocol>::stopped() const
+bool protocol_base_base::stopped() const
 {
     return stopped_;
 }
 
-template <class Protocol>
-void protocol_base<Protocol>::subscribe_stop()
+void protocol_base_base::subscribe_stop()
 {
     channel_->subscribe_stop(
-        bind(&protocol_base::handle_stop, std::placeholders::_1));
+        std::bind(&protocol_base_base::handle_stop,
+            shared_from_this(), _1));
 }
 
-template <class Protocol>
-void protocol_base<Protocol>::subscribe_timer(threadpool& pool,
+void protocol_base_base::subscribe_timer(threadpool& pool,
     const asio::duration& timeout)
 {
     deadline_ = std::make_shared<deadline>(pool, timeout);
     deadline_->start(
-        bind(&protocol_base::handle_timer, std::placeholders::_1));
+        std::bind(&protocol_base_base::handle_timer,
+            shared_from_this(), _1));
 }
-
-template <class Protocol>
-void protocol_base<Protocol>::handle_stop(const code& ec)
+    
+void protocol_base_base::handle_stop(const code& ec)
 {
     if (stopped())
         return;
@@ -151,8 +142,7 @@ void protocol_base<Protocol>::handle_stop(const code& ec)
     callback(ec);
 }
 
-template <class Protocol>
-void protocol_base<Protocol>::handle_timer(const code& ec)
+void protocol_base_base::handle_timer(const code& ec)
 {
     if (stopped() || deadline::canceled(ec))
         return;
@@ -166,5 +156,3 @@ void protocol_base<Protocol>::handle_timer(const code& ec)
 
 } // namespace network
 } // namespace libbitcoin
-
-#endif
