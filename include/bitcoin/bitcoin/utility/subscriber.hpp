@@ -46,7 +46,7 @@ public:
         const std::string& log_name);
     ~subscriber();
 
-    void subscribe(handler handler);
+    void subscribe(handler notifier);
     void relay(Args... args);
 
 private:

@@ -43,17 +43,17 @@ subscriber<Args...>::~subscriber()
 }
 
 template <typename... Args>
-void subscriber<Args...>::subscribe(handler handler)
+void subscriber<Args...>::subscribe(handler notifier)
 {
-    dispatch_.ordered_delegate(&subscriber<Args...>::do_subscribe,
-        this->shared_from_this(), handler)();
+    dispatch_.ordered(&subscriber<Args...>::do_subscribe,
+        this->shared_from_this(), notifier);
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
-    dispatch_.ordered_delegate(&subscriber<Args...>::do_relay,
-        this->shared_from_this(), std::forward<Args>(args)...)();
+    dispatch_.ordered(&subscriber<Args...>::do_relay,
+        this->shared_from_this(), args...);
 }
 
 template <typename... Args>
@@ -68,9 +68,9 @@ void subscriber<Args...>::do_relay(Args... args)
     if (subscriptions_.empty())
         return;
 
-    const auto subscriptions = subscriptions_;
+    const auto subscriptions_copy = subscriptions_;
     subscriptions_.clear();
-    for (const auto notifier: subscriptions)
+    for (const auto notifier: subscriptions_copy)
         notifier(args...);
 }
 
