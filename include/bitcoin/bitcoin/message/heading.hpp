@@ -35,6 +35,31 @@
 namespace libbitcoin {
 namespace message {
 
+enum class type
+{
+    unknown,
+    address,
+    alert,
+    block,
+    filter_add,
+    filter_clear,
+    filter_load,
+    get_address,
+    get_blocks,
+    get_data,
+    get_headers,
+    inventory,
+    memory_pool,
+    merkle_block,
+    not_found,
+    ping,
+    pong,
+    reject,
+    transaction,
+    verack,
+    version
+};
+
 class BC_API heading
 {
 public:
@@ -56,6 +81,7 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
+    type type() const;
 
     uint32_t magic;
     std::string command;

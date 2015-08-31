@@ -21,6 +21,7 @@
 
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/istream_reader.hpp>
@@ -118,6 +119,53 @@ void heading::to_data(writer& sink) const
     sink.write_fixed_string(command, command_size);
     sink.write_4_bytes_little_endian(payload_size);
     sink.write_4_bytes_little_endian(checksum);
+}
+
+type heading::type() const
+{
+    // TODO: convert to static map.
+    if (command == address::command)
+        return type::address;
+    if (command == alert::command)
+        return type::alert;
+    if (command == block::command)
+        return type::block;
+    if (command == filter_add::command)
+        return type::filter_add;
+    if (command == filter_clear::command)
+        return type::filter_clear;
+    if (command == filter_load::command)
+        return type::filter_load;
+    if (command == get_address::command)
+        return type::get_address;
+    if (command == get_blocks::command)
+        return type::get_blocks;
+    if (command == get_data::command)
+        return type::get_data;
+    if (command == get_headers::command)
+        return type::get_headers;
+    if (command == inventory::command)
+        return type::inventory;
+    if (command == memory_pool::command)
+        return type::memory_pool;
+    if (command == merkle_block::command)
+        return type::merkle_block;
+    if (command == not_found::command)
+        return type::not_found;
+    if (command == ping::command)
+        return type::ping;
+    if (command == pong::command)
+        return type::pong;
+    if (command == reject::command)
+        return type::reject;
+    if (command == transaction::command)
+        return type::transaction;
+    if (command == verack::command)
+        return type::verack;
+    if (command == version::command)
+        return type::version;
+
+    return type::unknown;
 }
 
 bool operator==(const heading& left, const heading& right)
