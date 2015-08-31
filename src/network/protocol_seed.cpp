@@ -82,7 +82,7 @@ void protocol_seed::start()
         return;
     }
 
-    ////subscribe<address>(&protocol_seed::handle_receive_address, _1, _2);
+    subscribe<protocol_seed, address>(&protocol_seed::handle_receive_address, _1, _2);
     send<protocol_seed>(get_address(), &protocol_seed::handle_send_get_address, _1);
 }
 

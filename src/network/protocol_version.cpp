@@ -99,7 +99,7 @@ void protocol_version::start()
 {
     protocol_base::start();
 
-    ////subscribe<protocol_version, version>(&protocol_version::handle_receive_version, _1, _2);
+    subscribe<protocol_version, version>(&protocol_version::handle_receive_version, _1, _2);
     subscribe<protocol_version, verack>(&protocol_version::handle_receive_verack, _1, _2);
     send<protocol_version>(version_, &protocol_version::handle_version_sent, _1);
 }

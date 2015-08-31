@@ -66,7 +66,7 @@ void protocol_address::start()
     if (hosts_.capacity() == 0)
         return;
 
-    ////subscribe<get_address>(&protocol_address::handle_receive_get_address, _1, _2);
+    subscribe<protocol_address, get_address>(&protocol_address::handle_receive_get_address, _1, _2);
     send<protocol_address>(get_address(), &protocol_address::handle_send_get_address, _1);
 }
 
@@ -86,7 +86,7 @@ void protocol_address::handle_receive_address(const code& ec,
     }
 
     // Resubscribe to address messages.
-    ////subscribe<address>(&protocol_address::handle_receive_address, _1, _2);
+    subscribe<protocol_address, address>(&protocol_address::handle_receive_address, _1, _2);
 
     log_debug(LOG_PROTOCOL)
         << "Storing addresses from [" << authority() << "] ("
@@ -114,7 +114,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
 
     // TODO: allowing repeated queries can allow a peer to map our history.
     // Resubscribe to get_address messages.
-    ////subscribe<get_address>(&protocol_address::handle_receive_get_address, _1, _2);
+    subscribe<protocol_address, get_address>(&protocol_address::handle_receive_get_address, _1, _2);
 
     // TODO: pull active hosts from host cache (currently just resending self).
     // TODO: need to distort for privacy, don't send currently-connected peers.

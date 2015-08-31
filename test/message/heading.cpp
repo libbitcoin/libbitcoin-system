@@ -37,12 +37,12 @@ BOOST_AUTO_TEST_CASE(to_data_checksum_variations)
 
     auto zero_checksum = instance.to_data();
 
-    BOOST_REQUIRE_EQUAL(zero_checksum.size(), message::heading::serialized_size);
+    BOOST_REQUIRE_EQUAL(zero_checksum.size(), message::heading::serialized_size());
 
     instance.checksum = 123u;
     const auto nonzero_checksum = instance.to_data();
 
-    BOOST_REQUIRE_EQUAL(nonzero_checksum.size(), message::heading::serialized_size);
+    BOOST_REQUIRE_EQUAL(nonzero_checksum.size(), message::heading::serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), message::heading::serialized_size);
+    BOOST_REQUIRE_EQUAL(data.size(), message::heading::serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), message::heading::serialized_size);
+    BOOST_REQUIRE_EQUAL(data.size(), message::heading::serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
     istream_reader source(istream);
     const auto result = message::heading::factory_from_data(source);
 
-    BOOST_REQUIRE_EQUAL(data.size(), message::heading::serialized_size);
+    BOOST_REQUIRE_EQUAL(data.size(), message::heading::serialized_size());
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
 }

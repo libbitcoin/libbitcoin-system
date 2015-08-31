@@ -29,6 +29,11 @@
 namespace libbitcoin {
 namespace message {
 
+const size_t heading::serialized_size()
+{
+    return buffer::static_size;
+}
+
 heading heading::factory_from_data(const data_chunk& data)
 {
     heading instance;
@@ -97,7 +102,7 @@ data_chunk heading::to_data() const
     data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == heading::serialized_size);
+    BITCOIN_ASSERT(data.size() == heading::serialized_size());
     return data;
 }
 

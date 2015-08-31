@@ -21,6 +21,7 @@
 #define LIBBITCOIN_MESSAGE_HEADING_HPP
 
 #include <cstdint>
+#include <cstddef>
 #include <istream>
 #include <string>
 #include <boost/array.hpp>
@@ -38,12 +39,11 @@ class BC_API heading
 {
 public:
     // Header minus checksum is 4 + 12 + 4 + 4 = 24 bytes
-    static BC_CONSTEXPR size_t serialized_size = 24;
-
     // boost1.54/linux/clang/libstdc++-4.8 error if std::array
     // could not match 'boost::array' against 'std::array'
-    typedef boost::array<uint8_t, serialized_size> buffer;
+    typedef boost::array<uint8_t, 24> buffer;
 
+    static const size_t serialized_size();
     static heading factory_from_data(const data_chunk& data);
     static heading factory_from_data(std::istream& stream);
     static heading factory_from_data(reader& source);

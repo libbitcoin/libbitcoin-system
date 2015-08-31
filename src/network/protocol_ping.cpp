@@ -58,7 +58,7 @@ void protocol_ping::start()
     // shared_from_this to execute within a constructor.
     set_callback(bind<protocol_ping>(&protocol_ping::send_ping, _1));
 
-    ////subscribe<ping>(&protocol_ping::handle_receive_ping, _1, _2);
+    subscribe<protocol_ping, ping>(&protocol_ping::handle_receive_ping, _1, _2);
 
     // Send initial ping message by simulating first heartbeat.
     callback(error::success);
@@ -81,7 +81,7 @@ void protocol_ping::send_ping(const code& ec)
 
     const auto nonce = pseudo_random();
 
-    ////subscribe<pong>(&protocol_ping::handle_receive_pong, _1, _2, nonce);
+    subscribe<protocol_ping, pong>(&protocol_ping::handle_receive_pong, _1, _2, nonce);
     send<protocol_ping>(ping(nonce), &protocol_ping::handle_send_ping, _1);
 }
 
@@ -101,7 +101,7 @@ void protocol_ping::handle_receive_ping(const code& ec,
     }
 
     // Resubscribe to ping messages.
-    ////subscribe<ping>(&protocol_ping::handle_receive_ping, _1, _2);
+    subscribe<protocol_ping, ping>(&protocol_ping::handle_receive_ping, _1, _2);
     send<protocol_ping>(pong(message.nonce), &protocol_ping::handle_send_pong, _1);
 }
 
