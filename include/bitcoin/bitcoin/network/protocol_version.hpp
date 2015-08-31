@@ -40,7 +40,7 @@ namespace network {
  * Attach this to a node immediately following socket creation.
  */
 class BC_API protocol_version
-  : public protocol_base, track<protocol_version>
+  : public protocol_base<protocol_version>, track<protocol_version>
 {
 public:
     /**

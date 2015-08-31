@@ -40,7 +40,7 @@ namespace network {
  * Attach this to a node immediately following handshake completion.
  */
 class BC_API protocol_address
-  : public protocol_base, track<protocol_address>
+  : public protocol_base<protocol_address>, track<protocol_address>
 {
 public:
     /**

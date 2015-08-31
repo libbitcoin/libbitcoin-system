@@ -39,7 +39,7 @@ namespace network {
  * Attach this to a node immediately following handshake completion.
  */
 class BC_API protocol_ping
-  : public protocol_base, track<protocol_ping>
+  : public protocol_base<protocol_ping>, track<protocol_ping>
 {
 public:
     typedef std::shared_ptr<protocol_ping> ptr;

@@ -39,13 +39,13 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "seed"
-#define CLASS protocol_seed
 
 using namespace bc::message;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-protocol_base::handler protocol_seed::synchronizer(handler complete)
+protocol_base<protocol_seed>::handler protocol_seed::synchronizer(
+    handler complete)
 {
     return synchronize(complete, 3, NAME);
 }
@@ -72,7 +72,7 @@ void protocol_seed::start()
     else
     {
         address self({ { self_.to_network_address() } });
-        send<protocol_seed>(self, &protocol_seed::handle_send_address, _1);
+        send(self, &protocol_seed::handle_send_address, _1);
     }
 
     if (hosts_.capacity() == 0)
@@ -82,8 +82,8 @@ void protocol_seed::start()
         return;
     }
 
-    subscribe<protocol_seed, address>(&protocol_seed::handle_receive_address, _1, _2);
-    send<protocol_seed>(get_address(), &protocol_seed::handle_send_get_address, _1);
+    subscribe<address>(&protocol_seed::handle_receive_address, _1, _2);
+    send(get_address(), &protocol_seed::handle_send_get_address, _1);
 }
 
 void protocol_seed::handle_receive_address(const code& ec,
@@ -109,8 +109,8 @@ void protocol_seed::handle_receive_address(const code& ec,
         << message.addresses.size() << ")";
 
     // TODO: manage timestamps (active peers are connected < 3 hours ago).
-    hosts_.store(message.addresses, 
-        bind<protocol_seed>(&protocol_seed::handle_store_addresses, _1));
+    hosts_.store(message.addresses,
+        bind(&protocol_seed::handle_store_addresses, _1));
 }
 
 void protocol_seed::handle_send_address(const code& ec)

@@ -36,10 +36,11 @@ namespace libbitcoin {
 namespace network {
 
 /**
- * Virtual base class for protocol implementations.
+ * Templated virtual base class for protocol implementations.
  */
-class BC_API protocol_base
-  : public std::enable_shared_from_this<protocol_base>
+template <class Protocol>
+class protocol_base
+  : public std::enable_shared_from_this<protocol_base<Protocol>>
 {
 public:
     /**
@@ -82,35 +83,35 @@ protected:
      * Used by implementations to obtain a shared pointer of the derived type.
      * Required because enable_shared_from_this doesn't support inheritance.
      */
-    template <class Self>
-    std::shared_ptr<Self> shared_from_base()
+    template <class Derived>
+    std::shared_ptr<Derived> shared_from_base()
     {
-        return std::static_pointer_cast<Self>(shared_from_this());
+        return std::static_pointer_cast<Derived>(shared_from_this());
     }
 
-    template <class Self, typename Handler, typename... Args>
+    template <typename Handler, typename... Args>
     auto bind(Handler&& handler, Args&&... args) ->
         decltype(std::bind(std::forward<Handler>(handler),
-            std::shared_ptr<Self>(), std::forward<Args>(args)...))
+            std::shared_ptr<Protocol>(), std::forward<Args>(args)...))
     {
         return std::bind(std::forward<Handler>(handler),
-            shared_from_base<Self>(), std::forward<Args>(args)...);
+            shared_from_base<Protocol>(), std::forward<Args>(args)...);
     }
 
-    template <class Self, class Message, typename Handler, typename... Args>
+    template <class Message, typename Handler, typename... Args>
     void send(Message&& packet, Handler&& handler, Args&&... args)
     {
         channel_->send(std::forward<Message>(packet),
             dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                shared_from_base<Self>(), std::forward<Args>(args)...));
+                shared_from_base<Protocol>(), std::forward<Args>(args)...));
     }
 
-    template <class Self, class Message, typename Handler, typename... Args>
+    template <class Message, typename Handler, typename... Args>
     void subscribe(Handler&& handler, Args&&... args)
     {
         channel_->subscribe<Message>(
             dispatch_.ordered_delegate(std::forward<Handler>(handler),
-                shared_from_base<Self>(), std::forward<Args>(args)...));
+                shared_from_base<Protocol>(), std::forward<Args>(args)...));
     }
 
     /**
@@ -168,5 +169,7 @@ private:
 
 } // namespace network
 } // namespace libbitcoin
+
+#include <bitcoin/bitcoin/impl/network/protocol_base.ipp>
 
 #endif

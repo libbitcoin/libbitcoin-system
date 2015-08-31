@@ -64,7 +64,8 @@ const message::version protocol_version::template_
     RELAY_TRUE
 };
 
-protocol_base::handler protocol_version::synchronizer(handler complete)
+protocol_base<protocol_version>::handler protocol_version::synchronizer(
+    handler complete)
 {
     return synchronize(complete, 3, NAME);
 }
@@ -99,9 +100,9 @@ void protocol_version::start()
 {
     protocol_base::start();
 
-    subscribe<protocol_version, version>(&protocol_version::handle_receive_version, _1, _2);
-    subscribe<protocol_version, verack>(&protocol_version::handle_receive_verack, _1, _2);
-    send<protocol_version>(version_, &protocol_version::handle_version_sent, _1);
+    subscribe<version>(&protocol_version::handle_receive_version, _1, _2);
+    subscribe<verack>(&protocol_version::handle_receive_verack, _1, _2);
+    send(version_, &protocol_version::handle_version_sent, _1);
 }
 
 void protocol_version::handle_receive_version(const code& ec,
@@ -137,7 +138,7 @@ void protocol_version::handle_receive_version(const code& ec,
         << "Peer version [" << authority() << "] ("
         << message.value << ") " << message.user_agent;
 
-    send<protocol_version>(verack(), &protocol_version::handle_verack_sent, _1);
+    send(verack(), &protocol_version::handle_verack_sent, _1);
 }
 
 void protocol_version::handle_verack_sent(const code& ec)

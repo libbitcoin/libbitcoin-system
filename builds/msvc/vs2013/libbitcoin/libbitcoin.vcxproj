@@ -142,7 +142,6 @@
     <ClCompile Include="..\..\..\..\src\network\proxy.cpp" />
     <ClCompile Include="..\..\..\..\src\network\stream_loader.cpp" />
     <ClCompile Include="..\..\..\..\src\network\connector.cpp" />
-    <ClCompile Include="..\..\..\..\src\network\protocol_base.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol_seed.cpp" />
     <ClCompile Include="..\..\..\..\src\network\protocol_version.cpp" />
     <ClCompile Include="..\..\..\..\src\network\hosts.cpp" />
@@ -329,6 +328,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base16.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\network\protocol_base.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />

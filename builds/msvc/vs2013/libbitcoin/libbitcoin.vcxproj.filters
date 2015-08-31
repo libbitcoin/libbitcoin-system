@@ -84,6 +84,9 @@
     <Filter Include="src\message">
       <UniqueIdentifier>{919f9823-945e-4ab1-82ab-2c7ba85502ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\impl\network">
+      <UniqueIdentifier>{f7b2c9aa-1a03-4f6b-a5a4-33db1aad4072}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -116,6 +119,9 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\network\protocol_base.ipp">
+      <Filter>include\bitcoin\impl\network</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -391,9 +397,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\string.cpp">
       <Filter>src\utility</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\protocol_base.cpp">
-      <Filter>src\network</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\protocol_seed.cpp">
       <Filter>src\network</Filter>

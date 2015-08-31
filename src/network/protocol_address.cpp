@@ -38,7 +38,6 @@ namespace libbitcoin {
 namespace network {
 
 #define NAME "adddress"
-#define CLASS protocol_address
 
 using namespace bc::message;
 using std::placeholders::_1;
@@ -60,14 +59,15 @@ void protocol_address::start()
     if (self_.port() != 0)
     {
         address self({ { self_.to_network_address() } });
-        send<protocol_address>(self, &protocol_address::handle_send_address, _1);
+        send(self, &protocol_address::handle_send_address, _1);
     }
 
     if (hosts_.capacity() == 0)
         return;
 
-    subscribe<protocol_address, get_address>(&protocol_address::handle_receive_get_address, _1, _2);
-    send<protocol_address>(get_address(), &protocol_address::handle_send_get_address, _1);
+    subscribe<get_address>(
+        &protocol_address::handle_receive_get_address, _1, _2);
+    send(get_address(), &protocol_address::handle_send_get_address, _1);
 }
 
 void protocol_address::handle_receive_address(const code& ec,
@@ -79,14 +79,14 @@ void protocol_address::handle_receive_address(const code& ec,
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure receiving address message from [" << authority() << "] "
-            << ec.message();
+            << "Failure receiving address message from ["
+            << authority() << "] " << ec.message();
         stop(ec);
         return;
     }
 
     // Resubscribe to address messages.
-    subscribe<protocol_address, address>(&protocol_address::handle_receive_address, _1, _2);
+    subscribe<address>(&protocol_address::handle_receive_address, _1, _2);
 
     log_debug(LOG_PROTOCOL)
         << "Storing addresses from [" << authority() << "] ("
@@ -94,7 +94,7 @@ void protocol_address::handle_receive_address(const code& ec,
 
     // TODO: manage timestamps (active peers are connected < 3 hours ago).
     hosts_.store(message.addresses,
-        bind<protocol_address>(&protocol_address::handle_store_addresses, _1));
+        bind(&protocol_address::handle_store_addresses, _1));
 }
 
 void protocol_address::handle_receive_get_address(const code& ec,
@@ -106,15 +106,16 @@ void protocol_address::handle_receive_get_address(const code& ec,
     if (ec)
     {
         log_debug(LOG_PROTOCOL)
-            << "Failure receiving get_address message from [" << authority() << "] "
-            << ec.message();
+            << "Failure receiving get_address message from ["
+            << authority() << "] " << ec.message();
         stop(ec);
         return;
     }
 
     // TODO: allowing repeated queries can allow a peer to map our history.
     // Resubscribe to get_address messages.
-    subscribe<protocol_address, get_address>(&protocol_address::handle_receive_get_address, _1, _2);
+    subscribe<get_address>(
+        &protocol_address::handle_receive_get_address, _1, _2);
 
     // TODO: pull active hosts from host cache (currently just resending self).
     // TODO: need to distort for privacy, don't send currently-connected peers.
@@ -126,7 +127,7 @@ void protocol_address::handle_receive_get_address(const code& ec,
         << "Sending addresses to [" << authority() << "] ("
         << active.addresses.size() << ")";
 
-    send<protocol_address>(active, &protocol_address::handle_send_address, _1);
+    send(active, &protocol_address::handle_send_address, _1);
 }
 
 void protocol_address::handle_send_address(const code& ec)

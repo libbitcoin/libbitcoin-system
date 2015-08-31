@@ -40,7 +40,7 @@ namespace network {
  * Attach this to a node immediately following seed handshake completion.
  */
 class BC_API protocol_seed
-  : public protocol_base, track<protocol_seed>
+  : public protocol_base<protocol_seed>, track<protocol_seed>
 {
 public:
     /**
