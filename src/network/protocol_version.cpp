@@ -92,7 +92,7 @@ protocol_version::protocol_version(channel::ptr channel, threadpool& pool,
     version_.nonce = pseudo_random();
 
     // TODO: Add nonce to channel state for loopback detection in the context.
-    ////channel_->set_nonce(version_.nonce);
+    set_identifier(version_.nonce);
 }
 
 void protocol_version::start()

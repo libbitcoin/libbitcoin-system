@@ -57,10 +57,11 @@ public:
     channel(const channel&) = delete;
     void operator=(const channel&) = delete;
 
+    uint64_t identifier() const;
+    void set_identifier(uint64_t value);
+
     void start();
     void stop(const code& ec);
-    uint64_t nonce() const;
-    void set_nonce(uint64_t nonce);
     config::authority address() const;
     void reset_revival();
     void set_revival_handler(proxy::handler handler);
@@ -81,7 +82,7 @@ public:
 
 private:
     proxy::ptr proxy_;
-    uint64_t nonce_;
+    uint64_t identifier_;
 };
 
 } // namespace network

@@ -37,7 +37,7 @@ namespace network {
 // TODO: derive channel from proxy, adding timers, tracking, nonce.
 channel::channel(proxy::ptr proxy)
   : proxy_(proxy),
-    nonce_(0),
+    identifier_(0),
     CONSTRUCT_TRACK(channel, LOG_NETWORK)
 {
 }
@@ -73,14 +73,14 @@ config::authority channel::address() const
 }
 
 // TODO: make private, pass on notfy.
-uint64_t channel::nonce() const
+uint64_t channel::identifier() const
 {
-    return nonce_;
+    return identifier_;
 }
 
-void channel::set_nonce(uint64_t nonce)
+void channel::set_identifier(uint64_t value)
 {
-    nonce_ = nonce;
+    identifier_ = value;
 }
 
 void channel::reset_revival()

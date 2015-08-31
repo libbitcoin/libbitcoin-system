@@ -131,6 +131,12 @@ protected:
      * @param[in]  callback  The complation callback.
      */
     void set_callback(handler complete);
+
+    /**
+     * Set the channel identity for own-channel detection.
+     * @param[in]  nonce  The nonce value.
+     */
+    void set_identifier(uint64_t nonce);
     
     /**
      * Stop the channel.

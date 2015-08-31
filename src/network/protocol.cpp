@@ -490,10 +490,10 @@ bool protocol::is_connected(const config::authority& peer) const
 bool protocol::is_loopback(channel::ptr node) const
 {
     const auto& outbound = outbound_connections_;
-    const auto nonce = node->nonce();
-    const auto found = [node, nonce](const channel::ptr& entry)
+    const auto id = node->identifier();
+    const auto found = [node, id](const channel::ptr& entry)
     {
-        return (entry != node) && (entry->nonce() == nonce);
+        return (entry != node) && (entry->identifier() == id);
     };
     auto it = std::find_if(outbound.begin(), outbound.end(), found);
     return it != outbound.end();

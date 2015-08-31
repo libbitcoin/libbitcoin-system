@@ -83,6 +83,11 @@ void protocol_base::set_callback(handler complete)
         callback_ = complete;
 }
 
+void protocol_base::set_identifier(uint64_t value)
+{
+    channel_->set_identifier(value);
+}
+
 // Startup is deferred until after construct in order to use shared_from_this.
 // We could simplify this by using boost::enable_shared_from_this which can be
 // called from construct, but that requires use of boost::share_ptr as well.
