@@ -60,6 +60,29 @@ using std::placeholders::_2;
 using boost::format;
 using boost::posix_time::time_duration;
 
+////class BC_API message_subscriber
+////  : public std::enable_shared_from_this<message_subscriber>,
+////    track<message_subscriber>
+////
+////template <typename Message, class Subscriber>
+////void message_subscriber::establish_message_relay(Subscriber subscriber)
+////{
+////    const auto handler = [subscriber](const code& ec, const Message& message)
+////    {
+////        subscriber->relay(ec, message);
+////    };
+////
+////    stream_loader_.add<Message>(handler);
+////}
+
+////// Subscriber doesn't have an unsubscribe, we just send service_stopped.
+////// The subscriber then has the option to not resubscribe in the handler.
+////template <typename Message, class Subscriber>
+////void message_subscriber::notify_stop(Subscriber subscriber) const
+////{
+////    subscriber->relay(error::channel_stopped, Message());
+////}
+
 // The proxy will have no config with timers moved to channel.
 proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     const timeout& timeouts)
@@ -71,8 +94,7 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
     stopped_(false),
-    nonce_(0),
-    ////INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS(),
+    ////message_subscriber_(std::make_shared<message_subscriber>(pool)),
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
     CONSTRUCT_TRACK(proxy, LOG_NETWORK)
 {
@@ -82,7 +104,28 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     if (!ec)
         authority_ = config::authority(endpoint);
 
-    ///ESTABLISH_PROXY_MESSAGE_RELAYS();
+    // TODO: establish_message_relay
+    // Each message type registers a loader.
+    // This means we always process known message types regardless of protocol.
+    ////message_subscriber_->start(stream_loader_);
+}
+
+void proxy::subscribe_stop(stop_handler handler)
+{
+    if (stopped())
+        handler(error::channel_stopped);
+    else
+        stop_subscriber_->subscribe(handler);
+}
+
+void proxy::clear_subscriptions(const code& ec)
+{
+    // TODO: notify_stop
+    // Each message subscription is fired wtih the channel stop code.
+    ////message_subscriber_->relay(error::channel_stopped);
+
+    // All stop subscriptions are fired with the channel stop reason code.
+    stop_subscriber_->relay(ec);
 }
 
 proxy::~proxy()
@@ -139,12 +182,6 @@ void proxy::do_stop(const code& ec)
     clear_subscriptions(ec);
 }
 
-void proxy::clear_subscriptions(const code& ec)
-{
-    ////CLEAR_PROXY_MESSAGE_SUBSCRIPTIONS();
-    stop_subscriber_->relay(ec);
-}
-
 void proxy::clear_timers()
 {
     expiration_->cancel();
@@ -163,7 +200,6 @@ void proxy::start_timers()
     start_inactivity();
 }
 
-// public
 void proxy::reset_revival()
 {
     if (stopped())
@@ -172,7 +208,6 @@ void proxy::reset_revival()
     start_revival();
 }
 
-// public
 void proxy::set_revival_handler(handler handler)
 {
     if (stopped())
@@ -378,14 +413,6 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
             << " from [" << address() << "] " << error.message();
         stop(error);
     }
-}
-
-void proxy::subscribe_stop(stop_handler handler)
-{
-    if (stopped())
-        handler(error::channel_stopped);
-    else
-        stop_subscriber_->subscribe(handler);
 }
 
 void proxy::do_send(const data_chunk& message, handler handler,

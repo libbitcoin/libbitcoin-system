@@ -58,7 +58,6 @@ public:
     typedef std::function<void(const code&)> send_handler;
     typedef std::function<void(const code&)> stop_handler;
     typedef subscriber<const code&> stop_subscriber;
-
     typedef std::shared_ptr<proxy> ptr;
     typedef std::function<void(const code&)> handler;
 
@@ -69,14 +68,6 @@ public:
     /// This class is not copyable.
     proxy(const proxy&) = delete;
     void operator=(const proxy&) = delete;
-
-    void start();
-    void stop(const code& ec);
-    bool stopped() const;
-    config::authority address() const;
-    void reset_revival();
-    void set_revival_handler(handler handler);
-    void set_nonce(uint64_t nonce);
 
     template <class Message>
     void send(const Message& packet, send_handler handler)
@@ -103,36 +94,24 @@ public:
         }
 
         // Subscribing must be immediate, we cannot switch thread contexts.
-        // message_subscriber<Message>(handler);
+        ////message_subscriber_->subscribe<Message>(handler);
     }
 
+    config::authority address() const;
+    void start();
+    void stop(const code& ec);
+    bool stopped() const;
     void subscribe_stop(stop_handler handler);
+
+    // TODO: move to channel.
+    void reset_revival();
+    void set_revival_handler(handler handler);
 
 private:
     typedef byte_source<message::heading::buffer> heading_source;
     typedef boost::iostreams::stream<heading_source> heading_stream;
-
     typedef byte_source<data_chunk> payload_source;
     typedef boost::iostreams::stream<payload_source> payload_stream;
-
-    ////template <typename Message, class Subscriber>
-    ////void proxy::establish_relay(Subscriber subscriber)
-    ////{
-    ////    const auto handler = [subscriber](const code& ec, const Message& message)
-    ////    {
-    ////        subscriber->relay(ec, message);
-    ////    };
-    ////
-    ////    stream_loader_.add<Message>(handler);
-    ////}
-
-    ////// Subscriber doesn't have an unsubscribe, we just send service_stopped.
-    ////// The subscriber then has the option to not resubscribe in the handler.
-    ////template <typename Message, class Subscriber>
-    ////void proxy::notify_stop(Subscriber subscriber) const
-    ////{
-    ////    subscriber->relay(error::channel_stopped, Message());
-    ////}
 
     void stop(const boost_code& ec);
     void do_stop(const code& ec);
@@ -164,18 +143,13 @@ private:
     message::heading::buffer heading_buffer_;
     data_chunk payload_buffer_;
     stream_loader stream_loader_;
-
     dispatcher dispatch_;
-
     const timeout& timeouts_;
     deadline::ptr expiration_;
     deadline::ptr inactivity_;
     deadline::ptr revival_;
     handler revival_handler_;
-
     bool stopped_;
-    uint64_t nonce_;
-
     ////message_subscriber::ptr message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
 };
