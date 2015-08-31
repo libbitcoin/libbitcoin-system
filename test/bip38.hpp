@@ -39,8 +39,6 @@ struct bip38_result
 
 typedef std::vector<bip38_result> bip38_result_list;
 
-#ifndef ENABLE_TESTNET
-
 // Test vector list taken from:
 // https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#Test_vectors
 //
@@ -49,10 +47,88 @@ typedef std::vector<bip38_result> bip38_result_list;
 // recreate the keys.
 //
 // So others were generated and verified using https://bit2factor.com/
+
+#ifdef ENABLE_TESTNET
+
 const bip38_result_list bip38_test_vector
 {
     {
-#ifndef ENABLE_TESTNET
+#ifdef WITH_ICU
+        {
+            "6PRL8jj6dLQjBBJjHMdUKLSNLEpjTyAfmt8GnCnfT87NeQ2BU5eAW1tcsS",
+            "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5",
+            "TestingOneTwoThree",
+            "",
+            "",
+            "",
+            "",
+            false,
+            false
+        },
+        {
+            "6PRN49fV2yEpyCv1pTaXxwCNuMtJEoYCT19iDTUJiRYdPW1HRyrZapfCWP",
+            "09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae",
+            "Satoshi",
+            "",
+            "",
+            "",
+            "",
+            false,
+            false
+        },
+        {
+            "6PYVB5nHnumbUua1UmsAMPHWHa76Ci48MY79aKYnpKmwxeGqHU2XpXtKvo",
+            "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5",
+            "TestingOneTwoThree",
+            "",
+            "",
+            "",
+            "",
+            true,
+            false
+        },
+        {
+            "6PYR63Hbut6L25z7t9mufV6wiiqcjfkV3AEKkyKCCNUZXoE6f8yoAc4JPq",
+            "09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae",
+            "Satoshi",
+            "",
+            "",
+            "",
+            "",
+            true,
+            false
+        },
+#endif // WITH_ICU
+        {
+            "6PfTz8uK5eN6KaNwkG2mzBb1AQkWdD8UMTLYvPm3t8cPaKuSGxzNG2cc4X",
+            "fb4bfb0bfe151d524b0b11983b9f826d6a0bc7f7bdc480864a1b557ff0c59eb4",
+            "libbitcoin test",
+            "passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM",
+            "cfrm38V5eSp6W4TStvncXprCwjhbyPc2RMFS8de6WZjEiU9zc9rRnDxcAeY7d82AHizXHoBxwqh",
+            "d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7",
+            "n2vddqLxpbRVsSDp1dQistCNAxcY2SHoXd",
+            false,
+            true
+        },
+        {
+            "6PfN3FmLygXWEJ98jtnM9PadDuig2CxmHzgDm2GeEWggowp9zHrSLiJkNS",
+            "97c745cc980e5a070e12d0bff3f539b70748aadb406045fc1b42d4ded559a564",
+            "Libbitcoin BIP38 Test Vector",
+            "passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD",
+            "cfrm38V5K4zxzAaonhvHyamnLCSZFMzNQpxLkMNLeUXnD9nThLr9QZQwEVpuk5KNAfJxcwB9H7K",
+            "bbeac8b9bb39381520b6873553544b387bcaa19112602230",
+            "n3FhDKvW2tPG13LKT7HLpn3JfpLioDQf8o",
+            false,
+            true
+        }
+    }
+};
+
+#else // ENABLE_TESTNET
+
+const bip38_result_list bip38_test_vector
+{
+    {
 #ifdef WITH_ICU
         {
             "6PRVWUbkzzsbcVac2qwfssoUJAN1Xhrg6bNk8J7Nzm5H7kxEbn2Nh2ZoGg",
@@ -165,7 +241,6 @@ const bip38_result_list bip38_test_vector
             false,
             true
         }
-#endif // ENABLE_TESTNET
     }
 };
 

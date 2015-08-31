@@ -25,8 +25,6 @@
 using namespace bc;
 using namespace bc::bip38;
 
-#ifndef ENABLE_TESTNET
-
 BOOST_AUTO_TEST_SUITE(bip38_tests)
 
 BOOST_AUTO_TEST_CASE(bip38__lock_test)
@@ -94,5 +92,3 @@ BOOST_AUTO_TEST_CASE(bip38__unlock_test)
 #endif // WITH_ICU
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif // ENABLE_TESTNET
