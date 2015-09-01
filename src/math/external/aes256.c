@@ -300,7 +300,7 @@ void aes_expandDecKey(uint8_t* k, uint8_t* rc)
 
 
 /* -------------------------------------------------------------------------- */
-void aes256_init(aes256_context* context, uint8_t* key)
+void aes256_init(aes256_context* context, const uint8_t* key)
 {
     uint8_t rcon = 1;
     register uint8_t i;
