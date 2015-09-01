@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -134,12 +134,20 @@ extern std::ostream& cerr;
 #ifdef WITH_ICU
 
 /**
+ * Normalize a string value using nfc normalization.
+ * This function requires the ICU dependency.
+ * @param[in]  value  The value to normalize.
+ * @return            The normalized value.
+ */
+BC_API std::string to_normal_nfc_form(const std::string& value);
+
+/**
  * Normalize a string value using nfkd normalization.
  * This function requires the ICU dependency.
  * @param[in]  value  The value to normalize.
  * @return            The normalized value.
  */
-BC_API std::string to_normal_form(const std::string& value);
+BC_API std::string to_normal_nfkd_form(const std::string& value);
 
 #endif
 

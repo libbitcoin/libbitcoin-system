@@ -30,11 +30,20 @@ BOOST_AUTO_TEST_SUITE(unicode_tests)
 
 #ifdef WITH_ICU
 
-BOOST_AUTO_TEST_CASE(unicode__to_normal_form__validate__test)
+// TODO: need nfc test vector.
+//BOOST_AUTO_TEST_CASE(unicode__to_normal_nfc_form__validate__test)
+//{
+//    const auto ascii_space_sandwich = "space-> <-space";
+//    const auto ideographic_space_sandwich = "space->　<-space";
+//    const auto normalized = to_normal_nfc_form(ideographic_space_sandwich);
+//    BOOST_REQUIRE_EQUAL(normalized.c_str(), ascii_space_sandwich);
+//}
+
+BOOST_AUTO_TEST_CASE(unicode__to_normal_nfkd_form__validate__test)
 {
     const auto ascii_space_sandwich = "space-> <-space";
     const auto ideographic_space_sandwich = "space->　<-space";
-    const auto normalized = to_normal_form(ideographic_space_sandwich);
+    const auto normalized = to_normal_nfkd_form(ideographic_space_sandwich);
     BOOST_REQUIRE_EQUAL(normalized.c_str(), ascii_space_sandwich);
 }
 

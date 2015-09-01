@@ -147,7 +147,7 @@ long_hash decode_mnemonic(const word_list& mnemonic,
 {
     const auto sentence = join(mnemonic);
     const std::string prefix(passphrase_prefix);
-    const auto salt = to_normal_form(prefix + passphrase);
+    const auto salt = to_normal_nfkd_form(prefix + passphrase);
     return pkcs5_pbkdf2_hmac_sha512(to_data_chunk(sentence),
         to_data_chunk(salt), hmac_iterations);
 }
