@@ -32,7 +32,7 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
-#include <bitcoin/bitcoin/network/loader.hpp>
+#include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
@@ -44,10 +44,9 @@
 #include <bitcoin/bitcoin/utility/random.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
-#include <bitcoin/bitcoin/utility/string.hpp>
+#include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 // These must be declared in the global namespace.
-////INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACKS()
 INITIALIZE_TRACK(bc::network::proxy::stop_subscriber)
 INITIALIZE_TRACK(bc::network::proxy)
 
@@ -60,29 +59,6 @@ using std::placeholders::_2;
 using boost::format;
 using boost::posix_time::time_duration;
 
-////class BC_API message_subscriber
-////  : public std::enable_shared_from_this<message_subscriber>,
-////    track<message_subscriber>
-////
-////template <typename Message, class Subscriber>
-////void message_subscriber::establish_message_relay(Subscriber subscriber)
-////{
-////    const auto handler = [subscriber](const code& ec, const Message& message)
-////    {
-////        subscriber->relay(ec, message);
-////    };
-////
-////    stream_loader_.add<Message>(handler);
-////}
-
-////// Subscriber doesn't have an unsubscribe, we just send service_stopped.
-////// The subscriber then has the option to not resubscribe in the handler.
-////template <typename Message, class Subscriber>
-////void message_subscriber::notify_stop(Subscriber subscriber) const
-////{
-////    subscriber->relay(error::channel_stopped, Message());
-////}
-
 // The proxy will have no config with timers moved to channel.
 proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     const timeout& timeouts)
@@ -94,7 +70,7 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
     stopped_(false),
-    ////message_subscriber_(std::make_shared<message_subscriber>(pool)),
+    message_subscriber_(pool),
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
     CONSTRUCT_TRACK(proxy, LOG_NETWORK)
 {
@@ -103,29 +79,6 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     const auto endpoint = socket_->remote_endpoint(ec);
     if (!ec)
         authority_ = config::authority(endpoint);
-
-    // TODO: establish_message_relay
-    // Each message type registers a loader.
-    // This means we always process known message types regardless of protocol.
-    ////message_subscriber_->start(stream_loader_);
-}
-
-void proxy::subscribe_stop(stop_handler handler)
-{
-    if (stopped())
-        handler(error::channel_stopped);
-    else
-        stop_subscriber_->subscribe(handler);
-}
-
-void proxy::clear_subscriptions(const code& ec)
-{
-    // TODO: notify_stop
-    // Each message subscription is fired wtih the channel stop code.
-    ////message_subscriber_->relay(error::channel_stopped);
-
-    // All stop subscriptions are fired with the channel stop reason code.
-    stop_subscriber_->relay(ec);
 }
 
 proxy::~proxy()
@@ -165,6 +118,14 @@ void proxy::stop(const code& ec)
         shared_from_this(), ec);
 }
 
+void proxy::subscribe_stop(stop_handler handler)
+{
+    if (stopped())
+        handler(error::channel_stopped);
+    else
+        stop_subscriber_->subscribe(handler);
+}
+
 void proxy::do_stop(const code& ec)
 {
     if (stopped())
@@ -173,13 +134,17 @@ void proxy::do_stop(const code& ec)
     stopped_ = true;
     clear_timers();
 
-    // Shutter the socket, ignore the error code.
-    boost_code code;
-    socket_->shutdown(asio::socket::shutdown_both, code);
-    socket_->close(code);
+    // Close the socket, ignore the error code.
+    boost_code ignore;
+    socket_->shutdown(asio::socket::shutdown_both, ignore);
+    socket_->close(ignore);
 
-    // Clear all message subscriptions and notify with stop reason code.
-    clear_subscriptions(ec);
+    // All message subscribers relay the channel stop code.
+    // This results in all message subscriptions fired with the same code.
+    message_subscriber_.broadcast(error::channel_stopped);
+
+    // All stop subscriptions are fired with the channel stop reason code.
+    stop_subscriber_->relay(ec);
 }
 
 void proxy::clear_timers()
@@ -386,7 +351,7 @@ void proxy::handle_read_payload(const boost_code& ec, size_t,
     // Parse and publish the payload to message subscribers.
     payload_source source(payload_copy);
     payload_stream istream(source);
-    const auto error = stream_loader_.load(heading.command, istream);
+    const auto error = message_subscriber_.load(heading.type(), istream);
 
     // Warn about unconsumed bytes in the stream.
     if (!error && istream.peek() != std::istream::traits_type::eof())

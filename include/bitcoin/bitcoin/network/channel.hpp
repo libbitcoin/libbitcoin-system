@@ -23,6 +23,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <utility>
 #include <string>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -31,8 +32,8 @@
 #include <bitcoin/bitcoin/messages.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/network/proxy.hpp>
-//#include <bitcoin/bitcoin/network/network.hpp>
 #include <bitcoin/bitcoin/network/asio.hpp>
+#include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/logger.hpp>
@@ -50,7 +51,8 @@ public:
     typedef std::shared_ptr<channel> ptr;
 
     channel(proxy::ptr proxy);
-    channel(threadpool& pool, asio::socket_ptr socket, const timeout& timeouts);
+    channel(threadpool& pool, asio::socket_ptr socket,
+        const timeout& timeouts);
     ~channel();
 
     /// This class is not copyable.
@@ -66,16 +68,17 @@ public:
     void reset_revival();
     void set_revival_handler(proxy::handler handler);
 
-    template <class Message>
-    void send(Message&& packet, proxy::send_handler handler)
+    template <class Message, typename Handler>
+    void send(Message&& packet, Handler&& handler)
     {
-        proxy_->send(std::forward<Message>(packet), handler);
+        proxy_->send(std::forward<Message>(packet),
+            std::forward<Handler>(handler));
     }
 
-    template <class Message>
-    void subscribe(proxy::message_handler<Message> handler)
+    template <class Message, typename Handler>
+    void subscribe(Handler&& handler)
     {
-        proxy_->subscribe<Message>(handler);
+        proxy_->subscribe<Message>(std::forward<Handler>(handler));
     }
 
     void subscribe_stop(proxy::stop_handler handle);

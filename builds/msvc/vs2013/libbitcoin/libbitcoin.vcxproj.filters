@@ -440,9 +440,6 @@
     <ClCompile Include="..\..\..\..\src\network\proxy.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\network\stream_loader.cpp">
-      <Filter>src\network</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\chain\input.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
@@ -456,6 +453,9 @@
       <Filter>src\message</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\protocol_base_base.cpp">
+      <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\network\message_subscriber.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
   </ItemGroup>
@@ -862,12 +862,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\proxy.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\loader.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\stream_loader.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\input.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
@@ -884,6 +878,9 @@
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base_base.hpp">
+      <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\message_subscriber.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>

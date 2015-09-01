@@ -34,9 +34,8 @@
 #include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/messages.hpp>
-#include <bitcoin/bitcoin/network/stream_loader.hpp>
+#include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/dispatcher.hpp>
@@ -53,13 +52,10 @@ class BC_API proxy
   : public std::enable_shared_from_this<proxy>, track<proxy>
 {
 public:
-    template <class Message>
-    using message_handler = std::function<void(const code&, const Message&)>;
-    typedef std::function<void(const code&)> send_handler;
-    typedef std::function<void(const code&)> stop_handler;
-    typedef subscriber<const code&> stop_subscriber;
     typedef std::shared_ptr<proxy> ptr;
     typedef std::function<void(const code&)> handler;
+    typedef std::function<void(const code&)> stop_handler;
+    typedef subscriber<const code&> stop_subscriber;
 
     proxy(asio::socket_ptr socket, threadpool& pool,
         const timeout& timeouts=timeout::defaults);
@@ -69,8 +65,8 @@ public:
     proxy(const proxy&) = delete;
     void operator=(const proxy&) = delete;
 
-    template <class Message>
-    void send(const Message& packet, send_handler handler)
+    template <class Message, typename Handler>
+    void send(Message&& packet, Handler&& handler)
     {
         if (stopped())
         {
@@ -78,14 +74,15 @@ public:
             return;
         }
 
-        const auto& command = Message::command;
-        const auto bytes = message::serialize(packet);
+        const auto& command = packet.command;
+        const auto bytes = message::serialize(std::forward<Message>(packet));
+        const auto callback = std::forward<Handler>(handler);
         dispatch_.ordered(&proxy::do_send,
-            shared_from_this(), bytes, handler, command);
+            shared_from_this(), bytes, callback, command);
     }
 
-    template <class Message>
-    void subscribe(message_handler<Message> handler)
+    template <class Message, typename Handler>
+    void subscribe(Handler&& handler)
     {
         if (stopped())
         {
@@ -94,13 +91,14 @@ public:
         }
 
         // Subscribing must be immediate, we cannot switch thread contexts.
-        ////message_subscriber_->subscribe<Message>(handler);
+        message_subscriber_.subscribe<Message>(std::forward<Handler>(handler));
     }
 
     config::authority address() const;
+    bool stopped() const;
+
     void start();
     void stop(const code& ec);
-    bool stopped() const;
     void subscribe_stop(stop_handler handler);
 
     // TODO: move to channel.
@@ -110,39 +108,40 @@ public:
 private:
     typedef byte_source<message::heading::buffer> heading_source;
     typedef boost::iostreams::stream<heading_source> heading_stream;
+
     typedef byte_source<data_chunk> payload_source;
     typedef boost::iostreams::stream<payload_source> payload_stream;
 
     void stop(const boost_code& ec);
     void do_stop(const code& ec);
-    void clear_subscriptions(const code& ec);
-    void clear_timers();
 
     void start_timers();
-    void start_expiration();
-    void start_inactivity();
-    void start_revival();
+    void clear_timers();
 
+    void start_expiration();
     void handle_expiration(const code& ec);
+
+    void start_inactivity();
     void handle_inactivity(const code& ec);
+
+    void start_revival();
     void handle_revival(const code& ec);
     
     void read_heading();
-    void read_payload(const message::heading& head);
-
     void handle_read_heading(const boost_code& ec, size_t);
+
+    void read_payload(const message::heading& head);
     void handle_read_payload(const boost_code& ec, size_t,
         const message::heading& heading);
 
+    void call_handle_send(const boost_code& ec, handler handler);
     void do_send(const data_chunk& message, handler handler,
         const std::string& command);
-    void call_handle_send(const boost_code& ec, handler handler);
 
     asio::socket_ptr socket_;
     config::authority authority_;
     message::heading::buffer heading_buffer_;
     data_chunk payload_buffer_;
-    stream_loader stream_loader_;
     dispatcher dispatch_;
     const timeout& timeouts_;
     deadline::ptr expiration_;
@@ -150,7 +149,7 @@ private:
     deadline::ptr revival_;
     handler revival_handler_;
     bool stopped_;
-    ////message_subscriber::ptr message_subscriber_;
+    message_subscriber message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;
 };
 

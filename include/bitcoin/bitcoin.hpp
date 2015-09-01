@@ -81,7 +81,7 @@
 #include <bitcoin/bitcoin/network/connector.hpp>
 #include <bitcoin/bitcoin/network/hosts.hpp>
 #include <bitcoin/bitcoin/network/initiator.hpp>
-#include <bitcoin/bitcoin/network/loader.hpp>
+#include <bitcoin/bitcoin/network/message_subscriber.hpp>
 #include <bitcoin/bitcoin/network/protocol.hpp>
 #include <bitcoin/bitcoin/network/protocol_address.hpp>
 #include <bitcoin/bitcoin/network/protocol_base.hpp>
@@ -93,7 +93,6 @@
 #include <bitcoin/bitcoin/network/seeder.hpp>
 #include <bitcoin/bitcoin/network/settings.hpp>
 #include <bitcoin/bitcoin/network/shared_const_buffer.hpp>
-#include <bitcoin/bitcoin/network/stream_loader.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
 #include <bitcoin/bitcoin/unicode/console_streambuf.hpp>
 #include <bitcoin/bitcoin/unicode/ifstream.hpp>

@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_MESSAGES_HPP
 #define LIBBITCOIN_MESSAGES_HPP
 
+#include <cstdint>
 #include <bitcoin/bitcoin/chain/block.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
@@ -45,6 +46,7 @@
 #include <bitcoin/bitcoin/message/reject.hpp>
 #include <bitcoin/bitcoin/message/verack.hpp>
 #include <bitcoin/bitcoin/message/version.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 // List of bitcoin messages
 // ------------------------
@@ -82,8 +84,8 @@ typedef bc::chain::block block;
 typedef bc::chain::transaction transaction;
 
 /**
- * Serialize a message object to the Bitcoin wire protocol encoding.
- */
+* Serialize a message object to the Bitcoin wire protocol encoding.
+*/
 template <typename Message>
 data_chunk serialize(const Message& packet)
 {
@@ -105,121 +107,5 @@ data_chunk serialize(const Message& packet)
 
 } // namespace message
 } // namespace libbitcoin
-
-// TODO: replace all of this using variadic template(s).
-
-// Terminator values for use in DEFINE_MESSAGE_MACROS.
-#define COMMA ,
-#define SEMICOLON ;
-#define NONE
-
-// Iterate over message types for other macro definitions.
-#define DEFINE_MESSAGE_MACROS(Macro, Terminator) \
-    Macro(block)Terminator \
-    Macro(transaction)Terminator \
-    Macro(address)Terminator \
-    Macro(alert)Terminator \
-    Macro(filter_add)Terminator \
-    Macro(filter_clear)Terminator \
-    Macro(filter_load)Terminator \
-    Macro(get_address)Terminator \
-    Macro(get_blocks)Terminator \
-    Macro(get_data)Terminator \
-    Macro(get_headers)Terminator \
-    Macro(inventory)Terminator \
-    Macro(memory_pool)Terminator \
-    Macro(merkle_block)Terminator \
-    Macro(not_found)Terminator \
-    Macro(ping)Terminator \
-    Macro(pong)Terminator \
-    Macro(reject)Terminator \
-    Macro(verack)Terminator \
-    Macro(version)
-
-// For proxy.hpp:
-
-#define DECLARE_PROXY_MESSAGE_HANDLER_TYPE(Message) \
-    typedef std::function<void(const code&, const message::Message&)> \
-        receive_##Message##_handler
-
-#define DECLARE_PROXY_MESSAGE_HANDLER_TYPES() \
-    DEFINE_MESSAGE_MACROS(DECLARE_PROXY_MESSAGE_HANDLER_TYPE, SEMICOLON)
-
-#define DECLARE_PROXY_MESSAGE_SUBSCRIBER(Message) \
-    void subscribe_##Message(receive_##Message##_handler handle)
-
-#define DECLARE_PROXY_MESSAGE_SUBSCRIBERS() \
-    DEFINE_MESSAGE_MACROS(DECLARE_PROXY_MESSAGE_SUBSCRIBER, SEMICOLON)
-
-#define DECLARE_PROXY_MESSAGE_SUBSCRIBER_TYPE(Message) \
-    typedef subscriber<const code&, const message::Message&> \
-        Message##_subscriber
-
-#define DECLARE_PROXY_MESSAGE_SUBSCRIBER_TYPES() \
-    DEFINE_MESSAGE_MACROS(DECLARE_PROXY_MESSAGE_SUBSCRIBER_TYPE, SEMICOLON)
-
-#define DECLARE_PROXY_MESSAGE_SUBSCRIBER_POINTER(Message) \
-    Message##_subscriber::ptr Message##_subscriber_
-
-#define DECLARE_PROXY_MESSAGE_SUBSCRIBER_POINTERS() \
-    DEFINE_MESSAGE_MACROS(DECLARE_PROXY_MESSAGE_SUBSCRIBER_POINTER, SEMICOLON)
-
-// For proxy.cpp:
-
-#define INITIALIZE_PROXY_MESSAGE_SUBSCRIBER(Message) \
-    Message##_subscriber_(MAKE_SUBSCRIBER(Message, pool, LOG_NETWORK))
-
-#define INITIALIZE_PROXY_MESSAGE_SUBSCRIBERS() \
-    DEFINE_MESSAGE_MACROS(INITIALIZE_PROXY_MESSAGE_SUBSCRIBER, COMMA)
-
-#define INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACK(Message) \
-    INITIALIZE_TRACK(bc::network::proxy::Message##_subscriber)
-
-#define INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACKS() \
-    DEFINE_MESSAGE_MACROS(INITIALIZE_PROXY_MESSAGE_SUBSCRIBER_TRACK, NONE)
-
-#define ESTABLISH_PROXY_MESSAGE_RELAY(Message) \
-    establish_relay<message::Message>(Message##_subscriber_)
-
-#define ESTABLISH_PROXY_MESSAGE_RELAYS() \
-    DEFINE_MESSAGE_MACROS(ESTABLISH_PROXY_MESSAGE_RELAY, SEMICOLON)
-
-#define CLEAR_PROXY_MESSAGE_SUBSCRIPTION(Message) \
-    notify_stop<message::Message>(Message##_subscriber_)
-
-#define CLEAR_PROXY_MESSAGE_SUBSCRIPTIONS() \
-    DEFINE_MESSAGE_MACROS(CLEAR_PROXY_MESSAGE_SUBSCRIPTION, SEMICOLON)
-
-#define DEFINE_PROXY_MESSAGE_SUBSCRIBER(Message) \
-void proxy::subscribe_##Message(receive_##Message##_handler handle) \
-{ \
-    if (stopped()) \
-        handle(error::channel_stopped, message::Message()); \
-    else \
-        subscribe<message::Message>(Message##_subscriber_, handle); \
-}
-
-#define DEFINE_PROXY_MESSAGE_SUBSCRIBERS() \
-    DEFINE_MESSAGE_MACROS(DEFINE_PROXY_MESSAGE_SUBSCRIBER, NONE)
-
-// For channel.hpp:
-
-#define DECLARE_CHANNEL_MESSAGE_SUBSCRIBER(Message) \
-    void subscribe_##Message(proxy::receive_##Message##_handler handle)
-
-#define DECLARE_CHANNEL_MESSAGE_SUBSCRIBERS() \
-    DEFINE_MESSAGE_MACROS(DECLARE_CHANNEL_MESSAGE_SUBSCRIBER, SEMICOLON)
-
-// For channel.cpp:
-
-#define DEFINE_CHANNEL_MESSAGE_SUBSCRIBER(Message) \
-void channel::subscribe_##Message( \
-    proxy::receive_##Message##_handler handler) \
-{ \
-    proxy_->subscribe_##Message(handler); \
-}
-
-#define DEFINE_CHANNEL_MESSAGE_SUBSCRIBERS() \
-    DEFINE_MESSAGE_MACROS(DEFINE_CHANNEL_MESSAGE_SUBSCRIBER, NONE)
 
 #endif
