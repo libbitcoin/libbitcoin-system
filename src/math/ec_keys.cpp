@@ -33,9 +33,8 @@ ec_point secret_to_public_key(const ec_secret& secret,
     bool compressed)
 {
     const auto signing_context = signing.context();
-    size_t public_key_size = ec_uncompressed_size;
-    if (compressed)
-        public_key_size = ec_compressed_size;
+    size_t public_key_size = compressed ? ec_compressed_size : 
+        ec_uncompressed_size;
 
     ec_point out(public_key_size);
     int out_size;
@@ -53,16 +52,17 @@ ec_point secret_to_public_key(const ec_secret& secret,
 
 ec_point decompress_public_key(const ec_point& public_key)
 {
+    if (public_key.size() != ec_compressed_size)
+        return ec_point();
+
+    ec_point out(public_key);
+    out.resize(ec_uncompressed_size);
+    int out_size = ec_compressed_size;
     const auto signing_context = signing.context();
 
-    int out_size = ec_compressed_size;
-    ec_point out(ec_uncompressed_size);
-    std::copy_n(public_key.begin(), ec_compressed_size, out.begin());
-
-    // NOTE: a later version of secp256k1 could use
-    // secp256k1_ec_pubkey_serialize instead
-    if (secp256k1_ec_pubkey_decompress(signing_context, out.data(),
-        &out_size) == 1)
+    // NOTE: a later version secp256k1 could use secp256k1_ec_pubkey_serialize
+    if (secp256k1_ec_pubkey_decompress(signing_context, out.data(), &out_size)
+        == 1)
     {
         BITCOIN_ASSERT_MSG(ec_uncompressed_size == static_cast<size_t>(out_size),
             "secp256k1_ec_pubkey_decompress returned invalid size");
@@ -196,62 +196,4 @@ bool ec_multiply(ec_secret& a, const ec_secret& b)
         b.data()) == 1;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// DEPRECATED (now redundant with secp256k1 implementation)
-///////////////////////////////////////////////////////////////////////////////
-ec_secret create_nonce(ec_secret secret, hash_digest hash, uint32_t index)
-{
-    hash_digest K
-    {{
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-    }};
-    hash_digest V
-    {{
-        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
-        0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
-    }};
-
-    K = hmac_sha256_hash(build_data({V, to_byte(0x00), secret, hash}), K);
-    V = hmac_sha256_hash(V, K);
-    K = hmac_sha256_hash(build_data({V, to_byte(0x01), secret, hash}), K);
-    V = hmac_sha256_hash(V, K);
-
-    while (true)
-    {
-        V = hmac_sha256_hash(V, K);
-
-        if (0 == index)
-            return V;
-        --index;
-
-        K = hmac_sha256_hash(build_data({V, to_byte(0x00)}), K);
-        V = hmac_sha256_hash(V, K);
-    }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// DEPRECATED (deterministic signatures are safer)
-///////////////////////////////////////////////////////////////////////////////
-endorsement sign(ec_secret secret, hash_digest hash, ec_secret /* nonce */)
-{
-    // THE CALLER'S NONCE IS IGNORED.
-    return sign(secret, hash);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// DEPRECATED (deterministic signatures are safer)
-///////////////////////////////////////////////////////////////////////////////
-compact_signature sign_compact(ec_secret secret, hash_digest hash,
-    ec_secret /* nonce */)
-{
-    // THE CALLER'S NONCE IS IGNORED.
-    return sign_compact(secret, hash);
-}
-
 } // namespace libbitcoin
-

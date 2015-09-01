@@ -429,27 +429,6 @@ bool script::create_signature(data_chunk& signature,
     return true;
 }
 
-// This uses the legacy non-deterministic nonce technique.
-bool script::create_signature(data_chunk& signature,
-    const ec_secret& private_key, const script& prevout_script,
-    const transaction& new_tx, uint32_t input_index, uint32_t hash_type,
-    const ec_secret& nonce)
-{
-    // This always produces a valid signature hash.
-    const auto sighash = generate_signature_hash(
-            new_tx, input_index, prevout_script, hash_type);
-
-    // Create the EC signature.
-    signature = sign(private_key, sighash, nonce);
-
-    if (signature.empty())
-        return false;
-
-    // Add the sighash type to the end of the signature.
-    signature.push_back(hash_type);
-    return true;
-}
-
 bool script::check_signature(data_slice signature, const ec_point& public_key,
     const script& script_code, const transaction& parent_tx,
     uint32_t input_index)
