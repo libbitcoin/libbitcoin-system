@@ -1,23 +1,22 @@
-/*  
-*   Byte-oriented AES-256 implementation.
-*   All lookup tables replaced with 'on the fly' calculations. 
-*
-*   Copyright (c) 2007-2009 Ilya O. Levin, http://www.literatecode.com
-*   Other contributors: Hal Finney
-*
-*   Permission to use, copy, modify, and distribute this software for any
-*   purpose with or without fee is hereby granted, provided that the above
-*   copyright notice and this permission notice appear in all copies.
-*
-*   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-*   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-*   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-*   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-*   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-*   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-*   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-*/
-
+/**
+ *   Byte-oriented AES-256 implementation.
+ *   All lookup tables replaced with 'on the fly' calculations. 
+ *
+ *   Copyright (c) 2007-2009 Ilya O. Levin, http://www.literatecode.com
+ *   Other contributors: Hal Finney
+ *
+ *   Permission to use, copy, modify, and distribute this software for any
+ *   purpose with or without fee is hereby granted, provided that the above
+ *   copyright notice and this permission notice appear in all copies.
+ *
+ *   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ *   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ *   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ *   ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ *   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ *   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ *   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
 #include "aes256.h"
 
 #include <errno.h>
@@ -301,50 +300,50 @@ void aes_expandDecKey(uint8_t* k, uint8_t* rc)
 
 
 /* -------------------------------------------------------------------------- */
-void aes256_init(aes256_context* ctx, uint8_t* k)
+void aes256_init(aes256_context* context, uint8_t* key)
 {
     uint8_t rcon = 1;
     register uint8_t i;
 
-    for (i = 0; i < sizeof(ctx->key); i++) ctx->enckey[i] = ctx->deckey[i] = k[i];
-    for (i = 8;--i;) aes_expandEncKey(ctx->deckey, &rcon);
+    for (i = 0; i < sizeof(context->key); i++) context->enckey[i] = context->deckey[i] = key[i];
+    for (i = 8;--i;) aes_expandEncKey(context->deckey, &rcon);
 } /* aes256_init */
 
 /* -------------------------------------------------------------------------- */
-void aes256_done(aes256_context* ctx)
+void aes256_done(aes256_context* context)
 {
     register uint8_t i;
 
-    for (i = 0; i < sizeof(ctx->key); i++) 
-        ctx->key[i] = ctx->enckey[i] = ctx->deckey[i] = 0;
+    for (i = 0; i < sizeof(context->key); i++) 
+        context->key[i] = context->enckey[i] = context->deckey[i] = 0;
 } /* aes256_done */
 
 /* -------------------------------------------------------------------------- */
-void aes256_encrypt_ecb(aes256_context* ctx, uint8_t* buf)
+void aes256_encrypt_ecb(aes256_context* context, uint8_t* buf)
 {
     uint8_t i, rcon;
 
-    aes_addRoundKey_cpy(buf, ctx->enckey, ctx->key);
+    aes_addRoundKey_cpy(buf, context->enckey, context->key);
     for(i = 1, rcon = 1; i < 14; ++i)
     {
         aes_subBytes(buf);
         aes_shiftRows(buf);
         aes_mixColumns(buf);
-        if( i & 1 ) aes_addRoundKey( buf, &ctx->key[16]);
-        else aes_expandEncKey(ctx->key, &rcon), aes_addRoundKey(buf, ctx->key);
+        if( i & 1 ) aes_addRoundKey( buf, &context->key[16]);
+        else aes_expandEncKey(context->key, &rcon), aes_addRoundKey(buf, context->key);
     }
     aes_subBytes(buf);
     aes_shiftRows(buf);
-    aes_expandEncKey(ctx->key, &rcon); 
-    aes_addRoundKey(buf, ctx->key);
+    aes_expandEncKey(context->key, &rcon); 
+    aes_addRoundKey(buf, context->key);
 } /* aes256_encrypt */
 
 /* -------------------------------------------------------------------------- */
-void aes256_decrypt_ecb(aes256_context* ctx, uint8_t* buf)
+void aes256_decrypt_ecb(aes256_context* context, uint8_t* buf)
 {
     uint8_t i, rcon;
 
-    aes_addRoundKey_cpy(buf, ctx->deckey, ctx->key);
+    aes_addRoundKey_cpy(buf, context->deckey, context->key);
     aes_shiftRows_inv(buf);
     aes_subBytes_inv(buf);
 
@@ -352,13 +351,13 @@ void aes256_decrypt_ecb(aes256_context* ctx, uint8_t* buf)
     {
         if( ( i & 1 ) )           
         {
-            aes_expandDecKey(ctx->key, &rcon);
-            aes_addRoundKey(buf, &ctx->key[16]);
+            aes_expandDecKey(context->key, &rcon);
+            aes_addRoundKey(buf, &context->key[16]);
         }
-        else aes_addRoundKey(buf, ctx->key);
+        else aes_addRoundKey(buf, context->key);
         aes_mixColumns_inv(buf);
         aes_shiftRows_inv(buf);
         aes_subBytes_inv(buf);
     }
-    aes_addRoundKey( buf, ctx->key); 
+    aes_addRoundKey( buf, context->key); 
 } /* aes256_decrypt */
