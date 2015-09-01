@@ -233,6 +233,7 @@ void SHA1Transform(uint32_t state[SHA1_STATE_LENGTH],
 
     a = b = c = d = e = 0;
 }
+
 void SHA1Update(SHA1CTX* context, const uint8_t* input, size_t length)
 {
     uint32_t i = 0;

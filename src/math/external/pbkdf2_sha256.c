@@ -1,4 +1,4 @@
-/*-
+/**
  * Copyright 2005,2007,2009 Colin Percival
  * All rights reserved.
  *
@@ -23,7 +23,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
 #include "pbkdf2_sha256.h"
 
 #include <stddef.h>

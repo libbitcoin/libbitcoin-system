@@ -1,4 +1,4 @@
-/*-
+/**
  * Copyright 2005,2007,2009 Colin Percival
  * All rights reserved.
  *
@@ -25,7 +25,6 @@
  *
  * $FreeBSD: src/lib/libmd/sha256.h,v 1.2 2006/01/17 15:35:56 phk Exp $
  */
-
 #ifndef LIBBITCOIN_PBKDF2SHA256_H
 #define LIBBITCOIN_PBKDF2SHA256_H
 
@@ -42,8 +41,8 @@ extern "C" {
  * write the output to buf.  The value dkLen must be at most 32 * (2^32 - 1).
  */
 void pbkdf2_sha256(const uint8_t* passphrase, size_t passphrase_length,
-    const uint8_t* salt, size_t salt_length, uint64_t c,
-    uint8_t* buf, size_t dk_length);
+    const uint8_t* salt, size_t salt_length, uint64_t c, uint8_t* buf,
+    size_t dk_length);
 
 #ifdef __cplusplus
 }
