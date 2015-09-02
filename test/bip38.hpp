@@ -24,7 +24,7 @@
 #include <vector>
 #include <bitcoin/bitcoin.hpp>
 
-struct bip38_result
+struct bip38_vector
 {
     std::string locked;
     std::string unlocked;
@@ -37,19 +37,16 @@ struct bip38_result
     bool ec_multiplied;
 };
 
-typedef std::vector<bip38_result> bip38_result_list;
+typedef std::vector<bip38_vector> bip38_vector_list;
 
-// Test vector list taken from:
-// https://github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#Test_vectors
-//
-// NOTE: Above test vectors cannot be locked since they do not include
-// the specific random data used to generate them, which is needed to
-// recreate the keys.
-//
-// So others were generated and verified using https://bit2factor.com/
-const bip38_result_list bip38_test_vector
+// Vectors 0 through 7 taken from:
+// github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#Test_vectors
+// Above test vectors cannot be locked since they do not include the specific 
+// random data used to generate them, which is needed to recreate the keys.
+const bip38_vector_list bip38_test_vector
 {
     {
+        // #1 and #2 from: github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
         {
             "6PRVWUbkzzsbcVac2qwfssoUJAN1Xhrg6bNk8J7Nzm5H7kxEbn2Nh2ZoGg",
             "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5",
@@ -72,6 +69,7 @@ const bip38_result_list bip38_test_vector
             false,
             false
         },
+        // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
         {
             "6PYNKZ1EAgYgmQfmNVamxyXVWHzK5s6DGhwP4J5o44cvXdoY7sRzhtpUeo",
             "cbf4b9f70470856bb4f40f80b87edb90865997ffee6df315ab166d713af433a5",
@@ -94,6 +92,7 @@ const bip38_result_list bip38_test_vector
             true,
             false
         },
+        // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
         {
             "6PfQu77ygVyJLZjfvMLyhLMQbYnu5uguoJJ4kMCLqWwPEdfpwANVS76gTX",
             "a43a940577f4e97f5c4d39eb14ff083a98187c64ea7c99ef7ce460833959a519",
@@ -116,6 +115,7 @@ const bip38_result_list bip38_test_vector
             false,
             true
         },
+        // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
         {
             "6PgNBNNzDkKdhkT6uJntUXwwzQV8Rr2tZcbkDcuC9DZRsS6AtHts4Ypo1j",
             "44ea95afbf138356a05ea32110dfd627232d0f2991ad221187be356f19fa8190",
@@ -138,6 +138,7 @@ const bip38_result_list bip38_test_vector
             false,
             true
         },
+        // generated and verified using bit2factor.com
         {
             "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn",
             "fb4bfb0bfe151d524b0b11983b9f826d6a0bc7f7bdc480864a1b557ff0c59eb4",
@@ -164,4 +165,3 @@ const bip38_result_list bip38_test_vector
 };
 
 #endif
-
