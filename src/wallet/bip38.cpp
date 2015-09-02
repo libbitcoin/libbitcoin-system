@@ -223,12 +223,12 @@ static bool is_ec_multiplied(data_slice key)
     return !is_ec_non_multiplied(key);
 }
 
-static uint8_t last_byte(data_slice buffer)
+uint8_t last_byte(data_slice buffer)
 {
     return buffer.data()[buffer.size() - 1];
 }
 
-static data_chunk normal(const std::string& passphrase)
+data_chunk normal(const std::string& passphrase)
 {
     return to_data_chunk(to_normal_nfc_form(passphrase));
 }
