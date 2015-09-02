@@ -20,573 +20,587 @@
 #include <bitcoin/bitcoin/wallet/bip38.hpp>
 
 #include <cstdint>
+#include <cstddef>
 #include <algorithm>
 #include <boost/locale.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/formats/base16.hpp>
+#include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/formats/base58.hpp>
+#include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include "../math/external/crypto_scrypt.h"
 
-
 namespace libbitcoin {
 namespace bip38 {
 
-static inline uint8_t generate_flag_byte(
-    bool compressed, bool ec_multiplied)
+// The total length in bytes of the address hash used as a salt in bip38.
+static constexpr size_t salt_size = 4;
+typedef byte_array<salt_size> salt;
+
+// The total length in bytes of an aes256 encrypted block used in bip38.
+static constexpr size_t two_block_size = sizeof(long_hash);
+typedef byte_array<two_block_size> two_block;
+static_assert(two_block_size == long_hash_size, "oops!");
+
+// The total length in bytes of an aes256 encrypted block used in bip38.
+static constexpr size_t block_size = two_block_size / 2;
+typedef byte_array<block_size> full_block;
+
+// The half length in bytes of a bip38 encrypted key.
+static constexpr size_t block_half_size = block_size / 2;
+typedef byte_array<block_half_size> half_block;
+static_assert(block_half_size == aes256_block_size, "oops!");
+
+// Scrypt parameters r used in bip38.
+static constexpr size_t scrypt_r = 8;
+static constexpr size_t scrypt_r_2 = 1;
+
+// Scrypt parameters p used in bip38.
+static constexpr size_t scrypt_p = 8;
+static constexpr size_t scrypt_p_2 = 1;
+
+// Scrypt parameters N used in bip38.
+static constexpr size_t scrypt_N = 16384;
+static constexpr size_t scrypt_N_2 = 1024;
+
+// The position of crfm flags used in bip38.
+static constexpr size_t cfrm_flag_index = 5;
+
+// Fixed byte ranges used bip38.
+static constexpr size_t cfrm_address_hash_start = 6;
+static constexpr size_t cfrm_address_hash_end = 10;
+static constexpr size_t cfrm_owner_entropy_start = 10;
+static constexpr size_t cfrm_owner_entropy_end = 18;
+static constexpr size_t cfrm_encrypted_start = 18;
+static constexpr size_t cfrm_encrypted_end = 51;
+static constexpr size_t salt_index_start = 3;
+static constexpr size_t salt_index_end = 7;
+static constexpr size_t key_index_start = 7;
+static constexpr size_t key_index_end = 39;
+static constexpr size_t owner_entropy_start = 7;
+static constexpr size_t owner_entropy_end = 15;
+static constexpr size_t intm_owner_entropy_start = 8;
+static constexpr size_t intm_owner_entropy_end = 16;
+static constexpr size_t pass_point_start = 16;
+static constexpr size_t pass_point_end = 49;
+static constexpr size_t enc_part1_start = 15;
+static constexpr size_t enc_part1_end = 23;
+static constexpr size_t enc_part2_start = 23;
+static constexpr size_t enc_part2_end = 39;
+
+// The fixed bip38 non-multiplied prefix data constants.
+static constexpr uint8_t nm_prefix[2] =
 {
-    return ((compressed ? bip38_compressed : 0x00) |
-        (ec_multiplied ? bip38_ec_multiplied : bip38_ec_non_multiplied));
+    0x01, 0x42
+};
+
+// The fixed bip38 ec-multiplied prefix data constants.
+static constexpr uint8_t m_prefix[2] =
+{
+    0x01, 0x43
+};
+
+// The fixed bip38 magic bytes used when lot is specified.
+static constexpr uint8_t magic_w_lot[8] =
+{
+    0x2C, 0xE9, 0xB3, 0xE1, 0xFF, 0x39, 0xE2, 0x51
+};
+
+// The fixed bip38 magic bytes used for confirmation codes.
+static constexpr uint8_t confirmation_prefix[5] =
+{
+    0x64, 0x3B, 0xF6, 0xA8, 0x9A
+};
+
+static constexpr size_t flag_index = 2;
+enum flag_byte : uint8_t
+{
+    none = 0,
+    lot_sequence = 1 << 2,
+    ec_compressed = 1 << 5,
+    ec_non_multiplied_low = 1 << 6,
+    ec_non_multiplied_high = 1 << 7,
+    ec_non_multiplied = (ec_non_multiplied_low | ec_non_multiplied_high)
+};
+
+// Dead code?
+//static constexpr size_t comp_mult_index = 1;
+//static constexpr size_t decrypt_xor_offset = 16;
+//static constexpr size_t decrypt_xor_length = 16;
+
+// Dead code?
+//// The fixed bip38 magic bytes used when lot is not specified.
+//static constexpr uint8_t magic_wo_lot[8] =
+//{
+//    0x2C, 0xE9, 0xB3, 0xE1, 0xFF, 0x39, 0xE2, 0x53
+//};
+
+template <class Type>
+static bool scrypt_hash(data_slice passphrase, data_slice salt, Type& output)
+{
+    return crypto_scrypt(passphrase.data(), passphrase.size(), salt.data(),
+        salt.size(), scrypt_N, scrypt_r, scrypt_p, output.data(),
+        sizeof(Type)) == 0;
 }
 
-static inline uint8_t get_flag_byte(const encrypted_private_key& key)
+template <class Type>
+static bool scrypt_hash_2(data_slice pass_point, data_slice salt, Type& output)
 {
-    return key[bip38_flag_index];
+    return crypto_scrypt(pass_point.data(), pass_point.size(), salt.data(),
+        salt.size(), scrypt_N_2, scrypt_r_2, scrypt_p_2, output.data(),
+        sizeof(Type)) == 0;
 }
 
-static inline uint8_t get_cfrm_flag_byte(const encrypted_private_key& key)
+template <class Type>
+static data_chunk chop(const Type& key, size_t begin, size_t end)
 {
-    return key[bip38_cfrm_flag_index];
+    const auto& key_data = key.data();
+    return data_chunk
+    {
+        &key_data[begin], &key_data[end]
+    };
 }
 
-static inline bool is_compressed(const encrypted_private_key& key)
+static inline uint8_t generate_flag_byte(bool compressed, bool multiplied)
 {
-    return ((get_flag_byte(key) & bip38_compressed) != 0);
+    uint8_t byte = flag_byte::none;
+
+    if (compressed)
+        byte |= flag_byte::ec_compressed;
+
+    if (!multiplied)
+        byte |= flag_byte::ec_non_multiplied;
+
+    return byte;
 }
 
-static inline bool is_cfrm_compressed(const data_chunk& key)
+static inline uint8_t get_flag_byte(data_slice key)
 {
-    return ((get_cfrm_flag_byte(key) & bip38_compressed) != 0);
+    BITCOIN_ASSERT(flag_index < key.size());
+    return key.data()[flag_index];
 }
 
-static inline bool has_lot_seq(const encrypted_private_key& key)
+static inline uint8_t get_cfrm_flag_byte(data_slice key)
 {
-    return ((get_flag_byte(key) & bip38_lot_sequence) != 0);
+    BITCOIN_ASSERT(cfrm_flag_index < key.size());
+    return key.data()[cfrm_flag_index];
 }
 
-static inline bool cfrm_has_lot_seq(const data_chunk& key)
+static inline bool is_compressed(data_slice key)
 {
-    return ((get_cfrm_flag_byte(key) & bip38_lot_sequence) != 0);
+    return ((get_flag_byte(key) & flag_byte::ec_compressed) != 0);
 }
 
-static inline bool is_bip38_ec_non_multiplied(
-    const encrypted_private_key& key)
+static inline bool is_cfrm_compressed(data_slice key)
 {
-    return ((get_flag_byte(key) & bip38_ec_non_multiplied) != 0);
+    return ((get_cfrm_flag_byte(key) & flag_byte::ec_compressed) != 0);
 }
 
-static inline bool is_bip38_ec_multiplied(
-    const encrypted_private_key& key)
+static inline bool has_lot_seq(data_slice key)
 {
-    return !is_bip38_ec_non_multiplied(key);
+    return ((get_flag_byte(key) & flag_byte::lot_sequence) != 0);
 }
 
-
-static std::string normalize_nfc(const std::string& value)
+static inline bool cfrm_has_lot_seq(data_slice key)
 {
-    using namespace boost::locale;
-    const generator locale;
-    return normalize(value, norm_type::norm_nfc, locale(""));
+    return ((get_cfrm_flag_byte(key) & flag_byte::lot_sequence) != 0);
 }
 
-template <class T>
-static bool bip38_scrypt_hash(const data_chunk passphrase,
-    data_slice salt, T& output)
+static inline bool is_ec_non_multiplied(data_slice key)
 {
-    return crypto_scrypt(passphrase.data(), passphrase.size(),
-        salt.data(), salt.size(), bip38_scrypt_N, bip38_scrypt_r,
-        bip38_scrypt_p, output.data(), sizeof(T)) == 0;
+    return ((get_flag_byte(key) & flag_byte::ec_non_multiplied) != 0);
 }
 
-template <class T>
-static bool bip38_scrypt_hash_2(const ec_point& pass_point,
-    data_slice salt, T& output)
+static inline bool is_ec_multiplied(data_slice key)
 {
-    return crypto_scrypt(pass_point.data(), pass_point.size(),
-        salt.data(), salt.size(), bip38_scrypt_N_2,
-        bip38_scrypt_r_2, bip38_scrypt_p_2,
-        output.data(), sizeof(T)) == 0;
+    return !is_ec_non_multiplied(key);
 }
 
-static inline data_chunk xor_data_offset(
-    const data_chunk& in1, const data_chunk& in2,
-    size_t in1_offset, size_t in2_offset, size_t length)
+uint8_t last_byte(data_slice buffer)
+{
+    return buffer.data()[buffer.size() - 1];
+}
+
+data_chunk normal(const std::string& passphrase)
+{
+    return to_data_chunk(to_normal_nfc_form(passphrase));
+}
+
+static inline data_chunk xor_offset(data_slice buffer1, data_slice buffer2,
+    size_t buffer1_offset, size_t buffer2_offset, size_t length)
 {
     data_chunk out;
-
+    const auto& data1 = buffer1.data();
+    const auto& data2 = buffer2.data();
     for(size_t i = 0; i < length; i++)
-        out.push_back(in1[i+in1_offset] ^ in2[i+in2_offset]);
+        out.push_back(data1[i + buffer1_offset] ^ data2[i + buffer2_offset]);
 
     return out;
 }
 
-static inline data_chunk xor_data(
-    const data_chunk& in1, const data_chunk& in2,
+static inline data_chunk xor(data_slice buffer1, data_slice buffer2,
     size_t offset, size_t length)
 {
-    return xor_data_offset(in1, in2, offset, offset, length);
+    return xor_offset(buffer1, buffer2, offset, offset, length);
 }
 
-static void bip38_generate_confirmation(uint8_t flag_byte,
-    const data_chunk& address_hash_oe, const ec_secret& factorb,
-    const data_chunk& derived_half1, const data_chunk& derived_half2,
-    data_chunk& confirmation_code, bool use_compression)
+static void generate_confirmation(uint8_t flag_byte,
+    data_slice address_hash_owner_entropy, const ec_secret& factorb,
+    data_slice derived_half1, data_slice derived_half2,
+    confirmation_code& confirmation_code, bool use_compression)
 {
-    ec_point pointb = secret_to_public_key(
-        factorb, true);
+    const auto pointb = secret_to_public_key(factorb, use_compression);
+    const auto pointb_data = to_data_chunk(pointb);
+    auto half1 = xor_offset(pointb_data, derived_half1, 1, 0, block_half_size);
 
-    uint8_t pointb_prefix =
-        pointb[0] ^ (derived_half2[sizeof(derived_half2)-1] & 0x01);
-
-    data_chunk pointb_data = to_data_chunk(pointb);
-
-    data_chunk half1 = xor_data_offset(pointb_data,
-        derived_half1, 1, 0, bip38_encrypted_block_half_length);
     aes256_encrypt(derived_half2, half1);
 
-    data_chunk half2 = xor_data_offset(pointb_data,
-        derived_half1, 17, 16, bip38_encrypted_block_half_length);
+    // TODO: magic numbers: 17, 16?
+    auto half2 = xor_offset(pointb_data, derived_half1, 17, 16,
+        block_half_size);
     aes256_encrypt(derived_half2, half2);
 
+    // TODO: magic flag: 0x01?
+    uint8_t pointb_prefix = pointb[0] ^ (last_byte(derived_half2) & 0x01);
     data_chunk encrypted_pointb;
     encrypted_pointb.push_back(pointb_prefix);
     extend_data(encrypted_pointb, half1);
     extend_data(encrypted_pointb, half2);
 
-    confirmation_code.clear();
-    for(const auto& b : bip38_confirmation_prefix)
-        confirmation_code.push_back(b);
-    confirmation_code.push_back(flag_byte);
-    extend_data(confirmation_code, address_hash_oe);
-    extend_data(confirmation_code, encrypted_pointb);
-    data_chunk checksum_hash = to_data_chunk(bitcoin_hash(confirmation_code));
-    data_chunk checksum(&checksum_hash[0], &checksum_hash[4]);
-    extend_data(confirmation_code, checksum);
+    data_chunk confirmation;
+    for (const auto& prefix: confirmation_prefix)
+        confirmation.push_back(prefix);
+
+    confirmation.push_back(flag_byte);
+    extend_data(confirmation, address_hash_owner_entropy);
+    extend_data(confirmation, encrypted_pointb);
+    append_checksum(confirmation);
+
+    // TODO: this copy can be avoided.
+    BITCOIN_ASSERT(confirmation.size() == confirmation_code_decoded_size);
+    std::copy(confirmation.begin(), confirmation.end(),
+        confirmation_code.begin());
 }
 
-data_chunk bip38_lock_intermediate(
-    const data_chunk& intermediate, const data_chunk& seedb,
-    data_chunk& confirmation_code, bool use_compression)
+#ifdef WITH_ICU
+
+data_chunk lock_intermediate(const intermediate& intermediate,
+    const seed& seed, confirmation_code& out_confirmation_code,
+    bool use_compression)
 {
-    BITCOIN_ASSERT(encode_base58(intermediate).size() ==
-        bip38_intermediate_length);
-    BITCOIN_ASSERT(seedb.size() == bip38_seed_length);
+    const auto uses_lot_sequence = std::equal(intermediate.begin(),
+        intermediate.begin() + sizeof(magic_w_lot), magic_w_lot);
 
-    bool uses_lot_sequence = std::equal(
-        intermediate.begin(), intermediate.begin() + bip38_magic_length,
-        bip38_magic_w_lot);
+    static const auto multiplied = true;
+    auto flag_byte = generate_flag_byte(use_compression, multiplied);
+    if (uses_lot_sequence)
+        flag_byte |= lot_sequence;
 
-    uint8_t flag_byte = generate_flag_byte(use_compression, true);
-    flag_byte |= (uses_lot_sequence ? bip38_lot_sequence : 0);
+    auto owner_entropy = chop(intermediate, intm_owner_entropy_start,
+        intm_owner_entropy_end);
+    auto pass_point_data = chop(intermediate, pass_point_start,
+        pass_point_end);
 
-    data_chunk owner_entropy(
-        &intermediate[bip38_intm_owner_entropy_start],
-        &intermediate[bip38_intm_owner_entropy_end]);
+    const ec_secret factorb(bitcoin_hash(seed));
 
-    data_chunk pass_point_data(
-        &intermediate[bip38_pass_point_start],
-        &intermediate[bip38_pass_point_end]);
-
-    const ec_secret factorb = ec_secret(bitcoin_hash(seedb));
-
-    ec_point pass_point = pass_point_data;
-    ec_point tmp_pass_point = pass_point_data;
-    ec_multiply(tmp_pass_point, factorb);
-
-    ec_point generated_point = (use_compression ? tmp_pass_point :
-        decompress_public_key(tmp_pass_point));
+    auto generated_point = pass_point_data;
+    ec_multiply(generated_point, factorb);
+    if (!use_compression)
+        generated_point = decompress_public_key(generated_point);
 
     wallet::payment_address address;
     address.set_public_key(generated_point);
-    const auto salt = bitcoin_hash(to_data_chunk(address.to_string()));
+    const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
 
-    data_chunk address_hash_oe(&salt[0], &salt[bip38_salt_length]);
-    extend_data(address_hash_oe, owner_entropy);
+    auto address_hash_owner_entropy = chop(hash, 0, salt_size);
+    extend_data(address_hash_owner_entropy, owner_entropy);
 
-    long_hash derived_data;
-    if (!bip38_scrypt_hash_2(pass_point, address_hash_oe, derived_data))
+    two_block derived;
+    if (!scrypt_hash_2(pass_point_data, address_hash_owner_entropy, derived))
         return data_chunk();
 
-    const data_chunk derived_half1(
-        &derived_data[0],
-        &derived_data[bip38_encrypted_block_length]);
-    const data_chunk derived_half2(
-        &derived_data[bip38_encrypted_block_length],
-        &derived_data[sizeof(derived_data)]);
+    data_chunk derived_half1;
+    data_chunk derived_half2;
+    split(derived, derived_half1, derived_half2, two_block_size);
 
-    data_chunk half1 = xor_data(seedb, derived_half1,
-        0, bip38_encrypted_block_half_length);
+    auto half1 = xor(seed, derived_half1, 0, block_half_size);
     aes256_encrypt(derived_half2, half1);
 
-    data_chunk combined_data;
-    for(size_t i = 8; i < 16; i++)
-        combined_data.push_back(half1[i]);
+    // TODO: magic number: 16, 16, 24?
+    auto combined_data = chop(half1, 8, 16);
+    const auto seed_data = chop(seed, 16, 24);
+    extend_data(combined_data, seed_data);
 
-    for(size_t i = 16; i < 24; i++)
-        combined_data.push_back(seedb[i]);
-
-    data_chunk half2 = xor_data_offset(
-        combined_data, derived_half1, 0, 16,
-        bip38_encrypted_block_half_length);
+    // TODO: magic number: 16?
+    auto half2 = xor_offset(combined_data, derived_half1, 0, 16,
+        block_half_size);
     aes256_encrypt(derived_half2, half2);
 
-    data_chunk encrypted_data;
-    for(size_t i = 0; i < 8; i++)
-        encrypted_data.push_back(half1[i]);
+    // TODO: magic number: 8?
+    auto encrypted_data = chop(half1, 0, 8);
     extend_data(encrypted_data, half2);
 
-    data_chunk bip38_encrypted_key;
-    bip38_encrypted_key.push_back(bip38_m_prefix_data[0]);
-    bip38_encrypted_key.push_back(bip38_m_prefix_data[1]);
-    bip38_encrypted_key.push_back(flag_byte);
-    extend_data(bip38_encrypted_key, address_hash_oe);
-    extend_data(bip38_encrypted_key, encrypted_data);
-    append_checksum(bip38_encrypted_key);
+    data_chunk encrypted_key;
+    encrypted_key.push_back(m_prefix[0]);
+    encrypted_key.push_back(m_prefix[1]);
+    encrypted_key.push_back(flag_byte);
+    extend_data(encrypted_key, address_hash_owner_entropy);
+    extend_data(encrypted_key, encrypted_data);
+    append_checksum(encrypted_key);
 
-    bip38_generate_confirmation(flag_byte, address_hash_oe, factorb,
-        derived_half1, derived_half2, confirmation_code, use_compression);
+    generate_confirmation(flag_byte, address_hash_owner_entropy, factorb,
+        derived_half1, derived_half2, out_confirmation_code, use_compression);
 
-    return bip38_encrypted_key;
+    return encrypted_key;
 }
 
-bool bip38_lock_verify(
-    const data_chunk& confirmation_code,
-    const std::string& passphrase, std::string& out_address)
+bool lock_verify(const confirmation_code& confirmation_code,
+    const std::string& passphrase, wallet::payment_address& out_address)
 {
-    BITCOIN_ASSERT(encode_base58(confirmation_code).size() ==
-        bip38_confirmation_code_length);
-
     const bool compressed = is_cfrm_compressed(confirmation_code);
     const bool uses_lot_seq = cfrm_has_lot_seq(confirmation_code);
 
-    const data_chunk address_hash(
-        &confirmation_code[bip38_cfrm_address_hash_start],
-        &confirmation_code[bip38_cfrm_address_hash_end]);
+    auto address_hash = chop(confirmation_code, cfrm_address_hash_start,
+        cfrm_address_hash_end);
+    auto owner_entropy = chop(confirmation_code, cfrm_owner_entropy_start,
+        cfrm_owner_entropy_end);
+    auto encrypted_pointb = chop(confirmation_code, cfrm_encrypted_start + 1,
+        cfrm_encrypted_end);
 
-    const data_chunk owner_entropy(
-        &confirmation_code[bip38_cfrm_owner_entropy_start],
-        &confirmation_code[bip38_cfrm_owner_entropy_end]);
+    auto owner_salt_end = salt_size;
+    if (uses_lot_seq)
+        owner_salt_end = owner_entropy.size();
 
-    data_chunk encrypted_pointb(
-        &confirmation_code[bip38_cfrm_encrypted_start],
-        &confirmation_code[bip38_cfrm_encrypted_end]);
-
-    const auto owner_salt_end = (uses_lot_seq ?
-        bip38_salt_length : owner_entropy.size());
-    const data_chunk owner_salt(
-        &owner_entropy[0],
-        &owner_entropy[owner_salt_end]);
+    auto owner_salt = chop(owner_entropy, 0, owner_salt_end);
 
     hash_digest pre_factor;
-    if (!bip38_scrypt_hash(to_data_chunk(normalize_nfc(passphrase)),
-        owner_salt, pre_factor))
+    if (!scrypt_hash(normal(passphrase), owner_salt, pre_factor))
         return false;
 
     ec_secret pass_factor;
     if (uses_lot_seq)
     {
-        data_chunk extended_pre_factor = to_data_chunk(pre_factor);
+        auto extended_pre_factor = to_data_chunk(pre_factor);
         extend_data(extended_pre_factor, owner_entropy);
-        pass_factor = ec_secret(bitcoin_hash(extended_pre_factor));
+        pre_factor = bitcoin_hash(extended_pre_factor);
     }
-    else
-    {
-        pass_factor = ec_secret(pre_factor);
-    }
+    
+    pass_factor = ec_secret(pre_factor);
+    static const auto compress = true;
+    const auto pass_point = secret_to_public_key(pass_factor, compress);
+    auto address_hash_owner_entropy = address_hash;
+    extend_data(address_hash_owner_entropy, owner_entropy);
 
-    ec_point pass_point = secret_to_public_key(pass_factor, true);
-
-    data_chunk address_hash_oe = address_hash;
-    extend_data(address_hash_oe, owner_entropy);
-
-    long_hash derived_data;
-    if (!bip38_scrypt_hash_2(pass_point, address_hash_oe, derived_data))
+    two_block derived_data;
+    if (!scrypt_hash_2(pass_point, address_hash_owner_entropy, derived_data))
         return false;
 
-    data_chunk derived_half1(
-        &derived_data[0],
-        &derived_data[bip38_encrypted_block_length]);
-    data_chunk derived_half2(
-        &derived_data[bip38_encrypted_block_length],
-        &derived_data[sizeof(derived_data)]);
+    data_chunk derived_half1;
+    data_chunk derived_half2;
+    split(derived_data, derived_half1, derived_half2, two_block_size);
 
-    data_chunk encrypted_half1(
-        &encrypted_pointb[1],
-        &encrypted_pointb[bip38_encrypted_block_half_length+1]);
-    data_chunk encrypted_half2(
-        &encrypted_pointb[bip38_encrypted_block_half_length+1],
-        &encrypted_pointb[bip38_encrypted_block_length+1]);
+    data_chunk encrypted_half1;
+    data_chunk encrypted_half2;
+    split(encrypted_pointb, encrypted_half1, encrypted_half2, block_size);
 
     aes256_decrypt(derived_half2, encrypted_half1);
-    data_chunk decrypted_half1 = xor_data(
-        encrypted_half1, derived_half1, 0,
-        bip38_encrypted_block_half_length);
+    auto decrypted_half1 = xor(encrypted_half1, derived_half1, 0,
+        block_half_size);
 
+    // TODO: magic number: 16?
     aes256_decrypt(derived_half2, encrypted_half2);
-    data_chunk decrypted_half2 = xor_data_offset(
-        encrypted_half2, derived_half1, 0, 16,
-        bip38_encrypted_block_half_length);
+    auto decrypted_half2 = xor_offset(encrypted_half2, derived_half1, 0, 16,
+        block_half_size);
 
+    // TODO: magic flag: 0x01?
     data_chunk pointb_data;
-    pointb_data.push_back(encrypted_pointb[0] ^
-        (derived_half2[sizeof(derived_half2)-1] & 0x01));
+    const auto pointb_sign = confirmation_code[cfrm_encrypted_start];
+    pointb_data.push_back(pointb_sign ^ (last_byte(derived_half2) & 0x01));
     extend_data(pointb_data, decrypted_half1);
     extend_data(pointb_data, decrypted_half2);
 
-    ec_point pointb = pointb_data;
+    auto pointb = pointb_data;
     ec_multiply(pointb, pass_factor);
-
-    ec_point generated_point = (compressed ? pointb :
-        decompress_public_key(pointb));
+    const auto generated = (compressed ? pointb : decompress_public_key(pointb));
 
     wallet::payment_address address;
-    address.set_public_key(generated_point);
-    const auto new_address_hash = bitcoin_hash(
-        to_data_chunk(address.to_string()));
+    address.set_public_key(generated);
+    const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
+    if (!std::equal(address_hash.begin(), address_hash.end(), hash.begin()))
+        return false;
 
-    if (std::equal(address_hash.begin(), address_hash.end(),
-        new_address_hash.begin()))
-    {
-        out_address = address.to_string();
-        return true;
-    }
-    return false;
+    out_address = address;
+    return true;
 }
 
-data_chunk bip38_lock_secret(
-    const ec_secret& private_key, const std::string& passphrase,
+data_chunk lock_secret(const ec_secret& secret, const std::string& passphrase,
     bool use_compression)
 {
-    const ec_point public_key = secret_to_public_key(
-        private_key, use_compression);
+    const auto public_key = secret_to_public_key(secret, use_compression);
     wallet::payment_address address;
     address.set_public_key(public_key);
 
-    const hash_digest salt_complete = bitcoin_hash(to_data_chunk(address.to_string()));
+    const auto address_hash = bitcoin_hash(to_data_chunk(address.to_string()));
+    auto salt = chop(address_hash, 0, salt_size);
 
-    const data_chunk salt(
-        &salt_complete[0], &salt_complete[bip38_salt_length]);
-
-    long_hash derived_data;
-    if (!bip38_scrypt_hash(to_data_chunk(normalize_nfc(passphrase)),
-        salt, derived_data))
+    two_block derived_data;
+    if (!scrypt_hash(normal(passphrase), salt, derived_data))
         return data_chunk();
 
-    const data_chunk derived_half1(
-        &derived_data[0],
-        &derived_data[bip38_encrypted_block_length]);
-    const data_chunk derived_half2(
-        &derived_data[bip38_encrypted_block_length],
-        &derived_data[sizeof(derived_data)]);
+    data_chunk derived_half1;
+    data_chunk derived_half2;
+    split(derived_data, derived_half1, derived_half2, two_block_size);
 
-    data_chunk private_key_data = to_data_chunk(private_key);
-    data_chunk half1 = xor_data(private_key_data, derived_half1,
-        0, bip38_encrypted_block_half_length);
-    data_chunk half2 = xor_data(private_key_data, derived_half1,
-        bip38_encrypted_block_half_length,
-        bip38_encrypted_block_half_length);
+    auto half1 = xor(secret, derived_half1, 0, block_half_size);
+    auto half2 = xor(secret, derived_half1, block_half_size, block_half_size);
 
     aes256_encrypt(derived_half2, half1);
     aes256_encrypt(derived_half2, half2);
 
-    data_chunk bip38_encrypted_key;
-    bip38_encrypted_key.push_back(bip38_nm_prefix_data[0]);
-    bip38_encrypted_key.push_back(bip38_nm_prefix_data[1]);
-    bip38_encrypted_key.push_back(
-        generate_flag_byte(use_compression, false));
-    bip38_encrypted_key.insert(bip38_encrypted_key.end(),
-        salt.begin(), salt.begin() + bip38_salt_length);
-    extend_data(bip38_encrypted_key, half1);
-    extend_data(bip38_encrypted_key, half2);
-    append_checksum(bip38_encrypted_key);
+    data_chunk encrypted_key;
+    encrypted_key.push_back(nm_prefix[0]);
+    encrypted_key.push_back(nm_prefix[1]);
+    const auto multiplied = false;
+    encrypted_key.push_back(generate_flag_byte(use_compression, multiplied));
 
-    return bip38_encrypted_key;
+    const auto salt_end = salt.begin() + salt_size;
+    encrypted_key.insert(encrypted_key.end(), salt.begin(), salt_end);
+    extend_data(encrypted_key, half1);
+    extend_data(encrypted_key, half2);
+    append_checksum(encrypted_key);
+
+    return encrypted_key;
 }
 
-static ec_secret bip38_unlock_ec_multiplied_secret(
-    const encrypted_private_key& bip38_key,
+static ec_secret unlock_ec_multiplied_secret(const encrypted_private_key& key,
     const std::string& passphrase)
 {
-    const bool compressed = is_compressed(bip38_key);
-    const bool uses_lot_seq = has_lot_seq(bip38_key);
+    const bool compressed = is_compressed(key);
+    const bool uses_lot_seq = has_lot_seq(key);
+    auto owner_salt_end = owner_entropy_end;
+    if (uses_lot_seq)
+        owner_salt_end = owner_entropy_start + salt_size;
 
-    const data_chunk address_hash(
-        &bip38_key[bip38_salt_index_start],
-        &bip38_key[bip38_salt_index_end]);
-
-    const data_chunk owner_entropy(
-        &bip38_key[bip38_owner_entropy_start],
-        &bip38_key[bip38_owner_entropy_end]);
-
-    const unsigned char* owner_salt_end = (uses_lot_seq ?
-        &bip38_key[bip38_owner_entropy_start + bip38_salt_length] :
-        &bip38_key[bip38_owner_entropy_end]);
-
-    const data_chunk owner_salt(
-        &bip38_key[bip38_owner_entropy_start], owner_salt_end);
-
-    data_chunk encrypted_part1(
-        &bip38_key[bip38_enc_part1_start],
-        &bip38_key[bip38_enc_part1_end]);
-
-    data_chunk encrypted_part2(
-        &bip38_key[bip38_enc_part2_start],
-        &bip38_key[bip38_enc_part2_end]);
+    const auto address_hash = chop(key, salt_index_start, salt_index_end);
+    const auto entropy = chop(key, owner_entropy_start, owner_entropy_end);
+    const auto owner_salt = chop(key, owner_entropy_start, owner_salt_end);
+    auto encrypted_part1 = chop(key, enc_part1_start, enc_part1_end);
+    auto encrypted_part2 = chop(key, enc_part2_start, enc_part2_end);
 
     hash_digest pre_factor;
-    if (!bip38_scrypt_hash(to_data_chunk(normalize_nfc(passphrase)),
-        owner_salt, pre_factor))
+    if (!scrypt_hash(normal(passphrase), owner_salt, pre_factor))
         return ec_secret();
 
     ec_secret pass_factor;
     if (uses_lot_seq)
     {
-        data_chunk extended_pre_factor = to_data_chunk(pre_factor);
-        extend_data(extended_pre_factor, owner_entropy);
-        pass_factor = ec_secret(bitcoin_hash(extended_pre_factor));
-    }
-    else
-    {
-        pass_factor = ec_secret(pre_factor);
+        auto extended_pre_factor = to_data_chunk(pre_factor);
+        extend_data(extended_pre_factor, entropy);
+        pre_factor = bitcoin_hash(extended_pre_factor);
     }
 
-    ec_point pass_point = secret_to_public_key(pass_factor, true);
+    pass_factor = ec_secret(pre_factor);
+    const auto compress = true;
+    const auto pass_point = secret_to_public_key(pass_factor, compress);
+    data_chunk address_hash_owner_entropy = address_hash;
+    extend_data(address_hash_owner_entropy, entropy);
 
-    data_chunk address_hash_oe = address_hash;
-    extend_data(address_hash_oe, owner_entropy);
-
-    long_hash seedb_pass;
-    if (!bip38_scrypt_hash_2(pass_point, address_hash_oe, seedb_pass))
+    two_block seedb_pass;
+    if (!scrypt_hash_2(pass_point, address_hash_owner_entropy, seedb_pass))
         return ec_secret();
 
-    data_chunk derived_half1(
-        &seedb_pass[0],
-        &seedb_pass[bip38_encrypted_block_length]);
-    data_chunk derived_half2(
-        &seedb_pass[bip38_encrypted_block_length],
-        &seedb_pass[sizeof(seedb_pass)]);
+    data_chunk derived_half1;
+    data_chunk derived_half2;
+    split(seedb_pass, derived_half1, derived_half2, two_block_size);
 
     aes256_decrypt(derived_half2, encrypted_part2);
-    const data_chunk& decrypted_part2 = encrypted_part2;
+    const auto& decrypted_part2 = encrypted_part2;
+    auto xor_seedb = xor_offset(decrypted_part2, derived_half1, 0,
+        block_half_size, block_half_size);
 
-    data_chunk tmp_seedb = xor_data_offset(
-        decrypted_part2, derived_half1, 0,
-        bip38_encrypted_block_half_length,
-        bip38_encrypted_block_half_length);
-    data_chunk seedb_part2(
-        &tmp_seedb[8],
-        &tmp_seedb[bip38_encrypted_block_half_length]);
+    data_chunk remaining_part1;
+    data_chunk seedb_part2;
+    split(xor_seedb, remaining_part1, seedb_part2, block_half_size);
 
-    data_chunk remaining_encrypted_part1(
-        &tmp_seedb[0], &tmp_seedb[8]);
-    extend_data(encrypted_part1, remaining_encrypted_part1);
-
+    extend_data(encrypted_part1, remaining_part1);
     aes256_decrypt(derived_half2, encrypted_part1);
-    const data_chunk& decrypted_part1 = encrypted_part1;
+    const auto& decrypted_part1 = encrypted_part1;
 
-    data_chunk seedb_part1 = xor_data(
-        decrypted_part1, derived_half1, 0, 16);
-
-    data_chunk seedb(seedb_part1);
+    auto seedb_part1 = xor(decrypted_part1, derived_half1, 0, block_half_size);
+    auto& seedb = seedb_part1;
     extend_data(seedb, seedb_part2);
 
-    ec_secret factorb = ec_secret(bitcoin_hash(seedb));
-
+    const auto factorb = ec_secret(bitcoin_hash(seedb));
     ec_multiply(pass_factor, factorb);
 
     const auto& unlocked_key = pass_factor;
-    const auto public_key = secret_to_public_key(
-        unlocked_key, compressed);
+    const auto public_key = secret_to_public_key(unlocked_key, compressed);
 
     wallet::payment_address address;
     address.set_public_key(public_key);
-    const auto new_address_hash = bitcoin_hash(
-        to_data_chunk(address.to_string()));
+    const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
+    const auto hash_end = hash.begin() + address_hash.size();
+    if (std::equal(hash.begin(), hash_end, address_hash.begin()))
+        return unlocked_key;
 
-    if (!std::equal(
-        new_address_hash.begin(),
-        new_address_hash.begin() + address_hash.size(),
-        address_hash.begin()))
-        return ec_secret();
-
-    return unlocked_key;
+    return ec_secret();
 }
 
-ec_secret bip38_unlock_secret(
-    const encrypted_private_key& bip38_key,
+ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
     const std::string& passphrase)
 {
-    ec_secret bip38_decrypted_key;
+    ec_secret secret;
+    if (is_ec_multiplied(encrypted_secret))
+        return unlock_ec_multiplied_secret(encrypted_secret, passphrase);
 
-    if (is_bip38_ec_multiplied(bip38_key))
-    {
-        bip38_decrypted_key = bip38_unlock_ec_multiplied_secret(
-            bip38_key, passphrase);
-    }
-    else
-    {
-        BITCOIN_ASSERT(is_bip38_ec_non_multiplied(bip38_key));
+    BITCOIN_ASSERT(is_ec_non_multiplied(encrypted_secret));
 
-        const data_chunk encrypted_data(
-            &bip38_key[bip38_key_index_start],
-            &bip38_key[bip38_key_index_end]);
+    const auto salt = chop(encrypted_secret, salt_index_start, salt_index_end);
+    const auto encrypted_data = chop(encrypted_secret, key_index_start,
+        key_index_end);
 
-        const data_chunk salt(
-            &bip38_key[bip38_salt_index_start],
-            &bip38_key[bip38_salt_index_end]);
+    two_block derived_data;
+    if (!scrypt_hash(normal(passphrase), salt, derived_data))
+        return ec_secret();
 
-        long_hash derived_data;
-        if (!bip38_scrypt_hash(to_data_chunk(normalize_nfc(passphrase)),
-            salt, derived_data))
-            return ec_secret();
+    data_chunk data_half1;
+    data_chunk data_half2;
+    split(encrypted_data, data_half1, data_half2, block_size);
 
-        data_chunk data_half1(
-            &encrypted_data[0],
-            &encrypted_data[bip38_encrypted_block_half_length]);
-        data_chunk data_half2(
-            &encrypted_data[bip38_encrypted_block_half_length],
-            &encrypted_data[bip38_encrypted_block_length]);
-        const data_chunk derived_half1(
-            &derived_data[0],
-            &derived_data[bip38_encrypted_block_length]);
-        const data_chunk derived_half2(
-            &derived_data[bip38_encrypted_block_length],
-            &derived_data[sizeof(derived_data)]);
+    data_chunk derived_half1;
+    data_chunk derived_half2;
+    split(derived_data, derived_half1, derived_half2, two_block_size);
 
-        aes256_decrypt(derived_half2, data_half1);
-        aes256_decrypt(derived_half2, data_half2);
+    aes256_decrypt(derived_half2, data_half1);
+    aes256_decrypt(derived_half2, data_half2);
 
-        data_chunk combined_data;
-        extend_data(combined_data, data_half1);
-        extend_data(combined_data, data_half2);
+    data_chunk combined_data;
+    extend_data(combined_data, data_half1);
+    extend_data(combined_data, data_half2);
 
-        const data_chunk decrypted_data = xor_data(
-            combined_data, derived_half1,
-            0, bip38_encrypted_block_length);
+    const auto decrypted = xor(combined_data, derived_half1, 0, block_size);
+    std::copy(decrypted.begin(), decrypted.end(), secret.begin());
 
-        std::copy_n(decrypted_data.begin(), ec_secret_size,
-            bip38_decrypted_key.begin());
+    const auto compressed = is_compressed(encrypted_secret);
+    const auto public_key = secret_to_public_key(secret, compressed);
 
-        const auto public_key = secret_to_public_key(
-            bip38_decrypted_key, is_compressed(bip38_key));
+    wallet::payment_address address;
+    address.set_public_key(public_key);
+    const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
+    if (std::equal(salt.begin(), salt.end(), hash.begin()))
+        return secret;
 
-        wallet::payment_address address;
-        address.set_public_key(public_key);
-        const auto address_hash = bitcoin_hash(
-            to_data_chunk(address.to_string()));
-
-        if (!std::equal(salt.begin(), salt.end(), address_hash.begin()))
-            return ec_secret();
-    }
-    return bip38_decrypted_key;
+    return ec_secret();
 }
+
+#endif
 
 } // namespace bip38
 } // namespace libbitcoin

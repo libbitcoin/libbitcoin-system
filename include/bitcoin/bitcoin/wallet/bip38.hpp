@@ -25,192 +25,86 @@
 #include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace bip38 {
 
-typedef data_chunk encrypted_private_key;
+#ifdef WITH_ICU
 
 /**
- * Scrypt parameters N used in bip38.
+ * A bip38 seed for use with an intermediate.
  */
-BC_CONSTEXPR size_t bip38_scrypt_N   = 16384;
-BC_CONSTEXPR size_t bip38_scrypt_N_2 =  1024;
+static BC_CONSTEXPR size_t seed_size = 24;
+typedef byte_array<seed_size> seed;
 
 /**
- * Scrypt parameters r used in bip38.
+ * A checked intermediate (checked but not base58 encoded).
  */
-BC_CONSTEXPR size_t bip38_scrypt_r   = 8;
-BC_CONSTEXPR size_t bip38_scrypt_r_2 = 1;
+static BC_CONSTEXPR size_t intermediate_encoded_size = 72;
+static BC_CONSTEXPR size_t intermediate_decoded_size = 53;
+typedef byte_array<intermediate_decoded_size> intermediate;
 
 /**
- * Scrypt parameters p used in bip38.
+ * A checked confirmation code (checked but not base58 encoded).
  */
-BC_CONSTEXPR size_t bip38_scrypt_p   = 8;
-BC_CONSTEXPR size_t bip38_scrypt_p_2 = 1;
+static BC_CONSTEXPR size_t confirmation_code_encoded_size = 75;
+static BC_CONSTEXPR size_t confirmation_code_decoded_size = 55;
+typedef byte_array<confirmation_code_decoded_size> confirmation_code;
 
 /**
- * The total length in bytes of the address hash used
- * as a salt in bip38.
+ * A checked encrypted private key type (checked but not base58 encoded).
  */
-BC_CONSTEXPR size_t bip38_salt_length = 4;
+static BC_CONSTEXPR size_t encrypted_key_encoded_size = 58;
+static BC_CONSTEXPR size_t encrypted_key_decoded_size = 43;
+typedef byte_array<encrypted_key_decoded_size> encrypted_private_key;
 
 /**
- * The total length in bytes of an aes256 encrypted block
- * used in bip38.
+ * Performs bip38 encryption based on the given intermediate and random 24 byte
+ * seed provided. The confirmation code is an output parameter.
  */
-BC_CONSTEXPR size_t bip38_encrypted_block_length = 32;
+BC_API data_chunk lock_intermediate(const intermediate& intermediate,
+    const seed& seed, confirmation_code& out_confirmation_code,
+    bool use_compression=true);
 
 /**
- * The half length in bytes of a bip38 encrypted key.
+ * Performs bip38 validation on the specified confirmation code using the
+ * passphrase.  If a Bitcoin address depends on the passphrase, the address is
+ * returned in out_address.
  */
-BC_CONSTEXPR size_t bip38_encrypted_block_half_length = 16;
+BC_API bool lock_verify(const confirmation_code& confirmation_code,
+    const std::string& passphrase, wallet::payment_address& out_address);
 
 /**
- * The total length in bytes of a bip38 encrypted key.
+ * Performs bip38 encryption on the private key given the specified passphrase.
  */
-BC_CONSTEXPR size_t bip38_encrypted_key_length = 58;
+BC_API data_chunk lock_secret(const ec_secret& secret,
+    const std::string& passphrase, bool use_compression=true);
 
 /**
- * The fixed bip38 non-multiplied
- * prefix data constants.
+ * Performs bip38 decryption on the encrypted key given the specified
+ * passphrase.
  */
-BC_CONSTEXPR uint8_t bip38_nm_prefix_data[2] = { 0x01, 0x42 };
+BC_API ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
+    const std::string& passphrase);
 
-/**
- * The fixed bip38 ec-multiplied prefix data constants.
- */
-BC_CONSTEXPR uint8_t bip38_m_prefix_data[2] = { 0x01, 0x43 };
-
-/**
- * The fixed number of bip38 base58 checked intermediate bytes required.
- */
-BC_CONSTEXPR size_t bip38_intermediate_length = 72;
-
-/**
- * The fixed length of bip38 base58 checked confirmation code.
- */
-BC_CONSTEXPR size_t bip38_confirmation_code_length = 75;
-
-/**
- * The fixed number of bip38 random seed bytes required.
- */
-BC_CONSTEXPR size_t bip38_seed_length = 24;
-
-/**
- * The fixed number of bip38 magic bytes.
- */
-BC_CONSTEXPR size_t bip38_magic_length = 8;
-
-typedef uint8_t bip38_magic[bip38_magic_length];
-
-/**
- * The fixed bip38 magic bytes used when lot is specified.
- */
-BC_CONSTEXPR bip38_magic bip38_magic_w_lot =
+// Test access only.
+template <class Type>
+void split(Type& from, data_chunk& lower, data_chunk& upper, size_t full_size)
 {
-    0x2C, 0xE9, 0xB3, 0xE1, 0xFF, 0x39, 0xE2, 0x51
-};
+    BITCOIN_ASSERT(from.size() == full_size);
+    BITCOIN_ASSERT(full_size % 2 == 0);
 
-/**
- * The fixed bip38 magic bytes used when lot is not specified.
- */
-BC_CONSTEXPR bip38_magic bip38_magic_wo_lot =
-{
-    0x2C, 0xE9, 0xB3, 0xE1, 0xFF, 0x39, 0xE2, 0x53
-};
+    const size_t midpoint = full_size / 2;
+    lower.assign(from.begin(), from.end() - midpoint);
+    upper.assign(from.begin() + midpoint, from.end());
+}
 
-/**
- * The fixed bip38 magic bytes used for confirmation codes.
- */
-BC_CONSTEXPR uint8_t bip38_confirmation_prefix[5] =
-{
-    0x64, 0x3B, 0xF6, 0xA8, 0x9A
-};
+// Test access only.
+uint8_t last_byte(data_slice buffer);
+data_chunk normal(const std::string& passphrase);
 
-
-/**
- * Fixed byte indices used for bip38.
- */
-BC_CONSTEXPR size_t bip38_comp_mult_index          =  1;
-BC_CONSTEXPR size_t bip38_flag_index               =  2;
-BC_CONSTEXPR size_t bip38_salt_index_start         =  3;
-BC_CONSTEXPR size_t bip38_cfrm_flag_index          =  5;
-BC_CONSTEXPR size_t bip38_salt_index_end           =  7;
-BC_CONSTEXPR size_t bip38_key_index_start          =  7;
-BC_CONSTEXPR size_t bip38_owner_entropy_start      =  7;
-BC_CONSTEXPR size_t bip38_owner_entropy_end        = 15;
-BC_CONSTEXPR size_t bip38_cfrm_address_hash_start  =  6;
-BC_CONSTEXPR size_t bip38_cfrm_address_hash_end    = 10;
-BC_CONSTEXPR size_t bip38_cfrm_owner_entropy_start = 10;
-BC_CONSTEXPR size_t bip38_cfrm_owner_entropy_end   = 18;
-BC_CONSTEXPR size_t bip38_cfrm_encrypted_start     = 18;
-BC_CONSTEXPR size_t bip38_cfrm_encrypted_end       = 51;
-BC_CONSTEXPR size_t bip38_intm_owner_entropy_start =  8;
-BC_CONSTEXPR size_t bip38_intm_owner_entropy_end   = 16;
-BC_CONSTEXPR size_t bip38_pass_point_start         = 16;
-BC_CONSTEXPR size_t bip38_pass_point_end           = 49;
-BC_CONSTEXPR size_t bip38_enc_part1_start          = 15;
-BC_CONSTEXPR size_t bip38_decrypt_xor_offset       = 16;
-BC_CONSTEXPR size_t bip38_decrypt_xor_length       = 16;
-BC_CONSTEXPR size_t bip38_enc_part1_end            = 23;
-BC_CONSTEXPR size_t bip38_enc_part2_start          = 23;
-BC_CONSTEXPR size_t bip38_enc_part2_end            = 39;
-BC_CONSTEXPR size_t bip38_key_index_end            = 39;
-
-
-/**
- * The bip38 flag byte masks used in this implementation.
- */
-BC_CONSTEXPR uint8_t bip38_lot_sequence      = 0x04;
-BC_CONSTEXPR uint8_t bip38_compressed        = 0x20;
-BC_CONSTEXPR uint8_t bip38_ec_multiplied     = 0x00;
-BC_CONSTEXPR uint8_t bip38_ec_non_multiplied = 0xC0;
-
-
-/**
- * Performs bip38 encryption based on the given
- * intermediate and random 24 byte seed provided.
- *
- * A confirmation code is an output parameter.
- *
- * bip38_lock_intermediate(intermediate, seedb,
- *   confirmation_code, use_compression)
- */
-BC_API data_chunk bip38_lock_intermediate(
-    const data_chunk& intermediate, const data_chunk& seedb,
-    data_chunk& confirmation_code, bool use_compression);
-
-/**
- * Performs bip38 validation on the specified confirmation
- * code using the passphrase.  If the address depends on the
- * passphrase, the address is returned in out_address.
- *
- * bip38_lock_verify(confirmation_code, passphrase, out_address)
- */
-BC_API bool bip38_lock_verify(
-    const data_chunk& confirmation_code,
-    const std::string& passphrase, std::string& out_address);
-
-/**
- * Performs bip38 encryption on the private key given
- * the specified passphrase.
- *
- * bip38_lock_secret(private_key, passphrase, use_compression)
- */
-BC_API data_chunk bip38_lock_secret(
-    const ec_secret& private_key, const std::string& passphrase,
-    bool use_compression);
-
-/**
- * Performs bip38 decryption on the encrypted key given
- * the specified passphrase.
- *
- * bip38_unlock_secret(encrypted_key, passphrase)
- */
-BC_API ec_secret bip38_unlock_secret(
-    const encrypted_private_key& bip38_key, const std::string& passphrase);
+#endif
 
 } // namespace bip38
 } // namespace libbitcoin
