@@ -181,59 +181,59 @@ static inline uint8_t generate_flag_byte(bool compressed, bool multiplied)
     return byte;
 }
 
-static inline uint8_t get_flag_byte(data_slice key)
+static uint8_t get_flag_byte(data_slice key)
 {
     BITCOIN_ASSERT(flag_index < key.size());
     return key.data()[flag_index];
 }
 
-static inline uint8_t get_cfrm_flag_byte(data_slice key)
+static uint8_t get_cfrm_flag_byte(data_slice key)
 {
     BITCOIN_ASSERT(cfrm_flag_index < key.size());
     return key.data()[cfrm_flag_index];
 }
 
-static inline bool is_compressed(data_slice key)
+static bool is_compressed(data_slice key)
 {
     return ((get_flag_byte(key) & flag_byte::ec_compressed) != 0);
 }
 
-static inline bool is_cfrm_compressed(data_slice key)
+static bool is_cfrm_compressed(data_slice key)
 {
     return ((get_cfrm_flag_byte(key) & flag_byte::ec_compressed) != 0);
 }
 
-static inline bool has_lot_seq(data_slice key)
+static bool has_lot_seq(data_slice key)
 {
     return ((get_flag_byte(key) & flag_byte::lot_sequence) != 0);
 }
 
-static inline bool cfrm_has_lot_seq(data_slice key)
+static bool cfrm_has_lot_seq(data_slice key)
 {
     return ((get_cfrm_flag_byte(key) & flag_byte::lot_sequence) != 0);
 }
 
-static inline bool is_ec_non_multiplied(data_slice key)
+static bool is_ec_non_multiplied(data_slice key)
 {
     return ((get_flag_byte(key) & flag_byte::ec_non_multiplied) != 0);
 }
 
-static inline bool is_ec_multiplied(data_slice key)
+static bool is_ec_multiplied(data_slice key)
 {
     return !is_ec_non_multiplied(key);
 }
 
-uint8_t last_byte(data_slice buffer)
+static uint8_t last_byte(data_slice buffer)
 {
     return buffer.data()[buffer.size() - 1];
 }
 
-data_chunk normal(const std::string& passphrase)
+static data_chunk normal(const std::string& passphrase)
 {
     return to_data_chunk(to_normal_nfc_form(passphrase));
 }
 
-static inline data_chunk xor_offset(data_slice buffer1, data_slice buffer2,
+static data_chunk xor_offset(data_slice buffer1, data_slice buffer2,
     size_t buffer1_offset, size_t buffer2_offset, size_t length)
 {
     data_chunk out;
@@ -245,7 +245,7 @@ static inline data_chunk xor_offset(data_slice buffer1, data_slice buffer2,
     return out;
 }
 
-static inline data_chunk xor(data_slice buffer1, data_slice buffer2,
+static data_chunk xor(data_slice buffer1, data_slice buffer2,
     size_t offset, size_t length)
 {
     return xor_offset(buffer1, buffer2, offset, offset, length);
