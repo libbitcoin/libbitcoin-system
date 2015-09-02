@@ -25,29 +25,46 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include "../math/external/aes256.h"
 
-
 namespace libbitcoin {
 
-void aes256_encrypt(const data_chunk& key, data_chunk& block)
+void aes256_encrypt(const aes_secret& key, aes_block& block)
 {
-    BITCOIN_ASSERT(key.size() == aes256_key_size);
-    BITCOIN_ASSERT(block.size() == aes256_block_size);
-
-    aes256_context ctx;
-    aes256_init(&ctx, const_cast<uint8_t*>(key.data()));
-    aes256_encrypt_ecb(&ctx, block.data());
-    aes256_done(&ctx);
+    aes256_context context;
+    aes256_init(&context, key.data());
+    aes256_encrypt_ecb(&context, block.data());
+    aes256_done(&context);
 }
 
-void aes256_decrypt(const data_chunk& key, data_chunk& block)
+void aes256_decrypt(const aes_secret& key, aes_block& block)
+{
+    aes256_context context;
+    aes256_init(&context, key.data());
+    aes256_decrypt_ecb(&context, block.data());
+    aes256_done(&context);
+}
+
+// DEPRECATED
+void aes256_encrypt(data_slice key, data_chunk& block)
 {
     BITCOIN_ASSERT(key.size() == aes256_key_size);
     BITCOIN_ASSERT(block.size() == aes256_block_size);
 
-    aes256_context ctx;
-    aes256_init(&ctx, const_cast<uint8_t*>(key.data()));
-    aes256_decrypt_ecb(&ctx, block.data());
-    aes256_done(&ctx);
+    aes256_context context;
+    aes256_init(&context, key.data());
+    aes256_encrypt_ecb(&context, block.data());
+    aes256_done(&context);
+}
+
+// DEPRECATED
+void aes256_decrypt(data_slice key, data_chunk& block)
+{
+    BITCOIN_ASSERT(key.size() == aes256_key_size);
+    BITCOIN_ASSERT(block.size() == aes256_block_size);
+
+    aes256_context context;
+    aes256_init(&context, key.data());
+    aes256_decrypt_ecb(&context, block.data());
+    aes256_done(&context);
 }
 
 } // namespace libbitcoin
