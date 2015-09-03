@@ -24,6 +24,10 @@
 
 namespace libbitcoin {
 
+// For template implementation only, do not call directly.
+BC_API bool decode_base16_private(uint8_t* out, size_t out_size,
+    const char* in);
+
 template <size_t Size>
 bool decode_base16(byte_array<Size>& out, const std::string &in)
 {
@@ -47,10 +51,6 @@ byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
     BITCOIN_ASSERT(success);
     return out;
 }
-
-// For template implementation only, do not call directly.
-BC_API bool decode_base16_private(uint8_t* out, size_t out_size,
-    const char* in);
 
 } // libbitcoin
 
