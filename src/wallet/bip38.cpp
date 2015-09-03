@@ -365,7 +365,7 @@ bool extract_address(const confirmation_code& confirmation,
     return true;
 }
 
-data_chunk lock_secret(const ec_secret& secret, const std::string& passphrase,
+private_key lock_secret(const ec_secret& secret, const std::string& passphrase,
     bool use_compression)
 {
     const auto public_key = secret_to_public_key(secret, use_compression);
@@ -377,7 +377,7 @@ data_chunk lock_secret(const ec_secret& secret, const std::string& passphrase,
 
     two_block derived_data;
     if (!scrypt_hash(normal(passphrase), salt, derived_data))
-        return data_chunk();
+        return private_key();
 
     data_chunk derived_half1;
     data_chunk derived_half2;
@@ -402,10 +402,13 @@ data_chunk lock_secret(const ec_secret& secret, const std::string& passphrase,
     extend_data(encrypted_key, half2);
     append_checksum(encrypted_key);
 
-    return encrypted_key;
+    private_key out;
+    BITCOIN_ASSERT(encrypted_key.size() == private_key_decoded_size);
+    std::copy(encrypted_key.begin(), encrypted_key.end(), out.begin());
+    return out;
 }
 
-static ec_secret unlock_ec_multiplied_secret(const encrypted_private_key& key,
+static ec_secret unlock_ec_multiplied_secret(const private_key& key,
     const std::string& passphrase)
 {
     const bool compressed = is_flag(key, flag_byte::ec_compressed);
@@ -480,7 +483,7 @@ static ec_secret unlock_ec_multiplied_secret(const encrypted_private_key& key,
     return ec_secret();
 }
 
-ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
+ec_secret unlock_secret(const private_key& encrypted_secret,
     const std::string& passphrase)
 {
     ec_secret secret;

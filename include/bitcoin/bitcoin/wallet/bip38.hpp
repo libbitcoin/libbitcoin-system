@@ -37,25 +37,25 @@ static BC_CONSTEXPR size_t seed_size = 24;
 typedef byte_array<seed_size> seed;
 
 /**
- * A checked intermediate (checked but not base58 encoded).
+ * A bip38 intermediate passphrase string type.
  */
-static BC_CONSTEXPR size_t intermediate_encoded_size = 72;
+////static BC_CONSTEXPR size_t intermediate_encoded_size = 72;
 static BC_CONSTEXPR size_t intermediate_decoded_size = 53;
 typedef byte_array<intermediate_decoded_size> intermediate;
 
 /**
  * A checked confirmation code (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t confirmation_code_encoded_size = 75;
+////static BC_CONSTEXPR size_t confirmation_code_encoded_size = 75;
 static BC_CONSTEXPR size_t confirmation_code_decoded_size = 55;
 typedef byte_array<confirmation_code_decoded_size> confirmation_code;
 
 /**
- * A checked encrypted private key type (checked but not base58 encoded).
+ * An encrypted private key type (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t encrypted_key_encoded_size = 58;
-static BC_CONSTEXPR size_t encrypted_key_decoded_size = 43;
-typedef byte_array<encrypted_key_decoded_size> encrypted_private_key;
+////static BC_CONSTEXPR size_t private_key_encoded_size = 58;
+static BC_CONSTEXPR size_t private_key_decoded_size = 43;
+typedef byte_array<private_key_decoded_size> private_key;
 
 /**
  * Create an intermediate encrypted private key.
@@ -68,21 +68,22 @@ BC_API data_chunk create_intermediate(const intermediate& intermediate,
 
 /**
  * Extract the payment address associated with passphrase and confirmation.
- * @return  True if there is an assocaited address.
+ * @return true if there is an assocaited address.
  */
 BC_API bool extract_address(const confirmation_code& confirmation,
     const std::string& passphrase, wallet::payment_address& out_address);
 
 /**
- * Performs bip38 encryption on the private key given the specified passphrase.
+ * Encrypt the private key given the specified passphrase.
+ * The compression option controls the public key representation.
  */
-BC_API data_chunk lock_secret(const ec_secret& secret,
+BC_API private_key lock_secret(const ec_secret& secret,
     const std::string& passphrase, bool use_compression=true);
 
 /**
- * Performs bip38 decryption on the encrypted key using the passphrase.
+ * Decrypt the encrypted private key using the passphrase.
  */
-BC_API ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
+BC_API ec_secret unlock_secret(const private_key& encrypted_secret,
     const std::string& passphrase);
 
 #endif // WITH_ICU
