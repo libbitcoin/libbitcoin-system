@@ -144,7 +144,7 @@ void protocol::start_connecting(const code& ec,
     }
 
     // Start outbound connection attempts (not concurrent because of strand).
-    for (auto channel = 0; channel < max_outbound_; ++channel)
+    for (size_t channel = 0; channel < max_outbound_; ++channel)
         new_connection();
 
     handle_complete(error::success);
