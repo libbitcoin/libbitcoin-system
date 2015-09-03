@@ -245,7 +245,7 @@ static data_chunk xor_offset(data_slice buffer1, data_slice buffer2,
     return out;
 }
 
-static data_chunk xor(data_slice buffer1, data_slice buffer2,
+static data_chunk xor_(data_slice buffer1, data_slice buffer2,
     size_t offset, size_t length)
 {
     return xor_offset(buffer1, buffer2, offset, offset, length);
@@ -330,7 +330,7 @@ data_chunk lock_intermediate(const intermediate& intermediate,
     data_chunk derived_half2;
     split(derived, derived_half1, derived_half2, two_block_size);
 
-    auto half1 = xor(seed, derived_half1, 0, block_half_size);
+    auto half1 = xor_(seed, derived_half1, 0, block_half_size);
     aes256_encrypt(derived_half2, half1);
 
     // TODO: magic number: 16, 16, 24?
@@ -411,7 +411,7 @@ bool lock_verify(const confirmation_code& confirmation_code,
     split(encrypted_pointb, encrypted_half1, encrypted_half2, block_size);
 
     aes256_decrypt(derived_half2, encrypted_half1);
-    auto decrypted_half1 = xor(encrypted_half1, derived_half1, 0,
+    auto decrypted_half1 = xor_(encrypted_half1, derived_half1, 0,
         block_half_size);
 
     // TODO: magic number: 16?
@@ -458,8 +458,8 @@ data_chunk lock_secret(const ec_secret& secret, const std::string& passphrase,
     data_chunk derived_half2;
     split(derived_data, derived_half1, derived_half2, two_block_size);
 
-    auto half1 = xor(secret, derived_half1, 0, block_half_size);
-    auto half2 = xor(secret, derived_half1, block_half_size, block_half_size);
+    auto half1 = xor_(secret, derived_half1, 0, block_half_size);
+    auto half2 = xor_(secret, derived_half1, block_half_size, block_half_size);
 
     aes256_encrypt(derived_half2, half1);
     aes256_encrypt(derived_half2, half2);
@@ -533,7 +533,7 @@ static ec_secret unlock_ec_multiplied_secret(const encrypted_private_key& key,
     aes256_decrypt(derived_half2, encrypted_part1);
     const auto& decrypted_part1 = encrypted_part1;
 
-    auto seedb_part1 = xor(decrypted_part1, derived_half1, 0, block_half_size);
+    auto seedb_part1 = xor_(decrypted_part1, derived_half1, 0, block_half_size);
     auto& seedb = seedb_part1;
     extend_data(seedb, seedb_part2);
 
@@ -585,7 +585,7 @@ ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
     extend_data(combined_data, data_half1);
     extend_data(combined_data, data_half2);
 
-    const auto decrypted = xor(combined_data, derived_half1, 0, block_size);
+    const auto decrypted = xor_(combined_data, derived_half1, 0, block_size);
     std::copy(decrypted.begin(), decrypted.end(), secret.begin());
 
     const auto compressed = is_compressed(encrypted_secret);
