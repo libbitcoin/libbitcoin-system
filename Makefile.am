@@ -316,7 +316,8 @@ include_bitcoin_bitcoin_formats_HEADERS = \
 
 include_bitcoin_bitcoin_impl_formatsdir = ${includedir}/bitcoin/bitcoin/impl/formats
 include_bitcoin_bitcoin_impl_formats_HEADERS = \
-    include/bitcoin/bitcoin/impl/formats/base16.ipp
+    include/bitcoin/bitcoin/impl/formats/base16.ipp \
+    include/bitcoin/bitcoin/impl/formats/base58.ipp
 
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \

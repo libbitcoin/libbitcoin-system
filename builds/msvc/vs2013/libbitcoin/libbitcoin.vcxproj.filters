@@ -117,6 +117,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base58.ipp">
+      <Filter>include\bitcoin\impl\formats</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\constants.cpp">

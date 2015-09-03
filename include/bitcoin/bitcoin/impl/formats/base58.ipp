@@ -17,40 +17,28 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BASE58_HPP
-#define LIBBITCOIN_BASE58_HPP
+#ifndef LIBBITCOIN_BASE58_IPP
+#define LIBBITCOIN_BASE58_IPP
 
-#include <string>
-#include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-BC_API bool is_base58(const char ch);
-BC_API bool is_base58(const std::string& text);
-
-/**
- * Converts a base58 string to a number of bytes.
- * @return false if the input is malformed, or the wrong length.
- */
 template <size_t Size>
-bool decode_base58(byte_array<Size>& out, const std::string &in);
+bool decode_base58(byte_array<Size>& out, const std::string &in)
+{
+    byte_array<Size> result;
+    if (!decode_base58_private(result.data(), result.size(), in.data()))
+        return false;
 
-/**
- * Encode data as base58.
- * @return the base58 encoded string.
- */
-BC_API std::string encode_base58(data_slice unencoded);
+    out = result;
+    return true;
+}
 
-/**
- * Attempt to decode base58 data.
- * @return false if the input contains non-base58 characters.
- */
-BC_API bool decode_base58(data_chunk& out, const std::string& in);
+// For support of template implementation only, do not call directly.
+BC_API bool decode_base58_private(uint8_t* out, size_t out_size, const char* in);
 
-} // namespace libbitcoin
-
-#include <bitcoin/bitcoin/impl/formats/base58.ipp>
+} // libbitcoin
 
 #endif
-
