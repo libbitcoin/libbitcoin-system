@@ -27,7 +27,12 @@ BOOST_AUTO_TEST_SUITE(base16_tests)
 BOOST_AUTO_TEST_CASE(base16_literal_test)
 {
     auto result = base16_literal("01ff42bc");
-    byte_array<4> expected = {{0x01, 0xff, 0x42, 0xbc}};
+    const byte_array<4> expected
+    {
+        {
+            0x01, 0xff, 0x42, 0xbc
+        }
+    };
     BOOST_REQUIRE(result == expected);
 }
 
@@ -44,16 +49,17 @@ BOOST_AUTO_TEST_CASE(base16_short_hash_test)
     short_hash hash;
     BOOST_REQUIRE(decode_base16(hash, hex_str));
     BOOST_REQUIRE_EQUAL(encode_base16(hash), hex_str);
-
-    short_hash expected = {{
-       0xf8, 0x5b, 0xeb, 0x63, 0x56, 0xd0, 0x81, 0x3d, 0xdb, 0x0d,
-       0xbb, 0x14, 0x23, 0x0a, 0x24, 0x9f, 0xe9, 0x31, 0xa1, 0x35
-    }};
+    const short_hash expected
+    {
+        {
+           0xf8, 0x5b, 0xeb, 0x63, 0x56, 0xd0, 0x81, 0x3d, 0xdb, 0x0d,
+           0xbb, 0x14, 0x23, 0x0a, 0x24, 0x9f, 0xe9, 0x31, 0xa1, 0x35
+        }
+    };
     BOOST_REQUIRE(hash == expected);
 }
 
-// TODO: these should be tested for correctness, not just round-tripping.
-
+// TODO: this should be tested for correctness, not just round-tripping.
 BOOST_AUTO_TEST_CASE(base16_round_trip_test)
 {
     const auto& hex_str = "10a7fd15cb45bda9e90e19a15f";
@@ -62,13 +68,17 @@ BOOST_AUTO_TEST_CASE(base16_round_trip_test)
     BOOST_REQUIRE_EQUAL(encode_base16(data), hex_str);
 }
 
-BOOST_AUTO_TEST_CASE(base16_legacy_padded_round_trip_test)
+BOOST_AUTO_TEST_CASE(base16_array_test)
 {
-    const auto& padded_hex = "  \n\t10a7fd15cb45bda9e90e19a15f\n  \t";
-    data_chunk data = decode_hex(padded_hex);
-
-    const auto& unpadded_hex = "10a7fd15cb45bda9e90e19a15f";
-    BOOST_REQUIRE_EQUAL(encode_hex(data), unpadded_hex);
+    byte_array<4> converted;
+    BOOST_REQUIRE(decode_base16(converted, "01ff42bc"));
+    const byte_array<4> expected
+    {
+        {
+            0x01, 0xff, 0x42, 0xbc
+        }
+    };
+    BOOST_REQUIRE(converted == expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

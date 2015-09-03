@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(sha1_hash_test)
     {
         data_chunk data;
         BOOST_REQUIRE(decode_base16(data, result.input));
-        BOOST_REQUIRE_EQUAL(encode_hex(sha1_hash(data)), result.result);
+        BOOST_REQUIRE_EQUAL(encode_base16(sha1_hash(data)), result.result);
     }
 }
 

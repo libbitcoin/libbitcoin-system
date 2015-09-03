@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
@@ -43,19 +44,6 @@ static unsigned from_hex(const char c)
     if ('a' <= c && c <= 'f')
         return 10 + c - 'a';
     return c - '0';
-}
-
-bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
-{
-    if (!std::all_of(in, in + 2 * out_size, isxdigit))
-        return false;
-
-    for (size_t i = 0; i < out_size; ++i)
-    {
-        out[i] = (from_hex(in[0]) << 4) + from_hex(in[1]);
-        in += 2;
-    }
-    return true;
 }
 
 bool decode_base16(data_chunk& out, const std::string& in)
@@ -103,20 +91,19 @@ hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
     return out;
 }
 
-// Old names for backwards-compatibility:
-std::string encode_hex(data_slice in)
+// For support of template implementation only, do not call directly.
+bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
 {
-    return encode_base16(in);
-}
+    if (!std::all_of(in, in + 2 * out_size, isxdigit))
+        return false;
 
-data_chunk decode_hex(std::string in)
-{
-    // Trim the fat:
-    boost::algorithm::trim(in);
+    for (size_t i = 0; i < out_size; ++i)
+    {
+        out[i] = (from_hex(in[0]) << 4) + from_hex(in[1]);
+        in += 2;
+    }
 
-    data_chunk out;
-    decode_base16(out, in);
-    return out;
+    return true;
 }
 
 } // namespace libbitcoin
