@@ -32,65 +32,6 @@ BOOST_AUTO_TEST_SUITE(bip38_tests)
 
 BOOST_AUTO_TEST_SUITE(bip38__utilities)
 
-BOOST_AUTO_TEST_CASE(bip38__last_byte__two_bytes__expected)
-{
-    const uint8_t expected = 24;
-    const data_chunk buffer
-    {
-        42, expected
-    };
-
-    const auto last = bip38::last_byte(buffer);
-    BOOST_REQUIRE_EQUAL(last, expected);
-}
-
-BOOST_AUTO_TEST_CASE(bip38__normal__ascii__expected)
-{
-    const std::string expected("ascii");
-    const auto normalized = bip38::normal(expected);
-    BOOST_REQUIRE_EQUAL(normalized[0], expected[0]);
-    BOOST_REQUIRE_EQUAL(normalized[1], expected[1]);
-    BOOST_REQUIRE_EQUAL(normalized[2], expected[2]);
-    BOOST_REQUIRE_EQUAL(normalized[3], expected[3]);
-}
-
-BOOST_AUTO_TEST_CASE(bip38__split__data_chunk__expected)
-{
-    const uint8_t expected_lower = 42;
-    const uint8_t expected_upper = 24;
-    data_chunk from
-    {
-        expected_lower, expected_upper
-    };
-
-    data_chunk lower_half;
-    data_chunk upper_half;
-    bip38::split(from, lower_half, upper_half, from.size());
-    BOOST_REQUIRE_EQUAL(lower_half[0], expected_lower);
-    BOOST_REQUIRE_EQUAL(upper_half[0], expected_upper);
-}
-
-BOOST_AUTO_TEST_CASE(bip38__split__long_hash__expected)
-{
-    const uint8_t l = 42;
-    const uint8_t u = 24;
-    long_hash from
-    { 
-        {
-            l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            u, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        } 
-    };
-
-    data_chunk lower_half;
-    data_chunk upper_half;
-    bip38::split(from, lower_half, upper_half, from.size());
-    BOOST_REQUIRE_EQUAL(lower_half[0], l);
-    BOOST_REQUIRE_EQUAL(upper_half[0], u);
-}
-
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(bip38__lock_secret)
@@ -110,26 +51,26 @@ static void test_lock_secret(const bip38_vector& vector)
 
 BOOST_AUTO_TEST_CASE(bip38__lock__vector_0_not_multiplied_uncompressed__expected)
 {
-    test_lock_secret(bip38_test_vector[0]);
+    test_lock_secret(bip38_test_vector0);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__lock__vector_1_not_multiplied_uncompressed__expected)
 {
-    test_lock_secret(bip38_test_vector[1]);
+    test_lock_secret(bip38_test_vector1);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__lock__vector_2_not_multiplied__expected)
 {
-    test_lock_secret(bip38_test_vector[2]);
+    test_lock_secret(bip38_test_vector2);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__lock__vector_3_not_multiplied__expected)
 {
-    test_lock_secret(bip38_test_vector[3]);
+    test_lock_secret(bip38_test_vector3);
 }
 
 // #3 from: github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(bip38__lock__vector_10_not_multiplied_uncompressed_unicode___expected)
+BOOST_AUTO_TEST_CASE(bip38__lock__vector_unicode_not_multiplied_uncompressed___expected)
 {
     data_chunk not_normalized;
     BOOST_REQUIRE(decode_base16(not_normalized, "cf92cc8100f0909080f09f92a9"));
@@ -167,52 +108,52 @@ static void test_unlock_secret(const bip38_vector& vector)
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_0_not_multiplied_uncompressed__expected)
 {
-    test_unlock_secret(bip38_test_vector[0]);
+    test_unlock_secret(bip38_test_vector0);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_1_not_multiplied_uncompressed__expected)
 {
-    test_unlock_secret(bip38_test_vector[1]);
+    test_unlock_secret(bip38_test_vector1);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_2_not_multiplied__expected)
 {
-    test_unlock_secret(bip38_test_vector[2]);
+    test_unlock_secret(bip38_test_vector2);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_3_not_multiplied__expected)
 {
-    test_unlock_secret(bip38_test_vector[3]);
+    test_unlock_secret(bip38_test_vector3);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_4_uncompressed__expected)
 {
-    test_unlock_secret(bip38_test_vector[4]);
+    test_unlock_secret(bip38_test_vector4);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_5_uncompressed__expected)
 {
-    test_unlock_secret(bip38_test_vector[5]);
+    test_unlock_secret(bip38_test_vector5);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_6_uncompressed_confirmation__expected)
 {
-    test_unlock_secret(bip38_test_vector[6]);
+    test_unlock_secret(bip38_test_vector6);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_7_uncompressed_confirmation__expected)
 {
-    test_unlock_secret(bip38_test_vector[7]);
+    test_unlock_secret(bip38_test_vector7);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_8_uncompressed_confirmation_seeded__expected)
 {
-    test_unlock_secret(bip38_test_vector[8]);
+    test_unlock_secret(bip38_test_vector8);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_9_uncompressed_confirmation_seeded__expected)
 {
-    test_unlock_secret(bip38_test_vector[9]);
+    test_unlock_secret(bip38_test_vector9);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -246,13 +187,13 @@ static void test_lock_intermediate(const bip38_vector& vector)
 BOOST_AUTO_TEST_CASE(bip38__lock_intermediate__vector_8_uncompressed__expected)
 {
     // Currently failing
-    test_lock_intermediate(bip38_test_vector[8]);
+    test_lock_intermediate(bip38_test_vector8);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__lock_intermediate__vector_9_uncompressed__expected)
 {
     // Currently failing
-    test_lock_intermediate(bip38_test_vector[9]);
+    test_lock_intermediate(bip38_test_vector9);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -64,7 +64,7 @@ typedef byte_array<encrypted_key_decoded_size> encrypted_private_key;
  * seed provided. The confirmation code is an output parameter.
  */
 BC_API data_chunk lock_intermediate(const intermediate& intermediate,
-    const seed& seed, confirmation_code& out_confirmation_code,
+    const seed& seed, confirmation_code& out_confirmation,
     bool use_compression=true);
 
 /**
@@ -72,7 +72,7 @@ BC_API data_chunk lock_intermediate(const intermediate& intermediate,
  * passphrase.  If a Bitcoin address depends on the passphrase, the address is
  * returned in out_address.
  */
-BC_API bool lock_verify(const confirmation_code& confirmation_code,
+BC_API bool lock_verify(const confirmation_code& confirmation,
     const std::string& passphrase, wallet::payment_address& out_address);
 
 /**
@@ -87,22 +87,6 @@ BC_API data_chunk lock_secret(const ec_secret& secret,
  */
 BC_API ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
     const std::string& passphrase);
-
-// Test access only.
-template <class Type>
-void split(Type& from, data_chunk& lower, data_chunk& upper, size_t full_size)
-{
-    BITCOIN_ASSERT(from.size() == full_size);
-    BITCOIN_ASSERT(full_size % 2 == 0);
-
-    const size_t midpoint = full_size / 2;
-    lower.assign(from.begin(), from.end() - midpoint);
-    upper.assign(from.begin() + midpoint, from.end());
-}
-
-// Test access only.
-uint8_t last_byte(data_slice buffer);
-data_chunk normal(const std::string& passphrase);
 
 #endif
 

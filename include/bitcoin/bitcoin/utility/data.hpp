@@ -62,13 +62,47 @@ data_chunk to_data_chunk(Type iterable);
  * Extend `data` by appending `other`.
  */
 template <typename Data, typename Type>
-void extend_data(Data& data, const Type& other);
+void extend_data(Data& buffer, const Type& other);
 
 /**
  * Constrain a numeric value within a given range.
  */
 template <typename Value>
 Value range_constrain(Value value, Value minimum, Value maximum);
+
+/**
+ * Return a copy of part of the buffer of length end minus start.
+ */
+template <typename Data>
+static data_chunk slice(const Data& buffer, size_t start, size_t end);
+
+/**
+ * Split a buffer into two even parts (or as close as possible).
+ * Source buffer is assigned to the parts and should not be used after calling.
+ */
+template <typename Data>
+void split(Data& buffer, data_chunk& lower, data_chunk& upper, size_t size);
+
+/**
+ * Return the last byte in the buffer or 0x00 if empty.
+ */
+uint8_t last_byte(data_slice buffer);
+
+/**
+ * Perform an exclusive or (xor) across two buffers to the length specified.
+ * Return the resulting buffer. Caller must ensure offsets and lengths do not
+ * exceed the respective buffers.
+ */
+data_chunk xor_offset(data_slice buffer1, data_slice buffer2,
+    size_t buffer1_offset, size_t buffer2_offset, size_t length);
+
+/**
+ * Perform an exclusive or (xor) across two buffers to the length specified.
+ * Return the resulting buffer. Caller must ensure offset and length do not
+ * exceed either buffer.
+ */
+data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset,
+    size_t length);
 
 } // namespace libbitcoin
 
