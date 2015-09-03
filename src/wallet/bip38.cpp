@@ -159,8 +159,6 @@ static bool scrypt_hash_2(data_slice pass_point, data_slice salt, Type& output)
         sizeof(Type)) == 0;
 }
 
-#ifdef WITH_ICU
-
 static inline bool is_flag(data_slice key, flag_byte flag)
 {
     BITCOIN_ASSERT(flag_index < key.size());
@@ -171,11 +169,6 @@ static inline bool is_cfrm_flag(data_slice key, flag_byte flag)
 {
     BITCOIN_ASSERT(cfrm_flag_index < key.size());
     return (key.data()[cfrm_flag_index] & flag) != 0;
-}
-
-static inline data_chunk normal(const std::string& passphrase)
-{
-    return to_data_chunk(to_normal_nfc_form(passphrase));
 }
 
 static void generate_confirmation(uint8_t flag_byte,
@@ -216,7 +209,7 @@ static void generate_confirmation(uint8_t flag_byte,
         confirmation.begin());
 }
 
-data_chunk lock_intermediate(const intermediate& intermediate,
+data_chunk create_intermediate(const intermediate& intermediate,
     const seed& seed, confirmation_code& out_confirmation_code,
     bool use_compression)
 {
@@ -286,7 +279,14 @@ data_chunk lock_intermediate(const intermediate& intermediate,
     return encrypted_key;
 }
 
-bool lock_verify(const confirmation_code& confirmation,
+#ifdef WITH_ICU
+
+static inline data_chunk normal(const std::string& passphrase)
+{
+    return to_data_chunk(to_normal_nfc_form(passphrase));
+}
+
+bool extract_address(const confirmation_code& confirmation,
     const std::string& passphrase, wallet::payment_address& out_address)
 {
     const bool compressed = is_cfrm_flag(confirmation, flag_byte::ec_compressed);
@@ -526,7 +526,7 @@ ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
     return ec_secret();
 }
 
-#endif
+#endif // WITH_ICU
 
 } // namespace bip38
 } // namespace libbitcoin

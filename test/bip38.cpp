@@ -26,13 +26,15 @@
 
 using namespace bc;
 
+// TODO: implement testnet tests.
+
 #ifndef ENABLE_TESTNET
 
 BOOST_AUTO_TEST_SUITE(bip38_tests)
 
-BOOST_AUTO_TEST_SUITE(bip38__utilities)
+///////////////////////////////////////////////////////////////////////////////
 
-BOOST_AUTO_TEST_SUITE_END()
+#ifdef WITH_ICU
 
 BOOST_AUTO_TEST_SUITE(bip38__lock_secret)
 
@@ -45,7 +47,7 @@ static void test_lock_secret(const bip38_vector& vector)
     ec_secret private_key;
     std::copy(unlocked.begin(), unlocked.end(), private_key.begin());
 
-    const auto& locked = bip38::lock_secret(private_key, vector.passphrase, vector.compressed);
+    const auto locked = bip38::lock_secret(private_key, vector.passphrase, vector.compressed);
     BOOST_REQUIRE_EQUAL(encode_base58(locked), vector.locked);
 }
 
@@ -90,19 +92,25 @@ BOOST_AUTO_TEST_CASE(bip38__lock__vector_unicode_not_multiplied_uncompressed___e
 
 BOOST_AUTO_TEST_SUITE_END()
 
+#endif // WITH_ICU
+
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef WITH_ICU
+
 BOOST_AUTO_TEST_SUITE(bip38__unlock_secret)
 
 static void test_unlock_secret(const bip38_vector& vector)
 {
     data_chunk locked;
-    decode_base58(locked, vector.locked);
+    BOOST_REQUIRE(decode_base58(locked, vector.locked));
 
     bip38::encrypted_private_key private_key;
     BOOST_REQUIRE_EQUAL(vector.locked.size(), bip38::encrypted_key_encoded_size);
     BOOST_REQUIRE_EQUAL(locked.size(), bip38::encrypted_key_decoded_size);
 
     std::copy(locked.begin(), locked.end(), private_key.begin());
-    const auto& unlocked = bip38::unlock_secret(private_key, vector.passphrase);
+    const auto unlocked = bip38::unlock_secret(private_key, vector.passphrase);
     BOOST_REQUIRE_EQUAL(encode_base16(unlocked), vector.unlocked);
 }
 
@@ -158,45 +166,82 @@ BOOST_AUTO_TEST_CASE(bip38__unlock_secret__vector_9_uncompressed_confirmation_se
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE(bip38__lock_intermediate)
+#endif // WITH_ICU
 
-static void test_lock_intermediate(const bip38_vector& vector)
+///////////////////////////////////////////////////////////////////////////////
+
+BOOST_AUTO_TEST_SUITE(bip38__create_intermediate)
+
+static void test_create_intermediate(const bip38_vector& vector)
 {
     data_chunk buffer;
-    decode_base58(buffer, vector.intermediate);
+    BOOST_REQUIRE(decode_base58(buffer, vector.intermediate));
     BOOST_REQUIRE_EQUAL(buffer.size(), bip38::intermediate_decoded_size);
     bip38::intermediate intermediate;
     std::copy(buffer.begin(), buffer.end(), intermediate.begin());
 
     buffer.clear();
-    decode_base16(buffer, vector.random_seed_data);
+    BOOST_REQUIRE(decode_base16(buffer, vector.random_seed_data));
     BOOST_REQUIRE_EQUAL(buffer.size(), bip38::seed_size);
     bip38::seed seed;
     std::copy(buffer.begin(), buffer.end(), seed.begin());
 
     bip38::confirmation_code confirmation_code;
-    const auto locked = bip38::lock_intermediate(intermediate, seed, confirmation_code, vector.compressed);
+    const auto locked = bip38::create_intermediate(intermediate, seed, confirmation_code, vector.compressed);
     BOOST_REQUIRE_EQUAL(encode_base58(locked), vector.locked);
     BOOST_REQUIRE_EQUAL(encode_base58(confirmation_code), vector.confirmation_code);
-
-    wallet::payment_address address;
-    BOOST_REQUIRE(bip38::lock_verify(confirmation_code, vector.passphrase, address));
-    BOOST_REQUIRE_EQUAL(address.to_string(), vector.address);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__lock_intermediate__vector_8_uncompressed__expected)
+BOOST_AUTO_TEST_CASE(bip38__create_intermediate__vector_8_uncompressed__expected)
 {
     // Currently failing
-    test_lock_intermediate(bip38_test_vector8);
+    test_create_intermediate(bip38_test_vector8);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__lock_intermediate__vector_9_uncompressed__expected)
+BOOST_AUTO_TEST_CASE(bip38__create_intermediate__vector_9_uncompressed__expected)
 {
     // Currently failing
-    test_lock_intermediate(bip38_test_vector9);
+    test_create_intermediate(bip38_test_vector9);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef WITH_ICU
+
+BOOST_AUTO_TEST_SUITE(bip38__extract_address)
+
+static void test_extract_address(const bip38_vector& vector)
+{
+    data_chunk buffer;
+    BOOST_REQUIRE(decode_base58(buffer, vector.confirmation_code));
+    BOOST_REQUIRE_EQUAL(buffer.size(), bip38::confirmation_code_decoded_size);
+    bip38::confirmation_code confirmation_code;
+    std::copy(buffer.begin(), buffer.end(), confirmation_code.begin());
+
+    wallet::payment_address address;
+    BOOST_REQUIRE(bip38::extract_address(confirmation_code, vector.passphrase, address));
+    BOOST_REQUIRE_EQUAL(address.to_string(), vector.address);
+}
+
+BOOST_AUTO_TEST_CASE(bip38__extract_address__vector_8_uncompressed__expected)
+{
+    // Currently failing
+    test_extract_address(bip38_test_vector8);
+}
+
+BOOST_AUTO_TEST_CASE(bip38__extract_address__vector_9_uncompressed__expected)
+{
+    // Currently failing
+    test_extract_address(bip38_test_vector9);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+#endif // WITH_ICU
+
+///////////////////////////////////////////////////////////////////////////////
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -30,8 +30,6 @@
 namespace libbitcoin {
 namespace bip38 {
 
-#ifdef WITH_ICU
-
 /**
  * A bip38 seed for use with an intermediate.
  */
@@ -60,19 +58,19 @@ static BC_CONSTEXPR size_t encrypted_key_decoded_size = 43;
 typedef byte_array<encrypted_key_decoded_size> encrypted_private_key;
 
 /**
- * Performs bip38 encryption based on the given intermediate and random 24 byte
- * seed provided. The confirmation code is an output parameter.
+ * Create an intermediate encrypted private key.
  */
-BC_API data_chunk lock_intermediate(const intermediate& intermediate,
+BC_API data_chunk create_intermediate(const intermediate& intermediate,
     const seed& seed, confirmation_code& out_confirmation,
     bool use_compression=true);
 
+#ifdef WITH_ICU
+
 /**
- * Performs bip38 validation on the specified confirmation code using the
- * passphrase.  If a Bitcoin address depends on the passphrase, the address is
- * returned in out_address.
+ * Extract the payment address associated with passphrase and confirmation.
+ * @return  True if there is an assocaited address.
  */
-BC_API bool lock_verify(const confirmation_code& confirmation,
+BC_API bool extract_address(const confirmation_code& confirmation,
     const std::string& passphrase, wallet::payment_address& out_address);
 
 /**
@@ -82,13 +80,12 @@ BC_API data_chunk lock_secret(const ec_secret& secret,
     const std::string& passphrase, bool use_compression=true);
 
 /**
- * Performs bip38 decryption on the encrypted key given the specified
- * passphrase.
+ * Performs bip38 decryption on the encrypted key using the passphrase.
  */
 BC_API ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
     const std::string& passphrase);
 
-#endif
+#endif // WITH_ICU
 
 } // namespace bip38
 } // namespace libbitcoin
