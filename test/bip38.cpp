@@ -40,15 +40,11 @@ BOOST_AUTO_TEST_SUITE(bip38__lock_secret)
 
 static void test_lock_secret(const bip38_vector& vector)
 {
-    data_chunk unlocked;
-    BOOST_REQUIRE(decode_base16(unlocked, vector.unlocked));
-    BOOST_REQUIRE_EQUAL(unlocked.size(), ec_secret_size);
+    ec_secret secret;
+    BOOST_REQUIRE(decode_base16(secret, vector.unlocked));
 
-    ec_secret private_key;
-    std::copy(unlocked.begin(), unlocked.end(), private_key.begin());
-
-    const auto locked = bip38::lock_secret(private_key, vector.passphrase, vector.compressed);
-    BOOST_REQUIRE_EQUAL(encode_base58(locked), vector.locked);
+    const auto key = bip38::lock_secret(secret, vector.passphrase, vector.compressed);
+    BOOST_REQUIRE_EQUAL(encode_base58(key), vector.locked);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__lock__vector_0_not_multiplied_uncompressed__expected)
@@ -79,14 +75,11 @@ BOOST_AUTO_TEST_CASE(bip38__lock__vector_unicode_not_multiplied_uncompressed___e
     std::string passphrase(not_normalized.begin(), not_normalized.end());
 
     // associated address: "16ktGzmfrurhbhi6JGqsMWf7TyqK9HNAeF"
-    data_chunk unlocked;
-    BOOST_REQUIRE(decode_base16(unlocked, "64eeab5f9be2a01a8365a579511eb3373c87c40da6d2a25f05bda68fe077b66e"));
-    BOOST_REQUIRE_EQUAL(unlocked.size(), ec_secret_size);
-    ec_secret private_key;
-    std::copy(unlocked.begin(), unlocked.end(), private_key.begin());
+    ec_secret secret;
+    BOOST_REQUIRE(decode_base16(secret, "64eeab5f9be2a01a8365a579511eb3373c87c40da6d2a25f05bda68fe077b66e"));
 
     const auto compressed = false;
-    const auto& locked = bip38::lock_secret(private_key, passphrase, compressed);
+    const auto locked = bip38::lock_secret(secret, passphrase, compressed);
     BOOST_REQUIRE_EQUAL(encode_base58(locked), "6PRW5o9FLp4gJDDVqJQKJFTpMvdsSGJxMYHtHaQBF3ooa8mwD69bapcDQn");
 }
 
@@ -102,15 +95,10 @@ BOOST_AUTO_TEST_SUITE(bip38__unlock_secret)
 
 static void test_unlock_secret(const bip38_vector& vector)
 {
-    data_chunk locked;
-    BOOST_REQUIRE(decode_base58(locked, vector.locked));
+    bip38::private_key key;
+    BOOST_REQUIRE(decode_base58(key, vector.locked));
 
-    bip38::encrypted_private_key private_key;
-    BOOST_REQUIRE_EQUAL(vector.locked.size(), bip38::encrypted_key_encoded_size);
-    BOOST_REQUIRE_EQUAL(locked.size(), bip38::encrypted_key_decoded_size);
-
-    std::copy(locked.begin(), locked.end(), private_key.begin());
-    const auto unlocked = bip38::unlock_secret(private_key, vector.passphrase);
+    const auto unlocked = bip38::unlock_secret(key, vector.passphrase);
     BOOST_REQUIRE_EQUAL(encode_base16(unlocked), vector.unlocked);
 }
 
@@ -174,17 +162,11 @@ BOOST_AUTO_TEST_SUITE(bip38__create_intermediate)
 
 static void test_create_intermediate(const bip38_vector& vector)
 {
-    data_chunk buffer;
-    BOOST_REQUIRE(decode_base58(buffer, vector.intermediate));
-    BOOST_REQUIRE_EQUAL(buffer.size(), bip38::intermediate_decoded_size);
     bip38::intermediate intermediate;
-    std::copy(buffer.begin(), buffer.end(), intermediate.begin());
+    BOOST_REQUIRE(decode_base58(intermediate, vector.intermediate));
 
-    buffer.clear();
-    BOOST_REQUIRE(decode_base16(buffer, vector.random_seed_data));
-    BOOST_REQUIRE_EQUAL(buffer.size(), bip38::seed_size);
     bip38::seed seed;
-    std::copy(buffer.begin(), buffer.end(), seed.begin());
+    BOOST_REQUIRE(decode_base16(seed, vector.random_seed_data));
 
     bip38::confirmation_code confirmation_code;
     const auto locked = bip38::create_intermediate(intermediate, seed, confirmation_code, vector.compressed);
@@ -214,11 +196,8 @@ BOOST_AUTO_TEST_SUITE(bip38__extract_address)
 
 static void test_extract_address(const bip38_vector& vector)
 {
-    data_chunk buffer;
-    BOOST_REQUIRE(decode_base58(buffer, vector.confirmation_code));
-    BOOST_REQUIRE_EQUAL(buffer.size(), bip38::confirmation_code_decoded_size);
     bip38::confirmation_code confirmation_code;
-    std::copy(buffer.begin(), buffer.end(), confirmation_code.begin());
+    BOOST_REQUIRE(decode_base58(confirmation_code, vector.confirmation_code));
 
     wallet::payment_address address;
     BOOST_REQUIRE(bip38::extract_address(confirmation_code, vector.passphrase, address));
