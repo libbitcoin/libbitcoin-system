@@ -138,6 +138,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/binary.cpp \
     src/utility/conditional_stack.cpp \
     src/utility/conditional_stack.hpp \
+    src/utility/data.cpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
     src/utility/evaluation_context.cpp \
@@ -258,6 +259,7 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
+    test/utility/data.cpp \
     test/utility/endian.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \

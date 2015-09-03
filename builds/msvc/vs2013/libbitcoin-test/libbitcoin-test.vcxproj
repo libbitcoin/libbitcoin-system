@@ -175,6 +175,7 @@
     <ClCompile Include="..\..\..\..\test\unicode_istream.cpp" />
     <ClCompile Include="..\..\..\..\test\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\test\uri.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />

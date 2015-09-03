@@ -254,5 +254,8 @@
     <ClCompile Include="..\..\..\..\test\chain\output.cpp">
       <Filter>src\chain</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\utility\data.cpp">
+      <Filter>src\utiltiy</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
