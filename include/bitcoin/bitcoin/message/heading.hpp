@@ -35,7 +35,7 @@
 namespace libbitcoin {
 namespace message {
 
-enum class type
+enum class message_type
 {
     unknown,
     address,
@@ -81,7 +81,7 @@ public:
     void to_data(writer& sink) const;
     bool is_valid() const;
     void reset();
-    type type() const;
+    message_type type() const;
 
     uint32_t magic;
     std::string command;

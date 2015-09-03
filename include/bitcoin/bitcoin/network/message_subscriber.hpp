@@ -124,7 +124,7 @@ public:
      * @param[in]  stream  The stream from which to load the message.
      * @return             Returns error::bad_stream if failed.
      */
-    code load(message::type type, std::istream& stream) const;
+    code load(message::message_type type, std::istream& stream) const;
 
 private:
     DEFINE_SUBSCRIBER_OVERLOAD(address);

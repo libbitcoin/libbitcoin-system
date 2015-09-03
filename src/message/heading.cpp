@@ -121,51 +121,51 @@ void heading::to_data(writer& sink) const
     sink.write_4_bytes_little_endian(checksum);
 }
 
-type heading::type() const
+message_type heading::type() const
 {
     // TODO: convert to static map.
     if (command == address::command)
-        return type::address;
+        return message_type::address;
     if (command == alert::command)
-        return type::alert;
+        return message_type::alert;
     if (command == block::command)
-        return type::block;
+        return message_type::block;
     if (command == filter_add::command)
-        return type::filter_add;
+        return message_type::filter_add;
     if (command == filter_clear::command)
-        return type::filter_clear;
+        return message_type::filter_clear;
     if (command == filter_load::command)
-        return type::filter_load;
+        return message_type::filter_load;
     if (command == get_address::command)
-        return type::get_address;
+        return message_type::get_address;
     if (command == get_blocks::command)
-        return type::get_blocks;
+        return message_type::get_blocks;
     if (command == get_data::command)
-        return type::get_data;
+        return message_type::get_data;
     if (command == get_headers::command)
-        return type::get_headers;
+        return message_type::get_headers;
     if (command == inventory::command)
-        return type::inventory;
+        return message_type::inventory;
     if (command == memory_pool::command)
-        return type::memory_pool;
+        return message_type::memory_pool;
     if (command == merkle_block::command)
-        return type::merkle_block;
+        return message_type::merkle_block;
     if (command == not_found::command)
-        return type::not_found;
+        return message_type::not_found;
     if (command == ping::command)
-        return type::ping;
+        return message_type::ping;
     if (command == pong::command)
-        return type::pong;
+        return message_type::pong;
     if (command == reject::command)
-        return type::reject;
+        return message_type::reject;
     if (command == transaction::command)
-        return type::transaction;
+        return message_type::transaction;
     if (command == verack::command)
-        return type::verack;
+        return message_type::verack;
     if (command == version::command)
-        return type::version;
+        return message_type::version;
 
-    return type::unknown;
+    return message_type::unknown;
 }
 
 bool operator==(const heading& left, const heading& right)
