@@ -26,13 +26,13 @@ namespace libbitcoin {
 
 void append_checksum(data_chunk& data)
 {
-    uint32_t checksum = bitcoin_checksum(data);
+    const auto checksum = bitcoin_checksum(data);
     extend_data(data, to_little_endian(checksum));
 }
 
-uint32_t bitcoin_checksum(data_slice chunk)
+uint32_t bitcoin_checksum(data_slice data)
 {
-    hash_digest hash = bitcoin_hash(chunk);
+    const auto hash = bitcoin_hash(data);
     return from_little_endian_unsafe<uint32_t>(hash.begin());
 }
 

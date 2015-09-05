@@ -24,6 +24,9 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(checksum_tests)
 
+// TODO: add append_checksum<> tests.
+// TODO: add build_checked_array<> tests.
+
 BOOST_AUTO_TEST_CASE(checksum_test)
 {
     data_chunk data = {'d', 'a', 't', 'a'};

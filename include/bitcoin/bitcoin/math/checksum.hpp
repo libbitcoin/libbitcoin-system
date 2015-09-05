@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHECKSUM_HPP
 #define LIBBITCOIN_CHECKSUM_HPP
 
+#include <algorithm>
 #include <cstdint>
 #include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
@@ -30,7 +31,24 @@ namespace libbitcoin {
 BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
 
 /**
- * Appends a four-byte checksum to a data chunk.
+ * Appends a four-byte checksum to an array.
+ * Returns false if the array capacity doesn't exceed array size by the
+ * required sizeof the checksum.
+ */
+template<size_t Size>
+bool insert_checksum(byte_array<Size>& out)
+{
+    if (out.max_size() - out.size() < checksum_size)
+        return false;
+
+    const auto checksum = bitcoin_checksum(out);
+    const auto bytes = to_little_endian(checksum);
+    std::copy(bytes.begin(), bytes.begin() + checksum_size, out.end());
+    return true;
+}
+
+/**
+ * Appends a four-byte checksum of a datachunk to itself.
  */
 BC_API void append_checksum(data_chunk& data);
 
@@ -39,7 +57,7 @@ BC_API void append_checksum(data_chunk& data);
  *
  * int(sha256(sha256(data))[-4:])
  */
-BC_API uint32_t bitcoin_checksum(data_slice chunk);
+BC_API uint32_t bitcoin_checksum(data_slice data);
 
 /**
  * Verifies the last four bytes of a data chunk are a valid checksum of the
