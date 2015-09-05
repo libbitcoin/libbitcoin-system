@@ -89,11 +89,13 @@ BC_API bool create_intermediate(uint32_t lot, uint32_t sequence,
  * @param[in]  seed         A random value.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_public   The new encrypted public key.
- * @param[out] compressed   Set true to associate ec public key compression.
+ * @param[in]  version      The coin address version byte.
+ * @param[in]  compressed   Set true to associate ec public key compression.
  * @return true if the keys are created.
  */
 BC_API bool create_key_pair(const intermediate& code, const seed& seed,
-    private_key& out_private, public_key& out_public, bool compressed=true);
+    private_key& out_private, public_key& out_public, uint8_t version,
+    bool compressed=true);
 
 #ifdef WITH_ICU
 
@@ -102,17 +104,19 @@ BC_API bool create_key_pair(const intermediate& code, const seed& seed,
  * @param[in]  secret       An ec secret to encrypt.
  * @param[in]  passphrase   A passphrase for use in the encryption.
  * @param[out] out_private  The new encrypted private key.
- * @param[out] compressed   Set true to associate ec public key compression.
+ * @param[in]  version      The coin address version byte.
+ * @param[in]  compressed   Set true to associate ec public key compression.
  * @return true if the encrypted private key is populated.
  */
 BC_API bool encrypt(const ec_secret& secret, const std::string& passphrase,
-    private_key& out_private, bool compressed=true);
+    private_key& out_private, uint8_t version, bool compressed=true);
 
 /**
  * Decrypt the ec secret associated with the encrypted private key.
  * @param[in]  key         An encrypted private key.
  * @param[in]  passphrase  A passphrase for use in the decryption.
  * @param[out] out_secret  The decrypted ec secret.
+ * @param[in]  version     The coin address version byte.
  * @return true if the encrypted private key is populated.
  */
 BC_API bool decrypt(const private_key& key, const std::string& passphrase,

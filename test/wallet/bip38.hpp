@@ -33,6 +33,7 @@ struct bip38_vector
     std::string public_key;
     std::string seed;
     std::string address;
+    uint8_t version;
     bool compressed;
     bool ec_multiplied;
     /*std::string salt;*/
@@ -55,6 +56,7 @@ const bip38_vector bip38_test_vector0
     "",
     "",
     "",
+    bc::wallet::payment_address::pubkey_version,
     false,
     false
 };
@@ -69,6 +71,7 @@ const bip38_vector bip38_test_vector1
     "",
     "",
     "",
+    bc::wallet::payment_address::pubkey_version,
     false,
     false
 };
@@ -83,6 +86,7 @@ const bip38_vector bip38_test_vector2
     "",
     "",
     "",
+    bc::wallet::payment_address::pubkey_version,
     true,
     false
 };
@@ -96,6 +100,7 @@ const bip38_vector bip38_test_vector3
     "",
     "",
     "",
+    bc::wallet::payment_address::pubkey_version,
     true,
     false
 };
@@ -110,6 +115,7 @@ const bip38_vector bip38_test_vector4
     "",
     "",
     "1PE6TQi6HTVNz5DLwB1LcpMBALubfuN2z2",
+    bc::wallet::payment_address::pubkey_version,
     false,
     true
 };
@@ -124,6 +130,7 @@ const bip38_vector bip38_test_vector5
     "",
     "",
     "1CqzrtZC6mXSAhoxtFwVjz8LtwLJjDYU3V",
+    bc::wallet::payment_address::pubkey_version,
     false,
     true
 };
@@ -138,6 +145,7 @@ const bip38_vector bip38_test_vector6
     "cfrm38V8aXBn7JWA1ESmFMUn6erxeBGZGAxJPY4e36S9QWkzZKtaVqLNMgnifETYw7BPwWC9aPD",
     "",
     "1Jscj8ALrYu2y9TD8NrpvDBugPedmbj4Yh",
+    bc::wallet::payment_address::pubkey_version,
     false,
     true
 };
@@ -152,6 +160,7 @@ const bip38_vector bip38_test_vector7
     "cfrm38V8G4qq2ywYEFfWLD5Cc6msj9UwsG2Mj4Z6QdGJAFQpdatZLavkgRd1i4iBMdRngDqDs51",
     "",
     "1Lurmih3KruL4xDB5FmHof38yawNtP9oGf",
+    bc::wallet::payment_address::pubkey_version,
     false,
     true
 };
@@ -166,6 +175,7 @@ const bip38_vector bip38_test_vector8
     "cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An",
     "d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7",
     "1NQgLnFz1ZzF6KkCJ4SM3xz3Jy1q2hEEax",
+    bc::wallet::payment_address::pubkey_version,
     false,
     true
 };
@@ -180,6 +190,7 @@ const bip38_vector bip38_test_vector9
     "cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC",
     "bbeac8b9bb39381520b6873553544b387bcaa19112602230",
     "1NjjvGqXDrx1DvrhjYJxzrpyopk1ygHTSJ",
+    bc::wallet::payment_address::pubkey_version,
     false,
     true
 };

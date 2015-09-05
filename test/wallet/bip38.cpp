@@ -66,7 +66,7 @@ static void test_create_key_pair(const bip38_vector& vector)
 
     bip38::public_key public_key;
     bip38::private_key private_key;
-    BOOST_REQUIRE(bip38::create_key_pair(intermediate, seed, private_key, public_key, vector.compressed));
+    BOOST_REQUIRE(bip38::create_key_pair(intermediate, seed, private_key, public_key, vector.version, vector.compressed));
     BOOST_REQUIRE_EQUAL(encode_base58(public_key), vector.public_key);
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
@@ -97,7 +97,7 @@ static void test_encrypt(const bip38_vector& vector)
     BOOST_REQUIRE(decode_base16(secret, vector.ec_secret));
 
     bip38::private_key private_key;
-    BOOST_REQUIRE(bip38::encrypt(secret, vector.passphrase, private_key, vector.compressed));
+    BOOST_REQUIRE(bip38::encrypt(secret, vector.passphrase, private_key, vector.version, vector.compressed));
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
 

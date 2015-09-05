@@ -74,6 +74,12 @@ namespace at
             entropy.start,
             part2.end 
         };
+
+        static constexpr bounds version =                 // 1
+        {
+            prefix.start,
+            prefix.start + 1
+        };
     }
 
     // encrypted public key (AKA confirmation code)
@@ -125,11 +131,12 @@ namespace at
 // of a coin address which (for Bitcoin) includes the leading '1', an alt-chain
 // can easily be denoted simply by using the alt-chain's preferred format for
 // representing an address.
-static constexpr uint8_t address_version = payment_address::pubkey_version;
-
+//
 // BIP38
 // Alt-chain implementers may also change the prefix such that encrypted
 // addresses do not start with "6P". [We do not currently support varying it.]
+//
+// The first byte in each prefix is also the base58check version byte.
 namespace prefix
 {
     // This prefix results in the prefix "6P" in the base58 encoding.
@@ -211,12 +218,12 @@ static inline data_chunk new_flags(bool compressed)
 
 static inline data_chunk new_flags(const intermediate& code, bool compressed)
 {
-    using namespace prefix;
-    const auto end = code.begin() + lot_intermediate.size();
-    const auto lot = std::equal(code.begin(), end, lot_intermediate.begin());
+    const auto lot = prefix::lot_intermediate;
+    const auto actual = slice(code, at::intermediate::prefix);
+    const auto is_lot = std::equal(lot.begin(), lot.end(), actual.begin());
     return
     {
-        generate_flag_byte(true, compressed, lot)
+        generate_flag_byte(true, compressed, is_lot)
     };
 }
 
@@ -233,9 +240,35 @@ static inline data_chunk point_sign(uint8_t byte, data_slice buffer)
     };
 }
 
-static data_chunk address_salt(const ec_point& point)
+static inline uint8_t read_version(const private_key& key)
 {
-    payment_address address(address_version, point);
+    // Infer the decrypt version from the private key prefix bytes.
+    // This will operate just like compression inference. As such it will
+    // require a mapping from 0x01 (private key) => 0x00 (address), becuase
+    // unfortunately the authors don't appear to have considered that 
+    // otherwise the decryption of private keys requires the key, passphrase
+    // *and the version byte*. Also they used (01) for bitcoin addresess (00).
+    // So in order to not waste a bit we special case 00|01 <-> 01|00.
+    // All others map directly between address and bip38 private key.
+    // We don't modify any other bip38 prefixes for altcoins and instead
+    // rely on the address hash differentiation So "6P" can be replaced
+    // deterministically and "cfrm" and "passphrase" are not impacted.
+    const auto version = slice(key, at::private_key::version)[0];
+
+    switch (version)
+    {
+        case 0:
+            return 1;
+        case 1:
+            return 0;
+        default:
+            return version;
+    }
+}
+
+static data_chunk address_salt(uint8_t version, const ec_point& point)
+{
+    payment_address address(version, point);
     const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
 
     // data_chunk explicit here to avoid MSVC CTP compiler bug.
@@ -306,11 +339,13 @@ static void create_public_key(data_slice flags, data_slice salt,
 }
 
 bool create_key_pair(const intermediate& code, const seed& seed,
-    private_key& out_private, public_key& out_public, bool compressed)
+    private_key& out_private, public_key& out_public, uint8_t version,
+    bool compressed)
 {
     if (!verify_checksum(code))
         return false;
 
+    // This is the only place where we read a prefix for context.
     const auto flags = new_flags(code, compressed);
     auto pass_point = slice(code, at::intermediate::hash);
     auto entropy = slice(code, at::intermediate::entropy);
@@ -321,7 +356,7 @@ bool create_key_pair(const intermediate& code, const seed& seed,
     if (!compressed)
         point = decompress_public_key(point);
 
-    const auto salt = address_salt(point);
+    const auto salt = address_salt(version, point);
     auto salt_entropy = salt;
     extend_data(salt_entropy, entropy);
 
@@ -394,10 +429,10 @@ bool create_intermediate(uint32_t lot, uint32_t sequence,
 }
 
 bool encrypt(const ec_secret& secret, const std::string& passphrase,
-    private_key& out_private, bool compressed)
+    private_key& out_private, uint8_t version, bool compressed)
 {
     const auto point = secret_to_public_key(secret, compressed);
-    const auto salt = address_salt(point);
+    const auto salt = address_salt(version, point);
 
     two_block derived;
     if (!scrypt(normal(passphrase), salt, derived))
@@ -427,17 +462,18 @@ bool encrypt(const ec_secret& secret, const std::string& passphrase,
     return true;
 }
 
-static bool validate(const ec_secret& secret, data_slice salt, bool compressed)
+static bool validate(const ec_secret& secret, data_slice salt, uint8_t version,
+    bool compressed)
 {
     // salt can be 4 or 8 bytes.
     const auto point = secret_to_public_key(secret, compressed);
-    payment_address address(address_version, point);
+    payment_address address(version, point);
     const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
 static bool extract_multiplied_secret(const private_key& key,
-    const std::string& passphrase, ec_secret& out_secret)
+    const std::string& passphrase, ec_secret& out_secret, uint8_t version)
 {
     const bool lot = check_flag(key, at::private_key::flags,
         flag_byte::lot_sequence);
@@ -490,7 +526,7 @@ static bool extract_multiplied_secret(const private_key& key,
 
     ec_multiply(secret, factor);
 
-    if (!validate(secret, salt, compressed))
+    if (!validate(secret, salt, version, compressed))
         return false;
 
     out_secret = secret;
@@ -498,7 +534,7 @@ static bool extract_multiplied_secret(const private_key& key,
 }
 
 static bool extract_secret(const private_key& key,
-    const std::string& passphrase, ec_secret& out_secret)
+    const std::string& passphrase, ec_secret& out_secret, uint8_t version)
 {
     const auto salt = slice(key, at::private_key::salt);
     const auto encrypted = slice(key, at::private_key::encrypted);
@@ -526,7 +562,7 @@ static bool extract_secret(const private_key& key,
     ec_secret secret;
     std::copy(decrypted.begin(), decrypted.end(), secret.begin());
 
-    if (!validate(secret, salt, compressed))
+    if (!validate(secret, salt, version, compressed))
         return false;
 
     out_secret = secret;
@@ -539,13 +575,14 @@ bool decrypt(const private_key& key, const std::string& passphrase,
     if (!verify_checksum(key))
         return false;
 
+    const auto version = read_version(key);
     const bool multiplied = !check_flag(key, at::private_key::flags,
         flag_byte::ec_non_multiplied);
 
     if (multiplied)
-        return extract_multiplied_secret(key, passphrase, out_secret);
-   
-    return extract_secret(key, passphrase, out_secret);
+        return extract_multiplied_secret(key, passphrase, out_secret, version);
+    else
+        return extract_secret(key, passphrase, out_secret, version);
 }
 
 bool decrypt(const public_key& key, const std::string& passphrase,
