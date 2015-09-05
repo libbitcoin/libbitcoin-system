@@ -353,8 +353,8 @@ static void create_public_key(data_slice flags, data_slice salt,
     BITCOIN_ASSERT(result);
 }
 
-bool create_key_pair(const intermediate& code, const seed& seed,
-    private_key& out_private, public_key& out_public, uint8_t version,
+bool create_key_pair(private_key& out_private, public_key& out_public,
+    const intermediate& code, const seed& seed, uint8_t version,
     bool compressed)
 {
     if (!verify_checksum(code))
@@ -400,8 +400,8 @@ static inline data_chunk normal(const std::string& passphrase)
     return to_data_chunk(to_normal_nfc_form(passphrase));
 }
 
-bool create_intermediate(uint32_t lot, uint32_t sequence,
-    const std::string& passphrase, const salt& salt, intermediate& out_code)
+bool create_intermediate(intermediate& out_code, const std::string& passphrase,
+    const salt& salt, uint32_t lot, uint32_t sequence)
 {
     if (lot > max_intermediate_lot || sequence > max_intermediate_sequence)
         return false;
@@ -443,8 +443,8 @@ bool create_intermediate(uint32_t lot, uint32_t sequence,
     return true;
 }
 
-bool encrypt(const ec_secret& secret, const std::string& passphrase,
-    private_key& out_private, uint8_t version, bool compressed)
+bool encrypt(private_key& out_private, const ec_secret& secret,
+    const std::string& passphrase, uint8_t version, bool compressed)
 {
     const auto point = secret_to_public_key(secret, compressed);
     const auto salt = address_salt(version, point);
@@ -586,8 +586,8 @@ static bool extract_secret(const private_key& key,
     return true;
 }
 
-bool decrypt(const private_key& key, const std::string& passphrase,
-    ec_secret& out_secret)
+bool decrypt(ec_secret& out_secret, const private_key& key,
+    const std::string& passphrase)
 {
     if (!verify_checksum(key))
         return false;
@@ -602,8 +602,8 @@ bool decrypt(const private_key& key, const std::string& passphrase,
         return extract_secret(key, passphrase, out_secret, version);
 }
 
-bool decrypt(const public_key& key, const std::string& passphrase,
-    ec_point& out_point)
+bool decrypt(ec_point& out_point, const public_key& key,
+    const std::string& passphrase)
 {
     if (!verify_checksum(key))
         return false;

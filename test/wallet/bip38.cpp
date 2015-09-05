@@ -66,7 +66,7 @@ static void test_create_key_pair(const bip38_vector& vector)
 
     bip38::public_key public_key;
     bip38::private_key private_key;
-    BOOST_REQUIRE(bip38::create_key_pair(intermediate, seed, private_key, public_key, vector.version, vector.compressed));
+    BOOST_REQUIRE(bip38::create_key_pair(private_key, public_key, intermediate, seed, vector.version, vector.compressed));
     BOOST_REQUIRE_EQUAL(encode_base58(public_key), vector.public_key);
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
@@ -97,7 +97,7 @@ static void test_encrypt(const bip38_vector& vector)
     BOOST_REQUIRE(decode_base16(secret, vector.ec_secret));
 
     bip38::private_key private_key;
-    BOOST_REQUIRE(bip38::encrypt(secret, vector.passphrase, private_key, vector.version, vector.compressed));
+    BOOST_REQUIRE(bip38::encrypt(private_key, secret, vector.passphrase, vector.version, vector.compressed));
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
 
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_unicode___expected)
     BOOST_REQUIRE(decode_base16(secret, vector.ec_secret));
 
     bip38::private_key private_key;
-    BOOST_REQUIRE(bip38::encrypt(secret, passphrase, private_key, false));
+    BOOST_REQUIRE(bip38::encrypt(private_key, secret, passphrase, false));
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
 
@@ -157,7 +157,7 @@ static void test_decrypt1(const bip38_vector& vector)
     BOOST_REQUIRE(decode_base58(private_key, vector.private_key));
 
     ec_secret secret;
-    BOOST_REQUIRE(bip38::decrypt(private_key, vector.passphrase, secret));
+    BOOST_REQUIRE(bip38::decrypt(secret, private_key, vector.passphrase));
     BOOST_REQUIRE_EQUAL(encode_base16(secret), vector.ec_secret);
 }
 
@@ -225,7 +225,7 @@ static void test_decrypt2(const bip38_vector& vector)
     BOOST_REQUIRE(decode_base58(public_key, vector.public_key));
 
     ec_point point;
-    BOOST_REQUIRE(bip38::decrypt(public_key, vector.passphrase, point));
+    BOOST_REQUIRE(bip38::decrypt(point, public_key, vector.passphrase));
 
     // This will vary by WITH_TESTNET. The vector must be for bitcoin address.
     const auto version = payment_address::pubkey_version;
