@@ -38,19 +38,19 @@ BOOST_AUTO_TEST_CASE(checksum__append_checksum__size__increased_by_checksum_size
 BOOST_AUTO_TEST_CASE(checksum__append_checksum__always__valid)
 {
     data_chunk data = { 0, 0, 0, 0, 0 };
-    append_checksum(data);
     auto checksum = data.size();
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0x6f);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0x6d);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0x79);
-    BOOST_REQUIRE_EQUAL(data[checksum++], 0x20);
+    append_checksum(data);
+    BOOST_REQUIRE_EQUAL(data[checksum++], 0x79u);
+    BOOST_REQUIRE_EQUAL(data[checksum++], 0x01u);
+    BOOST_REQUIRE_EQUAL(data[checksum++], 0xafu);
+    BOOST_REQUIRE_EQUAL(data[checksum++], 0x93u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__bitcoin_checksum__always__valid)
 {
     data_chunk data = { 0, 0, 0, 0, 0 };
     const auto result = bitcoin_checksum(data);
-    BOOST_CHECK_EQUAL(result, 0x93af0179);
+    BOOST_CHECK_EQUAL(result, 0x93af0179u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__build_checked_array__always__valid)
