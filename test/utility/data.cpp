@@ -45,9 +45,9 @@ BOOST_AUTO_TEST_CASE(data__build_data__empty__empty)
 BOOST_AUTO_TEST_CASE(data__build_data__one_slice__expected_size_and_value)
 {
     const uint8_t expected = 42;
-    const auto chunk1 = std::vector<uint8_t>{ { 24 } };
-    const auto chunk2 = std::vector<uint8_t>{ { expected } };
-    const auto chunk3 = std::vector<uint8_t>{ { 48 } };
+    const auto chunk1 = std::vector<uint8_t>{ 24 };
+    const auto chunk2 = std::vector<uint8_t>{ expected };
+    const auto chunk3 = std::vector<uint8_t>{ 48 };
     const auto result = build_data(
     {
         // Inline initialization doesn't work with vector (?).
@@ -147,9 +147,9 @@ BOOST_AUTO_TEST_CASE(data__build_array__overflow__returns_false)
 BOOST_AUTO_TEST_CASE(data__extend_data__twice__expected)
 {
     const uint8_t expected = 24;
-    data_chunk buffer1{ { 0 } };
+    data_chunk buffer1{ 0 };
     extend_data(buffer1, null_hash);
-    data_chunk buffer2{ { expected } };
+    data_chunk buffer2{ expected };
     extend_data(buffer1, buffer2);
     extend_data(buffer1, null_hash);
     BOOST_REQUIRE_EQUAL(buffer1.size(), 2u * hash_size + 2u);
