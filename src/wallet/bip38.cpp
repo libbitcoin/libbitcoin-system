@@ -240,6 +240,19 @@ static inline data_chunk point_sign(uint8_t byte, data_slice buffer)
     };
 }
 
+static inline uint8_t convert_vesion(const uint8_t version)
+{
+    switch (version)
+    {
+        case 0:
+            return 1;
+        case 1:
+            return 0;
+        default:
+            return version;
+    }
+}
+
 static inline uint8_t read_version(const private_key& key)
 {
     // Infer the decrypt version from the private key prefix bytes.
@@ -254,16 +267,15 @@ static inline uint8_t read_version(const private_key& key)
     // rely on the address hash differentiation So "6P" can be replaced
     // deterministically and "cfrm" and "passphrase" are not impacted.
     const auto version = slice(key, at::private_key::version)[0];
+    return convert_vesion(version);
+}
 
-    switch (version)
-    {
-        case 0:
-            return 1;
-        case 1:
-            return 0;
-        default:
-            return version;
-    }
+static inline data_chunk versioned_prefix(const uint8_t version,
+    const data_chunk& prefix)
+{
+    auto versioned = prefix;
+    versioned[0] = convert_vesion(version);
+    return versioned;
 }
 
 static data_chunk address_salt(uint8_t version, const ec_point& point)
@@ -281,7 +293,7 @@ static data_chunk address_salt(uint8_t version, const ec_point& point)
 
 static void create_private_key(data_slice flags, data_slice salt,
     data_slice entropy, data_slice derived1, data_slice derived2,
-    private_key& out_private, const seed& seed)
+    private_key& out_private, const seed& seed, uint8_t version)
 {
     auto half1 = xor_data(seed, derived1, 0, half);
     aes256_encrypt(derived2, half1);
@@ -294,9 +306,12 @@ static void create_private_key(data_slice flags, data_slice salt,
     aes256_encrypt(derived2, half2);
     const auto quart1 = slice(half1, 0, quarter);
 
+    const auto prefix = versioned_prefix(version, 
+        prefix::private_key_multiplied);
+
     DEBUG_ONLY(const auto result =) build_checked_array(out_private,
     {
-        prefix::private_key_multiplied,
+        prefix,
         flags,
         salt,
         entropy,
@@ -369,7 +384,7 @@ bool create_key_pair(const intermediate& code, const seed& seed,
     split(derived, derived1, derived2, two_block_size);
 
     create_private_key(flags, salt, entropy, derived1, derived2, out_private,
-        seed);
+        seed, version);
 
     create_public_key(flags, salt, entropy, derived1, derived2, out_public,
         factor, compressed);
@@ -447,10 +462,12 @@ bool encrypt(const ec_secret& secret, const std::string& passphrase,
 
     auto half2 = xor_data(secret, derived1, half, half);
     aes256_encrypt(derived2, half2);
-    
+
+    const auto prefix = versioned_prefix(version, prefix::private_key);
+
     DEBUG_ONLY(const auto result =) build_array(out_private,
     {
-        prefix::private_key,
+        prefix,
         new_flags(compressed),
         salt,
         half1,
