@@ -26,15 +26,18 @@
 
 struct bip38_vector
 {
-    std::string locked;
-    std::string unlocked;
+    std::string private_key;
+    std::string ec_secret;
     std::string passphrase;
     std::string intermediate;
-    std::string confirmation_code;
-    std::string random_seed_data;
+    std::string public_key;
+    std::string seed;
     std::string address;
     bool compressed;
     bool ec_multiplied;
+    /*std::string salt;*/
+    /*std::string lot;*/
+    /*std::string sequence;*/
 };
 
 // Vectors 0 through 7 taken from:
