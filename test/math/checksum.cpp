@@ -27,20 +27,67 @@ BOOST_AUTO_TEST_SUITE(checksum_tests)
 // TODO: add append_checksum<> tests.
 // TODO: add build_checked_array<> tests.
 
-BOOST_AUTO_TEST_CASE(checksum_test)
+BOOST_AUTO_TEST_CASE(checksum__append_checksum__size__increased_by_checksum_size)
 {
-    data_chunk data = {'d', 'a', 't', 'a'};
-
-    // No checksum:
-    BOOST_REQUIRE(!verify_checksum(data));
-
-    // Valid checksum:
+    data_chunk data = { 0, 0, 0, 0, 0 };
+    const auto data_size = data.size();
     append_checksum(data);
-    BOOST_REQUIRE_EQUAL(data.size(), 8u);
-    BOOST_REQUIRE(verify_checksum(data));
+    BOOST_REQUIRE_EQUAL(data.size(), data_size + checksum_size);
+}
 
-    // Data corruption:
-    data[0] = 1;
+BOOST_AUTO_TEST_CASE(checksum__append_checksum__always__valid)
+{
+    data_chunk data = { 0, 0, 0, 0, 0 };
+    append_checksum(data);
+    auto checksum = data.size();
+    BOOST_REQUIRE_EQUAL(data[checksum++], 0x6f);
+    BOOST_REQUIRE_EQUAL(data[checksum++], 0x6d);
+    BOOST_REQUIRE_EQUAL(data[checksum++], 0x79);
+    BOOST_REQUIRE_EQUAL(data[checksum++], 0x20);
+}
+
+BOOST_AUTO_TEST_CASE(checksum__bitcoin_checksum__always__valid)
+{
+    data_chunk data = { 0, 0, 0, 0, 0 };
+    const auto result = bitcoin_checksum(data);
+    BOOST_CHECK_EQUAL(result, 0x93af0179);
+}
+
+BOOST_AUTO_TEST_CASE(checksum__build_checked_array__always__valid)
+{
+    // TODO
+}
+
+BOOST_AUTO_TEST_CASE(checksum__insert_checksum__always__valid)
+{
+    // TODO
+}
+
+BOOST_AUTO_TEST_CASE(checksum__verify_checksum__too_short__false)
+{
+    const data_chunk data = { 0, 0, 0 };
+    BOOST_REQUIRE(!verify_checksum(data));
+}
+
+BOOST_AUTO_TEST_CASE(checksum__verify_checksum__not_set__false)
+{
+    const data_chunk data = { 0, 0, 0, 0, 0 };
+    BOOST_REQUIRE(!verify_checksum(data));
+}
+
+BOOST_AUTO_TEST_CASE(checksum__verify_checksum__added__true)
+{
+    data_chunk data = { 0, 0, 0, 0, 0 };
+    append_checksum(data);
+    BOOST_REQUIRE(verify_checksum(data));
+}
+
+BOOST_AUTO_TEST_CASE(checksum__verify_checksum__invalidated__false)
+{
+    data_chunk data = { 0, 0, 0, 0, 0 };
+    const auto data_size = data.size();
+    append_checksum(data);
+    data[data_size] = 42;
     BOOST_REQUIRE(!verify_checksum(data));
 }
 
