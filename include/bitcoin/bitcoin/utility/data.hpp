@@ -28,8 +28,6 @@
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/array_slice.hpp>
 
-// TODO: create tests/data.cpp
-
 namespace libbitcoin {
 
 // Define a byte array of a specified length.
@@ -40,13 +38,7 @@ using byte_array = std::array<uint8_t, Size>;
 typedef array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;
 typedef std::vector<data_chunk> data_stack;
-
-// Define tuple for slicing.
-typedef struct
-{
-    size_t start;
-    size_t end; 
-} bounds;
+typedef struct { size_t start; size_t end; } bounds;
 
 /**
  * Create a single byte data chunk with an initial value.
@@ -55,11 +47,11 @@ inline byte_array<1> to_byte(uint8_t byte);
 
 /**
  * Concatenate several data slices into a single data_chunk.
- * @param  extra_space  Include this much extra space when calling
+ * @param  extra_reserve  Include this many additional bytes when calling
  * `reserve` on the data_chunk (as an optimization).
  */
 inline data_chunk build_data(std::initializer_list<data_slice> slices,
-    size_t extra_space=0);
+    size_t extra_reserve=0);
 
 /**
  * Concatenate several data slices into a single fixed size array.
@@ -67,19 +59,6 @@ inline data_chunk build_data(std::initializer_list<data_slice> slices,
 template <size_t Size>
 bool build_array(byte_array<Size>& out,
     std::initializer_list<data_slice> slices);
-/**
- * Concatenate several data slices into a single fixed size array and append a
- * checksum. [TODO: move to checksum.hpp/ipp]
- */
-template <size_t Size>
-bool build_checked_array(byte_array<Size>& out,
-    std::initializer_list<data_slice> slices);
-
-/**
- * Create a data chunk from an interatable object.
- */
-template <class Data>
-data_chunk to_data_chunk(const Data iterable);
 
 /**
  * Extend buffer by appending other.
@@ -114,6 +93,12 @@ template <class Data>
 void split(Data& buffer, data_chunk& lower, data_chunk& upper, size_t size);
 
 /**
+ * Create a data chunk from an interatable object.
+ */
+template <class Data>
+data_chunk to_data_chunk(const Data iterable);
+
+/**
  * Perform an exclusive or (xor) across two buffers to the length specified.
  * Return the resulting buffer. Caller must ensure offset and length do not
  * exceed either buffer.
@@ -134,4 +119,3 @@ data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset1,
 #include <bitcoin/bitcoin/impl/utility/data.ipp>
 
 #endif
-
