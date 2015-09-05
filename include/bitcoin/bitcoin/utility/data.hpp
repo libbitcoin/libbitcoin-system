@@ -55,6 +55,7 @@ inline data_chunk build_data(std::initializer_list<data_slice> slices,
 
 /**
  * Concatenate several data slices into a single fixed size array.
+ * Returns false if the slices don't fit in the array. Underfill is ok.
  */
 template <size_t Size>
 bool build_array(byte_array<Size>& out,
