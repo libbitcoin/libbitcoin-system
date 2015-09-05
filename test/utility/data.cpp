@@ -26,7 +26,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(utility)
+BOOST_AUTO_TEST_SUITE(data_tests)
 
 BOOST_AUTO_TEST_CASE(data__to_byte__value__expected_size_and_value)
 {
