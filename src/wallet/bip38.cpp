@@ -37,7 +37,6 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/wallet/key_formats.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
-#include "../math/external/crypto_scrypt.h"
 
 namespace libbitcoin {
 namespace bip38 {
@@ -239,24 +238,6 @@ static data_chunk address_salt(const ec_point& point)
     };
 }
 
-static bool scrypt_hash(data_slice data, data_slice salt, full_block& output)
-{
-    static constexpr size_t r = 8;
-    static constexpr size_t p = 8;
-    static constexpr size_t N = 16384;
-    return crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(),
-        N, r, p, output.data(), block_size) == 0;
-}
-
-static bool scrypt_hash(data_slice data, data_slice salt, two_block& output)
-{
-    static constexpr size_t r = 1;
-    static constexpr size_t p = 1;
-    static constexpr size_t N = 1024;
-    return crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(),
-        N, r, p, output.data(), two_block_size) == 0;
-}
-
 static void create_private_key(data_slice flags, data_slice salt,
     data_slice entropy, data_slice derived1, data_slice derived2,
     private_key& out_private, const seed& seed)
@@ -337,7 +318,7 @@ bool create_key_pair(const intermediate& code, const seed& seed,
     extend_data(salt_entropy, entropy);
 
     two_block derived;
-    if (!scrypt_hash(pass_point, salt_entropy, derived))
+    if (!scrypt(pass_point, salt_entropy, derived))
         return false;
 
     data_chunk derived1;
@@ -377,7 +358,7 @@ bool create_intermediate(uint32_t lot, uint32_t sequence,
 
     // Derive a key from the passphrase using scrypt.
     full_block pre_factor;
-    if (!scrypt_hash(normal(passphrase), salt, pre_factor))
+    if (!scrypt(normal(passphrase), salt, pre_factor))
         return false;
 
     ec_secret secret;
@@ -411,7 +392,7 @@ bool encrypt(const ec_secret& secret, const std::string& passphrase,
     const auto salt = address_salt(point);
 
     two_block derived;
-    if (!scrypt_hash(normal(passphrase), salt, derived))
+    if (!scrypt(normal(passphrase), salt, derived))
         return false;
 
     data_chunk derived1;
@@ -460,7 +441,7 @@ static bool extract_multiplied_secret(const private_key& key,
     const auto owner_salt = slice(key, owner_salt_bound);
 
     ec_secret secret;
-    if (!scrypt_hash(normal(passphrase), owner_salt, secret))
+    if (!scrypt(normal(passphrase), owner_salt, secret))
         return false;
 
     if (lot)
@@ -475,7 +456,7 @@ static bool extract_multiplied_secret(const private_key& key,
     const auto point = secret_to_public_key(secret, compressed);
 
     two_block seed_pass;
-    if (!scrypt_hash(point, entropy, seed_pass))
+    if (!scrypt(point, entropy, seed_pass))
         return false;
 
     data_chunk derived1;
@@ -517,7 +498,7 @@ static bool extract_secret(const private_key& key,
         flag_byte::ec_compressed);
 
     two_block derived_data;
-    if (!scrypt_hash(normal(passphrase), salt, derived_data))
+    if (!scrypt(normal(passphrase), salt, derived_data))
         return false;
 
     data_chunk data1;
@@ -582,7 +563,7 @@ bool decrypt(const public_key& key, const std::string& passphrase,
     extend_data(salt_entropy, entropy);
 
     hash_digest pre_factor;
-    if (!scrypt_hash(normal(passphrase), owner_salt, pre_factor))
+    if (!scrypt(normal(passphrase), owner_salt, pre_factor))
         return false;
 
     ec_secret pass_factor;
@@ -597,7 +578,7 @@ bool decrypt(const public_key& key, const std::string& passphrase,
     const auto pass_point = secret_to_public_key(pass_factor, true);
 
     two_block derived_data;
-    if (!scrypt_hash(pass_point, salt_entropy, derived_data))
+    if (!scrypt(pass_point, salt_entropy, derived_data))
         return false;
 
     data_chunk derived1;

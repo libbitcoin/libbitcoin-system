@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <new>
+#include "../math/external/crypto_scrypt.h"
 #include "../math/external/hmac_sha256.h"
 #include "../math/external/hmac_sha512.h"
 #include "../math/external/pkcs5_pbkdf2.h"
@@ -106,6 +107,24 @@ hash_digest bitcoin_hash(data_slice data)
 short_hash bitcoin_short_hash(data_slice data)
 {
     return ripemd160_hash(sha256_hash(data));
+}
+
+bool scrypt(data_slice data, data_slice salt, hash_digest& output)
+{
+    static constexpr size_t r = 8;
+    static constexpr size_t p = 8;
+    static constexpr size_t N = 16384;
+    return crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(),
+        N, r, p, output.data(), hash_size) == 0;
+}
+
+bool scrypt(data_slice data, data_slice salt, long_hash& output)
+{
+    static constexpr size_t r = 1;
+    static constexpr size_t p = 1;
+    static constexpr size_t N = 1024;
+    return crypto_scrypt(data.data(), data.size(), salt.data(), salt.size(),
+        N, r, p, output.data(), long_hash_size) == 0;
 }
 
 } // namespace libbitcoin
