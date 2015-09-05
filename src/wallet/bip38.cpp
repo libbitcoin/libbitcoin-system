@@ -240,7 +240,7 @@ static inline data_chunk point_sign(uint8_t byte, data_slice buffer)
     };
 }
 
-static inline uint8_t convert_vesion(const uint8_t version)
+static inline uint8_t convert_version(const uint8_t version)
 {
     switch (version)
     {
@@ -267,14 +267,14 @@ static inline uint8_t read_version(const private_key& key)
     // rely on the address hash differentiation So "6P" can be replaced
     // deterministically and "cfrm" and "passphrase" are not impacted.
     const auto version = slice(key, at::private_key::version)[0];
-    return convert_vesion(version);
+    return convert_version(version);
 }
 
 static inline data_chunk versioned_prefix(const uint8_t version,
     const data_chunk& prefix)
 {
     auto versioned = prefix;
-    versioned[0] = convert_vesion(version);
+    versioned[0] = convert_version(version);
     return versioned;
 }
 
