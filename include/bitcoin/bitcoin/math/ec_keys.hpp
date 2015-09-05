@@ -49,6 +49,8 @@ struct compact_signature
     int recid;
 };
 
+// TODO: define string literal factory: ec_secret_literal().
+
 /**
  * Converts a secret parameter to a public point.
  */
