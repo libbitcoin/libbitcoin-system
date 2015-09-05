@@ -69,7 +69,11 @@ namespace at
         static constexpr bounds part2 = { 23, 39 };       //16
         static constexpr bounds checksum = { 39, 43 };    // 4
 
-        static constexpr bounds encrypted = { entropy.start, part2.end }; // 32
+        static constexpr bounds encrypted =               // 32
+        { 
+            entropy.start,
+            part2.end 
+        };
     }
 
     // encrypted public key (AKA confirmation code)
@@ -85,7 +89,7 @@ namespace at
     }
 
     // intermediate passphrase (with lot/sequence)
-    namespace intermediate_lot
+    namespace lot_intermediate
     {
         static constexpr bounds prefix = { 0, 8 };        // 8
         static constexpr bounds salt = { 8, 12 };         // 4
@@ -94,7 +98,11 @@ namespace at
         static constexpr bounds hash = { 17, 49 };        //32
         static constexpr bounds checksum = { 49, 53 };    // 4
 
-        static constexpr bounds entropy = { salt.start, lot.end }; // 8
+        static constexpr bounds entropy =                 // 8
+        {
+            salt.start,
+            lot.end
+        };
     }
 
     // intermediate passphrase (without lot/sequence)
@@ -107,7 +115,7 @@ namespace at
         static constexpr bounds checksum = { 49, 53 };    // 4
 
         // w/out lot salt is an alias for entropy and is 8 vs. usual 4 bytes
-        static const bounds salt = entropy;           // 8
+        static const bounds salt = entropy;               // 8
     }
 }
 
@@ -143,7 +151,7 @@ namespace prefix
     };
 
     // This prefix results in the prefix "passphrase" in the base58 encoding.
-    static const data_chunk intermediate_lot
+    static const data_chunk lot_intermediate
     {
         0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2, 0x51
     };
@@ -204,8 +212,8 @@ static inline data_chunk new_flags(bool compressed)
 static inline data_chunk new_flags(const intermediate& code, bool compressed)
 {
     using namespace prefix;
-    const auto end = code.begin() + intermediate_lot.size();
-    const auto lot = std::equal(code.begin(), end, intermediate_lot.begin());
+    const auto end = code.begin() + lot_intermediate.size();
+    const auto lot = std::equal(code.begin(), end, lot_intermediate.begin());
     return
     {
         generate_flag_byte(true, compressed, lot)
@@ -375,7 +383,7 @@ bool create_intermediate(uint32_t lot, uint32_t sequence,
 
     DEBUG_ONLY(const auto result =) build_array(out_code,
     {
-        prefix::intermediate_lot,
+        prefix::lot_intermediate,
         entropy,
         pass_point
     });
@@ -433,7 +441,7 @@ static bool extract_multiplied_secret(const private_key& key,
 {
     const bool lot = check_flag(key, at::private_key::flags,
         flag_byte::lot_sequence);
-    const auto owner_salt_bound = lot ? at::intermediate_lot::salt : 
+    const auto owner_salt_bound = lot ? at::lot_intermediate::salt : 
         at::intermediate::salt;
 
     const auto salt = slice(key, at::intermediate::salt);
@@ -551,7 +559,7 @@ bool decrypt(const public_key& key, const std::string& passphrase,
     const bool compressed = check_flag(key, at::public_key::flags,
         flag_byte::ec_compressed);
 
-    const auto owner_salt_bound = lot ? at::intermediate_lot::salt : 
+    const auto owner_salt_bound = lot ? at::lot_intermediate::salt : 
         at::intermediate::salt;
 
     const auto key_sign = slice(key, at::public_key::sign);
