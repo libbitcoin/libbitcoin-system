@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <initializer_list>
+#include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -47,13 +48,37 @@ inline data_chunk build_data(std::initializer_list<data_slice> slices,
     return out;
 }
 
-template <typename Data>
-data_chunk to_data_chunk(Data iterable)
+template <size_t Size>
+bool build_array(byte_array<Size>& out,
+    std::initializer_list<data_slice> slices)
+{
+    size_t size = 0;
+    for (const auto slice: slices)
+        size += slice.size();
+
+    if (size > Size)
+        return false;
+
+    for (const auto slice: slices)
+        std::copy(slice.begin(), slice.end(), out.end());
+
+    return true;
+}
+
+template <size_t Size>
+bool build_checked_array(byte_array<Size>& out,
+    std::initializer_list<data_slice> slices)
+{
+    return build_array(out, slices) && insert_checksum(out);
+}
+
+template <class Data>
+data_chunk to_data_chunk(const Data iterable)
 {
     return data_chunk(std::begin(iterable), std::end(iterable));
 }
 
-template <typename Data, typename Type>
+template <class Data, class Type>
 void extend_data(Data& buffer, const Type& other)
 {
     buffer.insert(std::end(buffer), std::begin(other), std::end(other));
@@ -71,8 +96,8 @@ Value range_constrain(Value value, Value minimum, Value maximum)
     return value;
 }
 
-template <typename Data>
-static data_chunk slice(const Data& buffer, size_t start, size_t end)
+template <class Data>
+data_chunk slice(const Data& buffer, size_t start, size_t end)
 {
     BITCOIN_ASSERT(start <= buffer.size());
 
@@ -83,7 +108,13 @@ static data_chunk slice(const Data& buffer, size_t start, size_t end)
     };
 }
 
-template <typename Data>
+template <class Data>
+data_chunk slice(const Data& buffer, const bounds& range)
+{
+    return slice(buffer, range.start, range.end);
+}
+
+template <class Data>
 void split(Data& buffer, data_chunk& lower, data_chunk& upper, size_t size)
 {
     BITCOIN_ASSERT(buffer.size() == size);

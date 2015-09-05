@@ -25,16 +25,7 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(data_tests)
 
-BOOST_AUTO_TEST_CASE(data__last_byte__two_bytes__expected)
-{
-    const uint8_t expected = 24;
-    const data_chunk source
-    {
-        42, expected
-    };
-
-    BOOST_REQUIRE_EQUAL(last_byte(source), expected);
-}
+// TODO: add xor_data tests.
 
 BOOST_AUTO_TEST_CASE(data__slice__three_bytes_front__expected)
 {

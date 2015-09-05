@@ -26,31 +26,23 @@
 
 namespace libbitcoin {
 
-uint8_t last_byte(data_slice buffer)
-{
-    if (buffer.empty())
-        return 0x00;
-
-    return buffer.data()[buffer.size() - 1];
-}
-
 data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset,
     size_t length)
 {
-    return xor_offset(buffer1, buffer2, offset, offset, length);
+    return xor_data(buffer1, buffer2, offset, offset, length);
 }
 
-data_chunk xor_offset(data_slice buffer1, data_slice buffer2,
-    size_t buffer1_offset, size_t buffer2_offset, size_t length)
+data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset1,
+    size_t offset2, size_t length)
 {
-    BITCOIN_ASSERT(buffer1_offset + length <= buffer1.size());
-    BITCOIN_ASSERT(buffer2_offset + length <= buffer2.size());
+    BITCOIN_ASSERT(offset1 + length <= buffer1.size());
+    BITCOIN_ASSERT(offset2 + length <= buffer2.size());
 
     const auto& data1 = buffer1.data();
     const auto& data2 = buffer2.data();
     data_chunk out;
     for(size_t i = 0; i < length; i++)
-        out.push_back(data1[i + buffer1_offset] ^ data2[i + buffer2_offset]);
+        out.push_back(data1[i + offset1] ^ data2[i + offset2]);
 
     return out;
 }
