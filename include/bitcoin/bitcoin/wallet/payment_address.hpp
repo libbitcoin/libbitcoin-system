@@ -90,17 +90,6 @@ BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
 // TODO: move wrap utilities to "checked.hpp/cpp"
 
 /**
- * Craeted a checked wrapper and copy into array instance.
- */
-template <size_t Size>
-void wrap(byte_array<Size>& target, uint8_t version, data_slice payload)
-{
-    const auto checked = wallet::wrap(version, payload);
-    BITCOIN_ASSERT(checked.size() == Size);
-    std::copy(checked.begin(), checked.end(), target.begin());
-}
-
-/**
  * Unwrap a wrapped payload.
  * @param[out] version   The version byte of the wrapped data.
  * @param[out] hash      The short_hash payload of the wrapped data.
@@ -129,6 +118,17 @@ BC_API bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
  * @return              The wrapped data.
  */
 BC_API data_chunk wrap(uint8_t version, data_slice payload);
+
+/**
+ * Craeted a checked wrapper and copy into array instance.
+ */
+template <size_t Size>
+void wrap(byte_array<Size>& target, uint8_t version, data_slice payload)
+{
+    const auto checked = wrap(version, payload);
+    BITCOIN_ASSERT(checked.size() == Size);
+    std::copy(checked.begin(), checked.end(), target.begin());
+}
 
 } // namspace wallet
 } // namspace libbitcoin
