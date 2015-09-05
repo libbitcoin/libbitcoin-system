@@ -195,4 +195,3 @@ bool decode_base58_private(uint8_t* out, size_t out_size, const char* in)
 }
 
 } // namespace libbitcoin
-

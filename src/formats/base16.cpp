@@ -107,4 +107,3 @@ bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
 }
 
 } // namespace libbitcoin
-

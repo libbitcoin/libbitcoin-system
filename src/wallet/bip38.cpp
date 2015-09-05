@@ -620,4 +620,3 @@ bool decrypt(const public_key& key, const std::string& passphrase,
 
 } // namespace bip38
 } // namespace libbitcoin
-

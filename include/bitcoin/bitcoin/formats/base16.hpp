@@ -76,4 +76,3 @@ BC_API hash_digest hash_literal(const char (&string)[2*hash_size + 1]);
 #include <bitcoin/bitcoin/impl/formats/base16.ipp>
 
 #endif
-
