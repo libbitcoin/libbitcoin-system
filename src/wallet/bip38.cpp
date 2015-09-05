@@ -240,6 +240,7 @@ static inline data_chunk point_sign(uint8_t byte, data_slice buffer)
     };
 }
 
+// This provides a bi-directional mapping.
 static inline uint8_t convert_version(const uint8_t version)
 {
     switch (version)
@@ -266,15 +267,15 @@ static inline uint8_t read_version(const private_key& key)
     // We don't modify any other bip38 prefixes for altcoins and instead
     // rely on the address hash differentiation So "6P" can be replaced
     // deterministically and "cfrm" and "passphrase" are not impacted.
-    const auto version = slice(key, at::private_key::version)[0];
-    return convert_version(version);
+    const auto prefix_version = slice(key, at::private_key::version)[0];
+    return convert_version(prefix_version);
 }
 
-static inline data_chunk versioned_prefix(const uint8_t version,
+static inline data_chunk versioned_prefix(const uint8_t address_version,
     const data_chunk& prefix)
 {
     auto versioned = prefix;
-    versioned[0] = convert_version(version);
+    versioned[0] = convert_version(address_version);
     return versioned;
 }
 
@@ -291,9 +292,9 @@ static data_chunk address_salt(uint8_t version, const ec_point& point)
     };
 }
 
-static void create_private_key(data_slice flags, data_slice salt,
-    data_slice entropy, data_slice derived1, data_slice derived2,
-    private_key& out_private, const seed& seed, uint8_t version)
+static void create_private_key(private_key& out_private, data_slice flags,
+    data_slice salt, data_slice entropy, data_slice derived1,
+    data_slice derived2, const seed& seed, uint8_t address_version)
 {
     auto half1 = xor_data(seed, derived1, 0, half);
     aes256_encrypt(derived2, half1);
@@ -306,10 +307,10 @@ static void create_private_key(data_slice flags, data_slice salt,
     aes256_encrypt(derived2, half2);
     const auto quart1 = slice(half1, 0, quarter);
 
-    const auto prefix = versioned_prefix(version, 
+    const auto prefix = versioned_prefix(address_version,
         prefix::private_key_multiplied);
 
-    DEBUG_ONLY(const auto result =) build_checked_array(out_private,
+    build_checked_array(out_private,
     {
         prefix,
         flags,
@@ -318,14 +319,11 @@ static void create_private_key(data_slice flags, data_slice salt,
         quart1,
         half2
     });
-
-    // The assertion can be dropped at some point.
-    BITCOIN_ASSERT(result);
 }
 
-static void create_public_key(data_slice flags, data_slice salt,
-    data_slice entropy, data_slice derived1, data_slice derived2,
-    public_key& out_public, const ec_secret& secret, bool compressed)
+static void create_public_key(public_key& out_public, data_slice flags,
+    data_slice salt, data_slice entropy, data_slice derived1,
+    data_slice derived2, const ec_secret& secret, bool compressed)
 {
     const auto point = secret_to_public_key(secret, compressed);
     const data_chunk unsigned_point(point.begin() + 1, point.end());
@@ -338,7 +336,7 @@ static void create_public_key(data_slice flags, data_slice salt,
 
     const auto sign = point_sign(point.front(), derived2);
 
-    DEBUG_ONLY(const auto result =) build_checked_array(out_public,
+    build_checked_array(out_public,
     {
         prefix::public_key,
         flags,
@@ -348,13 +346,10 @@ static void create_public_key(data_slice flags, data_slice salt,
         half1,
         half2
     });
-
-    // The assertion can be dropped at some point.
-    BITCOIN_ASSERT(result);
 }
 
 bool create_key_pair(private_key& out_private, public_key& out_public,
-    const intermediate& code, const seed& seed, uint8_t version,
+    const intermediate& code, const seed& seed, uint8_t address_version,
     bool compressed)
 {
     if (!verify_checksum(code))
@@ -371,7 +366,7 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
     if (!compressed)
         point = decompress_public_key(point);
 
-    const auto salt = address_salt(version, point);
+    const auto salt = address_salt(address_version, point);
     auto salt_entropy = salt;
     extend_data(salt_entropy, entropy);
 
@@ -383,10 +378,10 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
     data_chunk derived2;
     split(derived, derived1, derived2, two_block_size);
 
-    create_private_key(flags, salt, entropy, derived1, derived2, out_private,
-        seed, version);
+    create_private_key(out_private, flags, salt, entropy, derived1, derived2,
+        seed, address_version);
 
-    create_public_key(flags, salt, entropy, derived1, derived2, out_public,
+    create_public_key(out_public, flags, salt, entropy, derived1, derived2,
         factor, compressed);
 
     return true;
@@ -431,23 +426,21 @@ bool create_intermediate(intermediate& out_code, const std::string& passphrase,
     ///////////////////////////////////////////////////////////////////////////
     ec_multiply(pass_point, secret);
 
-    DEBUG_ONLY(const auto result =) build_array(out_code,
+    build_array(out_code,
     {
         prefix::lot_intermediate,
         entropy,
         pass_point
     });
 
-    // The assertion can be dropped at some point.
-    BITCOIN_ASSERT(result);
     return true;
 }
 
 bool encrypt(private_key& out_private, const ec_secret& secret,
-    const std::string& passphrase, uint8_t version, bool compressed)
+    const std::string& passphrase, uint8_t address_version, bool compressed)
 {
     const auto point = secret_to_public_key(secret, compressed);
-    const auto salt = address_salt(version, point);
+    const auto salt = address_salt(address_version, point);
 
     two_block derived;
     if (!scrypt(normal(passphrase), salt, derived))
@@ -463,9 +456,9 @@ bool encrypt(private_key& out_private, const ec_secret& secret,
     auto half2 = xor_data(secret, derived1, half, half);
     aes256_encrypt(derived2, half2);
 
-    const auto prefix = versioned_prefix(version, prefix::private_key);
+    const auto prefix = versioned_prefix(address_version, prefix::private_key);
 
-    DEBUG_ONLY(const auto result =) build_array(out_private,
+    build_array(out_private,
     {
         prefix,
         new_flags(compressed),
@@ -474,23 +467,21 @@ bool encrypt(private_key& out_private, const ec_secret& secret,
         half2
     });
 
-    // The assertion can be dropped at some point.
-    BITCOIN_ASSERT(result);
     return true;
 }
 
-static bool validate(const ec_secret& secret, data_slice salt, uint8_t version,
-    bool compressed)
+static bool validate(const ec_secret& secret, data_slice salt,
+    uint8_t address_version, bool compressed)
 {
     // salt can be 4 or 8 bytes.
     const auto point = secret_to_public_key(secret, compressed);
-    payment_address address(version, point);
+    payment_address address(address_version, point);
     const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
-static bool extract_multiplied_secret(const private_key& key,
-    const std::string& passphrase, ec_secret& out_secret, uint8_t version)
+static bool multiplied_secret(ec_secret& out_secret, const private_key& key,
+    const std::string& passphrase,  uint8_t address_version)
 {
     const bool lot = check_flag(key, at::private_key::flags,
         flag_byte::lot_sequence);
@@ -543,15 +534,15 @@ static bool extract_multiplied_secret(const private_key& key,
 
     ec_multiply(secret, factor);
 
-    if (!validate(secret, salt, version, compressed))
+    if (!validate(secret, salt, address_version, compressed))
         return false;
 
     out_secret = secret;
     return true;
 }
 
-static bool extract_secret(const private_key& key,
-    const std::string& passphrase, ec_secret& out_secret, uint8_t version)
+static bool secret(ec_secret& out_secret, const private_key& key,
+    const std::string& passphrase, uint8_t address_version)
 {
     const auto salt = slice(key, at::private_key::salt);
     const auto encrypted = slice(key, at::private_key::encrypted);
@@ -579,7 +570,7 @@ static bool extract_secret(const private_key& key,
     ec_secret secret;
     std::copy(decrypted.begin(), decrypted.end(), secret.begin());
 
-    if (!validate(secret, salt, version, compressed))
+    if (!validate(secret, salt, address_version, compressed))
         return false;
 
     out_secret = secret;
@@ -592,14 +583,14 @@ bool decrypt(ec_secret& out_secret, const private_key& key,
     if (!verify_checksum(key))
         return false;
 
-    const auto version = read_version(key);
+    const auto address_version = read_version(key);
     const bool multiplied = !check_flag(key, at::private_key::flags,
         flag_byte::ec_non_multiplied);
 
     if (multiplied)
-        return extract_multiplied_secret(key, passphrase, out_secret, version);
+        return multiplied_secret(out_secret, key, passphrase, address_version);
     else
-        return extract_secret(key, passphrase, out_secret, version);
+        return secret(out_secret, key, passphrase, address_version);
 }
 
 bool decrypt(ec_point& out_point, const public_key& key,
