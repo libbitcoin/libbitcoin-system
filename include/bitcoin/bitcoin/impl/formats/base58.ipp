@@ -17,28 +17,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <boost/test/unit_test.hpp>
-#include <bitcoin/bitcoin.hpp>
+#ifndef LIBBITCOIN_BASE58_IPP
+#define LIBBITCOIN_BASE58_IPP
 
-using namespace bc;
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
-BOOST_AUTO_TEST_SUITE(checksum_tests)
+namespace libbitcoin {
 
-BOOST_AUTO_TEST_CASE(checksum_test)
+// For support of template implementation only, do not call directly.
+BC_API bool decode_base58_private(uint8_t* out, size_t out_size,
+    const char* in);
+
+template <size_t Size>
+bool decode_base58(byte_array<Size>& out, const std::string &in)
 {
-    data_chunk data = {'d', 'a', 't', 'a'};
+    byte_array<Size> result;
+    if (!decode_base58_private(result.data(), result.size(), in.data()))
+        return false;
 
-    // No checksum:
-    BOOST_REQUIRE(!verify_checksum(data));
-
-    // Valid checksum:
-    append_checksum(data);
-    BOOST_REQUIRE_EQUAL(data.size(), 8u);
-    BOOST_REQUIRE(verify_checksum(data));
-
-    // Data corruption:
-    data[0] = 1;
-    BOOST_REQUIRE(!verify_checksum(data));
+    out = result;
+    return true;
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+} // libbitcoin
+
+#endif

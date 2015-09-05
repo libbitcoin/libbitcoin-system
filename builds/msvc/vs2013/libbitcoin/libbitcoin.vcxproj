@@ -160,6 +160,7 @@
     <ClCompile Include="..\..\..\..\src\unicode\unicode_ostream.cpp" />
     <ClCompile Include="..\..\..\..\src\unicode\unicode_streambuf.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\conditional_stack.cpp" />
+    <ClCompile Include="..\..\..\..\src\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\deadline.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\dispatcher.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\binary.cpp" />
@@ -329,6 +330,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base16.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base58.ipp" />
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\checksum.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\array_slice.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\collection.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\data.ipp" />

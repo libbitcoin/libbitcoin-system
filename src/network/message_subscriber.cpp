@@ -40,7 +40,7 @@
     value##_subscriber_->relay(ec, message::value())
 
 #define CASE_LOAD_STREAM(value) \
-    case type::value: \
+    case message_type::value: \
         return load<message::value>(stream, value##_subscriber_)
 
 TRACK_SUBSCRIBER(address)
@@ -117,7 +117,7 @@ void message_subscriber::broadcast(const code& ec)
     RELAY_MESSAGE(version);
 }
 
-code message_subscriber::load(type type, std::istream& stream) const
+code message_subscriber::load(message_type type, std::istream& stream) const
 {
     switch (type)
     {
@@ -141,7 +141,7 @@ code message_subscriber::load(type type, std::istream& stream) const
         CASE_LOAD_STREAM(transaction);
         CASE_LOAD_STREAM(verack);
         CASE_LOAD_STREAM(version);
-        case type::unknown:
+        case message_type::unknown:
         default:
             return error::not_found;
     }

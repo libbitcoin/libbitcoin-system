@@ -20,8 +20,11 @@
 #ifndef LIBBITCOIN_DATA_IPP
 #define LIBBITCOIN_DATA_IPP
 
+#include <algorithm>
 #include <cstddef>
 #include <initializer_list>
+#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
@@ -31,30 +34,45 @@ inline byte_array<1> to_byte(uint8_t byte)
 }
 
 inline data_chunk build_data(std::initializer_list<data_slice> slices,
-    size_t extra_space)
+    size_t extra_reserve)
 {
     size_t size = 0;
     for (const auto slice: slices)
         size += slice.size();
 
     data_chunk out;
-    out.reserve(size + extra_space);
+    out.reserve(size + extra_reserve);
     for (const auto slice: slices)
         out.insert(out.end(), slice.begin(), slice.end());
 
     return out;
 }
 
-template <typename Type>
-data_chunk to_data_chunk(Type iterable)
+template <size_t Size>
+bool build_array(byte_array<Size>& out,
+    std::initializer_list<data_slice> slices)
 {
-    return data_chunk(std::begin(iterable), std::end(iterable));
+    size_t size = 0;
+    for (const auto slice: slices)
+        size += slice.size();
+
+    if (size > Size)
+        return false;
+
+    auto position = out.begin();
+    for (const auto slice: slices)
+    {
+        std::copy(slice.begin(), slice.end(), position);
+        position += slice.size();
+    }
+
+    return true;
 }
 
-template <typename Data, typename Type>
-void extend_data(Data& data, const Type& other)
+template <class Data, class Type>
+void extend_data(Data& buffer, const Type& other)
 {
-    data.insert(std::end(data), std::begin(other), std::end(other));
+    buffer.insert(std::end(buffer), std::begin(other), std::end(other));
 }
 
 template <typename Value>
@@ -67,6 +85,41 @@ Value range_constrain(Value value, Value minimum, Value maximum)
         return maximum;
 
     return value;
+}
+
+template <class Data>
+data_chunk slice(const Data& buffer, size_t start, size_t end)
+{
+    BITCOIN_ASSERT(start <= buffer.size());
+
+    const auto& data = buffer.data();
+    return
+    {
+        &data[start], &data[end]
+    };
+}
+
+template <class Data>
+data_chunk slice(const Data& buffer, const bounds& range)
+{
+    return slice(buffer, range.start, range.end);
+}
+
+template <class Data>
+void split(Data& buffer, data_chunk& lower, data_chunk& upper, size_t size)
+{
+    BITCOIN_ASSERT(buffer.size() == size);
+
+    const size_t front = size / 2;
+    const size_t rest = size - front;
+    lower.assign(buffer.begin(), buffer.end() - front);
+    upper.assign(buffer.begin() + rest, buffer.end());
+}
+
+template <class Data>
+data_chunk to_data_chunk(const Data iterable)
+{
+    return data_chunk(std::begin(iterable), std::end(iterable));
 }
 
 } // namespace libbitcoin

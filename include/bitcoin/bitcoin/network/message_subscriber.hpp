@@ -40,7 +40,7 @@ namespace network {
 
 #define DEFINE_SUBSCRIBER_OVERLOAD(value) \
     template <typename Handler> \
-    void subscriber(message::value&&, Handler&& handler) \
+    void subscribe(message::value&&, Handler&& handler) \
     { \
         value##_subscriber_->subscribe(std::forward<Handler>(handler)); \
     }
@@ -91,7 +91,7 @@ public:
     template <class Message, typename Handler>
     void subscribe(Handler&& handler)
     {
-        subscriber(Message(), std::forward<Handler>(handler));
+        subscribe(Message(), std::forward<Handler>(handler));
     }
         
     /**
@@ -124,7 +124,7 @@ public:
      * @param[in]  stream  The stream from which to load the message.
      * @return             Returns error::bad_stream if failed.
      */
-    code load(message::type type, std::istream& stream) const;
+    code load(message::message_type type, std::istream& stream) const;
 
 private:
     DEFINE_SUBSCRIBER_OVERLOAD(address);

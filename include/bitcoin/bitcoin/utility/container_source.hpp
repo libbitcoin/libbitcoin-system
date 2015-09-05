@@ -46,7 +46,8 @@ public:
     std::streamsize read(char_type* buffer, std::streamsize size)
     {
         const auto amount = container_.size() - position_;
-        size_t result = std::min(size, static_cast<std::streamsize>(amount));
+        const auto result = std::min(size,
+            static_cast<std::streamsize>(amount));
 
         // TODO: use ios eof symbol (template-based).
         if (result <= 0)
@@ -55,12 +56,14 @@ public:
         const auto value = static_cast<typename Container::size_type>(result);
         DEBUG_ONLY(const auto maximum = 
             std::numeric_limits<typename Container::size_type>::max());
-        BITCOIN_ASSERT(result < maximum);
+        BITCOIN_ASSERT(value < maximum);
         BITCOIN_ASSERT(position_ + value < maximum);
-        const auto upperbound = position_ + value;
-        std::copy(container_.begin() + position_,
-            container_.begin() + upperbound, buffer);
-        position_ = upperbound;
+
+        const auto limit = position_ + value;
+        const auto start = container_.begin() + position_;
+        const auto end = container_.begin() + limit;
+        std::copy(start, end, buffer);
+        position_ = limit;
         return result;
     }
 

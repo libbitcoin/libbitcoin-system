@@ -17,41 +17,35 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BASE16_IPP
-#define LIBBITCOIN_BASE16_IPP
+#ifndef LIBBITCOIN_CHECKSUM_IPP
+#define LIBBITCOIN_CHECKSUM_IPP
 
+#include <algorithm>
+#include <cstddef>
+#include <initializer_list>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
-// For template implementation only, do not call directly.
-BC_API bool decode_base16_private(uint8_t* out, size_t out_size,
-    const char* in);
-
 template <size_t Size>
-bool decode_base16(byte_array<Size>& out, const std::string &in)
+bool build_checked_array(byte_array<Size>& out,
+    std::initializer_list<data_slice> slices)
 {
-    if (in.size() != 2 * Size)
-        return false;
+    return build_array(out, slices) && insert_checksum(out);
+}
 
-    byte_array<Size> result;
-    if (!decode_base16_private(result.data(), result.size(), in.data()))
-        return false;
-
-    out = result;
+template<size_t Size>
+bool insert_checksum(byte_array<Size>& out)
+{
+    BITCOIN_ASSERT(out.size() < checksum_size);
+    data_chunk body(out.begin(), out.end() - checksum_size);
+    const auto checksum = to_little_endian(bitcoin_checksum(body));
+    std::copy(checksum.begin(), checksum.end(), out.end() - checksum_size);
     return true;
 }
 
-template <size_t Size>
-byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
-{
-    byte_array<(Size - 1) / 2> out;
-    DEBUG_ONLY(const auto success =) decode_base16_private(out.data(),
-        out.size(), string);
-    BITCOIN_ASSERT(success);
-    return out;
-}
-
-} // libbitcoin
+} // namespace libbitcoin
 
 #endif

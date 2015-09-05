@@ -69,13 +69,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\test\big_number.hpp" />
-    <ClInclude Include="..\..\..\..\test\bip38.hpp" />
+    <ClInclude Include="..\..\..\..\test\chain\genesis_block.hpp" />
     <ClInclude Include="..\..\..\..\test\chain\script.hpp" />
-    <ClInclude Include="..\..\..\..\test\genesis_block.hpp" />
-    <ClInclude Include="..\..\..\..\test\hash.hpp" />
-    <ClInclude Include="..\..\..\..\test\mnemonic.hpp" />
-    <ClInclude Include="..\..\..\..\test\script_number.hpp" />
+    <ClInclude Include="..\..\..\..\test\math\big_number.hpp" />
+    <ClInclude Include="..\..\..\..\test\math\hash.hpp" />
+    <ClInclude Include="..\..\..\..\test\math\script_number.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\bip38.hpp" />
+    <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
@@ -110,35 +110,33 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\test\authority.cpp" />
-    <ClCompile Include="..\..\..\..\test\base10.cpp" />
-    <ClCompile Include="..\..\..\..\test\base16.cpp" />
-    <ClCompile Include="..\..\..\..\test\base58.cpp" />
-    <ClCompile Include="..\..\..\..\test\base64.cpp" />
-    <ClCompile Include="..\..\..\..\test\base85.cpp" />
-    <ClCompile Include="..\..\..\..\test\big_number.cpp" />
-    <ClCompile Include="..\..\..\..\test\binary.cpp" />
-    <ClCompile Include="..\..\..\..\test\bip38.cpp" />
-    <ClCompile Include="..\..\..\..\test\btc256.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\block.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\genesis_block.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\header.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
-    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\input.cpp" />
     <ClCompile Include="..\..\..\..\test\chain\output.cpp" />
-    <ClCompile Include="..\..\..\..\test\checkpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\checksum.cpp" />
-    <ClCompile Include="..\..\..\..\test\ec_keys.cpp" />
-    <ClCompile Include="..\..\..\..\test\endpoint.cpp" />
-    <ClCompile Include="..\..\..\..\test\format.cpp" />
-    <ClCompile Include="..\..\..\..\test\genesis_block.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash.cpp" />
-    <ClCompile Include="..\..\..\..\test\hash_number.cpp" />
-    <ClCompile Include="..\..\..\..\test\hd_keys.cpp" />
-    <ClCompile Include="..\..\..\..\test\key_formats.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\point.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\satoshi_words.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\script.cpp" />
+    <ClCompile Include="..\..\..\..\test\chain\transaction.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\authority.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\btc256.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\checkpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\endpoint.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\parameter.cpp" />
+    <ClCompile Include="..\..\..\..\test\config\printer.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base10.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base16.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base58.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base64.cpp" />
+    <ClCompile Include="..\..\..\..\test\formats\base85.cpp" />
     <ClCompile Include="..\..\..\..\test\main.cpp" />
-    <ClCompile Include="..\..\..\..\test\message.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\big_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\checksum.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\ec_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\hash.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\hash_number.cpp" />
+    <ClCompile Include="..\..\..\..\test\math\script_number.cpp" />
     <ClCompile Include="..\..\..\..\test\message\address.cpp" />
     <ClCompile Include="..\..\..\..\test\message\alert.cpp" />
     <ClCompile Include="..\..\..\..\test\message\alert_payload.cpp" />
@@ -162,22 +160,24 @@
     <ClCompile Include="..\..\..\..\test\message\ping.cpp" />
     <ClCompile Include="..\..\..\..\test\message\not_found.cpp" />
     <ClCompile Include="..\..\..\..\test\message\verack.cpp" />
-    <ClCompile Include="..\..\..\..\test\mnemonic.cpp" />
-    <ClCompile Include="..\..\..\..\test\parameter.cpp" />
-    <ClCompile Include="..\..\..\..\test\printer.cpp" />
-    <ClCompile Include="..\..\..\..\test\random.cpp" />
-    <ClCompile Include="..\..\..\..\test\satoshi_words.cpp" />
-    <ClCompile Include="..\..\..\..\test\script_number.cpp" />
-    <ClCompile Include="..\..\..\..\test\stealth.cpp" />
-    <ClCompile Include="..\..\..\..\test\stealth_address.cpp" />
-    <ClCompile Include="..\..\..\..\test\thread.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode_istream.cpp" />
-    <ClCompile Include="..\..\..\..\test\unicode_ostream.cpp" />
-    <ClCompile Include="..\..\..\..\test\uri.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\unicode.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\unicode_istream.cpp" />
+    <ClCompile Include="..\..\..\..\test\unicode\unicode_ostream.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\binary.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\data.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\random.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\serializer.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
+    <ClCompile Include="..\..\..\..\test\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\variable_uint_size.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\bip38.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\hd_keys.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\key_formats.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\message.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\mnemonic.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\stealth.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\stealth_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\uri.cpp" />
   </ItemGroup>
 </Project>

@@ -51,11 +51,14 @@ BOOST_AUTO_TEST_CASE(base58_test)
 
 BOOST_AUTO_TEST_CASE(base58_address_test)
 {
-    data_chunk pubkey = {
-        0x00,
-        0x5c, 0xc8, 0x7f, 0x4a, 0x3f, 0xdf, 0xe3, 0xa2, 0x34, 0x6b,
-        0x69, 0x53, 0x26, 0x7c, 0xa8, 0x67, 0x28, 0x26, 0x30, 0xd3,
-        0xf9, 0xb7, 0x8e, 0x64
+    const data_chunk pubkey
+    {
+        {
+            0x00, 0x5c, 0xc8, 0x7f, 0x4a, 0x3f, 0xdf, 0xe3,
+            0xa2, 0x34, 0x6b, 0x69, 0x53, 0x26, 0x7c, 0xa8,
+            0x67, 0x28, 0x26, 0x30, 0xd3, 0xf9, 0xb7, 0x8e,
+            0x64
+        }
     };
     std::string address = "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT";
     BOOST_REQUIRE(encode_base58(pubkey) == address);
@@ -67,17 +70,35 @@ BOOST_AUTO_TEST_CASE(base58_address_test)
 BOOST_AUTO_TEST_CASE(is_b58)
 {
     const std::string base58_chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
-    for (char c: base58_chars)
+    for (char ch: base58_chars)
     {
-        BOOST_REQUIRE(is_base58(c));
+        BOOST_REQUIRE(is_base58(ch));
     }
+
     const std::string non_base58_chars = "0OIl+- //#";
-    for (char c: non_base58_chars)
+    for (char ch: non_base58_chars)
     {
-        BOOST_REQUIRE(!is_base58(c));
+        BOOST_REQUIRE(!is_base58(ch));
     }
+
     BOOST_REQUIRE(is_base58("abcdjkk11"));
     BOOST_REQUIRE(!is_base58("abcdjkk011"));
+}
+
+BOOST_AUTO_TEST_CASE(base58_array_test)
+{
+    byte_array<25> converted;
+    BOOST_REQUIRE(decode_base58(converted, "19TbMSWwHvnxAKy12iNm3KdbGfzfaMFViT"));
+    const byte_array<25> expected
+    {
+        {
+            0x00, 0x5c, 0xc8, 0x7f, 0x4a, 0x3f, 0xdf, 0xe3,
+            0xa2, 0x34, 0x6b, 0x69, 0x53, 0x26, 0x7c, 0xa8,
+            0x67, 0x28, 0x26, 0x30, 0xd3, 0xf9, 0xb7, 0x8e,
+            0x64
+        }
+    };
+    BOOST_REQUIRE(converted == expected);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -30,81 +30,105 @@
 namespace libbitcoin {
 namespace bip38 {
 
-#ifdef WITH_ICU
+/**
+ * A seed for use in creating an intermediate passphrase string.
+ */
+static BC_CONSTEXPR size_t salt_size = 4;
+typedef byte_array<salt_size> salt;
 
 /**
- * A bip38 seed for use with an intermediate.
+ * A seed for use in creating a key pair.
  */
 static BC_CONSTEXPR size_t seed_size = 24;
 typedef byte_array<seed_size> seed;
 
 /**
- * A checked intermediate (checked but not base58 encoded).
+ * An intermediate passphrase string type.
  */
 static BC_CONSTEXPR size_t intermediate_encoded_size = 72;
 static BC_CONSTEXPR size_t intermediate_decoded_size = 53;
 typedef byte_array<intermediate_decoded_size> intermediate;
 
 /**
- * A checked confirmation code (checked but not base58 encoded).
+ * An encrypted private key type (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t confirmation_code_encoded_size = 75;
-static BC_CONSTEXPR size_t confirmation_code_decoded_size = 55;
-typedef byte_array<confirmation_code_decoded_size> confirmation_code;
+static BC_CONSTEXPR size_t private_key_encoded_size = 58;
+static BC_CONSTEXPR size_t private_key_decoded_size = 43;
+typedef byte_array<private_key_decoded_size> private_key;
 
 /**
- * A checked encrypted private key type (checked but not base58 encoded).
+ * An encrypted public key type (checked but not base58 encoded).
+ * This is refered to as a confirmation code in bip38.
  */
-static BC_CONSTEXPR size_t encrypted_key_encoded_size = 58;
-static BC_CONSTEXPR size_t encrypted_key_decoded_size = 43;
-typedef byte_array<encrypted_key_decoded_size> encrypted_private_key;
+static BC_CONSTEXPR size_t public_key_encoded_size = 75;
+static BC_CONSTEXPR size_t public_key_decoded_size = 55;
+typedef byte_array<public_key_decoded_size> public_key;
 
 /**
- * Performs bip38 encryption based on the given intermediate and random 24 byte
- * seed provided. The confirmation code is an output parameter.
+ * Maximum values for use with create_intermediate.
  */
-BC_API data_chunk lock_intermediate(const intermediate& intermediate,
-    const seed& seed, confirmation_code& out_confirmation_code,
-    bool use_compression=true);
+static BC_CONSTEXPR uint32_t max_intermediate_lot = 1048575;
+static BC_CONSTEXPR uint32_t max_intermediate_sequence = 4095;
 
 /**
- * Performs bip38 validation on the specified confirmation code using the
- * passphrase.  If a Bitcoin address depends on the passphrase, the address is
- * returned in out_address.
+ * Create an intermediate passphrase string for key pair generation.
+ * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
+ * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
+ * @param[in]  passphrase  A passphrase for use in the encryption.
+ * @param[in]  salt        A random value.
+ * @param[out] out_code    The new intermediate passphrase string.
+ * @return true if the intermediate is created.
  */
-BC_API bool lock_verify(const confirmation_code& confirmation_code,
-    const std::string& passphrase, wallet::payment_address& out_address);
+BC_API bool create_intermediate(uint32_t lot, uint32_t sequence,
+    const std::string& passphrase, const salt& salt,
+    intermediate& out_code);
 
 /**
- * Performs bip38 encryption on the private key given the specified passphrase.
+ * Create an encrypted key pair from an intermediate passphrase string.
+ * @param[in]  code         An intermediate passphrase string.
+ * @param[in]  seed         A random value.
+ * @param[out] out_private  The new encrypted private key.
+ * @param[out] out_public   The new encrypted public key.
+ * @param[out] compressed   Set true to associate ec public key compression.
+ * @return true if the keys are created.
  */
-BC_API data_chunk lock_secret(const ec_secret& secret,
-    const std::string& passphrase, bool use_compression=true);
+BC_API bool create_key_pair(const intermediate& code, const seed& seed,
+    private_key& out_private, public_key& out_public, bool compressed=true);
+
+#ifdef WITH_ICU
 
 /**
- * Performs bip38 decryption on the encrypted key given the specified
- * passphrase.
+ * Encrypt the ec secret to an encrypted public key using the passphrase.
+ * @param[in]  secret       An ec secret to encrypt.
+ * @param[in]  passphrase   A passphrase for use in the encryption.
+ * @param[out] out_private  The new encrypted private key.
+ * @param[out] compressed   Set true to associate ec public key compression.
+ * @return true if the encrypted private key is populated.
  */
-BC_API ec_secret unlock_secret(const encrypted_private_key& encrypted_secret,
-    const std::string& passphrase);
+BC_API bool encrypt(const ec_secret& secret, const std::string& passphrase,
+    private_key& out_private, bool compressed=true);
 
-// Test access only.
-template <class Type>
-void split(Type& from, data_chunk& lower, data_chunk& upper, size_t full_size)
-{
-    BITCOIN_ASSERT(from.size() == full_size);
-    BITCOIN_ASSERT(full_size % 2 == 0);
+/**
+ * Decrypt the ec secret associated with the encrypted private key.
+ * @param[in]  key         An encrypted private key.
+ * @param[in]  passphrase  A passphrase for use in the decryption.
+ * @param[out] out_secret  The decrypted ec secret.
+ * @return true if the encrypted private key is populated.
+ */
+BC_API bool decrypt(const private_key& key, const std::string& passphrase,
+    ec_secret& out_secret);
 
-    const size_t midpoint = full_size / 2;
-    lower.assign(from.begin(), from.end() - midpoint);
-    upper.assign(from.begin() + midpoint, from.end());
-}
+/**
+ * Decrypt the ec point associated with the encrypted public key.
+ * @param[in]  key         An encrypted public key.
+ * @param[in]  passphrase  A passphrase for use in the decryption.
+ * @param[out] out_point   The decrypted ec point.
+ * @return true if the public key is populated.
+ */
+BC_API bool decrypt(const public_key& key, const std::string& passphrase,
+    ec_point& out_point);
 
-// Test access only.
-uint8_t last_byte(data_slice buffer);
-data_chunk normal(const std::string& passphrase);
-
-#endif
+#endif // WITH_ICU
 
 } // namespace bip38
 } // namespace libbitcoin

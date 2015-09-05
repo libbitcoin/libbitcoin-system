@@ -84,6 +84,9 @@
     <Filter Include="src\message">
       <UniqueIdentifier>{919f9823-945e-4ab1-82ab-2c7ba85502ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\bitcoin\impl\math">
+      <UniqueIdentifier>{874c696b-294c-4208-ae68-32d49a136b55}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -116,6 +119,12 @@
     </None>
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp">
       <Filter>include\bitcoin\impl\utility</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\formats\base58.ipp">
+      <Filter>include\bitcoin\impl\formats</Filter>
+    </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\checksum.ipp">
+      <Filter>include\bitcoin\impl\math</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -457,6 +466,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\network\message_subscriber.cpp">
       <Filter>src\network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\utility\data.cpp">
+      <Filter>src\utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

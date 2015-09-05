@@ -131,7 +131,21 @@ BC_API hash_digest bitcoin_hash(data_slice data);
  */
 BC_API short_hash bitcoin_short_hash(data_slice data);
 
-// Make hash_digest and short_hash hashable for std::*map variants
+/**
+ * Generate a hash using the scrypt key derivation function.
+ *
+ * scrypt(data, salt)
+ */
+BC_API bool scrypt(data_slice data, data_slice salt, hash_digest& output);
+
+/**
+ * Generate a long hash using the scrypt key derivation function.
+ *
+ * scrypt(data, salt)
+ */
+BC_API bool scrypt(data_slice data, data_slice salt, long_hash& output);
+
+/// Make hash_digest and short_hash hashable for std::*map variants
 template <typename HashType>
 struct BC_API std_hash_wrapper
 {
@@ -144,7 +158,7 @@ struct BC_API std_hash_wrapper
 
 } // namespace libbitcoin
 
-// Extend std namespace with our hash wrappers
+/// Extend std namespace with our hash wrappers
 namespace std
 {
     using libbitcoin::std_hash_wrapper;

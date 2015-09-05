@@ -189,7 +189,6 @@ void serializer<Iterator>::write_fixed_string(const std::string& value,
     data_chunk raw_string(size, 0);
 
     std::copy_n(value.begin(), min_size, raw_string.begin());
-
     write_data(raw_string);
 }
 

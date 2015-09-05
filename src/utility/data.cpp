@@ -17,41 +17,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BASE16_IPP
-#define LIBBITCOIN_BASE16_IPP
+#include <bitcoin/bitcoin/utility/data.hpp>
 
+#include <cstddef>
+#include <cstdint>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 
-// For template implementation only, do not call directly.
-BC_API bool decode_base16_private(uint8_t* out, size_t out_size,
-    const char* in);
-
-template <size_t Size>
-bool decode_base16(byte_array<Size>& out, const std::string &in)
+data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset,
+    size_t length)
 {
-    if (in.size() != 2 * Size)
-        return false;
-
-    byte_array<Size> result;
-    if (!decode_base16_private(result.data(), result.size(), in.data()))
-        return false;
-
-    out = result;
-    return true;
+    return xor_data(buffer1, buffer2, offset, offset, length);
 }
 
-template <size_t Size>
-byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
+data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset1,
+    size_t offset2, size_t length)
 {
-    byte_array<(Size - 1) / 2> out;
-    DEBUG_ONLY(const auto success =) decode_base16_private(out.data(),
-        out.size(), string);
-    BITCOIN_ASSERT(success);
+    BITCOIN_ASSERT(offset1 + length <= buffer1.size());
+    BITCOIN_ASSERT(offset2 + length <= buffer2.size());
+
+    const auto& data1 = buffer1.data();
+    const auto& data2 = buffer2.data();
+    data_chunk out;
+    for(size_t i = 0; i < length; i++)
+        out.push_back(data1[i + offset1] ^ data2[i + offset2]);
+
     return out;
 }
 
-} // libbitcoin
-
-#endif
+} // namespace libbitcoin
