@@ -21,7 +21,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <bitcoin/bitcoin.hpp>
-#include "genesis_block.hpp"
+#include "../chain/genesis_block.hpp"
 
 using namespace bc;
 
