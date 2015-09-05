@@ -60,7 +60,7 @@ bool build_array(byte_array<Size>& out,
         return false;
 
     auto position = out.begin();
-    for (const auto slice : slices)
+    for (const auto slice: slices)
     {
         std::copy(slice.begin(), slice.end(), position);
         position += slice.size();
@@ -93,7 +93,7 @@ data_chunk slice(const Data& buffer, size_t start, size_t end)
     BITCOIN_ASSERT(start <= buffer.size());
 
     const auto& data = buffer.data();
-    return data_chunk
+    return
     {
         &data[start], &data[end]
     };
