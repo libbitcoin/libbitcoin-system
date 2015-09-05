@@ -74,7 +74,7 @@ static BC_CONSTEXPR uint32_t max_intermediate_sequence = 4095;
  * Create an intermediate passphrase string for key pair generation.
  * @param[out] out_code    The new intermediate passphrase string.
  * @param[in]  passphrase  A passphrase for use in the encryption.
- * @param[in]  salt        A random value.
+ * @param[in]  salt        A random value for use in the encryption.
  * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
  * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
  * @return true if the intermediate is created.
@@ -88,7 +88,7 @@ BC_API bool create_intermediate(intermediate& out_code,
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_public   The new encrypted public key.
  * @param[in]  code         An intermediate passphrase string.
- * @param[in]  seed         A random value.
+ * @param[in]  seed         A random value for use in the encryption.
  * @param[in]  version      The coin address version byte.
  * @param[in]  compressed   Set true to associate ec public key compression.
  * @return true if the keys are created.
