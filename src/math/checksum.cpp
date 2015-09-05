@@ -38,7 +38,6 @@ uint32_t bitcoin_checksum(data_slice data)
 
 bool verify_checksum(data_slice data)
 {
-    // guard against insufficient data length
     if (data.size() < checksum_size)
         return false;
 
