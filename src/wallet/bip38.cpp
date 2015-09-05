@@ -274,9 +274,9 @@ static inline uint8_t read_version(const private_key& key)
 static inline data_chunk versioned_prefix(const uint8_t address_version,
     const data_chunk& prefix)
 {
-    auto versioned = prefix;
-    versioned[0] = convert_version(address_version);
-    return versioned;
+    auto prefix_version = prefix;
+    prefix_version[0] = convert_version(address_version);
+    return prefix_version;
 }
 
 static data_chunk address_salt(uint8_t version, const ec_point& point)
