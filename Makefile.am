@@ -187,55 +187,38 @@ test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CP
 test_libbitcoin_test_LDFLAGS = ${boost_LDFLAGS}
 test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_test_SOURCES = \
-    test/authority.cpp \
-    test/base10.cpp \
-    test/base16.cpp \
-    test/base58.cpp \
-    test/base64.cpp \
-    test/base85.cpp \
-    test/big_number.cpp \
-    test/big_number.hpp \
-    test/binary.cpp \
-    test/bip38.cpp \
-    test/bip38.hpp \
-    test/btc256.cpp \
-    test/checkpoint.cpp \
-    test/checksum.cpp \
-    test/ec_keys.cpp \
-    test/endpoint.cpp \
-    test/format.cpp \
-    test/genesis_block.cpp \
-    test/genesis_block.hpp \
-    test/hash.cpp \
-    test/hash.hpp \
-    test/hash_number.cpp \
-    test/hd_keys.cpp \
-    test/key_formats.cpp \
     test/main.cpp \
-    test/message.cpp \
-    test/mnemonic.cpp \
-    test/mnemonic.hpp \
-    test/parameter.cpp \
-    test/printer.cpp \
-    test/random.cpp \
-    test/satoshi_words.cpp \
-    test/script_number.cpp \
-    test/script_number.hpp \
-    test/stealth.cpp \
-    test/stealth_address.cpp \
-    test/thread.cpp \
-    test/unicode.cpp \
-    test/unicode_istream.cpp \
-    test/unicode_ostream.cpp \
-    test/uri.cpp \
     test/chain/block.cpp \
+    test/chain/genesis_block.cpp \
+    test/chain/genesis_block.hpp \
     test/chain/header.cpp \
     test/chain/input.cpp \
     test/chain/output.cpp \
     test/chain/point.cpp \
+    test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
     test/chain/transaction.cpp \
+    test/config/authority.cpp \
+    test/config/btc256.cpp \
+    test/config/checkpoint.cpp \
+    test/config/endpoint.cpp \
+    test/config/parameter.cpp \
+    test/config/printer.cpp \
+    test/formats/base10.cpp \
+    test/formats/base16.cpp \
+    test/formats/base58.cpp \
+    test/formats/base64.cpp \
+    test/formats/base85.cpp \
+    test/math/big_number.cpp \
+    test/math/big_number.hpp \
+    test/math/checksum.cpp \
+    test/math/ec_keys.cpp \
+    test/math/hash.cpp \
+    test/math/hash.hpp \
+    test/math/hash_number.cpp \
+    test/math/script_number.cpp \
+    test/math/script_number.hpp \
     test/message/address.cpp \
     test/message/alert.cpp \
     test/message/alert_payload.cpp \
@@ -259,11 +242,27 @@ test_libbitcoin_test_SOURCES = \
     test/message/reject.cpp \
     test/message/verack.cpp \
     test/message/version.cpp \
+    test/unicode/unicode.cpp \
+    test/unicode/unicode_istream.cpp \
+    test/unicode/unicode_ostream.cpp \
+    test/utility/binary.cpp \
     test/utility/data.cpp \
     test/utility/endian.cpp \
+    test/utility/random.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \
-    test/utility/variable_uint_size.cpp
+    test/utility/thread.cpp \
+    test/utility/variable_uint_size.cpp \
+    test/wallet/bip38.cpp \
+    test/wallet/bip38.hpp \
+    test/wallet/hd_keys.cpp \
+    test/wallet/key_formats.cpp \
+    test/wallet/message.cpp \
+    test/wallet/mnemonic.cpp \
+    test/wallet/mnemonic.hpp \
+    test/wallet/stealth.cpp \
+    test/wallet/stealth_address.cpp \
+    test/wallet/uri.cpp
 
 endif WITH_TESTS
 
@@ -318,6 +317,10 @@ include_bitcoin_bitcoin_impl_formatsdir = ${includedir}/bitcoin/bitcoin/impl/for
 include_bitcoin_bitcoin_impl_formats_HEADERS = \
     include/bitcoin/bitcoin/impl/formats/base16.ipp \
     include/bitcoin/bitcoin/impl/formats/base58.ipp
+
+include_bitcoin_bitcoin_impl_mathdir = ${includedir}/bitcoin/bitcoin/impl/math
+include_bitcoin_bitcoin_impl_math_HEADERS = \
+    include/bitcoin/bitcoin/impl/math/checksum.ipp
 
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \
