@@ -71,7 +71,8 @@ static BC_CONSTEXPR uint32_t max_token_lot = 1048575;
 static BC_CONSTEXPR uint32_t max_token_sequence = 4095;
 
 /**
- * Create an intermediate passphrase for key pair generation.
+ * Create an intermediate passphrase for subsequent encrypted key pair 
+ * generation.
  * @param[out] out_token   The new intermediate passphrase.
  * @param[in]  passphrase  A passphrase for use in the encryption.
  * @param[in]  salt        A random value for use in the encryption.
@@ -122,13 +123,15 @@ BC_API bool decrypt(ec_secret& out_secret, const private_key& key,
 
 /**
  * Decrypt the ec point associated with the encrypted public key.
+ * The address version is provided so that the intended address can be
+ * reconstituted without external knowledge of the intended version byte.
  * @param[out] out_point   The decrypted ec point.
  * @param[in]  key         An encrypted public key.
  * @param[in]  passphrase  A passphrase for use in the decryption.
  * @return true if the public key is populated.
  */
-BC_API bool decrypt(ec_point& out_point, const public_key& key,
-    const std::string& passphrase);
+BC_API bool decrypt(ec_point& out_point, uint8_t& out_version,
+    const public_key& key, const std::string& passphrase);
 
 #endif // WITH_ICU
 

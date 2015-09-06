@@ -92,6 +92,12 @@ namespace at
         static constexpr bounds sign = { 18, 19 };        // 1
         static constexpr bounds hash = { 19, 51 };        //32
         static constexpr bounds checksum = { 51, 55 };    // 4
+
+        static constexpr bounds version =                 // 1
+        {
+            prefix.start,
+            prefix.start + 1
+        };
     }
 
     // intermediate passphrase (with lot/sequence)
@@ -112,7 +118,7 @@ namespace at
     }
 
     // intermediate passphrase (without lot/sequence)
-    namespace token
+    namespace plain_token
     {
         static constexpr bounds prefix = { 0, 8 };        // 8
         static constexpr bounds entropy = { 8, 16 };      // 8
@@ -130,41 +136,43 @@ namespace at
 // Since each operation in this proposal involves hashing a text representation
 // of a coin address which (for Bitcoin) includes the leading '1', an alt-chain
 // can easily be denoted simply by using the alt-chain's preferred format for
-// representing an address.
-//
-// BIP38
-// Alt-chain implementers may also change the prefix such that encrypted
-// addresses do not start with "6P". [We do not currently support varying it.]
+// representing an address.... Alt-chain implementers may also change the prefix
+// such that encrypted addresses do not start with "6P".
 //
 // The first byte in each prefix is also the base58check version byte.
 namespace prefix
 {
-    // This prefix results in the prefix "6P" in the base58 encoding.
+    // This prefix results in the prefix "6P" in the base58 encoding but is
+    // modified when the payment address is Bitcoin mainnet (0).
     static const data_chunk private_key
     {
         0x01, 0x42
     };
 
-    // This prefix results in the prefix "6P" in the base58 encoding.
+    // This prefix results in the prefix "6P" in the base58 encoding but is
+    // modified when the payment address is Bitcoin mainnet (0).
     static const data_chunk private_key_multiplied
     {
         0x01, 0x43
     };
 
-    // This prefix results in the prefix "cfrm" in the base58 encoding.
+    // This prefix results in the prefix "cfrm" in the base58 encoding but is
+    // modified when the payment address is Bitcoin mainnet (0).
     static const data_chunk public_key
     {
         0x64, 0x3b, 0xf6, 0xa8, 0x9a
     };
 
     // This prefix results in the prefix "passphrase" in the base58 encoding.
+    // The prefix is not modified as the result of variations to address.
     static const data_chunk lot_token
     {
         0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2, 0x51
     };
 
     // This prefix results in the prefix "passphrase" in the base58 encoding.
-    static const data_chunk token
+    // The prefix is not modified as the result of variations to address.
+    static const data_chunk plain_token
     {
         0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2, 0x53
     };
@@ -219,7 +227,7 @@ static inline data_chunk new_flags(bool compressed)
 static inline data_chunk new_flags(const token& token, bool compressed)
 {
     const auto lot = prefix::lot_token;
-    const auto actual = slice(token, at::token::prefix);
+    const auto actual = slice(token, at::plain_token::prefix);
     const auto is_lot = std::equal(lot.begin(), lot.end(), actual.begin());
     return
     {
@@ -240,56 +248,57 @@ static inline data_chunk point_sign(uint8_t byte, data_slice buffer)
     };
 }
 
-// This provides a bi-directional mapping.
-static inline uint8_t convert_version(const uint8_t version)
+// This provides a unidirectional mapping for all prefix variants.
+static inline uint8_t address_to_prefix(const uint8_t address_version,
+    const data_chunk& default_prefix)
 {
-    switch (version)
-    {
-        case 0:
-            return 1;
-        case 1:
-            return 0;
-        default:
-            return version;
-    }
+    const auto default_prefix_version = default_prefix[0];
+    return address_version == payment_address::pubkey_version ?
+        default_prefix_version : address_version;
+}
+
+// This provides a unidirectional mapping for all prefix variants.
+static inline uint8_t prefix_to_address(const uint8_t prefix_version,
+    const data_chunk& default_prefix)
+{
+    const auto default_prefix_version = default_prefix[0];
+    return prefix_version == default_prefix_version ?
+        payment_address::pubkey_version : prefix_version;
+}
+
+static inline data_chunk private_key_prefix(const uint8_t address_version,
+    const data_chunk& default_prefix)
+{
+    auto prefix_copy = default_prefix;
+    prefix_copy[0] = address_to_prefix(address_version, default_prefix);
+    return prefix_copy;
+}
+
+static inline data_chunk public_key_prefix(const uint8_t address_version)
+{
+    auto prefix_copy = prefix::public_key;
+    prefix_copy[0] = address_to_prefix(address_version, prefix::public_key);
+    return prefix_copy;
 }
 
 static inline uint8_t read_version(const private_key& key)
 {
-    // Infer the decrypt version from the private key prefix bytes.
-    // This will operate just like compression inference. As such it will
-    // require a mapping from 0x01 (private key) => 0x00 (address), becuase
-    // unfortunately the authors don't appear to have considered that 
-    // otherwise the decryption of private keys requires the key, passphrase
-    // *and the version byte*. Also they used (01) for bitcoin addresess (00).
-    // So in order to not waste a bit we special case 00|01 <-> 01|00.
-    // All others map directly between address and bip38 private key.
-    // We don't modify any other bip38 prefixes for altcoins and instead
-    // rely on the address hash differentiation So "6P" can be replaced
-    // deterministically and "cfrm" and "passphrase" are not impacted.
+    // We don't care if the key was multiplied, the map exception is the same.
     const auto prefix_version = slice(key, at::private_key::version)[0];
-    return convert_version(prefix_version);
+    return prefix_to_address(prefix_version, prefix::private_key);
 }
 
-static inline data_chunk versioned_prefix(const uint8_t address_version,
-    const data_chunk& prefix)
+static inline uint8_t read_version(const public_key& key)
 {
-    auto prefix_version = prefix;
-    prefix_version[0] = convert_version(address_version);
-    return prefix_version;
+    const auto prefix_version = slice(key, at::public_key::version)[0];
+    return prefix_to_address(prefix_version, prefix::public_key);
 }
 
 static data_chunk address_salt(uint8_t version, const ec_point& point)
 {
     payment_address address(version, point);
     const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
-
-    // data_chunk explicit here to avoid MSVC CTP compiler bug.
-    return data_chunk
-    {
-        hash.begin(),
-        hash.begin() + salt_size
-    };
+    return slice(hash, 0, salt_size);
 }
 
 static void create_private_key(private_key& out_private, data_slice flags,
@@ -307,7 +316,7 @@ static void create_private_key(private_key& out_private, data_slice flags,
     aes256_encrypt(derived2, half2);
     const auto quart1 = slice(half1, 0, quarter);
 
-    const auto prefix = versioned_prefix(address_version,
+    const auto prefix = private_key_prefix(address_version,
         prefix::private_key_multiplied);
 
     build_checked_array(out_private,
@@ -323,7 +332,8 @@ static void create_private_key(private_key& out_private, data_slice flags,
 
 static void create_public_key(public_key& out_public, data_slice flags,
     data_slice salt, data_slice entropy, data_slice derived1,
-    data_slice derived2, const ec_secret& secret, bool compressed)
+    data_slice derived2, const ec_secret& secret, uint8_t address_version,
+    bool compressed)
 {
     const auto point = secret_to_public_key(secret, compressed);
     const data_chunk unsigned_point(point.begin() + 1, point.end());
@@ -334,11 +344,12 @@ static void create_public_key(public_key& out_public, data_slice flags,
     auto half2 = xor_data(unsigned_point, derived1, half, half);
     aes256_encrypt(derived2, half2);
 
+    const auto prefix = public_key_prefix(address_version);
     const auto sign = point_sign(point.front(), derived2);
 
     build_checked_array(out_public,
     {
-        prefix::public_key,
+        prefix,
         flags,
         salt,
         entropy,
@@ -357,8 +368,8 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
 
     // This is the only place where we read a prefix for context.
     const auto flags = new_flags(token, compressed);
-    auto pass_point = slice(token, at::token::hash);
-    auto entropy = slice(token, at::token::entropy);
+    auto pass_point = slice(token, at::plain_token::hash);
+    auto entropy = slice(token, at::plain_token::entropy);
 
     auto point = pass_point;
     const ec_secret factor(bitcoin_hash(seed));
@@ -382,7 +393,7 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
         seed, address_version);
 
     create_public_key(out_public, flags, salt, entropy, derived1, derived2,
-        factor, compressed);
+        factor, address_version, compressed);
 
     return true;
 }
@@ -456,7 +467,8 @@ bool encrypt(private_key& out_private, const ec_secret& secret,
     auto half2 = xor_data(secret, derived1, half, half);
     aes256_encrypt(derived2, half2);
 
-    const auto prefix = versioned_prefix(address_version, prefix::private_key);
+    const auto prefix = private_key_prefix(address_version,
+        prefix::private_key);
 
     build_array(out_private,
     {
@@ -486,10 +498,10 @@ static bool multiplied_secret(ec_secret& out_secret, const private_key& key,
     const bool lot = check_flag(key, at::private_key::flags,
         flag_byte::lot_sequence);
     const auto owner_salt_bound = lot ? at::lot_token::salt : 
-        at::token::salt;
+        at::plain_token::salt;
 
-    const auto salt = slice(key, at::token::salt);
-    const auto entropy = slice(key, at::token::entropy);
+    const auto salt = slice(key, at::plain_token::salt);
+    const auto entropy = slice(key, at::plain_token::entropy);
     const auto owner_salt = slice(key, owner_salt_bound);
 
     ec_secret secret;
@@ -593,19 +605,20 @@ bool decrypt(ec_secret& out_secret, const private_key& key,
         return secret(out_secret, key, passphrase, address_version);
 }
 
-bool decrypt(ec_point& out_point, const public_key& key,
+bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
     const std::string& passphrase)
 {
     if (!verify_checksum(key))
         return false;
 
+    // The decryption doesn't depend on whether the key was multiplied.
     const bool lot = check_flag(key, at::public_key::flags,
         flag_byte::lot_sequence);
     const bool compressed = check_flag(key, at::public_key::flags,
         flag_byte::ec_compressed);
 
     const auto owner_salt_bound = lot ? at::lot_token::salt : 
-        at::token::salt;
+        at::plain_token::salt;
 
     const auto key_sign = slice(key, at::public_key::sign);
     const auto hash = slice(key, at::public_key::hash);
@@ -658,6 +671,7 @@ bool decrypt(ec_point& out_point, const public_key& key,
     if (!compressed)
         decompress_public_key(out_point);
 
+    out_version = read_version(key);
     return true;
 }
 

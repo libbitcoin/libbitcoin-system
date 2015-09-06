@@ -225,7 +225,9 @@ static void test_decrypt2(const bip38_vector& vector)
     BOOST_REQUIRE(decode_base58(public_key, vector.public_key));
 
     ec_point point;
-    BOOST_REQUIRE(bip38::decrypt(point, public_key, vector.passphrase));
+    uint8_t out_version;
+    BOOST_REQUIRE(bip38::decrypt(point, out_version, public_key, vector.passphrase));
+    BOOST_REQUIRE_EQUAL(out_version, vector.version);
 
     // This will vary by WITH_TESTNET. The vector must be for bitcoin address.
     const auto version = payment_address::pubkey_version;
