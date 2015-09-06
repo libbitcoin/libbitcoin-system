@@ -126,8 +126,11 @@ namespace at
         static constexpr bounds hash = { 17, 49 };        //32
         static constexpr bounds checksum = { 49, 53 };    // 4
 
-        // w/out lot salt is an alias for entropy and is 8 vs. usual 4 bytes
-        static const bounds salt = entropy;               // 8
+        static const bounds salt =                        // 8
+        {
+            entropy.start,
+            entropy.end  
+        };
     }
 }
 
