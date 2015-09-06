@@ -95,7 +95,7 @@ namespace at
     }
 
     // intermediate passphrase (with lot/sequence)
-    namespace lot_intermediate
+    namespace lot_token
     {
         static constexpr bounds prefix = { 0, 8 };        // 8
         static constexpr bounds salt = { 8, 12 };         // 4
@@ -112,7 +112,7 @@ namespace at
     }
 
     // intermediate passphrase (without lot/sequence)
-    namespace intermediate
+    namespace token
     {
         static constexpr bounds prefix = { 0, 8 };        // 8
         static constexpr bounds entropy = { 8, 16 };      // 8
@@ -158,13 +158,13 @@ namespace prefix
     };
 
     // This prefix results in the prefix "passphrase" in the base58 encoding.
-    static const data_chunk lot_intermediate
+    static const data_chunk lot_token
     {
         0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2, 0x51
     };
 
     // This prefix results in the prefix "passphrase" in the base58 encoding.
-    static const data_chunk intermediate
+    static const data_chunk token
     {
         0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2, 0x53
     };
@@ -216,10 +216,10 @@ static inline data_chunk new_flags(bool compressed)
     };
 }
 
-static inline data_chunk new_flags(const intermediate& code, bool compressed)
+static inline data_chunk new_flags(const token& token, bool compressed)
 {
-    const auto lot = prefix::lot_intermediate;
-    const auto actual = slice(code, at::intermediate::prefix);
+    const auto lot = prefix::lot_token;
+    const auto actual = slice(token, at::token::prefix);
     const auto is_lot = std::equal(lot.begin(), lot.end(), actual.begin());
     return
     {
@@ -349,16 +349,16 @@ static void create_public_key(public_key& out_public, data_slice flags,
 }
 
 bool create_key_pair(private_key& out_private, public_key& out_public,
-    const intermediate& code, const seed& seed, uint8_t address_version,
+    const token& token, const seed& seed, uint8_t address_version,
     bool compressed)
 {
-    if (!verify_checksum(code))
+    if (!verify_checksum(token))
         return false;
 
     // This is the only place where we read a prefix for context.
-    const auto flags = new_flags(code, compressed);
-    auto pass_point = slice(code, at::intermediate::hash);
-    auto entropy = slice(code, at::intermediate::entropy);
+    const auto flags = new_flags(token, compressed);
+    auto pass_point = slice(token, at::token::hash);
+    auto entropy = slice(token, at::token::entropy);
 
     auto point = pass_point;
     const ec_secret factor(bitcoin_hash(seed));
@@ -395,10 +395,10 @@ static inline data_chunk normal(const std::string& passphrase)
     return to_data_chunk(to_normal_nfc_form(passphrase));
 }
 
-bool create_intermediate(intermediate& out_code, const std::string& passphrase,
+bool create_token(token& out_token, const std::string& passphrase,
     const salt& salt, uint32_t lot, uint32_t sequence)
 {
-    if (lot > max_intermediate_lot || sequence > max_intermediate_sequence)
+    if (lot > max_token_lot || sequence > max_token_sequence)
         return false;
 
     // Combine lot and sequence into 32 bits.
@@ -426,9 +426,9 @@ bool create_intermediate(intermediate& out_code, const std::string& passphrase,
     ///////////////////////////////////////////////////////////////////////////
     ec_multiply(pass_point, secret);
 
-    build_array(out_code,
+    build_array(out_token,
     {
-        prefix::lot_intermediate,
+        prefix::lot_token,
         entropy,
         pass_point
     });
@@ -485,11 +485,11 @@ static bool multiplied_secret(ec_secret& out_secret, const private_key& key,
 {
     const bool lot = check_flag(key, at::private_key::flags,
         flag_byte::lot_sequence);
-    const auto owner_salt_bound = lot ? at::lot_intermediate::salt : 
-        at::intermediate::salt;
+    const auto owner_salt_bound = lot ? at::lot_token::salt : 
+        at::token::salt;
 
-    const auto salt = slice(key, at::intermediate::salt);
-    const auto entropy = slice(key, at::intermediate::entropy);
+    const auto salt = slice(key, at::token::salt);
+    const auto entropy = slice(key, at::token::entropy);
     const auto owner_salt = slice(key, owner_salt_bound);
 
     ec_secret secret;
@@ -604,8 +604,8 @@ bool decrypt(ec_point& out_point, const public_key& key,
     const bool compressed = check_flag(key, at::public_key::flags,
         flag_byte::ec_compressed);
 
-    const auto owner_salt_bound = lot ? at::lot_intermediate::salt : 
-        at::intermediate::salt;
+    const auto owner_salt_bound = lot ? at::lot_token::salt : 
+        at::token::salt;
 
     const auto key_sign = slice(key, at::public_key::sign);
     const auto hash = slice(key, at::public_key::hash);

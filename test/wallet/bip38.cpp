@@ -35,17 +35,17 @@ BOOST_AUTO_TEST_SUITE(bip38_tests)
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOST_AUTO_TEST_SUITE(bip38__create_intermediate)
+BOOST_AUTO_TEST_SUITE(bip38__create_token)
 
-static void test_create_intermediate(/* const bip38_vector& vector */)
+static void test_create_token(/* const bip38_vector& vector */)
 {
     // TODO
 }
 
-// TODO: add test vectors for create_intermediate.
-BOOST_AUTO_TEST_CASE(bip38__create_intermediate__always__throws)
+// TODO: add test vectors for create_token.
+BOOST_AUTO_TEST_CASE(bip38__create_token__always__throws)
 {
-    test_create_intermediate(/* vector */);
+    test_create_token(/* vector */);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -58,15 +58,15 @@ BOOST_AUTO_TEST_SUITE(bip38__create_key_pair)
 
 static void test_create_key_pair(const bip38_vector& vector)
 {
-    bip38::intermediate intermediate;
-    BOOST_REQUIRE(decode_base58(intermediate, vector.intermediate));
+    bip38::token token;
+    BOOST_REQUIRE(decode_base58(token, vector.token));
 
     bip38::seed seed;
     BOOST_REQUIRE(decode_base16(seed, vector.seed));
 
     bip38::public_key public_key;
     bip38::private_key private_key;
-    BOOST_REQUIRE(bip38::create_key_pair(private_key, public_key, intermediate, seed, vector.version, vector.compressed));
+    BOOST_REQUIRE(bip38::create_key_pair(private_key, public_key, token, seed, vector.version, vector.compressed));
     BOOST_REQUIRE_EQUAL(encode_base58(public_key), vector.public_key);
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }

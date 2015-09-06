@@ -29,7 +29,7 @@ struct bip38_vector
     std::string private_key;
     std::string ec_secret;
     std::string passphrase;
-    std::string intermediate;
+    std::string token;
     std::string public_key;
     std::string seed;
     std::string address;

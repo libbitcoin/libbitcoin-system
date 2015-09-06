@@ -31,7 +31,7 @@ namespace libbitcoin {
 namespace bip38 {
 
 /**
- * A seed for use in creating an intermediate passphrase string.
+ * A seed for use in creating an intermediate passphrase (token).
  */
 static BC_CONSTEXPR size_t salt_size = 4;
 typedef byte_array<salt_size> salt;
@@ -43,11 +43,11 @@ static BC_CONSTEXPR size_t seed_size = 24;
 typedef byte_array<seed_size> seed;
 
 /**
- * An intermediate passphrase string type.
+ * An intermediate passphrase (token) type (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t intermediate_encoded_size = 72;
-static BC_CONSTEXPR size_t intermediate_decoded_size = 53;
-typedef byte_array<intermediate_decoded_size> intermediate;
+static BC_CONSTEXPR size_t token_encoded_size = 72;
+static BC_CONSTEXPR size_t token_decoded_size = 53;
+typedef byte_array<token_decoded_size> token;
 
 /**
  * An encrypted private key type (checked but not base58 encoded).
@@ -65,36 +65,35 @@ static BC_CONSTEXPR size_t public_key_decoded_size = 55;
 typedef byte_array<public_key_decoded_size> public_key;
 
 /**
- * Maximum values for use with create_intermediate.
+ * Maximum values for use with create_token.
  */
-static BC_CONSTEXPR uint32_t max_intermediate_lot = 1048575;
-static BC_CONSTEXPR uint32_t max_intermediate_sequence = 4095;
+static BC_CONSTEXPR uint32_t max_token_lot = 1048575;
+static BC_CONSTEXPR uint32_t max_token_sequence = 4095;
 
 /**
- * Create an intermediate passphrase string for key pair generation.
- * @param[out] out_code    The new intermediate passphrase string.
+ * Create an intermediate passphrase for key pair generation.
+ * @param[out] out_token   The new intermediate passphrase.
  * @param[in]  passphrase  A passphrase for use in the encryption.
  * @param[in]  salt        A random value for use in the encryption.
  * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
  * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
- * @return true if the intermediate is created.
+ * @return true if the token is created.
  */
-BC_API bool create_intermediate(intermediate& out_code,
-    const std::string& passphrase, const salt& salt, uint32_t lot,
-    uint32_t sequence);
+BC_API bool create_token(token& out_token, const std::string& passphrase,
+    const salt& salt, uint32_t lot, uint32_t sequence);
 
 /**
- * Create an encrypted key pair from an intermediate passphrase string.
+ * Create an encrypted key pair from an intermediate passphrase.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_public   The new encrypted public key.
- * @param[in]  code         An intermediate passphrase string.
+ * @param[in]  token        An intermediate passphrase string.
  * @param[in]  seed         A random value for use in the encryption.
  * @param[in]  version      The coin address version byte.
  * @param[in]  compressed   Set true to associate ec public key compression.
  * @return true if the keys are created.
  */
 BC_API bool create_key_pair(private_key& out_private, public_key& out_public,
-    const intermediate& code, const seed& seed, uint8_t version,
+    const token& token, const seed& seed, uint8_t version,
     bool compressed=true);
 
 #ifdef WITH_ICU
