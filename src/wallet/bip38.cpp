@@ -409,6 +409,8 @@ static inline data_chunk normal(const std::string& passphrase)
     return to_data_chunk(to_normal_nfc_form(passphrase));
 }
 
+// There is no scneario requiring a public key, we support for completeness.
+// It would be better if the token incorporated version and compression values.
 bool create_token(token& out_token, const std::string& passphrase,
     const salt& salt, uint32_t lot, uint32_t sequence)
 {
@@ -495,8 +497,8 @@ static bool validate(const ec_secret& secret, data_slice salt,
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
-static bool multiplied_secret(ec_secret& out_secret, const private_key& key,
-    const std::string& passphrase,  uint8_t address_version)
+static bool secret_multiplied(ec_secret& out_secret, const private_key& key,
+    const std::string& passphrase, uint8_t address_version, bool compressed)
 {
     const bool lot = check_flag(key, at::private_key::flags,
         flag_byte::lot_sequence);
@@ -518,8 +520,6 @@ static bool multiplied_secret(ec_secret& out_secret, const private_key& key,
         secret = bitcoin_hash(extended_secret);
     }
 
-    const bool compressed = check_flag(key, at::private_key::flags,
-        flag_byte::ec_compressed);
     const auto point = secret_to_public_key(secret, compressed);
 
     two_block seed_pass;
@@ -557,12 +557,10 @@ static bool multiplied_secret(ec_secret& out_secret, const private_key& key,
 }
 
 static bool secret(ec_secret& out_secret, const private_key& key,
-    const std::string& passphrase, uint8_t address_version)
+    const std::string& passphrase, uint8_t address_version, bool compressed)
 {
     const auto salt = slice(key, at::private_key::salt);
     const auto encrypted = slice(key, at::private_key::encrypted);
-    const bool compressed = check_flag(key, at::private_key::flags,
-        flag_byte::ec_compressed);
 
     two_block derived_data;
     if (!scrypt(normal(passphrase), salt, derived_data))
@@ -592,20 +590,27 @@ static bool secret(ec_secret& out_secret, const private_key& key,
     return true;
 }
 
-bool decrypt(ec_secret& out_secret, const private_key& key,
-    const std::string& passphrase)
+bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
+    const private_key& key, const std::string& passphrase)
 {
     if (!verify_checksum(key))
         return false;
 
-    const auto address_version = read_version(key);
-    const bool multiplied = !check_flag(key, at::private_key::flags,
+    const auto version = read_version(key);
+    const auto compress = check_flag(key, at::private_key::flags,
+        flag_byte::ec_compressed);
+    const auto multiplied = !check_flag(key, at::private_key::flags,
         flag_byte::ec_non_multiplied);
 
-    if (multiplied)
-        return multiplied_secret(out_secret, key, passphrase, address_version);
-    else
-        return secret(out_secret, key, passphrase, address_version);
+    const auto decrypted =  multiplied ?
+        secret_multiplied(out_secret, key, passphrase, version, compress) :
+        secret(out_secret, key, passphrase, version, compress);
+
+    if (decrypted)
+    {
+        compressed = compress;
+        out_version = version;
+    }
 }
 
 bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
@@ -615,9 +620,9 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
         return false;
 
     // The decryption doesn't depend on whether the key was multiplied.
-    const bool lot = check_flag(key, at::public_key::flags,
+    const auto lot = check_flag(key, at::public_key::flags,
         flag_byte::lot_sequence);
-    const bool compressed = check_flag(key, at::public_key::flags,
+    const auto compressed = check_flag(key, at::public_key::flags,
         flag_byte::ec_compressed);
 
     const auto owner_salt_bound = lot ? at::lot_token::salt : 

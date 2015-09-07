@@ -71,8 +71,7 @@ static BC_CONSTEXPR uint32_t max_token_lot = 1048575;
 static BC_CONSTEXPR uint32_t max_token_sequence = 4095;
 
 /**
- * Create an intermediate passphrase for subsequent encrypted key pair 
- * generation.
+ * Create an intermediate passphrase for subsequent key pair generation.
  * @param[out] out_token   The new intermediate passphrase.
  * @param[in]  passphrase  A passphrase for use in the encryption.
  * @param[in]  salt        A random value for use in the encryption.
@@ -113,21 +112,25 @@ BC_API bool encrypt(private_key& out_private, const ec_secret& secret,
 
 /**
  * Decrypt the ec secret associated with the encrypted private key.
- * @param[out] out_secret  The decrypted ec secret.
- * @param[in]  key         An encrypted private key.
- * @param[in]  passphrase  A passphrase for use in the decryption.
+ * @param[out] out_secret      The decrypted ec secret.
+ * @param[out] out_version     The coin address version.
+ * @param[out] out_compressed  The compression of the associated ec public key.
+ * @param[in]  key             An encrypted private key.
+ * @param[in]  passphrase      The passphrase from the encryption or token.
  * @return true if the encrypted private key is populated.
  */
-BC_API bool decrypt(ec_secret& out_secret, const private_key& key,
+BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
+    bool& out_compressed, const private_key& key,
     const std::string& passphrase);
 
 /**
  * Decrypt the ec point associated with the encrypted public key.
  * The address version is provided so that the intended address can be
  * reconstituted without external knowledge of the intended version byte.
- * @param[out] out_point   The decrypted ec point.
- * @param[in]  key         An encrypted public key.
- * @param[in]  passphrase  A passphrase for use in the decryption.
+ * @param[out] out_point    The decrypted ec point.
+ * @param[out] out_version  The coin address version of the public key.
+ * @param[in]  key          An encrypted public key.
+ * @param[in]  passphrase   The passphrase of the associated token.
  * @return true if the public key is populated.
  */
 BC_API bool decrypt(ec_point& out_point, uint8_t& out_version,

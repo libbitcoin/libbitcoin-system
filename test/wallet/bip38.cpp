@@ -157,7 +157,9 @@ static void test_decrypt1(const bip38_vector& vector)
     BOOST_REQUIRE(decode_base58(private_key, vector.private_key));
 
     ec_secret secret;
-    BOOST_REQUIRE(bip38::decrypt(secret, private_key, vector.passphrase));
+    uint8_t version;
+    bool compressed;
+    BOOST_REQUIRE(bip38::decrypt(secret, version, compressed, private_key, vector.passphrase));
     BOOST_REQUIRE_EQUAL(encode_base16(secret), vector.ec_secret);
 }
 
