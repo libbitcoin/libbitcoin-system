@@ -430,17 +430,15 @@ bool create_token(token& out_token, const std::string& passphrase,
     if (!scrypt(normal(passphrase), salt, pre_factor))
         return false;
 
+    // Extend pass_factor with entropy and create the secret.
     ec_secret secret;
     auto pass_factor = to_data_chunk(pre_factor);
     extend_data(pass_factor, entropy);
     pass_factor = to_data_chunk(bitcoin_hash(pass_factor));
     std::copy(pass_factor.begin(), pass_factor.end(), secret.begin());
 
-    ec_point pass_point;
-    ///////////////////////////////////////////////////////////////////////////
-    //// TODO: pass_point = compressed(G * passfactor) -> 33 bytes
-    ///////////////////////////////////////////////////////////////////////////
-    ec_multiply(pass_point, secret);
+    // Derive the compressed public key.
+    const auto pass_point = secret_to_public_key(secret, true);
 
     build_array(out_token,
     {
@@ -636,23 +634,21 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
     const auto entropy = slice(key, at::public_key::entropy);
     extend_data(salt_entropy, entropy);
 
-    hash_digest pre_factor;
-    if (!scrypt(normal(passphrase), owner_salt, pre_factor))
+    hash_digest factor;
+    if (!scrypt(normal(passphrase), owner_salt, factor))
         return false;
 
-    ec_secret pass_factor;
     if (lot)
     {
-        auto extended_pre_factor = to_data_chunk(pre_factor);
-        extend_data(extended_pre_factor, entropy);
-        pre_factor = bitcoin_hash(extended_pre_factor);
+        auto extended = to_data_chunk(factor);
+        extend_data(extended, entropy);
+        factor = bitcoin_hash(extended);
     }
-    
-    pass_factor = ec_secret(pre_factor);
-    const auto pass_point = secret_to_public_key(pass_factor, true);
+
+    const auto point = secret_to_public_key(factor, true);
 
     two_block derived_data;
-    if (!scrypt(pass_point, salt_entropy, derived_data))
+    if (!scrypt(point, salt_entropy, derived_data))
         return false;
 
     data_chunk derived1;
@@ -675,7 +671,7 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
     extend_data(out_point, sign);
     extend_data(out_point, decrypted1);
     extend_data(out_point, decrypted2);
-    ec_multiply(out_point, pass_factor);
+    ec_multiply(out_point, factor);
     if (!compressed)
         decompress_public_key(out_point);
 
