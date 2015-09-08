@@ -102,7 +102,7 @@ namespace at
         };
     }
 
-    // intermediate passphrase (with lot/sequence)
+    // intermediate passphrase token (with lot/sequence)
     namespace lot_token
     {
         static constexpr bounds prefix = { 0, 8 };        // 8
@@ -119,7 +119,7 @@ namespace at
         };
     }
 
-    // intermediate passphrase (without lot/sequence)
+    // intermediate passphrase token (without lot/sequence)
     namespace plain_token
     {
         static constexpr bounds prefix = { 0, 8 };        // 8
@@ -185,7 +185,7 @@ namespace prefix
 
 // BIP38
 // It is requested that the unused flag bytes NOT be used for denoting that
-// the key belongs to an alt-chain [This shoud read "flag bits"?].
+// the key belongs to an alt-chain [This shoud read "flag bits"].
 enum flag_byte : uint8_t
 {
     none = 0,
@@ -428,7 +428,7 @@ bool create_token(token& out_token, const std::string& passphrase,
     static constexpr size_t max_sequence_bits = 12;
     const uint32_t lot_sequence = (lot << max_sequence_bits) || sequence;
 
-    // Add big-endian lost/sequence to salt to create entropy.
+    // Add big-endian lot/sequence to salt to create entropy.
     auto entropy = to_data_chunk(salt);
     extend_data(entropy, to_big_endian(lot_sequence));
 
@@ -446,7 +446,7 @@ bool create_token(token& out_token, const std::string& passphrase,
     // Derive the compressed public key.
     const auto pass_point = secret_to_public_key(secret, true);
 
-    build_array(out_token,
+    build_checked_array(out_token,
     {
         prefix::lot_token,
         entropy,
