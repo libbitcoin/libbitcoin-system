@@ -43,6 +43,8 @@ namespace bip38 {
 
 using namespace bc::wallet;
 
+static constexpr size_t mainnet_p2pkh_version = 0x00;
+
 static constexpr size_t two_block_size = bc::long_hash_size;
 static constexpr size_t block_size = two_block_size / 2;
 static constexpr size_t half = block_size / 2;
@@ -256,8 +258,8 @@ static inline uint8_t address_to_prefix(const uint8_t address_version,
     const data_chunk& default_prefix)
 {
     const auto default_prefix_version = default_prefix[0];
-    return address_version == payment_address::pubkey_version ?
-        default_prefix_version : address_version;
+    return address_version == mainnet_p2pkh_version ? default_prefix_version :
+        address_version;
 }
 
 // This provides a unidirectional mapping for all prefix variants.
@@ -265,8 +267,8 @@ static inline uint8_t prefix_to_address(const uint8_t prefix_version,
     const data_chunk& default_prefix)
 {
     const auto default_prefix_version = default_prefix[0];
-    return prefix_version == default_prefix_version ?
-        payment_address::pubkey_version : prefix_version;
+    return prefix_version == default_prefix_version ? mainnet_p2pkh_version :
+        prefix_version;
 }
 
 static inline data_chunk private_key_prefix(const uint8_t address_version,
@@ -362,8 +364,9 @@ static void create_public_key(public_key& out_public, data_slice flags,
     });
 }
 
+// There is no scenario requiring a public key, we support it for completeness.
 bool create_key_pair(private_key& out_private, public_key& out_public,
-    const token& token, const seed& seed, uint8_t address_version,
+    ec_point& out_point, const token& token, const seed& seed, uint8_t version,
     bool compressed)
 {
     if (!verify_checksum(token))
@@ -374,13 +377,13 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
     auto pass_point = slice(token, at::plain_token::hash);
     auto entropy = slice(token, at::plain_token::entropy);
 
-    auto point = pass_point;
-    const ec_secret factor(bitcoin_hash(seed));
-    ec_multiply(point, factor);
+    out_point = pass_point;
+    const auto factor = bitcoin_hash(seed);
+    ec_multiply(out_point, factor);
     if (!compressed)
-        point = decompress_public_key(point);
+        out_point = decompress_public_key(out_point);
 
-    const auto salt = address_salt(address_version, point);
+    const auto salt = address_salt(version, out_point);
     auto salt_entropy = salt;
     extend_data(salt_entropy, entropy);
 
@@ -392,10 +395,18 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
     split(derived, derived1, derived2, two_block_size);
 
     create_private_key(out_private, flags, salt, entropy, derived1, derived2,
-        seed, address_version);
+        seed, version);
     create_public_key(out_public, flags, salt, entropy, derived1, derived2,
-        factor, address_version, compressed);
+        factor, version, compressed);
     return true;
+}
+
+bool create_key_pair(private_key& out_private, ec_point& out_point,
+    const token& token, const seed& seed, uint8_t version, bool compressed)
+{
+    public_key out_public;
+    return create_key_pair(out_private, out_public, out_point, token, seed,
+        version, compressed);
 }
 
 #ifdef WITH_ICU
@@ -406,7 +417,6 @@ static inline data_chunk normal(const std::string& passphrase)
     return to_data_chunk(to_normal_nfc_form(passphrase));
 }
 
-// There is no scneario requiring a public key, we support for completeness.
 // It would be better if the token incorporated version and compression values.
 bool create_token(token& out_token, const std::string& passphrase,
     const salt& salt, uint32_t lot, uint32_t sequence)

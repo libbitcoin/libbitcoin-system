@@ -57,6 +57,7 @@ static BC_CONSTEXPR size_t private_key_decoded_size = 43;
 typedef byte_array<private_key_decoded_size> private_key;
 
 /**
+ * DEPRECATED
  * An encrypted public key type (checked but not base58 encoded).
  * This is refered to as a confirmation code in bip38.
  */
@@ -83,9 +84,25 @@ BC_API bool create_token(token& out_token, const std::string& passphrase,
     const salt& salt, uint32_t lot, uint32_t sequence);
 
 /**
+ * Create an encrypted private key from an intermediate passphrase.
+ * @param[out] out_private  The new encrypted private key.
+ * @param[out] out_point    The ec public key of the new key pair.
+ * @param[in]  token        An intermediate passphrase string.
+ * @param[in]  seed         A random value for use in the encryption.
+ * @param[in]  version      The coin address version byte.
+ * @param[in]  compressed   Set true to associate ec public key compression.
+ * @return false if the token checksum is not valid.
+ */
+BC_API bool create_key_pair(private_key& out_private, ec_point& out_point,
+    const token& token, const seed& seed, uint8_t version,
+    bool compressed=true);
+
+/**
+ * DEPRECATED
  * Create an encrypted key pair from an intermediate passphrase.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_public   The new encrypted public key.
+ * @param[out] out_point    The ec public key of the new key pair.
  * @param[in]  token        An intermediate passphrase string.
  * @param[in]  seed         A random value for use in the encryption.
  * @param[in]  version      The coin address version byte.
@@ -93,7 +110,7 @@ BC_API bool create_token(token& out_token, const std::string& passphrase,
  * @return false if the token checksum is not valid.
  */
 BC_API bool create_key_pair(private_key& out_private, public_key& out_public,
-    const token& token, const seed& seed, uint8_t version,
+    ec_point& out_point, const token& token, const seed& seed, uint8_t version,
     bool compressed=true);
 
 #ifdef WITH_ICU
@@ -123,6 +140,7 @@ BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
     const std::string& passphrase);
 
 /**
+ * DEPRECATED
  * Decrypt the ec point associated with the encrypted public key.
  * @param[out] out_point    The decrypted ec point.
  * @param[out] out_version  The coin address version of the public key.
