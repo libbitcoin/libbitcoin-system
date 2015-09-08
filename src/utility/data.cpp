@@ -41,7 +41,7 @@ data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset1,
     const auto& data1 = buffer1.data();
     const auto& data2 = buffer2.data();
     data_chunk out;
-    for(size_t i = 0; i < length; i++)
+    for (size_t i = 0; i < length; i++)
         out.push_back(data1[i + offset1] ^ data2[i + offset2]);
 
     return out;
