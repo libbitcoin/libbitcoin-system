@@ -39,7 +39,9 @@ bool build_checked_array(byte_array<Size>& out,
 template<size_t Size>
 bool insert_checksum(byte_array<Size>& out)
 {
-    BITCOIN_ASSERT(out.size() < checksum_size);
+    if (out.size() < checksum_size)
+        return false;
+
     data_chunk body(out.begin(), out.end() - checksum_size);
     const auto checksum = to_little_endian(bitcoin_checksum(body));
     std::copy(checksum.begin(), checksum.end(), out.end() - checksum_size);
