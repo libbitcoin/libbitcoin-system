@@ -77,7 +77,7 @@ static BC_CONSTEXPR uint32_t max_token_sequence = 4095;
  * @param[in]  salt        A random value for use in the encryption.
  * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
  * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
- * @return true if the token is created.
+ * @return false if the lot an d/o sequence are out of range.
  */
 BC_API bool create_token(token& out_token, const std::string& passphrase,
     const salt& salt, uint32_t lot, uint32_t sequence);
@@ -90,7 +90,7 @@ BC_API bool create_token(token& out_token, const std::string& passphrase,
  * @param[in]  seed         A random value for use in the encryption.
  * @param[in]  version      The coin address version byte.
  * @param[in]  compressed   Set true to associate ec public key compression.
- * @return true if the keys are created.
+ * @return false if the token checksum is not valid.
  */
 BC_API bool create_key_pair(private_key& out_private, public_key& out_public,
     const token& token, const seed& seed, uint8_t version,
@@ -105,9 +105,8 @@ BC_API bool create_key_pair(private_key& out_private, public_key& out_public,
  * @param[in]  passphrase   A passphrase for use in the encryption.
  * @param[in]  version      The coin address version byte.
  * @param[in]  compressed   Set true to associate ec public key compression.
- * @return true if the encrypted private key is populated.
  */
-BC_API bool encrypt(private_key& out_private, const ec_secret& secret,
+BC_API void encrypt(private_key& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version, bool compressed=true);
 
 /**
@@ -117,7 +116,7 @@ BC_API bool encrypt(private_key& out_private, const ec_secret& secret,
  * @param[out] out_compressed  The compression of the associated ec public key.
  * @param[in]  key             An encrypted private key.
  * @param[in]  passphrase      The passphrase from the encryption or token.
- * @return true if the encrypted private key is populated.
+ * @return false if the key checksum or passphrase is not valid.
  */
 BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
     bool& out_compressed, const private_key& key,
@@ -125,13 +124,11 @@ BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
 
 /**
  * Decrypt the ec point associated with the encrypted public key.
- * The address version is provided so that the intended address can be
- * reconstituted without external knowledge of the intended version byte.
  * @param[out] out_point    The decrypted ec point.
  * @param[out] out_version  The coin address version of the public key.
  * @param[in]  key          An encrypted public key.
  * @param[in]  passphrase   The passphrase of the associated token.
- * @return true if the public key is populated.
+ * @return false if the key checksum or passphrase is not valid.
  */
 BC_API bool decrypt(ec_point& out_point, uint8_t& out_version,
     const public_key& key, const std::string& passphrase);

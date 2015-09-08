@@ -97,7 +97,7 @@ static void test_encrypt(const bip38_vector& vector)
     BOOST_REQUIRE(decode_base16(secret, vector.ec_secret));
 
     bip38::private_key private_key;
-    BOOST_REQUIRE(bip38::encrypt(private_key, secret, vector.passphrase, vector.version, vector.compressed));
+    bip38::encrypt(private_key, secret, vector.passphrase, vector.version, vector.compressed);
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
 
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_unicode___expected)
     BOOST_REQUIRE(decode_base16(secret, vector.ec_secret));
 
     bip38::private_key private_key;
-    BOOST_REQUIRE(bip38::encrypt(private_key, secret, passphrase, false));
+    bip38::encrypt(private_key, secret, passphrase, false);
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
 
