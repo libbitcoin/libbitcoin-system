@@ -235,9 +235,9 @@ int crypto_scrypt(const uint8_t* passphrase, size_t passphrase_length,
     const uint8_t* salt, size_t salt_length, uint64_t N,
     uint32_t r, uint32_t p, uint8_t* buf, size_t buf_length)
 {
-    uint8_t*  B;
-    uint8_t*  V;
-    uint8_t*  XY;
+    uint8_t* B;
+    uint8_t* V;
+    uint8_t* XY;
     uint32_t i;
 
     /* Sanity-check parameters. */
