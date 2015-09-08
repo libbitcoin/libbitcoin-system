@@ -116,6 +116,12 @@ void split(Data& buffer, data_chunk& lower, data_chunk& upper, size_t size)
     upper.assign(buffer.begin() + rest, buffer.end());
 }
 
+template <size_t Size>
+bool to_array(byte_array<Size>& out, data_slice buffer)
+{
+    return build_array(out, { buffer });
+}
+
 template <class Data>
 data_chunk to_data_chunk(const Data iterable)
 {

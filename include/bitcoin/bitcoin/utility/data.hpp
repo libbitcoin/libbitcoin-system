@@ -62,6 +62,13 @@ bool build_array(byte_array<Size>& out,
     std::initializer_list<data_slice> slices);
 
 /**
+ * Convert the data buffer to a fixed size array.
+ * Returns false if the buffer doesn't fit in the array. Underfill is ok.
+ */
+template <size_t Size>
+bool to_array(byte_array<Size>& out, data_slice buffer);
+
+/**
  * Extend buffer by appending other.
  */
 template <class Data, class Type>
