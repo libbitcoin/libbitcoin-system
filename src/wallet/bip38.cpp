@@ -478,7 +478,7 @@ void encrypt(private_key& out_private, const ec_secret& secret,
     const auto prefix = private_key_prefix(address_version,
         prefix::private_key);
 
-    build_array(out_private,
+    build_checked_array(out_private,
     {
         prefix,
         new_flags(compressed),
