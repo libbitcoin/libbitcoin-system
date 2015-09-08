@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(checksum__insert_checksum__not_empty__valid)
     BOOST_REQUIRE_EQUAL(out[checksum++], 0x93u);
 }
 
-BOOST_AUTO_TEST_CASE(checksum__insert_checksum__underflowd__false)
+BOOST_AUTO_TEST_CASE(checksum__insert_checksum__underflow__false)
 {
     byte_array<checksum_size - 1> out;
     BOOST_REQUIRE(!insert_checksum(out));
