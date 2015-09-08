@@ -650,7 +650,7 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
         factor = bitcoin_hash(extended);
     }
 
-    const auto pass_point = secret_to_public_key(factor, true);
+    const auto pass_point = secret_to_public_key(factor, compressed);
 
     two_block derived_data;
     scrypt(pass_point, salt_entropy, derived_data);
