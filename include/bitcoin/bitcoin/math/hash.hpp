@@ -136,14 +136,14 @@ BC_API short_hash bitcoin_short_hash(data_slice data);
  *
  * scrypt(data, salt)
  */
-BC_API bool scrypt(data_slice data, data_slice salt, hash_digest& output);
+BC_API void scrypt(data_slice data, data_slice salt, hash_digest& output);
 
 /**
  * Generate a long hash using the scrypt key derivation function.
  *
  * scrypt(data, salt)
  */
-BC_API bool scrypt(data_slice data, data_slice salt, long_hash& output);
+BC_API void scrypt(data_slice data, data_slice salt, long_hash& output);
 
 /// Make hash_digest and short_hash hashable for std::*map variants
 template <typename HashType>
