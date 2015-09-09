@@ -57,7 +57,7 @@ BC_CONSTEXPR short_hash null_short_hash =
 /**
  * Generate a ripemd160 hash. This hash function is used in script for
  * op_ripemd160.
- *
+
  * ripemd160(data)
  */
 BC_API short_hash ripemd160_hash(data_slice data);
@@ -132,18 +132,21 @@ BC_API hash_digest bitcoin_hash(data_slice data);
 BC_API short_hash bitcoin_short_hash(data_slice data);
 
 /**
- * Generate a hash using the scrypt key derivation function.
+ * Generate a scrypt hash of specified length.
  *
- * scrypt(data, salt)
+ * scrypt(data, salt, params)
  */
-BC_API void scrypt(data_slice data, data_slice salt, hash_digest& output);
+BC_API data_chunk scrypt(data_slice data, data_slice salt, uint64_t N,
+    uint32_t p, uint32_t r, size_t length);
 
 /**
- * Generate a long hash using the scrypt key derivation function.
+ * Generate a scrypt hash to fill a byte array.
  *
- * scrypt(data, salt)
+ * scrypt(data, salt, params)
  */
-BC_API void scrypt(data_slice data, data_slice salt, long_hash& output);
+template <size_t Size>
+BC_API void scrypt(byte_array<Size> out, data_slice data, data_slice salt,
+    size_t N, size_t p, size_t r);
 
 /// Make hash_digest and short_hash hashable for std::*map variants
 template <typename HashType>
@@ -183,7 +186,9 @@ namespace std
       : public std_hash_wrapper<long_hash>
     {
     };
+
 } // namespace std
 
-#endif
+#include <bitcoin/bitcoin/impl/math/hash.ipp>
 
+#endif

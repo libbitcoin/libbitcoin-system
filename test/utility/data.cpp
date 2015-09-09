@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE(data__split__data_chunk__expected)
 
     data_chunk lower_half;
     data_chunk upper_half;
-    split(source, lower_half, upper_half, source.size());
+    split(lower_half, upper_half, source, source.size());
     BOOST_REQUIRE_EQUAL(lower_half[0], expected_lower);
     BOOST_REQUIRE_EQUAL(upper_half[0], expected_upper);
 }
@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE(data__split__long_hash__expected)
 
     data_chunk lower_half;
     data_chunk upper_half;
-    split(source, lower_half, upper_half, source.size());
+    split(lower_half, upper_half, source, source.size());
     BOOST_REQUIRE_EQUAL(lower_half[0], l);
     BOOST_REQUIRE_EQUAL(upper_half[0], u);
 }

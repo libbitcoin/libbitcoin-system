@@ -26,20 +26,51 @@
 
 namespace libbitcoin {
 
-data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset,
-    size_t length)
+data_chunk slice(data_slice bytes, size_t start, size_t end)
 {
-    return xor_data(buffer1, buffer2, offset, offset, length);
+    BITCOIN_ASSERT(start <= bytes.size());
+
+    const auto& data = bytes.data();
+    return
+    {
+        &data[start], &data[end]
+    };
 }
 
-data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset1,
+data_chunk slice(data_slice bytes, const bounds& range)
+{
+    return slice(bytes, range.start, range.end);
+}
+
+void split(data_chunk& lower, data_chunk& upper, data_slice bytes, size_t size)
+{
+    BITCOIN_ASSERT(bytes.size() == size);
+
+    const size_t front = size / 2;
+    const size_t rest = size - front;
+    lower.assign(std::begin(bytes), std::end(bytes) - front);
+    upper.assign(std::begin(bytes) + rest, std::end(bytes));
+}
+
+data_chunk to_data_chunk(data_slice bytes)
+{
+    return data_chunk(std::begin(bytes), std::end(bytes));
+}
+
+data_chunk xor_data(data_slice bytes1, data_slice bytes2, size_t offset,
+    size_t length)
+{
+    return xor_data(bytes1, bytes2, offset, offset, length);
+}
+
+data_chunk xor_data(data_slice bytes1, data_slice bytes2, size_t offset1,
     size_t offset2, size_t length)
 {
-    BITCOIN_ASSERT(offset1 + length <= buffer1.size());
-    BITCOIN_ASSERT(offset2 + length <= buffer2.size());
+    BITCOIN_ASSERT(offset1 + length <= bytes1.size());
+    BITCOIN_ASSERT(offset2 + length <= bytes2.size());
 
-    const auto& data1 = buffer1.data();
-    const auto& data2 = buffer2.data();
+    const auto& data1 = bytes1.data();
+    const auto& data2 = bytes2.data();
     data_chunk out;
     for (size_t i = 0; i < length; i++)
         out.push_back(data1[i + offset1] ^ data2[i + offset2]);

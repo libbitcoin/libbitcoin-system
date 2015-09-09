@@ -70,9 +70,9 @@ bool build_array(byte_array<Size>& out,
 }
 
 template <class Data, class Type>
-void extend_data(Data& buffer, const Type& other)
+void extend_data(Data& bytes, const Type& other)
 {
-    buffer.insert(std::end(buffer), std::begin(other), std::end(other));
+    bytes.insert(std::end(bytes), std::begin(other), std::end(other));
 }
 
 template <typename Value>
@@ -87,45 +87,16 @@ Value range_constrain(Value value, Value minimum, Value maximum)
     return value;
 }
 
-template <class Data>
-data_chunk slice(const Data& buffer, size_t start, size_t end)
-{
-    BITCOIN_ASSERT(start <= buffer.size());
-
-    const auto& data = buffer.data();
-    return
-    {
-        &data[start], &data[end]
-    };
-}
-
-template <class Data>
-data_chunk slice(const Data& buffer, const bounds& range)
-{
-    return slice(buffer, range.start, range.end);
-}
-
-template <class Data>
-void split(Data& buffer, data_chunk& lower, data_chunk& upper, size_t size)
-{
-    BITCOIN_ASSERT(buffer.size() == size);
-
-    const size_t front = size / 2;
-    const size_t rest = size - front;
-    lower.assign(buffer.begin(), buffer.end() - front);
-    upper.assign(buffer.begin() + rest, buffer.end());
-}
-
 template <size_t Size>
-bool to_array(byte_array<Size>& out, data_slice buffer)
+bool to_array(byte_array<Size>& out, data_slice bytes)
 {
-    return build_array(out, { buffer });
+    return build_array(out, { bytes });
 }
 
-template <class Data>
-data_chunk to_data_chunk(const Data iterable)
+template <typename Data>
+data_chunk to_data_chunk(const Data& bytes)
 {
-    return data_chunk(std::begin(iterable), std::end(iterable));
+    return data_chunk(std::begin(bytes), std::end(bytes));
 }
 
 } // namespace libbitcoin

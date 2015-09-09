@@ -320,7 +320,8 @@ include_bitcoin_bitcoin_impl_formats_HEADERS = \
 
 include_bitcoin_bitcoin_impl_mathdir = ${includedir}/bitcoin/bitcoin/impl/math
 include_bitcoin_bitcoin_impl_math_HEADERS = \
-    include/bitcoin/bitcoin/impl/math/checksum.ipp
+    include/bitcoin/bitcoin/impl/math/checksum.ipp \
+    include/bitcoin/bitcoin/impl/math/hash.ipp
 
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \

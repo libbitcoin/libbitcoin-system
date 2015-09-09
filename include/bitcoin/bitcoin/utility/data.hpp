@@ -66,13 +66,13 @@ bool build_array(byte_array<Size>& out,
  * Returns false if the buffer doesn't fit in the array. Underfill is ok.
  */
 template <size_t Size>
-bool to_array(byte_array<Size>& out, data_slice buffer);
+bool to_array(byte_array<Size>& out, data_slice bytes);
 
 /**
  * Extend buffer by appending other.
  */
 template <class Data, class Type>
-void extend_data(Data& buffer, const Type& other);
+void extend_data(Data& bytes, const Type& other);
 
 /**
  * Constrain a numeric value within a given range.
@@ -81,37 +81,35 @@ template <typename Value>
 Value range_constrain(Value value, Value minimum, Value maximum);
 
 /**
+ * Create a data chunk from an interatable object.
+ */
+template <typename Data>
+data_chunk to_data_chunk(const Data& bytes);
+
+/**
  * Return a copy of part of the buffer of length end minus start, starting at
  * start.
  */
-template <class Data>
-static data_chunk slice(const Data& buffer, size_t start, size_t end);
+BC_API data_chunk slice(data_slice bytes, size_t start, size_t end);
 
 /**
  * Return a copy of part of the buffer of length range.end minus range.start,
  * starting at range.start.
  */
-template <class Data>
-static data_chunk slice(const Data& buffer, const bounds& range);
+BC_API data_chunk slice(data_slice bytes, const bounds& range);
 
 /**
  * Split a buffer into two even parts (or as close as possible).
  */
-template <class Data>
-void split(Data& buffer, data_chunk& lower, data_chunk& upper, size_t size);
-
-/**
- * Create a data chunk from an interatable object.
- */
-template <class Data>
-data_chunk to_data_chunk(const Data iterable);
+BC_API void split(data_chunk& lower, data_chunk& upper, data_slice bytes,
+    size_t size);
 
 /**
  * Perform an exclusive or (xor) across two buffers to the length specified.
  * Return the resulting buffer. Caller must ensure offset and length do not
  * exceed either buffer.
  */
-data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset,
+BC_API data_chunk xor_data(data_slice bytes1, data_slice bytes2, size_t offset,
     size_t length);
 
 /**
@@ -119,8 +117,8 @@ data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset,
  * Return the resulting buffer. Caller must ensure offsets and lengths do not
  * exceed the respective buffers.
  */
-data_chunk xor_data(data_slice buffer1, data_slice buffer2, size_t offset1,
-    size_t offset2, size_t length);
+BC_API data_chunk xor_data(data_slice bytes1, data_slice bytes2,
+    size_t offset1, size_t offset2, size_t length);
 
 } // namespace libbitcoin
 

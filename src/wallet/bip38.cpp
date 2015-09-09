@@ -288,7 +288,7 @@ static inline data_chunk public_key_prefix(const uint8_t address_version)
 
 static inline uint8_t read_version(const private_key& key)
 {
-    // We don't care if the key was multiplied, the map exception is the same.
+    // We don't care if the key was multiplied, the map position is the same.
     const auto prefix_version = slice(key, at::private_key::version)[0];
     return prefix_to_address(prefix_version, prefix::private_key);
 }
@@ -304,6 +304,24 @@ static data_chunk address_salt(uint8_t version, const ec_point& point)
     payment_address address(version, point);
     const auto hash = bitcoin_hash(to_data_chunk(address.to_string()));
     return slice(hash, 0, salt_size);
+}
+
+void scrypt_token(hash_digest& out, data_slice data, data_slice salt)
+{
+    // Arbitrary scrypt parameters from BIP-38.
+    scrypt(out, data, salt, 16384u, 8u, 8u);
+}
+
+void scrypt_pair(long_hash& out, data_slice data, data_slice salt)
+{
+    // Arbitrary scrypt parameters from BIP-38.
+    scrypt(out, data, salt, 1024u, 1u, 1u);
+}
+
+void scrypt_non_multiply(long_hash& out, data_slice data, data_slice salt)
+{
+    // Arbitrary scrypt parameters from BIP-38.
+    scrypt(out, data, salt, 16384u, 8u, 8u);
 }
 
 static void create_private_key(private_key& out_private, data_slice flags,
@@ -388,11 +406,11 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
     extend_data(salt_entropy, entropy);
 
     two_block derived;
-    scrypt(pass_point, salt_entropy, derived);
+    scrypt_pair(derived, pass_point, salt_entropy);
 
     data_chunk derived1;
     data_chunk derived2;
-    split(derived, derived1, derived2, two_block_size);
+    split(derived1, derived2, derived, two_block_size);
 
     create_private_key(out_private, flags, salt, entropy, derived1, derived2,
         seed, version);
@@ -434,7 +452,7 @@ bool create_token(token& out_token, const std::string& passphrase,
 
     // Derive a key from the passphrase using scrypt.
     full_block pre_factor;
-    scrypt(normal(passphrase), salt, pre_factor);
+    scrypt_token(pre_factor, normal(passphrase), salt);
 
     // Extend pass_factor with entropy and create the secret.
     ec_secret secret;
@@ -443,7 +461,7 @@ bool create_token(token& out_token, const std::string& passphrase,
     pass_factor = to_data_chunk(bitcoin_hash(pass_factor));
     std::copy(pass_factor.begin(), pass_factor.end(), secret.begin());
 
-    // Derive the compressed public key.
+    // Derive the public key (always compressed).
     const auto pass_point = secret_to_public_key(secret, true);
 
     build_checked_array(out_token,
@@ -463,11 +481,11 @@ void encrypt(private_key& out_private, const ec_secret& secret,
     const auto salt = address_salt(address_version, point);
 
     two_block derived;
-    scrypt(normal(passphrase), salt, derived);
+    scrypt_non_multiply(derived, normal(passphrase), salt);
 
     data_chunk derived1;
     data_chunk derived2;
-    split(derived, derived1, derived2, two_block_size);
+    split(derived1, derived2, derived, two_block_size);
 
     auto half1 = xor_data(secret, derived1, 0, half);
     aes256_encrypt(derived2, half1);
@@ -516,7 +534,7 @@ static bool secret_multiplied(ec_secret& out_secret, const private_key& key,
     const auto owner_salt = slice(key, owner_salt_bound);
 
     ec_secret secret;
-    scrypt(normal(passphrase), owner_salt, secret);
+    scrypt_token(secret, normal(passphrase), owner_salt);
 
     if (lot)
     {
@@ -528,11 +546,11 @@ static bool secret_multiplied(ec_secret& out_secret, const private_key& key,
     const auto point = secret_to_public_key(secret, compressed);
 
     two_block seed_pass;
-    scrypt(point, entropy, seed_pass);
+    scrypt_pair(seed_pass, point, entropy);
 
     data_chunk derived1;
     data_chunk derived2;
-    split(seed_pass, derived1, derived2, two_block_size);
+    split(derived1, derived2, seed_pass, two_block_size);
 
     auto part1 = slice(key, at::private_key::part1);
     auto part2 = slice(key, at::private_key::part2);
@@ -567,15 +585,15 @@ static bool secret(ec_secret& out_secret, const private_key& key,
     const auto encrypted = slice(key, at::private_key::encrypted);
 
     two_block derived_data;
-    scrypt(normal(passphrase), salt, derived_data);
+    scrypt_non_multiply(derived_data, normal(passphrase), salt);
 
     data_chunk data1;
     data_chunk data2;
-    split(encrypted, data1, data2, block_size);
+    split(data1, data2, encrypted, block_size);
 
     data_chunk derived1;
     data_chunk derived2;
-    split(derived_data, derived1, derived2, two_block_size);
+    split(derived1, derived2, derived_data, two_block_size);
 
     aes256_decrypt(derived2, data1);
     aes256_decrypt(derived2, data2);
@@ -641,7 +659,7 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
     extend_data(salt_entropy, entropy);
 
     hash_digest factor;
-    scrypt(normal(passphrase), owner_salt, factor);
+    scrypt_token(factor, normal(passphrase), owner_salt);
 
     if (lot)
     {
@@ -653,15 +671,15 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
     const auto pass_point = secret_to_public_key(factor, compressed);
 
     two_block derived_data;
-    scrypt(pass_point, salt_entropy, derived_data);
+    scrypt_pair(derived_data, pass_point, salt_entropy);
 
     data_chunk derived1;
     data_chunk derived2;
-    split(derived_data, derived1, derived2, two_block_size);
+    split(derived1, derived2, derived_data, two_block_size);
 
     data_chunk encrypted1;
     data_chunk encrypted2;
-    split(address_hash, encrypted1, encrypted2, block_size);
+    split(encrypted1, encrypted2, address_hash, block_size);
 
     aes256_decrypt(derived2, encrypted1);
     auto decrypted1 = xor_data(encrypted1, derived1, 0, half);

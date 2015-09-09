@@ -126,6 +126,9 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\checksum.ipp">
       <Filter>include\bitcoin\impl\math</Filter>
     </None>
+    <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\hash.ipp">
+      <Filter>include\bitcoin\impl\math</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\src\constants.cpp">
@@ -338,9 +341,6 @@
     <ClCompile Include="..\..\..\..\src\math\external\aes256.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c">
-      <Filter>src\math\external</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\pbkdf2_sha256.c">
       <Filter>src\math\external</Filter>
     </ClCompile>
@@ -469,6 +469,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\utility\data.cpp">
       <Filter>src\utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c">
+      <Filter>src\math\external</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -805,9 +808,6 @@
     <ClInclude Include="..\..\..\..\src\math\external\aes256.h">
       <Filter>src\math\external</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h">
-      <Filter>src\math\external</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\pbkdf2_sha256.h">
       <Filter>src\math\external</Filter>
     </ClInclude>
@@ -894,6 +894,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\message_subscriber.hpp">
       <Filter>include\bitcoin\network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h">
+      <Filter>src\math\external</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
