@@ -558,11 +558,11 @@ static bool secret_multiplied(ec_secret& out_secret, const private_key& key,
     aes256_decrypt(derived2, part2);
     auto xor_seed = xor_data(part2, derived2, 0, half, half);
 
+    data_chunk first_part;
     data_chunk seed_part;
-    data_chunk remainder_part;
-    split(xor_seed, remainder_part, seed_part, half);
+    split(first_part, seed_part, xor_seed, half);
 
-    extend_data(part1, remainder_part);
+    extend_data(part1, first_part);
     aes256_decrypt(derived2, part1);
 
     auto seed = xor_data(part1, derived1, 0, half);
