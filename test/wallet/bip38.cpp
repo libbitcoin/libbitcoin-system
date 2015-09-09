@@ -68,8 +68,8 @@ static void test_create_key_pair(const bip38_vector& vector)
     bip38::public_key public_key;
     bip38::private_key private_key;
     BOOST_REQUIRE(bip38::create_key_pair(private_key, public_key, point, token, seed, vector.version, vector.compressed));
-    BOOST_REQUIRE_EQUAL(encode_base58(public_key), vector.public_key);
-    BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
+    BOOST_CHECK_EQUAL(encode_base58(private_key), vector.private_key);
+    BOOST_CHECK_EQUAL(encode_base58(public_key), vector.public_key);
 }
 
 BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_8__expected)
@@ -233,12 +233,11 @@ static void test_decrypt2(const bip38_vector& vector)
     BOOST_REQUIRE(decode_base58(public_key, vector.public_key));
 
     ec_point point;
-    uint8_t out_version;
-    BOOST_REQUIRE(bip38::decrypt(point, out_version, public_key, vector.passphrase));
-    BOOST_REQUIRE_EQUAL(out_version, vector.version);
+    uint8_t version;
+    BOOST_REQUIRE(bip38::decrypt(point, version, public_key, vector.passphrase));
+    BOOST_REQUIRE_EQUAL(version, vector.version);
 
-    static const auto version = 0x00;
-    const auto expected = payment_address(version, point).to_string();
+    const auto expected = payment_address(0x00, point).to_string();
     BOOST_REQUIRE_EQUAL(expected, vector.address);
 }
 
