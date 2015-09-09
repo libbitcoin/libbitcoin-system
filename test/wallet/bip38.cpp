@@ -125,6 +125,8 @@ BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_unicode___expected)
 {
     // This vector encodes as the passphrase as base16.
     bip38_vector vector;
+    vector.version = 0x00;
+    vector.compressed = false;
     vector.passphrase = "cf92cc8100f0909080f09f92a9";
     vector.ec_secret = "64eeab5f9be2a01a8365a579511eb3373c87c40da6d2a25f05bda68fe077b66e";
     vector.private_key = "6PRW5o9FLp4gJDDVqJQKJFTpMvdsSGJxMYHtHaQBF3ooa8mwD69bapcDQn";
@@ -134,11 +136,16 @@ BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_unicode___expected)
     BOOST_REQUIRE(decode_base16(not_normalized, vector.passphrase));
     std::string passphrase(not_normalized.begin(), not_normalized.end());
 
+    const auto normal = to_normal_nfc_form(passphrase);
+    data_chunk normalized(normal.size());
+    std::copy(normal.begin(), normal.end(), normalized.begin());
+    BOOST_REQUIRE_EQUAL(encode_base16(normalized), "cf9300f0909080f09f92a9");
+
     ec_secret secret;
     BOOST_REQUIRE(decode_base16(secret, vector.ec_secret));
 
     bip38::private_key private_key;
-    bip38::encrypt(private_key, secret, passphrase, false);
+    bip38::encrypt(private_key, secret, passphrase, vector.version, vector.compressed);
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
 
