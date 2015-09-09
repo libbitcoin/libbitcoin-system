@@ -37,6 +37,12 @@ static BC_CONSTEXPR size_t salt_size = 4;
 typedef byte_array<salt_size> salt;
 
 /**
+ * A seed for use in creating an intermediate passphrase (token).
+ */
+static BC_CONSTEXPR size_t entropy_size = 8;
+typedef byte_array<entropy_size> entropy;
+
+/**
  * A seed for use in creating a key pair.
  */
 static BC_CONSTEXPR size_t seed_size = 24;
@@ -75,10 +81,19 @@ static BC_CONSTEXPR uint32_t max_token_sequence = 4095;
  * Create an intermediate passphrase for subsequent key pair generation.
  * @param[out] out_token   The new intermediate passphrase.
  * @param[in]  passphrase  A passphrase for use in the encryption.
+ * @param[in]  entropy     A random value for use in the encryption.
+ */
+BC_API void create_token(token& out_token, const std::string& passphrase,
+    const entropy& entropy);
+
+/**
+ * Create an intermediate passphrase for subsequent key pair generation.
+ * @param[out] out_token   The new intermediate passphrase.
+ * @param[in]  passphrase  A passphrase for use in the encryption.
  * @param[in]  salt        A random value for use in the encryption.
  * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
  * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
- * @return false if the lot an d/o sequence are out of range.
+ * @return false if the lot and/or sequence are out of range.
  */
 BC_API bool create_token(token& out_token, const std::string& passphrase,
     const salt& salt, uint32_t lot, uint32_t sequence);
