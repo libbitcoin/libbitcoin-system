@@ -239,37 +239,6 @@ static data_chunk new_flags(data_slice prefix, bool compressed)
     };
 }
 
-static data_chunk point_sign(uint8_t byte, data_slice buffer)
-{
-    BITCOIN_ASSERT(!buffer.empty());
-    static constexpr uint8_t low_bit_mask = 0x01;
-    const uint8_t last_byte = buffer.data()[buffer.size() - 1];
-    const uint8_t last_byte_odd_field = last_byte & low_bit_mask;
-    const uint8_t sign_byte = byte ^ last_byte_odd_field;
-    return
-    {
-        sign_byte
-    };
-}
-
-static ec_point to_point(uint8_t sign, data_slice buffer)
-{
-    return build_data(
-    {
-        data_chunk{ sign },
-        buffer
-    });
-}
-
-// This provides a unidirectional mapping for all prefix variants.
-static uint8_t address_to_key(const uint8_t address_version,
-    const data_chunk& default_prefix)
-{
-    const auto default_prefix_version = default_prefix[0];
-    return address_version == mainnet_p2pkh_version ? default_prefix_version :
-        address_version;
-}
-
 // This provides a unidirectional mapping for all prefix variants.
 static uint8_t address_from_key(const uint8_t prefix_version,
     const data_chunk& default_prefix)
@@ -279,19 +248,13 @@ static uint8_t address_from_key(const uint8_t prefix_version,
         prefix_version;
 }
 
-static data_chunk private_key_prefix(const uint8_t address_version,
+// This provides a unidirectional mapping for all prefix variants.
+static uint8_t address_to_key(const uint8_t address_version,
     const data_chunk& default_prefix)
 {
-    auto prefix_copy = default_prefix;
-    prefix_copy[0] = address_to_key(address_version, default_prefix);
-    return prefix_copy;
-}
-
-static data_chunk public_key_prefix(const uint8_t address_version)
-{
-    auto prefix_copy = prefix::public_key;
-    prefix_copy[0] = address_to_key(address_version, prefix::public_key);
-    return prefix_copy;
+    const auto default_prefix_version = default_prefix[0];
+    return address_version == mainnet_p2pkh_version ? default_prefix_version :
+        address_version;
 }
 
 static hash_digest address_hash(uint8_t version, const ec_point& point)
@@ -319,6 +282,43 @@ static bool address_validate(const ec_secret& secret, data_slice salt,
     BITCOIN_ASSERT(salt.size() == salt_size);
     const auto point = secret_to_public_key(secret, compressed);
     return address_validate(point, salt, version, compressed);
+}
+
+static data_chunk point_sign(uint8_t byte, data_slice buffer)
+{
+    BITCOIN_ASSERT(!buffer.empty());
+    static constexpr uint8_t low_bit_mask = 0x01;
+    const uint8_t last_byte = buffer.data()[buffer.size() - 1];
+    const uint8_t last_byte_odd_field = last_byte & low_bit_mask;
+    const uint8_t sign_byte = byte ^ last_byte_odd_field;
+    return
+    {
+        sign_byte
+    };
+}
+
+static ec_point to_point(uint8_t sign, data_slice buffer)
+{
+    return build_data(
+    {
+        data_chunk{ sign },
+        buffer
+    });
+}
+
+static data_chunk private_key_prefix(const uint8_t address_version,
+    const data_chunk& default_prefix)
+{
+    auto prefix_copy = default_prefix;
+    prefix_copy[0] = address_to_key(address_version, default_prefix);
+    return prefix_copy;
+}
+
+static data_chunk public_key_prefix(const uint8_t address_version)
+{
+    auto prefix_copy = prefix::public_key;
+    prefix_copy[0] = address_to_key(address_version, prefix::public_key);
+    return prefix_copy;
 }
 
 static void scrypt_token(hash_digest& out, data_slice data, data_slice salt)
