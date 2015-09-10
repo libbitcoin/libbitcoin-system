@@ -165,7 +165,7 @@ const bip38_vector bip38_test_vector7
     true
 };
 
-// generated and verified using bit2factor.com
+// generated and verified using bit2factor.com, no lot/sequence
 const bip38_vector bip38_test_vector8
 {
     "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn",
@@ -180,7 +180,7 @@ const bip38_vector bip38_test_vector8
     true
 };
 
-// generated and verified using bit2factor.com
+// generated and verified using bit2factor.com, no lot/sequence
 const bip38_vector bip38_test_vector9
 {
     "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm",
