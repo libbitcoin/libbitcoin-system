@@ -106,23 +106,14 @@ public:
     {
         /// salt: address hash salt.
         /// entropy: owner salt + lot-sequence or owner entropy
-        prefix =    slice(key, { 0, 2 });       // 2
-        flags =     slice(key, { 2, 3 })[0];    // 1
-        salt =      slice(key, { 3, 7 });       // 4
-        entropy =   slice(key, { 7, 15 });      // 8
-        data1 =     slice(key, { 15, 23 });     // 8
-        data2 =     slice(key, { 23, 39 });     // 16
-        BITCOIN_ASSERT(verify_checksum(key));   // 4 { 39, 43 }
+        prefix =    slice(key, { 0, 2 });           // 2
+        flags =     slice(key, { 2, 3 })[0];        // 1
+        salt =      slice(key, { 3, 7 });           // 4
+        entropy =   slice(key, { 7, 15 });          // 8
+        data1 =     slice(key, { 15, 23 });         // 8
+        data2 =     slice(key, { 23, 39 });         // 16
+        BITCOIN_ASSERT(verify_checksum(key));       // 4 { 39, 43 }
     }
-
-    //operator const private_key() const
-    //{
-    //    private_key key;
-    //    DEBUG_ONLY(const auto fit =) build_checked_array(key,
-    //        { prefix, { flags }, salt, entropy, data1, data2 });
-    //    BITCOIN_ASSERT(fit);
-    //    return key;
-    //}
 
     data_chunk data1;
     data_chunk data2;
@@ -136,23 +127,14 @@ public:
     {
         /// salt: address hash salt.
         /// entropy: owner salt + lot-sequence or owner entropy
-        prefix =    slice(key, { 0, 5 });       // 5
-        flags =     slice(key, { 5, 6 })[0];    // 1
-        salt =      slice(key, { 6, 10 });      // 4
-        entropy =   slice(key, { 10, 18 });     // 8
-        sign =      slice(key, { 18, 19 })[0];  // 1
-        data =      slice(key, { 19, 51 });     // 32
-        BITCOIN_ASSERT(verify_checksum(key));   // 4 { 51, 55 }
+        prefix =    slice(key, { 0, 5 });           // 5
+        flags =     slice(key, { 5, 6 })[0];        // 1
+        salt =      slice(key, { 6, 10 });          // 4
+        entropy =   slice(key, { 10, 18 });         // 8
+        sign =      slice(key, { 18, 19 })[0];      // 1
+        data =      slice(key, { 19, 51 });         // 32
+        BITCOIN_ASSERT(verify_checksum(key));       // 4 { 51, 55 }
     }
-
-    //operator const public_key() const
-    //{
-    //    public_key key;
-    //    DEBUG_ONLY(const auto fit =) build_checked_array(key,
-    //        { prefix, { flags }, salt, entropy, { sign }, data });
-    //    BITCOIN_ASSERT(fit);
-    //    return key;
-    //}
 
     uint8_t sign;
     data_chunk data;
@@ -170,15 +152,6 @@ public:
         data =      slice(value, { 17, 49 });       // 32
         BITCOIN_ASSERT(verify_checksum(value));     // 4 { 49, 53 }
     }
-
-    //operator const token() const
-    //{
-    //    token value;
-    //    DEBUG_ONLY(const auto fit =) build_checked_array(value,
-    //        { prefix, entropy, { sign }, data });
-    //    BITCOIN_ASSERT(fit);
-    //    return value;
-    //}
 
     data_chunk prefix;
     data_chunk entropy;
@@ -641,8 +614,10 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
     
     const parse_private parse(key);
     const auto compress = check_flag(parse.flags, flag_byte::ec_compressed);
-    const auto multiplied = !check_flag(parse.flags, flag_byte::ec_non_multiplied);
-    const auto version = address_from_key(parse.prefix[0], prefix::private_key);
+    const auto multiplied = !check_flag(parse.flags,
+        flag_byte::ec_non_multiplied);
+    const auto version = address_from_key(parse.prefix[0],
+        prefix::private_key);
 
     const auto success = multiplied ?
         decrypt_multiplied(out_secret, parse, passphrase, version, compress) :
