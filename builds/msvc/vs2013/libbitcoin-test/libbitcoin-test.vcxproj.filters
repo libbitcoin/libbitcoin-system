@@ -51,9 +51,6 @@
     <ClInclude Include="..\..\..\..\test\wallet\mnemonic.hpp">
       <Filter>src\wallet</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\test\wallet\bip38.hpp">
-      <Filter>src\wallet</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\test\message\get_data.cpp">

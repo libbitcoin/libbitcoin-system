@@ -254,7 +254,6 @@ test_libbitcoin_test_SOURCES = \
     test/utility/thread.cpp \
     test/utility/variable_uint_size.cpp \
     test/wallet/bip38.cpp \
-    test/wallet/bip38.hpp \
     test/wallet/hd_keys.cpp \
     test/wallet/key_formats.cpp \
     test/wallet/message.cpp \
