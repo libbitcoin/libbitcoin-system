@@ -689,17 +689,17 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
     split(encrypted1, encrypted2, parse.data, block_size);
 
     aes256_decrypt(derived2, encrypted1);
-    const auto decrypted1 = xor_data(encrypted1, derived1, 0, half, half);
+    const auto decrypted1 = xor_data(encrypted1, derived1, 0, half);
 
     aes256_decrypt(derived2, encrypted2);
-    const auto decrypted2 = xor_data(encrypted1, derived1, 0, half);
+    const auto decrypted2 = xor_data(encrypted2, derived1, 0, half, half);
 
     const auto sign_byte = point_sign(parse.sign, derived2);
     auto generated = build_data({ sign_byte, decrypted1, decrypted2 });
 
     ec_multiply(generated, factor);
     if (!compressed)
-        decompress_public_key(generated);
+        generated = decompress_public_key(generated);
 
     const auto version = address_from_key(parse.prefix[0], prefix::public_key);
     if (!address_validate(generated, parse.salt, version, compressed))
