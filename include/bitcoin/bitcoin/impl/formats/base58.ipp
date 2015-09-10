@@ -40,6 +40,18 @@ bool decode_base58(byte_array<Size>& out, const std::string &in)
     return true;
 }
 
+// TODO: determine if the sizing function is always accurate.
+template <size_t Size>
+byte_array<Size * 733 / 1000> base58_literal(const char(&string)[Size])
+{
+    // log(58) / log(256), rounded up.
+    byte_array<Size * 733 / 1000> out;
+    DEBUG_ONLY(const auto success =) decode_base58_private(out.data(),
+        out.size(), string);
+    BITCOIN_ASSERT(success);
+    return out;
+}
+
 } // libbitcoin
 
 #endif
