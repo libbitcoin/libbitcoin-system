@@ -29,6 +29,8 @@ using namespace bc::wallet;
 
 BOOST_AUTO_TEST_SUITE(bip38_tests)
 
+#ifdef WITH_ICU
+
 BOOST_AUTO_TEST_CASE(bip38__fixture__unicode_passphrase__validated)
 {
     const auto encoded_password = base16_literal("cf92cc8100f0909080f09f92a9");
@@ -136,138 +138,6 @@ BOOST_AUTO_TEST_CASE(bip38__create_token_entropy__passphrase__expected)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_SUITE(bip38__create_key_pair)
-
-// TODO: create compressed vector(s).
-
-#define BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compressed) \
-    ec_point out_point; \
-    private_key out_private; \
-    BOOST_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, compressed))
-
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair__bad_checksum__false)
-{
-    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
-    const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
-    ec_point out_point;
-    private_key out_private;
-    BOOST_REQUIRE(!create_key_pair(out_private, out_point, token, seed, 0, false));
-}
-
-// generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_8__expected)
-{
-    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
-    const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM");
-    BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 0, false);
-    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
-    BOOST_CHECK_EQUAL(encode_base16(out_point), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
-}
-
-// generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_9__expected)
-{
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
-    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
-    BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 0, false);
-    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
-    BOOST_CHECK_EQUAL(encode_base16(out_point), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
-}
-
-// generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_9_compressed__expected)
-{
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
-    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
-    BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 0, true);
-    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
-    BOOST_CHECK_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
-}
-
-// Altchan vectors are based on preliminary bidirectional mapping proposal.
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_9_compressed_testnet__expected)
-{
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
-    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
-    BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 111, true);
-    BOOST_CHECK_EQUAL(encode_base58(out_private), "9CNPN5U7RUnisUEm4w5g8WEuV2MBoQEbjxyw7NbDAPdFjDuiKRze4ztPrmA");
-    BOOST_CHECK_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-// ----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_SUITE(bip38__create_key_pair_with_confirmation)
-
-// TODO: create compressed vector(s).
-
-#define BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compressed) \
-    ec_point out_point; \
-    public_key out_public; \
-    private_key out_private; \
-    BOOST_REQUIRE(create_key_pair(out_private, out_public, out_point, token, seed, version, compressed))
-
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__bad_checksum__false)
-{
-    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
-    const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
-    ec_point out_point;
-    public_key out_public;
-    private_key out_private;
-    BOOST_REQUIRE(!create_key_pair(out_private, out_public, out_point, token, seed, 0, false));
-}
-
-// generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_8__expected)
-{
-    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
-    const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM");
-    BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 0, false);
-    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
-    BOOST_CHECK_EQUAL(encode_base58(out_public), "cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An");
-    BOOST_CHECK_EQUAL(encode_base16(out_point), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
-}
-
-// generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_9__expected)
-{
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
-    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
-    BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 0, false);
-    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
-    BOOST_CHECK_EQUAL(encode_base58(out_public), "cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC");
-    BOOST_CHECK_EQUAL(encode_base16(out_point), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
-}
-
-// generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_9_compressed__expected)
-{
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
-    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
-    BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 0, true);
-    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
-    BOOST_CHECK_EQUAL(encode_base58(out_public), "cfrm38VUEdzHWKfUjdNjV22wyFNGgtRHYhXdBFT7fWw7cCJbCobryAYUThq4BbTPP15g4SeBsug");
-    BOOST_CHECK_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
-}
-
-// Altchan vectors are based on preliminary bidirectional mapping proposal.
-BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_9_compressed_testnet__expected)
-{
-    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
-    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
-    BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 111, true);
-    BOOST_CHECK_EQUAL(encode_base58(out_private), "9CNPN5U7RUnisUEm4w5g8WEuV2MBoQEbjxyw7NbDAPdFjDuiKRze4ztPrmA");
-    BOOST_CHECK_EQUAL(encode_base58(out_public), "gauEDoSi7eYQiggVLBbkibgy2HgezVNRQBD2FJ69edWqCjgsDJTAFySGK88RZVnv6zYBNe1mU6y");
-    BOOST_CHECK_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-#ifdef WITH_ICU
 
 // ----------------------------------------------------------------------------
 
@@ -487,8 +357,138 @@ BOOST_AUTO_TEST_CASE(bip38__decrypt_public__vector_9__expected)
 
 BOOST_AUTO_TEST_SUITE_END()
 
+#endif // WITH_ICU
+
 // ----------------------------------------------------------------------------
 
-#endif // WITH_ICU
+BOOST_AUTO_TEST_SUITE(bip38__create_key_pair)
+
+// TODO: create compressed vector(s).
+
+#define BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compressed) \
+    ec_point out_point; \
+    private_key out_private; \
+    BOOST_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, compressed))
+
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair__bad_checksum__false)
+{
+    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
+    const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
+    ec_point out_point;
+    private_key out_private;
+    BOOST_REQUIRE(!create_key_pair(out_private, out_point, token, seed, 0, false));
+}
+
+// generated and verified using bit2factor.com, no lot/sequence
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_8__expected)
+{
+    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
+    const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM");
+    BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 0, false);
+    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
+    BOOST_CHECK_EQUAL(encode_base16(out_point), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
+}
+
+// generated and verified using bit2factor.com, no lot/sequence
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_9__expected)
+{
+    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
+    BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 0, false);
+    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
+    BOOST_CHECK_EQUAL(encode_base16(out_point), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
+}
+
+// generated and verified using bit2factor.com, no lot/sequence
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_9_compressed__expected)
+{
+    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
+    BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 0, true);
+    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
+    BOOST_CHECK_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+}
+
+// Altchan vectors are based on preliminary bidirectional mapping proposal.
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair__vector_9_compressed_testnet__expected)
+{
+    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
+    BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 111, true);
+    BOOST_CHECK_EQUAL(encode_base58(out_private), "9CNPN5U7RUnisUEm4w5g8WEuV2MBoQEbjxyw7NbDAPdFjDuiKRze4ztPrmA");
+    BOOST_CHECK_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_SUITE(bip38__create_key_pair_with_confirmation)
+
+// TODO: create compressed vector(s).
+
+#define BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compressed) \
+    ec_point out_point; \
+    public_key out_public; \
+    private_key out_private; \
+    BOOST_REQUIRE(create_key_pair(out_private, out_public, out_point, token, seed, version, compressed))
+
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__bad_checksum__false)
+{
+    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
+    const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
+    ec_point out_point;
+    public_key out_public;
+    private_key out_private;
+    BOOST_REQUIRE(!create_key_pair(out_private, out_public, out_point, token, seed, 0, false));
+}
+
+// generated and verified using bit2factor.com, no lot/sequence
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_8__expected)
+{
+    const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
+    const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGM");
+    BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 0, false);
+    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
+    BOOST_CHECK_EQUAL(encode_base58(out_public), "cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An");
+    BOOST_CHECK_EQUAL(encode_base16(out_point), "04c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e103bd025079e984fb4439177224e48a2d9da5768d9b886d89d22c714169723a6");
+}
+
+// generated and verified using bit2factor.com, no lot/sequence
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_9__expected)
+{
+    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
+    BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 0, false);
+    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
+    BOOST_CHECK_EQUAL(encode_base58(out_public), "cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC");
+    BOOST_CHECK_EQUAL(encode_base16(out_point), "04c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52858af96a727252a99c54e871ff7bcf9b53cb74e4da1e15d9e83625e3c91222c0");
+}
+
+// generated and verified using bit2factor.com, no lot/sequence
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_9_compressed__expected)
+{
+    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
+    BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 0, true);
+    BOOST_CHECK_EQUAL(encode_base58(out_private), "6PnQ4ihgH1pxeUWa1SDPZ4xToaTdLtjebd8Qw6KJf8xDCW67ssaAqWuJkw");
+    BOOST_CHECK_EQUAL(encode_base58(out_public), "cfrm38VUEdzHWKfUjdNjV22wyFNGgtRHYhXdBFT7fWw7cCJbCobryAYUThq4BbTPP15g4SeBsug");
+    BOOST_CHECK_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+}
+
+// Altchan vectors are based on preliminary bidirectional mapping proposal.
+BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_9_compressed_testnet__expected)
+{
+    const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
+    const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
+    BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 111, true);
+    BOOST_CHECK_EQUAL(encode_base58(out_private), "9CNPN5U7RUnisUEm4w5g8WEuV2MBoQEbjxyw7NbDAPdFjDuiKRze4ztPrmA");
+    BOOST_CHECK_EQUAL(encode_base58(out_public), "gauEDoSi7eYQiggVLBbkibgy2HgezVNRQBD2FJ69edWqCjgsDJTAFySGK88RZVnv6zYBNe1mU6y");
+    BOOST_CHECK_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+// ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()
