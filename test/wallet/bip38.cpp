@@ -88,9 +88,9 @@ BOOST_AUTO_TEST_SUITE_END()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOST_AUTO_TEST_SUITE(bip38__encrypt)
+BOOST_AUTO_TEST_SUITE(bip38__encrypt_private)
 
-static void test_encrypt(const bip38_vector& vector)
+static void test_encrypt_private(const bip38_vector& vector)
 {
     ec_secret secret;
     BOOST_REQUIRE(decode_base16(secret, vector.ec_secret));
@@ -100,28 +100,28 @@ static void test_encrypt(const bip38_vector& vector)
     BOOST_REQUIRE_EQUAL(encode_base58(private_key), vector.private_key);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_0__expected)
+BOOST_AUTO_TEST_CASE(bip38__encrypt_private__vector_0__expected)
 {
-    test_encrypt(bip38_test_vector0);
+    test_encrypt_private(bip38_test_vector0);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_1__expected)
+BOOST_AUTO_TEST_CASE(bip38__encrypt_private__vector_1__expected)
 {
-    test_encrypt(bip38_test_vector1);
+    test_encrypt_private(bip38_test_vector1);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_2_compressed__expected)
+BOOST_AUTO_TEST_CASE(bip38__encrypt_private__vector_2_compressed__expected)
 {
-    test_encrypt(bip38_test_vector2);
+    test_encrypt_private(bip38_test_vector2);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_3_compressed__expected)
+BOOST_AUTO_TEST_CASE(bip38__encrypt_private__vector_3_compressed__expected)
 {
-    test_encrypt(bip38_test_vector3);
+    test_encrypt_private(bip38_test_vector3);
 }
 
 // #3 from: github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(bip38__encrypt__vector_unicode___expected)
+BOOST_AUTO_TEST_CASE(bip38__encrypt_private__vector_unicode___expected)
 {
     // This vector encodes as the passphrase as base16.
     bip38_vector vector;
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_SUITE(bip38__decrypt1)
 
 // TODO: create compressed + multiplied vector(s).
 
-static void test_decrypt1(const bip38_vector& vector)
+static void test_decrypt_private(const bip38_vector& vector)
 {
     bip38::private_key private_key;
     BOOST_REQUIRE(decode_base58(private_key, vector.private_key));
@@ -169,65 +169,65 @@ static void test_decrypt1(const bip38_vector& vector)
     BOOST_REQUIRE_EQUAL(encode_base16(secret), vector.ec_secret);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_0__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_0__expected)
 {
-    test_decrypt1(bip38_test_vector0);
+    test_decrypt_private(bip38_test_vector0);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_1__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_1__expected)
 {
-    test_decrypt1(bip38_test_vector1);
+    test_decrypt_private(bip38_test_vector1);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_2_compressed__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_2_compressed__expected)
 {
-    test_decrypt1(bip38_test_vector2);
+    test_decrypt_private(bip38_test_vector2);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_3_compressed__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_3_compressed__expected)
 {
-    test_decrypt1(bip38_test_vector3);
+    test_decrypt_private(bip38_test_vector3);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_4_multiplied__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_4_multiplied__expected)
 {
-    test_decrypt1(bip38_test_vector4);
+    test_decrypt_private(bip38_test_vector4);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_5_multiplied__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_5_multiplied__expected)
 {
-    test_decrypt1(bip38_test_vector5);
+    test_decrypt_private(bip38_test_vector5);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_6_multiplied__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_6_multiplied_lot__expected)
 {
-    test_decrypt1(bip38_test_vector6);
+    test_decrypt_private(bip38_test_vector6);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_7_multiplied__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_7_multiplied_lot__expected)
 {
-    test_decrypt1(bip38_test_vector7);
+    test_decrypt_private(bip38_test_vector7);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_8_multiplied__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_8_multiplied__expected)
 {
-    test_decrypt1(bip38_test_vector8);
+    test_decrypt_private(bip38_test_vector8);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt1__vector_9_multiplied__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_private__vector_9_multiplied__expected)
 {
-    test_decrypt1(bip38_test_vector9);
+    test_decrypt_private(bip38_test_vector9);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-BOOST_AUTO_TEST_SUITE(bip38__decrypt2)
+BOOST_AUTO_TEST_SUITE(bip38__decrypt_public)
 
 // TODO: create compressed vector(s).
 
-static void test_decrypt2(const bip38_vector& vector)
+static void test_decrypt_public(const bip38_vector& vector)
 {
     bip38::public_key public_key;
     BOOST_REQUIRE(decode_base58(public_key, vector.public_key));
@@ -241,14 +241,24 @@ static void test_decrypt2(const bip38_vector& vector)
     BOOST_REQUIRE_EQUAL(expected, vector.address);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt2__vector_8__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_public__vector_6_lot__expected)
 {
-    test_decrypt2(bip38_test_vector8);
+    test_decrypt_public(bip38_test_vector6);
 }
 
-BOOST_AUTO_TEST_CASE(bip38__decrypt2__vector_9__expected)
+BOOST_AUTO_TEST_CASE(bip38__decrypt_public__vector_7_lot__expected)
 {
-    test_decrypt2(bip38_test_vector9);
+    test_decrypt_public(bip38_test_vector7);
+}
+
+BOOST_AUTO_TEST_CASE(bip38__decrypt_public__vector_8__expected)
+{
+    test_decrypt_public(bip38_test_vector8);
+}
+
+BOOST_AUTO_TEST_CASE(bip38__decrypt_public__vector_9__expected)
+{
+    test_decrypt_public(bip38_test_vector9);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
