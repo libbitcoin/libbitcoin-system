@@ -403,6 +403,7 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
     ec_point& out_point, const token& token, const seed& seed, uint8_t version,
     bool compressed)
 {
+    // TODO: validate token prefix.
     if (!verify_checksum(token))
         return false;
 
@@ -609,6 +610,7 @@ static bool decrypt_secret(ec_secret& out_secret, const parse_private& parse,
 bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
     const private_key& key, const std::string& passphrase)
 {
+    // TODO: validate private_key prefix.
     if (!verify_checksum(key))
         return false;
     
@@ -635,6 +637,7 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
 bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
     const std::string& passphrase)
 {
+    // TODO: validate public_key prefix.
     if (!verify_checksum(key))
         return false;
 
