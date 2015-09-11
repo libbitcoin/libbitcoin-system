@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -27,79 +27,85 @@ BOOST_AUTO_TEST_SUITE(inventory_vector_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_insufficient_bytes_failure)
 {
-    data_chunk raw(1);
-    message::inventory_vector instance;
+    const data_chunk raw{ 1 };
+    message::inventory_vector instance{};
 
     BOOST_REQUIRE_EQUAL(false, instance.from_data(raw));
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::inventory_vector expected{
+    const message::inventory_vector expected
+    {
         message::inventory_type_id::error,
-        hash_digest{
-            0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
-            0xbb, 0x85, 0x0a, 0x3d, 0x79, 0x24, 0xed, 0x0f,
-            0xc3, 0x0d, 0x6f, 0x55, 0x7d, 0x71, 0x12, 0x1a,
-            0x37, 0xc0, 0xb0, 0x32, 0xf0, 0xd6, 0x6e, 0xdf
+        {
+            {
+                0x44, 0x9a, 0x0d, 0x24, 0x9a, 0xd5, 0x39, 0x89,
+                0xbb, 0x85, 0x0a, 0x3d, 0x79, 0x24, 0xed, 0x0f,
+                0xc3, 0x0d, 0x6f, 0x55, 0x7d, 0x71, 0x12, 0x1a,
+                0x37, 0xc0, 0xb0, 0x32, 0xf0, 0xd6, 0x6e, 0xdf
+            }
         }
     };
 
-    data_chunk data = expected.to_data();
-
-    auto result = message::inventory_vector::factory_from_data(data);
+    const auto data = expected.to_data();
+    const auto result = message::inventory_vector::factory_from_data(data);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::inventory_vector expected{
+    const message::inventory_vector expected
+    {
         message::inventory_type_id::transaction,
-        hash_digest{
-            0x44, 0x9a, 0x0d, 0xee, 0x9a, 0xd5, 0x39, 0xee,
-            0xee, 0x85, 0x0a, 0x3d, 0xee, 0x24, 0xed, 0x0f,
-            0xc3, 0xee, 0x6f, 0x55, 0x7d, 0xee, 0x12, 0x1a,
-            0x37, 0xc0, 0xee, 0x32, 0xf0, 0xd6, 0xee, 0xdf
+        {
+            {
+                0x44, 0x9a, 0x0d, 0xee, 0x9a, 0xd5, 0x39, 0xee,
+                0xee, 0x85, 0x0a, 0x3d, 0xee, 0x24, 0xed, 0x0f,
+                0xc3, 0xee, 0x6f, 0x55, 0x7d, 0xee, 0x12, 0x1a,
+                0x37, 0xc0, 0xee, 0x32, 0xf0, 0xd6, 0xee, 0xdf
+            }
         }
     };
 
-    data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-
-    auto result = message::inventory_vector::factory_from_data(istream);
+    const auto data = expected.to_data();
+    data_source istream(data);
+    const auto result = message::inventory_vector::factory_from_data(istream);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::inventory_vector expected{
+    const message::inventory_vector expected
+    {
         message::inventory_type_id::block,
-        hash_digest{
-            0x66, 0x9a, 0x0d, 0x24, 0x66, 0xd5, 0x39, 0x89,
-            0xbb, 0x66, 0x0a, 0x3d, 0x79, 0x66, 0xed, 0x0f,
-            0xc3, 0x0d, 0x66, 0x55, 0x7d, 0x71, 0x66, 0x1a,
-            0x37, 0xc0, 0xb0, 0x66, 0xf0, 0xd6, 0x6e, 0x66
+        {
+            {
+                0x66, 0x9a, 0x0d, 0x24, 0x66, 0xd5, 0x39, 0x89,
+                0xbb, 0x66, 0x0a, 0x3d, 0x79, 0x66, 0xed, 0x0f,
+                0xc3, 0x0d, 0x66, 0x55, 0x7d, 0x71, 0x66, 0x1a,
+                0x37, 0xc0, 0xb0, 0x66, 0xf0, 0xd6, 0x6e, 0x66
+            }
         }
     };
 
-    data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    const auto data = expected.to_data();
+    data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::inventory_vector::factory_from_data(source);
+    const auto result = message::inventory_vector::factory_from_data(source);
 
     BOOST_REQUIRE(result.is_valid());
     BOOST_REQUIRE(expected == result);
-    BOOST_REQUIRE_EQUAL(data.size(), result.satoshi_size());
-    BOOST_REQUIRE_EQUAL(expected.satoshi_size(), result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(data.size(), result.serialized_size());
+    BOOST_REQUIRE_EQUAL(expected.serialized_size(), result.serialized_size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

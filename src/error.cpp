@@ -19,7 +19,6 @@
  */
 #include <bitcoin/bitcoin/error.hpp>
 
-#include <system_error>
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/compat.hpp>
@@ -185,9 +184,9 @@ std::error_condition error_category_impl::default_error_condition(int ev)
 namespace libbitcoin {
 namespace error {
 
-    std::error_code make_error_code(error_code_t e)
+    code make_error_code(error_code_t e)
     {
-        return std::error_code(e, get_error_category_instance());
+        return code(e, get_error_category_instance());
     }
 
     std::error_condition make_error_condition(error_condition_t e)
@@ -195,14 +194,14 @@ namespace error {
         return std::error_condition(e, get_error_category_instance());
     }
 
-    error_code_t boost_to_error_code(const boost::system::error_code& ec)
+    error_code_t boost_to_error_code(const boost_code& ec)
     {
         namespace boost_error = boost::system::errc;
 
 #ifdef _MSC_VER
         // TODO: is there a means to map ASIO errors to boost errors?
         // ASIO codes are unique on Windows but not on Linux.
-        namespace boost_error_asio = boost::asio::error;
+        namespace asio_error = boost::asio::error;
 #endif
         // TODO: use a static map (hash table)
         switch (ec.value())
@@ -215,10 +214,10 @@ namespace error {
 
             // network errors
 #ifdef _MSC_VER
-            case boost_error_asio::connection_aborted:
-            case boost_error_asio::connection_reset:
-            case boost_error_asio::operation_aborted:
-            case boost_error_asio::operation_not_supported:
+            case asio_error::connection_aborted:
+            case asio_error::connection_reset:
+            case asio_error::operation_aborted:
+            case asio_error::operation_not_supported:
 #endif
             case boost_error::connection_aborted:
             case boost_error::connection_refused:
@@ -232,7 +231,7 @@ namespace error {
                 return error::operation_failed;
 
 #ifdef _MSC_VER
-            case boost_error_asio::address_family_not_supported:
+            case asio_error::address_family_not_supported:
 #endif
             case boost_error::address_family_not_supported:
             case boost_error::address_not_available:
@@ -271,7 +270,7 @@ namespace error {
                 return error::bad_stream;
 
 #ifdef _MSC_VER
-            case boost_error_asio::timed_out:
+            case asio_error::timed_out:
 #endif
             case boost_error::stream_timeout:
             case boost_error::timed_out:

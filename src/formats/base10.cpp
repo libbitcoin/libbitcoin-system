@@ -31,7 +31,7 @@ static bool is_digit(const char c)
     return '0' <= c && c <= '9';
 }
 
-template<char C>
+template <char C>
 bool char_is(const char c)
 {
     return c == C;

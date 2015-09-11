@@ -24,11 +24,9 @@
 
 namespace libbitcoin {
 
-/**
- * This is a private helper function, so please do not use it.
- * It is only exposed here to help template implementation.
- */
-BC_API bool decode_base16_private(uint8_t* out, size_t out_size, const char* in);
+// For template implementation only, do not call directly.
+BC_API bool decode_base16_private(uint8_t* out, size_t out_size,
+    const char* in);
 
 template <size_t Size>
 bool decode_base16(byte_array<Size>& out, const std::string &in)
@@ -44,7 +42,7 @@ bool decode_base16(byte_array<Size>& out, const std::string &in)
     return true;
 }
 
-template<size_t Size>
+template <size_t Size>
 byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
 {
     byte_array<(Size - 1) / 2> out;
@@ -57,4 +55,3 @@ byte_array<(Size - 1) / 2> base16_literal(const char (&string)[Size])
 } // libbitcoin
 
 #endif
-

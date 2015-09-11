@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/operation.hpp>
+
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -65,7 +66,7 @@ void operation::reset()
 
 bool operation::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -77,13 +78,10 @@ bool operation::from_data(std::istream& stream)
 
 bool operation::from_data(reader& source)
 {
-    bool result = true;
-
+    auto result = true;
     reset();
-
-    uint8_t raw_byte = source.read_byte();
+    const auto raw_byte = source.read_byte();
     result = source;
-
     code = static_cast<opcode>(raw_byte);
     result &= (raw_byte != 0 || code == opcode::zero);
 
@@ -92,12 +90,9 @@ bool operation::from_data(reader& source)
 
     if (result && operation::must_read_data(code))
     {
-        auto read_n_bytes =
-            read_opcode_data_byte_count(code, raw_byte, source);
-
-        data = source.read_data(read_n_bytes);
-
-        result = source && (read_n_bytes || data.empty());
+        const auto count = read_opcode_data_byte_count(code, raw_byte, source);
+        data = source.read_data(count);
+        result = source && (data.size() == count);
     }
 
     if (!result)
@@ -109,10 +104,10 @@ bool operation::from_data(reader& source)
 data_chunk operation::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -126,8 +121,7 @@ void operation::to_data(writer& sink) const
 {
     if (code != opcode::raw_data)
     {
-        uint8_t raw_byte = static_cast<uint8_t>(code);
-
+        auto raw_byte = static_cast<uint8_t>(code);
         if (code == opcode::special)
             raw_byte = static_cast<uint8_t>(data.size());
 
@@ -157,7 +151,7 @@ void operation::to_data(writer& sink) const
     sink.write_data(data);
 }
 
-uint64_t operation::satoshi_size() const
+uint64_t operation::serialized_size() const
 {
     uint64_t size = 1 + data.size();
 
@@ -255,15 +249,19 @@ bool is_push(const opcode code)
         || code == opcode::op_16;
 }
 
-uint64_t count_non_push(const operation::stack& operations)
+uint64_t count_non_push(const operation::stack& ops)
 {
-    return std::count_if(operations.begin(), operations.end(),
-        [](const operation& op) { return !is_push(op.code); });
+    const auto found = [](const operation& op)
+    {
+        return !is_push(op.code);
+    };
+
+    return std::count_if(ops.begin(), ops.end(), found);
 }
 
-bool is_push_only(const operation::stack& operations)
+bool is_push_only(const operation::stack& ops)
 {
-    return count_non_push(operations) == 0;
+    return count_non_push(ops) == 0;
 }
 
 bool is_pubkey_type(const operation::stack& ops)
@@ -303,6 +301,7 @@ bool is_stealth_info_type(const operation::stack& ops)
 
 bool is_multisig_type(const operation::stack&)
 {
+    // TODO: implement.
     return false;
 }
 
@@ -310,6 +309,7 @@ bool is_pubkey_hash_sig_type(const operation::stack& ops)
 {
     if (ops.size() != 2 || !is_push_only(ops))
         return false;
+
     const ec_point& last_data = ops.back().data;
     return verify_public_key_fast(last_data);
 }
@@ -319,13 +319,11 @@ bool is_script_code_sig_type(const operation::stack& ops)
     if (ops.size() < 2 || !is_push_only(ops))
         return false;
 
-    const data_chunk& last_data = ops.back().data;
-
+    const auto& last_data = ops.back().data;
     if (last_data.empty())
         return false;
 
     script script_code;
-
     if (!script_code.from_data(last_data, false, script::parse_mode::strict))
         return false;
 
@@ -336,5 +334,5 @@ bool is_script_code_sig_type(const operation::stack& ops)
         script_code.operations.back().code == opcode::checkmultisig;
 }
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin

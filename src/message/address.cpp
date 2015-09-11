@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/address.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -26,6 +27,8 @@
 
 namespace libbitcoin {
 namespace message {
+
+const std::string message::address::command = "addr";
 
 address address::factory_from_data(const data_chunk& data)
 {
@@ -60,7 +63,7 @@ void address::reset()
 
 bool address::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -72,7 +75,7 @@ bool address::from_data(std::istream& stream)
 
 bool address::from_data(reader& source)
 {
-    bool result = true;
+    auto result = true;
 
     reset();
 
@@ -94,10 +97,10 @@ bool address::from_data(reader& source)
 data_chunk address::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -110,16 +113,15 @@ void address::to_data(std::ostream& stream) const
 void address::to_data(writer& sink) const
 {
     sink.write_variable_uint_little_endian(addresses.size());
-
     for (const network_address& net_address : addresses)
         net_address.to_data(sink, true);
 }
 
-uint64_t address::satoshi_size() const
+uint64_t address::serialized_size() const
 {
-    return variable_uint_size(addresses.size())
-        + (addresses.size() * network_address::satoshi_fixed_size(true));
+    return variable_uint_size(addresses.size()) + 
+        (addresses.size() * network_address::satoshi_fixed_size(true));
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

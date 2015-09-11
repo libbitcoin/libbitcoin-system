@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -122,9 +122,9 @@ void ostream_writer::write_data(const data_chunk& data)
     write_data<const data_chunk>(data);
 }
 
-void ostream_writer::write_data(const uint8_t* data, size_t n_bytes)
+void ostream_writer::write_data(const uint8_t* data, size_t size)
 {
-    stream_.write(reinterpret_cast<const char*>(data), n_bytes);
+    stream_.write(reinterpret_cast<const char*>(data), size);
 }
 
 void ostream_writer::write_hash(const hash_digest& value)
@@ -137,17 +137,11 @@ void ostream_writer::write_short_hash(const short_hash& value)
     stream_.write(reinterpret_cast<const char*>(value.data()), value.size());
 }
 
-void ostream_writer::write_fixed_string(const std::string& value, size_t string_size)
+void ostream_writer::write_fixed_string(const std::string& value, size_t size)
 {
-    size_t max_size = std::max(string_size, value.size());
-    data_chunk raw_string(string_size, 0);
-
-    std::copy_n(value.begin(), max_size, raw_string.begin());
-
-    // conditionally truncate
-    if (max_size > string_size)
-        raw_string.resize(string_size);
-
+    const auto min_size = std::min(size, value.size());
+    data_chunk raw_string(size, 0);
+    std::copy_n(value.begin(), min_size, raw_string.begin());
     write_data(raw_string);
 }
 
@@ -157,4 +151,4 @@ void ostream_writer::write_string(const std::string& value)
     stream_.write(value.data(), value.size());
 }
 
-}
+} // namespace libbitcoin

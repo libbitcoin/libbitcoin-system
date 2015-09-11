@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_SETTINGS_HPP
-#define LIBBITCOIN_SETTINGS_HPP
+#ifndef LIBBITCOIN_NETWORK_SETTINGS_HPP
+#define LIBBITCOIN_NETWORK_SETTINGS_HPP
 
 #include <cstdint>
 #include <boost/filesystem.hpp>
@@ -42,6 +42,7 @@ struct BC_API settings
     uint32_t channel_heartbeat_minutes;
     uint32_t channel_inactivity_minutes;
     uint32_t channel_expiration_minutes;
+    uint32_t channel_germination_seconds;
     uint32_t host_pool_capacity;
     bool relay_transactions;
     boost::filesystem::path hosts_file;

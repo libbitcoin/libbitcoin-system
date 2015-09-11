@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -25,8 +25,8 @@
 #include <string>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/chain/transaction_input.hpp>
-#include <bitcoin/bitcoin/chain/transaction_output.hpp>
+#include <bitcoin/bitcoin/chain/input.hpp>
+#include <bitcoin/bitcoin/chain/output.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -37,59 +37,41 @@ namespace chain {
 class BC_API transaction
 {
 public:
-
     typedef std::vector<transaction> list;
 
-    static const std::string satoshi_command;
-
-    uint32_t version;
-    uint32_t locktime;
-    transaction_input::list inputs;
-    transaction_output::list outputs;
+    static transaction factory_from_data(const data_chunk& data);
+    static transaction factory_from_data(std::istream& stream);
+    static transaction factory_from_data(reader& source);
+    static uint64_t satoshi_fixed_size();
 
     bool from_data(const data_chunk& data);
-
     bool from_data(std::istream& stream);
-
     bool from_data(reader& source);
-
     data_chunk to_data() const;
-
     void to_data(std::ostream& stream) const;
-
     void to_data(writer& sink) const;
-
     std::string to_string() const;
-
     bool is_valid() const;
-
     void reset();
-
     hash_digest hash() const;
 
     // hash_type_code is used by OP_CHECKSIG
     hash_digest hash(uint32_t hash_type_code) const;
-
     bool is_coinbase() const;
-
     bool is_final(uint64_t block_height, uint32_t block_time) const;
-
     bool is_locktime_conflict() const;
-
     uint64_t total_output_value() const;
+    uint64_t serialized_size() const;
 
-    uint64_t satoshi_size() const;
+    static const std::string command;
 
-    static transaction factory_from_data(const data_chunk& data);
-
-    static transaction factory_from_data(std::istream& stream);
-
-    static transaction factory_from_data(reader& source);
-
-    static uint64_t satoshi_fixed_size();
+    uint32_t version;
+    uint32_t locktime;
+    input::list inputs;
+    output::list outputs;
 };
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin
 
 #endif

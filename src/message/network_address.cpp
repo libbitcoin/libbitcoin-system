@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/network_address.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -27,7 +28,8 @@
 namespace libbitcoin {
 namespace message {
 
-ip_address null_address = {
+ip_address null_address =
+{
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
@@ -57,10 +59,10 @@ network_address network_address::factory_from_data(reader& source,
 
 bool network_address::is_valid() const
 {
-    return (timestamp != 0) ||
-        (services != 0) ||
-        (port != 0) ||
-        (ip != null_address);
+    return (timestamp != 0)
+        || (services != 0)
+        || (port != 0)
+        || (ip != null_address);
 }
 
 void network_address::reset()
@@ -73,7 +75,7 @@ void network_address::reset()
 
 bool network_address::from_data(const data_chunk& data, bool with_timestamp)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream, with_timestamp);
 }
 
@@ -85,28 +87,31 @@ bool network_address::from_data(std::istream& stream, bool with_timestamp)
 
 bool network_address::from_data(reader& source, bool with_timestamp)
 {
+    bool result = false;
+
     reset();
 
     if (with_timestamp)
         timestamp = source.read_4_bytes_little_endian();
 
     services = source.read_8_bytes_little_endian();
-    source.read_data(ip.data(), ip.size());
+    size_t ip_size = source.read_data(ip.data(), ip.size());
     port = source.read_2_bytes_big_endian();
+    result = source && (ip.size() == ip_size);
 
-    if (!source)
+    if (!result)
         reset();
 
-    return source;
+    return result;
 }
 
 data_chunk network_address::to_data(bool with_timestamp) const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream, with_timestamp);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size(with_timestamp));
+    BITCOIN_ASSERT(data.size() == serialized_size(with_timestamp));
     return data;
 }
 
@@ -126,7 +131,7 @@ void network_address::to_data(writer& sink, bool with_timestamp) const
     sink.write_2_bytes_big_endian(port);
 }
 
-uint64_t network_address::satoshi_size(bool with_timestamp) const
+uint64_t network_address::serialized_size(bool with_timestamp) const
 {
     return network_address::satoshi_fixed_size(with_timestamp);
 }
@@ -134,12 +139,11 @@ uint64_t network_address::satoshi_size(bool with_timestamp) const
 uint64_t network_address::satoshi_fixed_size(bool with_timestamp)
 {
     uint64_t result = 26;
-
     if (with_timestamp)
         result += 4;
 
     return result;
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -30,10 +30,8 @@ uint32_t inventory_type_to_number(inventory_type_id inv_type)
         case inventory_type_id::none:
         default:
             return 0;
-
         case inventory_type_id::transaction:
             return 1;
-
         case inventory_type_id::block:
             return 2;
     }
@@ -54,5 +52,5 @@ inventory_type_id inventory_type_from_number(uint32_t raw_type)
     }
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

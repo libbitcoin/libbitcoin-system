@@ -22,37 +22,39 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include <system_error>
-#include <boost/asio.hpp>
 #include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/network/channel_proxy.hpp>
+#include <bitcoin/bitcoin/network/proxy.hpp>
 #include <bitcoin/bitcoin/network/timeout.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
+
+INITIALIZE_TRACK(bc::network::acceptor);
 
 namespace libbitcoin {
 namespace network {
 
 using std::placeholders::_1;
-using boost::asio::ip::tcp;
 
-acceptor::acceptor(threadpool& pool, tcp_acceptor_ptr accept,
+acceptor::acceptor(threadpool& pool, asio::acceptor_ptr accept,
     const timeout& timeouts)
-  : pool_(pool), timeouts_(timeouts), tcp_acceptor_(accept)
+  : pool_(pool), timeouts_(timeouts), asio_acceptor_(accept),
+    CONSTRUCT_TRACK(acceptor, LOG_NETWORK)
 {
 }
 
 void acceptor::accept(accept_handler handle_accept)
 {
-    const auto socket = std::make_shared<tcp::socket>(pool_.service());
+    const auto socket = std::make_shared<asio::socket>(pool_.service());
 
-    tcp_acceptor_->async_accept(*socket,
-        std::bind(&acceptor::call_handle_accept,
+    asio_acceptor_->async_accept(*socket,
+        std::bind(&acceptor::create_channel,
             shared_from_this(), _1, socket, handle_accept));
 }
 
-void acceptor::call_handle_accept(const boost::system::error_code& ec,
-    socket_ptr socket, accept_handler handle_accept)
+void acceptor::create_channel(const boost_code& ec, asio::socket_ptr socket,
+    accept_handler handle_accept)
 {
     if (ec)
     {
@@ -60,8 +62,8 @@ void acceptor::call_handle_accept(const boost::system::error_code& ec,
         return;
     }
 
-    const auto node = std::make_shared<channel>(pool_, socket, timeouts_);
-    handle_accept(error::success, node);
+    const auto peer = std::make_shared<channel>(pool_, socket, timeouts_);
+    handle_accept(error::success, peer);
 }
 
 } // namespace network

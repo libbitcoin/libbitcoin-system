@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_TIMEOUT_HPP
-#define LIBBITCOIN_TIMEOUT_HPP
+#ifndef LIBBITCOIN_NETWORK_TIMEOUT_HPP
+#define LIBBITCOIN_NETWORK_TIMEOUT_HPP
 
 #include <cstdint>
-#include <boost/date_time.hpp>
-#include <boost/system/error_code.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/error.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -32,22 +32,24 @@ class BC_API timeout
 {
 public:
     static const timeout defaults;
-    static bool canceled(const boost::system::error_code& ec);
+    static bool canceled(const boost_code& ec);
 
     timeout(
         uint32_t connect_timeout_seconds=5,
         uint32_t channel_handshake_seconds=30,
         uint32_t channel_revival_minutes=5,
         uint32_t channel_heartbeat_minutes=5,
-        uint32_t channel_inactivity_minutes = 30,
-        uint32_t channel_expiration_minutes=90);
+        uint32_t channel_inactivity_minutes=30,
+        uint32_t channel_expiration_minutes=90,
+        uint32_t channel_germination_seconds=30);
 
-    boost::posix_time::time_duration connect;
-    boost::posix_time::time_duration handshake;
-    boost::posix_time::time_duration revival;
-    boost::posix_time::time_duration heartbeat;
-    boost::posix_time::time_duration inactivity;
-    boost::posix_time::time_duration expiration;
+    asio::duration connect;
+    asio::duration handshake;
+    asio::duration revival;
+    asio::duration heartbeat;
+    asio::duration inactivity;
+    asio::duration expiration;
+    asio::duration germination;
 };
 
 } // namespace network

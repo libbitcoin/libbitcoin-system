@@ -26,6 +26,13 @@
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
+
+/// Alias for error code declarations.
+typedef std::error_code code;
+
+/// Alias for boost error code declarations.
+typedef boost::system::error_code boost_code;
+
 namespace error {
 
     // The numeric values of these codes may change without notice.
@@ -112,10 +119,9 @@ namespace error {
         //forced_removal
     };
 
-    BC_API std::error_code make_error_code(error_code_t e);
+    BC_API code make_error_code(error_code_t e);
     BC_API std::error_condition make_error_condition(error_condition_t e);
-    BC_API error_code_t boost_to_error_code(
-        const boost::system::error_code& ec);
+    BC_API error_code_t boost_to_error_code(const boost_code& ec);
 
 } // namespace error
 } // namespace libbitcoin

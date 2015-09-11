@@ -20,34 +20,21 @@
 #ifndef LIBBITCOIN_WALLET_PAYMENT_ADDRESS_HPP
 #define LIBBITCOIN_WALLET_PAYMENT_ADDRESS_HPP
 
+#include <algorithm>
+#include <cstddef>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
 /**
- * A class for handling Bitcoin addresses. Supports encoding and decoding
- * Bitcoin string addresses.
- *
- * To validate a Bitcoin address we can try to set a string address.
- *
- * @code
- *   payment_address payaddr;
- *   if (!payaddr.from_string("155GwFbFET2HCT6r6jHAHUoxc897sSdjaq"))
- *       // Address is invalid
- * @endcode
- *
- * To check whether a payment_address has successfully been set, the
- * hash value can be compared to null_short_hash (defined in constants.hpp).
- *
- * @code
- *   if (payaddr.version() == payment_address::invalid_version)
- *       // This payment_address is empty.
- * @endcode
+ * A class for working with Bitcoin addresses.
  */
 class BC_API payment_address
 {
@@ -72,33 +59,23 @@ public:
 #endif
 
     payment_address();
-
+    payment_address(uint8_t version, const ec_point& point);
     payment_address(uint8_t version, const short_hash& hash);
-
     payment_address(const std::string& encoded_address);
 
+    void set(uint8_t version, const ec_point& point);
     void set(uint8_t version, const short_hash& hash);
-
     uint8_t version() const;
-
     const short_hash& hash() const;
-
     bool from_string(const std::string& encoded_address);
-
     std::string to_string() const;
-
     void set_public_key_hash(const short_hash& pubkey_hash);
-
     void set_script_hash(const short_hash& script_hash);
-
     void set_public_key(const ec_point& public_key);
-
     void set_script(const chain::script& eval_script);
 
 private:
-
     uint8_t version_ = invalid_version;
-
     short_hash hash_ = null_short_hash;
 };
 
@@ -109,6 +86,8 @@ private:
 BC_API bool extract(payment_address& address, const chain::script& script);
 
 BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
+
+// TODO: move wrap utilities to "checked.hpp/cpp"
 
 /**
  * Unwrap a wrapped payload.
@@ -140,8 +119,19 @@ BC_API bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
  */
 BC_API data_chunk wrap(uint8_t version, data_slice payload);
 
-} // end wallet
-} // end libbitcoin
+/**
+ * Craeted a checked wrapper and copy into array instance.
+ */
+template <size_t Size>
+void wrap(byte_array<Size>& target, uint8_t version, data_slice payload)
+{
+    const auto checked = wrap(version, payload);
+    BITCOIN_ASSERT(checked.size() == Size);
+    std::copy(checked.begin(), checked.end(), target.begin());
+}
+
+} // namspace wallet
+} // namspace libbitcoin
 
 // Allow payment_address to be in indexed in std::*map classes.
 namespace std
@@ -168,6 +158,6 @@ namespace std
         }
     };
 
-} // end std
+} // namspace std
 
 #endif

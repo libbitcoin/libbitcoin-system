@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -28,30 +28,30 @@
 namespace libbitcoin {
 
 /**
- * The size in bytes of the key for aes routines.
+ * The secret for aes256 block cypher.
  */
 BC_CONSTEXPR uint8_t aes256_key_size = 32;
+typedef byte_array<aes256_key_size> aes_secret;
 
 /**
- * The size in bytes of the block for aes routines.
+ * The data block for use with aes256 block cypher.
  */
 BC_CONSTEXPR uint8_t aes256_block_size = 16;
+typedef byte_array<aes256_block_size> aes_block;
 
 /**
- * Perform aes256 encryption on the 32 byte data block,
- * given the specified 16 byte key.
- *
- * aes256_encrypt(key, block)
+ * Perform aes256 encryption on the specified data block.
  */
-BC_API void aes256_encrypt(const data_chunk& key, data_chunk& block);
+BC_API void aes256_encrypt(const aes_secret& key, aes_block& block);
 
 /**
- * Perform aes256 decryption on the 16 byte data block,
- * given the specified 32 byte key.
- *
- * aes256_decrypt(key, block)
+ * Perform aes256 decryption on the specified data block.
  */
-BC_API void aes256_decrypt(const data_chunk& key, data_chunk& block);
+BC_API void aes256_decrypt(const aes_secret& key, aes_block& block);
+
+// DEPRECATED
+BC_API void aes256_encrypt(data_slice key, data_chunk& block);
+BC_API void aes256_decrypt(data_slice key, data_chunk& block);
 
 } // namespace libbitcoin
 

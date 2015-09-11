@@ -394,7 +394,7 @@ BOOST_AUTO_TEST_CASE(factory_from_data_stream_test)
 {
     auto raw = to_data_chunk(base16_literal(
         "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
-    boost::iostreams::stream<byte_source<data_chunk>> istream(raw);
+    data_source istream(raw);
 
     auto instance = chain::script::factory_from_data(
         istream, false, chain::script::parse_mode::strict);
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(factory_from_data_reader_test)
 {
     auto raw = to_data_chunk(base16_literal(
         "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
-    boost::iostreams::stream<byte_source<data_chunk>> istream(raw);
+    data_source istream(raw);
     istream_reader source(istream);
 
     auto instance = chain::script::factory_from_data(

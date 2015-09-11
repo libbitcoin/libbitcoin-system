@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -26,7 +26,7 @@
 
 namespace libbitcoin {
 
-BC_API size_t variable_uint_size(uint64_t v);
+BC_API size_t variable_uint_size(uint64_t value);
 
 } // namespace libbitcoin
 

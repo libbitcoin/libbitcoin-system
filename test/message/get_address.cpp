@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -27,44 +27,38 @@ BOOST_AUTO_TEST_SUITE(get_address_tests)
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_chunk)
 {
-    message::get_address expected;
-
-    data_chunk data = expected.to_data();
-
-    auto result = message::get_address::factory_from_data(data);
+    const message::get_address expected{};
+    const auto data = expected.to_data();
+    const auto result = message::get_address::factory_from_data(data);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_stream)
 {
-    message::get_address expected;
-
-    data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
-
-    auto result = message::get_address::factory_from_data(istream);
+    const message::get_address expected{};
+    const auto data = expected.to_data();
+    data_source istream(data);
+    const auto result = message::get_address::factory_from_data(istream);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size());
 }
 
 BOOST_AUTO_TEST_CASE(roundtrip_to_data_factory_from_data_reader)
 {
-    message::get_address expected;
-
-    data_chunk data = expected.to_data();
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    const message::get_address expected{};
+    const auto data = expected.to_data();
+    data_source istream(data);
     istream_reader source(istream);
-
-    auto result = message::get_address::factory_from_data(source);
+    const auto result = message::get_address::factory_from_data(source);
 
     BOOST_REQUIRE_EQUAL(0u, data.size());
     BOOST_REQUIRE(result.is_valid());
-    BOOST_REQUIRE_EQUAL(0u, result.satoshi_size());
+    BOOST_REQUIRE_EQUAL(0u, result.serialized_size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

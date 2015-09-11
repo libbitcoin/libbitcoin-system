@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -21,65 +21,61 @@
 #define LIBBITCOIN_CONTAINER_SOURCE_HPP
 
 #include <algorithm>
-//#include <iosfwd>
+#include <cstdint>
 #include <boost/iostreams/categories.hpp>
-#include <boost/static_assert.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
 
 // modified from boost.iostreams example
-// http://www.boost.org/doc/libs/1_55_0/libs/iostreams/doc/tutorial/container_source.html
-template<typename Container, typename SourceType, typename CharType>
+// boost.org/doc/libs/1_55_0/libs/iostreams/doc/tutorial/container_source.html
+template <typename Container, typename SourceType, typename CharType>
 class BC_API container_source
 {
 public:
-
     typedef CharType char_type;
     typedef boost::iostreams::source_tag category;
 
     container_source(const Container& container)
-        : container_(container), pos_(0)
+      : container_(container), position_(0)
     {
-        BOOST_STATIC_ASSERT((sizeof(SourceType) == sizeof(CharType)));
+        static_assert(sizeof(SourceType) == sizeof(CharType), "invalid size");
     }
 
-    std::streamsize read(char_type* s, std::streamsize n)
+    std::streamsize read(char_type* buffer, std::streamsize size)
     {
-        auto amt = static_cast<std::streamsize>(container_.size() - pos_);
-        auto result = std::min(n, amt);
+        const auto amount = container_.size() - position_;
+        const auto result = std::min(size,
+            static_cast<std::streamsize>(amount));
 
-        if (result > 0)
-        {
-            BITCOIN_ASSERT(result < std::numeric_limits<typename Container::size_type>::max());
-			BITCOIN_ASSERT(pos_ + static_cast<typename Container::size_type>(result) < std::numeric_limits<typename Container::size_type>::max());
+        // TODO: use ios eof symbol (template-based).
+        if (result <= 0)
+            return -1;
 
-            auto upperbound = pos_ + static_cast<typename Container::size_type>(result);
+        const auto value = static_cast<typename Container::size_type>(result);
+        DEBUG_ONLY(const auto maximum = 
+            std::numeric_limits<typename Container::size_type>::max());
+        BITCOIN_ASSERT(value < maximum);
+        BITCOIN_ASSERT(position_ + value < maximum);
 
-            std::copy(
-                container_.begin() + pos_,
-                container_.begin() + upperbound,
-                s);
-
-            pos_ = upperbound;
-        }
-        else
-        {
-            result = -1; // EOF
-        }
-
+        const auto limit = position_ + value;
+        const auto start = container_.begin() + position_;
+        const auto end = container_.begin() + limit;
+        std::copy(start, end, buffer);
+        position_ = limit;
         return result;
     }
 
 private:
-
     const Container& container_;
-    typename Container::size_type pos_;
+    typename Container::size_type position_;
 };
 
-template<typename Container>
+template <typename Container>
 using byte_source = container_source<Container, uint8_t, char>;
+
+using data_source = boost::iostreams::stream<byte_source<data_chunk>>;
 
 } // namespace libbitcoin
 

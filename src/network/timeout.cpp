@@ -22,7 +22,7 @@
 #include <cstdint>
 #include <boost/asio.hpp>
 #include <boost/date_time.hpp>
-#include <boost/system/error_code.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -38,20 +38,22 @@ timeout::timeout(
     uint32_t channel_revival_minutes,
     uint32_t channel_heartbeat_minutes,
     uint32_t channel_inactivity_minutes,
-    uint32_t channel_expiration_minutes)
+    uint32_t channel_expiration_minutes,
+    uint32_t channel_germination_seconds)
   : connect(0, 0, connect_timeout_seconds),
     handshake(0, 0, channel_handshake_seconds),
     revival(0, channel_revival_minutes, 0),
     heartbeat(0, channel_heartbeat_minutes, 0),
     inactivity(0, channel_inactivity_minutes, 0),
-    expiration(0, channel_expiration_minutes, 0)
+    expiration(0, channel_expiration_minutes, 0),
+    germination(0, 0, channel_germination_seconds)
 {
 }
 
 // TODO: wrap boost timers with our own and map error codes internally.
-bool timeout::canceled(const boost::system::error_code& ec)
+bool timeout::canceled(const boost_code& ec)
 {
-    return ec == boost::asio::error::operation_aborted;
+    return ec == asio::error::operation_aborted;
 }
 
 } // namespace network

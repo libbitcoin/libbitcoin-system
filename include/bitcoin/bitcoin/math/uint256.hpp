@@ -28,7 +28,7 @@ public:
 };
 
 /** Template base class for unsigned big integers. */
-template<unsigned int BITS>
+template <unsigned int BITS>
 class BC_API base_uint
 {
 protected:

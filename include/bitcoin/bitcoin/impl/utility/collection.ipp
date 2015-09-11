@@ -64,7 +64,7 @@ Consequent if_else(bool antecedent, const Consequent consequent,
         return alternative;
 }
 
-template<typename Type, typename Predicate>
+template <typename Type, typename Predicate>
 typename std::vector<Type>::iterator insert_sorted(std::vector<Type>& list,
     Type& element, Predicate predicate)
 {

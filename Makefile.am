@@ -36,21 +36,17 @@ src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFL
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
-    src/conditional_stack.cpp \
-    src/conditional_stack.hpp \
     src/constants.cpp \
     src/error.cpp \
-    src/evaluation_context.cpp \
-    src/evaluation_context.hpp \
     src/chain/block.cpp \
-    src/chain/block_header.cpp \
+    src/chain/header.cpp \
+    src/chain/input.cpp \
     src/chain/opcode.cpp \
     src/chain/operation.cpp \
+    src/chain/output.cpp \
     src/chain/point.cpp \
     src/chain/script.cpp \
     src/chain/transaction.cpp \
-    src/chain/transaction_input.cpp \
-    src/chain/transaction_output.cpp \
     src/config/authority.cpp \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
@@ -94,27 +90,42 @@ src_libbitcoin_la_SOURCES = \
     src/math/external/zeroize.c \
     src/math/external/zeroize.h \
     src/message/address.cpp \
-    src/message/announce_version.cpp \
+    src/message/alert.cpp \
+    src/message/alert_payload.cpp \
+    src/message/filter_add.cpp \
+    src/message/filter_clear.cpp \
+    src/message/filter_load.cpp \
     src/message/get_address.cpp \
     src/message/get_blocks.cpp \
     src/message/get_data.cpp \
-    src/message/header.cpp \
+    src/message/get_headers.cpp \
+    src/message/heading.cpp \
     src/message/inventory.cpp \
     src/message/inventory_type_id.cpp \
     src/message/inventory_vector.cpp \
+    src/message/memory_pool.cpp \
+    src/message/merkle_block.cpp \
     src/message/network_address.cpp \
     src/message/nonce.cpp \
     src/message/not_found.cpp \
+    src/message/ping.cpp \
+    src/message/pong.cpp \
+    src/message/reject.cpp \
     src/message/verack.cpp \
+    src/message/version.cpp \
     src/network/acceptor.cpp \
     src/network/channel.cpp \
-    src/network/channel_proxy.cpp \
-    src/network/channel_stream_loader.cpp \
     src/network/connector.cpp \
-    src/network/handshake.cpp \
     src/network/hosts.cpp \
-    src/network/peer.cpp \
+    src/network/initiator.cpp \
+    src/network/message_subscriber.cpp \
     src/network/protocol.cpp \
+    src/network/protocol_address.cpp \
+    src/network/protocol_base_base.cpp \
+    src/network/protocol_ping.cpp \
+    src/network/protocol_seed.cpp \
+    src/network/protocol_version.cpp \
+    src/network/proxy.cpp \
     src/network/seeder.cpp \
     src/network/timeout.cpp \
     src/unicode/console_streambuf.cpp \
@@ -125,11 +136,17 @@ src_libbitcoin_la_SOURCES = \
     src/unicode/unicode_ostream.cpp \
     src/unicode/unicode_streambuf.cpp \
     src/utility/binary.cpp \
+    src/utility/conditional_stack.cpp \
+    src/utility/conditional_stack.hpp \
+    src/utility/data.cpp \
+    src/utility/deadline.cpp \
+    src/utility/dispatcher.cpp \
+    src/utility/evaluation_context.cpp \
+    src/utility/evaluation_context.hpp \
     src/utility/istream_reader.cpp \
     src/utility/logger.cpp \
     src/utility/ostream_writer.cpp \
     src/utility/random.cpp \
-    src/utility/sequencer.cpp \
     src/utility/string.cpp \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
@@ -170,72 +187,81 @@ test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CP
 test_libbitcoin_test_LDFLAGS = ${boost_LDFLAGS}
 test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_test_SOURCES = \
-    test/authority.cpp \
-    test/base10.cpp \
-    test/base16.cpp \
-    test/base58.cpp \
-    test/base64.cpp \
-    test/base85.cpp \
-    test/big_number.cpp \
-    test/big_number.hpp \
-    test/binary.cpp \
-    test/bip38.cpp \
-    test/bip38.hpp \
-    test/btc256.cpp \
-    test/checkpoint.cpp \
-    test/checksum.cpp \
-    test/ec_keys.cpp \
-    test/endpoint.cpp \
-    test/format.cpp \
-    test/genesis_block.cpp \
-    test/genesis_block.hpp \
-    test/hash.cpp \
-    test/hash.hpp \
-    test/hash_number.cpp \
-    test/hd_keys.cpp \
-    test/key_formats.cpp \
     test/main.cpp \
-    test/message.cpp \
-    test/mnemonic.cpp \
-    test/mnemonic.hpp \
-    test/parameter.cpp \
-    test/printer.cpp \
-    test/random.cpp \
-    test/satoshi_words.cpp \
-    test/script_number.cpp \
-    test/script_number.hpp \
-    test/stealth.cpp \
-    test/stealth_address.cpp \
-    test/thread.cpp \
-    test/unicode.cpp \
-    test/unicode_istream.cpp \
-    test/unicode_ostream.cpp \
-    test/uri.cpp \
     test/chain/block.cpp \
-    test/chain/block_header.cpp \
+    test/chain/genesis_block.cpp \
+    test/chain/genesis_block.hpp \
+    test/chain/header.cpp \
+    test/chain/input.cpp \
+    test/chain/output.cpp \
     test/chain/point.cpp \
+    test/chain/satoshi_words.cpp \
     test/chain/script.cpp \
     test/chain/script.hpp \
     test/chain/transaction.cpp \
-    test/chain/transaction_input.cpp \
-    test/chain/transaction_output.cpp \
+    test/config/authority.cpp \
+    test/config/btc256.cpp \
+    test/config/checkpoint.cpp \
+    test/config/endpoint.cpp \
+    test/config/parameter.cpp \
+    test/config/printer.cpp \
+    test/formats/base10.cpp \
+    test/formats/base16.cpp \
+    test/formats/base58.cpp \
+    test/formats/base64.cpp \
+    test/formats/base85.cpp \
+    test/math/big_number.cpp \
+    test/math/big_number.hpp \
+    test/math/checksum.cpp \
+    test/math/ec_keys.cpp \
+    test/math/hash.cpp \
+    test/math/hash.hpp \
+    test/math/hash_number.cpp \
+    test/math/script_number.cpp \
+    test/math/script_number.hpp \
     test/message/address.cpp \
-    test/message/announce_version.cpp \
+    test/message/alert.cpp \
+    test/message/alert_payload.cpp \
+    test/message/filter_add.cpp \
+    test/message/filter_clear.cpp \
+    test/message/filter_load.cpp \
     test/message/get_address.cpp \
     test/message/get_blocks.cpp \
     test/message/get_data.cpp \
-    test/message/header.cpp \
+    test/message/get_headers.cpp \
+    test/message/heading.cpp \
     test/message/inventory.cpp \
     test/message/inventory_type_id.cpp \
     test/message/inventory_vector.cpp \
+    test/message/memory_pool.cpp \
+    test/message/merkle_block.cpp \
     test/message/network_address.cpp \
-    test/message/nonce.cpp \
     test/message/not_found.cpp \
+    test/message/ping.cpp \
+    test/message/pong.cpp \
+    test/message/reject.cpp \
     test/message/verack.cpp \
+    test/message/version.cpp \
+    test/unicode/unicode.cpp \
+    test/unicode/unicode_istream.cpp \
+    test/unicode/unicode_ostream.cpp \
+    test/utility/binary.cpp \
+    test/utility/data.cpp \
     test/utility/endian.cpp \
+    test/utility/random.cpp \
     test/utility/serializer.cpp \
     test/utility/stream.cpp \
-    test/utility/variable_uint_size.cpp
+    test/utility/thread.cpp \
+    test/utility/variable_uint_size.cpp \
+    test/wallet/bip38.cpp \
+    test/wallet/hd_keys.cpp \
+    test/wallet/key_formats.cpp \
+    test/wallet/message.cpp \
+    test/wallet/mnemonic.cpp \
+    test/wallet/mnemonic.hpp \
+    test/wallet/stealth.cpp \
+    test/wallet/stealth_address.cpp \
+    test/wallet/uri.cpp
 
 endif WITH_TESTS
 
@@ -252,20 +278,21 @@ include_bitcoin_bitcoin_HEADERS = \
     include/bitcoin/bitcoin/constants.hpp \
     include/bitcoin/bitcoin/define.hpp \
     include/bitcoin/bitcoin/error.hpp \
+    include/bitcoin/bitcoin/messages.hpp \
     include/bitcoin/bitcoin/version.hpp
 
 include_bitcoin_bitcoin_chaindir = ${includedir}/bitcoin/bitcoin/chain
 include_bitcoin_bitcoin_chain_HEADERS = \
     include/bitcoin/bitcoin/chain/block.hpp \
-    include/bitcoin/bitcoin/chain/block_header.hpp \
+    include/bitcoin/bitcoin/chain/header.hpp \
+    include/bitcoin/bitcoin/chain/input.hpp \
     include/bitcoin/bitcoin/chain/opcode.hpp \
     include/bitcoin/bitcoin/chain/operation.hpp \
-    include/bitcoin/bitcoin/chain/payment.hpp \
+    include/bitcoin/bitcoin/chain/output.hpp \
+    include/bitcoin/bitcoin/chain/payment_type.hpp \
     include/bitcoin/bitcoin/chain/point.hpp \
     include/bitcoin/bitcoin/chain/script.hpp \
-    include/bitcoin/bitcoin/chain/transaction.hpp \
-    include/bitcoin/bitcoin/chain/transaction_input.hpp \
-    include/bitcoin/bitcoin/chain/transaction_output.hpp
+    include/bitcoin/bitcoin/chain/transaction.hpp
 
 include_bitcoin_bitcoin_configdir = ${includedir}/bitcoin/bitcoin/config
 include_bitcoin_bitcoin_config_HEADERS = \
@@ -287,7 +314,13 @@ include_bitcoin_bitcoin_formats_HEADERS = \
 
 include_bitcoin_bitcoin_impl_formatsdir = ${includedir}/bitcoin/bitcoin/impl/formats
 include_bitcoin_bitcoin_impl_formats_HEADERS = \
-    include/bitcoin/bitcoin/impl/formats/base16.ipp
+    include/bitcoin/bitcoin/impl/formats/base16.ipp \
+    include/bitcoin/bitcoin/impl/formats/base58.ipp
+
+include_bitcoin_bitcoin_impl_mathdir = ${includedir}/bitcoin/bitcoin/impl/math
+include_bitcoin_bitcoin_impl_math_HEADERS = \
+    include/bitcoin/bitcoin/impl/math/checksum.ipp \
+    include/bitcoin/bitcoin/impl/math/hash.ipp
 
 include_bitcoin_bitcoin_impl_utilitydir = ${includedir}/bitcoin/bitcoin/impl/utility
 include_bitcoin_bitcoin_impl_utility_HEADERS = \
@@ -315,31 +348,47 @@ include_bitcoin_bitcoin_math_HEADERS = \
 include_bitcoin_bitcoin_messagedir = ${includedir}/bitcoin/bitcoin/message
 include_bitcoin_bitcoin_message_HEADERS = \
     include/bitcoin/bitcoin/message/address.hpp \
-    include/bitcoin/bitcoin/message/announce_version.hpp \
+    include/bitcoin/bitcoin/message/alert.hpp \
+    include/bitcoin/bitcoin/message/alert_payload.hpp \
+    include/bitcoin/bitcoin/message/filter_add.hpp \
+    include/bitcoin/bitcoin/message/filter_clear.hpp \
+    include/bitcoin/bitcoin/message/filter_load.hpp \
     include/bitcoin/bitcoin/message/get_address.hpp \
     include/bitcoin/bitcoin/message/get_blocks.hpp \
     include/bitcoin/bitcoin/message/get_data.hpp \
-    include/bitcoin/bitcoin/message/header.hpp \
+    include/bitcoin/bitcoin/message/get_headers.hpp \
+    include/bitcoin/bitcoin/message/heading.hpp \
     include/bitcoin/bitcoin/message/inventory.hpp \
     include/bitcoin/bitcoin/message/inventory_type_id.hpp \
     include/bitcoin/bitcoin/message/inventory_vector.hpp \
+    include/bitcoin/bitcoin/message/memory_pool.hpp \
+    include/bitcoin/bitcoin/message/merkle_block.hpp \
     include/bitcoin/bitcoin/message/network_address.hpp \
     include/bitcoin/bitcoin/message/nonce.hpp \
     include/bitcoin/bitcoin/message/not_found.hpp \
-    include/bitcoin/bitcoin/message/verack.hpp
+    include/bitcoin/bitcoin/message/ping.hpp \
+    include/bitcoin/bitcoin/message/pong.hpp \
+    include/bitcoin/bitcoin/message/reject.hpp \
+    include/bitcoin/bitcoin/message/verack.hpp \
+    include/bitcoin/bitcoin/message/version.hpp
 
 include_bitcoin_bitcoin_networkdir = ${includedir}/bitcoin/bitcoin/network
 include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/acceptor.hpp \
+    include/bitcoin/bitcoin/network/asio.hpp \
     include/bitcoin/bitcoin/network/channel.hpp \
-    include/bitcoin/bitcoin/network/channel_loader_module.hpp \
-    include/bitcoin/bitcoin/network/channel_proxy.hpp \
-    include/bitcoin/bitcoin/network/channel_stream_loader.hpp \
     include/bitcoin/bitcoin/network/connector.hpp \
-    include/bitcoin/bitcoin/network/handshake.hpp \
     include/bitcoin/bitcoin/network/hosts.hpp \
-    include/bitcoin/bitcoin/network/peer.hpp \
+    include/bitcoin/bitcoin/network/initiator.hpp \
+    include/bitcoin/bitcoin/network/message_subscriber.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \
+    include/bitcoin/bitcoin/network/protocol_address.hpp \
+    include/bitcoin/bitcoin/network/protocol_base.hpp \
+    include/bitcoin/bitcoin/network/protocol_base_base.hpp \
+    include/bitcoin/bitcoin/network/protocol_ping.hpp \
+    include/bitcoin/bitcoin/network/protocol_seed.hpp \
+    include/bitcoin/bitcoin/network/protocol_version.hpp \
+    include/bitcoin/bitcoin/network/proxy.hpp \
     include/bitcoin/bitcoin/network/seeder.hpp \
     include/bitcoin/bitcoin/network/settings.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp \
@@ -364,8 +413,11 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/container_sink.hpp \
     include/bitcoin/bitcoin/utility/container_source.hpp \
     include/bitcoin/bitcoin/utility/data.hpp \
+    include/bitcoin/bitcoin/utility/deadline.hpp \
     include/bitcoin/bitcoin/utility/decorator.hpp \
+    include/bitcoin/bitcoin/utility/delegates.hpp \
     include/bitcoin/bitcoin/utility/deserializer.hpp \
+    include/bitcoin/bitcoin/utility/dispatcher.hpp \
     include/bitcoin/bitcoin/utility/endian.hpp \
     include/bitcoin/bitcoin/utility/exceptions.hpp \
     include/bitcoin/bitcoin/utility/istream_reader.hpp \
@@ -373,7 +425,6 @@ include_bitcoin_bitcoin_utility_HEADERS = \
     include/bitcoin/bitcoin/utility/ostream_writer.hpp \
     include/bitcoin/bitcoin/utility/random.hpp \
     include/bitcoin/bitcoin/utility/reader.hpp \
-    include/bitcoin/bitcoin/utility/sequencer.hpp \
     include/bitcoin/bitcoin/utility/serializer.hpp \
     include/bitcoin/bitcoin/utility/string.hpp \
     include/bitcoin/bitcoin/utility/subscriber.hpp \

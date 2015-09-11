@@ -34,8 +34,13 @@ payment_address::payment_address()
 {
 }
 
+payment_address::payment_address(uint8_t version, const ec_point& point)
+    : payment_address(version, bitcoin_short_hash(point))
+{
+}
+
 payment_address::payment_address(uint8_t version, const short_hash& hash)
-  : payment_address()
+    : payment_address()
 {
     set(version, hash);
 }
@@ -51,6 +56,12 @@ void payment_address::set(uint8_t version, const short_hash& hash)
 {
     version_ = version;
     hash_ = hash;
+}
+
+void payment_address::set(uint8_t version, const ec_point& point)
+{
+    version_ = version;
+    hash_ = bitcoin_short_hash(point);
 }
 
 uint8_t payment_address::version() const
@@ -71,7 +82,6 @@ bool payment_address::from_string(const std::string& encoded_address)
         return false;
 
     uint32_t checksum;
-
     return unwrap(version_, hash_, checksum, decoded_address);
 }
 

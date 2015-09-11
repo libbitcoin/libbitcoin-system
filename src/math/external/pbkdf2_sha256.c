@@ -1,4 +1,4 @@
-/*-
+/**
  * Copyright 2005,2007,2009 Colin Percival
  * All rights reserved.
  *
@@ -23,19 +23,18 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
 #include "pbkdf2_sha256.h"
-
-#include <sys/types.h>
 
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <bitcoin/bitcoin/compat.h>
 #include "hmac_sha256.h"
 #include "zeroize.h"
 
-static inline void be32enc(void* pp, uint32_t x)
+static BC_C_INLINE void be32enc(void* pp, uint32_t x)
 {
     uint8_t* p = (uint8_t*)pp;
 

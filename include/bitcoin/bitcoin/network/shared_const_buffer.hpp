@@ -27,7 +27,6 @@
 namespace libbitcoin {
 namespace network {
 
-// TODO: split into cpp file.
 // A reference-counted non-modifiable buffer class.
 class BC_API shared_const_buffer
 {

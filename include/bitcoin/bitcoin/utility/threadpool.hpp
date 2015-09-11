@@ -20,10 +20,11 @@
 #ifndef LIBBITCOIN_THREADPOOL_HPP
 #define LIBBITCOIN_THREADPOOL_HPP
 
+#include <memory>
 #include <functional>
 #include <thread>
-#include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
@@ -68,67 +69,49 @@ public:
         thread_priority priority=thread_priority::normal);
 
     /**
-     * Stop the threadpool. All remaining operations on the queue are dropped.
+     * Abandon outstanding operations without dispatching handlers.
+     * Terminate threads once work is complete.
+     * Prevents the enqueuing of new handlers.
+     * Caller should next call join, which will block until complete.
+     *
+     * WARNING: This can result in leaks in the case of heap allocated objects
+     * referenced captured in handlers that may not execute.
      */
-    void stop();
+    void abort();
 
     /**
-     * Finish executing all remaining operations in the queue.
-     * Adding more operations keeps the threadpool running.
+     * Allow outstanding operations and handlers to finish normally.
+     * Terminate threads once work is complete.
+     * Allows the enqueuing of new handlers.
+     * Caller should next call join, which will block until complete.
      */
     void shutdown();
 
     /**
-     * Join all the threads in this threadpool with the current thread,
-     * This method will hang until all the threads in this threadpool have
-     * finished their running tasks and exited.
-     *
-     * Attempting to join() from within any of the threads owned by this
-     * threadpool is invalid.
+     * Wait for all threads in the pool to terminate.
      *
      * WARNING: Do not call this within any of the threads owned by this
      * threadpool. Doing so will cause a resource deadlock and an
      * std::system_error exception will be thrown.
-     *
-     * @code
-     *  // Threadpool with 4 running threads.
-     *  threadpool pool(4);
-     *  // Stop all 4 threads.
-     *  pool.stop();
-     *  // Wait for them to finish gracefully.
-     *  pool.join();
-     * @endcode
      */
     void join();
 
-    template <typename... Args>
-    void push(Args&&... args)
-    {
-        ios_.post(std::bind(std::forward<Args>(args)...));
-    }
-
-    template <typename... Args>
-    void dispatch(Args&&... args)
-    {
-        ios_.dispatch(std::bind(std::forward<Args>(args)...));
-    }
+    /**
+     * Underlying boost::io_service object.
+     */
+    asio::service& service();
 
     /**
      * Underlying boost::io_service object.
      */
-    boost::asio::io_service& service();
-
-    /**
-     * Underlying boost::io_service object.
-     */
-    const boost::asio::io_service& service() const;
+    const asio::service& service() const;
 
 private:
     void spawn_once(thread_priority priority=thread_priority::normal);
 
-    boost::asio::io_service ios_;
-    boost::asio::io_service::work* work_;
+    asio::service service_;
     std::vector<std::thread> threads_;
+    std::shared_ptr<asio::service::work> work_;
 };
 
 } // namespace libbitcoin

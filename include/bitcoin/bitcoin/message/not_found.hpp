@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -30,24 +30,21 @@
 namespace libbitcoin {
 namespace message {
 
-class BC_API not_found : public inventory
+class BC_API not_found
+  : public inventory
 {
 public:
-
-    static const std::string satoshi_command;
-
     static not_found factory_from_data(const data_chunk& data);
-
     static not_found factory_from_data(std::istream& stream);
-
     static not_found factory_from_data(reader& source);
 
     not_found();
-
     not_found(const inventory_vector::list& elements);
+
+    static const std::string command;
 };
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif

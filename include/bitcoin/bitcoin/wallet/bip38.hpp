@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -25,192 +25,148 @@
 #include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
 namespace bip38 {
 
-typedef data_chunk encrypted_private_key;
+/**
+ * A seed for use in creating an intermediate passphrase (token).
+ */
+static BC_CONSTEXPR size_t salt_size = 4;
+typedef byte_array<salt_size> salt;
 
 /**
- * Scrypt parameters N used in bip38.
+ * A seed for use in creating an intermediate passphrase (token).
  */
-BC_CONSTEXPR size_t bip38_scrypt_N   = 16384;
-BC_CONSTEXPR size_t bip38_scrypt_N_2 =  1024;
+static BC_CONSTEXPR size_t entropy_size = 8;
+typedef byte_array<entropy_size> entropy;
 
 /**
- * Scrypt parameters r used in bip38.
+ * A seed for use in creating a key pair.
  */
-BC_CONSTEXPR size_t bip38_scrypt_r   = 8;
-BC_CONSTEXPR size_t bip38_scrypt_r_2 = 1;
+static BC_CONSTEXPR size_t seed_size = 24;
+typedef byte_array<seed_size> seed;
 
 /**
- * Scrypt parameters p used in bip38.
+ * An intermediate passphrase (token) type (checked but not base58 encoded).
  */
-BC_CONSTEXPR size_t bip38_scrypt_p   = 8;
-BC_CONSTEXPR size_t bip38_scrypt_p_2 = 1;
+static BC_CONSTEXPR size_t token_encoded_size = 72;
+static BC_CONSTEXPR size_t token_decoded_size = 53;
+typedef byte_array<token_decoded_size> token;
 
 /**
- * The total length in bytes of the address hash used
- * as a salt in bip38.
+ * An encrypted private key type (checked but not base58 encoded).
  */
-BC_CONSTEXPR size_t bip38_salt_length = 4;
+static BC_CONSTEXPR size_t private_key_encoded_size = 58;
+static BC_CONSTEXPR size_t private_key_decoded_size = 43;
+typedef byte_array<private_key_decoded_size> private_key;
 
 /**
- * The total length in bytes of an aes256 encrypted block
- * used in bip38.
+ * DEPRECATED
+ * An encrypted public key type (checked but not base58 encoded).
+ * This is refered to as a confirmation code in bip38.
  */
-BC_CONSTEXPR size_t bip38_encrypted_block_length = 32;
+static BC_CONSTEXPR size_t public_key_encoded_size = 75;
+static BC_CONSTEXPR size_t public_key_decoded_size = 55;
+typedef byte_array<public_key_decoded_size> public_key;
 
 /**
- * The half length in bytes of a bip38 encrypted key.
+ * Maximum values for use with create_token.
  */
-BC_CONSTEXPR size_t bip38_encrypted_block_half_length = 16;
+static BC_CONSTEXPR uint32_t max_token_lot = 1048575;
+static BC_CONSTEXPR uint32_t max_token_sequence = 4095;
 
 /**
- * The total length in bytes of a bip38 encrypted key.
+ * Create an intermediate passphrase for subsequent key pair generation.
+ * @param[out] out_token   The new intermediate passphrase.
+ * @param[in]  passphrase  A passphrase for use in the encryption.
+ * @param[in]  entropy     A random value for use in the encryption.
  */
-BC_CONSTEXPR size_t bip38_encrypted_key_length = 58;
+BC_API void create_token(token& out_token, const std::string& passphrase,
+    const entropy& entropy);
 
 /**
- * The fixed bip38 non-multiplied
- * prefix data constants.
+ * Create an intermediate passphrase for subsequent key pair generation.
+ * @param[out] out_token   The new intermediate passphrase.
+ * @param[in]  passphrase  A passphrase for use in the encryption.
+ * @param[in]  salt        A random value for use in the encryption.
+ * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
+ * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
+ * @return false if the lot and/or sequence are out of range.
  */
-BC_CONSTEXPR uint8_t bip38_nm_prefix_data[2] = { 0x01, 0x42 };
+BC_API bool create_token(token& out_token, const std::string& passphrase,
+    const salt& salt, uint32_t lot, uint32_t sequence);
 
 /**
- * The fixed bip38 ec-multiplied prefix data constants.
+ * Create an encrypted private key from an intermediate passphrase.
+ * @param[out] out_private  The new encrypted private key.
+ * @param[out] out_point    The ec public key of the new key pair.
+ * @param[in]  token        An intermediate passphrase string.
+ * @param[in]  seed         A random value for use in the encryption.
+ * @param[in]  version      The coin address version byte.
+ * @param[in]  compressed   Set true to associate ec public key compression.
+ * @return false if the token checksum is not valid.
  */
-BC_CONSTEXPR uint8_t bip38_m_prefix_data[2] = { 0x01, 0x43 };
+BC_API bool create_key_pair(private_key& out_private, ec_point& out_point,
+    const token& token, const seed& seed, uint8_t version,
+    bool compressed=true);
 
 /**
- * The fixed number of bip38 base58 checked intermediate bytes required.
+ * DEPRECATED
+ * Create an encrypted key pair from an intermediate passphrase.
+ * @param[out] out_private  The new encrypted private key.
+ * @param[out] out_public   The new encrypted public key.
+ * @param[out] out_point    The ec public key of the new key pair.
+ * @param[in]  token        An intermediate passphrase string.
+ * @param[in]  seed         A random value for use in the encryption.
+ * @param[in]  version      The coin address version byte.
+ * @param[in]  compressed   Set true to associate ec public key compression.
+ * @return false if the token checksum is not valid.
  */
-BC_CONSTEXPR size_t bip38_intermediate_length = 72;
+BC_API bool create_key_pair(private_key& out_private, public_key& out_public,
+    ec_point& out_point, const token& token, const seed& seed, uint8_t version,
+    bool compressed=true);
+
+#ifdef WITH_ICU
 
 /**
- * The fixed length of bip38 base58 checked confirmation code.
+ * Encrypt the ec secret to an encrypted public key using the passphrase.
+ * @param[out] out_private  The new encrypted private key.
+ * @param[in]  secret       An ec secret to encrypt.
+ * @param[in]  passphrase   A passphrase for use in the encryption.
+ * @param[in]  version      The coin address version byte.
+ * @param[in]  compressed   Set true to associate ec public key compression.
  */
-BC_CONSTEXPR size_t bip38_confirmation_code_length = 75;
+BC_API void encrypt(private_key& out_private, const ec_secret& secret,
+    const std::string& passphrase, uint8_t version, bool compressed=true);
 
 /**
- * The fixed number of bip38 random seed bytes required.
+ * Decrypt the ec secret associated with the encrypted private key.
+ * @param[out] out_secret      The decrypted ec secret.
+ * @param[out] out_version     The coin address version.
+ * @param[out] out_compressed  The compression of the associated ec public key.
+ * @param[in]  key             An encrypted private key.
+ * @param[in]  passphrase      The passphrase from the encryption or token.
+ * @return false if the key checksum or passphrase is not valid.
  */
-BC_CONSTEXPR size_t bip38_seed_length = 24;
+BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
+    bool& out_compressed, const private_key& key,
+    const std::string& passphrase);
 
 /**
- * The fixed number of bip38 magic bytes.
+ * DEPRECATED
+ * Decrypt the ec point associated with the encrypted public key.
+ * @param[out] out_point    The decrypted ec point.
+ * @param[out] out_version  The coin address version of the public key.
+ * @param[in]  key          An encrypted public key.
+ * @param[in]  passphrase   The passphrase of the associated token.
+ * @return false if the key checksum or passphrase is not valid.
  */
-BC_CONSTEXPR size_t bip38_magic_length = 8;
+BC_API bool decrypt(ec_point& out_point, uint8_t& out_version,
+    const public_key& key, const std::string& passphrase);
 
-typedef uint8_t bip38_magic[bip38_magic_length];
-
-/**
- * The fixed bip38 magic bytes used when lot is specified.
- */
-BC_CONSTEXPR bip38_magic bip38_magic_w_lot =
-{
-    0x2C, 0xE9, 0xB3, 0xE1, 0xFF, 0x39, 0xE2, 0x51
-};
-
-/**
- * The fixed bip38 magic bytes used when lot is not specified.
- */
-BC_CONSTEXPR bip38_magic bip38_magic_wo_lot =
-{
-    0x2C, 0xE9, 0xB3, 0xE1, 0xFF, 0x39, 0xE2, 0x53
-};
-
-/**
- * The fixed bip38 magic bytes used for confirmation codes.
- */
-BC_CONSTEXPR uint8_t bip38_confirmation_prefix[5] =
-{
-    0x64, 0x3B, 0xF6, 0xA8, 0x9A
-};
-
-
-/**
- * Fixed byte indices used for bip38.
- */
-BC_CONSTEXPR size_t bip38_comp_mult_index          =  1;
-BC_CONSTEXPR size_t bip38_flag_index               =  2;
-BC_CONSTEXPR size_t bip38_salt_index_start         =  3;
-BC_CONSTEXPR size_t bip38_cfrm_flag_index          =  5;
-BC_CONSTEXPR size_t bip38_salt_index_end           =  7;
-BC_CONSTEXPR size_t bip38_key_index_start          =  7;
-BC_CONSTEXPR size_t bip38_owner_entropy_start      =  7;
-BC_CONSTEXPR size_t bip38_owner_entropy_end        = 15;
-BC_CONSTEXPR size_t bip38_cfrm_address_hash_start  =  6;
-BC_CONSTEXPR size_t bip38_cfrm_address_hash_end    = 10;
-BC_CONSTEXPR size_t bip38_cfrm_owner_entropy_start = 10;
-BC_CONSTEXPR size_t bip38_cfrm_owner_entropy_end   = 18;
-BC_CONSTEXPR size_t bip38_cfrm_encrypted_start     = 18;
-BC_CONSTEXPR size_t bip38_cfrm_encrypted_end       = 51;
-BC_CONSTEXPR size_t bip38_intm_owner_entropy_start =  8;
-BC_CONSTEXPR size_t bip38_intm_owner_entropy_end   = 16;
-BC_CONSTEXPR size_t bip38_pass_point_start         = 16;
-BC_CONSTEXPR size_t bip38_pass_point_end           = 49;
-BC_CONSTEXPR size_t bip38_enc_part1_start          = 15;
-BC_CONSTEXPR size_t bip38_decrypt_xor_offset       = 16;
-BC_CONSTEXPR size_t bip38_decrypt_xor_length       = 16;
-BC_CONSTEXPR size_t bip38_enc_part1_end            = 23;
-BC_CONSTEXPR size_t bip38_enc_part2_start          = 23;
-BC_CONSTEXPR size_t bip38_enc_part2_end            = 39;
-BC_CONSTEXPR size_t bip38_key_index_end            = 39;
-
-
-/**
- * The bip38 flag byte masks used in this implementation.
- */
-BC_CONSTEXPR uint8_t bip38_lot_sequence      = 0x04;
-BC_CONSTEXPR uint8_t bip38_compressed        = 0x20;
-BC_CONSTEXPR uint8_t bip38_ec_multiplied     = 0x00;
-BC_CONSTEXPR uint8_t bip38_ec_non_multiplied = 0xC0;
-
-
-/**
- * Performs bip38 encryption based on the given
- * intermediate and random 24 byte seed provided.
- *
- * A confirmation code is an output parameter.
- *
- * bip38_lock_intermediate(intermediate, seedb,
- *   confirmation_code, use_compression)
- */
-BC_API data_chunk bip38_lock_intermediate(
-    const data_chunk& intermediate, const data_chunk& seedb,
-    data_chunk& confirmation_code, bool use_compression);
-
-/**
- * Performs bip38 validation on the specified confirmation
- * code using the passphrase.  If the address depends on the
- * passphrase, the address is returned in out_address.
- *
- * bip38_lock_verify(confirmation_code, passphrase, out_address)
- */
-BC_API bool bip38_lock_verify(
-    const data_chunk& confirmation_code,
-    const std::string& passphrase, std::string& out_address);
-
-/**
- * Performs bip38 encryption on the private key given
- * the specified passphrase.
- *
- * bip38_lock_secret(private_key, passphrase, use_compression)
- */
-BC_API data_chunk bip38_lock_secret(
-    const ec_secret& private_key, const std::string& passphrase,
-    bool use_compression);
-
-/**
- * Performs bip38 decryption on the encrypted key given
- * the specified passphrase.
- *
- * bip38_unlock_secret(encrypted_key, passphrase)
- */
-BC_API ec_secret bip38_unlock_secret(
-    const encrypted_private_key& bip38_key, const std::string& passphrase);
+#endif // WITH_ICU
 
 } // namespace bip38
 } // namespace libbitcoin

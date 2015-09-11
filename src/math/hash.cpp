@@ -20,7 +20,11 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 #include <new>
+#include <stdexcept>
+#include "../math/external/crypto_scrypt.h"
 #include "../math/external/hmac_sha256.h"
 #include "../math/external/hmac_sha512.h"
 #include "../math/external/pkcs5_pbkdf2.h"
@@ -68,8 +72,7 @@ hash_digest sha256_hash(data_slice first, data_slice second)
 hash_digest hmac_sha256_hash(data_slice data, data_slice key)
 {
     hash_digest hash;
-    HMACSHA256(data.data(), data.size(), key.data(),
-        key.size(), hash.data());
+    HMACSHA256(data.data(), data.size(), key.data(), key.size(), hash.data());
     return hash;
 }
 
@@ -83,8 +86,7 @@ long_hash sha512_hash(data_slice data)
 long_hash hmac_sha512_hash(data_slice data, data_slice key)
 {
     long_hash hash;
-    HMACSHA512(data.data(), data.size(), key.data(),
-        key.size(), hash.data());
+    HMACSHA512(data.data(), data.size(), key.data(), key.size(), hash.data());
     return hash;
 }
 
@@ -92,9 +94,12 @@ long_hash pkcs5_pbkdf2_hmac_sha512(data_slice passphrase,
     data_slice salt, size_t iterations)
 {
     long_hash hash;
-    if (pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
-        salt.data(), salt.size(), hash.data(), hash.size(), iterations))
+    const auto result = pkcs5_pbkdf2(passphrase.data(), passphrase.size(),
+        salt.data(), salt.size(), hash.data(), hash.size(), iterations);
+
+    if (result != 0)
         throw std::bad_alloc();
+
     return hash;
 }
 
@@ -108,5 +113,32 @@ short_hash bitcoin_short_hash(data_slice data)
     return ripemd160_hash(sha256_hash(data));
 }
 
-} // namespace libbitcoin
+static void handle_script_result(int result)
+{
+    if (result == 0)
+        return;
 
+    switch (errno)
+    {
+        case EFBIG:
+            throw std::length_error("scrypt parameter too large");
+        case EINVAL:
+            throw std::runtime_error("scrypt invalid argument");
+        case ENOMEM:
+            throw std::length_error("scrypt address space");
+        default:
+            throw std::bad_alloc();
+    }
+}
+
+data_chunk scrypt(data_slice data, data_slice salt, uint64_t N, uint32_t p,
+    uint32_t r, size_t length)
+{
+    data_chunk output(length);
+    const auto result = crypto_scrypt(data.data(), data.size(), salt.data(),
+        salt.size(), N, r, p, output.data(), output.size());
+    handle_script_result(result);
+    return output;
+}
+
+} // namespace libbitcoin

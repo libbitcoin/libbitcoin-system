@@ -30,11 +30,11 @@ namespace libbitcoin {
  * This class allows std::array, std::vector, std::string, and c-style arrays
  * to be used interchangeably in functions that expect raw data.
  */
-template<typename T>
+template <typename T>
 class array_slice
 {
 public:
-    template<typename Container>
+    template <typename Container>
     array_slice(const Container& container);
 
     array_slice(const T* begin, const T* end);

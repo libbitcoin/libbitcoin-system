@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -148,12 +148,10 @@ enum class opcode : uint8_t
 };
 
 BC_API std::string opcode_to_string(opcode code);
-
 BC_API opcode string_to_opcode(const std::string& code_repr);
-
 BC_API opcode data_to_opcode(const data_chunk& data);
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin
 
 #endif

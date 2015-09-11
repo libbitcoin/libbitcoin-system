@@ -290,5 +290,6 @@ void SHA512Update(SHA512CTX* context, const uint8_t* input, size_t length)
         input += 128;
         length -= 128;
     }
+
     memcpy(context->buf, input, length);
 }

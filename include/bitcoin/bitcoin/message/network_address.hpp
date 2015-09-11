@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -42,45 +42,33 @@ BC_CONSTEXPR ip_address localhost_ip_address =
 class BC_API network_address
 {
 public:
-
     typedef std::vector<network_address> list;
+
+    static network_address factory_from_data(const data_chunk& data,
+        bool with_timestamp /*= true*/);
+    static network_address factory_from_data(std::istream& stream,
+        bool with_timestamp /*= true*/);
+    static network_address factory_from_data(reader& source,
+        bool with_timestamp /*=true*/);
+    static uint64_t satoshi_fixed_size(bool with_timestamp /*= false*/);
+
+    bool from_data(const data_chunk& data, bool with_timestamp /*= true*/);
+    bool from_data(std::istream& stream, bool with_timestamp /*= true*/);
+    bool from_data(reader& source, bool with_timestamp /*= true*/);
+    data_chunk to_data(bool with_timestamp /*= true*/) const;
+    void to_data(std::ostream& stream, bool with_timestamp /*= true*/) const;
+    void to_data(writer& sink, bool with_timestamp /*= true*/) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t serialized_size(bool with_timestamp /*= false*/) const;
 
     uint32_t timestamp;
     uint64_t services;
     ip_address ip;
     uint16_t port;
-
-    bool from_data(const data_chunk& data, bool with_timestamp /*= true*/);
-
-    bool from_data(std::istream& stream, bool with_timestamp /*= true*/);
-
-    bool from_data(reader& source, bool with_timestamp /*= true*/);
-
-    data_chunk to_data(bool with_timestamp /*= true*/) const;
-
-    void to_data(std::ostream& stream, bool with_timestamp /*= true*/) const;
-
-    void to_data(writer& sink, bool with_timestamp /*= true*/) const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size(bool with_timestamp /*= false*/) const;
-
-    static network_address factory_from_data(const data_chunk& data,
-        bool with_timestamp /*= true*/);
-
-    static network_address factory_from_data(std::istream& stream,
-        bool with_timestamp /*= true*/);
-
-    static network_address factory_from_data(reader& source,
-        bool with_timestamp /*=true*/);
-
-    static uint64_t satoshi_fixed_size(bool with_timestamp /*= false*/);
 };
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif

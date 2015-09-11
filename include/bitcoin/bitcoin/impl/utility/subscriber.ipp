@@ -24,15 +24,16 @@
 
 #include <functional>
 #include <memory>
-#include <bitcoin/bitcoin/utility/logger.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
-   
+
 namespace libbitcoin {
 
 template <typename... Args>
-subscriber<Args...>::subscriber(threadpool& pool)
-  : strand_(pool)
+subscriber<Args...>::subscriber(threadpool& pool,
+    const std::string& class_name, const std::string& log_name)
+  : dispatch_(pool), track<subscriber<Args...>>(class_name, log_name)
 {
 }
 
@@ -42,21 +43,21 @@ subscriber<Args...>::~subscriber()
 }
 
 template <typename... Args>
-void subscriber<Args...>::subscribe(subscription_handler handler)
+void subscriber<Args...>::subscribe(handler notifier)
 {
-    strand_.wrap(&subscriber<Args...>::do_subscribe,
-        this->shared_from_this(), handler)();
+    dispatch_.ordered(&subscriber<Args...>::do_subscribe,
+        this->shared_from_this(), notifier);
 }
 
 template <typename... Args>
 void subscriber<Args...>::relay(Args... args)
 {
-    strand_.wrap(&subscriber<Args...>::do_relay,
-        this->shared_from_this(), std::forward<Args>(args)...)();
+    dispatch_.ordered(&subscriber<Args...>::do_relay,
+        this->shared_from_this(), args...);
 }
 
 template <typename... Args>
-void subscriber<Args...>::do_subscribe(subscription_handler notifier)
+void subscriber<Args...>::do_subscribe(handler notifier)
 {
     subscriptions_.push_back(notifier);
 }
@@ -67,9 +68,9 @@ void subscriber<Args...>::do_relay(Args... args)
     if (subscriptions_.empty())
         return;
 
-    const auto subscriptions = subscriptions_;
+    const auto subscriptions_copy = subscriptions_;
     subscriptions_.clear();
-    for (const auto notifier: subscriptions)
+    for (const auto notifier: subscriptions_copy)
         notifier(args...);
 }
 

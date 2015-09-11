@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -95,5 +95,5 @@ select_outputs_result select_outputs(output_info_list unspent,
     return select_outputs_result();
 }
 
-} // end wallet
-} // end libbitcoin
+} // namspace wallet
+} // namspace libbitcoin

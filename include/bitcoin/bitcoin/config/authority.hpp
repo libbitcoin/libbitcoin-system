@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_AUTHORITY_HPP
-#define LIBBITCOIN_AUTHORITY_HPP
+#ifndef LIBBITCOIN_CONFIG_AUTHORITY_HPP
+#define LIBBITCOIN_CONFIG_AUTHORITY_HPP
 
 #include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
-#include <boost/asio.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/network/asio.hpp>
 
 namespace libbitcoin {
 namespace config {
@@ -69,7 +69,7 @@ public:
      * Initialization constructor.
      * @param[in]  net  The network address (ip and port) to initialize with.
      */
-    authority(const message::network_address& net);
+    authority(const message::network_address& address);
     
     /**
      * Initialization constructor.
@@ -91,13 +91,13 @@ public:
      * @param[in]  ip    The boost ip addresss to initialize with.
      * @param[in]  port  The port to initialize with.
      */
-    authority(const boost::asio::ip::address& ip, uint16_t port);
+    authority(const asio::address& ip, uint16_t port);
     
     /**
      * Initialization constructor.
      * @param[in]  endpoint  The boost endpoint addresss to initialize with.
      */
-    authority(const boost::asio::ip::tcp::endpoint& endpoint);
+    authority(const asio::endpoint& endpoint);
 
     /**
      * Getter.
@@ -164,7 +164,7 @@ public:
         const authority& argument);
 
 private:
-    boost::asio::ip::address_v6 ip_;
+    asio::ipv6 ip_;
     uint16_t port_;
 };
 

@@ -51,34 +51,22 @@ struct BC_API hd_key_lineage
 class BC_API hd_public_key
 {
 public:
-
     hd_public_key();
-
     hd_public_key(const std::string& encoded);
-
     hd_public_key(const ec_point& public_key,
         const chain_code_type& chain_code, hd_key_lineage lineage);
 
     bool valid() const;
-
     const ec_point& public_key() const;
-
     const chain_code_type& chain_code() const;
-
     const hd_key_lineage& lineage() const;
-
     bool from_string(const std::string& encoded);
-
     std::string to_string() const;
-
     uint32_t fingerprint() const;
-
     payment_address address() const;
-
     hd_public_key generate_public_key(uint32_t i) const;
 
 protected:
-
     bool valid_;
     ec_point K_; // EC point
     chain_code_type c_;
@@ -91,28 +79,19 @@ protected:
 class BC_API hd_private_key : public hd_public_key
 {
 public:
-
     hd_private_key();
-
     hd_private_key(const std::string& encoded);
-
     hd_private_key(const ec_secret& private_key,
         const chain_code_type& chain_code, hd_key_lineage lineage);
-
     hd_private_key(data_slice seed, bool testnet=false);
 
     const ec_secret& private_key() const;
-
     bool from_string(const std::string& encoded);
-
     std::string to_string() const;
-
     hd_private_key generate_private_key(uint32_t i) const;
-
     hd_public_key generate_public_key(uint32_t i) const;
 
 protected:
-
     ec_secret k_;
 };
 

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_ENDPOINT_HPP
-#define LIBBITCOIN_ENDPOINT_HPP
+#ifndef LIBBITCOIN_CONFIG_ENDPOINT_HPP
+#define LIBBITCOIN_CONFIG_ENDPOINT_HPP
 
 #include <cstdint>
 #include <iostream>
@@ -82,14 +82,14 @@ public:
      * Initialization constructor.
      * @param[in]  endpoint  The endpoint addresss to initialize with.
      */
-    endpoint(const boost::asio::ip::tcp::endpoint& host);
+    endpoint(const asio::endpoint& host);
     
     /**
      * Initialization constructor.
      * @param[in]  ip    The boost ip addresss to initialize with.
      * @param[in]  port  The port to initialize with.
      */
-    endpoint(const boost::asio::ip::address& ip, uint16_t port);
+    endpoint(const asio::address& ip, uint16_t port);
 
     /**
      * Getter.

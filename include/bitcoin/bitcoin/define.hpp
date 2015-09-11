@@ -92,9 +92,5 @@ namespace bc = libbitcoin;
 #define LCOV_EXCL_START(text)
 #define LCOV_EXCL_STOP()
 
-// Define so we can have better visibility of lcov exclusion ranges.
-#define LCOV_EXCL_START(text)
-#define LCOV_EXCL_STOP()
-
 #endif
 

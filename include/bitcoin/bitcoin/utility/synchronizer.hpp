@@ -23,7 +23,7 @@
 #include <cstddef>
 #include <memory>
 #include <mutex>
-#include <system_error>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 
 namespace libbitcoin {
@@ -33,73 +33,83 @@ class synchronizer
 {
 public:
     synchronizer(Handler handler, size_t clearance_count,
-        const std::string& name)
+        const std::string& name, bool suppress_errors=false)
       : handler_(handler),
         clearance_count_(clearance_count),
         name_(name),
         counter_(std::make_shared<std::size_t>(0)),
-        counter_mutex_(std::make_shared<std::mutex>())
+        counter_mutex_(std::make_shared<std::mutex>()),
+        suppress_errors_(suppress_errors)
     {
     }
 
     template <typename... Args>
-    void operator()(const std::error_code& code, Args&&... args)
+    void operator()(const code& ec, Args... args)
     {
-        auto handle = false;
+        auto cleared = false;
 
         // This requires a critical section, not just an atomic counter.
+        if (true)
         {
             std::lock_guard<std::mutex> lock(*counter_mutex_);
 
             BITCOIN_ASSERT(*counter_ <= clearance_count_);
             if (*counter_ == clearance_count_)
             {
-                //log_debug(LOG_PROTOCOL)
-                //    << "Handled [" << name_ << "] > "
+                //log_debug(LOG_NETWORK)
+                //    << "Synchronizing [" << name_ << "] > "
                 //    << clearance_count_ << " (ignored)";
                 return;
             }
 
             ++(*counter_);
 
-            if (code)
+            if (ec)
             {
-                log_debug(LOG_PROTOCOL)
-                    << "Handled [" << name_ << "] " << *counter_
-                    << "/" << clearance_count_ << " " << code.message();
+                //log_debug(LOG_NETWORK)
+                //    << "Synchronizing [" << name_ << "] " << *counter_
+                //    << "/" << clearance_count_ << " " << ec.message()
+                //    << (suppress_errors_ ? " (suppressed)" : "");
 
-                // Stop because of failure.
-                *counter_ = clearance_count_;
-                handle = true;
+                if (!suppress_errors_)
+                    *counter_ = clearance_count_;
             }
-            else if (*counter_ == clearance_count_)
+            else
             {
-                // Finished executing multiple async paths.
-                handle = true;
+                //log_debug(LOG_NETWORK)
+                //    << "Synchronizing [" << name_ << "] " << *counter_ << "/"
+                //    << clearance_count_;
             }
 
-            if (!code)
-            {
-                log_debug(LOG_PROTOCOL)
-                    << "Handled [" << name_ << "] " << *counter_ << "/"
-                    << clearance_count_;
-            }
+            cleared = (*counter_ == clearance_count_);
         }
 
-        // Keep this long-running call out of critical section.
-        if (handle)
-            handler_(code, std::forward<Args>(args)...);
+        // Use execute flag to keep this log task out of the critical section.
+        if (cleared)
+        {
+            const auto result = suppress_errors_ ? error::success : ec;
+            handler_(result, std::forward<Args>(args)...);
+        }
     }
 
 private:
     Handler handler_;
     size_t clearance_count_;
     const std::string name_;
+    const bool suppress_errors_;
 
     // We use pointer to reference the same value/mutex across instance copies.
     std::shared_ptr<size_t> counter_;
     std::shared_ptr<std::mutex> counter_mutex_;
 };
+
+template <typename Handler>
+synchronizer<Handler> synchronize(Handler handler, size_t clearance_count,
+    const std::string& name, bool suppress_errors=false)
+{
+    return synchronizer<Handler>(handler, clearance_count, name,
+        suppress_errors);
+}
 
 } // libbitcoin
 

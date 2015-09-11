@@ -31,13 +31,14 @@
 namespace libbitcoin {
 
 // Define a byte array of a specified length.
-template<size_t Size>
+template <size_t Size>
 using byte_array = std::array<uint8_t, Size>;
 
 // Define arbitrary byte storage types.
 typedef array_slice<uint8_t> data_slice;
 typedef std::vector<uint8_t> data_chunk;
 typedef std::vector<data_chunk> data_stack;
+typedef struct { size_t start; size_t end; } bounds;
 
 /**
  * Create a single byte data chunk with an initial value.
@@ -46,33 +47,81 @@ inline byte_array<1> to_byte(uint8_t byte);
 
 /**
  * Concatenate several data slices into a single data_chunk.
- * @param  extra_space  Include this much extra space when calling
+ * @param  extra_reserve  Include this many additional bytes when calling
  * `reserve` on the data_chunk (as an optimization).
  */
 inline data_chunk build_data(std::initializer_list<data_slice> slices,
-    size_t extra_space=0);
+    size_t extra_reserve=0);
 
 /**
- * Create a data chunk from an interatable object.
+ * Concatenate several data slices into a single fixed size array.
+ * Returns false if the slices don't fit in the array. Underfill is ok.
  */
-template<typename Type>
-data_chunk to_data_chunk(Type iterable);
+template <size_t Size>
+bool build_array(byte_array<Size>& out,
+    std::initializer_list<data_slice> slices);
 
 /**
- * Extend `data` by appending `other`.
+ * Convert the data buffer to a fixed size array.
+ * Returns false if the buffer doesn't fit in the array. Underfill is ok.
  */
-template <typename Data, typename Type>
-void extend_data(Data& data, const Type& other);
+template <size_t Size>
+bool to_array(byte_array<Size>& out, data_slice bytes);
+
+/**
+ * Extend buffer by appending other.
+ */
+template <class Data, class Type>
+void extend_data(Data& bytes, const Type& other);
 
 /**
  * Constrain a numeric value within a given range.
  */
-template<typename Value>
+template <typename Value>
 Value range_constrain(Value value, Value minimum, Value maximum);
+
+/**
+ * Create a data chunk from an interatable object.
+ */
+template <typename Data>
+data_chunk to_data_chunk(const Data& bytes);
+
+/**
+ * Return a copy of part of the buffer of length end minus start, starting at
+ * start.
+ */
+BC_API data_chunk slice(data_slice bytes, size_t start, size_t end);
+
+/**
+ * Return a copy of part of the buffer of length range.end minus range.start,
+ * starting at range.start.
+ */
+BC_API data_chunk slice(data_slice bytes, const bounds& range);
+
+/**
+ * Split a buffer into two even parts (or as close as possible).
+ */
+BC_API void split(data_chunk& lower, data_chunk& upper, data_slice bytes,
+    size_t size);
+
+/**
+ * Perform an exclusive or (xor) across two buffers to the length specified.
+ * Return the resulting buffer. Caller must ensure offset and length do not
+ * exceed either buffer.
+ */
+BC_API data_chunk xor_data(data_slice bytes1, data_slice bytes2, size_t offset,
+    size_t length);
+
+/**
+ * Perform an exclusive or (xor) across two buffers to the length specified.
+ * Return the resulting buffer. Caller must ensure offsets and lengths do not
+ * exceed the respective buffers.
+ */
+BC_API data_chunk xor_data(data_slice bytes1, data_slice bytes2,
+    size_t offset1, size_t offset2, size_t length);
 
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/utility/data.ipp>
 
 #endif
-

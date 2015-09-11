@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -31,79 +31,34 @@
 namespace libbitcoin {
 namespace message {
 
-// TODO: Satoshi peers will might 0-length nonces as of 0.10.
-// Allow the ping & pong payloads to be any size.
-
-class BC_API nonce_base
+/**
+ * Abstract base class for ping and pong.
+ */
+class BC_API nonce_
 {
 public:
+    static uint64_t satoshi_fixed_size();
+
+    bool from_data(const data_chunk& data);
+    bool from_data(std::istream& stream);
+    bool from_data(reader& source);
+    data_chunk to_data() const;
+    void to_data(std::ostream& stream) const;
+    void to_data(writer& sink) const;
+    bool is_valid() const;
+    void reset();
+    uint64_t serialized_size() const;
 
     uint64_t nonce;
 
-    bool from_data(const data_chunk& data);
-
-    bool from_data(std::istream& stream);
-
-    bool from_data(reader& source);
-
-    data_chunk to_data() const;
-
-    void to_data(std::ostream& stream) const;
-
-    void to_data(writer& sink) const;
-
-    bool is_valid() const;
-
-    void reset();
-
-    uint64_t satoshi_size() const;
-
-    static uint64_t satoshi_fixed_size();
+protected:
+    nonce_(const uint64_t nonce);
 };
 
-bool operator==(const nonce_base& a, const nonce_base& b);
+BC_API bool operator==(const nonce_& left, const nonce_& right);
+BC_API bool operator!=(const nonce_& left, const nonce_& right);
 
-bool operator!=(const nonce_base& a, const nonce_base& b);
-
-class BC_API ping : public nonce_base
-{
-public:
-
-    static const std::string satoshi_command;
-
-    static ping factory_from_data(const data_chunk& data);
-
-    static ping factory_from_data(std::istream& stream);
-
-    static ping factory_from_data(reader& source);
-
-    static uint64_t satoshi_fixed_size();
-
-    ping();
-
-    ping(const uint64_t nonce);
-};
-
-class BC_API pong : public nonce_base
-{
-public:
-
-    static const std::string satoshi_command;
-
-    static pong factory_from_data(const data_chunk& data);
-
-    static pong factory_from_data(std::istream& stream);
-
-    static pong factory_from_data(reader& source);
-
-    static uint64_t satoshi_fixed_size();
-
-    pong();
-
-    pong(const uint64_t nonce);
-};
-
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin
 
 #endif

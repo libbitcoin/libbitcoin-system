@@ -71,13 +71,8 @@ BC_API bool decode_hash(hash_digest& out, const std::string& in);
  */
 BC_API hash_digest hash_literal(const char (&string)[2*hash_size + 1]);
 
-// Old names:
-std::string encode_hex(data_slice in);
-data_chunk decode_hex(std::string in);
-
 } // namespace libbitcoin
 
 #include <bitcoin/bitcoin/impl/formats/base16.ipp>
 
 #endif
-

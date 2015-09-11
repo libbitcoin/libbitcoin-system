@@ -23,7 +23,6 @@
 #include <stdexcept>
 #include <bitcoin/bitcoin/utility/writer.hpp>
 
-
 namespace libbitcoin {
 
 /**
@@ -43,27 +42,21 @@ namespace libbitcoin {
  * @endcode
  */
 template <typename Iterator>
-class serializer : public writer
+class serializer
+  : public writer
 {
 public:
-
     serializer(const Iterator begin);
 
     operator bool() const;
-
     bool operator!() const;
-
     void write_byte(uint8_t value);
-
     void write_data(const data_chunk& data);
-
-    void write_data(const uint8_t* data, size_t n_bytes);
-
+    void write_data(const uint8_t* data, size_t size);
     void write_hash(const hash_digest& hash);
-
     void write_short_hash(const short_hash& hash);
 
-    /* These write data in little endian format: */
+    // These write data in little endian format:
     void write_2_bytes_little_endian(uint16_t value);
     void write_4_bytes_little_endian(uint32_t value);
     void write_8_bytes_little_endian(uint64_t value);
@@ -74,7 +67,7 @@ public:
      */
     void write_variable_uint_little_endian(uint64_t value);
 
-    /* These write data in big endian format: */
+    // These write data in big endian format:
     void write_2_bytes_big_endian(uint16_t value);
     void write_4_bytes_big_endian(uint32_t value);
     void write_8_bytes_big_endian(uint64_t value);
@@ -103,12 +96,12 @@ public:
     /**
      * Write a fixed size string padded with zeroes.
      */
-    void write_fixed_string(const std::string& value, size_t string_size);
+    void write_fixed_string(const std::string& value, size_t size);
 
     /**
      * Write a variable length string.
      */
-    void write_string(const std::string& str);
+    void write_string(const std::string& value);
 
     /**
      * Returns underlying iterator.
@@ -119,13 +112,13 @@ public:
      * Useful if you want to serialize some data using another
      * routine and then continue with this serializer.
      */
-    void set_iterator(Iterator iter);
+    void set_iterator(Iterator iterator);
 
 private:
     template <typename T>
     void write_data_reverse(const T& data);
 
-    Iterator iter_;
+    Iterator iterator_;
 };
 
 template <typename Iterator>

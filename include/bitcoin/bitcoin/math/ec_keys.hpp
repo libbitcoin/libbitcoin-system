@@ -49,6 +49,8 @@ struct compact_signature
     int recid;
 };
 
+// TODO: define string literal factory: ec_secret_literal().
+
 /**
  * Converts a secret parameter to a public point.
  */
@@ -124,24 +126,6 @@ BC_API bool ec_multiply(ec_point& a, const ec_secret& b);
  * @return false on failure (such as a zero result).
  */
 BC_API bool ec_multiply(ec_secret& a, const ec_secret& b);
-
-///////////////////////////////////////////////////////////////////////////////
-// DEPRECATED (now redundant with secp256k1 implementation)
-///////////////////////////////////////////////////////////////////////////////
-BC_API ec_secret create_nonce(ec_secret secret, hash_digest hash,
-    unsigned index=0);
-
-///////////////////////////////////////////////////////////////////////////////
-// DEPRECATED (deterministic signatures are safer)
-///////////////////////////////////////////////////////////////////////////////
-
-BC_API endorsement sign(ec_secret secret, hash_digest hash, ec_secret);
-
-///////////////////////////////////////////////////////////////////////////////
-// DEPRECATED (deterministic signatures are safer)
-///////////////////////////////////////////////////////////////////////////////
-BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash,
-    ec_secret);
 
 } // namespace libbitcoin
 

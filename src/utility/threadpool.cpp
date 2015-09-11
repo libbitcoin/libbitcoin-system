@@ -19,17 +19,15 @@
  */
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
+#include <memory>
 #include <new>
-#include <system_error>
 #include <thread>
+#include <bitcoin/bitcoin/network/asio.hpp>
 #include <bitcoin/bitcoin/utility/thread.hpp>
 
 namespace libbitcoin {
 
-using boost::asio::io_service;
-
 threadpool::threadpool(size_t number_threads, thread_priority priority)
-  : work_(nullptr)
 {
     spawn(number_threads, priority);
 }
@@ -47,28 +45,27 @@ void threadpool::spawn(size_t number_threads, thread_priority priority)
 
 void threadpool::spawn_once(thread_priority priority)
 {
-    if (work_ == nullptr)
-        work_ = new io_service::work(ios_);
+    // In C++14 work should use a unique_ptr.
+    // Work prevents the service from running out of work and terminating.
+    if (!work_)
+        work_ = std::make_shared<asio::service::work>(service_);
 
     const auto action = [this, priority]
     {
         set_thread_priority(priority);
-        ios_.run();
+        service_.run();
     };
 
     threads_.push_back(std::thread(action));
 }
 
-void threadpool::stop()
+void threadpool::abort()
 {
-    ios_.stop();
+    service_.stop();
 }
 
 void threadpool::shutdown()
 {
-    if (work_ != nullptr)
-        delete work_;
-
     work_ = nullptr;
 }
 
@@ -79,14 +76,14 @@ void threadpool::join()
             thread.join();
 }
 
-io_service& threadpool::service()
+asio::service& threadpool::service()
 {
-    return ios_;
+    return service_;
 }
 
-const io_service& threadpool::service() const
+const asio::service& threadpool::service() const
 {
-    return ios_;
+    return service_;
 }
 
 } // namespace libbitcoin

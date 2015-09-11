@@ -24,16 +24,16 @@
 #include <cstdint>
 #include <string>
 #include <functional>
-#include <system_error>
 #include <vector>
 #include <boost/circular_buffer.hpp>
 #include <boost/filesystem.hpp>
 #include <bitcoin/bitcoin/config/authority.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/error.hpp>
 #include <bitcoin/bitcoin/network/channel.hpp>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/message/network_address.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
@@ -43,19 +43,16 @@ namespace network {
 class BC_API hosts
 {
 public:
-    typedef std::function<void (const std::error_code&)> load_handler;
-    typedef std::function<void (const std::error_code&)> save_handler;
-    typedef std::function<void (const std::error_code&)> store_handler;
-    typedef std::function<void (const std::error_code&)> remove_handler;
+    typedef std::function<void(const code&)> load_handler;
+    typedef std::function<void(const code&)> save_handler;
+    typedef std::function<void(const code&)> store_handler;
+    typedef std::function<void(const code&)> remove_handler;
+    typedef std::function<void(const code&, size_t)> fetch_count_handler;
+    typedef std::function<void(const code&, const message::network_address&)>
+        fetch_address_handler;
 
-    typedef std::function<void (const std::error_code&, size_t)>
-        fetch_count_handler;
-
-    typedef std::function<
-        void (const std::error_code&, const message::network_address&)>
-            fetch_address_handler;
-
-    hosts(threadpool& pool, const boost::filesystem::path& file_path,
+    hosts(threadpool& pool,
+        const boost::filesystem::path& file_path="hosts.cache",
         size_t capacity=1000);
     ~hosts();
 
@@ -63,29 +60,25 @@ public:
     hosts(const hosts&) = delete;
     void operator=(const hosts&) = delete;
 
-    bool empty() const;
-    size_t size() const;
-
+    size_t capacity();
+    size_t size();
     void load(load_handler handle_load);
     void save(save_handler handle_save);
-
-    BC_API void store(const message::network_address& address,
+    void store(const message::network_address& address,
         store_handler handle_store);
-    BC_API void remove(const message::network_address& address,
+    void store(const message::network_address::list& addresses,
+        store_handler handle_store);
+    void remove(const message::network_address& address,
         remove_handler handle_remove);
     void fetch_address(fetch_address_handler handle_fetch);
     void fetch_count(fetch_count_handler handle_fetch);
 
-    /// Deprecated, require hosts path on construct.
-    hosts(threadpool& pool, size_t capacity=1000);
-
-    /// Deprecated, set hosts path on construct.
-    void load(const std::string& path, load_handler handle_load);
-
-    /// Deprecated, set hosts path on construct.
-    void save(const std::string& path, save_handler handle_save);
-
 private:
+    typedef boost::circular_buffer<message::network_address> list;
+    typedef list::iterator iterator;
+
+    bool exists(const message::network_address& address);
+    iterator find(const message::network_address& address);
 
     void do_load(const boost::filesystem::path& path,
         load_handler handle_load);
@@ -99,16 +92,13 @@ private:
     void do_fetch_count(fetch_count_handler handle_fetch);
     size_t select_random_host();
 
-    sequencer strand_;
+    list buffer_;
+    dispatcher dispatch_;
     boost::filesystem::path file_path_;
-    boost::circular_buffer<config::authority> buffer_;
-
-    // Deprecated, remove when protocol::set_hosts_filename is removed.
-    // This allows (deprecated) protocol::set_hosts_filename to set file_path_.
-    friend class protocol;
 };
 
 } // namespace network
 } // namespace libbitcoin
 
 #endif
+

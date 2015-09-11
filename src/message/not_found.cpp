@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -21,6 +21,8 @@
 
 namespace libbitcoin {
 namespace message {
+
+const std::string message::not_found::command = "notfound";
 
 not_found not_found::factory_from_data(const data_chunk& data)
 {
@@ -52,5 +54,5 @@ not_found::not_found(const inventory_vector::list& elements)
     inventories = elements;
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

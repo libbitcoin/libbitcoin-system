@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/message/get_address.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -26,6 +27,8 @@
 
 namespace libbitcoin {
 namespace message {
+
+const std::string message::get_address::command = "getaddr";
 
 get_address get_address::factory_from_data(const data_chunk& data)
 {
@@ -59,7 +62,7 @@ void get_address::reset()
 
 bool get_address::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -78,10 +81,10 @@ bool get_address::from_data(reader& source)
 data_chunk get_address::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -95,7 +98,7 @@ void get_address::to_data(writer& sink) const
 {
 }
 
-uint64_t get_address::satoshi_size() const
+uint64_t get_address::serialized_size() const
 {
     return get_address::satoshi_fixed_size();
 }
@@ -105,5 +108,5 @@ uint64_t get_address::satoshi_fixed_size()
     return 0;
 }
 
-} // end message
-} // end libbitcoin
+} // namspace message
+} // namspace libbitcoin

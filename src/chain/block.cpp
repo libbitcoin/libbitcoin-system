@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <bitcoin/bitcoin/chain/block.hpp>
+
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
@@ -27,6 +28,8 @@
 
 namespace libbitcoin {
 namespace chain {
+
+const std::string chain::block::command = "block";
 
 block block::factory_from_data(const data_chunk& data)
 {
@@ -62,7 +65,7 @@ void block::reset()
 
 bool block::from_data(const data_chunk& data)
 {
-    boost::iostreams::stream<byte_source<data_chunk>> istream(data);
+    data_source istream(data);
     return from_data(istream);
 }
 
@@ -74,10 +77,8 @@ bool block::from_data(std::istream& stream)
 
 bool block::from_data(reader& source)
 {
-    bool result = true;
-
+    auto result = true;
     reset();
-
     result = header.from_data(source, false);
 
     if (result)
@@ -101,10 +102,10 @@ bool block::from_data(reader& source)
 data_chunk block::to_data() const
 {
     data_chunk data;
-    boost::iostreams::stream<byte_sink<data_chunk>> ostream(data);
+    data_sink ostream(data);
     to_data(ostream);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == satoshi_size());
+    BITCOIN_ASSERT(data.size() == serialized_size());
     return data;
 }
 
@@ -118,18 +119,17 @@ void block::to_data(writer& sink) const
 {
     header.to_data(sink, false);
     sink.write_variable_uint_little_endian(transactions.size());
-
-    for (const transaction& tx : transactions)
+    for (const auto& tx: transactions)
         tx.to_data(sink);
 }
 
-uint64_t block::satoshi_size() const
+uint64_t block::serialized_size() const
 {
-    uint64_t block_size = header.satoshi_size(false)
-        + variable_uint_size(transactions.size());
+    uint64_t block_size = header.serialized_size(false) + 
+        variable_uint_size(transactions.size());
 
-    for (const transaction& tx : transactions)
-        block_size += tx.satoshi_size();
+    for (const auto& tx: transactions)
+        block_size += tx.serialized_size();
 
     return block_size;
 }
@@ -158,7 +158,8 @@ hash_digest build_merkle_tree(hash_list& merkle)
         {
             // Join both current hashes together (concatenate).
             data_chunk concat_data;
-            boost::iostreams::stream<byte_sink<data_chunk>> concat_stream(concat_data);
+            data_sink 
+                concat_stream(concat_data);
             ostream_writer concat_sink(concat_stream);
             concat_sink.write_hash(*it);
             concat_sink.write_hash(*(it + 1));
@@ -167,7 +168,7 @@ hash_digest build_merkle_tree(hash_list& merkle)
             BITCOIN_ASSERT(concat_data.size() == (2 * hash_size));
 
             // Hash both of the hashes.
-            hash_digest new_root = bitcoin_hash(concat_data);
+            const auto new_root = bitcoin_hash(concat_data);
 
             // Add this to the new list.
             new_merkle.push_back(new_root);
@@ -181,18 +182,16 @@ hash_digest build_merkle_tree(hash_list& merkle)
     return merkle[0];
 }
 
-hash_digest block::generate_merkle_root(
-    const transaction::list& transactions)
+hash_digest block::generate_merkle_root(const transaction::list& transactions)
 {
     // Generate list of transaction hashes.
     hash_list tx_hashes;
-
-    for (transaction tx : transactions)
+    for (const auto& tx: transactions)
         tx_hashes.push_back(tx.hash());
 
     // Build merkle tree.
     return build_merkle_tree(tx_hashes);
 }
 
-} // end chain
-} // end libbitcoin
+} // namspace chain
+} // namspace libbitcoin

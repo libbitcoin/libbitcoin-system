@@ -23,37 +23,41 @@
 #include <functional>
 #include <memory>
 #include <vector>
-#include <bitcoin/bitcoin/utility/sequencer.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/dispatcher.hpp>
 #include <bitcoin/bitcoin/utility/threadpool.hpp>
 
 namespace libbitcoin {
 
+#define MAKE_SUBSCRIBER(Message, pool, log_name) \
+    std::make_shared<Message##_subscriber>( \
+        pool, #Message "_subscriber", log_name)
+
 template <typename... Args>
 class subscriber
-  : public std::enable_shared_from_this<subscriber<Args...>>
+  : public std::enable_shared_from_this<subscriber<Args...>>,
+    track<subscriber<Args...>>
 {
 public:
-    typedef std::function<void (Args...)> subscription_handler;
+    typedef std::function<void (Args...)> handler;
     typedef std::shared_ptr<subscriber<Args...>> ptr;
 
-    subscriber(threadpool& pool);
+    subscriber(threadpool& pool, const std::string& class_name,
+        const std::string& log_name);
     ~subscriber();
 
-    void subscribe(subscription_handler handler);
+    void subscribe(handler notifier);
     void relay(Args... args);
 
 private:
-    typedef std::vector<subscription_handler> subscription_list;
+    typedef std::vector<handler> list;
 
-    void do_subscribe(subscription_handler notifier);
+    void do_subscribe(handler notifier);
     void do_relay(Args... args);
 
-    sequencer strand_;
-    subscription_list subscriptions_;
+    dispatcher dispatch_;
+    list subscriptions_;
 };
-
-template <typename... Args>
-using subscriber_ptr = std::shared_ptr<subscriber<Args...>>;
 
 } // namespace libbitcoin
 

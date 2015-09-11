@@ -36,7 +36,7 @@ namespace libbitcoin {
 		/**
 		 * Returns the quantity (count) of the elapsed time as TimeT units.
 	 	 */
-		template<typename Function, typename ...Args>
+		template <typename Function, typename ...Args>
         static typename Time::rep execution(Function func, Args&&... args)
 		{
             auto start = Clock::now();
@@ -48,7 +48,7 @@ namespace libbitcoin {
 		/**
 		 * Returns the duration (in chrono's type system) of the elapsed time.
 		 */
-        template<typename Function, typename... Args>
+        template <typename Function, typename... Args>
         static Time duration(Function func, Args&&... args)
 		{
             auto start = Clock::now();

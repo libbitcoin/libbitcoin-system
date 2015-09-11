@@ -72,5 +72,4 @@ time_duration pseudo_randomize(const time_duration& expiration, uint8_t ratio)
     return seconds(expire);
 }
 
-
 } // namespace libbitcoin

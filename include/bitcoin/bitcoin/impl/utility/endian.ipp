@@ -35,6 +35,7 @@ T from_big_endian(Iterator start, const Iterator end)
     size_t i = sizeof(T);
     while (0 < i && start != end)
         out |= static_cast<T>(*start++) << (8 * --i);
+
     return out;
 }
 
@@ -46,6 +47,7 @@ T from_little_endian(Iterator start, const Iterator end)
     size_t i = 0;
     while (i < sizeof(T) && start != end)
         out |= static_cast<T>(*start++) << (8 * i++);
+
     return out;
 }
 
@@ -68,6 +70,7 @@ T from_little_endian_unsafe(Iterator in)
     size_t i = 0;
     while (i < sizeof(T))
         out |= static_cast<T>(*in++) << (8 * i++);
+
     return out;
 }
 
@@ -75,9 +78,7 @@ template <typename T>
 T from_big_endian_stream_unsafe(std::istream& stream)
 {
     VERIFY_UNSIGNED(T);
-
     T out = 0;
-
     for (size_t i = sizeof(T); (i > 0) && stream; i--)
     {
         uint8_t value = 0;
@@ -92,7 +93,6 @@ template <typename T>
 T from_little_endian_stream_unsafe(std::istream& stream)
 {
     VERIFY_UNSIGNED(T);
-
     T out = 0;
     stream.read(reinterpret_cast<char*>(&out), sizeof(T));
     return out;
@@ -108,6 +108,7 @@ byte_array<sizeof(T)> to_big_endian(T n)
         *i = static_cast<uint8_t>(n);
         n >>= 8;
     }
+
     return out;
 }
 
@@ -121,6 +122,7 @@ byte_array<sizeof(T)> to_little_endian(T n)
         *i = static_cast<uint8_t>(n);
         n >>= 8;
     }
+
     return out;
 }
 
