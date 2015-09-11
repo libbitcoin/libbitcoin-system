@@ -456,17 +456,18 @@ static data_chunk normal(const std::string& passphrase)
 static void create_token(token& out_token, const std::string& passphrase,
     data_slice owner_salt, data_slice owner_entropy, data_slice prefix)
 {
-    BITCOIN_ASSERT(owner_salt.size() >= salt_size);
-    BITCOIN_ASSERT(owner_salt.size() <= entropy_size);
+    BITCOIN_ASSERT(owner_salt.size() == salt_size ||
+        owner_salt.size() == entropy_size);
     BITCOIN_ASSERT(owner_entropy.size() == entropy_size);
+    const auto lot = owner_salt.size() == salt_size;
 
-    ec_secret scrypted;
-    scrypt_token(scrypted, normal(passphrase), owner_salt);
+    ec_secret factor;
+    scrypt_token(factor, normal(passphrase), owner_salt);
 
-    ec_secret hashed;
-    to_array(hashed, bitcoin_hash(build_data({ scrypted, owner_entropy })));
+    if (lot)
+        factor = bitcoin_hash(build_data({ factor, owner_entropy }));
 
-    const auto point = secret_to_public_key(hashed, true);
+    const auto point = secret_to_public_key(factor, true);
 
     build_checked_array(out_token,
     {
