@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_SUITE(bip38_tests)
 
 #ifdef WITH_ICU
 
-BOOST_AUTO_TEST_CASE(bip38__fixture__unicode_passphrase__validated)
+BOOST_AUTO_TEST_CASE(bip38__fixture__unicode_passphrase__matches_bip38_test_vector)
 {
     const auto encoded_password = base16_literal("cf92cc8100f0909080f09f92a9");
     std::string passphrase(encoded_password.begin(), encoded_password.end());
@@ -46,8 +46,6 @@ BOOST_AUTO_TEST_CASE(bip38__fixture__unicode_passphrase__validated)
 // ----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE(bip38__create_token_lot)
-
-// TODO: obtain external vectors to validate the create_token implementation.
 
 #define BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, bytes, lot, sequence) \
     token out_token; \
@@ -115,8 +113,6 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE(bip38__create_token_entropy)
 
-// TODO: obtain external vectors to validate the create_token implementation.
-
 #define BC_CREATE_TOKEN_ENTROPY(passphrase, bytes) \
     token out_token; \
     create_token(out_token, passphrase, bytes)
@@ -126,7 +122,7 @@ BOOST_AUTO_TEST_CASE(bip38__create_token_entropy__defaults__expected)
     const auto passphrase = "";
     const auto entropy = base16_literal("baadf00dbaadf00d");
     BC_CREATE_TOKEN_ENTROPY(passphrase, entropy);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G865e1hHL8fwmEKFDiHDW4BdYQfC1vupQtmFEsxjAh5Bwe4taiX");
+    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6yLmJ7TQ49fKnQtsgjybNgNHAKBCQKoFZcTNjNJtg4oCUgtPt3");
 }
 
 BOOST_AUTO_TEST_CASE(bip38__create_token_entropy__passphrase__expected)
@@ -134,7 +130,7 @@ BOOST_AUTO_TEST_CASE(bip38__create_token_entropy__passphrase__expected)
     const auto passphrase = "passphrase";
     const auto entropy = base16_literal("baadf00dbaadf00d");
     BC_CREATE_TOKEN_ENTROPY(passphrase, entropy);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G7SWTZ5WCjnDFtzLHYWKXLgo7Z7DuBcWNnP9y4ciffZwbdyYadM");
+    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -488,6 +484,94 @@ BOOST_AUTO_TEST_CASE(bip38__create_key_pair_with_confirmation__vector_9_compress
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+// ----------------------------------------------------------------------------
+
+#ifdef WITH_ICU
+
+BOOST_AUTO_TEST_SUITE(bip38__round_trips)
+
+BOOST_AUTO_TEST_CASE(bip38__encrypt__compressed_testnet__matches_secret_version_and_compression)
+{
+    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
+    const auto passphrase = "passphrase";
+
+    private_key out_private_key;
+    const uint8_t version = 111;
+    const auto compressed = true;
+    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
+    encrypt(out_private_key, secret, passphrase, version, compressed);
+
+    const auto& private_key = out_private_key;
+    ec_secret out_secret;
+    uint8_t out_version = 42;
+    bool out_compressed = false;
+    BOOST_REQUIRE(decrypt(out_secret, out_version, out_compressed, private_key, passphrase));
+    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), encode_base16(secret));
+    BOOST_REQUIRE_EQUAL(out_version, version);
+    BOOST_REQUIRE_EQUAL(out_compressed, compressed);
+}
+
+BOOST_AUTO_TEST_CASE(bip38__create_token_entropy__private_uncompressed_testnet__decrypts_with_matching_version_and_compression)
+{
+    token out_token;
+    const auto passphrase = "passphrase";
+    const auto entropy = base16_literal("baadf00dbaadf00d");
+    create_token(out_token, passphrase, entropy);
+    BOOST_CHECK_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
+
+    const auto& token = out_token;
+    ec_point out_point;
+    private_key out_private_key;
+    const uint8_t version = 111;
+    const auto compressed = false;
+    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
+    BOOST_REQUIRE(create_key_pair(out_private_key, out_point, token, seed, version, compressed));
+
+    const auto& private_key = out_private_key;
+    ec_secret out_secret;
+    uint8_t out_version = 42;
+    bool out_compressed = true;
+    BOOST_REQUIRE(decrypt(out_secret, out_version, out_compressed, private_key, passphrase));
+    BOOST_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(secret_to_public_key(out_secret, compressed)));
+    BOOST_REQUIRE_EQUAL(out_version, version);
+    BOOST_REQUIRE_EQUAL(out_compressed, compressed);
+}
+
+BOOST_AUTO_TEST_CASE(bip38__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
+{
+    token out_token;
+    const auto passphrase = "passphrase";
+    const auto salt = base16_literal("baadf00d");
+    BOOST_REQUIRE(create_token(out_token, passphrase, salt, 42, 24));
+    BOOST_CHECK_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
+
+    const auto& token = out_token;
+    ec_point out_point;
+    private_key out_private_key;
+    public_key out_public_key;
+    const uint8_t version = 111;
+    const auto compressed = true;
+    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
+    BOOST_REQUIRE(create_key_pair(out_private_key, out_public_key, out_point, token, seed, version, compressed));
+
+    const auto& private_key = out_private_key;
+    const auto& public_key = out_public_key;
+    ec_secret out_secret;
+    uint8_t out_version = 42;
+    bool out_compressed = false;
+    BOOST_REQUIRE(decrypt(out_secret, out_version, out_compressed, private_key, passphrase));
+    BOOST_REQUIRE_EQUAL(out_version, version);
+    BOOST_REQUIRE_EQUAL(out_compressed, compressed);
+
+    BOOST_REQUIRE(decrypt(out_point, out_version, public_key, passphrase));
+    BOOST_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(secret_to_public_key(out_secret, compressed)));
+    BOOST_REQUIRE_EQUAL(out_version, version);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+#endif
 
 // ----------------------------------------------------------------------------
 

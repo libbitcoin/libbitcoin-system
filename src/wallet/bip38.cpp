@@ -403,6 +403,7 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
     ec_point& out_point, const token& token, const seed& seed, uint8_t version,
     bool compressed)
 {
+    // TODO: validate token prefix.
     if (!verify_checksum(token))
         return false;
 
@@ -455,17 +456,18 @@ static data_chunk normal(const std::string& passphrase)
 static void create_token(token& out_token, const std::string& passphrase,
     data_slice owner_salt, data_slice owner_entropy, data_slice prefix)
 {
-    BITCOIN_ASSERT(owner_salt.size() >= salt_size);
-    BITCOIN_ASSERT(owner_salt.size() <= entropy_size);
+    BITCOIN_ASSERT(owner_salt.size() == salt_size ||
+        owner_salt.size() == entropy_size);
     BITCOIN_ASSERT(owner_entropy.size() == entropy_size);
+    const auto lot = owner_salt.size() == salt_size;
 
-    ec_secret scrypted;
-    scrypt_token(scrypted, normal(passphrase), owner_salt);
+    ec_secret factor;
+    scrypt_token(factor, normal(passphrase), owner_salt);
 
-    ec_secret hashed;
-    to_array(hashed, bitcoin_hash(build_data({ scrypted, owner_entropy })));
+    if (lot)
+        factor = bitcoin_hash(build_data({ factor, owner_entropy }));
 
-    const auto point = secret_to_public_key(hashed, true);
+    const auto point = secret_to_public_key(factor, true);
 
     build_checked_array(out_token,
     {
@@ -609,6 +611,7 @@ static bool decrypt_secret(ec_secret& out_secret, const parse_private& parse,
 bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
     const private_key& key, const std::string& passphrase)
 {
+    // TODO: validate private_key prefix.
     if (!verify_checksum(key))
         return false;
     
@@ -635,6 +638,7 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
 bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
     const std::string& passphrase)
 {
+    // TODO: validate public_key prefix.
     if (!verify_checksum(key))
         return false;
 
