@@ -576,54 +576,54 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // These are not actual tests, just for emitting the version maps.
 
-BOOST_AUTO_TEST_SUITE(ek__altchain_versions)
-
-static std::string hex(uint8_t number)
-{
-    return encode_base16(data_chunk{ number });
-}
-
-BOOST_AUTO_TEST_CASE(ek__create_key_pair__all_versions__print_private_and_public_encrypted_keys)
-{
-    ek_private out_private_key;
-    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
-
-    for (size_t version = 0x00; version <= 0xFF; ++version)
-    {
-        const auto byte = static_cast<uint8_t>(version);
-        encrypt(out_private_key, secret, "passphrase", byte, true);
-
-        auto key = encode_base58(out_private_key);
-        key.resize(2);
-        BOOST_MESSAGE("0x" + hex(byte) + " -> " + key + "... ");
-    }
-}
-
-BOOST_AUTO_TEST_CASE(ek__create_key_pair__all_multiplied_versions__print_private_and_public_encrypted_keys)
-{
-    ek_token out_token;
-    create_token(out_token, "passphrase", base16_literal("baadf00dbaadf00d"));
-
-    const auto& token = out_token;
-    ec_point unused;
-    ek_private out_private_key;
-    ek_public out_public_key;
-    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
-
-    for (size_t version = 0x00; version <= 0xFF; ++version)
-    {
-        const auto byte = static_cast<uint8_t>(version);
-        BOOST_REQUIRE(create_key_pair(out_private_key, out_public_key, unused, token, seed, byte, true));
-
-        auto private_key = encode_base58(out_private_key);
-        auto public_key = encode_base58(out_public_key);
-        private_key.resize(2);
-        public_key.resize(4);
-        BOOST_MESSAGE("0x" + hex(byte) + " -> " + private_key + "... " + public_key + "...");
-    }
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+//BOOST_AUTO_TEST_SUITE(ek__altchain_versions)
+//
+//static std::string hex(uint8_t number)
+//{
+//    return encode_base16(data_chunk{ number });
+//}
+//
+//BOOST_AUTO_TEST_CASE(ek__create_key_pair__all_versions__print_private_and_public_encrypted_keys)
+//{
+//    ek_private out_private_key;
+//    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
+//
+//    for (size_t version = 0x00; version <= 0xFF; ++version)
+//    {
+//        const auto byte = static_cast<uint8_t>(version);
+//        encrypt(out_private_key, secret, "passphrase", byte, true);
+//
+//        auto key = encode_base58(out_private_key);
+//        key.resize(2);
+//        BOOST_MESSAGE("0x" + hex(byte) + " -> " + key + "... ");
+//    }
+//}
+//
+//BOOST_AUTO_TEST_CASE(ek__create_key_pair__all_multiplied_versions__print_private_and_public_encrypted_keys)
+//{
+//    ek_token out_token;
+//    create_token(out_token, "passphrase", base16_literal("baadf00dbaadf00d"));
+//
+//    const auto& token = out_token;
+//    ec_point unused;
+//    ek_private out_private_key;
+//    ek_public out_public_key;
+//    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
+//
+//    for (size_t version = 0x00; version <= 0xFF; ++version)
+//    {
+//        const auto byte = static_cast<uint8_t>(version);
+//        BOOST_REQUIRE(create_key_pair(out_private_key, out_public_key, unused, token, seed, byte, true));
+//
+//        auto private_key = encode_base58(out_private_key);
+//        auto public_key = encode_base58(out_public_key);
+//        private_key.resize(2);
+//        public_key.resize(4);
+//        BOOST_MESSAGE("0x" + hex(byte) + " -> " + private_key + "... " + public_key + "...");
+//    }
+//}
+//
+//BOOST_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
