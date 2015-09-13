@@ -60,8 +60,8 @@ BC_CONSTEXPR short_hash null_short_hash =
  * scrypt(data, salt, params)
  */
 template <size_t Size>
-BC_API void scrypt(byte_array<Size>& out, data_slice data, data_slice salt,
-    size_t N, size_t p, size_t r);
+byte_array<Size> scrypt(data_slice data, data_slice salt, size_t N, size_t p,
+    size_t r);
 
 /**
  * Generate a ripemd160 hash. This hash function is used in script for

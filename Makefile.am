@@ -138,7 +138,6 @@ src_libbitcoin_la_SOURCES = \
     src/utility/binary.cpp \
     src/utility/conditional_stack.cpp \
     src/utility/conditional_stack.hpp \
-    src/utility/data.cpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
     src/utility/evaluation_context.cpp \
@@ -151,17 +150,18 @@ src_libbitcoin_la_SOURCES = \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
     src/utility/variable_uint_size.cpp \
-    src/wallet/bip38.cpp \
     src/wallet/dictionary.cpp \
+    src/wallet/encrypted_keys.cpp \
     src/wallet/hd_keys.cpp \
-    src/wallet/key_formats.cpp \
     src/wallet/message.cpp \
+    src/wallet/mini_keys.cpp \
     src/wallet/mnemonic.cpp \
     src/wallet/payment_address.cpp \
     src/wallet/select_outputs.cpp \
     src/wallet/stealth.cpp \
     src/wallet/stealth_address.cpp \
-    src/wallet/uri.cpp
+    src/wallet/uri.cpp \
+    src/wallet/wif_keys.cpp
 
 # local: examples/libbitcoin_examples
 #------------------------------------------------------------------------------
@@ -253,15 +253,15 @@ test_libbitcoin_test_SOURCES = \
     test/utility/stream.cpp \
     test/utility/thread.cpp \
     test/utility/variable_uint_size.cpp \
-    test/wallet/bip38.cpp \
+    test/wallet/encrypted_keys.cpp \
     test/wallet/hd_keys.cpp \
-    test/wallet/key_formats.cpp \
     test/wallet/message.cpp \
     test/wallet/mnemonic.cpp \
     test/wallet/mnemonic.hpp \
     test/wallet/stealth.cpp \
     test/wallet/stealth_address.cpp \
-    test/wallet/uri.cpp
+    test/wallet/uri.cpp \
+    test/wallet/wif_keys.cpp
 
 endif WITH_TESTS
 
@@ -437,17 +437,18 @@ include_bitcoin_bitcoin_utility_HEADERS = \
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
-    include/bitcoin/bitcoin/wallet/bip38.hpp \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
+    include/bitcoin/bitcoin/wallet/encrypted_keys.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
-    include/bitcoin/bitcoin/wallet/key_formats.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
+    include/bitcoin/bitcoin/wallet/mini_keys.hpp \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
     include/bitcoin/bitcoin/wallet/payment_address.hpp \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
     include/bitcoin/bitcoin/wallet/stealth.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
-    include/bitcoin/bitcoin/wallet/uri.hpp
+    include/bitcoin/bitcoin/wallet/uri.hpp \
+    include/bitcoin/bitcoin/wallet/wif_keys.hpp
 
 
 # Custom make targets.

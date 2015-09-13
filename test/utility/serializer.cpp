@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(roundtrip_serialize_deserialize)
     s.write_8_bytes_little_endian(0x8040201011223344);
     s.write_big_endian<uint32_t>(0x80402010);
     s.write_variable_uint_little_endian(1234);
-    s.write_data(to_data_chunk(to_little_endian<uint32_t>(0xbadf00d)));
+    s.write_data(to_chunk(to_little_endian<uint32_t>(0xbadf00d)));
     s.write_string("hello");
     auto ds = make_deserializer(data.begin(), s.iterator());
     BOOST_REQUIRE_EQUAL(ds.read_byte(), 0x80u);

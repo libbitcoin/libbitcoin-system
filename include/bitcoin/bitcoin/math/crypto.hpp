@@ -49,10 +49,6 @@ BC_API void aes256_encrypt(const aes_secret& key, aes_block& block);
  */
 BC_API void aes256_decrypt(const aes_secret& key, aes_block& block);
 
-// DEPRECATED
-BC_API void aes256_encrypt(data_slice key, data_chunk& block);
-BC_API void aes256_decrypt(data_slice key, data_chunk& block);
-
 } // namespace libbitcoin
 
 #endif

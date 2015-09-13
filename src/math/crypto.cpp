@@ -43,29 +43,4 @@ void aes256_decrypt(const aes_secret& key, aes_block& block)
     aes256_done(&context);
 }
 
-// DEPRECATED
-void aes256_encrypt(data_slice key, data_chunk& block)
-{
-    BITCOIN_ASSERT(key.size() == aes256_key_size);
-    BITCOIN_ASSERT(block.size() == aes256_block_size);
-
-    aes256_context context;
-    aes256_init(&context, key.data());
-    aes256_encrypt_ecb(&context, block.data());
-    aes256_done(&context);
-}
-
-// DEPRECATED
-void aes256_decrypt(data_slice key, data_chunk& block)
-{
-    BITCOIN_ASSERT(key.size() == aes256_key_size);
-    BITCOIN_ASSERT(block.size() == aes256_block_size);
-
-    aes256_context context;
-    aes256_init(&context, key.data());
-    aes256_decrypt_ecb(&context, block.data());
-    aes256_done(&context);
-}
-
 } // namespace libbitcoin
-

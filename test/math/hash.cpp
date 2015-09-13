@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(ripemd_hash_test)
             result.result);
     }
 
-    auto ripemd_hash = bitcoin_short_hash(to_byte(110));
+    auto ripemd_hash = bitcoin_short_hash(to_array(110));
     BOOST_REQUIRE_EQUAL(encode_base16(ripemd_hash),
         "17d040b739d639c729daaf627eaff88cfe4207f4");
 
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(pkcs5_pbkdf2_hmac_sha512_test)
             pkcs5_pbkdf2_hmac_sha512_tests)
     {
         const auto hash = pkcs5_pbkdf2_hmac_sha512(
-            to_data_chunk(result.passphrase), to_data_chunk(result.salt),
+            to_chunk(result.passphrase), to_chunk(result.salt),
             result.iterations);
         BOOST_REQUIRE_EQUAL(encode_base16(hash), result.result);
     }

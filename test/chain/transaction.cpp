@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(case_1_factory_data_chunk)
 {
     hash_digest tx_hash = hash_literal(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_data_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -191,7 +191,7 @@ BOOST_AUTO_TEST_CASE(case_2_factory_data_chunk)
 {
     hash_digest tx_hash = hash_literal(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_data_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE(case_1_factory_stream)
 {
     hash_digest tx_hash = hash_literal(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_data_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE(case_2_factory_stream)
 {
     hash_digest tx_hash = hash_literal(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_data_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE(case_1_factory_reader)
 {
     hash_digest tx_hash = hash_literal(
         "bf7c3f5a69a78edd81f3eff7e93a37fb2d7da394d48db4d85e7e5353b9b8e270");
-    data_chunk raw_tx = to_data_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_literal(
         "0100000001f08e44a96bfb5ae63eda1a6620adae37ee37ee4777fb0336e1bbbc"
         "4de65310fc010000006a473044022050d8368cacf9bf1b8fb1f7cfd9aff63294"
         "789eb1760139e7ef41f083726dadc4022067796354aba8f2e02363c5e510aa7e"
@@ -315,7 +315,7 @@ BOOST_AUTO_TEST_CASE(case_2_factory_reader)
 {
     hash_digest tx_hash = hash_literal(
         "8a6d9302fbe24f0ec756a94ecfc837eaffe16c43d1e68c62dfe980d99eea556f");
-    data_chunk raw_tx = to_data_chunk(base16_literal(
+    data_chunk raw_tx = to_chunk(base16_literal(
         "010000000364e62ad837f29617bafeae951776e7a6b3019b2da37827921548d1"
         "a5efcf9e5c010000006b48304502204df0dc9b7f61fbb2e4c8b0e09f3426d625"
         "a0191e56c48c338df3214555180eaf022100f21ac1f632201154f3c69e1eadb5"

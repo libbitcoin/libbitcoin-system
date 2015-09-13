@@ -22,7 +22,7 @@
 
 using namespace bc;
 
-BOOST_AUTO_TEST_SUITE(key_formats_tests)
+BOOST_AUTO_TEST_SUITE(wif_tests)
 
 static const ec_secret secret =
 {{

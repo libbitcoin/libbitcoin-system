@@ -20,7 +20,7 @@
 
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
-#include <bitcoin/bitcoin/wallet/key_formats.hpp>
+#include <bitcoin/bitcoin/wallet/wif_keys.hpp>
 
 namespace libbitcoin {
 namespace wallet {

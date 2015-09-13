@@ -129,16 +129,17 @@
 #include <bitcoin/bitcoin/utility/timer.hpp>
 #include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
-#include <bitcoin/bitcoin/wallet/bip38.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
-#include <bitcoin/bitcoin/wallet/key_formats.hpp>
 #include <bitcoin/bitcoin/wallet/message.hpp>
+#include <bitcoin/bitcoin/wallet/mini_keys.hpp>
 #include <bitcoin/bitcoin/wallet/mnemonic.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/select_outputs.hpp>
 #include <bitcoin/bitcoin/wallet/stealth.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 #include <bitcoin/bitcoin/wallet/uri.hpp>
+#include <bitcoin/bitcoin/wallet/wif_keys.hpp>
 
 #endif

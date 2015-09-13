@@ -245,18 +245,18 @@
     <ClCompile Include="..\..\..\..\test\wallet\uri.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\bip38.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\hd_keys.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\key_formats.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\message.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\main.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\encrypted_keys.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\wif_keys.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

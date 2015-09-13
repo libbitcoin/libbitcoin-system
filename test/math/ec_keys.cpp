@@ -61,11 +61,11 @@ BOOST_AUTO_TEST_CASE(ec_signature_test)
 
 BOOST_AUTO_TEST_CASE(ec_verify_test)
 {
-    ec_point pubkey = to_data_chunk(base16_literal(
+    ec_point pubkey = to_chunk(base16_literal(
         "03bc88a1bd6ebac38e9a9ed58eda735352ad10650e235499b7318315cc26c9b55b"));
     hash_digest sighash = hash_literal(
         "ed8f9b40c2d349c8a7e58cebe79faa25c21b6bb85b874901f72a1b3f1ad0a67f");
-    data_chunk signature = to_data_chunk(base16_literal(
+    data_chunk signature = to_chunk(base16_literal(
         "3045022100bc494fbd09a8e77d8266e2abdea9aef08b9e71b451c7d8de9f63cda33"
         "a62437802206b93edd6af7c659db42c579eb34a3a4cb60c28b5a6bc86fd5266d42f"
         "6b8bb67d"));

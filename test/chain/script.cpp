@@ -230,7 +230,7 @@ BOOST_AUTO_TEST_SUITE(script_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_fails_parse)
 {
-    data_chunk raw_script = to_data_chunk(base16_literal(
+    data_chunk raw_script = to_chunk(base16_literal(
         "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
         "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
         "b2c8d9febfb84d01"));
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(from_data_fails_parse)
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
 {
-    data_chunk normal_output_script = to_data_chunk(base16_literal(
+    data_chunk normal_output_script = to_chunk(base16_literal(
         "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
 
     chain::script out_scr;
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_weird)
 {
-    data_chunk weird_raw_script = to_data_chunk(base16_literal(
+    data_chunk weird_raw_script = to_chunk(base16_literal(
         "0c49206c69656b20636174732e483045022100c7387f64e1f4"
         "cf654cae3b28a15f7572106d6c1319ddcdc878e636ccb83845"
         "e30220050ebf440160a4c0db5623e0cb1562f46401a7ff5b87"
@@ -381,7 +381,7 @@ BOOST_AUTO_TEST_CASE(is_raw_data_returns_true)
 
 BOOST_AUTO_TEST_CASE(factory_from_data_chunk_test)
 {
-    auto raw = to_data_chunk(base16_literal(
+    auto raw = to_chunk(base16_literal(
         "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
 
     auto instance = chain::script::factory_from_data(
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE(factory_from_data_chunk_test)
 
 BOOST_AUTO_TEST_CASE(factory_from_data_stream_test)
 {
-    auto raw = to_data_chunk(base16_literal(
+    auto raw = to_chunk(base16_literal(
         "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
 
@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(factory_from_data_stream_test)
 
 BOOST_AUTO_TEST_CASE(factory_from_data_reader_test)
 {
-    auto raw = to_data_chunk(base16_literal(
+    auto raw = to_chunk(base16_literal(
         "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
     istream_reader source(istream);
