@@ -172,10 +172,11 @@
     <ClCompile Include="..\..\..\..\src\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp" />
     <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\bip38.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\encrypted_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\key_formats.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\mini_keys.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\wif_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\mnemonic.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\payment_address.cpp" />
@@ -301,10 +302,11 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\variable_uint_size.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\writer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\bip38.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\encrypted_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_keys.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\key_formats.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\mini_keys.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\wif_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\message.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\mnemonic.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\payment_address.hpp" />

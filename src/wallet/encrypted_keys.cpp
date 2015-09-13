@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/bip38.hpp>
+#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 
 #include <cstdint>
 #include <cstddef>
@@ -35,13 +35,11 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/wallet/key_formats.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
+#include <bitcoin/bitcoin/wallet/wif_keys.hpp>
 
 namespace libbitcoin {
-namespace bip38 {
-
-using namespace bc::wallet;
+namespace wallet {
 
 static constexpr size_t mainnet = 0x00;
 static constexpr size_t max_sequence_bits = 12;
@@ -57,7 +55,7 @@ static_assert(2 * quarter == bc::aes256_block_size, "oops!");
 // BIP38
 // It is requested that the unused flag bytes NOT be used for denoting that
 // the key belongs to an alt-chain [This shoud read "flag bits"].
-enum flag : uint8_t
+enum ek_flag : uint8_t
 {
     none = 0,
     lot_sequence = 1 << 2,
@@ -69,7 +67,7 @@ enum flag : uint8_t
     ec_non_multiplied = (ec_non_multiplied_low | ec_non_multiplied_high)
 };
 
-static inline bool is_set(uint8_t flags, bip38::flag flag)
+static inline bool is_set(uint8_t flags, ek_flag flag)
 {
     return (flags & flag) != 0;
 }
@@ -141,7 +139,7 @@ class parse_key
 {
 public:
     parse_key(const byte_array<Size>& prefix, const one_byte& flags,
-        const bip38::salt& salt, const bip38::entropy& entropy)
+        const wallet::salt& salt, const wallet::entropy& entropy)
       : parse_prefix<Check, Size>(prefix),
         flags_(flags), salt_(salt), entropy_(entropy)
     {
@@ -149,11 +147,11 @@ public:
 
     bool compressed() const
     {
-        return is_set(flags(), flag::ec_compressed);
+        return is_set(flags(), ek_flag::ec_compressed);
     }
 
     /// The owner salt + lot-sequence or owner entropy.
-    bip38::entropy entropy() const
+    wallet::entropy entropy() const
     {
         return entropy_;
     }
@@ -165,7 +163,7 @@ public:
 
     bool lot_sequence() const
     {
-        return is_set(flags(), flag::lot_sequence);
+        return is_set(flags(), ek_flag::lot_sequence);
     }
 
     /// Either 4 or 8 bytes, depending on the lot sequence flags.
@@ -178,15 +176,15 @@ public:
     }
 
     /// The address hash salt.
-    bip38::salt salt() const
+    wallet::salt salt() const
     {
         return salt_;
     }
 
 private:
     const one_byte flags_;
-    const bip38::salt salt_;
-    const bip38::entropy entropy_;
+    const wallet::salt salt_;
+    const wallet::entropy entropy_;
 };
 
 class parse_private
@@ -221,7 +219,7 @@ public:
 
     bool multiplied() const
     {
-        return !is_set(flags(), flag::ec_non_multiplied);
+        return !is_set(flags(), ek_flag::ec_non_multiplied);
     }
 
     quarter_hash data1() const
@@ -342,7 +340,7 @@ public:
         return data_;
     }
 
-    bip38::entropy entropy() const
+    wallet::entropy entropy() const
     {
         return entropy_;
     }
@@ -368,7 +366,7 @@ private:
     static constexpr uint8_t default_context = 0x53;
     static const byte_array<magic_size> token_magic;
 
-    const bip38::entropy entropy_;
+    const wallet::entropy entropy_;
     const one_byte sign_;
     const hash_digest data_;
 };
@@ -385,16 +383,16 @@ const byte_array<parse_token::magic_size> parse_token::token_magic
 
 static one_byte set_flags(bool compressed, bool lot_sequence, bool multiplied)
 {
-    uint8_t byte = flag::none;
+    uint8_t byte = ek_flag::none;
 
     if (compressed)
-        byte |= flag::ec_compressed;
+        byte |= ek_flag::ec_compressed;
 
     if (lot_sequence)
-        byte |= flag::lot_sequence;
+        byte |= ek_flag::lot_sequence;
 
     if (!multiplied)
-        byte |= flag::ec_non_multiplied;
+        byte |= ek_flag::ec_non_multiplied;
 
     return to_array(byte);
 }
@@ -423,14 +421,14 @@ static salt address_salt(uint8_t version, const ec_point& point)
     return slice<0, salt_size>(address_hash(version, point));
 }
 
-static bool address_validate(const ec_point& point, const bip38::salt& salt,
+static bool address_validate(const ec_point& point, const wallet::salt& salt,
     uint8_t version, bool compressed)
 {
     const auto hash = address_hash(version, point);
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
-static bool address_validate(const ec_secret& secret, const bip38::salt& salt,
+static bool address_validate(const ec_secret& secret, const wallet::salt& salt,
     uint8_t version, bool compressed)
 {
     const auto point = secret_to_public_key(secret, compressed);
@@ -595,7 +593,7 @@ static data_chunk normal(const std::string& passphrase)
 }
 
 static void create_token(token& out_token, const std::string& passphrase,
-    data_slice owner_salt, const bip38::entropy& owner_entropy,
+    data_slice owner_salt, const wallet::entropy& owner_entropy,
     const byte_array<parse_token::prefix_size>& prefix)
 {
     BITCOIN_ASSERT(owner_salt.size() == salt_size ||
@@ -619,7 +617,7 @@ static void create_token(token& out_token, const std::string& passphrase,
 
 // The salt here is owner-supplied random bits, not the address hash.
 void create_token(token& out_token, const std::string& passphrase,
-    const bip38::entropy& entropy)
+    const wallet::entropy& entropy)
 {
     // BIP38: If lot and sequence numbers are not being included, then
     // owner_salt is 8 random bytes instead of 4, lot_sequence is omitted and
@@ -630,7 +628,7 @@ void create_token(token& out_token, const std::string& passphrase,
 
 // The salt here is owner-supplied random bits, not the address hash.
 bool create_token(token& out_token, const std::string& passphrase,
-    const bip38::salt& salt, uint32_t lot, uint32_t sequence)
+    const wallet::salt& salt, uint32_t lot, uint32_t sequence)
 {
     if (lot > max_token_lot || sequence > max_token_sequence)
         return false;
@@ -794,5 +792,5 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
 
 #endif // WITH_ICU
 
-} // namespace bip38
+} // namespace wallet
 } // namespace libbitcoin

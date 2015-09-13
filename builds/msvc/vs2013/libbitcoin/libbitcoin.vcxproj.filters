@@ -209,9 +209,6 @@
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\key_formats.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -386,9 +383,6 @@
     <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\bip38.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\payment_address.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -469,6 +463,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c">
       <Filter>src\math\external</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\encrypted_keys.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\wif_keys.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\mini_keys.cpp">
+      <Filter>src\wallet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -566,9 +569,6 @@
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_keys.hpp">
-      <Filter>include\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\key_formats.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\message.hpp">
@@ -784,9 +784,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\exceptions.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\bip38.hpp">
-      <Filter>include\bitcoin\wallet</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\payment_address.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
@@ -894,6 +891,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\math\external\crypto_scrypt.h">
       <Filter>src\math\external</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\encrypted_keys.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\wif_keys.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\mini_keys.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_BIP38_HPP
-#define LIBBITCOIN_BIP38_HPP
+#ifndef LIBBITCOIN_ENCRYPTED_KEYS_HPP
+#define LIBBITCOIN_ENCRYPTED_KEYS_HPP
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
@@ -28,7 +28,7 @@
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 namespace libbitcoin {
-namespace bip38 {
+namespace wallet {
 
 /**
  * A seed for use in creating an intermediate passphrase (token).
@@ -168,7 +168,7 @@ BC_API bool decrypt(ec_point& out_point, uint8_t& out_version,
 
 #endif // WITH_ICU
 
-} // namespace bip38
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif

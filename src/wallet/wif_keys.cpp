@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/key_formats.hpp>
+#include <bitcoin/bitcoin/wallet/wif_keys.hpp>
 
 #include <cstdint>
 #include <bitcoin/bitcoin/define.hpp>
@@ -79,21 +79,6 @@ bool is_wif_compressed(const std::string& wif)
         return false;
     return decoded.size() == (1 + hash_size + 1 + 4) &&
         decoded[33] == (uint8_t)0x01;
-}
-
-bool check_minikey(const std::string& minikey)
-{
-    // Legacy minikeys are 22 chars long
-    if (minikey.size() != 22 && minikey.size() != 30)
-        return false;
-    return sha256_hash(to_chunk(minikey + "?"))[0] == 0x00;
-}
-
-ec_secret minikey_to_secret(const std::string& minikey)
-{
-    if (!check_minikey(minikey))
-        return ec_secret();
-    return sha256_hash(to_chunk(minikey));
 }
 
 } // namespace wallet
