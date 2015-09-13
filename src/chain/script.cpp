@@ -303,7 +303,7 @@ bool script::deserialize(const data_chunk& raw_script,
         const auto op = operation
         {
             opcode::raw_data,
-            to_data_chunk(raw_script)
+            to_chunk(raw_script)
         };
 
         operations.clear();
@@ -440,7 +440,7 @@ bool script::check_signature(data_slice signature, const ec_point& public_key,
         return false;
 
     // Remove the sighash type from the end of the signature.
-    auto ec_signature = to_data_chunk(signature);
+    auto ec_signature = to_chunk(signature);
     const auto hash_type = ec_signature.back();
     ec_signature.pop_back();
 
@@ -1140,7 +1140,7 @@ bool op_ripemd160(evaluation_context& context)
         return false;
 
     const auto hash = ripemd160_hash(context.pop_primary());
-    context.primary.push_back(to_data_chunk(hash));
+    context.primary.push_back(to_chunk(hash));
     return true;
 }
 
@@ -1150,7 +1150,7 @@ bool op_sha1(evaluation_context& context)
         return false;
 
     const auto hash = sha1_hash(context.pop_primary());
-    context.primary.push_back(to_data_chunk(hash));
+    context.primary.push_back(to_chunk(hash));
     return true;
 }
 
@@ -1160,7 +1160,7 @@ bool op_sha256(evaluation_context& context)
         return false;
 
     const auto hash = sha256_hash(context.pop_primary());
-    context.primary.push_back(to_data_chunk(hash));
+    context.primary.push_back(to_chunk(hash));
     return true;
 }
 
@@ -1170,7 +1170,7 @@ bool op_hash160(evaluation_context& context)
         return false;
 
     const auto hash = bitcoin_short_hash(context.pop_primary());
-    context.primary.push_back(to_data_chunk(hash));
+    context.primary.push_back(to_chunk(hash));
     return true;
 }
 
@@ -1180,7 +1180,7 @@ bool op_hash256(evaluation_context& context)
         return false;
 
     const auto hash = bitcoin_hash(context.pop_primary());
-    context.primary.push_back(to_data_chunk(hash));
+    context.primary.push_back(to_chunk(hash));
     return true;
 }
 

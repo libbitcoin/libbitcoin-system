@@ -129,9 +129,9 @@ std::string hd_public_key::to_string() const
     if (lineage_.testnet)
         prefix = testnet_public_prefix;
 
-    auto data = build_data({
+    auto data = build_chunk({
         to_big_endian(prefix),
-        to_byte(lineage_.depth),
+        to_array(lineage_.depth),
         to_little_endian(lineage_.parent_fingerprint),
         to_big_endian(lineage_.child_number),
         c_,
@@ -161,7 +161,7 @@ hd_public_key hd_public_key::generate_public_key(uint32_t i) const
     if (first_hardened_key <= i)
         return hd_public_key();
 
-    auto data = build_data({K_, to_big_endian(i)});
+    auto data = build_chunk({K_, to_big_endian(i)});
     const auto I = split(hmac_sha512_hash(data, c_));
 
     // The returned child key Ki is point(parse256(IL)) + Kpar.
@@ -203,7 +203,7 @@ hd_private_key::hd_private_key(data_slice seed, bool testnet)
   : hd_public_key()
 {
     std::string key("Bitcoin seed");
-    auto I = split(hmac_sha512_hash(seed, to_data_chunk(key)));
+    auto I = split(hmac_sha512_hash(seed, to_chunk(key)));
 
     // The key is invalid if parse256(IL) >= n or 0:
     if (!verify_private_key(I.L))
@@ -251,13 +251,13 @@ std::string hd_private_key::to_string() const
     if (lineage_.testnet)
         prefix = testnet_private_prefix;
 
-    auto data = build_data({
+    auto data = build_chunk({
         to_big_endian(prefix),
-        to_byte(lineage_.depth),
+        to_array(lineage_.depth),
         to_little_endian(lineage_.parent_fingerprint),
         to_big_endian(lineage_.child_number),
         c_,
-        to_byte(0x00),
+        to_array(0x00),
         k_
     }, checksum_size);
     append_checksum(data);
@@ -271,9 +271,9 @@ hd_private_key hd_private_key::generate_private_key(uint32_t i) const
 
     data_chunk data;
     if (first_hardened_key <= i)
-        data = build_data({to_byte(0x00), k_, to_big_endian(i)});
+        data = build_chunk({ to_array(0x00), k_, to_big_endian(i) });
     else
-        data = build_data({K_, to_big_endian(i)});
+        data = build_chunk({ K_, to_big_endian(i) });
     const auto I = split(hmac_sha512_hash(data, c_));
 
     // The child key ki is (parse256(IL) + kpar) mod n:

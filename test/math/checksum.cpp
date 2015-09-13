@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(checksum__bitcoin_checksum__always__valid)
 {
     data_chunk data = { 0, 0, 0, 0, 0 };
     const auto result = bitcoin_checksum(data);
-    BOOST_CHECK_EQUAL(result, 0x93af0179u);
+    BOOST_REQUIRE_EQUAL(result, 0x93af0179u);
 }
 
 BOOST_AUTO_TEST_CASE(checksum__build_checked_array__empty__valid)

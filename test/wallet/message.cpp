@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_SUITE(message_tests)
 
 BOOST_AUTO_TEST_CASE(message_sign_uncompressed_round_trip)
 {
-    const auto message = to_data_chunk(std::string("Bitcoin"));
+    const auto message = to_chunk(std::string("Bitcoin"));
     wallet::payment_address address(wallet::payment_address::pubkey_version,
         bitcoin_short_hash(secret_to_public_key(secret, false)));
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(message_sign_uncompressed_round_trip)
 
 BOOST_AUTO_TEST_CASE(message_sign_compressed_round_trip)
 {
-    const auto message = to_data_chunk(std::string("Nakomoto"));
+    const auto message = to_chunk(std::string("Nakomoto"));
     wallet::payment_address address(wallet::payment_address::pubkey_version,
         bitcoin_short_hash(secret_to_public_key(secret, true)));
 
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(message_sign_compressed_round_trip)
 BOOST_AUTO_TEST_CASE(message_sign_wif_uncompressed_round_trip)
 {
     const auto secret = wallet::wif_to_secret(wif_uncompressed);
-    const auto message = to_data_chunk(std::string("Nakomoto"));
+    const auto message = to_chunk(std::string("Nakomoto"));
 
     wallet::payment_address address(wallet::payment_address::pubkey_version,
         bitcoin_short_hash(secret_to_public_key(secret, false)));
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(message_sign_wif_uncompressed_round_trip)
 BOOST_AUTO_TEST_CASE(message_sign_wif_compressed_round_trip)
 {
     const auto secret = wallet::wif_to_secret(wif_compressed);
-    const auto message = to_data_chunk(std::string("Nakomoto"));
+    const auto message = to_chunk(std::string("Nakomoto"));
 
     wallet::payment_address address(wallet::payment_address::pubkey_version,
         bitcoin_short_hash(secret_to_public_key(secret, true)));
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(message_electrum_compressed_okay)
 {
     // Address of the compressed public key of the message signer.
     wallet::payment_address address("1PeChFbhxDD9NLbU21DfD55aQBC4ZTR3tE");
-    const auto message = to_data_chunk(std::string("Nakomoto"));
+    const auto message = to_chunk(std::string("Nakomoto"));
 
     BOOST_REQUIRE(wallet::verify_message(message, address, electrum_signature));
 }
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(message_electrum_uncompressed_failure)
 {
     // Address of the uncompressed public key of the message signer.
     wallet::payment_address address("1Em1SX7qQq1pTmByqLRafhL1ypx2V786tP");
-    auto message = to_data_chunk(std::string("Nakomoto"));
+    auto message = to_chunk(std::string("Nakomoto"));
 
     BOOST_REQUIRE(!wallet::verify_message(message, address, electrum_signature));
 }

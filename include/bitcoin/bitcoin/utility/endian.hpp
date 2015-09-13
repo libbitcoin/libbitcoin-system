@@ -50,7 +50,7 @@ byte_array<sizeof(T)> to_big_endian(T n);
 template <typename T>
 byte_array<sizeof(T)> to_little_endian(T n);
 
-byte_array<1> to_byte(uint8_t byte);
+byte_array<1> to_array(uint8_t byte);
 
 } // namespace libbitcoin
 

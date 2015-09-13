@@ -95,7 +95,7 @@ word_list create_mnemonic(data_slice entropy, const dictionary &lexicon)
     BITCOIN_ASSERT((total_bits % bits_per_word) == 0);
     BITCOIN_ASSERT((word_count % mnemonic_word_multiple) == 0);
 
-    const auto data = build_data({entropy, sha256_hash(entropy)});
+    const auto data = build_chunk({entropy, sha256_hash(entropy)});
 
     size_t bit = 0;
     word_list words;
@@ -136,8 +136,8 @@ long_hash decode_mnemonic(const word_list& mnemonic)
 {
     const auto sentence = join(mnemonic);
     const std::string salt(passphrase_prefix);
-    return pkcs5_pbkdf2_hmac_sha512(to_data_chunk(sentence),
-        to_data_chunk(salt), hmac_iterations);
+    return pkcs5_pbkdf2_hmac_sha512(to_chunk(sentence),
+        to_chunk(salt), hmac_iterations);
 }
 
 #ifdef WITH_ICU
@@ -148,8 +148,8 @@ long_hash decode_mnemonic(const word_list& mnemonic,
     const auto sentence = join(mnemonic);
     const std::string prefix(passphrase_prefix);
     const auto salt = to_normal_nfkd_form(prefix + passphrase);
-    return pkcs5_pbkdf2_hmac_sha512(to_data_chunk(sentence),
-        to_data_chunk(salt), hmac_iterations);
+    return pkcs5_pbkdf2_hmac_sha512(to_chunk(sentence),
+        to_chunk(salt), hmac_iterations);
 }
 
 #endif

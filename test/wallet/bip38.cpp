@@ -518,7 +518,7 @@ BOOST_AUTO_TEST_CASE(bip38__create_token_entropy__private_uncompressed_testnet__
     const auto passphrase = "passphrase";
     const auto entropy = base16_literal("baadf00dbaadf00d");
     create_token(out_token, passphrase, entropy);
-    BOOST_CHECK_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
+    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6sfRB4YdSaQ2m8URnkBYS1UT6JBju5G5o45YRZKLDpK6J3PEGq");
 
     const auto& token = out_token;
     ec_point out_point;
@@ -544,7 +544,7 @@ BOOST_AUTO_TEST_CASE(bip38__create_token_lot__private_and_public_compressed_test
     const auto passphrase = "passphrase";
     const auto salt = base16_literal("baadf00d");
     BOOST_REQUIRE(create_token(out_token, passphrase, salt, 42, 24));
-    BOOST_CHECK_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
+    BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
 
     const auto& token = out_token;
     ec_point out_point;
@@ -574,6 +574,8 @@ BOOST_AUTO_TEST_SUITE_END()
 #endif
 
 // ----------------------------------------------------------------------------
+
+// These are not actual tests, just for emitting the version maps.
 
 //BOOST_AUTO_TEST_SUITE(bip38__altchain_versions)
 //

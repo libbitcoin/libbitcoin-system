@@ -27,11 +27,11 @@
 namespace libbitcoin {
 
 template<size_t Size>
-void scrypt(byte_array<Size>& out, data_slice data, data_slice salt,
-    uint64_t N, uint32_t p, uint32_t r)
+byte_array<Size> scrypt(data_slice data, data_slice salt, uint64_t N,
+    uint32_t p, uint32_t r)
 {
-    const auto buffer = scrypt(data, salt, N, p, r, Size);
-    std::copy(buffer.begin(), buffer.end(), out.begin());
+    const auto out = scrypt(data, salt, N, r, p, Size);
+    return to_array<Size>({ out });
 }
 
 } // namespace libbitcoin

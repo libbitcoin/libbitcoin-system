@@ -467,9 +467,6 @@
     <ClCompile Include="..\..\..\..\src\network\message_subscriber.cpp">
       <Filter>src\network</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\utility\data.cpp">
-      <Filter>src\utility</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\math\external\crypto_scrypt.c">
       <Filter>src\math\external</Filter>
     </ClCompile>

@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(to_data_from_data_roundtrip)
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_data_chunk)
 {
-    data_chunk rawdata = to_data_chunk(base16_literal(
+    data_chunk rawdata = to_chunk(base16_literal(
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
     ));
 
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_data_chunk)
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_stream)
 {
-    data_chunk rawdata = to_data_chunk(base16_literal(
+    data_chunk rawdata = to_chunk(base16_literal(
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
     ));
 
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_stream)
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_factory_reader)
 {
-    data_chunk rawdata = to_data_chunk(base16_literal(
+    data_chunk rawdata = to_chunk(base16_literal(
         "46682488f0a721124a3905a1bb72445bf13493e2cd46c5c0c8db1c15afa0d58e00000000"
     ));
 

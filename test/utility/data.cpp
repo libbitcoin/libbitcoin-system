@@ -31,24 +31,24 @@ BOOST_AUTO_TEST_SUITE(data_tests)
 BOOST_AUTO_TEST_CASE(data__to_byte__value__expected_size_and_value)
 {
     const uint8_t expected = 42;
-    const auto result = to_byte(expected);
+    const auto result = to_array(expected);
     BOOST_REQUIRE_EQUAL(result.size(), 1u);
     BOOST_REQUIRE_EQUAL(result[0], expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__build_data__empty__empty)
+BOOST_AUTO_TEST_CASE(data__build_chunk__empty__empty)
 {
-    const auto result = build_data({});
+    const auto result = build_chunk({});
     BOOST_REQUIRE(result.empty());
 }
 
-BOOST_AUTO_TEST_CASE(data__build_data__one_slice__expected_size_and_value)
+BOOST_AUTO_TEST_CASE(data__build_chunk__one_slice__expected_size_and_value)
 {
     const uint8_t expected = 42;
     const auto chunk1 = std::vector<uint8_t>{ 24 };
     const auto chunk2 = std::vector<uint8_t>{ expected };
     const auto chunk3 = std::vector<uint8_t>{ 48 };
-    const auto result = build_data(
+    const auto result = build_chunk(
     {
         // Inline initialization doesn't work with vector (?).
         chunk1, chunk2, chunk3
@@ -57,13 +57,13 @@ BOOST_AUTO_TEST_CASE(data__build_data__one_slice__expected_size_and_value)
     BOOST_REQUIRE_EQUAL(result[1], expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__build_data__three_slices__expected_size_and_value)
+BOOST_AUTO_TEST_CASE(data__build_chunk__three_slices__expected_size_and_value)
 {
     const size_t size1 = 2;
     const size_t size2 = 1;
     const size_t size3 = 3;
     const uint8_t expected = 42;
-    const auto result = build_data(
+    const auto result = build_chunk(
     {
         std::array<uint8_t, size1>{ { 0, 0} },
         std::array<uint8_t, size2>{ { expected } },
@@ -73,13 +73,13 @@ BOOST_AUTO_TEST_CASE(data__build_data__three_slices__expected_size_and_value)
     BOOST_REQUIRE_EQUAL(result[size1], expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__build_data__extra_reserve__expected_size_and_capacity)
+BOOST_AUTO_TEST_CASE(data__build_chunk__extra_reserve__expected_size_and_capacity)
 {
     const uint8_t size1 = 2;
     const uint8_t size2 = 1;
     const uint8_t size3 = 3;
     const auto reserve = 42;
-    const auto result = build_data(
+    const auto result = build_chunk(
     {
         std::array<uint8_t, size1>{ { 0, 0 } },
         std::array<uint8_t, size2>{ { 0 } },
@@ -177,86 +177,65 @@ BOOST_AUTO_TEST_CASE(data__range_constrain__internal__unchanged)
     BOOST_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__slice1__three_bytes_front__expected)
+BOOST_AUTO_TEST_CASE(data__slice__empty_selection__compiles)
 {
-    const uint8_t expected = 24;
-    const data_chunk source
+    const byte_array<3> source
     {
-        expected, 42, 42
+        { 0, 0, 0 }
     };
 
-    BOOST_REQUIRE_EQUAL(slice(source, 0, 3)[0], expected);
+    slice<2, 2>(source);
+    BOOST_REQUIRE(true);
 }
 
-BOOST_AUTO_TEST_CASE(data__slice1__three_bytes_middle__expected)
+BOOST_AUTO_TEST_CASE(data__slice__three_bytes_front__expected)
 {
     const uint8_t expected = 24;
-    const data_chunk source
+    const byte_array<3> source
     {
-        42, expected, 42
+        { expected, 42, 42 }
     };
 
-    BOOST_REQUIRE_EQUAL(slice(source, 1, 2)[0], expected);
+    const auto result = slice<0, 3>(source)[0];
+    BOOST_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__slice1__three_bytes_end__expected)
+BOOST_AUTO_TEST_CASE(data__slice__three_bytes_middle__expected)
 {
     const uint8_t expected = 24;
-    const data_chunk source
+    const byte_array<3> source
     {
-        42, 42, expected
+        { 42, expected, 42 }
     };
 
-    BOOST_REQUIRE_EQUAL(slice(source, 2, 3)[0], expected);
+    const auto result = slice<1, 2>(source)[0];
+    BOOST_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__slice1__three_bytes_middle_empty__expected)
+BOOST_AUTO_TEST_CASE(data__slice__three_bytes_end__expected)
 {
     const uint8_t expected = 24;
-    const data_chunk source
+    const byte_array<3> source
     {
-        42, 42, 42
+        { 42, 42, expected }
     };
 
-    BOOST_REQUIRE(slice(source, 2, 2).empty());
+    const auto result = slice<2, 3>(source)[0];
+    BOOST_REQUIRE_EQUAL(result, expected);
 }
 
-BOOST_AUTO_TEST_CASE(data__slice1__three_bytes_end_empty__expected)
+BOOST_AUTO_TEST_CASE(data__split__two_bytes__expected)
 {
-    const uint8_t expected = 24;
-    const data_chunk source
+    const uint8_t expected_left = 42;
+    const uint8_t expected_right = 24;
+    const byte_array<2> source
     {
-        42, 42, 42
+        { expected_left, expected_right }
     };
 
-    BOOST_REQUIRE(slice(source, 3, 3).empty());
-}
-
-BOOST_AUTO_TEST_CASE(data__slice2__three_bytes_end__expected)
-{
-    const uint8_t expected = 24;
-    const data_chunk source
-    {
-        42, 42, expected
-    };
-
-    BOOST_REQUIRE_EQUAL(slice(source, bounds{ 2, 3 })[0], expected);
-}
-
-BOOST_AUTO_TEST_CASE(data__split__data_chunk__expected)
-{
-    const uint8_t expected_lower = 42;
-    const uint8_t expected_upper = 24;
-    data_chunk source
-    {
-        expected_lower, expected_upper
-    };
-
-    data_chunk lower_half;
-    data_chunk upper_half;
-    split(lower_half, upper_half, source, source.size());
-    BOOST_REQUIRE_EQUAL(lower_half[0], expected_lower);
-    BOOST_REQUIRE_EQUAL(upper_half[0], expected_upper);
+    const auto parts = split(source);
+    BOOST_REQUIRE_EQUAL(parts.left[0], expected_left);
+    BOOST_REQUIRE_EQUAL(parts.right[0], expected_right);
 }
 
 BOOST_AUTO_TEST_CASE(data__split__long_hash__expected)
@@ -273,14 +252,74 @@ BOOST_AUTO_TEST_CASE(data__split__long_hash__expected)
         } 
     };
 
-    data_chunk lower_half;
-    data_chunk upper_half;
-    split(lower_half, upper_half, source, source.size());
-    BOOST_REQUIRE_EQUAL(lower_half[0], l);
-    BOOST_REQUIRE_EQUAL(upper_half[0], u);
+    const auto parts = split(source);
+    BOOST_REQUIRE_EQUAL(parts.left[0], l);
+    BOOST_REQUIRE_EQUAL(parts.right[0], u);
 }
 
-BOOST_AUTO_TEST_CASE(data__to_data_chunk__long_hash__expected)
+BOOST_AUTO_TEST_CASE(data__splice_two__two_bytes_each__expected)
+{
+    const uint8_t expected_left = 42;
+    const uint8_t expected_right = 24;
+
+    const byte_array<2> left
+    {
+        { expected_left, 0 }
+    };
+
+    const byte_array<2> right
+    {
+        { 0, expected_right }
+    };
+
+    const auto combined = splice(left, right);
+    BOOST_REQUIRE_EQUAL(combined[0], expected_left);
+    BOOST_REQUIRE_EQUAL(combined[3], expected_right);
+}
+
+BOOST_AUTO_TEST_CASE(data__splice_three__one_two_three_bytes__expected)
+{
+    const uint8_t expected_left = 42;
+    const uint8_t expected_right = 24;
+
+    const byte_array<1> left
+    {
+        { expected_left }
+    };
+
+    const byte_array<2> middle
+    {
+        { 0, 0 }
+    };
+
+    const byte_array<3> right
+    {
+        { 0, 0, expected_right }
+    };
+
+    const auto combined = splice(left, middle, right);
+    BOOST_REQUIRE_EQUAL(combined[0], expected_left);
+    BOOST_REQUIRE_EQUAL(combined[5], expected_right);
+}
+
+BOOST_AUTO_TEST_CASE(data__to_array_slice__double_long_hash__expected)
+{
+    const uint8_t l = 42;
+    const uint8_t u = 24;
+    const data_chunk source
+    {
+        l, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        u, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+
+    const auto result = to_array<long_hash_size>(source);
+    BOOST_REQUIRE_EQUAL(result[0], l);
+    BOOST_REQUIRE_EQUAL(result[long_hash_size / 2], u);
+}
+
+BOOST_AUTO_TEST_CASE(data__to_chunk__long_hash__expected)
 {
     const uint8_t l = 42;
     const uint8_t u = 24;
@@ -294,9 +333,22 @@ BOOST_AUTO_TEST_CASE(data__to_data_chunk__long_hash__expected)
         } 
     };
 
-    const auto result = to_data_chunk(source);
+    const auto result = to_chunk(source);
     BOOST_REQUIRE_EQUAL(result[0], l);
     BOOST_REQUIRE_EQUAL(result[32], u);
+}
+
+BOOST_AUTO_TEST_CASE(data__xor_data0__same__zeros)
+{
+    const data_chunk source
+    {
+        0, 1
+    };
+
+    const auto result = xor_data<2>(source, source);
+    BOOST_REQUIRE_EQUAL(result.size(), 2u);
+    BOOST_REQUIRE_EQUAL(result[0], 0);
+    BOOST_REQUIRE_EQUAL(result[1], 0);
 }
 
 BOOST_AUTO_TEST_CASE(data__xor_data1__empty__empty)
@@ -305,7 +357,7 @@ BOOST_AUTO_TEST_CASE(data__xor_data1__empty__empty)
     {
     };
 
-    const auto result = xor_data(source, source, 0, 0);
+    const auto result = xor_data<0>(source, source, 0);
     BOOST_REQUIRE_EQUAL(result.size(), 0);
 }
 
@@ -316,8 +368,8 @@ BOOST_AUTO_TEST_CASE(data__xor_data1__same__zeros)
         0, 1
     };
 
-    const auto result = xor_data(source, source, 0, source.size());
-    BOOST_REQUIRE_EQUAL(result.size(), 2U);
+    const auto result = xor_data<2>(source, source, 0);
+    BOOST_REQUIRE_EQUAL(result.size(), 2u);
     BOOST_REQUIRE_EQUAL(result[0], 0);
     BOOST_REQUIRE_EQUAL(result[1], 0);
 }
@@ -329,7 +381,7 @@ BOOST_AUTO_TEST_CASE(data__xor_data1__same_offset__zeros)
         0, 1, 0
     };
 
-    const auto result = xor_data(source, source, 1, source.size() - 1);
+    const auto result = xor_data<2>(source, source, 1);
     BOOST_REQUIRE_EQUAL(result.size(), 2u);
     BOOST_REQUIRE_EQUAL(result[0], 0);
     BOOST_REQUIRE_EQUAL(result[1], 0);
@@ -347,7 +399,7 @@ BOOST_AUTO_TEST_CASE(data__xor_data1__distinct__ones)
         1, 0, 1
     };
 
-    const auto result = xor_data(source, opposite, 0, 3);
+    const auto result = xor_data<3>(source, opposite, 0);
     BOOST_REQUIRE_EQUAL(result.size(), 3u);
     BOOST_REQUIRE_EQUAL(result[0], 1);
     BOOST_REQUIRE_EQUAL(result[1], 1);
@@ -366,7 +418,7 @@ BOOST_AUTO_TEST_CASE(data__xor_data1__distinct_bites__bits)
         24, 13
     };
 
-    const auto result = xor_data(source1, source2, 0, 2);
+    const auto result = xor_data<2>(source1, source2, 0);
     BOOST_REQUIRE_EQUAL(result.size(), 2u);
     BOOST_REQUIRE_EQUAL(result[0], 50u);
     BOOST_REQUIRE_EQUAL(result[1], 0);
@@ -384,7 +436,7 @@ BOOST_AUTO_TEST_CASE(data__xor_data2__distinct_bites__bits)
         0, 0, 24, 13
     };
 
-    const auto result = xor_data(source1, source2, 1, 2, 2);
+    const auto result = xor_data<2>(source1, source2, 1, 2);
     BOOST_REQUIRE_EQUAL(result.size(), 2u);
     BOOST_REQUIRE_EQUAL(result[0], 50u);
     BOOST_REQUIRE_EQUAL(result[1], 0);

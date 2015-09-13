@@ -138,7 +138,6 @@ src_libbitcoin_la_SOURCES = \
     src/utility/binary.cpp \
     src/utility/conditional_stack.cpp \
     src/utility/conditional_stack.hpp \
-    src/utility/data.cpp \
     src/utility/deadline.cpp \
     src/utility/dispatcher.cpp \
     src/utility/evaluation_context.cpp \

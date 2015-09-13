@@ -33,13 +33,13 @@ namespace wallet {
 
 std::string secret_to_wif(const ec_secret& secret, bool compressed)
 {
-    auto version = to_byte(payment_address::wif_version);
+    auto version = to_array(payment_address::wif_version);
     data_chunk data;
 
     if (compressed)
-        data = build_data({version, secret, to_byte(0x01)}, checksum_size);
+        data = build_chunk({ version, secret, to_array(0x01) }, checksum_size);
     else
-        data = build_data({version, secret}, checksum_size);
+        data = build_chunk({version, secret}, checksum_size);
 
     append_checksum(data);
     return encode_base58(data);
@@ -86,14 +86,14 @@ bool check_minikey(const std::string& minikey)
     // Legacy minikeys are 22 chars long
     if (minikey.size() != 22 && minikey.size() != 30)
         return false;
-    return sha256_hash(to_data_chunk(minikey + "?"))[0] == 0x00;
+    return sha256_hash(to_chunk(minikey + "?"))[0] == 0x00;
 }
 
 ec_secret minikey_to_secret(const std::string& minikey)
 {
     if (!check_minikey(minikey))
         return ec_secret();
-    return sha256_hash(to_data_chunk(minikey));
+    return sha256_hash(to_chunk(minikey));
 }
 
 } // namespace wallet

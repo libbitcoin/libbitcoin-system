@@ -139,14 +139,14 @@ BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_multiple_transactions_match
     block100k.header.nonce = 719871722;
 
     block100k.transactions.emplace_back();
-    block100k.transactions.back().from_data(to_data_chunk(base16_literal(
+    block100k.transactions.back().from_data(to_chunk(base16_literal(
         "010000000100000000000000000000000000000000000000000000000000000000000"
         "00000ffffffff07049d8e2f1b0114ffffffff0100f2052a0100000043410437b36a72"
         "21bc977dce712728a954e3b5d88643ed5aef46660ddcfeeec132724cd950c1fdd008a"
         "d4a2dfd354d6af0ff155fc17c1ee9ef802062feb07ef1d065f0ac00000000")));
 
     block100k.transactions.emplace_back();
-    block100k.transactions.back().from_data(to_data_chunk(base16_literal(
+    block100k.transactions.back().from_data(to_chunk(base16_literal(
         "0100000001260fd102fab456d6b169f6af4595965c03c2296ecf25bfd8790e7aa29b4"
         "04eff010000008c493046022100c56ad717e07229eb93ecef2a32a42ad041832ffe66"
         "bd2e1485dc6758073e40af022100e4ba0559a4cebbc7ccb5d14d1312634664bac46f3"
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE(generate_merkle_root_block_with_multiple_transactions_match
         "105f7898f36b84ec583350d88ac00000000")));
 
     block100k.transactions.emplace_back();
-    block100k.transactions.back().from_data(to_data_chunk(base16_literal(
+    block100k.transactions.back().from_data(to_chunk(base16_literal(
         "010000000122cd6da26eef232381b1a670aa08f4513e9f91a9fd129d912081a3dd138"
         "cb013010000008c4930460221009339c11b83f234b6c03ebbc4729c2633cbc8cbd0d1"
         "5774594bfedc45c4f99e2f022100ae0135094a7d651801539df110a028d65459d24bc"
