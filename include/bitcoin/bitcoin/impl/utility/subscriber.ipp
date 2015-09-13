@@ -20,8 +20,6 @@
 #ifndef LIBBITCOIN_SUBSCRIBER_IPP
 #define LIBBITCOIN_SUBSCRIBER_IPP
 
-#include <bitcoin/bitcoin/utility/subscriber.hpp>
-
 #include <functional>
 #include <memory>
 #include <bitcoin/bitcoin/utility/assert.hpp>

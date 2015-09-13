@@ -25,8 +25,6 @@
 #include <iostream>
 #include <vector>
 
-/* NOTE: don't declare 'using namespace foo' in headers. */
-
 namespace libbitcoin {
 
 template <typename Pair, typename Key>
