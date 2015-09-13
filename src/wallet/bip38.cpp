@@ -96,7 +96,7 @@ public:
 
     uint8_t context() const
     {
-        return context_[0];
+        return context_.front();
     }
 
     byte_array<Size> prefix() const
@@ -106,7 +106,7 @@ public:
 
     uint8_t prefix_version() const
     {
-        return version_[0];
+        return version_.front();
     }
 
     bool valid() const
@@ -121,6 +121,7 @@ public:
 
     static constexpr uint8_t prefix_size = Size;
     static constexpr uint8_t default_check = Check;
+    static constexpr uint8_t magic_size = prefix_size - 2;
 
 private:
     bool verify_version()
@@ -129,7 +130,7 @@ private:
     }
 
     const one_byte version_;
-    const byte_array<Size - 2> magic_;
+    const byte_array<magic_size> magic_;
     const one_byte context_;
     bool valid_;
 };
@@ -159,7 +160,7 @@ public:
 
     uint8_t flags() const
     {
-        return flags_[0];
+        return flags_.front();
     }
 
     bool lot_sequence() const
@@ -298,7 +299,7 @@ private:
     }
 
     static constexpr uint8_t only_context = 0x9a;
-    static const byte_array<3> public_magic;
+    static const byte_array<magic_size> public_magic;
 
     const one_byte sign_;
     const hash_digest data_;
@@ -306,7 +307,10 @@ private:
 
 // This prefix results in the prefix "cfrm" in the base58 encoding but is
 // modified when the payment address is Bitcoin mainnet (0).
-const byte_array<3> parse_public::public_magic{ { 0x3b, 0xf6, 0xa8 } };
+const byte_array<parse_public::magic_size> parse_public::public_magic
+{
+    { 0x3b, 0xf6, 0xa8 }
+};
 
 class parse_token
   : public parse_prefix<0x2c, 8>
@@ -362,7 +366,7 @@ private:
 
     static constexpr uint8_t lot_context = 0x51;
     static constexpr uint8_t default_context = 0x53;
-    static const byte_array<6> token_magic;
+    static const byte_array<magic_size> token_magic;
 
     const bip38::entropy entropy_;
     const one_byte sign_;
@@ -371,7 +375,10 @@ private:
 
 // This prefix results in the prefix "passphrase" in the base58 encoding.
 // The prefix is not modified as the result of variations to address.
-const byte_array<6> parse_token::token_magic{ { 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 } };
+const byte_array<parse_token::magic_size> parse_token::token_magic
+{
+    { 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 } 
+};
 
 // Flags
 // ----------------------------------------------------------------------------
@@ -452,7 +459,7 @@ static one_byte point_sign(uint8_t byte, const hash_digest& hash)
 
 static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 {
-    return point_sign(single[0], hash);
+    return point_sign(single.front(), hash);
 }
 
 static ec_point to_point(const one_byte& sign, const hash_digest& hash)
