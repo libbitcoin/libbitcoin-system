@@ -29,22 +29,13 @@
 namespace libbitcoin {
 namespace wallet {
 
-static constexpr size_t half = hash_size / 2;
-static constexpr size_t quarter = half / 2;
-
-typedef byte_array<half> half_hash;
-typedef byte_array<quarter> quarter_hash;
-
-// The above sizes are all tied to aes256.
-static_assert(2 * quarter == bc::aes256_block_size, "oops!");
-
 class parse_encrypted_private_key
   : public parse_encrypted_key<0x01, 2>
 {
 public:
     static byte_array<prefix_size> prefix(uint8_t address, bool multiplied);
 
-    parse_encrypted_private_key(const private_key& key);
+    parse_encrypted_private_key(const ek_private& key);
 
     uint8_t address_version() const;
     quarter_hash data1() const;

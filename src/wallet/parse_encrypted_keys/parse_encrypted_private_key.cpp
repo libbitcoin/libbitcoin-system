@@ -34,13 +34,14 @@ namespace wallet {
 byte_array<parse_encrypted_private_key::prefix_size>
 parse_encrypted_private_key::prefix(uint8_t address, bool multiplied)
 {
-    const auto check = address == mainnet ? default_version : address;
+    const auto check = address == default_address_version ? default_key_version :
+        address;
     const auto context = multiplied ? multiplied_context : default_context;
     return splice(to_array(check), to_array(context));
 }
 
-parse_encrypted_private_key::parse_encrypted_private_key(const private_key& key)
-  : parse_encrypted_key<default_version, prefix_size>(
+parse_encrypted_private_key::parse_encrypted_private_key(const ek_private& key)
+  : parse_encrypted_key<default_key_version, prefix_size>(
         slice<0, 2>(key),
         slice<2, 3>(key),
         slice<3, 7>(key),
@@ -55,7 +56,7 @@ parse_encrypted_private_key::parse_encrypted_private_key(const private_key& key)
 uint8_t parse_encrypted_private_key::address_version() const
 {
     const auto check = version();
-    return check == default_version ? mainnet : check;
+    return check == default_key_version ? default_address_version : check;
 }
 
 quarter_hash parse_encrypted_private_key::data1() const
@@ -71,7 +72,7 @@ half_hash parse_encrypted_private_key::data2() const
 bool parse_encrypted_private_key::multiplied() const
 {
     // This is a double negative (multiplied = not not multiplied).
-    return (flags() & encrypted_key_flag::ec_non_multiplied) == 0;
+    return (flags() & ek_flag::ec_non_multiplied) == 0;
 }
 
 bool parse_encrypted_private_key::verify_flags() const

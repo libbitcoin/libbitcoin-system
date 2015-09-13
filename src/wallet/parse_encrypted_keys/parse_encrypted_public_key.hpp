@@ -35,7 +35,7 @@ class parse_encrypted_public_key
 public:
     static byte_array<prefix_size> prefix(uint8_t address);
 
-    parse_encrypted_public_key(const public_key& key);
+    parse_encrypted_public_key(const ek_public& key);
 
     uint8_t address_version() const;
     hash_digest data() const;
@@ -44,8 +44,8 @@ public:
 private:
     bool verify_context() const;
 
+    static const byte_array<magic_size> magic;
     static constexpr uint8_t only_context = 0x9a;
-    static const byte_array<magic_size> public_magic;
 
     const one_byte sign_;
     const hash_digest data_;

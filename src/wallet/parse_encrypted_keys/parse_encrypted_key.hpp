@@ -29,25 +29,25 @@
 namespace libbitcoin {
 namespace wallet {
 
-template<uint8_t Version, size_t Size>
+template<uint8_t Version, size_t PrefixSize>
 class parse_encrypted_key
-  : public parse_encrypted_prefix<Version, Size>
+  : public parse_encrypted_prefix<Version, PrefixSize>
 {
 public:
-    parse_encrypted_key(const byte_array<Size>& prefix, const one_byte& flags,
-        const salt& salt, const entropy& entropy);
+    parse_encrypted_key(const byte_array<PrefixSize>& prefix,
+        const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy);
 
     bool compressed() const;
-    entropy entropy() const;
+    ek_entropy entropy() const;
     uint8_t flags() const;
     bool lot_sequence() const;
     data_chunk owner_salt() const;
-    salt salt() const;
+    ek_salt salt() const;
 
 private:
     const one_byte flags_;
-    const wallet::salt salt_;
-    const wallet::entropy entropy_;
+    const ek_salt salt_;
+    const ek_entropy entropy_;
 };
 
 } // namespace wallet

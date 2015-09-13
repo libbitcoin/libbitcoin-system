@@ -36,23 +36,6 @@
 namespace libbitcoin {
 namespace wallet {
 
-static constexpr size_t mainnet = 0x00;
-
-// BIP38
-// It is requested that the unused flag bytes NOT be used for denoting that
-// the key belongs to an alt-chain [This shoud read "flag bits"].
-enum encrypted_key_flag : uint8_t
-{
-    none = 0,
-    lot_sequence = 1 << 2,
-    ec_compressed = 1 << 5,
-    ec_non_multiplied_low = 1 << 6,
-    ec_non_multiplied_high = 1 << 7,
-
-    // Two bits are used to represent "not multiplied".
-    ec_non_multiplied = (ec_non_multiplied_low | ec_non_multiplied_high)
-};
-
 template<uint8_t Version, size_t Size>
 class parse_encrypted_prefix
 {
@@ -61,16 +44,17 @@ public:
 
     static constexpr uint8_t prefix_size = Size;
 
+protected:
     parse_encrypted_prefix(const byte_array<Size>& value);
 
-protected:
     uint8_t context() const;
     byte_array<Size> prefix() const;
     void valid(bool value);
     uint8_t version() const;
 
-    static constexpr uint8_t default_version = Version;
-    static constexpr uint8_t magic_size = prefix_size - 2;
+    static constexpr uint8_t magic_size = Size - 2;
+    static constexpr uint8_t default_address_version = 0x00;
+    static constexpr uint8_t default_key_version = Version;
 
 private:
     bool verify_version() const;

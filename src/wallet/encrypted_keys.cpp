@@ -41,6 +41,13 @@
 
 namespace libbitcoin {
 namespace wallet {
+    
+// Alias commonly-used constants for brevity.
+static constexpr auto half = half_hash_size;
+static constexpr auto quarter = quarter_hash_size;
+
+// Ensure that hash sizes are aligned with AES block size.
+static_assert(2 * quarter == bc::aes256_block_size, "oops!");
 
 // address_
 // ----------------------------------------------------------------------------
@@ -51,19 +58,19 @@ static hash_digest address_hash(uint8_t version, const ec_point& point)
     return bitcoin_hash(to_chunk(address.to_string()));
 }
 
-static salt address_salt(uint8_t version, const ec_point& point)
+static ek_salt address_salt(uint8_t version, const ec_point& point)
 {
     return slice<0, salt_size>(address_hash(version, point));
 }
 
-static bool address_validate(const ec_point& point, const wallet::salt& salt,
+static bool address_validate(const ec_point& point, const ek_salt& salt,
     uint8_t version, bool compressed)
 {
     const auto hash = address_hash(version, point);
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
-static bool address_validate(const ec_secret& secret, const wallet::salt& salt,
+static bool address_validate(const ec_secret& secret, const ek_salt& salt,
     uint8_t version, bool compressed)
 {
     const auto point = secret_to_public_key(secret, compressed);
@@ -126,16 +133,16 @@ static long_hash scrypt_private(data_slice data, data_slice salt)
 
 static one_byte set_flags(bool compressed, bool lot_sequence, bool multiplied)
 {
-    uint8_t byte = encrypted_key_flag::none;
+    uint8_t byte = ek_flag::none;
 
     if (compressed)
-        byte |= encrypted_key_flag::ec_compressed;
+        byte |= ek_flag::ec_compressed;
 
     if (lot_sequence)
-        byte |= encrypted_key_flag::lot_sequence;
+        byte |= ek_flag::lot_sequence;
 
     if (!multiplied)
-        byte |= encrypted_key_flag::ec_non_multiplied;
+        byte |= ek_flag::ec_non_multiplied;
 
     return to_array(byte);
 }
@@ -153,9 +160,10 @@ static one_byte set_flags(bool compressed)
 // create_key_pair
 // ----------------------------------------------------------------------------
 
-static void create_private_key(private_key& out_private, const one_byte& flags,
-    const salt& salt, const entropy& entropy, const hash_digest& derived1,
-    const hash_digest& derived2, const seed& seed, uint8_t version)
+static void create_private_key(ek_private& out_private, const one_byte& flags,
+    const ek_salt& salt, const ek_entropy& entropy,
+    const hash_digest& derived1, const hash_digest& derived2,
+    const ek_seed& seed, uint8_t version)
 {
     const auto prefix = parse_encrypted_private_key::prefix(version, true);
 
@@ -179,9 +187,10 @@ static void create_private_key(private_key& out_private, const one_byte& flags,
     });
 }
 
-static void create_public_key(public_key& out_public, const one_byte& flags,
-    const salt& salt, const entropy& entropy, const hash_digest& derived1,
-    const hash_digest& derived2, const ec_secret& secret, uint8_t version)
+static void create_public_key(ek_public& out_public, const one_byte& flags,
+    const ek_salt& salt, const ek_entropy& entropy,
+    const hash_digest& derived1, const hash_digest& derived2,
+    const ec_secret& secret, uint8_t version)
 {
     const auto prefix = parse_encrypted_public_key::prefix(version);
     const auto point = secret_to_public_key(secret, true);
@@ -208,9 +217,9 @@ static void create_public_key(public_key& out_public, const one_byte& flags,
 }
 
 // There is no scenario requiring a public key, we support it for completeness.
-bool create_key_pair(private_key& out_private, public_key& out_public,
-    ec_point& out_point, const token& token, const seed& seed, uint8_t version,
-    bool compressed)
+bool create_key_pair(ek_private& out_private, ek_public& out_public,
+    ec_point& out_point, const ek_token& token, const ek_seed& seed,
+    uint8_t version, bool compressed)
 {
     const parse_encrypted_token parse(token);
     if (!parse.valid())
@@ -237,10 +246,11 @@ bool create_key_pair(private_key& out_private, public_key& out_public,
     return true;
 }
 
-bool create_key_pair(private_key& out_private, ec_point& out_point,
-    const token& token, const seed& seed, uint8_t version, bool compressed)
+bool create_key_pair(ek_private& out_private, ec_point& out_point,
+    const ek_token& token, const ek_seed& seed, uint8_t version,
+    bool compressed)
 {
-    public_key out_public;
+    ek_public out_public;
     return create_key_pair(out_private, out_public, out_point, token, seed,
         version, compressed);
 }
@@ -256,8 +266,8 @@ static data_chunk normal(const std::string& passphrase)
     return to_chunk(to_normal_nfc_form(passphrase));
 }
 
-static void create_token(token& out_token, const std::string& passphrase,
-    data_slice owner_salt, const wallet::entropy& owner_entropy,
+static void create_token(ek_token& out_token, const std::string& passphrase,
+    data_slice owner_salt, const ek_entropy& owner_entropy,
     const byte_array<parse_encrypted_token::prefix_size>& prefix)
 {
     BITCOIN_ASSERT(owner_salt.size() == salt_size ||
@@ -280,8 +290,8 @@ static void create_token(token& out_token, const std::string& passphrase,
 }
 
 // The salt here is owner-supplied random bits, not the address hash.
-void create_token(token& out_token, const std::string& passphrase,
-    const wallet::entropy& entropy)
+void create_token(ek_token& out_token, const std::string& passphrase,
+    const ek_entropy& entropy)
 {
     // BIP38: If lot and sequence numbers are not being included, then
     // owner_salt is 8 random bytes instead of 4, lot_sequence is omitted and
@@ -291,10 +301,11 @@ void create_token(token& out_token, const std::string& passphrase,
 }
 
 // The salt here is owner-supplied random bits, not the address hash.
-bool create_token(token& out_token, const std::string& passphrase,
-    const wallet::salt& salt, uint32_t lot, uint32_t sequence)
+bool create_token(ek_token& out_token, const std::string& passphrase,
+    const ek_salt& salt, uint32_t lot, uint32_t sequence)
 {
-    if (lot > max_token_lot || sequence > max_token_sequence)
+    if (lot > parse_encrypted_token::max_lot ||
+        sequence > parse_encrypted_token::max_sequence)
         return false;
 
     static constexpr size_t max_sequence_bits = 12;
@@ -308,7 +319,7 @@ bool create_token(token& out_token, const std::string& passphrase,
 // encrypt
 // ----------------------------------------------------------------------------
 
-void encrypt(private_key& out_private, const ec_secret& secret,
+void encrypt(ek_private& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version, bool compressed)
 {
     const auto prefix = parse_encrypted_private_key::prefix(version, false);
@@ -392,7 +403,7 @@ static bool decrypt_secret(ec_secret& out_secret,
 }
 
 bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
-    const private_key& key, const std::string& passphrase)
+    const ek_private& key, const std::string& passphrase)
 {
     const parse_encrypted_private_key parse(key);
     if (!parse.valid())
@@ -414,7 +425,7 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
 // decrypt public_key
 // ----------------------------------------------------------------------------
 
-bool decrypt(ec_point& out_point, uint8_t& out_version, const public_key& key,
+bool decrypt(ec_point& out_point, uint8_t& out_version, const ek_public& key,
     const std::string& passphrase)
 {
     const parse_encrypted_public_key parse(key);

@@ -29,42 +29,42 @@
 namespace libbitcoin {
 namespace wallet {
 
-template<uint8_t Version, size_t Size>
-parse_encrypted_key<Version, Size>::parse_encrypted_key(
-    const byte_array<Size>& prefix, const one_byte& flags,
-    const wallet::salt& salt, const wallet::entropy& entropy)
-  : parse_encrypted_prefix<Version, Size>(prefix),
+template<uint8_t Version, size_t PrefixSize>
+parse_encrypted_key<Version, PrefixSize>::parse_encrypted_key(
+    const byte_array<PrefixSize>& prefix, const one_byte& flags,
+    const ek_salt& salt, const ek_entropy& entropy)
+  : parse_encrypted_prefix<Version, PrefixSize>(prefix),
     flags_(flags), salt_(salt), entropy_(entropy)
 {
 }
 
-template<uint8_t Version, size_t Size>
-bool parse_encrypted_key<Version, Size>::compressed() const
+template<uint8_t Version, size_t PrefixSize>
+bool parse_encrypted_key<Version, PrefixSize>::compressed() const
 {
-    return (flags() & encrypted_key_flag::ec_compressed) != 0;
+    return (flags() & ek_flag::ec_compressed) != 0;
 }
 
-template<uint8_t Version, size_t Size>
-wallet::entropy parse_encrypted_key<Version, Size>::entropy() const
+template<uint8_t Version, size_t PrefixSize>
+ek_entropy parse_encrypted_key<Version, PrefixSize>::entropy() const
 {
     // The owner salt + lot-sequence or owner entropy.
     return entropy_;
 }
 
-template<uint8_t Version, size_t Size>
-uint8_t parse_encrypted_key<Version, Size>::flags() const
+template<uint8_t Version, size_t PrefixSize>
+uint8_t parse_encrypted_key<Version, PrefixSize>::flags() const
 {
     return flags_.front();
 }
 
-template<uint8_t Version, size_t Size>
-bool parse_encrypted_key<Version, Size>::lot_sequence() const
+template<uint8_t Version, size_t PrefixSize>
+bool parse_encrypted_key<Version, PrefixSize>::lot_sequence() const
 {
-    return (flags() & encrypted_key_flag::lot_sequence) != 0;
+    return (flags() & ek_flag::lot_sequence) != 0;
 }
 
-template<uint8_t Version, size_t Size>
-data_chunk parse_encrypted_key<Version, Size>::owner_salt() const
+template<uint8_t Version, size_t PrefixSize>
+data_chunk parse_encrypted_key<Version, PrefixSize>::owner_salt() const
 {
     // Either 4 or 8 bytes, depending on the lot sequence flags.
     if (lot_sequence())
@@ -73,8 +73,8 @@ data_chunk parse_encrypted_key<Version, Size>::owner_salt() const
         return to_chunk(entropy());
 }
 
-template<uint8_t Version, size_t Size>
-wallet::salt parse_encrypted_key<Version, Size>::salt() const
+template<uint8_t Version, size_t PrefixSize>
+ek_salt parse_encrypted_key<Version, PrefixSize>::salt() const
 {
     // The address hash salt.
     return salt_;

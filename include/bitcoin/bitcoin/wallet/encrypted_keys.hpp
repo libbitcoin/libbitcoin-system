@@ -34,48 +34,57 @@ namespace wallet {
  * A seed for use in creating an intermediate passphrase (token).
  */
 static BC_CONSTEXPR size_t salt_size = 4;
-typedef byte_array<salt_size> salt;
+typedef byte_array<salt_size> ek_salt;
 
 /**
  * A seed for use in creating an intermediate passphrase (token).
  */
 static BC_CONSTEXPR size_t entropy_size = 8;
-typedef byte_array<entropy_size> entropy;
+typedef byte_array<entropy_size> ek_entropy;
 
 /**
  * A seed for use in creating a key pair.
  */
 static BC_CONSTEXPR size_t seed_size = 24;
-typedef byte_array<seed_size> seed;
+typedef byte_array<seed_size> ek_seed;
 
 /**
  * An intermediate passphrase (token) type (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t token_encoded_size = 72;
-static BC_CONSTEXPR size_t token_decoded_size = 53;
-typedef byte_array<token_decoded_size> token;
+static BC_CONSTEXPR size_t ek_token_encoded_size = 72;
+static BC_CONSTEXPR size_t ek_token_decoded_size = 53;
+typedef byte_array<ek_token_decoded_size> ek_token;
 
 /**
  * An encrypted private key type (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t private_key_encoded_size = 58;
-static BC_CONSTEXPR size_t private_key_decoded_size = 43;
-typedef byte_array<private_key_decoded_size> private_key;
+static BC_CONSTEXPR size_t ek_private_encoded_size = 58;
+static BC_CONSTEXPR size_t ek_private_decoded_size = 43;
+typedef byte_array<ek_private_decoded_size> ek_private;
 
 /**
  * DEPRECATED
  * An encrypted public key type (checked but not base58 encoded).
  * This is refered to as a confirmation code in bip38.
  */
-static BC_CONSTEXPR size_t public_key_encoded_size = 75;
-static BC_CONSTEXPR size_t public_key_decoded_size = 55;
-typedef byte_array<public_key_decoded_size> public_key;
+static BC_CONSTEXPR size_t ek_public_encoded_size = 75;
+static BC_CONSTEXPR size_t ek_public_decoded_size = 55;
+typedef byte_array<ek_public_decoded_size> ek_public;
 
-/**
- * Maximum values for use with create_token.
- */
-static BC_CONSTEXPR uint32_t max_token_lot = 1048575;
-static BC_CONSTEXPR uint32_t max_token_sequence = 4095;
+// BIP38
+// It is requested that the unused flag bytes NOT be used for denoting that
+// the key belongs to an alt-chain [This shoud read "flag bits"].
+enum ek_flag : uint8_t
+{
+    none = 0,
+    lot_sequence = 1 << 2,
+    ec_compressed = 1 << 5,
+    ec_non_multiplied_low = 1 << 6,
+    ec_non_multiplied_high = 1 << 7,
+
+    /// Two bits are used to represent "not multiplied".
+    ec_non_multiplied = (ec_non_multiplied_low | ec_non_multiplied_high)
+};
 
 /**
  * Create an intermediate passphrase for subsequent key pair generation.
@@ -83,8 +92,8 @@ static BC_CONSTEXPR uint32_t max_token_sequence = 4095;
  * @param[in]  passphrase  A passphrase for use in the encryption.
  * @param[in]  entropy     A random value for use in the encryption.
  */
-BC_API void create_token(token& out_token, const std::string& passphrase,
-    const entropy& entropy);
+BC_API void create_token(ek_token& out_token, const std::string& passphrase,
+    const ek_entropy& entropy);
 
 /**
  * Create an intermediate passphrase for subsequent key pair generation.
@@ -95,8 +104,8 @@ BC_API void create_token(token& out_token, const std::string& passphrase,
  * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
  * @return false if the lot and/or sequence are out of range.
  */
-BC_API bool create_token(token& out_token, const std::string& passphrase,
-    const salt& salt, uint32_t lot, uint32_t sequence);
+BC_API bool create_token(ek_token& out_token, const std::string& passphrase,
+    const ek_salt& salt, uint32_t lot, uint32_t sequence);
 
 /**
  * Create an encrypted private key from an intermediate passphrase.
@@ -108,8 +117,8 @@ BC_API bool create_token(token& out_token, const std::string& passphrase,
  * @param[in]  compressed   Set true to associate ec public key compression.
  * @return false if the token checksum is not valid.
  */
-BC_API bool create_key_pair(private_key& out_private, ec_point& out_point,
-    const token& token, const seed& seed, uint8_t version,
+BC_API bool create_key_pair(ek_private& out_private, ec_point& out_point,
+    const ek_token& token, const ek_seed& seed, uint8_t version,
     bool compressed=true);
 
 /**
@@ -124,9 +133,9 @@ BC_API bool create_key_pair(private_key& out_private, ec_point& out_point,
  * @param[in]  compressed   Set true to associate ec public key compression.
  * @return false if the token checksum is not valid.
  */
-BC_API bool create_key_pair(private_key& out_private, public_key& out_public,
-    ec_point& out_point, const token& token, const seed& seed, uint8_t version,
-    bool compressed=true);
+BC_API bool create_key_pair(ek_private& out_private, ek_public& out_public,
+    ec_point& out_point, const ek_token& token, const ek_seed& seed,
+    uint8_t version, bool compressed=true);
 
 #ifdef WITH_ICU
 
@@ -138,7 +147,7 @@ BC_API bool create_key_pair(private_key& out_private, public_key& out_public,
  * @param[in]  version      The coin address version byte.
  * @param[in]  compressed   Set true to associate ec public key compression.
  */
-BC_API void encrypt(private_key& out_private, const ec_secret& secret,
+BC_API void encrypt(ek_private& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version, bool compressed=true);
 
 /**
@@ -151,7 +160,7 @@ BC_API void encrypt(private_key& out_private, const ec_secret& secret,
  * @return false if the key checksum or passphrase is not valid.
  */
 BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
-    bool& out_compressed, const private_key& key,
+    bool& out_compressed, const ek_private& key,
     const std::string& passphrase);
 
 /**
@@ -164,7 +173,7 @@ BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
  * @return false if the key checksum or passphrase is not valid.
  */
 BC_API bool decrypt(ec_point& out_point, uint8_t& out_version,
-    const public_key& key, const std::string& passphrase);
+    const ek_public& key, const std::string& passphrase);
 
 #endif // WITH_ICU
 

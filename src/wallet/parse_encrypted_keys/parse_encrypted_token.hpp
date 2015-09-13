@@ -36,22 +36,25 @@ class parse_encrypted_token
 public:
     static byte_array<prefix_size> prefix(bool lot_sequence);
 
-    parse_encrypted_token(const token& value);
+    parse_encrypted_token(const ek_token& value);
 
     bool lot_sequence() const;
     uint8_t address_version() const;
     hash_digest data() const;
-    entropy entropy() const;
+    ek_entropy entropy() const;
     one_byte sign() const;
+
+    static constexpr uint32_t max_lot = 1048575;
+    static constexpr uint32_t max_sequence = 4095;
 
 private:
     bool verify_context() const;
 
+    static const byte_array<magic_size> magic;
     static constexpr uint8_t lot_context = 0x51;
     static constexpr uint8_t default_context = 0x53;
-    static const byte_array<magic_size> token_magic;
 
-    const wallet::entropy entropy_;
+    const ek_entropy entropy_;
     const one_byte sign_;
     const hash_digest data_;
 };

@@ -34,7 +34,7 @@ namespace wallet {
 // This prefix results in the prefix "cfrm" in the base58 encoding but is
 // modified when the payment address is Bitcoin mainnet (0).
 const byte_array<parse_encrypted_public_key::magic_size>
-parse_encrypted_public_key::public_magic
+parse_encrypted_public_key::magic
 {
     { 0x3b, 0xf6, 0xa8 }
 };
@@ -42,12 +42,13 @@ parse_encrypted_public_key::public_magic
 byte_array<parse_encrypted_public_key::prefix_size>
 parse_encrypted_public_key::prefix(uint8_t address)
 {
-    const auto check = address == mainnet ? default_version : address;
-    return splice(to_array(check), public_magic, to_array(only_context));
+    const auto check = address == default_address_version ? default_key_version :
+        address;
+    return splice(to_array(check), magic, to_array(only_context));
 }
 
-parse_encrypted_public_key::parse_encrypted_public_key(const public_key& key)
-  : parse_encrypted_key<default_version, prefix_size>(
+parse_encrypted_public_key::parse_encrypted_public_key(const ek_public& key)
+  : parse_encrypted_key<default_key_version, prefix_size>(
         slice<0, 5>(key),
         slice<5, 6>(key),
         slice<6, 10>(key),
@@ -61,7 +62,7 @@ parse_encrypted_public_key::parse_encrypted_public_key(const public_key& key)
 uint8_t parse_encrypted_public_key::address_version() const
 {
     const auto check = version();
-    return check == default_version ? mainnet : check;
+    return check == default_key_version ? default_address_version : check;
 }
 
 hash_digest parse_encrypted_public_key::data() const

@@ -32,7 +32,7 @@ namespace wallet {
 // This prefix results in the prefix "passphrase" in the base58 encoding.
 // The prefix is not modified as the result of variations to address.
 const byte_array<parse_encrypted_token::magic_size>
-parse_encrypted_token::token_magic
+parse_encrypted_token::magic
 {
     { 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 } 
 };
@@ -41,11 +41,10 @@ byte_array<parse_encrypted_token::prefix_size>
 parse_encrypted_token::prefix(bool lot_sequence)
 {
     const auto context = lot_sequence ? lot_context : default_context;
-    return splice(to_array(default_version), token_magic,
-        to_array(context));
+    return splice(to_array(default_key_version), magic, to_array(context));
 }
 
-parse_encrypted_token::parse_encrypted_token(const token& value)
+parse_encrypted_token::parse_encrypted_token(const ek_token& value)
   : parse_encrypted_prefix(slice<0, 8>(value)),
     entropy_(slice<8, 16>(value)),
     sign_(slice<16, 17>(value)),
@@ -56,7 +55,7 @@ parse_encrypted_token::parse_encrypted_token(const token& value)
 
 uint8_t parse_encrypted_token::address_version() const
 {
-    return mainnet;
+    return default_address_version;
 }
 
 hash_digest parse_encrypted_token::data() const
@@ -64,7 +63,7 @@ hash_digest parse_encrypted_token::data() const
     return data_;
 }
 
-wallet::entropy parse_encrypted_token::entropy() const
+ek_entropy parse_encrypted_token::entropy() const
 {
     return entropy_;
 }
