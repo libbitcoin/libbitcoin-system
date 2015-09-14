@@ -35,19 +35,18 @@ namespace wallet {
 // modified when the payment address is Bitcoin mainnet (0).
 const byte_array<parse_ek_public::magic_size> parse_ek_public::magic
 {
-    { 0x3b, 0xf6, 0xa8 }
+    { 0x64, 0x3b, 0xf6, 0xa8 }
 };
 
 byte_array<parse_ek_public::prefix_size> parse_ek_public::prefix_factory(
     uint8_t address)
 {
-    const auto check = address == default_address_version ?
-        default_key_version : address;
-    return splice(to_array(check), magic, to_array(only_context));
+    const auto context = default_context + address;
+    return splice(magic, to_array(context));
 }
 
 parse_ek_public::parse_ek_public(const ek_public& key)
-  : parse_ek_key<default_key_version, prefix_size>(
+  : parse_ek_key<prefix_size>(
         slice<0, 5>(key),
         slice<5, 6>(key),
         slice<6, 10>(key),
@@ -55,14 +54,12 @@ parse_ek_public::parse_ek_public(const ek_public& key)
     sign_(slice<18, 19>(key)),
     data_(slice<19, 51>(key))
 {
-    valid(valid() && verify_magic() && verify_context() &&
-        verify_checksum(key));
+    valid(valid() && verify_checksum(key));
 }
 
 uint8_t parse_ek_public::address_version() const
 {
-    const auto check = version();
-    return check == default_key_version ? default_address_version : check;
+    return context() - default_context;
 }
 
 hash_digest parse_ek_public::data() const
@@ -73,16 +70,6 @@ hash_digest parse_ek_public::data() const
 one_byte parse_ek_public::sign() const
 {
     return sign_;
-}
-
-bool parse_ek_public::verify_context() const
-{
-    return context() == only_context;
-}
-
-bool parse_ek_public::verify_magic() const
-{
-    return slice<1, prefix_size - 1>(prefix()) == magic;
 }
 
 } // namespace wallet

@@ -33,14 +33,14 @@ namespace wallet {
 // The prefix is not modified as the result of variations to address.
 const byte_array<parse_ek_token::magic_size> parse_ek_token::magic
 {
-    { 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 } 
+    { 0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 }
 };
 
 byte_array<parse_ek_token::prefix_size> parse_ek_token::prefix_factory(
     bool lot_sequence)
 {
     const auto context = lot_sequence ? lot_context : default_context;
-    return splice(to_array(default_key_version), magic, to_array(context));
+    return splice(magic, to_array(context));
 }
 
 parse_ek_token::parse_ek_token(const ek_token& value)
@@ -49,14 +49,8 @@ parse_ek_token::parse_ek_token(const ek_token& value)
     sign_(slice<16, 17>(value)),
     data_(slice<17, 49>(value))
 {
-    valid(valid() && verify_magic() && verify_context() &&
-        verify_checksum(value));
+    valid(valid() && verify_context() && verify_checksum(value));
 }
-
-////uint8_t parse_ek_token::address_version() const
-////{
-////    return default_address_version;
-////}
 
 hash_digest parse_ek_token::data() const
 {
@@ -68,10 +62,9 @@ ek_entropy parse_ek_token::entropy() const
     return entropy_;
 }
 
-// There is no "flags" byte in token, we rely on prefix context.
 bool parse_ek_token::lot_sequence() const
 {
-    // The token doesn't have a "flags" byte and instead uses the context.
+    // There is no "flags" byte in token, we rely on prefix context.
     return context() == lot_context;
 }
 
@@ -83,11 +76,6 @@ one_byte parse_ek_token::sign() const
 bool parse_ek_token::verify_context() const
 {
     return context() == default_context || context() == lot_context;
-}
-
-bool parse_ek_token::verify_magic() const
-{
-    return slice<1, prefix_size - 1>(prefix()) == magic;
 }
 
 } // namespace wallet

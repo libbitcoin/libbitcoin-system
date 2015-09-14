@@ -28,48 +28,40 @@
 namespace libbitcoin {
 namespace wallet {
     
-template<uint8_t Version, size_t Size>
-parse_ek_prefix<Version, Size>::parse_ek_prefix(
-    const byte_array<Size>& value)
-  : prefix_(value), valid_(verify_version())
+template<size_t Size>
+parse_ek_prefix<Size>::parse_ek_prefix(const byte_array<Size>& value)
+  : prefix_(value), valid_(verify_magic())
 {
 }
 
-template<uint8_t Version, size_t Size>
-uint8_t parse_ek_prefix<Version, Size>::context() const
+template<size_t Size>
+uint8_t parse_ek_prefix<Size>::context() const
 {
     return prefix_.back();
 }
 
-template<uint8_t Version, size_t Size>
-byte_array<Size> parse_ek_prefix<Version, Size>::prefix() const
+template<size_t Size>
+byte_array<Size> parse_ek_prefix<Size>::prefix() const
 {
     return prefix_;
 }
 
-template<uint8_t Version, size_t Size>
-bool parse_ek_prefix<Version, Size>::valid() const
+template<size_t Size>
+bool parse_ek_prefix<Size>::valid() const
 {
     return valid_;
 }
 
-template<uint8_t Version, size_t Size>
-void parse_ek_prefix<Version, Size>::valid(bool value)
+template<size_t Size>
+void parse_ek_prefix<Size>::valid(bool value)
 {
     valid_ = value;
 }
 
-template<uint8_t Version, size_t Size>
-bool parse_ek_prefix<Version, Size>::verify_version() const
+template<size_t Size>
+bool parse_ek_prefix<Size>::verify_magic() const
 {
-    // All version numbers are valid.
-    return true;
-}
-
-template<uint8_t Version, size_t Size>
-uint8_t parse_ek_prefix<Version, Size>::version() const
-{
-    return prefix_.front();
+    return slice<0, prefix_size - 1>(prefix()) == magic;
 }
 
 } // namespace wallet

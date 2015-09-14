@@ -29,9 +29,9 @@
 namespace libbitcoin {
 namespace wallet {
 
-template<uint8_t Version, size_t PrefixSize>
+template<size_t PrefixSize>
 class parse_ek_key
-  : public parse_ek_prefix<Version, PrefixSize>
+  : public parse_ek_prefix<PrefixSize>
 {
 public:
     parse_ek_key(const byte_array<PrefixSize>& prefix,

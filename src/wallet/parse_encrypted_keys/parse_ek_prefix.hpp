@@ -36,7 +36,7 @@
 namespace libbitcoin {
 namespace wallet {
 
-template<uint8_t Version, size_t Size>
+template<size_t Size>
 class parse_ek_prefix
 {
 public:
@@ -47,17 +47,15 @@ public:
 protected:
     parse_ek_prefix(const byte_array<Size>& value);
 
-    uint8_t version() const;
     uint8_t context() const;
     byte_array<Size> prefix() const;
     void valid(bool value);
 
-    static constexpr uint8_t magic_size = Size - 2;
-    static constexpr uint8_t default_address_version = 0x00;
-    static constexpr uint8_t default_key_version = Version;
+    static constexpr uint8_t magic_size = Size - 1;
+    static const byte_array<magic_size> magic;
 
 private:
-    bool verify_version() const;
+    bool verify_magic() const;
 
     const byte_array<Size> prefix_;
     bool valid_;

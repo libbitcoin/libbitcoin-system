@@ -30,17 +30,21 @@
 namespace libbitcoin {
 namespace wallet {
 
+const byte_array<parse_ek_private::magic_size> parse_ek_private::magic
+{
+    { 0x01 }
+};
+
 byte_array<parse_ek_private::prefix_size> parse_ek_private::prefix_factory(
     uint8_t address, bool multiplied)
 {
-    const auto check = address == default_address_version ? 
-        default_key_version : address;
-    const auto context = multiplied ? multiplied_context : default_context;
-    return splice(to_array(check), to_array(context));
+    const auto baseline = multiplied ? multiplied_context : default_context;
+    const auto context = baseline + address;
+    return splice(magic, to_array(context));
 }
 
 parse_ek_private::parse_ek_private(const ek_private& key)
-  : parse_ek_key<default_key_version, prefix_size>(
+    : parse_ek_key<prefix_size>(
         slice<0, 2>(key),
         slice<2, 3>(key),
         slice<3, 7>(key),
@@ -48,14 +52,13 @@ parse_ek_private::parse_ek_private(const ek_private& key)
     data1_(slice<15, 23>(key)),
     data2_(slice<23, 39>(key))
 {
-    valid(valid() && verify_context() && verify_flags() &&
-        verify_checksum(key));
+    valid(valid() && verify_checksum(key));
 }
 
 uint8_t parse_ek_private::address_version() const
 {
-    const auto check = version();
-    return check == default_key_version ? default_address_version : check;
+    const auto baseline = multiplied() ? multiplied_context : default_context;
+    return context() - baseline;
 }
 
 quarter_hash parse_ek_private::data1() const
@@ -72,18 +75,6 @@ bool parse_ek_private::multiplied() const
 {
     // This is a double negative (multiplied = not not multiplied).
     return (flags() & ek_flag::ec_non_multiplied) == 0;
-}
-
-bool parse_ek_private::verify_flags() const
-{
-    // This guards against a conflict that can result from a redundancy in
-    // the BIP38 specification - multiplied context exists in two places.
-    return multiplied() == (context() == multiplied_context);
-}
-
-bool parse_ek_private::verify_context() const
-{
-    return context() == default_context || context() == multiplied_context;
 }
 
 } // namespace wallet
