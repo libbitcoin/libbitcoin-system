@@ -165,16 +165,16 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp \
     src/wallet/wif_keys.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_key.hpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_key.ipp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_prefix.hpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_prefix.ipp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_private_key.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_private_key.hpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_public_key.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_public_key.hpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_token.cpp \
-    src/wallet/parse_encrypted_keys/parse_encrypted_token.hpp
+    src/wallet/parse_encrypted_keys/parse_ek_key.hpp \
+    src/wallet/parse_encrypted_keys/parse_ek_key.ipp \
+    src/wallet/parse_encrypted_keys/parse_ek_prefix.hpp \
+    src/wallet/parse_encrypted_keys/parse_ek_prefix.ipp \
+    src/wallet/parse_encrypted_keys/parse_ek_private.cpp \
+    src/wallet/parse_encrypted_keys/parse_ek_private.hpp \
+    src/wallet/parse_encrypted_keys/parse_ek_public.cpp \
+    src/wallet/parse_encrypted_keys/parse_ek_public.hpp \
+    src/wallet/parse_encrypted_keys/parse_ek_token.cpp \
+    src/wallet/parse_encrypted_keys/parse_ek_token.hpp
 
 # local: examples/libbitcoin_examples
 #------------------------------------------------------------------------------

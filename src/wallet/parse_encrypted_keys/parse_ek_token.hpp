@@ -17,35 +17,36 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_TOKEN_HPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_TOKEN_HPP
+#ifndef LIBBITCOIN_PARSE_EK_TOKEN_HPP
+#define LIBBITCOIN_PARSE_EK_TOKEN_HPP
 
 #include <cstdint>
 #include <cstddef>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_encrypted_prefix.hpp"
+#include "parse_ek_key.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-class parse_encrypted_token
-  : public parse_encrypted_prefix<0x2c, 8>
+class parse_ek_token
+  : public parse_ek_prefix<0x2c, 8>
 {
 public:
-    static byte_array<prefix_size> prefix(bool lot_sequence);
+    static byte_array<prefix_size> prefix_factory(bool lot_sequence);
 
-    parse_encrypted_token(const ek_token& value);
+    parse_ek_token(const ek_token& value);
 
     bool lot_sequence() const;
-    uint8_t address_version() const;
+    ////uint8_t address_version() const;
     hash_digest data() const;
     ek_entropy entropy() const;
     one_byte sign() const;
 
 private:
     bool verify_context() const;
+    bool verify_magic() const;
 
     static const byte_array<magic_size> magic;
     static constexpr uint8_t lot_context = 0x51;

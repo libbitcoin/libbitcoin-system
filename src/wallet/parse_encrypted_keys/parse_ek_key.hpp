@@ -17,42 +17,43 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PRIVATE_KEY_HPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_PRIVATE_KEY_HPP
+#ifndef LIBBITCOIN_PARSE_EK_KEY_HPP
+#define LIBBITCOIN_PARSE_EK_KEY_HPP
 
 #include <cstdint>
 #include <cstddef>
-#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include "parse_encrypted_key.hpp"
+#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
+#include "parse_ek_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-class parse_encrypted_private_key
-  : public parse_encrypted_key<0x01, 2>
+template<uint8_t Version, size_t PrefixSize>
+class parse_ek_key
+  : public parse_ek_prefix<Version, PrefixSize>
 {
 public:
-    static byte_array<prefix_size> prefix(uint8_t address, bool multiplied);
+    parse_ek_key(const byte_array<PrefixSize>& prefix,
+        const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy);
 
-    parse_encrypted_private_key(const ek_private& key);
+    bool compressed() const;
+    bool lot_sequence() const;
+    data_chunk owner_salt() const;
 
-    uint8_t address_version() const;
-    quarter_hash data1() const;
-    half_hash data2() const;
-    bool multiplied() const;
+    uint8_t flags() const;
+    ek_salt salt() const;
+    ek_entropy entropy() const;
 
 private:
-    bool verify_context() const;
-    bool verify_flags() const;
-
-    static constexpr uint8_t default_context = 0x42;
-    static constexpr uint8_t multiplied_context = 0x43;
-
-    const quarter_hash data1_;
-    const half_hash data2_;
+    const one_byte flags_;
+    const ek_salt salt_;
+    const ek_entropy entropy_;
 };
+
 } // namespace wallet
 } // namespace libbitcoin
+
+#include "parse_ek_key.ipp"
 
 #endif

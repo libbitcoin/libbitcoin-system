@@ -17,32 +17,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PUBLIC_KEY_HPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_PUBLIC_KEY_HPP
+#ifndef LIBBITCOIN_PARSE_EK_PUBLIC_HPP
+#define LIBBITCOIN_PARSE_EK_PUBLIC_HPP
 
 #include <cstdint>
 #include <cstddef>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include "parse_encrypted_key.hpp"
+#include "parse_ek_key.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-class parse_encrypted_public_key
-  : public parse_encrypted_key<0x64, 5>
+class parse_ek_public
+  : public parse_ek_key<0x64, 5>
 {
 public:
-    static byte_array<prefix_size> prefix(uint8_t address);
+    static byte_array<prefix_size> prefix_factory(uint8_t address);
 
-    parse_encrypted_public_key(const ek_public& key);
+    parse_ek_public(const ek_public& key);
 
     uint8_t address_version() const;
-    hash_digest data() const;
+
     one_byte sign() const;
+    hash_digest data() const;
 
 private:
     bool verify_context() const;
+    bool verify_magic() const;
 
     static const byte_array<magic_size> magic;
     static constexpr uint8_t only_context = 0x9a;

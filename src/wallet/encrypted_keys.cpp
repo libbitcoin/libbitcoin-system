@@ -33,11 +33,11 @@
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include "parse_encrypted_keys/parse_encrypted_key.hpp"
-#include "parse_encrypted_keys/parse_encrypted_prefix.hpp"
-#include "parse_encrypted_keys/parse_encrypted_private_key.hpp"
-#include "parse_encrypted_keys/parse_encrypted_public_key.hpp"
-#include "parse_encrypted_keys/parse_encrypted_token.hpp"
+#include "parse_encrypted_keys/parse_ek_key.hpp"
+#include "parse_encrypted_keys/parse_ek_prefix.hpp"
+#include "parse_encrypted_keys/parse_ek_private.hpp"
+#include "parse_encrypted_keys/parse_ek_public.hpp"
+#include "parse_encrypted_keys/parse_ek_token.hpp"
 
 namespace libbitcoin {
 namespace wallet {
@@ -165,7 +165,7 @@ static void create_private_key(ek_private& out_private, const one_byte& flags,
     const hash_digest& derived1, const hash_digest& derived2,
     const ek_seed& seed, uint8_t version)
 {
-    const auto prefix = parse_encrypted_private_key::prefix(version, true);
+    const auto prefix = parse_ek_private::prefix_factory(version, true);
 
     auto encrypt1 = xor_data<half>(seed, derived1);
     aes256_encrypt(derived2, encrypt1);
@@ -192,7 +192,7 @@ static void create_public_key(ek_public& out_public, const one_byte& flags,
     const hash_digest& derived1, const hash_digest& derived2,
     const ec_secret& secret, uint8_t version)
 {
-    const auto prefix = parse_encrypted_public_key::prefix(version);
+    const auto prefix = parse_ek_public::prefix_factory(version);
     const auto point = secret_to_public_key(secret, true);
     const auto hash = point_hash(point);
 
@@ -221,7 +221,7 @@ bool create_key_pair(ek_private& out_private, ek_public& out_public,
     ec_point& out_point, const ek_token& token, const ek_seed& seed,
     uint8_t version, bool compressed)
 {
-    const parse_encrypted_token parse(token);
+    const parse_ek_token parse(token);
     if (!parse.valid())
         return false;
 
@@ -268,7 +268,7 @@ static data_chunk normal(const std::string& passphrase)
 
 static void create_token(ek_token& out_token, const std::string& passphrase,
     data_slice owner_salt, const ek_entropy& owner_entropy,
-    const byte_array<parse_encrypted_token::prefix_size>& prefix)
+    const byte_array<parse_ek_token::prefix_size>& prefix)
 {
     BITCOIN_ASSERT(owner_salt.size() == ek_salt_size ||
         owner_salt.size() == ek_entropy_size);
@@ -296,7 +296,7 @@ void create_token(ek_token& out_token, const std::string& passphrase,
     // BIP38: If lot and sequence numbers are not being included, then
     // owner_salt is 8 random bytes instead of 4, lot_sequence is omitted and
     // owner_entropy becomes an alias for owner_salt.
-    const auto prefix = parse_encrypted_token::prefix(false);
+    const auto prefix = parse_ek_token::prefix_factory(false);
     create_token(out_token, passphrase, entropy, entropy, prefix);
 }
 
@@ -310,7 +310,7 @@ bool create_token(ek_token& out_token, const std::string& passphrase,
     static constexpr size_t max_sequence_bits = 12;
     const uint32_t lot_sequence = (lot << max_sequence_bits) || sequence;
     const auto entropy = splice(salt, to_big_endian(lot_sequence));
-    const auto prefix = parse_encrypted_token::prefix(true);
+    const auto prefix = parse_ek_token::prefix_factory(true);
     create_token(out_token, passphrase, salt, entropy, prefix);
     return true;
 }
@@ -321,7 +321,7 @@ bool create_token(ek_token& out_token, const std::string& passphrase,
 void encrypt(ek_private& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version, bool compressed)
 {
-    const auto prefix = parse_encrypted_private_key::prefix(version, false);
+    const auto prefix = parse_ek_private::prefix_factory(version, false);
     const auto point = secret_to_public_key(secret, compressed);
     const auto salt = address_salt(version, point);
     const auto derived = split(scrypt_private(normal(passphrase), salt));
@@ -346,7 +346,7 @@ void encrypt(ek_private& out_private, const ec_secret& secret,
 // ----------------------------------------------------------------------------
 
 static bool decrypt_multiplied(ec_secret& out_secret,
-    const parse_encrypted_private_key& parse, const std::string& passphrase)
+    const parse_ek_private& parse, const std::string& passphrase)
 {
     auto secret = scrypt_token(normal(passphrase), parse.owner_salt());
 
@@ -380,7 +380,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
 }
 
 static bool decrypt_secret(ec_secret& out_secret,
-    const parse_encrypted_private_key& parse, const std::string& passphrase)
+    const parse_ek_private& parse, const std::string& passphrase)
 {
     const auto derived = split(scrypt_private(normal(passphrase), parse.salt()));
     auto encrypt1 = splice(parse.entropy(), parse.data1());
@@ -404,7 +404,7 @@ static bool decrypt_secret(ec_secret& out_secret,
 bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
     const ek_private& key, const std::string& passphrase)
 {
-    const parse_encrypted_private_key parse(key);
+    const parse_ek_private parse(key);
     if (!parse.valid())
         return false;
 
@@ -427,7 +427,7 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
 bool decrypt(ec_point& out_point, uint8_t& out_version, const ek_public& key,
     const std::string& passphrase)
 {
-    const parse_encrypted_public_key parse(key);
+    const parse_ek_public parse(key);
     if (!parse.valid())
         return false;
 

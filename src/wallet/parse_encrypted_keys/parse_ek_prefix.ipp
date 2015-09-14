@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_IPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_IPP
+#ifndef LIBBITCOIN_PARSE_EK_PREFIX_IPP
+#define LIBBITCOIN_PARSE_EK_PREFIX_IPP
 
 #include <cstdint>
 #include <cstddef>
@@ -29,50 +29,47 @@ namespace libbitcoin {
 namespace wallet {
     
 template<uint8_t Version, size_t Size>
-parse_encrypted_prefix<Version, Size>::parse_encrypted_prefix(
+parse_ek_prefix<Version, Size>::parse_ek_prefix(
     const byte_array<Size>& value)
-  : version_(slice<0, 1>(value)),
-    magic_(slice<1, Size - 1>(value)),
-    context_(slice<Size - 1, Size>(value)),
-    valid_(verify_version())
+  : prefix_(value), valid_(verify_version())
 {
 }
 
 template<uint8_t Version, size_t Size>
-uint8_t parse_encrypted_prefix<Version, Size>::context() const
+uint8_t parse_ek_prefix<Version, Size>::context() const
 {
-    return context_.front();
+    return prefix_.back();
 }
 
 template<uint8_t Version, size_t Size>
-byte_array<Size> parse_encrypted_prefix<Version, Size>::prefix() const
+byte_array<Size> parse_ek_prefix<Version, Size>::prefix() const
 {
-    return splice(version_, magic_, context_);
+    return prefix_;
 }
 
 template<uint8_t Version, size_t Size>
-bool parse_encrypted_prefix<Version, Size>::valid() const
+bool parse_ek_prefix<Version, Size>::valid() const
 {
     return valid_;
 }
 
 template<uint8_t Version, size_t Size>
-void parse_encrypted_prefix<Version, Size>::valid(bool value)
+void parse_ek_prefix<Version, Size>::valid(bool value)
 {
     valid_ = value;
 }
 
 template<uint8_t Version, size_t Size>
-bool parse_encrypted_prefix<Version, Size>::verify_version() const
+bool parse_ek_prefix<Version, Size>::verify_version() const
 {
     // All version numbers are valid.
     return true;
 }
 
 template<uint8_t Version, size_t Size>
-uint8_t parse_encrypted_prefix<Version, Size>::version() const
+uint8_t parse_ek_prefix<Version, Size>::version() const
 {
-    return version_.front();
+    return prefix_.front();
 }
 
 } // namespace wallet
