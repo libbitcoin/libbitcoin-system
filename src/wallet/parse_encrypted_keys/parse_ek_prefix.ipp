@@ -30,7 +30,7 @@ namespace wallet {
     
 template<size_t Size>
 parse_ek_prefix<Size>::parse_ek_prefix(const byte_array<Size>& value)
-  : prefix_(value), valid_(verify_magic())
+  : prefix_(value), valid_(false)
 {
 }
 
@@ -56,12 +56,6 @@ template<size_t Size>
 void parse_ek_prefix<Size>::valid(bool value)
 {
     valid_ = value;
-}
-
-template<size_t Size>
-bool parse_ek_prefix<Size>::verify_magic() const
-{
-    return slice<0, prefix_size - 1>(prefix()) == magic;
 }
 
 } // namespace wallet

@@ -26,11 +26,12 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 #include "parse_ek_key.hpp"
+#include "parse_ek_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-const byte_array<parse_ek_private::magic_size> parse_ek_private::magic
+const byte_array<parse_ek_private::magic_size> parse_ek_private::magic_
 {
     { 0x01 }
 };
@@ -38,9 +39,9 @@ const byte_array<parse_ek_private::magic_size> parse_ek_private::magic
 byte_array<parse_ek_private::prefix_size> parse_ek_private::prefix_factory(
     uint8_t address, bool multiplied)
 {
-    const auto baseline = multiplied ? multiplied_context : default_context;
-    const auto context = baseline + address;
-    return splice(magic, to_array(context));
+    const auto base = multiplied ? multiplied_context_ : default_context_;
+    const auto context = base + address;
+    return splice(magic_, to_array(context));
 }
 
 parse_ek_private::parse_ek_private(const ek_private& key)
@@ -52,13 +53,13 @@ parse_ek_private::parse_ek_private(const ek_private& key)
     data1_(slice<15, 23>(key)),
     data2_(slice<23, 39>(key))
 {
-    valid(valid() && verify_checksum(key));
+    valid(verify_magic() && verify_checksum(key));
 }
 
 uint8_t parse_ek_private::address_version() const
 {
-    const auto baseline = multiplied() ? multiplied_context : default_context;
-    return context() - baseline;
+    const auto base = multiplied() ? multiplied_context_ : default_context_;
+    return context() - base;
 }
 
 quarter_hash parse_ek_private::data1() const
@@ -75,6 +76,11 @@ bool parse_ek_private::multiplied() const
 {
     // This is a double negative (multiplied = not not multiplied).
     return (flags() & ek_flag::ec_non_multiplied) == 0;
+}
+
+bool parse_ek_private::verify_magic() const
+{
+    return slice<0, magic_size>(prefix()) == magic_;
 }
 
 } // namespace wallet

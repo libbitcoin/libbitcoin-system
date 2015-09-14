@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace wallet {
 
 class parse_ek_public
-  : public parse_ek_key<5>
+  : public parse_ek_key<5u>
 {
 public:
     static byte_array<prefix_size> prefix_factory(uint8_t address);
@@ -43,7 +43,10 @@ public:
     hash_digest data() const;
 
 private:
-    static constexpr uint8_t default_context = 0x9a;
+    bool verify_magic() const;
+
+    static constexpr uint8_t default_context_ = 0x9a;
+    static const byte_array<magic_size> magic_;
 
     const one_byte sign_;
     const hash_digest data_;

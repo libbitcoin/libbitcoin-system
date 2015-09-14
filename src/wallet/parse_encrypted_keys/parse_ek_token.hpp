@@ -31,7 +31,7 @@ namespace libbitcoin {
 namespace wallet {
 
 class parse_ek_token
-  : public parse_ek_prefix<8>
+  : public parse_ek_prefix<8u>
 {
 public:
     static byte_array<prefix_size> prefix_factory(bool lot_sequence);
@@ -45,9 +45,11 @@ public:
 
 private:
     bool verify_context() const;
+    bool verify_magic() const;
 
-    static constexpr uint8_t lot_context = 0x51;
-    static constexpr uint8_t default_context = 0x53;
+    static constexpr uint8_t lot_context_ = 0x51;
+    static constexpr uint8_t default_context_ = 0x53;
+    static const byte_array<magic_size> magic_;
 
     const ek_entropy entropy_;
     const one_byte sign_;

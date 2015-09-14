@@ -26,14 +26,14 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 #include "parse_ek_key.hpp"
-#include "parse_ek_key.hpp"
+#include "parse_ek_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
-
+    
 // This prefix results in the prefix "cfrm" in the base58 encoding but is
 // modified when the payment address is Bitcoin mainnet (0).
-const byte_array<parse_ek_public::magic_size> parse_ek_public::magic
+const byte_array<parse_ek_public::magic_size> parse_ek_public::magic_
 {
     { 0x64, 0x3b, 0xf6, 0xa8 }
 };
@@ -41,8 +41,8 @@ const byte_array<parse_ek_public::magic_size> parse_ek_public::magic
 byte_array<parse_ek_public::prefix_size> parse_ek_public::prefix_factory(
     uint8_t address)
 {
-    const auto context = default_context + address;
-    return splice(magic, to_array(context));
+    const auto context = default_context_ + address;
+    return splice(magic_, to_array(context));
 }
 
 parse_ek_public::parse_ek_public(const ek_public& key)
@@ -54,12 +54,12 @@ parse_ek_public::parse_ek_public(const ek_public& key)
     sign_(slice<18, 19>(key)),
     data_(slice<19, 51>(key))
 {
-    valid(valid() && verify_checksum(key));
+    valid(verify_magic() && verify_checksum(key));
 }
 
 uint8_t parse_ek_public::address_version() const
 {
-    return context() - default_context;
+    return context() - default_context_;
 }
 
 hash_digest parse_ek_public::data() const
@@ -70,6 +70,11 @@ hash_digest parse_ek_public::data() const
 one_byte parse_ek_public::sign() const
 {
     return sign_;
+}
+
+bool parse_ek_public::verify_magic() const
+{
+    return slice<0, magic_size>(prefix()) == magic_;
 }
 
 } // namespace wallet

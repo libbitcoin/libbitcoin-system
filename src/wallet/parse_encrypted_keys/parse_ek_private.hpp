@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace wallet {
 
 class parse_ek_private
-  : public parse_ek_key<2>
+  : public parse_ek_key<2u>
 {
 public:
     static byte_array<prefix_size> prefix_factory(uint8_t address, bool multiplied);
@@ -44,12 +44,16 @@ public:
     half_hash data2() const;
 
 private:
-    static constexpr uint8_t default_context = 0x42;
-    static constexpr uint8_t multiplied_context = 0x43;
+    bool verify_magic() const;
+
+    static constexpr uint8_t default_context_ = 0x42;
+    static constexpr uint8_t multiplied_context_ = 0x43;
+    static const byte_array<magic_size> magic_;
 
     const quarter_hash data1_;
     const half_hash data2_;
 };
+
 } // namespace wallet
 } // namespace libbitcoin
 

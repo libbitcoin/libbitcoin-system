@@ -52,7 +52,6 @@ protected:
     void valid(bool value);
 
     static constexpr uint8_t magic_size = Size - 1;
-    static const byte_array<magic_size> magic;
 
 private:
     bool verify_magic() const;
