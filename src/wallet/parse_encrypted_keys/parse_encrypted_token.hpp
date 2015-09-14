@@ -44,9 +44,6 @@ public:
     ek_entropy entropy() const;
     one_byte sign() const;
 
-    static constexpr uint32_t max_lot = 1048575;
-    static constexpr uint32_t max_sequence = 4095;
-
 private:
     bool verify_context() const;
 

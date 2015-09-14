@@ -31,22 +31,28 @@ namespace libbitcoin {
 namespace wallet {
 
 /**
- * A seed for use in creating an intermediate passphrase (token).
+ * The maximum lot and sequence values for encrypted key token creation.
  */
-static BC_CONSTEXPR size_t salt_size = 4;
-typedef byte_array<salt_size> ek_salt;
+static BC_CONSTEXPR uint32_t ek_max_lot = 1048575;
+static BC_CONSTEXPR uint32_t ek_max_sequence = 4095;
 
 /**
  * A seed for use in creating an intermediate passphrase (token).
  */
-static BC_CONSTEXPR size_t entropy_size = 8;
-typedef byte_array<entropy_size> ek_entropy;
+static BC_CONSTEXPR size_t ek_salt_size = 4;
+typedef byte_array<ek_salt_size> ek_salt;
+
+/**
+ * A seed for use in creating an intermediate passphrase (token).
+ */
+static BC_CONSTEXPR size_t ek_entropy_size = 8;
+typedef byte_array<ek_entropy_size> ek_entropy;
 
 /**
  * A seed for use in creating a key pair.
  */
-static BC_CONSTEXPR size_t seed_size = 24;
-typedef byte_array<seed_size> ek_seed;
+static BC_CONSTEXPR size_t ek_seed_size = 24;
+typedef byte_array<ek_seed_size> ek_seed;
 
 /**
  * An intermediate passphrase (token) type (checked but not base58 encoded).

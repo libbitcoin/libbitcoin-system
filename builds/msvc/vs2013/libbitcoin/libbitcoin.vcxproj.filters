@@ -491,6 +491,15 @@
     <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private_key.cpp">
       <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\ek_public.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\ek_token.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\config\ek_private.cpp">
+      <Filter>src\config</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\resource.h">
@@ -933,6 +942,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.hpp">
       <Filter>src\wallet\parse_encrypted_keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_public.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_token.hpp">
+      <Filter>include\bitcoin\config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_private.hpp">
+      <Filter>include\bitcoin\config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

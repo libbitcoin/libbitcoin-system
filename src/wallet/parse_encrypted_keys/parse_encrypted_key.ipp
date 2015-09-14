@@ -68,7 +68,7 @@ data_chunk parse_encrypted_key<Version, PrefixSize>::owner_salt() const
 {
     // Either 4 or 8 bytes, depending on the lot sequence flags.
     if (lot_sequence())
-        return to_chunk(slice<0, salt_size>(entropy()));
+        return to_chunk(slice<0, ek_salt_size>(entropy()));
     else
         return to_chunk(entropy());
 }

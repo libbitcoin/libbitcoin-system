@@ -60,7 +60,7 @@ static hash_digest address_hash(uint8_t version, const ec_point& point)
 
 static ek_salt address_salt(uint8_t version, const ec_point& point)
 {
-    return slice<0, salt_size>(address_hash(version, point));
+    return slice<0, ek_salt_size>(address_hash(version, point));
 }
 
 static bool address_validate(const ec_point& point, const ek_salt& salt,
@@ -270,10 +270,10 @@ static void create_token(ek_token& out_token, const std::string& passphrase,
     data_slice owner_salt, const ek_entropy& owner_entropy,
     const byte_array<parse_encrypted_token::prefix_size>& prefix)
 {
-    BITCOIN_ASSERT(owner_salt.size() == salt_size ||
-        owner_salt.size() == entropy_size);
+    BITCOIN_ASSERT(owner_salt.size() == ek_salt_size ||
+        owner_salt.size() == ek_entropy_size);
 
-    const auto lot_sequence = owner_salt.size() == salt_size;
+    const auto lot_sequence = owner_salt.size() == ek_salt_size;
     auto factor = scrypt_token(normal(passphrase), owner_salt);
 
     if (lot_sequence)
@@ -304,8 +304,7 @@ void create_token(ek_token& out_token, const std::string& passphrase,
 bool create_token(ek_token& out_token, const std::string& passphrase,
     const ek_salt& salt, uint32_t lot, uint32_t sequence)
 {
-    if (lot > parse_encrypted_token::max_lot ||
-        sequence > parse_encrypted_token::max_sequence)
+    if (lot > ek_max_lot || sequence > ek_max_sequence)
         return false;
 
     static constexpr size_t max_sequence_bits = 12;

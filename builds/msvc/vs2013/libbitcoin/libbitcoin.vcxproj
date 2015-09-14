@@ -84,6 +84,9 @@
     <ClCompile Include="..\..\..\..\src\config\btc256.cpp" />
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\ek_private.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\ek_public.cpp" />
+    <ClCompile Include="..\..\..\..\src\config\ek_token.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
@@ -206,6 +209,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\btc256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\checkpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_private.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_public.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_token.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp" />

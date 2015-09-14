@@ -35,6 +35,9 @@
 #include <bitcoin/bitcoin/config/btc256.hpp>
 #include <bitcoin/bitcoin/config/checkpoint.hpp>
 #include <bitcoin/bitcoin/config/directory.hpp>
+#include <bitcoin/bitcoin/config/ek_private.hpp>
+#include <bitcoin/bitcoin/config/ek_public.hpp>
+#include <bitcoin/bitcoin/config/ek_token.hpp>
 #include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/config/parameter.hpp>
 #include <bitcoin/bitcoin/config/printer.hpp>
