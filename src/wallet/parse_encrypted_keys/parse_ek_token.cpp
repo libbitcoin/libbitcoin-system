@@ -17,71 +17,70 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "parse_encrypted_token.hpp"
+#include "parse_ek_token.hpp"
 
 #include <cstdint>
 #include <cstddef>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_encrypted_prefix.hpp"
+#include "parse_ek_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
 // This prefix results in the prefix "passphrase" in the base58 encoding.
 // The prefix is not modified as the result of variations to address.
-const byte_array<parse_encrypted_token::magic_size>
-parse_encrypted_token::magic
+const byte_array<parse_ek_token::magic_size> parse_ek_token::magic_
 {
-    { 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 } 
+    { 0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 }
 };
 
-byte_array<parse_encrypted_token::prefix_size>
-parse_encrypted_token::prefix(bool lot_sequence)
+byte_array<parse_ek_token::prefix_size> parse_ek_token::prefix_factory(
+    bool lot_sequence)
 {
-    const auto context = lot_sequence ? lot_context : default_context;
-    return splice(to_array(default_key_version), magic, to_array(context));
+    const auto context = lot_sequence ? lot_context_ : default_context_;
+    return splice(magic_, to_array(context));
 }
 
-parse_encrypted_token::parse_encrypted_token(const ek_token& value)
-  : parse_encrypted_prefix(slice<0, 8>(value)),
+parse_ek_token::parse_ek_token(const ek_token& value)
+  : parse_ek_prefix(slice<0, 8>(value)),
     entropy_(slice<8, 16>(value)),
     sign_(slice<16, 17>(value)),
     data_(slice<17, 49>(value))
 {
-    valid(valid() && verify_context() && verify_checksum(value));
+    valid(verify_magic() && verify_context() && verify_checksum(value));
 }
 
-uint8_t parse_encrypted_token::address_version() const
-{
-    return default_address_version;
-}
-
-hash_digest parse_encrypted_token::data() const
+hash_digest parse_ek_token::data() const
 {
     return data_;
 }
 
-ek_entropy parse_encrypted_token::entropy() const
+ek_entropy parse_ek_token::entropy() const
 {
     return entropy_;
 }
 
-// There is no "flags" byte in token, we rely on prefix context.
-bool parse_encrypted_token::lot_sequence() const
+bool parse_ek_token::lot_sequence() const
 {
-    return context() == lot_context;
+    // There is no "flags" byte in token, we rely on prefix context.
+    return context() == lot_context_;
 }
 
-one_byte parse_encrypted_token::sign() const
+one_byte parse_ek_token::sign() const
 {
     return sign_;
 }
 
-bool parse_encrypted_token::verify_context() const
+bool parse_ek_token::verify_context() const
 {
-    return context() == default_context || context() == lot_context;
+    return context() == default_context_ || context() == lot_context_;
+}
+
+bool parse_ek_token::verify_magic() const
+{
+    return slice<0, magic_size>(prefix()) == magic_;
 }
 
 } // namespace wallet

@@ -404,13 +404,13 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_9_compressed__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
 }
 
-// Altchan vectors are based on preliminary bidirectional mapping proposal.
+// altchain vectors are based on preliminary bidirectional mapping proposal.
 BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_9_compressed_testnet__expected)
 {
     const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR(token, seed, 111, true);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "9CNPN5U7RUnisUEm4w5g8WEuV2MBoQEbjxyw7NbDAPdFjDuiKRze4ztPrmA");
+    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "8FELCpEDogaLG3WkLhSVpKKravcNDZ7HAQ7jwHApt1Rn4BHqaLAfo9nrRD");
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
 }
 
@@ -471,14 +471,14 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_9_compressed_
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
 }
 
-// Altchan vectors are based on preliminary bidirectional mapping proposal.
+// altchain vectors are based on preliminary bidirectional mapping proposal.
 BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_9_compressed_testnet__expected)
 {
     const auto seed = base16_literal("bbeac8b9bb39381520b6873553544b387bcaa19112602230");
     const auto token = base58_literal("passphraseouGLY8yjTZQ5Q2bTo8rtKfdbHz4tme7QuPheRgES8KnT6pX5yxFauYhv3SVPDD");
     BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, 111, true);
-    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "9CNPN5U7RUnisUEm4w5g8WEuV2MBoQEbjxyw7NbDAPdFjDuiKRze4ztPrmA");
-    BOOST_REQUIRE_EQUAL(encode_base58(out_public), "gauEDoSi7eYQiggVLBbkibgy2HgezVNRQBD2FJ69edWqCjgsDJTAFySGK88RZVnv6zYBNe1mU6y");
+    BOOST_REQUIRE_EQUAL(encode_base58(out_private), "8FELCpEDogaLG3WkLhSVpKKravcNDZ7HAQ7jwHApt1Rn4BHqaLAfo9nrRD");
+    BOOST_REQUIRE_EQUAL(encode_base58(out_public), "cfrm2zc77zW4FRDALEVBoKmmT79Q7KshtvLZoN62JADnXGPEcPosMx8sM8Ry4ieGW3FXUEoBwk2");
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
 }
 
@@ -595,7 +595,7 @@ BOOST_AUTO_TEST_SUITE_END()
 //
 //        auto key = encode_base58(out_private_key);
 //        key.resize(2);
-//        BOOST_MESSAGE("0x" + hex(byte) + " -> " + key + "... ");
+//        BOOST_MESSAGE("0x" + hex(byte) + " " + key);
 //    }
 //}
 //
@@ -618,8 +618,8 @@ BOOST_AUTO_TEST_SUITE_END()
 //        auto private_key = encode_base58(out_private_key);
 //        auto public_key = encode_base58(out_public_key);
 //        private_key.resize(2);
-//        public_key.resize(4);
-//        BOOST_MESSAGE("0x" + hex(byte) + " -> " + private_key + "... " + public_key + "...");
+//        public_key.resize(7);
+//        BOOST_MESSAGE("0x" + hex(byte) + " " + private_key + " " + public_key);
 //    }
 //}
 //

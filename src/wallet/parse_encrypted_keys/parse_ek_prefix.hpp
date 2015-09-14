@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_HPP
-#define LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_HPP
+#ifndef LIBBITCOIN_PARSE_EK_PREFIX_HPP
+#define LIBBITCOIN_PARSE_EK_PREFIX_HPP
 
 #include <cstdint>
 #include <cstddef>
@@ -36,8 +36,8 @@
 namespace libbitcoin {
 namespace wallet {
 
-template<uint8_t Version, size_t Size>
-class parse_encrypted_prefix
+template<size_t Size>
+class parse_ek_prefix
 {
 public:
     bool valid() const;
@@ -45,29 +45,24 @@ public:
     static constexpr uint8_t prefix_size = Size;
 
 protected:
-    parse_encrypted_prefix(const byte_array<Size>& value);
+    parse_ek_prefix(const byte_array<Size>& value);
 
     uint8_t context() const;
     byte_array<Size> prefix() const;
     void valid(bool value);
-    uint8_t version() const;
 
-    static constexpr uint8_t magic_size = Size - 2;
-    static constexpr uint8_t default_address_version = 0x00;
-    static constexpr uint8_t default_key_version = Version;
+    static constexpr uint8_t magic_size = Size - 1;
 
 private:
-    bool verify_version() const;
+    bool verify_magic() const;
 
-    const one_byte version_;
-    const byte_array<magic_size> magic_;
-    const one_byte context_;
+    const byte_array<Size> prefix_;
     bool valid_;
 };
 
 } // namespace wallet
 } // namespace libbitcoin
 
-#include "parse_encrypted_prefix.ipp"
+#include "parse_ek_prefix.ipp"
 
 #endif

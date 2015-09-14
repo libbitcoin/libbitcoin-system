@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "parse_encrypted_private_key.hpp"
+#include "parse_ek_private.hpp"
 
 #include <cstdint>
 #include <cstddef>
@@ -25,23 +25,27 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_encrypted_key.hpp"
-#include "parse_encrypted_prefix.hpp"
+#include "parse_ek_key.hpp"
+#include "parse_ek_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-byte_array<parse_encrypted_private_key::prefix_size>
-parse_encrypted_private_key::prefix(uint8_t address, bool multiplied)
+const byte_array<parse_ek_private::magic_size> parse_ek_private::magic_
 {
-    const auto check = address == default_address_version ? default_key_version :
-        address;
-    const auto context = multiplied ? multiplied_context : default_context;
-    return splice(to_array(check), to_array(context));
+    { 0x01 }
+};
+
+byte_array<parse_ek_private::prefix_size> parse_ek_private::prefix_factory(
+    uint8_t address, bool multiplied)
+{
+    const auto base = multiplied ? multiplied_context_ : default_context_;
+    const auto context = base + address;
+    return splice(magic_, to_array(context));
 }
 
-parse_encrypted_private_key::parse_encrypted_private_key(const ek_private& key)
-  : parse_encrypted_key<default_key_version, prefix_size>(
+parse_ek_private::parse_ek_private(const ek_private& key)
+    : parse_ek_key<prefix_size>(
         slice<0, 2>(key),
         slice<2, 3>(key),
         slice<3, 7>(key),
@@ -49,42 +53,34 @@ parse_encrypted_private_key::parse_encrypted_private_key(const ek_private& key)
     data1_(slice<15, 23>(key)),
     data2_(slice<23, 39>(key))
 {
-    valid(valid() && verify_context() && verify_flags() &&
-        verify_checksum(key));
+    valid(verify_magic() && verify_checksum(key));
 }
 
-uint8_t parse_encrypted_private_key::address_version() const
+uint8_t parse_ek_private::address_version() const
 {
-    const auto check = version();
-    return check == default_key_version ? default_address_version : check;
+    const auto base = multiplied() ? multiplied_context_ : default_context_;
+    return context() - base;
 }
 
-quarter_hash parse_encrypted_private_key::data1() const
+quarter_hash parse_ek_private::data1() const
 {
     return data1_;
 }
 
-half_hash parse_encrypted_private_key::data2() const
+half_hash parse_ek_private::data2() const
 {
     return data2_;
 }
 
-bool parse_encrypted_private_key::multiplied() const
+bool parse_ek_private::multiplied() const
 {
     // This is a double negative (multiplied = not not multiplied).
     return (flags() & ek_flag::ec_non_multiplied) == 0;
 }
 
-bool parse_encrypted_private_key::verify_flags() const
+bool parse_ek_private::verify_magic() const
 {
-    // This guards against a conflict that can result from a redundancy in
-    // the BIP38 specification - multiplied context exists in two places.
-    return multiplied() == (context() == multiplied_context);
-}
-
-bool parse_encrypted_private_key::verify_context() const
-{
-    return context() == default_context || context() == multiplied_context;
+    return slice<0, magic_size>(prefix()) == magic_;
 }
 
 } // namespace wallet
