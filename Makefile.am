@@ -51,6 +51,9 @@ src_libbitcoin_la_SOURCES = \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
     src/config/directory.cpp \
+    src/config/ek_private.cpp \
+    src/config/ek_public.cpp \
+    src/config/ek_token.cpp \
     src/config/endpoint.cpp \
     src/config/parameter.cpp \
     src/config/printer.cpp \
@@ -161,7 +164,17 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/stealth.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp \
-    src/wallet/wif_keys.cpp
+    src/wallet/wif_keys.cpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_key.hpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_key.ipp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_prefix.hpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_prefix.ipp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_private_key.cpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_private_key.hpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_public_key.cpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_public_key.hpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_token.cpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_token.hpp
 
 # local: examples/libbitcoin_examples
 #------------------------------------------------------------------------------
@@ -300,6 +313,9 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/btc256.hpp \
     include/bitcoin/bitcoin/config/checkpoint.hpp \
     include/bitcoin/bitcoin/config/directory.hpp \
+    include/bitcoin/bitcoin/config/ek_private.hpp \
+    include/bitcoin/bitcoin/config/ek_public.hpp \
+    include/bitcoin/bitcoin/config/ek_token.hpp \
     include/bitcoin/bitcoin/config/endpoint.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/printer.hpp

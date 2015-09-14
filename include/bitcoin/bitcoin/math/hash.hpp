@@ -29,19 +29,23 @@
 
 namespace libbitcoin {
 
-BC_CONSTEXPR size_t short_hash_size = 20;
-BC_CONSTEXPR size_t hash_size = 32;
-BC_CONSTEXPR size_t long_hash_size = 64;
+static BC_CONSTEXPR size_t hash_size = 32;
+static BC_CONSTEXPR size_t half_hash_size = hash_size / 2;
+static BC_CONSTEXPR size_t quarter_hash_size = half_hash_size / 2;
+static BC_CONSTEXPR size_t long_hash_size = 2 * hash_size;
+static BC_CONSTEXPR size_t short_hash_size = 20;
 
 // Standard hash containers.
-typedef byte_array<short_hash_size> short_hash;
 typedef byte_array<hash_size> hash_digest;
+typedef byte_array<half_hash_size> half_hash;
+typedef byte_array<quarter_hash_size> quarter_hash;
 typedef byte_array<long_hash_size> long_hash;
+typedef byte_array<short_hash_size> short_hash;
 
 // List of hashes. Useful primitive.
-typedef std::vector<short_hash> short_hash_list;
 typedef std::vector<hash_digest> hash_list;
 typedef std::vector<long_hash> long_hash_list;
+typedef std::vector<short_hash> short_hash_list;
 
 BC_CONSTEXPR hash_digest null_hash =
 {

@@ -47,14 +47,14 @@ BOOST_AUTO_TEST_CASE(ek__fixture__unicode_passphrase__matches_ek_test_vector)
 BOOST_AUTO_TEST_SUITE(ek__create_token_lot)
 
 #define BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, bytes, lot, sequence) \
-    token out_token; \
+    ek_token out_token; \
     BOOST_REQUIRE(create_token(out_token, passphrase, bytes, lot, sequence))
 
 BOOST_AUTO_TEST_CASE(ek__create_token_lot__lot_overlow__false)
 {
     const auto passphrase = "";
     const auto salt = base16_literal("baadf00d");
-    token out_token;
+    ek_token out_token;
     BOOST_REQUIRE(!create_token(out_token, passphrase, salt, 1048575 + 1, 0));
 }
 
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_lot__sequence_overlow__false)
 {
     const auto passphrase = "";
     const auto salt = base16_literal("baadf00d");
-    token out_token;
+    ek_token out_token;
     BOOST_REQUIRE(!create_token(out_token, passphrase, salt, 0, 4095 + 1));
 }
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(ek__create_token_entropy)
 
 #define BC_CREATE_TOKEN_ENTROPY(passphrase, bytes) \
-    token out_token; \
+    ek_token out_token; \
     create_token(out_token, passphrase, bytes)
 
 BOOST_AUTO_TEST_CASE(ek__create_token_entropy__defaults__expected)
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE(ek__encrypt_private)
 
 #define BC_REQUIRE_ENCRYPT(secret, passphrase, version, compressed, expected) \
-    private_key out_private; \
+    ek_private out_private; \
     encrypt(out_private, secret, passphrase, version, compressed); \
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), expected)
 
@@ -362,7 +362,7 @@ BOOST_AUTO_TEST_SUITE(ek__create_key_pair)
 
 #define BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compressed) \
     ec_point out_point; \
-    private_key out_private; \
+    ek_private out_private; \
     BOOST_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, compressed))
 
 BOOST_AUTO_TEST_CASE(ek__create_key_pair__bad_checksum__false)
@@ -370,7 +370,7 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair__bad_checksum__false)
     const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
     ec_point out_point;
-    private_key out_private;
+    ek_private out_private;
     BOOST_REQUIRE(!create_key_pair(out_private, out_point, token, seed, 0, false));
 }
 
@@ -424,8 +424,8 @@ BOOST_AUTO_TEST_SUITE(ek__create_key_pair_with_confirmation)
 
 #define BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compressed) \
     ec_point out_point; \
-    public_key out_public; \
-    private_key out_private; \
+    ek_public out_public; \
+    ek_private out_private; \
     BOOST_REQUIRE(create_key_pair(out_private, out_public, out_point, token, seed, version, compressed))
 
 BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__bad_checksum__false)
@@ -433,8 +433,8 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__bad_checksum__false)
     const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
     ec_point out_point;
-    public_key out_public;
-    private_key out_private;
+    ek_public out_public;
+    ek_private out_private;
     BOOST_REQUIRE(!create_key_pair(out_private, out_public, out_point, token, seed, 0, false));
 }
 
@@ -495,7 +495,7 @@ BOOST_AUTO_TEST_CASE(ek__encrypt__compressed_testnet__matches_secret_version_and
     const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
     const auto passphrase = "passphrase";
 
-    private_key out_private_key;
+    ek_private out_private_key;
     const uint8_t version = 111;
     const auto compressed = true;
     const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
@@ -513,7 +513,7 @@ BOOST_AUTO_TEST_CASE(ek__encrypt__compressed_testnet__matches_secret_version_and
 
 BOOST_AUTO_TEST_CASE(ek__create_token_entropy__private_uncompressed_testnet__decrypts_with_matching_version_and_compression)
 {
-    token out_token;
+    ek_token out_token;
     const auto passphrase = "passphrase";
     const auto entropy = base16_literal("baadf00dbaadf00d");
     create_token(out_token, passphrase, entropy);
@@ -521,7 +521,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_entropy__private_uncompressed_testnet__dec
 
     const auto& token = out_token;
     ec_point out_point;
-    private_key out_private_key;
+    ek_private out_private_key;
     const uint8_t version = 111;
     const auto compressed = false;
     const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
@@ -539,7 +539,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_entropy__private_uncompressed_testnet__dec
 
 BOOST_AUTO_TEST_CASE(ek__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
 {
-    token out_token;
+    ek_token out_token;
     const auto passphrase = "passphrase";
     const auto salt = base16_literal("baadf00d");
     BOOST_REQUIRE(create_token(out_token, passphrase, salt, 42, 24));
@@ -547,8 +547,8 @@ BOOST_AUTO_TEST_CASE(ek__create_token_lot__private_and_public_compressed_testnet
 
     const auto& token = out_token;
     ec_point out_point;
-    private_key out_private_key;
-    public_key out_public_key;
+    ek_private out_private_key;
+    ek_public out_public_key;
     const uint8_t version = 111;
     const auto compressed = true;
     const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
@@ -585,7 +585,7 @@ BOOST_AUTO_TEST_SUITE_END()
 //
 //BOOST_AUTO_TEST_CASE(ek__create_key_pair__all_versions__print_private_and_public_encrypted_keys)
 //{
-//    private_key out_private_key;
+//    ek_private out_private_key;
 //    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
 //
 //    for (size_t version = 0x00; version <= 0xFF; ++version)
@@ -601,13 +601,13 @@ BOOST_AUTO_TEST_SUITE_END()
 //
 //BOOST_AUTO_TEST_CASE(ek__create_key_pair__all_multiplied_versions__print_private_and_public_encrypted_keys)
 //{
-//    token out_token;
+//    ek_token out_token;
 //    create_token(out_token, "passphrase", base16_literal("baadf00dbaadf00d"));
 //
 //    const auto& token = out_token;
 //    ec_point unused;
-//    private_key out_private_key;
-//    public_key out_public_key;
+//    ek_private out_private_key;
+//    ek_public out_public_key;
 //    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
 //
 //    for (size_t version = 0x00; version <= 0xFF; ++version)

@@ -53,37 +53,25 @@ public:
 
     // Construction
     stealth_address();
-
-    stealth_address(const binary_type& prefix,
-        const ec_point& scan_pubkey, const pubkey_list& spend_pubkeys,
-        uint8_t signatures, bool testnet);
-
     stealth_address(const std::string& encoded_address);
+    stealth_address(const binary_type& prefix, const ec_point& scan_pubkey,
+        const pubkey_list& spend_pubkeys, uint8_t signatures, bool testnet);
 
     // Serialization
     bool from_string(const std::string& encoded_address);
-
     std::string to_string() const;
-
     bool valid() const;
 
     // Properties
     const binary_type& get_prefix() const;
-
     const ec_point& get_scan_pubkey() const;
-
     uint8_t get_signatures() const;
-
     const pubkey_list& get_spend_pubkeys() const;
-
     bool get_testnet() const;
 
 protected:
-
     bool get_reuse_key() const;
-
     uint8_t get_options() const;
-
     uint8_t get_version() const;
 
     bool valid_ = false;
