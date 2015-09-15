@@ -106,7 +106,7 @@ public:
         Message message;
         const bool parsed = message.from_data(stream);
         const code ec(parsed ? error::success : error::bad_stream);
-        subscriber->relay(ec, Message());
+        subscriber->relay(ec, message);
         return ec;
     }
 
