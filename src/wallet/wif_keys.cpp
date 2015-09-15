@@ -50,12 +50,15 @@ ec_secret wif_to_secret(const std::string& wif)
     data_chunk decoded;
     if (!decode_base58(decoded, wif))
         return ec_secret();
+
     // 1 marker, 32 byte secret, optional 1 compressed flag, 4 checksum bytes
     if (decoded.size() != 1 + hash_size + 4 &&
         decoded.size() != 1 + hash_size + 1 + 4)
         return ec_secret();
+
     if (!verify_checksum(decoded))
         return ec_secret();
+
     // Check first byte is valid
     if (decoded[0] != payment_address::wif_version)
         return ec_secret();
@@ -63,9 +66,11 @@ ec_secret wif_to_secret(const std::string& wif)
     // Checks passed. Drop the 0x80 start byte and checksum.
     decoded.erase(decoded.begin());
     decoded.erase(decoded.end() - 4, decoded.end());
+
     // If length is still 33 and last byte is 0x01, drop it.
     if (decoded.size() == 33 && decoded[32] == (uint8_t)0x01)
         decoded.erase(decoded.begin()+32);
+
     ec_secret secret;
     BITCOIN_ASSERT(secret.size() == decoded.size());
     std::copy(decoded.begin(), decoded.end(), secret.begin());
@@ -77,6 +82,7 @@ bool is_wif_compressed(const std::string& wif)
     data_chunk decoded;
     if (!decode_base58(decoded, wif))
         return false;
+
     return decoded.size() == (1 + hash_size + 1 + 4) &&
         decoded[33] == (uint8_t)0x01;
 }
