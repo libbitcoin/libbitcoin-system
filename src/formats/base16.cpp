@@ -20,7 +20,6 @@
 #include <bitcoin/bitcoin/formats/base16.hpp>
 
 #include <algorithm>
-#include <ctype.h>
 #include <iomanip>
 #include <sstream>
 #include <boost/algorithm/string.hpp>
@@ -35,6 +34,14 @@ std::string encode_base16(data_slice data)
     for (int val: data)
         ss << std::setw(2) << val;
     return ss.str();
+}
+
+bool is_base16(const char c)
+{
+    return
+        ('0' <= c && c <= '9') ||
+        ('A' <= c && c <= 'F') ||
+        ('a' <= c && c <= 'f');
 }
 
 static unsigned from_hex(const char c)
@@ -94,7 +101,7 @@ hash_digest hash_literal(const char (&string)[2 * hash_size + 1])
 // For support of template implementation only, do not call directly.
 bool decode_base16_private(uint8_t* out, size_t out_size, const char* in)
 {
-    if (!std::all_of(in, in + 2 * out_size, isxdigit))
+    if (!std::all_of(in, in + 2 * out_size, is_base16))
         return false;
 
     for (size_t i = 0; i < out_size; ++i)

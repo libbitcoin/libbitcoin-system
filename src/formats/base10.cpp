@@ -26,6 +26,14 @@
 
 namespace libbitcoin {
 
+/**
+ * Returns true if a character is one of `[0-9]`.
+ *
+ * The C standard library function `isdigit` depends on the current locale,
+ * and doesn't necessarily correspond to the valid base10 encoding digits.
+ * The Microsoft `isdigit` includes superscript characters like '²'
+ * in some locales, for example.
+ */
 static bool is_digit(const char c)
 {
     return '0' <= c && c <= '9';
