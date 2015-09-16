@@ -27,6 +27,13 @@
 namespace libbitcoin {
 
 /**
+ * Returns true if a character is a hexadecimal digit.
+ * The C standard library function `isxdigit` depends on the current locale,
+ * and does not necessarily match the base16 encoding.
+ */
+bool is_base16(const char c);
+
+/**
  * Convert data into a user-readable hex string.
  */
 BC_API std::string encode_base16(data_slice data);

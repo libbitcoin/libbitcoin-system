@@ -17,7 +17,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <ctype.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/lexical_cast.hpp>
@@ -43,7 +42,7 @@ bool is_hex_data(const std::string& token)
     if (!boost::starts_with(token, "0x"))
         return false;
     std::string hex_part(token.begin() + 2, token.end());
-    return boost::all(hex_part, [](char c) { return isxdigit(c); });
+    return boost::all(hex_part, [](char c) { return is_base16(c); });
 }
 
 bool is_quoted_string(const std::string& token)
