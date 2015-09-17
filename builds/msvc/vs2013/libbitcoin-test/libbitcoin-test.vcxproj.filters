@@ -233,6 +233,9 @@
     <ClCompile Include="..\..\..\..\test\utility\endian.cpp">
       <Filter>src\utiltiy</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\mnemonic.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -240,9 +243,6 @@
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\stealth_address.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\test\wallet\uri.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\test\wallet\hd_keys.cpp">

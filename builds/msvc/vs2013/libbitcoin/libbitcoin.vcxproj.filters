@@ -215,6 +215,9 @@
     <ClCompile Include="..\..\..\..\src\utility\threadpool.cpp">
       <Filter>src\utility</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\hd_keys.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -225,9 +228,6 @@
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\stealth_address.cpp">
-      <Filter>src\wallet</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\uri.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp">
@@ -595,6 +595,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\utility\threadpool.hpp">
       <Filter>include\bitcoin\utility</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\bitcoin_uri.hpp">
+      <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_keys.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
@@ -605,9 +608,6 @@
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\stealth_address.hpp">
-      <Filter>include\bitcoin\wallet</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp">

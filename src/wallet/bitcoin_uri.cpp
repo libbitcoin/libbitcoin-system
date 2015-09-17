@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/wallet/uri.hpp>
+#include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
 
 #include <cstdint>
 #include <iomanip>

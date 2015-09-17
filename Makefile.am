@@ -153,6 +153,7 @@ src_libbitcoin_la_SOURCES = \
     src/utility/thread.cpp \
     src/utility/threadpool.cpp \
     src/utility/variable_uint_size.cpp \
+    src/wallet/bitcoin_uri.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/encrypted_keys.cpp \
     src/wallet/hd_keys.cpp \
@@ -163,7 +164,6 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/select_outputs.cpp \
     src/wallet/stealth.cpp \
     src/wallet/stealth_address.cpp \
-    src/wallet/uri.cpp \
     src/wallet/wif_keys.cpp \
     src/wallet/parse_encrypted_keys/parse_ek_key.hpp \
     src/wallet/parse_encrypted_keys/parse_ek_key.ipp \
@@ -266,6 +266,7 @@ test_libbitcoin_test_SOURCES = \
     test/utility/stream.cpp \
     test/utility/thread.cpp \
     test/utility/variable_uint_size.cpp \
+    test/wallet/bitcoin_uri.cpp \
     test/wallet/encrypted_keys.cpp \
     test/wallet/hd_keys.cpp \
     test/wallet/message.cpp \
@@ -273,7 +274,6 @@ test_libbitcoin_test_SOURCES = \
     test/wallet/mnemonic.hpp \
     test/wallet/stealth.cpp \
     test/wallet/stealth_address.cpp \
-    test/wallet/uri.cpp \
     test/wallet/wif_keys.cpp
 
 endif WITH_TESTS
@@ -453,6 +453,7 @@ include_bitcoin_bitcoin_utility_HEADERS = \
 
 include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
+    include/bitcoin/bitcoin/wallet/bitcoin_uri.hpp \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/encrypted_keys.hpp \
     include/bitcoin/bitcoin/wallet/hd_keys.hpp \
@@ -463,7 +464,6 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
     include/bitcoin/bitcoin/wallet/stealth.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
-    include/bitcoin/bitcoin/wallet/uri.hpp \
     include/bitcoin/bitcoin/wallet/wif_keys.hpp
 
 
