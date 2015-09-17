@@ -164,6 +164,7 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/select_outputs.cpp \
     src/wallet/stealth.cpp \
     src/wallet/stealth_address.cpp \
+    src/wallet/uri.cpp \
     src/wallet/wif_keys.cpp \
     src/wallet/parse_encrypted_keys/parse_ek_key.hpp \
     src/wallet/parse_encrypted_keys/parse_ek_key.ipp \
@@ -274,6 +275,7 @@ test_libbitcoin_test_SOURCES = \
     test/wallet/mnemonic.hpp \
     test/wallet/stealth.cpp \
     test/wallet/stealth_address.cpp \
+    test/wallet/uri.cpp \
     test/wallet/wif_keys.cpp
 
 endif WITH_TESTS
@@ -464,6 +466,7 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
     include/bitcoin/bitcoin/wallet/stealth.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
+    include/bitcoin/bitcoin/wallet/uri.hpp \
     include/bitcoin/bitcoin/wallet/wif_keys.hpp
 
 

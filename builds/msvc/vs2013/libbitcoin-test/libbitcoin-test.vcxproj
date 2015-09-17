@@ -188,5 +188,6 @@
     <ClCompile Include="..\..\..\..\test\wallet\mnemonic.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\stealth.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\stealth_address.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\uri.cpp" />
   </ItemGroup>
 </Project>
