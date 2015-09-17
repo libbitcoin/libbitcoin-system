@@ -50,11 +50,11 @@ BOOST_AUTO_TEST_CASE(bitcoin_uri_parse_format_test)
     BOOST_REQUIRE(!uri_parse("bitcOin:&", result));
 
     // Various blank parameter elements:
-    BOOST_REQUIRE( uri_parse("bitcoin:?x=y", result));
-    BOOST_REQUIRE( uri_parse("bitcoin:?x=", result));
-    BOOST_REQUIRE(!uri_parse("bitcoin:?=y", result));
-    BOOST_REQUIRE(!uri_parse("bitcoin:?=", result));
-    BOOST_REQUIRE( uri_parse("bitcoin:?x", result));
+    BOOST_REQUIRE(uri_parse("bitcoin:?x=y", result));
+    BOOST_REQUIRE(uri_parse("bitcoin:?x=", result));
+    BOOST_REQUIRE(uri_parse("bitcoin:?=y", result));
+    BOOST_REQUIRE(uri_parse("bitcoin:?=", result));
+    BOOST_REQUIRE(uri_parse("bitcoin:?x", result));
 }
 
 BOOST_AUTO_TEST_CASE(bitcoin_uri_parse_address_test)
@@ -232,15 +232,15 @@ BOOST_AUTO_TEST_CASE(bitcoin_uri_write_test)
 {
     wallet::uri_writer writer;
     writer.write_address(std::string("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
-    writer.write_amount(120000);
     writer.write_amount(10000000000);
+    writer.write_amount(120000);
     writer.write_label("&=\n");
     writer.write_message("hello bitcoin");
     writer.write_r("http://example.com?purchase=shoes&user=bob");
 
     BOOST_REQUIRE_EQUAL(writer.string(),
         "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?"
-        "amount=0.0012&amount=100&"
+        "amount=0.0012&"
         "label=%26%3D%0A&"
         "message=hello%20bitcoin&"
         "r=http://example.com?purchase%3Dshoes%26user%3Dbob");

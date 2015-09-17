@@ -22,7 +22,6 @@
 
 #include <cstdint>
 #include <string>
-#include <sstream>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
@@ -81,8 +80,6 @@ BC_API bool uri_parse(const std::string& uri,
 class uri_writer
 {
 public:
-    BC_API uri_writer();
-
     // Formatted:
     BC_API void write_address(const payment_address& address);
     BC_API void write_address(const stealth_address& stealth);
@@ -98,8 +95,8 @@ public:
     BC_API std::string string() const;
 
 private:
-    std::ostringstream stream_;
-    bool first_param_;
+    std::string address_;
+    std::map<std::string, std::string> query_;
 };
 
 } // namespace wallet

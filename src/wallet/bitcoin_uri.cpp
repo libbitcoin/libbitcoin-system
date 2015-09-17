@@ -27,105 +27,42 @@
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
+#include <bitcoin/bitcoin/wallet/uri.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
-static bool is_qchar(const char c)
-{
-    return
-        ('0' <= c && c <= '9') ||
-        ('A' <= c && c <= 'Z') ||
-        ('a' <= c && c <= 'z') ||
-        '-' == c || '.' == c || '_' == c || '~' == c || // unreserved
-        '!' == c || '$' == c || '\'' == c || '(' == c || ')' == c ||
-        '*' == c || '+' == c || ',' == c || ';' == c || // sub-delims
-        ':' == c || '@' == c || // pchar
-        '/' == c || '?' == c;   // query
-}
-static bool isnt_amp(const char c)
-{
-    return '&' != c;
-}
-
-/**
- * Unescapes a percent-encoded string while advancing the iterator.
- * @param i set to one-past the last-read character on return.
- */
-typedef std::string::const_iterator sci;
-static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
-{
-    auto j = i;
-
-    // Find the end of the valid-character run:
-    size_t count = 0;
-    while (end != i && (is_valid(i[0]) ||
-        ('%' == *i && 2 < end - i && is_base16(i[1]) && is_base16(i[2]))))
-    {
-        ++count;
-        if ('%' == *i)
-            i += 3;
-        else
-            ++i;
-    }
-
-    // Do the conversion:
-    std::string out;
-    out.reserve(count);
-    while (j != i)
-    {
-        if ('%' == *j)
-        {
-            const char temp[] = {j[1], j[2], 0};
-            out.push_back(base16_literal(temp)[0]);
-            j += 3;
-        }
-        else
-            out.push_back(*j++);
-    }
-    return out;
-}
-
-bool uri_parse(const std::string& uri, uri_visitor& result,
+bool uri_parse(const std::string& in, uri_visitor& result,
     bool strict)
 {
-    auto i = uri.begin();
+    uri parsed;
+    if (!parsed.decode(in, strict))
+        return false;
 
-    // URI scheme (this approach does not depend on the current locale):
-    const char* lower = "bitcoin:";
-    const char* upper = "BITCOIN:";
-    while (*lower != '\0')
+    // Check the scheme:
+    if (parsed.scheme() != "bitcoin")
+        return false;
+
+    // Check the address:
+    auto address = parsed.path();
+    if (parsed.has_authority())
     {
-        if (uri.end() == i || (*lower != *i && *upper != *i))
+        if (strict || address.size())
             return false;
-        ++lower; ++upper; ++i;
+        // Using "bitcoin://" instead of "bitcoin:" is a common mistake:
+        address = parsed.authority();
     }
-
-    // Payment address:
-    std::string address = unescape(i, uri.end(), is_base58);
-    if (uri.end() != i && '?' != *i)
+    if (!is_base58(address))
         return false;
     if (!address.empty() && !result.got_address(address))
         return false;
 
-    // Parameters:
-    while (uri.end() != i)
+    // Check the parameters:
+    auto q = parsed.decode_query();
+    for (const auto& i: q)
     {
-        ++i; // Consume '?' or '&'
-        std::string key = unescape(i, uri.end(), is_qchar);
-        std::string value;
-        if (uri.end() != i && '=' == *i)
-        {
-            ++i; // Consume '='
-            if (key.empty())
-                return false;
-            if (strict)
-                value = unescape(i, uri.end(), is_qchar);
-            else
-                value = unescape(i, uri.end(), isnt_amp);
-        }
-        if (uri.end() != i && '&' != *i)
-            return false;
+        auto key = i.first;
+        auto value = i.second;
         if (!key.empty() && !result.got_param(key, value))
             return false;
     }
@@ -173,79 +110,54 @@ bool uri_parse_result::got_param(std::string& key, std::string& value)
     return true;
 }
 
-/**
- * Percent-encodes a string.
- * @param is_valid a function returning true for acceptable characters.
- */
-static std::string escape(const std::string& in, bool (*is_valid)(char))
-{
-    std::ostringstream stream;
-    stream << std::hex << std::uppercase << std::setfill('0');
-    for (auto c: in)
-    {
-        if (is_valid(c))
-            stream << c;
-        else
-            stream << '%' << std::setw(2) << +c;
-    }
-    return stream.str();
-}
-
-uri_writer::uri_writer()
-  : first_param_{true}
-{
-    stream_ << "bitcoin:";
-}
-
 void uri_writer::write_address(const payment_address& address)
 {
-    write_address(address.to_string());
+    address_ = address.to_string();
 }
 
 void uri_writer::write_address(const stealth_address& address)
 {
-    write_address(address.to_string());
+    address_ = address.to_string();
 }
 
 void uri_writer::write_amount(uint64_t satoshis)
 {
-    write_param("amount", encode_base10(satoshis, btc_decimal_places));
+    query_["amount"] = encode_base10(satoshis, btc_decimal_places);
 }
 
 void uri_writer::write_label(const std::string& label)
 {
-    write_param("label", label);
+    query_["label"] = label;
 }
 
 void uri_writer::write_message(const std::string& message)
 {
-    write_param("message", message);
+    query_["message"] = message;
 }
 
 void uri_writer::write_r(const std::string& r)
 {
-    write_param("r", r);
+    query_["r"] = r;
 }
 
 void uri_writer::write_address(const std::string& address)
 {
-    stream_ << address;
+    address_ = address;
 }
 
 void uri_writer::write_param(const std::string& key,
     const std::string& value)
 {
-    if (first_param_)
-        stream_ << '?';
-    else
-        stream_ << '&';
-    first_param_ = false;
-    stream_ << escape(key, is_qchar) << '=' << escape(value, is_qchar);
+    query_[key] = value;
 }
 
 std::string uri_writer::string() const
 {
-    return stream_.str();
+    uri out;
+    out.set_scheme("bitcoin");
+    out.set_path(address_);
+    out.encode_query(query_);
+    return out.encode();
 }
 
 } // namespace wallet
