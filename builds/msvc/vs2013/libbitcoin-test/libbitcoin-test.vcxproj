@@ -180,6 +180,7 @@
     <ClCompile Include="..\..\..\..\test\utility\stream.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\thread.cpp" />
     <ClCompile Include="..\..\..\..\test\utility\variable_uint_size.cpp" />
+    <ClCompile Include="..\..\..\..\test\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\encrypted_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\hd_keys.cpp" />
     <ClCompile Include="..\..\..\..\test\wallet\wif_keys.cpp" />

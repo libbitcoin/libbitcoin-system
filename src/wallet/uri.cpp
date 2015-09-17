@@ -19,158 +19,102 @@
  */
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 
-#include <cstdint>
 #include <iomanip>
-#include <boost/algorithm/string.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/formats/base10.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/formats/base58.hpp>
-#include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
-static bool is_qchar(const char c)
+// These character classification functions correspond to RFC 3986.
+// They avoid C standard library character classification functions,
+// since those give different answers based on the current locale.
+static bool is_alpha(const char c)
 {
     return
-        ('0' <= c && c <= '9') ||
         ('A' <= c && c <= 'Z') ||
-        ('a' <= c && c <= 'z') ||
-        '-' == c || '.' == c || '_' == c || '~' == c || // unreserved
-        '!' == c || '$' == c || '\'' == c || '(' == c || ')' == c ||
-        '*' == c || '+' == c || ',' == c || ';' == c || // sub-delims
-        ':' == c || '@' == c || // pchar
-        '/' == c || '?' == c;   // query
+        ('a' <= c && c <= 'z');
 }
-static bool isnt_amp(const char c)
+static bool is_scheme(const char c)
 {
-    return '&' != c;
+    return
+        is_alpha(c) || ('0' <= c && c <= '9') ||
+        '+' == c || '-' == c || '.' == c;
+}
+static bool is_pchar(const char c)
+{
+    return
+        is_alpha(c) || ('0' <= c && c <= '9') ||
+        '-' == c || '.' == c || '_' == c || '~' == c || // unreserved
+        '!' == c || '$' == c || '&' == c || '\'' == c ||
+        '(' == c || ')' == c || '*' == c || '+' == c ||
+        ',' == c || ';' == c || '=' == c || // sub-delims
+        ':' == c || '@' == c;
+}
+static bool is_path(const char c)
+{
+    return is_pchar(c) || '/' == c;
+}
+static bool is_query(const char c)
+{
+    return is_pchar(c) || '/' == c || '?' == c;
+}
+static bool is_qchar(const char c)
+{
+    return is_query(c) && '&' != c && '=' != c;
 }
 
 /**
- * Unescapes a percent-encoded string while advancing the iterator.
- * @param i set to one-past the last-read character on return.
+ * Verifies that all RFC 3986 escape sequences in a string are valid,
+ * and that all characters belong to the given class.
  */
-typedef std::string::const_iterator sci;
-static std::string unescape(sci& i, sci end, bool (*is_valid)(const char))
+static bool validate(const std::string& in, bool (*is_valid)(const char))
 {
-    auto j = i;
-
-    // Find the end of the valid-character run:
-    size_t count = 0;
-    while (end != i && (is_valid(i[0]) ||
-        ('%' == *i && 2 < end - i && is_base16(i[1]) && is_base16(i[2]))))
+    auto i = in.begin();
+    while (in.end() != i)
     {
-        ++count;
         if ('%' == *i)
+        {
+            if (!(2 < in.end() - i && is_base16(i[1]) && is_base16(i[2])))
+                return false;
             i += 3;
+        }
         else
-            ++i;
+        {
+            if (!is_valid(*i))
+                return false;
+            i += 1;
+        }
     }
+    return true;
+}
 
+/**
+ * Decodes all RFC 3986 escape sequences in a string.
+ */
+static std::string unescape(const std::string& in)
+{
     // Do the conversion:
     std::string out;
-    out.reserve(count);
-    while (j != i)
+    out.reserve(in.size());
+
+    auto i = in.begin();
+    while (in.end() != i)
     {
-        if ('%' == *j)
+        if ('%' == *i &&
+            2 < in.end() - i && is_base16(i[1]) && is_base16(i[2]))
         {
-            const char temp[] = {j[1], j[2], 0};
+            const char temp[] = {i[1], i[2], 0};
             out.push_back(base16_literal(temp)[0]);
-            j += 3;
+            i += 3;
         }
         else
-            out.push_back(*j++);
+        {
+            out.push_back(*i);
+            i += 1;
+        }
     }
     return out;
-}
-
-bool uri_parse(const std::string& uri, uri_visitor& result,
-    bool strict)
-{
-    auto i = uri.begin();
-
-    // URI scheme (this approach does not depend on the current locale):
-    const char* lower = "bitcoin:";
-    const char* upper = "BITCOIN:";
-    while (*lower != '\0')
-    {
-        if (uri.end() == i || (*lower != *i && *upper != *i))
-            return false;
-        ++lower; ++upper; ++i;
-    }
-
-    // Payment address:
-    std::string address = unescape(i, uri.end(), is_base58);
-    if (uri.end() != i && '?' != *i)
-        return false;
-    if (!address.empty() && !result.got_address(address))
-        return false;
-
-    // Parameters:
-    while (uri.end() != i)
-    {
-        ++i; // Consume '?' or '&'
-        std::string key = unescape(i, uri.end(), is_qchar);
-        std::string value;
-        if (uri.end() != i && '=' == *i)
-        {
-            ++i; // Consume '='
-            if (key.empty())
-                return false;
-            if (strict)
-                value = unescape(i, uri.end(), is_qchar);
-            else
-                value = unescape(i, uri.end(), isnt_amp);
-        }
-        if (uri.end() != i && '&' != *i)
-            return false;
-        if (!key.empty() && !result.got_param(key, value))
-            return false;
-    }
-    return true;
-}
-
-bool uri_parse_result::got_address(std::string& address)
-{
-    payment_address payaddr;
-    if (payaddr.from_string(address))
-    {
-        this->address.reset(payaddr);
-        this->stealth.reset();
-        return true;
-    }
-
-    stealth_address stealthaddr;
-    if (stealthaddr.from_string(address))
-    {
-        this->stealth.reset(stealthaddr);
-        this->address.reset();
-        return true;
-    }
-
-    return false;
-}
-
-bool uri_parse_result::got_param(std::string& key, std::string& value)
-{
-    if (key == "amount")
-    {
-        uint64_t amount;
-        if (!decode_base10(amount, value, btc_decimal_places))
-            return false;
-        this->amount.reset(amount);
-    }
-    else if (key == "label")
-        label.reset(value);
-    else if (key == "message")
-        message.reset(value);
-    else if (key == "r")
-        r.reset(value);
-    else if (!key.compare(0, 4, "req-"))
-        return false;
-    return true;
 }
 
 /**
@@ -191,61 +135,244 @@ static std::string escape(const std::string& in, bool (*is_valid)(char))
     return stream.str();
 }
 
-uri_writer::uri_writer()
-  : first_param_{true}
+bool uri::decode(const std::string& in, bool strict)
 {
-    stream_ << "bitcoin:";
+    auto i = in.begin();
+
+    // Store the scheme:
+    auto start = i;
+    while (in.end() != i && ':' != *i)
+        ++i;
+    scheme_ = std::string(start, i);
+    if (scheme_.empty() || !is_alpha(scheme_[0]))
+        return false;
+    if (!std::all_of(scheme_.begin(), scheme_.end(), is_scheme))
+        return false;
+
+    // Consume ':':
+    if (in.end() == i)
+        return false;
+    ++i;
+
+    // Consume "//":
+    authority_.clear();
+    has_authority_ = false;
+    if (1 < in.end() - i && '/' == i[0] && '/' == i[1])
+    {
+        has_authority_ = true;
+        i += 2;
+
+        // Store authority part:
+        start = i;
+        while (in.end() != i && '#' != *i && '?' != *i && '/' != *i)
+            ++i;
+        authority_ = std::string(start, i);
+        if (strict && !validate(authority_, is_pchar))
+            return false;
+    }
+
+    // Store the path part:
+    start = i;
+    while (in.end() != i && '#' != *i && '?' != *i)
+        ++i;
+    path_ = std::string(start, i);
+    if (strict && !validate(path_, is_path))
+        return false;
+
+    // Consume '?':
+    has_query_ = false;
+    if (in.end() != i && '#' != *i)
+    {
+        has_query_ = true;
+        ++i;
+    }
+
+    // Store the query part:
+    start = i;
+    while (in.end() != i && '#' != *i)
+        ++i;
+    query_ = std::string(start, i);
+    if (strict && !validate(query_, is_query))
+        return false;
+
+    // Consume '#':
+    has_fragment_ = false;
+    if (in.end() != i)
+    {
+        has_fragment_ = true;
+        ++i;
+    }
+
+    // Store the fragment part:
+    fragment_ = std::string(i, in.end());
+    if (strict && !validate(fragment_, is_query))
+        return false;
+
+    return true;
 }
 
-void uri_writer::write_address(const payment_address& address)
+std::string uri::encode() const
 {
-    write_address(address.to_string());
+    std::ostringstream out;
+    out << scheme_ << ':';
+    if (has_authority_)
+        out << "//" << authority_;
+    out << path_;
+    if (has_query_)
+        out << '?' << query_;
+    if (has_fragment_)
+        out << '#' << fragment_;
+    return out.str();
 }
 
-void uri_writer::write_address(const stealth_address& address)
+// Scheme accessors:
+
+std::string uri::scheme() const
 {
-    write_address(address.to_string());
+    auto out = scheme_;
+    for (auto& c: out)
+        if ('A' <= c && c <= 'Z')
+            c = c - 'A' + 'a';
+    return out;
 }
 
-void uri_writer::write_amount(uint64_t satoshis)
+void uri::set_scheme(const std::string& scheme)
 {
-    write_param("amount", encode_base10(satoshis, btc_decimal_places));
+    scheme_ = scheme;
 }
 
-void uri_writer::write_label(const std::string& label)
+// Authority accessors:
+
+std::string uri::authority() const
 {
-    write_param("label", label);
+    return unescape(authority_);
 }
 
-void uri_writer::write_message(const std::string& message)
+bool uri::has_authority() const
 {
-    write_param("message", message);
+    return has_authority_;
 }
 
-void uri_writer::write_r(const std::string& r)
+void uri::set_authority(const std::string& authority)
 {
-    write_param("r", r);
+    has_authority_ = true;
+    authority_ = escape(authority, is_pchar);
 }
 
-void uri_writer::write_address(const std::string& address)
+void uri::remove_authority()
 {
-    stream_ << address;
+    has_authority_ = false;
 }
 
-void uri_writer::write_param(const std::string& key,
-    const std::string& value)
+// Path accessors:
+
+std::string uri::path() const
 {
-    if (first_param_)
-        stream_ << '?';
-    else
-        stream_ << '&';
-    first_param_ = false;
-    stream_ << escape(key, is_qchar) << '=' << escape(value, is_qchar);
+    return unescape(path_);
 }
 
-std::string uri_writer::string() const
+void uri::set_path(const std::string& path)
 {
-    return stream_.str();
+    path_ = escape(path, is_path);
+}
+
+// Query accessors:
+
+std::string uri::query() const
+{
+    return unescape(query_);
+}
+
+bool uri::has_query() const
+{
+    return has_query_;
+}
+
+void uri::set_query(const std::string& query)
+{
+    has_query_ = true;
+    query_ = escape(query, is_query);
+}
+
+void uri::remove_query()
+{
+    has_query_ = false;
+}
+
+// Fragment accessors:
+
+std::string uri::fragment() const
+{
+    return unescape(fragment_);
+}
+
+bool uri::has_fragment() const
+{
+    return has_fragment_;
+}
+
+void uri::set_fragment(const std::string& fragment)
+{
+    has_fragment_ = true;
+    fragment_ = escape(fragment, is_query);
+}
+
+void uri::remove_fragment()
+{
+    has_fragment_ = false;
+}
+
+// Query interpretation:
+
+uri::query_map uri::decode_query() const
+{
+    query_map out;
+
+    auto i = query_.begin();
+    while (query_.end() != i)
+    {
+        // Read the key:
+        auto begin = i;
+        while (query_.end() != i && '&' != *i && '=' != *i)
+            ++i;
+        auto key = unescape(std::string(begin, i));
+
+        // Consume '=':
+        if (query_.end() != i && '&' != *i)
+            ++i;
+
+        // Read the value:
+        begin = i;
+        while (query_.end() != i && '&' != *i)
+            ++i;
+        out[key] = unescape(std::string(begin, i));
+
+        // Consume '&':
+        if (query_.end() != i)
+            ++i;
+    }
+
+    return out;
+}
+
+void uri::encode_query(const query_map& map)
+{
+    bool first = true;
+    std::ostringstream query;
+
+    for (const auto& i: map)
+    {
+        if (!first)
+            query << '&';
+        first = false;
+
+        query << escape(i.first, is_qchar);
+        if (!i.second.empty())
+            query << '=' << escape(i.second, is_qchar);
+    }
+
+    has_query_ = true;
+    query_ = query.str();
 }
 
 } // namespace wallet

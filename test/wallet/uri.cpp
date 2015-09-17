@@ -24,226 +24,153 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(uri_tests)
 
-BOOST_AUTO_TEST_CASE(uri_parse_test)
+BOOST_AUTO_TEST_CASE(uri_basic_test)
 {
-    // Typical-looking URI:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse(
-        "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=0.1", result));
-    BOOST_REQUIRE(result.address && result.address.get().to_string() ==
-        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    BOOST_REQUIRE(result.amount && result.amount.get() == 10000000);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    const std::string test = "http://github.com/libbitcoin?good=true#nice";
+    wallet::uri parsed;
+    BOOST_REQUIRE(parsed.decode(test));
+
+    BOOST_REQUIRE(parsed.has_authority());
+    BOOST_REQUIRE(parsed.has_query());
+    BOOST_REQUIRE(parsed.has_fragment());
+
+    BOOST_REQUIRE_EQUAL(parsed.scheme(), "http");
+    BOOST_REQUIRE_EQUAL(parsed.authority(), "github.com");
+    BOOST_REQUIRE_EQUAL(parsed.path(), "/libbitcoin");
+    BOOST_REQUIRE_EQUAL(parsed.query(), "good=true");
+    BOOST_REQUIRE_EQUAL(parsed.fragment(), "nice");
+
+    BOOST_REQUIRE_EQUAL(parsed.encode(), test);
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse_format_test)
+BOOST_AUTO_TEST_CASE(uri_messy_roundtrip_test)
 {
-    wallet::uri_parse_result result;
+    const std::string test = "TEST:%78?%79#%7a";
+    wallet::uri parsed;
+    BOOST_REQUIRE(parsed.decode(test));
 
-    // Various scheme spellings and blank structure elements:
-    BOOST_REQUIRE( uri_parse("bitcoin:", result));
-    BOOST_REQUIRE(!uri_parse("bitcorn:", result));
-    BOOST_REQUIRE( uri_parse("BITCOIN:?", result));
-    BOOST_REQUIRE( uri_parse("Bitcoin:?&", result));
-    BOOST_REQUIRE(!uri_parse("bitcOin:&", result));
+    BOOST_REQUIRE(!parsed.has_authority());
+    BOOST_REQUIRE(parsed.has_query());
+    BOOST_REQUIRE(parsed.has_fragment());
 
-    // Various blank parameter elements:
-    BOOST_REQUIRE( uri_parse("bitcoin:?x=y", result));
-    BOOST_REQUIRE( uri_parse("bitcoin:?x=", result));
-    BOOST_REQUIRE(!uri_parse("bitcoin:?=y", result));
-    BOOST_REQUIRE(!uri_parse("bitcoin:?=", result));
-    BOOST_REQUIRE( uri_parse("bitcoin:?x", result));
+    BOOST_REQUIRE_EQUAL(parsed.scheme(), "test");
+    BOOST_REQUIRE_EQUAL(parsed.path(), "x");
+    BOOST_REQUIRE_EQUAL(parsed.query(), "y");
+    BOOST_REQUIRE_EQUAL(parsed.fragment(), "z");
+
+    BOOST_REQUIRE_EQUAL(parsed.encode(), test);
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse_address_test)
+BOOST_AUTO_TEST_CASE(uri_scheme_test)
 {
-    // Address only:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(
-        "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
-    BOOST_REQUIRE(result.address && result.address.get().to_string() ==
-        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    wallet::uri parsed;
+    BOOST_REQUIRE(!parsed.decode(""));
+    BOOST_REQUIRE(!parsed.decode(":"));
+    BOOST_REQUIRE(!parsed.decode("1:"));
+    BOOST_REQUIRE(!parsed.decode("%78:"));
+
+    BOOST_REQUIRE(parsed.decode("x:"));
+    BOOST_REQUIRE_EQUAL(parsed.scheme(), "x");
+
+    BOOST_REQUIRE(parsed.decode("x::"));
+    BOOST_REQUIRE_EQUAL(parsed.scheme(), "x");
+    BOOST_REQUIRE_EQUAL(parsed.path(), ":");
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse_address_format_test)
+BOOST_AUTO_TEST_CASE(uri_non_strict_test)
 {
-    // Percent-encoding in address:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(
-        "bitcoin:%3113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD", result));
-    BOOST_REQUIRE(result.address && result.address.get().to_string() ==
-        "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    wallet::uri parsed;
+    BOOST_REQUIRE(!parsed.decode("test:?テスト"));
 
-    // Malformed addresses:
-    BOOST_REQUIRE(!uri_parse("bitcoin:19l88", result));
-    BOOST_REQUIRE(!uri_parse("bitcoin:19z88", result));
+    BOOST_REQUIRE(parsed.decode("test:テスト", false));
+    BOOST_REQUIRE_EQUAL(parsed.scheme(), "test");
+    BOOST_REQUIRE_EQUAL(parsed.path(), "テスト");
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse_amount_test)
+BOOST_AUTO_TEST_CASE(uri_authority_test)
 {
-    // Amount only:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(uri_parse("bitcoin:?amount=4.2", result));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(result.amount);
-    BOOST_REQUIRE_EQUAL(result.amount.get(), 420000000u);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    wallet::uri parsed;
+
+    BOOST_REQUIRE(parsed.decode("test:/"));
+    BOOST_REQUIRE(!parsed.has_authority());
+    BOOST_REQUIRE_EQUAL(parsed.path(), "/");
+
+    BOOST_REQUIRE(parsed.decode("test://"));
+    BOOST_REQUIRE(parsed.has_authority());
+    BOOST_REQUIRE_EQUAL(parsed.authority(), "");
+    BOOST_REQUIRE_EQUAL(parsed.path(), "");
+
+    BOOST_REQUIRE(parsed.decode("test:///"));
+    BOOST_REQUIRE(parsed.has_authority());
+    BOOST_REQUIRE_EQUAL(parsed.authority(), "");
+    BOOST_REQUIRE_EQUAL(parsed.path(), "/");
+
+    BOOST_REQUIRE(parsed.decode("test:/x//"));
+    BOOST_REQUIRE(!parsed.has_authority());
+    BOOST_REQUIRE_EQUAL(parsed.path(), "/x//");
+
+    BOOST_REQUIRE(parsed.decode("ssh://git@github.com:22/path/"));
+    BOOST_REQUIRE(parsed.has_authority());
+    BOOST_REQUIRE_EQUAL(parsed.authority(), "git@github.com:22");
+    BOOST_REQUIRE_EQUAL(parsed.path(), "/path/");
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse_amount_format_test)
+BOOST_AUTO_TEST_CASE(uri_query_test)
 {
-    // Minimal amount:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?amount=.", result));
-    BOOST_REQUIRE(result.amount && result.amount.get() == 0);
+    wallet::uri parsed;
 
-    // Malformed amounts:
-    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:amount=4.2.1", result));
-    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:amount=bob", result));
+    BOOST_REQUIRE(parsed.decode("test:#?"));
+    BOOST_REQUIRE(!parsed.has_query());
+
+    BOOST_REQUIRE(parsed.decode("test:?&&x=y&z"));
+    BOOST_REQUIRE(parsed.has_query());
+    BOOST_REQUIRE_EQUAL(parsed.query(), "&&x=y&z");
+
+    auto map = parsed.decode_query();
+    BOOST_REQUIRE(map.end() != map.find(""));
+    BOOST_REQUIRE(map.end() != map.find("x"));
+    BOOST_REQUIRE(map.end() != map.find("z"));
+    BOOST_REQUIRE(map.end() == map.find("y"));
+
+    BOOST_REQUIRE_EQUAL(map[""], "");
+    BOOST_REQUIRE_EQUAL(map["x"], "y");
+    BOOST_REQUIRE_EQUAL(map["z"], "");
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse_label_test)
+BOOST_AUTO_TEST_CASE(uri_fragment_test)
 {
-    // Label only:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?label=test", result));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(result.label);
-    BOOST_REQUIRE_EQUAL(result.label.get(), "test");
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    wallet::uri parsed;
+
+    BOOST_REQUIRE(parsed.decode("test:?"));
+    BOOST_REQUIRE(!parsed.has_fragment());
+
+    BOOST_REQUIRE(parsed.decode("test:#"));
+    BOOST_REQUIRE(parsed.has_fragment());
+    BOOST_REQUIRE_EQUAL(parsed.fragment(), "");
+
+    BOOST_REQUIRE(parsed.decode("test:#?"));
+    BOOST_REQUIRE(parsed.has_fragment());
+    BOOST_REQUIRE_EQUAL(parsed.fragment(), "?");
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse_escape_test)
+BOOST_AUTO_TEST_CASE(uri_encode_test)
 {
-    // Reserved symbol encoding and lowercase percent encoding:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?label=%26%3d%6b", result));
-    BOOST_REQUIRE(result.label && result.label.get() == "&=k");
+    wallet::uri out;
+    out.set_scheme("test");
+    out.set_authority("user@hostname");
+    out.set_path("/some/path/?/#");
+    out.set_query("tacos=yummy");
+    out.set_fragment("good evening");
 
-    // Malformed percent encoding:
-    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:label=%3", result));
-    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:label=%3G", result));
-}
+    BOOST_REQUIRE_EQUAL(out.encode(),
+        "test://user@hostname/some/path/%3F/%23?tacos=yummy#good%20evening");
 
-BOOST_AUTO_TEST_CASE(uri_parse_escape_utf8_test)
-{
-    // URL encoding of multibyte utf8 character.
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?label=%E3%83%95", result));
-    BOOST_REQUIRE(result.label && result.label.get() == "フ");
-}
+    out.remove_authority();
+    out.remove_query();
+    out.remove_fragment();
 
-BOOST_AUTO_TEST_CASE(uri_utf8_strict_test)
-{
-    // URL embedding of multibyte utf8 characters with unencoded space in label.
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse(
-        "bitcoin:?label=Some テスト", result, false));
-    BOOST_REQUIRE(result.label && result.label.get() == "Some テスト");
-
-    // Strict parsing:
-    BOOST_REQUIRE(!wallet::uri_parse(
-        "bitcoin:?label=Some テスト", result, true));
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse_message_test)
-{
-    // Message only:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse(
-        "bitcoin:?message=Hi%20Alice", result));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(result.message);
-    BOOST_REQUIRE_EQUAL(result.message.get(), "Hi Alice");
-    BOOST_REQUIRE(!result.r);
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse_payment_proto_test)
-{
-    // Payment protocol only:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse(
-        "bitcoin:?r=http://www.example.com?purchase%3Dshoes", result));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(result.r);
-    BOOST_REQUIRE_EQUAL(result.r.get(), "http://www.example.com?purchase=shoes");
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse_unknown_test)
-{
-    // Unknown optional parameter:
-    wallet::uri_parse_result result;
-    BOOST_REQUIRE(wallet::uri_parse("bitcoin:?ignore=true", result));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
-
-    // Unknown required parameter:
-    BOOST_REQUIRE(!wallet::uri_parse("bitcoin:?req-ignore=false", result));
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse_custom_test)
-{
-    // Example class to demonstrate handling custom URI parameters.
-    struct custom_result
-        : public wallet::uri_parse_result
-    {
-        optional_string myparam;
-
-    protected:
-        virtual bool got_param(std::string& key, std::string& value)
-        {
-            if ("myparam" == key)
-                myparam.reset(value);
-            return uri_parse_result::got_param(key, value);
-        }
-    };
-
-    // Custom parameter type:
-    custom_result custom;
-    BOOST_REQUIRE(uri_parse("bitcoin:?myparam=here", custom));
-    BOOST_REQUIRE(!custom.address);
-    BOOST_REQUIRE(!custom.amount);
-    BOOST_REQUIRE(!custom.label);
-    BOOST_REQUIRE(!custom.message);
-    BOOST_REQUIRE(!custom.r);
-    BOOST_REQUIRE(custom.myparam);
-    BOOST_REQUIRE_EQUAL(custom.myparam.get(), "here");
-}
-
-BOOST_AUTO_TEST_CASE(uri_write_test)
-{
-    wallet::uri_writer writer;
-    writer.write_address(std::string("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
-    writer.write_amount(120000);
-    writer.write_amount(10000000000);
-    writer.write_label("&=\n");
-    writer.write_message("hello bitcoin");
-    writer.write_r("http://example.com?purchase=shoes&user=bob");
-
-    BOOST_REQUIRE_EQUAL(writer.string(),
-        "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?"
-        "amount=0.0012&amount=100&"
-        "label=%26%3D%0A&"
-        "message=hello%20bitcoin&"
-        "r=http://example.com?purchase%3Dshoes%26user%3Dbob");
+    BOOST_REQUIRE_EQUAL(out.encode(),
+        "test:/some/path/%3F/%23");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

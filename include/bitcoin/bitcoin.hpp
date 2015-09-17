@@ -132,6 +132,7 @@
 #include <bitcoin/bitcoin/utility/timer.hpp>
 #include <bitcoin/bitcoin/utility/variable_uint_size.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
+#include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 #include <bitcoin/bitcoin/wallet/hd_keys.hpp>
