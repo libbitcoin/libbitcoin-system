@@ -64,7 +64,7 @@ static bool is_query(const char c)
     return is_path_char(c) || '/' == c || '?' == c;
 }
 
-static bool is_qchar(const char c)
+static bool is_query_char(const char c)
 {
     return is_query(c) && '&' != c && '=' != c;
 }
@@ -372,18 +372,18 @@ void uri::encode_query(const query_map& map)
 {
     auto first = true;
     std::ostringstream query;
-    for (const auto& i: map)
+    for (const auto& term: map)
     {
         if (!first)
             query << '&';
 
         first = false;
-        query << escape(i.first, is_qchar);
-        if (!i.second.empty())
-            query << '=' << escape(i.second, is_qchar);
+        query << escape(term.first, is_query_char);
+        if (!term.second.empty())
+            query << '=' << escape(term.second, is_query_char);
     }
 
-    has_query_ = true;
+    has_query_ = !map.empty();
     query_ = query.str();
 }
 

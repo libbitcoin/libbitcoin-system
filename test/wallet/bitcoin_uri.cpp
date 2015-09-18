@@ -265,6 +265,13 @@ BOOST_AUTO_TEST_CASE(uri_parse__custom_result__custom_parameter_type__test)
     BOOST_REQUIRE_EQUAL(custom.myparam.get(), "here");
 }
 
+BOOST_AUTO_TEST_CASE(uri_writer__encoded__unparameterized_uri__test)
+{
+    uri_writer writer;
+    writer.write_address("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE_EQUAL(writer.encoded(), "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+}
+
 BOOST_AUTO_TEST_CASE(uri_writer__encoded__typical_uri__test)
 {
     uri_writer writer;
