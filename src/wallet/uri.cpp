@@ -35,13 +35,15 @@ static bool is_alpha(const char c)
         ('A' <= c && c <= 'Z') ||
         ('a' <= c && c <= 'z');
 }
+
 static bool is_scheme(const char c)
 {
     return
         is_alpha(c) || ('0' <= c && c <= '9') ||
         '+' == c || '-' == c || '.' == c;
 }
-static bool is_pchar(const char c)
+
+static bool is_path_char(const char c)
 {
     return
         is_alpha(c) || ('0' <= c && c <= '9') ||
@@ -51,23 +53,25 @@ static bool is_pchar(const char c)
         ',' == c || ';' == c || '=' == c || // sub-delims
         ':' == c || '@' == c;
 }
+
 static bool is_path(const char c)
 {
-    return is_pchar(c) || '/' == c;
+    return is_path_char(c) || '/' == c;
 }
+
 static bool is_query(const char c)
 {
-    return is_pchar(c) || '/' == c || '?' == c;
+    return is_path_char(c) || '/' == c || '?' == c;
 }
+
 static bool is_qchar(const char c)
 {
     return is_query(c) && '&' != c && '=' != c;
 }
 
-/**
- * Verifies that all RFC 3986 escape sequences in a string are valid,
- * and that all characters belong to the given class.
- */
+
+// Verifies that all RFC 3986 escape sequences in a string are valid, and that
+// all characters belong to the given class.
 static bool validate(const std::string& in, bool (*is_valid)(const char))
 {
     auto i = in.begin();
@@ -77,21 +81,22 @@ static bool validate(const std::string& in, bool (*is_valid)(const char))
         {
             if (!(2 < in.end() - i && is_base16(i[1]) && is_base16(i[2])))
                 return false;
+
             i += 3;
         }
         else
         {
             if (!is_valid(*i))
                 return false;
+
             i += 1;
         }
     }
+
     return true;
 }
 
-/**
- * Decodes all RFC 3986 escape sequences in a string.
- */
+// Decodes all RFC 3986 escape sequences in a string.
 static std::string unescape(const std::string& in)
 {
     // Do the conversion:
@@ -101,8 +106,8 @@ static std::string unescape(const std::string& in)
     auto i = in.begin();
     while (in.end() != i)
     {
-        if ('%' == *i &&
-            2 < in.end() - i && is_base16(i[1]) && is_base16(i[2]))
+        if ('%' == *i && 2 < in.end() - i && is_base16(i[1]) &&
+            is_base16(i[2]))
         {
             const char temp[] = {i[1], i[2], 0};
             out.push_back(base16_literal(temp)[0]);
@@ -114,74 +119,79 @@ static std::string unescape(const std::string& in)
             i += 1;
         }
     }
+
     return out;
 }
 
-/**
- * Percent-encodes a string.
- * @param is_valid a function returning true for acceptable characters.
- */
+// URI encodes a string (i.e. percent encoding).
+// is_valid a function returning true for acceptable characters.
 static std::string escape(const std::string& in, bool (*is_valid)(char))
 {
     std::ostringstream stream;
     stream << std::hex << std::uppercase << std::setfill('0');
-    for (auto c: in)
+    for (const auto c: in)
     {
         if (is_valid(c))
             stream << c;
         else
             stream << '%' << std::setw(2) << +c;
     }
+
     return stream.str();
 }
 
-bool uri::decode(const std::string& in, bool strict)
+bool uri::decode(const std::string& encoded, bool strict)
 {
-    auto i = in.begin();
+    auto i = encoded.begin();
 
     // Store the scheme:
     auto start = i;
-    while (in.end() != i && ':' != *i)
+    while (encoded.end() != i && ':' != *i)
         ++i;
+
     scheme_ = std::string(start, i);
     if (scheme_.empty() || !is_alpha(scheme_[0]))
         return false;
+
     if (!std::all_of(scheme_.begin(), scheme_.end(), is_scheme))
         return false;
 
     // Consume ':':
-    if (in.end() == i)
+    if (encoded.end() == i)
         return false;
+
     ++i;
 
     // Consume "//":
     authority_.clear();
     has_authority_ = false;
-    if (1 < in.end() - i && '/' == i[0] && '/' == i[1])
+    if (1 < encoded.end() - i && '/' == i[0] && '/' == i[1])
     {
         has_authority_ = true;
         i += 2;
 
         // Store authority part:
         start = i;
-        while (in.end() != i && '#' != *i && '?' != *i && '/' != *i)
+        while (encoded.end() != i && '#' != *i && '?' != *i && '/' != *i)
             ++i;
+
         authority_ = std::string(start, i);
-        if (strict && !validate(authority_, is_pchar))
+        if (strict && !validate(authority_, is_path_char))
             return false;
     }
 
     // Store the path part:
     start = i;
-    while (in.end() != i && '#' != *i && '?' != *i)
+    while (encoded.end() != i && '#' != *i && '?' != *i)
         ++i;
+
     path_ = std::string(start, i);
     if (strict && !validate(path_, is_path))
         return false;
 
     // Consume '?':
     has_query_ = false;
-    if (in.end() != i && '#' != *i)
+    if (encoded.end() != i && '#' != *i)
     {
         has_query_ = true;
         ++i;
@@ -189,39 +199,40 @@ bool uri::decode(const std::string& in, bool strict)
 
     // Store the query part:
     start = i;
-    while (in.end() != i && '#' != *i)
+    while (encoded.end() != i && '#' != *i)
         ++i;
+
     query_ = std::string(start, i);
     if (strict && !validate(query_, is_query))
         return false;
 
     // Consume '#':
     has_fragment_ = false;
-    if (in.end() != i)
+    if (encoded.end() != i)
     {
         has_fragment_ = true;
         ++i;
     }
 
     // Store the fragment part:
-    fragment_ = std::string(i, in.end());
-    if (strict && !validate(fragment_, is_query))
-        return false;
-
-    return true;
+    fragment_ = std::string(i, encoded.end());
+    return !strict || validate(fragment_, is_query);
 }
 
-std::string uri::encode() const
+std::string uri::encoded() const
 {
     std::ostringstream out;
     out << scheme_ << ':';
     if (has_authority_)
         out << "//" << authority_;
+
     out << path_;
     if (has_query_)
         out << '?' << query_;
+
     if (has_fragment_)
         out << '#' << fragment_;
+
     return out.str();
 }
 
@@ -233,6 +244,7 @@ std::string uri::scheme() const
     for (auto& c: out)
         if ('A' <= c && c <= 'Z')
             c = c - 'A' + 'a';
+
     return out;
 }
 
@@ -256,7 +268,7 @@ bool uri::has_authority() const
 void uri::set_authority(const std::string& authority)
 {
     has_authority_ = true;
-    authority_ = escape(authority, is_pchar);
+    authority_ = escape(authority, is_path_char);
 }
 
 void uri::remove_authority()
@@ -327,7 +339,6 @@ void uri::remove_fragment()
 uri::query_map uri::decode_query() const
 {
     query_map out;
-
     auto i = query_.begin();
     while (query_.end() != i)
     {
@@ -335,6 +346,7 @@ uri::query_map uri::decode_query() const
         auto begin = i;
         while (query_.end() != i && '&' != *i && '=' != *i)
             ++i;
+
         auto key = unescape(std::string(begin, i));
 
         // Consume '=':
@@ -345,6 +357,7 @@ uri::query_map uri::decode_query() const
         begin = i;
         while (query_.end() != i && '&' != *i)
             ++i;
+
         out[key] = unescape(std::string(begin, i));
 
         // Consume '&':
@@ -357,15 +370,14 @@ uri::query_map uri::decode_query() const
 
 void uri::encode_query(const query_map& map)
 {
-    bool first = true;
+    auto first = true;
     std::ostringstream query;
-
     for (const auto& i: map)
     {
         if (!first)
             query << '&';
-        first = false;
 
+        first = false;
         query << escape(i.first, is_qchar);
         if (!i.second.empty())
             query << '=' << escape(i.second, is_qchar);

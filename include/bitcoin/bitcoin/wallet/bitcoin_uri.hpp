@@ -36,8 +36,9 @@ namespace wallet {
 class BC_API uri_visitor
 {
 public:
-    virtual bool got_address(std::string& address) = 0;
-    virtual bool got_param(std::string& key, std::string& value) = 0;
+    virtual bool set_address(const std::string& address) = 0;
+    virtual bool set_param(const std::string& key,
+        const std::string& value) = 0;
 };
 
 /**
@@ -53,15 +54,15 @@ public:
     typedef boost::optional<uint64_t> optional_amount;
     typedef boost::optional<std::string> optional_string;
 
+    bool set_address(const std::string& address);
+    bool set_param(const std::string& key, const std::string& value);
+
     optional_address address;
     optional_stealth stealth;
     optional_amount amount;
     optional_string label;
     optional_string message;
     optional_string r;
-
-    bool got_address(std::string& address);
-    bool got_param(std::string& key, std::string& value);
 };
 
 /**
@@ -71,8 +72,8 @@ public:
  * false allows these malformed URI's to parse anyhow.
  * @return false if the URI is malformed.
  */
-BC_API bool uri_parse(const std::string& uri,
-    uri_visitor& result, bool strict=true);
+BC_API bool uri_parse(uri_visitor& out, const std::string& uri,
+    bool strict=true);
 
 /**
  * Assembles a bitcoin URI string.
@@ -92,7 +93,7 @@ public:
     BC_API void write_address(const std::string& address);
     BC_API void write_param(const std::string& key, const std::string& value);
 
-    BC_API std::string string() const;
+    BC_API std::string encoded() const;
 
 private:
     std::string address_;
