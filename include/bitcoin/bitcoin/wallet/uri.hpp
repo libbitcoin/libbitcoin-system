@@ -37,8 +37,8 @@ public:
      * Decodes a URI from a string.
      * @param strict Set to false to tolerate unescaped special characters.
      */
-    bool decode(const std::string& in, bool strict=true);
-    std::string encode() const;
+    bool decode(const std::string& encoded, bool strict=true);
+    std::string encoded() const;
 
     /**
      * Returns the lowercased URI scheme.

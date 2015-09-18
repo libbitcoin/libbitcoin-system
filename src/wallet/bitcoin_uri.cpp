@@ -32,11 +32,17 @@
 namespace libbitcoin {
 namespace wallet {
 
-bool uri_parse(const std::string& in, uri_visitor& result,
-    bool strict)
+// TODO: The out parameter may be modified in the case of a failure.
+// This can lead to unexpected results if the visitor is reused.
+// This is not easily resolved since the parse result can't be cleared,
+// nor is that ideal (it should only be modified if successful). A temporary
+// copy is also hard, since the out parameter is a vitual base and therefore
+// copy construction from a local concrete copy is problematic. Templatizing
+// the out parameter type would probably work, but seems like overkill/ugly.
+bool uri_parse(uri_visitor& out, const std::string& uri, bool strict)
 {
-    uri parsed;
-    if (!parsed.decode(in, strict))
+    wallet::uri parsed;
+    if (!parsed.decode(uri, strict))
         return false;
 
     // Check the scheme:
@@ -47,42 +53,43 @@ bool uri_parse(const std::string& in, uri_visitor& result,
     auto address = parsed.path();
     if (parsed.has_authority())
     {
-        if (strict || address.size())
+        if (strict || !address.empty())
             return false;
+
         // Using "bitcoin://" instead of "bitcoin:" is a common mistake:
         address = parsed.authority();
     }
-    if (!is_base58(address))
-        return false;
-    if (!address.empty() && !result.got_address(address))
+
+    if (!address.empty() && !out.set_address(address))
         return false;
 
     // Check the parameters:
-    auto q = parsed.decode_query();
-    for (const auto& i: q)
+    const auto query = parsed.decode_query();
+    for (const auto& term: query)
     {
-        auto key = i.first;
-        auto value = i.second;
-        if (!key.empty() && !result.got_param(key, value))
+        const auto& key = term.first;
+        const auto& value = term.second;
+        if (!key.empty() && !out.set_param(key, value))
             return false;
     }
+
     return true;
 }
 
-bool uri_parse_result::got_address(std::string& address)
+bool uri_parse_result::set_address(const std::string& address)
 {
-    payment_address payaddr;
-    if (payaddr.from_string(address))
+    payment_address try_payment;
+    if (try_payment.from_string(address))
     {
-        this->address.reset(payaddr);
-        this->stealth.reset();
+        this->address.reset(try_payment);
+        stealth.reset();
         return true;
     }
 
-    stealth_address stealthaddr;
-    if (stealthaddr.from_string(address))
+    stealth_address try_stealth;
+    if (try_stealth.from_string(address))
     {
-        this->stealth.reset(stealthaddr);
+        stealth.reset(try_stealth);
         this->address.reset();
         return true;
     }
@@ -90,14 +97,15 @@ bool uri_parse_result::got_address(std::string& address)
     return false;
 }
 
-bool uri_parse_result::got_param(std::string& key, std::string& value)
+bool uri_parse_result::set_param(const std::string& key, const std::string& value)
 {
     if (key == "amount")
     {
-        uint64_t amount;
-        if (!decode_base10(amount, value, btc_decimal_places))
+        uint64_t decoded;
+        if (!decode_base10(decoded, value, btc_decimal_places))
             return false;
-        this->amount.reset(amount);
+
+        amount.reset(decoded);
     }
     else if (key == "label")
         label.reset(value);
@@ -105,8 +113,9 @@ bool uri_parse_result::got_param(std::string& key, std::string& value)
         message.reset(value);
     else if (key == "r")
         r.reset(value);
-    else if (!key.compare(0, 4, "req-"))
-        return false;
+    else
+        return key.substr(0, 4) != "req-";
+
     return true;
 }
 
@@ -145,19 +154,18 @@ void uri_writer::write_address(const std::string& address)
     address_ = address;
 }
 
-void uri_writer::write_param(const std::string& key,
-    const std::string& value)
+void uri_writer::write_param(const std::string& key, const std::string& value)
 {
     query_[key] = value;
 }
 
-std::string uri_writer::string() const
+std::string uri_writer::encoded() const
 {
     uri out;
     out.set_scheme("bitcoin");
     out.set_path(address_);
     out.encode_query(query_);
-    return out.encode();
+    return out.encoded();
 }
 
 } // namespace wallet
