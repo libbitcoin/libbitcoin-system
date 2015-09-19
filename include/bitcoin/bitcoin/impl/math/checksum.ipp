@@ -48,6 +48,43 @@ bool insert_checksum(byte_array<Size>& out)
     return true;
 }
 
+// std::array<> is used in place of byte_array<> to enable Size deduction.
+template <size_t Size>
+bool unwrap(uint8_t& out_version,
+    std::array<uint8_t, UNWRAP_SIZE(Size)>& out_payload,
+    const std::array<uint8_t, Size>& wrapped)
+{
+    uint32_t unused;
+    return unwrap(out_version, out_payload, unused, wrapped);
+}
+
+// std::array<> is used in place of byte_array<> to enable Size deduction.
+template <size_t Size>
+bool unwrap(uint8_t& out_version,
+    std::array<uint8_t, UNWRAP_SIZE(Size)>& out_payload,
+    uint32_t& out_checksum, const std::array<uint8_t, Size>& wrapped)
+{      
+    if (!verify_checksum(wrapped))
+        return false;
+
+    out_version = slice<0, 1>(wrapped)[0];
+    out_payload = slice<1, Size - checksum_size>(wrapped);
+    const auto bytes = slice<Size - checksum_size, Size>(wrapped);
+    out_checksum = from_little_endian_unsafe<uint32_t>(bytes.begin());
+    return true;
+}
+
+// std::array<> is used in place of byte_array<> to enable Size deduction.
+template <size_t Size>
+std::array<uint8_t, WRAP_SIZE(Size)> wrap(uint8_t version,
+    const std::array<uint8_t, Size>& payload)
+{
+    byte_array<WRAP_SIZE(Size)> out;
+    build_array(out, { to_array(version), payload });
+    insert_checksum(out);
+    return out;
+}
+
 } // namespace libbitcoin
 
 #endif

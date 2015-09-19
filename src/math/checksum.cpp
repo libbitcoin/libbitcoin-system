@@ -21,6 +21,7 @@
 
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/utility/deserializer.hpp>
 
 namespace libbitcoin {
 

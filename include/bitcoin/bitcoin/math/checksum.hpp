@@ -30,7 +30,10 @@
 
 namespace libbitcoin {
 
-BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
+static BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
+
+#define WRAP_SIZE(payload_size) (payload_size + checksum_size + 1)
+#define UNWRAP_SIZE(payload_size) (payload_size - checksum_size - 1)
 
 /**
  * Concatenate several data slices into a single fixed size array and append a
@@ -48,7 +51,41 @@ template<size_t Size>
 bool insert_checksum(byte_array<Size>& out);
 
 /**
- * Appends a four-byte checksum of a datachunk to itself.
+ * Unwrap a wrapped payload.
+ * @param[out] out_version   The version byte of the wrapped data.
+ * @param[out] out_payload   The payload of the wrapped data.
+ * @param[in]  wrapped       The wrapped data to unwrap.
+ * @return                   True if input checksum validates.
+ */
+template <size_t Size>
+bool unwrap(uint8_t& out_version, byte_array<UNWRAP_SIZE(Size)>& out_payload,
+    const std::array<uint8_t, Size>& wrapped);
+
+/**
+ * Unwrap a wrapped payload and return the checksum.
+ * @param[out] out_version   The version byte of the wrapped data.
+ * @param[out] out_payload   The payload of the wrapped data.
+ * @param[out] out_checksum  The validated checksum of the wrapped data.
+ * @param[in]  wrapped       The wrapped data to unwrap.
+ * @return                   True if input checksum validates.
+ */
+template <size_t Size>
+bool unwrap(uint8_t& out_version,
+    byte_array<UNWRAP_SIZE(Size)>& out_payload, uint32_t& out_checksum,
+    const std::array<uint8_t, Size>& wrapped);
+
+/**
+ * Wrap arbitrary data.
+ * @param[in]  version  The version byte for the wrapped data.
+ * @param[out] payload  The payload to wrap.
+ * @return              The wrapped data.
+ */
+template <size_t Size>
+std::array<uint8_t, WRAP_SIZE(Size)> wrap(uint8_t version,
+    const std::array<uint8_t, Size>& payload);
+
+/**
+ * Appends a four-byte checksum of a data chunk to itself.
  */
 BC_API void append_checksum(data_chunk& data);
 
