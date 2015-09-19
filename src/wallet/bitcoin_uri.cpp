@@ -143,16 +143,20 @@ void bitcoin_uri::set_r(const std::string& r)
 
 bool bitcoin_uri::set_address(const std::string& address)
 {
-    payment_address payment;
-    if (payment.from_string(address))
+    payment_address payment(address);
+    if (payment)
     {
+        // Normalize the encoding (as we do for amount)?
+        //address_ = payment.encoded();
         address_ = address;
         return true;
     }
 
-    stealth_address stealth;
-    if (stealth.from_string(address))
+    stealth_address stealth(address);
+    if (stealth)
     {
+        // Normalize the encoding (as we do for amount)?
+        //address_ = stealth.encoded();
         address_ = address;
         return true;
     }
@@ -162,12 +166,12 @@ bool bitcoin_uri::set_address(const std::string& address)
 
 void bitcoin_uri::set_address(const payment_address& payment)
 {
-    address_ = payment.to_string();
+    address_ = payment.encoded();
 }
 
 void bitcoin_uri::set_address(const stealth_address& stealth)
 {
-    address_ = stealth.to_string();
+    address_ = stealth.encoded();
 }
 
 bool bitcoin_uri::set_amount(const std::string& satoshis)
