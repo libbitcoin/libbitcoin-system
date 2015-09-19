@@ -48,7 +48,7 @@ public:
     void reset();
     uint64_t serialized_size() const;
 
-    static const ec_point satoshi_public_key;
+    static const ec_uncompressed satoshi_public_key;
 
     uint32_t version;
     uint64_t relay_until;

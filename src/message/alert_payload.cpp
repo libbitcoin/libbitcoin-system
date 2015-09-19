@@ -28,7 +28,7 @@ namespace libbitcoin {
 namespace message {
 
 // Libbitcon doesn't use this.
-const ec_point alert_payload::satoshi_public_key
+const ec_uncompressed alert_payload::satoshi_public_key
 {
     {
         0x04, 0xfc, 0x97, 0x02, 0x84, 0x78, 0x40, 0xaa, 0xf1, 0x95, 0xde, 0x84,
