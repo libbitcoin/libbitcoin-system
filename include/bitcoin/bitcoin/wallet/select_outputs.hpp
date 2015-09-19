@@ -56,7 +56,7 @@ enum class select_outputs_algorithm
  */
 BC_API select_outputs_result select_outputs(output_info_list unspent,
     uint64_t min_value,
-    select_outputs_algorithm algorithm = select_outputs_algorithm::greedy);
+    select_outputs_algorithm algorithm=select_outputs_algorithm::greedy);
 
 } // namspace wallet
 } // namspace libbitcoin
