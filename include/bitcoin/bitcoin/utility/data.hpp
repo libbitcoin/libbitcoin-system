@@ -88,7 +88,7 @@ Value range_constrain(Value value, Value minimum, Value maximum);
  * Extracty a subarray from start position with length end minus start.
  */
 template <size_t Start, size_t End, size_t Size>
-byte_array<End - Start> slice(const typename std::array<uint8_t, Size>& bytes);
+byte_array<End - Start> slice(const std::array<uint8_t, Size>& bytes);
 
 /**
  * Break an evenly-sized array array into two equal length parts.
