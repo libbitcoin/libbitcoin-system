@@ -19,153 +19,226 @@
  */
 #include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
 
+#include <cstddef>
 #include <cstdint>
-#include <iomanip>
-#include <boost/algorithm/string.hpp>
-#include <bitcoin/bitcoin/define.hpp>
+#include <map>
 #include <bitcoin/bitcoin/formats/base10.hpp>
-#include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/formats/base58.hpp>
+#include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 #include <bitcoin/bitcoin/wallet/uri.hpp>
+#include <bitcoin/bitcoin/wallet/uri_reader.hpp>
 
 namespace libbitcoin {
 namespace wallet {
+    
+static const auto bitcoin_scheme = "bitcoin";
+static const auto parameter_amount = "amount";
+static const auto parameter_label = "label";
+static const auto parameter_message = "message";
+static const auto parameter_r = "r";
+static const auto parameter_req_ = "req-";
+static constexpr size_t parameter_req_length = 4;
 
-// TODO: The out parameter may be modified in the case of a failure.
-// This can lead to unexpected results if the visitor is reused.
-// This is not easily resolved since the parse result can't be cleared,
-// nor is that ideal (it should only be modified if successful). A temporary
-// copy is also hard, since the out parameter is a vitual base and therefore
-// copy construction from a local concrete copy is problematic. Templatizing
-// the out parameter type would probably work, but seems like overkill/ugly.
-bool uri_parse(uri_visitor& out, const std::string& uri, bool strict)
+bitcoin_uri::bitcoin_uri()
+  : strict_(true)
 {
-    wallet::uri parsed;
-    if (!parsed.decode(uri, strict))
-        return false;
-
-    // Check the scheme:
-    if (parsed.scheme() != "bitcoin")
-        return false;
-
-    // Check the address:
-    auto address = parsed.path();
-    if (parsed.has_authority())
-    {
-        if (strict || !address.empty())
-            return false;
-
-        // Using "bitcoin://" instead of "bitcoin:" is a common mistake:
-        address = parsed.authority();
-    }
-
-    if (!address.empty() && !out.set_address(address))
-        return false;
-
-    // Check the parameters:
-    const auto query = parsed.decode_query();
-    for (const auto& term: query)
-    {
-        const auto& key = term.first;
-        const auto& value = term.second;
-        if (!key.empty() && !out.set_param(key, value))
-            return false;
-    }
-
-    return true;
 }
 
-bool uri_parse_result::set_address(const std::string& address)
+bitcoin_uri::bitcoin_uri(const bitcoin_uri& other)
+  : strict_(other.strict_), scheme_(other.scheme_), address_(other.address_),
+    query_(other.query_)
 {
-    payment_address try_payment;
-    if (try_payment.from_string(address))
+}
+
+bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict)
+  : bitcoin_uri(uri_reader::parse<bitcoin_uri>(uri, strict))
+{
+}
+
+bitcoin_uri::operator const bool() const
+{
+    // An uninitialized URI returns false.
+    return !address_.empty() || !query_.empty() || !scheme_.empty();
+}
+
+std::string bitcoin_uri::encoded() const
+{
+    // Bitcoin URIs don't use the authority or fragment components.
+    uri out;
+    out.set_scheme(bitcoin_scheme);
+    out.set_path(address_);
+    out.encode_query(query_);
+    return out.encoded();
+}
+
+// Property getters.
+// ----------------------------------------------------------------------------
+
+uint64_t bitcoin_uri::amount() const
+{
+    uint64_t satoshis;
+    decode_base10(satoshis, parameter(parameter_amount), btc_decimal_places);
+    return satoshis;
+}
+
+std::string bitcoin_uri::label() const
+{
+    return parameter(parameter_label);
+}
+
+std::string bitcoin_uri::message() const
+{
+    return parameter(parameter_message);
+}
+
+std::string bitcoin_uri::r() const
+{
+    return parameter(parameter_r);
+}
+
+payment_address bitcoin_uri::payment() const
+{
+    return payment_address(address_);
+}
+
+stealth_address bitcoin_uri::stealth() const
+{
+    return stealth_address(address_);
+}
+
+std::string bitcoin_uri::parameter(const std::string& key) const
+{
+    const auto value = query_.find(key);
+    return value == query_.end() ? std::string() : value->second;
+}
+
+std::string bitcoin_uri::address() const
+{
+    return address_;
+}
+
+// Property setters.
+// ----------------------------------------------------------------------------
+
+void bitcoin_uri::set_amount(uint64_t satoshis)
+{
+    const auto amount = encode_base10(satoshis, btc_decimal_places);
+    query_[parameter_amount] = amount;
+}
+
+void bitcoin_uri::set_label(const std::string& label)
+{
+    query_[parameter_label] = label;
+}
+
+void bitcoin_uri::set_message(const std::string& message)
+{
+    query_[parameter_message] = message;
+}
+
+void bitcoin_uri::set_r(const std::string& r)
+{
+    query_[parameter_r] = r;
+}
+
+bool bitcoin_uri::set_address(const std::string& address)
+{
+    payment_address payment;
+    if (payment.from_string(address))
     {
-        this->address.reset(try_payment);
-        stealth.reset();
+        address_ = address;
         return true;
     }
 
-    stealth_address try_stealth;
-    if (try_stealth.from_string(address))
+    stealth_address stealth;
+    if (stealth.from_string(address))
     {
-        stealth.reset(try_stealth);
-        this->address.reset();
+        address_ = address;
         return true;
     }
 
     return false;
 }
 
-bool uri_parse_result::set_param(const std::string& key, const std::string& value)
+void bitcoin_uri::set_address(const payment_address& payment)
 {
-    if (key == "amount")
-    {
-        uint64_t decoded;
-        if (!decode_base10(decoded, value, btc_decimal_places))
-            return false;
+    address_ = payment.to_string();
+}
 
-        amount.reset(decoded);
-    }
-    else if (key == "label")
-        label.reset(value);
-    else if (key == "message")
-        message.reset(value);
-    else if (key == "r")
-        r.reset(value);
-    else
-        return key.substr(0, 4) != "req-";
+void bitcoin_uri::set_address(const stealth_address& stealth)
+{
+    address_ = stealth.to_string();
+}
 
+bool bitcoin_uri::set_amount(const std::string& satoshis)
+{
+    uint64_t decoded;
+    if (!decode_base10(decoded, satoshis, btc_decimal_places, strict_))
+        return false;
+
+    // Normalize the encoding for string-based getter (parameter).
+    set_amount(decoded);
     return true;
 }
 
-void uri_writer::write_address(const payment_address& address)
+
+// uri_reader implementation.
+// ----------------------------------------------------------------------------
+
+void bitcoin_uri::set_strict(bool strict)
 {
-    address_ = address.to_string();
+    strict_ = strict;
 }
 
-void uri_writer::write_address(const stealth_address& address)
+bool bitcoin_uri::set_scheme(const std::string& scheme)
 {
-    address_ = address.to_string();
+    if (scheme == bitcoin_scheme)
+    {
+        scheme_ = scheme;
+        return true;
+    }
+
+    return false;
 }
 
-void uri_writer::write_amount(uint64_t satoshis)
+bool bitcoin_uri::set_authority(const std::string& authority)
 {
-    query_["amount"] = encode_base10(satoshis, btc_decimal_places);
+    // Using "bitcoin://" instead of "bitcoin:" is a common mistake, so we
+    // allow the authority in place of the path when not strict.
+    return !strict_ && set_path(authority);
 }
 
-void uri_writer::write_label(const std::string& label)
+bool bitcoin_uri::set_path(const std::string& path)
 {
-    query_["label"] = label;
+    // Guard against the path having been set via authority (or second set).
+    return address_.empty() && set_address(path);
 }
 
-void uri_writer::write_message(const std::string& message)
+bool bitcoin_uri::set_fragment(const std::string& fragment)
 {
-    query_["message"] = message;
+    return false;
 }
 
-void uri_writer::write_r(const std::string& r)
+bool bitcoin_uri::set_parameter(const std::string& key,
+    const std::string& value)
 {
-    query_["r"] = r;
-}
+    const auto required = [](const std::string& key)
+    {
+        return key.substr(0, parameter_req_length) == parameter_req_;
+    };
 
-void uri_writer::write_address(const std::string& address)
-{
-    address_ = address;
-}
+    if (key == parameter_amount)
+        return set_amount(value);
 
-void uri_writer::write_param(const std::string& key, const std::string& value)
-{
-    query_[key] = value;
-}
-
-std::string uri_writer::encoded() const
-{
-    uri out;
-    out.set_scheme("bitcoin");
-    out.set_path(address_);
-    out.encode_query(query_);
-    return out.encoded();
+    if (key == parameter_label)
+        set_label(value);
+    else if (key == parameter_message)
+        set_message(value);
+    else if (key == parameter_r)
+        set_r(value);
+    
+    // Fail on any required parameter that we don't support.
+    return !required(key);
 }
 
 } // namespace wallet

@@ -109,7 +109,7 @@ static std::string unescape(const std::string& in)
         if ('%' == *i && 2 < in.end() - i && is_base16(i[1]) &&
             is_base16(i[2]))
         {
-            const char temp[] = {i[1], i[2], 0};
+            const char temp[] = { i[1], i[2], 0 };
             out.push_back(base16_literal(temp)[0]);
             i += 3;
         }

@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include <boost/test/unit_test.hpp>
+
+#include <boost/optional.hpp>
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
@@ -25,269 +27,217 @@ using namespace bc::wallet;
 
 BOOST_AUTO_TEST_SUITE(bitcoin_uri_tests)
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__failure_reuse_hazard__test)
+// Constructors
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__uninitialized__false)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=bob"));
-
-    // Failed parse results in partial data in the parse result.
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().to_string(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-
-    // Reused parse result here carries address from previous failed parse.
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:"));
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().to_string(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(!bitcoin_uri());
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__success_reuse_hazard__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__initialized__true)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
-
-    // Reused parse result here carries address from previous successful parse.
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:"));
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().to_string(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(bitcoin_uri("bitcoin:"));
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__typical_uri__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__scheme_mixed_case__normalized)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?amount=0.1"));
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().to_string(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    BOOST_REQUIRE(result.amount);
-    BOOST_REQUIRE_EQUAL(result.amount.get(), 10000000u);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    BOOST_REQUIRE_EQUAL(bitcoin_uri("bitcOin:").encoded(), "bitcoin:");
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result___positive_scheme__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__invalid_scheme__false)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:"));
-    BOOST_REQUIRE(uri_parse(result, "Bitcoin:"));
-    BOOST_REQUIRE(uri_parse(result, "bitcOin:"));
-    BOOST_REQUIRE(uri_parse(result, "BITCOIN:"));
+    BOOST_REQUIRE(!bitcoin_uri("fedcoin:"));
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__negative_scheme__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__payment_address_only__false)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(!uri_parse(result, "bitcorn:"));
+    BOOST_REQUIRE(!bitcoin_uri("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result___positive_empty_name_parameter__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__stealth_address_only__false)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?"));
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?&"));
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?=y"));
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?="));
+    BOOST_REQUIRE(!bitcoin_uri("hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i"));
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result___positive_unknown_optional_parameter__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__fragment__false)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?x=y"));
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?x="));
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?x"));
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?ignore=true"));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    BOOST_REQUIRE(!bitcoin_uri("bitcoin:#satoshi"));
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__negative_unknown_required_parameter__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__strict__test)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:?req-ignore=false"));
+    BOOST_REQUIRE(!bitcoin_uri("bitcoin:?label=Some テスト"));
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__address__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__construct__not_strict__test)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().to_string(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    BOOST_REQUIRE(bitcoin_uri("bitcoin:?label=Some テスト", false));
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__uri_encoded_address__test)
+// Setters
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__set_path__payment_address__expected_encoding)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:%3113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
-    BOOST_REQUIRE(result.address);
-    BOOST_REQUIRE_EQUAL(result.address.get().to_string(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    const auto expected_payment = "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD";
+    const auto expected_uri = std::string("bitcoin:") + expected_payment;
+
+    bitcoin_uri uri;
+    BOOST_REQUIRE(uri.set_path(expected_payment));
+    BOOST_REQUIRE_EQUAL(uri.encoded(), expected_uri);
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__negative_address__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__set_path__stealth_address__expected_encoding)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:&"));
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:19l88"));
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:19z88"));
+    const auto expected_payment = "hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i";
+    const auto expected_uri = std::string("bitcoin:") + expected_payment;
+
+    bitcoin_uri uri;
+    BOOST_REQUIRE(uri.set_path(expected_payment));
+    BOOST_REQUIRE_EQUAL(uri.encoded(), expected_uri);
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__amount_only__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__set_path__reset_stealth_after_payment__expected_encoding)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?amount=4.2"));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(result.amount);
-    BOOST_REQUIRE_EQUAL(result.amount.get(), 420000000u);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    const auto expected_stealth = "hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i";
+    const auto expected_uri = std::string("bitcoin:") + expected_stealth;
+
+    bitcoin_uri uri;
+    payment_address payment;
+    BOOST_REQUIRE(payment.from_string("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
+    uri.set_address(payment);
+    uri.set_address(stealth_address(expected_stealth));
+    BOOST_REQUIRE_EQUAL(uri.encoded(), expected_uri);
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__minimal_amount__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__set_path__reset_payment_after_stealth__expected_encoding)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?amount=."));
-    BOOST_REQUIRE(result.amount);
-    BOOST_REQUIRE_EQUAL(result.amount.get(), 0);
+    const auto expected_payment = "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD";
+    const auto expected_uri = std::string("bitcoin:") + expected_payment;
+
+    bitcoin_uri uri;
+    stealth_address stealth;
+    BOOST_REQUIRE(stealth.from_string("hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i"));
+    uri.set_address(stealth);
+    uri.set_address(payment_address(expected_payment));
+    BOOST_REQUIRE_EQUAL(uri.encoded(), expected_uri);
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__invalid_amount__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__set_path__reset_path__false)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:amount=4.2.1"));
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:amount=bob"));
+    const auto expected_payment = "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD";
+    const auto expected_uri = std::string("bitcoin:") + expected_payment;
+
+    bitcoin_uri uri;
+    uri.set_address(stealth_address("hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i"));
+
+    // The set_path will not reset a path. This is necessary to catch failures in non-strict parsing.
+    BOOST_REQUIRE(!uri.set_path(expected_payment));
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__label_only__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__set_amount__reset_amount__latter_amount)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?label=test"));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(result.label);
-    BOOST_REQUIRE_EQUAL(result.label.get(), "test");
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(!result.r);
+    bitcoin_uri uri;
+    uri.set_amount(10000000000);
+    uri.set_amount(120000);
+    BOOST_REQUIRE_EQUAL(uri.encoded(), "bitcoin:?amount=0.0012");
 }
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__reserved_symbol_with_lowercase_percent__test)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__all_setters__complex_uri__expected_encoding)
 {
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?label=%26%3d%6b"));
-    BOOST_REQUIRE(result.label);
-    BOOST_REQUIRE_EQUAL(result.label.get(), "&=k");
-}
+    bitcoin_uri uri;
+    uri.set_path("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    uri.set_amount(120000);
+    uri.set_label("&=\n");
+    uri.set_message("hello bitcoin");
+    uri.set_r("http://example.com?purchase=shoes&user=bob");
 
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__negative_percent_encoding__test)
-{
-    uri_parse_result result;
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:label=%3"));
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:label=%3G"));
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__encoded_multibyte_utf8__test)
-{
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?label=%E3%83%95"));
-    BOOST_REQUIRE(result.label);
-    BOOST_REQUIRE_EQUAL(result.label.get(), "フ");
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__non_strict_encoded_multibyte_utf8_with_unencoded_label_space__test)
-{
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?label=Some テスト", false));
-    BOOST_REQUIRE(result.label);
-    BOOST_REQUIRE_EQUAL(result.label.get(), "Some テスト");
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__negative_strict_encoded_multibyte_utf8_with_unencoded_label_space__test)
-{
-    uri_parse_result result;
-    BOOST_REQUIRE(!uri_parse(result, "bitcoin:?label=Some テスト", true));
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__message_only__test)
-{
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?message=Hi%20Alice"));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(result.message);
-    BOOST_REQUIRE_EQUAL(result.message.get(), "Hi Alice");
-    BOOST_REQUIRE(!result.r);
-}
-
-BOOST_AUTO_TEST_CASE(uri_parse__uri_parse_result__payment_protocol_only__test)
-{
-    uri_parse_result result;
-    BOOST_REQUIRE(uri_parse(result, "bitcoin:?r=http://www.example.com?purchase%3Dshoes"));
-    BOOST_REQUIRE(!result.address);
-    BOOST_REQUIRE(!result.amount);
-    BOOST_REQUIRE(!result.label);
-    BOOST_REQUIRE(!result.message);
-    BOOST_REQUIRE(result.r);
-    BOOST_REQUIRE_EQUAL(result.r.get(), "http://www.example.com?purchase=shoes");
-}
-
-// Example class to demonstrate handling custom URI parameters.
-struct custom_result
-  : public uri_parse_result
-{
-    optional_string myparam;
-
-protected:
-    virtual bool set_param(const std::string& key, const std::string& value)
-    {
-        if ("myparam" == key)
-            myparam.reset(value);
-
-        return uri_parse_result::set_param(key, value);
-    }
-};
-
-BOOST_AUTO_TEST_CASE(uri_parse__custom_result__custom_parameter_type__test)
-{
-    custom_result custom;
-    BOOST_REQUIRE(uri_parse(custom, "bitcoin:?myparam=here"));
-    BOOST_REQUIRE(!custom.address);
-    BOOST_REQUIRE(!custom.amount);
-    BOOST_REQUIRE(!custom.label);
-    BOOST_REQUIRE(!custom.message);
-    BOOST_REQUIRE(!custom.r);
-    BOOST_REQUIRE(custom.myparam);
-    BOOST_REQUIRE_EQUAL(custom.myparam.get(), "here");
-}
-
-BOOST_AUTO_TEST_CASE(uri_writer__encoded__unparameterized_uri__test)
-{
-    uri_writer writer;
-    writer.write_address("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    BOOST_REQUIRE_EQUAL(writer.encoded(), "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-}
-
-BOOST_AUTO_TEST_CASE(uri_writer__encoded__typical_uri__test)
-{
-    uri_writer writer;
-    writer.write_address("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
-    writer.write_amount(10000000000);
-    writer.write_amount(120000);
-    writer.write_label("&=\n");
-    writer.write_message("hello bitcoin");
-    writer.write_r("http://example.com?purchase=shoes&user=bob");
-
-    BOOST_REQUIRE_EQUAL(writer.encoded(),
+    BOOST_REQUIRE_EQUAL(uri.encoded(),
         "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?"
         "amount=0.0012&"
         "label=%26%3D%0A&"
         "message=hello%20bitcoin&"
         "r=http://example.com?purchase%3Dshoes%26user%3Dbob");
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__set_parameter__amount_denormalized___normalized)
+{
+    bitcoin_uri uri;
+    BOOST_REQUIRE(uri.set_parameter("amount", ".0012"));
+    BOOST_REQUIRE_EQUAL(uri.encoded(), "bitcoin:?amount=0.0012");
+}
+
+// Getters
+// ----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__amount__set__expected)
+{
+    BOOST_REQUIRE_EQUAL(bitcoin_uri("bitcoin:?amount=0.0012").amount(), 120000u);
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__label__escaped__expected)
+{
+    BOOST_REQUIRE_EQUAL(bitcoin_uri("bitcoin:?label=%26%3D%0A").label(), "&=\n");
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__message__escaped__expected)
+{
+    BOOST_REQUIRE_EQUAL(bitcoin_uri("bitcoin:?message=hello%20bitcoin").message(), "hello bitcoin");
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__r__escaped__expected)
+{
+    BOOST_REQUIRE_EQUAL(bitcoin_uri("bitcoin:?r=http://example.com?purchase%3Dshoes%26user%3Dbob").r(), "http://example.com?purchase=shoes&user=bob");
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__payment__valid___expected)
+{
+    const auto expected_payment = "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD";
+    const auto expected_uri = std::string("bitcoin:") + expected_payment;
+    BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).payment().to_string(), expected_payment);
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__stealth__valid___expected)
+{
+    const auto expected_stealth = "hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i";
+    const auto expected_uri = std::string("bitcoin:") + expected_stealth;
+    BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).stealth().to_string(), expected_stealth);
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__address__payment___expected)
+{
+    const auto expected_payment = "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD";
+    const auto expected_uri = std::string("bitcoin:") + expected_payment;
+    BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).address(), expected_payment);
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__address__stealth___expected)
+{
+    const auto expected_stealth = "hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i";
+    const auto expected_uri = std::string("bitcoin:") + expected_stealth;
+    BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).address(), expected_stealth);
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__parameter_amount__denormalized___normalized)
+{
+    BOOST_REQUIRE_EQUAL(bitcoin_uri("bitcoin:?amount=.0012").parameter("amount"), "0.0012");
+}
+
+BOOST_AUTO_TEST_CASE(bitcoin_uri__parameters_all__complex_uri___expected)
+{
+    bitcoin_uri uri(
+        "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?"
+        "amount=0.0012&"
+        "label=%26%3D%0A&"
+        "message=hello%20bitcoin&"
+        "r=http://example.com?purchase%3Dshoes%26user%3Dbob");
+
+    BOOST_REQUIRE_EQUAL(uri.address(), "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE_EQUAL(uri.parameter("amount"), "0.0012");
+    BOOST_REQUIRE_EQUAL(uri.parameter("label"), "&=\n");
+    BOOST_REQUIRE_EQUAL(uri.parameter("message"), "hello bitcoin");
+    BOOST_REQUIRE_EQUAL(uri.parameter("r"), "http://example.com?purchase=shoes&user=bob");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
