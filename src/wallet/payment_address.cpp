@@ -159,15 +159,15 @@ payment_address extract_address(const chain::script& script)
     {
         case chain::payment_type::pubkey_hash:
             hash = to_array<short_hash_size>(ops[2].data);
-            return payment_address(hash, payment_address::main_p2pkh);
+            return payment_address(hash, payment_address::mainnet);
 
         case chain::payment_type::script_hash:
             hash = to_array<short_hash_size>(ops[1].data);
-            return payment_address(hash, payment_address::main_p2sh);
+            return payment_address(hash, payment_address::mainnet_p2sh);
 
         case chain::payment_type::script_code_sig:
             hash = bitcoin_short_hash(ops.back().data);
-            return payment_address(hash, payment_address::main_p2sh);
+            return payment_address(hash, payment_address::mainnet_p2sh);
 
         case chain::payment_type::pubkey:
         {
@@ -175,11 +175,11 @@ payment_address extract_address(const chain::script& script)
             if (data.size() == ec_compressed_size)
             {
                 const auto point = to_array<ec_compressed_size>(data);
-                return payment_address(point, payment_address::main_p2pkh);
+                return payment_address(point, payment_address::mainnet);
             }
 
             const auto point = to_array<ec_uncompressed_size>(data);
-            return payment_address(point, payment_address::main_p2pkh);
+            return payment_address(point, payment_address::mainnet);
         }
 
         case chain::payment_type::pubkey_hash_sig:
@@ -188,11 +188,11 @@ payment_address extract_address(const chain::script& script)
             if (data.size() == ec_compressed_size)
             {
                 const auto point = to_array<ec_compressed_size>(data);
-                return payment_address(point, payment_address::main_p2pkh);
+                return payment_address(point, payment_address::mainnet);
             }
 
             const auto point = to_array<ec_uncompressed_size>(data);
-            return payment_address(point, payment_address::main_p2pkh);
+            return payment_address(point, payment_address::mainnet);
         }
 
         default:

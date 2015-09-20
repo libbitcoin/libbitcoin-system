@@ -43,17 +43,17 @@ typedef byte_array<payment_size> payment;
 class BC_API payment_address
 {
 public:
-    static BC_CONSTEXPR uint8_t main_p2pkh = 0x00;
-    static BC_CONSTEXPR uint8_t main_p2sh = 0x05;
+    static BC_CONSTEXPR uint8_t mainnet = 0x00;
+    static BC_CONSTEXPR uint8_t mainnet_p2sh = 0x05;
 
     payment_address();
     payment_address(const payment& bytes);
     payment_address(const std::string& encoded);
     payment_address(const payment_address& other);
-    payment_address(const short_hash& hash, uint8_t version=main_p2pkh);
-    payment_address(const ec_compressed& point, uint8_t version=main_p2pkh);
-    payment_address(const ec_uncompressed& point, uint8_t version=main_p2pkh);
-    payment_address(const chain::script& script, uint8_t version=main_p2sh);
+    payment_address(const short_hash& hash, uint8_t version=mainnet);
+    payment_address(const ec_compressed& point, uint8_t version=mainnet);
+    payment_address(const ec_uncompressed& point, uint8_t version=mainnet);
+    payment_address(const chain::script& script, uint8_t version=mainnet_p2sh);
 
     /// Test for validity.
     operator const bool() const;
