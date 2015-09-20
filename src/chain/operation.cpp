@@ -266,37 +266,37 @@ bool is_push_only(const operation::stack& ops)
 
 bool is_pubkey_type(const operation::stack& ops)
 {
-    return ops.size() == 2 &&
-        ops[0].code == opcode::special &&
-        ops[1].code == opcode::checksig;
+    return ops.size() == 2
+        && ops[0].code == opcode::special
+        && ops[1].code == opcode::checksig;
 }
 
 bool is_pubkey_hash_type(const operation::stack& ops)
 {
-    return ops.size() == 5 &&
-        ops[0].code == opcode::dup &&
-        ops[1].code == opcode::hash160 &&
-        ops[2].code == opcode::special &&
-        ops[2].data.size() == 20 &&
-        ops[3].code == opcode::equalverify &&
-        ops[4].code == opcode::checksig;
+    return ops.size() == 5
+        && ops[0].code == opcode::dup
+        && ops[1].code == opcode::hash160
+        && ops[2].code == opcode::special
+        && ops[2].data.size() == 20
+        && ops[3].code == opcode::equalverify
+        && ops[4].code == opcode::checksig;
 }
 
 bool is_script_hash_type(const operation::stack& ops)
 {
-    return ops.size() == 3 &&
-        ops[0].code == opcode::hash160 &&
-        ops[1].code == opcode::special &&
-        ops[1].data.size() == 20 &&
-        ops[2].code == opcode::equal;
+    return ops.size() == 3
+        && ops[0].code == opcode::hash160
+        && ops[1].code == opcode::special
+        && ops[1].data.size() == 20
+        && ops[2].code == opcode::equal;
 }
 
 bool is_stealth_info_type(const operation::stack& ops)
 {
-    return ops.size() == 2 &&
-        ops[0].code == opcode::return_ &&
-        ops[1].code == opcode::special &&
-        ops[1].data.size() >= hash_size;
+    return ops.size() == 2
+        && ops[0].code == opcode::op_return
+        && ops[1].code == opcode::special
+        && ops[1].data.size() >= hash_size;
 }
 
 bool is_multisig_type(const operation::stack&)
@@ -307,11 +307,7 @@ bool is_multisig_type(const operation::stack&)
 
 bool is_pubkey_hash_sig_type(const operation::stack& ops)
 {
-    if (ops.size() != 2 || !is_push_only(ops))
-        return false;
-
-    const ec_point& last_data = ops.back().data;
-    return verify_public_key_fast(last_data);
+    return ops.size() == 2 && is_push_only(ops) && is_point(ops.back().data);
 }
 
 bool is_script_code_sig_type(const operation::stack& ops)
@@ -319,12 +315,12 @@ bool is_script_code_sig_type(const operation::stack& ops)
     if (ops.size() < 2 || !is_push_only(ops))
         return false;
 
-    const auto& last_data = ops.back().data;
-    if (last_data.empty())
+    const auto& data = ops.back().data;
+    if (data.empty())
         return false;
 
     script script_code;
-    if (!script_code.from_data(last_data, false, script::parse_mode::strict))
+    if (!script_code.from_data(data, false, script::parse_mode::strict))
         return false;
 
     // Minimum size is 4
