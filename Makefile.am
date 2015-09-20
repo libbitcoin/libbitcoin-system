@@ -156,7 +156,8 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/bitcoin_uri.cpp \
     src/wallet/dictionary.cpp \
     src/wallet/encrypted_keys.cpp \
-    src/wallet/hd_keys.cpp \
+    src/wallet/hd_private_key.cpp \
+    src/wallet/hd_public_key.cpp \
     src/wallet/message.cpp \
     src/wallet/mini_keys.cpp \
     src/wallet/mnemonic.cpp \
@@ -276,6 +277,7 @@ test_libbitcoin_test_SOURCES = \
     test/wallet/stealth.cpp \
     test/wallet/stealth_address.cpp \
     test/wallet/uri.cpp \
+    test/wallet/uri_reader.cpp \
     test/wallet/wif_keys.cpp
 
 endif WITH_TESTS
@@ -399,6 +401,7 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/hosts.hpp \
     include/bitcoin/bitcoin/network/initiator.hpp \
     include/bitcoin/bitcoin/network/message_subscriber.hpp \
+    include/bitcoin/bitcoin/network/network_settings.hpp \
     include/bitcoin/bitcoin/network/protocol.hpp \
     include/bitcoin/bitcoin/network/protocol_address.hpp \
     include/bitcoin/bitcoin/network/protocol_base.hpp \
@@ -408,7 +411,6 @@ include_bitcoin_bitcoin_network_HEADERS = \
     include/bitcoin/bitcoin/network/protocol_version.hpp \
     include/bitcoin/bitcoin/network/proxy.hpp \
     include/bitcoin/bitcoin/network/seeder.hpp \
-    include/bitcoin/bitcoin/network/settings.hpp \
     include/bitcoin/bitcoin/network/shared_const_buffer.hpp \
     include/bitcoin/bitcoin/network/timeout.hpp
 
@@ -458,15 +460,18 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/bitcoin_uri.hpp \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/encrypted_keys.hpp \
-    include/bitcoin/bitcoin/wallet/hd_keys.hpp \
+    include/bitcoin/bitcoin/wallet/hd_private_key.hpp \
+    include/bitcoin/bitcoin/wallet/hd_public_key.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
     include/bitcoin/bitcoin/wallet/mini_keys.hpp \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
     include/bitcoin/bitcoin/wallet/payment_address.hpp \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
+    include/bitcoin/bitcoin/wallet/settings.hpp \
     include/bitcoin/bitcoin/wallet/stealth.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp \
+    include/bitcoin/bitcoin/wallet/uri_reader.hpp \
     include/bitcoin/bitcoin/wallet/wif_keys.hpp
 
 
