@@ -21,114 +21,78 @@
 #define LIBBITCOIN_WALLET_PAYMENT_ADDRESS_HPP
 
 #include <algorithm>
-#include <cstddef>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <cstdint>
+#include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/ec_keys.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace wallet {
+    
+static BC_CONSTEXPR size_t payment_size = 25;
+typedef byte_array<payment_size> payment;
 
 /**
  * A class for working with Bitcoin addresses.
+ * Version defaults apply to Bitcoin mainnet ONLY.
  */
 class BC_API payment_address
 {
 public:
-
-#ifdef ENABLE_TESTNET
-    enum
-    {
-        pubkey_version = 0x6f,
-        script_version = 0xc4,
-        wif_version = 0xef,
-        invalid_version = 0xff
-    };
-#else
-    enum
-    {
-        pubkey_version = 0x00,
-        script_version = 0x05,
-        wif_version = 0x80,
-        invalid_version = 0xff
-    };
-#endif
+    static BC_CONSTEXPR uint8_t main_p2pkh = 0x00;
+    static BC_CONSTEXPR uint8_t main_p2sh = 0x05;
 
     payment_address();
-    payment_address(uint8_t version, const ec_point& point);
-    payment_address(uint8_t version, const short_hash& hash);
-    payment_address(const std::string& encoded_address);
+    payment_address(const payment& bytes);
+    payment_address(const std::string& encoded);
+    payment_address(const payment_address& other);
+    payment_address(const short_hash& hash, uint8_t version=main_p2pkh);
+    payment_address(const ec_compressed& point, uint8_t version=main_p2pkh);
+    payment_address(const ec_uncompressed& point, uint8_t version=main_p2pkh);
+    payment_address(const chain::script& script, uint8_t version=main_p2sh);
 
-    void set(uint8_t version, const ec_point& point);
-    void set(uint8_t version, const short_hash& hash);
+    /// Test for validity.
+    operator const bool() const;
+
+    /// Get the decoded representation (including version and checksum).
+    operator const payment() const;
+
+    /// Get the base58 encoded representation.
+    std::string encoded() const;
+
+    /// Get the version.
     uint8_t version() const;
+
+    /// Get the ripemd hash.
     const short_hash& hash() const;
-    bool from_string(const std::string& encoded_address);
-    std::string to_string() const;
-    void set_public_key_hash(const short_hash& pubkey_hash);
-    void set_script_hash(const short_hash& script_hash);
-    void set_public_key(const ec_point& public_key);
-    void set_script(const chain::script& eval_script);
 
 private:
-    uint8_t version_ = invalid_version;
-    short_hash hash_ = null_short_hash;
+    static payment_address from_address(const payment& decoded);
+    static payment_address from_string(const std::string& encoded);
+
+    bool valid_;
+    uint8_t version_;
+    short_hash hash_;
 };
 
-/**
- * Extract a Bitcoin address from an input or output script.
- * Returns false on failure.
- */
-BC_API bool extract(payment_address& address, const chain::script& script);
-
-BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
-
-// TODO: move wrap utilities to "checked.hpp/cpp"
 
 /**
- * Unwrap a wrapped payload.
- * @param[out] version   The version byte of the wrapped data.
- * @param[out] hash      The short_hash payload of the wrapped data.
- * @param[out] checksum  The validated checksum of the wrapped data.
- * @param[in]  wrapped   The wrapped data to unwrap.
- * @return               True if input checksum validates.
+ * Override the equality operator to compare to addresses.
+ * Compares only the hash value.
  */
-BC_API bool unwrap(uint8_t& version, short_hash& hash, uint32_t& checksum,
-    data_slice wrapped);
+BC_API bool operator==(const payment_address& left,
+    const payment_address& right);
 
 /**
- * Unwrap a wrapped payload.
- * @param[out] version   The version byte of the wrapped data.
- * @param[out] payload   The payload of the wrapped data.
- * @param[out] checksum  The validated checksum of the wrapped data.
- * @param[in]  wrapped   The wrapped data to unwrap.
- * @return               True if input checksum validates.
+ * Extract a payment address from an input or output script.
+ * The address will be invalid if and only if the script type is not
+ * supported or the script is itself invalid.
  */
-BC_API bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
-    data_slice wrapped);
-
-/**
- * Wrap arbitrary data.
- * @param[in]  version  The version byte for the wrapped data.
- * @param[out] payload  The payload to wrap.
- * @return              The wrapped data.
- */
-BC_API data_chunk wrap(uint8_t version, data_slice payload);
-
-/**
- * Craeted a checked wrapper and copy into array instance.
- */
-template <size_t Size>
-void wrap(byte_array<Size>& target, uint8_t version, data_slice payload)
-{
-    const auto checked = wrap(version, payload);
-    BITCOIN_ASSERT(checked.size() == Size);
-    std::copy(checked.begin(), checked.end(), target.begin());
-}
+BC_API payment_address extract_address(const chain::script& script);
 
 } // namspace wallet
 } // namspace libbitcoin
@@ -137,24 +101,19 @@ void wrap(byte_array<Size>& target, uint8_t version, data_slice payload)
 namespace std
 {
     template <>
-    struct BC_API hash<libbitcoin::wallet::payment_address>
+    struct BC_API hash<bc::wallet::payment_address>
     {
-        size_t operator()(const libbitcoin::wallet::payment_address& payaddr) const
+        size_t operator()(const bc::wallet::payment_address& address) const
         {
-            using libbitcoin::short_hash;
-            using libbitcoin::short_hash_size;
-            std::string raw_addr;
-
-            raw_addr.resize(short_hash_size + 1);
-            raw_addr[0] = payaddr.version();
-
-            const short_hash& addr_hash = payaddr.hash();
-            std::copy(addr_hash.begin(), addr_hash.end(),
-                raw_addr.begin() + 1);
+            // Create a string of the form [address-version|address-hash].
+            std::string buffer;
+            buffer.resize(bc::short_hash_size + 1);
+            buffer[0] = address.version();
+            const auto& hash = address.hash();
+            std::copy(hash.begin(), hash.end(), buffer.begin() + 1);
 
             std::hash<std::string> functor;
-
-            return functor(raw_addr);
+            return functor(buffer);
         }
     };
 

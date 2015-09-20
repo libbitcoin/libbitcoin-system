@@ -20,48 +20,85 @@
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
 #include <algorithm>
+#include <cstdint>
+#include <string>
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
-#include <bitcoin/bitcoin/utility/deserializer.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
 payment_address::payment_address()
+  : valid_(false), version_(0), hash_(null_short_hash)
 {
 }
 
-payment_address::payment_address(uint8_t version, const ec_point& point)
-    : payment_address(version, bitcoin_short_hash(point))
+payment_address::payment_address(const payment& decoded)
+  : payment_address(from_address(decoded))
 {
 }
 
-payment_address::payment_address(uint8_t version, const short_hash& hash)
-    : payment_address()
+payment_address::payment_address(const std::string& encoded)
+  : payment_address(from_string(encoded))
 {
-    set(version, hash);
 }
 
-payment_address::payment_address(const std::string& encoded_address)
-  : payment_address()
+payment_address::payment_address(const short_hash& hash, uint8_t version)
+  : valid_(true), version_(version), hash_(hash)
 {
-    if (!from_string(encoded_address))
-        throw std::invalid_argument("encoded_address");
 }
 
-void payment_address::set(uint8_t version, const short_hash& hash)
+payment_address::payment_address(const ec_compressed& point, uint8_t version)
+  : payment_address(bitcoin_short_hash(point), version)
 {
-    version_ = version;
-    hash_ = hash;
 }
 
-void payment_address::set(uint8_t version, const ec_point& point)
+payment_address::payment_address(const ec_uncompressed& point, uint8_t version)
+  : payment_address(bitcoin_short_hash(point), version)
 {
-    version_ = version;
-    hash_ = bitcoin_short_hash(point);
+}
+
+payment_address::payment_address(const chain::script& script, uint8_t version)
+  : valid_(true), version_(version),
+    hash_(bitcoin_short_hash(script.to_data(false)))
+{
+}
+
+payment_address::payment_address(const payment_address& other)
+  : valid_(other.valid_), version_(other.version_), hash_(other.hash_)
+{
+}
+
+payment_address payment_address::from_address(const payment& decoded)
+{
+    uint8_t version;
+    short_hash hash;
+    const auto valid = unwrap(version, hash, decoded);
+    return valid ? payment_address(hash, version) : payment_address();
+}
+
+payment_address payment_address::from_string(const std::string& encoded)
+{
+    payment decoded;
+    const auto valid = decode_base58(decoded, encoded);
+    return valid ? from_address(decoded) : payment_address();
+}
+
+payment_address::operator const bool() const
+{
+    return valid_;
+}
+
+payment_address::operator const payment() const
+{
+    return wrap(version_, hash_);
+}
+
+std::string payment_address::encoded() const
+{
+    return encode_base58(wrap(version_, hash_));
 }
 
 uint8_t payment_address::version() const
@@ -74,140 +111,95 @@ const short_hash& payment_address::hash() const
     return hash_;
 }
 
-bool payment_address::from_string(const std::string& encoded_address)
+bool operator==(const payment_address& left, const payment_address& right)
 {
-    data_chunk decoded_address;
-
-    if (!decode_base58(decoded_address, encoded_address))
-        return false;
-
-    uint32_t checksum;
-    return unwrap(version_, hash_, checksum, decoded_address);
+    return left.hash() == right.hash() && left.version() == right.version();
 }
 
-std::string payment_address::to_string() const
+payment_address extract_address(const chain::script& script)
 {
-    const auto data = wrap(version_, hash_);
-    return encode_base58(data);
-}
+    if (!script.is_valid())
+        return payment_address();
 
-void payment_address::set_public_key_hash(const short_hash& pubkey_hash)
-{
-    set(payment_address::pubkey_version, pubkey_hash);
-}
+    short_hash hash;
+    const auto& ops = script.operations;
 
-void payment_address::set_script_hash(const short_hash& script_hash)
-{
-    set(payment_address::script_version, script_hash);
-}
-
-void payment_address::set_public_key(const ec_point& public_key)
-{
-    set(payment_address::pubkey_version, bitcoin_short_hash(public_key));
-}
-
-void payment_address::set_script(const chain::script& eval_script)
-{
-    set(payment_address::script_version, bitcoin_short_hash(eval_script.to_data(false)));
-}
-
-bool extract(payment_address& address, const chain::script& script)
-{
-    // Cast a data_chunk to a short_hash and set the address
-    auto set_hash_data =
-        [&address](uint8_t version, const data_chunk& raw_hash)
-        {
-            short_hash hash_data;
-            BITCOIN_ASSERT(raw_hash.size() == hash_data.size());
-            std::copy(raw_hash.begin(), raw_hash.end(), hash_data.begin());
-            address.set(version, hash_data);
-        };
-    const chain::operation::stack& ops = script.operations;
-    chain::payment_type pay_type = script.type();
-
-    switch (pay_type)
+    // Split out the assertions for readability.
+    // We know that the script is valid and can therefore rely on these.
+    switch (script.type())
     {
-        case chain::payment_type::pubkey:
-            BITCOIN_ASSERT(ops.size() == 2);
-            address.set_public_key(ops[0].data);
-            return true;
-
         case chain::payment_type::pubkey_hash:
             BITCOIN_ASSERT(ops.size() == 5);
-            set_hash_data(payment_address::pubkey_version, ops[2].data);
-            return true;
-
+            BITCOIN_ASSERT(ops[2].data.size() == short_hash_size);
+            break;
         case chain::payment_type::script_hash:
             BITCOIN_ASSERT(ops.size() == 3);
-            set_hash_data(payment_address::script_version, ops[1].data);
-            return true;
-
-        case chain::payment_type::multisig:
-            // Unimplemented...
-            return false;
-
+            BITCOIN_ASSERT(ops[1].data.size() == short_hash_size);
+            break;
+        case chain::payment_type::script_code_sig:
+            BITCOIN_ASSERT(ops.size() > 1);
+            break;
+        case chain::payment_type::pubkey:
+            BITCOIN_ASSERT(ops.size() == 2);
+            BITCOIN_ASSERT(
+                ops[0].data.size() == ec_compressed_size ||
+                ops[0].data.size() == ec_uncompressed_size);
+            break;
         case chain::payment_type::pubkey_hash_sig:
             BITCOIN_ASSERT(ops.size() == 2);
-            address.set_public_key(ops[1].data);
-            return true;
-
-        case chain::payment_type::script_code_sig:
-            // Should have at least 1 sig and the script code.
-            BITCOIN_ASSERT(ops.size() > 1);
-            address.set_script_hash(bitcoin_short_hash(ops.back().data));
-            return true;
-
-        default:
-            return false;
+            BITCOIN_ASSERT(
+                ops[1].data.size() == ec_compressed_size ||
+                ops[1].data.size() == ec_uncompressed_size);
+            break;
+        default:;
     }
 
-    // Should never happen!
-    return false;
-}
+    // Convert data to hash or point and construct address.
+    switch (script.type())
+    {
+        case chain::payment_type::pubkey_hash:
+            hash = to_array<short_hash_size>(ops[2].data);
+            return payment_address(hash, payment_address::main_p2pkh);
 
-bool operator==(const payment_address& lhs, const payment_address& rhs)
-{
-    return lhs.hash() == rhs.hash() && lhs.version() == rhs.version();
-}
+        case chain::payment_type::script_hash:
+            hash = to_array<short_hash_size>(ops[1].data);
+            return payment_address(hash, payment_address::main_p2sh);
 
-bool unwrap(uint8_t& version, short_hash& hash, uint32_t& checksum,
-    data_slice wrapped)
-{
-    data_chunk payload;
-    auto result = unwrap(version, payload, checksum, wrapped) && 
-        (payload.size() == hash.size());
-    if (result)
-        std::copy_n(payload.begin(), hash.size(), hash.begin());
-    return result;
-}
+        case chain::payment_type::script_code_sig:
+            hash = bitcoin_short_hash(ops.back().data);
+            return payment_address(hash, payment_address::main_p2sh);
 
-bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
-    data_slice wrapped)
-{
-    constexpr size_t version_length = sizeof(version);
-    constexpr size_t checksum_length = sizeof(checksum);
-    // guard against insufficient buffer length
-    if (wrapped.size() < version_length + checksum_length)
-        return false;
-    if (!verify_checksum(wrapped))
-        return false;
-    // set return values
-    version = wrapped.data()[0];
-    payload = data_chunk(wrapped.begin() + version_length,
-        wrapped.end() - checksum_length);
-    const auto checksum_start = wrapped.end() - checksum_length;
-    auto deserial = make_deserializer(checksum_start, wrapped.end());
-    checksum = deserial.read_4_bytes_little_endian();
-    return true;
-}
+        case chain::payment_type::pubkey:
+        {
+            const auto& data = ops[0].data;
+            if (data.size() == ec_compressed_size)
+            {
+                const auto point = to_array<ec_compressed_size>(data);
+                return payment_address(point, payment_address::main_p2pkh);
+            }
 
-data_chunk wrap(uint8_t version, data_slice payload)
-{
-    data_chunk wrapped;
-    wrapped.push_back(version);
-    extend_data(wrapped, payload);
-    append_checksum(wrapped);
-    return wrapped;
+            const auto point = to_array<ec_uncompressed_size>(data);
+            return payment_address(point, payment_address::main_p2pkh);
+        }
+
+        case chain::payment_type::pubkey_hash_sig:
+        {
+            const auto& data = ops[1].data;
+            if (data.size() == ec_compressed_size)
+            {
+                const auto point = to_array<ec_compressed_size>(data);
+                return payment_address(point, payment_address::main_p2pkh);
+            }
+
+            const auto point = to_array<ec_uncompressed_size>(data);
+            return payment_address(point, payment_address::main_p2pkh);
+        }
+
+        default:
+        case chain::payment_type::multisig:
+            // multisig is unimplemented here...
+            return payment_address();
+    }
 }
 
 } // namespace wallet
