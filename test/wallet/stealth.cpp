@@ -26,31 +26,30 @@ BOOST_AUTO_TEST_SUITE(stealth_tests)
 
 BOOST_AUTO_TEST_CASE(verify_string_constructor)
 {
-    std::string repr = "01100110000";
-    binary_type prefix(repr);
-    BOOST_REQUIRE_EQUAL(repr.size(), prefix.size());
-    for (size_t i = 0; i < repr.size(); ++i)
+    const std::string binary = "01100110000";
+    binary_type prefix(binary);
+    BOOST_REQUIRE_EQUAL(binary.size(), prefix.size());
+    for (size_t i = 0; i < binary.size(); ++i)
     {
-        const bool value = repr[i] == '1';
+        const auto value = binary[i] == '1';
         BOOST_REQUIRE_EQUAL(prefix[i] , value);
     }
 }
 
+// Binary as a value on the left, padded with zeros to the right.
 BOOST_AUTO_TEST_CASE(compare_constructor_results)
 {
-    std::string repr = "01100111000";
-    binary_type prefix(repr);
-    // Binary repr as a value on the left, padded with zeros to the right.
-    //  repr + 0000....000
-    data_chunk blocks{{0x67, 0x00}};
-    binary_type prefix2(repr.size(), blocks);
+    std::string binary = "01100111000";
+    binary_type prefix(binary);
+    data_chunk blocks{ { 0x67, 0x00 } };
+    binary_type prefix2(binary.size(), blocks);
     BOOST_REQUIRE_EQUAL(prefix, prefix2);
 }
 
 BOOST_AUTO_TEST_CASE(bitfield_test1)
 {
     binary_type prefix("01100111001");
-    data_chunk raw_bitfield{{0x67, 0x20, 0x00, 0x0}};
+    data_chunk raw_bitfield{ { 0x67, 0x20, 0x00, 0x0 } };
     BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.size());
     binary_type compare(prefix.size(), raw_bitfield);
     BOOST_REQUIRE_EQUAL(prefix, compare);
@@ -58,30 +57,30 @@ BOOST_AUTO_TEST_CASE(bitfield_test1)
 
 BOOST_AUTO_TEST_CASE(bitfield_test2)
 {
-    data_chunk blocks1{{0x8b, 0xf4, 0x1c, 0x69}};
-    binary_type prefix1(27, blocks1);
-    data_chunk raw_bitfield1{ { 0x8b, 0xf4, 0x1c, 0x79 } };
-    BOOST_REQUIRE_GE(raw_bitfield1.size() * 8, prefix1.size());
-    binary_type compare1(prefix1.size(), raw_bitfield1);
-    BOOST_REQUIRE_EQUAL(prefix1, compare1);
+    const data_chunk blocks{ { 0x8b, 0xf4, 0x1c, 0x69 } };
+    const binary_type prefix(27, blocks);
+    const data_chunk raw_bitfield{ { 0x8b, 0xf4, 0x1c, 0x79 } };
+    BOOST_REQUIRE_GE(raw_bitfield.size() * 8, prefix.size());
+    const binary_type compare(prefix.size(), raw_bitfield);
+    BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 
 BOOST_AUTO_TEST_CASE(bitfield_test3)
 {
-    data_chunk blocks_bs{{0x69, 0x1c, 0xf4, 0x8b}};
-    binary_type prefix_bs(32, blocks_bs);
-    data_chunk raw_bitfield_bs{{0x69, 0x1c, 0xf4, 0x8b}};
-    binary_type compare_bs(prefix_bs.size(), raw_bitfield_bs);
-    BOOST_REQUIRE_EQUAL(prefix_bs, compare_bs);
+    const data_chunk blocks{ { 0x69, 0x1c, 0xf4, 0x8b } };
+    const binary_type prefix(32, blocks);
+    const data_chunk raw_bitfield{ { 0x69, 0x1c, 0xf4, 0x8b } };
+    const binary_type compare(prefix.size(), raw_bitfield);
+    BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 
 BOOST_AUTO_TEST_CASE(bitfield_test4)
 {
-    data_chunk blocks_b{{0x69, 0x1c, 0xf4, 0x8b}};
-    binary_type prefix_b(29, blocks_b);
-    data_chunk raw_bitfield_bs{ { 0x69, 0x1c, 0xf4, 0x8b } };
-    binary_type compare_b(prefix_b.size(), raw_bitfield_bs);
-    BOOST_REQUIRE_EQUAL(prefix_b, compare_b);
+    const data_chunk blocks{ { 0x69, 0x1c, 0xf4, 0x8b } };
+    const binary_type prefix(29, blocks);
+    const data_chunk raw_bitfield{ { 0x69, 0x1c, 0xf4, 0x8b } };
+    const binary_type compare(prefix.size(), raw_bitfield);
+    BOOST_REQUIRE_EQUAL(prefix, compare);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

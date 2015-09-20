@@ -21,6 +21,7 @@
 
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/binary.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -53,32 +54,47 @@ bool extract_stealth_info(stealth_info& info,
     return true;
 }
 
-ec_secret shared_secret(const ec_secret& secret, const ec_point& pubkey)
+bool shared_secret(ec_secret& out_shared, const ec_secret& secret,
+    const ec_compressed& point)
 {
-    auto final = pubkey;
-    DEBUG_ONLY(const auto success =) ec_multiply(final, secret);
-    BITCOIN_ASSERT(success);
-    return sha256_hash(final);
+    auto final = point;
+    if (!ec_multiply(final, secret))
+        return false;
+
+    out_shared = sha256_hash(final);
+    return true;
 }
 
-ec_point uncover_stealth(const ec_point& ephem_pubkey, 
-    const ec_secret& scan_secret, const ec_point& spend_pubkey)
+bool uncover_stealth(ec_compressed& out_stealth,
+    const ec_compressed& ephemeral, const ec_secret& scan,
+    const ec_compressed& spend)
 {
-    auto final = spend_pubkey;
-    const auto shared = shared_secret(scan_secret, ephem_pubkey);
-    DEBUG_ONLY(const auto success = ) ec_add(final, shared);
-    BITCOIN_ASSERT(success);
-    return final;
+    ec_secret shared;
+    if (!shared_secret(shared, scan, ephemeral))
+        return false;
+
+    auto final = spend;
+    if (!ec_add(final, shared))
+        return false;
+
+    out_stealth = final;
+    return true;
 }
 
-ec_secret uncover_stealth_secret(const ec_point& pubkey,
-    const ec_secret& secret, const ec_secret& spend_secret)
+bool uncover_stealth(ec_secret& out_stealth,
+    const ec_compressed& ephemeral, const ec_secret& scan,
+    const ec_secret& spend)
 {
-    auto final = spend_secret;
-    const auto shared = shared_secret(secret, pubkey);
-    DEBUG_ONLY(const auto success = ) ec_add(final, shared);
-    BITCOIN_ASSERT(success);
-    return final;
+    ec_secret shared;
+    if (!shared_secret(shared, scan, ephemeral))
+        return false;
+
+    auto final = spend;
+    if (!ec_add(final, shared))
+        return false;
+
+    out_stealth = final;
+    return true;
 }
 
 } // namespace wallet
