@@ -28,20 +28,22 @@
 
 namespace libbitcoin {
 
-// Private keys:
+/// Private keys:
 BC_CONSTEXPR size_t ec_secret_size = 32;
 typedef byte_array<ec_secret_size> ec_secret;
 
-// Public keys:
+/// Public keys:
 BC_CONSTEXPR size_t ec_compressed_size = 33;
-BC_CONSTEXPR size_t ec_uncompressed_size = 65;
-typedef data_chunk ec_point;
+typedef byte_array<ec_compressed_size> ec_compressed;
 
-// Full ecdsa signatures for input endorsement:
+BC_CONSTEXPR size_t ec_uncompressed_size = 65;
+typedef byte_array<ec_uncompressed_size> ec_uncompressed;
+
+/// Full ecdsa signatures for input endorsement:
 BC_CONSTEXPR size_t max_endorsement_size = 72;
 typedef data_chunk endorsement;
 
-// Compact ecdsa signature for message signing:
+/// Compact ecdsa signature for message signing:
 BC_CONSTEXPR size_t compact_signature_size = 64;
 struct compact_signature
 {
@@ -49,83 +51,127 @@ struct compact_signature
     int recid;
 };
 
+/// Trying out this compressed/decompressed slice.
+class BC_API ec_public
+{
+public:
+    ec_public(const ec_compressed& point)
+      : point_(point.begin(), point.end())
+    {
+    }
+
+    ec_public(const ec_uncompressed& point)
+      : point_(point.begin(), point.end())
+    {
+    }
+
+    const data_chunk& data() const
+    {
+        return point_;
+    }
+
+private:
+    data_chunk point_;
+};
+
 // TODO: define string literal factory: ec_secret_literal().
 
 /**
- * Converts a secret parameter to a public point.
- */
-BC_API ec_point secret_to_public_key(const ec_secret& secret,
-    bool compressed=true);
-
-/**
- * Decompresses a public point from compressed form.
- */
-BC_API ec_point decompress_public_key(const ec_point& public_key);
-
-/**
- * Verifies that a data chunk represents a valid EC point.
- */
-BC_API bool verify_public_key(const ec_point& public_key);
-
-/**
- * Verifies that a data chunk looks like a valid EC point.
+ * Verify whether data may be a public point.
  * Avoid allocations and point arithmetic.
  */
-BC_API bool verify_public_key_fast(const ec_point& public_key);
+BC_API bool is_point(data_slice data);
 
 /**
- * Verifies that a private key is within the valid range.
+ * Decompresses a compressed public point.
  */
-BC_API bool verify_private_key(const ec_secret& private_key);
+BC_API bool decompress(ec_uncompressed& out, const ec_compressed& point);
 
 /**
- * Create a deterministic EC signature using a private key.
- * This function will always produce a valid signature.
+ * Converts a secret to a compressed public point.
  */
-BC_API endorsement sign(ec_secret secret, hash_digest hash);
+BC_API bool secret_to_public(ec_compressed& out, const ec_secret& secret);
 
 /**
- * Create an compact EC signature for use in message signing.
- * This function will always produce a valid signature.
+ * Converts a secret parameter to an uncompressed public point.
  */
-BC_API compact_signature sign_compact(ec_secret secret, hash_digest hash);
+BC_API bool secret_to_public(ec_uncompressed& out, const ec_secret& secret);
 
 /**
- * Verifies an EC signature using a public key.
+ * Verify a secret.
  */
-BC_API bool verify_signature(const ec_point& public_key, hash_digest hash,
+BC_API bool verify(const ec_secret& secret);
+
+/**
+ * Verify a compressed or uncompressed point.
+ */
+BC_API bool verify(const ec_public& point);
+
+/**
+ * Create a deterministic signature using a private key.
+ */
+BC_API bool sign(endorsement& out, const ec_secret& secret,
+    const hash_digest& hash);
+
+/**
+ * Verify a signature using a compressed or uncompressed point.
+ */
+BC_API bool verify_signature(const ec_public& point, const hash_digest& hash,
     const endorsement& signature);
 
 /**
- * Recovers the public key from a compact message signature.
- * @return a public point, or a zero-length chunk if something goes wrong.
+ * Create a compact signature using a private key.
  */
-BC_API ec_point recover_compact(compact_signature signature,
-    hash_digest hash, bool compressed=true);
+BC_API bool sign_compact(compact_signature& out, const ec_secret& secret,
+    const hash_digest& hash);
 
 /**
- * Computes the sum a += G*b, where G is the curve's generator point.
+ * Recovers the compressed point from a compact message signature.
+ */
+BC_API bool recover_public(ec_compressed& point,
+    const compact_signature& signature, const hash_digest& hash);
+
+/**
+ * Recovers the uncompressed point from a compact message signature.
+ */
+BC_API bool recover_public(ec_uncompressed& point,
+    const compact_signature& signature, const hash_digest& hash);
+
+/**
+ * Compute the sum a += G*b, where G is the curve's generator point.
  * @return false on failure (such as infinity or zero).
  */
-BC_API bool ec_add(ec_point& a, const ec_secret& b);
+BC_API bool ec_add(ec_compressed& point, const ec_secret& secret);
 
 /**
- * Computes the sum a = (a + b) % n, where n is the curve order.
- * @return false on failure (such as a zero result).
- */
-BC_API bool ec_add(ec_secret& a, const ec_secret& b);
-
-/**
- * Computes the product a *= b.
+ * Compute the sum a += G*b, where G is the curve's generator point.
  * @return false on failure (such as infinity or zero).
  */
-BC_API bool ec_multiply(ec_point& a, const ec_secret& b);
+BC_API bool ec_add(ec_uncompressed& point, const ec_secret& secret);
 
 /**
- * Computes the product a = (a * b) % n, where n is the curve order.
+ * Compute the sum left = (left + right) % n, where n is the curve order.
  * @return false on failure (such as a zero result).
  */
-BC_API bool ec_multiply(ec_secret& a, const ec_secret& b);
+BC_API bool ec_add(ec_secret& left, const ec_secret& right);
+
+/**
+ * Compute the product point *= secret.
+ * @return false on failure (such as infinity or zero).
+ */
+BC_API bool ec_multiply(ec_compressed& point, const ec_secret& secret);
+
+/**
+ * Compute the product point *= secret.
+ * @return false on failure (such as infinity or zero).
+ */
+BC_API bool ec_multiply(ec_uncompressed& point, const ec_secret& secret);
+
+/**
+ * Compute the product left = (left * right) % n, where n is the curve order.
+ * @return false on failure (such as a zero result).
+ */
+BC_API bool ec_multiply(ec_secret& left, const ec_secret& right);
 
 } // namespace libbitcoin
 
