@@ -36,12 +36,12 @@ namespace wallet {
 /**
  * A valid mnemonic word count is evenly divisible by this number.
  */
-BC_CONSTEXPR size_t mnemonic_word_multiple = 3;
+static BC_CONSTEXPR size_t mnemonic_word_multiple = 3;
 
 /**
  * A valid seed byte count is evenly divisible by this number.
  */
-BC_CONSTEXPR size_t mnemonic_seed_multiple = 4;
+static BC_CONSTEXPR size_t mnemonic_seed_multiple = 4;
 
 /**
  * Represents a mnemonic word list.
