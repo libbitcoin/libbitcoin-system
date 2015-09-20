@@ -40,7 +40,7 @@ parse_ek_key<PrefixSize>::parse_ek_key(const byte_array<PrefixSize>& prefix,
 template<size_t PrefixSize>
 bool parse_ek_key<PrefixSize>::compressed() const
 {
-    return (flags() & ek_flag::ec_compressed) != 0;
+    return (flags() & ek_flag::ec_compressed_key) != 0;
 }
 
 template<size_t PrefixSize>
@@ -59,7 +59,7 @@ uint8_t parse_ek_key<PrefixSize>::flags() const
 template<size_t PrefixSize>
 bool parse_ek_key<PrefixSize>::lot_sequence() const
 {
-    return (flags() & ek_flag::lot_sequence) != 0;
+    return (flags() & ek_flag::lot_sequence_key) != 0;
 }
 
 template<size_t PrefixSize>
