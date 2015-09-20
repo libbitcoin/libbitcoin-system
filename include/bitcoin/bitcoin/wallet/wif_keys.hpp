@@ -26,24 +26,25 @@
 namespace libbitcoin {
 namespace wallet {
 
+static BC_CONSTEXPR uint8_t wif_mainnet = 0x80;
+
 /**
  * Convert a secret parameter to the wallet import format.
- * The compressed flag can be used to show this represents a compressed key.
- * Returns an empty string on error.
+ * The compressed flag indicates whether a payment address derived from the wif
+ * secret should use the compressed derived public key.
  */
-BC_API std::string secret_to_wif(const ec_secret& secret,
-    bool compressed=true);
+BC_API std::string encode_wif(const ec_secret& secret,
+    uint8_t version=wif_mainnet, bool compressed=true);
 
 /**
- * Convert wallet import format key to secret parameter.
- * Returns a nulled secret on error.
+ * Convert wallet import format (wif) key to its parts.
  */
-BC_API ec_secret wif_to_secret(const std::string& wif);
+BC_API bool decode_wif(ec_secret& out_secret, uint8_t& out_version,
+    bool& out_compressed, const std::string& wif);
 
 /**
- * Checks to see if a wif refers to a compressed key.
- * This does no other checks on the validity of the wif.
- * Returns false otherwise.
+ * Returns true if the wif key is both valid and represents a compressed
+ * payment address.
  */
 BC_API bool is_wif_compressed(const std::string& wif);
 
@@ -51,4 +52,3 @@ BC_API bool is_wif_compressed(const std::string& wif);
 } // namespace libbitcoin
 
 #endif
-

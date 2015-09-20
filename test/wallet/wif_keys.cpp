@@ -21,47 +21,70 @@
 #include <bitcoin/bitcoin.hpp>
 
 using namespace bc;
+using namespace bc::wallet;
 
-BOOST_AUTO_TEST_SUITE(wif_tests)
+BOOST_AUTO_TEST_SUITE(wif_keys_tests)
 
-static const ec_secret secret =
-{{
-    0x80, 0x10, 0xB1, 0xBB, 0x11, 0x9A, 0xD3, 0x7D,
-    0x4B, 0x65, 0xA1, 0x02, 0x2A, 0x31, 0x48, 0x97,
-    0xB1, 0xB3, 0x61, 0x4B, 0x34, 0x59, 0x74, 0x33,
-    0x2C, 0xB1, 0xB9, 0x58, 0x2C, 0xF0, 0x35, 0x36
-}};
+// TODO: add version tests
 
-#ifdef ENABLE_TESTNET
-    static const char wif_compressed[] =
-        "cRseHatKciTzFiXnoDjt5pWE3j3N2Hgd8qsVsCD4Ljv2DCwuD1V6";
-    static const char wif_uncompressed[] =
-        "92ZKR9aqAuSbirHVW3tQMaRJ1AXScBaSrosQkzpbHhzKrVBsZBL";
-#else
-    static const char wif_compressed[] =
-        "L1WepftUBemj6H4XQovkiW1ARVjxMqaw4oj2kmkYqdG1xTnBcHfC";
-    static const char wif_uncompressed[] =
-        "5JngqQmHagNTknnCshzVUysLMWAjT23FWs1TgNU5wyFH5SB3hrP";
-#endif
+#define SECRET "8010b1bb119ad37d4b65a1022a314897b1b3614b345974332cb1b9582cf03536"
+#define WIF_COMPRESSED "L1WepftUBemj6H4XQovkiW1ARVjxMqaw4oj2kmkYqdG1xTnBcHfC"
+#define WIF_UNCOMPRESSED "5JngqQmHagNTknnCshzVUysLMWAjT23FWs1TgNU5wyFH5SB3hrP"
 
-BOOST_AUTO_TEST_CASE(is_wif_compressed_test)
+// TODO: implement testnet version tests
+//#define WIF_COMPRESSED_TESTNET "cRseHatKciTzFiXnoDjt5pWE3j3N2Hgd8qsVsCD4Ljv2DCwuD1V6"
+//#define WIF_UNCOMPRESSED_TESTNET "92ZKR9aqAuSbirHVW3tQMaRJ1AXScBaSrosQkzpbHhzKrVBsZBL"
+
+BOOST_AUTO_TEST_CASE(wif_keys__is_wif_compressed__positive__test)
 {
-    BOOST_REQUIRE(wallet::is_wif_compressed(wif_compressed));
-    BOOST_REQUIRE(!wallet::is_wif_compressed(wif_uncompressed));
+    BOOST_REQUIRE(is_wif_compressed(WIF_COMPRESSED));
 }
 
-BOOST_AUTO_TEST_CASE(wif_to_secret_test)
+BOOST_AUTO_TEST_CASE(wif_keys__is_wif_compressed__negative__test)
 {
-    BOOST_REQUIRE(secret == wallet::wif_to_secret(wif_compressed));
-    BOOST_REQUIRE(secret == wallet::wif_to_secret(wif_uncompressed));
+    BOOST_REQUIRE(!is_wif_compressed(WIF_UNCOMPRESSED));
 }
 
-BOOST_AUTO_TEST_CASE(secret_to_wif_test)
+BOOST_AUTO_TEST_CASE(wif_keys__encode_wif__compressed__test)
 {
-    BOOST_REQUIRE_EQUAL(wallet::secret_to_wif(secret, true),
-        std::string(wif_compressed));
-    BOOST_REQUIRE_EQUAL(wallet::secret_to_wif(secret, false),
-        std::string(wif_uncompressed));
+    const auto compressed = true;
+    const uint8_t version = 0x80;
+    const auto secret = base16_literal(SECRET);
+    BOOST_REQUIRE_EQUAL(encode_wif(secret, version, compressed), WIF_COMPRESSED);
+}
+
+BOOST_AUTO_TEST_CASE(wif_keys__encode_wif__uncompressed__test)
+{
+    const auto compressed = false;
+    const uint8_t version = 0x80;
+    ec_secret secret = base16_literal(SECRET);
+    BOOST_REQUIRE_EQUAL(encode_wif(secret, version, compressed), WIF_UNCOMPRESSED);
+}
+
+BOOST_AUTO_TEST_CASE(wif_keys__decode_wif__compressed__test)
+{
+    const auto compressed = true;
+    const uint8_t version = 0x80;
+    bool out_compressed;
+    uint8_t out_version;
+    ec_secret out_secret;
+    BOOST_REQUIRE(decode_wif(out_secret, out_version, out_compressed, WIF_COMPRESSED));
+    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), SECRET);
+    BOOST_REQUIRE_EQUAL(out_version, version);
+    BOOST_REQUIRE(out_compressed);
+}
+
+BOOST_AUTO_TEST_CASE(wif_keys__decode_wif__uncompressed__test)
+{
+    const auto compressed = false;
+    const uint8_t version = 0x80;
+    bool out_compressed;
+    uint8_t out_version;
+    ec_secret out_secret;
+    BOOST_REQUIRE(decode_wif(out_secret, out_version, out_compressed, WIF_UNCOMPRESSED));
+    BOOST_REQUIRE_EQUAL(encode_base16(out_secret), SECRET);
+    BOOST_REQUIRE_EQUAL(out_version, version);
+    BOOST_REQUIRE(!out_compressed);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

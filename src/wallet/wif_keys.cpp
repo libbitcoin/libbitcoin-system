@@ -31,60 +31,51 @@
 namespace libbitcoin {
 namespace wallet {
 
-std::string secret_to_wif(const ec_secret& secret, bool compressed)
+static constexpr uint8_t wif_uncompressed_size = 1 + hash_size + checksum_size;
+static constexpr uint8_t wif_compressed_size = wif_uncompressed_size + 1;
+static constexpr uint8_t wif_compressed_sentinel = 0x01;
+
+static bool is_compressed(const data_chunk& decoded)
 {
-    auto version = to_array(payment_address::wif_version);
-    data_chunk data;
-
-    if (compressed)
-        data = build_chunk({ version, secret, to_array(0x01) }, checksum_size);
-    else
-        data = build_chunk({version, secret}, checksum_size);
-
-    append_checksum(data);
-    return encode_base58(data);
-}
-
-ec_secret wif_to_secret(const std::string& wif)
-{
-    data_chunk decoded;
-    if (!decode_base58(decoded, wif))
-        return ec_secret();
-
-    // 1 marker, 32 byte secret, optional 1 compressed flag, 4 checksum bytes
-    if (decoded.size() != 1 + hash_size + 4 &&
-        decoded.size() != 1 + hash_size + 1 + 4)
-        return ec_secret();
-
-    if (!verify_checksum(decoded))
-        return ec_secret();
-
-    // Check first byte is valid
-    if (decoded[0] != payment_address::wif_version)
-        return ec_secret();
-
-    // Checks passed. Drop the 0x80 start byte and checksum.
-    decoded.erase(decoded.begin());
-    decoded.erase(decoded.end() - 4, decoded.end());
-
-    // If length is still 33 and last byte is 0x01, drop it.
-    if (decoded.size() == 33 && decoded[32] == (uint8_t)0x01)
-        decoded.erase(decoded.begin()+32);
-
-    ec_secret secret;
-    BITCOIN_ASSERT(secret.size() == decoded.size());
-    std::copy(decoded.begin(), decoded.end(), secret.begin());
-    return secret;
+    return decoded.size() == wif_compressed_size &&
+        decoded[wif_compressed_size - checksum_size - 1] == wif_compressed_sentinel;
 }
 
 bool is_wif_compressed(const std::string& wif)
 {
     data_chunk decoded;
-    if (!decode_base58(decoded, wif))
+    return decode_base58(decoded, wif) && verify_checksum(decoded) &&
+        is_compressed(decoded);
+}
+
+std::string encode_wif(const ec_secret& secret, uint8_t version, bool compressed)
+{
+    const auto version_byte = to_array(version);
+    const auto compressed_byte = to_array(wif_compressed_sentinel);
+    auto data = compressed ?
+        build_chunk({ version_byte, secret, compressed_byte }, checksum_size) :
+        build_chunk({ version_byte, secret }, checksum_size);
+
+    append_checksum(data);
+    return encode_base58(data);
+}
+
+bool decode_wif(ec_secret& out_secret, uint8_t& out_version, bool& out_compressed,
+    const std::string& wif)
+{
+    data_chunk decoded;
+    if (!decode_base58(decoded, wif) || !verify_checksum(decoded))
         return false;
 
-    return decoded.size() == (1 + hash_size + 1 + 4) &&
-        decoded[33] == (uint8_t)0x01;
+    if (decoded.size() != wif_compressed_size &&
+        decoded.size() != wif_uncompressed_size)
+        return false;
+
+    out_version = decoded.front();
+    out_compressed = is_compressed(decoded);
+    const auto decoded_secret_end = decoded.begin() + 1 + ec_secret_size;
+    std::copy(decoded.begin() + 1, decoded_secret_end, out_secret.begin());
+    return true;
 }
 
 } // namespace wallet
