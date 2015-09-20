@@ -30,9 +30,11 @@ bool is_number(const std::string& token)
 {
     if (boost::all(token, boost::is_digit()))
         return true;
+
     // Now check for negative numbers
     if (!boost::starts_with(token, "-"))
         return false;
+
     std::string numeric_part(token.begin() + 1, token.end());
     return boost::all(numeric_part, boost::is_digit());
 }
@@ -41,6 +43,7 @@ bool is_hex_data(const std::string& token)
 {
     if (!boost::starts_with(token, "0x"))
         return false;
+
     std::string hex_part(token.begin() + 2, token.end());
     return boost::all(hex_part, [](char c) { return is_base16(c); });
 }
@@ -49,6 +52,7 @@ bool is_quoted_string(const std::string& token)
 {
     if (token.size() < 2)
         return false;
+
     return boost::starts_with(token, "'") && boost::ends_with(token, "'");
 }
 
@@ -130,9 +134,11 @@ void push_data(data_chunk& raw_script, const data_chunk& data)
 bool parse_token(data_chunk& raw_script, std::string token)
 {
     boost::trim(token);
+
     // skip this
     if (token.empty())
         return true;
+
     static data_chunk hex_raw;
     if (token == "ENDING" || !is_hex_data(token))
     {
@@ -142,15 +148,18 @@ bool parse_token(data_chunk& raw_script, std::string token)
             hex_raw.resize(0);
         }
     }
+
     if (token == "ENDING")
     {
         // Do nothing...
     }
     else if (is_number(token))
     {
-        int64_t value = boost::lexical_cast<int64_t>(token);
+        const auto value = boost::lexical_cast<int64_t>(token);
         if (is_opx(value))
+        {
             push_literal(raw_script, value);
+        }
         else
         {
             script_number bignum(value);
@@ -163,6 +172,7 @@ bool parse_token(data_chunk& raw_script, std::string token)
         data_chunk raw_data;
         if (!decode_base16(raw_data, hex_part))
             return false;
+
         extend_data(hex_raw, raw_data);
     }
     else if (is_quoted_string(token))
@@ -180,6 +190,7 @@ bool parse_token(data_chunk& raw_script, std::string token)
         log_error() << "Token parsing failed with: " << token;
         return false;
     }
+
     return true;
 }
 
@@ -188,11 +199,13 @@ bool parse(chain::script& result_script, std::string format)
     boost::trim(format);
     if (format.empty())
         return true;
+
     const auto tokens = split(format);
     data_chunk raw_script;
     for (const auto& token: tokens)
         if (!parse_token(raw_script, token))
             return false;
+
     parse_token(raw_script, "ENDING");
 
     if (!result_script.from_data(raw_script, false, chain::script::parse_mode::strict))
@@ -206,22 +219,21 @@ bool parse(chain::script& result_script, std::string format)
 
 bool run_script(const script_test& test)
 {
-    chain::script input, output;
-
+    chain::script input;
+    chain::script output;
     if (!parse(input, test.input))
         return false;
 
     if (!parse(output, test.output))
         return false;
 
-    chain::transaction tx;
     //log_debug() << test.input << " -> " << input;
     //log_debug() << test.output << " -> " << output;
+    chain::transaction tx;
     return chain::script::verify(input, output, tx, 0);
 }
 
-void ignore_output(log_level,
-    const std::string&, const std::string&)
+void ignore_output(log_level, const std::string&, const std::string&)
 {
 }
 
@@ -229,32 +241,26 @@ BOOST_AUTO_TEST_SUITE(script_tests)
 
 BOOST_AUTO_TEST_CASE(from_data_fails_parse)
 {
-    data_chunk raw_script = to_chunk(base16_literal(
-        "3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c"
-        "5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744d"
-        "b2c8d9febfb84d01"));
+    const auto raw_script = to_chunk(base16_literal("3045022100ff1fc58dbd608e5e05846a8e6b45a46ad49878aef6879ad1a7cf4c5a7f853683022074a6a10f6053ab3cddc5620d169c7374cd42c1416c51b9744db2c8d9febfb84d01"));
 
-    chain::script psc;
-    BOOST_REQUIRE_EQUAL(false, psc.from_data(raw_script, true,
-        chain::script::parse_mode::strict));
+    chain::script parsed;
+    BOOST_REQUIRE_EQUAL(false, parsed.from_data(raw_script, true, chain::script::parse_mode::strict));
 }
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip)
 {
-    data_chunk normal_output_script = to_chunk(base16_literal(
-        "76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
+    const auto normal_output_script = to_chunk(base16_literal("76a91406ccef231c2db72526df9338894ccf9355e8f12188ac"));
 
-    chain::script out_scr;
-    BOOST_REQUIRE(out_scr.from_data(normal_output_script, false,
-        chain::script::parse_mode::raw_data_fallback));
+    chain::script out_script;
+    BOOST_REQUIRE(out_script.from_data(normal_output_script, false, chain::script::parse_mode::raw_data_fallback));
 
-    data_chunk roundtrip = out_scr.to_data(false);
+    data_chunk roundtrip = out_script.to_data(false);
     BOOST_REQUIRE(roundtrip == normal_output_script);
 }
 
 BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_weird)
 {
-    data_chunk weird_raw_script = to_chunk(base16_literal(
+    const auto weird_raw_script = to_chunk(base16_literal(
         "0c49206c69656b20636174732e483045022100c7387f64e1f4"
         "cf654cae3b28a15f7572106d6c1319ddcdc878e636ccb83845"
         "e30220050ebf440160a4c0db5623e0cb1562f46401a7ff5b87"
@@ -274,8 +280,7 @@ BOOST_AUTO_TEST_CASE(from_data_to_data_roundtrip_weird)
         "74b1d185dbf5b4db4ddb0642848868685174519c6351670068"));
 
     chain::script weird;
-    BOOST_REQUIRE(weird.from_data(weird_raw_script, false,
-        chain::script::parse_mode::raw_data_fallback));
+    BOOST_REQUIRE(weird.from_data(weird_raw_script, false, chain::script::parse_mode::raw_data_fallback));
 
     data_chunk roundtrip_result = weird.to_data(false);
     BOOST_REQUIRE(roundtrip_result == weird_raw_script);
@@ -315,18 +320,15 @@ BOOST_AUTO_TEST_CASE(script_checksig_uses_one_hash)
     data_chunk signature;
     decode_base16(signature, "30450220087ede38729e6d35e4f515505018e659222031273b7366920f393ee3ab17bc1e022100ca43164b757d1a6d1235f13200d4b5f76dd8fda4ec9fc28546b2df5b1211e8df03");
 
-    data_chunk pubkey;
-    decode_base16(pubkey, "0275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cb");
+    data_chunk point;
+    decode_base16(point, "0275983913e60093b767e85597ca9397fb2f418e57f998d6afbbc536116085b1cb");
 
     data_chunk raw_script;
     decode_base16(raw_script, "76a91433cef61749d11ba2adf091a5e045678177fe3a6d88ac");
 
     chain::script script_code;
-    BOOST_REQUIRE(script_code.from_data(raw_script, false,
-        chain::script::parse_mode::raw_data_fallback));
-
-    BOOST_REQUIRE(chain::script::check_signature(
-        signature, pubkey, script_code, parent_tx, input_index));
+    BOOST_REQUIRE(script_code.from_data(raw_script, false, chain::script::parse_mode::raw_data_fallback));
+    BOOST_REQUIRE(chain::script::check_signature(signature, point, script_code, parent_tx, input_index));
 }
 
 BOOST_AUTO_TEST_CASE(script_checksig_normal)
@@ -342,18 +344,15 @@ BOOST_AUTO_TEST_CASE(script_checksig_normal)
     data_chunk signature;
     decode_base16(signature, "304402205d8feeb312478e468d0b514e63e113958d7214fa572acd87079a7f0cc026fc5c02200fa76ea05bf243af6d0f9177f241caf606d01fcfd5e62d6befbca24e569e5c2703");
 
-    data_chunk pubkey;
-    decode_base16(pubkey, "02100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2fe");
+    data_chunk point;
+    decode_base16(point, "02100a1a9ca2c18932d6577c58f225580184d0e08226d41959874ac963e3c1b2fe");
 
     data_chunk raw_script;
     decode_base16(raw_script, "76a914fcc9b36d38cf55d7d5b4ee4dddb6b2c17612f48c88ac");
 
     chain::script script_code;
-    BOOST_REQUIRE_EQUAL(true, script_code.from_data(raw_script, false,
-        chain::script::parse_mode::raw_data_fallback));
-
-    BOOST_REQUIRE(chain::script::check_signature(
-        signature, pubkey, script_code, parent_tx, input_index));
+    BOOST_REQUIRE_EQUAL(true, script_code.from_data(raw_script, false, chain::script::parse_mode::raw_data_fallback));
+    BOOST_REQUIRE(chain::script::check_signature(signature, point, script_code, parent_tx, input_index));
 }
 
 BOOST_AUTO_TEST_CASE(is_raw_data_operations_size_not_equal_one_returns_false)
@@ -380,37 +379,25 @@ BOOST_AUTO_TEST_CASE(is_raw_data_returns_true)
 
 BOOST_AUTO_TEST_CASE(factory_from_data_chunk_test)
 {
-    auto raw = to_chunk(base16_literal(
-        "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
-
-    auto instance = chain::script::factory_from_data(
-        raw, false, chain::script::parse_mode::strict);
-
+    auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    auto instance = chain::script::factory_from_data(raw, false, chain::script::parse_mode::strict);
     BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(factory_from_data_stream_test)
 {
-    auto raw = to_chunk(base16_literal(
-        "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
-
-    auto instance = chain::script::factory_from_data(
-        istream, false, chain::script::parse_mode::strict);
-
+    auto instance = chain::script::factory_from_data(istream, false, chain::script::parse_mode::strict);
     BOOST_REQUIRE(instance.is_valid());
 }
 
 BOOST_AUTO_TEST_CASE(factory_from_data_reader_test)
 {
-    auto raw = to_chunk(base16_literal(
-        "76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
+    auto raw = to_chunk(base16_literal("76a914fc7b44566256621affb1541cc9d59f08336d276b88ac"));
     data_source istream(raw);
     istream_reader source(istream);
-
-    auto instance = chain::script::factory_from_data(
-        source, false, chain::script::parse_mode::strict);
-
+    auto instance = chain::script::factory_from_data(source, false, chain::script::parse_mode::strict);
     BOOST_REQUIRE(instance.is_valid());
 }
 

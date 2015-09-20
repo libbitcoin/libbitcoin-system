@@ -45,27 +45,26 @@ static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{ 1 };
 static constexpr uint64_t op_counter_limit = 201;
 
-script script::factory_from_data(const data_chunk& data,
-    bool with_length_prefix, script::parse_mode mode)
+script script::factory_from_data(const data_chunk& data, bool prefix,
+    parse_mode mode)
 {
     script instance;
-    instance.from_data(data, with_length_prefix, mode);
+    instance.from_data(data, prefix, mode);
     return instance;
 }
 
-script script::factory_from_data(std::istream& stream, bool with_length_prefix,
-    script::parse_mode mode)
+script script::factory_from_data(std::istream& stream, bool prefix,
+    parse_mode mode)
 {
     script instance;
-    instance.from_data(stream, with_length_prefix, mode);
+    instance.from_data(stream, prefix, mode);
     return instance;
 }
 
-script script::factory_from_data(reader& source, bool with_length_prefix,
-    script::parse_mode mode)
+script script::factory_from_data(reader& source, bool prefix, parse_mode mode)
 {
     script instance;
-    instance.from_data(source, with_length_prefix, mode);
+    instance.from_data(source, prefix, mode);
     return instance;
 }
 
@@ -111,11 +110,10 @@ void script::reset()
     operations.clear();
 }
 
-bool script::from_data(const data_chunk& data, bool with_length_prefix,
-    script::parse_mode mode)
+bool script::from_data(const data_chunk& data, bool prefix, parse_mode mode)
 {
     auto result = true;
-    if (with_length_prefix)
+    if (prefix)
     {
         data_source istream(data);
         result = from_data(istream, true, mode);
@@ -131,21 +129,19 @@ bool script::from_data(const data_chunk& data, bool with_length_prefix,
     return result;
 }
 
-bool script::from_data(std::istream& stream, bool with_length_prefix,
-    script::parse_mode mode)
+bool script::from_data(std::istream& stream, bool prefix, parse_mode mode)
 {
     istream_reader source(stream);
-    return from_data(source, with_length_prefix, mode);
+    return from_data(source, prefix, mode);
 }
 
-bool script::from_data(reader& source, bool with_length_prefix,
-    script::parse_mode mode)
+bool script::from_data(reader& source, bool prefix, parse_mode mode)
 {
     auto result = true;
     data_chunk raw_script;
     reset();
 
-    if (with_length_prefix)
+    if (prefix)
     {
         auto script_length = source.read_variable_uint_little_endian();
         result = source;
@@ -172,25 +168,25 @@ bool script::from_data(reader& source, bool with_length_prefix,
     return result;
 }
 
-data_chunk script::to_data(bool with_length_prefix) const
+data_chunk script::to_data(bool prefix) const
 {
     data_chunk data;
     data_sink ostream(data);
-    to_data(ostream, with_length_prefix);
+    to_data(ostream, prefix);
     ostream.flush();
-    BITCOIN_ASSERT(data.size() == serialized_size(with_length_prefix));
+    BITCOIN_ASSERT(data.size() == serialized_size(prefix));
     return data;
 }
 
-void script::to_data(std::ostream& stream, bool with_length_prefix) const
+void script::to_data(std::ostream& stream, bool prefix) const
 {
     ostream_writer sink(stream);
-    to_data(sink, with_length_prefix);
+    to_data(sink, prefix);
 }
 
-void script::to_data(writer& sink, bool with_length_prefix) const
+void script::to_data(writer& sink, bool prefix) const
 {
-    if (with_length_prefix)
+    if (prefix)
         sink.write_variable_uint_little_endian(satoshi_content_size());
 
     if ((operations.size() > 0) && (operations[0].code == opcode::raw_data))
@@ -213,10 +209,10 @@ uint64_t script::satoshi_content_size() const
     return size;
 }
 
-uint64_t script::serialized_size(bool with_length_prefix) const
+uint64_t script::serialized_size(bool prefix) const
 {
     uint64_t size = satoshi_content_size();
-    if (with_length_prefix)
+    if (prefix)
         size += variable_uint_size(size);
 
     return size;
@@ -288,14 +284,13 @@ std::string script::to_string() const
     return value.str();
 }
 
-bool script::deserialize(const data_chunk& raw_script,
-    script::parse_mode mode)
+bool script::deserialize(const data_chunk& raw_script, parse_mode mode)
 {
     auto success = false;
-    if (mode != script::parse_mode::raw_data)
+    if (mode != parse_mode::raw_data)
         success = parse(raw_script);
 
-    if (!success && (mode != script::parse_mode::strict))
+    if (!success && (mode != parse_mode::strict))
     {
         success = true;
 
@@ -412,32 +407,49 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     return parent_tx.hash(hash_type);
 }
 
-// This uses the simpler and more secure deterministic nonce technique.
-bool script::create_signature(data_chunk& signature,
-    const ec_secret& private_key, const script& prevout_script,
-    const transaction& new_tx, uint32_t input_index, uint32_t hash_type)
+// This uses the deterministic nonce technique.
+bool script::create_signature(data_chunk& signature, const ec_secret& secret,
+    const script& prevout_script, const transaction& new_tx,
+    uint32_t input_index, uint32_t hash_type)
 {
     // This always produces a valid signature hash.
-    const auto sighash = generate_signature_hash(
-        new_tx, input_index, prevout_script, hash_type);
+    const auto sighash = generate_signature_hash(new_tx, input_index,
+        prevout_script, hash_type);
 
     // Create the EC signature.
-    signature = sign(private_key, sighash);
+    if (!sign(signature, secret, sighash))
+        return false;
 
     // Add the sighash type to the end of the signature.
     signature.push_back(hash_type);
     return true;
 }
 
-bool script::check_signature(data_slice signature, const ec_point& public_key,
+// This is a helper to simplify working with script-derived public keys.
+bool script::check_signature(data_slice signature, const data_chunk& point,
     const script& script_code, const transaction& parent_tx,
     uint32_t input_index)
 {
-    if (public_key.empty())
+    if (!is_point(point))
         return false;
 
-    if (signature.empty())
-        return false;
+    if (point.size() == ec_compressed_size)
+    {
+        const auto compressed = to_array<ec_compressed_size>(point);
+        return check_signature(signature, compressed, script_code, parent_tx,
+            input_index);
+    }
+
+    const auto uncompressed = to_array<ec_uncompressed_size>(point);
+    return check_signature(signature, uncompressed, script_code, parent_tx,
+        input_index);
+}
+
+// Convert op data to a public key and verify the signature.
+bool script::check_signature(data_slice signature, const ec_public& point,
+    const script& script_code, const transaction& parent_tx,
+    uint32_t input_index)
+{
 
     // Remove the sighash type from the end of the signature.
     auto ec_signature = to_chunk(signature);
@@ -445,11 +457,11 @@ bool script::check_signature(data_slice signature, const ec_point& public_key,
     ec_signature.pop_back();
 
     // This always produces a valid signature hash.
-    const auto sighash = generate_signature_hash(
-            parent_tx, input_index, script_code, hash_type);
+    const auto sighash = generate_signature_hash(parent_tx, input_index,
+        script_code, hash_type);
 
     // Validate the EC signature.
-    return verify_signature(public_key, sighash, ec_signature);
+    return verify_signature(point, sighash, ec_signature);
 }
 
 inline bool cast_to_bool(const data_chunk& values)
@@ -1190,7 +1202,7 @@ bool op_checksigverify(evaluation_context& context, const script& script,
     if (context.primary.size() < 2)
         return false;
 
-    const auto pubkey = context.pop_primary();
+    const auto point = context.pop_primary();
     const auto signature = context.pop_primary();
 
     chain::script script_code;
@@ -1203,7 +1215,7 @@ bool op_checksigverify(evaluation_context& context, const script& script,
         script_code.operations.push_back(op);
     }
 
-    return script::check_signature(signature, pubkey, script_code, parent_tx,
+    return script::check_signature(signature, point, script_code, parent_tx,
         input_index);
 }
 
@@ -1259,8 +1271,8 @@ bool op_checkmultisigverify(evaluation_context& context, const script& script,
     if (!read_section(context, signatures, sigs_count))
         return false;
 
-    // Due to a bug in bitcoind, we need to read an extra null value
-    // which we discard after.
+    // Due to a bug in bitcoind, we need to read an extra null value which we
+    // discard later.
     if (context.primary.empty())
         return false;
 
@@ -1285,24 +1297,20 @@ bool op_checkmultisigverify(evaluation_context& context, const script& script,
         script_code.operations.push_back(op);
     }
 
-    // When checking the signatures against our public keys,
-    // we always advance forwards until we either run out of pubkeys (fail)
-    // or finish with our signatures (pass)
-    auto pubkey_current = pubkeys.begin();
+    // The exact number of signatures are required and must be in order.
+    // One key can validate more than one script. So we always advance 
+    // until we exhaust either pubkeys (fail) or signatures (pass).
+    auto pubkey_iterator = pubkeys.begin();
     for (const auto& signature: signatures)
     {
-        for (auto pubkey_iterator = pubkey_current;;)
+        while (true)
         {
-            if (script::check_signature(signature, *pubkey_iterator, 
-                script_code, parent_tx, input_index))
-            {
-                pubkey_current = pubkey_iterator;
+            const auto& point = *pubkey_iterator;
+            if (script::check_signature(signature, point, script_code,
+                parent_tx, input_index))
                 break;
-            }
 
-            // pubkeys are only exhausted when script failed
             ++pubkey_iterator;
-
             if (pubkey_iterator == pubkeys.end())
                 return false;
         }
@@ -1387,7 +1395,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::verify:
             return op_verify(context);
 
-        case opcode::return_:
+        case opcode::op_return:
             return false;
 
         case opcode::toaltstack:
@@ -1751,7 +1759,7 @@ bool script::verify(const script& input_script, const script& output_script,
 
         // Invalid script - parse-able only as raw_data
         if (!eval_script.from_data(input_context.primary.back(), false,
-            script::parse_mode::raw_data_fallback))
+            parse_mode::raw_data_fallback))
             return false;
 
         // Pop last item and copy as starting stack to eval script
