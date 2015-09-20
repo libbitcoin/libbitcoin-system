@@ -69,6 +69,7 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     inactivity_(std::make_shared<deadline>(pool, timeouts.inactivity)),
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
+    magic_(bc::magic_value),  ///// TODO: pass via config.
     stopped_(false),
     message_subscriber_(pool),
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),
@@ -297,7 +298,7 @@ void proxy::handle_read_heading(const boost_code& ec, size_t)
     heading head;
     heading_stream istream(heading_buffer_);
     const auto parsed = head.from_data(istream);
-    if (!parsed || head.magic != bc::magic_value)
+    if (!parsed || head.magic != magic_)
     {
         log_warning(LOG_NETWORK) 
             << "Invalid heading received [" << address() << "]";

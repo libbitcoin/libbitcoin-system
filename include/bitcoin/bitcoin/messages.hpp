@@ -87,14 +87,14 @@ typedef bc::chain::transaction transaction;
 * Serialize a message object to the Bitcoin wire protocol encoding.
 */
 template <typename Message>
-data_chunk serialize(const Message& packet)
+data_chunk serialize(const Message& packet, uint32_t magic)
 {
     // Serialize the payload (required for header size).
     auto payload = packet.to_data();
 
     // Construct the payload header.
     heading head;
-    head.magic = bc::magic_value;
+    head.magic = magic;
     head.command = Message::command;
     head.payload_size = static_cast<uint32_t>(payload.size());
     head.checksum = bitcoin_checksum(payload);
