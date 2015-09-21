@@ -45,11 +45,7 @@ typedef data_chunk endorsement;
 
 /// Compact ecdsa signature for message signing:
 BC_CONSTEXPR size_t compact_signature_size = 64;
-struct compact_signature
-{
-    byte_array<compact_signature_size> signature;
-    int recid;
-};
+typedef byte_array<compact_signature_size> compact_signature;
 
 /// Trying out this compressed/decompressed slice.
 class BC_API ec_public
@@ -122,20 +118,23 @@ BC_API bool verify_signature(const ec_public& point, const hash_digest& hash,
 /**
  * Create a compact signature using a private key.
  */
-BC_API bool sign_compact(compact_signature& out, const ec_secret& secret,
+BC_API bool sign_compact(compact_signature& out_signature,
+    uint8_t& out_recovery_id, const ec_secret& secret,
     const hash_digest& hash);
 
 /**
  * Recovers the compressed point from a compact message signature.
  */
 BC_API bool recover_public(ec_compressed& point,
-    const compact_signature& signature, const hash_digest& hash);
+    const compact_signature& signature, uint8_t recovery_id,
+    const hash_digest& hash);
 
 /**
  * Recovers the uncompressed point from a compact message signature.
  */
 BC_API bool recover_public(ec_uncompressed& point,
-    const compact_signature& signature, const hash_digest& hash);
+    const compact_signature& signature, uint8_t out_recovery_id,
+    const hash_digest& hash);
 
 /**
  * Compute the sum a += G*b, where G is the curve's generator point.

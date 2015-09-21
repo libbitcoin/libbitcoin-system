@@ -120,7 +120,7 @@ bool sign(endorsement& out, const ec_secret& secret, const hash_digest& hash)
         != 1)
     {
         BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign failed");
-        out.clear();
+        ////out.clear();
         return false;
     };
 
@@ -140,32 +140,43 @@ bool verify_signature(const ec_public& point, const hash_digest& hash,
     return result == 1;
 }
 
-bool sign_compact(compact_signature& out, const ec_secret& secret,
-    const hash_digest& hash)
+bool sign_compact(compact_signature& out_signature, uint8_t& out_recovery_id,
+    const ec_secret& secret, const hash_digest& hash)
 {
     const auto signing_context = signing.context();
 
+    int recid;
     if (secp256k1_ecdsa_sign_compact(signing_context, hash.data(),
-        out.signature.data(), secret.data(), secp256k1_nonce_function_rfc6979,
-        nullptr, &out.recid) != 1)
+        out_signature.data(), secret.data(), secp256k1_nonce_function_rfc6979,
+        nullptr, &recid) != 1)
     {
         BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign_compact failed");
         return false;
     }
 
+    if (recid < 0 || recid > 3)
+    {
+        BITCOIN_ASSERT_MSG(false, "secp256k1_ecdsa_sign_compact invalid");
+        return false;
+    }
+
+    out_recovery_id = static_cast<uint8_t>(recid);
     return true;
 }
 
 bool recover_public(ec_compressed& out, const compact_signature& signature,
-    const hash_digest& hash)
+    uint8_t recovery_id, const hash_digest& hash)
 {
+    if (recovery_id > 3)
+        return false;
+
     const auto verification_context = verification.context();
 
     int out_size = ec_compressed_size;
     static constexpr int compression = 1;
+    const auto recid = static_cast<int>(recovery_id);
     if (secp256k1_ecdsa_recover_compact(verification_context, hash.data(),
-        signature.signature.data(), out.data(), &out_size, compression,
-        signature.recid) == 1)
+        signature.data(), out.data(), &out_size, compression, recid) == 1)
     {
         BITCOIN_ASSERT_MSG(
             ec_compressed_size == static_cast<size_t>(out_size),
@@ -177,15 +188,18 @@ bool recover_public(ec_compressed& out, const compact_signature& signature,
 }
 
 bool recover_public(ec_uncompressed& out, const compact_signature& signature,
-    const hash_digest& hash)
+    uint8_t recovery_id, const hash_digest& hash)
 {
+    if (recovery_id > 3)
+        return false;
+
     const auto verification_context = verification.context();
 
     int out_size = ec_compressed_size;
     static constexpr int compression = 0;
+    const auto recid = static_cast<int>(recovery_id);
     if (secp256k1_ecdsa_recover_compact(verification_context, hash.data(),
-        signature.signature.data(), out.data(), &out_size, compression,
-        signature.recid) == 1)
+        signature.data(), out.data(), &out_size, compression, recid) == 1)
     {
         BITCOIN_ASSERT_MSG(
             ec_compressed_size == static_cast<size_t>(out_size),
