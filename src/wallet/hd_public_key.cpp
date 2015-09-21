@@ -110,6 +110,7 @@ hd_public_key hd_public_key::from_secret(const ec_secret& secret,
 
 hd_public_key hd_public_key::from_key(const hd_key& key, uint32_t prefix)
 {
+    // TODO: convert to istream_reader
     auto stream = make_deserializer(key.begin(), key.end());
     const auto actual_prefix = stream.read_big_endian<uint32_t>();
     const auto depth = stream.read_big_endian<uint8_t>();

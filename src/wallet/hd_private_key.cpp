@@ -100,6 +100,7 @@ std::string hd_private_key::encoded() const
 
 hd_private_key hd_private_key::from_key(const hd_key& key, uint64_t prefixes)
 {
+    // TODO: convert to istream_reader
     auto stream = make_deserializer(key.begin(), key.end());
     const auto prefix = stream.read_big_endian<uint32_t>();
     const auto depth = stream.read_big_endian<uint8_t>();
