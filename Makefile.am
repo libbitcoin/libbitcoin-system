@@ -274,6 +274,7 @@ test_libbitcoin_test_SOURCES = \
     test/wallet/message.cpp \
     test/wallet/mnemonic.cpp \
     test/wallet/mnemonic.hpp \
+    test/wallet/payment_address.cpp \
     test/wallet/stealth.cpp \
     test/wallet/stealth_address.cpp \
     test/wallet/uri.cpp \

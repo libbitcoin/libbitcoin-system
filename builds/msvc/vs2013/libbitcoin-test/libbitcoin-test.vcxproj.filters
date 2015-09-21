@@ -264,5 +264,8 @@
     <ClCompile Include="..\..\..\..\test\wallet\uri_reader.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\test\wallet\payment_address.cpp">
+      <Filter>src\wallet</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

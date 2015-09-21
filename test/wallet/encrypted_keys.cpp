@@ -341,23 +341,21 @@ BOOST_AUTO_TEST_SUITE(ek__decrypt_public)
 
 // TODO: create compressed and altchain/testnet vector(s).
 
-#define BC_REQUIRE_DECRYPT_UNCOMPRESSED_POINT(key, passphrase, version) \
+#define BC_REQUIRE_DECRYPT_POINT(key, passphrase, version) \
     ec_compressed out_point; \
     uint8_t out_version = 42; \
     bool out_is_compressed = true; \
     BOOST_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, passphrase)); \
     BOOST_REQUIRE_EQUAL(out_version, version); \
     BOOST_REQUIRE(!out_is_compressed); \
-    ec_uncompressed uncompressed; \
-    BOOST_REQUIRE(decompress(uncompressed, out_point)); \
-    const auto derived_address = payment_address(uncompressed, out_version).encoded()
+    const auto derived_address = payment_address(out_point, out_version, out_is_compressed).encoded()
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
 BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_6_lot__expected)
 {
     const uint8_t version = 0x00;
     const auto key = base58_literal("cfrm38V8aXBn7JWA1ESmFMUn6erxeBGZGAxJPY4e36S9QWkzZKtaVqLNMgnifETYw7BPwWC9aPD");
-    BC_REQUIRE_DECRYPT_UNCOMPRESSED_POINT(key, "MOLON LABE", version);
+    BC_REQUIRE_DECRYPT_POINT(key, "MOLON LABE", version);
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), "03e20f3b812f630d0374eefe776e983549d5cdde87780be45cb9def7ee339dfed4");
     BOOST_REQUIRE_EQUAL(derived_address, "1Jscj8ALrYu2y9TD8NrpvDBugPedmbj4Yh");
 }
@@ -367,7 +365,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_7_lot__expected)
 {
     const uint8_t version = 0x00;
     const auto key = base58_literal("cfrm38V8G4qq2ywYEFfWLD5Cc6msj9UwsG2Mj4Z6QdGJAFQpdatZLavkgRd1i4iBMdRngDqDs51");
-    BC_REQUIRE_DECRYPT_UNCOMPRESSED_POINT(key, "ΜΟΛΩΝ ΛΑΒΕ", version);
+    BC_REQUIRE_DECRYPT_POINT(key, "ΜΟΛΩΝ ΛΑΒΕ", version);
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), "0215fb4e4e62fcec936920dbda69e83facfe2cc5e152fafcf474c8fa0dcf5023f3");
     BOOST_REQUIRE_EQUAL(derived_address, "1Lurmih3KruL4xDB5FmHof38yawNtP9oGf");
 }
@@ -377,7 +375,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_8__expected)
 {
     const uint8_t version = 0x00;
     const auto key = base58_literal("cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An");
-    BC_REQUIRE_DECRYPT_UNCOMPRESSED_POINT(key, "libbitcoin test", version);
+    BC_REQUIRE_DECRYPT_POINT(key, "libbitcoin test", version);
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c13b65302bbbed4f7ad67bc68e928b58e7748d84091a2d42680dc52e7916079e");
     BOOST_REQUIRE_EQUAL(derived_address, "1NQgLnFz1ZzF6KkCJ4SM3xz3Jy1q2hEEax");
 }
@@ -387,7 +385,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_9__expected)
 {
     const uint8_t version = 0x00;
     const auto key = base58_literal("cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC");
-    BC_REQUIRE_DECRYPT_UNCOMPRESSED_POINT(key, "Libbitcoin BIP38 Test Vector", version);
+    BC_REQUIRE_DECRYPT_POINT(key, "Libbitcoin BIP38 Test Vector", version);
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), "02c3b28a224e38af4219cd782653250d2e4b67ed85ac342201f8f05ff909efdc52");
     BOOST_REQUIRE_EQUAL(derived_address, "1NjjvGqXDrx1DvrhjYJxzrpyopk1ygHTSJ");
 }

@@ -57,81 +57,45 @@ static hash_digest address_hash(const payment_address& address)
     return bitcoin_hash(to_chunk(address.encoded()));
 }
 
-static hash_digest address_hash(const ec_compressed& point, uint8_t version)
+static bool address_salt(ek_salt& salt, const payment_address& address)
 {
-    return address_hash(payment_address(point, version));
+    salt = slice<0, ek_salt_size>(address_hash(address));
+    return true;
 }
 
-static hash_digest address_hash(const ec_uncompressed& point, uint8_t version)
-{
-    return address_hash(payment_address(point, version));
-}
-
-static bool address_salt(ek_salt& salt, const ec_compressed& point,
+static bool address_salt(ek_salt& salt, const ec_public& point,
     uint8_t version, bool compressed)
 {
-    if (compressed)
-    {
-        salt = slice<0, ek_salt_size>(address_hash(point, version));
-        return true;
-    }
-
-    ec_uncompressed uncompressed;
-    if (!decompress(uncompressed, point))
-        return false;
-
-    salt = slice<0, ek_salt_size>(address_hash(uncompressed, version));
-    return true;
+    payment_address address(point, version, compressed);
+    return address ? address_salt(salt, address) : false;
 }
 
 static bool address_salt(ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
-    ec_compressed point;
-    if (!secret_to_public(point, secret))
-        return false;
-
-    return address_salt(salt, point, version, compressed);
+    payment_address address(secret, version, compressed);
+    return address ? address_salt(salt, address) : false;
 }
 
-static bool address_validate(const hash_digest& hash, const ek_salt& salt)
+static bool address_validate(const ek_salt& salt,
+    const payment_address& address)
 {
+    const auto hash = address_hash(address);
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
-static bool address_validate(const ec_compressed& point, uint8_t version,
-    const ek_salt& salt)
-{
-    return address_validate(address_hash(point, version), salt);
-}
-
-static bool address_validate(const ec_uncompressed& point, uint8_t version,
-    const ek_salt& salt)
-{
-    return address_validate(address_hash(point, version), salt);
-}
-
-static bool address_validate(const ec_compressed& point,
-    const ek_salt& salt, uint8_t version, bool compressed)
-{
-    if (compressed)
-        return address_validate(point, version, salt);
-
-    ec_uncompressed uncompressed;
-    if (!decompress(uncompressed, point))
-        return false;
-
-    return address_validate(uncompressed, version, salt);
-}
-
-static bool address_validate(const ec_secret& secret, const ek_salt& salt,
+static bool address_validate(const ek_salt& salt, const ec_public& point,
     uint8_t version, bool compressed)
 {
-    ec_compressed point;
-    if (!secret_to_public(point, secret))
-        return false;
+    payment_address address(point, version, compressed);
+    return address ? address_validate(salt, address) : false;
+}
 
-    return address_validate(point, salt, version, compressed);
+static bool address_validate(const ek_salt& salt, const ec_secret& secret,
+    uint8_t version, bool compressed)
+{
+    payment_address address(secret, version, compressed);
+    return address ? address_validate(salt, address) : false;
 }
 
 // point_
@@ -434,7 +398,7 @@ static bool decrypt_multiplied(ec_secret& out_secret,
 
     const auto compressed = parse.compressed();
     const auto address_version = parse.address_version();
-    if (!address_validate(secret, parse.salt(), address_version, compressed))
+    if (!address_validate(parse.salt(), secret, address_version, compressed))
         return false;
 
     out_secret = secret;
@@ -456,7 +420,7 @@ static bool decrypt_secret(ec_secret& out_secret,
 
     const auto compressed = parse.compressed();
     const auto address_version = parse.address_version();
-    if (!address_validate(secret, parse.salt(), address_version, compressed))
+    if (!address_validate(parse.salt(), secret, address_version, compressed))
         return false;
 
     out_secret = secret;
@@ -519,7 +483,7 @@ bool decrypt(ec_compressed& out_point, uint8_t& out_version,
     if (!ec_multiply(product, factor))
         return false;
 
-    if (!address_validate(product, parse.salt(), version, parse.compressed()))
+    if (!address_validate(parse.salt(), product, version, parse.compressed()))
         return false;
 
     out_point = product;

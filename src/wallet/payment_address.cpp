@@ -36,7 +36,7 @@ payment_address::payment_address()
 }
 
 payment_address::payment_address(const payment& decoded)
-  : payment_address(from_address(decoded))
+  : payment_address(from_payment(decoded))
 {
 }
 
@@ -45,18 +45,13 @@ payment_address::payment_address(const std::string& encoded)
 {
 }
 
+payment_address::payment_address(const payment_address& other)
+  : valid_(other.valid_), version_(other.version_), hash_(other.hash_)
+{
+}
+
 payment_address::payment_address(const short_hash& hash, uint8_t version)
   : valid_(true), version_(version), hash_(hash)
-{
-}
-
-payment_address::payment_address(const ec_compressed& point, uint8_t version)
-  : payment_address(bitcoin_short_hash(point), version)
-{
-}
-
-payment_address::payment_address(const ec_uncompressed& point, uint8_t version)
-  : payment_address(bitcoin_short_hash(point), version)
 {
 }
 
@@ -66,12 +61,19 @@ payment_address::payment_address(const chain::script& script, uint8_t version)
 {
 }
 
-payment_address::payment_address(const payment_address& other)
-  : valid_(other.valid_), version_(other.version_), hash_(other.hash_)
+payment_address::payment_address(const ec_public& point, uint8_t version,
+    bool compressed)
+  : payment_address(from_public(point, version, compressed))
 {
 }
 
-payment_address payment_address::from_address(const payment& decoded)
+payment_address::payment_address(const ec_secret& secret, uint8_t version,
+    bool compressed)
+  : payment_address(from_secret(secret, version, compressed))
+{
+}
+
+payment_address payment_address::from_payment(const payment& decoded)
 {
     uint8_t version;
     short_hash hash;
@@ -83,7 +85,33 @@ payment_address payment_address::from_string(const std::string& encoded)
 {
     payment decoded;
     const auto valid = decode_base58(decoded, encoded);
-    return valid ? from_address(decoded) : payment_address();
+    return valid ? from_payment(decoded) : payment_address();
+}
+
+payment_address payment_address::from_public(const ec_public& point,
+    uint8_t version, bool compressed)
+{
+    ////BITCOIN_ASSERT_MSG(!compressed || point.is_compressed(),
+    ////    "cannot compress an uncompressed public key");
+
+    if (compressed == point.is_compressed())
+        return payment_address(bitcoin_short_hash(point.data()), version);
+
+    ec_uncompressed uncompress;
+    if (!compressed && point.is_compressed() && decompress(uncompress, point))
+        return payment_address(bitcoin_short_hash(uncompress), version);
+
+    return payment_address();
+}
+
+payment_address payment_address::from_secret(const ec_secret& secret,
+    uint8_t version, bool compressed)
+{
+    ec_compressed point;
+    if (secret_to_public(point, secret))
+        return payment_address(point, version, compressed);
+
+    return payment_address();
 }
 
 payment_address::operator const bool() const

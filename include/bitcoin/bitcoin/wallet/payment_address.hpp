@@ -51,9 +51,11 @@ public:
     payment_address(const std::string& encoded);
     payment_address(const payment_address& other);
     payment_address(const short_hash& hash, uint8_t version=mainnet);
-    payment_address(const ec_compressed& point, uint8_t version=mainnet);
-    payment_address(const ec_uncompressed& point, uint8_t version=mainnet);
     payment_address(const chain::script& script, uint8_t version=mainnet_p2sh);
+    payment_address(const ec_public& point, uint8_t version=mainnet,
+        bool compressed=true);
+    payment_address(const ec_secret& secret, uint8_t version=mainnet,
+        bool compressed=true);
 
     /// Test for validity.
     operator const bool() const;
@@ -71,8 +73,12 @@ public:
     const short_hash& hash() const;
 
 private:
-    static payment_address from_address(const payment& decoded);
+    static payment_address from_payment(const payment& decoded);
     static payment_address from_string(const std::string& encoded);
+    static payment_address from_public(const ec_public& point,
+        uint8_t version, bool compressed);
+    static payment_address from_secret(const ec_secret& secret,
+        uint8_t version, bool compressed);
 
     bool valid_;
     uint8_t version_;
