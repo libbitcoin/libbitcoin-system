@@ -18,83 +18,137 @@
  */
 #include <bitcoin/bitcoin/wallet/message.hpp>
 
+#include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/serializer.hpp>
+#include <bitcoin/bitcoin/utility/container_sink.hpp>
+#include <bitcoin/bitcoin/utility/ostream_writer.hpp>
 #include <bitcoin/bitcoin/wallet/wif_keys.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
-hash_digest hash_message(data_slice message)
+constexpr uint8_t max_recovery_id = 3;
+constexpr uint8_t magic_compressed = 31;
+constexpr uint8_t magic_uncompressed = 27;
+constexpr uint8_t magic_differential = magic_compressed - magic_uncompressed;
+static_assert(magic_differential > max_recovery_id, "oops!");
+static_assert(MAX_UINT8 - max_recovery_id >= magic_uncompressed, "oops!");
+
+static hash_digest hash_message(data_slice message)
 {
-    std::string prefix = "Bitcoin Signed Message:\n";
+    // This is a specified magic prefix.
+    static const std::string prefix("Bitcoin Signed Message:\n");
 
-    size_t size = variable_uint_size(prefix.size()) + prefix.size() +
-        variable_uint_size(message.size()) + message.size();
-    data_chunk data(size);
-
-    auto ser = make_serializer(data.begin());
-    ser.write_string(prefix);
-    ser.write_variable_uint_little_endian(message.size());
-    ser.write_data(message);
-
+    data_chunk data;
+    data_sink ostream(data);
+    ostream_writer sink(ostream);
+    sink.write_string(prefix);
+    sink.write_variable_uint_little_endian(message.size());
+    sink.write_data(message);
+    ostream.flush();
     return bitcoin_hash(data);
 }
 
-// This is convenient thought not as efficient as the other override.
-message_signature sign_message(data_slice message, const std::string& wif)
+static bool recover(short_hash& out_hash, bool compressed,
+    const compact_signature& compact, uint8_t recovery_id,
+    const hash_digest& message_digest)
 {
-    auto secret = wif_to_secret(wif);
-    if (secret == ec_secret())
-        return message_signature();
+    if (compressed)
+    {
+        ec_compressed point;
+        if (!recover_public(point, compact, recovery_id, message_digest))
+            return false;
 
-    bool compressed = is_wif_compressed(wif);
+        out_hash = bitcoin_short_hash(point);
+        return true;
+    }
 
-    return sign_message(message, secret, compressed);
+    ec_uncompressed point;
+    if (!recover_public(point, compact, recovery_id, message_digest))
+        return false;
+
+    out_hash = bitcoin_short_hash(point);
+    return true;
 }
 
-message_signature sign_message(data_slice message,
+bool recovery_id_to_magic(uint8_t& out_magic, uint8_t recovery_id,
+    bool compressed)
+{
+    if (recovery_id > max_recovery_id)
+        return false;
+
+    // Offset the recovery id with sentinels to indication compression state.
+    const auto increment = compressed ? magic_compressed : magic_uncompressed;
+    out_magic = recovery_id + increment;
+    return true;
+}
+
+bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
+    uint8_t magic)
+{
+    // Magic less offsets cannot exceed recovery id range [0, max_recovery_id].
+    if (magic < magic_uncompressed ||
+        magic > magic_compressed + max_recovery_id)
+        return false;
+
+    // Subtract smaller sentinel (guarded above).
+    auto recovery_id = magic - magic_uncompressed;
+
+    // Obtain compression state (differential exceeds the recovery id range).
+    out_compressed = recovery_id >= magic_differential;
+
+    // If compression is indicated subtract differential (guarded above).
+    if (out_compressed)
+        recovery_id -= magic_differential;
+
+    out_recovery_id = static_cast<uint8_t>(recovery_id);
+    return true;
+}
+
+bool sign_message(message_signature& signature, data_slice message,
+    const std::string& wif)
+{
+    bool compressed;
+    uint8_t version;
+    ec_secret secret;
+    if (!decode_wif(secret, version, compressed, wif))
+        return false;
+
+    return sign_message(signature, message, secret, compressed);
+}
+
+bool sign_message(message_signature& signature, data_slice message,
     const ec_secret& secret, bool compressed)
 {
-    auto hash = hash_message(message);
+    uint8_t recovery_id;
+    compact_signature compact;
+    if (!sign_compact(compact, recovery_id, secret, hash_message(message)))
+        return false;
 
-    auto cs = sign_compact(secret, hash);
+    uint8_t magic;
+    if (!recovery_id_to_magic(magic, recovery_id, compressed))
+        return false;
 
-    int magic = 27 + cs.recid;
-    if (compressed)
-        magic += 4;
-
-    message_signature out;
-    out[0] = magic;
-    std::copy(cs.signature.begin(), cs.signature.end(), out.begin() + 1);
-    return out;
+    signature = splice(to_array(magic), compact);
+    return true;
 }
 
-bool verify_message(data_slice message,
-    const payment_address& address, const message_signature& signature)
+bool verify_message(data_slice message, const payment_address& address,
+    const message_signature& signature)
 {
-    auto hash = hash_message(message);
+    const auto magic = signature.front();
+    const auto compact = slice<1, message_signature_size>(signature);
 
-    bool compressed = false;
-    int magic = signature[0] - 27;
-    if (magic < 0 || 8 <= magic)
-    {
+    bool compressed;
+    uint8_t recovery_id;
+    if (!magic_to_recovery_id(recovery_id, compressed, magic))
         return false;
-    }
-    if (4 <= magic)
-    {
-        compressed = true;
-        magic -= 4;
-    }
 
-    compact_signature cs;
-    std::copy(signature.begin() + 1, signature.end(), cs.signature.begin());
-    cs.recid = magic;
-    ec_point pubkey = recover_compact(cs, hash, compressed);
-
-    return address.hash() == bitcoin_short_hash(pubkey);
+    short_hash hash;
+    const auto message_digest = hash_message(message);
+    return recover(hash, compressed, compact, recovery_id, message_digest) &&
+        (hash == address.hash());
 }
 
 } // namespace wallet
 } // namespace libbitcoin
-
