@@ -47,24 +47,15 @@ typedef data_chunk endorsement;
 BC_CONSTEXPR size_t compact_signature_size = 64;
 typedef byte_array<compact_signature_size> compact_signature;
 
-/// Trying out this compressed/decompressed slice.
+/// Use to pass a point as either ec_compressed or ec_uncompressed.
 class BC_API ec_public
 {
 public:
-    ec_public(const ec_compressed& point)
-      : point_(point.begin(), point.end())
-    {
-    }
-
-    ec_public(const ec_uncompressed& point)
-      : point_(point.begin(), point.end())
-    {
-    }
-
-    const data_chunk& data() const
-    {
-        return point_;
-    }
+    ec_public(const ec_compressed& point);
+    ec_public(const ec_uncompressed& point);
+    operator const data_chunk&() const;
+    const data_chunk& data() const;
+    const bool is_compressed() const;
 
 private:
     data_chunk point_;
@@ -79,17 +70,17 @@ private:
 BC_API bool is_point(data_slice data);
 
 /**
- * Decompresses a compressed public point.
+ * Decompress a public point (or return if already compressed).
  */
-BC_API bool decompress(ec_uncompressed& out, const ec_compressed& point);
+BC_API bool decompress(ec_uncompressed& out, const ec_public& point);
 
 /**
- * Converts a secret to a compressed public point.
+ * Convert a secret to a compressed public point.
  */
 BC_API bool secret_to_public(ec_compressed& out, const ec_secret& secret);
 
 /**
- * Converts a secret parameter to an uncompressed public point.
+ * Convert a secret parameter to an uncompressed public point.
  */
 BC_API bool secret_to_public(ec_uncompressed& out, const ec_secret& secret);
 
@@ -123,14 +114,14 @@ BC_API bool sign_compact(compact_signature& out_signature,
     const hash_digest& hash);
 
 /**
- * Recovers the compressed point from a compact message signature.
+ * Recover the compressed point from a compact message signature.
  */
 BC_API bool recover_public(ec_compressed& point,
     const compact_signature& signature, uint8_t recovery_id,
     const hash_digest& hash);
 
 /**
- * Recovers the uncompressed point from a compact message signature.
+ * Recover the uncompressed point from a compact message signature.
  */
 BC_API bool recover_public(ec_uncompressed& point,
     const compact_signature& signature, uint8_t out_recovery_id,
