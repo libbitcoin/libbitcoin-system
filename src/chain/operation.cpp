@@ -291,7 +291,7 @@ bool is_script_hash_type(const operation::stack& ops)
         && ops[2].code == opcode::equal;
 }
 
-bool is_stealth_info_type(const operation::stack& ops)
+bool is_null_data_type(const operation::stack& ops)
 {
     return ops.size() == 2
         && ops[0].code == opcode::op_return
@@ -299,7 +299,7 @@ bool is_stealth_info_type(const operation::stack& ops)
         && ops[1].data.size() >= hash_size;
 }
 
-bool is_multisig_type(const operation::stack&)
+bool is_multisig_type(const operation::stack& ops)
 {
     // TODO: implement.
     return false;
@@ -323,11 +323,25 @@ bool is_script_code_sig_type(const operation::stack& ops)
     if (!script_code.from_data(data, false, script::parse_mode::strict))
         return false;
 
-    // Minimum size is 4
+    const payment_type redeem_type = script_code.type();
     // M [SIG]... N checkmultisig
+    // or one of the other standard transaction types
     return script_code.operations.size() >= 4 &&
         count_non_push(script_code.operations) == 1 &&
-        script_code.operations.back().code == opcode::checkmultisig;
+        script_code.operations.back().code == opcode::checkmultisig ||
+        redeem_type == payment_type::pubkey;
+        redeem_type == payment_type::pubkey_hash;
+        redeem_type == payment_type::script_hash;
+        redeem_type == payment_type::null_data;
+}
+
+bool is_multi_pubkey_sig_type(const operation::stack& ops)
+{
+    if (ops.size() < 2 || !is_push_only(ops))
+        return false;
+    if (ops.front().code != opcode::zero)
+        return false;
+    return true;
 }
 
 } // namspace chain
