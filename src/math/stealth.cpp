@@ -73,7 +73,7 @@ bool uncover_stealth(ec_secret& out_stealth,
 
 static bool is_stealth_info(const script& script)
 {
-    if (script.type() != payment_type::stealth_info)
+    if (script.pattern() != chain::script_pattern::null_data)
         return false;
 
     BITCOIN_ASSERT(script.operations.size() == 2);

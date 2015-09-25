@@ -78,27 +78,31 @@ bool operation::from_data(std::istream& stream)
 
 bool operation::from_data(reader& source)
 {
-    auto result = true;
     reset();
-    const auto raw_byte = source.read_byte();
-    result = source;
-    code = static_cast<opcode>(raw_byte);
-    result &= (raw_byte != 0 || code == opcode::zero);
+    const auto byte = source.read_byte();
+    if (!source)
+        return false;
 
-    if (0 < raw_byte && raw_byte <= 75)
-        code = opcode::special;
+    auto op_code = static_cast<opcode>(byte);
+    if (byte == 0 && op_code != opcode::zero)
+        return false;
 
-    if (result && operation::must_read_data(code))
+    if (0 < byte && byte <= 75)
+        op_code = opcode::special;
+
+    if (operation::must_read_data(op_code))
     {
-        const auto count = read_opcode_data_byte_count(code, raw_byte, source);
-        data = source.read_data(count);
-        result = source && (data.size() == count);
+        uint32_t size;
+        if (!read_opcode_data_size(size, op_code, byte, source))
+            return false;
+
+        data = source.read_data(size);
+        if (!source || data.size() != size)
+            return false;
     }
 
-    if (!result)
-        reset();
-
-    return result;
+    code = op_code;
+    return true;
 }
 
 data_chunk operation::to_data() const
@@ -158,15 +162,15 @@ uint64_t operation::serialized_size() const
     switch (code)
     {
         case opcode::pushdata1:
-            size += 1;
+            size += sizeof(uint8_t);
             break;
 
         case opcode::pushdata2:
-            size += 2;
+            size += sizeof(uint16_t);
             break;
 
         case opcode::pushdata4:
-            size += 4;
+            size += sizeof(uint32_t);
             break;
 
         case opcode::raw_data:
@@ -193,26 +197,36 @@ std::string operation::to_string() const
     return ss.str();
 }
 
-uint32_t operation::read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
-    reader& source)
+bool operation::read_opcode_data_size(uint32_t& count, opcode code,
+    uint8_t raw_byte, reader& source)
 {
     switch (code)
     {
         case opcode::special:
-            return raw_byte;
+            count = raw_byte;
+            return true;
         case opcode::pushdata1:
-            return source.read_byte();
+            count = source.read_byte();
+            return true;
         case opcode::pushdata2:
-            return source.read_2_bytes_little_endian();
+            count = source.read_2_bytes_little_endian();
+            return true;
         case opcode::pushdata4:
-            return source.read_4_bytes_little_endian();
+            count = source.read_4_bytes_little_endian();
+            return true;
         default:
-            break;
+            return false;
     }
+}
 
-    throw std::ios_base::failure("read_opcode_data_byte_count invalid opcode");
+uint64_t operation::count_non_push(const operation::stack& ops)
+{
+    const auto found = [](const operation& op)
+    {
+        return !is_push(op.code);
+    };
 
-    return 0;
+    return std::count_if(ops.begin(), ops.end(), found);
 }
 
 bool operation::must_read_data(opcode code)
@@ -223,7 +237,7 @@ bool operation::must_read_data(opcode code)
         || code == opcode::pushdata4;
 }
 
-bool is_push(const opcode code)
+bool operation::is_push(const opcode code)
 {
     return code == opcode::zero
         || code == opcode::special
@@ -249,99 +263,124 @@ bool is_push(const opcode code)
         || code == opcode::op_16;
 }
 
-uint64_t count_non_push(const operation::stack& ops)
-{
-    const auto found = [](const operation& op)
-    {
-        return !is_push(op.code);
-    };
-
-    return std::count_if(ops.begin(), ops.end(), found);
-}
-
-bool is_push_only(const operation::stack& ops)
+bool operation::is_push_only(const operation::stack& ops)
 {
     return count_non_push(ops) == 0;
 }
 
-bool is_pubkey_type(const operation::stack& ops)
+// null data pattern
+// ----------------------------------------------------------------------------
+
+bool operation::is_null_data_pattern(const operation::stack& ops)
+{
+    static constexpr size_t max_op_return_size = 80;
+
+    return ops.size() == 2
+        && ops[0].code == opcode::op_return
+        && ops[1].code == opcode::special
+        && ops[1].data.size() <= max_op_return_size;
+}
+
+// payment script patterns
+// ----------------------------------------------------------------------------
+
+bool operation::is_pay_multisig_pattern(const operation::stack& ops)
+{
+    // Subtract 80 because OP_1 = 81
+    static constexpr size_t op_1_offset = 80;
+
+    // M of N multisig
+    const auto op_count = ops.size();
+    if (op_count < 4 || ops.back().code != opcode::checkmultisig)
+        return false;
+
+    const auto m = static_cast<uint8_t>(ops[0].code) - op_1_offset;
+    const auto n = static_cast<uint8_t>(ops[op_count - 2].code) - op_1_offset;
+    
+    if (m < 1 || n < 1 || n < m || op_count != n + 3u)
+        return false;
+
+    for (auto op = ops.begin() + 1; op != ops.end() - 2; ++op)
+    {
+        if (op->data.size() != ec_compressed_size &&
+            op->data.size() != ec_uncompressed_size)
+            return false;
+    }
+
+    return true;
+}
+
+bool operation::is_pay_public_key_pattern(const operation::stack& ops)
 {
     return ops.size() == 2
         && ops[0].code == opcode::special
         && ops[1].code == opcode::checksig;
 }
 
-bool is_pubkey_hash_type(const operation::stack& ops)
+bool operation::is_pay_public_key_hash_pattern(const operation::stack& ops)
 {
     return ops.size() == 5
         && ops[0].code == opcode::dup
         && ops[1].code == opcode::hash160
         && ops[2].code == opcode::special
-        && ops[2].data.size() == 20
+        && ops[2].data.size() == short_hash_size
         && ops[3].code == opcode::equalverify
         && ops[4].code == opcode::checksig;
 }
 
-bool is_script_hash_type(const operation::stack& ops)
+bool operation::is_pay_script_hash_pattern(const operation::stack& ops)
 {
     return ops.size() == 3
         && ops[0].code == opcode::hash160
         && ops[1].code == opcode::special
-        && ops[1].data.size() == 20
+        && ops[1].data.size() == short_hash_size
         && ops[2].code == opcode::equal;
 }
 
-bool is_null_data_type(const operation::stack& ops)
+// signature script patterns
+// ----------------------------------------------------------------------------
+
+bool operation::is_sign_multisig_pattern(const operation::stack& ops)
 {
-    return ops.size() == 2
-        && ops[0].code == opcode::op_return
-        && ops[1].code == opcode::special
-        && ops[1].data.size() >= hash_size;
+    if (ops.size() < 2 || !is_push_only(ops))
+        return false;
+
+    if (ops.front().code != opcode::zero)
+        return false;
+
+    return true;
 }
 
-bool is_multisig_type(const operation::stack& ops)
+bool operation::is_sign_public_key_pattern(const operation::stack& ops)
 {
-    // TODO: implement.
-    return false;
+    return ops.size() == 1 && is_push_only(ops);
 }
 
-bool is_pubkey_hash_sig_type(const operation::stack& ops)
+bool operation::is_sign_public_key_hash_pattern(const operation::stack& ops)
 {
     return ops.size() == 2 && is_push_only(ops) && is_point(ops.back().data);
 }
 
-bool is_script_code_sig_type(const operation::stack& ops)
+bool operation::is_sign_script_hash_pattern(const operation::stack& ops)
 {
     if (ops.size() < 2 || !is_push_only(ops))
         return false;
 
-    const auto& data = ops.back().data;
-    if (data.empty())
+    const auto& redeem_data = ops.back().data;
+    if (redeem_data.empty())
         return false;
 
-    script script_code;
-    if (!script_code.from_data(data, false, script::parse_mode::strict))
+    script redeem_script;
+    if (!redeem_script.from_data(redeem_data, false, script::parse_mode::strict))
         return false;
 
-    const payment_type redeem_type = script_code.type();
-    // M [SIG]... N checkmultisig
-    // or one of the other standard transaction types
-    return script_code.operations.size() >= 4 &&
-        count_non_push(script_code.operations) == 1 &&
-        script_code.operations.back().code == opcode::checkmultisig ||
-        redeem_type == payment_type::pubkey;
-        redeem_type == payment_type::pubkey_hash;
-        redeem_type == payment_type::script_hash;
-        redeem_type == payment_type::null_data;
-}
-
-bool is_multi_pubkey_sig_type(const operation::stack& ops)
-{
-    if (ops.size() < 2 || !is_push_only(ops))
-        return false;
-    if (ops.front().code != opcode::zero)
-        return false;
-    return true;
+    // Is the redeem script a standard pay (output) script?
+    const auto redeem_script_pattern = redeem_script.pattern();
+    return redeem_script_pattern == script_pattern::pay_multisig
+        || redeem_script_pattern == script_pattern::pay_public_key
+        || redeem_script_pattern == script_pattern::pay_public_key_hash
+        || redeem_script_pattern == script_pattern::pay_script_hash
+        || redeem_script_pattern == script_pattern::null_data;
 }
 
 } // namspace chain

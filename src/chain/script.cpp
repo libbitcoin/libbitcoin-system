@@ -23,6 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/chain/operation.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -68,30 +69,36 @@ script script::factory_from_data(reader& source, bool prefix, parse_mode mode)
     return instance;
 }
 
-payment_type script::type() const
+script_pattern script::pattern() const
 {
-    if (is_pubkey_type(operations))
-        return payment_type::pubkey;
+    if (operation::is_null_data_pattern(operations))
+        return script_pattern::null_data;
 
-    if (is_pubkey_hash_type(operations))
-        return payment_type::pubkey_hash;
+    if (operation::is_pay_multisig_pattern(operations))
+        return script_pattern::pay_multisig;
 
-    if (is_script_hash_type(operations))
-        return payment_type::script_hash;
+    if (operation::is_pay_public_key_pattern(operations))
+        return script_pattern::pay_public_key;
 
-    if (is_stealth_info_type(operations))
-        return payment_type::stealth_info;
+    if (operation::is_pay_public_key_hash_pattern(operations))
+        return script_pattern::pay_public_key_hash;
 
-    if (is_multisig_type(operations))
-        return payment_type::multisig;
+    if (operation::is_pay_script_hash_pattern(operations))
+        return script_pattern::pay_script_hash;
 
-    if (is_pubkey_hash_sig_type(operations))
-        return payment_type::pubkey_hash_sig;
+    if (operation::is_sign_multisig_pattern(operations))
+        return script_pattern::sign_multisig;
 
-    if (is_script_code_sig_type(operations))
-        return payment_type::script_code_sig;
+    if (operation::is_sign_public_key_pattern(operations))
+        return script_pattern::sign_public_key;
 
-    return payment_type::non_standard;
+    if (operation::is_sign_public_key_hash_pattern(operations))
+        return script_pattern::sign_public_key_hash;
+
+    if (operation::is_sign_script_hash_pattern(operations))
+        return script_pattern::sign_script_hash;
+
+    return script_pattern::non_standard;
 }
 
 bool script::is_raw_data() const
@@ -1730,9 +1737,10 @@ bool script::verify(const script& input_script, const script& output_script,
         return false;
 
     // Additional validation for spend-to-script-hash transactions
-    if (bip16_enabled && (output_script.type() == payment_type::script_hash))
+    if (bip16_enabled &&
+        (output_script.pattern() == script_pattern::pay_script_hash))
     {
-        if (!is_push_only(input_script.operations))
+        if (!operation::is_push_only(input_script.operations))
             return false;
 
         // Load last input_script stack item as a script

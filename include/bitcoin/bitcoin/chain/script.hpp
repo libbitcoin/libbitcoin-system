@@ -25,7 +25,6 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/operation.hpp>
-#include <bitcoin/bitcoin/chain/payment_type.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
@@ -36,12 +35,47 @@ namespace chain {
 
 class BC_API transaction;
 
+/// Signature hash types.
+/// Comments from: bitcoin.org/en/developer-guide#standard-transactions
 enum signature_hash_algorithm : uint32_t
 {
+    /// The default, signs all the inputs and outputs, protecting everything
+    /// except the signature scripts against modification.
     all = 1,
+
+    /// Signs all of the inputs but none of the outputs, allowing anyone to
+    /// change where the satoshis are going unless other signatures using 
+    /// other signature hash flags protect the outputs.
     none = 2,
+
+    /// The only output signed is the one corresponding to this input (the
+    /// output with the same output index number as this input), ensuring
+    /// nobody can change your part of the transaction but allowing other 
+    /// signers to change their part of the transaction. The corresponding 
+    /// output must exist or the value '1' will be signed, breaking the
+    /// security scheme. This input, as well as other inputs, are included
+    /// in the signature. The sequence numbers of other inputs are not
+    /// included in the signature, and can be updated.
     single = 3,
-    anyone_can_pay = 0x80
+
+    /// The above types can be modified with this flag, creating three new
+    /// combined types.
+    anyone_can_pay = 0x80,
+
+    /// Signs all of the outputs but only this one input, and it also allows
+    /// anyone to add or remove other inputs, so anyone can contribute
+    /// additional satoshis but they cannot change how many satoshis are
+    /// sent nor where they go.
+    all_anyone_can_pay = all | anyone_can_pay,
+
+    /// Signs only this one input and allows anyone to add or remove other
+    /// inputs or outputs, so anyone who gets a copy of this input can spend
+    /// it however they'd like.
+    none_anyone_can_pay = none | anyone_can_pay,
+
+    /// Signs this one input and its corresponding output. Allows anyone to
+    /// add or remove other inputs.
+    single_anyone_can_pay = single | anyone_can_pay
 };
 
 // All prefix = true
@@ -78,7 +112,7 @@ public:
         const ec_secret& secret, const script& prevout_script,
         const transaction& tx, uint32_t input_index, uint32_t hash_type);
 
-    payment_type type() const;
+    script_pattern pattern() const;
     bool is_raw_data() const;
     bool from_data(const data_chunk& data, bool prefix, parse_mode mode);
     bool from_data(std::istream& stream, bool prefix, parse_mode mode);

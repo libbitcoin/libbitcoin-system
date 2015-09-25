@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_OPERATION_HPP
 #define LIBBITCOIN_CHAIN_OPERATION_HPP
 
-#include <istream>
+#include <iostream>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/opcode.hpp>
@@ -31,6 +31,52 @@
 namespace libbitcoin {
 namespace chain {
 
+/// Script patterms.
+/// Comments from: bitcoin.org/en/developer-guide#signature-hash-types
+enum class script_pattern
+{
+    /// Null Data
+    /// Pubkey Script: OP_RETURN <0 to 80 bytes of data> (formerly 40 bytes)
+    /// Null data scripts cannot be spent, so there's no signature script.
+    null_data,
+
+    /// Pay to Multisig [BIP11]
+    /// Pubkey script: <m> <A pubkey>[B pubkey][C pubkey...] <n> OP_CHECKMULTISIG
+    /// Signature script: OP_0 <A sig>[B sig][C sig...]
+    pay_multisig,
+
+    /// Pay to Public Key (obsolete)
+    pay_public_key,
+
+    /// Pay to Public Key Hash [P2PKH]
+    /// Pubkey script: OP_DUP OP_HASH160 <PubKeyHash> OP_EQUALVERIFY OP_CHECKSIG
+    /// Signature script: <sig> <pubkey>
+    pay_public_key_hash,
+
+    /// Pay to Script Hash [P2SH/BIP16]
+    /// The redeem script may be any pay type, but only multisig makes sense.
+    /// Pubkey script: OP_HASH160 <Hash160(redeemScript)> OP_EQUAL
+    /// Signature script: <sig>[sig][sig...] <redeemScript>
+    pay_script_hash,
+
+    /// Sign Multisig script [BIP11]
+    sign_multisig,
+
+    /// Sign Public Key (obsolete)
+    sign_public_key,
+
+    /// Sign Public Key Hash [P2PKH]
+    sign_public_key_hash,
+
+    /// Sign Script Hash [P2SH/BIP16]
+    sign_script_hash,
+
+    /// The script is valid but does not conform to the standard tempaltes.
+    /// Such scripts are always accepted if they are mined into blocks, but
+    /// transactions with non-standard scripts may not be forwarded by peers.
+    non_standard
+};
+
 class BC_API operation
 {
 public:
@@ -40,6 +86,23 @@ public:
     static operation factory_from_data(const data_chunk& data);
     static operation factory_from_data(std::istream& stream);
     static operation factory_from_data(reader& source);
+
+    static bool is_push_only(const operation::stack& operations);
+
+    /// unspendable pattern (standard)
+    static bool is_null_data_pattern(const operation::stack& ops);
+
+    /// payment script patterns (standard)
+    static bool is_pay_multisig_pattern(const operation::stack& ops);
+    static bool is_pay_public_key_pattern(const operation::stack& ops);
+    static bool is_pay_public_key_hash_pattern(const operation::stack& ops);
+    static bool is_pay_script_hash_pattern(const operation::stack& ops);
+
+    /// signature script patterns (standard)
+    static bool is_sign_multisig_pattern(const operation::stack& ops);
+    static bool is_sign_public_key_pattern(const operation::stack& ops);
+    static bool is_sign_public_key_hash_pattern(const operation::stack& ops);
+    static bool is_sign_script_hash_pattern(const operation::stack& ops);
 
     bool from_data(const data_chunk& data);
     bool from_data(std::istream& stream);
@@ -56,23 +119,14 @@ public:
     data_chunk data;
 
 private:
+    static bool is_push(const opcode code);
+    static uint64_t count_non_push(const operation::stack& operations);
     static bool must_read_data(opcode code);
-	static uint32_t read_opcode_data_byte_count(opcode code, uint8_t raw_byte,
-        reader& source);
+    static bool read_opcode_data_size(uint32_t& count, opcode code,
+        uint8_t byte, reader& source);
 };
 
-BC_API uint64_t count_non_push(const operation::stack& ops);
-BC_API bool is_push(const opcode code);
-BC_API bool is_push_only(const operation::stack& ops);
-BC_API bool is_pubkey_type(const operation::stack& ops);
-BC_API bool is_pubkey_hash_type(const operation::stack& ops);
-BC_API bool is_script_hash_type(const operation::stack& ops);
-BC_API bool is_stealth_info_type(const operation::stack& ops);
-BC_API bool is_multisig_type(const operation::stack& /* ops */);
-BC_API bool is_pubkey_hash_sig_type(const operation::stack& ops);
-BC_API bool is_script_code_sig_type(const operation::stack& ops);
-
-} // namspace chain
-} // namspace libbitcoin
+} // end chain
+} // end libbitcoin
 
 #endif

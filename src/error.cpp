@@ -68,8 +68,8 @@ std::string error_category_impl::message(int ev) const BC_NOEXCEPT
             return "matching previous object found";
         case error::unspent_output:
             return "unspent output";
-        case error::unsupported_payment_type:
-            return "unsupport payment type";
+        case error::unsupported_script_pattern:
+            return "unsupport script pattern";
 
         // network errors (more)
         case error::resolve_failed:

@@ -200,7 +200,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\header.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\opcode.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\operation.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment_type.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\point.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\script.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\transaction.hpp" />
