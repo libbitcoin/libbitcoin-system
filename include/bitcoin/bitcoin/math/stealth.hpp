@@ -47,11 +47,11 @@ BC_API bool to_stealth_prefix(binary_type& out_prefix,
     const chain::script& script);
 
 /// Extract the stealth ephemeral public key from an output script.
-BC_API bool to_ephemeral_key(ec_compressed& out_ephemeral_public_key,
+BC_API bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
     const chain::script& script);
 
 /// Extract the unsigned stealth ephemeral public key from an output script.
-BC_API bool to_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
+BC_API bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
     const chain::script& script);
 
 } // namespace libbitcoin

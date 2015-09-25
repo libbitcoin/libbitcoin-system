@@ -94,7 +94,7 @@ bool to_stealth_prefix(binary_type& out_prefix, const script& script)
     return true;
 }
 
-bool to_ephemeral_key(ec_compressed& out_ephemeral_public_key,
+bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
     const script& script)
 {
     if (!is_stealth_info(script))
@@ -112,7 +112,7 @@ bool to_ephemeral_key(ec_compressed& out_ephemeral_public_key,
     return true;
 }
 
-bool to_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
+bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
     const script& script)
 {
     if (!is_stealth_info(script))
