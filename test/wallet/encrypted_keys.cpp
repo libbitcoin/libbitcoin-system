@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_3_compressed__expected)
 }
 
 // #3 from: github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_unicode___expected)
+BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_unicode__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_SUITE(ek__decrypt_public)
     BOOST_REQUIRE(decrypt(out_point, out_version, out_is_compressed, key, passphrase)); \
     BOOST_REQUIRE_EQUAL(out_version, version); \
     BOOST_REQUIRE(!out_is_compressed); \
-    const auto derived_address = payment_address(out_point, out_version, out_is_compressed).encoded()
+    const auto derived_address = payment_address({ out_point, out_is_compressed }, out_version).encoded()
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
 BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_6_lot__expected)

@@ -21,65 +21,86 @@
 
 #include <cstdint>
 #include <vector>
+#include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
-#include <bitcoin/bitcoin/wallet/stealth.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
+#include <bitcoin/bitcoin/utility/binary.hpp>
+#include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace libbitcoin {
 namespace wallet {
-
-typedef std::vector<ec_point> pubkey_list;
-
-// Supports testnet and mainnet addresses but not prefix > 0
+    
+/// A class for working with stealth payment addresses.
 class BC_API stealth_address
 {
 public:
+    /// DEPRECATED: we intend to make p2kh same as payment address versions.
+    static const uint8_t mainnet_p2kh;
+    static const uint8_t reuse_key_flag;
 
-    static const uint8_t max_prefix_bits = sizeof(uint32_t) * byte_bits;
+    typedef std::vector<ec_compressed> point_list;
 
-    enum flags : uint8_t
-    {
-        none = 0x00,
-        reuse_key = 0x01
-    };
-
-    // TODO: move this to higher level with dynamic testnet refactor.
-    enum network : uint8_t
-    {
-        mainnet = 0x2a,
-        testnet = 0x2b
-    };
-
-    // Construction
+    /// Constructors.
     stealth_address();
-    stealth_address(const std::string& encoded_address);
-    stealth_address(const binary_type& prefix, const ec_point& scan_pubkey,
-        const pubkey_list& spend_pubkeys, uint8_t signatures, bool testnet);
+    stealth_address(const data_chunk& decoded);
+    stealth_address(const std::string& encoded);
+    stealth_address(const stealth_address& other);
+    stealth_address(const binary_type& filter, const ec_compressed& scan_key,
+        const point_list& spend_keys, uint8_t signatures=0,
+        uint8_t version=mainnet_p2kh);
 
-    // Serialization
-    bool from_string(const std::string& encoded_address);
-    std::string to_string() const;
-    bool valid() const;
+    /// Operators.
+    bool operator==(const stealth_address& other) const;
+    bool operator!=(const stealth_address& other) const;
+    stealth_address& operator=(const stealth_address& other);
+    friend std::istream& operator>>(std::istream& in, stealth_address& to);
+    friend std::ostream& operator<<(std::ostream& out,
+        const stealth_address& of);
 
-    // Properties
-    const binary_type& get_prefix() const;
-    const ec_point& get_scan_pubkey() const;
-    uint8_t get_signatures() const;
-    const pubkey_list& get_spend_pubkeys() const;
-    bool get_testnet() const;
+    /// Cast operators.
+    operator const bool() const;
+    operator const data_chunk() const;
 
-protected:
-    bool get_reuse_key() const;
-    uint8_t get_options() const;
-    uint8_t get_version() const;
+    /// Serializer.
+    std::string encoded() const;
 
-    bool valid_ = false;
-    bool testnet_ = false;
-    uint8_t signatures_ = 0;
-    ec_point scan_pubkey_;
-    pubkey_list spend_pubkeys_;
-    binary_type prefix_;
+    /// Accessors.
+    uint8_t version() const;
+    const ec_compressed& scan_key() const;
+    const point_list& spend_keys() const;
+    uint8_t signatures() const;
+    const binary_type& filter() const;
+
+    /// Methods.
+    data_chunk to_chunk() const;
+
+private:
+    /// Factories.
+    static stealth_address from_string(const std::string& encoded);
+    static stealth_address from_stealth(const data_chunk& decoded);
+    static stealth_address from_stealth(const binary_type& filter,
+        const ec_compressed& scan_key, const point_list& spend_keys,
+        uint8_t signatures, uint8_t version);
+
+    /// Parameter order is used to change the constructor signature.
+    stealth_address(uint8_t version, const binary_type& filter,
+        const ec_compressed& scan_key, const point_list& spend_keys,
+        uint8_t signatures);
+
+    /// Helpers.
+    bool reuse_key() const;
+    uint8_t options() const;
+
+
+    /// Members.
+    /// These should be const, apart from the need to implement assignment.
+    bool valid_;
+    uint8_t version_;
+    ec_compressed scan_key_;
+    point_list spend_keys_;
+    uint8_t signatures_;
+    binary_type filter_;
 };
 
 } // namespace wallet

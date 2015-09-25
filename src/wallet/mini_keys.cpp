@@ -20,7 +20,7 @@
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {

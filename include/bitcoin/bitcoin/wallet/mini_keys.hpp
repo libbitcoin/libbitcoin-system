@@ -21,7 +21,7 @@
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 namespace wallet {

@@ -17,30 +17,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/math/crypto.hpp>
+#include <boost/test/unit_test.hpp>
+#include <bitcoin/bitcoin.hpp>
 
-#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
-#include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
-#include "../math/external/aes256.h"
+using namespace bc;
+using namespace bc::wallet;
 
-namespace libbitcoin {
+BOOST_AUTO_TEST_SUITE(ec_public_tests)
 
-void aes256_encrypt(const aes_secret& key, aes_block& block)
-{
-    aes256_context context;
-    aes256_init(&context, key.data());
-    aes256_encrypt_ecb(&context, block.data());
-    aes256_done(&context);
-}
+////BOOST_AUTO_TEST_CASE(ec_public__todo)
+////{
+////}
 
-void aes256_decrypt(const aes_secret& key, aes_block& block)
-{
-    aes256_context context;
-    aes256_init(&context, key.data());
-    aes256_decrypt_ecb(&context, block.data());
-    aes256_done(&context);
-}
-
-} // namespace libbitcoin
+BOOST_AUTO_TEST_SUITE_END()

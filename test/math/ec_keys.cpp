@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(ec_keys__ec_add__positive__test)
     BOOST_REQUIRE(std::equal(public1.begin(), public1.end(), public2.begin()));
 }
 
-BOOST_AUTO_TEST_CASE(ec_keys__ec_add___negative__test)
+BOOST_AUTO_TEST_CASE(ec_keys__ec_add__negative__test)
 {
     // = n - 1
     ec_secret secret1 = base16_literal("fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140");

@@ -19,10 +19,11 @@
 #include <bitcoin/bitcoin/wallet/message.hpp>
 
 #include <boost/iostreams/stream.hpp>
+#include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/ostream_writer.hpp>
-#include <bitcoin/bitcoin/wallet/wif_keys.hpp>
+#include <bitcoin/bitcoin/wallet/ec_private.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -32,9 +33,9 @@ constexpr uint8_t magic_compressed = 31;
 constexpr uint8_t magic_uncompressed = 27;
 constexpr uint8_t magic_differential = magic_compressed - magic_uncompressed;
 static_assert(magic_differential > max_recovery_id, "oops!");
-static_assert(MAX_UINT8 - max_recovery_id >= magic_uncompressed, "oops!");
+static_assert(max_uint8 - max_recovery_id >= magic_uncompressed, "oops!");
 
-static hash_digest hash_message(data_slice message)
+hash_digest hash_message(data_slice message)
 {
     // This is a specified magic prefix.
     static const std::string prefix("Bitcoin Signed Message:\n");
@@ -108,13 +109,9 @@ bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
 bool sign_message(message_signature& signature, data_slice message,
     const std::string& wif)
 {
-    bool compressed;
-    uint8_t version;
-    ec_secret secret;
-    if (!decode_wif(secret, version, compressed, wif))
-        return false;
-
-    return sign_message(signature, message, secret, compressed);
+    ec_private secret(wif);
+    return (secret && 
+        sign_message(signature, message, secret, secret.compressed()));
 }
 
 bool sign_message(message_signature& signature, data_slice message,

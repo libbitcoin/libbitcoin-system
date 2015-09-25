@@ -64,11 +64,12 @@ src_libbitcoin_la_SOURCES = \
     src/formats/base85.cpp \
     src/math/checksum.cpp \
     src/math/crypto.cpp \
-    src/math/ec_keys.cpp \
+    src/math/elliptic_curve.cpp \
     src/math/hash.cpp \
     src/math/hash_number.cpp \
     src/math/script_number.cpp \
     src/math/secp256k1_initializer.cpp \
+    src/math/stealth.cpp \
     src/math/uint256.cpp \
     src/math/external/aes256.c \
     src/math/external/aes256.h \
@@ -155,18 +156,18 @@ src_libbitcoin_la_SOURCES = \
     src/utility/variable_uint_size.cpp \
     src/wallet/bitcoin_uri.cpp \
     src/wallet/dictionary.cpp \
+    src/wallet/ec_private.cpp \
+    src/wallet/ec_public.cpp \
     src/wallet/encrypted_keys.cpp \
-    src/wallet/hd_private_key.cpp \
-    src/wallet/hd_public_key.cpp \
+    src/wallet/hd_private.cpp \
+    src/wallet/hd_public.cpp \
     src/wallet/message.cpp \
     src/wallet/mini_keys.cpp \
     src/wallet/mnemonic.cpp \
     src/wallet/payment_address.cpp \
     src/wallet/select_outputs.cpp \
-    src/wallet/stealth.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp \
-    src/wallet/wif_keys.cpp \
     src/wallet/parse_encrypted_keys/parse_ek_key.hpp \
     src/wallet/parse_encrypted_keys/parse_ek_key.ipp \
     src/wallet/parse_encrypted_keys/parse_ek_prefix.hpp \
@@ -234,6 +235,7 @@ test_libbitcoin_test_SOURCES = \
     test/math/hash_number.cpp \
     test/math/script_number.cpp \
     test/math/script_number.hpp \
+    test/math/stealth.cpp \
     test/message/address.cpp \
     test/message/alert.cpp \
     test/message/alert_payload.cpp \
@@ -269,17 +271,18 @@ test_libbitcoin_test_SOURCES = \
     test/utility/thread.cpp \
     test/utility/variable_uint_size.cpp \
     test/wallet/bitcoin_uri.cpp \
+    test/wallet/ec_private.cpp \
+    test/wallet/ec_public.cpp \
     test/wallet/encrypted_keys.cpp \
-    test/wallet/hd_keys.cpp \
+    test/wallet/hd_private.cpp \
+    test/wallet/hd_public.cpp \
     test/wallet/message.cpp \
     test/wallet/mnemonic.cpp \
     test/wallet/mnemonic.hpp \
     test/wallet/payment_address.cpp \
-    test/wallet/stealth.cpp \
     test/wallet/stealth_address.cpp \
     test/wallet/uri.cpp \
-    test/wallet/uri_reader.cpp \
-    test/wallet/wif_keys.cpp
+    test/wallet/uri_reader.cpp
 
 endif WITH_TESTS
 
@@ -359,11 +362,12 @@ include_bitcoin_bitcoin_mathdir = ${includedir}/bitcoin/bitcoin/math
 include_bitcoin_bitcoin_math_HEADERS = \
     include/bitcoin/bitcoin/math/checksum.hpp \
     include/bitcoin/bitcoin/math/crypto.hpp \
-    include/bitcoin/bitcoin/math/ec_keys.hpp \
+    include/bitcoin/bitcoin/math/elliptic_curve.hpp \
     include/bitcoin/bitcoin/math/hash.hpp \
     include/bitcoin/bitcoin/math/hash_number.hpp \
     include/bitcoin/bitcoin/math/script_number.hpp \
     include/bitcoin/bitcoin/math/secp256k1_initializer.hpp \
+    include/bitcoin/bitcoin/math/stealth.hpp \
     include/bitcoin/bitcoin/math/uint256.hpp
 
 include_bitcoin_bitcoin_messagedir = ${includedir}/bitcoin/bitcoin/message
@@ -460,20 +464,20 @@ include_bitcoin_bitcoin_walletdir = ${includedir}/bitcoin/bitcoin/wallet
 include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/bitcoin_uri.hpp \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
+    include/bitcoin/bitcoin/wallet/ec_private.hpp \
+    include/bitcoin/bitcoin/wallet/ec_public.hpp \
     include/bitcoin/bitcoin/wallet/encrypted_keys.hpp \
-    include/bitcoin/bitcoin/wallet/hd_private_key.hpp \
-    include/bitcoin/bitcoin/wallet/hd_public_key.hpp \
+    include/bitcoin/bitcoin/wallet/hd_private.hpp \
+    include/bitcoin/bitcoin/wallet/hd_public.hpp \
     include/bitcoin/bitcoin/wallet/message.hpp \
     include/bitcoin/bitcoin/wallet/mini_keys.hpp \
     include/bitcoin/bitcoin/wallet/mnemonic.hpp \
     include/bitcoin/bitcoin/wallet/payment_address.hpp \
     include/bitcoin/bitcoin/wallet/select_outputs.hpp \
     include/bitcoin/bitcoin/wallet/settings.hpp \
-    include/bitcoin/bitcoin/wallet/stealth.hpp \
     include/bitcoin/bitcoin/wallet/stealth_address.hpp \
     include/bitcoin/bitcoin/wallet/uri.hpp \
-    include/bitcoin/bitcoin/wallet/uri_reader.hpp \
-    include/bitcoin/bitcoin/wallet/wif_keys.hpp
+    include/bitcoin/bitcoin/wallet/uri_reader.hpp
 
 
 # Custom make targets.

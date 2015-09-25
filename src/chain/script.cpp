@@ -25,7 +25,7 @@
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/utility/container_sink.hpp>
 #include <bitcoin/bitcoin/utility/container_source.hpp>
@@ -425,31 +425,14 @@ bool script::create_signature(data_chunk& signature, const ec_secret& secret,
     return true;
 }
 
-// This is a helper to simplify working with script-derived public keys.
+// Convert op data to a public key and verify the signature.
+// data_chunk is used instead of ec keys to optimize script processing.
 bool script::check_signature(data_slice signature, const data_chunk& point,
     const script& script_code, const transaction& parent_tx,
     uint32_t input_index)
 {
     if (!is_point(point))
         return false;
-
-    if (point.size() == ec_compressed_size)
-    {
-        const auto compressed = to_array<ec_compressed_size>(point);
-        return check_signature(signature, compressed, script_code, parent_tx,
-            input_index);
-    }
-
-    const auto uncompressed = to_array<ec_uncompressed_size>(point);
-    return check_signature(signature, uncompressed, script_code, parent_tx,
-        input_index);
-}
-
-// Convert op data to a public key and verify the signature.
-bool script::check_signature(data_slice signature, const ec_public& point,
-    const script& script_code, const transaction& parent_tx,
-    uint32_t input_index)
-{
 
     // Remove the sighash type from the end of the signature.
     auto ec_signature = to_chunk(signature);

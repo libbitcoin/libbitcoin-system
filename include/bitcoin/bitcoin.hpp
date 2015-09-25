@@ -48,11 +48,12 @@
 #include <bitcoin/bitcoin/formats/base85.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/math/hash_number.hpp>
 #include <bitcoin/bitcoin/math/script_number.hpp>
 #include <bitcoin/bitcoin/math/secp256k1_initializer.hpp>
+#include <bitcoin/bitcoin/math/stealth.hpp>
 #include <bitcoin/bitcoin/math/uint256.hpp>
 #include <bitcoin/bitcoin/message/address.hpp>
 #include <bitcoin/bitcoin/message/alert.hpp>
@@ -134,19 +135,19 @@
 #include <bitcoin/bitcoin/utility/writer.hpp>
 #include <bitcoin/bitcoin/wallet/bitcoin_uri.hpp>
 #include <bitcoin/bitcoin/wallet/dictionary.hpp>
+#include <bitcoin/bitcoin/wallet/ec_private.hpp>
+#include <bitcoin/bitcoin/wallet/ec_public.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include <bitcoin/bitcoin/wallet/hd_private_key.hpp>
-#include <bitcoin/bitcoin/wallet/hd_public_key.hpp>
+#include <bitcoin/bitcoin/wallet/hd_private.hpp>
+#include <bitcoin/bitcoin/wallet/hd_public.hpp>
 #include <bitcoin/bitcoin/wallet/message.hpp>
 #include <bitcoin/bitcoin/wallet/mini_keys.hpp>
 #include <bitcoin/bitcoin/wallet/mnemonic.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/select_outputs.hpp>
 #include <bitcoin/bitcoin/wallet/settings.hpp>
-#include <bitcoin/bitcoin/wallet/stealth.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
 #include <bitcoin/bitcoin/wallet/uri.hpp>
 #include <bitcoin/bitcoin/wallet/uri_reader.hpp>
-#include <bitcoin/bitcoin/wallet/wif_keys.hpp>
 
 #endif

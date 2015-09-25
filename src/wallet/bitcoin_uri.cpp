@@ -21,6 +21,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 #include <map>
 #include <bitcoin/bitcoin/formats/base10.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
@@ -55,11 +56,17 @@ bitcoin_uri::bitcoin_uri(const std::string& uri, bool strict)
 {
 }
 
+// Cast operators.
+// ----------------------------------------------------------------------------
+
 bitcoin_uri::operator const bool() const
 {
     // An uninitialized URI returns false.
     return !address_.empty() || !query_.empty() || !scheme_.empty();
 }
+
+// Serializer.
+// ----------------------------------------------------------------------------
 
 std::string bitcoin_uri::encoded() const
 {
@@ -185,7 +192,6 @@ bool bitcoin_uri::set_amount(const std::string& satoshis)
     return true;
 }
 
-
 // uri_reader implementation.
 // ----------------------------------------------------------------------------
 
@@ -243,6 +249,44 @@ bool bitcoin_uri::set_parameter(const std::string& key,
     
     // Fail on any required parameter that we don't support.
     return !required(key);
+}
+
+// Operators.
+// ----------------------------------------------------------------------------
+
+bitcoin_uri& bitcoin_uri::operator=(const bitcoin_uri& other)
+{
+    strict_ = other.strict_;
+    scheme_ = other.scheme_;
+    address_ = other.address_;
+    query_ = other.query_;
+    return *this;
+}
+
+bool bitcoin_uri::operator==(const bitcoin_uri& other) const
+{
+    return strict_ == other.strict_ && scheme_ == other.scheme_ &&
+        address_ == other.address_ && query_ == other.query_;
+}
+
+bool bitcoin_uri::operator!=(const bitcoin_uri& other) const
+{
+    return !(*this == other);
+}
+
+// This is always strict.
+std::istream& operator>>(std::istream& input, bitcoin_uri& argument)
+{
+    std::string value;
+    input >> value;
+    argument = bitcoin_uri(value);
+    return input;
+}
+
+std::ostream& operator<<(std::ostream& output, const bitcoin_uri& argument)
+{
+    output << argument.encoded();
+    return output;
 }
 
 } // namespace wallet

@@ -85,15 +85,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__string_invalid__invalid)
     BOOST_REQUIRE_EQUAL(address.encoded(), UNINITIALIZED_ADDRESS);
 }
 
-BOOST_AUTO_TEST_CASE(payment_address__construct__compressed_from_uncompressed__invalid)
-{
-    ec_uncompressed point;
-    BOOST_REQUIRE(decode_base16(point, UNCOMPRESSED));
-    const payment_address address(point, 42);
-    BOOST_REQUIRE(!address);
-}
-
-// secret:
+// construct secret:
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__secret__valid_expected)
 {
@@ -108,7 +100,10 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__secret_testnet__valid_expected)
 {
     ec_secret secret;
     BOOST_REQUIRE(decode_base16(secret, SECRET));
-    const payment_address address(secret, 111);
+
+    // MSVC CTP loses the MSB (WIF prefix) byte of the literal version when
+    // using this initializer, but the MSB isn't used by payment_address.
+    const payment_address address({ secret, 0x806f });
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED_TESTNET);
 }
@@ -117,7 +112,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__secret_mainnet_uncompressed__va
 {
     ec_secret secret;
     BOOST_REQUIRE(decode_base16(secret, SECRET));
-    const payment_address address(secret, payment_address::mainnet, false);
+    const payment_address address({ secret, payment_address::mainnet_p2kh, false });
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED);
 }
@@ -126,50 +121,63 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__secret_testnet_uncompressed__va
 {
     ec_secret secret;
     BOOST_REQUIRE(decode_base16(secret, SECRET));
-    const payment_address address(secret, 111, false);
+
+    // MSVC CTP loses the MSB (WIF prefix) byte of the literal version when
+    // using this initializer, but the MSB isn't used by payment_address.
+    const payment_address address({ secret, 0x806f, false });
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED_TESTNET);
 }
 
-// public:
+// construct public:
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__public__valid_expected)
 {
-    ec_compressed point;
-    BOOST_REQUIRE(decode_base16(point, COMPRESSED));
-    const payment_address address(point);
+    const payment_address address(ec_public(COMPRESSED));
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED);
 }
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__public_testnet__valid_expected)
 {
-    ec_compressed point;
-    BOOST_REQUIRE(decode_base16(point, COMPRESSED));
-    const payment_address address(point, 111);
+    const payment_address address(ec_public(COMPRESSED), 0x6f);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED_TESTNET);
 }
 
-BOOST_AUTO_TEST_CASE(payment_address__construct__public_mainnet_uncompressed__valid_expected)
+BOOST_AUTO_TEST_CASE(payment_address__construct__public_uncompressed__valid_expected)
 {
-    ec_uncompressed point;
-    BOOST_REQUIRE(decode_base16(point, UNCOMPRESSED));
-    const payment_address address(point, payment_address::mainnet, false);
+    const payment_address address(ec_public(UNCOMPRESSED));
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED);
 }
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__public_testnet_uncompressed__valid_expected)
 {
-    ec_uncompressed point;
-    BOOST_REQUIRE(decode_base16(point, UNCOMPRESSED));
-    const payment_address address(point, 111, false);
+    const payment_address address(ec_public(UNCOMPRESSED), 0x6f);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED_TESTNET);
 }
 
-// hash:
+BOOST_AUTO_TEST_CASE(payment_address__construct__public_compressed_from_uncompressed_testnet__valid_expected)
+{
+    ec_uncompressed point;
+    BOOST_REQUIRE(decode_base16(point, UNCOMPRESSED));
+    const payment_address address({ point, true }, 0x6f);
+    BOOST_REQUIRE(address);
+    BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_COMPRESSED_TESTNET);
+}
+
+BOOST_AUTO_TEST_CASE(payment_address__construct__public_uncompressed_from_compressed_testnet__valid_expected)
+{
+    ec_compressed point;
+    BOOST_REQUIRE(decode_base16(point, COMPRESSED));
+    const payment_address address({ point, false }, 0x6f);
+    BOOST_REQUIRE(address);
+    BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED_TESTNET);
+}
+
+// construct hash:
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__hash__valid_expected)
 {
@@ -184,12 +192,12 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__uncompressed_hash_testnet__vali
 {
     short_hash hash;
     BOOST_REQUIRE(decode_base16(hash, UNCOMPRESSED_HASH));
-    const payment_address address(hash, 111);
+    const payment_address address(hash, 0x6f);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_UNCOMPRESSED_TESTNET);
 }
 
-// script:
+// construct script:
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__script__valid_expected)
 {
@@ -204,12 +212,12 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__script_testnet__valid_expected)
 {
     script ops;
     BOOST_REQUIRE(ops.from_string(SCRIPT));
-    const payment_address address(ops, 196);
+    const payment_address address(ops, 0xc4);
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT_TESTNET);
 }
 
-// payment:
+// construct payment:
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__payment__valid_expected)
 {
@@ -229,7 +237,7 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__payment_testnet__valid_expected
     BOOST_REQUIRE_EQUAL(address.encoded(), ADDRESS_SCRIPT_TESTNET);
 }
 
-// copy:
+// construct copy:
 
 BOOST_AUTO_TEST_CASE(payment_address__construct__copy__valid_expected)
 {
@@ -241,22 +249,19 @@ BOOST_AUTO_TEST_CASE(payment_address__construct__copy__valid_expected)
     BOOST_REQUIRE_EQUAL(copy.encoded(), ADDRESS_SCRIPT);
 }
 
-// version:
+// version property:
 
 BOOST_AUTO_TEST_CASE(payment_address__version__default__mainnet)
 {
-    ec_compressed point;
-    BOOST_REQUIRE(decode_base16(point, COMPRESSED));
-    const payment_address address(point);
-    BOOST_REQUIRE_EQUAL(address.version(), payment_address::mainnet);
+    const payment_address address(ec_public(COMPRESSED));
+    BOOST_REQUIRE_EQUAL(address.version(), payment_address::mainnet_p2kh);
 }
 
 BOOST_AUTO_TEST_CASE(payment_address__version__testnet__testnet)
 {
-    ec_compressed point;
-    const uint8_t testnet = 111;
-    BOOST_REQUIRE(decode_base16(point, COMPRESSED));
-    const payment_address address(point, testnet);
+    const uint8_t testnet = 0x6f;
+    const payment_address address(ec_public(COMPRESSED), testnet);
+    BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.version(), testnet);
 }
 
@@ -265,16 +270,15 @@ BOOST_AUTO_TEST_CASE(payment_address__version__script__valid_mainnet_p2sh)
     script ops;
     BOOST_REQUIRE(ops.from_string(SCRIPT));
     const payment_address address(ops);
+    BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(address.version(), payment_address::mainnet_p2sh);
 }
 
-// hash:
+// hash property:
 
 BOOST_AUTO_TEST_CASE(payment_address__hash__compressed_point__expected)
 {
-    ec_compressed point;
-    BOOST_REQUIRE(decode_base16(point, COMPRESSED));
-    const payment_address address(point);
+    const payment_address address(ec_public(COMPRESSED));
     BOOST_REQUIRE(address);
     BOOST_REQUIRE_EQUAL(encode_base16(address.hash()), COMPRESSED_HASH);
 }

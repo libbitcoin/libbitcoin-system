@@ -23,12 +23,15 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/wallet/ec_private.hpp>
+#include <bitcoin/bitcoin/wallet/ec_public.hpp>
 
 namespace libbitcoin {
 namespace wallet {
@@ -36,93 +39,89 @@ namespace wallet {
 static BC_CONSTEXPR size_t payment_size = 1u + short_hash_size + checksum_size;
 typedef byte_array<payment_size> payment;
 
-/**
- * A class for working with Bitcoin addresses.
- * Version defaults apply to Bitcoin mainnet ONLY.
- */
+/// A class for working with non-stealth payment addresses.
 class BC_API payment_address
 {
 public:
-    static BC_CONSTEXPR uint8_t mainnet = 0x00;
-    static BC_CONSTEXPR uint8_t mainnet_p2sh = 0x05;
+    static const uint8_t mainnet_p2kh;
+    static const uint8_t mainnet_p2sh;
 
+    /// Extract a payment address from an input or output script.
+    /// The address will be invalid if and only if the script type is not
+    /// supported or the script is itself invalid.
+    static payment_address extract(const chain::script& script,
+        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
+
+    /// Constructors.
     payment_address();
-    payment_address(const payment& bytes);
-    payment_address(const std::string& encoded);
+    payment_address(const payment& decoded);
+    payment_address(const ec_private& secret);
+    payment_address(const std::string& address);
     payment_address(const payment_address& other);
-    payment_address(const short_hash& hash, uint8_t version=mainnet);
+    payment_address(const short_hash& hash, uint8_t version=mainnet_p2kh);
+    payment_address(const ec_public& point, uint8_t version=mainnet_p2kh);
     payment_address(const chain::script& script, uint8_t version=mainnet_p2sh);
-    payment_address(const ec_public& point, uint8_t version=mainnet,
-        bool compressed=true);
-    payment_address(const ec_secret& secret, uint8_t version=mainnet,
-        bool compressed=true);
 
-    /// Test for validity.
+    /// Operators.
+    bool operator==(const payment_address& other) const;
+    bool operator!=(const payment_address& other) const;
+    payment_address& operator=(const payment_address& other);
+    friend std::istream& operator>>(std::istream& in, payment_address& to);
+    friend std::ostream& operator<<(std::ostream& out,
+        const payment_address& of);
+
+    /// Cast operators.
     operator const bool() const;
+    operator const short_hash&() const;
 
-    /// Get the decoded representation (including version and checksum).
-    operator const payment() const;
-
-    /// Get the base58 encoded representation.
+    /// Serializer.
     std::string encoded() const;
 
-    /// Get the version.
+    /// Accessors.
     uint8_t version() const;
-
-    /// Get the ripemd hash.
     const short_hash& hash() const;
 
 private:
-    static payment_address from_payment(const payment& decoded);
-    static payment_address from_string(const std::string& encoded);
-    static payment_address from_public(const ec_public& point,
-        uint8_t version, bool compressed);
-    static payment_address from_secret(const ec_secret& secret,
-        uint8_t version, bool compressed);
+    /// Validators.
+    static bool is_address(data_slice decoded);
 
+    /// Factories.
+    static payment_address from_string(const std::string& address);
+    static payment_address from_payment(const payment& decoded);
+    static payment_address from_private(const ec_private& secret);
+    static payment_address from_public(const ec_public& point, uint8_t version);
+    static payment_address from_script(const chain::script& script,
+        uint8_t version);
+
+    /// Members.
+    /// These should be const, apart from the need to implement assignment.
     bool valid_;
     uint8_t version_;
     short_hash hash_;
 };
 
-
-/**
- * Override the equality operator to compare to addresses.
- * Compares only the hash value.
- */
-BC_API bool operator==(const payment_address& left,
-    const payment_address& right);
-
-/**
- * Extract a payment address from an input or output script.
- * The address will be invalid if and only if the script type is not
- * supported or the script is itself invalid.
- */
-BC_API payment_address extract_address(const chain::script& script);
-
 } // namspace wallet
 } // namspace libbitcoin
 
-// Allow payment_address to be in indexed in std::*map classes.
-namespace std
-{
-    template <>
-    struct BC_API hash<bc::wallet::payment_address>
-    {
-        size_t operator()(const bc::wallet::payment_address& address) const
-        {
-            // Create a string of the form [address-version|address-hash].
-            std::string buffer;
-            buffer.resize(bc::short_hash_size + 1);
-            buffer[0] = address.version();
-            const auto& hash = address.hash();
-            std::copy(hash.begin(), hash.end(), buffer.begin() + 1);
-
-            std::hash<std::string> functor;
-            return functor(buffer);
-        }
-    };
-
-} // namspace std
+////// Allow payment_address to be in indexed in std::*map classes.
+////namespace std
+////{
+////    template <>
+////    struct hash<bc::wallet::payment_address>
+////    {
+////        size_t operator()(const bc::wallet::payment_address& address) const
+////        {
+////            // Create a string of the form [address-version|address-hash].
+////            std::string buffer;
+////            buffer.resize(bc::short_hash_size + 1);
+////            buffer[0] = address.version();
+////            const auto& hash = address.hash();
+////            std::copy(hash.begin(), hash.end(), buffer.begin() + 1);
+////            std::hash<std::string> functor;
+////            return functor(buffer);
+////        }
+////    };
+////
+////} // namspace std
 
 #endif

@@ -28,11 +28,13 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/wallet/ec_private.hpp>
+#include <bitcoin/bitcoin/wallet/ec_public.hpp>
 #include "parse_encrypted_keys/parse_ek_key.hpp"
 #include "parse_encrypted_keys/parse_ek_prefix.hpp"
 #include "parse_encrypted_keys/parse_ek_private.hpp"
@@ -63,17 +65,17 @@ static bool address_salt(ek_salt& salt, const payment_address& address)
     return true;
 }
 
-static bool address_salt(ek_salt& salt, const ec_public& point,
+static bool address_salt(ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
-    payment_address address(point, version, compressed);
+    payment_address address({ point, compressed }, version);
     return address ? address_salt(salt, address) : false;
 }
 
 static bool address_salt(ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
-    payment_address address(secret, version, compressed);
+    payment_address address({ secret, version, compressed });
     return address ? address_salt(salt, address) : false;
 }
 
@@ -84,17 +86,17 @@ static bool address_validate(const ek_salt& salt,
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
-static bool address_validate(const ek_salt& salt, const ec_public& point,
+static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
-    payment_address address(point, version, compressed);
+    payment_address address({ point, compressed }, version);
     return address ? address_validate(salt, address) : false;
 }
 
 static bool address_validate(const ek_salt& salt, const ec_secret& secret,
     uint8_t version, bool compressed)
 {
-    payment_address address(secret, version, compressed);
+    payment_address address({ secret, version, compressed });
     return address ? address_validate(salt, address) : false;
 }
 
@@ -241,13 +243,13 @@ bool create_key_pair(ek_private& out_private, ek_public& out_public,
         return false;
 
     const auto point = splice(parse.sign(), parse.data());
-    out_point = point;
+    auto point_copy = point;
     const auto factor = bitcoin_hash(seed);
-    if (!ec_multiply(out_point, factor))
+    if (!ec_multiply(point_copy, factor))
         return false;
 
     ek_salt salt;
-    if (!address_salt(salt, out_point, version, compressed))
+    if (!address_salt(salt, point_copy, version, compressed))
         return false;
 
     const auto salt_entropy = splice(salt, parse.entropy());
@@ -261,6 +263,7 @@ bool create_key_pair(ek_private& out_private, ek_public& out_public,
     create_private_key(out_private, flags, salt, parse.entropy(), derived.left,
         derived.right, seed, version);
 
+    out_point = point_copy;
     return true;
 }
 

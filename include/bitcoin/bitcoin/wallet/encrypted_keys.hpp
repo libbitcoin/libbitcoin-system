@@ -21,9 +21,10 @@
 #define LIBBITCOIN_ENCRYPTED_KEYS_HPP
 
 #include <string>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
@@ -117,7 +118,7 @@ BC_API bool create_token(ek_token& out_token, const std::string& passphrase,
 /**
  * Create an encrypted private key from an intermediate passphrase.
  * The `out_point` paramter is always compressed, so to use it it should be 
- * decompressed as necessary to match the state ot the `compressed` parameter.
+ * decompressed as necessary to match the state of the `compressed` parameter.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_point    The ec compressed public key of the new key pair.
  * @param[in]  token        An intermediate passphrase string.
@@ -134,7 +135,7 @@ BC_API bool create_key_pair(ek_private& out_private, ec_compressed& out_point,
  * DEPRECATED
  * Create an encrypted key pair from an intermediate passphrase.
  * The `out_point` paramter is always compressed, so to use it it should be 
- * decompressed as necessary to match the state ot the `compressed` parameter.
+ * decompressed as necessary to match the state of the `compressed` parameter.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_public   The new encrypted public key.
  * @param[out] out_point    The compressed ec public key of the new key pair.
