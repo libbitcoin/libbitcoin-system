@@ -58,7 +58,6 @@ public:
         const hd_private& of);
 
     /// Cast operators.
-    operator const bool() const;
     operator const ec_secret&() const;
 
     /// Serializer.
