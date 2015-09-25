@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -344,6 +345,13 @@ std::istream& operator>>(std::istream& in, stealth_address& to)
     std::string value;
     in >> value;
     to = stealth_address(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
     return in;
 }
 

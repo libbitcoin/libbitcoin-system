@@ -48,10 +48,9 @@ public:
     bool operator==(const bitcoin_uri& other) const;
     bool operator!=(const bitcoin_uri& other) const;
     bitcoin_uri& operator=(const bitcoin_uri& other);
-    friend std::istream& operator>>(std::istream& input,
-        bitcoin_uri& argument);
-    friend std::ostream& operator<<(std::ostream& output,
-        const bitcoin_uri& argument);
+    friend std::istream& operator>>(std::istream& in, bitcoin_uri& to);
+    friend std::ostream& operator<<(std::ostream& out,
+        const bitcoin_uri& from);
 
     /// Test whether the URI has been initialized.
     operator const bool() const;

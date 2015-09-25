@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
 
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -221,6 +222,13 @@ std::istream& operator>>(std::istream& in, ec_public& to)
     std::string value;
     in >> value;
     to = ec_public(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
     return in;
 }
 

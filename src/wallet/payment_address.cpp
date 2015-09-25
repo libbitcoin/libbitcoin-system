@@ -22,6 +22,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -196,6 +197,13 @@ std::istream& operator>>(std::istream& in, payment_address& to)
     std::string value;
     in >> value;
     to = payment_address(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
     return in;
 }
 

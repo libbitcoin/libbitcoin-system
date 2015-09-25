@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <string>
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
@@ -239,6 +240,13 @@ std::istream& operator>>(std::istream& in, hd_private& to)
     std::string value;
     in >> value;
     to = hd_private(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
     return in;
 }
 
