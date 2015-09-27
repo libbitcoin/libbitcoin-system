@@ -69,7 +69,6 @@ static bool is_query_char(const char c)
     return is_query(c) && '&' != c && '=' != c;
 }
 
-
 // Verifies that all RFC 3986 escape sequences in a string are valid, and that
 // all characters belong to the given class.
 static bool validate(const std::string& in, bool (*is_valid)(const char))
