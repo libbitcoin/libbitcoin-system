@@ -154,8 +154,6 @@ bool bitcoin_uri::set_address(const std::string& address)
     payment_address payment(address);
     if (payment)
     {
-        // Normalize the encoding (as we do for amount)?
-        //address_ = payment.encoded();
         address_ = address;
         return true;
     }
@@ -163,8 +161,6 @@ bool bitcoin_uri::set_address(const std::string& address)
     stealth_address stealth(address);
     if (stealth)
     {
-        // Normalize the encoding (as we do for amount)?
-        //address_ = stealth.encoded();
         address_ = address;
         return true;
     }
