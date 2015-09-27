@@ -73,6 +73,7 @@ public:
     void set_label(const std::string& label);
     void set_message(const std::string& message);
     void set_r(const std::string& r);
+    bool set_address(const std::string& address);
     void set_address(const payment_address& payment);
     void set_address(const stealth_address& stealth);
 
@@ -86,7 +87,6 @@ public:
 
 private:
     /// Private helpers.
-    bool set_address(const std::string& address);
     bool set_amount(const std::string& satoshis);
 
     /// Member state.
