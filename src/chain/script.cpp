@@ -44,6 +44,7 @@ namespace chain {
 // False is an empty stack.
 static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{ 1 };
+static constexpr uint32_t five_bits = 0x0000001f;
 static constexpr uint64_t op_counter_limit = 201;
 
 script script::factory_from_data(const data_chunk& data, bool prefix,
@@ -374,7 +375,7 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // (note the lack of nullify_input_sequences() call)
 
     // sighash::none signs no outputs so they can be changed.
-    if ((hash_type & 0x1f) == signature_hash_algorithm::none)
+    if ((hash_type & five_bits) == signature_hash_algorithm::none)
     {
         parent_tx.outputs.clear();
         nullify_input_sequences(parent_tx.inputs, input_index);
@@ -382,9 +383,9 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
 
     // Sign the single corresponding output to our index.
     // We don't care about additional inputs or outputs to the tx.
-    else if ((hash_type & 0x1f) == signature_hash_algorithm::single)
+    else if ((hash_type & five_bits) == signature_hash_algorithm::single)
     {
-        output::list& outputs = parent_tx.outputs;
+        auto& outputs = parent_tx.outputs;
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
@@ -394,7 +395,7 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
 
         outputs.resize(output_index + 1);
 
-        // Loop through outputs except the last one
+        // Loop through outputs except the last one.
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
             it->value = std::numeric_limits<uint64_t>::max();
