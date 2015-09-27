@@ -94,6 +94,13 @@ std::string endpoint::to_string() const
     return value.str();
 }
 
+endpoint::operator const bool() const
+{
+    // Return true if initialized.
+    // TODO: this is a quick hack, along with http/https.
+    return !scheme_.empty();
+}
+
 bool endpoint::operator==(const endpoint& other) const
 {
     return host_ == other.host_ && port_ == other.port_ &&
@@ -106,7 +113,7 @@ std::istream& operator>>(std::istream& input, endpoint& argument)
     input >> value;
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    static const regex regular("^((tcp|udp):\\/\\/)?"
+    static const regex regular("^((tcp|udp|http|https):\\/\\/)?"
         "(\\[([0-9a-f:\\.]+)]|([^:]+))(:([0-9]{1,5}))?$");
 
     sregex_iterator it(value.begin(), value.end(), regular), end;

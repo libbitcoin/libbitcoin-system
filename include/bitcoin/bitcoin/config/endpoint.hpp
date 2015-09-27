@@ -93,6 +93,12 @@ public:
 
     /**
      * Getter.
+     * @return True if the endpoint is initialized.
+     */
+    operator const bool() const;
+
+    /**
+     * Getter.
      * @return The scheme of the endpoint or empty string.
      */
     const std::string& scheme() const;
