@@ -38,8 +38,8 @@
 namespace libbitcoin {
 namespace wallet {
     
-const uint64_t hd_private::mainnet = uint64_t(0x0488ade4) << 32 |
-    hd_public::mainnet;
+BC_CONSTEXPR uint64_t hd_private::mainnet = to_prefixes(0x0488ade4,
+    hd_public::mainnet);
 
 hd_private::hd_private()
   : hd_public(), secret_(null_hash)
@@ -172,6 +172,11 @@ hd_key hd_private::to_hd_key() const
     });
 
     return out;
+}
+
+const hd_public& hd_private::to_public() const
+{
+    return *this;
 }
 
 const ec_secret& hd_private::to_secret() const
