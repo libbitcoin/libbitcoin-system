@@ -38,10 +38,10 @@ class payment_address;
 class BC_API ec_public
 {
 public:
-    static const uint8_t compressed_even;
-    static const uint8_t compressed_odd;
-    static const uint8_t uncompressed;
-    static const uint8_t mainnet_p2kh;
+    static BC_CONSTEXPR uint8_t compressed_even;
+    static BC_CONSTEXPR uint8_t compressed_odd;
+    static BC_CONSTEXPR uint8_t uncompressed;
+    static BC_CONSTEXPR uint8_t mainnet_p2kh;
 
     /// Constructors.
     ec_public();

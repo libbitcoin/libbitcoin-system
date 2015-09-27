@@ -32,10 +32,10 @@
 namespace libbitcoin {
 namespace wallet {
 
-const uint8_t ec_private::wif = 0x80;
-const uint8_t ec_private::mainnet_p2kh = 0x00;
-const uint16_t ec_private::mainnet = uint8_t(wif) << 8 | mainnet_p2kh;
-const uint8_t ec_private::compressed_sentinel = 0x01;
+BC_CONSTEXPR uint8_t ec_private::wif = 0x80;
+BC_CONSTEXPR uint8_t ec_private::mainnet_p2kh = 0x00;
+BC_CONSTEXPR uint16_t ec_private::mainnet = uint8_t(wif) << 8 | mainnet_p2kh;
+BC_CONSTEXPR uint8_t ec_private::compressed_sentinel = 0x01;
 
 ec_private::ec_private()
   : valid_(false), compress_(true), version_(0), secret_(null_hash)
@@ -188,6 +188,7 @@ const bool ec_private::compressed() const
 // ----------------------------------------------------------------------------
 
 // Conversion to ec_public loses all version information.
+// In the case of failure the key is always compressed (ec_compressed_null).
 ec_public ec_private::to_public() const
 {
     ec_compressed point;
