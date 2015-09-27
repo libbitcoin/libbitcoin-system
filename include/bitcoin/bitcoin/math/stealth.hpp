@@ -35,11 +35,11 @@ BC_API bool shared_secret(ec_secret& out_shared, const ec_secret& secret,
     const ec_compressed& point);
 
 BC_API bool uncover_stealth(ec_compressed& out_stealth,
-    const ec_compressed& ephemeral, const ec_secret& scan,
+    const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ephemeral,
     const ec_compressed& spend);
 
 BC_API bool uncover_stealth(ec_secret& out_stealth,
-    const ec_compressed& ephemeral, const ec_secret& scan,
+    const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ephemeral,
     const ec_secret& spend);
 
 /// Convert a stealth info script to a prefix usable for stealth.

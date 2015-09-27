@@ -40,11 +40,11 @@ bool shared_secret(ec_secret& out_shared, const ec_secret& secret,
 }
 
 bool uncover_stealth(ec_compressed& out_stealth,
-    const ec_compressed& ephemeral, const ec_secret& scan,
+    const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ophemeral,
     const ec_compressed& spend)
 {
     ec_secret shared;
-    if (!shared_secret(shared, scan, ephemeral))
+    if (!shared_secret(shared, scan_or_ophemeral, ephemeral_or_scan))
         return false;
 
     auto copy = spend;
@@ -56,11 +56,11 @@ bool uncover_stealth(ec_compressed& out_stealth,
 }
 
 bool uncover_stealth(ec_secret& out_stealth,
-    const ec_compressed& ephemeral, const ec_secret& scan,
+    const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ephemeral,
     const ec_secret& spend)
 {
     ec_secret shared;
-    if (!shared_secret(shared, scan, ephemeral))
+    if (!shared_secret(shared, scan_or_ephemeral, ephemeral_or_scan))
         return false;
 
     auto copy = spend;
