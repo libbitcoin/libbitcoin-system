@@ -43,8 +43,8 @@ typedef byte_array<payment_size> payment;
 class BC_API payment_address
 {
 public:
-    static const uint8_t mainnet_p2kh;
-    static const uint8_t mainnet_p2sh;
+    static BC_CONSTEXPR uint8_t mainnet_p2kh;
+    static BC_CONSTEXPR uint8_t mainnet_p2sh;
 
     /// Extract a payment address from an input or output script.
     /// The address will be invalid if and only if the script type is not
@@ -80,6 +80,9 @@ public:
     /// Accessors.
     uint8_t version() const;
     const short_hash& hash() const;
+
+    /// Methods.
+    payment to_payment() const;
 
 private:
     /// Validators.

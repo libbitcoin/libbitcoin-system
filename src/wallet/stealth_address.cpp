@@ -40,7 +40,6 @@ static constexpr uint8_t options_size = sizeof(uint8_t);
 static constexpr uint8_t number_keys_size = sizeof(uint8_t);
 static constexpr uint8_t number_sigs_size = sizeof(uint8_t);
 static constexpr uint8_t filter_length_size = sizeof(uint8_t);
-static constexpr uint8_t max_filter_bits = sizeof(uint32_t) * byte_bits;
 static constexpr uint8_t max_spend_key_count = max_uint8;
 
 // wiki.unsystem.net/index.php/DarkWallet/Stealth#Address_format
@@ -56,8 +55,10 @@ constexpr size_t min_address_size = version_size + options_size +
 static_assert(binary_type::bits_per_block == byte_bits,
     "The declaraction of stealh_prefix must have an 8 bit block size.");
 
-const uint8_t stealth_address::mainnet_p2kh = 0x2a;
-const uint8_t stealth_address::reuse_key_flag = 1 << 0;
+BC_CONSTEXPR uint8_t stealth_address::mainnet_p2kh = 0x2a;
+BC_CONSTEXPR uint8_t stealth_address::reuse_key_flag = 1 << 0;
+BC_CONSTEXPR uint8_t stealth_address::max_filter_bits = sizeof(uint32_t) *
+    byte_bits;
 
 stealth_address::stealth_address()
   : valid_(false), version_(0), scan_key_(null_compressed_point),

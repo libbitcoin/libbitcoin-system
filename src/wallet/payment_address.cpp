@@ -32,8 +32,8 @@
 namespace libbitcoin {
 namespace wallet {
 
-const uint8_t payment_address::mainnet_p2kh = 0x00;
-const uint8_t payment_address::mainnet_p2sh = 0x05;
+BC_CONSTEXPR uint8_t payment_address::mainnet_p2kh = 0x00;
+BC_CONSTEXPR uint8_t payment_address::mainnet_p2sh = 0x05;
 
 payment_address::payment_address()
   : valid_(false), version_(0), hash_(null_short_hash)
@@ -168,6 +168,14 @@ uint8_t payment_address::version() const
 const short_hash& payment_address::hash() const
 {
     return hash_;
+}
+
+// Methods.
+// ----------------------------------------------------------------------------
+
+payment payment_address::to_payment() const
+{
+    return wrap(version_, hash_);
 }
 
 // Operators.
