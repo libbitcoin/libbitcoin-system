@@ -94,6 +94,23 @@ const wallet::ek_token& ek_token::token() const
 // Operators.
 // ----------------------------------------------------------------------------
 
+ek_token& ek_token::operator=(const ek_token& other)
+{
+    valid_ = other.valid_;
+    token_ = other.token_;
+    return *this;
+}
+
+bool ek_token::operator==(const ek_token& other) const
+{
+    return valid_ == other.valid_ && token_ == other.token_;
+}
+
+bool ek_token::operator!=(const ek_token& other) const
+{
+    return !(*this == other);
+}
+
 std::istream& operator>>(std::istream& in, ek_token& to)
 {
     std::string value;

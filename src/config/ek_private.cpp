@@ -94,6 +94,23 @@ const wallet::ek_private& ek_private::private_key() const
 // Operators.
 // ----------------------------------------------------------------------------
 
+ek_private& ek_private::operator=(const ek_private& other)
+{
+    valid_ = other.valid_;
+    private_ = other.private_;
+    return *this;
+}
+
+bool ek_private::operator==(const ek_private& other) const
+{
+    return valid_ == other.valid_ && private_ == other.private_;
+}
+
+bool ek_private::operator!=(const ek_private& other) const
+{
+    return !(*this == other);
+}
+
 std::istream& operator>>(std::istream& in, ek_private& to)
 {
     std::string value;

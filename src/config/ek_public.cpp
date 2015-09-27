@@ -94,6 +94,23 @@ const wallet::ek_public& ek_public::public_key() const
 // Operators.
 // ----------------------------------------------------------------------------
 
+ek_public& ek_public::operator=(const ek_public& other)
+{
+    valid_ = other.valid_;
+    public_ = other.public_;
+    return *this;
+}
+
+bool ek_public::operator==(const ek_public& other) const
+{
+    return valid_ == other.valid_ && public_ == other.public_;
+}
+
+bool ek_public::operator!=(const ek_public& other) const
+{
+    return !(*this == other);
+}
+
 std::istream& operator>>(std::istream& in, ek_public& to)
 {
     std::string value;
