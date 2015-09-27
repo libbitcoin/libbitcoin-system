@@ -30,64 +30,89 @@
 namespace libbitcoin {
 namespace config {
 
-static bool decode_key(wallet::ek_token& key, const std::string& encoded)
-{
-    return decode_base58(key, encoded) && verify_checksum(key);
-}
-
-static std::string encode_key(const wallet::ek_token& key)
-{
-    return encode_base58(key);
-}
-
 ek_token::ek_token()
-  : value_()
+  : valid_(false), token_()
 {
 }
 
-ek_token::ek_token(const std::string& base58)
-{
-    std::stringstream(base58) >> *this;
-}
-
-ek_token::ek_token(const wallet::ek_token& value)
-  : value_(value)
+ek_token::ek_token(const std::string& encoded)
+  : ek_token(from_string(encoded))
 {
 }
 
 ek_token::ek_token(const ek_token& other)
-  : ek_token(other.value_)
+  : valid_(other.valid_), token_(other.token_)
 {
 }
 
-wallet::ek_token& ek_token::data()
+ek_token::ek_token(const wallet::ek_token& value)
+  : valid_(true), token_(value)
 {
-    return value_;
+}
+
+// Factories.
+// ----------------------------------------------------------------------------
+
+ek_token ek_token::from_string(const std::string& encoded)
+{
+    // TODO: incorporate existing parser here, setting new members.
+
+    wallet::ek_token key;
+    return decode_base58(key, encoded) && verify_checksum(key) ?
+        ek_token(key) : ek_token();
+}
+
+// Cast operators.
+// ----------------------------------------------------------------------------
+
+ek_token::operator const bool() const
+{
+    return valid_;
 }
 
 ek_token::operator const wallet::ek_token&() const
 {
-    return value_;
+    return token_;
 }
 
-std::istream& operator>>(std::istream& input, ek_token& argument)
-{
-    std::string base58;
-    input >> base58;
+// Serializer.
+// ----------------------------------------------------------------------------
 
-    if (!decode_key(argument.value_, base58))
+std::string ek_token::encoded() const
+{
+    return encode_base58(token_);
+}
+
+// Accessors.
+// ----------------------------------------------------------------------------
+
+const wallet::ek_token& ek_token::token() const
+{
+    return token_;
+}
+
+// Operators.
+// ----------------------------------------------------------------------------
+
+std::istream& operator>>(std::istream& in, ek_token& to)
+{
+    std::string value;
+    in >> value;
+    to = ek_token(value);
+
+    if (!to)
     {
         using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(base58));
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }
 
-    return input;
+    return in;
 }
 
-std::ostream& operator<<(std::ostream& output, const ek_token& argument)
+std::ostream& operator<<(std::ostream& out, const ek_token& of)
 {
-    output << encode_key(argument.value_);
-    return output;
+    out << of.encoded();
+    return out;
 }
 
 } // namespace config

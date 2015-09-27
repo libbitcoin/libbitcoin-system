@@ -23,78 +23,46 @@
 #include <iostream>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 
 namespace libbitcoin {
 namespace config {
 
-/**
- * Serialization helper to convert between base58 and encrypted public key.
- */
+/// Use to pass an encrypted public key.
 class BC_API ek_public
 {
 public:
-
-    /**
-     * Default constructor.
-     */
+    /// Constructors.
     ek_public();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  base58  The value to initialize with.
-     */
-    ek_public(const std::string& base58);
-
-    /**
-     * Initialization constructor.
-     * @param[in]  key  The value to initialize with.
-     */
+    ek_public(const std::string& encoded);
     ek_public(const wallet::ek_public& key);
-
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
     ek_public(const ek_public& other);
 
-    /**
-     * Return a reference to the data member.
-     * @return  A reference to the object's internal data.
-     */
-    wallet::ek_public& data();
+    /// Operators.
+    bool operator==(const ek_public& other) const;
+    bool operator!=(const ek_public& other) const;
+    ek_public& operator=(const ek_public& other);
+    friend std::istream& operator>>(std::istream& in, ek_public& to);
+    friend std::ostream& operator<<(std::ostream& out, const ek_public& of);
 
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type.
-     */
+    /// Cast operators.
+    operator const bool() const;
     operator const wallet::ek_public&() const;
 
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
-    friend std::istream& operator>>(std::istream& input,
-        ek_public& argument);
+    /// Serializer.
+    std::string encoded() const;
 
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
-    friend std::ostream& operator<<(std::ostream& output,
-        const ek_public& argument);
+    /// Accessors.
+    const wallet::ek_public& ek_public::public_key() const;
 
 private:
+    /// Factories.
+    static ek_public from_string(const std::string& encoded);
 
-    /**
-     * The state of this object.
-     */
-    wallet::ek_public value_;
+    /// Members.
+    /// These should be const, apart from the need to implement assignment.
+    bool valid_;
+    wallet::ek_public public_;
 };
 
 } // namespace config

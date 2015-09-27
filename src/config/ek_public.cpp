@@ -30,64 +30,89 @@
 namespace libbitcoin {
 namespace config {
 
-static bool decode_key(wallet::ek_public& key, const std::string& encoded)
-{
-    return decode_base58(key, encoded) && verify_checksum(key);
-}
-
-static std::string encode_key(const wallet::ek_public& key)
-{
-    return encode_base58(key);
-}
-
 ek_public::ek_public()
-  : value_()
+  : valid_(false), public_()
 {
 }
 
-ek_public::ek_public(const std::string& base58)
-{
-    std::stringstream(base58) >> *this;
-}
-
-ek_public::ek_public(const wallet::ek_public& value)
-  : value_(value)
+ek_public::ek_public(const std::string& encoded)
+  : ek_public(from_string(encoded))
 {
 }
 
 ek_public::ek_public(const ek_public& other)
-  : ek_public(other.value_)
+  : valid_(other.valid_), public_(other.public_)
 {
 }
 
-wallet::ek_public& ek_public::data()
+ek_public::ek_public(const wallet::ek_public& value)
+  : valid_(true), public_(value)
 {
-    return value_;
+}
+
+// Factories.
+// ----------------------------------------------------------------------------
+
+ek_public ek_public::from_string(const std::string& encoded)
+{
+    // TODO: incorporate existing parser here, setting new members.
+
+    wallet::ek_public key;
+    return decode_base58(key, encoded) && verify_checksum(key) ?
+        ek_public(key) : ek_public();
+}
+
+// Cast operators.
+// ----------------------------------------------------------------------------
+
+ek_public::operator const bool() const
+{
+    return valid_;
 }
 
 ek_public::operator const wallet::ek_public&() const
 {
-    return value_;
+    return public_;
 }
 
-std::istream& operator>>(std::istream& input, ek_public& argument)
-{
-    std::string base58;
-    input >> base58;
+// Serializer.
+// ----------------------------------------------------------------------------
 
-    if (!decode_key(argument.value_, base58))
+std::string ek_public::encoded() const
+{
+    return encode_base58(public_);
+}
+
+// Accessors.
+// ----------------------------------------------------------------------------
+
+const wallet::ek_public& ek_public::public_key() const
+{
+    return public_;
+}
+
+// Operators.
+// ----------------------------------------------------------------------------
+
+std::istream& operator>>(std::istream& in, ek_public& to)
+{
+    std::string value;
+    in >> value;
+    to = ek_public(value);
+
+    if (!to)
     {
         using namespace boost::program_options;
-        BOOST_THROW_EXCEPTION(invalid_option_value(base58));
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
     }
 
-    return input;
+    return in;
 }
 
-std::ostream& operator<<(std::ostream& output, const ek_public& argument)
+std::ostream& operator<<(std::ostream& out, const ek_public& of)
 {
-    output << encode_key(argument.value_);
-    return output;
+    out << of.encoded();
+    return out;
 }
 
 } // namespace config
