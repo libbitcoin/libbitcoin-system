@@ -81,8 +81,8 @@ script_pattern script::pattern() const
     if (operation::is_pay_public_key_pattern(operations))
         return script_pattern::pay_public_key;
 
-    if (operation::is_pay_public_key_hash_pattern(operations))
-        return script_pattern::pay_public_key_hash;
+    if (operation::is_pay_key_hash_pattern(operations))
+        return script_pattern::pay_key_hash;
 
     if (operation::is_pay_script_hash_pattern(operations))
         return script_pattern::pay_script_hash;
@@ -93,8 +93,8 @@ script_pattern script::pattern() const
     if (operation::is_sign_public_key_pattern(operations))
         return script_pattern::sign_public_key;
 
-    if (operation::is_sign_public_key_hash_pattern(operations))
-        return script_pattern::sign_public_key_hash;
+    if (operation::is_sign_key_hash_pattern(operations))
+        return script_pattern::sign_key_hash;
 
     if (operation::is_sign_script_hash_pattern(operations))
         return script_pattern::sign_script_hash;

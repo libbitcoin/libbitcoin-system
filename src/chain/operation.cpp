@@ -32,6 +32,8 @@
 namespace libbitcoin {
 namespace chain {
 
+BC_CONSTEXPR size_t operation::max_null_data_size = 80;
+
 operation operation::factory_from_data(const data_chunk& data)
 {
     operation instance;
@@ -268,44 +270,39 @@ bool operation::is_push_only(const operation::stack& ops)
     return count_non_push(ops) == 0;
 }
 
-// null data pattern
+// pattern comparisons
 // ----------------------------------------------------------------------------
 
 bool operation::is_null_data_pattern(const operation::stack& ops)
 {
-    static constexpr size_t max_return_size = 80;
-
     return ops.size() == 2
         && ops[0].code == opcode::return_
         && ops[1].code == opcode::special
-        && ops[1].data.size() <= max_return_size;
+        && ops[1].data.size() <= max_null_data_size;
 }
-
-// payment script patterns
-// ----------------------------------------------------------------------------
 
 bool operation::is_pay_multisig_pattern(const operation::stack& ops)
 {
-    // Subtract 80 because OP_1 = 81
-    static constexpr size_t op_1_offset = 80;
+    static constexpr size_t op_1 = static_cast<uint8_t>(opcode::op_1);
+    static constexpr size_t op_16 = static_cast<uint8_t>(opcode::op_16);
 
-    // M of N multisig
     const auto op_count = ops.size();
-    if (op_count < 4 || ops.back().code != opcode::checkmultisig)
+    if (op_count < 4 || ops[op_count - 1].code != opcode::checkmultisig)
         return false;
 
-    const auto m = static_cast<uint8_t>(ops[0].code) - op_1_offset;
-    const auto n = static_cast<uint8_t>(ops[op_count - 2].code) - op_1_offset;
-    
-    if (m < 1 || n < 1 || n < m || op_count != n + 3u)
+    const auto op_m = static_cast<uint8_t>(ops[0].code);
+    const auto op_n = static_cast<uint8_t>(ops[op_count - 2].code);
+    if (op_m < op_1 || op_m > op_n || op_n < op_1 || op_n > op_16)
+        return false;
+
+    const auto n = op_n - op_1;
+    const auto points = op_count - 3u;
+    if (n != points)
         return false;
 
     for (auto op = ops.begin() + 1; op != ops.end() - 2; ++op)
-    {
-        if (op->data.size() != ec_compressed_size &&
-            op->data.size() != ec_uncompressed_size)
+        if (!is_point(op->data))
             return false;
-    }
 
     return true;
 }
@@ -314,10 +311,11 @@ bool operation::is_pay_public_key_pattern(const operation::stack& ops)
 {
     return ops.size() == 2
         && ops[0].code == opcode::special
+        && is_point(ops[0].data)
         && ops[1].code == opcode::checksig;
 }
 
-bool operation::is_pay_public_key_hash_pattern(const operation::stack& ops)
+bool operation::is_pay_key_hash_pattern(const operation::stack& ops)
 {
     return ops.size() == 5
         && ops[0].code == opcode::dup
@@ -337,9 +335,6 @@ bool operation::is_pay_script_hash_pattern(const operation::stack& ops)
         && ops[2].code == opcode::equal;
 }
 
-// signature script patterns
-// ----------------------------------------------------------------------------
-
 bool operation::is_sign_multisig_pattern(const operation::stack& ops)
 {
     if (ops.size() < 2 || !is_push_only(ops))
@@ -356,7 +351,7 @@ bool operation::is_sign_public_key_pattern(const operation::stack& ops)
     return ops.size() == 1 && is_push_only(ops);
 }
 
-bool operation::is_sign_public_key_hash_pattern(const operation::stack& ops)
+bool operation::is_sign_key_hash_pattern(const operation::stack& ops)
 {
     return ops.size() == 2 && is_push_only(ops) && is_point(ops.back().data);
 }
@@ -378,9 +373,90 @@ bool operation::is_sign_script_hash_pattern(const operation::stack& ops)
     const auto redeem_script_pattern = redeem_script.pattern();
     return redeem_script_pattern == script_pattern::pay_multisig
         || redeem_script_pattern == script_pattern::pay_public_key
-        || redeem_script_pattern == script_pattern::pay_public_key_hash
+        || redeem_script_pattern == script_pattern::pay_key_hash
         || redeem_script_pattern == script_pattern::pay_script_hash
         || redeem_script_pattern == script_pattern::null_data;
+}
+
+// pattern templates
+// ----------------------------------------------------------------------------
+
+operation::stack operation::to_null_data_pattern(data_slice data)
+{
+    if (data.size() > max_null_data_size)
+        return operation::stack();
+
+    return operation::stack
+    {
+        operation{ opcode::return_, data_chunk() },
+        operation{ opcode::special, to_chunk(data) }
+    };
+}
+
+operation::stack operation::to_pay_public_key_pattern(data_slice point)
+{
+    if (!is_point(point))
+        return operation::stack();
+
+    return operation::stack
+    {
+        operation{ opcode::special, to_chunk(point) },
+        operation{ opcode::checksig, data_chunk() }
+    };
+}
+
+operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
+    loaf points)
+{
+    static constexpr size_t op_1 = static_cast<uint8_t>(opcode::op_1);
+    static constexpr size_t op_16 = static_cast<uint8_t>(opcode::op_16);
+    static constexpr size_t zero = op_1 - 1;
+    static constexpr size_t max = op_16 - zero;
+
+    const auto m = signatures;
+    const auto n = points.size();
+    if (m < 1 || m > n || n < 1 || n > max)
+        return operation::stack();
+
+    const auto op_m = static_cast<opcode>(m + zero);
+    const auto op_n = static_cast<opcode>(points.size() + zero);
+
+    operation::stack ops;
+    ops.push_back({ op_m, data_chunk() });
+
+    for (const auto point: points)
+    {
+        if (!is_point(point))
+            return operation::stack();
+
+        ops.push_back({ opcode::special, to_chunk(point) });
+    }
+
+    ops.push_back({ op_n, data_chunk() });
+    ops.push_back({ opcode::checkmultisig, data_chunk() });
+    return ops;
+}
+
+operation::stack operation::to_pay_key_hash_pattern(const short_hash& hash)
+{
+    return operation::stack
+    {
+        operation{ opcode::dup, data_chunk() },
+        operation{ opcode::hash160, data_chunk() },
+        operation{ opcode::special, to_chunk(hash) },
+        operation{ opcode::equalverify, data_chunk() },
+        operation{ opcode::checksig, data_chunk() }
+    };
+}
+
+operation::stack operation::to_pay_script_hash_pattern(const short_hash& hash)
+{
+    return operation::stack
+    {
+        operation{ opcode::hash160, data_chunk() },
+        operation{ opcode::special, to_chunk(hash) },
+        operation{ opcode::equal, data_chunk() }
+    };
 }
 
 } // namspace chain
