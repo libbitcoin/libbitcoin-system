@@ -139,7 +139,13 @@ ec_public::operator const ec_compressed&() const
 
 std::string ec_public::encoded() const
 {
-    return encode_base16(point_);
+    if (compressed())
+        return encode_base16(point_);
+
+    // If the point is valid it should always decompress, but if not, is null.
+    ec_uncompressed uncompressed(null_uncompressed_point);
+    to_uncompressed(uncompressed);
+    return encode_base16(uncompressed);
 }
 
 // Accessors.
