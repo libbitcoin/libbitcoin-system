@@ -178,7 +178,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
 
     // Deserialize the filter bytes/blocks.
     const data_chunk raw_filter(iterator, iterator + filter_bytes);
-    const binary_type filter(filter_bytes, raw_filter);
+    const binary_type filter(filter_bits, raw_filter);
     return stealth_address(filter, scan_key, spend_keys, signatures, version);
 }
 
