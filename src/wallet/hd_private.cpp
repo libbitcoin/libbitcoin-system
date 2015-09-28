@@ -189,7 +189,7 @@ hd_private hd_private::derive_private(uint32_t index) const
     constexpr uint8_t depth = 0;
     constexpr size_t size = sizeof(depth) + ec_secret_size + sizeof(index);
 
-    auto data = (index >= hd_first_hardened_key) ?
+    const auto data = (index >= hd_first_hardened_key) ?
         splice(to_array(depth), secret_, to_big_endian(index)) :
         splice(point_, to_big_endian(index));
 
@@ -225,14 +225,18 @@ hd_public hd_private::derive_public(uint32_t index) const
 hd_private& hd_private::operator=(const hd_private& other)
 {
     secret_ = other.secret_;
-    static_cast<hd_public>(*this) = other;
+    valid_ = other.valid_;
+    chain_ = other.chain_;
+    lineage_ = other.lineage_;
+    point_ = other.point_;
     return *this;
 }
 
 bool hd_private::operator==(const hd_private& other) const
 {
-    return secret_ == other.secret_ && 
-        static_cast<hd_public>(*this) == other;
+    return secret_ == other.secret_ && valid_ == other.valid_ &&
+        chain_ == other.chain_ && lineage_ == other.lineage_ &&
+        point_ == other.point_;
 }
 
 bool hd_private::operator!=(const hd_private& other) const
