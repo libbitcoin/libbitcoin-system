@@ -1386,7 +1386,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::verify:
             return op_verify(context);
 
-        case opcode::op_return:
+        case opcode::return_:
             return false;
 
         case opcode::toaltstack:

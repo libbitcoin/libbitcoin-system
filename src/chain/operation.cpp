@@ -273,12 +273,12 @@ bool operation::is_push_only(const operation::stack& ops)
 
 bool operation::is_null_data_pattern(const operation::stack& ops)
 {
-    static constexpr size_t max_op_return_size = 80;
+    static constexpr size_t max_return_size = 80;
 
     return ops.size() == 2
-        && ops[0].code == opcode::op_return
+        && ops[0].code == opcode::return_
         && ops[1].code == opcode::special
-        && ops[1].data.size() <= max_op_return_size;
+        && ops[1].data.size() <= max_return_size;
 }
 
 // payment script patterns
