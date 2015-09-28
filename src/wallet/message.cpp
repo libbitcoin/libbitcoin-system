@@ -107,6 +107,12 @@ bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
 }
 
 bool sign_message(message_signature& signature, data_slice message,
+    const ec_private& secret)
+{
+    return sign_message(signature, message, secret, secret.compressed());
+}
+
+bool sign_message(message_signature& signature, data_slice message,
     const std::string& wif)
 {
     ec_private secret(wif);
