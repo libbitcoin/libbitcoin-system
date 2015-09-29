@@ -17,46 +17,42 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_EK_PREFIX_IPP
-#define LIBBITCOIN_PARSE_EK_PREFIX_IPP
+#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PRIVATE_HPP
+#define LIBBITCOIN_PARSE_ENCRYPTED_PRIVATE_HPP
 
 #include <cstdint>
 #include <cstddef>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
+#include "parse_encrypted_key.hpp"
 
 namespace libbitcoin {
 namespace wallet {
-    
-template<size_t Size>
-parse_ek_prefix<Size>::parse_ek_prefix(const byte_array<Size>& value)
-  : prefix_(value), valid_(false)
-{
-}
 
-template<size_t Size>
-uint8_t parse_ek_prefix<Size>::context() const
+class parse_encrypted_private
+  : public parse_encrypted_key<2u>
 {
-    return prefix_.back();
-}
+public:
+    static byte_array<prefix_size> prefix_factory(uint8_t address, bool multiplied);
 
-template<size_t Size>
-byte_array<Size> parse_ek_prefix<Size>::prefix() const
-{
-    return prefix_;
-}
+    parse_encrypted_private(const encrypted_private& key);
 
-template<size_t Size>
-bool parse_ek_prefix<Size>::valid() const
-{
-    return valid_;
-}
+    bool multiplied() const;
+    uint8_t address_version() const;
 
-template<size_t Size>
-void parse_ek_prefix<Size>::valid(bool value)
-{
-    valid_ = value;
-}
+    quarter_hash data1() const;
+    half_hash data2() const;
+
+private:
+    bool verify_magic() const;
+
+    static constexpr uint8_t default_context_ = 0x42;
+    static constexpr uint8_t multiplied_context_ = 0x43;
+    static const byte_array<magic_size> magic_;
+
+    const quarter_hash data1_;
+    const half_hash data2_;
+};
 
 } // namespace wallet
 } // namespace libbitcoin

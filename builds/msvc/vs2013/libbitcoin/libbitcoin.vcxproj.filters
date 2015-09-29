@@ -132,10 +132,10 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\math\hash.ipp">
       <Filter>include\bitcoin\impl\math</Filter>
     </None>
-    <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_prefix.ipp">
+    <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp">
       <Filter>src\wallet\parse_encrypted_keys</Filter>
     </None>
-    <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_key.ipp">
+    <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.ipp">
       <Filter>src\wallet\parse_encrypted_keys</Filter>
     </None>
   </ItemGroup>
@@ -476,15 +476,6 @@
     <ClCompile Include="..\..\..\..\src\config\ek_private.cpp">
       <Filter>src\config</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_token.cpp">
-      <Filter>src\wallet\parse_encrypted_keys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_public.cpp">
-      <Filter>src\wallet\parse_encrypted_keys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_private.cpp">
-      <Filter>src\wallet\parse_encrypted_keys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp">
       <Filter>src\wallet</Filter>
     </ClCompile>
@@ -508,6 +499,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\src\wallet\hd_public.cpp">
       <Filter>src\wallet</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.cpp">
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.cpp">
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.cpp">
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -928,21 +928,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_private.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_token.hpp">
-      <Filter>src\wallet\parse_encrypted_keys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_public.hpp">
-      <Filter>src\wallet\parse_encrypted_keys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_private.hpp">
-      <Filter>src\wallet\parse_encrypted_keys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_prefix.hpp">
-      <Filter>src\wallet\parse_encrypted_keys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_key.hpp">
-      <Filter>src\wallet\parse_encrypted_keys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri_reader.hpp">
       <Filter>include\bitcoin\wallet</Filter>
     </ClInclude>
@@ -969,6 +954,21 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\hd_public.hpp">
       <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.hpp">
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.hpp">
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.hpp">
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.hpp">
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.hpp">
+      <Filter>src\wallet\parse_encrypted_keys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

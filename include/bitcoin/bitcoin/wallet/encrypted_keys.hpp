@@ -58,25 +58,25 @@ typedef byte_array<ek_seed_size> ek_seed;
 /**
  * An intermediate passphrase (token) type (checked but not base58 encoded).
  */
-static BC_CONSTEXPR size_t ek_token_encoded_size = 72;
-static BC_CONSTEXPR size_t ek_token_decoded_size = 53;
-typedef byte_array<ek_token_decoded_size> ek_token;
+static BC_CONSTEXPR size_t encrypted_token_encoded_size = 72;
+static BC_CONSTEXPR size_t encrypted_token_decoded_size = 53;
+typedef byte_array<encrypted_token_decoded_size> encrypted_token;
 
 /**
  * An encrypted private key type (checked but not base58 encoded).
  */
 static BC_CONSTEXPR size_t ek_private_encoded_size = 58;
 static BC_CONSTEXPR size_t ek_private_decoded_size = 43;
-typedef byte_array<ek_private_decoded_size> ek_private;
+typedef byte_array<ek_private_decoded_size> encrypted_private;
 
 /**
  * DEPRECATED
  * An encrypted public key type (checked but not base58 encoded).
  * This is refered to as a confirmation code in bip38.
  */
-static BC_CONSTEXPR size_t ek_public_encoded_size = 75;
-static BC_CONSTEXPR size_t ek_public_decoded_size = 55;
-typedef byte_array<ek_public_decoded_size> ek_public;
+static BC_CONSTEXPR size_t encrypted_public_encoded_size = 75;
+static BC_CONSTEXPR size_t encrypted_public_decoded_size = 55;
+typedef byte_array<encrypted_public_decoded_size> encrypted_public;
 
 // BIP38
 // It is requested that the unused flag bytes NOT be used for denoting that
@@ -99,7 +99,7 @@ enum ek_flag : uint8_t
  * @param[in]  entropy     A random value for use in the encryption.
  * @return false if the token could not be created from the entropy.
  */
-BC_API bool create_token(ek_token& out_token, const std::string& passphrase,
+BC_API bool create_token(encrypted_token& out_token, const std::string& passphrase,
     const ek_entropy& entropy);
 
 /**
@@ -112,7 +112,7 @@ BC_API bool create_token(ek_token& out_token, const std::string& passphrase,
  * @return false if the lot and/or sequence are out of range or the token
  * could not be created from the entropy.
  */
-BC_API bool create_token(ek_token& out_token, const std::string& passphrase,
+BC_API bool create_token(encrypted_token& out_token, const std::string& passphrase,
     const ek_salt& salt, uint32_t lot, uint32_t sequence);
 
 /**
@@ -127,8 +127,8 @@ BC_API bool create_token(ek_token& out_token, const std::string& passphrase,
  * @param[in]  compressed   Set true to associate ec public key compression.
  * @return false if the token checksum is not valid.
  */
-BC_API bool create_key_pair(ek_private& out_private, ec_compressed& out_point,
-    const ek_token& token, const ek_seed& seed, uint8_t version,
+BC_API bool create_key_pair(encrypted_private& out_private, ec_compressed& out_point,
+    const encrypted_token& token, const ek_seed& seed, uint8_t version,
     bool compressed=true);
 
 /**
@@ -145,8 +145,8 @@ BC_API bool create_key_pair(ek_private& out_private, ec_compressed& out_point,
  * @param[in]  compressed   Set true to associate ec public key compression.
  * @return false if the token checksum is not valid.
  */
-BC_API bool create_key_pair(ek_private& out_private, ek_public& out_public,
-    ec_compressed& out_point, const ek_token& token, const ek_seed& seed,
+BC_API bool create_key_pair(encrypted_private& out_private, encrypted_public& out_public,
+    ec_compressed& out_point, const encrypted_token& token, const ek_seed& seed,
     uint8_t version, bool compressed=true);
 
 #ifdef WITH_ICU
@@ -160,7 +160,7 @@ BC_API bool create_key_pair(ek_private& out_private, ek_public& out_public,
  * @param[in]  compressed   Set true to associate ec public key compression.
  * @return false if the secret could not be converted to a public key.
  */
-BC_API bool encrypt(ek_private& out_private, const ec_secret& secret,
+BC_API bool encrypt(encrypted_private& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version, bool compressed=true);
 
 /**
@@ -173,7 +173,7 @@ BC_API bool encrypt(ek_private& out_private, const ec_secret& secret,
  * @return false if the key checksum or passphrase is not valid.
  */
 BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
-    bool& out_compressed, const ek_private& key,
+    bool& out_compressed, const encrypted_private& key,
     const std::string& passphrase);
 
 /**
@@ -187,7 +187,7 @@ BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
  * @return false if the key    checksum or passphrase is not valid.
  */
 BC_API bool decrypt(ec_compressed& out_point, uint8_t& out_version,
-    bool& out_compressed, const ek_public& key, const std::string& passphrase);
+    bool& out_compressed, const encrypted_public& key, const std::string& passphrase);
 
 #endif // WITH_ICU
 

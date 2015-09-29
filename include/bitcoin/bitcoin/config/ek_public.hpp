@@ -35,7 +35,7 @@ public:
     /// Constructors.
     ek_public();
     ek_public(const std::string& encoded);
-    ek_public(const wallet::ek_public& key);
+    ek_public(const wallet::encrypted_public& key);
     ek_public(const ek_public& other);
 
     /// Operators.
@@ -47,13 +47,13 @@ public:
 
     /// Cast operators.
     operator const bool() const;
-    operator const wallet::ek_public&() const;
+    operator const wallet::encrypted_public&() const;
 
     /// Serializer.
     std::string encoded() const;
 
     /// Accessors.
-    const wallet::ek_public& public_key() const;
+    const wallet::encrypted_public& public_key() const;
 
 private:
     /// Factories.
@@ -62,7 +62,7 @@ private:
     /// Members.
     /// These should be const, apart from the need to implement assignment.
     bool valid_;
-    wallet::ek_public public_;
+    wallet::encrypted_public public_;
 };
 
 } // namespace config

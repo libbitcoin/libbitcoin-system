@@ -17,43 +17,46 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_EK_KEY_HPP
-#define LIBBITCOIN_PARSE_EK_KEY_HPP
+#ifndef LIBBITCOIN_PARSE_ENCRYPTED_TOKEN_HPP
+#define LIBBITCOIN_PARSE_ENCRYPTED_TOKEN_HPP
 
 #include <cstdint>
 #include <cstddef>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_ek_prefix.hpp"
+#include "parse_encrypted_key.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-template<size_t PrefixSize>
-class parse_ek_key
-  : public parse_ek_prefix<PrefixSize>
+class parse_encrypted_token
+  : public parse_encrypted_prefix<8u>
 {
 public:
-    parse_ek_key(const byte_array<PrefixSize>& prefix,
-        const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy);
+    static byte_array<prefix_size> prefix_factory(bool lot_sequence);
 
-    bool compressed() const;
+    parse_encrypted_token(const encrypted_token& value);
+
     bool lot_sequence() const;
-    data_chunk owner_salt() const;
-
-    uint8_t flags() const;
-    ek_salt salt() const;
+    hash_digest data() const;
     ek_entropy entropy() const;
+    one_byte sign() const;
 
 private:
-    const one_byte flags_;
-    const ek_salt salt_;
+    bool verify_context() const;
+    bool verify_magic() const;
+
+    static constexpr uint8_t lot_context_ = 0x51;
+    static constexpr uint8_t default_context_ = 0x53;
+    static const byte_array<magic_size> magic_;
+
     const ek_entropy entropy_;
+    const one_byte sign_;
+    const hash_digest data_;
 };
 
 } // namespace wallet
 } // namespace libbitcoin
-
-#include "parse_ek_key.ipp"
 
 #endif

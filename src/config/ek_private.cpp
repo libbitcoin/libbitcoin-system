@@ -30,6 +30,8 @@
 namespace libbitcoin {
 namespace config {
 
+using namespace wallet;
+
 ek_private::ek_private()
   : valid_(false), private_()
 {
@@ -45,7 +47,7 @@ ek_private::ek_private(const ek_private& other)
 {
 }
 
-ek_private::ek_private(const wallet::ek_private& value)
+ek_private::ek_private(const encrypted_private& value)
   : valid_(true), private_(value)
 {
 }
@@ -57,7 +59,7 @@ ek_private ek_private::from_string(const std::string& encoded)
 {
     // TODO: incorporate existing parser here, setting new members.
 
-    wallet::ek_private key;
+    encrypted_private key;
     return decode_base58(key, encoded) && verify_checksum(key) ?
         ek_private(key) : ek_private();
 }
@@ -70,7 +72,7 @@ ek_private::operator const bool() const
     return valid_;
 }
 
-ek_private::operator const wallet::ek_private&() const
+ek_private::operator const encrypted_private&() const
 {
     return private_;
 }
@@ -86,7 +88,7 @@ std::string ek_private::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const wallet::ek_private& ek_private::private_key() const
+const encrypted_private& ek_private::private_key() const
 {
     return private_;
 }

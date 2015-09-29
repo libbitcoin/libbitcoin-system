@@ -26,11 +26,11 @@
 using namespace bc;
 using namespace bc::wallet;
 
-BOOST_AUTO_TEST_SUITE(ek_tests)
+BOOST_AUTO_TEST_SUITE(encrypted_tests)
 
 #ifdef WITH_ICU
 
-BOOST_AUTO_TEST_CASE(ek__fixture__unicode_passphrase__matches_ek_test_vector)
+BOOST_AUTO_TEST_CASE(encrypted__fixture__unicode_passphrase__matches_encrypted_test_vector)
 {
     const auto encoded_password = base16_literal("cf92cc8100f0909080f09f92a9");
     std::string passphrase(encoded_password.begin(), encoded_password.end());
@@ -44,33 +44,33 @@ BOOST_AUTO_TEST_CASE(ek__fixture__unicode_passphrase__matches_ek_test_vector)
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(ek__create_token_lot)
+BOOST_AUTO_TEST_SUITE(encrypted__create_token_lot)
 
 #define BC_REQUIRE_CREATE_TOKEN_LOT(passphrase, bytes, lot, sequence) \
-    ek_token out_token; \
+    encrypted_token out_token; \
     BOOST_REQUIRE(create_token(out_token, passphrase, bytes, lot, sequence))
 
-BOOST_AUTO_TEST_CASE(ek__create_token_lot__lot_overlow__false)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__lot_overlow__false)
 {
     const size_t lot = 1048575 + 1;
     const size_t sequence = 0;
     const auto passphrase = "";
     const auto salt = base16_literal("baadf00d");
-    ek_token out_token;
+    encrypted_token out_token;
     BOOST_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_lot__sequence_overlow__false)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__sequence_overlow__false)
 {
     const size_t lot = 0;
     const size_t sequence = 4095 + 1;
     const auto passphrase = "";
     const auto salt = base16_literal("baadf00d");
-    ek_token out_token;
+    encrypted_token out_token;
     BOOST_REQUIRE(!create_token(out_token, passphrase, salt, lot, sequence));
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_lot__defaults__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__defaults__expected)
 {
     const size_t lot = 0;
     const size_t sequence = 0;
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_lot__defaults__expected)
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8F7yQVcg1eQKPuX7rzGwBtEH1YSZnKbyk75x3rugZu1ci4RyF4rEn");
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_lot__passphrase__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase__expected)
 {
     const size_t lot = 0;
     const size_t sequence = 0;
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_lot__passphrase__expected)
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8F7x4pQXMhsJs2j7L8LTV8ujk9jGqgzUrafBeto9VrabP5SmvANvz");
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_lot__passphrase_lot_max__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_lot_max__expected)
 {
     const size_t lot = 1048575;
     const size_t sequence = 0;
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_lot__passphrase_lot_max__expected)
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_lot__passphrase_sequence_max__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_sequence_max__expected)
 {
     const size_t lot = 0;
     const size_t sequence = 4095;
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_lot__passphrase_sequence_max__expected)
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphrasecpXbDpHuo8FGWnwMTnTFiHSDnqyARArE2YSFQzMHtCZvM2oWg2K3Ua2crKyc11");
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_lot__passphrase_lot_sequence__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__passphrase_lot_sequence__expected)
 {
     const size_t lot = 42;
     const size_t sequence = 42;
@@ -124,13 +124,13 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(ek__create_token_entropy)
+BOOST_AUTO_TEST_SUITE(encrypted__create_token_entropy)
 
 #define BC_CREATE_TOKEN_ENTROPY(passphrase, bytes) \
-    ek_token out_token; \
+    encrypted_token out_token; \
     create_token(out_token, passphrase, bytes)
 
-BOOST_AUTO_TEST_CASE(ek__create_token_entropy__defaults__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__defaults__expected)
 {
     const auto passphrase = "";
     const auto entropy = base16_literal("baadf00dbaadf00d");
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_entropy__defaults__expected)
     BOOST_REQUIRE_EQUAL(encode_base58(out_token), "passphraseqVHzjNrYRo5G6yLmJ7TQ49fKnQtsgjybNgNHAKBCQKoFZcTNjNJtg4oCUgtPt3");
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_entropy__passphrase__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__passphrase__expected)
 {
     const auto passphrase = "passphrase";
     const auto entropy = base16_literal("baadf00dbaadf00d");
@@ -150,15 +150,15 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(ek__encrypt_private)
+BOOST_AUTO_TEST_SUITE(encrypted__encrypt_private)
 
 #define BC_REQUIRE_ENCRYPT(secret, passphrase, version, compressed, expected) \
-    ek_private out_private; \
+    encrypted_private out_private; \
     BOOST_REQUIRE(encrypt(out_private, secret, passphrase, version, compressed)); \
     BOOST_REQUIRE_EQUAL(encode_base58(out_private), expected)
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_0__expected)
+BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_0__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_0__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_1__expected)
+BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_1__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_1__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_2_compressed__expected)
+BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_2_compressed__expected)
 {
     auto compression = true;
     const uint8_t version = 0x00;
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_2_compressed__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_3_compressed__expected)
+BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_3_compressed__expected)
 {
     auto compression = true;
     const uint8_t version = 0x00;
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_3_compressed__expected)
 }
 
 // #3 from: github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__encrypt_private__vector_unicode__expected)
+BOOST_AUTO_TEST_CASE(encrypted__encrypt_private__vector_unicode__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(ek__decrypt1)
+BOOST_AUTO_TEST_SUITE(encrypted__decrypt1)
 
 // TODO: create compressed+multiplied and altchain/testnet vector(s).
 
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_SUITE(ek__decrypt1)
     BOOST_REQUIRE(decrypt(out_secret, out_version, out_is_compressed, key, passphrase))
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_0__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_0__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PRVWUbkzzsbcVac2qwfssoUJAN1Xhrg6bNk8J7Nzm5H7kxEbn2Nh2ZoGg");
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_0__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_1__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_1__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PRNFFkZc2NZ6dJqFfhRoFNMR9Lnyj7dYGrzdgXXVMXcxoKTePPX1dWByq");
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_1__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_2_compressed__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_2_compressed__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PYNKZ1EAgYgmQfmNVamxyXVWHzK5s6DGhwP4J5o44cvXdoY7sRzhtpUeo");
@@ -257,7 +257,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_2_compressed__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_3_compressed__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_3_compressed__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PYLtMnXvfG3oJde97zRyLYFZCYizPU5T3LwgdYJz1fRhh16bU7u6PPmY7");
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_3_compressed__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_4_multiplied__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_4_multiplied__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PfQu77ygVyJLZjfvMLyhLMQbYnu5uguoJJ4kMCLqWwPEdfpwANVS76gTX");
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_4_multiplied__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#no-compression-no-ec-multiply
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_5_multiplied__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_5_multiplied__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PfLGnQs6VZnrNpmVKfjotbnQuaJK4KZoPFrAjx1JMJUa1Ft8gnf5WxfKd");
@@ -290,7 +290,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_5_multiplied__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_6_multiplied_lot__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_6_multiplied_lot__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PgNBNNzDkKdhkT6uJntUXwwzQV8Rr2tZcbkDcuC9DZRsS6AtHts4Ypo1j");
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_6_multiplied_lot__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_7_multiplied_lot__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_7_multiplied_lot__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PgGWtx25kUg8QWvwuJAgorN6k9FbE25rv5dMRwu5SKMnfpfVe5mar2ngH");
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_7_multiplied_lot__expected)
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_8_multiplied__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_8_multiplied__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PfPAw5HErFdzMyBvGMwSfSWjKmzgm3jDg7RxQyVCSSBJFZLAZ6hVupmpn");
@@ -323,7 +323,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_8_multiplied__expected)
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__decrypt_private__vector_9_multiplied__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_private__vector_9_multiplied__expected)
 {
     const uint8_t expected_version = 0x00;
     const auto key = base58_literal("6PfU2yS6DUHjgH8wmsJRT1rHWXRofmDV5UJ3dypocew56BDcw5TQJXFYfm");
@@ -337,7 +337,7 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(ek__decrypt_public)
+BOOST_AUTO_TEST_SUITE(encrypted__decrypt_public)
 
 // TODO: create compressed and altchain/testnet vector(s).
 
@@ -351,7 +351,7 @@ BOOST_AUTO_TEST_SUITE(ek__decrypt_public)
     const auto derived_address = payment_address({ out_point, out_is_compressed }, out_version).encoded()
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
-BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_6_lot__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_6_lot__expected)
 {
     const uint8_t version = 0x00;
     const auto key = base58_literal("cfrm38V8aXBn7JWA1ESmFMUn6erxeBGZGAxJPY4e36S9QWkzZKtaVqLNMgnifETYw7BPwWC9aPD");
@@ -361,7 +361,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_6_lot__expected)
 }
 
 // github.com/bitcoin/bips/blob/master/bip-0038.mediawiki#ec-multiply-no-compression-lotsequence-numbers
-BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_7_lot__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_7_lot__expected)
 {
     const uint8_t version = 0x00;
     const auto key = base58_literal("cfrm38V8G4qq2ywYEFfWLD5Cc6msj9UwsG2Mj4Z6QdGJAFQpdatZLavkgRd1i4iBMdRngDqDs51");
@@ -371,7 +371,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_7_lot__expected)
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_8__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_8__expected)
 {
     const uint8_t version = 0x00;
     const auto key = base58_literal("cfrm38V5Nm1mn7GxPBAGTXawqXRwE1EbR19GqsvJ9JmF5VKLqi8nETmULpELkQvExCGkTNCH2An");
@@ -381,7 +381,7 @@ BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_8__expected)
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__decrypt_public__vector_9__expected)
+BOOST_AUTO_TEST_CASE(encrypted__decrypt_public__vector_9__expected)
 {
     const uint8_t version = 0x00;
     const auto key = base58_literal("cfrm38V5ec4E5RKwBu46Jf5zfaE54nuB1NWHpHSpgX4GQqfzx7fvqm43mBHvr89pPgykDHts9VC");
@@ -396,28 +396,28 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(ek__create_key_pair)
+BOOST_AUTO_TEST_SUITE(encrypted__create_key_pair)
 
 // TODO: create compressed vector(s).
 
 #define BC_REQUIRE_CREATE_KEY_PAIR(token, seed, version, compressed) \
     ec_compressed out_point; \
-    ek_private out_private; \
+    encrypted_private out_private; \
     BOOST_REQUIRE(create_key_pair(out_private, out_point, token, seed, version, compressed))
 
-BOOST_AUTO_TEST_CASE(ek__create_key_pair__bad_checksum__false)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__bad_checksum__false)
 {
     auto compression = false;
     const uint8_t version = 0x00;
     const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
     ec_compressed out_point;
-    ek_private out_private;
+    encrypted_private out_private;
     BOOST_REQUIRE(!create_key_pair(out_private, out_point, token, seed, version, compression));
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_8__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_8__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
@@ -432,7 +432,7 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_8__expected)
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_9__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
@@ -447,7 +447,7 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_9__expected)
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_9_compressed__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9_compressed__expected)
 {
     auto compression = true;
     const uint8_t version = 0x00;
@@ -459,7 +459,7 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_9_compressed__expected)
 }
 
 // altchain vectors are based on preliminary bidirectional mapping proposal.
-BOOST_AUTO_TEST_CASE(ek__create_key_pair__vector_9_compressed_testnet__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__vector_9_compressed_testnet__expected)
 {
     auto compression = true;
     const uint8_t version = 111;
@@ -474,28 +474,28 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // ----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(ek__create_key_pair_with_confirmation)
+BOOST_AUTO_TEST_SUITE(encrypted__create_key_pair_with_confirmation)
 
 // TODO: create compressed vector(s).
 
 #define BC_REQUIRE_CREATE_KEY_PAIR_CONFIRMATION(token, seed, version, compressed) \
     ec_compressed out_point; \
-    ek_public out_public; \
-    ek_private out_private; \
+    encrypted_public out_public; \
+    encrypted_private out_private; \
     BOOST_REQUIRE(create_key_pair(out_private, out_public, out_point, token, seed, version, compressed))
 
-BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__bad_checksum__false)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__bad_checksum__false)
 {
     const auto seed = base16_literal("d36d8e703d8bd5445044178f69087657fba73d9f3ff211f7");
     const auto token = base58_literal("passphraseo59BauW85etaRsKpbbTrEa5RRYw6bq5K9yrDf4r4N5fcirPdtDKmfJw9oYNoGN");
     ec_compressed out_point;
-    ek_public out_public;
-    ek_private out_private;
+    encrypted_public out_public;
+    encrypted_private out_private;
     BOOST_REQUIRE(!create_key_pair(out_private, out_public, out_point, token, seed, 0, false));
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_8__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_8__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
@@ -511,7 +511,7 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_8__expected)
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_9__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9__expected)
 {
     auto compression = false;
     const uint8_t version = 0x00;
@@ -527,7 +527,7 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_9__expected)
 }
 
 // generated and verified using bit2factor.com, no lot/sequence
-BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_9_compressed__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9_compressed__expected)
 {
     auto compression = true;
     const uint8_t version = 0x00;
@@ -540,7 +540,7 @@ BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_9_compressed_
 }
 
 // altchain vectors are based on preliminary bidirectional mapping proposal.
-BOOST_AUTO_TEST_CASE(ek__create_key_pair_with_confirmation__vector_9_compressed_testnet__expected)
+BOOST_AUTO_TEST_CASE(encrypted__create_key_pair_with_confirmation__vector_9_compressed_testnet__expected)
 {
     auto compression = true;
     const uint8_t version = 111;
@@ -558,15 +558,15 @@ BOOST_AUTO_TEST_SUITE_END()
 
 #ifdef WITH_ICU
 
-BOOST_AUTO_TEST_SUITE(ek__round_trips)
+BOOST_AUTO_TEST_SUITE(encrypted__round_trips)
 
-BOOST_AUTO_TEST_CASE(ek__encrypt__compressed_testnet__matches_secret_version_and_compression)
+BOOST_AUTO_TEST_CASE(encrypted__encrypt__compressed_testnet__matches_secret_version_and_compression)
 {
     const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
     const auto passphrase = "passphrase";
 
     // Encrypt the secret as a private key.
-    ek_private out_private_key;
+    encrypted_private out_private_key;
     const uint8_t version = 111;
     const auto is_compressed = true;
     const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
@@ -583,10 +583,10 @@ BOOST_AUTO_TEST_CASE(ek__encrypt__compressed_testnet__matches_secret_version_and
     BOOST_REQUIRE_EQUAL(out_version, version);
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_entropy__private_uncompressed_testnet__decrypts_with_matching_version_and_compression)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_entropy__private_uncompressed_testnet__decrypts_with_matching_version_and_compression)
 {
     // Create the token.
-    ek_token out_token;
+    encrypted_token out_token;
     const auto passphrase = "passphrase";
     const auto entropy = base16_literal("baadf00dbaadf00d");
     BOOST_REQUIRE(create_token(out_token, passphrase, entropy));
@@ -595,7 +595,7 @@ BOOST_AUTO_TEST_CASE(ek__create_token_entropy__private_uncompressed_testnet__dec
     // Create the private key.
     const auto& token = out_token;
     ec_compressed out_point;
-    ek_private out_private_key;
+    encrypted_private out_private_key;
     const uint8_t version = 111;
     const auto is_compressed = false;
     const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
@@ -617,10 +617,10 @@ BOOST_AUTO_TEST_CASE(ek__create_token_entropy__private_uncompressed_testnet__dec
     BOOST_REQUIRE_EQUAL(encode_base16(out_point), encode_base16(compressed));
 }
 
-BOOST_AUTO_TEST_CASE(ek__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
+BOOST_AUTO_TEST_CASE(encrypted__create_token_lot__private_and_public_compressed_testnet__decrypts_with_matching_version_and_compression)
 {
     // Create the token.
-    ek_token out_token;
+    encrypted_token out_token;
     const auto passphrase = "passphrase";
     const auto salt = base16_literal("baadf00d");
     BOOST_REQUIRE(create_token(out_token, passphrase, salt, 42, 24));
@@ -629,8 +629,8 @@ BOOST_AUTO_TEST_CASE(ek__create_token_lot__private_and_public_compressed_testnet
     // Create the public/private key pair.
     const auto& token = out_token;
     ec_compressed out_point;
-    ek_private out_private_key;
-    ek_public out_public_key;
+    encrypted_private out_private_key;
+    encrypted_public out_public_key;
     const uint8_t version = 111;
     const auto is_compressed = true;
     const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
@@ -667,16 +667,16 @@ BOOST_AUTO_TEST_SUITE_END()
 
 // These are not actual tests, just for emitting the version maps.
 
-//BOOST_AUTO_TEST_SUITE(ek__altchain_versions)
+//BOOST_AUTO_TEST_SUITE(encrypted__altchain_versions)
 //
 //static std::string hex(uint8_t number)
 //{
 //    return encode_base16(data_chunk{ number });
 //}
 //
-//BOOST_AUTO_TEST_CASE(ek__create_key_pair__all_versions__print_private_and_public_encrypted_keys)
+//BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__all_versions__print_private_and_public_encrypted_keys)
 //{
-//    ek_private out_private_key;
+//    encrypted_private out_private_key;
 //    const auto secret = base16_literal("09c2686880095b1a4c249ee3ac4eea8a014f11e6f986d0b5025ac1f39afbd9ae");
 //
 //    const auto compressed = true;
@@ -691,15 +691,15 @@ BOOST_AUTO_TEST_SUITE_END()
 //    }
 //}
 //
-//BOOST_AUTO_TEST_CASE(ek__create_key_pair__all_multiplied_versions__print_private_and_public_encrypted_keys)
+//BOOST_AUTO_TEST_CASE(encrypted__create_key_pair__all_multiplied_versions__print_private_and_public_encrypted_keys)
 //{
-//    ek_token out_token;
+//    encrypted_token out_token;
 //    create_token(out_token, "passphrase", base16_literal("baadf00dbaadf00d"));
 //
 //    const auto& token = out_token;
 //    ec_compressed unused;
-//    ek_private out_private_key;
-//    ek_public out_public_key;
+//    encrypted_private out_private_key;
+//    encrypted_public out_public_key;
 //    const auto seed = base16_literal("baadf00dbaadf00dbaadf00dbaadf00dbaadf00dbaadf00d");
 //
 //    const auto compressed = true;

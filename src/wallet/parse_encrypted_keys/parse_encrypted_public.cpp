@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "parse_ek_private.hpp"
+#include "parse_encrypted_public.hpp"
 
 #include <cstdint>
 #include <cstddef>
@@ -25,60 +25,54 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_ek_key.hpp"
-#include "parse_ek_prefix.hpp"
+#include "parse_encrypted_key.hpp"
+#include "parse_encrypted_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
-
-const byte_array<parse_ek_private::magic_size> parse_ek_private::magic_
+    
+// This prefix results in the prefix "cfrm" in the base58 encoding but is
+// modified when the payment address is Bitcoin mainnet (0).
+const byte_array<parse_encrypted_public::magic_size> parse_encrypted_public::magic_
 {
-    { 0x01 }
+    { 0x64, 0x3b, 0xf6, 0xa8 }
 };
 
-byte_array<parse_ek_private::prefix_size> parse_ek_private::prefix_factory(
-    uint8_t address, bool multiplied)
+byte_array<parse_encrypted_public::prefix_size> parse_encrypted_public::prefix_factory(
+    uint8_t address)
 {
-    const auto base = multiplied ? multiplied_context_ : default_context_;
-    const auto context = base + address;
+    const auto context = default_context_ + address;
     return splice(magic_, to_array(context));
 }
 
-parse_ek_private::parse_ek_private(const ek_private& key)
-    : parse_ek_key<prefix_size>(
-        slice<0, 2>(key),
-        slice<2, 3>(key),
-        slice<3, 7>(key),
-        slice<7, 15>(key)),
-    data1_(slice<15, 23>(key)),
-    data2_(slice<23, 39>(key))
+parse_encrypted_public::parse_encrypted_public(const encrypted_public& key)
+  : parse_encrypted_key<prefix_size>(
+        slice<0, 5>(key),
+        slice<5, 6>(key),
+        slice<6, 10>(key),
+        slice<10, 18>(key)),
+    sign_(slice<18, 19>(key)),
+    data_(slice<19, 51>(key))
 {
     valid(verify_magic() && verify_checksum(key));
 }
 
-uint8_t parse_ek_private::address_version() const
+uint8_t parse_encrypted_public::address_version() const
 {
-    const auto base = multiplied() ? multiplied_context_ : default_context_;
-    return context() - base;
+    return context() - default_context_;
 }
 
-quarter_hash parse_ek_private::data1() const
+hash_digest parse_encrypted_public::data() const
 {
-    return data1_;
+    return data_;
 }
 
-half_hash parse_ek_private::data2() const
+one_byte parse_encrypted_public::sign() const
 {
-    return data2_;
+    return sign_;
 }
 
-bool parse_ek_private::multiplied() const
-{
-    // This is a double negative (multiplied = not not multiplied).
-    return (flags() & ek_flag::ec_non_multiplied) == 0;
-}
-
-bool parse_ek_private::verify_magic() const
+bool parse_encrypted_public::verify_magic() const
 {
     return slice<0, magic_size>(prefix()) == magic_;
 }

@@ -29,6 +29,8 @@
 
 namespace libbitcoin {
 namespace config {
+    
+using namespace wallet;
 
 ek_token::ek_token()
   : valid_(false), token_()
@@ -45,7 +47,7 @@ ek_token::ek_token(const ek_token& other)
 {
 }
 
-ek_token::ek_token(const wallet::ek_token& value)
+ek_token::ek_token(const encrypted_token& value)
   : valid_(true), token_(value)
 {
 }
@@ -57,7 +59,7 @@ ek_token ek_token::from_string(const std::string& encoded)
 {
     // TODO: incorporate existing parser here, setting new members.
 
-    wallet::ek_token key;
+    encrypted_token key;
     return decode_base58(key, encoded) && verify_checksum(key) ?
         ek_token(key) : ek_token();
 }
@@ -70,7 +72,7 @@ ek_token::operator const bool() const
     return valid_;
 }
 
-ek_token::operator const wallet::ek_token&() const
+ek_token::operator const encrypted_token&() const
 {
     return token_;
 }
@@ -86,7 +88,7 @@ std::string ek_token::encoded() const
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const wallet::ek_token& ek_token::token() const
+const encrypted_token& ek_token::token() const
 {
     return token_;
 }
