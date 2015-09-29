@@ -51,9 +51,6 @@ src_libbitcoin_la_SOURCES = \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
     src/config/directory.cpp \
-    src/config/ek_private.cpp \
-    src/config/ek_public.cpp \
-    src/config/ek_token.cpp \
     src/config/endpoint.cpp \
     src/config/parameter.cpp \
     src/config/printer.cpp \
@@ -158,6 +155,9 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/dictionary.cpp \
     src/wallet/ec_private.cpp \
     src/wallet/ec_public.cpp \
+    src/wallet/ek_private.cpp \
+    src/wallet/ek_public.cpp \
+    src/wallet/ek_token.cpp \
     src/wallet/encrypted_keys.cpp \
     src/wallet/hd_private.cpp \
     src/wallet/hd_public.cpp \
@@ -320,9 +320,6 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/btc256.hpp \
     include/bitcoin/bitcoin/config/checkpoint.hpp \
     include/bitcoin/bitcoin/config/directory.hpp \
-    include/bitcoin/bitcoin/config/ek_private.hpp \
-    include/bitcoin/bitcoin/config/ek_public.hpp \
-    include/bitcoin/bitcoin/config/ek_token.hpp \
     include/bitcoin/bitcoin/config/endpoint.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
@@ -465,6 +462,9 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/ec_private.hpp \
     include/bitcoin/bitcoin/wallet/ec_public.hpp \
+    include/bitcoin/bitcoin/wallet/ek_private.hpp \
+    include/bitcoin/bitcoin/wallet/ek_public.hpp \
+    include/bitcoin/bitcoin/wallet/ek_token.hpp \
     include/bitcoin/bitcoin/wallet/encrypted_keys.hpp \
     include/bitcoin/bitcoin/wallet/hd_private.hpp \
     include/bitcoin/bitcoin/wallet/hd_public.hpp \

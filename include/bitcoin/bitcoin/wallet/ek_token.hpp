@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_CONFIG_EK_PUBLIC_HPP
-#define LIBBITCOIN_CONFIG_EK_PUBLIC_HPP
+#ifndef LIBBITCOIN_WALLET_EK_TOKEN_HPP
+#define LIBBITCOIN_WALLET_EK_TOKEN_HPP
 
 #include <iostream>
 #include <string>
@@ -26,46 +26,48 @@
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 
 namespace libbitcoin {
-namespace config {
+namespace wallet {
 
-/// Use to pass an encrypted public key.
-class BC_API ek_public
+/**
+ * Serialization helper to convert between base58 string and bip38 token.
+ */
+class BC_API ek_token
 {
 public:
     /// Constructors.
-    ek_public();
-    ek_public(const std::string& encoded);
-    ek_public(const wallet::encrypted_public& key);
-    ek_public(const ek_public& other);
+    ek_token();
+    ek_token(const std::string& encoded);
+    ek_token(const encrypted_token& key);
+    ek_token(const ek_token& other);
 
     /// Operators.
-    bool operator==(const ek_public& other) const;
-    bool operator!=(const ek_public& other) const;
-    ek_public& operator=(const ek_public& other);
-    friend std::istream& operator>>(std::istream& in, ek_public& to);
-    friend std::ostream& operator<<(std::ostream& out, const ek_public& of);
-
+    bool operator==(const ek_token& other) const;
+    bool operator!=(const ek_token& other) const;
+    ek_token& operator=(const ek_token& other);
+    friend std::istream& operator>>(std::istream& in, ek_token& to);
+    friend std::ostream& operator<<(std::ostream& out, const ek_token& of);
+    
     /// Cast operators.
     operator const bool() const;
-    operator const wallet::encrypted_public&() const;
+    operator const encrypted_token&() const;
 
     /// Serializer.
     std::string encoded() const;
 
     /// Accessors.
-    const wallet::encrypted_public& public_key() const;
+    const encrypted_token& token() const;
 
 private:
     /// Factories.
-    static ek_public from_string(const std::string& encoded);
+    static ek_token from_string(const std::string& encoded);
 
     /// Members.
     /// These should be const, apart from the need to implement assignment.
     bool valid_;
-    wallet::encrypted_public public_;
+    encrypted_token token_;
 };
 
-} // namespace config
+} // namespace wallet
 } // namespace libbitcoin
 
 #endif
