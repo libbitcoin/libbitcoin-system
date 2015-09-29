@@ -32,7 +32,7 @@
 namespace libbitcoin {
 namespace chain {
 
-BC_CONSTEXPR size_t operation::max_null_data_size = 80;
+const size_t operation::max_null_data_size = 80;
 
 operation operation::factory_from_data(const data_chunk& data)
 {
