@@ -33,13 +33,14 @@ namespace wallet {
     
 // This prefix results in the prefix "cfrm" in the base58 encoding but is
 // modified when the payment address is Bitcoin mainnet (0).
-const byte_array<parse_encrypted_public::magic_size> parse_encrypted_public::magic_
+const byte_array<parse_encrypted_public::magic_size>
+parse_encrypted_public::magic_
 {
     { 0x64, 0x3b, 0xf6, 0xa8 }
 };
 
-byte_array<parse_encrypted_public::prefix_size> parse_encrypted_public::prefix_factory(
-    uint8_t address)
+byte_array<parse_encrypted_public::prefix_size>
+parse_encrypted_public::prefix_factory(uint8_t address)
 {
     const auto context = default_context_ + address;
     return splice(magic_, to_array(context));

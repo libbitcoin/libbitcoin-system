@@ -31,13 +31,14 @@
 namespace libbitcoin {
 namespace wallet {
 
-const byte_array<parse_encrypted_private::magic_size> parse_encrypted_private::magic_
+const byte_array<parse_encrypted_private::magic_size> 
+parse_encrypted_private::magic_
 {
     { 0x01 }
 };
 
-byte_array<parse_encrypted_private::prefix_size> parse_encrypted_private::prefix_factory(
-    uint8_t address, bool multiplied)
+byte_array<parse_encrypted_private::prefix_size>
+parse_encrypted_private::prefix_factory(uint8_t address, bool multiplied)
 {
     const auto base = multiplied ? multiplied_context_ : default_context_;
     const auto context = base + address;

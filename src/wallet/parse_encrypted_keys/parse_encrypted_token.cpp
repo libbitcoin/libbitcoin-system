@@ -36,8 +36,8 @@ const byte_array<parse_encrypted_token::magic_size> parse_encrypted_token::magic
     { 0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 }
 };
 
-byte_array<parse_encrypted_token::prefix_size> parse_encrypted_token::prefix_factory(
-    bool lot_sequence)
+byte_array<parse_encrypted_token::prefix_size>
+parse_encrypted_token::prefix_factory(bool lot_sequence)
 {
     const auto context = lot_sequence ? lot_context_ : default_context_;
     return splice(magic_, to_array(context));

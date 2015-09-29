@@ -33,7 +33,8 @@ class parse_encrypted_private
   : public parse_encrypted_key<2u>
 {
 public:
-    static byte_array<prefix_size> prefix_factory(uint8_t address, bool multiplied);
+    static byte_array<prefix_size> prefix_factory(uint8_t address,
+        bool multiplied);
 
     parse_encrypted_private(const encrypted_private& key);
 

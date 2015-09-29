@@ -30,8 +30,9 @@ namespace libbitcoin {
 namespace wallet {
 
 template<size_t PrefixSize>
-parse_encrypted_key<PrefixSize>::parse_encrypted_key(const byte_array<PrefixSize>& prefix,
-    const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy)
+parse_encrypted_key<PrefixSize>::parse_encrypted_key(
+    const byte_array<PrefixSize>& prefix, const one_byte& flags,
+    const ek_salt& salt, const ek_entropy& entropy)
   : parse_encrypted_prefix<PrefixSize>(prefix),
     flags_(flags), salt_(salt), entropy_(entropy)
 {
