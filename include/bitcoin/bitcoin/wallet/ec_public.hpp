@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_EC_PUBLIC_HPP
 #define LIBBITCOIN_EC_PUBLIC_HPP
 
-#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>

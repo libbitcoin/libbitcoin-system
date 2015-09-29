@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
 
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -138,7 +139,13 @@ ec_public::operator const ec_compressed&() const
 
 std::string ec_public::encoded() const
 {
-    return encode_base16(point_);
+    if (compressed())
+        return encode_base16(point_);
+
+    // If the point is valid it should always decompress, but if not, is null.
+    ec_uncompressed uncompressed(null_uncompressed_point);
+    to_uncompressed(uncompressed);
+    return encode_base16(uncompressed);
 }
 
 // Accessors.
@@ -221,6 +228,13 @@ std::istream& operator>>(std::istream& in, ec_public& to)
     std::string value;
     in >> value;
     to = ec_public(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
     return in;
 }
 

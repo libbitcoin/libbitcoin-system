@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/wallet/select_outputs.hpp>
 
+#include <algorithm>
 #include <cstdint>
 #include <cstddef>
 #include <bitcoin/bitcoin/constants.hpp>
@@ -37,57 +38,56 @@ select_outputs_result select_outputs(output_info_list unspent,
     uint64_t min_value, select_outputs_algorithm DEBUG_ONLY(algorithm))
 {
     // Just one default implementation for now.
-    // Consider a switch case with greedy_select_outputs(min_value) .etc
+    // Consider a switch case with greedy_select_outputs(min_value) etc.
     // if this is ever extended with more algorithms.
     BITCOIN_ASSERT(algorithm == select_outputs_algorithm::greedy);
 
-    // Fail if empty.
     if (unspent.empty())
         return select_outputs_result();
 
-    auto lesser_begin = unspent.begin();
-    auto lesser_end = std::partition(unspent.begin(), unspent.end(),
-        [min_value](const output_info& out_info)
-        {
-            return out_info.value < min_value;
-        });
+    const auto less_than_min_value = [min_value](const output_info& out_info)
+    {
+        return out_info.value < min_value;
+    };
 
-    auto greater_begin = lesser_end;
-    auto greater_end = unspent.end();
-    auto min_greater = std::min_element(greater_begin, greater_end,
-        [](const output_info& info_a, const output_info& info_b)
-        {
-            return info_a.value < info_b.value;
-        });
+    const auto lesser = [](const output_info& left, const output_info& right)
+    {
+        return left.value < right.value;
+    };
+
+    const auto greater = [](const output_info& left, const output_info& right)
+    {
+        return left.value > right.value;
+    };
+
+    const auto lesser_begin = unspent.begin();
+    const auto lesser_end = std::partition(unspent.begin(), unspent.end(),
+        less_than_min_value);
+
+    const auto greater_begin = lesser_end;
+    const auto greater_end = unspent.end();
+    const auto min_greater = std::min_element(greater_begin, greater_end,
+        lesser);
 
     select_outputs_result result;
-
     if (min_greater != greater_end)
     {
         result.change = min_greater->value - min_value;
         result.points.push_back(min_greater->point);
         return result;
     }
+    // Not found in greaters so try several lessers instead. Rearrange from
+    // biggest to smallest. We want to use the fewest inputs possible.
+    std::sort(lesser_begin, lesser_end, greater);
 
-    // Not found in greaters. Try several lessers instead.
-    // Rearrange them from biggest to smallest. We want to use the least
-    // amount of inputs as possible.
-    std::sort(lesser_begin, lesser_end,
-        [](const output_info& info_a, const output_info& info_b)
-        {
-            return info_a.value > info_b.value;
-        });
-
-    uint64_t accum = 0;
-
+    uint64_t accumulator = 0;
     for (auto it = lesser_begin; it != lesser_end; ++it)
     {
         result.points.push_back(it->point);
-        accum += it->value;
-
-        if (accum >= min_value)
+        accumulator += it->value;
+        if (accumulator >= min_value)
         {
-            result.change = accum - min_value;
+            result.change = accumulator - min_value;
             return result;
         }
     }

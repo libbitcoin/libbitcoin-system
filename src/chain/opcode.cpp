@@ -93,7 +93,7 @@ std::string opcode_to_string(opcode code)
             return "endif";
         case opcode::verify:
             return "verify";
-        case opcode::op_return:
+        case opcode::return_:
             return "return";
         case opcode::toaltstack:
             return "toaltstack";
@@ -331,7 +331,7 @@ opcode string_to_opcode(const std::string& code_repr)
     else if (code_repr == "verify")
         return opcode::verify;
     else if (code_repr == "return")
-        return opcode::op_return;
+        return opcode::return_;
     else if (code_repr == "toaltstack")
         return opcode::toaltstack;
     else if (code_repr == "fromaltstack")

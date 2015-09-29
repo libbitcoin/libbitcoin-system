@@ -57,6 +57,7 @@ class BC_API hd_public
 {
 public:
     static const uint32_t mainnet;
+
     static inline uint32_t to_prefix(uint64_t prefixes)
     {
         return prefixes & 0x00000000FFFFFFFF;
@@ -81,7 +82,7 @@ public:
     operator const ec_compressed&() const;
 
     /// Serializer.
-    virtual std::string encoded() const;
+    std::string encoded() const;
 
     /// Accessors.
     const hd_chain_code& chain_code() const;
@@ -90,8 +91,7 @@ public:
 
     /// Methods.
     hd_key to_hd_key() const;
-    const ec_compressed& to_point() const;
-    virtual hd_public derive_public(uint32_t index) const;
+    hd_public derive_public(uint32_t index) const;
 
 protected:
     /// Factories.

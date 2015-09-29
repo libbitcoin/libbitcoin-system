@@ -158,8 +158,7 @@ hash_digest build_merkle_tree(hash_list& merkle)
         {
             // Join both current hashes together (concatenate).
             data_chunk concat_data;
-            data_sink 
-                concat_stream(concat_data);
+            data_sink concat_stream(concat_data);
             ostream_writer concat_sink(concat_stream);
             concat_sink.write_hash(*it);
             concat_sink.write_hash(*(it + 1));

@@ -37,9 +37,16 @@ class BC_API hd_private
 {
 public:
     static const uint64_t mainnet;
+
     static inline uint32_t to_prefix(uint64_t prefixes)
     {
         return prefixes >> 32;
+    }
+
+    static inline uint64_t to_prefixes(uint32_t private_prefix,
+        uint32_t public_prefix)
+    {
+        return uint64_t(private_prefix) << 32 | public_prefix;
     }
 
     /// Constructors.
@@ -58,17 +65,19 @@ public:
         const hd_private& of);
 
     /// Cast operators.
-    operator const bool() const;
     operator const ec_secret&() const;
 
     /// Serializer.
-    std::string encoded() const override;
+    std::string encoded() const;
+
+    /// Accessors.
+    const ec_secret& secret() const;
 
     /// Methods.
     hd_key to_hd_key() const;
-    const ec_secret& to_secret() const;
+    hd_public to_public() const;
     hd_private derive_private(uint32_t index) const;
-    hd_public derive_public(uint32_t index) const override;
+    hd_public derive_public(uint32_t index) const;
 
 private:
     /// Factories.

@@ -28,10 +28,10 @@
 namespace libbitcoin {
 namespace wallet {
 
-constexpr uint8_t max_recovery_id = 3;
-constexpr uint8_t magic_compressed = 31;
-constexpr uint8_t magic_uncompressed = 27;
-constexpr uint8_t magic_differential = magic_compressed - magic_uncompressed;
+static constexpr uint8_t max_recovery_id = 3;
+static constexpr uint8_t magic_compressed = 31;
+static constexpr uint8_t magic_uncompressed = 27;
+static constexpr uint8_t magic_differential = magic_compressed - magic_uncompressed;
 static_assert(magic_differential > max_recovery_id, "oops!");
 static_assert(max_uint8 - max_recovery_id >= magic_uncompressed, "oops!");
 
@@ -104,6 +104,12 @@ bool magic_to_recovery_id(uint8_t& out_recovery_id, bool& out_compressed,
 
     out_recovery_id = static_cast<uint8_t>(recovery_id);
     return true;
+}
+
+bool sign_message(message_signature& signature, data_slice message,
+    const ec_private& secret)
+{
+    return sign_message(signature, message, secret, secret.compressed());
 }
 
 bool sign_message(message_signature& signature, data_slice message,

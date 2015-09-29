@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <string>
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
@@ -180,11 +181,6 @@ hd_key hd_public::to_hd_key() const
     return out;
 }
 
-const ec_compressed& hd_public::to_point() const
-{
-    return point_;
-}
-
 hd_public hd_public::derive_public(uint32_t index) const
 {
     if (index >= hd_first_hardened_key)
@@ -249,6 +245,13 @@ std::istream& operator>>(std::istream& in, hd_public& to)
     std::string value;
     in >> value;
     to = hd_public(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
     return in;
 }
 

@@ -23,6 +23,7 @@
 #include <cstdint>
 #include <iostream>
 #include <map>
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base10.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
@@ -153,8 +154,6 @@ bool bitcoin_uri::set_address(const std::string& address)
     payment_address payment(address);
     if (payment)
     {
-        // Normalize the encoding (as we do for amount)?
-        //address_ = payment.encoded();
         address_ = address;
         return true;
     }
@@ -162,8 +161,6 @@ bool bitcoin_uri::set_address(const std::string& address)
     stealth_address stealth(address);
     if (stealth)
     {
-        // Normalize the encoding (as we do for amount)?
-        //address_ = stealth.encoded();
         address_ = address;
         return true;
     }
@@ -275,18 +272,25 @@ bool bitcoin_uri::operator!=(const bitcoin_uri& other) const
 }
 
 // This is always strict.
-std::istream& operator>>(std::istream& input, bitcoin_uri& argument)
+std::istream& operator>>(std::istream& in, bitcoin_uri& to)
 {
     std::string value;
-    input >> value;
-    argument = bitcoin_uri(value);
-    return input;
+    in >> value;
+    to = bitcoin_uri(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
+    return in;
 }
 
-std::ostream& operator<<(std::ostream& output, const bitcoin_uri& argument)
+std::ostream& operator<<(std::ostream& out, const bitcoin_uri& from)
 {
-    output << argument.encoded();
-    return output;
+    out << from.encoded();
+    return out;
 }
 
 } // namespace wallet

@@ -20,6 +20,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -39,7 +40,6 @@ static constexpr uint8_t options_size = sizeof(uint8_t);
 static constexpr uint8_t number_keys_size = sizeof(uint8_t);
 static constexpr uint8_t number_sigs_size = sizeof(uint8_t);
 static constexpr uint8_t filter_length_size = sizeof(uint8_t);
-static constexpr uint8_t max_filter_bits = sizeof(uint32_t) * byte_bits;
 static constexpr uint8_t max_spend_key_count = max_uint8;
 
 // wiki.unsystem.net/index.php/DarkWallet/Stealth#Address_format
@@ -57,6 +57,7 @@ static_assert(binary_type::bits_per_block == byte_bits,
 
 const uint8_t stealth_address::mainnet_p2kh = 0x2a;
 const uint8_t stealth_address::reuse_key_flag = 1 << 0;
+const uint8_t stealth_address::max_filter_bits = sizeof(uint32_t) * byte_bits;
 
 stealth_address::stealth_address()
   : valid_(false), version_(0), scan_key_(null_compressed_point),
@@ -176,7 +177,7 @@ stealth_address stealth_address::from_stealth(const data_chunk& decoded)
 
     // Deserialize the filter bytes/blocks.
     const data_chunk raw_filter(iterator, iterator + filter_bytes);
-    const binary_type filter(filter_bytes, raw_filter);
+    const binary_type filter(filter_bits, raw_filter);
     return stealth_address(filter, scan_key, spend_keys, signatures, version);
 }
 
@@ -344,6 +345,13 @@ std::istream& operator>>(std::istream& in, stealth_address& to)
     std::string value;
     in >> value;
     to = stealth_address(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
     return in;
 }
 

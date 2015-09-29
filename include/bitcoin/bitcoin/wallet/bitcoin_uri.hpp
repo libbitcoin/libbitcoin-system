@@ -48,10 +48,9 @@ public:
     bool operator==(const bitcoin_uri& other) const;
     bool operator!=(const bitcoin_uri& other) const;
     bitcoin_uri& operator=(const bitcoin_uri& other);
-    friend std::istream& operator>>(std::istream& input,
-        bitcoin_uri& argument);
-    friend std::ostream& operator<<(std::ostream& output,
-        const bitcoin_uri& argument);
+    friend std::istream& operator>>(std::istream& in, bitcoin_uri& to);
+    friend std::ostream& operator<<(std::ostream& out,
+        const bitcoin_uri& from);
 
     /// Test whether the URI has been initialized.
     operator const bool() const;
@@ -74,6 +73,7 @@ public:
     void set_label(const std::string& label);
     void set_message(const std::string& message);
     void set_r(const std::string& r);
+    bool set_address(const std::string& address);
     void set_address(const payment_address& payment);
     void set_address(const stealth_address& stealth);
 
@@ -87,7 +87,6 @@ public:
 
 private:
     /// Private helpers.
-    bool set_address(const std::string& address);
     bool set_amount(const std::string& satoshis);
 
     /// Member state.

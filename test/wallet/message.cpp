@@ -151,6 +151,16 @@ BOOST_AUTO_TEST_CASE(message__sign_message__uncompressed__expected)
     BOOST_REQUIRE_EQUAL(encode_base16(out_signature), SIGNATURE_UNCOMPRESSED);
 }
 
+BOOST_AUTO_TEST_CASE(message__sign_message_secret__compressed__expected)
+{
+    ec_private secret(WIF_COMPRESSED);
+    const payment_address address(secret);
+    const auto message = to_chunk(std::string("Compressed"));
+    message_signature out_signature;
+    BOOST_REQUIRE(sign_message(out_signature, message, secret));
+    BOOST_REQUIRE_EQUAL(encode_base16(out_signature), SIGNATURE_WIF_COMPRESSED);
+}
+
 BOOST_AUTO_TEST_CASE(message__sign_message_wif__compressed__expected)
 {
     ec_private secret(WIF_COMPRESSED);

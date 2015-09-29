@@ -20,6 +20,7 @@
 
 #include <cstdint>
 #include <string>
+#include <boost/program_options.hpp>
 #include <bitcoin/bitcoin/formats/base58.hpp>
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -187,6 +188,7 @@ const bool ec_private::compressed() const
 // ----------------------------------------------------------------------------
 
 // Conversion to ec_public loses all version information.
+// In the case of failure the key is always compressed (ec_compressed_null).
 ec_public ec_private::to_public() const
 {
     ec_compressed point;
@@ -227,6 +229,13 @@ std::istream& operator>>(std::istream& in, ec_private& to)
     std::string value;
     in >> value;
     to = ec_private(value);
+
+    if (!to)
+    {
+        using namespace boost::program_options;
+        BOOST_THROW_EXCEPTION(invalid_option_value(value));
+    }
+
     return in;
 }
 

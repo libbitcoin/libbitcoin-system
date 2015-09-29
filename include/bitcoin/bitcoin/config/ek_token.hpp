@@ -22,9 +22,7 @@
 
 #include <iostream>
 #include <string>
-#include <bitcoin/bitcoin.hpp>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
 
 namespace libbitcoin {
@@ -36,66 +34,37 @@ namespace config {
 class BC_API ek_token
 {
 public:
-
-    /**
-     * Default constructor.
-     */
+    /// Constructors.
     ek_token();
-
-    /**
-     * Initialization constructor.
-     * @param[in]  base58  The value to initialize with.
-     */
-    ek_token(const std::string& base58);
-
-    /**
-     * Initialization constructor.
-     * @param[in]  value  The value to initialize with.
-     */
-    ek_token(const wallet::ek_token& value);
-
-    /**
-     * Copy constructor.
-     * @param[in]  other  The object to copy into self on construct.
-     */
+    ek_token(const std::string& encoded);
+    ek_token(const wallet::ek_token& key);
     ek_token(const ek_token& other);
 
-    /**
-     * Return a reference to the data member.
-     * @return  A reference to the object's internal data.
-     */
-    wallet::ek_token& data();
-
-    /**
-     * Overload cast to internal type.
-     * @return  This object's value cast to internal type.
-     */
+    /// Operators.
+    bool operator==(const ek_token& other) const;
+    bool operator!=(const ek_token& other) const;
+    ek_token& operator=(const ek_token& other);
+    friend std::istream& operator>>(std::istream& in, ek_token& to);
+    friend std::ostream& operator<<(std::ostream& out, const ek_token& of);
+    
+    /// Cast operators.
+    operator const bool() const;
     operator const wallet::ek_token&() const;
 
-    /**
-     * Overload stream in. Throws if input is invalid.
-     * @param[in]   input     The input stream to read the value from.
-     * @param[out]  argument  The object to receive the read value.
-     * @return                The input stream reference.
-     */
-    friend std::istream& operator>>(std::istream& input,
-        ek_token& argument);
+    /// Serializer.
+    std::string encoded() const;
 
-    /**
-     * Overload stream out.
-     * @param[in]   output    The output stream to write the value to.
-     * @param[out]  argument  The object from which to obtain the value.
-     * @return                The output stream reference.
-     */
-    friend std::ostream& operator<<(std::ostream& output,
-        const ek_token& argument);
+    /// Accessors.
+    const wallet::ek_token& token() const;
 
 private:
+    /// Factories.
+    static ek_token from_string(const std::string& encoded);
 
-    /**
-     * The state of this object.
-     */
-    wallet::ek_token value_;
+    /// Members.
+    /// These should be const, apart from the need to implement assignment.
+    bool valid_;
+    wallet::ek_token token_;
 };
 
 } // namespace config

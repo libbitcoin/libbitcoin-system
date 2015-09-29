@@ -38,6 +38,7 @@ public:
     /// DEPRECATED: we intend to make p2kh same as payment address versions.
     static const uint8_t mainnet_p2kh;
     static const uint8_t reuse_key_flag;
+    static const uint8_t max_filter_bits;
 
     typedef std::vector<ec_compressed> point_list;
 

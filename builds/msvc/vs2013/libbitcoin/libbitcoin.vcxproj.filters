@@ -898,9 +898,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\output.hpp">
       <Filter>include\bitcoin\chain</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\chain\payment_type.hpp">
-      <Filter>include\bitcoin\chain</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\message\heading.hpp">
       <Filter>include\bitcoin\message</Filter>
     </ClInclude>

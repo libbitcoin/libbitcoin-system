@@ -48,7 +48,7 @@ namespace error {
         not_found,
         duplicate,
         unspent_output,
-        unsupported_payment_type,
+        unsupported_script_pattern,
 
         // network errors (more)
         resolve_failed,

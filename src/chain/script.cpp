@@ -23,6 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/chain/operation.hpp>
 #include <bitcoin/bitcoin/chain/transaction.hpp>
 #include <bitcoin/bitcoin/formats/base16.hpp>
 #include <bitcoin/bitcoin/math/elliptic_curve.hpp>
@@ -43,6 +44,7 @@ namespace chain {
 // False is an empty stack.
 static const data_chunk stack_false_value;
 static const data_chunk stack_true_value{ 1 };
+static constexpr uint32_t five_bits = 0x0000001f;
 static constexpr uint64_t op_counter_limit = 201;
 
 script script::factory_from_data(const data_chunk& data, bool prefix,
@@ -68,30 +70,36 @@ script script::factory_from_data(reader& source, bool prefix, parse_mode mode)
     return instance;
 }
 
-payment_type script::type() const
+script_pattern script::pattern() const
 {
-    if (is_pubkey_type(operations))
-        return payment_type::pubkey;
+    if (operation::is_null_data_pattern(operations))
+        return script_pattern::null_data;
 
-    if (is_pubkey_hash_type(operations))
-        return payment_type::pubkey_hash;
+    if (operation::is_pay_multisig_pattern(operations))
+        return script_pattern::pay_multisig;
 
-    if (is_script_hash_type(operations))
-        return payment_type::script_hash;
+    if (operation::is_pay_public_key_pattern(operations))
+        return script_pattern::pay_public_key;
 
-    if (is_stealth_info_type(operations))
-        return payment_type::stealth_info;
+    if (operation::is_pay_key_hash_pattern(operations))
+        return script_pattern::pay_key_hash;
 
-    if (is_multisig_type(operations))
-        return payment_type::multisig;
+    if (operation::is_pay_script_hash_pattern(operations))
+        return script_pattern::pay_script_hash;
 
-    if (is_pubkey_hash_sig_type(operations))
-        return payment_type::pubkey_hash_sig;
+    if (operation::is_sign_multisig_pattern(operations))
+        return script_pattern::sign_multisig;
 
-    if (is_script_code_sig_type(operations))
-        return payment_type::script_code_sig;
+    if (operation::is_sign_public_key_pattern(operations))
+        return script_pattern::sign_public_key;
 
-    return payment_type::non_standard;
+    if (operation::is_sign_key_hash_pattern(operations))
+        return script_pattern::sign_key_hash;
+
+    if (operation::is_sign_script_hash_pattern(operations))
+        return script_pattern::sign_script_hash;
+
+    return script_pattern::non_standard;
 }
 
 bool script::is_raw_data() const
@@ -367,7 +375,7 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
     // (note the lack of nullify_input_sequences() call)
 
     // sighash::none signs no outputs so they can be changed.
-    if ((hash_type & 0x1f) == signature_hash_algorithm::none)
+    if ((hash_type & five_bits) == signature_hash_algorithm::none)
     {
         parent_tx.outputs.clear();
         nullify_input_sequences(parent_tx.inputs, input_index);
@@ -375,9 +383,9 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
 
     // Sign the single corresponding output to our index.
     // We don't care about additional inputs or outputs to the tx.
-    else if ((hash_type & 0x1f) == signature_hash_algorithm::single)
+    else if ((hash_type & five_bits) == signature_hash_algorithm::single)
     {
-        output::list& outputs = parent_tx.outputs;
+        auto& outputs = parent_tx.outputs;
         uint32_t output_index = input_index;
 
         // This is NOT considered an error result and callers should not test
@@ -387,7 +395,7 @@ hash_digest script::generate_signature_hash(transaction parent_tx,
 
         outputs.resize(output_index + 1);
 
-        // Loop through outputs except the last one
+        // Loop through outputs except the last one.
         for (auto it = outputs.begin(); it != outputs.end() - 1; ++it)
         {
             it->value = std::numeric_limits<uint64_t>::max();
@@ -1378,7 +1386,7 @@ bool run_operation(const operation& op, const transaction& parent_tx,
         case opcode::verify:
             return op_verify(context);
 
-        case opcode::op_return:
+        case opcode::return_:
             return false;
 
         case opcode::toaltstack:
@@ -1730,9 +1738,10 @@ bool script::verify(const script& input_script, const script& output_script,
         return false;
 
     // Additional validation for spend-to-script-hash transactions
-    if (bip16_enabled && (output_script.type() == payment_type::script_hash))
+    if (bip16_enabled &&
+        (output_script.pattern() == script_pattern::pay_script_hash))
     {
-        if (!is_push_only(input_script.operations))
+        if (!operation::is_push_only(input_script.operations))
             return false;
 
         // Load last input_script stack item as a script
