@@ -73,16 +73,16 @@ struct custom_reader
 
     virtual bool set_fragment(const std::string& fragment)
     {
-        myfragment.emplace(fragment);
+        myfragment = boost::in_place(fragment);
         return true;
     }
 
     virtual bool set_parameter(const std::string& key, const std::string& value)
     {
         if (key == "myparam1")
-            myparam1.emplace(value);
+            myparam1 = boost::in_place(value);
         else if (key == "myparam2")
-            myparam2.emplace(value);
+            myparam2 = boost::in_place(value);
         else
             return !strict_;
 
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__typical_uri__test)
     BOOST_REQUIRE(uri.r().empty());
 }
 
-BOOST_AUTO_TEST_CASE(uri_reader__parse___positive_scheme__test)
+BOOST_AUTO_TEST_CASE(uri_reader__parse__positive_scheme__test)
 {
     BOOST_REQUIRE(parse("bitcoin:"));
     BOOST_REQUIRE(parse("Bitcoin:"));
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse__negative_scheme__test)
     BOOST_REQUIRE(!parse("bitcorn:"));
 }
 
-BOOST_AUTO_TEST_CASE(uri_reader__parse___positive_empty_name_parameter__test)
+BOOST_AUTO_TEST_CASE(uri_reader__parse__positive_empty_name_parameter__test)
 {
     BOOST_REQUIRE(parse("bitcoin:?"));
     BOOST_REQUIRE(parse("bitcoin:?&"));
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(uri_reader__parse___positive_empty_name_parameter__test)
     BOOST_REQUIRE(parse("bitcoin:?="));
 }
 
-BOOST_AUTO_TEST_CASE(uri_reader__parse___positive_unknown_optional_parameter__test)
+BOOST_AUTO_TEST_CASE(uri_reader__parse__positive_unknown_optional_parameter__test)
 {
     BOOST_REQUIRE(parse("bitcoin:?x=y"));
     BOOST_REQUIRE(parse("bitcoin:?x="));

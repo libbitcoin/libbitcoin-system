@@ -20,7 +20,7 @@
 
 #include <cstdint>
 #include <string>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
 
 namespace libbitcoin {
@@ -33,12 +33,12 @@ bool check_minikey(const std::string& minikey)
     return valid && sha256_hash(to_chunk(minikey + "?"))[0] == 0x00;
 }
 
-bool minikey_to_secret(ec_secret& secret, const std::string& key)
+bool minikey_to_secret(ec_secret& out_secret, const std::string& key)
 {
     if (!check_minikey(key))
         return false;
 
-    secret = sha256_hash(to_chunk(key));
+    out_secret = sha256_hash(to_chunk(key));
     return true;
 }
 

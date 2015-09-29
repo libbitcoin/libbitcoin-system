@@ -17,39 +17,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_NETWORK_SETTINGS_HPP
-#define LIBBITCOIN_NETWORK_SETTINGS_HPP
+#ifndef LIBBITCOIN_WALLET_SETTINGS_HPP
+#define LIBBITCOIN_WALLET_SETTINGS_HPP
 
 #include <cstdint>
-#include <boost/filesystem.hpp>
-#include <bitcoin/bitcoin/config/authority.hpp>
-#include <bitcoin/bitcoin/config/endpoint.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 
 namespace libbitcoin {
-namespace network {
+namespace wallet {
 
-// This is in network vs. config because plan to move to libbitcoin-network.
 struct BC_API settings
 {
-    uint32_t threads;
-    uint16_t inbound_port;
-    uint32_t inbound_connection_limit;
-    uint32_t outbound_connections;
-    uint32_t connect_timeout_seconds;
-    uint32_t channel_handshake_seconds;
-    uint32_t channel_revival_minutes;
-    uint32_t channel_heartbeat_minutes;
-    uint32_t channel_inactivity_minutes;
-    uint32_t channel_expiration_minutes;
-    uint32_t channel_germination_seconds;
-    uint32_t host_pool_capacity;
-    bool relay_transactions;
-    boost::filesystem::path hosts_file;
-    boost::filesystem::path debug_file;
-    boost::filesystem::path error_file;
-    config::authority self;
-    config::endpoint::list seeds;
+    uint8_t address_public_key;
+    uint8_t address_script;
+    uint8_t address_stealth;
+    uint8_t private_key;
+    uint64_t private_key_hd;
+    uint64_t public_key_hd;
 };
 
 } // namespace network

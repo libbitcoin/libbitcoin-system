@@ -21,9 +21,10 @@
 #define LIBBITCOIN_ENCRYPTED_KEYS_HPP
 
 #include <string>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 
@@ -82,9 +83,8 @@ typedef byte_array<ek_public_decoded_size> ek_public;
 // the key belongs to an alt-chain [This shoud read "flag bits"].
 enum ek_flag : uint8_t
 {
-    none = 0,
-    lot_sequence = 1 << 2,
-    ec_compressed = 1 << 5,
+    lot_sequence_key = 1 << 2,
+    ec_compressed_key = 1 << 5,
     ec_non_multiplied_low = 1 << 6,
     ec_non_multiplied_high = 1 << 7,
 
@@ -97,8 +97,9 @@ enum ek_flag : uint8_t
  * @param[out] out_token   The new intermediate passphrase.
  * @param[in]  passphrase  A passphrase for use in the encryption.
  * @param[in]  entropy     A random value for use in the encryption.
+ * @return false if the token could not be created from the entropy.
  */
-BC_API void create_token(ek_token& out_token, const std::string& passphrase,
+BC_API bool create_token(ek_token& out_token, const std::string& passphrase,
     const ek_entropy& entropy);
 
 /**
@@ -108,31 +109,36 @@ BC_API void create_token(ek_token& out_token, const std::string& passphrase,
  * @param[in]  salt        A random value for use in the encryption.
  * @param[in]  lot         A lot, max allowed value 1048575 (2^20-1).
  * @param[in]  sequence    A sequence, max allowed value 4095 (2^12-1).
- * @return false if the lot and/or sequence are out of range.
+ * @return false if the lot and/or sequence are out of range or the token
+ * could not be created from the entropy.
  */
 BC_API bool create_token(ek_token& out_token, const std::string& passphrase,
     const ek_salt& salt, uint32_t lot, uint32_t sequence);
 
 /**
  * Create an encrypted private key from an intermediate passphrase.
+ * The `out_point` paramter is always compressed, so to use it it should be 
+ * decompressed as necessary to match the state of the `compressed` parameter.
  * @param[out] out_private  The new encrypted private key.
- * @param[out] out_point    The ec public key of the new key pair.
+ * @param[out] out_point    The ec compressed public key of the new key pair.
  * @param[in]  token        An intermediate passphrase string.
  * @param[in]  seed         A random value for use in the encryption.
  * @param[in]  version      The coin address version byte.
  * @param[in]  compressed   Set true to associate ec public key compression.
  * @return false if the token checksum is not valid.
  */
-BC_API bool create_key_pair(ek_private& out_private, ec_point& out_point,
+BC_API bool create_key_pair(ek_private& out_private, ec_compressed& out_point,
     const ek_token& token, const ek_seed& seed, uint8_t version,
     bool compressed=true);
 
 /**
  * DEPRECATED
  * Create an encrypted key pair from an intermediate passphrase.
+ * The `out_point` paramter is always compressed, so to use it it should be 
+ * decompressed as necessary to match the state of the `compressed` parameter.
  * @param[out] out_private  The new encrypted private key.
  * @param[out] out_public   The new encrypted public key.
- * @param[out] out_point    The ec public key of the new key pair.
+ * @param[out] out_point    The compressed ec public key of the new key pair.
  * @param[in]  token        An intermediate passphrase string.
  * @param[in]  seed         A random value for use in the encryption.
  * @param[in]  version      The coin address version byte.
@@ -140,7 +146,7 @@ BC_API bool create_key_pair(ek_private& out_private, ec_point& out_point,
  * @return false if the token checksum is not valid.
  */
 BC_API bool create_key_pair(ek_private& out_private, ek_public& out_public,
-    ec_point& out_point, const ek_token& token, const ek_seed& seed,
+    ec_compressed& out_point, const ek_token& token, const ek_seed& seed,
     uint8_t version, bool compressed=true);
 
 #ifdef WITH_ICU
@@ -152,8 +158,9 @@ BC_API bool create_key_pair(ek_private& out_private, ek_public& out_public,
  * @param[in]  passphrase   A passphrase for use in the encryption.
  * @param[in]  version      The coin address version byte.
  * @param[in]  compressed   Set true to associate ec public key compression.
+ * @return false if the secret could not be converted to a public key.
  */
-BC_API void encrypt(ek_private& out_private, const ec_secret& secret,
+BC_API bool encrypt(ek_private& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version, bool compressed=true);
 
 /**
@@ -172,14 +179,15 @@ BC_API bool decrypt(ec_secret& out_secret, uint8_t& out_version,
 /**
  * DEPRECATED
  * Decrypt the ec point associated with the encrypted public key.
- * @param[out] out_point    The decrypted ec point.
- * @param[out] out_version  The coin address version of the public key.
- * @param[in]  key          An encrypted public key.
- * @param[in]  passphrase   The passphrase of the associated token.
- * @return false if the key checksum or passphrase is not valid.
+ * @param[out] out_point       The decrypted ec compressed point.
+ * @param[out] out_version     The coin address version of the public key.
+ * @param[out] out_compressed  The public key specified compression state.
+ * @param[in]  key             An encrypted public key.
+ * @param[in]  passphrase      The passphrase of the associated token.
+ * @return false if the key    checksum or passphrase is not valid.
  */
-BC_API bool decrypt(ec_point& out_point, uint8_t& out_version,
-    const ek_public& key, const std::string& passphrase);
+BC_API bool decrypt(ec_compressed& out_point, uint8_t& out_version,
+    bool& out_compressed, const ek_public& key, const std::string& passphrase);
 
 #endif // WITH_ICU
 

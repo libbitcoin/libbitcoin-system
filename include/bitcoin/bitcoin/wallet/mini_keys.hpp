@@ -21,16 +21,15 @@
 
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
 /**
  * Convert Cascasius minikey to secret parameter.
- * Returns a nulled secret on error.
  */
-BC_API bool minikey_to_secret(ec_secret secret, const std::string& key);
+BC_API bool minikey_to_secret(ec_secret out_secret, const std::string& key);
 
 } // namespace wallet
 } // namespace libbitcoin

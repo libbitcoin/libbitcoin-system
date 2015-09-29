@@ -21,6 +21,7 @@
 #define LIBBITCOIN_WALLET_BITCOIN_URI_HPP
 
 #include <cstdint>
+#include <iostream>
 #include <map>
 #include <string>
 #include <boost/optional.hpp>
@@ -32,21 +33,30 @@
 namespace libbitcoin {
 namespace wallet {
 
-/**
- * A bitcoin URI corresponding to BIP 21 and BIP 72.
- */
+/// A bitcoin URI corresponding to BIP 21 and BIP 72.
+/// The object is not constant, setters can change state after construction.
 class BC_API bitcoin_uri
   : public uri_reader
 {
 public:
+    /// Constructors.
     bitcoin_uri();
     bitcoin_uri(const bitcoin_uri& other);
     bitcoin_uri(const std::string& uri, bool strict=true);
 
-    /// Test for validity following a parse.
+    /// Operators.
+    bool operator==(const bitcoin_uri& other) const;
+    bool operator!=(const bitcoin_uri& other) const;
+    bitcoin_uri& operator=(const bitcoin_uri& other);
+    friend std::istream& operator>>(std::istream& input,
+        bitcoin_uri& argument);
+    friend std::ostream& operator<<(std::ostream& output,
+        const bitcoin_uri& argument);
+
+    /// Test whether the URI has been initialized.
     operator const bool() const;
 
-    /// Get the serialize URI representation.
+    /// Get the serialized URI representation.
     std::string encoded() const;
 
     /// Property getters.
@@ -76,9 +86,11 @@ public:
     bool set_parameter(const std::string& key, const std::string& value);
 
 private:
+    /// Private helpers.
     bool set_address(const std::string& address);
     bool set_amount(const std::string& satoshis);
 
+    /// Member state.
     bool strict_;
     std::string scheme_;
     std::string address_;

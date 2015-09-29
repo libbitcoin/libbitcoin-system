@@ -21,143 +21,107 @@
 #define LIBBITCOIN_WALLET_PAYMENT_ADDRESS_HPP
 
 #include <algorithm>
-#include <cstddef>
-#include <bitcoin/bitcoin/constants.hpp>
+#include <cstdint>
+#include <string>
+#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/checksum.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
+#include <bitcoin/bitcoin/wallet/ec_private.hpp>
+#include <bitcoin/bitcoin/wallet/ec_public.hpp>
 
 namespace libbitcoin {
 namespace wallet {
+    
+static BC_CONSTEXPR size_t payment_size = 1u + short_hash_size + checksum_size;
+typedef byte_array<payment_size> payment;
 
-/**
- * A class for working with Bitcoin addresses.
- */
+/// A class for working with non-stealth payment addresses.
 class BC_API payment_address
 {
 public:
+    static const uint8_t mainnet_p2kh;
+    static const uint8_t mainnet_p2sh;
 
-#ifdef ENABLE_TESTNET
-    enum
-    {
-        pubkey_version = 0x6f,
-        script_version = 0xc4,
-        wif_version = 0xef,
-        invalid_version = 0xff
-    };
-#else
-    enum
-    {
-        pubkey_version = 0x00,
-        script_version = 0x05,
-        wif_version = 0x80,
-        invalid_version = 0xff
-    };
-#endif
+    /// Extract a payment address from an input or output script.
+    /// The address will be invalid if and only if the script type is not
+    /// supported or the script is itself invalid.
+    static payment_address extract(const chain::script& script,
+        uint8_t p2kh_version=mainnet_p2kh, uint8_t p2sh_version=mainnet_p2sh);
 
+    /// Constructors.
     payment_address();
-    payment_address(uint8_t version, const ec_point& point);
-    payment_address(uint8_t version, const short_hash& hash);
-    payment_address(const std::string& encoded_address);
+    payment_address(const payment& decoded);
+    payment_address(const ec_private& secret);
+    payment_address(const std::string& address);
+    payment_address(const payment_address& other);
+    payment_address(const short_hash& hash, uint8_t version=mainnet_p2kh);
+    payment_address(const ec_public& point, uint8_t version=mainnet_p2kh);
+    payment_address(const chain::script& script, uint8_t version=mainnet_p2sh);
 
-    void set(uint8_t version, const ec_point& point);
-    void set(uint8_t version, const short_hash& hash);
+    /// Operators.
+    bool operator==(const payment_address& other) const;
+    bool operator!=(const payment_address& other) const;
+    payment_address& operator=(const payment_address& other);
+    friend std::istream& operator>>(std::istream& in, payment_address& to);
+    friend std::ostream& operator<<(std::ostream& out,
+        const payment_address& of);
+
+    /// Cast operators.
+    operator const bool() const;
+    operator const short_hash&() const;
+
+    /// Serializer.
+    std::string encoded() const;
+
+    /// Accessors.
     uint8_t version() const;
     const short_hash& hash() const;
-    bool from_string(const std::string& encoded_address);
-    std::string to_string() const;
-    void set_public_key_hash(const short_hash& pubkey_hash);
-    void set_script_hash(const short_hash& script_hash);
-    void set_public_key(const ec_point& public_key);
-    void set_script(const chain::script& eval_script);
 
 private:
-    uint8_t version_ = invalid_version;
-    short_hash hash_ = null_short_hash;
+    /// Validators.
+    static bool is_address(data_slice decoded);
+
+    /// Factories.
+    static payment_address from_string(const std::string& address);
+    static payment_address from_payment(const payment& decoded);
+    static payment_address from_private(const ec_private& secret);
+    static payment_address from_public(const ec_public& point, uint8_t version);
+    static payment_address from_script(const chain::script& script,
+        uint8_t version);
+
+    /// Members.
+    /// These should be const, apart from the need to implement assignment.
+    bool valid_;
+    uint8_t version_;
+    short_hash hash_;
 };
-
-/**
- * Extract a Bitcoin address from an input or output script.
- * Returns false on failure.
- */
-BC_API bool extract(payment_address& address, const chain::script& script);
-
-BC_API bool operator==(const payment_address& lhs, const payment_address& rhs);
-
-// TODO: move wrap utilities to "checked.hpp/cpp"
-
-/**
- * Unwrap a wrapped payload.
- * @param[out] version   The version byte of the wrapped data.
- * @param[out] hash      The short_hash payload of the wrapped data.
- * @param[out] checksum  The validated checksum of the wrapped data.
- * @param[in]  wrapped   The wrapped data to unwrap.
- * @return               True if input checksum validates.
- */
-BC_API bool unwrap(uint8_t& version, short_hash& hash, uint32_t& checksum,
-    data_slice wrapped);
-
-/**
- * Unwrap a wrapped payload.
- * @param[out] version   The version byte of the wrapped data.
- * @param[out] payload   The payload of the wrapped data.
- * @param[out] checksum  The validated checksum of the wrapped data.
- * @param[in]  wrapped   The wrapped data to unwrap.
- * @return               True if input checksum validates.
- */
-BC_API bool unwrap(uint8_t& version, data_chunk& payload, uint32_t& checksum,
-    data_slice wrapped);
-
-/**
- * Wrap arbitrary data.
- * @param[in]  version  The version byte for the wrapped data.
- * @param[out] payload  The payload to wrap.
- * @return              The wrapped data.
- */
-BC_API data_chunk wrap(uint8_t version, data_slice payload);
-
-/**
- * Craeted a checked wrapper and copy into array instance.
- */
-template <size_t Size>
-void wrap(byte_array<Size>& target, uint8_t version, data_slice payload)
-{
-    const auto checked = wrap(version, payload);
-    BITCOIN_ASSERT(checked.size() == Size);
-    std::copy(checked.begin(), checked.end(), target.begin());
-}
 
 } // namspace wallet
 } // namspace libbitcoin
 
-// Allow payment_address to be in indexed in std::*map classes.
-namespace std
-{
-    template <>
-    struct BC_API hash<libbitcoin::wallet::payment_address>
-    {
-        size_t operator()(const libbitcoin::wallet::payment_address& payaddr) const
-        {
-            using libbitcoin::short_hash;
-            using libbitcoin::short_hash_size;
-            std::string raw_addr;
-
-            raw_addr.resize(short_hash_size + 1);
-            raw_addr[0] = payaddr.version();
-
-            const short_hash& addr_hash = payaddr.hash();
-            std::copy(addr_hash.begin(), addr_hash.end(),
-                raw_addr.begin() + 1);
-
-            std::hash<std::string> functor;
-
-            return functor(raw_addr);
-        }
-    };
-
-} // namspace std
+////// Allow payment_address to be in indexed in std::*map classes.
+////namespace std
+////{
+////    template <>
+////    struct hash<bc::wallet::payment_address>
+////    {
+////        size_t operator()(const bc::wallet::payment_address& address) const
+////        {
+////            // Create a string of the form [address-version|address-hash].
+////            std::string buffer;
+////            buffer.resize(bc::short_hash_size + 1);
+////            buffer[0] = address.version();
+////            const auto& hash = address.hash();
+////            std::copy(hash.begin(), hash.end(), buffer.begin() + 1);
+////            std::hash<std::string> functor;
+////            return functor(buffer);
+////        }
+////    };
+////
+////} // namspace std
 
 #endif

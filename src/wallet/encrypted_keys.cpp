@@ -28,11 +28,13 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 #include <bitcoin/bitcoin/math/crypto.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
-#include <bitcoin/bitcoin/math/ec_keys.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/unicode/unicode.hpp>
 #include <bitcoin/bitcoin/utility/assert.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/endian.hpp>
+#include <bitcoin/bitcoin/wallet/ec_private.hpp>
+#include <bitcoin/bitcoin/wallet/ec_public.hpp>
 #include "parse_encrypted_keys/parse_ek_key.hpp"
 #include "parse_encrypted_keys/parse_ek_prefix.hpp"
 #include "parse_encrypted_keys/parse_ek_private.hpp"
@@ -52,46 +54,64 @@ static_assert(2 * quarter == bc::aes256_block_size, "oops!");
 // address_
 // ----------------------------------------------------------------------------
 
-static hash_digest address_hash(uint8_t version, const ec_point& point)
+static hash_digest address_hash(const payment_address& address)
 {
-    const payment_address address(version, point);
-    return bitcoin_hash(to_chunk(address.to_string()));
+    return bitcoin_hash(to_chunk(address.encoded()));
 }
 
-static ek_salt address_salt(uint8_t version, const ec_point& point)
+static bool address_salt(ek_salt& salt, const payment_address& address)
 {
-    return slice<0, ek_salt_size>(address_hash(version, point));
+    salt = slice<0, ek_salt_size>(address_hash(address));
+    return true;
 }
 
-static bool address_validate(const ec_point& point, const ek_salt& salt,
+static bool address_salt(ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
-    const auto hash = address_hash(version, point);
+    payment_address address({ point, compressed }, version);
+    return address ? address_salt(salt, address) : false;
+}
+
+static bool address_salt(ek_salt& salt, const ec_secret& secret,
+    uint8_t version, bool compressed)
+{
+    payment_address address({ secret, version, compressed });
+    return address ? address_salt(salt, address) : false;
+}
+
+static bool address_validate(const ek_salt& salt,
+    const payment_address& address)
+{
+    const auto hash = address_hash(address);
     return std::equal(hash.begin(), hash.begin() + salt.size(), salt.begin());
 }
 
-static bool address_validate(const ec_secret& secret, const ek_salt& salt,
+static bool address_validate(const ek_salt& salt, const ec_compressed& point,
     uint8_t version, bool compressed)
 {
-    const auto point = secret_to_public_key(secret, compressed);
-    return address_validate(point, salt, version, compressed);
+    payment_address address({ point, compressed }, version);
+    return address ? address_validate(salt, address) : false;
+}
+
+static bool address_validate(const ek_salt& salt, const ec_secret& secret,
+    uint8_t version, bool compressed)
+{
+    payment_address address({ secret, version, compressed });
+    return address ? address_validate(salt, address) : false;
 }
 
 // point_
 // ----------------------------------------------------------------------------
 
-static hash_digest point_hash(const ec_point& compressed_point)
+static hash_digest point_hash(const ec_compressed& point)
 {
-    static constexpr size_t compressed_size = 1 + hash_size;
-    BITCOIN_ASSERT(compressed_point.size() == compressed_size);
-    const auto point_array = to_array<compressed_size>(compressed_point);
-    return slice<1, compressed_size>(point_array);
+    return slice<1, ec_compressed_size>(point);
 }
 
 static one_byte point_sign(uint8_t byte, const hash_digest& hash)
 {
     static constexpr uint8_t low_bit_mask = 0x01;
-    const uint8_t last_byte = hash[hash_size - 1];
+    const uint8_t last_byte = hash.back();
     const uint8_t last_byte_odd_field = last_byte & low_bit_mask;
     const uint8_t sign_byte = byte ^ last_byte_odd_field;
     return to_array(sign_byte);
@@ -100,11 +120,6 @@ static one_byte point_sign(uint8_t byte, const hash_digest& hash)
 static one_byte point_sign(const one_byte& single, const hash_digest& hash)
 {
     return point_sign(single.front(), hash);
-}
-
-static ec_point point_factory(const one_byte& sign, const hash_digest& hash)
-{
-    return build_chunk({ sign, hash });
 }
 
 // scrypt_
@@ -133,13 +148,13 @@ static long_hash scrypt_private(data_slice data, data_slice salt)
 
 static one_byte set_flags(bool compressed, bool lot_sequence, bool multiplied)
 {
-    uint8_t byte = ek_flag::none;
+    uint8_t byte = 0;
 
     if (compressed)
-        byte |= ek_flag::ec_compressed;
+        byte |= ek_flag::ec_compressed_key;
 
     if (lot_sequence)
-        byte |= ek_flag::lot_sequence;
+        byte |= ek_flag::lot_sequence_key;
 
     if (!multiplied)
         byte |= ek_flag::ec_non_multiplied;
@@ -187,13 +202,16 @@ static void create_private_key(ek_private& out_private, const one_byte& flags,
     });
 }
 
-static void create_public_key(ek_public& out_public, const one_byte& flags,
+static bool create_public_key(ek_public& out_public, const one_byte& flags,
     const ek_salt& salt, const ek_entropy& entropy,
     const hash_digest& derived1, const hash_digest& derived2,
     const ec_secret& secret, uint8_t version)
 {
+    ec_compressed point;
+    if (!secret_to_public(point, secret))
+        return false;
+
     const auto prefix = parse_ek_public::prefix_factory(version);
-    const auto point = secret_to_public_key(secret, true);
     const auto hash = point_hash(point);
 
     auto encrypted1 = xor_data<half>(hash, derived1);
@@ -203,8 +221,7 @@ static void create_public_key(ek_public& out_public, const one_byte& flags,
     aes256_encrypt(derived2, encrypted2);
 
     const auto sign = point_sign(point.front(), derived2);
-
-    build_checked_array(out_public,
+    return build_checked_array(out_public,
     {
         prefix,
         flags,
@@ -218,35 +235,39 @@ static void create_public_key(ek_public& out_public, const one_byte& flags,
 
 // There is no scenario requiring a public key, we support it for completeness.
 bool create_key_pair(ek_private& out_private, ek_public& out_public,
-    ec_point& out_point, const ek_token& token, const ek_seed& seed,
+    ec_compressed& out_point, const ek_token& token, const ek_seed& seed,
     uint8_t version, bool compressed)
 {
     const parse_ek_token parse(token);
     if (!parse.valid())
         return false;
 
-    const auto point = point_factory(parse.sign(), parse.data());
-    out_point = point;
+    const auto point = splice(parse.sign(), parse.data());
+    auto point_copy = point;
     const auto factor = bitcoin_hash(seed);
-    ec_multiply(out_point, factor);
+    if (!ec_multiply(point_copy, factor))
+        return false;
 
-    if (!compressed)
-        out_point = decompress_public_key(out_point);
+    ek_salt salt;
+    if (!address_salt(salt, point_copy, version, compressed))
+        return false;
 
-    const auto salt = address_salt(version, out_point);
     const auto salt_entropy = splice(salt, parse.entropy());
     const auto derived = split(scrypt_pair(point, salt_entropy));
     const auto flags = set_flags(compressed, parse.lot_sequence(), true);
 
+    if (!create_public_key(out_public, flags, salt, parse.entropy(),
+        derived.left, derived.right, factor, version))
+        return false;
+
     create_private_key(out_private, flags, salt, parse.entropy(), derived.left,
         derived.right, seed, version);
-    create_public_key(out_public, flags, salt, parse.entropy(), derived.left,
-        derived.right, factor, version);
 
+    out_point = point_copy;
     return true;
 }
 
-bool create_key_pair(ek_private& out_private, ec_point& out_point,
+bool create_key_pair(ek_private& out_private, ec_compressed& out_point,
     const ek_token& token, const ek_seed& seed, uint8_t version,
     bool compressed)
 {
@@ -266,7 +287,7 @@ static data_chunk normal(const std::string& passphrase)
     return to_chunk(to_normal_nfc_form(passphrase));
 }
 
-static void create_token(ek_token& out_token, const std::string& passphrase,
+static bool create_token(ek_token& out_token, const std::string& passphrase,
     data_slice owner_salt, const ek_entropy& owner_entropy,
     const byte_array<parse_ek_token::prefix_size>& prefix)
 {
@@ -279,9 +300,11 @@ static void create_token(ek_token& out_token, const std::string& passphrase,
     if (lot_sequence)
         factor = bitcoin_hash(splice(factor, owner_entropy));
 
-    const auto point = secret_to_public_key(factor, true);
+    ec_compressed point;
+    if (!secret_to_public(point, factor))
+        return false;
 
-    build_checked_array(out_token,
+    return build_checked_array(out_token,
     {
         prefix,
         owner_entropy,
@@ -290,14 +313,14 @@ static void create_token(ek_token& out_token, const std::string& passphrase,
 }
 
 // The salt here is owner-supplied random bits, not the address hash.
-void create_token(ek_token& out_token, const std::string& passphrase,
+bool create_token(ek_token& out_token, const std::string& passphrase,
     const ek_entropy& entropy)
 {
     // BIP38: If lot and sequence numbers are not being included, then
     // owner_salt is 8 random bytes instead of 4, lot_sequence is omitted and
     // owner_entropy becomes an alias for owner_salt.
     const auto prefix = parse_ek_token::prefix_factory(false);
-    create_token(out_token, passphrase, entropy, entropy, prefix);
+    return create_token(out_token, passphrase, entropy, entropy, prefix);
 }
 
 // The salt here is owner-supplied random bits, not the address hash.
@@ -318,12 +341,14 @@ bool create_token(ek_token& out_token, const std::string& passphrase,
 // encrypt
 // ----------------------------------------------------------------------------
 
-void encrypt(ek_private& out_private, const ec_secret& secret,
+bool encrypt(ek_private& out_private, const ec_secret& secret,
     const std::string& passphrase, uint8_t version, bool compressed)
 {
+    ek_salt salt;
+    if (!address_salt(salt, secret, version, compressed))
+        return false;
+
     const auto prefix = parse_ek_private::prefix_factory(version, false);
-    const auto point = secret_to_public_key(secret, compressed);
-    const auto salt = address_salt(version, point);
     const auto derived = split(scrypt_private(normal(passphrase), salt));
 
     auto encrypted1 = xor_data<half>(secret, derived.left);
@@ -332,7 +357,7 @@ void encrypt(ek_private& out_private, const ec_secret& secret,
     auto encrypted2 = xor_data<half>(secret, derived.left, half);
     aes256_encrypt(derived.right, encrypted2);
 
-    build_checked_array(out_private,
+    return build_checked_array(out_private,
     {
         prefix,
         set_flags(compressed),
@@ -353,7 +378,10 @@ static bool decrypt_multiplied(ec_secret& out_secret,
     if (parse.lot_sequence())
         secret = bitcoin_hash(splice(secret, parse.entropy()));
 
-    const auto point = secret_to_public_key(secret, true);
+    ec_compressed point;
+    if (!secret_to_public(point, secret))
+        return false;
+
     const auto salt_entropy = splice(parse.salt(), parse.entropy());
     const auto derived = split(scrypt_pair(point, salt_entropy));
 
@@ -368,11 +396,12 @@ static bool decrypt_multiplied(ec_secret& out_secret,
     aes256_decrypt(derived.right, extended);
     const auto decrypt1 = xor_data<half>(extended, derived.left);
     const auto factor = bitcoin_hash(splice(decrypt1, part.right));
-    ec_multiply(secret, factor);
+    if (!ec_multiply(secret, factor))
+        return false;
 
     const auto compressed = parse.compressed();
     const auto address_version = parse.address_version();
-    if (!address_validate(secret, parse.salt(), address_version, compressed))
+    if (!address_validate(parse.salt(), secret, address_version, compressed))
         return false;
 
     out_secret = secret;
@@ -394,14 +423,14 @@ static bool decrypt_secret(ec_secret& out_secret,
 
     const auto compressed = parse.compressed();
     const auto address_version = parse.address_version();
-    if (!address_validate(secret, parse.salt(), address_version, compressed))
+    if (!address_validate(parse.salt(), secret, address_version, compressed))
         return false;
 
     out_secret = secret;
     return true;
 }
 
-bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
+bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& out_compressed,
     const ek_private& key, const std::string& passphrase)
 {
     const parse_ek_private parse(key);
@@ -414,7 +443,7 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
 
     if (success)
     {
-        compressed = parse.compressed();
+        out_compressed = parse.compressed();
         out_version = parse.address_version();
     }
 
@@ -424,22 +453,24 @@ bool decrypt(ec_secret& out_secret, uint8_t& out_version, bool& compressed,
 // decrypt public_key
 // ----------------------------------------------------------------------------
 
-bool decrypt(ec_point& out_point, uint8_t& out_version, const ek_public& key,
-    const std::string& passphrase)
+bool decrypt(ec_compressed& out_point, uint8_t& out_version,
+    bool& out_compressed, const ek_public& key, const std::string& passphrase)
 {
     const parse_ek_public parse(key);
     if (!parse.valid())
         return false;
 
     const auto version = parse.address_version();
-    const auto compressed = parse.compressed();
     const auto lot_sequence = parse.lot_sequence();
     auto factor = scrypt_token(normal(passphrase), parse.owner_salt());
 
     if (lot_sequence)
         factor = bitcoin_hash(splice(factor, parse.entropy()));
 
-    const auto point = secret_to_public_key(factor, true);
+    ec_compressed point;
+    if (!secret_to_public(point, factor))
+        return false;
+
     const auto salt_entropy = splice(parse.salt(), parse.entropy());
     auto derived = split(scrypt_pair(point, salt_entropy));
     auto encrypt = split(parse.data());
@@ -451,17 +482,16 @@ bool decrypt(ec_point& out_point, uint8_t& out_version, const ek_public& key,
     const auto decrypt2 = xor_data<half>(encrypt.right, derived.left, 0, half);
 
     const auto sign_byte = point_sign(parse.sign(), derived.right);
-    auto generated = build_chunk({ sign_byte, decrypt1, decrypt2 });
-
-    ec_multiply(generated, factor);
-    if (!compressed)
-        generated = decompress_public_key(generated);
-
-    if (!address_validate(generated, parse.salt(), version, compressed))
+    auto product = splice(sign_byte, decrypt1, decrypt2);
+    if (!ec_multiply(product, factor))
         return false;
 
-    out_point = generated;
+    if (!address_validate(parse.salt(), product, version, parse.compressed()))
+        return false;
+
+    out_point = product;
     out_version = version;
+    out_compressed = parse.compressed();
     return true;
 }
 

@@ -75,7 +75,7 @@ public:
         }
 
         const auto& command = packet.command;
-        const auto bytes = message::serialize(std::forward<Message>(packet));
+        const auto bytes = message::serialize(std::forward<Message>(packet), magic_);
         const auto callback = std::forward<Handler>(handler);
         dispatch_.ordered(&proxy::do_send,
             shared_from_this(), bytes, callback, command);
@@ -148,6 +148,7 @@ private:
     deadline::ptr inactivity_;
     deadline::ptr revival_;
     handler revival_handler_;
+    uint32_t magic_;
     bool stopped_;
     message_subscriber message_subscriber_;
     stop_subscriber::ptr stop_subscriber_;

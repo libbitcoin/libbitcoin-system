@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE(bitcoin_uri__set_path__reset_stealth_after_payment__expecte
     const auto expected_uri = std::string("bitcoin:") + expected_stealth;
 
     bitcoin_uri uri;
-    payment_address payment;
-    BOOST_REQUIRE(payment.from_string("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD"));
+    const auto payment = payment_address("113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD");
+    BOOST_REQUIRE(payment);
     uri.set_address(payment);
     uri.set_address(stealth_address(expected_stealth));
     BOOST_REQUIRE_EQUAL(uri.encoded(), expected_uri);
@@ -117,8 +117,8 @@ BOOST_AUTO_TEST_CASE(bitcoin_uri__set_path__reset_payment_after_stealth__expecte
     const auto expected_uri = std::string("bitcoin:") + expected_payment;
 
     bitcoin_uri uri;
-    stealth_address stealth;
-    BOOST_REQUIRE(stealth.from_string("hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i"));
+    const auto stealth = stealth_address("hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i");
+    BOOST_REQUIRE(stealth);
     uri.set_address(stealth);
     uri.set_address(payment_address(expected_payment));
     BOOST_REQUIRE_EQUAL(uri.encoded(), expected_uri);
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(bitcoin_uri__all_setters__complex_uri__expected_encoding)
         "r=http://example.com?purchase%3Dshoes%26user%3Dbob");
 }
 
-BOOST_AUTO_TEST_CASE(bitcoin_uri__set_parameter__amount_denormalized___normalized)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__set_parameter__amount_denormalized__normalized)
 {
     bitcoin_uri uri;
     BOOST_REQUIRE(uri.set_parameter("amount", ".0012"));
@@ -191,40 +191,40 @@ BOOST_AUTO_TEST_CASE(bitcoin_uri__r__escaped__expected)
     BOOST_REQUIRE_EQUAL(bitcoin_uri("bitcoin:?r=http://example.com?purchase%3Dshoes%26user%3Dbob").r(), "http://example.com?purchase=shoes&user=bob");
 }
 
-BOOST_AUTO_TEST_CASE(bitcoin_uri__payment__valid___expected)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__payment__valid__expected)
 {
     const auto expected_payment = "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD";
     const auto expected_uri = std::string("bitcoin:") + expected_payment;
-    BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).payment().to_string(), expected_payment);
+    BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).payment().encoded(), expected_payment);
 }
 
-BOOST_AUTO_TEST_CASE(bitcoin_uri__stealth__valid___expected)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__stealth__valid__expected)
 {
     const auto expected_stealth = "hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i";
     const auto expected_uri = std::string("bitcoin:") + expected_stealth;
-    BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).stealth().to_string(), expected_stealth);
+    BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).stealth().encoded(), expected_stealth);
 }
 
-BOOST_AUTO_TEST_CASE(bitcoin_uri__address__payment___expected)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__address__payment__expected)
 {
     const auto expected_payment = "113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD";
     const auto expected_uri = std::string("bitcoin:") + expected_payment;
     BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).address(), expected_payment);
 }
 
-BOOST_AUTO_TEST_CASE(bitcoin_uri__address__stealth___expected)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__address__stealth__expected)
 {
     const auto expected_stealth = "hfFGUXFPKkQ5M6LC6aEUKMsURdhw93bUdYdacEtBA8XttLv7evZkira2i";
     const auto expected_uri = std::string("bitcoin:") + expected_stealth;
     BOOST_REQUIRE_EQUAL(bitcoin_uri(expected_uri).address(), expected_stealth);
 }
 
-BOOST_AUTO_TEST_CASE(bitcoin_uri__parameter_amount__denormalized___normalized)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__parameter_amount__denormalized__normalized)
 {
     BOOST_REQUIRE_EQUAL(bitcoin_uri("bitcoin:?amount=.0012").parameter("amount"), "0.0012");
 }
 
-BOOST_AUTO_TEST_CASE(bitcoin_uri__parameters_all__complex_uri___expected)
+BOOST_AUTO_TEST_CASE(bitcoin_uri__parameters_all__complex_uri__expected)
 {
     bitcoin_uri uri(
         "bitcoin:113Pfw4sFqN1T5kXUnKbqZHMJHN9oyjtgD?"
