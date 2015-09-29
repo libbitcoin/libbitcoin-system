@@ -181,11 +181,6 @@ hd_key hd_public::to_hd_key() const
     return out;
 }
 
-const ec_compressed& hd_public::to_point() const
-{
-    return point_;
-}
-
 hd_public hd_public::derive_public(uint32_t index) const
 {
     if (index >= hd_first_hardened_key)

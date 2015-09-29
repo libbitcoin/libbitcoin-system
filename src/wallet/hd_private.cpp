@@ -149,6 +149,14 @@ std::string hd_private::encoded() const
     return encode_base58(to_hd_key());
 }
 
+/// Accessors.
+// ----------------------------------------------------------------------------
+
+const ec_secret& hd_private::secret() const
+{
+    return secret_;
+}
+
 // Methods.
 // ----------------------------------------------------------------------------
 
@@ -174,14 +182,9 @@ hd_key hd_private::to_hd_key() const
     return out;
 }
 
-const hd_public& hd_private::to_public() const
+hd_public hd_private::to_public() const
 {
-    return *this;
-}
-
-const ec_secret& hd_private::to_secret() const
-{
-    return secret_;
+    return hd_public(*this);
 }
 
 hd_private hd_private::derive_private(uint32_t index) const
@@ -216,7 +219,7 @@ hd_private hd_private::derive_private(uint32_t index) const
 
 hd_public hd_private::derive_public(uint32_t index) const
 {
-    return derive_private(index);
+    return derive_private(index).to_public();
 }
 
 // Operators.

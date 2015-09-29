@@ -68,14 +68,16 @@ public:
     operator const ec_secret&() const;
 
     /// Serializer.
-    std::string encoded() const override;
+    std::string encoded() const;
+
+    /// Accessors.
+    const ec_secret& secret() const;
 
     /// Methods.
     hd_key to_hd_key() const;
-    const hd_public& to_public() const;
-    const ec_secret& to_secret() const;
+    hd_public to_public() const;
     hd_private derive_private(uint32_t index) const;
-    hd_public derive_public(uint32_t index) const override;
+    hd_public derive_public(uint32_t index) const;
 
 private:
     /// Factories.
