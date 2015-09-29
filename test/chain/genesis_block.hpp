@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2011-2015 libbitcoin developers (see AUTHORS)
+/*
+ * Copyright (c) 2011-2013 libbitcoin developers (see AUTHORS)
  *
  * This file is part of libbitcoin.
  *
@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef TEST_GENESIS_BLOCK_HPP
-#define TEST_GENESIS_BLOCK_HPP
+#ifndef LIBBITCOIN_TEST_GENESIS_BLOCK_HPP
+#define LIBBITCOIN_TEST_GENESIS_BLOCK_HPP
 
 #include <bitcoin/bitcoin.hpp>
 

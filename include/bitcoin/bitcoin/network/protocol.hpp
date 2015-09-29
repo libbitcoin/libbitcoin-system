@@ -55,9 +55,9 @@ public:
         fetch_connection_count_handler;
 
     protocol(threadpool& pool, hosts& hosts, initiator& network,
-        uint16_t port=bc::protocol_port, bool relay=true,
-        size_t max_outbound=8, size_t max_inbound=8,
-        const config::endpoint::list& seeds=seeder::defaults,
+        uint16_t port=8333, bool relay=true, size_t max_outbound=8,
+        size_t max_inbound=8,
+        const config::endpoint::list& seeds=seeder::mainnet,
         const config::authority& self=bc::unspecified_network_address,
         const timeout& timeouts=timeout::defaults);
     

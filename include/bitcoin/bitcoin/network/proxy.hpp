@@ -58,7 +58,8 @@ public:
     typedef subscriber<const code&> stop_subscriber;
 
     proxy(asio::socket_ptr socket, threadpool& pool,
-        const timeout& timeouts=timeout::defaults);
+        const timeout& timeouts=timeout::defaults,
+        uint32_t network_magic=0xd9b4bef9);
     ~proxy();
 
     /// This class is not copyable.

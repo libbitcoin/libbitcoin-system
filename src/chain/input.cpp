@@ -149,7 +149,7 @@ std::string input::to_string() const
 
 bool input::is_final() const
 {
-    return (sequence == max_sequence);
+    return (sequence == max_input_sequence);
 }
 
 } // namspace chain
