@@ -55,7 +55,7 @@ public:
     std::string encoded() const;
 
     /// Accessors.
-    const wallet::ek_token& ek_token::token() const;
+    const wallet::ek_token& token() const;
 
 private:
     /// Factories.

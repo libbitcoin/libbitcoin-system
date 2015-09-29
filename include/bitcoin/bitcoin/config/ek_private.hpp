@@ -53,7 +53,7 @@ public:
     std::string encoded() const;
 
     /// Accessors.
-    const wallet::ek_private& ek_private::private_key() const;
+    const wallet::ek_private& private_key() const;
 
 private:
     /// Factories.
