@@ -38,7 +38,7 @@
 namespace libbitcoin {
 namespace wallet {
     
-BC_CONSTEXPR uint64_t hd_private::mainnet = to_prefixes(0x0488ade4,
+const uint64_t hd_private::mainnet = to_prefixes(0x0488ade4,
     hd_public::mainnet);
 
 hd_private::hd_private()

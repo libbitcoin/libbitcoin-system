@@ -56,8 +56,9 @@ struct BC_API hd_lineage
 class BC_API hd_public
 {
 public:
-    static BC_CONSTEXPR uint32_t mainnet;
-    static BC_CONSTFUNC uint32_t to_prefix(uint64_t prefixes)
+    static const uint32_t mainnet;
+
+    static inline uint32_t to_prefix(uint64_t prefixes)
     {
         return prefixes & 0x00000000FFFFFFFF;
     }

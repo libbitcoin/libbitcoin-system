@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_CHAIN_OPERATION_HPP
 #define LIBBITCOIN_CHAIN_OPERATION_HPP
 
+#include <cstddef>
 #include <iostream>
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
@@ -80,7 +81,7 @@ enum class script_pattern
 class BC_API operation
 {
 public:
-    static BC_CONSTEXPR size_t max_null_data_size;
+    static const size_t max_null_data_size;
 
     typedef std::vector<operation> list;
     typedef std::vector<operation> stack;

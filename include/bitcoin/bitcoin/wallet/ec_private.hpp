@@ -48,23 +48,23 @@ public:
     // assumes a mapping to payment address version. This is insufficient
     // as a parameterized mapping is required, so we use the same technique as
     // with hd keys, merging the two necessary values into one version.
-    static BC_CONSTEXPR uint8_t wif;
-    static BC_CONSTEXPR uint8_t mainnet_p2kh;
-    static BC_CONSTEXPR uint16_t mainnet;
-    static BC_CONSTEXPR uint8_t compressed_sentinel;
+    static const uint8_t wif;
+    static const uint8_t mainnet_p2kh;
+    static const uint16_t mainnet;
+    static const uint8_t compressed_sentinel;
 
-    static BC_CONSTFUNC uint8_t to_address_prefix(uint16_t version)
+    static inline uint8_t to_address_prefix(uint16_t version)
     {
         return version & 0x00FF;
     }
 
-    static BC_CONSTFUNC uint8_t to_wif_prefix(uint16_t version)
+    static inline uint8_t to_wif_prefix(uint16_t version)
     {
         return version >> 8;
     }
 
     // Unfortunately can't use this below to define mainnet (MSVC).
-    static BC_CONSTFUNC uint16_t to_version(uint8_t address, uint8_t wif)
+    static inline uint16_t to_version(uint8_t address, uint8_t wif)
     {
         return uint16_t(wif) << 8 | address;
     }

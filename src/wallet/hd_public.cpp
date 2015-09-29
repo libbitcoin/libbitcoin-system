@@ -36,7 +36,7 @@
 namespace libbitcoin {
 namespace wallet {
 
-BC_CONSTEXPR uint32_t hd_public::mainnet = 0x0488b21eu;
+const uint32_t hd_public::mainnet = 0x0488b21eu;
 
 // hd_public
 // ----------------------------------------------------------------------------

@@ -20,7 +20,7 @@
 #ifndef LIBBITCOIN_EC_PUBLIC_HPP
 #define LIBBITCOIN_EC_PUBLIC_HPP
 
-#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/math/hash.hpp>
@@ -38,10 +38,10 @@ class payment_address;
 class BC_API ec_public
 {
 public:
-    static BC_CONSTEXPR uint8_t compressed_even;
-    static BC_CONSTEXPR uint8_t compressed_odd;
-    static BC_CONSTEXPR uint8_t uncompressed;
-    static BC_CONSTEXPR uint8_t mainnet_p2kh;
+    static const uint8_t compressed_even;
+    static const uint8_t compressed_odd;
+    static const uint8_t uncompressed;
+    static const uint8_t mainnet_p2kh;
 
     /// Constructors.
     ec_public();
