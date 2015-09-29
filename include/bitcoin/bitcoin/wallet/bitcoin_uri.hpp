@@ -21,81 +21,66 @@
 #define LIBBITCOIN_WALLET_BITCOIN_URI_HPP
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <boost/optional.hpp>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/wallet/payment_address.hpp>
 #include <bitcoin/bitcoin/wallet/stealth_address.hpp>
+#include <bitcoin/bitcoin/wallet/uri_reader.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
 /**
- * The URI parser calls these methods each time it extracts a URI component.
+ * A bitcoin URI corresponding to BIP 21 and BIP 72.
  */
-class BC_API uri_visitor
+class BC_API bitcoin_uri
+  : public uri_reader
 {
 public:
-    virtual bool set_address(const std::string& address) = 0;
-    virtual bool set_param(const std::string& key,
-        const std::string& value) = 0;
-};
+    bitcoin_uri();
+    bitcoin_uri(const bitcoin_uri& other);
+    bitcoin_uri(const std::string& uri, bool strict=true);
 
-/**
- * A decoded bitcoin URI corresponding to BIP 21 and BIP 72.
- * All string members are UTF-8.
- */
-class BC_API uri_parse_result
-  : public uri_visitor
-{
-public:
-    typedef boost::optional<payment_address> optional_address;
-    typedef boost::optional<stealth_address> optional_stealth;
-    typedef boost::optional<uint64_t> optional_amount;
-    typedef boost::optional<std::string> optional_string;
+    /// Test for validity following a parse.
+    operator const bool() const;
 
-    bool set_address(const std::string& address);
-    bool set_param(const std::string& key, const std::string& value);
+    /// Get the serialize URI representation.
+    std::string encoded() const;
 
-    optional_address address;
-    optional_stealth stealth;
-    optional_amount amount;
-    optional_string label;
-    optional_string message;
-    optional_string r;
-};
+    /// Property getters.
+    uint64_t amount() const;
+    std::string label() const;
+    std::string message() const;
+    std::string r() const;
+    std::string address() const;
+    payment_address payment() const;
+    stealth_address stealth() const;
+    std::string parameter(const std::string& key) const;
 
-/**
- * Parses a URI string into its individual components.
- * @param strict Only accept properly-escaped parameters. Some bitcoin
- * software does not properly escape URI parameters, and setting strict to
- * false allows these malformed URI's to parse anyhow.
- * @return false if the URI is malformed.
- */
-BC_API bool uri_parse(uri_visitor& out, const std::string& uri,
-    bool strict=true);
+    /// Property setters.
+    void set_amount(uint64_t satoshis);
+    void set_label(const std::string& label);
+    void set_message(const std::string& message);
+    void set_r(const std::string& r);
+    void set_address(const payment_address& payment);
+    void set_address(const stealth_address& stealth);
 
-/**
- * Assembles a bitcoin URI string.
- */
-class uri_writer
-{
-public:
-    // Formatted:
-    BC_API void write_address(const payment_address& address);
-    BC_API void write_address(const stealth_address& stealth);
-    BC_API void write_amount(uint64_t satoshis);
-    BC_API void write_label(const std::string& label);
-    BC_API void write_message(const std::string& message);
-    BC_API void write_r(const std::string& r);
-
-    // Raw:
-    BC_API void write_address(const std::string& address);
-    BC_API void write_param(const std::string& key, const std::string& value);
-
-    BC_API std::string encoded() const;
+    /// uri_reader implementation.
+    void set_strict(bool strict);
+    bool set_scheme(const std::string& scheme);
+    bool set_authority(const std::string& authority);
+    bool set_path(const std::string& path);
+    bool set_fragment(const std::string& fragment);
+    bool set_parameter(const std::string& key, const std::string& value);
 
 private:
+    bool set_address(const std::string& address);
+    bool set_amount(const std::string& satoshis);
+
+    bool strict_;
+    std::string scheme_;
     std::string address_;
     std::map<std::string, std::string> query_;
 };
