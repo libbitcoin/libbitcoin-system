@@ -44,9 +44,9 @@ class BC_API initiator
 {
 public:
     /// Magic number that identifies p2p protocol messages.
-    static const uint32_t network;
+    static const uint32_t mainnet;
 
-    initiator(threadpool& pool, uint32_t network_magic=network,
+    initiator(threadpool& pool, uint32_t network_magic=mainnet,
         const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.

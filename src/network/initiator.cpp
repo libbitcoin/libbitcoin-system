@@ -38,7 +38,7 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-const uint32_t initiator::network = 0xd9b4bef9;
+const uint32_t initiator::mainnet = 3652501241;
 
 initiator::initiator(threadpool& pool, uint32_t network_magic,
     const timeout& timeouts)
