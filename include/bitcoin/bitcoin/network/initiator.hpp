@@ -43,6 +43,7 @@ namespace network {
 class BC_API initiator
 {
 public:
+    /// Magic number that identifies p2p protocol messages.
     static const uint32_t network;
 
     initiator(threadpool& pool, uint32_t network_magic=network,
