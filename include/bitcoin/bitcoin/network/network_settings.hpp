@@ -34,6 +34,7 @@ namespace network {
 struct BC_API settings
 {
     uint32_t threads;
+    uint32_t identifier;
     uint16_t inbound_port;
     uint32_t inbound_connection_limit;
     uint32_t outbound_connections;
