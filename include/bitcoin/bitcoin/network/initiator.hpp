@@ -43,7 +43,10 @@ namespace network {
 class BC_API initiator
 {
 public:
-    initiator(threadpool& pool, const timeout& timeouts=timeout::defaults);
+    static const uint32_t network;
+
+    initiator(threadpool& pool, uint32_t network_magic=network,
+        const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
     initiator(const initiator&) = delete;
@@ -58,6 +61,7 @@ private:
         connector::handler handle_connect, asio::resolver_ptr, asio::query_ptr);
 
     threadpool& pool_;
+    uint32_t magic_;
     const timeout& timeouts_;
 };
 

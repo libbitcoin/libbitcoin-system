@@ -52,7 +52,7 @@ public:
 
     channel(proxy::ptr proxy);
     channel(threadpool& pool, asio::socket_ptr socket,
-        const timeout& timeouts);
+        uint32_t network_magic, const timeout& timeouts);
     ~channel();
 
     /// This class is not copyable.

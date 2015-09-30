@@ -38,8 +38,11 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-initiator::initiator(threadpool& pool, const timeout& timeouts)
-  : pool_(pool), timeouts_(timeouts)
+const uint32_t initiator::network = 0xd9b4bef9;
+
+initiator::initiator(threadpool& pool, uint32_t network_magic,
+    const timeout& timeouts)
+  : pool_(pool), magic_(network_magic), timeouts_(timeouts)
 {
 }
 
@@ -55,7 +58,9 @@ void initiator::resolve_handler(const boost_code& ec,
         return;
     }
 
-    const auto outbound = std::make_shared<connector>(pool_, timeouts_);
+    const auto outbound = std::make_shared<connector>(pool_, magic_,
+        timeouts_);
+
     outbound->connect(endpoint_iterator, handle_connect);
 }
 
@@ -81,7 +86,7 @@ void initiator::listen(uint16_t port, acceptor::listen_handler handle_listen)
 
     const auto ec = bc::error::boost_to_error_code(result);
     const auto inbound = ec ? nullptr :
-        std::make_shared<acceptor>(pool_, accept, timeouts_);
+        std::make_shared<acceptor>(pool_, accept, magic_, timeouts_);
 
     handle_listen(ec, inbound);
 }
