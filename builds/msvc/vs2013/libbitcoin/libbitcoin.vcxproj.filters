@@ -718,9 +718,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp">
       <Filter>include\bitcoin\config</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp">
-      <Filter>include\bitcoin\network</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp">
       <Filter>include\bitcoin\network</Filter>
     </ClInclude>
@@ -969,6 +966,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_private.hpp">
       <Filter>include\bitcoin\wallet</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network_settings.hpp">
+      <Filter>include\bitcoin\network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
