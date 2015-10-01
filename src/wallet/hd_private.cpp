@@ -106,7 +106,6 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
 hd_private hd_private::from_seed(data_slice seed, uint64_t prefixes)
 {
     // This is a magic constant from BIP32.
-    // see: bip-0032.mediawiki#master-key-generation
     static const data_chunk magic(to_chunk("Bitcoin seed"));
 
     const auto intermediate = split(hmac_sha512_hash(seed, magic));
