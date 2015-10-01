@@ -42,8 +42,9 @@ BC_API bool to_stealth_prefix(uint32_t& out_prefix,
 BC_API bool create_ephemeral_keys(ec_secret& out_secret,
     ec_compressed& out_point, const data_chunk& seed);
 
-/// Create a null-data stealth script for the ephemeral public key.
-BC_API bool create_shealth_script(chain::script& out_ephemeral_script,
+/// Create an ephemeral public/private key pair from the provided seed with the
+/// null-data script data value that produces the desired filter prefix.
+BC_API bool create_shealth_script(data_chunk& out_stealth_data,
     ec_secret& out_secret, ec_compressed& out_point, const binary_type& filter,
     const data_chunk& seed);
 

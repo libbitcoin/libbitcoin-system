@@ -84,8 +84,8 @@ bool create_ephemeral_keys(ec_secret& out_secret, ec_compressed& out_point,
 }
 
 // Mine a filter into the leftmost bytes of sha256(sha256(output-script)).
-bool create_shealth_script(chain::script& out_stealth_script,
-    ec_secret& out_secret, ec_compressed& out_point, const binary_type& filter,
+bool create_shealth_script(data_chunk& out_stealth_data, ec_secret& out_secret,
+    ec_compressed& out_point, const binary_type& filter,
     const data_chunk& seed)
 {
     // Create a valid ephemeral key pair.
@@ -131,7 +131,7 @@ bool create_shealth_script(chain::script& out_stealth_script,
         if (to_stealth_prefix(field, stealth_script) &&
             filter.is_prefix_of(field))
         {
-            out_stealth_script = stealth_script;
+            out_stealth_data = data;
             out_secret = secret;
             out_point = point;
             return true;
