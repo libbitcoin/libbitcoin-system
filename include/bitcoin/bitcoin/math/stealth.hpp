@@ -31,9 +31,6 @@ namespace libbitcoin {
 
 static BC_CONSTEXPR uint8_t ephemeral_public_key_sign = 0x02;
 
-/// Determine if the filter is a leftmost subset of the prefix.
-BC_API bool is_filter_match(const binary_type& filter, uint32_t prefix);
-
 /// Determine if the script is a null-data script of at least 32 data bytes.
 BC_API bool is_stealth_script(const chain::script& script);
 

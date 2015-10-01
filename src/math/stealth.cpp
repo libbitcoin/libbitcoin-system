@@ -32,13 +32,6 @@ namespace libbitcoin {
 
 using namespace chain;
 
-bool is_filter_match(const binary_type& filter, const uint32_t prefix)
-{
-    const auto prefix_bytes = to_little_endian(prefix);
-    const binary_type truncated_prefix(filter.size(), prefix_bytes);
-    return filter == truncated_prefix;
-}
-
 bool is_stealth_script(const script& script)
 {
     if (script.pattern() != chain::script_pattern::null_data)
@@ -134,9 +127,9 @@ bool create_shealth_script(chain::script& out_stealth_script,
         const auto stealth_script = script{ ops };
 
         // Test for match of filter to stealth script hash prefix.
-        uint32_t prefix;
-        if (to_stealth_prefix(prefix, stealth_script) &&
-            is_filter_match(filter, prefix))
+        uint32_t field;
+        if (to_stealth_prefix(field, stealth_script) &&
+            filter.is_prefix_of(field))
         {
             out_stealth_script = stealth_script;
             out_secret = secret;

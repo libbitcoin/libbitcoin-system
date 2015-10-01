@@ -21,7 +21,6 @@
 #define LIBBITCOIN_BINARY_HPP
 
 #include <cstdint>
-#include <bitcoin/bitcoin/compat.hpp>
 #include <bitcoin/bitcoin/constants.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 
@@ -37,6 +36,7 @@ public:
     static size_type blocks_size(const size_type bitsize);
 
     binary_type();
+    binary_type(const binary_type& other);
     binary_type(const std::string& bitstring);
     binary_type(size_type size, data_slice blocks);
 
@@ -50,27 +50,25 @@ public:
     void prepend(const binary_type& prior);
     void shift_left(size_type distance);
     void shift_right(size_type distance);
-    binary_type get_substring(size_type first, size_type length = SIZE_MAX) const;
+    binary_type substring(size_type first, size_type length=max_size_t) const;
+
+    bool is_prefix_of(data_slice field) const;
+    bool is_prefix_of(const uint32_t field) const;
+    bool is_prefix_of(const binary_type& field) const;
+
+    bool operator==(const binary_type& other) const;
+    bool operator!=(const binary_type& other) const;
+    binary_type& operator=(const binary_type& other);
+    friend std::istream& operator>>(std::istream& in, binary_type& to);
+    friend std::ostream& operator<<(std::ostream& out, const binary_type& of);
 
 private:
-    friend bool operator==(const binary_type& a, const binary_type& b);
-    friend std::istream& operator>>(std::istream& stream, binary_type& prefix);
-    friend std::ostream& operator<<(std::ostream& stream,
-        const binary_type& prefix);
-
     static uint8_t shift_block_right(uint8_t next, uint8_t current, uint8_t prior,
         size_type original_offset, size_type intended_offset);
 
     data_chunk blocks_;
-    uint8_t final_block_excess_ = 0;
+    uint8_t final_block_excess_;
 };
-
-BC_API bool operator==(const binary_type& left, const binary_type& right);
-BC_API bool operator!=(const binary_type& left, const binary_type& right);
-
-BC_API std::istream& operator>>(std::istream& stream, binary_type& prefix);
-BC_API std::ostream& operator<<(std::ostream& stream,
-    const binary_type& prefix);
 
 } // namespace libbitcoin
 
