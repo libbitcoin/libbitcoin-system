@@ -122,18 +122,6 @@ AC_ARG_ENABLE([ndebug],
 AC_MSG_RESULT([$enable_ndebug])
 AS_CASE([${enable_ndebug}], [yes], AC_DEFINE([NDEBUG]))
 
-# Implement --enable-testnet and define ENABLE_TESTNET and output ${testnet}.
-#------------------------------------------------------------------------------
-AC_MSG_CHECKING([--enable-testnet option])
-AC_ARG_ENABLE([testnet],
-    AS_HELP_STRING([--enable-testnet],
-        [Compile for testnet (deprecated). @<:@default=no@:>@]),
-    [enable_testnet=$enableval],
-    [enable_testnet=no])
-AC_MSG_RESULT([$enable_testnet])
-AS_CASE([${enable_testnet}], [yes], AC_DEFINE([ENABLE_TESTNET]))
-AS_CASE([${enable_testnet}], [yes], AC_SUBST([testnet], [-DENABLE_TESTNET]))
-
 # Inherit --enable-shared and define BOOST_TEST_DYN_LINK.
 #------------------------------------------------------------------------------
 AS_CASE([${enable_shared}], [yes], AC_DEFINE([BOOST_TEST_DYN_LINK]))
