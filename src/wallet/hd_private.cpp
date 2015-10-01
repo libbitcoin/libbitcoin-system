@@ -183,7 +183,8 @@ hd_key hd_private::to_hd_key() const
 
 hd_public hd_private::to_public() const
 {
-    return hd_public(*this);
+    return hd_public(((hd_public)*this).to_hd_key(), 
+        hd_public::to_prefix(lineage_.prefixes));
 }
 
 hd_private hd_private::derive_private(uint32_t index) const
