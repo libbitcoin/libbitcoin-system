@@ -228,7 +228,7 @@ bool transaction::is_locktime_conflict() const
 
     if (locktime_set)
         for (const auto& input: inputs)
-            if (input.sequence < max_sequence)
+            if (input.sequence < max_input_sequence)
                 return false;
 
     return locktime_set;

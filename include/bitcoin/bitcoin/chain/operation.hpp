@@ -25,6 +25,7 @@
 #include <vector>
 #include <bitcoin/bitcoin/define.hpp>
 #include <bitcoin/bitcoin/chain/opcode.hpp>
+#include <bitcoin/bitcoin/math/elliptic_curve.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/utility/reader.hpp>
 #include <bitcoin/bitcoin/utility/writer.hpp>
@@ -109,7 +110,10 @@ public:
 
     /// stack factories
     static stack to_null_data_pattern(data_slice data);
-    static stack to_pay_multisig_pattern(uint8_t signatures, loaf points);
+    static stack to_pay_multisig_pattern(uint8_t signatures,
+        const std::vector<ec_compressed>& points);
+    static stack to_pay_multisig_pattern(uint8_t signatures,
+        const std::vector<data_chunk>& points);
     static stack to_pay_public_key_pattern(data_slice point);
     static stack to_pay_key_hash_pattern(const short_hash& hash);
     static stack to_pay_script_hash_pattern(const short_hash& hash);

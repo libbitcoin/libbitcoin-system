@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(is_final_locktime_inputs_final_returns_true)
     chain::transaction instance;
     instance.locktime = 101;
     instance.inputs.emplace_back();
-    instance.inputs.back().sequence = max_sequence;
+    instance.inputs.back().sequence = max_input_sequence;
     BOOST_REQUIRE_EQUAL(true, instance.is_final(height, time));
 }
 
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(is_locktime_conflict_input_max_sequence_returns_true)
     chain::transaction instance;
     instance.locktime = 2143;
     instance.inputs.emplace_back();
-    instance.inputs.back().sequence = max_sequence;
+    instance.inputs.back().sequence = max_input_sequence;
     BOOST_REQUIRE_EQUAL(true, instance.is_locktime_conflict());
 }
 

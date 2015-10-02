@@ -28,15 +28,32 @@
 #include <bitcoin/bitcoin/utility/binary.hpp>
 
 namespace libbitcoin {
-    
+
 static BC_CONSTEXPR uint8_t ephemeral_public_key_sign = 0x02;
 
-/// Create an ephemeral public/private key pair from the provided seed.
-/// The public key must have a sign value of 0x02 (i.e. must be even y-valued).
-/// Returns false if the seed does not yield a valid key pair.
-/// The seed will be nonced and rehashed 256 times before failure.
-BC_API bool create_ephemeral_keys(ec_secret& out_secret,
-    ec_compressed& out_point, const data_chunk& seed);
+/// Determine if the script is a null-data script of at least 32 data bytes.
+BC_API bool is_stealth_script(const chain::script& script);
+
+/// Convert a stealth info script to a prefix usable for stealth.
+BC_API bool to_stealth_prefix(uint32_t& out_prefix,
+    const chain::script& script);
+
+/// Create a valid stealth ephemeral private key from the provided seed.
+BC_API bool create_ephemeral_key(ec_secret& out_secret,
+    const data_chunk& seed);
+
+/// Create an ephemeral public key from the provided seed with the
+/// null-data script data value that produces the desired filter prefix.
+BC_API bool create_stealth_data(data_chunk& out_stealth_data,
+    ec_secret& out_secret, const binary_type& filter, const data_chunk& seed);
+
+/// Extract the stealth ephemeral public key from an output script.
+BC_API bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
+    const chain::script& script);
+
+/// Extract the unsigned stealth ephemeral public key from an output script.
+BC_API bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
+    const chain::script& script);
 
 /// Calculate the shared secret.
 BC_API bool shared_secret(ec_secret& out_shared, const ec_secret& secret,
@@ -51,18 +68,6 @@ BC_API bool uncover_stealth(ec_compressed& out_stealth,
 BC_API bool uncover_stealth(ec_secret& out_stealth,
     const ec_compressed& ephemeral_or_scan, const ec_secret& scan_or_ephemeral,
     const ec_secret& spend);
-
-/// Convert a stealth info script to a prefix usable for stealth.
-BC_API bool to_stealth_prefix(binary_type& out_prefix,
-    const chain::script& script);
-
-/// Extract the stealth ephemeral public key from an output script.
-BC_API bool extract_ephemeral_key(ec_compressed& out_ephemeral_public_key,
-    const chain::script& script);
-
-/// Extract the unsigned stealth ephemeral public key from an output script.
-BC_API bool extract_ephemeral_key(hash_digest& out_unsigned_ephemeral_key,
-    const chain::script& script);
 
 } // namespace libbitcoin
 

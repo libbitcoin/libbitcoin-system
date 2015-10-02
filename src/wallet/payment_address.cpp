@@ -303,7 +303,7 @@ payment_address payment_address::extract(const chain::script& script,
 
         case chain::script_pattern::pay_script_hash:
             hash = to_array<short_hash_size>(ops[1].data);
-            return payment_address(hash, payment_address::mainnet_p2sh);
+            return payment_address(hash, p2sh_version);
             
         // sign
         // --------------------------------------------------------------------
@@ -329,7 +329,7 @@ payment_address payment_address::extract(const chain::script& script,
 
         case chain::script_pattern::sign_script_hash:
             hash = bitcoin_short_hash(ops.back().data);
-            return payment_address(hash, payment_address::mainnet_p2sh);
+            return payment_address(hash, p2sh_version);
 
         case chain::script_pattern::non_standard:
         default:

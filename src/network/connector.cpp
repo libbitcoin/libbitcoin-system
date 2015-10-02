@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/network/connector.hpp>
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <boost/date_time.hpp>
@@ -42,8 +43,9 @@ using std::placeholders::_1;
 using std::placeholders::_2;
 
 // There is no way to cancel channel creation, must wait for timer.
-connector::connector(threadpool& pool, const timeout& timeouts)
-  : pool_(pool), timeouts_(timeouts),
+connector::connector(threadpool& pool, uint32_t network_magic, 
+    const timeout& timeouts)
+  : pool_(pool), magic_(network_magic), timeouts_(timeouts),
     deadline_(std::make_shared<deadline>(pool, timeouts.connect)),
     CONSTRUCT_TRACK(connector, LOG_NETWORK)
 {
@@ -85,7 +87,9 @@ void connector::create_channel(const boost_code& ec, asio::iterator,
 
     // It is possible for the node to get created here after a timeout, but it
     // will subsequently self-destruct following rejection by the synchronizer.
-    const auto peer = std::make_shared<channel>(pool_, socket, timeouts_);
+    const auto peer = std::make_shared<channel>(pool_, socket, magic_,
+        timeouts_);
+
     complete(error::success, peer);
 }
 

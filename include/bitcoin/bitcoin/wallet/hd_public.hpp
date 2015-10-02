@@ -52,6 +52,8 @@ struct BC_API hd_lineage
     bool operator!=(const hd_lineage& other) const;
 };
 
+class hd_private;
+
 /// An extended public key, as defined by BIP 32.
 class BC_API hd_public
 {

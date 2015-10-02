@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_NETWORK_CONNECTOR_HPP
 #define LIBBITCOIN_NETWORK_CONNECTOR_HPP
 
+#include <cstdint>
 #include <memory>
 #include <boost/date_time.hpp>
 #include <bitcoin/bitcoin/error.hpp>
@@ -47,10 +48,12 @@ public:
 
     /**
      * Construct a socket connector.
-     * @param[in]  pool     The thread pool used by the connector.
-     * @param[in]  timeout  The collection of network timeout settings.
+     * @param[in]  pool           The thread pool used by the connector.
+     * @param[in]  network_magic  The magic bytes that identify the network.
+     * @param[in]  timeout        The collection of network timeout settings.
      */
-    connector(threadpool& pool, const timeout& timeout);
+    connector(threadpool& pool, uint32_t network_magic,
+        const timeout& timeout);
 
     /// This class is not copyable.
     connector(const connector&) = delete;
@@ -69,6 +72,7 @@ private:
     void handle_timer(const code& ec, handler complete);
 
     threadpool& pool_;
+    uint32_t magic_;
     const timeout& timeouts_;
     deadline::ptr deadline_;
 };

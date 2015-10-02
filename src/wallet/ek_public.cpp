@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <bitcoin/bitcoin/config/ek_token.hpp>
+#include <bitcoin/bitcoin/wallet/ek_public.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -28,94 +28,94 @@
 #include <bitcoin/bitcoin/math/checksum.hpp>
 
 namespace libbitcoin {
-namespace config {
+namespace wallet {
 
-ek_token::ek_token()
-  : valid_(false), token_()
+ek_public::ek_public()
+  : valid_(false), public_()
 {
 }
 
-ek_token::ek_token(const std::string& encoded)
-  : ek_token(from_string(encoded))
+ek_public::ek_public(const std::string& encoded)
+  : ek_public(from_string(encoded))
 {
 }
 
-ek_token::ek_token(const ek_token& other)
-  : valid_(other.valid_), token_(other.token_)
+ek_public::ek_public(const ek_public& other)
+  : valid_(other.valid_), public_(other.public_)
 {
 }
 
-ek_token::ek_token(const wallet::ek_token& value)
-  : valid_(true), token_(value)
+ek_public::ek_public(const encrypted_public& value)
+  : valid_(true), public_(value)
 {
 }
 
 // Factories.
 // ----------------------------------------------------------------------------
 
-ek_token ek_token::from_string(const std::string& encoded)
+ek_public ek_public::from_string(const std::string& encoded)
 {
     // TODO: incorporate existing parser here, setting new members.
 
-    wallet::ek_token key;
+    encrypted_public key;
     return decode_base58(key, encoded) && verify_checksum(key) ?
-        ek_token(key) : ek_token();
+        ek_public(key) : ek_public();
 }
 
 // Cast operators.
 // ----------------------------------------------------------------------------
 
-ek_token::operator const bool() const
+ek_public::operator const bool() const
 {
     return valid_;
 }
 
-ek_token::operator const wallet::ek_token&() const
+ek_public::operator const encrypted_public&() const
 {
-    return token_;
+    return public_;
 }
 
 // Serializer.
 // ----------------------------------------------------------------------------
 
-std::string ek_token::encoded() const
+std::string ek_public::encoded() const
 {
-    return encode_base58(token_);
+    return encode_base58(public_);
 }
 
 // Accessors.
 // ----------------------------------------------------------------------------
 
-const wallet::ek_token& ek_token::token() const
+const encrypted_public& ek_public::public_key() const
 {
-    return token_;
+    return public_;
 }
 
 // Operators.
 // ----------------------------------------------------------------------------
 
-ek_token& ek_token::operator=(const ek_token& other)
+ek_public& ek_public::operator=(const ek_public& other)
 {
     valid_ = other.valid_;
-    token_ = other.token_;
+    public_ = other.public_;
     return *this;
 }
 
-bool ek_token::operator==(const ek_token& other) const
+bool ek_public::operator==(const ek_public& other) const
 {
-    return valid_ == other.valid_ && token_ == other.token_;
+    return valid_ == other.valid_ && public_ == other.public_;
 }
 
-bool ek_token::operator!=(const ek_token& other) const
+bool ek_public::operator!=(const ek_public& other) const
 {
     return !(*this == other);
 }
 
-std::istream& operator>>(std::istream& in, ek_token& to)
+std::istream& operator>>(std::istream& in, ek_public& to)
 {
     std::string value;
     in >> value;
-    to = ek_token(value);
+    to = ek_public(value);
 
     if (!to)
     {
@@ -126,11 +126,11 @@ std::istream& operator>>(std::istream& in, ek_token& to)
     return in;
 }
 
-std::ostream& operator<<(std::ostream& out, const ek_token& of)
+std::ostream& operator<<(std::ostream& out, const ek_public& of)
 {
     out << of.encoded();
     return out;
 }
 
-} // namespace config
+} // namespace wallet
 } // namespace libbitcoin

@@ -38,7 +38,7 @@
 namespace libbitcoin {
 namespace wallet {
     
-const uint64_t hd_private::mainnet = to_prefixes(0x0488ade4,
+const uint64_t hd_private::mainnet = to_prefixes(76066276,
     hd_public::mainnet);
 
 hd_private::hd_private()
@@ -106,7 +106,6 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
 hd_private hd_private::from_seed(data_slice seed, uint64_t prefixes)
 {
     // This is a magic constant from BIP32.
-    // see: bip-0032.mediawiki#master-key-generation
     static const data_chunk magic(to_chunk("Bitcoin seed"));
 
     const auto intermediate = split(hmac_sha512_hash(seed, magic));
@@ -184,7 +183,8 @@ hd_key hd_private::to_hd_key() const
 
 hd_public hd_private::to_public() const
 {
-    return hd_public(*this);
+    return hd_public(((hd_public)*this).to_hd_key(), 
+        hd_public::to_prefix(lineage_.prefixes));
 }
 
 hd_private hd_private::derive_private(uint32_t index) const

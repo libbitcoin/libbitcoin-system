@@ -17,41 +17,39 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_EK_PRIVATE_HPP
-#define LIBBITCOIN_PARSE_EK_PRIVATE_HPP
+#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PUBLIC_HPP
+#define LIBBITCOIN_PARSE_ENCRYPTED_PUBLIC_HPP
 
 #include <cstdint>
 #include <cstddef>
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include "parse_ek_key.hpp"
+#include "parse_encrypted_key.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-class parse_ek_private
-  : public parse_ek_key<2u>
+class parse_encrypted_public
+  : public parse_encrypted_key<5u>
 {
 public:
-    static byte_array<prefix_size> prefix_factory(uint8_t address, bool multiplied);
+    static byte_array<prefix_size> prefix_factory(uint8_t address);
 
-    parse_ek_private(const ek_private& key);
+    parse_encrypted_public(const encrypted_public& key);
 
-    bool multiplied() const;
     uint8_t address_version() const;
 
-    quarter_hash data1() const;
-    half_hash data2() const;
+    one_byte sign() const;
+    hash_digest data() const;
 
 private:
     bool verify_magic() const;
 
-    static constexpr uint8_t default_context_ = 0x42;
-    static constexpr uint8_t multiplied_context_ = 0x43;
+    static constexpr uint8_t default_context_ = 0x9a;
     static const byte_array<magic_size> magic_;
 
-    const quarter_hash data1_;
-    const half_hash data2_;
+    const one_byte sign_;
+    const hash_digest data_;
 };
 
 } // namespace wallet

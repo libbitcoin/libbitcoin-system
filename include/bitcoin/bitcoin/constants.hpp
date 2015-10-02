@@ -67,11 +67,6 @@ BC_CONSTEXPR uint32_t initial_block_reward = 50;
 BC_CONSTEXPR uint32_t max_work_bits = 0x1d00ffff;
 BC_CONSTEXPR uint32_t max_input_sequence = max_uint32;
 
-// Deprecated (use more descriptive).
-BC_CONSTEXPR uint32_t max_bits = max_work_bits;
-BC_CONSTEXPR uint32_t max_sequence = max_input_sequence;
-BC_CONSTEXPR uint32_t block_reward = initial_block_reward;
-
 // Threshold for nLockTime: below this value it is interpreted as block number,
 // otherwise as UNIX timestamp. [Tue Nov 5 00:53:20 1985 UTC]
 BC_CONSTEXPR uint32_t locktime_threshold = 500000000;
@@ -91,21 +86,6 @@ BC_CONSTFUNC uint64_t max_money()
     return reward_interval *
         max_money_recursive(coin_price(initial_block_reward));
 }
-
-#ifdef ENABLE_TESTNET
-    // Block 514 is the first block after [Feb 15 2014].
-    // Testnet started bip16 before mainnet.
-    BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
-    BC_CONSTEXPR uint32_t bip16_switchover_height = 514;
-    BC_CONSTEXPR uint16_t protocol_port = 18333;
-    BC_CONSTEXPR uint32_t magic_value = 0x0709110b;
-#else
-    // [April 1 2012]
-    BC_CONSTEXPR uint32_t bip16_switchover_timestamp = 1333238400;
-    BC_CONSTEXPR uint32_t bip16_switchover_height = 173805;
-    BC_CONSTEXPR uint16_t protocol_port = 8333;
-    BC_CONSTEXPR uint32_t magic_value = 0xd9b4bef9;
-#endif
 
 enum services: uint64_t
 {

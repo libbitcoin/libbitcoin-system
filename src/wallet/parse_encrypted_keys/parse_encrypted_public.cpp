@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "parse_ek_public.hpp"
+#include "parse_encrypted_public.hpp"
 
 #include <cstdint>
 #include <cstddef>
@@ -25,28 +25,29 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_ek_key.hpp"
-#include "parse_ek_prefix.hpp"
+#include "parse_encrypted_key.hpp"
+#include "parse_encrypted_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
     
 // This prefix results in the prefix "cfrm" in the base58 encoding but is
 // modified when the payment address is Bitcoin mainnet (0).
-const byte_array<parse_ek_public::magic_size> parse_ek_public::magic_
+const byte_array<parse_encrypted_public::magic_size>
+parse_encrypted_public::magic_
 {
     { 0x64, 0x3b, 0xf6, 0xa8 }
 };
 
-byte_array<parse_ek_public::prefix_size> parse_ek_public::prefix_factory(
-    uint8_t address)
+byte_array<parse_encrypted_public::prefix_size>
+parse_encrypted_public::prefix_factory(uint8_t address)
 {
     const auto context = default_context_ + address;
     return splice(magic_, to_array(context));
 }
 
-parse_ek_public::parse_ek_public(const ek_public& key)
-  : parse_ek_key<prefix_size>(
+parse_encrypted_public::parse_encrypted_public(const encrypted_public& key)
+  : parse_encrypted_key<prefix_size>(
         slice<0, 5>(key),
         slice<5, 6>(key),
         slice<6, 10>(key),
@@ -57,22 +58,22 @@ parse_ek_public::parse_ek_public(const ek_public& key)
     valid(verify_magic() && verify_checksum(key));
 }
 
-uint8_t parse_ek_public::address_version() const
+uint8_t parse_encrypted_public::address_version() const
 {
     return context() - default_context_;
 }
 
-hash_digest parse_ek_public::data() const
+hash_digest parse_encrypted_public::data() const
 {
     return data_;
 }
 
-one_byte parse_ek_public::sign() const
+one_byte parse_encrypted_public::sign() const
 {
     return sign_;
 }
 
-bool parse_ek_public::verify_magic() const
+bool parse_encrypted_public::verify_magic() const
 {
     return slice<0, magic_size>(prefix()) == magic_;
 }

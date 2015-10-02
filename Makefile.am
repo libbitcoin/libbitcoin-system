@@ -32,7 +32,7 @@ doc_DATA = \
 # src/libbitcoin.la => ${libdir}
 #------------------------------------------------------------------------------
 lib_LTLIBRARIES = src/libbitcoin.la
-src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
+src_libbitcoin_la_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 src_libbitcoin_la_LDFLAGS = ${boost_LDFLAGS}
 src_libbitcoin_la_LIBADD = ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 src_libbitcoin_la_SOURCES = \
@@ -51,9 +51,6 @@ src_libbitcoin_la_SOURCES = \
     src/config/btc256.cpp \
     src/config/checkpoint.cpp \
     src/config/directory.cpp \
-    src/config/ek_private.cpp \
-    src/config/ek_public.cpp \
-    src/config/ek_token.cpp \
     src/config/endpoint.cpp \
     src/config/parameter.cpp \
     src/config/printer.cpp \
@@ -158,6 +155,9 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/dictionary.cpp \
     src/wallet/ec_private.cpp \
     src/wallet/ec_public.cpp \
+    src/wallet/ek_private.cpp \
+    src/wallet/ek_public.cpp \
+    src/wallet/ek_token.cpp \
     src/wallet/encrypted_keys.cpp \
     src/wallet/hd_private.cpp \
     src/wallet/hd_public.cpp \
@@ -168,23 +168,23 @@ src_libbitcoin_la_SOURCES = \
     src/wallet/select_outputs.cpp \
     src/wallet/stealth_address.cpp \
     src/wallet/uri.cpp \
-    src/wallet/parse_encrypted_keys/parse_ek_key.hpp \
-    src/wallet/parse_encrypted_keys/parse_ek_key.ipp \
-    src/wallet/parse_encrypted_keys/parse_ek_prefix.hpp \
-    src/wallet/parse_encrypted_keys/parse_ek_prefix.ipp \
-    src/wallet/parse_encrypted_keys/parse_ek_private.cpp \
-    src/wallet/parse_encrypted_keys/parse_ek_private.hpp \
-    src/wallet/parse_encrypted_keys/parse_ek_public.cpp \
-    src/wallet/parse_encrypted_keys/parse_ek_public.hpp \
-    src/wallet/parse_encrypted_keys/parse_ek_token.cpp \
-    src/wallet/parse_encrypted_keys/parse_ek_token.hpp
+    src/wallet/parse_encrypted_keys/parse_encrypted_key.hpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_key.ipp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_prefix.hpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_prefix.ipp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_private.cpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_private.hpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_public.cpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_public.hpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_token.cpp \
+    src/wallet/parse_encrypted_keys/parse_encrypted_token.hpp
 
 # local: examples/libbitcoin_examples
 #------------------------------------------------------------------------------
 if WITH_EXAMPLES
 
 noinst_PROGRAMS = examples/libbitcoin_examples
-examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
+examples_libbitcoin_examples_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 examples_libbitcoin_examples_LDFLAGS = ${boost_LDFLAGS}
 examples_libbitcoin_examples_LDADD = src/libbitcoin.la ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 examples_libbitcoin_examples_SOURCES = \
@@ -199,7 +199,7 @@ if WITH_TESTS
 TESTS = libbitcoin_test_runner.sh
 
 check_PROGRAMS = test/libbitcoin_test
-test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${icu} ${testnet} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
+test_libbitcoin_test_CPPFLAGS = -I${srcdir}/include ${icu} ${boost_CPPFLAGS} ${pthread_CPPFLAGS} ${icu_i18n_CPPFLAGS} ${secp256k1_CPPFLAGS}
 test_libbitcoin_test_LDFLAGS = ${boost_LDFLAGS}
 test_libbitcoin_test_LDADD = src/libbitcoin.la ${boost_unit_test_framework_LIBS} ${boost_chrono_LIBS} ${boost_date_time_LIBS} ${boost_filesystem_LIBS} ${boost_iostreams_LIBS} ${boost_locale_LIBS} ${boost_program_options_LIBS} ${boost_regex_LIBS} ${boost_system_LIBS} ${boost_thread_LIBS} ${pthread_LIBS} ${rt_LIBS} ${icu_i18n_LIBS} ${dl_LIBS} ${secp256k1_LIBS}
 test_libbitcoin_test_SOURCES = \
@@ -320,9 +320,6 @@ include_bitcoin_bitcoin_config_HEADERS = \
     include/bitcoin/bitcoin/config/btc256.hpp \
     include/bitcoin/bitcoin/config/checkpoint.hpp \
     include/bitcoin/bitcoin/config/directory.hpp \
-    include/bitcoin/bitcoin/config/ek_private.hpp \
-    include/bitcoin/bitcoin/config/ek_public.hpp \
-    include/bitcoin/bitcoin/config/ek_token.hpp \
     include/bitcoin/bitcoin/config/endpoint.hpp \
     include/bitcoin/bitcoin/config/parameter.hpp \
     include/bitcoin/bitcoin/config/printer.hpp
@@ -465,6 +462,9 @@ include_bitcoin_bitcoin_wallet_HEADERS = \
     include/bitcoin/bitcoin/wallet/dictionary.hpp \
     include/bitcoin/bitcoin/wallet/ec_private.hpp \
     include/bitcoin/bitcoin/wallet/ec_public.hpp \
+    include/bitcoin/bitcoin/wallet/ek_private.hpp \
+    include/bitcoin/bitcoin/wallet/ek_public.hpp \
+    include/bitcoin/bitcoin/wallet/ek_token.hpp \
     include/bitcoin/bitcoin/wallet/encrypted_keys.hpp \
     include/bitcoin/bitcoin/wallet/hd_private.hpp \
     include/bitcoin/bitcoin/wallet/hd_public.hpp \

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include "parse_ek_private.hpp"
+#include "parse_encrypted_private.hpp"
 
 #include <cstdint>
 #include <cstddef>
@@ -25,27 +25,28 @@
 #include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_ek_key.hpp"
-#include "parse_ek_prefix.hpp"
+#include "parse_encrypted_key.hpp"
+#include "parse_encrypted_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-const byte_array<parse_ek_private::magic_size> parse_ek_private::magic_
+const byte_array<parse_encrypted_private::magic_size> 
+parse_encrypted_private::magic_
 {
     { 0x01 }
 };
 
-byte_array<parse_ek_private::prefix_size> parse_ek_private::prefix_factory(
-    uint8_t address, bool multiplied)
+byte_array<parse_encrypted_private::prefix_size>
+parse_encrypted_private::prefix_factory(uint8_t address, bool multiplied)
 {
     const auto base = multiplied ? multiplied_context_ : default_context_;
     const auto context = base + address;
     return splice(magic_, to_array(context));
 }
 
-parse_ek_private::parse_ek_private(const ek_private& key)
-    : parse_ek_key<prefix_size>(
+parse_encrypted_private::parse_encrypted_private(const encrypted_private& key)
+    : parse_encrypted_key<prefix_size>(
         slice<0, 2>(key),
         slice<2, 3>(key),
         slice<3, 7>(key),
@@ -56,29 +57,29 @@ parse_ek_private::parse_ek_private(const ek_private& key)
     valid(verify_magic() && verify_checksum(key));
 }
 
-uint8_t parse_ek_private::address_version() const
+uint8_t parse_encrypted_private::address_version() const
 {
     const auto base = multiplied() ? multiplied_context_ : default_context_;
     return context() - base;
 }
 
-quarter_hash parse_ek_private::data1() const
+quarter_hash parse_encrypted_private::data1() const
 {
     return data1_;
 }
 
-half_hash parse_ek_private::data2() const
+half_hash parse_encrypted_private::data2() const
 {
     return data2_;
 }
 
-bool parse_ek_private::multiplied() const
+bool parse_encrypted_private::multiplied() const
 {
     // This is a double negative (multiplied = not not multiplied).
     return (flags() & ek_flag::ec_non_multiplied) == 0;
 }
 
-bool parse_ek_private::verify_magic() const
+bool parse_encrypted_private::verify_magic() const
 {
     return slice<0, magic_size>(prefix()) == magic_;
 }

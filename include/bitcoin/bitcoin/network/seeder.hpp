@@ -47,7 +47,8 @@ public:
     typedef std::function<void(const code&)> handler;
     typedef std::function<void(const code&, channel::ptr)> ptr;
 
-    static const config::endpoint::list defaults;
+    static const config::endpoint::list mainnet;
+    static const config::endpoint::list testnet;
 
     seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,
         initiator& network, const config::endpoint::list& seeds,

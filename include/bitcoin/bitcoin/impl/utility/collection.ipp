@@ -27,6 +27,14 @@
 
 namespace libbitcoin {
 
+template <typename Source, typename Target>
+std::vector<Target> cast(const std::vector<Source>& source)
+{
+    std::vector<Target> target(source.size());
+    target.assign(source.begin(), source.end());
+    return target;
+}
+
 template <typename Pair, typename Key>
 int find_pair_position(const std::vector<Pair>& list, const Key& key)
 {

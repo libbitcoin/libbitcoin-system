@@ -17,44 +17,47 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_EK_TOKEN_HPP
-#define LIBBITCOIN_PARSE_EK_TOKEN_HPP
+#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_IPP
+#define LIBBITCOIN_PARSE_ENCRYPTED_PREFIX_IPP
 
 #include <cstdint>
 #include <cstddef>
-#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_ek_key.hpp"
 
 namespace libbitcoin {
 namespace wallet {
-
-class parse_ek_token
-  : public parse_ek_prefix<8u>
+    
+template<size_t Size>
+parse_encrypted_prefix<Size>::parse_encrypted_prefix(
+    const byte_array<Size>& value)
+  : prefix_(value), valid_(false)
 {
-public:
-    static byte_array<prefix_size> prefix_factory(bool lot_sequence);
+}
 
-    parse_ek_token(const ek_token& value);
+template<size_t Size>
+uint8_t parse_encrypted_prefix<Size>::context() const
+{
+    return prefix_.back();
+}
 
-    bool lot_sequence() const;
-    hash_digest data() const;
-    ek_entropy entropy() const;
-    one_byte sign() const;
+template<size_t Size>
+byte_array<Size> parse_encrypted_prefix<Size>::prefix() const
+{
+    return prefix_;
+}
 
-private:
-    bool verify_context() const;
-    bool verify_magic() const;
+template<size_t Size>
+bool parse_encrypted_prefix<Size>::valid() const
+{
+    return valid_;
+}
 
-    static constexpr uint8_t lot_context_ = 0x51;
-    static constexpr uint8_t default_context_ = 0x53;
-    static const byte_array<magic_size> magic_;
-
-    const ek_entropy entropy_;
-    const one_byte sign_;
-    const hash_digest data_;
-};
+template<size_t Size>
+void parse_encrypted_prefix<Size>::valid(bool value)
+{
+    valid_ = value;
+}
 
 } // namespace wallet
 } // namespace libbitcoin

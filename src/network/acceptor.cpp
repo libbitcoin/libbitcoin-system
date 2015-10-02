@@ -20,6 +20,7 @@
 #include <bitcoin/bitcoin/network/acceptor.hpp>
 
 #include <algorithm>
+#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <bitcoin/bitcoin/error.hpp>
@@ -38,8 +39,8 @@ namespace network {
 using std::placeholders::_1;
 
 acceptor::acceptor(threadpool& pool, asio::acceptor_ptr accept,
-    const timeout& timeouts)
-  : pool_(pool), timeouts_(timeouts), asio_acceptor_(accept),
+    uint32_t network_magic, const timeout& timeouts)
+  : pool_(pool), magic_(network_magic), timeouts_(timeouts), asio_acceptor_(accept),
     CONSTRUCT_TRACK(acceptor, LOG_NETWORK)
 {
 }
@@ -62,7 +63,9 @@ void acceptor::create_channel(const boost_code& ec, asio::socket_ptr socket,
         return;
     }
 
-    const auto peer = std::make_shared<channel>(pool_, socket, timeouts_);
+    const auto peer = std::make_shared<channel>(pool_, socket, magic_,
+        timeouts_);
+
     handle_accept(error::success, peer);
 }
 

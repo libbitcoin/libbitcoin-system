@@ -48,17 +48,7 @@ namespace network {
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-// Based on bitcoinstats.com/network/dns-servers
-#ifdef ENABLE_TESTNET
-const config::endpoint::list seeder::defaults
-{
-    { "testnet-seed.alexykot.me", 18333 },
-    { "testnet-seed.bitcoin.petertodd.org", 18333 },
-    { "testnet-seed.bluematt.me", 18333 },
-    { "testnet-seed.bitcoin.schildbach.de", 18333 }
-};
-#else
-const config::endpoint::list seeder::defaults
+const config::endpoint::list seeder::mainnet
 {
     { "seed.bitnodes.io", 8333 },
     { "seed.bitcoinstats.com", 8333 },
@@ -67,7 +57,15 @@ const config::endpoint::list seeder::defaults
     { "seed.bitcoin.jonasschnelli.ch", 8333 },
     { "dnsseed.bitcoin.dashjr.org", 8333 }
 };
-#endif
+
+// Based on bitcoinstats.com/network/dns-servers
+const config::endpoint::list seeder::testnet
+{
+    { "testnet-seed.alexykot.me", 18333 },
+    { "testnet-seed.bitcoin.petertodd.org", 18333 },
+    { "testnet-seed.bluematt.me", 18333 },
+    { "testnet-seed.bitcoin.schildbach.de", 18333 }
+};
 
 // This is not currently stoppable.
 seeder::seeder(threadpool& pool, hosts& hosts, const timeout& timeouts,

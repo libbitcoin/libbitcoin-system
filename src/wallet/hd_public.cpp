@@ -32,11 +32,12 @@
 #include <bitcoin/bitcoin/utility/endian.hpp>
 #include <bitcoin/bitcoin/utility/serializer.hpp>
 #include <bitcoin/bitcoin/wallet/ec_public.hpp>
+#include <bitcoin/bitcoin/wallet/hd_private.hpp>
 
 namespace libbitcoin {
 namespace wallet {
 
-const uint32_t hd_public::mainnet = 0x0488b21eu;
+const uint32_t hd_public::mainnet = 76067358;
 
 // hd_public
 // ----------------------------------------------------------------------------
@@ -95,8 +96,6 @@ hd_public hd_public::from_key(const hd_key& key, uint32_t prefix)
     // Validate the prefix against the provided value.
     if (actual_prefix != prefix)
         return hd_public();
-
-    BITCOIN_ASSERT(prefix == hd_public::mainnet);
 
     // The private prefix will be zero'd here, but there's no way to access it.
     const hd_lineage lineage

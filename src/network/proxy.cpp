@@ -60,7 +60,7 @@ using boost::format;
 using boost::posix_time::time_duration;
 
 // The proxy will have no config with timers moved to channel.
-proxy::proxy(asio::socket_ptr socket, threadpool& pool,
+proxy::proxy(asio::socket_ptr socket, threadpool& pool, uint32_t network_magic,
     const timeout& timeouts)
   : socket_(socket),
     dispatch_(pool),
@@ -69,7 +69,7 @@ proxy::proxy(asio::socket_ptr socket, threadpool& pool,
     inactivity_(std::make_shared<deadline>(pool, timeouts.inactivity)),
     revival_(std::make_shared<deadline>(pool, timeouts.revival)),
     revival_handler_(nullptr),
-    magic_(bc::magic_value),  ///// TODO: pass via config.
+    magic_(network_magic),
     stopped_(false),
     message_subscriber_(pool),
     stop_subscriber_(MAKE_SUBSCRIBER(stop, pool, LOG_NETWORK)),

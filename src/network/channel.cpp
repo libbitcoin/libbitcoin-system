@@ -47,8 +47,8 @@ channel::channel(proxy::ptr proxy)
 
 // TODO: move proxy timeouts to channel (revival deprecated).
 channel::channel(threadpool& pool, asio::socket_ptr socket,
-    const timeout& timeouts)
-  : channel(std::make_shared<proxy>(socket, pool, timeouts))
+    uint32_t network_magic, const timeout& timeouts)
+  : channel(std::make_shared<proxy>(socket, pool, network_magic, timeouts))
 {
 }
 

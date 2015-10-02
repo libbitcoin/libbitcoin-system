@@ -47,6 +47,8 @@ namespace network {
 class BC_API protocol
 {
 public:
+    static const uint16_t mainnet;
+
     typedef subscriber<const code&, channel::ptr> channel_subscriber;
     typedef std::function<void(const code&)> completion_handler;
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
@@ -55,9 +57,9 @@ public:
         fetch_connection_count_handler;
 
     protocol(threadpool& pool, hosts& hosts, initiator& network,
-        uint16_t port=bc::protocol_port, bool relay=true,
-        size_t max_outbound=8, size_t max_inbound=8,
-        const config::endpoint::list& seeds=seeder::defaults,
+        uint16_t port=mainnet, bool relay=true, size_t max_outbound=8,
+        size_t max_inbound=8,
+        const config::endpoint::list& seeds=seeder::mainnet,
         const config::authority& self=bc::unspecified_network_address,
         const timeout& timeouts=timeout::defaults);
     

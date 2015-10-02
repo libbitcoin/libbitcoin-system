@@ -19,30 +19,37 @@
  */
 #include <bitcoin/bitcoin/utility/binary.hpp>
 
-#include <sstream>
-#include <bitcoin/bitcoin/utility/assert.hpp>
 #include <iostream>
+#include <sstream>
+#include <bitcoin/bitcoin/constants.hpp>
+#include <bitcoin/bitcoin/utility/assert.hpp>
+#include <bitcoin/bitcoin/utility/endian.hpp>
 
 namespace libbitcoin {
 
 binary_type::size_type binary_type::blocks_size(const size_type bitsize)
 {
-    if (bitsize == 0)
-        return 0;
-
-    return (bitsize - 1) / bits_per_block + 1;
+    return bitsize == 0 ? 0 : (bitsize - 1) / bits_per_block + 1;
 }
 
 binary_type::binary_type()
+  : final_block_excess_(0)
+{
+}
+
+binary_type::binary_type(const binary_type& other)
+  : blocks_(other.blocks_), final_block_excess_(other.final_block_excess_)
 {
 }
 
 binary_type::binary_type(const std::string& bitstring)
+  : binary_type()
 {
     std::stringstream(bitstring) >> *this;
 }
 
 binary_type::binary_type(size_type size, data_slice blocks)
+  : binary_type()
 {
     // Copy blocks
     blocks_.resize(blocks.size());
@@ -181,7 +188,7 @@ void binary_type::shift_right(size_type distance)
     }
 }
 
-binary_type binary_type::get_substring(size_type start, size_type length) const
+binary_type binary_type::substring(size_type start, size_type length) const
 {
     size_type current_size = size();
     if (start > current_size)
@@ -189,7 +196,7 @@ binary_type binary_type::get_substring(size_type start, size_type length) const
         start = current_size;
     }
 
-    if ((length == SIZE_MAX) || ((start + length) > current_size))
+    if ((length == max_size_t) || ((start + length) > current_size))
     {
         length = current_size - start;
     }
@@ -200,27 +207,50 @@ binary_type binary_type::get_substring(size_type start, size_type length) const
     return result;
 }
 
-bool operator==(const binary_type& left, const binary_type& right)
+bool binary_type::is_prefix_of(const uint32_t field) const
+{
+    return is_prefix_of(to_little_endian(field));
+}
+
+bool binary_type::is_prefix_of(const binary_type& field) const
+{
+    return is_prefix_of(field.blocks());
+}
+
+bool binary_type::is_prefix_of(data_slice field) const
+{
+    const binary_type truncated_prefix(size(), field);
+    return *this == truncated_prefix;
+}
+
+bool binary_type::operator==(const binary_type& other) const
 {
     using size_type = binary_type::size_type;
-    for (size_type i = 0; i < left.size() && i < right.size(); ++i)
-        if (left[i] != right[i])
+    for (size_type i = 0; i < size() && i < other.size(); ++i)
+        if ((*this)[i] != other[i])
             return false;
 
     return true;
 }
 
-bool operator!=(const binary_type& left, const binary_type& right)
+bool binary_type::operator!=(const binary_type& other) const
 {
-    return !(left == right);
+    return !(*this == other);
 }
 
-std::istream& operator>>(std::istream& stream, binary_type& prefix)
+binary_type& binary_type::operator=(const binary_type& other)
+{
+    blocks_ = other.blocks_;
+    final_block_excess_ = other.final_block_excess_;
+    return *this;
+}
+
+std::istream& operator>>(std::istream& in, binary_type& to)
 {
     std::string bitstring;
-    stream >> bitstring;
+    in >> bitstring;
 
-    prefix.resize(0);
+    to.resize(0);
     uint8_t block = 0;
     auto bit_iterator = binary_type::bits_per_block;
 
@@ -228,8 +258,8 @@ std::istream& operator>>(std::istream& stream, binary_type& prefix)
     {
         if (representation != '0' && representation != '1')
         {
-            prefix.blocks_.clear();
-            return stream;
+            to.blocks_.clear();
+            return in;
         }
 
         // Set bit to 1
@@ -245,7 +275,7 @@ std::istream& operator>>(std::istream& stream, binary_type& prefix)
         if (bit_iterator == 0)
         {
             // Move to the next block.
-            prefix.blocks_.push_back(block);
+            to.blocks_.push_back(block);
             block = 0;
             bit_iterator = binary_type::bits_per_block;
         }
@@ -253,21 +283,21 @@ std::istream& operator>>(std::istream& stream, binary_type& prefix)
 
     // Block wasn't finished but push it back.
     if (bit_iterator != binary_type::bits_per_block)
-        prefix.blocks_.push_back(block);
+        to.blocks_.push_back(block);
 
-    prefix.resize(bitstring.size());
-    return stream;
+    to.resize(bitstring.size());
+    return in;
 }
 
-std::ostream& operator<<(std::ostream& stream, const binary_type& prefix)
+std::ostream& operator<<(std::ostream& out, const binary_type& of)
 {
-    for (binary_type::size_type i = 0; i < prefix.size(); ++i)
-        if (prefix[i])
-            stream << '1';
+    for (binary_type::size_type i = 0; i < of.size(); ++i)
+        if (of[i])
+            out << '1';
         else
-            stream << '0';
+            out << '0';
 
-    return stream;
+    return out;
 }
 
 } // namespace libbitcoin

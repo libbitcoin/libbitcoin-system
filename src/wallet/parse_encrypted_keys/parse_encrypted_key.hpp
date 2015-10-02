@@ -17,24 +17,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_EK_KEY_HPP
-#define LIBBITCOIN_PARSE_EK_KEY_HPP
+#ifndef LIBBITCOIN_PARSE_ENCRYPTED_KEY_HPP
+#define LIBBITCOIN_PARSE_ENCRYPTED_KEY_HPP
 
 #include <cstdint>
 #include <cstddef>
 #include <bitcoin/bitcoin/utility/data.hpp>
 #include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-#include "parse_ek_prefix.hpp"
+#include "parse_encrypted_prefix.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
 template<size_t PrefixSize>
-class parse_ek_key
-  : public parse_ek_prefix<PrefixSize>
+class parse_encrypted_key
+  : public parse_encrypted_prefix<PrefixSize>
 {
 public:
-    parse_ek_key(const byte_array<PrefixSize>& prefix,
+    parse_encrypted_key(const byte_array<PrefixSize>& prefix,
         const one_byte& flags, const ek_salt& salt, const ek_entropy& entropy);
 
     bool compressed() const;
@@ -54,6 +54,6 @@ private:
 } // namespace wallet
 } // namespace libbitcoin
 
-#include "parse_ek_key.ipp"
+#include "parse_encrypted_key.ipp"
 
 #endif

@@ -20,6 +20,7 @@
 #ifndef LIBBITCOIN_NETWORK_ACCEPTOR_HPP
 #define LIBBITCOIN_NETWORK_ACCEPTOR_HPP
 
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <bitcoin/bitcoin/define.hpp>
@@ -42,7 +43,7 @@ public:
     typedef std::function<void(const code&, acceptor::ptr)> listen_handler;
 
     acceptor(threadpool& pool, asio::acceptor_ptr accept,
-        const timeout& timeouts=timeout::defaults);
+        uint32_t network_magic, const timeout& timeouts=timeout::defaults);
 
     /// This class is not copyable.
     acceptor(const acceptor&) = delete;
@@ -55,6 +56,7 @@ private:
         asio::socket_ptr socket, accept_handler handle_accept);
 
     threadpool& pool_;
+    uint32_t magic_;
     const timeout& timeouts_;
     asio::acceptor_ptr asio_acceptor_;
 };

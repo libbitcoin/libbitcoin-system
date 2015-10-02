@@ -24,9 +24,21 @@ using namespace bc;
 
 BOOST_AUTO_TEST_SUITE(binary_tests)
 
-//
-// shift_left tests
-//
+BOOST_AUTO_TEST_SUITE(binary__to_string)
+
+BOOST_AUTO_TEST_CASE(prefix_to_string__32_bits__expected_value)
+{
+    const data_chunk blocks{ { 0xba, 0xad, 0xf0, 0x0d } };
+    const binary_type prefix(32, blocks);
+    std::stringstream stream;
+    stream << prefix;
+    BOOST_REQUIRE_EQUAL(stream.str(), "10111010101011011111000000001101");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(binary__shift_left)
+
 BOOST_AUTO_TEST_CASE(shift_left_by_zero)
 {
     binary_type::size_type distance = 0;
@@ -117,9 +129,10 @@ BOOST_AUTO_TEST_CASE(shift_left_by_greater_than_size)
     BOOST_REQUIRE(expected == instance);
 }
 
-//
-// shift_right tests
-//
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(binary__shift_right)
+
 BOOST_AUTO_TEST_CASE(shift_right_by_zero)
 {
     binary_type::size_type distance = 0;
@@ -201,9 +214,10 @@ BOOST_AUTO_TEST_CASE(shift_right_by_greater_than_size)
     BOOST_REQUIRE(expected == instance);
 }
 
-//
-// append tests
-//
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(binary__append)
+
 BOOST_AUTO_TEST_CASE(append_to_zero_length)
 {
     binary_type instance(0, data_chunk { 0x00 });
@@ -279,78 +293,72 @@ BOOST_AUTO_TEST_CASE(prepend_byte_nonaligned_instances)
     BOOST_REQUIRE(expected == instance);
 }
 
-//
-// get_substring tests
-//
-BOOST_AUTO_TEST_CASE(get_substring_start_after_end)
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(binary__substring)
+
+BOOST_AUTO_TEST_CASE(substring_start_after_end)
 {
     binary_type instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
     binary_type::size_type start = 21;
     binary_type::size_type length = 10;
     binary_type expected(0, data_chunk {});
-    binary_type result = instance.get_substring(start, length);
+    binary_type result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(get_substring_length_zero)
+BOOST_AUTO_TEST_CASE(substring_length_zero)
 {
     binary_type instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
     binary_type::size_type start = 5;
     binary_type::size_type length = 0;
     binary_type expected(0, data_chunk {});
-    binary_type result = instance.get_substring(start, length);
+    binary_type result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(get_substring_byte_aligned_start)
+BOOST_AUTO_TEST_CASE(substring_byte_aligned_start)
 {
     binary_type instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
     binary_type::size_type start = 8;
     binary_type::size_type length = 10;
     binary_type expected(10, data_chunk { 0xBB, 0xC0 });
-    binary_type result = instance.get_substring(start, length);
+    binary_type result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(get_substring_byte_nonaligned_start)
+BOOST_AUTO_TEST_CASE(substring_byte_nonaligned_start)
 {
     binary_type instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
     binary_type::size_type start = 10;
     binary_type::size_type length = 10;
     binary_type expected(10, data_chunk { 0xEF, 0x00 });
-    binary_type result = instance.get_substring(start, length);
+    binary_type result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(get_substring_request_exceeds_string)
+BOOST_AUTO_TEST_CASE(substring_request_exceeds_string)
 {
     binary_type instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
     binary_type::size_type start = 10;
     binary_type::size_type length = 15;
     binary_type expected(10, data_chunk { 0xEF, 0x00 });
-    binary_type result = instance.get_substring(start, length);
+    binary_type result = instance.substring(start, length);
     BOOST_REQUIRE(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(get_substring_implicit_length)
+BOOST_AUTO_TEST_CASE(substring_implicit_length)
 {
     binary_type instance(20, data_chunk { 0xAA, 0xBB, 0xCC });
     binary_type::size_type start = 10;
     binary_type expected(10, data_chunk { 0xEF, 0x00 });
-    binary_type result = instance.get_substring(start);
+    binary_type result = instance.substring(start);
     BOOST_REQUIRE(expected == result);
 }
 
-// Moved from stealth_address tests.
+BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_CASE(prefix_to_string__32_bits__expected_value)
-{
-    const data_chunk blocks{ { 0xba, 0xad, 0xf0, 0x0d } };
-    const binary_type prefix(32, blocks);
-    std::stringstream stream;
-    stream << prefix;
-    BOOST_REQUIRE_EQUAL(stream.str(), "10111010101011011111000000001101");
-}
+BOOST_AUTO_TEST_SUITE(binary__blocks)
 
 BOOST_AUTO_TEST_CASE(string_to_prefix__32_bits__expected_value)
 {
@@ -461,5 +469,7 @@ BOOST_AUTO_TEST_CASE(prefix_to_bytes__two_bytes_leading_null_byte__round_trips)
     BOOST_REQUIRE_EQUAL(bytes.size(), 2u);
     BOOST_REQUIRE_EQUAL(stream.str(), "0000000000000000");
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()

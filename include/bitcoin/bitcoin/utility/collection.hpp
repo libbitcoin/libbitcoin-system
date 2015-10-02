@@ -32,6 +32,16 @@ namespace libbitcoin {
 #define BC_SENTENCE_DELIMITER " "
 
 /**
+ * Cast vector/enumerable elements into a new vector.
+ * @param      <Source>  The source element type.
+ * @param      <Target>  The target element type.
+ * @param[in]  source    The enumeration of Source elements to cast.
+ * @returns              A new enumeration with elements cast to Target.
+ */
+template <typename Source, typename Target>
+std::vector<Target> cast(const std::vector<Source>& source);
+
+/**
  * Find the position of a pair in an ordered list.
  * @param      <Pair>  The type of list member elements.
  * @param[in]  list    The list to search.

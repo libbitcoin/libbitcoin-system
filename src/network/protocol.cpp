@@ -55,6 +55,8 @@ using boost::format;
 using boost::posix_time::time_duration;
 using boost::posix_time::seconds;
 
+const uint16_t protocol::mainnet = 8333;
+
 protocol::protocol(threadpool& pool, hosts& hosts, initiator& network,
     uint16_t port, bool relay, size_t max_outbound, size_t max_inbound,
     const config::endpoint::list& seeds, const config::authority& self,

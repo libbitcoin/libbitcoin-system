@@ -84,9 +84,6 @@
     <ClCompile Include="..\..\..\..\src\config\btc256.cpp" />
     <ClCompile Include="..\..\..\..\src\config\checkpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\directory.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\ek_private.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\ek_public.cpp" />
-    <ClCompile Include="..\..\..\..\src\config\ek_token.cpp" />
     <ClCompile Include="..\..\..\..\src\config\endpoint.cpp" />
     <ClCompile Include="..\..\..\..\src\config\parameter.cpp" />
     <ClCompile Include="..\..\..\..\src\config\printer.cpp" />
@@ -178,13 +175,16 @@
     <ClCompile Include="..\..\..\..\src\utility\variable_uint_size.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\dictionary.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ec_public.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\ek_private.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\ek_public.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\ek_token.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\encrypted_keys.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\hd_public.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\mini_keys.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_private.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_public.cpp" />
-    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_token.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.cpp" />
+    <ClCompile Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\bitcoin_uri.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\ec_private.cpp" />
     <ClCompile Include="..\..\..\..\src\wallet\message.cpp" />
@@ -211,9 +211,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\btc256.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\checkpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\directory.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_private.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_public.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\ek_token.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\endpoint.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\parameter.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\config\printer.hpp" />
@@ -263,6 +260,7 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\asio.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\channel.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\message_subscriber.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\network_settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_base_base.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\proxy.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\connector.hpp" />
@@ -275,7 +273,6 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol_ping.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\protocol.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\seeder.hpp" />
-    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\settings.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\shared_const_buffer.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\network\timeout.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\unicode\console_streambuf.hpp" />
@@ -316,6 +313,9 @@
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\version.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\bitcoin_uri.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ec_public.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_private.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_public.hpp" />
+    <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\ek_token.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\uri_reader.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\encrypted_keys.hpp" />
     <ClInclude Include="..\..\..\..\include\bitcoin\bitcoin\wallet\dictionary.hpp" />
@@ -342,11 +342,11 @@
     <ClInclude Include="..\..\..\..\src\math\external\zeroize.h" />
     <ClInclude Include="..\..\..\..\src\utility\conditional_stack.hpp" />
     <ClInclude Include="..\..\..\..\src\utility\evaluation_context.hpp" />
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_key.hpp" />
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_prefix.hpp" />
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_private.hpp" />
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_public.hpp" />
-    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_token.hpp" />
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.hpp" />
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.hpp" />
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_private.hpp" />
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_public.hpp" />
+    <ClInclude Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_token.hpp" />
     <ClInclude Include="..\..\resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -363,8 +363,8 @@
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\ostream_writer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\serializer.ipp" />
     <None Include="..\..\..\..\include\bitcoin\bitcoin\impl\utility\subscriber.ipp" />
-    <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_key.ipp" />
-    <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_ek_prefix.ipp" />
+    <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_key.ipp" />
+    <None Include="..\..\..\..\src\wallet\parse_encrypted_keys\parse_encrypted_prefix.ipp" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

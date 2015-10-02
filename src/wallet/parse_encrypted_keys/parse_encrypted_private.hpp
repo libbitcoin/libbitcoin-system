@@ -17,52 +17,45 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef LIBBITCOIN_PARSE_EK_PREFIX_HPP
-#define LIBBITCOIN_PARSE_EK_PREFIX_HPP
+#ifndef LIBBITCOIN_PARSE_ENCRYPTED_PRIVATE_HPP
+#define LIBBITCOIN_PARSE_ENCRYPTED_PRIVATE_HPP
 
 #include <cstdint>
 #include <cstddef>
+#include <bitcoin/bitcoin/math/hash.hpp>
 #include <bitcoin/bitcoin/utility/data.hpp>
-#include <bitcoin/bitcoin/wallet/encrypted_keys.hpp>
-
-// BIP38
-// Alt-chain implementers should exploit the address hash for [identification].
-// Since each operation in this proposal involves hashing a text representation
-// of a coin address which (for Bitcoin) includes the leading '1', an alt-chain
-// can easily be denoted simply by using the alt-chain's preferred format for
-// representing an address.... Alt-chain implementers may also change the prefix
-// such that encrypted addresses do not start with "6P".
+#include "parse_encrypted_key.hpp"
 
 namespace libbitcoin {
 namespace wallet {
 
-template<size_t Size>
-class parse_ek_prefix
+class parse_encrypted_private
+  : public parse_encrypted_key<2u>
 {
 public:
-    bool valid() const;
+    static byte_array<prefix_size> prefix_factory(uint8_t address,
+        bool multiplied);
 
-    static constexpr uint8_t prefix_size = Size;
+    parse_encrypted_private(const encrypted_private& key);
 
-protected:
-    parse_ek_prefix(const byte_array<Size>& value);
+    bool multiplied() const;
+    uint8_t address_version() const;
 
-    uint8_t context() const;
-    byte_array<Size> prefix() const;
-    void valid(bool value);
-
-    static constexpr uint8_t magic_size = Size - 1;
+    quarter_hash data1() const;
+    half_hash data2() const;
 
 private:
     bool verify_magic() const;
 
-    const byte_array<Size> prefix_;
-    bool valid_;
+    static constexpr uint8_t default_context_ = 0x42;
+    static constexpr uint8_t multiplied_context_ = 0x43;
+    static const byte_array<magic_size> magic_;
+
+    const quarter_hash data1_;
+    const half_hash data2_;
 };
 
 } // namespace wallet
 } // namespace libbitcoin
-
-#include "parse_ek_prefix.ipp"
 
 #endif
