@@ -57,8 +57,8 @@ bool to_stealth_prefix(uint32_t& out_prefix, const script& script)
 }
 
 // The public key must have a sign value of 0x02 (i.e. must be even y-valued).
-bool create_ephemeral_keys(ec_secret& out_secret, ec_compressed& out_point,
-    const data_chunk& seed)
+static bool create_ephemeral_keys(ec_secret& out_secret,
+    ec_compressed& out_point, const data_chunk& seed)
 {
     static const data_chunk magic(to_chunk("Stealth seed"));
     auto nonced_seed = build_chunk({ to_array(0), seed });
@@ -83,10 +83,16 @@ bool create_ephemeral_keys(ec_secret& out_secret, ec_compressed& out_point,
     return false;
 }
 
+// No reason to return the public key (except our internal optimization).
+bool create_ephemeral_key(ec_secret& out_secret, const data_chunk& seed)
+{
+    ec_compressed unused;
+    return create_ephemeral_keys(out_secret, unused, seed);
+}
+
 // Mine a filter into the leftmost bytes of sha256(sha256(output-script)).
-bool create_shealth_script(data_chunk& out_stealth_data, ec_secret& out_secret,
-    ec_compressed& out_point, const binary_type& filter,
-    const data_chunk& seed)
+bool create_stealth_data(data_chunk& out_stealth_data, ec_secret& out_secret,
+    const binary_type& filter, const data_chunk& seed)
 {
     // Create a valid ephemeral key pair.
     ec_secret secret;
@@ -133,7 +139,6 @@ bool create_shealth_script(data_chunk& out_stealth_data, ec_secret& out_secret,
         {
             out_stealth_data = data;
             out_secret = secret;
-            out_point = point;
             return true;
         }
     }
