@@ -19,6 +19,7 @@
  */
 #include <bitcoin/bitcoin/chain/operation.hpp>
 
+#include <algorithm>
 #include <sstream>
 #include <boost/iostreams/stream.hpp>
 #include <bitcoin/bitcoin/chain/script.hpp>
@@ -406,7 +407,20 @@ operation::stack operation::to_pay_public_key_pattern(data_slice point)
 }
 
 operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
-    loaf points)
+    const std::vector<ec_compressed>& points)
+{
+    const auto conversion = [](const ec_compressed& point)
+    {
+        return to_chunk(point);
+    };
+
+    std::vector<data_chunk> chunks(points.size());
+    std::transform(points.begin(), points.end(), chunks.begin(), conversion);
+    return to_pay_multisig_pattern(signatures, chunks);
+}
+
+operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
+    const std::vector<data_chunk>& points)
 {
     static constexpr size_t op_1 = static_cast<uint8_t>(opcode::op_1);
     static constexpr size_t op_16 = static_cast<uint8_t>(opcode::op_16);
@@ -429,7 +443,7 @@ operation::stack operation::to_pay_multisig_pattern(uint8_t signatures,
         if (!is_point(point))
             return operation::stack();
 
-        ops.push_back({ opcode::special, to_chunk(point) });
+        ops.push_back({ opcode::special, point });
     }
 
     ops.push_back({ op_n, data_chunk() });
