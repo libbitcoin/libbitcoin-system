@@ -68,8 +68,10 @@ public:
     /// Constructors.
     hd_public();
     hd_public(const hd_public& other);
-    hd_public(const hd_key& public_key, uint32_t prefix=mainnet);
-    hd_public(const std::string& encoded, uint32_t prefix=mainnet);
+    hd_public(const hd_key& public_key);
+    hd_public(const hd_key& public_key, uint32_t prefix);
+    hd_public(const std::string& encoded);
+    hd_public(const std::string& encoded, uint32_t prefix);
 
     /// Operators.
     bool operator==(const hd_public& other) const;
@@ -111,6 +113,8 @@ protected:
     ec_compressed point_;
 
 private:
+    static hd_public from_key(const hd_key& public_key);
+    static hd_public from_string(const std::string& encoded);
     static hd_public from_key(const hd_key& public_key, uint32_t prefix);
     static hd_public from_string(const std::string& encoded, uint32_t prefix);
 

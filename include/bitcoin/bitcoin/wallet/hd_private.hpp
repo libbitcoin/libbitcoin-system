@@ -53,8 +53,12 @@ public:
     hd_private();
     hd_private(const hd_private& other);
     hd_private(const data_chunk& seed, uint64_t prefixes=mainnet);
-    hd_private(const hd_key& private_key, uint64_t prefixes=mainnet);
-    hd_private(const std::string& encoded, uint64_t prefixes=mainnet);
+    hd_private(const hd_key& private_key);
+    hd_private(const hd_key& private_key, uint64_t prefixes);
+    hd_private(const hd_key& private_key, uint32_t public_prefix);
+    hd_private(const std::string& encoded);
+    hd_private(const std::string& encoded, uint64_t prefixes);
+    hd_private(const std::string& encoded, uint32_t public_prefix);
 
     /// Operators.
     bool operator==(const hd_private& other) const;
@@ -81,8 +85,13 @@ public:
 
 private:
     /// Factories.
-    static hd_private from_key(const hd_key& decoded, uint64_t prefixes);
     static hd_private from_seed(data_slice seed, uint64_t prefixes);
+    static hd_private from_key(const hd_key& decoded);
+    static hd_private from_key(const hd_key& decoded, uint32_t prefix);
+    static hd_private from_key(const hd_key& decoded, uint64_t public_prefix);
+    static hd_private from_string(const std::string& encoded);
+    static hd_private from_string(const std::string& encoded,
+        uint32_t public_prefix);
     static hd_private from_string(const std::string& encoded,
         uint64_t prefixes);
 

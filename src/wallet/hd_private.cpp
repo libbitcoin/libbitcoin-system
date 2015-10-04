@@ -56,11 +56,37 @@ hd_private::hd_private(const data_chunk& seed, uint64_t prefixes)
 {
 }
 
+// This reads the private version and sets the public to mainnet.
+hd_private::hd_private(const hd_key& private_key)
+  : hd_private(from_key(private_key, hd_public::mainnet))
+{
+}
+
+// This reads the private version and sets the public to mainnet.
+hd_private::hd_private(const std::string& encoded)
+    : hd_private(from_string(encoded, hd_public::mainnet))
+{
+}
+
+// This reads the private version and sets the public.
+hd_private::hd_private(const hd_key& private_key, uint32_t prefix)
+  : hd_private(from_key(private_key, prefix))
+{
+}
+
+// This validates the private version and sets the public.
 hd_private::hd_private(const hd_key& private_key, uint64_t prefixes)
   : hd_private(from_key(private_key, prefixes))
 {
 }
 
+// This reads the private version and sets the public.
+hd_private::hd_private(const std::string& encoded, uint32_t prefix)
+  : hd_private(from_string(encoded, prefix))
+{
+}
+
+// This validates the private version and sets the public.
 hd_private::hd_private(const std::string& encoded, uint64_t prefixes)
   : hd_private(from_string(encoded, prefixes))
 {
@@ -75,6 +101,34 @@ hd_private::hd_private(const ec_secret& secret,
 
 // Factories.
 // ----------------------------------------------------------------------------
+
+hd_private hd_private::from_seed(data_slice seed, uint64_t prefixes)
+{
+    // This is a magic constant from BIP32.
+    static const data_chunk magic(to_chunk("Bitcoin seed"));
+
+    const auto intermediate = split(hmac_sha512_hash(seed, magic));
+
+    // The key is invalid if parse256(IL) >= n or 0:
+    if (!verify(intermediate.left))
+        return hd_private();
+
+    const auto master = hd_lineage
+    {
+        prefixes,
+        0x00,
+        0x00000000,
+        0x00000000
+    };
+
+    return hd_private(intermediate.left, intermediate.right, master);
+}
+
+hd_private hd_private::from_key(const hd_key& key, uint32_t public_prefix)
+{
+    const auto prefix = from_big_endian_unsafe<uint32_t>(key.begin());
+    return from_key(key, to_prefixes(prefix, public_prefix));
+}
 
 hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
 {
@@ -103,33 +157,22 @@ hd_private hd_private::from_key(const hd_key& key, uint64_t prefixes)
     return hd_private(secret, chain, lineage);
 }
 
-hd_private hd_private::from_seed(data_slice seed, uint64_t prefixes)
+hd_private hd_private::from_string(const std::string& encoded,
+    uint32_t public_prefix)
 {
-    // This is a magic constant from BIP32.
-    static const data_chunk magic(to_chunk("Bitcoin seed"));
-
-    const auto intermediate = split(hmac_sha512_hash(seed, magic));
-
-    // The key is invalid if parse256(IL) >= n or 0:
-    if (!verify(intermediate.left))
+    hd_key key;
+    if (!decode_base58(key, encoded))
         return hd_private();
 
-    const auto master = hd_lineage
-    {
-        prefixes,
-        0x00,
-        0x00000000,
-        0x00000000
-    };
-
-    return hd_private(intermediate.left, intermediate.right, master);
+    return hd_private(from_key(key, public_prefix));
 }
 
 hd_private hd_private::from_string(const std::string& encoded,
     uint64_t prefixes)
 {
     hd_key key;
-    return decode_base58(key, encoded) ? hd_private(key) : hd_private();
+    return decode_base58(key, encoded) ? hd_private(key, prefixes) :
+        hd_private();
 }
 
 // Cast operators.
@@ -247,11 +290,14 @@ bool hd_private::operator!=(const hd_private& other) const
     return !(*this == other);
 }
 
+// We must assume mainnet for public version here.
+// When converting this to public a clone of this key should be used, with the
+// public version specified - after validating the private version.
 std::istream& operator>>(std::istream& in, hd_private& to)
 {
     std::string value;
     in >> value;
-    to = hd_private(value);
+    to = hd_private(value, hd_public::mainnet);
 
     if (!to)
     {
