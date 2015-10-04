@@ -54,11 +54,25 @@ hd_public::hd_public(const hd_public& other)
 {
 }
 
+// This cannot validate the version.
+hd_public::hd_public(const hd_key& public_key)
+  : hd_public(from_key(public_key))
+{
+}
+
+// This cannot validate the version.
+hd_public::hd_public(const std::string& encoded)
+  : hd_public(from_string(encoded))
+{
+}
+
+// This validates the version.
 hd_public::hd_public(const hd_key& public_key, uint32_t prefix)
   : hd_public(from_key(public_key, prefix))
 {
 }
 
+// This validates the version.
 hd_public::hd_public(const std::string& encoded, uint32_t prefix)
   : hd_public(from_string(encoded, prefix))
 {
@@ -79,6 +93,21 @@ hd_public hd_public::from_secret(const ec_secret& secret,
     ec_compressed point;
     return secret_to_public(point, secret) ? 
         hd_public(point, chain_code, lineage) : hd_public();
+}
+
+hd_public hd_public::from_key(const hd_key& key)
+{
+    const auto prefix = from_big_endian_unsafe<uint32_t>(key.begin());
+    return from_key(key, prefix);
+}
+
+hd_public hd_public::from_string(const std::string& encoded)
+{
+    hd_key key;
+    if (!decode_base58(key, encoded))
+        return hd_public();
+
+    return hd_public(from_key(key));
 }
 
 hd_public hd_public::from_key(const hd_key& key, uint32_t prefix)
