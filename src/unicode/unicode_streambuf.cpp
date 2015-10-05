@@ -33,7 +33,7 @@ namespace libbitcoin {
 constexpr size_t utf8_max_character_size = 4;
 
 unicode_streambuf::unicode_streambuf(std::wstreambuf* wide_buffer, size_t size)
-    : wide_size_(size), narrow_size_(wide_size_ * utf8_max_character_size),
+  : wide_size_(size), narrow_size_(wide_size_ * utf8_max_character_size),
     narrow_(new char[narrow_size_]), wide_(new wchar_t[narrow_size_]),
     wide_buffer_(wide_buffer)
 {

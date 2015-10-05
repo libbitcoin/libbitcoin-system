@@ -22,7 +22,7 @@
 namespace libbitcoin {
 
 ostream_writer::ostream_writer(std::ostream& stream)
-: stream_(stream)
+  : stream_(stream)
 {
 }
 
