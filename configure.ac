@@ -77,7 +77,7 @@ AC_ARG_WITH([pkgconfigdir],
 AC_MSG_RESULT([$pkgconfigdir])
 AC_SUBST([pkgconfigdir])
 
-# Implement --with-tests and declare WITH_TESTS.
+# Implement --with-tests and define WITH_TESTS and output ${tests} and declare WITH_TESTS.
 #------------------------------------------------------------------------------
 AC_MSG_CHECKING([--with-tests option])
 AC_ARG_WITH([tests],
@@ -86,6 +86,8 @@ AC_ARG_WITH([tests],
     [with_tests=$withval],
     [with_tests=yes])
 AC_MSG_RESULT([$with_tests])
+AS_CASE([${with_tests}], [yes], AC_DEFINE([WITH_TESTS]))
+AS_CASE([${with_tests}], [yes], AC_SUBST([tests], [-DENABLE_TESTNET]))
 AM_CONDITIONAL([WITH_TESTS], [test x$with_tests != xno])
 
 # Implement --with-examples and declare WITH_EXAMPLES.

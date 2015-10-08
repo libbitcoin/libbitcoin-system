@@ -88,9 +88,19 @@ namespace bc = libbitcoin;
     #endif
 #endif
 
+// TODO: integrate option in VS props.
+#ifdef _MSC_VER
+    #define WITH_TESTS
+#endif
+
+#ifdef WITH_TESTS
+    #define PRIVATE_TESTABLE protected
+#else
+    #define PRIVATE_TESTABLE private
+#endif
+
 // Define so we can have better visibility of lcov exclusion ranges.
 #define LCOV_EXCL_START(text)
 #define LCOV_EXCL_STOP()
 
 #endif
-
